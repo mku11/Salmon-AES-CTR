@@ -1,3 +1,4 @@
+﻿/*
 MIT License
 
 Copyright (c) 2021 Max Kas
@@ -19,3 +20,30 @@ AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
 LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
+*/
+using System;
+using System.Collections.Generic;
+using System.IO;
+using Salmon.FS;
+
+namespace Salmon.Net.FS
+{
+    // Salmon Drive implementation for .Net that can be used in Windows Forms, WPF, Console applications, etc
+    public class DotNetDrive : SalmonDrive
+    {
+        public static string TAG = typeof(DotNetDrive).Name;
+
+        public DotNetDrive(string realRoot) : base(realRoot) { }
+
+        protected override IRealFile GetFile(string filepath, bool root)
+        {
+            DotNetFile dotNetFile = new DotNetFile(filepath);
+            return dotNetFile;
+        }
+
+        public override void PickRealFolder(object sender, string body, bool folder, string lastDir)
+        {
+            throw new NotSupportedException();
+        }
+    }
+}

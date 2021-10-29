@@ -1,3 +1,5 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
 MIT License
 
 Copyright (c) 2021 Max Kas
@@ -19,3 +21,10 @@ AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
 LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
+-->
+<resources>
+    <color name="launcher_background">#000000</color>
+    <color name="colorPrimary">#4E4E50</color>
+    <color name="colorPrimaryDark">#616163</color>
+    <color name="colorAccent">#303F9F</color>
+</resources>

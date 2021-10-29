@@ -1,3 +1,4 @@
+﻿/*
 MIT License
 
 Copyright (c) 2021 Max Kas
@@ -19,3 +20,22 @@ AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
 LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
+*/
+using System;
+
+namespace Salmon
+{
+    public class SalmonTime
+    {
+        private static readonly DateTime UNIX_TIME = new DateTime(1970, 1, 1, 0, 0, 0, DateTimeKind.Utc);
+
+        /// <summary>
+        /// Returns the time since 1/1/1970 in milliseconds
+        /// </summary>
+        /// <returns></returns>
+        public static long CurrentTimeMillis()
+        {
+            return (long)(DateTime.UtcNow - UNIX_TIME).TotalMilliseconds;
+        }
+    }
+}

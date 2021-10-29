@@ -1,3 +1,5 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
 MIT License
 
 Copyright (c) 2021 Max Kas
@@ -19,3 +21,20 @@ AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
 LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
+-->
+<PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android" >
+
+    <PreferenceCategory android:title="@string/SalmonPrefCat" >
+
+        <Preference
+            android:key="vaultLocation"
+            android:summary="@string/VaultLocationSummary"
+            android:title="@string/VaultLocationTitle" />
+
+        <Preference
+            android:key="changePassword"
+            android:summary="@string/ChangePasswordSummary"
+            android:title="@string/ChangePasswordTitle" />
+
+    </PreferenceCategory>
+</PreferenceScreen>

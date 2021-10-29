@@ -1,3 +1,4 @@
+﻿/*
 MIT License
 
 Copyright (c) 2021 Max Kas
@@ -19,3 +20,31 @@ AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
 LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
+*/
+using System.IO;
+
+namespace Salmon.FS
+{
+    public interface IRealFile
+    {
+        bool Exists();
+        bool Delete();
+        Stream GetInputStream(int bufferSize = 0);
+        Stream GetOutputStream(int bufferSize = 0);
+        bool RenameTo(string newFilepath);
+        long Length();
+        long LastModified();
+        string GetAbsolutePath();
+        string GetPath();
+        bool IsFile();
+        bool IsDirectory();
+        IRealFile[] ListFiles();
+        string GetBaseName();
+        IRealFile CreateDirectory(string dataDirName);
+        IRealFile GetParent();
+        IRealFile CreateFile(string filename);
+        bool Move(IRealFile newDir);
+        IRealFile GetChild(string filename);
+        bool Mkdir();
+    }
+}

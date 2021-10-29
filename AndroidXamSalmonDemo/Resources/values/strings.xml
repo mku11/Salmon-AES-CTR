@@ -1,0 +1,87 @@
+<!--
+MIT License
+
+Copyright (c) 2021 Max Kas
+
+Permission is hereby granted, free of charge, to any person obtaining a copy
+of this software and associated documentation files (the "Software"), to deal
+in the Software without restriction, including without limitation the rights
+to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+copies of the Software, and to permit persons to whom the Software is
+furnished to do so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in all
+copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+SOFTWARE.
+-->
+<resources>
+	<string name="app_name">Salmon Vault Beta Demo</string>
+	<string name="FileProvider" translatable="false">com.mku.android.salmonvault.fileprovider</string>
+	<string name="SourceCodeURL" translatable="false">https://github.com/mku11/Salmon</string>
+
+	<string name="SalmonPrefCat">Preferences</string>
+	<string name="VaultLocationSummary">Open another vault folder</string>
+	<string name="VaultLocationTitle">Vault Location</string>
+	<string name="ChangePasswordSummary">Change the current vault password</string>
+	<string name="ChangePasswordTitle">Change Password</string>
+	<string name="IntegrityCheckSummary">Always check files integrity before opening. Warning: This is buggy and Very Slow for large files.</string>
+	<string name="IntegrityCheckTitle">Integrity Check</string>
+	
+	<string name="Import">Import</string>
+	<string name="Export">Export</string>
+	<string name="Sort">Sort</string>
+	<string name="ExportAll">Export All</string>
+	<string name="Action">Action</string>
+	<string name="Refresh">Refresh</string>
+	<string name="CouldNotParseConfig">Could not parse config file, choose another folder!</string>
+	<string name="AboutText">Released under MIT License</string>
+	<string name="Authenticate">Authenticate</string>
+	<string name="Password">Password</string>
+	<string name="RetypePassword">Retype Password</string>
+	<string name="SetPassword">Set Password</string>
+	<string name="PasswordsDontMatch">Passwords Don\'t Match</string>
+	<string name="CreateFolder">Create Folder</string>
+	<string name="ChooseApp">Choose App</string>
+	<string name="GetSourceCode">Get Source Code</string>
+	<string name="Settings">Settings</string>
+	<string name="DeleteAll">Delete All</string>
+	<string name="About">About</string>
+	<string name="SelectFilesToImport">Select File(s) to Import</string>
+	<string name="FileSizeTooLarge">File size too large, try export instead</string>
+	<string name="Exit">Exit</string>
+	<string name="PleaseWaitWhileDecrypting">Please Wait while decrypting</string>
+	<string name="CouldNotImportFiles">Could not import files</string>
+	<string name="CouldNotOpenConfigFile">Could not open config file, choose another folder</string>
+	<string name="NewPassword">New Password</string>
+	<string name="File">File</string>
+	<string name="View">View</string>
+	<string name="ViewExternal">View External</string>
+
+	<string name="ImportStopped">Import Stopped</string>
+	<string name="ImportFailed">Import Failed</string>
+	<string name="ImportComplete">Import Complete</string>
+	
+	<string name="ExportStopped">Export Stopped</string>
+	<string name="ExportFailed">Export Failed</string>
+	<string name="ExportComplete">Export Complete</string>
+	
+	<string name="Share">Share</string>
+	<string name="ShareExternal">Share External</string>
+	<string name="FileSavedInSalmonVault">File saved in Salmon Vault</string>
+	<string name="NoApplicationsFound">No applications found</string>
+	
+	<string name="FilesImported">Files Imported</string>
+	<string name="Edit">Edit</string>
+	<string name="EditExternal">Edit External</string>
+	<string name="Delete">Delete</string>
+	<string name="SelectFolderForFiles">Select or create a folder for your vault</string>
+	<string name="FilesExportedTo">Files exported to</string>
+	<string name="FileCorrupOrTampered">File is corrupt or tampered</string>
+</resources>
