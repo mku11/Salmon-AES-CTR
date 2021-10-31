@@ -98,7 +98,7 @@ namespace Salmon.Droid.FS
             if (bytesRead <= 0)
                 return 0;
             buf.Rewind();
-            buf.Get(buffer, 0, bytesRead);
+            buf.Get(buffer, offset, bytesRead);
             return bytesRead;
         }
 
@@ -106,7 +106,7 @@ namespace Salmon.Droid.FS
         {
             //ByteBuffer buf = ByteBuffer.Wrap(buffer, 0, count);
             ByteBuffer buf = ByteBuffer.Allocate(count);
-            buf.Put(buffer, 0, count);
+            buf.Put(buffer, offset, count);
             buf.Rewind();
             int bytesWrite = (int)fileChannel.Write(buf);
         }
