@@ -1,229 +1,131 @@
 #### Salmon
-**Salmon** is an AES 256bit CTR **encryption library for C#** with support for **seekable** streams. 
-Salmon is currently **BETA software** which means this library **should NOT be used in production systems**
-since it **may contain security bugs**. To learn more on what Salmon can do build and install the Salmon Vault 
-for Android written in Xamarin C#. For more information scroll down.
+**Salmon** is an encryption AES256 CTR library with HMAC SHA256 integrity capabilities.
 
+Subprojects:
+**SalmonFS** provides an easy file encryption and virtual filesystem API with multithreaded read/write file support.
+**SalmonNative** provides a performant native C library with AES intrinsics for Intel x86 32/64bit, and ARM 64Bit.
+**SalmonVault** is an app that implements a file vault using Salmon. Currently there are versions in JavaFX, C# WPF, and Android Java and Xamarin. It features an explorer like interface for navigating, importing, and exporting files. There are also builtin apps for viewing encrypted files with Image, Video, and Audio contents as well as a Text Editor for editing encrypted files. The android version also features editing capabilities with external apps.
+
+To learn more on what Salmon can do build install the SalmonVault for JavaFX, C# WPF, or Android (Xamarin or Java).
+
+Salmon is currently in **BETA** which means this library should **NOT** be used in production systems
+since it may contain several security bugs. 
+
+#### License
 Salmon is released under MIT Licence, see LICENSE file.
+Make sure you read the LICENSE file and display proper attribution if you decide to use this software.
+Dependency libraries from Github, Maven, and NuGet are covered by their own license.
 
 #### Library Features
 * AES256 standard encryption in CTR Mode.
-* Data Integrity with standard HMAC SHA256.
+* Data chunk integrity with standard HMAC SHA256.
 * Password based key derivation with Pbkdf2 SHA256.
-* Parallel file processing.
-* Support for .NET seekable streams.
-* File Encryption for .NET files.
-* File Vault implementation with Import/Export utilities.
-* IRealFile interface provided for support with other filesystems: UWP, Android, IOS, etc.
-* A file vault demo implementation for Android written in Xamarin C#.
+* AES256 intrinsics written in c for Intel x86 and ARM.
+* Seekable stream implementations for Java, C#, and Android.
+* File Encryption with parallel read/write operations.
+* Interfaces provided for supporting other filesystems (ie UWP, Xamarin iOS, etc).
+
+#### Limitations
+* Maximum numbers of files in a SalmonDrive: 4,294,967,295 bytes
+* Maximum size of file: 16*256^7 bytes
+* **WARNING** about the SalmonDrive implementation only. Do NOT IMPORT files into MULTIPLE CLONES of the same Salmon drive. Someone that has access to both CLONES can decrypt the contents. Keep only ONE INSTANCE which you can MOVE (DO NOT COPY) to other devices. If you wish to keep a backup of the drive in another device you can do that but do NOT IMPORT any files into the backup drive. If you need to restore the backup drive just export all files, create a new drive, and then import everything into the new drive.
 
 #### SalmonStream
 ```
-// Example: Decrypt and write data to a .Net FileStream
-FileStream fileStream = ...;
-SalmonStream stream = new SalmonStreamWriter(key, nonce, EncryptionMode.Encrypt, fileStream);
-stream.Write(plainText,...);
 
-// Example: Decrypt data from a .Net FileStream
-FileStream fileStream = ...;
-SalmonStream stream = new SalmonStream(key, nonce, EncryptionMode.Decrypt, fileStream);
-stream.Read(...);
-```
-
-#### SalmonStream format
-```
-        12bytes  +   4bytes
-  CTR =  NONCE  || 0x00000000           CTR       CTR + 1                          CTR + 2      CTR + 3
-_____________________________________________________________________________________________________________
-|             |                   |  16 bytes  |  16 bytes  |                   |  16 bytes  |  16 bytes  |
-|             |                   | AES BLOCK1 | AES BLOCK2 |                   | AES BLOCK3 | AES BLOCK4 |...
-|_____________|___________________|____________|____________|___________________|____________|____________|__
-|  optional   | optional 32 bytes |          DATA           | optional 32 Bytes |          DATA           |
-| HEADER DATA-> HMAC1 signature   <-   CHUNK1 (256 kbytes)  |  HMAC2 signature <-   CHUNK2 (256 kbytes)   |...
-|_____________|___________________|_________________________|___________________|_________________________|__
-|             |                                                                                           |
-|             |                                         READ/WRITE                                        |...
-|             |                         BUFFER multiple of 16 bytes or 256 kbytes                         |
-|_____________|___________________________________________________________________________________________|__
+                         |   CTR      |   CTR + 1  |...|                   |   CTR + n  | CTR + n+1  |...|
+_________________________|____________|___________ |...|___________________|____________|____________|...|
+|             |          |  16 bytes  |  16 bytes  |...|                   |  16 bytes  |  16 bytes  |...|
+|             |          | AES BLOCK1 | AES BLOCK2 |...|                   | AES BLOCK3 | AES BLOCK4 |...|
+|_____________|__________|____________|____________|...|___________________|____________|____________|...|
+|  optional   | 32 bytes |       DATA CHUNK1       |...|     32 Bytes      |       DATA CHUNK2       |...|
+| HEADER DATA ->  HMAC1 <-        256 kbytes       |...|  HMAC2 signature <-        256 kbytes       |...|
+|_____________|__________|_________________________|___|___________________|_________________________|___|
+|             |                                                                                          |
+|             |                                         READ/WRITE                                       |
+|             |                         BUFFER multiple of 16 bytes, default: 256 kbytes                 |
+|_____________|__________________________________________________________________________________________|
 
 ```
 Notes:
-* If you enable HMAC integrity the stream will interleave HMAC SHA256 hash signatures before the chunks.
-* The HMAC signature is always in front of the data chunk!
-* First HMAC hash includes the header data during computation!
-* HMAC is applied over the encrypted data in each chunk
-* Same HMAC key is used for all integrity chunks
-* Last chunk might have a length lesser than the chunk size.
-* SalmonStream is NOT thread safe!
-* There is support for buffering the streams so large buffers are prefered.
-* If you use integrity align your read/write buffers to the Chunk size for better performance
-* If you don't use integrity align your read/write buffers to the AES Block size for better performance
-
+* SalmonStream optionally supports a header if you want to include the IV or any other data. 
+* Enabling HMAC integrity in the stream will interleave HMAC SHA256 hash signatures before the chunks as shown above.
+* The first HMAC section includes the HMAC for the first chunk and the header data.
+* HMAC is applied after the encrypted data in each chunk.
+* Same HMAC key is used for all integrity chunks.
+* Last chunk might have a length lesser than the chunk size, no padding applied.
+* SalmonStream is NOT thread safe, if you need parallel processing see SalmonImporter and SalmonExporter.
+* If you use integrity align your read/write buffers to the chunk size for better performance.
+* If you don't use integrity align your read/write buffers to the AES Block size for better performance.
 
 #### SalmonFile
 
-```
-// create the encrypted file
-IRealFile realDir = new DotNetFile(outputDir);
-SalmonFile dir = new SalmonFile(realDir);
-string filename = "test.txt";
-SalmonFile newFile = dir.CreateFile(filename, key, filenameNonce, fileNonce);
-
-// optionally enable applying integrity while writing
-newFile.SetApplyIntegrity(true, hmacKey, requestChunkSize: chunkSize);
-
-// write file contents
-Stream stream = newFile.GetOutputStream();
-byte[] testBytes = System.Text.UTF8Encoding.Default.GetBytes(text);
-stream.Write(testBytes);
-stream.Flush();
-stream.Close();
-            
-// open the encrypted file
-string realFilePath = newFile.GetRealFile().GetAbsolutePath();
-IRealFile realFile = new DotNetFile(realFilePath);
-SalmonFile readFile = new SalmonFile(realFile);
-readFile.SetEncryptionKey(key);
-readFile.SetRequestedNonce(fileNonce);
-
-// optionally enable verifying integrity while reading
-readFile.SetVerifyIntegrity(true, hmacKey);
-
-// read the contents
-SalmonStream inStream = readFile.GetInputStream();
-byte[] textBytes = new byte[testBytes.Length];
-inStream.Read(textBytes, 0, textBytes.Length);
-string textString = System.Text.UTF8Encoding.Default.GetString(textBytes);
-
+You can use a SalmonFile to encrypt contents of a file.
+SalmonFile follows the same format as the stream but with the addition of data into the header, see below.
 ```
 
+FS_NONCE is a sequence hosted in the virtual drive and it is incremented for each file that is encrypted
+This nonce will be the 8 high bytes of the CTR. 
+CTR is the counter that is used for the AES algorithm to encrypt every 16 bytes of data.
 
+       8 bytes + 8 bytes
+CTR = FS_NONCE + 0x0000000000000000
 
-#### SalmonFile format
-
-The encrypted contents follow the same format as the stream, see above with the addition of a file header.
-```
-_____________________________________________________________________________________________________________________
-|                                             |                             CONTENTS                              |
-|               FILE HEADER DATA              | HMAC1 | CHUNK1 | HMAC2 | CHUNK2 | HMAC3 | CHUNK3 | HMAC4 | CHUNK4 |...
-|_____________________________________________|_________________________________|_________________________________|__               
-| 3 bytes |  1 byte  |  4 bytes   | 12 bytes  |                                 |                                 |
-|  MAGIC  | VERSION# | CHUNK SIZE |   nonce   |              PART1              |              PART2              |...
-|_________|__________|____________|___________|_________________________________|_________________________________|__
+ _____________________________________________ _________________________________
+|                                             |                                 |
+|               FILE HEADER DATA              | HMAC1 | CHUNK1 | HMAC2 | CHUNK2 |
+|_____________________________________________|_________________________________|    
+| 3 bytes |  1 byte  |  4 bytes   |  8 bytes  |                                 |
+|  MAGIC  | VERSION# | CHUNK SIZE | FS_NONCE  |         FILE CONTENTS           |
+|_________|__________|____________|___________|_________________________________|
 
 ```
 
 Notes:
-* SalmonStream optionally supports a header if you want to stream additional data int the header like the 
-initial counter and the HMAC or any other custom data. 
+* SalmonFile comes with a complete API for creating, deleting, copying, and moving files.
 * Filenames may be the same for 2 or more files so when you export make sure you don't overwrite 
 other files in the export directory
-* Maximum file size supported is ~68GB, 68,719,476,736 bytes
+* If you use parallel processing you need to align to the chunk size. See SalmonImporter
 
-#### SalmonFile parallel processing
-
-SalmonFiles can be broken up to parts and processed in parallel.
-Make sure you also align the part start and buffer sizes to either the Chunk size if you use integrity otherwise the AES block size.
-
-```
-//Example:
-//Create multiple threads then seek to different positions in the stream and start reading.
-SalmonStream stream1 = file.GetOutputStream();
-stream1.Position = 256 * 1024;
-stream1.Read(...);
-```
-See the unit test cases or the SalmonFileImporter/Exporter for a complete example.
-
-#### Virtual Filesystem C# API
-The API is simple and supports the most common File operations: list a directory, create files, open for read/write, etc.
-To learn more about how to use the API view the Unit Test case under the Test folder.
-
-#### Virtual Drive
-SalmonDrive is provided as a virtual drive that:
-1) Takes advantage of the Virtual filesystem API, see above.
+#### SalmonDrive
+SalmonDrive is a virtual drive that takes care of the maintenance of hosting encrypted files.
+More specifically:
+1) Takes advantage of the SalmonFile API.
 2) Uses parallel processing to import and export files to the drive.
 3) Handles configuration for the encryption keys and nonce generation.
 
-```
-// Example creating a SalmonDrive and a file under the virtual root
-// To create a virtual file drive
-SalmonVault.SetDriveClass(typeof(DotNetDrive));
-SalmonVault.SetDriveLocation("d:\\virtualdrive\\..");
-
-// set a new password
-SalmonVault.GetDrive().SetPassword(pass);
-
-// or authenticate if it already exists
-// SalmonVault.GetDrive().Authenticate(pass);
-
-// enable integrity 
-SalmonVault.GetDrive().SetEnableIntegrityCheck(integrity);
-
-// get the root directory and create a file then write to it
-RootDir = SalmonVault.GetDrive().GetVirtualRoot();
-SalmonFile file = RootDir.CreateFile("test.txt");
-SalmonStream stream = file.GetInputStream();
-stream.Write(...);
-stream.Flush();
-stream.Close();
-```
-
-To learn more about how to use view the Unit Test case under the Test folder.
-
-#### Virtual Drive Config Format
-
-Each virtual drive contains a configuration file with all the encryption properties to encrypt / decrypt your files.
+#### SalmonDriveConfig
 
 ```
-________________________________________________________________________________________________________________
+ _______________________________________________________________________________________________________________
 |                                                                                                               |
 |                                                   CONFIG FILE                                                 |
-|_______________________________________________________________________________________________________________|
+|_________________________________________________________ _________________________________________ ___________|
 |                                                         |                                         |           |
 |                    HEADER                               |            ENCRYPTED DATA               | INTEGRITY |
-|_________________________________________________________|_________________________________________|___________|
-| 3 bytes |  1 byte  |  24 bytes  |  4 bytes   | 16 bytes |  32 bytes   |  32 bytes  |  12 bytes    |  32 bytes |
-|  MAGIC  | VERSION# |    SALT    | ITERATIONS |    IV    |  DRIVE KEY  |  HMAC KEY  |  NONCE SEQ  -> HMAC SIGN |
+|_________ __________ ____________ ____________ __________|_____________ ____________ ______________|___________|
+| 3 bytes |  1 byte  |  24 bytes  |  4 bytes   | 16 bytes |  32 bytes   |  32 bytes  |    8 bytes   |  32 bytes |
+|  MAGIC  | VERSION# |    SALT    | ITERATIONS |    IV    |  DRIVE KEY  |  HMAC KEY  |   FS_NONCE   ->   HMAC   |
 |_________|__________|____________|____________|__________|_____________|____________|______________|___________|
 
 ```
 
 Notes:
-* The master key is derived from the user text password using Pbkdf2 SHA256 providing the salt and iterations.
-* The DRIVE KEY, HMAC KEY, and NONCE SEQ have been encrypted with the master key.
-* The DRIVE KEY will be used for file encryption / decryption.
+* The Master key is derived from the user text password using Pbkdf2 SHA256 providing the SALT and ITERATIONS.
+* The DRIVE KEY, HMAC KEY, and NONCE SEQ are encrypted with the Master key.
+* The DRIVE KEY is then used for file encryption and decryption.
 * The HMAC key will be used to sign file contents and verify their data integrity.
-* The NONCE SEQ will contain at all times the next value that will serve as the nonce for the next file that will created inside the vault.
-* The NONCE SEQ higher 8 bytes are random and the lowest 4 are an incremental value starting from zero to accomodate a large enough range.
-* The integrity section contains an HMAC signature of the encrypted nonce sequence.
-* The HMAC signature will verify that nonce has not been altered and a way to validate the user password.
+* The FS_NONCE contain at all times the next value that will serve as a nonce (part of the IV) for the next encrypted file.
+* The IV used for each file is a combination of 8 bytes FS_NONCE and 8 bytes for the CTR.
+* The INTEGRITY section contains an HMAC signature of the encrypted nonce sequence for tampering prevention.
+* The HMAC signature serves a dual purpose: a) verify that nonce has not been altered and b) a way to validate the user password.
 
-#### Support for other filesystems
-To use with other filesystems (ie UWP, Xamarin, IOS, Android, Silverlight, etc) or network files
-you need to implement the RealFile interface as well as extend the SalmonDrive.
-For a working implentation you can check the built in .Net implementation and the Android implementation 
-inside the Android app demo.
+#### SalmonNative
+SalmonNative contains low level routines utilizing AES hardware acceleration for Intel and ARM processors.
+Notes:
+* AES Support only for Intel x86 32 and 64 bit and ARM 64 bit (NEON enabled).
+* TinyAES implemetation of key expansion is used.
+* There is no stream implementation for C++ only basic buffer encryption/decryption in C that you can link to.
 
-#### Salmon Vault for Android
-A sample Salmon Android app written in C# Xamarin is also included. The Salmon app demonstrates a  
-portable file vault with support for external SD cards. The file vault also features In memory Video/Audio Player and Image/Text 
-Viewer for encryption files. File sharing and editing capabilities with external apps is also provided with a limited size.
-
-Editing Files with External Apps:   
-External Android Apps should use Intent filters with Action EDIT (not VIEW) inside their Manifest.   
-The files are temporarily decrypted and stored within the Android app private cache directory thus being inaccessible by other apps only to the app the user has selected.    
-The DocumentFile is then retrievable 
-by the standard Android Storage Access Framework.
-
-Example:
-```
-// A receiving app can open the file as a content Uri and read/write like so:
-DocumentFile documentFile = DocumentFile.fromSingleUri(this, (Uri) b.get("android.intent.extra.STREAM"));
-ParcelFileDescriptor pfd = context.getContentResolver().openFileDescriptor(documentFile.getUri(), "w");
-FileOutputStream outs = new FileOutputStream(pfd.getFileDescriptor());
-outs.Write(...);
-outs.Flush();
-outs.Close();
-```
-
-The Salmon app will detect any changes made in the file contents and reimport the file into the vault.
+#### Examples
+See unit test cases under folders java/test and csharp/test or the SalmonVault app for usage examples.
