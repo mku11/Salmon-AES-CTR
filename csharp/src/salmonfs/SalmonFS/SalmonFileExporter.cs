@@ -95,7 +95,7 @@ namespace Salmon.FS
                 exportDir.Mkdir();
             string targetFileName = fileToExport.GetBaseName();
             IRealFile tfile = exportDir.GetChild(targetFileName);
-            if (tfile.Exists())
+            if (tfile != null && tfile.Exists())
             {
                 String filename = SalmonDriveManager.GetDrive().GetFileNameWithoutExtension(targetFileName);
                 String ext = SalmonDriveManager.GetDrive().GetExtensionFromFileName(targetFileName);
