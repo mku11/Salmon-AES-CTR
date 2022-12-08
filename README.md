@@ -1,35 +1,39 @@
-#### Salmon
-**Salmon** is an encryption AES256 CTR library with HMAC SHA256 integrity capabilities.
+# Salmon
+Salmon BETA is an encryption AES256 CTR library with HMAC SHA256 integrity capabilities. Currently it written in Java and C# but it also offers an native C low level implemenation for Intel x86 and ARM64 intrinsics. There is also a BETA app in JavaFX, C# WPF, Android, and Xamarin-Android that demonstrate what Salmon can do.
 
-Subprojects:
-**SalmonFS** provides an easy file encryption and virtual filesystem API with multithreaded read/write file support.
-**SalmonNative** provides a performant native C library with AES intrinsics for Intel x86 32/64bit, and ARM 64Bit.
-**SalmonVault** is an app that implements a file vault using Salmon. Currently there are versions in JavaFX, C# WPF, and Android Java and Xamarin. It features an explorer like interface for navigating, importing, and exporting files. There are also builtin apps for viewing encrypted files with Image, Video, and Audio contents as well as a Text Editor for editing encrypted files. The android version also features editing capabilities with external apps.
-
-To learn more on what Salmon can do build install the SalmonVault for JavaFX, C# WPF, or Android (Xamarin or Java).
-
-Salmon is currently in **BETA** which means this library should **NOT** be used in production systems
-since it may contain several security bugs. 
-
-#### License
-Salmon is released under MIT Licence, see LICENSE file.
-Make sure you read the LICENSE file and display proper attribution if you decide to use this software.
-Dependency libraries from Github, Maven, and NuGet are covered by their own license.
-
-#### Library Features
+### Library Features
 * AES256 standard encryption in CTR Mode.
 * Data chunk integrity with standard HMAC SHA256.
 * Password based key derivation with Pbkdf2 SHA256.
-* AES256 intrinsics written in c for Intel x86 and ARM.
+* AES256 intrinsics written in C for Intel x86 and ARM64.
 * Seekable stream implementations for Java, C#, and Android.
 * File Encryption with parallel read/write operations.
-* Interfaces provided for supporting other filesystems (ie UWP, Xamarin iOS, etc).
+* Interfaces provided for support with other filesystems (ie UWP, Xamarin iOS, etc).
 
-#### Limitations
+### Notice
+Salmon is currently in **BETA** which means this library should **NOT** be used in production systems since it may contain several security bugs. 
+
+### Limitations
 * Maximum numbers of files in a SalmonDrive: 4,294,967,295 bytes
 * Maximum size of file: 16*256^7 bytes
 * **WARNING** about the SalmonDrive implementation only. Do NOT IMPORT files into MULTIPLE CLONES of the same Salmon drive. Someone that has access to both CLONES can decrypt the contents. Keep only ONE INSTANCE which you can MOVE (DO NOT COPY) to other devices. If you wish to keep a backup of the drive in another device you can do that but do NOT IMPORT any files into the backup drive. If you need to restore the backup drive just export all files, create a new drive, and then import everything into the new drive.
 
+### License
+Salmon is released under MIT Licence, see LICENSE file.
+Make sure you read the LICENSE file and display proper attribution if you decide to use this software.
+Dependency libraries from Github, Maven, and NuGet are covered by their own license.
+
+# Subprojects  
+### SalmonFS
+SalmonFS provides an easy file encryption and virtual filesystem API with multithreaded read/write file support.
+
+### SalmonNative
+SalmonNative provides a performant native C library with AES intrinsics for Intel x86 32/64bit, and ARM 64bit.
+
+### SalmonVault
+SalmonValut is an app that implements a file vault using Salmon. Currently there are versions in JavaFX, C# WPF, and Android Java and Xamarin. It features an explorer like interface for navigating, importing, and exporting files. There are also builtin apps for viewing encrypted files with Image, Video, and Audio contents as well as a Text Editor for editing encrypted files. The android version also features editing capabilities with external apps.
+
+### Specifications
 #### SalmonStream
 ```
 
