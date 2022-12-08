@@ -68,7 +68,6 @@ public class ActivityCommon {
         SalmonAlert alert = new SalmonAlert(Alert.AlertType.NONE, "", ButtonType.OK, ButtonType.CANCEL);
         alert.setTitle("Password");
         PasswordField pass = new PasswordField();
-        pass.setText("test");
         VBox box = new VBox();
         Label status = new Label();
         box.getChildren().addAll(pass,status);
