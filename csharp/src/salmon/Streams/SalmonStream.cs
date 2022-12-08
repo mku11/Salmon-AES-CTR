@@ -85,17 +85,13 @@ namespace Salmon.Streams
         /// AES Counter mode Stream
         /// </summary>
         /// <param name="backStream">
-        /// There is only Read mode available if you need to directly write you can use it in a buffered loop
-        /// or use the helper class SalmonStream.
-        /// If you read from the transformer it will encrypt/decrypt the data from the baseStream.
-        /// 
-        /// The transformation is based on AES CTR Mode: 
+        /// If you read from the stream it will decrypt the data from the baseStream.
+        /// If you write to the stream it will encrypt the data from the baseStream.
+        /// The transformation is based on AES CTR Mode:
         /// https://en.wikipedia.org/wiki/Block_cipher_mode_of_operation#Counter_(CTR)
         /// Notes:
-        /// a) The initial value of the counter is a result of the concatenation of a 8 byte nonce and an additional 8 bytes of zero value.
-        /// b) The counter is incremented every block.
-        /// b) The counter is then encrypted by the key the user has choosen (usually coverted from his/her text password).
-        /// c) Finally the counter is xored with the plain text.
+        /// The initial value of the counter is a result of the concatenation of an 8 byte nonce and an additional 8 bytes counter.
+        /// The counter is then: incremented every block, encrypted by the key, and xored with the plain text.
         /// </summary>
         /// <param name="key">The AES key that is used to encrypt decrypt</param>
         /// <param name="nonce">The nonce used for the initial counter</param>
