@@ -1,5 +1,5 @@
 # Salmon
-Salmon BETA is an encryption AES256 CTR library with HMAC SHA256 integrity seekable stream support. Currently it is written in Java and C# but it also offers an native C low level implementation for Intel x86 and ARM64 intrinsics. There is also a BETA app in JavaFX, C# WPF, Android, and Xamarin-Android that demonstrate what Salmon can do.
+Salmon BETA is an encryption AES256 CTR library with HMAC SHA256 integrity and seekable stream support. Currently it is written in Java and C# but it also offers an native C low level implementation for Intel x86 and ARM64 intrinsics. There is also a BETA app in JavaFX, C# WPF, Android, and Xamarin-Android that demonstrate what Salmon can do.
 
 ### Library Features
 * AES256 standard encryption in CTR Mode.
