@@ -11,6 +11,7 @@ local.properties
 **/.idea/uiDesigner.xml
 **/.idea/description.xml
 **/.idea/vcs.xml
+**/.idea/misc.xml
 **/.idea/tasks.xml
 **/.idea/compiler.xml
 javafx/app/dist
@@ -30,4 +31,4 @@ packages
 Debug
 /c/src/tiny-aes/aes.h
 /c/src/tiny-aes/aes.c
-
+Resource.designer.cs
