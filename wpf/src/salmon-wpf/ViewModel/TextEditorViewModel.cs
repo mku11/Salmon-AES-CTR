@@ -29,7 +29,6 @@ using System;
 using System.ComponentModel;
 using System.IO;
 using System.Text;
-using System.Windows.Data;
 using System.Windows.Input;
 
 namespace Salmon.ViewModel
