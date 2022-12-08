@@ -4,6 +4,9 @@
     <modules>
       <module fileurl="file://$PROJECT_DIR$/Salmon/Salmon.iml" filepath="$PROJECT_DIR$/Salmon/Salmon.iml" />
       <module fileurl="file://$PROJECT_DIR$/SalmonFS/SalmonFS.iml" filepath="$PROJECT_DIR$/SalmonFS/SalmonFS.iml" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/modules/SalmonNative.iml" filepath="$PROJECT_DIR$/.idea/modules/SalmonNative.iml" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/modules/SalmonNative.main.iml" filepath="$PROJECT_DIR$/.idea/modules/SalmonNative.main.iml" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/modules/SalmonNative.test.iml" filepath="$PROJECT_DIR$/.idea/modules/SalmonNative.test.iml" />
       <module fileurl="file://$PROJECT_DIR$/app.iml" filepath="$PROJECT_DIR$/app.iml" />
     </modules>
   </component>
