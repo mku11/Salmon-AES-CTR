@@ -437,7 +437,7 @@ namespace Salmon.Streams
         /// We use little endianness eventhough it does not matter for AES
         /// </summary>
         /// <param name="value"></param>
-        /// TODO: throw Exception when 4 lower bytes overflow
+        /// TODO: throw Exception when 8 lower bytes overflow
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         private void IncrementCounter(long value)
         {
