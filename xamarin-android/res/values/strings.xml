@@ -1,0 +1,81 @@
+<resources>
+	<string name="app_name">Salmon Vault Beta</string>
+	<string name="FileProvider" translatable="false">com.mku.android.salmonvault.fileprovider</string>
+	<string name="SourceCodeURL" translatable="false">https://github.com/mku11/Salmon</string>
+
+	<string name="SalmonPrefCat">Preferences</string>
+	<string name="VaultLocationSummary">Open another vault folder</string>
+	<string name="VaultLocationTitle">Vault Location</string>
+	<string name="ChangePasswordSummary">Change the current vault password</string>
+	<string name="ChangePasswordTitle">Change Password</string>
+	<string name="IntegrityCheckSummary">Always check files integrity before opening. Warning: This is buggy and Very Slow for large files.</string>
+	<string name="IntegrityCheckTitle">Integrity Check</string>
+
+
+	<string name="Search">Search</string>
+	<string name="Keywords">Keywords</string>
+	<string name="Import">Import</string>
+	<string name="Export">Export</string>
+	<string name="Sort">Sort</string>
+	<string name="ExportAll">Export All</string>
+	<string name="Action">Action</string>
+	<string name="Refresh">Refresh</string>
+	<string name="CouldNotParseConfig">Could not parse config file, choose another folder!</string>
+	<string name="AboutText">Released under MIT License</string>
+	<string name="Authenticate">Authenticate</string>
+	<string name="Password">Password</string>
+	<string name="RetypePassword">Retype Password</string>
+	<string name="SetPassword">Set Password</string>
+	<string name="PasswordsDontMatch">Passwords Don\'t Match</string>
+	<string name="CreateFolder">Create Folder</string>
+	<string name="ChooseApp">Choose App</string>
+	<string name="GetSourceCode">Get Source Code</string>
+	<string name="Settings">Settings</string>
+	<string name="DeleteAll">Delete All</string>
+	<string name="About">About</string>
+	<string name="SelectFilesToImport">Select File(s) to Import</string>
+	<string name="FileSizeTooLarge">File size too large, try export instead</string>
+	<string name="Exit">Exit</string>
+	<string name="PleaseWaitWhileDecrypting">Please Wait while decrypting</string>
+	<string name="CouldNotImportFiles">Could not import files</string>
+	<string name="CouldNotOpenConfigFile">Could not open config file, choose another folder</string>
+	<string name="NewPassword">New Password</string>
+	<string name="File">File</string>
+	<string name="View">View</string>
+	<string name="ViewExternal">View External</string>
+
+	<string name="ImportStopped">Import Stopped</string>
+	<string name="ImportFailed">Import Failed</string>
+	<string name="ImportComplete">Import Complete</string>
+
+	<string name="ExportStopped">Export Stopped</string>
+	<string name="ExportFailed">Export Failed</string>
+	<string name="ExportComplete">Export Complete</string>
+
+	<string name="Share">Share</string>
+	<string name="ShareExternal">Share External</string>
+	<string name="FileSavedInSalmonVault">File saved in Salmon Vault</string>
+	<string name="NoApplicationsFound">No applications found</string>
+
+	<string name="FilesImported">Files Imported</string>
+	<string name="Edit">Edit</string>
+	<string name="EditExternal">Edit External</string>
+	<string name="Delete">Delete</string>
+	<string name="SelectFolderForFiles">Select or create a folder for your vault</string>
+	<string name="FilesExportedTo">Files exported to</string>
+	<string name="FileCorrupOrTampered">File is corrupt or tampered</string>
+	<string name="Rename">Rename</string>
+	<string name="NewFilename">New Filename</string>
+	<string name="Default">Default</string>
+	<string name="TinyAes">Tiny Aes</string>
+	<string name="AesIntrinsics">Aes Intrinsics</string>
+	<string name="ExcludeFromRecents">Exclude from recents</string>
+	<string name="ExcludeFromRecentsSummury">Exclude App from recents (might be killed by OS) </string>
+	<string name="DeleteSourceFilesAfterImport">Delete source files after import</string>
+	<string name="DeleteFilesAfterImport">Delete files after import</string>
+	<string name="EnableLog">Enable Log</string>
+	<string name="EnableLogDetails">Enable Log Details</string>
+	<string name="AESEncryptionImplementation">AES Encryption Implementation</string>
+	<string name="AESImplementation">AES Implementation</string>
+
+</resources>
