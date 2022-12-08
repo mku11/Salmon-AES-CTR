@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.Menu?>
+<?import javafx.scene.control.MenuBar?>
+<?import javafx.scene.control.MenuItem?>
+<?import javafx.scene.image.ImageView?>
+<?import javafx.scene.layout.*?>
+<GridPane xmlns="http://javafx.com/javafx"
+          xmlns:fx="http://javafx.com/fxml"
+          fx:controller="com.mku11.salmon.vault.controller.ImageViewerController"
+          GridPane.hgrow="ALWAYS"
+          GridPane.vgrow="ALWAYS"
+          minWidth="800"
+          minHeight="600"
+          stylesheets="/css/dark.css"
+>
+    <VBox id="vbox" GridPane.hgrow="ALWAYS" GridPane.vgrow="ALWAYS">
+        <padding>
+            <Insets bottom="10" left="10" right="10" top="10"/>
+        </padding>
+        <MenuBar onKeyPressed="#shortcutPressed">
+            <Menu text="File">
+                <MenuItem text="Close" onAction="#onClose"/>
+            </Menu>
+        </MenuBar>
+        <HBox id="topContainer" VBox.vgrow="ALWAYS" GridPane.hgrow="ALWAYS" alignment="CENTER" minWidth="100" minHeight="100">
+            <ImageView fx:id="imageView" VBox.vgrow="ALWAYS" HBox.hgrow="ALWAYS" >
+
+            </ImageView>
+        </HBox>
+    </VBox>
+
+</GridPane>

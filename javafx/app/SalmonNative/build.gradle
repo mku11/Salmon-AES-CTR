@@ -1,0 +1,65 @@
+import org.gradle.internal.jvm.Jvm
+
+plugins {
+    id 'java'
+    id 'application'
+    id 'c'
+}
+
+repositories {
+    mavenCentral()
+}
+
+dependencies {
+    testImplementation 'junit:junit:4.12'
+}
+
+model {
+    platforms {
+        x64 {
+            architecture "x86_64"
+        }
+    }
+    components {
+        // needs VC, cygwin GCC, or minGW in windows, or Linux GCC, MacOS Darwin GCC
+        // the plugin will find it automatically
+        salmon(NativeLibrarySpec) {
+            targetPlatform "x64"
+            binaries.all {
+                def jvmHome = Jvm.current().javaHome
+                if (targetPlatform.operatingSystem.macOsX) {
+                    cCompiler.args '-I', "${jvmHome}/include"
+                    cCompiler.args '-I', "${jvmHome}/include/darwin"
+                    cCompiler.args '-mmacosx-version-min=10.4'
+                    linker.args '-mmacosx-version-min=10.4'
+                } else if (targetPlatform.operatingSystem.linux) {
+                    cCompiler.args '-I', "${jvmHome}/include"
+                    cCompiler.args '-I', "${jvmHome}/include/linux"
+                    cCompiler.args '-D_FILE_OFFSET_BITS=64'
+                } else if (targetPlatform.operatingSystem.windows) {
+                    cCompiler.args "-I${jvmHome}/include"
+                    cCompiler.args "-I${jvmHome}/include/win32"
+                } else if (targetPlatform.operatingSystem.freeBSD) {
+                    cCompiler.args '-I', "${jvmHome}/include"
+                    cCompiler.args '-I', "${jvmHome}/include/freebsd"
+                }
+            }
+            sources {
+                c {
+                    source {
+                        srcDirs "../../../c/src"
+                        include "**/*.c"
+                    }
+                }
+            }
+        }
+    }
+}
+
+jar {
+    manifest {
+        attributes 'Main-Class': 'salmon.HelloWorld'
+    }
+}
+
+classes.dependsOn 'salmonSharedLibrary'

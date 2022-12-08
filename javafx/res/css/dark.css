@@ -1,0 +1,63 @@
+.root {
+    -fx-base: #2d3343;
+    -fx-accent: #lightblue;
+    -fx-control-inner-background: derive(-fx-base, 42%);
+}
+
+.label{
+    -fx-text-fill: white;
+}
+
+.text-field {
+    -fx-prompt-text-fill: white;
+}
+
+.button{
+    -fx-focus-traversable: false;
+}
+
+.button:hover{
+    -fx-text-fill: white;
+}
+
+.table-view{
+    -fx-table-cell-border-color: transparent;
+    -fx-background-color: black;
+    -fx-text-fill: white;
+}
+
+.table-row-cell {
+    -fx-table-cell-border-color: transparent;
+    -fx-background-color: black;
+    -fx-text-fill: white;
+}
+
+.table-row-cell:selected {
+    -fx-table-cell-border-color: transparent;
+    -fx-background-color: #909090;
+    -fx-text-fill: white;
+}
+
+.table-cell:selected {
+    -fx-text-fill: white;
+}
+
+
+.dialog-pane{
+    -fx-accent: #lightblue;
+    -fx-base: #2d3343;
+    -fx-control-inner-background: derive(-fx-base, 42%);
+ }
+
+.dialog-pane {
+    -fx-accent: #lightblue;
+    -fx-base: #2d3343;
+    -fx-control-inner-background: derive(-fx-base, 42%);
+    -fx-focus-traversable: false;
+ }
+
+.dialog-pane .button:hover{
+    -fx-accent: #lightblue;
+    -fx-base: #2d3343;-fx-control-inner-background: derive(-fx-base, 42%);
+    -fx-text-fill: white;
+ }

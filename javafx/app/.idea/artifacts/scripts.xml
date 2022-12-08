@@ -1,0 +1,8 @@
+<component name="ArtifactManager">
+  <artifact name="scripts">
+    <output-path>$PROJECT_DIR$/dist</output-path>
+    <root id="root">
+      <element id="file-copy" path="$PROJECT_DIR$/scripts/start.bat" />
+    </root>
+  </artifact>
+</component>
