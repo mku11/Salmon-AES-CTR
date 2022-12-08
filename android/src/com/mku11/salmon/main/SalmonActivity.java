@@ -51,6 +51,7 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import com.mku.android.salmonvault.R;
 import com.mku11.salmon.SalmonGenerator;
+import com.mku11.salmon.config.Config;
 import com.mku11.salmon.file.AndroidDrive;
 import com.mku11.salmon.file.AndroidSharedFileObserver;
 import com.mku11.salmon.media.SalmonMediaDataSource;
@@ -182,7 +183,8 @@ public class SalmonActivity extends AppCompatActivity {
     }
 
     private void setupNativeLib() {
-        System.loadLibrary("salmon");
+        if(Config.enableNativeLib)
+            System.loadLibrary("salmon");
     }
 
     private void setupFileCommander() {
