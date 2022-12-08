@@ -105,7 +105,7 @@ public class SalmonFileExporter {
             exportDir.mkdir();
         String targetFileName = fileToExport.getBaseName();
         IRealFile tfile = exportDir.getChild(targetFileName);
-        if(tfile.exists()) {
+        if(tfile != null && tfile.exists()) {
             String filename = SalmonDriveManager.getDrive().getFileNameWithoutExtension(targetFileName);
             String ext = SalmonDriveManager.getDrive().getExtensionFromFileName(targetFileName);
             targetFileName = filename + "_" + SalmonTime.currentTimeMillis() + "." + ext;
