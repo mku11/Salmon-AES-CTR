@@ -212,7 +212,12 @@ namespace Salmon.Net.FS
 
         public bool RenameTo(string newFilename)
         {
-            System.IO.File.Move(filePath, newFilename);
+            string newFilepath = GetParent().GetPath() + Path.DirectorySeparatorChar + newFilename;
+            if (IsDirectory())
+                Directory.Move(filePath, newFilepath);
+            else
+                File.Move(filePath, newFilepath);
+            filePath = newFilepath;
             return true;
         }
 

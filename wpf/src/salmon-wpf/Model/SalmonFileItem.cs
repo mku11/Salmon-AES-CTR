@@ -23,11 +23,12 @@ SOFTWARE.
 */
 using Salmon.FS;
 using System;
+using System.ComponentModel;
 using System.Windows.Media.Imaging;
 
 namespace Salmon.Model
 {
-    public class SalmonFileItem : FileItem
+    public class SalmonFileItem : FileItem, INotifyPropertyChanged
     {
         private static string dateFormat = "dd/MM/yyyy hh:mm tt";
         private SalmonFile salmonFile;
@@ -67,12 +68,20 @@ namespace Salmon.Model
             Name = salmonFile.GetBaseName();
         }
 
+        public event PropertyChangedEventHandler PropertyChanged;
+        private string _name;
+
         public override string Name  {
-            get => base.Name;
+            get => _name;
             set {
                 if (!GetBaseName().Equals(value))
                     salmonFile.Rename(value, null);
-                base.Name = value;
+                if (_name != value)
+                {
+                    _name = value;
+                    if (PropertyChanged != null)
+                        PropertyChanged(this, new PropertyChangedEventArgs("Name"));
+                }
             }
         }
 
