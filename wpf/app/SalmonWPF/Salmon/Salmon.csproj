@@ -1,0 +1,35 @@
+﻿<Project Sdk="Microsoft.NET.Sdk.WindowsDesktop">
+
+  <PropertyGroup>
+    <TargetFramework>netcoreapp3.1</TargetFramework>
+    <UseWPF>true</UseWPF>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <Compile Include="..\..\..\..\csharp\src\salmon\Salmon\BitConverter.cs" Link="salmon\Salmon\BitConverter.cs" />
+    <Compile Include="..\..\..\..\csharp\src\salmon\Salmon\SalmonEncryptor.cs" Link="salmon\Salmon\SalmonEncryptor.cs" />
+    <Compile Include="..\..\..\..\csharp\src\salmon\Salmon\SalmonGenerator.cs" Link="salmon\Salmon\SalmonGenerator.cs" />
+    <Compile Include="..\..\..\..\csharp\src\salmon\Salmon\SalmonIntegrity.cs" Link="salmon\Salmon\SalmonIntegrity.cs" />
+    <Compile Include="..\..\..\..\csharp\src\salmon\Salmon\SalmonSecurityException.cs" Link="salmon\Salmon\SalmonSecurityException.cs" />
+    <Compile Include="..\..\..\..\csharp\src\salmon\Salmon\SalmonTextEncryptor.cs" Link="salmon\Salmon\SalmonTextEncryptor.cs" />
+    <Compile Include="..\..\..\..\csharp\src\salmon\Salmon\SalmonTime.cs" Link="salmon\Salmon\SalmonTime.cs" />
+    <Compile Include="..\..\..\..\csharp\src\salmon\Streams\AbsStream.cs" Link="salmon\Streams\AbsStream.cs" />
+    <Compile Include="..\..\..\..\csharp\src\salmon\Streams\SalmonStream.cs" Link="salmon\Streams\SalmonStream.cs" />
+    <Compile Include="..\..\..\..\csharp\src\salmon\Transformers\SalmonAES.cs" Link="salmon\Transformers\SalmonAES.cs" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Folder Include="salmon\Salmon\" />
+    <Folder Include="salmon\Streams\" />
+    <Folder Include="salmon\Transformers\" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Microsoft.AspNetCore.Cryptography.KeyDerivation" Version="7.0.0" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\SalmonNative\SalmonNative.vcxproj" />
+  </ItemGroup>
+
+</Project>

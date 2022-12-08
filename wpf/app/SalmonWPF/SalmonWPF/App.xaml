@@ -1,0 +1,129 @@
+﻿<Application x:Class="SalmonWPF.App"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:local="clr-namespace:SalmonWPF"
+             xmlns:view="clr-namespace:Salmon.View"
+             Startup="Application_Startup"
+             >
+    <Application.Resources>
+        <ResourceDictionary>
+            <SolidColorBrush x:Key="SalmonBackground" Color="#2d3343" />
+            
+            <Style TargetType="Window">
+                <Setter Property="Background" Value ="{StaticResource SalmonBackground}"/>
+                <Setter Property="Foreground" Value ="White"/>
+            </Style>
+            <Style TargetType="TextBlock">
+                <Setter Property="Background" Value ="Transparent"/>
+                <Setter Property="Foreground" Value ="White"/>
+            </Style>
+            <Style TargetType="Label">
+                <Setter Property="Background" Value ="Transparent"/>
+                <Setter Property="Foreground" Value ="White"/>
+            </Style>
+            <Style TargetType="ToggleButton">
+                <Setter Property="BorderBrush" Value="{StaticResource SalmonBackground}"/>
+            </Style>
+            <Style TargetType="PasswordBox">
+                <Setter Property="Background" Value ="{StaticResource SalmonBackground}"/>
+                <Setter Property="Foreground" Value ="White"/>
+            </Style>
+            <Style TargetType="Button">
+                <Setter Property="Background" Value ="Transparent"/>
+                <Setter Property="Foreground" Value ="White"/>
+                <Setter Property="Template">
+                    <Setter.Value>
+                        <ControlTemplate TargetType="{x:Type Button}">
+                            <Border Background="{TemplateBinding Background}" BorderBrush="{TemplateBinding BorderBrush}" BorderThickness="{TemplateBinding BorderThickness}">
+                                <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                            </Border>
+                            <ControlTemplate.Triggers>
+                                <Trigger Property="IsMouseOver" Value="True">
+                                    <Setter Property="Background" Value="Gray"/>
+                                </Trigger>
+                            </ControlTemplate.Triggers>
+                        </ControlTemplate>
+                    </Setter.Value>
+                </Setter>
+            </Style>
+            <Style TargetType="ContentPresenter">
+                <Setter Property="Canvas.Background" Value="{StaticResource SalmonBackground}"/>
+            </Style>
+            <Style TargetType="TextBox">
+                <Setter Property="Background" Value="{StaticResource SalmonBackground}"/>
+                <Setter Property="Foreground" Value="White"/>
+            </Style>
+            <Style TargetType="view:ImageViewer">
+                <Setter Property="Background" Value="{StaticResource SalmonBackground}"/>
+            </Style>
+            <Style TargetType="Grid">
+                <Setter Property="Background" Value="Transparent"/>
+            </Style>
+            <Style TargetType="ScrollViewer">
+                <Setter Property="Background" Value="{StaticResource SalmonBackground}"/>
+            </Style>
+            <Style TargetType="StackPanel">
+                <Setter Property="Background" Value="{StaticResource SalmonBackground}"/>
+            </Style>
+            <Style TargetType="DockPanel">
+                <Setter Property="Background" Value="{StaticResource SalmonBackground}"/>
+            </Style>
+            <Style TargetType="ContextMenu">
+                <Setter Property="Foreground" Value="White"/>
+                <Setter Property="Background" Value="{StaticResource SalmonBackground}"/>
+                <Setter Property="BorderThickness" Value="1"/>
+            </Style>
+            <Style TargetType="Menu">
+                <Setter Property="Foreground" Value="White"/>
+                <Setter Property="Background" Value="Black"/>
+                <Setter Property="BorderThickness" Value="1"/>
+            </Style>
+            <Style TargetType="Separator">
+                <Setter Property="Foreground" Value="White"/>
+                <Setter Property="Background" Value="{StaticResource SalmonBackground}"/>
+            </Style>
+            <Style TargetType="MenuItem">
+                <Setter Property="Foreground" Value="White"/>
+                <Setter Property="Background" Value="{StaticResource SalmonBackground}"/>
+                <Setter Property="BorderThickness" Value="1"/>
+            </Style>
+            <Style TargetType="GroupBox">
+                <Setter Property="Foreground" Value="{StaticResource SalmonBackground}"/>
+                <Setter Property="Background" Value="{StaticResource SalmonBackground}"/>
+                <Setter Property="BorderThickness" Value="1"/>
+            </Style>
+            <Style TargetType="ToolTip">
+                <Setter Property="Foreground" Value="{StaticResource SalmonBackground}"/>
+                <Setter Property="Background" Value="White"/>
+            </Style>
+            <Style TargetType="DataGrid">
+                <Setter Property="Background" Value="Black"/>
+            </Style>
+            <Style TargetType="Border">
+                <Setter Property="Background" Value="{StaticResource SalmonBackground}"/>
+            </Style>
+            <Style TargetType="{x:Type DataGridCell}">
+                <Setter Property="BorderThickness" Value="0"/>
+            </Style>
+            <Style TargetType="{x:Type DataGridRow}">
+                <Setter Property="Background" Value="Black"/>
+                <Setter Property="Foreground" Value="White"/>
+                <Style.Resources>
+                    <SolidColorBrush x:Key="{x:Static SystemColors.InactiveSelectionHighlightBrushKey}" Color="Gray"/>
+                    <SolidColorBrush x:Key="{x:Static SystemColors.InactiveSelectionHighlightTextBrushKey}" Color="White"/>
+                    <SolidColorBrush x:Key="{x:Static SystemColors.HighlightBrushKey}" Color="Gray" />
+                    <SolidColorBrush x:Key="{x:Static SystemColors.ControlBrushKey}" Color="Gray" />
+                    <SolidColorBrush x:Key="{x:Static SystemColors.HighlightTextBrushKey}" Color="White" />
+                    <SolidColorBrush x:Key="{x:Static SystemColors.ControlTextBrushKey}" Color="White" />
+                </Style.Resources>
+            </Style>
+            <Style TargetType="{x:Type DataGridRowHeader}">
+                <Setter Property="Background" Value="{StaticResource SalmonBackground}"/>
+                <Setter Property="Foreground" Value="White"/>
+            </Style>
+            <Style TargetType="{x:Type DataGridColumnHeader}">
+                <Setter Property="Background" Value="{StaticResource SalmonBackground}"/>
+            </Style>
+        </ResourceDictionary>
+    </Application.Resources>
+</Application>

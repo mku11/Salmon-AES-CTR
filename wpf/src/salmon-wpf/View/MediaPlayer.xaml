@@ -1,0 +1,44 @@
+﻿<Window x:Class="Salmon.View.MediaPlayer"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:local="clr-namespace:Salmon.View"
+        xmlns:viewmodel="clr-namespace:Salmon.ViewModel" 
+        xmlns:wpf="clr-namespace:LibVLCSharp.WPF;assembly=LibVLCSharp.WPF"
+        mc:Ignorable="d"
+        Title="Media Player" Height="450" Width="800"
+        Background="{StaticResource SalmonBackground}">
+    <Window.DataContext>
+        <viewmodel:MediaPlayerViewModel/>
+    </Window.DataContext>
+    <Grid Background="{StaticResource SalmonBackground}" >
+        <Grid.RowDefinitions>
+            <RowDefinition Height="*"/>
+            <RowDefinition Height="Auto"/>
+        </Grid.RowDefinitions>
+        <wpf:VideoView Background="{StaticResource SalmonBackground}" Grid.Row="0" MediaPlayer="{Binding Path=MediaPlayer}">
+
+        </wpf:VideoView>
+        <Grid Grid.Row="1" HorizontalAlignment="Stretch" Background="{StaticResource SalmonBackground}" >
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="Auto"/>
+                <ColumnDefinition Width="Auto"/>
+                <ColumnDefinition Width="*"/>
+                <ColumnDefinition Width="Auto"/>
+            </Grid.ColumnDefinitions>
+            <Button Grid.Column="0" Command="{Binding ClickCommand}"
+                       CommandParameter="{x:Static viewmodel:ActionType.PLAY}">
+                <Image Source="{Binding Path=PlayImageSource}" Width="24" Height="24"/>
+            </Button>
+            <Label Grid.Column="1" Width="55" Content="{Binding Path=CurrTime}" HorizontalContentAlignment="Left" Margin="2"/>
+            <Slider x:Name="PlayerSlider" VerticalAlignment="Center" HorizontalAlignment="Stretch" Grid.Column="2" 
+                    IsMoveToPointEnabled="True"
+                    Value="{Binding Path=SliderValue}" Minimum="0" Maximum="1000"
+                    Foreground="Black" d:Value="20"
+                    IsSelectionRangeEnabled="True">
+            </Slider>
+            <Label Grid.Column="3" Width="55" Content="{Binding Path=TotalTime}" HorizontalContentAlignment="Right" Margin="2"/>
+        </Grid>
+    </Grid>
+</Window>

@@ -1,0 +1,107 @@
+﻿<Window x:Class="Salmon.View.Settings"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:local="clr-namespace:Salmon.View"
+        xmlns:viewmodel="clr-namespace:Salmon.ViewModel"
+        mc:Ignorable="d"
+        WindowStartupLocation="CenterOwner"
+        Title="Settings" Height="350" Width="400">
+    <Window.DataContext>
+        <viewmodel:SettingsViewModel/>
+    </Window.DataContext>
+    <ScrollViewer HorizontalAlignment="Stretch" VerticalAlignment="Stretch" HorizontalScrollBarVisibility="Disabled"
+                  VerticalScrollBarVisibility="Auto">
+        <StackPanel HorizontalAlignment="Stretch" Margin="10 20 10 10">
+            <GroupBox HorizontalAlignment="Stretch">
+                <GroupBox.Header>
+                    <TextBlock FontWeight="Bold" Text="Vault"></TextBlock>
+                </GroupBox.Header>
+                <StackPanel Orientation="Vertical" HorizontalAlignment="Stretch">
+                    <Grid HorizontalAlignment="Stretch" Margin="2">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*"/>
+                            <ColumnDefinition Width="Auto"/>
+                        </Grid.ColumnDefinitions>
+                        <StackPanel Grid.Column="0" Orientation="Vertical" HorizontalAlignment="Stretch" Margin="0 0 8 0">
+                            <Label HorizontalAlignment="Stretch" Content="Vault Location"/>
+                            <Label HorizontalAlignment="Stretch" FontSize="10" Content="{Binding VaultLocation}"/>
+                        </StackPanel>
+                        <Button Grid.Column="1" HorizontalAlignment="Right" Height="24" Margin="1"
+                                Command="{Binding ClickCommand}"
+                       CommandParameter="{x:Static viewmodel:ActionType.CHANGE_VAULT_LOCATION}">
+                            <StackPanel Orientation="Horizontal" Margin="2">
+                                <Image Width="16" Height="16" Source="/icons/folder.png" Margin="1"/>
+                                <TextBlock Margin="4 0 4 0">Change</TextBlock>
+                            </StackPanel>
+                        </Button>
+                    </Grid>
+                    <Grid HorizontalAlignment="Stretch" Margin="2">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*"/>
+                            <ColumnDefinition Width="Auto"/>
+                        </Grid.ColumnDefinitions>
+                        <Label Grid.Column="0" HorizontalAlignment="Left" Content="Password"/>
+                        <Button Grid.Column="1" HorizontalAlignment="Right" Height="24" Margin="1"
+                                Command="{Binding ClickCommand}"
+                       CommandParameter="{x:Static viewmodel:ActionType.CHANGE_PASSWORD}">
+                            <StackPanel Orientation="Horizontal" Margin="2">
+                                <Image Source="/icons/key.png" Width="16" Height="16" Margin="1"/>
+                                <TextBlock Margin="4 0 4 0">Change</TextBlock>
+                            </StackPanel>
+                        </Button>
+                    </Grid>
+                </StackPanel>
+            </GroupBox>
+            <GroupBox HorizontalAlignment="Stretch">
+                <GroupBox.Header>
+                    <TextBlock FontWeight="Bold" Text="Encryption"></TextBlock>
+                </GroupBox.Header>
+                <StackPanel Orientation="Vertical" HorizontalAlignment="Stretch">
+                    <Grid HorizontalAlignment="Stretch" Margin="2">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*"/>
+                            <ColumnDefinition Width="Auto"/>
+                        </Grid.ColumnDefinitions>
+                        <Label Grid.Column="0" HorizontalAlignment="Left" VerticalAlignment="Top" Content="AES Type" Margin="4,0,0,0"/>
+                        <ComboBox MinWidth="100" Grid.Column="1" x:Name="AesType" VerticalAlignment="Center" ItemsSource="{Binding Path=AesTypes}" SelectedItem="{Binding Path=AesTypeSelected, Mode=TwoWay}" 
+                                  SelectedIndex="0">
+                        </ComboBox>
+                    </Grid>
+                </StackPanel>
+            </GroupBox>
+            <GroupBox HorizontalAlignment="Stretch">
+                <GroupBox.Header>
+                    <TextBlock FontWeight="Bold" Text="Miscellaneous"></TextBlock>
+                </GroupBox.Header>
+                <StackPanel Orientation="Vertical" HorizontalAlignment="Stretch">
+                    <Grid HorizontalAlignment="Stretch" Margin="2">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*"/>
+                            <ColumnDefinition Width="Auto"/>
+                        </Grid.ColumnDefinitions>
+                        <Label Grid.Column="0" VerticalAlignment="Center" HorizontalAlignment ="Left" Content="Delete source files after import" Margin="4 0 4 4"/>
+                        <CheckBox Grid.Column="1" VerticalAlignment="Center" HorizontalAlignment="Left" x:Name="deleteSourceAfterImport" IsChecked="{Binding Path=DeleteSourceAfterImport, Mode=TwoWay}"/>
+                    </Grid>
+                    <Grid HorizontalAlignment="Stretch" Margin="2">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*"/>
+                            <ColumnDefinition Width="Auto"/>
+                        </Grid.ColumnDefinitions>
+                        <Label Grid.Column="0" VerticalAlignment="Center" HorizontalAlignment="Left" Content="Enable Log" Margin="4 0 4 4"/>
+                        <CheckBox Grid.Column="1" VerticalAlignment="Center" HorizontalAlignment="Left" x:Name="enableLogs" IsChecked="{Binding Path=EnableLogs, Mode=TwoWay}"/>
+                    </Grid>
+                    <Grid HorizontalAlignment="Stretch" Margin="2">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*"/>
+                            <ColumnDefinition Width="Auto"/>
+                        </Grid.ColumnDefinitions>
+                        <Label Grid.Column="0" VerticalAlignment="Center" HorizontalAlignment ="Left" Content="Enable Log Details" Margin="4 0 4 4"/>
+                        <CheckBox Grid.Column="1" VerticalAlignment="Center" HorizontalAlignment="Left" x:Name="enableDetailedLogs" IsChecked="{Binding Path=EnableDetailedLogs, Mode=TwoWay}"/>
+                    </Grid>
+                </StackPanel>
+            </GroupBox>
+        </StackPanel>
+    </ScrollViewer>
+</Window>

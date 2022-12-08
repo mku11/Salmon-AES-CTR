@@ -1,0 +1,8 @@
+{
+  "profiles": {
+    "SalmonWPF": {
+      "commandName": "Project",
+      "nativeDebugging": false
+    }
+  }
+}

@@ -1,0 +1,186 @@
+﻿<Window x:Class="Salmon.View.MainWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:local="clr-namespace:Salmon.View"
+        xmlns:xrpb="http://XamlRadialProgressBar/DotNet"
+        xmlns:viewmodel="clr-namespace:Salmon.ViewModel"
+        mc:Ignorable="d"
+        WindowStartupLocation="CenterScreen"
+        Title="Salmon" Height="450" Width="800"
+        Background="{StaticResource SalmonBackground}">
+    <Window.DataContext>
+        <viewmodel:MainViewModel/>
+    </Window.DataContext>
+    <Window.Resources>
+        <BooleanToVisibilityConverter x:Key="BooleanToVisibilityConverter" />
+    </Window.Resources>
+    <Window.InputBindings>
+        <KeyBinding Command="{Binding ClickCommand}" 
+                    CommandParameter="{x:Static viewmodel:ActionType.DELETE}" Key="Delete" />
+        <KeyBinding Command="{Binding ClickCommand}"
+                    CommandParameter="{x:Static viewmodel:ActionType.COPY}" Key="C" Modifiers="Ctrl"  />
+        <KeyBinding Command="{Binding ClickCommand}"
+                    CommandParameter="{x:Static viewmodel:ActionType.MOVE}" Key="X" Modifiers="Ctrl"  />
+        <KeyBinding Command="{Binding ClickCommand}"
+                    CommandParameter="{x:Static viewmodel:ActionType.PASTE}" Key="V" Modifiers="Ctrl"  />
+        <KeyBinding Command="{Binding ClickCommand}"
+                    CommandParameter="{x:Static viewmodel:ActionType.SEARCH}" Key="F" Modifiers="Ctrl"  />
+    </Window.InputBindings>
+
+    <Grid Background="{StaticResource SalmonBackground}">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="*"/>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
+        </Grid.RowDefinitions>
+        <DockPanel Grid.Row="0" Background="{StaticResource SalmonBackground}">
+            <Menu DockPanel.Dock="Top" x:Name="MainMenu" Background="{StaticResource SalmonBackground}">
+                <MenuItem Header="File">
+                    <MenuItem Header="Open Vault" 
+                              Command="{Binding ClickCommand}"
+                       CommandParameter="{x:Static viewmodel:ActionType.CHANGE_VAULT_LOCATION}"/>
+                    <Separator/>
+                    <MenuItem Header="Settings" 
+                              Command="{Binding ClickCommand}"
+                              CommandParameter="{x:Static viewmodel:ActionType.SETTINGS}"/>
+                    <Separator/>
+                    <MenuItem Header="Exit" 
+                              Command="{Binding ClickCommand}"
+                              CommandParameter="{x:Static viewmodel:ActionType.EXIT}"/>
+                </MenuItem>
+                <MenuItem Header="Edit">
+                    <MenuItem Header="New Folder" 
+                              Command="{Binding ClickCommand}"
+                              CommandParameter="{x:Static viewmodel:ActionType.NEW_FOLDER}"/>
+                    <MenuItem Header="New File"
+                              Command="{Binding ClickCommand}"
+                              CommandParameter="{x:Static viewmodel:ActionType.NEW_FILE}"/>
+                    <Separator/>
+                    <MenuItem Header="Copy" 
+                              Command="{Binding ClickCommand}"
+                              CommandParameter="{x:Static viewmodel:ActionType.COPY}"/>
+                    <MenuItem Header="Cut"
+                              Command="{Binding ClickCommand}"
+                              CommandParameter="{x:Static viewmodel:ActionType.MOVE}"/>
+                    <MenuItem Header="Paste"
+                              Command="{Binding ClickCommand}"
+                              CommandParameter="{x:Static viewmodel:ActionType.PASTE}"/>
+                    <MenuItem Header="Delete"
+                              Command="{Binding ClickCommand}"
+                              CommandParameter="{x:Static viewmodel:ActionType.DELETE}"/>
+                    <Separator/>
+                    <MenuItem Header="Refresh" 
+                              Command="{Binding ClickCommand}"
+                              CommandParameter="{x:Static viewmodel:ActionType.REFRESH}"/>
+                </MenuItem>
+                <MenuItem Header="Operations">
+                    <MenuItem Header="Import" Command="{Binding ClickCommand}"
+                              CommandParameter="{x:Static viewmodel:ActionType.IMPORT}"/>
+                    <MenuItem Header="Export"
+                              Command="{Binding ClickCommand}"
+                              CommandParameter="{x:Static viewmodel:ActionType.EXPORT}"/>
+                    <MenuItem Header="Search" Command="{Binding ClickCommand}"
+                              CommandParameter="{x:Static viewmodel:ActionType.SEARCH}"/>
+                    <MenuItem Header="Stop" Command="{Binding ClickCommand}"
+                              CommandParameter="{x:Static viewmodel:ActionType.STOP}"
+                              Visibility="{Binding Path=StopVisibility, Converter={StaticResource BooleanToVisibilityConverter}}"/>
+                </MenuItem>
+                <MenuItem Header="Help">
+                    <MenuItem Header="About" Command="{Binding ClickCommand}"
+                              CommandParameter="{x:Static viewmodel:ActionType.ABOUT}"/>
+                </MenuItem>
+            </Menu>
+        </DockPanel>
+        <Grid HorizontalAlignment="Stretch" Grid.Row="1">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="Auto"/>
+                <ColumnDefinition Width="*"/>
+                <ColumnDefinition Width="Auto"/>
+            </Grid.ColumnDefinitions>
+            <Button Grid.Column="0" Width="24" Height="24" HorizontalAlignment="Left"
+                    Command="{Binding ClickCommand}"
+                    CommandParameter="{x:Static viewmodel:ActionType.UP}"
+                    >
+                <Image Source="/icons/up.png"></Image>
+            </Button>
+            <TextBox Grid.Column="1" HorizontalAlignment="Stretch" VerticalContentAlignment="Center" Text="{Binding Path=Path}" IsReadOnly="True" VerticalAlignment="Stretch"/>
+            <Button Grid.Column="2" Width="24" Height="24" HorizontalAlignment="Right"
+                    Command="{Binding ClickCommand}"
+                    CommandParameter="{x:Static viewmodel:ActionType.REFRESH}"
+                    >
+                <Image Source="/icons/refresh.png"/>
+            </Button>
+        </Grid>
+        <Grid Grid.Row="2" HorizontalAlignment="Stretch" VerticalAlignment="Stretch">
+            <DataGrid x:Name="DataGrid" HorizontalAlignment="Stretch" VerticalAlignment="Stretch"
+                  ItemsSource="{Binding FileItemList}" AutoGenerateColumns="False" GridLinesVisibility="None">
+                <DataGrid.InputBindings>
+                    <KeyBinding Key="C" Modifiers="Control" Command="ApplicationCommands.NotACommand" />
+                    <KeyBinding Key="X" Modifiers="Control" Command="ApplicationCommands.NotACommand" />
+                    <KeyBinding Key="V" Modifiers="Control" Command="ApplicationCommands.NotACommand" />
+                    <KeyBinding Key="F" Modifiers="Control" Command="ApplicationCommands.NotACommand" />
+                    <KeyBinding Key="Delete" Command="ApplicationCommands.NotACommand" />
+                </DataGrid.InputBindings>
+                <DataGrid.Columns>
+                    <DataGridTemplateColumn Header="" Width="32" IsReadOnly="True">
+                        <DataGridTemplateColumn.CellTemplate>
+                            <DataTemplate>
+                                <Image Source="{Binding Image}" Width="16" Height="16"/>
+                            </DataTemplate>
+                        </DataGridTemplateColumn.CellTemplate>
+                    </DataGridTemplateColumn>
+                    <DataGridTextColumn Binding="{Binding Name}" Header="Name" IsReadOnly="True" Width="200"/>
+                    <DataGridTextColumn Binding="{Binding Date}" Header="Date Modified" IsReadOnly="True" Width="200"/>
+                    <DataGridTextColumn Binding="{Binding Type}" Header="Type" IsReadOnly="True" Width="60"/>
+                    <DataGridTextColumn Binding="{Binding Size}" Header="Size" IsReadOnly="True" Width="60"/>
+                    <DataGridTextColumn Binding="{Binding Path}" Header="Path" IsReadOnly="True" Width="200"/>
+                </DataGrid.Columns>
+            </DataGrid>
+        </Grid>
+        <Grid HorizontalAlignment="Stretch" Grid.Row="3" Background="{StaticResource SalmonBackground}"
+              Visibility="{Binding Path=ProgressVisibility, Converter={StaticResource BooleanToVisibilityConverter}}" d:Visibility="Visible">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="*"/>
+                <ColumnDefinition Width="Auto"/>
+            </Grid.ColumnDefinitions>
+            <StackPanel Grid.Column="1" Orientation="Horizontal" HorizontalAlignment="Right">
+                <Grid>
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="*"/>
+                        <RowDefinition Height="Auto"/>
+                    </Grid.RowDefinitions>
+                    <xrpb:RadialProgressBar Minimum="0" Maximum="100" d:Value="50" Value="{Binding Path=FileProgress}" 
+                                        Width="60" Height="60" ArcWidth="20" BorderThickness="6"
+                                            InnerBackgroundBrush="#31313F" OuterBackgroundBrush="DarkSlateGray"
+                                            />
+                    <TextBlock HorizontalAlignment="Center" VerticalAlignment="Center"
+				           FontWeight="Bold" FontSize="12">
+							<Run d:Text="50" Text="{Binding Path=FileProgress, UpdateSourceTrigger=PropertyChanged, Mode=OneWay}"/>
+                        <Run Text="%"/>
+                    </TextBlock>
+                </Grid>
+                <Grid>
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="*"/>
+                        <RowDefinition Height="Auto"/>
+                    </Grid.RowDefinitions>
+                    <xrpb:RadialProgressBar Minimum="0" Maximum="100" d:Value="50" Value="{Binding FilesProgress}" 
+                                        Width="60" Height="60" ArcWidth="20" BorderThickness="6" 
+                                            InnerBackgroundBrush="#31313F" OuterBackgroundBrush="DarkSlateGray"/>
+                    <TextBlock HorizontalAlignment="Center" VerticalAlignment="Center"
+				           FontWeight="Bold" FontSize="12">
+							<Run d:Text="50" Text="{Binding FilesProgress, UpdateSourceTrigger=PropertyChanged, Mode=OneWay}"/>
+                        <Run Text="%"/>
+                    </TextBlock>
+                </Grid>
+            </StackPanel>
+        </Grid>
+        <StackPanel HorizontalAlignment="Stretch" Grid.Row="4" Background="{StaticResource SalmonBackground}">
+            <Label Grid.Column="0" HorizontalAlignment="Right" Content="{Binding Status}" VerticalAlignment="Stretch"/>
+        </StackPanel>
+    </Grid>
+</Window>
