@@ -1,0 +1,75 @@
+<?xml version="1.0" encoding="utf-8"?>
+<manifest xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    package="com.mku.android.salmonvault"
+    android:installLocation="auto"
+    android:versionCode="102"
+    android:versionName="1.2">
+
+    <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" />
+	<!-- We need to able to query apps on the device to let the user choose which one to 
+	give temporary permission to share encrypted files with -->
+    <uses-permission
+        android:name="android.permission.QUERY_ALL_PACKAGES"
+        tools:ignore="QueryAllPackagesPermission" />
+
+    <application
+        android:name="com.mku11.salmon.main.SalmonApplication"
+        tools:replace="android:icon,android:theme"
+        android:icon="@drawable/logo"
+        android:label="@string/app_name"
+        android:largeHeap="true"
+        android:theme="@style/Theme.MaterialComponents">
+        <provider
+            android:name="androidx.core.content.FileProvider"
+            android:authorities="@string/FileProvider"
+            android:exported="false"
+            android:grantUriPermissions="true">
+            <meta-data
+                android:name="android.support.FILE_PROVIDER_PATHS"
+                android:resource="@xml/fileprovider" />
+        </provider>
+
+        <activity
+            android:name="com.mku11.salmon.main.SalmonActivity"
+            android:configChanges="orientation|screenSize"
+            android:icon="@drawable/logo"
+            android:label="@string/app_name"
+            android:theme="@style/Theme.MaterialComponents"
+            android:exported="true">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+
+                <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
+        </activity>
+
+        <activity
+            android:name="com.mku11.salmon.main.MediaPlayerActivity"
+            android:label="@string/app_name"
+            android:configChanges="screenSize|orientation"
+            android:icon="@drawable/logo"
+            android:theme="@style/Theme.MaterialComponents.NoActionBar"
+            >
+        </activity>
+
+        <activity
+            android:name="com.mku11.salmon.main.WebViewerActivity"
+            android:label="@string/app_name"
+            android:configChanges="screenSize|orientation"
+            android:theme="@style/Theme.MaterialComponents.Light.DarkActionBar"
+            android:icon="@drawable/logo"
+            >
+        </activity>
+
+        <activity
+            android:name="com.mku11.salmon.main.SettingsActivity"
+            android:label="@string/app_name"
+            android:configChanges="screenSize|orientation"
+            android:theme="@style/Theme.MaterialComponents"
+            android:icon="@drawable/logo"
+            >
+        </activity>
+
+    </application>
+</manifest>
