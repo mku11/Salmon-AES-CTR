@@ -31,5 +31,8 @@ public class Config {
     public static final String SourceCodeURL = "https://github.com/mku11/Salmon";
     public static final String icon = "icons/logo.png";
     public static final String css = "/css/dark.css";
-    public static final boolean enableNativeLib = true;
+
+    // set to true to enable the AES intrinsics
+    // make sure you read the README.md file
+    public static final boolean enableNativeLib = false;
 }

@@ -1,5 +1,8 @@
-You will need Intellij idea IDE to build the app
-You will also need to download the JavaFX SDK: https://openjfx.io/
-	make sure you update the start.bat with the location of the JavaFX SDK
-If you want to use the AES intrinsics you will need the Microsoft Visual Studio Compiler installed
-	and set VM option -Djava.library.path=SalmonNative/build/libs/salmon/shared in your run configuration within the IDE
+To build the JavaFX app you will need:  
+1. Intellij IDEA ide  
+2. Download the JavaFX SDK: https://openjfx.io/. Make sure you update the start.bat with the location of the JavaFX SDK   
+3. If you want to use the AES intrinsics you will need:  
+   a. Microsoft Visual Studio Compiler installed  
+   b. Download tiny-aes: https://github.com/kokke/tiny-AES-c into folder c/src/tiny-aes  
+   c. Modify aes.h and set: #define AES256 1  
+   d. set VM option -Djava.library.path=SalmonNative/build/libs/salmon/shared in your run configuration in the IDE   
