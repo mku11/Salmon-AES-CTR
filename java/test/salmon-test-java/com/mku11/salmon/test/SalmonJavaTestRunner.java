@@ -154,7 +154,7 @@ public class SalmonJavaTestRunner {
     @Test
     public void shouldEncryptAndDecryptTextCompatible() throws Exception {
         String plainText = TestHelper.TEST_TEXT;
-        for (int i = 0; i < 12; i++)
+        for (int i = 0; i < 15; i++)
             plainText += plainText;
         SalmonStream.setProviderType(SalmonStream.ProviderType.Default);
         byte[] bytes = plainText.getBytes(Charset.defaultCharset());
