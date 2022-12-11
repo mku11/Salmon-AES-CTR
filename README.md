@@ -20,24 +20,32 @@ Salmon is currently in **BETA** which means this library should **NOT** be used 
 * **WARNING** about the SalmonDrive implementation only. Do NOT IMPORT files into MULTIPLE CLONES of the same Salmon drive. Someone that has access to both CLONES can decrypt the contents. Keep only ONE INSTANCE which you can MOVE (DO NOT COPY) to other devices. If you wish to keep a backup of the drive in another device you can do that but do NOT IMPORT any files into the backup drive. If you need to restore the backup drive just export all files, create a new drive, and then import everything into the new drive.
 
 ### License
-Salmon is released under MIT Licence, see LICENSE file.
+Salmon is released under MIT Licence, see [LICENSE](https://github.com/mku11/Salmon/blob/main/LICENSE) file.
 Make sure you read the LICENSE file and display proper attribution if you decide to use this software.
 Dependency libraries from Github, Maven, and NuGet are covered by their own license.
 
-# Subprojects  
-### SalmonFS
-SalmonFS provides an easy file encryption and virtual filesystem API with multithreaded read/write file support.
 
-### SalmonNative
-SalmonNative provides a performant native C library with AES intrinsics for Intel x86 32/64bit, and ARM 64bit.
+# Subprojects   
+* SalmonFS  
+Library provides easy file encryption and virtual filesystem API with multithreaded read/write file support.  
 
-### SalmonVault
-SalmonValut is an app that implements a file vault using Salmon. Currently there are versions in JavaFX, C# WPF, and Android Java and Xamarin. It features an explorer like interface for navigating, importing, and exporting files. There are also builtin apps for viewing encrypted files with Image, Video, and Audio contents as well as a Text Editor for editing encrypted files. The android version also features editing capabilities with external apps.
 
-### Specifications
-#### SalmonStream
+* SalmonNative  
+Library provides a fast native C library with AES intrinsics for Intel x86 32/64bit, and ARM 64bit.  
+
+
+* SalmonVault  
+A secure file vault app using Salmon. Currently there are versions in JavaFX, C# WPF, and Android Java and Xamarin. It features an explorer like interface for navigating, importing, and exporting files. There are also builtin apps for viewing encrypted files with Image, Video, and Audio contents as well as a Text Editor for editing encrypted files. The android version also features editing capabilities with external apps.  
+
+
+![alt text](https://github.com/mku11/Salmon/blob/main/screenshots/Salmon%20Vault%20WPF.png)   
+
+
+
+
+# Specifications
+### SalmonStream
 ```
-
                          |   CTR      |   CTR + 1  |...|                   |   CTR + n  | CTR + n+1  |...|
 _________________________|____________|___________ |...|___________________|____________|____________|...|
 |             |          |  16 bytes  |  16 bytes  |...|                   |  16 bytes  |  16 bytes  |...|
@@ -63,7 +71,7 @@ Notes:
 * If you use integrity align your read/write buffers to the chunk size for better performance.
 * If you don't use integrity align your read/write buffers to the AES Block size for better performance.
 
-#### SalmonFile
+### SalmonFile
 
 You can use a SalmonFile to encrypt contents of a file.
 SalmonFile follows the same format as the stream but with the addition of data into the header, see below.
@@ -92,14 +100,14 @@ Notes:
 other files in the export directory
 * If you use parallel processing you need to align to the chunk size. See SalmonImporter
 
-#### SalmonDrive
+### SalmonDrive
 SalmonDrive is a virtual drive that takes care of the maintenance of hosting encrypted files.
 More specifically:
 1) Takes advantage of the SalmonFile API.
 2) Uses parallel processing to import and export files to the drive.
 3) Handles configuration for the encryption keys and nonce generation.
 
-#### SalmonDriveConfig
+### SalmonDriveConfig
 
 ```
  _______________________________________________________________________________________________________________
@@ -125,12 +133,12 @@ Notes:
 * The INTEGRITY section contains an HMAC signature of the encrypted nonce sequence for tampering prevention.
 * The HMAC signature serves a dual purpose: a) verify that nonce has not been altered and b) a way to validate the user password.
 
-#### SalmonNative
+### SalmonNative
 SalmonNative contains low level routines utilizing AES hardware acceleration for Intel and ARM processors.
 Notes:
 * AES Support only for Intel x86 32 and 64 bit and ARM 64 bit (NEON enabled).
 * TinyAES implemetation of key expansion is used.
 * There is no stream implementation for C++ only basic buffer encryption/decryption in C that you can link to.
 
-#### Examples
-See unit test cases under folders java/test and csharp/test or the SalmonVault app for usage examples.
+### Examples
+See unit test cases under folders [java/test](https://github.com/mku11/Salmon/tree/main/java/test)  and [csharp/test](https://github.com/mku11/Salmon/tree/main/csharp/test) or the SalmonVault app for usage examples.  
