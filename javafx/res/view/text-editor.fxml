@@ -17,7 +17,7 @@
         </padding>
         <MenuBar onKeyPressed="#shortcutPressed">
             <Menu text="File">
-                <MenuItem text="Save" onAction="#onSave"/>
+                <MenuItem text="Save (Ctrl+S)" onAction="#onSave"/>
                 <MenuItem text="Close" onAction="#onClose"/>
             </Menu>
             <Menu text="Operations">
@@ -25,7 +25,7 @@
             </Menu>
         </MenuBar>
         <HBox id="topContainer" VBox.vgrow="ALWAYS">
-            <TextArea fx:id="contentArea" VBox.vgrow="ALWAYS" HBox.hgrow="ALWAYS">
+            <TextArea fx:id="contentArea" VBox.vgrow="ALWAYS" HBox.hgrow="ALWAYS" onKeyReleased="#onTextKeyReleased">
 
             </TextArea>
         </HBox>

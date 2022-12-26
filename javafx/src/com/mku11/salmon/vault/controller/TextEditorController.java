@@ -33,6 +33,7 @@ import javafx.fxml.FXMLLoader;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.scene.control.TextArea;
+import javafx.scene.input.KeyEvent;
 import javafx.stage.Modality;
 import javafx.stage.Stage;
 
@@ -122,5 +123,14 @@ public class TextEditorController {
         stream.flush();
         stream.close();
         ins.close();
+    }
+
+    public void onTextKeyReleased(KeyEvent keyEvent) {
+        switch (keyEvent.getCode()) {
+            case S:
+                if (keyEvent.isControlDown())
+                    onSave();
+                break;
+        }
     }
 }
