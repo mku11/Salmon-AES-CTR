@@ -782,15 +782,15 @@ namespace Salmon.ViewModel
         {
             ContextMenu contextMenu = new ContextMenu();
 
-            MenuItem item = new MenuItem() { Header = "Export" };
+            MenuItem item = new MenuItem() { Header = "Export", InputGestureText = "Ctrl-E"};
             item.Click += (object sender, RoutedEventArgs e) => ExportSelectedFiles();
             contextMenu.Items.Add(item);
 
-            item = new MenuItem() { Header = "Copy" };
+            item = new MenuItem() { Header = "Copy", InputGestureText = "Ctrl-C" };
             item.Click += (object sender, RoutedEventArgs e) => OnCopy();
             contextMenu.Items.Add(item);
 
-            item = new MenuItem() { Header = "Cut" };
+            item = new MenuItem() { Header = "Cut", InputGestureText = "Ctrl-X" };
             item.Click += (object sender, RoutedEventArgs e) => OnCut();
             contextMenu.Items.Add(item);
 
