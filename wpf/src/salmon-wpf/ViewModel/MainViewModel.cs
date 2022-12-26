@@ -980,7 +980,6 @@ namespace Salmon.ViewModel
             {
                 Console.Error.WriteLine(e);
             }
-            Refresh();
         }
 
         private void StartMediaPlayer(int position, MediaType type)
@@ -994,7 +993,6 @@ namespace Salmon.ViewModel
             {
                 Console.Error.WriteLine(e);
             }
-            Refresh();
         }
 
         private void Logout()
