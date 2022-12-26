@@ -64,10 +64,6 @@ public class SalmonFileItem extends FileItem {
     public SalmonFile getSalmonFile() {
         return salmonFile;
     }
-    public void Rename(String newFilename, byte[] nonce) throws Exception {
-        salmonFile.rename(newFilename, nonce);
-        name.set(salmonFile.getBaseName());
-    }
 
     public void setName(String name) throws Exception {
         salmonFile.rename(name, null);
@@ -132,6 +128,4 @@ public class SalmonFileItem extends FileItem {
         salmonFile.rename(newValue);
         name.setValue(salmonFile.getBaseName());
     }
-
-
 }
