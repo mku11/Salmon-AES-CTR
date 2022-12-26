@@ -17,16 +17,22 @@
         <BooleanToVisibilityConverter x:Key="BooleanToVisibilityConverter" />
     </Window.Resources>
     <Window.InputBindings>
-        <KeyBinding Command="{Binding ClickCommand}" 
-                    CommandParameter="{x:Static viewmodel:ActionType.DELETE}" Key="Delete" />
+        <KeyBinding Command="{Binding ClickCommand}"
+                    CommandParameter="{x:Static viewmodel:ActionType.CHANGE_VAULT_LOCATION}" Key="O" Modifiers="Ctrl"  />
+        <KeyBinding Command="{Binding ClickCommand}"
+                    CommandParameter="{x:Static viewmodel:ActionType.IMPORT}" Key="I" Modifiers="Ctrl"  />
+        <KeyBinding Command="{Binding ClickCommand}"
+                    CommandParameter="{x:Static viewmodel:ActionType.EXPORT}" Key="E" Modifiers="Ctrl"  />
         <KeyBinding Command="{Binding ClickCommand}"
                     CommandParameter="{x:Static viewmodel:ActionType.COPY}" Key="C" Modifiers="Ctrl"  />
         <KeyBinding Command="{Binding ClickCommand}"
-                    CommandParameter="{x:Static viewmodel:ActionType.MOVE}" Key="X" Modifiers="Ctrl"  />
+                    CommandParameter="{x:Static viewmodel:ActionType.CUT}" Key="X" Modifiers="Ctrl"  />
         <KeyBinding Command="{Binding ClickCommand}"
                     CommandParameter="{x:Static viewmodel:ActionType.PASTE}" Key="V" Modifiers="Ctrl"  />
         <KeyBinding Command="{Binding ClickCommand}"
                     CommandParameter="{x:Static viewmodel:ActionType.SEARCH}" Key="F" Modifiers="Ctrl"  />
+        <KeyBinding Command="{Binding ClickCommand}" 
+                    CommandParameter="{x:Static viewmodel:ActionType.DELETE}" Key="Delete" />
     </Window.InputBindings>
 
     <Grid Background="{StaticResource SalmonBackground}">
@@ -40,7 +46,7 @@
         <DockPanel Grid.Row="0" Background="{StaticResource SalmonBackground}">
             <Menu DockPanel.Dock="Top" x:Name="MainMenu" Background="{StaticResource SalmonBackground}">
                 <MenuItem Header="File">
-                    <MenuItem Header="Open Vault" 
+                    <MenuItem Header="Open Vault" InputGestureText="Ctrl+O"
                               Command="{Binding ClickCommand}"
                        CommandParameter="{x:Static viewmodel:ActionType.CHANGE_VAULT_LOCATION}"/>
                     <Separator/>
@@ -60,30 +66,32 @@
                               Command="{Binding ClickCommand}"
                               CommandParameter="{x:Static viewmodel:ActionType.NEW_FILE}"/>
                     <Separator/>
-                    <MenuItem Header="Copy" 
+                        <MenuItem Header="Copy " InputGestureText="Ctrl+C" 
                               Command="{Binding ClickCommand}"
                               CommandParameter="{x:Static viewmodel:ActionType.COPY}"/>
-                    <MenuItem Header="Cut"
+                    <MenuItem Header="Cut" InputGestureText="Ctrl+X"
                               Command="{Binding ClickCommand}"
-                              CommandParameter="{x:Static viewmodel:ActionType.MOVE}"/>
-                    <MenuItem Header="Paste"
+                              CommandParameter="{x:Static viewmodel:ActionType.CUT}"/>
+                    <MenuItem Header="Paste" InputGestureText="Ctrl+P"
                               Command="{Binding ClickCommand}"
                               CommandParameter="{x:Static viewmodel:ActionType.PASTE}"/>
                     <MenuItem Header="Delete"
                               Command="{Binding ClickCommand}"
                               CommandParameter="{x:Static viewmodel:ActionType.DELETE}"/>
                     <Separator/>
-                    <MenuItem Header="Refresh" 
+                    <MenuItem Header="Refresh" InputGestureText="Ctrl+R"
                               Command="{Binding ClickCommand}"
                               CommandParameter="{x:Static viewmodel:ActionType.REFRESH}"/>
                 </MenuItem>
                 <MenuItem Header="Operations">
-                    <MenuItem Header="Import" Command="{Binding ClickCommand}"
+                    <MenuItem Header="Import"  InputGestureText="Ctrl+I"
+                              Command="{Binding ClickCommand}"
                               CommandParameter="{x:Static viewmodel:ActionType.IMPORT}"/>
-                    <MenuItem Header="Export"
+                    <MenuItem Header="Export"  InputGestureText="Ctrl+E"
                               Command="{Binding ClickCommand}"
                               CommandParameter="{x:Static viewmodel:ActionType.EXPORT}"/>
-                    <MenuItem Header="Search" Command="{Binding ClickCommand}"
+                    <MenuItem Header="Search"  InputGestureText="Ctrl+F"
+                              Command="{Binding ClickCommand}"
                               CommandParameter="{x:Static viewmodel:ActionType.SEARCH}"/>
                     <MenuItem Header="Stop" Command="{Binding ClickCommand}"
                               CommandParameter="{x:Static viewmodel:ActionType.STOP}"

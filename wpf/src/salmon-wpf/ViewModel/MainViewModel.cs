@@ -328,7 +328,7 @@ namespace Salmon.ViewModel
                 case ActionType.COPY:
                     OnCopy();
                     break;
-                case ActionType.MOVE:
+                case ActionType.CUT:
                     OnCut();
                     break;
                 case ActionType.DELETE:
