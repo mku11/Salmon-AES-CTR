@@ -39,6 +39,12 @@ namespace Salmon.Model
             Update();
         }
 
+        public void SetSalmonFile(SalmonFile file)
+        {
+            this.salmonFile = file;
+            Update();
+        }
+
         public override void Update()
         {
             Name = salmonFile.GetBaseName();
@@ -145,5 +151,6 @@ namespace Salmon.Model
             Name = salmonFile.GetBaseName();
         }
 
+        
     }
 }

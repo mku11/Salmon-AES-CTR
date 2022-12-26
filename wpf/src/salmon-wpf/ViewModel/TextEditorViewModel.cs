@@ -28,6 +28,7 @@ using Salmon.View;
 using System;
 using System.ComponentModel;
 using System.IO;
+using System.Runtime.CompilerServices;
 using System.Text;
 using System.Windows.Input;
 
@@ -120,7 +121,7 @@ namespace Salmon.ViewModel
             TextEditor textEditor = new TextEditor();
             textEditor.SetWindow(owner);
             textEditor.Load(file);
-            textEditor.ShowDialog();
+            textEditor.Show();
         }
 
         public void Load(FileItem fileItem)
@@ -167,6 +168,7 @@ namespace Salmon.ViewModel
             }
         }
 
+        [MethodImpl(MethodImplOptions.Synchronized)]
         private void SaveContent()
         {
             byte[] contents = UTF8Encoding.UTF8.GetBytes(ContentArea);
@@ -174,12 +176,13 @@ namespace Salmon.ViewModel
             SalmonFile file = ((SalmonFileItem)item).GetSalmonFile();
             SalmonFile dir = file.GetParent();
             file.Delete();
-            SalmonFile nfile = dir.CreateFile(file.GetBaseName());
-            SalmonStream stream = nfile.GetOutputStream();
+            file = dir.CreateFile(file.GetBaseName());
+            SalmonStream stream = file.GetOutputStream();
             ins.CopyTo(stream);
             stream.Flush();
             stream.Close();
             ins.Close();
+            ((SalmonFileItem)item).SetSalmonFile(file);
         }
     }
 }
