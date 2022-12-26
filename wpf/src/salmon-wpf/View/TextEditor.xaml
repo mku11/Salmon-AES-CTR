@@ -22,8 +22,8 @@
         </Grid.RowDefinitions>
         <DockPanel Grid.Row="0">
             <Menu x:Name="MainMenu" DockPanel.Dock="Top">
-                <MenuItem Header="_File" InputGestureText="Ctrl+S">
-                    <MenuItem Header="Save"
+                <MenuItem Header="File">
+                    <MenuItem Header="Save" InputGestureText="Ctrl+S"
                               Command="{Binding ClickCommand}"
                               CommandParameter="{x:Static viewmodel:ActionType.SAVE}"/>
                     <MenuItem Header="Exit" 
