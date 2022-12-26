@@ -63,7 +63,7 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.function.Function;
 
-public class Controller {
+public class MainController {
     private static final int BUFFER_SIZE = 512 * 1024;
     private static final int THREADS = 4;
 
@@ -219,7 +219,7 @@ public class Controller {
     }
 
     public void onOpen() {
-        File selectedDirectory = Controller.selectVault(stage);
+        File selectedDirectory = MainController.selectVault(stage);
         if (selectedDirectory == null)
             return;
         String filePath = selectedDirectory.getAbsolutePath();

@@ -107,7 +107,7 @@ public class MediaPlayerController {
         });
     }
 
-    public static void openMediaPlayer(FileItem file, Stage owner, Controller.MediaType type) throws IOException {
+    public static void openMediaPlayer(FileItem file, Stage owner, MainController.MediaType type) throws IOException {
         FXMLLoader loader = new FXMLLoader(Settings.getInstance().getClass().getResource("/view/media-player.fxml"));
         Parent root = loader.load();
         MediaPlayerController controller = loader.getController();
@@ -135,7 +135,7 @@ public class MediaPlayerController {
         URL.setURLStreamHandlerFactory(new SalmonStreamHandlerFactory());
     }
 
-    private void load(FileItem fileItem, Controller.MediaType type) {
+    private void load(FileItem fileItem, MainController.MediaType type) {
         SalmonFile file = ((SalmonFileItem) fileItem).getSalmonFile();
         String filePath;
         try {

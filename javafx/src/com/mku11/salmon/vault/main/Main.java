@@ -24,7 +24,7 @@ SOFTWARE.
 */
 
 import com.mku11.salmon.vault.config.Config;
-import com.mku11.salmon.vault.controller.Controller;
+import com.mku11.salmon.vault.controller.MainController;
 import com.mku11.salmon.vault.dialog.SalmonAlert;
 import com.mku11.salmon.vault.prefs.Preferences;
 import com.mku11.salmon.vault.settings.Settings;
@@ -46,7 +46,7 @@ public class Main extends Application {
         Preferences.loadPrefs(Settings.getInstance());
         FXMLLoader loader = new FXMLLoader(getClass().getResource("/view/main.fxml"));
         Parent root = loader.load();
-        Controller controller = loader.getController();
+        MainController controller = loader.getController();
         controller.setStage(stage);
         stage.setTitle(Config.APP_NAME);
         stage.getIcons().add(Window.getDefaultIcon());

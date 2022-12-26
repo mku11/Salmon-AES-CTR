@@ -80,7 +80,7 @@ public class SettingsController {
 
     @FXML
     private void changeVaultLocation() {
-        File selectedDirectory = Controller.selectVault(stage);
+        File selectedDirectory = MainController.selectVault(stage);
         if(selectedDirectory == null)
             return;
         String filePath = selectedDirectory.getAbsolutePath();
