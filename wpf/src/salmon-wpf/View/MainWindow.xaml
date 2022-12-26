@@ -18,6 +18,8 @@
     </Window.Resources>
     <Window.InputBindings>
         <KeyBinding Command="{Binding ClickCommand}"
+                    CommandParameter="{x:Static viewmodel:ActionType.REFRESH}" Key="R" Modifiers="Ctrl"  />
+        <KeyBinding Command="{Binding ClickCommand}"
                     CommandParameter="{x:Static viewmodel:ActionType.CHANGE_VAULT_LOCATION}" Key="O" Modifiers="Ctrl"  />
         <KeyBinding Command="{Binding ClickCommand}"
                     CommandParameter="{x:Static viewmodel:ActionType.IMPORT}" Key="I" Modifiers="Ctrl"  />
