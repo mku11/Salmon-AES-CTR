@@ -16,7 +16,7 @@
         </padding>
         <MenuBar id="menuContainer" onKeyPressed="#shortcutPressed">
             <Menu text="File">
-                <MenuItem onAction="#onOpen" text="Open Vault"/>
+                <MenuItem onAction="#onOpen" text="Open Vault (Ctrl+O)"/>
                 <SeparatorMenuItem/>
                 <MenuItem onAction="#onSettings" text="Settings"/>
                 <SeparatorMenuItem/>
@@ -26,17 +26,17 @@
                 <MenuItem onAction="#onNewFolder" text="New Folder"/>
                 <MenuItem onAction="#onNewFile" text="New File"/>
                 <SeparatorMenuItem/>
-                <MenuItem onAction="#onCopy" text="Copy"/>
-                <MenuItem onAction="#onCut" text="Cut"/>
-                <MenuItem onAction="#onPaste" text="Paste"/>
+                <MenuItem onAction="#onCopy" text="Copy (Ctrl+C)"/>
+                <MenuItem onAction="#onCut" text="Cut (Ctrl+X)"/>
+                <MenuItem onAction="#onPaste" text="Paste (Ctrl+V)"/>
                 <MenuItem onAction="#onDelete" text="Delete"/>
                 <SeparatorMenuItem/>
-                <MenuItem onAction="#onRefresh" text="Refresh"/>
+                <MenuItem onAction="#onRefresh" text="Refresh (Ctrl+R)"/>
             </Menu>
             <Menu text="Operations">
-                <MenuItem onAction="#onImport" text="Import"/>
-                <MenuItem onAction="#onExport" text="Export"/>
-                <MenuItem onAction="#onSearch" text="Search"/>
+                <MenuItem onAction="#onImport" text="Import (Ctrl+I)"/>
+                <MenuItem onAction="#onExport" text="Export (Ctrl+E)"/>
+                <MenuItem onAction="#onSearch" text="Search (Ctrl+F)"/>
                 <MenuItem onAction="#onStop" text="Stop" visible="${controller.progressVisibility}"/>
             </Menu>
             <Menu text="Help">

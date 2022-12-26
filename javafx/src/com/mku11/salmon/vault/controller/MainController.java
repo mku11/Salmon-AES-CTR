@@ -179,16 +179,25 @@ public class MainController {
 
     public void onTableKeyReleased(KeyEvent keyEvent) {
         switch (keyEvent.getCode()) {
-            case DELETE:
-                promptDelete();
+            case O:
+                if (keyEvent.isControlDown())
+                    onOpen();
+                break;
+            case I:
+                if (keyEvent.isControlDown())
+                    onImport();
+                break;
+            case E:
+                if (keyEvent.isControlDown())
+                    onExport();
+                break;
+            case R:
+                if (keyEvent.isControlDown())
+                    onRefresh();
                 break;
             case C:
                 if (keyEvent.isControlDown())
                     onCopy();
-                break;
-            case F:
-                if (keyEvent.isControlDown())
-                    onSearch();
                 break;
             case X:
                 if (keyEvent.isControlDown())
@@ -197,6 +206,13 @@ public class MainController {
             case V:
                 if (keyEvent.isControlDown())
                     pasteSelected();
+                break;
+            case F:
+                if (keyEvent.isControlDown())
+                    onSearch();
+                break;
+            case DELETE:
+                promptDelete();
                 break;
         }
     }
