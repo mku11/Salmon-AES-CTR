@@ -28,10 +28,19 @@ using System.Windows.Media.Imaging;
 
 namespace Salmon.Model
 {
-    public class SalmonFileItem : FileItem, INotifyPropertyChanged
+    public class SalmonFileItem : FileItem
     {
         private static string dateFormat = "dd/MM/yyyy hh:mm tt";
         private SalmonFile salmonFile;
+
+        public override string Name
+        {
+            get => base.Name;
+            set {
+                salmonFile.Rename(value, null);
+                base.Name = value;
+            }
+        }
 
         public SalmonFileItem(SalmonFile salmonFile)
         {
@@ -67,28 +76,6 @@ namespace Salmon.Model
         public SalmonFile GetSalmonFile()
         {
             return salmonFile;
-        }
-        public void Rename(string newFilename, byte[] nonce)
-        {
-            salmonFile.Rename(newFilename, nonce);
-            Name = salmonFile.GetBaseName();
-        }
-
-        public event PropertyChangedEventHandler PropertyChanged;
-        private string _name;
-
-        public override string Name  {
-            get => _name;
-            set {
-                if (!GetBaseName().Equals(value))
-                    salmonFile.Rename(value, null);
-                if (_name != value)
-                {
-                    _name = value;
-                    if (PropertyChanged != null)
-                        PropertyChanged(this, new PropertyChangedEventArgs("Name"));
-                }
-            }
         }
 
         public override bool IsDirectory()

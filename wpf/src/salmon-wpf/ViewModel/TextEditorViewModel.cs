@@ -121,7 +121,7 @@ namespace Salmon.ViewModel
             TextEditor textEditor = new TextEditor();
             textEditor.SetWindow(owner);
             textEditor.Load(file);
-            textEditor.Show();
+            textEditor.ShowDialog();
         }
 
         public void Load(FileItem fileItem)

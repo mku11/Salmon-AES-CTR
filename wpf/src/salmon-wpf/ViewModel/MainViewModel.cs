@@ -966,7 +966,6 @@ namespace Salmon.ViewModel
             {
                 Console.Error.WriteLine(e);
             }
-            Refresh();
         }
 
 

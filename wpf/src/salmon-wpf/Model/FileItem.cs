@@ -21,19 +21,95 @@ LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 */
+using Salmon.FS;
+using System.ComponentModel;
 using System.Windows.Media.Imaging;
 
 namespace Salmon.Model
 {
-    public abstract class FileItem
+    public abstract class FileItem : INotifyPropertyChanged
     {
-        public virtual string Name { get; set; }
-        public virtual string Date { get; set; }
-        public virtual string Type { get; set; }
-        public virtual string Size { get; set; }
-        public virtual string Path { get; set; }
+
+        private string _name;
+        public virtual string Name
+        {
+            get => _name;
+            set
+            {
+                if (_name != value)
+                {
+                    _name = value;
+                    if (PropertyChanged != null)
+                        PropertyChanged(this, new PropertyChangedEventArgs("Name"));
+                }
+            }
+        }
+
+        private string _date;
+        public virtual string Date
+        {
+            get => _date;
+            set
+            {
+                if (_date != value)
+                {
+                    _date = value;
+                    if (PropertyChanged != null)
+                        PropertyChanged(this, new PropertyChangedEventArgs("Date"));
+                }
+            }
+        }
+
+        private string _type;
+        public virtual string Type
+        {
+            get => _type;
+            set
+            {
+                if (_type != value)
+                {
+                    _type = value;
+                    if (PropertyChanged != null)
+                        PropertyChanged(this, new PropertyChangedEventArgs("Type"));
+                }
+            }
+        }
+
+        private string _size;
+        public virtual string Size
+        {
+            get => _size;
+            set
+            {
+                if (_size != value)
+                {
+                    _size = value;
+                    if (PropertyChanged != null)
+                        PropertyChanged(this, new PropertyChangedEventArgs("Size"));
+                }
+            }
+        }
+
+        private string _path;
+        public virtual string Path
+        {
+            get => _path;
+            set
+            {
+                if (_path != value)
+                {
+                    _path = value;
+                    if (PropertyChanged != null)
+                        PropertyChanged(this, new PropertyChangedEventArgs("Path"));
+                }
+            }
+        }
+
+        
+        public event PropertyChangedEventHandler PropertyChanged;
 
         public virtual BitmapImage Image { get; set; }
+
 
         public abstract bool IsDirectory();
 
