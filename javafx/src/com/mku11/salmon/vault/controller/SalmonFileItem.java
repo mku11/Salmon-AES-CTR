@@ -33,10 +33,15 @@ import java.util.Date;
 
 public class SalmonFileItem extends FileItem {
     private static final SimpleDateFormat formatter = new SimpleDateFormat("dd/MM/yyyy hh:mm:ss a");
-    private final SalmonFile salmonFile;
+    private SalmonFile salmonFile;
 
     public SalmonFileItem(SalmonFile salmonFile) throws Exception {
         this.salmonFile = salmonFile;
+        update();
+    }
+
+    public void setSalmonFile(SalmonFile file) throws Exception {
+        salmonFile = file;
         update();
     }
 
@@ -127,5 +132,6 @@ public class SalmonFileItem extends FileItem {
         salmonFile.rename(newValue);
         name.setValue(salmonFile.getBaseName());
     }
+
 
 }

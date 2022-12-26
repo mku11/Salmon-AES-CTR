@@ -43,7 +43,7 @@ import java.nio.charset.StandardCharsets;
 public class TextEditorController {
 
     private Stage stage;
-    private FileItem item;
+    private SalmonFile file;
 
     @FXML
     private TextArea contentArea;
@@ -56,7 +56,7 @@ public class TextEditorController {
         this.stage = stage;
     }
 
-    public static void openTextEditor(FileItem file, Stage owner) throws IOException {
+    public static void openTextEditor(SalmonFile file, Stage owner) throws IOException {
         FXMLLoader loader = new FXMLLoader(Settings.getInstance().getClass().getResource("/view/text-editor.fxml"));
         Parent root = loader.load();
         TextEditorController controller = loader.getController();
@@ -73,11 +73,11 @@ public class TextEditorController {
         stage.showAndWait();
     }
 
-    private void load(FileItem fileItem) {
-        this.item = fileItem;
+    private void load(SalmonFile file) {
+        this.file = file;
         String content;
         try {
-            content = getTextContent(item);
+            content = getTextContent(file);
             contentArea.setText(content);
         } catch (Exception e) {
             e.printStackTrace();
@@ -85,8 +85,7 @@ public class TextEditorController {
 
     }
 
-    private String getTextContent(FileItem item) throws Exception {
-        SalmonFile file = ((SalmonFileItem) item).getSalmonFile();
+    private String getTextContent(SalmonFile file) throws Exception {
         SalmonStream stream = file.getInputStream();
         MemoryStream ms = new MemoryStream();
         stream.copyTo(ms);
@@ -111,14 +110,13 @@ public class TextEditorController {
         }
     }
 
-    private void saveContent() throws Exception {
+    private synchronized void saveContent() throws Exception {
         byte[] contents = contentArea.getText().getBytes(StandardCharsets.UTF_8);
         MemoryStream ins = new MemoryStream(contents);
-        SalmonFile file = ((SalmonFileItem) item).getSalmonFile();
         SalmonFile dir = file.getParent();
         file.delete();
-        SalmonFile nfile = dir.createFile(file.getBaseName());
-        SalmonStream stream = nfile.getOutputStream();
+        file = dir.createFile(file.getBaseName());
+        SalmonStream stream = file.getOutputStream();
         ins.copyTo(stream);
         stream.flush();
         stream.close();
