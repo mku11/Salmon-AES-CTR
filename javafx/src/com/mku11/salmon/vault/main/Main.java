@@ -51,8 +51,8 @@ public class Main extends Application {
         stage.setTitle(Config.APP_NAME);
         stage.getIcons().add(Window.getDefaultIcon());
         Scene scene = new Scene(root);
-        stage.setMinHeight(600);
-        stage.setMinWidth(800);
+        stage.setMinWidth(400);
+        stage.setMinHeight(300);
         stage.setScene(scene);
         stage.show();
     }
