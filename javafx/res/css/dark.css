@@ -1,6 +1,6 @@
 .root {
     -fx-base: #2d3343;
-    -fx-accent: #lightblue;
+
     -fx-control-inner-background: derive(-fx-base, 42%);
 }
 
@@ -44,20 +44,20 @@
 
 
 .dialog-pane{
-    -fx-accent: #lightblue;
+
     -fx-base: #2d3343;
     -fx-control-inner-background: derive(-fx-base, 42%);
  }
 
 .dialog-pane {
-    -fx-accent: #lightblue;
+
     -fx-base: #2d3343;
     -fx-control-inner-background: derive(-fx-base, 42%);
     -fx-focus-traversable: false;
  }
 
 .dialog-pane .button:hover{
-    -fx-accent: #lightblue;
+
     -fx-base: #2d3343;-fx-control-inner-background: derive(-fx-base, 42%);
     -fx-text-fill: white;
  }
