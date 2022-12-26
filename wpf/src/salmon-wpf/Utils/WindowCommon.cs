@@ -23,10 +23,10 @@ SOFTWARE.
 */
 using Salmon.Alert;
 using Salmon.FS;
+using Salmon.Window;
 using System;
-using System.Security;
+using System.Windows;
 using System.Windows.Controls;
-using System.Windows.Media;
 using static Salmon.Alert.SalmonDialog;
 using static System.Windows.Forms.VisualStyles.VisualStyleElement;
 using Action = System.Action;
@@ -63,8 +63,8 @@ namespace Salmon
             panel.Children.Add(passPanel);
             panel.Children.Add(status);
             alert.Content = panel;
-            SalmonDialog.Button btOk = alert.GetButton(ButtonType.Ok);
-            btOk.Click += (object sender, System.Windows.RoutedEventArgs e) =>
+            Button btOk = alert.GetButton(ButtonType.Ok);
+            Action<object, RoutedEventArgs> OnOk = (sender, e) =>
             {
                 string password = pass.Password;
                 try
@@ -79,7 +79,28 @@ namespace Salmon
                     status.Content = "Incorrect Password";
                 }
             };
+            btOk.Click += (sender, e) => OnOk.Invoke(null, e);
+            pass.KeyDown += (sender, e) =>
+            {
+                if (e.Key == System.Windows.Input.Key.Enter)
+                {
+                    OnOk.Invoke(null, e);
+                    if (!e.Handled)
+                        alert.Close();
+                }
+            };
+            WindowUtils.RunOnMainThread(() =>
+            {
+                pass.Focus();
+                pass.SelectAll();
+            });
             alert.Show();
+        }
+
+
+        private static void Pass_KeyDown(object sender, System.Windows.Input.KeyEventArgs e)
+        {
+            throw new NotImplementedException();
         }
 
         public static void PromptSetPassword(Action<string> OnPasswordChanged)
@@ -110,7 +131,7 @@ namespace Salmon
             validatePanel.Children.Add(validate);
 
             Label status = new Label();
-            
+
             StackPanel panel = new StackPanel();
             panel.Children.Add(passPanel);
             panel.Children.Add(validatePanel);
@@ -143,7 +164,7 @@ namespace Salmon
             };
         }
 
-        public static void PromptEdit(string title, string msg, string value, string option, System.Action<string, bool> OnEdit)
+        public static void PromptEdit(string title, string msg, string value, string option, bool isFileName, System.Action<string, bool> OnEdit)
         {
             SalmonDialog alert = new SalmonDialog("", ButtonType.Ok, ButtonType.Cancel);
             alert.Title = title;
@@ -163,13 +184,38 @@ namespace Salmon
             }
             alert.Content = panel;
             Button btOk = (Button)alert.GetButton(ButtonType.Ok);
-            btOk.Click += (object sender, System.Windows.RoutedEventArgs e) =>
+            Action<object, RoutedEventArgs> OnOk = (sender, e) =>
             {
                 if (OnEdit != null)
                     OnEdit.Invoke(valueText.Text, (bool)optionCheckBox.IsChecked);
             };
+            btOk.Click += (sender, e) => OnOk.Invoke(null, e);
+            valueText.KeyDown += (sender, e) =>
+            {
+                if (e.Key == System.Windows.Input.Key.Enter)
+                {
+                    OnOk.Invoke(null, e);
+                    if (!e.Handled)
+                        alert.Close();
+                }
+            };
+            WindowUtils.RunOnMainThread(() =>
+            {
+                valueText.Focus();
+                if (isFileName)
+                {
+                    string ext = SalmonDriveManager.GetDrive().GetExtensionFromFileName(value);
+                    if(ext != null && ext.Length > 0)
+                        valueText.Select(0, value.Length - ext.Length - 1);
+                    else
+                        valueText.Select(0, value.Length);
+                }
+                else
+                {
+                    valueText.SelectAll();
+                }
+            });
             alert.Show();
-
         }
 
         public static void PromptDialog(string title, string body,

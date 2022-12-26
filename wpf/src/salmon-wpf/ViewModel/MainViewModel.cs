@@ -580,10 +580,11 @@ namespace Salmon.ViewModel
 
         private void PromptSearch()
         {
-            WindowCommon.PromptEdit("Search", "Keywords", "", "Match any term", (string value, bool isChecked) =>
-            {
-                Search(value, isChecked);
-            });
+            WindowCommon.PromptEdit("Search", "Keywords", "", "Match any term", false,
+                (string value, bool isChecked) =>
+                {
+                    Search(value, isChecked);
+                });
         }
 
         public void ShowTaskRunning(bool value)
@@ -660,39 +661,41 @@ namespace Salmon.ViewModel
 
         private void PromptNewFolder()
         {
-            WindowCommon.PromptEdit("New Folder", "Folder Name", "New Folder", null, (string folderName, bool isChecked) =>
-            {
-                try
+            WindowCommon.PromptEdit("New Folder", "Folder Name", "New Folder", null, false,
+                (string folderName, bool isChecked) =>
                 {
-                    CurrDir.CreateDirectory(folderName, null, null);
-                    Refresh();
+                    try
+                    {
+                        CurrDir.CreateDirectory(folderName, null, null);
+                        Refresh();
+                    }
+                    catch (Exception exception)
+                    {
+                        Console.Error.WriteLine(exception);
+                        new SalmonDialog("Could Not Create Folder: " + exception.Message).Show();
+                        Refresh();
+                    }
                 }
-                catch (Exception exception)
-                {
-                    Console.Error.WriteLine(exception);
-                    new SalmonDialog("Could Not Create Folder: " + exception.Message).Show();
-                    Refresh();
-                }
-            }
         );
         }
 
         private void PromptNewFile()
         {
-            WindowCommon.PromptEdit("New File", "File Name", "New File", null, (string fileName, bool isChecked) =>
-            {
-                try
+            WindowCommon.PromptEdit("New File", "File Name", "New File", null, true,
+                (string fileName, bool isChecked) =>
                 {
-                    CurrDir.CreateFile(fileName);
-                    Refresh();
+                    try
+                    {
+                        CurrDir.CreateFile(fileName);
+                        Refresh();
+                    }
+                    catch (Exception exception)
+                    {
+                        Console.Error.WriteLine(exception);
+                        new SalmonDialog("Could Not Create File: " + exception.Message).Show();
+                        Refresh();
+                    }
                 }
-                catch (Exception exception)
-                {
-                    Console.Error.WriteLine(exception);
-                    new SalmonDialog("Could Not Create File: " + exception.Message).Show();
-                    Refresh();
-                }
-            }
         );
         }
 
@@ -782,7 +785,7 @@ namespace Salmon.ViewModel
         {
             ContextMenu contextMenu = new ContextMenu();
 
-            MenuItem item = new MenuItem() { Header = "Export", InputGestureText = "Ctrl-E"};
+            MenuItem item = new MenuItem() { Header = "Export", InputGestureText = "Ctrl-E" };
             item.Click += (object sender, RoutedEventArgs e) => ExportSelectedFiles();
             contextMenu.Items.Add(item);
 
@@ -823,18 +826,18 @@ namespace Salmon.ViewModel
             {
                 try
                 {
-                    WindowCommon.PromptEdit("Rename", "New filename",
-                            ifile.GetBaseName(), null, (string newFilename, bool isChecked) =>
+                    WindowCommon.PromptEdit("Rename", "New filename", ifile.GetBaseName(), null, true,
+                        (string newFilename, bool isChecked) =>
+                        {
+                            try
                             {
-                                try
-                                {
-                                    ifile.Rename(newFilename);
-                                }
-                                catch (Exception exception)
-                                {
-                                    Console.Error.WriteLine(exception);
-                                }
-                            });
+                                ifile.Rename(newFilename);
+                            }
+                            catch (Exception exception)
+                            {
+                                Console.Error.WriteLine(exception);
+                            }
+                        });
                 }
                 catch (Exception exception)
                 {
