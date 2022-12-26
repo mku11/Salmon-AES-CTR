@@ -11,6 +11,10 @@
     <Window.DataContext>
         <viewmodel:TextEditorViewModel/>
     </Window.DataContext>
+    <Window.InputBindings>
+        <KeyBinding Command="{Binding ClickCommand}"
+                    CommandParameter="{x:Static viewmodel:ActionType.SAVE}" Key="S" Modifiers="Ctrl"  />
+    </Window.InputBindings>
     <Grid>
         <Grid.RowDefinitions>
             <RowDefinition Height="Auto"/>
@@ -18,7 +22,7 @@
         </Grid.RowDefinitions>
         <DockPanel Grid.Row="0">
             <Menu x:Name="MainMenu" DockPanel.Dock="Top">
-                <MenuItem Header="File">
+                <MenuItem Header="_File" InputGestureText="Ctrl+S">
                     <MenuItem Header="Save"
                               Command="{Binding ClickCommand}"
                               CommandParameter="{x:Static viewmodel:ActionType.SAVE}"/>
