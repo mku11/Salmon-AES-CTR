@@ -823,9 +823,8 @@ public class MainController {
 
     private void startTextEditor(int position) {
         FileItem item = fileItemList.get(position);
-        SalmonFile file = ((SalmonFileItem) item).getSalmonFile();
         try {
-            TextEditorController.openTextEditor(file, stage);
+            TextEditorController.openTextEditor(item, stage);
         } catch (IOException e) {
             e.printStackTrace();
         }

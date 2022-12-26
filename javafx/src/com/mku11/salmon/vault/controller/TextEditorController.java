@@ -43,7 +43,7 @@ import java.nio.charset.StandardCharsets;
 public class TextEditorController {
 
     private Stage stage;
-    private SalmonFile file;
+    private FileItem item;
 
     @FXML
     private TextArea contentArea;
@@ -56,7 +56,7 @@ public class TextEditorController {
         this.stage = stage;
     }
 
-    public static void openTextEditor(SalmonFile file, Stage owner) throws IOException {
+    public static void openTextEditor(FileItem file, Stage owner) throws IOException {
         FXMLLoader loader = new FXMLLoader(Settings.getInstance().getClass().getResource("/view/text-editor.fxml"));
         Parent root = loader.load();
         TextEditorController controller = loader.getController();
@@ -73,11 +73,11 @@ public class TextEditorController {
         stage.showAndWait();
     }
 
-    private void load(SalmonFile file) {
-        this.file = file;
+    private void load(FileItem item) {
+        this.item = item;
         String content;
         try {
-            content = getTextContent(file);
+            content = getTextContent(((SalmonFileItem) item).getSalmonFile());
             contentArea.setText(content);
         } catch (Exception e) {
             e.printStackTrace();
@@ -113,6 +113,7 @@ public class TextEditorController {
     private synchronized void saveContent() throws Exception {
         byte[] contents = contentArea.getText().getBytes(StandardCharsets.UTF_8);
         MemoryStream ins = new MemoryStream(contents);
+        SalmonFile file = ((SalmonFileItem) item).getSalmonFile();
         SalmonFile dir = file.getParent();
         file.delete();
         file = dir.createFile(file.getBaseName());
@@ -121,6 +122,7 @@ public class TextEditorController {
         stream.flush();
         stream.close();
         ins.close();
+        ((SalmonFileItem) item).setSalmonFile(file);
     }
 
     public void onTextKeyReleased(KeyEvent keyEvent) {
