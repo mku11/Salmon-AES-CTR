@@ -23,6 +23,7 @@ SOFTWARE.
 */
 using Salmon.FS;
 using Salmon.Model;
+using Salmon.Streams;
 using Salmon.View;
 using System;
 using System.ComponentModel;
@@ -39,6 +40,8 @@ namespace Salmon.ViewModel
 
         public event PropertyChangedEventHandler PropertyChanged;
         public ImageSource _imageSource;
+        private SalmonStream stream;
+
         public ImageSource ImageSource
         {
             get => _imageSource;
@@ -70,16 +73,24 @@ namespace Salmon.ViewModel
             SalmonFile salmonFile = ((SalmonFileItem)file).GetSalmonFile();
             try
             {
-                Stream mediaStream = salmonFile.GetInputStream();
+                stream = salmonFile.GetInputStream();
                 BitmapImage imageSource = new BitmapImage();
                 imageSource.BeginInit();
-                imageSource.StreamSource = mediaStream;
+                imageSource.StreamSource = stream;
                 imageSource.EndInit();
                 ImageSource = imageSource;
             }
             catch (Exception e)
             {
                 Console.Error.WriteLine(e);
+            }
+        }
+
+        public void OnClosing()
+        {
+            if(stream!=null)
+            {
+                stream.Close();
             }
         }
     }

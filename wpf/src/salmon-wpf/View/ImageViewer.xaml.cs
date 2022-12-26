@@ -34,8 +34,13 @@ namespace Salmon.View
             InitializeComponent();
             viewModel = new ImageViewerViewModel();
             DataContext = viewModel;
-
+            Closing += (sender, e) =>
+            {
+                viewModel.OnClosing();
+            };
         }
+
+
         public void Load(FileItem file)
         {
             viewModel.Load(file);

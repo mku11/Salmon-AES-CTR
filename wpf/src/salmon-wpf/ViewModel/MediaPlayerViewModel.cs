@@ -29,6 +29,7 @@ using Salmon.Window;
 using SalmonFS.Media;
 using System;
 using System.ComponentModel;
+using System.IO;
 using System.Threading;
 using System.Windows.Controls;
 using System.Windows.Input;
@@ -155,6 +156,7 @@ namespace Salmon.ViewModel
         }
 
         private ICommand _clickCommand;
+        private SalmonMediaDataSource stream;
 
         public ICommand ClickCommand
         {
@@ -201,6 +203,9 @@ namespace Salmon.ViewModel
                     Stop();
                     MediaPlayer.Dispose();
                     MediaPlayer = null;
+                    if (stream != null)
+                        stream.Close();
+
                 });
             };
         }
@@ -239,8 +244,8 @@ namespace Salmon.ViewModel
             }
 
             LibVLC libvlc = new LibVLC(enableDebugLogs: true);
-            SalmonMediaDataSource salmonMediaDataSource = new SalmonMediaDataSource(file, MEDIA_BUFFER_SIZE, MEDIA_THREADS);
-            MediaInput input = new StreamMediaInput(salmonMediaDataSource);
+            stream = new SalmonMediaDataSource(file, MEDIA_BUFFER_SIZE, MEDIA_THREADS);
+            MediaInput input = new StreamMediaInput(stream);
             Media media = new Media(libvlc, input);
             MediaPlayer mediaPlayer = new MediaPlayer(media);
             MediaPlayer = mediaPlayer;

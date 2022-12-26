@@ -34,7 +34,7 @@ namespace SalmonFS.Media
     /// <summary>
     /// This class provides a parallel processing seekable source for encrypted media content
     /// </summary>
-    public class SalmonMediaDataSource : System.IO.Stream
+    public class SalmonMediaDataSource : System.IO.Stream, IDisposable
     {
         private static bool enableLog = false;
 
@@ -338,6 +338,7 @@ namespace SalmonFS.Media
             }
             return null;
         }
+
 
         public override void Close()
         {
