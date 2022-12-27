@@ -6,6 +6,7 @@
 <?import javafx.scene.image.*?>
 <?import javafx.scene.layout.*?>
 
+<?import javafx.scene.input.KeyCodeCombination?>
 <GridPane stylesheets="@../css/dark.css" GridPane.hgrow="ALWAYS" GridPane.vgrow="ALWAYS"
           xmlns="http://javafx.com/javafx/11.0.1" xmlns:fx="http://javafx.com/fxml/1"
           fx:controller="com.mku11.salmon.vault.controller.MainController">
@@ -16,7 +17,11 @@
         </padding>
         <MenuBar id="menuContainer" onKeyPressed="#shortcutPressed">
             <Menu text="File">
-                <MenuItem onAction="#onOpen" text="Open Vault (Ctrl+O)"/>
+                <MenuItem onAction="#onOpen" text="Open Vault">
+                    <accelerator>
+                        <KeyCodeCombination alt="UP" code="O" control="DOWN" meta="UP" shift="UP" shortcut="UP" />
+                    </accelerator>
+                </MenuItem>
                 <SeparatorMenuItem/>
                 <MenuItem onAction="#onSettings" text="Settings"/>
                 <SeparatorMenuItem/>
@@ -26,17 +31,45 @@
                 <MenuItem onAction="#onNewFolder" text="New Folder"/>
                 <MenuItem onAction="#onNewFile" text="New File"/>
                 <SeparatorMenuItem/>
-                <MenuItem onAction="#onCopy" text="Copy (Ctrl+C)"/>
-                <MenuItem onAction="#onCut" text="Cut (Ctrl+X)"/>
-                <MenuItem onAction="#onPaste" text="Paste (Ctrl+V)"/>
+                <MenuItem onAction="#onCopy" text="Copy">
+                    <accelerator>
+                        <KeyCodeCombination alt="UP" code="C" control="DOWN" meta="UP" shift="UP" shortcut="UP" />
+                    </accelerator>
+                </MenuItem>
+                <MenuItem onAction="#onCut" text="Cut">
+                    <accelerator>
+                        <KeyCodeCombination alt="UP" code="X" control="DOWN" meta="UP" shift="UP" shortcut="UP" />
+                    </accelerator>
+                </MenuItem>
+                <MenuItem onAction="#onPaste" text="Paste">
+                    <accelerator>
+                        <KeyCodeCombination alt="UP" code="V" control="DOWN" meta="UP" shift="UP" shortcut="UP" />
+                    </accelerator>
+                </MenuItem>
                 <MenuItem onAction="#onDelete" text="Delete"/>
                 <SeparatorMenuItem/>
-                <MenuItem onAction="#onRefresh" text="Refresh (Ctrl+R)"/>
+                <MenuItem onAction="#onRefresh" text="Refresh">
+                    <accelerator>
+                        <KeyCodeCombination alt="UP" code="R" control="DOWN" meta="UP" shift="UP" shortcut="UP" />
+                    </accelerator>
+                </MenuItem>
             </Menu>
             <Menu text="Operations">
-                <MenuItem onAction="#onImport" text="Import (Ctrl+I)"/>
-                <MenuItem onAction="#onExport" text="Export (Ctrl+E)"/>
-                <MenuItem onAction="#onSearch" text="Search (Ctrl+F)"/>
+                <MenuItem onAction="#onImport" text="Import">
+                    <accelerator>
+                        <KeyCodeCombination alt="UP" code="I" control="DOWN" meta="UP" shift="UP" shortcut="UP" />
+                    </accelerator>
+                </MenuItem>
+                <MenuItem onAction="#onExport" text="Export">
+                    <accelerator>
+                        <KeyCodeCombination alt="UP" code="E" control="DOWN" meta="UP" shift="UP" shortcut="UP" />
+                    </accelerator>
+                </MenuItem>
+                <MenuItem onAction="#onSearch" text="Search">
+                    <accelerator>
+                        <KeyCodeCombination alt="UP" code="F" control="DOWN" meta="UP" shift="UP" shortcut="UP" />
+                    </accelerator>
+                </MenuItem>
                 <MenuItem onAction="#onStop" text="Stop" visible="${controller.progressVisibility}"/>
             </Menu>
             <Menu text="Help">
@@ -63,7 +96,7 @@
             </Button>
         </HBox>
         <HBox id="tableContainer" alignment="TOP_CENTER" VBox.vgrow="ALWAYS">
-            <TableView fx:id="table" minHeight="200" minWidth="600" onKeyReleased="#onTableKeyReleased"
+            <TableView fx:id="table" minHeight="200" minWidth="600"
                        HBox.hgrow="SOMETIMES" VBox.vgrow="SOMETIMES">
                 <placeholder>
                     <Label/>

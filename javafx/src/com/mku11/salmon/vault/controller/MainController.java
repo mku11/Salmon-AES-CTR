@@ -177,46 +177,6 @@ public class MainController {
 
     }
 
-    public void onTableKeyReleased(KeyEvent keyEvent) {
-        switch (keyEvent.getCode()) {
-            case O:
-                if (keyEvent.isControlDown())
-                    onOpen();
-                break;
-            case I:
-                if (keyEvent.isControlDown())
-                    onImport();
-                break;
-            case E:
-                if (keyEvent.isControlDown())
-                    onExport();
-                break;
-            case R:
-                if (keyEvent.isControlDown())
-                    onRefresh();
-                break;
-            case C:
-                if (keyEvent.isControlDown())
-                    onCopy();
-                break;
-            case X:
-                if (keyEvent.isControlDown())
-                    onCut();
-                break;
-            case V:
-                if (keyEvent.isControlDown())
-                    pasteSelected();
-                break;
-            case F:
-                if (keyEvent.isControlDown())
-                    onSearch();
-                break;
-            case DELETE:
-                promptDelete();
-                break;
-        }
-    }
-
     private void promptDelete() {
         ActivityCommon.promptDialog("Delete", "Delete " + getSelectedFileItems().length + " item(s)?",
                 "Ok", (buttonType) -> {
@@ -229,9 +189,9 @@ public class MainController {
         ActivityCommon.promptDialog("Salmon",
                 Config.APP_NAME + " " + Config.VERSION + "\n" + Config.ABOUT_TEXT,
                 "Get Source Code", (ButtonType) -> {
-            URLUtils.goToUrl(Config.SourceCodeURL);
-            return null;
-        }, "Cancel", null);
+                    URLUtils.goToUrl(Config.SourceCodeURL);
+                    return null;
+                }, "Cancel", null);
     }
 
     public void onOpen() {
@@ -325,6 +285,8 @@ public class MainController {
     }
 
     public void onCopy() {
+        if(!table.isFocused())
+            return;
         mode = Mode.Copy;
         copyFiles = getSelectedFiles();
         showTaskRunning(true, false);
@@ -350,6 +312,9 @@ public class MainController {
     }
 
     public void onCut() {
+        if (!table.isFocused())
+            return;
+
         mode = Mode.Move;
         copyFiles = getSelectedFiles();
         showTaskRunning(true, false);
@@ -357,10 +322,14 @@ public class MainController {
     }
 
     public void onDelete() {
+        if (!table.isFocused())
+            return;
         promptDelete();
     }
 
     public void onPaste() {
+        if (!table.isFocused())
+            return;
         pasteSelected();
     }
 
@@ -635,7 +604,7 @@ public class MainController {
     }
 
     private void deleteFiles(SalmonFileItem[] files) {
-        if(files.length == 0) {
+        if (files.length == 0) {
             status.setValue("Select 1 or more files");
             return;
         }
@@ -662,7 +631,7 @@ public class MainController {
     }
 
     private void copyFiles(SalmonFile[] files, SalmonFile dir, boolean move) {
-        if(files.length == 0) {
+        if (files.length == 0) {
             status.setValue("Select 1 or more files");
             return;
         }
@@ -697,7 +666,7 @@ public class MainController {
         if (RootDir == null || !SalmonDriveManager.getDrive().isAuthenticated())
             return;
         SalmonFile[] files = getSelectedFiles();
-        if(files.length == 0) {
+        if (files.length == 0) {
             status.setValue("Select 1 or more files");
             return;
         }
