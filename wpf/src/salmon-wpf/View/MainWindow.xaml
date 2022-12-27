@@ -22,6 +22,8 @@
         <KeyBinding Command="{Binding ClickCommand}"
                     CommandParameter="{x:Static viewmodel:ActionType.CHANGE_VAULT_LOCATION}" Key="O" Modifiers="Ctrl"  />
         <KeyBinding Command="{Binding ClickCommand}"
+                    CommandParameter="{x:Static viewmodel:ActionType.CLOSE_VAULT}" Key="L" Modifiers="Ctrl"  />
+        <KeyBinding Command="{Binding ClickCommand}"
                     CommandParameter="{x:Static viewmodel:ActionType.IMPORT}" Key="I" Modifiers="Ctrl"  />
         <KeyBinding Command="{Binding ClickCommand}"
                     CommandParameter="{x:Static viewmodel:ActionType.EXPORT}" Key="E" Modifiers="Ctrl"  />
@@ -51,6 +53,9 @@
                     <MenuItem Header="Open Vault" InputGestureText="Ctrl+O"
                               Command="{Binding ClickCommand}"
                        CommandParameter="{x:Static viewmodel:ActionType.CHANGE_VAULT_LOCATION}"/>
+                    <MenuItem Header="Close Vault" InputGestureText="Ctrl+L"
+                              Command="{Binding ClickCommand}"
+                       CommandParameter="{x:Static viewmodel:ActionType.CLOSE_VAULT}"/>
                     <Separator/>
                     <MenuItem Header="Settings" 
                               Command="{Binding ClickCommand}"

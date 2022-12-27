@@ -346,6 +346,9 @@ namespace Salmon.ViewModel
                 case ActionType.CHANGE_VAULT_LOCATION:
                     ChangeVaultLocation();
                     break;
+                case ActionType.CLOSE_VAULT:
+                    OnClose();
+                    break;
                 default:
                     break;
             }
@@ -868,7 +871,7 @@ namespace Salmon.ViewModel
             }
         }
 
-        public void Clear()
+        public void OnClose()
         {
             Logout();
             RootDir = null;
@@ -1019,7 +1022,7 @@ namespace Salmon.ViewModel
                     return;
                 if (selectedDirectory != null)
                 {
-                    Clear();
+                    OnClose();
                     Preferences.SetVaultFolder(selectedDirectory);
                     SetupRootDir();
                 }
