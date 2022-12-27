@@ -22,6 +22,11 @@
                         <KeyCodeCombination alt="UP" code="O" control="DOWN" meta="UP" shift="UP" shortcut="UP" />
                     </accelerator>
                 </MenuItem>
+                <MenuItem onAction="#onClose" text="Close Vault">
+                    <accelerator>
+                        <KeyCodeCombination alt="UP" code="L" control="DOWN" meta="UP" shift="UP" shortcut="UP" />
+                    </accelerator>
+                </MenuItem>
                 <SeparatorMenuItem/>
                 <MenuItem onAction="#onSettings" text="Settings"/>
                 <SeparatorMenuItem/>

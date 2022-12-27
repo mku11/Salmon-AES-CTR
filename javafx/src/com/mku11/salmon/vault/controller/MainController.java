@@ -47,7 +47,6 @@ import javafx.fxml.FXML;
 import javafx.scene.control.MenuItem;
 import javafx.scene.control.*;
 import javafx.scene.image.ImageView;
-import javafx.scene.input.KeyEvent;
 import javafx.scene.input.MouseButton;
 import javafx.stage.DirectoryChooser;
 import javafx.stage.FileChooser;
@@ -199,7 +198,11 @@ public class MainController {
         if (selectedDirectory == null)
             return;
         String filePath = selectedDirectory.getAbsolutePath();
-        ActivityCommon.setVaultFolder(filePath);
+        try {
+            ActivityCommon.setVaultFolder(filePath);
+        } catch (Exception e) {
+            new Alert(Alert.AlertType.WARNING, "Could not open vault").show();
+        }
         refresh();
     }
 
@@ -285,7 +288,7 @@ public class MainController {
     }
 
     public void onCopy() {
-        if(!table.isFocused())
+        if (!table.isFocused())
             return;
         mode = Mode.Copy;
         copyFiles = getSelectedFiles();
@@ -470,7 +473,7 @@ public class MainController {
 
     private boolean checkFileSearcher() {
         if (fileCommander.isFileSearcherRunning()) {
-            new Alert(Alert.AlertType.WARNING, "Another process is running");
+            new Alert(Alert.AlertType.WARNING, "Another process is running").show();
             return true;
         }
         return false;
@@ -744,7 +747,7 @@ public class MainController {
         }
     }
 
-    public void clear() {
+    public void onClose() {
         logout();
         RootDir = null;
         CurrDir = null;
@@ -845,16 +848,21 @@ public class MainController {
     }
 
     private void promptSelectRoot() {
-        ActivityCommon.promptDialog("Vault", "Choose a location for your vault", "ok", (buttonType) -> {
-            File selectedDirectory = selectVault(stage);
-            if (selectedDirectory == null)
-                return null;
-            String filePath = selectedDirectory.getAbsolutePath();
-            clear();
-            ActivityCommon.setVaultFolder(filePath);
-            setupRootDir();
-            return null;
-        }, "cancel", null);
+        ActivityCommon.promptDialog("Vault", "Choose a location for your vault", "ok",
+                (buttonType) -> {
+                    File selectedDirectory = selectVault(stage);
+                    if (selectedDirectory == null)
+                        return null;
+                    String filePath = selectedDirectory.getAbsolutePath();
+                    onClose();
+                    try {
+                        ActivityCommon.setVaultFolder(filePath);
+                        setupRootDir();
+                    } catch (Exception e) {
+                        new Alert(Alert.AlertType.WARNING, "Could not open vault").show();
+                    }
+                    return null;
+                }, "cancel", null);
     }
 
     public static File selectVault(Stage stage) {

@@ -39,6 +39,7 @@ import javafx.scene.layout.VBox;
 import javafx.util.Duration;
 
 import java.io.IOException;
+import java.lang.reflect.InvocationTargetException;
 import java.util.Optional;
 import java.util.function.Function;
 
@@ -55,17 +56,11 @@ public class ActivityCommon {
         void onTextSubmitted(String text, Boolean option);
     }
 
-    public static boolean setVaultFolder(String dirPath) {
+    public static void setVaultFolder(String dirPath) throws Exception {
         Settings.getInstance().vaultLocation = dirPath;
         Preferences.savePrefs();
-        try {
-            SalmonDriveManager.setDriveLocation(dirPath);
-            SalmonDriveManager.getDrive().setEnableIntegrityCheck(true);
-        } catch (Exception e) {
-            e.printStackTrace();
-            return false;
-        }
-        return true;
+        SalmonDriveManager.setDriveLocation(dirPath);
+        SalmonDriveManager.getDrive().setEnableIntegrityCheck(true);
     }
 
     public static void promptPassword(Function<Void, Void> onAuthenticationSucceded) {
@@ -152,16 +147,13 @@ public class ActivityCommon {
         alert.show();
         final Button btOk = (Button) alert.getDialogPane().lookupButton(ButtonType.OK);
         valueText.requestFocus();
-        if (isFileName)
-        {
+        if (isFileName) {
             String ext = SalmonDriveManager.getDrive().getExtensionFromFileName(value);
-            if(ext != null && ext.length() > 0)
+            if (ext != null && ext.length() > 0)
                 valueText.selectRange(0, value.length() - ext.length() - 1);
             else
                 valueText.selectRange(0, value.length());
-        }
-        else
-        {
+        } else {
             valueText.selectAll();
         }
         valueText.setOnKeyPressed(event -> btOk.fire());

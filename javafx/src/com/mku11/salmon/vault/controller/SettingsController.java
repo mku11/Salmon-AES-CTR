@@ -34,6 +34,7 @@ import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
+import javafx.scene.control.Alert;
 import javafx.scene.control.CheckBox;
 import javafx.scene.control.ComboBox;
 import javafx.stage.Modality;
@@ -84,7 +85,11 @@ public class SettingsController {
         if(selectedDirectory == null)
             return;
         String filePath = selectedDirectory.getAbsolutePath();
-        ActivityCommon.setVaultFolder(filePath);
+        try {
+            ActivityCommon.setVaultFolder(filePath);
+        } catch (Exception e) {
+            new Alert(Alert.AlertType.WARNING, "Could not change vault location").show();
+        }
         vaultlocation.setValue("Location: " + filePath);
         //TODO: notify the main screen to refresh
     }

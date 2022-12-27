@@ -36,7 +36,7 @@ public class SalmonDriveManager {
     private static Class driveClassType;
     private static SalmonDrive drive;
 
-    public static void setVirtualDriveClass(Class driveClassType) throws ClassNotFoundException, NoSuchMethodException, InvocationTargetException, InstantiationException, IllegalAccessException {
+    public static void setVirtualDriveClass(Class driveClassType) throws Exception {
         SalmonDriveManager.driveClassType = driveClassType;
         setDriveLocation(null);
     }
@@ -55,7 +55,7 @@ public class SalmonDriveManager {
      * This requires you previously use SetDriveClass() to provide a class for the drive
      * @param dirPath The directory path that will used for storing the contents of the vault
      */
-    public static void setDriveLocation(String dirPath) throws NoSuchMethodException, ClassNotFoundException, IllegalAccessException, InvocationTargetException, InstantiationException {
+    public static void setDriveLocation(String dirPath) throws Exception {
         Class<?> clazz = Class.forName(driveClassType.getName());
         Constructor<?> ctor = clazz.getConstructor(String.class);
         drive = (SalmonDrive) ctor.newInstance(new Object[]{dirPath});
