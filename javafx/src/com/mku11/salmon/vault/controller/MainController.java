@@ -711,15 +711,15 @@ public class MainController {
     private void openContextMenu(ObservableList<FileItem> items) {
         ContextMenu contextMenu = new ContextMenu();
 
-        MenuItem item = new MenuItem("Export");
+        MenuItem item = new MenuItem("Export (Ctrl+E)");
         item.setOnAction((event) -> onExport());
         contextMenu.getItems().add(item);
 
-        item = new MenuItem("Copy");
+        item = new MenuItem("Copy (Ctrl+C)");
         item.setOnAction((event) -> onCopy());
         contextMenu.getItems().add(item);
 
-        item = new MenuItem("Move");
+        item = new MenuItem("Cut (Ctrl+X)");
         item.setOnAction((event) -> onCopy());
         contextMenu.getItems().add(item);
 
