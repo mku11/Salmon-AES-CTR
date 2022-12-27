@@ -20,6 +20,8 @@
         <KeyBinding Command="{Binding ClickCommand}"
                     CommandParameter="{x:Static viewmodel:ActionType.REFRESH}" Key="R" Modifiers="Ctrl"  />
         <KeyBinding Command="{Binding ClickCommand}"
+                    CommandParameter="{x:Static viewmodel:ActionType.UP}" Key="Backspace"  />
+        <KeyBinding Command="{Binding ClickCommand}"
                     CommandParameter="{x:Static viewmodel:ActionType.CHANGE_VAULT_LOCATION}" Key="O" Modifiers="Ctrl"  />
         <KeyBinding Command="{Binding ClickCommand}"
                     CommandParameter="{x:Static viewmodel:ActionType.CLOSE_VAULT}" Key="L" Modifiers="Ctrl"  />
@@ -85,10 +87,6 @@
                     <MenuItem Header="Delete"
                               Command="{Binding ClickCommand}"
                               CommandParameter="{x:Static viewmodel:ActionType.DELETE}"/>
-                    <Separator/>
-                    <MenuItem Header="Refresh" InputGestureText="Ctrl+R"
-                              Command="{Binding ClickCommand}"
-                              CommandParameter="{x:Static viewmodel:ActionType.REFRESH}"/>
                 </MenuItem>
                 <MenuItem Header="Operations">
                     <MenuItem Header="Import"  InputGestureText="Ctrl+I"
@@ -100,6 +98,13 @@
                     <MenuItem Header="Search"  InputGestureText="Ctrl+F"
                               Command="{Binding ClickCommand}"
                               CommandParameter="{x:Static viewmodel:ActionType.SEARCH}"/>
+                    <Separator/>
+                    <MenuItem Header="Refresh" InputGestureText="Ctrl+R"
+                              Command="{Binding ClickCommand}"
+                              CommandParameter="{x:Static viewmodel:ActionType.REFRESH}"/>
+                    <MenuItem Header="Up" InputGestureText="Backspace"
+                              Command="{Binding ClickCommand}"
+                              CommandParameter="{x:Static viewmodel:ActionType.UP}"/>
                     <MenuItem Header="Stop" Command="{Binding ClickCommand}"
                               CommandParameter="{x:Static viewmodel:ActionType.STOP}"
                               Visibility="{Binding Path=StopVisibility, Converter={StaticResource BooleanToVisibilityConverter}}"/>
