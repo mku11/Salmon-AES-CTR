@@ -21,6 +21,7 @@ LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 */
+using LibVLCSharp.Shared;
 using Salmon.Alert;
 using Salmon.FS;
 using Salmon.Model;
@@ -35,6 +36,7 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.ComponentModel;
+using System.Reflection;
 using System.Threading;
 using System.Windows;
 using System.Windows.Controls;
@@ -365,8 +367,8 @@ namespace Salmon.ViewModel
                 case ActionType.CLOSE_VAULT:
                     OnClose();
                     break;
-                case ActionType.BACKSPACE:
-                    OnUp();
+                case ActionType.BACK:
+                    OnBack();
                     break;
                 default:
                     break;
@@ -527,7 +529,14 @@ namespace Salmon.ViewModel
                 {
                     if (mode != Mode.Search)
                         salmonFiles = CurrDir.ListFiles();
-                    DisplayFiles(false);
+                    WindowUtils.RunOnMainThread(() =>
+                    {
+                        SalmonFile selectedFile = null;
+                        if (dataGrid.SelectedItem != null)
+                            selectedFile = (dataGrid.SelectedItem as SalmonFileItem).GetSalmonFile();
+                        DisplayFiles(false, selectedFile);
+                    });
+                    
                 });
             }
             catch (SalmonAuthException e)
@@ -551,7 +560,7 @@ namespace Salmon.ViewModel
             return false;
         }
 
-        private void DisplayFiles(bool reset)
+        private void DisplayFiles(bool reset, SalmonFile selectedFile)
         {
             WindowUtils.RunOnMainThread(() =>
             {
@@ -581,6 +590,8 @@ namespace Salmon.ViewModel
                 }
                 if (mode != Mode.Search)
                     SortFiles();
+                int index = 0;
+                SelectItem(selectedFile);
             });
         }
 
@@ -951,7 +962,7 @@ namespace Salmon.ViewModel
                         return;
                     CurrDir = ((SalmonFileItem)selectedFile).GetSalmonFile();
                     salmonFiles = CurrDir.ListFiles();
-                    DisplayFiles(true);
+                    DisplayFiles(true, null);
                 });
                 return true;
             }
@@ -1057,7 +1068,7 @@ namespace Salmon.ViewModel
             return null;
         }
 
-        public void OnUp()
+        public void OnBack()
         {
             SalmonFile parent = CurrDir.GetParent();
             if (mode == Mode.Search && fileCommander.isFileSearcherRunning())
@@ -1070,7 +1081,7 @@ namespace Salmon.ViewModel
                 {
                     mode = Mode.Browse;
                     salmonFiles = CurrDir.ListFiles();
-                    DisplayFiles(true);
+                    DisplayFiles(true, null);
                 });
             }
             else if (parent != null)
@@ -1079,10 +1090,31 @@ namespace Salmon.ViewModel
                 {
                     if (CheckFileSearcher())
                         return;
+                    SalmonFile parentDir = CurrDir;
                     CurrDir = parent;
                     salmonFiles = CurrDir.ListFiles();
-                    DisplayFiles(true);
+                    DisplayFiles(true, parentDir);
                 });
+            }
+        }
+
+        private void SelectItem(SalmonFile selectedFile)
+        {
+            int index = 0;
+            foreach (SalmonFileItem file in FileItemList)
+            {
+                if (selectedFile != null && file.GetSalmonFile().GetPath().Equals(selectedFile.GetPath()))
+                {
+                    dataGrid.SelectedIndex = index;
+                    dataGrid.ScrollIntoView(dataGrid.SelectedIndex);
+                    WindowUtils.RunOnMainThread(() =>
+                    {
+                        DataGridRow row = (DataGridRow)dataGrid.ItemContainerGenerator.ContainerFromIndex(dataGrid.SelectedIndex);
+                        row.MoveFocus(new TraversalRequest(FocusNavigationDirection.Next));
+                    }, 1);
+                    break;
+                }
+                index++;
             }
         }
 
@@ -1203,7 +1235,7 @@ namespace Salmon.ViewModel
                         Console.Error.WriteLine(exception);
                     }
                     salmonFiles = new SalmonFile[] { };
-                    DisplayFiles(true);
+                    DisplayFiles(true, null);
                 });
                 salmonFiles = fileCommander.Search(CurrDir, value, any, (SalmonFile salmonFile) =>
                 {

@@ -48,7 +48,7 @@ namespace Salmon.Window
         {
             new Thread(() =>
             {
-                Thread.Sleep(1000);
+                Thread.Sleep(delay);
                 RunOnMainThread(action);
             }).Start();
         }
