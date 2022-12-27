@@ -546,7 +546,7 @@ public class MainController {
     }
 
     private void promptSearch() {
-        ActivityCommon.promptEdit("Search", "Keywords", "", "Match any term", this::search);
+        ActivityCommon.promptEdit("Search", "Keywords", "", "Match any term", false, this::search);
     }
 
     public void showTaskRunning(boolean value) {
@@ -598,7 +598,7 @@ public class MainController {
 
     private void promptNewFolder() {
         ActivityCommon.promptEdit("New Folder", "Folder Name",
-                "New Folder", null, (String folderName, Boolean checked) -> {
+                "New Folder", null, false, (String folderName, Boolean checked) -> {
                     try {
                         CurrDir.createDirectory(folderName, null, null);
                         refresh();
@@ -613,7 +613,7 @@ public class MainController {
 
     private void promptNewFile() {
         ActivityCommon.promptEdit("New File", "File Name",
-                "New File", null, (String fileName, Boolean checked) -> {
+                "New File", null, true, (String fileName, Boolean checked) -> {
                     try {
                         CurrDir.createFile(fileName);
                         refresh();
@@ -743,7 +743,7 @@ public class MainController {
         Platform.runLater(() -> {
             try {
                 ActivityCommon.promptEdit("Rename", "New filename",
-                        ifile.getBaseName(), null, (String newFilename, Boolean checked) -> {
+                        ifile.getBaseName(), null, true, (String newFilename, Boolean checked) -> {
                             try {
                                 ifile.rename(newFilename);
                             } catch (Exception exception) {

@@ -22,6 +22,7 @@ LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 */
+
 import com.mku11.salmon.vault.settings.Settings;
 import com.mku11.salmon.vault.prefs.Preferences;
 import com.mku11.salmonfs.SalmonAuthException;
@@ -30,7 +31,10 @@ import javafx.animation.KeyFrame;
 import javafx.animation.Timeline;
 import javafx.application.Platform;
 import javafx.event.ActionEvent;
+import javafx.event.EventHandler;
 import javafx.scene.control.*;
+import javafx.scene.input.KeyCode;
+import javafx.scene.input.KeyEvent;
 import javafx.scene.layout.VBox;
 import javafx.util.Duration;
 
@@ -70,7 +74,7 @@ public class ActivityCommon {
         PasswordField pass = new PasswordField();
         VBox box = new VBox();
         Label status = new Label();
-        box.getChildren().addAll(pass,status);
+        box.getChildren().addAll(pass, status);
         alert.getDialogPane().setContent(box);
         alert.show();
         final Button btOk = (Button) alert.getDialogPane().lookupButton(ButtonType.OK);
@@ -88,6 +92,12 @@ public class ActivityCommon {
                     }
                 }
         );
+        pass.setOnKeyPressed(event -> {
+            if (event.getCode() == KeyCode.ENTER)
+                btOk.fire();
+        });
+        pass.requestFocus();
+        pass.positionCaret(0);
     }
 
     public static void promptSetPassword(Function<String, Void> OnPasswordChanged) {
@@ -122,7 +132,8 @@ public class ActivityCommon {
         );
     }
 
-    public static void promptEdit(String title, String msg, String value, String option, OnTextSubmittedListener OnEdit) {
+    public static void promptEdit(String title, String msg, String value, String option, boolean isFileName,
+                                  OnTextSubmittedListener OnEdit) {
         SalmonAlert alert = new SalmonAlert(Alert.AlertType.NONE, "", ButtonType.OK, ButtonType.CANCEL);
         alert.setTitle(title);
         Label msgText = new Label();
@@ -140,6 +151,20 @@ public class ActivityCommon {
         alert.getDialogPane().setContent(box);
         alert.show();
         final Button btOk = (Button) alert.getDialogPane().lookupButton(ButtonType.OK);
+        valueText.requestFocus();
+        if (isFileName)
+        {
+            String ext = SalmonDriveManager.getDrive().getExtensionFromFileName(value);
+            if(ext != null && ext.length() > 0)
+                valueText.selectRange(0, value.length() - ext.length() - 1);
+            else
+                valueText.selectRange(0, value.length());
+        }
+        else
+        {
+            valueText.selectAll();
+        }
+        valueText.setOnKeyPressed(event -> btOk.fire());
         btOk.addEventFilter(ActionEvent.ACTION, event -> {
                     if (OnEdit != null)
                         OnEdit.onTextSubmitted(valueText.getText(), optionCheckBox.isSelected());
