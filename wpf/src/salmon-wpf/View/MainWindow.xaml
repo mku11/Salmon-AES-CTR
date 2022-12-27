@@ -20,7 +20,7 @@
         <KeyBinding Command="{Binding ClickCommand}"
                     CommandParameter="{x:Static viewmodel:ActionType.REFRESH}" Key="R" Modifiers="Ctrl"  />
         <KeyBinding Command="{Binding ClickCommand}"
-                    CommandParameter="{x:Static viewmodel:ActionType.UP}" Key="Backspace"  />
+                    CommandParameter="{x:Static viewmodel:ActionType.BACKSPACE}" Key="Backspace"  />
         <KeyBinding Command="{Binding ClickCommand}"
                     CommandParameter="{x:Static viewmodel:ActionType.CHANGE_VAULT_LOCATION}" Key="O" Modifiers="Ctrl"  />
         <KeyBinding Command="{Binding ClickCommand}"
@@ -50,7 +50,7 @@
             <RowDefinition Height="Auto"/>
         </Grid.RowDefinitions>
         <DockPanel Grid.Row="0" Background="{StaticResource SalmonBackground}">
-            <Menu DockPanel.Dock="Top" x:Name="MainMenu" Background="{StaticResource SalmonBackground}">
+            <Menu DockPanel.Dock="Top" x:Name="MainMenu" Background="{StaticResource SalmonBackground}" IsTabStop="True">
                 <MenuItem Header="File">
                     <MenuItem Header="Open Vault" InputGestureText="Ctrl+O"
                               Command="{Binding ClickCommand}"
@@ -75,7 +75,7 @@
                               Command="{Binding ClickCommand}"
                               CommandParameter="{x:Static viewmodel:ActionType.NEW_FILE}"/>
                     <Separator/>
-                        <MenuItem Header="Copy " InputGestureText="Ctrl+C" 
+                    <MenuItem Header="Copy " InputGestureText="Ctrl+C" 
                               Command="{Binding ClickCommand}"
                               CommandParameter="{x:Static viewmodel:ActionType.COPY}"/>
                     <MenuItem Header="Cut" InputGestureText="Ctrl+X"
@@ -121,14 +121,16 @@
                 <ColumnDefinition Width="*"/>
                 <ColumnDefinition Width="Auto"/>
             </Grid.ColumnDefinitions>
-            <Button Grid.Column="0" Width="24" Height="24" HorizontalAlignment="Left"
+            <Button Grid.Column="0" Width="24" Height="24" HorizontalAlignment="Left" IsTabStop="True"
                     Command="{Binding ClickCommand}"
                     CommandParameter="{x:Static viewmodel:ActionType.UP}"
                     >
                 <Image Source="/icons/up.png"></Image>
             </Button>
-            <TextBox Grid.Column="1" HorizontalAlignment="Stretch" VerticalContentAlignment="Center" Text="{Binding Path=Path}" IsReadOnly="True" VerticalAlignment="Stretch"/>
-            <Button Grid.Column="2" Width="24" Height="24" HorizontalAlignment="Right"
+            <TextBox Grid.Column="1" HorizontalAlignment="Stretch" VerticalContentAlignment="Center" 
+                     Text="{Binding Path=Path}" IsReadOnly="True" VerticalAlignment="Stretch"
+                     IsTabStop="True"/>
+            <Button Grid.Column="2" Width="24" Height="24" HorizontalAlignment="Right" IsTabStop="True"
                     Command="{Binding ClickCommand}"
                     CommandParameter="{x:Static viewmodel:ActionType.REFRESH}"
                     >
@@ -137,7 +139,7 @@
         </Grid>
         <Grid Grid.Row="2" HorizontalAlignment="Stretch" VerticalAlignment="Stretch">
             <DataGrid x:Name="DataGrid" HorizontalAlignment="Stretch" VerticalAlignment="Stretch"
-                  ItemsSource="{Binding FileItemList}" AutoGenerateColumns="False" GridLinesVisibility="None">
+                  ItemsSource="{Binding FileItemList}" AutoGenerateColumns="False" GridLinesVisibility="None" TabIndex="0">
                 <DataGrid.InputBindings>
                     <KeyBinding Key="C" Modifiers="Control" Command="ApplicationCommands.NotACommand" />
                     <KeyBinding Key="X" Modifiers="Control" Command="ApplicationCommands.NotACommand" />

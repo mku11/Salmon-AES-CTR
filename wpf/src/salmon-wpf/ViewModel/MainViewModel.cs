@@ -187,11 +187,11 @@ namespace Salmon.ViewModel
                 }, "Cancel", null);
         }
 
-        private void OnDoubleClick(int selectedItem)
+        private void OnOpenItem(int selectedItem)
         {
             try
             {
-                Selected(selectedItem);
+                OpenItem(selectedItem);
             }
             catch (Exception e)
             {
@@ -237,10 +237,19 @@ namespace Salmon.ViewModel
             };
             dataGrid.MouseDoubleClick += (object sender, MouseButtonEventArgs e) =>
             {
-                OnDoubleClick(dataGrid.SelectedIndex);
+                e.Handled = true;
+                OnOpenItem(dataGrid.SelectedIndex);
             };
-
+            dataGrid.PreviewKeyDown += (object sender, System.Windows.Input.KeyEventArgs e) =>
+            {
+                if (e.Key == Key.Enter)
+                {
+                    e.Handled = true;
+                    OnOpenItem(dataGrid.SelectedIndex);
+                }
+            };
         }
+
 
         public void SetWindow(System.Windows.Window window)
         {
@@ -248,6 +257,16 @@ namespace Salmon.ViewModel
             window.Loaded += (object sender, RoutedEventArgs e) =>
             {
                 OnShow();
+            };
+            window.KeyDown += (object sender, System.Windows.Input.KeyEventArgs e) =>
+            {
+                if (e.Key == Key.Down && !dataGrid.IsFocused)
+                {
+                    e.Handled = true;
+                    dataGrid.SelectedIndex = 0;
+                    DataGridRow row = (DataGridRow)dataGrid.ItemContainerGenerator.ContainerFromIndex(0);
+                    row.MoveFocus(new TraversalRequest(FocusNavigationDirection.Next));
+                }
             };
         }
 
@@ -301,9 +320,6 @@ namespace Salmon.ViewModel
                 case ActionType.REFRESH:
                     Refresh();
                     break;
-                case ActionType.UP:
-                    OnUp();
-                    break;
                 case ActionType.SETTINGS:
                     OnSettings();
                     break;
@@ -349,10 +365,14 @@ namespace Salmon.ViewModel
                 case ActionType.CLOSE_VAULT:
                     OnClose();
                     break;
+                case ActionType.BACKSPACE:
+                    OnUp();
+                    break;
                 default:
                     break;
             }
         }
+
 
         private void ChangeVaultLocation()
         {
@@ -920,7 +940,7 @@ namespace Salmon.ViewModel
             }
         }
 
-        protected bool Selected(int position)
+        protected bool OpenItem(int position)
         {
             FileItem selectedFile = FileItemList[position];
             if (selectedFile.IsDirectory())
