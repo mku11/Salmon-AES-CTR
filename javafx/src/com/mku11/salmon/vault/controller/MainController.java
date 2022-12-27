@@ -751,7 +751,7 @@ public class MainController {
         logout();
         RootDir = null;
         CurrDir = null;
-        Platform.runLater(() -> fileItemList.clear());
+        Platform.runLater(fileItemList::clear);
     }
 
     private void checkCredentials() {
