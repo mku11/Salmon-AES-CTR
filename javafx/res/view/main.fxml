@@ -52,12 +52,6 @@
                     </accelerator>
                 </MenuItem>
                 <MenuItem onAction="#onDelete" text="Delete"/>
-                <SeparatorMenuItem/>
-                <MenuItem onAction="#onRefresh" text="Refresh">
-                    <accelerator>
-                        <KeyCodeCombination alt="UP" code="R" control="DOWN" meta="UP" shift="UP" shortcut="UP" />
-                    </accelerator>
-                </MenuItem>
             </Menu>
             <Menu text="Operations">
                 <MenuItem onAction="#onImport" text="Import">
@@ -75,6 +69,17 @@
                         <KeyCodeCombination alt="UP" code="F" control="DOWN" meta="UP" shift="UP" shortcut="UP" />
                     </accelerator>
                 </MenuItem>
+                <SeparatorMenuItem/>
+                <MenuItem onAction="#onRefresh" text="Refresh">
+                    <accelerator>
+                        <KeyCodeCombination alt="UP" code="R" control="DOWN" meta="UP" shift="UP" shortcut="UP" />
+                    </accelerator>
+                </MenuItem>
+                <MenuItem onAction="#onBack" text="Back">
+                    <accelerator>
+                        <KeyCodeCombination alt="UP" code="BACK_SPACE" control="UP" meta="UP" shift="UP" shortcut="UP" />
+                    </accelerator>
+                </MenuItem>
                 <MenuItem onAction="#onStop" text="Stop" visible="${controller.progressVisibility}"/>
             </Menu>
             <Menu text="Help">
@@ -82,7 +87,7 @@
             </Menu>
         </MenuBar>
         <HBox id="pathContainer" spacing="1">
-            <Button alignment="CENTER_RIGHT" onAction="#onUp">
+            <Button alignment="CENTER_RIGHT" onAction="#onBack">
                 <graphic>
                     <ImageView fitHeight="16.0" fitWidth="16.0" layoutX="100" layoutY="100" pickOnBounds="true"
                                preserveRatio="true">
@@ -101,8 +106,7 @@
             </Button>
         </HBox>
         <HBox id="tableContainer" alignment="TOP_CENTER" VBox.vgrow="ALWAYS">
-            <TableView fx:id="table" minHeight="200" minWidth="600"
-                       HBox.hgrow="SOMETIMES" VBox.vgrow="SOMETIMES">
+            <TableView fx:id="table" minHeight="200" minWidth="600" HBox.hgrow="SOMETIMES" VBox.vgrow="SOMETIMES">
                 <placeholder>
                     <Label/>
                 </placeholder>

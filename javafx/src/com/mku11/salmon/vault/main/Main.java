@@ -47,13 +47,13 @@ public class Main extends Application {
         FXMLLoader loader = new FXMLLoader(getClass().getResource("/view/main.fxml"));
         Parent root = loader.load();
         MainController controller = loader.getController();
-        controller.setStage(stage);
-        stage.setTitle(Config.APP_NAME);
-        stage.getIcons().add(Window.getDefaultIcon());
         Scene scene = new Scene(root);
         stage.setMinWidth(400);
         stage.setMinHeight(300);
         stage.setScene(scene);
+        stage.setTitle(Config.APP_NAME);
+        stage.getIcons().add(Window.getDefaultIcon());
+        controller.setStage(stage);
         stage.show();
     }
 

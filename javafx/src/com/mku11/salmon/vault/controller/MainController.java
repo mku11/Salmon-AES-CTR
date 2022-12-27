@@ -47,6 +47,7 @@ import javafx.fxml.FXML;
 import javafx.scene.control.MenuItem;
 import javafx.scene.control.*;
 import javafx.scene.image.ImageView;
+import javafx.scene.input.KeyCode;
 import javafx.scene.input.MouseButton;
 import javafx.stage.DirectoryChooser;
 import javafx.stage.FileChooser;
@@ -163,7 +164,7 @@ public class MainController {
             row.setOnMouseClicked(event -> {
                 if (event.getButton() == MouseButton.PRIMARY && event.getClickCount() == 2 && (!row.isEmpty())) {
                     TableView.TableViewSelectionModel<FileItem> rowData = table.getSelectionModel();
-                    onDoubleClick(rowData.getSelectedIndex());
+                    onOpenItem(rowData.getSelectedIndex());
                 } else if (event.getButton() == MouseButton.SECONDARY) {
                     ObservableList<FileItem> items = table.getSelectionModel().getSelectedItems();
                     openContextMenu(items);
@@ -171,9 +172,16 @@ public class MainController {
             });
             return row;
         });
+        table.setOnKeyPressed(event -> {
+            if (event.getCode() == KeyCode.ENTER) {
+                event.consume();
+                TableView.TableViewSelectionModel<FileItem> rowData = table.getSelectionModel();
+                onOpenItem(rowData.getSelectedIndex());
+            }
+        });
         TableColumn<FileItem, ImageView> columnChild = (TableColumn<FileItem, ImageView>) table.getColumns().get(0);
         columnChild.setCellFactory(new TextCellCallback());
-
+        Platform.runLater(() -> table.requestFocus());
     }
 
     private void promptDelete() {
@@ -239,9 +247,9 @@ public class MainController {
         return cell;
     }
 
-    private void onDoubleClick(int selectedItem) {
+    private void onOpenItem(int selectedItem) {
         try {
-            Selected(selectedItem);
+            openItem(selectedItem);
         } catch (Exception e) {
             e.printStackTrace();
         }
@@ -260,7 +268,16 @@ public class MainController {
         });
 
         stage.setOnShowing(event -> Platform.runLater(() -> onShow()));
-
+//        stage.getScene().setOnKeyPressed(event -> {
+//            if (event.getCode() == KeyCode.DOWN && !table.isFocused())
+//            {
+//                event.consume();
+//                table.requestFocus();
+//                table.getSelectionModel().select(0);
+////                    DataGridRow row = (DataGridRow)dataGrid.ItemContainerGenerator.ContainerFromIndex(0);
+////                    row.MoveFocus(new TraversalRequest(FocusNavigationDirection.Next));
+//            }
+//        });
     }
 
     public void shortcutPressed() {
@@ -365,10 +382,6 @@ public class MainController {
                 }, "cancel", null);
     }
 
-    public void onUp() {
-        onBackPressed();
-    }
-
     enum MediaType {
         AUDIO, VIDEO
     }
@@ -462,7 +475,12 @@ public class MainController {
             executor.submit(() -> {
                 if (mode != Mode.Search)
                     salmonFiles = CurrDir.listFiles();
-                displayFiles();
+                Platform.runLater(() -> {
+                    SalmonFile selectedFile = null;
+                    if (table.getSelectionModel().getSelectedItem() != null)
+                        selectedFile = ((SalmonFileItem) table.getSelectionModel().getSelectedItem()).getSalmonFile();
+                    displayFiles(selectedFile);
+                });
             });
         } catch (SalmonAuthException e) {
             checkCredentials();
@@ -479,7 +497,7 @@ public class MainController {
         return false;
     }
 
-    private void displayFiles() {
+    private void displayFiles(SalmonFile selectedFile) {
         Platform.runLater(() -> {
             try {
                 if (mode == Mode.Search)
@@ -497,12 +515,30 @@ public class MainController {
                 } catch (Exception e) {
                     e.printStackTrace();
                 }
-
             }
             if (mode != Mode.Search)
                 sortFiles();
-
+            try {
+                selectItem(selectedFile);
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
         });
+    }
+
+    private void selectItem(SalmonFile selectedFile) throws Exception {
+        int index = 0;
+        for (FileItem file : fileItemList) {
+            if (selectedFile != null && ((SalmonFileItem) file).getSalmonFile().getPath().equals(selectedFile.getPath())) {
+                table.getSelectionModel().select(index);
+                table.scrollTo(table.selectionModelProperty().get().getSelectedIndex());
+                Platform.runLater(() -> {
+                    table.requestFocus();
+                });
+                break;
+            }
+            index++;
+        }
     }
 
     private void setupVirtualDrive() {
@@ -784,7 +820,7 @@ public class MainController {
         }
     }
 
-    protected void Selected(int position) throws Exception {
+    protected void openItem(int position) throws Exception {
         FileItem selectedFile = fileItemList.get(position);
         if (selectedFile.isDirectory()) {
             executor.submit(() -> {
@@ -792,7 +828,7 @@ public class MainController {
                     return;
                 CurrDir = ((SalmonFileItem) selectedFile).getSalmonFile();
                 salmonFiles = CurrDir.listFiles();
-                displayFiles();
+                displayFiles(null);
             });
             return;
         }
@@ -872,7 +908,7 @@ public class MainController {
         return selectedDirectory;
     }
 
-    public void onBackPressed() {
+    public void onBack() {
         SalmonFile parent = CurrDir.getParent();
         if (mode == Mode.Search && fileCommander.isFileSearcherRunning()) {
             fileCommander.stopFileSearch();
@@ -880,15 +916,16 @@ public class MainController {
             executor.submit(() -> {
                 mode = Mode.Browse;
                 salmonFiles = CurrDir.listFiles();
-                displayFiles();
+                displayFiles(null);
             });
         } else if (parent != null) {
             executor.submit(() -> {
                 if (checkFileSearcher())
                     return;
+                SalmonFile parentDir = CurrDir;
                 CurrDir = parent;
                 salmonFiles = CurrDir.listFiles();
-                displayFiles();
+                displayFiles(parentDir);
             });
         }
     }
