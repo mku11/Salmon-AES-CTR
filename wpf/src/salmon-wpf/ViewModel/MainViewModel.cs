@@ -534,7 +534,7 @@ namespace Salmon.ViewModel
                         SalmonFile selectedFile = null;
                         if (dataGrid.SelectedItem != null)
                             selectedFile = (dataGrid.SelectedItem as SalmonFileItem).GetSalmonFile();
-                        DisplayFiles(false, selectedFile);
+                        DisplayFiles(selectedFile);
                     });
                     
                 });
@@ -560,7 +560,7 @@ namespace Salmon.ViewModel
             return false;
         }
 
-        private void DisplayFiles(bool reset, SalmonFile selectedFile)
+        private void DisplayFiles(SalmonFile selectedFile)
         {
             WindowUtils.RunOnMainThread(() =>
             {
@@ -590,7 +590,6 @@ namespace Salmon.ViewModel
                 }
                 if (mode != Mode.Search)
                     SortFiles();
-                int index = 0;
                 SelectItem(selectedFile);
             });
         }
@@ -962,7 +961,7 @@ namespace Salmon.ViewModel
                         return;
                     CurrDir = ((SalmonFileItem)selectedFile).GetSalmonFile();
                     salmonFiles = CurrDir.ListFiles();
-                    DisplayFiles(true, null);
+                    DisplayFiles(null);
                 });
                 return true;
             }
@@ -1081,7 +1080,7 @@ namespace Salmon.ViewModel
                 {
                     mode = Mode.Browse;
                     salmonFiles = CurrDir.ListFiles();
-                    DisplayFiles(true, null);
+                    DisplayFiles(null);
                 });
             }
             else if (parent != null)
@@ -1093,7 +1092,7 @@ namespace Salmon.ViewModel
                     SalmonFile parentDir = CurrDir;
                     CurrDir = parent;
                     salmonFiles = CurrDir.ListFiles();
-                    DisplayFiles(true, parentDir);
+                    DisplayFiles(parentDir);
                 });
             }
         }
@@ -1235,7 +1234,7 @@ namespace Salmon.ViewModel
                         Console.Error.WriteLine(exception);
                     }
                     salmonFiles = new SalmonFile[] { };
-                    DisplayFiles(true, null);
+                    DisplayFiles(null);
                 });
                 salmonFiles = fileCommander.Search(CurrDir, value, any, (SalmonFile salmonFile) =>
                 {
