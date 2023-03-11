@@ -27,6 +27,7 @@ import com.mku11.salmon.vault.window.Window;
 import javafx.scene.Scene;
 import javafx.scene.control.ButtonType;
 import javafx.scene.image.Image;
+import javafx.scene.layout.Region;
 import javafx.stage.Stage;
 
 public class SalmonAlert extends javafx.scene.control.Alert {
@@ -72,6 +73,7 @@ public class SalmonAlert extends javafx.scene.control.Alert {
         Stage dialogStage = (Stage) getDialogPane().getScene().getWindow();
         Scene scene = dialogStage.getScene();
         scene.getStylesheets().add(defaultStyleSheet);
+        getDialogPane().setMinHeight(Region.USE_PREF_SIZE);
     }
 
 }
