@@ -239,7 +239,7 @@ public class SalmonMediaDataSource extends InputStream {
         if (!integrityFailed) {
             integrityFailed = true;
             //TODO: display to the user
-//            new Alert(javafx.scene.control.Alert.AlertType.ERROR, "File corrupt or tampered").show();
+//            new SalmonAlert(javafx.scene.control.Alert.AlertType.ERROR, "File corrupt or tampered").show();
         }
     }
 
