@@ -47,8 +47,10 @@ import javafx.stage.Modality;
 import javafx.stage.Stage;
 
 import java.io.IOException;
+import java.io.UnsupportedEncodingException;
 import java.net.URL;
 import java.net.URLEncoder;
+import java.net.URLStreamHandler;
 import java.nio.charset.Charset;
 import java.text.SimpleDateFormat;
 import java.util.Date;
@@ -135,7 +137,7 @@ public class MediaPlayerController {
         URL.setURLStreamHandlerFactory(new SalmonStreamHandlerFactory());
     }
 
-    private void load(FileItem fileItem, MainController.MediaType type) {
+    private void load(FileItem fileItem, MainController.MediaType type) throws UnsupportedEncodingException {
         SalmonFile file = ((SalmonFileItem) fileItem).getSalmonFile();
         String filePath;
         try {
@@ -144,7 +146,7 @@ public class MediaPlayerController {
             e.printStackTrace();
             return;
         }
-        filePath = URLEncoder.encode(filePath, Charset.defaultCharset());
+        filePath = URLEncoder.encode(filePath, "UTF-8");
         String uri = "http://localhost/" + filePath;
 
         Media m = new Media(uri);
