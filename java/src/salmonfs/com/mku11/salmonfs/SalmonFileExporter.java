@@ -40,7 +40,6 @@ public class SalmonFileExporter {
     private static final int MIN_FILE_SIZE = 2 * 1024 * 1024;
     private static final boolean enableMultiThread = true;
 
-    //TODO: delegate
     public OnProgressChanged onTaskProgressChanged;
 
     private final int bufferSize;
@@ -73,7 +72,7 @@ public class SalmonFileExporter {
     }
 
     public interface OnProgressChanged {
-        void onProgressChanged(Object sender, long bytesRead, long totalBytesRead, String message);
+        void onProgressChanged(SalmonFile file, long bytesRead, long totalBytesRead, String message);
     }
 
     public void stop() {
@@ -89,58 +88,58 @@ public class SalmonFileExporter {
      */
     public IRealFile exportFile(final SalmonFile fileToExport, IRealFile exportDir, boolean deleteSource,
                                 Boolean integrity, int fileCount, int totalFiles) throws Exception {
-        //FIXME: multithreaded during import is causing issues 
-        if (!enableMultiThread && threads != 1)
-            throw new UnsupportedOperationException("Multi threaded is not supported");
+        final IRealFile exportFile;
 
-        long startTime = 0;
-        stopped = false;
-        if (enableLog) {
-            startTime = SalmonTime.currentTimeMillis();
-        }
-        final long[] totalBytesWritten = new long[]{0};
-        failed = false;
+        try {
+            if (!enableMultiThread && threads != 1)
+                throw new UnsupportedOperationException("Multi threaded is not supported");
 
-        if (!exportDir.exists())
-            exportDir.mkdir();
-        String targetFileName = fileToExport.getBaseName();
-        IRealFile tfile = exportDir.getChild(targetFileName);
-        if(tfile != null && tfile.exists()) {
-            String filename = SalmonDriveManager.getDrive().getFileNameWithoutExtension(targetFileName);
-            String ext = SalmonDriveManager.getDrive().getExtensionFromFileName(targetFileName);
-            targetFileName = filename + "_" + SalmonTime.currentTimeMillis() + "." + ext;
-        }
-        final IRealFile exportFile = exportDir.createFile(targetFileName);
+            long startTime = 0;
+            stopped = false;
+            if (enableLog) {
+                startTime = SalmonTime.currentTimeMillis();
+            }
+            final long[] totalBytesWritten = new long[]{0};
+            failed = false;
 
-        if (integrity != null)
-            fileToExport.setVerifyIntegrity(integrity, null);
+            if (!exportDir.exists())
+                exportDir.mkdir();
+            String targetFileName = fileToExport.getBaseName();
+            IRealFile tfile = exportDir.getChild(targetFileName);
+            if (tfile != null && tfile.exists()) {
+                String filename = SalmonDriveManager.getDrive().getFileNameWithoutExtension(targetFileName);
+                String ext = SalmonDriveManager.getDrive().getExtensionFromFileName(targetFileName);
+                targetFileName = filename + "_" + SalmonTime.currentTimeMillis() + "." + ext;
+            }
+            exportFile = exportDir.createFile(targetFileName);
 
-        final long fileSize = fileToExport.getSize();
-        long partSize = fileSize;
-        int runningThreads = 1;
-        if (fileSize > MIN_FILE_SIZE) {
-            partSize = (int) Math.ceil(fileSize / (float) threads);
+            if (integrity != null)
+                fileToExport.setVerifyIntegrity(integrity, null);
 
-            // if we want to check integrity we align to the HMAC Chunk size otherwise to the AES Block
-            long minPartSize = fileToExport.getMinimumPartSize();
+            final long fileSize = fileToExport.getSize();
+            long partSize = fileSize;
+            int runningThreads = 1;
+            if (fileSize > MIN_FILE_SIZE) {
+                partSize = (int) Math.ceil(fileSize / (float) threads);
 
-            // calculate the last chunk size
-            long rem = partSize % minPartSize;
-            if (rem != 0)
-                partSize += minPartSize - rem;
+                // if we want to check integrity we align to the HMAC Chunk size otherwise to the AES Block
+                long minPartSize = fileToExport.getMinimumPartSize();
 
-            runningThreads = (int) (fileSize / partSize);
-            if (fileSize % partSize != 0)
-                runningThreads++;
-        }
-        final CountDownLatch done = new CountDownLatch(runningThreads);
-        ExecutorService executor = Executors.newFixedThreadPool(runningThreads);
-        final long finalPartSize = partSize;
-        for (int i = 0; i < runningThreads; i++) {
-            final int index = i;
-            executor.submit(new Runnable() {
-                @Override
-                public void run() {
+                // calculate the last chunk size
+                long rem = partSize % minPartSize;
+                if (rem != 0)
+                    partSize += minPartSize - rem;
+
+                runningThreads = (int) (fileSize / partSize);
+                if (fileSize % partSize != 0)
+                    runningThreads++;
+            }
+            final CountDownLatch done = new CountDownLatch(runningThreads);
+            ExecutorService executor = Executors.newFixedThreadPool(runningThreads);
+            final long finalPartSize = partSize;
+            for (int i = 0; i < runningThreads; i++) {
+                final int index = i;
+                executor.submit(() -> {
                     long start = finalPartSize * index;
                     long length = Math.min(finalPartSize, fileSize - start);
                     try {
@@ -149,22 +148,28 @@ public class SalmonFileExporter {
                         e.printStackTrace();
                     }
                     done.countDown();
-                }
-            });
+                });
+            }
+            done.await();
+            if (stopped)
+                exportFile.delete();
+            else if (deleteSource)
+                fileToExport.getRealFile().delete();
+            if (lastException != null)
+                throw lastException;
+            if (enableLog) {
+                long total = SalmonTime.currentTimeMillis() - startTime;
+                System.out.println("SalmonFileExporter AesType: " + SalmonStream.getProviderType() + " File: " + fileToExport.getBaseName() + " verified and exported "
+                        + totalBytesWritten[0] + " bytes in: " + total + " ms"
+                        + ", avg speed: " + totalBytesWritten[0] / (float) total + " bytes/sec");
+            }
+        } catch (Exception ex) {
+            ex.printStackTrace();
+            failed = true;
+            stopped = true;
+            throw ex;
         }
-        done.await();
-        if (stopped)
-            exportFile.delete();
-        else if (deleteSource)
-            fileToExport.getRealFile().delete();
-        if (lastException != null)
-            throw lastException;
-        if (enableLog) {
-            long total = SalmonTime.currentTimeMillis() - startTime;
-            System.out.println("SalmonFileExporter AesType: " + SalmonStream.getProviderType() + " File: " + fileToExport.getBaseName() + " verified and exported "
-                    + totalBytesWritten[0] + " bytes in: " + total + " ms"
-                    + ", avg speed: " + totalBytesWritten[0] / (float) total + " bytes/sec");
-        }
+
         if (stopped || failed) {
             stopped = true;
             return null;
@@ -213,7 +218,7 @@ public class SalmonFileExporter {
                 totalChunkBytesWritten += bytesRead;
 
                 totalBytesWritten[0] += bytesRead;
-                notifyProgressListener(totalBytesWritten[0], fileToExport.getSize(), fileCount + "/" + totalFiles + " Exporting File: "
+                notifyProgressListener(fileToExport, totalBytesWritten[0], fileToExport.getSize(), fileCount + "/" + totalFiles + " Exporting File: "
                         + fileToExport.getBaseName());
             }
             if (enableLogDetails) {
@@ -238,10 +243,8 @@ public class SalmonFileExporter {
         }
     }
 
-    private void notifyProgressListener(long bytesRead, long totalBytes, String message) {
+    private void notifyProgressListener(SalmonFile file, long bytesRead, long totalBytes, String message) {
         if (onTaskProgressChanged != null)
-            onTaskProgressChanged.onProgressChanged(this, bytesRead, totalBytes, message);
+            onTaskProgressChanged.onProgressChanged(file, bytesRead, totalBytes, message);
     }
-
-
 }

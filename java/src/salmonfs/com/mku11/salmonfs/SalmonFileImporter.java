@@ -33,13 +33,12 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
 public class SalmonFileImporter {
-    private static boolean enableLog;
-    private static boolean enableLogDetails;
     private static final int DEFAULT_BUFFER_SIZE = 512 * 1024;
     private static final int DEFAULT_THREADS = 1;
     private static final int MIN_FILE_SIZE = 2 * 1024 * 1024;
     private static final boolean enableMultiThread = true;
-
+    private static boolean enableLog;
+    private static boolean enableLogDetails;
     /**
      * Informs when the task progress has changed
      */
@@ -86,11 +85,6 @@ public class SalmonFileImporter {
         return !stopped;
     }
 
-    // TODO: functional interface
-    public interface OnProgressChanged {
-        void onProgressChanged(Object sender, long bytesRead, long totalBytesRead, String message);
-    }
-
     /**
      * Imports a real file into the file vault.
      *
@@ -100,47 +94,43 @@ public class SalmonFileImporter {
      */
     public SalmonFile importFile(final IRealFile fileToImport, SalmonFile dir, boolean deleteSource,
                                  Boolean integrity, int fileCount, int totalFiles) throws Exception {
-        //FIXME: multithreaded during import is causing issues
-        if (!enableMultiThread && threads != 1)
-            throw new UnsupportedOperationException("Multi threaded is not supported");
-
         long startTime = 0;
-        stopped = false;
-        if (enableLog) {
-            startTime = SalmonTime.currentTimeMillis();
-        }
         final long[] totalBytesRead = new long[]{0};
-        failed = false;
+        final SalmonFile salmonFile;
+        try {
+            if (!enableMultiThread && threads != 1)
+                throw new UnsupportedOperationException("Multi threaded is not supported");
+            stopped = false;
+            if (enableLog) {
+                startTime = SalmonTime.currentTimeMillis();
+            }
+            failed = false;
+            salmonFile = dir.createFile(fileToImport.getBaseName());
+            salmonFile.setAllowOverwrite(true);
+            if (integrity != null)
+                salmonFile.setApplyIntegrity(integrity, null, null);
+            final long fileSize = fileToImport.length();
+            int runningThreads = 1;
+            long partSize = fileSize;
 
+            if (fileSize > MIN_FILE_SIZE) {
+                partSize = (int) Math.ceil(fileSize / (float) threads);
+                // if we want to check integrity we align to the HMAC Chunk size instead of the AES Block
+                long minimumPartSize = salmonFile.getMinimumPartSize();
+                long rem = partSize % minimumPartSize;
+                if (rem != 0)
+                    partSize += minimumPartSize - rem;
 
-        final SalmonFile salmonFile = dir.createFile(fileToImport.getBaseName());
-        salmonFile.setAllowOverwrite(true);
-        if (integrity != null)
-            salmonFile.setApplyIntegrity(integrity, null, null);
-        final long fileSize = fileToImport.length();
-        int runningThreads = 1;
-        long partSize = fileSize;
-
-        if (fileSize > MIN_FILE_SIZE) {
-            partSize = (int) Math.ceil(fileSize / (float) threads);
-            // if we want to check integrity we align to the HMAC Chunk size instead of the AES Block
-            long minimumPartSize = salmonFile.getMinimumPartSize();
-            long rem = partSize % minimumPartSize;
-            if (rem != 0)
-                partSize += minimumPartSize - rem;
-
-            runningThreads = (int) (fileSize / partSize);
-            if (fileSize % partSize != 0)
-                runningThreads++;
-        }
-        final CountDownLatch done = new CountDownLatch(runningThreads);
-        ExecutorService executor = Executors.newFixedThreadPool(runningThreads);
-        final long finalPartSize = partSize;
-        for (int i = 0; i < runningThreads; i++) {
-            final int index = i;
-            executor.submit(new Runnable() {
-                @Override
-                public void run() {
+                runningThreads = (int) (fileSize / partSize);
+                if (fileSize % partSize != 0)
+                    runningThreads++;
+            }
+            final CountDownLatch done = new CountDownLatch(runningThreads);
+            ExecutorService executor = Executors.newFixedThreadPool(runningThreads);
+            final long finalPartSize = partSize;
+            for (int i = 0; i < runningThreads; i++) {
+                final int index = i;
+                executor.submit(() -> {
                     long start = finalPartSize * index;
                     long length = Math.min(finalPartSize, fileSize - start);
                     try {
@@ -149,15 +139,20 @@ public class SalmonFileImporter {
                         e.printStackTrace();
                     }
                     done.countDown();
-                }
-            });
-        }
-        done.await();
-        if (stopped)
-            salmonFile.getRealFile().delete();
-        else {
-            if (deleteSource)
-                fileToImport.delete();
+                });
+            }
+            done.await();
+            if (stopped)
+                salmonFile.getRealFile().delete();
+            else {
+                if (deleteSource)
+                    fileToImport.delete();
+            }
+        } catch (Exception ex) {
+            ex.printStackTrace();
+            failed = true;
+            stopped = true;
+            throw ex;
         }
         if (enableLog) {
             long total = SalmonTime.currentTimeMillis() - startTime;
@@ -212,7 +207,7 @@ public class SalmonFileImporter {
                 totalChunkBytesRead += bytesRead;
 
                 totalBytesRead[0] += bytesRead;
-                notifyProgressListener(totalBytesRead[0], fileToImport.length(), (fileCount + 1) + "/" + totalFiles + " Importing File: " + fileToImport.getBaseName());
+                notifyProgressListener(fileToImport, totalBytesRead[0], fileToImport.length(), (fileCount + 1) + "/" + totalFiles + " Importing File: " + fileToImport.getBaseName());
             }
             if (enableLogDetails) {
                 long total = SalmonTime.currentTimeMillis() - startTime;
@@ -235,9 +230,13 @@ public class SalmonFileImporter {
         }
     }
 
-    private void notifyProgressListener(long bytesRead, long totalBytes, String message) {
+    private void notifyProgressListener(IRealFile file, long bytesRead, long totalBytes, String message) {
         if (onTaskProgressChanged != null)
-            onTaskProgressChanged.onProgressChanged(this, bytesRead, totalBytes, message);
+            onTaskProgressChanged.onProgressChanged(file, bytesRead, totalBytes, message);
+    }
+
+    public interface OnProgressChanged {
+        void onProgressChanged(IRealFile file, long bytesRead, long totalBytesRead, String message);
     }
 
 }
