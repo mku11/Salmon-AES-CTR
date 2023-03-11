@@ -1,5 +1,5 @@
 <resources>
-    <string name="app_name">Salmon Vault Beta</string>
+    <string name="app_name">Salmon Vault</string>
     <string name="FileProvider" translatable="false">com.mku.android.salmonvault.fileprovider</string>
     <string name="SourceCodeURL" translatable="false">https://github.com/mku11/Salmon</string>
 
@@ -39,6 +39,7 @@
     <string name="NewPassword">New Password</string>
     <string name="File">File</string>
     <string name="View">View</string>
+    <string name="ViewAsText">View As Text</string>
     <string name="ViewExternal">View External</string>
 
     <string name="ImportStopped">Import Stopped</string>
@@ -116,4 +117,15 @@
     <string name="Paste">Paste</string>
     <string name="ItemsSelectedForCopy">Items selected for copy</string>
     <string name="ItemsSelectedForMove">Items selected for move</string>
+    <string name="NewFile">New File</string>
+    <string name="OpenVault">Open Vault</string>
+    <string name="NewVault">New Vault</string>
+    <string name="CloseVault">Close Vault</string>
+    <string name="ImportAuthFile">Import Auth File</string>
+    <string name="ExportAuthFile">Export Auth File</string>
+    <string name="RevokeAuth">Revoke Auth</string>
+    <string name="DisplayAuthID">Display Auth ID</string>
+    <string name="Cut">Cut</string>
+    <string name="Error">Error</string>
+    <string name="CouldNotGetAuthID">Could not get Auth ID</string>
 </resources>
