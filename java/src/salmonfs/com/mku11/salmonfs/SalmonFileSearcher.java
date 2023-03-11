@@ -84,7 +84,7 @@ public class SalmonFileSearcher {
                 searchResults.addAll(searchDir(file, keywords, any, OnResultFound));
             else {
                 getSearchResults(file, terms, any);
-                if (file.getTag() != null) {
+                if (file.getTag() != null && ((int) file.getTag()) > 0) {
                     searchResults.add(file);
                     if (OnResultFound != null)
                         OnResultFound.onResultFound(file);
