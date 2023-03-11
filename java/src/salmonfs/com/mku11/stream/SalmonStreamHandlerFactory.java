@@ -22,6 +22,7 @@ LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 */
+
 import java.net.URLStreamHandler;
 import java.net.URLStreamHandlerFactory;
 
@@ -29,6 +30,8 @@ public class SalmonStreamHandlerFactory implements URLStreamHandlerFactory {
 
     @Override
     public URLStreamHandler createURLStreamHandler(String protocol) {
-        return new SalmonStreamHandler();
+        if (protocol.equals("http"))
+            return new SalmonStreamHandler();
+        return null;
     }
 }
