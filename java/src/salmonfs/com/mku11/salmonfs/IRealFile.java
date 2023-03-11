@@ -37,7 +37,7 @@ public interface IRealFile {
 
     AbsStream getOutputStream() throws FileNotFoundException;
 
-    boolean renameTo(String newFilepath) throws FileNotFoundException;
+    boolean renameTo(String newFilename) throws FileNotFoundException;
 
     long length();
 

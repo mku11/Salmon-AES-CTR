@@ -124,7 +124,7 @@ public class JavaFile implements IRealFile {
     }
 
     public IRealFile move(IRealFile newDir, AbsStream.OnProgressListener progressListener) {
-        String nFilePath = newDir.getAbsolutePath() + File.separator + getBaseName();
+        String nFilePath = newDir.getPath() + File.separator + getBaseName();
         boolean res = new File(filePath).renameTo(new File(nFilePath));
         return new JavaFile(nFilePath);
     }
