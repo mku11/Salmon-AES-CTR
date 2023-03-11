@@ -24,7 +24,7 @@ SOFTWARE.
 */
 public class BitConverter {
 
-    public static byte[] getBytes(int value, int length) {
+    public static byte[] toBytes(long value, int length) {
         byte[] buffer = new byte[length];
         for (int i = length - 1; i >= 0; i--) {
             buffer[i] = (byte) (value % 256);
@@ -33,16 +33,7 @@ public class BitConverter {
         return buffer;
     }
 
-    public static byte[] getBytes(long value, int length) {
-        byte[] buffer = new byte[length];
-        for (int i = length - 1; i >= 0; i--) {
-            buffer[i] = (byte) (value % 256);
-            value /= 256;
-        }
-        return buffer;
-    }
-
-    public static long toInt64(byte[] bytes, int index, int length) {
+    public static long toLong(byte[] bytes, int index, int length) {
         long num = 0;
         long mul = 1;
         for (int i = index + length - 1; i >= index; i--) {
@@ -52,13 +43,20 @@ public class BitConverter {
         return num;
     }
 
-    public static int toInt32(byte[] bytes, int index, int length) {
-        int num = 0;
-        int mul = 1;
-        for (int i = index + length - 1; i >= index; i--) {
-            num += (bytes[i] & 0xFF) * mul;
-            mul *= 256;
+    public static String toHex(byte[] data) {
+        StringBuilder sb = new StringBuilder();
+        for (byte b : data)
+            sb.append(String.format("%02x", b));
+        return sb.toString();
+    }
+
+    public static byte[] toBytes(String data) {
+        byte[] bytes = new byte[data.length()/2];
+        int k = 0;
+        for (int i = 0; i < data.length(); i += 2) {
+            bytes[k] = (byte) (16 * Byte.parseByte(data.charAt(i) + "", 16));
+            bytes[k++] += Byte.parseByte(data.charAt(i + 1) + "", 16);
         }
-        return num;
+        return bytes;
     }
 }
