@@ -26,6 +26,7 @@ SOFTWARE.
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.pm.ResolveInfo;
+import android.net.Uri;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
@@ -36,29 +37,33 @@ import android.view.MenuItem;
 import android.view.View;
 import android.view.WindowManager;
 import android.webkit.MimeTypeMap;
-import android.widget.ImageButton;
-import android.widget.ProgressBar;
 import android.widget.TextView;
 import android.widget.Toast;
 
 import androidx.appcompat.app.AppCompatActivity;
-import androidx.arch.core.util.Function;
+import androidx.appcompat.widget.Toolbar;
 import androidx.core.app.ShareCompat;
 import androidx.core.content.FileProvider;
+import androidx.core.view.MenuCompat;
 import androidx.documentfile.provider.DocumentFile;
-import androidx.recyclerview.widget.GridLayoutManager;
+import androidx.recyclerview.widget.DividerItemDecoration;
+import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.mku.android.salmonvault.R;
+import com.mku11.file.JavaFile;
 import com.mku11.salmon.SalmonGenerator;
 import com.mku11.salmon.config.Config;
 import com.mku11.salmon.file.AndroidDrive;
 import com.mku11.salmon.file.AndroidSharedFileObserver;
 import com.mku11.salmon.media.SalmonMediaDataSource;
 import com.mku11.salmon.streams.SalmonStream;
-import com.mku11.salmon.utils.FileCommander;
-import com.mku11.salmon.utils.FileUtils;
+import com.mku11.salmon.utils.AndroidSequenceParser;
 import com.mku11.salmon.utils.Utils;
+import com.mku11.salmonfs.Comparators;
+import com.mku11.salmonfs.FileCommander;
+import com.mku11.salmonfs.FileSequencer;
+import com.mku11.salmonfs.FileUtils;
 import com.mku11.salmonfs.IRealFile;
 import com.mku11.salmonfs.SalmonAuthException;
 import com.mku11.salmonfs.SalmonDriveManager;
@@ -69,121 +74,69 @@ import com.mku11.salmonfs.SalmonFileImporter;
 import java.io.File;
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.Comparator;
 import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Objects;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Semaphore;
+import java.util.function.Consumer;
 
 public class SalmonActivity extends AppCompatActivity {
-    private static final String TAG = SalmonActivity.class.getName();
-    private static final long MAX_FILE_SIZE_TO_SHARE = 100 * 1024 * 1024;
-    private static final long MEDIUM_FILE_SIZE_TO_SHARE = 10 * 1024 * 1024;
+    public static final String TAG = SalmonActivity.class.getName();
+    public static final int REQUEST_OPEN_VAULT_DIR = 1000;
+    public static final int REQUEST_CREATE_VAULT_DIR = 1001;
+    public static final int REQUEST_IMPORT_FILES = 1002;
+    public static final int REQUEST_EXPORT_DIR = 1003;
+    public static final int REQUEST_IMPORT_AUTH_FILE = 1004;
+    public static final int REQUEST_EXPORT_AUTH_FILE = 1005;
+    public static final String SEQUENCER_DIR_NAME = ".salmon";
+    public static final String SEQUENCER_FILE_NAME = "config.xml";
 
-    private static final int BUFFER_SIZE = 512 * 1024;
+    private static final long MAX_FILE_SIZE_TO_SHARE = 50 * 1024 * 1024;
+    private static final long MEDIUM_FILE_SIZE_TO_SHARE = 10 * 1024 * 1024;
+    private static final int BUFFER_SIZE = 1 * 1024 * 1024;
     private static final int THREADS = 4;
 
-    public static SalmonFile rootDir;
-    public static SalmonFile currDir;
-    private FileCommander fileCommander;
-    private SalmonFile[] copyFiles;
+    public SalmonFile rootDir;
+    public SalmonFile currDir;
+    private ArrayList<SalmonFile> fileItemList = new ArrayList<>();
+    private ExecutorService executor = Executors.newFixedThreadPool(1);
+    private Semaphore done = new Semaphore(1);
 
-    public SalmonFile[] getSalmonFiles() {
-        return salmonFiles;
-    }
-
-    enum MediaType {
-        AUDIO, VIDEO
-    }
-
-    enum Action {
-        REFRESH, IMPORT, VIEW, EDIT, SHARE,
-        EXPORT, DELETE, RENAME,
-        MULTI_SELECT, SINGLE_SELECT, SELECT_ALL, UNSELECT_ALL,
-        EXPORT_SELECTED, DELETE_SELECTED, COPY, MOVE, PASTE,
-        NEW_FOLDER, SEARCH, STOP, SORT,
-        PROPERTIES, SETTINGS, ABOUT, EXIT
-    }
-
-
-    Semaphore done = new Semaphore(1);
-    Comparator<SalmonFile> defaultComparator = (SalmonFile c1, SalmonFile c2) ->
-    {
-        if (c1.isDirectory() && !c2.isDirectory())
-            return -1;
-        else if (!c1.isDirectory() && c2.isDirectory())
-            return 1;
-        else return 0;
-    };
-    Comparator<SalmonFile> filenameComparator = (SalmonFile c1, SalmonFile c2) ->
-    {
-        if (c1.isDirectory() && !c2.isDirectory())
-            return -1;
-        else if (!c1.isDirectory() && c2.isDirectory())
-            return 1;
-        else
-            return tryGetBasename(c1).compareTo(tryGetBasename(c2));
-    };
-    Comparator<SalmonFile> sizeComparator = (SalmonFile c1, SalmonFile c2) ->
-    {
-        if (c1.isDirectory() && !c2.isDirectory())
-            return -1;
-        else if (!c1.isDirectory() && c2.isDirectory())
-            return 1;
-        else
-            return (int) (tryGetSize(c1) - tryGetSize(c2));
-    };
-    Comparator<SalmonFile> typeComparator = (SalmonFile c1, SalmonFile c2) ->
-    {
-        if (c1.isDirectory() && !c2.isDirectory())
-            return -1;
-        else if (!c1.isDirectory() && c2.isDirectory())
-            return 1;
-        else
-            return tryGetType(c1).compareTo(tryGetType(c2));
-    };
-    Comparator<SalmonFile> dateComparator = (SalmonFile c1, SalmonFile c2) ->
-    {
-        if (c1.isDirectory() && !c2.isDirectory())
-            return -1;
-        else if (!c1.isDirectory() && c2.isDirectory())
-            return 1;
-        else
-            return (int) (tryGetDate(c1) - tryGetDate(c2));
-    };
-    Comparator<SalmonFile> relevanceComparator = (SalmonFile c1, SalmonFile c2) ->
-            (int) c2.getTag() - (int) c1.getTag();
-    private Mode mode = Mode.Browse;
+    private TextView pathText;
+    private RecyclerView listView;
+    private FileAdapter adapter;
     private View statusControlLayout;
     private TextView statusText;
-    private ProgressBar fileProgress;
-    private ProgressBar filesProgress;
-    private TextView pathText;
-    private RecyclerView gridList;
-    private FileGridAdapter adapter;
-
-    private final ArrayList<SalmonFile> fileItemList = new ArrayList<>();
-
-    private final ExecutorService executor = Executors.newFixedThreadPool(1);
-    private SortType sortType = SortType.Name;
+    private PieProgress fileProgress;
+    private PieProgress filesProgress;
     private SalmonFile[] salmonFiles;
+    private FileCommander fileCommander;
+    private SalmonFile[] copyFiles;
+    private String exportAuthID;
+    private Mode mode = Mode.Browse;
+    private SortType sortType = SortType.Name;
 
     protected void onCreate(Bundle bundle) {
         super.onCreate(bundle);
-        setContentView(R.layout.main);
         setupWindow();
+        setContentView(R.layout.main);
         setupControls();
         setupFileCommander();
         setupListeners();
         loadSettings();
-        setupVirtualDrive();
+        setupSalmonManager();
         setupRootDir();
         setupNativeLib();
     }
 
+    private void setupWindow() {
+        getWindow().setFlags(WindowManager.LayoutParams.FLAG_SECURE, WindowManager.LayoutParams.FLAG_SECURE);
+    }
+
     private void setupNativeLib() {
-        if(Config.enableNativeLib)
+        if (Config.enableNativeLib)
             System.loadLibrary("salmon");
     }
 
@@ -203,19 +156,14 @@ public class SalmonActivity extends AppCompatActivity {
         Utils.removeFromRecents(this, SettingsActivity.getExcludeFromRecents(this));
     }
 
-    private void setupWindow() {
-        getWindow().setFlags(WindowManager.LayoutParams.FLAG_SECURE, WindowManager.LayoutParams.FLAG_SECURE);
-    }
-
-
     private void setupListeners() {
-        fileCommander.setFileImporterOnTaskProgressChanged((Object sender, long bytesRead, long totalBytesRead, String message) ->
+        fileCommander.setImporterProgressListener((IRealFile file, long bytesRead, long totalBytesRead, String message) ->
                 runOnUiThread(() -> {
                     statusText.setText(message);
                     fileProgress.setProgress((int) (bytesRead * 100.0F / totalBytesRead));
                 }));
 
-        fileCommander.setFileExporterOnTaskProgressChanged((Object sender, long bytesWritten, long totalBytesWritten, String message) ->
+        fileCommander.setExporterProgressListener((SalmonFile file, long bytesWritten, long totalBytesWritten, String message) ->
                 runOnUiThread(() -> {
                     statusText.setText(message);
                     fileProgress.setProgress((int) (bytesWritten * 100.0F / totalBytesWritten));
@@ -226,46 +174,44 @@ public class SalmonActivity extends AppCompatActivity {
         fileProgress = findViewById(R.id.fileProgress);
         filesProgress = findViewById(R.id.filesProgress);
         statusText = findViewById(R.id.status);
-        ImageButton cancelButton = findViewById(R.id.cancelButton);
-        cancelButton.setOnClickListener((view) -> {
-            fileCommander.cancelJobs();
-            mode = Mode.Browse;
-            new Handler(Looper.getMainLooper()).postDelayed(() ->
-                    showTaskRunning(false), 1000);
-        });
-        statusControlLayout = findViewById(R.id.statusControlLayout);
+        statusControlLayout = findViewById(R.id.status_control_layout);
+        statusControlLayout.setVisibility(View.GONE);
         pathText = findViewById(R.id.path);
         pathText.setText("");
-        gridList = findViewById(R.id.gridList);
-        GridLayoutManager gridLayoutManager = new GridLayoutManager(this, 4, GridLayoutManager.VERTICAL, false);
-        gridList.setLayoutManager(gridLayoutManager);
-        registerForContextMenu(gridList);
+        listView = findViewById(R.id.list);
+        listView.setLayoutManager(new LinearLayoutManager(this));
+        listView.addItemDecoration(new DividerItemDecoration(this, LinearLayoutManager.VERTICAL));
+        registerForContextMenu(listView);
         adapter = createAdapter();
-        gridList.setAdapter(adapter);
-
+        listView.setAdapter(adapter);
+        Toolbar toolbar = findViewById(R.id.toolbar);
+        setSupportActionBar(toolbar);
+        Objects.requireNonNull(getSupportActionBar()).setDisplayShowTitleEnabled(true);
+        Objects.requireNonNull(getSupportActionBar()).setDisplayUseLogoEnabled(true);
+        getSupportActionBar().setLogo(R.drawable.logo_48x48);
     }
 
-    private FileGridAdapter createAdapter() {
-        return new FileGridAdapter(this, fileItemList, (Integer pos) ->
+    private FileAdapter createAdapter() {
+        return new FileAdapter(this, fileItemList, (Integer pos) ->
         {
             try {
-                return selected(pos);
+                return openFile(pos);
             } catch (Exception exception) {
                 exception.printStackTrace();
             }
-            return null;
+            return false;
         });
     }
 
     protected void setupRootDir() {
         String vaultLocation = SettingsActivity.getVaultLocation(this);
         try {
-            SalmonDriveManager.setDriveLocation(vaultLocation);
+            SalmonDriveManager.openDrive(vaultLocation);
             SalmonDriveManager.getDrive().setEnableIntegrityCheck(true);
             rootDir = SalmonDriveManager.getDrive().getVirtualRoot();
             currDir = rootDir;
             if (rootDir == null) {
-                promptSelectRoot();
+                onOpenVault();
                 return;
             }
         } catch (SalmonAuthException e) {
@@ -273,8 +219,6 @@ public class SalmonActivity extends AppCompatActivity {
             return;
         } catch (Exception e) {
             e.printStackTrace();
-            promptSelectRoot();
-            return;
         }
         refresh();
     }
@@ -286,7 +230,7 @@ public class SalmonActivity extends AppCompatActivity {
             return;
         try {
             if (SalmonDriveManager.getDrive().getVirtualRoot() == null || !SalmonDriveManager.getDrive().getVirtualRoot().exists()) {
-                promptSelectRoot();
+                onOpenVault();
                 return;
             }
             if (!SalmonDriveManager.getDrive().isAuthenticated()) {
@@ -294,7 +238,7 @@ public class SalmonActivity extends AppCompatActivity {
                 return;
             }
             executor.submit(() -> {
-                if (mode == Mode.Browse)
+                if (mode != Mode.Search)
                     salmonFiles = currDir.listFiles();
                 displayFiles(false);
             });
@@ -317,13 +261,13 @@ public class SalmonActivity extends AppCompatActivity {
     private void displayFiles(boolean reset) {
         runOnUiThread(() -> {
             try {
-                pathText.setText(currDir.getPath());
+                setPath(currDir.getPath());
             } catch (Exception exception) {
                 exception.printStackTrace();
             }
             fileItemList.clear();
             if (reset) {
-                adapter.resetCache(gridList);
+                adapter.resetCache(listView);
             }
             adapter.notifyDataSetChanged();
             Collections.addAll(fileItemList, salmonFiles);
@@ -333,63 +277,90 @@ public class SalmonActivity extends AppCompatActivity {
         });
     }
 
-    private void setupVirtualDrive() {
+    private void setupSalmonManager() {
         try {
             SalmonDriveManager.setVirtualDriveClass(AndroidDrive.class);
+            if (SalmonDriveManager.getSequencer() != null)
+                SalmonDriveManager.getSequencer().close();
+            setupFileSequencer();
         } catch (Exception e) {
             e.printStackTrace();
         }
     }
 
+    private void setupFileSequencer() throws Exception {
+        String dirPath = getNoBackupFilesDir() + File.separator + SEQUENCER_DIR_NAME;
+        String filePath = dirPath + File.separator + SEQUENCER_FILE_NAME;
+        IRealFile dirFile = new JavaFile(dirPath);
+        if (!dirFile.exists())
+            dirFile.mkdir();
+        IRealFile seqFile = new JavaFile(filePath);
+        FileSequencer sequencer = new FileSequencer(seqFile, new AndroidSequenceParser());
+        SalmonDriveManager.setSequencer(sequencer);
+    }
+
     public boolean onPrepareOptionsMenu(Menu menu) {
+        MenuCompat.setGroupDividerEnabled(menu, true);
         menu.clear();
-        menu.add(0, Action.REFRESH.ordinal(), 0, getString(R.string.Refresh))
-                .setIcon(android.R.drawable.ic_menu_rotate)
-                .setShowAsAction(MenuItem.SHOW_AS_ACTION_ALWAYS);
-        menu.add(0, Action.IMPORT.ordinal(), 0, getString(R.string.Import))
-                .setIcon(android.R.drawable.ic_menu_add)
+
+        menu.add(1, Action.OPEN_VAULT.ordinal(), 0, getResources().getString(R.string.OpenVault))
                 .setShowAsAction(MenuItem.SHOW_AS_ACTION_NEVER);
-        menu.add(0, Action.NEW_FOLDER.ordinal(), 0, getString(R.string.NewFolder))
-                .setIcon(android.R.drawable.ic_input_add);
-        if (adapter.getMode() == FileGridAdapter.Mode.MULTI_SELECT) {
-            menu.add(0, Action.EXPORT_SELECTED.ordinal(), 0, getString(R.string.Export))
-                    .setIcon(android.R.drawable.btn_minus);
-            menu.add(0, Action.COPY.ordinal(), 0, getString(R.string.Copy))
-                    .setIcon(android.R.drawable.ic_menu_send);
-            menu.add(0, Action.MOVE.ordinal(), 0, getString(R.string.Move))
-                    .setIcon(android.R.drawable.ic_menu_send);
-            menu.add(0, Action.DELETE_SELECTED.ordinal(), 0, getString(R.string.Delete))
-                    .setIcon(android.R.drawable.ic_menu_delete);
+        menu.add(1, Action.CREATE_VAULT.ordinal(), 0, getResources().getString(R.string.NewVault))
+                .setShowAsAction(MenuItem.SHOW_AS_ACTION_NEVER);
+        menu.add(1, Action.CLOSE_VAULT.ordinal(), 0, getResources().getString(R.string.CloseVault))
+                .setShowAsAction(MenuItem.SHOW_AS_ACTION_NEVER);
 
-            menu.add(0, Action.SELECT_ALL.ordinal(), 0, getString(R.string.SelectAll))
-                    .setIcon(android.R.drawable.checkbox_on_background);
-
-            menu.add(0, Action.UNSELECT_ALL.ordinal(), 0, getString(R.string.UnselectAll))
-                    .setIcon(android.R.drawable.checkbox_off_background);
+        if (fileCommander.isRunning()) {
+            menu.add(2, Action.STOP.ordinal(), 0, getResources().getString(R.string.Stop))
+                    .setShowAsAction(MenuItem.SHOW_AS_ACTION_NEVER);
         }
 
-        if (mode == Mode.Copy || mode == Mode.Move)
-            menu.add(0, Action.PASTE.ordinal(), 0, getString(R.string.Paste))
-                    .setIcon(android.R.drawable.ic_menu_set_as);
+        if (mode == Mode.Copy || mode == Mode.Move) {
+            menu.add(3, Action.PASTE.ordinal(), 0, getResources().getString(R.string.Paste));
+        }
+        menu.add(3, Action.IMPORT.ordinal(), 0, getResources().getString(R.string.Import))
+                .setIcon(android.R.drawable.ic_menu_add)
+                .setShowAsAction(MenuItem.SHOW_AS_ACTION_NEVER);
+        menu.add(3, Action.NEW_FOLDER.ordinal(), 0, getString(R.string.NewFolder))
+                .setIcon(android.R.drawable.ic_input_add);
 
-        menu.add(0, Action.SEARCH.ordinal(), 0, getString(R.string.Search))
-                .setIcon(android.R.drawable.ic_menu_search);
-        if (fileCommander.isRunning())
-            menu.add(0, Action.STOP.ordinal(), 0, getString(R.string.Stop))
-                    .setIcon(android.R.drawable.ic_menu_close_clear_cancel);
-        menu.add(0, Action.SORT.ordinal(), 0, getString(R.string.Sort))
+        if (adapter.getMode() == FileAdapter.Mode.MULTI_SELECT) {
+            menu.add(3, Action.COPY.ordinal(), 0, getResources().getString(R.string.Copy));
+            menu.add(3, Action.CUT.ordinal(), 0, getResources().getString(R.string.Cut));
+            menu.add(3, Action.DELETE.ordinal(), 0, getResources().getString(R.string.Delete));
+            menu.add(3, Action.EXPORT.ordinal(), 0, getResources().getString(R.string.Export));
+        }
+
+        menu.add(4, Action.REFRESH.ordinal(), 0, getResources().getString(R.string.Refresh))
+                .setIcon(android.R.drawable.ic_menu_rotate)
+                .setShowAsAction(MenuItem.SHOW_AS_ACTION_NEVER);
+        menu.add(4, Action.SORT.ordinal(), 0, getResources().getString(R.string.Sort))
                 .setIcon(android.R.drawable.ic_menu_sort_alphabetically);
-        if (adapter.getMode() == FileGridAdapter.Mode.SINGLE_SELECT)
-            menu.add(0, Action.MULTI_SELECT.ordinal(), 0, getString(R.string.MultiSelect))
+        menu.add(4, Action.SEARCH.ordinal(), 0, getResources().getString(R.string.Search))
+                .setIcon(android.R.drawable.ic_menu_search);
+        if (adapter.getMode() == FileAdapter.Mode.SINGLE_SELECT)
+            menu.add(4, Action.MULTI_SELECT.ordinal(), 0, getString(R.string.MultiSelect))
                     .setIcon(android.R.drawable.ic_menu_agenda);
         else
-            menu.add(0, Action.SINGLE_SELECT.ordinal(), 0, getString(R.string.SingleSelect))
+            menu.add(4, Action.SINGLE_SELECT.ordinal(), 0, getString(R.string.SingleSelect))
                     .setIcon(android.R.drawable.ic_menu_agenda);
-        menu.add(0, Action.SETTINGS.ordinal(), 0, getString(R.string.Settings))
+
+        if (SalmonDriveManager.getDrive() != null) {
+            menu.add(5, Action.IMPORT_AUTH.ordinal(), 0, getResources().getString(R.string.ImportAuthFile))
+                    .setShowAsAction(MenuItem.SHOW_AS_ACTION_NEVER);
+            menu.add(5, Action.EXPORT_AUTH.ordinal(), 0, getResources().getString(R.string.ExportAuthFile))
+                    .setShowAsAction(MenuItem.SHOW_AS_ACTION_NEVER);
+            menu.add(5, Action.REVOKE_AUTH.ordinal(), 0, getResources().getString(R.string.RevokeAuth))
+                    .setShowAsAction(MenuItem.SHOW_AS_ACTION_NEVER);
+            menu.add(5, Action.DISPLAY_AUTH_ID.ordinal(), 0, getResources().getString(R.string.DisplayAuthID))
+                    .setShowAsAction(MenuItem.SHOW_AS_ACTION_NEVER);
+        }
+
+        menu.add(6, Action.SETTINGS.ordinal(), 0, getResources().getString(R.string.Settings))
                 .setIcon(android.R.drawable.ic_menu_preferences);
-        menu.add(0, Action.ABOUT.ordinal(), 0, getString(R.string.About))
+        menu.add(6, Action.ABOUT.ordinal(), 0, getResources().getString(R.string.About))
                 .setIcon(android.R.drawable.ic_menu_info_details);
-        menu.add(0, Action.EXIT.ordinal(), 0, getString(R.string.Exit))
+        menu.add(6, Action.EXIT.ordinal(), 0, getResources().getString(R.string.Exit))
                 .setIcon(android.R.drawable.ic_menu_close_clear_cancel);
 
         return super.onPrepareOptionsMenu(menu);
@@ -397,13 +368,23 @@ public class SalmonActivity extends AppCompatActivity {
 
     public boolean onOptionsItemSelected(MenuItem item) {
         switch (Action.values()[item.getItemId()]) {
+            case OPEN_VAULT:
+                onOpenVault();
+                break;
+            case CREATE_VAULT:
+                onCreateVault();
+                break;
+            case CLOSE_VAULT:
+                onCloseVault();
+                break;
+
             case REFRESH:
                 refresh();
                 return true;
             case IMPORT:
                 promptImportFiles();
                 return true;
-            case EXPORT_SELECTED:
+            case EXPORT:
                 exportSelectedFiles();
                 return true;
             case NEW_FOLDER:
@@ -413,17 +394,17 @@ public class SalmonActivity extends AppCompatActivity {
                 mode = Mode.Copy;
                 copyFiles = adapter.getSelectedFiles().toArray(new SalmonFile[0]);
                 showTaskRunning(true, false);
-                showTaskMessage(copyFiles.length + " " + getResources().getString(R.string.ItemsSelectedForMove));
+                showTaskMessage(copyFiles.length + " " + getResources().getString(R.string.ItemsSelectedForCopy));
                 adapter.setMultiSelect(false);
                 return true;
-            case MOVE:
+            case CUT:
                 mode = Mode.Move;
                 copyFiles = adapter.getSelectedFiles().toArray(new SalmonFile[0]);
                 showTaskRunning(true, false);
                 showTaskMessage(copyFiles.length + " " + getResources().getString(R.string.ItemsSelectedForMove));
                 adapter.setMultiSelect(false);
                 return true;
-            case DELETE_SELECTED:
+            case DELETE:
                 deleteSelectedFiles();
                 return true;
             case PASTE:
@@ -445,11 +426,25 @@ public class SalmonActivity extends AppCompatActivity {
                 adapter.setMultiSelect(false);
                 return true;
             case STOP:
-                fileCommander.cancelJobs();
+                fileCommander.cancel();
                 return true;
             case SORT:
                 promptSortFiles();
                 break;
+
+            case IMPORT_AUTH:
+                onImportAuth();
+                break;
+            case EXPORT_AUTH:
+                onExportAuth();
+                break;
+            case REVOKE_AUTH:
+                onRevokeAuth();
+                break;
+            case DISPLAY_AUTH_ID:
+                onDisplayAuthID();
+                break;
+
             case SETTINGS:
                 startSettings();
                 return true;
@@ -462,6 +457,82 @@ public class SalmonActivity extends AppCompatActivity {
         }
         super.onOptionsItemSelected(item);
         return false;
+    }
+
+
+    public void onCreateContextMenu(ContextMenu menu, View v, ContextMenu.ContextMenuInfo menuInfo) {
+        menu.setHeaderTitle(getString(R.string.Action));
+        menu.add(0, Action.VIEW.ordinal(), 0, getString(R.string.View))
+                .setIcon(android.R.drawable.ic_menu_view);
+        menu.add(0, Action.VIEW_AS_TEXT.ordinal(), 0, getString(R.string.ViewAsText))
+                .setIcon(android.R.drawable.ic_menu_view);
+        menu.add(0, Action.VIEW_EXTERNAL.ordinal(), 0, getString(R.string.ViewExternal))
+                .setIcon(android.R.drawable.ic_menu_view);
+        menu.add(0, Action.EDIT.ordinal(), 0, getString(R.string.EditExternal))
+                .setIcon(android.R.drawable.ic_menu_send);
+        menu.add(0, Action.SHARE.ordinal(), 0, getString(R.string.ShareExternal))
+                .setIcon(android.R.drawable.ic_menu_send);
+
+        menu.add(1, Action.COPY.ordinal(), 0, getString(R.string.Copy))
+                .setIcon(android.R.drawable.ic_menu_delete);
+        menu.add(1, Action.CUT.ordinal(), 0, getString(R.string.Cut))
+                .setIcon(android.R.drawable.ic_menu_delete);
+        menu.add(1, Action.DELETE.ordinal(), 0, getString(R.string.Delete))
+                .setIcon(android.R.drawable.ic_menu_delete);
+        menu.add(1, Action.RENAME.ordinal(), 0, getString(R.string.Rename))
+                .setIcon(android.R.drawable.ic_menu_edit);
+        menu.add(1, Action.EXPORT.ordinal(), 0, getString(R.string.Export))
+                .setIcon(android.R.drawable.btn_minus);
+
+        menu.add(2, Action.PROPERTIES.ordinal(), 0, getString(R.string.Properties))
+                .setIcon(android.R.drawable.ic_dialog_info);
+    }
+
+    public boolean onContextItemSelected(MenuItem item) {
+        int position = adapter.getPosition();
+        SalmonFile ifile = fileItemList.get(position);
+        switch (Action.values()[item.getItemId()]) {
+            case VIEW:
+                openFile(position);
+                break;
+            case VIEW_AS_TEXT:
+                startTextViewer(position);
+                break;
+            case VIEW_EXTERNAL:
+                openWith(ifile, Action.VIEW_EXTERNAL.ordinal());
+                break;
+            case EDIT:
+                openWith(ifile, Action.EDIT.ordinal());
+                break;
+            case SHARE:
+                openWith(ifile, Action.SHARE.ordinal());
+                break;
+            case EXPORT:
+                exportFile(ifile, position);
+                break;
+            case COPY:
+                mode = Mode.Copy;
+                copyFiles = new SalmonFile[]{ifile};
+                showTaskRunning(true, false);
+                showTaskMessage(copyFiles.length + " " + getResources().getString(R.string.ItemsSelectedForCopy));
+                break;
+            case CUT:
+                mode = Mode.Move;
+                copyFiles = new SalmonFile[]{ifile};
+                showTaskRunning(true, false);
+                showTaskMessage(copyFiles.length + " " + getResources().getString(R.string.ItemsSelectedForMove));
+                break;
+            case DELETE:
+                deleteFile(ifile, position);
+                break;
+            case RENAME:
+                renameFile(ifile, position);
+                break;
+            case PROPERTIES:
+                showProperties(ifile);
+                break;
+        }
+        return true;
     }
 
     private void pasteSelected() {
@@ -505,67 +576,27 @@ public class SalmonActivity extends AppCompatActivity {
         this.sortType = sortType;
         switch (sortType) {
             case Default:
-                Collections.sort(fileItemList, defaultComparator);
+                Collections.sort(fileItemList, Comparators.defaultComparator);
                 break;
             case Name:
-                Collections.sort(fileItemList, filenameComparator);
+                Collections.sort(fileItemList, Comparators.filenameComparator);
                 break;
             case Size:
-                Collections.sort(fileItemList, sizeComparator);
+                Collections.sort(fileItemList, Comparators.sizeComparator);
                 break;
             case Type:
-                Collections.sort(fileItemList, typeComparator);
+                Collections.sort(fileItemList, Comparators.typeComparator);
                 break;
             case Date:
-                Collections.sort(fileItemList, dateComparator);
+                Collections.sort(fileItemList, Comparators.dateComparator);
                 break;
         }
-    }
-
-    private String tryGetBasename(SalmonFile salmonFile) {
-        try {
-            return salmonFile.getBaseName();
-        } catch (Exception ex) {
-            ex.printStackTrace();
-        }
-        return "";
-    }
-
-    private String tryGetType(SalmonFile salmonFile) {
-        try {
-            if (salmonFile.isDirectory())
-                return salmonFile.getBaseName();
-            return SalmonDriveManager.getDrive().getExtensionFromFileName(salmonFile.getBaseName()).toLowerCase();
-        } catch (Exception ex) {
-            ex.printStackTrace();
-        }
-        return "";
-    }
-
-    private long tryGetSize(SalmonFile salmonFile) {
-        try {
-            if (salmonFile.isDirectory())
-                return salmonFile.listFiles().length;
-            return salmonFile.getSize();
-        } catch (Exception ex) {
-            ex.printStackTrace();
-        }
-        return 0;
-    }
-
-    private long tryGetDate(SalmonFile salmonFile) {
-        try {
-            return salmonFile.getLastDateTimeModified();
-        } catch (Exception ex) {
-            ex.printStackTrace();
-        }
-        return 0;
     }
 
     private void about() {
         ActivityCommon.promptDialog(this, getString(R.string.About),
                 getString(R.string.app_name) + " v" + SalmonApplication.getVersion() + "\n"
-                + getString(R.string.AboutText),
+                        + getString(R.string.AboutText),
                 getString(R.string.GetSourceCode), (DialogInterface dialog, int which) ->
                 {
                     Intent intent = new Intent(Intent.ACTION_VIEW, android.net.Uri.parse(getString(R.string.SourceCodeURL)));
@@ -575,8 +606,7 @@ public class SalmonActivity extends AppCompatActivity {
     }
 
     private void promptImportFiles() {
-        ((AndroidDrive) SalmonDriveManager.getDrive()).pickFiles(this, getString(R.string.SelectFilesToImport), false,
-                SettingsActivity.getVaultLocation(this));
+        ActivityCommon.openFilesystem(this, false, true, null, REQUEST_IMPORT_FILES);
     }
 
     private void promptNewFolder() {
@@ -590,7 +620,6 @@ public class SalmonActivity extends AppCompatActivity {
                         Toast.makeText(SalmonActivity.this,
                                 getString(R.string.CouldNotCreateFolder) + " "
                                         + exception.getMessage(), Toast.LENGTH_LONG).show();
-                        refresh();
                     }
                 }
         );
@@ -632,14 +661,13 @@ public class SalmonActivity extends AppCompatActivity {
         {
             showTaskRunning(true);
             try {
-                fileCommander.doDeleteFiles((file) -> {
+                fileCommander.deleteFiles(files, (file) -> {
                     runOnUiThread(() -> {
                         fileItemList.remove(file);
                         sortFiles(sortType);
                         adapter.notifyDataSetChanged();
                     });
-                    return null;
-                }, files);
+                });
             } catch (Exception e) {
                 e.printStackTrace();
             }
@@ -657,14 +685,13 @@ public class SalmonActivity extends AppCompatActivity {
         {
             showTaskRunning(true);
             try {
-                fileCommander.doCopyFiles(files, dir, move, (fileInfo) -> {
+                fileCommander.copyFiles(files, dir, move, (fileInfo) -> {
                     runOnUiThread(() -> {
                         fileProgress.setProgress(fileInfo.fileProgress);
                         filesProgress.setProgress((int) (fileInfo.processedFiles * 100F / fileInfo.totalFiles));
                         String action = move ? " Moving: " : " Copying: ";
                         showTaskMessage((fileInfo.processedFiles + 1) + "/" + fileInfo.totalFiles + action + fileInfo.filename);
                     });
-                    return null;
                 });
             } catch (Exception e) {
                 e.printStackTrace();
@@ -687,71 +714,7 @@ public class SalmonActivity extends AppCompatActivity {
         exportFiles(adapter.getSelectedFiles().toArray(new SalmonFile[0]), (files) ->
         {
             refresh();
-            return null;
         });
-    }
-
-    public void onCreateContextMenu(ContextMenu menu, View v, ContextMenu.ContextMenuInfo menuInfo) {
-        menu.setHeaderTitle(getString(R.string.Action));
-        menu.add(0, Action.VIEW.ordinal(), 0, getString(R.string.ViewExternal))
-                .setIcon(android.R.drawable.ic_menu_view);
-        menu.add(0, Action.EDIT.ordinal(), 0, getString(R.string.EditExternal))
-                .setIcon(android.R.drawable.ic_menu_send);
-        menu.add(0, Action.SHARE.ordinal(), 0, getString(R.string.ShareExternal))
-                .setIcon(android.R.drawable.ic_menu_send);
-        menu.add(0, Action.EXPORT.ordinal(), 0, getString(R.string.Export))
-                .setIcon(android.R.drawable.btn_minus);
-        menu.add(0, Action.COPY.ordinal(), 0, getString(R.string.Copy))
-                .setIcon(android.R.drawable.ic_menu_delete);
-        menu.add(0, Action.MOVE.ordinal(), 0, getString(R.string.Move))
-                .setIcon(android.R.drawable.ic_menu_delete);
-        menu.add(0, Action.DELETE.ordinal(), 0, getString(R.string.Delete))
-                .setIcon(android.R.drawable.ic_menu_delete);
-        menu.add(0, Action.RENAME.ordinal(), 0, getString(R.string.Rename))
-                .setIcon(android.R.drawable.ic_menu_edit);
-        menu.add(0, Action.PROPERTIES.ordinal(), 0, getString(R.string.Properties))
-                .setIcon(android.R.drawable.ic_dialog_info);
-    }
-
-    public boolean onContextItemSelected(MenuItem item) {
-        int position = adapter.getPosition();
-        SalmonFile ifile = fileItemList.get(position);
-        switch (Action.values()[item.getItemId()]) {
-            case VIEW:
-                openWith(ifile, Action.VIEW.ordinal());
-                break;
-            case EDIT:
-                openWith(ifile, Action.EDIT.ordinal());
-                break;
-            case SHARE:
-                openWith(ifile, Action.SHARE.ordinal());
-                break;
-            case EXPORT:
-                exportFile(ifile, position);
-                break;
-            case COPY:
-                mode = Mode.Copy;
-                copyFiles = new SalmonFile[]{ifile};
-                showTaskRunning(true, false);
-                showTaskMessage(copyFiles.length + " " + getResources().getString(R.string.ItemsSelectedForCopy));
-                break;
-            case MOVE:
-                mode = Mode.Move;
-                copyFiles = new SalmonFile[]{ifile};
-                showTaskRunning(true, false);
-                showTaskMessage(copyFiles.length + " " + getResources().getString(R.string.ItemsSelectedForMove));
-                break;
-            case DELETE:
-                deleteFile(ifile, position);
-                break;
-            case RENAME:
-                renameFile(ifile, position);
-                break;
-            case PROPERTIES:
-                showProperties(ifile);
-                break;
-        }
-        return true;
     }
 
     private void showProperties(SalmonFile ifile) {
@@ -791,6 +754,10 @@ public class SalmonActivity extends AppCompatActivity {
                                 ifile.rename(newFilename);
                             } catch (Exception exception) {
                                 exception.printStackTrace();
+								runOnUiThread(() ->
+                    			{
+									Toast toast = Toast.makeText(this, "Could not rename file: " + exception.getMessage(), Toast.LENGTH_LONG);
+								});
                             }
                             adapter.notifyItemChanged(position);
                         });
@@ -813,7 +780,6 @@ public class SalmonActivity extends AppCompatActivity {
                 fileItemList.remove(ifile);
                 adapter.notifyItemRemoved(position);
             });
-            return null;
         });
     }
 
@@ -855,7 +821,7 @@ public class SalmonActivity extends AppCompatActivity {
         Intent intent;
         // if we just share (final) we can show the android chooser activity
         // since we don't have to grant the app write permissions
-        if (action == Action.VIEW.ordinal()) {
+        if (action == Action.VIEW_EXTERNAL.ordinal()) {
             intent = builder.createChooserIntent();
             intent.setAction(Intent.ACTION_VIEW);
             intent.setData(uri);
@@ -890,7 +856,6 @@ public class SalmonActivity extends AppCompatActivity {
                         (AndroidSharedFileObserver fileObserver) ->
                         {
                             reimportSharedFile(uri, fileObserver);
-                            return null;
                         });
             });
         }
@@ -939,37 +904,71 @@ public class SalmonActivity extends AppCompatActivity {
                 Toast.makeText(this, getString(R.string.FileSavedInSalmonVault), Toast.LENGTH_LONG).show();
             });
             done.release(1);
-            return null;
         });
     }
 
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
-        if (requestCode == AndroidDrive.REQUEST_SDCARD_CODE_IMPORT_FILE) {
-            if (data == null)
-                return;
-            if (rootDir == null || !SalmonDriveManager.getDrive().isAuthenticated())
-                return;
+        if (data == null)
+            return;
+        Uri uri = data.getData();
+
+        if (requestCode == REQUEST_IMPORT_FILES) {
+            IRealFile[] filesToImport;
             try {
-                IRealFile[] filesToImport = AndroidDrive.getFilesFromIntent(this, data);
-                importFiles(filesToImport, currDir, SettingsActivity.getDeleteAfterImport(this), (SalmonFile[] importedFiles) ->
+                filesToImport = ActivityCommon.getFilesFromIntent(this, data);
+                importFiles(filesToImport, currDir, false, (SalmonFile[] importedFiles) ->
                 {
-                    runOnUiThread(this::refresh);
-                    return null;
+                    runOnUiThread(() -> refresh());
                 });
             } catch (Exception e) {
                 e.printStackTrace();
-                Toast.makeText(this, getString(R.string.CouldNotImportFiles), Toast.LENGTH_LONG).show();
+                Toast.makeText(this, getResources().getString(R.string.CouldNotImportFiles), Toast.LENGTH_LONG).show();
             }
-        } else if (requestCode == AndroidDrive.REQUEST_SDCARD_VAULT_FOLDER) {
-            if (data != null) {
-                boolean res = ActivityCommon.setVaultFolder(this, data);
-                if (!res) {
-                    promptSelectRoot();
-                    return;
-                }
+        } else if (requestCode == REQUEST_OPEN_VAULT_DIR) {
+            try {
+                ActivityCommon.setUriPermissions(this, data, uri);
+                SettingsActivity.setVaultLocation(this, uri.toString());
+                ActivityCommon.OpenVault(this, uri.toString());
                 clear();
                 setupRootDir();
+            } catch (Exception e) {
+                Toast.makeText(this, "Could not open vault: " + e.getMessage(), Toast.LENGTH_LONG).show();
+            }
+
+        } else if (requestCode == REQUEST_CREATE_VAULT_DIR) {
+            ActivityCommon.promptSetPassword(this, (String pass) ->
+            {
+                try {
+                    ActivityCommon.CreateVault(this, uri.toString(), pass);
+                    Toast.makeText(this, "Vault created", Toast.LENGTH_LONG).show();
+                    rootDir = SalmonDriveManager.getDrive().getVirtualRoot();
+                    currDir = rootDir;
+                    refresh();
+                } catch (Exception e) {
+                    e.printStackTrace();
+                    Toast.makeText(this, "Could not create vault: " + e.getMessage(), Toast.LENGTH_LONG).show();
+                }
+            });
+
+        } else if (requestCode == REQUEST_IMPORT_AUTH_FILE) {
+            try {
+                SalmonDriveManager.importAuthFile(uri.toString());
+                Toast.makeText(this, "Device is now Authorized", Toast.LENGTH_LONG).show();
+            } catch (Exception ex) {
+                ex.printStackTrace();
+                Toast.makeText(this, "Could Not Import Auth: " + ex.getMessage(), Toast.LENGTH_LONG).show();
+            }
+
+        } else if (requestCode == REQUEST_EXPORT_AUTH_FILE) {
+            try {
+                DocumentFile dir = DocumentFile.fromTreeUri(this, uri);
+                String filename = SalmonDriveManager.getAppDriveConfigFilename();
+                SalmonDriveManager.exportAuthFile(exportAuthID, dir.getUri().toString(), filename);
+                Toast.makeText(this, "Auth File Exported", Toast.LENGTH_LONG).show();
+            } catch (Exception ex) {
+                ex.printStackTrace();
+                Toast.makeText(this, "Could Not Export Auth: " + ex.getMessage(), Toast.LENGTH_LONG).show();
             }
         }
     }
@@ -980,7 +979,7 @@ public class SalmonActivity extends AppCompatActivity {
         currDir = null;
         runOnUiThread(() -> {
             fileItemList.clear();
-            adapter.resetCache(gridList);
+            adapter.resetCache(listView);
             adapter.notifyDataSetChanged();
         });
     }
@@ -996,26 +995,11 @@ public class SalmonActivity extends AppCompatActivity {
                     e.printStackTrace();
                 }
                 refresh();
-                return null;
-            });
-        } else {
-            ActivityCommon.promptSetPassword(this, (String pass) ->
-            {
-                try {
-                    rootDir = SalmonDriveManager.getDrive().getVirtualRoot();
-                    currDir = rootDir;
-                } catch (SalmonAuthException e) {
-                    e.printStackTrace();
-                }
-                refresh();
-                if (fileItemList.size() == 0)
-                    promptImportFiles();
-                return null;
             });
         }
     }
 
-    protected boolean selected(int position) throws Exception {
+    protected boolean openFile(int position) {
         SalmonFile selectedFile = fileItemList.get(position);
         if (selectedFile.isDirectory()) {
             executor.submit(() -> {
@@ -1027,22 +1011,26 @@ public class SalmonActivity extends AppCompatActivity {
             });
             return true;
         }
-        String filename = selectedFile.getBaseName();
-
-
-        if (FileUtils.isVideo(filename)) {
-            startMediaPlayer(position, MediaType.VIDEO);
-            return true;
-        } else if (FileUtils.isAudio(filename)) {
-            startMediaPlayer(position, MediaType.AUDIO);
-            return true;
-        } else if (FileUtils.isImage(filename)) {
-            startWebViewer(position);
-            return true;
-        } else if (FileUtils.isText(filename)) {
-            startWebViewer(position);
-            return true;
+        try {
+            String filename = selectedFile.getBaseName();
+            if (FileUtils.isVideo(filename)) {
+                startMediaPlayer(position, MediaType.VIDEO);
+                return true;
+            } else if (FileUtils.isAudio(filename)) {
+                startMediaPlayer(position, MediaType.AUDIO);
+                return true;
+            } else if (FileUtils.isImage(filename)) {
+                startWebViewer(position);
+                return true;
+            } else if (FileUtils.isText(filename)) {
+                startTextViewer(position);
+                return true;
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+            Toast.makeText(this, "Could not open: " + e.getMessage(), Toast.LENGTH_LONG).show();
         }
+
         return false;
     }
 
@@ -1052,11 +1040,6 @@ public class SalmonActivity extends AppCompatActivity {
         } catch (Exception ex) {
             ex.printStackTrace();
         }
-    }
-
-    private void promptSelectRoot() {
-        ((AndroidDrive) SalmonDriveManager.getDrive()).pickFiles(this, getString(R.string.SelectFolderForFiles), true,
-                SettingsActivity.getVaultLocation(this));
     }
 
     public void startMediaPlayer(int position, MediaType type) {
@@ -1085,40 +1068,63 @@ public class SalmonActivity extends AppCompatActivity {
         startActivity(intent);
     }
 
-    private void startWebViewer(int position) {
-        ArrayList<SalmonFile> salmonFiles = new ArrayList<>();
-        int pos = 0;
-        for (int i = 0; i < fileItemList.size(); i++) {
-            SalmonFile selectedFile = fileItemList.get(i);
-            String filename;
-            try {
-                filename = selectedFile.getBaseName();
-                if (FileUtils.isImage(filename) || FileUtils.isText(filename)) {
-                    salmonFiles.add(selectedFile);
-                }
-                if (i == position)
-                    pos = salmonFiles.size() - 1;
-            } catch (Exception e) {
-                e.printStackTrace();
+    private void startTextViewer(int position) {
+        try {
+            if (fileItemList.get(position).getSize() > 1 * 1024 * 1024) {
+                Toast.makeText(this, "File too large", Toast.LENGTH_LONG).show();
+                return;
             }
+            startWebViewer(position);
+        } catch (Exception e) {
+            e.printStackTrace();
         }
+    }
 
-        Intent intent = new Intent(this, WebViewerActivity.class);
-        WebViewerActivity.setContentFiles(pos, salmonFiles.toArray(new SalmonFile[0]));
-        intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_NEW_TASK);
-        startActivity(intent);
+    private void startWebViewer(int position) {
+        try {
+            ArrayList<SalmonFile> salmonFiles = new ArrayList<>();
+            SalmonFile file = fileItemList.get(position);
+            String filename = file.getBaseName();
+
+            int pos = 0;
+            for (int i = 0; i < fileItemList.size(); i++) {
+                try {
+                    SalmonFile listFile = fileItemList.get(i);
+                    String listFilename = listFile.getBaseName();
+                    if (i != position &&
+                            (FileUtils.isImage(filename) && FileUtils.isImage(listFilename))
+                            || (FileUtils.isText(filename) && FileUtils.isText(listFilename))) {
+                        salmonFiles.add(listFile);
+                    }
+                    if (i == position) {
+                        salmonFiles.add(listFile);
+                        pos = salmonFiles.size() - 1;
+                    }
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
+            }
+            Intent intent = new Intent(this, WebViewerActivity.class);
+            WebViewerActivity.setContentFiles(pos, salmonFiles.toArray(new SalmonFile[0]));
+            intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_NEW_TASK);
+            startActivity(intent);
+        } catch (Exception e) {
+            e.printStackTrace();
+            Toast.makeText(this, "Could not open viewer: " + e.getMessage(), Toast.LENGTH_LONG).show();
+        }
     }
 
     protected void onDestroy() {
         logout();
         Utils.removeFromRecents(this, true);
+        adapter.stop();
         super.onDestroy();
     }
 
     @Override
     public void onBackPressed() {
         SalmonFile parent = currDir.getParent();
-        if (adapter.getMode() == FileGridAdapter.Mode.MULTI_SELECT) {
+        if (adapter.getMode() == FileAdapter.Mode.MULTI_SELECT) {
             adapter.setMultiSelect(false);
         } else if (mode == Mode.Search && fileCommander.isFileSearcherRunning()) {
             fileCommander.stopFileSearch();
@@ -1147,28 +1153,30 @@ public class SalmonActivity extends AppCompatActivity {
         }
     }
 
-    enum Mode {
-        Browse, Search, Copy, Move
-    }
-
-    private enum SortType {
-        Default, Name, Size, Type, Date
-    }
-
-    public void exportFiles(SalmonFile[] items, final Function<IRealFile[], Void> OnFinished) {
+    public void exportFiles(SalmonFile[] items, final Consumer<IRealFile[]> OnFinished) {
 
         executor.submit(() ->
         {
+            for (SalmonFile file : items) {
+                if (file.isDirectory()) {
+                    runOnUiThread(() -> {
+                        Toast.makeText(this, "Cannot Export Directories select files only", Toast.LENGTH_LONG).show();
+                    });
+                    return;
+                }
+            }
             showTaskRunning(true);
             boolean success = false;
             try {
-                success = fileCommander.doExportFiles(items,
+                success = fileCommander.exportFiles(items,
                         (progress) -> {
                             runOnUiThread(() -> filesProgress.setProgress(progress));
-                            return null;
                         }, OnFinished);
             } catch (Exception e) {
                 e.printStackTrace();
+                runOnUiThread(() -> {
+                    Toast.makeText(this, "Could not export files: " + e.getMessage(), Toast.LENGTH_LONG).show();
+                });
             }
             if (fileCommander.isStopped())
                 showTaskMessage(getString(R.string.ExportStopped));
@@ -1178,7 +1186,8 @@ public class SalmonActivity extends AppCompatActivity {
             runOnUiThread(() -> {
                 fileProgress.setProgress(100);
                 filesProgress.setProgress(100);
-                ActivityCommon.promptDialog(this, getString(R.string.Export), getString(R.string.FilesExportedTo) + SalmonDriveManager.getDrive().getExportDir().getAbsolutePath(),
+                ActivityCommon.promptDialog(this, getString(R.string.Export), getString(R.string.FilesExportedTo)
+                                + ": " + SalmonDriveManager.getDrive().getExportDir().getAbsolutePath(),
                         getString(android.R.string.ok), null, null, null);
             });
             new Handler(Looper.getMainLooper()).postDelayed(() ->
@@ -1188,20 +1197,22 @@ public class SalmonActivity extends AppCompatActivity {
     }
 
     public void importFiles(IRealFile[] fileNames, SalmonFile importDir, boolean deleteSource,
-                            Function<SalmonFile[], Void> OnFinished) {
+                            Consumer<SalmonFile[]> OnFinished) {
 
         executor.submit(() ->
         {
             showTaskRunning(true);
             boolean success = false;
             try {
-                success = fileCommander.doImportFiles(fileNames, importDir, deleteSource,
+                success = fileCommander.importFiles(fileNames, importDir, deleteSource,
                         (progress) -> {
                             runOnUiThread(() -> filesProgress.setProgress(progress));
-                            return null;
                         }, OnFinished);
             } catch (Exception e) {
                 e.printStackTrace();
+                runOnUiThread(() -> {
+                    Toast.makeText(this, "Could not import files: " + e.getMessage(), Toast.LENGTH_LONG).show();
+                });
             }
             if (fileCommander.isStopped())
                 showTaskMessage(getString(R.string.ImportStopped));
@@ -1213,10 +1224,9 @@ public class SalmonActivity extends AppCompatActivity {
                 filesProgress.setProgress(100);
             });
             new Handler(Looper.getMainLooper()).postDelayed(() ->
-                    showTaskRunning(false), 1000);
+                    showTaskRunning(false), 2000);
         });
     }
-
 
     //TODO: refactor to a class and update ui frequently with progress
     private void search(String value, boolean any) {
@@ -1250,8 +1260,127 @@ public class SalmonActivity extends AppCompatActivity {
                 if (!fileCommander.isFileSearcherStopped())
                     pathText.setText(getString(R.string.Search) + ": " + value);
                 else
-                    pathText.setText(getString(R.string.Search) + " " + getString(R.string.Stopped) + ": " + value);
+                    setPath(getString(R.string.Search) + " " + getString(R.string.Stopped) + ": " + value);
             });
         });
+    }
+
+
+    public void onImportAuth() {
+        if (SalmonDriveManager.getDrive() == null) {
+            Toast.makeText(this, "No Drive Loaded", Toast.LENGTH_LONG).show();
+            return;
+        }
+        // TODO: filter by extension
+        String filename = SalmonDriveManager.getAppDriveConfigFilename();
+        String ext = SalmonDriveManager.getDrive().getExtensionFromFileName(filename);
+        ActivityCommon.openFilesystem(this, false, false, null, REQUEST_IMPORT_AUTH_FILE);
+    }
+
+    public void onExportAuth() {
+        if (SalmonDriveManager.getDrive() == null) {
+            Toast.makeText(this, "No Drive Loaded", Toast.LENGTH_LONG).show();
+            return;
+        }
+
+        ActivityCommon.promptEdit(this, "Export Auth File",
+                "Enter the Auth ID for the device you want to authorize", "", null,
+                (targetAuthID, option) ->
+                {
+                    exportAuthID = targetAuthID;
+                    String filename = SalmonDriveManager.getAppDriveConfigFilename();
+                    String ext = SalmonDriveManager.getDrive().getExtensionFromFileName(filename);
+                    ActivityCommon.openFilesystem(this, true, false, null, REQUEST_EXPORT_AUTH_FILE);
+                });
+    }
+
+    public void onRevokeAuth() {
+        if (SalmonDriveManager.getDrive() == null) {
+            Toast.makeText(this, "No Drive Loaded", Toast.LENGTH_LONG).show();
+            return;
+        }
+        ActivityCommon.promptDialog(this, "Revoke Auth", "Revoke Auth for this drive? You will still be able to decrypt and view your files but you won't be able to import any more files in this drive.",
+                "Ok", (d, e) ->
+                {
+                    try {
+                        SalmonDriveManager.revokeSequences();
+                        Toast.makeText(this, "Revoke Auth Successful", Toast.LENGTH_LONG).show();
+                    } catch (Exception ex) {
+                        ex.printStackTrace();
+                        Toast.makeText(this, "Could Not Revoke Auth: " + ex.getMessage(), Toast.LENGTH_LONG).show();
+                    }
+                }, "Cancel", null);
+    }
+
+
+    public void onDisplayAuthID() {
+        if (SalmonDriveManager.getDrive() == null) {
+            Toast.makeText(this, "No Drive Loaded", Toast.LENGTH_LONG).show();
+            return;
+        }
+        String driveID;
+        try {
+            driveID = SalmonDriveManager.getAuthID();
+            ActivityCommon.promptEdit(this, "Salmon Auth ID", "", driveID, null, null);
+        } catch (Exception e) {
+            e.printStackTrace();
+            Toast.makeText(this, getString(R.string.Error) + ": "
+                    + getString(R.string.CouldNotGetAuthID) + ": "
+                    + e.getMessage(), Toast.LENGTH_LONG).show();
+        }
+    }
+
+
+    public void setPath(String value) {
+        if (value.startsWith("/"))
+            value = value.substring(1);
+        pathText.setText("salmonfs://" + value);
+    }
+
+    public SalmonFile[] getSalmonFiles() {
+        return salmonFiles;
+    }
+
+    private void onOpenVault() {
+        ActivityCommon.openFilesystem(this, true, false, null, REQUEST_OPEN_VAULT_DIR);
+    }
+
+    public void onCreateVault() {
+        ActivityCommon.openFilesystem(this, true, false, null, REQUEST_CREATE_VAULT_DIR);
+    }
+
+    public void onCloseVault() {
+        logout();
+        rootDir = null;
+        currDir = null;
+        runOnUiThread(() ->
+        {
+            pathText.setText("");
+            fileItemList.clear();
+            adapter.notifyDataSetChanged();
+        });
+    }
+
+    public enum MediaType {
+        AUDIO, VIDEO
+    }
+
+    public enum Action {
+        BACK, REFRESH, IMPORT, VIEW, VIEW_AS_TEXT, VIEW_EXTERNAL, EDIT, SHARE, SAVE,
+        EXPORT, DELETE, RENAME, UP, DOWN,
+        MULTI_SELECT, SINGLE_SELECT, SELECT_ALL, UNSELECT_ALL,
+        COPY, CUT, PASTE,
+        NEW_FOLDER, SEARCH, STOP, PLAY, SORT,
+        OPEN_VAULT, CREATE_VAULT, CLOSE_VAULT, CHANGE_PASSWORD,
+        IMPORT_AUTH, EXPORT_AUTH, REVOKE_AUTH, DISPLAY_AUTH_ID,
+        PROPERTIES, SETTINGS, ABOUT, EXIT
+    }
+
+    enum Mode {
+        Browse, Search, Copy, Move
+    }
+
+    private enum SortType {
+        Default, Name, Size, Type, Date
     }
 }

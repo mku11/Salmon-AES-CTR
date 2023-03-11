@@ -43,11 +43,12 @@ import android.widget.Toast;
 import androidx.appcompat.app.AppCompatActivity;
 
 import com.mku.android.salmonvault.R;
-import com.mku11.salmon.utils.FileUtils;
+import com.mku11.salmon.streams.InputStreamWrapper;
+
 import com.mku11.salmon.SalmonIntegrity;
+import com.mku11.salmonfs.FileUtils;
 import com.mku11.salmonfs.SalmonDriveManager;
 import com.mku11.salmonfs.SalmonFile;
-import com.mku11.salmon.streams.SalmonInputStream;
 import com.mku11.salmon.streams.SalmonStream;
 
 import org.jetbrains.annotations.NotNull;
@@ -109,7 +110,7 @@ public class WebViewerActivity extends AppCompatActivity {
 
             // in order for the webview not to crash we suppress Exceptions
             encStream.setFailSilently(true);
-            SalmonInputStream inputStream = new SalmonInputStream(encStream);
+            InputStreamWrapper inputStream = new InputStreamWrapper(encStream);
 
             // we inject our SalmonStream into the webview client
             stream = new BufferedInputStream(inputStream, ENC_BUFFER_SIZE);

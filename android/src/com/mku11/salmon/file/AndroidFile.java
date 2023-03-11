@@ -24,6 +24,7 @@ SOFTWARE.
 */
 
 import android.content.Context;
+import android.net.Uri;
 import android.os.Build;
 import android.os.ParcelFileDescriptor;
 import android.provider.DocumentsContract;
@@ -41,9 +42,9 @@ import java.io.FileNotFoundException;
  * This class is used by the AndroidDrive implementation so you can use SalmonFile wrapper transparently
  */
 public class AndroidFile implements IRealFile {
+    private final Context context;
     private DocumentFile documentFile;
     private String basename = null;
-    private final Context context;
 
     /**
      * Construct an AndroidFile wrapper from an Android DocumentFile.
@@ -66,7 +67,7 @@ public class AndroidFile implements IRealFile {
     }
 
     public IRealFile createFile(String filename) {
-        DocumentFile doc = documentFile.createFile("", filename);
+        DocumentFile doc = documentFile.createFile("*/*", filename);
         // for some reason android storage access framework even though it supports auto rename
         // somehow it includes the extension. to protect that we temporarily use another extension
         doc.renameTo(filename + ".dat");
@@ -84,7 +85,13 @@ public class AndroidFile implements IRealFile {
     }
 
     public String getAbsolutePath() {
-        return documentFile.getUri().getPath();
+        try {
+            String path = Uri.decode(documentFile.getUri().toString());
+            int index = path.lastIndexOf(":");
+            return "/" + path.substring(index + 1);
+        } catch (Exception ex) {
+            return documentFile.getUri().getPath();
+        }
     }
 
     public String getBaseName() {

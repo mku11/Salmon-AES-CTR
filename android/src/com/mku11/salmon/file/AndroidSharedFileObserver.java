@@ -34,6 +34,7 @@ import com.mku11.salmonfs.SalmonFile;
 
 import java.io.File;
 import java.util.HashMap;
+import java.util.function.Consumer;
 
 /**
  * Implementation of a file observer that will detect if the file contents have changed
@@ -43,18 +44,18 @@ public class AndroidSharedFileObserver extends FileObserver {
     private static final HashMap<String, AndroidSharedFileObserver> fileObservers = new HashMap<String, AndroidSharedFileObserver>();
 
     private SalmonFile salmonFile;
-    private Function<AndroidSharedFileObserver, Void> onFileContentsChanged;
+    private Consumer<AndroidSharedFileObserver> onFileContentsChanged;
 
     @RequiresApi(api = Build.VERSION_CODES.Q)
     private AndroidSharedFileObserver(File file, SalmonFile salmonFile,
-                                      Function<AndroidSharedFileObserver, Void> onFileContentsChanged) {
+                                      Consumer<AndroidSharedFileObserver> onFileContentsChanged) {
         super(file, FileObserver.CLOSE_WRITE);
         this.salmonFile = salmonFile;
         this.onFileContentsChanged = onFileContentsChanged;
     }
 
     private AndroidSharedFileObserver(String filePath, SalmonFile salmonFile,
-                                      Function<AndroidSharedFileObserver, Void> onFileContentsChanged) {
+                                      Consumer<AndroidSharedFileObserver> onFileContentsChanged) {
         super(filePath, FileObserver.CLOSE_WRITE);
         this.salmonFile = salmonFile;
         this.onFileContentsChanged = onFileContentsChanged;
@@ -68,13 +69,13 @@ public class AndroidSharedFileObserver extends FileObserver {
      * @param onFileContentsChanged Action notifier when file contents change
      */
     public static AndroidSharedFileObserver createFileObserver(File cacheFile, SalmonFile salmonFile,
-                                                               Function<AndroidSharedFileObserver, Void> onFileContentsChanged) {
+                                                               Consumer<AndroidSharedFileObserver> onFileContentsChanged) {
         AndroidSharedFileObserver fileObserver;
         if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.Q) {
             fileObserver = new AndroidSharedFileObserver(cacheFile,
                     salmonFile, onFileContentsChanged);
         } else {
-            fileObserver = new AndroidSharedFileObserver(cacheFile.getAbsolutePath(),
+            fileObserver = new AndroidSharedFileObserver(cacheFile.getPath(),
                     salmonFile, onFileContentsChanged);
         }
         fileObservers.put(cacheFile.getPath(), fileObserver);
@@ -96,7 +97,7 @@ public class AndroidSharedFileObserver extends FileObserver {
     @Override
     public void onEvent(int e, @Nullable String path) {
         if (onFileContentsChanged != null)
-            onFileContentsChanged.apply(this);
+            onFileContentsChanged.accept(this);
     }
 
     /**

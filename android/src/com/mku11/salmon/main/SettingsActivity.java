@@ -26,10 +26,12 @@ SOFTWARE.
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.net.Uri;
 import android.os.Bundle;
 import android.preference.Preference;
 import android.preference.PreferenceActivity;
 import android.preference.PreferenceManager;
+import android.widget.Toast;
 
 import com.mku.android.salmonvault.R;
 import com.mku11.salmon.file.AndroidDrive;
@@ -114,7 +116,7 @@ public class SettingsActivity extends PreferenceActivity {
         getPreferenceManager().findPreference("vaultLocation").setOnPreferenceClickListener(new Preference.OnPreferenceClickListener() {
             @Override
             public boolean onPreferenceClick(Preference preference) {
-                ((AndroidDrive) SalmonDriveManager.getDrive()).pickFiles(SettingsActivity.this, "Select a Folder for your Encrypted files", true, null);
+                ActivityCommon.openFilesystem(SettingsActivity.this, true, false, null, SalmonActivity.REQUEST_OPEN_VAULT_DIR);
                 return true;
             }
         });
@@ -122,7 +124,15 @@ public class SettingsActivity extends PreferenceActivity {
         getPreferenceManager().findPreference("changePassword").setOnPreferenceClickListener(new Preference.OnPreferenceClickListener() {
             @Override
             public boolean onPreferenceClick(Preference preference) {
-                ActivityCommon.promptSetPassword(SettingsActivity.this, null);
+                ActivityCommon.promptSetPassword(SettingsActivity.this, (pass) -> {
+                    try {
+                        SalmonDriveManager.getDrive().setPassword(pass);
+                        Toast.makeText(SettingsActivity.this, "Password changed", Toast.LENGTH_LONG).show();
+                    } catch (Exception e) {
+                        e.printStackTrace();
+                        Toast.makeText(SettingsActivity.this, "Could not change password", Toast.LENGTH_LONG).show();
+                    }
+                });
                 return true;
             }
         });
@@ -173,15 +183,17 @@ public class SettingsActivity extends PreferenceActivity {
     }
 
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
-        if (requestCode == AndroidDrive.REQUEST_SDCARD_VAULT_FOLDER) {
-            if (data != null) {
-                Thread t = new Thread(new Runnable() {
-                    @Override
-                    public void run() {
-                        boolean res = ActivityCommon.setVaultFolder(SettingsActivity.this, data);
-                    }
-                });
-                t.start();
+        if (data == null)
+            return;
+        Uri uri = data.getData();
+        if (requestCode == SalmonActivity.REQUEST_OPEN_VAULT_DIR) {
+            try {
+                ActivityCommon.setUriPermissions(this, data, uri);
+                SettingsActivity.setVaultLocation(this, uri.toString());
+                ActivityCommon.OpenVault(this, uri.toString());
+                //TODO: notify ui
+            } catch (Exception e) {
+                Toast.makeText(this, "Could not change vault: " + e.getMessage(), Toast.LENGTH_LONG).show();
             }
         }
         super.onActivityResult(requestCode, resultCode, data);

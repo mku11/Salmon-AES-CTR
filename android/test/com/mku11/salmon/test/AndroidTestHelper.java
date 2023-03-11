@@ -75,7 +75,7 @@ public class AndroidTestHelper {
 
     public static SalmonFile login(String vaultDir, String pass) throws Exception {
         SalmonDriveManager.setVirtualDriveClass(AndroidDrive.class);
-        SalmonDriveManager.setDriveLocation(AndroidTestHelper.generateFolder(vaultDir));
+        SalmonDriveManager.openDrive(AndroidTestHelper.generateFolder(vaultDir));
 
         if (!SalmonDriveManager.getDrive().hasConfig()) {
             SalmonDriveManager.getDrive().setPassword(pass);
@@ -121,7 +121,7 @@ public class AndroidTestHelper {
         onView(isRoot()).perform(sleep(1000));
         activity.openOptionsMenu();
         onView(ViewMatchers.withText("Multi Select")).perform(click());
-        onView(withId(R.id.gridList))
+        onView(withId(R.id.list))
                 .perform(RecyclerViewActions.actionOnItemAtPosition(index, click()));
         activity.openOptionsMenu();
         onView(isRoot()).perform(sleep(3000));
@@ -131,7 +131,7 @@ public class AndroidTestHelper {
         Assert.assertNotNull(destSalmonDir);
         int indexDest = getIndexFromAdapter(activity, destSalmonDir);
         onView(isRoot()).perform(sleep(1000));
-        onView(withId(R.id.gridList))
+        onView(withId(R.id.list))
                 .perform(RecyclerViewActions.actionOnItemAtPosition(indexDest, click()));
         activity.openOptionsMenu();
         onView(ViewMatchers.withText("Paste")).perform(click());

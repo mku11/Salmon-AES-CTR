@@ -49,12 +49,8 @@ import java.util.List;
  */
 public class AndroidDrive extends SalmonDrive {
     public static final String TAG = AndroidDrive.class.getName();
-    public static final String EXTERNAL_STORAGE_PROVIDER_AUTHORITY = "com.android.externalstorage.documents";
     private static final int ENC_BUFFER_SIZE = 512 * 1024;
     private static final int ENC_THREADS = 4;
-    public static final int REQUEST_SDCARD_CODE_IMPORT_FILE = 10000;
-    public static final int REQUEST_SDCARD_VAULT_FOLDER = 10001;
-
 
     /**
      * Instantiate a virtual Drive for android under a real directory path
@@ -63,37 +59,6 @@ public class AndroidDrive extends SalmonDrive {
      */
     public AndroidDrive(String realRoot) {
         super(realRoot);
-    }
-
-    public static void setFilePermissions(Intent data, Uri uri) {
-        int takeFlags = 0;
-        if (data != null)
-            takeFlags = (int) data.getFlags();
-        takeFlags &= (
-                (int) Intent.FLAG_GRANT_READ_URI_PERMISSION |
-                        (int) Intent.FLAG_GRANT_WRITE_URI_PERMISSION
-        );
-
-        try {
-            SalmonApplication.getInstance().getApplicationContext().grantUriPermission(SalmonApplication.getInstance().getApplicationContext().getPackageName(), uri, Intent.FLAG_GRANT_READ_URI_PERMISSION);
-            SalmonApplication.getInstance().getApplicationContext().grantUriPermission(SalmonApplication.getInstance().getApplicationContext().getPackageName(), uri, Intent.FLAG_GRANT_WRITE_URI_PERMISSION);
-            SalmonApplication.getInstance().getApplicationContext().grantUriPermission(SalmonApplication.getInstance().getApplicationContext().getPackageName(), uri, Intent.FLAG_GRANT_PERSISTABLE_URI_PERMISSION);
-        } catch (Exception ex) {
-            ex.printStackTrace();
-            Toast.makeText(SalmonApplication.getInstance().getApplicationContext(), ex.getMessage(), Toast.LENGTH_LONG).show();
-        }
-
-        try {
-            SalmonApplication.getInstance().getApplicationContext().getContentResolver().takePersistableUriPermission(uri, takeFlags);
-        } catch (Exception ex) {
-            ex.printStackTrace();
-            Toast.makeText(SalmonApplication.getInstance().getApplicationContext(), ex.getMessage(), Toast.LENGTH_LONG).show();
-        }
-    }
-
-    public static List<UriPermission> getPermissionsList() {
-        List<UriPermission> list = SalmonApplication.getInstance().getApplicationContext().getContentResolver().getPersistedUriPermissions();
-        return list;
     }
 
     // TODO: use multiple threads for performance
@@ -116,55 +81,18 @@ public class AndroidDrive extends SalmonDrive {
         return sharedDir;
     }
 
-    public static IRealFile[] getFilesFromIntent(Context context, Intent data) {
-        IRealFile[] filesToImport = null;
-
-        if (data != null) {
-            if (null != data.getClipData()) {
-                filesToImport = new IRealFile[data.getClipData().getItemCount()];
-                for (int i = 0; i < data.getClipData().getItemCount(); i++) {
-                    android.net.Uri uri = data.getClipData().getItemAt(i).getUri();
-                    AndroidDrive.setFilePermissions(data, uri);
-                    DocumentFile docFile = DocumentFile.fromSingleUri(context, uri);
-                    filesToImport[i] = new AndroidFile(docFile, context);
-                }
-            } else {
-                android.net.Uri uri = data.getData();
-                filesToImport = new IRealFile[1];
-                AndroidDrive.setFilePermissions(data, uri);
-                DocumentFile docFile = DocumentFile.fromSingleUri(context, uri);
-                filesToImport[0] = new AndroidFile(docFile, context);
-            }
-        }
-        return filesToImport;
-    }
-
     public static IRealFile getFile(DocumentFile docFile) {
         return new AndroidFile(docFile, SalmonApplication.getInstance().getApplicationContext());
     }
 
-    protected IRealFile getFile(String filepath, boolean root) {
+    public IRealFile getFile(String filepath, boolean isDirectory) {
         DocumentFile docFile;
-        if (root)
+        if (isDirectory)
             docFile = DocumentFile.fromTreeUri(SalmonApplication.getInstance().getApplicationContext(), Uri.parse(filepath));
         else
             docFile = DocumentFile.fromSingleUri(SalmonApplication.getInstance().getApplicationContext(), Uri.parse(filepath));
         AndroidFile file = new AndroidFile(docFile, SalmonApplication.getInstance().getApplicationContext());
         return file;
-    }
-
-
-    /**
-     * Prompt user to select a real directory for selecting/creating the virtual drive
-     *
-     * @param activity Activity
-     * @param body     Text to show when file/directory dialog opens
-     * @param folder   True if you want to select a folder
-     * @param lastDir  The initial directory
-     */
-    public void pickFiles(Activity activity, String body, boolean folder, String lastDir) {
-        activity.runOnUiThread(() -> ActivityCommon.promptDialog(activity, null, body, "OK",
-                (DialogInterface dialog, int which) -> promptSAFOpenDocument(activity, folder, lastDir), null, null));
     }
 
     @Override
@@ -189,43 +117,6 @@ public class AndroidDrive extends SalmonDrive {
             }
         } else {
             file.delete();
-        }
-    }
-
-    private void promptSAFOpenDocument(Activity activity, boolean folder, String lastDir) {
-        Intent intent = new Intent(folder ? Intent.ACTION_OPEN_DOCUMENT_TREE : Intent.ACTION_OPEN_DOCUMENT);
-        intent.addFlags(Intent.FLAG_GRANT_PERSISTABLE_URI_PERMISSION);
-        intent.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
-        intent.addFlags(Intent.FLAG_GRANT_WRITE_URI_PERMISSION);
-
-        if (folder && lastDir == null) {
-            try {
-                Uri uri = DocumentsContract.buildDocumentUri(EXTERNAL_STORAGE_PROVIDER_AUTHORITY, "primary:");
-                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-                    intent.putExtra(DocumentsContract.EXTRA_INITIAL_URI, uri);
-                }
-            } catch (Exception ex) {
-                ex.printStackTrace();
-            }
-        }
-        if (!folder) {
-            intent.putExtra(Intent.EXTRA_ALLOW_MULTIPLE, true);
-            intent.addCategory(Intent.CATEGORY_OPENABLE);
-            intent.setType("*/*");
-        }
-
-        String prompt = "Open File(s)";
-        if (folder)
-            prompt = "Open Directory";
-
-        intent.putExtra(DocumentsContract.EXTRA_PROMPT, prompt);
-        intent.putExtra("android.content.extra.SHOW_ADVANCED", true);
-        intent.putExtra(Intent.EXTRA_LOCAL_ONLY, true);
-        try {
-            activity.startActivityForResult(intent, folder ? REQUEST_SDCARD_VAULT_FOLDER : REQUEST_SDCARD_CODE_IMPORT_FILE);
-        } catch (Exception ex) {
-            ex.printStackTrace();
-            Toast.makeText(activity, ex.getMessage(), Toast.LENGTH_LONG).show();
         }
     }
 }

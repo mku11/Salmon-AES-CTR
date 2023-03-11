@@ -27,108 +27,41 @@ import android.app.Activity;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
-import android.content.UriPermission;
+import android.net.Uri;
 import android.os.Handler;
 import android.os.Looper;
+import android.provider.DocumentsContract;
 import android.text.InputType;
-import android.util.Log;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.CheckBox;
 import android.widget.LinearLayout;
 import android.widget.Toast;
 
-import androidx.arch.core.util.Function;
+import androidx.documentfile.provider.DocumentFile;
 
 import com.google.android.material.dialog.MaterialAlertDialogBuilder;
 import com.google.android.material.textfield.TextInputEditText;
 import com.google.android.material.textfield.TextInputLayout;
 import com.mku.android.salmonvault.R;
-import com.mku11.salmon.file.AndroidDrive;
+import com.mku11.salmon.file.AndroidFile;
 import com.mku11.salmon.file.AndroidSharedFileObserver;
+import com.mku11.salmonfs.IRealFile;
 import com.mku11.salmonfs.SalmonAuthException;
+import com.mku11.salmonfs.SalmonDrive;
 import com.mku11.salmonfs.SalmonDriveManager;
 import com.mku11.salmonfs.SalmonFile;
 
 import java.io.File;
 import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.function.BiConsumer;
+import java.util.function.Consumer;
 
 public class ActivityCommon {
+    public static final String EXTERNAL_STORAGE_PROVIDER_AUTHORITY = "com.android.externalstorage.documents";
     static final String TAG = ActivityCommon.class.getName();
 
-    public interface OnTextSubmittedListener {
-        void onTextSubmitted(String text, Boolean option);
-    }
-
-    public static boolean setVaultFolder(Activity activity, Intent data) {
-
-        android.net.Uri treeUri = data.getData();
-        if (treeUri == null) {
-            Toast.makeText(activity, "Cannot List Directory", Toast.LENGTH_LONG).show();
-            return false;
-        }
-
-        String lastDir = treeUri.toString();
-
-        if (lastDir.contains("com.android.providers.downloads")) {
-            ((AndroidDrive) SalmonDriveManager.getDrive()).pickFiles(activity, "Directory Already Used For Downloads", true,
-                    SettingsActivity.getVaultLocation(activity));
-            return false;
-        } else if (!lastDir.contains("com.android.externalstorage")) {
-            ((AndroidDrive) SalmonDriveManager.getDrive()).pickFiles(activity, "Directory Not Supported", true,
-                    SettingsActivity.getVaultLocation(activity));
-            return false;
-        }
-
-        try {
-            for (int i = 0; activity.getContentResolver().getPersistedUriPermissions().size() > 100; i++) {
-                List<UriPermission> list = AndroidDrive.getPermissionsList();
-                android.net.Uri uri = list.get(i).getUri();
-                activity.getContentResolver().releasePersistableUriPermission(uri,
-                        Intent.FLAG_GRANT_READ_URI_PERMISSION |
-                                Intent.FLAG_GRANT_WRITE_URI_PERMISSION);
-            }
-        } catch (Exception ex) {
-            String err = "Could not release previous Persistable perms: " + ex;
-            Log.e(TAG, err);
-            Toast.makeText(activity, err, Toast.LENGTH_LONG).show();
-        }
-
-        try {
-            activity.grantUriPermission(activity.getPackageName(), treeUri,
-                    Intent.FLAG_GRANT_READ_URI_PERMISSION);
-            activity.grantUriPermission(activity.getPackageName(), treeUri,
-                    Intent.FLAG_GRANT_PERSISTABLE_URI_PERMISSION);
-            activity.grantUriPermission(activity.getPackageName(), treeUri,
-                    Intent.FLAG_GRANT_WRITE_URI_PERMISSION);
-
-        } catch (Exception ex) {
-            String err = "Could not grant uri perms to Activity: " + ex;
-            Log.e(TAG, err);
-            Toast.makeText(activity, err, Toast.LENGTH_LONG).show();
-        }
-
-        try {
-            activity.getContentResolver().takePersistableUriPermission(treeUri,
-                    Intent.FLAG_GRANT_READ_URI_PERMISSION |
-                            Intent.FLAG_GRANT_WRITE_URI_PERMISSION);
-        } catch (Exception ex) {
-            String err = "Could not take Persistable perms: " + ex;
-            Log.e(TAG, err);
-            Toast.makeText(activity, err, Toast.LENGTH_LONG).show();
-        }
-        SettingsActivity.setVaultLocation(activity, treeUri.toString());
-        try {
-            SalmonDriveManager.setDriveLocation(treeUri.toString());
-            SalmonDriveManager.getDrive().setEnableIntegrityCheck(true);
-        } catch (Exception e) {
-            e.printStackTrace();
-            return false;
-        }
-        return true;
-    }
-
-    public static void promptPassword(Activity activity, Function<Void, Void> OnAuthenticationSucceded) {
+    public static void promptPassword(Activity activity, Consumer<SalmonDrive> OnAuthenticationSucceded) {
         MaterialAlertDialogBuilder builder = new MaterialAlertDialogBuilder(activity);
 
         LinearLayout layout = new LinearLayout(activity);
@@ -156,7 +89,7 @@ public class ActivityCommon {
             try {
                 SalmonDriveManager.getDrive().authenticate(typePasswd.getText().toString());
                 if (OnAuthenticationSucceded != null)
-                    OnAuthenticationSucceded.apply(null);
+                    OnAuthenticationSucceded.accept(SalmonDriveManager.getDrive());
             } catch (Exception ex) {
                 ex.printStackTrace();
                 ActivityCommon.promptPassword(activity, OnAuthenticationSucceded);
@@ -175,7 +108,7 @@ public class ActivityCommon {
             alertDialog.show();
     }
 
-    public static void promptSetPassword(Activity activity, Function<String, Void> OnPasswordChanged) {
+    public static void promptSetPassword(Activity activity, Consumer<String> OnPasswordChanged) {
         MaterialAlertDialogBuilder builder = new MaterialAlertDialogBuilder(activity);
 
         LinearLayout layout = new LinearLayout(activity);
@@ -214,24 +147,13 @@ public class ActivityCommon {
 
         builder.setPositiveButton(activity.getString(android.R.string.ok), (DialogInterface dialog, int which) ->
         {
+            
             if (!typePasswd.getText().toString().equals(retypePasswd.getText().toString()))
-                ActivityCommon.promptSetPassword(activity, OnPasswordChanged);
+                promptSetPassword(activity, OnPasswordChanged);
             else {
-                try {
-                    SalmonDriveManager.getDrive().setPassword(typePasswd.getText().toString());
-                    if (OnPasswordChanged != null)
-                        OnPasswordChanged.apply(typePasswd.getText().toString());
-                } catch (SalmonAuthException ex) {
-                    promptPassword(activity, (a) ->
-                    {
-                        ActivityCommon.promptSetPassword(activity, OnPasswordChanged);
-                        return null;
-                    });
-                } catch (Exception ex) {
-                    ex.printStackTrace();
-                }
-            }
-
+            	if (OnPasswordChanged != null)
+                	OnPasswordChanged.accept(typePasswd.getText().toString());
+			}
         });
         builder.setNegativeButton(activity.getString(android.R.string.cancel), (DialogInterface dialog, int which) ->
                 dialog.dismiss());
@@ -245,7 +167,8 @@ public class ActivityCommon {
             alertDialog.show();
     }
 
-    public static void promptEdit(Activity activity, String title, String msg, String value, String option, OnTextSubmittedListener OnEdit) {
+    public static void promptEdit(Activity activity, String title, String msg,
+                                  String value, String option, BiConsumer<String, Boolean> OnEdit) {
         MaterialAlertDialogBuilder builder = new MaterialAlertDialogBuilder(activity);
 
         LinearLayout layout = new LinearLayout(activity);
@@ -275,7 +198,7 @@ public class ActivityCommon {
         builder.setPositiveButton("Ok", (DialogInterface dialog, int which) ->
         {
             if (OnEdit != null)
-                OnEdit.onTextSubmitted(valueText.getText().toString(), optionCheckBox.isChecked());
+                OnEdit.accept(valueText.getText().toString(), optionCheckBox.isChecked());
         });
         builder.setNegativeButton(activity.getString(android.R.string.cancel), (DialogInterface dialog, int which) ->
                 dialog.dismiss());
@@ -300,7 +223,7 @@ public class ActivityCommon {
 
     static void promptOpenWith(Activity activity, Intent intent, LinkedHashMap<String, String> apps,
                                android.net.Uri uri, File sharedFile, SalmonFile salmonFile, boolean allowWrite,
-                               Function<AndroidSharedFileObserver, Void> OnFileContentsChanged) {
+                               Consumer<AndroidSharedFileObserver> OnFileContentsChanged) {
 
         String[] names = apps.keySet().toArray(new String[0]);
         String[] packageNames = apps.values().toArray(new String[0]);
@@ -331,7 +254,8 @@ public class ActivityCommon {
         alert.show();
     }
 
-    private static void setFileContentsChangedObserver(File cacheFile, SalmonFile salmonFile, Function<AndroidSharedFileObserver, Void> onFileContentsChanged) {
+    private static void setFileContentsChangedObserver(File cacheFile, SalmonFile salmonFile,
+                                                       Consumer<AndroidSharedFileObserver> onFileContentsChanged) {
         AndroidSharedFileObserver fileObserver = AndroidSharedFileObserver.createFileObserver(cacheFile,
                 salmonFile, onFileContentsChanged);
         fileObserver.startWatching();
@@ -370,5 +294,103 @@ public class ActivityCommon {
 
         if (!activity.isFinishing())
             alertDialog.show();
+    }
+
+
+    public static void OpenVault(Context context, String dirPath) throws Exception {
+        SalmonDriveManager.openDrive(dirPath);
+        SalmonDriveManager.getDrive().setEnableIntegrityCheck(true);
+        SettingsActivity.setVaultLocation(context, dirPath);
+    }
+
+    public static void CreateVault(Context context, String dirPath, String password) throws Exception {
+        SalmonDriveManager.createDrive(dirPath, password);
+        SalmonDriveManager.getDrive().setEnableIntegrityCheck(true);
+        SettingsActivity.setVaultLocation(context, dirPath);
+    }
+
+    public static void openFilesystem(Activity activity, boolean folder, boolean multiSelect, String lastDir, int resultCode) {
+        Intent intent = new Intent(folder ? Intent.ACTION_OPEN_DOCUMENT_TREE : Intent.ACTION_OPEN_DOCUMENT);
+        intent.addFlags(Intent.FLAG_GRANT_PERSISTABLE_URI_PERMISSION);
+        intent.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
+        intent.addFlags(Intent.FLAG_GRANT_WRITE_URI_PERMISSION);
+
+        if (folder && lastDir != null) {
+            try {
+                Uri uri = DocumentsContract.buildDocumentUri(EXTERNAL_STORAGE_PROVIDER_AUTHORITY, "primary:");
+                intent.putExtra(DocumentsContract.EXTRA_INITIAL_URI, uri);
+            } catch (Exception ex) {
+                ex.printStackTrace();
+            }
+        }
+        if (!folder) {
+            intent.addCategory(Intent.CATEGORY_OPENABLE);
+            intent.setType("*/*");
+        }
+
+        if (multiSelect) {
+            intent.putExtra(Intent.EXTRA_ALLOW_MULTIPLE, true);
+        }
+
+        String prompt = "Open File(s)";
+        if (folder)
+            prompt = "Open Directory";
+
+        intent.putExtra(DocumentsContract.EXTRA_PROMPT, prompt);
+        intent.putExtra("android.content.extra.SHOW_ADVANCED", true);
+        intent.putExtra(Intent.EXTRA_LOCAL_ONLY, true);
+        try {
+            activity.startActivityForResult(intent, resultCode);
+        } catch (Exception e) {
+            Toast.makeText(activity, "Could not start picker: " + e.getMessage(), Toast.LENGTH_LONG).show();
+        }
+    }
+
+    public static void setUriPermissions(Context context, Intent data, Uri uri) {
+        int takeFlags = 0;
+        if (data != null)
+            takeFlags = (int) data.getFlags();
+        takeFlags &= (Intent.FLAG_GRANT_READ_URI_PERMISSION | Intent.FLAG_GRANT_WRITE_URI_PERMISSION);
+
+        try {
+            context.grantUriPermission(context.getPackageName(), uri, Intent.FLAG_GRANT_READ_URI_PERMISSION);
+            context.grantUriPermission(context.getPackageName(), uri, Intent.FLAG_GRANT_WRITE_URI_PERMISSION);
+            context.grantUriPermission(context.getPackageName(), uri, Intent.FLAG_GRANT_PERSISTABLE_URI_PERMISSION);
+        } catch (Exception ex) {
+            ex.printStackTrace();
+            String err = "Could not grant uri perms to activity: " + ex;
+            Toast.makeText(context, err, Toast.LENGTH_LONG).show();
+        }
+
+        try {
+            context.getContentResolver().takePersistableUriPermission(uri, takeFlags);
+        } catch (Exception ex) {
+            ex.printStackTrace();
+            String err = "Could not take Persistable perms: " + ex;
+            Toast.makeText(context, err, Toast.LENGTH_LONG).show();
+        }
+    }
+
+    public static IRealFile[] getFilesFromIntent(Context context, Intent data) {
+        IRealFile[] files = null;
+
+        if (data != null) {
+            if (null != data.getClipData()) {
+                files = new IRealFile[data.getClipData().getItemCount()];
+                for (int i = 0; i < data.getClipData().getItemCount(); i++) {
+                    android.net.Uri uri = data.getClipData().getItemAt(i).getUri();
+                    ActivityCommon.setUriPermissions(context, data, uri);
+                    DocumentFile docFile = DocumentFile.fromSingleUri(context, uri);
+                    files[i] = new AndroidFile(docFile, context);
+                }
+            } else {
+                android.net.Uri uri = data.getData();
+                files = new IRealFile[1];
+                ActivityCommon.setUriPermissions(context, data, uri);
+                DocumentFile docFile = DocumentFile.fromSingleUri(context, uri);
+                files[0] = new AndroidFile(docFile, context);
+            }
+        }
+        return files;
     }
 }

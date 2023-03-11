@@ -45,8 +45,15 @@ import org.junit.Assert;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.w3c.dom.NodeList;
 
+import java.io.StringReader;
 import java.nio.charset.Charset;
+
+import javax.xml.xpath.XPath;
+import javax.xml.xpath.XPathConstants;
+import javax.xml.xpath.XPathExpressionException;
+import javax.xml.xpath.XPathFactory;
 
 @RunWith(AndroidJUnit4.class)
 public class SalmonAndroidInstrumentedTestRunner {

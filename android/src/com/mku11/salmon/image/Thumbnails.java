@@ -30,11 +30,11 @@ import android.media.ThumbnailUtils;
 import android.provider.MediaStore;
 
 import com.mku11.salmon.main.SalmonApplication;
+import com.mku11.salmon.streams.InputStreamWrapper;
 import com.mku11.salmonfs.SalmonDriveManager;
 import com.mku11.salmonfs.SalmonFile;
 import com.mku11.salmon.streams.AbsStream;
 import com.mku11.salmon.streams.MemoryStream;
-import com.mku11.salmon.streams.SalmonInputStream;
 import com.mku11.salmon.streams.SalmonStream;
 
 import java.io.BufferedInputStream;
@@ -173,9 +173,9 @@ public class Thumbnails {
         try {
             String ext = SalmonDriveManager.getDrive().getExtensionFromFileName(salmonFile.getBaseName()).toLowerCase();
             if (ext.equals("gif") && salmonFile.getSize() > TMP_GIF_THUMB_MAX_SIZE)
-                stream = new BufferedInputStream(new SalmonInputStream(getTempStream(salmonFile, TMP_GIF_THUMB_MAX_SIZE)), ENC_BUFFER_SIZE);
+                stream = new BufferedInputStream(new InputStreamWrapper(getTempStream(salmonFile, TMP_GIF_THUMB_MAX_SIZE)), ENC_BUFFER_SIZE);
             else
-                stream = new BufferedInputStream(new SalmonInputStream(salmonFile.getInputStream()), ENC_BUFFER_SIZE);
+                stream = new BufferedInputStream(new InputStreamWrapper(salmonFile.getInputStream()), ENC_BUFFER_SIZE);
             BitmapFactory.Options options = new BitmapFactory.Options();
             options.inSampleSize = 4;
             bitmap = BitmapFactory.decodeStream(stream, null, options);
