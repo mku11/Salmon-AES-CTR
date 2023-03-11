@@ -23,6 +23,7 @@ SOFTWARE.
 */
 using Salmon.Alert;
 using Salmon.FS;
+using Salmon.Prefs;
 using Salmon.Window;
 using System;
 using System.Windows;
@@ -137,7 +138,6 @@ namespace Salmon
             panel.Children.Add(validatePanel);
             panel.Children.Add(status);
             alert.Content = panel;
-            alert.Show();
             Button btOk = alert.GetButton(ButtonType.Ok);
             btOk.Click += (object sender, System.Windows.RoutedEventArgs e) =>
             {
@@ -150,21 +150,15 @@ namespace Salmon
                 }
                 else
                 {
-                    try
-                    {
-                        SalmonDriveManager.GetDrive().SetPassword(password);
-                        if (OnPasswordChanged != null)
-                            OnPasswordChanged.Invoke(password);
-                    }
-                    catch (Exception ex)
-                    {
-                        Console.Error.WriteLine(ex);
-                    }
+                    if (OnPasswordChanged != null)
+                        OnPasswordChanged.Invoke(password);
                 }
             };
+            alert.Show();
         }
 
-        public static void PromptEdit(string title, string msg, string value, string option, bool isFileName, System.Action<string, bool> OnEdit)
+        public static void PromptEdit(string title, string msg, string value, string option, 
+            bool isFileName, System.Action<string, bool> OnEdit, bool readOnly)
         {
             SalmonDialog alert = new SalmonDialog("", ButtonType.Ok, ButtonType.Cancel);
             alert.Title = title;
@@ -172,6 +166,8 @@ namespace Salmon
             msgText.Content = msg;
             TextBox valueText = new TextBox();
             valueText.Text = value;
+            if (readOnly)
+                valueText.IsReadOnly = true;
             CheckBox optionCheckBox = new CheckBox();
             StackPanel panel = new StackPanel();
             panel.Margin = new System.Windows.Thickness(10);
@@ -183,6 +179,9 @@ namespace Salmon
                 panel.Children.Add(optionCheckBox);
             }
             alert.Content = panel;
+            alert.MinWidth = 340;
+            alert.MinHeight = 150;
+
             Button btOk = (Button)alert.GetButton(ButtonType.Ok);
             Action<object, RoutedEventArgs> OnOk = (sender, e) =>
             {
@@ -205,7 +204,7 @@ namespace Salmon
                 if (isFileName)
                 {
                     string ext = SalmonDriveManager.GetDrive().GetExtensionFromFileName(value);
-                    if(ext != null && ext.Length > 0)
+                    if (ext != null && ext.Length > 0)
                         valueText.Select(0, value.Length - ext.Length - 1);
                     else
                         valueText.Select(0, value.Length);
@@ -256,6 +255,23 @@ namespace Salmon
             alert.Content = ContentText;
             alert.Show();
 
+        }
+
+
+        public static void OpenVault(string dirPath)
+        {
+            SalmonDriveManager.OpenDrive(dirPath);
+            SalmonDriveManager.GetDrive().SetEnableIntegrityCheck(true);
+            Settings.Settings.GetInstance().vaultLocation = dirPath;
+            Preferences.SavePrefs();
+        }
+
+        public static void CreateVault(string dirPath, string password)
+        {
+            SalmonDriveManager.CreateDrive(dirPath, password);
+            SalmonDriveManager.GetDrive().SetEnableIntegrityCheck(true);
+            Settings.Settings.GetInstance().vaultLocation = dirPath;
+            Preferences.SavePrefs();
         }
     }
 }

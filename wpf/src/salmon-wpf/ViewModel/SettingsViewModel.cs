@@ -21,13 +21,13 @@ LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 */
+using Salmon.Alert;
 using Salmon.FS;
 using Salmon.Prefs;
 using System;
 using System.ComponentModel;
 using System.Windows.Data;
 using System.Windows.Input;
-using static Salmon.Settings.Settings;
 namespace Salmon.ViewModel
 {
     public class SettingsViewModel : INotifyPropertyChanged
@@ -49,8 +49,8 @@ namespace Salmon.ViewModel
             }
         }
 
-        public AESType _aesTypeSelected = AESType.Default;
-        public AESType AesTypeSelected
+        public Settings.Settings.AESType _aesTypeSelected = Settings.Settings.AESType.Default;
+        public Settings.Settings.AESType AesTypeSelected
         {
             get => _aesTypeSelected;
             set
@@ -60,6 +60,41 @@ namespace Salmon.ViewModel
                     _aesTypeSelected = value;
                     if (PropertyChanged != null)
                         PropertyChanged(this, new PropertyChangedEventArgs("AesTypeSelected"));
+                }
+            }
+        }
+
+        public CollectionView _authTypes = new CollectionView(Enum.GetValues(typeof(Settings.Settings.AuthType)));
+        public CollectionView AuthTypes
+        {
+            get => _authTypes;
+            set
+            {
+                _authTypes = value;
+                if (PropertyChanged != null)
+                    PropertyChanged(this, new PropertyChangedEventArgs("AuthTypes"));
+
+            }
+        }
+        public Settings.Settings.AuthType _authTypeSelected = Settings.Settings.AuthType.Service;
+        public Settings.Settings.AuthType AuthTypeSelected
+        {
+            get => _authTypeSelected;
+            set
+            {
+                if (_authTypeSelected != value)
+                {
+                    _authTypeSelected = value;
+                    if (PropertyChanged != null)
+                        PropertyChanged(this, new PropertyChangedEventArgs("AuthTypeSelected"));
+                }
+                if (initialized && _authTypeSelected == Settings.Settings.AuthType.User)
+                {
+                    new SalmonDialog("WARNING! User based authorization is less secure. "
+                            + "\n" + "Make sure the auth config file is not accessible by other users:"
+                            + "\n" + MainViewModel.SEQUENCER_FILE_PATH
+                            + "\n" + "If you need more security install the Salmon Service"
+                    ).Show();
                 }
             }
         }
@@ -143,6 +178,8 @@ namespace Salmon.ViewModel
         }
 
         private ICommand _clickCommand;
+        private bool initialized;
+
         public ICommand ClickCommand
         {
             get
@@ -158,7 +195,7 @@ namespace Salmon.ViewModel
         {
             switch (actionType)
             {
-                case ActionType.CHANGE_VAULT_LOCATION:
+                case ActionType.OPEN_VAULT:
                     ChangeVaultLocation();
                     break;
                 case ActionType.CHANGE_PASSWORD:
@@ -178,27 +215,32 @@ namespace Salmon.ViewModel
                 OnShow();
             };
         }
+
         private void OnShow()
         {
-            AesTypes = new CollectionView(Enum.GetValues(typeof(AESType)));
-            AesTypeSelected = GetInstance().aesType;
+            AesTypes = new CollectionView(Enum.GetValues(typeof(Settings.Settings.AESType)));
+            AesTypeSelected = Settings.Settings.GetInstance().aesType;
 
-            DeleteSourceAfterImport = GetInstance().deleteAfterImport;
-            EnableLogs = GetInstance().enableLog;
-            EnableDetailedLogs = GetInstance().enableLogDetails;
-            if (GetInstance().vaultLocation != null)
-                VaultLocation = "Location: " + GetInstance().vaultLocation;
+            AuthTypes = new CollectionView(Enum.GetValues(typeof(Settings.Settings.AuthType)));
+            AuthTypeSelected = Settings.Settings.GetInstance().authType;
+
+            DeleteSourceAfterImport = Settings.Settings.GetInstance().deleteAfterImport;
+            EnableLogs = Settings.Settings.GetInstance().enableLog;
+            EnableDetailedLogs = Settings.Settings.GetInstance().enableLogDetails;
+            if (Settings.Settings.GetInstance().vaultLocation != null)
+                VaultLocation = "Location: " + Settings.Settings.GetInstance().vaultLocation;
+            initialized = true;
         }
 
         private void ChangeVaultLocation()
         {
-            string selectedDirectory = MainViewModel.SelectVault(window);
+            string selectedDirectory = MainViewModel.SelectDirectory(window, "Select vault directory");
             if (selectedDirectory == null)
                 return;
             string filePath = selectedDirectory;
             if (filePath != null)
             {
-                Preferences.SetVaultFolder(filePath);
+                WindowCommon.OpenVault(filePath);
                 VaultLocation = "Location: " + filePath;
                 //TODO: notify the main screen to refresh
             }
@@ -210,20 +252,29 @@ namespace Salmon.ViewModel
             {
                 try
                 {
-                    SalmonDriveManager.GetDrive().GetVirtualRoot();
+                    SalmonDriveManager.GetDrive().SetPassword(pass);
                     //TODO: notify main screen to refresh
+                    new SalmonDialog("Password Changed").Show();
                 }
                 catch (SalmonAuthException e)
                 {
                     Console.Error.WriteLine(e);
+                    new SalmonDialog("Could not change password: " + e).Show();
+                    throw e;
                 }
             });
         }
 
-        private AESType GetAESType()
+        private Settings.Settings.AESType GetAESType()
         {
             return AesTypeSelected;
         }
+
+        private Settings.Settings.AuthType GetAuthType()
+        {
+            return AuthTypeSelected;
+        }
+
 
         public static void OpenSettings(System.Windows.Window owner)
         {
@@ -231,10 +282,11 @@ namespace Salmon.ViewModel
             settings.SetWindow(owner);
             settings.ShowDialog();
 
-            GetInstance().aesType = settings.viewModel.GetAESType();
-            GetInstance().deleteAfterImport = settings.viewModel.DeleteSourceAfterImport;
-            GetInstance().enableLog = settings.viewModel.EnableLogs;
-            GetInstance().enableLogDetails = settings.viewModel.EnableDetailedLogs;
+            Settings.Settings.GetInstance().aesType = settings.viewModel.GetAESType();
+            Settings.Settings.GetInstance().authType = settings.viewModel.GetAuthType();
+            Settings.Settings.GetInstance().deleteAfterImport = settings.viewModel.DeleteSourceAfterImport;
+            Settings.Settings.GetInstance().enableLog = settings.viewModel.EnableLogs;
+            Settings.Settings.GetInstance().enableLogDetails = settings.viewModel.EnableDetailedLogs;
             Preferences.SavePrefs();
         }
 

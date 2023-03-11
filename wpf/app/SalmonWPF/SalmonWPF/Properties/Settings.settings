@@ -17,5 +17,8 @@
     <Setting Name="EnableLogDetails" Type="System.Boolean" Scope="User">
       <Value Profile="(Default)">False</Value>
     </Setting>
+    <Setting Name="AuthType" Type="System.String" Scope="User">
+      <Value Profile="(Default)">Service</Value>
+    </Setting>
   </Settings>
 </SettingsFile>

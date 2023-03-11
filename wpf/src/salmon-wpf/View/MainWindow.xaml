@@ -22,7 +22,9 @@
         <KeyBinding Command="{Binding ClickCommand}"
                     CommandParameter="{x:Static viewmodel:ActionType.BACK}" Key="Backspace"  />
         <KeyBinding Command="{Binding ClickCommand}"
-                    CommandParameter="{x:Static viewmodel:ActionType.CHANGE_VAULT_LOCATION}" Key="O" Modifiers="Ctrl"  />
+                    CommandParameter="{x:Static viewmodel:ActionType.OPEN_VAULT}" Key="O" Modifiers="Ctrl"  />
+        <KeyBinding Command="{Binding ClickCommand}"
+                    CommandParameter="{x:Static viewmodel:ActionType.CREATE_VAULT}" Key="N" Modifiers="Ctrl"  />
         <KeyBinding Command="{Binding ClickCommand}"
                     CommandParameter="{x:Static viewmodel:ActionType.CLOSE_VAULT}" Key="L" Modifiers="Ctrl"  />
         <KeyBinding Command="{Binding ClickCommand}"
@@ -54,10 +56,26 @@
                 <MenuItem Header="File">
                     <MenuItem Header="Open Vault" InputGestureText="Ctrl+O"
                               Command="{Binding ClickCommand}"
-                       CommandParameter="{x:Static viewmodel:ActionType.CHANGE_VAULT_LOCATION}"/>
+                       CommandParameter="{x:Static viewmodel:ActionType.OPEN_VAULT}"/>
+                    <MenuItem Header="New Vault" InputGestureText="Ctrl+N"
+                              Command="{Binding ClickCommand}"
+                       CommandParameter="{x:Static viewmodel:ActionType.CREATE_VAULT}"/>
                     <MenuItem Header="Close Vault" InputGestureText="Ctrl+L"
                               Command="{Binding ClickCommand}"
                        CommandParameter="{x:Static viewmodel:ActionType.CLOSE_VAULT}"/>
+                    <Separator/>
+                    <MenuItem Header="Import Auth File"
+                              Command="{Binding ClickCommand}"
+                       CommandParameter="{x:Static viewmodel:ActionType.IMPORT_AUTH}"/>
+                    <MenuItem Header="Export Auth File"
+                              Command="{Binding ClickCommand}"
+                       CommandParameter="{x:Static viewmodel:ActionType.EXPORT_AUTH}"/>
+                    <MenuItem Header="Revoke Auth"
+                              Command="{Binding ClickCommand}"
+                       CommandParameter="{x:Static viewmodel:ActionType.REVOKE_AUTH}"/>
+                    <MenuItem Header="Display Auth ID"
+                              Command="{Binding ClickCommand}"
+                       CommandParameter="{x:Static viewmodel:ActionType.DISPLAY_AUTH_ID}"/>
                     <Separator/>
                     <MenuItem Header="Settings" 
                               Command="{Binding ClickCommand}"
@@ -71,9 +89,6 @@
                     <MenuItem Header="New Folder" 
                               Command="{Binding ClickCommand}"
                               CommandParameter="{x:Static viewmodel:ActionType.NEW_FOLDER}"/>
-                    <MenuItem Header="New File"
-                              Command="{Binding ClickCommand}"
-                              CommandParameter="{x:Static viewmodel:ActionType.NEW_FILE}"/>
                     <Separator/>
                     <MenuItem Header="Copy " InputGestureText="Ctrl+C" 
                               Command="{Binding ClickCommand}"

@@ -14,15 +14,13 @@
     <Compile Include="..\..\..\src\salmon-wpf\Dialog\SalmonDialog.cs" Link="salmon-wpf\Dialog\SalmonDialog.cs" />
     <Compile Include="..\..\..\src\salmon-wpf\Model\FileItem.cs" Link="salmon-wpf\Model\FileItem.cs" />
     <Compile Include="..\..\..\src\salmon-wpf\Model\SalmonFileItem.cs" Link="salmon-wpf\Model\SalmonFileItem.cs" />
+	<Compile Include="..\..\..\src\salmon-wpf\Sequencer\WinClientSequencer.cs" Link="salmon-wpf\Sequencer\WinClientSequencer.cs" />
     <Compile Include="..\..\..\src\salmon-wpf\Prefs\Preferences.cs" Link="salmon-wpf\Prefs\Preferences.cs" />
     <Compile Include="..\..\..\src\salmon-wpf\Settings\Settings.cs" Link="salmon-wpf\Settings\Settings.cs" />
-    <Compile Include="..\..\..\src\salmon-wpf\Utils\FileCommander.cs" Link="salmon-wpf\Utils\FileCommander.cs" />
-    <Compile Include="..\..\..\src\salmon-wpf\Utils\FileUtils.cs" Link="salmon-wpf\Utils\FileUtils.cs" />
     <Compile Include="..\..\..\src\salmon-wpf\Utils\URLUtils.cs" Link="salmon-wpf\Utils\URLUtils.cs" />
     <Compile Include="..\..\..\src\salmon-wpf\Utils\Utils.cs" Link="salmon-wpf\Utils\Utils.cs" />
     <Compile Include="..\..\..\src\salmon-wpf\Utils\WindowCommon.cs" Link="salmon-wpf\Utils\WindowCommon.cs" />
     <Compile Include="..\..\..\src\salmon-wpf\Utils\WindowUtils.cs" Link="salmon-wpf\Utils\WindowUtils.cs" />
-    <Compile Include="..\..\..\src\salmon-wpf\ViewModel\ActionType.cs" Link="salmon-wpf\ViewModel\ActionType.cs" />
     <Compile Include="..\..\..\src\salmon-wpf\ViewModel\ImageViewerViewModel.cs" Link="salmon-wpf\ViewModel\ImageViewerViewModel.cs" />
     <Compile Include="..\..\..\src\salmon-wpf\ViewModel\MainViewModel.cs" Link="salmon-wpf\ViewModel\MainViewModel.cs" />
     <Compile Include="..\..\..\src\salmon-wpf\ViewModel\MediaPlayerViewModel.cs" Link="salmon-wpf\ViewModel\MediaPlayerViewModel.cs" />
@@ -129,6 +127,21 @@
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
+  </ItemGroup>
+
+  <ItemGroup>
+    <Compile Update="Properties\Settings.Designer.cs">
+      <DesignTimeSharedInput>True</DesignTimeSharedInput>
+      <AutoGen>True</AutoGen>
+      <DependentUpon>Settings.settings</DependentUpon>
+    </Compile>
+  </ItemGroup>
+
+  <ItemGroup>
+    <None Update="Properties\Settings.settings">
+      <Generator>SettingsSingleFileGenerator</Generator>
+      <LastGenOutput>Settings.Designer.cs</LastGenOutput>
+    </None>
   </ItemGroup>
 
 </Project>

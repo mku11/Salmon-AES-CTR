@@ -38,10 +38,8 @@ namespace Salmon.View
         public MainWindow()
         {
             InitializeComponent();
-            MainViewModel mainViewModel = new MainViewModel();
-            DataContext = mainViewModel;
-            mainViewModel.SetWindow(this);
-            mainViewModel.SetDataGrid(DataGrid);
+            ((MainViewModel)DataContext).SetWindow(this);
+            ((MainViewModel)DataContext).SetDataGrid(DataGrid);
             this.Loaded += MainWindow_Loaded;
         }
 

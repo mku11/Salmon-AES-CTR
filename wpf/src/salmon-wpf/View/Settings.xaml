@@ -30,7 +30,7 @@
                         </StackPanel>
                         <Button Grid.Column="1" HorizontalAlignment="Right" Height="24" Margin="1"
                                 Command="{Binding ClickCommand}"
-                       CommandParameter="{x:Static viewmodel:ActionType.CHANGE_VAULT_LOCATION}">
+                       CommandParameter="{x:Static viewmodel:ActionType.OPEN_VAULT}">
                             <StackPanel Orientation="Horizontal" Margin="2">
                                 <Image Width="16" Height="16" Source="/icons/folder.png" Margin="1"/>
                                 <TextBlock Margin="4 0 4 0">Change</TextBlock>
@@ -66,6 +66,23 @@
                         </Grid.ColumnDefinitions>
                         <Label Grid.Column="0" HorizontalAlignment="Left" VerticalAlignment="Top" Content="AES Type" Margin="4,0,0,0"/>
                         <ComboBox MinWidth="100" Grid.Column="1" x:Name="AesType" VerticalAlignment="Center" ItemsSource="{Binding Path=AesTypes}" SelectedItem="{Binding Path=AesTypeSelected, Mode=TwoWay}" 
+                                  SelectedIndex="0">
+                        </ComboBox>
+                    </Grid>
+                </StackPanel>
+            </GroupBox>
+            <GroupBox HorizontalAlignment="Stretch">
+                <GroupBox.Header>
+                    <TextBlock FontWeight="Bold" Text="Authorization"></TextBlock>
+                </GroupBox.Header>
+                <StackPanel Orientation="Vertical" HorizontalAlignment="Stretch">
+                    <Grid HorizontalAlignment="Stretch" Margin="2">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*"/>
+                            <ColumnDefinition Width="Auto"/>
+                        </Grid.ColumnDefinitions>
+                        <Label Grid.Column="0" HorizontalAlignment="Left" VerticalAlignment="Top" Content="Auth Type" Margin="4,0,0,0"/>
+                        <ComboBox MinWidth="100" Grid.Column="1" x:Name="AuthType" VerticalAlignment="Center" ItemsSource="{Binding Path=AuthTypes}" SelectedItem="{Binding Path=AuthTypeSelected, Mode=TwoWay}" 
                                   SelectedIndex="0">
                         </ComboBox>
                     </Grid>

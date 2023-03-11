@@ -82,5 +82,17 @@ namespace SalmonWPF.Properties {
                 this["EnableLogDetails"] = value;
             }
         }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("Service")]
+        public string AuthType {
+            get {
+                return ((string)(this["AuthType"]));
+            }
+            set {
+                this["AuthType"] = value;
+            }
+        }
     }
 }

@@ -46,6 +46,11 @@ namespace Salmon.View
                 if (obj.GetType() == typeof(Border))
                     ((Border)obj).Background = (Brush)App.Current.Resources["SalmonBackground"];
             });
+            WindowUtils.SetChildBackground(AuthType, (obj) =>
+            {
+                if (obj.GetType() == typeof(Border))
+                    ((Border)obj).Background = (Brush)App.Current.Resources["SalmonBackground"];
+            });
         }
         internal void SetWindow(System.Windows.Window owner)
         {

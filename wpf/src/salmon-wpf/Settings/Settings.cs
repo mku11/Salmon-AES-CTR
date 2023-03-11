@@ -32,10 +32,19 @@ namespace Salmon.Settings
         public AESType aesType = DEFAULT_AES_TYPE;
         public static readonly AESType DEFAULT_AES_TYPE = AESType.Default;
         public static readonly string AES_TYPE_KEY = "AES_TYPE_KEY";
-        private static Settings instance;
+        
         public enum AESType
         {
             Default, AesIntrinsics
+        }
+
+        public AuthType authType = DEFAULT_AUTH_TYPE;
+        public static readonly AuthType DEFAULT_AUTH_TYPE = AuthType.Service;
+        public static readonly string AUTH_TYPE_KEY = "AUTH_TYPE_KEY";
+        
+        public enum AuthType
+        {
+            Service, User
         }
 
         public static readonly bool DEFAULT_DELETE_AFTER_IMPORT = false;
@@ -50,6 +59,7 @@ namespace Salmon.Settings
         public static readonly string ENABLE_LOG_DETAILS_KEY = "ENABLE_LOG_DETAILS_KEY";
         public bool enableLogDetails = DEFAULT_ENABLE_LOG_DETAILS;
 
+        private static Settings instance;
         public static Settings GetInstance()
         {
             if (instance == null)

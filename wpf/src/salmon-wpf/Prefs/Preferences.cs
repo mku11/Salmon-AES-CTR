@@ -30,23 +30,6 @@ namespace Salmon.Prefs
     public class Preferences
     {
 
-        public static bool SetVaultFolder(string dirPath)
-        {
-            Settings.Settings.GetInstance().vaultLocation = dirPath;
-            SavePrefs();
-            try
-            {
-                SalmonDriveManager.SetDriveLocation(dirPath);
-                SalmonDriveManager.GetDrive().SetEnableIntegrityCheck(true);
-            }
-            catch (Exception e)
-            {
-                Console.Error.WriteLine(e);
-                return false;
-            }
-            return true;
-        }
-
         public static void LoadPrefs(Salmon.Settings.Settings settings)
         {
             try
@@ -56,6 +39,7 @@ namespace Salmon.Prefs
                     settings.vaultLocation = null;
                 settings.deleteAfterImport = SalmonWPF.Properties.Settings.Default.DeleteSource;
                 settings.aesType = (Settings.Settings.AESType)Enum.Parse(typeof(Settings.Settings.AESType), SalmonWPF.Properties.Settings.Default.AesType);
+                settings.authType = (Settings.Settings.AuthType)Enum.Parse(typeof(Settings.Settings.AuthType), SalmonWPF.Properties.Settings.Default.AuthType);
                 settings.enableLog = SalmonWPF.Properties.Settings.Default.EnableLog;
                 settings.enableLogDetails = SalmonWPF.Properties.Settings.Default.EnableLogDetails;
             }
@@ -72,6 +56,7 @@ namespace Salmon.Prefs
                 SalmonWPF.Properties.Settings.Default.VaultLocation = Settings.Settings.GetInstance().vaultLocation;
                 SalmonWPF.Properties.Settings.Default.DeleteSource = Settings.Settings.GetInstance().deleteAfterImport;
                 SalmonWPF.Properties.Settings.Default.AesType = Settings.Settings.GetInstance().aesType.ToString();
+                SalmonWPF.Properties.Settings.Default.AuthType = Settings.Settings.GetInstance().authType.ToString();
                 SalmonWPF.Properties.Settings.Default.EnableLog = Settings.Settings.GetInstance().enableLog;
                 SalmonWPF.Properties.Settings.Default.EnableLogDetails = Settings.Settings.GetInstance().enableLogDetails;
                 SalmonWPF.Properties.Settings.Default.Save();

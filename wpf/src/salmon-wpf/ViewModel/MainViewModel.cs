@@ -21,7 +21,6 @@ LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 */
-using LibVLCSharp.Shared;
 using Salmon.Alert;
 using Salmon.FS;
 using Salmon.Model;
@@ -36,7 +35,6 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.ComponentModel;
-using System.Reflection;
 using System.Threading;
 using System.Windows;
 using System.Windows.Controls;
@@ -48,13 +46,30 @@ using OpenFileDialog = System.Windows.Forms.OpenFileDialog;
 
 namespace Salmon.ViewModel
 {
+    public enum ActionType
+    {
+        BACK, REFRESH, IMPORT, VIEW, VIEW_AS_TEXT, VIEW_EXTERNAL, EDIT, SHARE, SAVE,
+        EXPORT, DELETE, RENAME, UP, DOWN,
+        MULTI_SELECT, SINGLE_SELECT, SELECT_ALL, UNSELECT_ALL,
+        EXPORT_SELECTED, DELETE_SELECTED, COPY, CUT, PASTE,
+        NEW_FOLDER, SEARCH, STOP, PLAY, SORT,
+        OPEN_VAULT, CREATE_VAULT, CLOSE_VAULT, CHANGE_PASSWORD,
+        IMPORT_AUTH, EXPORT_AUTH, REVOKE_AUTH, DISPLAY_AUTH_ID,
+        PROPERTIES, SETTINGS, ABOUT, EXIT
+    }
+
     public class MainViewModel : INotifyPropertyChanged
     {
+        private static readonly string SEQUENCER_DIR_NAME = ".salmon";
+        public static readonly string SEQUENCER_DIR_PATH = Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData) + System.IO.Path.DirectorySeparatorChar + SEQUENCER_DIR_NAME;
+        public static readonly string SEQUENCER_FILE_PATH = SEQUENCER_DIR_PATH + System.IO.Path.DirectorySeparatorChar + "config.xml";
+        private static readonly string SERVICE_PIPE_NAME = "SalmonService";
+
         private static readonly int BUFFER_SIZE = 512 * 1024;
         private static readonly int THREADS = 4;
 
-        public static SalmonFile RootDir;
-        public static SalmonFile CurrDir;
+        public SalmonFile RootDir;
+        public SalmonFile CurrDir;
 
         private FileCommander fileCommander;
         private SalmonFile[] copyFiles;
@@ -177,7 +192,7 @@ namespace Salmon.ViewModel
             SetupFileCommander();
             SetupListeners();
             LoadSettings();
-            SetupVirtualDrive();
+            SetupSalmonManager();
         }
 
         private void PromptDelete()
@@ -203,12 +218,8 @@ namespace Salmon.ViewModel
 
         private void OnShow()
         {
-            WindowUtils.RunOnMainThread(() =>
-            {
-                SetupRootDir();
-            }, 1000);
-        }
 
+        }
 
         public void SetPath(string value)
         {
@@ -217,11 +228,11 @@ namespace Salmon.ViewModel
             Path = "salmonfs://" + value;
         }
 
-
         public void OnSettings()
         {
             SettingsViewModel.OpenSettings(window);
             LoadSettings();
+            SetupSalmonManager();
         }
 
         public SalmonFile[] GetSalmonFiles()
@@ -340,9 +351,6 @@ namespace Salmon.ViewModel
                 case ActionType.NEW_FOLDER:
                     PromptNewFolder();
                     break;
-                case ActionType.NEW_FILE:
-                    PromptNewFile();
-                    break;
                 case ActionType.COPY:
                     OnCopy();
                     break;
@@ -361,11 +369,26 @@ namespace Salmon.ViewModel
                 case ActionType.EXIT:
                     window.Close();
                     break;
-                case ActionType.CHANGE_VAULT_LOCATION:
-                    ChangeVaultLocation();
+                case ActionType.OPEN_VAULT:
+                    OnOpenVault();
+                    break;
+                case ActionType.CREATE_VAULT:
+                    OnCreateVault();
                     break;
                 case ActionType.CLOSE_VAULT:
-                    OnClose();
+                    OnCloseVault();
+                    break;
+                case ActionType.IMPORT_AUTH:
+                    OnImportAuth();
+                    break;
+                case ActionType.EXPORT_AUTH:
+                    OnExportAuth();
+                    break;
+                case ActionType.REVOKE_AUTH:
+                    OnRevokeAuth();
+                    break;
+                case ActionType.DISPLAY_AUTH_ID:
+                    OnDisplayAuthID();
                     break;
                 case ActionType.BACK:
                     OnBack();
@@ -376,18 +399,50 @@ namespace Salmon.ViewModel
         }
 
 
-        private void ChangeVaultLocation()
+        private void OnOpenVault()
         {
-            string selectedDirectory = MainViewModel.SelectVault(window);
+            string selectedDirectory = MainViewModel.SelectDirectory(window, "Select directory of existing vault");
             if (selectedDirectory == null)
                 return;
             string filePath = selectedDirectory;
             if (filePath != null)
             {
-                Preferences.SetVaultFolder(filePath);
+
+                try
+                {
+                    WindowCommon.OpenVault(filePath);
+                }
+                catch (Exception e)
+                {
+                    new SalmonDialog("Could not open vault: " + e.Message).Show();
+                }
                 Refresh();
             }
         }
+
+
+        public void OnCreateVault()
+        {
+            string selectedDirectory = SelectDirectory(window, "Select directory for your new vault");
+            if (selectedDirectory == null)
+                return;
+            WindowCommon.PromptSetPassword((string pass) =>
+            {
+                try
+                {
+                    WindowCommon.CreateVault(selectedDirectory, pass);
+                    RootDir = SalmonDriveManager.GetDrive().GetVirtualRoot();
+                    CurrDir = RootDir;
+                    Refresh();
+                }
+                catch (Exception e)
+                {
+                    new SalmonDialog("Could not create vault: " + e.Message).Show();
+                }
+            });
+        }
+
+
         public void StopOperation()
         {
             fileCommander.CancelJobs();
@@ -459,7 +514,7 @@ namespace Salmon.ViewModel
 
         private void SetupListeners()
         {
-            fileCommander.SetFileImporterOnTaskProgressChanged((object sender, long bytesRead, long totalBytesRead, string message) =>
+            fileCommander.SetImporterProgressListener((IRealFile file, long bytesRead, long totalBytesRead, string message) =>
             {
                 WindowUtils.RunOnMainThread(() =>
                 {
@@ -468,7 +523,7 @@ namespace Salmon.ViewModel
                 });
             });
 
-            fileCommander.SetFileExporterOnTaskProgressChanged((object sender, long bytesWritten, long totalBytesWritten, string message) =>
+            fileCommander.SetExporterProgressListener((SalmonFile file, long bytesWritten, long totalBytesWritten, string message) =>
             {
                 WindowUtils.RunOnMainThread(() =>
                 {
@@ -483,7 +538,7 @@ namespace Salmon.ViewModel
             string vaultLocation = Salmon.Settings.Settings.GetInstance().vaultLocation;
             try
             {
-                SalmonDriveManager.SetDriveLocation(vaultLocation);
+                SalmonDriveManager.OpenDrive(vaultLocation);
                 SalmonDriveManager.GetDrive().SetEnableIntegrityCheck(true);
                 RootDir = SalmonDriveManager.GetDrive().GetVirtualRoot();
                 CurrDir = RootDir;
@@ -536,7 +591,7 @@ namespace Salmon.ViewModel
                             selectedFile = (dataGrid.SelectedItem as SalmonFileItem).GetSalmonFile();
                         DisplayFiles(selectedFile);
                     });
-                    
+
                 });
             }
             catch (SalmonAuthException e)
@@ -552,7 +607,7 @@ namespace Salmon.ViewModel
 
         private bool CheckFileSearcher()
         {
-            if (fileCommander.isFileSearcherRunning())
+            if (fileCommander.IsFileSearcherRunning())
             {
                 new SalmonDialog("Another process is running").Show();
                 return true;
@@ -594,16 +649,53 @@ namespace Salmon.ViewModel
             });
         }
 
-        private void SetupVirtualDrive()
+        private void SetupSalmonManager()
         {
             try
             {
                 SalmonDriveManager.SetVirtualDriveClass(typeof(DotNetDrive));
+                if (SalmonDriveManager.GetSequencer() != null)
+                    SalmonDriveManager.GetSequencer().Dispose();
+                if (Settings.Settings.GetInstance().authType == Settings.Settings.AuthType.User)
+                {
+                    SetupFileSequencer();
+                }
+                else if (Settings.Settings.GetInstance().authType == Settings.Settings.AuthType.Service)
+                {
+                    SetupClientSequencer();
+                }
             }
             catch (Exception e)
             {
                 Console.Error.WriteLine(e);
+                new SalmonDialog("Error during initializing: " + e.Message).Show();
             }
+        }
+
+        private void SetupClientSequencer()
+        {
+            try
+            {
+                WinClientSequencer sequencer = new WinClientSequencer(SERVICE_PIPE_NAME);
+                SalmonDriveManager.SetSequencer(sequencer);
+            }
+            catch (Exception ex)
+            {
+                WindowUtils.RunOnMainThread(() =>
+                {
+                    new SalmonDialog("Error during service lookup. Make sure the Salmon Service is installed and running:\n" + ex.Message).Show();
+                });
+            }
+        }
+
+        private void SetupFileSequencer()
+        {
+            IRealFile dirFile = new DotNetFile(SEQUENCER_DIR_PATH);
+            if (!dirFile.Exists())
+                dirFile.Mkdir();
+            IRealFile seqFile = new DotNetFile(SEQUENCER_FILE_PATH);
+            FileSequencer sequencer = new FileSequencer(seqFile, new SalmonSequenceParser());
+            SalmonDriveManager.SetSequencer(sequencer);
         }
 
         private void PasteSelected()
@@ -617,15 +709,10 @@ namespace Salmon.ViewModel
                 (string value, bool isChecked) =>
                 {
                     Search(value, isChecked);
-                });
+                }, false);
         }
 
-        public void ShowTaskRunning(bool value)
-        {
-            ShowTaskRunning(value, true);
-        }
-
-        public void ShowTaskRunning(bool value, bool progress)
+        public void ShowTaskRunning(bool value, bool progress = true)
         {
             WindowUtils.RunOnMainThread(() =>
             {
@@ -708,33 +795,12 @@ namespace Salmon.ViewModel
                         new SalmonDialog("Could Not Create Folder: " + exception.Message).Show();
                         Refresh();
                     }
-                }
-        );
-        }
-
-        private void PromptNewFile()
-        {
-            WindowCommon.PromptEdit("New File", "File Name", "New File", null, true,
-                (string fileName, bool isChecked) =>
-                {
-                    try
-                    {
-                        CurrDir.CreateFile(fileName);
-                        Refresh();
-                    }
-                    catch (Exception exception)
-                    {
-                        Console.Error.WriteLine(exception);
-                        new SalmonDialog("Could Not Create File: " + exception.Message).Show();
-                        Refresh();
-                    }
-                }
-        );
+                }, false);
         }
 
         private void DeleteSelectedFiles()
         {
-            DeleteFiles(GetSelectedFileItems());
+            DeleteFiles(GetSelectedFiles());
         }
 
         private void CopySelectedFiles(bool move)
@@ -742,21 +808,14 @@ namespace Salmon.ViewModel
             CopyFiles(copyFiles, CurrDir, move);
         }
 
-        private void DeleteFiles(SalmonFileItem[] files)
+        private void DeleteFiles(SalmonFile[] files)
         {
             ThreadPool.QueueUserWorkItem(state =>
             {
                 ShowTaskRunning(true);
                 try
                 {
-                    fileCommander.DoDeleteFiles((file) =>
-                    {
-                        WindowUtils.RunOnMainThread(() =>
-                        {
-                            FileItemList.Remove(file);
-                            SortFiles();
-                        });
-                    }, files);
+                    fileCommander.DeleteFiles(files, null);
                 }
                 catch (Exception e)
                 {
@@ -778,7 +837,7 @@ namespace Salmon.ViewModel
                 ShowTaskRunning(true);
                 try
                 {
-                    fileCommander.DoCopyFiles(files, dir, move, (fileInfo) =>
+                    fileCommander.CopyFiles(files, dir, move, (fileInfo) =>
                     {
                         WindowUtils.RunOnMainThread(() =>
                         {
@@ -818,8 +877,12 @@ namespace Salmon.ViewModel
         {
             ContextMenu contextMenu = new ContextMenu();
 
-            MenuItem item = new MenuItem() { Header = "Export", InputGestureText = "Ctrl-E" };
-            item.Click += (object sender, RoutedEventArgs e) => ExportSelectedFiles();
+            MenuItem item = new MenuItem() { Header = "View" };
+            item.Click += (object sender, RoutedEventArgs e) => OnOpenItem(dataGrid.SelectedIndex);
+            contextMenu.Items.Add(item);
+
+            item = new MenuItem() { Header = "View As Text" };
+            item.Click += (object sender, RoutedEventArgs e) => StartTextEditor(dataGrid.SelectedIndex);
             contextMenu.Items.Add(item);
 
             item = new MenuItem() { Header = "Copy", InputGestureText = "Ctrl-C" };
@@ -836,6 +899,10 @@ namespace Salmon.ViewModel
 
             item = new MenuItem() { Header = "Rename" };
             item.Click += (object sender, RoutedEventArgs e) => RenameFile(items[0]);
+            contextMenu.Items.Add(item);
+
+            item = new MenuItem() { Header = "Export", InputGestureText = "Ctrl-E" };
+            item.Click += (object sender, RoutedEventArgs e) => ExportSelectedFiles();
             contextMenu.Items.Add(item);
 
             item = new MenuItem() { Header = "Properties" };
@@ -870,7 +937,7 @@ namespace Salmon.ViewModel
                             {
                                 Console.Error.WriteLine(exception);
                             }
-                        });
+                        }, false);
                 }
                 catch (Exception exception)
                 {
@@ -901,7 +968,7 @@ namespace Salmon.ViewModel
             }
         }
 
-        public void OnClose()
+        public void OnCloseVault()
         {
             Logout();
             RootDir = null;
@@ -930,24 +997,6 @@ namespace Salmon.ViewModel
                     Refresh();
                 });
             }
-            else
-            {
-                WindowCommon.PromptSetPassword((string pass) =>
-                        {
-                            try
-                            {
-                                RootDir = SalmonDriveManager.GetDrive().GetVirtualRoot();
-                                CurrDir = RootDir;
-                            }
-                            catch (SalmonAuthException e)
-                            {
-                                Console.Error.WriteLine(e);
-                            }
-                            Refresh();
-                            if (FileItemList.Count == 0)
-                                PromptImportFiles();
-                        });
-            }
         }
 
         protected bool OpenItem(int position)
@@ -966,27 +1015,33 @@ namespace Salmon.ViewModel
                 return true;
             }
             string filename = selectedFile.GetBaseName();
-
-
-            if (FileUtils.isVideo(filename))
+            try
             {
-                StartMediaPlayer(position, MediaType.VIDEO);
-                return true;
+                if (FileUtils.IsVideo(filename))
+                {
+                    StartMediaPlayer(position, MediaType.VIDEO);
+                    return true;
+                }
+                else if (FileUtils.IsAudio(filename))
+                {
+                    StartMediaPlayer(position, MediaType.AUDIO);
+                    return true;
+                }
+                else if (FileUtils.IsImage(filename))
+                {
+                    StartImageViewer(position);
+                    return true;
+                }
+                else if (FileUtils.IsText(filename))
+                {
+                    StartTextEditor(position);
+                    return true;
+                }
             }
-            else if (FileUtils.isAudio(filename))
+            catch (Exception ex)
             {
-                StartMediaPlayer(position, MediaType.AUDIO);
-                return true;
-            }
-            else if (FileUtils.isImage(filename))
-            {
-                StartImageViewer(position);
-                return true;
-            }
-            else if (FileUtils.isText(filename))
-            {
-                StartTextEditor(position);
-                return true;
+                Console.Error.WriteLine(ex);
+                new SalmonDialog("Could not open: " + ex.Message).Show();
             }
             return false;
         }
@@ -994,41 +1049,26 @@ namespace Salmon.ViewModel
         private void StartTextEditor(int position)
         {
             FileItem item = FileItemList[position];
-            try
+            if (item.GetSize() > 1 * 1024 * 1024)
             {
-                TextEditorViewModel.OpenTextEditor(item, window);
+                new SalmonDialog("File too large").Show();
+                return;
             }
-            catch (Exception e)
-            {
-                Console.Error.WriteLine(e);
-            }
+            TextEditorViewModel.OpenTextEditor(item, window);
         }
-
 
         private void StartImageViewer(int position)
         {
             FileItem item = FileItemList[position];
-            try
-            {
-                ImageViewerViewModel.OpenImageViewer(item, window);
-            }
-            catch (Exception e)
-            {
-                Console.Error.WriteLine(e);
-            }
+            ImageViewerViewModel.OpenImageViewer(item, window);
+
+
         }
 
         private void StartMediaPlayer(int position, MediaType type)
         {
             FileItem item = FileItemList[position];
-            try
-            {
-                MediaPlayerViewModel.OpenMediaPlayer(item, window, type);
-            }
-            catch (Exception e)
-            {
-                Console.Error.WriteLine(e);
-            }
+            MediaPlayerViewModel.OpenMediaPlayer(item, window, type);
         }
 
         private void Logout()
@@ -1047,21 +1087,19 @@ namespace Salmon.ViewModel
         {
             WindowCommon.PromptDialog("Vault", "Choose a location for your vault", "Ok", () =>
             {
-                string selectedDirectory = SelectVault(window);
+                string selectedDirectory = SelectDirectory(window, "Select vault directory");
                 if (selectedDirectory == null)
                     return;
-                if (selectedDirectory != null)
-                {
-                    OnClose();
-                    Preferences.SetVaultFolder(selectedDirectory);
-                    SetupRootDir();
-                }
+                OnCloseVault();
+                WindowCommon.OpenVault(selectedDirectory);
+                SetupRootDir();
             }, "Cancel", null);
         }
 
-        public static string SelectVault(System.Windows.Window window)
+        public static string SelectDirectory(System.Windows.Window window, string title)
         {
             FolderBrowserDialog directoryChooser = new FolderBrowserDialog();
+            directoryChooser.Description = title;
             if (directoryChooser.ShowDialog() == DialogResult.OK)
                 return directoryChooser.SelectedPath;
             return null;
@@ -1070,7 +1108,7 @@ namespace Salmon.ViewModel
         public void OnBack()
         {
             SalmonFile parent = CurrDir.GetParent();
-            if (mode == Mode.Search && fileCommander.isFileSearcherRunning())
+            if (mode == Mode.Search && fileCommander.IsFileSearcherRunning())
             {
                 fileCommander.StopFileSearch();
             }
@@ -1126,6 +1164,17 @@ namespace Salmon.ViewModel
         {
             ThreadPool.QueueUserWorkItem(state =>
             {
+                foreach (SalmonFile file in items)
+                {
+                    if (file.IsDirectory())
+                    {
+                        WindowUtils.RunOnMainThread(() =>
+                        {
+                            new SalmonDialog("Cannot Export Directories select files only").Show();
+                        });
+                        return;
+                    }
+                }
                 StopVisibility = true;
                 FileProgress = 0;
                 FilesProgress = 0;
@@ -1133,7 +1182,7 @@ namespace Salmon.ViewModel
                 bool success = false;
                 try
                 {
-                    success = fileCommander.DoExportFiles(items, (progress) =>
+                    success = fileCommander.ExportFiles(items, (progress) =>
                     {
                         WindowUtils.RunOnMainThread(() =>
                         {
@@ -1144,8 +1193,9 @@ namespace Salmon.ViewModel
                 catch (Exception e)
                 {
                     Console.Error.WriteLine(e);
+                    WindowUtils.RunOnMainThread(() => new SalmonDialog("Error while exporting files: " + e.Message).Show());
                 }
-                if (fileCommander.isStopped())
+                if (fileCommander.IsStopped())
                     ShowTaskMessage("Export Stopped");
                 else if (!success)
                     ShowTaskMessage("Export Failed");
@@ -1179,7 +1229,7 @@ namespace Salmon.ViewModel
                 bool success = false;
                 try
                 {
-                    success = fileCommander.DoImportFiles(fileNames, importDir, deleteSource, (progress) =>
+                    success = fileCommander.ImportFiles(fileNames, importDir, deleteSource, (progress) =>
                     {
                         WindowUtils.RunOnMainThread(() =>
                         {
@@ -1190,8 +1240,9 @@ namespace Salmon.ViewModel
                 catch (Exception e)
                 {
                     Console.Error.WriteLine(e);
+                    WindowUtils.RunOnMainThread(() => new SalmonDialog("Error while importing files: " + e.Message).Show());
                 }
-                if (fileCommander.isStopped())
+                if (fileCommander.IsStopped())
                     ShowTaskMessage("Import Stopped");
                 else if (!success)
                     ShowTaskMessage("Import Failed");
@@ -1264,7 +1315,7 @@ namespace Salmon.ViewModel
                 });
                 WindowUtils.RunOnMainThread(() =>
                 {
-                    if (!fileCommander.isFileSearcherStopped())
+                    if (!fileCommander.IsFileSearcherStopped())
                         Status = "Search: " + value;
                     else
                         Status = "Search Stopped: " + value;
@@ -1272,5 +1323,108 @@ namespace Salmon.ViewModel
             });
         }
 
+
+        public void OnImportAuth()
+        {
+            if (SalmonDriveManager.GetDrive() == null)
+            {
+                new SalmonDialog("No Drive Loaded").Show();
+                return;
+            }
+            OpenFileDialog fileChooser = new OpenFileDialog();
+            fileChooser.Title = "Import Auth File";
+            string filename = SalmonDriveManager.GetAppDriveConfigFilename();
+            string ext = SalmonDriveManager.GetDrive().GetExtensionFromFileName(filename);
+            fileChooser.Filter = "Salmon Auth Files(*." + ext + ")| *." + ext;
+            if (fileChooser.ShowDialog() == DialogResult.Cancel)
+                return;
+            if (fileChooser.FileName == null)
+                return;
+            try
+            {
+                SalmonDriveManager.ImportAuthFile(fileChooser.FileName);
+                new SalmonDialog("Device is now Authorized").Show();
+            }
+            catch (Exception ex)
+            {
+                Console.Error.WriteLine(ex);
+                new SalmonDialog("Could Not Import Auth: " + ex.Message).Show();
+            }
+        }
+
+        public void OnExportAuth()
+        {
+            if (SalmonDriveManager.GetDrive() == null)
+            {
+                new SalmonDialog("No Drive Loaded").Show();
+                return;
+            }
+            WindowCommon.PromptEdit("Export Auth File",
+                    "Enter the Auth ID for the device you want to authorize",
+                    "", null, false,
+                    (targetAuthID, option) =>
+                    {
+                        SaveFileDialog fileChooser = new SaveFileDialog();
+                        fileChooser.Title = "Export Auth File";
+                        string filename = SalmonDriveManager.GetAppDriveConfigFilename();
+                        string ext = SalmonDriveManager.GetDrive().GetExtensionFromFileName(filename);
+                        fileChooser.Filter = "Salmon Auth Files(*." + ext + ")| *." + ext;
+                        fileChooser.FileName = filename;
+                        if (fileChooser.ShowDialog() == DialogResult.Cancel)
+                            return;
+                        if (fileChooser.FileName == null)
+                            return;
+                        try
+                        {
+                            DotNetFile authFile = new DotNetFile(fileChooser.FileName);
+                            SalmonDriveManager.ExportAuthFile(targetAuthID, authFile.GetParent().GetPath(), authFile.GetBaseName());
+                            new SalmonDialog("Auth File Exported").Show();
+                        }
+                        catch (Exception ex)
+                        {
+                            Console.Error.WriteLine(ex);
+                            new SalmonDialog("Could Not Export Auth: " + ex.Message).Show();
+                        }
+                    }, false);
+        }
+
+
+        public void OnRevokeAuth()
+        {
+            if (SalmonDriveManager.GetDrive() == null)
+            {
+                new SalmonDialog("No Drive Loaded").Show();
+                return;
+            }
+            WindowCommon.PromptDialog("Revoke Auth", "Revoke Auth for this drive? You will still be able to decrypt and view your files but you won't be able to import any more files in this drive.",
+                    "Ok", () =>
+                    {
+                        try
+                        {
+                            SalmonDriveManager.RevokeSequences();
+                            new SalmonDialog("Revoke Auth Successful").Show();
+                        }
+                        catch (Exception e)
+                        {
+                            Console.Error.WriteLine(e);
+                            new SalmonDialog("Could Not Revoke Auth: " + e.Message).Show();
+                        }
+                    }, "Cancel", null);
+        }
+
+
+        public void OnDisplayAuthID()
+        {
+            if (SalmonDriveManager.GetDrive() == null)
+            {
+                new SalmonDialog("No Drive Loaded").Show();
+                return;
+            }
+            string driveID = SalmonDriveManager.GetAuthID();
+            WindowCommon.PromptEdit("Salmon Auth App ID",
+                    "", driveID, null, false,
+                    null, true);
+
+        }
     }
 }
