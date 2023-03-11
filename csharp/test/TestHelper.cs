@@ -25,16 +25,22 @@ using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Org.BouncyCastle.Crypto;
 using Org.BouncyCastle.Crypto.Parameters;
 using Org.BouncyCastle.Security;
+using Org.BouncyCastle.Utilities;
+using Salmon;
 using Salmon.FS;
 using Salmon.Net.FS;
 using Salmon.Streams;
+using Salmon.Test.Utils;
 using System;
+using System.Collections.Generic;
 using System.IO;
 using System.Reflection;
 using System.Security.Cryptography;
 using System.Text;
+using static Salmon.FS.SalmonSequenceConfig;
 using static Salmon.SalmonIntegrity;
 using static Salmon.Streams.SalmonStream;
+using static System.Net.Mime.MediaTypeNames;
 
 namespace Salmon.Test.Utils
 {
@@ -52,11 +58,14 @@ namespace Salmon.Test.Utils
         public static readonly string TEST_PASSWORD = @"test123";
         public static readonly string TEST_FALSE_PASSWORD = @"falsepass";
 
-        public static readonly long MAX_ENC_COUNTER = (long) Math.Pow(256,7);
+        public static readonly long MAX_ENC_COUNTER = (long)Math.Pow(256, 7);
 
         public static readonly byte[] TEXT_VAULT_MAX_FILE_NONCE = {
-            (byte) 0xFF, (byte) 0xFF, (byte) 0xFF, (byte) 0xFF, (byte) 0xFF, (byte) 0xFF, (byte) 0xFF, (byte) 0xFF
-    };
+            0x7F, (byte) 0xFF, (byte) 0xFF, (byte) 0xFF, (byte) 0xFF, (byte) 0xFF, (byte) 0xFF, (byte) 0xFF
+        };
+        public static readonly string TEST_SEQUENCER_FILENAME1 = "seq1.xml";
+        public static readonly string TEST_SEQUENCER_FILENAME2 = "seq2.xml";
+        private static readonly string TEST_AUTH_FILENAME = "export.slma";
 
         public static string TEST_KEY = "ABCDEFGHIJKLMNOPABCDEFGHIJKLMNOP"; // 256bit
         public static string TEST_NONCE = "12345678"; // 8 bytes
@@ -72,7 +81,7 @@ namespace Salmon.Test.Utils
         public static byte[] TEST_NONCE_BYTES = System.Text.UTF8Encoding.Default.GetBytes(TEST_NONCE);
         public static byte[] TEST_FILENAME_NONCE_BYTES = System.Text.UTF8Encoding.Default.GetBytes(TEST_FILENAME_NONCE);
         public static byte[] TEST_HMAC_KEY_BYTES = System.Text.UTF8Encoding.Default.GetBytes(TEST_HMAC_KEY);
-
+        public static int TEST_PERF_SIZE = 40 * 1024 * 1024;
         public const int TEXT_ITERATIONS = 20;
         public static string SeekAndGetSubstringByRead(SalmonStream reader, int seek, int readCount, SeekOrigin seekOrigin)
         {
@@ -88,7 +97,7 @@ namespace Salmon.Test.Utils
                 encOuts2.Write(bytes, 0, bytesRead);
                 totalBytesRead += bytesRead;
             }
-            string decText1 = System.Text.UTF8Encoding.Default.GetString(encOuts2.ToArray());
+            string decText1 = Encoding.Default.GetString(encOuts2.ToArray());
             encOuts2.Close();
             return decText1;
         }
@@ -101,7 +110,7 @@ namespace Salmon.Test.Utils
             MemoryStream outs = new MemoryStream();
             ins.CopyTo(outs, bufferSize);
             outs.Flush();
-            contents = System.Text.UTF8Encoding.Default.GetString(outs.ToArray());
+            contents = Encoding.Default.GetString(outs.ToArray());
             outs.Close();
             return contents;
         }
@@ -111,8 +120,8 @@ namespace Salmon.Test.Utils
             MD5 md5 = MD5.Create();
             FileStream stream = File.OpenRead(realFile.GetAbsolutePath());
             byte[] hash = md5.ComputeHash(stream);
-            string hashString = Convert.ToBase64String(hash);
-            return hashString;
+            string hashstring = Convert.ToBase64String(hash);
+            return hashstring;
         }
 
         public static void EncryptWriteDecryptRead(string text, byte[] key, byte[] iv,
@@ -143,7 +152,7 @@ namespace Salmon.Test.Utils
             byte[] outputByte2 = Decrypt(encBytes, key, iv, decBufferSize,
                 integrity: testIntegrity, chunkSize: chunkSize, hmacKey: hmacKey,
                 headerLength: header != null ? (int?)headerLength : null);
-            string decText = System.Text.UTF8Encoding.Default.GetString(outputByte2);
+            string decText = Encoding.Default.GetString(outputByte2);
 
             Console.WriteLine(plainText);
             Console.WriteLine(decText);
@@ -235,24 +244,13 @@ namespace Salmon.Test.Utils
         internal static void ImportAndExport(string vaultDir, string pass, string importFile,
             int importBufferSize, int importThreads, int exportBufferSize, int exportThreads, bool integrity = false,
             bool bitflip = false, long flipPosition = -1, bool shouldBeEqual = true,
-            bool? overrideApplyFileIntegrity = null, bool? overrideVerifyFileIntegrity = null,
-            byte[] vaultNonce = null)
+            bool? overrideApplyFileIntegrity = null, bool? overrideVerifyFileIntegrity = null)
         {
-            SalmonDriveManager.SetVirtualDriveClass(typeof(DotNetDrive));
-            SalmonDriveManager.SetDriveLocation(TestHelper.GenerateFolder(vaultDir));
-            SalmonFile RootDir;
-            if (!SalmonDriveManager.GetDrive().HasConfig())
-            {
-                SalmonDriveManager.GetDrive().SetPassword(pass);
-                RootDir = SalmonDriveManager.GetDrive().GetVirtualRoot();
-            }
-            else
-            {
-                SalmonDriveManager.GetDrive().Authenticate(pass);
-            }
+
+            SalmonDriveManager.CreateDrive(vaultDir, pass);
+            SalmonFile rootDir = SalmonDriveManager.GetDrive().GetVirtualRoot();
+            rootDir.ListFiles();
             SalmonDriveManager.GetDrive().SetEnableIntegrityCheck(integrity);
-            if (vaultNonce != null)
-                SalmonDriveManager.GetDrive().GetKey().SetVaultNonce(vaultNonce);
 
             SalmonFile salmonRootDir = SalmonDriveManager.GetDrive().GetVirtualRoot();
 
@@ -291,6 +289,71 @@ namespace Salmon.Test.Utils
             {
                 Assert.AreEqual(hashPreImport, hashPostExport);
             }
+        }
+
+
+        public static void ImportAndSearch(string vaultDir, string pass, string importFile,
+                                           int importBufferSize, int importThreads)
+        {
+
+            SalmonDriveManager.CreateDrive(vaultDir, pass);
+            SalmonFile rootDir = SalmonDriveManager.GetDrive().GetVirtualRoot();
+            rootDir.ListFiles();
+            SalmonFile salmonRootDir = SalmonDriveManager.GetDrive().GetVirtualRoot();
+            DotNetFile fileToImport = new DotNetFile(importFile);
+            string rbasename = fileToImport.GetBaseName();
+
+            // import
+            SalmonFileImporter fileImporter = new SalmonFileImporter(importBufferSize, importThreads, null);
+            SalmonFile salmonFile = fileImporter.ImportFile(fileToImport, salmonRootDir, false);
+
+            // trigger the cache to add the filename
+            string basename = salmonFile.GetBaseName();
+
+            Assert.IsNotNull(salmonFile);
+            Assert.IsTrue(salmonFile.Exists());
+
+            //TODO:
+            //SalmonFileSearcher searcher = new SalmonFileSearcher();
+            //SalmonFile[] files = searcher.search(salmonRootDir, basename, true, null);
+            //Assert.IsTrue(files.Length > 0);
+            //Assert.Equals(files[0].GetBaseName(), basename);
+
+        }
+
+
+        public static void ImportAndCopy(string vaultDir, string pass, string importFile,
+                                         int importBufferSize, int importThreads, string newDir, bool move)
+        {
+
+            SalmonDriveManager.CreateDrive(vaultDir, pass);
+            SalmonFile rootDir = SalmonDriveManager.GetDrive().GetVirtualRoot();
+            rootDir.ListFiles();
+            SalmonFile salmonRootDir = SalmonDriveManager.GetDrive().GetVirtualRoot();
+            DotNetFile fileToImport = new DotNetFile(importFile);
+            string rbasename = fileToImport.GetBaseName();
+
+            // import
+            SalmonFileImporter fileImporter = new SalmonFileImporter(importBufferSize, importThreads, null);
+            SalmonFile salmonFile = fileImporter.ImportFile(fileToImport, salmonRootDir, false);
+
+            // trigger the cache to add the filename
+            string basename = salmonFile.GetBaseName();
+
+            Assert.IsNotNull(salmonFile);
+            Assert.IsTrue(salmonFile.Exists());
+
+            string checkSumBefore = GetChecksum(salmonFile.GetRealFile());
+            SalmonFile newDir1 = salmonRootDir.CreateDirectory(newDir);
+            SalmonFile newFile;
+            if (move)
+                newFile = salmonFile.Move(newDir1, null);
+            else
+                newFile = salmonFile.Copy(newDir1, null);
+            Assert.IsNotNull(newFile);
+            string checkSumAfter = GetChecksum(newFile.GetRealFile());
+            Assert.Equals(checkSumBefore, checkSumAfter);
+            Assert.Equals(salmonFile.GetBaseName(), newFile.GetBaseName());
         }
 
         private static void FlipBit(SalmonFile salmonFile, long position)
@@ -422,15 +485,15 @@ namespace Salmon.Test.Utils
         /// <param name="decReader"></param>
         private static void TestCounter(SalmonStream decReader)
         {
-            long expectedBlock = decReader.Position / decReader.GetBlockSize();
+            long expectedBlock = decReader.Position / SalmonStream.AES_BLOCK_SIZE;
             Assert.AreEqual(expectedBlock, decReader.GetBlock());
 
-            long counterBlock = BitConverter.ToInt64(decReader.GetCounter(), SalmonGenerator.GetNonceLength(), SalmonGenerator.GetBlockSize() - SalmonGenerator.GetNonceLength());
+            long counterBlock = BitConverter.ToLong(decReader.GetCounter(), SalmonGenerator.NONCE_LENGTH, SalmonGenerator.BLOCK_SIZE - SalmonGenerator.NONCE_LENGTH);
             long expectedCounterValue = decReader.GetBlock();
             Assert.AreEqual(expectedCounterValue, counterBlock);
 
-            long nonce = BitConverter.ToInt64(decReader.GetCounter(), 0, SalmonGenerator.GetNonceLength());
-            long expectedNonce = BitConverter.ToInt64(decReader.GetNonce(), 0, SalmonGenerator.GetNonceLength());
+            long nonce = BitConverter.ToLong(decReader.GetCounter(), 0, SalmonGenerator.NONCE_LENGTH);
+            long expectedNonce = BitConverter.ToLong(decReader.GetNonce(), 0, SalmonGenerator.NONCE_LENGTH);
             Assert.AreEqual(expectedNonce, nonce);
         }
 
@@ -559,8 +622,8 @@ namespace Salmon.Test.Utils
             SalmonStream inStream = readFile.GetInputStream();
             byte[] textBytes = new byte[testBytes.Length];
             inStream.Read(textBytes, 0, textBytes.Length);
-            string textString = System.Text.UTF8Encoding.Default.GetString(textBytes);
-            Assert.AreEqual(text, textString);
+            string textstring = Encoding.Default.GetString(textBytes);
+            Assert.AreEqual(text, textstring);
         }
 
         internal static void TestCounterValue(string text, byte[] key, byte[] nonce, long counter)
@@ -571,7 +634,7 @@ namespace Salmon.Test.Utils
             stream.SetAllowRangeWrite(true);
 
             // we resort to reflection to test this.
-            MethodInfo methodInfo = stream.GetType().GetMethod("IncrementCounter", BindingFlags.Instance | BindingFlags.NonPublic);
+            MethodInfo methodInfo = stream.GetType().GetMethod("IncreaseCounter", BindingFlags.Instance | BindingFlags.NonPublic);
             methodInfo.Invoke(stream, new object[] { counter });
 
             if (stream != null)
@@ -593,5 +656,310 @@ namespace Salmon.Test.Utils
             return encryptedBytes;
         }
 
+
+        public static void ExportAndImportAuth(string vault, string importFilePath)
+        {
+            string exportAuthFilePath = vault + "/" + TEST_AUTH_FILENAME;
+            string seqFile1 = vault + "/" + TEST_SEQUENCER_FILENAME1;
+            string seqFile2 = vault + "/" + TEST_SEQUENCER_FILENAME2;
+
+            // emulate 2 different devices with different sequencers
+            FileSequencer sequencer1 = new FileSequencer(new DotNetFile(seqFile1), new SalmonSequenceParser());
+            FileSequencer sequencer2 = new FileSequencer(new DotNetFile(seqFile2), new SalmonSequenceParser());
+
+            // set to the first sequencer and create the vault
+            SalmonDriveManager.SetSequencer(sequencer1);
+            SalmonDriveManager.CreateDrive(vault, TestHelper.TEST_PASSWORD);
+            SalmonDriveManager.GetDrive().Authenticate(TestHelper.TEST_PASSWORD);
+            // import a test file
+            SalmonFile salmonRootDir = SalmonDriveManager.GetDrive().GetVirtualRoot();
+            IRealFile fileToImport = SalmonDriveManager.GetDrive().GetFile(importFilePath, false);
+            SalmonFileImporter fileImporter = new SalmonFileImporter(0, 0, null);
+            SalmonFile salmonFileA1 = fileImporter.ImportFile(fileToImport, salmonRootDir, false);
+            long nonceA1 = BitConverter.ToLong(salmonFileA1.GetRequestedNonce(), 0, SalmonGenerator.NONCE_LENGTH);
+            SalmonDriveManager.CloseDrive();
+
+            // open with another device (different sequencer) and export auth id
+            SalmonDriveManager.SetSequencer(sequencer2);
+            SalmonDriveManager.OpenDrive(vault);
+            SalmonDriveManager.GetDrive().Authenticate(TestHelper.TEST_PASSWORD);
+            string authID = SalmonDriveManager.GetAuthID();
+            bool success = false;
+            try
+            {
+                // import a test file should fail because not authorized
+                salmonRootDir = SalmonDriveManager.GetDrive().GetVirtualRoot();
+                fileToImport = SalmonDriveManager.GetDrive().GetFile(importFilePath, false);
+                fileImporter = new SalmonFileImporter(0, 0, null);
+                fileImporter.ImportFile(fileToImport, salmonRootDir, false);
+                success = true;
+            }
+            catch (Exception ignored)
+            {
+
+            }
+            Assert.IsFalse(success);
+            SalmonDriveManager.CloseDrive();
+
+            //reopen with first device sequencer and export the auth file with the auth id from the second device
+            SalmonDriveManager.SetSequencer(sequencer1);
+            SalmonDriveManager.OpenDrive(vault);
+            SalmonDriveManager.GetDrive().Authenticate(TestHelper.TEST_PASSWORD);
+            SalmonDriveManager.ExportAuthFile(authID, vault, TEST_AUTH_FILENAME);
+            IRealFile configFile = SalmonDriveManager.GetDrive().GetFile(exportAuthFilePath, false);
+            SalmonFile salmonCfgFile = new SalmonFile(configFile, SalmonDriveManager.GetDrive());
+            long nonceCfg = BitConverter.ToLong(salmonCfgFile.GetFileNonce(), 0, SalmonGenerator.NONCE_LENGTH);
+            // import another test file
+            salmonRootDir = SalmonDriveManager.GetDrive().GetVirtualRoot();
+            fileToImport = SalmonDriveManager.GetDrive().GetFile(importFilePath, false);
+            fileImporter = new SalmonFileImporter(0, 0, null);
+            SalmonFile salmonFileA2 = fileImporter.ImportFile(fileToImport, salmonRootDir, false);
+            long nonceA2 = BitConverter.ToLong(salmonFileA2.GetFileNonce(), 0, SalmonGenerator.NONCE_LENGTH);
+            SalmonDriveManager.CloseDrive();
+
+            //reopen with second device(sequencer) and import auth file
+            SalmonDriveManager.SetSequencer(sequencer2);
+            SalmonDriveManager.OpenDrive(vault);
+            SalmonDriveManager.GetDrive().Authenticate(TestHelper.TEST_PASSWORD);
+            SalmonDriveManager.ImportAuthFile(exportAuthFilePath);
+            // now import a 3rd file
+            salmonRootDir = SalmonDriveManager.GetDrive().GetVirtualRoot();
+            fileToImport = SalmonDriveManager.GetDrive().GetFile(importFilePath, false);
+            SalmonFile salmonFileB1 = fileImporter.ImportFile(fileToImport, salmonRootDir, false);
+            long nonceB1 = BitConverter.ToLong(salmonFileB1.GetFileNonce(), 0, SalmonGenerator.NONCE_LENGTH);
+            SalmonFile salmonFileB2 = fileImporter.ImportFile(fileToImport, salmonRootDir, false);
+            long nonceB2 = BitConverter.ToLong(salmonFileB2.GetFileNonce(), 0, SalmonGenerator.NONCE_LENGTH);
+            SalmonDriveManager.CloseDrive();
+
+            Assert.AreEqual(nonceA1, nonceCfg - 1);
+            Assert.AreEqual(nonceCfg, nonceA2 - 2);
+            Assert.AreNotEqual(nonceA2, nonceB1);
+            Assert.AreEqual(nonceB1, nonceB2 - 2);
+        }
+
+        class MockUserSequencer : FileSequencer
+        {
+            byte[] testMaxNonce;
+            long offset;
+            internal MockUserSequencer(IRealFile file, byte[] testMaxNonce, long offset) : base(file, new SalmonSequenceParser())
+            {
+                this.testMaxNonce = testMaxNonce;
+                this.offset = offset;
+            }
+            public override void InitSequence(string driveID, string authID, byte[] startNonce, byte[] maxNonce)
+            {
+                long nMaxNonce = BitConverter.ToLong(testMaxNonce, 0, SalmonGenerator.NONCE_LENGTH);
+                startNonce = BitConverter.ToBytes(nMaxNonce + offset, SalmonGenerator.NONCE_LENGTH);
+                maxNonce = BitConverter.ToBytes(nMaxNonce, SalmonGenerator.NONCE_LENGTH);
+                base.InitSequence(driveID, authID, startNonce, maxNonce);
+            }
+        };
+
+        public static void TestMaxFiles(string vaultDir, string seqFile, string importFile,
+                                        byte[] testMaxNonce, long offset, bool shouldImport)
+        {
+            bool importSuccess;
+            try
+            {
+                importSuccess = true;
+
+                MockUserSequencer sequencer = new MockUserSequencer(new DotNetFile(seqFile), testMaxNonce, offset);
+
+                SalmonDriveManager.SetSequencer(sequencer);
+                try
+                {
+                    SalmonDrive drive = SalmonDriveManager.OpenDrive(vaultDir);
+                    drive.Authenticate(TestHelper.TEST_PASSWORD);
+                }
+                catch (Exception ex)
+                {
+                    SalmonDriveManager.CreateDrive(vaultDir, TestHelper.TEST_PASSWORD);
+                }
+                SalmonFile rootDir = SalmonDriveManager.GetDrive().GetVirtualRoot();
+                rootDir.ListFiles();
+                SalmonFile salmonRootDir = SalmonDriveManager.GetDrive().GetVirtualRoot();
+                DotNetFile fileToImport = new DotNetFile(importFile);
+                SalmonFileImporter fileImporter = new SalmonFileImporter(0, 0, null);
+                SalmonFile salmonFile = fileImporter.ImportFile(fileToImport, salmonRootDir, false);
+                if (salmonFile != null)
+                    importSuccess = true;
+                else
+                    importSuccess = false;
+            }
+            catch (Exception ex)
+            {
+                importSuccess = false;
+                Console.Error.WriteLine(ex);
+            }
+            Assert.AreEqual(shouldImport, importSuccess);
+        }
+
+        public static void TestExamples()
+        {
+            string text = "This is a plaintext that will be used for testing";
+            string testFile = "D:/tmp/file.txt";
+            IRealFile tFile = new DotNetFile(testFile);
+            if (tFile.Exists())
+                tFile.Delete();
+            byte[] bytes = Encoding.UTF8.GetBytes(text);
+            byte[] key = SalmonGenerator.GetSecureRandomBytes(32); // 256 bit key
+            byte[] nonce = SalmonGenerator.GetSecureRandomBytes(8); // 64 bit nonce
+
+            // Example 1: encrypt byte array
+            byte[] encBytes = SalmonEncryptor.Encrypt(bytes, key, nonce, false);
+            // decrypt byte array
+            byte[] decBytes = SalmonEncryptor.Decrypt(encBytes, key, nonce, false);
+            CollectionAssert.AreEqual(bytes, decBytes);
+
+            // Example 2: encrypt string and save the nonce in the header
+            nonce = SalmonGenerator.GetSecureRandomBytes(8); // always get a fresh nonce!
+            string encText = SalmonTextEncryptor.EncryptString(text, key, nonce, true);
+            // decrypt string
+            string decText = SalmonTextEncryptor.DecryptString(encText, key, null, true);
+            Assert.AreEqual(text, decText);
+
+            // Example 3: encrypt data to an output stream
+            Stream encOutStream = new MemoryStream(); // or any other writeable Stream like to a file
+            nonce = SalmonGenerator.GetSecureRandomBytes(8); // always get a fresh nonce!
+            // pass the output stream to the SalmonStream
+            SalmonStream encrypter = new SalmonStream(key, nonce, EncryptionMode.Encrypt, encOutStream);
+            // encrypt and write with a single call, you can also Seek() and Write()
+            encrypter.Write(bytes, 0, bytes.Length);
+            // encrypted data are now written to the encOutStream.
+            encOutStream.Position = 0;
+            byte[] encData = (encOutStream as MemoryStream).ToArray();
+            encrypter.Flush();
+            encrypter.Close();
+            encOutStream.Close();
+            //decrypt a stream with encoded data
+            Stream encInputStream = new MemoryStream(encData); // or any other readable Stream like from a file
+            SalmonStream decrypter = new SalmonStream(key, nonce, EncryptionMode.Decrypt, encInputStream);
+            byte[] decBuffer = new byte[1024];
+            // decrypt and read data with a single call, you can also Seek() before Read()
+            int bytesRead = decrypter.Read(decBuffer, 0, decBuffer.Length);
+            // encrypted data are now in the decBuffer
+            string decString = Encoding.UTF8.GetString(decBuffer, 0, bytesRead);
+            Console.WriteLine(decString);
+            decrypter.Close();
+            encInputStream.Close();
+            Assert.AreEqual(text, decString);
+
+            // Example 4: encrypt to a file
+            SalmonFile encFile = new SalmonFile(new DotNetFile(testFile));
+            nonce = SalmonGenerator.GetSecureRandomBytes(8); // always get a fresh nonce!
+            encFile.SetEncryptionKey(key);
+            encFile.SetRequestedNonce(nonce);
+            Stream stream = encFile.GetOutputStream();
+            // encrypt data and write with a single call
+            stream.Write(bytes, 0, bytes.Length);
+            stream.Flush();
+            stream.Close();
+            // decrypt an encrypted file
+            SalmonFile encFile2 = new SalmonFile(new DotNetFile(testFile));
+            encFile2.SetEncryptionKey(key);
+            Stream stream2 = encFile2.GetInputStream();
+            byte[] decBuff = new byte[1024];
+            // decrypt and read data with a single call, you can also Seek() to any position before Read()
+            int encBytesRead = stream2.Read(decBuff, 0, decBuff.Length);
+            string decString2 = Encoding.UTF8.GetString(decBuff, 0, encBytesRead);
+            Console.WriteLine(decString2);
+            stream2.Close();
+            Assert.AreEqual(text, decString2);
+
+        }
+
+        public static void EncryptAndDecryptStream(byte[] data, byte[] key, byte[] nonce)
+        {
+            Stream encOutStream = new MemoryStream();
+            SalmonStream encrypter = new SalmonStream(key, nonce, EncryptionMode.Encrypt, encOutStream);
+            Stream inputStream = new MemoryStream(data);
+            inputStream.CopyTo(encrypter);
+            encOutStream.Position = 0;
+            byte[] encData = (encOutStream as MemoryStream).ToArray();
+            encrypter.Flush();
+            encrypter.Close();
+            encOutStream.Close();
+            inputStream.Close();
+
+            Stream encInputStream = new MemoryStream(encData);
+            SalmonStream decrypter = new SalmonStream(key, nonce, EncryptionMode.Decrypt, encInputStream);
+            Stream outStream = new MemoryStream();
+            decrypter.CopyTo(outStream);
+            outStream.Position = 0;
+            byte[] decData = (outStream as MemoryStream).ToArray();
+            decrypter.Close();
+            encInputStream.Close();
+            outStream.Close();
+
+            CollectionAssert.AreEqual(data, decData);
+        }
+
+        internal static byte[] GetRealFileContents(string filePath)
+        {
+            IRealFile file = new DotNetFile(filePath);
+            Stream ins = file.GetInputStream();
+            MemoryStream outs = new MemoryStream();
+            ins.CopyTo(outs);
+            outs.Position = 0;
+            outs.Flush();
+            outs.Close();
+            return outs.ToArray();
+        }
+
+        public static byte[] GetRandArray(int size)
+        {
+            Random random = new Random();
+            byte[] data = new byte[size];
+            random.NextBytes(data);
+            return data;
+        }
+
+        internal static void EncryptAndDecryptByteArray(int size, int threads = 1)
+        {
+            byte[] data = TestHelper.GetRandArray(size);
+            long t1 = SalmonTime.CurrentTimeMillis();
+            byte[] encData = SalmonEncryptor.Encrypt(data, TestHelper.TEST_KEY_BYTES, TestHelper.TEST_NONCE_BYTES, false, threads: threads);
+            long t2 = SalmonTime.CurrentTimeMillis();
+            byte[] decData = SalmonEncryptor.Decrypt(encData, TestHelper.TEST_KEY_BYTES, TestHelper.TEST_NONCE_BYTES, false, threads: threads);
+            long t3 = SalmonTime.CurrentTimeMillis();
+            CollectionAssert.AreEqual(data, decData);
+            Console.WriteLine("enc time: " + (t2 - t1));
+            Console.WriteLine("dec time: " + (t3 - t2));
+        }
+
+        internal static void EncryptAndDecryptByteArrayDef(int size)
+        {
+            byte[] data = TestHelper.GetRandArray(size);
+            long t1 = SalmonTime.CurrentTimeMillis();
+            byte[] encData = TestHelper.DefaultAESCTRTransform(data, TestHelper.TEST_KEY_BYTES, TestHelper.TEST_NONCE_BYTES);
+            long t2 = SalmonTime.CurrentTimeMillis();
+            byte[] decData = TestHelper.DefaultAESCTRTransform(encData, TestHelper.TEST_KEY_BYTES, TestHelper.TEST_NONCE_BYTES);
+            long t3 = SalmonTime.CurrentTimeMillis();
+            CollectionAssert.AreEqual(data, decData);
+            Console.WriteLine("enc time: " + (t2 - t1));
+            Console.WriteLine("dec time: " + (t3 - t2));
+        }
+
+        internal static void CopyMemory(int size)
+        {
+            long t1 = SalmonTime.CurrentTimeMillis();
+            byte[] data = TestHelper.GetRandArray(size);
+            long t2 = SalmonTime.CurrentTimeMillis();
+            byte[] data1 = new byte[data.Length];
+            Array.Copy(data, data1, data.Length);
+            long t3 = SalmonTime.CurrentTimeMillis();
+            Console.WriteLine("gen time: " + (t2 - t1));
+            Console.WriteLine("copy time: " + (t3 - t2));
+
+            byte[] mem = new byte[16];
+            MemoryStream ms = new MemoryStream(mem);
+            ms.Write(new byte[] { 1, 2, 3, 4, 5, 6, 7, 8, 9, 10 }, 3, 2);
+            byte[] output = ms.ToArray();
+            Console.WriteLine("write: " + string.Join(", ", output));
+            byte[] buff = new byte[16];
+            ms.Position = 0;
+            ms.Read(buff, 1, 4);
+            Console.WriteLine("read: " + string.Join(", ", buff));
+        }
     }
 }

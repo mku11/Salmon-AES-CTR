@@ -22,37 +22,72 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 */
 using Microsoft.VisualStudio.TestTools.UnitTesting;
+using Org.BouncyCastle.Utilities;
 using Salmon.FS;
 using Salmon.Net.FS;
 using Salmon.Streams;
 using Salmon.Test.Utils;
 using System;
 using System.IO;
-using System.Reflection;
-using System.Runtime.InteropServices;
 using System.Text;
-using static Salmon.SalmonIntegrity;
-using static Salmon.Streams.SalmonStream;
 
 namespace Salmon.Test
 {
     [TestClass]
     public class SalmonTestRunner
     {
-        private static readonly string TEST_OUTPUT_DIR = @"d:\\tmp\output";
-        private static readonly string TEST_VAULT_DIR = @"d:\\tmp\output\enc";
-        private static readonly string TEST_VAULT2_DIR = @"d:\\tmp\output\enc2";
-
-        private static readonly string TEST_IMPORT_TINY_FILE = @"d:\\tmp\testdata\tiny_test.txt";
-        private static readonly string TEST_IMPORT_SMALL_FILE = @"d:\\tmp\testdata\small_test.zip";
-        private static readonly string TEST_IMPORT_MEDIUM_FILE = @"d:\\tmp\testdata\medium_test.zip";
-        private static readonly string TEST_IMPORT_LARGE_FILE = @"d:\\tmp\testdata\large_test.mp4";
-        private static readonly string TEST_IMPORT_HUGE_FILE = @"d:\\tmp\testdata\huge.zip";
+        private static readonly string TEST_OUTPUT_DIR = @"d:\tmp\output";
+        private static readonly string TEST_VAULT_DIR = @"d:\tmp\output\enc";
+        private static readonly string TEST_VAULT2_DIR = @"d:\tmp\output\enc2";
+        private static readonly string TEST_EXPORT_AUTH_DIR = @"d:\tmp\output\export";
+        private static readonly string TEST_IMPORT_TINY_FILE = @"d:\tmp\testdata\tiny_test.txt";
+        private static readonly string TEST_IMPORT_SMALL_FILE = @"d:\tmp\testdata\small_test.zip";
+        private static readonly string TEST_IMPORT_MEDIUM_FILE = @"d:\tmp\testdata\medium_test.zip";
+        private static readonly string TEST_IMPORT_LARGE_FILE = @"d:\tmp\testdata\large_test.mp4";
+        private static readonly string TEST_IMPORT_HUGE_FILE = @"d:\tmp\testdata\huge.zip";
         private static readonly string TEST_IMPORT_FILE = TEST_IMPORT_SMALL_FILE;
+        private static readonly string TEST_PIPE_NAME = "SalmonService";
 
         static SalmonTestRunner()
         {
             SalmonStream.SetProviderType(SalmonStream.ProviderType.AesIntrinsics);
+            SalmonDriveManager.SetVirtualDriveClass(typeof(DotNetDrive));
+            SalmonStream.SetEnableLogDetails(false);
+            //SalmonEncryptor.SetBufferSize(16);
+
+            SetupFileSequencer();
+            //SetupServiceSequencer();
+        }
+
+
+        [TestInitialize]
+        public void Setup()
+        {
+            
+        }
+
+        [TestCleanup]
+        public void Finish()
+        {
+
+        }
+
+        private static void SetupServiceSequencer()
+        {
+            WinClientSequencer serviceSequencer = new WinClientSequencer(TEST_PIPE_NAME);
+            SalmonDriveManager.SetSequencer(serviceSequencer);
+        }
+
+        private static void SetupFileSequencer()
+        {
+            IRealFile dir = new DotNetFile(TEST_OUTPUT_DIR);
+            if (!dir.Exists())
+                dir.Mkdir();
+            IRealFile file = dir.GetChild(TestHelper.TEST_SEQUENCER_FILENAME1);
+            if (file.Exists())
+                file.Delete();
+            FileSequencer sequencer = new FileSequencer(file, new SalmonSequenceParser());
+            SalmonDriveManager.SetSequencer(sequencer);
         }
 
         [TestMethod]
@@ -180,7 +215,7 @@ TestHelper.TEST_ENC_BUFFER_SIZE, TestHelper.TEST_ENC_BUFFER_SIZE,
                 TestHelper.EncryptWriteDecryptRead(TestHelper.TEST_TEXT, TestHelper.TEST_KEY_BYTES, TestHelper.TEST_NONCE_BYTES, 16 * 2 + 3, 16 * 2,
                 testIntegrity: true, hmacKey: TestHelper.TEST_HMAC_KEY_BYTES, chunkSize: 32);
             }
-            catch (SalmonIntegrityException)
+            catch (SalmonIntegrity.SalmonIntegrityException)
             {
                 caught = true;
             }
@@ -199,7 +234,7 @@ TestHelper.TEST_ENC_BUFFER_SIZE, TestHelper.TEST_ENC_BUFFER_SIZE,
                 TestHelper.EncryptWriteDecryptRead(TestHelper.TEST_TEXT, TestHelper.TEST_KEY_BYTES, TestHelper.TEST_NONCE_BYTES, 16 * 2 + 3, 16 * 2,
                 testIntegrity: true, hmacKey: TestHelper.TEST_HMAC_KEY_BYTES);
             }
-            catch (SalmonIntegrityException)
+            catch (SalmonIntegrity.SalmonIntegrityException)
             {
                 caught = true;
             }
@@ -226,7 +261,7 @@ TestHelper.TEST_ENC_BUFFER_SIZE, TestHelper.TEST_ENC_BUFFER_SIZE,
                 TestHelper.EncryptWriteDecryptRead(TestHelper.TEST_TEXT, TestHelper.TEST_KEY_BYTES, TestHelper.TEST_NONCE_BYTES, 16 * 2, 16 * 2 + 3,
                 testIntegrity: true, hmacKey: TestHelper.TEST_HMAC_KEY_BYTES);
             }
-            catch (SalmonIntegrityException)
+            catch (SalmonIntegrity.SalmonIntegrityException)
             {
                 caught = true;
             }
@@ -245,7 +280,7 @@ TestHelper.TEST_ENC_BUFFER_SIZE, TestHelper.TEST_ENC_BUFFER_SIZE,
 TestHelper.TEST_ENC_BUFFER_SIZE, TestHelper.TEST_ENC_BUFFER_SIZE,
                     testIntegrity: true, hmacKey: TestHelper.TEST_HMAC_KEY_BYTES, flipBits: true);
             }
-            catch (SalmonIntegrityException)
+            catch (SalmonIntegrity.SalmonIntegrityException)
             {
                 caught = true;
             }
@@ -262,7 +297,7 @@ TestHelper.TEST_ENC_BUFFER_SIZE, TestHelper.TEST_ENC_BUFFER_SIZE,
 TestHelper.TEST_ENC_BUFFER_SIZE, TestHelper.TEST_ENC_BUFFER_SIZE,
                     testIntegrity: true, hmacKey: TestHelper.TEST_HMAC_KEY_BYTES, chunkSize: 32, flipBits: true);
             }
-            catch (SalmonIntegrityException)
+            catch (SalmonIntegrity.SalmonIntegrityException)
             {
                 caught = true;
             }
@@ -284,7 +319,7 @@ TestHelper.TEST_ENC_BUFFER_SIZE, TestHelper.TEST_ENC_BUFFER_SIZE,
             byte[] inputBytes = System.Text.UTF8Encoding.Default.GetBytes(plainText);
             MemoryStream ins = new MemoryStream(inputBytes);
             MemoryStream outs = new MemoryStream();
-            SalmonStream encWriter = new SalmonStream(TestHelper.TEST_KEY_BYTES, TestHelper.TEST_NONCE_BYTES, EncryptionMode.Encrypt, outs);
+            SalmonStream encWriter = new SalmonStream(TestHelper.TEST_KEY_BYTES, TestHelper.TEST_NONCE_BYTES, SalmonStream.EncryptionMode.Encrypt, outs);
             try
             {
                 encWriter.CopyTo(outs);
@@ -316,7 +351,7 @@ TestHelper.TEST_ENC_BUFFER_SIZE, TestHelper.TEST_ENC_BUFFER_SIZE,
 
             MemoryStream ins = new MemoryStream(encBytes);
             MemoryStream outs = new MemoryStream();
-            SalmonStream encWriter = new SalmonStream(TestHelper.TEST_KEY_BYTES, TestHelper.TEST_NONCE_BYTES, EncryptionMode.Decrypt, ins);
+            SalmonStream encWriter = new SalmonStream(TestHelper.TEST_KEY_BYTES, TestHelper.TEST_NONCE_BYTES, SalmonStream.EncryptionMode.Decrypt, ins);
             try
             {
                 ins.CopyTo(encWriter);
@@ -405,7 +440,7 @@ TestHelper.TEST_ENC_BUFFER_SIZE, TestHelper.TEST_ENC_BUFFER_SIZE,
                 5, TestHelper.TEST_TEXT_WRITE.Length, TestHelper.TEST_TEXT_WRITE, alignToChunk: false,
                 integrity: true, chunkSize: 32, hmacKey: TestHelper.TEST_HMAC_KEY_BYTES, allowRangeWrite: true);
             }
-            catch (SalmonIntegrityException)
+            catch (SalmonIntegrity.SalmonIntegrityException)
             {
                 caught = true;
             }
@@ -415,15 +450,11 @@ TestHelper.TEST_ENC_BUFFER_SIZE, TestHelper.TEST_ENC_BUFFER_SIZE,
         [TestMethod]
         public void ShouldAuthenticateNegative()
         {
-            SalmonDriveManager.SetVirtualDriveClass(typeof(DotNetDrive));
-            SalmonDriveManager.SetDriveLocation(TestHelper.GenerateFolder(TEST_VAULT2_DIR));
-            SalmonFile RootDir;
+            string vaultDir = TestHelper.GenerateFolder(TEST_VAULT2_DIR);
+            SalmonDriveManager.CreateDrive(vaultDir, TestHelper.TEST_PASSWORD);
             bool wrongPassword = false;
-            if (!SalmonDriveManager.GetDrive().HasConfig())
-            {
-                SalmonDriveManager.GetDrive().SetPassword(TestHelper.TEST_PASSWORD);
-                RootDir = SalmonDriveManager.GetDrive().GetVirtualRoot();
-            }
+            SalmonFile rootDir = SalmonDriveManager.GetDrive().GetVirtualRoot();
+            rootDir.ListFiles();
             try
             {
                 SalmonDriveManager.GetDrive().Authenticate(TestHelper.TEST_FALSE_PASSWORD);
@@ -438,19 +469,14 @@ TestHelper.TEST_ENC_BUFFER_SIZE, TestHelper.TEST_ENC_BUFFER_SIZE,
         [TestMethod]
         public void ShouldCatchNotAuthenticatedNegative()
         {
-            SalmonDriveManager.SetVirtualDriveClass(typeof(DotNetDrive));
-            SalmonDriveManager.SetDriveLocation(TestHelper.GenerateFolder(TEST_VAULT2_DIR));
-            SalmonFile RootDir;
+            string vaultDir = TestHelper.GenerateFolder(TEST_VAULT2_DIR);
+            SalmonDriveManager.CreateDrive(vaultDir, TestHelper.TEST_PASSWORD);
             bool wrongPassword = false;
-            SalmonDriveManager.GetDrive().SetPassword(TestHelper.TEST_PASSWORD);
-
-            // log out 
-            SalmonDriveManager.GetDrive().Authenticate(null);
-
+            SalmonDriveManager.CloseDrive();
+            SalmonDriveManager.OpenDrive(vaultDir);
             try
             {
-                // access but not authenticated
-                RootDir = SalmonDriveManager.GetDrive().GetVirtualRoot();
+                SalmonFile RootDir = SalmonDriveManager.GetDrive().GetVirtualRoot();
             }
             catch (SalmonAuthException)
             {
@@ -463,20 +489,16 @@ TestHelper.TEST_ENC_BUFFER_SIZE, TestHelper.TEST_ENC_BUFFER_SIZE,
         [TestMethod]
         public void ShouldAuthenticatePositive()
         {
-            SalmonDriveManager.SetVirtualDriveClass(typeof(DotNetDrive));
-            SalmonDriveManager.SetDriveLocation(TestHelper.GenerateFolder(TEST_VAULT2_DIR));
-            SalmonFile RootDir;
+            string vaultDir = TestHelper.GenerateFolder(TEST_VAULT2_DIR);
+            SalmonDriveManager.CreateDrive(vaultDir, TestHelper.TEST_PASSWORD);
             bool wrongPassword = false;
-            SalmonDriveManager.GetDrive().SetPassword(TestHelper.TEST_PASSWORD);
-
-            // log out 
-            SalmonDriveManager.GetDrive().Authenticate(null);
+            SalmonDriveManager.CloseDrive();
 
             try
             {
-                // log back in
+                SalmonDriveManager.OpenDrive(vaultDir);
                 SalmonDriveManager.GetDrive().Authenticate(TestHelper.TEST_PASSWORD);
-                RootDir = SalmonDriveManager.GetDrive().GetVirtualRoot();
+                SalmonFile RootDir = SalmonDriveManager.GetDrive().GetVirtualRoot();
             }
             catch (SalmonAuthException)
             {
@@ -492,11 +514,11 @@ TestHelper.TEST_ENC_BUFFER_SIZE, TestHelper.TEST_ENC_BUFFER_SIZE,
             bool integrityFailed = false;
             try
             {
-                TestHelper.ImportAndExport(TEST_VAULT2_DIR, TestHelper.TEST_PASSWORD, TEST_IMPORT_FILE,
+                TestHelper.ImportAndExport(TestHelper.GenerateFolder(TEST_VAULT2_DIR), TestHelper.TEST_PASSWORD, TEST_IMPORT_FILE,
 TestHelper.ENC_IMPORT_BUFFER_SIZE, TestHelper.ENC_IMPORT_THREADS, TestHelper.ENC_EXPORT_BUFFER_SIZE, TestHelper.ENC_EXPORT_THREADS,
                 integrity: false, bitflip: true, 24 + 10, shouldBeEqual: false);
             }
-            catch (SalmonIntegrityException)
+            catch (SalmonIntegrity.SalmonIntegrityException)
             {
                 integrityFailed = true;
             }
@@ -509,11 +531,11 @@ TestHelper.ENC_IMPORT_BUFFER_SIZE, TestHelper.ENC_IMPORT_THREADS, TestHelper.ENC
             bool integrityFailed = false;
             try
             {
-                TestHelper.ImportAndExport(TEST_VAULT2_DIR, TestHelper.TEST_PASSWORD, TEST_IMPORT_FILE,
+                TestHelper.ImportAndExport(TestHelper.GenerateFolder(TEST_VAULT2_DIR), TestHelper.TEST_PASSWORD, TEST_IMPORT_FILE,
 TestHelper.ENC_IMPORT_BUFFER_SIZE, TestHelper.ENC_IMPORT_THREADS, TestHelper.ENC_EXPORT_BUFFER_SIZE, TestHelper.ENC_EXPORT_THREADS,
                 integrity: false);
             }
-            catch (SalmonIntegrityException)
+            catch (SalmonIntegrity.SalmonIntegrityException)
             {
                 integrityFailed = true;
             }
@@ -526,11 +548,11 @@ TestHelper.ENC_IMPORT_BUFFER_SIZE, TestHelper.ENC_IMPORT_THREADS, TestHelper.ENC
             bool integrityFailed = false;
             try
             {
-                TestHelper.ImportAndExport(TEST_VAULT2_DIR, TestHelper.TEST_PASSWORD, TEST_IMPORT_FILE,
+                TestHelper.ImportAndExport(TestHelper.GenerateFolder(TEST_VAULT2_DIR), TestHelper.TEST_PASSWORD, TEST_IMPORT_FILE,
 TestHelper.ENC_IMPORT_BUFFER_SIZE, TestHelper.ENC_IMPORT_THREADS, TestHelper.ENC_EXPORT_BUFFER_SIZE, TestHelper.ENC_EXPORT_THREADS,
                 integrity: true, bitflip: true, 24 + 10, shouldBeEqual: false);
             }
-            catch (SalmonIntegrityException)
+            catch (SalmonIntegrity.SalmonIntegrityException)
             {
                 integrityFailed = true;
             }
@@ -545,12 +567,12 @@ TestHelper.ENC_IMPORT_BUFFER_SIZE, TestHelper.ENC_IMPORT_THREADS, TestHelper.ENC
             bool failed = false;
             try
             {
-                TestHelper.ImportAndExport(TEST_VAULT2_DIR, TestHelper.TEST_PASSWORD, TEST_IMPORT_FILE,
+                TestHelper.ImportAndExport(TestHelper.GenerateFolder(TEST_VAULT2_DIR), TestHelper.TEST_PASSWORD, TEST_IMPORT_FILE,
 TestHelper.ENC_IMPORT_BUFFER_SIZE, TestHelper.ENC_IMPORT_THREADS, TestHelper.ENC_EXPORT_BUFFER_SIZE, TestHelper.ENC_EXPORT_THREADS,
                 integrity: true, bitflip: true, 24 + 10, shouldBeEqual: false,
                 overrideApplyFileIntegrity: false);
             }
-            catch (SalmonIntegrityException)
+            catch (SalmonIntegrity.SalmonIntegrityException)
             {
                 integrityFailed = true;
             }
@@ -586,7 +608,7 @@ TestHelper.ENC_IMPORT_BUFFER_SIZE, TestHelper.ENC_IMPORT_THREADS, TestHelper.ENC
             bool failed = false;
             try
             {
-                TestHelper.ImportAndExport(TEST_VAULT2_DIR, TestHelper.TEST_PASSWORD, TEST_IMPORT_FILE,
+                TestHelper.ImportAndExport(TestHelper.GenerateFolder(TEST_VAULT2_DIR), TestHelper.TEST_PASSWORD, TEST_IMPORT_FILE,
 TestHelper.ENC_IMPORT_BUFFER_SIZE, TestHelper.ENC_IMPORT_THREADS, TestHelper.ENC_EXPORT_BUFFER_SIZE, TestHelper.ENC_EXPORT_THREADS,
                 integrity: true, bitflip: true, flipPosition: 36, shouldBeEqual: false,
                 overrideApplyFileIntegrity: true, overrideVerifyFileIntegrity: false);
@@ -604,7 +626,7 @@ TestHelper.ENC_IMPORT_BUFFER_SIZE, TestHelper.ENC_IMPORT_THREADS, TestHelper.ENC
             bool failed = false;
             try
             {
-                TestHelper.ImportAndExport(TEST_VAULT2_DIR, TestHelper.TEST_PASSWORD, TEST_IMPORT_FILE,
+                TestHelper.ImportAndExport(TestHelper.GenerateFolder(TEST_VAULT2_DIR), TestHelper.TEST_PASSWORD, TEST_IMPORT_FILE,
 TestHelper.ENC_IMPORT_BUFFER_SIZE, TestHelper.ENC_IMPORT_THREADS, TestHelper.ENC_EXPORT_BUFFER_SIZE, TestHelper.ENC_EXPORT_THREADS,
                 integrity: true, bitflip: false, shouldBeEqual: true,
                 overrideApplyFileIntegrity: true, overrideVerifyFileIntegrity: false);
@@ -622,11 +644,11 @@ TestHelper.ENC_IMPORT_BUFFER_SIZE, TestHelper.ENC_IMPORT_THREADS, TestHelper.ENC
             bool integrityFailed = false;
             try
             {
-                TestHelper.ImportAndExport(TEST_VAULT2_DIR, TestHelper.TEST_PASSWORD, TEST_IMPORT_FILE,
+                TestHelper.ImportAndExport(TestHelper.GenerateFolder(TEST_VAULT2_DIR), TestHelper.TEST_PASSWORD, TEST_IMPORT_FILE,
 TestHelper.ENC_IMPORT_BUFFER_SIZE, TestHelper.ENC_IMPORT_THREADS, TestHelper.ENC_EXPORT_BUFFER_SIZE, TestHelper.ENC_EXPORT_THREADS,
                 integrity: true, bitflip: true, 20, shouldBeEqual: false);
             }
-            catch (SalmonIntegrityException)
+            catch (SalmonIntegrity.SalmonIntegrityException)
             {
                 integrityFailed = true;
             }
@@ -639,12 +661,12 @@ TestHelper.ENC_IMPORT_BUFFER_SIZE, TestHelper.ENC_IMPORT_THREADS, TestHelper.ENC
             bool importSuccess = false;
             try
             {
-                TestHelper.ImportAndExport(TEST_VAULT2_DIR, TestHelper.TEST_PASSWORD, TEST_IMPORT_FILE,
+                TestHelper.ImportAndExport(TestHelper.GenerateFolder(TEST_VAULT2_DIR), TestHelper.TEST_PASSWORD, TEST_IMPORT_FILE,
 TestHelper.ENC_IMPORT_BUFFER_SIZE, TestHelper.ENC_IMPORT_THREADS, TestHelper.ENC_EXPORT_BUFFER_SIZE, TestHelper.ENC_EXPORT_THREADS,
                 integrity: true);
                 importSuccess = true;
             }
-            catch (SalmonIntegrityException)
+            catch (SalmonIntegrity.SalmonIntegrityException)
             {
                 importSuccess = false;
             }
@@ -656,20 +678,29 @@ TestHelper.ENC_IMPORT_BUFFER_SIZE, TestHelper.ENC_IMPORT_THREADS, TestHelper.ENC
         [TestMethod]
         public void ShouldCatchVaultMaxFiles()
         {
-            bool importSuccess = false;
-            try
-            {
-                TestHelper.ImportAndExport(TEST_VAULT2_DIR, TestHelper.TEST_PASSWORD, TEST_IMPORT_FILE,
-TestHelper.ENC_IMPORT_BUFFER_SIZE, TestHelper.ENC_IMPORT_THREADS, TestHelper.ENC_EXPORT_BUFFER_SIZE, TestHelper.ENC_EXPORT_THREADS,
-                vaultNonce: TestHelper.TEXT_VAULT_MAX_FILE_NONCE);
-                importSuccess = true;
-            }
-            catch (Exception ex)
-            {
-                importSuccess = false;
-                Console.WriteLine(ex);
-            }
-            Assert.IsFalse(importSuccess);
+            SalmonDriveManager.SetVirtualDriveClass(typeof(DotNetDrive));
+
+            string vaultDir = TestHelper.GenerateFolder(TEST_VAULT2_DIR);
+            string seqFile = vaultDir + "/" + TestHelper.TEST_SEQUENCER_FILENAME1;
+            TestHelper.TestMaxFiles(vaultDir, seqFile, TEST_IMPORT_TINY_FILE,
+                    TestHelper.TEXT_VAULT_MAX_FILE_NONCE, -2, true);
+
+            // we need 2 nonces once of the filename the other for the file
+            // so this should fail
+            vaultDir = TestHelper.GenerateFolder(TEST_VAULT2_DIR);
+            seqFile = vaultDir + "/" + TestHelper.TEST_SEQUENCER_FILENAME1;
+            TestHelper.TestMaxFiles(vaultDir, seqFile, TEST_IMPORT_TINY_FILE,
+                    TestHelper.TEXT_VAULT_MAX_FILE_NONCE, -1, false);
+
+            vaultDir = TestHelper.GenerateFolder(TEST_VAULT2_DIR);
+            seqFile = vaultDir + "/" + TestHelper.TEST_SEQUENCER_FILENAME1;
+            TestHelper.TestMaxFiles(vaultDir, seqFile, TEST_IMPORT_TINY_FILE,
+                TestHelper.TEXT_VAULT_MAX_FILE_NONCE, 0, false);
+
+            vaultDir = TestHelper.GenerateFolder(TEST_VAULT2_DIR);
+            seqFile = vaultDir + "/" + TestHelper.TEST_SEQUENCER_FILENAME1;
+            TestHelper.TestMaxFiles(vaultDir, seqFile, TEST_IMPORT_TINY_FILE,
+                    TestHelper.TEXT_VAULT_MAX_FILE_NONCE, 1, false);
         }
 
         [TestMethod]
@@ -725,7 +756,7 @@ TestHelper.ENC_IMPORT_BUFFER_SIZE, TestHelper.ENC_IMPORT_THREADS, TestHelper.ENC
                 filenameNonce: TestHelper.TEST_FILENAME_NONCE_BYTES, fileNonce: TestHelper.TEST_NONCE_BYTES, outputDir: TEST_OUTPUT_DIR,
                 flipBit: true, flipPosition: 45);
             }
-            catch (SalmonIntegrityException)
+            catch (SalmonIntegrity.SalmonIntegrityException)
             {
                 caught = true;
             }
@@ -746,7 +777,7 @@ TestHelper.ENC_IMPORT_BUFFER_SIZE, TestHelper.ENC_IMPORT_THREADS, TestHelper.ENC
                 filenameNonce: TestHelper.TEST_FILENAME_NONCE_BYTES, fileNonce: TestHelper.TEST_NONCE_BYTES, outputDir: TEST_OUTPUT_DIR,
                 flipBit: true, flipPosition: 45);
             }
-            catch (SalmonIntegrityException)
+            catch (SalmonIntegrity.SalmonIntegrityException)
             {
                 caught = true;
             }
@@ -773,7 +804,7 @@ TestHelper.ENC_IMPORT_BUFFER_SIZE, TestHelper.ENC_IMPORT_THREADS, TestHelper.ENC
                 filenameNonce: TestHelper.TEST_FILENAME_NONCE_BYTES, fileNonce: TestHelper.TEST_NONCE_BYTES, outputDir: TEST_OUTPUT_DIR,
                 flipBit: true, flipPosition: 24 + 32 + 5);
             }
-            catch (SalmonIntegrityException)
+            catch (SalmonIntegrity.SalmonIntegrityException)
             {
                 caught = true;
             }
@@ -802,17 +833,153 @@ TestHelper.ENC_IMPORT_BUFFER_SIZE, TestHelper.ENC_IMPORT_THREADS, TestHelper.ENC
         public void ShouldConvert()
         {
             int num1 = 12564;
-            byte[] bytes = BitConverter.GetBytes(num1, 4);
-            int num2 = BitConverter.ToInt32(bytes, 0, 4);
+            byte[] bytes = BitConverter.ToBytes(num1, 4);
+            int num2 = (int)BitConverter.ToLong(bytes, 0, 4);
             Assert.AreEqual(num1, num2);
 
             long lnum1 = 1256445783493L;
-            bytes = BitConverter.GetBytes(lnum1, 8);
-            long lnum2 = BitConverter.ToInt64(bytes, 0, 8);
+            bytes = BitConverter.ToBytes(lnum1, 8);
+            long lnum2 = BitConverter.ToLong(bytes, 0, 8);
             Assert.AreEqual(lnum1, lnum2);
 
 
 
         }
-    }
+
+
+        [TestMethod]
+        public void ShouldExportAndImportAuth()
+        {
+            string vault = TestHelper.GenerateFolder(TEST_VAULT_DIR);
+            string importFilePath = TEST_IMPORT_TINY_FILE;
+            TestHelper.ExportAndImportAuth(vault, importFilePath);
+        }
+
+
+        [TestMethod]
+        public void TestExamples()
+        {
+            TestHelper.TestExamples();
+        }
+
+        [TestMethod]
+        public void ShouldEncryptAndDecrtypStream()
+        {
+            byte[] data = TestHelper.GetRealFileContents(TEST_IMPORT_FILE);
+            TestHelper.EncryptAndDecryptStream(data, TestHelper.TEST_KEY_BYTES, TestHelper.TEST_NONCE_BYTES);
+        }
+
+        [TestMethod]
+        public void ShouldEncryptAndDecrtyptStreamPerformanceDef()
+        {
+            Console.WriteLine("SalmonStream Def");
+            SalmonStream.SetProviderType(SalmonStream.ProviderType.Default);
+            TestHelper.EncryptAndDecryptByteArray(TestHelper.TEST_PERF_SIZE);
+        }
+
+        [TestMethod]
+        public void ShouldEncryptAndDecrtyptStreamPerformanceDefParallel()
+        {
+            Console.WriteLine("SalmonStream Def");
+            SalmonStream.SetProviderType(SalmonStream.ProviderType.Default);
+            TestHelper.EncryptAndDecryptByteArray(TestHelper.TEST_PERF_SIZE, threads: 4);        }
+
+        [TestMethod]
+        public void ShouldEncryptAndDecrtyptStreamPerformanceIntr()
+        {
+            Console.WriteLine("SalmonStream Intr");
+            SalmonStream.SetProviderType(SalmonStream.ProviderType.AesIntrinsics);
+            TestHelper.EncryptAndDecryptByteArray(TestHelper.TEST_PERF_SIZE);
+        }
+
+        [TestMethod]
+        public void ShouldEncryptAndDecrtyptStreamPerformanceIntrParallel()
+        {
+            Console.WriteLine("SalmonStream Intr");
+            SalmonStream.SetProviderType(SalmonStream.ProviderType.AesIntrinsics);
+            TestHelper.EncryptAndDecryptByteArray(TestHelper.TEST_PERF_SIZE, threads: 4);
+        }
+
+
+        [TestMethod]
+        public void ShouldEncryptAndDecrtyptStreamPerformanceDefault()
+        {
+            Console.WriteLine("Default");
+            TestHelper.EncryptAndDecryptByteArrayDef(TestHelper.TEST_PERF_SIZE);
+        }
+
+        [TestMethod]
+        public void ShouldEncryptAndDecrtyptArrayMultipleThreads()
+        {
+            byte[] data = TestHelper.GetRandArray(1 * 1024 * 1024);
+            //byte[] data = Encoding.UTF8.GetBytes("This is another test that is better");
+            long t1 = SalmonTime.CurrentTimeMillis();
+            byte[] encData = SalmonEncryptor.Encrypt(data, TestHelper.TEST_KEY_BYTES, TestHelper.TEST_NONCE_BYTES, false, threads: 2);
+            long t2 = SalmonTime.CurrentTimeMillis();
+            byte[] decData = SalmonEncryptor.Decrypt(encData, TestHelper.TEST_KEY_BYTES, TestHelper.TEST_NONCE_BYTES, false, threads: 2);
+            long t3 = SalmonTime.CurrentTimeMillis();
+            CollectionAssert.AreEqual(data, decData);
+            Console.WriteLine("enc time: " + (t2 - t1));
+            Console.WriteLine("dec time: " + (t3 - t2));
+        }
+
+        [TestMethod]
+        public void ShouldEncryptAndDecrtyptArrayMultipleThreadsIntegrity()
+        {
+            SalmonEncryptor.SetBufferSize(2 * 1024 * 1024);
+            byte[] data = TestHelper.GetRandArray(1 * 1024 * 1024 + 3);
+            //byte[] data = Encoding.UTF8.GetBytes("This is another test that is better");
+            long t1 = SalmonTime.CurrentTimeMillis();
+            byte[] encData = SalmonEncryptor.Encrypt(data, TestHelper.TEST_KEY_BYTES, TestHelper.TEST_NONCE_BYTES, 
+                false, threads: 2, integrity: true, hmacKey: TestHelper.TEST_HMAC_KEY_BYTES);
+            long t2 = SalmonTime.CurrentTimeMillis();
+            byte[] decData = SalmonEncryptor.Decrypt(encData, TestHelper.TEST_KEY_BYTES, TestHelper.TEST_NONCE_BYTES, 
+                false, threads: 2, integrity: true, hmacKey: TestHelper.TEST_HMAC_KEY_BYTES);
+            long t3 = SalmonTime.CurrentTimeMillis();
+            CollectionAssert.AreEqual(data, decData);
+            Console.WriteLine("enc time: " + (t2 - t1));
+            Console.WriteLine("dec time: " + (t3 - t2));
+        }
+
+        [TestMethod]
+        public void ShouldEncryptAndDecrtyptArrayMultipleThreadsIntegrityCustomChunkSize()
+        {
+            byte[] data = TestHelper.GetRandArray(1 * 1024 * 1024);
+            //byte[] data = Encoding.UTF8.GetBytes("This is another test that is better");
+            long t1 = SalmonTime.CurrentTimeMillis();
+            byte[] encData = SalmonEncryptor.Encrypt(data, TestHelper.TEST_KEY_BYTES, TestHelper.TEST_NONCE_BYTES,
+                false, threads: 2, integrity: true, hmacKey: TestHelper.TEST_HMAC_KEY_BYTES, chunkSize: 32);
+            long t2 = SalmonTime.CurrentTimeMillis();
+            byte[] decData = SalmonEncryptor.Decrypt(encData, TestHelper.TEST_KEY_BYTES, TestHelper.TEST_NONCE_BYTES,
+                false, threads: 2, integrity: true, hmacKey: TestHelper.TEST_HMAC_KEY_BYTES, chunkSize: 32);
+            long t3 = SalmonTime.CurrentTimeMillis();
+            CollectionAssert.AreEqual(data, decData);
+            Console.WriteLine("enc time: " + (t2 - t1));
+            Console.WriteLine("dec time: " + (t3 - t2));
+        }
+
+        [TestMethod]
+        public void ShouldEncryptAndDecrtyptArrayMultipleThreadsIntegrityCustomChunkSizeStoreHeader()
+        {
+            byte[] data = TestHelper.GetRandArray(1 * 1024 * 1024);
+            //byte[] data = Encoding.UTF8.GetBytes("This is another test that is better");
+            long t1 = SalmonTime.CurrentTimeMillis();
+            byte[] encData = SalmonEncryptor.Encrypt(data, TestHelper.TEST_KEY_BYTES, TestHelper.TEST_NONCE_BYTES,
+                storeHeaderData: true, threads: 2, integrity: false, hmacKey: TestHelper.TEST_HMAC_KEY_BYTES, chunkSize: 32);
+            long t2 = SalmonTime.CurrentTimeMillis();
+            byte[] decData = SalmonEncryptor.Decrypt(encData, TestHelper.TEST_KEY_BYTES, hasHeaderData: true,
+                threads: 1, hmacKey: TestHelper.TEST_HMAC_KEY_BYTES);
+            long t3 = SalmonTime.CurrentTimeMillis();
+            CollectionAssert.AreEqual(data, decData);
+            Console.WriteLine("enc time: " + (t2 - t1));
+            Console.WriteLine("dec time: " + (t3 - t2));
+        }
+
+
+        [TestMethod]
+        public void ShouldCopyMemory()
+        {
+            TestHelper.CopyMemory(4 * 1024 * 1024);
+        }
+        }
 }
