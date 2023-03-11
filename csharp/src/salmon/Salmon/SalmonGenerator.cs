@@ -34,62 +34,52 @@ namespace Salmon
     {
         //TODO: support versioned formats for the stream header
         //TODO: perhaps store this property in an XML config file?
-        private static string MAGIC_BYTES = "SAL";
-        private static readonly byte VERSION = 1; 
+        public static readonly string MAGIC_BYTES = "SLM";
+        public static readonly byte VERSION = 2;
 
-        private static readonly int MAGIC_LENGTH = 3;
-        private static readonly int VERSION_LENGTH = sizeof(byte);
+        public static readonly int MAGIC_LENGTH = 3;
+        public static readonly int VERSION_LENGTH = 1;
 
-        private static readonly int ITERATIONS_LENGTH = sizeof(int);
-
-        // iterations for the text derived master key
-        private static readonly int ITERATIONS = 65536;
+        public static readonly int ITERATIONS_LENGTH = 4;
 
         // should be 16 for AES256 the same as the iv
-        private static readonly int BLOCK_SIZE = 16;
+        public static readonly int BLOCK_SIZE = 16;
 
         // length for IV that will be used for encryption and master encryption of the combined key
-        private static readonly int IV_LENGTH = 16;
+        public static readonly int IV_LENGTH = 16;
 
         // encryption key length for AES256
-        private static readonly int KEY_LENGTH = 32;
+        public static readonly int KEY_LENGTH = 32;
 
         // encryption key length for HMAC256
-        private static readonly int HMAC_KEY_LENGTH = 32;
+        public static readonly int HMAC_KEY_LENGTH = 32;
 
         // result of the SHA256 should always be 256 bits
-        private static readonly int HMAC_RESULT_LENGTH = 32;
-        
+        public static readonly int HMAC_RESULT_LENGTH = 32;
+
 
         // combined key is encryption key + HMAC key
-        private static readonly int COMBINED_KEY_LENGTH = KEY_LENGTH + HMAC_KEY_LENGTH;
+        public static readonly int COMBINED_KEY_LENGTH = KEY_LENGTH + HMAC_KEY_LENGTH;
 
         // master key to encrypt the combined key we also use AES256
-        private static readonly int MASTER_KEY_LENGTH = 32;
+        public static readonly int MASTER_KEY_LENGTH = 32;
 
         // salt size
-        private static readonly int SALT_LENGTH = 24;
+        public static readonly int SALT_LENGTH = 24;
 
         // vault nonce size
-        private static readonly int NONCE_LENGTH = 8;
+        public static readonly int NONCE_LENGTH = 8;
 
-        /// <summary>
-        /// Returns the byte length for the salt that will be used for encrypting the combined key (encryption key + HMAC key)
-        /// </summary>
-        /// <returns></returns>
-        public static int GetSaltLength()
-        {
-            return SALT_LENGTH;
-        }
+        // drive ID size
+        public static readonly int DRIVE_ID_LENGTH = 16;
 
-        /// <summary>
-        /// Returns the byte length for the combined key (encryption key + HMAC key)
-        /// </summary>
-        /// <returns></returns>
-        public static int GetCombinedKeyLength()
-        {
-            return COMBINED_KEY_LENGTH;
-        }
+        // auth ID size
+        public static readonly int AUTH_ID_SIZE = 16;
+
+        public static readonly int CHUNKSIZE_LENGTH = 4;
+
+        // iterations for the text derived master key
+        public static int iterations = 65536;
 
         /// <summary>
         /// Gets the fixed magic bytes array
@@ -110,67 +100,39 @@ namespace Salmon
         }
 
         /// <summary>
-        /// Returns the byte length that will store the version number 
-        /// </summary>
-        /// <returns></returns>
-        public static int GetVersionLength()
-        {
-            return VERSION_LENGTH;
-        }
-
-        /// <summary>
-        /// Returns the byte length of the magic bytes
-        /// </summary>
-        /// <returns></returns>
-        public static int GetMagicBytesLength()
-        {
-            return MAGIC_LENGTH;
-        }
-
-        /// <summary>
-        /// Returns the byte length of the initial vector
-        /// </summary>
-        /// <returns></returns>
-        public static int GetIvLength()
-        {
-            return IV_LENGTH;
-        }
-
-        /// <summary>
         /// Returns the iterations used for deriving the combined key from 
         /// the text password
         /// </summary>
         /// <returns></returns>
         public static int GetIterations()
         {
-            return ITERATIONS;
+            return iterations;
         }
 
-        /// <summary>
-        /// Returns the byte length of the iterations that will be stored in the config file
-        /// </summary>
-        /// <returns></returns>
-        public static int GetIterationsLength()
+        public static void SetIterations(int iterations)
         {
-            return ITERATIONS_LENGTH;
+            SalmonGenerator.iterations = iterations;
         }
 
-        /// <summary>
-        /// Returns the byte length of the HMAC key that will be stored in the file
-        /// </summary>
-        /// <returns></returns>
-        public static int GetHMACKeyLength()
+        public static byte[] GenerateDriveID()
         {
-            return HMAC_KEY_LENGTH;
+            return GetSecureRandomBytes(DRIVE_ID_LENGTH);
         }
 
-        /// <summary>
-        /// Returns the byte length of the encryption key
-        /// </summary>
-        /// <returns></returns>
-        public static int GetKeyLength()
+        public static byte[] getDefaultVaultNonce()
         {
-            return KEY_LENGTH;
+            byte[] bytes = new byte[NONCE_LENGTH];
+            return bytes;
+        }
+
+        public static byte[] GetDefaultMaxVaultNonce()
+        {
+            return BitConverter.ToBytes(long.MaxValue, 8);
+        }
+
+        public static byte[] GenerateAuthId()
+        {
+            return GetSecureRandomBytes(AUTH_ID_SIZE);
         }
 
         /// <summary>
@@ -180,7 +142,7 @@ namespace Salmon
         public static byte[] GetSecureRandomBytes(int size)
         {
             RNGCryptoServiceProvider rand = new RNGCryptoServiceProvider();
-            byte [] bytes = new byte[size];
+            byte[] bytes = new byte[size];
             rand.GetNonZeroBytes(bytes);
             return bytes;
         }
@@ -191,7 +153,7 @@ namespace Salmon
         /// <returns></returns>
         public static byte[] GenerateCombinedKey()
         {
-            return GetSecureRandomBytes(GetCombinedKeyLength());
+            return GetSecureRandomBytes(COMBINED_KEY_LENGTH);
         }
 
         /// <summary>
@@ -201,19 +163,10 @@ namespace Salmon
         /// <param name="salt">The salt to be used for the key derivation</param>
         /// <param name="iterations">The number of iterations the key derivation alogrithm will use</param>
         /// <returns></returns>
-        public static byte[] GetMasterKey(string pass, byte [] salt, int iterations)
+        public static byte[] GetMasterKey(string pass, byte[] salt, int iterations)
         {
-            byte[] masterKey = SalmonGenerator.GetKeyFromPassword(pass, salt, iterations, GetMasterKeyLength());
+            byte[] masterKey = SalmonGenerator.GetKeyFromPassword(pass, salt, iterations, MASTER_KEY_LENGTH);
             return masterKey;
-        }
-
-        /// <summary>
-        /// Return the length of the master key in bytes
-        /// </summary>
-        /// <returns></returns>
-        public static int GetMasterKeyLength()
-        {
-            return MASTER_KEY_LENGTH;
         }
 
         /// <summary>
@@ -222,7 +175,7 @@ namespace Salmon
         /// <returns></returns>
         public static byte[] GenerateSalt()
         {
-            return GetSecureRandomBytes(GetSaltLength());
+            return GetSecureRandomBytes(SALT_LENGTH);
         }
 
         /// <summary>
@@ -231,7 +184,7 @@ namespace Salmon
         /// <returns></returns>
         public static byte[] GenerateMasterKeyIV()
         {
-            return GetSecureRandomBytes(GetIvLength());
+            return GetSecureRandomBytes(IV_LENGTH);
         }
 
         /// <summary>
@@ -248,32 +201,5 @@ namespace Salmon
             return KeyDerivation.Pbkdf2(password, salt, KeyDerivationPrf.HMACSHA256, iterations, outputBytes);
         }
 
-        /// <summary>
-        /// Returns the HMAC signature length
-        /// </summary>
-        /// <returns></returns>
-        public static int GetHmacResultLength()
-        {
-            return HMAC_RESULT_LENGTH;
-        }
-
-        /// <summary>
-        /// Returns the HMAC signature length
-        /// </summary>
-        /// <returns></returns>
-        public static int GetBlockSize()
-        {
-            return BLOCK_SIZE;
-        }
-
-        /// <summary>
-        /// Returns the Vault Nonce Length
-        /// </summary>
-        /// <returns></returns>
-        public static int GetNonceLength()
-        {
-            return NONCE_LENGTH;
-        }
-        
     }
 }

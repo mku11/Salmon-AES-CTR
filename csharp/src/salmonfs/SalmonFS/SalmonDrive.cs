@@ -36,16 +36,16 @@ namespace Salmon.FS
     /// </summary>
     public abstract class SalmonDrive
     {
-        protected static readonly string CONFIG_FILE = "cf.dat";
-        protected static readonly string VALIDATION_FILE = "vl.dat";
-        protected static readonly string VIRTUAL_DRIVE_DIR = "fs";
-        protected static readonly string THUMBNAIL_DIR = "ic";
-        protected static readonly string SHARE_DIR = "share";
-        protected static readonly string EXPORT_DIR = "export";
+        public static readonly string CONFIG_FILE = "vault.slmn";
+        public static readonly string AUTH_CONFIG_FILENAME = "auth.slma";
+        public static readonly string VIRTUAL_DRIVE_DIR = "fs";
+        public static readonly string THUMBNAIL_DIR = ".thumbnail";
+        public static readonly string SHARE_DIR = "share";
+        public static readonly string EXPORT_DIR = "export";
 
         private static readonly int DEFAULT_FILE_CHUNK_SIZE = 256 * 1024;
         private static readonly int BUFFER_SIZE = 32768;
-
+        private byte[] driveID;
         private SalmonKey encryptionKey = null;
         private bool enableIntegrityCheck = true;
         private static int defaultFileChunkSize = DEFAULT_FILE_CHUNK_SIZE;
@@ -71,7 +71,7 @@ namespace Salmon.FS
             defaultFileChunkSize = fileChunkSize;
         }
 
-        protected abstract IRealFile GetFile(string filepath, bool root);
+        public abstract IRealFile GetFile(string filepath, bool root);
 
         /// <summary>
         // create a virtual drive at the directory path provided
@@ -83,20 +83,6 @@ namespace Salmon.FS
             if (realRootPath == null)
                 return;
             realRoot = GetFile(realRootPath, true);
-            IRealFile virtualRootRealFile = realRoot.GetChild(VIRTUAL_DRIVE_DIR);
-            if (virtualRootRealFile == null || !virtualRootRealFile.Exists())
-            {
-                try
-                {
-                    virtualRootRealFile = realRoot.CreateDirectory(VIRTUAL_DRIVE_DIR);
-                }
-                catch (Exception ex)
-                {
-                    Console.WriteLine(ex);
-                }
-
-            }
-            virtualRoot = new SalmonFile(virtualRootRealFile, this);
             encryptionKey = new SalmonKey();
         }
 
@@ -108,17 +94,6 @@ namespace Salmon.FS
             enableIntegrityCheck = false;
             realRoot = null;
             virtualRoot = null;
-        }
-
-        /// <summary>
-        /// Returns true if the file is a system file
-        /// </summary>
-        /// <param name="salmonFile">Virtual File to be checked</param>
-        /// <returns></returns>
-        internal bool IsSystemFile(SalmonFile salmonFile)
-        {
-            IRealFile rnFile = realRoot.GetChild(VALIDATION_FILE);
-            return salmonFile.GetRealPath().Equals(rnFile.GetPath());
         }
 
         /// <summary>
@@ -154,8 +129,28 @@ namespace Salmon.FS
         /// <param name="pass"></param>
         public void SetPassword(string pass)
         {
-            SalmonKey key = GetKey();
-            CreateConfigFile(pass, key.GetDriveKey(), key.GetHMACKey());
+            lock (this)
+            {
+                SalmonKey key = GetKey();
+                CreateConfig(pass, key.GetDriveKey(), key.GetHMACKey());
+            }
+        }
+
+        private void InitFS()
+        {
+            IRealFile virtualRootRealFile = realRoot.GetChild(VIRTUAL_DRIVE_DIR);
+            if (virtualRootRealFile == null || !virtualRootRealFile.Exists())
+            {
+                try
+                {
+                    virtualRootRealFile = realRoot.CreateDirectory(VIRTUAL_DRIVE_DIR);
+                }
+                catch (Exception ex)
+                {
+                    Console.WriteLine(ex);
+                }
+            }
+            virtualRoot = new SalmonFile(virtualRootRealFile, this);
         }
 
         /// <summary>
@@ -168,15 +163,15 @@ namespace Salmon.FS
         /// <param name="driveKey">The current Drive key</param>
         /// <param name="hmacKey">The current HMAC key</param>
         //TODO: partial refactor to SalmonDriveConfig
-        private void CreateConfigFile(string password, byte[] driveKey, byte [] hmacKey)
+        private void CreateConfig(string password, byte[] driveKey, byte[] hmacKey)
         {
             IRealFile configFile = realRoot.GetChild(CONFIG_FILE);
 
             // if it's an exsting config that we need to update with
             // the new password then we prefer to be authenticate
-            // TODO: we should probably call Authenticate() rather
-            // than assume the key != null but the user can anyway manually delete the config file
-            // so it doesn't matter
+            // TODO: we should probably call Authenticate() rather than assume
+            //  that the key != null. Though the user can anyway manually delete the config file
+            //  so it doesn't matter
             if (driveKey == null && configFile != null && configFile.Exists())
                 throw new SalmonAuthException("Not authenticated");
 
@@ -189,17 +184,19 @@ namespace Salmon.FS
 
             byte version = SalmonGenerator.GetVersion();
 
-            // if this is a new config file
-            // derive a 512 bit key that will be split to:
-            // a file encryption key (encryption key)
-            // an HMAC key
+            // if this is a new config file derive a 512 bit key that will be split to:
+            // a) drive encryption key (for encrypting filenames and files)
+            // b) HMAC key for file integrity
+            bool newDrive = false;
             if (driveKey == null)
             {
-                driveKey = new byte[SalmonGenerator.GetKeyLength()];
-                hmacKey = new byte[SalmonGenerator.GetHMACKeyLength()];
-                byte [] combinedKey = SalmonGenerator.GenerateCombinedKey();
-                Array.Copy(combinedKey, 0, driveKey, 0, SalmonGenerator.GetKeyLength());
-                Array.Copy(combinedKey, SalmonGenerator.GetKeyLength(), hmacKey, 0, SalmonGenerator.GetHMACKeyLength());
+                newDrive = true;
+                driveKey = new byte[SalmonGenerator.KEY_LENGTH];
+                hmacKey = new byte[SalmonGenerator.HMAC_KEY_LENGTH];
+                byte[] combKey = SalmonGenerator.GenerateCombinedKey();
+                Array.Copy(combKey, 0, driveKey, 0, SalmonGenerator.KEY_LENGTH);
+                Array.Copy(combKey, SalmonGenerator.KEY_LENGTH, hmacKey, 0, SalmonGenerator.HMAC_KEY_LENGTH);
+                driveID = SalmonGenerator.GenerateDriveID();
             }
 
             // Get the salt that we will use to encrypt the combined key (encryption key + HMAC key)
@@ -213,37 +210,33 @@ namespace Salmon.FS
             // create a key that will encrypt both the (encryption key and the HMAC key)
             byte[] masterKey = SalmonGenerator.GetMasterKey(password, salt, iterations);
 
-            // initialize a once that will serve as an incremental sequence for each of the files
-            byte[] vaultNonce = new byte[SalmonGenerator.GetNonceLength()];
-
             // encrypt the combined key (fskey + hmacKey) using the masterKey and the masterKeyIv
             MemoryStream ms = new MemoryStream();
             SalmonStream stream = new SalmonStream(masterKey, masterKeyIv, EncryptionMode.Encrypt, ms);
             stream.Write(driveKey, 0, driveKey.Length);
             stream.Write(hmacKey, 0, hmacKey.Length);
-            stream.Write(vaultNonce, 0, vaultNonce.Length);
+            stream.Write(driveID, 0, driveID.Length);
             stream.Flush();
             stream.Close();
-            byte[] encryptedCombinedKeyAndNonce = ms.ToArray();
+            byte[] encData = ms.ToArray();
 
-            byte[] encVaultNonce = new byte[SalmonGenerator.GetNonceLength()];
-            Array.Copy(encryptedCombinedKeyAndNonce, SalmonGenerator.GetKeyLength() + SalmonGenerator.GetHMACKeyLength(),
-                encVaultNonce, 0, SalmonGenerator.GetNonceLength());
-
-            // get the hmac hash only for the vault nonce
-            byte[] hmacSignature = SalmonIntegrity.CalculateHMAC(encVaultNonce, 0, encVaultNonce.Length, hmacKey);
+            // generate the hmac signature
+            byte[] hmacSignature = SalmonIntegrity.CalculateHMAC(encData, 0, encData.Length, hmacKey, null);
 
             SalmonDriveConfig.WriteDriveConfig(configFile, magicBytes, version, salt, iterations, masterKeyIv,
-                encryptedCombinedKeyAndNonce, hmacSignature);
+                    encData, hmacSignature);
 
-            encryptionKey.SetDriveKey(driveKey);
-            encryptionKey.SetHmacKey(hmacKey);
-            encryptionKey.SetVaultNonce(vaultNonce);
-            encryptionKey.SetMasterKey(masterKey);
-            encryptionKey.SetSalt(salt);
-            encryptionKey.SetIterations(iterations);
+            SetKey(masterKey, driveKey, hmacKey, salt, iterations);
+
+            if (newDrive)
+            {
+                // create a full sequence for nonces
+                byte[] authID = SalmonGenerator.GenerateAuthId();
+                SalmonDriveManager.CreateSequence(driveID, authID);
+                SalmonDriveManager.InitSequence(driveID, authID);
+            }
+            InitFS();
         }
-
 
         /// <summary>
         /// Return the root directory of the virtual drive
@@ -259,7 +252,7 @@ namespace Salmon.FS
         }
 
         /// <summary>
-        /// Function Verifies if the user password is correct otherwise it 
+        /// Verify if the user password is correct otherwise it throws a SalmonAuthException
         /// throws a SalmonAuthException
         /// </summary>
         /// <param name="password"></param>
@@ -272,90 +265,98 @@ namespace Salmon.FS
                 {
                     if (encryptionKey != null)
                     {
-                        encryptionKey.SetMasterKey(null);
-                        encryptionKey.SetDriveKey(null);
-                        encryptionKey.SetHmacKey(null);
-                        encryptionKey.SetVaultNonce(null);
-                        encryptionKey.SetSalt(null);
-                        encryptionKey.SetIterations(0);
+                        ClearKey();
+                        this.driveID = null;
                     }
                     return;
                 }
 
-                IRealFile realConfigFile = GetConfigFile();
-                SalmonDriveConfig salmonConfig = GetSalmonConfig(realConfigFile);
+                SalmonDriveConfig salmonConfig = GetDriveConfig();
 
                 int iterations = salmonConfig.GetIterations();
 
-                byte [] salt = salmonConfig.GetSalt();
+                byte[] salt = salmonConfig.GetSalt();
 
                 // derive the master key from the text password
                 byte[] masterKey = SalmonGenerator.GetMasterKey(password, salt, iterations);
-                
+
                 // get the master Key Iv
                 byte[] masterKeyIv = salmonConfig.GetIv();
 
-                // get the encrypted combined key and vault nonce
-                byte[] encryptedCombinedKeysAndNonce = salmonConfig.GetEncryptedKeysAndNonce();
-                byte[] encVaultNonce = new byte[SalmonGenerator.GetNonceLength()];
-                Array.Copy(encryptedCombinedKeysAndNonce, SalmonGenerator.GetKeyLength() + SalmonGenerator.GetHMACKeyLength(),
-                    encVaultNonce, 0, encVaultNonce.Length);
-
+                // get the encrypted combined key and drive id
+                byte[] encData = salmonConfig.GetEncryptedData();
+                
                 // decrypt the combined key (encryption key + HMAC key) using the master key
-                MemoryStream ms = new MemoryStream(encryptedCombinedKeysAndNonce);
-                stream = new SalmonStream(masterKey, masterKeyIv, EncryptionMode.Decrypt, ms);
-                
-                byte[] driveKey = new byte[SalmonGenerator.GetKeyLength()];
-                int bytesRead = stream.Read(driveKey, 0, driveKey.Length);
+                MemoryStream ms = new MemoryStream(encData);
+                stream = new SalmonStream(masterKey, masterKeyIv, SalmonStream.EncryptionMode.Decrypt, ms,
+                        null, false, null, null);
 
-                byte[] hmacKey = new byte[SalmonGenerator.GetHMACKeyLength()];
-                bytesRead = stream.Read(hmacKey, 0, hmacKey.Length);
-                
-                byte[] vaultNonce = new byte[SalmonGenerator.GetNonceLength()];
-                bytesRead = stream.Read(vaultNonce, 0, vaultNonce.Length);
+                byte[] driveKey = new byte[SalmonGenerator.KEY_LENGTH];
+                stream.Read(driveKey, 0, driveKey.Length);
 
-                // to make sure we have the right key we get the hmac portion 
-                // and try to verify the vault nonce
-                VerifyHmac(salmonConfig, encVaultNonce, hmacKey);
+                byte[] hmacKey = new byte[SalmonGenerator.HMAC_KEY_LENGTH];
+                stream.Read(hmacKey, 0, hmacKey.Length);
+
+                byte[] driveID = new byte[SalmonGenerator.DRIVE_ID_LENGTH];
+                stream.Read(driveID, 0, driveID.Length);
+
+                // to make sure we have the right key we get the hmac portion
+                // and try to verify the vault drive ID
+                VerifyHmac(salmonConfig, encData, hmacKey);
 
                 // set the combined key (encryption key + HMAC key) and the vault nonce
-                encryptionKey.SetMasterKey(masterKey);
-                encryptionKey.SetDriveKey(driveKey);
-                encryptionKey.SetHmacKey(hmacKey);
-                encryptionKey.SetVaultNonce(vaultNonce);
-                encryptionKey.SetSalt(salt);
-                encryptionKey.SetIterations(iterations);
-
+                SetKey(masterKey, driveKey, hmacKey, salt, iterations);
+                this.driveID = driveID;
+                InitFS();
                 OnAuthenticationSuccess();
             }
             catch (Exception ex)
             {
-                Console.WriteLine(ex);
-                encryptionKey.SetMasterKey(null);
-                encryptionKey.SetDriveKey(null);
-                encryptionKey.SetHmacKey(null);
-                encryptionKey.SetVaultNonce(null);
-                encryptionKey.SetSalt(null);
-                encryptionKey.SetIterations(0);
+                if (encryptionKey != null)
+                {
+                    ClearKey();
+                }
+                this.driveID = null;
                 OnAuthenticationError();
                 throw new SalmonAuthException("Could not authenticate, try again", ex);
-            } finally
+            }
+            finally
             {
                 if (stream != null)
                     stream.Close();
             }
         }
 
+
+        private void SetKey(byte[] masterKey, byte[] driveKey, byte[] hmacKey, byte[] salt, int iterations)
+        {
+            encryptionKey.SetMasterKey(masterKey);
+            encryptionKey.SetDriveKey(driveKey);
+            encryptionKey.SetHmacKey(hmacKey);
+            encryptionKey.SetSalt(salt);
+            encryptionKey.SetIterations(iterations);
+        }
+
+        private void ClearKey()
+        {
+            encryptionKey.SetMasterKey(null);
+            encryptionKey.SetDriveKey(null);
+            encryptionKey.SetHmacKey(null);
+            encryptionKey.SetSalt(null);
+            encryptionKey.SetIterations(0);
+        }
+
+
         /// <summary>
-        /// Verify that the HMAC is correct for the current vaultNonce
+        /// Verify that the HMAC is correct
         /// </summary>
         /// <param name="salmonConfig"></param>
-        /// <param name="encVaultNonce"></param>
+        /// <param name="data"></param>
         /// <param name="hmacKey"></param>
-        private void VerifyHmac(SalmonDriveConfig salmonConfig, byte[] encVaultNonce, byte[] hmacKey)
+        private void VerifyHmac(SalmonDriveConfig salmonConfig, byte[] data, byte[] hmacKey)
         {
             byte[] hmacSignature = salmonConfig.GetHMACsignature();
-            byte[] hmac = SalmonIntegrity.CalculateHMAC(encVaultNonce, 0, encVaultNonce.Length, hmacKey);
+            byte[] hmac = SalmonIntegrity.CalculateHMAC(data, 0, data.Length, hmacKey);
             for (int i = 0; i < hmacKey.Length; i++)
                 if (hmacSignature[i] != hmac[i])
                     throw new Exception("Could not authenticate");
@@ -363,85 +364,20 @@ namespace Salmon.FS
 
         internal byte[] GetNextNonce()
         {
-            lock (this)
-            {
-                if (!IsAuthenticated())
-                    throw new SalmonAuthException("Not authenticated");
-
-                int iterations = GetKey().GetIterations();
-
-                // get the salt
-                byte[] salt = GetKey().GetSalt();
-
-                // get the current master key
-                byte[] masterKey = GetKey().GetMasterKey();
-
-                // generate a new iv so we don't get the same
-                // the master iv is 128 bit so the space is quite large so collisions are very non-probable
-                byte[] masterKeyIv = SalmonGenerator.GenerateMasterKeyIV();
-
-                byte[] driveKey = GetKey().GetDriveKey();
-
-                byte[] hmacKey = GetKey().GetHMACKey();
-
-                byte[] vaultNonce = GetKey().GetVaultNonce();
-
-                //We get the next nonce by incrementing the lowest 4 bytes
-                long newLowNonce = 0;
-                //we check not to wrap around so we don't reuse nonces
-                long currNonceInt = BitConverter.ToInt64(vaultNonce, 0, SalmonGenerator.GetNonceLength());
-                //TODO: use Math.addExact is available for SDK 24+ so for now we provide as much
-                // backwards compatibility as possible with a simple check instead
-                if (currNonceInt < 0 || currNonceInt >= long.MaxValue)
-                    throw new Exception("Cannot import file, vault exceeded maximum nonces");
-                newLowNonce = currNonceInt + 1;
-                byte[] newLowVaultNonce = BitConverter.GetBytes(newLowNonce, SalmonGenerator.GetNonceLength());
-                Array.Copy(newLowVaultNonce, 0, vaultNonce, 0, newLowVaultNonce.Length);
-                GetKey().SetVaultNonce(vaultNonce);
-
-
-                // encrypt the combined key (fskey + hmacKey) using the masterKey and the masterKeyIv
-                MemoryStream encMs = new MemoryStream();
-                SalmonStream encStream = new SalmonStream(masterKey, masterKeyIv, EncryptionMode.Encrypt, encMs);
-                encStream.Write(driveKey, 0, driveKey.Length);
-                encStream.Write(hmacKey, 0, hmacKey.Length);
-                encStream.Write(vaultNonce, 0, vaultNonce.Length);
-                encStream.Flush();
-                encStream.Close();
-                byte[] encryptedCombinedKeyAndNonce = encMs.ToArray();
-
-                byte[] encVaultNonce = new byte[SalmonGenerator.GetNonceLength()];
-                Array.Copy(encryptedCombinedKeyAndNonce, SalmonGenerator.GetKeyLength() + SalmonGenerator.GetHMACKeyLength(),
-                    encVaultNonce, 0, SalmonGenerator.GetNonceLength());
-
-                // get the hmac hash only for the vault nonce
-                byte[] hmacSignature = SalmonIntegrity.CalculateHMAC(encVaultNonce, 0, encVaultNonce.Length, GetKey().GetHMACKey());
-
-                // rewrite the config file
-                IRealFile realConfigFile = GetConfigFile();
-                SalmonDriveConfig.WriteDriveConfig(realConfigFile, SalmonGenerator.GetMagicBytes(), SalmonGenerator.GetVersion(),
-                    salt, iterations, masterKeyIv,
-                    encryptedCombinedKeyAndNonce, hmacSignature);
-
-                return vaultNonce;
-            }
+            if (!IsAuthenticated())
+                throw new SalmonAuthException("Not authenticated");
+            return SalmonDriveManager.GetNextNonce(this);
         }
 
         /// <summary>
         /// Method is called when the user is authenticated
         /// </summary>
-        protected virtual void OnAuthenticationSuccess()
-        {
-            
-        }
+        protected abstract void OnAuthenticationSuccess();
 
         /// <summary>
         /// Method is called when the user authentication has failed
         /// </summary>
-        protected virtual void OnAuthenticationError()
-        {
-
-        }
+        protected abstract void OnAuthenticationError();
 
         /// <summary>
         /// Returns true if password authentication has succeeded
@@ -480,10 +416,10 @@ namespace Salmon.FS
         }
 
         /// <summary>
-        /// Return the current config file
+        /// Return the drive config file
         /// </summary>
         /// <returns></returns>
-        private IRealFile GetConfigFile()
+        private IRealFile GetDriveConfigFile()
         {
             if (realRoot == null || !realRoot.Exists())
                 return null;
@@ -521,8 +457,11 @@ namespace Salmon.FS
         /// </summary>
         /// <param name="configFile">The drive configuration file</param>
         /// <returns></returns>
-        private SalmonDriveConfig GetSalmonConfig(IRealFile configFile)
+        private SalmonDriveConfig GetDriveConfig()
         {
+            IRealFile configFile = GetDriveConfigFile();
+            if (configFile == null || !configFile.Exists())
+                return null;
             byte[] bytes = GetBytesFromRealFile(configFile.GetPath());
             SalmonDriveConfig driveConfig = new SalmonDriveConfig(bytes);
             return driveConfig;
@@ -552,7 +491,7 @@ namespace Salmon.FS
         /// </summary>
         /// <param name="fileName">Filename</param>
         /// <returns></returns>
-        public string GetFileNameWithoutExtension(String fileName)
+        public string GetFileNameWithoutExtension(string fileName)
         {
             if (fileName == null)
                 return "";
@@ -571,23 +510,28 @@ namespace Salmon.FS
         /// <returns></returns>
         public bool HasConfig()
         {
-            IRealFile configFile = GetConfigFile();
-            if (configFile == null || !configFile.Exists())
-                return false;
+            SalmonDriveConfig salmonConfig = null;
             try
             {
-                SalmonDriveConfig salmonConfig = GetSalmonConfig(configFile);
+                salmonConfig = GetDriveConfig();
             }
-            catch (Exception)
+            catch (Exception ex)
             {
                 return false;
             }
+            if (salmonConfig == null)
+                return false;
             return true;
         }
 
         public void SaveCache()
         {
             //TODO: 
+        }
+
+        public byte[] GetDriveID()
+        {
+            return driveID;
         }
     }
 }

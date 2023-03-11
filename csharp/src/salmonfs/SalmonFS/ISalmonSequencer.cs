@@ -1,4 +1,4 @@
-﻿/*
+/*
 MIT License
 
 Copyright (c) 2021 Max Kas
@@ -22,31 +22,22 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 */
 using System;
-using System.Collections.Generic;
-using System.IO;
-using Salmon.FS;
 
-namespace Salmon.Net.FS
+namespace Salmon.FS
 {
-    // Salmon Drive implementation for .Net
-    public class DotNetDrive : SalmonDrive
+    public interface ISalmonSequencer : IDisposable
     {
-        public DotNetDrive(string realRoot) : base(realRoot) { }
 
-        public override IRealFile GetFile(string filepath, bool root)
-        {
-            DotNetFile dotNetFile = new DotNetFile(filepath);
-            return dotNetFile;
-        }
+        void CreateSequence(string driveID, string authID);
 
-        protected override void OnAuthenticationError()
-        {
-            
-        }
+        void InitSequence(string driveID, string authID, byte[] startNonce, byte[] maxNonce);
 
-        protected override void OnAuthenticationSuccess()
-        {
-            
-        }
+        void SetMaxNonce(string driveID, string authID, byte[] maxNonce);
+
+        byte[] NextNonce(string driveID);
+
+        void RevokeSequence(string driveID);
+
+        SalmonSequenceConfig.Sequence GetSequence(string driveID);
     }
 }

@@ -43,7 +43,7 @@ namespace Salmon.FS
         private bool failed = false;
         private Exception lastException;
 
-        public delegate void OnProgressChanged(object sender, long bytesRead, long totalBytesRead, string message);
+        public delegate void OnProgressChanged(SalmonFile file, long bytesRead, long totalBytesRead, string message);
         public OnProgressChanged OnTaskProgressChanged;
 
         public SalmonFileExporter(int bufferSize = DEFAULT_ENC_BUFFER_SIZE, int threads = DEFAULT_ENC_THREADS)
@@ -97,8 +97,8 @@ namespace Salmon.FS
             IRealFile tfile = exportDir.GetChild(targetFileName);
             if (tfile != null && tfile.Exists())
             {
-                String filename = SalmonDriveManager.GetDrive().GetFileNameWithoutExtension(targetFileName);
-                String ext = SalmonDriveManager.GetDrive().GetExtensionFromFileName(targetFileName);
+                string filename = SalmonDriveManager.GetDrive().GetFileNameWithoutExtension(targetFileName);
+                string ext = SalmonDriveManager.GetDrive().GetExtensionFromFileName(targetFileName);
                 targetFileName = filename + "_" + SalmonTime.CurrentTimeMillis() + "." + ext;
             }
             IRealFile exportFile = exportDir.CreateFile(targetFileName);
@@ -200,7 +200,7 @@ namespace Salmon.FS
                     totalChunkBytesWritten += bytesRead;
 
                     totalBytesWritten += bytesRead;
-                    NotifyProgressListener(totalBytesWritten, fileToExport.GetSize(), "Exporting File: " 
+                    NotifyProgressListener(fileToExport, totalBytesWritten, fileToExport.GetSize(), "Exporting File: " 
                         + fileToExport.GetBaseName());
                 }
                 if (enableLogDetails)
@@ -232,10 +232,10 @@ namespace Salmon.FS
             }
         }
 
-        private void NotifyProgressListener(long bytesRead, long totalBytes, string message)
+        private void NotifyProgressListener(SalmonFile file, long bytesRead, long totalBytes, string message)
         {
             if (OnTaskProgressChanged != null)
-                OnTaskProgressChanged.Invoke(this, bytesRead, totalBytes, message);
+                OnTaskProgressChanged.Invoke(file, bytesRead, totalBytes, message);
         }        
     }
 }

@@ -27,7 +27,6 @@ using System.Collections.Generic;
 using System.IO;
 using System.Runtime.CompilerServices;
 using System.Text;
-using static Salmon.SalmonIntegrity;
 using static Salmon.Streams.SalmonStream;
 
 namespace Salmon.FS
@@ -52,6 +51,14 @@ namespace Salmon.FS
         private byte[] hmacKey;
         private byte[] requestedNonce;
         private Object tag;
+
+        private class SalmonFileHeader
+        {
+            internal byte[] mgc;
+            internal byte version;
+            internal int chunkSize;
+            internal byte[] nonce;
+        }
 
         /// <summary>
         /// Provides a file handle that can be used to create encrypted files.
@@ -82,17 +89,17 @@ namespace Salmon.FS
                 throw new Exception("File does not exist");
 
             Stream realStream = realFile.GetInputStream(bufferSize);
-            realStream.Seek(SalmonGenerator.GetMagicBytesLength() + SalmonGenerator.GetVersionLength(), SeekOrigin.Begin);
+            realStream.Seek(SalmonGenerator.MAGIC_LENGTH + SalmonGenerator.VERSION_LENGTH, SeekOrigin.Begin);
 
             byte[] fileChunkSizeBytes = new byte[GetChunkSizeLength()];
             int bytesRead = realStream.Read(fileChunkSizeBytes, 0, fileChunkSizeBytes.Length);
             if (bytesRead == 0)
                 throw new Exception("Could not parse chunks size from file header");
-            int chunkSize = BitConverter.ToInt32(fileChunkSizeBytes, 0, 4);
+            int chunkSize = (int)BitConverter.ToLong(fileChunkSizeBytes, 0, 4);
             if (integrity && chunkSize == 0)
                 throw new Exception("Cannot check integrity if file doesn't support it");
 
-            byte[] nonceBytes = new byte[SalmonGenerator.GetNonceLength()];
+            byte[] nonceBytes = new byte[SalmonGenerator.NONCE_LENGTH];
             int ivBytesRead = realStream.Read(nonceBytes, 0, nonceBytes.Length);
             if (ivBytesRead == 0)
                 throw new Exception("Could not parse nonce from file header");
@@ -109,22 +116,27 @@ namespace Salmon.FS
 
 
 
+        public SalmonStream GetOutputStream(int bufferSize = 0)
+        {
+            return GetOutputStream(null, bufferSize);
+        }
+
         /// <summary>
         /// Retrieves a stream that can be used to encrypt data and write to the file.
         /// </summary>
         /// <param name="bufferSize">The buffer size that will be used to write data to the real file</param>
         /// <returns></returns>
         [MethodImpl(MethodImplOptions.Synchronized)]
-        public SalmonStream GetOutputStream(int bufferSize = 0)
-        {
 
+        internal SalmonStream GetOutputStream(byte[] nonce, int bufferSize = 0)
+        {
             // check if we have an existing iv in the header
             byte[] nonceBytes = GetFileNonce();
             if (nonceBytes != null && !overwrite)
                 throw new SalmonSecurityException("You should not overwrite existing files for security instead delete the existing file and create a new file. If this is a new file and you want to use parallel streams you can override this with SetAllowOverwrite(true)");
 
             if (nonceBytes == null)
-                CreateHeader();
+                CreateHeader(nonce);
             nonceBytes = GetFileNonce();
 
             // we also get the header data to include in HMAC
@@ -264,16 +276,52 @@ namespace Salmon.FS
         /// <returns></returns>
         public int? GetFileChunkSize()
         {
-            Stream stream = realFile.GetInputStream();
-            stream.Seek(SalmonGenerator.GetMagicBytesLength() + SalmonGenerator.GetVersionLength(), SeekOrigin.Begin);
-            byte[] fileChunkSizeBytes = new byte[GetChunkSizeLength()];
-            int bytesRead = stream.Read(fileChunkSizeBytes, 0, fileChunkSizeBytes.Length);
-            stream.Close();
-            if (bytesRead <= 0)
+            SalmonFileHeader header = GetHeader();
+            if (header == null)
                 return null;
-            int fileChunkSize = BitConverter.ToInt32(fileChunkSizeBytes, 0, 4);
-            return fileChunkSize;
+            return GetHeader().chunkSize;
         }
+
+
+        SalmonFileHeader GetHeader()
+        {
+			if(!Exists())
+				return null;
+            SalmonFileHeader header = new SalmonFileHeader();
+            Stream stream = null;
+            try
+            {
+                stream = realFile.GetInputStream();
+                header.mgc = new byte[SalmonGenerator.MAGIC_LENGTH];
+                int bytesRead = stream.Read(header.mgc, 0, header.mgc.Length);
+                if (bytesRead != header.mgc.Length)
+                    return null;
+                byte[] buff = new byte[8];
+                bytesRead = stream.Read(buff, 0, SalmonGenerator.VERSION_LENGTH);
+                if (bytesRead != SalmonGenerator.VERSION_LENGTH)
+                    return null;
+                header.version = buff[0];
+                bytesRead = stream.Read(buff, 0, GetChunkSizeLength());
+                if (bytesRead != GetChunkSizeLength())
+                    return null;
+                header.chunkSize = (int)BitConverter.ToLong(buff, 0, bytesRead);
+                header.nonce = new byte[SalmonGenerator.NONCE_LENGTH];
+                bytesRead = stream.Read(header.nonce, 0, SalmonGenerator.NONCE_LENGTH);
+                if (bytesRead != SalmonGenerator.NONCE_LENGTH)
+                    return null;
+            }
+            catch (Exception ex)
+            {
+                Console.Error.WriteLine(ex);
+            }
+            finally
+            {
+                if (stream != null)
+                    stream.Close();
+            }
+            return header;
+        }
+
 
         /// <summary>
         /// Returns the minimum part size that can be encrypted / decrypted in parallel
@@ -294,27 +342,22 @@ namespace Salmon.FS
         /// Returns the length of the header in bytes
         /// </summary>
         /// <returns></returns>
-        private long GetHeaderLength()
+        private int GetHeaderLength()
         {
-            return SalmonGenerator.GetMagicBytesLength() + SalmonGenerator.GetVersionLength() +
-                GetChunkSizeLength() + SalmonGenerator.GetNonceLength();
+            return SalmonGenerator.MAGIC_LENGTH + SalmonGenerator.VERSION_LENGTH +
+                GetChunkSizeLength() + SalmonGenerator.NONCE_LENGTH;
         }
 
         /// <summary>
         /// Returns the initial vector that is used for encryption / decryption
         /// </summary>
         /// <returns></returns>
-        private byte[] GetFileNonce()
+        public byte[] GetFileNonce()
         {
-            Stream ivStream = realFile.GetInputStream();
-            ivStream.Seek(SalmonGenerator.GetMagicBytesLength() + SalmonGenerator.GetVersionLength() +
-                GetChunkSizeLength(), SeekOrigin.Begin);
-            byte[] nonceBytes = new byte[SalmonGenerator.GetNonceLength()];
-            int bytesRead = ivStream.Read(nonceBytes, 0, nonceBytes.Length);
-            ivStream.Close();
-            if (bytesRead <= 0)
+            SalmonFileHeader header = GetHeader();
+            if (header == null)
                 return null;
-            return nonceBytes;
+            return GetHeader().nonce;
         }
 
         public void SetRequestedNonce(byte[] nonce)
@@ -330,7 +373,7 @@ namespace Salmon.FS
         /// <summary>
         /// Create the header for the file
         /// </summary>
-        public void CreateHeader()
+        public void CreateHeader(byte[] nonce)
         {
             // set it to zero (disabled integrity) or get the default chunk
             // size defined by the drive
@@ -340,19 +383,22 @@ namespace Salmon.FS
                 reqChunkSize = 0;
             if (reqChunkSize == null)
                 throw new Exception("File requires a chunk size");
-            if (requestedNonce == null && drive != null)
+
+            if (nonce != null)
+                requestedNonce = nonce;
+            else if (requestedNonce == null && drive != null)
                 requestedNonce = drive.GetNextNonce();
             if (requestedNonce == null)
-                throw new Exception("File requires a nonce");
+                throw new Exception("File requires a nonce, use SetRequestedNonce");
 
             Stream realStream = realFile.GetOutputStream();
             byte[] magicBytes = SalmonGenerator.GetMagicBytes();
             realStream.Write(magicBytes, 0, magicBytes.Length);
 
             byte version = SalmonGenerator.GetVersion();
-            realStream.Write(new byte[] { version }, 0, SalmonGenerator.GetVersionLength());
+            realStream.Write(new byte[] { version }, 0, SalmonGenerator.VERSION_LENGTH);
 
-            byte[] chunkSizeBytes = BitConverter.GetBytes((int)reqChunkSize, 4);
+            byte[] chunkSizeBytes = BitConverter.ToBytes((int)reqChunkSize, 4);
             realStream.Write(chunkSizeBytes, 0, chunkSizeBytes.Length);
 
             realStream.Write(requestedNonce, 0, requestedNonce.Length);
@@ -367,7 +413,7 @@ namespace Salmon.FS
         /// <returns></returns>
         public int GetBlockSize()
         {
-            return SalmonGenerator.GetBlockSize();
+            return SalmonGenerator.BLOCK_SIZE;
         }
 
         /// <summary>
@@ -389,10 +435,11 @@ namespace Salmon.FS
         /// Creates a directory under this directory
         /// </summary>
         /// <param name="dirName">The name of the directory to be created</param>
-        public void CreateDirectory(string dirName, byte[] key = null, byte[] nonce = null)
+        public SalmonFile CreateDirectory(string dirName, byte[] key = null, byte[] dirNameNonce = null)
         {
-            string encryptedDirName = GetEncryptedFilename(dirName, key, nonce);
-            realFile.CreateDirectory(encryptedDirName);
+            string encryptedDirName = GetEncryptedFilename(dirName, key, dirNameNonce);
+            IRealFile realDir = realFile.CreateDirectory(encryptedDirName);
+            return new SalmonFile(realDir, drive);
         }
 
         /// <summary>
@@ -443,7 +490,6 @@ namespace Salmon.FS
         /// <summary>
         /// Returns the virtual path for the drive and the file provided
         /// </summary>
-        /// <param name="drive">The virtual drive this file belongs to</param>
         /// <param name="realPath">The path of the real file </param>
         /// <returns></returns>
         private string GetPath(string realPath)
@@ -518,7 +564,7 @@ namespace Salmon.FS
             {
                 if (drive == null
                         || this.GetPath().Equals("")
-                        || this.GetPath().Equals(Path.DirectorySeparatorChar+"")
+                        || this.GetPath().Equals(Path.DirectorySeparatorChar + "")
                 )
                     return null;
             }
@@ -584,7 +630,7 @@ namespace Salmon.FS
             if (integrity && GetHMACKey() == null)
                 throw new Exception("File requires hmacKey, use SetVerifyIntegrity() to provide one");
 
-            return SalmonIntegrity.GetTotalHMACBytesFrom(realFile.Length(), (int)GetFileChunkSize(), SalmonGenerator.GetHmacResultLength());
+            return SalmonIntegrity.GetTotalHMACBytesFrom(realFile.Length(), (int)GetFileChunkSize(), SalmonGenerator.HMAC_RESULT_LENGTH);
         }
 
 

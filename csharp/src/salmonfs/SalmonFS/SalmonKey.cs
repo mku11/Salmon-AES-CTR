@@ -31,7 +31,6 @@ namespace Salmon.FS
         private byte[] masterKey;
         private byte[] driveKey;
         private byte[] hmacKey;
-        private byte[] vaultNonce;
         private byte[] salt;
         private int iterations;
 
@@ -45,10 +44,6 @@ namespace Salmon.FS
             if (hmacKey != null)
                 Array.Clear(hmacKey, 0, hmacKey.Length);
             hmacKey = null;
-
-            if (vaultNonce != null)
-                Array.Clear(vaultNonce, 0, vaultNonce.Length);
-            vaultNonce = null;
         }
 
         /// <summary>
@@ -77,16 +72,6 @@ namespace Salmon.FS
         public void SetHmacKey(byte[] hmacKey)
         {
             this.hmacKey = hmacKey;
-        }
-
-        public void SetVaultNonce(byte[] vaultNonce)
-        {
-            this.vaultNonce = vaultNonce;
-        }
-
-        public byte [] GetVaultNonce()
-        {
-            return vaultNonce;
         }
 
         public byte[] GetMasterKey()

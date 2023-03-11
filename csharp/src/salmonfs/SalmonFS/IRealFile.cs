@@ -33,7 +33,7 @@ namespace Salmon.FS
         bool Delete();
         Stream GetInputStream(int bufferSize = 0);
         Stream GetOutputStream(int bufferSize = 0);
-        bool RenameTo(string newFilepath);
+        bool RenameTo(string newFilename);
         long Length();
         long LastModified();
         string GetAbsolutePath();
@@ -47,7 +47,7 @@ namespace Salmon.FS
         IRealFile CreateFile(string filename);
         IRealFile Move(IRealFile newDir, AbsStream.OnProgressChanged progressListener);
         IRealFile Copy(IRealFile newDir, AbsStream.OnProgressChanged progressListener);
-        IRealFile GetChild(String filename);
+        IRealFile GetChild(string filename);
         bool Mkdir();
     }
 }

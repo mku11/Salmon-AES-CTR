@@ -41,7 +41,7 @@ namespace Salmon.FS
         private bool stopped = false;
         private bool failed = false;
 
-        public delegate void OnProgressChanged(object sender, long bytesRead, long totalBytesRead, string message);
+        public delegate void OnProgressChanged(IRealFile file, long bytesRead, long totalBytesRead, string message);
         /// <summary>
         /// Informs when the task progress has changed
         /// </summary>
@@ -201,7 +201,7 @@ namespace Salmon.FS
                     totalChunkBytesRead += bytesRead;
                     
                     totalBytesRead += bytesRead;
-                    NotifyProgressListener(totalBytesRead, fileToImport.Length(), "Importing File: " + fileToImport.GetBaseName());
+                    NotifyProgressListener(fileToImport, totalBytesRead, fileToImport.Length(), "Importing File: " + fileToImport.GetBaseName());
                 }
                 if (enableLogDetails)
                 {
@@ -232,10 +232,10 @@ namespace Salmon.FS
             }
         }
 
-        private void NotifyProgressListener(long bytesRead, long totalBytes, string message)
+        private void NotifyProgressListener(IRealFile file, long bytesRead, long totalBytes, string message)
         {
             if (OnTaskProgressChanged != null)
-                OnTaskProgressChanged.Invoke(this, bytesRead, totalBytes, message);
+                OnTaskProgressChanged.Invoke(file, bytesRead, totalBytes, message);
         }
     }
 }

@@ -33,13 +33,13 @@ namespace Salmon
     public class SalmonDriveConfig
     {
         //TODO: support versioned formats for the file header
-        internal byte[] magicBytes = new byte[SalmonGenerator.GetMagicBytesLength()];
-        internal byte[] version = new byte[SalmonGenerator.GetVersionLength()];
-        internal byte[] salt = new byte[SalmonGenerator.GetSaltLength()];
-        internal byte[] iterations = new byte[SalmonGenerator.GetIterationsLength()];
-        internal byte[] iv = new byte[SalmonGenerator.GetIvLength()];
-        internal byte[] encryptedKeysAndNonce = new byte[SalmonGenerator.GetCombinedKeyLength() + SalmonGenerator.GetNonceLength()];
-        internal byte[] hmacSignature = new byte[SalmonGenerator.GetHmacResultLength()];
+        internal byte[] magicBytes = new byte[SalmonGenerator.MAGIC_LENGTH];
+        internal byte[] version = new byte[SalmonGenerator.VERSION_LENGTH];
+        internal byte[] salt = new byte[SalmonGenerator.SALT_LENGTH];
+        internal byte[] iterations = new byte[SalmonGenerator.ITERATIONS_LENGTH];
+        internal byte[] iv = new byte[SalmonGenerator.IV_LENGTH];
+        internal byte[] encryptedData = new byte[SalmonGenerator.COMBINED_KEY_LENGTH + SalmonGenerator.DRIVE_ID_LENGTH];
+        internal byte[] hmacSignature = new byte[SalmonGenerator.HMAC_RESULT_LENGTH];
 
         /// <summary>
         /// Provide a class that hosts the properties of the vault config file
@@ -48,13 +48,13 @@ namespace Salmon
         public SalmonDriveConfig(byte[] contents)
         {
             MemoryStream ms = new MemoryStream(contents);
-            ms.Read(magicBytes, 0, SalmonGenerator.GetMagicBytesLength());
-            ms.Read(version, 0, SalmonGenerator.GetVersionLength());
-            ms.Read(salt, 0, SalmonGenerator.GetSaltLength());
-            ms.Read(iterations, 0, SalmonGenerator.GetIterationsLength());
-            ms.Read(iv, 0, SalmonGenerator.GetIvLength());
-            ms.Read(encryptedKeysAndNonce, 0, SalmonGenerator.GetCombinedKeyLength() + SalmonGenerator.GetNonceLength());
-            ms.Read(hmacSignature, 0, SalmonGenerator.GetHmacResultLength());
+            ms.Read(magicBytes, 0, SalmonGenerator.MAGIC_LENGTH);
+            ms.Read(version, 0, SalmonGenerator.VERSION_LENGTH);
+            ms.Read(salt, 0, SalmonGenerator.SALT_LENGTH);
+            ms.Read(iterations, 0, SalmonGenerator.ITERATIONS_LENGTH);
+            ms.Read(iv, 0, SalmonGenerator.IV_LENGTH);
+            ms.Read(encryptedData, 0, SalmonGenerator.COMBINED_KEY_LENGTH + SalmonGenerator.DRIVE_ID_LENGTH);
+            ms.Read(hmacSignature, 0, SalmonGenerator.HMAC_RESULT_LENGTH);
             ms.Close();
         }
 
@@ -67,7 +67,7 @@ namespace Salmon
         /// <param name="salt">The salt that will be used for encryption of the combined key</param>
         /// <param name="iterations">The iteration that will be used to derive the master key from a text password</param>
         /// <param name="keyIv">The initial vector that was used with the master password to encrypt the combined key</param>
-        /// <param name="encryptedCombinedKeyAndNonce">The encrypted combined key and vault nonce</param>
+        /// <param name="encryptedData">The encrypted combined key and vault nonce</param>
         /// <param name="hmacSignature">The HMAC signature of the nonce</param>
         public static void WriteDriveConfig(IRealFile configFile, byte[] magicBytes, byte version, byte[] salt, int iterations, byte[] keyIv, 
             byte[] encryptedCombinedKeyAndNonce, byte [] hmacSignature)
@@ -75,9 +75,9 @@ namespace Salmon
             // construct the contents of the config file
             MemoryStream ms2 = new MemoryStream();
             ms2.Write(magicBytes, 0, magicBytes.Length);
-            ms2.Write(BitConverter.GetBytes(version, 1), 0, 1);
+            ms2.Write(BitConverter.ToBytes(version, 1), 0, 1);
             ms2.Write(salt, 0, salt.Length);
-            ms2.Write(BitConverter.GetBytes(iterations, 4), 0, 4);
+            ms2.Write(BitConverter.ToBytes(iterations, 4), 0, 4);
             ms2.Write(keyIv, 0, keyIv.Length);
             ms2.Write(encryptedCombinedKeyAndNonce, 0, encryptedCombinedKeyAndNonce.Length);
             ms2.Write(hmacSignature, 0, hmacSignature.Length);
@@ -99,7 +99,7 @@ namespace Salmon
             Array.Clear(salt, 0, salt.Length);
             Array.Clear(iterations, 0, iterations.Length);
             Array.Clear(iv, 0, iv.Length);
-            Array.Clear(encryptedKeysAndNonce, 0, encryptedKeysAndNonce.Length);
+            Array.Clear(encryptedData, 0, encryptedData.Length);
             Array.Clear(hmacSignature, 0, hmacSignature.Length);
         }
         public byte[] GetMagicBytes()
@@ -116,12 +116,12 @@ namespace Salmon
         {
             if (iterations == null)
                 return 0;
-            return BitConverter.ToInt32(iterations, 0, 4);
+            return (int)BitConverter.ToLong(iterations, 0, SalmonGenerator.ITERATIONS_LENGTH);
         }
 
-        public byte[] GetEncryptedKeysAndNonce()
+        public byte[] GetEncryptedData()
         {
-            return encryptedKeysAndNonce;
+            return encryptedData;
         }
 
         public byte[] GetIv()

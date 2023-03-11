@@ -1,4 +1,4 @@
-﻿/*
+/*
 MIT License
 
 Copyright (c) 2021 Max Kas
@@ -21,32 +21,19 @@ LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 */
+
 using System;
-using System.Collections.Generic;
-using System.IO;
-using Salmon.FS;
 
-namespace Salmon.Net.FS
+namespace Salmon.FS
 {
-    // Salmon Drive implementation for .Net
-    public class DotNetDrive : SalmonDrive
-    {
-        public DotNetDrive(string realRoot) : base(realRoot) { }
-
-        public override IRealFile GetFile(string filepath, bool root)
-        {
-            DotNetFile dotNetFile = new DotNetFile(filepath);
-            return dotNetFile;
-        }
-
-        protected override void OnAuthenticationError()
-        {
-            
-        }
-
-        protected override void OnAuthenticationSuccess()
-        {
-            
-        }
+    public class SalmonSequenceAuthException : Exception {
+    public SalmonSequenceAuthException(string msg) : base(msg) {
+        
     }
+
+    public SalmonSequenceAuthException(string msg, Exception ex):base(msg, ex)
+    {
+    }
+}
+
 }

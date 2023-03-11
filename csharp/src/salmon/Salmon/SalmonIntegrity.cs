@@ -125,7 +125,6 @@ namespace Salmon
         }
 
 
-
         /// <summary>
         /// 
         /// </summary>
@@ -141,7 +140,7 @@ namespace Salmon
             int rem = (int)(actualPosition % (chunkSize + hmacOffset));
             if (rem > hmacOffset)
                 chunks++;
-            return chunks * SalmonGenerator.GetHMACKeyLength();
+            return chunks * SalmonGenerator.HMAC_KEY_LENGTH;
         }
 
     }
