@@ -25,9 +25,9 @@ SOFTWARE.
 using Salmon.FS;
 using System;
 using System.Collections.Generic;
-using static SalmonFS.SalmonFileSearcher;
 
-namespace SalmonFS {
+namespace SalmonFS
+{
     public class SalmonFileSearcher {
         private bool running;
         private bool quit;
@@ -84,7 +84,7 @@ namespace SalmonFS {
                     searchResults.AddRange(SearchDir(file, keywords, any, OnResultFound));
                 else {
                     GetSearchResults(file, terms, any);
-                    if (file.GetTag() != null) {
+                    if (file.GetTag() != null && ((int) file.GetTag()) > 0) {
                         searchResults.Add(file);
                         if (OnResultFound != null)
                             OnResultFound.Invoke(file);
