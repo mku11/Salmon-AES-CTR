@@ -42,11 +42,11 @@ import static javax.crypto.Cipher.ENCRYPT_MODE;
  * Block data integrity is also supported.
  */
 public class SalmonStream extends AbsStream {
-    private static final int BLOCK_SIZE = 16;
-    private static boolean enableLogDetails = true;
+    public static final int BLOCK_SIZE = 16;
+    public static final int MAX_CHUNK_SIZE = 1024 * 1024;
+    public static final int DEFAULT_CHUNK_SIZE = 256 * 1024;
 
-    private static final int MAX_CHUNK_SIZE = 1024 * 1024;
-    private static final int DEFAULT_CHUNK_SIZE = 256 * 1024;
+    private static boolean enableLogDetails = false;
     private final byte[] headerData;
 
     private final EncryptionMode encryptionMode;
@@ -70,6 +70,15 @@ public class SalmonStream extends AbsStream {
         Default, AesIntrinsics
     }
 
+    public SalmonStream(byte[] key, byte[] nonce, EncryptionMode encryptionMode,
+                        AbsStream baseStream) throws Exception {
+        this(key, nonce, encryptionMode, baseStream, null, false, null, null);
+    }
+
+    public SalmonStream(byte[] key, byte[] nonce, EncryptionMode encryptionMode,
+                        AbsStream baseStream, byte[] headerData) throws Exception {
+        this(key, nonce, encryptionMode, baseStream, headerData, false, null, null);
+    }
     /**
      * AES Counter mode Stream
      * <p>
@@ -78,7 +87,7 @@ public class SalmonStream extends AbsStream {
      * The transformation is based on AES CTR Mode:
      * https://en.wikipedia.org/wiki/Block_cipher_mode_of_operation#Counter_(CTR)
      * Notes:
-     * The initial value of the counter is a result of the concatenation of an 8 byte nonce and an additional 8 bytes counter.
+     * The initial value of the counter is a result of the concatenation of an 12 byte nonce and an additional 4 bytes counter.
      * The counter is then: incremented every block, encrypted by the key, and xored with the plain text.
      *
      * @param key            The AES key that is used to encrypt decrypt
@@ -127,9 +136,18 @@ public class SalmonStream extends AbsStream {
     }
 
     public long length() {
-        int hmacOffset = chunkSize > 0 ? SalmonGenerator.getHmacResultLength() : 0;
+        int hmacOffset = chunkSize > 0 ? SalmonGenerator.HMAC_RESULT_LENGTH : 0;
         long totalHMACBytes = getTotalHMACBytesFrom(baseStream.length() - 1, hmacOffset);
         return baseStream.length() - getHeaderLength() - totalHMACBytes;
+    }
+
+    public long actualLength() {
+        long totalHMACBytes = getTotalHMACBytesFrom(baseStream.length() - 1, 0);
+        if (canRead())
+            return length();
+        else if (canWrite())
+            return baseStream.length() + getHeaderLength() + totalHMACBytes;
+        return 0;
     }
 
     public long position() throws IOException {
@@ -192,7 +210,7 @@ public class SalmonStream extends AbsStream {
             aesTransformer = Cipher.getInstance("AES/ECB/NoPadding");
             aesTransformer.init(ENCRYPT_MODE, encSecretKey);
         }
-        hmacHashLength = SalmonGenerator.getHmacResultLength();
+        hmacHashLength = SalmonGenerator.HMAC_RESULT_LENGTH;
         if (integrity) {
             if (chunkSize < 0 || chunkSize < BLOCK_SIZE || chunkSize % BLOCK_SIZE != 0 || chunkSize > MAX_CHUNK_SIZE)
                 throw new SalmonIntegrity.SalmonIntegrityException("Invalid chunk size, specify zero for default value or a positive number multiple of: "
@@ -239,13 +257,6 @@ public class SalmonStream extends AbsStream {
     @Override
     public void close() throws IOException {
         closeStreams();
-    }
-
-    /**
-     * Returns the Block size of the AES algorithm used
-     */
-    public int getBLOCK_SIZE() {
-        return BLOCK_SIZE;
     }
 
     /**
@@ -336,7 +347,7 @@ public class SalmonStream extends AbsStream {
      * Returns the Virtual Position of the stream excluding the header and HMAC signatures
      */
     private long getVirtualPosition() throws IOException {
-        int hmacOffset = chunkSize > 0 ? SalmonGenerator.getHmacResultLength() : 0;
+        int hmacOffset = chunkSize > 0 ? SalmonGenerator.HMAC_RESULT_LENGTH : 0;
         long totalHMACBytes = getTotalHMACBytesFrom(baseStream.position(), hmacOffset);
         return baseStream.position() - getHeaderLength() - totalHMACBytes;
     }
@@ -358,7 +369,7 @@ public class SalmonStream extends AbsStream {
      * @return True if the stream has integrity enabled
      */
     private void resetCounter() {
-        counter = new byte[getBLOCK_SIZE()];
+        counter = new byte[BLOCK_SIZE];
         System.arraycopy(nonce, 0, counter, 0, nonce.length);
         block = 0;
     }
@@ -369,24 +380,24 @@ public class SalmonStream extends AbsStream {
      */
     private void syncCounter() throws Exception {
         long currBlock = position() / BLOCK_SIZE;
-        incrementCounter(currBlock - block);
+        increaseCounter(currBlock - block);
         block = currBlock;
     }
 
     /**
-     * Increment the Counter
+     * Increase the Counter
      * We use only big endianness for AES regardless of the machine architecture
      *
-     * @param value block to increment to
+     * @param value value to increase counter by
      */
     // TODO: throw Exception when 8 lower bytes overflow
-    private void incrementCounter(long value) throws Exception {
+    private void increaseCounter(long value) throws Exception {
         if (value < 0)
             throw new IllegalArgumentException("Value should be positive");
         int index = BLOCK_SIZE - 1;
         int carriage = 0;
         while (index >= 0 && value + carriage > 0) {
-            if (index <= BLOCK_SIZE - SalmonGenerator.getNonceLength())
+            if (index <= BLOCK_SIZE - SalmonGenerator.NONCE_LENGTH)
                 throw new MaxFileSizeExceededException("Current CTR max blocks exceeded");
             long val = (value + carriage) % 256;
             carriage = (int) (((counter[index] & 0xFF) + val) / 256);
@@ -465,7 +476,7 @@ public class SalmonStream extends AbsStream {
             if (bytesAvail[0] < 0) {
                 if (failSilently)
                     return -1;
-                throw new SalmonIntegrity.SalmonIntegrityException("File is corrupt or tampered!");
+                throw new SalmonIntegrity.SalmonIntegrityException("Data corrupt or tampered!");
             }
         }
 
@@ -477,13 +488,16 @@ public class SalmonStream extends AbsStream {
 
         int totalBytesRead;
         if (providerType == ProviderType.AesIntrinsics) {
-            totalBytesRead = SalmonAES.decrypt(key, cacheReadBuffer, cacheReadBuffer.length, buffer, chunkToBlockOffset, blockOffset, bytesAvail[0],
-                    count, offset, counter, integrity, chunkSize);
+            totalBytesRead = SalmonAES.decrypt(key, counter, chunkSize,
+                    cacheReadBuffer, cacheReadBuffer.length, bytesAvail[0],
+                    buffer, offset, count,
+                    chunkToBlockOffset, blockOffset);
             if (totalBytesRead < 0)
                 throw new Exception("Error during DecryptNative(), see previous messages");
         } else {
-            totalBytesRead = decrypt(cacheReadBuffer, buffer, chunkToBlockOffset, blockOffset, bytesAvail[0],
-                    count, offset);
+            totalBytesRead = decrypt(cacheReadBuffer, bytesAvail[0],
+                    buffer, offset, count,
+                    chunkToBlockOffset, blockOffset);
         }
 
         setVirtualPosition(dataStart + totalBytesRead);
@@ -532,7 +546,7 @@ public class SalmonStream extends AbsStream {
             int chunks = actualCount / chunkSize;
             if (actualCount != 0 && actualCount % chunkSize != 0)
                 chunks++;
-            actualCount += chunks * SalmonGenerator.getHmacResultLength();
+            actualCount += chunks * SalmonGenerator.HMAC_RESULT_LENGTH;
         }
 
         byte[] cacheBuffer = new byte[actualCount];
@@ -575,18 +589,23 @@ public class SalmonStream extends AbsStream {
 
         int totalBytesWritten;
         if (providerType == ProviderType.AesIntrinsics) {
-            totalBytesWritten = SalmonAES.encrypt(key, buffer, buffer.length, cacheWriteBuffer, blockOffset, count, offset, counter, integrity, chunkSize);
+            totalBytesWritten = SalmonAES.encrypt(key, counter, chunkSize,
+                    buffer, buffer.length, offset, count,
+                    cacheWriteBuffer,
+                    blockOffset);
             if (totalBytesWritten < 0)
                 throw new Exception("Error during EncryptNative(), see previous messages");
         } else {
-            totalBytesWritten = encrypt(buffer, cacheWriteBuffer, blockOffset, count, offset);
+            totalBytesWritten = encrypt(buffer, offset, count,
+                    cacheWriteBuffer,
+                    blockOffset);
         }
 
         // reset the position before we write
         setVirtualPosition(currPosition);
 
         // write hmac signatures for all the chunk sizes
-        if (integrity) {
+        if (chunkSize > 0) {
             long startSign = 0;
             if (enableLogDetails) {
                 startSign = SalmonTime.currentTimeMillis();
@@ -609,8 +628,9 @@ public class SalmonStream extends AbsStream {
         }
     }
 
-    private int encrypt(byte[] buffer, byte[] cacheWriteBuffer, int blockOffset, int count,
-                        int offset) throws Exception {
+    private int encrypt(byte[] buffer, int offset, int count,
+                        byte[] cacheWriteBuffer,
+                        int blockOffset) throws Exception {
         int totalBytesWritten = 0;
         long totalTransformTime = 0;
         int hmacSectionOffset = 0;
@@ -632,7 +652,7 @@ public class SalmonStream extends AbsStream {
             }
 
             // adding a placeholder for hmac
-            if (integrity && i % chunkSize == 0)
+            if (chunkSize > 0 && i % chunkSize == 0)
                 hmacSectionOffset += hmacHashLength;
 
             // xor the plain text with the encrypted counter
@@ -645,7 +665,7 @@ public class SalmonStream extends AbsStream {
             // but since we haven't written the data to the stream yet we have to
             // increment the counter manually
             if (length + blockOffset >= BLOCK_SIZE)
-                incrementCounter(1);
+                increaseCounter(1);
 
             blockOffset = 0;
         }
@@ -656,8 +676,9 @@ public class SalmonStream extends AbsStream {
     }
 
 
-    private int decrypt(byte[] cacheReadBuffer, byte[] buffer, int chunkToBlockOffset, int blockOffset,
-                        int bytesAvail, int count, int offset) throws Exception {
+    private int decrypt(byte[] cacheReadBuffer, int bytesAvail,
+                        byte[] buffer, int offset, int count,
+                        int chunkToBlockOffset, int blockOffset) throws Exception {
         int totalBytesRead = 0;
         int bytesRead;
         long totalTransformTime = 0;
@@ -715,7 +736,7 @@ public class SalmonStream extends AbsStream {
             // XXX: since we have read all the data from the stream already
             // we have to increment the counter
             if (blockOffset + bytesRead >= BLOCK_SIZE)
-                incrementCounter(1);
+                increaseCounter(1);
 
             // reset the blockOffset
             blockOffset = 0;
@@ -752,7 +773,7 @@ public class SalmonStream extends AbsStream {
             int chunks = count / chunkSize;
             if (count != 0 && count % chunkSize != 0)
                 chunks++;
-            actualCount = count + chunks * SalmonGenerator.getHmacResultLength();
+            actualCount = count + chunks * SalmonGenerator.HMAC_RESULT_LENGTH;
         }
 
         byte[] cacheBuffer = new byte[actualCount];
