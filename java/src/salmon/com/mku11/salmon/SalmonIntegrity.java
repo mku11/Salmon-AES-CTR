@@ -124,7 +124,7 @@ public class SalmonIntegrity {
         int rem = (int) (actualPosition % (chunkSize + hmacOffset));
         if (rem > hmacOffset)
             chunks++;
-        return (long) chunks * SalmonGenerator.getHMACKeyLength();
+        return (long) chunks * SalmonGenerator.HMAC_KEY_LENGTH;
     }
 
     public static class SalmonIntegrityException extends Exception {
