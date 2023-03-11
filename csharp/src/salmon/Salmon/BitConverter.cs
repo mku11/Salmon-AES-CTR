@@ -22,33 +22,15 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 */
 
+using System;
+using System.Text;
+
 namespace Salmon
 {
     public class BitConverter
     {
-        public static byte[] GetBytes(byte value, int length)
-        {
-            byte[] buffer = new byte[length];
-            for (int i = length - 1; i >= 0; i--)
-            {
-                buffer[i] = (byte)(value % 256);
-                value = (byte) (value / 256);
-            }
-            return buffer;
-        }
 
-        public static byte[] GetBytes(int value, int length)
-        {
-            byte[] buffer = new byte[length];
-            for (int i = length-1; i >= 0; i--)
-            {
-                buffer[i] = (byte)(value % 256);
-                value /= 256;
-            }
-            return buffer;
-        }
-
-        public static byte[] GetBytes(long value, int length)
+        public static byte[] ToBytes(long value, int length)
         {
             byte[] buffer = new byte[length];
             for (int i = length - 1; i >= 0; i--)
@@ -59,7 +41,7 @@ namespace Salmon
             return buffer;
         }
 
-        public static long ToInt64(byte[] bytes, int index, int length)
+        public static long ToLong(byte[] bytes, int index, int length)
         {
             long num = 0;
             long mul = 1;
@@ -71,16 +53,44 @@ namespace Salmon
             return num;
         }
 
-        public static int ToInt32(byte[] bytes, int index, int length)
+        public static string ToHex(byte[] driveId)
         {
-            int num = 0;
-            int mul = 1;
-            for (int i = index + length - 1; i >= index; i--)
+            StringBuilder sb = new StringBuilder();
+            foreach (byte b in driveId)
+                sb.Append(b.ToString("X2"));
+            return sb.ToString();
+        }
+
+        public static byte[] ToBytes(string data)
+        {
+            byte[] bytes = new byte[data.Length/2];
+            int k = 0;
+            for (int i = 0; i < data.Length; i += 2)
             {
-                num += bytes[i] * mul;
-                mul *= 256;
+                bytes[k] = (byte)(16 * byte.Parse(data[i] + "", System.Globalization.NumberStyles.HexNumber));
+                bytes[k++] += byte.Parse(data[i + 1] + "", System.Globalization.NumberStyles.HexNumber);
             }
-            return num;
+            return bytes;
+        }
+
+        public static byte[] Increase(byte[] num, byte[] max)
+        {
+            long n = BitConverter.ToLong(num, 0, num.Length);
+            long m = BitConverter.ToLong(max, 0, max.Length);
+            n++;
+            if (n <= 0 || n > m)
+                throw new Exception("Range exceeded");
+            return BitConverter.ToBytes(n, 8);
+        }
+
+        public static byte[] Split(byte[] start, byte[] end)
+        {
+            long s = BitConverter.ToLong(start, 0, start.Length);
+            long e = BitConverter.ToLong(end, 0, end.Length);
+            // we reserve some nonces
+            if (e - s < 256)
+                throw new Exception("Insufficient Range Size");
+            return BitConverter.ToBytes(s + (e - s) / 2, start.Length);
         }
     }
 }
