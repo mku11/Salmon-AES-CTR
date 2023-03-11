@@ -33,15 +33,6 @@ namespace Salmon.Model
         private static string dateFormat = "dd/MM/yyyy hh:mm tt";
         private SalmonFile salmonFile;
 
-        public override string Name
-        {
-            get => base.Name;
-            set {
-                salmonFile.Rename(value, null);
-                base.Name = value;
-            }
-        }
-
         public SalmonFileItem(SalmonFile salmonFile)
         {
             this.salmonFile = salmonFile;
