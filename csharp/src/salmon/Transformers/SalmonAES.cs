@@ -32,10 +32,16 @@ namespace Salmon.Streams
         public static extern void init(bool enableLogDetails, int hmacHashLength);
 
         [DllImport("SalmonNative.dll")]
-        public static extern int decrypt(byte[] key, byte[] cacheReadBuffer, int arrayLen, byte[] buffer, int chunkToBlockOffset, int blockOffset,
-                                            int bytesAvail, int count, int offset, byte[] counter, bool integrity, int chunkSize);
+        public static extern int decrypt(byte[] key, byte[] counter, int hmacChunkSize,
+            byte[] inBuffer, int inBufferLength, int bytesAvail,
+            byte[] buffer, int offset, int count,
+            int chunkToBlockOffset, int blockOffset
+            );
+
         [DllImport("SalmonNative.dll")]
-        public static extern int encrypt(byte[] key, byte[] buffer, int arrayLen, byte[] cacheWriteBuffer, int blockOffset, int count, int offset,
-                                                byte[] counter, bool integrity, int chunkSize);
+        public static extern int encrypt(byte[] key, byte[] counter, int hmacChunkSize,
+            byte[] inBuffer, int inBufferLength, int offset, int count,
+            byte[] outBuffer, int blockOffset
+            );
     }
 }

@@ -21,16 +21,11 @@ LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 */
-using Salmon;
-using Salmon.Streams;
 using System;
-using System.Drawing;
 using System.IO;
-using System.Reflection;
 using System.Runtime.CompilerServices;
 using System.Security.Cryptography;
 using static Salmon.SalmonIntegrity;
-using static Salmon.Streams.SalmonStream;
 
 namespace Salmon.Streams
 {
@@ -43,7 +38,7 @@ namespace Salmon.Streams
         private static bool enableLogDetails = true;
 
         private const int MAX_CHUNK_SIZE = 1 * 1024 * 1024;
-        private const int DEFAULT_CHUNK_SIZE = 256 * 1024;
+        public const int DEFAULT_CHUNK_SIZE = 256 * 1024;
 
         private Stream baseStream;
 
@@ -53,7 +48,7 @@ namespace Salmon.Streams
         private byte[] nonce;
         private byte[] hmacKey;
 
-        private static readonly int AES_BLOCK_SIZE = 16;
+        public static readonly int AES_BLOCK_SIZE = 16;
 
         private long block = 0;
         private byte[] counter;
@@ -185,7 +180,7 @@ namespace Salmon.Streams
                 Mode = CipherMode.ECB,
                 Padding = PaddingMode.None
             };
-            hmacHashLength = SalmonGenerator.GetHmacResultLength();
+            hmacHashLength = SalmonGenerator.HMAC_RESULT_LENGTH;
             if (integrity)
             {
                 if (chunkSize < 0 || chunkSize < AES_BLOCK_SIZE || chunkSize % AES_BLOCK_SIZE != 0 || chunkSize > MAX_CHUNK_SIZE)
@@ -209,12 +204,24 @@ namespace Salmon.Streams
         {
             get
             {
-                int hmacOffset = chunkSize > 0 ? SalmonGenerator.GetHmacResultLength() : 0;
+                int hmacOffset = chunkSize > 0 ? SalmonGenerator.HMAC_RESULT_LENGTH : 0;
                 long totalHMACBytes = GetTotalHMACBytesFrom(baseStream.Length - 1, hmacOffset);
                 return baseStream.Length - GetHeaderLength() - totalHMACBytes;
             }
         }
 
+        public long ActualLength
+        {
+            get
+            {
+                long totalHMACBytes = GetTotalHMACBytesFrom(baseStream.Length - 1, 0);
+                if (CanRead)
+                    return Length;
+                else if (CanWrite)
+                    return baseStream.Length + GetHeaderLength() + totalHMACBytes;
+                return 0;
+            }
+        }
 
         /// <summary>
         /// Current Position of the stream excluding the header and all HMAC signatures
@@ -228,7 +235,7 @@ namespace Salmon.Streams
             set
             {
                 if (CanWrite && !allowRangeWrite && value != 0)
-                    throw new SalmonSecurityException("Range Write is not allowed for security (non-reusable IVs), if you still want to take the risk you can override it by setting SetAllowRangeWrite(true)");
+                    throw new SalmonSecurityException("Range Write is not allowed for security (non-reusable IVs). If you still need to use it like in a case of parallel writes for a new file then set method SetAllowRangeWrite(true)");
                 SetVirtualPosition(value);
 
             }
@@ -272,15 +279,6 @@ namespace Salmon.Streams
         {
             CloseStreams();
             base.Close();
-        }
-
-        /// <summary>
-        /// Returns the Block size of the AES algorithm used
-        /// </summary>
-        /// <returns></returns>
-        public int GetBlockSize()
-        {
-            return AES_BLOCK_SIZE;
         }
 
         /// <summary>
@@ -390,7 +388,7 @@ namespace Salmon.Streams
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         private long GetVirtualPosition()
         {
-            int hmacOffset = chunkSize > 0 ? SalmonGenerator.GetHmacResultLength() : 0;
+            int hmacOffset = chunkSize > 0 ? SalmonGenerator.HMAC_RESULT_LENGTH : 0;
             long totalHMACBytes = GetTotalHMACBytesFrom(baseStream.Position, hmacOffset);
             return baseStream.Position - GetHeaderLength() - totalHMACBytes;
         }
@@ -414,7 +412,7 @@ namespace Salmon.Streams
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         private void ResetCounter()
         {
-            counter = new byte[GetBlockSize()];
+            counter = new byte[AES_BLOCK_SIZE];
             Array.Copy(nonce, 0, counter, 0, nonce.Length);
             block = 0;
         }
@@ -427,19 +425,19 @@ namespace Salmon.Streams
         private void SyncCounter()
         {
             long currBlock = Position / AES_BLOCK_SIZE;
-            IncrementCounter(currBlock - block);
+            IncreaseCounter(currBlock - block);
             block = currBlock;
 
         }
 
         /// <summary>
-        /// Increment the Counter
+        /// Increase the Counter
         /// We use little endianness eventhough it does not matter for AES
         /// </summary>
         /// <param name="value"></param>
         /// TODO: throw Exception when 8 lower bytes overflow
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        private void IncrementCounter(long value)
+        private void IncreaseCounter(long value)
         {
             if (value < 0)
                 throw new Exception("Value should be positive");
@@ -447,7 +445,7 @@ namespace Salmon.Streams
             int carriage = 0;
             while (index >= 0 && value + carriage > 0)
             {
-                if (index <= AES_BLOCK_SIZE - SalmonGenerator.GetNonceLength())
+                if (index <= AES_BLOCK_SIZE - SalmonGenerator.NONCE_LENGTH)
                     throw new Exception("Current CTR max blocks exceeded");
 
                 long val = (value + carriage) % 256;
@@ -480,6 +478,7 @@ namespace Salmon.Streams
             // if we don't use integrity we can align to the AES block size
             return Position / AES_BLOCK_SIZE * AES_BLOCK_SIZE;
         }
+
 
 
         /// <summary> 
@@ -525,6 +524,7 @@ namespace Salmon.Streams
                 {
                     startVerify = SalmonTime.CurrentTimeMillis();
                 }
+                //TODO: remove the header data from the HMAC?
                 bytesAvail = SalmonIntegrity.VerifyHMAC(cacheReadBuffer, bytesAvail, hmacKey, chunkSize,
                         GetVirtualPosition() == 0 ? headerData : null);
                 if (enableLogDetails)
@@ -535,7 +535,7 @@ namespace Salmon.Streams
                 {
                     if (failSilently)
                         return -1;
-                    throw new SalmonIntegrity.SalmonIntegrityException("File is corrupt or tampered!");
+                    throw new SalmonIntegrity.SalmonIntegrityException("Data are corrupt or tampered!");
                 }
             }
 
@@ -548,15 +548,19 @@ namespace Salmon.Streams
             int totalBytesRead;
             if (providerType == ProviderType.AesIntrinsics)
             {
-                totalBytesRead = SalmonAES.decrypt(key, cacheReadBuffer, cacheReadBuffer.Length, buffer, chunkToBlockOffset, blockOffset, bytesAvail,
-                count, offset, counter, integrity, chunkSize);
+                totalBytesRead = SalmonAES.decrypt(key, counter, chunkSize,
+                    cacheReadBuffer, cacheReadBuffer.Length, bytesAvail,
+                    buffer, offset, count,
+                    chunkToBlockOffset, blockOffset);
                 if (totalBytesRead < 0)
                     throw new Exception("Error during DecryptNative(), see previous messages");
             }
             else
             {
-                totalBytesRead = Decrypt(cacheReadBuffer, buffer, chunkToBlockOffset, blockOffset, bytesAvail,
-                        count, offset);
+                totalBytesRead = Decrypt(cacheReadBuffer, bytesAvail,
+                    buffer, offset, count,
+                    chunkToBlockOffset, blockOffset
+                        );
             }
 
             SetVirtualPosition(dataStart + totalBytesRead);
@@ -576,8 +580,9 @@ namespace Salmon.Streams
 
 
 
-        private int Decrypt(byte[] cacheReadBuffer, byte[] buffer, int chunkToBlockOffset, int blockOffset,
-                            int bytesAvail, int count, int offset)
+        private int Decrypt(byte[] cacheReadBuffer, int bytesAvail,
+            byte[] buffer, int offset, int count,
+            int chunkToBlockOffset, int blockOffset)
         {
             int totalBytesRead = 0;
             int bytesRead = 0;
@@ -591,9 +596,9 @@ namespace Salmon.Streams
             {
                 // if we have integrity enabled  we skip the hmac header
                 // to arrive at the beginning of our chunk
-                if (chunkSize > 0 && ms.Position % (chunkSize + SalmonGenerator.GetHmacResultLength()) == 0)
+                if (chunkSize > 0 && ms.Position % (chunkSize + SalmonGenerator.HMAC_RESULT_LENGTH) == 0)
                 {
-                    ms.Seek(SalmonGenerator.GetHmacResultLength(), SeekOrigin.Current);
+                    ms.Seek(SalmonGenerator.HMAC_RESULT_LENGTH, SeekOrigin.Current);
                 }
                 // now we skip the data prior to our block within that chunk
                 // this should happen only at the first time so we have to reset
@@ -641,7 +646,7 @@ namespace Salmon.Streams
                 // XXX: since we have read all the data from the stream already
                 // we have to increment the counter
                 if (blockOffset + bytesRead >= AES_BLOCK_SIZE)
-                    IncrementCounter(1);
+                    IncreaseCounter(1);
 
                 // reset the blockOffset
                 blockOffset = 0;
@@ -694,7 +699,7 @@ namespace Salmon.Streams
                 int chunks = actualCount / chunkSize;
                 if (actualCount != 0 && actualCount % chunkSize != 0)
                     chunks++;
-                actualCount += chunks * SalmonGenerator.GetHmacResultLength();
+                actualCount += chunks * SalmonGenerator.HMAC_RESULT_LENGTH;
             }
 
             byte[] cacheBuffer = new byte[actualCount];
@@ -741,27 +746,30 @@ namespace Salmon.Streams
             int totalBytesWritten = 0;
             if (providerType == ProviderType.AesIntrinsics)
             {
-                totalBytesWritten = SalmonAES.encrypt(key, buffer, buffer.Length, cacheWriteBuffer, blockOffset, count, offset,
-                        counter, integrity, chunkSize);
+                totalBytesWritten = SalmonAES.encrypt(key, counter, chunkSize,
+                    buffer, buffer.Length, offset, count,
+                    cacheWriteBuffer, blockOffset);
                 if (totalBytesWritten < 0)
                     throw new Exception("Error during EncryptNative(), see previous messages");
             }
             else
             {
-                totalBytesWritten = Encrypt(buffer, cacheWriteBuffer, blockOffset, count, offset);
+                totalBytesWritten = Encrypt(buffer, offset, count,
+                    cacheWriteBuffer, blockOffset);
             }
 
             // reset the position before we write
             SetVirtualPosition(currPosition);
 
             // write hmac signatures for all the chunk sizes
-            if (integrity)
+            if (chunkSize > 0)
             {
                 long startSign = 0;
                 if (enableLogDetails)
                 {
                     startSign = SalmonTime.CurrentTimeMillis();
                 }
+                //TODO: remove the header data from the HMAC?
                 SalmonIntegrity.ApplyHMAC(cacheWriteBuffer, cacheWriteBuffer.Length, chunkSize, hmacKey,
                         GetVirtualPosition() == 0 ? headerData : null);
                 if (enableLogDetails)
@@ -783,8 +791,9 @@ namespace Salmon.Streams
         }
 
 
-        private int Encrypt(byte[] buffer, byte[] cacheWriteBuffer, int blockOffset, int count,
-                            int offset)
+        private int Encrypt(byte[] buffer, int offset, int count,
+                            byte[] cacheWriteBuffer,
+                            int blockOffset)
         {
             int totalBytesWritten = 0;
             long totalTransformTime = 0;
@@ -810,7 +819,7 @@ namespace Salmon.Streams
                 }
 
                 // adding a placeholder for hmac
-                if (integrity && i % chunkSize == 0)
+                if (chunkSize > 0 && i % chunkSize == 0)
                     hmacSectionOffset += hmacHashLength;
 
                 // xor the plain text with the encrypted counter
@@ -823,7 +832,7 @@ namespace Salmon.Streams
                 // but since we haven't written the data to the stream yet we have to
                 // increment the counter manually
                 if (length + blockOffset >= AES_BLOCK_SIZE)
-                    IncrementCounter(1);
+                    IncreaseCounter(1);
 
                 blockOffset = 0;
             }
@@ -863,7 +872,7 @@ namespace Salmon.Streams
                 int chunks = count / chunkSize;
                 if (count != 0 && count % chunkSize != 0)
                     chunks++;
-                actualCount = count + chunks * SalmonGenerator.GetHmacResultLength();
+                actualCount = count + chunks * SalmonGenerator.HMAC_RESULT_LENGTH;
             }
 
             byte[] cacheBuffer = new byte[actualCount];
