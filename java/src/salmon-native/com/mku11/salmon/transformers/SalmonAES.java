@@ -25,8 +25,14 @@ SOFTWARE.
 
 public class SalmonAES {
     public native static void init(boolean enableLogDetails, int hmacHashLength);
-    public native static int encrypt(byte[] key, byte[] buffer, int arrayLen, byte[] cacheWriteBuffer, int blockOffset, int count, int offset,
-                                     byte[] counter, boolean integrity, int chunkSize);
-    public native static int decrypt(byte[] key, byte[] cacheReadBuffer, int arrayLen, byte[] buffer, int chunkToBlockOffset, int blockOffset,
-                                     int bytesAvail, int count, int offset, byte[] counter, boolean integrity, int chunkSize);
+
+    public native static int encrypt(byte[] key, byte[] counter, int chunkSize,
+                                     byte[] inBuffer, int inBufferLength, int offset, int count,
+                                     byte[] cacheWriteBuffer,
+                                     int blockOffset);
+
+    public native static int decrypt(byte[] key, byte[] counter, int chunkSize,
+                                     byte[] inBuffer, int inBufferLength, int bytesAvail,
+                                     byte[] outBuffer, int offset, int count,
+                                     int chunkToBlockOffset, int blockOffset);
 }
