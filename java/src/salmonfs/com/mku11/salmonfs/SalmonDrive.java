@@ -23,7 +23,6 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 */
 
-import com.mku11.salmon.BitConverter;
 import com.mku11.salmon.SalmonGenerator;
 import com.mku11.salmon.SalmonIntegrity;
 import com.mku11.salmon.streams.AbsStream;
@@ -37,16 +36,17 @@ import java.io.IOException;
  * with an implementation of an IRealFile
  */
 public abstract class SalmonDrive {
-    protected static final String CONFIG_FILE = "cf.dat";
-    protected static final String VALIDATION_FILE = "vl.dat";
+    protected static final String CONFIG_FILE = "vault.slmn";
+    protected static final String AUTH_CONFIG_FILENAME = "auth.slma";
     protected static final String VIRTUAL_DRIVE_DIR = "fs";
-    protected static final String THUMBNAIL_DIR = "ic";
+    protected static final String THUMBNAIL_DIR = ".thumbnail";
     protected static final String SHARE_DIR = "share";
     protected static final String EXPORT_DIR = "export";
     private static final int DEFAULT_FILE_CHUNK_SIZE = 256 * 1024;
 
     private static int defaultFileChunkSize = DEFAULT_FILE_CHUNK_SIZE;
     private SalmonKey encryptionKey = null;
+    private byte[] driveID;
     private boolean enableIntegrityCheck = true;
     private IRealFile realRoot = null;
     private SalmonFile virtualRoot = null;
@@ -99,7 +99,7 @@ public abstract class SalmonDrive {
         defaultFileChunkSize = fileChunkSize;
     }
 
-    protected abstract IRealFile getFile(String filepath, boolean root);
+    public abstract IRealFile getFile(String filepath, boolean isDirectory);
 
     private void clear() {
         if (encryptionKey != null)
@@ -108,16 +108,6 @@ public abstract class SalmonDrive {
         enableIntegrityCheck = false;
         realRoot = null;
         virtualRoot = null;
-    }
-
-    /**
-     * Returns true if the file is a system file
-     *
-     * @param salmonFile Virtual File to be checked
-     */
-    boolean isSystemFile(SalmonFile salmonFile) {
-        IRealFile rnFile = realRoot.getChild(VALIDATION_FILE);
-        return salmonFile.getRealPath().equals(rnFile.getPath());
     }
 
     /**
@@ -149,9 +139,29 @@ public abstract class SalmonDrive {
      * @param pass
      */
     public void setPassword(String pass) throws Exception {
-        SalmonKey key = getKey();
-        createConfigFile(pass, key.getDriveKey(), key.getHMACKey());
+        synchronized (this) {
+            SalmonKey key = getKey();
+            createConfig(pass, key.getDriveKey(), key.getHMACKey());
+        }
     }
+
+
+        private void initFS()
+        {
+            IRealFile virtualRootRealFile = realRoot.getChild(VIRTUAL_DRIVE_DIR);
+            if (virtualRootRealFile == null || !virtualRootRealFile.exists())
+            {
+                try
+                {
+                    virtualRootRealFile = realRoot.createDirectory(VIRTUAL_DRIVE_DIR);
+                }
+                catch (Exception ex)
+                {
+                    ex.printStackTrace();
+                }
+            }
+            virtualRoot = new SalmonFile(virtualRootRealFile, this);
+        }
 
     /**
      * Create a configuration file for the vault
@@ -163,14 +173,14 @@ public abstract class SalmonDrive {
      * @param hmacKey  The current HMAC key
      */
     //TODO: partial refactor to SalmonDriveConfig
-    private void createConfigFile(String password, byte[] driveKey, byte[] hmacKey) throws Exception {
+    private void createConfig(String password, byte[] driveKey, byte[] hmacKey) throws Exception {
         IRealFile configFile = realRoot.getChild(CONFIG_FILE);
 
         // if it's an exsting config that we need to update with
         // the new password then we prefer to be authenticate
-        // TODO: we should probably call Authenticate() rather
-        // than assume the key != null but the user can anyway manually delete the config file
-        // so it doesn't matter
+        // TODO: we should probably call Authenticate() rather than assume
+        //  that the key != null. Though the user can anyway manually delete the config file
+        //  so it doesn't matter
         if (driveKey == null && configFile != null && configFile.exists())
             throw new SalmonAuthException("Not authenticated");
 
@@ -183,16 +193,18 @@ public abstract class SalmonDrive {
 
         byte version = SalmonGenerator.getVersion();
 
-        // if this is a new config file
-        // derive a 512 bit key that will be split to:
-        // a file encryption key (encryption key)
-        // an HMAC key
+        // if this is a new config file derive a 512 bit key that will be split to:
+        // a) drive encryption key (for encrypting filenames and files)
+        // b) HMAC key for file integrity
+        boolean newDrive = false;
         if (driveKey == null) {
-            driveKey = new byte[SalmonGenerator.getKeyLength()];
-            hmacKey = new byte[SalmonGenerator.getHMACKeyLength()];
-            byte[] combinedKey = SalmonGenerator.generateCombinedKey();
-            System.arraycopy(combinedKey, 0, driveKey, 0, SalmonGenerator.getKeyLength());
-            System.arraycopy(combinedKey, SalmonGenerator.getKeyLength(), hmacKey, 0, SalmonGenerator.getHMACKeyLength());
+            newDrive = true;
+            driveKey = new byte[SalmonGenerator.KEY_LENGTH];
+            hmacKey = new byte[SalmonGenerator.HMAC_KEY_LENGTH];
+            byte[] combKey = SalmonGenerator.generateCombinedKey();
+            System.arraycopy(combKey, 0, driveKey, 0, SalmonGenerator.KEY_LENGTH);
+            System.arraycopy(combKey, SalmonGenerator.KEY_LENGTH, hmacKey, 0, SalmonGenerator.HMAC_KEY_LENGTH);
+            driveID = SalmonGenerator.generateDriveID();
         }
 
         // Get the salt that we will use to encrypt the combined key (encryption key + HMAC key)
@@ -206,39 +218,32 @@ public abstract class SalmonDrive {
         // create a key that will encrypt both the (encryption key and the HMAC key)
         byte[] masterKey = SalmonGenerator.getMasterKey(password, salt, iterations);
 
-        // initialize a nonce that will serve as an incremental sequence for each of the files
-        // so to keep the uniqueness of the counter.
-        byte[] vaultNonce = new byte[SalmonGenerator.getNonceLength()];
-
         // encrypt the combined key (fskey + hmacKey) using the masterKey and the masterKeyIv
         MemoryStream ms = new MemoryStream();
         SalmonStream stream = new SalmonStream(masterKey, masterKeyIv, SalmonStream.EncryptionMode.Encrypt, ms,
                 null, false, null, null);
         stream.write(driveKey, 0, driveKey.length);
         stream.write(hmacKey, 0, hmacKey.length);
-        stream.write(vaultNonce, 0, vaultNonce.length);
+        stream.write(driveID, 0, driveID.length);
         stream.flush();
         stream.close();
-        byte[] encryptedCombinedKeyAndNonce = ms.toArray();
+        byte[] encData = ms.toArray();
 
-        byte[] encVaultNonce = new byte[SalmonGenerator.getNonceLength()];
-        System.arraycopy(encryptedCombinedKeyAndNonce, SalmonGenerator.getKeyLength() + SalmonGenerator.getHMACKeyLength(),
-                encVaultNonce, 0, SalmonGenerator.getNonceLength());
-
-        // get the hmac hash only for the vault nonce
-        byte[] hmacSignature = SalmonIntegrity.calculateHMAC(encVaultNonce, 0, encVaultNonce.length, hmacKey, null);
+        // generate the hmac signature
+        byte[] hmacSignature = SalmonIntegrity.calculateHMAC(encData, 0, encData.length, hmacKey, null);
 
         SalmonDriveConfig.writeDriveConfig(configFile, magicBytes, version, salt, iterations, masterKeyIv,
-                encryptedCombinedKeyAndNonce, hmacSignature);
+                encData, hmacSignature);
+        setKey(masterKey, driveKey, hmacKey, salt, iterations);
 
-        encryptionKey.setDriveKey(driveKey);
-        encryptionKey.setHmacKey(hmacKey);
-        encryptionKey.setVaultNonce(vaultNonce);
-        encryptionKey.setMasterKey(masterKey);
-        encryptionKey.setSalt(salt);
-        encryptionKey.setIterations(iterations);
+        if (newDrive) {
+            // create a full sequence for nonces
+            byte[] authID = SalmonGenerator.generateAuthId();
+            SalmonDriveManager.createSequence(driveID, authID);
+            SalmonDriveManager.initSequence(driveID, authID);
+        }
+		initFS();
     }
-
 
     /**
      * Return the root directory of the virtual drive
@@ -252,8 +257,7 @@ public abstract class SalmonDrive {
     }
 
     /**
-     * Function Verifies if the user password is correct otherwise it
-     * throws a SalmonAuthException
+     * Verify if the user password is correct otherwise it throws a SalmonAuthException
      *
      * @param password
      */
@@ -262,18 +266,12 @@ public abstract class SalmonDrive {
         try {
             if (password == null) {
                 if (encryptionKey != null) {
-                    encryptionKey.setMasterKey(null);
-                    encryptionKey.setDriveKey(null);
-                    encryptionKey.setHmacKey(null);
-                    encryptionKey.setVaultNonce(null);
-                    encryptionKey.setSalt(null);
-                    encryptionKey.setIterations(0);
+                    clearKey();
+                    this.driveID = null;
                 }
                 return;
             }
-
-            IRealFile realConfigFile = getConfigFile();
-            SalmonDriveConfig salmonConfig = getSalmonConfig(realConfigFile);
+            SalmonDriveConfig salmonConfig = getDriveConfig();
             int iterations = salmonConfig.getIterations();
             byte[] salt = salmonConfig.getSalt();
 
@@ -283,48 +281,38 @@ public abstract class SalmonDrive {
             // get the master Key Iv
             byte[] masterKeyIv = salmonConfig.getIv();
 
-            // get the encrypted combined key and vault nonce
-            byte[] encryptedCombinedKeysAndNonce = salmonConfig.getEncryptedKeysAndNonce();
-            byte[] encVaultNonce = new byte[SalmonGenerator.getNonceLength()];
-            System.arraycopy(encryptedCombinedKeysAndNonce, SalmonGenerator.getKeyLength() + SalmonGenerator.getHMACKeyLength(),
-                    encVaultNonce, 0, encVaultNonce.length);
+            // get the encrypted combined key and drive id
+            byte[] encData = salmonConfig.getEncryptedData();
 
             // decrypt the combined key (encryption key + HMAC key) using the master key
-            MemoryStream ms = new MemoryStream(encryptedCombinedKeysAndNonce);
+            MemoryStream ms = new MemoryStream(encData);
             stream = new SalmonStream(masterKey, masterKeyIv, SalmonStream.EncryptionMode.Decrypt, ms,
                     null, false, null, null);
 
-            byte[] driveKey = new byte[SalmonGenerator.getKeyLength()];
+            byte[] driveKey = new byte[SalmonGenerator.KEY_LENGTH];
             stream.read(driveKey, 0, driveKey.length);
 
-            byte[] hmacKey = new byte[SalmonGenerator.getHMACKeyLength()];
+            byte[] hmacKey = new byte[SalmonGenerator.HMAC_KEY_LENGTH];
             stream.read(hmacKey, 0, hmacKey.length);
 
-            byte[] vaultNonce = new byte[SalmonGenerator.getNonceLength()];
-            stream.read(vaultNonce, 0, vaultNonce.length);
+            byte[] driveID = new byte[SalmonGenerator.DRIVE_ID_LENGTH];
+            stream.read(driveID, 0, driveID.length);
 
             // to make sure we have the right key we get the hmac portion
             // and try to verify the vault nonce
-            verifyHmac(salmonConfig, encVaultNonce, hmacKey);
+            verifyHmac(salmonConfig, encData, hmacKey);
 
             // set the combined key (encryption key + HMAC key) and the vault nonce
-            encryptionKey.setMasterKey(masterKey);
-            encryptionKey.setDriveKey(driveKey);
-            encryptionKey.setHmacKey(hmacKey);
-            encryptionKey.setVaultNonce(vaultNonce);
-            encryptionKey.setSalt(salt);
-            encryptionKey.setIterations(iterations);
-
+            setKey(masterKey, driveKey, hmacKey, salt, iterations);
+            this.driveID = driveID;
+			initFS();
             onAuthenticationSuccess();
         } catch (Exception ex) {
             if (encryptionKey != null) {
-                encryptionKey.setMasterKey(null);
-                encryptionKey.setDriveKey(null);
-                encryptionKey.setHmacKey(null);
-                encryptionKey.setVaultNonce(null);
-                encryptionKey.setSalt(null);
-                encryptionKey.setIterations(0);
+                clearKey();
+                
             }
+			this.driveID = null;
             onAuthenticationError();
             throw new SalmonAuthException("Could not authenticate, try again", ex);
         } finally {
@@ -333,97 +321,52 @@ public abstract class SalmonDrive {
         }
     }
 
+    private void setKey(byte[] masterKey, byte[] driveKey, byte[] hmacKey, byte[] salt, int iterations) {
+        encryptionKey.setMasterKey(masterKey);
+        encryptionKey.setDriveKey(driveKey);
+        encryptionKey.setHmacKey(hmacKey);
+        encryptionKey.setSalt(salt);
+        encryptionKey.setIterations(iterations);
+    }
+
+    private void clearKey() {
+        encryptionKey.setMasterKey(null);
+        encryptionKey.setDriveKey(null);
+        encryptionKey.setHmacKey(null);
+        encryptionKey.setSalt(null);
+        encryptionKey.setIterations(0);
+    }
+
     /**
-     * Verify that the HMAC is correct for the current vaultNonce
+     * Verify that the HMAC is correct
      *
      * @param salmonConfig
-     * @param encVaultNonce
+     * @param data
      * @param hmacKey
      */
-    private void verifyHmac(SalmonDriveConfig salmonConfig, byte[] encVaultNonce, byte[] hmacKey) throws Exception {
+    private void verifyHmac(SalmonDriveConfig salmonConfig, byte[] data, byte[] hmacKey) throws Exception {
         byte[] hmacSignature = salmonConfig.getHMACsignature();
-        byte[] hmac = SalmonIntegrity.calculateHMAC(encVaultNonce, 0, encVaultNonce.length, hmacKey, null);
+        byte[] hmac = SalmonIntegrity.calculateHMAC(data, 0, data.length, hmacKey, null);
         for (int i = 0; i < hmacKey.length; i++)
             if (hmacSignature[i] != hmac[i])
                 throw new Exception("Could not authenticate");
     }
 
     byte[] getNextNonce() throws Exception {
-        synchronized (this) {
-            if (!isAuthenticated())
-                throw new SalmonAuthException("Not authenticated");
-
-            int iterations = getKey().getIterations();
-
-            // get the salt
-            byte[] salt = getKey().getSalt();
-
-            // get the current master key
-            byte[] masterKey = getKey().getMasterKey();
-
-            // generate a new iv so we don't get the same
-            byte[] masterKeyIv = SalmonGenerator.generateMasterKeyIV();
-
-            byte[] driveKey = getKey().getDriveKey();
-
-            byte[] hmacKey = getKey().getHMACKey();
-
-            byte[] vaultNonce = getKey().getVaultNonce();
-
-            //We get the next nonce by incrementing the lowest 4 bytes
-            long newLowNonce = 0;
-            //we check not to wrap around so we don't reuse nonces
-            long currNonceInt = BitConverter.toInt64(vaultNonce, 0, SalmonGenerator.getNonceLength());
-            //TODO: use Math.addExact is available for SDK 24+ so for now we provide as much
-            // backwards compatibility as possible with a simple check instead
-            if (currNonceInt < 0 || currNonceInt >= Long.MAX_VALUE)
-                throw new Exception("Cannot import file, vault exceeded maximum nonces");
-            newLowNonce = currNonceInt + 1;
-            byte[] newLowVaultNonce = BitConverter.getBytes(newLowNonce, SalmonGenerator.getNonceLength());
-            System.arraycopy(newLowVaultNonce, 0, vaultNonce, 0, newLowVaultNonce.length);
-            getKey().setVaultNonce(vaultNonce);
-
-            // encrypt the combined key (fskey + hmacKey) using the masterKey and the masterKeyIv
-            MemoryStream encMs = new MemoryStream();
-            SalmonStream encStream = new SalmonStream(masterKey, masterKeyIv, SalmonStream.EncryptionMode.Encrypt, encMs,
-                    null, false, null, null);
-            encStream.write(driveKey, 0, driveKey.length);
-            encStream.write(hmacKey, 0, hmacKey.length);
-            encStream.write(vaultNonce, 0, vaultNonce.length);
-            encStream.flush();
-            encStream.close();
-            byte[] encryptedCombinedKeyAndNonce = encMs.toArray();
-
-            byte[] encVaultNonce = new byte[SalmonGenerator.getNonceLength()];
-            System.arraycopy(encryptedCombinedKeyAndNonce, SalmonGenerator.getKeyLength() + SalmonGenerator.getHMACKeyLength(),
-                    encVaultNonce, 0, SalmonGenerator.getNonceLength());
-
-            // get the hmac hash only for the vault nonce
-            byte[] hmacSignature = SalmonIntegrity.calculateHMAC(encVaultNonce, 0, encVaultNonce.length, getKey().getHMACKey(), null);
-
-            // rewrite the config file
-            IRealFile realConfigFile = getConfigFile();
-            SalmonDriveConfig.writeDriveConfig(realConfigFile, SalmonGenerator.getMagicBytes(), SalmonGenerator.getVersion(),
-                    salt, iterations, masterKeyIv,
-                    encryptedCombinedKeyAndNonce, hmacSignature);
-
-            return vaultNonce;
-        }
+        if (!isAuthenticated())
+            throw new SalmonAuthException("Not authenticated");
+        return SalmonDriveManager.getNextNonce(this);
     }
 
     /**
      * Method is called when the user is authenticated
      */
-    protected void onAuthenticationSuccess() {
-
-    }
+    protected abstract void onAuthenticationSuccess();
 
     /**
      * Method is called when the user authentication has failed
      */
-    protected void onAuthenticationError() {
-
-    }
+    protected abstract void onAuthenticationError();
 
     /**
      * Returns true if password authentication has succeeded
@@ -456,9 +399,9 @@ public abstract class SalmonDrive {
     }
 
     /**
-     * Return the current config file
+     * Return the drive config file
      */
-    private IRealFile getConfigFile() {
+    private IRealFile getDriveConfigFile() {
         if (realRoot == null || !realRoot.exists())
             return null;
         IRealFile file = realRoot.getChild(CONFIG_FILE);
@@ -488,10 +431,11 @@ public abstract class SalmonDrive {
 
     /**
      * Return the configuration properties for this drive
-     *
-     * @param configFile The drive configuration file
      */
-    private SalmonDriveConfig getSalmonConfig(IRealFile configFile) throws Exception {
+    protected SalmonDriveConfig getDriveConfig() throws Exception {
+        IRealFile configFile = getDriveConfigFile();
+        if (configFile == null || !configFile.exists())
+            return null;
         byte[] bytes = getBytesFromRealFile(configFile.getPath(), 0);
         SalmonDriveConfig driveConfig = new SalmonDriveConfig(bytes);
         return driveConfig;
@@ -531,14 +475,14 @@ public abstract class SalmonDrive {
      * Return true if the drive already has a configuration file
      */
     public boolean hasConfig() {
-        IRealFile configFile = getConfigFile();
-        if (configFile == null || !configFile.exists())
-            return false;
+        SalmonDriveConfig salmonConfig = null;
         try {
-            SalmonDriveConfig salmonConfig = getSalmonConfig(configFile);
+            salmonConfig = getDriveConfig();
         } catch (Exception ex) {
             return false;
         }
+        if (salmonConfig == null)
+            return false;
         return true;
     }
 
@@ -581,4 +525,9 @@ public abstract class SalmonDrive {
             ex.printStackTrace();
         }
     }
+
+    public byte[] getDriveID() {
+        return driveID;
+    }
+
 }

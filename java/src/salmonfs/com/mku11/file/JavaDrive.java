@@ -26,12 +26,15 @@ SOFTWARE.
 import com.mku11.salmonfs.IRealFile;
 import com.mku11.salmonfs.SalmonDrive;
 
+import java.io.File;
+
 // Salmon Drive implementation for Java
 public class JavaDrive extends SalmonDrive {
 
     public JavaDrive(String realRoot) {
         super(realRoot);
     }
+
 
     public static String getPrivateDir() throws Exception {
         String fileFolder = null;
@@ -46,12 +49,21 @@ public class JavaDrive extends SalmonDrive {
         if (fileFolder == null)
             throw new Exception("Operating System not supported");
         return fileFolder;
-    }
+    }    
 
-    @Override
-    protected IRealFile getFile(String filepath, boolean root) {
+	@Override
+    public IRealFile getFile(String filepath, boolean root) {
         JavaFile JavaFile = new JavaFile(filepath);
         return JavaFile;
     }
 
+    @Override
+    protected void onAuthenticationSuccess() {
+
+    }
+
+    @Override
+    protected void onAuthenticationError() {
+
+    }
 }

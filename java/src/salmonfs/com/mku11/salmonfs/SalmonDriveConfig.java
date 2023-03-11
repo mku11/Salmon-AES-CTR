@@ -37,13 +37,13 @@ import java.util.Arrays;
  */
 public class SalmonDriveConfig {
     //TODO: support versioned formats for the file header
-    byte[] magicBytes = new byte[SalmonGenerator.getMagicBytesLength()];
-    byte[] version = new byte[SalmonGenerator.getVersionLength()];
-    byte[] salt = new byte[SalmonGenerator.getSaltLength()];
-    byte[] iterations = new byte[SalmonGenerator.getIterationsLength()];
-    byte[] iv = new byte[SalmonGenerator.getIvLength()];
-    byte[] encryptedKeysAndNonce = new byte[SalmonGenerator.getCombinedKeyLength() + SalmonGenerator.getNonceLength()];
-    byte[] hmacSignature = new byte[SalmonGenerator.getHmacResultLength()];
+    byte[] magicBytes = new byte[SalmonGenerator.MAGIC_LENGTH];
+    byte[] version = new byte[SalmonGenerator.VERSION_LENGTH];
+    byte[] salt = new byte[SalmonGenerator.SALT_LENGTH];
+    byte[] iterations = new byte[SalmonGenerator.ITERATIONS_LENGTH];
+    byte[] iv = new byte[SalmonGenerator.IV_LENGTH];
+    byte[] encryptedData = new byte[SalmonGenerator.COMBINED_KEY_LENGTH + SalmonGenerator.DRIVE_ID_LENGTH];
+    byte[] hmacSignature = new byte[SalmonGenerator.HMAC_RESULT_LENGTH];
 
     /**
      * Provide a class that hosts the properties of the vault config file
@@ -52,13 +52,13 @@ public class SalmonDriveConfig {
      */
     public SalmonDriveConfig(byte[] contents) throws IOException {
         MemoryStream ms = new MemoryStream(contents);
-        ms.read(magicBytes, 0, SalmonGenerator.getMagicBytesLength());
-        ms.read(version, 0, SalmonGenerator.getVersionLength());
-        ms.read(salt, 0, SalmonGenerator.getSaltLength());
-        ms.read(iterations, 0, SalmonGenerator.getIterationsLength());
-        ms.read(iv, 0, SalmonGenerator.getIvLength());
-        ms.read(encryptedKeysAndNonce, 0, SalmonGenerator.getCombinedKeyLength() + SalmonGenerator.getNonceLength());
-        ms.read(hmacSignature, 0, SalmonGenerator.getHmacResultLength());
+        ms.read(magicBytes, 0, SalmonGenerator.MAGIC_LENGTH);
+        ms.read(version, 0, SalmonGenerator.VERSION_LENGTH);
+        ms.read(salt, 0, SalmonGenerator.SALT_LENGTH);
+        ms.read(iterations, 0, SalmonGenerator.ITERATIONS_LENGTH);
+        ms.read(iv, 0, SalmonGenerator.IV_LENGTH);
+        ms.read(encryptedData, 0, SalmonGenerator.COMBINED_KEY_LENGTH + SalmonGenerator.AUTH_ID_SIZE);
+        ms.read(hmacSignature, 0, SalmonGenerator.HMAC_RESULT_LENGTH);
         ms.close();
     }
 
@@ -71,19 +71,19 @@ public class SalmonDriveConfig {
      * @param salt                         The salt that will be used for encryption of the combined key
      * @param iterations                   The iteration that will be used to derive the master key from a text password
      * @param keyIv                        The initial vector that was used with the master password to encrypt the combined key
-     * @param encryptedCombinedKeyAndNonce The encrypted combined key and vault nonce
-     * @param hmacSignature                The HMAC signature of the nonce
+     * @param encryptedData The encrypted combined key and drive id
+     * @param hmacSignature                The HMAC signature of the drive id
      */
     public static void writeDriveConfig(IRealFile configFile, byte[] magicBytes, byte version, byte[] salt, int iterations, byte[] keyIv,
-                                        byte[] encryptedCombinedKeyAndNonce, byte[] hmacSignature) throws Exception {
+                                        byte[] encryptedData, byte[] hmacSignature) throws Exception {
         // construct the contents of the config file
         MemoryStream ms2 = new MemoryStream();
         ms2.write(magicBytes, 0, magicBytes.length);
         ms2.write(new byte[]{version}, 0, 1);
         ms2.write(salt, 0, salt.length);
-        ms2.write(BitConverter.getBytes(iterations, 4), 0, 4); // sizeof( int)
+        ms2.write(BitConverter.toBytes(iterations, 4), 0, 4); // sizeof( int)
         ms2.write(keyIv, 0, keyIv.length);
-        ms2.write(encryptedCombinedKeyAndNonce, 0, encryptedCombinedKeyAndNonce.length);
+        ms2.write(encryptedData, 0, encryptedData.length);
         ms2.write(hmacSignature, 0, hmacSignature.length);
         ms2.flush();
         ms2.position(0);
@@ -102,7 +102,7 @@ public class SalmonDriveConfig {
         Arrays.fill(salt, 0, salt.length, (byte) 0);
         Arrays.fill(iterations, 0, iterations.length, (byte) 0);
         Arrays.fill(iv, 0, iv.length, (byte) 0);
-        Arrays.fill(encryptedKeysAndNonce, 0, encryptedKeysAndNonce.length, (byte) 0);
+        Arrays.fill(encryptedData, 0, encryptedData.length, (byte) 0);
         Arrays.fill(hmacSignature, 0, hmacSignature.length, (byte) 0);
     }
 
@@ -117,11 +117,11 @@ public class SalmonDriveConfig {
     public int getIterations() {
         if (iterations == null)
             return 0;
-        return BitConverter.toInt32(iterations, 0, 4);
+        return (int) BitConverter.toLong(iterations, 0, SalmonGenerator.ITERATIONS_LENGTH);
     }
 
-    public byte[] getEncryptedKeysAndNonce() {
-        return encryptedKeysAndNonce;
+    public byte[] getEncryptedData() {
+        return encryptedData;
     }
 
     public byte[] getIv() {

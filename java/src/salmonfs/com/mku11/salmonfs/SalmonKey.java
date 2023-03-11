@@ -30,7 +30,7 @@ public class SalmonKey {
     private byte[] masterKey;
     private byte[] driveKey;
     private byte[] hmacKey;
-    private byte[] vaultNonce;
+
     private byte[] salt;
     private int iterations;
 
@@ -43,10 +43,6 @@ public class SalmonKey {
         if (hmacKey != null)
             Arrays.fill(hmacKey, 0, hmacKey.length, (byte) 0);
         hmacKey = null;
-
-        if (vaultNonce != null)
-            Arrays.fill(vaultNonce, 0, vaultNonce.length, (byte) 0);
-        vaultNonce = null;
     }
 
     //TODO: replace with Phantom References
@@ -64,6 +60,7 @@ public class SalmonKey {
         return driveKey;
     }
 
+
     /**
      * Function returns the HMAC key that will be used to sign the file chunks
      */
@@ -77,14 +74,6 @@ public class SalmonKey {
 
     public void setHmacKey(byte[] hmacKey) {
         this.hmacKey = hmacKey;
-    }
-
-    public void setVaultNonce(byte[] vaultNonce) {
-        this.vaultNonce = vaultNonce;
-    }
-
-    public byte[] getVaultNonce() {
-        return vaultNonce;
     }
 
     public byte[] getMasterKey() {

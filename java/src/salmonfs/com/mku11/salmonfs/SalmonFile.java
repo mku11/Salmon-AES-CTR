@@ -52,6 +52,12 @@ public class SalmonFile {
     private byte[] requestedNonce;
     private Object tag;
 
+    private static class SalmonFileHeader {
+        byte[] mgc;
+        byte version;
+        int chunkSize;
+        byte[] nonce;
+    }
 
     /**
      * Provides a file handle that can be used to create encrypted files.
@@ -79,46 +85,73 @@ public class SalmonFile {
         return reqChunkSize;
     }
 
-    Integer getFileChunkSize() throws Exception {
-        AbsStream stream = realFile.getInputStream();
-        stream.seek(SalmonGenerator.getMagicBytesLength() + SalmonGenerator.getVersionLength(), AbsStream.SeekOrigin.Begin);
-        byte[] fileChunkSizeBytes = new byte[getChunkSizeLength()];
-        int bytesRead = stream.read(fileChunkSizeBytes, 0, fileChunkSizeBytes.length);
-        stream.close();
-        if (bytesRead <= 0)
+
+    public Integer getFileChunkSize() throws Exception {
+        SalmonFileHeader header = getHeader();
+        if(header == null)
             return null;
-        int fileChunkSize = BitConverter.toInt32(fileChunkSizeBytes, 0, 4);
-        return fileChunkSize;
+        return getHeader().chunkSize;
+    }
+
+    SalmonFileHeader getHeader() throws Exception {
+        if(!exists())
+            return null;
+        SalmonFileHeader header = new SalmonFileHeader();
+        AbsStream stream = null;
+        try {
+            stream = realFile.getInputStream();
+            header.mgc = new byte[SalmonGenerator.MAGIC_LENGTH];
+            int bytesRead = stream.read(header.mgc, 0, header.mgc.length);
+            if(bytesRead != header.mgc.length)
+                return null;
+            byte[] buff = new byte[8];
+            bytesRead = stream.read(buff, 0, SalmonGenerator.VERSION_LENGTH);
+            if(bytesRead != SalmonGenerator.VERSION_LENGTH)
+                return null;
+            header.version = buff[0];
+            bytesRead = stream.read(buff, 0, getChunkSizeLength());
+            if(bytesRead != getChunkSizeLength())
+                return null;
+            header.chunkSize = (int) BitConverter.toLong(buff, 0, bytesRead);
+            header.nonce = new byte[SalmonGenerator.NONCE_LENGTH];
+            bytesRead = stream.read(header.nonce, 0, SalmonGenerator.NONCE_LENGTH);
+            if(bytesRead != SalmonGenerator.NONCE_LENGTH)
+                return null;
+        } catch (Exception ex) {
+            ex.printStackTrace();
+        } finally {
+            if (stream != null)
+                stream.close();
+        }
+        return header;
     }
 
     /**
      * Retrieves a SalmonStream that will be used for decrypting the data stored in the file
-     *
-     * @param bufferSize The buffer size that will be used for reading from the real file
      */
     public SalmonStream getInputStream() throws Exception {
         if (!exists())
             throw new Exception("File does not exist");
 
         AbsStream realStream = realFile.getInputStream();
-        realStream.seek(SalmonGenerator.getMagicBytesLength() + SalmonGenerator.getVersionLength(),
+        realStream.seek(SalmonGenerator.MAGIC_LENGTH + SalmonGenerator.VERSION_LENGTH,
                 AbsStream.SeekOrigin.Begin);
 
         byte[] fileChunkSizeBytes = new byte[getChunkSizeLength()];
         int bytesRead = realStream.read(fileChunkSizeBytes, 0, fileChunkSizeBytes.length);
         if (bytesRead == 0)
             throw new Exception("Could not parse chunks size from file header");
-        int chunkSize = BitConverter.toInt32(fileChunkSizeBytes, 0, 4);
+        int chunkSize = (int) BitConverter.toLong(fileChunkSizeBytes, 0, 4);
         if (integrity && chunkSize == 0)
             throw new Exception("Cannot check integrity if file doesn't support it");
 
-        byte[] nonceBytes = new byte[SalmonGenerator.getNonceLength()];
+        byte[] nonceBytes = new byte[SalmonGenerator.NONCE_LENGTH];
         int ivBytesRead = realStream.read(nonceBytes, 0, nonceBytes.length);
         if (ivBytesRead == 0)
             throw new Exception("Could not parse nonce from file header");
 
         realStream.position(0);
-        byte[] headerData = new byte[(int) getHeaderLength()];
+        byte[] headerData = new byte[getHeaderLength()];
         realStream.read(headerData, 0, headerData.length);
 
         SalmonStream stream = new SalmonStream(getEncryptionKey(),
@@ -128,6 +161,10 @@ public class SalmonFile {
     }
 
     public synchronized SalmonStream getOutputStream() throws Exception {
+        return getOutputStream(null);
+    }
+
+    synchronized SalmonStream getOutputStream(byte[] nonce) throws Exception {
 
         // check if we have an existing iv in the header
         byte[] nonceBytes = getFileNonce();
@@ -135,7 +172,7 @@ public class SalmonFile {
             throw new SalmonSecurityException("You should not overwrite existing files for security instead delete the existing file and create a new file. If this is a new file and you want to use parallel streams you can   this with SetAllowOverwrite(true)");
 
         if (nonceBytes == null)
-            createHeader();
+            createHeader(nonce);
         nonceBytes = getFileNonce();
 
         // we also get the header data to include in HMAC
@@ -181,7 +218,7 @@ public class SalmonFile {
      */
     private byte[] getRealFileHeaderData(IRealFile realFile) throws Exception {
         AbsStream realStream = realFile.getInputStream();
-        byte[] headerData = new byte[(int) getHeaderLength()];
+        byte[] headerData = new byte[getHeaderLength()];
         realStream.read(headerData, 0, headerData.length);
         realStream.close();
         return headerData;
@@ -267,24 +304,19 @@ public class SalmonFile {
     /**
      * Returns the length of the header in bytes
      */
-    private long getHeaderLength() {
-        return SalmonGenerator.getMagicBytesLength() + SalmonGenerator.getVersionLength() +
-                getChunkSizeLength() + SalmonGenerator.getNonceLength();
+    private int getHeaderLength() {
+        return SalmonGenerator.MAGIC_LENGTH + SalmonGenerator.VERSION_LENGTH +
+                getChunkSizeLength() + SalmonGenerator.NONCE_LENGTH;
     }
 
     /**
      * Returns the initial vector that is used for encryption / decryption
      */
-    private byte[] getFileNonce() throws Exception {
-        AbsStream ivStream = realFile.getInputStream();
-        ivStream.seek(SalmonGenerator.getMagicBytesLength() + SalmonGenerator.getVersionLength() +
-                getChunkSizeLength(), AbsStream.SeekOrigin.Begin);
-        byte[] nonceBytes = new byte[SalmonGenerator.getNonceLength()];
-        int bytesRead = ivStream.read(nonceBytes, 0, nonceBytes.length);
-        ivStream.close();
-        if (bytesRead <= 0)
+    public byte[] getFileNonce() throws Exception {
+        SalmonFileHeader header = getHeader();
+        if(header == null)
             return null;
-        return nonceBytes;
+        return getHeader().nonce;
     }
 
     public void setRequestedNonce(byte[] nonce) throws Exception {
@@ -300,7 +332,7 @@ public class SalmonFile {
     /**
      * Create the header for the file
      */
-    public void createHeader() throws Exception {
+    private void createHeader(byte[] nonce) throws Exception {
         // set it to zero (disabled integrity) or get the default chunk
         // size defined by the drive
         if (integrity && reqChunkSize == null && drive != null)
@@ -309,8 +341,12 @@ public class SalmonFile {
             reqChunkSize = 0;
         if (reqChunkSize == null)
             throw new Exception("File requires a chunk size");
-        if (requestedNonce == null && drive != null)
+
+        if (nonce != null)
+            requestedNonce = nonce;
+        else if (requestedNonce == null && drive != null)
             requestedNonce = drive.getNextNonce();
+
         if (requestedNonce == null)
             throw new Exception("File requires a nonce");
 
@@ -319,9 +355,9 @@ public class SalmonFile {
         realStream.write(magicBytes, 0, magicBytes.length);
 
         byte version = SalmonGenerator.getVersion();
-        realStream.write(new byte[]{version}, 0, SalmonGenerator.getVersionLength());
+        realStream.write(new byte[]{version}, 0, SalmonGenerator.VERSION_LENGTH);
 
-        byte[] chunkSizeBytes = BitConverter.getBytes(reqChunkSize, 4);
+        byte[] chunkSizeBytes = BitConverter.toBytes(reqChunkSize, 4);
         realStream.write(chunkSizeBytes, 0, chunkSizeBytes.length);
 
         realStream.write(requestedNonce, 0, requestedNonce.length);
@@ -334,7 +370,7 @@ public class SalmonFile {
      * Return the AES block size for encryption / decryption
      */
     public int getBlockSize() {
-        return SalmonGenerator.getBlockSize();
+        return SalmonGenerator.BLOCK_SIZE;
     }
 
     /**
@@ -342,7 +378,7 @@ public class SalmonFile {
      */
     public SalmonFile[] listFiles() {
         IRealFile[] files = realFile.listFiles();
-        List<SalmonFile> salmonFiles = new ArrayList<SalmonFile>();
+        List<SalmonFile> salmonFiles = new ArrayList<>();
         for (int i = 0; i < files.length; i++) {
             SalmonFile file = new SalmonFile(files[i], drive);
             salmonFiles.add(file);
@@ -364,9 +400,9 @@ public class SalmonFile {
     /**
      * Creates a directory under this directory
      *
-     * @param dirName         The name of the directory to be created
-     * @param key             The key that will be used to encrypt the directory name
-     * @param folderNameNonce The nonce to be used for encrypting the directory name
+     * @param dirName      The name of the directory to be created
+     * @param key          The key that will be used to encrypt the directory name
+     * @param dirNameNonce The nonce to be used for encrypting the directory name
      */
     public SalmonFile createDirectory(String dirName, byte[] key, byte[] dirNameNonce) throws Exception {
         String encryptedDirName = getEncryptedFilename(dirName, key, dirNameNonce);
@@ -413,7 +449,6 @@ public class SalmonFile {
     /**
      * Returns the virtual path for the drive and the file provided
      *
-     * @param drive    The virtual drive this file belongs to
      * @param realPath The path of the real file
      */
     private String getPath(String realPath) throws Exception {
@@ -441,7 +476,6 @@ public class SalmonFile {
     /**
      * Return the virtual relative path of the file belonging to a drive
      *
-     * @param drive    The virtual drive the file belongs to
      * @param realPath The path of the real file
      */
     private String getRelativePath(String realPath) throws SalmonAuthException {
@@ -531,7 +565,7 @@ public class SalmonFile {
             throw new Exception("File requires hmacKey, use SetVerifyIntegrity() to provide one");
 
         return SalmonIntegrity.getTotalHMACBytesFrom(realFile.length(), getFileChunkSize(),
-                SalmonGenerator.getHmacResultLength());
+                SalmonGenerator.HMAC_RESULT_LENGTH);
     }
 
     /**
