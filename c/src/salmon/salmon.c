@@ -57,19 +57,15 @@ static inline int incrementCounter(long value, uint8_t * counter) {
     return value;
 }
 
-static void aes_transform(uint8_t* roundKey, uint8_t * data) {
-    uint8_t result[16];
-    aes_intr_transform(data, result, AES_BLOCK_SIZE, roundKey, ROUNDS);
-    memcpy(data, result, 16);
-}
-
 extern EXPORT_DLL void init(bool _enableLogDetails, int _hmacHashLength) {
     enableLogDetails = _enableLogDetails;
     hmacHashLength = _hmacHashLength;
 }
 
-extern EXPORT_DLL int encrypt(uint8_t* key, uint8_t *buffer, int arrayLen, uint8_t *cacheWriteBuffer, int blockOffset, int count, int offset,
-    uint8_t* counter, bool integrity, int chunkSize) {
+extern EXPORT_DLL int encrypt(uint8_t* key, uint8_t* counter, int hmacChunkSize,
+    uint8_t *inBuffer, int inBufferLength, int offset, int count,
+    uint8_t *outBuffer, 
+    int blockOffset) {
 
     int totalBytesWritten = 0;
     long totalTransformTime = 0;
@@ -88,20 +84,18 @@ extern EXPORT_DLL int encrypt(uint8_t* key, uint8_t *buffer, int arrayLen, uint8
         if (enableLogDetails) {
             startTransform = currentTimeMillis();
         }
-
-        memcpy(encCounter, counter, 16);
-        aes_transform(roundKey, encCounter);
+        aes_intr_transform(counter, encCounter, AES_BLOCK_SIZE, roundKey, ROUNDS);
         if (enableLogDetails) {
             totalTransformTime += (currentTimeMillis() - startTransform);
         }
 
         // adding a placeholder for hmac
-        if (integrity && i % chunkSize == 0)
+        if (hmacChunkSize > 0 && i % hmacChunkSize == 0)
             hmacSectionOffset += hmacHashLength;
 
         // xor the plain text with the encrypted counter
         for (int k = 0; k < length; k++)
-            cacheWriteBuffer[i + k + hmacSectionOffset] = (uint8_t) (buffer[i + k + offset] ^ encCounter[k + blockOffset]);
+            outBuffer[i + k + hmacSectionOffset] = (uint8_t) (inBuffer[i + k + offset] ^ encCounter[k + blockOffset]);
 
         totalBytesWritten += length;
 
@@ -121,8 +115,11 @@ extern EXPORT_DLL int encrypt(uint8_t* key, uint8_t *buffer, int arrayLen, uint8
     return totalBytesWritten;
 }
 
-extern EXPORT_DLL int decrypt(uint8_t* key, uint8_t *cacheReadBuffer, int arrayLen, uint8_t *buffer, int chunkToBlockOffset, int blockOffset, int bytesAvail, int count, int offset,
-    uint8_t *counter, bool integrity, int chunkSize) {
+extern EXPORT_DLL int decrypt(uint8_t* key, uint8_t* counter, int hmacChunkSize,
+    uint8_t *inBuffer, int inBufferLength, int bytesAvail,
+    uint8_t *outBuffer, int offset, int count, 
+    int chunkToBlockOffset, int blockOffset
+    ) {
 
     int totalBytesRead = 0;
     int bytesRead = 0;
@@ -137,12 +134,12 @@ extern EXPORT_DLL int decrypt(uint8_t* key, uint8_t *cacheReadBuffer, int arrayL
     for (int i = 0; i < count && i < bytesAvail; i += bytesRead) {
         // if we have integrity enabled  we skip the hmac header
         // to arrive at the beginning of our chunk
-        if (chunkSize > 0 && pos % (chunkSize + hmacHashLength) == 0) {
+        if (hmacChunkSize > 0 && pos % (hmacChunkSize + hmacHashLength) == 0) {
             pos += hmacHashLength;
         }
         // now we skip the data prior to our block within that chunk
         // this should happen only at the first time so we have to reset
-        if (chunkSize > 0) {
+        if (hmacChunkSize > 0) {
             pos += chunkToBlockOffset;
             chunkToBlockOffset = 0;
         }
@@ -160,8 +157,8 @@ extern EXPORT_DLL int decrypt(uint8_t* key, uint8_t *cacheReadBuffer, int arrayL
         if (length > count - totalBytesRead)
             length = count - totalBytesRead;
 
-        bytesRead = length < arrayLen - pos?length:arrayLen - pos;
-        memcpy(blockData, cacheReadBuffer + pos, length);
+        bytesRead = length < inBufferLength - pos?length: inBufferLength - pos;
+        memcpy(blockData, inBuffer + pos, length);
         pos += bytesRead;
 
         if (bytesRead == 0)
@@ -170,15 +167,14 @@ extern EXPORT_DLL int decrypt(uint8_t* key, uint8_t *cacheReadBuffer, int arrayL
         if (enableLogDetails) {
             startTransform = currentTimeMillis();
         }
-        memcpy(encCounter, counter, 16);
-        aes_transform(roundKey, encCounter);
+        aes_intr_transform(counter, encCounter, AES_BLOCK_SIZE, roundKey, ROUNDS);
 
         if (enableLogDetails) {
             totalTransformTime += (currentTimeMillis() - startTransform);
         }
         // xor the plain text with the encrypted counter
         for (int k = 0; k < length && k < bytesRead && i + k < bytesAvail; k++) {
-            buffer[i + k + offset] = (uint8_t) (blockData[k] ^ encCounter[k + blockOffset]);
+            outBuffer[i + k + offset] = (uint8_t) (blockData[k] ^ encCounter[k + blockOffset]);
             totalBytesRead++;
         }
 

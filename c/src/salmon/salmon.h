@@ -41,10 +41,14 @@ SOFTWARE.
 
 static long CurrentTimeMillis();
 static inline int incrementCounter(long value, uint8_t * counter);
-static void aes_transform(uint8_t* roundKey, uint8_t * data);
 
 extern EXPORT_DLL void init(bool _enableLogDetails, int _hmacHashLength);
-extern EXPORT_DLL int encrypt(uint8_t* key, uint8_t* buffer, int arrayLen, uint8_t* cacheWriteBuffer, int blockOffset, int count, int offset,
-    uint8_t* counter, bool integrity, int chunkSize);
-extern EXPORT_DLL int decrypt(uint8_t* key, uint8_t* cacheReadBuffer, int arrayLen, uint8_t* buffer, int chunkToBlockOffset, int blockOffset, int bytesAvail, int count, int offset,
-    uint8_t* counter, bool integrity, int chunkSize);
+
+extern EXPORT_DLL int encrypt(uint8_t* key, uint8_t* counter, int hmacChunkSize,
+    uint8_t* inBuffer, int inBufferLength, int offset, int count,
+    uint8_t* outBuffer, int blockOffset);
+
+extern EXPORT_DLL int decrypt(uint8_t* key, uint8_t* counter, int hmacChunkSize,
+    uint8_t* inBuffer, int inBufferLength, int bytesAvail,
+    uint8_t* outBuffer, int offset, int count,
+    int chunkToBlockOffset, int blockOffset);

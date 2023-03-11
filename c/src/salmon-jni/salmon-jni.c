@@ -36,8 +36,10 @@ JNIEXPORT void JNICALL Java_com_mku11_salmon_transformers_SalmonAES_init(JNIEnv*
 }
 
 JNIEXPORT jint JNICALL Java_com_mku11_salmon_transformers_SalmonAES_encrypt(JNIEnv* env, jclass thiz,
-    jbyteArray jkey, jbyteArray jbuffer, jint arrayLen, jbyteArray jcacheWriteBuffer, jint blockOffset, jint count, jint offset,
-    jbyteArray jcounter, jboolean integrity, jint chunkSize) {
+    jbyteArray jkey, jbyteArray jcounter, jint chunkSize,
+    jbyteArray jbuffer, jint arrayLen, jint offset, jint count,
+    jbyteArray jcacheWriteBuffer,
+    jint blockOffset) {
 
     jboolean isCopy;
     uint8_t *key = (uint8_t *) (*env)->GetPrimitiveArrayCritical(env, jkey, &isCopy);
@@ -45,8 +47,10 @@ JNIEXPORT jint JNICALL Java_com_mku11_salmon_transformers_SalmonAES_encrypt(JNIE
     uint8_t *cacheWriteBuffer = (uint8_t *) (*env)->GetPrimitiveArrayCritical(env, jcacheWriteBuffer, &isCopy);
     uint8_t *counter = (uint8_t *) (*env)->GetPrimitiveArrayCritical(env, jcounter, &isCopy);
 
-    int totalBytesWritten = encrypt(key, buffer, arrayLen, cacheWriteBuffer, blockOffset, count, offset,
-        counter, integrity, chunkSize);
+    int totalBytesWritten = encrypt(key,counter, chunkSize,
+        buffer, arrayLen, offset, count,
+        cacheWriteBuffer,
+        blockOffset);
 
     (*env)->ReleasePrimitiveArrayCritical(env, jbuffer, buffer, 0);
     (*env)->ReleasePrimitiveArrayCritical(env, jcacheWriteBuffer, cacheWriteBuffer, 0);
@@ -56,8 +60,10 @@ JNIEXPORT jint JNICALL Java_com_mku11_salmon_transformers_SalmonAES_encrypt(JNIE
 }
 
 JNIEXPORT jint JNICALL Java_com_mku11_salmon_transformers_SalmonAES_decrypt(JNIEnv* env, jclass thiz,
-    jbyteArray jkey, jbyteArray jcacheReadBuffer, jint arrayLen, jbyteArray jbuffer, jint chunkToBlockOffset, jint blockOffset, jint bytesAvail, jint count, jint offset,
-    jbyteArray jcounter, jboolean integrity, jint chunkSize) {
+    jbyteArray jkey, jbyteArray jcounter, jint chunkSize,
+    jbyteArray jcacheReadBuffer, jint arrayLen, jint bytesAvail,
+    jbyteArray jbuffer, jint offset, jint count,
+    jint chunkToBlockOffset, jint blockOffset) {
 
     jboolean isCopy;
     uint8_t *key = (uint8_t *) (*env)->GetPrimitiveArrayCritical(env, jkey, &isCopy);
@@ -65,8 +71,10 @@ JNIEXPORT jint JNICALL Java_com_mku11_salmon_transformers_SalmonAES_decrypt(JNIE
     uint8_t *buffer = (uint8_t *) (*env)->GetPrimitiveArrayCritical(env, jbuffer, &isCopy);
     uint8_t *counter = (uint8_t *) (*env)->GetPrimitiveArrayCritical(env, jcounter, &isCopy);
 
-    int totalBytesRead = decrypt(key, cacheReadBuffer, arrayLen, buffer, chunkToBlockOffset, blockOffset, bytesAvail, count, offset,
-        counter, integrity, chunkSize);
+    int totalBytesRead = decrypt(key,counter, chunkSize,
+        cacheReadBuffer, arrayLen, bytesAvail,
+        buffer, offset, count,
+        chunkToBlockOffset, blockOffset);
 
     (*env)->ReleasePrimitiveArrayCritical(env, jcacheReadBuffer, cacheReadBuffer, 0);
     (*env)->ReleasePrimitiveArrayCritical(env, jbuffer, buffer, 0);
