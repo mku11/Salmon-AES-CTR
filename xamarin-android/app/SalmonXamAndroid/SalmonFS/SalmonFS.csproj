@@ -34,7 +34,15 @@
     <Compile Include="..\..\..\..\csharp\src\salmonfs\File\DotNetDrive.cs" Link="salmonfs\File\DotNetDrive.cs" />
     <Compile Include="..\..\..\..\csharp\src\salmonfs\File\DotNetFile.cs" Link="salmonfs\File\DotNetFile.cs" />
     <Compile Include="..\..\..\..\csharp\src\salmonfs\Media\SalmonMediaDataSource.cs" Link="salmonfs\Media\SalmonMediaDataSource.cs" />
+	<Compile Include="..\..\..\..\csharp\src\salmonfs\SalmonFS\Comparators.cs" Link="salmonfs\SalmonFS\Comparators.cs" />
+    <Compile Include="..\..\..\..\csharp\src\salmonfs\SalmonFS\FileCommander.cs" Link="salmonfs\SalmonFS\FileCommander.cs" />
+    <Compile Include="..\..\..\..\csharp\src\salmonfs\SalmonFS\FileSequencer.cs" Link="salmonfs\SalmonFS\FileSequencer.cs" />
+    <Compile Include="..\..\..\..\csharp\src\salmonfs\SalmonFS\FileUtils.cs" Link="salmonfs\SalmonFS\FileUtils.cs" />
     <Compile Include="..\..\..\..\csharp\src\salmonfs\SalmonFS\IRealFile.cs" Link="salmonfs\SalmonFS\IRealFile.cs" />
+    <Compile Include="..\..\..\..\csharp\src\salmonfs\SalmonFS\ISalmonSequenceParser.cs" Link="salmonfs\SalmonFS\ISalmonSequenceParser.cs" />
+	<Compile Include="..\..\..\..\csharp\src\salmonfs\SalmonFS\SalmonSequenceParser.cs" Link="salmonfs\SalmonFS\SalmonSequenceParser.cs" />
+	<Compile Include="..\..\..\..\csharp\src\salmonfs\SalmonFS\ISalmonSequencer.cs" Link="salmonfs\SalmonFS\ISalmonSequencer.cs" /> 
+    <Compile Include="..\..\..\..\csharp\src\salmonfs\SalmonFS\SalmonAuthConfig.cs" Link="salmonfs\SalmonFS\SalmonAuthConfig.cs" />
     <Compile Include="..\..\..\..\csharp\src\salmonfs\SalmonFS\SalmonAuthException.cs" Link="salmonfs\SalmonFS\SalmonAuthException.cs" />
     <Compile Include="..\..\..\..\csharp\src\salmonfs\SalmonFS\SalmonDrive.cs" Link="salmonfs\SalmonFS\SalmonDrive.cs" />
     <Compile Include="..\..\..\..\csharp\src\salmonfs\SalmonFS\SalmonDriveConfig.cs" Link="salmonfs\SalmonFS\SalmonDriveConfig.cs" />
@@ -44,6 +52,8 @@
     <Compile Include="..\..\..\..\csharp\src\salmonfs\SalmonFS\SalmonFileImporter.cs" Link="salmonfs\SalmonFS\SalmonFileImporter.cs" />
     <Compile Include="..\..\..\..\csharp\src\salmonfs\SalmonFS\SalmonFileSearcher.cs" Link="salmonfs\SalmonFS\SalmonFileSearcher.cs" />
     <Compile Include="..\..\..\..\csharp\src\salmonfs\SalmonFS\SalmonKey.cs" Link="salmonfs\SalmonFS\SalmonKey.cs" />
+    <Compile Include="..\..\..\..\csharp\src\salmonfs\SalmonFS\SalmonSequenceAuthException.cs" Link="salmonfs\SalmonFS\SalmonSequenceAuthException.cs" />
+    <Compile Include="..\..\..\..\csharp\src\salmonfs\SalmonFS\SalmonSequenceConfig.cs" Link="salmonfs\SalmonFS\SalmonSequenceConfig.cs" />
     <Compile Include="..\..\..\..\csharp\src\salmonfs\Stream\SalmonFSConnection.cs" Link="salmonfs\Stream\SalmonFSConnection.cs" />
   </ItemGroup>
 

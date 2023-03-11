@@ -23,6 +23,8 @@ SOFTWARE.
 */
 using Android.App;
 using Android.Content;
+using Java.Lang;
+using Java.Text;
 
 namespace Salmon.Droid.Utils
 {
@@ -39,6 +41,35 @@ namespace Salmon.Droid.Utils
                     tasks[0].SetExcludeFromRecents(value);
                 }
             }
+        }
+
+        public static string GetBytes(long bytes, int decimals)
+        {
+            StringBuilder format = new StringBuilder("#");
+            if (decimals > 0)
+                format.Append(".");
+            for (int i = 0; i < decimals; i++)
+            {
+                format.Append("0");
+            }
+            NumberFormat formatter = new DecimalFormat(format.ToString());
+
+            if (bytes > 1024 * 1024 * 1024)
+            {
+                return formatter.Format(((double)bytes) / (1024 * 1024 * 1024)) + " GB";
+            }
+            else if (bytes > 1024 * 1024)
+            {
+                return formatter.Format(((double)bytes) / (1024 * 1024)) + " MB";
+            }
+            else if (bytes > 1024)
+            {
+                return formatter.Format(((double)bytes) / 1024) + " KB";
+            }
+            else if (bytes >= 0)
+                return ("" + bytes + " B");
+            return "";
+
         }
     }
 }

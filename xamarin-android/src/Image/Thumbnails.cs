@@ -21,13 +21,15 @@ LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 */
-using Android.App;
 using Android.Graphics;
 using Android.Media;
-using Salmon.Droid.Utils;
+using Android.Provider;
+using Java.IO;
+using Java.Lang;
+using Salmon.Droid.Main;
 using Salmon.FS;
 using Salmon.Streams;
-using System.IO;
+
 
 namespace Salmon.Droid.Image
 {
@@ -37,25 +39,41 @@ namespace Salmon.Droid.Image
     public class Thumbnails
     {
         private static readonly string TMP_THUMB_DIR = "tmp";
-        private static readonly int TMP_VIDEO_THUMB_MAX_SIZE = 1 * 1024 * 1024;
+        private static readonly int TMP_VIDEO_THUMB_MAX_SIZE = 3 * 1024 * 1024;
         private static readonly int TMP_GIF_THUMB_MAX_SIZE = 512 * 1024;
-        private static readonly int ENC_BUFFER_SIZE = 512 * 1024; 
+        private static readonly int ENC_BUFFER_SIZE = 128 * 1024;
+        private static readonly bool ENABLE_ALT_THUMBNAIL_GENERATOR = false;
 
-        /// <summary>
-        /// Returns a bitmap thumbanil from an encrypted file
-        /// </summary>
-        /// <param name="salmonFile">The encrypted media file which will be used to get the thumbnail</param>
-        /// <returns></returns>
+        /**
+         * Returns a bitmap thumbnail from an encrypted file
+         *
+         * @param salmonFile The encrypted media file which will be used to get the thumbnail
+         */
         public static Bitmap GetVideoThumbnail(SalmonFile salmonFile)
+        {
+            return GetVideoThumbnail(salmonFile, 0);
+        }
+
+        public static Bitmap GetVideoThumbnail(SalmonFile salmonFile, long ms)
         {
             Bitmap bitmap = null;
             Java.IO.File tmpFile = null;
             try
             {
                 tmpFile = GetVideoTmpFile(salmonFile);
-                bitmap = ThumbnailUtils.CreateVideoThumbnail(tmpFile.Path, Android.Provider.ThumbnailKind.FullScreenKind);
+                if (ENABLE_ALT_THUMBNAIL_GENERATOR)
+                {
+                    bitmap = GetVideoThumbnailAlt(tmpFile, ms);
+                }
+                else
+                {
+                    if (ms > 0)
+                        bitmap = GetVideoThumbnailMedia(tmpFile, ms);
+                    else
+                        bitmap = ThumbnailUtils.CreateVideoThumbnail(tmpFile.Path, ThumbnailKind.FullScreenKind);
+                }
             }
-            catch (System.Exception ex)
+            catch (Exception ex)
             {
                 ex.PrintStackTrace();
             }
@@ -70,93 +88,119 @@ namespace Salmon.Droid.Image
             return bitmap;
         }
 
-        /// <summary>
-        /// Create a partial temp file from an encrypted file that will be used to get the thumbnail
-        /// </summary>
-        /// <param name="salmonFile">The encrypted file that will be used to get the temp file</param>
-        /// <returns></returns>
-        private static Java.IO.File GetVideoTmpFile(SalmonFile salmonFile)
+        private static Bitmap GetVideoThumbnailAlt(File file, long ms)
         {
-            Java.IO.File tmpDir = new Java.IO.File(Application.Context.CacheDir, TMP_THUMB_DIR);
+            throw new UnsupportedOperationException();
+        }
+
+        public static Bitmap GetVideoThumbnailMedia(File file, long ms)
+        {
+            MediaMetadataRetriever retriever = new MediaMetadataRetriever();
+            Bitmap bitmap = null;
+            try
+            {
+                retriever.SetDataSource(file.Path);
+                bitmap = retriever.GetFrameAtTime(ms * 1000);
+            }
+            catch (Exception ex)
+            {
+                ex.PrintStackTrace();
+            }
+            finally
+            {
+                try
+                {
+                    retriever.Release();
+                }
+                catch (IOException e)
+                {
+                    e.PrintStackTrace();
+                }
+            }
+            return bitmap;
+        }
+
+        /**
+         * Create a partial temp file from an encrypted file that will be used to retrieve the thumbnail
+         *
+         * @param salmonFile The encrypted file that will be used to get the temp file
+         */
+        private static File GetVideoTmpFile(SalmonFile salmonFile)
+        {
+            File tmpDir = new File(SalmonApplication.getInstance().ApplicationContext.CacheDir, TMP_THUMB_DIR);
             if (!tmpDir.Exists())
                 tmpDir.Mkdir();
 
-            Java.IO.File tmpFile = new Java.IO.File(tmpDir, salmonFile.GetBaseName());
+            File tmpFile = new File(tmpDir, SalmonTime.CurrentTimeMillis() + "." + salmonFile.GetDrive().GetExtensionFromFileName(salmonFile.GetBaseName()));
             if (tmpFile.Exists())
                 tmpFile.Delete();
             tmpFile.CreateNewFile();
-            Java.IO.FileOutputStream fileStream = new Java.IO.FileOutputStream(tmpFile);
-            SalmonStream ins = salmonFile.GetInputStream(ENC_BUFFER_SIZE);
+            FileOutputStream fileStream = new FileOutputStream(tmpFile);
+            SalmonStream ins = salmonFile.GetInputStream();
             byte[] buffer = new byte[ENC_BUFFER_SIZE];
             int bytesRead;
             long totalBytesRead = 0;
             while ((bytesRead = ins.Read(buffer, 0, buffer.Length)) > 0
-                && totalBytesRead < TMP_VIDEO_THUMB_MAX_SIZE)
+                    && totalBytesRead < TMP_VIDEO_THUMB_MAX_SIZE)
             {
                 fileStream.Write(buffer, 0, bytesRead);
                 totalBytesRead += bytesRead;
             }
-            if (fileStream != null)
-            {
-                fileStream.Flush();
-                fileStream.Close();
-            }
-            if (ins != null)
-                ins.Close();
+            fileStream.Flush();
+            fileStream.Close();
+            ins.Close();
             return tmpFile;
         }
 
-        /// <summary>
-        /// Return a MemoryStream with the partial unencrypted file contents.
-        /// This will read only the beginning contents of the file since we don't need the whole file.
-        /// </summary>
-        /// <param name="salmonFile">The encrypted file to be used</param>
-        /// <param name="maxSize">The max content length that will be decrypted from the beginning of the file</param>
-        /// <returns></returns>
+        /**
+         * Return a MemoryStream with the partial unencrypted file contents.
+         * This will read only the beginning contents of the file since we don't need the whole file.
+         *
+         * @param salmonFile The encrypted file to be used
+         * @param maxSize    The max content length that will be decrypted from the beginning of the file
+         */
         private static System.IO.Stream GetTempStream(SalmonFile salmonFile, long maxSize)
         {
-            MemoryStream ms = new MemoryStream();
-            SalmonStream ins = salmonFile.GetInputStream(ENC_BUFFER_SIZE);
+            System.IO.MemoryStream ms = new System.IO.MemoryStream();
+            SalmonStream ins = salmonFile.GetInputStream();
             byte[] buffer = new byte[ENC_BUFFER_SIZE];
             int bytesRead;
             long totalBytesRead = 0;
             while ((bytesRead = ins.Read(buffer, 0, buffer.Length)) > 0
-                && totalBytesRead < maxSize)
+                    && totalBytesRead < maxSize)
             {
                 ms.Write(buffer, 0, bytesRead);
                 totalBytesRead += bytesRead;
             }
-            if (ms != null)
-                ms.Flush();
-            if (ins != null)
-                ins.Close();
+            ms.Flush();
+            ins.Close();
             ms.Position = 0;
             return ms;
         }
 
-        /// <summary>
-        /// Create a bitmap from the unecrypted data contents of a media file
-        /// If the file is a gif we get only a certain amount of data from the beginning of the file 
-        /// since we don't need to get the whole file.
-        /// </summary>
-        /// <param name="salmonFile"></param>
-        /// <returns></returns>
+        /**
+         * Create a bitmap from the unecrypted data contents of a media file
+         * If the file is a gif we get only a certain amount of data from the beginning of the file
+         * since we don't need to get the whole file.
+         *
+         * @param salmonFile
+         */
         public static Bitmap GetImageThumbnail(SalmonFile salmonFile)
         {
-            BufferedStream stream = null;
+            System.IO.Stream stream = null;
             Bitmap bitmap = null;
             try
             {
                 string ext = SalmonDriveManager.GetDrive().GetExtensionFromFileName(salmonFile.GetBaseName()).ToLower();
-                if(ext.Equals("gif") && salmonFile.GetSize()> TMP_GIF_THUMB_MAX_SIZE)
-                    stream = new BufferedStream(GetTempStream(salmonFile, TMP_GIF_THUMB_MAX_SIZE), ENC_BUFFER_SIZE);
+                if (ext.Equals("gif") && salmonFile.GetSize() > TMP_GIF_THUMB_MAX_SIZE)
+                    stream = new System.IO.BufferedStream(GetTempStream(salmonFile, TMP_GIF_THUMB_MAX_SIZE), ENC_BUFFER_SIZE);
                 else
-                    stream = new BufferedStream(salmonFile.GetInputStream(), ENC_BUFFER_SIZE);
+                    stream = new System.IO.BufferedStream(salmonFile.GetInputStream(), ENC_BUFFER_SIZE);
                 BitmapFactory.Options options = new BitmapFactory.Options();
                 options.InSampleSize = 4;
                 bitmap = BitmapFactory.DecodeStream(stream, null, options);
             }
-            catch (System.Exception ex)
+            catch (Exception ex)
             {
                 ex.PrintStackTrace();
             }
@@ -167,6 +211,5 @@ namespace Salmon.Droid.Image
             }
             return bitmap;
         }
-
     }
 }

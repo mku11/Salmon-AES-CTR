@@ -40,10 +40,7 @@ using static Salmon.SalmonIntegrity;
 
 namespace Salmon.Droid.Main
 {
-
-    [Activity(Label = "@string/app_name", Icon = "@drawable/logo", 
-        Theme = "@style/Theme.MaterialComponents.Light.DarkActionBar",
-        ConfigurationChanges = ConfigChanges.ScreenSize | ConfigChanges.Orientation)]
+    [Activity(Label = "@string/app_name", ConfigurationChanges = ConfigChanges.ScreenSize | ConfigChanges.Orientation)]
     public class WebViewerActivity : AppCompatActivity
     {
         private static readonly string TAG = typeof(WebViewerActivity).Name;
@@ -202,8 +199,8 @@ namespace Salmon.Droid.Main
 
         private void PromptTextSearch()
         {
-            ActivityCommon.PromptEdit(this, Resources.GetString(Resource.String.Search), 
-                Resources.GetString(Resource.String.Keywords), "", (string value) =>{
+            ActivityCommon.PromptEdit(this, Resources.GetString(Resource.String.Search),
+                "Keywords", "", null, (string value, bool option) =>{
                     webView.FindAllAsync(value);
                 });
         }

@@ -23,7 +23,6 @@ SOFTWARE.
 */
 using Android.App;
 using Android.Content;
-using Android.Util;
 using Android.Widget;
 using Salmon.Droid.Utils;
 using Salmon.Droid.FS;
@@ -34,99 +33,25 @@ using Java.IO;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using Context = Android.Content.Context;
+using Android.OS;
+using Android.Provider;
+using Console = System.Console;
+using Uri = Android.Net.Uri;
+using Android.Util;
+using AndroidX.DocumentFile.Provider;
+using AlertDialog = AndroidX.AppCompat.App.AlertDialog;
 
 namespace Salmon.Droid.Main
 {
     public partial class ActivityCommon
     {
         static readonly string TAG = typeof(ActivityCommon).Name;
-        public static bool SetVaultFolder(Activity activity, Intent data)
-        {
-
-            Android.Net.Uri treeUri = data.Data;
-            if (treeUri == null)
-            {
-                Toast.MakeText(activity, "Cannot List Directory", ToastLength.Long).Show();
-                return false;
-            }
-
-            string lastDir = treeUri.ToString();
-
-            if (lastDir.Contains("com.android.providers.downloads"))
-            {
-                ((AndroidDrive) SalmonDriveManager.GetDrive()).PickRealFolder(activity, "Directory Used For Downloads", true,
-                    SettingsActivity.GetVaultLocation(activity));
-                return false;
-            }
-            else if (!lastDir.Contains("com.android.externalstorage"))
-            {
-                ((AndroidDrive)SalmonDriveManager.GetDrive()).PickRealFolder(activity, "Directory Not Supported", true,
-                    SettingsActivity.GetVaultLocation(activity));
-                return false;
-            }
-
-            ActivityFlags takeFlags = data.Flags & (
-                                ActivityFlags.GrantReadUriPermission |
-                                ActivityFlags.GrantWriteUriPermission);
-
-            try
-            {
-                for (int i = 0; activity.ContentResolver.PersistedUriPermissions.Count > 100; i++)
-                {
-                    IList<UriPermission> list = AndroidDrive.GetPermissionsList();
-                    Android.Net.Uri uri = list[0].Uri;
-                    activity.ContentResolver.ReleasePersistableUriPermission(uri, takeFlags);
-                }
-            }
-            catch (Exception ex)
-            {
-				ex.PrintStackTrace();
-                Toast.MakeText(activity, ex.Message, ToastLength.Long).Show();
-            }
-
-            try
-            {
-                activity.GrantUriPermission(activity.PackageName, treeUri,
-                    ActivityFlags.GrantReadUriPermission);
-                activity.GrantUriPermission(activity.PackageName, treeUri,
-                    ActivityFlags.GrantPersistableUriPermission);
-                activity.GrantUriPermission(activity.PackageName, treeUri,
-                    ActivityFlags.GrantWriteUriPermission);
-
-            }
-            catch (Exception ex)
-            {
-                ex.PrintStackTrace();
-                Toast.MakeText(activity, ex.Message, ToastLength.Long).Show();
-            }
-
-            try
-            {
-                activity.ContentResolver.TakePersistableUriPermission(treeUri, takeFlags);
-            }
-            catch (Exception ex)
-            {
-                ex.PrintStackTrace();
-                Toast.MakeText(activity, ex.Message, ToastLength.Long).Show();
-            }
-            SettingsActivity.SetVaultLocation(activity, treeUri.ToString());
-            try
-            {
-                SalmonDriveManager.SetDriveLocation(treeUri.ToString());
-                SalmonDriveManager.GetDrive().SetEnableIntegrityCheck(true);
-            }
-            catch (Exception e)
-            {
-                e.PrintStackTrace();
-                return false;
-            }
-            return true;
-        }
-
+        public static readonly string EXTERNAL_STORAGE_PROVIDER_AUTHORITY = "com.android.externalstorage.documents";
 
         //TODO: this is the standard way to get a users password though within c# we
         // shoud try using SecureString which requires other ways to capture the password from the user
-        public static void PromptPassword(Activity activity, Action OnAuthenticationSucceded)
+        public static void PromptPassword(Activity activity, Action<SalmonDrive> OnAuthenticationSucceded)
         {
             MaterialAlertDialogBuilder builder = new MaterialAlertDialogBuilder(activity);
 
@@ -156,14 +81,13 @@ namespace Salmon.Droid.Main
                 {
                     SalmonDriveManager.GetDrive().Authenticate(typePasswd.Text.ToString());
                     if (OnAuthenticationSucceded != null)
-                        OnAuthenticationSucceded.Invoke();
+                        OnAuthenticationSucceded.Invoke(SalmonDriveManager.GetDrive());
                 }
                 catch (Exception ex)
                 {
                     ex.PrintStackTrace();
-                    ActivityCommon.PromptPassword(activity, OnAuthenticationSucceded);
+                    PromptPassword(activity, OnAuthenticationSucceded);
                 }
-
             });
             builder.SetNegativeButton(activity.GetString(Android.Resource.String.Cancel), (object sender, DialogClickEventArgs e) =>
             {
@@ -223,20 +147,9 @@ namespace Salmon.Droid.Main
                     ActivityCommon.PromptSetPassword(activity, OnPasswordChanged);
                 else
                 {
-                    try
-                    {
-                        SalmonDriveManager.GetDrive().SetPassword(typePasswd.Text.ToString());
-                        if (OnPasswordChanged != null)
-                            OnPasswordChanged.Invoke(typePasswd.Text.ToString());
-                    } catch (SalmonAuthException ex)
-                    {
-                        PromptPassword(activity, ()=>
-                        {
-                            ActivityCommon.PromptSetPassword(activity, OnPasswordChanged);
-                        });
-                    }
+                    if (OnPasswordChanged != null)
+                        OnPasswordChanged.Invoke(typePasswd.Text.ToString());
                 }
-                
             });
             builder.SetNegativeButton(activity.GetString(Android.Resource.String.Cancel), (object sender, DialogClickEventArgs e) =>
             {
@@ -253,7 +166,9 @@ namespace Salmon.Droid.Main
         }
 
 
-        public static void PromptEdit(Activity activity, String title, String msg, String value, Action<String> OnEdit)
+        public static void PromptEdit(Activity activity, string title, string msg,
+            string value, string option, Action<string,bool> OnEdit, bool isFileName = false,
+            bool readOnly = false)
         {
             MaterialAlertDialogBuilder builder = new MaterialAlertDialogBuilder(activity);
 
@@ -269,17 +184,41 @@ namespace Salmon.Droid.Main
 
             TextInputEditText valueText = new TextInputEditText(msgText.Context);
             valueText.Text = value;
-            valueText.InputType = Android.Text.InputTypes.ClassText;
+            if (readOnly)
+            {
+                valueText.InputType = Android.Text.InputTypes.Null;
+                valueText.SetTextIsSelectable(true);
+            }
+            else
+            {
+                valueText.InputType = Android.Text.InputTypes.ClassText;
+            }
+            if (isFileName)
+            {
+                string ext = SalmonDriveManager.GetDrive().GetExtensionFromFileName(value);
+                if (ext != null && ext.Length > 0)
+                    valueText.SetSelection(0, value.Length - ext.Length - 1);
+                else
+                    valueText.SetSelection(0, value.Length);
+            }
+            else
+            {
+                valueText.SelectAll();
+            }
             LinearLayout.LayoutParams parameters = new LinearLayout.LayoutParams(
                     LinearLayout.LayoutParams.MatchParent, LinearLayout.LayoutParams.MatchParent);
             msgText.AddView(valueText);
-
             layout.AddView(msgText, parameters);
-
+            CheckBox optionCheckBox = new CheckBox(activity);
+            if (option != null)
+            {
+                optionCheckBox.Text = option;
+                layout.AddView(optionCheckBox, parameters);
+            }
             builder.SetPositiveButton(activity.GetString(Android.Resource.String.Ok), (object sender, DialogClickEventArgs e) =>
             {
                 if (OnEdit != null)
-                    OnEdit.Invoke(valueText.Text.ToString());
+                    OnEdit.Invoke(valueText.Text.ToString(), optionCheckBox.Checked);
             });
             builder.SetNegativeButton(activity.GetString(Android.Resource.String.Cancel), (object sender, DialogClickEventArgs e) =>
             {
@@ -295,15 +234,14 @@ namespace Salmon.Droid.Main
                 alertDialog.Show();
         }
 
-
-        internal static void PromptOpenWith(Activity activity, Intent intent, SortedDictionary<string,string> apps,
-            Android.Net.Uri uri, File sharedFile, SalmonFile salmonFile, bool allowWrite, 
+        internal static void PromptOpenWith(Activity activity, Intent intent, SortedDictionary<string, string> apps,
+            Android.Net.Uri uri, File sharedFile, SalmonFile salmonFile, bool allowWrite,
             Action<AndroidSharedFileObserver> OnFileContentsChanged)
         {
 
             string[] names = apps.Keys.ToArray();
             string[] packageNames = apps.Values.ToArray();
-            
+
             MaterialAlertDialogBuilder builder = new MaterialAlertDialogBuilder(activity);
             builder.SetTitle(activity.GetString(Resource.String.ChooseApp));
             builder.SetSingleChoiceItems(names, -1, (object sender, DialogClickEventArgs e) =>
@@ -316,7 +254,7 @@ namespace Salmon.Droid.Main
                     ActivityFlags activityFlags = ActivityFlags.GrantReadUriPermission;
                     if (allowWrite)
                         activityFlags |= ActivityFlags.GrantWriteUriPermission;
-                    
+
                     SetFileContentsChangedObserver(sharedFile, salmonFile, OnFileContentsChanged);
                     activity.GrantUriPermission(packageNames[e.Which], uri, activityFlags);
                     intent.SetPackage(packageNames[e.Which]);
@@ -335,7 +273,7 @@ namespace Salmon.Droid.Main
 
         private static void SetFileContentsChangedObserver(File cacheFile, SalmonFile salmonFile, Action<AndroidSharedFileObserver> onFileContentsChanged)
         {
-            AndroidSharedFileObserver fileObserver = AndroidSharedFileObserver.CreateFileObserver(cacheFile, 
+            AndroidSharedFileObserver fileObserver = AndroidSharedFileObserver.CreateFileObserver(cacheFile,
                 salmonFile, onFileContentsChanged);
             fileObserver.StartWatching();
         }
@@ -359,6 +297,163 @@ namespace Salmon.Droid.Main
 
             if (!activity.IsFinishing)
                 alertDialog.Show();
+        }
+
+
+        public static void PromptSingleValue(Activity activity, string title,
+                                             List<string> items, int currSelection, Action<int> onClickListener)
+        {
+            MaterialAlertDialogBuilder builder = new MaterialAlertDialogBuilder(activity);
+            if (title != null)
+                builder.SetTitle(title);
+            builder.SetSingleChoiceItems(items.ToArray(), currSelection, (object sender, DialogClickEventArgs e) =>
+            {
+                onClickListener.Invoke(e.Which);
+            });
+            AlertDialog alertDialog = builder.Create();
+            alertDialog.SetTitle(title);
+            alertDialog.SetCancelable(true);
+
+            if (!activity.IsFinishing)
+                alertDialog.Show();
+        }
+
+        public static void OpenVault(Context context, string dirPath)
+        {
+            SalmonDriveManager.OpenDrive(dirPath);
+            SalmonDriveManager.GetDrive().SetEnableIntegrityCheck(true);
+            SettingsActivity.SetVaultLocation(context, dirPath);
+        }
+
+        public static void CreateVault(Context context, string dirPath, string password)
+        {
+            SalmonDriveManager.CreateDrive(dirPath, password);
+            SalmonDriveManager.GetDrive().SetEnableIntegrityCheck(true);
+            SettingsActivity.SetVaultLocation(context, dirPath);
+        }
+
+
+        /// <summary>
+        /// Prompt the user for a Storage Access Framework uri
+        /// </summary>
+        /// <param name="activity"></param>
+        /// <param name="folder"></param>
+        /// <param name="lastDir"></param>
+        public static void OpenFilesystem(Activity activity, bool folder, bool multiSelect, string lastDir, int resultCode)
+        {
+            Intent intent = new Intent(folder ? Intent.ActionOpenDocumentTree : Intent.ActionOpenDocument);
+            intent.AddFlags(ActivityFlags.GrantPersistableUriPermission);
+            intent.AddFlags(ActivityFlags.GrantReadUriPermission);
+            intent.AddFlags(ActivityFlags.GrantWriteUriPermission);
+
+            if (folder && lastDir != null)
+            {
+                try
+                {
+                    Uri uri = DocumentsContract.BuildDocumentUri(EXTERNAL_STORAGE_PROVIDER_AUTHORITY, "primary:");
+                    intent.PutExtra(DocumentsContract.ExtraInitialUri, uri);
+                }
+                catch (Exception ex)
+                {
+                    Console.WriteLine(ex);
+                }
+            }
+            if (!folder)
+            {
+                intent.AddCategory(Intent.CategoryOpenable);
+                intent.SetType("*/*");
+            }
+            if (multiSelect)
+            {
+                intent.PutExtra(Intent.ExtraAllowMultiple, true);
+            }
+
+            string prompt = "Open File(s)";
+            if (folder)
+                prompt = "Open Directory";
+
+            intent.PutExtra(DocumentsContract.ExtraPrompt, prompt);
+            intent.PutExtra("android.content.extra.SHOW_ADVANCED", true);
+            intent.PutExtra(Intent.ExtraLocalOnly, true);
+            try
+            {
+                activity.StartActivityForResult(intent, resultCode);
+            }
+            catch (Exception e)
+            {
+                Toast.MakeText(activity, "Could not start file picker!" + e.Message, ToastLength.Long).Show();
+            }
+        }
+
+        public static void SetUriPermissions(Intent data, Uri uri)
+        {
+            int takeFlags = 0;
+            if (data != null)
+                takeFlags = (int)data.Flags;
+            takeFlags &= (
+                    (int)ActivityFlags.GrantReadUriPermission |
+                    (int)ActivityFlags.GrantWriteUriPermission
+            );
+
+            try
+            {
+                Application.Context.GrantUriPermission(Application.Context.PackageName, uri, ActivityFlags.GrantReadUriPermission);
+                Application.Context.GrantUriPermission(Application.Context.PackageName, uri, ActivityFlags.GrantWriteUriPermission);
+                Application.Context.GrantUriPermission(Application.Context.PackageName, uri, ActivityFlags.GrantPersistableUriPermission);
+            }
+            catch (Exception ex)
+            {
+                ex.PrintStackTrace();
+                string err = "Could not grant uri perms to activity: " + ex;
+                Toast.MakeText(Application.Context, err, ToastLength.Long).Show();
+            }
+
+            try
+            {
+                Application.Context.ContentResolver.TakePersistableUriPermission(uri, (ActivityFlags)takeFlags);
+            }
+            catch (Exception ex)
+            {
+                ex.PrintStackTrace();
+                string err = "Could not take Persistable perms: " + ex;
+                Toast.MakeText(Application.Context, err, ToastLength.Long).Show();
+            }
+        }
+
+
+        /// <summary>
+        /// Retrieve real files from an intent that was received
+        /// </summary>
+        /// <param name="context"></param>
+        /// <param name="data"></param>
+        /// <returns></returns>
+        public static IRealFile[] GetFilesFromIntent(Context context, Intent data)
+        {
+            IRealFile[] files = null;
+
+            if (data != null)
+            {
+                if (null != data.ClipData)
+                {
+                    files = new IRealFile[data.ClipData.ItemCount];
+                    for (int i = 0; i < data.ClipData.ItemCount; i++)
+                    {
+                        Android.Net.Uri uri = data.ClipData.GetItemAt(i).Uri;
+                        string filename = uri.ToString();
+                        Log.Debug(TAG, "File: " + filename);
+                        DocumentFile docFile = DocumentFile.FromSingleUri(context, uri);
+                        files[i] = new AndroidFile(docFile, context);
+                    }
+                }
+                else
+                {
+                    Uri uri = data.Data;
+                    files = new IRealFile[1];
+                    DocumentFile docFile = DocumentFile.FromSingleUri(context, uri);
+                    files[0] = new AndroidFile(docFile, context);
+                }
+            }
+            return files;
         }
     }
 }

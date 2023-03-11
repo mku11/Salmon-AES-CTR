@@ -1,18 +1,24 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
-<manifest xmlns:android="http://schemas.android.com/apk/res/android" package="com.mku.android.salmonvault" 
-xmlns:tools="http://schemas.android.com/tools"
-android:versionCode="102" android:versionName="1.2" android:installLocation="auto">
-	<uses-sdk android:minSdkVersion="26" android:targetSdkVersion="33" />
-	<uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" />
+<manifest xmlns:android="http://schemas.android.com/apk/res/android" package="com.mku.android.salmonvault" xmlns:tools="http://schemas.android.com/tools" android:versionCode="102" android:versionName="1.2" android:installLocation="auto">
+	<uses-sdk android:minSdkVersion="26" android:targetSdkVersion="33"/>
+	<uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE"/>
 	<!-- We need to able to query apps on the device to let the user choose which one to 
 	give temporary permission to share encrypted files with -->
-    <uses-permission
-        android:name="android.permission.QUERY_ALL_PACKAGES"
-        tools:ignore="QueryAllPackagesPermission" />
-	
-	<application android:label="@string/app_name" android:name="Salmon.Droid.SalmonApplication" android:theme="@style/Theme.MaterialComponents" android:largeHeap="true" android:icon="@drawable/logo">
-		<provider android:name="androidx.core.content.FileProvider" android:authorities="@string/FileProvider" android:exported="false" android:grantUriPermissions="true">
-			<meta-data android:name="android.support.FILE_PROVIDER_PATHS" android:resource="@xml/fileprovider" />
+	<uses-permission android:name="android.permission.QUERY_ALL_PACKAGES" tools:ignore="QueryAllPackagesPermission"/>
+	<application 
+		android:label="@string/app_name" 
+		android:name="Salmon.Droid.SalmonApplication" 
+		android:theme="@style/AppTheme"
+		android:largeHeap="true" 
+		android:icon="@drawable/logo_small" 
+		android:allowBackup="false">
+		<provider android:name="androidx.core.content.FileProvider" 
+			android:authorities="@string/FileProvider" 
+			android:exported="false" 
+			android:grantUriPermissions="true">
+			<meta-data 
+				android:name="android.support.FILE_PROVIDER_PATHS" 
+				android:resource="@xml/fileprovider"/>
 		</provider>
 	</application>
 </manifest>

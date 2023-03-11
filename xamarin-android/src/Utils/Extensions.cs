@@ -21,6 +21,7 @@ LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 */
+using Salmon.Droid.Main;
 using System;
 
 namespace Salmon.Droid.Utils
@@ -30,6 +31,11 @@ namespace Salmon.Droid.Utils
         public static void PrintStackTrace(this Exception ex)
         {
             Console.WriteLine(ex.StackTrace);
+        }
+
+        public static int Ordinal<T>(this T e) where T : Enum
+        {
+            return (int)Enum.Parse(typeof(T), e.ToString());
         }
     }
 }

@@ -41,7 +41,7 @@ using static Android.Views.ViewGroup;
 
 namespace Salmon.Droid.Main
 {
-    [Activity(Label = "@string/app_name", Icon = "@drawable/logo", Theme = "@style/Theme.AppCompat.NoActionBar",
+    [Activity(Label = "@string/app_name", 
         ConfigurationChanges = ConfigChanges.ScreenSize | ConfigChanges.Orientation)]
     public class MediaPlayerActivity : AppCompatActivity, ISurfaceHolderCallback
     {

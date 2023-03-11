@@ -26,19 +26,16 @@ using Android.Content;
 using Android.Content.PM;
 using Android.OS;
 using Android.Preferences;
-using Salmon.Droid.FS;
+using Android.Widget;
 using Salmon.Droid.Media;
 using Salmon.Droid.Utils;
 using Salmon.FS;
 using Salmon.Streams;
 using System;
-using System.Threading;
 
 namespace Salmon.Droid.Main
 {
-    [Activity(Label = "@string/app_name", Icon = "@drawable/logo",
-        Theme = "@style/Theme.MaterialComponents",
-        ConfigurationChanges = ConfigChanges.ScreenSize | ConfigChanges.Orientation)]
+    [Activity(Label = "@string/app_name", ConfigurationChanges = ConfigChanges.ScreenSize | ConfigChanges.Orientation)]
     [System.Obsolete]
     public class SettingsActivity : PreferenceActivity
     {
@@ -53,12 +50,25 @@ namespace Salmon.Droid.Main
         {
             PreferenceManager.FindPreference("vaultLocation").PreferenceClick += delegate
             {
-                ((AndroidDrive)SalmonDriveManager.GetDrive()).PickRealFolder(this, "Select a Folder for your Encrypted files", true, null);
+                ActivityCommon.OpenFilesystem(this, true, false, GetVaultLocation(this),
+                    SalmonActivity.REQUEST_OPEN_VAULT_DIR);
             };
 
             PreferenceManager.FindPreference("changePassword").PreferenceClick += delegate
             {
-                ActivityCommon.PromptSetPassword(this, null);
+                ActivityCommon.PromptSetPassword(this, (pass) =>
+                {
+                    try
+                    {
+                        SalmonDriveManager.GetDrive().SetPassword(pass);
+                        Toast.MakeText(this, "Password changed", ToastLength.Long).Show();
+                    }
+                    catch (Exception e)
+                    {
+                        e.PrintStackTrace();
+                        Toast.MakeText(this, "Could not change password", ToastLength.Long).Show();
+                    }
+                });
             };
 
             PreferenceManager.FindPreference("enableLog").PreferenceChange += (object sender, Preference.PreferenceChangeEventArgs e) =>
@@ -105,24 +115,25 @@ namespace Salmon.Droid.Main
             editor.Commit();
         }
 
-        protected override void OnActivityResult(int requestCode, Result resultCode, Intent data) 
+        protected override void OnActivityResult(int requestCode, Result resultCode, Intent data)
         {
-            if (requestCode == AndroidDrive.RequestSdcardCodeFolder)
+            if (data == null)
+                return;
+            Android.Net.Uri uri = data.Data;
+            if (requestCode == SalmonActivity.REQUEST_OPEN_VAULT_DIR)
             {
-                if (data != null)
+                try
                 {
-                    Thread t = new Thread(() =>
-                    {
-                        bool res = ActivityCommon.SetVaultFolder(this, data);
-                        if (!res)
-                        {
-                            return;
-                        }
-                    });
-                    t.Start();
+                    ActivityCommon.SetUriPermissions(data, data.Data);
+                    SetVaultLocation(this, data.Data.ToString());
+                    ActivityCommon.OpenVault(this, uri.ToString());
+                    //TODO: notify ui
+                }
+                catch (Exception e)
+                {
+                    Toast.MakeText(this, "Could not change vault: " + e.Message, ToastLength.Long).Show();
                 }
             }
-            base.OnActivityResult(requestCode, resultCode, data);
         }
 
         public static SalmonStream.ProviderType getProviderType(Context context)
@@ -135,7 +146,6 @@ namespace Salmon.Droid.Main
             ISharedPreferences prefs = PreferenceManager.GetDefaultSharedPreferences(context);
             return prefs.GetString("aesType", "Default");
         }
-
 
         public static bool getEnableLog(Context context)
         {
