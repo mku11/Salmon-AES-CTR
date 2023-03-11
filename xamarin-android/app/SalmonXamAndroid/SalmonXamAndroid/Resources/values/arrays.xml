@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+    <string-array name="AESImplEntries">
+        <item>@string/Default</item>
+        <item>@string/AesIntrinsics</item>
+    </string-array>
+
+    <string-array name="AESImplValues">
+        <item>Default</item>
+        <item>AesIntrinsics</item>
+    </string-array>
+
+    <string-array name="PBKDFImplEntries">
+        <item>@string/Default</item>
+    </string-array>
+
+    <string-array name="PBKDFImplValues">
+        <item>Default</item>
+    </string-array>
+
+</resources>
