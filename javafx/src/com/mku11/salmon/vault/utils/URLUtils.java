@@ -23,6 +23,7 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 */
 
+import com.mku11.salmon.vault.dialog.SalmonAlert;
 import javafx.scene.control.Alert;
 
 import java.awt.*;
@@ -38,7 +39,7 @@ public class URLUtils {
                 try {
                     Desktop.getDesktop().browse(new URI(url));
                 } catch (Exception ex) {
-                    new Alert(Alert.AlertType.ERROR, "Could not open Url: " + url);
+                    new SalmonAlert(Alert.AlertType.ERROR, "Could not open Url: " + url);
                 }
             }
         });
