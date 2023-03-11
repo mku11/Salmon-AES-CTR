@@ -26,21 +26,30 @@ SOFTWARE.
 public class Settings {
     public static final String DEFAULT_VAULT_LOCATION = null;
     public static final String VAULT_LOCATION_KEY = "VAULT_LOCATION_KEY";
+
     public String vaultLocation = DEFAULT_VAULT_LOCATION;
 
     public AESType aesType = DEFAULT_AES_TYPE;
     public static final AESType DEFAULT_AES_TYPE = AESType.Default;
     public static final String AES_TYPE_KEY = "AES_TYPE_KEY";
-    private static Settings instance;
+    
     public enum AESType {
         Default, AesIntrinsics
     }
 
-    public PbkdfType pbkdfType = DEFAULT_PBKDFTYPE;
-    public static final PbkdfType DEFAULT_PBKDFTYPE = PbkdfType.Default;
+    public PbkdfType pbkdfType = DEFAULT_PBKDF_TYPE;
+    public static final PbkdfType DEFAULT_PBKDF_TYPE = PbkdfType.Default;
     public static final String PBKDF_TYPE_KEY = "PBKDF_TYPE_KEY";
     public enum PbkdfType {
         Default
+    }
+
+
+    public AuthType authType = DEFAULT_AUTH_TYPE;
+    public static final AuthType DEFAULT_AUTH_TYPE = AuthType.Service;
+    public static final String AUTH_TYPE_KEY = "AUTH_TYPE_KEY";
+    public enum AuthType {
+        Service, User
     }
 
     public static final boolean DEFAULT_DELETE_AFTER_IMPORT = false;
@@ -58,6 +67,8 @@ public class Settings {
     public static final String DEFAULT_LAST_IMPORT_DIR = null;
     public static final String LAST_IMPORT_DIR_KEY = "LAST_IMPORT_DIR_KEY";
     public String lastImportDir = DEFAULT_LAST_IMPORT_DIR;
+
+	private static Settings instance;
 
     public static Settings getInstance() {
         if(instance == null)

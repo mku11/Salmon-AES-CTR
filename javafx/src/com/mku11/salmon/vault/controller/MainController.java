@@ -30,10 +30,10 @@ import com.mku11.salmon.SalmonGenerator;
 import com.mku11.salmon.streams.SalmonStream;
 import com.mku11.salmon.vault.config.Config;
 import com.mku11.salmon.vault.dialog.ActivityCommon;
+import com.mku11.salmon.vault.dialog.SalmonAlert;
 import com.mku11.salmon.vault.prefs.Preferences;
+import com.mku11.salmon.vault.sequencer.WinClientSequencer;
 import com.mku11.salmon.vault.settings.Settings;
-import com.mku11.salmon.vault.utils.FileCommander;
-import com.mku11.salmon.vault.utils.FileUtils;
 import com.mku11.salmon.vault.utils.URLUtils;
 import com.mku11.salmon.vault.utils.Utils;
 import com.mku11.salmonfs.*;
@@ -61,11 +61,15 @@ import java.util.Comparator;
 import java.util.List;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
+import java.util.function.Consumer;
 import java.util.function.Function;
 
 public class MainController {
     private static final int BUFFER_SIZE = 512 * 1024;
     private static final int THREADS = 4;
+    public static final String SEQUENCER_DIR_PATH = System.getenv("LOCALAPPDATA") + File.separator + ".salmon";
+    public static final String SEQUENCER_FILE_PATH = SEQUENCER_DIR_PATH + File.separator + "config.xml";
+    private static final String SERVICE_PIPE_NAME = "SalmonService";
 
     public static SalmonFile RootDir;
     public static SalmonFile CurrDir;
@@ -152,7 +156,7 @@ public class MainController {
         setupFileCommander();
         setupListeners();
         loadSettings();
-        setupVirtualDrive();
+        setupSalmonManager();
     }
 
     @SuppressWarnings("unchecked")
@@ -185,7 +189,7 @@ public class MainController {
     }
 
     private void promptDelete() {
-        ActivityCommon.promptDialog("Delete", "Delete " + getSelectedFileItems().length + " item(s)?",
+        ActivityCommon.promptDialog("Delete", "Delete " + getSelectedFiles().length + " item(s)?",
                 "Ok", (buttonType) -> {
                     deleteSelectedFiles();
                     return null;
@@ -201,17 +205,36 @@ public class MainController {
                 }, "Cancel", null);
     }
 
-    public void onOpen() {
-        File selectedDirectory = MainController.selectVault(stage);
+    public void onOpenVault() {
+        File selectedDirectory = MainController.selectDirectory(stage, "Select directory of existing vault");
         if (selectedDirectory == null)
             return;
         String filePath = selectedDirectory.getAbsolutePath();
         try {
-            ActivityCommon.setVaultFolder(filePath);
+            ActivityCommon.openVault(filePath);
         } catch (Exception e) {
-            new Alert(Alert.AlertType.WARNING, "Could not open vault").show();
+            new SalmonAlert(Alert.AlertType.WARNING, "Could not open vault: " + e).show();
         }
         refresh();
+    }
+
+    public void onCreateVault() {
+        File selectedDirectory = MainController.selectDirectory(stage, "Select directory for your new vault");
+        if (selectedDirectory == null)
+            return;
+        ActivityCommon.promptSetPassword((String pass) ->
+        {
+            String filePath = selectedDirectory.getAbsolutePath();
+            try {
+                ActivityCommon.createVault(filePath, pass);
+                RootDir = SalmonDriveManager.getDrive().getVirtualRoot();
+                CurrDir = RootDir;
+                refresh();
+            } catch (Exception e) {
+                new SalmonAlert(Alert.AlertType.WARNING, "Could not create vault: " + e).show();
+            }
+            return null;
+        });
     }
 
     class TextCellCallback implements Callback<TableColumn<FileItem, ImageView>, TableCell<FileItem, ImageView>> {
@@ -226,7 +249,7 @@ public class MainController {
     }
 
     private TableCell<FileItem, ImageView> getTextCell() {
-        TableCell<FileItem, ImageView> cell = new TableCell<>() {
+        TableCell<FileItem, ImageView> cell = new TableCell<FileItem, ImageView>() {
             @Override
             public void updateItem(ImageView newValue, boolean empty) {
                 TableRow<FileItem> tableRow = getTableRow();
@@ -256,7 +279,7 @@ public class MainController {
     }
 
     private void onShow() {
-        setupRootDir();
+
     }
 
     public void setStage(Stage stage) {
@@ -300,10 +323,6 @@ public class MainController {
         promptNewFolder();
     }
 
-    public void onNewFile() {
-        promptNewFile();
-    }
-
     public void onCopy() {
         if (!table.isFocused())
             return;
@@ -322,12 +341,12 @@ public class MainController {
         return files;
     }
 
-    private SalmonFileItem[] getSelectedFileItems() {
+    private SalmonFile[] getSelectedFile() {
         ObservableList<FileItem> selectedItems = table.getSelectionModel().getSelectedItems();
-        SalmonFileItem[] files = new SalmonFileItem[selectedItems.size()];
+        SalmonFile[] files = new SalmonFile[selectedItems.size()];
         int index = 0;
         for (FileItem item : selectedItems)
-            files[index++] = (SalmonFileItem) item;
+            files[index++] = ((SalmonFileItem) item).getSalmonFile();
         return files;
     }
 
@@ -358,7 +377,7 @@ public class MainController {
     }
 
     public void onStop() {
-        fileCommander.cancelJobs();
+        fileCommander.cancel();
         mode = Mode.Browse;
         ActivityCommon.runLater(() -> showTaskRunning(false), 1000);
     }
@@ -367,6 +386,7 @@ public class MainController {
         try {
             SettingsController.openSettings(stage);
             loadSettings();
+            MainController.setupSalmonManager();
         } catch (IOException e) {
             e.printStackTrace();
         }
@@ -423,13 +443,13 @@ public class MainController {
     }
 
     private void setupListeners() {
-        fileCommander.setFileImporterOnTaskProgressChanged((Object sender, long bytesRead, long totalBytesRead, String message) ->
+        fileCommander.setImporterProgressListener((IRealFile file, long bytesRead, long totalBytesRead, String message) ->
                 Platform.runLater(() -> {
                     status.setValue(message);
                     fileprogress.setValue(bytesRead / (double) totalBytesRead);
                 }));
 
-        fileCommander.setFileExporterOnTaskProgressChanged((Object sender, long bytesWritten, long totalBytesWritten, String message) ->
+        fileCommander.setExporterProgressListener((SalmonFile file, long bytesWritten, long totalBytesWritten, String message) ->
                 Platform.runLater(() -> {
                     status.setValue(message);
                     fileprogress.setValue(bytesWritten / (double) totalBytesWritten);
@@ -439,7 +459,7 @@ public class MainController {
     protected void setupRootDir() {
         String vaultLocation = Settings.getInstance().vaultLocation;
         try {
-            SalmonDriveManager.setDriveLocation(vaultLocation);
+            SalmonDriveManager.openDrive(vaultLocation);
             SalmonDriveManager.getDrive().setEnableIntegrityCheck(true);
             RootDir = SalmonDriveManager.getDrive().getVirtualRoot();
             CurrDir = RootDir;
@@ -491,7 +511,7 @@ public class MainController {
 
     private boolean checkFileSearcher() {
         if (fileCommander.isFileSearcherRunning()) {
-            new Alert(Alert.AlertType.WARNING, "Another process is running").show();
+            new SalmonAlert(Alert.AlertType.WARNING, "Another process is running").show();
             return true;
         }
         return false;
@@ -541,12 +561,39 @@ public class MainController {
         }
     }
 
-    private void setupVirtualDrive() {
+    public static void setupSalmonManager() {
         try {
             SalmonDriveManager.setVirtualDriveClass(JavaDrive.class);
+            if(SalmonDriveManager.getSequencer() != null)
+                SalmonDriveManager.getSequencer().close();
+            if(Settings.getInstance().authType == Settings.AuthType.User) {
+                setupFileSequencer();
+            } else if(Settings.getInstance().authType == Settings.AuthType.Service) {
+                setupClientSequencer();
+            }
         } catch (Exception e) {
             e.printStackTrace();
+            new SalmonAlert(Alert.AlertType.ERROR, "Error during initializing: " + e.getMessage()).show();
         }
+    }
+
+    private static void setupFileSequencer() throws Exception {
+        IRealFile dirFile = new JavaFile(SEQUENCER_DIR_PATH);
+        if (!dirFile.exists())
+            dirFile.mkdir();
+        IRealFile seqFile = new JavaFile(SEQUENCER_FILE_PATH);
+        FileSequencer sequencer = new FileSequencer(seqFile, new SalmonSequenceParser());
+        SalmonDriveManager.setSequencer(sequencer);
+    }
+
+    private static void setupClientSequencer() throws Exception {
+        try {
+            SalmonDriveManager.setSequencer(new WinClientSequencer(SERVICE_PIPE_NAME));
+        } catch (Exception ex) {
+            ex.printStackTrace();
+            new SalmonAlert(Alert.AlertType.ERROR, "Error during service lookup. Make sure the Salmon Service is installed and running:\n" + ex.getMessage()).show();
+        }
+
     }
 
     private void pasteSelected() {
@@ -554,7 +601,7 @@ public class MainController {
     }
 
     private void promptSearch() {
-        ActivityCommon.promptEdit("Search", "Keywords", "", "Match any term", false, this::search);
+        ActivityCommon.promptEdit("Search", "Keywords", "", "Match any term", false, this::search, false);
     }
 
     public void showTaskRunning(boolean value) {
@@ -600,7 +647,6 @@ public class MainController {
         importFiles(filesToImport, CurrDir, Settings.getInstance().deleteAfterImport, (SalmonFile[] importedFiles) ->
         {
             Platform.runLater(this::refresh);
-            return null;
         });
     }
 
@@ -612,37 +658,22 @@ public class MainController {
                         refresh();
                     } catch (Exception exception) {
                         exception.printStackTrace();
-                        new Alert(Alert.AlertType.ERROR, "Could Not Create Folder: " + exception.getMessage()).show();
+                        new SalmonAlert(Alert.AlertType.ERROR, "Could Not Create Folder: " + exception.getMessage()).show();
                         refresh();
                     }
                 }
-        );
-    }
-
-    private void promptNewFile() {
-        ActivityCommon.promptEdit("New File", "File Name",
-                "New File", null, true, (String fileName, Boolean checked) -> {
-                    try {
-                        CurrDir.createFile(fileName);
-                        refresh();
-                    } catch (Exception exception) {
-                        exception.printStackTrace();
-                        new Alert(Alert.AlertType.ERROR, "Could Not Create File: " + exception.getMessage()).show();
-                        refresh();
-                    }
-                }
-        );
+                , false);
     }
 
     private void deleteSelectedFiles() {
-        deleteFiles(getSelectedFileItems());
+        deleteFiles(getSelectedFiles());
     }
 
     private void copySelectedFiles(boolean move) {
         copyFiles(copyFiles, CurrDir, move);
     }
 
-    private void deleteFiles(SalmonFileItem[] files) {
+    private void deleteFiles(SalmonFile[] files) {
         if (files.length == 0) {
             status.setValue("Select 1 or more files");
             return;
@@ -651,13 +682,12 @@ public class MainController {
         {
             showTaskRunning(true);
             try {
-                fileCommander.doDeleteFiles((file) -> {
+                fileCommander.deleteFiles(files, (file) -> {
                     Platform.runLater(() -> {
                         fileItemList.remove(file);
                         sortFiles();
                     });
-                    return null;
-                }, files);
+                });
             } catch (Exception e) {
                 e.printStackTrace();
             }
@@ -678,14 +708,13 @@ public class MainController {
         {
             showTaskRunning(true);
             try {
-                fileCommander.DoCopyFiles(files, dir, move, (fileInfo) -> {
+                fileCommander.copyFiles(files, dir, move, (fileInfo) -> {
                     Platform.runLater(() -> {
                         fileprogress.setValue(fileInfo.fileProgress);
                         filesprogress.setValue(fileInfo.processedFiles / (double) fileInfo.totalFiles);
                         String action = move ? " Moving: " : " Copying: ";
                         showTaskMessage((fileInfo.processedFiles + 1) + "/" + fileInfo.totalFiles + action + fileInfo.filename);
                     });
-                    return null;
                 });
             } catch (Exception e) {
                 e.printStackTrace();
@@ -712,23 +741,26 @@ public class MainController {
         exportFiles(files, (exportedFiles) ->
         {
             refresh();
-            return null;
         });
     }
 
     private void openContextMenu(ObservableList<FileItem> items) {
         ContextMenu contextMenu = new ContextMenu();
 
-        MenuItem item = new MenuItem("Export (Ctrl+E)");
-        item.setOnAction((event) -> onExport());
+		MenuItem item = new MenuItem("View");
+        item.setOnAction((event) -> onOpenItem(table.getSelectionModel().getSelectedIndex()));
         contextMenu.getItems().add(item);
-
+		
+		item = new MenuItem("View as Text");
+        item.setOnAction((event) -> startTextEditor(table.getSelectionModel().getSelectedIndex()));
+        contextMenu.getItems().add(item);
+		
         item = new MenuItem("Copy (Ctrl+C)");
         item.setOnAction((event) -> onCopy());
         contextMenu.getItems().add(item);
 
         item = new MenuItem("Cut (Ctrl+X)");
-        item.setOnAction((event) -> onCopy());
+        item.setOnAction((event) -> onCut());
         contextMenu.getItems().add(item);
 
         item = new MenuItem("Delete");
@@ -739,6 +771,10 @@ public class MainController {
         item.setOnAction((event) -> renameFile(items.get(0)));
         contextMenu.getItems().add(item);
 
+		item = new MenuItem("Export (Ctrl+E)");
+        item.setOnAction((event) -> onExport());
+        contextMenu.getItems().add(item);
+		
         item = new MenuItem("Properties");
         item.setOnAction((event) -> showProperties(((SalmonFileItem) items.get(0)).getSalmonFile()));
         contextMenu.getItems().add(item);
@@ -757,7 +793,7 @@ public class MainController {
                             } catch (Exception exception) {
                                 exception.printStackTrace();
                             }
-                        });
+                        }, false);
             } catch (Exception exception) {
                 exception.printStackTrace();
             }
@@ -783,7 +819,7 @@ public class MainController {
         }
     }
 
-    public void onClose() {
+    public void onCloseVault() {
         logout();
         RootDir = null;
         CurrDir = null;
@@ -803,20 +839,6 @@ public class MainController {
                 refresh();
                 return null;
             });
-        } else {
-            ActivityCommon.promptSetPassword((String pass) ->
-            {
-                try {
-                    RootDir = SalmonDriveManager.getDrive().getVirtualRoot();
-                    CurrDir = RootDir;
-                } catch (SalmonAuthException e) {
-                    e.printStackTrace();
-                }
-                refresh();
-                if (fileItemList.size() == 0)
-                    promptImportFiles();
-                return null;
-            });
         }
     }
 
@@ -833,7 +855,7 @@ public class MainController {
             return;
         }
         String filename = selectedFile.getBaseName();
-
+		try {
         if (FileUtils.isVideo(filename)) {
             startMediaPlayer(position, MediaType.VIDEO);
         } else if (FileUtils.isAudio(filename)) {
@@ -843,13 +865,21 @@ public class MainController {
         } else if (FileUtils.isText(filename)) {
             startTextEditor(position);
         }
+		} catch (Exception ex) {
+			ex.printStackTrace();
+			new SalmonAlert(Alert.AlertType.WARNING, "Could not open: " + ex).show();
+		}
     }
 
     private void startTextEditor(int position) {
         FileItem item = fileItemList.get(position);
-        try {
-            TextEditorController.openTextEditor(item, stage);
-        } catch (IOException e) {
+		try {
+            if (salmonFiles[position].getSize() > 1 * 1024 * 1024) {
+                new SalmonAlert(Alert.AlertType.WARNING, "File too large").show();
+				return;
+            }
+			TextEditorController.openTextEditor(item, stage);
+        } catch (Exception e) {
             e.printStackTrace();
         }
     }
@@ -877,7 +907,7 @@ public class MainController {
 
     private void logout() {
         try {
-            SalmonDriveManager.getDrive().authenticate(null);
+            SalmonDriveManager.closeDrive();
         } catch (Exception ex) {
             ex.printStackTrace();
         }
@@ -886,24 +916,24 @@ public class MainController {
     private void promptSelectRoot() {
         ActivityCommon.promptDialog("Vault", "Choose a location for your vault", "ok",
                 (buttonType) -> {
-                    File selectedDirectory = selectVault(stage);
+                    File selectedDirectory = selectDirectory(stage, "Select vault directory");
                     if (selectedDirectory == null)
                         return null;
                     String filePath = selectedDirectory.getAbsolutePath();
-                    onClose();
+                    onCloseVault();
                     try {
-                        ActivityCommon.setVaultFolder(filePath);
+                        ActivityCommon.openVault(filePath);
                         setupRootDir();
                     } catch (Exception e) {
-                        new Alert(Alert.AlertType.WARNING, "Could not open vault").show();
+                        new SalmonAlert(Alert.AlertType.WARNING, "Could not open vault: " + e).show();
                     }
                     return null;
                 }, "cancel", null);
     }
 
-    public static File selectVault(Stage stage) {
+    public static File selectDirectory(Stage stage, String title) {
         DirectoryChooser directoryChooser = new DirectoryChooser();
-        directoryChooser.setTitle("Select Vault Location");
+        directoryChooser.setTitle(title);
         File selectedDirectory = directoryChooser.showDialog(stage);
         return selectedDirectory;
     }
@@ -934,19 +964,26 @@ public class MainController {
         Browse, Search, Copy, Move
     }
 
-    public void exportFiles(SalmonFile[] items, final Function<IRealFile[], Void> OnFinished) {
+    public void exportFiles(SalmonFile[] items, final Consumer<IRealFile[]> OnFinished) {
         executor.submit(() ->
         {
+            for(SalmonFile file : items){
+                if(file.isDirectory()) {
+                    Platform.runLater(() -> new SalmonAlert(Alert.AlertType.ERROR, "Cannot Export Directories select files only").show());
+                    return;
+                }
+            }
+
             showTaskRunning(true);
             boolean success = false;
             try {
-                success = fileCommander.doExportFiles(items,
+                success = fileCommander.exportFiles(items,
                         (progress) -> {
                             Platform.runLater(() -> filesprogress.setValue(progress / 100F));
-                            return null;
                         }, OnFinished);
             } catch (Exception e) {
                 e.printStackTrace();
+                Platform.runLater(() -> new SalmonAlert(Alert.AlertType.ERROR, "Error while exporting files: " + e).show());
             }
             if (fileCommander.isStopped())
                 showTaskMessage("ExportStopped");
@@ -967,20 +1004,20 @@ public class MainController {
     }
 
     public void importFiles(IRealFile[] fileNames, SalmonFile importDir, boolean deleteSource,
-                            Function<SalmonFile[], Void> OnFinished) {
+                            Consumer<SalmonFile[]> OnFinished) {
 
         executor.submit(() ->
         {
             showTaskRunning(true);
             boolean success = false;
             try {
-                success = fileCommander.doImportFiles(fileNames, importDir, deleteSource,
+                success = fileCommander.importFiles(fileNames, importDir, deleteSource,
                         (progress) -> {
                             Platform.runLater(() -> filesprogress.setValue(progress / 100F));
-                            return null;
                         }, OnFinished);
             } catch (Exception e) {
                 e.printStackTrace();
+                Platform.runLater(() -> new SalmonAlert(Alert.AlertType.ERROR, "Error while importing files: " + e).show());
             }
             if (fileCommander.isStopped())
                 showTaskMessage("Import Stopped");
@@ -1034,6 +1071,85 @@ public class MainController {
                     status.setValue("Search Stopped: " + value);
             });
         });
+    }
+
+    public void onImportAuth() {
+        FileChooser fileChooser = new FileChooser();
+        fileChooser.setTitle("Import Auth File");
+        String filename = SalmonDriveManager.getAppDriveConfigFilename();
+        String ext = SalmonDriveManager.getDrive().getExtensionFromFileName(filename);
+        FileChooser.ExtensionFilter filter = new FileChooser.ExtensionFilter("Salmon Auth Files (*." + ext + ")", "*." + ext);
+        fileChooser.getExtensionFilters().add(filter);
+        File file = fileChooser.showOpenDialog(stage);
+        if (file == null)
+            return;
+        try {
+            SalmonDriveManager.importAuthFile(file.getPath());
+            new SalmonAlert(Alert.AlertType.ERROR, "Device is now Authorized").show();
+        } catch (Exception ex) {
+            ex.printStackTrace();
+            new SalmonAlert(Alert.AlertType.ERROR, "Could Not Import Auth: " + ex.getMessage()).show();
+        }
+    }
+
+    public void onExportAuth() {
+        if (SalmonDriveManager.getDrive() == null) {
+            new SalmonAlert(Alert.AlertType.ERROR, "No Drive Loaded").show();
+            return;
+        }
+        ActivityCommon.promptEdit("Export Auth File",
+                "Enter the Auth ID for the device you want to authorize",
+                "", null, false,
+                (targetAuthID, option) -> {
+                    FileChooser fileChooser = new FileChooser();
+                    fileChooser.setTitle("Export Auth File");
+                    String filename = SalmonDriveManager.getAppDriveConfigFilename();
+                    String ext = SalmonDriveManager.getDrive().getExtensionFromFileName(filename);
+                    fileChooser.setInitialFileName(filename);
+                    FileChooser.ExtensionFilter filter = new FileChooser.ExtensionFilter("Salmon Auth Files (*." + ext + ")", "*." + ext);
+                    fileChooser.getExtensionFilters().add(filter);
+                    File file = fileChooser.showSaveDialog(stage);
+                    if (file == null)
+                        return;
+                    try {
+                        SalmonDriveManager.exportAuthFile(targetAuthID, file.getParent(), file.getName());
+                        new SalmonAlert(Alert.AlertType.INFORMATION, "Auth File Exported").show();
+                    } catch (Exception ex) {
+                        ex.printStackTrace();
+                        new SalmonAlert(Alert.AlertType.ERROR, "Could Not Export Auth: " + ex).show();
+                    }
+                }, false);
+    }
+
+
+    public void onRevokeAuth() {
+        if (SalmonDriveManager.getDrive() == null) {
+            new SalmonAlert(Alert.AlertType.ERROR, "No Drive Loaded").show();
+            return;
+        }
+        ActivityCommon.promptDialog("Revoke Auth", "Revoke Auth for this drive? You will still be able to decrypt and view your files but you won't be able to import any more files in this drive.",
+                "Ok", (buttonType) -> {
+                    try {
+                        SalmonDriveManager.revokeSequences();
+                        new SalmonAlert(Alert.AlertType.ERROR, "Revoke Auth Successful").show();
+                    } catch (Exception e) {
+                        e.printStackTrace();
+                        new SalmonAlert(Alert.AlertType.ERROR, "Could Not Revoke Auth: " + e.getMessage()).show();
+                    }
+                    return null;
+                }, "Cancel", null);
+    }
+
+
+    public void onDisplayAuthID() throws Exception {
+        if (SalmonDriveManager.getDrive() == null) {
+            new SalmonAlert(Alert.AlertType.ERROR, "No Drive Loaded").show();
+            return;
+        }
+        String driveID = SalmonDriveManager.getAuthID();
+        ActivityCommon.promptEdit("Salmon Auth ID",
+                "", driveID, null, false,
+                null, true);
     }
 
 }

@@ -31,15 +31,12 @@ import javafx.animation.KeyFrame;
 import javafx.animation.Timeline;
 import javafx.application.Platform;
 import javafx.event.ActionEvent;
-import javafx.event.EventHandler;
 import javafx.scene.control.*;
 import javafx.scene.input.KeyCode;
-import javafx.scene.input.KeyEvent;
 import javafx.scene.layout.VBox;
 import javafx.util.Duration;
 
 import java.io.IOException;
-import java.lang.reflect.InvocationTargetException;
 import java.util.Optional;
 import java.util.function.Function;
 
@@ -56,11 +53,18 @@ public class ActivityCommon {
         void onTextSubmitted(String text, Boolean option);
     }
 
-    public static void setVaultFolder(String dirPath) throws Exception {
+    public static void openVault(String dirPath) throws Exception {
+        SalmonDriveManager.openDrive(dirPath);
+        SalmonDriveManager.getDrive().setEnableIntegrityCheck(true);
         Settings.getInstance().vaultLocation = dirPath;
         Preferences.savePrefs();
-        SalmonDriveManager.setDriveLocation(dirPath);
+    }
+
+    public static void createVault(String dirPath, String password) throws Exception {
+        SalmonDriveManager.createDrive(dirPath, password);
         SalmonDriveManager.getDrive().setEnableIntegrityCheck(true);
+        Settings.getInstance().vaultLocation = dirPath;
+        Preferences.savePrefs();
     }
 
     public static void promptPassword(Function<Void, Void> onAuthenticationSucceded) {
@@ -113,28 +117,23 @@ public class ActivityCommon {
                     if (!password.equals(passwordValidate)) {
                         event.consume();
                     } else {
-                        try {
-                            SalmonDriveManager.getDrive().setPassword(password);
-                            if (OnPasswordChanged != null)
-                                OnPasswordChanged.apply(password);
-                        } catch (SalmonAuthException ex) {
-                            ex.printStackTrace();
-                        } catch (Exception e) {
-                            e.printStackTrace();
-                        }
+                        if (OnPasswordChanged != null)
+                            OnPasswordChanged.apply(password);
                     }
                 }
         );
     }
 
     public static void promptEdit(String title, String msg, String value, String option, boolean isFileName,
-                                  OnTextSubmittedListener OnEdit) {
+                                  OnTextSubmittedListener OnEdit, boolean readOnly) {
         SalmonAlert alert = new SalmonAlert(Alert.AlertType.NONE, "", ButtonType.OK, ButtonType.CANCEL);
         alert.setTitle(title);
         Label msgText = new Label();
         msgText.setText(msg);
         TextField valueText = new TextField();
         valueText.setText(value);
+        if (readOnly)
+            valueText.setEditable(false);
         CheckBox optionCheckBox = new CheckBox();
         VBox box = new VBox();
         box.setSpacing(10);
@@ -144,7 +143,9 @@ public class ActivityCommon {
             box.getChildren().add(optionCheckBox);
         }
         alert.getDialogPane().setContent(box);
+        alert.getDialogPane().setMinSize(340, 150);
         alert.show();
+        alert.getDialogPane().autosize();
         final Button btOk = (Button) alert.getDialogPane().lookupButton(ButtonType.OK);
         valueText.requestFocus();
         if (isFileName) {
@@ -156,7 +157,10 @@ public class ActivityCommon {
         } else {
             valueText.selectAll();
         }
-        valueText.setOnKeyPressed(event -> btOk.fire());
+        valueText.setOnKeyPressed(event -> {
+            if (event.getCode() == KeyCode.ENTER)
+                btOk.fire();
+        });
         btOk.addEventFilter(ActionEvent.ACTION, event -> {
                     if (OnEdit != null)
                         OnEdit.onTextSubmitted(valueText.getText(), optionCheckBox.isSelected());

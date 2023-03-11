@@ -22,14 +22,18 @@ LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 */
+
 import com.mku11.salmon.vault.config.Config;
 import com.mku11.salmon.vault.dialog.ActivityCommon;
+import com.mku11.salmon.vault.dialog.SalmonAlert;
 import com.mku11.salmon.vault.prefs.Preferences;
 import com.mku11.salmon.vault.settings.Settings;
 import com.mku11.salmon.vault.window.Window;
 import com.mku11.salmonfs.SalmonAuthException;
 import com.mku11.salmonfs.SalmonDriveManager;
 import javafx.beans.property.SimpleStringProperty;
+import javafx.beans.value.ChangeListener;
+import javafx.beans.value.ObservableValue;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Parent;
@@ -50,6 +54,9 @@ public class SettingsController {
     private ComboBox<String> aesType;
     @FXML
     private ComboBox<String> pbkdfType;
+
+    @FXML
+    private ComboBox<String> authType;
     @FXML
     private CheckBox deleteSourceAfterImport;
     @FXML
@@ -68,27 +75,41 @@ public class SettingsController {
         pbkdfType.getItems().setAll(pbkdfTypes);
         pbkdfType.getSelectionModel().select(Settings.getInstance().pbkdfType.ordinal());
 
+        String[] authTypes = Stream.of(Settings.AuthType.values()).map(Settings.AuthType::name).toArray(String[]::new);
+        authType.getItems().setAll(authTypes);
+        authType.getSelectionModel().select(Settings.getInstance().authType.ordinal());
+        authType.getSelectionModel().selectedItemProperty().addListener((observable, oldValue, newValue) -> {
+            if (newValue.equals(Settings.AuthType.User.toString())) {
+                new SalmonAlert(Alert.AlertType.INFORMATION, "WARNING! User based authorization is less secure. "
+                        + "\n" + "Make sure the auth config file is not accessible by other users:"
+                        + "\n" + MainController.SEQUENCER_FILE_PATH
+                        + "\n" + "If you need more security install the Salmon Service"
+                ).show();
+            }
+        });
+
         deleteSourceAfterImport.setSelected(Settings.getInstance().deleteAfterImport);
         enableLogs.setSelected(Settings.getInstance().enableLog);
         enableDetailedLogs.setSelected(Settings.getInstance().enableLogDetails);
-        if(Settings.getInstance().vaultLocation != null)
+        if (Settings.getInstance().vaultLocation != null)
             vaultlocation.setValue("Location: " + Settings.getInstance().vaultLocation);
 
     }
+
     public void setStage(Stage stage) {
         this.stage = stage;
     }
 
     @FXML
     private void changeVaultLocation() {
-        File selectedDirectory = MainController.selectVault(stage);
-        if(selectedDirectory == null)
+        File selectedDirectory = MainController.selectDirectory(stage, "Select vault directory");
+        if (selectedDirectory == null)
             return;
         String filePath = selectedDirectory.getAbsolutePath();
         try {
-            ActivityCommon.setVaultFolder(filePath);
+            ActivityCommon.openVault(filePath);
         } catch (Exception e) {
-            new Alert(Alert.AlertType.WARNING, "Could not change vault location").show();
+            new SalmonAlert(Alert.AlertType.WARNING, "Could not change vault location").show();
         }
         vaultlocation.setValue("Location: " + filePath);
         //TODO: notify the main screen to refresh
@@ -96,13 +117,15 @@ public class SettingsController {
 
     @FXML
     private void changePassword() {
-        ActivityCommon.promptSetPassword( (String pass) ->
+        ActivityCommon.promptSetPassword((String pass) ->
         {
             try {
-                SalmonDriveManager.getDrive().getVirtualRoot();
+                SalmonDriveManager.getDrive().setPassword(pass);
                 //TODO: notify main screen to refresh
-            } catch (SalmonAuthException e) {
-                e.printStackTrace();
+                new SalmonAlert(Alert.AlertType.INFORMATION, "Password Changed").show();
+            } catch (Exception e) {
+                new SalmonAlert(Alert.AlertType.WARNING, "Could not change password: " + e).show();
+                throw new RuntimeException(e);
             }
             return null;
         });
@@ -128,6 +151,10 @@ public class SettingsController {
         return Settings.AESType.valueOf(aesType.getSelectionModel().getSelectedItem());
     }
 
+    private Settings.AuthType getAuthType() {
+        return Settings.AuthType.valueOf(authType.getSelectionModel().getSelectedItem());
+    }
+
     public static void openSettings(Stage owner) throws IOException {
         FXMLLoader loader = new FXMLLoader(Settings.getInstance().getClass().getResource("/view/settings.fxml"));
         Parent root = loader.load();
@@ -145,6 +172,7 @@ public class SettingsController {
 
         Settings.getInstance().aesType = controller.getAESType();
         Settings.getInstance().pbkdfType = controller.getpbkdfType();
+        Settings.getInstance().authType = controller.getAuthType();
         Settings.getInstance().deleteAfterImport = controller.isDeleteAfterImportSelected();
         Settings.getInstance().enableLog = controller.isEnabledLog();
         Settings.getInstance().enableLogDetails = controller.isEnabledDetailedLog();
@@ -154,13 +182,11 @@ public class SettingsController {
 
     private final SimpleStringProperty vaultlocation = new SimpleStringProperty("Location: None");
 
-    public String getVaultlocation()
-    {
+    public String getVaultlocation() {
         return vaultlocation.get();
     }
 
-    public void setVaultlocation(String value)
-    {
+    public void setVaultlocation(String value) {
         vaultlocation.set(value);
     }
 

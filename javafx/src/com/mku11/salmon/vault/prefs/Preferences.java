@@ -24,18 +24,18 @@ SOFTWARE.
 */
 
 import com.mku11.salmon.vault.settings.Settings;
-import javafx.stage.Window;
 
 public class Preferences {
 
     public static void loadPrefs(Settings settings) {
         java.util.prefs.Preferences prefs;
         try {
-            prefs = java.util.prefs.Preferences.userRoot().node(Window.class.getCanonicalName());
+            prefs = java.util.prefs.Preferences.userRoot().node(Preferences.class.getCanonicalName());
             settings.vaultLocation = prefs.get(Settings.VAULT_LOCATION_KEY, Settings.DEFAULT_VAULT_LOCATION);
             settings.deleteAfterImport = prefs.getBoolean(Settings.DELETE_AFTER_IMPORT_KEY, Settings.DEFAULT_DELETE_AFTER_IMPORT);
             settings.aesType = Settings.AESType.values()[prefs.getInt(Settings.AES_TYPE_KEY, Settings.DEFAULT_AES_TYPE.ordinal())];
-            settings.pbkdfType = Settings.PbkdfType.values()[prefs.getInt(Settings.PBKDF_TYPE_KEY, Settings.DEFAULT_PBKDFTYPE.ordinal())];
+            settings.pbkdfType = Settings.PbkdfType.values()[prefs.getInt(Settings.PBKDF_TYPE_KEY, Settings.DEFAULT_PBKDF_TYPE.ordinal())];
+            settings.authType = Settings.AuthType.values()[prefs.getInt(Settings.AUTH_TYPE_KEY, Settings.DEFAULT_AUTH_TYPE.ordinal())];
             settings.enableLog = prefs.getBoolean(Settings.ENABLE_LOG_KEY, Settings.DEFAULT_ENABLE_LOG);
             settings.enableLogDetails = prefs.getBoolean(Settings.ENABLE_LOG_DETAILS_KEY, Settings.DEFAULT_ENABLE_LOG_DETAILS);
             settings.lastImportDir = prefs.get(Settings.LAST_IMPORT_DIR_KEY, Settings.DEFAULT_LAST_IMPORT_DIR);
@@ -47,11 +47,12 @@ public class Preferences {
     public static void savePrefs() {
         java.util.prefs.Preferences prefs;
         try {
-            prefs = java.util.prefs.Preferences.userRoot().node(Window.class.getCanonicalName());
+            prefs = java.util.prefs.Preferences.userRoot().node(Preferences.class.getCanonicalName());
             prefs.put(Settings.VAULT_LOCATION_KEY, Settings.getInstance().vaultLocation);
             prefs.putBoolean(Settings.DELETE_AFTER_IMPORT_KEY, Settings.getInstance().deleteAfterImport);
             prefs.putInt(Settings.AES_TYPE_KEY, Settings.getInstance().aesType.ordinal());
             prefs.putInt(Settings.PBKDF_TYPE_KEY, Settings.getInstance().pbkdfType.ordinal());
+            prefs.putInt(Settings.AUTH_TYPE_KEY, Settings.getInstance().authType.ordinal());
             prefs.putBoolean(Settings.ENABLE_LOG_KEY, Settings.getInstance().enableLog);
             prefs.putBoolean(Settings.ENABLE_LOG_DETAILS_KEY, Settings.getInstance().enableLogDetails);
             prefs.put(Settings.LAST_IMPORT_DIR_KEY, Settings.getInstance().lastImportDir);

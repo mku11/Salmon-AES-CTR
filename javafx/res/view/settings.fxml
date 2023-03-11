@@ -13,16 +13,16 @@
 
     <VBox maxWidth="Infinity" HBox.hgrow="ALWAYS">
         <padding>
-            <Insets bottom="10" left="20" right="10" top="10" />
+            <Insets bottom="10" left="20" right="10" top="10"/>
         </padding>
         <TitledPane text="Vault" maxWidth="Infinity" HBox.hgrow="ALWAYS">
             <padding>
-                <Insets bottom="2" top="2" />
+                <Insets bottom="2" top="2"/>
             </padding>
             <VBox maxWidth="Infinity" minWidth="250.0" HBox.hgrow="ALWAYS">
                 <HBox alignment="CENTER_LEFT" maxWidth="Infinity" HBox.hgrow="ALWAYS">
                     <padding>
-                        <Insets bottom="2" top="2" />
+                        <Insets bottom="2" top="2"/>
                     </padding>
                     <VBox alignment="CENTER_LEFT" maxWidth="Infinity" HBox.hgrow="ALWAYS">
                         <padding>
@@ -31,7 +31,8 @@
                         <Label maxWidth="Infinity" text="Vault Location" HBox.hgrow="ALWAYS">
 
                         </Label>
-                        <Label maxWidth="Infinity" style="-fx-font-size: 8pt" text="${controller.vaultlocation}" HBox.hgrow="ALWAYS">
+                        <Label maxWidth="Infinity" style="-fx-font-size: 8pt" text="${controller.vaultlocation}"
+                               HBox.hgrow="ALWAYS">
 
                         </Label>
                     </VBox>
@@ -47,7 +48,7 @@
                 </HBox>
                 <HBox alignment="CENTER_LEFT" maxWidth="Infinity" HBox.hgrow="ALWAYS">
                     <padding>
-                        <Insets bottom="2" top="2" />
+                        <Insets bottom="2" top="2"/>
                     </padding>
                     <Label maxWidth="Infinity" text="Password" HBox.hgrow="ALWAYS">
 
@@ -67,17 +68,17 @@
 
         <TitledPane text="Encryption" maxWidth="Infinity" HBox.hgrow="ALWAYS">
             <padding>
-                <Insets bottom="2" top="2" />
+                <Insets bottom="2" top="2"/>
             </padding>
             <VBox maxWidth="Infinity" minWidth="250.0" HBox.hgrow="ALWAYS">
 
                 <HBox maxWidth="Infinity" HBox.hgrow="ALWAYS">
                     <padding>
-                        <Insets bottom="2" top="2" />
+                        <Insets bottom="2" top="2"/>
                     </padding>
                     <Label maxWidth="Infinity" text="AES Type" HBox.hgrow="ALWAYS">
                         <padding>
-                            <Insets bottom="4" right="4" top="4" />
+                            <Insets bottom="4" right="4" top="4"/>
                         </padding>
                     </Label>
                     <ComboBox fx:id="aesType" HBox.hgrow="ALWAYS">
@@ -86,11 +87,11 @@
                 </HBox>
                 <HBox maxWidth="Infinity" HBox.hgrow="ALWAYS">
                     <padding>
-                        <Insets bottom="2" top="2" />
+                        <Insets bottom="2" top="2"/>
                     </padding>
                     <Label maxWidth="Infinity" text="PBKDF Type" HBox.hgrow="ALWAYS">
                         <padding>
-                            <Insets bottom="4" right="4" top="4" />
+                            <Insets bottom="4" right="4" top="4"/>
                         </padding>
                     </Label>
                     <ComboBox fx:id="pbkdfType" HBox.hgrow="ALWAYS">
@@ -100,18 +101,39 @@
             </VBox>
         </TitledPane>
 
+        <TitledPane text="Authorization" maxWidth="Infinity" HBox.hgrow="ALWAYS">
+            <padding>
+                <Insets bottom="2" top="2"/>
+            </padding>
+            <VBox maxWidth="Infinity" minWidth="250.0" HBox.hgrow="ALWAYS">
+
+                <HBox maxWidth="Infinity" HBox.hgrow="ALWAYS">
+                    <padding>
+                        <Insets bottom="2" top="2"/>
+                    </padding>
+                    <Label maxWidth="Infinity" text="Auth Type" HBox.hgrow="ALWAYS">
+                        <padding>
+                            <Insets bottom="4" right="4" top="4"/>
+                        </padding>
+                    </Label>
+                    <ComboBox fx:id="authType" HBox.hgrow="ALWAYS">
+
+                    </ComboBox>
+                </HBox>
+            </VBox>
+        </TitledPane>
         <TitledPane text="Miscellaneous" maxWidth="Infinity" HBox.hgrow="ALWAYS">
             <padding>
-                <Insets bottom="2" top="2" />
+                <Insets bottom="2" top="2"/>
             </padding>
             <VBox maxWidth="Infinity" minWidth="250.0" HBox.hgrow="ALWAYS">
                 <HBox maxWidth="Infinity" HBox.hgrow="ALWAYS">
                     <padding>
-                        <Insets bottom="2" top="2" />
+                        <Insets bottom="2" top="2"/>
                     </padding>
                     <Label maxWidth="Infinity" text="Delete source files after import" HBox.hgrow="ALWAYS">
                         <padding>
-                            <Insets bottom="4" right="4" top="4" />
+                            <Insets bottom="4" right="4" top="4"/>
                         </padding>
                     </Label>
                     <CheckBox alignment="CENTER_RIGHT" HBox.hgrow="ALWAYS" fx:id="deleteSourceAfterImport">
@@ -120,11 +142,11 @@
                 </HBox>
                 <HBox maxWidth="Infinity" HBox.hgrow="ALWAYS">
                     <padding>
-                        <Insets bottom="2" top="2" />
+                        <Insets bottom="2" top="2"/>
                     </padding>
                     <Label maxWidth="Infinity" text="Enable logs" HBox.hgrow="ALWAYS">
                         <padding>
-                            <Insets bottom="4" right="4" top="4" />
+                            <Insets bottom="4" right="4" top="4"/>
                         </padding>
                     </Label>
                     <CheckBox alignment="CENTER_RIGHT" HBox.hgrow="ALWAYS" fx:id="enableLogs">
@@ -133,11 +155,11 @@
                 </HBox>
                 <HBox maxWidth="Infinity" HBox.hgrow="ALWAYS">
                     <padding>
-                        <Insets bottom="2" top="2" />
+                        <Insets bottom="2" top="2"/>
                     </padding>
                     <Label maxWidth="Infinity" text="Enable Log Details" HBox.hgrow="ALWAYS">
                         <padding>
-                            <Insets bottom="4" right="4" top="4" />
+                            <Insets bottom="4" right="4" top="4"/>
                         </padding>
                     </Label>
                     <CheckBox alignment="CENTER_RIGHT" HBox.hgrow="ALWAYS" fx:id="enableDetailedLogs">
