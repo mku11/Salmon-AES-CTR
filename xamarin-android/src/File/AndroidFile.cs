@@ -27,7 +27,6 @@ using Android.App;
 using Salmon.FS;
 using AndroidX.DocumentFile.Provider;
 using Android.Content;
-using Android.Webkit;
 using Android.OS;
 using System;
 using Salmon.Streams;
@@ -69,7 +68,7 @@ namespace Salmon.Droid.FS
 
         public IRealFile CreateFile(string filename)
         {
-            DocumentFile doc = documentFile.CreateFile("", filename);
+            DocumentFile doc = documentFile.CreateFile("*/*", filename);
             // for some reason android storage access framework eventhough it supports auto rename
             // somehow it includes the extension. to protect that we temporarily use another extension
             doc.RenameTo(filename + ".dat");
@@ -90,7 +89,16 @@ namespace Salmon.Droid.FS
 
         public string GetAbsolutePath()
         {
-            return documentFile.Uri.Path;
+            try
+            {
+                string path = Android.Net.Uri.Decode(documentFile.Uri.ToString());
+                int index = path.LastIndexOf(":");
+                return "/" + path.Substring(index + 1);
+            }
+            catch (Exception ex)
+            {
+                return documentFile.Uri.Path;
+            }
         }
 
         public string GetBaseName()
@@ -198,9 +206,9 @@ namespace Salmon.Droid.FS
 
         public bool RenameTo(string newFilename)
         {
-            DocumentsContract.RenameDocument(context.ContentResolver, documentFile.Uri, newFilename);
-            //FIXME: we should also get a new documentFile since the old is renamed
-            basename = newFilename;
+            Android.Net.Uri uri = DocumentsContract.RenameDocument(context.ContentResolver, documentFile.Uri, newFilename);
+            documentFile = DocumentFile.FromSingleUri(context, uri);
+            basename = null;
             return true;
         }
 
