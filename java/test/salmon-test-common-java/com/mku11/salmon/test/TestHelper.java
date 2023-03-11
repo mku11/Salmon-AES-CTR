@@ -26,21 +26,19 @@ SOFTWARE.
 
 import com.mku11.file.JavaDrive;
 import com.mku11.file.JavaFile;
+import com.mku11.salmon.SalmonEncryptor;
 import com.mku11.salmon.SalmonGenerator;
+import com.mku11.salmon.SalmonTextEncryptor;
 import com.mku11.salmon.SalmonTime;
 import com.mku11.salmon.BitConverter;
-import com.mku11.salmonfs.IRealFile;
-import com.mku11.salmonfs.SalmonDriveManager;
-import com.mku11.salmonfs.SalmonFile;
-import com.mku11.salmonfs.SalmonFileExporter;
-import com.mku11.salmonfs.SalmonFileImporter;
-import com.mku11.salmonfs.SalmonFileSearcher;
+import com.mku11.salmonfs.*;
 import com.mku11.salmon.streams.AbsStream;
 import com.mku11.salmon.streams.MemoryStream;
 import com.mku11.salmon.streams.SalmonStream;
 
 import org.junit.Assert;
 
+import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
@@ -49,6 +47,9 @@ import java.nio.charset.Charset;
 import java.security.DigestInputStream;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
+import java.util.Arrays;
+import java.util.Random;
+import java.util.stream.Stream;
 
 import javax.crypto.Cipher;
 import javax.crypto.spec.IvParameterSpec;
@@ -61,11 +62,16 @@ public class TestHelper {
     public static final int TEST_DEC_BUFFER_SIZE = 512 * 1024;
     public static final String TEST_PASSWORD = "test123";
     public static final String TEST_FALSE_PASSWORD = "falsepass";
+    public static final String TEST_EXPORT_DIR = "export.slma";
+
     public static final long MAX_ENC_COUNTER = (long) Math.pow(256, 7);
     // a nonce ready to overflow if a new file is imported
     public static final byte[] TEXT_VAULT_MAX_FILE_NONCE = {
-            (byte) 0xFF, (byte) 0xFF, (byte) 0xFF, (byte) 0xFF, (byte) 0xFF, (byte) 0xFF, (byte) 0xFF, (byte) 0xFF
+            0x7F, (byte) 0xFF, (byte) 0xFF, (byte) 0xFF, (byte) 0xFF, (byte) 0xFF, (byte) 0xFF, (byte) 0xFF
     };
+    public static final String TEST_SEQUENCER_FILE1 = "seq1.xml";
+    public static final String TEST_SEQUENCER_FILE2 = "seq2.xml";
+
     private static final int TEXT_ITERATIONS = 20;
     public static String TEST_KEY = "ABCDEFGHIJKLMNOPABCDEFGHIJKLMNOP"; // 256bit
     public static byte[] TEST_KEY_BYTES = TEST_KEY.getBytes(Charset.defaultCharset());
@@ -75,6 +81,7 @@ public class TestHelper {
     public static byte[] TEST_FILENAME_NONCE_BYTES = TEST_FILENAME_NONCE.getBytes(Charset.defaultCharset());
     public static String TEST_HMAC_KEY = "12345678901234561234567890123456"; //32bytes
     public static byte[] TEST_HMAC_KEY_BYTES = TEST_HMAC_KEY.getBytes(Charset.defaultCharset());
+    public static int TEST_PERF_SIZE = 5 * 1024 * 1024;
     public static String TEST_HEADER = "SOMEHEADERDATASOMEHEADER";
     public static String TEST_TINY_TEXT = "test.txt";
     public static String TEST_TEXT = "This is another test that could be very long if used correct.";
@@ -102,7 +109,7 @@ public class TestHelper {
         DigestInputStream dis = null;
         try {
             MessageDigest md = MessageDigest.getInstance("MD5");
-            is = new FileInputStream(realFile.getAbsolutePath());
+            is = new FileInputStream(realFile.getPath());
             dis = new DigestInputStream(is, md);
             byte[] digest = md.digest();
 
@@ -220,20 +227,16 @@ public class TestHelper {
     public static void importAndExport(String vaultDir, String pass, String importFile,
                                        int importBufferSize, int importThreads, int exportBufferSize, int exportThreads, boolean integrity,
                                        boolean bitflip, long flipPosition, boolean shouldBeEqual,
-                                       Boolean ApplyFileIntegrity, Boolean VerifyFileIntegrity,
-                                       byte[] vaultNonce) throws Exception {
+                                       Boolean ApplyFileIntegrity, Boolean VerifyFileIntegrity) throws Exception {
         SalmonDriveManager.setVirtualDriveClass(JavaDrive.class);
-        SalmonDriveManager.setDriveLocation(vaultDir);
-        if (!SalmonDriveManager.getDrive().hasConfig()) {
-            SalmonDriveManager.getDrive().setPassword(pass);
-            SalmonFile rootDir = SalmonDriveManager.getDrive().getVirtualRoot();
-            rootDir.listFiles();
-        } else {
-            SalmonDriveManager.getDrive().authenticate(pass);
-        }
+        FileSequencer sequencer = new FileSequencer(new JavaFile(vaultDir + "/" + TEST_SEQUENCER_FILE1), new SalmonSequenceParser());
+        SalmonDriveManager.setSequencer(sequencer);
+
+        SalmonDriveManager.createDrive(vaultDir, pass);
+        SalmonFile rootDir = SalmonDriveManager.getDrive().getVirtualRoot();
+        rootDir.listFiles();
+
         SalmonDriveManager.getDrive().setEnableIntegrityCheck(integrity);
-        if (vaultNonce != null)
-            SalmonDriveManager.getDrive().getKey().setVaultNonce(vaultNonce);
 
         SalmonFile salmonRootDir = SalmonDriveManager.getDrive().getVirtualRoot();
 
@@ -273,15 +276,12 @@ public class TestHelper {
     public static void importAndSearch(String vaultDir, String pass, String importFile,
                                        int importBufferSize, int importThreads) throws Exception {
         SalmonDriveManager.setVirtualDriveClass(JavaDrive.class);
-        SalmonDriveManager.setDriveLocation(vaultDir);
-        if (!SalmonDriveManager.getDrive().hasConfig()) {
-            SalmonDriveManager.getDrive().setPassword(pass);
-            SalmonFile rootDir = SalmonDriveManager.getDrive().getVirtualRoot();
-            rootDir.listFiles();
-        } else {
-            SalmonDriveManager.getDrive().authenticate(pass);
-        }
+        FileSequencer sequencer = new FileSequencer(new JavaFile(vaultDir + "/" + TestHelper.TEST_SEQUENCER_FILE1), new SalmonSequenceParser());
+        SalmonDriveManager.setSequencer(sequencer);
 
+        SalmonDriveManager.createDrive(vaultDir, pass);
+        SalmonFile rootDir = SalmonDriveManager.getDrive().getVirtualRoot();
+        rootDir.listFiles();
         SalmonFile salmonRootDir = SalmonDriveManager.getDrive().getVirtualRoot();
         JavaFile fileToImport = new JavaFile(importFile);
         String rbasename = fileToImport.getBaseName();
@@ -308,16 +308,12 @@ public class TestHelper {
     public static void importAndCopy(String vaultDir, String pass, String importFile,
                                      int importBufferSize, int importThreads, String newDir, boolean move) throws Exception {
         SalmonDriveManager.setVirtualDriveClass(JavaDrive.class);
-        SalmonDriveManager.setDriveLocation(vaultDir);
+        FileSequencer sequencer = new FileSequencer(new JavaFile(vaultDir + "/" + TestHelper.TEST_SEQUENCER_FILE1), new SalmonSequenceParser());
+        SalmonDriveManager.setSequencer(sequencer);
 
-        if (!SalmonDriveManager.getDrive().hasConfig()) {
-            SalmonDriveManager.getDrive().setPassword(pass);
-            SalmonFile rootDir = SalmonDriveManager.getDrive().getVirtualRoot();
-            rootDir.listFiles();
-        } else {
-            SalmonDriveManager.getDrive().authenticate(pass);
-        }
-
+        SalmonDriveManager.createDrive(vaultDir, pass);
+        SalmonFile rootDir = SalmonDriveManager.getDrive().getVirtualRoot();
+        rootDir.listFiles();
         SalmonFile salmonRootDir = SalmonDriveManager.getDrive().getVirtualRoot();
         JavaFile fileToImport = new JavaFile(importFile);
         String rbasename = fileToImport.getBaseName();
@@ -459,15 +455,16 @@ public class TestHelper {
     }
 
     private static void testCounter(SalmonStream decReader) throws IOException {
-        long expectedBlock = decReader.position() / decReader.getBLOCK_SIZE();
+        long expectedBlock = decReader.position() / decReader.BLOCK_SIZE;
         Assert.assertEquals(expectedBlock, decReader.getBlock());
 
-        long counterBlock = BitConverter.toInt64(decReader.getCounter(), SalmonGenerator.getNonceLength(), SalmonGenerator.getBlockSize() - SalmonGenerator.getNonceLength());
+        long counterBlock = BitConverter.toLong(decReader.getCounter(), SalmonGenerator.NONCE_LENGTH,
+                SalmonGenerator.BLOCK_SIZE - SalmonGenerator.NONCE_LENGTH);
         long expectedCounterValue = decReader.getBlock();
         Assert.assertEquals(expectedCounterValue, counterBlock);
 
-        long nonce = BitConverter.toInt64(decReader.getCounter(), 0, SalmonGenerator.getNonceLength());
-        long expectedNonce = BitConverter.toInt64(decReader.getNonce(), 0, SalmonGenerator.getNonceLength());
+        long nonce = BitConverter.toLong(decReader.getCounter(), 0, SalmonGenerator.NONCE_LENGTH);
+        long expectedNonce = BitConverter.toLong(decReader.getNonce(), 0, SalmonGenerator.NONCE_LENGTH);
         Assert.assertEquals(expectedNonce, nonce);
     }
 
@@ -567,7 +564,7 @@ public class TestHelper {
         stream.write(testBytes, 0, testBytes.length);
         stream.flush();
         stream.close();
-        String realFilePath = newFile.getRealFile().getAbsolutePath();
+        String realFilePath = newFile.getRealFile().getPath();
 
         // tamper
         if (flipBit) {
@@ -603,7 +600,7 @@ public class TestHelper {
 
         // creating enormous files to test is overkill and since the law was made for man and not the other way around
         // we resort to reflection to test this.
-        Method incrementCounter = SalmonStream.class.getDeclaredMethod("incrementCounter", long.class);
+        Method incrementCounter = SalmonStream.class.getDeclaredMethod("increaseCounter", long.class);
         incrementCounter.setAccessible(true);
         try {
             incrementCounter.invoke(stream, counter);
@@ -633,5 +630,286 @@ public class TestHelper {
             cipher.init(Cipher.DECRYPT_MODE, key, ivSpec);
         byte[] encrypted = cipher.doFinal(plainText);
         return encrypted;
+    }
+
+    public static void exportAndImportAuth(String vault, String importFilePath) throws Exception {
+        String exportAuthFilePath = vault + File.separator + TestHelper.TEST_EXPORT_DIR;
+        String seqFile1 = vault + "/" + TEST_SEQUENCER_FILE1;
+        String seqFile2 = vault + "/" + TEST_SEQUENCER_FILE2;
+
+        // emulate 2 different devices with different sequencers
+        FileSequencer sequencer1 = new FileSequencer(new JavaFile(seqFile1), new SalmonSequenceParser());
+        FileSequencer sequencer2 = new FileSequencer(new JavaFile(seqFile2), new SalmonSequenceParser());
+
+        // set to the first sequencer and create the vault
+        SalmonDriveManager.setSequencer(sequencer1);
+        SalmonDriveManager.createDrive(vault, TestHelper.TEST_PASSWORD);
+        SalmonDriveManager.getDrive().authenticate(TestHelper.TEST_PASSWORD);
+        // import a test file
+        SalmonFile salmonRootDir = SalmonDriveManager.getDrive().getVirtualRoot();
+        IRealFile fileToImport = SalmonDriveManager.getDrive().getFile(importFilePath, false);
+        SalmonFileImporter fileImporter = new SalmonFileImporter(0, 0, null);
+        SalmonFile salmonFileA1 = fileImporter.importFile(fileToImport, salmonRootDir, false, null, 1, 1);
+        long nonceA1 = BitConverter.toLong(salmonFileA1.getRequestedNonce(), 0, SalmonGenerator.NONCE_LENGTH);
+        SalmonDriveManager.closeDrive();
+
+        // open with another device (different sequencer) and export auth id
+        SalmonDriveManager.setSequencer(sequencer2);
+        SalmonDriveManager.openDrive(vault);
+        SalmonDriveManager.getDrive().authenticate(TestHelper.TEST_PASSWORD);
+        String authID = SalmonDriveManager.getAuthID();
+        boolean success = false;
+        try {
+            // import a test file should fail because not authorized
+            salmonRootDir = SalmonDriveManager.getDrive().getVirtualRoot();
+            fileToImport = SalmonDriveManager.getDrive().getFile(importFilePath, false);
+            fileImporter = new SalmonFileImporter(0, 0, null);
+            fileImporter.importFile(fileToImport, salmonRootDir, false, null, 1, 1);
+            success = true;
+        } catch (Exception ignored) {
+
+        }
+        Assert.assertFalse(success);
+        SalmonDriveManager.closeDrive();
+
+        //reopen with first device sequencer and export the auth file with the auth id from the second device
+        SalmonDriveManager.setSequencer(sequencer1);
+        SalmonDriveManager.openDrive(vault);
+        SalmonDriveManager.getDrive().authenticate(TestHelper.TEST_PASSWORD);
+        SalmonDriveManager.exportAuthFile(authID, vault, TestHelper.TEST_EXPORT_DIR);
+        IRealFile configFile = SalmonDriveManager.getDrive().getFile(exportAuthFilePath, false);
+        SalmonFile salmonCfgFile = new SalmonFile(configFile, SalmonDriveManager.getDrive());
+        long nonceCfg = BitConverter.toLong(salmonCfgFile.getFileNonce(), 0, SalmonGenerator.NONCE_LENGTH);
+        // import another test file
+        salmonRootDir = SalmonDriveManager.getDrive().getVirtualRoot();
+        fileToImport = SalmonDriveManager.getDrive().getFile(importFilePath, false);
+        fileImporter = new SalmonFileImporter(0, 0, null);
+        SalmonFile salmonFileA2 = fileImporter.importFile(fileToImport, salmonRootDir, false, null, 1, 1);
+        long nonceA2 = BitConverter.toLong(salmonFileA2.getFileNonce(), 0, SalmonGenerator.NONCE_LENGTH);
+        SalmonDriveManager.closeDrive();
+
+        //reopen with second device(sequencer) and import auth file
+        SalmonDriveManager.setSequencer(sequencer2);
+        SalmonDriveManager.openDrive(vault);
+        SalmonDriveManager.getDrive().authenticate(TestHelper.TEST_PASSWORD);
+        SalmonDriveManager.importAuthFile(exportAuthFilePath);
+        // now import a 3rd file
+        salmonRootDir = SalmonDriveManager.getDrive().getVirtualRoot();
+        fileToImport = SalmonDriveManager.getDrive().getFile(importFilePath, false);
+        SalmonFile salmonFileB1 = fileImporter.importFile(fileToImport, salmonRootDir, false, null, 1, 1);
+        long nonceB1 = BitConverter.toLong(salmonFileB1.getFileNonce(), 0, SalmonGenerator.NONCE_LENGTH);
+        SalmonFile salmonFileB2 = fileImporter.importFile(fileToImport, salmonRootDir, false, null, 1, 1);
+        long nonceB2 = BitConverter.toLong(salmonFileB2.getFileNonce(), 0, SalmonGenerator.NONCE_LENGTH);
+        SalmonDriveManager.closeDrive();
+
+        Assert.assertEquals(nonceA1, nonceCfg - 1);
+        Assert.assertEquals(nonceCfg, nonceA2 - 2);
+        Assert.assertNotEquals(nonceA2, nonceB1);
+        Assert.assertEquals(nonceB1, nonceB2 - 2);
+    }
+
+    public static void testMaxFiles(String vaultDir, String seqFile, String importFile,
+                                    byte[] testMaxNonce, long offset, boolean shouldImport) {
+        boolean importSuccess = true;
+        try {
+            FileSequencer sequencer = new FileSequencer(new JavaFile(seqFile), new SalmonSequenceParser()) {
+                @Override
+                public void initSequence(String driveID, String authID, byte[] startNonce, byte[] maxNonce) throws Exception {
+                    long nMaxNonce = BitConverter.toLong(testMaxNonce, 0, SalmonGenerator.NONCE_LENGTH);
+                    startNonce = BitConverter.toBytes(nMaxNonce + offset, SalmonGenerator.NONCE_LENGTH);
+                    maxNonce = BitConverter.toBytes(nMaxNonce, SalmonGenerator.NONCE_LENGTH);
+                    super.initSequence(driveID, authID, startNonce, maxNonce);
+                }
+            };
+            SalmonDriveManager.setSequencer(sequencer);
+            try {
+                SalmonDrive drive = SalmonDriveManager.openDrive(vaultDir);
+                drive.authenticate(TestHelper.TEST_PASSWORD);
+            } catch (Exception ex) {
+                SalmonDriveManager.createDrive(vaultDir, TestHelper.TEST_PASSWORD);
+            }
+            SalmonFile rootDir = SalmonDriveManager.getDrive().getVirtualRoot();
+            rootDir.listFiles();
+            SalmonFile salmonRootDir = SalmonDriveManager.getDrive().getVirtualRoot();
+            JavaFile fileToImport = new JavaFile(importFile);
+            SalmonFileImporter fileImporter = new SalmonFileImporter(0, 0, null);
+            SalmonFile salmonFile = fileImporter.importFile(fileToImport, salmonRootDir, false, null, 1, 1);
+            if (salmonFile != null)
+                importSuccess = true;
+            else
+                importSuccess = false;
+        } catch (Exception ex) {
+            importSuccess = false;
+            ex.printStackTrace();
+        }
+        Assert.assertEquals(shouldImport, importSuccess);
+    }
+
+    public static void testExamples() throws Exception {
+        String text = "This is a plaintext that will be used for testing";
+        String testFile = "D:/tmp/file.txt";
+        IRealFile tFile = new JavaFile(testFile);
+        if (tFile.exists())
+            tFile.delete();
+        byte[] bytes = text.getBytes();
+        byte[] key = SalmonGenerator.getSecureRandomBytes(32); // 256 bit key
+        byte[] nonce = SalmonGenerator.getSecureRandomBytes(8); // 64 bit nonce
+
+        // Example 1: encrypt byte array
+        byte[] encBytes = SalmonEncryptor.encrypt(bytes, key, nonce, false);
+        // decrypt byte array
+        byte[] decBytes = SalmonEncryptor.decrypt(encBytes, key, nonce, false);
+        Assert.assertArrayEquals(bytes, decBytes);
+
+        // Example 2: encrypt string and save the nonce in the header
+        nonce = SalmonGenerator.getSecureRandomBytes(8); // always get a fresh nonce!
+        String encText = SalmonTextEncryptor.encryptString(text, key, nonce, true);
+        // decrypt string
+        String decText = SalmonTextEncryptor.decryptString(encText, key, null, true);
+        Assert.assertEquals(text, decText);
+
+        // Example 3: encrypt data to an output stream
+        AbsStream encOutStream = new MemoryStream(); // or any other writeable Stream like to a file
+        nonce = SalmonGenerator.getSecureRandomBytes(8); // always get a fresh nonce!
+        // pass the output stream to the SalmonStream
+        SalmonStream encrypter = new SalmonStream(key, nonce, SalmonStream.EncryptionMode.Encrypt, encOutStream,
+                null, false, null, null);
+        // encrypt and write with a single call, you can also Seek() and Write()
+        encrypter.write(bytes, 0, bytes.length);
+        // encrypted data are now written to the encOutStream.
+        encOutStream.position(0);
+        byte[] encData = ((MemoryStream) encOutStream).toArray();
+        encrypter.flush();
+        encrypter.close();
+        encOutStream.close();
+        //decrypt a stream with encoded data
+        AbsStream encInputStream = new MemoryStream(encData); // or any other readable Stream like from a file
+        SalmonStream decrypter = new SalmonStream(key, nonce, SalmonStream.EncryptionMode.Decrypt, encInputStream,
+                null, false, null, null);
+        byte[] decBuffer = new byte[1024];
+        // decrypt and read data with a single call, you can also Seek() before Read()
+        int bytesRead = decrypter.read(decBuffer, 0, decBuffer.length);
+        // encrypted data are now in the decBuffer
+        String decString = new String(decBuffer, 0, bytesRead);
+        System.out.println(decString);
+        decrypter.close();
+        encInputStream.close();
+        Assert.assertEquals(text, decString);
+
+        // Example 4: encrypt to a file, the SalmonFile has a virtual file system API
+        // with copy, move, rename, delete operations
+        SalmonFile encFile = new SalmonFile(new JavaFile(testFile), null);
+        nonce = SalmonGenerator.getSecureRandomBytes(8); // always get a fresh nonce!
+        encFile.setEncryptionKey(key);
+        encFile.setRequestedNonce(nonce);
+        AbsStream stream = encFile.getOutputStream();
+        // encrypt data and write with a single call
+        stream.write(bytes, 0, bytes.length);
+        stream.flush();
+        stream.close();
+        // decrypt an encrypted file
+        SalmonFile encFile2 = new SalmonFile(new JavaFile(testFile), null);
+        encFile2.setEncryptionKey(key);
+        AbsStream stream2 = encFile2.getInputStream();
+        byte[] decBuff = new byte[1024];
+        // decrypt and read data with a single call, you can also Seek() to any position before Read()
+        int encBytesRead = stream2.read(decBuff, 0, decBuff.length);
+        String decString2 = new String(decBuff, 0, encBytesRead);
+        System.out.println(decString2);
+        stream2.close();
+        Assert.assertEquals(text, decString2);
+    }
+
+    public static void encryptAndDecryptStream(byte[] data, byte[] key, byte[] nonce) throws Exception {
+        AbsStream encOutStream = new MemoryStream();
+        SalmonStream encrypter = new SalmonStream(key, nonce, SalmonStream.EncryptionMode.Encrypt, encOutStream);
+        AbsStream inputStream = new MemoryStream(data);
+        inputStream.copyTo(encrypter);
+        encOutStream.position(0);
+        byte[] encData = ((MemoryStream) encOutStream).toArray();
+        encrypter.flush();
+        encrypter.close();
+        encOutStream.close();
+        inputStream.close();
+
+        AbsStream encInputStream = new MemoryStream(encData);
+        SalmonStream decrypter = new SalmonStream(key, nonce, SalmonStream.EncryptionMode.Decrypt, encInputStream);
+        AbsStream outStream = new MemoryStream();
+        decrypter.copyTo(outStream);
+        outStream.position(0);
+        byte[] decData = ((MemoryStream) outStream).toArray();
+        decrypter.close();
+        encInputStream.close();
+        outStream.close();
+
+        Assert.assertArrayEquals(data, decData);
+    }
+
+    public static byte[] getRealFileContents(String filePath) throws Exception {
+        IRealFile file = new JavaFile(filePath);
+        AbsStream ins = file.getInputStream();
+        MemoryStream outs = new MemoryStream();
+        ins.copyTo(outs);
+        outs.position(0);
+        outs.flush();
+        outs.close();
+        return outs.toArray();
+    }
+
+    public static byte[] getRandArray(int size)
+    {
+        Random random = new Random();
+        byte[] data = new byte[size];
+        random.nextBytes(data);
+        return data;
+    }
+
+    public static void encryptAndDecryptByteArray(int size) throws Exception {
+        encryptAndDecryptByteArray(size, 1);
+    }
+
+    public static void encryptAndDecryptByteArray(int size, int threads) throws Exception {
+        byte[] data = TestHelper.getRandArray(size);
+        long t1 = SalmonTime.currentTimeMillis();
+        byte[] encData = SalmonEncryptor.encrypt(data, TestHelper.TEST_KEY_BYTES, TestHelper.TEST_NONCE_BYTES, false, threads);
+        long t2 = SalmonTime.currentTimeMillis();
+        byte[] decData = SalmonEncryptor.decrypt(encData, TestHelper.TEST_KEY_BYTES, TestHelper.TEST_NONCE_BYTES, false, threads);
+        long t3 = SalmonTime.currentTimeMillis();
+        Assert.assertArrayEquals(data, decData);
+        System.out.println("enc time: " + (t2 - t1));
+        System.out.println("dec time: " + (t3 - t2));
+    }
+
+    public static void encryptAndDecryptByteArrayDef(int size) throws Exception {
+        byte[] data = TestHelper.getRandArray(size);
+        long t1 = SalmonTime.currentTimeMillis();
+        byte[] encData = TestHelper.defaultAESCTRTransform(data, TestHelper.TEST_KEY_BYTES, TestHelper.TEST_NONCE_BYTES, true);
+        long t2 = SalmonTime.currentTimeMillis();
+        byte[] decData = TestHelper.defaultAESCTRTransform(encData, TestHelper.TEST_KEY_BYTES, TestHelper.TEST_NONCE_BYTES, false);
+        long t3 = SalmonTime.currentTimeMillis();
+        Assert.assertArrayEquals(data, decData);
+        System.out.println("enc time: " + (t2 - t1));
+        System.out.println("dec time: " + (t3 - t2));
+    }
+
+    public static void CopyMemory(int size) throws IOException {
+        long t1 = SalmonTime.currentTimeMillis();
+        byte[] data = TestHelper.getRandArray(size);
+        long t2 = SalmonTime.currentTimeMillis();
+        byte[] data1 = new byte[data.length];
+        System.arraycopy(data, 0, data1, 0, data.length);
+        long t3 = SalmonTime.currentTimeMillis();
+        System.out.println("gen time: " + (t2 - t1));
+        System.out.println("copy time: " + (t3 - t2));
+
+        byte[] mem = new byte[16];
+        MemoryStream ms = new MemoryStream(mem);
+        ms.write(new byte[] { 1, 2, 3, 4, 5, 6, 7, 8, 9, 10 }, 3, 2);
+        byte[] output = ms.toArray();
+        System.out.println("write: " + Arrays.toString(output));
+        byte[] buff = new byte[16];
+        ms.position(0);
+        ms.read(buff, 1, 4);
+        System.out.println("read: " + Arrays.toString(buff));
     }
 }

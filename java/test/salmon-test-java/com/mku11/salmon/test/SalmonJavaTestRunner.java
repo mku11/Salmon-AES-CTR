@@ -25,6 +25,7 @@ SOFTWARE.
 */
 
 import com.mku11.file.JavaDrive;
+import com.mku11.file.JavaFile;
 import com.mku11.salmon.BitConverter;
 import com.mku11.salmon.MaxFileSizeExceededException;
 import com.mku11.salmon.SalmonEncryptor;
@@ -32,44 +33,56 @@ import com.mku11.salmon.SalmonGenerator;
 import com.mku11.salmon.SalmonIntegrity;
 import com.mku11.salmon.SalmonSecurityException;
 import com.mku11.salmon.SalmonTextEncryptor;
+import com.mku11.salmon.streams.InputStreamWrapper;
 import com.mku11.salmon.streams.MemoryStream;
 import com.mku11.salmon.streams.SalmonStream;
-import com.mku11.salmonfs.SalmonAuthException;
-import com.mku11.salmonfs.SalmonDriveManager;
-import com.mku11.salmonfs.SalmonFile;
+//import com.mku11.salmon.vault.sequencer.WinClientSequencer;
+import com.mku11.salmonfs.*;
 
 import org.junit.Assert;
 import org.junit.Test;
+import org.w3c.dom.Node;
+import org.w3c.dom.NodeList;
+import org.xml.sax.InputSource;
 
+import java.io.ByteArrayInputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.StringReader;
 import java.nio.charset.Charset;
+import java.nio.charset.StandardCharsets;
+import java.util.stream.Stream;
+
+import javax.xml.xpath.XPath;
+import javax.xml.xpath.XPathConstants;
+import javax.xml.xpath.XPathExpressionException;
+import javax.xml.xpath.XPathFactory;
 
 public class SalmonJavaTestRunner {
 
-
-    private static final String TEST_OUTPUT_DIR = "d:\\\\tmp\\output";
-    private static final String TEST_VAULT_DIR = "d:\\\\tmp\\output\\enc";
-    private static final String TEST_VAULT2_DIR = "d:\\\\tmp\\output\\enc2";
-
-    private static final String TEST_IMPORT_TINY_FILE = "d:\\\\tmp\\testdata\\tiny_test.txt";
-    private static final String TEST_IMPORT_SMALL_FILE = "d:\\\\tmp\\testdata\\small_test.zip";
-    private static final String TEST_IMPORT_MEDIUM_FILE = "d:\\\\tmp\\testdata\\medium_test.zip";
-    private static final String TEST_IMPORT_LARGE_FILE = "d:\\\\tmp\\testdata\\large_test.mp4";
-    private static final String TEST_IMPORT_HUGE_FILE = "d:\\\\tmp\\testdata\\huge.zip";
-    private static final String TEST_IMPORT_FILE = TEST_IMPORT_SMALL_FILE;
-
     public static final int ENC_IMPORT_BUFFER_SIZE = 512 * 1024;
     public static final int ENC_IMPORT_THREADS = 4;
-
     // set to false out if you're running test cases for android
-    public static final boolean enableNativeLib = false;
+    public static final boolean enableNativeLib = true;
+    private static final String TEST_OUTPUT_DIR = "d:\\tmp\\output";
+    private static final String TEST_VAULT_DIR = "d:\\tmp\\output\\enc";
+    private static final String TEST_VAULT2_DIR = "d:\\tmp\\output\\enc2";
+    private static final String TEST_EXPORT_AUTH_DIR = "d:\\tmp\\output\\export";
+    private static final String TEST_IMPORT_TINY_FILE = "d:\\tmp\\testdata\\tiny_test.txt";
+    private static final String TEST_IMPORT_SMALL_FILE = "d:\\tmp\\testdata\\small_test.zip";
+    private static final String TEST_IMPORT_MEDIUM_FILE = "d:\\tmp\\testdata\\medium_test.zip";
+    private static final String TEST_IMPORT_LARGE_FILE = "d:\\tmp\\testdata\\large_test.mp4";
+    private static final String TEST_IMPORT_HUGE_FILE = "d:\\tmp\\testdata\\huge.zip";
+    private static final String TEST_IMPORT_FILE = TEST_IMPORT_SMALL_FILE;
 
     static {
         if (enableNativeLib) {
             System.loadLibrary("salmon");
         }
-        SalmonStream.setProviderType(SalmonStream.ProviderType.Default);
-        SalmonStream.setEnableLogDetails(true);
+        SalmonStream.setProviderType(SalmonStream.ProviderType.AesIntrinsics);
+//        SalmonStream.setEnableLogDetails(true);
         SalmonGenerator.setPbkdfType(SalmonGenerator.PbkdfType.Default);
+        SalmonDriveManager.setVirtualDriveClass(JavaDrive.class);
     }
 
     @Test
@@ -350,7 +363,7 @@ public class SalmonJavaTestRunner {
     @Test
     public void shouldNotReadFromStreamEncryptionMode() throws Exception {
         String testText = TestHelper.TEST_TEXT;
-        
+
         StringBuilder tBuilder = new StringBuilder();
         for (int i = 0; i < 10; i++) {
             tBuilder.append(testText);
@@ -376,7 +389,7 @@ public class SalmonJavaTestRunner {
     @Test
     public void shouldNotWriteToStreamDecryptionMode() throws Exception {
         String testText = TestHelper.TEST_TEXT;
-        
+
         StringBuilder tBuilder = new StringBuilder();
         for (int i = 0; i < 10; i++) {
             tBuilder.append(testText);
@@ -472,14 +485,13 @@ public class SalmonJavaTestRunner {
 
     @Test
     public void shouldAuthenticateNegative() throws Exception {
-        SalmonDriveManager.setVirtualDriveClass(JavaDrive.class);
-        SalmonDriveManager.setDriveLocation(JavaTestHelper.generateFolder(TEST_VAULT2_DIR));
+        String vaultDir = JavaTestHelper.generateFolder(TEST_VAULT2_DIR);
+        FileSequencer sequencer = new FileSequencer(new JavaFile(vaultDir + "/" + TestHelper.TEST_SEQUENCER_FILE1), new SalmonSequenceParser());
+        SalmonDriveManager.setSequencer(sequencer);
+        SalmonDriveManager.createDrive(vaultDir, TestHelper.TEST_PASSWORD);
         boolean wrongPassword = false;
-        if (!SalmonDriveManager.getDrive().hasConfig()) {
-            SalmonDriveManager.getDrive().setPassword(TestHelper.TEST_PASSWORD);
-            SalmonFile rootDir = SalmonDriveManager.getDrive().getVirtualRoot();
-            rootDir.listFiles();
-        }
+        SalmonFile rootDir = SalmonDriveManager.getDrive().getVirtualRoot();
+        rootDir.listFiles();
         try {
             SalmonDriveManager.getDrive().authenticate(TestHelper.TEST_FALSE_PASSWORD);
         } catch (SalmonAuthException ex) {
@@ -490,16 +502,14 @@ public class SalmonJavaTestRunner {
 
     @Test
     public void shouldCatchNotAuthenticatedNegative() throws Exception {
-        SalmonDriveManager.setVirtualDriveClass(JavaDrive.class);
-        SalmonDriveManager.setDriveLocation(JavaTestHelper.generateFolder(TEST_VAULT2_DIR));
+        String vaultDir = JavaTestHelper.generateFolder(TEST_VAULT2_DIR);
+        FileSequencer sequencer = new FileSequencer(new JavaFile(vaultDir + "/" + TestHelper.TEST_SEQUENCER_FILE1), new SalmonSequenceParser());
+        SalmonDriveManager.setSequencer(sequencer);
+        SalmonDriveManager.createDrive(vaultDir, TestHelper.TEST_PASSWORD);
         boolean wrongPassword = false;
-        SalmonDriveManager.getDrive().setPassword(TestHelper.TEST_PASSWORD);
-
-        // log out
-        SalmonDriveManager.getDrive().authenticate(null);
-
+        SalmonDriveManager.closeDrive();
         try {
-            // access but not authenticated
+            SalmonDriveManager.openDrive(vaultDir);
             SalmonFile rootDir = SalmonDriveManager.getDrive().getVirtualRoot();
             rootDir.listFiles();
         } catch (SalmonAuthException ex) {
@@ -511,23 +521,20 @@ public class SalmonJavaTestRunner {
 
     @Test
     public void shouldAuthenticatePositive() throws Exception {
-        SalmonDriveManager.setVirtualDriveClass(JavaDrive.class);
-        SalmonDriveManager.setDriveLocation(JavaTestHelper.generateFolder(TEST_VAULT2_DIR));
+        String vaultDir = JavaTestHelper.generateFolder(TEST_VAULT2_DIR);
+        FileSequencer sequencer = new FileSequencer(new JavaFile(vaultDir + "/" + TestHelper.TEST_SEQUENCER_FILE1), new SalmonSequenceParser());
+        SalmonDriveManager.setSequencer(sequencer);
+        SalmonDriveManager.createDrive(vaultDir, TestHelper.TEST_PASSWORD);
         boolean wrongPassword = false;
-        SalmonDriveManager.getDrive().setPassword(TestHelper.TEST_PASSWORD);
-
-        // log out
-        SalmonDriveManager.getDrive().authenticate(null);
-
+        SalmonDriveManager.closeDrive();
         try {
-            // log back in
+            SalmonDriveManager.openDrive(vaultDir);
             SalmonDriveManager.getDrive().authenticate(TestHelper.TEST_PASSWORD);
             SalmonDriveManager.getDrive().getVirtualRoot();
         } catch (SalmonAuthException ex) {
             wrongPassword = true;
         }
         Assert.assertFalse(wrongPassword);
-
     }
 
     @Test
@@ -536,7 +543,7 @@ public class SalmonJavaTestRunner {
         try {
             TestHelper.importAndExport(JavaTestHelper.generateFolder(TEST_VAULT2_DIR), TestHelper.TEST_PASSWORD, TEST_IMPORT_FILE,
                     ENC_IMPORT_BUFFER_SIZE, ENC_IMPORT_THREADS, TestHelper.ENC_EXPORT_BUFFER_SIZE, TestHelper.ENC_EXPORT_THREADS,
-                    false, true, 24 + 10, true, null, null, null);
+                    false, true, 24 + 10, true, null, null);
         } catch (SalmonIntegrity.SalmonIntegrityException ex) {
             integrityFailed = true;
         }
@@ -550,7 +557,7 @@ public class SalmonJavaTestRunner {
             TestHelper.importAndExport(JavaTestHelper.generateFolder(TEST_VAULT2_DIR), TestHelper.TEST_PASSWORD, TEST_IMPORT_FILE,
                     ENC_IMPORT_BUFFER_SIZE, ENC_IMPORT_THREADS, TestHelper.ENC_EXPORT_BUFFER_SIZE, TestHelper.ENC_EXPORT_THREADS,
                     false, false, 0, true, false,
-                    false, null);
+                    false);
         } catch (SalmonIntegrity.SalmonIntegrityException ex) {
             integrityFailed = true;
         }
@@ -594,7 +601,7 @@ public class SalmonJavaTestRunner {
             TestHelper.importAndExport(JavaTestHelper.generateFolder(TEST_VAULT2_DIR), TestHelper.TEST_PASSWORD, TEST_IMPORT_FILE,
                     ENC_IMPORT_BUFFER_SIZE, ENC_IMPORT_THREADS, TestHelper.ENC_EXPORT_BUFFER_SIZE, TestHelper.ENC_EXPORT_THREADS,
                     true, true, 24 + 10, false, null,
-                    null, null);
+                    null);
         } catch (SalmonIntegrity.SalmonIntegrityException ex) {
             integrityFailed = true;
         }
@@ -610,7 +617,7 @@ public class SalmonJavaTestRunner {
             TestHelper.importAndExport(JavaTestHelper.generateFolder(TEST_VAULT2_DIR), TestHelper.TEST_PASSWORD, TEST_IMPORT_FILE,
                     ENC_IMPORT_BUFFER_SIZE, ENC_IMPORT_THREADS, TestHelper.ENC_EXPORT_BUFFER_SIZE, TestHelper.ENC_EXPORT_THREADS,
                     true, true, 24 + 10, false, false,
-                    null, null
+                    null
             );
         } catch (SalmonIntegrity.SalmonIntegrityException ex) {
             integrityFailed = true;
@@ -628,7 +635,7 @@ public class SalmonJavaTestRunner {
             TestHelper.importAndExport(JavaTestHelper.generateFolder(TEST_VAULT2_DIR), TestHelper.TEST_PASSWORD, TEST_IMPORT_FILE,
                     ENC_IMPORT_BUFFER_SIZE, ENC_IMPORT_THREADS, TestHelper.ENC_EXPORT_BUFFER_SIZE, TestHelper.ENC_EXPORT_THREADS,
                     true, false, 0, false,
-                    false, true, null);
+                    false, true);
         } catch (Exception ex) {
             failed = true;
         }
@@ -642,7 +649,7 @@ public class SalmonJavaTestRunner {
             TestHelper.importAndExport(JavaTestHelper.generateFolder(TEST_VAULT2_DIR), TestHelper.TEST_PASSWORD, TEST_IMPORT_FILE,
                     ENC_IMPORT_BUFFER_SIZE, ENC_IMPORT_THREADS, TestHelper.ENC_EXPORT_BUFFER_SIZE, TestHelper.ENC_EXPORT_THREADS,
                     true, true, 36, false,
-                    true, false, null);
+                    true, false);
         } catch (SalmonIntegrity.SalmonIntegrityException ex) {
             failed = true;
         }
@@ -656,7 +663,7 @@ public class SalmonJavaTestRunner {
             TestHelper.importAndExport(JavaTestHelper.generateFolder(TEST_VAULT2_DIR), TestHelper.TEST_PASSWORD, TEST_IMPORT_FILE,
                     ENC_IMPORT_BUFFER_SIZE, ENC_IMPORT_THREADS, TestHelper.ENC_EXPORT_BUFFER_SIZE, TestHelper.ENC_EXPORT_THREADS,
                     true, false, 0, true,
-                    true, false, null);
+                    true, false);
         } catch (SalmonIntegrity.SalmonIntegrityException ex) {
             failed = true;
         }
@@ -670,7 +677,7 @@ public class SalmonJavaTestRunner {
             TestHelper.importAndExport(JavaTestHelper.generateFolder(TEST_VAULT2_DIR), TestHelper.TEST_PASSWORD, TEST_IMPORT_FILE,
                     ENC_IMPORT_BUFFER_SIZE, ENC_IMPORT_THREADS, TestHelper.ENC_EXPORT_BUFFER_SIZE, TestHelper.ENC_EXPORT_THREADS,
                     true, true, 20, false,
-                    null, null, null);
+                    null, null);
         } catch (SalmonIntegrity.SalmonIntegrityException ex) {
             integrityFailed = true;
         }
@@ -686,7 +693,7 @@ public class SalmonJavaTestRunner {
                         ENC_IMPORT_BUFFER_SIZE, ENC_IMPORT_THREADS,
                         TestHelper.ENC_EXPORT_BUFFER_SIZE, TestHelper.ENC_EXPORT_THREADS,
                         true, false, 0, true,
-                        null, null, null);
+                        null, null);
             importSuccess = true;
         } catch (SalmonIntegrity.SalmonIntegrityException ex) {
             ex.printStackTrace();
@@ -699,18 +706,30 @@ public class SalmonJavaTestRunner {
 
     @Test
     public void shouldCatchVaultMaxFiles() {
-        boolean importSuccess;
-        try {
-            TestHelper.importAndExport(JavaTestHelper.generateFolder(TEST_VAULT2_DIR), TestHelper.TEST_PASSWORD, TEST_IMPORT_FILE,
-                    ENC_IMPORT_BUFFER_SIZE, ENC_IMPORT_THREADS, TestHelper.ENC_EXPORT_BUFFER_SIZE, TestHelper.ENC_EXPORT_THREADS,
-                    false, false, 0, false,
-                    null, null, TestHelper.TEXT_VAULT_MAX_FILE_NONCE);
-            importSuccess = true;
-        } catch (Exception ex) {
-            importSuccess = false;
-            ex.printStackTrace();
-        }
-        Assert.assertFalse(importSuccess);
+        SalmonDriveManager.setVirtualDriveClass(JavaDrive.class);
+
+        String vaultDir = JavaTestHelper.generateFolder(TEST_VAULT2_DIR);
+        String seqFile = vaultDir + "/" + TestHelper.TEST_SEQUENCER_FILE1;
+
+        TestHelper.testMaxFiles(vaultDir, seqFile, TEST_IMPORT_TINY_FILE,
+                TestHelper.TEXT_VAULT_MAX_FILE_NONCE, -2, true);
+
+        // we need 2 nonces once of the filename the other for the file
+        // so this should fail
+        vaultDir = JavaTestHelper.generateFolder(TEST_VAULT2_DIR);
+        seqFile = vaultDir + "/" + TestHelper.TEST_SEQUENCER_FILE1;
+        TestHelper.testMaxFiles(vaultDir, seqFile, TEST_IMPORT_TINY_FILE,
+                TestHelper.TEXT_VAULT_MAX_FILE_NONCE, -1, false);
+
+        vaultDir = JavaTestHelper.generateFolder(TEST_VAULT2_DIR);
+        seqFile = vaultDir + "/" + TestHelper.TEST_SEQUENCER_FILE1;
+        TestHelper.testMaxFiles(vaultDir, seqFile, TEST_IMPORT_TINY_FILE,
+                TestHelper.TEXT_VAULT_MAX_FILE_NONCE, 0, false);
+
+        vaultDir = JavaTestHelper.generateFolder(TEST_VAULT2_DIR);
+        seqFile = vaultDir + "/" + TestHelper.TEST_SEQUENCER_FILE1;
+        TestHelper.testMaxFiles(vaultDir, seqFile, TEST_IMPORT_TINY_FILE,
+                TestHelper.TEXT_VAULT_MAX_FILE_NONCE, 1, false);
     }
 
     @Test
@@ -815,17 +834,172 @@ public class SalmonJavaTestRunner {
     @Test
     public void shouldConvert() {
         int num1 = 12564;
-        byte[] bytes = BitConverter.getBytes(num1, 4);
-        int num2 = BitConverter.toInt32(bytes, 0, 4);
+        byte[] bytes = BitConverter.toBytes(num1, 4);
+        int num2 = (int) BitConverter.toLong(bytes, 0, 4);
         Assert.assertEquals(num1, num2);
 
 
         long lnum1 = 56445783493L;
-        bytes = BitConverter.getBytes(lnum1, 8);
-        long lnum2 = BitConverter.toInt64(bytes, 0, 8);
+        bytes = BitConverter.toBytes(lnum1, 8);
+        long lnum2 = BitConverter.toLong(bytes, 0, 8);
         Assert.assertEquals(lnum1, lnum2);
 
     }
 
+    @Test
+    public void shouldExportAndImportAuth() throws Exception {
+        String vault = JavaTestHelper.generateFolder(TEST_VAULT_DIR);
+        String importFilePath = TEST_IMPORT_TINY_FILE;
+        TestHelper.exportAndImportAuth(vault, importFilePath);
+    }
+
+    @Test
+    public void testServerSid() throws Exception {
+//        boolean res = WinClientSequencer.isServiceAdmin(JavaTestHelper.TEST_SERVICE_PIPE_NAME);
+//        Assert.assertTrue(res);
+//        Thread.sleep(2000);
+    }
+
+    @Test
+    public void shouldConnectAndDisconnectToService() throws Exception {
+//        for(int i=0; i<12; i++) {
+//            SalmonDriveManager.setSequencer(new WinClientSequencer(JavaTestHelper.TEST_SERVICE_PIPE_NAME));
+//            SalmonDriveManager.getSequencer().close();
+//            Thread.sleep(1000);
+//        }
+    }
+
+
+    @Test
+    public void shouldParseXML() throws XPathExpressionException {
+        XPathFactory factory = XPathFactory.newInstance();
+        XPath xPath = factory.newXPath();
+        String contents = "<?xml version=\"1.0\" encoding=\"utf-8\"?>" +
+                "<drives>" +
+                "<drive driveID=\"86259681097afcc9a56f75664ea8d3dd\" authID=\"46d34ff19deab97fa898b0d1553adc47\" status=\"Active\" nextNonce=\"AAAAAAAAAAA=\" maxNonce=\"f/////////8=\" />" +
+                "<drive driveID=\"86259681097afcc9a56f75664ea8d3d1\" authID=\"46d34ff19deab97fa898b0d1553adc47\" status=\"Active\" nextNonce=\"AAAAAAAAAAA=\" maxNonce=\"f/////////8=\" />" +
+                "</drives>";
+        InputSource inputXML = new InputSource(new StringReader(contents));
+        Node drives = (Node) xPath.evaluate("/drives", inputXML, XPathConstants.NODE);
+        Assert.assertEquals(2, drives.getChildNodes().getLength());
+    }
+
+    @Test
+    public void testExamples() throws Exception {
+        TestHelper.testExamples();
+    }
+
+
+    @Test
+    public void ShouldEncryptAndDecrtypStream() throws Exception {
+        byte[] data = TestHelper.getRealFileContents(TEST_IMPORT_FILE);
+        TestHelper.encryptAndDecryptStream(data, TestHelper.TEST_KEY_BYTES, TestHelper.TEST_NONCE_BYTES);
+    }
+
+    @Test
+    public void ShouldEncryptAndDecrtyptStreamPerformanceDef() throws Exception {
+        System.out.println("SalmonStream Def");
+        SalmonStream.setProviderType(SalmonStream.ProviderType.Default);
+        TestHelper.encryptAndDecryptByteArray(TestHelper.TEST_PERF_SIZE);
+    }
+
+    @Test
+    public void ShouldEncryptAndDecrtyptStreamPerformanceDefParallel() throws Exception {
+        System.out.println("SalmonStream Def");
+        SalmonStream.setProviderType(SalmonStream.ProviderType.Default);
+        TestHelper.encryptAndDecryptByteArray(TestHelper.TEST_PERF_SIZE, 4);
+    }
+
+    @Test
+    public void ShouldEncryptAndDecrtyptStreamPerformanceIntr() throws Exception {
+        System.out.println("SalmonStream Intr");
+        SalmonStream.setProviderType(SalmonStream.ProviderType.AesIntrinsics);
+        TestHelper.encryptAndDecryptByteArray(TestHelper.TEST_PERF_SIZE);
+    }
+
+    @Test
+    public void ShouldEncryptAndDecrtyptStreamPerformanceIntrParallel() throws Exception {
+        System.out.println("SalmonStream Intr");
+        SalmonStream.setProviderType(SalmonStream.ProviderType.AesIntrinsics);
+        TestHelper.encryptAndDecryptByteArray(TestHelper.TEST_PERF_SIZE, 4);
+    }
+
+
+    @Test
+    public void ShouldEncryptAndDecrtyptStreamPerformanceDefault() throws Exception {
+        System.out.println("Default");
+        TestHelper.encryptAndDecryptByteArrayDef(TestHelper.TEST_PERF_SIZE);
+    }
+
+    @Test
+    public void ShouldEncryptAndDecrtyptArrayMultipleThreads() throws Exception {
+        byte[] data = TestHelper.getRandArray(1 * 1024 * 1024);
+        //byte[] data = Encoding.UTF8.GetBytes("This is another test that is better");
+        long t1 = System.currentTimeMillis();
+        byte[] encData = SalmonEncryptor.encrypt(data, TestHelper.TEST_KEY_BYTES, TestHelper.TEST_NONCE_BYTES, false, 
+        2);
+        long t2 = System.currentTimeMillis();
+        byte[] decData = SalmonEncryptor.decrypt(encData, TestHelper.TEST_KEY_BYTES, TestHelper.TEST_NONCE_BYTES, false, 
+        2);
+        long t3 = System.currentTimeMillis();
+        Assert.assertArrayEquals(data, decData);
+        System.out.println("enc time: " + (t2 - t1));
+        System.out.println("dec time: " + (t3 - t2));
+    }
+
+    @Test
+    public void ShouldEncryptAndDecrtyptArrayMultipleThreadsIntegrity() throws Exception {
+        SalmonEncryptor.setBufferSize(2 * 1024 * 1024);
+        byte[] data = TestHelper.getRandArray(1 * 1024 * 1024 + 3);
+        //byte[] data = Encoding.UTF8.GetBytes("This is another test that is better");
+        long t1 = System.currentTimeMillis();
+        byte[] encData = SalmonEncryptor.encrypt(data, TestHelper.TEST_KEY_BYTES, TestHelper.TEST_NONCE_BYTES,
+                false, 2, true, TestHelper.TEST_HMAC_KEY_BYTES, null);
+        long t2 = System.currentTimeMillis();
+        byte[] decData = SalmonEncryptor.decrypt(encData, TestHelper.TEST_KEY_BYTES, TestHelper.TEST_NONCE_BYTES,
+                false, 2, true, TestHelper.TEST_HMAC_KEY_BYTES, null);
+        long t3 = System.currentTimeMillis();
+        Assert.assertArrayEquals(data, decData);
+        System.out.println("enc time: " + (t2 - t1));
+        System.out.println("dec time: " + (t3 - t2));
+    }
+
+    @Test
+    public void ShouldEncryptAndDecrtyptArrayMultipleThreadsIntegrityCustomChunkSize() throws Exception {
+        byte[] data = TestHelper.getRandArray(1 * 1024 * 1024);
+        //byte[] data = Encoding.UTF8.GetBytes("This is another test that is better");
+        long t1 = System.currentTimeMillis();
+        byte[] encData = SalmonEncryptor.encrypt(data, TestHelper.TEST_KEY_BYTES, TestHelper.TEST_NONCE_BYTES,
+                false, 2, true, TestHelper.TEST_HMAC_KEY_BYTES, 32);
+        long t2 = System.currentTimeMillis();
+        byte[] decData = SalmonEncryptor.decrypt(encData, TestHelper.TEST_KEY_BYTES, TestHelper.TEST_NONCE_BYTES,
+                false, 2, true, TestHelper.TEST_HMAC_KEY_BYTES, 32);
+        long t3 = System.currentTimeMillis();
+        Assert.assertArrayEquals(data, decData);
+        System.out.println("enc time: " + (t2 - t1));
+        System.out.println("dec time: " + (t3 - t2));
+    }
+
+    @Test
+    public void ShouldEncryptAndDecrtyptArrayMultipleThreadsIntegrityCustomChunkSizeStoreHeader() throws Exception {
+        byte[] data = TestHelper.getRandArray(1 * 1024 * 1024);
+        //byte[] data = Encoding.UTF8.GetBytes("This is another test that is better");
+        long t1 = System.currentTimeMillis();
+        byte[] encData = SalmonEncryptor.encrypt(data, TestHelper.TEST_KEY_BYTES, TestHelper.TEST_NONCE_BYTES,
+                true, 2, true, TestHelper.TEST_HMAC_KEY_BYTES, 32);
+        long t2 = System.currentTimeMillis();
+        byte[] decData = SalmonEncryptor.decrypt(encData, TestHelper.TEST_KEY_BYTES, null, true,
+                1, true, TestHelper.TEST_HMAC_KEY_BYTES, null);
+        long t3 = System.currentTimeMillis();
+        Assert.assertArrayEquals(data, decData);
+        System.out.println("enc time: " + (t2 - t1));
+        System.out.println("dec time: " + (t3 - t2));
+    }
+
+
+    @Test
+    public void ShouldCopyMemory() throws IOException {
+        TestHelper.CopyMemory(4 * 1024 * 1024);
+    }
 
 }
