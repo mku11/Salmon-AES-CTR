@@ -2,64 +2,91 @@
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:orientation="vertical"
+    android:clickable="true"
+    android:focusable="true"
+    android:foreground="?attr/selectableItemBackground"
     android:padding="4dp">
 
     <RelativeLayout
+        android:id="@+id/thumbnail_layout"
         android:layout_width="wrap_content"
-        android:layout_height="wrap_content">
+        android:layout_height="wrap_content"
+        android:padding="4dp"
+        android:layout_alignParentTop="true">
 
-        <RelativeLayout
-            android:id="@+id/thumbnail_layout"
+        <ImageView
+            android:id="@+id/thumbnail"
+            android:layout_width="64dp"
+            android:layout_height="64dp"
+            android:layout_alignParentTop="true"
+            android:layout_centerHorizontal="true"
+            android:contentDescription="@string/File"
+            android:src="@drawable/file" />
+
+        <TextView
+            android:id="@+id/extension"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_alignParentTop="true"
-            android:layout_centerHorizontal="true">
+            android:layout_centerInParent="true"
+            android:layout_centerHorizontal="true"
+            android:gravity="center"
+            android:text="DAT"
+            android:textStyle="bold" />
 
-            <ImageView
-                android:id="@+id/thumbnail"
-                android:layout_width="256dp"
-                android:layout_height="256dp"
-                android:layout_alignParentTop="true"
-                android:layout_centerHorizontal="true"
-                android:contentDescription="@string/File"
-                android:src="@drawable/file" />
+    </RelativeLayout>
 
-            <TextView
-                android:id="@+id/extension"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_centerInParent="true"
-                android:layout_centerHorizontal="true"
-                android:gravity="center"
-                android:text="DAT"
-                android:textStyle="bold" />
+    <CheckBox
+        android:id="@+id/selected"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentRight="true"
+        android:gravity="center_vertical"
+        android:padding="4dp"
+        android:layoutDirection="rtl" />
 
-        </RelativeLayout>
+    <RelativeLayout
+        android:id="@+id/file_layout"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_toLeftOf="@id/selected"
+        android:layout_toRightOf="@+id/thumbnail_layout"
+        android:padding="8dp">
 
         <TextView
             android:id="@+id/filename"
-            android:layout_width="wrap_content"
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_below="@+id/thumbnail_layout"
             android:layout_centerHorizontal="true"
+            android:padding="2dp"
             android:text="file.dat" />
 
-        <TextView
-            android:id="@+id/filesize"
-            android:layout_width="wrap_content"
+        <LinearLayout
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_below="@+id/filename"
             android:layout_centerHorizontal="true"
-            android:text="10MB" />
+            android:orientation="horizontal">
 
-        <CheckBox
-            android:id="@+id/selected"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_alignParentTop="true"
-            android:layout_alignParentRight="true"
-            android:gravity="center_vertical"
-            android:layoutDirection="rtl" />
+            <TextView
+                android:id="@+id/filesize"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center"
+                android:layout_weight="1"
+                android:lines="1"
+                android:padding="2dp"
+                android:text="10MB" />
+
+            <TextView
+                android:id="@+id/filedate"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:gravity="right"
+                android:lines="1"
+                android:padding="2dp"
+                android:text="01/01/2001" />
+
+        </LinearLayout>
     </RelativeLayout>
 </RelativeLayout>

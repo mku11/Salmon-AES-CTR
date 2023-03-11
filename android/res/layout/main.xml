@@ -1,82 +1,82 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
-<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
-    android:layout_height="wrap_content"
-    android:orientation="vertical"
+    android:layout_height="match_parent"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:background="#222222"
     android:padding="2dp">
 
-    <RelativeLayout
-        android:id="@+id/statusControlLayout"
+    <com.google.android.material.appbar.AppBarLayout
+        android:id="@+id/toolbarLayout"
+        style="@style/ThemeOverlay.MaterialComponents.Dark.ActionBar"
         android:layout_width="match_parent"
-        android:layout_height="48dp"
-        android:layout_alignParentTop="true"
-        android:gravity="center"
-        android:orientation="horizontal"
-        android:visibility="gone">
+        app:layout_constraintTop_toTopOf="parent"
+        android:layout_height="wrap_content">
 
-        <ImageButton
-            android:id="@+id/cancelButton"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_alignParentRight="true"
-            android:layout_centerHorizontal="true"
-            android:layout_centerVertical="true"
-            android:contentDescription="Cancel"
-            android:scaleType="fitCenter"
-            android:src="@android:drawable/ic_menu_close_clear_cancel" />
-
-        <LinearLayout
-            android:id="@+id/statusLayout"
+        <androidx.appcompat.widget.Toolbar
+            android:id="@+id/toolbar"
             android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_alignParentLeft="true"
-            android:layout_toLeftOf="@id/cancelButton"
-            android:orientation="vertical"
-            android:paddingLeft="12dp"
-            android:paddingRight="12dp">
-
-            <TextView
-                android:id="@+id/status"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:ellipsize="end"
-                android:lines="1"
-                android:text=""
-                android:textSize="12sp" />
-
-            <ProgressBar
-                android:id="@+id/fileProgress"
-                style="@style/Widget.AppCompat.ProgressBar.Horizontal"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:max="100" />
-
-            <ProgressBar
-                android:id="@+id/filesProgress"
-                style="@style/Widget.AppCompat.ProgressBar.Horizontal"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:max="100" />
-        </LinearLayout>
-    </RelativeLayout>
+            android:layout_height="?attr/actionBarSize" />
+    </com.google.android.material.appbar.AppBarLayout>
 
     <TextView
         android:id="@+id/path"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_below="@id/statusControlLayout"
-        android:layout_centerHorizontal="true"
+        app:layout_constraintTop_toBottomOf="@id/toolbarLayout"
+        android:ellipsize="start"
         android:gravity="center"
-        android:padding="4dp"
-        >
-
-    </TextView>
+        android:padding="2dp"
+        android:text="salmonfs://"
+        android:textColor="#FFFFFF" />
 
     <androidx.recyclerview.widget.RecyclerView
-        android:id="@+id/gridList"
+        android:id="@+id/list"
         android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:layout_below="@id/path"
+        tools:listitem="@layout/file_item"
+        android:layout_height="0dp"
+        app:layout_constraintTop_toBottomOf="@id/path"
+        app:layout_constraintBottom_toTopOf="@id/status_control_layout"
         android:layout_alignParentBottom="true" />
 
-</RelativeLayout>
+    <RelativeLayout
+        android:id="@+id/status_control_layout"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/list"
+        android:orientation="horizontal"
+        android:padding="8dp">
+
+        <TextView
+            android:id="@+id/status"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_centerVertical="true"
+            android:layout_toLeftOf="@id/fileProgress"
+            android:ellipsize="start"
+            android:maxLines="3"
+            android:text="Status"
+            android:textColor="#FFFFFF"
+            android:textSize="12sp" />
+
+        <com.mku11.salmon.main.PieProgress
+            android:id="@+id/fileProgress"
+            android:layout_width="48dp"
+            android:layout_height="48dp"
+            android:layout_marginStart="2dp"
+            android:layout_marginTop="2dp"
+            android:layout_marginEnd="2dp"
+            android:layout_marginBottom="2dp"
+            android:layout_toLeftOf="@id/filesProgress" />
+
+        <com.mku11.salmon.main.PieProgress
+            android:id="@+id/filesProgress"
+            android:layout_width="48dp"
+            android:layout_height="48dp"
+            android:layout_alignParentRight="true"
+            android:layout_margin="2dp" />
+
+    </RelativeLayout>
+</androidx.constraintlayout.widget.ConstraintLayout>
