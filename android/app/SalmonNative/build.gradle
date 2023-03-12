@@ -39,7 +39,7 @@ android {
     externalNativeBuild {
         cmake {
             // uncomment this line to build AES intrinsics
-            // path "../../make/CMakeLists.txt"
+            path "../../make/CMakeLists.txt"
             version "3.18.1"
         }
     }

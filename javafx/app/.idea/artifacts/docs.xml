@@ -1,0 +1,8 @@
+<component name="ArtifactManager">
+  <artifact name="docs">
+    <output-path>$PROJECT_DIR$/dist</output-path>
+    <root id="root">
+      <element id="file-copy" path="$PROJECT_DIR$/docs/README.txt" />
+    </root>
+  </artifact>
+</component>

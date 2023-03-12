@@ -25,7 +25,7 @@ SOFTWARE.
 public class Config {
 
     public static final String APP_NAME = "Salmon Vault";
-    public static final String VERSION = "Beta 1.2";
+    public static final String VERSION = "Beta 1.0.3";
     public static final String LIB_NAME = "salmon";
     public static final String ABOUT_TEXT = "Released under MIT License";
     public static final String SourceCodeURL = "https://github.com/mku11/Salmon";
@@ -34,5 +34,5 @@ public class Config {
 
     // set to true to enable the AES intrinsics
     // make sure you read the README.md file
-    public static final boolean enableNativeLib = false;
+    public static final boolean enableNativeLib = true;
 }

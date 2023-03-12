@@ -1,0 +1,9 @@
+<component name="ArtifactManager">
+  <artifact name="net_java_dev_jna">
+    <output-path>$PROJECT_DIR$/out/artifacts/net_java_dev_jna</output-path>
+    <root id="root">
+      <element id="library" level="project" name="net.java.dev.jna" />
+      <element id="library" level="project" name="net.java.dev.jna.platform" />
+    </root>
+  </artifact>
+</component>

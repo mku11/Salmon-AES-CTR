@@ -26,8 +26,8 @@ namespace Salmon
 {
     public class Config
     {
-        public static readonly string APP_NAME = "Salmon Vault Beta";
-        public static readonly string VERSION = "1.2";
+        public static readonly string APP_NAME = "Salmon Vault";
+        public static readonly string VERSION = "1.0.3";
         public static readonly string ABOUT_TEXT = "Released under MIT License";
         public static readonly string SourceCodeURL = "https://github.com/mku11/Salmon";
     }
