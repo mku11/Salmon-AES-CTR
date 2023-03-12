@@ -826,6 +826,7 @@ namespace Salmon.ViewModel
                     FileProgress = 100;
                     FilesProgress = 100;
                 });
+				Refresh();
                 WindowUtils.RunOnMainThread(() => ShowTaskRunning(false), 1000);
             });
         }

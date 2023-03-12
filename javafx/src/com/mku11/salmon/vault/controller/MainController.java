@@ -691,6 +691,7 @@ public class MainController {
             } catch (Exception e) {
                 e.printStackTrace();
             }
+            refresh();
             Platform.runLater(() -> {
                 fileprogress.setValue(100);
                 filesprogress.setValue(100);
