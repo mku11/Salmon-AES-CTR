@@ -64,7 +64,11 @@
                         <KeyCodeCombination alt="UP" code="V" control="DOWN" meta="UP" shift="UP" shortcut="UP"/>
                     </accelerator>
                 </MenuItem>
-                <MenuItem onAction="#onDelete" text="Delete"/>
+                <MenuItem onAction="#onDelete" text="Delete">
+                    <accelerator>
+                        <KeyCodeCombination alt="UP" code="DELETE" control="UP" meta="UP" shift="UP" shortcut="UP"/>
+                    </accelerator>
+                </MenuItem>
             </Menu>
             <Menu text="Operations">
                 <MenuItem onAction="#onImport" text="Import">
