@@ -981,5 +981,5 @@ TestHelper.ENC_IMPORT_BUFFER_SIZE, TestHelper.ENC_IMPORT_THREADS, TestHelper.ENC
         {
             TestHelper.CopyMemory(4 * 1024 * 1024);
         }
-        }
+    }
 }
