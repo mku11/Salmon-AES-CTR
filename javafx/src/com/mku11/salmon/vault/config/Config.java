@@ -34,5 +34,5 @@ public class Config {
 
     // set to true to enable the AES intrinsics
     // make sure you read the README.md file
-    public static final boolean enableNativeLib = true;
+    public static final boolean enableNativeLib = false;
 }
