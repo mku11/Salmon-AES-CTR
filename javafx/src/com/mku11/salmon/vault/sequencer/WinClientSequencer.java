@@ -104,8 +104,8 @@ public class WinClientSequencer implements ISalmonSequencer, Closeable {
         IntByReference cbSid = new IntByReference(WinNT.SECURITY_MAX_SID_SIZE);
         Advapi32.INSTANCE.CreateWellKnownSid(WinNT.WELL_KNOWN_SID_TYPE.WinBuiltinAdministratorsSid,
                 null, pSid, cbSid);
-        System.out.println("Named pipe owner SID: " + getSIDString(ppSid));
-        System.out.println("Admin SID: " + getSIDString(pSid));
+//        System.out.println("Named pipe owner SID: " + getSIDString(ppSid));
+//        System.out.println("Admin SID: " + getSIDString(pSid));
 
         return Advapi32.INSTANCE.EqualSid(pSid, ppSid);
     }
@@ -226,7 +226,7 @@ public class WinClientSequencer implements ISalmonSequencer, Closeable {
 
         private static Response Parse(String contents) throws XPathExpressionException, ParserConfigurationException, IOException, SAXException {
             Response response = new Response();
-            ByteArrayInputStream stream = new ByteArrayInputStream(contents.getBytes(StandardCharsets.UTF_8));
+            ByteArrayInputStream stream = new ByteArrayInputStream(contents.getBytes());
             try {
                 DocumentBuilderFactory builderFactory = DocumentBuilderFactory.newInstance();
                 DocumentBuilder builder = builderFactory.newDocumentBuilder();
