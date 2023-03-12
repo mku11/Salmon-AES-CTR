@@ -85,12 +85,12 @@
     <Compile Include="..\..\..\..\csharp\src\salmonfs\SalmonFS\ISalmonSequencer.cs">
       <Link>SalmonFS\ISalmonSequencer.cs</Link>
     </Compile>
-	  <Compile Include="..\..\..\..\csharp\src\salmonfs\SalmonFS\ISalmonSequenceParser.cs">
-		  <Link>SalmonFS\ISalmonSequenceParser.cs</Link>
-	  </Compile>
-	  <Compile Include="..\..\..\..\csharp\src\salmonfs\SalmonFS\SalmonSequenceParser.cs">
-		  <Link>SalmonFS\SalmonSequenceParser.cs</Link>
-	  </Compile>
+    <Compile Include="..\..\..\..\csharp\src\salmonfs\SalmonFS\ISalmonSequenceParser.cs">
+      <Link>SalmonFS\ISalmonSequenceParser.cs</Link>
+    </Compile>
+    <Compile Include="..\..\..\..\csharp\src\salmonfs\SalmonFS\SalmonSequenceParser.cs">
+      <Link>SalmonFS\SalmonSequenceParser.cs</Link>
+    </Compile>
     <Compile Include="..\..\..\..\csharp\src\salmonfs\SalmonFS\SalmonSequenceAuthException.cs">
       <Link>SalmonFS\SalmonSequenceAuthException.cs</Link>
     </Compile>
@@ -146,6 +146,11 @@
       <Link>Service\Service.resx</Link>
       <DependentUpon>Service.cs</DependentUpon>
     </EmbeddedResource>
+  </ItemGroup>
+  <ItemGroup>
+    <Content Include="README.txt">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>
