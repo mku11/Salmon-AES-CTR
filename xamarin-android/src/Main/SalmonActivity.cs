@@ -1028,7 +1028,7 @@ namespace Salmon.Droid.Main
                 try
                 {
                     filesToImport = ActivityCommon.GetFilesFromIntent(this, data);
-                    ImportFiles(filesToImport, currDir, false, (SalmonFile[] importedFiles) =>
+                    ImportFiles(filesToImport, currDir, SettingsActivity.GetDeleteAfterImport(this), (SalmonFile[] importedFiles) =>
                         {
                             RunOnUiThread(() => Refresh());
                         });

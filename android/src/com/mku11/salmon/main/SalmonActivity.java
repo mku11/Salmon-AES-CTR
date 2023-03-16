@@ -917,7 +917,7 @@ public class SalmonActivity extends AppCompatActivity {
             IRealFile[] filesToImport;
             try {
                 filesToImport = ActivityCommon.getFilesFromIntent(this, data);
-                importFiles(filesToImport, currDir, false, (SalmonFile[] importedFiles) ->
+                importFiles(filesToImport, currDir, SettingsActivity.getDeleteAfterImport(this), (SalmonFile[] importedFiles) ->
                 {
                     runOnUiThread(() -> refresh());
                 });
