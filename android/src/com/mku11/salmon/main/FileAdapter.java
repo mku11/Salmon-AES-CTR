@@ -81,7 +81,7 @@ public class FileAdapter extends RecyclerView.Adapter	 {
     private int cacheSize = 0;
     private boolean isMultiSelect = false;
     private HashSet<SalmonFile> selectedFiles = new HashSet<>();
-    private SimpleDateFormat formatter = new SimpleDateFormat("MM/dd/YYYY");
+    private SimpleDateFormat formatter = new SimpleDateFormat("MM/dd/yyyy");
     private Mode mode = Mode.SINGLE_SELECT;
     private ExecutorService executor;
 
