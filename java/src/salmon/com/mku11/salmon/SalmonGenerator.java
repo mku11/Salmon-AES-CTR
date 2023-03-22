@@ -40,7 +40,8 @@ public class SalmonGenerator {
     public static final int MAGIC_LENGTH = 3;
     public static final int VERSION_LENGTH = 1;
     public static final int ITERATIONS_LENGTH = 4;
-
+	public static final String PBKDF_SHA256 = "PBKDF2WithHmacSHA256";
+	public static final String PBKDF_SHA1 = "PBKDF2WithHmacSHA1";
 
     // should be 16 for AES256 the same as the iv
     public static final int BLOCK_SIZE = 16;
@@ -75,6 +76,13 @@ public class SalmonGenerator {
     // iterations for the text derived master key
     private static int iterations = 65536;
 
+	// default sha algo is SHA256
+	private static PbkdfAlgo pbkdfAlgo = PbkdfAlgo.SHA256;
+
+
+	public static void setPbkdfAlgo(PbkdfAlgo pbkdfAlgo) {
+		SalmonGenerator.pbkdfAlgo = pbkdfAlgo;
+	}
     public static byte[] generateDriveID() {
         return getSecureRandomBytes(DRIVE_ID_LENGTH);
     }
@@ -95,6 +103,10 @@ public class SalmonGenerator {
 
     public enum PbkdfType {
         Default
+    }
+	
+	public enum PbkdfAlgo {
+        SHA1, SHA256
     }
 
     public static void setPbkdfType(PbkdfType pbkdfType) {
@@ -171,7 +183,7 @@ public class SalmonGenerator {
     }
 
     /**
-     * Function will derive a key from a text password using Pbkdf2 with SHA256
+     * Function will derive a key from a text password using Pbkdf2
      *
      * @param password    The password that will be used to derive the key
      * @param salt        The salt byte array that will be used together with the password
@@ -182,11 +194,22 @@ public class SalmonGenerator {
         //PBKDF2WithHmacSHA256 might not available for some devices
         if (pbkdfType == PbkdfType.Default) {
             PBEKeySpec keySpec = new PBEKeySpec(password.toCharArray(), salt, iterations, outputBytes * 8);
-            SecretKeyFactory factory = SecretKeyFactory.getInstance("PBKDF2WithHmacSHA256");
+			String pbkdfAlgoStr = getPbkdfAlgoString(pbkdfAlgo);
+            SecretKeyFactory factory = SecretKeyFactory.getInstance(pbkdfAlgoStr);
             return factory.generateSecret(keySpec).getEncoded();
         }
         throw new Exception("Unknown PBKDF type");
     }
+	
+	private static String getPbkdfAlgoString(PbkdfAlgo pbkdfAlgo) {
+		switch(pbkdfAlgo) {
+			case SHA1:
+				return PBKDF_SHA1;
+			case SHA256:
+				return PBKDF_SHA256;
+		}
+		return null;
+	}
 
     /**
      * Increase the sequential NONCE by a value of 1.

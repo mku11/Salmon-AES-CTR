@@ -27,6 +27,7 @@ import com.mku11.file.JavaDrive;
 import com.mku11.file.JavaFile;
 import com.mku11.media.SalmonMediaDataSource;
 import com.mku11.salmon.SalmonGenerator;
+import com.mku11.salmon.func.Consumer;
 import com.mku11.salmon.streams.SalmonStream;
 import com.mku11.salmon.vault.config.Config;
 import com.mku11.salmon.vault.dialog.ActivityCommon;
@@ -61,8 +62,6 @@ import java.util.Comparator;
 import java.util.List;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
-import java.util.function.Consumer;
-import java.util.function.Function;
 
 public class MainController {
     private static final int BUFFER_SIZE = 512 * 1024;

@@ -6,24 +6,18 @@ import com.mku11.salmonfs.ISalmonSequenceParser;
 import com.mku11.salmonfs.SalmonSequenceConfig;
 
 import org.w3c.dom.Node;
-import org.w3c.dom.NodeList;
 import org.xml.sax.InputSource;
-import org.xml.sax.SAXException;
 import org.xmlpull.v1.XmlSerializer;
 
-import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.StringReader;
 import java.io.StringWriter;
-import java.nio.charset.StandardCharsets;
-import java.util.Base64;
+import android.util.Base64;
 import java.util.HashMap;
 import java.util.Map;
 
-import javax.xml.parsers.ParserConfigurationException;
 import javax.xml.xpath.XPath;
 import javax.xml.xpath.XPathConstants;
-import javax.xml.xpath.XPathExpressionException;
 import javax.xml.xpath.XPathFactory;
 
 public class AndroidSequenceParser implements ISalmonSequenceParser {
@@ -41,9 +35,9 @@ public class AndroidSequenceParser implements ISalmonSequenceParser {
                 out.attribute("", "authID", entry.getValue().authID);
                 out.attribute("", "status", entry.getValue().status.toString());
                 if (entry.getValue().nonce != null)
-                    out.attribute("", "nextNonce", Base64.getEncoder().encodeToString(entry.getValue().nonce));
+                    out.attribute("", "nextNonce", Base64.encodeToString(entry.getValue().nonce, Base64.NO_WRAP));
                 if (entry.getValue().maxNonce != null)
-                    out.attribute("", "maxNonce", Base64.getEncoder().encodeToString(entry.getValue().maxNonce));
+                    out.attribute("", "maxNonce", Base64.encodeToString(entry.getValue().maxNonce, Base64.NO_WRAP));
                 out.endTag("", "drive");
             }
             out.endTag("", "drives");
@@ -80,10 +74,10 @@ public class AndroidSequenceParser implements ISalmonSequenceParser {
                     byte[] nextNonce = null;
                     byte[] maxNonce = null;
                     if (drive.getAttributes().getNamedItem("nextNonce") != null) {
-                        nextNonce = Base64.getDecoder().decode(drive.getAttributes().getNamedItem("nextNonce").getNodeValue());
+                        nextNonce = Base64.decode(drive.getAttributes().getNamedItem("nextNonce").getNodeValue(), Base64.NO_WRAP);
                     }
                     if (drive.getAttributes().getNamedItem("maxNonce") != null) {
-                        maxNonce = Base64.getDecoder().decode(drive.getAttributes().getNamedItem("maxNonce").getNodeValue());
+                        maxNonce = Base64.decode(drive.getAttributes().getNamedItem("maxNonce").getNodeValue(), Base64.NO_WRAP);
                     }
                     SalmonSequenceConfig.Sequence sequence = new SalmonSequenceConfig.Sequence(driveID, authID, nextNonce, maxNonce, SalmonSequenceConfig.Status.valueOf(status));
                     configs.put(driveID, sequence);

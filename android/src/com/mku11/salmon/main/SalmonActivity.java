@@ -53,12 +53,14 @@ import androidx.recyclerview.widget.RecyclerView;
 import com.mku.android.salmonvault.R;
 import com.mku11.file.JavaFile;
 import com.mku11.salmon.SalmonGenerator;
+import com.mku11.salmon.SalmonTextEncryptor;
 import com.mku11.salmon.config.Config;
 import com.mku11.salmon.file.AndroidDrive;
 import com.mku11.salmon.file.AndroidSharedFileObserver;
 import com.mku11.salmon.media.SalmonMediaDataSource;
 import com.mku11.salmon.streams.SalmonStream;
 import com.mku11.salmon.utils.AndroidSequenceParser;
+import com.mku11.salmon.utils.Base64;
 import com.mku11.salmon.utils.Utils;
 import com.mku11.salmonfs.Comparators;
 import com.mku11.salmonfs.FileCommander;
@@ -80,7 +82,7 @@ import java.util.Objects;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Semaphore;
-import java.util.function.Consumer;
+import com.mku11.salmon.func.Consumer;
 
 public class SalmonActivity extends AppCompatActivity {
     public static final String TAG = SalmonActivity.class.getName();
@@ -145,6 +147,8 @@ public class SalmonActivity extends AppCompatActivity {
     }
 
     private void loadSettings() {
+        SalmonTextEncryptor.setBase64(new Base64());
+        SalmonGenerator.setPbkdfAlgo(Config.pbkdfAlgo);
         SalmonStream.setProviderType(SettingsActivity.getProviderType(this));
         SalmonGenerator.setPbkdfType(SettingsActivity.getPbkdfType(this));
         SalmonFileExporter.setEnableLog(SettingsActivity.getEnableLog(this));

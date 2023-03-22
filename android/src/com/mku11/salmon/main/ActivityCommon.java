@@ -55,7 +55,7 @@ import java.io.File;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.function.BiConsumer;
-import java.util.function.Consumer;
+import com.mku11.salmon.func.Consumer;
 
 public class ActivityCommon {
     public static final String EXTERNAL_STORAGE_PROVIDER_AUTHORITY = "com.android.externalstorage.documents";

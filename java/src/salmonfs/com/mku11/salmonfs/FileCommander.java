@@ -24,7 +24,7 @@ SOFTWARE.
 */
 
 import java.util.ArrayList;
-import java.util.function.Consumer;
+import com.mku11.salmon.func.Consumer;
 
 public class FileCommander {
     private final int exportBufferSize;

@@ -34,7 +34,7 @@ import com.mku11.salmonfs.SalmonFile;
 
 import java.io.File;
 import java.util.HashMap;
-import java.util.function.Consumer;
+import com.mku11.salmon.func.Consumer;
 
 /**
  * Implementation of a file observer that will detect if the file contents have changed

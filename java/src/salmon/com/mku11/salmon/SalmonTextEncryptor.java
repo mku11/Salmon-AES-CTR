@@ -24,14 +24,19 @@ SOFTWARE.
 */
 
 import java.nio.charset.Charset;
-import java.util.Base64;
 
 /**
  * Utility class that encrypts and decrypts text strings
  */
 public class SalmonTextEncryptor {
-    private static final int ENC_BUFFER_SIZE = 32768;
+    private static IBase64 base64;
+    static {
+        base64 = new Base64();
+    }
 
+    public static void setBase64(IBase64 base64) {
+        SalmonTextEncryptor.base64 = base64;
+    }
     /**
      * Decrypts a text String
      *
@@ -41,7 +46,7 @@ public class SalmonTextEncryptor {
      */
     // TODO: there is currently no integrity for filenames, is it worthy it?
     public static String decryptString(String text, byte[] key, byte[] nonce, boolean header) throws Exception {
-        byte[] bytes = Base64.getDecoder().decode(text);
+        byte[] bytes = base64.decode(text);
         byte[] decBytes = SalmonEncryptor.decrypt(bytes, key, nonce, header);
         String decString = new String(decBytes, Charset.defaultCharset());
         return decString;
@@ -58,7 +63,7 @@ public class SalmonTextEncryptor {
     public static String encryptString(String text, byte[] key, byte[] nonce, boolean header) throws Exception {
         byte[] bytes = text.getBytes(Charset.defaultCharset());
         byte[] encBytes = SalmonEncryptor.encrypt(bytes, key, nonce, header);
-        String encString = Base64.getEncoder().encodeToString(encBytes).replace("\n", "");
+        String encString = base64.encode(encBytes).replace("\n", "");
         return encString;
     }
 }
