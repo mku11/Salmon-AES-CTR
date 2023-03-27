@@ -119,7 +119,7 @@ namespace Salmon.FS
         {
             stopJobs = false;
             int count = 0;
-            int total = GetFilesRecurrsively(files);
+            int total = getFiles(files);
             foreach (SalmonFile ifile in files)
             {
                 if (dir.GetPath().StartsWith(ifile.GetPath()))
@@ -229,7 +229,7 @@ namespace Salmon.FS
             }
         }
 
-        private int GetFilesRecurrsively(SalmonFile[] files)
+        private int getFiles(SalmonFile[] files)
         {
             int total = 0;
             foreach (SalmonFile file in files)
@@ -237,7 +237,7 @@ namespace Salmon.FS
                 total++;
                 if (file.IsDirectory())
                 {
-                    total += GetFilesRecurrsively(file.ListFiles());
+                    total += getFiles(file.ListFiles());
                 }
             }
             return total;
