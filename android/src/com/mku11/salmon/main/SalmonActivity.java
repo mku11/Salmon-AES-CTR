@@ -335,6 +335,8 @@ public class SalmonActivity extends AppCompatActivity {
             menu.add(3, Action.CUT.ordinal(), 0, getResources().getString(R.string.Cut));
             menu.add(3, Action.DELETE.ordinal(), 0, getResources().getString(R.string.Delete));
             menu.add(3, Action.EXPORT.ordinal(), 0, getResources().getString(R.string.Export));
+            menu.add(3, Action.SELECT_ALL.ordinal(), 0, getResources().getString(R.string.SelectAll));
+            menu.add(3, Action.UNSELECT_ALL.ordinal(), 0, getResources().getString(R.string.UnselectAll));
         }
 
         menu.add(4, Action.REFRESH.ordinal(), 0, getResources().getString(R.string.Refresh))
