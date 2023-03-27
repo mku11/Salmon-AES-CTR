@@ -43,6 +43,7 @@ import android.widget.Toast;
 import androidx.appcompat.app.AppCompatActivity;
 
 import com.mku.android.salmonvault.R;
+import com.mku11.salmon.config.Config;
 import com.mku11.salmon.streams.InputStreamWrapper;
 
 import com.mku11.salmon.SalmonIntegrity;
@@ -162,7 +163,8 @@ public class WebViewerActivity extends AppCompatActivity {
     }
 
     private void setupWindow() {
-        getWindow().setFlags(WindowManager.LayoutParams.FLAG_SECURE, WindowManager.LayoutParams.FLAG_SECURE);
+        if(!Config.allowScreenContents)
+            getWindow().setFlags(WindowManager.LayoutParams.FLAG_SECURE, WindowManager.LayoutParams.FLAG_SECURE);
     }
 
     protected void onDestroy() {

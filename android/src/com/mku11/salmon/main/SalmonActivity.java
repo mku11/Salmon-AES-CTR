@@ -134,7 +134,8 @@ public class SalmonActivity extends AppCompatActivity {
     }
 
     private void setupWindow() {
-        getWindow().setFlags(WindowManager.LayoutParams.FLAG_SECURE, WindowManager.LayoutParams.FLAG_SECURE);
+        if(!Config.allowScreenContents)
+            getWindow().setFlags(WindowManager.LayoutParams.FLAG_SECURE, WindowManager.LayoutParams.FLAG_SECURE);
     }
 
     private void setupNativeLib() {

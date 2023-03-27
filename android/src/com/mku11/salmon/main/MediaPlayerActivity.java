@@ -46,6 +46,7 @@ import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 
 import com.mku.android.salmonvault.R;
+import com.mku11.salmon.config.Config;
 import com.mku11.salmon.media.SalmonMediaDataSource;
 import com.mku11.salmonfs.SalmonFile;
 
@@ -123,7 +124,8 @@ public class MediaPlayerActivity extends AppCompatActivity implements SurfaceHol
     }
 
     private void setupWindow() {
-        getWindow().setFlags(WindowManager.LayoutParams.FLAG_SECURE,WindowManager.LayoutParams.FLAG_SECURE);
+        if(!Config.allowScreenContents)
+            getWindow().setFlags(WindowManager.LayoutParams.FLAG_SECURE,WindowManager.LayoutParams.FLAG_SECURE);
         setContentView(R.layout.mediaplayer);
         mSurfaceView = findViewById(R.id.surfaceview);
         mSurfaceView.getHolder().addCallback(this);
