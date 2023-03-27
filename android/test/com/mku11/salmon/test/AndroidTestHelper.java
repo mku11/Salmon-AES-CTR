@@ -115,7 +115,7 @@ public class AndroidTestHelper {
 
     private static void copyFile(Activity activity, SalmonFile currDir, String srcFile, String destDir, boolean delete) throws Exception {
         SalmonFile srcSalmonFile = getFileFromAdapter(activity, srcFile);
-        int children = getFilesRecurrsively(new SalmonFile[] {srcSalmonFile});
+        int children = getFile(new SalmonFile[] {srcSalmonFile});
         Assert.assertNotNull(srcSalmonFile);
         int index = getIndexFromAdapter(activity, srcSalmonFile);
         onView(isRoot()).perform(sleep(1000));
@@ -137,7 +137,7 @@ public class AndroidTestHelper {
         onView(ViewMatchers.withText("Paste")).perform(click());
         SalmonFile child = getChild(currDir, srcFile);
         Assert.assertNotNull(child);
-        Assert.assertEquals(children, getFilesRecurrsively(new SalmonFile[]{child}));
+        Assert.assertEquals(children, getFile(new SalmonFile[]{child}));
         if(delete)
             srcSalmonFile.delete();
     }
@@ -162,12 +162,12 @@ public class AndroidTestHelper {
         return Arrays.asList(files).indexOf(testFile);
     }
 
-    private static int getFilesRecurrsively(SalmonFile [] files) {
+    private static int getFile(SalmonFile [] files) {
         int total = 0;
         for(SalmonFile file : files) {
             total++;
             if(file.isDirectory()) {
-                total += getFilesRecurrsively(file.listFiles());
+                total += getFile(file.listFiles());
             }
         }
         return total;
