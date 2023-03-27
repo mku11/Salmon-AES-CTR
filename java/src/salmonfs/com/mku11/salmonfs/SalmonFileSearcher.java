@@ -59,7 +59,7 @@ public class SalmonFileSearcher {
         int count = 0;
         for (String term : terms) {
             try {
-                if (term.length() > 0 && file.getBaseName().contains(term)) {
+                if (term.length() > 0 && file.getBaseName().toLowerCase().contains(term.toLowerCase())) {
                     count++;
                 }
             } catch (Exception exception) {
