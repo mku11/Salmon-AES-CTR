@@ -115,6 +115,12 @@ namespace Salmon.Droid.Main
             editor.Commit();
         }
 
+        public static bool GetDeleteAfterImport(Context context)
+        {
+            ISharedPreferences prefs = PreferenceManager.GetDefaultSharedPreferences(context);
+            return prefs.GetBoolean("deleteAfterImport", false);
+        }
+
         protected override void OnActivityResult(int requestCode, Result resultCode, Intent data)
         {
             if (data == null)
