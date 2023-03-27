@@ -170,7 +170,7 @@ public class FileCommander {
     public void DoCopyFiles(SalmonFile[] files, SalmonFile dir, boolean move, Function<FileTaskProgress, Void> OnProgressChanged) throws Exception {
         stopJobs = false;
         int count = 0;
-        int total = GetFilesRecurrsively(files);
+        int total = GetFiles(files);
         for (SalmonFile ifile : files) {
             if (dir.getPath().startsWith(ifile.getPath()))
                 continue;
@@ -200,12 +200,12 @@ public class FileCommander {
         }
     }
 
-    private int GetFilesRecurrsively(SalmonFile[] files) {
+    private int GetFiles(SalmonFile[] files) {
         int total = 0;
         for (SalmonFile file : files) {
             total++;
             if (file.isDirectory()) {
-                total += GetFilesRecurrsively(file.listFiles());
+                total += GetFiles(file.listFiles());
             }
         }
         return total;
