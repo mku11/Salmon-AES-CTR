@@ -24,6 +24,8 @@ SOFTWARE.
 */
 
 import java.util.ArrayList;
+
+import com.mku11.salmon.func.BiConsumer;
 import com.mku11.salmon.func.Consumer;
 
 public class FileCommander {
@@ -47,7 +49,7 @@ public class FileCommander {
     }
 
     public boolean importFiles(IRealFile[] filesToImport, SalmonFile importDir, boolean deleteSource,
-                               Consumer<Integer> OnProgressChanged, Consumer<SalmonFile[]> OnFinished) throws Exception {
+                               BiConsumer<Integer, SalmonFile> OnProgressChanged, Consumer<SalmonFile[]> OnFinished) throws Exception {
         stopJobs = false;
         ArrayList<SalmonFile> importedFiles = new ArrayList<>();
         for (int i = 0; i < filesToImport.length; i++) {
@@ -57,14 +59,14 @@ public class FileCommander {
             salmonFile = fileImporter.importFile(filesToImport[i], importDir, deleteSource, null, i, filesToImport.length);
             importedFiles.add(salmonFile);
             if (OnProgressChanged != null)
-                OnProgressChanged.accept((int) (i * 100.0F / filesToImport.length));
+                OnProgressChanged.accept((int) (i * 100.0F / filesToImport.length), salmonFile);
         }
         if (OnFinished != null)
             OnFinished.accept(importedFiles.toArray(new SalmonFile[0]));
         return true;
     }
 
-    public boolean exportFiles(SalmonFile[] filesToExport, Consumer<Integer> OnProgressChanged,
+    public boolean exportFiles(SalmonFile[] filesToExport, BiConsumer<Integer, SalmonFile> OnProgressChanged,
                                Consumer<IRealFile[]> OnFinished) throws Exception {
         stopJobs = false;
         ArrayList<IRealFile> exportedFiles = new ArrayList<>();
@@ -83,7 +85,7 @@ public class FileCommander {
             realFile = fileExporter.exportFile(fileToExport, exportDir, true, null, i, filesToExport.length);
             exportedFiles.add(realFile);
             if (OnProgressChanged != null)
-                OnProgressChanged.accept((int) (i * 100.0F / filesToExport.length));
+                OnProgressChanged.accept((int) (i * 100.0F / filesToExport.length), fileToExport);
         }
         if (OnFinished != null)
             OnFinished.accept(exportedFiles.toArray(new IRealFile[0]));
@@ -106,7 +108,7 @@ public class FileCommander {
     public void copyFiles(SalmonFile[] files, SalmonFile dir, boolean move, Consumer<FileTaskProgress> OnProgressChanged) throws Exception {
         stopJobs = false;
         int count = 0;
-        int total = getFilesRecurrsively(files);
+        int total = getFiles(files);
         for (SalmonFile ifile : files) {
             if (dir.getPath().startsWith(ifile.getPath()))
                 continue;
@@ -176,12 +178,12 @@ public class FileCommander {
         return stopJobs;
     }
 
-    private int getFilesRecurrsively(SalmonFile[] files) {
+    private int getFiles(SalmonFile[] files) {
         int total = 0;
         for (SalmonFile file : files) {
             total++;
             if (file.isDirectory()) {
-                total += getFilesRecurrsively(file.listFiles());
+                total += getFiles(file.listFiles());
             }
         }
         return total;
