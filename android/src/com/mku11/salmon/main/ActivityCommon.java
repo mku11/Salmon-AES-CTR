@@ -54,8 +54,7 @@ import com.mku11.salmonfs.SalmonFile;
 
 import java.io.File;
 import java.util.LinkedHashMap;
-import java.util.List;
-import java.util.function.BiConsumer;
+import com.mku11.salmon.func.BiConsumer;
 import com.mku11.salmon.func.Consumer;
 
 public class ActivityCommon {
