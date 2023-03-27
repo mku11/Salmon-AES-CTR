@@ -23,9 +23,6 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 */
 
-import com.mku11.salmonfs.SalmonDriveManager;
-import com.mku11.salmonfs.SalmonFile;
-
 import java.util.Comparator;
 
 public class Comparators {
@@ -37,7 +34,7 @@ public class Comparators {
             return 1;
         else return 0;
     };
-    public static Comparator<SalmonFile> filenameComparator = (SalmonFile c1, SalmonFile c2) ->
+    public static Comparator<SalmonFile> filenameAscComparator = (SalmonFile c1, SalmonFile c2) ->
     {
         if (c1.isDirectory() && !c2.isDirectory())
             return -1;
@@ -46,7 +43,16 @@ public class Comparators {
         else
             return tryGetBasename(c1).compareTo(tryGetBasename(c2));
     };
-    public static Comparator<SalmonFile> sizeComparator = (SalmonFile c1, SalmonFile c2) ->
+    public static Comparator<SalmonFile> filenameDescComparator = (SalmonFile c1, SalmonFile c2) ->
+    {
+        if (c1.isDirectory() && !c2.isDirectory())
+            return 1;
+        else if (!c1.isDirectory() && c2.isDirectory())
+            return -1;
+        else
+            return tryGetBasename(c2).compareTo(tryGetBasename(c1));
+    };
+    public static Comparator<SalmonFile> sizeAscComparator = (SalmonFile c1, SalmonFile c2) ->
     {
         if (c1.isDirectory() && !c2.isDirectory())
             return -1;
@@ -55,7 +61,16 @@ public class Comparators {
         else
             return (int) (tryGetSize(c1) - tryGetSize(c2));
     };
-    public static Comparator<SalmonFile> typeComparator = (SalmonFile c1, SalmonFile c2) ->
+    public static Comparator<SalmonFile> sizeDescComparator = (SalmonFile c1, SalmonFile c2) ->
+    {
+        if (c1.isDirectory() && !c2.isDirectory())
+            return 1;
+        else if (!c1.isDirectory() && c2.isDirectory())
+            return -1;
+        else
+            return (int) (tryGetSize(c2) - tryGetSize(c1));
+    };
+    public static Comparator<SalmonFile> typeAscComparator = (SalmonFile c1, SalmonFile c2) ->
     {
         if (c1.isDirectory() && !c2.isDirectory())
             return -1;
@@ -64,7 +79,16 @@ public class Comparators {
         else
             return tryGetType(c1).compareTo(tryGetType(c2));
     };
-    public static Comparator<SalmonFile> dateComparator = (SalmonFile c1, SalmonFile c2) ->
+    public static Comparator<SalmonFile> typeDescComparator = (SalmonFile c1, SalmonFile c2) ->
+    {
+        if (c1.isDirectory() && !c2.isDirectory())
+            return 1;
+        else if (!c1.isDirectory() && c2.isDirectory())
+            return -1;
+        else
+            return tryGetType(c2).compareTo(tryGetType(c1));
+    };
+    public static Comparator<SalmonFile> dateAscComparator = (SalmonFile c1, SalmonFile c2) ->
     {
         if (c1.isDirectory() && !c2.isDirectory())
             return -1;
@@ -72,6 +96,16 @@ public class Comparators {
             return 1;
         else
             return (int) (tryGetDate(c1) - tryGetDate(c2));
+    };
+
+    public static Comparator<SalmonFile> dateDescComparator = (SalmonFile c1, SalmonFile c2) ->
+    {
+        if (c1.isDirectory() && !c2.isDirectory())
+            return 1;
+        else if (!c1.isDirectory() && c2.isDirectory())
+            return -1;
+        else
+            return (int) (tryGetDate(c2) - tryGetDate(c1));
     };
 
     public static Comparator<SalmonFile> relevanceComparator = (SalmonFile c1, SalmonFile c2) ->

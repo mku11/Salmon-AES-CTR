@@ -37,6 +37,7 @@ import android.view.MenuItem;
 import android.view.View;
 import android.view.WindowManager;
 import android.webkit.MimeTypeMap;
+import android.widget.ArrayAdapter;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -118,7 +119,7 @@ public class SalmonActivity extends AppCompatActivity {
     private SalmonFile[] copyFiles;
     private String exportAuthID;
     private Mode mode = Mode.Browse;
-    private SortType sortType = SortType.Name;
+    private SortType sortType = SortType.Default;
 
     protected void onCreate(Bundle bundle) {
         super.onCreate(bundle);
@@ -349,6 +350,7 @@ public class SalmonActivity extends AppCompatActivity {
         else
             menu.add(4, Action.SINGLE_SELECT.ordinal(), 0, getString(R.string.SingleSelect))
                     .setIcon(android.R.drawable.ic_menu_agenda);
+
 
         if (SalmonDriveManager.getDrive() != null) {
             menu.add(5, Action.IMPORT_AUTH.ordinal(), 0, getResources().getString(R.string.ImportAuthFile))
@@ -584,16 +586,28 @@ public class SalmonActivity extends AppCompatActivity {
                 Collections.sort(fileItemList, Comparators.defaultComparator);
                 break;
             case Name:
-                Collections.sort(fileItemList, Comparators.filenameComparator);
+                Collections.sort(fileItemList, Comparators.filenameAscComparator);
+                break;
+            case NameDesc:
+                Collections.sort(fileItemList, Comparators.filenameDescComparator);
                 break;
             case Size:
-                Collections.sort(fileItemList, Comparators.sizeComparator);
+                Collections.sort(fileItemList, Comparators.sizeAscComparator);
+                break;
+            case SizeDesc:
+                Collections.sort(fileItemList, Comparators.sizeDescComparator);
                 break;
             case Type:
-                Collections.sort(fileItemList, Comparators.typeComparator);
+                Collections.sort(fileItemList, Comparators.typeAscComparator);
+                break;
+            case TypeDesc:
+                Collections.sort(fileItemList, Comparators.typeDescComparator);
                 break;
             case Date:
-                Collections.sort(fileItemList, Comparators.dateComparator);
+                Collections.sort(fileItemList, Comparators.dateAscComparator);
+                break;
+            case DateDesc:
+                Collections.sort(fileItemList, Comparators.dateDescComparator);
                 break;
         }
     }
@@ -632,11 +646,15 @@ public class SalmonActivity extends AppCompatActivity {
 
     private void promptSortFiles() {
         List<String> sortTypes = new ArrayList<>();
-        for (SortType type : SortType.values()) {
-            sortTypes.add(type.name());
+        SortType[] values = SortType.values();
+        sortTypes.add(values[0].name());
+        for (int i=1; i<values.length; i++) {
+            sortTypes.add((i%2==1?"↓":"↑") + " " + values[i-(i+1)%2].name());
         }
-        ActivityCommon.promptSingleValue(this, getString(R.string.Sort),
-                sortTypes, sortTypes.indexOf(sortType.toString()), (DialogInterface dialog, int which) -> {
+        ArrayAdapter<CharSequence> itemsAdapter = new ArrayAdapter<>(
+                this, android.R.layout.simple_list_item_activated_1, sortTypes.toArray(new String[0]));
+        ActivityCommon.promptSingleValue(this, itemsAdapter, getString(R.string.Sort),
+                sortTypes.indexOf(sortType.toString()), (DialogInterface dialog, int which) -> {
                     sortFiles(SortType.values()[which]);
                     adapter.notifyDataSetChanged();
                     dialog.dismiss();
@@ -1386,6 +1404,6 @@ public class SalmonActivity extends AppCompatActivity {
     }
 
     private enum SortType {
-        Default, Name, Size, Type, Date
+        Default, Name, NameDesc, Size, SizeDesc, Type, TypeDesc, Date, DateDesc
     }
 }

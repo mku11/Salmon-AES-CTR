@@ -33,6 +33,7 @@ import android.os.Looper;
 import android.provider.DocumentsContract;
 import android.text.InputType;
 import android.view.inputmethod.InputMethodManager;
+import android.widget.ArrayAdapter;
 import android.widget.CheckBox;
 import android.widget.LinearLayout;
 import android.widget.Toast;
@@ -281,12 +282,12 @@ public class ActivityCommon {
             alertDialog.show();
     }
 
-    public static void promptSingleValue(Activity activity, String title,
-                                         List<String> items, int currSelection, DialogInterface.OnClickListener onClickListener) {
+    public static void promptSingleValue(Activity activity, ArrayAdapter<CharSequence> adapter, String title,
+                                         int currSelection, DialogInterface.OnClickListener onClickListener) {
         MaterialAlertDialogBuilder builder = new MaterialAlertDialogBuilder(activity);
         if (title != null)
             builder.setTitle(title);
-        builder.setSingleChoiceItems(items.toArray(new String[0]), currSelection, onClickListener);
+        builder.setSingleChoiceItems(adapter, currSelection, onClickListener);
 
         androidx.appcompat.app.AlertDialog alertDialog = builder.create();
         alertDialog.setTitle(title);
