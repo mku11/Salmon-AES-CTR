@@ -978,7 +978,7 @@ public class MainController {
             boolean success = false;
             try {
                 success = fileCommander.exportFiles(items,
-                        (progress) -> {
+                        (progress,file) -> {
                             Platform.runLater(() -> filesprogress.setValue(progress / 100F));
                         }, OnFinished);
             } catch (Exception e) {
@@ -1012,7 +1012,7 @@ public class MainController {
             boolean success = false;
             try {
                 success = fileCommander.importFiles(fileNames, importDir, deleteSource,
-                        (progress) -> {
+                        (progress, file) -> {
                             Platform.runLater(() -> filesprogress.setValue(progress / 100F));
                         }, OnFinished);
             } catch (Exception e) {
