@@ -517,7 +517,7 @@ public class SalmonActivity extends AppCompatActivity {
                 openWith(ifile, Action.SHARE.ordinal());
                 break;
             case EXPORT:
-                exportFile(ifile, position);
+                exportFile(ifile);
                 break;
             case COPY:
                 mode = Mode.Copy;
@@ -688,9 +688,10 @@ public class SalmonActivity extends AppCompatActivity {
             try {
                 fileCommander.deleteFiles(files, (file) -> {
                     runOnUiThread(() -> {
-                        fileItemList.remove(file);
-                        sortFiles(sortType);
-                        adapter.notifyDataSetChanged();
+                        int pos = fileItemList.indexOf(file);
+                        fileItemList.remove(pos);
+                        adapter.getSelectedFiles().remove(file);
+                        adapter.notifyItemRemoved(pos);
                     });
                 });
             } catch (Exception e) {
@@ -734,12 +735,7 @@ public class SalmonActivity extends AppCompatActivity {
     }
 
     private void exportSelectedFiles() {
-        if (rootDir == null || !SalmonDriveManager.getDrive().isAuthenticated())
-            return;
-        exportFiles(adapter.getSelectedFiles().toArray(new SalmonFile[0]), (files) ->
-        {
-            refresh();
-        });
+        exportFiles(adapter.getSelectedFiles().toArray(new SalmonFile[0]));
     }
 
     private void showProperties(SalmonFile ifile) {
@@ -763,10 +759,6 @@ public class SalmonActivity extends AppCompatActivity {
 
     private void deleteFile(SalmonFile ifile, int position) {
         deleteFiles(new SalmonFile[]{ifile});
-        runOnUiThread(() -> {
-            fileItemList.remove(ifile);
-            adapter.notifyItemRemoved(position);
-        });
     }
 
     private void renameFile(SalmonFile ifile, int position) {
@@ -792,20 +784,8 @@ public class SalmonActivity extends AppCompatActivity {
         });
     }
 
-    private void exportFile(SalmonFile ifile, int position) {
-        if (ifile == null)
-            return;
-
-        if (rootDir == null || !SalmonDriveManager.getDrive().isAuthenticated())
-            return;
-
-        exportFiles(new SalmonFile[]{ifile}, (IRealFile[] realFiles) ->
-        {
-            runOnUiThread(() -> {
-                fileItemList.remove(ifile);
-                adapter.notifyItemRemoved(position);
-            });
-        });
+    private void exportFile(SalmonFile ifile) {
+        exportFiles(new SalmonFile[]{ifile});
     }
 
     private void openWith(SalmonFile salmonFile, int action) {
@@ -921,6 +901,7 @@ public class SalmonActivity extends AppCompatActivity {
                 if (importedSalmonFiles[0] != null) {
                     fileItemList.add(importedSalmonFiles[0]);
                     fileItemList.remove(oldSalmonFile);
+                    adapter.getSelectedFiles().remove(oldSalmonFile);
                     if (oldSalmonFile.exists())
                         oldSalmonFile.delete();
                     sortFiles(sortType);
@@ -1178,7 +1159,7 @@ public class SalmonActivity extends AppCompatActivity {
         }
     }
 
-    public void exportFiles(SalmonFile[] items, final Consumer<IRealFile[]> OnFinished) {
+    public void exportFiles(SalmonFile[] items) {
 
         executor.submit(() ->
         {
@@ -1194,9 +1175,21 @@ public class SalmonActivity extends AppCompatActivity {
             boolean success = false;
             try {
                 success = fileCommander.exportFiles(items,
-                        (progress) -> {
-                            runOnUiThread(() -> filesProgress.setProgress(progress));
-                        }, OnFinished);
+                        (progress, file) -> {
+                            runOnUiThread(() -> {
+                                filesProgress.setProgress(progress);
+                            });
+                        }, (IRealFile[] realFiles) ->
+                        {
+                            runOnUiThread(() -> {
+                                for(SalmonFile item : items) {
+                                    int pos = fileItemList.indexOf(item);
+                                    fileItemList.remove(pos);
+                                    adapter.getSelectedFiles().remove(item);
+                                    adapter.notifyItemRemoved(pos);
+                                }
+                            });
+                        });
             } catch (Exception e) {
                 e.printStackTrace();
                 runOnUiThread(() -> {
@@ -1230,8 +1223,10 @@ public class SalmonActivity extends AppCompatActivity {
             boolean success = false;
             try {
                 success = fileCommander.importFiles(fileNames, importDir, deleteSource,
-                        (progress) -> {
-                            runOnUiThread(() -> filesProgress.setProgress(progress));
+                        (progress, file) -> {
+                            runOnUiThread(() -> {
+                                filesProgress.setProgress(progress);
+                            });
                         }, OnFinished);
             } catch (Exception e) {
                 e.printStackTrace();
