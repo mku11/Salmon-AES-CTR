@@ -4,11 +4,13 @@
     <string-array name="AESImplEntries">
         <item>@string/Default</item>
         <item>@string/AesIntrinsics</item>
+        <item>@string/TinyAes</item>
     </string-array>
 
     <string-array name="AESImplValues">
         <item>Default</item>
         <item>AesIntrinsics</item>
+        <item>TinyAES</item>
     </string-array>
 
     <string-array name="PBKDFImplEntries">

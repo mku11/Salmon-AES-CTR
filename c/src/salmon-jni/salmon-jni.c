@@ -30,9 +30,9 @@ SOFTWARE.
 #include "../salmon/salmon.h"
 
 JNIEXPORT void JNICALL Java_com_mku11_salmon_transformers_SalmonAES_init(JNIEnv* env, jclass thiz,
-    jboolean enableLogDetails, jint hmacHashLength) {
+    jint aesImpl, jboolean enableLogDetails, jint hmacHashLength) {
     jboolean isCopy;
-    init(enableLogDetails, hmacHashLength);
+    init(aesImpl, enableLogDetails, hmacHashLength);
 }
 
 JNIEXPORT jint JNICALL Java_com_mku11_salmon_transformers_SalmonAES_encrypt(JNIEnv* env, jclass thiz,

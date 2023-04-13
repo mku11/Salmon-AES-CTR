@@ -29,6 +29,15 @@ SOFTWARE.
 #include "salmon.h"
 #include "../salmon-aes-intr/salmon-aes-intr.h"
 
+#ifdef USE_TINY_AES
+#include "../tiny-aes/aes.h"
+#else
+struct AES_ctx { int dummy;};
+void AES_init_ctx() {}
+AES_ECB_encrypt() {}
+#endif
+
+static int aesImpl = AES_IMPL_AES_INTR;
 static bool enableLogDetails;
 static int hmacHashLength;
 
@@ -57,7 +66,8 @@ static inline int incrementCounter(long value, uint8_t * counter) {
     return value;
 }
 
-extern EXPORT_DLL void init(bool _enableLogDetails, int _hmacHashLength) {
+extern EXPORT_DLL void init(int _aesImpl, bool _enableLogDetails, int _hmacHashLength) {
+    aesImpl = _aesImpl;
     enableLogDetails = _enableLogDetails;
     hmacHashLength = _hmacHashLength;
 }
@@ -73,7 +83,12 @@ extern EXPORT_DLL int encrypt(uint8_t* key, uint8_t* counter, int hmacChunkSize,
     int length;
     uint8_t encCounter[AES_BLOCK_SIZE];
     static unsigned char roundKey[240];
-    aes_key_expand(key, roundKey);
+    struct AES_ctx ctx;
+
+    if(aesImpl == AES_IMPL_AES_INTR)
+        aes_intr_key_expand(key, roundKey);
+    else if(aesImpl == AES_IMPL_TINY_AES)
+        AES_init_ctx(&ctx, key);
 
     for (int i = 0; i < count; i += length) {
         if (count - totalBytesWritten < AES_BLOCK_SIZE - blockOffset)
@@ -84,7 +99,13 @@ extern EXPORT_DLL int encrypt(uint8_t* key, uint8_t* counter, int hmacChunkSize,
         if (enableLogDetails) {
             startTransform = currentTimeMillis();
         }
-        aes_intr_transform(counter, encCounter, AES_BLOCK_SIZE, roundKey, ROUNDS);
+        if(aesImpl == AES_IMPL_AES_INTR) {
+            aes_intr_transform(counter, encCounter, AES_BLOCK_SIZE, roundKey, ROUNDS);
+        } else if(aesImpl == AES_IMPL_TINY_AES) {
+            memcpy(encCounter, counter, AES_BLOCK_SIZE);
+            AES_ECB_encrypt(&ctx, encCounter);
+        }
+
         if (enableLogDetails) {
             totalTransformTime += (currentTimeMillis() - startTransform);
         }
@@ -128,7 +149,13 @@ extern EXPORT_DLL int decrypt(uint8_t* key, uint8_t* counter, int hmacChunkSize,
     uint8_t blockData[AES_BLOCK_SIZE];
     uint8_t encCounter[AES_BLOCK_SIZE];
     static unsigned char roundKey[240];
-    aes_key_expand(key, roundKey);
+    struct AES_ctx ctx;
+
+    if(aesImpl == AES_IMPL_AES_INTR)
+        aes_intr_key_expand(key, roundKey);
+    else if(aesImpl == AES_IMPL_TINY_AES)
+        AES_init_ctx(&ctx, key);
+
     int pos = 0;
 
     for (int i = 0; i < count && i < bytesAvail; i += bytesRead) {
@@ -167,7 +194,12 @@ extern EXPORT_DLL int decrypt(uint8_t* key, uint8_t* counter, int hmacChunkSize,
         if (enableLogDetails) {
             startTransform = currentTimeMillis();
         }
-        aes_intr_transform(counter, encCounter, AES_BLOCK_SIZE, roundKey, ROUNDS);
+        if(aesImpl == AES_IMPL_AES_INTR) {
+            aes_intr_transform(counter, encCounter, AES_BLOCK_SIZE, roundKey, ROUNDS);
+        } else if(aesImpl == AES_IMPL_TINY_AES) {
+            memcpy(encCounter, counter, AES_BLOCK_SIZE);
+            AES_ECB_encrypt(&ctx, encCounter);
+        }
 
         if (enableLogDetails) {
             totalTransformTime += (currentTimeMillis() - startTransform);

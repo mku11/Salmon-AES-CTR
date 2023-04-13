@@ -33,6 +33,11 @@ SOFTWARE.
 #define AES_BLOCK_SIZE 16
 #define NONCE_SIZE 8
 
+#define AES_IMPL_AES_INTR 1
+#define AES_IMPL_TINY_AES 2
+
+// #define USE_TINY_AES 1
+
 #if defined(_MSC_VER)
 #define EXPORT_DLL __declspec(dllexport)
 #else
@@ -42,7 +47,7 @@ SOFTWARE.
 static long CurrentTimeMillis();
 static inline int incrementCounter(long value, uint8_t * counter);
 
-extern EXPORT_DLL void init(bool _enableLogDetails, int _hmacHashLength);
+extern EXPORT_DLL void init(int _aesImpl, bool _enableLogDetails, int _hmacHashLength);
 
 extern EXPORT_DLL int encrypt(uint8_t* key, uint8_t* counter, int hmacChunkSize,
     uint8_t* inBuffer, int inBufferLength, int offset, int count,

@@ -34,16 +34,15 @@ public class Settings {
     public static final String AES_TYPE_KEY = "AES_TYPE_KEY";
     
     public enum AESType {
-        Default, AesIntrinsics
+        Default, AesIntrinsics, TinyAES
     }
 
     public PbkdfType pbkdfType = DEFAULT_PBKDF_TYPE;
     public static final PbkdfType DEFAULT_PBKDF_TYPE = PbkdfType.Default;
     public static final String PBKDF_TYPE_KEY = "PBKDF_TYPE_KEY";
     public enum PbkdfType {
-        Default
+        Default, BouncyCastle
     }
-
 
     public AuthType authType = DEFAULT_AUTH_TYPE;
     public static final AuthType DEFAULT_AUTH_TYPE = AuthType.Service;

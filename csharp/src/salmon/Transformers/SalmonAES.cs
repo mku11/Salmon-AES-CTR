@@ -29,7 +29,7 @@ namespace Salmon.Streams
     public class SalmonAES
     {
         [DllImport("SalmonNative.dll")]
-        public static extern void init(bool enableLogDetails, int hmacHashLength);
+        public static extern void init(int aesImpl, bool enableLogDetails, int hmacHashLength);
 
         [DllImport("SalmonNative.dll")]
         public static extern int decrypt(byte[] key, byte[] counter, int hmacChunkSize,

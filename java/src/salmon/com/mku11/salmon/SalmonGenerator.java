@@ -81,6 +81,9 @@ public class SalmonGenerator {
     // default sha algo is SHA256
     private static PbkdfAlgo pbkdfAlgo = PbkdfAlgo.SHA256;
 
+    public static PbkdfAlgo getPbkdfAlgo() {
+        return pbkdfAlgo;
+    }
 
     public static void setPbkdfAlgo(PbkdfAlgo pbkdfAlgo) {
         SalmonGenerator.pbkdfAlgo = pbkdfAlgo;

@@ -3,7 +3,7 @@
 #include "wincrypt.h"
 #include <iostream>
 extern "C" {
-	#include "salmon/salmon.h"
+	#include "../../c/src/salmon/salmon.h"
 }
 
 using namespace std;
@@ -25,7 +25,7 @@ namespace SalmonNativeTest
 			CryptAcquireContextW(&hCryptProv, 0, 0, PROV_RSA_FULL, CRYPT_VERIFYCONTEXT);
 			CryptGenRandom(hCryptProv, 32, key); // get a random key
 			CryptGenRandom(hCryptProv, 8, nonce); // 8 bytes for the random nonce
-			init(false, 32);
+			init(AES_IMPL_AES_INTR, false, 32);
 
 			string text = "This is a plaintext that will be used for testing";
 			char const* bytes = text.c_str();

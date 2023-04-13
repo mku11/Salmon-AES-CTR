@@ -24,7 +24,7 @@ SOFTWARE.
 */
 
 public class SalmonAES {
-    public native static void init(boolean enableLogDetails, int hmacHashLength);
+    public native static void init(int aesImpl, boolean enableLogDetails, int hmacHashLength);
 
     public native static int encrypt(byte[] key, byte[] counter, int chunkSize,
                                      byte[] inBuffer, int inBufferLength, int offset, int count,

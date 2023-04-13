@@ -79,7 +79,7 @@ public class SalmonJavaTestRunner {
         if (enableNativeLib) {
             System.loadLibrary("salmon");
         }
-        SalmonStream.setProviderType(SalmonStream.ProviderType.AesIntrinsics);
+        SalmonStream.setProviderType(SalmonStream.ProviderType.Default);
 //        SalmonStream.setEnableLogDetails(true);
         SalmonGenerator.setPbkdfType(SalmonGenerator.PbkdfType.Default);
         SalmonDriveManager.setVirtualDriveClass(JavaDrive.class);
@@ -929,6 +929,13 @@ public class SalmonJavaTestRunner {
     public void ShouldEncryptAndDecrtyptStreamPerformanceDefault() throws Exception {
         System.out.println("Default");
         TestHelper.encryptAndDecryptByteArrayDef(TestHelper.TEST_PERF_SIZE);
+    }
+
+    @Test
+    public void ShouldEncryptAndDecrtyptStreamPerformanceTinyAes() throws Exception {
+        System.out.println("SalmonStream TinyAES");
+        SalmonStream.setProviderType(SalmonStream.ProviderType.TinyAES);
+        TestHelper.encryptAndDecryptByteArray(TestHelper.TEST_PERF_SIZE);
     }
 
     @Test

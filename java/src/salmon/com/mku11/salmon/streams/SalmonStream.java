@@ -67,7 +67,7 @@ public class SalmonStream extends AbsStream {
     private int hmacHashLength;
 
     public enum ProviderType {
-        Default, AesIntrinsics
+        Default, AesIntrinsics, TinyAES
     }
 
     public SalmonStream(byte[] key, byte[] nonce, EncryptionMode encryptionMode,
@@ -216,8 +216,8 @@ public class SalmonStream extends AbsStream {
                 throw new SalmonIntegrity.SalmonIntegrityException("Invalid chunk size, specify zero for default value or a positive number multiple of: "
                         + BLOCK_SIZE + " and less than: " + MAX_CHUNK_SIZE + " bytes");
         }
-        if (providerType == ProviderType.AesIntrinsics) {
-            SalmonAES.init(enableLogDetails, hmacHashLength);
+        if (providerType == ProviderType.AesIntrinsics || providerType == ProviderType.TinyAES) {
+            SalmonAES.init(providerType.ordinal(), enableLogDetails, hmacHashLength);
         }
         resetCounter();
     }
@@ -487,7 +487,7 @@ public class SalmonStream extends AbsStream {
         bytesAvail[0] -= chunkToBlockOffset;
 
         int totalBytesRead;
-        if (providerType == ProviderType.AesIntrinsics) {
+        if (providerType == ProviderType.AesIntrinsics || providerType == ProviderType.TinyAES) {
             totalBytesRead = SalmonAES.decrypt(key, counter, chunkSize,
                     cacheReadBuffer, cacheReadBuffer.length, bytesAvail[0],
                     buffer, offset, count,
@@ -588,7 +588,7 @@ public class SalmonStream extends AbsStream {
         setVirtualPosition(getVirtualPosition() / BLOCK_SIZE * BLOCK_SIZE);
 
         int totalBytesWritten;
-        if (providerType == ProviderType.AesIntrinsics) {
+        if (providerType == ProviderType.AesIntrinsics || providerType == ProviderType.TinyAES) {
             totalBytesWritten = SalmonAES.encrypt(key, counter, chunkSize,
                     buffer, buffer.length, offset, count,
                     cacheWriteBuffer,

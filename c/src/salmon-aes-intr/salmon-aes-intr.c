@@ -62,7 +62,7 @@ inline void KEY_256_ASSIST_2(__m128i* temp1, __m128i* temp3)
     *temp3 = _mm_xor_si128(*temp3, temp2);
 }
 
-void aes_key_expand(const unsigned char* userkey, unsigned char* key) {
+void aes_intr_key_expand(const unsigned char* userkey, unsigned char* key) {
     __m128i temp1, temp2, temp3;
     __m128i* Key_Schedule = (__m128i*)key;
     temp1 = _mm_loadu_si128((__m128i*)userkey);
@@ -130,7 +130,7 @@ void aes_intr_transform(const unsigned char *in,
 // See: https://github.com/kokke/tiny-AES-c
 // License: https://github.com/kokke/tiny-AES-c/blob/master/unlicense.txt
 // To compile with tiny-aes read: c\src\tiny-aes\README.md
-void aes_key_expand(const unsigned char* key, unsigned char* roundKey) {
+void aes_intr_key_expand(const unsigned char* key, unsigned char* roundKey) {
     struct AES_ctx ctx;
     AES_init_ctx(&ctx, key);
     memcpy(roundKey, (&ctx)->RoundKey, 240);
@@ -149,5 +149,7 @@ aes_intr_transform(const uint8_t *text, uint8_t *cipher, int length, uint8_t *ke
     vtext = veorq_u8(vtext, (uint8x16_t) vld1q_u8(keys + rounds * 16));
     vst1q_u8(cipher, vtext);
 }
-
+#else
+aes_intr_transform(const uint8_t *text, uint8_t *cipher, int length, uint8_t *keys, int rounds){}
+void aes_intr_key_expand(const unsigned char* key, unsigned char* roundKey){}
 #endif

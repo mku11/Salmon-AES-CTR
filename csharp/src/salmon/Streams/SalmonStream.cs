@@ -191,7 +191,7 @@ namespace Salmon.Streams
             aesTransformer = aes.CreateEncryptor(key, zeroIv);
             if (providerType == ProviderType.AesIntrinsics)
             {
-                SalmonAES.init(enableLogDetails, hmacHashLength);
+                SalmonAES.init((int) providerType, enableLogDetails, hmacHashLength);
             }
             ResetCounter();
         }

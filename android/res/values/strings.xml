@@ -88,8 +88,8 @@
     <string name="AESImplementation">AES Implementation</string>
     <string name="Default">Default</string>
     <string name="BouncyCastle">Bouncy Castle</string>
-    <string name="TinyAes">Tiny Aes</string>
-    <string name="AesIntrinsics">Aes Intrinsics</string>
+    <string name="TinyAes">Tiny AES</string>
+    <string name="AesIntrinsics">AES Intrinsics</string>
     <string name="PBKDFHashImplementation">PBKDF Hash Implementation</string>
     <string name="PBKDFImplementation">PBKDF Implementation</string>
     <string name="Lambdaworks">Lambdaworks</string>

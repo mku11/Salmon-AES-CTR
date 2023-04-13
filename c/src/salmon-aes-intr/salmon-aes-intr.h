@@ -27,9 +27,9 @@ SOFTWARE.
 #include <stdint.h>
 
 void aes_intr_transform(const uint8_t *in, uint8_t *out, int length, uint8_t *keys, int rounds);
-void aes_key_expand(const unsigned char* userkey, unsigned char* key);
+void aes_intr_key_expand(const unsigned char* userkey, unsigned char* key);
 
-#if !defined(__ARM_FEATURE_CRYPTO)
+#if defined(_MSC_VER) || defined(__i386__) || defined(__x86_64__)
 #include <wmmintrin.h>
 void KEY_256_ASSIST_1(__m128i* temp1, __m128i* temp2);
 void KEY_256_ASSIST_2(__m128i* temp1, __m128i* temp3);
