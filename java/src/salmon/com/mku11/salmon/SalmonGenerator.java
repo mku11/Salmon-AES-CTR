@@ -23,10 +23,17 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 */
 
+import org.bouncycastle.crypto.Digest;
+import org.bouncycastle.crypto.digests.SHA1Digest;
+import org.bouncycastle.crypto.digests.SHA256Digest;
+import org.bouncycastle.crypto.generators.PKCS5S2ParametersGenerator;
+import org.bouncycastle.crypto.params.KeyParameter;
+
 import javax.crypto.SecretKeyFactory;
 import javax.crypto.spec.PBEKeySpec;
 
 import java.nio.charset.Charset;
+import java.nio.charset.StandardCharsets;
 import java.security.SecureRandom;
 
 //TODO: support versioned formats for the stream header
@@ -35,14 +42,12 @@ import java.security.SecureRandom;
  * Utility class to be used with generating secure keys and initial vectors
  */
 public class SalmonGenerator {
-	private static final String MAGIC_BYTES = "SLM";
     public static final byte VERSION = 2;
     public static final int MAGIC_LENGTH = 3;
     public static final int VERSION_LENGTH = 1;
     public static final int ITERATIONS_LENGTH = 4;
-	public static final String PBKDF_SHA256 = "PBKDF2WithHmacSHA256";
-	public static final String PBKDF_SHA1 = "PBKDF2WithHmacSHA1";
-
+    public static final String PBKDF_SHA256 = "PBKDF2WithHmacSHA256";
+    public static final String PBKDF_SHA1 = "PBKDF2WithHmacSHA1";
     // should be 16 for AES256 the same as the iv
     public static final int BLOCK_SIZE = 16;
     // length for IV that will be used for encryption and master encryption of the combined key
@@ -61,28 +66,26 @@ public class SalmonGenerator {
     public static final int SALT_LENGTH = 24;
     // vault nonce size
     public static final int NONCE_LENGTH = 8;
-
     // drive ID size
     public static final int DRIVE_ID_LENGTH = 16;
-
     // auth ID size
     public static final int AUTH_ID_SIZE = 16;
-
     public static final int CHUNKSIZE_LENGTH = 4;
-
+    private static final String MAGIC_BYTES = "SLM";
     private static PbkdfType pbkdfType = PbkdfType.Default;
 
 
     // iterations for the text derived master key
     private static int iterations = 65536;
 
-	// default sha algo is SHA256
-	private static PbkdfAlgo pbkdfAlgo = PbkdfAlgo.SHA256;
+    // default sha algo is SHA256
+    private static PbkdfAlgo pbkdfAlgo = PbkdfAlgo.SHA256;
 
 
-	public static void setPbkdfAlgo(PbkdfAlgo pbkdfAlgo) {
-		SalmonGenerator.pbkdfAlgo = pbkdfAlgo;
-	}
+    public static void setPbkdfAlgo(PbkdfAlgo pbkdfAlgo) {
+        SalmonGenerator.pbkdfAlgo = pbkdfAlgo;
+    }
+
     public static byte[] generateDriveID() {
         return getSecureRandomBytes(DRIVE_ID_LENGTH);
     }
@@ -98,15 +101,6 @@ public class SalmonGenerator {
 
     public static byte[] generateAuthId() {
         return getSecureRandomBytes(AUTH_ID_SIZE);
-    }
-
-
-    public enum PbkdfType {
-        Default
-    }
-	
-	public enum PbkdfAlgo {
-        SHA1, SHA256
     }
 
     public static void setPbkdfType(PbkdfType pbkdfType) {
@@ -194,22 +188,31 @@ public class SalmonGenerator {
         //PBKDF2WithHmacSHA256 might not available for some devices
         if (pbkdfType == PbkdfType.Default) {
             PBEKeySpec keySpec = new PBEKeySpec(password.toCharArray(), salt, iterations, outputBytes * 8);
-			String pbkdfAlgoStr = getPbkdfAlgoString(pbkdfAlgo);
+            String pbkdfAlgoStr = getPbkdfAlgoString(pbkdfAlgo);
             SecretKeyFactory factory = SecretKeyFactory.getInstance(pbkdfAlgoStr);
             return factory.generateSecret(keySpec).getEncoded();
+        } else if (pbkdfType == PbkdfType.BouncyCastle) {
+            Digest dig = null;
+            if (pbkdfAlgo == PbkdfAlgo.SHA1)
+                dig = new SHA1Digest();
+            if (pbkdfAlgo == PbkdfAlgo.SHA256)
+                dig = new SHA256Digest();
+            PKCS5S2ParametersGenerator gen = new PKCS5S2ParametersGenerator(dig);
+            gen.init(password.getBytes(StandardCharsets.UTF_8), salt, iterations);
+            return ((KeyParameter) gen.generateDerivedParameters(outputBytes * 8)).getKey();
         }
         throw new Exception("Unknown PBKDF type");
     }
-	
-	private static String getPbkdfAlgoString(PbkdfAlgo pbkdfAlgo) {
-		switch(pbkdfAlgo) {
-			case SHA1:
-				return PBKDF_SHA1;
-			case SHA256:
-				return PBKDF_SHA256;
-		}
-		return null;
-	}
+
+    private static String getPbkdfAlgoString(PbkdfAlgo pbkdfAlgo) {
+        switch (pbkdfAlgo) {
+            case SHA1:
+                return PBKDF_SHA1;
+            case SHA256:
+                return PBKDF_SHA256;
+        }
+        return null;
+    }
 
     /**
      * Increase the sequential NONCE by a value of 1.
@@ -229,7 +232,6 @@ public class SalmonGenerator {
         return BitConverter.toBytes(nonce, 8);
     }
 
-
     /**
      * Returns the middle nonce in the provided range.
      * Note: This assumes the nonce is 8 bytes, if you need to increase the nonce length
@@ -244,9 +246,18 @@ public class SalmonGenerator {
         long start = BitConverter.toLong(startNonce, 0, SalmonGenerator.NONCE_LENGTH);
         long end = BitConverter.toLong(endNonce, 0, SalmonGenerator.NONCE_LENGTH);
         // we reserve some nonces
-        if(end - start < 256)
+        if (end - start < 256)
             throw new Exception("Not enough nonces left");
         return BitConverter.toBytes(start + (end - start) / 2, SalmonGenerator.NONCE_LENGTH);
+    }
+
+    public enum PbkdfType {
+        Default, BouncyCastle
+    }
+
+
+    public enum PbkdfAlgo {
+        SHA1, SHA256
     }
 }
 
