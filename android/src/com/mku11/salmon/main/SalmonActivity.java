@@ -150,9 +150,9 @@ public class SalmonActivity extends AppCompatActivity {
 
     private void loadSettings() {
         SalmonTextEncryptor.setBase64(new Base64());
-        SalmonGenerator.setPbkdfAlgo(Config.pbkdfAlgo);
         SalmonStream.setProviderType(SettingsActivity.getProviderType(this));
         SalmonGenerator.setPbkdfType(SettingsActivity.getPbkdfType(this));
+        SalmonGenerator.setPbkdfAlgo(SettingsActivity.getPbkdfAlgo(this));
         SalmonFileExporter.setEnableLog(SettingsActivity.getEnableLog(this));
         SalmonFileExporter.setEnableLogDetails(SettingsActivity.getEnableLogDetails(this));
         SalmonFileImporter.setEnableLog(SettingsActivity.getEnableLog(this));

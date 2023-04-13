@@ -88,7 +88,16 @@ public class SettingsActivity extends PreferenceActivity {
 
     private static String getPbkdfTypeString(Context context) {
         SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(context);
-        return prefs.getString("pbkdfType", "Default");
+        return prefs.getString("pbkdfType", SalmonGenerator.PbkdfType.Default.name());
+    }
+
+    public static SalmonGenerator.PbkdfAlgo getPbkdfAlgo(Context context) {
+        return SalmonGenerator.PbkdfAlgo.valueOf(getPbkdfAlgoString(context));
+    }
+
+    private static String getPbkdfAlgoString(Context context) {
+        SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(context);
+        return prefs.getString("pbkdfAlgo", SalmonGenerator.PbkdfAlgo.SHA256.name());
     }
 
     public static boolean getEnableLog(Context context) {
@@ -113,72 +122,56 @@ public class SettingsActivity extends PreferenceActivity {
     }
 
     private void setupListeners() {
-        getPreferenceManager().findPreference("vaultLocation").setOnPreferenceClickListener(new Preference.OnPreferenceClickListener() {
-            @Override
-            public boolean onPreferenceClick(Preference preference) {
-                ActivityCommon.openFilesystem(SettingsActivity.this, true, false, null, SalmonActivity.REQUEST_OPEN_VAULT_DIR);
-                return true;
-            }
+        getPreferenceManager().findPreference("vaultLocation").setOnPreferenceClickListener(preference -> {
+            ActivityCommon.openFilesystem(SettingsActivity.this, true, false, null, SalmonActivity.REQUEST_OPEN_VAULT_DIR);
+            return true;
         });
 
-        getPreferenceManager().findPreference("changePassword").setOnPreferenceClickListener(new Preference.OnPreferenceClickListener() {
-            @Override
-            public boolean onPreferenceClick(Preference preference) {
-                ActivityCommon.promptSetPassword(SettingsActivity.this, (pass) -> {
-                    try {
-                        SalmonDriveManager.getDrive().setPassword(pass);
-                        Toast.makeText(SettingsActivity.this, "Password changed", Toast.LENGTH_LONG).show();
-                    } catch (Exception e) {
-                        e.printStackTrace();
-                        Toast.makeText(SettingsActivity.this, "Could not change password", Toast.LENGTH_LONG).show();
-                    }
-                });
-                return true;
-            }
+        getPreferenceManager().findPreference("changePassword").setOnPreferenceClickListener(preference -> {
+            ActivityCommon.promptSetPassword(SettingsActivity.this, (pass) -> {
+                try {
+                    SalmonDriveManager.getDrive().setPassword(pass);
+                    Toast.makeText(SettingsActivity.this, "Password changed", Toast.LENGTH_LONG).show();
+                } catch (Exception e) {
+                    e.printStackTrace();
+                    Toast.makeText(SettingsActivity.this, "Could not change password", Toast.LENGTH_LONG).show();
+                }
+            });
+            return true;
         });
 
-        getPreferenceManager().findPreference("aesType").setOnPreferenceChangeListener(new Preference.OnPreferenceChangeListener() {
-            @Override
-            public boolean onPreferenceChange(Preference preference, Object o) {
-                SalmonStream.setProviderType(SalmonStream.ProviderType.valueOf((String) o));
-                return true;
-            }
+        getPreferenceManager().findPreference("aesType").setOnPreferenceChangeListener((preference, o) -> {
+            SalmonStream.setProviderType(SalmonStream.ProviderType.valueOf((String) o));
+            return true;
         });
 
-        getPreferenceManager().findPreference("pbkdfType").setOnPreferenceChangeListener(new Preference.OnPreferenceChangeListener() {
-            @Override
-            public boolean onPreferenceChange(Preference preference, Object o) {
-                SalmonGenerator.setPbkdfType(SalmonGenerator.PbkdfType.valueOf((String) o));
-                return true;
-            }
+        getPreferenceManager().findPreference("pbkdfType").setOnPreferenceChangeListener((preference, o) -> {
+            SalmonGenerator.setPbkdfType(SalmonGenerator.PbkdfType.valueOf((String) o));
+            return true;
         });
 
-        getPreferenceManager().findPreference("enableLog").setOnPreferenceChangeListener(new Preference.OnPreferenceChangeListener() {
-            @Override
-            public boolean onPreferenceChange(Preference preference, Object o) {
-                SalmonFileExporter.setEnableLog((boolean) o);
-                SalmonFileImporter.setEnableLog((boolean) o);
-                SalmonMediaDataSource.setEnableLog((boolean) o);
-                return true;
-            }
+        getPreferenceManager().findPreference("pbkdfAlgo").setOnPreferenceChangeListener((preference, o) -> {
+            SalmonGenerator.setPbkdfAlgo(SalmonGenerator.PbkdfAlgo.valueOf((String) o));
+            return true;
         });
 
-        getPreferenceManager().findPreference("enableLogDetails").setOnPreferenceChangeListener(new Preference.OnPreferenceChangeListener() {
-            @Override
-            public boolean onPreferenceChange(Preference preference, Object o) {
-                SalmonFileExporter.setEnableLogDetails((boolean) o);
-                SalmonFileImporter.setEnableLogDetails((boolean) o);
-                SalmonStream.setEnableLogDetails((boolean) o);
-                return true;
-            }
+        getPreferenceManager().findPreference("enableLog").setOnPreferenceChangeListener((preference, o) -> {
+            SalmonFileExporter.setEnableLog((boolean) o);
+            SalmonFileImporter.setEnableLog((boolean) o);
+            SalmonMediaDataSource.setEnableLog((boolean) o);
+            return true;
         });
 
-        getPreferenceManager().findPreference("excludeFromRecents").setOnPreferenceChangeListener(new Preference.OnPreferenceChangeListener() {
-            @Override
-            public boolean onPreferenceChange(Preference preference, Object o) {
-                Utils.removeFromRecents(SettingsActivity.this, (boolean) o);
-                return true;
-            }
+        getPreferenceManager().findPreference("enableLogDetails").setOnPreferenceChangeListener((preference, o) -> {
+            SalmonFileExporter.setEnableLogDetails((boolean) o);
+            SalmonFileImporter.setEnableLogDetails((boolean) o);
+            SalmonStream.setEnableLogDetails((boolean) o);
+            return true;
+        });
+
+        getPreferenceManager().findPreference("excludeFromRecents").setOnPreferenceChangeListener((preference, o) -> {
+            Utils.removeFromRecents(SettingsActivity.this, (boolean) o);
+            return true;
         });
     }
 

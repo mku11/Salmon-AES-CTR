@@ -13,10 +13,21 @@
 
     <string-array name="PBKDFImplEntries">
         <item>@string/Default</item>
+        <item>@string/BouncyCastle</item>
     </string-array>
 
     <string-array name="PBKDFImplValues">
         <item>Default</item>
+        <item>BouncyCastle</item>
     </string-array>
 
+    <string-array name="PBKDFAlgoEntries">
+        <item>SHA256</item>
+        <item>SHA1</item>
+    </string-array>
+
+    <string-array name="PBKDFAlgoValues">
+        <item>@string/SHA256</item>
+        <item>@string/SHA1</item>
+    </string-array>
 </resources>

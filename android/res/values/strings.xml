@@ -128,4 +128,7 @@
     <string name="Cut">Cut</string>
     <string name="Error">Error</string>
     <string name="CouldNotGetAuthID">Could not get Auth ID</string>
+    <string name="PBKDFAlgo">PBKDF Algorithm</string>
+    <string name="SHA1">SHA1</string>
+    <string name="SHA256">SHA256</string>
 </resources>
