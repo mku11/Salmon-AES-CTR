@@ -101,6 +101,7 @@
     <string name="Any">Any</string>
     <string name="MatchAnyTerm">Match any term</string>
     <string name="ExcludeFromRecents">Exclude from recents</string>
+    <string name="HideScreenContents">Hide Screen Contents</string>
     <string name="ExcludeFromRecentsSummury">Exclude App from recents (might be killed by OS) </string>
     <string name="Speed">Speed</string>
     <string name="MultiSelect">Multi Select</string>

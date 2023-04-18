@@ -62,5 +62,13 @@
             android:summary="@string/ExcludeFromRecents"
             android:title="@string/ExcludeFromRecents" />
 
+        <CheckBoxPreference
+            android:key="hideScreenContents"
+            android:summary="@string/HideScreenContents"
+            android:title="@string/HideScreenContents"
+            android:defaultValue="true"/>
+
+
+
     </PreferenceCategory>
 </PreferenceScreen>

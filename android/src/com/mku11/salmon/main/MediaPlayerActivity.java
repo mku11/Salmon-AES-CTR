@@ -124,7 +124,7 @@ public class MediaPlayerActivity extends AppCompatActivity implements SurfaceHol
     }
 
     private void setupWindow() {
-        if(!Config.allowScreenContents)
+        if(SettingsActivity.getHideScreenContents(this))
             getWindow().setFlags(WindowManager.LayoutParams.FLAG_SECURE,WindowManager.LayoutParams.FLAG_SECURE);
         setContentView(R.layout.mediaplayer);
         mSurfaceView = findViewById(R.id.surfaceview);

@@ -115,6 +115,11 @@ public class SettingsActivity extends PreferenceActivity {
         return prefs.getBoolean("excludeFromRecents", false);
     }
 
+    public static boolean getHideScreenContents(Context context) {
+        SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(context);
+        return prefs.getBoolean("hideScreenContents", true);
+    }
+
     public void onCreate(Bundle SavedInstanceState) {
         super.onCreate(SavedInstanceState);
         addPreferencesFromResource(R.xml.settings);

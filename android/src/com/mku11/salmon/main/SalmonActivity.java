@@ -135,7 +135,7 @@ public class SalmonActivity extends AppCompatActivity {
     }
 
     private void setupWindow() {
-        if(!Config.allowScreenContents)
+        if(SettingsActivity.getHideScreenContents(this))
             getWindow().setFlags(WindowManager.LayoutParams.FLAG_SECURE, WindowManager.LayoutParams.FLAG_SECURE);
     }
 
