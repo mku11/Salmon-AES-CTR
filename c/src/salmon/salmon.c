@@ -33,8 +33,8 @@ SOFTWARE.
 #include "../tiny-aes/aes.h"
 #else
 struct AES_ctx { int dummy;};
-void AES_init_ctx() {}
-AES_ECB_encrypt() {}
+void AES_init_ctx(struct AES_ctx* ctx, const uint8_t* key){}
+void AES_ECB_encrypt(const struct AES_ctx* ctx, uint8_t* buf){}
 #endif
 
 static int aesImpl = AES_IMPL_AES_INTR;
