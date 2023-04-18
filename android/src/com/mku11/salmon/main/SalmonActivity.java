@@ -271,6 +271,7 @@ public class SalmonActivity extends AppCompatActivity {
             } catch (Exception exception) {
                 exception.printStackTrace();
             }
+            listView.scrollToPosition(0);
             fileItemList.clear();
             if (reset) {
                 adapter.resetCache(listView);
