@@ -5,7 +5,7 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:Salmon.View"
         xmlns:viewmodel="clr-namespace:Salmon.ViewModel" 
-        xmlns:wpf="clr-namespace:LibVLCSharp.WPF;assembly=LibVLCSharp.WPF"
+        xmlns:ffme="clr-namespace:Unosquare.FFME;assembly=ffme.win"
         mc:Ignorable="d"
         Title="Media Player" Height="450" Width="800"
         Background="{StaticResource SalmonBackground}">
@@ -17,9 +17,7 @@
             <RowDefinition Height="*"/>
             <RowDefinition Height="Auto"/>
         </Grid.RowDefinitions>
-        <wpf:VideoView Background="{StaticResource SalmonBackground}" Grid.Row="0" MediaPlayer="{Binding Path=MediaPlayer}">
-
-        </wpf:VideoView>
+        <ffme:MediaElement x:Name="Media" Background="Gray" LoadedBehavior="Play" UnloadedBehavior="Manual" />
         <Grid Grid.Row="1" HorizontalAlignment="Stretch" Background="{StaticResource SalmonBackground}" >
             <Grid.ColumnDefinitions>
                 <ColumnDefinition Width="Auto"/>

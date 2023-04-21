@@ -21,8 +21,7 @@ LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 */
-using LibVLCSharp.Shared;
-using LibVLCSharp.WPF;
+using FFmpeg.AutoGen;
 using Salmon.FS;
 using Salmon.Model;
 using Salmon.Window;
@@ -30,12 +29,13 @@ using SalmonFS.Media;
 using System;
 using System.ComponentModel;
 using System.IO;
+using System.Runtime.InteropServices;
 using System.Threading;
 using System.Windows.Controls;
 using System.Windows.Input;
 using System.Windows.Media;
 using System.Windows.Media.Imaging;
-using MediaPlayer = LibVLCSharp.Shared.MediaPlayer;
+using Unosquare.FFME.Common;
 using MediaType = Salmon.ViewModel.MainViewModel.MediaType;
 
 namespace Salmon.ViewModel
@@ -43,28 +43,15 @@ namespace Salmon.ViewModel
 
     public class MediaPlayerViewModel : INotifyPropertyChanged
     {
-        private static readonly int MEDIA_BUFFER_SIZE = 0;
+        private static readonly int MEDIA_BUFFER_SIZE = 4 * 1024 * 1024;
         private static readonly int MEDIA_THREADS = 4;
-
+        private readonly string FFMPEG_DIR = @"c:\ffmpeg\x64";
         public Button playButton;
 
         private System.Windows.Window window;
         private FileItem item;
 
         private MediaType type;
-
-        public MediaPlayer _mediaPlayer;
-        public MediaPlayer MediaPlayer
-        {
-            get => _mediaPlayer;
-            set
-            {
-                _mediaPlayer = value;
-                if (PropertyChanged != null)
-                    PropertyChanged(this, new PropertyChangedEventArgs("MediaPlayer"));
-            }
-        }
-
 
         public ImageSource _playImageSource;
         public ImageSource PlayImageSource
@@ -157,6 +144,7 @@ namespace Salmon.ViewModel
 
         private ICommand _clickCommand;
         private SalmonMediaDataSource stream;
+        private Unosquare.FFME.MediaElement mediaPlayer;
 
         public ICommand ClickCommand
         {
@@ -201,8 +189,8 @@ namespace Salmon.ViewModel
                 WindowUtils.RunOnMainThread(() =>
                 {
                     Stop();
-                    MediaPlayer.Dispose();
-                    MediaPlayer = null;
+                    mediaPlayer.Close();
+                    mediaPlayer = null;
                     if (stream != null)
                         stream.Close();
 
@@ -220,12 +208,20 @@ namespace Salmon.ViewModel
 
         private void Play()
         {
-            MediaPlayer.Play();
+            mediaPlayer.Play();
+            PlayImageSource = pauseImage;
+        }
+
+        private void Pause()
+        {
+            mediaPlayer.Pause();
+            PlayImageSource = playImage;
         }
 
         private void Stop()
         {
-            MediaPlayer.Stop();
+            mediaPlayer.Stop();
+            PlayImageSource = playImage;
         }
         
         public void Load(FileItem fileItem, MediaType type)
@@ -243,22 +239,59 @@ namespace Salmon.ViewModel
                 Console.Error.WriteLine(e);
             }
 
-            LibVLC libvlc = new LibVLC(enableDebugLogs: true);
             stream = new SalmonMediaDataSource(file, MEDIA_BUFFER_SIZE, MEDIA_THREADS);
-            MediaInput input = new StreamMediaInput(stream);
-            Media media = new Media(libvlc, input);
-            MediaPlayer mediaPlayer = new MediaPlayer(media);
-            MediaPlayer = mediaPlayer;
-            MediaPlayer.Paused += (object sender, EventArgs e) =>
-            {
-                PlayImageSource = playImage;
-            };
-            MediaPlayer.Playing += (object sender, EventArgs e) =>
-            {
-                PlayImageSource = pauseImage;
-            };
+            mediaPlayer.Open(new MediaInputStream(stream));
             StartTimer();
-            Play();
+        }
+
+        class MediaInputStream : IMediaInputStream
+        {
+            private readonly object ReadLock = new object();
+
+            byte[] buff;
+
+            public Uri StreamUri => new Uri("dummy://data.dat");
+
+            public bool CanSeek => true;
+
+            public int ReadBufferLength => MEDIA_BUFFER_SIZE;
+
+            public InputStreamInitializing OnInitializing { get; }
+
+            public InputStreamInitialized OnInitialized { get; }
+
+            private Stream stream;
+
+            public MediaInputStream(Stream stream)
+            {
+                this.stream = stream;
+                buff = new byte[ReadBufferLength];
+            }
+
+            unsafe int IMediaInputStream.Read(void* opaque, byte* targetBuffer, int targetBufferLength)
+            {
+                lock (ReadLock)
+                {
+                    int bytesRead = stream.Read(buff, 0, Math.Min(buff.Length, targetBufferLength));
+                    if (bytesRead > 0)
+                        Marshal.Copy(buff, 0, (IntPtr)targetBuffer, bytesRead);
+                    return bytesRead;
+                }
+            }
+
+            unsafe long IMediaInputStream.Seek(void* opaque, long offset, int whence)
+            {
+                lock (ReadLock)
+                {
+                    return whence == ffmpeg.AVSEEK_SIZE ?
+                           stream.Length : stream.Seek(offset, SeekOrigin.Begin);
+                }
+            }
+
+            void IDisposable.Dispose()
+            {
+                stream.Close();
+            }
         }
 
         private void StopTimer()
@@ -274,12 +307,12 @@ namespace Salmon.ViewModel
                 {
                     WindowUtils.RunOnMainThread(() =>
                     {
-                        if (MediaPlayer != null)
+                        if (mediaPlayer != null)
                         {
-                            int progressInt = (int)(MediaPlayer.Time / (double)MediaPlayer.Media.Duration * 1000);
+                            int progressInt = (int)(mediaPlayer.Position.Ticks / (double) mediaPlayer.NaturalDuration.Value.Ticks * 1000);
                             SliderValue = progressInt;
-                            DateTime curr = DateTimeOffset.FromUnixTimeMilliseconds(MediaPlayer.Time).UtcDateTime;
-                            DateTime total = DateTimeOffset.FromUnixTimeMilliseconds(MediaPlayer.Media.Duration).UtcDateTime;
+                            DateTime curr = DateTimeOffset.FromUnixTimeMilliseconds((int) mediaPlayer.Position.TotalMilliseconds).UtcDateTime;
+                            DateTime total = DateTimeOffset.FromUnixTimeMilliseconds((int) mediaPlayer.NaturalDuration.Value.TotalMilliseconds).UtcDateTime;
                             CurrTime = curr.ToString(dtFormat);
                             TotalTime = total.ToString(dtFormat);
                         }
@@ -292,19 +325,25 @@ namespace Salmon.ViewModel
 
         public void TogglePlay()
         {
-            if (MediaPlayer.IsPlaying)
+            if (mediaPlayer.IsPlaying)
             {
-                MediaPlayer.Pause();
+                Pause();
             }
             else
-                MediaPlayer.Play();
+                Play();
         }
 
         public void OnSliderChanged(int value)
         {
-            int posMillis = (int)(MediaPlayer.Media.Duration * (double)value / 1000);
+            int posMillis = (int)(mediaPlayer.NaturalDuration.Value.TotalMilliseconds * value / 1000);
             TimeSpan duration = TimeSpan.FromMilliseconds(posMillis);
-            MediaPlayer.SeekTo(duration);
+            mediaPlayer.Seek(duration);
+        }
+
+        internal void SetMediaPlayer(Unosquare.FFME.MediaElement mediaPlayer)
+        {
+            Unosquare.FFME.Library.FFmpegDirectory = FFMPEG_DIR;
+            this.mediaPlayer = mediaPlayer;
         }
     }
 

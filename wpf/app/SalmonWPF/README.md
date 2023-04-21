@@ -14,3 +14,9 @@ If you want to use the AES intrinsics for ARM64 (optional) you will need:
 
 To debug the native code check the option under Project Properties/Debug/Debug Launch UI profiles/Enable native code debugging
 Note that debugging the native code will probably disable the Edit and Continue for .NET code.
+
+Video Playback (Optional):
+If you want to play encrypted media you will need to download ffmpeg from here:
+https://github.com/BtbN/FFmpeg-Builds/releases
+Make sure you download version 4.4: ffmpeg-n4.4-latest-win64-gpl-shared-4.4.zip
+unzip the contents of the bin/ folder from inside the zip file into folder: c:\ffmpeg\x64

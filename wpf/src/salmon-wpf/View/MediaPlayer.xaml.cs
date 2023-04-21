@@ -23,11 +23,8 @@ SOFTWARE.
 */
 using Salmon.Model;
 using Salmon.ViewModel;
-using Salmon.Window;
-using System;
 using System.Windows.Controls;
 using System.Windows.Input;
-using static Salmon.ViewModel.MainViewModel;
 
 namespace Salmon.View
 {
@@ -47,15 +44,15 @@ namespace Salmon.View
             viewModel.OnSliderChanged((int)((Slider)sender).Value);
         }
 
-        public void Load(FileItem file, MediaType type)
+        public void Load(FileItem file, MainViewModel.MediaType type)
         {
             viewModel.Load(file, type);
         }
 
         public void SetWindow(System.Windows.Window owner)
         {
+            viewModel.SetMediaPlayer(Media);
             viewModel.SetWindow(this, owner);
         }
-
     }
 }
