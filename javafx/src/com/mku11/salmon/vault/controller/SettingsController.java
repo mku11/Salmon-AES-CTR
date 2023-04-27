@@ -56,6 +56,9 @@ public class SettingsController {
     private ComboBox<String> pbkdfType;
 
     @FXML
+    private ComboBox<String> pbkdfAlgo;
+
+    @FXML
     private ComboBox<String> authType;
     @FXML
     private CheckBox deleteSourceAfterImport;
@@ -74,6 +77,10 @@ public class SettingsController {
         String[] pbkdfTypes = Stream.of(Settings.PbkdfType.values()).map(Settings.PbkdfType::name).toArray(String[]::new);
         pbkdfType.getItems().setAll(pbkdfTypes);
         pbkdfType.getSelectionModel().select(Settings.getInstance().pbkdfType.ordinal());
+
+        String[] pbkdfAlgos = Stream.of(Settings.PbkdfAlgo.values()).map(Settings.PbkdfAlgo::name).toArray(String[]::new);
+        pbkdfAlgo.getItems().setAll(pbkdfAlgos);
+        pbkdfAlgo.getSelectionModel().select(Settings.getInstance().pbkdfAlgo.ordinal());
 
         String[] authTypes = Stream.of(Settings.AuthType.values()).map(Settings.AuthType::name).toArray(String[]::new);
         authType.getItems().setAll(authTypes);
@@ -147,6 +154,10 @@ public class SettingsController {
         return Settings.PbkdfType.valueOf(pbkdfType.getSelectionModel().getSelectedItem());
     }
 
+    private Settings.PbkdfAlgo getpbkdfAlgo() {
+        return Settings.PbkdfAlgo.valueOf(pbkdfAlgo.getSelectionModel().getSelectedItem());
+    }
+
     private Settings.AESType getAESType() {
         return Settings.AESType.valueOf(aesType.getSelectionModel().getSelectedItem());
     }
@@ -172,6 +183,7 @@ public class SettingsController {
 
         Settings.getInstance().aesType = controller.getAESType();
         Settings.getInstance().pbkdfType = controller.getpbkdfType();
+        Settings.getInstance().pbkdfAlgo = controller.getpbkdfAlgo();
         Settings.getInstance().authType = controller.getAuthType();
         Settings.getInstance().deleteAfterImport = controller.isDeleteAfterImportSelected();
         Settings.getInstance().enableLog = controller.isEnabledLog();

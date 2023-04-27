@@ -35,6 +35,7 @@ public class Preferences {
             settings.deleteAfterImport = prefs.getBoolean(Settings.DELETE_AFTER_IMPORT_KEY, Settings.DEFAULT_DELETE_AFTER_IMPORT);
             settings.aesType = Settings.AESType.values()[prefs.getInt(Settings.AES_TYPE_KEY, Settings.DEFAULT_AES_TYPE.ordinal())];
             settings.pbkdfType = Settings.PbkdfType.values()[prefs.getInt(Settings.PBKDF_TYPE_KEY, Settings.DEFAULT_PBKDF_TYPE.ordinal())];
+            settings.pbkdfAlgo = Settings.PbkdfAlgo.values()[prefs.getInt(Settings.PBKDF_ALGO_KEY, Settings.DEFAULT_PBKDF_ALGO.ordinal())];
             settings.authType = Settings.AuthType.values()[prefs.getInt(Settings.AUTH_TYPE_KEY, Settings.DEFAULT_AUTH_TYPE.ordinal())];
             settings.enableLog = prefs.getBoolean(Settings.ENABLE_LOG_KEY, Settings.DEFAULT_ENABLE_LOG);
             settings.enableLogDetails = prefs.getBoolean(Settings.ENABLE_LOG_DETAILS_KEY, Settings.DEFAULT_ENABLE_LOG_DETAILS);
@@ -52,6 +53,7 @@ public class Preferences {
             prefs.putBoolean(Settings.DELETE_AFTER_IMPORT_KEY, Settings.getInstance().deleteAfterImport);
             prefs.putInt(Settings.AES_TYPE_KEY, Settings.getInstance().aesType.ordinal());
             prefs.putInt(Settings.PBKDF_TYPE_KEY, Settings.getInstance().pbkdfType.ordinal());
+            prefs.putInt(Settings.PBKDF_ALGO_KEY, Settings.getInstance().pbkdfAlgo.ordinal());
             prefs.putInt(Settings.AUTH_TYPE_KEY, Settings.getInstance().authType.ordinal());
             prefs.putBoolean(Settings.ENABLE_LOG_KEY, Settings.getInstance().enableLog);
             prefs.putBoolean(Settings.ENABLE_LOG_DETAILS_KEY, Settings.getInstance().enableLogDetails);

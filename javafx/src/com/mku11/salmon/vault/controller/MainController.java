@@ -433,6 +433,7 @@ public class MainController {
     private void loadSettings() {
         SalmonStream.setProviderType(SalmonStream.ProviderType.valueOf(Settings.getInstance().aesType.name()));
         SalmonGenerator.setPbkdfType(SalmonGenerator.PbkdfType.valueOf(Settings.getInstance().pbkdfType.name()));
+        SalmonGenerator.setPbkdfAlgo(SalmonGenerator.PbkdfAlgo.valueOf(Settings.getInstance().pbkdfAlgo.name()));
         SalmonFileExporter.setEnableLog(Settings.getInstance().enableLog);
         SalmonFileExporter.setEnableLogDetails(Settings.getInstance().enableLogDetails);
         SalmonFileImporter.setEnableLog(Settings.getInstance().enableLog);
@@ -631,7 +632,7 @@ public class MainController {
         fileChooser.setTitle("Import Files");
         if (Settings.getInstance().lastImportDir != null) {
             File lastDir = new File(Settings.getInstance().lastImportDir);
-            if (lastDir.exists())
+            if (lastDir.exists() && lastDir.isDirectory())
                 fileChooser.setInitialDirectory(lastDir);
         }
         List<File> files = fileChooser.showOpenMultipleDialog(stage);

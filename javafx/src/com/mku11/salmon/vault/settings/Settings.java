@@ -44,6 +44,13 @@ public class Settings {
         Default, BouncyCastle
     }
 
+    public PbkdfAlgo pbkdfAlgo = DEFAULT_PBKDF_ALGO;
+    public static final PbkdfAlgo DEFAULT_PBKDF_ALGO = PbkdfAlgo.SHA256;
+    public static final String PBKDF_ALGO_KEY = "PBKDF_ALGO_KEY";
+    public enum PbkdfAlgo {
+        SHA256, SHA1
+    }
+
     public AuthType authType = DEFAULT_AUTH_TYPE;
     public static final AuthType DEFAULT_AUTH_TYPE = AuthType.Service;
     public static final String AUTH_TYPE_KEY = "AUTH_TYPE_KEY";

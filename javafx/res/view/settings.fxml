@@ -98,6 +98,19 @@
 
                     </ComboBox>
                 </HBox>
+                <HBox maxWidth="Infinity" HBox.hgrow="ALWAYS">
+                    <padding>
+                        <Insets bottom="2" top="2"/>
+                    </padding>
+                    <Label maxWidth="Infinity" text="PBKDF Algo" HBox.hgrow="ALWAYS">
+                        <padding>
+                            <Insets bottom="4" right="4" top="4"/>
+                        </padding>
+                    </Label>
+                    <ComboBox fx:id="pbkdfAlgo" HBox.hgrow="ALWAYS">
+
+                    </ComboBox>
+                </HBox>
             </VBox>
         </TitledPane>
 
