@@ -22,7 +22,9 @@ LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 */
+
 import com.mku11.salmon.streams.AbsStream;
+import com.mku11.salmon.streams.InputStreamWrapper;
 import com.mku11.salmon.streams.SalmonStream;
 import com.mku11.salmon.vault.config.Config;
 import com.mku11.salmon.vault.settings.Settings;
@@ -42,18 +44,29 @@ import javafx.stage.Stage;
 
 import javax.imageio.ImageIO;
 import java.awt.image.BufferedImage;
+import java.io.BufferedInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 
 public class ImageViewerController {
+    private static final int ENC_BUFFER_SIZE = 128 * 1024;
 
     public ImageView imageView;
     private Stage stage;
 
     private final ObjectProperty<Image> image = new SimpleObjectProperty<>(this, "image");
-    public final void setImage(Image image) { this.image.set(image); }
-    public final Image getImage() { return image.get(); }
-    public final ObjectProperty<Image> imageProperty() { return image; }
+
+    public final void setImage(Image image) {
+        this.image.set(image);
+    }
+
+    public final Image getImage() {
+        return image.get();
+    }
+
+    public final ObjectProperty<Image> imageProperty() {
+        return image;
+    }
 
     public void setStage(Stage stage) {
         this.stage = stage;
@@ -82,9 +95,9 @@ public class ImageViewerController {
         SalmonFile salmonFile = ((SalmonFileItem) file).getSalmonFile();
         Image image;
         try {
-            ImageStream mediaStream = new ImageStream(salmonFile);
-            BufferedImage bimage = ImageIO.read(mediaStream);
-            image = SwingFXUtils.toFXImage(bimage, null);
+            BufferedInputStream stream = new BufferedInputStream(new InputStreamWrapper(salmonFile.getInputStream()), ENC_BUFFER_SIZE);
+            image = new Image(stream);
+            imageView.setPreserveRatio(true);
             imageView.setImage(image);
         } catch (Exception e) {
             e.printStackTrace();
@@ -94,54 +107,6 @@ public class ImageViewerController {
 
     public void onClose() {
         stage.close();
-    }
-
-    // might be slower
-    static class ImageStream extends InputStream {
-        private SalmonStream salmonStream = null;
-
-        ImageStream(SalmonFile salmonFile) {
-            try {
-                salmonStream = salmonFile.getInputStream();
-            } catch (Exception e) {
-                e.printStackTrace();
-            }
-        }
-
-        public long skip(long pos) {
-            long currPos = 0;
-            long newPos = 0;
-            try {
-                currPos =  salmonStream.position();
-                salmonStream.seek(pos, AbsStream.SeekOrigin.Current);
-                newPos = salmonStream.position();
-            } catch (Exception e) {
-                e.printStackTrace();
-            }
-            return newPos - currPos;
-        }
-
-        @Override
-        public int read() {
-            byte[] buffer = new byte[1];
-            int bytesRead = 0;
-            try {
-                bytesRead = salmonStream.read(buffer, 0, 1);
-            } catch (Exception e) {
-                e.printStackTrace();
-            }
-            return bytesRead;
-        }
-
-        public int read(byte[] buffer, int start, int length) {
-            int bytesRead = 0;
-            try {
-                bytesRead = salmonStream.read(buffer, start, length);
-            } catch (Exception e) {
-                e.printStackTrace();
-            }
-            return bytesRead;
-        }
     }
 
     public void shortcutPressed(KeyEvent keyEvent) {

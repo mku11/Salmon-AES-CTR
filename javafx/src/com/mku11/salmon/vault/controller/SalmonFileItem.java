@@ -22,6 +22,9 @@ LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 */
+
+import com.mku11.salmon.vault.image.Thumbnails;
+import com.mku11.salmon.vault.utils.FileUtils;
 import com.mku11.salmon.vault.utils.Utils;
 import com.mku11.salmonfs.SalmonDriveManager;
 import com.mku11.salmonfs.SalmonFile;
@@ -49,11 +52,11 @@ public class SalmonFileItem extends FileItem {
         name.setValue(salmonFile.getBaseName());
         Date dt = new Date(salmonFile.getLastDateTimeModified());
         date.setValue(formatter.format(dt));
-        if(!salmonFile.isDirectory())
-            size.setValue(Utils.getBytes(salmonFile.getSize(),2));
+        if (!salmonFile.isDirectory())
+            size.setValue(Utils.getBytes(salmonFile.getSize(), 2));
         else {
             int items = salmonFile.listFiles().length;
-            size.setValue(items + " item" + (items == 1?"":"s"));
+            size.setValue(items + " item" + (items == 1 ? "" : "s"));
         }
         String ext = SalmonDriveManager.getDrive().getExtensionFromFileName(name.getValue()).toLowerCase();
         type.setValue(ext);
@@ -82,10 +85,7 @@ public class SalmonFileItem extends FileItem {
 
     @Override
     public ImageView getImage() {
-        String icon = salmonFile.isFile()?"/icons/file-small.png":"/icons/folder-small.png";
-        Image image = new Image(this.getClass().getResourceAsStream(icon));
-        ImageView imageView = new ImageView(image);
-        return imageView;
+        return Thumbnails.generateThumbnail(salmonFile);
     }
 
     @Override
@@ -93,7 +93,7 @@ public class SalmonFileItem extends FileItem {
         SalmonFile[] files = salmonFile.listFiles();
         SalmonFileItem[] nfiles = new SalmonFileItem[files.length];
         int count = 0;
-        for(SalmonFile file : files)
+        for (SalmonFile file : files)
             nfiles[count++] = new SalmonFileItem(file);
         return nfiles;
     }
