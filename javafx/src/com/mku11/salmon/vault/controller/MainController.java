@@ -935,6 +935,11 @@ public class MainController {
     public static File selectDirectory(Stage stage, String title) {
         DirectoryChooser directoryChooser = new DirectoryChooser();
         directoryChooser.setTitle(title);
+        if(Settings.getInstance().vaultLocation != null) {
+            File initDir = new File(Settings.getInstance().vaultLocation);
+            if(initDir.exists() && initDir.isDirectory())
+                directoryChooser.setInitialDirectory(new File(Settings.getInstance().vaultLocation));
+        }
         File selectedDirectory = directoryChooser.showDialog(stage);
         return selectedDirectory;
     }
