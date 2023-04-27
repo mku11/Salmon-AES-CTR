@@ -49,7 +49,6 @@ public class Thumbnails {
     private static final int TMP_VIDEO_THUMB_MAX_SIZE = 3 * 1024 * 1024;
     private static final int TMP_GIF_THUMB_MAX_SIZE = 512 * 1024;
     private static final int ENC_BUFFER_SIZE = 128 * 1024;
-    private static final boolean ENABLE_ALT_THUMBNAIL_GENERATOR = false;
 
     /**
      * Returns a bitmap thumbnail from an encrypted file
@@ -65,14 +64,10 @@ public class Thumbnails {
         java.io.File tmpFile = null;
         try {
             tmpFile = getVideoTmpFile(salmonFile);
-            if (ENABLE_ALT_THUMBNAIL_GENERATOR) {
-                bitmap = getVideoThumbnailAlt(tmpFile, ms);
-            } else {
-                if (ms > 0)
-                    bitmap = getVideoThumbnailMedia(tmpFile, ms);
-                else
-                    bitmap = ThumbnailUtils.createVideoThumbnail(tmpFile.getPath(), MediaStore.Images.Thumbnails.FULL_SCREEN_KIND);
-            }
+            if (ms > 0)
+                bitmap = getVideoThumbnailMedia(tmpFile, ms);
+            else
+                bitmap = ThumbnailUtils.createVideoThumbnail(tmpFile.getPath(), MediaStore.Images.Thumbnails.FULL_SCREEN_KIND);
         } catch (Exception ex) {
             ex.printStackTrace();
         } finally {
@@ -82,10 +77,6 @@ public class Thumbnails {
             }
         }
         return bitmap;
-    }
-
-    private static Bitmap getVideoThumbnailAlt(File file, long ms) {
-        throw new UnsupportedOperationException();
     }
 
     public static Bitmap getVideoThumbnailMedia(File file, long ms) {
