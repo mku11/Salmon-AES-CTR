@@ -28,10 +28,13 @@ import android.content.Intent;
 import android.content.SharedPreferences;
 import android.net.Uri;
 import android.os.Bundle;
+import android.preference.ListPreference;
 import android.preference.Preference;
 import android.preference.PreferenceActivity;
 import android.preference.PreferenceManager;
 import android.widget.Toast;
+
+import androidx.documentfile.provider.DocumentFile;
 
 import com.mku.android.salmonvault.R;
 import com.mku11.salmon.file.AndroidDrive;
@@ -120,15 +123,47 @@ public class SettingsActivity extends PreferenceActivity {
         return prefs.getBoolean("hideScreenContents", true);
     }
 
+    public static String getLastImportDir(Context context) {
+        SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(context);
+        return prefs.getString("lastImportDir", null);
+    }
+
+    public static void setLastImportDir(Context context, String importDir) {
+        SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(context);
+        SharedPreferences.Editor editor = prefs.edit();
+        editor.putString("lastImportDir", importDir);
+        editor.commit();
+    }
+
     public void onCreate(Bundle SavedInstanceState) {
         super.onCreate(SavedInstanceState);
         addPreferencesFromResource(R.xml.settings);
+        updateSummaries();
         setupListeners();
+    }
+
+    public void onResume() {
+        super.onResume();
+        updateSummaries();
+    }
+
+    private void updateSummaries() {
+        getPreferenceManager().findPreference("vaultLocation").setSummary(getVaultDirName());
+        getPreferenceManager().findPreference("aesType").setSummary(getProviderTypeString(this));
+        getPreferenceManager().findPreference("pbkdfType").setSummary(getPbkdfTypeString(this));
+        getPreferenceManager().findPreference("pbkdfAlgo").setSummary(getPbkdfAlgoString(this));
+
+    }
+
+    private String getVaultDirName() {
+        String path = getVaultLocation(this);
+        DocumentFile documentFile = DocumentFile.fromTreeUri(this, Uri.parse(path));
+        return documentFile.getName();
     }
 
     private void setupListeners() {
         getPreferenceManager().findPreference("vaultLocation").setOnPreferenceClickListener(preference -> {
-            ActivityCommon.openFilesystem(SettingsActivity.this, true, false, null, SalmonActivity.REQUEST_OPEN_VAULT_DIR);
+            ActivityCommon.openFilesystem(SettingsActivity.this, true, false, getVaultLocation(this), SalmonActivity.REQUEST_OPEN_VAULT_DIR);
             return true;
         });
 
@@ -147,16 +182,20 @@ public class SettingsActivity extends PreferenceActivity {
 
         getPreferenceManager().findPreference("aesType").setOnPreferenceChangeListener((preference, o) -> {
             SalmonStream.setProviderType(SalmonStream.ProviderType.valueOf((String) o));
+            getPreferenceManager().findPreference("aesType").setSummary((String) o);
             return true;
         });
 
         getPreferenceManager().findPreference("pbkdfType").setOnPreferenceChangeListener((preference, o) -> {
             SalmonGenerator.setPbkdfType(SalmonGenerator.PbkdfType.valueOf((String) o));
+            getPreferenceManager().findPreference("pbkdfType").setSummary((String) o);
+            updateSummaries();
             return true;
         });
 
         getPreferenceManager().findPreference("pbkdfAlgo").setOnPreferenceChangeListener((preference, o) -> {
             SalmonGenerator.setPbkdfAlgo(SalmonGenerator.PbkdfAlgo.valueOf((String) o));
+            getPreferenceManager().findPreference("pbkdfAlgo").setSummary((String) o);
             return true;
         });
 

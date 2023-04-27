@@ -309,16 +309,20 @@ public class ActivityCommon {
         SettingsActivity.setVaultLocation(context, dirPath);
     }
 
-    public static void openFilesystem(Activity activity, boolean folder, boolean multiSelect, String lastDir, int resultCode) {
+    public static void openFilesystem(Activity activity, boolean folder, boolean multiSelect, String initialDir, int resultCode) {
         Intent intent = new Intent(folder ? Intent.ACTION_OPEN_DOCUMENT_TREE : Intent.ACTION_OPEN_DOCUMENT);
         intent.addFlags(Intent.FLAG_GRANT_PERSISTABLE_URI_PERMISSION);
         intent.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
         intent.addFlags(Intent.FLAG_GRANT_WRITE_URI_PERMISSION);
 
-        if (folder && lastDir != null) {
+        if (initialDir != null) {
             try {
-                Uri uri = DocumentsContract.buildDocumentUri(EXTERNAL_STORAGE_PROVIDER_AUTHORITY, "primary:");
-                intent.putExtra(DocumentsContract.EXTRA_INITIAL_URI, uri);
+                DocumentFile documentFile;
+                if(folder)
+                    documentFile = DocumentFile.fromTreeUri(activity, Uri.parse(initialDir));
+                else
+                    documentFile = DocumentFile.fromSingleUri(activity, Uri.parse(initialDir));
+                intent.putExtra(DocumentsContract.EXTRA_INITIAL_URI, documentFile.getUri());
             } catch (Exception ex) {
                 ex.printStackTrace();
             }
@@ -392,5 +396,20 @@ public class ActivityCommon {
             }
         }
         return files;
+    }
+
+
+    public static String getDirectoryFromIntent(Context context, Intent data) {
+        if (data != null) {
+            Uri uri = null;
+            if (null != data.getClipData()) {
+                uri = data.getClipData().getItemAt(0).getUri();
+            } else {
+                uri = data.getData();
+            }
+            DocumentFile documentFile = DocumentFile.fromSingleUri(context, uri);
+            return documentFile.getUri().toString();
+        }
+        return null;
     }
 }

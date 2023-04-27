@@ -628,7 +628,7 @@ public class SalmonActivity extends AppCompatActivity {
     }
 
     private void promptImportFiles() {
-        ActivityCommon.openFilesystem(this, false, true, null, REQUEST_IMPORT_FILES);
+        ActivityCommon.openFilesystem(this, false, true, SettingsActivity.getLastImportDir(this), REQUEST_IMPORT_FILES);
     }
 
     private void promptNewFolder() {
@@ -924,6 +924,8 @@ public class SalmonActivity extends AppCompatActivity {
             IRealFile[] filesToImport;
             try {
                 filesToImport = ActivityCommon.getFilesFromIntent(this, data);
+                String importDir = ActivityCommon.getDirectoryFromIntent(this, data);
+                SettingsActivity.setLastImportDir(this, importDir);
                 importFiles(filesToImport, currDir, SettingsActivity.getDeleteAfterImport(this), (SalmonFile[] importedFiles) ->
                 {
                     runOnUiThread(() -> refresh());
@@ -1363,7 +1365,7 @@ public class SalmonActivity extends AppCompatActivity {
     }
 
     private void onOpenVault() {
-        ActivityCommon.openFilesystem(this, true, false, null, REQUEST_OPEN_VAULT_DIR);
+        ActivityCommon.openFilesystem(this, true, false, SettingsActivity.getVaultLocation(this), REQUEST_OPEN_VAULT_DIR);
     }
 
     public void onCreateVault() {
