@@ -5,6 +5,10 @@ To build the WPF app you will need:
 	b. Make sure the SalmonAES.dll and SalmonAES.pdb (Debug symbols) from the $root/x64 folder as links.  
 	c. Then set their properties as Content and Copy if newer.  
   
+Note:  
+The Tiny AES variant is not supported for wpf so make sure that the below line in salmon.h is commented:  
+// #define USE_TINY_AES 1  
+  
 Optional:  
 If you want to use the AES intrinsics for ARM64 (optional) you will need:  
 1. Microsoft Visual Studio C++ installed  
