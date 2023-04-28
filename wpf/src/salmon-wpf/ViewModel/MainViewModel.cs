@@ -1148,7 +1148,8 @@ namespace Salmon.ViewModel
                     WindowUtils.RunOnMainThread(() =>
                     {
                         DataGridRow row = (DataGridRow)dataGrid.ItemContainerGenerator.ContainerFromIndex(dataGrid.SelectedIndex);
-                        row.MoveFocus(new TraversalRequest(FocusNavigationDirection.Next));
+                        if(row!=null)
+                            row.MoveFocus(new TraversalRequest(FocusNavigationDirection.Next));
                     }, 1);
                     break;
                 }
