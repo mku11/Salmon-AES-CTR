@@ -21,8 +21,8 @@ LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 */
-using Salmon.FS;
 using System.ComponentModel;
+using System.Windows.Media;
 using System.Windows.Media.Imaging;
 
 namespace Salmon.Model
@@ -108,8 +108,9 @@ namespace Salmon.Model
         
         public event PropertyChangedEventHandler PropertyChanged;
 
-        public virtual BitmapImage Image { get; set; }
-
+        public virtual ImageSource Image { get; set; }
+        public virtual Color TintColor { get; set; }
+        public virtual string Ext { get; set; }
 
         public abstract bool IsDirectory();
 

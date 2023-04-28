@@ -13,6 +13,7 @@
   <ItemGroup>
     <Compile Include="..\..\..\src\salmon-wpf\Config\Config.cs" Link="salmon-wpf\Config\Config.cs" />
     <Compile Include="..\..\..\src\salmon-wpf\Dialog\SalmonDialog.cs" Link="salmon-wpf\Dialog\SalmonDialog.cs" />
+	<Compile Include="..\..\..\src\salmon-wpf\Image\Thumbnails.cs" Link="salmon-wpf\Image\Thumbnails.cs" />
     <Compile Include="..\..\..\src\salmon-wpf\Model\FileItem.cs" Link="salmon-wpf\Model\FileItem.cs" />
     <Compile Include="..\..\..\src\salmon-wpf\Model\SalmonFileItem.cs" Link="salmon-wpf\Model\SalmonFileItem.cs" />
 	<Compile Include="..\..\..\src\salmon-wpf\Sequencer\WinClientSequencer.cs" Link="salmon-wpf\Sequencer\WinClientSequencer.cs" />

@@ -56,6 +56,7 @@ public class Thumbnails {
     private static final int TMP_VIDEO_THUMB_MAX_SIZE = 3 * 1024 * 1024;
     private static final int TMP_GIF_THUMB_MAX_SIZE = 512 * 1024;
     private static final int ENC_BUFFER_SIZE = 128 * 1024;
+	private static THUMBNAIL_SIZE = 128;
 
     private static final int MAX_CACHE_SIZE = 50 * 1024 * 1024;
     private static final ConcurrentHashMap<String, Image> cache = new ConcurrentHashMap<>();
@@ -185,19 +186,10 @@ public class Thumbnails {
                         bufferedImage.getWidth(),
                         bufferedImage.getHeight(),
                         BufferedImage.TYPE_INT_ARGB_PRE);
-
                 Graphics g = nimage.getGraphics();
-                g.setFont(new Font(Font.MONOSPACED, Font.BOLD, 12));
-                FontMetrics fontMetrics = g.getFontMetrics();
-                int textWidth = fontMetrics.stringWidth(ext);
-                int textHeight = fontMetrics.getHeight();
                 Color tintColor = getFileColorFromExtension(ext);
-                tintColor = new Color(255 - tintColor.getRed(), 255 - tintColor.getGreen(), 255 - tintColor.getBlue(), TINT_COLOR_ALPHA);
-                g.setXORMode(tintColor);
-                g.drawImage(bufferedImage, 0, 0, null);
-                g.setColor(Color.WHITE);
-                g.setXORMode(Color.decode("#00000000"));
-                g.drawString(ext, bufferedImage.getWidth() / 2 - textWidth / 2, bufferedImage.getHeight() / 2 + textHeight / 4);
+                addImage(g, bufferedImage, tintColor);
+				addText(g, );
                 g.dispose();
                 image = SwingFXUtils.toFXImage(nimage, null);
             } catch (Exception ex) {
@@ -208,15 +200,30 @@ public class Thumbnails {
             image = new Image(Thumbnails.class.getResourceAsStream(icon));
         return image;
     }
+	
+	private static void addImage(Graphics g) {
+		Color tintColor = new Color(255 - tintColor.getRed(), 255 - tintColor.getGreen(), 
+			255 - tintColor.getBlue(), TINT_COLOR_ALPHA);
+        g.setXORMode(tintColor);
+        g.drawImage(bufferedImage, 0, 0, null);
+		// reset the tint
+		g.setXORMode(Color.decode("#00000000"));
+	}
+	
+	private static void addText(Graphics g) {
+		g.setColor(Color.WHITE);
+		// add it in the middle of the image
+		FontMetrics fontMetrics = g.getFontMetrics();
+		int textWidth = fontMetrics.stringWidth(ext);
+        int textHeight = fontMetrics.getHeight();
+        g.drawString(ext, bufferedImage.getWidth() / 2 - textWidth / 2, bufferedImage.getHeight() / 2 + textHeight / 4);
+	}
 
     private static void generateThumbnail(ThumbnailTask task) throws Exception {
         Image image = null;
         try {
             if (task.file.isFile() && FileUtils.isImage(task.file.getBaseName())) {
-                long s1 = System.currentTimeMillis();
                 image = Thumbnails.fromFile(task.file);
-                long e1 = System.currentTimeMillis();
-                System.out.println("time for getting image: " + task.file.getBaseName() + " = " + (e1 - s1));
                 addCache(task.file.getRealPath(), image);
                 task.view.setImage(image);
             }
@@ -247,7 +254,7 @@ public class Thumbnails {
                 stream = new BufferedInputStream(new InputStreamWrapper(getTempStream(file, TMP_GIF_THUMB_MAX_SIZE)), ENC_BUFFER_SIZE);
             else
                 stream = new BufferedInputStream(new InputStreamWrapper(file.getInputStream()), ENC_BUFFER_SIZE);
-            image = new Image(stream, 128, 128, true, true);
+            image = new Image(stream, THUMBNAIL_SIZE, THUMBNAIL_SIZE, true, true);
         } catch (Exception ex) {
             ex.printStackTrace();
         } finally {

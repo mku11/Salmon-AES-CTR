@@ -22,9 +22,9 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 */
 using Salmon.FS;
+using Salmon.Image;
 using System;
-using System.ComponentModel;
-using System.Windows.Media.Imaging;
+using System.Windows.Media;
 
 namespace Salmon.Model
 {
@@ -59,9 +59,7 @@ namespace Salmon.Model
             }
             string ext = SalmonDriveManager.GetDrive().GetExtensionFromFileName(Name).ToLower();
             Type = ext;
-
             Path = salmonFile.GetPath();
-            Image = GetImage();
         }
 
         public SalmonFile GetSalmonFile()
@@ -80,11 +78,29 @@ namespace Salmon.Model
         }
 
 
-        public BitmapImage GetImage()
+        //TODO: use IsAsync=True for ui performance
+        public override ImageSource Image
         {
-            string icon = salmonFile.IsFile() ? "/icons/file-small.png" : "/icons/folder-small.png";
-            BitmapImage imageSource = new BitmapImage(new Uri(icon, UriKind.Relative));
-            return imageSource;
+            get
+            {
+                return Thumbnails.GenerateThumbnail(salmonFile);
+            }
+        }
+
+        public override Color TintColor
+        {
+            get
+            {
+                return Thumbnails.GetTintColor(salmonFile);
+            }
+        }
+
+        public override string Ext
+        {
+            get
+            {
+                return Thumbnails.GetExt(salmonFile);
+            }
         }
 
         public override FileItem[] ListFiles()
@@ -129,6 +145,6 @@ namespace Salmon.Model
             Name = salmonFile.GetBaseName();
         }
 
-        
+
     }
 }

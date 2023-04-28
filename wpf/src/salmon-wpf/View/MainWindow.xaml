@@ -154,7 +154,8 @@
         </Grid>
         <Grid Grid.Row="2" HorizontalAlignment="Stretch" VerticalAlignment="Stretch">
             <DataGrid x:Name="DataGrid" HorizontalAlignment="Stretch" VerticalAlignment="Stretch"
-                  ItemsSource="{Binding FileItemList}" AutoGenerateColumns="False" GridLinesVisibility="None" TabIndex="0">
+                  ItemsSource="{Binding FileItemList}" AutoGenerateColumns="False" GridLinesVisibility="None" TabIndex="0"
+                      VirtualizingPanel.IsVirtualizingWhenGrouping="True">
                 <DataGrid.InputBindings>
                     <KeyBinding Key="C" Modifiers="Control" Command="ApplicationCommands.NotACommand" />
                     <KeyBinding Key="X" Modifiers="Control" Command="ApplicationCommands.NotACommand" />
@@ -163,18 +164,60 @@
                     <KeyBinding Key="Delete" Command="ApplicationCommands.NotACommand" />
                 </DataGrid.InputBindings>
                 <DataGrid.Columns>
-                    <DataGridTemplateColumn Header="" Width="32" IsReadOnly="True">
+                    <DataGridTemplateColumn Header="" Width="64" IsReadOnly="True">
                         <DataGridTemplateColumn.CellTemplate>
                             <DataTemplate>
-                                <Image Source="{Binding Image}" Width="16" Height="16"/>
+                                <Grid Width="32" Height="32" Margin="2">
+                                    <Image Source="{Binding Image}" Width="32" Height="32"/>
+                                    <Rectangle Width="32" Height="32" Opacity="0.5">
+                                        <Rectangle.Fill>
+                                            <SolidColorBrush Color="{Binding TintColor}"/>
+                                        </Rectangle.Fill>
+                                        <Rectangle.OpacityMask>
+                                            <ImageBrush ImageSource="{Binding Image}"/>
+                                        </Rectangle.OpacityMask>
+                                    </Rectangle>
+                                    <TextBlock Text="{Binding Ext}" FontWeight="Bold" Foreground="Black" Background="Transparent" 
+                                               HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                                </Grid>
                             </DataTemplate>
                         </DataGridTemplateColumn.CellTemplate>
                     </DataGridTemplateColumn>
-                    <DataGridTextColumn Binding="{Binding Name}" Header="Name" IsReadOnly="True" Width="200"/>
-                    <DataGridTextColumn Binding="{Binding Date}" Header="Date Modified" IsReadOnly="True" Width="200"/>
-                    <DataGridTextColumn Binding="{Binding Type}" Header="Type" IsReadOnly="True" Width="60"/>
-                    <DataGridTextColumn Binding="{Binding Size}" Header="Size" IsReadOnly="True" Width="60"/>
-                    <DataGridTextColumn Binding="{Binding Path}" Header="Path" IsReadOnly="True" Width="200"/>
+                    <DataGridTextColumn Binding="{Binding Name}" Header="Name" IsReadOnly="True" Width="200">
+                        <DataGridTextColumn.ElementStyle>
+                            <Style TargetType="TextBlock">
+                                <Setter Property="VerticalAlignment" Value="Center"></Setter>
+                            </Style>
+                        </DataGridTextColumn.ElementStyle>
+                    </DataGridTextColumn>
+                    <DataGridTextColumn Binding="{Binding Date}" Header="Date Modified" IsReadOnly="True" Width="200">
+                        <DataGridTextColumn.ElementStyle>
+                            <Style TargetType="TextBlock">
+                                <Setter Property="VerticalAlignment" Value="Center"></Setter>
+                            </Style>
+                        </DataGridTextColumn.ElementStyle>
+                    </DataGridTextColumn>
+                    <DataGridTextColumn Binding="{Binding Type}" Header="Type" IsReadOnly="True" Width="60">
+                        <DataGridTextColumn.ElementStyle>
+                            <Style TargetType="TextBlock">
+                                <Setter Property="VerticalAlignment" Value="Center"></Setter>
+                            </Style>
+                        </DataGridTextColumn.ElementStyle>
+                    </DataGridTextColumn>
+                    <DataGridTextColumn Binding="{Binding Size}" Header="Size" IsReadOnly="True" Width="60">
+                        <DataGridTextColumn.ElementStyle>
+                            <Style TargetType="TextBlock">
+                                <Setter Property="VerticalAlignment" Value="Center"></Setter>
+                            </Style>
+                        </DataGridTextColumn.ElementStyle>
+                    </DataGridTextColumn>
+                    <DataGridTextColumn Binding="{Binding Path}" Header="Path" IsReadOnly="True" Width="200">
+                        <DataGridTextColumn.ElementStyle>
+                            <Style TargetType="TextBlock">
+                                <Setter Property="VerticalAlignment" Value="Center"></Setter>
+                            </Style>
+                        </DataGridTextColumn.ElementStyle>
+                    </DataGridTextColumn>
                 </DataGrid.Columns>
             </DataGrid>
         </Grid>
