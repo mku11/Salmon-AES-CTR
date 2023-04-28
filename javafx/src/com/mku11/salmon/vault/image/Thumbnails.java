@@ -24,7 +24,6 @@ SOFTWARE.
 */
 
 import com.mku11.salmon.BitConverter;
-import com.mku11.salmon.SalmonGenerator;
 import com.mku11.salmon.streams.AbsStream;
 import com.mku11.salmon.streams.InputStreamWrapper;
 import com.mku11.salmon.streams.MemoryStream;
@@ -45,7 +44,6 @@ import java.io.IOException;
 import java.nio.charset.Charset;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
-import java.util.HashMap;
 import java.util.concurrent.*;
 
 /**
@@ -56,7 +54,7 @@ public class Thumbnails {
     private static final int TMP_VIDEO_THUMB_MAX_SIZE = 3 * 1024 * 1024;
     private static final int TMP_GIF_THUMB_MAX_SIZE = 512 * 1024;
     private static final int ENC_BUFFER_SIZE = 128 * 1024;
-	private static THUMBNAIL_SIZE = 128;
+    private static final int THUMBNAIL_SIZE = 128;
 
     private static final int MAX_CACHE_SIZE = 50 * 1024 * 1024;
     private static final ConcurrentHashMap<String, Image> cache = new ConcurrentHashMap<>();
@@ -189,7 +187,7 @@ public class Thumbnails {
                 Graphics g = nimage.getGraphics();
                 Color tintColor = getFileColorFromExtension(ext);
                 addImage(g, bufferedImage, tintColor);
-				addText(g, );
+                addText(g, ext, bufferedImage.getWidth() / 2, bufferedImage.getHeight() / 2);
                 g.dispose();
                 image = SwingFXUtils.toFXImage(nimage, null);
             } catch (Exception ex) {
@@ -200,24 +198,21 @@ public class Thumbnails {
             image = new Image(Thumbnails.class.getResourceAsStream(icon));
         return image;
     }
-	
-	private static void addImage(Graphics g) {
-		Color tintColor = new Color(255 - tintColor.getRed(), 255 - tintColor.getGreen(), 
-			255 - tintColor.getBlue(), TINT_COLOR_ALPHA);
+
+    private static void addImage(Graphics g, BufferedImage bufferedImage, Color tintColor) {
         g.setXORMode(tintColor);
         g.drawImage(bufferedImage, 0, 0, null);
-		// reset the tint
-		g.setXORMode(Color.decode("#00000000"));
-	}
-	
-	private static void addText(Graphics g) {
-		g.setColor(Color.WHITE);
-		// add it in the middle of the image
-		FontMetrics fontMetrics = g.getFontMetrics();
-		int textWidth = fontMetrics.stringWidth(ext);
+        // reset the tint
+        g.setXORMode(Color.decode("#00000000"));
+    }
+
+    private static void addText(Graphics g, String text, int width, int height) {
+        g.setColor(Color.WHITE);
+        FontMetrics fontMetrics = g.getFontMetrics();
+        int textWidth = fontMetrics.stringWidth(text);
         int textHeight = fontMetrics.getHeight();
-        g.drawString(ext, bufferedImage.getWidth() / 2 - textWidth / 2, bufferedImage.getHeight() / 2 + textHeight / 4);
-	}
+        g.drawString(text, width - textWidth / 2, height + textHeight / 4);
+    }
 
     private static void generateThumbnail(ThumbnailTask task) throws Exception {
         Image image = null;
@@ -275,6 +270,9 @@ public class Thumbnails {
         byte[] hashValue = md.digest(bytes);
         StringBuilder sb = new StringBuilder();
         sb.append(BitConverter.toHex(hashValue));
-        return Color.decode("#" + sb.substring(0, 6));
+        Color color = Color.decode("#" + sb.substring(0, 6));
+        color = new Color(255 - color.getRed(), 255 - color.getGreen(),
+                255 - color.getBlue(), TINT_COLOR_ALPHA);
+        return color;
     }
 }
