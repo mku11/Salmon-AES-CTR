@@ -23,6 +23,8 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 */
 
+import com.mku11.salmon.BitConverter;
+import com.mku11.salmon.SalmonGenerator;
 import com.mku11.salmon.streams.AbsStream;
 import com.mku11.salmon.streams.InputStreamWrapper;
 import com.mku11.salmon.streams.MemoryStream;
@@ -30,18 +32,25 @@ import com.mku11.salmon.streams.SalmonStream;
 import com.mku11.salmon.vault.utils.FileUtils;
 import com.mku11.salmonfs.SalmonDriveManager;
 import com.mku11.salmonfs.SalmonFile;
+import javafx.embed.swing.SwingFXUtils;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 
+import javax.imageio.ImageIO;
+import java.awt.*;
+import java.awt.image.BufferedImage;
 import java.io.BufferedInputStream;
 import java.io.File;
 import java.io.IOException;
+import java.nio.charset.Charset;
+import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
 import java.util.HashMap;
 import java.util.concurrent.*;
 
-/// <summary>
-/// Utility class that generates thumbnails for encrypted salmon files
-/// </summary>
+/**
+ * Utility class that generates thumbnails for encrypted salmon files
+ */
 public class Thumbnails {
     private static final String TMP_THUMB_DIR = "tmp";
     private static final int TMP_VIDEO_THUMB_MAX_SIZE = 3 * 1024 * 1024;
@@ -50,6 +59,7 @@ public class Thumbnails {
 
     private static final int MAX_CACHE_SIZE = 50 * 1024 * 1024;
     private static final ConcurrentHashMap<String, Image> cache = new ConcurrentHashMap<>();
+    private static final int TINT_COLOR_ALPHA = 127;
     private static int cacheSize;
 
     private static final Executor executor = Executors.newFixedThreadPool(2);
@@ -133,8 +143,7 @@ public class Thumbnails {
             return imageView;
         }
 
-        String icon = salmonFile.isFile() ? "/icons/file-small.png" : "/icons/folder-small.png";
-        Image image = new Image(Thumbnails.class.getResourceAsStream(icon));
+        Image image = getIcon(salmonFile);
         imageView.setImage(image);
 
         ThumbnailTask task = null;
@@ -163,6 +172,41 @@ public class Thumbnails {
             }
         });
         return imageView;
+    }
+
+    private static Image getIcon(SalmonFile salmonFile) {
+        String icon = salmonFile.isFile() ? "/icons/file-small.png" : "/icons/folder-small.png";
+        Image image = null;
+        if (salmonFile.isFile()) {
+            try {
+                String ext = SalmonDriveManager.getDrive().getExtensionFromFileName(salmonFile.getBaseName()).toLowerCase();
+                BufferedImage bufferedImage = ImageIO.read(Thumbnails.class.getResourceAsStream(icon));
+                BufferedImage nimage = new BufferedImage(
+                        bufferedImage.getWidth(),
+                        bufferedImage.getHeight(),
+                        BufferedImage.TYPE_INT_ARGB_PRE);
+
+                Graphics g = nimage.getGraphics();
+                g.setFont(new Font(Font.MONOSPACED, Font.BOLD, 12));
+                FontMetrics fontMetrics = g.getFontMetrics();
+                int textWidth = fontMetrics.stringWidth(ext);
+                int textHeight = fontMetrics.getHeight();
+                Color tintColor = getFileColorFromExtension(ext);
+                tintColor = new Color(255 - tintColor.getRed(), 255 - tintColor.getGreen(), 255 - tintColor.getBlue(), TINT_COLOR_ALPHA);
+                g.setXORMode(tintColor);
+                g.drawImage(bufferedImage, 0, 0, null);
+                g.setColor(Color.WHITE);
+                g.setXORMode(Color.decode("#00000000"));
+                g.drawString(ext, bufferedImage.getWidth() / 2 - textWidth / 2, bufferedImage.getHeight() / 2 + textHeight / 4);
+                g.dispose();
+                image = SwingFXUtils.toFXImage(nimage, null);
+            } catch (Exception ex) {
+                ex.printStackTrace();
+            }
+        }
+        if (image == null)
+            image = new Image(Thumbnails.class.getResourceAsStream(icon));
+        return image;
     }
 
     private static void generateThumbnail(ThumbnailTask task) throws Exception {
@@ -216,5 +260,14 @@ public class Thumbnails {
             }
         }
         return image;
+    }
+
+    private static Color getFileColorFromExtension(String extension) throws NoSuchAlgorithmException {
+        MessageDigest md = MessageDigest.getInstance("MD5");
+        byte[] bytes = extension.getBytes(Charset.defaultCharset());
+        byte[] hashValue = md.digest(bytes);
+        StringBuilder sb = new StringBuilder();
+        sb.append(BitConverter.toHex(hashValue));
+        return Color.decode("#" + sb.substring(0, 6));
     }
 }
