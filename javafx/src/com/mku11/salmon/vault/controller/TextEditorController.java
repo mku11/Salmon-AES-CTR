@@ -25,6 +25,8 @@ SOFTWARE.
 import com.mku11.salmon.streams.MemoryStream;
 import com.mku11.salmon.streams.SalmonStream;
 import com.mku11.salmon.vault.config.Config;
+import com.mku11.salmon.vault.model.FileItem;
+import com.mku11.salmon.vault.model.SalmonFileItem;
 import com.mku11.salmon.vault.settings.Settings;
 import com.mku11.salmon.vault.window.Window;
 import com.mku11.salmonfs.SalmonFile;

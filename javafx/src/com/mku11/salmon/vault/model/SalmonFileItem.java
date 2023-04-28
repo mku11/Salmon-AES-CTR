@@ -1,4 +1,4 @@
-package com.mku11.salmon.vault.controller;
+package com.mku11.salmon.vault.model;
 /*
 MIT License
 
@@ -24,11 +24,9 @@ SOFTWARE.
 */
 
 import com.mku11.salmon.vault.image.Thumbnails;
-import com.mku11.salmon.vault.utils.FileUtils;
 import com.mku11.salmon.vault.utils.Utils;
 import com.mku11.salmonfs.SalmonDriveManager;
 import com.mku11.salmonfs.SalmonFile;
-import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 
 import java.text.SimpleDateFormat;
@@ -74,7 +72,7 @@ public class SalmonFileItem extends FileItem {
     }
 
     @Override
-    boolean isDirectory() {
+    public boolean isDirectory() {
         return salmonFile.isDirectory();
     }
 

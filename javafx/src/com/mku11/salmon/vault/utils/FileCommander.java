@@ -24,7 +24,7 @@ SOFTWARE.
 */
 
 import com.mku11.salmon.SalmonTime;
-import com.mku11.salmon.vault.controller.SalmonFileItem;
+import com.mku11.salmon.vault.model.SalmonFileItem;
 import com.mku11.salmonfs.*;
 
 import java.util.ArrayList;

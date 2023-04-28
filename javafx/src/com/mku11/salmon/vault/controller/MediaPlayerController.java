@@ -23,6 +23,8 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 */
 import com.mku11.salmon.vault.config.Config;
+import com.mku11.salmon.vault.model.FileItem;
+import com.mku11.salmon.vault.model.SalmonFileItem;
 import com.mku11.salmon.vault.settings.Settings;
 import com.mku11.salmon.vault.window.Window;
 import com.mku11.salmonfs.SalmonFile;
@@ -50,8 +52,6 @@ import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.net.URL;
 import java.net.URLEncoder;
-import java.net.URLStreamHandler;
-import java.nio.charset.Charset;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.TimeZone;

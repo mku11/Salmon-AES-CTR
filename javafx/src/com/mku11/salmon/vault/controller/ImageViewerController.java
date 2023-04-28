@@ -23,16 +23,15 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 */
 
-import com.mku11.salmon.streams.AbsStream;
 import com.mku11.salmon.streams.InputStreamWrapper;
-import com.mku11.salmon.streams.SalmonStream;
 import com.mku11.salmon.vault.config.Config;
+import com.mku11.salmon.vault.model.FileItem;
+import com.mku11.salmon.vault.model.SalmonFileItem;
 import com.mku11.salmon.vault.settings.Settings;
 import com.mku11.salmon.vault.window.Window;
 import com.mku11.salmonfs.SalmonFile;
 import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.SimpleObjectProperty;
-import javafx.embed.swing.SwingFXUtils;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
@@ -42,11 +41,8 @@ import javafx.scene.input.KeyEvent;
 import javafx.stage.Modality;
 import javafx.stage.Stage;
 
-import javax.imageio.ImageIO;
-import java.awt.image.BufferedImage;
 import java.io.BufferedInputStream;
 import java.io.IOException;
-import java.io.InputStream;
 
 public class ImageViewerController {
     private static final int ENC_BUFFER_SIZE = 128 * 1024;

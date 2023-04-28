@@ -32,6 +32,8 @@ import com.mku11.salmon.streams.SalmonStream;
 import com.mku11.salmon.vault.config.Config;
 import com.mku11.salmon.vault.dialog.ActivityCommon;
 import com.mku11.salmon.vault.dialog.SalmonAlert;
+import com.mku11.salmon.vault.model.FileItem;
+import com.mku11.salmon.vault.model.SalmonFileItem;
 import com.mku11.salmon.vault.prefs.Preferences;
 import com.mku11.salmon.vault.sequencer.WinClientSequencer;
 import com.mku11.salmon.vault.settings.Settings;

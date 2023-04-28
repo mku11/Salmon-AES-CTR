@@ -1,4 +1,4 @@
-package com.mku11.salmon.vault.controller;
+package com.mku11.salmon.vault.model;
 /*
 MIT License
 
@@ -79,9 +79,9 @@ public abstract class FileItem {
         return path;
     }
 
-    abstract ImageView getImage() throws Exception;
+    public abstract ImageView getImage() throws Exception;
 
-    abstract boolean isDirectory();
+    public abstract boolean isDirectory();
 
     public abstract String getBaseName() throws Exception;
 
