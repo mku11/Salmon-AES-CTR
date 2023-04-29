@@ -36,7 +36,6 @@ namespace Salmon.Net.FS
     /// </summary>
     public class DotNetFile : IRealFile
     {
-        private const int DEFAULT_ENC_BUFFER_SIZE = 32768;
 
         private string filePath = null;
 
@@ -95,22 +94,14 @@ namespace Salmon.Net.FS
             return new FileInfo(filePath).Name;
         }
 
-        public Stream GetInputStream(int bufferSize = 0)
+        public Stream GetInputStream()
         {
-            if (bufferSize == 0)
-                bufferSize = DEFAULT_ENC_BUFFER_SIZE;
-            FileStream stream = File.Open(filePath, FileMode.OpenOrCreate, FileAccess.Read, FileShare.ReadWrite);
-            BufferedStream bufferedStream = new BufferedStream(stream, bufferSize);
-            return bufferedStream;
+            return File.Open(filePath, FileMode.OpenOrCreate, FileAccess.Read, FileShare.ReadWrite);
         }
 
-        public Stream GetOutputStream(int bufferSize = 0)
+        public Stream GetOutputStream()
         {
-            if (bufferSize == 0)
-                bufferSize = DEFAULT_ENC_BUFFER_SIZE;
-            FileStream stream = File.Open(filePath, FileMode.OpenOrCreate, FileAccess.Write, FileShare.ReadWrite);
-            BufferedStream bufferedStream = new BufferedStream(stream, bufferSize);
-            return bufferedStream;
+            return File.Open(filePath, FileMode.OpenOrCreate, FileAccess.Write, FileShare.ReadWrite);
         }
 
         public IRealFile GetParent()

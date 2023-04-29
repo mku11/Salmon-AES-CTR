@@ -176,10 +176,10 @@ namespace Salmon.FS
 
             try
             {
-                targetStream = exportFile.GetOutputStream(bufferSize);
+                targetStream = exportFile.GetOutputStream();
                 targetStream.Position = start;
 
-                sourceStream = fileToExport.GetInputStream(bufferSize);
+                sourceStream = fileToExport.GetInputStream();
                 sourceStream.Position = start;
 
                 byte[] bytes = new byte[bufferSize];
