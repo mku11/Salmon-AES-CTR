@@ -72,6 +72,9 @@ public class SalmonGenerator {
     public static final int AUTH_ID_SIZE = 16;
     public static final int CHUNKSIZE_LENGTH = 4;
     private static final String MAGIC_BYTES = "SLM";
+
+    //WARNING! SHA1 is not secure anymore enable only if you know what you're doing!
+    private static final boolean ENABLE_SHA1 = false;
     private static PbkdfType pbkdfType = PbkdfType.Default;
 
 
@@ -188,6 +191,9 @@ public class SalmonGenerator {
      * @param outputBytes The number of bytes for the key
      */
     public static byte[] getKeyFromPassword(String password, byte[] salt, int iterations, int outputBytes) throws Exception {
+        if(pbkdfAlgo == PbkdfAlgo.SHA1 && !ENABLE_SHA1)
+            throw new RuntimeException("Cannot use SHA1, SHA1 is not secure anymore use SHA256!");
+
         //PBKDF2WithHmacSHA256 might not available for some devices
         if (pbkdfType == PbkdfType.Default) {
             PBEKeySpec keySpec = new PBEKeySpec(password.toCharArray(), salt, iterations, outputBytes * 8);
@@ -197,7 +203,6 @@ public class SalmonGenerator {
         } else if (pbkdfType == PbkdfType.BouncyCastle) {
             Digest dig = null;
             if (pbkdfAlgo == PbkdfAlgo.SHA1) {
-				throw new RuntimeException("SHA1 is not secure use SHA256!");
                 dig = new SHA1Digest();
 			}
             if (pbkdfAlgo == PbkdfAlgo.SHA256)
