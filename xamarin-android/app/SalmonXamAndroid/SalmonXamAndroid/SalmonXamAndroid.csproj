@@ -101,17 +101,20 @@
     </PackageReference>
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="..\..\..\src\File\AndroidDrive.cs">
-      <Link>src\File\AndroidDrive.cs</Link>
+	<Compile Include="..\..\..\src\Config\Config.cs">
+      <Link>src\Config\Config.cs</Link>
     </Compile>
-    <Compile Include="..\..\..\src\File\AndroidFile.cs">
-      <Link>src\File\AndroidFile.cs</Link>
+    <Compile Include="..\..\..\src\Model\AndroidDrive.cs">
+      <Link>src\Model\AndroidDrive.cs</Link>
     </Compile>
-    <Compile Include="..\..\..\src\File\AndroidFileStream.cs">
-      <Link>src\File\AndroidFileStream.cs</Link>
+    <Compile Include="..\..\..\src\Model\AndroidFile.cs">
+      <Link>src\Model\AndroidFile.cs</Link>
     </Compile>
-    <Compile Include="..\..\..\src\File\AndroidSharedFileObserver.cs">
-      <Link>src\File\AndroidSharedFileObserver.cs</Link>
+    <Compile Include="..\..\..\src\Model\AndroidFileStream.cs">
+      <Link>src\Model\AndroidFileStream.cs</Link>
+    </Compile>
+    <Compile Include="..\..\..\src\Model\AndroidSharedFileObserver.cs">
+      <Link>src\Model\AndroidSharedFileObserver.cs</Link>
     </Compile>
     <Compile Include="..\..\..\src\Image\Thumbnails.cs">
       <Link>src\Image\Thumbnails.cs</Link>
