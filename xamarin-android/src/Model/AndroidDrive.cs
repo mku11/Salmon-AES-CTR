@@ -22,19 +22,13 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 */
 using System;
-using System.Collections.Generic;
 using Android.App;
-using Android.Content;
-using Android.OS;
-using Android.Provider;
-using Android.Widget;
 using AndroidX.DocumentFile.Provider;
 using Salmon.Droid.Utils;
 using Salmon.FS;
 using Uri = Android.Net.Uri;
-using Android.Util;
 
-namespace Salmon.Droid.FS
+namespace Salmon.Droid.Model
 {
     /// <summary>
     /// Implementation of a virtual drive for android.
@@ -51,6 +45,37 @@ namespace Salmon.Droid.FS
         /// <param name="realRoot">The path of the real directory</param>
         public AndroidDrive(string realRoot) : base(realRoot) { }
 
+        public static Java.IO.File CopyToSharedFolder(SalmonFile salmonFile)
+        {
+            Java.IO.File privateDir = GetPrivateDir();
+            Java.IO.File cacheFile = new Java.IO.File(privateDir, salmonFile.GetBaseName());
+            AndroidSharedFileObserver.RemoveFileObserver(cacheFile);
+            cacheFile.Delete();
+
+            AndroidFile sharedDir = new AndroidFile(DocumentFile.FromFile(privateDir), Application.Context);
+            SalmonFileExporter fileExporter = new SalmonFileExporter(ENC_BUFFER_SIZE, ENC_THREADS);
+            fileExporter.ExportFile(salmonFile, sharedDir, false);
+            return cacheFile;
+        }
+		
+		protected static Java.IO.File GetPrivateDir()
+        {
+            Java.IO.File sharedDir = new Java.IO.File(Application.Context.CacheDir, SHARE_DIR);
+            if (!sharedDir.Exists())
+                sharedDir.Mkdir();
+            return sharedDir;
+        }
+		
+		/// <summary>
+        /// Get an android file from a DocumentFile
+        /// </summary>
+        /// <param name="docFile"></param>
+        /// <returns></returns>
+        public static IRealFile GetFile(DocumentFile docFile)
+        {
+            return new AndroidFile(docFile, Application.Context);
+        }
+		
         public override IRealFile GetFile(string filepath, bool folder)
         {
             DocumentFile docFile;
@@ -105,38 +130,6 @@ namespace Salmon.Droid.FS
             {
                 file.Delete();
             }
-        }
-
-        // TODO: use multithreaded for performance
-        public static Java.IO.File CopyToSharedFolder(SalmonFile salmonFile)
-        {
-            Java.IO.File privateDir = GetPrivateDir();
-            Java.IO.File cacheFile = new Java.IO.File(privateDir, salmonFile.GetBaseName());
-            AndroidSharedFileObserver.RemoveFileObserver(cacheFile);
-            cacheFile.Delete();
-
-            AndroidFile sharedDir = new AndroidFile(DocumentFile.FromFile(privateDir), Application.Context);
-            SalmonFileExporter fileExporter = new SalmonFileExporter(ENC_BUFFER_SIZE, ENC_THREADS);
-            fileExporter.ExportFile(salmonFile, sharedDir, false);
-            return cacheFile;
-        }
-
-        protected static Java.IO.File GetPrivateDir()
-        {
-            Java.IO.File sharedDir = new Java.IO.File(Application.Context.CacheDir, SHARE_DIR);
-            if (!sharedDir.Exists())
-                sharedDir.Mkdir();
-            return sharedDir;
-        }
-
-        /// <summary>
-        /// Get an android file from a DocumentFile
-        /// </summary>
-        /// <param name="docFile"></param>
-        /// <returns></returns>
-        public static IRealFile GetFile(DocumentFile docFile)
-        {
-            return new AndroidFile(docFile, Application.Context);
         }
     }
 }

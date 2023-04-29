@@ -29,7 +29,7 @@ using Java.Nio;
 using Java.Nio.Channels;
 using System.IO;
 
-namespace Salmon.Droid.FS
+namespace Salmon.Droid.Model
 {
     /// <summary>
     /// Class is a C# stream implementation wrapper for java streams that are retrieved from AndroidFile
@@ -39,10 +39,8 @@ namespace Salmon.Droid.FS
     {
         private AndroidFile file;
         private ParcelFileDescriptor pfd;
-        private FileChannel fileChannel;
         private bool canWrite;
-        private FileInputStream ins;
-        private FileOutputStream outs;
+		private FileChannel fileChannel;
 
         /// <summary>
         /// Construct a file stream from an AndroidFile.
@@ -57,14 +55,14 @@ namespace Salmon.Droid.FS
             {
                 canWrite = true;
             }
-            pfd = Application.Context.ContentResolver.OpenFileDescriptor(file.documentFile.Uri, mode);
+            pfd = file.GetFileDescriptor(mode);
             if (canWrite) { 
-                outs = new FileOutputStream(pfd.FileDescriptor);
+                FileOutputStream outs = new FileOutputStream(pfd.FileDescriptor);
                 fileChannel = outs.Channel;
             }
             else
             {
-                ins = new FileInputStream(pfd.FileDescriptor);
+                FileInputStream ins = new FileInputStream(pfd.FileDescriptor);
                 fileChannel = ins.Channel;
             }
         }
@@ -90,9 +88,6 @@ namespace Salmon.Droid.FS
 
         public override int Read(byte[] buffer, int offset, int count)
         {
-            // XXX: buffer wrapping doesn't map the bytes array
-            // so we copy the contents manually
-            // ByteBuffer buf = ByteBuffer.Wrap(buffer, 0, count);
             ByteBuffer buf = ByteBuffer.Allocate(count);
             int bytesRead = (int)fileChannel.Read(buf);
             if (bytesRead <= 0)
@@ -104,7 +99,6 @@ namespace Salmon.Droid.FS
 
         public override void Write(byte[] buffer, int offset, int count)
         {
-            //ByteBuffer buf = ByteBuffer.Wrap(buffer, 0, count);
             ByteBuffer buf = ByteBuffer.Allocate(count);
             buf.Put(buffer, offset, count);
             buf.Rewind();

@@ -32,7 +32,7 @@ using System;
 using Salmon.Streams;
 using Salmon.Droid.Main;
 
-namespace Salmon.Droid.FS
+namespace Salmon.Droid.Model
 {
     /// <summary>
     /// Implementation of the IRealFile for Android using Storage Access Framework that supports read/write to external SD cards.
@@ -40,10 +40,9 @@ namespace Salmon.Droid.FS
     /// </summary>
     public class AndroidFile : IRealFile
     {
-        private const int DEFAULT_ENC_BUFFER_SIZE = 32768;
-        string basename = null;
-        private Context context;
-        public DocumentFile documentFile = null;
+        private readonly Context context;
+        private DocumentFile documentFile = null;
+		private string basename = null;
 
         /// <summary>
         /// Construct an AndroidFile wrapper from an Android DocumentFile.
@@ -113,24 +112,16 @@ namespace Salmon.Droid.FS
             return basename;
         }
 
-        // we cannot set the optional default parameter value here because c# says it needs
-        // to be defined in the interface therefore we need to do this manually in the body
-        public Stream GetInputStream(int bufferSize = 0)
+        public Stream GetInputStream()
         {
-            if (bufferSize == 0)
-                bufferSize = DEFAULT_ENC_BUFFER_SIZE;
             AndroidFileStream androidFileStream = new AndroidFileStream(this, "r");
-            Stream ins = new BufferedStream(androidFileStream, bufferSize);
-            return ins;
+			return androidFileStream;
         }
 
-        public Stream GetOutputStream(int bufferSize = 0)
+        public Stream GetOutputStream()
         {
-            if (bufferSize == 0)
-                bufferSize = DEFAULT_ENC_BUFFER_SIZE;
             AndroidFileStream androidFileStream = new AndroidFileStream(this, "rw");
-            Stream outs = new BufferedStream(androidFileStream, bufferSize);
-            return outs;
+			return androidFileStream;
         }
 
         public IRealFile GetParent()
@@ -178,59 +169,13 @@ namespace Salmon.Droid.FS
             }
             return realFiles;
         }
-
-        public bool Move(IRealFile newDir)
+		
+		public IRealFile Move(IRealFile newDir, AbsStream.OnProgressChanged progressListener)
         {
             AndroidFile androidDir = (AndroidFile)newDir;
             if (Build.VERSION.SdkInt >= Android.OS.BuildVersionCodes.N)
             {
-                DocumentsContract.MoveDocument(Application.Context.ContentResolver, documentFile.Uri, documentFile.ParentFile.Uri, androidDir.documentFile.Uri);
-            }
-            else
-            {
-                throw new NotImplementedException();
-            }
-            return true;
-        }
-
-        public IRealFile GetChild(string filename)
-        {
-            DocumentFile[] documentFiles = documentFile.ListFiles();
-            foreach (DocumentFile documentFile in documentFiles)
-            {
-                if (documentFile.Name.Equals(filename))
-                    return new AndroidFile(documentFile, context);
-            }
-            return null;
-        }
-
-        public bool RenameTo(string newFilename)
-        {
-            Android.Net.Uri uri = DocumentsContract.RenameDocument(context.ContentResolver, documentFile.Uri, newFilename);
-            documentFile = DocumentFile.FromSingleUri(context, uri);
-            basename = null;
-            return true;
-        }
-
-        public bool Mkdir()
-        {
-            IRealFile parent = GetParent();
-            if (parent != null)
-            {
-                IRealFile dir = parent.CreateDirectory(GetBaseName());
-                if (dir.Exists() && dir.IsDirectory())
-                    return true;
-            }
-            return false;
-        }
-
-
-        public IRealFile Move(IRealFile newDir, AbsStream.OnProgressChanged progressListener)
-        {
-            AndroidFile androidDir = (AndroidFile)newDir;
-            if (Build.VERSION.SdkInt >= Android.OS.BuildVersionCodes.N)
-            {
-                DocumentsContract.MoveDocument(SalmonApplication.getInstance().ApplicationContext.ContentResolver,
+                DocumentsContract.MoveDocument(SalmonApplication.GetInstance().ApplicationContext.ContentResolver,
                         documentFile.Uri, documentFile.ParentFile.Uri, androidDir.documentFile.Uri);
                 return androidDir.GetChild(documentFile.Name);
             }
@@ -239,7 +184,8 @@ namespace Salmon.Droid.FS
                 return Copy(newDir, progressListener, true);
             }
         }
-        public IRealFile Copy(IRealFile newDir, AbsStream.OnProgressChanged progressListener)
+		
+		public IRealFile Copy(IRealFile newDir, AbsStream.OnProgressChanged progressListener)
         {
             return Copy(newDir, progressListener, false);
         }
@@ -282,5 +228,40 @@ namespace Salmon.Droid.FS
             }
         }
 
+        public IRealFile GetChild(string filename)
+        {
+            DocumentFile[] documentFiles = documentFile.ListFiles();
+            foreach (DocumentFile documentFile in documentFiles)
+            {
+                if (documentFile.Name.Equals(filename))
+                    return new AndroidFile(documentFile, context);
+            }
+            return null;
+        }
+
+        public bool RenameTo(string newFilename)
+        {
+            Android.Net.Uri uri = DocumentsContract.RenameDocument(context.ContentResolver, documentFile.Uri, newFilename);
+			//TEST: check if the new documentfile can list if it's a dir
+            documentFile = DocumentFile.FromSingleUri(context, uri);
+            basename = null;
+            return true;
+        }
+
+        public bool Mkdir()
+        {
+            IRealFile parent = GetParent();
+            if (parent != null)
+            {
+                IRealFile dir = parent.CreateDirectory(GetBaseName());
+                if (dir.Exists() && dir.IsDirectory())
+                    return true;
+            }
+            return false;
+        }
+		
+		public ParcelFileDescriptor GetFileDescriptor(String mode) {
+			return SalmonApplication.GetInstance().ApplicationContext.ContentResolver.OpenFileDescriptor(documentFile.Uri, mode);
+		}
     }
 }

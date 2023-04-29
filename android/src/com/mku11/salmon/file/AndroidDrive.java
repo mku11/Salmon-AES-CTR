@@ -49,7 +49,7 @@ import java.util.List;
  */
 public class AndroidDrive extends SalmonDrive {
     public static final String TAG = AndroidDrive.class.getName();
-    private static final int ENC_BUFFER_SIZE = 512 * 1024;
+    private static final int ENC_BUFFER_SIZE = 5 * 1024 * 1024;
     private static final int ENC_THREADS = 4;
 
     /**
@@ -61,7 +61,6 @@ public class AndroidDrive extends SalmonDrive {
         super(realRoot);
     }
 
-    // TODO: use multiple threads for performance
     public static java.io.File copyToSharedFolder(SalmonFile salmonFile) throws Exception {
         java.io.File privateDir = getPrivateDir();
         java.io.File cacheFile = new java.io.File(privateDir, salmonFile.getBaseName());

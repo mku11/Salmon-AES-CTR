@@ -42,7 +42,6 @@ namespace Salmon.Droid.Image
         private static readonly int TMP_VIDEO_THUMB_MAX_SIZE = 3 * 1024 * 1024;
         private static readonly int TMP_GIF_THUMB_MAX_SIZE = 512 * 1024;
         private static readonly int ENC_BUFFER_SIZE = 128 * 1024;
-        private static readonly bool ENABLE_ALT_THUMBNAIL_GENERATOR = false;
 
         /**
          * Returns a bitmap thumbnail from an encrypted file
@@ -61,17 +60,10 @@ namespace Salmon.Droid.Image
             try
             {
                 tmpFile = GetVideoTmpFile(salmonFile);
-                if (ENABLE_ALT_THUMBNAIL_GENERATOR)
-                {
-                    bitmap = GetVideoThumbnailAlt(tmpFile, ms);
-                }
+                if (ms > 0)
+                    bitmap = GetVideoThumbnailMedia(tmpFile, ms);
                 else
-                {
-                    if (ms > 0)
-                        bitmap = GetVideoThumbnailMedia(tmpFile, ms);
-                    else
-                        bitmap = ThumbnailUtils.CreateVideoThumbnail(tmpFile.Path, ThumbnailKind.FullScreenKind);
-                }
+                    bitmap = ThumbnailUtils.CreateVideoThumbnail(tmpFile.Path, ThumbnailKind.FullScreenKind);
             }
             catch (Exception ex)
             {
@@ -86,11 +78,6 @@ namespace Salmon.Droid.Image
                 }
             }
             return bitmap;
-        }
-
-        private static Bitmap GetVideoThumbnailAlt(File file, long ms)
-        {
-            throw new UnsupportedOperationException();
         }
 
         public static Bitmap GetVideoThumbnailMedia(File file, long ms)
@@ -127,7 +114,7 @@ namespace Salmon.Droid.Image
          */
         private static File GetVideoTmpFile(SalmonFile salmonFile)
         {
-            File tmpDir = new File(SalmonApplication.getInstance().ApplicationContext.CacheDir, TMP_THUMB_DIR);
+            File tmpDir = new File(SalmonApplication.GetInstance().ApplicationContext.CacheDir, TMP_THUMB_DIR);
             if (!tmpDir.Exists())
                 tmpDir.Mkdir();
 

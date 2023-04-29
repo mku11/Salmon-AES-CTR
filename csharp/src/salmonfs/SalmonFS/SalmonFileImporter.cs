@@ -178,10 +178,10 @@ namespace Salmon.FS
 
             try
             {
-                targetStream = salmonFile.GetOutputStream(bufferSize);
+                targetStream = salmonFile.GetOutputStream();
                 targetStream.Position = start;
 
-                sourceStream = fileToImport.GetInputStream(bufferSize);
+                sourceStream = fileToImport.GetInputStream();
                 sourceStream.Position = start;
 
                 byte[] bytes = new byte[bufferSize];

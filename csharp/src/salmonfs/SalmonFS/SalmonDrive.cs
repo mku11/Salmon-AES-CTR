@@ -400,10 +400,10 @@ namespace Salmon.FS
         /// <param name="sourcePath">The path of the file</param>
         /// <param name="bufferSize">The buffer to be used when reading</param>
         /// <returns></returns>
-        public byte[] GetBytesFromRealFile(string sourcePath, int bufferSize = 0)
+        public byte[] GetBytesFromRealFile(string sourcePath)
         {
             IRealFile file = GetFile(sourcePath, false);
-            Stream stream = file.GetInputStream(bufferSize);
+            Stream stream = file.GetInputStream();
             BufferedStream bufferedStream = new BufferedStream(stream, BUFFER_SIZE);
             MemoryStream ms = new MemoryStream();
             bufferedStream.CopyTo(ms);

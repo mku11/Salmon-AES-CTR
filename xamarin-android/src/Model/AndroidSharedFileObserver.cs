@@ -27,7 +27,7 @@ using Java.IO;
 using System;
 using System.Collections.Generic;
 
-namespace Salmon.Droid.FS
+namespace Salmon.Droid.Model
 {
     /// <summary>
     /// Implementation of a file observer that will detect if the file contents have changed

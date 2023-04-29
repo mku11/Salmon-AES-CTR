@@ -33,7 +33,7 @@ using AndroidX.Core.App;
 using AndroidX.DocumentFile.Provider;
 using AndroidX.RecyclerView.Widget;
 using Salmon.Droid.Utils;
-using Salmon.Droid.FS;
+using Salmon.Droid.Model;
 using Salmon.FS;
 using Java.Lang;
 
@@ -987,7 +987,7 @@ namespace Salmon.Droid.Main
             }
             if (rootDir == null || !SalmonDriveManager.GetDrive().IsAuthenticated())
                 return;
-            DocumentFile docFile = DocumentFile.FromSingleUri(SalmonApplication.getInstance().ApplicationContext, uri);
+            DocumentFile docFile = DocumentFile.FromSingleUri(SalmonApplication.GetInstance().ApplicationContext, uri);
             IRealFile realFile = AndroidDrive.GetFile(docFile);
             if (realFile == null)
                 return;

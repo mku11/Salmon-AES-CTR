@@ -24,12 +24,11 @@ SOFTWARE.
 using System;
 using Android.App;
 using Android.Runtime;
-using AndroidX.Core.OS;
 using Xamarin.Essentials;
 
 namespace Salmon.Droid.Main
 {
-	[Application]
+    [Application]
 	public class SalmonApplication : Application
 	{
 		private static readonly string TAG = typeof(SalmonApplication).Name;
@@ -42,7 +41,7 @@ namespace Salmon.Droid.Main
 			this.handle = handle;
 		}
 
-		public static SalmonApplication getInstance()
+		public static SalmonApplication GetInstance()
         {
 			return mInstance;
         }

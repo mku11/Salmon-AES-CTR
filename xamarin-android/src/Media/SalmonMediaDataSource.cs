@@ -101,7 +101,7 @@ namespace Salmon.Droid.Media
                 for (int i = 0; i < threads; i++)
                 {
                     int threadBufferSize = (int)System.Math.Ceiling(cacheBufferSize / (double)threads);
-                    bufferedStreams[i] = salmonFile.GetInputStream(threadBufferSize);
+                    bufferedStreams[i] = salmonFile.GetInputStream();
                 }
             }
             catch (System.Exception ex)

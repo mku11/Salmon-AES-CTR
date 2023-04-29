@@ -83,12 +83,12 @@ namespace Salmon.FS
         /// </summary>
         /// <param name="bufferSize">The buffer size that will be used for reading from the real file</param>
         /// <returns></returns>
-        public SalmonStream GetInputStream(int bufferSize = 0)
+        public SalmonStream GetInputStream()
         {
             if (!Exists())
                 throw new Exception("File does not exist");
 
-            Stream realStream = realFile.GetInputStream(bufferSize);
+            Stream realStream = realFile.GetInputStream();
             realStream.Seek(SalmonGenerator.MAGIC_LENGTH + SalmonGenerator.VERSION_LENGTH, SeekOrigin.Begin);
 
             byte[] fileChunkSizeBytes = new byte[GetChunkSizeLength()];
@@ -116,9 +116,9 @@ namespace Salmon.FS
 
 
 
-        public SalmonStream GetOutputStream(int bufferSize = 0)
+        public SalmonStream GetOutputStream()
         {
-            return GetOutputStream(null, bufferSize);
+            return GetOutputStream(null);
         }
 
         /// <summary>
@@ -128,7 +128,7 @@ namespace Salmon.FS
         /// <returns></returns>
         [MethodImpl(MethodImplOptions.Synchronized)]
 
-        internal SalmonStream GetOutputStream(byte[] nonce, int bufferSize = 0)
+        internal SalmonStream GetOutputStream(byte[] nonce)
         {
             // check if we have an existing iv in the header
             byte[] nonceBytes = GetFileNonce();
@@ -145,7 +145,7 @@ namespace Salmon.FS
             // create a stream with the file chunk size specified which will be used to host the integrity HMACs
             // we also specify if stream ranges can be overwritten which is generally dangerous if the file is existing
             // but practical if the file is brand new and multithreaded writes for performance need to be used.
-            Stream realStream = realFile.GetOutputStream(bufferSize);
+            Stream realStream = realFile.GetOutputStream();
             realStream.Seek(GetHeaderLength(), SeekOrigin.Begin);
 
             SalmonStream stream = new SalmonStream(GetEncryptionKey(), nonceBytes,

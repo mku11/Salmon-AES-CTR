@@ -27,6 +27,7 @@ using Android.Content.PM;
 using Android.OS;
 using Android.Preferences;
 using Android.Widget;
+using AndroidX.DocumentFile.Provider;
 using Salmon.Droid.Media;
 using Salmon.Droid.Utils;
 using Salmon.FS;
@@ -43,7 +44,27 @@ namespace Salmon.Droid.Main
         {
             base.OnCreate(SavedInstanceState);
             AddPreferencesFromResource(Resource.Xml.settings);
+            UpdateSummaries();
             SetupListeners();
+        }
+
+        protected override void OnResume()
+        {
+            base.OnResume();
+            UpdateSummaries();
+        }
+
+
+        private void UpdateSummaries()
+        {
+            PreferenceManager.FindPreference("vaultLocation").Summary = GetVaultDirName();
+        }
+
+        private string GetVaultDirName()
+        {
+            string path = GetVaultLocation(this);
+            DocumentFile documentFile = DocumentFile.FromTreeUri(this, Android.Net.Uri.Parse(path));
+            return documentFile.Name;
         }
 
         private void SetupListeners()

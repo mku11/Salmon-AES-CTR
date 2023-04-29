@@ -31,8 +31,8 @@ namespace Salmon.FS
     {
         bool Exists();
         bool Delete();
-        Stream GetInputStream(int bufferSize = 0);
-        Stream GetOutputStream(int bufferSize = 0);
+        Stream GetInputStream();
+        Stream GetOutputStream();
         bool RenameTo(string newFilename);
         long Length();
         long LastModified();
