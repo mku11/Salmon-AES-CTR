@@ -189,7 +189,6 @@ public class SettingsActivity extends PreferenceActivity {
         getPreferenceManager().findPreference("pbkdfType").setOnPreferenceChangeListener((preference, o) -> {
             SalmonGenerator.setPbkdfType(SalmonGenerator.PbkdfType.valueOf((String) o));
             getPreferenceManager().findPreference("pbkdfType").setSummary((String) o);
-            updateSummaries();
             return true;
         });
 
