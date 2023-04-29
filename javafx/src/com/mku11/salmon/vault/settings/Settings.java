@@ -48,7 +48,9 @@ public class Settings {
     public static final PbkdfAlgo DEFAULT_PBKDF_ALGO = PbkdfAlgo.SHA256;
     public static final String PBKDF_ALGO_KEY = "PBKDF_ALGO_KEY";
     public enum PbkdfAlgo {
-        SHA256, SHA1
+        SHA256
+		// SHA1 is not secure anymore uncomment only if you know what you're doing
+		//, SHA1
     }
 
     public AuthType authType = DEFAULT_AUTH_TYPE;

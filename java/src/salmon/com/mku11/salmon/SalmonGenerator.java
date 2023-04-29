@@ -196,8 +196,10 @@ public class SalmonGenerator {
             return factory.generateSecret(keySpec).getEncoded();
         } else if (pbkdfType == PbkdfType.BouncyCastle) {
             Digest dig = null;
-            if (pbkdfAlgo == PbkdfAlgo.SHA1)
+            if (pbkdfAlgo == PbkdfAlgo.SHA1) {
+				throw new RuntimeException("SHA1 is not secure use SHA256!");
                 dig = new SHA1Digest();
+			}
             if (pbkdfAlgo == PbkdfAlgo.SHA256)
                 dig = new SHA256Digest();
             PKCS5S2ParametersGenerator gen = new PKCS5S2ParametersGenerator(dig);
