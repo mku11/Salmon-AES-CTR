@@ -106,7 +106,7 @@ namespace Salmon.Test.Utils
         {
             string contents = null;
             string filename = salmonFile.GetBaseName();
-            Stream ins = salmonFile.GetInputStream(bufferSize);
+            Stream ins = salmonFile.GetInputStream();
             MemoryStream outs = new MemoryStream();
             ins.CopyTo(outs, bufferSize);
             outs.Flush();
