@@ -22,6 +22,7 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 */
 using FFmpeg.AutoGen;
+using Salmon.Alert;
 using Salmon.FS;
 using Salmon.Model;
 using Salmon.Window;
@@ -36,6 +37,8 @@ using System.Windows.Input;
 using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using Unosquare.FFME.Common;
+using static Salmon.Alert.SalmonDialog;
+using static System.Windows.Forms.VisualStyles.VisualStyleElement.Tab;
 using MediaType = Salmon.ViewModel.MainViewModel.MediaType;
 
 namespace Salmon.ViewModel
@@ -45,8 +48,7 @@ namespace Salmon.ViewModel
     {
         private static readonly int MEDIA_BUFFER_SIZE = 4 * 1024 * 1024;
         private static readonly int MEDIA_THREADS = 4;
-        private readonly string FFMPEG_DIR = @"c:\ffmpeg\x64";
-        public Button playButton;
+        private static readonly string FFMPEG_DIR = @"c:\ffmpeg\x64";
 
         private System.Windows.Window window;
         private FileItem item;
@@ -200,6 +202,15 @@ namespace Salmon.ViewModel
 
         public static void OpenMediaPlayer(FileItem file, System.Windows.Window owner, MediaType type)
         {
+            if (!Directory.Exists(FFMPEG_DIR) || !File.Exists(FFMPEG_DIR + "/ffmpeg.exe"))
+            {
+                WindowCommon.PromptDialog("Media Player",
+                    "Could not find FFMPEG in " + FFMPEG_DIR + ". Download version "
+                    + Config.FFMPEGLibraryVersion + " and copy the extract the contents of directory bin to directory " + FFMPEG_DIR,
+                    "Download", () => URLUtils.GoToUrl(Config.FFMPEGLibraryURL),
+                    "Cancel", null);
+                return;
+            }
             View.MediaPlayer mediaPlayer = new View.MediaPlayer();
             mediaPlayer.SetWindow(owner);
             mediaPlayer.Load(file, type);

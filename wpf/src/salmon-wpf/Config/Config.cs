@@ -30,5 +30,7 @@ namespace Salmon
         public static readonly string VERSION = "1.0.3";
         public static readonly string ABOUT_TEXT = "Released under MIT License";
         public static readonly string SourceCodeURL = "https://github.com/mku11/Salmon";
+        internal static readonly string FFMPEGLibraryURL = "https://github.com/BtbN/FFmpeg-Builds/releases";
+        internal static readonly string FFMPEGLibraryVersion = "ffmpeg-n4.4-latest-win64-gpl-shared-4.4.zip";
     }
 }
