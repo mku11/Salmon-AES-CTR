@@ -1,5 +1,5 @@
 <resources>
-    <string name="app_name">Salmon Vault</string>
+    <string name="app_name">Salmon Vault Beta</string>
     <string name="FileProvider" translatable="false">com.mku.android.salmonvault.fileprovider</string>
     <string name="SourceCodeURL" translatable="false">https://github.com/mku11/Salmon</string>
 
