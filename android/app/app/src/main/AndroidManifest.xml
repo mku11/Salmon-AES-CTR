@@ -3,8 +3,8 @@
     xmlns:tools="http://schemas.android.com/tools"
     package="com.mku.android.salmonvault"
     android:installLocation="auto"
-    android:versionCode="103"
-    android:versionName="1.0.3">
+    android:versionCode="104"
+    android:versionName="1.0.4">
 
     <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" />
     <!-- We need to able to query apps on the device to let the user choose which one to
