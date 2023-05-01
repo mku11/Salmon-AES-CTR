@@ -157,6 +157,8 @@ public class SettingsActivity extends PreferenceActivity {
 
     private String getVaultDirName() {
         String path = getVaultLocation(this);
+        if(path == null)
+            return "None";
         DocumentFile documentFile = DocumentFile.fromTreeUri(this, Uri.parse(path));
         return documentFile.getName();
     }
