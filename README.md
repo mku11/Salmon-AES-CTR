@@ -2,6 +2,9 @@
 # Salmon
 Salmon is an encryption AES256 CTR library with HMAC SHA256 integrity, seekable stream support, and parallel file operations (read/write). It provides a stream and virtual filesystem API written in Java and C#, a secure sequential Nonce generator, and fast C subroutines using Intel x86 and ARM64 intrinsics. The Salmon Vault application demonstrates the library capabilities for different platforms: JavaFX, WPF, Android, and Xamarin-Android.
 
+### Downloads
+[Release 1.0.4](https://github.com/mku11/Salmon-AES-CTR/releases)
+
 ### Library Features
 * AES256 standard encryption with CTR Mode.
 * Data chunk integrity with standard HMAC SHA256.
