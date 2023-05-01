@@ -36,7 +36,7 @@ SOFTWARE.
 #define AES_IMPL_AES_INTR 1
 #define AES_IMPL_TINY_AES 2
 
-// #define USE_TINY_AES 1
+#define USE_TINY_AES 1
 
 #if defined(_MSC_VER)
 #define EXPORT_DLL __declspec(dllexport)

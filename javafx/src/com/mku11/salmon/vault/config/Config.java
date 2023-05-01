@@ -24,8 +24,8 @@ SOFTWARE.
 */
 public class Config {
 
-    public static final String APP_NAME = "Salmon Vault";
-    public static final String VERSION = "Beta 1.0.4";
+    public static final String APP_NAME = "Salmon Vault Beta";
+    public static final String VERSION = "1.0.4";
     public static final String LIB_NAME = "salmon";
     public static final String ABOUT_TEXT = "Released under MIT License";
     public static final String SourceCodeURL = "https://github.com/mku11/Salmon";
