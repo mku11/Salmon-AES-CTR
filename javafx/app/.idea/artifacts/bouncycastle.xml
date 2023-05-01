@@ -1,0 +1,8 @@
+<component name="ArtifactManager">
+  <artifact name="bouncycastle">
+    <output-path>$PROJECT_DIR$/dist/</output-path>
+    <root id="root">
+      <element id="library" level="project" name="bouncycastle.bcprov.jdk15on" />
+    </root>
+  </artifact>
+</component>

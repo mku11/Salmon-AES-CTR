@@ -27,5 +27,6 @@
     <orderEntry type="module" module-name="SalmonNative" exported="" />
     <orderEntry type="library" name="net.java.dev.jna" level="project" />
     <orderEntry type="library" name="net.java.dev.jna.platform" level="project" />
+    <orderEntry type="library" name="bouncycastle.bcprov.jdk15on" level="project" />
   </component>
 </module>
