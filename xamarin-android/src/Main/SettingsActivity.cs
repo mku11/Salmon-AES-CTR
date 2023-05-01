@@ -63,6 +63,8 @@ namespace Salmon.Droid.Main
         private string GetVaultDirName()
         {
             string path = GetVaultLocation(this);
+			if(path == null)
+				return "None";
             DocumentFile documentFile = DocumentFile.FromTreeUri(this, Android.Net.Uri.Parse(path));
             return documentFile.Name;
         }
