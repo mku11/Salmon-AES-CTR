@@ -35,6 +35,7 @@ android {
         main.java.srcDirs += '../../src'
         main.res.srcDirs += '../../res'
         test.java.srcDirs += '../../../java/test/salmon-test-java'
+        test.java.srcDirs += '../../../java/test/salmon-test-common-java'
         androidTest.java.srcDirs += '../../test'
     }
 }
@@ -66,14 +67,10 @@ dependencies {
 
     testImplementation "androidx.arch.core:core-testing:2.1.0"
     androidTestImplementation "androidx.arch.core:core-testing:2.1.0"
-    implementation group: 'io.reactivex.rxjava2', name: 'rxjava', version: '2.1.1'
 
     annotationProcessor "androidx.lifecycle:lifecycle-compiler:2.3.1"
 
     implementation project(path: ':Salmon')
     implementation project(path: ':SalmonFS')
     implementation project(path: ':SalmonNative')
-
-    testImplementation project(path: ':SalmonTest')
-    androidTestImplementation project(path: ':SalmonTest')
 }

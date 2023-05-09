@@ -2,5 +2,4 @@ include ':SalmonFS'
 include ':Salmon'
 include ':app'
 rootProject.name = "Salmon"
-include ':SalmonTest'
 include ':SalmonNative'
