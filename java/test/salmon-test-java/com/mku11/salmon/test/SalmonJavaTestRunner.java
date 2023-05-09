@@ -36,7 +36,6 @@ import com.mku11.salmon.SalmonTextEncryptor;
 import com.mku11.salmon.streams.InputStreamWrapper;
 import com.mku11.salmon.streams.MemoryStream;
 import com.mku11.salmon.streams.SalmonStream;
-//import com.mku11.salmon.vault.sequencer.WinClientSequencer;
 import com.mku11.salmonfs.*;
 
 import org.junit.Assert;
@@ -62,8 +61,8 @@ public class SalmonJavaTestRunner {
 
     public static final int ENC_IMPORT_BUFFER_SIZE = 512 * 1024;
     public static final int ENC_IMPORT_THREADS = 4;
-    // set to false out if you're running test cases for android
-    public static final boolean enableNativeLib = true;
+    // NOTE: set to false out if you're building with gradle or running test cases for android
+    public static final boolean enableNativeLib = false;
     private static final String TEST_OUTPUT_DIR = "d:\\tmp\\output";
     private static final String TEST_VAULT_DIR = "d:\\tmp\\output\\enc";
     private static final String TEST_VAULT2_DIR = "d:\\tmp\\output\\enc2";
