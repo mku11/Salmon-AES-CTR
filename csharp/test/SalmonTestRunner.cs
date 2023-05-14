@@ -49,7 +49,6 @@ namespace Salmon.Test
 
         static SalmonTestRunner()
         {
-            SalmonStream.SetProviderType(SalmonStream.ProviderType.AesIntrinsics);
             SalmonDriveManager.SetVirtualDriveClass(typeof(DotNetDrive));
             SalmonStream.SetEnableLogDetails(false);
             //SalmonEncryptor.SetBufferSize(16);
@@ -62,7 +61,7 @@ namespace Salmon.Test
         [TestInitialize]
         public void Setup()
         {
-            
+            SalmonStream.SetProviderType(SalmonStream.ProviderType.Default);
         }
 
         [TestCleanup]
@@ -71,10 +70,11 @@ namespace Salmon.Test
 
         }
 
+        //TODO: move to wpf test
         private static void SetupServiceSequencer()
         {
-            WinClientSequencer serviceSequencer = new WinClientSequencer(TEST_PIPE_NAME);
-            SalmonDriveManager.SetSequencer(serviceSequencer);
+            //WinClientSequencer serviceSequencer = new WinClientSequencer(TEST_PIPE_NAME);
+            //SalmonDriveManager.SetSequencer(serviceSequencer);
         }
 
         private static void SetupFileSequencer()
@@ -98,7 +98,7 @@ namespace Salmon.Test
             string decText = SalmonTextEncryptor.DecryptString(encText, TestHelper.TEST_KEY_BYTES, null, true);
             Assert.AreEqual(plainText, decText);
         }
-
+        // TODO: refactor to intrinsics test class
         [TestMethod]
         public void ShouldEncryptAndDecryptTextCompatible()
         {
@@ -883,6 +883,7 @@ TestHelper.ENC_IMPORT_BUFFER_SIZE, TestHelper.ENC_IMPORT_THREADS, TestHelper.ENC
             SalmonStream.SetProviderType(SalmonStream.ProviderType.Default);
             TestHelper.EncryptAndDecryptByteArray(TestHelper.TEST_PERF_SIZE, threads: 4);        }
 
+        // TODO: refactor to intrinsics test class
         [TestMethod]
         public void ShouldEncryptAndDecrtyptStreamPerformanceIntr()
         {
@@ -890,7 +891,7 @@ TestHelper.ENC_IMPORT_BUFFER_SIZE, TestHelper.ENC_IMPORT_THREADS, TestHelper.ENC
             SalmonStream.SetProviderType(SalmonStream.ProviderType.AesIntrinsics);
             TestHelper.EncryptAndDecryptByteArray(TestHelper.TEST_PERF_SIZE);
         }
-
+        // TODO: refactor to intrinsics test class
         [TestMethod]
         public void ShouldEncryptAndDecrtyptStreamPerformanceIntrParallel()
         {

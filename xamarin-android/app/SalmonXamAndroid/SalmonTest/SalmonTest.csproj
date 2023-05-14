@@ -1,7 +1,7 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
 	<PropertyGroup>
-		<TargetFramework>netcoreapp3.1</TargetFramework>
+		<TargetFramework>net6.0</TargetFramework>
 
 		<IsPackable>false</IsPackable>
 
@@ -18,8 +18,8 @@
 	</PropertyGroup>
 
 	<ItemGroup>
-		<Compile Include="..\..\..\code\salmon-test-csharp\SalmonTestRunner.cs" Link="salmon-test-csharp\SalmonTestRunner.cs" />
-		<Compile Include="..\..\..\code\salmon-test-csharp\TestHelper.cs" Link="salmon-test-csharp\TestHelper.cs" />
+		<Compile Include="..\..\..\..\csharp\test\SalmonTestRunner.cs" Link="salmon-test-csharp\SalmonTestRunner.cs" />
+		<Compile Include="..\..\..\..\csharp\test\TestHelper.cs" Link="salmon-test-csharp\TestHelper.cs" />
 	</ItemGroup>
 
 	<ItemGroup>
@@ -34,23 +34,8 @@
 	</ItemGroup>
 
 	<ItemGroup>
-	  <Content Include="..\..\salmon-wpf-app\x64\Debug\SalmonAES.dll" Link="SalmonAES.dll">
-	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-	  </Content>
-	  <Content Include="..\..\salmon-wpf-app\x64\Debug\SalmonAES.exp" Link="SalmonAES.exp">
-	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-	  </Content>
-	  <Content Include="..\..\salmon-wpf-app\x64\Debug\SalmonAES.lib" Link="SalmonAES.lib">
-	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-	  </Content>
-	  <Content Include="..\..\salmon-wpf-app\x64\Debug\SalmonAES.pdb" Link="SalmonAES.pdb">
-	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-	  </Content>
-	</ItemGroup>
-
-	<ItemGroup>
-	  <ProjectReference Include="..\..\salmon-wpf-app\SalmonFS\SalmonFS.csproj" />
-	  <ProjectReference Include="..\..\salmon-wpf-app\Salmon\Salmon.csproj" />
+	  <ProjectReference Include="..\SalmonFS\SalmonFS.csproj" />
+	  <ProjectReference Include="..\Salmon\Salmon.csproj" />
 	</ItemGroup>
 
 </Project>
