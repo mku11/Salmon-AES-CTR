@@ -22,7 +22,6 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 */
 using Microsoft.VisualStudio.TestTools.UnitTesting;
-using Org.BouncyCastle.Utilities;
 using Salmon.FS;
 using Salmon.Net.FS;
 using Salmon.Streams;

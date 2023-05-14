@@ -1,7 +1,7 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <TargetFramework>netcoreapp3.1</TargetFramework>
+    <TargetFramework>net6.0-windows</TargetFramework>
 
     <IsPackable>false</IsPackable>
   </PropertyGroup>
@@ -43,6 +43,7 @@
 
   <ItemGroup>
     <ProjectReference Include="..\SalmonFS\SalmonFS.csproj" />
+    <ProjectReference Include="..\SalmonNative\SalmonNative.vcxproj" />
     <ProjectReference Include="..\SalmonWPF\SalmonWPF.csproj" />
     <ProjectReference Include="..\Salmon\Salmon.csproj" />
   </ItemGroup>
