@@ -1,0 +1,236 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFrameworks>net7.0-android;net7.0-ios;net7.0-maccatalyst</TargetFrameworks>
+    <TargetFrameworks Condition="$([MSBuild]::IsOSPlatform('windows'))">$(TargetFrameworks);net7.0-windows10.0.19041.0</TargetFrameworks>
+    <!-- Uncomment to also build the tizen app. You will need to install tizen by following this: https://github.com/Samsung/Tizen.NET -->
+    <!-- <TargetFrameworks>$(TargetFrameworks);net6.0-tizen</TargetFrameworks> -->
+    <OutputType>Exe</OutputType>
+    <RootNamespace>Salmon.Vault.MAUI</RootNamespace>
+    <UseMaui>true</UseMaui>
+    <SingleProject>true</SingleProject>
+    <ImplicitUsings>false</ImplicitUsings>
+    <XamarinGoogleGuavaListenableFutureOptOut>true</XamarinGoogleGuavaListenableFutureOptOut>
+    <UsingMauiEssentials>true</UsingMauiEssentials>
+
+    <!-- Display name -->
+    <ApplicationTitle>SalmonMAUI</ApplicationTitle>
+
+    <!-- App Identifier -->
+    <ApplicationId>com.companyname.salmonmaui</ApplicationId>
+    <ApplicationIdGuid>a36c16ff-b265-49ca-9ebc-ee7c747d62fe</ApplicationIdGuid>
+
+    <!-- Versions -->
+    <ApplicationDisplayVersion>1.0.5</ApplicationDisplayVersion>
+    <ApplicationVersion>105</ApplicationVersion>
+
+    <SupportedOSPlatformVersion Condition="$([MSBuild]::GetTargetPlatformIdentifier('$(TargetFramework)')) == 'ios'">14.2</SupportedOSPlatformVersion>
+    <SupportedOSPlatformVersion Condition="$([MSBuild]::GetTargetPlatformIdentifier('$(TargetFramework)')) == 'maccatalyst'">14.0</SupportedOSPlatformVersion>
+    <SupportedOSPlatformVersion Condition="$([MSBuild]::GetTargetPlatformIdentifier('$(TargetFramework)')) == 'android'">21.0</SupportedOSPlatformVersion>
+    <SupportedOSPlatformVersion Condition="$([MSBuild]::GetTargetPlatformIdentifier('$(TargetFramework)')) == 'windows'">10.0.17763.0</SupportedOSPlatformVersion>
+    <TargetPlatformMinVersion Condition="$([MSBuild]::GetTargetPlatformIdentifier('$(TargetFramework)')) == 'windows'">10.0.17763.0</TargetPlatformMinVersion>
+    <SupportedOSPlatformVersion Condition="$([MSBuild]::GetTargetPlatformIdentifier('$(TargetFramework)')) == 'tizen'">6.5</SupportedOSPlatformVersion>
+    <DefaultLanguage>en-US</DefaultLanguage>
+    <Version>1.0.5</Version>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <!-- App Icon -->
+    <MauiIcon Include="..\..\..\..\common\common-res\icons\logo_128x128.png" />
+    <!--<MauiIcon Include="Resources\AppIcon\appicon.svg" ForegroundFile="Resources\AppIcon\appiconfg.svg" Color="#512BD4" />-->
+
+    <!-- Splash Screen -->
+    <MauiSplashScreen Include="Resources\Splash\splash.svg" Color="#512BD4" BaseSize="128,128" />
+
+    <!-- Images -->
+    <MauiImage Include="Resources\Images\*" />
+    <MauiImage Update="Resources\Images\dotnet_bot.svg" BaseSize="168,208" />
+
+    <!-- Custom Fonts -->
+    <MauiFont Include="Resources\Fonts\*" />
+
+    <!-- Raw Assets (also remove the "Resources\Raw" prefix) -->
+    <MauiAsset Include="Resources\Raw\**" LogicalName="%(RecursiveDir)%(Filename)%(Extension)" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <None Remove="Platforms\Android\env.conf" />
+    <None Remove="Platforms\Android\Resources\layout\mediaplayer.xml" />
+    <None Remove="README.txt" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <AndroidEnvironment Include="Platforms\Android\env.conf" />
+  </ItemGroup>
+
+
+  <ItemGroup>
+    <Compile Include="..\..\src\Config\SalmonConfig.cs" Link="Config\SalmonConfig.cs" />
+    <Compile Include="..\..\src\Dialog\SalmonDialog.cs" Link="Dialog\SalmonDialog.cs" />
+    
+    
+    <Compile Include="..\..\src\Image\Thumbnails.cs" Link="Image\Thumbnails.cs" />
+    <Compile Include="..\..\src\Prefs\SalmonPreferences.cs" Link="Prefs\SalmonPreferences.cs" />
+    <Compile Include="..\..\src\Utils\URLUtils.cs" Link="Utils\URLUtils.cs" />
+    <Compile Include="..\..\src\Utils\WindowUtils.cs" Link="Utils\WindowUtils.cs" />
+    
+    <Compile Include="..\..\src\ViewModel\ImageViewerViewModel.cs" Link="ViewModel\ImageViewerViewModel.cs" />
+    <Compile Include="..\..\src\ViewModel\MainViewModel.cs" Link="ViewModel\MainViewModel.cs" />
+    <Compile Include="..\..\src\ViewModel\SettingsViewModel.cs" Link="ViewModel\SettingsViewModel.cs" />
+    <Compile Include="..\..\src\ViewModel\TextEditorViewModel.cs" Link="ViewModel\TextEditorViewModel.cs" />
+    <Compile Include="..\..\src\ViewModel\SalmonFileViewModel.cs" Link="ViewModel\SalmonFileViewModel.cs" />
+    <Compile Include="..\..\src\ViewModel\ContentViewerViewModel.cs" Link="ViewModel\ContentViewerViewModel.cs" />
+    <Compile Include="..\..\src\ViewModel\ActionType.cs" Link="ViewModel\ActionType.cs" />
+    
+    <Compile Include="..\..\src\View\ImageViewer.xaml.cs" Link="View\ImageViewer.xaml.cs" />
+    <Compile Include="..\..\src\View\MainWindow.xaml.cs" Link="View\MainWindow.xaml.cs" />
+    <Compile Include="..\..\src\View\SettingsViewer.xaml.cs" Link="View\SettingsViewer.xaml.cs" />
+    <Compile Include="..\..\src\View\TextEditor.xaml.cs" Link="View\TextEditor.xaml.cs" />
+    <Compile Include="..\..\src\View\ContentViewer.xaml.cs" Link="View\ContentViewer.xaml.cs" />
+    <Compile Include="..\..\src\View\DoubleToStringPercentageConverter.cs" Link="View\DoubleToStringPercentageConverter.cs" />
+    <Compile Include="..\..\src\View\BooleanToMultiSelectionConverter.cs" Link="View\BooleanToMultiSelectionConverter.cs" />
+    <Compile Include="..\..\src\View\ViewHandlers.cs" Link="View\ViewHandlers.cs" />
+    <Compile Include="..\..\src\View\StringToWebViewSourceConverter.cs" Link="View\StringToWebViewSourceConverter.cs" />
+
+    <Compile Include="..\..\..\salmon-vault-csharp-common\src\Model\SalmonContentViewer.cs" Link="Model\SalmonContentViewer.cs" />
+    <Compile Include="..\..\..\salmon-vault-csharp-common\src\Model\SalmonVaultManager.cs" Link="Model\SalmonVaultManager.cs" />
+    <Compile Include="..\..\..\salmon-vault-csharp-common\src\Model\SalmonFileAttrQueue.cs" Link="Model\SalmonFileAttrQueue.cs" />
+    <Compile Include="..\..\..\salmon-vault-csharp-common\src\Model\SalmonTextEditor.cs" Link="Model\SalmonTextEditor.cs" />
+    <Compile Include="..\..\..\salmon-vault-csharp-common\src\Model\SalmonImageViewer.cs" Link="Model\SalmonImageViewer.cs" />
+    <Compile Include="..\..\..\salmon-vault-csharp-common\src\Model\SalmonSettings.cs" Link="Model\SalmonSettings.cs" />
+    <Compile Include="..\..\..\salmon-vault-csharp-common\src\Model\Win\SalmonWinVaultManager.cs" Link="Model\Win\SalmonWinVaultManager.cs" />
+    
+    <Compile Include="..\..\..\salmon-vault-csharp-common\src\Services\ServiceLocator.cs" Link="Services\ServiceLocator.cs" />
+    <Compile Include="..\..\..\salmon-vault-csharp-common\src\Services\IFileService.cs" Link="Services\IFileService.cs" />
+    <Compile Include="..\..\..\salmon-vault-csharp-common\src\Services\IWebBrowserService.cs" Link="Services\IWebBrowserService.cs" />
+    <Compile Include="..\..\..\salmon-vault-csharp-common\src\Services\IFileDialogService.cs" Link="Services\IFileDialogService.cs" />
+    <Compile Include="..\..\..\salmon-vault-csharp-common\src\Services\IKeyboardService.cs" Link="Services\IKeyboardService.cs" />
+    <Compile Include="..\..\..\salmon-vault-csharp-common\src\Services\IMediaPlayerService.cs" Link="Services\IMediaPlayerService.cs" />
+
+    <Compile Include="..\..\..\salmon-vault-csharp-common\src\Extensions\EnumExtensions.cs" Link="Extensions\EnumExtensions.cs" />
+    <Compile Include="..\..\..\salmon-vault-csharp-common\src\Extensions\ExceptionExtensions.cs" Link="Extensions\ExceptionExtensions.cs" />
+
+    <Compile Include="..\..\..\salmon-vault-csharp-common\src\Utils\ByteUtils.cs" Link="Utils\ByteUtils.cs" />
+
+    <Compile Include="..\..\..\salmon-vault-csharp-common\src\Dialog\SalmonDialogs.cs" Link="Dialog\SalmonDialogs.cs" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <MauiImage Include="..\..\..\..\common\common-res\icons\file_small.png" Link="Icons\file_small.png">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </MauiImage>
+    <MauiImage Include="..\..\..\..\common\common-res\icons\file.png" Link="Icons\file.png">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </MauiImage>
+    <MauiImage Include="..\..\..\..\common\common-res\icons\folder_small.png" Link="Icons\folder_small.png">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </MauiImage>
+    <MauiImage Include="..\..\..\..\common\common-res\icons\folder.png" Link="Icons\folder.png">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </MauiImage>
+    <MauiImage Include="..\..\..\..\common\common-res\icons\key.png" Link="Icons\key.png">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </MauiImage>
+    <MauiImage Include="..\..\..\..\common\common-res\icons\logo.ico" Link="Icons\logo.ico">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </MauiImage>
+    <MauiImage Include="..\..\..\..\common\common-res\icons\logo.png" Link="Icons\logo.png">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </MauiImage>
+    <MauiImage Include="..\..\..\..\common\common-res\icons\pause.png" Link="Icons\pause.png">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </MauiImage>
+    <MauiImage Include="..\..\..\..\common\common-res\icons\play.png" Link="Icons\play.png">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </MauiImage>
+    <MauiImage Include="..\..\..\..\common\common-res\icons\refresh.png" Link="Icons\refresh.png">
+      <CopyToOutputDirectory>Never</CopyToOutputDirectory>
+    </MauiImage>
+    <MauiImage Include="..\..\..\..\common\common-res\icons\up.png" Link="Icons\up.png">
+      <CopyToOutputDirectory>Never</CopyToOutputDirectory>
+    </MauiImage>
+  </ItemGroup>
+
+  <ItemGroup>
+    <MauiXaml Include="..\..\src\View\ContentViewer.xaml" Link="View\ContentViewer.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </MauiXaml>
+    <MauiXaml Include="..\..\src\View\ImageViewer.xaml" Link="View\ImageViewer.xaml">
+      <Generator>MSBuild:Compile</Generator>
+    </MauiXaml>
+    <MauiXaml Include="..\..\src\View\MainWindow.xaml" Link="View\MainWindow.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </MauiXaml>
+    <MauiXaml Include="..\..\src\View\SettingsViewer.xaml" Link="View\SettingsViewer.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </MauiXaml>
+    <MauiXaml Include="..\..\src\View\TextEditor.xaml" Link="View\TextEditor.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </MauiXaml>
+
+
+  </ItemGroup>
+
+  <ItemGroup>
+    <AndroidResource Include="..\..\..\salmon-vault-dotnet-android\project\Salmon.Vault.Net.Android\Resources\values\strings.xml" Link="Platforms\Android\Resources\values\strings.xml" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Content Include="README.txt">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="MimeTypesMap" Version="1.0.8" />
+    <PackageReference Include="Salmon.Core" Version="1.0.5" />
+    <PackageReference Include="Salmon.FS" Version="1.0.5" />
+    <PackageReference Include="Salmon.Native" Version="1.0.5" />
+    <PackageReference Include="Salmon.Win" Version="1.0.5" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Compile Update="Platforms\Android\AndroidFileService.cs">
+      <ExcludeFromCurrentConfiguration>false</ExcludeFromCurrentConfiguration>
+    </Compile>
+    <Compile Update="Platforms\Android\AndroidFileDialogService.cs">
+      <ExcludeFromCurrentConfiguration>false</ExcludeFromCurrentConfiguration>
+    </Compile>
+    <Compile Update="Platforms\Android\AndroidBrowserService.cs">
+      <ExcludeFromCurrentConfiguration>false</ExcludeFromCurrentConfiguration>
+    </Compile>
+  </ItemGroup>
+
+  <ItemGroup Condition="'$(TargetFramework)' == 'net7.0-android'">
+    <PackageReference Include="Salmon.FS.Android">
+      <Version>1.0.5</Version>
+    </PackageReference>
+    <PackageReference Include="Salmon.Native.Android">
+      <Version>1.0.5</Version>
+    </PackageReference>
+    <PackageReference Include="Xamarin.Google.Guava">
+      <Version>32.0.1</Version>
+    </PackageReference>
+    <PackageReference Include="Xamarin.Kotlin.StdLib">
+      <Version>1.9.10.2</Version>
+    </PackageReference>
+    <PackageReference Include="Xamarin.Kotlin.StdLib.Jdk7">
+      <Version>1.9.10.2</Version>
+    </PackageReference>
+    <PackageReference Include="Xamarin.Kotlin.StdLib.Jdk8">
+      <Version>1.9.10.2</Version>
+    </PackageReference>
+  </ItemGroup>
+
+  <ProjectExtensions>
+    <VisualStudio>
+      <UserProperties XamarinHotReloadDebuggerTimeoutExceptionSalmonMAUIHideInfoBar="True" />
+    </VisualStudio>
+  </ProjectExtensions>
+
+</Project>
+

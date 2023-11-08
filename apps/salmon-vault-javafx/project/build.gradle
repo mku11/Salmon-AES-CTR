@@ -1,0 +1,100 @@
+plugins {
+    id 'java'
+    id 'application'
+    id 'org.openjfx.javafxplugin' version '0.0.13'
+}
+
+group 'com.mku.salmon'
+version '1.0.5'
+
+repositories {
+    maven {
+        allowInsecureProtocol true
+        url 'http://localhost/repository/maven/releases'
+    }
+//    mavenLocal()
+    mavenCentral()
+}
+
+ext {
+    junitVersion = '5.9.1'
+}
+
+sourceCompatibility = '11'
+targetCompatibility = '11'
+
+tasks.withType(JavaCompile) {
+    options.encoding = 'UTF-8'
+}
+
+application {
+    mainModule = 'com.mku.salmon.vault.main'
+    mainClass = 'com.mku.salmon.vault.main.Main'
+}
+
+javafx {
+    version = '17.0.2'
+    modules = ['javafx.controls', 'javafx.fxml', 'javafx.swing', 'javafx.media', 'javafx.graphics']
+}
+
+// path to download the native libraries
+project.ext.set('nativeLibsDir', "$buildDir/libs/natives")
+
+sourceSets {
+    main {
+        java {
+            main.java.srcDirs += '../src'
+            main.java.srcDirs += '../../salmon-vault-java-common/src'
+            main.java.srcDirs += '../../salmon-vault-java-win-common/src'
+        }
+    }
+    main.resources.srcDirs += '../res'
+    main.resources.srcDirs += '../../../common/common-res'
+}
+
+// unzipping the native library
+configurations {
+    nativeImplementation
+}
+task unzipNative(type: Sync) {
+    from {
+        configurations.nativeImplementation.collect { zipTree(it) }
+    }
+    into file(project.nativeLibsDir)
+}
+build.dependsOn unzipNative
+
+dependencies {
+
+    // salmon libs:
+    implementation 'com.mku.salmon:salmon-core:1.0.5'
+    implementation 'com.mku.salmon:salmon-fs:1.0.5'
+    implementation 'com.mku.salmon:salmon-win:1.0.5'
+    // optional fast AES intrinsics and Tiny AES:
+    nativeImplementation 'com.mku.salmon:salmon-native:1.0.5'
+
+    implementation 'net.java.dev.jna:jna:5.13.0'
+    implementation 'net.java.dev.jna:jna-platform:5.13.0'
+
+    testImplementation("org.junit.jupiter:junit-jupiter-api:${junitVersion}")
+    testRuntimeOnly("org.junit.jupiter:junit-jupiter-engine:${junitVersion}")
+}
+
+test {
+    useJUnitPlatform()
+}
+
+ext {
+    javaMainClass = "com.mku.salmon.vault.main.Main"
+}
+
+task runApp(type: JavaExec) {
+    group = "application"
+    description = "Run the application"
+    classpath = sourceSets.main.runtimeClasspath
+    main = javaMainClass
+    systemProperty "java.library.path", "build/libs/natives/lib"
+}
+
+// run the unzipNative task first
+runApp.dependsOn build

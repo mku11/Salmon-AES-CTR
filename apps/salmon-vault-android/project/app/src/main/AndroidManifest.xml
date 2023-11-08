@@ -1,0 +1,56 @@
+<?xml version="1.0" encoding="utf-8"?>
+<manifest xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    package="com.mku.salmon.vault.android"
+    android:versionCode="105"
+    android:versionName="1.0.5">
+
+    <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" />
+    <!-- We need to able to query apps on the device to let the user choose which one to
+    give temporary permission to share encrypted files with -->
+    <uses-permission
+        android:name="android.permission.QUERY_ALL_PACKAGES"
+        tools:ignore="QueryAllPackagesPermission" />
+
+    <application
+        android:name="com.mku.salmon.vault.main.SalmonApplication"
+        android:allowBackup="false"
+        android:icon="@drawable/logo_128x128"
+        android:label="@string/app_name"
+        android:largeHeap="true"
+        android:theme="@style/AppTheme">
+        <provider
+            android:name="androidx.core.content.FileProvider"
+            android:authorities="com.mku.salmon.vault.android.fileprovider"
+            android:exported="false"
+            android:grantUriPermissions="true">
+            <meta-data
+                android:name="android.support.FILE_PROVIDER_PATHS"
+                android:resource="@xml/fileprovider" />
+        </provider>
+
+        <activity
+            android:name="com.mku.salmon.vault.main.SalmonActivity"
+            android:configChanges="orientation|screenSize"
+            android:exported="true">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+
+                <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
+        </activity>
+
+        <activity
+            android:name="com.mku.salmon.vault.main.MediaPlayerActivity"
+            android:configChanges="screenSize|orientation"/>
+
+        <activity
+            android:name="com.mku.salmon.vault.main.WebViewerActivity"
+            android:configChanges="screenSize|orientation"/>
+
+        <activity
+            android:name="com.mku.salmon.vault.main.SettingsActivity"
+            android:configChanges="screenSize|orientation"/>
+
+    </application>
+</manifest>
