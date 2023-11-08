@@ -1,0 +1,15 @@
+﻿<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+        xmlns:local="using:Salmon.Vault.View"
+        x:Class="Salmon.Vault.View.ImageViewer"
+        xmlns:viewmodel="clr-namespace:Salmon.Vault.ViewModel"
+        BindingContext="viewmodel:ImageViewerViewModel">
+    <ContentPage.BindingContext>
+        <viewmodel:ImageViewerViewModel/>
+    </ContentPage.BindingContext>
+    <Image HorizontalOptions="StartAndExpand" VerticalOptions="StartAndExpand" 
+           Source="{Binding ImageSource}" IsAnimationPlaying="True">
+
+    </Image>
+</ContentPage>

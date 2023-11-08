@@ -1,0 +1,133 @@
+﻿<ContentPage x:Class="Salmon.Vault.View.SettingsViewer"
+        xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:local="using:Salmon.Vault.View"
+        xmlns:viewmodel="clr-namespace:Salmon.Vault.ViewModel"
+             Background="Black"
+             >
+    <ContentPage.BindingContext>
+        <viewmodel:SettingsViewModel/>
+    </ContentPage.BindingContext>
+    <ScrollView HorizontalOptions="Center" VerticalOptions="FillAndExpand" 
+                HorizontalScrollBarVisibility="Never"
+                  VerticalScrollBarVisibility="Default"
+                
+                Background="Black">
+        <StackLayout HorizontalOptions="Center" Margin="10,20,10,10" 
+                     Background="{StaticResource SalmonBackground}"
+                     MinimumWidthRequest="400">
+            <Grid HorizontalOptions="FillAndExpand" Margin="8">
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="Auto"/>
+                    <RowDefinition Height="*"/>
+                </Grid.RowDefinitions>
+                <Label Grid.Row="0" FontSize="20" FontAttributes="Bold" Text="Vault" TextColor="White"></Label>
+                <StackLayout Grid.Row="1" Orientation="Vertical" >
+                    <Grid HorizontalOptions="FillAndExpand" Margin="2">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*"/>
+                            <ColumnDefinition Width="Auto"/>
+                        </Grid.ColumnDefinitions>
+                        <StackLayout Grid.Column="0" Orientation="Vertical" 
+                                    Margin="0,0,8,0">
+                            <Label Text="Vault Location" FontSize="16"
+                                   TextColor="White"/>
+                            <Label FontSize="10" 
+                                   TextColor="White"
+                                   Text="{Binding VaultLocation}"/>
+                        </StackLayout>
+                        <ImageButton Grid.Column="1" HorizontalOptions="End" 
+                                Margin="1,1,1,1"
+                                Command="{Binding ClickCommand}"
+                                Source="folder.png"
+                        CommandParameter="{x:Static viewmodel:ActionType.OPEN_VAULT}"
+                             WidthRequest="32" HeightRequest="32"
+                                     Padding="2"
+                                     BorderColor="White" />
+                    </Grid>
+                    <Grid HorizontalOptions="FillAndExpand" Margin="2,2,2,2">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*"/>
+                            <ColumnDefinition Width="Auto"/>
+                        </Grid.ColumnDefinitions>
+                        <Label Grid.Column="0" HorizontalOptions="Start" Text="Password"
+                               TextColor="White" FontSize="16"/>
+                        <ImageButton Grid.Column="1" HorizontalOptions="End" Margin="1,1,1,1"
+                                Command="{Binding ClickCommand}"
+                                CommandParameter="{x:Static viewmodel:ActionType.CHANGE_PASSWORD}"
+                                     WidthRequest="32" HeightRequest="32"
+                                     Padding="2"
+                                Source="key.png"
+                                />
+                    </Grid>
+                </StackLayout>
+            </Grid>
+            <Grid HorizontalOptions="FillAndExpand" Margin="8">
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="Auto"/>
+                    <RowDefinition Height="*"/>
+                </Grid.RowDefinitions>
+                <Label Grid.Row="0" FontAttributes="Bold" FontSize="20" Text="Encryption" 
+                       TextColor="White"/>
+                <StackLayout Grid.Row="1" Orientation="Vertical" HorizontalOptions="FillAndExpand">
+                    <Grid HorizontalOptions="FillAndExpand" Margin="2">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*"/>
+                            <ColumnDefinition Width="Auto"/>
+                        </Grid.ColumnDefinitions>
+                        <Label Grid.Column="0" HorizontalOptions="FillAndExpand" VerticalOptions="Center" 
+                               Text="AES Type" Margin="4" TextColor="White"/>
+                        <Picker MinimumWidthRequest="100" Grid.Column="1" x:Name="AesType" 
+                                VerticalOptions="Center" HorizontalOptions="End"
+                                ItemsSource="{Binding Path=AesTypes}" 
+                                SelectedItem="{Binding Path=AesTypeSelected, Mode=TwoWay}" >
+                        </Picker>
+                    </Grid>
+                </StackLayout>
+            </Grid>
+            <Grid HorizontalOptions="FillAndExpand" Margin="8">
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="*"/>
+                    <RowDefinition Height="Auto"/>
+                </Grid.RowDefinitions>
+                <Label Grid.Row="0" FontAttributes="Bold" FontSize="20" Text="Authorization" TextColor="White"/>
+                <StackLayout Grid.Row="1" Orientation="Vertical" HorizontalOptions="FillAndExpand">
+                    <Grid HorizontalOptions="FillAndExpand" Margin="2">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*"/>
+                            <ColumnDefinition Width="Auto"/>
+                        </Grid.ColumnDefinitions>
+                        <Label Grid.Column="0" HorizontalOptions="FillAndExpand" VerticalOptions="Center" 
+                               Text="Auth Type" Margin="4" TextColor="White"/>
+                        <Picker MinimumWidthRequest="100" Grid.Column="1" x:Name="AuthType" 
+                                    VerticalOptions="Center" ItemsSource="{Binding Path=AuthTypes}" 
+                                    SelectedItem="{Binding Path=AuthTypeSelected, Mode=TwoWay}" 
+                                  />
+                    </Grid>
+                </StackLayout>
+            </Grid>
+            <Grid HorizontalOptions="FillAndExpand" Margin="8">
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="Auto"/>
+                    <RowDefinition Height="*"/>
+                </Grid.RowDefinitions>
+                <Label Grid.Row="0" FontAttributes="Bold" FontSize="20" Text="Miscellaneous" TextColor="White"/>
+                <StackLayout Grid.Row="1" Orientation="Vertical" HorizontalOptions="FillAndExpand">
+                    <Grid HorizontalOptions="FillAndExpand" Margin="2">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*"/>
+                            <ColumnDefinition Width="Auto"/>
+                        </Grid.ColumnDefinitions>
+                        <Label Grid.Column="0" VerticalOptions="Center" HorizontalOptions ="Start" 
+                               Text="Delete source files after import" Margin="4,0,4,4"
+                               TextColor="White"/>
+                        <CheckBox Grid.Column="1" VerticalOptions="Center" HorizontalOptions="Start" 
+                                  x:Name="deleteSourceAfterImport" Color="DarkGrey" BackgroundColor="Black"
+                                  IsChecked="{Binding Path=DeleteSourceAfterImport, Mode=TwoWay}"/>
+                    </Grid>
+                </StackLayout>
+            </Grid>
+        </StackLayout>
+    </ScrollView>
+</ContentPage>
