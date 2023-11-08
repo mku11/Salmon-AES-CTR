@@ -1,0 +1,8 @@
+{
+  "profiles": {
+    "CSharpSamples": {
+      "commandName": "Project",
+      "nativeDebugging": true
+    }
+  }
+}
