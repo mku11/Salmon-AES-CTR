@@ -1,0 +1,121 @@
+
+plugins {
+    id 'com.android.library'
+    id 'maven-publish'
+}
+
+group 'com.mku.salmon'
+description = 'Salmon AES256 CTR android filesystem encryption library'
+version '1.0.5'
+
+repositories {
+    maven {
+        allowInsecureProtocol true
+        url 'http://localhost/repository/maven/releases'
+    }
+    mavenCentral()
+}
+
+android {
+    namespace 'com.mku.salmonfs.android'
+    compileSdk 33
+
+    defaultConfig {
+        minSdk 23
+        targetSdk 33
+
+        testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
+        consumerProguardFiles "consumer-rules.pro"
+    }
+
+    buildTypes {
+        release {
+            minifyEnabled false
+            proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
+        }
+    }
+    compileOptions {
+        sourceCompatibility 11
+        targetCompatibility 11
+    }
+
+    sourceSets {
+        main.java.srcDirs += '../../../src/android/src/salmon-android-fs/'
+    }
+}
+
+dependencies {
+    implementation 'androidx.documentfile:documentfile:1.0.1'
+    implementation 'com.mku.salmon:salmon-core:1.0.5'
+    implementation 'com.mku.salmon:salmon-fs:1.0.5'
+}
+
+task sourcesJar(type: Jar) {
+    classifier = 'sources'
+    from android.sourceSets.main.java.srcDirs
+}
+task javadoc(type: Javadoc) {
+    source = android.sourceSets.main.java.srcDirs
+    classpath += project.files(android.getBootClasspath().join(File.pathSeparator))
+}
+
+afterEvaluate {
+    javadoc.classpath += files(android.libraryVariants.collect { variant ->
+        variant.javaCompileProvider.get().classpath.files
+    })
+}
+
+task javadocJar(type: Jar, dependsOn: javadoc) {
+    classifier = 'javadoc'
+    from javadoc.destinationDir
+}
+
+artifacts {
+    archives sourcesJar
+    archives javadocJar
+}
+
+publishing {
+    publications {
+        salmon(MavenPublication) {
+            groupId 'com.mku.salmon'
+            artifactId 'salmon-fs-android'
+            version '1.0.5'
+            artifact("$buildDir/outputs/aar/salmon-fs-android-release.aar")
+            pom {
+                name = project.name
+                packaging = 'aar'
+                description = project.description
+
+                url = 'https://github.com/mku11/Salmon-AES-CTR'
+
+                scm {
+                    url = 'https://github.com/mku11/Salmon-AES-CTR'
+                }
+
+                licenses {
+                    license {
+                        name = 'MIT License'
+                        url = 'https://github.com/mku11/Salmon-AES-CTR/blob/main/LICENSE'
+                    }
+                }
+
+                developers {
+                    developer {
+                        id = 'mku'
+                        name = 'Max Kas'
+                    }
+                }
+            }
+            artifact sourcesJar
+            artifact javadocJar
+        }
+    }
+    repositories {
+        maven  {
+            url uri("${projectDir}/../../../../output/maven/releases")
+        }
+    }
+}
+
+publish.dependsOn 'assembleRelease'
