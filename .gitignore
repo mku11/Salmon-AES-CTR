@@ -32,7 +32,6 @@ obj
 packages
 Debug
 Release
-**/tiny-AES-c/
 
 Resource.designer.cs
 
