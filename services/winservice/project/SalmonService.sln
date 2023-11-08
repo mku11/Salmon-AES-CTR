@@ -1,0 +1,31 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 17
+VisualStudioVersion = 17.3.32929.385
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "WinServiceTest", "SalmonServiceTest\WinServiceTest.csproj", "{62441736-4C19-4F54-9A23-04F93DE800BD}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "SalmonWinService", "SalmonWinService\SalmonWinService.csproj", "{8ABC52E1-77BA-43B4-927F-5A2A7CE3B4FA}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{62441736-4C19-4F54-9A23-04F93DE800BD}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{62441736-4C19-4F54-9A23-04F93DE800BD}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{62441736-4C19-4F54-9A23-04F93DE800BD}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{62441736-4C19-4F54-9A23-04F93DE800BD}.Release|Any CPU.Build.0 = Release|Any CPU
+		{8ABC52E1-77BA-43B4-927F-5A2A7CE3B4FA}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{8ABC52E1-77BA-43B4-927F-5A2A7CE3B4FA}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{8ABC52E1-77BA-43B4-927F-5A2A7CE3B4FA}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{8ABC52E1-77BA-43B4-927F-5A2A7CE3B4FA}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {A39708D0-568C-440C-9CFB-03DAD470EE19}
+	EndGlobalSection
+EndGlobal

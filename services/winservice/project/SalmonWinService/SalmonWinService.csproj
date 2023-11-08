@@ -1,0 +1,76 @@
+﻿<Project Sdk="Microsoft.NET.Sdk.Worker">
+
+  <PropertyGroup>
+    <TargetFramework>net6.0-windows</TargetFramework>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <UserSecretsId>dotnet-SalmonWinService-1ec69ddf-3346-47e5-84e9-de923d826e88</UserSecretsId>
+    <DockerDefaultTargetOS>Windows</DockerDefaultTargetOS>
+    <OutputType>exe</OutputType>
+    <PublishSingleFile Condition="'$(Configuration)' == 'Release'">true</PublishSingleFile>
+    <RuntimeIdentifier>win-x64</RuntimeIdentifier>
+    <PlatformTarget>x64</PlatformTarget>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <None Remove="install.bat" />
+    <None Remove="README.txt" />
+    <None Remove="uninstall.bat" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Microsoft.Extensions.Hosting" Version="7.0.1" />
+    <PackageReference Include="Microsoft.Extensions.Hosting.WindowsServices" Version="7.0.1" />
+    <PackageReference Include="Microsoft.VisualStudio.Azure.Containers.Tools.Targets" Version="1.18.1" />
+    <PackageReference Include="Salmon.Win" Version="1.0.5" />
+  </ItemGroup>
+
+  <ItemGroup>
+
+    <Compile Include="..\..\src\Config\SalmonConfig.cs">
+      <Link>Config\SalmonConfig.cs</Link>
+    </Compile>
+
+    <Compile Include="..\..\src\Program.cs">
+      <Link>Program.cs</Link>
+    </Compile>
+
+    <Compile Include="..\..\src\SalmonService.cs">
+      <Link>SalmonService.cs</Link>
+    </Compile>
+
+    <Compile Include="..\..\src\WindowsBackgroundService.cs">
+      <Link>WindowsBackgroundService.cs</Link>
+    </Compile>
+    
+    
+    <Compile Include="..\..\src\SequenceServer\Request.cs">
+      <Link>SequenceServer\Request.cs</Link>
+    </Compile>
+    <Compile Include="..\..\src\SequenceServer\Response.cs">
+      <Link>SequenceServer\Response.cs</Link>
+    </Compile>
+    <Compile Include="..\..\src\SequenceServer\SequenceServer.cs">
+      <Link>SequenceServer\SequenceServer.cs</Link>
+    </Compile>    
+  </ItemGroup>
+
+  <ItemGroup>
+    <Content Include="install.bat">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="README.txt">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="uninstall.bat">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="..\..\..\..\LICENSE">
+      <Link>LICENSE</Link>
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="..\..\..\..\NOTICE">
+      <Link>NOTICE</Link>
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+  </ItemGroup>
+</Project>
