@@ -17,7 +17,7 @@ repositories {
 
 android {
     compileSdk 33
-
+    ndkVersion "26.1.10909125"
     defaultConfig {
         minSdk 23
         targetSdk 33
