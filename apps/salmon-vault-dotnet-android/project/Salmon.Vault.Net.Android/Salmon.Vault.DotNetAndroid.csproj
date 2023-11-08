@@ -85,6 +85,7 @@
   </ItemGroup>
 
   <ItemGroup>
+    <PackageReference Include="MimeTypesMap" Version="1.0.8" />
     <PackageReference Include="Salmon.Core" Version="1.0.5" />
     <PackageReference Include="Salmon.FS" Version="1.0.5" />
     <PackageReference Include="Salmon.FS.Android" Version="1.0.5" />
