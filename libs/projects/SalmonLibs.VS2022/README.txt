@@ -3,6 +3,10 @@ To build the c# libraries you will need:
 For additional requirements for each subproject see README.md in its respective folder.
 2. If you want to build the AES intrinsics for Intel x86 (optional) you will need Microsoft Visual Studio C++ package (Visual Studio installer).
 
+To build the native libraries you will need TinyAES 
+To download Tiny Aes source code from the project root folder type:
+git submodule update --recursive --init
+
 Build:
 You can build from the windows command line:
 msbuild SalmonDotNetLibs.sln

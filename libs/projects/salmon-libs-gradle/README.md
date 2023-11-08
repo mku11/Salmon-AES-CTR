@@ -29,6 +29,11 @@ To create the maven packages (see root folder output dir):
 ./gradlew publish --rerun-tasks  
 ```
 
+To build the native libraries you will need TinyAES 
+To download Tiny Aes source code from the project root folder type:
+git submodule update --recursive --init
+
+
 ## Tests and Benchmarks:  
 test files for core, fs, and native subprojects are included in respective test sourceSets (See build.gradle).  
 see salmon-core/src/jmh folder for benchmarks. To run from the command line:  
