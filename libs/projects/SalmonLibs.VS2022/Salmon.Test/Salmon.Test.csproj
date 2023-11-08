@@ -54,7 +54,6 @@
   <ItemGroup>
     <ProjectReference Include="..\Salmon.Core\Salmon.Core.csproj" />
     <ProjectReference Include="..\Salmon.FS\Salmon.FS.csproj" />
-    <ProjectReference Include="..\Salmon.Native\SalmonNative.vcxproj" />
   </ItemGroup>
 
 </Project>

@@ -100,7 +100,7 @@
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
-      <AdditionalLibraryDirectories>..\Salmon.Native\x64\Debug;$(VCInstallDir)UnitTest\lib;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalLibraryDirectories>..\SalmonNative\x64\Debug;$(VCInstallDir)UnitTest\lib;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
       <AdditionalDependencies>salmon.obj;salmon-aes-intr.obj;aes.obj;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
   </ItemDefinitionGroup>
@@ -161,7 +161,7 @@
     <ClCompile Include="..\..\..\test\salmon-native-test-c\SalmonNativeTest.cpp" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\Salmon.Native\SalmonNative.vcxproj">
+    <ProjectReference Include="..\SalmonNative\SalmonNative.vcxproj">
       <Project>{4c23cba6-6b26-4195-a9c5-db47714c75aa}</Project>
     </ProjectReference>
   </ItemGroup>
