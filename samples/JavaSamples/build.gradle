@@ -1,0 +1,58 @@
+plugins {
+    id 'java'
+}
+
+group 'com.mku.salmon'
+version '1.0.5'
+
+repositories {
+    maven {
+        allowInsecureProtocol true
+        url 'http://localhost/repository/maven/releases'
+    }
+//    mavenLocal()
+    mavenCentral()
+}
+
+// path to download the native libraries
+project.ext.set('nativeLibsDir', "$buildDir/libs/natives")
+
+configurations {
+    nativeBundle
+}
+
+dependencies {
+    testImplementation 'org.junit.jupiter:junit-jupiter-api:5.8.1'
+    testRuntimeOnly 'org.junit.jupiter:junit-jupiter-engine:5.8.1'
+
+    // salmon libs:
+    implementation 'com.mku.salmon:salmon-core:1.0.5'
+    implementation 'com.mku.salmon:salmon-fs:1.0.5'
+    // optional fast AES intrinsics and Tiny AES:
+    nativeBundle 'com.mku.salmon:salmon-native:1.0.5'
+}
+
+test {
+    useJUnitPlatform()
+}
+
+task extractNativeBundle(type: Sync) {
+    from {
+        configurations.nativeBundle.collect { zipTree(it) }
+    }
+    into file(project.nativeLibsDir)
+}
+
+classes.dependsOn extractNativeBundle
+
+ext {
+    javaMainClass = "com.mku.salmon.samples.Main"
+}
+
+task run(type: JavaExec) {
+    group = "application"
+    description = "Run Main"
+    classpath = sourceSets.main.runtimeClasspath
+    main = javaMainClass
+    systemProperty "java.library.path", "build/libs/natives/lib"
+}
