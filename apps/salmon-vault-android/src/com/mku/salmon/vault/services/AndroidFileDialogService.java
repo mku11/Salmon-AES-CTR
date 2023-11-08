@@ -1,0 +1,64 @@
+package com.mku.salmon.vault.services;
+/*
+MIT License
+
+Copyright (c) 2021 Max Kas
+
+Permission is hereby granted, free of charge, to any person obtaining a copy
+of this software and associated documentation files (the "Software"), to deal
+in the Software without restriction, including without limitation the rights
+to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+copies of the Software, and to permit persons to whom the Software is
+furnished to do so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in all
+copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+SOFTWARE.
+*/
+
+import android.app.Activity;
+
+import com.mku.func.Consumer;
+import com.mku.salmon.vault.main.ActivityCommon;
+
+import java.util.HashMap;
+
+public class AndroidFileDialogService implements IFileDialogService {
+    private HashMap<Integer, Consumer<Object>> handlers = new HashMap<>();
+    private Activity activity;
+
+    public AndroidFileDialogService(Activity activity) {
+        this.activity = activity;
+    }
+
+    public Consumer<Object> getCallback(int requestCode) {
+        return handlers.get(requestCode);
+    }
+
+    public void openFile(String title, String filename, HashMap<String, String> filter, String initialDirectory, Consumer<Object> onFilePicked, int requestCode) {
+        handlers.put(requestCode, onFilePicked);
+        ActivityCommon.openFilesystem(activity, false, false, filter, null, requestCode);
+    }
+
+    public void openFiles(String title, HashMap<String, String> filter, String initialDirectory, Consumer<Object> onFilesPicked, int requestCode) {
+        handlers.put(requestCode, onFilesPicked);
+        ActivityCommon.openFilesystem(activity, false, true, filter, null, requestCode);
+    }
+
+    public void pickFolder(String title, String initialDirectory, Consumer<Object> onFolderPicked, int requestCode) {
+        handlers.put(requestCode, onFolderPicked);
+        ActivityCommon.openFilesystem(activity, true, false, null, initialDirectory, requestCode);
+    }
+
+    public void saveFile(String title, String filename, HashMap<String, String> filter, String initialDirectory, Consumer<Object> onFilePicked, int requestCode) {
+        handlers.put(requestCode, onFilePicked);
+        ActivityCommon.openFilesystem(activity, true, false, filter, initialDirectory, requestCode);
+    }
+}
