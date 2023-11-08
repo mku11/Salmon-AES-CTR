@@ -32,8 +32,8 @@ obj
 packages
 Debug
 Release
-/c/src/tiny-aes/aes.h
-/c/src/tiny-aes/aes.c
+**/tiny-AES-c/
+
 Resource.designer.cs
 
 inspectionProfiles
