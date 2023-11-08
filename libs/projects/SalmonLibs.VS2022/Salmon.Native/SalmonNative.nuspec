@@ -1,0 +1,29 @@
+<?xml version="1.0"?>
+<package >
+  <metadata>
+    <id>Salmon.Native</id>
+    <version>1.0.5</version>
+    <title>Salmon AES-256 CTR native encryption library</title>
+    <authors>Max Kas</authors>
+    <requireLicenseAcceptance>true</requireLicenseAcceptance>
+    <licenseUrl>https://github.com/mku11/Salmon-AES-CTR/blob/main/LICENSE</licenseUrl>
+    <icon>logo.png</icon>
+    <projectUrl>https://github.com/mku11/Salmon-AES-CTR</projectUrl>
+    <description>Salmon is an AES-256 CTR encryption library with HMAC SHA 256 integrity featuring seekable streams and parallel processing.</description>
+    <tags>AES,AES-256,CTR,Native</tags>
+    <repository url="https://github.com/mku11/Salmon-AES-CTR" />
+  </metadata>
+
+  <files>
+    <file src="..\x64\Debug\SalmonNative.dll"       target="runtimes\win-x64\native"/>
+    <file src="..\x64\Debug\SalmonNative.lib"       target="runtimes\win-x64\native"/>
+    <file src="..\..\..\src\c\salmon\salmon.h"   target="runtimes\win-x64\native\include\salmon"/>
+    <file src="..\..\..\src\c\salmon\salmon-jni\salmon-jni.h"   target="runtimes\win-x64\native\include\salmon\salmon-jni" />
+    <file src="..\..\..\src\c\salmon\salmon-aes-intr\salmon-aes-intr.h"   target="runtimes\win-x64\native\include\salmon\salmon-aes-intr"/>
+    <file src="..\..\..\src\c\tiny-AES-c\aes.h"   target="runtimes\win-x64\native\include\tiny-AES-c"/>
+    <file src="..\..\..\..\common\common-res\icons\logo.png"   target="" />
+    <file src="..\..\..\..\README.md"   target="" />
+    <file src="..\..\..\..\LICENSE"   target="LICENSE" />
+    <file src="..\..\..\..\NOTICE"   target="NOTICE" />
+  </files>
+</package>

@@ -1,0 +1,65 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <TargetFramework>net7.0-android</TargetFramework>
+    <SupportedOSPlatformVersion>26</SupportedOSPlatformVersion>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <LangVersion>10</LangVersion>
+    <Title>Salmon AES256 CTR Android native ARM64 encryption library</Title>
+    <GeneratePackageOnBuild>True</GeneratePackageOnBuild>
+    <PackageIcon>logo.png</PackageIcon>
+    <PackageReadmeFile>README.md</PackageReadmeFile>
+    <PackageLicenseFile>LICENSE</PackageLicenseFile>
+    <PackageRequireLicenseAcceptance>True</PackageRequireLicenseAcceptance>
+    <IncludeSymbols>True</IncludeSymbols>
+    <Authors>Max Kas</Authors>
+    <Company>$(Authors)</Company>
+    <Description>Salmon is an AES-256 CTR encrypted virtual filesystem library with HMAC SHA 256 integrity featuring seekable streams and parallel processing.</Description>
+    <PackageProjectUrl>https://github.com/mku11/Salmon-AES-CTR</PackageProjectUrl>
+    <RepositoryUrl>https://github.com/mku11/Salmon-AES-CTR</RepositoryUrl>
+    <PackageTags>AES,AES-256,CTR,SHA256,HMAC,Encryption,Virtual,Filesystem,File</PackageTags>
+    <PackAsTool>False</PackAsTool>
+    <PackageOutputPath>..\..\..\..\output\nuget\releases</PackageOutputPath>
+    <GenerateDocumentationFile>True</GenerateDocumentationFile>
+    <Version>1.0.5</Version>
+  </PropertyGroup>
+
+
+  <ItemGroup>
+    <Compile Include="..\..\..\src\dotnetandroid\salmon-dotnet-android-native\Transform\AndroidNativeProxy.cs" Link="Transform\AndroidNativeProxy.cs" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <!-- Add the Android ARM64 library we compiled with NDK, see README.md for information -->
+    <AndroidNativeLibrary Include="..\..\salmon-libs-gradle-android\salmon-native-android\build\intermediates\cmake\release\obj\arm64-v8a\libsalmon.so">
+      <Abi>arm64-v8a</Abi>
+    </AndroidNativeLibrary>
+  </ItemGroup>
+
+  <ItemGroup>
+    <None Include="..\..\..\..\common\common-res\icons\logo.png">
+      <Pack>True</Pack>
+      <PackagePath>\</PackagePath>
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="..\..\..\..\LICENSE">
+      <Pack>True</Pack>
+      <PackagePath>\</PackagePath>
+    </None>
+    <None Include="..\..\..\..\NOTICE">
+      <Pack>True</Pack>
+      <PackagePath>\</PackagePath>
+    </None>
+    <None Include="..\..\..\..\NOTICE">
+      <Pack>True</Pack>
+      <PackagePath>\</PackagePath>
+    </None>
+    <Content Include="README.md">
+      <Pack>True</Pack>
+      <PackagePath>\</PackagePath>
+    </Content>
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\Salmon.Core\Salmon.Core.csproj" />
+  </ItemGroup>
+</Project>
