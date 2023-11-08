@@ -1,0 +1,88 @@
+plugins {
+    id 'java-library'
+    id 'maven-publish'
+}
+
+group 'com.mku.salmon'
+description = 'Salmon AES256 CTR filesystem encryption library'
+version '1.0.5'
+
+repositories {
+    mavenCentral()
+}
+
+dependencies {
+    testImplementation project(':salmon-core').sourceSets.test.output
+
+    implementation project(path: ':salmon-core')
+    testImplementation 'org.junit.jupiter:junit-jupiter:5.8.1'
+}
+
+test {
+    useJUnitPlatform()
+}
+
+tasks.withType(Test) {
+    systemProperty "java.library.path", "../salmon-native/build/libs/salmon/shared"
+}
+
+sourceSets {
+    main.java.srcDirs += '../../../src/java/salmon-fs/'
+    test.java.srcDirs += '../../../test/salmon-fs-test-java/'
+}
+
+
+task sourcesJar(type: Jar, dependsOn: classes) {
+    classifier = 'sources'
+    from sourceSets.main.allSource
+}
+
+task javadocJar(type: Jar, dependsOn: javadoc) {
+    classifier = 'javadoc'
+    from javadoc.destinationDir
+}
+
+artifacts {
+    archives sourcesJar
+    archives javadocJar
+}
+
+publishing {
+    publications {
+        mavenJava(MavenPublication) {
+            from components.java
+            pom {
+                name = project.name
+                packaging = 'jar'
+                description = project.description
+                url = 'https://github.com/mku11/Salmon-AES-CTR'
+
+                scm {
+                    url = 'https://github.com/mku11/Salmon-AES-CTR'
+                }
+
+                licenses {
+                    license {
+                        name = 'MIT License'
+                        url = 'https://github.com/mku11/Salmon-AES-CTR/blob/main/LICENSE'
+                    }
+                }
+
+                developers {
+                    developer {
+                        id = 'mku'
+                        name = 'Max Kas'
+                    }
+                }
+            }
+            artifact sourcesJar
+            artifact javadocJar
+        }
+    }
+    repositories {
+        maven  {
+            url uri("${projectDir}/../../../../output/maven/releases")
+        }
+        mavenLocal()
+    }
+}

@@ -1,0 +1,6 @@
+rootProject.name = 'salmon-libs'
+include 'salmon-core'
+include 'salmon-native'
+include 'salmon-fs'
+include 'salmon-win'
+
