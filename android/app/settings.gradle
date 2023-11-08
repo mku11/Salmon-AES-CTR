@@ -1,5 +1,0 @@
-include ':SalmonFS'
-include ':Salmon'
-include ':app'
-rootProject.name = "Salmon"
-include ':SalmonNative'

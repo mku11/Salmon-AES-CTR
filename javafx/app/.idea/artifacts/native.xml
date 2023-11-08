@@ -1,8 +1,0 @@
-<component name="ArtifactManager">
-  <artifact name="native">
-    <output-path>$PROJECT_DIR$/dist</output-path>
-    <root id="root">
-      <element id="file-copy" path="$PROJECT_DIR$/SalmonNative/build/libs/salmon/shared/salmon.dll" />
-    </root>
-  </artifact>
-</component>
