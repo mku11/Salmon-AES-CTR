@@ -1,0 +1,59 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.*?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+
+<?import javafx.scene.input.KeyCodeCombination?>
+<GridPane stylesheets="/css/dark.css" GridPane.hgrow="ALWAYS" GridPane.vgrow="ALWAYS"
+          xmlns="http://javafx.com/javafx/17.0.2-ea" xmlns:fx="http://javafx.com/fxml/1"
+          fx:controller="com.mku.salmon.vault.controller.TextEditorController"
+          minWidth="800" minHeight="600">
+
+    <VBox id="vbox" GridPane.hgrow="ALWAYS" GridPane.vgrow="ALWAYS">
+        <padding>
+            <Insets bottom="10" left="10" right="10" top="10"/>
+        </padding>
+        <GridPane GridPane.hgrow="ALWAYS">
+            <MenuBar GridPane.columnIndex="0" GridPane.hgrow="ALWAYS">
+                <Menu text="File">
+                    <MenuItem onAction="#onSave" text="Save (Ctrl+S)"/>
+                    <MenuItem onAction="#onClose" text="Close"/>
+                </Menu>
+                <Menu text="Operations">
+                    <MenuItem onAction="#onFind" text="Search">
+                        <accelerator>
+                            <KeyCodeCombination alt="UP" code="F" control="DOWN" meta="UP" shift="UP" shortcut="UP"/>
+                        </accelerator>
+                    </MenuItem>
+                </Menu>
+            </MenuBar>
+            <HBox GridPane.columnIndex="1" alignment="CENTER_RIGHT">
+                <padding>
+                    <Insets left="4"/>
+                </padding>
+                <Label text="Search: " GridPane.hgrow="ALWAYS">
+
+                </Label>
+                <TextField GridPane.columnIndex="1" fx:id="searchText" maxWidth="120" focusTraversable="false" onAction="#onSearch">
+
+                </TextField>
+                <Button GridPane.columnIndex="2" text="🔎" fx:id="searchButton" GridPane.hgrow="NEVER" onAction="#onSearch">
+
+                </Button>
+            </HBox>
+        </GridPane>
+        <HBox id="topContainer" VBox.vgrow="ALWAYS">
+            <TextArea fx:id="contentArea" onKeyReleased="#onTextKeyReleased"
+                      HBox.hgrow="ALWAYS" VBox.vgrow="ALWAYS" wrapText="true">
+
+            </TextArea>
+        </HBox>
+        <HBox alignment="CENTER_RIGHT">
+            <padding>
+                <Insets bottom="2" left="2" right="2" top="2"/>
+            </padding>
+            <Label alignment="CENTER_RIGHT" fx:id="status"/>
+        </HBox>
+    </VBox>
+</GridPane>
