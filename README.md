@@ -5,8 +5,8 @@ Salmon is an AES-256 CTR encryption library with HMAC SHA-256 integrity, paralle
 
 [![License: MIT](https://img.shields.io/github/license/mku11/Salmon-AES-CTR)](https://github.com/mku11/Salmon-AES-CTR/blob/main/LICENSE)
 [![GitHub commit activity](https://img.shields.io/github/commit-activity/m/mku11/Salmon-AES-CTR)](https://github.com/mku11/Salmon-AES-CTR/commits/master)
-[![GitHub Releases](https://img.shields.io/github/downloads/mku11/Salmon-AES-CTR/latest/total?logo=github)](https://github.com/mku11/Salmon-AES-CTR/releases)
 [![CodeFactor](https://www.codefactor.io/repository/github/mku11/salmon-AES-CTR/badge)](https://www.codefactor.io/repository/github/mku11/salmon-AES-CTR)
+<!-- [![GitHub Releases](https://img.shields.io/github/downloads/mku11/Salmon-AES-CTR/latest/total?logo=github)](https://github.com/mku11/Salmon-AES-CTR/releases) -->
 
 ## Library Features
 * AES-256 standard AES-256 in CTR Mode.
