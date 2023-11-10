@@ -166,10 +166,10 @@ encStream.write(...);
 SalmonStream decStream = new SalmonStream(key, nonce, EncryptionMode.Decrypt, byteStream);
 encStream.read(...);
 
-// SalmonStream is not a standard java Stream but so you have 
-// to wrap it with SalmonInputStreamWrapper if you want to inject it to 3rd party code:
+// For Java only: SalmonStream is not a standard java Stream but so you have 
+// to wrap it with InputStreamWrapper if you want to inject it to 3rd party code:
 SalmonStream decStream = new SalmonStream(key, nonce, EncryptionMode.Decrypt,byteStream);
-SalmonInputStreamWrapper stream = new SalmonInputStream(decStream);
+InputStreamWrapper stream = new InputStreamWrapper(decStream);
 stream.read(...);
 
 // Or save directly to an encrypted file:
@@ -188,6 +188,11 @@ SalmonFile fileToDecrypt = new SalmonFile(file);
 fileToDecrypt.setEncryptionKey(key);
 SalmonStream inputStream = fileToDecrypt.getInputStream();
 inputStream.read(...);
+
+// To use parallel decryption with 3 threads reading a SalmonFile create a SalmonFileInputStream:
+SalmonFileInputStream fileInputStream = new SalmonFileInputStream(salmonFile, 1, 4*1024*1024, 3, 0);
+fileInputStream.read(...);
+
 // for more detailed examples see the Samples folder.
 
 ```
