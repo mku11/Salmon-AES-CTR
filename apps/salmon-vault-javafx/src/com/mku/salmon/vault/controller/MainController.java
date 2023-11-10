@@ -259,7 +259,7 @@ public class MainController {
     }
 
     public void onOpenVault() {
-        SalmonDialogs.promptCreateVault();
+        SalmonDialogs.promptOpenVault();
     }
 
     public void onCreateVault() {
