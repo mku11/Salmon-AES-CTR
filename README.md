@@ -32,7 +32,7 @@ Salmon is an AES-256 CTR encryption library with HMAC SHA-256 integrity, paralle
 * Admin-Protected nonce sequences: Additional protection from non-admin users (Salmon Windows Service Win10/11 only).
 
 ## Applications
-For a complete showcase of the Salmon API check out the Salmon Vault app offered on several platforms:  
+For a complete showcase of the Salmon API check out the Salmon Vault app offered on several different platforms:  
 [**JavaFX**](https://github.com/mku11/Salmon-AES-CTR/tree/main/apps/salmon-vault-javafx) | [**WPF**](https://github.com/mku11/Salmon-AES-CTR/tree/main/apps/salmon-vault-wpf) | [**Android**](https://github.com/mku11/Salmon-AES-CTR/tree/main/apps/salmon-vault-android) | [**.NET Android**](https://github.com/mku11/Salmon-AES-CTR/tree/main/apps/salmon-vault-dotnet-android) | [**MAUI**](https://github.com/mku11/Salmon-AES-CTR/tree/main/apps/salmon-vault-maui)   
 
 [**Downloads**](https://github.com/mku11/Salmon-AES-CTR/releases)
