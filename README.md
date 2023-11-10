@@ -141,61 +141,110 @@ For a sample using the SalmonDrive and the sequential nonce sequencer see: [Samp
 For a full fledge demo app see: [Salmon Vault](https://github.com/mku11/Salmon-AES-CTR/tree/main/apps)  
 For a simple usage sample see below.
 
+##### Simple encryption/decryption
 ```
-// Get a fresh secure random key you need to keep this somewhere safe.
-// For text passwords derived keys see the Samples folder.
+// Get a fresh secure random key and keep this somewhere safe.
+// For text passwords see the Samples folder.
+// For the more secure sequential nonces see the SalmonDrive sample.
 byte[] key = SalmonGenerator.getSecureRandomBytes(32); // 256-bit key
-// Get a fresh nonce, nonce is not a secret thought it must only be used once!
+
+// Also get a fresh nonce, nonce is not a secret thought it must only be used once per content!
 byte[] nonce = SalmonGenerator.getSecureRandomBytes(8); // 64-bit nonce
 
-// Encrypt/decrypt a byte array using 3 parallel threads:
-byte[] encBytes = new SalmonEncryptor(3).encrypt(bytes, key, nonce, false);
-byte[] decBytes = new SalmonDecryptor(3).decrypt(encBytes, key, nonce, false);
+// Now you encrypt/decrypt a byte array using 2 parallel threads:
+byte[] encBytes = new SalmonEncryptor(2).encrypt(bytes, key, nonce, false);
+byte[] decBytes = new SalmonDecryptor(2).decrypt(encBytes, key, nonce, false);
 
-// Or encrypt a string and save the nonce in the header
+// Or encrypt a text string and save the nonce in the header:
 nonce = SalmonGenerator.getSecureRandomBytes(8); // always get a fresh nonce!
 String encText = SalmonTextEncryptor.encryptString(text, key, nonce, true);
-// Now decrypt the encrypted string
+// Decrypt the encrypted string:
 String decText = SalmonTextEncryptor.decryptString(encText, key, null, true);
+```
 
-// Alternatively use a stream to encrypt a byte stream with write()
-SalmonStream encStream = new SalmonStream(key, nonce, SalmonStream.EncryptionMode.Encrypt, byteStream);
-encStream.write(...);
+##### Use a SalmonStream to encrypt/decrypt in single operations:
+```
+MemoryStream memoryStream = MemoryStream();
+SalmonStream encStream = new SalmonStream(key, nonce, SalmonStream.EncryptionMode.Encrypt, memoryStream);
+encStream.write(data, 0, count); // encrypt the data and write to the memoryStream with a single operation
 
-// Or decrypt an existing encrypted byte stream with seek() and read()
+// Decrypt an existing encrypted byte stream with seek() and read():
 SalmonStream decStream = new SalmonStream(key, nonce, EncryptionMode.Decrypt, byteStream);
-encStream.read(...);
+encStream.seek(...);
+encStream.read(...); // single operation to decrypt and read
+```
 
-// For Java only: SalmonStream is not a standard java Stream but so you have 
-// to wrap it with InputStreamWrapper if you want to inject it to 3rd party code:
-SalmonStream decStream = new SalmonStream(key, nonce, EncryptionMode.Decrypt,byteStream);
-InputStreamWrapper stream = new InputStreamWrapper(decStream);
-stream.read(...);
-
-// Or save directly to an encrypted file:
-// Instantiate a new file with the path on disk:
+##### Use SalmonFile to encrypt to a file
+```
+// Instantiate a new real file on the disk:
 JavaFile file = new JavaFile(filePath);
+// or a DotNetFile for c#:
+// DotNetFile file = new DotNetFile(filePath);
+
+// always get a fresh nonce!
+nonce = SalmonGenerator.getSecureRandomBytes(8); 
+
+// Wrap the file in a SalmonFile:
 SalmonFile salmonFile = new SalmonFile(file);
-nonce = SalmonGenerator.getSecureRandomBytes(8); // always get a fresh nonce!
 salmonFile.setEncryptionKey(key);
 salmonFile.setRequestedNonce(nonce);
-// get an output stream
+
+// Get an output stream for writing:
 SalmonStream outputStream = salmonFile.getOutputStream();
-// writing to the stream will automatically encrypt the data.
+// writing to the stream will automatically encrypt the data and write to the file.
 outputStream.write(...);
-// to decrypt get an output stream and read directly:
+
+// To decrypt and read directly from the encrypted file:
 SalmonFile fileToDecrypt = new SalmonFile(file);
 fileToDecrypt.setEncryptionKey(key);
 SalmonStream inputStream = fileToDecrypt.getInputStream();
-inputStream.read(...);
+inputStream.read(...); // read and decrypt in a single operation
 
-// To use parallel decryption with 3 threads reading a SalmonFile create a SalmonFileInputStream:
+// To use parallel tasks for decrypting a SalmonFile create a SalmonFileInputStream with 3 threads:
 SalmonFileInputStream fileInputStream = new SalmonFileInputStream(salmonFile, 1, 4*1024*1024, 3, 0);
 fileInputStream.read(...);
-
-// for more detailed examples see the Samples folder.
-
 ```
+
+##### Enable the AES-NI intrinsics
+```
+// To set the fast native AesIntrinsics:
+SalmonStream.setAesProviderType(SalmonStream.ProviderType.AesIntrinsics);
+```
+
+##### Inject the SalmonStream to 3rd party code
+```
+// If you work with Java and want to inject a SalmonStream to 3rd party code to read the contents
+// Wrap it with InputStreamWrapper which is a standard Java InputStream:
+SalmonStream decStream = new SalmonStream(key, nonce, EncryptionMode.Decrypt, byteStream);
+InputStreamWrapper stream = new InputStreamWrapper(decStream);
+// somewhere inside the 3rd party code the data will be decrypted
+// stream.read(...); 
+```
+
+##### Use the SalmonDrive and the virtual Filesystem API:
+```
+// If you don't want to deal with the above you can directly use the SalmonDrive
+// which will take care generating the nonces, use a text password based key,
+// and create a virtual drive in a folder which you can operate via a virtual filesystem API.
+SalmonDrive drive = SalmonDriveManager.createDrive("c:\path\to\your\drive", password);
+SalmonFileCommander commander = new SalmonFileCommander(SalmonDefaultOptions.getBufferSize(), SalmonDefaultOptions.getBufferSize(), 2);
+JavaFile[] files = new JavaFile[]{new JavaFile("data/file.txt")};
+// import file(s):
+JavaFile[] files = new JavaFile[]{new JavaFile("data/file.txt")};
+commander.importFiles(files, drive.getVirtualRoot(), false, true, (taskProgress) -> {
+	System.out.println("file importing: " + taskProgress.getFile().getBaseName() + ": "
+		+ taskProgress.getProcessedBytes() + "/" + taskProgress.getTotalBytes() + " bytes");
+	}, IRealFile.autoRename, (file, ex) -> {
+		// file failed to import
+	});
+// get for the file:
+SalmonFile file = drive.getVirtualRoot().getChild("file.txt");
+// now read from the stream using parallel threads and caching:
+SalmonFileInputStream inputStream = new SalmonFileInputStream(file, 4, 4 * 1024 * 1024, 2, 256 * 1024);
+inputStream.read(...);
+```
+
+For more detailed examples see the Samples folder.
 
 #### C/C++  
 There is no stream support for C/C++ but you can use the native AES-NI subroutines directly as in the example below.
