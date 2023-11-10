@@ -162,7 +162,7 @@ String encText = SalmonTextEncryptor.encryptString(text, key, nonce, true);
 String decText = SalmonTextEncryptor.decryptString(encText, key, null, true);
 ```
 
-##### Use a SalmonStream to encrypt/decrypt in single operations:
+##### Use a SalmonStream to encrypt/write and decrypt/read using single operations
 ```
 MemoryStream memoryStream = MemoryStream();
 SalmonStream encStream = new SalmonStream(key, nonce, SalmonStream.EncryptionMode.Encrypt, memoryStream);
@@ -174,7 +174,7 @@ encStream.seek(...);
 encStream.read(...); // single operation to decrypt and read
 ```
 
-##### Use SalmonFile to encrypt to a file
+##### Encrypt and write directly to a file
 ```
 // Instantiate a new real file on the disk:
 JavaFile file = new JavaFile(filePath);
@@ -211,22 +211,23 @@ fileInputStream.read(...);
 SalmonStream.setAesProviderType(SalmonStream.ProviderType.AesIntrinsics);
 ```
 
-##### Inject the SalmonStream to 3rd party code
+##### Inject the SalmonStream into 3rd party code
 ```
 // If you work with Java and want to inject a SalmonStream to 3rd party code to read the contents
 // Wrap it with InputStreamWrapper which is a standard Java InputStream:
 SalmonStream decStream = new SalmonStream(key, nonce, EncryptionMode.Decrypt, byteStream);
 InputStreamWrapper stream = new InputStreamWrapper(decStream);
-// somewhere inside the 3rd party code the data will be decrypted
+// somewhere inside the 3rd party code the data will be decrypted and read transparently
 // stream.read(...); 
 ```
 
 ##### Use the SalmonDrive and the virtual Filesystem API:
 ```
 // If you don't want to deal with the above you can directly use the SalmonDrive
-// which will take care generating the nonces, use a text password based key,
-// and create a virtual drive in a folder which you can operate via a virtual filesystem API.
+// which will a) take care of generating secure sequential nonces, b) use a text password based key,
+// and c) create a virtual drive in a folder which you can operate via a virtual filesystem API.
 SalmonDrive drive = SalmonDriveManager.createDrive("c:\path\to\your\drive", password);
+// use 2 threads for encrypting and importing files
 SalmonFileCommander commander = new SalmonFileCommander(SalmonDefaultOptions.getBufferSize(), SalmonDefaultOptions.getBufferSize(), 2);
 JavaFile[] files = new JavaFile[]{new JavaFile("data/file.txt")};
 // import file(s):
@@ -237,7 +238,7 @@ commander.importFiles(files, drive.getVirtualRoot(), false, true, (taskProgress)
 	}, IRealFile.autoRename, (file, ex) -> {
 		// file failed to import
 	});
-// get for the file:
+// use the virtual filesystem API to get the file:
 SalmonFile file = drive.getVirtualRoot().getChild("file.txt");
 // now read from the stream using parallel threads and caching:
 SalmonFileInputStream inputStream = new SalmonFileInputStream(file, 4, 4 * 1024 * 1024, 2, 256 * 1024);
