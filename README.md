@@ -1,4 +1,4 @@
-![alt text](https://github.com/mku11/Salmon/blob/main/common/common-res/icons/logo.png)
+![alt text](https://github.com/mku11/Salmon-AES-CTR/blob/wip/common/common-res/icons/logo.png)
 
 # Salmon
 Salmon is an AES-256 CTR encryption library with HMAC SHA-256 integrity, parallel file operations (read/write), and seekable stream support. It provides a high level, low-ceremony, consistent, and transparent API for encrypted streams and files in Java and C#. Salmon is using low-level fast subroutines using Intel x86 and ARM64 intrinsics that you can alternatively include in your C/C++ projects.  
