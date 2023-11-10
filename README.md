@@ -33,11 +33,7 @@ Salmon is an AES-256 CTR encryption library with HMAC SHA-256 integrity, paralle
 
 ## Applications
 For a complete showcase of the Salmon API check out the Salmon Vault app offered on several platforms:  
-[**JavaFX**](https://github.com/mku11/Salmon-AES-CTR/tree/main/apps/salmon-vault-javafx)  
-[**WPF**](https://github.com/mku11/Salmon-AES-CTR/tree/main/apps/salmon-vault-wpf)  
-[**Android**](https://github.com/mku11/Salmon-AES-CTR/tree/main/apps/salmon-vault-android)  
-[**.NET Android**](https://github.com/mku11/Salmon-AES-CTR/tree/main/apps/salmon-vault-dotnet-android)  
-[**MAUI**](https://github.com/mku11/Salmon-AES-CTR/tree/main/apps/salmon-vault-maui)  
+[**JavaFX**](https://github.com/mku11/Salmon-AES-CTR/tree/main/apps/salmon-vault-javafx) | [**WPF**](https://github.com/mku11/Salmon-AES-CTR/tree/main/apps/salmon-vault-wpf) | [**Android**](https://github.com/mku11/Salmon-AES-CTR/tree/main/apps/salmon-vault-android) | [**.NET Android**](https://github.com/mku11/Salmon-AES-CTR/tree/main/apps/salmon-vault-dotnet-android) | [**MAUI**](https://github.com/mku11/Salmon-AES-CTR/tree/main/apps/salmon-vault-maui)   
 
 [**Downloads**](https://github.com/mku11/Salmon-AES-CTR/releases)
 
@@ -45,7 +41,8 @@ For a complete showcase of the Salmon API check out the Salmon Vault app offered
 
 ### Gradle  
 
-Make sure you add the salmon repository:
+To integrate the Salmon libraries to your gradle project add the salmon repository:  
+
 ```
 repositories {
     maven {
@@ -96,7 +93,7 @@ dependencies {
 
 ### Maven
 
-Add the salmon repository:
+To integrate the Salmon libraries to your maven project add the salmon repository:
 ```
 <repositories>
     <repository>
@@ -126,6 +123,7 @@ Now add the dependencies:
 
 ### Nuget
 
+To integrate the Salmon libraries to your Visual Studio project:
 Download the Nuget packages from [Salmon nuget repo](https://github.com/mku11/Repo/tree/main/nuget/releases)  
 Within Visual Studio go to Tools / Optons / Nuget Package Manager / Package Sources  
 Create a new source with a name like "Salmon Repo" and add the local dir that has the downloaded packages.  
