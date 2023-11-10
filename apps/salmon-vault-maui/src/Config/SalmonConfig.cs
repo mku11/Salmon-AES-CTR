@@ -36,11 +36,11 @@ public class SalmonConfig
             "webview2 - https://learn.microsoft.com/en-us/microsoft-edge/webview2/\n" +
             "Xamarin Android bindings - MIT and Apache 2.0 License - https://github.com/xamarin/AndroidX\n\n" +
             "For more information visit the project website";
-    public static readonly string SourceCodeURL = "https://github.com/mku11/Salmon";
+    public static readonly string SourceCodeURL = "https://github.com/mku11/Salmon-AES-CTR";
 
     // maui winui3 will be using a virtualized registry so we need to set different names
     // so they don't clash with other salmon apps
-    public static readonly string REGISTRY_CHKSUM_KEY = "FILESEQCHKSUM_MAUI_DBG";
+    public static readonly string REGISTRY_CHKSUM_KEY = "FILESEQCHKSUM_MAUI";
     public static readonly string FILE_SEQ_FILENAME = "config_maui.xml";
 
     internal static readonly string FFMPEGLibraryURL = "https://github.com/BtbN/FFmpeg-Builds/releases";

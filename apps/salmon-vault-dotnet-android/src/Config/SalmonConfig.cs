@@ -35,7 +35,7 @@ public class SalmonConfig
 			"MimeTypesMap - MIT License - https://github.com/hey-red/MimeTypesMap/blob/master/LICENSE\n" +
             "Xamarin Android bindings - MIT and Apache 2.0 License - https://github.com/xamarin/AndroidX\n\n" +
             "For more information visit the project website";
-    public static readonly string SourceCodeURL = "https://github.com/mku11/Salmon";
+    public static readonly string SourceCodeURL = "https://github.com/mku11/Salmon-AES-CTR";
     
     public static readonly string FILE_SEQ_FILENAME = "config.xml";
     // use the webview to view content instead of the image viewer and media players.

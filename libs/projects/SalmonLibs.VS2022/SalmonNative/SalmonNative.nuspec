@@ -15,8 +15,9 @@
   </metadata>
 
   <files>
-    <file src="..\x64\Debug\SalmonNative.dll"       target="runtimes\win-x64\native"/>
-    <file src="..\x64\Debug\SalmonNative.lib"       target="runtimes\win-x64\native"/>
+    <!--Change the path to debug if you're in developement-->
+    <file src="..\x64\Release\SalmonNative.dll"       target="runtimes\win-x64\native"/>
+    <file src="..\x64\Release\SalmonNative.lib"       target="runtimes\win-x64\native"/>
     <file src="..\..\..\src\c\salmon\salmon.h"   target="runtimes\win-x64\native\include\salmon"/>
     <file src="..\..\..\src\c\salmon\salmon-jni\salmon-jni.h"   target="runtimes\win-x64\native\include\salmon\salmon-jni" />
     <file src="..\..\..\src\c\salmon\salmon-aes-intr\salmon-aes-intr.h"   target="runtimes\win-x64\native\include\salmon\salmon-aes-intr"/>

@@ -9,8 +9,12 @@ version '1.0.5'
 
 repositories {
     maven {
-        allowInsecureProtocol true
-        url 'http://localhost/repository/maven/releases'
+        // uncomment for local repo
+        // allowInsecureProtocol true
+        // url 'http://localhost/repository/maven/releases'
+
+        // official salmon repo
+        url 'https://github.com/mku11/Repo/raw/main/maven/releases'
     }
     mavenCentral()
 }
@@ -52,7 +56,7 @@ android {
     externalNativeBuild {
         cmake {
             path "../../../src/android/make/CMakeLists.txt"
-            version "3.18.1"
+            version "3.22.1"
         }
     }
     sourceSets {

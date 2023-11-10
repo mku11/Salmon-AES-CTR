@@ -2,9 +2,13 @@
 buildscript {
     repositories {
         maven {
-            allowInsecureProtocol true
-            url 'http://localhost/repository/maven/releases'
-        }
+			// uncomment for local repo
+			// allowInsecureProtocol true
+			// url 'http://localhost/repository/maven/releases'
+
+			// official salmon repo
+			url 'https://github.com/mku11/Repo/raw/main/maven/releases'
+		}
         google()
         jcenter()
         maven {

@@ -133,7 +133,7 @@
       <FunctionLevelLinking>true</FunctionLevelLinking>
       <IntrinsicFunctions>true</IntrinsicFunctions>
       <SDLCheck>true</SDLCheck>
-      <PreprocessorDefinitions>NDEBUG;SALMONNATIVE_EXPORTS;_WINDOWS;_USRDLL;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>NDEBUG;SALMONNATIVE_EXPORTS;_WINDOWS;_USRDLL;%(PreprocessorDefinitions);USE_TINY_AES;AES256=1</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
       <PrecompiledHeader>NotUsing</PrecompiledHeader>
       <PrecompiledHeaderFile>pch.h</PrecompiledHeaderFile>
@@ -145,6 +145,12 @@
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <EnableUAC>false</EnableUAC>
     </Link>
+    <PostBuildEvent>
+      <Command>..\packages\NuGet.CommandLine.6.7.0\tools\NuGet.exe pack SalmonNative.nuspec -outputDir ..\..\..\..\output\nuget\releases</Command>
+    </PostBuildEvent>
+    <PostBuildEvent>
+      <Message>Creating nuget package</Message>
+    </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClInclude Include="..\..\..\src\c\salmon\salmon-aes-intr\salmon-aes-intr.h" />

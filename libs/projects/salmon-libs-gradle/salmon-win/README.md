@@ -9,8 +9,7 @@ You can add the libraries to your project using gradle:
 ```
 repositories {
     maven {
-        allowInsecureProtocol true
-        url 'http://localhost/repository/maven/releases'
+        url 'https://github.com/mku11/Repo/raw/main/maven/releases'
     }
     ...
 }

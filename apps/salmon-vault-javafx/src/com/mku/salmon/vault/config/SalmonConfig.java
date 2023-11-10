@@ -34,10 +34,10 @@ public class SalmonConfig {
             "Java Native Access - Apache 2.0 - https://github.com/java-native-access/jna\n" +
             "JavaFX - GPLv2.0 - https://github.com/openjdk/jfx\n\n" +
             "For more information visit the project website";
-    public static final String SourceCodeURL = "https://github.com/mku11/Salmon";
+    public static final String SourceCodeURL = "https://github.com/mku11/Salmon-AES-CTR";
     public static final String icon = "icons/logo_48x48.png";
     public static final String css = "/css/dark.css";
-    public static final String REGISTRY_CHKSUM_KEY = "FILESEQCHKSUM_DBG";
+    public static final String REGISTRY_CHKSUM_KEY = "FILESEQCHKSUM";
     public static final String FILE_SEQ_FILENAME = "config.xml";
     public static String getVersion() {
         return SalmonConfig.class.getPackage().getImplementationVersion();

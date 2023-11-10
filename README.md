@@ -3,9 +3,9 @@
 # Salmon
 Salmon is an AES-256 CTR encryption library with HMAC SHA-256 integrity, parallel file operations (read/write), and seekable stream support. It provides a high level, low-ceremony, consistent, and transparent API for encrypted streams and files in Java and C#. Salmon is using low-level fast subroutines using Intel x86 and ARM64 intrinsics that you can alternatively include in your C/C++ projects.  
 
-[![License: MIT](https://img.shields.io/github/license/mku11/salmon-AES-CTR)](https://github.com/mku11/salmon-AES-CTR/blob/main/LICENSE)
-[![GitHub commit activity](https://img.shields.io/github/commit-activity/m/mku11/salmon-AES-CTR)](https://github.com/mku11/salmon-AES-CTR/commits/master)
-[![GitHub Releases](https://img.shields.io/github/downloads/mku11/salmon-AES-CTR/latest/total?logo=github)](https://github.com/mku11/salmon-AES-CTR/releases)
+[![License: MIT](https://img.shields.io/github/license/mku11/Salmon-AES-CTR)](https://github.com/mku11/Salmon-AES-CTR/blob/main/LICENSE)
+[![GitHub commit activity](https://img.shields.io/github/commit-activity/m/mku11/Salmon-AES-CTR)](https://github.com/mku11/Salmon-AES-CTR/commits/master)
+[![GitHub Releases](https://img.shields.io/github/downloads/mku11/Salmon-AES-CTR/latest/total?logo=github)](https://github.com/mku11/Salmon-AES-CTR/releases)
 <!-- [![CodeFactor](https://www.codefactor.io/repository/github/mku11/salmon-AES-CTR/badge)](https://www.codefactor.io/repository/github/mku11/salmon-AES-CTR) -->
 
 ## Library Features
@@ -33,23 +33,30 @@ Salmon is an AES-256 CTR encryption library with HMAC SHA-256 integrity, paralle
 
 ## Applications
 For a complete showcase of the Salmon API check out the Salmon Vault app offered on several platforms:  
-JavaFX, WPF, Android, .Net Android, MAUI.  
+[**JavaFX**](https://github.com/mku11/Salmon-AES-CTR/apps/salmon-vault-javafx)  
+[**WPF**](https://github.com/mku11/Salmon-AES-CTR/salmon-vault-wpf)  
+[**Android**](https://github.com/mku11/Salmon-AES-CTR/apps/salmon-vault-android)  
+[**.NET Android**](https://github.com/mku11/Salmon-AES-CTR/apps/salmon-vault-dotnet-android)  
+[**MAUI**](https://github.com/mku11/Salmon-AES-CTR/apps/salmon-vault-maui)  
 
-[**Download Salmon Vault**](https://github.com/mku11/Salmon-AES-CTR/releases)  
-  ![alt text](https://github.com/mku11/Salmon/blob/main/screenshots/Salmon%20Vault%20WPF.png)  
+[**Downloads**](https://github.com/mku11/Salmon-AES-CTR/releases)
 
 ---
 
 ### Gradle  
-You can add the java libraries to your project using gradle:  
+
+Make sure you add the salmon repository:
 ```
 repositories {
     maven {
-        allowInsecureProtocol true
-        url 'http://localhost/repository/maven/releases'
+        url 'https://github.com/mku11/Repo/raw/main/maven/releases'
     }
     ...
 }
+```
+
+You can now add the java libraries to your project: 
+```
 dependencies {
     implementation 'com.mku.salmon:salmon-core:1.0.5'
     implementation 'com.mku.salmon:salmon-fs:1.0.5'
@@ -57,11 +64,12 @@ dependencies {
     // for android
     implementation 'com.mku.salmon:salmon-fs-android:1.0.5'
     
-    // uncomment to use optional fast AES intrinsics and Tiny AES
-    // use SalmonStream.setProviderType() within your code
-    // implementation 'com.mku.salmon:salmon-native-android:1.0.5'
+    // optional fast AES intrinsics and Tiny AES
+    // make sure you use SalmonStream.setProviderType() to set the provider in java
+    implementation 'com.mku.salmon:salmon-native-android:1.0.5'
 }
 ```
+
 ### Gradle for windows native library:
 To add the native library for windows add the gradle task below to gradle.build:
 ```
@@ -87,6 +95,8 @@ dependencies {
 ```
 
 ### Maven
+
+Add the salmon repository:
 ```
 <repositories>
     <repository>
@@ -95,6 +105,10 @@ dependencies {
     </repository>     
     ...
 </repositories>
+```
+
+Now add the dependencies:
+```
 <dependencies>
     <dependency>
         <groupId>com.mku.salmon</groupId>
@@ -109,9 +123,11 @@ dependencies {
     ...
 </dependencies>
 ```
+
 ### Nuget
-Download the Nuget packages from [Here](https://github.com/mku11/Repo/nuget/releases)
+
 ```
+Download the Nuget packages from [Here](https://github.com/mku11/Repo/nuget/releases)
 Within Visual Studio go to Tools / Optons / Nuget Package Manager / Package Sources  
 Create a new source with a name like "Salmon Repo" and add the local dir that has the downloaded packages.  
 Then bring up the Nuget Package Manager and change the Package Source to "Salmon Repo".  
@@ -124,8 +140,8 @@ Install the salmon packages like you usually do.
 #### Java / C#
 The API is consistent across platforms with slight variations on naming conventions between Java and C#.  
   
-For a sample using the SalmonDrive and the sequential nonce sequencer see: [Samples](https://github.com/mku11/Salmon/tree/main/samples)  
-For a full fledge demo app see: [Salmon Vault](https://github.com/mku11/Salmon/tree/main/apps)  
+For a sample using the SalmonDrive and the sequential nonce sequencer see: [Samples](https://github.com/mku11/Salmon-AES-CTR/tree/main/samples)  
+For a full fledge demo app see: [Salmon Vault](https://github.com/mku11/Salmon-AES-CTR/tree/main/apps)  
 For a simple usage sample see below.
 
 ```
@@ -181,7 +197,7 @@ inputStream.read(...);
 
 #### C/C++  
 There is no stream support for C/C++ but you can use the native AES-NI subroutines directly as in the example below.
-For a full working C++ sample see: [Samples](https://github.com/mku11/Salmon/tree/main/samples)
+For a full working C++ sample see: [Samples](https://github.com/mku11/Salmon-AES-CTR/tree/main/samples)
 
 ```
 // encrypt/decrypt byte array using low level subroutines
@@ -230,7 +246,7 @@ int decBytes = salmon_transform(
 
 ### Specifications
 Want to know more about Salmon specs and subprojects?  
-Click on [Salmon specifications and formats](https://github.com/mku11/Salmon/tree/main/docs)   
+Click on [Salmon specifications and formats](https://github.com/mku11/Salmon-AES-CTR/tree/main/docs)   
 For how to compile and build each subproject see README.md in its respective folder.
 
 ### Limitations
@@ -254,7 +270,7 @@ Code contributions are not accepted.
 Bug reports and security POCs are more than welcome!  
   
 ### License
-Salmon is released under MIT Licence, see [LICENSE](https://github.com/mku11/Salmon/blob/main/LICENSE) file.
+Salmon is released under MIT Licence, see [LICENSE](https://github.com/mku11/Salmon-AES-CTR/blob/main/LICENSE) file.
 Make sure you read the LICENSE file and display proper attribution if you decide to use this software.
 Dependency libraries from Github, Maven, and NuGet are covered by their own license  
-see [NOTICE](https://github.com/mku11/Salmon/blob/main/LICENSE)  
+see [NOTICE](https://github.com/mku11/Salmon-AES-CTR/blob/main/LICENSE)  

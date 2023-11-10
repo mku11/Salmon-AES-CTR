@@ -8,10 +8,6 @@ description = 'Salmon AES256 CTR encryption library for windows'
 version '1.0.5'
 
 repositories {
-    maven {
-        allowInsecureProtocol true
-        url 'http://localhost/repository/maven/releases'
-    }
     mavenCentral()
 }
 

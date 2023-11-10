@@ -36,8 +36,8 @@ public class SalmonConfig
             "MimeTypesMap - MIT License - https://github.com/hey-red/MimeTypesMap/blob/master/LICENSE\n" +
             "webview2 - https://learn.microsoft.com/en-us/microsoft-edge/webview2/\n\n" +
             "For more information visit the project website";
-    public static readonly string SourceCodeURL = "https://github.com/mku11/Salmon";
-    public static readonly string REGISTRY_CHKSUM_KEY = "FILESEQCHKSUM_DBG";
+    public static readonly string SourceCodeURL = "https://github.com/mku11/Salmon-AES-CTR";
+    public static readonly string REGISTRY_CHKSUM_KEY = "FILESEQCHKSUM";
     public static readonly string FILE_SEQ_FILENAME = "config.xml";
     public static readonly string FFMPEGLibraryURL = "https://github.com/BtbN/FFmpeg-Builds/releases";
     public static readonly string FFMPEGLibraryVersion = "ffmpeg-n4.4-latest-win64-gpl-shared-4.4.zip";

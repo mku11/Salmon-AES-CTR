@@ -9,7 +9,7 @@ public class SalmonConfig {
             "Open source projects included:\n" +
             "TinyAES - The Unlicense - https://github.com/kokke/tiny-AES-c\n\n" +
             "For more information visit the project website";
-    public static final String SourceCodeURL = "https://github.com/mku11/Salmon";
+    public static final String SourceCodeURL = "https://github.com/mku11/Salmon-AES-CTR";
     public static final String FILE_SEQ_FILENAME = "config.xml";
 
     public static final String FILE_PROVIDER = "com.mku.salmon.vault.android.fileprovider";
