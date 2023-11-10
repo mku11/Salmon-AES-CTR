@@ -250,9 +250,9 @@ For how to compile and build each subproject see README.md in its respective fol
 
 ### Limitations
 * SalmonStream is seekable only if the backed resource supports random access (disk, memory, network).
-* SalmonStream is not Thread Safe! If you want to use parallel processing you need to use [SalmonEncryptor]/[SalmonDecryptor].
+* SalmonStream is not Thread Safe! If you want to use parallel processing you need to use SalmonEncryptor/SalmonDecryptor.
 * SalmonFile is seekable only if the backed resource supports random access (disk, memory, network).
-* SalmonFile is not Thread Safe! If you want to use parallel processing you need to use [SalmonFileImporter]/[SalmonFileExporter].
+* SalmonFile is not Thread Safe! If you want to use parallel processing you need to use SalmonFileImporter/SalmonFileExporter.
 * Importing files to a salmon virtual drive using different devices requires authorization by an already authorized device for each  virtual drive. The device that created the drive is by default authorized. The authorization mechanism protects against repeated access based attacks!
 * Make sure that you never backup and restore the Nonce Sequencer files in your Windows Device! They are located in each user %LOCALAPPDATA%\\.salmon directory (including the LocalSystem user if you use the Salmon Windows Service). So make sure you exclude them from backups and restores.
 * The Windows user sequencer files are not secure from other apps! Also do not share your device account with other users! Salmon will attempt to notify you if it encounters tampering on the sequencer though for additional security you should use the Salmon Windows Service which protects the sequencer under the LocalSystem space.
