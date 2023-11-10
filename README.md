@@ -100,7 +100,7 @@ To integrate the Salmon libraries to your maven project add the salmon repositor
 <repositories>
     <repository>
         <id>mku-salmon-repo</id>
-        <url>https://localhost/repository/maven/releases/</url>
+        <url>https://github.com/mku11/Repo/raw/main/maven/releases</url>
     </repository>     
     ...
 </repositories>
