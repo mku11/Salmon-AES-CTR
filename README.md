@@ -6,7 +6,7 @@ Salmon is an AES-256 CTR encryption library with HMAC SHA-256 integrity, paralle
 [![License: MIT](https://img.shields.io/github/license/mku11/Salmon-AES-CTR)](https://github.com/mku11/Salmon-AES-CTR/blob/main/LICENSE)
 [![GitHub commit activity](https://img.shields.io/github/commit-activity/m/mku11/Salmon-AES-CTR)](https://github.com/mku11/Salmon-AES-CTR/commits/master)
 [![GitHub Releases](https://img.shields.io/github/downloads/mku11/Salmon-AES-CTR/latest/total?logo=github)](https://github.com/mku11/Salmon-AES-CTR/releases)
-<!-- [![CodeFactor](https://www.codefactor.io/repository/github/mku11/salmon-AES-CTR/badge)](https://www.codefactor.io/repository/github/mku11/salmon-AES-CTR) -->
+[![CodeFactor](https://www.codefactor.io/repository/github/mku11/salmon-AES-CTR/badge)](https://www.codefactor.io/repository/github/mku11/salmon-AES-CTR)
 
 ## Library Features
 * AES-256 standard AES-256 in CTR Mode.
@@ -33,11 +33,11 @@ Salmon is an AES-256 CTR encryption library with HMAC SHA-256 integrity, paralle
 
 ## Applications
 For a complete showcase of the Salmon API check out the Salmon Vault app offered on several platforms:  
-[**JavaFX**](https://github.com/mku11/Salmon-AES-CTR/apps/salmon-vault-javafx)  
-[**WPF**](https://github.com/mku11/Salmon-AES-CTR/salmon-vault-wpf)  
-[**Android**](https://github.com/mku11/Salmon-AES-CTR/apps/salmon-vault-android)  
-[**.NET Android**](https://github.com/mku11/Salmon-AES-CTR/apps/salmon-vault-dotnet-android)  
-[**MAUI**](https://github.com/mku11/Salmon-AES-CTR/apps/salmon-vault-maui)  
+[**JavaFX**](https://github.com/mku11/Salmon-AES-CTR/tree/main/apps/salmon-vault-javafx)  
+[**WPF**](https://github.com/mku11/Salmon-AES-CTR/tree/main/apps/salmon-vault-wpf)  
+[**Android**](https://github.com/mku11/Salmon-AES-CTR/tree/main/apps/salmon-vault-android)  
+[**.NET Android**](https://github.com/mku11/Salmon-AES-CTR/tree/main/apps/salmon-vault-dotnet-android)  
+[**MAUI**](https://github.com/mku11/Salmon-AES-CTR/tree/main/apps/salmon-vault-maui)  
 
 [**Downloads**](https://github.com/mku11/Salmon-AES-CTR/releases)
 
@@ -126,13 +126,12 @@ Now add the dependencies:
 
 ### Nuget
 
-```
-Download the Nuget packages from [Here](https://github.com/mku11/Repo/nuget/releases)
+Download the Nuget packages from [Salmon nuget repo](https://github.com/mku11/Repo/tree/main/nuget/releases)  
 Within Visual Studio go to Tools / Optons / Nuget Package Manager / Package Sources  
 Create a new source with a name like "Salmon Repo" and add the local dir that has the downloaded packages.  
 Then bring up the Nuget Package Manager and change the Package Source to "Salmon Repo".  
 Install the salmon packages like you usually do.  
-```
+
 ---
 
 ### Examples
@@ -261,9 +260,6 @@ For how to compile and build each subproject see README.md in its respective fol
 * Maximum guaranteed file size: 2^64 bytes or limited by the backed resource (disk, memory, network).
 * Maximum drive file size: 2^64 bytes
 * Maximum number of drive files: 2^62 (64 bit nonces used for the filename and the file contents.
-
-### Build Status
-Salmon is currently in beta stage which means you should use your own discretion before using it in production systems.
 
 ### Contributions
 Code contributions are not accepted.  
