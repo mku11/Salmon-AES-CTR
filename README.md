@@ -54,7 +54,7 @@ repositories {
 }
 ```
 
-You can now add the java libraries to your project: 
+Add the java libraries to your project:
 ```
 dependencies {
     implementation 'com.mku.salmon:salmon-core:1.0.5'
@@ -70,7 +70,7 @@ dependencies {
 ```
 
 ### Windows native library in Gradle
-To add the native library for windows to your gradle project add the task below to build.gradle:
+To add the native library for windows to your gradle project add the task below:
 
 ```
 // unzipping the native library
