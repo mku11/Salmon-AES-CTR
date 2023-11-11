@@ -69,8 +69,9 @@ dependencies {
 }
 ```
 
-### Gradle for windows native library:
-To add the native library for windows add the gradle task below to gradle.build:
+### Windows native library in Gradle
+To add the native library for windows to your gradle project add the task below to build.gradle:
+
 ```
 // unzipping the native library
 configurations {
