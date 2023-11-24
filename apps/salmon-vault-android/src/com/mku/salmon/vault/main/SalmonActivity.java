@@ -234,7 +234,6 @@ public class SalmonActivity extends AppCompatActivity {
         }
     }
 
-
     private void UpdateFileAdapter() {
         if (manager.getFileItemList() == null) {
             fileItemList.clear();
@@ -619,7 +618,6 @@ public class SalmonActivity extends AppCompatActivity {
         }
     }
 
-
     private void reimportSharedFile(android.net.Uri uri, AndroidSharedFileObserver fileObserver) {
         try {
             done.acquire(1);
@@ -635,7 +633,6 @@ public class SalmonActivity extends AppCompatActivity {
         }
         DocumentFile docFile = DocumentFile.fromSingleUri(SalmonApplication.getInstance().getApplicationContext(), uri);
         IRealFile realFile = new AndroidFile(docFile, this);
-
 
         SalmonFile oldSalmonFile = fileObserver.getSalmonFile();
         SalmonFile parentDir = oldSalmonFile.getParent();
@@ -724,7 +721,6 @@ public class SalmonActivity extends AppCompatActivity {
     }
 
     public boolean openListItem(SalmonFile file) {
-
         try {
             if (SalmonFileUtils.isVideo(file.getBaseName()) || SalmonFileUtils.isAudio(file.getBaseName())) {
                 StartMediaPlayer(fileItemList.indexOf(file));
@@ -800,8 +796,8 @@ public class SalmonActivity extends AppCompatActivity {
                 try {
                     String listFilename = listFile.getBaseName();
                     if (i != position &&
-                            (SalmonFileUtils.isImage(filename) && SalmonFileUtils.isImage(listFilename))
-                            || (SalmonFileUtils.isText(filename) && SalmonFileUtils.isText(listFilename))) {
+                            ((SalmonFileUtils.isImage(filename) && SalmonFileUtils.isImage(listFilename))
+                            || (SalmonFileUtils.isText(filename) && SalmonFileUtils.isText(listFilename)))) {
                         salmonFiles.add(listFile);
                     }
                     if (i == position) {

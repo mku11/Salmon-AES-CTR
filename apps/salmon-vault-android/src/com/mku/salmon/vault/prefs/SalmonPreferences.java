@@ -75,7 +75,6 @@ public class SalmonPreferences {
         editor.commit();
     }
 
-
     public static SalmonSettings.PbkdfAlgoType getPbkdfAlgorithm() {
         return SalmonSettings.PbkdfAlgoType.valueOf(getPbkdfAlgoString());
     }

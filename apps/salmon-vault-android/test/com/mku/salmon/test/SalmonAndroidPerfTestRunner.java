@@ -89,7 +89,6 @@ public class SalmonAndroidPerfTestRunner {
         System.out.println();
     }
 
-
     public static void EncryptAndDecryptStreamPerformanceSalmonTinyAes() throws Exception {
         SalmonStream.setAesProviderType(SalmonStream.ProviderType.TinyAES);
         // warm up
@@ -98,5 +97,4 @@ public class SalmonAndroidPerfTestRunner {
         AndroidTestHelper.encryptAndDecryptByteArray(TEST_PERF_SIZE, true);
         System.out.println();
     }
-
 }

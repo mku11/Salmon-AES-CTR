@@ -71,7 +71,6 @@ public class SalmonAndroidInstrumentedTestRunner {
         assertEquals("com.mku.salmon", appContext.getPackageName());
     }
 
-
     @Rule
     public ActivityScenarioRule<SalmonActivity> activityScenarioRule =
             new ActivityScenarioRule<>(SalmonActivity.class);
@@ -137,5 +136,4 @@ public class SalmonAndroidInstrumentedTestRunner {
         activity[0].finish();
         System.exit(0);
     }
-
 }

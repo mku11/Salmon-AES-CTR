@@ -1,4 +1,5 @@
-package com.mku.salmon.vault.services;/*
+package com.mku.salmon.vault.services;
+/*
 MIT License
 
 Copyright (c) 2021 Max Kas

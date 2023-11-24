@@ -205,7 +205,6 @@ public class WebViewerActivity extends AppCompatActivity {
     }
 
     private void initGestures() {
-
         final GestureDetector gd = new GestureDetector(this, new GestureDetector.SimpleOnGestureListener() {
             @Override
             public boolean onDoubleTap(MotionEvent e) {
@@ -261,7 +260,6 @@ public class WebViewerActivity extends AppCompatActivity {
             }
         }
     }
-
 
     private synchronized void playPreviousItem() {
         if (pos > 0) {

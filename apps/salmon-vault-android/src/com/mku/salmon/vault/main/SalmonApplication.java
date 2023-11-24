@@ -38,5 +38,4 @@ public class SalmonApplication extends Application {
         super.onCreate();
         mInstance = this;
     }
-
 }

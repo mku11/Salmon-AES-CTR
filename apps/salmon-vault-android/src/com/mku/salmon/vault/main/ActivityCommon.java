@@ -116,7 +116,6 @@ public class ActivityCommon {
         }
     }
 
-
     /// <summary>
     /// Retrieve real files from an intent that was received
     /// </summary>
@@ -143,5 +142,4 @@ public class ActivityCommon {
         }
         return files;
     }
-
 }

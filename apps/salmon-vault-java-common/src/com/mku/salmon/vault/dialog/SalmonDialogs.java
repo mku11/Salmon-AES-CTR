@@ -1,4 +1,5 @@
-package com.mku.salmon.vault.dialog;/*
+package com.mku.salmon.vault.dialog;
+/*
 MIT License
 
 Copyright (c) 2021 Max Kas
@@ -94,7 +95,6 @@ public class SalmonDialogs {
         });
     }
 
-
     public static void promptImportAuth() {
         if (SalmonDriveManager.getDrive() == null) {
             SalmonDialog.promptDialog("Error", "No Drive Loaded");
@@ -166,7 +166,6 @@ public class SalmonDialogs {
                 "Cancel", null);
     }
 
-
     public static void onDisplayAuthID() {
         try {
             if (SalmonDriveManager.getDrive() == null || SalmonDriveManager.getDrive().getDriveID() == null) {
@@ -181,7 +180,6 @@ public class SalmonDialogs {
         }
     }
 
-
     public static void showProperties(SalmonFile item) {
         try {
             SalmonDialog.promptDialog("Properties", SalmonVaultManager.getInstance().getFileProperties(item));
@@ -193,7 +191,6 @@ public class SalmonDialogs {
     }
 
     public static void promptSequenceReset(Consumer<Boolean> resetSequencer) {
-
         SalmonDialog.promptDialog("Warning", "The nonce sequencer file seems to be tampered.\n" +
                         "This could be a sign of a malicious attack. " +
                         "The recommended action is to press Reset to de-authorize all drives.\n" +
@@ -207,7 +204,6 @@ public class SalmonDialogs {
                     resetSequencer.accept(true);
                 });
     }
-
 
     public static void promptDelete() {
         SalmonDialog.promptDialog(
@@ -322,7 +318,6 @@ public class SalmonDialogs {
                     }
                 }, "New Folder", true, false, false, null);
     }
-
 
     public static void promptRenameFile(SalmonFile ifile) {
         String currentFilename = "";

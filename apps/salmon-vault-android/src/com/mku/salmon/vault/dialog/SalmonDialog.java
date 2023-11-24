@@ -173,7 +173,6 @@ public class SalmonDialog {
         });
     }
 
-
     public static void promptSingleValue(ArrayAdapter<String> adapter, String title,
                                          int currSelection, BiConsumer<AlertDialog, Integer> onClickListener) {
         Activity activity = WindowUtils.getUiActivity();
@@ -191,7 +190,6 @@ public class SalmonDialog {
         if (!activity.isFinishing())
             alertDialog.show();
     }
-
 
     public static void promptOpenWith(Intent intent, TreeMap<String, String> apps,
                                       android.net.Uri uri, java.io.File sharedFile,

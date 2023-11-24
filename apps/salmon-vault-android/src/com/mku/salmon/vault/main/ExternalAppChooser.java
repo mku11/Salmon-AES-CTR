@@ -77,7 +77,6 @@ public class ExternalAppChooser {
                 }
             });
         } else {
-
             // we show only apps that explicitly have intent filters for action edit
             if (action == ActionType.SHARE.ordinal()) {
                 builder.setStream(uri);
@@ -114,5 +113,4 @@ public class ExternalAppChooser {
         }
         return apps;
     }
-
 }

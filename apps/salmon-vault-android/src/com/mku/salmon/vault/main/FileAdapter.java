@@ -136,7 +136,6 @@ public class FileAdapter extends RecyclerView.Adapter implements IPropertyNotifi
         executor = Executors.newFixedThreadPool(TASK_THREADS);
     }
 
-
     @Override
     public int getItemCount() {
         return items.size();

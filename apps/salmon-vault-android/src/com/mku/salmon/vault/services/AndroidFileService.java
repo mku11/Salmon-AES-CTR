@@ -54,5 +54,4 @@ public class AndroidFileService implements IFileService {
         }
         return file;
     }
-
 }

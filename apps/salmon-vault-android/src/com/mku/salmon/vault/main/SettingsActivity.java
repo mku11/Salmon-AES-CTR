@@ -35,10 +35,11 @@ import com.mku.salmon.vault.android.R;
 import com.mku.salmon.SalmonSecurityException;
 import com.mku.salmon.io.SalmonStream;
 import com.mku.salmon.password.SalmonPassword;
+import com.mku.salmon.vault.model.SalmonSettings;
+import com.mku.salmon.vault.prefs.SalmonPreferences;
 import com.mku.salmon.vault.utils.WindowUtils;
 
 public class SettingsActivity extends PreferenceActivity {
-
     private static SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(SalmonApplication.getInstance());
     /**
      * Returns the current vault location on disk
@@ -141,7 +142,6 @@ public class SettingsActivity extends PreferenceActivity {
     }
 
     private void setupListeners() {
-
         getPreferenceManager().findPreference("aesType").setOnPreferenceChangeListener((preference, o) -> {
             SalmonStream.setAesProviderType(SalmonStream.ProviderType.valueOf((String) o));
             getPreferenceManager().findPreference("aesType").setSummary((String) o);
@@ -166,6 +166,12 @@ public class SettingsActivity extends PreferenceActivity {
 
         getPreferenceManager().findPreference("excludeFromRecents").setOnPreferenceChangeListener((preference, o) -> {
             WindowUtils.removeFromRecents(SettingsActivity.this, (boolean) o);
+            return true;
+        });
+
+        getPreferenceManager().findPreference("deleteAfterImport").setOnPreferenceChangeListener((preference, o) -> {
+            SalmonPreferences.savePrefs();
+            SalmonSettings.getInstance().setDeleteAfterImport((boolean) o);
             return true;
         });
     }

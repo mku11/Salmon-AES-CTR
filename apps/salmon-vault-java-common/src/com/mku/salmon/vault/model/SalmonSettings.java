@@ -151,7 +151,6 @@ public class SalmonSettings {
         this.enableLogDetails = enableLogDetails;
     }
 
-
     public String getLastImportDir() {
         return lastImportDir;
     }
@@ -159,5 +158,4 @@ public class SalmonSettings {
     public void setLastImportDir(String lastImportDir) {
         this.lastImportDir = lastImportDir;
     }
-
 }

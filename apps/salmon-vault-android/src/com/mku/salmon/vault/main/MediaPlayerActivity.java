@@ -23,7 +23,6 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 */
 
-
 import android.content.res.Configuration;
 import android.media.MediaPlayer;
 import android.os.Bundle;
@@ -55,7 +54,6 @@ public class MediaPlayerActivity extends AppCompatActivity implements SurfaceHol
     private static final int MEDIA_BUFFERS = 4;
 
     // make sure we use a large enough buffer for the MediaDataSource since some videos stall
-    //FIXME: this is overly large
     private static final int MEDIA_BUFFER_SIZE = 4 * 1024 * 1024;
 
     private static final int MEDIA_BACKOFFSET = 256 * 1024;
@@ -296,7 +294,6 @@ public class MediaPlayerActivity extends AppCompatActivity implements SurfaceHol
         }
     }
 
-
     private void toggleSpeed() {
         synchronized (mediaPlayerLock) {
             if (mediaPlayer != null) {
@@ -348,7 +345,6 @@ public class MediaPlayerActivity extends AppCompatActivity implements SurfaceHol
 
     @Override
     public void surfaceChanged(SurfaceHolder holder, int format, int width, int height) {
-
     }
 
     @Override
@@ -358,7 +354,6 @@ public class MediaPlayerActivity extends AppCompatActivity implements SurfaceHol
 
     @Override
     public void surfaceDestroyed(SurfaceHolder holder) {
-
     }
 
     private void onFingerMove(MotionEvent motionevent) {
@@ -395,12 +390,10 @@ public class MediaPlayerActivity extends AppCompatActivity implements SurfaceHol
 
         @Override
         public void onStartTrackingTouch(SeekBar seekBar) {
-
         }
 
         @Override
         public void onStopTrackingTouch(SeekBar seekBar) {
-
         }
     }
 

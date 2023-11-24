@@ -129,7 +129,6 @@ public class AndroidTestHelper {
         AndroidTestHelper.createDir(activity, currDir, testNewDir);
         AndroidTestHelper.copyFile(activity, currDir, testDir, testNewDir, move);
 
-
         AndroidTestHelper.deleteFile(currDir, testDir);
         AndroidTestHelper.deleteFile(currDir, testNewDir);
     }
@@ -242,7 +241,6 @@ public class AndroidTestHelper {
 
     public static byte[] defaultAESCTRTransform(byte[] plainText, byte[] testKeyBytes, byte[] testNonceBytes, boolean encrypt)
             throws Exception {
-
         if (testNonceBytes.length < 16) {
             byte[] tmp = new byte[16];
             System.arraycopy(testNonceBytes, 0, tmp, 0, testNonceBytes.length);
@@ -259,7 +257,6 @@ public class AndroidTestHelper {
         byte[] encrypted = cipher.doFinal(plainText);
         return encrypted;
     }
-
 
     public static byte[] getRandArray(int size) {
         byte[] data = new byte[size];

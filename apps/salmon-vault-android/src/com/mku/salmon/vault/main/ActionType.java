@@ -1,4 +1,5 @@
-package com.mku.salmon.vault.main;/*
+package com.mku.salmon.vault.main;
+/*
 MIT License
 
 Copyright (c) 2021 Max Kas

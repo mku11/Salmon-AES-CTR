@@ -39,5 +39,4 @@ public class SalmonAndroidVaultManager extends SalmonVaultManager {
     protected ISalmonSequenceSerializer createSerializer() {
         return new AndroidSequenceSerializer();
     }
-
 }

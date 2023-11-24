@@ -1,4 +1,5 @@
-package com.mku.salmon.vault.services;/*
+package com.mku.salmon.vault.services;
+/*
 MIT License
 
 Copyright (c) 2021 Max Kas
@@ -22,7 +23,6 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 */
 
-
 import android.webkit.WebResourceRequest;
 import android.webkit.WebResourceResponse;
 import android.webkit.WebView;
@@ -42,7 +42,6 @@ public class AndroidBrowserService implements IWebBrowserService
 
     public AndroidBrowserService()
     {
-
     }
 
     public void setResponse(String url, String mimeType, long contentLength,

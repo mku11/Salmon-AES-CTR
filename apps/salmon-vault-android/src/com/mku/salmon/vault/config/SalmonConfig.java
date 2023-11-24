@@ -21,5 +21,4 @@ public class SalmonConfig {
 	public static String getPrivateDir() {
         return SalmonApplication.getInstance().getFilesDir().getAbsolutePath();
     }
-
 }

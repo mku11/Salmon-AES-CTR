@@ -23,7 +23,6 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 */
 
-
 import android.app.Activity;
 
 public class AndroidKeyboardService implements IKeyboardService {
@@ -35,11 +34,9 @@ public class AndroidKeyboardService implements IKeyboardService {
 
     @Override
     public void onMetaKey(MetaKeyEventArgs args) {
-
     }
 
     @Override
     public void onKey(KeyEventArgs args) {
-
     }
 }

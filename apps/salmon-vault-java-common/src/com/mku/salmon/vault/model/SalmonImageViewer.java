@@ -23,7 +23,6 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 */
 
-
 import com.mku.func.BiConsumer;
 import com.mku.salmon.vault.utils.IPropertyNotifier;
 import com.mku.salmonfs.SalmonFile;
@@ -47,7 +46,6 @@ public class SalmonImageViewer implements IPropertyNotifier {
             propertyChanged(this, "ImageStream");
         }
     }
-
 
     public void load(SalmonFile salmonFile) {
         try {

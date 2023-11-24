@@ -23,7 +23,6 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 */
 
-
 import com.mku.file.IRealFile;
 import com.mku.file.JavaFile;
 import com.mku.func.BiConsumer;
@@ -131,7 +130,6 @@ public class SalmonVaultManager implements IPropertyNotifier {
         }
     }
 
-
     private SalmonFile _currentItem;
 
     public SalmonFile getCurrentItem() {
@@ -157,7 +155,6 @@ public class SalmonVaultManager implements IPropertyNotifier {
             propertyChanged(this, "Status");
         }
     }
-
 
     private boolean isJobRunning;
 
@@ -395,7 +392,6 @@ public class SalmonVaultManager implements IPropertyNotifier {
         }
     }
 
-
     private void setupFileSequencer() throws SalmonSequenceException, IOException {
         IRealFile dirFile = new JavaFile(getSequencerDefaultDirPath());
         if (!dirFile.exists())
@@ -475,6 +471,7 @@ public class SalmonVaultManager implements IPropertyNotifier {
                                                 + " " + (taskProgress.getProcessedFiles() + 1) + "/" + taskProgress.getTotalFiles());
                                     }
                                 } catch (Exception e) {
+                                    e.printStackTrace();
                                 }
                                 processedFiles[0] = taskProgress.getProcessedFiles();
                             }
@@ -529,6 +526,7 @@ public class SalmonVaultManager implements IPropertyNotifier {
                                     setTaskMessage(action + ": " + taskProgress.getFile().getBaseName()
                                             + " " + (taskProgress.getProcessedFiles() + 1) + "/" + taskProgress.getTotalFiles());
                                 } catch (Exception e) {
+                                    e.printStackTrace();
                                 }
                                 processedFiles[0] = taskProgress.getProcessedFiles();
                             }
@@ -705,6 +703,7 @@ public class SalmonVaultManager implements IPropertyNotifier {
                                             + " " + (taskProgress.getProcessedFiles() + 1)
                                             + "/" + taskProgress.getTotalFiles());
                                 } catch (Exception e) {
+                                    e.printStackTrace();
                                 }
                                 processedFiles[0] = taskProgress.getProcessedFiles();
                             }
@@ -761,6 +760,7 @@ public class SalmonVaultManager implements IPropertyNotifier {
                                     setTaskMessage("Importing: " + taskProgress.getFile().getBaseName()
                                             + " " + (taskProgress.getProcessedFiles() + 1) + "/" + taskProgress.getTotalFiles());
                                 } catch (Exception e) {
+                                    e.printStackTrace();
                                 }
                                 processedFiles[0] = taskProgress.getProcessedFiles();
                             }
@@ -793,7 +793,6 @@ public class SalmonVaultManager implements IPropertyNotifier {
     }
 
     public void handleThrowException(Exception ex) {
-
     }
 
     public void search(String value, boolean any) {

@@ -56,7 +56,6 @@ public class SalmonContentViewer implements IPropertyNotifier {
     }
 
     public void setSource(String value) {
-
         if (_source != value) {
             _source = value;
             propertyChanged(this, "Source");

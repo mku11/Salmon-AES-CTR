@@ -23,7 +23,6 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 */
 
-
 import com.mku.io.MemoryStream;
 import com.mku.salmon.SalmonSecurityException;
 import com.mku.salmon.integrity.SalmonIntegrityException;
