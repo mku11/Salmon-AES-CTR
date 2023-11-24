@@ -24,7 +24,6 @@ SOFTWARE.
 */
 
 import com.mku.file.IRealFile;
-import com.mku.func.BiConsumer;
 import com.mku.func.Consumer;
 import com.mku.salmon.vault.config.SalmonConfig;
 import com.mku.salmon.vault.model.SalmonSettings;
@@ -43,10 +42,8 @@ import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.List;
 
-//TODO: make this a service
 public class SalmonDialogs {
     public static void promptPassword(Runnable onAuthenticationSucceded) {
         SalmonDialog.promptEdit("Vault", "Password", (password, option) ->

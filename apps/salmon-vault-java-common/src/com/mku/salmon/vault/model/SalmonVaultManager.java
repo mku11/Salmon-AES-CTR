@@ -479,7 +479,6 @@ public class SalmonVaultManager implements IPropertyNotifier {
                             setFilesProgress(taskProgress.getProcessedFiles() / (double) taskProgress.getTotalFiles());
                         }, (file, ex) ->
                         {
-                            // TODO: report on failed files
                             failedFiles.add(file);
                             exception[0] = ex;
                         });
@@ -535,7 +534,6 @@ public class SalmonVaultManager implements IPropertyNotifier {
                         }, SalmonFile.autoRename, true, (file, ex) ->
                         {
                             handleThrowException(ex);
-                            // TODO: report on failed files
                             failedFiles.add(file);
                             exception[0] = ex;
                         });
@@ -711,7 +709,6 @@ public class SalmonVaultManager implements IPropertyNotifier {
                             setFilesProgress(taskProgress.getProcessedFiles() / (double) taskProgress.getTotalFiles());
                         }, IRealFile.autoRename, (file, ex) ->
                         {
-                            //TODO: report failed files
                             failedFiles.add(file);
                             exception[0] = ex;
                         });
@@ -769,7 +766,6 @@ public class SalmonVaultManager implements IPropertyNotifier {
                         }, IRealFile.autoRename, (file, ex) ->
                         {
                             handleThrowException(ex);
-                            // TODO: report on failed files
                             failedFiles.add(file);
                             exception[0] = ex;
                         });
@@ -817,7 +813,6 @@ public class SalmonVaultManager implements IPropertyNotifier {
             salmonFiles = fileCommander.search(currDir, value, any, (SalmonFile salmonFile) ->
             {
                 int position = 0;
-                // TODO: this slows down the search
                 for (SalmonFile file : fileItemList) {
                     if (salmonFile.getTag() != null &&
                             (file.getTag() == null || (int) salmonFile.getTag() > (int) file.getTag()))
