@@ -166,7 +166,6 @@ public class FileAdapter extends RecyclerView.Adapter implements IPropertyNotifi
         } catch (Exception ex) {
             ex.printStackTrace();
         }
-        //TODO: upgrade to a queue structure with faster remove()
         tasks.remove(viewHolder);
         tasks.addFirst(viewHolder);
         executor.submit(() -> {

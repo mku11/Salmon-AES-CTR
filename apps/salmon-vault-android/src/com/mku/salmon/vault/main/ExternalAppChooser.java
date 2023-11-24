@@ -106,7 +106,6 @@ public class ExternalAppChooser {
         List<ResolveInfo> appInfoList = activity.getPackageManager().queryIntentActivities(intent, 0);
         TreeMap<String, String> apps = new TreeMap<>();
         for (ResolveInfo resolveInfo : appInfoList) {
-            //FIXME: the key should be the package name
             String name = activity.getPackageManager().getApplicationLabel(resolveInfo.activityInfo.applicationInfo).toString();
             String packageName = resolveInfo.activityInfo.applicationInfo.packageName;
             apps.put(name, packageName);
