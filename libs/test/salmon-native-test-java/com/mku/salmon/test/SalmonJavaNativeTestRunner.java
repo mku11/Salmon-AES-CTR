@@ -38,16 +38,11 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 
 public class SalmonJavaNativeTestRunner {
 
-
     static int ENC_THREADS = 1;
     static int DEC_THREADS = 1;
 
     static {
-        try {
-            SalmonPassword.setPbkdfType(SalmonPassword.PbkdfType.Default);
-        } catch (SalmonSecurityException e) {
-            throw new RuntimeException(e);
-        }
+        SalmonPassword.setPbkdfType(SalmonPassword.PbkdfType.Default);
     }
 
     @BeforeEach
@@ -78,7 +73,6 @@ public class SalmonJavaNativeTestRunner {
         assertArrayEquals(bytes, decBytes);
     }
 
-
     @Test
     public void shouldEncryptAndDecryptNativeStreamTextCompatible() throws Exception {
         String plainText = TestHelper.TEST_TEXT;
@@ -94,14 +88,13 @@ public class SalmonJavaNativeTestRunner {
         assertArrayEquals(bytes, decBytesDef);
 
         byte[] encBytes = new SalmonEncryptor(ENC_THREADS).encrypt(bytes, TestHelper.TEST_KEY_BYTES, TestHelper.TEST_NONCE_BYTES, false,
-                                false, null, null);
+                false, null, null);
         assertArrayEquals(encBytesDef, encBytes);
 
         byte[] decBytes = new SalmonDecryptor(DEC_THREADS).decrypt(encBytes, TestHelper.TEST_KEY_BYTES, TestHelper.TEST_NONCE_BYTES, false,
                 false, null, null);
         assertArrayEquals(bytes, decBytes);
     }
-
 
     @Test
     public void shouldEncryptAndDecryptNativeStreamReadBuffersNotAlignedTextCompatible() throws Exception {
@@ -149,7 +142,6 @@ public class SalmonJavaNativeTestRunner {
 
         assertArrayEquals(bytes, decBytes);
     }
-
 
     private void assertArrayEqualsWithIntegrity(byte[] buffer, byte[] bufferWithIntegrity, int chunkSize) {
         int index = 0;
