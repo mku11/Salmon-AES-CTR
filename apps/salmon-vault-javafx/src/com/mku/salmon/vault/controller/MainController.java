@@ -155,11 +155,7 @@ public class MainController {
     private SalmonWinVaultManager manager;
 
     public MainController() {
-        manager = SalmonWinVaultManager.getInstance();
-        manager.openListItem = this::OpenListItem;
-        manager.observePropertyChanges(this::managerPropertyChanged);
-        manager.updateListItem = this::updateListItem;
-        manager.onFileItemAdded = this::fileItemAdded;
+
     }
 
     private void fileItemAdded(Integer position, SalmonFile file) {
@@ -423,11 +419,19 @@ public class MainController {
     public void setupSalmonManager() {
         try {
             SalmonDriveManager.setVirtualDriveClass(JavaDrive.class);
+            ServiceLocator.getInstance().register(ISettingsService.class, new JavaFxSettingsService());
             ServiceLocator.getInstance().register(IFileService.class, new JavaFxFileService());
             ServiceLocator.getInstance().register(IFileDialogService.class, new JavaFxFileDialogService(stage));
             ServiceLocator.getInstance().register(IWebBrowserService.class, new JavaFxBrowserService());
             ServiceLocator.getInstance().register(IKeyboardService.class, new JavaFxKeyboardService());
             ServiceLocator.getInstance().register(IMediaPlayerService.class, new JavaFxMediaPlayerService());
+
+            manager = SalmonWinVaultManager.getInstance();
+            manager.openListItem = this::OpenListItem;
+            manager.observePropertyChanges(this::managerPropertyChanged);
+            manager.updateListItem = this::updateListItem;
+            manager.onFileItemAdded = this::fileItemAdded;
+
         } catch (Exception e) {
             e.printStackTrace();
             new SalmonDialog(Alert.AlertType.ERROR, "Error during initializing: " + e.getMessage()).show();

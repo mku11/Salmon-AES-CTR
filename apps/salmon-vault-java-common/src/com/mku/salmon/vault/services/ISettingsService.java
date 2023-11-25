@@ -23,41 +23,29 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 */
 
-import android.content.SharedPreferences;
-
-import com.mku.func.Consumer;
-import com.mku.salmon.vault.model.SalmonSettings;
-
-import java.util.HashMap;
-
 public interface ISettingsService {
     public String getVaultLocation();
 
     public void setVaultLocation(String value);
 
-    public boolean getDeleteAfterImport();
+    public void setAesType(String value);
+    public String getAesType();
 
-    public void setDeleteAfterImport(boolean value);
+    public void setPbkdfImplType(String value);
+    public String getPbkdfImplType();
 
-    public void setAesProviderType(SalmonSettings.AESType value);
+    public String getPbkdfAlgoType();
+    public void setPbkdfAlgoType(String value);
 
-    public String getProviderTypeString();
-
-    public String getPbkdfTypeString();
-
-    public void setPbkdfImplType(SalmonSettings.PbkdfImplType value);
-
-    public void setPbkdfAlgorithm(SalmonSettings.PbkdfAlgoType value);
-
-    public void set(SalmonSettings.PbkdfAlgoType value);
-
-    public String getPbkdfAlgoString();
-
-    public boolean getExcludeFromRecents();
-
-    public String getLastImportDir();
-
-    public void setLastImportDir(String value);
 
     public String getSequenceAuthType();
+    public void setSequenceAuthType(String value);
+
+    public String getLastImportDir();
+    public void setLastImportDir(String value);
+
+    public boolean getDeleteAfterImport();
+    public void setDeleteAfterImport(boolean value);
+
+    public boolean getExcludeFromRecents();
 }

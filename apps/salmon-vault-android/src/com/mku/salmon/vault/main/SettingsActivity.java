@@ -46,8 +46,8 @@ public class SettingsActivity extends PreferenceActivity {
     }
 
     private void updateSummaries() {
-        getPreferenceManager().findPreference("aesType").setSummary(SalmonSettings.getInstance().getAesProviderType().name());
-        getPreferenceManager().findPreference("pbkdfType").setSummary(SalmonSettings.getInstance().getPbkdfImplType().name());
+        getPreferenceManager().findPreference("aesType").setSummary(SalmonSettings.getInstance().getAesType().name());
+        getPreferenceManager().findPreference("pbkdfType").setSummary(SalmonSettings.getInstance().getPbkdfImpl().name());
         getPreferenceManager().findPreference("pbkdfAlgo").setSummary(SalmonSettings.getInstance().getPbkdfAlgo().name());
     }
 

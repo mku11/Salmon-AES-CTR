@@ -28,7 +28,6 @@ import com.mku.func.Consumer;
 import com.mku.salmon.vault.config.SalmonConfig;
 import com.mku.salmon.vault.model.SalmonSettings;
 import com.mku.salmon.vault.model.SalmonVaultManager;
-import com.mku.salmon.vault.prefs.AndroidSettingsService;
 import com.mku.salmon.vault.services.IFileDialogService;
 import com.mku.salmon.vault.services.IFileService;
 import com.mku.salmon.vault.services.ServiceLocator;

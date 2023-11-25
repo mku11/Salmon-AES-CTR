@@ -23,10 +23,7 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 */
 
-import com.mku.salmon.io.SalmonStream;
 import com.mku.salmon.vault.model.SalmonSettings;
-import com.mku.salmon.vault.model.SalmonVaultManager;
-import com.mku.salmon.vault.prefs.SalmonPreferences;
 import com.mku.salmon.vault.utils.WindowUtils;
 import com.mku.salmon.vault.config.SalmonConfig;
 
@@ -124,10 +121,5 @@ public class SettingsController {
         SalmonSettings.getInstance().setPbkdfAlgo(controller.getpbkdfAlgo());
         SalmonSettings.getInstance().setSequencerAuthType(controller.getAuthType());
         SalmonSettings.getInstance().setDeleteAfterImport(controller.isDeleteAfterImportSelected());
-
-        SalmonStream.setAesProviderType(SalmonStream.ProviderType.valueOf(SalmonSettings.getInstance().getAesType().name()));
-        SalmonVaultManager.getInstance().setupSalmonManager();
-        SalmonPreferences.savePrefs();
     }
-
 }

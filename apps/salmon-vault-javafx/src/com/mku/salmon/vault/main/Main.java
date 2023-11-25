@@ -26,7 +26,6 @@ SOFTWARE.
 import com.mku.salmon.vault.config.SalmonConfig;
 import com.mku.salmon.vault.controller.MainController;
 import com.mku.salmon.vault.dialog.SalmonDialog;
-import com.mku.salmon.vault.prefs.SalmonPreferences;
 import com.mku.salmon.vault.utils.WindowUtils;
 import javafx.application.Application;
 import javafx.fxml.FXMLLoader;
@@ -39,7 +38,6 @@ public class Main extends Application {
     public void start(Stage stage) throws Exception {
         WindowUtils.setDefaultIconPath(SalmonConfig.icon);
         SalmonDialog.setDefaultStyleSheet(SalmonConfig.css);
-        SalmonPreferences.loadPrefs();
         FXMLLoader loader = new FXMLLoader(getClass().getResource("/view/main.fxml"));
         Parent root = loader.load();
         MainController controller = loader.getController();

@@ -28,8 +28,6 @@ import com.mku.salmon.io.SalmonStream;
 import com.mku.salmon.password.SalmonPassword;
 import com.mku.salmon.vault.services.ISettingsService;
 import com.mku.salmon.vault.services.ServiceLocator;
-import com.mku.utils.SalmonFileExporter;
-import com.mku.utils.SalmonFileImporter;
 
 public class SalmonSettings {
     public static final String DEFAULT_VAULT_LOCATION = null;
@@ -44,6 +42,7 @@ public class SalmonSettings {
 
     public void setVaultLocation(String vaultLocation) {
         this.vaultLocation = vaultLocation;
+        settingsService.setVaultLocation(vaultLocation);
     }
 
     public enum AESType {
@@ -64,19 +63,16 @@ public class SalmonSettings {
 
     public void setAesType(AESType aesType) {
         this.aesType = aesType;
+        settingsService.setAesType(aesType.name());
         SalmonStream.setAesProviderType(SalmonStream.ProviderType.valueOf(aesType.name()));
-    }
-
-    public SalmonSettings.AESType getAesProviderType() {
-        return SalmonSettings.AESType.valueOf(settingsService.getProviderTypeString());
     }
 
     public enum PbkdfImplType {
         Default
     }
 
-    private PbkdfImplType pbkdfImpl = DEFAULT_IMPL_TYPE;
-    public static final PbkdfImplType DEFAULT_IMPL_TYPE = PbkdfImplType.Default;
+    private PbkdfImplType pbkdfImpl = DEFAULT_PBKDF_IMPL_TYPE;
+    public static final PbkdfImplType DEFAULT_PBKDF_IMPL_TYPE = PbkdfImplType.Default;
     public static final String PBKDF_IMPL_TYPE_KEY = "PBKDF_IMPL_TYPE_KEY";
 
     public void setPbkdfImpl(String value) {
@@ -89,13 +85,9 @@ public class SalmonSettings {
 
     public void setPbkdfImpl(PbkdfImplType pbkdfImpl) {
         this.pbkdfImpl = pbkdfImpl;
+        settingsService.setPbkdfImplType(pbkdfImpl.name());
         SalmonPassword.setPbkdfType(SalmonPassword.PbkdfType.valueOf(this.pbkdfImpl.name()));
     }
-
-    public SalmonSettings.PbkdfImplType getPbkdfImplType() {
-        return SalmonSettings.PbkdfImplType.valueOf(settingsService.getPbkdfTypeString());
-    }
-
 
     public enum PbkdfAlgoType {
         // SHA1 is not secure
@@ -104,7 +96,7 @@ public class SalmonSettings {
 
     private PbkdfAlgoType pbkdfAlgo = DEFAULT_PBKDF_ALGO;
     public static final PbkdfAlgoType DEFAULT_PBKDF_ALGO = PbkdfAlgoType.SHA256;
-    public static final String PBKDF_TYPE_KEY = "PBKDF_TYPE_KEY";
+    public static final String PBKDF_ALGO_TYPE_KEY = "PBKDF_ALGO_TYPE_KEY";
 
     public PbkdfAlgoType getPbkdfAlgo() {
         return pbkdfAlgo;
@@ -112,15 +104,12 @@ public class SalmonSettings {
 
     public void setPbkdfAlgo(PbkdfAlgoType pbkdfAlgo) {
         this.pbkdfAlgo = pbkdfAlgo;
+        settingsService.setPbkdfAlgoType(pbkdfAlgo.toString());
         SalmonPassword.setPbkdfAlgo(SalmonPassword.PbkdfAlgo.valueOf(pbkdfAlgo.name()));
     }
 
     public void setPbkdfAlgo(String value) {
         setPbkdfAlgo(PbkdfAlgoType.valueOf(value));
-    }
-
-    public SalmonSettings.PbkdfAlgoType getPbkdfAlgorithm() {
-        return SalmonSettings.PbkdfAlgoType.valueOf(settingsService.getPbkdfAlgoString());
     }
 
     public enum AuthType {
@@ -141,6 +130,8 @@ public class SalmonSettings {
 
     public void setSequencerAuthType(AuthType sequencerAuthType) {
         this.sequencerAuthType = sequencerAuthType;
+        settingsService.setSequenceAuthType(sequencerAuthType.name());
+        SalmonVaultManager.getInstance().setupSalmonManager();
     }
 
     public static final boolean DEFAULT_DELETE_AFTER_IMPORT = false;
@@ -151,33 +142,9 @@ public class SalmonSettings {
         return deleteAfterImport;
     }
 
-    public void setDeleteAfterImport(boolean deleteAfterImport) {
-        this.deleteAfterImport = deleteAfterImport;
-    }
-
-    public static final boolean DEFAULT_ENABLE_LOG = false;
-    public static final String ENABLE_LOG_KEY = "ENABLE_LOG_KEY";
-    private boolean enableLog = DEFAULT_ENABLE_LOG;
-
-    public boolean isEnableLog() {
-        return enableLog;
-    }
-
-    public void setEnableLog(boolean enableLog) {
-        this.enableLog = enableLog;
-    }
-
-
-    public static final boolean DEFAULT_ENABLE_LOG_DETAILS = false;
-    public static final String ENABLE_LOG_DETAILS_KEY = "ENABLE_LOG_DETAILS_KEY";
-    private boolean enableLogDetails = DEFAULT_ENABLE_LOG_DETAILS;
-
-    public boolean isEnableLogDetails() {
-        return enableLogDetails;
-    }
-
-    public void setEnableLogDetails(boolean enableLogDetails) {
-        this.enableLogDetails = enableLogDetails;
+    public void setDeleteAfterImport(boolean value) {
+        settingsService.setDeleteAfterImport(value);
+        this.deleteAfterImport = value;
     }
 
     public static final String DEFAULT_LAST_IMPORT_DIR = null;
@@ -206,13 +173,12 @@ public class SalmonSettings {
     }
 
     public void load() {
-        setAesType(settingsService.getProviderTypeString());
-        setPbkdfImpl(settingsService.getPbkdfTypeString());
-        setPbkdfAlgo(settingsService.getPbkdfAlgoString());
-        setSequencerAuthType(settingsService.getSequenceAuthType());
-        SalmonFileExporter.setEnableLog(SalmonSettings.getInstance().isEnableLog());
-        SalmonFileExporter.setEnableLogDetails(SalmonSettings.getInstance().isEnableLogDetails());
-        SalmonFileImporter.setEnableLog(SalmonSettings.getInstance().isEnableLog());
-        SalmonFileImporter.setEnableLogDetails(SalmonSettings.getInstance().isEnableLogDetails());
+        vaultLocation = settingsService.getVaultLocation();
+        aesType = AESType.valueOf(settingsService.getAesType());
+        pbkdfImpl = PbkdfImplType.valueOf(settingsService.getPbkdfImplType());
+        pbkdfAlgo = PbkdfAlgoType.valueOf(settingsService.getPbkdfAlgoType());
+        sequencerAuthType = AuthType.valueOf(settingsService.getSequenceAuthType());
+        deleteAfterImport = settingsService.getDeleteAfterImport();
+        lastImportDir = settingsService.getLastImportDir();
     }
 }
