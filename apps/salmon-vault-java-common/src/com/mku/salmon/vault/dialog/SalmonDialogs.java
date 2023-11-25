@@ -28,7 +28,7 @@ import com.mku.func.Consumer;
 import com.mku.salmon.vault.config.SalmonConfig;
 import com.mku.salmon.vault.model.SalmonSettings;
 import com.mku.salmon.vault.model.SalmonVaultManager;
-import com.mku.salmon.vault.prefs.SalmonPreferences;
+import com.mku.salmon.vault.prefs.AndroidSettingsService;
 import com.mku.salmon.vault.services.IFileDialogService;
 import com.mku.salmon.vault.services.IFileService;
 import com.mku.salmon.vault.services.ServiceLocator;
@@ -290,7 +290,6 @@ public class SalmonDialogs {
                         filesToImport.add(fileService.getFile(file, false));
                     }
                     SalmonSettings.getInstance().setLastImportDir(new File(files[0]).getParentFile().getAbsolutePath());
-                    SalmonPreferences.savePrefs();
                     SalmonVaultManager.getInstance().importFiles(filesToImport.toArray(new IRealFile[0]),
                             SalmonVaultManager.getInstance().getCurrDir(), SalmonSettings.getInstance().isDeleteAfterImport(), (SalmonFile[] importedFiles) ->
                             {

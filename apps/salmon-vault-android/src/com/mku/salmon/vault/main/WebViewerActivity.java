@@ -147,8 +147,7 @@ public class WebViewerActivity extends AppCompatActivity {
     }
 
     private void setupWindow() {
-        if (SettingsActivity.getHideScreenContents())
-            getWindow().setFlags(WindowManager.LayoutParams.FLAG_SECURE, WindowManager.LayoutParams.FLAG_SECURE);
+        getWindow().setFlags(WindowManager.LayoutParams.FLAG_SECURE, WindowManager.LayoutParams.FLAG_SECURE);
     }
 
     protected void onDestroy() {

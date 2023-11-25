@@ -31,12 +31,9 @@ import com.mku.func.Function;
 import com.mku.salmon.SalmonRangeExceededException;
 import com.mku.salmon.SalmonSecurityException;
 import com.mku.salmon.integrity.SalmonIntegrityException;
-import com.mku.salmon.io.SalmonStream;
-import com.mku.salmon.password.SalmonPassword;
 import com.mku.salmon.vault.config.SalmonConfig;
 import com.mku.salmon.vault.dialog.SalmonDialog;
 import com.mku.salmon.vault.dialog.SalmonDialogs;
-import com.mku.salmon.vault.prefs.SalmonPreferences;
 import com.mku.salmon.vault.utils.ByteUtils;
 import com.mku.salmon.vault.utils.IPropertyNotifier;
 import com.mku.salmonfs.SalmonAuthException;
@@ -47,8 +44,6 @@ import com.mku.sequence.SalmonFileSequencer;
 import com.mku.sequence.SalmonSequenceException;
 import com.mku.sequence.SalmonSequenceSerializer;
 import com.mku.utils.SalmonFileCommander;
-import com.mku.utils.SalmonFileExporter;
-import com.mku.utils.SalmonFileImporter;
 
 import java.io.File;
 import java.io.IOException;
@@ -225,8 +220,8 @@ public class SalmonVaultManager implements IPropertyNotifier {
     }
 
     protected SalmonVaultManager() {
+        SalmonSettings.getInstance().load();
         setupFileCommander();
-        loadSettings();
         setupSalmonManager();
     }
 
@@ -278,21 +273,6 @@ public class SalmonVaultManager implements IPropertyNotifier {
 
     private void setupFileCommander() {
         fileCommander = new SalmonFileCommander(BUFFER_SIZE, BUFFER_SIZE, THREADS);
-    }
-
-    private void loadSettings() {
-        try {
-            SalmonPreferences.loadPrefs();
-            SalmonStream.setAesProviderType(SalmonStream.ProviderType.valueOf(SalmonSettings.getInstance().getAesType().toString()));
-            SalmonPassword.setPbkdfType(SalmonPassword.PbkdfType.valueOf(SalmonSettings.getInstance().getPbkdfImpl().toString()));
-            SalmonPassword.setPbkdfAlgo(SalmonPassword.PbkdfAlgo.valueOf(SalmonSettings.getInstance().getPbkdfAlgo().toString()));
-            SalmonFileExporter.setEnableLog(SalmonSettings.getInstance().isEnableLog());
-            SalmonFileExporter.setEnableLogDetails(SalmonSettings.getInstance().isEnableLogDetails());
-            SalmonFileImporter.setEnableLog(SalmonSettings.getInstance().isEnableLog());
-            SalmonFileImporter.setEnableLogDetails(SalmonSettings.getInstance().isEnableLogDetails());
-        } catch (SalmonSecurityException e) {
-            throw new RuntimeException(e);
-        }
     }
 
     protected void setupRootDir() {
@@ -430,7 +410,6 @@ public class SalmonVaultManager implements IPropertyNotifier {
             closeVault();
             SalmonDriveManager.openDrive(path);
             SalmonSettings.getInstance().setVaultLocation(path);
-            SalmonPreferences.savePrefs();
         } catch (Exception e) {
             SalmonDialog.promptDialog("Error", "Could not open vault: " + e.getMessage());
         }
@@ -839,7 +818,6 @@ public class SalmonVaultManager implements IPropertyNotifier {
             IOException, SalmonAuthException {
         SalmonDriveManager.createDrive(dirPath, password);
         SalmonSettings.getInstance().setVaultLocation(dirPath);
-        SalmonPreferences.savePrefs();
         currDir = SalmonDriveManager.getDrive().getVirtualRoot();
         refresh();
     }

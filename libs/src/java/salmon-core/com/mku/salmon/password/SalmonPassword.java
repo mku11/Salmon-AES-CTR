@@ -68,9 +68,8 @@ public class SalmonPassword {
      * Set the global PBKDF implementation to be used for text key derivation.
      *
      * @param pbkdfType
-     * @throws SalmonSecurityException
      */
-    public static void setPbkdfType(PbkdfType pbkdfType) throws SalmonSecurityException {
+    public static void setPbkdfType(PbkdfType pbkdfType) {
         provider = SalmonPbkdfFactory.create(pbkdfType);
     }
 

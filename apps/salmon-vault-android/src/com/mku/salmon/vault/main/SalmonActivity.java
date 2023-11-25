@@ -55,7 +55,7 @@ import com.mku.salmon.vault.dialog.SalmonDialog;
 import com.mku.salmon.vault.dialog.SalmonDialogs;
 import com.mku.salmon.vault.model.SalmonVaultManager;
 import com.mku.salmon.vault.model.android.SalmonAndroidVaultManager;
-import com.mku.salmon.vault.prefs.SalmonPreferences;
+import com.mku.salmon.vault.prefs.AndroidSettingsService;
 import com.mku.salmon.vault.services.AndroidBrowserService;
 import com.mku.salmon.vault.services.AndroidFileDialogService;
 import com.mku.salmon.vault.services.AndroidFileService;
@@ -63,6 +63,7 @@ import com.mku.salmon.vault.services.AndroidKeyboardService;
 import com.mku.salmon.vault.services.IFileDialogService;
 import com.mku.salmon.vault.services.IFileService;
 import com.mku.salmon.vault.services.IKeyboardService;
+import com.mku.salmon.vault.services.ISettingsService;
 import com.mku.salmon.vault.services.IWebBrowserService;
 import com.mku.salmon.vault.services.ServiceLocator;
 import com.mku.salmon.vault.utils.WindowUtils;
@@ -111,8 +112,7 @@ public class SalmonActivity extends AppCompatActivity {
     }
 
     private void setupWindow() {
-        if (SalmonPreferences.getHideScreenContents())
-            getWindow().setFlags(WindowManager.LayoutParams.FLAG_SECURE, WindowManager.LayoutParams.FLAG_SECURE);
+        getWindow().setFlags(WindowManager.LayoutParams.FLAG_SECURE, WindowManager.LayoutParams.FLAG_SECURE);
         WindowUtils.setUiActivity(this);
     }
 
@@ -164,6 +164,7 @@ public class SalmonActivity extends AppCompatActivity {
             AndroidDrive.initialize(this.getApplicationContext());
             SalmonDriveManager.setVirtualDriveClass(AndroidDrive.class);
 
+            ServiceLocator.getInstance().register(ISettingsService.class, new AndroidSettingsService());
             ServiceLocator.getInstance().register(IFileService.class, new AndroidFileService(this));
             ServiceLocator.getInstance().register(IFileDialogService.class, new AndroidFileDialogService(this));
             ServiceLocator.getInstance().register(IWebBrowserService.class, new AndroidBrowserService());

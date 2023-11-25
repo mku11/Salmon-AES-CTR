@@ -1,4 +1,4 @@
-package com.mku.salmon.password;
+package com.mku.salmon.vault.services;
 /*
 MIT License
 
@@ -23,23 +23,41 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 */
 
-import com.mku.salmon.SalmonSecurityException;
+import android.content.SharedPreferences;
 
-/**
- * Creates AES transformer implementations.
- */
-public class SalmonPbkdfFactory {
-    /**
-     * Create an instance of a pbkdf provider.
-     * @param type The pbkdf type.
-     * @return The provider.
-     */
-    @SuppressWarnings("SwitchStatementWithTooFewBranches")
-    public static ISalmonPbkdfProvider create(SalmonPassword.PbkdfType type) {
-        switch(type) {
-            case Default:
-                return new SalmonDefaultPbkdfProvider();
-        }
-        throw new RuntimeException("Unknown Pbkdf provider type");
-    }
+import com.mku.func.Consumer;
+import com.mku.salmon.vault.model.SalmonSettings;
+
+import java.util.HashMap;
+
+public interface ISettingsService {
+    public String getVaultLocation();
+
+    public void setVaultLocation(String value);
+
+    public boolean getDeleteAfterImport();
+
+    public void setDeleteAfterImport(boolean value);
+
+    public void setAesProviderType(SalmonSettings.AESType value);
+
+    public String getProviderTypeString();
+
+    public String getPbkdfTypeString();
+
+    public void setPbkdfImplType(SalmonSettings.PbkdfImplType value);
+
+    public void setPbkdfAlgorithm(SalmonSettings.PbkdfAlgoType value);
+
+    public void set(SalmonSettings.PbkdfAlgoType value);
+
+    public String getPbkdfAlgoString();
+
+    public boolean getExcludeFromRecents();
+
+    public String getLastImportDir();
+
+    public void setLastImportDir(String value);
+
+    public String getSequenceAuthType();
 }

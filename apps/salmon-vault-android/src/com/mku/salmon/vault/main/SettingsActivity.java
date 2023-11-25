@@ -23,97 +23,16 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 */
 
-import android.content.SharedPreferences;
-import android.net.Uri;
 import android.os.Bundle;
 import android.preference.PreferenceActivity;
-import android.preference.PreferenceManager;
 
-import androidx.documentfile.provider.DocumentFile;
-
-import com.mku.salmon.vault.android.R;
-import com.mku.salmon.SalmonSecurityException;
 import com.mku.salmon.io.SalmonStream;
 import com.mku.salmon.password.SalmonPassword;
+import com.mku.salmon.vault.android.R;
 import com.mku.salmon.vault.model.SalmonSettings;
-import com.mku.salmon.vault.prefs.SalmonPreferences;
 import com.mku.salmon.vault.utils.WindowUtils;
 
 public class SettingsActivity extends PreferenceActivity {
-    private static SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(SalmonApplication.getInstance());
-    /**
-     * Returns the current vault location on disk
-     *
-     */
-    public static String getVaultLocation() {
-        return prefs.getString("vaultLocation", null);
-    }
-
-    /**
-     * Sets the current vault location on disk
-     *
-     * @param location
-     */
-    public static void setVaultLocation(String location) {
-        SharedPreferences.Editor editor = prefs.edit();
-        editor.putString("vaultLocation", location);
-        editor.commit();
-    }
-
-    public static boolean getDeleteAfterImport() {
-        return prefs.getBoolean("deleteAfterImport", false);
-    }
-
-    public static SalmonStream.ProviderType getProviderType() {
-        return SalmonStream.ProviderType.valueOf(getProviderTypeString());
-    }
-
-    private static String getProviderTypeString() {
-        return prefs.getString("aesType", SalmonStream.ProviderType.Default.name());
-    }
-
-    public static SalmonPassword.PbkdfType getPbkdfType() {
-        return SalmonPassword.PbkdfType.valueOf(getPbkdfTypeString());
-    }
-
-    private static String getPbkdfTypeString() {
-        return prefs.getString("pbkdfType", SalmonPassword.PbkdfType.Default.name());
-    }
-
-    public static SalmonPassword.PbkdfAlgo getPbkdfAlgo() {
-        return SalmonPassword.PbkdfAlgo.valueOf(getPbkdfAlgoString());
-    }
-
-    private static String getPbkdfAlgoString() {
-        return prefs.getString("pbkdfAlgo", SalmonPassword.PbkdfAlgo.SHA256.name());
-    }
-
-    public static boolean getEnableLog() {
-        return prefs.getBoolean("enableLog", false);
-    }
-
-    public static boolean getEnableLogDetails() {
-        return prefs.getBoolean("enableLogDetails", false);
-    }
-
-    public static boolean getExcludeFromRecents() {
-        return prefs.getBoolean("excludeFromRecents", false);
-    }
-
-    public static boolean getHideScreenContents() {
-        return prefs.getBoolean("hideScreenContents", true);
-    }
-
-    public static String getLastImportDir() {
-        return prefs.getString("lastImportDir", null);
-    }
-
-    public static void setLastImportDir(String importDir) {
-        SharedPreferences.Editor editor = prefs.edit();
-        editor.putString("lastImportDir", importDir);
-        editor.commit();
-    }
-
     public void onCreate(Bundle SavedInstanceState) {
         super.onCreate(SavedInstanceState);
         addPreferencesFromResource(R.xml.settings);
@@ -127,40 +46,27 @@ public class SettingsActivity extends PreferenceActivity {
     }
 
     private void updateSummaries() {
-        getPreferenceManager().findPreference("aesType").setSummary(getProviderTypeString());
-        getPreferenceManager().findPreference("pbkdfType").setSummary(getPbkdfTypeString());
-        getPreferenceManager().findPreference("pbkdfAlgo").setSummary(getPbkdfAlgoString());
-
-    }
-
-    private String getVaultDirName() {
-        String path = getVaultLocation();
-        if(path == null)
-            return "None";
-        DocumentFile documentFile = DocumentFile.fromTreeUri(this, Uri.parse(path));
-        return documentFile.getName();
+        getPreferenceManager().findPreference("aesType").setSummary(SalmonSettings.getInstance().getAesProviderType().name());
+        getPreferenceManager().findPreference("pbkdfType").setSummary(SalmonSettings.getInstance().getPbkdfImplType().name());
+        getPreferenceManager().findPreference("pbkdfAlgo").setSummary(SalmonSettings.getInstance().getPbkdfAlgo().name());
     }
 
     private void setupListeners() {
         getPreferenceManager().findPreference("aesType").setOnPreferenceChangeListener((preference, o) -> {
-            SalmonStream.setAesProviderType(SalmonStream.ProviderType.valueOf((String) o));
-            getPreferenceManager().findPreference("aesType").setSummary((String) o);
+            SalmonSettings.getInstance().setAesType((String) o);
+            preference.setSummary((String) o);
             return true;
         });
 
         getPreferenceManager().findPreference("pbkdfType").setOnPreferenceChangeListener((preference, o) -> {
-            try {
-                SalmonPassword.setPbkdfType(SalmonPassword.PbkdfType.valueOf((String) o));
-            } catch (SalmonSecurityException e) {
-                throw new RuntimeException(e);
-            }
-            getPreferenceManager().findPreference("pbkdfType").setSummary((String) o);
+            SalmonSettings.getInstance().setPbkdfImpl((String) o);
+            preference.setSummary((String) o);
             return true;
         });
 
         getPreferenceManager().findPreference("pbkdfAlgo").setOnPreferenceChangeListener((preference, o) -> {
-            SalmonPassword.setPbkdfAlgo(SalmonPassword.PbkdfAlgo.valueOf((String) o));
-            getPreferenceManager().findPreference("pbkdfAlgo").setSummary((String) o);
+            SalmonSettings.getInstance().setPbkdfAlgo((String) o);
+            preference.setSummary((String) o);
             return true;
         });
 
@@ -170,7 +76,6 @@ public class SettingsActivity extends PreferenceActivity {
         });
 
         getPreferenceManager().findPreference("deleteAfterImport").setOnPreferenceChangeListener((preference, o) -> {
-            SalmonPreferences.savePrefs();
             SalmonSettings.getInstance().setDeleteAfterImport((boolean) o);
             return true;
         });
