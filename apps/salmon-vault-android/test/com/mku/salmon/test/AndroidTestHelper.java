@@ -40,14 +40,14 @@ import androidx.test.espresso.contrib.RecyclerViewActions;
 import androidx.test.espresso.matcher.ViewMatchers;
 
 import com.mku.android.file.AndroidDrive;
-import com.mku.salmon.vault.android.R;
 import com.mku.salmon.SalmonDecryptor;
 import com.mku.salmon.SalmonDefaultOptions;
 import com.mku.salmon.SalmonEncryptor;
 import com.mku.salmon.io.SalmonStream;
-import com.mku.salmon.main.SalmonActivity;
 import com.mku.salmon.transform.ISalmonCTRTransformer;
 import com.mku.salmon.transform.SalmonTransformerFactory;
+import com.mku.salmon.vault.android.R;
+import com.mku.salmon.vault.model.SalmonVaultManager;
 import com.mku.salmonfs.SalmonDriveManager;
 import com.mku.salmonfs.SalmonFile;
 
@@ -56,6 +56,7 @@ import org.junit.Assert;
 
 import java.nio.charset.Charset;
 import java.util.Arrays;
+import java.util.List;
 import java.util.Random;
 
 import javax.crypto.Cipher;
@@ -184,7 +185,7 @@ public class AndroidTestHelper {
     }
 
     private static int getIndexFromAdapter(Activity activity, SalmonFile testFile) {
-        SalmonFile[] files = ((SalmonActivity) activity).getSalmonFiles();
+        List<SalmonFile> files = SalmonVaultManager.getInstance().getFileItemList();
         return Arrays.asList(files).indexOf(testFile);
     }
 
@@ -199,19 +200,14 @@ public class AndroidTestHelper {
         return total;
     }
 
-    private static SalmonFile getFileFromAdapter(Activity activity, String testDir) throws Exception {
-        SalmonFile[] files = ((SalmonActivity) activity).getSalmonFiles();
-        int index = -1;
-        for (int i = 0; i < files.length; i++) {
-            if (files[i].getBaseName().equals(testDir)) {
-                index = i;
+    private static SalmonFile getFileFromAdapter(Activity activity, String filename) throws Exception {
+        List<SalmonFile> files = SalmonVaultManager.getInstance().getFileItemList();
+        for (SalmonFile file : files) {
+            if (file.getBaseName().equals(filename)) {
+                return file;
             }
         }
-        SalmonFile testFile = null;
-        if (index > -1) {
-            testFile = files[index];
-        }
-        return testFile;
+        return null;
     }
 
     private static void importFile(Activity activity, SalmonFile currDir, String testImportFile1) {
