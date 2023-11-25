@@ -5,16 +5,16 @@ plugins {
 
 group 'com.mku.salmon'
 description = 'Salmon AES256 CTR android native encryption library'
-version '1.0.5'
+version '1.0.6-SNAPSHOT'
 
 repositories {
     maven {
         // uncomment for local repo
-        // allowInsecureProtocol true
-        // url 'http://localhost/repository/maven/releases'
+        allowInsecureProtocol true
+        url 'http://localhost/repository/maven/releases'
 
         // official salmon repo
-        url 'https://github.com/mku11/Repo/raw/main/maven/releases'
+        // url 'https://github.com/mku11/Repo/raw/main/maven/releases'
     }
     mavenCentral()
 }
@@ -73,7 +73,7 @@ java {
 }
 
 dependencies {
-    implementation 'com.mku.salmon:salmon-core:1.0.5'
+    implementation 'com.mku.salmon:salmon-core:1.0.6-SNAPSHOT'
 }
 
 publishing {
@@ -81,7 +81,6 @@ publishing {
         salmon(MavenPublication) {
             groupId 'com.mku.salmon'
             artifactId 'salmon-native-android'
-            version '1.0.5'
             artifact("$buildDir/outputs/aar/salmon-native-android-release.aar")
             pom {
                 name = project.name

@@ -5,11 +5,11 @@ plugins {
 repositories {
     maven {
         // uncomment for local repo
-        // allowInsecureProtocol true
-        // url 'http://localhost/repository/maven/releases'
+        allowInsecureProtocol true
+        url 'http://localhost/repository/maven/releases'
 
         // official salmon repo
-        url 'https://github.com/mku11/Repo/raw/main/maven/releases'
+        // url 'https://github.com/mku11/Repo/raw/main/maven/releases'
     }
     mavenCentral()
 }
@@ -58,10 +58,10 @@ dependencies {
     implementation 'com.google.android.material:material:1.7.0'
     implementation 'androidx.constraintlayout:constraintlayout:2.1.4'
 
-    implementation 'com.mku.salmon:salmon-core:1.0.5'
-    implementation 'com.mku.salmon:salmon-fs:1.0.5'
-    implementation 'com.mku.salmon:salmon-fs-android:1.0.5'
-    implementation 'com.mku.salmon:salmon-native-android:1.0.5'
+    implementation 'com.mku.salmon:salmon-core:1.0.6-SNAPSHOT'
+    implementation 'com.mku.salmon:salmon-fs:1.0.6-SNAPSHOT'
+    implementation 'com.mku.salmon:salmon-fs-android:1.0.6-SNAPSHOT'
+    implementation 'com.mku.salmon:salmon-native-android:1.0.6-SNAPSHOT'
 
     androidTestImplementation 'androidx.test.espresso:espresso-contrib:3.4.0'
     androidTestImplementation 'junit:junit:4.13.2'

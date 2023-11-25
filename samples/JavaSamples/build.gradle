@@ -3,16 +3,16 @@ plugins {
 }
 
 group 'com.mku.salmon'
-version '1.0.5'
+version '1.0.6-SNAPSHOT'
 
 repositories {
     maven {
         // uncomment for local repo
-        // allowInsecureProtocol true
-        // url 'http://localhost/repository/maven/releases'
+        allowInsecureProtocol true
+        url 'http://localhost/repository/maven/releases'
 
         // official salmon repo
-        url 'https://github.com/mku11/Repo/raw/main/maven/releases'
+        // url 'https://github.com/mku11/Repo/raw/main/maven/releases'
     }
     mavenCentral()
 }
@@ -29,10 +29,10 @@ dependencies {
     testRuntimeOnly 'org.junit.jupiter:junit-jupiter-engine:5.8.1'
 
     // salmon libs:
-    implementation 'com.mku.salmon:salmon-core:1.0.5'
-    implementation 'com.mku.salmon:salmon-fs:1.0.5'
+    implementation 'com.mku.salmon:salmon-core:1.0.6-SNAPSHOT'
+    implementation 'com.mku.salmon:salmon-fs:1.0.6-SNAPSHOT'
     // optional fast AES intrinsics and Tiny AES:
-    nativeBundle 'com.mku.salmon:salmon-native:1.0.5'
+    nativeBundle 'com.mku.salmon:salmon-native:1.0.6-SNAPSHOT'
 }
 
 test {

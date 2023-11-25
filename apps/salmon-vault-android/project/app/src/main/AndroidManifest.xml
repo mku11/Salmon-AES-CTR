@@ -2,8 +2,8 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
     package="com.mku.salmon.vault.android"
-    android:versionCode="105"
-    android:versionName="1.0.5">
+    android:versionCode="106"
+    android:versionName="1.0.6-SNAPSHOT">
 
     <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" />
     <!-- We need to able to query apps on the device to let the user choose which one to
