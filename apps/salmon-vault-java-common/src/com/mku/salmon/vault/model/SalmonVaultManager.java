@@ -317,7 +317,6 @@ public class SalmonVaultManager implements IPropertyNotifier {
                 populateFileList(selectedFile);
             });
         } catch (SalmonAuthException e) {
-            e.printStackTrace();
             checkCredentials();
         } catch (Exception e) {
             e.printStackTrace();
