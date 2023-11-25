@@ -85,7 +85,6 @@ public class Thumbnails {
         return getVideoThumbnail(salmonFile, 0);
     }
 
-    //TODO: video thumbnails needs a 3rd party lib
     public static ImageView getVideoThumbnail(SalmonFile salmonFile, long ms) {
         throw new UnsupportedOperationException();
     }
@@ -228,7 +227,6 @@ public class Thumbnails {
         cache.put(file, image);
         cacheSize += image.getWidth() * image.getHeight() * 4;
     }
-
 
     private static void resetCache() {
         cacheSize = 0;
