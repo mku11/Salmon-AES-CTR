@@ -19,3 +19,7 @@ implementation 'com.mku.salmon:salmon-android-native:x.x.x'
 
 Package:
 From Android Studio menu bar click on Build / Generate Signed Bundle/APK
+
+Notes:
+If you get a transform error with the dependencies make sure you right click
+on Gradle window in Android Studio and select Refresh Gradle Dependencies
