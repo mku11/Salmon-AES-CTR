@@ -23,7 +23,6 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 */
 
-
 import com.mku.file.IRealFile;
 import com.mku.salmon.win.registry.SalmonRegistry;
 import com.mku.sequence.ISalmonSequenceSerializer;
@@ -34,7 +33,6 @@ import com.sun.jna.platform.win32.Crypt32Util;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.security.MessageDigest;
-
 
 /**
  * File Sequencer for Windows with tamper protection.

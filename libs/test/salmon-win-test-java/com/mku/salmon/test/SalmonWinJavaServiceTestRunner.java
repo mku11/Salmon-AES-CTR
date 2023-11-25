@@ -73,7 +73,6 @@ public class SalmonWinJavaServiceTestRunner {
         }
     }
 
-
     @Test
     public void shouldWriteToRegistry() {
         String key = "Seq Hash";
@@ -83,7 +82,6 @@ public class SalmonWinJavaServiceTestRunner {
         String val = (String) registry.read(key);
         assertEquals(value, val);
     }
-
 
     @Test
     public void shouldCreateWinFileSequencer() throws SalmonSequenceException, IOException, SalmonRangeExceededException {

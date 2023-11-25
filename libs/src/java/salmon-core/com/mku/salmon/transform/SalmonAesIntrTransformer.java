@@ -82,5 +82,4 @@ public class SalmonAesIntrTransformer extends SalmonNativeTransformer {
                 srcBuffer, srcOffset,
                 destBuffer, destOffset, count);
     }
-
 }

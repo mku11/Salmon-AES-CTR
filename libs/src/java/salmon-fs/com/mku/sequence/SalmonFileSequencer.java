@@ -294,7 +294,6 @@ public class SalmonFileSequencer implements ISalmonSequencer {
         }
     }
 
-
     /**
      * Get the sequence for the drive provided.
      *

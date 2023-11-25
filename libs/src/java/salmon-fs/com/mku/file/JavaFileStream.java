@@ -216,5 +216,4 @@ public class JavaFileStream extends RandomAccessStream {
         fileChannel.close();
         raf.close();
     }
-
 }

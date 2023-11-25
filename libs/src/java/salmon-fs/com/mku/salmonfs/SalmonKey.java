@@ -74,7 +74,6 @@ public class SalmonKey {
         return driveKey;
     }
 
-
     /**
      * Function returns the hash key that will be used to sign the file chunks
      */
@@ -129,5 +128,4 @@ public class SalmonKey {
     public void setIterations(int iterations) {
         this.iterations = iterations;
     }
-
 }

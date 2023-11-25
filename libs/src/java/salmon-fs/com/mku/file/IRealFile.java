@@ -159,7 +159,6 @@ public interface IRealFile {
      */
     IRealFile getParent();
 
-
     /**
      * Create an empty file with the provided name.
      *
@@ -240,7 +239,6 @@ public interface IRealFile {
      * @return
      */
     boolean mkdir();
-
 
     /**
      * Copy contents of a file to another file.

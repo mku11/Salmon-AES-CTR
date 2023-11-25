@@ -48,7 +48,6 @@ public class SalmonWinVaultManager extends SalmonVaultManager {
         return (SalmonWinVaultManager) instance;
     }
 
-
     protected void setupWinFileSequencer() throws SalmonSequenceException, IOException {
         IRealFile dirFile = new JavaFile(getSequencerDefaultDirPath());
         if (!dirFile.exists())

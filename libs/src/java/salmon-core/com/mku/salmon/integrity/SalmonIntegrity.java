@@ -66,7 +66,6 @@ public class SalmonIntegrity {
 
     private final boolean integrity;
 
-
     /**
      * Instantiate an object to be used for applying and verifying hash signatures for each of the data chunks.
      *
@@ -149,7 +148,6 @@ public class SalmonIntegrity {
             chunks++;
         return (long) chunks * hashLength;
     }
-
 
     /**
      * Return the number of bytes that all hash signatures occupy for each chunk size

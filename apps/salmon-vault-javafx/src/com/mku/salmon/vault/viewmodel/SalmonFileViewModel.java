@@ -166,5 +166,4 @@ public class SalmonFileViewModel {
         salmonFile.rename(newValue);
         name.setValue(salmonFile.getBaseName());
     }
-
 }

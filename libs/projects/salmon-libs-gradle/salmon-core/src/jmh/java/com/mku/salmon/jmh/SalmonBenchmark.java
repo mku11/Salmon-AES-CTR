@@ -84,6 +84,4 @@ public class SalmonBenchmark {
         SalmonStream.setAesProviderType(SalmonStream.ProviderType.TinyAES);
         TestHelper.encryptAndDecryptByteArray(TEST_PERF_SIZE, false);
     }
-
-
 }

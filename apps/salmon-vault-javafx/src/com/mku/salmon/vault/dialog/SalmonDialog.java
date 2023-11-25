@@ -69,13 +69,11 @@ public class SalmonDialog extends javafx.scene.control.Alert {
         setupStyle();
     }
 
-
     public SalmonDialog(AlertType confirmation, String content, ButtonType buttonType1, ButtonType buttonType2, ButtonType buttonType3) {
         super(confirmation, content, buttonType1, buttonType2, buttonType3);
         setupIcon();
         setupStyle();
     }
-
 
     private void setupStyle() {
         Stage dialogStage = (Stage) getDialogPane().getScene().getWindow();
@@ -83,7 +81,6 @@ public class SalmonDialog extends javafx.scene.control.Alert {
         scene.getStylesheets().add(defaultStyleSheet);
         getDialogPane().setMinHeight(Region.USE_PREF_SIZE);
     }
-
 
     public static void promptEdit(String title, String msg, BiConsumer<String, Boolean> OnEdit,
                                   String value, boolean isFileName, boolean readOnly, boolean isPassword, String option) {

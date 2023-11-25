@@ -78,7 +78,6 @@ public abstract class SalmonAES256CTRTransformer implements ISalmonCTRTransforme
      */
     public static final int BLOCK_SIZE = 16;
 
-
     /**
      * Key to be used for AES transformation.
      */
@@ -113,7 +112,6 @@ public abstract class SalmonAES256CTRTransformer implements ISalmonCTRTransforme
         block = 0;
     }
 
-
     /**
      * Syncs the Counter based on what AES block position the stream is at.
      * The block count is already excluding the header and the hash signatures.
@@ -145,7 +143,6 @@ public abstract class SalmonAES256CTRTransformer implements ISalmonCTRTransforme
             value /= 256;
         }
     }
-
 
     /**
      * Initialize the transformer. Most common operations include precalculating expansion keys or

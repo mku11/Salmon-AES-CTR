@@ -526,7 +526,6 @@ public class SalmonFileCommander {
         }
     }
 
-
     public class RealFileTaskProgress extends FileTaskProgress {
         public IRealFile getFile() {
             return file;

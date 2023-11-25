@@ -84,7 +84,6 @@ public class SalmonHeader {
         return headerData;
     }
 
-
     /**
      * Get the Salmon format  version
      * @return The format version

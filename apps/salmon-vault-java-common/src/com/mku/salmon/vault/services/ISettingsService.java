@@ -37,7 +37,6 @@ public interface ISettingsService {
     public String getPbkdfAlgoType();
     public void setPbkdfAlgoType(String value);
 
-
     public String getSequenceAuthType();
     public void setSequenceAuthType(String value);
 

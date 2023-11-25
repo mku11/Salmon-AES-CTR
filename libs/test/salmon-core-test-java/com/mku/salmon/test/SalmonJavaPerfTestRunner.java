@@ -93,5 +93,4 @@ public class SalmonJavaPerfTestRunner {
         TestHelper.encryptAndDecryptByteArray(TEST_PERF_SIZE, true);
         System.out.println();
     }
-
 }

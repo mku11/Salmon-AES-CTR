@@ -30,7 +30,6 @@ import com.mku.salmon.SalmonSecurityException;
  */
 public class SalmonPassword {
 
-
     /**
      * WARNING! SHA1 is not secure anymore enable only if you know what you're doing!
      */

@@ -93,5 +93,4 @@ public class SalmonRegistry
     public boolean exists(String key){
         return Advapi32Util.registryValueExists(WinReg.HKEY_CURRENT_USER, SETTINGS_PATH, key);
     }
-
 }

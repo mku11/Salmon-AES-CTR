@@ -56,7 +56,6 @@ public interface ISalmonCTRTransformer {
                     byte[] destBuffer, int destOffset, int count)
             throws SalmonSecurityException, SalmonRangeExceededException;
 
-
     /**
      * Decrypt the data.
      * @param srcBuffer The source byte array.
@@ -83,7 +82,6 @@ public interface ISalmonCTRTransformer {
      * @return
      */
     byte[] getKey();
-
 
     /**
      * Get the current block.

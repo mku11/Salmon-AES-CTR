@@ -47,7 +47,6 @@ public class SalmonDefaultTransformer extends SalmonAES256CTRTransformer {
      */
     private SecretKeySpec encSecretKey;
 
-
     /**
      * Initialize the default Java AES cipher transformer.
      * @param key The AES256 key to use.
@@ -63,7 +62,6 @@ public class SalmonDefaultTransformer extends SalmonAES256CTRTransformer {
             throw new SalmonSecurityException("Could not init AES transformer", e);
         }
     }
-
 
     /**
      * Encrypt the data.
@@ -88,7 +86,6 @@ public class SalmonDefaultTransformer extends SalmonAES256CTRTransformer {
             throw new SalmonSecurityException("Could not encrypt data: ", ex);
         }
     }
-
 
     /**
      * Decrypt the data.

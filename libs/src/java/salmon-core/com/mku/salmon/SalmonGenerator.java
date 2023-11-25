@@ -26,7 +26,6 @@ SOFTWARE.
 import java.nio.charset.Charset;
 import java.security.SecureRandom;
 
-
 /**
  * Utility class generates internal secure properties.
  */

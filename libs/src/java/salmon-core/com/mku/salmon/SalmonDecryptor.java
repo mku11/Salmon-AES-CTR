@@ -41,7 +41,6 @@ import java.util.concurrent.atomic.AtomicReference;
  */
 public class SalmonDecryptor {
 
-
     /**
      * The number of parallel threads to use.
      */

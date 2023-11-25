@@ -142,7 +142,6 @@ public class TextEditorController {
         }
     }
 
-
     public void ShowTaskMessage(String msg) {
         WindowUtils.runOnMainThread(() ->
         {

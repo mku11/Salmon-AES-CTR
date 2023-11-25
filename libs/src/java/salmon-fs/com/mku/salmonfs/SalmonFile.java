@@ -92,7 +92,6 @@ public class SalmonFile {
             hashKey = drive.getKey().getHashKey();
     }
 
-
     /**
      * Return the current chunk size requested that will be used for integrity
      */

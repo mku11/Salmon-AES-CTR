@@ -58,7 +58,6 @@ import java.util.TimeZone;
 import java.util.concurrent.Executor;
 import java.util.concurrent.Executors;
 
-
 public class MediaPlayerController {
     private static int MEDIA_BUFFERS = 4;
     private static int MEDIA_BUFFER_SIZE = 4 * 1024 * 1024;
@@ -185,10 +184,6 @@ public class MediaPlayerController {
 
         Media m = new Media(uri);
         mp = new MediaPlayer(m);
-        //FIXME: hangs
-//        mp.setOnStopped(() -> {
-//            new Thread(()->mp.dispose());
-//        });
         mp.setOnPaused(() -> setImage(playImage));
         mp.setOnPlaying(() -> setImage(pauseImage));
         mediaView.setMediaPlayer(mp);

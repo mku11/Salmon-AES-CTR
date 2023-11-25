@@ -1,4 +1,5 @@
-package com.mku.salmon.transform;/*
+package com.mku.salmon.transform;
+/*
 MIT License
 
 Copyright (c) 2021 Max Kas

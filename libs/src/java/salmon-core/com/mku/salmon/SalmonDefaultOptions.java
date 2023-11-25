@@ -51,5 +51,4 @@ public class SalmonDefaultOptions {
     public static void setBufferSize(int bufferSize) {
         SalmonDefaultOptions.bufferSize = bufferSize;
     }
-
 }

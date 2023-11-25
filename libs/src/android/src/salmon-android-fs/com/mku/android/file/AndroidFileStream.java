@@ -34,7 +34,6 @@ import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.nio.channels.FileChannel;
 
-
 /**
  * Class is a stream implementation wrapper for java streams that are retrieved from AndroidFile
  * which support external SD cards.
@@ -52,7 +51,6 @@ public class AndroidFileStream extends RandomAccessStream {
     public boolean canRead() {
         return fileChannel.isOpen() && !canWrite;
     }
-
 
     /**
      * True if the stream is writeable.

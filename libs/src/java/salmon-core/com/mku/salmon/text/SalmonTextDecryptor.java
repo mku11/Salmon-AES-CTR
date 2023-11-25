@@ -79,5 +79,4 @@ public class SalmonTextDecryptor {
         String decString = new String(decBytes, Charset.defaultCharset());
         return decString;
     }
-
 }

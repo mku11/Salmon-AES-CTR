@@ -110,7 +110,6 @@ public class TestHelper {
         return decText1;
     }
 
-
     public static void encryptWriteDecryptRead(String text, byte[] key, byte[] iv,
                                                int encBufferSize, int decBufferSize, boolean testIntegrity, Integer chunkSize,
                                                byte[] hashKey, boolean flipBits, String header, Integer maxTextLength) throws Exception {
@@ -144,7 +143,6 @@ public class TestHelper {
 
         assertEquals(plainText, decText);
     }
-
 
     public static byte[] encrypt(byte[] inputBytes, byte[] key, byte[] iv, int bufferSize,
                                  boolean integrity, Integer chunkSize, byte[] hashKey,
@@ -205,7 +203,6 @@ public class TestHelper {
         outs.close();
         return bytes;
     }
-
 
     public static void seekAndRead(String text, byte[] key, byte[] iv,
                                    boolean integrity, int chunkSize, byte[] hashKey) throws Exception {
@@ -378,13 +375,11 @@ public class TestHelper {
         partialWriter.close();
         pOuts.close();
 
-
         // Use SalmonStrem to read from cipher text and test if writing was successful
         MemoryStream encIns = new MemoryStream(encBytes);
         SalmonStream decReader = new SalmonStream(key, iv, SalmonStream.EncryptionMode.Decrypt, encIns,
                 null, integrity, chunkSize, hashKey);
         String decText = TestHelper.seekAndGetSubstringByRead(decReader, 0, text.length(), RandomAccessStream.SeekOrigin.Begin);
-
 
         assertEquals(text.substring(0, (int) seek), decText.substring(0, (int) seek));
 
@@ -392,7 +387,6 @@ public class TestHelper {
 
         assertEquals(text.substring((int) seek + writeCount), decText.substring((int) seek + writeCount));
         testCounter(decReader);
-
 
         encIns.close();
         decReader.close();
@@ -444,7 +438,6 @@ public class TestHelper {
         return encrypted;
     }
 
-
     public static byte[] nativeCTRTransform(byte[] input, byte[] testKeyBytes, byte[] testNonceBytes,
                                             boolean encrypt, SalmonStream.ProviderType providerType)
             throws Exception {
@@ -464,7 +457,6 @@ public class TestHelper {
             transformer.decryptData(input, 0, output, 0, input.length);
         return output;
     }
-
 
     public static byte[] getRandArray(int size) {
         byte[] data = new byte[size];
@@ -564,7 +556,6 @@ public class TestHelper {
         System.out.println("read: " + Arrays.toString(buff));
     }
 
-
     public static void copyFromMemStream(int size, int bufferSize) throws Exception {
         byte[] testData = getRandArray(size);
         MessageDigest md = MessageDigest.getInstance("MD5");
@@ -590,7 +581,6 @@ public class TestHelper {
         ms1.close();
         ms2.close();
         dis2.close();
-
 
         assertArrayEquals(digest, digest2);
 

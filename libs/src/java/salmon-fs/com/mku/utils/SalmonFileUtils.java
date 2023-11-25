@@ -109,7 +109,6 @@ public class SalmonFileUtils {
             return "";
     }
 
-
     /**
      * Returns the minimum part size that can be encrypted / decrypted in parallel
      * aligning to the integrity chunk size if available.
@@ -122,6 +121,4 @@ public class SalmonFileUtils {
             return file.getRequestedChunkSize();
         return file.getBlockSize();
     }
-
-
 }

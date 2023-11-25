@@ -23,7 +23,6 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 */
 
-
 import com.mku.file.IRealFile;
 import com.mku.convert.BitConverter;
 import com.mku.io.RandomAccessStream;
@@ -146,7 +145,6 @@ public class SalmonDriveConfig {
         return encryptedData;
     }
 
-
     /**
      * Get the initial vector that was used to encrypt this drive configuration.
      * @return
@@ -162,5 +160,4 @@ public class SalmonDriveConfig {
     public byte[] getHashSignature() {
         return hashSignature;
     }
-
 }

@@ -105,5 +105,4 @@ public class ImageViewerController {
     public void onClose() {
         stage.close();
     }
-
 }

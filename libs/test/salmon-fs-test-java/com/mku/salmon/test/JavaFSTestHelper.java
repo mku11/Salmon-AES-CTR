@@ -84,7 +84,6 @@ public class JavaFSTestHelper {
         }
     }
 
-
     public static void importAndExport(String vaultDir, String pass, String importFile,
                                        int importBufferSize, int importThreads, int exportBufferSize, int exportThreads, boolean integrity,
                                        boolean bitflip, long flipPosition, boolean shouldBeEqual,
@@ -157,7 +156,6 @@ public class JavaFSTestHelper {
         // trigger the cache to add the filename
         String basename = salmonFile.getBaseName();
 
-
         assertNotNull(salmonFile);
 
         assertTrue(salmonFile.exists());
@@ -165,13 +163,11 @@ public class JavaFSTestHelper {
         SalmonFileSearcher searcher = new SalmonFileSearcher();
         SalmonFile[] files = searcher.search(salmonRootDir, basename, true, null, null);
 
-
         assertTrue(files.length > 0);
 
         assertEquals(files[0].getBaseName(), basename);
 
     }
-
 
     public static void importAndCopy(String vaultDir, String pass, String importFile,
                                      int importBufferSize, int importThreads, String newDir, boolean move) throws Exception {
@@ -221,7 +217,6 @@ public class JavaFSTestHelper {
         stream.close();
     }
 
-
     public static SalmonFile shouldCreateFileWithoutVault(byte[] testBytes, byte[] key, boolean applyIntegrity, boolean verifyIntegrity, int chunkSize, byte[] hashKey,
                                                     byte[] filenameNonce, byte[] fileNonce, String outputDir, boolean flipBit, int flipPosition, boolean checkData) throws Exception {
         // write file
@@ -263,7 +258,6 @@ public class JavaFSTestHelper {
             assertArrayEquals(testBytes, textBytes);
         return readFile;
     }
-
 
     public static void exportAndImportAuth(String vault, String importFilePath) throws Exception {
         String exportAuthFilePath = vault + File.separator + TestHelper.TEST_EXPORT_DIR;
@@ -336,7 +330,6 @@ public class JavaFSTestHelper {
         long nonceB2 = BitConverter.toLong(salmonFileB2.getFileNonce(), 0, SalmonGenerator.NONCE_LENGTH);
         SalmonDriveManager.closeDrive();
 
-
         assertEquals(nonceA1, nonceCfg - 1);
 
         assertEquals(nonceCfg, nonceA2 - 2);
@@ -345,7 +338,6 @@ public class JavaFSTestHelper {
 
         assertEquals(nonceB1, nonceB2 - 2);
     }
-
 
     public static void testMaxFiles(String vaultDir, String seqFile, String importFile,
                                     byte[] testMaxNonce, long offset, boolean shouldImport) {
@@ -483,7 +475,6 @@ public class JavaFSTestHelper {
         decryptor.close();
         encInputStream.close();
         outStream.close();
-
 
         assertArrayEquals(data, decData);
     }

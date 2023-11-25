@@ -173,7 +173,6 @@ public class SalmonEncryptor {
         return outData;
     }
 
-
     /**
      * Encrypt stream using parallel threads.
      *

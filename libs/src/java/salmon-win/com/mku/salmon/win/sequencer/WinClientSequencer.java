@@ -130,7 +130,6 @@ public class WinClientSequencer implements ISalmonSequencer, Closeable {
             throw new SalmonSequenceException("Could not create sequence: " + res.error);
     }
 
-
     public SalmonSequence getSequence(String driveID) throws SalmonSequenceException {
         Response res;
         try {
@@ -311,7 +310,6 @@ public class WinClientSequencer implements ISalmonSequencer, Closeable {
     private void write(String request) throws IOException {
         namedPipe.write(request.getBytes(StandardCharsets.UTF_8));
     }
-
 
     private String read() throws IOException {
         byte[] buffer = new byte[1024];

@@ -199,7 +199,6 @@ public class SalmonFSJavaTestRunner extends SalmonJavaTestRunner {
         assertTrue(integrityFailed);
     }
 
-
     @Test
     public void shouldImportAndExportNoAppliedIntegrityBitFlipDataShouldNotCatch() {
         boolean integrityFailed = false;
@@ -300,7 +299,6 @@ public class SalmonFSJavaTestRunner extends SalmonJavaTestRunner {
         assertTrue(importSuccess);
     }
 
-
     @Test
     public void shouldCatchVaultMaxFiles() {
         SalmonDriveManager.setVirtualDriveClass(JavaDrive.class);
@@ -336,7 +334,6 @@ public class SalmonFSJavaTestRunner extends SalmonJavaTestRunner {
                 TestHelper.TEST_FILENAME_NONCE_BYTES, TestHelper.TEST_NONCE_BYTES, TEST_OUTPUT_DIR, false, -1, true);
     }
 
-
     @Test
     public void shouldCreateFileWithoutVaultApplyAndVerifyIntegrityFlipCaught() throws Exception {
 
@@ -353,7 +350,6 @@ public class SalmonFSJavaTestRunner extends SalmonJavaTestRunner {
 
         assertTrue(caught);
     }
-
 
     @Test
     public void shouldCreateFileWithoutVaultApplyIntegrityNoVerifyIntegrityFlipHMACNotCaught() {
@@ -377,7 +373,6 @@ public class SalmonFSJavaTestRunner extends SalmonJavaTestRunner {
             assertFalse(failed);
         }
     }
-
 
     @Test
     public void shouldCreateFileWithoutVaultApplyIntegrityNoVerifyIntegrityFlipDataNotCaughtNotEqual() throws Exception {
@@ -403,7 +398,6 @@ public class SalmonFSJavaTestRunner extends SalmonJavaTestRunner {
         assertTrue(failed);
     }
 
-
     @Test
     public void shouldExportAndImportAuth() throws Exception {
         String vault = TestHelper.generateFolder(TEST_VAULT_DIR);
@@ -415,7 +409,6 @@ public class SalmonFSJavaTestRunner extends SalmonJavaTestRunner {
     public void testExamples() throws Exception {
         JavaFSTestHelper.testExamples();
     }
-
 
     @Test
     public void shouldEncryptAndDecryptStream() throws Exception {
@@ -444,7 +437,6 @@ public class SalmonFSJavaTestRunner extends SalmonJavaTestRunner {
         JavaFSTestHelper.seekAndReadFileInputStream(data, fileInputStream, 124, 50, 0, 50);
         JavaFSTestHelper.seekAndReadFileInputStream(data, fileInputStream, 250, 10, 0, 6);
     }
-
 
     @Test
     public void shouldCreateDriveAndOpenFsFolder() throws Exception {
@@ -475,7 +467,6 @@ public class SalmonFSJavaTestRunner extends SalmonJavaTestRunner {
     public void shouldCreateWinFileSequencer() throws SalmonSequenceException, IOException, SalmonRangeExceededException {
         JavaFSTestHelper.shouldTestFileSequencer();
     }
-
 
     @Test
     public void ShouldPerformOperationsRealFiles() throws IOException {
@@ -578,7 +569,6 @@ public class SalmonFSJavaTestRunner extends SalmonJavaTestRunner {
         assertEquals(6, dir.getChild("folder4").getChild("folder1").getChild("folder2").getChildrenCount());
         assertEquals(0, dir.getChild("folder4").getChild("folder1").getChild("folder2").getChild("folder2").getChildrenCount());
 
-
         dir.getChild("folder4").getChild("folder1").getChild("folder2").getChild(file.getBaseName()).delete();
         dir.getChild("folder4").getChild("folder1").getChild(file.getBaseName()).delete();
         ArrayList<IRealFile> failedmv = new ArrayList<IRealFile>();
@@ -650,7 +640,6 @@ public class SalmonFSJavaTestRunner extends SalmonJavaTestRunner {
         ms1.close();
         msa1.close();
         dism1.close();
-
 
         fileInputStream2 = new SalmonFileInputStream(sfiles[0], 4, 4 * 1024 * 1024, 1, 256 * 1024);
         fileInputStream2.skip(pos);

@@ -88,7 +88,6 @@ public class SalmonFileImporter {
      */
     private final ExecutorService executor = Executors.newCachedThreadPool();
 
-
     /**
      * Constructs a file importer that can be used to import files to the drive
      *
@@ -313,5 +312,4 @@ public class SalmonFileImporter {
     public void close() {
         executor.shutdownNow();
     }
-
 }

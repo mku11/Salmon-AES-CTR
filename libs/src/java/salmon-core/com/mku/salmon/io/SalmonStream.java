@@ -66,7 +66,6 @@ public class SalmonStream extends RandomAccessStream {
      */
     private final RandomAccessStream baseStream;
 
-
     /**
      * Current global AES provider type.
      */
@@ -347,7 +346,6 @@ public class SalmonStream extends RandomAccessStream {
         transformer.init(key, nonce);
         transformer.resetCounter();
     }
-
 
     /**
      * Seek to a specific position on the stream. This does not include the header and any hash Signatures.
@@ -654,7 +652,6 @@ public class SalmonStream extends RandomAccessStream {
         }
     }
 
-
     /**
      * Get the aligned offset wrt the Chunk size if integrity is enabled otherwise
      * wrt to the encryption block size. Use this method to align a position to the
@@ -768,7 +765,6 @@ public class SalmonStream extends RandomAccessStream {
         return pos;
     }
 
-
     /**
      * Strip hash signatures from the buffer.
      *
@@ -834,6 +830,5 @@ public class SalmonStream extends RandomAccessStream {
     public boolean isAllowRangeWrite() {
         return allowRangeWrite;
     }
-
 }
 

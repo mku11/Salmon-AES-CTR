@@ -126,7 +126,6 @@ public class MainController {
         return fileprogresstext.get();
     }
 
-
     @FXML
     private final SimpleDoubleProperty filesprogress = new SimpleDoubleProperty();
 
@@ -138,7 +137,6 @@ public class MainController {
     public Double getFilesprogress() {
         return filesprogress.get();
     }
-
 
     @FXML
     private final SimpleStringProperty filesprogresstext = new SimpleStringProperty();
@@ -195,7 +193,6 @@ public class MainController {
             WindowUtils.runOnMainThread(() -> filesprogresstext.set((int) (manager.getFilesProgress() * 100f) + " %"));
         }
     }
-
 
     private void updateFileViewModels() {
         if (manager.getFileItemList() == null)
@@ -528,7 +525,6 @@ public class MainController {
             e.printStackTrace();
         }
     }
-
 
     private void startImageViewer(SalmonFileViewModel item) {
         try {

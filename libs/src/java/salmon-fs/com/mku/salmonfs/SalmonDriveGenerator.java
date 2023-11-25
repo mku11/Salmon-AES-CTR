@@ -137,5 +137,4 @@ public class SalmonDriveGenerator {
     public static void setIterations(int iterations) {
         SalmonDriveGenerator.iterations = iterations;
     }
-
 }

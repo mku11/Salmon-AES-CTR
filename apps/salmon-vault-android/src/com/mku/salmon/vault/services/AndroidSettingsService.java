@@ -118,5 +118,4 @@ public class AndroidSettingsService implements ISettingsService {
     public boolean getExcludeFromRecents() {
         return prefs.getBoolean("excludeFromRecents", false);
     }
-
 }

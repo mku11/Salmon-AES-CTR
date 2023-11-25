@@ -65,7 +65,6 @@ public class SalmonJavaTestRunner {
     public void shouldEncryptAndDecryptText() throws Exception {
         String plainText = TestHelper.TEST_TINY_TEXT;
 
-
         String encText = SalmonTextEncryptor.encryptString(plainText, TestHelper.TEST_KEY_BYTES, TestHelper.TEST_NONCE_BYTES, false);
         String decText = SalmonTextDecryptor.decryptString(encText, TestHelper.TEST_KEY_BYTES, TestHelper.TEST_NONCE_BYTES, false);
         assertEquals(plainText, decText);
@@ -74,7 +73,6 @@ public class SalmonJavaTestRunner {
     @Test
     public void shouldEncryptAndDecryptTextWithHeader() throws Exception {
         String plainText = TestHelper.TEST_TINY_TEXT;
-
 
         String encText = SalmonTextEncryptor.encryptString(plainText, TestHelper.TEST_KEY_BYTES, TestHelper.TEST_NONCE_BYTES, true);
         String decText = SalmonTextDecryptor.decryptString(encText, TestHelper.TEST_KEY_BYTES, null, true);
@@ -129,7 +127,6 @@ public class SalmonJavaTestRunner {
         assertTrue(caught);
     }
 
-
     @Test
     public void shouldEncryptDecryptCatchNoKey() {
         String plainText = TestHelper.TEST_TINY_TEXT;
@@ -164,7 +161,6 @@ public class SalmonJavaTestRunner {
 
         assertArrayEquals(bytes, decBytes);
     }
-
 
     @Test
     public void shouldEncryptAndDecryptTextCompatibleWithIntegrity() throws Exception {
@@ -298,7 +294,6 @@ public class SalmonJavaTestRunner {
         assertTrue(caught);
     }
 
-
     @Test
     public void shouldEncryptDecryptUsingStreamTestIntegrityMultipleChunksNoBufferSpecifiedEncBufferNotAlignedNegative() throws Exception {
         boolean caught = false;
@@ -313,9 +308,7 @@ public class SalmonJavaTestRunner {
 
         assertTrue(caught);
 
-
     }
-
 
     @Test
     public void shouldEncryptDecryptUsingStreamTestIntegrityMultipleChunksSpecifiedDecBufferNotAligned() throws Exception {
@@ -323,7 +316,6 @@ public class SalmonJavaTestRunner {
                 true, 32, TestHelper.TEST_HMAC_KEY_BYTES, false, null, null
         );
     }
-
 
     @Test
     public void shouldEncryptDecryptUsingStreamTestIntegrityMultipleChunksNoBufferSpecifiedDecBufferNotAlignedNegative() throws Exception {
@@ -338,7 +330,6 @@ public class SalmonJavaTestRunner {
         }
 
         assertTrue(caught);
-
 
     }
 
@@ -434,12 +425,10 @@ public class SalmonJavaTestRunner {
         TestHelper.seekAndRead(TestHelper.TEST_TEXT, TestHelper.TEST_KEY_BYTES, TestHelper.TEST_NONCE_BYTES, false, 0, null);
     }
 
-
     @Test
     public void shouldSeekAndTestBlockAndCounter() throws Exception {
         TestHelper.seekTestCounterAndBlock(TestHelper.TEST_TEXT, TestHelper.TEST_KEY_BYTES, TestHelper.TEST_NONCE_BYTES, false, 0, null);
     }
-
 
     @Test
     public void shouldSeekAndReadWithIntegrity() throws Exception {
@@ -489,7 +478,6 @@ public class SalmonJavaTestRunner {
         assertTrue(caught);
     }
 
-
     @Test
     public void shouldCatchCTROverflow() {
         boolean caught = false;
@@ -503,7 +491,6 @@ public class SalmonJavaTestRunner {
 
         assertTrue(caught);
     }
-
 
     @Test
     public void shouldHoldCTRValue() {
@@ -534,7 +521,6 @@ public class SalmonJavaTestRunner {
         int num2 = (int) BitConverter.toLong(bytes, 0, 4);
 
         assertEquals(num1, num2);
-
 
         long lnum1 = 56445783493L;
         bytes = BitConverter.toBytes(lnum1, 8);
@@ -609,12 +595,10 @@ public class SalmonJavaTestRunner {
         System.out.println("dec time: " + (t3 - t2));
     }
 
-
     @Test
     public void ShouldCopyMemory() throws IOException {
         TestHelper.CopyMemory(4 * 1024 * 1024);
     }
-
 
     @Test
     public void ShouldCopyFromToMemoryStream() throws Exception {

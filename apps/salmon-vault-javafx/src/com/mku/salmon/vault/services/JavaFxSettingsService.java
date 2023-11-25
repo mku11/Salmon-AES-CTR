@@ -35,7 +35,8 @@ public class JavaFxSettingsService implements ISettingsService {
     }
 
     public String getVaultLocation() {
-        return prefs.get(SalmonSettings.VAULT_LOCATION_KEY, SalmonSettings.DEFAULT_VAULT_LOCATION);
+        return prefs.get(SalmonSettings.VAULT_LOCATION_KEY,
+                SalmonSettings.DEFAULT_VAULT_LOCATION);
     }
 
     public void setVaultLocation(String value) {
@@ -43,15 +44,17 @@ public class JavaFxSettingsService implements ISettingsService {
     }
 
     public void setAesType(String value) {
-        prefs.put(SalmonSettings.AES_TYPE_KEY, value.toString());
+        prefs.put(SalmonSettings.AES_TYPE_KEY, value);
     }
 
     public String getAesType() {
-        return prefs.get(SalmonSettings.AES_TYPE_KEY, SalmonSettings.DEFAULT_AES_TYPE.toString());
+        return prefs.get(SalmonSettings.AES_TYPE_KEY,
+                SalmonSettings.DEFAULT_AES_TYPE.name());
     }
 
     public String getPbkdfImplType() {
-        return prefs.get(SalmonSettings.PBKDF_IMPL_TYPE_KEY, SalmonSettings.DEFAULT_IMPL_TYPE.toString());
+        return prefs.get(SalmonSettings.PBKDF_IMPL_TYPE_KEY,
+                SalmonSettings.DEFAULT_PBKDF_IMPL_TYPE.name());
     }
 
     public void setPbkdfImplType(String value) {
@@ -59,7 +62,8 @@ public class JavaFxSettingsService implements ISettingsService {
     }
 
     public String getPbkdfAlgoType() {
-        return prefs.get(SalmonSettings.PBKDF_ALGO_TYPE_KEY, SalmonSettings.DEFAULT_PBKDF_ALGO.toString());
+        return prefs.get(SalmonSettings.PBKDF_ALGO_TYPE_KEY,
+                SalmonSettings.DEFAULT_PBKDF_ALGO.toString());
     }
 
     public void setPbkdfAlgoType(String value) {
@@ -68,7 +72,8 @@ public class JavaFxSettingsService implements ISettingsService {
 
     @Override
     public String getSequenceAuthType() {
-        return prefs.get(SalmonSettings.AUTH_TYPE_KEY, SalmonSettings.DEFAULT_AUTH_TYPE.toString());
+        return prefs.get(SalmonSettings.AUTH_TYPE_KEY,
+                SalmonSettings.DEFAULT_AUTH_TYPE.toString());
     }
 
     @Override
@@ -86,7 +91,8 @@ public class JavaFxSettingsService implements ISettingsService {
     }
 
     public String getLastImportDir() {
-        return prefs.get(SalmonSettings.LAST_IMPORT_DIR_KEY, SalmonSettings.DEFAULT_LAST_IMPORT_DIR);
+        return prefs.get(SalmonSettings.LAST_IMPORT_DIR_KEY,
+                SalmonSettings.DEFAULT_LAST_IMPORT_DIR);
     }
 
     public void setLastImportDir(String value) {

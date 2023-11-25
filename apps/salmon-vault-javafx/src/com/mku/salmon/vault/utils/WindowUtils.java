@@ -62,5 +62,4 @@ public class WindowUtils {
         Image icon = new Image(logo);
         return icon;
     }
-
 }

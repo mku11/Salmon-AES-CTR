@@ -58,7 +58,6 @@ public class SalmonNativeTransformer extends SalmonAES256CTRTransformer {
         setExpandedKey(expandedKey);
     }
 
-
     /**
      * Encrypt the data.
      * @param srcBuffer The source byte array.
@@ -92,5 +91,4 @@ public class SalmonNativeTransformer extends SalmonAES256CTRTransformer {
                 srcBuffer, srcOffset,
                 destBuffer, destOffset, count);
     }
-
 }

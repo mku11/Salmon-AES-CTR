@@ -55,7 +55,6 @@ public class SalmonTextEncryptor {
         return encryptString(text, key, nonce, header, false, null, null);
     }
 
-
     /**
      * Encrypts a text String using AES256 with the key and nonce provided.
      *
