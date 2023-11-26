@@ -69,7 +69,6 @@
     
     
     <Compile Include="..\..\src\Image\Thumbnails.cs" Link="Image\Thumbnails.cs" />
-    <Compile Include="..\..\src\Prefs\SalmonPreferences.cs" Link="Prefs\SalmonPreferences.cs" />
     <Compile Include="..\..\src\Utils\URLUtils.cs" Link="Utils\URLUtils.cs" />
     <Compile Include="..\..\src\Utils\WindowUtils.cs" Link="Utils\WindowUtils.cs" />
     
@@ -105,13 +104,16 @@
     <Compile Include="..\..\..\salmon-vault-csharp-common\src\Services\IFileDialogService.cs" Link="Services\IFileDialogService.cs" />
     <Compile Include="..\..\..\salmon-vault-csharp-common\src\Services\IKeyboardService.cs" Link="Services\IKeyboardService.cs" />
     <Compile Include="..\..\..\salmon-vault-csharp-common\src\Services\IMediaPlayerService.cs" Link="Services\IMediaPlayerService.cs" />
-
+    <Compile Include="..\..\..\salmon-vault-csharp-common\src\Services\ISettingsService.cs" Link="Services\ISettingsService.cs" />
+    
     <Compile Include="..\..\..\salmon-vault-csharp-common\src\Extensions\EnumExtensions.cs" Link="Extensions\EnumExtensions.cs" />
     <Compile Include="..\..\..\salmon-vault-csharp-common\src\Extensions\ExceptionExtensions.cs" Link="Extensions\ExceptionExtensions.cs" />
 
     <Compile Include="..\..\..\salmon-vault-csharp-common\src\Utils\ByteUtils.cs" Link="Utils\ByteUtils.cs" />
 
     <Compile Include="..\..\..\salmon-vault-csharp-common\src\Dialog\SalmonDialogs.cs" Link="Dialog\SalmonDialogs.cs" />
+
+    <Compile Include="..\..\src\Services\MAUISettingsService.cs" Link="Services\MAUISettingsService.cs" />
   </ItemGroup>
 
   <ItemGroup>

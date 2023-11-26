@@ -1,5 +1,7 @@
 ﻿using Microsoft.Maui.Controls;
+using Salmon.Vault.Services;
 using Salmon.Vault.View;
+using System;
 
 namespace Salmon.Vault.MAUI;
 
@@ -10,8 +12,14 @@ public partial class AppShell : Shell
 	{
 		InitializeComponent();
         RegisterRoutes();
+        SetupServices();
 		SetIcon();
 	}
+
+    private void SetupServices()
+    {
+        ServiceLocator.GetInstance().Register(typeof(ISettingsService), new MAUISettingsService());
+    }
 
     private void RegisterRoutes()
     {

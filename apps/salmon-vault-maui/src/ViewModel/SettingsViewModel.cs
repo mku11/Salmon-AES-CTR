@@ -22,15 +22,11 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 */
 using Mku.Salmon.IO;
-using Mku.SalmonFS;
-using Salmon.Vault.Dialog;
 using Salmon.Vault.Model;
-using Salmon.Vault.Prefs;
 using Salmon.Vault.Settings;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel;
-using System.Windows.Input;
 
 namespace Salmon.Vault.ViewModel;
 
@@ -66,7 +62,6 @@ public class SettingsViewModel : INotifyPropertyChanged
                 _aesTypeSelected = value;
                 SalmonSettings.GetInstance().AesType = (SalmonSettings.AESType)value;
                 SalmonStream.AesProviderType = (SalmonStream.ProviderType)Enum.Parse(typeof(SalmonStream.ProviderType), SalmonSettings.GetInstance().AesType.ToString());
-                SalmonPreferences.SavePrefs();
                 if (PropertyChanged != null)
                     PropertyChanged(this, new PropertyChangedEventArgs("AesTypeSelected"));
             }
@@ -95,7 +90,6 @@ public class SettingsViewModel : INotifyPropertyChanged
             {
                 _authTypeSelected = value;
                 SalmonSettings.GetInstance().SequencerAuthType = (SalmonSettings.AuthType)value;
-                SalmonPreferences.SavePrefs();
                 if (PropertyChanged != null)
                     PropertyChanged(this, new PropertyChangedEventArgs("AuthTypeSelected"));
                 if (initialized)
@@ -114,7 +108,6 @@ public class SettingsViewModel : INotifyPropertyChanged
         {
             _deleteSourceAfterImport = value;
             SalmonSettings.GetInstance().DeleteAfterImport = value;
-            SalmonPreferences.SavePrefs();
             if (PropertyChanged != null)
                 PropertyChanged(this, new PropertyChangedEventArgs("DeleteSourceAfterImport"));
 
