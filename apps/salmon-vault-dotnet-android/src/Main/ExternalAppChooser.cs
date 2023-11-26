@@ -114,7 +114,6 @@ public class ExternalAppChooser
         SortedDictionary<string, string> apps = new SortedDictionary<string, string>();
         foreach (ResolveInfo resolveInfo in appInfoList)
         {
-            //FIXME: the key should be the package name
             string name = activity.PackageManager.GetApplicationLabel(resolveInfo.ActivityInfo.ApplicationInfo).ToString();
             string packageName = resolveInfo.ActivityInfo.ApplicationInfo.PackageName;
             apps[name] = packageName;

@@ -160,7 +160,6 @@ class FileAdapter : RecyclerView.Adapter, INotifyPropertyChanged
             ex.PrintStackTrace();
         }
 
-        //TODO: upgrade to a queue structure with faster remove()
         tasks.Remove(viewHolder);
         tasks.AddFirst(viewHolder);
         executor.Submit(new Runnable(() =>
