@@ -1,5 +1,5 @@
 Salmon.Native  
-version: 1.0.5  
+version: 1.0.6-SNAPSHOT  
 project: https://github.com/mku11/Salmon-AES-CTR  
 license: MIT License https://github.com/mku11/Salmon-AES-CTR/blob/main/LICENSE  
   

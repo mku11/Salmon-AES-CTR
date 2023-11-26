@@ -9,7 +9,7 @@
     <ApplicationIcon>logo_48x48.ico</ApplicationIcon>
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
     <ImplicitUsings>false</ImplicitUsings>
-    <Version>1.0.5</Version>
+    <Version>1.0.6-SNAPSHOT</Version>
   </PropertyGroup>
 
   <ItemGroup>
@@ -124,10 +124,10 @@
     <PackageReference Include="FFME.Windows" Version="4.4.350" />
     <PackageReference Include="Microsoft.Web.WebView2" Version="1.0.2088.41" />
     <PackageReference Include="MimeTypesMap" Version="1.0.8" />
-    <PackageReference Include="Salmon.Core" Version="1.0.5" />
-    <PackageReference Include="Salmon.FS" Version="1.0.5" />
-    <PackageReference Include="Salmon.Native" Version="1.0.5" />
-    <PackageReference Include="Salmon.Win" Version="1.0.5" />
+    <PackageReference Include="Salmon.Core" Version="1.0.6-SNAPSHOT" />
+    <PackageReference Include="Salmon.FS" Version="1.0.6-SNAPSHOT" />
+    <PackageReference Include="Salmon.Native" Version="1.0.6-SNAPSHOT" />
+    <PackageReference Include="Salmon.Win" Version="1.0.6-SNAPSHOT" />
   </ItemGroup>
 
   <ItemGroup>

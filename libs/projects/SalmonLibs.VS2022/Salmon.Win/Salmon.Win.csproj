@@ -20,7 +20,7 @@
     <DocumentationFile></DocumentationFile>
     <ImplicitUsings>enable</ImplicitUsings>
     <LangVersion>10</LangVersion>
-    <Version>1.0.5</Version>
+    <Version>1.0.6-SNAPSHOT</Version>
   </PropertyGroup>
   <ItemGroup>
     <Compile Include="..\..\..\src\csharp\SalmonWin\Sequencer\WinClientSequencer.cs" Link="Sequencer\WinClientSequencer.cs" />

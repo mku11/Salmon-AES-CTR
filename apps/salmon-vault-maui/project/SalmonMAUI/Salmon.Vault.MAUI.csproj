@@ -21,8 +21,8 @@
     <ApplicationIdGuid>a36c16ff-b265-49ca-9ebc-ee7c747d62fe</ApplicationIdGuid>
 
     <!-- Versions -->
-    <ApplicationDisplayVersion>1.0.5</ApplicationDisplayVersion>
-    <ApplicationVersion>105</ApplicationVersion>
+    <ApplicationDisplayVersion>1.0.6-SNAPSHOT</ApplicationDisplayVersion>
+    <ApplicationVersion>106</ApplicationVersion>
 
     <SupportedOSPlatformVersion Condition="$([MSBuild]::GetTargetPlatformIdentifier('$(TargetFramework)')) == 'ios'">14.2</SupportedOSPlatformVersion>
     <SupportedOSPlatformVersion Condition="$([MSBuild]::GetTargetPlatformIdentifier('$(TargetFramework)')) == 'maccatalyst'">14.0</SupportedOSPlatformVersion>
@@ -31,7 +31,7 @@
     <TargetPlatformMinVersion Condition="$([MSBuild]::GetTargetPlatformIdentifier('$(TargetFramework)')) == 'windows'">10.0.17763.0</TargetPlatformMinVersion>
     <SupportedOSPlatformVersion Condition="$([MSBuild]::GetTargetPlatformIdentifier('$(TargetFramework)')) == 'tizen'">6.5</SupportedOSPlatformVersion>
     <DefaultLanguage>en-US</DefaultLanguage>
-    <Version>1.0.5</Version>
+    <Version>1.0.6-SNAPSHOT</Version>
   </PropertyGroup>
 
   <ItemGroup>
@@ -185,10 +185,10 @@
 
   <ItemGroup>
     <PackageReference Include="MimeTypesMap" Version="1.0.8" />
-    <PackageReference Include="Salmon.Core" Version="1.0.5" />
-    <PackageReference Include="Salmon.FS" Version="1.0.5" />
-    <PackageReference Include="Salmon.Native" Version="1.0.5" />
-    <PackageReference Include="Salmon.Win" Version="1.0.5" />
+    <PackageReference Include="Salmon.Core" Version="1.0.6-SNAPSHOT" />
+    <PackageReference Include="Salmon.FS" Version="1.0.6-SNAPSHOT" />
+    <PackageReference Include="Salmon.Native" Version="1.0.6-SNAPSHOT" />
+    <PackageReference Include="Salmon.Win" Version="1.0.6-SNAPSHOT" />
   </ItemGroup>
 
   <ItemGroup>
@@ -205,10 +205,10 @@
 
   <ItemGroup Condition="'$(TargetFramework)' == 'net7.0-android'">
     <PackageReference Include="Salmon.FS.Android">
-      <Version>1.0.5</Version>
+      <Version>1.0.6-SNAPSHOT</Version>
     </PackageReference>
     <PackageReference Include="Salmon.Native.Android">
-      <Version>1.0.5</Version>
+      <Version>1.0.6-SNAPSHOT</Version>
     </PackageReference>
     <PackageReference Include="Xamarin.Google.Guava">
       <Version>32.0.1</Version>

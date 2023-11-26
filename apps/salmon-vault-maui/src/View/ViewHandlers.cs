@@ -34,6 +34,9 @@ using Microsoft.Maui.Controls.Handlers.Items;
 using Microsoft.Maui.Handlers;
 using Microsoft.Maui.Platform;
 using System;
+#if IOS
+using UIKit;
+#endif
 using Items = Microsoft.Maui.Controls.Handlers.Items;
 
 namespace Salmon.Vault.View;
