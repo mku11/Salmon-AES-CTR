@@ -17,7 +17,7 @@ Requirements for native libraries:
 To build from the command line run:  
 ./gradlew build -x test --rerun-tasks    
   
-To build the release aar libs:  
+To build the release aar libs which can be used for the VS project:  
 ./gradlew assembleRelease -x test --rerun-tasks  
   
 To publish the maven aar libs to a local directory:  
