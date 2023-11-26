@@ -217,5 +217,4 @@ namespace Salmon.Vault.View
             ViewModel.OnSelectedItems(DataGrid.SelectedItems.Cast<SalmonFileViewModel>().ToList());
         }
     }
-
 }

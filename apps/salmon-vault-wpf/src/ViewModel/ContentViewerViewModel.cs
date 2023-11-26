@@ -69,5 +69,4 @@ public class ContentViewerViewModel : INotifyPropertyChanged
     {
         contentViewer.OnClose();
     }
-
 }

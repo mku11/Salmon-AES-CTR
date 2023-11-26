@@ -98,7 +98,6 @@ public class SalmonWinVaultManager : SalmonVaultManager
         SetupSalmonManager();
     }
 
-
     override
     public void SetupSalmonManager()
     {
@@ -124,5 +123,4 @@ public class SalmonWinVaultManager : SalmonVaultManager
             SalmonDialog.PromptDialog("Error", "Error during initializing: " + e.Message);
         }
     }
-
 }

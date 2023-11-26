@@ -162,7 +162,6 @@ public class SalmonFileViewModel : INotifyPropertyChanged
         }
     }
 
-
     ImageSource _imageSource = null;
     public ImageSource Image
     {
@@ -334,5 +333,4 @@ public class SalmonFileViewModel : INotifyPropertyChanged
     {
         return Name;
     }
-
 }

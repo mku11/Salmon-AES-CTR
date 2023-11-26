@@ -265,7 +265,6 @@ public class SalmonVaultManager : INotifyPropertyChanged
         SetTaskMessage(copyFiles.Length + " Items selected for copy");
     }
 
-
     public void CutSelectedFiles()
     {
         FileManagerMode = Mode.Move;
@@ -416,7 +415,6 @@ public class SalmonVaultManager : INotifyPropertyChanged
         }
     }
 
-
     private void SetupFileSequencer()
     {
         IRealFile dirFile = new DotNetFile(SequencerDefaultDirPath);
@@ -512,7 +510,6 @@ public class SalmonVaultManager : INotifyPropertyChanged
                         FilesProgress = taskProgress.ProcessedFiles / (double)taskProgress.TotalFiles;
                     }, (file, ex) =>
                     {
-                        // TODO: report on failed files
                         failedFiles.Add(file);
                         exception = ex;
                     });
@@ -576,7 +573,6 @@ public class SalmonVaultManager : INotifyPropertyChanged
                     }, SalmonFile.AutoRename, true, (file, ex) =>
                     {
                         HandleThrowException(ex);
-                        // TODO: report on failed files
                         failedFiles.Add(file);
                         exception = ex;
                     });
@@ -780,7 +776,6 @@ public class SalmonVaultManager : INotifyPropertyChanged
                         FilesProgress = taskProgress.ProcessedFiles / (double)taskProgress.TotalFiles;
                     }, IRealFile.AutoRename, (file, ex) =>
                     {
-                        //TODO: report failed files
                         failedFiles.Add(file);
                         exception = ex;
                     });
@@ -846,7 +841,6 @@ public class SalmonVaultManager : INotifyPropertyChanged
                     }, IRealFile.AutoRename, (file, ex) =>
                     {
                         HandleThrowException(ex);
-                        // TODO: report on failed files
                         failedFiles.Add(file);
                         exception = ex;
                     });
@@ -893,7 +887,6 @@ public class SalmonVaultManager : INotifyPropertyChanged
             salmonFiles = fileCommander.Search(CurrDir, value, any, (SalmonFile salmonFile) =>
             {
                 int position = 0;
-                // TODO: this slows down the search
                 foreach (SalmonFile file in FileItemList)
                 {
                     if (salmonFile.Tag != null &&

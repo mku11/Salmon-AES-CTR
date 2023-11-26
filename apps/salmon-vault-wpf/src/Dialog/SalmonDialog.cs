@@ -199,7 +199,6 @@ public class SalmonDialog : System.Windows.Window
         ShowDialog();
     }
 
-
     public static void PromptEdit(string title, string msg, Action<string, bool> OnEdit,
         string value = "", bool isFileName = false, bool readOnly = false, bool isPassword = false,
         string option = null)

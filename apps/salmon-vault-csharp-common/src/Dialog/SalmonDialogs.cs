@@ -41,7 +41,6 @@ using Action = System.Action;
 
 namespace Salmon.Vault.Dialog;
 
-//TODO: make this a service
 public class SalmonDialogs
 {
     public static void PromptPassword(Action OnAuthenticationSucceded)
@@ -129,7 +128,6 @@ public class SalmonDialogs
         }, SalmonVaultManager.REQUEST_IMPORT_AUTH_FILE);
     }
 
-
     public static void PromptExportAuth()
     {
         if (SalmonDriveManager.Drive == null)
@@ -188,7 +186,6 @@ public class SalmonDialogs
             "Cancel");
     }
 
-
     public static void OnDisplayAuthID()
     {
         try
@@ -206,7 +203,6 @@ public class SalmonDialogs
             SalmonDialog.PromptDialog("Error", ex.Message);
         }
     }
-
 
     public static void ShowProperties(SalmonFile item)
     {
@@ -248,7 +244,6 @@ public class SalmonDialogs
                 ResetSequencer(true);
             });
     }
-
 
     public static void PromptDelete()
     {
@@ -336,7 +331,6 @@ public class SalmonDialogs
                 SalmonVaultManager.REQUEST_CREATE_VAULT_DIR);
     }
 
-
     public static void PromptOpenVault()
     {
         ServiceLocator.GetInstance().Resolve<IFileDialogService>().PickFolder("Select the vault",
@@ -388,7 +382,6 @@ public class SalmonDialogs
                     }
                 }, "New Folder", true, false, false, null);
     }
-
 
     public static void PromptRenameFile(SalmonFile ifile)
     {

@@ -253,11 +253,9 @@ public class MainViewModel : INotifyPropertyChanged
         }
     }
 
-
     public class RelayCommand<T> : ICommand
     {
         readonly Action<T> command;
-
 
         public RelayCommand(Action<T> command)
         {
@@ -366,7 +364,6 @@ public class MainViewModel : INotifyPropertyChanged
         }
         OpenTextEditor(item);
     }
-
 
     private void StartImageViewer(SalmonFileViewModel item)
     {

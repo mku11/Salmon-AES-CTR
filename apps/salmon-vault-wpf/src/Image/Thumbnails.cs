@@ -67,7 +67,6 @@ public class Thumbnails
         return GetVideoThumbnail(salmonFile, 0);
     }
 
-    //TODO: video thumbnails needs a 3rd party lib
     public static BitmapImage GetVideoThumbnail(SalmonFile salmonFile, long ms)
     {
         throw new NotSupportedException();
@@ -207,7 +206,6 @@ public class Thumbnails
         cache[file] = image;
         try
         {
-            //FIXME: need to keep track of actual size
             if(image != null)
                 cacheSize += (int)(image.Width * image.Height * 4);
         }

@@ -97,7 +97,6 @@ public class TextEditorViewModel : INotifyPropertyChanged
     {
         readonly Action<T> command;
 
-
         public RelayCommand(Action<T> command)
         {
             this.command = command;
@@ -119,7 +118,6 @@ public class TextEditorViewModel : INotifyPropertyChanged
         }
 
     }
-
 
     private ICommand _clickCommand;
     public ICommand ClickCommand

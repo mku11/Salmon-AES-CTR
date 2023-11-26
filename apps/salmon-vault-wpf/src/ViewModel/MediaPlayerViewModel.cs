@@ -156,7 +156,6 @@ public class MediaPlayerViewModel : INotifyPropertyChanged
     {
         readonly Action<T> command;
 
-
         public RelayCommand(Action<T> command)
         {
             this.command = command;
@@ -264,7 +263,6 @@ public class MediaPlayerViewModel : INotifyPropertyChanged
         StartTimer();
         Play();
     }
-
 
     private void StopTimer()
     {

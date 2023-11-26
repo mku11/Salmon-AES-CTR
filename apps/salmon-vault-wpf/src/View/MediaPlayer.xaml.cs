@@ -74,6 +74,5 @@ namespace Salmon.Vault.View
             dragEntered = false;
         }
 
-
     }
 }

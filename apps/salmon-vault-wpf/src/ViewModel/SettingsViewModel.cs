@@ -106,7 +106,6 @@ public class SettingsViewModel : INotifyPropertyChanged
             _deleteSourceAfterImport = value;
             if (PropertyChanged != null)
                 PropertyChanged(this, new PropertyChangedEventArgs("DeleteSourceAfterImport"));
-
         }
     }
 
@@ -121,5 +120,4 @@ public class SettingsViewModel : INotifyPropertyChanged
         DeleteSourceAfterImport = SalmonSettings.GetInstance().DeleteAfterImport;
         initialized = true;
     }
-
 }

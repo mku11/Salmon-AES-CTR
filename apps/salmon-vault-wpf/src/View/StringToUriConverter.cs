@@ -38,5 +38,4 @@ public class StringToUriConverter : IValueConverter
     {
         return (value as Uri).ToString();
     }
-
 }
