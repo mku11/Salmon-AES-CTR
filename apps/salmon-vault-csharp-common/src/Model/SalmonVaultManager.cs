@@ -23,16 +23,11 @@ SOFTWARE.
 */
 
 using Mku.File;
-using Mku.Salmon.IO;
-using Mku.Salmon.Password;
 using Mku.SalmonFS;
 using Mku.Sequence;
 using Mku.Utils;
 using Salmon.Vault.Config;
 using Salmon.Vault.Dialog;
-using Salmon.Vault.Extensions;
-using Salmon.Vault.Prefs;
-using Salmon.Vault.Services;
 using Salmon.Vault.Settings;
 using Salmon.Vault.Utils;
 using System;
@@ -211,8 +206,8 @@ public class SalmonVaultManager : INotifyPropertyChanged
 
     protected SalmonVaultManager()
     {
+        SalmonSettings.GetInstance().Load();
         SetupFileCommander();
-        LoadSettings();
         SetupSalmonManager();
     }
 
@@ -276,18 +271,6 @@ public class SalmonVaultManager : INotifyPropertyChanged
     private void SetupFileCommander()
     {
         fileCommander = new SalmonFileCommander(BUFFER_SIZE, BUFFER_SIZE, THREADS);
-    }
-
-    private void LoadSettings()
-    {
-        SalmonPreferences.LoadPrefs();
-        SalmonStream.AesProviderType = (SalmonStream.ProviderType)Enum.Parse(typeof(SalmonStream.ProviderType), SalmonSettings.GetInstance().AesType.ToString());
-        SalmonPassword.PbkdfImplType = (SalmonPassword.PbkdfType)Enum.Parse(typeof(SalmonPassword.PbkdfType), SalmonSettings.GetInstance().PbkdfImpl.ToString());
-        SalmonPassword.PbkdfAlgorithm = (SalmonPassword.PbkdfAlgo)Enum.Parse(typeof(SalmonPassword.PbkdfAlgo), SalmonSettings.GetInstance().PbkdfAlgo.ToString());
-        SalmonFileExporter.SetEnableLog(SalmonSettings.GetInstance().EnableLog);
-        SalmonFileExporter.SetEnableLogDetails(SalmonSettings.GetInstance().EnableLogDetails);
-        SalmonFileImporter.SetEnableLog(SalmonSettings.GetInstance().EnableLog);
-        SalmonFileImporter.SetEnableLogDetails(SalmonSettings.GetInstance().EnableLogDetails);
     }
 
     protected void SetupRootDir()
@@ -451,7 +434,6 @@ public class SalmonVaultManager : INotifyPropertyChanged
             CloseVault();
             SalmonDriveManager.OpenDrive(path);
             SalmonSettings.GetInstance().VaultLocation = path;
-            SalmonPreferences.SavePrefs();
         }
         catch (Exception e)
         {
@@ -916,7 +898,6 @@ public class SalmonVaultManager : INotifyPropertyChanged
     {
         SalmonDriveManager.CreateDrive(dirPath, password);
         SalmonSettings.GetInstance().VaultLocation = dirPath;
-        SalmonPreferences.SavePrefs();
         CurrDir = SalmonDriveManager.Drive.VirtualRoot;
         Refresh();
     }

@@ -26,10 +26,8 @@ using Mku.File;
 using Mku.SalmonFS;
 using Mku.Utils;
 using Salmon.Vault.Config;
-using Salmon.Vault.Dialog;
 using Salmon.Vault.Extensions;
 using Salmon.Vault.Model;
-using Salmon.Vault.Prefs;
 using Salmon.Vault.Services;
 using Salmon.Vault.Settings;
 using Salmon.Vault.Utils;
@@ -352,7 +350,6 @@ public class SalmonDialogs
                             filesToImport.Add(fileService.GetFile(file, false));
                         }
                         SalmonSettings.GetInstance().LastImportDir = new FileInfo(files[0]).Directory.FullName;
-                        SalmonPreferences.SavePrefs();
                         SalmonVaultManager.Instance.ImportFiles(filesToImport.ToArray(),
                             SalmonVaultManager.Instance.CurrDir, SalmonSettings.GetInstance().DeleteAfterImport, (SalmonFile[] importedFiles) =>
                             {

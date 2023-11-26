@@ -23,7 +23,6 @@ SOFTWARE.
 */
 using Mku.Salmon.IO;
 using Salmon.Vault.Model;
-using Salmon.Vault.Prefs;
 using Salmon.Vault.Settings;
 using System;
 using System.ComponentModel;
@@ -59,7 +58,6 @@ public class SettingsViewModel : INotifyPropertyChanged
                 _aesTypeSelected = value;
                 SalmonSettings.GetInstance().AesType = (SalmonSettings.AESType)value;
                 SalmonStream.AesProviderType = (SalmonStream.ProviderType)Enum.Parse(typeof(SalmonStream.ProviderType), SalmonSettings.GetInstance().AesType.ToString());
-                SalmonPreferences.SavePrefs();
                 if (PropertyChanged != null)
                     PropertyChanged(this, new PropertyChangedEventArgs("AesTypeSelected"));
             }
@@ -88,7 +86,6 @@ public class SettingsViewModel : INotifyPropertyChanged
             {
                 _authTypeSelected = value;
                 SalmonSettings.GetInstance().SequencerAuthType = (SalmonSettings.AuthType)value;
-                SalmonPreferences.SavePrefs();
                 if (PropertyChanged != null)
                     PropertyChanged(this, new PropertyChangedEventArgs("AuthTypeSelected"));
                 if (initialized)

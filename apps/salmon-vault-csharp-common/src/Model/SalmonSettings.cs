@@ -22,6 +22,9 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 */
 
+using Salmon.Vault.Services;
+using System;
+
 namespace Salmon.Vault.Settings;
 
 public class SalmonSettings
@@ -48,7 +51,7 @@ public class SalmonSettings
 
     public PbkdfAlgoType PbkdfAlgo { get; set; } = DEFAULT_PBKDF_ALGO;
     public static readonly PbkdfAlgoType DEFAULT_PBKDF_ALGO = PbkdfAlgoType.SHA256;
-    public static readonly string PBKDF_TYPE_KEY = "PBKDF_TYPE_KEY";
+    public static readonly string PBKDF_ALGO_KEY = "PBKDF_ALGO_KEY";
     public enum PbkdfAlgoType
     {
         // SHA1 is not secure
@@ -67,23 +70,33 @@ public class SalmonSettings
     public static readonly string DELETE_AFTER_IMPORT_KEY = "DELETE_AFTER_IMPORT_KEY";
     public bool DeleteAfterImport { get; set; } = false;
 
-    public static readonly bool DEFAULT_ENABLE_LOG = false;
-    public static readonly string ENABLE_LOG_KEY = "ENABLE_LOG_KEY";
-    public bool EnableLog { get; set; } = DEFAULT_ENABLE_LOG;
-
-    public static readonly bool DEFAULT_ENABLE_LOG_DETAILS = false;
-    public static readonly string ENABLE_LOG_DETAILS_KEY = "ENABLE_LOG_DETAILS_KEY";
-    public bool EnableLogDetails { get; set; } = DEFAULT_ENABLE_LOG_DETAILS;
-
     public static readonly string DEFAULT_LAST_IMPORT_DIR = null;
     public static readonly string LAST_IMPORT_DIR_KEY = "LAST_IMPORT_DIR_KEY";
     public string LastImportDir { get; set; } = DEFAULT_LAST_IMPORT_DIR;
 
     private static SalmonSettings instance;
+    private ISettingsService settingsService;
+
     public static SalmonSettings GetInstance()
     {
         if (instance == null)
             instance = new SalmonSettings();
         return instance;
+    }
+
+    private SalmonSettings()
+    {
+        settingsService = ServiceLocator.GetInstance().Resolve<ISettingsService>();
+    }
+
+    public void Load()
+    {
+        VaultLocation = settingsService.VaultLocation;
+        AesType = (AESType)Enum.Parse(typeof(AESType), settingsService.AesType);
+        PbkdfImpl = (PbkdfImplType)Enum.Parse(typeof(PbkdfImplType), settingsService.PbkdfImplType);
+        PbkdfAlgo = (PbkdfAlgoType)Enum.Parse(typeof(PbkdfAlgoType), settingsService.PbkdfAlgoType);
+        SequencerAuthType = (AuthType)Enum.Parse(typeof(AuthType), settingsService.SequenceAuthType);
+        DeleteAfterImport = settingsService.DeleteAfterImport;
+        LastImportDir = settingsService.LastImportDir;
     }
 }

@@ -21,7 +21,7 @@ LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 */
-using Salmon.Vault.Prefs;
+
 using Salmon.Vault.ViewModel;
 using Salmon.Vault.Utils;
 using Salmon.Vault.WPF;
@@ -126,7 +126,6 @@ namespace Salmon.Vault.View
             SalmonSettings.GetInstance().AesType = settings.ViewModel.AesTypeSelected;
             SalmonSettings.GetInstance().SequencerAuthType = settings.ViewModel.AuthTypeSelected;
             SalmonSettings.GetInstance().DeleteAfterImport = settings.ViewModel.DeleteSourceAfterImport;
-            SalmonPreferences.SavePrefs();
         }
 
         private void ScrollTo(SalmonFileViewModel item)

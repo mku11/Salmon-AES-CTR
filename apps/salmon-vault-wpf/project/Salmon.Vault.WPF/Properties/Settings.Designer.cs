@@ -61,37 +61,49 @@ namespace Salmon.Vault.WPF.Properties {
         
         [global::System.Configuration.UserScopedSettingAttribute()]
         [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
-        [global::System.Configuration.DefaultSettingValueAttribute("False")]
-        public bool EnableLog {
-            get {
-                return ((bool)(this["EnableLog"]));
-            }
-            set {
-                this["EnableLog"] = value;
-            }
-        }
-        
-        [global::System.Configuration.UserScopedSettingAttribute()]
-        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
-        [global::System.Configuration.DefaultSettingValueAttribute("False")]
-        public bool EnableLogDetails {
-            get {
-                return ((bool)(this["EnableLogDetails"]));
-            }
-            set {
-                this["EnableLogDetails"] = value;
-            }
-        }
-        
-        [global::System.Configuration.UserScopedSettingAttribute()]
-        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
-        [global::System.Configuration.DefaultSettingValueAttribute("Service")]
+        [global::System.Configuration.DefaultSettingValueAttribute("User")]
         public string AuthType {
             get {
                 return ((string)(this["AuthType"]));
             }
             set {
                 this["AuthType"] = value;
+            }
+        }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("Default")]
+        public string PbkdfImplType {
+            get {
+                return ((string)(this["PbkdfImplType"]));
+            }
+            set {
+                this["PbkdfImplType"] = value;
+            }
+        }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("SHA256")]
+        public string PbkdfAlgoType {
+            get {
+                return ((string)(this["PbkdfAlgoType"]));
+            }
+            set {
+                this["PbkdfAlgoType"] = value;
+            }
+        }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("")]
+        public string LastImportDir {
+            get {
+                return ((string)(this["LastImportDir"]));
+            }
+            set {
+                this["LastImportDir"] = value;
             }
         }
     }

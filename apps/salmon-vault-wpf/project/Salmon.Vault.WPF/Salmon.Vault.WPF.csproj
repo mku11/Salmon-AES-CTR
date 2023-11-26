@@ -22,7 +22,6 @@
     <Compile Include="..\..\src\Dialog\SalmonDialog.cs" Link="Dialog\SalmonDialog.cs" />
 
     <Compile Include="..\..\src\Image\Thumbnails.cs" Link="Image\Thumbnails.cs" />
-    <Compile Include="..\..\src\Prefs\SalmonPreferences.cs" Link="Prefs\SalmonPreferences.cs" />
     <Compile Include="..\..\src\Utils\URLUtils.cs" Link="Utils\URLUtils.cs" />
     <Compile Include="..\..\src\Utils\WindowUtils.cs" Link="Utils\WindowUtils.cs" />
     <Compile Include="..\..\src\ViewModel\ImageViewerViewModel.cs" Link="ViewModel\ImageViewerViewModel.cs" />
@@ -50,6 +49,7 @@
     <Compile Include="..\..\src\Services\WPFBrowserService.cs" Link="Services\WPFBrowserService.cs" />
     <Compile Include="..\..\src\Services\WPFFileService.cs" Link="Services\WPFFileService.cs" />
     <Compile Include="..\..\src\Services\WPFKeyboardService.cs" Link="Services\WPFKeyboardService.cs" />
+    <Compile Include="..\..\src\Services\WPFSettingsService.cs" Link="Services\WPFSettingsService.cs" />
 
     <Compile Include="..\..\..\salmon-vault-csharp-common\src\Model\SalmonContentViewer.cs" Link="Model\SalmonContentViewer.cs" />
     <Compile Include="..\..\..\salmon-vault-csharp-common\src\Model\SalmonVaultManager.cs" Link="Model\SalmonVaultManager.cs" />
@@ -64,6 +64,7 @@
     <Compile Include="..\..\..\salmon-vault-csharp-common\src\Services\IFileDialogService.cs" Link="Services\IFileDialogService.cs" />
     <Compile Include="..\..\..\salmon-vault-csharp-common\src\Services\IKeyboardService.cs" Link="Services\IKeyboardService.cs" />
     <Compile Include="..\..\..\salmon-vault-csharp-common\src\Services\IMediaPlayerService.cs" Link="Services\IMediaPlayerService.cs" />
+    <Compile Include="..\..\..\salmon-vault-csharp-common\src\Services\ISettingsService.cs" Link="Services\ISettingsService.cs" />
 
     <Compile Include="..\..\..\salmon-vault-csharp-common\src\Extensions\EnumExtensions.cs" Link="Extensions\EnumExtensions.cs" />
     <Compile Include="..\..\..\salmon-vault-csharp-common\src\Extensions\ExceptionExtensions.cs" Link="Extensions\ExceptionExtensions.cs" />

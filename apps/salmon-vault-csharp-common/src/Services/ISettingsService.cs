@@ -1,4 +1,4 @@
-﻿/*
+/*
 MIT License
 
 Copyright (c) 2021 Max Kas
@@ -21,32 +21,24 @@ LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 */
-using Mku.File;
-using Mku.SalmonFS;
-using Salmon.Vault.Model.Win;
-using Salmon.Vault.Services;
-using Salmon.Vault.View;
-using System;
-using System.Windows;
 
-namespace Salmon.Vault.WPF;
+namespace Salmon.Vault.Services;
 
-public partial class App : Application
+public interface ISettingsService
 {
-    private void Application_Startup(object sender, StartupEventArgs e)
-    {
-        SetupServices();
-        MainWindow wnd = new MainWindow();
-        wnd.Show();
-    }
+    public string VaultLocation { get; set; }
 
-    private void SetupServices()
-    {
-        SalmonDriveManager.VirtualDriveClass = typeof(DotNetDrive);
-        ServiceLocator.GetInstance().Register(typeof(ISettingsService), new WPFSettingsService());
-        ServiceLocator.GetInstance().Register(typeof(IFileService), new WPFFileService());
-        ServiceLocator.GetInstance().Register(typeof(IWebBrowserService), new WPFBrowserService());
-        ServiceLocator.GetInstance().Register(typeof(IFileDialogService), new WPFFileDialogService());
-        ServiceLocator.GetInstance().Register(typeof(IKeyboardService), new WPFKeyboardService());
-    }
+    public string AesType { get; set; }
+
+    public string PbkdfImplType { get; set; }
+
+    public string PbkdfAlgoType { get; set; }
+
+    public string SequenceAuthType { get; set; }
+
+    public string LastImportDir { get; set; }
+
+    public bool DeleteAfterImport { get; set; }
+
+    public bool ExcludeFromRecents { get; }
 }
