@@ -247,7 +247,6 @@ public class SalmonActivity : AppCompatActivity
         }
     }
 
-
     private void UpdateFileAdapter()
     {
         if (manager.FileItemList == null)
@@ -451,7 +450,6 @@ public class SalmonActivity : AppCompatActivity
         return false;
     }
 
-
     public override void OnCreateContextMenu(IContextMenu menu, View v, IContextMenuContextMenuInfo menuInfo)
     {
         menu.SetHeaderTitle(GetString(Resource.String.Action));
@@ -650,7 +648,6 @@ public class SalmonActivity : AppCompatActivity
             exception.PrintStackTrace();
         }
     }
-
 
     private void ReimportSharedFile(Android.Net.Uri uri, AndroidSharedFileObserver fileObserver)
     {

@@ -32,7 +32,6 @@ using Mku.Time;
 using Mku.Utils;
 using Salmon.Vault.Main;
 
-
 namespace Salmon.Vault.Image;
 
 /// <summary>

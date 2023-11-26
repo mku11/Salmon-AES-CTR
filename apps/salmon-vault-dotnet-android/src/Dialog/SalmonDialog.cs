@@ -173,8 +173,6 @@ public class SalmonDialog
         });
     }
 
-
-
     public static void PromptSingleValue(ArrayAdapter<string> adapter, string title,
                                          int currSelection, Action<AlertDialog, int> onClickListener)
     {
@@ -193,7 +191,6 @@ public class SalmonDialog
         if (!activity.IsFinishing)
             alertDialog.Show();
     }
-
 
     public static void PromptOpenWith(Intent intent, SortedDictionary<string, string> apps,
         Android.Net.Uri uri, Java.IO.File sharedFile, SalmonFile salmonFile, bool allowWrite,

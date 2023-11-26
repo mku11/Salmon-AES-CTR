@@ -120,5 +120,4 @@ public class ExternalAppChooser
         }
         return apps;
     }
-
 }

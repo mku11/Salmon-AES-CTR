@@ -379,7 +379,6 @@ class FileAdapter : RecyclerView.Adapter, INotifyPropertyChanged
         }
     }
 
-
     public override RecyclerView.ViewHolder OnCreateViewHolder(ViewGroup parent, int viewType)
     {
         View view = inflater.Inflate(Resource.Layout.file_item, parent, false);
@@ -451,5 +450,4 @@ class FileAdapter : RecyclerView.Adapter, INotifyPropertyChanged
             };
         }
     }
-
 }

@@ -345,7 +345,6 @@ public class MediaPlayerActivity : AppCompatActivity, ISurfaceHolderCallback
         }
     }
 
-
     private void ToggleSpeed()
     {
         lock (mediaPlayerLock)
@@ -412,7 +411,6 @@ public class MediaPlayerActivity : AppCompatActivity, ISurfaceHolderCallback
 
     }
 
-
     public void SurfaceCreated(ISurfaceHolder holder)
     {
         mediaPlayer.SetDisplay(holder);
@@ -471,12 +469,10 @@ public class MediaPlayerActivity : AppCompatActivity, ISurfaceHolderCallback
             }
         }
 
-
         public void OnStartTrackingTouch(SeekBar seekBar)
         {
 
         }
-
 
         public void OnStopTrackingTouch(SeekBar seekBar)
         {

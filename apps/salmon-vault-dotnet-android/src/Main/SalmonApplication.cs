@@ -56,5 +56,4 @@ public class SalmonApplication : Application
         base.OnCreate();
         mInstance = this;
     }
-
 }
