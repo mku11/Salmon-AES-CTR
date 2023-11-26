@@ -28,19 +28,13 @@ using Android.OS;
 using Android.Views;
 using Android.Webkit;
 using AndroidX.AppCompat.App;
-using Salmon.Vault.Utils;
-using Java.Lang;
 using Exception = System.Exception;
-using Thread = Java.Lang.Thread;
 using Mku.Utils;
 using Mku.Salmon.Integrity;
 using Mku.SalmonFS;
 using Mku.Salmon.IO;
 using Salmon.Vault.DotNetAndroid;
-using Android.Systems;
 using Java.IO;
-using Salmon.Vault.Main;
-using static Google.Android.Material.Tabs.TabLayout;
 using Math = System.Math;
 using Kotlin.Jvm;
 using Android.App;
@@ -49,7 +43,6 @@ using Salmon.Vault.Extensions;
 using System.IO;
 using System.Linq;
 using Salmon.Vault.Dialog;
-using Salmon.Vault.Prefs;
 using System.Threading.Tasks;
 
 namespace Salmon.Vault.Main;
@@ -179,8 +172,7 @@ public class WebViewerActivity : AppCompatActivity
 
     private void SetupWindow()
     {
-        if (SalmonPreferences.HideScreenContents)
-            Window.SetFlags(WindowManagerFlags.Secure, WindowManagerFlags.Secure);
+        Window.SetFlags(WindowManagerFlags.Secure, WindowManagerFlags.Secure);
     }
 
     override

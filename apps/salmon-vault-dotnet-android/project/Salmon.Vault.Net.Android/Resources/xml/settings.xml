@@ -4,11 +4,6 @@
 
   <PreferenceCategory android:title="@string/SalmonPrefCat" >
 
-    <CheckBoxPreference
-        android:key="deleteAfterImport"
-        android:summary="@string/DeleteSourceFilesAfterImport"
-        android:title="@string/DeleteFilesAfterImport" />
-
     <ListPreference
         android:key="aesType"
         android:summary="@string/AESEncryptionImplementation"
@@ -34,6 +29,11 @@
         android:entries="@array/PBKDFAlgoEntries"
         android:defaultValue="@string/SHA256"/>
 
+    <CheckBoxPreference
+        android:key="deleteAfterImport"
+        android:summary="@string/DeleteSourceFilesAfterImport"
+        android:title="@string/DeleteFilesAfterImport" />
+    
     <CheckBoxPreference
         android:key="excludeFromRecents"
         android:summary="@string/ExcludeFromRecents"

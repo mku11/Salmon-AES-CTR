@@ -10,6 +10,7 @@
     <!-- WORKAROUND: ListeneableFuture see: https://github.com/dotnet/maui/issues/6022
     and: https://github.com/xamarin/AndroidX/issues/535 -->
     <XamarinGoogleGuavaListenableFutureOptOut>true</XamarinGoogleGuavaListenableFutureOptOut>
+    <Version>1.0.6-SNAPSHOT</Version>
   </PropertyGroup>
 
   <ItemGroup>
@@ -53,14 +54,12 @@
       <Link>Utils\WindowUtils.cs</Link>
     </Compile>
     <Compile Include="..\..\src\Utils\URLUtils.cs" Link="Utils\URLUtils.cs" />
-    <Compile Include="..\..\src\Prefs\SalmonPreferences.cs">
-      <Link>Prefs\SalmonPreferences.cs</Link>
-    </Compile>
 
     <Compile Include="..\..\src\Services\AndroidFileDialogService.cs" Link="Services\AndroidFileDialogService.cs" />
     <Compile Include="..\..\src\Services\AndroidBrowserService.cs" Link="Services\AndroidBrowserService.cs" />
     <Compile Include="..\..\src\Services\AndroidFileService.cs" Link="Services\AndroidFileService.cs" />
     <Compile Include="..\..\src\Services\AndroidKeyboardService.cs" Link="Services\AndroidKeyboardService.cs" />
+    <Compile Include="..\..\src\Services\AndroidSettingsService.cs" Link="Services\AndroidSettingsService.cs" />
 
     <Compile Include="..\..\..\salmon-vault-csharp-common\src\Model\SalmonContentViewer.cs" Link="Model\SalmonContentViewer.cs" />
     <Compile Include="..\..\..\salmon-vault-csharp-common\src\Model\SalmonVaultManager.cs" Link="Model\SalmonVaultManager.cs" />
@@ -75,6 +74,7 @@
     <Compile Include="..\..\..\salmon-vault-csharp-common\src\Services\IFileDialogService.cs" Link="Services\IFileDialogService.cs" />
     <Compile Include="..\..\..\salmon-vault-csharp-common\src\Services\IKeyboardService.cs" Link="Services\IKeyboardService.cs" />
     <Compile Include="..\..\..\salmon-vault-csharp-common\src\Services\IMediaPlayerService.cs" Link="Services\IMediaPlayerService.cs" />
+    <Compile Include="..\..\..\salmon-vault-csharp-common\src\Services\ISettingsService.cs" Link="Services\ISettingsService.cs" />
 
     <Compile Include="..\..\..\salmon-vault-csharp-common\src\Extensions\EnumExtensions.cs" Link="Extensions\EnumExtensions.cs" />
     <Compile Include="..\..\..\salmon-vault-csharp-common\src\Extensions\ExceptionExtensions.cs" Link="Extensions\ExceptionExtensions.cs" />

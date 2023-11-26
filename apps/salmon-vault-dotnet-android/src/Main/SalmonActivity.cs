@@ -54,7 +54,6 @@ using Salmon.Vault.Services;
 using System;
 using System.ComponentModel;
 using Salmon.Vault.MAUI.ANDROID;
-using Salmon.Vault.Prefs;
 using System.Threading.Tasks;
 
 namespace Salmon.Vault.Main;
@@ -96,8 +95,7 @@ public class SalmonActivity : AppCompatActivity
 
     private void SetupWindow()
     {
-        if (SalmonPreferences.HideScreenContents)
-            Window.SetFlags(WindowManagerFlags.Secure, WindowManagerFlags.Secure);
+        Window.SetFlags(WindowManagerFlags.Secure, WindowManagerFlags.Secure);
         WindowUtils.UiActivity = this;
     }
 
@@ -158,6 +156,7 @@ public class SalmonActivity : AppCompatActivity
             AndroidDrive.Initialize(this.ApplicationContext);
             SalmonDriveManager.VirtualDriveClass = typeof(AndroidDrive);
 
+            ServiceLocator.GetInstance().Register(typeof(ISettingsService), new AndroidSettingsService());
             ServiceLocator.GetInstance().Register(typeof(IFileService), new AndroidFileService(this));
             ServiceLocator.GetInstance().Register(typeof(IFileDialogService), new AndroidFileDialogService(this));
             ServiceLocator.GetInstance().Register(typeof(IWebBrowserService), new AndroidBrowserService());
@@ -793,7 +792,7 @@ public class SalmonActivity : AppCompatActivity
     {
         List<SalmonFile> salmonFiles = new List<SalmonFile>();
         int pos = 0;
-		int i = 0;
+        int i = 0;
         foreach (SalmonFile file in fileItemList)
         {
             string filename;
@@ -811,7 +810,7 @@ public class SalmonActivity : AppCompatActivity
             {
                 e.PrintStackTrace();
             }
-			i++;
+            i++;
         }
 
         Intent intent = new Intent(this, typeof(MediaPlayerActivity));
@@ -846,7 +845,7 @@ public class SalmonActivity : AppCompatActivity
             string filename = file.BaseName;
 
             int pos = 0;
-			int i = 0;
+            int i = 0;
             foreach (SalmonFile listFile in fileItemList)
             {
                 try
@@ -868,7 +867,7 @@ public class SalmonActivity : AppCompatActivity
                 {
                     e.PrintStackTrace();
                 }
-				i++;
+                i++;
             }
             Intent intent = new Intent(this, typeof(WebViewerActivity));
             SalmonFile selectedFile = fileItemList[position];

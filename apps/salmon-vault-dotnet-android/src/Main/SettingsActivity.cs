@@ -22,21 +22,13 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 */
 using Android.App;
-using Android.Content;
 using Android.Content.PM;
 using Android.OS;
 using Android.Preferences;
-using Android.Widget;
-using AndroidX.DocumentFile.Provider;
-using Mku.Salmon;
-using Mku.Salmon.IO;
-using Mku.Salmon.Password;
-using Salmon.Vault.Model;
-using Salmon.Vault.Settings;
 using Salmon.Vault.Utils;
 using Salmon.Vault.DotNetAndroid;
 using System;
-using Salmon.Vault.Prefs;
+using Salmon.Vault.Settings;
 
 namespace Salmon.Vault.Main;
 
@@ -62,18 +54,9 @@ public class SettingsActivity : PreferenceActivity
 
     private void UpdateSummaries()
     {
-        PreferenceManager.FindPreference("aesType").Summary = SalmonPreferences.GetProviderTypeString();
-        PreferenceManager.FindPreference("pbkdfType").Summary = SalmonPreferences.GetPbkdfTypeString();
-        PreferenceManager.FindPreference("pbkdfAlgo").Summary = SalmonPreferences.GetPbkdfAlgoString();
-    }
-
-    private string GetVaultDirName()
-    {
-        string path = SalmonPreferences.VaultLocation;
-        if (path == null)
-            return "None";
-        DocumentFile documentFile = DocumentFile.FromTreeUri(this, Android.Net.Uri.Parse(path));
-        return documentFile.Name;
+        PreferenceManager.FindPreference("aesType").Summary = SalmonSettings.GetInstance().AesType.ToString();
+        PreferenceManager.FindPreference("pbkdfType").Summary = SalmonSettings.GetInstance().PbkdfImpl.ToString();
+        PreferenceManager.FindPreference("pbkdfAlgo").Summary = SalmonSettings.GetInstance().PbkdfAlgo.ToString();
     }
 
     private void SetupListeners()
@@ -81,27 +64,25 @@ public class SettingsActivity : PreferenceActivity
 
         PreferenceManager.FindPreference("aesType").PreferenceChange += (s, args) =>
         {
-            SalmonStream.AesProviderType = (SalmonStream.ProviderType)Enum.Parse(typeof(SalmonStream.ProviderType), (string)args.NewValue);
-            PreferenceManager.FindPreference("aesType").Summary = (string)args.NewValue;
+            SalmonSettings.GetInstance().AesType = (SalmonSettings.AESType)Enum.Parse(typeof(SalmonSettings.AESType), (String)args.NewValue);
+            ((Preference)s).Summary = (string)args.NewValue;
         };
 
         PreferenceManager.FindPreference("pbkdfType").PreferenceChange += (s, args) =>
         {
-            try
-            {
-                SalmonPassword.PbkdfImplType = (SalmonPassword.PbkdfType)Enum.Parse(typeof(SalmonPassword.PbkdfType), (string)args.NewValue);
-            }
-            catch (SalmonSecurityException e)
-            {
-                throw new Exception("Could not change Pbdkdf type", e);
-            }
-            PreferenceManager.FindPreference("pbkdfType").Summary = (string)args.NewValue;
+            SalmonSettings.GetInstance().PbkdfImpl = (SalmonSettings.PbkdfImplType)Enum.Parse(typeof(SalmonSettings.PbkdfImplType), (String)args.NewValue);
+            ((Preference)s).Summary = (string)args.NewValue;
         };
 
         PreferenceManager.FindPreference("pbkdfAlgo").PreferenceChange += (s, args) =>
         {
-            SalmonPassword.PbkdfAlgorithm = (SalmonPassword.PbkdfAlgo)Enum.Parse(typeof(SalmonPassword.PbkdfAlgo), (string)args.NewValue);
-            PreferenceManager.FindPreference("pbkdfAlgo").Summary = (string)args.NewValue;
+            SalmonSettings.GetInstance().PbkdfAlgo = (SalmonSettings.PbkdfAlgoType)Enum.Parse(typeof(SalmonSettings.PbkdfAlgoType), (String)args.NewValue);
+            ((Preference)s).Summary = (string)args.NewValue;
+        };
+
+        PreferenceManager.FindPreference("deleteAfterImport").PreferenceChange += (s, args) =>
+        {
+            SalmonSettings.GetInstance().DeleteAfterImport = (bool)args.NewValue;
         };
 
         PreferenceManager.FindPreference("excludeFromRecents").PreferenceChange += (s, args) =>
