@@ -53,7 +53,6 @@ public interface ISalmonCTRTransformer
     int EncryptData(byte[] srcBuffer, int srcOffset,
                     byte[] destBuffer, int destOffset, int count);
 
-
     /// <summary>
     ///  Decrypt the data.
 	/// </summary>

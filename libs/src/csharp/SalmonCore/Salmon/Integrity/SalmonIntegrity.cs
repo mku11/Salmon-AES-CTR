@@ -66,7 +66,6 @@ public class SalmonIntegrity
 
     private readonly bool integrity;
 
-
     /// <summary>
     ///  Instantiate an object to be used for applying and verifying hash signatures for each of the data chunks.
 	/// </summary>
@@ -112,7 +111,6 @@ public class SalmonIntegrity
     ///  <param name="includeData">Additional data to be included in the calculation.</param>
     ///  <returns>The hash.</returns>
     ///  <exception cref="SalmonIntegrityException"></exception>
-    //TODO: we should avoid the header data for performance?
     public static byte[] CalculateHash(IHashProvider provider, byte[] buffer, int offset, int count,
                                        byte[] key, byte[] includeData)
     {
@@ -152,7 +150,6 @@ public class SalmonIntegrity
         return (long)chunks * hashLength;
     }
 
-
     /// <summary>
     ///  Return the number of bytes that all hash signatures occupy for each chunk size
 	/// </summary>
@@ -165,7 +162,6 @@ public class SalmonIntegrity
             return 0;
         return SalmonIntegrity.GetTotalHashDataLength(count, ChunkSize, hashOffset, hashSize);
     }
-
 
     /// <summary>
     ///  Get the integrity enabled option.

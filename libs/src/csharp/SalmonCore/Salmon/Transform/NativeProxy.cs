@@ -68,7 +68,6 @@ public class NativeProxy : INativeProxy
                                      byte[] srcBuffer, int srcOffset,
                                      byte[] destBuffer, int destOffset, int count);
 
-
     /// <summary>
     ///  Proxy Init the native code with AES implementation, and hash length options.
     /// </summary>

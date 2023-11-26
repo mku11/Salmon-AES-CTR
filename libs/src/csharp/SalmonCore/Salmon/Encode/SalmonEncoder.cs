@@ -40,5 +40,4 @@ public class SalmonEncoder
     ///  Current global Base64 implementation for encrypting/decrypting text strings.
 	/// </summary>
 	public static IBase64 Base64 { get; set; }
-
 }

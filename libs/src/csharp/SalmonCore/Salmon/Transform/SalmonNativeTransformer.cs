@@ -53,7 +53,6 @@ public class SalmonNativeTransformer : SalmonAES256CTRTransformer
         ExpandedKey = expandedKey;
     }
 
-
     /// <summary>
     ///  Encrypt the data.
 	/// </summary>
@@ -89,5 +88,4 @@ public class SalmonNativeTransformer : SalmonAES256CTRTransformer
                 srcBuffer, srcOffset,
                 destBuffer, destOffset, count);
     }
-
 }

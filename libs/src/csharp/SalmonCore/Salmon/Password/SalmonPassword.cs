@@ -41,7 +41,6 @@ public class SalmonPassword
     /// </summary>
     public static PbkdfAlgo PbkdfAlgorithm { get; set; } = PbkdfAlgo.SHA256;
 
-
     /// <summary>
     ///  Global PBKDF implementation to be used for text key derivation.
 	/// </summary>
@@ -58,7 +57,6 @@ public class SalmonPassword
     ///  Pbkdf provider.
     /// </summary>
     private static ISalmonPbkdfProvider provider = new SalmonDefaultPbkdfProvider();
-
 
     /// <summary>
     ///  Derives the key from a text password

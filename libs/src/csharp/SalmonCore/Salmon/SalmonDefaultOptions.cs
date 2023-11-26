@@ -34,7 +34,5 @@ public class SalmonDefaultOptions
     /// <summary>
     ///  Default buffer size for all internal streams including Encryptors and Decryptors.
 	/// </summary>
-	    //TODO: do we need this?
     public static int BufferSize { get; set; } = SalmonIntegrity.DEFAULT_CHUNK_SIZE;
-
 }

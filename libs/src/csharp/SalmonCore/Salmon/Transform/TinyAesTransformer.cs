@@ -34,7 +34,6 @@ public class TinyAesTransformer : SalmonNativeTransformer
     /// </summary>
     public static readonly int AES_IMPL_TINY_AES = 2;
 
-
     /// <summary>
     ///  Initialiaze the native transformer to use the Tiny AES implementation.
 	/// </summary>

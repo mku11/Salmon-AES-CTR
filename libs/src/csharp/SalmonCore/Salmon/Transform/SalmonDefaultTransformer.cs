@@ -38,7 +38,6 @@ public class SalmonDefaultTransformer : SalmonAES256CTRTransformer
     /// </summary>
     private ICryptoTransform aesTransformer;
 
-
     /// <summary>
     ///  Initialize the default c# AES transformer.
 	/// </summary>
@@ -63,7 +62,6 @@ public class SalmonDefaultTransformer : SalmonAES256CTRTransformer
             throw new SalmonSecurityException("Could not init AES transformer", e);
         }
     }
-
 
     /// <summary>
     ///  Encrypt the data.
@@ -107,7 +105,6 @@ public class SalmonDefaultTransformer : SalmonAES256CTRTransformer
 
         return totalBytes;
     }
-
 
     /// <summary>
     ///  Decrypt the data.

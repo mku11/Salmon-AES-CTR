@@ -28,7 +28,6 @@ using System.IO;
 
 namespace Mku.Salmon.Transform;
 
-
 /// <summary>
 ///  Abstract class for AES256 transformer implementations.
 /// </summary>
@@ -73,7 +72,6 @@ public abstract class SalmonAES256CTRTransformer : ISalmonCTRTransformer
     /// </summary>
     public static readonly int BLOCK_SIZE = 16;
 
-
     /// <summary>
     ///  Key to be used for AES transformation.
     /// </summary>
@@ -109,7 +107,6 @@ public abstract class SalmonAES256CTRTransformer : ISalmonCTRTransformer
         Block = 0;
     }
 
-
     /// <summary>
     ///  Syncs the Counter based on what AES block position the stream is at.
     ///  The block count is already excluding the header and the hash signatures.
@@ -143,7 +140,6 @@ public abstract class SalmonAES256CTRTransformer : ISalmonCTRTransformer
             value /= 256;
         }
     }
-
 
     /// <summary>
     ///  Initialize the transformer. Most common operations include precalculating expansion keys or

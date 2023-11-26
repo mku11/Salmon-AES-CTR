@@ -46,7 +46,6 @@ public class SalmonStream : Stream
     /// </summary>
     public EncryptionMode AesEncryptionMode { get; private set; }
 
-
     /// <summary>
     ///  Warning! Allow byte range encryption writes on a current stream. Overwriting is not a good idea because it will re-use the same IV.
     ///  This is not recommended if you use the stream on storing files or generally data if prior version can be inspected by others.
@@ -211,7 +210,6 @@ public class SalmonStream : Stream
     override
     public bool CanRead => baseStream.CanRead && AesEncryptionMode == EncryptionMode.Decrypt;
 
-
     /// <summary>
     ///  If the stream is seekable (supported only if base stream is seekable).
 	/// </summary>
@@ -225,7 +223,6 @@ public class SalmonStream : Stream
 	///  <returns>True if mode is decryption.</returns>
     override
     public bool CanWrite => baseStream.CanWrite && AesEncryptionMode == EncryptionMode.Encrypt;
-
 
     /// <summary>
     ///  If the stream has integrity enabled
@@ -283,7 +280,6 @@ public class SalmonStream : Stream
         transformer.Init(key, nonce);
         transformer.ResetCounter();
     }
-
 
     /// <summary>
     ///  Seek to a specific position on the stream. This does not include the header and any hash Signatures.
@@ -346,18 +342,15 @@ public class SalmonStream : Stream
     /// </summary>
     public long Block => transformer.Block;
 
-
     /// <summary>
     ///  Returns a copy of the encryption key.
     /// </summary>
     public byte[] Key => (byte[])transformer.Key.Clone();
 
-
     /// <summary>
     ///  Returns a copy of the hash key.
     /// </summary>
     public byte[] HashKey => (byte[])salmonIntegrity.Key.Clone();
-
 
     /// <summary>
     ///  Returns a copy of the initial vector.
@@ -368,7 +361,6 @@ public class SalmonStream : Stream
     ///  Returns the Chunk size used to apply hash signature
     /// </summary>
     public int ChunkSize => salmonIntegrity.ChunkSize;
-
 
     /// <summary>
     ///  Set the virtual position of the stream.
@@ -572,7 +564,6 @@ public class SalmonStream : Stream
         }
     }
 
-
     /// <summary>
     ///  Get the aligned offset wrt the Chunk size if integrity is enabled otherwise
     ///  wrt to the encryption block size. Use this method to align a position to the
@@ -695,7 +686,6 @@ public class SalmonStream : Stream
         return pos;
     }
 
-
     /// <summary>
     ///  Strip hash signatures from the buffer.
 	/// </summary>
@@ -746,6 +736,5 @@ public class SalmonStream : Stream
             return salmonIntegrity.UseIntegrity;
         }
     }
-
 }
 
