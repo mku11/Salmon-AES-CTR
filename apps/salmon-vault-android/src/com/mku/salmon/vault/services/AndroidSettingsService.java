@@ -37,81 +37,81 @@ public class AndroidSettingsService implements ISettingsService {
     }
 
     public String getVaultLocation() {
-        return prefs.getString(SalmonSettings.VAULT_LOCATION_KEY,
+        return prefs.getString("vaultLocation",
                 SalmonSettings.DEFAULT_VAULT_LOCATION);
     }
 
     public void setVaultLocation(String value) {
         SharedPreferences.Editor editor = prefs.edit();
-        editor.putString(SalmonSettings.VAULT_LOCATION_KEY, value);
+        editor.putString("vaultLocation", value);
         editor.apply();
     }
 
     public String getAesType() {
-        return prefs.getString(SalmonSettings.AES_TYPE_KEY,
-                SalmonSettings.AESType.AesIntrinsics.toString());
+        return prefs.getString("aesType",
+                SalmonSettings.DEFAULT_AES_TYPE.name());
     }
 
     public void setAesType(String value) {
         SharedPreferences.Editor editor = prefs.edit();
-        editor.putString(SalmonSettings.AES_TYPE_KEY, value);
+        editor.putString("aesType", value);
         editor.apply();
     }
 
     public String getPbkdfImplType() {
-        return prefs.getString(SalmonSettings.PBKDF_IMPL_TYPE_KEY,
+        return prefs.getString("pbkdfType",
                 SalmonSettings.DEFAULT_PBKDF_IMPL_TYPE.name());
     }
 
     public void setPbkdfImplType(String value) {
         SharedPreferences.Editor editor = prefs.edit();
-        editor.putString(SalmonSettings.PBKDF_IMPL_TYPE_KEY, value);
+        editor.putString("pbkdfType", value);
         editor.apply();
     }
 
     public String getPbkdfAlgoType() {
-        return prefs.getString(SalmonSettings.PBKDF_ALGO_TYPE_KEY,
+        return prefs.getString("pbkdfAlgo",
                 SalmonSettings.DEFAULT_PBKDF_ALGO.name());
     }
 
     public void setPbkdfAlgoType(String value) {
         SharedPreferences.Editor editor = prefs.edit();
-        editor.putString(SalmonSettings.PBKDF_ALGO_TYPE_KEY, value);
+        editor.putString("pbkdfAlgo", value);
         editor.apply();
     }
 
     @Override
     public String getSequenceAuthType() {
-        return prefs.getString(SalmonSettings.AUTH_TYPE_KEY,
+        return prefs.getString("authType",
                 SalmonSettings.DEFAULT_AUTH_TYPE.name());
     }
 
     @Override
     public void setSequenceAuthType(String value) {
         SharedPreferences.Editor editor = prefs.edit();
-        editor.putString(SalmonSettings.AUTH_TYPE_KEY, value);
+        editor.putString("authType", value);
         editor.apply();
     }
 
     public String getLastImportDir() {
-        return prefs.getString(SalmonSettings.LAST_IMPORT_DIR_KEY,
+        return prefs.getString("lastImportDir",
                 SalmonSettings.DEFAULT_LAST_IMPORT_DIR);
     }
 
     public void setLastImportDir(String value) {
         SharedPreferences.Editor editor = prefs.edit();
-        editor.putString(SalmonSettings.LAST_IMPORT_DIR_KEY, value);
+        editor.putString("lastImportDir", value);
         editor.apply();
     }
 
     public boolean getDeleteAfterImport() {
-        return prefs.getBoolean(SalmonSettings.DELETE_AFTER_IMPORT_KEY,
+        return prefs.getBoolean("deleteAfterImport",
                 SalmonSettings.DEFAULT_DELETE_AFTER_IMPORT);
     }
 
     public void setDeleteAfterImport(boolean value) {
         SharedPreferences.Editor editor = prefs.edit();
-        editor.putBoolean(SalmonSettings.DELETE_AFTER_IMPORT_KEY, value);
+        editor.putBoolean("deleteAfterImport", value);
         editor.apply();
     }
 

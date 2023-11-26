@@ -53,30 +53,30 @@ public class SettingsActivity extends PreferenceActivity {
 
     private void setupListeners() {
         getPreferenceManager().findPreference("aesType").setOnPreferenceChangeListener((preference, o) -> {
-            SalmonSettings.getInstance().setAesType((String) o);
+            SalmonSettings.getInstance().setAesType(SalmonSettings.AESType.valueOf((String) o));
             preference.setSummary((String) o);
             return true;
         });
 
         getPreferenceManager().findPreference("pbkdfType").setOnPreferenceChangeListener((preference, o) -> {
-            SalmonSettings.getInstance().setPbkdfImpl((String) o);
+            SalmonSettings.getInstance().setPbkdfImpl(SalmonSettings.PbkdfImplType.valueOf((String) o));
             preference.setSummary((String) o);
             return true;
         });
 
         getPreferenceManager().findPreference("pbkdfAlgo").setOnPreferenceChangeListener((preference, o) -> {
-            SalmonSettings.getInstance().setPbkdfAlgo((String) o);
+            SalmonSettings.getInstance().setPbkdfAlgo(SalmonSettings.PbkdfAlgoType.valueOf((String) o));
             preference.setSummary((String) o);
             return true;
         });
-
-        getPreferenceManager().findPreference("excludeFromRecents").setOnPreferenceChangeListener((preference, o) -> {
-            WindowUtils.removeFromRecents(SettingsActivity.this, (boolean) o);
+		
+		getPreferenceManager().findPreference("deleteAfterImport").setOnPreferenceChangeListener((preference, o) -> {
+            SalmonSettings.getInstance().setDeleteAfterImport((boolean) o);
             return true;
         });
-
-        getPreferenceManager().findPreference("deleteAfterImport").setOnPreferenceChangeListener((preference, o) -> {
-            SalmonSettings.getInstance().setDeleteAfterImport((boolean) o);
+		
+        getPreferenceManager().findPreference("excludeFromRecents").setOnPreferenceChangeListener((preference, o) -> {
+            WindowUtils.removeFromRecents(SettingsActivity.this, (boolean) o);
             return true;
         });
     }

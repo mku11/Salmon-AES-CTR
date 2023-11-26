@@ -53,10 +53,6 @@ public class SalmonSettings {
     public static final AESType DEFAULT_AES_TYPE = AESType.AesIntrinsics;
     public static final String AES_TYPE_KEY = "AES_TYPE_KEY";
 
-    public void setAesType(String value) {
-        setAesType(AESType.valueOf(value));
-    }
-
     public AESType getAesType() {
         return aesType;
     }
@@ -74,10 +70,6 @@ public class SalmonSettings {
     private PbkdfImplType pbkdfImpl = DEFAULT_PBKDF_IMPL_TYPE;
     public static final PbkdfImplType DEFAULT_PBKDF_IMPL_TYPE = PbkdfImplType.Default;
     public static final String PBKDF_IMPL_TYPE_KEY = "PBKDF_IMPL_TYPE_KEY";
-
-    public void setPbkdfImpl(String value) {
-        setPbkdfImpl(PbkdfImplType.valueOf(value));
-    }
 
     public PbkdfImplType getPbkdfImpl() {
         return pbkdfImpl;
@@ -108,10 +100,6 @@ public class SalmonSettings {
         SalmonPassword.setPbkdfAlgo(SalmonPassword.PbkdfAlgo.valueOf(pbkdfAlgo.name()));
     }
 
-    public void setPbkdfAlgo(String value) {
-        setPbkdfAlgo(PbkdfAlgoType.valueOf(value));
-    }
-
     public enum AuthType {
         User, Service
     }
@@ -122,10 +110,6 @@ public class SalmonSettings {
 
     public AuthType getSequencerAuthType() {
         return sequencerAuthType;
-    }
-
-    public void setSequencerAuthType(String value) {
-        setSequencerAuthType(AuthType.valueOf(value));
     }
 
     public void setSequencerAuthType(AuthType sequencerAuthType) {
