@@ -38,5 +38,4 @@ public class DoubleToStringPercentageConverter : IValueConverter
     {
         return null;
     }
-
 }

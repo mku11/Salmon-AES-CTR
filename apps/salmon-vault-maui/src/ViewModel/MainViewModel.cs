@@ -384,7 +384,6 @@ public class MainViewModel : INotifyPropertyChanged
         }
     }
 
-
     public void StartTextEditor(SalmonFileViewModel item)
     {
         if (((SalmonFileViewModel)item).GetSalmonFile().Size > 1 * 1024 * 1024)
@@ -398,7 +397,6 @@ public class MainViewModel : INotifyPropertyChanged
             AppShell.Current.GoToAsync(nameof(TextEditor), parameters);
         });
     }
-
 
     private void StartImageViewer(SalmonFileViewModel item)
     {

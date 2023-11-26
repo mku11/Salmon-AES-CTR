@@ -30,7 +30,7 @@ namespace Salmon.Vault.Utils;
 
 public class WindowUtils
 {
-    //TODO: Maui WinUI3 icon is missing
+    // Maui WinUI3 icon is missing
     private static string iconPath;
     public static void SetDefaultIconPath(string iconPath)
     {

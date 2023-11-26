@@ -185,7 +185,7 @@
                 
                 <CollectionView.ItemTemplate>
                     <DataTemplate x:DataType="viewmodel:SalmonFileViewModel">
-                        <!-- FIXME: Android is showing an orange background and not updating selected color -->
+                        <!-- Android is showing an orange background and not updating selected color -->
                         <Border HorizontalOptions="FillAndExpand" BackgroundColor="{Binding ItemBackgroundColor, Mode=OneWay}" HeightRequest="54">
                             <Grid HorizontalOptions="FillAndExpand" VerticalOptions="FillAndExpand" 
                                   BackgroundColor="Transparent" >
@@ -215,7 +215,7 @@
                                       BackgroundColor="Transparent">
                                     <Image Source="{Binding Image, Mode=OneWay}"
                                            HorizontalOptions="Center" VerticalOptions="Center"/>
-                                    <!--FIXME: Android does not seem to support Opacity-->
+                                    <!-- Android does not seem to support Opacity -->
                                     <Rectangle Opacity="0.5" Background="{Binding TintColor, Mode=OneWay}" 
                                                HorizontalOptions="FillAndExpand" VerticalOptions="FillAndExpand"/>
                                     <Label Text="{Binding Ext, Mode=OneWay}" Background="Transparent"  TextColor="Black"

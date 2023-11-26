@@ -63,7 +63,6 @@
     <AndroidEnvironment Include="Platforms\Android\env.conf" />
   </ItemGroup>
 
-
   <ItemGroup>
     <Compile Include="..\..\src\Config\SalmonConfig.cs" Link="Config\SalmonConfig.cs" />
     <Compile Include="..\..\src\Dialog\SalmonDialog.cs" Link="Dialog\SalmonDialog.cs" />
@@ -171,7 +170,6 @@
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </MauiXaml>
-
 
   </ItemGroup>
 

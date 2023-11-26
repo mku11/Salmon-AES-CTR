@@ -61,7 +61,6 @@ public class Thumbnails
     private static readonly int BUFFER_SIZE = 256 * 1024;
     private static readonly int THUMBNAIL_SIZE = 128;
 
-    // TODO: keep track of the cache size instead
     private static readonly int MAX_CACHE_SIZE = 10 * 1024 * 1024;
 
     private static readonly ConcurrentDictionary<SalmonFileViewModel, byte[]> cache = new ConcurrentDictionary<SalmonFileViewModel, byte[]>();
@@ -77,7 +76,6 @@ public class Thumbnails
         return GetVideoThumbnail(salmonFile, 0);
     }
 
-    //TODO: video thumbnails needs a 3rd party lib
     public static ImageSource GetVideoThumbnail(SalmonFile salmonFile, long ms)
     {
         throw new NotSupportedException();
@@ -189,7 +187,7 @@ public class Thumbnails
         image = PlatformImage.FromStream(stream);
 #elif WINDOWS
         // see: https://github.com/dotnet/Microsoft.Maui.Graphics/issues/422
-        // FIXME: use W2DImage as an alternative when downsize becomes available:
+        // use W2DImage as an alternative when downsize becomes available:
         // https://github.com/dotnet/maui/issues/16767
         // image = new W2DImageLoadingService().FromStream(stream);
 #endif
@@ -289,7 +287,6 @@ public class Thumbnails
         return stream;
     }
 
-
     public static Color GetTintColor(SalmonFile item)
     {
         if (!item.IsFile || SalmonFileUtils.IsImage(item.BaseName))
@@ -307,5 +304,4 @@ public class Thumbnails
             return "";
         return SalmonFileUtils.GetExtensionFromFileName(salmonFile.BaseName).ToLower();
     }
-
 }

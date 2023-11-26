@@ -147,7 +147,6 @@ public partial class MainWindow : ContentPage
     {
         readonly Action<T> command;
 
-
         public RelayCommand(Action<T> command)
         {
             this.command = command;
@@ -247,7 +246,6 @@ public partial class MainWindow : ContentPage
 
     private void SelectItem(SalmonFileViewModel viewModel)
     {
-        // TODO: do we still need this workaround?
 #if ANDROID
         if (DataGrid.SelectionMode == SelectionMode.Multiple)
         {
@@ -330,7 +328,6 @@ public partial class MainWindow : ContentPage
     #endregion
 
     #region Menu flyout passthrough
-    // TODO: bind directly and refactor to the MainViewModel, note that CommandParameter doesn't work
     private void MenuFlyoutItem_OnViewItem(object sender, EventArgs e)
     {
         SalmonFileViewModel viewModel = (SalmonFileViewModel)(sender as MenuFlyoutItem).BindingContext;
@@ -440,5 +437,4 @@ public partial class MainWindow : ContentPage
     {
         ViewModel.SortBySize();
     }
-
 }

@@ -164,7 +164,7 @@ public class SalmonFileViewModel : INotifyPropertyChanged
         }
     }
 
-    // FIXME: when scrolling back images disappear
+    // when scrolling back images disappear
     // see https://github.com/dotnet/maui/issues/17508
     private ImageSource _imageSource = null;
     public ImageSource Image
@@ -344,5 +344,4 @@ public class SalmonFileViewModel : INotifyPropertyChanged
     {
         return Name;
     }
-
 }

@@ -86,7 +86,6 @@ public partial class TextEditor : ContentPage
             keysPressed.Remove(e.Key);
     }
 
-
     private void DetectShortcuts()
     {
         if (TextArea.IsFocused)

@@ -44,5 +44,4 @@ public partial class ImageViewer : ContentPage
         InitializeComponent();
         ViewModel = (ImageViewerViewModel)BindingContext;
     }
-
 }

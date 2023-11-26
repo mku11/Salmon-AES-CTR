@@ -38,5 +38,4 @@ public class BooleanToMultiSelectionConverter : IValueConverter
     {
         return (SelectionMode)value == SelectionMode.Multiple;
     }
-
 }

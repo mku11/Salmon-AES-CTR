@@ -38,5 +38,4 @@ public class StringToWebViewSourceConverter : IValueConverter
     {
         return null;
     }
-
 }

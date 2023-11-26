@@ -51,7 +51,6 @@ public class MediaPlayerActivity : AppCompatActivity, ISurfaceHolderCallback
     private static readonly int MEDIA_BUFFERS = 4;
 
     // make sure we use a large enough buffer for the MediaDataSource since some videos stall
-    //FIXME: this is overly large
     private static readonly int MEDIA_BUFFER_SIZE = 4 * 1024 * 1024;
 
     private static readonly int MEDIA_BACKOFFSET = 256 * 1024;
@@ -345,7 +344,6 @@ public class MediaPlayerActivity : AppCompatActivity, ISurfaceHolderCallback
         }
     }
 
-
     private void ToggleSpeed()
     {
         lock (mediaPlayerLock)
@@ -412,7 +410,6 @@ public class MediaPlayerActivity : AppCompatActivity, ISurfaceHolderCallback
 
     }
 
-
     public void SurfaceCreated(ISurfaceHolder holder)
     {
         mediaPlayer.SetDisplay(holder);
@@ -471,12 +468,10 @@ public class MediaPlayerActivity : AppCompatActivity, ISurfaceHolderCallback
             }
         }
 
-
         public void OnStartTrackingTouch(SeekBar seekBar)
         {
 
         }
-
 
         public void OnStopTrackingTouch(SeekBar seekBar)
         {

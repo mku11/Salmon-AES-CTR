@@ -50,5 +50,4 @@ public partial class SettingsViewer : ContentPage
     {
         ViewModel.Initialize();
     }
-
 }

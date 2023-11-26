@@ -54,6 +54,4 @@ public partial class App : MauiWinUIApplication
         ServiceLocator.GetInstance().Register(typeof(IKeyboardService), keyboardService);
         
     }
-
 }
-
