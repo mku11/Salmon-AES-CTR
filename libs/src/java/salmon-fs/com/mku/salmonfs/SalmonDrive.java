@@ -48,7 +48,7 @@ public abstract class SalmonDrive {
     private static String configFilename = "vault.slmn";
     private static String authConfigFilename = "auth.slma";
     private static String virtualDriveDirectoryName = "fs";
-    private static String shareDir = "share";
+    private static String shareDirectoryName = "share";
     private static String exportDirectoryName = "export";
 
     private int defaultFileChunkSize = DEFAULT_FILE_CHUNK_SIZE;
@@ -139,6 +139,14 @@ public abstract class SalmonDrive {
 
     public static void setExportDirectoryName(String exportDirectoryName) {
         SalmonDrive.exportDirectoryName = exportDirectoryName;
+    }
+	
+	public static String getShareDirectoryName() {
+        return shareDirectoryName;
+    }
+
+    public static void setShareDirectoryName(String shareDirectoryName) {
+        SalmonDrive.shareDirectoryName = shareDirectoryName;
     }
 
     /**

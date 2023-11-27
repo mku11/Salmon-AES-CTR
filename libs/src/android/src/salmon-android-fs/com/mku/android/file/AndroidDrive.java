@@ -88,7 +88,7 @@ public class AndroidDrive extends SalmonDrive {
      * @return
      */
     protected java.io.File getPrivateDir() {
-        java.io.File sharedDir = new java.io.File(context.getCacheDir(), SHARE_DIR);
+        java.io.File sharedDir = new java.io.File(context.getCacheDir(), getShareDirectoryName());
         if (!sharedDir.exists())
             sharedDir.mkdir();
         return sharedDir;
