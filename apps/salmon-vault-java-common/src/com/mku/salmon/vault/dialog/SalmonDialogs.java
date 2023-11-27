@@ -55,9 +55,8 @@ public class SalmonDialogs {
                     onAuthenticationSucceded.run();
             } catch (SalmonAuthException ex) {
                 SalmonDialog.promptDialog("Vault", "Wrong password");
-            } catch (IOException e) {
+            } catch (Exception e) {
                 SalmonDialog.promptDialog("Vault", "Error: " + e.getMessage());
-                throw new RuntimeException(e);
             }
         }, "", false, false, true, null);
     }

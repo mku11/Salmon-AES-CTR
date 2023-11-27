@@ -274,7 +274,7 @@ public abstract class SalmonDrive {
      *
      * @param password The password.
      */
-    public void authenticate(String password) throws SalmonAuthException, IOException {
+    public void authenticate(String password) throws Exception {
         SalmonStream stream = null;
         try {
             if (password == null) {
@@ -317,8 +317,7 @@ public abstract class SalmonDrive {
 			initFS();
             onAuthenticationSuccess();
         } catch (Exception ex) {
-            onAuthenticationError();
-            throw new SalmonAuthException("Could not authenticate, try again", ex);
+            throw ex;
         } finally {
             if (stream != null)
                 stream.close();
@@ -351,7 +350,7 @@ public abstract class SalmonDrive {
         byte[] hash = SalmonIntegrity.calculateHash(hashProvider, data, 0, data.length, hashKey, null);
         for (int i = 0; i < hashKey.length; i++)
             if (hashSignature[i] != hash[i])
-                throw new Exception("Could not authenticate");
+                throw new SalmonAuthException("Could not authenticate");
     }
 
     /**
