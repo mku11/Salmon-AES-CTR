@@ -105,10 +105,19 @@ public class SalmonActivity extends AppCompatActivity {
     @Override
     protected void onCreate(Bundle bundle) {
         super.onCreate(bundle);
+        setupServices();
         setupWindow();
         setContentView(R.layout.main);
         setupControls();
         setupSalmonManager();
+    }
+
+    protected void setupServices() {
+        ServiceLocator.getInstance().register(ISettingsService.class, new AndroidSettingsService());
+        ServiceLocator.getInstance().register(IFileService.class, new AndroidFileService(this));
+        ServiceLocator.getInstance().register(IFileDialogService.class, new AndroidFileDialogService(this));
+        ServiceLocator.getInstance().register(IWebBrowserService.class, new AndroidBrowserService());
+        ServiceLocator.getInstance().register(IKeyboardService.class, new AndroidKeyboardService(this));
     }
 
     private void setupWindow() {
@@ -163,12 +172,6 @@ public class SalmonActivity extends AppCompatActivity {
         try {
             AndroidDrive.initialize(this.getApplicationContext());
             SalmonDriveManager.setVirtualDriveClass(AndroidDrive.class);
-
-            ServiceLocator.getInstance().register(ISettingsService.class, new AndroidSettingsService());
-            ServiceLocator.getInstance().register(IFileService.class, new AndroidFileService(this));
-            ServiceLocator.getInstance().register(IFileDialogService.class, new AndroidFileDialogService(this));
-            ServiceLocator.getInstance().register(IWebBrowserService.class, new AndroidBrowserService());
-            ServiceLocator.getInstance().register(IKeyboardService.class, new AndroidKeyboardService(this));
 
             manager = createVaultManager();
             manager.openListItem = this::openListItem;

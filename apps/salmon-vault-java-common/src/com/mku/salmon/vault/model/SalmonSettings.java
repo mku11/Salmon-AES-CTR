@@ -32,7 +32,12 @@ import com.mku.salmon.vault.services.ServiceLocator;
 public class SalmonSettings {
     public static final String DEFAULT_VAULT_LOCATION = null;
     public static final String VAULT_LOCATION_KEY = "VAULT_LOCATION_KEY";
+
     private final ISettingsService settingsService;
+
+    protected ISettingsService getSettingsService() {
+        return settingsService;
+    }
 
     private String vaultLocation = DEFAULT_VAULT_LOCATION;
 
@@ -50,7 +55,7 @@ public class SalmonSettings {
     }
 
     private AESType aesType = DEFAULT_AES_TYPE;
-    public static final AESType DEFAULT_AES_TYPE = AESType.AesIntrinsics;
+    public static final AESType DEFAULT_AES_TYPE = AESType.Default;
     public static final String AES_TYPE_KEY = "AES_TYPE_KEY";
 
     public AESType getAesType() {
@@ -144,7 +149,7 @@ public class SalmonSettings {
         settingsService.setLastImportDir(value);
     }
 
-    private static SalmonSettings instance;
+    protected static SalmonSettings instance;
 
     public static SalmonSettings getInstance() {
         if (instance == null)
@@ -152,15 +157,18 @@ public class SalmonSettings {
         return instance;
     }
 
-    private SalmonSettings() {
+    protected SalmonSettings() {
         settingsService = ServiceLocator.getInstance().resolve(ISettingsService.class);
     }
 
     public void load() {
         vaultLocation = settingsService.getVaultLocation();
         aesType = AESType.valueOf(settingsService.getAesType());
+        SalmonStream.setAesProviderType(SalmonStream.ProviderType.valueOf(aesType.name()));
         pbkdfImpl = PbkdfImplType.valueOf(settingsService.getPbkdfImplType());
+        SalmonPassword.setPbkdfType(SalmonPassword.PbkdfType.valueOf(this.pbkdfImpl.name()));
         pbkdfAlgo = PbkdfAlgoType.valueOf(settingsService.getPbkdfAlgoType());
+        SalmonPassword.setPbkdfAlgo(SalmonPassword.PbkdfAlgo.valueOf(pbkdfAlgo.name()));
         sequencerAuthType = AuthType.valueOf(settingsService.getSequenceAuthType());
         deleteAfterImport = settingsService.getDeleteAfterImport();
         lastImportDir = settingsService.getLastImportDir();
