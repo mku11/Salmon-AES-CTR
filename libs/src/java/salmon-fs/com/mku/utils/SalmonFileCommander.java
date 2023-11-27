@@ -116,7 +116,8 @@ public class SalmonFileCommander {
                                    Function<IRealFile, String> autoRename, BiConsumer<IRealFile, Exception> onFailed,
                                    ArrayList<SalmonFile> importedFiles, int[] count, int total,
                                    HashMap<String, SalmonFile> existingFiles) throws Exception {
-        SalmonFile sfile = existingFiles.getOrDefault(fileToImport.getBaseName(), null);
+        SalmonFile sfile = existingFiles.containsKey(fileToImport.getBaseName())
+			?existingFiles.get(fileToImport.getBaseName()):null;
         if (fileToImport.isDirectory()) {
             if (onProgressChanged != null)
                 onProgressChanged.accept(new RealFileTaskProgress(fileToImport, 0, 1, count[0], total));
@@ -214,7 +215,8 @@ public class SalmonFileCommander {
                                    ArrayList<IRealFile> exportedFiles, int[] count, int total,
                                    HashMap<String, IRealFile> existingFiles)
             throws Exception {
-        IRealFile rfile = existingFiles.getOrDefault(fileToExport.getBaseName(), null);
+        IRealFile rfile = existingFiles.containsKey(fileToExport.getBaseName())
+			?existingFiles.get(fileToExport.getBaseName()):null;
 
         if (fileToExport.isDirectory()) {
             if (rfile == null || !rfile.exists())
