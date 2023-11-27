@@ -43,12 +43,13 @@ import java.io.IOException;
  * Drive implementations needs to be realized together with {@link IRealFile}.
  */
 public abstract class SalmonDrive {
-    public static final String CONFIG_FILE = "vault.slmn";
-    public static final String AUTH_CONFIG_FILENAME = "auth.slma";
-    public static final String VIRTUAL_DRIVE_DIR = "fs";
-    public static final String SHARE_DIR = "share";
-    public static final String EXPORT_DIR = "export";
     private static final int DEFAULT_FILE_CHUNK_SIZE = 256 * 1024;
+
+    private static String configFilename = "vault.slmn";
+    private static String authConfigFilename = "auth.slma";
+    private static String virtualDriveDirectoryName = "fs";
+    private static String shareDir = "share";
+    private static String exportDirectoryName = "export";
 
     private int defaultFileChunkSize = DEFAULT_FILE_CHUNK_SIZE;
     private SalmonKey key = null;
@@ -80,9 +81,9 @@ public abstract class SalmonDrive {
 			}
         }
 		
-        IRealFile virtualRootRealFile = realRoot.getChild(VIRTUAL_DRIVE_DIR);
+        IRealFile virtualRootRealFile = realRoot.getChild(virtualDriveDirectoryName);
         if (createIfNotExists && (virtualRootRealFile == null || !virtualRootRealFile.exists())) {
-            virtualRootRealFile = realRoot.createDirectory(VIRTUAL_DRIVE_DIR);
+            virtualRootRealFile = realRoot.createDirectory(virtualDriveDirectoryName);
         }
         virtualRoot = new SalmonFile(virtualRootRealFile, this);
         registerOnProcessClose();
@@ -107,6 +108,38 @@ public abstract class SalmonDrive {
      * Method is called when the user authentication has failed
      */
     protected abstract void onAuthenticationError();
+
+    public static String getConfigFilename() {
+        return configFilename;
+    }
+
+    public static void setConfigFilename(String configFilename) {
+        SalmonDrive.configFilename = configFilename;
+    }
+
+    public static String getAuthConfigFilename() {
+        return authConfigFilename;
+    }
+
+    public static void setAuthConfigFilename(String authConfigFilename) {
+        SalmonDrive.authConfigFilename = authConfigFilename;
+    }
+
+    public static String getVirtualDriveDirectoryName() {
+        return virtualDriveDirectoryName;
+    }
+
+    public static void setVirtualDriveDirectoryName(String virtualDriveDirectoryName) {
+        SalmonDrive.virtualDriveDirectoryName = virtualDriveDirectoryName;
+    }
+
+    public static String getExportDirectoryName() {
+        return exportDirectoryName;
+    }
+
+    public static void setExportDirectoryName(String exportDirectoryName) {
+        SalmonDrive.exportDirectoryName = exportDirectoryName;
+    }
 
     /**
      * Clear sensitive information when app is close.
@@ -160,10 +193,10 @@ public abstract class SalmonDrive {
      * Initialize the drive virtual filesystem.
      */
     private void initFS() {
-        IRealFile virtualRootRealFile = realRoot.getChild(VIRTUAL_DRIVE_DIR);
+        IRealFile virtualRootRealFile = realRoot.getChild(virtualDriveDirectoryName);
         if (virtualRootRealFile == null || !virtualRootRealFile.exists()) {
             try {
-                virtualRootRealFile = realRoot.createDirectory(VIRTUAL_DRIVE_DIR);
+                virtualRootRealFile = realRoot.createDirectory(virtualDriveDirectoryName);
             } catch (Exception ex) {
                 ex.printStackTrace();
             }
@@ -185,7 +218,7 @@ public abstract class SalmonDrive {
         byte[] driveKey = getKey().getDriveKey();
         byte[] hashKey = getKey().getHashKey();
 
-        IRealFile configFile = realRoot.getChild(CONFIG_FILE);
+        IRealFile configFile = realRoot.getChild(configFilename);
 
         // if it's an existing config that we need to update with
         // the new password then we prefer to be authenticate
@@ -198,7 +231,7 @@ public abstract class SalmonDrive {
         // delete the old config file and create a new one
         if (configFile != null && configFile.exists())
             configFile.delete();
-        configFile = realRoot.createFile(CONFIG_FILE);
+        configFile = realRoot.createFile(configFilename);
 
         byte[] magicBytes = SalmonGenerator.getMagicBytes();
 
@@ -400,7 +433,7 @@ public abstract class SalmonDrive {
     private IRealFile getDriveConfigFile() {
         if (realRoot == null || !realRoot.exists())
             return null;
-        IRealFile file = realRoot.getChild(CONFIG_FILE);
+        IRealFile file = realRoot.getChild(configFilename);
         return file;
     }
 
@@ -409,9 +442,9 @@ public abstract class SalmonDrive {
      * @return The file on the real filesystem.
      */
     public IRealFile getExportDir() {
-        IRealFile virtualThumbnailsRealDir = realRoot.getChild(EXPORT_DIR);
+        IRealFile virtualThumbnailsRealDir = realRoot.getChild(exportDirectoryName);
         if (virtualThumbnailsRealDir == null || !virtualThumbnailsRealDir.exists())
-            virtualThumbnailsRealDir = realRoot.createDirectory(EXPORT_DIR);
+            virtualThumbnailsRealDir = realRoot.createDirectory(exportDirectoryName);
         return virtualThumbnailsRealDir;
     }
 

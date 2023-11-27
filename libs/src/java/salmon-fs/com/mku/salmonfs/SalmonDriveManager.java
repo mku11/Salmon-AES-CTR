@@ -37,7 +37,6 @@ import com.mku.sequence.SalmonSequence;
 
 import java.io.IOException;
 import java.lang.reflect.Constructor;
-import java.lang.reflect.InvocationTargetException;
 import java.util.Arrays;
 
 /**
@@ -200,7 +199,7 @@ public class SalmonDriveManager {
      * @return
      */
     public static String getDefaultAuthConfigFilename() {
-        return SalmonDrive.AUTH_CONFIG_FILENAME;
+        return SalmonDrive.getAuthConfigFilename();
     }
 
     /**

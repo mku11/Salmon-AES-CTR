@@ -720,7 +720,7 @@ public class SalmonActivity extends AppCompatActivity {
             if (dir == null)
                 return;
             Consumer<Object> callback = ServiceLocator.getInstance().resolve(IFileDialogService.class).getCallback(requestCode);
-            callback.accept(new String[]{dir, SalmonDrive.AUTH_CONFIG_FILENAME});
+            callback.accept(new String[]{dir, SalmonDrive.getAuthConfigFilename()});
         }
     }
 

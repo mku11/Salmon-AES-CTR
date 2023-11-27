@@ -33,7 +33,7 @@ public class JavaDrive extends SalmonDrive {
 
     /**
      * Instantiate a virtual drive with the provided real filepath.
-     * Encrypted files will be located under the {@link SalmonDrive#VIRTUAL_DRIVE_DIR}.
+     * Encrypted files will be located under the {@link SalmonDrive#virtualDriveDirectoryName}.
      * @param realRoot The filepath to the location of the virtual drive.
 	 * @param createIfNotExists Create the drive if it doesn't exist.
      */
