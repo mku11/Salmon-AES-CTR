@@ -297,7 +297,7 @@ public class SalmonFileCommander {
             if (stopJobs)
                 break;
             int finalTotal = total;
-            salmonFile.DeleteRecursively((file, position, length) ->
+            salmonFile.deleteRecursively((file, position, length) ->
             {
                 if (stopJobs)
                     throw new CancellationException();

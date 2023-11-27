@@ -170,9 +170,6 @@ public class SalmonActivity extends AppCompatActivity {
 
     private void setupSalmonManager() {
         try {
-            AndroidDrive.initialize(this.getApplicationContext());
-            SalmonDriveManager.setVirtualDriveClass(AndroidDrive.class);
-
             manager = createVaultManager();
             manager.openListItem = this::openListItem;
             manager.observePropertyChanges(this::manager_PropertyChanged);
@@ -846,6 +843,8 @@ public class SalmonActivity extends AppCompatActivity {
     }
 
     protected SalmonVaultManager createVaultManager() {
+        AndroidDrive.initialize(this.getApplicationContext());
+        SalmonDriveManager.setVirtualDriveClass(AndroidDrive.class);
         return SalmonAndroidVaultManager.getInstance();
     }
 }

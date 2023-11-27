@@ -558,7 +558,7 @@ public class SalmonVaultManager implements IPropertyNotifier {
 
     public void closeVault() {
         try {
-            fileItemList = null;
+            setFileItemList(null);
             currDir = null;
             clearCopiedFiles();
             setPathText("");

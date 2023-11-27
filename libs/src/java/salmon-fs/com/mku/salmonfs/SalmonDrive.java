@@ -85,7 +85,7 @@ public abstract class SalmonDrive {
         if (createIfNotExists && (virtualRootRealFile == null || !virtualRootRealFile.exists())) {
             virtualRootRealFile = realRoot.createDirectory(virtualDriveDirectoryName);
         }
-        virtualRoot = new SalmonFile(virtualRootRealFile, this);
+        virtualRoot = createVirtualRoot(virtualRootRealFile);
         registerOnProcessClose();
         key = new SalmonKey();
     }
@@ -192,7 +192,7 @@ public abstract class SalmonDrive {
     /**
      * Initialize the drive virtual filesystem.
      */
-    private void initFS() {
+    protected void initFS() {
         IRealFile virtualRootRealFile = realRoot.getChild(virtualDriveDirectoryName);
         if (virtualRootRealFile == null || !virtualRootRealFile.exists()) {
             try {
@@ -201,8 +201,12 @@ public abstract class SalmonDrive {
                 ex.printStackTrace();
             }
         }
-        virtualRoot = new SalmonFile(virtualRootRealFile, this);
+        virtualRoot = createVirtualRoot(virtualRootRealFile);
     }
+	
+	protected SalmonFile createVirtualRoot(IRealFile virtualRootRealFile) {
+		return new SalmonFile(virtualRootRealFile, this);
+	}
 
     /**
      * Create a configuration file for the drive.
@@ -300,6 +304,12 @@ public abstract class SalmonDrive {
         if (!isAuthenticated())
             throw new SalmonAuthException("Not authenticated");
         return virtualRoot;
+    }
+	
+	protected IRealFile getRealRoot() {
+        if (realRoot == null)
+            return null;
+        return realRoot;
     }
 
     /**

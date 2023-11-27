@@ -737,7 +737,7 @@ public class SalmonFile {
      * @param key      The encryption key if the file doesn't belong to a drive
      * @param nonce    The nonce if the file doesn't belong to a drive
      */
-    private String getDecryptedFilename(String filename, byte[] key, byte[] nonce)
+    protected String getDecryptedFilename(String filename, byte[] key, byte[] nonce)
             throws IOException, SalmonSecurityException, SalmonIntegrityException {
         String rfilename = filename.replaceAll("-", "/");
         if (drive != null && nonce != null)
@@ -760,7 +760,7 @@ public class SalmonFile {
      * @param key      The encryption key if the file doesn't belong to a drive
      * @param nonce    The nonce if the file doesn't belong to a drive
      */
-    private String getEncryptedFilename(String filename, byte[] key, byte[] nonce)
+    protected String getEncryptedFilename(String filename, byte[] key, byte[] nonce)
             throws IOException, SalmonSecurityException, SalmonIntegrityException, SalmonAuthException,
             SalmonSequenceException, SalmonRangeExceededException {
         if (drive != null && nonce != null)
@@ -909,22 +909,22 @@ public class SalmonFile {
                 renameRealFile, autoRenameFolders, onFailedRealFile);
     }
 
-    public void DeleteRecursively(TriConsumer<SalmonFile, Long, Long> progressListener, BiConsumer<SalmonFile, Exception> OnFailed)
+    public void deleteRecursively(TriConsumer<SalmonFile, Long, Long> progressListener, BiConsumer<SalmonFile, Exception> onFailed)
     {
-        BiConsumer<IRealFile, Exception> OnFailedRealFile = null;
-        if (OnFailed != null)
+        BiConsumer<IRealFile, Exception> onFailedRealFile = null;
+        if (onFailed != null)
         {
-            OnFailedRealFile = (file, ex) ->
+            onFailedRealFile = (file, ex) ->
             {
-                if (OnFailed != null)
-                    OnFailed.accept(new SalmonFile(file, drive), ex);
+                if (onFailed != null)
+                    onFailed.accept(new SalmonFile(file, drive), ex);
             };
         }
         this.getRealFile().deleteRecursively((file, position, length) ->
         {
             if (progressListener != null)
                 progressListener.accept(new SalmonFile(file, drive), position, length);
-        }, OnFailedRealFile);
+        }, onFailedRealFile);
     }
 
     public static Function<SalmonFile, String> autoRename = (SalmonFile file) -> {
