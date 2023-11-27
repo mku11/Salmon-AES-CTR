@@ -54,7 +54,7 @@ public class SalmonDefaultPbkdfProvider  implements ISalmonPbkdfProvider{
             SecretKeyFactory factory = SecretKeyFactory.getInstance(pbkdfAlgoStr);
             key = factory.generateSecret(keySpec).getEncoded();
         } catch (NoSuchAlgorithmException | InvalidKeySpecException e) {
-            throw new SalmonSecurityException("Could not initialize pbkdf algo");
+            throw new SalmonSecurityException("Could not initialize pbkdf: " + e);
         }
         return key;
     }

@@ -71,6 +71,15 @@ public class SalmonPassword {
     public static void setPbkdfType(PbkdfType pbkdfType) {
         provider = SalmonPbkdfFactory.create(pbkdfType);
     }
+	
+	/**
+     * Set the global PBKDF provider to be used for text key derivation.
+     *
+     * @param pbkdfProvider
+     */
+    public static void setPbkdfProvider(ISalmonPbkdfProvider pbkdfProvider) {
+        provider = pbkdfProvider;
+    }
 
     /**
      * Derives the key from a text password
