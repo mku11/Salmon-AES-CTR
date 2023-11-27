@@ -72,6 +72,8 @@ public class SalmonVaultManager implements IPropertyNotifier {
     private String sequencerDefaultDirPath = SalmonConfig.getPrivateDir() + File.separator + SEQUENCER_DIR_NAME;
     private HashSet<BiConsumer<Object, String>> observers = new HashSet<>();
 
+    private boolean promptExitOnBack;
+
     public String getSequencerDefaultDirPath() {
         return sequencerDefaultDirPath;
     }
@@ -612,7 +614,7 @@ public class SalmonVaultManager implements IPropertyNotifier {
                 salmonFiles = currDir.listFiles();
                 populateFileList(null);
             });
-        } else if (currDir != null && currDir.getParent() != null) {
+        } else if (canGoBack()) {
             SalmonFile finalParent = currDir.getParent();
             executor.execute(() ->
             {
@@ -623,7 +625,7 @@ public class SalmonVaultManager implements IPropertyNotifier {
                 salmonFiles = currDir.listFiles();
                 populateFileList(parentDir);
             });
-        } else {
+        } else if(promptExitOnBack){
             SalmonDialogs.promptExit();
         }
     }
@@ -839,4 +841,13 @@ public class SalmonVaultManager implements IPropertyNotifier {
                 (!item.isDirectory() ? "Encrypted Size: " + ByteUtils.getBytes(item.getRealFile().length(), 2)
                         + " (" + item.getRealFile().length() + " bytes)" : "") + "\n";
     }
+
+    public boolean canGoBack() {
+        return currDir != null && currDir.getParent() != null;
+    }
+
+    public void setPromptExitOnBack(boolean promptExitOnBack) {
+        this.promptExitOnBack = promptExitOnBack;
+    }
+
 }

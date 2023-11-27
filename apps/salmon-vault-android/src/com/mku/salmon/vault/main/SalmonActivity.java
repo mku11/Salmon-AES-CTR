@@ -131,8 +131,8 @@ public class SalmonActivity extends AppCompatActivity {
         listView.setLayoutManager(new LinearLayoutManager(this));
         listView.addItemDecoration(new DividerItemDecoration(this, LinearLayoutManager.VERTICAL));
         registerForContextMenu(listView);
-        adapter = CreateAdapter();
-        adapter.setOnCacheCleared(this::ClearRecyclerViewCache);
+        adapter = createAdapter();
+        adapter.setOnCacheCleared(this::clearRecyclerViewCache);
         listView.setAdapter(adapter);
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
@@ -141,12 +141,12 @@ public class SalmonActivity extends AppCompatActivity {
         getSupportActionBar().setLogo(R.drawable.logo_48x48);
     }
 
-    private void ClearRecyclerViewCache() {
+    private void clearRecyclerViewCache() {
         listView.getRecycledViewPool().clear();
         listView.setRecycledViewPool(new RecyclerView.RecycledViewPool());
     }
 
-    private FileAdapter CreateAdapter() {
+    protected FileAdapter createAdapter() {
         return new FileAdapter(this, fileItemList, (Integer pos) ->
         {
             try {
@@ -170,7 +170,7 @@ public class SalmonActivity extends AppCompatActivity {
             ServiceLocator.getInstance().register(IWebBrowserService.class, new AndroidBrowserService());
             ServiceLocator.getInstance().register(IKeyboardService.class, new AndroidKeyboardService(this));
 
-            manager = SalmonAndroidVaultManager.getInstance();
+            manager = createVaultManager();
             manager.openListItem = this::openListItem;
             manager.observePropertyChanges(this::manager_PropertyChanged);
             manager.updateListItem = this::updateListItem;
@@ -840,5 +840,9 @@ public class SalmonActivity extends AppCompatActivity {
 
     public enum SortType {
         Default, Name, NameDesc, Size, SizeDesc, Type, TypeDesc, Date, DateDesc
+    }
+
+    protected SalmonVaultManager createVaultManager() {
+        return SalmonAndroidVaultManager.getInstance();
     }
 }
