@@ -87,10 +87,20 @@ public class SalmonActivity : AppCompatActivity
     protected override void OnCreate(Bundle bundle)
     {
         base.OnCreate(bundle);
+        SetupServices();
         SetupWindow();
         SetContentView(Resource.Layout.main);
         SetupControls();
         SetupSalmonManager();
+    }
+
+    protected void SetupServices()
+    {
+        ServiceLocator.GetInstance().Register(typeof(ISettingsService), new AndroidSettingsService());
+        ServiceLocator.GetInstance().Register(typeof(IFileService), new AndroidFileService(this));
+        ServiceLocator.GetInstance().Register(typeof(IFileDialogService), new AndroidFileDialogService(this));
+        ServiceLocator.GetInstance().Register(typeof(IWebBrowserService), new AndroidBrowserService());
+        ServiceLocator.GetInstance().Register(typeof(IKeyboardService), new AndroidKeyboardService(this));
     }
 
     private void SetupWindow()
@@ -131,7 +141,7 @@ public class SalmonActivity : AppCompatActivity
         listView.SetRecycledViewPool(new RecyclerView.RecycledViewPool());
     }
 
-    private FileAdapter CreateAdapter()
+    protected FileAdapter CreateAdapter()
     {
         return new FileAdapter(this, fileItemList, (int pos) =>
         {
@@ -156,13 +166,7 @@ public class SalmonActivity : AppCompatActivity
             AndroidDrive.Initialize(this.ApplicationContext);
             SalmonDriveManager.VirtualDriveClass = typeof(AndroidDrive);
 
-            ServiceLocator.GetInstance().Register(typeof(ISettingsService), new AndroidSettingsService());
-            ServiceLocator.GetInstance().Register(typeof(IFileService), new AndroidFileService(this));
-            ServiceLocator.GetInstance().Register(typeof(IFileDialogService), new AndroidFileDialogService(this));
-            ServiceLocator.GetInstance().Register(typeof(IWebBrowserService), new AndroidBrowserService());
-            ServiceLocator.GetInstance().Register(typeof(IKeyboardService), new AndroidKeyboardService(this));
-
-            manager = SalmonVaultManager.Instance;
+            manager = CreateVaultManager();
             manager.OpenListItem = OpenListItem;
             manager.PropertyChanged += Manager_PropertyChanged;
             manager.UpdateListItem = UpdateListItem;
@@ -743,7 +747,7 @@ public class SalmonActivity : AppCompatActivity
             if (dir == null)
                 return;
             Action<string[]> callback = ServiceLocator.GetInstance().Resolve<IFileDialogService>().GetCallback(requestCode);
-            callback(new string[] { dir, SalmonDrive.AUTH_CONFIG_FILENAME });
+            callback(new string[] { dir, SalmonDrive.AuthConfigFilename });
         }
     }
 
@@ -904,5 +908,13 @@ public class SalmonActivity : AppCompatActivity
     public enum SortType
     {
         Default, Name, NameDesc, Size, SizeDesc, Type, TypeDesc, Date, DateDesc
+    }
+
+    protected SalmonVaultManager CreateVaultManager()
+    {
+        SalmonNativeTransformer.NativeProxy = new AndroidNativeProxy();
+        AndroidDrive.Initialize(this.ApplicationContext);
+        SalmonDriveManager.VirtualDriveClass = typeof(AndroidDrive);
+        return SalmonVaultManager.Instance;
     }
 }

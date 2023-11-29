@@ -315,8 +315,6 @@ public abstract class SalmonDrive {
     }
 	
 	protected IRealFile getRealRoot() {
-        if (realRoot == null)
-            return null;
         return realRoot;
     }
 
@@ -368,6 +366,7 @@ public abstract class SalmonDrive {
 			initFS();
             onAuthenticationSuccess();
         } catch (Exception ex) {
+			onAuthenticationError();
             throw ex;
         } finally {
             if (stream != null)

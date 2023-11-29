@@ -45,7 +45,7 @@ using System.ComponentModel;
 
 namespace Salmon.Vault.Main;
 
-class FileAdapter : RecyclerView.Adapter, INotifyPropertyChanged
+public class FileAdapter : RecyclerView.Adapter, INotifyPropertyChanged
 {
     private static readonly string TAG = typeof(FileAdapter).Name;
     private const int MAX_CACHE_SIZE = 20 * 1024 * 1024;

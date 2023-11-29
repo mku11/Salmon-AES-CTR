@@ -54,6 +54,18 @@ public class SalmonPassword
     }
 
     /// <summary>
+    ///  Global PBKDF provider to be used for text key derivation.
+	/// </summary>
+    ///  <exception cref="SalmonSecurityException"></exception>
+    public static ISalmonPbkdfProvider PbkdfImplProvider
+    {
+        set
+        {
+            provider = value;
+        }
+    }
+
+    /// <summary>
     ///  Pbkdf provider.
     /// </summary>
     private static ISalmonPbkdfProvider provider = new SalmonDefaultPbkdfProvider();

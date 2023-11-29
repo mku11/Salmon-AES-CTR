@@ -36,7 +36,7 @@ public class DotNetDrive : SalmonDrive
 
     /// <summary>
     ///  Instantiate a virtual drive with the provided real filepath.
-    ///  Encrypted files will be located under the <see cref="SalmonDrive.VIRTUAL_DRIVE_DIR"/>.
+    ///  Encrypted files will be located under the <see cref="SalmonDrive.VirtualDriveDirectoryName"/>.
 	/// </summary>
 	///  <param name="realRoot">The filepath to the location of the virtual drive.</param>
 	///  <param name="createIfNotExists">Create the drive if it doesn't exist.</param>

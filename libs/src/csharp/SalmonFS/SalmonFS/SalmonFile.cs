@@ -746,7 +746,7 @@ public class SalmonFile
 	///  <param name="filename">The filename of a real file</param>
     ///  <param name="key">     The encryption key if the file doesn't belong to a drive</param>
     ///  <param name="nonce">   The nonce if the file doesn't belong to a drive</param>
-    private string GetDecryptedFilename(string filename, byte[] key, byte[] nonce)
+    protected string GetDecryptedFilename(string filename, byte[] key, byte[] nonce)
     {
         string rfilename = filename.Replace("-", "/");
         if (Drive != null && nonce != null)
@@ -768,7 +768,7 @@ public class SalmonFile
 	///  <param name="filename">The virtual filename</param>
     ///  <param name="key">     The encryption key if the file doesn't belong to a drive</param>
     ///  <param name="nonce">   The nonce if the file doesn't belong to a drive</param>
-    private string GetEncryptedFilename(string filename, byte[] key, byte[] nonce)
+    protected string GetEncryptedFilename(string filename, byte[] key, byte[] nonce)
     {
         if (Drive != null && nonce != null)
             throw new SalmonSecurityException("Filename nonce is already set by the drive");

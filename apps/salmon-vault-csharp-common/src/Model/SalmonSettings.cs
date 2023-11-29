@@ -22,6 +22,9 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 */
 
+using Mku.Salmon.IO;
+using Mku.Salmon.Password;
+using Salmon.Vault.Model;
 using Salmon.Vault.Services;
 using System;
 
@@ -29,19 +32,57 @@ namespace Salmon.Vault.Settings;
 
 public class SalmonSettings
 {
+    public string _vaultLocation = DEFAULT_VAULT_LOCATION;
+    public string VaultLocation
+    {
+        get
+        {
+            return _vaultLocation;
+        }
+        set
+        {
+            _vaultLocation = value;
+            SettingsService.VaultLocation = value;
+        }
+    }
     public static readonly string DEFAULT_VAULT_LOCATION = null;
     public static readonly string VAULT_LOCATION_KEY = "VAULT_LOCATION_KEY";
-    public string VaultLocation { get; set; } = DEFAULT_VAULT_LOCATION;
 
-    public AESType AesType { get; set; } = DEFAULT_AES_TYPE;
-    public static readonly AESType DEFAULT_AES_TYPE = AESType.AesIntrinsics;
+    public AESType _aesType = DEFAULT_AES_TYPE;
+    public AESType AesType
+    {
+        get
+        {
+            return _aesType;
+        }
+        set
+        {
+            this._aesType = value;
+            SettingsService.AesType = value.ToString();
+            SalmonStream.AesProviderType = (SalmonStream.ProviderType)Enum.Parse(typeof(SalmonStream.ProviderType), AesType.ToString());
+        }
+    }
+    public static readonly AESType DEFAULT_AES_TYPE = AESType.Default;
     public static readonly string AES_TYPE_KEY = "AES_TYPE_KEY";
     public enum AESType
     {
         Default, AesIntrinsics, TinyAES
     }
 
-    public PbkdfImplType PbkdfImpl { get; set; } = DEFAULT_IMPL_TYPE;
+    public PbkdfImplType _pbkdfImpl = DEFAULT_IMPL_TYPE;
+    public PbkdfImplType PbkdfImpl
+    {
+        get
+        {
+            return _pbkdfImpl;
+        }
+        set
+        {
+            this._pbkdfImpl = value;
+            SettingsService.PbkdfImplType = value.ToString();
+            SalmonPassword.PbkdfImplType = (SalmonPassword.PbkdfType)Enum.Parse(typeof(SalmonPassword.PbkdfType), PbkdfImpl.ToString());
+        }
+    }
     public static readonly PbkdfImplType DEFAULT_IMPL_TYPE = PbkdfImplType.Default;
     public static readonly string PBKDF_IMPL_TYPE_KEY = "PBKDF_IMPL_TYPE_KEY";
     public enum PbkdfImplType
@@ -49,7 +90,20 @@ public class SalmonSettings
         Default
     }
 
-    public PbkdfAlgoType PbkdfAlgo { get; set; } = DEFAULT_PBKDF_ALGO;
+    public PbkdfAlgoType _pbkdfAlgo = DEFAULT_PBKDF_ALGO;
+    public PbkdfAlgoType PbkdfAlgo
+    {
+        get
+        {
+            return _pbkdfAlgo;
+        }
+        set
+        {
+            this._pbkdfAlgo = value;
+            SettingsService.PbkdfAlgoType = value.ToString();
+            SalmonPassword.PbkdfAlgorithm = (SalmonPassword.PbkdfAlgo)Enum.Parse(typeof(SalmonPassword.PbkdfAlgo), PbkdfAlgo.ToString());
+        }
+    }
     public static readonly PbkdfAlgoType DEFAULT_PBKDF_ALGO = PbkdfAlgoType.SHA256;
     public static readonly string PBKDF_ALGO_KEY = "PBKDF_ALGO_KEY";
     public enum PbkdfAlgoType
@@ -58,7 +112,20 @@ public class SalmonSettings
         SHA256
     }
 
-    public AuthType SequencerAuthType { get; set; } = DEFAULT_AUTH_TYPE;
+    public AuthType _sequencerAuthType = DEFAULT_AUTH_TYPE;
+    public AuthType SequencerAuthType
+    {
+        get
+        {
+            return _sequencerAuthType;
+        }
+        set
+        {
+            this._sequencerAuthType = value;
+            SettingsService.SequenceAuthType = value.ToString();
+            SalmonVaultManager.Instance.SetupSalmonManager();
+        }
+    }
     public static readonly AuthType DEFAULT_AUTH_TYPE = AuthType.User;
     public static readonly string AUTH_TYPE_KEY = "AUTH_TYPE_KEY";
     public enum AuthType
@@ -74,8 +141,8 @@ public class SalmonSettings
     public static readonly string LAST_IMPORT_DIR_KEY = "LAST_IMPORT_DIR_KEY";
     public string LastImportDir { get; set; } = DEFAULT_LAST_IMPORT_DIR;
 
-    private static SalmonSettings instance;
-    private ISettingsService settingsService;
+    protected static SalmonSettings instance;
+    protected ISettingsService SettingsService { get; set; }
 
     public static SalmonSettings GetInstance()
     {
@@ -84,19 +151,22 @@ public class SalmonSettings
         return instance;
     }
 
-    private SalmonSettings()
+    protected SalmonSettings()
     {
-        settingsService = ServiceLocator.GetInstance().Resolve<ISettingsService>();
+        SettingsService = ServiceLocator.GetInstance().Resolve<ISettingsService>();
     }
 
     public void Load()
     {
-        VaultLocation = settingsService.VaultLocation;
-        AesType = (AESType)Enum.Parse(typeof(AESType), settingsService.AesType);
-        PbkdfImpl = (PbkdfImplType)Enum.Parse(typeof(PbkdfImplType), settingsService.PbkdfImplType);
-        PbkdfAlgo = (PbkdfAlgoType)Enum.Parse(typeof(PbkdfAlgoType), settingsService.PbkdfAlgoType);
-        SequencerAuthType = (AuthType)Enum.Parse(typeof(AuthType), settingsService.SequenceAuthType);
-        DeleteAfterImport = settingsService.DeleteAfterImport;
-        LastImportDir = settingsService.LastImportDir;
+        _vaultLocation = SettingsService.VaultLocation;
+        _aesType = (AESType)Enum.Parse(typeof(AESType), SettingsService.AesType);
+        SalmonStream.AesProviderType = (SalmonStream.ProviderType)Enum.Parse(typeof(SalmonStream.ProviderType), AesType.ToString());
+        _pbkdfImpl = (PbkdfImplType)Enum.Parse(typeof(PbkdfImplType), SettingsService.PbkdfImplType);
+        SalmonPassword.PbkdfImplType = (SalmonPassword.PbkdfType)Enum.Parse(typeof(SalmonPassword.PbkdfType), PbkdfImpl.ToString());
+        _pbkdfAlgo = (PbkdfAlgoType)Enum.Parse(typeof(PbkdfAlgoType), SettingsService.PbkdfAlgoType);
+        SalmonPassword.PbkdfAlgorithm = (SalmonPassword.PbkdfAlgo)Enum.Parse(typeof(SalmonPassword.PbkdfAlgo), PbkdfAlgo.ToString());
+        _sequencerAuthType = (AuthType)Enum.Parse(typeof(AuthType), SettingsService.SequenceAuthType);
+        DeleteAfterImport = SettingsService.DeleteAfterImport;
+        LastImportDir = SettingsService.LastImportDir;
     }
 }

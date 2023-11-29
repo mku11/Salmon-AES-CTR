@@ -57,6 +57,10 @@ public class SalmonDialogs
             {
                 SalmonDialog.PromptDialog("Vault", "Wrong password");
             }
+            catch (Exception e)
+            {
+                SalmonDialog.PromptDialog("Vault", "Error: " + e.Message);
+            }
         }, isPassword: true);
     }
 

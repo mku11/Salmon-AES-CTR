@@ -174,7 +174,7 @@ public class SalmonDriveManager
 	///  <returns></returns>
     public static string GetDefaultAuthConfigFilename()
     {
-        return SalmonDrive.AUTH_CONFIG_FILENAME;
+        return SalmonDrive.AuthConfigFilename;
     }
 
     /// <summary>

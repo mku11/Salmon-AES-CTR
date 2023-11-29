@@ -55,6 +55,8 @@ public class SalmonVaultManager : INotifyPropertyChanged
     public static readonly int REQUEST_IMPORT_AUTH_FILE = 1004;
     public static readonly int REQUEST_EXPORT_AUTH_FILE = 1005;
 
+    public bool PromptExitOnBack { get; set; }
+
     public string SequencerDefaultDirPath { get; set; } = SalmonConfig.GetPrivateDir() + System.IO.Path.DirectorySeparatorChar + SEQUENCER_DIR_NAME;
 
     protected string SequencerFilepath => SequencerDefaultDirPath + System.IO.Path.DirectorySeparatorChar
@@ -678,7 +680,7 @@ public class SalmonVaultManager : INotifyPropertyChanged
                 PopulateFileList(null);
             });
         }
-        else if (CurrDir != null && CurrDir.Parent != null)
+        else if (CanGoBack())
         {
             SalmonFile finalParent = CurrDir.Parent;
             Task.Run(() =>
@@ -691,7 +693,7 @@ public class SalmonVaultManager : INotifyPropertyChanged
                 PopulateFileList(parentDir);
             });
         }
-        else
+        else if(PromptExitOnBack)
         {
             SalmonDialogs.PromptExit();
         }
@@ -920,5 +922,10 @@ public class SalmonVaultManager : INotifyPropertyChanged
                 "Encrypted Path: " + item.RealFile.AbsolutePath + "\n" +
                 (!item.IsDirectory ? "Encrypted Size: " + ByteUtils.GetBytes(item.RealFile.Length, 2)
                         + " (" + item.RealFile.Length + " bytes)" : "") + "\n";
+    }
+
+    public bool CanGoBack()
+    {
+        return CurrDir != null && CurrDir.Parent != null;
     }
 }

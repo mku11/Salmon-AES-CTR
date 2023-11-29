@@ -40,28 +40,28 @@ namespace Mku.SalmonFS;
 /// </summary>
 public abstract class SalmonDrive
 {
+    private static readonly int DEFAULT_FILE_CHUNK_SIZE = 256 * 1024;
+
     /// <summary>
     /// Default config filename
     /// </summary>
-    public static readonly string CONFIG_FILE = "vault.slmn";
+    public static string ConfigFilename { get; set; } = "vault.slmn";
     /// <summary>
     /// Default aUthorization filename
     /// </summary>
-    public static readonly string AUTH_CONFIG_FILENAME = "auth.slma";
+    public static string AuthConfigFilename { get; set; } = "auth.slma";
     /// <summary>
     /// Virtual drive directory to host the encrypted files
     /// </summary>
-    public static readonly string VIRTUAL_DRIVE_DIR = "fs";
+    public static string VirtualDriveDirectoryName { get; set; } = "fs";
     /// <summary>
     /// Default shared directory.
     /// </summary>
-    public static readonly string SHARE_DIR = "share";
+    public static string ShareDirectoryName { get; set; } = "share";
     /// <summary>
     /// Default export directory filename
     /// </summary>
-    public static readonly string EXPORT_DIR = "export";
-
-    private static readonly int DEFAULT_FILE_CHUNK_SIZE = 256 * 1024;
+    public static string ExportDirectoryName { get; set; } = "export";  
 
     /// <summary>
     /// Default file chunk that will be used to import new files.
@@ -78,8 +78,10 @@ public abstract class SalmonDrive
     /// </summary>
     public byte[] DriveID { get; private set; }
 
-
-    private IRealFile realRoot = null;
+    /// <summary>
+    /// The real root location of the vault
+    /// </summary>
+    public IRealFile RealRoot { get; private set; } = null;
     private SalmonFile virtualRoot = null;
     private readonly IHashProvider hashProvider = new HmacSHA256Provider();
 
@@ -93,25 +95,25 @@ public abstract class SalmonDrive
         Close();
         if (realRootPath == null)
             return;
-        realRoot = GetRealFile(realRootPath, true);
-        if (!createIfNotExists && !HasConfig() && realRoot.Parent != null && realRoot.Parent.Exists)
+        RealRoot = GetRealFile(realRootPath, true);
+        if (!createIfNotExists && !HasConfig() && RealRoot.Parent != null && RealRoot.Parent.Exists)
         {
             // try the parent if this is the filesystem folder 
-            IRealFile originalRealRoot = realRoot;
-            realRoot = realRoot.Parent;
+            IRealFile originalRealRoot = RealRoot;
+            RealRoot = RealRoot.Parent;
             if (!HasConfig())
             {
                 // revert to original
-                realRoot = originalRealRoot;
+                RealRoot = originalRealRoot;
             }
         }
 
-        IRealFile virtualRootRealFile = realRoot.GetChild(VIRTUAL_DRIVE_DIR);
+        IRealFile virtualRootRealFile = RealRoot.GetChild(VirtualDriveDirectoryName);
         if (createIfNotExists && (virtualRootRealFile == null || !virtualRootRealFile.Exists))
         {
-            virtualRootRealFile = realRoot.CreateDirectory(VIRTUAL_DRIVE_DIR);
+            virtualRootRealFile = RealRoot.CreateDirectory(VirtualDriveDirectoryName);
         }
-        virtualRoot = new SalmonFile(virtualRootRealFile, this);
+        virtualRoot = CreateVirtualRoot(virtualRootRealFile);
         RegisterOnProcessClose();
         Key = new SalmonKey();
     }
@@ -161,21 +163,26 @@ public abstract class SalmonDrive
     /// <summary>
     ///  Initialize the drive virtual filesystem.
     /// </summary>
-    private void InitFS()
+    protected void InitFS()
     {
-        IRealFile virtualRootRealFile = realRoot.GetChild(VIRTUAL_DRIVE_DIR);
+        IRealFile virtualRootRealFile = RealRoot.GetChild(VirtualDriveDirectoryName);
         if (virtualRootRealFile == null || !virtualRootRealFile.Exists)
         {
             try
             {
-                virtualRootRealFile = realRoot.CreateDirectory(VIRTUAL_DRIVE_DIR);
+                virtualRootRealFile = RealRoot.CreateDirectory(VirtualDriveDirectoryName);
             }
             catch (Exception ex)
             {
                 Console.Error.WriteLine(ex);
             }
         }
-        virtualRoot = new SalmonFile(virtualRootRealFile, this);
+        virtualRoot = CreateVirtualRoot(virtualRootRealFile);
+    }
+
+    protected SalmonFile CreateVirtualRoot(IRealFile virtualRootRealFile)
+    {
+        return new SalmonFile(virtualRootRealFile, this);
     }
 
     /// <summary>
@@ -190,7 +197,7 @@ public abstract class SalmonDrive
         byte[] driveKey = Key.DriveKey;
         byte[] hashKey = Key.HashKey;
 
-        IRealFile configFile = realRoot.GetChild(CONFIG_FILE);
+        IRealFile configFile = RealRoot.GetChild(ConfigFilename);
 
         // if it's an existing config that we need to update with
         // the new password then we prefer to be authenticate
@@ -203,7 +210,7 @@ public abstract class SalmonDrive
         // delete the old config file and create a new one
         if (configFile != null && configFile.Exists)
             configFile.Delete();
-        configFile = realRoot.CreateFile(CONFIG_FILE);
+        configFile = RealRoot.CreateFile(ConfigFilename);
 
         byte[] magicBytes = SalmonGenerator.GetMagicBytes();
 
@@ -272,7 +279,7 @@ public abstract class SalmonDrive
     {
         get
         {
-            if (realRoot == null || !realRoot.Exists)
+            if (RealRoot == null || !RealRoot.Exists)
                 return null;
             if (!IsAuthenticated)
                 throw new SalmonAuthException("Not authenticated");
@@ -333,7 +340,7 @@ public abstract class SalmonDrive
         catch (Exception ex)
         {
             OnAuthenticationError();
-            throw new SalmonAuthException("Could not authenticate, try again", ex);
+            throw ex;
         }
         finally
         {
@@ -369,7 +376,7 @@ public abstract class SalmonDrive
         byte[] hash = SalmonIntegrity.CalculateHash(hashProvider, data, 0, data.Length, hashKey, null);
         for (int i = 0; i < hashKey.Length; i++)
             if (hashSignature[i] != hash[i])
-                throw new Exception("Could not authenticate");
+                throw new SalmonAuthException("Could not authenticate");
     }
 
     /// <summary>
@@ -423,9 +430,9 @@ public abstract class SalmonDrive
     /// </summary>
     private IRealFile GetDriveConfigFile()
     {
-        if (realRoot == null || !realRoot.Exists)
+        if (RealRoot == null || !RealRoot.Exists)
             return null;
-        IRealFile file = realRoot.GetChild(CONFIG_FILE);
+        IRealFile file = RealRoot.GetChild(ConfigFilename);
         return file;
     }
 
@@ -437,9 +444,9 @@ public abstract class SalmonDrive
     {
         get
         {
-            IRealFile virtualThumbnailsRealDir = realRoot.GetChild(EXPORT_DIR);
+            IRealFile virtualThumbnailsRealDir = RealRoot.GetChild(ExportDirectoryName);
             if (virtualThumbnailsRealDir == null || !virtualThumbnailsRealDir.Exists)
-                virtualThumbnailsRealDir = realRoot.CreateDirectory(EXPORT_DIR);
+                virtualThumbnailsRealDir = RealRoot.CreateDirectory(ExportDirectoryName);
             return virtualThumbnailsRealDir;
         }
     }
@@ -481,7 +488,7 @@ public abstract class SalmonDrive
     /// </summary>
     public void Close()
     {
-        realRoot = null;
+        RealRoot = null;
         virtualRoot = null;
         DriveID = null;
         if (Key != null)

@@ -88,7 +88,7 @@ public class AndroidDrive : SalmonDrive
 	///  <returns></returns>
     protected Java.IO.File GetPrivateDir()
     {
-        Java.IO.File sharedDir = new Java.IO.File(context.CacheDir, SHARE_DIR);
+        Java.IO.File sharedDir = new Java.IO.File(context.CacheDir, ShareDirectoryName);
         if (!sharedDir.Exists())
             sharedDir.Mkdir();
         return sharedDir;
