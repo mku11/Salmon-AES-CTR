@@ -353,6 +353,8 @@ public class SalmonDialogs
                         {
                             filesToImport.Add(fileService.GetFile(file, false));
                         }
+                        if (filesToImport.Count == 0)
+                            return;
                         SalmonSettings.GetInstance().LastImportDir = new FileInfo(files[0]).Directory.FullName;
                         SalmonVaultManager.Instance.ImportFiles(filesToImport.ToArray(),
                             SalmonVaultManager.Instance.CurrDir, SalmonSettings.GetInstance().DeleteAfterImport, (SalmonFile[] importedFiles) =>

@@ -287,6 +287,8 @@ public class SalmonDialogs {
                     for (String file : files) {
                         filesToImport.add(fileService.getFile(file, false));
                     }
+					if (filesToImport.size() == 0)
+                            return;
                     SalmonSettings.getInstance().setLastImportDir(new File(files[0]).getParentFile().getAbsolutePath());
                     SalmonVaultManager.getInstance().importFiles(filesToImport.toArray(new IRealFile[0]),
                             SalmonVaultManager.getInstance().getCurrDir(), SalmonSettings.getInstance().isDeleteAfterImport(), (SalmonFile[] importedFiles) ->
