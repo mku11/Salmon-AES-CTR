@@ -61,7 +61,6 @@ public class SettingsViewModel : INotifyPropertyChanged
             {
                 _aesTypeSelected = value;
                 SalmonSettings.GetInstance().AesType = (SalmonSettings.AESType)value;
-                SalmonStream.AesProviderType = (SalmonStream.ProviderType)Enum.Parse(typeof(SalmonStream.ProviderType), SalmonSettings.GetInstance().AesType.ToString());
                 if (PropertyChanged != null)
                     PropertyChanged(this, new PropertyChangedEventArgs("AesTypeSelected"));
             }
@@ -89,13 +88,10 @@ public class SettingsViewModel : INotifyPropertyChanged
             if (_authTypeSelected != value)
             {
                 _authTypeSelected = value;
-                SalmonSettings.GetInstance().SequencerAuthType = (SalmonSettings.AuthType)value;
+                if (initialized)
+                    SalmonSettings.GetInstance().SequencerAuthType = (SalmonSettings.AuthType)value;
                 if (PropertyChanged != null)
                     PropertyChanged(this, new PropertyChangedEventArgs("AuthTypeSelected"));
-                if (initialized)
-                {
-                    SalmonVaultManager.Instance.SetupSalmonManager();
-                }
             }
         }
     }
