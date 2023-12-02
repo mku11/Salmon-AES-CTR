@@ -26,7 +26,9 @@ using Mku.Utils;
 using Salmon.Vault.Dialog;
 using Salmon.Vault.MAUI;
 using Salmon.Vault.Model;
+#if WINDOWS
 using Salmon.Vault.Model.Win;
+#endif
 using Salmon.Vault.Services;
 using Salmon.Vault.Utils;
 using Salmon.Vault.View;
@@ -200,6 +202,7 @@ public class MainViewModel : INotifyPropertyChanged
 
     public event PropertyChangedEventHandler PropertyChanged;
     private SalmonVaultManager manager;
+    private bool initialized;
 
     public MainViewModel()
     {
@@ -469,6 +472,9 @@ public class MainViewModel : INotifyPropertyChanged
 
     public void OnShow()
     {
+        if(initialized)
+            return;
+        initialized = true;
         WindowUtils.RunOnMainThread(() =>
         {
             manager.Initialize();
