@@ -30,7 +30,6 @@ using Salmon.Vault.Image;
 using Salmon.Vault.Model;
 using Salmon.Vault.Utils;
 using System;
-using System.Collections.Concurrent;
 using System.ComponentModel;
 
 namespace Salmon.Vault.ViewModel;
