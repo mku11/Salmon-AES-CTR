@@ -13,6 +13,7 @@ local.properties
 **/.idea/compiler.xml
 **/.idea/androidTestResultsUserPreferences.xml
 apps/salmon-vault-javafx/app/dist
+libs/src/python/**/.idea/*
 build
 
 **/output/
