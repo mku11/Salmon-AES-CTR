@@ -29,6 +29,7 @@ from salmon.integrity.ihash_provider import IHashProvider
 from salmon.integrity.salmon_integrity_exception import SalmonIntegrityException
 from salmon.salmon_generator import SalmonGenerator
 from salmon.salmon_security_exception import SalmonSecurityException
+from salmon.transform.salmon_aes256_ctr_transformer import SalmonAES256CTRTransformer
 
 
 class SalmonIntegrity:
@@ -97,7 +98,7 @@ class SalmonIntegrity:
                 + SalmonAES256CTRTransformer.BLOCK_SIZE + " and less than: " + SalmonIntegrity.MAX_CHUNK_SIZE + " bytes");
         if integrity and key is None:
             raise SalmonSecurityException("You need a hash to use with integrity")
-        if integrity and (chunk_size == None or chunk_size == 0):
+        if integrity and (chunk_size is None or chunk_size == 0):
             self._chunkSize = SalmonIntegrity.DEFAULT_CHUNK_SIZE
         elif integrity or (chunk_size is not None and chunk_size > 0):
             self._chunkSize = chunk_size
@@ -169,7 +170,7 @@ class SalmonIntegrity:
             return 0
         return SalmonIntegrity.get_total_hash_data_length(count, self._chunkSize, hash_offset, self._hashSize)
 
-    def get_chunk_size(self) -> int:
+    def getChunkSize(self) -> int:
         """
          * Get the chunk size.
          * @return The chunk size.
