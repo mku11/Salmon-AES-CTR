@@ -127,7 +127,7 @@ class SalmonIntegrity:
     # TODO: we should avoid the header data for performance?
     @staticmethod
     def calculate_hash(provider: IHashProvider, buffer: bytearray, offset: int, count: int,
-                       key: bytearray, include_data: bytearray) -> bytearray:
+                       key: bytearray, include_data: bytearray | None) -> bytearray:
 
         final_buffer: bytearray = buffer
         final_offset: int = offset
@@ -155,7 +155,7 @@ class SalmonIntegrity:
          * @return
         """
         # if the stream is using multiple chunks for integrity
-        chunks: int = int(length / (chunk_size + hash_offset))
+        chunks: int = int(length // (chunk_size + hash_offset))
         rem: int = int(length % (chunk_size + hash_offset))
         if rem > hash_offset:
             chunks += 1
