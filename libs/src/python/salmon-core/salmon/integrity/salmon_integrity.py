@@ -26,7 +26,6 @@ from builtins import int
 
 from salmon.integrity.ihash_provider import IHashProvider
 from salmon.integrity.salmon_integrity_exception import SalmonIntegrityException
-from salmon.salmon_default_options import SalmonDefaultOptions
 from salmon.salmon_generator import SalmonGenerator
 from salmon.salmon_security_exception import SalmonSecurityException
 

@@ -23,10 +23,6 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 '''
 from __future__ import annotations
-
-from abc import ABC
-from enum import Enum
-
 from iostream.random_access_stream import RandomAccessStream
 from salmon.integrity.hmac_sha256_provider import HmacSHA256Provider
 from salmon.integrity.salmon_integrity import SalmonIntegrity
