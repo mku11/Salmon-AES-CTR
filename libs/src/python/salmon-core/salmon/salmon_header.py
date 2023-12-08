@@ -108,20 +108,20 @@ class SalmonHeader:
          * @throws IOException
         """
         header: SalmonHeader = SalmonHeader()
-        header.magicBytes = bytearray(SalmonGenerator.MAGIC_LENGTH)
-        stream.read(header.magicBytes, 0, len(header.magicBytes))
+        header.__magicBytes = bytearray(SalmonGenerator.MAGIC_LENGTH)
+        stream.read(header.__magicBytes, 0, len(header.__magicBytes))
         version_bytes: bytearray = bytearray(SalmonGenerator.VERSION_LENGTH)
         stream.read(version_bytes, 0, SalmonGenerator.VERSION_LENGTH)
-        header.version = version_bytes[0]
+        header.__version = version_bytes[0]
         chunk_size_header: bytearray = bytearray(SalmonGenerator.CHUNK_SIZE_LENGTH)
         stream.read(chunk_size_header, 0, len(chunk_size_header))
-        header.chunkSize = BitConverter.to_long(chunk_size_header, 0, SalmonGenerator.CHUNK_SIZE_LENGTH)
-        header.nonce = bytearray(SalmonGenerator.NONCE_LENGTH)
-        stream.read(header.nonce, 0, len(header.nonce))
+        header.__chunkSize = BitConverter.to_long(chunk_size_header, 0, SalmonGenerator.CHUNK_SIZE_LENGTH)
+        header.__nonce = bytearray(SalmonGenerator.NONCE_LENGTH)
+        stream.read(header.__nonce, 0, len(header.__nonce))
         stream.set_position(0)
-        header.headerData = bytearray(SalmonGenerator.MAGIC_LENGTH + SalmonGenerator.VERSION_LENGTH
+        header.__headerData = bytearray(SalmonGenerator.MAGIC_LENGTH + SalmonGenerator.VERSION_LENGTH
                                       + SalmonGenerator.CHUNK_SIZE_LENGTH + SalmonGenerator.NONCE_LENGTH)
-        stream.read(header.headerData, 0, len(header.headerData))
+        stream.read(header.__headerData, 0, len(header.__headerData))
         return header
 
     """
