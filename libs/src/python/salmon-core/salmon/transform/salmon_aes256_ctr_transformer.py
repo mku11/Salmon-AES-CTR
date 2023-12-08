@@ -85,7 +85,7 @@ class SalmonAES256CTRTransformer(ISalmonCTRTransformer, ABC):
         """
         curr_block: int = position // SalmonGenerator.BLOCK_SIZE
         self.reset_counter()
-        self.increaseCounter(curr_block)
+        self._increase_counter(curr_block)
         __block = curr_block
 
     def _increase_counter(self, value: int):
