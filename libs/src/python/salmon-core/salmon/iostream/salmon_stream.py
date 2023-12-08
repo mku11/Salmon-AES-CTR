@@ -55,7 +55,7 @@ class SalmonStream(RandomAccessStream):
 
     @staticmethod
     def get_actual_size(data: bytearray, key: bytearray, nonce: bytearray, mode: EncryptionMode,
-                        header_data: bytearray | None, integrity: bool, chunk_size: int,
+                        header_data: bytearray | None, integrity: bool, chunk_size: int | None,
                         hash_key: bytearray | None) -> int:
 
         """
@@ -85,7 +85,7 @@ class SalmonStream(RandomAccessStream):
 
     def __init__(self, key: bytearray, nonce: bytearray, encryption_mode: EncryptionMode,
                  base_stream: RandomAccessStream, header_data: bytearray | None = None,
-                 integrity: bool = False, chunk_size: int = None, hash_key: bytearray | None = None):
+                 integrity: bool = False, chunk_size: int | None = None, hash_key: bytearray | None = None):
         """
          * Instantiate a new Salmon stream with a base stream and optional header data and hash integrity.
          * <p>
@@ -252,7 +252,7 @@ class SalmonStream(RandomAccessStream):
         """
         return self.get_chunk_size() > 0
 
-    def __init_integrity(self, integrity: bool, hash_key: bytearray | None, chunk_size: int):
+    def __init_integrity(self, integrity: bool, hash_key: bytearray | None, chunk_size: int | None):
         """
          * Initialize the integrity validator. This object is always associated with the
          * stream because in the case of a decryption stream that has already embedded integrity
@@ -573,7 +573,7 @@ class SalmonStream(RandomAccessStream):
             try:
                 self.__transformer.encrypt_data(src_buffer, 0, dest_buffer, 0, len(src_buffer))
                 integrity_hashes: list | None = self.__salmonIntegrity.generate_hashes(dest_buffer,
-                                                                              self.__headerData if self.get_position() == 0 else None)
+                                                                                       self.__headerData if self.get_position() == 0 else None)
                 pos += self.__write_to_stream(dest_buffer, self.get_chunk_size(), integrity_hashes)
                 self.__transformer.sync_counter(self.get_position())
             except (SalmonSecurityException, SalmonRangeExceededException, SalmonIntegrityException) as ex:

@@ -83,7 +83,7 @@ class SalmonDecryptor:
 
     def decrypt(self, data: bytearray, key: bytearray, nonce: bytearray,
                 has_header_data: bool,
-                integrity: bool = False, hash_key: bytearray = None, chunk_size: int = None) -> bytearray:
+                integrity: bool = False, hash_key: bytearray | None = None, chunk_size: int | None = None) -> bytearray:
         """
          * Decrypt a byte array using AES256 based on the provided key and nonce.
          * @param data The input data to be decrypted.
@@ -122,8 +122,8 @@ class SalmonDecryptor:
             raise SalmonSecurityException("Nonce is missing")
 
         real_size: int = SalmonStream.get_actual_size(data, key, nonce,
-                                                                    EncryptionMode.Decrypt,
-                                                                    header_data, integrity, chunk_size, hash_key)
+                                                      EncryptionMode.Decrypt,
+                                                      header_data, integrity, chunk_size, hash_key)
         out_data: bytearray = bytearray(real_size)
 
         if self.__threads == 1:
@@ -252,7 +252,8 @@ class SalmonDecryptor:
 
     def __decrypt_data(self, input_stream: RandomAccessStream, start: int, count: int, out_data: bytearray,
                        key: bytearray, nonce: bytearray,
-                       header_data: bytearray, integrity: bool, hash_key: bytearray, chunk_size: int):
+                       header_data: bytearray | None, integrity: bool, hash_key: bytearray | None,
+                       chunk_size: int | None):
         stream: SalmonStream | None = None
         output_stream: MemoryStream | None = None
         try:
