@@ -23,35 +23,31 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 '''
 
+from enum import Enum
 
-class SalmonDefaultOptions:
-    """
-     * Global options for salmon operations.
-    """
 
-    DEFAULT_BUFFER_SIZE = 256 * 1024
+class ProviderType(Enum):
     """
-     Default buffer size
-    """
-
-    @staticmethod
-    def get_buffer_size() -> int:
-        """
-         * Get the default buffer size for all internal streams including Encryptors and Decryptors.
-         * @return
-        """
-        return SalmonDefaultOptions.__bufferSize
-
-    __bufferSize = DEFAULT_BUFFER_SIZE
-    """
-     * Default buffer size for all internal streams including Encryptors and Decryptors
+     * AES provider types. List of AES implementations that currently supported.
+     *
+     * @see #Default
+     * @see #AesIntrinsics
+     * @see #TinyAES
     """
 
-    @staticmethod
-    def set_buffer_size(buffer_size: int):
-        """
-         * Set the default buffer size for all internal streams including Encryptors and Decryptors.
-         *
-         * @param bufferSize
-        """
-        SalmonDefaultOptions.__bufferSize = buffer_size
+    Default = 0
+    """
+     * Default AES cipher.
+    """
+
+    AesIntrinsics = 1
+    """
+     * Salmon builtin AES intrinsics. This needs the SalmonNative library to be loaded. 
+     @see <a href="https://github.com/mku11/Salmon-AES-CTR#readme">Salmon README.md</a>
+    """
+
+    TinyAES = 2
+    """
+     * Tiny AES implementation. This needs the SalmonNative library to be loaded. 
+     @see <a href="https://github.com/mku11/Salmon-AES-CTR#readme">Salmon README.md</a>
+    """

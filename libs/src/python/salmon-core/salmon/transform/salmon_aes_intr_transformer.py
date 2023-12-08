@@ -22,7 +22,7 @@ LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 '''
-from salmon.iostream.salmon_stream import SalmonStream
+from salmon.iostream.encryption_mode import EncryptionMode
 from salmon.transform.salmon_native_transformer import SalmonNativeTransformer
 
 
@@ -59,7 +59,7 @@ class SalmonAesIntrTransformer(SalmonNativeTransformer):
         """
         # AES intrinsics needs the expanded key
         return self.get_native_proxy().salmon_transform(self.get_expanded_key(), self.get_counter(),
-                                                        SalmonStream.EncryptionMode.Encrypt.ordinal(),
+                                                        EncryptionMode.Encrypt.ordinal(),
                                                         src_buffer, src_offset,
                                                         dest_buffer, dest_offset, count)
 
@@ -77,6 +77,6 @@ class SalmonAesIntrTransformer(SalmonNativeTransformer):
                      dest_buffer: bytearray, dest_offset: int, count: int) -> int:
         # AES intrinsics needs the expanded key
         return self.get_native_proxy().salmon_transform(self.get_expanded_key(), self.get_counter(),
-                                                        SalmonStream.EncryptionMode.Encrypt.ordinal(),
+                                                        EncryptionMode.Encrypt.ordinal(),
                                                         src_buffer, src_offset,
                                                         dest_buffer, dest_offset, count)

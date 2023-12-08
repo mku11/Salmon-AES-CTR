@@ -23,35 +23,23 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 '''
 
+from enum import Enum
 
-class SalmonDefaultOptions:
-    """
-     * Global options for salmon operations.
-    """
 
-    DEFAULT_BUFFER_SIZE = 256 * 1024
+class EncryptionMode(Enum):
     """
-     Default buffer size
-    """
-
-    @staticmethod
-    def get_buffer_size() -> int:
-        """
-         * Get the default buffer size for all internal streams including Encryptors and Decryptors.
-         * @return
-        """
-        return SalmonDefaultOptions.__bufferSize
-
-    __bufferSize = DEFAULT_BUFFER_SIZE
-    """
-     * Default buffer size for all internal streams including Encryptors and Decryptors
+     * Encryption Mode
+     *
+     * @see #Encrypt
+     * @see #Decrypt
     """
 
-    @staticmethod
-    def set_buffer_size(buffer_size: int):
-        """
-         * Set the default buffer size for all internal streams including Encryptors and Decryptors.
-         *
-         * @param bufferSize
-        """
-        SalmonDefaultOptions.__bufferSize = buffer_size
+    Encrypt = 0
+    """
+     * Encryption Mode used with a base stream as a target.
+    """
+
+    Decrypt = 1
+    """
+     * Decryption Mode used with a base stream as a source.
+    """

@@ -29,7 +29,9 @@ from iostream.memory_stream import MemoryStream
 from iostream.random_access_stream import RandomAccessStream
 from salmon.integrity.salmon_integrity import SalmonIntegrity
 from salmon.integrity.salmon_integrity_exception import SalmonIntegrityException
+from salmon.iostream.encryption_mode import EncryptionMode
 from salmon.iostream.salmon_stream import SalmonStream
+from salmon.salmon_generator import SalmonGenerator
 from salmon.salmon_header import SalmonHeader
 from salmon.salmon_security_exception import SalmonSecurityException
 from salmon.transform.salmon_aes256_ctr_transformer import SalmonAES256CTRTransformer
@@ -117,7 +119,7 @@ class SalmonDecryptor:
             raise SalmonSecurityException("Nonce is missing")
 
         real_size: int = SalmonAES256CTRTransformer.get_actual_size(data, key, nonce,
-                                                                    SalmonStream.EncryptionMode.Decrypt,
+                                                                    EncryptionMode.Decrypt,
                                                                     header_data, integrity, chunk_size, hash_key)
         out_data: bytearray = bytearray(real_size)
 
@@ -149,7 +151,7 @@ class SalmonDecryptor:
         part_size: int = len(data)
 
         # if we want to check integrity we align to the chunk size otherwise to the AES Block
-        min_part_size: int = SalmonAES256CTRTransformer.BLOCK_SIZE
+        min_part_size: int = SalmonGenerator.BLOCK_SIZE
         if integrity and chunk_size is not None:
             min_part_size = chunk_size
         elif integrity:
@@ -253,7 +255,7 @@ class SalmonDecryptor:
         try:
             output_stream = MemoryStream(out_data)
             output_stream.set_position(start)
-            stream = SalmonStream(key, nonce, SalmonStream.EncryptionMode.Decrypt, input_stream,
+            stream = SalmonStream(key, nonce, EncryptionMode.Decrypt, input_stream,
                                   header_data, integrity, chunk_size, hash_key)
             stream.set_position(start)
             total_chunk_bytes_read: int = 0

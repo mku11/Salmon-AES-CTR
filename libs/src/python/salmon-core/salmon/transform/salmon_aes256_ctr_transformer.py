@@ -22,7 +22,7 @@ LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 '''
-from salmon.iostream.salmon_stream import SalmonStream
+from salmon.iostream.encryption_mode import EncryptionMode
 from salmon.salmon_generator import SalmonGenerator
 from salmon.salmon_range_exceeded_exception import SalmonRangeExceededException
 from salmon.transform.isalmon_ctr_transformer import ISalmonCTRTransformer
@@ -40,7 +40,7 @@ class SalmonAES256CTRTransformer(ISalmonCTRTransformer):
     """
 
     @staticmethod
-    def get_actual_size(data: bytearray, key: bytearray, nonce: bytearray, mode: SalmonStream.EncryptionMode,
+    def get_actual_size(data: bytearray, key: bytearray, nonce: bytearray, mode: EncryptionMode,
                         header_data: bytearray, integrity: bool, chunk_size: int, hash_key: bytearray) -> int:
 
         """
@@ -51,7 +51,7 @@ class SalmonAES256CTRTransformer(ISalmonCTRTransformer):
          * @param data The data to be transformed.
          * @param key The AES key.
          * @param nonce The nonce for the CTR.
-         * @param mode The {@link SalmonStream.EncryptionMode} Encrypt or Decrypt.
+         * @param mode The {@link EncryptionMode} Encrypt or Decrypt.
          * @param headerData The header data to be embedded if you use Encryption.
          * @param integrity True if you want to enable integrity.
          * @param chunkSize The chunk size for integrity chunks.
@@ -69,11 +69,6 @@ class SalmonAES256CTRTransformer(ISalmonCTRTransformer):
         # s.close()
         # return size
         pass
-
-    """
-     * Salmon stream encryption block size, same as AES.
-    """
-    BLOCK_SIZE = 16
 
     def __init__(self):
         self.__key: bytearray = bytearray()
@@ -105,7 +100,7 @@ class SalmonAES256CTRTransformer(ISalmonCTRTransformer):
         """
          * Resets the Counter and the block count.
         """
-        __counter: bytearray = bytearray(SalmonAES256CTRTransformer.BLOCK_SIZE)
+        __counter: bytearray = bytearray(SalmonGenerator.BLOCK_SIZE)
         __counter[0:len(self.__nonce)] = self.__nonce[0:]
         self.__block = 0
 
@@ -114,7 +109,7 @@ class SalmonAES256CTRTransformer(ISalmonCTRTransformer):
          * Syncs the Counter based on what AES block position the stream is at.
          * The block count is already excluding the header and the hash signatures.
         """
-        curr_block: int = position // SalmonAES256CTRTransformer.BLOCK_SIZE
+        curr_block: int = position // SalmonGenerator.BLOCK_SIZE
         self.reset_counter()
         self.increaseCounter(curr_block)
         __block = curr_block
@@ -128,10 +123,10 @@ class SalmonAES256CTRTransformer(ISalmonCTRTransformer):
         """
         if value < 0:
             raise ValueError("Value should be positive")
-        index: int = SalmonAES256CTRTransformer.BLOCK_SIZE - 1
+        index: int = SalmonGenerator.BLOCK_SIZE - 1
         carriage: int = 0
         while index >= 0 and value + carriage > 0:
-            if index <= SalmonAES256CTRTransformer.BLOCK_SIZE - SalmonGenerator.NONCE_LENGTH:
+            if index <= SalmonGenerator.BLOCK_SIZE - SalmonGenerator.NONCE_LENGTH:
                 raise SalmonRangeExceededException("Current CTR max blocks exceeded")
             val: int = (value + carriage) % 256
             carriage = int((((self.__counter[index] & 0xFF) + val) / 256))

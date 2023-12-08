@@ -26,9 +26,9 @@ from builtins import int
 
 from salmon.integrity.ihash_provider import IHashProvider
 from salmon.integrity.salmon_integrity_exception import SalmonIntegrityException
+from salmon.salmon_default_options import SalmonDefaultOptions
 from salmon.salmon_generator import SalmonGenerator
 from salmon.salmon_security_exception import SalmonSecurityException
-from salmon.transform.salmon_aes256_ctr_transformer import SalmonAES256CTRTransformer
 
 
 class SalmonIntegrity:
@@ -89,12 +89,12 @@ class SalmonIntegrity:
         """
 
         if (chunk_size is not None and (chunk_size < 0
-                                        or (0 < chunk_size < SalmonAES256CTRTransformer.BLOCK_SIZE)
-                                        or (chunk_size > 0 and chunk_size % SalmonAES256CTRTransformer.BLOCK_SIZE != 0)
+                                        or (0 < chunk_size < SalmonGenerator.BLOCK_SIZE)
+                                        or (chunk_size > 0 and chunk_size % SalmonGenerator.BLOCK_SIZE != 0)
                                         or chunk_size > SalmonIntegrity.MAX_CHUNK_SIZE)):
             raise SalmonIntegrityException(
                 "Invalid chunk size, specify zero for default value or a positive number multiple of: "
-                + SalmonAES256CTRTransformer.BLOCK_SIZE + " and less than: " + str(
+                + SalmonGenerator.BLOCK_SIZE + " and less than: " + str(
                     SalmonIntegrity.MAX_CHUNK_SIZE) + " bytes")
         if integrity and key is None:
             raise SalmonSecurityException("You need a hash to use with integrity")

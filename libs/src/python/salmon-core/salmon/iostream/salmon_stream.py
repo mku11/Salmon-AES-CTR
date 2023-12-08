@@ -31,48 +31,23 @@ from iostream.random_access_stream import RandomAccessStream
 from salmon.integrity.hmac_sha256_provider import HmacSHA256Provider
 from salmon.integrity.salmon_integrity import SalmonIntegrity
 from salmon.integrity.salmon_integrity_exception import SalmonIntegrityException
+from salmon.iostream.encryption_mode import EncryptionMode
+from salmon.iostream.provider_type import ProviderType
 from salmon.salmon_default_options import SalmonDefaultOptions
 from salmon.salmon_generator import SalmonGenerator
 from salmon.salmon_range_exceeded_exception import SalmonRangeExceededException
 from salmon.salmon_security_exception import SalmonSecurityException
 from salmon.transform.isalmon_ctr_transformer import ISalmonCTRTransformer
-from salmon.transform.salmon_aes256_ctr_transformer import SalmonAES256CTRTransformer
 from salmon.transform.salmon_transformer_factory import SalmonTransformerFactory
 
 
-class SalmonStream(ABC, RandomAccessStream):
+class SalmonStream(RandomAccessStream):
     """
      * Stream decorator provides AES256 encryption and decryption of stream.
      * Block data integrity is also supported.
     """
 
-    class ProviderType(Enum):
-        """
-         * AES provider types. List of AES implementations that currently supported.
-         *
-         * @see #Default
-         * @see #AesIntrinsics
-         * @see #TinyAES
-        """
-
-        Default = 0
-        """
-         * Default AES cipher.
-        """
-
-        AesIntrinsics = 1
-        """
-         * Salmon builtin AES intrinsics. This needs the SalmonNative library to be loaded. 
-         @see <a href="https://github.com/mku11/Salmon-AES-CTR#readme">Salmon README.md</a>
-        """
-
-        TinyAES = 2
-        """
-         * Tiny AES implementation. This needs the SalmonNative library to be loaded. 
-         @see <a href="https://github.com/mku11/Salmon-AES-CTR#readme">Salmon README.md</a>
-        """
-
-    __provider_type: SalmonStream.ProviderType = ProviderType.Default
+    __provider_type: ProviderType = ProviderType.Default
     """
      * Current global AES provider type.
     """
@@ -109,7 +84,7 @@ class SalmonStream(ABC, RandomAccessStream):
          * Header data embedded in the stream if available.
         """
 
-        self.__encryptionMode: SalmonStream.EncryptionMode
+        self.__encryptionMode: EncryptionMode
         """
          * Mode to be used for this stream. This can only be set once.
         """
@@ -222,7 +197,7 @@ class SalmonStream(ABC, RandomAccessStream):
          *
          * @return True if mode is decryption.
         """
-        return self.__baseStream.can_read() and self.__encryptionMode == SalmonStream.EncryptionMode.Decrypt
+        return self.__baseStream.can_read() and self.__encryptionMode == EncryptionMode.Decrypt
 
     def can_seek(self) -> bool:
         """
@@ -238,7 +213,7 @@ class SalmonStream(ABC, RandomAccessStream):
          *
          * @return True if mode is decryption.
         """
-        return self.__baseStream.can_write() and self.__encryptionMode == SalmonStream.EncryptionMode.Encrypt
+        return self.__baseStream.can_write() and self.__encryptionMode == EncryptionMode.Encrypt
 
     def has_integrity(self) -> bool:
         """
@@ -484,8 +459,8 @@ class SalmonStream(ABC, RandomAccessStream):
             return 0
         if self.__salmonIntegrity.get_chunk_size() > 0 and self.get_position() % self.__salmonIntegrity.get_chunk_size() != 0:
             raise IOError("All reads should be aligned to the chunks size: " + self.__salmonIntegrity.get_chunk_size())
-        elif self.__salmonIntegrity.get_chunk_size() == 0 and self.get_position() % SalmonAES256CTRTransformer.BLOCK_SIZE != 0:
-            raise IOError("All reads should be aligned to the block size: " + SalmonAES256CTRTransformer.BLOCK_SIZE)
+        elif self.__salmonIntegrity.get_chunk_size() == 0 and self.get_position() % SalmonGenerator.BLOCK_SIZE != 0:
+            raise IOError("All reads should be aligned to the block size: " + SalmonGenerator.BLOCK_SIZE)
 
         pos: int = self.get_position()
 
@@ -544,10 +519,10 @@ class SalmonStream(ABC, RandomAccessStream):
                 SalmonIntegrityException("All write operations should be aligned to the chunks size: "
                                          + str(self.__salmonIntegrity.get_chunk_size()))
         elif self.__salmonIntegrity.get_chunk_size() == 0 \
-                and self.get_position() % SalmonAES256CTRTransformer.BLOCK_SIZE != 0:
+                and self.get_position() % SalmonGenerator.BLOCK_SIZE != 0:
             raise IOError() from \
                 SalmonIntegrityException("All write operations should be aligned to the block size: "
-                                         + SalmonAES256CTRTransformer.BLOCK_SIZE)
+                                         + SalmonGenerator.BLOCK_SIZE)
 
         # if there are not enough data in the buffer
         count = min(count, len(buffer) - offset)
@@ -585,7 +560,7 @@ class SalmonStream(ABC, RandomAccessStream):
         if self.__salmonIntegrity.get_chunk_size() > 0:
             align_offset = self.get_position() % self.__salmonIntegrity.get_chunk_size()
         else:
-            align_offset = self.get_position() % SalmonAES256CTRTransformer.BLOCK_SIZE
+            align_offset = self.get_position() % SalmonGenerator.BLOCK_SIZE
         return align_offset
 
     def __get_normalized_buffer_size(self, include_hashes: bool) -> int:
@@ -611,7 +586,7 @@ class SalmonStream(ABC, RandomAccessStream):
                 buffer_size += buffer_size // self.get_chunk_size() * SalmonGenerator.HASH_RESULT_LENGTH
         else:
             # buffer size should also be a multiple of the AES block size
-            buffer_size = buffer_size // SalmonAES256CTRTransformer.BLOCK_SIZE * SalmonAES256CTRTransformer.BLOCK_SIZE
+            buffer_size = buffer_size // SalmonGenerator.BLOCK_SIZE * SalmonGenerator.BLOCK_SIZE
 
         return buffer_size
 
@@ -696,24 +671,6 @@ class SalmonStream(ABC, RandomAccessStream):
             buff[index:index + n_chunk_size] = buffer[i + SalmonGenerator.HASH_RESULT_LENGTH:end]
             index += n_chunk_size
         return buff
-
-    class EncryptionMode:
-        """
-         * Encryption Mode
-         *
-         * @see #Encrypt
-         * @see #Decrypt
-        """
-
-        Encrypt = 0,
-        """
-         * Encryption Mode used with a base stream as a target.
-        """
-
-        Decrypt = 1
-        """
-         * Decryption Mode used with a base stream as a source.
-        """
 
     def is_integrity_enabled(self) -> bool:
         """
