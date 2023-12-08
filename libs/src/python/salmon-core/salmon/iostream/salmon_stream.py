@@ -165,7 +165,7 @@ class SalmonStream(RandomAccessStream):
             return self.__baseStream.length() + self.get_header_length() + total_hash_bytes
         return 0
 
-    def position(self) -> int:
+    def get_position(self) -> int:
         """
          * Provides the position of the stream relative to the data to be transformed.
          *
