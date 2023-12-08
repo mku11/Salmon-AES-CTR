@@ -40,7 +40,7 @@ class Base64(IBase64):
         * @param text String to be decoded
         * @return Byte array of decoded data.
         """
-        return bytearray(base64.b64decode(str))
+        return bytearray(base64.b64decode(text))
 
     def encode(self, data: bytearray) -> str:
         """
