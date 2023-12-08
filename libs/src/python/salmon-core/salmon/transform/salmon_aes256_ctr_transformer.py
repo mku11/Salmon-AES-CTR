@@ -22,6 +22,8 @@ LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 '''
+from abc import ABC
+
 from salmon.iostream.encryption_mode import EncryptionMode
 from salmon.salmon_generator import SalmonGenerator
 from salmon.salmon_range_exceeded_exception import SalmonRangeExceededException
@@ -31,7 +33,7 @@ from typeguard import typechecked
 
 
 @typechecked
-class SalmonAES256CTRTransformer(ISalmonCTRTransformer):
+class SalmonAES256CTRTransformer(ISalmonCTRTransformer, ABC):
     """
      * Abstract class for AES256 transformer implementations.
      *
