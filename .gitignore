@@ -41,3 +41,4 @@ Resource.designer.cs
 inspectionProfiles
 deploymentTargetDropDown.xml
 /libs/src/python/salmon-core/convert/testfile.py
+__pycache__
