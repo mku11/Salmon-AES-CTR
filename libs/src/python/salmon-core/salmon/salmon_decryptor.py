@@ -81,7 +81,7 @@ class SalmonDecryptor:
         else:
             self.__bufferSize = buffer_size
 
-    def decrypt(self, data: bytearray, key: bytearray, nonce: bytearray,
+    def decrypt(self, data: bytearray, key: bytearray, nonce: bytearray | None,
                 has_header_data: bool,
                 integrity: bool = False, hash_key: bytearray | None = None, chunk_size: int | None = None) -> bytearray:
         """
