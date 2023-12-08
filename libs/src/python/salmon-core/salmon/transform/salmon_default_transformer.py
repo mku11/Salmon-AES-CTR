@@ -22,6 +22,11 @@ LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 '''
+import Crypto
+from Crypto.Cipher import AES
+from Crypto.Util import Counter
+
+from convert.bit_converter import BitConverter
 from salmon.salmon_security_exception import SalmonSecurityException
 from salmon.transform.salmon_aes256_ctr_transformer import SalmonAES256CTRTransformer
 
@@ -36,15 +41,6 @@ class SalmonDefaultTransformer(SalmonAES256CTRTransformer):
 
     def __init__(self):
         super().__init__()
-        #__cipher: Cipher
-        """
-         * Default Java AES cipher.
-        """
-
-        #__encSecretKey: SecretKeySpec
-        """
-         * Key spec for the initial nonce (counter).
-        """
 
     def init(self, key: bytearray, nonce: bytearray):
         """
@@ -54,12 +50,6 @@ class SalmonDefaultTransformer(SalmonAES256CTRTransformer):
          * @throws SalmonSecurityException
         """
         super().init(key, nonce)
-        try:
-            pass
-        # encSecretKey = new SecretKeySpec(key, "AES")
-        # cipher = Cipher.getInstance("AES/CTR/NoPadding")
-        except Exception as e:
-            raise SalmonSecurityException("Could not init AES transformer") from e
 
     def encrypt_data(self, src_buffer: bytearray, src_offset: int,
                      dest_buffer: bytearray, dest_offset: int, count: int) -> int:
@@ -73,15 +63,15 @@ class SalmonDefaultTransformer(SalmonAES256CTRTransformer):
          * @return The number of bytes transformed.
          * @throws SalmonSecurityException
         """
-        # TODO:
-        return 0
-        # try:
-        # # byte[] counter = getCounter();
-        # # IvParameterSpec ivSpec = new IvParameterSpec(counter);
-        # # cipher.init(Cipher.ENCRYPT_MODE, encSecretKey, ivSpec);
-        # # return cipher.doFinal(srcBuffer, srcOffset, count, destBuffer, destOffset);
-        # except Exception as ex:
-        #     raise SalmonSecurityException("Could not encrypt data: ") from ex
+        try:
+            counter: bytearray = self.get_counter()
+            ctr = Counter.new(len(counter) * 8, initial_value=BitConverter.to_long(counter, 0, len(counter)))
+            cipher = AES.new(self.get_key(), AES.MODE_CTR, counter=ctr)
+            v_bytes = cipher.encrypt(memoryview(src_buffer)[src_offset:src_offset + count])
+            dest_buffer[dest_offset:dest_offset + count] = v_bytes[0:count]
+            return count
+        except Exception as ex:
+            raise SalmonSecurityException("Could not encrypt data: ") from ex
 
     def decrypt_data(self, src_buffer: bytearray, src_offset: int,
                      dest_buffer: bytearray, dest_offset: int, count: int) -> int:
@@ -96,10 +86,11 @@ class SalmonDefaultTransformer(SalmonAES256CTRTransformer):
          * @throws SalmonSecurityException
         """
         try:
-            pass
-        # byte[] counter = getCounter();
-        # IvParameterSpec ivSpec = new IvParameterSpec(counter);
-        # cipher.init(Cipher.DECRYPT_MODE, encSecretKey, ivSpec);
-        # return cipher.doFinal(srcBuffer, srcOffset, count, destBuffer, destOffset);
+            counter: bytearray = self.get_counter()
+            ctr = Counter.new(len(counter) * 8, initial_value=BitConverter.to_long(counter, 0, len(counter)))
+            cipher = AES.new(self.get_key(), AES.MODE_CTR, counter=ctr)
+            v_bytes = cipher.decrypt(memoryview(src_buffer)[src_offset:src_offset + count])
+            dest_buffer[dest_offset:dest_offset + count] = v_bytes[0:count]
+            return count
         except Exception as ex:
             raise SalmonSecurityException("Could not decrypt data: ") from ex
