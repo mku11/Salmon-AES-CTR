@@ -24,7 +24,7 @@ SOFTWARE.
 '''
 
 
-class SalmonSecurityException (Exception):
+class SalmonSecurityException(Exception):
     """
      * Salmon generic security exception.
     """
@@ -34,4 +34,4 @@ class SalmonSecurityException (Exception):
          * Construct an exception with a specific message.
          * @param msg The provided message.
         """
-        super(msg)
+        super().__init__(msg)

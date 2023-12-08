@@ -35,4 +35,4 @@ class SalmonRangeExceededException(Exception):
     """
 
     def __init__(self, msg: str):
-        super(msg)
+        super().__init__(msg)

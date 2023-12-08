@@ -34,4 +34,4 @@ class SalmonIntegrityException (Exception):
          * Construct an exception with a specific message.
          * @param msg The message
         """
-        super(msg)
+        super().__init__(msg)
