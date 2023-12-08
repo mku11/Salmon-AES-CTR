@@ -164,7 +164,7 @@ class MemoryStream(RandomAccessStream):
                 new_capacity += MemoryStream.__CAPACITY_INCREMENT
             n_bytes: bytearray = bytearray(new_capacity)
             n_bytes[0:self.__capacity] = self.__bytes[0:self.__capacity]
-            _capacity = new_capacity
+            self.__capacity = new_capacity
             self.__bytes = n_bytes
         self.__length = new_length
 
