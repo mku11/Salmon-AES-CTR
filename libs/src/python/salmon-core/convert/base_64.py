@@ -47,4 +47,4 @@ class Base64(IBase64):
         * @param data Byte array to be encoded.
         * @return String of encoded data.
         """
-        return str(base64.b64decode(data))
+        return base64.b64encode(data).decode('utf-8')
