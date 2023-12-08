@@ -37,7 +37,7 @@ class SalmonTextDecryptor:
     __decryptor: SalmonDecryptor = SalmonDecryptor()
 
     @staticmethod
-    def decrypt_string(text: str, key: bytearray, nonce: bytearray, header: bool,
+    def decrypt_string(text: str, key: bytearray, nonce: bytearray | None, header: bool,
                        integrity: bool = False, hash_key: bytearray | None = None,
                        chunk_size: int | None = None) -> str:
         """
