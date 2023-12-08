@@ -44,10 +44,10 @@ class SalmonTransformerFactory:
          * @throws SalmonSecurityException
         """
         match v_type:
-            case SalmonStream.ProviderType.Default:
+            case ProviderType.Default:
                 return SalmonDefaultTransformer()
-            case SalmonStream.ProviderType.AesIntrinsics:
+            case ProviderType.AesIntrinsics:
                 return SalmonAesIntrTransformer()
-            case SalmonStream.ProviderType.TinyAES:
+            case ProviderType.TinyAES:
                 return TinyAesTransformer()
         raise SalmonSecurityException("Unknown Transformer type")
