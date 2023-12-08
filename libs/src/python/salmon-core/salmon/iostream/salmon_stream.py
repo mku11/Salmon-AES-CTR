@@ -79,7 +79,7 @@ class SalmonStream(RandomAccessStream):
         """
         input_stream: MemoryStream = MemoryStream(data)
         s: SalmonStream = SalmonStream(key, nonce, mode, input_stream, header_data, integrity, chunk_size, hash_key)
-        size: int = s.actualLength()
+        size: int = s.actual_length()
         s.close()
         return size
 
