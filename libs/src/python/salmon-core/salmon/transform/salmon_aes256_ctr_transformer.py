@@ -44,37 +44,6 @@ class SalmonAES256CTRTransformer(ISalmonCTRTransformer, ABC):
      * Standard expansion key size for AES256 only.
     """
 
-    @staticmethod
-    def get_actual_size(data: bytearray, key: bytearray, nonce: bytearray, mode: EncryptionMode,
-                        header_data: bytearray, integrity: bool, chunk_size: int, hash_key: bytearray) -> int:
-
-        """
-         * Get the output size of the data to be transformed(encrypted or decrypted) including
-         * header and hash without executing any operations. This can be used to prevent over-allocating memory
-         * where creating your output buffers.
-         *
-         * @param data The data to be transformed.
-         * @param key The AES key.
-         * @param nonce The nonce for the CTR.
-         * @param mode The {@link EncryptionMode} Encrypt or Decrypt.
-         * @param headerData The header data to be embedded if you use Encryption.
-         * @param integrity True if you want to enable integrity.
-         * @param chunkSize The chunk size for integrity chunks.
-         * @param hashKey The hash key to be used for integrity checks.
-         * @return The size of the output data.
-         *
-         * @throws SalmonSecurityException
-         * @throws SalmonIntegrityException
-         * @throws IOException
-        """
-        # MemoryStream inputStream = new MemoryStream(data)
-        # SalmonStream s = new SalmonStream(key, nonce, mode, inputStream,
-        #              headerData, integrity, chunkSize, hashKey)
-        # long size = s.actualLength()
-        # s.close()
-        # return size
-        pass
-
     def __init__(self):
         self.__key: bytearray = bytearray()
         """

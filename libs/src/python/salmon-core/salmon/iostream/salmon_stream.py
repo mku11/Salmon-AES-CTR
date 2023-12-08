@@ -23,6 +23,8 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 '''
 from __future__ import annotations
+
+from iostream.memory_stream import MemoryStream
 from iostream.random_access_stream import RandomAccessStream
 from salmon.integrity.hmac_sha256_provider import HmacSHA256Provider
 from salmon.integrity.salmon_integrity import SalmonIntegrity
@@ -50,6 +52,36 @@ class SalmonStream(RandomAccessStream):
     """
      * Current global AES provider type.
     """
+
+    @staticmethod
+    def get_actual_size(data: bytearray, key: bytearray, nonce: bytearray, mode: EncryptionMode,
+                        header_data: bytearray | None, integrity: bool, chunk_size: int,
+                        hash_key: bytearray | None) -> int:
+
+        """
+         * Get the output size of the data to be transformed(encrypted or decrypted) including
+         * header and hash without executing any operations. This can be used to prevent over-allocating memory
+         * where creating your output buffers.
+         *
+         * @param data The data to be transformed.
+         * @param key The AES key.
+         * @param nonce The nonce for the CTR.
+         * @param mode The {@link EncryptionMode} Encrypt or Decrypt.
+         * @param headerData The header data to be embedded if you use Encryption.
+         * @param integrity True if you want to enable integrity.
+         * @param chunkSize The chunk size for integrity chunks.
+         * @param hashKey The hash key to be used for integrity checks.
+         * @return The size of the output data.
+         *
+         * @throws SalmonSecurityException
+         * @throws SalmonIntegrityException
+         * @throws IOException
+        """
+        input_stream: MemoryStream = MemoryStream(data)
+        s: SalmonStream = SalmonStream(key, nonce, mode, input_stream, header_data, integrity, chunk_size, hash_key)
+        size: int = s.actualLength()
+        s.close()
+        return size
 
     def __init__(self, key: bytearray, nonce: bytearray, encryption_mode: EncryptionMode,
                  base_stream: RandomAccessStream, header_data: bytearray = None,

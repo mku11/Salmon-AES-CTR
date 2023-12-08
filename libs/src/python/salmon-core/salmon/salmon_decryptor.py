@@ -121,7 +121,7 @@ class SalmonDecryptor:
         if nonce is None:
             raise SalmonSecurityException("Nonce is missing")
 
-        real_size: int = SalmonAES256CTRTransformer.get_actual_size(data, key, nonce,
+        real_size: int = SalmonStream.get_actual_size(data, key, nonce,
                                                                     EncryptionMode.Decrypt,
                                                                     header_data, integrity, chunk_size, hash_key)
         out_data: bytearray = bytearray(real_size)
