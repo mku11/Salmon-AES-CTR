@@ -22,7 +22,6 @@ LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 '''
-from array import array
 from builtins import int
 
 from salmon.integrity.ihash_provider import IHashProvider
@@ -89,13 +88,14 @@ class SalmonIntegrity:
         * True to use integrity, false to skip the chunks
         """
 
-        if (chunk_size is not None and (
-                chunk_size < 0 or (chunk_size > 0 and chunk_size < SalmonAES256CTRTransformer.BLOCK_SIZE)
-                or (
-                        chunk_size > 0 and chunk_size % SalmonAES256CTRTransformer.BLOCK_SIZE != 0) or chunk_size > SalmonIntegrity.MAX_CHUNK_SIZE)):
+        if (chunk_size is not None and (chunk_size < 0
+                                        or (0 < chunk_size < SalmonAES256CTRTransformer.BLOCK_SIZE)
+                                        or (chunk_size > 0 and chunk_size % SalmonAES256CTRTransformer.BLOCK_SIZE != 0)
+                                        or chunk_size > SalmonIntegrity.MAX_CHUNK_SIZE)):
             raise SalmonIntegrityException(
                 "Invalid chunk size, specify zero for default value or a positive number multiple of: "
-                + SalmonAES256CTRTransformer.BLOCK_SIZE + " and less than: " + SalmonIntegrity.MAX_CHUNK_SIZE + " bytes");
+                + SalmonAES256CTRTransformer.BLOCK_SIZE + " and less than: " + str(
+                    SalmonIntegrity.MAX_CHUNK_SIZE) + " bytes")
         if integrity and key is None:
             raise SalmonSecurityException("You need a hash to use with integrity")
         if integrity and (chunk_size is None or chunk_size == 0):
@@ -146,7 +146,8 @@ class SalmonIntegrity:
          * Get the total number of bytes for all hash signatures for data of a specific length.
          * @param length 		The length of the data.
          * @param chunkSize      The byte size of the stream chunk that will be used to calculate the hash.
-         *                       The length should be fixed value except for the last chunk which might be lesser since we don't use padding
+         *                       The length should be fixed value except for the last chunk which might be lesser since
+         *                       we don't use padding
          * @param hashOffset     The hash key length that will be used as an offset.
          * @param hashLength     The hash length.
          * @return
@@ -170,7 +171,7 @@ class SalmonIntegrity:
             return 0
         return SalmonIntegrity.get_total_hash_data_length(count, self._chunkSize, hash_offset, self._hashSize)
 
-    def getChunkSize(self) -> int:
+    def get_chunk_size(self) -> int:
         """
          * Get the chunk size.
          * @return The chunk size.
@@ -200,17 +201,17 @@ class SalmonIntegrity:
      * @throws SalmonIntegrityException
      """
 
-    def generateHashes(self, buffer: bytearray, includeHeaderData: bytearray) -> []:
+    def generate_hashes(self, buffer: bytearray, include_header_data: bytearray) -> []:
         if not self._integrity:
             return None
         hashes = []
         for i in range(0, len(buffer), self._chunkSize):
             length: int = min(self._chunkSize, len(buffer) - i)
             hashes.append(self.calculate_hash(self._provider, buffer, i, length, self.get_key(),
-                                              includeHeaderData if i == 0 else None))
+                                              include_header_data if i == 0 else None))
         return hashes
 
-    def getHashes(self, buffer: bytearray) -> []:
+    def get_hashes(self, buffer: bytearray) -> []:
         """
          * Get the hashes for each data chunk.
          * @param buffer The buffer that contains the data chunks.
@@ -225,7 +226,7 @@ class SalmonIntegrity:
             hashes.append(v_hash)
         return hashes
 
-    def verifyHashes(self, hashes: [], buffer: bytearray, includeHeaderData: bytearray):
+    def verify_hashes(self, hashes: [], buffer: bytearray, include_header_data: bytearray):
         """
          * Verify the buffer chunks against the hash signatures.
          * @param hashes The hashes to verify.
@@ -235,10 +236,10 @@ class SalmonIntegrity:
         """
         chunk: int = 0
         for i in range(0, len(buffer), self._chunkSize):
-            nChunkSize: int = min(self._chunkSize, len(buffer) - i)
-            hash: bytearray = self.calculate_hash(self._provider, buffer, i, nChunkSize, self.get_key(),
-                                                  includeHeaderData if i == 0 else None)
-            for k in range(0, len(hash)):
-                if hash[k] != hashes[chunk][k]:
+            n_chunk_size: int = min(self._chunkSize, len(buffer) - i)
+            v_hash: bytearray = self.calculate_hash(self._provider, buffer, i, n_chunk_size, self.get_key(),
+                                                    include_header_data if i == 0 else None)
+            for k in range(0, len(v_hash)):
+                if v_hash[k] != hashes[chunk][k]:
                     raise SalmonIntegrityException("Data corrupt or tampered")
             chunk += 1

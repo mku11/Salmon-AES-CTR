@@ -23,6 +23,8 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 '''
 from __future__ import annotations
+
+from abc import ABC
 from enum import Enum
 
 from iostream.random_access_stream import RandomAccessStream
@@ -38,7 +40,7 @@ from salmon.transform.salmon_aes256_ctr_transformer import SalmonAES256CTRTransf
 from salmon.transform.salmon_transformer_factory import SalmonTransformerFactory
 
 
-class SalmonStream(RandomAccessStream):
+class SalmonStream(ABC, RandomAccessStream):
     """
      * Stream decorator provides AES256 encryption and decryption of stream.
      * Block data integrity is also supported.
@@ -60,22 +62,24 @@ class SalmonStream(RandomAccessStream):
 
         AesIntrinsics = 1
         """
-         * Salmon builtin AES intrinsics. This needs the SalmonNative library to be loaded. @see <a href="https://github.com/mku11/Salmon-AES-CTR#readme">Salmon README.md</a>
+         * Salmon builtin AES intrinsics. This needs the SalmonNative library to be loaded. 
+         @see <a href="https://github.com/mku11/Salmon-AES-CTR#readme">Salmon README.md</a>
         """
 
         TinyAES = 2
         """
-         * Tiny AES implementation. This needs the SalmonNative library to be loaded. @see <a href="https://github.com/mku11/Salmon-AES-CTR#readme">Salmon README.md</a>
+         * Tiny AES implementation. This needs the SalmonNative library to be loaded. 
+         @see <a href="https://github.com/mku11/Salmon-AES-CTR#readme">Salmon README.md</a>
         """
 
-    __providerType: SalmonStream.ProviderType = ProviderType.Default
+    __provider_type: SalmonStream.ProviderType = ProviderType.Default
     """
      * Current global AES provider type.
     """
 
-    def __init__(self, key: bytearray, nonce: bytearray, encryptionMode: EncryptionMode,
-                 baseStream: RandomAccessStream, headerData: bytearray = None,
-                 integrity: bool = False, chunkSize: int = None, hashKey: bytearray = None):
+    def __init__(self, key: bytearray, nonce: bytearray, encryption_mode: EncryptionMode,
+                 base_stream: RandomAccessStream, header_data: bytearray = None,
+                 integrity: bool = False, chunk_size: int = None, hash_key: bytearray = None):
         """
          * Instantiate a new Salmon stream with a base stream and optional header data and hash integrity.
          * <p>
@@ -136,31 +140,31 @@ class SalmonStream(RandomAccessStream):
          * The integrity to use for hash signature creation and validation.
         """
 
-        self.__encryptionMode = encryptionMode
-        self.__baseStream = baseStream
-        self.__headerData = headerData
+        self.__encryptionMode = encryption_mode
+        self.__baseStream = base_stream
+        self.__headerData = header_data
 
-        self.__initIntegrity(integrity, hashKey, chunkSize)
-        self.__initTransformer(key, nonce)
-        self.__initStream()
+        self.__init_integrity(integrity, hash_key, chunk_size)
+        self.__init_transformer(key, nonce)
+        self.__init_stream()
 
     @staticmethod
-    def setAesProviderType(providerType: ProviderType):
+    def set_aes_provider_type(provider_type: ProviderType):
         """
          * Set the global AES provider type. Supported types: {@link ProviderType}.
          *
          * @param providerType The provider Type.
         """
-        SalmonStream.providerType = providerType
+        SalmonStream.providerType = provider_type
 
     @staticmethod
-    def getAesProviderType() -> ProviderType:
+    def get_aes_provider_type() -> ProviderType:
         """
          * Get the global AES provider type. Supported types: {@link ProviderType}.
          *
          * @return The provider Type.
         """
-        return SalmonStream.__providerType
+        return SalmonStream.__provider_type
 
     def length(self) -> int:
         """
@@ -168,23 +172,23 @@ class SalmonStream(RandomAccessStream):
          *
          * @return The length of the stream.
         """
-        totalHashBytes: int
-        hashOffset: int = SalmonGenerator.HASH_RESULT_LENGTH if self.__salmonIntegrity.getChunkSize() > 0 else 0
-        totalHashBytes = self.__salmonIntegrity.get_hash_data_length(self.__baseStream.length() - 1, hashOffset)
-        return self.__baseStream.length() - self.getHeaderLength() - totalHashBytes
+        total_hash_bytes: int
+        hash_offset: int = SalmonGenerator.HASH_RESULT_LENGTH if self.__salmonIntegrity.get_chunk_size() > 0 else 0
+        total_hash_bytes = self.__salmonIntegrity.get_hash_data_length(self.__baseStream.length() - 1, hash_offset)
+        return self.__baseStream.length() - self.get_header_length() - total_hash_bytes
 
-    def actualLength(self) -> int:
+    def actual_length(self) -> int:
         """
          * Provides the total length of the base stream including header and integrity data if available.
          *
          * @return The actual length of the base stream.
         """
-        totalHashBytes: int = 0
-        totalHashBytes += self.__salmonIntegrity.get_hash_data_length(self.__baseStream.length() - 1, 0)
-        if self.canRead():
+        total_hash_bytes: int = 0
+        total_hash_bytes += self.__salmonIntegrity.get_hash_data_length(self.__baseStream.length() - 1, 0)
+        if self.can_read():
             return self.length()
-        elif self.canWrite():
-            return self.__baseStream.length() + self.getHeaderLength() + totalHashBytes
+        elif self.can_write():
+            return self.__baseStream.length() + self.get_header_length() + total_hash_bytes
         return 0
 
     def position(self) -> int:
@@ -194,7 +198,7 @@ class SalmonStream(RandomAccessStream):
          * @return The current position of the stream.
          * @throws IOError
         """
-        return self.__getVirtualPosition()
+        return self.__get_virtual_position()
 
     def set_position(self, value: int):
         """
@@ -203,46 +207,46 @@ class SalmonStream(RandomAccessStream):
          * @param value
          * @throws IOError
         """
-        if self.canWrite() and not self.__allowRangeWrite and value != 0:
+        if self.can_write() and not self.__allowRangeWrite and value != 0:
             raise IOError() from \
                 SalmonSecurityException("Range Write is not allowed for security (non-reusable IVs). " +
                                         "If you still want to take the risk you need to use SetAllowRangeWrite(true)")
         try:
-            self.setVirtualPosition(value)
+            self.__set_virtual_position(value)
         except SalmonRangeExceededException as e:
             raise IOError() from e
 
-    def canRead(self) -> bool:
+    def can_read(self) -> bool:
         """
          * If the stream is readable (only if EncryptionMode == Decrypted)
          *
          * @return True if mode is decryption.
         """
-        return self.__baseStream.canRead() and self.__encryptionMode == SalmonStream.EncryptionMode.Decrypt
+        return self.__baseStream.can_read() and self.__encryptionMode == SalmonStream.EncryptionMode.Decrypt
 
-    def canSeek(self) -> bool:
+    def can_seek(self) -> bool:
         """
          * If the stream is seekable (supported only if base stream is seekable).
          *
          * @return True if stream is seekable.
         """
-        return self.__baseStream.canSeek()
+        return self.__baseStream.can_seek()
 
-    def canWrite(self) -> bool:
+    def can_write(self) -> bool:
         """
          * If the stream is writeable (only if EncryptionMode is Encrypt)
          *
          * @return True if mode is decryption.
         """
-        return self.__baseStream.canWrite() and self.__encryptionMode == SalmonStream.EncryptionMode.Encrypt
+        return self.__baseStream.can_write() and self.__encryptionMode == SalmonStream.EncryptionMode.Encrypt
 
-    def hasIntegrity(self) -> bool:
+    def has_integrity(self) -> bool:
         """
          * If the stream has integrity enabled
         """
-        return self.getChunkSize() > 0
+        return self.get_chunk_size() > 0
 
-    def __initIntegrity(self, integrity: bool, hashKey: bytearray, chunkSize: int):
+    def __init_integrity(self, integrity: bool, hash_key: bytearray, chunk_size: int):
         """
          * Initialize the integrity validator. This object is always associated with the
          * stream because in the case of a decryption stream that has already embedded integrity
@@ -254,18 +258,18 @@ class SalmonStream(RandomAccessStream):
          * @throws SalmonSecurityException
          * @throws SalmonIntegrityException
         """
-        self.__salmonIntegrity = SalmonIntegrity(integrity, hashKey, chunkSize,
+        self.__salmonIntegrity = SalmonIntegrity(integrity, hash_key, chunk_size,
                                                  HmacSHA256Provider(), SalmonGenerator.HASH_RESULT_LENGTH)
 
-    def __initStream(self):
+    def __init_stream(self):
         """
          * Init the stream.
          *
          * @throws IOError
         """
-        self.__baseStream.set_position(self.getHeaderLength())
+        self.__baseStream.set_position(self.get_header_length())
 
-    def getHeaderLength(self) -> int:
+    def get_header_length(self) -> int:
         """
          * The length of the header data if the stream was initialized with a header.
          *
@@ -276,7 +280,7 @@ class SalmonStream(RandomAccessStream):
         else:
             return len(self.__headerData)
 
-    def __initTransformer(self, key: bytearray, nonce: bytearray):
+    def __init_transformer(self, key: bytearray, nonce: bytearray):
         """
          * To create the AES CTR mode we use ECB for AES with No Padding.
          * Initailize the Counter to the initial vector provided.
@@ -288,9 +292,9 @@ class SalmonStream(RandomAccessStream):
         if nonce is None:
             raise SalmonSecurityException("Nonce is missing")
 
-        transformer = SalmonTransformerFactory.create(self.__providerType)
+        transformer = SalmonTransformerFactory.create(self.__provider_type)
         transformer.init(key, nonce)
-        transformer.resetCounter()
+        transformer.reset_counter()
 
     def seek(self, offset: int, origin: RandomAccessStream.SeekOrigin) -> int:
         """
@@ -309,7 +313,7 @@ class SalmonStream(RandomAccessStream):
             self.set_position(self.length() - offset)
         return self.get_position()
 
-    def setLength(self, value: int):
+    def set_length(self, value: int):
         """
          * Set the length of the base stream. Currently unsupported.
          *
@@ -330,47 +334,47 @@ class SalmonStream(RandomAccessStream):
          *
          * @throws IOError
         """
-        self.closeStreams()
+        self.__close_streams()
 
-    def getCounter(self) -> bytearray:
+    def get_counter(self) -> bytearray:
         """
          * Returns the current Counter value.
          *
          * @return The current Counter value.
         """
-        return self.__transformer.getCounter().copy()
+        return self.__transformer.get_counter().copy()
 
-    def getBlock(self) -> int:
+    def get_block(self) -> int:
         """
          * Returns the current Block value
         """
-        return self.__transformer.getBlock()
+        return self.__transformer.get_block()
 
-    def getKey(self) -> bytearray:
+    def get_key(self) -> bytearray:
         """
          * Returns a copy of the encryption key.
         """
-        return self.__transformer.getKey().copy()
+        return self.__transformer.get_key().copy()
 
-    def getHashKey(self) -> bytearray:
+    def get_hash_key(self) -> bytearray:
         """
          * Returns a copy of the hash key.
         """
         return self.__salmonIntegrity.get_key().copy()
 
-    def getNonce(self) -> bytearray:
+    def get_nonce(self) -> bytearray:
         """
          * Returns a copy of the initial vector.
         """
-        return self.__transformer.getNonce().copy()
+        return self.__transformer.get_nonce().copy()
 
-    def getChunkSize(self) -> int:
+    def get_chunk_size(self) -> int:
         """
          * Returns the Chunk size used to apply hash signature
         """
-        return self.__salmonIntegrity.getChunkSize()
+        return self.__salmonIntegrity.get_chunk_size()
 
-    def setAllowRangeWrite(self, value: bool):
+    def set_allow_range_write(self, value: bool):
         """
          * Warning! Allow byte range encryption writes on a current stream. Overwriting is not a good idea because it will re-use the same IV.
          * This is not recommended if you use the stream on storing files or generally data if prior version can be inspected by others.
@@ -380,7 +384,7 @@ class SalmonStream(RandomAccessStream):
         """
         self.__allowRangeWrite = value
 
-    def setFailSilently(self, value: bool):
+    def set_fail_silently(self, value: bool):
         """
          * Set to True if you want the stream to fail silently when integrity cannot be verified.
          * In that case read() operations will return -1 instead of raising an exception.
@@ -390,7 +394,7 @@ class SalmonStream(RandomAccessStream):
         """
         self.__failSilently = value
 
-    def __setVirtualPosition(self, value: int):
+    def __set_virtual_position(self, value: int):
         """
          * Set the virtual position of the stream.
          *
@@ -400,27 +404,27 @@ class SalmonStream(RandomAccessStream):
         """
         # we skip the header bytes and any hash values we have if the file has integrity set
         self.__baseStream.set_position(value)
-        totalHashBytes: int = self.__salmonIntegrity.get_hash_data_length(self.__baseStream.self.get_position(), 0)
-        self.__baseStream.set_position(self.__baseStream.self.get_position() + totalHashBytes)
-        self.__baseStream.set_position(self.__baseStream.self.get_position() + self.getHeaderLength())
-        self.__transformer.resetCounter()
-        self.__transformer.syncCounter(self.get_position())
+        total_hash_bytes: int = self.__salmonIntegrity.get_hash_data_length(self.__baseStream.get_position(), 0)
+        self.__baseStream.set_position(self.__baseStream.get_position() + total_hash_bytes)
+        self.__baseStream.set_position(self.__baseStream.get_position() + self.get_header_length())
+        self.__transformer.reset_counter()
+        self.__transformer.sync_counter(self.get_position())
 
-    def __getVirtualPosition(self) -> int:
+    def __get_virtual_position(self) -> int:
         """
          * Returns the Virtual Position of the stream excluding the header and hash signatures.
         """
-        totalHashBytes: int
-        hashOffset: int = SalmonGenerator.HASH_RESULT_LENGTH if self.__salmonIntegrity.getChunkSize() > 0 else 0
-        totalHashBytes = self.__salmonIntegrity.get_hash_data_length(self.__baseStream.self.get_position(), hashOffset)
-        return self.__baseStream.self.get_position() - self.getHeaderLength() - totalHashBytes
+        total_hash_bytes: int
+        hash_offset: int = SalmonGenerator.HASH_RESULT_LENGTH if self.__salmonIntegrity.get_chunk_size() > 0 else 0
+        total_hash_bytes = self.__salmonIntegrity.get_hash_data_length(self.__baseStream.get_position(), hash_offset)
+        return self.__baseStream.get_position() - self.get_header_length() - total_hash_bytes
 
-    def __closeStreams(self):
+    def __close_streams(self):
         """
          * Close base stream
         """
         if self.__baseStream is not None:
-            if self.canWrite():
+            if self.can_write():
                 self.__baseStream.flush()
             self.__baseStream.close()
 
@@ -435,36 +439,36 @@ class SalmonStream(RandomAccessStream):
         """
         if self.get_position() == self.length():
             return -1
-        alignedOffset: int = self.getAlignedOffset()
-        bytes: int = 0
+        aligned_offset: int = self.__get_aligned_offset()
+        v_bytes: int = 0
         pos: int = self.get_position()
 
         # if the base stream is not aligned for read
-        if alignedOffset != 0:
+        if aligned_offset != 0:
             # read partially once
-            self.set_position(self.get_position() - alignedOffset)
-            nCount: int = self.__salmonIntegrity.getChunkSize() if self.__salmonIntegrity.getChunkSize() > 0 else SalmonGenerator.BLOCK_SIZE
-            buff: bytearray = bytearray(nCount)
-            bytes = self.read(buff, 0, nCount)
-            bytes = min(bytes - alignedOffset, count)
+            self.set_position(self.get_position() - aligned_offset)
+            n_count: int = self.__salmonIntegrity.get_chunk_size() if self.__salmonIntegrity.get_chunk_size() > 0 else SalmonGenerator.BLOCK_SIZE
+            buff: bytearray = bytearray(n_count)
+            v_bytes = self.read(buff, 0, n_count)
+            v_bytes = min(v_bytes - aligned_offset, count)
             # if no more bytes to read from the stream
-            if bytes <= 0:
+            if v_bytes <= 0:
                 return -1
-            buffer[offset:offset + bytes] = buff[alignedOffset:alignedOffset + bytes]
-            self.set_position(pos + bytes)
+            buffer[offset:offset + v_bytes] = buff[aligned_offset:aligned_offset + v_bytes]
+            self.set_position(pos + v_bytes)
 
         # if we have all bytes originally requested
-        if bytes == count:
-            return bytes
+        if v_bytes == count:
+            return v_bytes
 
         # the base stream position should now be aligned
         # now we can now read the rest of the data.
         pos = self.get_position()
-        nBytes: int = self.readFromStream(buffer, bytes + offset, count - bytes)
-        self.set_position(pos + nBytes)
-        return bytes + nBytes
+        n_bytes: int = self.__read_from_stream(buffer, v_bytes + offset, count - v_bytes)
+        self.set_position(pos + n_bytes)
+        return v_bytes + n_bytes
 
-    def __readFromStream(self, buffer: bytearray, offset: int, count: int):
+    def __read_from_stream(self, buffer: bytearray, offset: int, count: int):
         """
          * Decrypts the data from the baseStream and stores them in the buffer provided.
          * Use this only after you align the base stream to the chunk if integrity is enabled
@@ -478,9 +482,9 @@ class SalmonStream(RandomAccessStream):
         """
         if self.get_position() == self.length():
             return 0
-        if self.__salmonIntegrity.getChunkSize() > 0 and self.get_position() % self.__salmonIntegrity.getChunkSize() != 0:
-            raise IOError("All reads should be aligned to the chunks size: " + self.__salmonIntegrity.getChunkSize())
-        elif self.__salmonIntegrity.getChunkSize() == 0 and self.get_position() % SalmonAES256CTRTransformer.BLOCK_SIZE != 0:
+        if self.__salmonIntegrity.get_chunk_size() > 0 and self.get_position() % self.__salmonIntegrity.get_chunk_size() != 0:
+            raise IOError("All reads should be aligned to the chunks size: " + self.__salmonIntegrity.get_chunk_size())
+        elif self.__salmonIntegrity.get_chunk_size() == 0 and self.get_position() % SalmonAES256CTRTransformer.BLOCK_SIZE != 0:
             raise IOError("All reads should be aligned to the block size: " + SalmonAES256CTRTransformer.BLOCK_SIZE)
 
         pos: int = self.get_position()
@@ -495,33 +499,33 @@ class SalmonStream(RandomAccessStream):
             return 0
 
         # make sure our buffer size is also aligned to the block or chunk
-        bufferSize: int = self.getNormalizedBufferSize(True)
+        buffer_size: int = self.__get_normalized_buffer_size(True)
 
-        bytes: int = 0
-        while bytes < count:
+        v_bytes: int = 0
+        while v_bytes < count:
             # read data and integrity signatures
-            srcBuffer: bytearray = self.__readStreamData(bufferSize)
+            src_buffer: bytearray = self.__read_stream_data(buffer_size)
             try:
-                integrityHashes: [] = None
+                integrity_hashes: [] = None
                 # if there are integrity hashes strip them and get the data chunks only
-                if self.__salmonIntegrity.getChunkSize() > 0:
+                if self.__salmonIntegrity.get_chunk_size() > 0:
                     # get the integrity signatures
-                    integrityHashes = self.__salmonIntegrity.getHashes(srcBuffer)
-                    srcBuffer = self.__stripSignatures(srcBuffer, self.__salmonIntegrity.getChunkSize())
-                destBuffer: bytearray = bytearray(len(srcBuffer))
+                    integrity_hashes = self.__salmonIntegrity.get_hashes(src_buffer)
+                    src_buffer = self.__strip_signatures(src_buffer, self.__salmonIntegrity.get_chunk_size())
+                dest_buffer: bytearray = bytearray(len(src_buffer))
                 if self.__salmonIntegrity.use_integrity():
-                    self.__salmonIntegrity.verifyHashes(integrityHashes, srcBuffer,
-                                                        self.__headerData if pos == 0 and bytes == 0 else None)
-                self.__transformer.decryptData(srcBuffer, 0, destBuffer, 0, len(srcBuffer))
-                length: int = min(count - bytes, len(destBuffer))
-                self.__writeToBuffer(destBuffer, 0, buffer, bytes + offset, length)
-                bytes += length
-                self.__transformer.syncCounter(self.get_position())
+                    self.__salmonIntegrity.verify_hashes(integrity_hashes, src_buffer,
+                                                         self.__headerData if pos == 0 and v_bytes == 0 else None)
+                self.__transformer.decrypt_data(src_buffer, 0, dest_buffer, 0, len(src_buffer))
+                length: int = min(count - v_bytes, len(dest_buffer))
+                self.__write_to_buffer(dest_buffer, 0, buffer, v_bytes + offset, length)
+                v_bytes += length
+                self.__transformer.sync_counter(self.get_position())
             except (SalmonSecurityException, SalmonRangeExceededException, SalmonIntegrityException) as ex:
                 if isinstance(ex, SalmonIntegrityException) and self.__failSilently:
                     return -1
                 raise IOError("Could not read from stream: ") from ex
-        return bytes
+        return v_bytes
 
     def write(self, buffer: bytearray, offset: int, count: int):
         """
@@ -534,11 +538,13 @@ class SalmonStream(RandomAccessStream):
          * @param count  The length of the bytes that will be encrypted.
          *
         """
-        if self.__salmonIntegrity.getChunkSize() > 0 and self.get_position() % self.__salmonIntegrity.getChunkSize() != 0:
+        if self.__salmonIntegrity.get_chunk_size() > 0 \
+                and self.get_position() % self.__salmonIntegrity.get_chunk_size() != 0:
             raise IOError() from \
                 SalmonIntegrityException("All write operations should be aligned to the chunks size: "
-                                         + str(self.__salmonIntegrity.getChunkSize()))
-        elif self.__salmonIntegrity.getChunkSize() == 0 and self.get_position() % SalmonAES256CTRTransformer.BLOCK_SIZE != 0:
+                                         + str(self.__salmonIntegrity.get_chunk_size()))
+        elif self.__salmonIntegrity.get_chunk_size() == 0 \
+                and self.get_position() % SalmonAES256CTRTransformer.BLOCK_SIZE != 0:
             raise IOError() from \
                 SalmonIntegrityException("All write operations should be aligned to the block size: "
                                          + SalmonAES256CTRTransformer.BLOCK_SIZE)
@@ -547,27 +553,27 @@ class SalmonStream(RandomAccessStream):
         count = min(count, len(buffer) - offset)
 
         # if there
-        bufferSize: int = self.__getNormalizedBufferSize(False)
+        buffer_size: int = self.__get_normalized_buffer_size(False)
 
         pos: int = 0
         while pos < count:
-            nBufferSize: int = min(bufferSize, count - pos)
+            n_buffer_size: int = min(buffer_size, count - pos)
 
-            srcBuffer: bytearray = self.__readBufferData(buffer, pos, nBufferSize)
-            if len(srcBuffer) == 0:
+            src_buffer: bytearray = self.__read_buffer_data(buffer, pos, n_buffer_size)
+            if len(src_buffer) == 0:
                 break
-            destBuffer: bytearray = bytearray(len(srcBuffer))
+            dest_buffer: bytearray = bytearray(len(src_buffer))
 
             try:
-                self.__transformer.encryptData(srcBuffer, 0, destBuffer, 0, len(srcBuffer))
-                integrityHashes: [] = self.__salmonIntegrity.generateHashes(destBuffer,
-                                                                            self.__headerData if self.get_position() == 0 else None)
-                pos += self.__writeToStream(destBuffer, self.__getChunkSize(), integrityHashes)
-                self.__transformer.syncCounter(self.get_position())
+                self.__transformer.encrypt_data(src_buffer, 0, dest_buffer, 0, len(src_buffer))
+                integrity_hashes: [] = self.__salmonIntegrity.generate_hashes(dest_buffer,
+                                                                              self.__headerData if self.get_position() == 0 else None)
+                pos += self.__write_to_stream(dest_buffer, self.get_chunk_size(), integrity_hashes)
+                self.__transformer.sync_counter(self.get_position())
             except SalmonSecurityException | SalmonRangeExceededException | SalmonIntegrityException as ex:
                 raise IOError("Could not write to stream: ") from ex
 
-    def __getAlignedOffset(self) -> int:
+    def __get_aligned_offset(self) -> int:
         """
          * Get the aligned offset wrt the Chunk size if integrity is enabled otherwise
          * wrt to the encryption block size. Use this method to align a position to the
@@ -575,14 +581,14 @@ class SalmonStream(RandomAccessStream):
          *
          * @return
         """
-        alignOffset: int
-        if self.__salmonIntegrity.getChunkSize() > 0:
-            alignOffset = self.get_position() % self.__salmonIntegrity.getChunkSize()
+        align_offset: int
+        if self.__salmonIntegrity.get_chunk_size() > 0:
+            align_offset = self.get_position() % self.__salmonIntegrity.get_chunk_size()
         else:
-            alignOffset = self.get_position() % SalmonAES256CTRTransformer.BLOCK_SIZE
-        return alignOffset
+            align_offset = self.get_position() % SalmonAES256CTRTransformer.BLOCK_SIZE
+        return align_offset
 
-    def __getNormalizedBufferSize(self, includeHashes: bool) -> int:
+    def __get_normalized_buffer_size(self, include_hashes: bool) -> int:
         """
          * Get the aligned buffer size wrt the Chunk size if integrity is enabled otherwise
          * wrt to the encryption block size. Use this method to ensure that buffer sizes request
@@ -590,26 +596,26 @@ class SalmonStream(RandomAccessStream):
          *
          * @return
         """
-        bufferSize: int = SalmonDefaultOptions.getBufferSize()
-        if self.getChunkSize() > 0:
+        buffer_size: int = SalmonDefaultOptions.get_buffer_size()
+        if self.get_chunk_size() > 0:
             # buffer size should be a multiple of the chunk size if integrity is enabled
-            partSize: int = self.getChunkSize()
+            part_size: int = self.get_chunk_size()
             # if add the hash signatures
 
-            if partSize < bufferSize:
-                bufferSize = bufferSize // self.getChunkSize() * self.getChunkSize()
+            if part_size < buffer_size:
+                buffer_size = buffer_size // self.get_chunk_size() * self.get_chunk_size()
             else:
-                bufferSize = partSize
+                buffer_size = part_size
 
-            if includeHashes:
-                bufferSize += bufferSize // self.getChunkSize() * SalmonGenerator.HASH_RESULT_LENGTH
+            if include_hashes:
+                buffer_size += buffer_size // self.get_chunk_size() * SalmonGenerator.HASH_RESULT_LENGTH
         else:
             # buffer size should also be a multiple of the AES block size
-            bufferSize = bufferSize // SalmonAES256CTRTransformer.BLOCK_SIZE * SalmonAES256CTRTransformer.BLOCK_SIZE
+            buffer_size = buffer_size // SalmonAES256CTRTransformer.BLOCK_SIZE * SalmonAES256CTRTransformer.BLOCK_SIZE
 
-        return bufferSize
+        return buffer_size
 
-    def __readBufferData(self, buffer: bytearray, offset: int, count: int) -> bytearray:
+    def __read_buffer_data(self, buffer: bytearray, offset: int, count: int) -> bytearray:
         """
          * Read the data from the buffer
          *
@@ -622,7 +628,7 @@ class SalmonStream(RandomAccessStream):
         data[0:len(data)] = buffer[offset:len(data)]
         return data
 
-    def __readStreamData(self, count: int) -> bytearray:
+    def __read_stream_data(self, count: int) -> bytearray:
         """
          * Read the data from the base stream into the buffer.
          *
@@ -634,7 +640,8 @@ class SalmonStream(RandomAccessStream):
         self.__baseStream.read(data, 0, len(data))
         return data
 
-    def __writeToBuffer(self, srcBuffer: bytearray, srcOffset: int, destBuffer: bytearray, destOffset: int, count: int):
+    def __write_to_buffer(self, src_buffer: bytearray, src_offset: int, dest_buffer: bytearray, dest_offset: int,
+                          count: int):
         """
          * Write the buffer data to the destination buffer.
          *
@@ -644,9 +651,9 @@ class SalmonStream(RandomAccessStream):
          * @param destOffset The destination byte offset.
          * @param count      The number of bytes to write.
         """
-        destBuffer[destOffset:destOffset + count] = srcBuffer[srcOffset:srcOffset + count]
+        dest_buffer[dest_offset:dest_offset + count] = src_buffer[src_offset:src_offset + count]
 
-    def __writeToStream(self, buffer: bytearray, chunkSize: int, hashes: []) -> int:
+    def __write_to_stream(self, buffer: bytearray, chunk_size: int, hashes: []) -> int:
         """
          * Write data to the base stream.
          *
@@ -658,18 +665,18 @@ class SalmonStream(RandomAccessStream):
         """
         pos: int = 0
         chunk: int = 0
-        if chunkSize <= 0:
-            chunkSize = len(buffer)
+        if chunk_size <= 0:
+            chunk_size = len(buffer)
         while pos < len(buffer):
             if hashes is not None:
                 self.__baseStream.write(hashes[chunk], 0, hashes[chunk].length)
-            length: int = min(chunkSize, len(buffer) - pos)
+            length: int = min(chunk_size, len(buffer) - pos)
             self.__baseStream.write(buffer, pos, length)
             pos += length
             chunk += 1
         return pos
 
-    def __stripSignatures(self, buffer: bytearray, chunkSize: int) -> bytearray:
+    def __strip_signatures(self, buffer: bytearray, chunk_size: int) -> bytearray:
         """
          * Strip hash signatures from the buffer.
          *
@@ -677,16 +684,17 @@ class SalmonStream(RandomAccessStream):
          * @param chunkSize The chunk size.
          * @return
         """
-        bytes: int = len(buffer) // (chunkSize + SalmonGenerator.HASH_RESULT_LENGTH) * chunkSize
-        if len(buffer) % (chunkSize + SalmonGenerator.HASH_RESULT_LENGTH) != 0:
-            bytes += len(buffer) % (chunkSize + SalmonGenerator.HASH_RESULT_LENGTH) - SalmonGenerator.HASH_RESULT_LENGTH
-        buff: bytearray = bytearray(bytes)
+        v_bytes: int = len(buffer) // (chunk_size + SalmonGenerator.HASH_RESULT_LENGTH) * chunk_size
+        if len(buffer) % (chunk_size + SalmonGenerator.HASH_RESULT_LENGTH) != 0:
+            v_bytes += len(buffer) % (chunk_size + SalmonGenerator.HASH_RESULT_LENGTH) \
+                       - SalmonGenerator.HASH_RESULT_LENGTH
+        buff: bytearray = bytearray(v_bytes)
         index: int = 0
-        for i in range(0, len(buffer), chunkSize + SalmonGenerator.HASH_RESULT_LENGTH):
-            nChunkSize: int = min(chunkSize, len(buff) - index)
-            end: int = i + SalmonGenerator.HASH_RESULT_LENGTH + nChunkSize
-            buff[index:index + nChunkSize] = buffer[i + SalmonGenerator.HASH_RESULT_LENGTH:end]
-            index += nChunkSize
+        for i in range(0, len(buffer), chunk_size + SalmonGenerator.HASH_RESULT_LENGTH):
+            n_chunk_size: int = min(chunk_size, len(buff) - index)
+            end: int = i + SalmonGenerator.HASH_RESULT_LENGTH + n_chunk_size
+            buff[index:index + n_chunk_size] = buffer[i + SalmonGenerator.HASH_RESULT_LENGTH:end]
+            index += n_chunk_size
         return buff
 
     class EncryptionMode:
@@ -707,7 +715,7 @@ class SalmonStream(RandomAccessStream):
          * Decryption Mode used with a base stream as a source.
         """
 
-    def isIntegrityEnabled(self) -> bool:
+    def is_integrity_enabled(self) -> bool:
         """
          * True if the stream has integrity enabled.
          *
@@ -715,7 +723,7 @@ class SalmonStream(RandomAccessStream):
         """
         return self.__salmonIntegrity.use_integrity()
 
-    def getEncryptionMode(self) -> EncryptionMode:
+    def get_encryption_mode(self) -> EncryptionMode:
         """
          * Get the encryption mode.
          *
@@ -723,7 +731,7 @@ class SalmonStream(RandomAccessStream):
         """
         return self.__encryptionMode
 
-    def isAllowRangeWrite(self) -> bool:
+    def is_allow_range_write(self) -> bool:
         """
          * Get the allowed range write option. This can check if you can use random access write.
          * This is generally not a good option since it prevents reusing the same nonce/counter.

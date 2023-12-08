@@ -35,7 +35,7 @@ class SalmonGenerator:
     * Version.
     """
 
-    MAGIC_LENGTH = 3;
+    MAGIC_LENGTH = 3
     """
      * Length for the magic bytes.
     """
@@ -60,7 +60,7 @@ class SalmonGenerator:
      * HASH Key length for integrity, currently we use HMAC SHA256.
     """
 
-    HASH_RESULT_LENGTH = 32;
+    HASH_RESULT_LENGTH = 32
     """
      * Hash signature size for integrity, currently we use HMAC SHA256.
     """
@@ -84,14 +84,14 @@ class SalmonGenerator:
      * Gets the fixed magic bytes array
     """
     @staticmethod
-    def getMagicBytes() -> bytearray:
+    def get_magic_bytes() -> bytearray:
         return bytearray(SalmonGenerator.MAGIC_BYTES.encode('utf-8'))
 
     """
      * Returns the current Salmon format version.
     """
     @staticmethod
-    def getVersion() -> int:
+    def get_version() -> int:
         return SalmonGenerator.VERSION
 
     """
@@ -100,6 +100,6 @@ class SalmonGenerator:
      * @return The random secure byte array.
     """
     @staticmethod
-    def getSecureRandomBytes(size: int) -> bytearray:
+    def get_secure_random_bytes(size: int) -> bytearray:
         v_bytes: bytearray = bytearray(secrets.token_bytes(size))
         return v_bytes

@@ -34,7 +34,7 @@ class SalmonNonce:
     """
 
     @staticmethod
-    def increaseNonce(startNonce: bytearray, endNonce: bytearray) -> bytearray:
+    def increase_nonce(start_nonce: bytearray, end_nonce: bytearray) -> bytearray:
         """
          * Increase the sequential NONCE by a value of 1.
          * This implementation assumes that the NONCE length is 8 bytes or fewer so it can fit in a long.
@@ -44,10 +44,10 @@ class SalmonNonce:
          * @return
          * @throws SalmonRangeExceededException
         """
-        nonce: int = BitConverter.to_long(startNonce, 0, SalmonGenerator.NONCE_LENGTH)
-        maxNonce: int = BitConverter.to_long(endNonce, 0, SalmonGenerator.NONCE_LENGTH)
+        nonce: int = BitConverter.to_long(start_nonce, 0, SalmonGenerator.NONCE_LENGTH)
+        max_nonce: int = BitConverter.to_long(end_nonce, 0, SalmonGenerator.NONCE_LENGTH)
         nonce += 1
-        if nonce <= 0 or nonce > maxNonce:
+        if nonce <= 0 or nonce > max_nonce:
             raise SalmonRangeExceededException("Cannot increase nonce, maximum nonce exceeded")
         return BitConverter.to_bytes(nonce, 8)
 
@@ -64,9 +64,9 @@ class SalmonNonce:
     """
 
     @staticmethod
-    def splitNonceRange(startNonce: bytearray, endNonce: bytearray) -> bytearray:
-        start: int = BitConverter.to_long(startNonce, 0, SalmonGenerator.NONCE_LENGTH)
-        end: int = BitConverter.to_long(endNonce, 0, SalmonGenerator.NONCE_LENGTH)
+    def split_nonce_range(start_nonce: bytearray, end_nonce: bytearray) -> bytearray:
+        start: int = BitConverter.to_long(start_nonce, 0, SalmonGenerator.NONCE_LENGTH)
+        end: int = BitConverter.to_long(end_nonce, 0, SalmonGenerator.NONCE_LENGTH)
         # we reserve some nonces
         if end - start < 256:
             raise SalmonSecurityException("Not enough nonces left")

@@ -39,7 +39,7 @@ class SalmonEncryptor:
      * Encrypts byte arrays.
     """
 
-    def __init__(self, threads: int = None, bufferSize: int = None):
+    def __init__(self, threads: int = None, buffer_size: int = None):
         """
          * Instantiate an encryptor with parallel tasks and buffer size.
          *
@@ -70,14 +70,14 @@ class SalmonEncryptor:
             self.__threads = threads
             executor = ThreadPool(threads)
 
-        if bufferSize is None:
+        if buffer_size is None:
             self.__bufferSize = SalmonIntegrity.DEFAULT_CHUNK_SIZE
         else:
-            self.__bufferSize = bufferSize
+            self.__bufferSize = buffer_size
 
     def encrypt(self, data: bytearray, key: bytearray, nonce: bytearray,
-                storeHeaderData: bool,
-                integrity: bool, hashKey: bytearray, chunkSize: int) -> bytearray:
+                store_header_data: bool,
+                integrity: bool, hash_key: bytearray, chunk_size: int) -> bytearray:
         """
          * Encrypts a byte array using the provided key and nonce.
          *
@@ -101,44 +101,45 @@ class SalmonEncryptor:
             raise SalmonSecurityException("Nonce is missing")
 
         if integrity:
-            chunkSize = SalmonIntegrity.DEFAULT_CHUNK_SIZE if chunkSize is None else chunkSize
+            chunk_size = SalmonIntegrity.DEFAULT_CHUNK_SIZE if chunk_size is None else chunk_size
         else:
-            chunkSize = 0
+            chunk_size = 0
 
-        outputStream: MemoryStream = MemoryStream()
-        headerData: bytearray = None
-        if storeHeaderData:
-            magicBytes: bytearray = SalmonGenerator.getMagicBytes()
-            outputStream.write(magicBytes, 0, len(magicBytes))
-            version: int = SalmonGenerator.getVersion()
-            versionBytes: bytearray = bytearray([version])
-            outputStream.write(versionBytes, 0, len(versionBytes))
-            chunkSizeBytes: bytearray = BitConverter.to_bytes(chunkSize, SalmonGenerator.CHUNK_SIZE_LENGTH)
-            outputStream.write(chunkSizeBytes, 0, len(chunkSizeBytes))
-            outputStream.write(nonce, 0, len(nonce))
-            outputStream.flush()
-            headerData = outputStream.toArray()
+        output_stream: MemoryStream = MemoryStream()
+        header_data: bytearray = None
+        if store_header_data:
+            magic_bytes: bytearray = SalmonGenerator.get_magic_bytes()
+            output_stream.write(magic_bytes, 0, len(magic_bytes))
+            version: int = SalmonGenerator.get_version()
+            version_bytes: bytearray = bytearray([version])
+            output_stream.write(version_bytes, 0, len(version_bytes))
+            chunk_size_bytes: bytearray = BitConverter.to_bytes(chunk_size, SalmonGenerator.CHUNK_SIZE_LENGTH)
+            output_stream.write(chunk_size_bytes, 0, len(chunk_size_bytes))
+            output_stream.write(nonce, 0, len(nonce))
+            output_stream.flush()
+            header_data = output_stream.to_array()
 
-        realSize: int = SalmonAES256CTRTransformer.getActualSize(data, key, nonce, SalmonStream.EncryptionMode.Encrypt,
-                                                                 headerData, integrity, chunkSize, hashKey)
-        outData: bytearray = bytearray(realSize)
-        outputStream.set_position(0)
-        outputStream.read(outData, 0, outputStream.length())
-        outputStream.close()
+        real_size: int = SalmonAES256CTRTransformer.get_actual_size(data, key, nonce,
+                                                                    SalmonStream.EncryptionMode.Encrypt,
+                                                                    header_data, integrity, chunk_size, hash_key)
+        out_data: bytearray = bytearray(real_size)
+        output_stream.set_position(0)
+        output_stream.read(out_data, 0, output_stream.length())
+        output_stream.close()
 
         if self.__threads == 1:
-            inputStream: MemoryStream = MemoryStream(data)
-            self.encryptData(inputStream, 0, len(data), outData,
-                             key, nonce, headerData, integrity, hashKey, chunkSize)
+            input_stream: MemoryStream = MemoryStream(data)
+            self.__encrypt_data(input_stream, 0, len(data), out_data,
+                                key, nonce, header_data, integrity, hash_key, chunk_size)
         else:
-            self.encryptDataParallel(data, outData,
-                                     key, hashKey, nonce, headerData,
-                                     chunkSize, integrity)
-        return outData
+            self.__encrypt_data_parallel(data, out_data,
+                                         key, hash_key, nonce, header_data,
+                                         chunk_size, integrity)
+        return out_data
 
-    def __encryptDataParallel(self, data: bytearray, outData: bytearray,
-                              key: bytearray, hashKey: bytearray, nonce: bytearray, headerData: bytearray,
-                              chunkSize: int, integrity: bool):
+    def __encrypt_data_parallel(self, data: bytearray, out_data: bytearray,
+                                key: bytearray, hash_key: bytearray, nonce: bytearray, header_data: bytearray,
+                                chunk_size: int, integrity: bool):
         """
          * Encrypt stream using parallel threads.
          *
@@ -152,35 +153,35 @@ class SalmonEncryptor:
          * @param integrity  True to apply integrity.
         """
 
-        runningThreads: int = 1
-        partSize: int = len(data)
+        running_threads: int = 1
+        part_size: int = len(data)
 
         # if we want to check integrity we align to the chunk size otherwise to the AES Block
-        minPartSize: int = SalmonAES256CTRTransformer.BLOCK_SIZE
-        if integrity and chunkSize is not None:
-            minPartSize = chunkSize
+        min_part_size: int = SalmonAES256CTRTransformer.BLOCK_SIZE
+        if integrity and chunk_size is not None:
+            min_part_size = chunk_size
         elif integrity:
-            minPartSize = SalmonIntegrity.DEFAULT_CHUNK_SIZE
+            min_part_size = SalmonIntegrity.DEFAULT_CHUNK_SIZE
 
-        if partSize > minPartSize:
-            partSize = int(math.ceil(partSize / float(self.__threads)))
+        if part_size > min_part_size:
+            part_size = int(math.ceil(part_size / float(self.__threads)))
             # if we want to check integrity we align to the chunk size instead of the AES Block
-            rem = partSize % minPartSize
+            rem = part_size % min_part_size
             if rem != 0:
-                partSize += minPartSize - rem
+                part_size += min_part_size - rem
 
-            runningThreads = len(data) // partSize
+            running_threads = len(data) // part_size
         else:
-            runningThreads = 1
+            running_threads = 1
 
-        self.__submitEncryptJobs(runningThreads, partSize,
-                                 data, outData,
-                                 key, hashKey, nonce, headerData,
-                                 integrity, chunkSize)
+        self.__submit_encrypt_jobs(running_threads, part_size,
+                                   data, out_data,
+                                   key, hash_key, nonce, header_data,
+                                   integrity, chunk_size)
 
-    def __submitEncryptJobs(self, runningThreads: int, partSize: int, data: bytearray, outData: bytearray,
-                            key: bytearray, hashKey: bytearray, nonce: bytearray,
-                            headerData: bytearray, integrity: bool, chunkSize: int):
+    def __submit_encrypt_jobs(self, running_threads: int, part_size: int, data: bytearray, out_data: bytearray,
+                              key: bytearray, hash_key: bytearray, nonce: bytearray,
+                              header_data: bytearray, integrity: bool, chunk_size: int):
         """
          * Submit encryption parallel jobs.
          *
@@ -233,9 +234,9 @@ class SalmonEncryptor:
     #     }
     # }
 
-    def __encryptData(self, inputStream: MemoryStream, start: int, count: int, outData: bytearray,
-                      key: bytearray, nonce: bytearray, headerData: bytearray,
-                      integrity: bool, hashKey: bytearray, chunkSize: int):
+    def __encrypt_data(self, input_stream: MemoryStream, start: int, count: int, out_data: bytearray,
+                       key: bytearray, nonce: bytearray, header_data: bytearray,
+                       integrity: bool, hash_key: bytearray, chunk_size: int):
         """
          * Encrypt the data stream.
          *
@@ -254,33 +255,33 @@ class SalmonEncryptor:
          * @throws SalmonIntegrityException Thrown if integrity cannot be applied.
         """
 
-        outputStream: MemoryStream = MemoryStream(outData)
+        output_stream: MemoryStream = MemoryStream(out_data)
         stream: SalmonStream = None
         try:
-            inputStream.set_position(start)
-            stream = SalmonStream(key, nonce, SalmonStream.EncryptionMode.Encrypt, outputStream, headerData,
-                                  integrity, chunkSize, hashKey)
-            stream.setAllowRangeWrite(True)
+            input_stream.set_position(start)
+            stream = SalmonStream(key, nonce, SalmonStream.EncryptionMode.Encrypt, output_stream, header_data,
+                                  integrity, chunk_size, hash_key)
+            stream.set_allow_range_write(True)
             stream.set_position(start)
-            totalChunkBytesRead: int = 0
+            total_chunk_bytes_read: int = 0
             # align to the chunk size if available
-            buffSize: int = max(self.__bufferSize, stream.getChunkSize())
-            buff: bytearray = bytearray(buffSize)
+            buff_size: int = max(self.__bufferSize, stream.get_chunk_size())
+            buff: bytearray = bytearray(buff_size)
             bytesRead: int
-            while (bytesRead := inputStream.read(buff, 0, min(len(buff),
-                                                              count - totalChunkBytesRead))) > 0 and totalChunkBytesRead < count:
+            while (bytesRead := input_stream.read(buff, 0, min(len(buff), count - total_chunk_bytes_read))) > 0 \
+                    and total_chunk_bytes_read < count:
                 stream.write(buff, 0, bytesRead)
-                totalChunkBytesRead += bytesRead
+                total_chunk_bytes_read += bytesRead
             stream.flush()
         except IOError as ex:
             print(ex)
             raise ex
         finally:
-            outputStream.close()
+            output_stream.close()
             if stream is not None:
                 stream.close()
-            if inputStream is not None:
-                inputStream.close()
+            if input_stream is not None:
+                input_stream.close()
 
     def __finalize(self):
         self.__executor.close()

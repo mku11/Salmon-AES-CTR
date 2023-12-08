@@ -22,6 +22,7 @@ LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 '''
+from salmon.iostream.salmon_stream import SalmonStream
 from salmon.transform.salmon_native_transformer import SalmonNativeTransformer
 
 
@@ -42,11 +43,11 @@ class SalmonAesIntrTransformer(SalmonNativeTransformer):
          * @param nonce The nonce to use.
          * @throws SalmonSecurityException
         """
-        self.getNativeProxy().salmonInit(SalmonAesIntrTransformer.AES_IMPL_AES_INTR)
+        self.get_native_proxy().salmon_init(SalmonAesIntrTransformer.AES_IMPL_AES_INTR)
         super().init(key, nonce)
 
-    def encryptData(self, srcBuffer: bytearray, srcOffset: int,
-                    destBuffer: bytearray, destOffset: int, count: int) -> int:
+    def encrypt_data(self, src_buffer: bytearray, src_offset: int,
+                     dest_buffer: bytearray, dest_offset: int, count: int) -> int:
         """
          * Encrypt the data.
          * @param srcBuffer The source byte array.
@@ -57,10 +58,10 @@ class SalmonAesIntrTransformer(SalmonNativeTransformer):
          * @return The number of bytes transformed.
         """
         # AES intrinsics needs the expanded key
-        return self.getNativeProxy().salmonTransform(self.getExpandedKey(), self.getCounter(),
-                                                     SalmonStream.EncryptionMode.Encrypt.ordinal(),
-                                                     srcBuffer, srcOffset,
-                                                     destBuffer, destOffset, count)
+        return self.get_native_proxy().salmon_transform(self.get_expanded_key(), self.get_counter(),
+                                                        SalmonStream.EncryptionMode.Encrypt.ordinal(),
+                                                        src_buffer, src_offset,
+                                                        dest_buffer, dest_offset, count)
 
     """
      * Decrypt the data.
@@ -72,10 +73,10 @@ class SalmonAesIntrTransformer(SalmonNativeTransformer):
      * @return The number of bytes transformed.
     """
 
-    def decryptData(self, srcBuffer: bytearray, srcOffset: int,
-                    destBuffer: bytearray, destOffset: int, count: int) -> int:
+    def decrypt_data(self, src_buffer: bytearray, src_offset: int,
+                     dest_buffer: bytearray, dest_offset: int, count: int) -> int:
         # AES intrinsics needs the expanded key
-        return self.getNativeProxy().salmonTransform(self.getExpandedKey(), self.getCounter(),
-                                                     SalmonStream.EncryptionMode.Encrypt.ordinal(),
-                                                     srcBuffer, srcOffset,
-                                                     destBuffer, destOffset, count)
+        return self.get_native_proxy().salmon_transform(self.get_expanded_key(), self.get_counter(),
+                                                        SalmonStream.EncryptionMode.Encrypt.ordinal(),
+                                                        src_buffer, src_offset,
+                                                        dest_buffer, dest_offset, count)

@@ -35,8 +35,8 @@ class SalmonDefaultPbkdfProvider(ISalmonPbkdfProvider):
      * Provides pbkdf via Java default algorithm.
     """
 
-    def getKey(self, password: str, salt: bytearray, iterations: int, outputBytes: int,
-               pbkdfAlgo: SalmonPassword.PbkdfAlgo) -> bytearray:
+    def get_key(self, password: str, salt: bytearray, iterations: int, output_bytes: int,
+                pbkdf_algo: SalmonPassword.PbkdfAlgo) -> bytearray:
         """
          * Get a key derived from a text password
          * @param password The text password.
@@ -51,10 +51,10 @@ class SalmonDefaultPbkdfProvider(ISalmonPbkdfProvider):
         # keySpec = new
         # PBEKeySpec(password.toCharArray(), salt, iterations, outputBytes * 8)
 
-        pbkdfAlgoStr: str = ISalmonPbkdfProvider.getPbkdfAlgoString(pbkdfAlgo)
+        pbkdf_algo_str: str = ISalmonPbkdfProvider.get_pbkdf_algo_string(pbkdf_algo)
         key: bytearray = bytearray()
         try:
-            hashlib.pbkdf2_hmac(pbkdfAlgoStr, password.encode("utf-8"), salt, iterations, outputBytes * 8)
+            hashlib.pbkdf2_hmac(pbkdf_algo_str, password.encode("utf-8"), salt, iterations, output_bytes * 8)
         except Exception as e:
             raise SalmonSecurityException("Could not initialize pbkdf") from e
         return key

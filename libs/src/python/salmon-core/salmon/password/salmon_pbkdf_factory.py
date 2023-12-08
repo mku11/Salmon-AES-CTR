@@ -33,13 +33,13 @@ class SalmonPbkdfFactory:
     """
 
     @staticmethod
-    def create(pbkdfType: SalmonPassword.PbkdfType) -> ISalmonPbkdfProvider:
+    def create(pbkdf_type: SalmonPassword.PbkdfType) -> ISalmonPbkdfProvider:
         """
          * Create an instance of a pbkdf provider.
          * @param type The pbkdf type.
          * @return The provider.
         """
-        match pbkdfType:
+        match pbkdf_type:
             case SalmonPassword.PbkdfType.Default:
                 return SalmonDefaultPbkdfProvider()
         raise RuntimeError("Unknown Pbkdf provider type")

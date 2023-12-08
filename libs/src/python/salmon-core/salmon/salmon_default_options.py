@@ -37,7 +37,7 @@ class SalmonDefaultOptions:
     """
 
     @staticmethod
-    def getBufferSize() -> int:
+    def get_buffer_size() -> int:
         return SalmonDefaultOptions.__bufferSize
 
     __bufferSize = SalmonIntegrity.DEFAULT_CHUNK_SIZE
@@ -46,10 +46,10 @@ class SalmonDefaultOptions:
     """
 
     @staticmethod
-    def setBufferSize(bufferSize: int):
+    def set_buffer_size(buffer_size: int):
         """
          * Set the default buffer size for all internal streams including Encryptors and Decryptors.
          *
          * @param bufferSize
         """
-        SalmonDefaultOptions.__bufferSize = bufferSize
+        SalmonDefaultOptions.__bufferSize = buffer_size

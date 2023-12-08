@@ -27,6 +27,7 @@ from enum import Enum
 
 from salmon.password.isalmon_pbkdf_provider import ISalmonPbkdfProvider
 from salmon.password.salmon_default_pbkdf_provider import SalmonDefaultPbkdfProvider
+from salmon.password.salmon_pbkdf_factory import SalmonPbkdfFactory
 
 
 class SalmonPassword:
@@ -50,7 +51,7 @@ class SalmonPassword:
     """
 
     @staticmethod
-    def getPbkdfAlgo() -> PbkdfAlgo:
+    def get_pbkdf_algo() -> PbkdfAlgo:
         """
          * Returns the current global PBKDF algorithm.
          *
@@ -59,34 +60,34 @@ class SalmonPassword:
         return SalmonPassword.__pbkdfAlgo
 
     @staticmethod
-    def setPbkdfAlgo(pbkdfAlgo: PbkdfAlgo):
+    def set_pbkdf_algo(pbkdf_algo: PbkdfAlgo):
         """
          * Set the global PDKDF algorithm to be used for key derivation.
          *
          * @param pbkdfAlgo
         """
-        SalmonPassword.__pbkdfAlgo = pbkdfAlgo
+        SalmonPassword.__pbkdfAlgo = pbkdf_algo
 
     @staticmethod
-    def setPbkdfType(pbkdfType: PbkdfType):
+    def set_pbkdf_type(pbkdf_type: PbkdfType):
         """
          * Set the global PBKDF implementation to be used for text key derivation.
          *
          * @param pbkdfType
         """
-        provider = SalmonPbkdfFactory.create(pbkdfType)
+        __provider = SalmonPbkdfFactory.create(pbkdf_type)
 
     @staticmethod
-    def setPbkdfProvider(pbkdfProvider: ISalmonPbkdfProvider):
+    def set_pbkdf_provider(pbkdf_provider: ISalmonPbkdfProvider):
         """
          * Set the global PBKDF provider to be used for text key derivation.
          *
          * @param pbkdfProvider
         """
-        SalmonPassword.__provider = pbkdfProvider
+        SalmonPassword.__provider = pbkdf_provider
 
     @staticmethod
-    def getMasterKey(password: str, salt: bytearray, iterations: int, length: int) -> bytearray:
+    def get_master_key(password: str, salt: bytearray, iterations: int, length: int) -> bytearray:
         """
          * Derives the key from a text password
          *
@@ -97,11 +98,11 @@ class SalmonPassword:
          * @return The derived master key.
          * @throws SalmonSecurityException
         """
-        masterKey: bytearray = SalmonPassword.getKeyFromPassword(password, salt, iterations, length)
-        return masterKey
+        master_key: bytearray = SalmonPassword.get_key_from_password(password, salt, iterations, length)
+        return master_key
 
     @staticmethod
-    def getKeyFromPassword(password: str, salt: bytearray, iterations: int, outputBytes: int) -> bytearray:
+    def get_key_from_password(password: str, salt: bytearray, iterations: int, output_bytes: int) -> bytearray:
         """
          * Function will derive a key from a text password
          *
@@ -114,7 +115,7 @@ class SalmonPassword:
         """
         if SalmonPassword.__pbkdfAlgo == SalmonPassword.PbkdfAlgo.SHA1 and not SalmonPassword.ENABLE_SHA1:
             raise RuntimeError("Cannot use SHA1, SHA1 is not secure anymore use SHA256!")
-        return SalmonPassword.__provider.getKey(password, salt, iterations, outputBytes, SalmonPassword.__pbkdfAlgo);
+        return SalmonPassword.__provider.get_key(password, salt, iterations, output_bytes, SalmonPassword.__pbkdfAlgo)
 
     class PbkdfType(Enum):
         """
@@ -143,4 +144,4 @@ class SalmonPassword:
 
     # WORKAROUND: __future__ forw references does not seem to work with enum at least easily,
     # so we delay default assignment till the enum is declared in this module
-    setPbkdfAlgo(PbkdfAlgo.SHA256)
+    set_pbkdf_algo(PbkdfAlgo.SHA256)

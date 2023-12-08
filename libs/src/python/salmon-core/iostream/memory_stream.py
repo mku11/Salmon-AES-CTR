@@ -70,19 +70,19 @@ class MemoryStream(RandomAccessStream):
         self.__bytes = v_bytes
         self.__capacity = len(v_bytes)
 
-    def canRead(self) -> bool:
+    def can_read(self) -> bool:
         """
          * @return Always True.
         """
         return True
 
-    def canWrite(self) -> bool:
+    def can_write(self) -> bool:
         """
          * @return Always True.
         """
         return True
 
-    def canSeek(self) -> bool:
+    def can_seek(self) -> bool:
         """
          * @return Always True.
         """
@@ -111,14 +111,14 @@ class MemoryStream(RandomAccessStream):
         """
         self.__position = value
 
-    def setLength(self, value: int):
+    def set_length(self, value: int):
         """
-         * Changes the length of the stream. The capacity of the stream might also change if the value is lesser than the
-         * current capacity.
+         * Changes the length of the stream. The capacity of the stream might also change
+         * if the value is lesser than the current capacity.
          * @param value
          * @throws IOException
         """
-        self.__checkAndResize(value)
+        self.__check_and_resize(value)
         self.__capacity = value
 
     def read(self, buffer: bytearray, offset: int, count: int) -> int:
@@ -130,12 +130,12 @@ class MemoryStream(RandomAccessStream):
          * @return
          * @throws IOException
         """
-        bytesRead: int = int(min(self.__length - self.get_position(), count))
-        buffer[offset:offset + bytesRead] = self.__bytes[self.__position:self.__position + bytesRead]
-        self.set_position(self.get_position() + bytesRead)
-        if bytesRead <= 0:
+        bytes_read: int = int(min(self.__length - self.get_position(), count))
+        buffer[offset:offset + bytes_read] = self.__bytes[self.__position:self.__position + bytes_read]
+        self.set_position(self.get_position() + bytes_read)
+        if bytes_read <= 0:
             return -1
-        return bytesRead
+        return bytes_read
 
     def write(self, buffer: bytearray, offset: int, count: int):
         """
@@ -145,25 +145,25 @@ class MemoryStream(RandomAccessStream):
          * @param count The number of bytes that will be written to the stream.
          * @throws IOException
         """
-        self.__checkAndResize(self.__position + count)
+        self.__check_and_resize(self.__position + count)
         self.__bytes[self.__position:self.__position + count] = buffer[offset:offset + count]
         self.set_position(self.get_position() + count)
 
-    def __checkAndResize(self, newLength: int):
+    def __check_and_resize(self, new_length: int):
         """
          * Check if there is no more space in the byte array and increase the capacity.
          * @param newLength The new length of the stream.
         """
-        if self.__capacity < newLength:
-            newCapacity: int = self.__capacity + MemoryStream.__CAPACITY_INCREMENT * (
-                    (newLength - self.__capacity) // MemoryStream.__CAPACITY_INCREMENT)
-            if newCapacity < newLength:
-                newCapacity += MemoryStream.__CAPACITY_INCREMENT
-            nBytes: bytearray = bytearray(newCapacity)
-            nBytes[0:self.__capacity] = self.__bytes[0:self.__capacity]
-            _capacity = newCapacity
-            self.__bytes = nBytes
-        self.__length = newLength
+        if self.__capacity < new_length:
+            new_capacity: int = self.__capacity + MemoryStream.__CAPACITY_INCREMENT * (
+                    (new_length - self.__capacity) // MemoryStream.__CAPACITY_INCREMENT)
+            if new_capacity < new_length:
+                new_capacity += MemoryStream.__CAPACITY_INCREMENT
+            n_bytes: bytearray = bytearray(new_capacity)
+            n_bytes[0:self.__capacity] = self.__bytes[0:self.__capacity]
+            _capacity = new_capacity
+            self.__bytes = n_bytes
+        self.__length = new_length
 
     def seek(self, offset: int, origin: RandomAccessStream.SeekOrigin) -> int:
         """
@@ -173,15 +173,15 @@ class MemoryStream(RandomAccessStream):
          * @return
          * @throws IOException
         """
-        nPos: int = 0
+        n_pos: int = 0
         if origin == RandomAccessStream.SeekOrigin.Begin:
-            nPos = offset
+            n_pos = offset
         elif origin == RandomAccessStream.SeekOrigin.Current:
-            nPos = self.get_position() + offset
+            n_pos = self.get_position() + offset
         elif origin == RandomAccessStream.SeekOrigin.End:
-            nPos = len(self.__bytes) - offset
-        self.__checkAndResize(nPos)
-        self.set_position(nPos)
+            n_pos = len(self.__bytes) - offset
+        self.__check_and_resize(n_pos)
+        self.set_position(n_pos)
         return self.get_position()
 
     def flush(self):
@@ -196,11 +196,11 @@ class MemoryStream(RandomAccessStream):
         """
         pass
 
-    def toArray(self) -> bytearray:
+    def to_array(self) -> bytearray:
         """
          * Convert the stream to an array:
          * @return A byte array containing the data from the stream.
         """
-        nBytes: bytearray = bytearray(self.__length)
-        nBytes[0:self.__length] = self.__bytes[0:self.__length];
-        return nBytes
+        n_bytes: bytearray = bytearray(self.__length)
+        n_bytes[0:self.__length] = self.__bytes[0:self.__length]
+        return n_bytes

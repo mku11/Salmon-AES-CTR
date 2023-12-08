@@ -31,14 +31,14 @@ from interface import Interface
 from salmon.salmon_default_options import SalmonDefaultOptions
 
 
-class RandomAccessStream:
+class RandomAccessStream(ABC):
     """
      * Abstract read-write seekable stream used by internal streams
      * (modeled after c# Stream class).
     """
 
     @abstractmethod
-    def canRead(self) -> bool:
+    def can_read(self) -> bool:
         """
          * True if the stream is readable.
          * @return
@@ -46,7 +46,7 @@ class RandomAccessStream:
         pass
 
     @abstractmethod
-    def canWrite(self) -> bool:
+    def can_write(self) -> bool:
         """
          * True if the stream is writeable.
          * @return
@@ -54,7 +54,7 @@ class RandomAccessStream:
         pass
 
     @abstractmethod
-    def canSeek(self) -> bool:
+    def can_seek(self) -> bool:
         """
          * True if the stream is seekable.
          * @return
@@ -88,7 +88,7 @@ class RandomAccessStream:
         pass
 
     @abstractmethod
-    def setLength(self, value: int):
+    def set_length(self, value: int):
         """
          * Set the length of this stream.
          * @param value The length.
@@ -151,10 +151,10 @@ class RandomAccessStream:
          *
         """
 
-        def onProgressChanged(self, position: int, length: int):
+        def on_progress_changed(self, position: int, length: int):
             pass
 
-    def copyTo(self, stream: RandomAccessStream, bufferSize: int, progressListener: OnProgressListener):
+    def copy_to(self, stream: RandomAccessStream, buffer_size: int, progress_listener: OnProgressListener):
         """
          * Write stream contents to another stream.
          * @param stream The target stream.
@@ -162,21 +162,21 @@ class RandomAccessStream:
          * @param progressListener The listener to notify when progress changes.
          * @throws IOException
         """
-        if not self.canRead():
+        if not self.can_read():
             raise IOError("Target stream not readable")
-        if not stream.canWrite():
+        if not stream.can_write():
             raise IOError("Target stream not writable")
-        if bufferSize <= 0:
-            bufferSize = SalmonDefaultOptions.getBufferSize();
+        if buffer_size <= 0:
+            buffer_size = SalmonDefaultOptions.get_buffer_size()
         bytesRead: int
-        pos: int = self.position()
-        buffer: bytearray = bytearray(bufferSize)
-        while (bytesRead := self.read(buffer, 0, bufferSize)) > 0:
+        pos: int = self.get_position()
+        buffer: bytearray = bytearray(buffer_size)
+        while (bytesRead := self.read(buffer, 0, buffer_size)) > 0:
             stream.write(buffer, 0, bytesRead)
-            if progressListener is not None:
-                progressListener.onProgressChanged(self.position(), self.length())
+            if progress_listener is not None:
+                progress_listener.on_progress_changed(self.get_position(), self.length())
         stream.flush()
-        self.position(pos)
+        self.set_position(pos)
 
     class SeekOrigin(Enum):
         """

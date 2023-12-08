@@ -33,12 +33,12 @@ class SalmonDefaultTransformer(SalmonAES256CTRTransformer):
 
     def __init__(self):
         super().__init__()
-        __cipher: Cipher
+        #__cipher: Cipher
         """
          * Default Java AES cipher.
         """
 
-        __encSecretKey: SecretKeySpec
+        #__encSecretKey: SecretKeySpec
         """
          * Key spec for the initial nonce (counter).
         """
@@ -58,8 +58,8 @@ class SalmonDefaultTransformer(SalmonAES256CTRTransformer):
         except Exception as e:
             raise SalmonSecurityException("Could not init AES transformer") from e
 
-    def encryptData(srcBuffer: bytearray, srcOffset: int,
-                    destBuffer: bytearray, destOffset: int, count: int) -> int:
+    def encrypt_data(self, src_buffer: bytearray, src_offset: int,
+                     dest_buffer: bytearray, dest_offset: int, count: int) -> int:
         """
          * Encrypt the data.
          * @param srcBuffer The source byte array.
@@ -70,17 +70,18 @@ class SalmonDefaultTransformer(SalmonAES256CTRTransformer):
          * @return The number of bytes transformed.
          * @throws SalmonSecurityException
         """
-        try:
-            pass
-        # byte[] counter = getCounter();
-        # IvParameterSpec ivSpec = new IvParameterSpec(counter);
-        # cipher.init(Cipher.ENCRYPT_MODE, encSecretKey, ivSpec);
-        # return cipher.doFinal(srcBuffer, srcOffset, count, destBuffer, destOffset);
-        except Exception as ex:
-            raise SalmonSecurityException("Could not encrypt data: ") from ex
+        # TODO:
+        return 0
+        # try:
+        # # byte[] counter = getCounter();
+        # # IvParameterSpec ivSpec = new IvParameterSpec(counter);
+        # # cipher.init(Cipher.ENCRYPT_MODE, encSecretKey, ivSpec);
+        # # return cipher.doFinal(srcBuffer, srcOffset, count, destBuffer, destOffset);
+        # except Exception as ex:
+        #     raise SalmonSecurityException("Could not encrypt data: ") from ex
 
-    def decryptData(srcBuffer: bytearray, srcOffset: int,
-                    destBuffer: bytearray, destOffset: int, count: int) -> int:
+    def decrypt_data(self, src_buffer: bytearray, src_offset: int,
+                     dest_buffer: bytearray, dest_offset: int, count: int) -> int:
         """
          * Decrypt the data.
          * @param srcBuffer The source byte array.

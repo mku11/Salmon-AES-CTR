@@ -22,6 +22,7 @@ LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 '''
+from salmon.iostream.salmon_stream import SalmonStream
 from salmon.transform.inative_proxy import INativeProxy
 from salmon.transform.native_proxy import NativeProxy
 from salmon.transform.salmon_aes256_ctr_transformer import SalmonAES256CTRTransformer
@@ -39,11 +40,11 @@ class SalmonNativeTransformer(SalmonAES256CTRTransformer):
     """
 
     @staticmethod
-    def setNativeProxy(proxy: INativeProxy):
+    def set_native_proxy(proxy: INativeProxy):
         SalmonNativeTransformer.__nativeProxy = proxy
 
     @staticmethod
-    def getNativeProxy() -> INativeProxy:
+    def get_native_proxy() -> INativeProxy:
         return SalmonNativeTransformer.__nativeProxy
 
     def init(self, key: bytearray, nonce: bytearray):
@@ -54,9 +55,9 @@ class SalmonNativeTransformer(SalmonAES256CTRTransformer):
          * @throws SalmonSecurityException
         """
         super().init(key, nonce)
-        self.__expandedKey: bytearray = bytearray(SalmonAES256CTRTransformer.EXPANDED_KEY_SIZE)
-        SalmonNativeTransformer.__nativeProxy.salmonExpandKey(key, self.__expandedKey)
-        SalmonNativeTransformer.setExpandedKey(self.__expandedKey)
+        expanded_key: bytearray = bytearray(SalmonAES256CTRTransformer.EXPANDED_KEY_SIZE)
+        SalmonNativeTransformer.__nativeProxy.salmon_expand_key(key, expanded_key)
+        self.set_expanded_key(expanded_key)
 
     """
      * Encrypt the data.
@@ -68,12 +69,12 @@ class SalmonNativeTransformer(SalmonAES256CTRTransformer):
      * @return The number of bytes transformed.
     """
 
-    def encryptData(self, srcBuffer: bytearray, srcOffset: int,
-                    destBuffer: bytearray, destOffset: int, count: int) -> int:
-        return SalmonNativeTransformer.__nativeProxy.salmonTransform(self.getKey(), self.getCounter(),
-                                                                     SalmonStream.EncryptionMode.Encrypt.ordinal(),
-                                                                     srcBuffer, srcOffset,
-                                                                     destBuffer, destOffset, count)
+    def encrypt_data(self, src_buffer: bytearray, src_offset: int,
+                     dest_buffer: bytearray, dest_offset: int, count: int) -> int:
+        return SalmonNativeTransformer.__nativeProxy.salmon_transform(self.get_key(), self.get_counter(),
+                                                                      SalmonStream.EncryptionMode.Encrypt.ordinal(),
+                                                                      src_buffer, src_offset,
+                                                                      dest_buffer, dest_offset, count)
 
     """
      * Decrypt the data.
@@ -85,9 +86,9 @@ class SalmonNativeTransformer(SalmonAES256CTRTransformer):
      * @return The number of bytes transformed.
     """
 
-    def decryptData(self, srcBuffer: bytearray, srcOffset: int,
-                    destBuffer: bytearray, destOffset: int, count: int) -> int:
-        return SalmonNativeTransformer.__nativeProxy.salmonTransform(self.getKey(), self.getCounter(),
-                                                                     SalmonStream.EncryptionMode.Encrypt.ordinal(),
-                                                                     srcBuffer, srcOffset,
-                                                                     destBuffer, destOffset, count);
+    def decrypt_data(self, src_buffer: bytearray, src_offset: int,
+                     dest_buffer: bytearray, dest_offset: int, count: int) -> int:
+        return SalmonNativeTransformer.__nativeProxy.salmon_transform(self.get_key(), self.get_counter(),
+                                                                      SalmonStream.EncryptionMode.Encrypt.ordinal(),
+                                                                      src_buffer, src_offset,
+                                                                      dest_buffer, dest_offset, count)

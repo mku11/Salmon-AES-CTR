@@ -40,7 +40,7 @@ class SalmonDecryptor:
      * Utility class that decrypts byte arrays.
     """
 
-    def __init__(self, threads: int = None, bufferSize: int = None):
+    def __init__(self, threads: int = None, buffer_size: int = None):
         """
          * Instantiate an encryptor with parallel tasks and buffer size.
          *
@@ -60,7 +60,7 @@ class SalmonDecryptor:
          * Executor for parallel tasks.
         """
 
-        __bufferSize:int = 0
+        __bufferSize: int = 0
         """
          * The buffer size to use.
         """
@@ -71,14 +71,14 @@ class SalmonDecryptor:
             self.__threads = threads
             executor = ThreadPool(threads)
 
-        if bufferSize is None:
+        if buffer_size is None:
             self.__bufferSize = SalmonIntegrity.DEFAULT_CHUNK_SIZE
         else:
-            self.__bufferSize = bufferSize
+            self.__bufferSize = buffer_size
 
     def decrypt(self, data: bytearray, key: bytearray, nonce: bytearray,
-                                 hasHeaderData: bool,
-                                 integrity: bool = False, hashKey: bytearray = None, chunkSize: int = None) -> bytearray:
+                has_header_data: bool,
+                integrity: bool = False, hash_key: bytearray = None, chunk_size: int = None) -> bytearray:
         """
          * Decrypt a byte array using AES256 based on the provided key and nonce.
          * @param data The input data to be decrypted.
@@ -96,38 +96,39 @@ class SalmonDecryptor:
         """
         if key is None:
             raise SalmonSecurityException("Key is missing")
-        if not hasHeaderData and nonce is None:
+        if not has_header_data and nonce is None:
             raise SalmonSecurityException("Need to specify a nonce if the file doesn't have a header")
 
         if integrity:
-            chunkSize = SalmonIntegrity.DEFAULT_CHUNK_SIZE  if chunkSize is None else chunkSize
+            chunk_size = SalmonIntegrity.DEFAULT_CHUNK_SIZE if chunk_size is None else chunk_size
 
-        inputStream: MemoryStream = MemoryStream(data)
+        input_stream: MemoryStream = MemoryStream(data)
         header: SalmonHeader
-        headerData: bytearray = None
-        if hasHeaderData:
-            header = SalmonHeader.parseHeaderData(inputStream)
-            if header.getChunkSize() > 0:
+        header_data: bytearray = None
+        if has_header_data:
+            header = SalmonHeader.parse_header_data(input_stream)
+            if header.get_chunk_size() > 0:
                 integrity = True
-            chunkSize = header.getChunkSize()
-            nonce = header.getNonce()
-            headerData = header.getHeaderData()
+            chunk_size = header.get_chunk_size()
+            nonce = header.get_nonce()
+            header_data = header.get_header_data()
 
         if nonce is None:
             raise SalmonSecurityException("Nonce is missing")
 
-        realSize: int = SalmonAES256CTRTransformer.getActualSize(data, key, nonce, SalmonStream.EncryptionMode.Decrypt,
-                headerData, integrity, chunkSize, hashKey)
-        outData: bytearray = bytearray(realSize)
+        real_size: int = SalmonAES256CTRTransformer.get_actual_size(data, key, nonce,
+                                                                    SalmonStream.EncryptionMode.Decrypt,
+                                                                    header_data, integrity, chunk_size, hash_key)
+        out_data: bytearray = bytearray(real_size)
 
         if self.__threads == 1:
-            self.decryptData(inputStream, 0, inputStream.length(), outData,
-                    key, nonce, headerData, integrity, hashKey, chunkSize)
+            self.__decrypt_data(input_stream, 0, input_stream.length(), out_data,
+                                key, nonce, header_data, integrity, hash_key, chunk_size)
         else:
-            self.decryptDataParallel(data, outData,
-                    key, hashKey, nonce, headerData,
-                    chunkSize, integrity)
-        return outData
+            self.__decrypt_data_parallel(data, out_data,
+                                         key, hash_key, nonce, header_data,
+                                         chunk_size, integrity)
+        return out_data
 
     """
      * Decrypt stream using parallel threads.
@@ -140,33 +141,34 @@ class SalmonDecryptor:
      * @param chunkSize The chunk size.
      * @param integrity True to verify integrity.
     """
-    def __decryptDataParallel(self, data: bytearray, outData: bytearray,
-                                            key: bytearray, hashKey: bytearray, nonce: bytearray, headerData: bytearray,
-                                            chunkSize: int, integrity: bool):
-        runningThreads: int = 1
-        partSize: int = len(data)
+
+    def __decrypt_data_parallel(self, data: bytearray, out_data: bytearray,
+                                key: bytearray, hash_key: bytearray, nonce: bytearray, header_data: bytearray,
+                                chunk_size: int, integrity: bool):
+        running_threads: int = 1
+        part_size: int = len(data)
 
         # if we want to check integrity we align to the chunk size otherwise to the AES Block
-        minPartSize: int = SalmonAES256CTRTransformer.BLOCK_SIZE
-        if integrity and chunkSize is not None:
-            minPartSize = chunkSize
+        min_part_size: int = SalmonAES256CTRTransformer.BLOCK_SIZE
+        if integrity and chunk_size is not None:
+            min_part_size = chunk_size
         elif integrity:
-            minPartSize = SalmonIntegrity.DEFAULT_CHUNK_SIZE
+            min_part_size = SalmonIntegrity.DEFAULT_CHUNK_SIZE
 
-        if partSize > minPartSize:
-            partSize = math.ceil(partSize / float(self.__threads))
+        if part_size > min_part_size:
+            part_size = math.ceil(part_size / float(self.__threads))
             # if we want to check integrity we align to the chunk size instead of the AES Block
-            rem: int = partSize % minPartSize
+            rem: int = part_size % min_part_size
             if rem != 0:
-                partSize += minPartSize - rem
-            runningThreads = len(data) // partSize
+                part_size += min_part_size - rem
+            running_threads = len(data) // part_size
         else:
-            runningThreads = 1
+            running_threads = 1
 
-        self.__submitDecryptJobs(runningThreads, partSize,
-                data, outData,
-                key, hashKey, nonce, headerData,
-                integrity, chunkSize)
+        self.__submit_decrypt_jobs(running_threads, part_size,
+                                   data, out_data,
+                                   key, hash_key, nonce, header_data,
+                                   integrity, chunk_size)
 
     """
      * Submit decryption parallel jobs.
@@ -182,13 +184,15 @@ class SalmonDecryptor:
      * @param integrity True to verify the data integrity.
      * @param chunkSize The chunk size.
     """
-    def __submitDecryptJobs(self, runningThreads: int, partSize: int,
-                                          data: bytearray, outData: bytearray,
-                                          key: bytearray, hashKey: bytearray, nonce: bytearray, headerData: bytearray,
-                                          integrity: bool, chunkSize: int):
+
+    def __submit_decrypt_jobs(self, running_threads: int, part_size: int,
+                              data: bytearray, out_data: bytearray,
+                              key: bytearray, hash_key: bytearray, nonce: bytearray, header_data: bytearray,
+                              integrity: bool, chunk_size: int):
         pass
         # TODO:
         # done: CountDownLatch = CountDownLatch(runningThreads)
+
     #     AtomicReference<Exception> ex = new AtomicReference<>()
     #     for i in (0, runningThreads):
     #         int index = i
@@ -197,10 +201,10 @@ class SalmonDecryptor:
     #             try {
     #                 long start = partSize * index
     #                 long length
-	# 				if(index == runningThreads - 1)
-	# 					length = data.length-start
-	# 				else
-	# 					length = partSize
+    # 				if(index == runningThreads - 1)
+    # 					length = data.length-start
+    # 				else
+    # 					length = partSize
     #                 MemoryStream ins = new MemoryStream(data)
     #                 decryptData(ins, start, length, outData, key, nonce, headerData,
     #                         integrity, hashKey, chunkSize)
@@ -240,36 +244,38 @@ class SalmonDecryptor:
      * @throws SalmonSecurityException Thrown if there is a security exception with the stream.
      * @throws SalmonIntegrityException Thrown if the stream is corrupt or tampered with.
     """
-    def __decryptData(self, inputStream: RandomAccessStream, start: int, count: int, outData: bytearray,
-                                    key: bytearray, nonce: bytearray,
-                                    headerData: bytearray, integrity: bool, hashKey: bytearray, chunkSize: int):
+
+    def __decrypt_data(self, input_stream: RandomAccessStream, start: int, count: int, out_data: bytearray,
+                       key: bytearray, nonce: bytearray,
+                       header_data: bytearray, integrity: bool, hash_key: bytearray, chunk_size: int):
         stream: SalmonStream = None
-        outputStream: MemoryStream = None
+        output_stream: MemoryStream = None
         try:
-            outputStream = MemoryStream(outData)
-            outputStream.set_position(start)
-            stream = SalmonStream(key, nonce, SalmonStream.EncryptionMode.Decrypt, inputStream,
-                    headerData, integrity, chunkSize, hashKey)
+            output_stream = MemoryStream(out_data)
+            output_stream.set_position(start)
+            stream = SalmonStream(key, nonce, SalmonStream.EncryptionMode.Decrypt, input_stream,
+                                  header_data, integrity, chunk_size, hash_key)
             stream.set_position(start)
-            totalChunkBytesRead: int = 0
-            # align to the chunksize if available
-            buffSize: int = max(self.__bufferSize, stream.getChunkSize())
-            buff: bytearray = bytearray(buffSize)
+            total_chunk_bytes_read: int = 0
+            # align to the chunk size if available
+            buff_size: int = max(self.__bufferSize, stream.get_chunk_size())
+            buff: bytearray = bytearray(buff_size)
             bytesRead: int
-            while (bytesRead := stream.read(buff, 0, min(len(buff), (count - totalChunkBytesRead)))) > 0 and totalChunkBytesRead < count:
-                outputStream.write(buff, 0, bytesRead)
-                totalChunkBytesRead += bytesRead
-            outputStream.flush()
+            while (bytesRead := stream.read(buff, 0, min(len(buff), (
+                    count - total_chunk_bytes_read)))) > 0 and total_chunk_bytes_read < count:
+                output_stream.write(buff, 0, bytesRead)
+                total_chunk_bytes_read += bytesRead
+            output_stream.flush()
         except (IOError, SalmonSecurityException, SalmonIntegrityException) as ex:
             print(ex)
             raise SalmonSecurityException("Could not decrypt data") from ex
         finally:
-            if inputStream is not None:
-                inputStream.close()
+            if input_stream is not None:
+                input_stream.close()
             if stream is not None:
                 stream.close()
-            if outputStream is not None:
-                outputStream.close()
+            if output_stream is not None:
+                output_stream.close()
 
     def __finalize(self):
         self.__executor.close()

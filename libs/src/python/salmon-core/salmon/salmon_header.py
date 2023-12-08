@@ -22,6 +22,7 @@ LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 '''
+from __future__ import annotations
 from convert.bit_converter import BitConverter
 from iostream.random_access_stream import RandomAccessStream
 from salmon.salmon_generator import SalmonGenerator
@@ -60,35 +61,35 @@ class SalmonHeader:
          * Binary data.
         """
 
-    def getNonce(self) -> bytearray:
+    def get_nonce(self) -> bytearray:
         """
          * Get the nonce.
          * @return The nonce
         """
         return self.__nonce
 
-    def getChunkSize(self) -> int:
+    def get_chunk_size(self) -> int:
         """
          * Get the chunk size.
          * @return Chunk size
         """
         return self.__chunkSize
 
-    def getHeaderData(self) -> bytearray:
+    def get_header_data(self) -> bytearray:
         """
          * Get the raw header data.
          * @return Header data
         """
         return self.__headerData
 
-    def getVersion(self) -> int:
+    def get_version(self) -> int:
         """
          * Get the Salmon format  version
          * @return The format version
         """
         return self.__version
 
-    def getMagicBytes(self) -> bytearray:
+    def get_magic_bytes(self) -> bytearray:
         """
          * Get the magic bytes
          * @return Magic bytes
@@ -96,7 +97,7 @@ class SalmonHeader:
         return self.__magicBytes
 
     @staticmethod
-    def parseHeaderData(stream: RandomAccessStream) -> SalmonHeader:
+    def parse_header_data(stream: RandomAccessStream) -> SalmonHeader:
         """
          * Parse the header data from the stream
          * @param stream The stream.
@@ -106,17 +107,17 @@ class SalmonHeader:
         header: SalmonHeader = SalmonHeader()
         header.magicBytes = bytearray(SalmonGenerator.MAGIC_LENGTH)
         stream.read(header.magicBytes, 0, len(header.magicBytes))
-        versionBytes: bytearray = bytearray(SalmonGenerator.VERSION_LENGTH)
-        stream.read(versionBytes, 0, SalmonGenerator.VERSION_LENGTH);
-        header.version = versionBytes[0];
-        chunkSizeHeader: bytearray = bytearray(SalmonGenerator.CHUNK_SIZE_LENGTH)
-        stream.read(chunkSizeHeader, 0, len(chunkSizeHeader))
-        header.chunkSize = BitConverter.to_long(chunkSizeHeader, 0, SalmonGenerator.CHUNK_SIZE_LENGTH)
+        version_bytes: bytearray = bytearray(SalmonGenerator.VERSION_LENGTH)
+        stream.read(version_bytes, 0, SalmonGenerator.VERSION_LENGTH)
+        header.version = version_bytes[0]
+        chunk_size_header: bytearray = bytearray(SalmonGenerator.CHUNK_SIZE_LENGTH)
+        stream.read(chunk_size_header, 0, len(chunk_size_header))
+        header.chunkSize = BitConverter.to_long(chunk_size_header, 0, SalmonGenerator.CHUNK_SIZE_LENGTH)
         header.nonce = bytearray(SalmonGenerator.NONCE_LENGTH)
         stream.read(header.nonce, 0, len(header.nonce))
-        stream.position(0)
-        header.headerData = bytearray(
-            SalmonGenerator.MAGIC_LENGTH + SalmonGenerator.VERSION_LENGTH + SalmonGenerator.CHUNK_SIZE_LENGTH + SalmonGenerator.NONCE_LENGTH)
+        stream.set_position(0)
+        header.headerData = bytearray(SalmonGenerator.MAGIC_LENGTH + SalmonGenerator.VERSION_LENGTH
+                                      + SalmonGenerator.CHUNK_SIZE_LENGTH + SalmonGenerator.NONCE_LENGTH)
         stream.read(header.headerData, 0, len(header.headerData))
         return header
 
@@ -125,17 +126,17 @@ class SalmonHeader:
      * @param chunkSize The chunk size
     """
 
-    def setChunkSize(self, chunkSize: int):
-        self.__chunkSize = chunkSize
+    def set_chunk_size(self, chunk_size: int):
+        self.__chunkSize = chunk_size
 
-    def setVersion(self, version: int):
+    def set_version(self, version: int):
         """
          * Set the Salmon format version
          * @param version The format version
         """
         self.__version = version
 
-    def setNonce(self, nonce: bytearray):
+    def set_nonce(self, nonce: bytearray):
         """
          * Set the nonce to be used.
          * @param nonce The nonce

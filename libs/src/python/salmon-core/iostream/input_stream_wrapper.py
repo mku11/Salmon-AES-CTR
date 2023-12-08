@@ -50,12 +50,12 @@ class InputStreamWrapper(BufferedIOBase):
          * @return The number of bytes read.
          * @throws IOException with an optional inner Exception if the base stream is a SalmonStream
         """
-        bytesRead: int
+        bytes_read: int
         try:
-            bytesRead = self.__stream.read(buffer, 0, len(buffer))
+            bytes_read = self.__stream.read(buffer, 0, len(buffer))
         except Exception as exception:
             raise IOError() from exception
-        return bytesRead
+        return bytes_read
 
     def read(self, size: int | None = ...) -> bytearray:
         raise NotImplementedError("use readinto instead")

@@ -52,24 +52,24 @@ class ISalmonPbkdfProvider(Interface):
     """
 
     @staticmethod
-    def getPbkdfAlgoString(pbkdfAlgo: SalmonPassword.PbkdfAlgo) -> str:
-        match pbkdfAlgo:
+    def get_pbkdf_algo_string(pbkdf_algo: SalmonPassword.PbkdfAlgo) -> str:
+        match pbkdf_algo:
             case SalmonPassword.PbkdfAlgo.SHA1:
                 return ISalmonPbkdfProvider.PBKDF_SHA1
             case SalmonPassword.PbkdfAlgo.SHA256:
                 return ISalmonPbkdfProvider.PBKDF_SHA256
         raise SalmonSecurityException("Unknown pbkdf algorithm")
 
-    def getKey(self, password: str, salt: bytearray, iterations: int, outputBytes: int,
-               pbkdfAlgo: SalmonPassword.PbkdfAlgo) -> bytearray:
+    def get_key(self, password: str, salt: bytearray, iterations: int, output_bytes: int,
+                pbkdf_algo: SalmonPassword.PbkdfAlgo) -> bytearray:
         """
         Get a key derived from a text password.
 
         :param password: The text password.
         :param salt: The salt needs to be at least 24 bytes.
         :param iterations: Iterations to use. Make sure you use a high number according to your hardware specs.
-        :param outputBytes: The length of the output key.
-        :param pbkdfAlgo: The hash algorithm to use.
+        :param output_bytes: The length of the output key.
+        :param pbkdf_algo: The hash algorithm to use.
         :return: The key.
         :raises: SalmonSecurityException
         """

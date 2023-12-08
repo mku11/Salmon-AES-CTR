@@ -41,8 +41,8 @@ class ISalmonCTRTransformer(Interface):
         """
         pass
 
-    def encryptData(self, srcBuffer: bytearray, srcOffset: int,
-                    destBuffer: bytearray, destOffset: int, count: int) -> int:
+    def encrypt_data(self, src_buffer: bytearray, src_offset: int,
+                     dest_buffer: bytearray, dest_offset: int, count: int) -> int:
         """
          * Encrypt the data.
          * @param srcBuffer The source byte array.
@@ -56,8 +56,8 @@ class ISalmonCTRTransformer(Interface):
         """
         pass
 
-    def decryptData(self, srcBuffer: bytearray, srcOffset: int,
-                    destBuffer: bytearray, destOffset: int, count: int) -> int:
+    def decrypt_data(self, src_buffer: bytearray, src_offset: int,
+                     dest_buffer: bytearray, dest_offset: int, count: int) -> int:
         """
          * Decrypt the data.
          * @param srcBuffer The source byte array.
@@ -71,41 +71,41 @@ class ISalmonCTRTransformer(Interface):
         """
         pass
 
-    def getCounter(self) -> bytearray:
+    def get_counter(self) -> bytearray:
         """
          * Get the current counter.
          * @return
         """
         pass
 
-    def getKey(self) -> bytearray:
+    def get_key(self) -> bytearray:
         """
          * Get the current encryption key.
          * @return
         """
         pass
 
-    def getBlock(self) -> int:
+    def get_block(self) -> int:
         """
          * Get the current block.
          * @return
         """
         pass
 
-    def getNonce(self) -> bytearray:
+    def get_nonce(self) -> bytearray:
         """
          * Get the nonce (initial counter) to be used for the data.
          * @return
         """
         pass
 
-    def resetCounter(self):
+    def reset_counter(self):
         """
          * Reset the counter to the nonce (initial counter).
         """
         pass
 
-    def syncCounter(self, position: int):
+    def sync_counter(self, position: int):
         """
          * Calculate the value of the counter based on the current block. After an encryption
          * operation (ie sync or read) the block will be incremented. This method calculates

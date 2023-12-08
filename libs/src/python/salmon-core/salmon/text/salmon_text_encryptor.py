@@ -34,8 +34,8 @@ class SalmonTextEncryptor:
     __encryptor: SalmonEncryptor = SalmonEncryptor()
 
     @staticmethod
-    def encryptString(text: str, key: bytearray, nonce: bytearray, header: bool,
-                      integrity: bool = False, hashKey: bytearray = None, chunkSize: int = None) -> str:
+    def encrypt_string(text: str, key: bytearray, nonce: bytearray, header: bool,
+                       integrity: bool = False, hash_key: bytearray = None, chunk_size: int = None) -> str:
         """
          * Encrypts a text String using AES256 with the key and nonce provided.
          *
@@ -53,7 +53,7 @@ class SalmonTextEncryptor:
          * @throws IOException
         """
         v_bytes: bytearray = bytearray(text.encode('utf-8'))
-        encBytes: bytearray = SalmonTextEncryptor.__encryptor.encrypt(v_bytes, key, nonce, header, integrity, hashKey,
-                                                                      chunkSize)
-        encString: str = SalmonEncoder.get_base64().encode(encBytes).replace("\n", "")
-        return encString
+        enc_bytes: bytearray = SalmonTextEncryptor.__encryptor.encrypt(v_bytes, key, nonce, header, integrity, hash_key,
+                                                                       chunk_size)
+        enc_string: str = SalmonEncoder.get_base64().encode(enc_bytes).replace("\n", "")
+        return enc_string

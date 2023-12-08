@@ -22,7 +22,7 @@ LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 '''
-
+from salmon.iostream.salmon_stream import SalmonStream
 from salmon.salmon_generator import SalmonGenerator
 from salmon.salmon_range_exceeded_exception import SalmonRangeExceededException
 from salmon.transform.isalmon_ctr_transformer import ISalmonCTRTransformer
@@ -40,8 +40,8 @@ class SalmonAES256CTRTransformer(ISalmonCTRTransformer):
     """
 
     @staticmethod
-    def getActualSize(data: bytearray, key: bytearray, nonce: bytearray, mode: SalmonStream.EncryptionMode,
-                      headerData: bytearray, integrity: bool, chunkSize: int, hashKey: bytearray) -> int:
+    def get_actual_size(data: bytearray, key: bytearray, nonce: bytearray, mode: SalmonStream.EncryptionMode,
+                        header_data: bytearray, integrity: bool, chunk_size: int, hash_key: bytearray) -> int:
 
         """
          * Get the output size of the data to be transformed(encrypted or decrypted) including
@@ -67,7 +67,8 @@ class SalmonAES256CTRTransformer(ISalmonCTRTransformer):
         #              headerData, integrity, chunkSize, hashKey)
         # long size = s.actualLength()
         # s.close()
-        return size
+        # return size
+        pass
 
     """
      * Salmon stream encryption block size, same as AES.
@@ -100,7 +101,7 @@ class SalmonAES256CTRTransformer(ISalmonCTRTransformer):
          * Current operation counter.
         """
 
-    def resetCounter(self):
+    def reset_counter(self):
         """
          * Resets the Counter and the block count.
         """
@@ -108,17 +109,17 @@ class SalmonAES256CTRTransformer(ISalmonCTRTransformer):
         __counter[0:len(self.__nonce)] = self.__nonce[0:]
         self.__block = 0
 
-    def syncCounter(self, position: int):
+    def sync_counter(self, position: int):
         """
          * Syncs the Counter based on what AES block position the stream is at.
          * The block count is already excluding the header and the hash signatures.
         """
-        currBlock: int = position // SalmonAES256CTRTransformer.BLOCK_SIZE
-        self.resetCounter()
-        self.increaseCounter(currBlock)
-        __block = currBlock
+        curr_block: int = position // SalmonAES256CTRTransformer.BLOCK_SIZE
+        self.reset_counter()
+        self.increaseCounter(curr_block)
+        __block = curr_block
 
-    def _increaseCounter(self, value: int):
+    def _increase_counter(self, value: int):
         """
          * Increase the Counter
          * We use only big endianness for AES regardless of the machine architecture
@@ -149,44 +150,44 @@ class SalmonAES256CTRTransformer(ISalmonCTRTransformer):
         self.__key = key
         self.__nonce = nonce
 
-    def getCounter(self) -> bytearray:
+    def get_counter(self) -> bytearray:
         """
          * Get the current Counter.
          * @return
         """
         return self.__counter
 
-    def getBlock(self) -> int:
+    def get_block(self) -> int:
         """
          * Get the current block.
          * @return
         """
         return self.__block
 
-    def getKey(self) -> bytearray:
+    def get_key(self) -> bytearray:
         """
          * Get the current encryption key.
          * @return
         """
         return self.__key
 
-    def getExpandedKey(self) -> bytearray:
+    def get_expanded_key(self) -> bytearray:
         """
          * Get the expanded key if available.
          * @return
         """
         return self.__expandedKey
 
-    def getNonce(self) -> bytearray:
+    def get_nonce(self) -> bytearray:
         """
          * Get the nonce (initial counter)
          * @return
         """
         return self.__nonce
 
-    def setExpandedKey(self, expandedKey: bytearray):
+    def set_expanded_key(self, expanded_key: bytearray):
         """
          * Set the expanded key. This should be called once during initialization phase.
          * @param expandedKey
         """
-        self.__expandedKey = expandedKey
+        self.__expandedKey = expanded_key

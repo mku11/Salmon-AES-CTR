@@ -43,7 +43,7 @@ class NativeProxy(INativeProxy):
 
     # TODO:
     @staticmethod
-    def __init(aesImpl: int):
+    def __init(aes_impl: int):
         """
          * Init the native code with AES implementation, and hash length options.
          *
@@ -53,7 +53,7 @@ class NativeProxy(INativeProxy):
 
     # TODO:
     @staticmethod
-    def expandkey(key: bytearray, expandedKey: bytearray):
+    def expand_key(key: bytearray, expanded_key: bytearray):
         """
          * Native Key schedule algorithm for expanding the 32 byte key to 240 bytes required
          *
@@ -65,8 +65,8 @@ class NativeProxy(INativeProxy):
     # TODO:
     @staticmethod
     def __transform(key: bytearray, counter: bytearray, encryption_mode: int,
-                    srcBuffer: bytearray, srcOffset: int,
-                    destBuffer: bytearray, destOffset: int, count: int) -> int:
+                    src_buffer: bytearray, src_offset: int,
+                    dest_buffer: bytearray, dest_offset: int, count: int) -> int:
         """
          * Native transform of the input byte array using AES 256 encryption or decryption mode.
          *
@@ -82,20 +82,20 @@ class NativeProxy(INativeProxy):
         """
         pass
 
-    def salmonInit(self, aesImpl: int):
+    def salmon_init(self, aes_impl: int):
         """
          * Proxy Init the native code with AES implementation, and hash length options.
          *
          * @param aesImpl
         """
-        self._loadLibrary()
-        NativeProxy.__init(aesImpl)
+        self._load_library()
+        NativeProxy.__init(aes_impl)
 
     """
      * Load the native library
     """
 
-    def _loadLibrary(self):
+    def _load_library(self):
         if self.__loaded:
             return
         try:
@@ -107,18 +107,18 @@ class NativeProxy(INativeProxy):
 
         __loaded = True
 
-    def salmonExpandKey(self, key: bytearray, expandedKey: bytearray):
+    def salmon_expand_key(self, key: bytearray, expanded_key: bytearray):
         """
          * Proxy Key schedule algorithm for expanding the 32 byte key to 240 bytes required
          *
          * @param key
          * @param expandedKey
         """
-        NativeProxy.__expandkey(key, expandedKey)
+        NativeProxy.__expandkey(key, expanded_key)
 
-    def salmonTransform(self, key: bytearray, counter: bytearray, encryption_mode: int,
-                        srcBuffer: bytearray, srcOffset: int, destBuffer: bytearray, destOffset: int,
-                        count: int) -> int:
+    def salmon_transform(self, key: bytearray, counter: bytearray, encryption_mode: int,
+                         src_buffer: bytearray, src_offset: int, dest_buffer: bytearray, dest_offset: int,
+                         count: int) -> int:
         """
          * Proxy Transform the input byte array using AES 256 using encryption or decryption mode.
          *
@@ -132,5 +132,5 @@ class NativeProxy(INativeProxy):
          * @param count
          * @return
         """
-        return NativeProxy.__transform(key, counter, encryption_mode, srcBuffer, srcOffset, destBuffer, destOffset,
+        return NativeProxy.__transform(key, counter, encryption_mode, src_buffer, src_offset, dest_buffer, dest_offset,
                                        count)

@@ -22,6 +22,7 @@ LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 '''
+from salmon.iostream.salmon_stream import SalmonStream
 from salmon.salmon_security_exception import SalmonSecurityException
 from salmon.transform.isalmon_ctr_transformer import ISalmonCTRTransformer
 from salmon.transform.salmon_aes_intr_transformer import SalmonAesIntrTransformer
@@ -35,14 +36,14 @@ class SalmonTransformerFactory:
     """
 
     @staticmethod
-    def create(type: SalmonStream.ProviderType) -> ISalmonCTRTransformer:
+    def create(v_type: SalmonStream.ProviderType) -> ISalmonCTRTransformer:
         """
          * Create an encryption transformer implementation.
          * @param type The supported provider type.
          * @return The transformer.
          * @throws SalmonSecurityException
         """
-        match type:
+        match v_type:
             case SalmonStream.ProviderType.Default:
                 return SalmonDefaultTransformer()
             case SalmonStream.ProviderType.AesIntrinsics:

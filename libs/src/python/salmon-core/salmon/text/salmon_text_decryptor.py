@@ -34,8 +34,8 @@ class SalmonTextDecryptor:
     __decryptor: SalmonDecryptor = SalmonDecryptor()
 
     @staticmethod
-    def decryptString(self, text: str, key: bytearray, nonce: bytearray, header: bool,
-                      integrity: bool = False, hashKey: bytearray = None, chunkSize: int = None) -> str:
+    def decrypt_string(text: str, key: bytearray, nonce: bytearray, header: bool,
+                       integrity: bool = False, hash_key: bytearray = None, chunk_size: int = None) -> str:
         """
          * Decrypts a text String using AES256 with the key and nonce provided.
          *
@@ -52,8 +52,8 @@ class SalmonTextDecryptor:
          * @throws SalmonSecurityException
          * @throws SalmonIntegrityException
         """
-        bytes: bytearray = SalmonEncoder.get_base64().decode(text)
-        decBytes: bytearray = SalmonTextDecryptor.__decryptor.decrypt(bytes, key, nonce, header, integrity, hashKey,
-                                                                      chunkSize)
-        decString: str = decBytes.decode('utf-8')
-        return decString
+        v_bytes: bytearray = SalmonEncoder.get_base64().decode(text)
+        dec_bytes: bytearray = SalmonTextDecryptor.__decryptor.decrypt(v_bytes, key, nonce, header, integrity, hash_key,
+                                                                       chunk_size)
+        dec_string: str = dec_bytes.decode('utf-8')
+        return dec_string
