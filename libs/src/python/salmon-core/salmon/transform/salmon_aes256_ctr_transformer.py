@@ -45,7 +45,7 @@ class SalmonAES256CTRTransformer(ISalmonCTRTransformer, ABC):
     """
 
     def __init__(self):
-        self.__key: bytearray = bytearray()
+        self.__key: bytearray | None = None
         """
          * Key to be used for AES transformation.
         """
@@ -55,7 +55,7 @@ class SalmonAES256CTRTransformer(ISalmonCTRTransformer, ABC):
          * Expanded key.
         """
 
-        self.__nonce: bytearray = bytearray()
+        self.__nonce: bytearray | None = None
         """
          * Nonce to be used for CTR mode.
         """
@@ -65,7 +65,7 @@ class SalmonAES256CTRTransformer(ISalmonCTRTransformer, ABC):
          * Current operation block.
         """
 
-        self.__counter: bytearray
+        self.__counter: bytearray | None = None
         """
          * Current operation counter.
         """
@@ -74,8 +74,8 @@ class SalmonAES256CTRTransformer(ISalmonCTRTransformer, ABC):
         """
          * Resets the Counter and the block count.
         """
-        __counter: bytearray = bytearray(SalmonGenerator.BLOCK_SIZE)
-        __counter[0:len(self.__nonce)] = self.__nonce[0:]
+        self.__counter: bytearray = bytearray(SalmonGenerator.BLOCK_SIZE)
+        self.__counter[0:len(self.__nonce)] = self.__nonce[0:]
         self.__block = 0
 
     def sync_counter(self, position: int):
@@ -103,10 +103,10 @@ class SalmonAES256CTRTransformer(ISalmonCTRTransformer, ABC):
             if index <= SalmonGenerator.BLOCK_SIZE - SalmonGenerator.NONCE_LENGTH:
                 raise SalmonRangeExceededException("Current CTR max blocks exceeded")
             val: int = (value + carriage) % 256
-            carriage = int((((self.__counter[index] & 0xFF) + val) / 256))
+            carriage = int((((self.__counter[index] & 0xFF) + val) // 256))
             self.__counter[index] += val
             index -= 1
-            value /= 256
+            value //= 256
 
     def init(self, key: bytearray, nonce: bytearray):
         """
