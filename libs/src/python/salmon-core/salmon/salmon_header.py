@@ -27,7 +27,10 @@ from convert.bit_converter import BitConverter
 from iostream.random_access_stream import RandomAccessStream
 from salmon.salmon_generator import SalmonGenerator
 
+from typeguard import typechecked
 
+
+@typechecked
 class SalmonHeader:
     """
      * Header embedded in the SalmonStream. Header contains nonce and other information for

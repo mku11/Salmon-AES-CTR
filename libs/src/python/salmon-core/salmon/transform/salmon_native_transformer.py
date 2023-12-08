@@ -27,7 +27,10 @@ from salmon.transform.inative_proxy import INativeProxy
 from salmon.transform.native_proxy import NativeProxy
 from salmon.transform.salmon_aes256_ctr_transformer import SalmonAES256CTRTransformer
 
+from typeguard import typechecked
 
+
+@typechecked
 class SalmonNativeTransformer(SalmonAES256CTRTransformer):
     """
      * Generic Native AES transformer. Extend this with your specific

@@ -26,7 +26,10 @@ from salmon.password.isalmon_pbkdf_provider import ISalmonPbkdfProvider
 from salmon.password.salmon_default_pbkdf_provider import SalmonDefaultPbkdfProvider
 from salmon.password.salmon_password import SalmonPassword
 
+from typeguard import typechecked
 
+
+@typechecked
 class SalmonPbkdfFactory:
     """
      * Creates AES transformer implementations.

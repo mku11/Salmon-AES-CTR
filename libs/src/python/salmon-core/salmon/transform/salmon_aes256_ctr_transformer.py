@@ -27,7 +27,10 @@ from salmon.salmon_generator import SalmonGenerator
 from salmon.salmon_range_exceeded_exception import SalmonRangeExceededException
 from salmon.transform.isalmon_ctr_transformer import ISalmonCTRTransformer
 
+from typeguard import typechecked
 
+
+@typechecked
 class SalmonAES256CTRTransformer(ISalmonCTRTransformer):
     """
      * Abstract class for AES256 transformer implementations.

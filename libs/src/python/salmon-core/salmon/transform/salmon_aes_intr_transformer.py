@@ -25,7 +25,10 @@ SOFTWARE.
 from salmon.iostream.encryption_mode import EncryptionMode
 from salmon.transform.salmon_native_transformer import SalmonNativeTransformer
 
+from typeguard import typechecked
 
+
+@typechecked
 class SalmonAesIntrTransformer(SalmonNativeTransformer):
     """
      * Salmon AES transformer implemented with AES intrinsics.

@@ -24,7 +24,10 @@ SOFTWARE.
 '''
 from salmon.transform.salmon_native_transformer import SalmonNativeTransformer
 
+from typeguard import typechecked
 
+
+@typechecked
 class TinyAesTransformer(SalmonNativeTransformer):
     """
      *  Salmon AES transformer implemented with TinyAES backend.

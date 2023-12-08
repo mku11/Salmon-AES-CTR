@@ -22,8 +22,10 @@ LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 '''
+from typeguard import typechecked
 
 
+@typechecked
 class BitConverter:
     """
      * Converts from/to byte arrays, integral values, and hex strings.
@@ -54,7 +56,7 @@ class BitConverter:
         """
         num: int = 0
         mul: int = 1
-        for i in range(index + length - 1, index-1, -1):
+        for i in range(index + length - 1, index - 1, -1):
             num += (v_bytes[i] & 0xFF) * mul
             mul *= 256
         return num
@@ -64,6 +66,7 @@ class BitConverter:
      * @param data The byte array to be converted.
      * @return The hex string representation.
     """
+
     @staticmethod
     def to_hex(data: bytearray) -> str:
         sb = ""

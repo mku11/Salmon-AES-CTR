@@ -27,7 +27,10 @@ from salmon.salmon_generator import SalmonGenerator
 from salmon.salmon_range_exceeded_exception import SalmonRangeExceededException
 from salmon.salmon_security_exception import SalmonSecurityException
 
+from typeguard import typechecked
 
+
+@typechecked
 class SalmonNonce:
     """
      * Utility provides nonce operations.

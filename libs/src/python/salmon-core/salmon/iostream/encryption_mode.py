@@ -25,7 +25,10 @@ SOFTWARE.
 
 from enum import Enum
 
+from typeguard import typechecked
 
+
+@typechecked
 class EncryptionMode(Enum):
     """
      * Encryption Mode

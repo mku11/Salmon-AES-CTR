@@ -30,7 +30,10 @@ from salmon.salmon_default_options import SalmonDefaultOptions
 from salmon.salmon_generator import SalmonGenerator
 from salmon.salmon_security_exception import SalmonSecurityException
 
+from typeguard import typechecked
 
+
+@typechecked
 class SalmonIntegrity:
     """
      * Provide operations for calculating, storing, and verifying data integrity.

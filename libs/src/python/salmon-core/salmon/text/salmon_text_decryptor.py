@@ -25,7 +25,10 @@ SOFTWARE.
 from salmon.encode.salmon_encoder import SalmonEncoder
 from salmon.salmon_decryptor import SalmonDecryptor
 
+from typeguard import typechecked
 
+
+@typechecked
 class SalmonTextDecryptor:
     """
      * Utility class that encrypts and decrypts text strings.

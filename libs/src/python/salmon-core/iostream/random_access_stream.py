@@ -25,10 +25,11 @@ SOFTWARE.
 from __future__ import annotations
 from abc import ABC, abstractmethod
 from enum import Enum
-
 from salmon.salmon_default_options import SalmonDefaultOptions
+from typeguard import typechecked
 
 
+@typechecked
 class RandomAccessStream(ABC):
     """
      * Abstract read-write seekable stream used by internal streams

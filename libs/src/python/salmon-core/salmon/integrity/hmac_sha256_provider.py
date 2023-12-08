@@ -29,7 +29,10 @@ import hmac
 from salmon.integrity.ihash_provider import IHashProvider
 from salmon.integrity.salmon_integrity_exception import SalmonIntegrityException
 
+from typeguard import typechecked
 
+
+@typechecked
 class HmacSHA256Provider(IHashProvider):
     """
      * Provides Java HMAC256 hashing.

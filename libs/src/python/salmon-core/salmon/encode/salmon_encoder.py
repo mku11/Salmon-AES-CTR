@@ -26,7 +26,10 @@ SOFTWARE.
 from convert.base_64 import Base64
 from convert.ibase_64 import IBase64
 
+from typeguard import typechecked
 
+
+@typechecked
 class SalmonEncoder:
     """
      * Provides generic encoder (ie Base64).

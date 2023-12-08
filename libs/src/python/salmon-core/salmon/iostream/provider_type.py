@@ -25,7 +25,10 @@ SOFTWARE.
 
 from enum import Enum
 
+from typeguard import typechecked
 
+
+@typechecked
 class ProviderType(Enum):
     """
      * AES provider types. List of AES implementations that currently supported.

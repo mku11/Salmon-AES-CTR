@@ -29,7 +29,10 @@ import hashlib
 
 from salmon.salmon_security_exception import SalmonSecurityException
 
+from typeguard import typechecked
 
+
+@typechecked
 class SalmonDefaultPbkdfProvider(ISalmonPbkdfProvider):
     """
      * Provides pbkdf via Java default algorithm.

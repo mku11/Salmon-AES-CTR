@@ -24,7 +24,10 @@ SOFTWARE.
 '''
 from abc import ABC, abstractmethod
 
+from typeguard import typechecked
 
+
+@typechecked
 class IHashProvider(ABC):
     """
      * Provides Hashing calculation.

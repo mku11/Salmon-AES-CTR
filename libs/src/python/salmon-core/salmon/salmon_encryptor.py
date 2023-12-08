@@ -55,7 +55,7 @@ class SalmonEncryptor:
          * The number of parallel threads to use.
         """
 
-        self.__executor: ThreadPool = None
+        self.__executor: ThreadPool | None = None
         """
          * Executor for parallel tasks.
         """
@@ -96,7 +96,7 @@ class SalmonEncryptor:
          * @throws SalmonIntegrityException
         """
 
-        if key is not None:
+        if key is None:
             raise SalmonSecurityException("Key is missing")
         if nonce is None:
             raise SalmonSecurityException("Nonce is missing")
@@ -107,7 +107,7 @@ class SalmonEncryptor:
             chunk_size = 0
 
         output_stream: MemoryStream = MemoryStream()
-        header_data: bytearray = None
+        header_data: bytearray | None = None
         if store_header_data:
             magic_bytes: bytearray = SalmonGenerator.get_magic_bytes()
             output_stream.write(magic_bytes, 0, len(magic_bytes))
@@ -257,7 +257,7 @@ class SalmonEncryptor:
         """
 
         output_stream: MemoryStream = MemoryStream(out_data)
-        stream: SalmonStream = None
+        stream: SalmonStream | None = None
         try:
             input_stream.set_position(start)
             stream = SalmonStream(key, nonce, EncryptionMode.Encrypt, output_stream, header_data,

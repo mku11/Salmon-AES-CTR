@@ -40,7 +40,10 @@ from salmon.salmon_security_exception import SalmonSecurityException
 from salmon.transform.isalmon_ctr_transformer import ISalmonCTRTransformer
 from salmon.transform.salmon_transformer_factory import SalmonTransformerFactory
 
+from typeguard import typechecked
 
+
+@typechecked
 class SalmonStream(RandomAccessStream):
     """
      * Stream decorator provides AES256 encryption and decryption of stream.
@@ -105,12 +108,12 @@ class SalmonStream(RandomAccessStream):
          * When EncryptionMode is Decrypt this will be the source stream.
         """
 
-        self.__transformer: ISalmonCTRTransformer = None
+        self.__transformer: ISalmonCTRTransformer | None = None
         """
          * The transformer to use for encryption.
         """
 
-        self.__salmonIntegrity: SalmonIntegrity = None
+        self.__salmonIntegrity: SalmonIntegrity | None = None
         """
          * The integrity to use for hash signature creation and validation.
         """

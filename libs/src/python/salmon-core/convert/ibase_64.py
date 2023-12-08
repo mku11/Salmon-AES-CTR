@@ -24,7 +24,10 @@ SOFTWARE.
 '''
 from abc import ABC, abstractmethod
 
+from typeguard import typechecked
 
+
+@typechecked
 class IBase64(ABC):
     """
      * Interface for Base64 conversion implementations.

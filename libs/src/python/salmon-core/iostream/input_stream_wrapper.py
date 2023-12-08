@@ -27,7 +27,10 @@ from io import RawIOBase, BufferedIOBase
 
 from random_access_stream import RandomAccessStream
 
+from typeguard import typechecked
 
+
+@typechecked
 class InputStreamWrapper(BufferedIOBase):
     """
      * Wrapper stream of AbsStream to Java's native InputStream interface.

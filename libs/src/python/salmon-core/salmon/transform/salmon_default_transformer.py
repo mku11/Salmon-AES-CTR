@@ -25,7 +25,10 @@ SOFTWARE.
 from salmon.salmon_security_exception import SalmonSecurityException
 from salmon.transform.salmon_aes256_ctr_transformer import SalmonAES256CTRTransformer
 
+from typeguard import typechecked
 
+
+@typechecked
 class SalmonDefaultTransformer(SalmonAES256CTRTransformer):
     """
      * Salmon AES transformer based on the javax.crypto routines.

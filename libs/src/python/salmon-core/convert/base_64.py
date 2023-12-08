@@ -22,12 +22,13 @@ LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 '''
-
+from typeguard import typechecked
 import base64
 
 from convert.ibase_64 import IBase64
 
 
+@typechecked
 class Base64(IBase64):
     """
      * Python default implementation of Base64 encoder/decoder.

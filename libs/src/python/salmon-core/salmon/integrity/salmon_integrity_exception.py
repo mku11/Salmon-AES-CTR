@@ -23,7 +23,10 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 '''
 
+from typeguard import typechecked
 
+
+@typechecked
 class SalmonIntegrityException (Exception):
     """
      * Thrown when Salmon Stream's data are corrupt or tampered with.

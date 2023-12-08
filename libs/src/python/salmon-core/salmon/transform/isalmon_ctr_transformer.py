@@ -25,7 +25,10 @@ SOFTWARE.
 
 from abc import ABC, abstractmethod
 
+from typeguard import typechecked
 
+
+@typechecked
 class ISalmonCTRTransformer(ABC):
     """
      * Contract for the encryption/decryption transformers.

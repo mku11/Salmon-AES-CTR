@@ -24,7 +24,10 @@ SOFTWARE.
 '''
 from iostream.random_access_stream import RandomAccessStream
 
+from typeguard import typechecked
 
+
+@typechecked
 class MemoryStream(RandomAccessStream):
     """
      * Memory Stream for seeking, reading, and writing to a memory buffer (modeled after C# MemoryStream).
@@ -42,7 +45,7 @@ class MemoryStream(RandomAccessStream):
     """
 
     def __init__(self, v_bytes: bytearray = None):
-        self.__bytes: bytearray = None
+        self.__bytes: bytearray | None = None
         """
          * Buffer to store the data. This can be provided via the constructor.
         """

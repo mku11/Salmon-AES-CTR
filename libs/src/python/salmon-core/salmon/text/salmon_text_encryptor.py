@@ -24,8 +24,10 @@ SOFTWARE.
 '''
 from salmon.encode.salmon_encoder import SalmonEncoder
 from salmon.salmon_encryptor import SalmonEncryptor
+from typeguard import typechecked
 
 
+@typechecked
 class SalmonTextEncryptor:
     """
      * Utility class that encrypts and decrypts text strings.
@@ -34,8 +36,8 @@ class SalmonTextEncryptor:
     __encryptor: SalmonEncryptor = SalmonEncryptor()
 
     @staticmethod
-    def encrypt_string(text: str, key: bytearray, nonce: bytearray, header: bool,
-                       integrity: bool = False, hash_key: bytearray = None, chunk_size: int = None) -> str:
+    def encrypt_string(text: str, key: bytearray, nonce: bytearray, header: bool, integrity: bool = False,
+                       hash_key: bytearray | None = None, chunk_size: int | None = None) -> str:
         """
          * Encrypts a text String using AES256 with the key and nonce provided.
          *

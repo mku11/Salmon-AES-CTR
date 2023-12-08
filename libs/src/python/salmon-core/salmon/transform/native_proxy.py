@@ -25,7 +25,10 @@ SOFTWARE.
 
 from salmon.transform.inative_proxy import INativeProxy
 
+from typeguard import typechecked
 
+
+@typechecked
 class NativeProxy(INativeProxy):
     """
      * Proxy class for use with windows native library.

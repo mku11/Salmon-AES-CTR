@@ -26,8 +26,10 @@ SOFTWARE.
 from salmon.password.salmon_password import SalmonPassword
 from salmon.salmon_security_exception import SalmonSecurityException
 from abc import ABC, abstractmethod
+from typeguard import typechecked
 
 
+@typechecked
 class ISalmonPbkdfProvider(ABC):
     """
      * Provides key derivation based on text passwords.

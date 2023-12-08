@@ -36,13 +36,16 @@ from salmon.salmon_header import SalmonHeader
 from salmon.salmon_security_exception import SalmonSecurityException
 from salmon.transform.salmon_aes256_ctr_transformer import SalmonAES256CTRTransformer
 
+from typeguard import typechecked
 
+
+@typechecked
 class SalmonDecryptor:
     """
      * Utility class that decrypts byte arrays.
     """
 
-    def __init__(self, threads: int = None, buffer_size: int = None):
+    def __init__(self, threads: int | None = None, buffer_size: int | None = None):
         """
          * Instantiate an encryptor with parallel tasks and buffer size.
          *
@@ -57,7 +60,7 @@ class SalmonDecryptor:
          * The number of parallel threads to use.
         """
 
-        self.__executor: ThreadPool = None
+        self.__executor: ThreadPool | None = None
         """
          * Executor for parallel tasks.
         """
@@ -106,7 +109,7 @@ class SalmonDecryptor:
 
         input_stream: MemoryStream = MemoryStream(data)
         header: SalmonHeader
-        header_data: bytearray = None
+        header_data: bytearray | None = None
         if has_header_data:
             header = SalmonHeader.parse_header_data(input_stream)
             if header.get_chunk_size() > 0:
@@ -250,8 +253,8 @@ class SalmonDecryptor:
     def __decrypt_data(self, input_stream: RandomAccessStream, start: int, count: int, out_data: bytearray,
                        key: bytearray, nonce: bytearray,
                        header_data: bytearray, integrity: bool, hash_key: bytearray, chunk_size: int):
-        stream: SalmonStream = None
-        output_stream: MemoryStream = None
+        stream: SalmonStream | None = None
+        output_stream: MemoryStream | None = None
         try:
             output_stream = MemoryStream(out_data)
             output_stream.set_position(start)

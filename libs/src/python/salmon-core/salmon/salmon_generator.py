@@ -24,7 +24,10 @@ SOFTWARE.
 '''
 import secrets
 
+from typeguard import typechecked
 
+
+@typechecked
 class SalmonGenerator:
     """
      * Utility class generates internal secure properties.

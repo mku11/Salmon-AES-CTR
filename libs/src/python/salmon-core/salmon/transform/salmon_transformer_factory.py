@@ -28,8 +28,10 @@ from salmon.transform.isalmon_ctr_transformer import ISalmonCTRTransformer
 from salmon.transform.salmon_aes_intr_transformer import SalmonAesIntrTransformer
 from salmon.transform.salmon_default_transformer import SalmonDefaultTransformer
 from salmon.transform.tiny_aes_transformer import TinyAesTransformer
+from typeguard import typechecked
 
 
+@typechecked
 class SalmonTransformerFactory:
     """
      * Creates an AES transformer object.

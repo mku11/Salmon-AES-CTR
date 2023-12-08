@@ -27,7 +27,10 @@ SOFTWARE.
  * Thrown when maximum nonce range is exceeded.
 """
 
+from typeguard import typechecked
 
+
+@typechecked
 class SalmonRangeExceededException(Exception):
     """
      * Construct an exception with a specific message.

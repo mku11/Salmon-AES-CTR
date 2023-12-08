@@ -24,7 +24,10 @@ SOFTWARE.
 '''
 from abc import ABC, abstractmethod
 
+from typeguard import typechecked
 
+
+@typechecked
 class INativeProxy(ABC):
     """
      * Proxy interface for use with native libraries for different platforms and operating systems.
