@@ -42,7 +42,7 @@ class BitConverter:
         buffer: bytearray = bytearray(length)
         for i in range(length - 1, -1, -1):
             buffer[i] = value % 256
-            value /= 256
+            value //= 256
         return buffer
 
     @staticmethod
