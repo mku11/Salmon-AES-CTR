@@ -576,7 +576,7 @@ class SalmonStream(RandomAccessStream):
                                                                               self.__headerData if self.get_position() == 0 else None)
                 pos += self.__write_to_stream(dest_buffer, self.get_chunk_size(), integrity_hashes)
                 self.__transformer.sync_counter(self.get_position())
-            except SalmonSecurityException | SalmonRangeExceededException | SalmonIntegrityException as ex:
+            except (SalmonSecurityException, SalmonRangeExceededException, SalmonIntegrityException) as ex:
                 raise IOError("Could not write to stream: ") from ex
 
     def __get_aligned_offset(self) -> int:
