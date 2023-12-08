@@ -26,9 +26,10 @@ from interface import Interface
 
 from salmon.password.salmon_password import SalmonPassword
 from salmon.salmon_security_exception import SalmonSecurityException
+from abc import ABC, abstractmethod
 
 
-class ISalmonPbkdfProvider(Interface):
+class ISalmonPbkdfProvider(ABC):
     """
      * Provides key derivation based on text passwords.
     """
@@ -60,6 +61,7 @@ class ISalmonPbkdfProvider(Interface):
                 return ISalmonPbkdfProvider.PBKDF_SHA256
         raise SalmonSecurityException("Unknown pbkdf algorithm")
 
+    @abstractmethod
     def get_key(self, password: str, salt: bytearray, iterations: int, output_bytes: int,
                 pbkdf_algo: SalmonPassword.PbkdfAlgo) -> bytearray:
         """

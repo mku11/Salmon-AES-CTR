@@ -23,15 +23,16 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 '''
 
-from interface import Interface
+from abc import ABC, abstractmethod
 
 
-class ISalmonCTRTransformer(Interface):
+class ISalmonCTRTransformer(ABC):
     """
      * Contract for the encryption/decryption transformers.
      * Note that Counter mode needs to be supported.
     """
 
+    @abstractmethod
     def init(self, key: bytearray, nonce: bytearray):
         """
          * Initialize the transformer.
@@ -41,6 +42,7 @@ class ISalmonCTRTransformer(Interface):
         """
         pass
 
+    @abstractmethod
     def encrypt_data(self, src_buffer: bytearray, src_offset: int,
                      dest_buffer: bytearray, dest_offset: int, count: int) -> int:
         """
@@ -56,6 +58,7 @@ class ISalmonCTRTransformer(Interface):
         """
         pass
 
+    @abstractmethod
     def decrypt_data(self, src_buffer: bytearray, src_offset: int,
                      dest_buffer: bytearray, dest_offset: int, count: int) -> int:
         """
@@ -71,6 +74,7 @@ class ISalmonCTRTransformer(Interface):
         """
         pass
 
+    @abstractmethod
     def get_counter(self) -> bytearray:
         """
          * Get the current counter.
@@ -78,6 +82,7 @@ class ISalmonCTRTransformer(Interface):
         """
         pass
 
+    @abstractmethod
     def get_key(self) -> bytearray:
         """
          * Get the current encryption key.
@@ -85,6 +90,7 @@ class ISalmonCTRTransformer(Interface):
         """
         pass
 
+    @abstractmethod
     def get_block(self) -> int:
         """
          * Get the current block.
@@ -92,6 +98,7 @@ class ISalmonCTRTransformer(Interface):
         """
         pass
 
+    @abstractmethod
     def get_nonce(self) -> bytearray:
         """
          * Get the nonce (initial counter) to be used for the data.
@@ -99,12 +106,14 @@ class ISalmonCTRTransformer(Interface):
         """
         pass
 
+    @abstractmethod
     def reset_counter(self):
         """
          * Reset the counter to the nonce (initial counter).
         """
         pass
 
+    @abstractmethod
     def sync_counter(self, position: int):
         """
          * Calculate the value of the counter based on the current block. After an encryption

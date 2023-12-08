@@ -22,15 +22,15 @@ LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 '''
+from abc import ABC, abstractmethod
 
-from interface import Interface
 
-
-class IBase64(Interface):
+class IBase64(ABC):
     """
      * Interface for Base64 conversion implementations.
     """
 
+    @abstractmethod
     def decode(self, text: str) -> bytearray:
         """
         * Decode a Base64 string to byte array
@@ -39,6 +39,7 @@ class IBase64(Interface):
         """
         pass
 
+    @abstractmethod
     def encode(self, data: bytearray) -> str:
         """
         Encode a byte array to Base64 string.

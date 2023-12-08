@@ -22,14 +22,15 @@ LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 '''
-from interface import Interface
+from abc import ABC, abstractmethod
 
 
-class INativeProxy(Interface):
+class INativeProxy(ABC):
     """
      * Proxy interface for use with native libraries for different platforms and operating systems.
     """
 
+    @abstractmethod
     def salmon_init(self, aes_impl: int):
         """
          * Proxy Init the native code with AES implementation, and hash length options.
@@ -37,6 +38,7 @@ class INativeProxy(Interface):
         """
         pass
 
+    @abstractmethod
     def salmon_expand_key(self, key: bytearray, expanded_key: bytearray):
         """
          * Proxy Key schedule algorithm for expanding the 32 byte key to 240 bytes required
@@ -46,6 +48,7 @@ class INativeProxy(Interface):
         """
         pass
 
+    @abstractmethod
     def salmon_transform(self, key: bytearray, counter: bytearray, encryption_mode: int,
                          src_buffer: bytearray, src_offset: int,
                          dest_buffer: bytearray, dest_offset: int, count: int) -> int:

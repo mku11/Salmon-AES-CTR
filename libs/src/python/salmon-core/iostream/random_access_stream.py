@@ -145,12 +145,13 @@ class RandomAccessStream(ABC):
         """
         pass
 
-    class OnProgressListener(Interface):
+    class OnProgressListener(ABC):
         """
          * Progress listener for stream operations.
          *
         """
 
+        @abstractmethod
         def on_progress_changed(self, position: int, length: int):
             pass
 
