@@ -512,7 +512,7 @@ class SalmonStream(RandomAccessStream):
             # read data and integrity signatures
             src_buffer: bytearray = self.__read_stream_data(buffer_size)
             try:
-                integrity_hashes: [] = None
+                integrity_hashes: list | None = None
                 # if there are integrity hashes strip them and get the data chunks only
                 if self.__salmonIntegrity.get_chunk_size() > 0:
                     # get the integrity signatures
