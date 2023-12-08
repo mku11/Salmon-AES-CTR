@@ -38,7 +38,8 @@ class SalmonTextDecryptor:
 
     @staticmethod
     def decrypt_string(text: str, key: bytearray, nonce: bytearray, header: bool,
-                       integrity: bool = False, hash_key: bytearray = None, chunk_size: int = None) -> str:
+                       integrity: bool = False, hash_key: bytearray | None = None,
+                       chunk_size: int | None = None) -> str:
         """
          * Decrypts a text String using AES256 with the key and nonce provided.
          *
