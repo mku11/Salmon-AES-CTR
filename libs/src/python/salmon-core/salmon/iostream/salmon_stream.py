@@ -572,7 +572,7 @@ class SalmonStream(RandomAccessStream):
 
             try:
                 self.__transformer.encrypt_data(src_buffer, 0, dest_buffer, 0, len(src_buffer))
-                integrity_hashes: [] = self.__salmonIntegrity.generate_hashes(dest_buffer,
+                integrity_hashes: list | None = self.__salmonIntegrity.generate_hashes(dest_buffer,
                                                                               self.__headerData if self.get_position() == 0 else None)
                 pos += self.__write_to_stream(dest_buffer, self.get_chunk_size(), integrity_hashes)
                 self.__transformer.sync_counter(self.get_position())
@@ -659,7 +659,7 @@ class SalmonStream(RandomAccessStream):
         """
         dest_buffer[dest_offset:dest_offset + count] = src_buffer[src_offset:src_offset + count]
 
-    def __write_to_stream(self, buffer: bytearray, chunk_size: int, hashes: []) -> int:
+    def __write_to_stream(self, buffer: bytearray, chunk_size: int, hashes: list | None) -> int:
         """
          * Write data to the base stream.
          *

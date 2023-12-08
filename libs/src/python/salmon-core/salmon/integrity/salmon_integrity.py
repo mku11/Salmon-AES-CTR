@@ -203,7 +203,7 @@ class SalmonIntegrity:
      * @throws SalmonIntegrityException
      """
 
-    def generate_hashes(self, buffer: bytearray, include_header_data: bytearray) -> []:
+    def generate_hashes(self, buffer: bytearray, include_header_data: bytearray | None) -> list | None:
         if not self._integrity:
             return None
         hashes = []
