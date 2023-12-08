@@ -62,7 +62,7 @@ class SalmonIntegrity:
      * @throws SalmonSecurityException When security has failed
      """
 
-    def __init__(self, integrity: bool, key: bytearray, chunk_size: int,
+    def __init__(self, integrity: bool, key: bytearray | None, chunk_size: int,
                  provider: IHashProvider, hash_size: int):
 
         self._chunkSize: int = -1

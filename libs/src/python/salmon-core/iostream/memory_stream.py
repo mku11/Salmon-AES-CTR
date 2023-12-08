@@ -44,7 +44,7 @@ class MemoryStream(RandomAccessStream):
      * @param bytes
     """
 
-    def __init__(self, v_bytes: bytearray = None):
+    def __init__(self, v_bytes: bytearray | None = None):
         self.__bytes: bytearray | None = None
         """
          * Buffer to store the data. This can be provided via the constructor.
