@@ -84,8 +84,8 @@ class SalmonStream(RandomAccessStream):
         return size
 
     def __init__(self, key: bytearray, nonce: bytearray, encryption_mode: EncryptionMode,
-                 base_stream: RandomAccessStream, header_data: bytearray = None,
-                 integrity: bool = False, chunk_size: int = None, hash_key: bytearray = None):
+                 base_stream: RandomAccessStream, header_data: bytearray | None = None,
+                 integrity: bool = False, chunk_size: int = None, hash_key: bytearray | None = None):
         """
          * Instantiate a new Salmon stream with a base stream and optional header data and hash integrity.
          * <p>
@@ -252,7 +252,7 @@ class SalmonStream(RandomAccessStream):
         """
         return self.get_chunk_size() > 0
 
-    def __init_integrity(self, integrity: bool, hash_key: bytearray, chunk_size: int):
+    def __init_integrity(self, integrity: bool, hash_key: bytearray | None, chunk_size: int):
         """
          * Initialize the integrity validator. This object is always associated with the
          * stream because in the case of a decryption stream that has already embedded integrity
