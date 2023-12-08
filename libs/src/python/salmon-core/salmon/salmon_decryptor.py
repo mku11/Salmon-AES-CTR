@@ -23,6 +23,8 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 '''
 import math
+import threading
+from concurrent.futures import ThreadPoolExecutor
 from multiprocessing.pool import ThreadPool
 
 from iostream.memory_stream import MemoryStream
@@ -60,7 +62,7 @@ class SalmonDecryptor:
          * The number of parallel threads to use.
         """
 
-        self.__executor: ThreadPool | None = None
+        self.__executor: ThreadPoolExecutor | None = None
         """
          * Executor for parallel tasks.
         """
@@ -74,7 +76,7 @@ class SalmonDecryptor:
             self.__threads = 1
         else:
             self.__threads = threads
-            executor = ThreadPool(threads)
+            self.__executor = ThreadPoolExecutor(threads)
 
         if buffer_size is None:
             self.__bufferSize = SalmonIntegrity.DEFAULT_CHUNK_SIZE
@@ -135,21 +137,22 @@ class SalmonDecryptor:
                                          chunk_size, integrity)
         return out_data
 
-    """
-     * Decrypt stream using parallel threads.
-     * @param data The input data to be decrypted
-     * @param outData The output buffer with the decrypted data.
-     * @param key The AES key.
-     * @param hashKey The hash key.
-     * @param nonce The nonce to be used for decryption.
-     * @param headerData The header data.
-     * @param chunkSize The chunk size.
-     * @param integrity True to verify integrity.
-    """
-
     def __decrypt_data_parallel(self, data: bytearray, out_data: bytearray,
-                                key: bytearray, hash_key: bytearray, nonce: bytearray, header_data: bytearray,
-                                chunk_size: int, integrity: bool):
+                                key: bytearray, hash_key: bytearray | None, nonce: bytearray,
+                                header_data: bytearray | None,
+                                chunk_size: int | None, integrity: bool):
+        """
+         * Decrypt stream using parallel threads.
+         * @param data The input data to be decrypted
+         * @param outData The output buffer with the decrypted data.
+         * @param key The AES key.
+         * @param hashKey The hash key.
+         * @param nonce The nonce to be used for decryption.
+         * @param headerData The header data.
+         * @param chunkSize The chunk size.
+         * @param integrity True to verify integrity.
+        """
+
         running_threads: int = 1
         part_size: int = len(data)
 
@@ -175,85 +178,81 @@ class SalmonDecryptor:
                                    key, hash_key, nonce, header_data,
                                    integrity, chunk_size)
 
-    """
-     * Submit decryption parallel jobs.
-     * @param runningThreads The number of threads to submit.
-     * @param partSize The data length of each part that belongs to each thread.
-     * @param data The buffer of data you want to decrypt. This is a shared byte array across all threads where each
-     *             thread will read each own part.
-     * @param outData The buffer of data containing the decrypted data.
-     * @param key The AES key.
-     * @param hashKey The hash key for integrity validation.
-     * @param nonce The nonce for the data.
-     * @param headerData The header data common to all parts.
-     * @param integrity True to verify the data integrity.
-     * @param chunkSize The chunk size.
-    """
-
     def __submit_decrypt_jobs(self, running_threads: int, part_size: int,
                               data: bytearray, out_data: bytearray,
-                              key: bytearray, hash_key: bytearray, nonce: bytearray, header_data: bytearray,
-                              integrity: bool, chunk_size: int):
-        pass
-        # TODO:
-        # done: CountDownLatch = CountDownLatch(runningThreads)
+                              key: bytearray, hash_key: bytearray | None, nonce: bytearray,
+                              header_data: bytearray | None,
+                              integrity: bool, chunk_size: int | None):
 
-    #     AtomicReference<Exception> ex = new AtomicReference<>()
-    #     for i in (0, runningThreads):
-    #         int index = i
-    #         executor.submit(() ->
-    #         {
-    #             try {
-    #                 long start = partSize * index
-    #                 long length
-    # 				if(index == runningThreads - 1)
-    # 					length = data.length-start
-    # 				else
-    # 					length = partSize
-    #                 MemoryStream ins = new MemoryStream(data)
-    #                 decryptData(ins, start, length, outData, key, nonce, headerData,
-    #                         integrity, hashKey, chunkSize)
-    #             } catch (Exception ex1) {
-    #                 ex.set(ex1)
-    #             }
-    #             done.countDown()
-    #         })
-    #     }
-    #
-    #     try {
-    #         done.await()
-    #     } catch (InterruptedException ignored) {}
-    #
-    #     if (ex.get() != null) {
-    #         try {
-    #             throw ex.get()
-    #         } catch (Exception e) {
-    #             throw new RuntimeException(e)
-    #         }
-    #     }
-    # }
+        """
+         * Submit decryption parallel jobs.
+         * @param runningThreads The number of threads to submit.
+         * @param partSize The data length of each part that belongs to each thread.
+         * @param data The buffer of data you want to decrypt. This is a shared byte array across all threads where each
+         *             thread will read each own part.
+         * @param outData The buffer of data containing the decrypted data.
+         * @param key The AES key.
+         * @param hashKey The hash key for integrity validation.
+         * @param nonce The nonce for the data.
+         * @param headerData The header data common to all parts.
+         * @param integrity True to verify the data integrity.
+         * @param chunkSize The chunk size.
+        """
+        done: threading.Barrier = threading.Barrier(running_threads + 1)
+        ex: Exception | None = None
+        for i in range(0, running_threads):
+            index: int = i
 
-    """
-     * Decrypt the data stream.
-     * @param inputStream The Stream to be decrypted.
-     * @param start The start position of the stream to be decrypted.
-     * @param count The number of bytes to be decrypted.
-     * @param outData The buffer with the decrypted data.
-     * @param key The AES key to be used.
-     * @param nonce The nonce to be used.
-     * @param headerData The header data to be used.
-     * @param integrity True to verify integrity.
-     * @param hashKey The hash key to be used for integrity verification.
-     * @param chunkSize The chunk size.
-     * @throws IOException  Thrown if there is an error with the stream.
-     * @throws SalmonSecurityException Thrown if there is a security exception with the stream.
-     * @throws SalmonIntegrityException Thrown if the stream is corrupt or tampered with.
-    """
+            def decrypt():
+                nonlocal ex, index
+                try:
+                    start: int = part_size * index
+                    length: int
+                    if index == running_threads - 1:
+                        length = len(data) - start
+                    else:
+                        length = part_size
+                    ins: MemoryStream = MemoryStream(data)
+                    self.__decrypt_data(ins, start, length, out_data, key, nonce, header_data,
+                                        integrity, hash_key, chunk_size)
+                except Exception as ex1:
+                    ex = ex1
+                done.wait()
+
+            self.__executor.submit(lambda: decrypt())
+
+        try:
+            done.wait()
+        except InterruptedError as ignored:
+            pass
+
+        if ex is not None:
+            try:
+                raise ex
+            except Exception as e:
+                raise RuntimeError() from e
 
     def __decrypt_data(self, input_stream: RandomAccessStream, start: int, count: int, out_data: bytearray,
                        key: bytearray, nonce: bytearray,
                        header_data: bytearray | None, integrity: bool, hash_key: bytearray | None,
                        chunk_size: int | None):
+        """
+         * Decrypt the data stream.
+         * @param inputStream The Stream to be decrypted.
+         * @param start The start position of the stream to be decrypted.
+         * @param count The number of bytes to be decrypted.
+         * @param outData The buffer with the decrypted data.
+         * @param key The AES key to be used.
+         * @param nonce The nonce to be used.
+         * @param headerData The header data to be used.
+         * @param integrity True to verify integrity.
+         * @param hashKey The hash key to be used for integrity verification.
+         * @param chunkSize The chunk size.
+         * @throws IOException  Thrown if there is an error with the stream.
+         * @throws SalmonSecurityException Thrown if there is a security exception with the stream.
+         * @throws SalmonIntegrityException Thrown if the stream is corrupt or tampered with.
+        """
+
         stream: SalmonStream | None = None
         output_stream: MemoryStream | None = None
         try:
@@ -283,5 +282,7 @@ class SalmonDecryptor:
             if output_stream is not None:
                 output_stream.close()
 
-    def __finalize(self):
-        self.__executor.close()
+    def __del__(self):
+        pass
+        if self.__executor is not None:
+            self.__executor.shutdown(False)

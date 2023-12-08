@@ -23,7 +23,8 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 """
 import math
-from multiprocessing.pool import ThreadPool
+import threading
+from concurrent.futures import ThreadPoolExecutor
 
 from convert.bit_converter import BitConverter
 from iostream.memory_stream import MemoryStream
@@ -32,7 +33,6 @@ from salmon.iostream.encryption_mode import EncryptionMode
 from salmon.iostream.salmon_stream import SalmonStream
 from salmon.salmon_generator import SalmonGenerator
 from salmon.salmon_security_exception import SalmonSecurityException
-from salmon.transform.salmon_aes256_ctr_transformer import SalmonAES256CTRTransformer
 
 
 class SalmonEncryptor:
@@ -55,7 +55,7 @@ class SalmonEncryptor:
          * The number of parallel threads to use.
         """
 
-        self.__executor: ThreadPool | None = None
+        self.__executor: ThreadPoolExecutor | None = None
         """
          * Executor for parallel tasks.
         """
@@ -69,7 +69,7 @@ class SalmonEncryptor:
             self.__threads = 1
         else:
             self.__threads = threads
-            executor = ThreadPool(threads)
+            self.__executor = ThreadPoolExecutor(threads)
 
         if buffer_size is None:
             self.__bufferSize = SalmonIntegrity.DEFAULT_CHUNK_SIZE
@@ -78,7 +78,7 @@ class SalmonEncryptor:
 
     def encrypt(self, data: bytearray, key: bytearray, nonce: bytearray,
                 store_header_data: bool,
-                integrity: bool, hash_key: bytearray, chunk_size: int) -> bytearray:
+                integrity: bool = False, hash_key: bytearray | None = None, chunk_size: int | None = None) -> bytearray:
         """
          * Encrypts a byte array using the provided key and nonce.
          *
@@ -121,8 +121,8 @@ class SalmonEncryptor:
             header_data = output_stream.to_array()
 
         real_size: int = SalmonStream.get_actual_size(data, key, nonce,
-                                                                    EncryptionMode.Encrypt,
-                                                                    header_data, integrity, chunk_size, hash_key)
+                                                      EncryptionMode.Encrypt,
+                                                      header_data, integrity, chunk_size, hash_key)
         out_data: bytearray = bytearray(real_size)
         output_stream.set_position(0)
         output_stream.read(out_data, 0, output_stream.length())
@@ -198,42 +198,40 @@ class SalmonEncryptor:
          * @param integrity      True to apply the data integrity.
          * @param chunkSize      The chunk size.
         """
-        # TODO:
 
-    #     final CountDownLatch done = new CountDownLatch(runningThreads)
-    #
-    #     AtomicReference<Exception> ex = new AtomicReference<>()
-    #     for (int i = 0 i < runningThreads i++) {
-    #         final int index = i
-    #         executor.submit(() -> {
-    #             try {
-    #                 long start = partSize * index
-    #                 long length
-    #                 if (index == runningThreads - 1)
-    #                     length = data.length - start
-    #                 else
-    #                     length = partSize
-    #                 MemoryStream ins = new MemoryStream(data)
-    #                 encryptData(ins, start, length, outData, key, nonce, headerData, integrity, hashKey, chunkSize)
-    #             } catch (Exception ex1) {
-    #                 ex.set(ex1)
-    #             }
-    #             done.countDown()
-    #         })
-    #     }
-    #     try {
-    #         done.await()
-    #     } catch (InterruptedException ignored) {
-    #     }
-    #
-    #     if (ex.get() != null) {
-    #         try {
-    #             throw ex.get()
-    #         } catch (Exception e) {
-    #             throw new RuntimeException(e)
-    #         }
-    #     }
-    # }
+        done: threading.Barrier = threading.Barrier(running_threads + 1)
+        ex: Exception | None = None
+
+        for i in range(0, running_threads):
+            index: int = i
+
+            def encrypt():
+                nonlocal ex, index
+                try:
+                    start: int = part_size * index
+                    length: int
+                    if index == running_threads - 1:
+                        length = len(data) - start
+                    else:
+                        length = part_size
+                    ins: MemoryStream = MemoryStream(data)
+                    self.__encrypt_data(ins, start, length, out_data, key, nonce, header_data, integrity, hash_key,
+                                        chunk_size)
+                except Exception as ex1:
+                    ex = ex1
+                done.wait()
+
+            self.__executor.submit(lambda: encrypt())
+
+        try:
+            done.wait()
+        except InterruptedError as ignored:
+            pass
+        if ex is not None:
+            try:
+                raise ex
+            except Exception as e:
+                raise RuntimeError() from e
 
     def __encrypt_data(self, input_stream: MemoryStream, start: int, count: int, out_data: bytearray,
                        key: bytearray, nonce: bytearray, header_data: bytearray,
@@ -284,5 +282,7 @@ class SalmonEncryptor:
             if input_stream is not None:
                 input_stream.close()
 
-    def __finalize(self):
-        self.__executor.close()
+    def __del__(self):
+        pass
+        if self.__executor is not None:
+            self.__executor.shutdown(False)
