@@ -1,3 +1,10 @@
-# Salmon needs python 3.11+ 
-# package dependencies:
+## Salmon for python
+
+#### Requirements
+Python 3.11+  
+
+#### Dependencies:
+* python-interface  
+
+install packages:  
 python -m pip install python-interface
