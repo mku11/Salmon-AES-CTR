@@ -675,7 +675,7 @@ class SalmonStream(RandomAccessStream):
             chunk_size = len(buffer)
         while pos < len(buffer):
             if hashes is not None:
-                self.__baseStream.write(hashes[chunk], 0, hashes[chunk].length)
+                self.__baseStream.write(hashes[chunk], 0, len(hashes[chunk]))
             length: int = min(chunk_size, len(buffer) - pos)
             self.__baseStream.write(buffer, pos, length)
             pos += length
