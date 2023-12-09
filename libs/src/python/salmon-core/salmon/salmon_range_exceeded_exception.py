@@ -23,19 +23,18 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 '''
 
-"""
- * Thrown when maximum nonce range is exceeded.
-"""
-
 from typeguard import typechecked
 
 
 @typechecked
 class SalmonRangeExceededException(Exception):
     """
-     * Construct an exception with a specific message.
-     * @param msg The message.
+     * Thrown when maximum nonce range is exceeded.
     """
 
     def __init__(self, msg: str):
+        """
+         * Construct an exception with a specific message.
+         * @param msg The message.
+        """
         super().__init__(msg)

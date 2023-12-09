@@ -120,7 +120,7 @@ class SalmonHeader:
         stream.read(header.__nonce, 0, len(header.__nonce))
         stream.set_position(0)
         header.__headerData = bytearray(SalmonGenerator.MAGIC_LENGTH + SalmonGenerator.VERSION_LENGTH
-                                      + SalmonGenerator.CHUNK_SIZE_LENGTH + SalmonGenerator.NONCE_LENGTH)
+                                        + SalmonGenerator.CHUNK_SIZE_LENGTH + SalmonGenerator.NONCE_LENGTH)
         stream.read(header.__headerData, 0, len(header.__headerData))
         return header
 

@@ -25,7 +25,6 @@ SOFTWARE.
 import math
 import threading
 from concurrent.futures import ThreadPoolExecutor
-from multiprocessing.pool import ThreadPool
 
 from iostream.memory_stream import MemoryStream
 from iostream.random_access_stream import RandomAccessStream
@@ -36,7 +35,6 @@ from salmon.iostream.salmon_stream import SalmonStream
 from salmon.salmon_generator import SalmonGenerator
 from salmon.salmon_header import SalmonHeader
 from salmon.salmon_security_exception import SalmonSecurityException
-from salmon.transform.salmon_aes256_ctr_transformer import SalmonAES256CTRTransformer
 
 from typeguard import typechecked
 

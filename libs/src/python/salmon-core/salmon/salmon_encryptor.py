@@ -188,8 +188,8 @@ class SalmonEncryptor:
          *
          * @param runningThreads The number of threads to submit.
          * @param partSize       The data length of each part that belongs to each thread.
-         * @param data           The buffer of data you want to decrypt. This is a shared byte array across all threads where each
-         *                       thread will read each own part.
+         * @param data           The buffer of data you want to decrypt. This is a shared byte array across all threads
+                                 where each thread will read each own part.
          * @param outData        The buffer of data containing the encrypted data.
          * @param key            The AES key.
          * @param hashKey        The hash key for integrity.

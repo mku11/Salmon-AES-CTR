@@ -94,9 +94,10 @@ class SalmonStream(RandomAccessStream):
          * The transformation is based on AES CTR Mode.
          * </p>
          * Notes:
-         * The initial value of the counter is a result of the concatenation of an 12 byte nonce and an additional 4 bytes counter.
+         * The initial value of the counter is a result of the concatenation of an 12 byte nonce and an additional
+         * 4 bytes counter.
          * The counter is then: incremented every block, encrypted by the key, and xored with the plain text.
-         * @see <a href="https://en.wikipedia.org/wiki/Block_cipher_mode_of_operation#Counter_(CTR)">Salmon README.md</a>
+         * see <a href="https://en.wikipedia.org/wiki/Block_cipher_mode_of_operation#Counter_(CTR)">Salmon README.md</a>
          *
          * @param key            The AES key that is used to encrypt decrypt
          * @param nonce          The nonce used for the initial counter
@@ -382,8 +383,10 @@ class SalmonStream(RandomAccessStream):
 
     def set_allow_range_write(self, value: bool):
         """
-         * Warning! Allow byte range encryption writes on a current stream. Overwriting is not a good idea because it will re-use the same IV.
-         * This is not recommended if you use the stream on storing files or generally data if prior version can be inspected by others.
+         * Warning! Allow byte range encryption writes on a current stream. Overwriting is not a good idea because it
+         * will re-use the same IV.
+         * This is not recommended if you use the stream on storing files or generally data if prior version can
+         * be inspected by others.
          * You should only use this setting for initial encryption with parallel streams and not for overwriting!
          *
          * @param value True to allow byte range encryption write operations
@@ -453,7 +456,8 @@ class SalmonStream(RandomAccessStream):
         if aligned_offset != 0:
             # read partially once
             self.set_position(self.get_position() - aligned_offset)
-            n_count: int = self.__salmonIntegrity.get_chunk_size() if self.__salmonIntegrity.get_chunk_size() > 0 else SalmonGenerator.BLOCK_SIZE
+            n_count: int = self.__salmonIntegrity.get_chunk_size() if self.__salmonIntegrity.get_chunk_size() > 0 \
+                else SalmonGenerator.BLOCK_SIZE
             buff: bytearray = bytearray(n_count)
             v_bytes = self.read(buff, 0, n_count)
             v_bytes = min(v_bytes - aligned_offset, count)
@@ -488,7 +492,8 @@ class SalmonStream(RandomAccessStream):
         """
         if self.get_position() == self.length():
             return 0
-        if self.__salmonIntegrity.get_chunk_size() > 0 and self.get_position() % self.__salmonIntegrity.get_chunk_size() != 0:
+        if self.__salmonIntegrity.get_chunk_size() > 0 \
+                and self.get_position() % self.__salmonIntegrity.get_chunk_size() != 0:
             raise IOError("All reads should be aligned to the chunks size: " + self.__salmonIntegrity.get_chunk_size())
         elif self.__salmonIntegrity.get_chunk_size() == 0 and self.get_position() % SalmonGenerator.BLOCK_SIZE != 0:
             raise IOError("All reads should be aligned to the block size: " + SalmonGenerator.BLOCK_SIZE)
@@ -572,8 +577,9 @@ class SalmonStream(RandomAccessStream):
 
             try:
                 self.__transformer.encrypt_data(src_buffer, 0, dest_buffer, 0, len(src_buffer))
-                integrity_hashes: list | None = self.__salmonIntegrity.generate_hashes(dest_buffer,
-                                                                                       self.__headerData if self.get_position() == 0 else None)
+                integrity_hashes: list | None = \
+                    self.__salmonIntegrity.generate_hashes(
+                        dest_buffer, self.__headerData if self.get_position() == 0 else None)
                 pos += self.__write_to_stream(dest_buffer, self.get_chunk_size(), integrity_hashes)
                 self.__transformer.sync_counter(self.get_position())
             except (SalmonSecurityException, SalmonRangeExceededException, SalmonIntegrityException) as ex:
