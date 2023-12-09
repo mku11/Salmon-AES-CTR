@@ -135,8 +135,8 @@ class SalmonIntegrity:
         if include_data is not None:
             final_buffer = bytearray(count + len(include_data))
             final_count = count + len(include_data)
-            final_buffer[0:len(include_data)] = include_data[:]
-            final_buffer[len(include_data):len(include_data) + count] = buffer[offset:]
+            final_buffer[0:len(include_data)] = include_data[0:len(include_data)]
+            final_buffer[len(include_data):len(include_data) + count] = buffer[offset:offset + count]
             final_offset = 0
         hash_value: bytearray = provider.calc(key, final_buffer, final_offset, final_count)
         return hash_value
@@ -224,7 +224,7 @@ class SalmonIntegrity:
         hashes = []
         for i in range(0, len(buffer), SalmonGenerator.HASH_KEY_LENGTH + self._chunkSize):
             v_hash: bytearray = bytearray(SalmonGenerator.HASH_KEY_LENGTH)
-            v_hash[0:SalmonGenerator.HASH_KEY_LENGTH] = buffer[i:]
+            v_hash[0:SalmonGenerator.HASH_KEY_LENGTH] = buffer[i:i + SalmonGenerator.HASH_KEY_LENGTH]
             hashes.append(v_hash)
         return hashes
 

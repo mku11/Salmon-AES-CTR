@@ -49,7 +49,7 @@ class HmacSHA256Provider(IHashProvider):
          * @throws SalmonIntegrityException thrown if hash cannot be calculated
         """
         try:
-            v_hmac = hmac.new(hash_key, buffer, digestmod=hashlib.sha256)
+            v_hmac = hmac.new(hash_key, memoryview(buffer)[offset:offset + count], digestmod=hashlib.sha256)
             hash_value: bytearray = bytearray(v_hmac.digest())
             return hash_value
         except Exception as ex:
