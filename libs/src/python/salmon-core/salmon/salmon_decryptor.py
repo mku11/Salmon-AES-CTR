@@ -70,7 +70,7 @@ class SalmonDecryptor:
          * The buffer size to use.
         """
 
-        if threads is None:
+        if threads is None or threads <= 0:
             self.__threads = 1
         else:
             self.__threads = threads
