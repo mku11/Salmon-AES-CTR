@@ -62,7 +62,7 @@ class SalmonAesIntrTransformer(SalmonNativeTransformer):
         """
         # AES intrinsics needs the expanded key
         return self.get_native_proxy().salmon_transform(self.get_expanded_key(), self.get_counter(),
-                                                        EncryptionMode.Encrypt.ordinal(),
+                                                        int(EncryptionMode.Encrypt.value),
                                                         src_buffer, src_offset,
                                                         dest_buffer, dest_offset, count)
 
@@ -80,6 +80,6 @@ class SalmonAesIntrTransformer(SalmonNativeTransformer):
                      dest_buffer: bytearray, dest_offset: int, count: int) -> int:
         # AES intrinsics needs the expanded key
         return self.get_native_proxy().salmon_transform(self.get_expanded_key(), self.get_counter(),
-                                                        EncryptionMode.Encrypt.ordinal(),
+                                                        int(EncryptionMode.Encrypt.value),
                                                         src_buffer, src_offset,
                                                         dest_buffer, dest_offset, count)

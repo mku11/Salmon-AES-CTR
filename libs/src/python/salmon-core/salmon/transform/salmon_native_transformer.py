@@ -75,7 +75,7 @@ class SalmonNativeTransformer(SalmonAES256CTRTransformer):
     def encrypt_data(self, src_buffer: bytearray, src_offset: int,
                      dest_buffer: bytearray, dest_offset: int, count: int) -> int:
         return SalmonNativeTransformer.__nativeProxy.salmon_transform(self.get_key(), self.get_counter(),
-                                                                      EncryptionMode.Encrypt.ordinal(),
+                                                                      int(EncryptionMode.Encrypt.value),
                                                                       src_buffer, src_offset,
                                                                       dest_buffer, dest_offset, count)
 
@@ -92,6 +92,6 @@ class SalmonNativeTransformer(SalmonAES256CTRTransformer):
     def decrypt_data(self, src_buffer: bytearray, src_offset: int,
                      dest_buffer: bytearray, dest_offset: int, count: int) -> int:
         return SalmonNativeTransformer.__nativeProxy.salmon_transform(self.get_key(), self.get_counter(),
-                                                                      EncryptionMode.Encrypt.ordinal(),
+                                                                      int(EncryptionMode.Encrypt.value),
                                                                       src_buffer, src_offset,
                                                                       dest_buffer, dest_offset, count)
