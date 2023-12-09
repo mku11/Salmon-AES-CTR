@@ -23,7 +23,7 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 '''
 from salmon.password.isalmon_pbkdf_provider import ISalmonPbkdfProvider
-from salmon.password.salmon_password import SalmonPassword
+from salmon.password.pbkdf_algo import PbkdfAlgo
 
 import hashlib
 
@@ -39,7 +39,7 @@ class SalmonDefaultPbkdfProvider(ISalmonPbkdfProvider):
     """
 
     def get_key(self, password: str, salt: bytearray, iterations: int, output_bytes: int,
-                pbkdf_algo: SalmonPassword.PbkdfAlgo) -> bytearray:
+                pbkdf_algo: PbkdfAlgo) -> bytearray:
         """
          * Get a key derived from a text password
          * @param password The text password.

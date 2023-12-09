@@ -23,8 +23,8 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 '''
 from salmon.password.isalmon_pbkdf_provider import ISalmonPbkdfProvider
+from salmon.password.pbkdf_type import PbkdfType
 from salmon.password.salmon_default_pbkdf_provider import SalmonDefaultPbkdfProvider
-from salmon.password.salmon_password import SalmonPassword
 
 from typeguard import typechecked
 
@@ -36,13 +36,13 @@ class SalmonPbkdfFactory:
     """
 
     @staticmethod
-    def create(pbkdf_type: SalmonPassword.PbkdfType) -> ISalmonPbkdfProvider:
+    def create(pbkdf_type: PbkdfType) -> ISalmonPbkdfProvider:
         """
          * Create an instance of a pbkdf provider.
          * @param type The pbkdf type.
          * @return The provider.
         """
         match pbkdf_type:
-            case SalmonPassword.PbkdfType.Default:
+            case PbkdfType.Default:
                 return SalmonDefaultPbkdfProvider()
         raise RuntimeError("Unknown Pbkdf provider type")

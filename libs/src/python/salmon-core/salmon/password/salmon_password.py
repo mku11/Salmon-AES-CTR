@@ -118,6 +118,6 @@ class SalmonPassword:
          * @return The derived key.
          * @throws SalmonSecurityException
         """
-        if SalmonPassword.__pbkdfAlgo == SalmonPassword.PbkdfAlgo.SHA1 and not SalmonPassword.ENABLE_SHA1:
+        if SalmonPassword.__pbkdfAlgo == PbkdfAlgo.SHA1 and not SalmonPassword.ENABLE_SHA1:
             raise RuntimeError("Cannot use SHA1, SHA1 is not secure anymore use SHA256!")
         return SalmonPassword.__provider.get_key(password, salt, iterations, output_bytes, SalmonPassword.__pbkdfAlgo)

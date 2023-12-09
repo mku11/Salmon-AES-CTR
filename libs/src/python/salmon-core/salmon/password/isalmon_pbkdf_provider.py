@@ -22,8 +22,7 @@ LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 '''
-
-from salmon.password.salmon_password import SalmonPassword
+from salmon.password.pbkdf_algo import PbkdfAlgo
 from salmon.salmon_security_exception import SalmonSecurityException
 from abc import ABC, abstractmethod
 from typeguard import typechecked
@@ -54,17 +53,17 @@ class ISalmonPbkdfProvider(ABC):
     """
 
     @staticmethod
-    def get_pbkdf_algo_string(pbkdf_algo: SalmonPassword.PbkdfAlgo) -> str:
+    def get_pbkdf_algo_string(pbkdf_algo: PbkdfAlgo) -> str:
         match pbkdf_algo:
-            case SalmonPassword.PbkdfAlgo.SHA1:
+            case PbkdfAlgo.SHA1:
                 return ISalmonPbkdfProvider.PBKDF_SHA1
-            case SalmonPassword.PbkdfAlgo.SHA256:
+            case PbkdfAlgo.SHA256:
                 return ISalmonPbkdfProvider.PBKDF_SHA256
         raise SalmonSecurityException("Unknown pbkdf algorithm")
 
     @abstractmethod
     def get_key(self, password: str, salt: bytearray, iterations: int, output_bytes: int,
-                pbkdf_algo: SalmonPassword.PbkdfAlgo) -> bytearray:
+                pbkdf_algo: PbkdfAlgo) -> bytearray:
         """
         Get a key derived from a text password.
 
