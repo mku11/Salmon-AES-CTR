@@ -154,7 +154,8 @@ class RandomAccessStream(ABC):
         def on_progress_changed(self, position: int, length: int):
             pass
 
-    def copy_to(self, stream: RandomAccessStream, buffer_size: int, progress_listener: OnProgressListener):
+    def copy_to(self, stream: RandomAccessStream, buffer_size: int | None = 0,
+                progress_listener: RandomAccessStream.OnProgressListener | None = None):
         """
          * Write stream contents to another stream.
          * @param stream The target stream.

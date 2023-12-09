@@ -213,7 +213,7 @@ class SalmonIntegrity:
                                               include_header_data if i == 0 else None))
         return hashes
 
-    def get_hashes(self, buffer: bytearray) -> []:
+    def get_hashes(self, buffer: bytearray) -> list | None:
         """
          * Get the hashes for each data chunk.
          * @param buffer The buffer that contains the data chunks.
@@ -228,7 +228,7 @@ class SalmonIntegrity:
             hashes.append(v_hash)
         return hashes
 
-    def verify_hashes(self, hashes: [], buffer: bytearray, include_header_data: bytearray):
+    def verify_hashes(self, hashes: list | None, buffer: bytearray, include_header_data: bytearray | None):
         """
          * Verify the buffer chunks against the hash signatures.
          * @param hashes The hashes to verify.
