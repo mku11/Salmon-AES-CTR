@@ -24,7 +24,6 @@ SOFTWARE.
 '''
 from abc import ABC
 
-from salmon.iostream.encryption_mode import EncryptionMode
 from salmon.salmon_generator import SalmonGenerator
 from salmon.salmon_range_exceeded_exception import SalmonRangeExceededException
 from salmon.transform.isalmon_ctr_transformer import ISalmonCTRTransformer
