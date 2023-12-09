@@ -40,46 +40,18 @@ class NativeProxy(INativeProxy):
      * If proxy is loaded 
     """
 
-    __libraryName: str = "salmon.dll"
+    __library_path: str = "salmon.dll"
     """
-     * The dll name for the salmon library.
+     * The dll path for the salmon library.
     """
+
+    @staticmethod
+    def set_library_path(library_path: str):
+        NativeProxy.__library_path = library_path
 
     @staticmethod
     def get_char_array(v_bytes: bytearray):
         return (ctypes.c_char * len(v_bytes)).from_buffer(bytearray(v_bytes))
-
-    #
-    # # TODO:
-    # @staticmethod
-    # def __expand_key(key: bytearray, expanded_key: bytearray):
-    #     """
-    #      * Native Key schedule algorithm for expanding the 32 byte key to 240 bytes required
-    #      *
-    #      * @param key
-    #      * @param expandedKey
-    #     """
-    #     pass
-
-    # # TODO:
-    # @staticmethod
-    # def __transform(key: bytearray, counter: bytearray, encryption_mode: int,
-    #                 src_buffer: bytearray, src_offset: int,
-    #                 dest_buffer: bytearray, dest_offset: int, count: int) -> int:
-    #     """
-    #      * Native transform of the input byte array using AES 256 encryption or decryption mode.
-    #      *
-    #      * @param key
-    #      * @param counter
-    #      * @param encryption_mode
-    #      * @param srcBuffer
-    #      * @param srcOffset
-    #      * @param destBuffer
-    #      * @param destOffset
-    #      * @param count
-    #      * @return
-    #     """
-    #     pass
 
     def salmon_init(self, aes_impl: int):
         """
@@ -98,7 +70,7 @@ class NativeProxy(INativeProxy):
         if NativeProxy.__loaded:
             return
         try:
-            lib = ctypes.CDLL('./' + self.__libraryName)
+            lib = ctypes.CDLL(NativeProxy.__library_path)
             NativeProxy.__init = lib.salmon_init
             NativeProxy.__init.argtypes = [ctypes.c_int]
 
@@ -126,11 +98,8 @@ class NativeProxy(INativeProxy):
         """
         c_key = NativeProxy.get_char_array(key)
         c_expanded_key = NativeProxy.get_char_array(expanded_key)
-        print(bytearray(c_key))
-        print(bytearray(c_expanded_key))
         NativeProxy.__expand_key(c_key, c_expanded_key)
-        print(bytearray(c_key))
-        print(bytearray(c_expanded_key))
+        expanded_key[0:len(expanded_key)] = bytearray(c_expanded_key)
 
     def salmon_transform(self, key: bytearray, counter: bytearray, encryption_mode: int,
                          src_buffer: bytearray, src_offset: int, dest_buffer: bytearray, dest_offset: int,
@@ -153,6 +122,8 @@ class NativeProxy(INativeProxy):
         c_counter = NativeProxy.get_char_array(counter)
         c_src_buffer = NativeProxy.get_char_array(src_buffer)
         c_dest_buffer = NativeProxy.get_char_array(dest_buffer)
-        return NativeProxy.__transform(c_key, c_counter, encryption_mode,
-                                       c_src_buffer, src_offset,
-                                       c_dest_buffer, dest_offset, count)
+        v_bytes: int = NativeProxy.__transform(c_key, c_counter, encryption_mode,
+                                               c_src_buffer, src_offset,
+                                               c_dest_buffer, dest_offset, count)
+        dest_buffer[0:len(dest_buffer)] = bytearray(c_dest_buffer)
+        return v_bytes
