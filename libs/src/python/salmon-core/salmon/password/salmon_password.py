@@ -26,6 +26,8 @@ from __future__ import annotations
 from enum import Enum
 
 from salmon.password.isalmon_pbkdf_provider import ISalmonPbkdfProvider
+from salmon.password.pbkdf_algo import PbkdfAlgo
+from salmon.password.pbkdf_type import PbkdfType
 from salmon.password.salmon_default_pbkdf_provider import SalmonDefaultPbkdfProvider
 from salmon.password.salmon_pbkdf_factory import SalmonPbkdfFactory
 
@@ -43,7 +45,7 @@ class SalmonPassword:
      * WARNING! SHA1 is not secure anymore enable only if you know what you're doing!
     """
 
-    __pbkdfAlgo: PbkdfAlgo = None
+    __pbkdfAlgo: PbkdfAlgo = PbkdfAlgo.SHA256
     """
      * Global PBKDF algorithm option that will be used for the master key derivation.
     """
@@ -119,32 +121,3 @@ class SalmonPassword:
         if SalmonPassword.__pbkdfAlgo == SalmonPassword.PbkdfAlgo.SHA1 and not SalmonPassword.ENABLE_SHA1:
             raise RuntimeError("Cannot use SHA1, SHA1 is not secure anymore use SHA256!")
         return SalmonPassword.__provider.get_key(password, salt, iterations, output_bytes, SalmonPassword.__pbkdfAlgo)
-
-    class PbkdfType(Enum):
-        """
-          * Pbkdf implementation type.
-         """
-
-        Default = 1
-        """
-          * Default Java pbkdf implementation.
-         """
-
-    class PbkdfAlgo(Enum):
-        """
-         * Pbkdf algorithm implementation type.
-        """
-
-        SHA1 = 1
-        """
-         * SHA1 hashing. DO NOT USE.
-        """
-
-        SHA256 = 2
-        """
-         * SHA256 hashing.
-        """
-
-    # WORKAROUND: __future__ forw references does not seem to work with enum at least easily,
-    # so we delay default assignment till the enum is declared in this module
-    set_pbkdf_algo(PbkdfAlgo.SHA256)
