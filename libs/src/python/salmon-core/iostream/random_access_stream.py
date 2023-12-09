@@ -184,17 +184,17 @@ class RandomAccessStream(ABC):
          * Used to identify the start offset for seeking to a stream.
         """
 
-        Begin = 1
+        Begin = 0
         """
          * Start from the beginning of the stream.
         """
 
-        Current = 2
+        Current = 1
         """
          * Start from the current position of the stream.
         """
 
-        End = 3
+        End = 2
         """
          * Start from the end of the stream.
         """
