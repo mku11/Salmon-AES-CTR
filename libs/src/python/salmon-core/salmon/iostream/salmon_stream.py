@@ -162,7 +162,7 @@ class SalmonStream(RandomAccessStream):
          *
          * @param providerType The provider Type.
         """
-        SalmonStream.providerType = provider_type
+        SalmonStream.__provider_type = provider_type
 
     @staticmethod
     def get_aes_provider_type() -> ProviderType:
