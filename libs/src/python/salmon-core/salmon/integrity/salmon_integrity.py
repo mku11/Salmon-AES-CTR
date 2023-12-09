@@ -124,7 +124,6 @@ class SalmonIntegrity:
      * @throws SalmonIntegrityException
      """
 
-    # TODO: we should avoid the header data for performance?
     @staticmethod
     def calculate_hash(provider: IHashProvider, buffer: bytearray, offset: int, count: int,
                        key: bytearray, include_data: bytearray | None) -> bytearray:
