@@ -1,0 +1,32 @@
+﻿<Project Sdk="Microsoft.VisualStudio.JavaScript.Sdk/0.5.127-alpha">
+  <PropertyGroup>
+    <PublishAssetsDirectory>
+    </PublishAssetsDirectory>
+  </PropertyGroup>
+
+  <!-- Add the items so they can be seen in the ui -->
+  <ItemGroup>
+    <None Include="..\..\..\src\typescript\salmon-core\convert\base64.ts">
+      <Link>salmon-core\convert\base64.ts</Link>
+    </None>
+    <None Include="..\..\..\src\typescript\salmon-core\convert\ibase64.ts">
+      <Link>salmon-core\convert\ibase64.ts</Link>
+    </None>
+    <None Include="..\..\..\src\typescript\salmon-core\convert\bit_converter.ts">
+      <Link>salmon-core\convert\bit_converter.ts</Link>
+    </None>
+  </ItemGroup>
+
+  <!-- Add the items so they can be built -->
+  <ItemGroup>
+    <TypeScriptCompile Include="..\..\..\src\typescript\salmon-core\convert\base64.ts">
+      <Link>salmon-core\convert\base64.ts</Link>
+    </TypeScriptCompile>
+    <TypeScriptCompile Include="..\..\..\src\typescript\salmon-core\convert\ibase64.ts">
+      <Link>salmon-core\convert\ibase64.ts</Link>
+    </TypeScriptCompile>
+    <TypeScriptCompile Include="..\..\..\src\typescript\salmon-core\convert\bit_converter.ts">
+      <Link>salmon-core\convert\bit_converter.ts</Link>
+    </TypeScriptCompile>
+  </ItemGroup>
+</Project>
