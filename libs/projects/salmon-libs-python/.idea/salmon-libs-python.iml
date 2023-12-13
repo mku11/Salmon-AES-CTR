@@ -11,6 +11,14 @@
 	<content url="file://$MODULE_DIR$/../../test/salmon-native-test-python">
       <sourceFolder url="file://$MODULE_DIR$/../../test/salmon-native-test-python" isTestSource="true" />
     </content>
+	
+	<content url="file://$MODULE_DIR$/../../src/python/salmon-fs">
+      <sourceFolder url="file://$MODULE_DIR$/../../src/python/salmon-fs" isTestSource="false" />
+    </content>
+    <content url="file://$MODULE_DIR$/../../test/salmon-fs-test-python">
+      <sourceFolder url="file://$MODULE_DIR$/../../test/salmon-fs-test-python" isTestSource="true" />
+    </content>
+	
     <orderEntry type="inheritedJdk" />
     <orderEntry type="sourceFolder" forTests="false" />
   </component>
