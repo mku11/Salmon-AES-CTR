@@ -767,10 +767,14 @@ public class SalmonActivity extends AppCompatActivity {
             i++;
         }
 
-        Intent intent = new Intent(this, MediaPlayerActivity.class);
+        Intent intent = getMediaPlayerIntent();
         MediaPlayerActivity.setMediaFiles(pos, salmonFiles.toArray(new SalmonFile[0]));
         intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_NEW_TASK);
         startActivity(intent);
+    }
+
+    protected Intent getMediaPlayerIntent() {
+        return new Intent(this, MediaPlayerActivity.class);
     }
 
     private void startTextViewer(int position) {
@@ -810,7 +814,7 @@ public class SalmonActivity extends AppCompatActivity {
                 }
                 i++;
             }
-            Intent intent = new Intent(this, WebViewerActivity.class);
+            Intent intent = getWebViewerIntent();
             SalmonFile selectedFile = fileItemList.get(position);
             WebViewerActivity.setContentFiles(pos, salmonFiles.toArray(new SalmonFile[0]));
             intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_NEW_TASK);
@@ -819,6 +823,10 @@ public class SalmonActivity extends AppCompatActivity {
             e.printStackTrace();
             Toast.makeText(this, "Could not open viewer: " + e.getMessage(), Toast.LENGTH_LONG).show();
         }
+    }
+
+    protected Intent getWebViewerIntent() {
+        return new Intent(this, WebViewerActivity.class);
     }
 
     @Override

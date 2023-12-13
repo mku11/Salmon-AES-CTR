@@ -63,7 +63,7 @@ public class WebViewerActivity extends AppCompatActivity {
     private static SalmonFile[] fileList = null;
     private static int pos;
 
-    public WebView webView;
+    private WebView webView;
     private SalmonWebViewClient webViewClient;
     private BufferedInputStream stream;
     private TextView mTitle;
@@ -77,7 +77,7 @@ public class WebViewerActivity extends AppCompatActivity {
     public void loadContentAsync() {
         new Thread(() -> {
             try {
-                loadContent();
+                loadContent(fileList[pos]);
             } catch (Exception e) {
                 e.printStackTrace();
             }
@@ -90,8 +90,8 @@ public class WebViewerActivity extends AppCompatActivity {
 
     }
 
-    protected void loadContent() throws Exception {
-        String filename = fileList[pos].getBaseName();
+    protected void loadContent(SalmonFile file) throws Exception {
+        String filename = file.getBaseName();
         String ext = SalmonFileUtils.getExtensionFromFileName(filename).toLowerCase();
         String mimeType = null;
         try {
@@ -104,7 +104,7 @@ public class WebViewerActivity extends AppCompatActivity {
         }
 
         try {
-            SalmonStream encStream = fileList[pos].getInputStream();
+            SalmonStream encStream = file.getInputStream();
 
             // in order for the webview not to crash we suppress Exceptions
             encStream.setFailSilently(true);
@@ -207,13 +207,13 @@ public class WebViewerActivity extends AppCompatActivity {
         final GestureDetector gd = new GestureDetector(this, new GestureDetector.SimpleOnGestureListener() {
             @Override
             public boolean onDoubleTap(MotionEvent e) {
-                return false;
+                return WebViewerActivity.this.onDoubleTap(e);
             }
 
             @Override
             public void onLongPress(MotionEvent e) {
                 super.onLongPress(e);
-
+                WebViewerActivity.this.onLongPress(e);
             }
 
             @Override
@@ -223,7 +223,7 @@ public class WebViewerActivity extends AppCompatActivity {
 
             @Override
             public boolean onSingleTapConfirmed(MotionEvent e) {
-                return false;
+                return WebViewerActivity.this.onSingleTapConfirmed();
             }
 
             @Override
@@ -233,21 +233,37 @@ public class WebViewerActivity extends AppCompatActivity {
 
             @Override
             public boolean onFling(MotionEvent e1, MotionEvent e2, float velocityX, float velocityY) {
-                float distanceX = e2.getX() - e1.getX();
-                float distanceY = e2.getY() - e1.getY();
-                if (Math.abs(distanceX) > Math.abs(distanceY)
-                        && Math.abs(distanceX) > SWIPE_DISTANCE_THRESHOLD
-                        && Math.abs(velocityX) > SWIPE_VELOCITY_THRESHOLD) {
-                    onSwipe((int) (-1 * distanceX));
-                    return true;
-                }
-                return false;
+                return WebViewerActivity.this.onFling(e1, e2, velocityX, velocityY);
             }
         });
         webView.setOnTouchListener((v, motionevent) -> {
             gd.onTouchEvent(motionevent);
             return false;
         });
+    }
+
+    protected boolean onSingleTapConfirmed() {
+        return false;
+    }
+
+    protected boolean onDoubleTap(MotionEvent e) {
+        return false;
+    }
+
+    protected boolean onFling(MotionEvent e1, MotionEvent e2, float velocityX, float velocityY) {
+        float distanceX = e2.getX() - e1.getX();
+        float distanceY = e2.getY() - e1.getY();
+        if (Math.abs(distanceX) > Math.abs(distanceY)
+                && Math.abs(distanceX) > SWIPE_DISTANCE_THRESHOLD
+                && Math.abs(velocityX) > SWIPE_VELOCITY_THRESHOLD) {
+            onSwipe((int) (-1 * distanceX));
+            return true;
+        }
+        return false;
+    }
+
+    protected void onLongPress(MotionEvent e) {
+
     }
 
     private void onSwipe(int interval) {
@@ -260,14 +276,14 @@ public class WebViewerActivity extends AppCompatActivity {
         }
     }
 
-    private synchronized void playPreviousItem() {
+    protected synchronized void playPreviousItem() {
         if (pos > 0) {
             pos--;
             loadContentAsync();
         }
     }
 
-    private synchronized void playNextItem() {
+    protected synchronized void playNextItem() {
         if (pos < fileList.length - 1) {
             pos++;
             loadContentAsync();
@@ -286,7 +302,7 @@ public class WebViewerActivity extends AppCompatActivity {
     public void onConfigurationChanged(@NotNull Configuration c) {
         super.onConfigurationChanged(c);
         try {
-            loadContent();
+            loadContent(fileList[pos]);
         } catch (Exception exception) {
             exception.printStackTrace();
         }
