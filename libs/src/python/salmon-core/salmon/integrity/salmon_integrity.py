@@ -77,7 +77,7 @@ class SalmonIntegrity:
 
         self._hashSize: int
         """
-         * Hash result size;
+         * Hash result size
         """
 
         self._provider: IHashProvider
@@ -202,17 +202,17 @@ class SalmonIntegrity:
      * @throws SalmonIntegrityException
      """
 
-    def generate_hashes(self, buffer: bytearray, include_header_data: bytearray | None) -> list | None:
+    def generate_hashes(self, buffer: bytearray, include_header_data: bytearray | None) -> list[bytearray] | None:
         if not self._integrity:
             return None
-        hashes = []
+        hashes: list[bytearray] = []
         for i in range(0, len(buffer), self._chunkSize):
             length: int = min(self._chunkSize, len(buffer) - i)
             hashes.append(self.calculate_hash(self._provider, buffer, i, length, self.get_key(),
                                               include_header_data if i == 0 else None))
         return hashes
 
-    def get_hashes(self, buffer: bytearray) -> list | None:
+    def get_hashes(self, buffer: bytearray) -> list[bytearray] | None:
         """
          * Get the hashes for each data chunk.
          * @param buffer The buffer that contains the data chunks.
@@ -220,7 +220,7 @@ class SalmonIntegrity:
         """
         if not self._integrity:
             return None
-        hashes = []
+        hashes: list[bytearray] = []
         for i in range(0, len(buffer), SalmonGenerator.HASH_KEY_LENGTH + self._chunkSize):
             v_hash: bytearray = bytearray(SalmonGenerator.HASH_KEY_LENGTH)
             v_hash[0:SalmonGenerator.HASH_KEY_LENGTH] = buffer[i:i + SalmonGenerator.HASH_KEY_LENGTH]
