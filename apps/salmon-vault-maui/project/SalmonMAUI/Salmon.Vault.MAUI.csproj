@@ -1,7 +1,7 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <TargetFrameworks>net8.0-android;net8.0-ios;net8.0-maccatalyst</TargetFrameworks>
+    <!--<TargetFrameworks>net8.0-android;net8.0-ios;net8.0-maccatalyst</TargetFrameworks>-->
     <TargetFrameworks Condition="$([MSBuild]::IsOSPlatform('windows'))">$(TargetFrameworks);net8.0-windows10.0.19041.0</TargetFrameworks>
     <!-- Uncomment to also build the tizen app. You will need to install tizen by following this: https://github.com/Samsung/Tizen.NET -->
     <!-- <TargetFrameworks>$(TargetFrameworks);net6.0-tizen</TargetFrameworks> -->
@@ -37,10 +37,9 @@
   <ItemGroup>
     <!-- App Icon -->
     <MauiIcon Include="..\..\..\..\common\common-res\icons\logo_128x128.png" />
-    <!--<MauiIcon Include="Resources\AppIcon\appicon.svg" ForegroundFile="Resources\AppIcon\appiconfg.svg" Color="#512BD4" />-->
 
     <!-- Splash Screen -->
-    <MauiSplashScreen Include="Resources\Splash\splash.svg" Color="#512BD4" BaseSize="128,128" />
+    <MauiSplashScreen Include="Resources\Splash\logo_128x128.png" Color="#512BD4" BaseSize="128,128" />
 
     <!-- Images -->
     <MauiImage Include="Resources\Images\*" />
@@ -66,12 +65,12 @@
   <ItemGroup>
     <Compile Include="..\..\src\Config\SalmonConfig.cs" Link="Config\SalmonConfig.cs" />
     <Compile Include="..\..\src\Dialog\SalmonDialog.cs" Link="Dialog\SalmonDialog.cs" />
-    
-    
+
+
     <Compile Include="..\..\src\Image\Thumbnails.cs" Link="Image\Thumbnails.cs" />
     <Compile Include="..\..\src\Utils\URLUtils.cs" Link="Utils\URLUtils.cs" />
     <Compile Include="..\..\src\Utils\WindowUtils.cs" Link="Utils\WindowUtils.cs" />
-    
+
     <Compile Include="..\..\src\ViewModel\ImageViewerViewModel.cs" Link="ViewModel\ImageViewerViewModel.cs" />
     <Compile Include="..\..\src\ViewModel\MainViewModel.cs" Link="ViewModel\MainViewModel.cs" />
     <Compile Include="..\..\src\ViewModel\SettingsViewModel.cs" Link="ViewModel\SettingsViewModel.cs" />
@@ -79,7 +78,7 @@
     <Compile Include="..\..\src\ViewModel\SalmonFileViewModel.cs" Link="ViewModel\SalmonFileViewModel.cs" />
     <Compile Include="..\..\src\ViewModel\ContentViewerViewModel.cs" Link="ViewModel\ContentViewerViewModel.cs" />
     <Compile Include="..\..\src\ViewModel\ActionType.cs" Link="ViewModel\ActionType.cs" />
-    
+
     <Compile Include="..\..\src\View\ImageViewer.xaml.cs" Link="View\ImageViewer.xaml.cs" />
     <Compile Include="..\..\src\View\MainWindow.xaml.cs" Link="View\MainWindow.xaml.cs" />
     <Compile Include="..\..\src\View\SettingsViewer.xaml.cs" Link="View\SettingsViewer.xaml.cs" />
@@ -97,7 +96,7 @@
     <Compile Include="..\..\..\salmon-vault-csharp-common\src\Model\SalmonImageViewer.cs" Link="Model\SalmonImageViewer.cs" />
     <Compile Include="..\..\..\salmon-vault-csharp-common\src\Model\SalmonSettings.cs" Link="Model\SalmonSettings.cs" />
     <Compile Include="..\..\..\salmon-vault-csharp-common\src\Model\Win\SalmonWinVaultManager.cs" Link="Model\Win\SalmonWinVaultManager.cs" />
-    
+
     <Compile Include="..\..\..\salmon-vault-csharp-common\src\Services\ServiceLocator.cs" Link="Services\ServiceLocator.cs" />
     <Compile Include="..\..\..\salmon-vault-csharp-common\src\Services\IFileService.cs" Link="Services\IFileService.cs" />
     <Compile Include="..\..\..\salmon-vault-csharp-common\src\Services\IWebBrowserService.cs" Link="Services\IWebBrowserService.cs" />
@@ -105,7 +104,7 @@
     <Compile Include="..\..\..\salmon-vault-csharp-common\src\Services\IKeyboardService.cs" Link="Services\IKeyboardService.cs" />
     <Compile Include="..\..\..\salmon-vault-csharp-common\src\Services\IMediaPlayerService.cs" Link="Services\IMediaPlayerService.cs" />
     <Compile Include="..\..\..\salmon-vault-csharp-common\src\Services\ISettingsService.cs" Link="Services\ISettingsService.cs" />
-    
+
     <Compile Include="..\..\..\salmon-vault-csharp-common\src\Extensions\EnumExtensions.cs" Link="Extensions\EnumExtensions.cs" />
     <Compile Include="..\..\..\salmon-vault-csharp-common\src\Extensions\ExceptionExtensions.cs" Link="Extensions\ExceptionExtensions.cs" />
 
