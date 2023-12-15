@@ -35,7 +35,7 @@ from typeguard import typechecked
 @typechecked
 class SalmonDefaultPbkdfProvider(ISalmonPbkdfProvider):
     """
-     * Provides pbkdf via Java default algorithm.
+     * Provides pbkdf via Python default algorithm.
     """
 
     def get_key(self, password: str, salt: bytearray, iterations: int, output_bytes: int,

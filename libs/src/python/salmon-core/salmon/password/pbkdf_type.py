@@ -36,5 +36,5 @@ class PbkdfType(Enum):
 
     Default = 1
     """
-      * Default Java pbkdf implementation.
+      * Default Python pbkdf implementation.
      """

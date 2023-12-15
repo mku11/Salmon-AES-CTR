@@ -36,20 +36,20 @@ class ISalmonPbkdfProvider(ABC):
 
     PBKDF_SHA256: str = "sha256"
     """
-     * Java Cipher key for SHA256. See javax.crypto.SecretKeyFactory.
+     * Python Cipher key for SHA256. See cryptodome
     """
 
     PBKDF_SHA1: str = "sha1"
     """
-     * Cipher key for SHA1. See javax.crypto.SecretKeyFactory.
+     * Cipher key for SHA1. See cryptodome
      * WARNING! SHA1 is considered insecure! Use PBKDF_SHA256 instead.
     """
 
     """
-     * Get the PBKDF java cipher algorigthm string.
+     * Get the PBKDF python cipher algorithm string.
      *
      * @param pbkdfAlgo The PBKDF algorithm to be used
-     * @return The java cipher algorithm string. See javax.crypto.SecretKeyFactory.
+     * @return The python cipher algorithm string. See cryptodome
     """
 
     @staticmethod

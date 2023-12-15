@@ -35,7 +35,7 @@ from typeguard import typechecked
 @typechecked
 class HmacSHA256Provider(IHashProvider):
     """
-     * Provides Java HMAC256 hashing.
+     * Provides Python HMAC256 hashing.
     """
 
     def calc(self, hash_key: bytearray, buffer: bytearray, offset: int, count: int) -> bytearray:

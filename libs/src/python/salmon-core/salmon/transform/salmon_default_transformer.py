@@ -36,7 +36,7 @@ from typeguard import typechecked
 @typechecked
 class SalmonDefaultTransformer(SalmonAES256CTRTransformer):
     """
-     * Salmon AES transformer based on the javax.crypto routines.
+     * Salmon AES transformer based on the cryptodome routines.
     """
 
     def __init__(self):
@@ -44,7 +44,7 @@ class SalmonDefaultTransformer(SalmonAES256CTRTransformer):
 
     def init(self, key: bytearray, nonce: bytearray):
         """
-         * Initialize the default Java AES cipher transformer.
+         * Initialize the default Python AES cipher transformer.
          * @param key The AES256 key to use.
          * @param nonce The nonce to use.
          * @throws SalmonSecurityException
