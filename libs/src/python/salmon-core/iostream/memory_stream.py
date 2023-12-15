@@ -102,7 +102,7 @@ class MemoryStream(RandomAccessStream):
         """
          *
          * @return The position of the stream.
-         * @throws IOException
+         * @throws IOError
         """
         return self.__position
 
@@ -110,7 +110,7 @@ class MemoryStream(RandomAccessStream):
         """
          * Changes the current position of the stream. For more options use seek() method.
          * @param value The new position of the stream.
-         * @throws IOException
+         * @throws IOError
         """
         self.__position = value
 
@@ -119,7 +119,7 @@ class MemoryStream(RandomAccessStream):
          * Changes the length of the stream. The capacity of the stream might also change
          * if the value is lesser than the current capacity.
          * @param value
-         * @throws IOException
+         * @throws IOError
         """
         self.__check_and_resize(value)
         self.__capacity = value
@@ -131,7 +131,7 @@ class MemoryStream(RandomAccessStream):
          * @param offset The offset of the buffer that will be used to write the bytes.
          * @param count The length of the bytes that can be read from the stream and written to the buffer.
          * @return
-         * @throws IOException
+         * @throws IOError
         """
         bytes_read: int = int(min(self.__length - self.get_position(), count))
         buffer[offset:offset + bytes_read] = self.__bytes[self.__position:self.__position + bytes_read]
@@ -146,7 +146,7 @@ class MemoryStream(RandomAccessStream):
          * @param buffer The buffer that the bytes will be read from.
          * @param offset The position offset that will be used to read from the buffer.
          * @param count The number of bytes that will be written to the stream.
-         * @throws IOException
+         * @throws IOError
         """
         self.__check_and_resize(self.__position + count)
         self.__bytes[self.__position:self.__position + count] = buffer[offset:offset + count]
@@ -174,7 +174,7 @@ class MemoryStream(RandomAccessStream):
          * @param offset
          * @param origin Possible Values: Begin, Current, End
          * @return
-         * @throws IOException
+         * @throws IOError
         """
         n_pos: int = 0
         if origin == RandomAccessStream.SeekOrigin.Begin:

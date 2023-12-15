@@ -105,7 +105,7 @@ class SalmonHeader:
          * Parse the header data from the stream
          * @param stream The stream.
          * @return
-         * @throws IOException
+         * @throws IOError
         """
         header: SalmonHeader = SalmonHeader()
         header.__magicBytes = bytearray(SalmonGenerator.MAGIC_LENGTH)

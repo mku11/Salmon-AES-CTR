@@ -92,7 +92,7 @@ class SalmonEncryptor:
          * @param chunkSize       The chunk size.
          * @return The byte array with the encrypted data.
          * @throws SalmonSecurityException
-         * @throws IOException
+         * @throws IOError
          * @throws SalmonIntegrityException
         """
 
@@ -249,7 +249,7 @@ class SalmonEncryptor:
          * @param integrity   True to apply integrity.
          * @param hashKey     The key to be used for integrity application.
          * @param chunkSize   The chunk size.
-         * @throws IOException              Thrown if there is an error with the stream.
+         * @throws IOError              Thrown if there is an error with the stream.
          * @throws SalmonSecurityException  Thrown if there is a security exception with the stream.
          * @throws SalmonIntegrityException Thrown if integrity cannot be applied.
         """

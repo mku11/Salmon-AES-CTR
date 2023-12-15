@@ -51,7 +51,7 @@ class InputStreamWrapper(BufferedIOBase):
          * to specify the count and offset pass a memoryview instead
          * @param buffer     the buffer into which the data is read.
          * @return The number of bytes read.
-         * @throws IOException with an optional inner Exception if the base stream is a SalmonStream
+         * @throws IOError with an optional inner Exception if the base stream is a SalmonStream
         """
         bytes_read: int
         try:
@@ -78,7 +78,7 @@ class InputStreamWrapper(BufferedIOBase):
     def close(self):
         """
          * Closes the base stream.
-         * @throws IOException
+         * @throws IOError
         """
         self.__stream.close()
 
@@ -87,7 +87,7 @@ class InputStreamWrapper(BufferedIOBase):
          * Skip number of bytes on the stream.
          * @param pos   the number of bytes to be skipped.
          * @return
-         * @throws IOException
+         * @throws IOError
         """
         if pos > self.__stream.length():
             self.__stream.set_position(self.__stream.length())

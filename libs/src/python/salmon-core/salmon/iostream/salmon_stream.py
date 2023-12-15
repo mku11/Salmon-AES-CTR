@@ -75,7 +75,7 @@ class SalmonStream(RandomAccessStream):
          *
          * @throws SalmonSecurityException
          * @throws SalmonIntegrityException
-         * @throws IOException
+         * @throws IOError
         """
         input_stream: MemoryStream = MemoryStream(data)
         s: SalmonStream = SalmonStream(key, nonce, mode, input_stream, header_data, integrity, chunk_size, hash_key)

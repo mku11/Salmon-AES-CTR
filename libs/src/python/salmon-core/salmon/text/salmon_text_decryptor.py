@@ -46,13 +46,13 @@ class SalmonTextDecryptor:
          * @param text  Text to be decrypted.
          * @param key   The encryption key to be used.
          * @param nonce The nonce to be used, set only if header=false.
-         * @param header Set to true if you encrypted the string with encrypt(header=true), set only if nonce=null
+         * @param header Set to true if you encrypted the string with encrypt(header=true), set only if nonce=None
          *               otherwise you will have to provide the original nonce.
          * @param integrity True if you want to calculate and store hash signatures for each chunkSize
          * @param hashKey Hash key to be used for all chunks.
          * @param chunkSize The chunk size.
          * @return The decrypted text.
-         * @throws IOException
+         * @throws IOError
          * @throws SalmonSecurityException
          * @throws SalmonIntegrityException
         """

@@ -73,7 +73,7 @@ class RandomAccessStream(ABC):
         """
          * Get the current position of the stream.
          * @return The current position.
-         * @throws IOException
+         * @throws IOError
         """
         pass
 
@@ -82,7 +82,7 @@ class RandomAccessStream(ABC):
         """
          * Change the current position of the stream.
          * @param value The new position.
-         * @throws IOException
+         * @throws IOError
         """
         pass
 
@@ -91,7 +91,7 @@ class RandomAccessStream(ABC):
         """
          * Set the length of this stream.
          * @param value The length.
-         * @throws IOException
+         * @throws IOError
         """
         pass
 
@@ -103,7 +103,7 @@ class RandomAccessStream(ABC):
          * @param offset
          * @param count The number of bytes that were read. If the stream reached the end return -1.
          * @return
-         * @throws IOException
+         * @throws IOError
         """
         pass
 
@@ -114,7 +114,7 @@ class RandomAccessStream(ABC):
          * @param buffer The buffer to read the contents from.
          * @param offset The position the reading will start from.
          * @param count The count of bytes to be read from the buffer.
-         * @throws IOException
+         * @throws IOError
         """
         pass
 
@@ -125,7 +125,7 @@ class RandomAccessStream(ABC):
          * @param position The new position.
          * @param origin The origin type.
          * @return The position after the seeking was complete.
-         * @throws IOException
+         * @throws IOError
         """
         pass
 
@@ -140,7 +140,7 @@ class RandomAccessStream(ABC):
     def close(self):
         """
          * Close the stream and associated resources.
-         * @throws IOException
+         * @throws IOError
         """
         pass
 
@@ -161,7 +161,7 @@ class RandomAccessStream(ABC):
          * @param stream The target stream.
          * @param bufferSize The buffer size to be used when copying.
          * @param progressListener The listener to notify when progress changes.
-         * @throws IOException
+         * @throws IOError
         """
         if not self.can_read():
             raise IOError("Target stream not readable")

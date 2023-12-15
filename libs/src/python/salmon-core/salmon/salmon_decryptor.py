@@ -94,9 +94,9 @@ class SalmonDecryptor:
          * @param hashKey The hash key to be used for integrity.
          * @param chunkSize The chunk size.
          * @return The byte array with the decrypted data.
-         * @throws IOException Thrown if there is a problem with decoding the array.
+         * @throws IOError Thrown if there is a problem with decoding the array.
          * @throws SalmonSecurityException Thrown if the key and nonce are not provided.
-         * @throws IOException
+         * @throws IOError
          * @throws SalmonIntegrityException
         """
         if key is None:
@@ -246,7 +246,7 @@ class SalmonDecryptor:
          * @param integrity True to verify integrity.
          * @param hashKey The hash key to be used for integrity verification.
          * @param chunkSize The chunk size.
-         * @throws IOException  Thrown if there is an error with the stream.
+         * @throws IOError  Thrown if there is an error with the stream.
          * @throws SalmonSecurityException Thrown if there is a security exception with the stream.
          * @throws SalmonIntegrityException Thrown if the stream is corrupt or tampered with.
         """
