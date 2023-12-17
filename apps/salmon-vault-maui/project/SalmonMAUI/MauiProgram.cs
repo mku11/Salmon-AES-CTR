@@ -1,4 +1,5 @@
-﻿using Microsoft.Maui.Controls.Hosting;
+﻿using Microsoft.Maui;
+using Microsoft.Maui.Controls.Hosting;
 using Microsoft.Maui.Hosting;
 
 namespace Salmon.Vault.MAUI;
@@ -9,6 +10,7 @@ public static class MauiProgram
 	{
 		var builder = MauiApp.CreateBuilder();
 		builder.UseMauiApp<App>()
+            .UseVirtualListView()
             .ConfigureFonts(fonts =>
 			{
 				fonts.AddFont("OpenSans-Regular.ttf", "OpenSansRegular");

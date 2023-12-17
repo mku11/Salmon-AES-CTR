@@ -24,6 +24,7 @@ SOFTWARE.
 #if ANDROID
 using AndroidX.Lifecycle;
 #endif
+using Microsoft.Maui;
 using Microsoft.Maui.Controls;
 using Microsoft.Maui.Graphics;
 using Salmon.Vault.Services;
@@ -54,7 +55,7 @@ public partial class MainWindow : ContentPage
     private HashSet<string> keysPressed = new HashSet<string>();
     private HashSet<MetaKey> metaKeysPressed = new HashSet<MetaKey>();
 
-    public static Window ActiveWindow { get; private set; }
+    public static MainWindow ActiveWindow { get; private set; }
     private SalmonFileViewModel lastSelectedItem;
 
     public MainWindow()
@@ -68,8 +69,9 @@ public partial class MainWindow : ContentPage
 
         this.Loaded += MainWindow_Loaded;
 
-        ViewHandlers = new ViewHandlers();
-        ViewHandlers.OnContextMenu += OnContextMenu;
+        //TODO:
+        //ViewHandlers = new ViewHandlers();
+        //ViewHandlers.OnContextMenu += OnContextMenu;
         ViewModel.PropertyChanged += ViewModel_PropertyChanged;
 
         SetupKeyboardShortcuts();
@@ -77,7 +79,7 @@ public partial class MainWindow : ContentPage
 
     private void MainWindow_Loaded(object sender, EventArgs e)
     {
-        MainWindow.ActiveWindow = this.Window;
+        MainWindow.ActiveWindow = this;
         DataGrid.Focus();
         ViewModel.OnShow();
     }
@@ -200,8 +202,9 @@ public partial class MainWindow : ContentPage
             {
                 ViewModel.IsMultiSelection = true;
                 DataGrid.Focus();
-                foreach (SalmonFileViewModel vm in ViewModel.FileItemList)
-                    DataGrid.SelectedItems.Add(vm);
+                //TODO:
+                //foreach (SalmonFileViewModel vm in ViewModel.FileItemList)
+                //    DataGrid.SelectedItems.Add(vm);
             }
             else if (keysPressed.Contains("Delete"))
                 ViewModel.OnCommandClicked(ActionType.DELETE);
@@ -214,8 +217,9 @@ public partial class MainWindow : ContentPage
             }
             else if (keysPressed.Contains("Enter"))
             {
-                if (DataGrid.SelectionMode == SelectionMode.Single && DataGrid.SelectedItem != null)
-                    ViewModel.OpenItem((SalmonFileViewModel)DataGrid.SelectedItem);
+                //TODO:
+                //if (DataGrid.SelectionMode == Microsoft.Maui.SelectionMode.Single && DataGrid.SelectedItem != null)
+                //    ViewModel.OpenItem((SalmonFileViewModel) DataGrid.SelectedItem);
             }
 
         }
@@ -228,61 +232,66 @@ public partial class MainWindow : ContentPage
     {
         WindowUtils.RunOnMainThread(() =>
         {
-            if (DataGrid.SelectionMode == SelectionMode.Multiple)
+            if (DataGrid.SelectionMode == Microsoft.Maui.SelectionMode.Multiple)
             {
-                DataGrid.SelectionMode = SelectionMode.Single;
+                DataGrid.SelectionMode = Microsoft.Maui.SelectionMode.Single;
                 DataGrid.SelectedItems.Clear();
             }
 
-            if (e.Index >= 0)
-                DataGrid.SelectedItem = DataGrid.ItemsSource.Cast<SalmonFileViewModel>().ToArray()[e.Index];
-            else if (e.Context != null)
-            {
-                SalmonFileViewModel viewModel = (SalmonFileViewModel)e.Context;
-                SelectItem(viewModel);
-            }
+            //TODO:
+            //if (e.Index >= 0)
+            //    DataGrid.SelectedItem  = DataGrid.Adapter.GetItem(0, e.Index);
+            //else if (e.Context != null)
+            //{
+            //    SalmonFileViewModel viewModel = (SalmonFileViewModel)e.Context;
+            //    SelectItem(viewModel);
+            //}
         });
     }
 
     private void SelectItem(SalmonFileViewModel viewModel)
     {
 #if ANDROID
-        if (DataGrid.SelectionMode == SelectionMode.Multiple)
-        {
-            if (DataGrid.SelectedItems.Contains(viewModel))
-                DataGrid.SelectedItems.Remove(viewModel);
-            else
-                DataGrid.SelectedItems.Add(viewModel);
-        }
-        else
-        {
-            DataGrid.SelectedItem = viewModel;
-        }
+        //TODO:
+        //if (DataGrid.SelectionMode == Microsoft.Maui.SelectionMode.Multiple)
+        //{
+        //    if (DataGrid.SelectedItems.Contains(viewModel))
+        //        DataGrid.SelectedItems.Remove(viewModel);
+        //    else
+        //        DataGrid.SelectedItems.Add(viewModel);
+        //}
+        //else
+        //{
+        //    DataGrid.SelectedItem = viewModel;
+        //}
 #else
-        DataGrid.SelectedItem = viewModel;
+        //TODO:
+        // DataGrid.SelectedItem = viewModel;
 #endif
     }
     #endregion
 
     #region WORKAROUND for Android selection and multi selection with keyboard ctrl and shift
-    private void TapGestureRecognizer_SingleTapped(object sender, EventArgs e)
+    public void TapGestureRecognizer_SingleTapped(object sender, EventArgs e)
     {
         SalmonFileViewModel nSelectedItem = (SalmonFileViewModel)(sender as Grid).BindingContext;
-        if (!metaKeysPressed.Contains(MetaKey.Ctrl) && DataGrid.SelectionMode == SelectionMode.Multiple)
+        if (!metaKeysPressed.Contains(MetaKey.Ctrl) && DataGrid.SelectionMode == Microsoft.Maui.SelectionMode.Multiple)
         {
             lastSelectedItem = nSelectedItem;
         }
-        else if (metaKeysPressed.Contains(MetaKey.Ctrl) && DataGrid.SelectionMode == SelectionMode.Single)
+        else if (metaKeysPressed.Contains(MetaKey.Ctrl) && DataGrid.SelectionMode == Microsoft.Maui.SelectionMode.Single)
         {
-            DataGrid.SelectionMode = SelectionMode.Multiple;
-            DataGrid.SelectedItems.Add(lastSelectedItem);
-            DataGrid.SelectedItems.Add(nSelectedItem);
+            DataGrid.SelectionMode = Microsoft.Maui.SelectionMode.Multiple;
+            //TODO:
+            //DataGrid.SelectedItems.Add(lastSelectedItem);
+            //DataGrid.SelectedItems.Add(nSelectedItem);
             lastSelectedItem = nSelectedItem;
         }
-        else if (metaKeysPressed.Contains(MetaKey.Shift) && DataGrid.SelectionMode == SelectionMode.Single)
+        else if (metaKeysPressed.Contains(MetaKey.Shift) && DataGrid.SelectionMode == Microsoft.Maui.SelectionMode.Single)
         {
-            DataGrid.SelectionMode = SelectionMode.Multiple;
-            DataGrid.SelectedItems.Add(lastSelectedItem);
+            DataGrid.SelectionMode = Microsoft.Maui.SelectionMode.Multiple;
+            //TODO:
+            //DataGrid.SelectedItems.Add(lastSelectedItem);
             SalmonFileViewModel startItem = lastSelectedItem;
             SalmonFileViewModel endItem = nSelectedItem;
             lastSelectedItem = nSelectedItem;
@@ -312,13 +321,14 @@ public partial class MainWindow : ContentPage
             return;
         for (int i = Math.Min(pos1, pos2); i <= Math.Max(pos1, pos2); i++)
         {
-            DataGrid.SelectedItems.Add(ViewModel.FileItemList[i]);
+            // TODO:
+            // DataGrid.SelectedItems.Add(ViewModel.FileItemList[i]);
         }
     }
     #endregion
 
     #region WORKAROUND for WinUI DoubleClick to open item
-    private void TapGestureRecognizer_DoubleTapped(object sender, EventArgs e)
+    public void TapGestureRecognizer_DoubleTapped(object sender, EventArgs e)
     {
 #if WINDOWS || MACCATALYST
         SalmonFileViewModel viewModel = (SalmonFileViewModel)(sender as Grid).BindingContext;
@@ -327,55 +337,7 @@ public partial class MainWindow : ContentPage
     }
     #endregion
 
-    #region Menu flyout passthrough
-    private void MenuFlyoutItem_OnViewItem(object sender, EventArgs e)
-    {
-        SalmonFileViewModel viewModel = (SalmonFileViewModel)(sender as MenuFlyoutItem).BindingContext;
-        ViewModel.OpenItem(viewModel);
-    }
-
-    private void MenuFlyoutItem_OnViewAsTextItem(object sender, EventArgs e)
-    {
-        SalmonFileViewModel viewModel = (SalmonFileViewModel)(sender as MenuFlyoutItem).BindingContext;
-        ViewModel.StartTextEditor(viewModel);
-    }
-
-    private void MenuFlyoutItem_OnCopyItem(object sender, EventArgs e)
-    {
-        ViewModel.OnCopy();
-    }
-
-    private void MenuFlyoutItem_OnCutItem(object sender, EventArgs e)
-    {
-        ViewModel.OnCut();
-    }
-
-    private void MenuFlyoutItem_OnDeleteItem(object sender, EventArgs e)
-    {
-        ViewModel.PromptDelete();
-    }
-
-    private void MenuFlyoutItem_OnRenameItem(object sender, EventArgs e)
-    {
-        ViewModel.RenameFile((SalmonFileViewModel)DataGrid.SelectedItem);
-    }
-
-    private void MenuFlyoutItem_OnExportItem(object sender, EventArgs e)
-    {
-        ViewModel.ExportSelectedFiles(false);
-    }
-
-    private void MenuFlyoutItem_OnExportAndDeleteItem(object sender, EventArgs e)
-    {
-        ViewModel.ExportSelectedFiles(true);
-    }
-
-    private void MenuFlyoutItem_OnPropertiesItem(object sender, EventArgs e)
-    {
-        SalmonFileViewModel viewModel = (SalmonFileViewModel)(sender as MenuFlyoutItem).BindingContext;
-        ViewModel.ShowProperties(viewModel);
-    }
-    #endregion
+    
 
     protected override bool OnBackButtonPressed()
     {
@@ -384,23 +346,23 @@ public partial class MainWindow : ContentPage
     }
 
     #region WORKAROUND for Android highlighting selection with different color
-    private void DataGrid_SelectionChanged(object sender, SelectionChangedEventArgs e)
+    void DataGrid_SelectionChanged(object sender, SelectedItemsChangedEventArgs e)
     {
-        if (DataGrid == null || DataGrid.ItemsSource == null)
+        if (DataGrid == null)
             return;
-        foreach (SalmonFileViewModel vm in DataGrid.ItemsSource)
-        {
-            if (vm != DataGrid.SelectedItem && !DataGrid.SelectedItems.Contains(vm))
-            {
-                vm.ItemBackgroundColor = Colors.Transparent;
-                ViewModel.Select(vm, false);
-            }
-            else
-            {
-                vm.ItemBackgroundColor = Color.FromHex("#445566");
-                ViewModel.Select(vm, true);
-            }
-        }
+        //foreach (SalmonFileViewModel vm in DataGrid.ItemsSource)
+        //{
+        //    if (vm != DataGrid.SelectedItem && !DataGrid.SelectedItems.Contains(vm))
+        //    {
+        //        vm.ItemBackgroundColor = Colors.Transparent;
+        //        ViewModel.Select(vm, false);
+        //    }
+        //    else
+        //    {
+        //        vm.ItemBackgroundColor = Color.FromHex("#445566");
+        //        ViewModel.Select(vm, true);
+        //    }
+        //}
     }
     #endregion
 
@@ -408,13 +370,14 @@ public partial class MainWindow : ContentPage
     {
         WindowUtils.RunOnMainThread(() =>
         {
-            int position = DataGrid.ItemsSource.Cast<SalmonFileViewModel>().ToList().IndexOf(item);
-            if (position >= 0)
-            {
-                DataGrid.ScrollTo(position);
-                DataGrid.SelectedItem = item;
-            }
-            DataGrid.Focus();
+            //TODO:
+            //int position = DataGrid.ItemsSource.Cast<SalmonFileViewModel>().ToList().IndexOf(item);
+            //if (position >= 0)
+            //{
+            //    DataGrid.ScrollTo(position);
+            //    DataGrid.SelectedItem = item;
+            //}
+            //DataGrid.Focus();
         });
     }
 

@@ -1,0 +1,83 @@
+﻿<?xml version="1.0" encoding="UTF-8"?>
+<vlv:VirtualViewCell
+	xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+	xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+	xmlns:vlv="clr-namespace:Microsoft.Maui.Controls;assembly=VirtualListView"
+    xmlns:viewmodel="clr-namespace:Salmon.Vault.ViewModel"
+	xmlns:local="using:Salmon.Vault.View"
+	x:Name="self"
+	x:DataType="viewmodel:SalmonFileViewModel"
+	x:Class="Salmon.Vault.View.FileViewCell"
+    
+    >
+    <VerticalStackLayout Spacing="0" >
+
+        <ContentView
+			HorizontalOptions="FillAndExpand"
+			HeightRequest="1.4"
+			x:DataType="vlv:VirtualViewCell"
+            
+			BindingContext="{x:Reference self}"/>
+
+
+        <!-- Android is showing an orange background and not updating selected color -->
+        <!--BackgroundColor="{Binding ItemBackgroundColor, Mode=OneWay}"-->
+        <Border HorizontalOptions="FillAndExpand" 
+                
+                HeightRequest="54">
+            <Grid HorizontalOptions="FillAndExpand" VerticalOptions="FillAndExpand" 
+          BackgroundColor="Transparent" >
+                <FlyoutBase.ContextFlyout>
+                    <MenuFlyout>
+                        <MenuFlyoutItem Text="View" Clicked="MenuFlyoutItem_OnViewItem" />
+                        <MenuFlyoutItem Text="View As Text" Clicked="MenuFlyoutItem_OnViewAsTextItem" />
+                        <MenuFlyoutItem Text="Copy" Clicked="MenuFlyoutItem_OnCopyItem" />
+                        <MenuFlyoutItem Text="Cut" Clicked="MenuFlyoutItem_OnCutItem" />
+                        <MenuFlyoutItem Text="Delete" Clicked="MenuFlyoutItem_OnDeleteItem" />
+                        <MenuFlyoutItem Text="Rename" Clicked="MenuFlyoutItem_OnRenameItem" />
+                        <MenuFlyoutItem Text="Export" Clicked="MenuFlyoutItem_OnExportItem" />
+                        <MenuFlyoutItem Text="Export And Delete" Clicked="MenuFlyoutItem_OnExportAndDeleteItem" />
+                        <MenuFlyoutItem Text="Properties" Clicked="MenuFlyoutItem_OnPropertiesItem" />
+                    </MenuFlyout>
+                </FlyoutBase.ContextFlyout>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="Auto"/>
+                    <ColumnDefinition Width="Auto"/>
+                    <ColumnDefinition Width="Auto"/>
+                    <ColumnDefinition Width="Auto"/>
+                    <ColumnDefinition Width="Auto"/>
+                    <ColumnDefinition Width="Auto"/>
+                </Grid.ColumnDefinitions>
+                <Grid Grid.Column="0" Background="Black" Padding="0,0,8,0"
+                          MaximumHeightRequest="52" WidthRequest="52"
+                          BackgroundColor="Transparent">
+                    <Image Source="{Binding Image, Mode=OneWay}"
+                            HorizontalOptions="Center" VerticalOptions="Center"/>
+                    <!-- Android does not seem to support Opacity -->
+                    <Rectangle Opacity="0.5" Background="{Binding TintColor, Mode=OneWay}" 
+                       HorizontalOptions="FillAndExpand" VerticalOptions="FillAndExpand"/>
+                    <Label Text="{Binding Ext, Mode=OneWay}" Background="Transparent"  TextColor="Black"
+                       HorizontalOptions="Center" VerticalOptions="Center" 
+                   FontSize="10"
+                   HorizontalTextAlignment="Center" VerticalTextAlignment="Center"/>
+                </Grid>
+
+                <Label Grid.Column="1" Text="{Binding Name, Mode=OneWay}" HorizontalOptions="Start" VerticalOptions="Center"
+                                   Background="Transparent" TextColor="White" Padding="10,0,0,0" WidthRequest="300"/>
+                <Label Grid.Column="2" Text="{Binding Date, Mode=OneWay}" HorizontalOptions="Start" VerticalOptions="Center"
+                           Background="Transparent" TextColor="White" Padding="10,0,0,0" WidthRequest="100"/>
+                <Label Grid.Column="3" Text="{Binding Type, Mode=OneWay}" HorizontalOptions="Start" VerticalOptions="Center"
+                           Background="Transparent" TextColor="White" Padding="10,0,0,0" WidthRequest="100"/>
+                <Label Grid.Column="4" Text="{Binding SizeText, Mode=OneWay}" HorizontalOptions="End" HorizontalTextAlignment="End" VerticalOptions="Center"
+                           Background="Transparent" TextColor="White" Padding="10,0,0,0" WidthRequest="100"/>
+                <Label Grid.Column="5" Text="{Binding Path, Mode=OneWay}" HorizontalOptions="Start" VerticalOptions="Center"
+                           Background="Transparent" TextColor="White" Padding="10,0,0,0" WidthRequest="300" IsVisible="false"/>
+
+                <!--<Grid.GestureRecognizers>
+                    --><!--<TapGestureRecognizer NumberOfTapsRequired="1" Tapped="TapGestureRecognizer_SingleTapped"/>--><!--
+                    <TapGestureRecognizer NumberOfTapsRequired="2" Tapped="TapGestureRecognizer_DoubleTapped"/>
+                </Grid.GestureRecognizers>-->
+            </Grid>
+        </Border>
+    </VerticalStackLayout>
+</vlv:VirtualViewCell>

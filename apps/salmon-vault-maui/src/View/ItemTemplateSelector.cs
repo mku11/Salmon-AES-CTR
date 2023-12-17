@@ -1,4 +1,4 @@
-/*
+﻿/*
 MIT License
 
 Copyright (c) 2021 Max Kas
@@ -21,21 +21,22 @@ LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 */
+
 using Microsoft.Maui.Controls;
-using System;
-using System.Globalization;
 
 namespace Salmon.Vault.View;
 
-public class BooleanToMultiSelectionConverter : IValueConverter
+public class ItemTemplateSelector : VirtualListViewItemTemplateSelector
 {
-    public object Convert(object value, Type targetType, object parameter, CultureInfo culture)
-    {
-        return (bool)value ? Microsoft.Maui.SelectionMode.Multiple : Microsoft.Maui.SelectionMode.Single;
-    }
+	public ItemTemplateSelector() : base()
+	{
+        FileTemplate = new DataTemplate(typeof(FileViewCell));
+	}
 
-    public object ConvertBack(object value, Type targetType, object parameter, CultureInfo culture)
-    {
-        return (Microsoft.Maui.SelectionMode)value == Microsoft.Maui.SelectionMode.Multiple;
-    }
+	readonly DataTemplate FileTemplate;
+
+	public override DataTemplate SelectTemplate(object item, int sectionIndex, int itemIndex)
+	{
+		return FileTemplate;
+	}
 }

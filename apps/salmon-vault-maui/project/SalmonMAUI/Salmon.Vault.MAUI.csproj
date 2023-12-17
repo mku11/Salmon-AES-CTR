@@ -2,6 +2,7 @@
 
   <PropertyGroup>
     <!--<TargetFrameworks>net8.0-android;net8.0-ios;net8.0-maccatalyst</TargetFrameworks>-->
+    <TargetFrameworks>net8.0-android</TargetFrameworks>
     <TargetFrameworks Condition="$([MSBuild]::IsOSPlatform('windows'))">$(TargetFrameworks);net8.0-windows10.0.19041.0</TargetFrameworks>
     <!-- Uncomment to also build the tizen app. You will need to install tizen by following this: https://github.com/Samsung/Tizen.NET -->
     <!-- <TargetFrameworks>$(TargetFrameworks);net6.0-tizen</TargetFrameworks> -->
@@ -88,6 +89,10 @@
     <Compile Include="..\..\src\View\BooleanToMultiSelectionConverter.cs" Link="View\BooleanToMultiSelectionConverter.cs" />
     <Compile Include="..\..\src\View\ViewHandlers.cs" Link="View\ViewHandlers.cs" />
     <Compile Include="..\..\src\View\StringToWebViewSourceConverter.cs" Link="View\StringToWebViewSourceConverter.cs" />
+    <Compile Include="..\..\src\View\FileAdapter.cs" Link="View\FileAdapter.cs" />
+    <Compile Include="..\..\src\View\ItemTemplateSelector.cs" Link="View\ItemTemplateSelector.cs" />
+    <Compile Include="..\..\src\View\FileViewCell.xaml.cs" Link="View\FileViewCell.xaml.cs" />
+    
 
     <Compile Include="..\..\..\salmon-vault-csharp-common\src\Model\SalmonContentViewer.cs" Link="Model\SalmonContentViewer.cs" />
     <Compile Include="..\..\..\salmon-vault-csharp-common\src\Model\SalmonVaultManager.cs" Link="Model\SalmonVaultManager.cs" />
@@ -168,17 +173,15 @@
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </MauiXaml>
+    <MauiXaml Include="..\..\src\View\FileViewCell.xaml" Link="View\FileViewCell.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </MauiXaml>
 
   </ItemGroup>
 
   <ItemGroup>
     <AndroidResource Include="..\..\..\salmon-vault-dotnet-android\project\Salmon.Vault.Net.Android\Resources\values\strings.xml" Link="Platforms\Android\Resources\values\strings.xml" />
-  </ItemGroup>
-
-  <ItemGroup>
-    <Content Include="README.txt">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </Content>
   </ItemGroup>
 
   <ItemGroup>

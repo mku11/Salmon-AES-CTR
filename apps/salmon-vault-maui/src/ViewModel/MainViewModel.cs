@@ -43,8 +43,22 @@ namespace Salmon.Vault.ViewModel;
 
 public class MainViewModel : INotifyPropertyChanged
 {
-    private ObservableCollection<SalmonFileViewModel> _fileItemList;
-    public ObservableCollection<SalmonFileViewModel> FileItemList
+    public FileAdapter _adapter;
+    public FileAdapter Adapter
+    {
+        get => _adapter;
+        set
+        {
+            if (value != _adapter)
+            {
+                _adapter = value;
+                PropertyChanged(this, new PropertyChangedEventArgs("Adapter"));
+            }
+        }
+    }
+
+    private List<SalmonFileViewModel> _fileItemList;
+    public List<SalmonFileViewModel> FileItemList
     {
         get => _fileItemList;
         set
@@ -62,8 +76,8 @@ public class MainViewModel : INotifyPropertyChanged
         }
     }
 
-    private ObservableCollection<SalmonFileViewModel> _selectedItems = new ObservableCollection<SalmonFileViewModel>();
-    public ObservableCollection<SalmonFileViewModel> SelectedItems
+    private List<SalmonFileViewModel> _selectedItems = new List<SalmonFileViewModel>();
+    public List<SalmonFileViewModel> SelectedItems
     {
         get => _selectedItems;
         private set
@@ -194,7 +208,7 @@ public class MainViewModel : INotifyPropertyChanged
     {
         if (SelectedItems == null)
             return;
-        ObservableCollection<SalmonFileViewModel> selectedItems = SelectedItems;
+        List<SalmonFileViewModel> selectedItems = SelectedItems;
         SelectedItems = null;
         selectedItems.Clear();
         SelectedItems = selectedItems;
@@ -202,6 +216,7 @@ public class MainViewModel : INotifyPropertyChanged
 
     public event PropertyChangedEventHandler PropertyChanged;
     private SalmonVaultManager manager;
+    
     private bool initialized;
 
     public MainViewModel()
@@ -215,7 +230,8 @@ public class MainViewModel : INotifyPropertyChanged
         manager.PropertyChanged += Manager_PropertyChanged;
         manager.UpdateListItem = UpdateListItem;
         manager.OnFileItemAdded = FileItemAdded;
-        SelectedItems.CollectionChanged += SelectedItems_CollectionChanged;
+        //TODO:
+        //SelectedItems.CollectionChanged += SelectedItems_CollectionChanged;
     }
 
     private void FileItemAdded(int position, SalmonFile file)
@@ -282,10 +298,12 @@ public class MainViewModel : INotifyPropertyChanged
     private void UpdateFileViewModels()
     {
         if (manager.FileItemList == null)
-            FileItemList = new ObservableCollection<SalmonFileViewModel>();
+            FileItemList = new List<SalmonFileViewModel>();
         else
-            FileItemList = new ObservableCollection<SalmonFileViewModel>(manager.FileItemList
+            FileItemList = new List<SalmonFileViewModel>(manager.FileItemList
                 .Select(x => new SalmonFileViewModel(x)));
+        Adapter = new FileAdapter(FileItemList);
+        Adapter.InvalidateData();
     }
 
     private List<SalmonFileViewModel> GetViewModels(HashSet<SalmonFile> files)
@@ -555,7 +573,7 @@ public class MainViewModel : INotifyPropertyChanged
         List<SalmonFileViewModel> list = FileItemList.ToList();
         Comparer<SalmonFile> comparer = nameOrderAsc ? SalmonFileComparators.FilenameDescComparator : SalmonFileComparators.FilenameAscComparator;
         list.Sort((a, b) => comparer.Compare(a.GetSalmonFile(), b.GetSalmonFile()));
-        FileItemList = new ObservableCollection<SalmonFileViewModel>(list);
+        FileItemList = new List<SalmonFileViewModel>(list);
         nameOrderAsc = !nameOrderAsc;
     }
 
@@ -565,7 +583,7 @@ public class MainViewModel : INotifyPropertyChanged
         List<SalmonFileViewModel> list = FileItemList.ToList();
         Comparer<SalmonFile> comparer = dateOrderAsc ? SalmonFileComparators.DateDescComparator : SalmonFileComparators.DateAscComparator;
         list.Sort((a, b) => comparer.Compare(a.GetSalmonFile(), b.GetSalmonFile()));
-        FileItemList = new ObservableCollection<SalmonFileViewModel>(list);
+        FileItemList = new List<SalmonFileViewModel>(list);
         dateOrderAsc = !dateOrderAsc;
     }
 
@@ -575,7 +593,7 @@ public class MainViewModel : INotifyPropertyChanged
         List<SalmonFileViewModel> list = FileItemList.ToList();
         Comparer<SalmonFile> comparer = typeOrderAsc ? SalmonFileComparators.TypeDescComparator : SalmonFileComparators.TypeAscComparator;
         list.Sort((a, b) => comparer.Compare(a.GetSalmonFile(), b.GetSalmonFile()));
-        FileItemList = new ObservableCollection<SalmonFileViewModel>(list);
+        FileItemList = new List<SalmonFileViewModel>(list);
         typeOrderAsc = !typeOrderAsc;
     }
 
@@ -585,7 +603,7 @@ public class MainViewModel : INotifyPropertyChanged
         List<SalmonFileViewModel> list = FileItemList.ToList();
         Comparer<SalmonFile> comparer = sizeOrderAsc ? SalmonFileComparators.SizeDescComparator : SalmonFileComparators.SizeAscComparator;
         list.Sort((a, b) => comparer.Compare(a.GetSalmonFile(), b.GetSalmonFile()));
-        FileItemList = new ObservableCollection<SalmonFileViewModel>(list);
+        FileItemList = new List<SalmonFileViewModel>(list);
         sizeOrderAsc = !sizeOrderAsc;
     }
 }

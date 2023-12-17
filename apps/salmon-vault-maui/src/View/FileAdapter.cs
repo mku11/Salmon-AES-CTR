@@ -21,21 +21,27 @@ LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 */
-using Microsoft.Maui.Controls;
-using System;
-using System.Globalization;
+
+using Microsoft.Maui.Adapters;
+using Salmon.Vault.ViewModel;
+using System.Collections.Generic;
+using System.Collections.ObjectModel;
 
 namespace Salmon.Vault.View;
 
-public class BooleanToMultiSelectionConverter : IValueConverter
+public class FileAdapter : VirtualListViewAdapter<SalmonFileViewModel>
 {
-    public object Convert(object value, Type targetType, object parameter, CultureInfo culture)
+    private List<SalmonFileViewModel> _items;
+
+    public FileAdapter(List<SalmonFileViewModel> items) : base(items)
     {
-        return (bool)value ? Microsoft.Maui.SelectionMode.Multiple : Microsoft.Maui.SelectionMode.Single;
+        this._items = items;
     }
 
-    public object ConvertBack(object value, Type targetType, object parameter, CultureInfo culture)
+    public override SalmonFileViewModel GetItem(int sectionIndex, int itemIndex)
     {
-        return (Microsoft.Maui.SelectionMode)value == Microsoft.Maui.SelectionMode.Multiple;
+        SalmonFileViewModel item = base.GetItem(0, itemIndex);
+        return item;
     }
+
 }
