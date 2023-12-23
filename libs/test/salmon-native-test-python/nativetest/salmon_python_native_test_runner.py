@@ -56,7 +56,7 @@ class SalmonPythonNativeTestRunner(TestCase):
         SalmonStream.set_aes_provider_type(ProviderType.AesIntrinsics)
         # SalmonStream.set_aes_provider_type(ProviderType.TinyAES)
 
-    def test_should_encrypt_and_decrypt_native_text_compatible(self):
+    def test_encrypt_and_decrypt_native_text_compatible(self):
         plain_text = TestHelper.TEST_TEXT  # [0:16]
         for i in range(0, 13):
             plain_text += plain_text
@@ -79,7 +79,7 @@ class SalmonPythonNativeTestRunner(TestCase):
                                                     SalmonStream.get_aes_provider_type())
         self.assertEqual(v_bytes, dec_bytes)
 
-    def test_should_encrypt_and_decrypt_native_stream_text_compatible(self):
+    def test_encrypt_and_decrypt_native_stream_text_compatible(self):
         plain_text = TestHelper.TEST_TEXT
         for i in range(0, 2):
             plain_text += plain_text
@@ -108,7 +108,7 @@ class SalmonPythonNativeTestRunner(TestCase):
                                                                                       False, None, None)
         self.assertEqual(bytes, dec_bytes)
 
-    def test_should_encrypt_and_decrypt_native_stream_read_buffers_not_aligned_text_compatible(self):
+    def test_encrypt_and_decrypt_native_stream_read_buffers_not_aligned_text_compatible(self):
         plain_text = TestHelper.TEST_TEXT
         for i in range(0, 3):
             plain_text += plain_text
@@ -138,7 +138,7 @@ class SalmonPythonNativeTestRunner(TestCase):
                                                                                       False, None, None)
         self.assertEqual(v_bytes, dec_bytes)
 
-    def test_should_encrypt_and_decrypt_native_stream_compatible_with_integrity(self):
+    def test_encrypt_and_decrypt_native_stream_compatible_with_integrity(self):
         plain_text = TestHelper.TEST_TEXT
         for i in range(0, 13):
             plain_text += plain_text
