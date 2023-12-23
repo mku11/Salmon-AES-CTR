@@ -5,21 +5,19 @@
     <content url="file://$MODULE_DIR$/../../src/python/salmon-core">
       <sourceFolder url="file://$MODULE_DIR$/../../src/python/salmon-core" isTestSource="false" />
     </content>
+    <content url="file://$MODULE_DIR$/../../src/python/salmon-fs">
+      <sourceFolder url="file://$MODULE_DIR$/../../src/python/salmon-fs" isTestSource="false" />
+    </content>
     <content url="file://$MODULE_DIR$/../../test/salmon-core-test-python">
       <sourceFolder url="file://$MODULE_DIR$/../../test/salmon-core-test-python" isTestSource="true" />
-    </content>
-	<content url="file://$MODULE_DIR$/../../test/salmon-native-test-python">
-      <sourceFolder url="file://$MODULE_DIR$/../../test/salmon-native-test-python" isTestSource="true" />
-    </content>
-	
-	<content url="file://$MODULE_DIR$/../../src/python/salmon-fs">
-      <sourceFolder url="file://$MODULE_DIR$/../../src/python/salmon-fs" isTestSource="false" />
     </content>
     <content url="file://$MODULE_DIR$/../../test/salmon-fs-test-python">
       <sourceFolder url="file://$MODULE_DIR$/../../test/salmon-fs-test-python" isTestSource="true" />
     </content>
-	
-    <orderEntry type="inheritedJdk" />
+    <content url="file://$MODULE_DIR$/../../test/salmon-native-test-python">
+      <sourceFolder url="file://$MODULE_DIR$/../../test/salmon-native-test-python" isTestSource="true" />
+    </content>
+    <orderEntry type="jdk" jdkName="Python 3.11" jdkType="Python SDK" />
     <orderEntry type="sourceFolder" forTests="false" />
   </component>
 </module>
