@@ -23,7 +23,6 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 '''
 from __future__ import annotations
-from enum import Enum
 
 from salmon.password.isalmon_pbkdf_provider import ISalmonPbkdfProvider
 from salmon.password.pbkdf_algo import PbkdfAlgo
