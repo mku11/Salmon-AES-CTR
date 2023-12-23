@@ -62,11 +62,10 @@ class NativeProxy(INativeProxy):
         self._load_library()
         NativeProxy.__init(aes_impl)
 
-    """
-     * Load the native library
-    """
-
     def _load_library(self):
+        """
+         * Load the native library
+        """
         if NativeProxy.__loaded:
             return
         try:
