@@ -17,6 +17,13 @@ build
 
 **/output/
 
+libs/src/python/**/.idea/*
+build
+
+libs/projects/salmon-libs-python/main.py
+libs/src/python/**/func/
+*.pyc
+
 csharp/lib/SalmonDotNetLibs/output/
 
 .cxx
