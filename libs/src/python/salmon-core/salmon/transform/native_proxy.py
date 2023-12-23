@@ -82,7 +82,6 @@ class NativeProxy(INativeProxy):
                                                 ctypes.c_char_p, ctypes.c_int, ctypes.c_int]
             NativeProxy.__transform.restype = ctypes.c_int
 
-
         except Exception as ex:
             print(ex)
 
