@@ -41,7 +41,7 @@ class HmacSHA256Provider(IHashProvider):
     def calc(self, hash_key: bytearray, buffer: bytearray, offset: int, count: int) -> bytearray:
         """
          * Calculate HMAC SHA256 hash for a byte buffer.
-         * @param hashKey The HMAC SHA256 key to use for hashing (32 bytes).
+         * @param hash_key The HMAC SHA256 key to use for hashing (32 bytes).
          * @param buffer The buffer to read the data from.
          * @param offset The position reading will start from.
          * @param count The count of bytes to be read.

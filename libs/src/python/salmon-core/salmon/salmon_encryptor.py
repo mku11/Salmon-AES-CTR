@@ -45,7 +45,7 @@ class SalmonEncryptor:
          * Instantiate an encryptor with parallel tasks and buffer size.
          *
          * @param threads    The number of threads to use.
-         * @param bufferSize The buffer size to use. It is recommended for performance  to use
+         * @param buffer_size The buffer size to use. It is recommended for performance  to use
          *                   a multiple of the chunk size if you enabled integrity
          *                   otherwise a multiple of the AES block size (16 bytes).
         """
@@ -60,7 +60,7 @@ class SalmonEncryptor:
          * Executor for parallel tasks.
         """
 
-        __bufferSize: int = 0
+        __buffer_size: int = 0
         """
          * The buffer size to use.
         """
@@ -72,9 +72,9 @@ class SalmonEncryptor:
             self.__executor = ThreadPoolExecutor(threads)
 
         if buffer_size is None:
-            self.__bufferSize = SalmonIntegrity.DEFAULT_CHUNK_SIZE
+            self.__buffer_size = SalmonIntegrity.DEFAULT_CHUNK_SIZE
         else:
-            self.__bufferSize = buffer_size
+            self.__buffer_size = buffer_size
 
     def encrypt(self, data: bytearray, key: bytearray, nonce: bytearray,
                 store_header_data: bool,
@@ -88,7 +88,7 @@ class SalmonEncryptor:
          * @param storeHeaderData True if you want to store a header data with the nonce. False if you store
          *                        the nonce external. Note that you will need to provide the nonce when decrypting.
          * @param integrity       True if you want to calculate and store hash signatures for each chunkSize.
-         * @param hashKey         Hash key to be used for all chunks.
+         * @param hash_key         Hash key to be used for all chunks.
          * @param chunkSize       The chunk size.
          * @return The byte array with the encrypted data.
          * @throws SalmonSecurityException
@@ -147,7 +147,7 @@ class SalmonEncryptor:
          * @param data       The input data to be encrypted
          * @param outData    The output buffer with the encrypted data.
          * @param key        The AES key.
-         * @param hashKey    The hash key.
+         * @param hash_key    The hash key.
          * @param nonce      The nonce to be used for encryption.
          * @param headerData The header data.
          * @param chunkSize  The chunk size.
@@ -192,7 +192,7 @@ class SalmonEncryptor:
                                  where each thread will read each own part.
          * @param outData        The buffer of data containing the encrypted data.
          * @param key            The AES key.
-         * @param hashKey        The hash key for integrity.
+         * @param hash_key        The hash key for integrity.
          * @param nonce          The nonce for the data.
          * @param headerData     The header data common to all parts.
          * @param integrity      True to apply the data integrity.
@@ -207,6 +207,7 @@ class SalmonEncryptor:
 
             def encrypt():
                 nonlocal ex, index
+
                 try:
                     start: int = part_size * index
                     length: int
@@ -247,7 +248,7 @@ class SalmonEncryptor:
          * @param nonce       The nonce to be used.
          * @param headerData  The header data to be used.
          * @param integrity   True to apply integrity.
-         * @param hashKey     The key to be used for integrity application.
+         * @param hash_key     The key to be used for integrity application.
          * @param chunkSize   The chunk size.
          * @throws IOError              Thrown if there is an error with the stream.
          * @throws SalmonSecurityException  Thrown if there is a security exception with the stream.
@@ -264,13 +265,13 @@ class SalmonEncryptor:
             stream.set_position(start)
             total_chunk_bytes_read: int = 0
             # align to the chunk size if available
-            buff_size: int = max(self.__bufferSize, stream.get_chunk_size())
+            buff_size: int = max(self.__buffer_size, stream.get_chunk_size())
             buff: bytearray = bytearray(buff_size)
-            bytesRead: int
-            while (bytesRead := input_stream.read(buff, 0, min(len(buff), count - total_chunk_bytes_read))) > 0 \
+            bytes_read: int
+            while (bytes_read := input_stream.read(buff, 0, min(len(buff), count - total_chunk_bytes_read))) > 0 \
                     and total_chunk_bytes_read < count:
-                stream.write(buff, 0, bytesRead)
-                total_chunk_bytes_read += bytesRead
+                stream.write(buff, 0, bytes_read)
+                total_chunk_bytes_read += bytes_read
             stream.flush()
         except IOError as ex:
             print(ex)

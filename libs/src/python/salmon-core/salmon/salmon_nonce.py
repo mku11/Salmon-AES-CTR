@@ -42,7 +42,7 @@ class SalmonNonce:
          * Increase the sequential NONCE by a value of 1.
          * This implementation assumes that the NONCE length is 8 bytes or fewer so it can fit in a long.
          *
-         * @param startNonce
+         * @param start_nonce
          * @param endNonce
          * @return
          * @throws SalmonRangeExceededException
@@ -60,7 +60,7 @@ class SalmonNonce:
      * then the long transient variables will not hold. In that case you will need to
      * override with your own implementation.
      *
-     * @param startNonce The starting nonce.
+     * @param start_nonce The starting nonce.
      * @param endNonce The ending nonce in the sequence.
      * @return The byte array with the middle nonce.
      * @throws SalmonSecurityException

@@ -47,7 +47,7 @@ class SalmonTextEncryptor:
          * @param header Set to true to store a header with information like nonce and/or chunk size,
          *               otherwise you will have to store that information externally.
          * @param integrity True if you want to calculate and store hash signatures for each chunkSize
-         * @param hashKey Hash key to be used for all chunks.
+         * @param hash_key Hash key to be used for all chunks.
          * @param chunkSize The chunk size.
          * @throws IOError
          * @throws SalmonSecurityException

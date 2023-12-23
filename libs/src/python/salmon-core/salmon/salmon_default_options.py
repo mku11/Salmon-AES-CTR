@@ -43,9 +43,9 @@ class SalmonDefaultOptions:
          * Get the default buffer size for all internal streams including Encryptors and Decryptors.
          * @return
         """
-        return SalmonDefaultOptions.__bufferSize
+        return SalmonDefaultOptions.__buffer_size
 
-    __bufferSize = DEFAULT_BUFFER_SIZE
+    __buffer_size = DEFAULT_BUFFER_SIZE
     """
      * Default buffer size for all internal streams including Encryptors and Decryptors
     """
@@ -55,6 +55,6 @@ class SalmonDefaultOptions:
         """
          * Set the default buffer size for all internal streams including Encryptors and Decryptors.
          *
-         * @param bufferSize
+         * @param buffer_size
         """
-        SalmonDefaultOptions.__bufferSize = buffer_size
+        SalmonDefaultOptions.__buffer_size = buffer_size

@@ -159,8 +159,8 @@ class RandomAccessStream(ABC):
         """
          * Write stream contents to another stream.
          * @param stream The target stream.
-         * @param bufferSize The buffer size to be used when copying.
-         * @param progressListener The listener to notify when progress changes.
+         * @param buffer_size The buffer size to be used when copying.
+         * @param progress_listener The listener to notify when progress changes.
          * @throws IOError
         """
         if not self.can_read():
@@ -169,11 +169,11 @@ class RandomAccessStream(ABC):
             raise IOError("Target stream not writable")
         if buffer_size <= 0:
             buffer_size = SalmonDefaultOptions.get_buffer_size()
-        bytesRead: int
+        bytes_read: int
         pos: int = self.get_position()
         buffer: bytearray = bytearray(buffer_size)
-        while (bytesRead := self.read(buffer, 0, buffer_size)) > 0:
-            stream.write(buffer, 0, bytesRead)
+        while (bytes_read := self.read(buffer, 0, buffer_size)) > 0:
+            stream.write(buffer, 0, bytes_read)
             if progress_listener is not None:
                 progress_listener.on_progress_changed(self.get_position(), self.length())
         stream.flush()

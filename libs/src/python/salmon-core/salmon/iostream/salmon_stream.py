@@ -70,7 +70,7 @@ class SalmonStream(RandomAccessStream):
          * @param headerData The header data to be embedded if you use Encryption.
          * @param integrity True if you want to enable integrity.
          * @param chunkSize The chunk size for integrity chunks.
-         * @param hashKey The hash key to be used for integrity checks.
+         * @param hash_key The hash key to be used for integrity checks.
          * @return The size of the output data.
          *
          * @throws SalmonSecurityException
@@ -106,7 +106,7 @@ class SalmonStream(RandomAccessStream):
          * @param headerData     The data to store in the header when encrypting.
          * @param integrity      enable integrity
          * @param chunkSize      the chunk size to be used with integrity
-         * @param hashKey        Hash key to be used with integrity
+         * @param hash_key        Hash key to be used with integrity
          * @throws IOError
          * @throws SalmonSecurityException
          * @throws SalmonIntegrityException
@@ -260,7 +260,7 @@ class SalmonStream(RandomAccessStream):
          * we still need to calculate/skip the chunks.
          *
          * @param integrity
-         * @param hashKey
+         * @param hash_key
          * @param chunkSize
          * @throws SalmonSecurityException
          * @throws SalmonIntegrityException

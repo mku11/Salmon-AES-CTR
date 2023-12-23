@@ -50,7 +50,7 @@ class SalmonDecryptor:
          * Instantiate an encryptor with parallel tasks and buffer size.
          *
          * @param threads    The number of threads to use.
-         * @param bufferSize The buffer size to use. It is recommended for performance  to use
+         * @param buffer_size The buffer size to use. It is recommended for performance  to use
          *                   a multiple of the chunk size if you enabled integrity
          *                   otherwise a multiple of the AES block size (16 bytes).
         """
@@ -65,7 +65,7 @@ class SalmonDecryptor:
          * Executor for parallel tasks.
         """
 
-        __bufferSize: int = 0
+        __buffer_size: int = 0
         """
          * The buffer size to use.
         """
@@ -77,9 +77,9 @@ class SalmonDecryptor:
             self.__executor = ThreadPoolExecutor(threads)
 
         if buffer_size is None:
-            self.__bufferSize = SalmonIntegrity.DEFAULT_CHUNK_SIZE
+            self.__buffer_size = SalmonIntegrity.DEFAULT_CHUNK_SIZE
         else:
-            self.__bufferSize = buffer_size
+            self.__buffer_size = buffer_size
 
     def decrypt(self, data: bytearray, key: bytearray, nonce: bytearray | None,
                 has_header_data: bool,
@@ -91,7 +91,7 @@ class SalmonDecryptor:
          * @param nonce The nonce to use for decryption.
          * @param hasHeaderData The header data.
          * @param integrity Verify hash integrity in the data.
-         * @param hashKey The hash key to be used for integrity.
+         * @param hash_key The hash key to be used for integrity.
          * @param chunkSize The chunk size.
          * @return The byte array with the decrypted data.
          * @throws IOError Thrown if there is a problem with decoding the array.
@@ -144,7 +144,7 @@ class SalmonDecryptor:
          * @param data The input data to be decrypted
          * @param outData The output buffer with the decrypted data.
          * @param key The AES key.
-         * @param hashKey The hash key.
+         * @param hash_key The hash key.
          * @param nonce The nonce to be used for decryption.
          * @param headerData The header data.
          * @param chunkSize The chunk size.
@@ -190,7 +190,7 @@ class SalmonDecryptor:
          *             thread will read each own part.
          * @param outData The buffer of data containing the decrypted data.
          * @param key The AES key.
-         * @param hashKey The hash key for integrity validation.
+         * @param hash_key The hash key for integrity validation.
          * @param nonce The nonce for the data.
          * @param headerData The header data common to all parts.
          * @param integrity True to verify the data integrity.
@@ -203,6 +203,7 @@ class SalmonDecryptor:
 
             def decrypt():
                 nonlocal ex, index
+
                 try:
                     start: int = part_size * index
                     length: int
@@ -244,7 +245,7 @@ class SalmonDecryptor:
          * @param nonce The nonce to be used.
          * @param headerData The header data to be used.
          * @param integrity True to verify integrity.
-         * @param hashKey The hash key to be used for integrity verification.
+         * @param hash_key The hash key to be used for integrity verification.
          * @param chunkSize The chunk size.
          * @throws IOError  Thrown if there is an error with the stream.
          * @throws SalmonSecurityException Thrown if there is a security exception with the stream.
@@ -261,13 +262,13 @@ class SalmonDecryptor:
             stream.set_position(start)
             total_chunk_bytes_read: int = 0
             # align to the chunk size if available
-            buff_size: int = max(self.__bufferSize, stream.get_chunk_size())
+            buff_size: int = max(self.__buffer_size, stream.get_chunk_size())
             buff: bytearray = bytearray(buff_size)
-            bytesRead: int
-            while (bytesRead := stream.read(buff, 0, min(len(buff), (
+            bytes_read: int
+            while (bytes_read := stream.read(buff, 0, min(len(buff), (
                     count - total_chunk_bytes_read)))) > 0 and total_chunk_bytes_read < count:
-                output_stream.write(buff, 0, bytesRead)
-                total_chunk_bytes_read += bytesRead
+                output_stream.write(buff, 0, bytes_read)
+                total_chunk_bytes_read += bytes_read
             output_stream.flush()
         except (IOError, SalmonSecurityException, SalmonIntegrityException) as ex:
             print(ex)
