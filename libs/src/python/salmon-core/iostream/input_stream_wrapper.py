@@ -33,7 +33,7 @@ from typeguard import typechecked
 @typechecked
 class InputStreamWrapper(BufferedIOBase):
     """
-     * Wrapper stream of AbsStream to Pythons's native IOBase interface.
+     * Wrapper stream of AbsStream to Python's native IOBase interface.
      * Use this class to wrap any AbsStream to a less powerful but familiar and compatible Python InputStream.
     """
 
