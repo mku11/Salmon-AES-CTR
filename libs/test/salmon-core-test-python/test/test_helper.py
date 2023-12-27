@@ -596,9 +596,8 @@ class TestHelper:
     @staticmethod
     def generate_folder(dir_path):
         v_time = time.time()
-        dir_path = dir_path + "_" + time
-        if not os.mkdir(dir_path):
-            return None
+        dir_path = dir_path + "_" + str(int(v_time))
+        os.mkdir(dir_path)
         return dir_path
 
     @staticmethod
