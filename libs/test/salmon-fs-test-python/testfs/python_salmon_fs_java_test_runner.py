@@ -48,7 +48,7 @@ from utils.salmon_file_commander import SalmonFileCommander
 
 
 class SalmonFSPythonTestRunner(SalmonPythonTestRunner):
-    SalmonDriveManager.set_virtual_drive_class(type(PyDrive))
+    SalmonDriveManager.set_virtual_drive_class(PyDrive)
 
     def test_AuthenticateNegative(self):
         vault_dir: str = TestHelper.generate_folder(SalmonPythonTestRunner.TEST_VAULT2_DIR)
