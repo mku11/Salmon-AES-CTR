@@ -130,7 +130,7 @@ class SalmonDriveGenerator:
          * Get the default max nonce to be used for drives.
          * @return A secure random byte array (8 bytes).
         """
-        return BitConverter.toBytes(SalmonDriveGenerator.LONG_MAX_VALUE, 8)
+        return BitConverter.to_bytes(SalmonDriveGenerator.LONG_MAX_VALUE, 8)
 
     @staticmethod
     def get_iterations() -> int:

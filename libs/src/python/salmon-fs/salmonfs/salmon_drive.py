@@ -283,7 +283,7 @@ class SalmonDrive(VirtualDrive):
          * @param hash_key
         """
         hash_signature: bytearray = salmon_config.get_hash_signature()
-        v_hash: bytearray = SalmonIntegrity.calculateHash(self.__hashProvider, data, 0, len(data), hash_key, None)
+        v_hash: bytearray = SalmonIntegrity.calculate_hash(self.__hashProvider, data, 0, len(data), hash_key, None)
         for i in range(0, len(hash_key)):
             if hash_signature[i] != v_hash[i]:
                 raise SalmonAuthException("Could not authenticate")
@@ -318,10 +318,10 @@ class SalmonDrive(VirtualDrive):
         file: IRealFile = self.get_real_file(source_path, False)
         stream: RandomAccessStream = file.get_input_stream()
         ms: MemoryStream = MemoryStream()
-        stream.copyTo(ms, buffer_size, None)
+        stream.copy_to(ms, buffer_size, None)
         ms.flush()
-        ms.position(0)
-        byte_contents: bytearray = ms.toArray()
+        ms.set_position(0)
+        byte_contents: bytearray = ms.to_array()
         ms.close()
         stream.close()
         return byte_contents

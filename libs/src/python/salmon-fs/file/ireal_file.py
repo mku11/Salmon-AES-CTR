@@ -241,7 +241,7 @@ class IRealFile(ABC):
         source: RandomAccessStream = src.get_input_stream()
         target: RandomAccessStream = dest.get_output_stream()
         try:
-            source.copyTo(target, progress_listener)
+            source.copy_to(target, progress_listener)
         except Exception as ex:
             dest.delete()
             return False

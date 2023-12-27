@@ -206,7 +206,7 @@ class PythonFSTestHelper:
     @staticmethod
     def flip_bit(salmon_file: SalmonFile, position: int):
         stream: RandomAccessStream = salmon_file.get_real_file().get_output_stream()
-        stream.position(position)
+        stream.set_position(position)
         stream.write(bytearray([1]), 0, 1)
         stream.flush()
         stream.close()
@@ -235,7 +235,7 @@ class PythonFSTestHelper:
         if flip_bit:
             real_tmp_file: IRealFile = new_file.get_real_file()
             real_stream: RandomAccessStream = real_tmp_file.get_output_stream()
-            real_stream.position(flip_position)
+            real_stream.set_position(flip_position)
             real_stream.write(bytearray([0]), 0, 1)
             real_stream.flush()
             real_stream.close()
@@ -343,8 +343,8 @@ class PythonFSTestHelper:
 
         def init_sequence(self, drive_id: str, auth_id: str, start_nonce: bytearray, max_nonce: bytearray):
             n_max_nonce: int = BitConverter.toLong(self.testMaxNonce, 0, SalmonGenerator.NONCE_LENGTH)
-            start_nonce = BitConverter.toBytes(n_max_nonce + self.offset, SalmonGenerator.NONCE_LENGTH)
-            max_nonce = BitConverter.toBytes(n_max_nonce, SalmonGenerator.NONCE_LENGTH)
+            start_nonce = BitConverter.to_bytes(n_max_nonce + self.offset, SalmonGenerator.NONCE_LENGTH)
+            max_nonce = BitConverter.to_bytes(n_max_nonce, SalmonGenerator.NONCE_LENGTH)
             super().init_sequence(drive_id, auth_id, start_nonce, max_nonce)
             pass
 
@@ -410,8 +410,8 @@ class PythonFSTestHelper:
         # encrypt and write with a single call, you can also Seek() and Write()
         encryptor.write(v_bytes, 0, len(v_bytes))
         # encrypted data are now written to the encOutStream.
-        enc_out_stream.position(0)
-        enc_data: bytearray = enc_out_stream.toArray()
+        enc_out_stream.set_position(0)
+        enc_data: bytearray = enc_out_stream.to_array()
         encryptor.flush()
         encryptor.close()
         enc_out_stream.close()
@@ -459,9 +459,9 @@ class PythonFSTestHelper:
         enc_out_stream: MemoryStream = MemoryStream()
         encryptor: SalmonStream = SalmonStream(key, nonce, EncryptionMode.Encrypt, enc_out_stream)
         input_stream: RandomAccessStream = MemoryStream(data)
-        input_stream.copyTo(encryptor)
-        enc_out_stream.position(0)
-        enc_data: bytearray = enc_out_stream.toArray()
+        input_stream.copy_to(encryptor)
+        enc_out_stream.set_position(0)
+        enc_data: bytearray = enc_out_stream.to_array()
         encryptor.flush()
         encryptor.close()
         enc_out_stream.close()
@@ -470,9 +470,9 @@ class PythonFSTestHelper:
         enc_input_stream: RandomAccessStream = MemoryStream(enc_data)
         decryptor: SalmonStream = SalmonStream(key, nonce, EncryptionMode.Decrypt, enc_input_stream)
         out_stream: MemoryStream = MemoryStream()
-        decryptor.copyTo(out_stream)
-        out_stream.position(0)
-        dec_data: bytearray = out_stream.toArray()
+        decryptor.copy_to(out_stream)
+        out_stream.set_position(0)
+        dec_data: bytearray = out_stream.to_array()
         decryptor.close()
         enc_input_stream.close()
         out_stream.close()
@@ -484,11 +484,11 @@ class PythonFSTestHelper:
         file: IRealFile = PyFile(file_path)
         ins: RandomAccessStream = file.get_input_stream()
         outs: MemoryStream = MemoryStream()
-        ins.copyTo(outs)
-        outs.position(0)
+        ins.copy_to(outs)
+        outs.set_position(0)
         outs.flush()
         outs.close()
-        return outs.toArray()
+        return outs.to_array()
 
     @staticmethod
     def seek_and_read_file_input_stream(data: bytearray, file_input_stream: SalmonFileInputStream, start: int,
@@ -512,8 +512,8 @@ class PythonFSTestHelper:
 
         sequencer.create_sequence("AAAA", "AAAA")
         sequencer.init_sequence("AAAA", "AAAA",
-                                BitConverter.toBytes(1, 8),
-                                BitConverter.toBytes(4, 8))
+                                BitConverter.to_bytes(1, 8),
+                                BitConverter.to_bytes(4, 8))
         nonce: bytearray = sequencer.next_nonce("AAAA")
         PythonFSTestHelper.testCase.assertEquals(1, BitConverter.toLong(nonce, 0, 8))
         nonce = sequencer.next_nonce("AAAA")

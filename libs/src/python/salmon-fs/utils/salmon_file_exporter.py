@@ -245,10 +245,10 @@ class SalmonFileExporter:
 
         try:
             target_stream = export_file.get_output_stream()
-            target_stream.position(start)
+            target_stream.set_position(start)
 
             source_stream = file_to_export.get_input_stream()
-            source_stream.position(start)
+            source_stream.set_position(start)
 
             v_bytes: bytearray = bytearray(self.__buffer_size)
             bytes_read: int

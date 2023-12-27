@@ -173,7 +173,7 @@ class SalmonFile(VirtualFile):
         if iv_bytes_read == 0:
             raise IOError("Could not parse nonce from file header")
 
-        real_stream.position(0)
+        real_stream.set_position(0)
         header_data: bytearray = bytearray(self.__get_header_length())
         real_stream.read(header_data, 0, len(header_data))
 
@@ -381,7 +381,7 @@ class SalmonFile(VirtualFile):
         version: int = SalmonGenerator.get_version()
         real_stream.write(bytearray([version]), 0, SalmonGenerator.VERSION_LENGTH)
 
-        chunk_size_bytes: bytearray = BitConverter.toBytes(self.__reqChunkSize, 4)
+        chunk_size_bytes: bytearray = BitConverter.to_bytes(self.__reqChunkSize, 4)
         real_stream.write(chunk_size_bytes, 0, len(chunk_size_bytes))
 
         real_stream.write(self.__requestedNonce, 0, len(self.__requestedNonce))

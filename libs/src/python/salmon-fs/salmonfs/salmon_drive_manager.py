@@ -169,7 +169,7 @@ class SalmonDriveManager:
             SalmonDriveManager.create_sequence(SalmonDriveManager.get_drive().get_drive_id(), auth_id)
 
         sequence = SalmonDriveManager.__sequencer.get_sequence(drv_str)
-        return BitConverter.toBytes(sequence.get_auth_id())
+        return BitConverter.to_bytes(sequence.get_auth_id())
 
     @staticmethod
     def import_auth_file(file_path: str):
@@ -230,7 +230,7 @@ class SalmonDriveManager:
         pivot_nonce: bytearray = SalmonNonce.splitNonceRange(sequence.get_next_nonce(), sequence.get_max_nonce())
         SalmonDriveManager.__sequencer.set_max_nonce(sequence.get_drive_id(), sequence.get_auth_id(), pivot_nonce)
         SalmonAuthConfig.write_auth_file(target_app_drive_config_file, SalmonDriveManager.get_drive(),
-                                         BitConverter.toBytes(target_auth_id),
+                                         BitConverter.to_bytes(target_auth_id),
                                          pivot_nonce, sequence.get_max_nonce(),
                                          cfg_nonce)
 
@@ -313,10 +313,10 @@ class SalmonDriveManager:
         salmon_file: SalmonFile = SalmonFile(auth_file, SalmonDriveManager.get_drive())
         stream: SalmonStream = salmon_file.get_input_stream()
         ms: MemoryStream = MemoryStream()
-        stream.copyTo(ms)
+        stream.copy_to(ms)
         ms.close()
         stream.close()
-        drive_config: SalmonAuthConfig = SalmonAuthConfig(ms.toArray())
+        drive_config: SalmonAuthConfig = SalmonAuthConfig(ms.to_array())
         if not SalmonDriveManager.__verify_auth_id(drive_config.get_auth_id()):
             raise SalmonSecurityException("Could not authorize this device, the authentication id does not match")
         return drive_config
@@ -408,10 +408,10 @@ class SalmonDriveManager:
         stream.write(drive.get_drive_id(), 0, len(drive.get_drive_id()))
         stream.flush()
         stream.close()
-        enc_data: bytearray = ms.toArray()
+        enc_data: bytearray = ms.to_array()
 
         # generate the hash signature
-        hash_signature: bytearray = SalmonIntegrity.calculateHash(drive.get_hash_provider(), enc_data, 0, len(enc_data),
+        hash_signature: bytearray = SalmonIntegrity.calculate_hash(drive.get_hash_provider(), enc_data, 0, len(enc_data),
                                                                   hash_key, None)
 
         SalmonDriveConfig.write_drive_config(config_file, magic_bytes, version, salt, iterations, master_key_iv,

@@ -129,7 +129,7 @@ class SalmonAuthConfig:
             ms.write(auth_id, 0, len(auth_id))
             ms.write(next_nonce, 0, len(next_nonce))
             ms.write(max_nonce, 0, len(max_nonce))
-            content: bytearray = ms.toArray()
+            content: bytearray = ms.to_array()
             buffer: bytearray = bytearray(SalmonIntegrity.DEFAULT_CHUNK_SIZE)
             buffer[0: len(content)] = content[0:len(content)]
             stream.write(buffer, 0, len(content))
