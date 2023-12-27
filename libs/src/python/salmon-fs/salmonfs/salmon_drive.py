@@ -79,19 +79,19 @@ class SalmonDrive(VirtualDrive):
         self.close()
         if real_root_path is None:
             return
-        real_root = self.get_real_file(real_root_path, True)
+        self.__realRoot = self.get_real_file(real_root_path, True)
         if not create_if_not_exists and not self.has_config() \
-                and real_root.get_parent() is not None and real_root.get_parent().exists():
+                and self.__realRoot.get_parent() is not None and self.__realRoot.get_parent().exists():
             # try the parent if this is the filesystem folder
-            original_real_root: IRealFile = real_root
-            real_root = real_root.get_parent()
+            original_real_root: IRealFile = self.__realRoot
+            self.__realRoot = self.__realRoot.get_parent()
             if not self.has_config():
                 # revert to original
-                real_root = original_real_root
+                self.__realRoot = original_real_root
 
-        virtual_root_real_file: IRealFile = real_root.get_child(SalmonDrive.__virtualDriveDirectoryName)
+        virtual_root_real_file: IRealFile = self.__realRoot.get_child(SalmonDrive.__virtualDriveDirectoryName)
         if create_if_not_exists and (virtual_root_real_file is None or not virtual_root_real_file.exists()):
-            virtual_root_real_file = real_root.create_directory(SalmonDrive.__virtualDriveDirectoryName)
+            virtual_root_real_file = self.__realRoot.create_directory(SalmonDrive.__virtualDriveDirectoryName)
 
         self.__virtualRoot = self._create_virtual_root(virtual_root_real_file)
         self.__register_on_process_close()
