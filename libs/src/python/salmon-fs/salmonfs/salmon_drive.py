@@ -95,7 +95,7 @@ class SalmonDrive(VirtualDrive):
 
         self.__virtualRoot = self._create_virtual_root(virtual_root_real_file)
         self.__register_on_process_close()
-        key = SalmonKey()
+        self.__key = SalmonKey()
 
     @abstractmethod
     def get_real_file(self, filepath: str, is_directory: bool) -> IRealFile:
