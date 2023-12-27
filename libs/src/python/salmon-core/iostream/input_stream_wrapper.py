@@ -22,12 +22,11 @@ LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 '''
-from _typeshed import WriteableBuffer, ReadableBuffer
 from io import RawIOBase, BufferedIOBase
 
-from random_access_stream import RandomAccessStream
-
 from typeguard import typechecked
+
+from iostream.random_access_stream import RandomAccessStream
 
 
 @typechecked
@@ -45,7 +44,7 @@ class InputStreamWrapper(BufferedIOBase):
 
         self.__stream = stream
 
-    def readinto(self, buffer: WriteableBuffer) -> int:
+    def readinto(self, buffer: bytearray) -> int:
         """
          * Read a sequence of bytes from the base stream into the buffer provided.
          * to specify the count and offset pass a memoryview instead
@@ -69,10 +68,10 @@ class InputStreamWrapper(BufferedIOBase):
     def detach(self) -> RawIOBase:
         raise NotImplementedError()
 
-    def write(self, __buffer: ReadableBuffer) -> int:
+    def write(self, __buffer: bytearray) -> int:
         raise NotImplementedError()
 
-    def readinto1(self, __buffer: WriteableBuffer) -> int:
+    def readinto1(self, __buffer: bytearray) -> int:
         raise NotImplementedError()
 
     def close(self):

@@ -26,7 +26,6 @@ from __future__ import annotations
 
 import math
 import threading
-from _typeshed import ReadableBuffer, WriteableBuffer
 from concurrent.futures import ThreadPoolExecutor
 from io import BufferedIOBase, RawIOBase
 from wrapt import synchronized
@@ -160,7 +159,7 @@ class SalmonFileInputStream(BufferedIOBase):
     def reset(self):
         position = 0
 
-    def readinto(self, buffer: WriteableBuffer) -> int:
+    def readinto(self, buffer: bytearray) -> int:
         """
          * Reads and decrypts the contents of an encrypted file
          *
@@ -214,10 +213,10 @@ class SalmonFileInputStream(BufferedIOBase):
     def detach(self) -> RawIOBase:
         raise NotImplementedError()
 
-    def write(self, __buffer: ReadableBuffer) -> int:
+    def write(self, __buffer: bytearray) -> int:
         raise NotImplementedError()
 
-    def readinto1(self, __buffer: WriteableBuffer) -> int:
+    def readinto1(self, __buffer: bytearray) -> int:
         raise NotImplementedError()
 
     @synchronized
