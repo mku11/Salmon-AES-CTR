@@ -112,7 +112,9 @@ class PyFileStream(RandomAccessStream):
          * @return
          * @throws IOError
         """
-        bytes_read: int = self.readinto(memoryview(buffer)[offset:offset + count])
+        buff: bytes = self.__raf.read(count)
+        bytes_read: int = len(buff)
+        buffer[offset:offset + bytes_read] = buff[:]
         if bytes_read <= 0:
             return -1
         return bytes_read
