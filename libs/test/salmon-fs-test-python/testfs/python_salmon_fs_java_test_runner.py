@@ -51,7 +51,7 @@ class SalmonFSPythonTestRunner(SalmonPythonTestRunner):
     SalmonDriveManager.set_virtual_drive_class(type(PyDrive))
 
     def test_AuthenticateNegative(self):
-        vault_dir: str = TestHelper.generate_folder(TestHelper.TEST_VAULT2_DIR)
+        vault_dir: str = TestHelper.generate_folder(SalmonPythonTestRunner.TEST_VAULT2_DIR)
         sequencer: SalmonFileSequencer = SalmonFileSequencer(PyFile(vault_dir + "/" + TestHelper.TEST_SEQUENCER_FILE1),
                                                              SalmonSequenceSerializer())
         SalmonDriveManager.set_sequencer(sequencer)
@@ -67,7 +67,7 @@ class SalmonFSPythonTestRunner(SalmonPythonTestRunner):
         self.assertTrue(wrong_password)
 
     def test_CatchNotAuthenticatedNegative(self):
-        vault_dir: str = TestHelper.generate_folder(TestHelper.TEST_VAULT2_DIR)
+        vault_dir: str = TestHelper.generate_folder(SalmonPythonTestRunner.TEST_VAULT2_DIR)
         sequencer: SalmonFileSequencer = SalmonFileSequencer(PyFile(vault_dir + "/" + TestHelper.TEST_SEQUENCER_FILE1),
                                                              SalmonSequenceSerializer())
         SalmonDriveManager.set_sequencer(sequencer)
@@ -84,7 +84,7 @@ class SalmonFSPythonTestRunner(SalmonPythonTestRunner):
             self.assertTrue(wrong_password)
 
     def test_AuthenticatePositive(self):
-        vault_dir: str = TestHelper.generate_folder(TestHelper.TEST_VAULT2_DIR)
+        vault_dir: str = TestHelper.generate_folder(SalmonPythonTestRunner.TEST_VAULT2_DIR)
         sequencer: SalmonFileSequencer = SalmonFileSequencer(PyFile(vault_dir + "/" + TestHelper.TEST_SEQUENCER_FILE1),
                                                              SalmonSequenceSerializer())
         SalmonDriveManager.set_sequencer(sequencer)
@@ -103,7 +103,7 @@ class SalmonFSPythonTestRunner(SalmonPythonTestRunner):
     def test_ImportAndExportNoIntegrityBitFlipDataNoCatch(self):
         integrity_failed: bool = False
         try:
-            PythonFSTestHelper.import_and_export(TestHelper.generate_folder(TestHelper.TEST_VAULT2_DIR),
+            PythonFSTestHelper.import_and_export(TestHelper.generate_folder(SalmonPythonTestRunner.TEST_VAULT2_DIR),
                                                  TestHelper.TEST_PASSWORD, TestHelper.TEST_IMPORT_FILE,
                                                  TestHelper.ENC_IMPORT_BUFFER_SIZE, TestHelper.ENC_IMPORT_THREADS,
                                                  TestHelper.ENC_EXPORT_BUFFER_SIZE, TestHelper.ENC_EXPORT_THREADS,
@@ -117,7 +117,7 @@ class SalmonFSPythonTestRunner(SalmonPythonTestRunner):
     def test_ImportAndExportNoIntegrity(self):
         integrity_failed: bool = False
         try:
-            PythonFSTestHelper.import_and_export(TestHelper.generate_folder(TestHelper.TEST_VAULT2_DIR),
+            PythonFSTestHelper.import_and_export(TestHelper.generate_folder(SalmonPythonTestRunner.TEST_VAULT2_DIR),
                                                  TestHelper.TEST_PASSWORD, TestHelper.TEST_IMPORT_FILE,
                                                  TestHelper.ENC_IMPORT_BUFFER_SIZE, TestHelper.ENC_IMPORT_THREADS,
                                                  TestHelper.ENC_EXPORT_BUFFER_SIZE, TestHelper.ENC_EXPORT_THREADS,
@@ -130,14 +130,14 @@ class SalmonFSPythonTestRunner(SalmonPythonTestRunner):
         self.assertFalse(integrity_failed)
 
     def test_import_and_search_files(self):
-        PythonFSTestHelper.import_and_search(TestHelper.generate_folder(TestHelper.TEST_VAULT2_DIR),
+        PythonFSTestHelper.import_and_search(TestHelper.generate_folder(SalmonPythonTestRunner.TEST_VAULT2_DIR),
                                              TestHelper.TEST_PASSWORD, TestHelper.TEST_IMPORT_FILE,
                                              TestHelper.ENC_IMPORT_BUFFER_SIZE, TestHelper.ENC_IMPORT_THREADS)
 
     def test_ImportAndCopyFile(self):
         integrity_failed: bool = False
         try:
-            PythonFSTestHelper.import_and_copy(TestHelper.generate_folder(TestHelper.TEST_VAULT2_DIR),
+            PythonFSTestHelper.import_and_copy(TestHelper.generate_folder(SalmonPythonTestRunner.TEST_VAULT2_DIR),
                                                TestHelper.TEST_PASSWORD, TestHelper.TEST_IMPORT_FILE,
                                                TestHelper.ENC_IMPORT_BUFFER_SIZE,
                                                TestHelper.ENC_IMPORT_THREADS, "subdir", False)
@@ -150,7 +150,7 @@ class SalmonFSPythonTestRunner(SalmonPythonTestRunner):
     def test_import_and_move_file(self):
         integrity_failed: bool = False
         try:
-            PythonFSTestHelper.import_and_copy(TestHelper.generate_folder(TestHelper.TEST_VAULT2_DIR),
+            PythonFSTestHelper.import_and_copy(TestHelper.generate_folder(SalmonPythonTestRunner.TEST_VAULT2_DIR),
                                                TestHelper.TEST_PASSWORD, TestHelper.TEST_IMPORT_FILE,
                                                TestHelper.ENC_IMPORT_BUFFER_SIZE, TestHelper.ENC_IMPORT_THREADS,
                                                "subdir",
@@ -164,7 +164,7 @@ class SalmonFSPythonTestRunner(SalmonPythonTestRunner):
     def test_import_and_export_integrity_bit_flip_data(self):
         integrity_failed: bool = False
         try:
-            PythonFSTestHelper.import_and_export(TestHelper.generate_folder(TestHelper.TEST_VAULT2_DIR),
+            PythonFSTestHelper.import_and_export(TestHelper.generate_folder(SalmonPythonTestRunner.TEST_VAULT2_DIR),
                                                  TestHelper.TEST_PASSWORD, TestHelper.TEST_IMPORT_FILE,
                                                  TestHelper.ENC_IMPORT_BUFFER_SIZE, TestHelper.ENC_IMPORT_THREADS,
                                                  TestHelper.ENC_EXPORT_BUFFER_SIZE, TestHelper.ENC_EXPORT_THREADS,
@@ -179,7 +179,7 @@ class SalmonFSPythonTestRunner(SalmonPythonTestRunner):
         integrity_failed: bool = False
         failed: bool = False
         try:
-            PythonFSTestHelper.import_and_export(TestHelper.generate_folder(TestHelper.TEST_VAULT2_DIR),
+            PythonFSTestHelper.import_and_export(TestHelper.generate_folder(SalmonPythonTestRunner.TEST_VAULT2_DIR),
                                                  TestHelper.TEST_PASSWORD, TestHelper.TEST_IMPORT_FILE,
                                                  TestHelper.ENC_IMPORT_BUFFER_SIZE, TestHelper.ENC_IMPORT_THREADS,
                                                  TestHelper.ENC_EXPORT_BUFFER_SIZE, TestHelper.ENC_EXPORT_THREADS,
@@ -197,7 +197,7 @@ class SalmonFSPythonTestRunner(SalmonPythonTestRunner):
     def test_ImportAndExportNoAppliedIntegrityYesVerifyIntegrityNoBitFlipDataShouldCatch(self):
         failed: bool = False
         try:
-            PythonFSTestHelper.import_and_export(TestHelper.generate_folder(TestHelper.TEST_VAULT2_DIR),
+            PythonFSTestHelper.import_and_export(TestHelper.generate_folder(SalmonPythonTestRunner.TEST_VAULT2_DIR),
                                                  TestHelper.TEST_PASSWORD, TestHelper.TEST_IMPORT_FILE,
                                                  TestHelper.ENC_IMPORT_BUFFER_SIZE, TestHelper.ENC_IMPORT_THREADS,
                                                  TestHelper.ENC_EXPORT_BUFFER_SIZE, TestHelper.ENC_EXPORT_THREADS,
@@ -211,7 +211,7 @@ class SalmonFSPythonTestRunner(SalmonPythonTestRunner):
     def test_ImportAndExportAppliedIntegrityNoVerifyIntegrityBitFlipDataShouldNotCatch(self):
         failed: bool = False
         try:
-            PythonFSTestHelper.import_and_export(TestHelper.generate_folder(TestHelper.TEST_VAULT2_DIR),
+            PythonFSTestHelper.import_and_export(TestHelper.generate_folder(SalmonPythonTestRunner.TEST_VAULT2_DIR),
                                                  TestHelper.TEST_PASSWORD, TestHelper.TEST_IMPORT_FILE,
                                                  TestHelper.ENC_IMPORT_BUFFER_SIZE, TestHelper.ENC_IMPORT_THREADS,
                                                  TestHelper.ENC_EXPORT_BUFFER_SIZE, TestHelper.ENC_EXPORT_THREADS,
@@ -225,7 +225,7 @@ class SalmonFSPythonTestRunner(SalmonPythonTestRunner):
     def test_ImportAndExportAppliedIntegrityNoVerifyIntegrity(self):
         failed: bool = False
         try:
-            PythonFSTestHelper.import_and_export(TestHelper.generate_folder(TestHelper.TEST_VAULT2_DIR),
+            PythonFSTestHelper.import_and_export(TestHelper.generate_folder(SalmonPythonTestRunner.TEST_VAULT2_DIR),
                                                  TestHelper.TEST_PASSWORD, TestHelper.TEST_IMPORT_FILE,
                                                  TestHelper.ENC_IMPORT_BUFFER_SIZE, TestHelper.ENC_IMPORT_THREADS,
                                                  TestHelper.ENC_EXPORT_BUFFER_SIZE, TestHelper.ENC_EXPORT_THREADS,
@@ -240,7 +240,7 @@ class SalmonFSPythonTestRunner(SalmonPythonTestRunner):
     def test_ImportAndExportIntegrityBitFlipHeader(self):
         integrity_failed: bool = False
         try:
-            PythonFSTestHelper.import_and_export(TestHelper.generate_folder(TestHelper.TEST_VAULT2_DIR),
+            PythonFSTestHelper.import_and_export(TestHelper.generate_folder(SalmonPythonTestRunner.TEST_VAULT2_DIR),
                                                  TestHelper.TEST_PASSWORD, TestHelper.TEST_IMPORT_FILE,
                                                  TestHelper.ENC_IMPORT_BUFFER_SIZE, TestHelper.ENC_IMPORT_THREADS,
                                                  TestHelper.ENC_EXPORT_BUFFER_SIZE, TestHelper.ENC_EXPORT_THREADS,
@@ -255,7 +255,7 @@ class SalmonFSPythonTestRunner(SalmonPythonTestRunner):
     def test_ImportAndExportIntegrity(self):
         import_success: bool = True
         try:
-            PythonFSTestHelper.import_and_export(TestHelper.generate_folder(TestHelper.TEST_VAULT2_DIR),
+            PythonFSTestHelper.import_and_export(TestHelper.generate_folder(SalmonPythonTestRunner.TEST_VAULT2_DIR),
                                                  TestHelper.TEST_PASSWORD, TestHelper.TEST_IMPORT_FILE,
                                                  TestHelper.ENC_IMPORT_BUFFER_SIZE, TestHelper.ENC_IMPORT_THREADS,
                                                  TestHelper.ENC_EXPORT_BUFFER_SIZE, TestHelper.ENC_EXPORT_THREADS,
@@ -270,27 +270,27 @@ class SalmonFSPythonTestRunner(SalmonPythonTestRunner):
     def test_CatchVaultMaxFiles(self):
         SalmonDriveManager.set_virtual_drive_class(type(PyDrive))
 
-        vault_dir: str = TestHelper.generate_folder(TestHelper.TEST_VAULT2_DIR)
+        vault_dir: str = TestHelper.generate_folder(SalmonPythonTestRunner.TEST_VAULT2_DIR)
         seq_file: str = vault_dir + "/" + TestHelper.TEST_SEQUENCER_FILE1
 
-        PythonFSTestHelper.test_max_files(vault_dir, seq_file, TestHelper.TEST_IMPORT_TINY_FILE,
+        PythonFSTestHelper.test_max_files(vault_dir, seq_file, SalmonPythonTestRunner.TEST_IMPORT_TINY_FILE,
                                           TestHelper.TEXT_VAULT_MAX_FILE_NONCE, -2, True)
 
         # we need 2 nonces once of the filename the other for the file
         # so this should fail
-        vault_dir = TestHelper.generate_folder(TestHelper.TEST_VAULT2_DIR)
+        vault_dir = TestHelper.generate_folder(SalmonPythonTestRunner.TEST_VAULT2_DIR)
         seq_file = vault_dir + "/" + TestHelper.TEST_SEQUENCER_FILE1
-        PythonFSTestHelper.test_max_files(vault_dir, seq_file, TestHelper.TEST_IMPORT_TINY_FILE,
+        PythonFSTestHelper.test_max_files(vault_dir, seq_file, SalmonPythonTestRunner.TEST_IMPORT_TINY_FILE,
                                           TestHelper.TEXT_VAULT_MAX_FILE_NONCE, -1, False)
 
-        vault_dir = TestHelper.generate_folder(TestHelper.TEST_VAULT2_DIR)
+        vault_dir = TestHelper.generate_folder(SalmonPythonTestRunner.TEST_VAULT2_DIR)
         seq_file = vault_dir + "/" + TestHelper.TEST_SEQUENCER_FILE1
-        PythonFSTestHelper.test_max_files(vault_dir, seq_file, TestHelper.TEST_IMPORT_TINY_FILE,
+        PythonFSTestHelper.test_max_files(vault_dir, seq_file, SalmonPythonTestRunner.TEST_IMPORT_TINY_FILE,
                                           TestHelper.TEXT_VAULT_MAX_FILE_NONCE, 0, False)
 
-        vault_dir = TestHelper.generate_folder(TestHelper.TEST_VAULT2_DIR)
+        vault_dir = TestHelper.generate_folder(SalmonPythonTestRunner.TEST_VAULT2_DIR)
         seq_file = vault_dir + "/" + TestHelper.TEST_SEQUENCER_FILE1
-        PythonFSTestHelper.test_max_files(vault_dir, seq_file, TestHelper.TEST_IMPORT_TINY_FILE,
+        PythonFSTestHelper.test_max_files(vault_dir, seq_file, SalmonPythonTestRunner.TEST_IMPORT_TINY_FILE,
                                           TestHelper.TEXT_VAULT_MAX_FILE_NONCE, 1, False)
 
     def test_CreateFileWithoutVault(self):
@@ -365,7 +365,7 @@ class SalmonFSPythonTestRunner(SalmonPythonTestRunner):
 
     def test_ExportAndImportAuth(self):
         vault: str = TestHelper.generate_folder(TestHelper.TEST_VAULT_DIR)
-        import_file_path: str = TestHelper.TEST_IMPORT_TINY_FILE
+        import_file_path: str = SalmonPythonTestRunner.TEST_IMPORT_TINY_FILE
         PythonFSTestHelper.export_and_import_auth(vault, import_file_path)
 
     def test_examples(self):
@@ -399,7 +399,7 @@ class SalmonFSPythonTestRunner(SalmonPythonTestRunner):
         PythonFSTestHelper.seek_and_read_file_input_stream(data, file_input_stream, 250, 10, 0, 6)
 
     def test_CreateDriveAndOpenFsFolder(self):
-        vault_dir: str = TestHelper.generate_folder(TestHelper.TEST_VAULT2_DIR)
+        vault_dir: str = TestHelper.generate_folder(SalmonPythonTestRunner.TEST_VAULT2_DIR)
         sequence_file: PyFile = PyFile(vault_dir + "/" + TestHelper.TEST_SEQUENCER_FILE1)
         serializer: ISalmonSequenceSerializer = SalmonSequenceSerializer()
         sequencer: SalmonFileSequencer = SalmonFileSequencer(sequence_file, serializer)
@@ -425,9 +425,9 @@ class SalmonFSPythonTestRunner(SalmonPythonTestRunner):
 
     def test_shouldPerformOperationsRealFiles(self):
         caught: bool = False
-        vault_dir: str = TestHelper.generate_folder(TestHelper.TEST_VAULT2_DIR)
+        vault_dir: str = TestHelper.generate_folder(SalmonPythonTestRunner.TEST_VAULT2_DIR)
         v_dir: PyFile = PyFile(vault_dir)
-        file: PyFile = PyFile(TestHelper.TEST_IMPORT_TINY_FILE)
+        file: PyFile = PyFile(SalmonPythonTestRunner.TEST_IMPORT_TINY_FILE)
         file1: IRealFile = file.copy(v_dir)
         file2: IRealFile
         try:
@@ -533,7 +533,7 @@ class SalmonFSPythonTestRunner(SalmonPythonTestRunner):
 
     def ShouldReadFromFileMultithreaded(self):
         caught: bool = False
-        vault_dir: str = TestHelper.generate_folder(TestHelper.TEST_VAULT2_DIR)
+        vault_dir: str = TestHelper.generate_folder(SalmonPythonTestRunner.TEST_VAULT2_DIR)
         file: IRealFile = PyFile(TestHelper.TEST_IMPORT_MEDIUM_FILE)
 
         SalmonDriveManager.set_virtual_drive_class(type(PyDrive))
