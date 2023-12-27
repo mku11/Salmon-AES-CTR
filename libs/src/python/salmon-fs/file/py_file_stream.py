@@ -24,7 +24,7 @@ SOFTWARE.
 '''
 from typing import BinaryIO
 
-from file.py_file import PyFile
+from file.ireal_file import IRealFile
 from iostream.random_access_stream import RandomAccessStream
 
 
@@ -34,7 +34,7 @@ class PyFileStream(RandomAccessStream):
      * This class is used internally for random file access of physical (real) files.
     """
 
-    def __init__(self, file: PyFile, mode: str):
+    def __init__(self, file: IRealFile, mode: str):
         """
          * Construct a file stream from an AndroidFile.
          * This will create a wrapper stream that will route read() and write() to the FileChannel
@@ -48,7 +48,7 @@ class PyFileStream(RandomAccessStream):
          * The random access file associated with this stream.
         """
 
-        self.__file: PyFile | None = None
+        self.__file: IRealFile | None = None
         """
          * The python file associated with this stream.
         """

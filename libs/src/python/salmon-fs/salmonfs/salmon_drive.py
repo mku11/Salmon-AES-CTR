@@ -23,10 +23,12 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 '''
 from __future__ import annotations
-from abc import ABC, abstractmethod
-from threading import RLock
+from abc import abstractmethod
 
+from convert.bit_converter import BitConverter
 from file.ireal_file import IRealFile
+from file.virtual_drive import VirtualDrive
+from file.virtual_file import VirtualFile
 from iostream.memory_stream import MemoryStream
 from iostream.random_access_stream import RandomAccessStream
 from salmon.integrity.hmac_sha256_provider import HmacSHA256Provider
@@ -39,12 +41,11 @@ from salmon.salmon_security_exception import SalmonSecurityException
 from salmonfs.salmon_auth_exception import SalmonAuthException
 from salmonfs.salmon_drive_config import SalmonDriveConfig
 from salmonfs.salmon_drive_generator import SalmonDriveGenerator
-from salmonfs.salmon_drive_manager import SalmonDriveManager
-from salmonfs.salmon_file import SalmonFile
 from salmonfs.salmon_key import SalmonKey
+from sequence.isalmon_sequencer import ISalmonSequencer
 
 
-class SalmonDrive(ABC):
+class SalmonDrive(VirtualDrive):
     """
      * Class provides an abstract virtual drive that can be extended for use with
      * any filesystem ie disk, net, cloud, etc.
@@ -66,15 +67,14 @@ class SalmonDrive(ABC):
          * @param real_root_path The path of the real directory
          * @param create_if_not_exists Create the drive if it does not exist
         """
+        super().__init__(real_root_path, create_if_not_exists)
         self.__defaultFileChunkSize: int = SalmonDrive.__DEFAULT_FILE_CHUNK_SIZE
         self.__key: SalmonKey | None = None
         self.__driveID: bytearray | None = None
         self.__realRoot: IRealFile | None = None
-        self.__virtualRoot: SalmonFile | None = None
-
+        self.__virtualRoot: VirtualFile | None = None
         self.__hashProvider: IHashProvider = HmacSHA256Provider()
-
-        self.__lock = RLock()
+        self.__sequencer: ISalmonSequencer | None = None
 
         self.close()
         if real_root_path is None:
@@ -190,121 +190,7 @@ class SalmonDrive(ABC):
         """
         return self.__key
 
-    def set_password(self, password: str):
-        """
-         * Change the user password.
-         * @param pass The new password.
-         * @throws IOError
-         * @throws SalmonAuthException
-         * @throws SalmonSecurityException
-         * @throws SalmonIntegrityException
-         * @throws SalmonSequenceException
-        """
-        with (self.__lock):
-            self.__create_config(password)
-
-    def _init_fs(self):
-        """
-         * Initialize the drive virtual filesystem.
-        """
-        virtual_root_real_file: IRealFile = self.__realRoot.get_child(SalmonDrive.__virtualDriveDirectoryName)
-        if virtual_root_real_file is None or not virtual_root_real_file.exists():
-            try:
-                virtual_root_real_file = self.__realRoot.create_directory(SalmonDrive.__virtualDriveDirectoryName)
-            except Exception as ex:
-                print(ex)
-
-        self.__virtualRoot = self._create_virtual_root(virtual_root_real_file)
-
-    def _create_virtual_root(self, virtual_root_real_file: IRealFile) -> SalmonFile:
-        return SalmonFile(virtual_root_real_file, self)
-
-    # TODO: partial refactor to SalmonDriveConfig
-    def __create_config(self, password: str):
-        """
-         * Create a configuration file for the drive.
-         *
-         * @param password The new password to be saved in the configuration
-         *                 This password will be used to derive the master key that will be used to
-         *                 encrypt the combined key (encryption key + hash key)
-        """
-        drive_key: bytearray = self.get_key().get_drive_key()
-        hash_key: bytearray = self.get_key().get_hash_key()
-
-        config_file: IRealFile = self.__realRoot.get_child(SalmonDrive.__configFilename)
-
-        # if it's an existing config that we need to update with
-        # the new password then we prefer to be authenticate
-        # TODO: we should probably call Authenticate() rather than assume
-        #  that the key is not None. Though the user can anyway manually delete the config file
-        #  so it doesn't matter.
-        if drive_key is None and config_file is not None and config_file.exists():
-            raise SalmonAuthException("Not authenticated")
-
-        # delete the old config file and create a new one
-        if config_file is not None and config_file.exists():
-            config_file.delete()
-        config_file = self.__realRoot.create_file(SalmonDrive.__configFilename)
-
-        magic_bytes: bytearray = SalmonGenerator.getMagicBytes()
-
-        version: int = SalmonGenerator.getVersion()
-
-        # if this is a new config file derive a 512-bit key that will be split to:
-        # a) drive encryption key (for encrypting filenames and files)
-        # b) hash key for file integrity
-        new_drive: bool = False
-        if drive_key is None:
-            new_drive = True
-            drive_key: bytearray = bytearray(SalmonGenerator.KEY_LENGTH)
-            hash_key: bytearray = bytearray(SalmonGenerator.HASH_KEY_LENGTH)
-            comb_key: bytearray = SalmonDriveGenerator.generate_combined_key()
-            drive_key[0: SalmonGenerator.KEY_LENGTH] = comb_key[0:SalmonGenerator.KEY_LENGTH]
-            hash_key[0:SalmonGenerator.HASH_KEY_LENGTH] = comb_key[
-                                                          SalmonGenerator.KEY_LENGTH:SalmonGenerator.HASH_KEY_LENGTH]
-            self.__driveID = SalmonDriveGenerator.generate_drive_id()
-
-        # Get the salt that we will use to encrypt the combined key (drive key + hash key)
-        salt: bytearray = SalmonDriveGenerator.generate_salt()
-
-        iterations: int = SalmonDriveGenerator.get_iterations()
-
-        # generate a 128 bit IV that will be used with the master key
-        # to encrypt the combined 64-bit key (drive key + hash key)
-        master_key_iv: bytearray = SalmonDriveGenerator.generate_master_key_iv()
-
-        # create a key that will encrypt both the (drive key and the hash key)
-        master_key: bytearray = SalmonPassword.getMasterKey(password, salt, iterations,
-                                                            SalmonDriveGenerator.MASTER_KEY_LENGTH)
-
-        # encrypt the combined key (drive key + hash key) using the master_key and the masterKeyIv
-        ms: MemoryStream = MemoryStream()
-        stream: SalmonStream = SalmonStream(master_key, master_key_iv, SalmonStream.EncryptionMode.Encrypt, ms,
-                                            None, False, None, None)
-        stream.write(drive_key, 0, len(drive_key))
-        stream.write(hash_key, 0, len(hash_key))
-        stream.write(self.__driveID, 0, len(self.__driveID))
-        stream.flush()
-        stream.close()
-        enc_data: bytearray = ms.toArray()
-
-        # generate the hash signature
-        hash_signature: bytearray = SalmonIntegrity.calculateHash(self.__hashProvider, enc_data, 0, len(enc_data),
-                                                                  hash_key, None)
-
-        SalmonDriveConfig.write_drive_config(config_file, magic_bytes, version, salt, iterations, master_key_iv,
-                                             enc_data, hash_signature)
-        self.__set_key(master_key, drive_key, hash_key, iterations)
-
-        if new_drive:
-            # create a full sequence for nonces
-            auth_id: bytearray = SalmonDriveGenerator.generate_auth_id()
-            SalmonDriveManager.create_sequence(self.__driveID, auth_id)
-            SalmonDriveManager.init_sequence(self.__driveID, auth_id)
-
-        self._init_fs()
-
-    def get_virtual_root(self) -> SalmonFile | None:
+    def get_virtual_root(self) -> VirtualFile | None:
         """
          * Return the virtual root directory of the drive.
          * @return
@@ -316,7 +202,7 @@ class SalmonDrive(ABC):
             raise SalmonAuthException("Not authenticated")
         return self.__virtualRoot
 
-    def _get_real_root(self) -> IRealFile:
+    def get_real_root(self) -> IRealFile:
         return self.__realRoot
 
     def authenticate(self, password: str):
@@ -363,9 +249,9 @@ class SalmonDrive(ABC):
             self.__verify_hash(salmon_config, enc_data, hash_key)
 
             # set the combined key (drive key + hash key) and the drive nonce
-            self.__set_key(master_key, drive_key, hash_key, iterations)
+            self.set_key(master_key, drive_key, hash_key, iterations)
             self.__driveID = drive_id
-            self._init_fs()
+            self.init_fs()
             self._on_authentication_success()
         except Exception as ex:
             self._on_authentication_error()
@@ -374,7 +260,7 @@ class SalmonDrive(ABC):
             if stream is not None:
                 stream.close()
 
-    def __set_key(self, master_key: bytearray, drive_key: bytearray, hash_key: bytearray, iterations: int):
+    def set_key(self, master_key: bytearray, drive_key: bytearray, hash_key: bytearray, iterations: int):
         """
          * Sets the key properties.
          * @param master_key The master key.
@@ -409,7 +295,7 @@ class SalmonDrive(ABC):
         """
         if not self.is_authenticated():
             raise SalmonAuthException("Not authenticated")
-        return SalmonDriveManager.get_next_nonce(self)
+        return self.__sequencer.next_nonce(BitConverter.to_hex(self.get_drive_id()))
 
     def is_authenticated(self) -> bool:
         """
@@ -499,3 +385,30 @@ class SalmonDrive(ABC):
         if self.__key is not None:
             self.__key.clear()
         self.__key = None
+
+    def init_fs(self):
+        """
+         * Initialize the drive virtual filesystem.
+        """
+        virtual_root_real_file: IRealFile = self.get_real_root().get_child(
+            SalmonDrive.get_virtual_drive_directory_name())
+        if virtual_root_real_file is None or not virtual_root_real_file.exists():
+            try:
+                virtual_root_real_file = self.get_real_root().create_directory(
+                    SalmonDrive.get_virtual_drive_directory_name())
+            except Exception as ex:
+                print(ex)
+
+        self.__virtualRoot = self._create_virtual_root(virtual_root_real_file)
+
+    def _create_virtual_root(self, virtual_root_real_file: IRealFile) -> VirtualFile:
+        pass
+
+    def get_hash_provider(self):
+        return self.__hashProvider
+
+    def get_sequencer(self):
+        return self.__sequencer
+
+    def set_sequencer(self, sequencer: ISalmonSequencer):
+        self.__sequencer = sequencer

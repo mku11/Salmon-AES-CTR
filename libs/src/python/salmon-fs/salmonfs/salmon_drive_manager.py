@@ -27,15 +27,21 @@ from typing import Type
 from convert.bit_converter import BitConverter
 from file.ireal_file import IRealFile
 from iostream.memory_stream import MemoryStream
+from salmon.integrity.salmon_integrity import SalmonIntegrity
 from salmon.iostream.salmon_stream import SalmonStream
+from salmon.password.salmon_password import SalmonPassword
+from salmon.salmon_generator import SalmonGenerator
 from salmon.salmon_nonce import SalmonNonce
 from salmon.salmon_security_exception import SalmonSecurityException
 from salmonfs.salmon_auth_config import SalmonAuthConfig
+from salmonfs.salmon_auth_exception import SalmonAuthException
 from salmonfs.salmon_drive import SalmonDrive
+from salmonfs.salmon_drive_config import SalmonDriveConfig
 from salmonfs.salmon_drive_generator import SalmonDriveGenerator
 from salmonfs.salmon_file import SalmonFile
 from sequence.isalmon_sequencer import ISalmonSequencer
 from sequence.salmon_sequence import SalmonSequence
+from threading import RLock
 
 
 class SalmonDriveManager:
@@ -47,6 +53,7 @@ class SalmonDriveManager:
     __drive_class_type: Type | None = None
     __drive: SalmonDrive | None = None
     __sequencer: ISalmonSequencer | None = None
+    __lock = RLock()
 
     @staticmethod
     def set_virtual_drive_class(drive_class_type: Type):
@@ -114,7 +121,7 @@ class SalmonDriveManager:
         if drive.has_config():
             raise SalmonSecurityException("Drive already exists")
         SalmonDriveManager.__drive = drive
-        drive.set_password(password)
+        SalmonDriveManager.set_password(drive, password)
         return drive
 
     @staticmethod
@@ -130,6 +137,7 @@ class SalmonDriveManager:
         drive: SalmonDrive | None = None
         try:
             drive = SalmonDriveManager.__drive_class_type(dir_path, create_if_not_exists)
+            drive.set_sequencer(SalmonDriveManager.__sequencer)
             pass
         except Exception as e:
             SalmonSecurityException("Could not create drive instance", e)
@@ -224,18 +232,6 @@ class SalmonDriveManager:
                                          BitConverter.toBytes(target_auth_id),
                                          pivot_nonce, sequence.get_max_nonce(),
                                          cfg_nonce)
-
-    @staticmethod
-    def get_next_nonce(salmon_drive: SalmonDrive) -> bytearray:
-        """
-         * Get the next nonce for the drive. This operation IS atomic as per transaction.
-         *
-         * @param salmon_drive
-         * @return
-         * @throws SalmonSequenceException
-         * @throws SalmonRangeExceededException
-        """
-        return SalmonDriveManager.__sequencer.next_nonce(BitConverter.to_hex(salmon_drive.get_drive_id()))
 
     @staticmethod
     def create_sequence(drive_id: bytearray, auth_id: bytearray):
@@ -343,3 +339,101 @@ class SalmonDriveManager:
             if array1[i] != array2[i]:
                 return False
         return True
+
+    @staticmethod
+    def __create_config(drive: SalmonDrive, password: str):
+        """
+         * Create a configuration file for the drive.
+         *
+         * @param password The new password to be saved in the configuration
+         *                 This password will be used to derive the master key that will be used to
+         *                 encrypt the combined key (encryption key + hash key)
+        """
+        drive_key: bytearray = drive.get_key().get_drive_key()
+        hash_key: bytearray = drive.get_key().get_hash_key()
+
+        config_file: IRealFile = drive.get_real_root().get_child(SalmonDrive.get_config_filename())
+
+        # if it's an existing config that we need to update with
+        # the new password then we prefer to be authenticate
+        # TODO: we should probably call Authenticate() rather than assume
+        #  that the key is not None. Though the user can anyway manually delete the config file
+        #  so it doesn't matter.
+        if drive_key is None and config_file is not None and config_file.exists():
+            raise SalmonAuthException("Not authenticated")
+
+        # delete the old config file and create a new one
+        if config_file is not None and config_file.exists():
+            config_file.delete()
+        config_file = drive.get_real_root().create_file(SalmonDrive.get_config_filename())
+
+        magic_bytes: bytearray = SalmonGenerator.getMagicBytes()
+
+        version: int = SalmonGenerator.getVersion()
+
+        # if this is a new config file derive a 512-bit key that will be split to:
+        # a) drive encryption key (for encrypting filenames and files)
+        # b) hash key for file integrity
+        new_drive: bool = False
+        if drive_key is None:
+            new_drive = True
+            drive_key: bytearray = bytearray(SalmonGenerator.KEY_LENGTH)
+            hash_key: bytearray = bytearray(SalmonGenerator.HASH_KEY_LENGTH)
+            comb_key: bytearray = SalmonDriveGenerator.generate_combined_key()
+            drive_key[0: SalmonGenerator.KEY_LENGTH] = comb_key[0:SalmonGenerator.KEY_LENGTH]
+            hash_key[0:SalmonGenerator.HASH_KEY_LENGTH] = comb_key[
+                                                          SalmonGenerator.KEY_LENGTH:SalmonGenerator.HASH_KEY_LENGTH]
+            drive.__driveID = SalmonDriveGenerator.generate_drive_id()
+
+        # Get the salt that we will use to encrypt the combined key (drive key + hash key)
+        salt: bytearray = SalmonDriveGenerator.generate_salt()
+
+        iterations: int = SalmonDriveGenerator.get_iterations()
+
+        # generate a 128 bit IV that will be used with the master key
+        # to encrypt the combined 64-bit key (drive key + hash key)
+        master_key_iv: bytearray = SalmonDriveGenerator.generate_master_key_iv()
+
+        # create a key that will encrypt both the (drive key and the hash key)
+        master_key: bytearray = SalmonPassword.getMasterKey(password, salt, iterations,
+                                                            SalmonDriveGenerator.MASTER_KEY_LENGTH)
+
+        # encrypt the combined key (drive key + hash key) using the master_key and the masterKeyIv
+        ms: MemoryStream = MemoryStream()
+        stream: SalmonStream = SalmonStream(master_key, master_key_iv, SalmonStream.EncryptionMode.Encrypt, ms,
+                                            None, False, None, None)
+        stream.write(drive_key, 0, len(drive_key))
+        stream.write(hash_key, 0, len(hash_key))
+        stream.write(drive.get_drive_id(), 0, len(drive.get_drive_id()))
+        stream.flush()
+        stream.close()
+        enc_data: bytearray = ms.toArray()
+
+        # generate the hash signature
+        hash_signature: bytearray = SalmonIntegrity.calculateHash(drive.get_hash_provider(), enc_data, 0, len(enc_data),
+                                                                  hash_key, None)
+
+        SalmonDriveConfig.write_drive_config(config_file, magic_bytes, version, salt, iterations, master_key_iv,
+                                             enc_data, hash_signature)
+        drive.set_key(master_key, drive_key, hash_key, iterations)
+
+        if new_drive:
+            # create a full sequence for nonces
+            auth_id: bytearray = SalmonDriveGenerator.generate_auth_id()
+            SalmonDriveManager.create_sequence(drive.get_drive_id(), auth_id)
+            SalmonDriveManager.init_sequence(drive.get_drive_id(), auth_id)
+
+        drive.init_fs()
+
+    def set_password(drive: SalmonDrive, password: str):
+        """
+         * Change the user password.
+         * @param pass The new password.
+         * @throws IOError
+         * @throws SalmonAuthException
+         * @throws SalmonSecurityException
+         * @throws SalmonIntegrityException
+         * @throws SalmonSequenceException
+        """
+        with (SalmonDriveManager.__lock):
+            SalmonDriveManager.__create_config(drive, password)

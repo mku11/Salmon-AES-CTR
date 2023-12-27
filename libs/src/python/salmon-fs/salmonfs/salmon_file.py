@@ -30,6 +30,7 @@ from wrapt import synchronized
 
 from convert.bit_converter import BitConverter
 from file.ireal_file import IRealFile
+from file.virtual_file import VirtualFile
 from iostream.random_access_stream import RandomAccessStream
 from salmon.integrity.salmon_integrity import SalmonIntegrity
 from salmon.integrity.salmon_integrity_exception import SalmonIntegrityException
@@ -42,7 +43,7 @@ from salmon.text.salmon_text_encryptor import SalmonTextEncryptor
 from salmonfs.salmon_drive import SalmonDrive
 
 
-class SalmonFile:
+class SalmonFile(VirtualFile):
     """
      * A virtual file backed by an encrypted {@link IRealFile} on the real filesystem.
      * Supports operations for retrieving {@link SalmonStream} for reading/decrypting
@@ -60,6 +61,7 @@ class SalmonFile:
          * @param real_file The real file
         """
 
+        super().__init__(real_file, drive)
         self.__drive: SalmonDrive | None = None
         self.__realFile: IRealFile | None = None
 

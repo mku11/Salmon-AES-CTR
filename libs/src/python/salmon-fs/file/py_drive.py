@@ -27,7 +27,9 @@ import platform
 
 from file.py_file import PyFile
 from file.ireal_file import IRealFile
+from file.virtual_file import VirtualFile
 from salmonfs.salmon_drive import SalmonDrive
+from salmonfs.salmon_file import SalmonFile
 
 
 class PyDrive(SalmonDrive):
@@ -86,3 +88,6 @@ class PyDrive(SalmonDrive):
          * When authentication succeeds.
         """
         pass
+
+    def _create_virtual_root(self, virtual_root_real_file: IRealFile) -> VirtualFile:
+        return SalmonFile(virtual_root_real_file, self)

@@ -29,7 +29,6 @@ from datetime import datetime
 from typing import Callable, Any
 
 from iostream.random_access_stream import RandomAccessStream
-from utils.salmon_file_utils import SalmonFileUtils
 
 
 class IRealFile(ABC):
@@ -385,7 +384,7 @@ class IRealFile(ABC):
          * @param filename
          * @return
         """
-        ext: str = SalmonFileUtils.get_extension_from_file_name(filename)
+        ext: str = IRealFile.__get_extension(filename)
         filename_no_ext: str | None = None
         if len(ext) > 0:
             filename_no_ext = filename[0:len(filename) - len(ext) - 1]
@@ -399,3 +398,13 @@ class IRealFile(ABC):
     def notify(self, position: int, length: int, progress_listener: Callable[[IRealFile, int, int], Any] | None = None):
         if progress_listener is not None:
             progress_listener(self, position, length)
+
+    @staticmethod
+    def __get_extension(file_name: str) -> str:
+        if file_name is None:
+            return ""
+        index: int = file_name.rindex(".")
+        if index >= 0:
+            return file_name[index + 1]
+        else:
+            return ""
