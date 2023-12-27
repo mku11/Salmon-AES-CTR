@@ -221,7 +221,7 @@ class SalmonDrive(VirtualDrive):
             salt: bytearray = salmon_config.get_salt()
 
             # derive the master key from the text password
-            master_key: bytearray = SalmonPassword.getMasterKey(password, salt, iterations,
+            master_key: bytearray = SalmonPassword.get_master_key(password, salt, iterations,
                                                                 SalmonDriveGenerator.MASTER_KEY_LENGTH)
 
             # get the master Key Iv
@@ -232,7 +232,7 @@ class SalmonDrive(VirtualDrive):
 
             # decrypt the combined key (drive key + hash key) using the master key
             ms: MemoryStream = MemoryStream(enc_data)
-            stream = SalmonStream(master_key, master_key_iv, SalmonStream.EncryptionMode.Decrypt, ms,
+            stream = SalmonStream(master_key, master_key_iv, EncryptionMode.Decrypt, ms,
                                   None, False, None, None)
 
             drive_key: bytearray = bytearray(SalmonGenerator.KEY_LENGTH)

@@ -383,8 +383,8 @@ class PythonFSTestHelper:
         if t_file.exists():
             t_file.delete()
         v_bytes: bytearray = bytearray(text.encode('utf-8'))
-        key: bytearray = SalmonGenerator.getSecureRandomBytes(32)  # 256-bit key
-        nonce: bytearray = SalmonGenerator.getSecureRandomBytes(8)  # 64-bit nonce
+        key: bytearray = SalmonGenerator.get_secure_random_bytes(32)  # 256-bit key
+        nonce: bytearray = SalmonGenerator.get_secure_random_bytes(8)  # 64-bit nonce
 
         # Example 1: encrypt byte array
         enc_bytes: bytearray = SalmonEncryptor().encrypt(v_bytes, key, nonce, False)
@@ -394,7 +394,7 @@ class PythonFSTestHelper:
         PythonFSTestHelper.assert_array_equals(v_bytes, dec_bytes)
 
         # Example 2: encrypt string and save the nonce in the header
-        nonce = SalmonGenerator.getSecureRandomBytes(8)  # always get a fresh nonce!
+        nonce = SalmonGenerator.get_secure_random_bytes(8)  # always get a fresh nonce!
         enc_text: str = SalmonTextEncryptor.encryptstr(text, key, nonce, True)
         # decrypt string
         dec_text: str = SalmonTextDecryptor.decryptstr(enc_text, key, None, True)
@@ -403,9 +403,9 @@ class PythonFSTestHelper:
 
         # Example 3: encrypt data to an output stream
         enc_out_stream: MemoryStream = MemoryStream()  # or any other writeable Stream like to a file
-        nonce = SalmonGenerator.getSecureRandomBytes(8)  # always get a fresh nonce!
+        nonce = SalmonGenerator.get_secure_random_bytes(8)  # always get a fresh nonce!
         # pass the output stream to the SalmonStream
-        encryptor: SalmonStream = SalmonStream(key, nonce, SalmonStream.EncryptionMode.Encrypt, enc_out_stream,
+        encryptor: SalmonStream = SalmonStream(key, nonce, EncryptionMode.Encrypt, enc_out_stream,
                                                None, False, None, None)
         # encrypt and write with a single call, you can also Seek() and Write()
         encryptor.write(v_bytes, 0, len(v_bytes))
@@ -417,7 +417,7 @@ class PythonFSTestHelper:
         enc_out_stream.close()
         # decrypt a stream with encoded data
         enc_input_stream: RandomAccessStream = MemoryStream(enc_data)  # or any other readable Stream like from a file
-        decryptor: SalmonStream = SalmonStream(key, nonce, SalmonStream.EncryptionMode.Decrypt, enc_input_stream,
+        decryptor: SalmonStream = SalmonStream(key, nonce, EncryptionMode.Decrypt, enc_input_stream,
                                                None, False, None, None)
         dec_buffer: bytearray = bytearray(1024)
         # decrypt and read data with a single call, you can also Seek() before Read()
@@ -433,7 +433,7 @@ class PythonFSTestHelper:
         # Example 4: encrypt to a file, the SalmonFile has a virtual file system API
         # with copy, move, rename, delete operations
         enc_file: SalmonFile = SalmonFile(PyFile(test_file), None)
-        nonce = SalmonGenerator.getSecureRandomBytes(8)  # always get a fresh nonce!
+        nonce = SalmonGenerator.get_secure_random_bytes(8)  # always get a fresh nonce!
         enc_file.set_encryption_key(key)
         enc_file.set_requested_nonce(nonce)
         stream: RandomAccessStream = enc_file.get_output_stream()
@@ -457,7 +457,7 @@ class PythonFSTestHelper:
     @staticmethod
     def encrypt_and_decrypt_stream(data: bytearray, key: bytearray, nonce: bytearray):
         enc_out_stream: MemoryStream = MemoryStream()
-        encryptor: SalmonStream = SalmonStream(key, nonce, SalmonStream.EncryptionMode.Encrypt, enc_out_stream)
+        encryptor: SalmonStream = SalmonStream(key, nonce, EncryptionMode.Encrypt, enc_out_stream)
         input_stream: RandomAccessStream = MemoryStream(data)
         input_stream.copyTo(encryptor)
         enc_out_stream.position(0)
@@ -468,7 +468,7 @@ class PythonFSTestHelper:
         input_stream.close()
 
         enc_input_stream: RandomAccessStream = MemoryStream(enc_data)
-        decryptor: SalmonStream = SalmonStream(key, nonce, SalmonStream.EncryptionMode.Decrypt, enc_input_stream)
+        decryptor: SalmonStream = SalmonStream(key, nonce, EncryptionMode.Decrypt, enc_input_stream)
         out_stream: MemoryStream = MemoryStream()
         decryptor.copyTo(out_stream)
         out_stream.position(0)

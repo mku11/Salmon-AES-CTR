@@ -81,7 +81,7 @@ class SalmonDriveGenerator:
          * Generate a Drive ID.
          * @return The Drive ID.
         """
-        return SalmonGenerator.getSecureRandomBytes(SalmonDriveGenerator.DRIVE_ID_LENGTH)
+        return SalmonGenerator.get_secure_random_bytes(SalmonDriveGenerator.DRIVE_ID_LENGTH)
 
     @staticmethod
     def generate_auth_id() -> bytearray:
@@ -89,7 +89,7 @@ class SalmonDriveGenerator:
          * Generate a secure random authentication ID.
          * @return The authentication Id (16 bytes).
         """
-        return SalmonGenerator.getSecureRandomBytes(SalmonDriveGenerator.AUTH_ID_SIZE)
+        return SalmonGenerator.get_secure_random_bytes(SalmonDriveGenerator.AUTH_ID_SIZE)
 
     @staticmethod
     def generate_combined_key() -> bytearray:
@@ -97,7 +97,7 @@ class SalmonDriveGenerator:
          * Generates a secure random combined key (drive key + hash key)
          * @return The length of the combined key.
         """
-        return SalmonGenerator.getSecureRandomBytes(SalmonDriveGenerator.COMBINED_KEY_LENGTH)
+        return SalmonGenerator.get_secure_random_bytes(SalmonDriveGenerator.COMBINED_KEY_LENGTH)
 
     @staticmethod
     def generate_master_key_iv() -> bytearray:
@@ -105,7 +105,7 @@ class SalmonDriveGenerator:
          * Generates the initial vector that will be used with the master key
          * to encrypt the combined key (drive key + hash key)
         """
-        return SalmonGenerator.getSecureRandomBytes(SalmonDriveGenerator.IV_LENGTH)
+        return SalmonGenerator.get_secure_random_bytes(SalmonDriveGenerator.IV_LENGTH)
 
     @staticmethod
     def generate_salt() -> bytearray:
@@ -113,7 +113,7 @@ class SalmonDriveGenerator:
          * Generates a salt.
          * @return The salt byte array.
         """
-        return SalmonGenerator.getSecureRandomBytes(SalmonDriveGenerator.SALT_LENGTH)
+        return SalmonGenerator.get_secure_random_bytes(SalmonDriveGenerator.SALT_LENGTH)
 
     @staticmethod
     def get_starting_nonce() -> bytearray:

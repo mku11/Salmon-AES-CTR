@@ -28,6 +28,7 @@ from convert.bit_converter import BitConverter
 from file.ireal_file import IRealFile
 from iostream.memory_stream import MemoryStream
 from salmon.integrity.salmon_integrity import SalmonIntegrity
+from salmon.iostream.encryption_mode import EncryptionMode
 from salmon.iostream.salmon_stream import SalmonStream
 from salmon.password.salmon_password import SalmonPassword
 from salmon.salmon_generator import SalmonGenerator
@@ -367,9 +368,9 @@ class SalmonDriveManager:
             config_file.delete()
         config_file = drive.get_real_root().create_file(SalmonDrive.get_config_filename())
 
-        magic_bytes: bytearray = SalmonGenerator.getMagicBytes()
+        magic_bytes: bytearray = SalmonGenerator.get_magic_bytes()
 
-        version: int = SalmonGenerator.getVersion()
+        version: int = SalmonGenerator.get_version()
 
         # if this is a new config file derive a 512-bit key that will be split to:
         # a) drive encryption key (for encrypting filenames and files)
@@ -395,12 +396,12 @@ class SalmonDriveManager:
         master_key_iv: bytearray = SalmonDriveGenerator.generate_master_key_iv()
 
         # create a key that will encrypt both the (drive key and the hash key)
-        master_key: bytearray = SalmonPassword.getMasterKey(password, salt, iterations,
+        master_key: bytearray = SalmonPassword.get_master_key(password, salt, iterations,
                                                             SalmonDriveGenerator.MASTER_KEY_LENGTH)
 
         # encrypt the combined key (drive key + hash key) using the master_key and the masterKeyIv
         ms: MemoryStream = MemoryStream()
-        stream: SalmonStream = SalmonStream(master_key, master_key_iv, SalmonStream.EncryptionMode.Encrypt, ms,
+        stream: SalmonStream = SalmonStream(master_key, master_key_iv, EncryptionMode.Encrypt, ms,
                                             None, False, None, None)
         stream.write(drive_key, 0, len(drive_key))
         stream.write(hash_key, 0, len(hash_key))

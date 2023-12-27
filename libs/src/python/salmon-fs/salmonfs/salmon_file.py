@@ -118,8 +118,8 @@ class SalmonFile(VirtualFile):
         stream: RandomAccessStream | None = None
         try:
             stream = self.__realFile.get_input_stream()
-            bytes_read: int = stream.read(header.getMagicBytes(), 0, header.getMagicBytes().length)
-            if bytes_read != header.getMagicBytes().length:
+            bytes_read: int = stream.read(header.get_magic_bytes(), 0, header.get_magic_bytes().length)
+            if bytes_read != header.get_magic_bytes().length:
                 return None
             buff: bytearray = bytearray(8)
             bytes_read = stream.read(buff, 0, SalmonGenerator.VERSION_LENGTH)
@@ -178,7 +178,7 @@ class SalmonFile(VirtualFile):
         real_stream.read(header_data, 0, len(header_data))
 
         stream: SalmonStream = SalmonStream(self.get_encryption_key(),
-                                            nonce_bytes, SalmonStream.EncryptionMode.Decrypt, real_stream, header_data,
+                                            nonce_bytes, EncryptionMode.Decrypt, real_stream, header_data,
                                             self.__integrity, self.get_file_chunk_size(), self.__get_hash_key())
         return stream
 
@@ -215,7 +215,7 @@ class SalmonFile(VirtualFile):
         real_stream.seek(self.__get_header_length(), RandomAccessStream.SeekOrigin.Begin)
 
         stream: SalmonStream = SalmonStream(self.get_encryption_key(), nonce_bytes,
-                                            SalmonStream.EncryptionMode.Encrypt, real_stream, header_data,
+                                            EncryptionMode.Encrypt, real_stream, header_data,
                                             self.__integrity,
                                             self.get_requested_chunk_size() if self.get_requested_chunk_size() > 0
                                             else None,
@@ -375,10 +375,10 @@ class SalmonFile(VirtualFile):
             raise SalmonSecurityException("File requires a nonce")
 
         real_stream: RandomAccessStream = self.__realFile.get_output_stream()
-        magic_bytes: bytearray = SalmonGenerator.getMagicBytes()
+        magic_bytes: bytearray = SalmonGenerator.get_magic_bytes()
         real_stream.write(magic_bytes, 0, len(magic_bytes))
 
-        version: int = SalmonGenerator.getVersion()
+        version: int = SalmonGenerator.get_version()
         real_stream.write(bytearray([version]), 0, SalmonGenerator.VERSION_LENGTH)
 
         chunk_size_bytes: bytearray = BitConverter.toBytes(self.__reqChunkSize, 4)
