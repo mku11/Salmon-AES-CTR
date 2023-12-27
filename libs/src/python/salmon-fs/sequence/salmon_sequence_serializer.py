@@ -53,7 +53,8 @@ class SalmonSequenceSerializer(ISalmonSequenceSerializer):
             doc.insert(0, Et.Comment(
                 "WARNING! Do not edit or replace this file, security may be compromised if you do so"))
             drives: Et.Element = Et.SubElement(root, "drives")
-            for (key, value) in drive_auth_entries.items():
+            for key in drive_auth_entries:
+                value: SalmonSequence = drive_auth_entries[key]
                 drive: Et.Element = Et.SubElement(drives, "drive",
                                                   driveID=value.get_drive_id(),
                                                   authID=value.get_auth_id(),
