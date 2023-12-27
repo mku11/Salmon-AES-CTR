@@ -140,7 +140,7 @@ class SalmonDriveManager:
             drive.set_sequencer(SalmonDriveManager.__sequencer)
             pass
         except Exception as e:
-            SalmonSecurityException("Could not create drive instance", e)
+            raise SalmonSecurityException("Could not create drive instance") from e
 
         return drive
 
