@@ -37,7 +37,7 @@ class PyFileStream(RandomAccessStream):
     def __init__(self, file: IRealFile, mode: str):
         """
          * Construct a file stream from an AndroidFile.
-         * This will create a wrapper stream that will route read() and write() to the FileChannel
+         * This will create a wrapper stream that will route read() and write() to the file
          *
          * @param file The AndroidFile that will be used to get the read/write stream
          * @param mode The mode "r" for read "rw" for write
@@ -66,14 +66,14 @@ class PyFileStream(RandomAccessStream):
          * True if stream can read from file.
          * @return
         """
-        return self.fileChannel.isOpen() and not self.__canWrite
+        return not self.__canWrite
 
     def can_write(self) -> bool:
         """
          * True if stream can write to file.
          * @return
         """
-        return self.fileChannel.isOpen() and self.__canWrite
+        return self.__canWrite
 
     def can_seek(self) -> bool:
         """
@@ -90,7 +90,7 @@ class PyFileStream(RandomAccessStream):
         return self.file.length()
 
     def get_position(self) -> int:
-        return self.fileChannel.__position()
+        return self.__raf.tell()
 
     def set_position(self, value: int):
         """
@@ -98,10 +98,10 @@ class PyFileStream(RandomAccessStream):
          * @param value The new position.
          * @throws IOError
         """
-        self.fileChannel.set_position(value)
+        self.__raf.seek(value)
 
     def set_length(self, value: int):
-        self.fileChannel.__position(value)
+        self.__raf.truncate(value)
 
     def read(self, buffer: bytearray, offset: int, count: int) -> int:
         """
@@ -135,7 +135,7 @@ class PyFileStream(RandomAccessStream):
          * @return The new position after seeking.
          * @throws IOError
         """
-        pos: int = self.fileChannel.__position()
+        pos: int = self.__raf.tell()
         if origin == RandomAccessStream.SeekOrigin.Begin:
             pos = offset
         elif origin == RandomAccessStream.SeekOrigin.Current:
@@ -143,17 +143,15 @@ class PyFileStream(RandomAccessStream):
         elif origin == RandomAccessStream.SeekOrigin.End:
             pos = self.file.length() - offset
 
-        self.fileChannel.__position(pos)
-        return self.fileChannel.__position()
+        self.__raf.seek(pos)
+        return self.__raf.tell()
 
     def flush(self):
         """
          * Flush the buffers to the associated file.
         """
         try:
-            if self.fileChannel.isOpen():
-                self.fileChannel.force(True)
-
+            self.__raf.flush()
         except Exception as ex:
             print(ex)
 
@@ -162,6 +160,4 @@ class PyFileStream(RandomAccessStream):
          * Close this stream and associated resources.
          * @throws IOError
         """
-        self.fileChannel.close()
-        self.fileChannel.close()
-        self.raf.close()
+        self.__raf.close()
