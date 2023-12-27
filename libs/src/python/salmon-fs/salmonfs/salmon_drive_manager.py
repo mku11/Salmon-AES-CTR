@@ -162,7 +162,7 @@ class SalmonDriveManager:
          * @return
          * @throws Exception
         """
-        drv_str: str = BitConverter.toHex(SalmonDriveManager.get_drive().get_drive_id())
+        drv_str: str = BitConverter.to_hex(SalmonDriveManager.get_drive().get_drive_id())
         sequence: SalmonSequence = SalmonDriveManager.__sequencer.get_sequence(drv_str)
         if sequence is None:
             auth_id: bytearray = SalmonDriveGenerator.generate_auth_id()
@@ -180,7 +180,7 @@ class SalmonDriveManager:
          * @throws Exception
         """
         sequence: SalmonSequence = SalmonDriveManager.__sequencer.get_sequence(
-            BitConverter.toHex(SalmonDriveManager.get_drive().get_drive_id()))
+            BitConverter.to_hex(SalmonDriveManager.get_drive().get_drive_id()))
         if sequence is not None and sequence.get_status() == SalmonSequence.Status.Active:
             raise Exception("Device is already authorized")
 
@@ -219,7 +219,7 @@ class SalmonDriveManager:
             BitConverter.to_hex(SalmonDriveManager.get_drive().get_drive_id()))
 
         sequence: SalmonSequence = SalmonDriveManager.__sequencer.get_sequence(
-            BitConverter.toHex(SalmonDriveManager.get_drive().get_drive_id()))
+            BitConverter.to_hex(SalmonDriveManager.get_drive().get_drive_id()))
         if sequence is None:
             raise Exception("Device is not authorized to export")
         v_dir: IRealFile = SalmonDriveManager.get_drive().get_real_file(target_dir, True)
@@ -244,8 +244,8 @@ class SalmonDriveManager:
          * @param auth_id  The auth_id
          * @throws Exception
         """
-        drv_str: str = BitConverter.toHex(drive_id)
-        auth_str: str = BitConverter.toHex(auth_id)
+        drv_str: str = BitConverter.to_hex(drive_id)
+        auth_str: str = BitConverter.to_hex(auth_id)
         SalmonDriveManager.__sequencer.create_sequence(drv_str, auth_str)
 
     @staticmethod
@@ -260,8 +260,8 @@ class SalmonDriveManager:
         """
         starting_nonce: bytearray = SalmonDriveGenerator.get_starting_nonce()
         max_nonce: bytearray = SalmonDriveGenerator.get_max_nonce()
-        drv_str: str = BitConverter.toHex(drive_id)
-        auth_str: str = BitConverter.toHex(auth_id)
+        drv_str: str = BitConverter.to_hex(drive_id)
+        auth_str: str = BitConverter.to_hex(auth_id)
         SalmonDriveManager.__sequencer.init_sequence(drv_str, auth_str, starting_nonce, max_nonce)
 
     @staticmethod
@@ -275,7 +275,7 @@ class SalmonDriveManager:
          * @see <a href="https://github.com/mku11/Salmon-AES-CTR#readme">Salmon README.md</a>
         """
         drive_id: bytearray = SalmonDriveManager.__drive.get_drive_id()
-        SalmonDriveManager.__sequencer.revoke_sequence(BitConverter.toHex(drive_id))
+        SalmonDriveManager.__sequencer.revoke_sequence(BitConverter.to_hex(drive_id))
 
     @staticmethod
     def __verify_auth_id(auth_id: bytearray) -> bool:
@@ -296,8 +296,8 @@ class SalmonDriveManager:
          * @param auth_config
          * @throws Exception
         """
-        drv_str: str = BitConverter.toHex(auth_config.get_drive_id())
-        auth_str: str = BitConverter.toHex(auth_config.get_auth_id())
+        drv_str: str = BitConverter.to_hex(auth_config.get_drive_id())
+        auth_str: str = BitConverter.to_hex(auth_config.get_auth_id())
         SalmonDriveManager.__sequencer.init_sequence(drv_str, auth_str, auth_config.get_start_nonce(),
                                                      auth_config.get_max_nonce())
 
@@ -330,7 +330,7 @@ class SalmonDriveManager:
          * @throws SalmonSequenceException
          * @throws SalmonAuthException
         """
-        return BitConverter.toHex(SalmonDriveManager.__get_auth_id_bytes())
+        return BitConverter.to_hex(SalmonDriveManager.__get_auth_id_bytes())
 
     @staticmethod
     def __arrays_equal(array1: bytearray, array2: bytearray) -> bool:

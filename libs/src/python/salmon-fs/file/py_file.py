@@ -258,7 +258,7 @@ class PyFile(IRealFile):
         os.mkdir(self.__file_path)
         return self.exists()
 
-    def tostr(self) -> str:
+    def __str__(self) -> str:
         """
          * Returns a string representation of this object
         """
