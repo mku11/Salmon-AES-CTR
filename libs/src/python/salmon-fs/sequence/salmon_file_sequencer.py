@@ -183,7 +183,7 @@ class SalmonFileSequencer(ISalmonSequencer):
                 except IOError as e:
                     raise SalmonSequenceException("Could not get contents") from e
 
-        return output_stream.tostr().trim()
+        return output_stream.to_array().decode('utf-8').strip()
 
     def revoke_sequence(self, drive_id: str):
         """
