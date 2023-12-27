@@ -34,6 +34,7 @@ from iostream.random_access_stream import RandomAccessStream
 from salmon.integrity.hmac_sha256_provider import HmacSHA256Provider
 from salmon.integrity.ihash_provider import IHashProvider
 from salmon.integrity.salmon_integrity import SalmonIntegrity
+from salmon.iostream.encryption_mode import EncryptionMode
 from salmon.iostream.salmon_stream import SalmonStream
 from salmon.password.salmon_password import SalmonPassword
 from salmon.salmon_generator import SalmonGenerator
@@ -412,3 +413,6 @@ class SalmonDrive(VirtualDrive):
 
     def set_sequencer(self, sequencer: ISalmonSequencer):
         self.__sequencer = sequencer
+
+    def set_drive_id(self, drive_id: str):
+        self.__driveID = drive_id
