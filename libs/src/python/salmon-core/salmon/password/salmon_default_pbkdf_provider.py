@@ -55,9 +55,10 @@ class SalmonDefaultPbkdfProvider(ISalmonPbkdfProvider):
         # PBEKeySpec(password.toCharArray(), salt, iterations, outputBytes * 8)
 
         pbkdf_algo_str: str = ISalmonPbkdfProvider.get_pbkdf_algo_string(pbkdf_algo)
-        key: bytearray = bytearray()
+        key: bytearray | None = None
         try:
-            hashlib.pbkdf2_hmac(pbkdf_algo_str, password.encode("utf-8"), salt, iterations, output_bytes * 8)
+            key = bytearray(
+                hashlib.pbkdf2_hmac(pbkdf_algo_str, password.encode("utf-8"), salt, iterations, output_bytes))
         except Exception as e:
             raise SalmonSecurityException("Could not initialize pbkdf") from e
         return key
