@@ -56,7 +56,7 @@ class PyFileStream(RandomAccessStream):
         self.__canWrite: bool = False
 
         self.__file = file
-        if mode == "r":
+        if mode == "w":
             self.__canWrite = True
 
         self.__raf: BinaryIO = open(file.get_path(), mode + "b")
