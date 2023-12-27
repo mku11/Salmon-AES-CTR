@@ -93,3 +93,6 @@ class InputStreamWrapper(BufferedIOBase):
         else:
             self.__stream.set_position(self.__stream.get_position() + pos)
         return self.__stream.get_position()
+
+    def tell(self):
+        return self.__stream.get_position()
