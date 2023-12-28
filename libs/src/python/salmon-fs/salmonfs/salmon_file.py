@@ -236,7 +236,7 @@ class SalmonFile(VirtualFile):
             return self.__drive.get_key().get_drive_key()
         return None
 
-    def set_encryption_key(self, encryption_key: bytearray):
+    def set_encryption_key(self, encryption_key: bytearray | None):
         """
          * Sets the encryption key
          *
@@ -348,7 +348,7 @@ class SalmonFile(VirtualFile):
             raise SalmonSecurityException("Nonce is already set by the drive")
         self.__requestedNonce = nonce
 
-    def get_requested_nonce(self) -> bytearray:
+    def get_requested_nonce(self) -> bytearray | None:
         """
          * Get the nonce that is used for encryption/decryption of this file.
          *
@@ -667,7 +667,7 @@ class SalmonFile(VirtualFile):
         decfilename: str = SalmonTextDecryptor.decrypt_string(rfilename, key, nonce, True)
         return decfilename
 
-    def _get_encrypted_filename(self, filename: str, key: bytearray | None, nonce: bytearray) -> str:
+    def _get_encrypted_filename(self, filename: str, key: bytearray | None, nonce: bytearray | None) -> str:
         """
          * Return the encrypted filename of a virtual filename
          *
@@ -723,7 +723,7 @@ class SalmonFile(VirtualFile):
         new_real_file: IRealFile = self.__realFile.move(v_dir.__realFile, None, on_progress_listener)
         return SalmonFile(new_real_file, self.__drive)
 
-    def copy(self, v_dir: SalmonFile, on_progress_listener: RandomAccessStream.OnProgressListener = None) -> SalmonFile:
+    def copy(self, v_dir: SalmonFile, on_progress_listener: RandomAccessStream.OnProgressListener | None = None) -> SalmonFile:
         """
          * Copy a file to another directory.
          *

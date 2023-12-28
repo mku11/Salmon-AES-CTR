@@ -318,7 +318,7 @@ class SalmonFSPythonTestRunner(SalmonPythonTestRunner):
                                           TestHelper.TEXT_VAULT_MAX_FILE_NONCE, 1, False)
 
     def test_CreateFileWithoutVault(self):
-        PythonFSTestHelper.should_create_file_without_vault(TestHelper.TEST_TEXT.encode('utf-8'),
+        PythonFSTestHelper.should_create_file_without_vault(bytearray(TestHelper.TEST_TEXT.encode('utf-8')),
                                                             TestHelper.TEST_KEY_BYTES,
                                                             True, True, 64, TestHelper.TEST_HMAC_KEY_BYTES,
                                                             TestHelper.TEST_FILENAME_NONCE_BYTES,
@@ -330,7 +330,7 @@ class SalmonFSPythonTestRunner(SalmonPythonTestRunner):
 
         caught: bool = False
         try:
-            PythonFSTestHelper.should_create_file_without_vault(TestHelper.TEST_TEXT.encode('utf-8'),
+            PythonFSTestHelper.should_create_file_without_vault(bytearray(TestHelper.TEST_TEXT.encode('utf-8')),
                                                                 TestHelper.TEST_KEY_BYTES,
                                                                 True, True, 64, TestHelper.TEST_HMAC_KEY_BYTES,
                                                                 TestHelper.TEST_FILENAME_NONCE_BYTES,

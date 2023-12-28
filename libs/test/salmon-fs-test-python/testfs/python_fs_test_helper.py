@@ -123,7 +123,7 @@ class PythonFSTestHelper:
         salmon_files: list[SalmonFile] = SalmonDriveManager.get_drive().get_virtual_root().list_files()
         real_file_size: int = file_to_import.length()
         for file in salmon_files:
-            if file.get_base_name().equals(file_to_import.get_base_name()):
+            if file.get_base_name() == file_to_import.get_base_name():
                 if should_be_equal:
                     PythonFSTestHelper.testCase.assertTrue(file.exists())
                     file_size: int = file.get_size()
