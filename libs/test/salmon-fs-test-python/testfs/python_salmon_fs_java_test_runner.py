@@ -108,7 +108,7 @@ class SalmonFSPythonTestRunner(SalmonPythonTestRunner):
                                                  SalmonPythonTestRunner.ENC_IMPORT_BUFFER_SIZE,
                                                  SalmonPythonTestRunner.ENC_IMPORT_THREADS,
                                                  TestHelper.ENC_EXPORT_BUFFER_SIZE,
-                                                 SalmonPythonTestRunner.ENC_EXPORT_THREADS,
+                                                 TestHelper.ENC_EXPORT_THREADS,
                                                  False, True, 24 + 10, True, False, False)
         except IOError as ex:
             if isinstance(ex.__cause__, SalmonIntegrityException):
@@ -124,7 +124,7 @@ class SalmonFSPythonTestRunner(SalmonPythonTestRunner):
                                                  SalmonPythonTestRunner.ENC_IMPORT_BUFFER_SIZE,
                                                  SalmonPythonTestRunner.ENC_IMPORT_THREADS,
                                                  TestHelper.ENC_EXPORT_BUFFER_SIZE,
-                                                 SalmonPythonTestRunner.ENC_EXPORT_THREADS,
+                                                 TestHelper.ENC_EXPORT_THREADS,
                                                  False, False, 0, True, False,
                                                  False)
         except IOError as ex:
@@ -175,7 +175,7 @@ class SalmonFSPythonTestRunner(SalmonPythonTestRunner):
                                                  SalmonPythonTestRunner.ENC_IMPORT_BUFFER_SIZE,
                                                  SalmonPythonTestRunner.ENC_IMPORT_THREADS,
                                                  TestHelper.ENC_EXPORT_BUFFER_SIZE,
-                                                 SalmonPythonTestRunner.ENC_EXPORT_THREADS,
+                                                 TestHelper.ENC_EXPORT_THREADS,
                                                  True, True, 24 + 10, False, True, True)
         except IOError as ex:
             if isinstance(ex.__cause__, SalmonIntegrityException):
@@ -192,7 +192,7 @@ class SalmonFSPythonTestRunner(SalmonPythonTestRunner):
                                                  SalmonPythonTestRunner.ENC_IMPORT_BUFFER_SIZE,
                                                  SalmonPythonTestRunner.ENC_IMPORT_THREADS,
                                                  TestHelper.ENC_EXPORT_BUFFER_SIZE,
-                                                 SalmonPythonTestRunner.ENC_EXPORT_THREADS,
+                                                 TestHelper.ENC_EXPORT_THREADS,
                                                  True, True, 24 + 10, False, False, False)
         except IOError as ex:
             if isinstance(ex.__cause__, SalmonIntegrityException):
@@ -212,7 +212,7 @@ class SalmonFSPythonTestRunner(SalmonPythonTestRunner):
                                                  SalmonPythonTestRunner.ENC_IMPORT_BUFFER_SIZE,
                                                  SalmonPythonTestRunner.ENC_IMPORT_THREADS,
                                                  TestHelper.ENC_EXPORT_BUFFER_SIZE,
-                                                 SalmonPythonTestRunner.ENC_EXPORT_THREADS,
+                                                 TestHelper.ENC_EXPORT_THREADS,
                                                  True, False, 0, False,
                                                  False, True)
         except Exception as ex:
@@ -228,7 +228,7 @@ class SalmonFSPythonTestRunner(SalmonPythonTestRunner):
                                                  SalmonPythonTestRunner.ENC_IMPORT_BUFFER_SIZE,
                                                  SalmonPythonTestRunner.ENC_IMPORT_THREADS,
                                                  TestHelper.ENC_EXPORT_BUFFER_SIZE,
-                                                 SalmonPythonTestRunner.ENC_EXPORT_THREADS,
+                                                 TestHelper.ENC_EXPORT_THREADS,
                                                  True, True, 36, False,
                                                  True, False)
         except IOError as ex:
@@ -244,7 +244,7 @@ class SalmonFSPythonTestRunner(SalmonPythonTestRunner):
                                                  SalmonPythonTestRunner.ENC_IMPORT_BUFFER_SIZE,
                                                  SalmonPythonTestRunner.ENC_IMPORT_THREADS,
                                                  TestHelper.ENC_EXPORT_BUFFER_SIZE,
-                                                 SalmonPythonTestRunner.ENC_EXPORT_THREADS,
+                                                 TestHelper.ENC_EXPORT_THREADS,
                                                  True, False, 0, True,
                                                  True, False)
         except IOError as ex:
@@ -261,7 +261,7 @@ class SalmonFSPythonTestRunner(SalmonPythonTestRunner):
                                                  SalmonPythonTestRunner.ENC_IMPORT_BUFFER_SIZE,
                                                  SalmonPythonTestRunner.ENC_IMPORT_THREADS,
                                                  TestHelper.ENC_EXPORT_BUFFER_SIZE,
-                                                 SalmonPythonTestRunner.ENC_EXPORT_THREADS,
+                                                 TestHelper.ENC_EXPORT_THREADS,
                                                  True, True, 20, False,
                                                  True, True)
         except IOError as ex:
@@ -278,7 +278,7 @@ class SalmonFSPythonTestRunner(SalmonPythonTestRunner):
                                                  SalmonPythonTestRunner.ENC_IMPORT_BUFFER_SIZE,
                                                  SalmonPythonTestRunner.ENC_IMPORT_THREADS,
                                                  TestHelper.ENC_EXPORT_BUFFER_SIZE,
-                                                 SalmonPythonTestRunner.ENC_EXPORT_THREADS,
+                                                 TestHelper.ENC_EXPORT_THREADS,
                                                  True, False, 0, True,
                                                  True, True)
         except IOError as ex:
