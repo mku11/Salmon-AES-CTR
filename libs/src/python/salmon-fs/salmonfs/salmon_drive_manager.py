@@ -383,7 +383,8 @@ class SalmonDriveManager:
             comb_key: bytearray = SalmonDriveGenerator.generate_combined_key()
             drive_key[0: SalmonGenerator.KEY_LENGTH] = comb_key[0:SalmonGenerator.KEY_LENGTH]
             hash_key[0:SalmonGenerator.HASH_KEY_LENGTH] = comb_key[
-                                                          SalmonGenerator.KEY_LENGTH:SalmonGenerator.HASH_KEY_LENGTH]
+                                                          SalmonGenerator.KEY_LENGTH:SalmonGenerator.KEY_LENGTH
+                                                                                     + SalmonGenerator.HASH_KEY_LENGTH]
             drive.set_drive_id(SalmonDriveGenerator.generate_drive_id())
 
         # Get the salt that we will use to encrypt the combined key (drive key + hash key)
@@ -397,7 +398,7 @@ class SalmonDriveManager:
 
         # create a key that will encrypt both the (drive key and the hash key)
         master_key: bytearray = SalmonPassword.get_master_key(password, salt, iterations,
-                                                            SalmonDriveGenerator.MASTER_KEY_LENGTH)
+                                                              SalmonDriveGenerator.MASTER_KEY_LENGTH)
 
         # encrypt the combined key (drive key + hash key) using the master_key and the masterKeyIv
         ms: MemoryStream = MemoryStream()
@@ -411,8 +412,9 @@ class SalmonDriveManager:
         enc_data: bytearray = ms.to_array()
 
         # generate the hash signature
-        hash_signature: bytearray = SalmonIntegrity.calculate_hash(drive.get_hash_provider(), enc_data, 0, len(enc_data),
-                                                                  hash_key, None)
+        hash_signature: bytearray = SalmonIntegrity.calculate_hash(drive.get_hash_provider(), enc_data, 0,
+                                                                   len(enc_data),
+                                                                   hash_key, None)
 
         SalmonDriveConfig.write_drive_config(config_file, magic_bytes, version, salt, iterations, master_key_iv,
                                              enc_data, hash_signature)
