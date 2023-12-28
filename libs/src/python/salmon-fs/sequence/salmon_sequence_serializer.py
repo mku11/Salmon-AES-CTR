@@ -95,9 +95,9 @@ class SalmonSequenceSerializer(ISalmonSequenceSerializer):
                     next_nonce: bytearray | None = None
                     max_nonce: bytearray | None = None
                     if "next_nonce" in drive.attrib:
-                        next_nonce = Base64.getDecoder().decode(drive.attrib["next_nonce"])
+                        next_nonce = SalmonEncoder.get_base64().decode(drive.attrib["next_nonce"])
                     if "max_nonce" in drive.attrib:
-                        max_nonce = Base64.getDecoder().decode(drive.attrib["max_nonce"])
+                        max_nonce = SalmonEncoder.get_base64().decode(drive.attrib["max_nonce"])
 
                     sequence: SalmonSequence = SalmonSequence(drive_id, auth_id, next_nonce, max_nonce,
                                                               SalmonSequence.Status[status])

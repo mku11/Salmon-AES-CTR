@@ -144,7 +144,7 @@ class SalmonFileSequencer(ISalmonSequencer):
 
         # We get the next nonce
         next_nonce: bytearray = sequence.get_next_nonce()
-        sequence.set_next_nonce(SalmonNonce.increaseNonce(sequence.get_next_nonce(), sequence.get_max_nonce()))
+        sequence.set_next_nonce(SalmonNonce.increase_nonce(sequence.get_next_nonce(), sequence.get_max_nonce()))
         self._save_sequence_file(configs)
         return next_nonce
 

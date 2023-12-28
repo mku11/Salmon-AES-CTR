@@ -217,7 +217,7 @@ class SalmonStream(RandomAccessStream):
         if self.can_write() and not self.__allowRangeWrite and value != 0:
             raise IOError() from \
                 SalmonSecurityException("Range Write is not allowed for security (non-reusable IVs). " +
-                                        "If you still want to take the risk you need to use SetAllowRangeWrite(true)")
+                                        "If you still want to take the risk you need to use set_allow_range_write(true)")
         try:
             self.__set_virtual_position(value)
         except SalmonRangeExceededException as e:

@@ -126,13 +126,13 @@ class SalmonFile(VirtualFile):
             bytes_read = stream.read(buff, 0, SalmonGenerator.VERSION_LENGTH)
             if bytes_read != SalmonGenerator.VERSION_LENGTH:
                 return None
-            header.setVersion(buff[0])
+            header.set_version(buff[0])
             bytes_read = stream.read(buff, 0, self.__get_chunk_size_length())
             if bytes_read != self.__get_chunk_size_length():
                 return None
-            header.setChunkSize(BitConverter.to_long(buff, 0, bytes_read))
-            header.setNonce(bytearray(SalmonGenerator.NONCE_LENGTH))
-            bytes_read = stream.read(header.getNonce(), 0, SalmonGenerator.NONCE_LENGTH)
+            header.set_chunk_size(BitConverter.to_long(buff, 0, bytes_read))
+            header.set_nonce(bytearray(SalmonGenerator.NONCE_LENGTH))
+            bytes_read = stream.read(header.get_nonce(), 0, SalmonGenerator.NONCE_LENGTH)
             if bytes_read != SalmonGenerator.NONCE_LENGTH:
                 return None
         except Exception as ex:
@@ -184,7 +184,7 @@ class SalmonFile(VirtualFile):
         return stream
 
     @synchronized
-    def get_output_stream(self, nonce: bytearray) -> SalmonStream:
+    def get_output_stream(self, nonce: bytearray | None = None) -> SalmonStream:
         """
          * Get a {@link SalmonStream} for encrypting/writing contents to this file.
          *
@@ -221,7 +221,7 @@ class SalmonFile(VirtualFile):
                                             self.get_requested_chunk_size() if self.get_requested_chunk_size() > 0
                                             else None,
                                             self.__get_hash_key())
-        stream.setAllowRangeWrite(self.__overwrite)
+        stream.set_allow_range_write(self.__overwrite)
         return stream
 
     def get_encryption_key(self) -> bytearray | None:
@@ -311,7 +311,7 @@ class SalmonFile(VirtualFile):
          *
          * @param value True to allow overwriting operations
         """
-        overwrite = value
+        self.__overwrite = value
 
     def __get_chunk_size_length(self) -> int:
         """
@@ -333,7 +333,7 @@ class SalmonFile(VirtualFile):
         header: SalmonHeader = self.get_header()
         if header is None:
             return None
-        return self.get_header().getNonce()
+        return self.get_header().get_nonce()
 
     def set_requested_nonce(self, nonce: bytearray):
         """
@@ -368,9 +368,9 @@ class SalmonFile(VirtualFile):
             raise SalmonIntegrityException("File requires a chunk size")
 
         if nonce is not None:
-            requested_nonce = nonce
+            self.__requestedNonce = nonce
         elif self.__requestedNonce is None and self.__drive is not None:
-            requested_nonce = self.__drive.get_next_nonce()
+            self.__requestedNonce = self.__drive.get_next_nonce()
 
         if self.__requestedNonce is None:
             raise SalmonSecurityException("File requires a nonce")
@@ -662,7 +662,7 @@ class SalmonFile(VirtualFile):
             key = self.__encryptionKey
         if key is None and self.__drive is not None:
             key = self.__drive.get_key().get_drive_key()
-        decfilename: str = SalmonTextDecryptor.decryptstr(rfilename, key, nonce, True)
+        decfilename: str = SalmonTextDecryptor.decrypt_string(rfilename, key, nonce, True)
         return decfilename
 
     def _get_encrypted_filename(self, filename: str, key: bytearray | None, nonce: bytearray) -> str:
@@ -681,7 +681,7 @@ class SalmonFile(VirtualFile):
             raise SalmonSecurityException("Key is already set by the drive")
         if self.__drive is not None:
             key = self.__drive.get_key().get_drive_key()
-        encrypted_path: str = SalmonTextEncryptor.encryptstr(filename, key, nonce, True)
+        encrypted_path: str = SalmonTextEncryptor.encrypt_string(filename, key, nonce, True)
         encrypted_path = encrypted_path.replace("/", "-")
         return encrypted_path
 

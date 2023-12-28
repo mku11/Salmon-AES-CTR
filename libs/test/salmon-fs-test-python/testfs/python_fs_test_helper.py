@@ -168,7 +168,7 @@ class PythonFSTestHelper:
         searcher: SalmonFileSearcher = SalmonFileSearcher()
         files: [SalmonFile] = searcher.search(salmon_root_dir, basename, True, None, None)
 
-        PythonFSTestHelper.testCase.assertTrue(files.length > 0)
+        PythonFSTestHelper.testCase.assertTrue(len(files) > 0)
         PythonFSTestHelper.testCase.assertEquals(files[0].get_base_name(), basename)
 
     @staticmethod
