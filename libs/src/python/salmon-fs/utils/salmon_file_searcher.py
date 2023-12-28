@@ -80,7 +80,7 @@ class SalmonFileSearcher:
         return self.__quit
 
     def search(self, v_dir: SalmonFile, terms: str, any_term: bool,
-               on_result_found: OnResultFoundListener = None,
+               on_result_found: SalmonFileSearcher.OnResultFoundListener = None,
                on_search_event: Callable[[SearchEvent], Any] = None) -> [SalmonFile]:
         """
          * Search files in directory and its subdirectories recursively for matching terms.

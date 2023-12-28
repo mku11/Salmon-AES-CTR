@@ -32,6 +32,7 @@ from typeguard import typechecked
 
 from iostream.random_access_stream import RandomAccessStream
 
+
 @typechecked
 class IRealFile(ABC):
     """
@@ -229,7 +230,7 @@ class IRealFile(ABC):
 
     @staticmethod
     def copy_file_contents(src: IRealFile, dest: IRealFile, delete: bool = False,
-                           progress_listener: RandomAccessStream.OnProgressListener = None) -> bool:
+                           progress_listener: RandomAccessStream.OnProgressListener | None = None) -> bool:
         """
          * Copy contents of a file to another file.
          *

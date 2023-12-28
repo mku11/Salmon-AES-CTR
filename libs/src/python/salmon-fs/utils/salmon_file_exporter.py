@@ -230,7 +230,7 @@ class SalmonFileExporter:
         return export_file
 
     def __export_file_part(self, file_to_export: SalmonFile, export_file: IRealFile, start: int, count: int,
-                           total_bytes_written: list[int], on_progress: Callable[[int, int], Any]):
+                           total_bytes_written: list[int], on_progress: Callable[[int, int], Any] | None):
         """
          * Export a file part from the drive.
          *

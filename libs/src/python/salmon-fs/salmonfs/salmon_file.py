@@ -711,7 +711,7 @@ class SalmonFile(VirtualFile):
         """
         return self.__tag
 
-    def move(self, v_dir: SalmonFile, on_progress_listener: RandomAccessStream.OnProgressListener = None) -> SalmonFile:
+    def move(self, v_dir: SalmonFile, on_progress_listener: RandomAccessStream.OnProgressListener | None = None) -> SalmonFile:
         """
          * Move file to another directory.
          *
