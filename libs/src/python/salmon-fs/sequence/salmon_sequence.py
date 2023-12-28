@@ -36,7 +36,7 @@ class SalmonSequence:
     """
 
     def __init__(self, drive_id: str, auth_id: str | None, next_nonce: bytearray | None, max_nonce: bytearray | None,
-                 status: Status):
+                 status: SalmonSequence.Status):
         """
          * Instantiate a nonce sequence for a drive with the provided authentication id.
          * @param drive_id The drive ID.
@@ -156,14 +156,14 @@ class SalmonSequence:
         """
         self.__maxNonce = max_nonce
 
-    def get_status(self) -> Status:
+    def get_status(self) -> SalmonSequence.Status:
         """
          * Get the sequence status.
          * @return
         """
         return self.__status
 
-    def set_status(self, status: Status):
+    def set_status(self, status: SalmonSequence.Status):
         """
          * Set the sequence status.
          * @param status
