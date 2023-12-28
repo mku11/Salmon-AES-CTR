@@ -62,7 +62,8 @@ class SalmonFileSequencer(ISalmonSequencer):
         self.__serializer = serializer
         if not sequence_file.exists():
             sequence_file.get_parent().create_file(sequence_file.get_base_name())
-            self._save_sequence_file({})
+            sequences: {str, SalmonSequence} = {}
+            self._save_sequence_file(sequences)
 
     def get_sequence_file(self) -> IRealFile:
         return self.__sequenceFile
