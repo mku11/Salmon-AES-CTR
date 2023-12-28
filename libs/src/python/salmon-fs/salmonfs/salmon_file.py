@@ -597,7 +597,7 @@ class SalmonFile(VirtualFile):
          * @param file_nonce     The nonce for the encrypting the file contents
         """
 
-        if self.__drive is None:
+        if self.__drive is None and (key is None or file_name_nonce is None or file_nonce is None):
             raise SalmonSecurityException("Need to pass the key, filename nonce, and file nonce if not using a drive")
 
         encrypted_filename: str = self._get_encrypted_filename(real_filename, key, file_name_nonce)
