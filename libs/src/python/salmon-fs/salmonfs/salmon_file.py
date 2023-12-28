@@ -503,8 +503,8 @@ class SalmonFile(VirtualFile):
          *
          * @param real_path The path of the real file
         """
-        virtual_root: SalmonFile = self.__drive.get_virtual_root()
-        virtual_root_path: str = virtual_root.__realFile.get_absolute_path()
+        virtual_root: VirtualFile = self.__drive.get_virtual_root()
+        virtual_root_path: str = virtual_root.get_real_file().get_absolute_path()
         if real_path.startswith(virtual_root_path):
             return real_path.replace(virtual_root_path, "")
 
