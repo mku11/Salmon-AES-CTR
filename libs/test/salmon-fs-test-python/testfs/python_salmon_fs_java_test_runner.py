@@ -395,7 +395,7 @@ class SalmonFSPythonTestRunner(SalmonPythonTestRunner):
         data: bytearray = PythonFSTestHelper.get_real_file_contents(SalmonPythonTestRunner.TEST_IMPORT_FILE)
         PythonFSTestHelper.encrypt_and_decrypt_stream(data, TestHelper.TEST_KEY_BYTES, TestHelper.TEST_NONCE_BYTES)
 
-    def ShouldEncryptAndReadFileInputStream(self):
+    def test_ShouldEncryptAndReadFileInputStream(self):
         data: bytearray = bytearray(256)
         for i in range(0, len(data)):
             data[i] = i
