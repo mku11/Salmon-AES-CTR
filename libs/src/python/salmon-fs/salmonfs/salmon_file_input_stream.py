@@ -162,7 +162,7 @@ class SalmonFileInputStream(BufferedIOBase):
     def reset(self):
         position = 0
 
-    def readinto(self, buffer: bytearray) -> int:
+    def readinto(self, buffer: bytearray | memoryview) -> int:
         """
          * Reads and decrypts the contents of an encrypted file
          *
@@ -180,7 +180,7 @@ class SalmonFileInputStream(BufferedIOBase):
         # truncate the count so getCacheBuffer() reports the correct buffer
         count = min(len(buffer), self.__size - self.__position)
 
-        cache_buffer: SalmonFileInputStream.CacheBuffer = self.__get_cache_buffer(self.__position, count)
+        cache_buffer: SalmonFileInputStream.CacheBuffer | None = self.__get_cache_buffer(self.__position, count)
         if cache_buffer is None:
             cache_buffer = self.__get_avail_cache_buffer()
             # the stream is closed
@@ -223,7 +223,7 @@ class SalmonFileInputStream(BufferedIOBase):
         raise NotImplementedError()
 
     @synchronized
-    def __fill_buffer(self, cache_buffer: CacheBuffer, start_position: int, buffer_size: int) -> int:
+    def __fill_buffer(self, cache_buffer: SalmonFileInputStream.CacheBuffer, start_position: int, buffer_size: int) -> int:
         """
          * Fills a cache buffer with the decrypted data from the encrypted source file.
          *
@@ -239,7 +239,7 @@ class SalmonFileInputStream(BufferedIOBase):
 
         return bytes_read
 
-    def __fill_buffer_part(self, cache_buffer: CacheBuffer, start: int, offset: int, buffer_size: int,
+    def __fill_buffer_part(self, cache_buffer: SalmonFileInputStream.CacheBuffer, start: int, offset: int, buffer_size: int,
                            salmon_stream: SalmonStream) -> int:
         """
          * Fills a cache buffer with the decrypted data from a part of an encrypted file served as a salmon stream
@@ -252,7 +252,7 @@ class SalmonFileInputStream(BufferedIOBase):
         total_bytes_read: int = salmon_stream.read(cache_buffer.buffer, offset, buffer_size)
         return total_bytes_read
 
-    def __fill_buffer_multi(self, cache_buffer: CacheBuffer, start_position: int, buffer_size: int) -> int:
+    def __fill_buffer_multi(self, cache_buffer: SalmonFileInputStream.CacheBuffer, start_position: int, buffer_size: int) -> int:
         """
          * Fill the buffer using parallel streams for performance
          *
@@ -260,7 +260,7 @@ class SalmonFileInputStream(BufferedIOBase):
          * @param start_position The source file position the read will start from
          * @param buffer_size    The buffer size that will be used to read from the file
         """
-        bytes_read: [int] = [0]
+        bytes_read = [0]
         ex: Exception | None = None
         # Multithreaded decryption jobs
         done: threading.Barrier = threading.Barrier(self.__threads + 1)
@@ -269,7 +269,7 @@ class SalmonFileInputStream(BufferedIOBase):
             index: int = i
 
             def fill():
-                nonlocal ex, index
+                nonlocal ex, index, bytes_read
 
                 start: int = part_size * index
                 length: int
@@ -305,7 +305,7 @@ class SalmonFileInputStream(BufferedIOBase):
         return bytes_read[0]
 
     @synchronized
-    def __get_avail_cache_buffer(self) -> CacheBuffer | None:
+    def __get_avail_cache_buffer(self) -> SalmonFileInputStream.CacheBuffer | None:
         """
          * Returns an available cache buffer if there is none then reuse the least recently used one.
         """
@@ -317,7 +317,7 @@ class SalmonFileInputStream(BufferedIOBase):
             self.__lruBuffersIndex.insert(0, index)
             return self.__buffers[self.__lruBuffersIndex[-1]]
 
-        for i in range(0, self.__buffers):
+        for i in range(0, len(self.__buffers)):
             buffer: SalmonFileInputStream.CacheBuffer = self.__buffers[i]
             if buffer is not None and buffer.count == 0:
                 self.__lruBuffersIndex.insert(0, i)
@@ -329,13 +329,13 @@ class SalmonFileInputStream(BufferedIOBase):
             return None
 
     @synchronized
-    def __get_cache_buffer(self, position: int, count: int) -> CacheBuffer | None:
+    def __get_cache_buffer(self, position: int, count: int) -> SalmonFileInputStream.CacheBuffer | None:
         """
          * Returns the buffer that contains the data requested.
          *
          * @param position The source file position of the data to be read
         """
-        for i in range(0, self.__buffers.length):
+        for i in range(0, len(self.__buffers)):
             buffer: SalmonFileInputStream.CacheBuffer = self.__buffers[i]
             if self.__position >= buffer.startPos and self.__position + count <= buffer.startPos + buffer.count:
                 # promote buffer to the front
