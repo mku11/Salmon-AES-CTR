@@ -580,7 +580,7 @@ class SalmonFile(VirtualFile):
         if self.__integrity and self.__get_hash_key() is None:
             raise SalmonIntegrityException("File requires hash_key, use SetVerifyIntegrity() to provide one")
 
-        return SalmonIntegrity.getTotalHashDataLength(self.__realFile.length(), self.get_file_chunk_size(),
+        return SalmonIntegrity.get_total_hash_data_length(self.__realFile.length(), self.get_file_chunk_size(),
                                                       SalmonGenerator.HASH_RESULT_LENGTH,
                                                       SalmonGenerator.HASH_KEY_LENGTH)
 
