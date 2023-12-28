@@ -46,7 +46,7 @@ class ISalmonSequenceSerializer(ABC):
         """
         pass
 
-    def serialize(self, sequences: {str, SalmonSequence}):
+    def serialize(self, sequences: dict[str, SalmonSequence] | None):
         """
          * Generates the contents from sequences.
          * @param sequences The sequences to convert to text.

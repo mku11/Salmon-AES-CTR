@@ -41,7 +41,7 @@ class SalmonSequenceSerializer(ISalmonSequenceSerializer):
      * Serializes sequences for all the drives the device is authorized.
     """
 
-    def serialize(self, drive_auth_entries: {str, SalmonSequence}) -> str:
+    def serialize(self, drive_auth_entries: dict[str, SalmonSequence] | None) -> str:
         """
          * Serialize the sequences to an XML string.
          *
@@ -49,6 +49,8 @@ class SalmonSequenceSerializer(ISalmonSequenceSerializer):
          * @return
          * @throws SalmonSequenceException
         """
+        if drive_auth_entries is None:
+            drive_auth_entries = {}
         root = Et.Element("root")
         tree: Et.ElementTree = Et.ElementTree(root)
         doc = Et.SubElement(root, "doc")
