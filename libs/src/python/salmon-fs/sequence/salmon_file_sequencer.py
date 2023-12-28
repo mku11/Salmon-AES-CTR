@@ -79,7 +79,7 @@ class SalmonFileSequencer(ISalmonSequencer):
         if sequence is not None:
             raise SalmonSequenceException("Sequence already exists")
         nsequence: SalmonSequence = SalmonSequence(drive_id, auth_id, None, None, SalmonSequence.Status.New)
-        configs.put(drive_id + ":" + auth_id, nsequence)
+        configs[drive_id + ":" + auth_id] = nsequence
         self._save_sequence_file(configs)
 
     def init_sequence(self, drive_id: str, auth_id: str, start_nonce: bytearray, max_nonce: bytearray):
@@ -281,7 +281,7 @@ class SalmonFileSequencer(ISalmonSequencer):
         """
         sequence: SalmonSequence | None = None
         for seq in configs.values():
-            if drive_id.upper() == seq.get_drive_id().toUpperCase():
+            if drive_id.upper() == seq.get_drive_id().upper():
                 # there should be only one sequence available
                 if seq.get_status() == SalmonSequence.Status.Active or seq.get_status() == SalmonSequence.Status.New:
                     if sequence is not None:

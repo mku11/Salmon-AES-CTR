@@ -144,7 +144,7 @@ class SalmonFileSearcher:
                 try:
                     hits: int = self.__get_search_results(file.get_base_name(), terms_array, anyterm)
                     if hits > 0:
-                        search_results.put(file.get_real_path(), file)
+                        search_results[file.get_real_path()] = file
                         if on_result_found is not None:
                             on_result_found.on_result_found(file)
                 except Exception as ex:
