@@ -141,9 +141,9 @@ class SalmonFileInputStream(BufferedIOBase):
          * The first buffer will be sourcing at the start of the encrypted file where the header and indexing are
          * The rest of the buffers can be placed to whatever position the user slides to
         """
-        buffers = []
+        self.__buffers: [SalmonFileInputStream.CacheBuffer] = [None] * self.__buffersCount
         for i in range(0, self.__buffersCount):
-            buffers[i] = SalmonFileInputStream.CacheBuffer(self.__cacheBufferSize)
+            self.__buffers[i] = SalmonFileInputStream.CacheBuffer(self.__cacheBufferSize)
 
     def skip(self, v_bytes: int) -> int:
         """
