@@ -85,7 +85,7 @@ class SalmonFileCommander:
         for i in range(0, files_to_import.length):
             total += self.__get_real_files_count_recursively(files_to_import[i])
         count: [int] = [1]
-        existing_files: {str, SalmonFile} = self.__get_existing_salmon_files(import_dir)
+        existing_files: dict[str, SalmonFile] = self.__get_existing_salmon_files(import_dir)
         for i in range(0, files_to_import.length):
             if self.__stopJobs:
                 break
@@ -97,8 +97,8 @@ class SalmonFileCommander:
 
         return imported_files
 
-    def __get_existing_salmon_files(self, import_dir: SalmonFile) -> {str, SalmonFile}:
-        files: {str, SalmonFile} = {}
+    def __get_existing_salmon_files(self, import_dir: SalmonFile) -> dict[str, SalmonFile]:
+        files: dict[str, SalmonFile] = {}
         for file in import_dir.list_files():
             try:
                 files[file.get_base_name()] = file
@@ -112,7 +112,7 @@ class SalmonFileCommander:
                              on_progress_changed: Callable[[RealFileTaskProgress], Any],
                              auto_rename: Callable[[IRealFile], str], on_failed: Callable[[IRealFile, Exception], Any],
                              imported_files: [SalmonFile], count: [int], total: [int],
-                             existing_files: {str, SalmonFile}):
+                             existing_files: dict[str, SalmonFile]):
         sfile: SalmonFile = existing_files.get(
             file_to_import.get_base_name()) if file_to_import.get_base_name() in existing_files else None
         if file_to_import.is_directory():
@@ -125,7 +125,7 @@ class SalmonFileCommander:
             if on_progress_changed is not None:
                 on_progress_changed(SalmonFileCommander.RealFileTaskProgress(file_to_import, 1, 1, count[0], total))
             count[0] += 1
-            n_existing_files: {str, SalmonFile} = self.__get_existing_salmon_files(sfile)
+            n_existing_files: dict[str, SalmonFile] = self.__get_existing_salmon_files(sfile)
             for child in file_to_import.list_files():
                 self.__import_recursively(child, sfile, delete_source, integrity, on_progress_changed,
                                           auto_rename, on_failed, imported_files, count, total,
@@ -134,7 +134,7 @@ class SalmonFileCommander:
                 file_to_import.delete()
         else:
             try:
-                filename: {str, SalmonFile} = file_to_import.get_base_name()
+                filename: dict[str, SalmonFile] = file_to_import.get_base_name()
                 if sfile is not None and (sfile.exists() or sfile.is_directory()) and auto_rename is not None:
                     filename = auto_rename(file_to_import)
                 sfile = self.__fileImporter.import_file(file_to_import, import_dir, filename, delete_source, integrity,
@@ -177,7 +177,7 @@ class SalmonFileCommander:
         for i in range(0, files_to_export.length):
             total += self.__get_salmon_files_count_recursively(files_to_export[i])
 
-        existing_files: {str, IRealFile} = self.__get_existing_real_files(export_dir)
+        existing_files: dict[str, IRealFile] = self.__get_existing_real_files(export_dir)
 
         count: [int] = [1]
         for i in range(0, files_to_export.length):
@@ -191,8 +191,8 @@ class SalmonFileCommander:
 
         return exported_files
 
-    def __get_existing_real_files(self, export_dir: IRealFile) -> {str, IRealFile}:
-        files: {str, IRealFile} = {}
+    def __get_existing_real_files(self, export_dir: IRealFile) -> dict[str, IRealFile]:
+        files: dict[str, IRealFile] = {}
         for file in export_dir.list_files():
             files[file.get_base_name()] = file
 
@@ -204,7 +204,7 @@ class SalmonFileCommander:
                              auto_rename: Callable[[IRealFile], str],
                              on_failed: Callable[[SalmonFile, Exception], Any],
                              exported_files: [IRealFile], count: [int], total: int,
-                             existing_files: {str, IRealFile}):
+                             existing_files: dict[str, IRealFile]):
         rfile: IRealFile = existing_files.get(
             file_to_export.get_base_name()) if file_to_export.get_base_name() in existing_files else None
 
@@ -216,7 +216,7 @@ class SalmonFileCommander:
             if on_progress_changed is not None:
                 on_progress_changed(SalmonFileCommander.SalmonFileTaskProgress(file_to_export, 1, 1, count[0], total))
             count[0] += 1
-            n_existing_files: {str, IRealFile} = self.__get_existing_real_files(rfile)
+            n_existing_files: dict[str, IRealFile] = self.__get_existing_real_files(rfile)
             for child in file_to_export.list_files():
                 self.__export_recursively(child, rfile, delete_source, integrity, on_progress_changed,
                                           auto_rename, on_failed, exported_files, count, total,

@@ -353,8 +353,8 @@ class SalmonDriveManager:
          *                 This password will be used to derive the master key that will be used to
          *                 encrypt the combined key (encryption key + hash key)
         """
-        drive_key: bytearray = drive.get_key().get_drive_key()
-        hash_key: bytearray = drive.get_key().get_hash_key()
+        drive_key: bytearray | None = drive.get_key().get_drive_key()
+        hash_key: bytearray | None = drive.get_key().get_hash_key()
 
         config_file: IRealFile = drive.get_real_root().get_child(SalmonDrive.get_config_filename())
 

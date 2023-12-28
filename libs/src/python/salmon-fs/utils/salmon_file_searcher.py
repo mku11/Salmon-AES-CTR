@@ -93,7 +93,7 @@ class SalmonFileSearcher:
         """
         self.__running = True
         self.__quit = False
-        search_results: {str, SalmonFile} = {}
+        search_results: dict[str, SalmonFile] = {}
         if on_search_event is not None:
             on_search_event(SalmonFileSearcher.SearchEvent.SearchingFiles)
         self.__search_dir(v_dir, terms, any_term, on_result_found, search_results)
@@ -123,7 +123,7 @@ class SalmonFileSearcher:
         return 0
 
     def __search_dir(self, v_dir: SalmonFile, terms: str, anyterm: bool, on_result_found: OnResultFoundListener,
-                     search_results: {str, SalmonFile}):
+                     search_results: dict[str, SalmonFile]):
         """
          * Search a directory for all filenames matching the terms supplied.
          * @param dir The directory to start the search.

@@ -37,7 +37,7 @@ class ISalmonSequenceSerializer(ABC):
      * Serializes/Deserializes nonce sequences.
     """
 
-    def deserialize(self, contents: str) -> {str, SalmonSequence}:
+    def deserialize(self, contents: str) -> dict[str, SalmonSequence]:
         """
          * Parse nonce sequences from text contents.
          * @param contents The contents containing the nonce sequences.

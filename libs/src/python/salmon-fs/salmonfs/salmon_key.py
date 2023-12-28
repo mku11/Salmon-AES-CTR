@@ -62,13 +62,13 @@ class SalmonKey:
         """
         self.clear()
 
-    def get_drive_key(self) -> bytearray:
+    def get_drive_key(self) -> bytearray | None:
         """
          * Function returns the encryption key that will be used to encrypt/decrypt the files
         """
         return self.__driveKey
 
-    def get_hash_key(self) -> bytearray:
+    def get_hash_key(self) -> bytearray | None:
         """
          * Function returns the hash key that will be used to sign the file chunks
         """

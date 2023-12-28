@@ -74,7 +74,7 @@ class SalmonSequenceSerializer(ISalmonSequenceSerializer):
 
         return minidom.parseString(Et.tostring(root, encoding="utf8")).toprettyxml(indent="    ")
 
-    def deserialize(self, contents: str) -> {str, SalmonSequence}:
+    def deserialize(self, contents: str) -> dict[str, SalmonSequence]:
         """
          * Deserialize sequences from XML string.
          *
@@ -83,7 +83,7 @@ class SalmonSequenceSerializer(ISalmonSequenceSerializer):
          * @throws SalmonSequenceException
         """
 
-        configs: {str, SalmonSequence} = {}
+        configs: dict[str, SalmonSequence] = {}
         root: Et.Element = Et.fromstring(contents)
         try:
             drives: Et.Element = root.find("drives")

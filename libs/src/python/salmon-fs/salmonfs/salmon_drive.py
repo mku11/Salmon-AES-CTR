@@ -187,7 +187,7 @@ class SalmonDrive(VirtualDrive):
         """
         self.__defaultFileChunkSize = file_chunk_size
 
-    def get_key(self) -> SalmonKey:
+    def get_key(self) -> SalmonKey | None:
         """
          * Return the encryption key that is used for encryption / decryption
          * @return

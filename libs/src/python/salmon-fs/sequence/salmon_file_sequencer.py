@@ -77,8 +77,8 @@ class SalmonFileSequencer(ISalmonSequencer):
         """
 
         xml_contents: str = self.__get_contents()
-        configs: {str, SalmonSequence} = self.__serializer.deserialize(xml_contents)
-        sequence: SalmonSequence = self.__get_sequence(configs, drive_id)
+        configs: dict[str, SalmonSequence] = self.__serializer.deserialize(xml_contents)
+        sequence: SalmonSequence | None = self.__get_sequence(configs, drive_id)
         if sequence is not None:
             raise SalmonSequenceException("Sequence already exists")
         nsequence: SalmonSequence = SalmonSequence(drive_id, auth_id, None, None, SalmonSequence.Status.New)
@@ -98,7 +98,7 @@ class SalmonFileSequencer(ISalmonSequencer):
         """
 
         xml_contents: str = self.__get_contents()
-        configs: {str, SalmonSequence} = self.__serializer.deserialize(xml_contents)
+        configs: dict[str, SalmonSequence] = self.__serializer.deserialize(xml_contents)
         sequence: SalmonSequence = self.__get_sequence(configs, drive_id)
         if sequence is None:
             raise SalmonSequenceException("Sequence does not exist")
@@ -119,7 +119,7 @@ class SalmonFileSequencer(ISalmonSequencer):
          * @throws SalmonSequenceException
         """
         xml_contents: str = self.__get_contents()
-        configs: {str, SalmonSequence} = self.__serializer.deserialize(xml_contents)
+        configs: dict[str, SalmonSequence] = self.__serializer.deserialize(xml_contents)
         sequence: SalmonSequence = self.__get_sequence(configs, drive_id)
         if sequence is None or sequence.get_status() == SalmonSequence.Status.Revoked:
             raise SalmonSequenceException("Sequence does not exist")
@@ -139,7 +139,7 @@ class SalmonFileSequencer(ISalmonSequencer):
          * @throws SalmonRangeExceededException
         """
         xml_contents: str = self.__get_contents()
-        configs: {str, SalmonSequence} = self.__serializer.deserialize(xml_contents)
+        configs: dict[str, SalmonSequence] = self.__serializer.deserialize(xml_contents)
         sequence: SalmonSequence = self.__get_sequence(configs, drive_id)
         if sequence is None or sequence.get_next_nonce() is None or sequence.get_max_nonce() is None:
             raise SalmonSequenceException("Device not Authorized")
@@ -194,7 +194,7 @@ class SalmonFileSequencer(ISalmonSequencer):
         """
 
         xml_contents: str = self.__get_contents()
-        configs: {str, SalmonSequence} = self.__serializer.deserialize(xml_contents)
+        configs: dict[str, SalmonSequence] = self.__serializer.deserialize(xml_contents)
         sequence: SalmonSequence = self.__get_sequence(configs, drive_id)
         if sequence is None:
             raise SalmonSequenceException("Sequence does not exist")
@@ -212,7 +212,7 @@ class SalmonFileSequencer(ISalmonSequencer):
          * @throws SalmonSequenceException
         """
         xml_contents: str = self.__get_contents()
-        configs: {str, SalmonSequence} = self.__serializer.deserialize(xml_contents)
+        configs: dict[str, SalmonSequence] = self.__serializer.deserialize(xml_contents)
         sequence: SalmonSequence = self.__get_sequence(configs, drive_id)
         return sequence
 
@@ -269,7 +269,7 @@ class SalmonFileSequencer(ISalmonSequencer):
                 except IOError as e:
                     raise SalmonSequenceException("Could not save sequence file") from e
 
-    def __get_sequence(self, configs: {str, SalmonSequence}, drive_id: str) -> SalmonSequence:
+    def __get_sequence(self, configs: dict[str, SalmonSequence], drive_id: str) -> SalmonSequence | None:
         """
          * Get the sequence for the drive provided.
          *
