@@ -129,7 +129,7 @@ class SalmonFile(VirtualFile):
             bytes_read = stream.read(buff, 0, self.__get_chunk_size_length())
             if bytes_read != self.__get_chunk_size_length():
                 return None
-            header.setChunkSize(BitConverter.toLong(buff, 0, bytes_read))
+            header.setChunkSize(BitConverter.to_long(buff, 0, bytes_read))
             header.setNonce(bytearray(SalmonGenerator.NONCE_LENGTH))
             bytes_read = stream.read(header.getNonce(), 0, SalmonGenerator.NONCE_LENGTH)
             if bytes_read != SalmonGenerator.NONCE_LENGTH:
@@ -164,7 +164,7 @@ class SalmonFile(VirtualFile):
         bytes_read: int = real_stream.read(file_chunk_size_bytes, 0, len(file_chunk_size_bytes))
         if bytes_read == 0:
             raise IOError("Could not parse chunks size from file header")
-        chunk_size: int = BitConverter.toLong(file_chunk_size_bytes, 0, 4)
+        chunk_size: int = BitConverter.to_long(file_chunk_size_bytes, 0, 4)
         if self.__integrity and chunk_size == 0:
             raise SalmonSecurityException("Cannot check integrity if file doesn't support it")
 

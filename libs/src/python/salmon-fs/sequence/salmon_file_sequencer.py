@@ -120,7 +120,7 @@ class SalmonFileSequencer(ISalmonSequencer):
         sequence: SalmonSequence = self.__get_sequence(configs, drive_id)
         if sequence is None or sequence.get_status() == SalmonSequence.Status.Revoked:
             raise SalmonSequenceException("Sequence does not exist")
-        if BitConverter.toLong(sequence.get_max_nonce(), 0, SalmonGenerator.NONCE_LENGTH) \
+        if BitConverter.to_long(sequence.get_max_nonce(), 0, SalmonGenerator.NONCE_LENGTH) \
                 < BitConverter.to_long(max_nonce, 0, SalmonGenerator.NONCE_LENGTH):
             raise SalmonSequenceException("Max nonce cannot be increased")
         sequence.set_max_nonce(max_nonce)

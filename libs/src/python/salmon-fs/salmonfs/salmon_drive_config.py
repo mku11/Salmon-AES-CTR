@@ -131,7 +131,7 @@ class SalmonDriveConfig:
         """
         if self.__iterations is None:
             return 0
-        return BitConverter.toLong(self.__iterations, 0, SalmonDriveGenerator.ITERATIONS_LENGTH)
+        return BitConverter.to_long(self.__iterations, 0, SalmonDriveGenerator.ITERATIONS_LENGTH)
 
     def get_encrypted_data(self) -> bytearray:
         """

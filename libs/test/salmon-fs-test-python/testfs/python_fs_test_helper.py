@@ -275,7 +275,7 @@ class PythonFSTestHelper:
         file_importer: SalmonFileImporter = SalmonFileImporter(0, 0)
         salmon_file_a1: SalmonFile = file_importer.import_file(file_to_import, salmon_root_dir, None, False, False,
                                                                None)
-        nonce_a1: int = BitConverter.toLong(salmon_file_a1.get_requested_nonce(), 0, SalmonGenerator.NONCE_LENGTH)
+        nonce_a1: int = BitConverter.to_long(salmon_file_a1.get_requested_nonce(), 0, SalmonGenerator.NONCE_LENGTH)
         SalmonDriveManager.close_drive()
 
         # open with another device (different sequencer) and export auth id
@@ -303,14 +303,14 @@ class PythonFSTestHelper:
         SalmonDriveManager.export_auth_file(auth_id, vault, TestHelper.TEST_EXPORT_DIR)
         config_file: IRealFile = PyFile(export_auth_file_path)
         salmon_cfg_file: SalmonFile = SalmonFile(config_file, SalmonDriveManager.get_drive())
-        nonce_cfg: int = BitConverter.toLong(salmon_cfg_file.get_file_nonce(), 0, SalmonGenerator.NONCE_LENGTH)
+        nonce_cfg: int = BitConverter.to_long(salmon_cfg_file.get_file_nonce(), 0, SalmonGenerator.NONCE_LENGTH)
         #  import another test file
         salmon_root_dir = SalmonDriveManager.get_drive().get_virtual_root()
         file_to_import = PyFile(import_file_path)
         file_importer = SalmonFileImporter(0, 0)
         salmon_file_a2: SalmonFile = file_importer.import_file(file_to_import, salmon_root_dir, None, False, False,
                                                                None)
-        nonce_a2: int = BitConverter.toLong(salmon_file_a2.get_file_nonce(), 0, SalmonGenerator.NONCE_LENGTH)
+        nonce_a2: int = BitConverter.to_long(salmon_file_a2.get_file_nonce(), 0, SalmonGenerator.NONCE_LENGTH)
         SalmonDriveManager.close_drive()
 
         # reopen with second device(sequencer) and import auth file
@@ -323,10 +323,10 @@ class PythonFSTestHelper:
         file_to_import = PyFile(import_file_path)
         salmon_file_b1: SalmonFile = file_importer.import_file(file_to_import, salmon_root_dir, None, False, False,
                                                                None)
-        nonce_b1: int = BitConverter.toLong(salmon_file_b1.get_file_nonce(), 0, SalmonGenerator.NONCE_LENGTH)
+        nonce_b1: int = BitConverter.to_long(salmon_file_b1.get_file_nonce(), 0, SalmonGenerator.NONCE_LENGTH)
         salmon_file_b2: SalmonFile = file_importer.import_file(file_to_import, salmon_root_dir, None, False, False,
                                                                None)
-        nonce_b2: int = BitConverter.toLong(salmon_file_b2.get_file_nonce(), 0, SalmonGenerator.NONCE_LENGTH)
+        nonce_b2: int = BitConverter.to_long(salmon_file_b2.get_file_nonce(), 0, SalmonGenerator.NONCE_LENGTH)
         SalmonDriveManager.close_drive()
 
         PythonFSTestHelper.testCase.assertEquals(nonce_a1, nonce_cfg - 1)
@@ -342,7 +342,7 @@ class PythonFSTestHelper:
             self.offset = offset
 
         def init_sequence(self, drive_id: str, auth_id: str, start_nonce: bytearray, max_nonce: bytearray):
-            n_max_nonce: int = BitConverter.toLong(self.testMaxNonce, 0, SalmonGenerator.NONCE_LENGTH)
+            n_max_nonce: int = BitConverter.to_long(self.testMaxNonce, 0, SalmonGenerator.NONCE_LENGTH)
             start_nonce = BitConverter.to_bytes(n_max_nonce + self.offset, SalmonGenerator.NONCE_LENGTH)
             max_nonce = BitConverter.to_bytes(n_max_nonce, SalmonGenerator.NONCE_LENGTH)
             super().init_sequence(drive_id, auth_id, start_nonce, max_nonce)
@@ -515,16 +515,16 @@ class PythonFSTestHelper:
                                 BitConverter.to_bytes(1, 8),
                                 BitConverter.to_bytes(4, 8))
         nonce: bytearray = sequencer.next_nonce("AAAA")
-        PythonFSTestHelper.testCase.assertEquals(1, BitConverter.toLong(nonce, 0, 8))
+        PythonFSTestHelper.testCase.assertEquals(1, BitConverter.to_long(nonce, 0, 8))
         nonce = sequencer.next_nonce("AAAA")
-        PythonFSTestHelper.testCase.assertEquals(2, BitConverter.toLong(nonce, 0, 8))
+        PythonFSTestHelper.testCase.assertEquals(2, BitConverter.to_long(nonce, 0, 8))
         nonce = sequencer.next_nonce("AAAA")
-        PythonFSTestHelper.testCase.assertEquals(3, BitConverter.toLong(nonce, 0, 8))
+        PythonFSTestHelper.testCase.assertEquals(3, BitConverter.to_long(nonce, 0, 8))
 
         caught: bool = False
         try:
             nonce = sequencer.next_nonce("AAAA")
-            PythonFSTestHelper.testCase.assertEquals(5, BitConverter.toLong(nonce, 0, 8))
+            PythonFSTestHelper.testCase.assertEquals(5, BitConverter.to_long(nonce, 0, 8))
         except SalmonRangeExceededException as ex:
             print(ex)
             caught = True
