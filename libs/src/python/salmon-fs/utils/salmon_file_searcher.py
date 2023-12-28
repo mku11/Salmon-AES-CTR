@@ -97,7 +97,7 @@ class SalmonFileSearcher:
         if on_search_event is not None:
             on_search_event(SalmonFileSearcher.SearchEvent.SearchingFinished)
         self.__running = False
-        return search_results.values()
+        return list(search_results.values())
 
     def __get_search_results(self, filename: str, terms: [str], any_term: bool) -> int:
         """
