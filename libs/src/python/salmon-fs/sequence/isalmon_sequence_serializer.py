@@ -26,9 +26,12 @@ from __future__ import annotations
 
 from abc import ABC
 
+from typeguard import typechecked
+
 from sequence.salmon_sequence import SalmonSequence
 
 
+@typechecked
 class ISalmonSequenceSerializer(ABC):
     """
      * Serializes/Deserializes nonce sequences.

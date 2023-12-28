@@ -28,9 +28,12 @@ from abc import ABC
 from enum import Enum
 from typing import Callable, Any
 
+from typeguard import typechecked
+
 from salmonfs.salmon_file import SalmonFile
 
 
+@typechecked
 class SalmonFileSearcher:
     """
      * Class searches for files in a SalmonDrive by filename.

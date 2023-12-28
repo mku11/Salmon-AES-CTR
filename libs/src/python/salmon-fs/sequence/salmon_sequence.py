@@ -26,7 +26,10 @@ from __future__ import annotations
 
 from enum import Enum
 
+from typeguard import typechecked
 
+
+@typechecked
 class SalmonSequence:
     """
      * Represents a nonce sequence for a specific drive and device.

@@ -26,6 +26,7 @@ from __future__ import annotations
 import os
 from typing import Callable, Any
 
+from typeguard import typechecked
 from wrapt import synchronized
 
 from convert.bit_converter import BitConverter
@@ -44,6 +45,7 @@ from salmon.text.salmon_text_encryptor import SalmonTextEncryptor
 from salmonfs.salmon_drive import SalmonDrive
 
 
+@typechecked
 class SalmonFile(VirtualFile):
     """
      * A virtual file backed by an encrypted {@link IRealFile} on the real filesystem.

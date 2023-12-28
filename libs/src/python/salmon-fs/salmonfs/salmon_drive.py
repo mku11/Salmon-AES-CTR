@@ -25,6 +25,8 @@ SOFTWARE.
 from __future__ import annotations
 from abc import abstractmethod
 
+from typeguard import typechecked
+
 from convert.bit_converter import BitConverter
 from file.ireal_file import IRealFile
 from file.virtual_drive import VirtualDrive
@@ -46,6 +48,7 @@ from salmonfs.salmon_key import SalmonKey
 from sequence.isalmon_sequencer import ISalmonSequencer
 
 
+@typechecked
 class SalmonDrive(VirtualDrive):
     """
      * Class provides an abstract virtual drive that can be extended for use with
@@ -223,7 +226,7 @@ class SalmonDrive(VirtualDrive):
 
             # derive the master key from the text password
             master_key: bytearray = SalmonPassword.get_master_key(password, salt, iterations,
-                                                                SalmonDriveGenerator.MASTER_KEY_LENGTH)
+                                                                  SalmonDriveGenerator.MASTER_KEY_LENGTH)
 
             # get the master Key Iv
             master_key_iv: bytearray = salmon_config.get_iv()

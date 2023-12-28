@@ -24,10 +24,13 @@ SOFTWARE.
 '''
 from __future__ import annotations
 
+from typeguard import typechecked
+
 from convert.bit_converter import BitConverter
 from salmon.salmon_generator import SalmonGenerator
 
 
+@typechecked
 class SalmonDriveGenerator:
     """
      * Utility class generates internal secure properties for the drive.

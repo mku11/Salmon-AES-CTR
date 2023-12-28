@@ -24,9 +24,12 @@ SOFTWARE.
 '''
 from abc import ABC
 
+from typeguard import typechecked
+
 from sequence.salmon_sequence import SalmonSequence
 
 
+@typechecked
 class ISalmonSequencer(ABC):
     """
      * Salmon nonce sequencer.

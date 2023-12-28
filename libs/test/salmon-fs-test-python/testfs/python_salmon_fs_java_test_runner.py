@@ -26,6 +26,9 @@ from __future__ import annotations
 
 import hashlib
 import random
+
+from typeguard import typechecked
+
 from file.py_drive import PyDrive
 from file.py_file import PyFile
 from file.virtual_file import VirtualFile
@@ -47,6 +50,7 @@ from test.test_helper import TestHelper
 from utils.salmon_file_commander import SalmonFileCommander
 
 
+@typechecked
 class SalmonFSPythonTestRunner(SalmonPythonTestRunner):
     SalmonDriveManager.set_virtual_drive_class(PyDrive)
 

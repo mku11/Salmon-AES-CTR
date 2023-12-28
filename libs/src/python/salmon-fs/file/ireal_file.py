@@ -28,9 +28,11 @@ from abc import ABC
 from datetime import datetime
 from typing import Callable, Any
 
+from typeguard import typechecked
+
 from iostream.random_access_stream import RandomAccessStream
 
-
+@typechecked
 class IRealFile(ABC):
     """
      * Interface that represents a real file. This class is used internally by the virtual disk to

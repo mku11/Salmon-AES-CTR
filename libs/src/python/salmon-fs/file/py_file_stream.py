@@ -26,10 +26,13 @@ from io import BufferedRandom
 from mmap import mmap
 from typing import BinaryIO
 
+from typeguard import typechecked
+
 from file.ireal_file import IRealFile
 from iostream.random_access_stream import RandomAccessStream
 
 
+@typechecked
 class PyFileStream(RandomAccessStream):
     """
      * An advanced Salmon File Stream implementation for python files.

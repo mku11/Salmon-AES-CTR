@@ -24,6 +24,8 @@ SOFTWARE.
 '''
 from typing import Type
 
+from typeguard import typechecked
+
 from convert.bit_converter import BitConverter
 from file.ireal_file import IRealFile
 from iostream.memory_stream import MemoryStream
@@ -45,6 +47,7 @@ from sequence.salmon_sequence import SalmonSequence
 from threading import RLock
 
 
+@typechecked
 class SalmonDriveManager:
     """
      * Manages the drive and nonce sequencer to be used.

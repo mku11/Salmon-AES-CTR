@@ -30,6 +30,8 @@ import time
 from concurrent.futures import ThreadPoolExecutor
 from typing import Any, Callable
 
+from typeguard import typechecked
+
 from file.ireal_file import IRealFile
 from iostream.random_access_stream import RandomAccessStream
 from salmon.iostream.salmon_stream import SalmonStream
@@ -37,6 +39,7 @@ from salmonfs.salmon_file import SalmonFile
 from utils.salmon_file_utils import SalmonFileUtils
 
 
+@typechecked
 class SalmonFileExporter:
     __DEFAULT_BUFFER_SIZE = 512 * 1024
     """

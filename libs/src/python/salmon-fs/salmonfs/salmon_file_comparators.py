@@ -23,10 +23,14 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 '''
 from __future__ import annotations
+
+from typeguard import typechecked
+
 from salmonfs.salmon_file import SalmonFile
 from utils.salmon_file_utils import SalmonFileUtils
 
 
+@typechecked
 class SalmonFileComparators:
     """
      * Useful comparators for SalmonFile.

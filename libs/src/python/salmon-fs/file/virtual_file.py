@@ -26,11 +26,14 @@ from __future__ import annotations
 
 from abc import ABC
 
+from typeguard import typechecked
+
 from file.ireal_file import IRealFile
 from file.virtual_drive import VirtualDrive
 from iostream.random_access_stream import RandomAccessStream
 
 
+@typechecked
 class VirtualFile(ABC):
     """
      * A virtual file. Read-only operations are included. Since write operations can be implementation

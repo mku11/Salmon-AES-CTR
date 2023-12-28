@@ -22,6 +22,8 @@ LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 '''
+from typeguard import typechecked
+
 from convert.bit_converter import BitConverter
 from file.ireal_file import IRealFile
 from iostream.memory_stream import MemoryStream
@@ -30,6 +32,7 @@ from salmon.salmon_generator import SalmonGenerator
 from salmonfs.salmon_drive_generator import SalmonDriveGenerator
 
 
+@typechecked
 class SalmonDriveConfig:
     """
      * Represents a configuration file for a drive. The properties are encrypted in the file

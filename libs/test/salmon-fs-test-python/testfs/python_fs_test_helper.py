@@ -30,6 +30,8 @@ import time
 from typing import BinaryIO
 from unittest import TestCase
 
+from typeguard import typechecked
+
 from convert.bit_converter import BitConverter
 from file.py_drive import PyDrive
 from file.py_file import PyFile
@@ -58,6 +60,7 @@ from utils.salmon_file_importer import SalmonFileImporter
 from utils.salmon_file_searcher import SalmonFileSearcher
 
 
+@typechecked
 class PythonFSTestHelper:
     TEST_SEQUENCER_DIR = "D:\\tmp\\output"
     TEST_SEQUENCER_FILENAME = "fileseq.xml"

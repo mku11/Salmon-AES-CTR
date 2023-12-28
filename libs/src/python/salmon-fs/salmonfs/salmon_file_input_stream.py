@@ -28,6 +28,8 @@ import math
 import threading
 from concurrent.futures import ThreadPoolExecutor
 from io import BufferedIOBase, RawIOBase
+
+from typeguard import typechecked
 from wrapt import synchronized
 
 from iostream.random_access_stream import RandomAccessStream
@@ -37,6 +39,7 @@ from salmon.salmon_security_exception import SalmonSecurityException
 from salmonfs.salmon_file import SalmonFile
 
 
+@typechecked
 class SalmonFileInputStream(BufferedIOBase):
     """
      * Implementation of a Python InputStream for seeking and reading a SalmonFile.

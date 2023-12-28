@@ -23,6 +23,8 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 '''
 from io import BufferedIOBase
+
+from typeguard import typechecked
 from wrapt import synchronized
 
 from convert.bit_converter import BitConverter
@@ -38,6 +40,7 @@ from sequence.salmon_sequence import SalmonSequence
 from sequence.salmon_sequence_exception import SalmonSequenceException
 
 
+@typechecked
 class SalmonFileSequencer(ISalmonSequencer):
     """
      * Generates nonces based on a sequencer backed by a file.
@@ -126,7 +129,6 @@ class SalmonFileSequencer(ISalmonSequencer):
         sequence.set_max_nonce(max_nonce)
         self._save_sequence_file(configs)
 
-
     def next_nonce(self, drive_id: str) -> bytearray:
         """
          * Get the next nonce.
@@ -147,8 +149,6 @@ class SalmonFileSequencer(ISalmonSequencer):
         sequence.set_next_nonce(SalmonNonce.increase_nonce(sequence.get_next_nonce(), sequence.get_max_nonce()))
         self._save_sequence_file(configs)
         return next_nonce
-
-
 
     @synchronized
     def __get_contents(self) -> str:
@@ -202,7 +202,6 @@ class SalmonFileSequencer(ISalmonSequencer):
             raise SalmonSequenceException("Sequence already revoked")
         sequence.set_status(SalmonSequence.Status.Revoked)
         self._save_sequence_file(configs)
-
 
     def get_sequence(self, drive_id: str) -> SalmonSequence:
         """

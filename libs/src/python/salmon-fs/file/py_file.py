@@ -25,11 +25,14 @@ SOFTWARE.
 from __future__ import annotations
 import os
 
+from typeguard import typechecked
+
 from file.ireal_file import IRealFile
 from file.py_file_stream import PyFileStream
 from iostream.random_access_stream import RandomAccessStream
 
 
+@typechecked
 class PyFile(IRealFile):
     """
      * Salmon RealFile implementation for Python.

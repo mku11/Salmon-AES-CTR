@@ -27,13 +27,15 @@ from __future__ import annotations
 import xml.etree.ElementTree as Et
 from xml.dom import minidom
 
-from convert.base_64 import Base64
+from typeguard import typechecked
+
 from salmon.encode.salmon_encoder import SalmonEncoder
 from sequence.isalmon_sequence_serializer import ISalmonSequenceSerializer
 from sequence.salmon_sequence import SalmonSequence
 from sequence.salmon_sequence_exception import SalmonSequenceException
 
 
+@typechecked
 class SalmonSequenceSerializer(ISalmonSequenceSerializer):
     """
      * Serializes sequences for all the drives the device is authorized.

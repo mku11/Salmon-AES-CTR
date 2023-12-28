@@ -28,6 +28,8 @@ from __future__ import annotations
 from concurrent.futures import CancelledError
 from typing import Callable, Any
 
+from typeguard import typechecked
+
 from file.ireal_file import IRealFile
 from salmonfs.salmon_file import SalmonFile
 from sequence.salmon_sequence_exception import SalmonSequenceException
@@ -36,6 +38,7 @@ from utils.salmon_file_importer import SalmonFileImporter
 from utils.salmon_file_searcher import SalmonFileSearcher
 
 
+@typechecked
 class SalmonFileCommander:
     """
      * Facade class for file operations.
@@ -202,7 +205,8 @@ class SalmonFileCommander:
                              on_failed: Callable[[SalmonFile, Exception], Any],
                              exported_files: [IRealFile], count: [int], total: int,
                              existing_files: {str, IRealFile}):
-        rfile: IRealFile = existing_files.get(file_to_export.get_base_name()) if file_to_export.get_base_name() in existing_files else None
+        rfile: IRealFile = existing_files.get(
+            file_to_export.get_base_name()) if file_to_export.get_base_name() in existing_files else None
 
         if file_to_export.is_directory():
             if rfile is None or not rfile.exists():

@@ -25,13 +25,15 @@ from __future__ import annotations
 import os
 import platform
 
+from typeguard import typechecked
+
 from file.py_file import PyFile
 from file.ireal_file import IRealFile
 from file.virtual_file import VirtualFile
 from salmonfs.salmon_drive import SalmonDrive
 from salmonfs.salmon_file import SalmonFile
 
-
+@typechecked
 class PyDrive(SalmonDrive):
     """
      * SalmonDrive implementation for standard Python file API. This provides a virtual drive implementation

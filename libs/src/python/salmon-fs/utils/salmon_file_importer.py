@@ -30,6 +30,8 @@ import time
 from concurrent.futures import ThreadPoolExecutor
 from typing import Any, Callable
 
+from typeguard import typechecked
+
 from file.ireal_file import IRealFile
 from iostream.random_access_stream import RandomAccessStream
 from salmon.iostream.salmon_stream import SalmonStream
@@ -37,6 +39,7 @@ from salmonfs.salmon_file import SalmonFile
 from utils.salmon_file_utils import SalmonFileUtils
 
 
+@typechecked
 class SalmonFileImporter:
     __DEFAULT_BUFFER_SIZE = 512 * 1024
     """
@@ -280,7 +283,8 @@ class SalmonFileImporter:
                     + " start = " + str(start) + " count = " + str(count))
 
             while (bytes_read := source_stream.read(
-                    v_bytes, 0, min(len(v_bytes), count - total_part_bytes_read)) > 0 and total_part_bytes_read < count):
+                    v_bytes, 0,
+                    min(len(v_bytes), count - total_part_bytes_read)) > 0 and total_part_bytes_read < count):
                 if self.__stopped:
                     break
 

@@ -24,6 +24,8 @@ SOFTWARE.
 '''
 from __future__ import annotations
 
+from typeguard import typechecked
+
 from file.ireal_file import IRealFile
 from iostream.memory_stream import MemoryStream
 from salmon.integrity.salmon_integrity import SalmonIntegrity
@@ -34,6 +36,8 @@ from salmonfs.salmon_drive import SalmonDrive
 from salmonfs.salmon_drive_generator import SalmonDriveGenerator
 from salmonfs.salmon_file import SalmonFile
 
+
+@typechecked
 class SalmonAuthConfig:
     """
      * Device Authorization Configuration. This represents the authorization that will be provided
