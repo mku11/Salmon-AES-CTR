@@ -116,7 +116,7 @@ class PyFile(IRealFile):
          * @return The stream to write to.
          * @throws FileNotFoundException
         """
-        return PyFileStream(self, "w")
+        return PyFileStream(self, "rw")
 
     def get_parent(self) -> IRealFile:
         """

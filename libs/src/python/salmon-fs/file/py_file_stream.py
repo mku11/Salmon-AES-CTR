@@ -22,6 +22,8 @@ LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 '''
+from io import BufferedRandom
+from mmap import mmap
 from typing import BinaryIO
 
 from file.ireal_file import IRealFile
@@ -48,6 +50,11 @@ class PyFileStream(RandomAccessStream):
          * The random access file associated with this stream.
         """
 
+        self.__mm: mmap | None = None
+        """
+         * mapped memory file for random access
+        """
+
         self.__file: IRealFile | None = None
         """
          * The python file associated with this stream.
@@ -56,10 +63,17 @@ class PyFileStream(RandomAccessStream):
         self.__canWrite: bool = False
 
         self.__file = file
-        if mode == "w":
+        if mode == "rw":
             self.__canWrite = True
+            if self.__file.exists() and self.__file.length() > 0:
+                mode = "a+"
+            else:
+                mode = "w+"
 
-        self.__raf: BinaryIO = open(file.get_path(), mode + "b")
+        self.__raf: BinaryIO = open(self.__file.get_path(), mode + "b")
+        if mode == "a+":
+            self.__mm = mmap(self.__raf.fileno(), 0)
+            self.__mm.seek(0)
 
     def can_read(self) -> bool:
         """
@@ -87,10 +101,10 @@ class PyFileStream(RandomAccessStream):
          * Get the length of the stream. This is the same as the backed file.
          * @return
         """
-        return self.file.length()
+        return self.__file.length()
 
     def get_position(self) -> int:
-        return self.__raf.tell()
+        return self.__mm.tell() if self.__mm is not None else self.__raf.tell()
 
     def set_position(self, value: int):
         """
@@ -98,7 +112,7 @@ class PyFileStream(RandomAccessStream):
          * @param value The new position.
          * @throws IOError
         """
-        self.__raf.seek(value)
+        self.__mm.seek(value) if self.__mm is not None else self.__raf.seek(value)
 
     def set_length(self, value: int):
         self.__raf.truncate(value)
@@ -127,7 +141,17 @@ class PyFileStream(RandomAccessStream):
          * @param count The maximum number of bytes to read from the buffer.
          * @throws IOError
         """
-        self.__raf.write(buffer[offset:offset + count])
+        if self.__mm:
+            if self.get_position() + count > self.__file.length():
+                self.set_length(self.get_position() + count)
+                pos: int = self.__mm.tell()
+                self.__mm.flush()
+                self.__mm.close()
+                self.__mm = mmap(self.__raf.fileno(), 0)
+                self.__mm.seek(pos)
+            self.__mm.write(buffer[offset:offset + count])
+        else:
+            self.__raf.write(buffer[offset:offset + count])
 
     def seek(self, offset: int, origin: RandomAccessStream.SeekOrigin) -> int:
         """
@@ -137,23 +161,23 @@ class PyFileStream(RandomAccessStream):
          * @return The new position after seeking.
          * @throws IOError
         """
-        pos: int = self.__raf.tell()
+        pos: int = self.__mm.tell() if self.__mm else self.__raf.tell()
         if origin == RandomAccessStream.SeekOrigin.Begin:
             pos = offset
         elif origin == RandomAccessStream.SeekOrigin.Current:
             pos += offset
         elif origin == RandomAccessStream.SeekOrigin.End:
-            pos = self.file.length() - offset
+            pos = self.__file.length() - offset
 
-        self.__raf.seek(pos)
-        return self.__raf.tell()
+        self.__mm.seek(pos) if self.__mm else self.__raf.seek(pos)
+        return self.__mm.tell() if self.__mm else self.__raf.tell()
 
     def flush(self):
         """
          * Flush the buffers to the associated file.
         """
         try:
-            self.__raf.flush()
+            self.__mm.flush() if self.__mm else self.__raf.flush()
         except Exception as ex:
             print(ex)
 
@@ -162,4 +186,6 @@ class PyFileStream(RandomAccessStream):
          * Close this stream and associated resources.
          * @throws IOError
         """
+        if self.__mm:
+            self.__mm.close()
         self.__raf.close()
