@@ -162,7 +162,7 @@ class SalmonFileImporter:
 
         filename = filename if filename is not None else file_to_import.get_base_name()
         start_time: int = 0
-        total_bytes_read: [int] = [0]
+        total_bytes_read = [0]
         salmon_file: SalmonFile
         try:
             if not SalmonFileImporter.__enableMultiThread and self.__threads != 1:
@@ -203,7 +203,7 @@ class SalmonFileImporter:
                 index: int = i
 
                 def __import_file():
-                    nonlocal ex, index
+                    nonlocal ex, index, total_bytes_read
 
                     start: int = final_part_size * index
                     length: int
@@ -250,7 +250,7 @@ class SalmonFileImporter:
         return salmon_file
 
     def __import_file_part(self, file_to_import: IRealFile, salmon_file: SalmonFile, start: int, count: int,
-                           total_bytes_read: [int], on_progress: Callable[[int, int], Any]):
+                           total_bytes_read: [], on_progress: Callable[[int, int], Any]):
         """
          * Import a file part into a file in the drive.
          *

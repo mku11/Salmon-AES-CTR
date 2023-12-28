@@ -146,7 +146,7 @@ class SalmonFileExporter:
             if self.__enableLog:
                 start_time = int(time.time())
 
-            total_bytes_written: bytearray = bytearray([0])
+            total_bytes_written = [0]
             self.__failed = False
 
             if not export_dir.exists():
@@ -184,7 +184,7 @@ class SalmonFileExporter:
                 index: int = i
 
                 def __export_file():
-                    nonlocal ex, index
+                    nonlocal ex, index, total_bytes_written
 
                     start: int = final_part_size * index
                     length: int
@@ -230,7 +230,7 @@ class SalmonFileExporter:
         return export_file
 
     def __export_file_part(self, file_to_export: SalmonFile, export_file: IRealFile, start: int, count: int,
-                           total_bytes_written: bytearray, on_progress: Callable[[int, int], Any]):
+                           total_bytes_written: [], on_progress: Callable[[int, int], Any]):
         """
          * Export a file part from the drive.
          *
