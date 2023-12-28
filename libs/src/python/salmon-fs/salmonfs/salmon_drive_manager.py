@@ -428,7 +428,8 @@ class SalmonDriveManager:
 
         drive.init_fs()
 
-    def set_password(self, drive: SalmonDrive, password: str):
+    @staticmethod
+    def set_password(drive: SalmonDrive, password: str):
         """
          * Change the user password.
          * @param pass The new password.
