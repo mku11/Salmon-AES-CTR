@@ -185,4 +185,4 @@ class SalmonPythonNativeTestRunner(TestCase):
 
             SalmonPythonNativeTestRunner.testCase.assertEqual(buff1, buff2)
             index += n_chunk_size + SalmonGenerator.HASH_RESULT_LENGTH
-            SalmonPythonNativeTestRunner.testCase.assertEquals(len(buffer_with_integrity), index)
+            SalmonPythonNativeTestRunner.testCase.assertEqual(len(buffer_with_integrity), index)

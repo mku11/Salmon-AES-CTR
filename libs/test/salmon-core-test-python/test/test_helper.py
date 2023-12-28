@@ -88,11 +88,11 @@ class TestHelper:
     testCase: TestCase = TestCase()
 
     @staticmethod
-    def assert_equals(a, b):
+    def assert_equal(a, b):
         return TestHelper.testCase.assertEqual(a, b)
 
     @staticmethod
-    def assert_array_equals(a, b):
+    def assert_array_equal(a, b):
         return TestHelper.testCase.assertEqual(a, b)
 
     @staticmethod
@@ -144,7 +144,7 @@ class TestHelper:
         print(plain_text)
         print(dec_text)
 
-        TestHelper.assert_equals(plain_text, dec_text)
+        TestHelper.assert_equal(plain_text, dec_text)
 
     @staticmethod
     def encrypt(input_bytes, key, iv, buffer_size,
@@ -233,48 +233,48 @@ class TestHelper:
         correct_text = plain_text[0:6]
         dec_text = TestHelper.seek_and_get_substring_by_read(dec_reader, 0, 6, RandomAccessStream.SeekOrigin.Begin)
 
-        TestHelper.assert_equals(correct_text, dec_text)
+        TestHelper.assert_equal(correct_text, dec_text)
         TestHelper.test_counter(dec_reader)
 
         correct_text = plain_text[0:6]
         dec_text = TestHelper.seek_and_get_substring_by_read(dec_reader, 0, 6, RandomAccessStream.SeekOrigin.Begin)
 
-        TestHelper.assert_equals(correct_text, dec_text)
+        TestHelper.assert_equal(correct_text, dec_text)
         TestHelper.test_counter(dec_reader)
 
         correct_text = plain_text[dec_reader.get_position() + 4: dec_reader.get_position() + 4 + 4]
         dec_text = TestHelper.seek_and_get_substring_by_read(dec_reader, 4, 4, RandomAccessStream.SeekOrigin.Current)
 
-        TestHelper.assert_equals(correct_text, dec_text)
+        TestHelper.assert_equal(correct_text, dec_text)
         TestHelper.test_counter(dec_reader)
 
         correct_text = plain_text[dec_reader.get_position() + 6: dec_reader.get_position() + 6 + 4]
         dec_text = TestHelper.seek_and_get_substring_by_read(dec_reader, 6, 4, RandomAccessStream.SeekOrigin.Current)
 
-        TestHelper.assert_equals(correct_text, dec_text)
+        TestHelper.assert_equal(correct_text, dec_text)
         TestHelper.test_counter(dec_reader)
 
         correct_text = plain_text[dec_reader.get_position() + 10: dec_reader.get_position() + 10 + 6]
         dec_text = TestHelper.seek_and_get_substring_by_read(dec_reader, 10, 6, RandomAccessStream.SeekOrigin.Current)
 
-        TestHelper.assert_equals(correct_text, dec_text)
+        TestHelper.assert_equal(correct_text, dec_text)
         TestHelper.test_counter(dec_reader)
 
         correct_text = plain_text[12: 12 + 8]
         dec_text = TestHelper.seek_and_get_substring_by_read(dec_reader, 12, 8, RandomAccessStream.SeekOrigin.Begin)
 
-        TestHelper.assert_equals(correct_text, dec_text)
+        TestHelper.assert_equal(correct_text, dec_text)
         TestHelper.test_counter(dec_reader)
 
         correct_text = plain_text[len(plain_text) - 14: len(plain_text) - 14 + 7]
         dec_text = TestHelper.seek_and_get_substring_by_read(dec_reader, 14, 7, RandomAccessStream.SeekOrigin.End)
 
-        TestHelper.assert_equals(correct_text, dec_text)
+        TestHelper.assert_equal(correct_text, dec_text)
 
         correct_text = plain_text[len(plain_text) - 27: len(plain_text) - 27 + 12]
         dec_text = TestHelper.seek_and_get_substring_by_read(dec_reader, 27, 12, RandomAccessStream.SeekOrigin.End)
 
-        TestHelper.assert_equals(correct_text, dec_text)
+        TestHelper.assert_equal(correct_text, dec_text)
         TestHelper.test_counter(dec_reader)
         enc_ins.close()
         dec_reader.close()
@@ -316,18 +316,18 @@ class TestHelper:
     def test_counter(dec_reader: SalmonStream):
         expected_block = dec_reader.get_position() // SalmonGenerator.BLOCK_SIZE
 
-        TestHelper.assert_equals(expected_block, dec_reader.get_block())
+        TestHelper.assert_equal(expected_block, dec_reader.get_block())
 
         counter_block = BitConverter.to_long(dec_reader.get_counter(), SalmonGenerator.NONCE_LENGTH,
                                              SalmonGenerator.BLOCK_SIZE - SalmonGenerator.NONCE_LENGTH)
         expected_counter_value = dec_reader.get_block()
 
-        TestHelper.assert_equals(expected_counter_value, counter_block)
+        TestHelper.assert_equal(expected_counter_value, counter_block)
 
         nonce = BitConverter.to_long(dec_reader.get_counter(), 0, SalmonGenerator.NONCE_LENGTH)
         expected_nonce = BitConverter.to_long(dec_reader.get_nonce(), 0, SalmonGenerator.NONCE_LENGTH)
 
-        TestHelper.assert_equals(expected_nonce, nonce)
+        TestHelper.assert_equal(expected_nonce, nonce)
 
     @staticmethod
     def seek_and_write(text: str, key, iv,
@@ -378,11 +378,11 @@ class TestHelper:
         dec_text = TestHelper.seek_and_get_substring_by_read(dec_reader, 0, len(text),
                                                              RandomAccessStream.SeekOrigin.Begin)
 
-        TestHelper.assert_equals(text[0:seek], dec_text[0:seek])
+        TestHelper.assert_equal(text[0:seek], dec_text[0:seek])
 
-        TestHelper.assert_equals(text_to_write, dec_text[seek:seek + write_count])
+        TestHelper.assert_equal(text_to_write, dec_text[seek:seek + write_count])
 
-        TestHelper.assert_equals(text[seek + write_count:], dec_text[seek + write_count:])
+        TestHelper.assert_equal(text[seek + write_count:], dec_text[seek + write_count:])
         TestHelper.test_counter(dec_reader)
 
         enc_ins.close()
@@ -466,7 +466,7 @@ class TestHelper:
                                                     False)
         t3 = time.time()
 
-        TestHelper.assert_array_equals(data, dec_data)
+        TestHelper.assert_array_equal(data, dec_data)
         if enable_log:
             print("enc time: " + str(t2 - t1))
             print("dec time: " + str(t3 - t2))
@@ -488,7 +488,7 @@ class TestHelper:
                                                    SalmonStream.get_aes_provider_type())
         t3 = time.time()
 
-        TestHelper.assert_array_equals(data, dec_data)
+        TestHelper.assert_array_equal(data, dec_data)
         if enable_log:
             print("enc time: " + str(t2 - t1))
             print("dec time: " + str(t3 - t2))
@@ -509,7 +509,7 @@ class TestHelper:
                                                        False)
         t3 = time.time()
 
-        TestHelper.assert_array_equals(data, dec_data)
+        TestHelper.assert_array_equal(data, dec_data)
         if enable_log:
             print("enc: " + str(t2 - t1))
             print("dec: " + str(t3 - t2))
@@ -546,12 +546,12 @@ class TestHelper:
         ms2.close()
         data2: bytearray = ms2.to_array()
 
-        TestHelper.assert_equals(len(test_data), len(data2))
+        TestHelper.assert_equal(len(test_data), len(data2))
         digest2 = hashlib.md5(data2).hexdigest()
         ms1.close()
         ms2.close()
 
-        TestHelper.assert_array_equals(digest, digest2)
+        TestHelper.assert_array_equal(digest, digest2)
 
     @staticmethod
     def copy_from_mem_stream_to_salmon_stream(size, key, nonce,

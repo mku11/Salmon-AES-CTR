@@ -102,7 +102,7 @@ class SalmonFile(VirtualFile):
         header: SalmonHeader = self.get_header()
         if header is None:
             return None
-        return header.getChunkSize()
+        return header.get_chunk_size()
 
     def get_header(self) -> SalmonHeader | None:
         """

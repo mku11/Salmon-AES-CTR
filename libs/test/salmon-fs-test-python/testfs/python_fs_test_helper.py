@@ -65,11 +65,11 @@ class PythonFSTestHelper:
     testCase: TestCase = TestCase()
 
     @staticmethod
-    def assert_equals(a, b):
+    def assert_equal(a, b):
         return TestHelper.assert_equal(a, b)
 
     @staticmethod
-    def assert_array_equals(a, b):
+    def assert_array_equal(a, b):
         return TestHelper.assert_equal(a, b)
 
     @staticmethod
@@ -124,7 +124,7 @@ class PythonFSTestHelper:
                 if should_be_equal:
                     PythonFSTestHelper.testCase.assertTrue(file.exists())
                     file_size: int = file.get_size()
-                    PythonFSTestHelper.testCase.assertEquals(real_file_size, file_size)
+                    PythonFSTestHelper.testCase.assertEqual(real_file_size, file_size)
 
         # export
         file_exporter: SalmonFileExporter = SalmonFileExporter(export_buffer_size, export_threads)
@@ -137,7 +137,7 @@ class PythonFSTestHelper:
 
         hash_post_export: str = PythonFSTestHelper.get_checksum(export_file)
         if should_be_equal:
-            PythonFSTestHelper.testCase.assertEquals(hash_pre_import, hash_post_export)
+            PythonFSTestHelper.testCase.assertEqual(hash_pre_import, hash_post_export)
 
     @staticmethod
     def import_and_search(vault_dir: str, password: str, import_file: str,
@@ -169,7 +169,7 @@ class PythonFSTestHelper:
         files: [SalmonFile] = searcher.search(salmon_root_dir, basename, True, None, None)
 
         PythonFSTestHelper.testCase.assertTrue(len(files) > 0)
-        PythonFSTestHelper.testCase.assertEquals(files[0].get_base_name(), basename)
+        PythonFSTestHelper.testCase.assertEqual(files[0].get_base_name(), basename)
 
     @staticmethod
     def import_and_copy(vault_dir: str, password: str, import_file: str, import_buffer_size: int, import_threads: int,
@@ -208,8 +208,8 @@ class PythonFSTestHelper:
         PythonFSTestHelper.testCase.assertIsNotNone(new_file)
         check_sum_after: str = PythonFSTestHelper.get_checksum(new_file.get_real_file())
 
-        PythonFSTestHelper.testCase.assertEquals(check_sum_before, check_sum_after)
-        PythonFSTestHelper.testCase.assertEquals(salmon_file.get_base_name(), new_file.get_base_name())
+        PythonFSTestHelper.testCase.assertEqual(check_sum_before, check_sum_after)
+        PythonFSTestHelper.testCase.assertEqual(salmon_file.get_base_name(), new_file.get_base_name())
 
     @staticmethod
     def flip_bit(salmon_file: SalmonFile, position: int):
@@ -260,7 +260,7 @@ class PythonFSTestHelper:
         in_stream.read(text_bytes, 0, len(text_bytes))
         in_stream.close()
         if check_data:
-            PythonFSTestHelper.assert_array_equals(test_bytes, text_bytes)
+            PythonFSTestHelper.assert_array_equal(test_bytes, text_bytes)
         return read_file
 
     @staticmethod
@@ -337,10 +337,10 @@ class PythonFSTestHelper:
         nonce_b2: int = BitConverter.to_long(salmon_file_b2.get_file_nonce(), 0, SalmonGenerator.NONCE_LENGTH)
         SalmonDriveManager.close_drive()
 
-        PythonFSTestHelper.testCase.assertEquals(nonce_a1, nonce_cfg - 1)
-        PythonFSTestHelper.testCase.assertEquals(nonce_cfg, nonce_a2 - 2)
-        PythonFSTestHelper.testCase.assertNotEquals(nonce_a2, nonce_b1)
-        PythonFSTestHelper.testCase.assertEquals(nonce_b1, nonce_b2 - 2)
+        PythonFSTestHelper.testCase.assertEqual(nonce_a1, nonce_cfg - 1)
+        PythonFSTestHelper.testCase.assertEqual(nonce_cfg, nonce_a2 - 2)
+        PythonFSTestHelper.testCase.assertNotEqual(nonce_a2, nonce_b1)
+        PythonFSTestHelper.testCase.assertEqual(nonce_b1, nonce_b2 - 2)
 
     class TestSalmonFileSequencer(SalmonFileSequencer):
         def __init__(self, sequence_file: IRealFile, serializer: ISalmonSequenceSerializer, test_max_nonce: bytearray,
@@ -381,7 +381,7 @@ class PythonFSTestHelper:
             import_success = False
             print(ex)
 
-        PythonFSTestHelper.testCase.assertEquals(should_import, import_success)
+        PythonFSTestHelper.testCase.assertEqual(should_import, import_success)
 
     @staticmethod
     def test_examples():
@@ -399,15 +399,15 @@ class PythonFSTestHelper:
         # decrypt byte array
         dec_bytes: bytearray = SalmonDecryptor().decrypt(enc_bytes, key, nonce, False)
 
-        PythonFSTestHelper.assert_array_equals(v_bytes, dec_bytes)
+        PythonFSTestHelper.assert_array_equal(v_bytes, dec_bytes)
 
         # Example 2: encrypt string and save the nonce in the header
         nonce = SalmonGenerator.get_secure_random_bytes(8)  # always get a fresh nonce!
-        enc_text: str = SalmonTextEncryptor.encryptstr(text, key, nonce, True)
+        enc_text: str = SalmonTextEncryptor.encrypt_string(text, key, nonce, True)
         # decrypt string
-        dec_text: str = SalmonTextDecryptor.decryptstr(enc_text, key, None, True)
+        dec_text: str = SalmonTextDecryptor.decrypt_string(enc_text, key, None, True)
 
-        PythonFSTestHelper.testCase.assertEquals(text, dec_text)
+        PythonFSTestHelper.testCase.assertEqual(text, dec_text)
 
         # Example 3: encrypt data to an output stream
         enc_out_stream: MemoryStream = MemoryStream()  # or any other writeable Stream like to a file
@@ -431,12 +431,12 @@ class PythonFSTestHelper:
         # decrypt and read data with a single call, you can also Seek() before Read()
         bytes_read: int = decryptor.read(dec_buffer, 0, len(dec_buffer))
         # encrypted data are now in the decBuffer
-        decstr: str = str(dec_buffer[0:bytes_read])
+        decstr: str = dec_buffer[0:bytes_read].decode('utf-8')
         print(decstr)
         decryptor.close()
         enc_input_stream.close()
 
-        PythonFSTestHelper.testCase.assertEquals(text, decstr)
+        PythonFSTestHelper.testCase.assertEqual(text, decstr)
 
         # Example 4: encrypt to a file, the SalmonFile has a virtual file system API
         # with copy, move, rename, delete operations
@@ -456,11 +456,11 @@ class PythonFSTestHelper:
         dec_buff: bytearray = bytearray(1024)
         # decrypt and read data with a single call, you can also Seek() to any position before Read()
         enc_bytes_read: int = stream2.read(dec_buff, 0, len(dec_buff))
-        decstr2: str = str(dec_buff[0:enc_bytes_read])
+        decstr2: str = dec_buff[0:enc_bytes_read].decode('utf-8')
         print(decstr2)
         stream2.close()
 
-        PythonFSTestHelper.testCase.assertEquals(text, decstr2)
+        PythonFSTestHelper.testCase.assertEqual(text, decstr2)
 
     @staticmethod
     def encrypt_and_decrypt_stream(data: bytearray, key: bytearray, nonce: bytearray):
@@ -485,7 +485,7 @@ class PythonFSTestHelper:
         enc_input_stream.close()
         out_stream.close()
 
-        PythonFSTestHelper.assert_array_equals(data, dec_data)
+        PythonFSTestHelper.assert_array_equal(data, dec_data)
 
     @staticmethod
     def get_real_file_contents(file_path: str) -> bytearray:
@@ -506,10 +506,10 @@ class PythonFSTestHelper:
         file_input_stream.reset()
         file_input_stream.skip(start)
         bytes_read: int = file_input_stream.readinto(memoryview(buffer)[read_offset:read_offset + length])
-        PythonFSTestHelper.testCase.assertEquals(should_read_length, bytes_read)
+        PythonFSTestHelper.testCase.assertEqual(should_read_length, bytes_read)
         tdata: bytearray = bytearray(len(buffer))
         tdata[read_offset:should_read_length] = data[start:start + should_read_length]
-        PythonFSTestHelper.assert_array_equals(tdata, buffer)
+        PythonFSTestHelper.assert_array_equal(tdata, buffer)
 
     @staticmethod
     def should_test_file_sequencer():
@@ -523,16 +523,16 @@ class PythonFSTestHelper:
                                 BitConverter.to_bytes(1, 8),
                                 BitConverter.to_bytes(4, 8))
         nonce: bytearray = sequencer.next_nonce("AAAA")
-        PythonFSTestHelper.testCase.assertEquals(1, BitConverter.to_long(nonce, 0, 8))
+        PythonFSTestHelper.testCase.assertEqual(1, BitConverter.to_long(nonce, 0, 8))
         nonce = sequencer.next_nonce("AAAA")
-        PythonFSTestHelper.testCase.assertEquals(2, BitConverter.to_long(nonce, 0, 8))
+        PythonFSTestHelper.testCase.assertEqual(2, BitConverter.to_long(nonce, 0, 8))
         nonce = sequencer.next_nonce("AAAA")
-        PythonFSTestHelper.testCase.assertEquals(3, BitConverter.to_long(nonce, 0, 8))
+        PythonFSTestHelper.testCase.assertEqual(3, BitConverter.to_long(nonce, 0, 8))
 
         caught: bool = False
         try:
             nonce = sequencer.next_nonce("AAAA")
-            PythonFSTestHelper.testCase.assertEquals(5, BitConverter.to_long(nonce, 0, 8))
+            PythonFSTestHelper.testCase.assertEqual(5, BitConverter.to_long(nonce, 0, 8))
         except SalmonRangeExceededException as ex:
             print(ex)
             caught = True

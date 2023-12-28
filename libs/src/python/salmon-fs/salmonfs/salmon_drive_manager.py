@@ -169,7 +169,7 @@ class SalmonDriveManager:
             SalmonDriveManager.create_sequence(SalmonDriveManager.get_drive().get_drive_id(), auth_id)
 
         sequence = SalmonDriveManager.__sequencer.get_sequence(drv_str)
-        return BitConverter.to_bytes(sequence.get_auth_id())
+        return BitConverter.hex_to_bytes(sequence.get_auth_id())
 
     @staticmethod
     def import_auth_file(file_path: str):
@@ -227,10 +227,10 @@ class SalmonDriveManager:
         if target_app_drive_config_file is None or not target_app_drive_config_file.exists():
             target_app_drive_config_file = v_dir.create_file(filename)
 
-        pivot_nonce: bytearray = SalmonNonce.splitNonceRange(sequence.get_next_nonce(), sequence.get_max_nonce())
+        pivot_nonce: bytearray = SalmonNonce.split_nonce_range(sequence.get_next_nonce(), sequence.get_max_nonce())
         SalmonDriveManager.__sequencer.set_max_nonce(sequence.get_drive_id(), sequence.get_auth_id(), pivot_nonce)
         SalmonAuthConfig.write_auth_file(target_app_drive_config_file, SalmonDriveManager.get_drive(),
-                                         BitConverter.to_bytes(target_auth_id),
+                                         BitConverter.hex_to_bytes(target_auth_id),
                                          pivot_nonce, sequence.get_max_nonce(),
                                          cfg_nonce)
 

@@ -384,7 +384,7 @@ class SalmonFSPythonTestRunner(SalmonPythonTestRunner):
         self.assertTrue(failed)
 
     def test_ExportAndImportAuth(self):
-        vault: str = TestHelper.generate_folder(TestHelper.TEST_VAULT_DIR)
+        vault: str = TestHelper.generate_folder(SalmonPythonTestRunner.TEST_VAULT_DIR)
         import_file_path: str = SalmonPythonTestRunner.TEST_IMPORT_TINY_FILE
         PythonFSTestHelper.export_and_import_auth(vault, import_file_path)
 
@@ -456,10 +456,10 @@ class SalmonFSPythonTestRunner(SalmonPythonTestRunner):
             print(ex)
             caught = True
 
-        self.assertEquals(True, caught)
+        self.assertEqual(True, caught)
         file2 = file.copy(v_dir, IRealFile.auto_rename_file(file))
 
-        self.assertEquals(2, v_dir.get_children_count())
+        self.assertEqual(2, v_dir.get_children_count())
         self.assertTrue(v_dir.get_child(file.get_base_name()).exists())
         self.assertTrue(v_dir.get_child(file.get_base_name()).is_file())
         self.assertTrue(v_dir.get_child(file2.get_base_name()).exists())
@@ -468,7 +468,7 @@ class SalmonFSPythonTestRunner(SalmonPythonTestRunner):
         dir1: IRealFile = v_dir.create_directory("folder1")
         self.assertTrue(v_dir.get_child("folder1").exists())
         self.assertTrue(v_dir.get_child("folder1").is_directory())
-        self.assertEquals(3, v_dir.get_children_count())
+        self.assertEqual(3, v_dir.get_children_count())
 
         folder1: IRealFile = v_dir.create_directory("folder2")
         self.assertTrue(folder1.exists())
@@ -477,11 +477,11 @@ class SalmonFSPythonTestRunner(SalmonPythonTestRunner):
         self.assertFalse(v_dir.get_child("folder2").exists())
         self.assertTrue(v_dir.get_child("folder3").exists())
         self.assertTrue(v_dir.get_child("folder3").is_directory())
-        self.assertEquals(4, v_dir.get_children_count())
+        self.assertEqual(4, v_dir.get_children_count())
         delres: bool = v_dir.get_child("folder3").delete()
         self.assertTrue(delres)
         self.assertFalse(v_dir.get_child("folder3").exists())
-        self.assertEquals(3, v_dir.get_children_count())
+        self.assertEqual(3, v_dir.get_children_count())
 
         file1.move(v_dir.get_child("folder1"))
         file2.move(v_dir.get_child("folder1"))
@@ -497,32 +497,32 @@ class SalmonFSPythonTestRunner(SalmonPythonTestRunner):
         self.assertTrue(caught)
         file4: IRealFile = file3.move(v_dir.get_child("folder1"), IRealFile.auto_rename_file(file3))
         self.assertTrue(file4.exists())
-        self.assertEquals(3, v_dir.get_child("folder1").get_children_count())
+        self.assertEqual(3, v_dir.get_child("folder1").get_children_count())
 
         folder2: IRealFile = v_dir.get_child("folder1").create_directory("folder2")
         for rfile in v_dir.get_child("folder1").list_files():
             rfile.copy(folder2)
-        self.assertEquals(4, v_dir.get_child("folder1").get_children_count())
-        self.assertEquals(4, v_dir.get_child("folder1").get_child("folder2").get_children_count())
+        self.assertEqual(4, v_dir.get_child("folder1").get_children_count())
+        self.assertEqual(4, v_dir.get_child("folder1").get_child("folder2").get_children_count())
 
         # recursive copy
         folder3: IRealFile = v_dir.create_directory("folder4")
         v_dir.get_child("folder1").copy_recursively(folder3)
         count1: int = PythonFSTestHelper.get_children_count_recursively(v_dir.get_child("folder1"))
         count2: int = PythonFSTestHelper.get_children_count_recursively(v_dir.get_child("folder4").get_child("folder1"))
-        self.assertEquals(count1, count2)
+        self.assertEqual(count1, count2)
 
         dfile: IRealFile = v_dir.get_child("folder4").get_child("folder1").get_child("folder2").get_child(
             file.get_base_name())
         self.assertTrue(dfile.exists())
         self.assertTrue(dfile.delete())
-        self.assertEquals(3, v_dir.get_child("folder4").get_child("folder1").get_child("folder2").get_children_count())
+        self.assertEqual(3, v_dir.get_child("folder4").get_child("folder1").get_child("folder2").get_children_count())
         v_dir.get_child("folder1").copy_recursively(folder3, None, IRealFile.auto_rename_file, False, None)
-        self.assertEquals(2, v_dir.get_children_count())
-        self.assertEquals(1, v_dir.get_child("folder4").get_children_count())
-        self.assertEquals(7, v_dir.get_child("folder4").get_child("folder1").get_children_count())
-        self.assertEquals(6, v_dir.get_child("folder4").get_child("folder1").get_child("folder2").get_children_count())
-        self.assertEquals(0, v_dir.get_child("folder4").get_child("folder1").get_child("folder2").get_child(
+        self.assertEqual(2, v_dir.get_children_count())
+        self.assertEqual(1, v_dir.get_child("folder4").get_children_count())
+        self.assertEqual(7, v_dir.get_child("folder4").get_child("folder1").get_children_count())
+        self.assertEqual(6, v_dir.get_child("folder4").get_child("folder1").get_child("folder2").get_children_count())
+        self.assertEqual(0, v_dir.get_child("folder4").get_child("folder1").get_child("folder2").get_child(
             "folder2").get_children_count())
 
         v_dir.get_child("folder4").get_child("folder1").get_child("folder2").get_child(file.get_base_name()).delete()
@@ -530,12 +530,12 @@ class SalmonFSPythonTestRunner(SalmonPythonTestRunner):
         failed: [IRealFile] = []
         v_dir.get_child("folder1").copy_recursively(folder3, None, None, False,
                                                     lambda failed_file, e: failed.append(failed_file))
-        self.assertEquals(4, len(failed))
-        self.assertEquals(2, v_dir.get_children_count())
-        self.assertEquals(1, v_dir.get_child("folder4").get_children_count())
-        self.assertEquals(7, v_dir.get_child("folder4").get_child("folder1").get_children_count())
-        self.assertEquals(6, v_dir.get_child("folder4").get_child("folder1").get_child("folder2").get_children_count())
-        self.assertEquals(0, v_dir.get_child("folder4").get_child("folder1").get_child("folder2").get_child(
+        self.assertEqual(4, len(failed))
+        self.assertEqual(2, v_dir.get_children_count())
+        self.assertEqual(1, v_dir.get_child("folder4").get_children_count())
+        self.assertEqual(7, v_dir.get_child("folder4").get_child("folder1").get_children_count())
+        self.assertEqual(6, v_dir.get_child("folder4").get_child("folder1").get_child("folder2").get_children_count())
+        self.assertEqual(0, v_dir.get_child("folder4").get_child("folder1").get_child("folder2").get_child(
             "folder2").get_children_count())
 
         v_dir.get_child("folder4").get_child("folder1").get_child("folder2").get_child(file.get_base_name()).delete()
@@ -543,12 +543,12 @@ class SalmonFSPythonTestRunner(SalmonPythonTestRunner):
         failedmv: [IRealFile] = []
         v_dir.get_child("folder1").move_recursively(v_dir.get_child("folder4"), None, IRealFile.auto_rename_file, False,
                                                     lambda failed_file, e1: failedmv.append(failed_file))
-        self.assertEquals(4, len(failed))
-        self.assertEquals(1, v_dir.get_children_count())
-        self.assertEquals(1, v_dir.get_child("folder4").get_children_count())
-        self.assertEquals(9, v_dir.get_child("folder4").get_child("folder1").get_children_count())
-        self.assertEquals(8, v_dir.get_child("folder4").get_child("folder1").get_child("folder2").get_children_count())
-        self.assertEquals(0, v_dir.get_child("folder4").get_child("folder1").get_child("folder2").get_child(
+        self.assertEqual(4, len(failed))
+        self.assertEqual(1, v_dir.get_children_count())
+        self.assertEqual(1, v_dir.get_child("folder4").get_children_count())
+        self.assertEqual(9, v_dir.get_child("folder4").get_child("folder1").get_children_count())
+        self.assertEqual(8, v_dir.get_child("folder4").get_child("folder1").get_child("folder2").get_children_count())
+        self.assertEqual(0, v_dir.get_child("folder4").get_child("folder1").get_child("folder2").get_child(
             "folder2").get_children_count())
 
     def ShouldReadFromFileMultithreaded(self):
@@ -574,7 +574,7 @@ class SalmonFSPythonTestRunner(SalmonPythonTestRunner):
 
         file_input_stream2: SalmonFileInputStream = SalmonFileInputStream(sfiles[0], 4, 4 * 1024 * 1024, 1, 256 * 1024)
         h2: str = hashlib.md5(file_input_stream2).hexdigest()
-        self.assertEquals(h1, h2)
+        self.assertEqual(h1, h2)
 
         pos: int = abs(random.randint(0, file.length()))
 
@@ -598,4 +598,4 @@ class SalmonFSPythonTestRunner(SalmonPythonTestRunner):
         h4: str = hashlib.md5(ms2.to_array()).hexdigest()
         file_input_stream2.close()
         ms2.close()
-        self.assertEquals(h3, h4)
+        self.assertEqual(h3, h4)

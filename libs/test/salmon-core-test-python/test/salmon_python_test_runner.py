@@ -476,7 +476,7 @@ class SalmonPythonTestRunner(TestCase):
         v_bytes = BitConverter.to_bytes(lnum1, 8)
         lnum2 = BitConverter.to_long(v_bytes, 0, 8)
 
-        self.assertEquals(lnum1, lnum2)
+        self.assertEqual(lnum1, lnum2)
 
     def test_encrypt_and_decrypt_array_multiple_threads(self):
         data = TestHelper.get_rand_array(1 * 1024 * 1024)
