@@ -480,13 +480,13 @@ class SalmonPythonTestRunner(TestCase):
 
     def test_encrypt_and_decrypt_array_multiple_threads(self):
         data = TestHelper.get_rand_array(1 * 1024 * 1024)
-        t1 = time.time()
+        t1 = time.time() * 1000
         enc_data = SalmonEncryptor(2).encrypt(data, TestHelper.TEST_KEY_BYTES, TestHelper.TEST_NONCE_BYTES,
                                               False)
-        t2 = time.time()
+        t2 = time.time() * 1000
         dec_data = SalmonDecryptor(2).decrypt(enc_data, TestHelper.TEST_KEY_BYTES, TestHelper.TEST_NONCE_BYTES,
                                               False)
-        t3 = time.time()
+        t3 = time.time() * 1000
 
         self.assertEqual(data, dec_data)
         print("enc time: " + str(t2 - t1))
@@ -495,13 +495,13 @@ class SalmonPythonTestRunner(TestCase):
     def test_encrypt_and_decrypt_array_multiple_threads_integrity(self):
         SalmonDefaultOptions.set_buffer_size(2 * 1024 * 1024)
         data = TestHelper.get_rand_array(1 * 1024 * 1024 + 3)
-        t1 = time.time()
+        t1 = time.time() * 1000
         enc_data = SalmonEncryptor(2).encrypt(data, TestHelper.TEST_KEY_BYTES, TestHelper.TEST_NONCE_BYTES,
                                               False, True, TestHelper.TEST_HMAC_KEY_BYTES, None)
-        t2 = time.time()
+        t2 = time.time() * 1000
         dec_data = SalmonDecryptor(2).decrypt(enc_data, TestHelper.TEST_KEY_BYTES, TestHelper.TEST_NONCE_BYTES,
                                               False, True, TestHelper.TEST_HMAC_KEY_BYTES, None)
-        t3 = time.time()
+        t3 = time.time() * 1000
 
         self.assertEqual(data, dec_data)
         print("enc time: " + str(t2 - t1))
@@ -509,13 +509,13 @@ class SalmonPythonTestRunner(TestCase):
 
     def test_encrypt_and_decrypt_array_multiple_threads_integrity_custom_chunk_size(self):
         data = TestHelper.get_rand_array(1 * 1024 * 1024)
-        t1 = time.time()
+        t1 = time.time() * 1000
         enc_data = SalmonEncryptor(2).encrypt(data, TestHelper.TEST_KEY_BYTES, TestHelper.TEST_NONCE_BYTES,
                                               False, True, TestHelper.TEST_HMAC_KEY_BYTES, 32)
-        t2 = time.time()
+        t2 = time.time() * 1000
         dec_data = SalmonDecryptor(2).decrypt(enc_data, TestHelper.TEST_KEY_BYTES, TestHelper.TEST_NONCE_BYTES,
                                               False, True, TestHelper.TEST_HMAC_KEY_BYTES, 32)
-        t3 = time.time()
+        t3 = time.time() * 1000
 
         self.assertEqual(data, dec_data)
         print("enc time: " + str(t2 - t1))
@@ -523,13 +523,13 @@ class SalmonPythonTestRunner(TestCase):
 
     def test_encrypt_and_decrypt_array_multiple_threads_integrity_custom_chunk_size_store_header(self):
         data = TestHelper.get_rand_array_same(129 * 1024)
-        t1 = time.time()
+        t1 = time.time() * 1000
         enc_data = SalmonEncryptor().encrypt(data, TestHelper.TEST_KEY_BYTES, TestHelper.TEST_NONCE_BYTES,
                                              True, True, TestHelper.TEST_HMAC_KEY_BYTES, 32)
-        t2 = time.time()
+        t2 = time.time() * 1000
         dec_data = SalmonDecryptor().decrypt(enc_data, TestHelper.TEST_KEY_BYTES,
                                              None, True, True, TestHelper.TEST_HMAC_KEY_BYTES, None)
-        t3 = time.time()
+        t3 = time.time() * 1000
 
         self.assertEqual(data, dec_data)
         print("enc time: " + str(t2 - t1))

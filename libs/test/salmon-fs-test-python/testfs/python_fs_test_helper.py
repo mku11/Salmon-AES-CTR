@@ -231,7 +231,7 @@ class PythonFSTestHelper:
         # write file
         real_dir: IRealFile = PyFile(output_dir)
         v_dir: SalmonFile = SalmonFile(real_dir, None)
-        filename: str = "test_" + str(int(time.time())) + ".txt"
+        filename: str = "test_" + str(int(time.time() * 1000)) + ".txt"
         new_file: SalmonFile = v_dir.create_file(filename, key, filename_nonce, file_nonce)
         if apply_integrity:
             new_file.set_apply_integrity(True, hash_key, chunk_size)

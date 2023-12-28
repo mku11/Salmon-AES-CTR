@@ -144,7 +144,7 @@ class SalmonFileExporter:
             start_time: int = 0
             self.__stopped = False
             if self.__enableLog:
-                start_time = int(time.time())
+                start_time = int(time.time() * 1000)
 
             total_bytes_written = [0]
             self.__failed = False
@@ -210,7 +210,7 @@ class SalmonFileExporter:
             if self.__lastException is not None:
                 raise self.__lastException
             if self.__enableLog:
-                total: int = int(time.time()) - start_time
+                total: int = int(time.time() * 1000) - start_time
                 print("SalmonFileExporter AesType: " + SalmonStream.getAesProviderType()
                       + " File: " + file_to_export.get_base_name() + " verified and exported "
                       + str(total_bytes_written[0]) + " bytes in: " + str(total) + " ms"
@@ -240,7 +240,7 @@ class SalmonFileExporter:
          * @param count             The length of the bytes to be decrypted
          * @param total_bytes_written The total bytes that were written to the external file
         """
-        start_time: int = int(time.time())
+        start_time: int = int(time.time() * 1000)
         total_part_bytes_written: int = 0
 
         target_stream: RandomAccessStream | None = None
@@ -273,7 +273,7 @@ class SalmonFileExporter:
                     on_progress(total_bytes_written[0], file_to_export.get_size())
 
             if SalmonFileExporter.__enableLogDetails:
-                total: int = int(time.time()) - start_time
+                total: int = int(time.time() * 1000) - start_time
                 print("SalmonFileExporter: File Part: " + file_to_export.get_base_name() + " exported " + str(
                     total_part_bytes_written)
                       + " bytes in: " + str(total) + " ms"

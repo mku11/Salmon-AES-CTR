@@ -169,7 +169,7 @@ class SalmonFileImporter:
                 raise NotImplementedError("Multithreading is not supported")
             self.__stopped = False
             if SalmonFileImporter.__enableLog:
-                start_time = int(time.time())
+                start_time = int(time.time() * 1000)
 
             self.__failed = False
             salmon_file = v_dir.create_file(filename)
@@ -229,7 +229,7 @@ class SalmonFileImporter:
             if self.__lastException is not None:
                 raise self.__lastException
             if SalmonFileImporter.__enableLog:
-                total: int = int(time.time()) - start_time
+                total: int = int(time.time() * 1000) - start_time
                 print(
                     "SalmonFileImporter AesType: " + SalmonStream.getAesProviderType()
                     + " File: " + file_to_import.get_base_name()
@@ -261,7 +261,7 @@ class SalmonFileImporter:
          * @param total_bytes_read The total bytes read from the external file
          * @param on_progress 	 Progress observer
         """
-        start_time: int = int(time.time())
+        start_time: int = int(time.time() * 1000)
         total_part_bytes_read: int = 0
 
         target_stream: SalmonStream | None = None
@@ -296,7 +296,7 @@ class SalmonFileImporter:
                     on_progress(total_bytes_read[0], file_to_import.length())
 
             if SalmonFileImporter.__enableLogDetails:
-                total: int = int(time.time()) - start_time
+                total: int = int(time.time() * 1000) - start_time
                 print("SalmonFileImporter: File Part: " + file_to_import.get_base_name()
                       + " imported " + str(total_part_bytes_read) + " bytes in: " + str(total) + " ms"
                       + ", avg speed: " + str(total_part_bytes_read / float(total)) + " bytes/sec")

@@ -459,12 +459,12 @@ class TestHelper:
 
     @staticmethod
     def encrypt_and_decrypt_byte_array2(data, threads, enable_log):
-        t1 = time.time()
+        t1 = time.time() * 1000
         enc_data = SalmonEncryptor(threads).encrypt(data, TestHelper.TEST_KEY_BYTES, TestHelper.TEST_NONCE_BYTES, False)
-        t2 = time.time()
+        t2 = time.time() * 1000
         dec_data = SalmonDecryptor(threads).decrypt(enc_data, TestHelper.TEST_KEY_BYTES, TestHelper.TEST_NONCE_BYTES,
                                                     False)
-        t3 = time.time()
+        t3 = time.time() * 1000
 
         TestHelper.assert_array_equal(data, dec_data)
         if enable_log:
@@ -479,14 +479,14 @@ class TestHelper:
 
     @staticmethod
     def encrypt_and_decrypt_byte_array_native2(data, enable_log):
-        t1 = time.time()
+        t1 = time.time() * 1000
         enc_data = TestHelper.native_ctr_transform(data, TestHelper.TEST_KEY_BYTES, TestHelper.TEST_NONCE_BYTES, True,
                                                    SalmonStream.get_aes_provider_type())
-        t2 = time.time()
+        t2 = time.time() * 1000
         dec_data = TestHelper.native_ctr_transform(enc_data, TestHelper.TEST_KEY_BYTES, TestHelper.TEST_NONCE_BYTES,
                                                    False,
                                                    SalmonStream.get_aes_provider_type())
-        t3 = time.time()
+        t3 = time.time() * 1000
 
         TestHelper.assert_array_equal(data, dec_data)
         if enable_log:
@@ -501,13 +501,13 @@ class TestHelper:
 
     @staticmethod
     def encrypt_and_decrypt_byte_array_def2(data, enable_log):
-        t1 = time.time()
+        t1 = time.time() * 1000
         enc_data = TestHelper.default_aesctr_transform(data, TestHelper.TEST_KEY_BYTES, TestHelper.TEST_NONCE_BYTES,
                                                        True)
-        t2 = time.time()
+        t2 = time.time() * 1000
         dec_data = TestHelper.default_aesctr_transform(enc_data, TestHelper.TEST_KEY_BYTES, TestHelper.TEST_NONCE_BYTES,
                                                        False)
-        t3 = time.time()
+        t3 = time.time() * 1000
 
         TestHelper.assert_array_equal(data, dec_data)
         if enable_log:
@@ -517,10 +517,10 @@ class TestHelper:
 
     @staticmethod
     def copy_memory(size):
-        t1 = time.time()
+        t1 = time.time() * 1000
         data = TestHelper.get_rand_array(size)
-        t2 = time.time()
-        t3 = time.time()
+        t2 = time.time() * 1000
+        t3 = time.time() * 1000
         print("gen time: " + str(t2 - t1))
         print("copy time: " + str(t3 - t2))
 
@@ -595,7 +595,7 @@ class TestHelper:
 
     @staticmethod
     def generate_folder(dir_path):
-        v_time = time.time()
+        v_time = time.time() * 1000
         dir_path = dir_path + "_" + str(int(v_time))
         os.mkdir(dir_path)
         return dir_path
