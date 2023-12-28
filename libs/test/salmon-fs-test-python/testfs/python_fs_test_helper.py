@@ -36,6 +36,7 @@ from file.py_file import PyFile
 from file.ireal_file import IRealFile
 from iostream.memory_stream import MemoryStream
 from iostream.random_access_stream import RandomAccessStream
+from salmon.iostream.encryption_mode import EncryptionMode
 from salmon.iostream.salmon_stream import SalmonStream
 from salmon.salmon_decryptor import SalmonDecryptor
 from salmon.salmon_default_options import SalmonDefaultOptions

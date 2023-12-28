@@ -34,6 +34,7 @@ from file.virtual_file import VirtualFile
 from iostream.random_access_stream import RandomAccessStream
 from salmon.integrity.salmon_integrity import SalmonIntegrity
 from salmon.integrity.salmon_integrity_exception import SalmonIntegrityException
+from salmon.iostream.encryption_mode import EncryptionMode
 from salmon.iostream.salmon_stream import SalmonStream
 from salmon.salmon_generator import SalmonGenerator
 from salmon.salmon_header import SalmonHeader
@@ -118,8 +119,8 @@ class SalmonFile(VirtualFile):
         stream: RandomAccessStream | None = None
         try:
             stream = self.__realFile.get_input_stream()
-            bytes_read: int = stream.read(header.get_magic_bytes(), 0, header.get_magic_bytes().length)
-            if bytes_read != header.get_magic_bytes().length:
+            bytes_read: int = stream.read(header.get_magic_bytes(), 0, len(header.get_magic_bytes()))
+            if bytes_read != len(header.get_magic_bytes()):
                 return None
             buff: bytearray = bytearray(8)
             bytes_read = stream.read(buff, 0, SalmonGenerator.VERSION_LENGTH)

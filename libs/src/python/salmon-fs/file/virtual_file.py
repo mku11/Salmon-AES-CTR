@@ -36,6 +36,7 @@ class VirtualFile(ABC):
      * A virtual file. Read-only operations are included. Since write operations can be implementation
      * specific ie for encryption they can be implemented by extending this class.
     """
+
     def __init__(self, real_file: IRealFile, drive: VirtualDrive | None = None):
         pass
 
@@ -61,6 +62,9 @@ class VirtualFile(ABC):
         pass
 
     def get_real_path(self) -> str:
+        pass
+
+    def get_real_file(self) -> IRealFile:
         pass
 
     def get_base_name(self) -> str:
