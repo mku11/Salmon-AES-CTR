@@ -517,7 +517,7 @@ class PythonFSTestHelper:
 
     @staticmethod
     def should_test_file_sequencer():
-        file: IRealFile = PyFile(TestHelper.TEST_SEQUENCER_DIR + "\\" + TestHelper.TEST_SEQUENCER_FILENAME)
+        file: IRealFile = PyFile(PythonFSTestHelper.TEST_SEQUENCER_DIR + "\\" + PythonFSTestHelper.TEST_SEQUENCER_FILENAME)
         if file.exists():
             file.delete()
         sequencer: SalmonFileSequencer = SalmonFileSequencer(file, SalmonSequenceSerializer())
