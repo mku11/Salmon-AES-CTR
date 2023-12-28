@@ -126,7 +126,7 @@ class SalmonFileInputStream(BufferedIOBase):
          * Method creates the parallel streams for reading from the file
         """
         self.__executor = ThreadPoolExecutor(self.__threads)
-        self.__streams = []
+        self.__streams = [None] * self.__threads
         try:
             for i in range(0, self.__threads):
                 self.__streams[i] = self.__salmonFile.get_input_stream()
