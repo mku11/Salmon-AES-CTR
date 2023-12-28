@@ -129,17 +129,17 @@ class SalmonFileSearcher:
          * @param on_result_found Callback interface to receive notifications when results found.
          * @param search_results The array to store the search results.
         """
-        if quit:
+        if self.__quit:
             return
         files: [SalmonFile] = v_dir.list_files()
         terms_array: [str] = terms.split(" ")
         for file in files:
-            if quit:
+            if self.__quit:
                 break
             if file.is_directory():
                 self.__search_dir(file, terms, anyterm, on_result_found, search_results)
             else:
-                if search_results.containsKey(file.get_real_path()):
+                if file.get_real_path() in search_results:
                     continue
                 try:
                     hits: int = self.__get_search_results(file.get_base_name(), terms_array, anyterm)

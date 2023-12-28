@@ -110,8 +110,8 @@ class SalmonFileCommander:
                              auto_rename: Callable[[IRealFile], str], on_failed: Callable[[IRealFile, Exception], Any],
                              imported_files: [SalmonFile], count: [int], total: [int],
                              existing_files: {str, SalmonFile}):
-        sfile: SalmonFile = existing_files.get(file_to_import.get_base_name()) if existing_files.containsKey(
-            file_to_import.get_base_name()) else None
+        sfile: SalmonFile = existing_files.get(
+            file_to_import.get_base_name()) if file_to_import.get_base_name() in existing_files else None
         if file_to_import.is_directory():
             if on_progress_changed is not None:
                 on_progress_changed(SalmonFileCommander.RealFileTaskProgress(file_to_import, 0, 1, count[0], total))
@@ -136,11 +136,11 @@ class SalmonFileCommander:
                     filename = auto_rename(file_to_import)
                 sfile = self.__fileImporter.import_file(file_to_import, import_dir, filename, delete_source, integrity,
                                                         lambda v_bytes, total_bytes2, on_progress_changed2:
-                                                      self.__notify_real_file_progress(file_to_import,
-                                                                                       v_bytes,
-                                                                                       total_bytes2,
-                                                                                       count, total,
-                                                                                       on_progress_changed2))
+                                                        self.__notify_real_file_progress(file_to_import,
+                                                                                         v_bytes,
+                                                                                         total_bytes2,
+                                                                                         count, total,
+                                                                                         on_progress_changed2))
                 imported_files.add(sfile)
                 count[0] += 1
             except SalmonSequenceException as ex:
@@ -202,8 +202,7 @@ class SalmonFileCommander:
                              on_failed: Callable[[SalmonFile, Exception], Any],
                              exported_files: [IRealFile], count: [int], total: int,
                              existing_files: {str, IRealFile}):
-        rfile: IRealFile = existing_files.get(file_to_export.get_base_name()) if existing_files.containsKey(
-            file_to_export.get_base_name()) else None
+        rfile: IRealFile = existing_files.get(file_to_export.get_base_name()) if file_to_export.get_base_name() in existing_files else None
 
         if file_to_export.is_directory():
             if rfile is None or not rfile.exists():
@@ -227,8 +226,8 @@ class SalmonFileCommander:
                     filename = auto_rename(rfile)
                 rfile = self.__fileExporter.export_file(file_to_export, export_dir, filename, delete_source, integrity,
                                                         lambda v_bytes, total_bytes: self.__notify_salmon_file_progress(
-                                                          file_to_export, v_bytes, total_bytes, count, total,
-                                                          on_progress_changed))
+                                                            file_to_export, v_bytes, total_bytes, count, total,
+                                                            on_progress_changed))
                 exported_files.add(rfile)
                 count[0] += 1
             except SalmonSequenceException as ex:
@@ -503,4 +502,3 @@ class SalmonFileCommander:
                 pass
         if position == length:
             count[0] += 1
-
