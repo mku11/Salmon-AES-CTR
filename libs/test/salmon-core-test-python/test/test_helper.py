@@ -73,7 +73,7 @@ class TestHelper:
     TEST_NONCE = "12345678"  # 8 bytes
     TEST_NONCE_BYTES = bytearray(TEST_NONCE.encode('utf-8'))
     TEST_FILENAME_NONCE = "ABCDEFGH"  # 8 bytes
-    TEST_FILENAME_NONCE_BYTES = TEST_FILENAME_NONCE.encode('utf-8')
+    TEST_FILENAME_NONCE_BYTES = bytearray(TEST_FILENAME_NONCE.encode('utf-8'))
     TEST_HMAC_KEY = "12345678901234561234567890123456"  # 32bytes
     TEST_HMAC_KEY_BYTES = bytearray(TEST_HMAC_KEY.encode('utf-8'))
 
