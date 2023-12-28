@@ -414,5 +414,5 @@ class SalmonDrive(VirtualDrive):
     def set_sequencer(self, sequencer: ISalmonSequencer):
         self.__sequencer = sequencer
 
-    def set_drive_id(self, drive_id: str):
+    def set_drive_id(self, drive_id: bytearray):
         self.__driveID = drive_id
