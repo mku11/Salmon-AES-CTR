@@ -120,7 +120,7 @@ class PythonFSTestHelper:
         PythonFSTestHelper.testCase.assertIsNotNone(salmon_file)
 
         PythonFSTestHelper.testCase.assertTrue(salmon_file.exists())
-        salmon_files: [SalmonFile] = SalmonDriveManager.get_drive().get_virtual_root().list_files()
+        salmon_files: list[SalmonFile] = SalmonDriveManager.get_drive().get_virtual_root().list_files()
         real_file_size: int = file_to_import.length()
         for file in salmon_files:
             if file.get_base_name().equals(file_to_import.get_base_name()):
@@ -169,7 +169,7 @@ class PythonFSTestHelper:
         PythonFSTestHelper.testCase.assertTrue(salmon_file.exists())
 
         searcher: SalmonFileSearcher = SalmonFileSearcher()
-        files: [SalmonFile] = searcher.search(salmon_root_dir, basename, True, None, None)
+        files: list[SalmonFile] = searcher.search(salmon_root_dir, basename, True, None, None)
 
         PythonFSTestHelper.testCase.assertTrue(len(files) > 0)
         PythonFSTestHelper.testCase.assertEqual(files[0].get_base_name(), basename)

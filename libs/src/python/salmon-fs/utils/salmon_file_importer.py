@@ -250,7 +250,7 @@ class SalmonFileImporter:
         return salmon_file
 
     def __import_file_part(self, file_to_import: IRealFile, salmon_file: SalmonFile, start: int, count: int,
-                           total_bytes_read: [], on_progress: Callable[[int, int], Any]):
+                           total_bytes_read: list[int], on_progress: Callable[[int, int], Any]):
         """
          * Import a file part into a file in the drive.
          *

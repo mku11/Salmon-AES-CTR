@@ -77,7 +77,7 @@ class PyFile(IRealFile):
          * @return True if deletion is successful.
         """
         if self.is_directory():
-            p_files: [IRealFile] = self.list_files()
+            p_files: list[IRealFile] = self.list_files()
             for p_file in p_files:
                 p_file.delete()
         os.remove(self.__file_path)
@@ -172,17 +172,17 @@ class PyFile(IRealFile):
         """
         return len(os.listdir(self.__file_path)) if self.is_directory() else 0
 
-    def list_files(self) -> [IRealFile]:
+    def list_files(self) -> list[IRealFile]:
         """
          * List all files under this directory.
          * @return The list of files.
         """
-        files: [str] = os.listdir(self.__file_path)
+        files: list[str] = os.listdir(self.__file_path)
         if files is None:
             return []
 
-        real_files: [PyFile] = []
-        real_dirs: [PyFile] = []
+        real_files: list[PyFile] = []
+        real_dirs: list[PyFile] = []
         for i in range(0, len(files)):
             p_file: PyFile = PyFile(files[i])
             if p_file.is_directory():

@@ -406,12 +406,12 @@ class SalmonFile(VirtualFile):
         """
         return self.__realFile.get_children_count()
 
-    def list_files(self) -> [SalmonFile]:
+    def list_files(self) -> list[SalmonFile]:
         """
          * Lists files and directories under this directory
         """
-        files: [IRealFile] = self.__realFile.list_files()
-        salmon_files: [SalmonFile] = []
+        files: list[IRealFile] = self.__realFile.list_files()
+        salmon_files: list[SalmonFile] = []
         for iRealFile in files:
             file: SalmonFile = SalmonFile(iRealFile, self.__drive)
             salmon_files.append(file)
@@ -429,7 +429,7 @@ class SalmonFile(VirtualFile):
          * @throws IOError
          * @throws SalmonAuthException
         """
-        files: [SalmonFile] = self.list_files()
+        files: list[SalmonFile] = self.list_files()
         for file in files:
             if file.get_base_name() == filename:
                 return file
@@ -485,7 +485,7 @@ class SalmonFile(VirtualFile):
         relative_path: str = self.__get_relative_path(real_path)
         path: str = ""
         # TODO: test if char is escaped
-        parts: [str] = relative_path.split(os.sep)
+        parts: list[str] = relative_path.split(os.sep)
         for part in parts:
             if part != "":
                 path += SalmonFile.separator

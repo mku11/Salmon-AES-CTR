@@ -128,7 +128,7 @@ class SalmonSequence:
         """
         self.__authID = auth_id
 
-    def get_next_nonce(self) -> bytearray:
+    def get_next_nonce(self) -> bytearray | None:
         """
          * Get the next nonce.
          * @return
@@ -142,7 +142,7 @@ class SalmonSequence:
         """
         self.__nextNonce = next_nonce
 
-    def get_max_nonce(self) -> bytearray:
+    def get_max_nonce(self) -> bytearray | None:
         """
          * Get the max nonce.
          * @return

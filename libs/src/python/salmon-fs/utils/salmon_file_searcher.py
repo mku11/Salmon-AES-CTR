@@ -102,7 +102,7 @@ class SalmonFileSearcher:
         self.__running = False
         return list(search_results.values())
 
-    def __get_search_results(self, filename: str, terms: [str], any_term: bool) -> int:
+    def __get_search_results(self, filename: str, terms: list[str], any_term: bool) -> int:
         """
          * Match the current terms in the filename.
          * @param filename The filename to match.
@@ -134,8 +134,8 @@ class SalmonFileSearcher:
         """
         if self.__quit:
             return
-        files: [SalmonFile] = v_dir.list_files()
-        terms_array: [str] = terms.split(" ")
+        files: list[SalmonFile] = v_dir.list_files()
+        terms_array: list[str] = terms.split(" ")
         for file in files:
             if self.__quit:
                 break

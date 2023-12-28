@@ -49,7 +49,7 @@ class VirtualFile(ABC):
     def get_output_stream(self, nonce: bytearray) -> RandomAccessStream:
         pass
 
-    def list_files(self) -> [VirtualFile]:
+    def list_files(self) -> list[VirtualFile]:
         pass
 
     def get_child(self, filename: str) -> VirtualFile | None:

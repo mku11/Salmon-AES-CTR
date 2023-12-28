@@ -72,8 +72,8 @@ class SalmonFileInputStream(BufferedIOBase):
          * @param back_offset   The back offset.
         """
         self.__buffersCount: int
-        self.__buffers: [SalmonFileInputStream.CacheBuffer] = None
-        self.__streams: [SalmonStream] = None
+        self.__buffers: list[SalmonFileInputStream.CacheBuffer] | None = None
+        self.__streams: list[SalmonStream] | None = None
         self.__salmonFile: SalmonFile | None = None
         self.__cacheBufferSize: int = 0
         self.__threads: int = 0
@@ -81,7 +81,7 @@ class SalmonFileInputStream(BufferedIOBase):
         self.__position: int = 0
         self.__size: int = 0
 
-        self.__lruBuffersIndex: [int] = []
+        self.__lruBuffersIndex: list[int] = []
         """
          * We reuse the least recently used buffer. Since the buffer count is relative
          * small (see {@link #MAX_BUFFERS}) there is no need for a fast-access lru queue
@@ -141,7 +141,7 @@ class SalmonFileInputStream(BufferedIOBase):
          * The first buffer will be sourcing at the start of the encrypted file where the header and indexing are
          * The rest of the buffers can be placed to whatever position the user slides to
         """
-        self.__buffers: [SalmonFileInputStream.CacheBuffer] = [None] * self.__buffersCount
+        self.__buffers: list[SalmonFileInputStream.CacheBuffer] = [None] * self.__buffersCount
         for i in range(0, self.__buffersCount):
             self.__buffers[i] = SalmonFileInputStream.CacheBuffer(self.__cacheBufferSize)
 
@@ -223,7 +223,8 @@ class SalmonFileInputStream(BufferedIOBase):
         raise NotImplementedError()
 
     @synchronized
-    def __fill_buffer(self, cache_buffer: SalmonFileInputStream.CacheBuffer, start_position: int, buffer_size: int) -> int:
+    def __fill_buffer(self, cache_buffer: SalmonFileInputStream.CacheBuffer, start_position: int,
+                      buffer_size: int) -> int:
         """
          * Fills a cache buffer with the decrypted data from the encrypted source file.
          *
@@ -239,7 +240,8 @@ class SalmonFileInputStream(BufferedIOBase):
 
         return bytes_read
 
-    def __fill_buffer_part(self, cache_buffer: SalmonFileInputStream.CacheBuffer, start: int, offset: int, buffer_size: int,
+    def __fill_buffer_part(self, cache_buffer: SalmonFileInputStream.CacheBuffer, start: int, offset: int,
+                           buffer_size: int,
                            salmon_stream: SalmonStream) -> int:
         """
          * Fills a cache buffer with the decrypted data from a part of an encrypted file served as a salmon stream
@@ -252,7 +254,8 @@ class SalmonFileInputStream(BufferedIOBase):
         total_bytes_read: int = salmon_stream.read(cache_buffer.buffer, offset, buffer_size)
         return total_bytes_read
 
-    def __fill_buffer_multi(self, cache_buffer: SalmonFileInputStream.CacheBuffer, start_position: int, buffer_size: int) -> int:
+    def __fill_buffer_multi(self, cache_buffer: SalmonFileInputStream.CacheBuffer, start_position: int,
+                            buffer_size: int) -> int:
         """
          * Fill the buffer using parallel streams for performance
          *

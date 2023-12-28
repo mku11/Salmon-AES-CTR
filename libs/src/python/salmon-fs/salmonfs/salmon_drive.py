@@ -308,7 +308,7 @@ class SalmonDrive(VirtualDrive):
         key: SalmonKey = self.get_key()
         if key is None:
             return False
-        enc_key: bytearray = key.get_drive_key()
+        enc_key: bytearray | None = key.get_drive_key()
         return enc_key is not None
 
     def get_bytes_from_real_file(self, source_path: str, buffer_size: int) -> bytearray:

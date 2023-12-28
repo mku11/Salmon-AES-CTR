@@ -531,7 +531,7 @@ class SalmonFSPythonTestRunner(SalmonPythonTestRunner):
 
         v_dir.get_child("folder4").get_child("folder1").get_child("folder2").get_child(file.get_base_name()).delete()
         v_dir.get_child("folder4").get_child("folder1").get_child(file.get_base_name()).delete()
-        failed: [IRealFile] = []
+        failed: list[IRealFile] = []
         v_dir.get_child("folder1").copy_recursively(folder3, None, None, False,
                                                     lambda failed_file, e: failed.append(failed_file))
         self.assertEqual(4, len(failed))
@@ -544,7 +544,7 @@ class SalmonFSPythonTestRunner(SalmonPythonTestRunner):
 
         v_dir.get_child("folder4").get_child("folder1").get_child("folder2").get_child(file.get_base_name()).delete()
         v_dir.get_child("folder4").get_child("folder1").get_child(file.get_base_name()).delete()
-        failedmv: [IRealFile] = []
+        failedmv: list[IRealFile] = []
         v_dir.get_child("folder1").move_recursively(v_dir.get_child("folder4"), None, IRealFile.auto_rename_file, False,
                                                     lambda failed_file, e1: failedmv.append(failed_file))
         self.assertEqual(4, len(failed))
@@ -565,7 +565,7 @@ class SalmonFSPythonTestRunner(SalmonPythonTestRunner):
                                                              SalmonSequenceSerializer())
         SalmonDriveManager.set_sequencer(sequencer)
         drive: SalmonDrive = SalmonDriveManager.create_drive(vault_dir, TestHelper.TEST_PASSWORD)
-        sfiles: [SalmonFile] = SalmonFileCommander(SalmonDefaultOptions.getBufferSize(),
+        sfiles: list[SalmonFile] = SalmonFileCommander(SalmonDefaultOptions.getBufferSize(),
                                                    SalmonDefaultOptions.getBufferSize(), 2).import_files(
             [file],
             drive.get_virtual_root(),
