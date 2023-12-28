@@ -58,8 +58,8 @@ class SalmonFileImporter:
      * True if multithreading is enabled.
     """
 
-    __enableLog: bool
-    __enableLogDetails: bool
+    __enableLog: bool = False
+    __enableLogDetails: bool = False
 
     def __init__(self, buffer_size: int, threads: int):
         """
