@@ -28,6 +28,7 @@ import xml.etree.ElementTree as Et
 from xml.dom import minidom
 
 from convert.base_64 import Base64
+from salmon.encode.salmon_encoder import SalmonEncoder
 from sequence.isalmon_sequence_serializer import ISalmonSequenceSerializer
 from sequence.salmon_sequence import SalmonSequence
 from sequence.salmon_sequence_exception import SalmonSequenceException
@@ -58,11 +59,11 @@ class SalmonSequenceSerializer(ISalmonSequenceSerializer):
                 drive: Et.Element = Et.SubElement(drives, "drive",
                                                   driveID=value.get_drive_id(),
                                                   authID=value.get_auth_id(),
-                                                  status=value.get_status().tostr())
+                                                  status=value.get_status().name)
                 if value.get_next_nonce() is not None:
-                    drive.attrib["next_nonce"] = Base64.getEncoder().encodeTostr(value.get_next_nonce())
+                    drive.attrib["next_nonce"] = SalmonEncoder.get_base64().encode(value.get_next_nonce())
                 if value.get_max_nonce() is not None:
-                    drive.attrib["max_nonce"] = Base64.getEncoder().encodeTostr(value.get_max_nonce())
+                    drive.attrib["max_nonce"] = SalmonEncoder.get_base64().encode(value.get_max_nonce())
         except Exception as ex:
             print(ex)
             raise SalmonSequenceException("Could not serialize sequences") from ex
@@ -81,14 +82,15 @@ class SalmonSequenceSerializer(ISalmonSequenceSerializer):
         configs: {str, SalmonSequence} = {}
         root: Et.Element = Et.fromstring(contents)
         try:
-            drives: Et.Element = root.find("/drives")
+            drives: Et.Element = root.find("drives")
             if drives is not None:
-                for i in range(0, len(drives.getchildren())):
-                    drive: Et.Element = drives.getchildren()[i]
+                children = list(drives.iter())
+                for i in range(0, len(children)):
+                    drive: Et.Element = children[i]
                     if not drive.tag == "drive":
                         continue
-                    drive_id: str = drive.attrib["drive_id"]
-                    auth_id: str = drive.attrib["auth_id"]
+                    drive_id: str = drive.attrib["driveID"]
+                    auth_id: str = drive.attrib["authID"]
                     status: str = drive.attrib["status"]
                     next_nonce: bytearray | None = None
                     max_nonce: bytearray | None = None
