@@ -256,7 +256,7 @@ class SalmonFile(VirtualFile):
         real_stream.close()
         return header_data
 
-    def __get_hash_key(self) -> bytearray:
+    def __get_hash_key(self) -> bytearray | None:
         """
          * Retrieve the current hash key that is used to encrypt / decrypt the file contents.
         """
@@ -356,7 +356,7 @@ class SalmonFile(VirtualFile):
         """
         return self.__requestedNonce
 
-    def __create_header(self, nonce: bytearray):
+    def __create_header(self, nonce: bytearray | None):
         """
          * Create the header for the file
         """
