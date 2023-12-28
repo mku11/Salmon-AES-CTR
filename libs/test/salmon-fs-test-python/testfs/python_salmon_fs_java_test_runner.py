@@ -78,10 +78,10 @@ class SalmonFSPythonTestRunner(SalmonPythonTestRunner):
             SalmonDriveManager.open_drive(vault_dir)
             root_dir: VirtualFile = SalmonDriveManager.get_drive().get_virtual_root()
             root_dir.list_files()
+        except SalmonAuthException as ex:
             wrong_password = True
 
-        except SalmonAuthException as ex:
-            self.assertTrue(wrong_password)
+        self.assertTrue(wrong_password)
 
     def test_AuthenticatePositive(self):
         vault_dir: str = TestHelper.generate_folder(SalmonPythonTestRunner.TEST_VAULT2_DIR)
