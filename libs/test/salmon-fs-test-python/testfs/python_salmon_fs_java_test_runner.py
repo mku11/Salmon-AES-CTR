@@ -322,7 +322,7 @@ class SalmonFSPythonTestRunner(SalmonPythonTestRunner):
                                                             TestHelper.TEST_KEY_BYTES,
                                                             True, True, 64, TestHelper.TEST_HMAC_KEY_BYTES,
                                                             TestHelper.TEST_FILENAME_NONCE_BYTES,
-                                                            TestHelper.TEST_NONCE_BYTES, TestHelper.TEST_OUTPUT_DIR,
+                                                            TestHelper.TEST_NONCE_BYTES, SalmonFSPythonTestRunner.TEST_OUTPUT_DIR,
                                                             False,
                                                             -1, True)
 
@@ -334,7 +334,7 @@ class SalmonFSPythonTestRunner(SalmonPythonTestRunner):
                                                                 TestHelper.TEST_KEY_BYTES,
                                                                 True, True, 64, TestHelper.TEST_HMAC_KEY_BYTES,
                                                                 TestHelper.TEST_FILENAME_NONCE_BYTES,
-                                                                TestHelper.TEST_NONCE_BYTES, TestHelper.TEST_OUTPUT_DIR,
+                                                                TestHelper.TEST_NONCE_BYTES, SalmonFSPythonTestRunner.TEST_OUTPUT_DIR,
                                                                 True, 45, True)
         except IOError as ex:
             if isinstance(ex.__cause__, SalmonIntegrityException):
@@ -354,7 +354,7 @@ class SalmonFSPythonTestRunner(SalmonPythonTestRunner):
                                                                     TestHelper.TEST_HMAC_KEY_BYTES,
                                                                     TestHelper.TEST_FILENAME_NONCE_BYTES,
                                                                     TestHelper.TEST_NONCE_BYTES,
-                                                                    TestHelper.TEST_OUTPUT_DIR, True, i, False)
+                                                                    SalmonFSPythonTestRunner.TEST_OUTPUT_DIR, True, i, False)
             except IOError as ex:
                 if isinstance(ex.__cause__, SalmonIntegrityException):
                     caught = True
@@ -375,7 +375,7 @@ class SalmonFSPythonTestRunner(SalmonPythonTestRunner):
                                                                 TestHelper.TEST_HMAC_KEY_BYTES,
                                                                 TestHelper.TEST_FILENAME_NONCE_BYTES,
                                                                 TestHelper.TEST_NONCE_BYTES,
-                                                                TestHelper.TEST_OUTPUT_DIR,
+                                                                SalmonFSPythonTestRunner.TEST_OUTPUT_DIR,
                                                                 True, 24 + 32 + 5, True)
         except IOError as ex:
             if isinstance(ex.__cause__, SalmonIntegrityException):
@@ -409,7 +409,7 @@ class SalmonFSPythonTestRunner(SalmonPythonTestRunner):
                                                                                TestHelper.TEST_HMAC_KEY_BYTES,
                                                                                TestHelper.TEST_FILENAME_NONCE_BYTES,
                                                                                TestHelper.TEST_NONCE_BYTES,
-                                                                               TestHelper.TEST_OUTPUT_DIR,
+                                                                               SalmonFSPythonTestRunner.TEST_OUTPUT_DIR,
                                                                                False, -1, True)
         file_input_stream: SalmonFileInputStream = SalmonFileInputStream(file,
                                                                          3, 50, 2, 12)
