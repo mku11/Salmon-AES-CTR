@@ -332,7 +332,7 @@ class SalmonFile(VirtualFile):
         """
          * Returns the initial vector that is used for encryption / decryption
         """
-        header: SalmonHeader = self.get_header()
+        header: SalmonHeader | None = self.get_header()
         if header is None:
             return None
         return self.get_header().get_nonce()
