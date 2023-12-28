@@ -101,7 +101,7 @@ class SalmonFile(VirtualFile):
          * @return The chunk size.
          * @throws IOError Throws exceptions if the format is corrupt.
         """
-        header: SalmonHeader = self.get_header()
+        header: SalmonHeader | None = self.get_header()
         if header is None:
             return None
         return header.get_chunk_size()
@@ -284,7 +284,7 @@ class SalmonFile(VirtualFile):
          *                         A positive number to specify integrity chunks.
         """
 
-        file_chunk_size: int = self.get_file_chunk_size()
+        file_chunk_size: int | None = self.get_file_chunk_size()
 
         if file_chunk_size is not None:
             raise SalmonIntegrityException("Cannot redefine chunk size, delete file and recreate")
