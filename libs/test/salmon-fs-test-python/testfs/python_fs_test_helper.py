@@ -496,6 +496,7 @@ class PythonFSTestHelper:
         outs.set_position(0)
         outs.flush()
         outs.close()
+        ins.close()
         return outs.to_array()
 
     @staticmethod
