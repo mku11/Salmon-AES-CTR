@@ -87,7 +87,7 @@ class PythonFSTestHelper:
                           export_buffer_size: int, export_threads: int, integrity: bool, bitflip: bool,
                           flip_position: int,
                           should_be_equal: bool, apply_file_integrity: bool, verify_file_integrity: bool):
-        SalmonDriveManager.set_virtual_drive_class(type(PyDrive))
+        SalmonDriveManager.set_virtual_drive_class(PyDrive)
         sequencer: SalmonFileSequencer = SalmonFileSequencer(PyFile(vault_dir + "/" + TestHelper.TEST_SEQUENCER_FILE1),
                                                              SalmonSequenceSerializer())
         SalmonDriveManager.set_sequencer(sequencer)
@@ -135,7 +135,7 @@ class PythonFSTestHelper:
     @staticmethod
     def import_and_search(vault_dir: str, password: str, import_file: str,
                           import_buffer_size: int, import_threads: int):
-        SalmonDriveManager.set_virtual_drive_class(type(PyDrive))
+        SalmonDriveManager.set_virtual_drive_class(PyDrive)
         sequencer: SalmonFileSequencer = SalmonFileSequencer(PyFile(vault_dir + "/" + TestHelper.TEST_SEQUENCER_FILE1),
                                                              SalmonSequenceSerializer())
         SalmonDriveManager.set_sequencer(sequencer)
@@ -167,7 +167,7 @@ class PythonFSTestHelper:
     @staticmethod
     def import_and_copy(vault_dir: str, password: str, import_file: str, import_buffer_size: int, import_threads: int,
                         new_dir: str, move: bool):
-        SalmonDriveManager.set_virtual_drive_class(type(PyDrive))
+        SalmonDriveManager.set_virtual_drive_class(PyDrive)
         sequencer: SalmonFileSequencer = SalmonFileSequencer(PyFile(vault_dir + "/" + TestHelper.TEST_SEQUENCER_FILE1),
                                                              SalmonSequenceSerializer())
         SalmonDriveManager.set_sequencer(sequencer)

@@ -288,7 +288,7 @@ class SalmonFSPythonTestRunner(SalmonPythonTestRunner):
         self.assertTrue(import_success)
 
     def test_CatchVaultMaxFiles(self):
-        SalmonDriveManager.set_virtual_drive_class(type(PyDrive))
+        SalmonDriveManager.set_virtual_drive_class(PyDrive)
 
         vault_dir: str = TestHelper.generate_folder(SalmonPythonTestRunner.TEST_VAULT2_DIR)
         seq_file: str = vault_dir + "/" + TestHelper.TEST_SEQUENCER_FILE1
@@ -556,7 +556,7 @@ class SalmonFSPythonTestRunner(SalmonPythonTestRunner):
         vault_dir: str = TestHelper.generate_folder(SalmonPythonTestRunner.TEST_VAULT2_DIR)
         file: IRealFile = PyFile(TestHelper.TEST_IMPORT_MEDIUM_FILE)
 
-        SalmonDriveManager.set_virtual_drive_class(type(PyDrive))
+        SalmonDriveManager.set_virtual_drive_class(PyDrive)
         sequencer: SalmonFileSequencer = SalmonFileSequencer(PyFile(vault_dir + "/" + TestHelper.TEST_SEQUENCER_FILE1),
                                                              SalmonSequenceSerializer())
         SalmonDriveManager.set_sequencer(sequencer)
