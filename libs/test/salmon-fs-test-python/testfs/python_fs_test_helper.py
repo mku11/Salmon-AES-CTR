@@ -77,7 +77,14 @@ class PythonFSTestHelper:
         ins: BinaryIO | None = None
         try:
             ins = open(real_file.get_path(), 'rb')
-            return hashlib.md5(ins).hexdigest()
+            hash_md5 = hashlib.md5()
+            while True:
+                data = ins.read(32768)
+                if not data:
+                    break
+                hash_md5.update(data)
+            return hash_md5.hexdigest()
+
         finally:
             if ins is not None:
                 ins.close()
