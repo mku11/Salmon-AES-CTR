@@ -284,7 +284,7 @@ class SalmonFileImporter:
 
             while (bytes_read := source_stream.read(
                     v_bytes, 0,
-                    min(len(v_bytes), count - total_part_bytes_read)) > 0 and total_part_bytes_read < count):
+                    min(len(v_bytes), count - total_part_bytes_read))) > 0 and total_part_bytes_read < count:
                 if self.__stopped:
                     break
 
