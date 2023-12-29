@@ -184,7 +184,8 @@ class PyFile(IRealFile):
         real_files: list[PyFile] = []
         real_dirs: list[PyFile] = []
         for i in range(0, len(files)):
-            p_file: PyFile = PyFile(files[i])
+            file = os.path.abspath(os.path.join(self.__file_path, files[i]))
+            p_file: PyFile = PyFile(file)
             if p_file.is_directory():
                 real_dirs.append(p_file)
             else:
