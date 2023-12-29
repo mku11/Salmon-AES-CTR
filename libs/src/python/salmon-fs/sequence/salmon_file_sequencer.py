@@ -203,7 +203,7 @@ class SalmonFileSequencer(ISalmonSequencer):
         sequence.set_status(SalmonSequence.Status.Revoked)
         self._save_sequence_file(configs)
 
-    def get_sequence(self, drive_id: str) -> SalmonSequence:
+    def get_sequence(self, drive_id: str) -> SalmonSequence | None:
         """
          * Get the sequence by the drive ID.
          *
@@ -213,7 +213,7 @@ class SalmonFileSequencer(ISalmonSequencer):
         """
         xml_contents: str = self.__get_contents()
         configs: dict[str, SalmonSequence] = self.__serializer.deserialize(xml_contents)
-        sequence: SalmonSequence = self.__get_sequence(configs, drive_id)
+        sequence: SalmonSequence | None = self.__get_sequence(configs, drive_id)
         return sequence
 
     def close(self):

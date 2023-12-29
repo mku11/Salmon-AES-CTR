@@ -166,7 +166,7 @@ class SalmonDriveManager:
          * @throws Exception
         """
         drv_str: str = BitConverter.to_hex(SalmonDriveManager.get_drive().get_drive_id())
-        sequence: SalmonSequence = SalmonDriveManager.__sequencer.get_sequence(drv_str)
+        sequence: SalmonSequence | None = SalmonDriveManager.__sequencer.get_sequence(drv_str)
         if sequence is None:
             auth_id: bytearray = SalmonDriveGenerator.generate_auth_id()
             SalmonDriveManager.create_sequence(SalmonDriveManager.get_drive().get_drive_id(), auth_id)
