@@ -364,7 +364,9 @@ class PythonFSTestHelper:
                        should_import: bool):
         import_success: bool
         try:
-            sequencer: SalmonFileSequencer = SalmonFileSequencer(PyFile(seq_file), SalmonSequenceSerializer())
+            sequencer: SalmonFileSequencer = PythonFSTestHelper.TestSalmonFileSequencer(PyFile(seq_file),
+                                                                                        SalmonSequenceSerializer(),
+                                                                                        test_max_nonce, offset)
 
             SalmonDriveManager.set_sequencer(sequencer)
             try:
@@ -517,7 +519,8 @@ class PythonFSTestHelper:
 
     @staticmethod
     def should_test_file_sequencer():
-        file: IRealFile = PyFile(PythonFSTestHelper.TEST_SEQUENCER_DIR + "\\" + PythonFSTestHelper.TEST_SEQUENCER_FILENAME)
+        file: IRealFile = PyFile(
+            PythonFSTestHelper.TEST_SEQUENCER_DIR + "\\" + PythonFSTestHelper.TEST_SEQUENCER_FILENAME)
         if file.exists():
             file.delete()
         sequencer: SalmonFileSequencer = SalmonFileSequencer(file, SalmonSequenceSerializer())
