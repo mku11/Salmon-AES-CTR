@@ -167,6 +167,8 @@ class RandomAccessStream(ABC):
             raise IOError("Target stream not readable")
         if not stream.can_write():
             raise IOError("Target stream not writable")
+        if buffer_size is None:
+            buffer_size = 0
         if buffer_size <= 0:
             buffer_size = SalmonDefaultOptions.get_buffer_size()
         bytes_read: int
