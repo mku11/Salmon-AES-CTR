@@ -150,10 +150,8 @@ class PyFileStream(RandomAccessStream):
          * @param count The maximum number of bytes to read from the buffer.
          * @throws IOError
         """
-        print("write: " + str(self.get_position()) + " - " + str(self.get_position() + count))
         if self.__mm:
             if self.get_position() + count > self.__file.length():
-                print("write resize: " + str(self.__file.length()) + " new: " + str(self.get_position() + count))
                 self.__resize(self.get_position() + count)
             self.__mm.write(buffer[offset:offset + count])
         else:
@@ -176,7 +174,6 @@ class PyFileStream(RandomAccessStream):
             pos = self.__file.length() - offset
 
         if self.__mm and pos > self.__file.length():
-            print("seek resize: " + str(self.__file.length()) + " new: " + str(pos))
             self.__resize(pos)
 
         self.__mm.seek(pos) if self.__mm else self.__raf.seek(pos)
