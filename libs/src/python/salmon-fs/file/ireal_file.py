@@ -187,7 +187,7 @@ class IRealFile(ABC):
         pass
 
     def move(self, new_dir: IRealFile, new_name: str | None = None,
-             progress_listener: RandomAccessStream.OnProgressListener | None = None) -> IRealFile:
+             progress_listener: Callable[[int,int], Any] | None = None) -> IRealFile:
         """
          * Move this file to another directory.
          *
@@ -199,7 +199,7 @@ class IRealFile(ABC):
         pass
 
     def copy(self, new_dir: IRealFile, new_name: str | None = None,
-             progress_listener: RandomAccessStream.OnProgressListener | None = None) -> IRealFile:
+             progress_listener: Callable[[int,int], Any] | None = None) -> IRealFile:
         """
          * Copy this file to another directory.
          *
@@ -230,7 +230,7 @@ class IRealFile(ABC):
 
     @staticmethod
     def copy_file_contents(src: IRealFile, dest: IRealFile, delete: bool = False,
-                           progress_listener: RandomAccessStream.OnProgressListener | None = None) -> bool:
+                           progress_listener: Callable[[int,int], Any] | None = None) -> bool:
         """
          * Copy contents of a file to another file.
          *
@@ -244,7 +244,7 @@ class IRealFile(ABC):
         source: RandomAccessStream = src.get_input_stream()
         target: RandomAccessStream = dest.get_output_stream()
         try:
-            source.copy_to(target, progress_listener)
+            source.copy_to(target, progress_listener=progress_listener)
         except Exception as ex:
             dest.delete()
             return False
@@ -257,7 +257,7 @@ class IRealFile(ABC):
 
     def copy_recursively(self, dest: IRealFile,
                          progress_listener: Callable[[IRealFile, int, int], Any] | None = None,
-                         auto_rename: Callable[[IRealFile], str] = None,
+                         auto_rename: Callable[[IRealFile], str] | None = None,
                          auto_rename_folders: bool = True,
                          on_failed: Callable[[IRealFile, Exception], Any] | None = None):
         """
@@ -332,7 +332,7 @@ class IRealFile(ABC):
                     return
 
             self.move(dest, new_filename,
-                      lambda progress_listener2, position, length: self.notify(position, length, progress_listener2))
+                      lambda position, length: self.notify(position, length, progress_listener))
         elif self.is_directory():
             if progress_listener is not None:
                 progress_listener(self, 0, 1)
@@ -408,6 +408,6 @@ class IRealFile(ABC):
             return ""
         index: int = file_name.rindex(".")
         if index >= 0:
-            return file_name[index + 1]
+            return file_name[index + 1:]
         else:
             return ""

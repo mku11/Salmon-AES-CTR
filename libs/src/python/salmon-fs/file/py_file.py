@@ -24,6 +24,7 @@ SOFTWARE.
 '''
 from __future__ import annotations
 import os
+from typing import Any, Callable
 
 from typeguard import typechecked
 
@@ -80,7 +81,9 @@ class PyFile(IRealFile):
             p_files: list[IRealFile] = self.list_files()
             for p_file in p_files:
                 p_file.delete()
-        os.remove(self.__file_path)
+            os.rmdir(self.__file_path)
+        else:
+            os.remove(self.__file_path)
         return not os.path.exists(self.__file_path)
 
     def exists(self) -> bool:
@@ -195,7 +198,7 @@ class PyFile(IRealFile):
         return real_dirs
 
     def move(self, new_dir: IRealFile, new_name: str | None = None,
-             progress_listener: RandomAccessStream.OnProgressListener | None = None) -> IRealFile:
+             progress_listener: Callable[[int, int], Any] | None = None) -> IRealFile:
         """
          * Move this file or directory under a new directory.
          * @param new_dir The target directory.
@@ -211,7 +214,7 @@ class PyFile(IRealFile):
         return PyFile(n_file_path)
 
     def copy(self, new_dir: IRealFile, new_name: str | None = None,
-             progress_listener: RandomAccessStream.OnProgressListener | None = None) -> IRealFile:
+             progress_listener: Callable[[int, int], Any] | None = None) -> IRealFile:
         """
          * Move this file or directory under a new directory.
          * @param new_dir    The target directory.

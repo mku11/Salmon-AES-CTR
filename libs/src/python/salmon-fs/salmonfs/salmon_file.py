@@ -711,7 +711,7 @@ class SalmonFile(VirtualFile):
         """
         return self.__tag
 
-    def move(self, v_dir: SalmonFile, on_progress_listener: RandomAccessStream.OnProgressListener | None = None) -> SalmonFile:
+    def move(self, v_dir: SalmonFile, on_progress_listener: Callable[[int,int], Any] | None = None) -> SalmonFile:
         """
          * Move file to another directory.
          *
@@ -723,7 +723,7 @@ class SalmonFile(VirtualFile):
         new_real_file: IRealFile = self.__realFile.move(v_dir.__realFile, None, on_progress_listener)
         return SalmonFile(new_real_file, self.__drive)
 
-    def copy(self, v_dir: SalmonFile, on_progress_listener: RandomAccessStream.OnProgressListener | None = None) -> SalmonFile:
+    def copy(self, v_dir: SalmonFile, on_progress_listener: Callable[[int,int], Any] | None = None) -> SalmonFile:
         """
          * Copy a file to another directory.
          *

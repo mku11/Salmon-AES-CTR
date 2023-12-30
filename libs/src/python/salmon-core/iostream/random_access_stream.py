@@ -25,6 +25,8 @@ SOFTWARE.
 from __future__ import annotations
 from abc import ABC, abstractmethod
 from enum import Enum
+from typing import Callable, Any
+
 from salmon.salmon_default_options import SalmonDefaultOptions
 from typeguard import typechecked
 
@@ -144,18 +146,8 @@ class RandomAccessStream(ABC):
         """
         pass
 
-    class OnProgressListener(ABC):
-        """
-         * Progress listener for stream operations.
-         *
-        """
-
-        @abstractmethod
-        def on_progress_changed(self, position: int, length: int):
-            pass
-
     def copy_to(self, stream: RandomAccessStream, buffer_size: int | None = 0,
-                progress_listener: RandomAccessStream.OnProgressListener | None = None):
+                progress_listener: Callable[[int, int], Any] | None = None):
         """
          * Write stream contents to another stream.
          * @param stream The target stream.
@@ -177,7 +169,7 @@ class RandomAccessStream(ABC):
         while (bytes_read := self.read(buffer, 0, buffer_size)) > 0:
             stream.write(buffer, 0, bytes_read)
             if progress_listener is not None:
-                progress_listener.on_progress_changed(self.get_position(), self.length())
+                progress_listener(self.get_position(), self.length())
         stream.flush()
         self.set_position(pos)
 
