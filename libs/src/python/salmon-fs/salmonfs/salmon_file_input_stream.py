@@ -73,7 +73,7 @@ class SalmonFileInputStream(BufferedIOBase):
         """
         self.__buffersCount: int
         self.__buffers: list[SalmonFileInputStream.CacheBuffer] | None = None
-        self.__streams: list[SalmonStream] | None = None
+        self.__streams: list[SalmonStream] | list[None] | None = None
         self.__salmonFile: SalmonFile | None = None
         self.__cacheBufferSize: int = 0
         self.__threads: int = 0
@@ -141,26 +141,28 @@ class SalmonFileInputStream(BufferedIOBase):
          * The first buffer will be sourcing at the start of the encrypted file where the header and indexing are
          * The rest of the buffers can be placed to whatever position the user slides to
         """
-        self.__buffers: list[SalmonFileInputStream.CacheBuffer] = [None] * self.__buffersCount
+        self.__buffers: list[SalmonFileInputStream.CacheBuffer] | list[None] = [None] * self.__buffersCount
         for i in range(0, self.__buffersCount):
             self.__buffers[i] = SalmonFileInputStream.CacheBuffer(self.__cacheBufferSize)
 
-    def skip(self, v_bytes: int) -> int:
+    def seek(self, v_bytes: int, whence: int = ...) -> int:
         """
-         * Skip a number of bytes.
+         * Seek to a position in the stream
          *
-         * @param bytes the number of bytes to be skipped.
+         * @param v_bytes the number of bytes to
+         * @whence 0: from the start, 1: from the current position, 2: from the end of the stream
          * @return
         """
-        curr_pos: int = self.__position
-        if self.__position + v_bytes > self.__size:
-            self.__position = self.__size
-        else:
+        if whence == 0:
+            self.__position = v_bytes
+        elif whence == 1:
             self.__position += v_bytes
-        return self.__position - curr_pos
+        elif whence == 2:
+            self.__position = self.length() - v_bytes
+        return self.__position
 
     def reset(self):
-        position = 0
+        self.__position = 0
 
     def readinto(self, buffer: bytearray | memoryview) -> int:
         """
@@ -195,7 +197,6 @@ class SalmonFileInputStream(BufferedIOBase):
                 start_position = 0
 
             bytes_read = self.__fill_buffer(cache_buffer, start_position, self.__cacheBufferSize)
-
             if bytes_read <= 0:
                 return -1
             cache_buffer.startPos = start_position
@@ -221,6 +222,9 @@ class SalmonFileInputStream(BufferedIOBase):
 
     def readinto1(self, __buffer: bytearray) -> int:
         raise NotImplementedError()
+
+    def tell(self) -> int:
+        return self.__position - self.__positionStart
 
     @synchronized
     def __fill_buffer(self, cache_buffer: SalmonFileInputStream.CacheBuffer, start_position: int,
@@ -326,8 +330,8 @@ class SalmonFileInputStream(BufferedIOBase):
                 self.__lruBuffersIndex.insert(0, i)
                 return buffer
 
-        if self.__buffers[self.__buffers.length - 1] is not None:
-            return self.__buffers[self.__buffers.length - 1]
+        if self.__buffers[len(self.__buffers) - 1] is not None:
+            return self.__buffers[len(self.__buffers) - 1]
         else:
             return None
 
@@ -379,7 +383,7 @@ class SalmonFileInputStream(BufferedIOBase):
         """
          * Clear all buffers.
         """
-        for i in range(0, self.__buffers.length):
+        for i in range(0, len(self.__buffers)):
             if self.__buffers[i] is not None:
                 self.__buffers[i].clear()
             self.__buffers[i] = None
