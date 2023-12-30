@@ -326,7 +326,10 @@ class SalmonStream(RandomAccessStream):
          *
          * @param value
         """
-        raise NotImplementedError()
+        pos: int = self.get_position()
+        self.set_position(value)
+        self.set_position(pos)
+
 
     def flush(self):
         """
@@ -637,7 +640,7 @@ class SalmonStream(RandomAccessStream):
          * @return The array with the data that were read.
         """
         data: bytearray = bytearray(min(count, len(buffer) - offset))
-        data[0:len(data)] = buffer[offset:len(data)]
+        data[0:len(data)] = buffer[offset:offset+len(data)]
         return data
 
     def __read_stream_data(self, count: int) -> bytearray:

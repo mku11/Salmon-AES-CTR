@@ -127,7 +127,7 @@ class SalmonFileImporter:
          *
          * @param value True to enable logging details.
         """
-        enable_log_details = value
+        SalmonFileImporter.__enableLogDetails = value
 
     def stop(self):
         """
@@ -180,6 +180,11 @@ class SalmonFileImporter:
             running_threads: int
             part_size: int = file_size
 
+            # make sure we allocate enough space for the file
+            target_stream: SalmonStream = salmon_file.get_output_stream()
+            target_stream.set_length(file_size)
+            target_stream.close()
+
             if file_size > SalmonFileImporter.__MIN_FILE_SIZE:
                 part_size = math.ceil(file_size / float(self.__threads))
                 # if we want to check integrity we align to the chunk size instead of the AES Block
@@ -231,7 +236,7 @@ class SalmonFileImporter:
             if SalmonFileImporter.__enableLog:
                 total: int = int(time.time() * 1000) - start_time
                 print(
-                    "SalmonFileImporter AesType: " + SalmonStream.getAesProviderType()
+                    "SalmonFileImporter AesType: " + SalmonStream.get_aes_provider_type().name
                     + " File: " + file_to_import.get_base_name()
                     + " imported and signed " + str(total_bytes_read[0]) + " bytes in total time: " + str(total) + " ms"
                     + ", avg speed: " + str(total_bytes_read[0] / float(total)) + " bytes/sec")

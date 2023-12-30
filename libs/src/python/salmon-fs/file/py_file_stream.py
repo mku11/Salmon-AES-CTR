@@ -24,6 +24,7 @@ SOFTWARE.
 '''
 from io import BufferedRandom
 from mmap import mmap
+from threading import RLock
 from typing import BinaryIO
 
 from typeguard import typechecked
@@ -37,6 +38,11 @@ class PyFileStream(RandomAccessStream):
     """
      * An advanced Salmon File Stream implementation for python files.
      * This class is used internally for random file access of physical (real) files.
+    """
+
+    __lock = RLock()
+    """
+    Global lock for resizing files. 
     """
 
     def __init__(self, file: IRealFile, mode: str):
@@ -107,7 +113,7 @@ class PyFileStream(RandomAccessStream):
         return self.__file.length()
 
     def get_position(self) -> int:
-        return self.__mm.tell() if self.__mm is not None else self.__raf.tell()
+        return self.__mm.tell() if self.__mm else self.__raf.tell()
 
     def set_position(self, value: int):
         """
@@ -115,9 +121,10 @@ class PyFileStream(RandomAccessStream):
          * @param value The new position.
          * @throws IOError
         """
-        self.__mm.seek(value) if self.__mm is not None else self.__raf.seek(value)
+        self.seek(value, RandomAccessStream.SeekOrigin.Begin)
 
     def set_length(self, value: int):
+        # with (PyFileStream.__lock):
         self.__raf.truncate(value)
 
     def read(self, buffer: bytearray, offset: int, count: int) -> int:
@@ -144,14 +151,11 @@ class PyFileStream(RandomAccessStream):
          * @param count The maximum number of bytes to read from the buffer.
          * @throws IOError
         """
+        print("write: " + str(self.get_position()) + " - " + str(self.get_position() + count))
         if self.__mm:
             if self.get_position() + count > self.__file.length():
-                self.set_length(self.get_position() + count)
-                pos: int = self.__mm.tell()
-                self.__mm.flush()
-                self.__mm.close()
-                self.__mm = mmap(self.__raf.fileno(), 0)
-                self.__mm.seek(pos)
+                print("write resize: " + str(self.__file.length()) + " new: " + str(self.get_position() + count))
+                self.__resize(self.get_position() + count)
             self.__mm.write(buffer[offset:offset + count])
         else:
             self.__raf.write(buffer[offset:offset + count])
@@ -171,6 +175,10 @@ class PyFileStream(RandomAccessStream):
             pos += offset
         elif origin == RandomAccessStream.SeekOrigin.End:
             pos = self.__file.length() - offset
+
+        if self.__mm and pos > self.__file.length():
+            print("seek resize: " + str(self.__file.length()) + " new: " + str(pos))
+            self.__resize(pos)
 
         self.__mm.seek(pos) if self.__mm else self.__raf.seek(pos)
         return self.__mm.tell() if self.__mm else self.__raf.tell()
@@ -192,3 +200,12 @@ class PyFileStream(RandomAccessStream):
         if self.__mm:
             self.__mm.close()
         self.__raf.close()
+
+    def __resize(self, value: int):
+        self.set_length(value)
+        if self.__mm:
+            pos: int = self.__mm.tell()
+            self.__mm.flush()
+            self.__mm.close()
+            self.__mm = mmap(self.__raf.fileno(), 0)
+            self.__mm.seek(pos)

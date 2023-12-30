@@ -105,11 +105,11 @@ class SalmonFileExporter:
 
     @staticmethod
     def set_enable_log(value: bool):
-        SalmonFileExporter.enable_log = value
+        SalmonFileExporter.__enableLog = value
 
     @staticmethod
     def set_enable_log_details(value: bool):
-        SalmonFileExporter.enable_log_details = value
+        SalmonFileExporter.__enableLogDetails = value
 
     def is_running(self) -> bool:
         return not self.__stopped
@@ -158,6 +158,12 @@ class SalmonFileExporter:
             file_size: int = file_to_export.get_size()
             part_size: int = file_size
             running_threads: int
+
+            # make sure we allocate enough space for the file
+            target_stream: RandomAccessStream = export_file.get_output_stream()
+            target_stream.set_length(file_size)
+            target_stream.close()
+
             if file_size > SalmonFileExporter.__MIN_FILE_SIZE:
                 part_size = int(math.ceil(file_size / float(self.__threads)))
 
@@ -211,7 +217,7 @@ class SalmonFileExporter:
                 raise self.__lastException
             if self.__enableLog:
                 total: int = int(time.time() * 1000) - start_time
-                print("SalmonFileExporter AesType: " + SalmonStream.getAesProviderType()
+                print("SalmonFileExporter AesType: " + SalmonStream.get_aes_provider_type().name
                       + " File: " + file_to_export.get_base_name() + " verified and exported "
                       + str(total_bytes_written[0]) + " bytes in: " + str(total) + " ms"
                       + ", avg speed: " + str(total_bytes_written[0] / float(total)) + " bytes/sec")
