@@ -113,7 +113,7 @@ class SalmonFSPythonTestRunner(SalmonPythonTestRunner):
                                                  SalmonPythonTestRunner.ENC_IMPORT_THREADS,
                                                  TestHelper.ENC_EXPORT_BUFFER_SIZE,
                                                  TestHelper.ENC_EXPORT_THREADS,
-                                                 False, True, 24 + 10, True, False, False)
+                                                 False, True, 24 + 10, False, False, False)
         except IOError as ex:
             if isinstance(ex.__cause__, SalmonIntegrityException):
                 integrity_failed = True
@@ -322,7 +322,8 @@ class SalmonFSPythonTestRunner(SalmonPythonTestRunner):
                                                             TestHelper.TEST_KEY_BYTES,
                                                             True, True, 64, TestHelper.TEST_HMAC_KEY_BYTES,
                                                             TestHelper.TEST_FILENAME_NONCE_BYTES,
-                                                            TestHelper.TEST_NONCE_BYTES, SalmonFSPythonTestRunner.TEST_OUTPUT_DIR,
+                                                            TestHelper.TEST_NONCE_BYTES,
+                                                            SalmonFSPythonTestRunner.TEST_OUTPUT_DIR,
                                                             False,
                                                             -1, True)
 
@@ -334,7 +335,8 @@ class SalmonFSPythonTestRunner(SalmonPythonTestRunner):
                                                                 TestHelper.TEST_KEY_BYTES,
                                                                 True, True, 64, TestHelper.TEST_HMAC_KEY_BYTES,
                                                                 TestHelper.TEST_FILENAME_NONCE_BYTES,
-                                                                TestHelper.TEST_NONCE_BYTES, SalmonFSPythonTestRunner.TEST_OUTPUT_DIR,
+                                                                TestHelper.TEST_NONCE_BYTES,
+                                                                SalmonFSPythonTestRunner.TEST_OUTPUT_DIR,
                                                                 True, 45, True)
         except IOError as ex:
             if isinstance(ex.__cause__, SalmonIntegrityException):
@@ -354,7 +356,8 @@ class SalmonFSPythonTestRunner(SalmonPythonTestRunner):
                                                                     TestHelper.TEST_HMAC_KEY_BYTES,
                                                                     TestHelper.TEST_FILENAME_NONCE_BYTES,
                                                                     TestHelper.TEST_NONCE_BYTES,
-                                                                    SalmonFSPythonTestRunner.TEST_OUTPUT_DIR, True, i, False)
+                                                                    SalmonFSPythonTestRunner.TEST_OUTPUT_DIR, True, i,
+                                                                    False)
             except IOError as ex:
                 if isinstance(ex.__cause__, SalmonIntegrityException):
                     caught = True
@@ -566,7 +569,7 @@ class SalmonFSPythonTestRunner(SalmonPythonTestRunner):
         SalmonDriveManager.set_sequencer(sequencer)
         drive: SalmonDrive = SalmonDriveManager.create_drive(vault_dir, TestHelper.TEST_PASSWORD)
         sfiles: list[SalmonFile] = SalmonFileCommander(SalmonDefaultOptions.getBufferSize(),
-                                                   SalmonDefaultOptions.getBufferSize(), 2).import_files(
+                                                       SalmonDefaultOptions.getBufferSize(), 2).import_files(
             [file],
             drive.get_virtual_root(),
             False, True,
@@ -583,7 +586,7 @@ class SalmonFSPythonTestRunner(SalmonPythonTestRunner):
         pos: int = abs(random.randint(0, file.length()))
 
         file_input_stream1 = SalmonFileInputStream(sfiles[0], 4, 4 * 1024 * 1024, 4, 256 * 1024)
-        file_input_stream1.skip(pos)
+        file_input_stream1.seek(pos, 1)
         ms1: MemoryStream = MemoryStream()
         PythonFSTestHelper.copy_stream(file_input_stream1, ms1)
         ms1.flush()
@@ -594,7 +597,7 @@ class SalmonFSPythonTestRunner(SalmonPythonTestRunner):
         ms1.close()
 
         file_input_stream2 = SalmonFileInputStream(sfiles[0], 4, 4 * 1024 * 1024, 1, 256 * 1024)
-        file_input_stream2.skip(pos)
+        file_input_stream2.seek(pos, 1)
         ms2: MemoryStream = MemoryStream()
         PythonFSTestHelper.copy_stream(file_input_stream2, ms2)
         ms2.flush()

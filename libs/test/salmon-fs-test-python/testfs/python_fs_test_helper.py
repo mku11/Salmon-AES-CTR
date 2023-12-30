@@ -510,11 +510,11 @@ class PythonFSTestHelper:
                                         read_offset: int, should_read_length: int):
         buffer: bytearray = bytearray(length + read_offset)
         file_input_stream.reset()
-        file_input_stream.skip(start)
+        file_input_stream.seek(start, 1)
         bytes_read: int = file_input_stream.readinto(memoryview(buffer)[read_offset:read_offset + length])
         PythonFSTestHelper.testCase.assertEqual(should_read_length, bytes_read)
         tdata: bytearray = bytearray(len(buffer))
-        tdata[read_offset:should_read_length] = data[start:start + should_read_length]
+        tdata[read_offset:read_offset + should_read_length] = data[start:start + should_read_length]
         PythonFSTestHelper.assert_array_equal(tdata, buffer)
 
     @staticmethod
