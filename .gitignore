@@ -43,3 +43,4 @@ inspectionProfiles
 deploymentTargetDropDown.xml
 /libs/src/python/salmon-core/convert/testfile.py
 __pycache__
+/libs/projects/salmon-libs-python/main_threading.py
