@@ -70,9 +70,4 @@ public class WPFSettingsService : ISettingsService
         set { Properties.Settings.Default.DeleteSource = value; Properties.Settings.Default.Save(); }
     }
 
-    public bool ExcludeFromRecents
-    {
-        get => throw new NotImplementedException();
-        set => throw new NotImplementedException();
-    }
 }

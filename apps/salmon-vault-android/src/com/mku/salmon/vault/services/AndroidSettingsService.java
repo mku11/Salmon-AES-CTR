@@ -114,8 +114,4 @@ public class AndroidSettingsService implements ISettingsService {
         editor.putBoolean("deleteAfterImport", value);
         editor.apply();
     }
-
-    public boolean getExcludeFromRecents() {
-        return prefs.getBoolean("excludeFromRecents", false);
-    }
 }

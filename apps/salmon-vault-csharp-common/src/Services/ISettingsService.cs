@@ -40,5 +40,4 @@ public interface ISettingsService
 
     public bool DeleteAfterImport { get; set; }
 
-    public bool ExcludeFromRecents { get; }
 }

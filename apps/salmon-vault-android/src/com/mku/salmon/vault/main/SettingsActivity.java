@@ -25,6 +25,7 @@ SOFTWARE.
 
 import android.os.Bundle;
 import android.preference.PreferenceActivity;
+import android.view.WindowManager;
 
 import com.mku.salmon.io.SalmonStream;
 import com.mku.salmon.password.SalmonPassword;
@@ -35,6 +36,7 @@ import com.mku.salmon.vault.utils.WindowUtils;
 public class SettingsActivity extends PreferenceActivity {
     public void onCreate(Bundle SavedInstanceState) {
         super.onCreate(SavedInstanceState);
+        getWindow().setFlags(WindowManager.LayoutParams.FLAG_SECURE, WindowManager.LayoutParams.FLAG_SECURE);
         addPreferencesFromResource(R.xml.settings);
         updateSummaries();
         setupListeners();
@@ -72,11 +74,6 @@ public class SettingsActivity extends PreferenceActivity {
 		
 		getPreferenceManager().findPreference("deleteAfterImport").setOnPreferenceChangeListener((preference, o) -> {
             SalmonSettings.getInstance().setDeleteAfterImport((boolean) o);
-            return true;
-        });
-		
-        getPreferenceManager().findPreference("excludeFromRecents").setOnPreferenceChangeListener((preference, o) -> {
-            WindowUtils.removeFromRecents(SettingsActivity.this, (boolean) o);
             return true;
         });
     }

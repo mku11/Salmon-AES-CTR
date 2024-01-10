@@ -590,7 +590,7 @@ public class SalmonActivity extends AppCompatActivity {
         finish();
     }
 
-    private void StartSettings() {
+    protected void StartSettings() {
         Intent intent = new Intent(this, SettingsActivity.class);
         startActivity(intent);
     }
@@ -833,7 +833,6 @@ public class SalmonActivity extends AppCompatActivity {
     @Override
     protected void onDestroy() {
         Logout();
-        WindowUtils.removeFromRecents(this, true);
         adapter.stop();
         super.onDestroy();
     }
