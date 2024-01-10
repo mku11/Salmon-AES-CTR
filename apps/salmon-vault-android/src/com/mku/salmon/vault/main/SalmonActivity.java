@@ -171,6 +171,7 @@ public class SalmonActivity extends AppCompatActivity {
     private void setupSalmonManager() {
         try {
             manager = createVaultManager();
+            manager.setPromptExitOnBack(true);
             manager.openListItem = this::openListItem;
             manager.observePropertyChanges(this::manager_PropertyChanged);
             manager.updateListItem = this::updateListItem;
