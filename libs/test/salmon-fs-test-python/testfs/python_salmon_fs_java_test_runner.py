@@ -591,7 +591,7 @@ class SalmonFSPythonTestRunner(SalmonPythonTestRunner):
         PythonFSTestHelper.copy_stream(file_input_stream1, ms1)
         ms1.flush()
         ms1.set_position(0)
-        file_input_stream1.reset()
+        file_input_stream1.set_position(0)
         h3: str = hashlib.md5(ms1.to_array()).hexdigest()
         file_input_stream1.close()
         ms1.close()
