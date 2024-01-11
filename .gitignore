@@ -21,6 +21,8 @@ csharp/lib/SalmonDotNetLibs/output/
 
 .cxx
 
+*.pyc
+
 *.pro
 *.filters
 *.user
