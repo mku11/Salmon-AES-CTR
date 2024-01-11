@@ -22,9 +22,11 @@ LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 """
+import concurrent
 import math
-import threading
-from concurrent.futures import ThreadPoolExecutor
+from concurrent.futures import ProcessPoolExecutor
+from multiprocessing import shared_memory
+from multiprocessing.shared_memory import SharedMemory
 
 from convert.bit_converter import BitConverter
 from iostream.memory_stream import MemoryStream
@@ -33,6 +35,80 @@ from salmon.iostream.encryption_mode import EncryptionMode
 from salmon.iostream.salmon_stream import SalmonStream
 from salmon.salmon_generator import SalmonGenerator
 from salmon.salmon_security_exception import SalmonSecurityException
+
+
+def encrypt_shm(index: int, part_size: int, running_threads: int,
+                data: bytearray, shm_out_name: str, key: bytearray, nonce: bytearray, header_data: bytearray,
+                integrity: bool, hash_key: bytearray, chunk_size: int, buffer_size: int):
+    try:
+        start: int = part_size * index
+        length: int
+        if index == running_threads - 1:
+            length = len(data) - start
+        else:
+            length = part_size
+
+        shm_out = SharedMemory(shm_out_name)
+        shm_out_data = shm_out.buf
+
+        ins: MemoryStream = MemoryStream(data)
+        out_data: bytearray = bytearray(len(shm_out_data))
+        encrypt_data(ins, start, length, out_data, key, nonce, header_data,
+                     integrity, hash_key, chunk_size, buffer_size)
+        for i in range(0, length):
+            shm_out_data[start + i] = out_data[start + i]
+    except Exception as ex:
+        raise Exception from ex
+
+
+def encrypt_data(input_stream: MemoryStream, start: int, count: int, out_data: bytearray,
+                 key: bytearray, nonce: bytearray, header_data: bytearray,
+                 integrity: bool, hash_key: bytearray, chunk_size: int, buffer_size: int):
+    """
+     * Encrypt the data stream.
+     *
+     * @param inputStream The Stream to be encrypted.
+     * @param start       The start position of the stream to be encrypted.
+     * @param count       The number of bytes to be encrypted.
+     * @param outData     The buffer with the encrypted data.
+     * @param key         The AES key to be used.
+     * @param nonce       The nonce to be used.
+     * @param headerData  The header data to be used.
+     * @param integrity   True to apply integrity.
+     * @param hash_key     The key to be used for integrity application.
+     * @param chunkSize   The chunk size.
+     * @throws IOError              Thrown if there is an error with the stream.
+     * @throws SalmonSecurityException  Thrown if there is a security exception with the stream.
+     * @throws SalmonIntegrityException Thrown if integrity cannot be applied.
+    """
+
+    output_stream: MemoryStream = MemoryStream(out_data)
+    stream: SalmonStream | None = None
+    try:
+        input_stream.set_position(start)
+        stream = SalmonStream(key, nonce, EncryptionMode.Encrypt, output_stream, header_data,
+                              integrity, chunk_size, hash_key)
+        stream.set_allow_range_write(True)
+        stream.set_position(start)
+        total_chunk_bytes_read: int = 0
+        # align to the chunk size if available
+        buff_size: int = max(buffer_size, stream.get_chunk_size())
+        buff: bytearray = bytearray(buff_size)
+        bytes_read: int
+        while (bytes_read := input_stream.read(buff, 0, min(len(buff), count - total_chunk_bytes_read))) > 0 \
+                and total_chunk_bytes_read < count:
+            stream.write(buff, 0, bytes_read)
+            total_chunk_bytes_read += bytes_read
+        stream.flush()
+    except IOError as ex:
+        print(ex)
+        raise ex
+    finally:
+        output_stream.close()
+        if stream is not None:
+            stream.close()
+        if input_stream is not None:
+            input_stream.close()
 
 
 class SalmonEncryptor:
@@ -55,7 +131,7 @@ class SalmonEncryptor:
          * The number of parallel threads to use.
         """
 
-        self.__executor: ThreadPoolExecutor | None = None
+        self.__executor: ProcessPoolExecutor | None = None
         """
          * Executor for parallel tasks.
         """
@@ -69,7 +145,7 @@ class SalmonEncryptor:
             self.__threads = 1
         else:
             self.__threads = threads
-            self.__executor = ThreadPoolExecutor(threads)
+            self.__executor = ProcessPoolExecutor(threads)
 
         if buffer_size is None:
             self.__buffer_size = SalmonIntegrity.DEFAULT_CHUNK_SIZE
@@ -130,8 +206,8 @@ class SalmonEncryptor:
 
         if self.__threads == 1:
             input_stream: MemoryStream = MemoryStream(data)
-            self.__encrypt_data(input_stream, 0, len(data), out_data,
-                                key, nonce, header_data, integrity, hash_key, chunk_size)
+            encrypt_data(input_stream, 0, len(data), out_data,
+                         key, nonce, header_data, integrity, hash_key, chunk_size, self.__buffer_size)
         else:
             self.__encrypt_data_parallel(data, out_data,
                                          key, hash_key, nonce, header_data,
@@ -199,88 +275,30 @@ class SalmonEncryptor:
          * @param chunkSize      The chunk size.
         """
 
-        done: threading.Barrier = threading.Barrier(running_threads + 1)
+        shm_out = shared_memory.SharedMemory(create=True, size=len(out_data))
+        shm_out_name = shm_out.name
+
         ex: Exception | None = None
-
+        fs = []
         for i in range(0, running_threads):
-
-            def __encrypt(index: int):
-                nonlocal ex
-
-                try:
-                    start: int = part_size * index
-                    length: int
-                    if index == running_threads - 1:
-                        length = len(data) - start
-                    else:
-                        length = part_size
-                    ins: MemoryStream = MemoryStream(data)
-                    self.__encrypt_data(ins, start, length, out_data, key, nonce, header_data, integrity, hash_key,
-                                        chunk_size)
-                except Exception as ex1:
-                    ex = ex1
-                done.wait()
-
-            self.__executor.submit(__encrypt, i)
+            fs.append(self.__executor.submit(encrypt_shm, i, part_size, running_threads,
+                                             data, shm_out_name, key, nonce, header_data,
+                                             integrity, hash_key, chunk_size, self.__buffer_size))
+        concurrent.futures.wait(fs)
 
         try:
-            done.wait()
-        except InterruptedError as ignored:
-            pass
+            # catch any errors within the children processes
+            for f in fs:
+                f.result()
+        except Exception as ex1:
+            ex = ex1
+
+        out_data[:] = shm_out.buf[:]
         if ex is not None:
             try:
                 raise ex
             except Exception as e:
                 raise RuntimeError() from e
-
-    def __encrypt_data(self, input_stream: MemoryStream, start: int, count: int, out_data: bytearray,
-                       key: bytearray, nonce: bytearray, header_data: bytearray,
-                       integrity: bool, hash_key: bytearray, chunk_size: int):
-        """
-         * Encrypt the data stream.
-         *
-         * @param inputStream The Stream to be encrypted.
-         * @param start       The start position of the stream to be encrypted.
-         * @param count       The number of bytes to be encrypted.
-         * @param outData     The buffer with the encrypted data.
-         * @param key         The AES key to be used.
-         * @param nonce       The nonce to be used.
-         * @param headerData  The header data to be used.
-         * @param integrity   True to apply integrity.
-         * @param hash_key     The key to be used for integrity application.
-         * @param chunkSize   The chunk size.
-         * @throws IOError              Thrown if there is an error with the stream.
-         * @throws SalmonSecurityException  Thrown if there is a security exception with the stream.
-         * @throws SalmonIntegrityException Thrown if integrity cannot be applied.
-        """
-
-        output_stream: MemoryStream = MemoryStream(out_data)
-        stream: SalmonStream | None = None
-        try:
-            input_stream.set_position(start)
-            stream = SalmonStream(key, nonce, EncryptionMode.Encrypt, output_stream, header_data,
-                                  integrity, chunk_size, hash_key)
-            stream.set_allow_range_write(True)
-            stream.set_position(start)
-            total_chunk_bytes_read: int = 0
-            # align to the chunk size if available
-            buff_size: int = max(self.__buffer_size, stream.get_chunk_size())
-            buff: bytearray = bytearray(buff_size)
-            bytes_read: int
-            while (bytes_read := input_stream.read(buff, 0, min(len(buff), count - total_chunk_bytes_read))) > 0 \
-                    and total_chunk_bytes_read < count:
-                stream.write(buff, 0, bytes_read)
-                total_chunk_bytes_read += bytes_read
-            stream.flush()
-        except IOError as ex:
-            print(ex)
-            raise ex
-        finally:
-            output_stream.close()
-            if stream is not None:
-                stream.close()
-            if input_stream is not None:
-                input_stream.close()
 
     def __del__(self):
         pass
