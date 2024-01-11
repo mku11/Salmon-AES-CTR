@@ -205,10 +205,9 @@ class SalmonFileImporter:
             final_part_size: int = part_size
             final_running_threads: int = running_threads
             for i in range(0, running_threads):
-                index: int = i
 
-                def __import_file():
-                    nonlocal ex, index, total_bytes_read
+                def __import_file(index: int):
+                    nonlocal ex, total_bytes_read
 
                     start: int = final_part_size * index
                     length: int
@@ -224,7 +223,7 @@ class SalmonFileImporter:
 
                     done.wait()
 
-                self.__executor.submit(lambda: __import_file())
+                self.__executor.submit(__import_file, i)
 
             done.wait()
             if self.__stopped:

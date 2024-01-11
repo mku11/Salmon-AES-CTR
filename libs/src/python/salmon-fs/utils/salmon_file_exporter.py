@@ -187,10 +187,9 @@ class SalmonFileExporter:
             final_part_size: int = part_size
             final_running_threads: int = running_threads
             for i in range(0, running_threads):
-                index: int = i
 
-                def __export_file():
-                    nonlocal ex, index, total_bytes_written
+                def __export_file(index: int):
+                    nonlocal ex, total_bytes_written
 
                     start: int = final_part_size * index
                     length: int
@@ -206,7 +205,7 @@ class SalmonFileExporter:
 
                     done.wait()
 
-                self.__executor.submit(lambda: __export_file())
+                self.__executor.submit(__export_file, i)
 
             done.wait()
             if self.__stopped:

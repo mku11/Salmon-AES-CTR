@@ -203,10 +203,9 @@ class SalmonEncryptor:
         ex: Exception | None = None
 
         for i in range(0, running_threads):
-            index: int = i
 
-            def encrypt():
-                nonlocal ex, index
+            def __encrypt(index: int):
+                nonlocal ex
 
                 try:
                     start: int = part_size * index
@@ -222,7 +221,7 @@ class SalmonEncryptor:
                     ex = ex1
                 done.wait()
 
-            self.__executor.submit(lambda: encrypt())
+            self.__executor.submit(__encrypt, i)
 
         try:
             done.wait()

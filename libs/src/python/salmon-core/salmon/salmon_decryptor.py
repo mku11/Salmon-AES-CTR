@@ -199,10 +199,9 @@ class SalmonDecryptor:
         done: threading.Barrier = threading.Barrier(running_threads + 1)
         ex: Exception | None = None
         for i in range(0, running_threads):
-            index: int = i
 
-            def decrypt():
-                nonlocal ex, index
+            def __decrypt(index: int):
+                nonlocal ex
 
                 try:
                     start: int = part_size * index
@@ -218,7 +217,7 @@ class SalmonDecryptor:
                     ex = ex1
                 done.wait()
 
-            self.__executor.submit(lambda: decrypt())
+            self.__executor.submit(__decrypt, i)
 
         try:
             done.wait()

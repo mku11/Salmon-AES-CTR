@@ -161,9 +161,6 @@ class SalmonFileInputStream(BufferedIOBase):
             self.__position = self.length() - v_bytes
         return self.__position
 
-    def reset(self):
-        self.__position = 0
-
     def readinto(self, buffer: bytearray | memoryview) -> int:
         """
          * Reads and decrypts the contents of an encrypted file
@@ -273,10 +270,9 @@ class SalmonFileInputStream(BufferedIOBase):
         done: threading.Barrier = threading.Barrier(self.__threads + 1)
         part_size: int = int(math.ceil(buffer_size / float(self.__threads)))
         for i in range(0, self.__threads):
-            index: int = i
 
-            def fill():
-                nonlocal ex, index, bytes_read
+            def __fill(index: int):
+                nonlocal ex, bytes_read
 
                 start: int = part_size * index
                 length: int
@@ -296,7 +292,7 @@ class SalmonFileInputStream(BufferedIOBase):
 
                 done.wait()
 
-            self.__executor.submit(lambda: fill())
+            self.__executor.submit(__fill, i)
 
         try:
             done.wait()
