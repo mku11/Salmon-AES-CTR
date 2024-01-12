@@ -41,6 +41,23 @@ def encrypt_shm(index: int, part_size: int, running_threads: int,
                 data: bytearray, shm_out_name: str, shm_length: int, key: bytearray, nonce: bytearray,
                 header_data: bytearray,
                 integrity: bool, hash_key: bytearray, chunk_size: int, buffer_size: int):
+    """
+    Do not use directly use encrypt() instead.
+    :param index:
+    :param part_size:
+    :param running_threads:
+    :param data:
+    :param shm_out_name:
+    :param shm_length:
+    :param key:
+    :param nonce:
+    :param header_data:
+    :param integrity:
+    :param hash_key:
+    :param chunk_size:
+    :param buffer_size:
+    :return:
+    """
     try:
         start: int = part_size * index
         length: int
@@ -65,7 +82,7 @@ def encrypt_data(input_stream: MemoryStream, start: int, count: int, out_data: b
                  key: bytearray, nonce: bytearray, header_data: bytearray,
                  integrity: bool, hash_key: bytearray, chunk_size: int, buffer_size: int) -> (int, int):
     """
-     * Encrypt the data stream.
+     * Encrypt the data stream. Do not use directly use encrypt() instead.
      *
      * @param inputStream The Stream to be encrypted.
      * @param start       The start position of the stream to be encrypted.
