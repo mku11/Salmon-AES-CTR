@@ -147,6 +147,7 @@ public class SalmonFileCommander {
                                         bytes, totalBytes, count[0], total));
                             }
                         });
+				existingFiles.put(sfile.getBaseName(), sfile);
                 importedFiles.add(sfile);
                 count[0]++;
             } catch (SalmonSequenceException ex) {
@@ -246,6 +247,7 @@ public class SalmonFileCommander {
                                         bytes, totalBytes, count[0], total));
                             }
                         });
+				existingFiles.put(rfile.getBaseName(), rfile);
                 exportedFiles.add(rfile);
                 count[0]++;
             } catch (SalmonSequenceException ex) {
