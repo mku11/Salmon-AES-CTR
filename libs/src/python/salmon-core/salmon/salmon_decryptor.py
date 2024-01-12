@@ -22,9 +22,11 @@ LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 '''
+import concurrent
 import math
-import threading
-from concurrent.futures import ThreadPoolExecutor
+from concurrent.futures import ProcessPoolExecutor
+from multiprocessing import shared_memory
+from multiprocessing.shared_memory import SharedMemory
 
 from iostream.memory_stream import MemoryStream
 from iostream.random_access_stream import RandomAccessStream
@@ -38,6 +40,100 @@ from salmon.salmon_security_exception import SalmonSecurityException
 
 from typeguard import typechecked
 
+
+def decrypt_shm(index: int, part_size: int, running_threads: int,
+                data: bytearray, shm_out_name: str, shm_length: int, key: bytearray, nonce: bytearray,
+                header_data: bytearray,
+                integrity: bool, hash_key: bytearray, chunk_size: int, buffer_size: int):
+    """
+    Do not use directly use decrypt() instead.
+    :param index:
+    :param part_size:
+    :param running_threads:
+    :param data:
+    :param shm_out_name:
+    :param shm_length:
+    :param key:
+    :param nonce:
+    :param header_data:
+    :param integrity:
+    :param hash_key:
+    :param chunk_size:
+    :param buffer_size:
+    :return:
+    """
+    try:
+        start: int = part_size * index
+        length: int
+        if index == running_threads - 1:
+            length = len(data) - start
+        else:
+            length = part_size
+
+        shm_out = SharedMemory(shm_out_name)
+        shm_out_data = shm_out.buf
+        ins: MemoryStream = MemoryStream(data)
+        out_data: bytearray = bytearray(shm_length)
+        (byte_start, byte_end) = decrypt_data(ins, start, length, out_data, key, nonce, header_data,
+                                              integrity, hash_key, chunk_size, buffer_size)
+        shm_out_data[byte_start:byte_end] = out_data[byte_start:byte_end]
+    except Exception as ex:
+        raise Exception from ex
+
+
+def decrypt_data(input_stream: RandomAccessStream, start: int, count: int, out_data: bytearray,
+                 key: bytearray, nonce: bytearray,
+                 header_data: bytearray | None, integrity: bool, hash_key: bytearray | None,
+                 chunk_size: int | None, buffer_size: int) -> (int, int):
+    """
+     * Decrypt the data stream. Do not use directly use decrypt() instead.
+     * @param inputStream The Stream to be decrypted.
+     * @param start The start position of the stream to be decrypted.
+     * @param count The number of bytes to be decrypted.
+     * @param outData The buffer with the decrypted data.
+     * @param key The AES key to be used.
+     * @param nonce The nonce to be used.
+     * @param headerData The header data to be used.
+     * @param integrity True to verify integrity.
+     * @param hash_key The hash key to be used for integrity verification.
+     * @param chunkSize The chunk size.
+     * @throws IOError  Thrown if there is an error with the stream.
+     * @throws SalmonSecurityException Thrown if there is a security exception with the stream.
+     * @throws SalmonIntegrityException Thrown if the stream is corrupt or tampered with.
+    """
+
+    stream: SalmonStream | None = None
+    output_stream: MemoryStream | None = None
+    start_pos: int
+    try:
+        output_stream = MemoryStream(out_data)
+        output_stream.set_position(start)
+        stream = SalmonStream(key, nonce, EncryptionMode.Decrypt, input_stream,
+                              header_data, integrity, chunk_size, hash_key)
+        stream.set_position(start)
+        start_pos = output_stream.get_position()
+        total_chunk_bytes_read: int = 0
+        # align to the chunk size if available
+        buff_size: int = max(buffer_size, stream.get_chunk_size())
+        buff: bytearray = bytearray(buff_size)
+        bytes_read: int
+        while (bytes_read := stream.read(buff, 0, min(len(buff), (
+                count - total_chunk_bytes_read)))) > 0 and total_chunk_bytes_read < count:
+            output_stream.write(buff, 0, bytes_read)
+            total_chunk_bytes_read += bytes_read
+        output_stream.flush()
+    except (IOError, SalmonSecurityException, SalmonIntegrityException) as ex:
+        print(ex)
+        raise SalmonSecurityException("Could not decrypt data") from ex
+    finally:
+        if input_stream is not None:
+            input_stream.close()
+        if stream is not None:
+            stream.close()
+        if output_stream is not None:
+            output_stream.close()
+    end_pos: int = output_stream.get_position()
+    return start_pos, end_pos
 
 @typechecked
 class SalmonDecryptor:
@@ -60,7 +156,7 @@ class SalmonDecryptor:
          * The number of parallel threads to use.
         """
 
-        self.__executor: ThreadPoolExecutor | None = None
+        self.__executor: ProcessPoolExecutor | None = None
         """
          * Executor for parallel tasks.
         """
@@ -74,7 +170,7 @@ class SalmonDecryptor:
             self.__threads = 1
         else:
             self.__threads = threads
-            self.__executor = ThreadPoolExecutor(threads)
+            self.__executor = ProcessPoolExecutor(threads)
 
         if buffer_size is None:
             self.__buffer_size = SalmonIntegrity.DEFAULT_CHUNK_SIZE
@@ -127,8 +223,8 @@ class SalmonDecryptor:
         out_data: bytearray = bytearray(real_size)
 
         if self.__threads == 1:
-            self.__decrypt_data(input_stream, 0, input_stream.length(), out_data,
-                                key, nonce, header_data, integrity, hash_key, chunk_size)
+            decrypt_data(input_stream, 0, input_stream.length(), out_data,
+                         key, nonce, header_data, integrity, hash_key, chunk_size, self.__buffer_size)
         else:
             self.__decrypt_data_parallel(data, out_data,
                                          key, hash_key, nonce, header_data,
@@ -196,89 +292,30 @@ class SalmonDecryptor:
          * @param integrity True to verify the data integrity.
          * @param chunkSize The chunk size.
         """
-        done: threading.Barrier = threading.Barrier(running_threads + 1)
+        shm_out = shared_memory.SharedMemory(create=True, size=len(out_data))
+        shm_out_name = shm_out.name
+
         ex: Exception | None = None
+        fs = []
         for i in range(0, running_threads):
+            fs.append(self.__executor.submit(decrypt_shm, i, part_size, running_threads,
+                                             data, shm_out_name, len(shm_out.buf), key, nonce, header_data,
+                                             integrity, hash_key, chunk_size, self.__buffer_size))
 
-            def __decrypt(index: int):
-                nonlocal ex
-
-                try:
-                    start: int = part_size * index
-                    length: int
-                    if index == running_threads - 1:
-                        length = len(data) - start
-                    else:
-                        length = part_size
-                    ins: MemoryStream = MemoryStream(data)
-                    self.__decrypt_data(ins, start, length, out_data, key, nonce, header_data,
-                                        integrity, hash_key, chunk_size)
-                except Exception as ex1:
-                    ex = ex1
-                done.wait()
-
-            self.__executor.submit(__decrypt, i)
-
+        concurrent.futures.wait(fs)
         try:
-            done.wait()
-        except InterruptedError as ignored:
-            pass
+            # catch any errors within the children processes
+            for f in fs:
+                f.result()
+        except Exception as ex1:
+            ex = ex1
 
+        out_data[:] = shm_out.buf[:]
         if ex is not None:
             try:
                 raise ex
             except Exception as e:
                 raise RuntimeError() from e
-
-    def __decrypt_data(self, input_stream: RandomAccessStream, start: int, count: int, out_data: bytearray,
-                       key: bytearray, nonce: bytearray,
-                       header_data: bytearray | None, integrity: bool, hash_key: bytearray | None,
-                       chunk_size: int | None):
-        """
-         * Decrypt the data stream.
-         * @param inputStream The Stream to be decrypted.
-         * @param start The start position of the stream to be decrypted.
-         * @param count The number of bytes to be decrypted.
-         * @param outData The buffer with the decrypted data.
-         * @param key The AES key to be used.
-         * @param nonce The nonce to be used.
-         * @param headerData The header data to be used.
-         * @param integrity True to verify integrity.
-         * @param hash_key The hash key to be used for integrity verification.
-         * @param chunkSize The chunk size.
-         * @throws IOError  Thrown if there is an error with the stream.
-         * @throws SalmonSecurityException Thrown if there is a security exception with the stream.
-         * @throws SalmonIntegrityException Thrown if the stream is corrupt or tampered with.
-        """
-
-        stream: SalmonStream | None = None
-        output_stream: MemoryStream | None = None
-        try:
-            output_stream = MemoryStream(out_data)
-            output_stream.set_position(start)
-            stream = SalmonStream(key, nonce, EncryptionMode.Decrypt, input_stream,
-                                  header_data, integrity, chunk_size, hash_key)
-            stream.set_position(start)
-            total_chunk_bytes_read: int = 0
-            # align to the chunk size if available
-            buff_size: int = max(self.__buffer_size, stream.get_chunk_size())
-            buff: bytearray = bytearray(buff_size)
-            bytes_read: int
-            while (bytes_read := stream.read(buff, 0, min(len(buff), (
-                    count - total_chunk_bytes_read)))) > 0 and total_chunk_bytes_read < count:
-                output_stream.write(buff, 0, bytes_read)
-                total_chunk_bytes_read += bytes_read
-            output_stream.flush()
-        except (IOError, SalmonSecurityException, SalmonIntegrityException) as ex:
-            print(ex)
-            raise SalmonSecurityException("Could not decrypt data") from ex
-        finally:
-            if input_stream is not None:
-                input_stream.close()
-            if stream is not None:
-                stream.close()
-            if output_stream is not None:
-                output_stream.close()
 
     def __del__(self):
         pass
