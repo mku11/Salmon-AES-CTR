@@ -427,7 +427,7 @@ public class SalmonVaultManager implements IPropertyNotifier {
         clearSelectedFiles();
     }
 
-    private void deleteFiles(SalmonFile[] files) {
+    public void deleteFiles(SalmonFile[] files) {
         if (files == null)
             return;
         executor.execute(() ->
