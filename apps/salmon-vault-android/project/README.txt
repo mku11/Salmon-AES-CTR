@@ -12,6 +12,9 @@ Build:
 To build the app you will need:
 1. Android Studio
 
+If you're in development and the snapshot dependencies have changed make sure you refresh:
+./graldew --refresh-dependencies
+
 Optional:  
 If you want to include the fast AES intrinsics and Tiny AES:
 uncomment line in app/build.gradle:

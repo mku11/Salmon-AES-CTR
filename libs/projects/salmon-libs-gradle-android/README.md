@@ -22,3 +22,6 @@ To build the release aar libs which can be used for the VS project:
   
 To publish the maven aar libs to a local directory:  
 ./gradlew publish --rerun-tasks  
+
+If you're in development and the snapshot dependencies have changed make sure you refresh:
+./graldew --refresh-dependencies
