@@ -38,7 +38,8 @@ from salmon.salmon_security_exception import SalmonSecurityException
 
 
 def encrypt_shm(index: int, part_size: int, running_threads: int,
-                data: bytearray, shm_out_name: str, key: bytearray, nonce: bytearray, header_data: bytearray,
+                data: bytearray, shm_out_name: str, shm_length: int, key: bytearray, nonce: bytearray,
+                header_data: bytearray,
                 integrity: bool, hash_key: bytearray, chunk_size: int, buffer_size: int):
     try:
         start: int = part_size * index
@@ -52,18 +53,17 @@ def encrypt_shm(index: int, part_size: int, running_threads: int,
         shm_out_data = shm_out.buf
 
         ins: MemoryStream = MemoryStream(data)
-        out_data: bytearray = bytearray(len(shm_out_data))
-        encrypt_data(ins, start, length, out_data, key, nonce, header_data,
-                     integrity, hash_key, chunk_size, buffer_size)
-        for i in range(0, length):
-            shm_out_data[start + i] = out_data[start + i]
+        out_data: bytearray = bytearray(shm_length)
+        (byte_start, byte_end) = encrypt_data(ins, start, length, out_data, key, nonce, header_data,
+                                              integrity, hash_key, chunk_size, buffer_size)
+        shm_out_data[byte_start:byte_end] = out_data[byte_start:byte_end]
     except Exception as ex:
         raise Exception from ex
 
 
 def encrypt_data(input_stream: MemoryStream, start: int, count: int, out_data: bytearray,
                  key: bytearray, nonce: bytearray, header_data: bytearray,
-                 integrity: bool, hash_key: bytearray, chunk_size: int, buffer_size: int):
+                 integrity: bool, hash_key: bytearray, chunk_size: int, buffer_size: int) -> (int, int):
     """
      * Encrypt the data stream.
      *
@@ -84,12 +84,14 @@ def encrypt_data(input_stream: MemoryStream, start: int, count: int, out_data: b
 
     output_stream: MemoryStream = MemoryStream(out_data)
     stream: SalmonStream | None = None
+    start_pos: int
     try:
         input_stream.set_position(start)
         stream = SalmonStream(key, nonce, EncryptionMode.Encrypt, output_stream, header_data,
                               integrity, chunk_size, hash_key)
         stream.set_allow_range_write(True)
         stream.set_position(start)
+        start_pos = output_stream.get_position()
         total_chunk_bytes_read: int = 0
         # align to the chunk size if available
         buff_size: int = max(buffer_size, stream.get_chunk_size())
@@ -109,6 +111,8 @@ def encrypt_data(input_stream: MemoryStream, start: int, count: int, out_data: b
             stream.close()
         if input_stream is not None:
             input_stream.close()
+    end_pos: int = output_stream.get_position()
+    return start_pos, end_pos
 
 
 class SalmonEncryptor:
@@ -282,10 +286,9 @@ class SalmonEncryptor:
         fs = []
         for i in range(0, running_threads):
             fs.append(self.__executor.submit(encrypt_shm, i, part_size, running_threads,
-                                             data, shm_out_name, key, nonce, header_data,
+                                             data, shm_out_name, len(shm_out.buf), key, nonce, header_data,
                                              integrity, hash_key, chunk_size, self.__buffer_size))
         concurrent.futures.wait(fs)
-
         try:
             # catch any errors within the children processes
             for f in fs:
