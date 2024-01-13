@@ -42,7 +42,8 @@ from typeguard import typechecked
 
 
 def decrypt_shm(index: int, part_size: int, running_threads: int,
-                data: bytearray, shm_out_name: str, shm_length: int, key: bytearray, nonce: bytearray,
+                data: bytearray, shm_out_name: str, shm_length: int, shm_cancel_name: str, key: bytearray,
+                nonce: bytearray,
                 header_data: bytearray,
                 integrity: bool, hash_key: bytearray, chunk_size: int, buffer_size: int):
     """
@@ -53,6 +54,7 @@ def decrypt_shm(index: int, part_size: int, running_threads: int,
     :param data:
     :param shm_out_name:
     :param shm_length:
+    :param shm_cancel_name:
     :param key:
     :param nonce:
     :param header_data:
@@ -62,29 +64,25 @@ def decrypt_shm(index: int, part_size: int, running_threads: int,
     :param buffer_size:
     :return:
     """
-    try:
-        start: int = part_size * index
-        length: int
-        if index == running_threads - 1:
-            length = len(data) - start
-        else:
-            length = part_size
-
-        shm_out = SharedMemory(shm_out_name)
-        shm_out_data = shm_out.buf
-        ins: MemoryStream = MemoryStream(data)
-        out_data: bytearray = bytearray(shm_length)
-        (byte_start, byte_end) = decrypt_data(ins, start, length, out_data, key, nonce, header_data,
-                                              integrity, hash_key, chunk_size, buffer_size)
-        shm_out_data[byte_start:byte_end] = out_data[byte_start:byte_end]
-    except Exception as ex:
-        raise Exception from ex
+    start: int = part_size * index
+    length: int
+    if index == running_threads - 1:
+        length = len(data) - start
+    else:
+        length = part_size
+    shm_out = SharedMemory(shm_out_name)
+    shm_out_data = shm_out.buf
+    ins: MemoryStream = MemoryStream(data)
+    out_data: bytearray = bytearray(shm_length)
+    (byte_start, byte_end) = decrypt_data(ins, start, length, out_data, key, nonce, header_data,
+                                          integrity, hash_key, chunk_size, buffer_size, shm_cancel_name)
+    shm_out_data[byte_start:byte_end] = out_data[byte_start:byte_end]
 
 
 def decrypt_data(input_stream: RandomAccessStream, start: int, count: int, out_data: bytearray,
                  key: bytearray, nonce: bytearray,
                  header_data: bytearray | None, integrity: bool, hash_key: bytearray | None,
-                 chunk_size: int | None, buffer_size: int) -> (int, int):
+                 chunk_size: int | None, buffer_size: int, shm_cancel_name: str | None = None) -> (int, int):
     """
      * Decrypt the data stream. Do not use directly use decrypt() instead.
      * @param inputStream The Stream to be decrypted.
@@ -101,6 +99,10 @@ def decrypt_data(input_stream: RandomAccessStream, start: int, count: int, out_d
      * @throws SalmonSecurityException Thrown if there is a security exception with the stream.
      * @throws SalmonIntegrityException Thrown if the stream is corrupt or tampered with.
     """
+    shm_cancel_data: memoryview | None = None
+    if shm_cancel_name is not None:
+        shm_cancel = SharedMemory(shm_cancel_name, size=1)
+        shm_cancel_data = shm_cancel.buf
 
     stream: SalmonStream | None = None
     output_stream: MemoryStream | None = None
@@ -119,6 +121,8 @@ def decrypt_data(input_stream: RandomAccessStream, start: int, count: int, out_d
         bytes_read: int
         while (bytes_read := stream.read(buff, 0, min(len(buff), (
                 count - total_chunk_bytes_read)))) > 0 and total_chunk_bytes_read < count:
+            if shm_cancel_data is not None and shm_cancel_data[0]:
+                break
             output_stream.write(buff, 0, bytes_read)
             total_chunk_bytes_read += bytes_read
         output_stream.flush()
@@ -134,6 +138,7 @@ def decrypt_data(input_stream: RandomAccessStream, start: int, count: int, out_d
             output_stream.close()
     end_pos: int = output_stream.get_position()
     return start_pos, end_pos
+
 
 @typechecked
 class SalmonDecryptor:
@@ -295,22 +300,35 @@ class SalmonDecryptor:
         shm_out = shared_memory.SharedMemory(create=True, size=len(out_data))
         shm_out_name = shm_out.name
 
+        shm_cancel = shared_memory.SharedMemory(create=True, size=1)
+        shm_cancel_name = shm_cancel.name
+
         ex: Exception | None = None
         fs = []
         for i in range(0, running_threads):
             fs.append(self.__executor.submit(decrypt_shm, i, part_size, running_threads,
-                                             data, shm_out_name, len(shm_out.buf), key, nonce, header_data,
+                                             data, shm_out_name, len(shm_out.buf), shm_cancel_name, key, nonce,
+                                             header_data,
                                              integrity, hash_key, chunk_size, self.__buffer_size))
 
-        concurrent.futures.wait(fs)
-        try:
-            # catch any errors within the children processes
-            for f in fs:
+        for f in concurrent.futures.as_completed(fs):
+            try:
+                # catch any errors within the children processes
                 f.result()
-        except Exception as ex1:
-            ex = ex1
+            except Exception as ex1:
+                print(ex1)
+                ex = ex1
+                # cancel all tasks
+                shm_cancel.buf[0] = 1
 
         out_data[:] = shm_out.buf[:]
+
+        shm_cancel.close()
+        shm_cancel.unlink()
+
+        shm_out.close()
+        shm_out.unlink()
+
         if ex is not None:
             try:
                 raise ex

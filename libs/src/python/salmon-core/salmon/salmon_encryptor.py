@@ -31,6 +31,7 @@ from multiprocessing.shared_memory import SharedMemory
 from convert.bit_converter import BitConverter
 from iostream.memory_stream import MemoryStream
 from salmon.integrity.salmon_integrity import SalmonIntegrity
+from salmon.integrity.salmon_integrity_exception import SalmonIntegrityException
 from salmon.iostream.encryption_mode import EncryptionMode
 from salmon.iostream.salmon_stream import SalmonStream
 from salmon.salmon_generator import SalmonGenerator
@@ -38,7 +39,8 @@ from salmon.salmon_security_exception import SalmonSecurityException
 
 
 def encrypt_shm(index: int, part_size: int, running_threads: int,
-                data: bytearray, shm_out_name: str, shm_length: int, key: bytearray, nonce: bytearray,
+                data: bytearray, shm_out_name: str, shm_length: int, shm_cancel_name: str, key: bytearray,
+                nonce: bytearray,
                 header_data: bytearray,
                 integrity: bool, hash_key: bytearray, chunk_size: int, buffer_size: int):
     """
@@ -49,6 +51,7 @@ def encrypt_shm(index: int, part_size: int, running_threads: int,
     :param data:
     :param shm_out_name:
     :param shm_length:
+    :param shm_cancel_name:
     :param key:
     :param nonce:
     :param header_data:
@@ -58,29 +61,28 @@ def encrypt_shm(index: int, part_size: int, running_threads: int,
     :param buffer_size:
     :return:
     """
-    try:
-        start: int = part_size * index
-        length: int
-        if index == running_threads - 1:
-            length = len(data) - start
-        else:
-            length = part_size
 
-        shm_out = SharedMemory(shm_out_name)
-        shm_out_data = shm_out.buf
+    start: int = part_size * index
+    length: int
+    if index == running_threads - 1:
+        length = len(data) - start
+    else:
+        length = part_size
+    shm_out = SharedMemory(shm_out_name)
+    shm_out_data = shm_out.buf
 
-        ins: MemoryStream = MemoryStream(data)
-        out_data: bytearray = bytearray(shm_length)
-        (byte_start, byte_end) = encrypt_data(ins, start, length, out_data, key, nonce, header_data,
-                                              integrity, hash_key, chunk_size, buffer_size)
-        shm_out_data[byte_start:byte_end] = out_data[byte_start:byte_end]
-    except Exception as ex:
-        raise Exception from ex
+    ins: MemoryStream = MemoryStream(data)
+    out_data: bytearray = bytearray(shm_length)
+    (byte_start, byte_end) = encrypt_data(ins, start, length, out_data, key, nonce, header_data,
+                                          integrity, hash_key, chunk_size, buffer_size, shm_cancel_name)
+    shm_out_data[byte_start:byte_end] = out_data[byte_start:byte_end]
 
 
 def encrypt_data(input_stream: MemoryStream, start: int, count: int, out_data: bytearray,
                  key: bytearray, nonce: bytearray, header_data: bytearray,
-                 integrity: bool, hash_key: bytearray, chunk_size: int, buffer_size: int) -> (int, int):
+                 integrity: bool, hash_key: bytearray, chunk_size: int, buffer_size: int,
+                 shm_cancel_name: str | None = None) -> (
+        int, int):
     """
      * Encrypt the data stream. Do not use directly use encrypt() instead.
      *
@@ -98,6 +100,10 @@ def encrypt_data(input_stream: MemoryStream, start: int, count: int, out_data: b
      * @throws SalmonSecurityException  Thrown if there is a security exception with the stream.
      * @throws SalmonIntegrityException Thrown if integrity cannot be applied.
     """
+    shm_cancel_data: memoryview | None = None
+    if shm_cancel_name is not None:
+        shm_cancel = SharedMemory(shm_cancel_name, size=1)
+        shm_cancel_data = shm_cancel.buf
 
     output_stream: MemoryStream = MemoryStream(out_data)
     stream: SalmonStream | None = None
@@ -116,12 +122,14 @@ def encrypt_data(input_stream: MemoryStream, start: int, count: int, out_data: b
         bytes_read: int
         while (bytes_read := input_stream.read(buff, 0, min(len(buff), count - total_chunk_bytes_read))) > 0 \
                 and total_chunk_bytes_read < count:
+            if shm_cancel_data is not None and shm_cancel_data[0]:
+                break
             stream.write(buff, 0, bytes_read)
             total_chunk_bytes_read += bytes_read
         stream.flush()
-    except IOError as ex:
+    except (IOError, SalmonSecurityException, SalmonIntegrityException) as ex:
         print(ex)
-        raise ex
+        raise SalmonSecurityException("Could not encrypt data") from ex
     finally:
         output_stream.close()
         if stream is not None:
@@ -299,21 +307,34 @@ class SalmonEncryptor:
         shm_out = shared_memory.SharedMemory(create=True, size=len(out_data))
         shm_out_name = shm_out.name
 
+        shm_cancel = shared_memory.SharedMemory(create=True, size=1)
+        shm_cancel_name = shm_cancel.name
+
         ex: Exception | None = None
         fs = []
         for i in range(0, running_threads):
             fs.append(self.__executor.submit(encrypt_shm, i, part_size, running_threads,
-                                             data, shm_out_name, len(shm_out.buf), key, nonce, header_data,
+                                             data, shm_out_name, len(shm_out.buf), shm_cancel_name, key, nonce,
+                                             header_data,
                                              integrity, hash_key, chunk_size, self.__buffer_size))
-        concurrent.futures.wait(fs)
-        try:
-            # catch any errors within the children processes
-            for f in fs:
+        for f in concurrent.futures.as_completed(fs):
+            try:
+                # catch any errors within the children processes
                 f.result()
-        except Exception as ex1:
-            ex = ex1
+            except Exception as ex1:
+                print(ex1)
+                ex = ex1
+                # cancel all tasks
+                shm_cancel.buf[0] = 1
 
         out_data[:] = shm_out.buf[:]
+
+        shm_cancel.close()
+        shm_cancel.unlink()
+
+        shm_out.close()
+        shm_out.unlink()
+
         if ex is not None:
             try:
                 raise ex
