@@ -131,7 +131,7 @@ class SalmonFSPythonTestRunner(SalmonPythonTestRunner):
                                                  TestHelper.ENC_EXPORT_THREADS,
                                                  False, False, 0, True, False,
                                                  False)
-        except IOError as ex:
+        except Exception as ex:
             if isinstance(ex.__cause__, SalmonIntegrityException):
                 integrity_failed = True
 
@@ -181,7 +181,7 @@ class SalmonFSPythonTestRunner(SalmonPythonTestRunner):
                                                  TestHelper.ENC_EXPORT_BUFFER_SIZE,
                                                  TestHelper.ENC_EXPORT_THREADS,
                                                  True, True, 24 + 10, False, True, True)
-        except IOError as ex:
+        except Exception as ex:
             if isinstance(ex.__cause__, SalmonIntegrityException):
                 integrity_failed = True
 
