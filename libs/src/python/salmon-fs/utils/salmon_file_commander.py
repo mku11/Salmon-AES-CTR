@@ -44,20 +44,21 @@ class SalmonFileCommander:
      * Facade class for file operations.
     """
 
-    def __init__(self, import_buffer_size: int, export_buffer_size: int, threads: int):
+    def __init__(self, import_buffer_size: int, export_buffer_size: int, threads: int, multi_cpu: False):
         """
          * Instantiate a new file commander object.
          *
          * @param import_buffer_size The buffer size to use for importing files.
          * @param export_buffer_size The buffer size to use for exporting files.
+         * :multi_cpu:  Utilize multiple cpus. Windows does not have a fast fork() so it has a very slow startup
         """
         self.__fileImporter: SalmonFileImporter
         self.__fileExporter: SalmonFileExporter
         self.__fileSearcher: SalmonFileSearcher
         self.__stopJobs: bool = False
 
-        self.__fileImporter = SalmonFileImporter(import_buffer_size, threads)
-        self.__fileExporter = SalmonFileExporter(export_buffer_size, threads)
+        self.__fileImporter = SalmonFileImporter(import_buffer_size, threads, multi_cpu)
+        self.__fileExporter = SalmonFileExporter(export_buffer_size, threads, multi_cpu)
         self.__fileSearcher = SalmonFileSearcher()
 
     def import_files(self, files_to_import: list[IRealFile], import_dir: SalmonFile,
