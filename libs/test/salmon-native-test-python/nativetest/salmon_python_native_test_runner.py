@@ -94,18 +94,20 @@ class SalmonPythonNativeTestRunner(TestCase):
                                                             False)
         self.assertEqual(v_bytes, dec_bytes_def)
 
-        enc_bytes = SalmonEncryptor(SalmonPythonNativeTestRunner.ENC_THREADS).encrypt(v_bytes,
-                                                                                      TestHelper.TEST_KEY_BYTES,
-                                                                                      TestHelper.TEST_NONCE_BYTES,
-                                                                                      False,
-                                                                                      False, None, None)
+        enc_bytes = SalmonEncryptor(SalmonPythonNativeTestRunner.ENC_THREADS,
+                                    multi_cpu=TestHelper.ENABLE_MULTI_CPU).encrypt(v_bytes,
+                                                                                   TestHelper.TEST_KEY_BYTES,
+                                                                                   TestHelper.TEST_NONCE_BYTES,
+                                                                                   False,
+                                                                                   False, None, None)
         self.assertEqual(enc_bytes_def, enc_bytes)
 
-        dec_bytes = SalmonDecryptor(SalmonPythonNativeTestRunner.DEC_THREADS).decrypt(enc_bytes,
-                                                                                      TestHelper.TEST_KEY_BYTES,
-                                                                                      TestHelper.TEST_NONCE_BYTES,
-                                                                                      False,
-                                                                                      False, None, None)
+        dec_bytes = SalmonDecryptor(SalmonPythonNativeTestRunner.DEC_THREADS,
+                                    multi_cpu=TestHelper.ENABLE_MULTI_CPU).decrypt(enc_bytes,
+                                                                                   TestHelper.TEST_KEY_BYTES,
+                                                                                   TestHelper.TEST_NONCE_BYTES,
+                                                                                   False,
+                                                                                   False, None, None)
         self.assertEqual(bytes, dec_bytes)
 
     def test_encrypt_and_decrypt_native_stream_read_buffers_not_aligned_text_compatible(self):
@@ -123,19 +125,21 @@ class SalmonPythonNativeTestRunner(TestCase):
                                                             False)
         self.assertEqual(v_bytes, dec_bytes_def)
 
-        enc_bytes = SalmonEncryptor(SalmonPythonNativeTestRunner.ENC_THREADS).encrypt(v_bytes,
-                                                                                      TestHelper.TEST_KEY_BYTES,
-                                                                                      TestHelper.TEST_NONCE_BYTES,
-                                                                                      False,
-                                                                                      False, None, None)
+        enc_bytes = SalmonEncryptor(SalmonPythonNativeTestRunner.ENC_THREADS,
+                                    multi_cpu=TestHelper.ENABLE_MULTI_CPU).encrypt(v_bytes,
+                                                                                   TestHelper.TEST_KEY_BYTES,
+                                                                                   TestHelper.TEST_NONCE_BYTES,
+                                                                                   False,
+                                                                                   False, None, None)
         self.assertEqual(enc_bytes_def, enc_bytes)
 
         SalmonDefaultOptions.set_buffer_size(32 + 2)
-        dec_bytes = SalmonDecryptor(SalmonPythonNativeTestRunner.DEC_THREADS).decrypt(enc_bytes,
-                                                                                      TestHelper.TEST_KEY_BYTES,
-                                                                                      TestHelper.TEST_NONCE_BYTES,
-                                                                                      False,
-                                                                                      False, None, None)
+        dec_bytes = SalmonDecryptor(SalmonPythonNativeTestRunner.DEC_THREADS,
+                                    multi_cpu=TestHelper.ENABLE_MULTI_CPU).decrypt(enc_bytes,
+                                                                                   TestHelper.TEST_KEY_BYTES,
+                                                                                   TestHelper.TEST_NONCE_BYTES,
+                                                                                   False,
+                                                                                   False, None, None)
         self.assertEqual(v_bytes, dec_bytes)
 
     def test_encrypt_and_decrypt_native_stream_compatible_with_integrity(self):
@@ -152,22 +156,24 @@ class SalmonPythonNativeTestRunner(TestCase):
 
         chunk_size = 256 * 1024
         self.assertEqual(v_bytes, dec_bytes_def)
-        enc_bytes = SalmonEncryptor(SalmonPythonNativeTestRunner.ENC_THREADS).encrypt(v_bytes,
-                                                                                      TestHelper.TEST_KEY_BYTES,
-                                                                                      TestHelper.TEST_NONCE_BYTES,
-                                                                                      False,
-                                                                                      True,
-                                                                                      TestHelper.TEST_HMAC_KEY_BYTES,
-                                                                                      chunk_size)
+        enc_bytes = SalmonEncryptor(SalmonPythonNativeTestRunner.ENC_THREADS,
+                                    multi_cpu=TestHelper.ENABLE_MULTI_CPU).encrypt(v_bytes,
+                                                                                   TestHelper.TEST_KEY_BYTES,
+                                                                                   TestHelper.TEST_NONCE_BYTES,
+                                                                                   False,
+                                                                                   True,
+                                                                                   TestHelper.TEST_HMAC_KEY_BYTES,
+                                                                                   chunk_size)
 
         SalmonPythonNativeTestRunner.assert_equal_with_integrity(enc_bytes_def, enc_bytes, chunk_size)
-        dec_bytes = SalmonDecryptor(SalmonPythonNativeTestRunner.DEC_THREADS).decrypt(enc_bytes,
-                                                                                      TestHelper.TEST_KEY_BYTES,
-                                                                                      TestHelper.TEST_NONCE_BYTES,
-                                                                                      False,
-                                                                                      True,
-                                                                                      TestHelper.TEST_HMAC_KEY_BYTES,
-                                                                                      chunk_size)
+        dec_bytes = SalmonDecryptor(SalmonPythonNativeTestRunner.DEC_THREADS,
+                                    multi_cpu=TestHelper.ENABLE_MULTI_CPU).decrypt(enc_bytes,
+                                                                                   TestHelper.TEST_KEY_BYTES,
+                                                                                   TestHelper.TEST_NONCE_BYTES,
+                                                                                   False,
+                                                                                   True,
+                                                                                   TestHelper.TEST_HMAC_KEY_BYTES,
+                                                                                   chunk_size)
 
         self.assertEqual(v_bytes, dec_bytes)
 
