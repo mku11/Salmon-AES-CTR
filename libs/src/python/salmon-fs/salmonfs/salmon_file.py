@@ -182,7 +182,7 @@ class SalmonFile(VirtualFile):
 
         stream: SalmonStream = SalmonStream(self.get_encryption_key(),
                                             nonce_bytes, EncryptionMode.Decrypt, real_stream, header_data,
-                                            self.__integrity, self.get_file_chunk_size(), self.__get_hash_key())
+                                            self.__integrity, self.get_file_chunk_size(), self.get_hash_key())
         return stream
 
     @synchronized
@@ -198,7 +198,7 @@ class SalmonFile(VirtualFile):
 
         # check if we have an existing iv in the header
         nonce_bytes: bytearray = self.get_file_nonce()
-        if nonce_bytes is not None and not self.__overwrite:
+        if nonce_bytes is not None:
             raise SalmonSecurityException(
                 "You should not overwrite existing files for security instead delete the existing file and create a "
                 "new file. If this is a new file and you want to use parallel streams you can do "
@@ -222,7 +222,7 @@ class SalmonFile(VirtualFile):
                                             self.__integrity,
                                             self.get_requested_chunk_size() if self.get_requested_chunk_size() > 0
                                             else None,
-                                            self.__get_hash_key())
+                                            self.get_hash_key())
         stream.set_allow_range_write(self.__overwrite)
         return stream
 
@@ -256,7 +256,7 @@ class SalmonFile(VirtualFile):
         real_stream.close()
         return header_data
 
-    def __get_hash_key(self) -> bytearray | None:
+    def get_hash_key(self) -> bytearray | None:
         """
          * Retrieve the current hash key that is used to encrypt / decrypt the file contents.
         """
@@ -286,7 +286,7 @@ class SalmonFile(VirtualFile):
 
         file_chunk_size: int | None = self.get_file_chunk_size()
 
-        if file_chunk_size is not None:
+        if file_chunk_size is not None and not self.__overwrite:
             raise SalmonIntegrityException("Cannot redefine chunk size, delete file and recreate")
         if request_chunk_size is not None and request_chunk_size < 0:
             raise SalmonIntegrityException("Chunk size needs to be zero for default chunk size or a positive value")
@@ -577,7 +577,7 @@ class SalmonFile(VirtualFile):
             return 0
 
         # integrity has been requested but hash is missing
-        if self.__integrity and self.__get_hash_key() is None:
+        if self.__integrity and self.get_hash_key() is None:
             raise SalmonIntegrityException("File requires hash_key, use SetVerifyIntegrity() to provide one")
 
         return SalmonIntegrity.get_total_hash_data_length(self.__realFile.length(), self.get_file_chunk_size(),
