@@ -64,6 +64,10 @@ from utils.salmon_file_searcher import SalmonFileSearcher
 class PythonFSTestHelper:
     TEST_SEQUENCER_DIR = "D:\\tmp\\output"
     TEST_SEQUENCER_FILENAME = "fileseq.xml"
+    ENABLE_LOG = True
+    ENABLE_LOG_DETAILS = True
+    ENABLE_FILE_PROGRESS = False
+    ENABLE_MULTI_CPU = False
 
     testCase: TestCase = TestCase()
 
@@ -112,10 +116,15 @@ class PythonFSTestHelper:
         hash_pre_import: str = PythonFSTestHelper.get_checksum(file_to_import)
 
         # import
-        file_importer: SalmonFileImporter = SalmonFileImporter(import_buffer_size, import_threads)
+        file_importer: SalmonFileImporter = SalmonFileImporter(import_buffer_size, import_threads,
+                                                               PythonFSTestHelper.ENABLE_MULTI_CPU)
+        file_importer.set_enable_log(PythonFSTestHelper.ENABLE_LOG)
+        file_importer.set_enable_log_details(PythonFSTestHelper.ENABLE_LOG_DETAILS)
+        print_import_progress = lambda vb, tb: print(
+            "importing file: " + file_to_import.get_base_name() + ": " + str(vb) + "/" + str(
+                tb)) if PythonFSTestHelper.ENABLE_FILE_PROGRESS else None
         salmon_file: SalmonFile = file_importer.import_file(file_to_import, salmon_root_dir, None, False,
-                                                            apply_file_integrity,
-                                                            None)
+                                                            apply_file_integrity, print_import_progress)
 
         PythonFSTestHelper.testCase.assertIsNotNone(salmon_file)
 
@@ -130,13 +139,20 @@ class PythonFSTestHelper:
                     PythonFSTestHelper.testCase.assertEqual(real_file_size, file_size)
 
         # export
-        file_exporter: SalmonFileExporter = SalmonFileExporter(export_buffer_size, export_threads)
+        file_exporter: SalmonFileExporter = SalmonFileExporter(export_buffer_size, export_threads,
+                                                               PythonFSTestHelper.ENABLE_MULTI_CPU)
+        file_exporter.set_enable_log(PythonFSTestHelper.ENABLE_LOG)
+        file_exporter.set_enable_log_details(PythonFSTestHelper.ENABLE_LOG_DETAILS)
+        print_export_progress = lambda vb, tb: print(
+            "exporting file: " + file_to_import.get_base_name() + ": " + str(vb) + "/" + str(
+                tb)) if PythonFSTestHelper.ENABLE_FILE_PROGRESS else None
+
         if bitflip:
             PythonFSTestHelper.flip_bit(salmon_file, flip_position)
 
         export_file: IRealFile = file_exporter.export_file(salmon_file, SalmonDriveManager.get_drive().get_export_dir(),
                                                            None,
-                                                           True, verify_file_integrity, None)
+                                                           True, verify_file_integrity, print_export_progress)
 
         hash_post_export: str = PythonFSTestHelper.get_checksum(export_file)
         if should_be_equal:
@@ -158,7 +174,8 @@ class PythonFSTestHelper:
         rbasename: str = file_to_import.get_base_name()
 
         # import
-        file_importer: SalmonFileImporter = SalmonFileImporter(import_buffer_size, import_threads)
+        file_importer: SalmonFileImporter = SalmonFileImporter(import_buffer_size, import_threads,
+                                                               PythonFSTestHelper.ENABLE_MULTI_CPU)
         salmon_file: SalmonFile = file_importer.import_file(file_to_import, salmon_root_dir, None, False, False, None)
 
         # trigger the cache to add the filename
@@ -190,7 +207,8 @@ class PythonFSTestHelper:
         rbasename: str = file_to_import.get_base_name()
 
         # import
-        file_importer: SalmonFileImporter = SalmonFileImporter(import_buffer_size, import_threads)
+        file_importer: SalmonFileImporter = SalmonFileImporter(import_buffer_size, import_threads,
+                                                               PythonFSTestHelper.ENABLE_MULTI_CPU)
         salmon_file: SalmonFile = file_importer.import_file(file_to_import, salmon_root_dir, None, False, False, None)
 
         # trigger the cache to add the filename
@@ -283,7 +301,7 @@ class PythonFSTestHelper:
         # import a test file
         salmon_root_dir: SalmonFile = SalmonDriveManager.get_drive().get_virtual_root()
         file_to_import: IRealFile = PyFile(import_file_path)
-        file_importer: SalmonFileImporter = SalmonFileImporter(0, 0)
+        file_importer: SalmonFileImporter = SalmonFileImporter(0, 0, PythonFSTestHelper.ENABLE_MULTI_CPU)
         salmon_file_a1: SalmonFile = file_importer.import_file(file_to_import, salmon_root_dir, None, False, False,
                                                                None)
         nonce_a1: int = BitConverter.to_long(salmon_file_a1.get_requested_nonce(), 0, SalmonGenerator.NONCE_LENGTH)
@@ -299,7 +317,7 @@ class PythonFSTestHelper:
             # import a test file should fail because not authorized
             salmon_root_dir = SalmonDriveManager.get_drive().get_virtual_root()
             file_to_import = PyFile(import_file_path)
-            file_importer = SalmonFileImporter(0, 0)
+            file_importer = SalmonFileImporter(0, 0, PythonFSTestHelper.ENABLE_MULTI_CPU)
             file_importer.import_file(file_to_import, salmon_root_dir, None, False, False, None)
             success = True
         except Exception as ignored:
@@ -318,7 +336,7 @@ class PythonFSTestHelper:
         #  import another test file
         salmon_root_dir = SalmonDriveManager.get_drive().get_virtual_root()
         file_to_import = PyFile(import_file_path)
-        file_importer = SalmonFileImporter(0, 0)
+        file_importer = SalmonFileImporter(0, 0, PythonFSTestHelper.ENABLE_MULTI_CPU)
         salmon_file_a2: SalmonFile = file_importer.import_file(file_to_import, salmon_root_dir, None, False, False,
                                                                None)
         nonce_a2: int = BitConverter.to_long(salmon_file_a2.get_file_nonce(), 0, SalmonGenerator.NONCE_LENGTH)
@@ -378,7 +396,7 @@ class PythonFSTestHelper:
             root_dir.list_files()
             salmon_root_dir: SalmonFile = SalmonDriveManager.get_drive().get_virtual_root()
             file_to_import: PyFile = PyFile(import_file)
-            file_importer: SalmonFileImporter = SalmonFileImporter(0, 0)
+            file_importer: SalmonFileImporter = SalmonFileImporter(0, 0, PythonFSTestHelper.ENABLE_MULTI_CPU)
             salmon_file: SalmonFile = file_importer.import_file(file_to_import, salmon_root_dir, None, False, False,
                                                                 None)
             import_success = salmon_file is not None
@@ -402,7 +420,7 @@ class PythonFSTestHelper:
         # Example 1: encrypt byte array
         enc_bytes: bytearray = SalmonEncryptor().encrypt(v_bytes, key, nonce, False)
         # decrypt byte array
-        dec_bytes: bytearray = SalmonDecryptor().decrypt(enc_bytes, key, nonce, False)
+        dec_bytes: bytearray = SalmonDecryptor(multi_cpu=TestHelper.ENABLE_MULTI_CPU).decrypt(enc_bytes, key, nonce, False)
 
         PythonFSTestHelper.assert_array_equal(v_bytes, dec_bytes)
 
