@@ -24,19 +24,128 @@ SOFTWARE.
 '''
 from __future__ import annotations
 
+import concurrent
 import math
-import threading
 import time
-from concurrent.futures import ThreadPoolExecutor
+from concurrent.futures import ThreadPoolExecutor, Future, ProcessPoolExecutor
+from multiprocessing import shared_memory
+from multiprocessing.shared_memory import SharedMemory
 from typing import Any, Callable
 
 from typeguard import typechecked
 
+from convert.bit_converter import BitConverter
 from file.ireal_file import IRealFile
 from iostream.random_access_stream import RandomAccessStream
 from salmon.iostream.salmon_stream import SalmonStream
 from salmonfs.salmon_file import SalmonFile
 from utils.salmon_file_utils import SalmonFileUtils
+
+
+@typechecked
+def export_file(index: int, final_part_size: int, final_running_threads: int, file_size: int,
+                real_file_to_export: IRealFile,
+                real_file: IRealFile,
+                shm_total_bytes_read_name: str,
+                shm_cancel_name: str,
+                buffer_size: int, key: bytearray, integrity: bool, hash_key: bytearray | None, chunk_size: int,
+                enable_log_details: bool = False):
+    file_to_export: SalmonFile = SalmonFile(real_file_to_export)
+    file_to_export.set_allow_overwrite(True)
+    file_to_export.set_encryption_key(key)
+    file_to_export.set_apply_integrity(integrity, hash_key, chunk_size)
+
+    shm_total_bytes_read = SharedMemory(shm_total_bytes_read_name)
+    total_bytes_written = memoryview(shm_total_bytes_read.buf[index * 8:(index + 1) * 8])
+
+    start: int = final_part_size * index
+    length: int
+    if index == final_running_threads - 1:
+        length = file_size - start
+    else:
+        length = final_part_size
+    try:
+        export_file_part(file_to_export, real_file, start, length, total_bytes_written,
+                         buffer_size,
+                         shm_cancel_name, enable_log_details)
+    except Exception as ex:
+        raise ex
+    finally:
+        if shm_total_bytes_read is not None:
+            total_bytes_written.release()
+            shm_total_bytes_read.close()
+            shm_total_bytes_read.unlink()
+
+
+@typechecked
+def export_file_part(file_to_export: SalmonFile, real_file: IRealFile, start: int, count: int,
+                     total_bytes_written: memoryview, buffer_size: int,
+                     shm_cancel_name: str | None = None, enable_log_details: bool = False):
+    """
+     * Export a file part from the drive.
+     *
+     * @param file_to_export      The file the part belongs to
+     * @param export_file        The file to copy the exported part to
+     * @param start             The start position on the file
+     * @param count             The length of the bytes to be decrypted
+     * @param total_bytes_written The total bytes that were written to the external file
+    """
+
+    shm_cancel_data: memoryview | None = None
+    shm_cancel: SharedMemory | None = None
+    if shm_cancel_name is not None:
+        shm_cancel = SharedMemory(shm_cancel_name, size=1)
+        shm_cancel_data = shm_cancel.buf
+
+    start_time: int = int(time.time() * 1000)
+    total_part_bytes_written: int = 0
+
+    target_stream: RandomAccessStream | None = None
+    source_stream: RandomAccessStream | None = None
+
+    try:
+        target_stream = real_file.get_output_stream()
+        target_stream.set_position(start)
+
+        source_stream = file_to_export.get_input_stream()
+        source_stream.set_position(start)
+
+        v_bytes: bytearray = bytearray(buffer_size)
+        bytes_read: int
+        if enable_log_details:
+            print("SalmonFileExporter: FilePart: " + file_to_export.get_real_file().get_base_name() + ": "
+                  + file_to_export.get_base_name() + " start = " + str(start) + " count = " + str(count))
+
+        while (bytes_read := source_stream.read(v_bytes, 0,
+                                                min(len(v_bytes), count - total_part_bytes_written))) > 0 \
+                and total_part_bytes_written < count:
+            if shm_cancel_data is not None and shm_cancel_data[0]:
+                break
+            target_stream.write(v_bytes, 0, bytes_read)
+            total_part_bytes_written += bytes_read
+            total_bytes_written[:8] = BitConverter.to_bytes(total_part_bytes_written, 8)[0:8]
+
+        if enable_log_details:
+            total: int = int(time.time() * 1000) - start_time
+            print("SalmonFileExporter: File Part: " + file_to_export.get_base_name() + " exported " + str(
+                total_part_bytes_written)
+                  + " bytes in: " + str(total) + " ms"
+                  + ", avg speed: " + str(total_bytes_written[0] / float(total)) + " bytes/sec")
+
+    except Exception as ex:
+        print(ex)
+        raise ex
+    finally:
+        if target_stream is not None:
+            target_stream.flush()
+            target_stream.close()
+
+        if source_stream is not None:
+            source_stream.close()
+
+        if shm_cancel is not None:
+            shm_cancel.close()
+            shm_cancel.unlink()
 
 
 @typechecked
@@ -64,7 +173,16 @@ class SalmonFileExporter:
     __enableLog: bool = False
     __enableLogDetails: bool = False
 
-    def __init__(self, buffer_size: int, threads: int):
+    def __init__(self, buffer_size: int, threads: int, multi_cpu: bool = False):
+        """
+         * Constructs a file exporter that can be used to export files from the drive
+         *
+         * @param buffer_size Buffer size to be used when decrypting files.
+         *                   If using integrity self value has to be a multiple of the Chunk size.
+         *                   If not using integrity it should be a multiple of the AES block size for better performance
+         * @param threads
+         * :multi_cpu:  Utilize multiple cpus. Windows does not have a fast fork() so it has a very slow startup
+        """
 
         self.__buffer_size: int = 0
         """
@@ -81,6 +199,12 @@ class SalmonFileExporter:
          * True if last job was stopped by the user.
         """
 
+        self.__shm_cancel = shared_memory.SharedMemory(create=True, size=1)
+        """
+        Shared memory to notify for task cancellations 
+        """
+
+
         self.__failed: bool = False
         """
          * Failed if last job was failed.
@@ -91,7 +215,7 @@ class SalmonFileExporter:
          * Last exception occurred.
         """
 
-        self.__executor: ThreadPoolExecutor = ThreadPoolExecutor()
+        self.__executor: ThreadPoolExecutor | ProcessPoolExecutor | None = None
         """
          * The executor to be used for running parallel exports.
         """
@@ -102,6 +226,8 @@ class SalmonFileExporter:
             threads = SalmonFileExporter.__DEFAULT_THREADS
         self.__buffer_size = buffer_size
         self.__threads = threads
+
+        self.__executor = ThreadPoolExecutor(self.__threads) if not multi_cpu else ProcessPoolExecutor(self.__threads)
 
     @staticmethod
     def set_enable_log(value: bool):
@@ -135,7 +261,7 @@ class SalmonFileExporter:
         if file_to_export.is_directory():
             raise Exception("Cannot export directory, use SalmonFileCommander instead")
 
-        export_file: IRealFile | None = None
+        exported_file: IRealFile | None = None
         filename = filename if filename is not None else file_to_export.get_base_name()
         try:
             if not self.__enableMultiThread and self.__threads != 1:
@@ -143,7 +269,7 @@ class SalmonFileExporter:
 
             start_time: int = 0
             self.__stopped = False
-            if self.__enableLog:
+            if SalmonFileExporter.__enableLog:
                 start_time = int(time.time() * 1000)
 
             total_bytes_written = [0]
@@ -151,7 +277,7 @@ class SalmonFileExporter:
 
             if not export_dir.exists():
                 export_dir.mkdir()
-            export_file = export_dir.create_file(filename)
+            exported_file = export_dir.create_file(filename)
             # we use the drive hash key for integrity verification
             file_to_export.set_verify_integrity(integrity, None)
 
@@ -160,7 +286,7 @@ class SalmonFileExporter:
             running_threads: int
 
             # make sure we allocate enough space for the file
-            target_stream: RandomAccessStream = export_file.get_output_stream()
+            target_stream: RandomAccessStream = exported_file.get_output_stream()
             target_stream.set_length(file_size)
             target_stream.close()
 
@@ -182,39 +308,70 @@ class SalmonFileExporter:
             if running_threads == 0:
                 running_threads = 1
 
-            # we use a countdown latch which is better suited with executor than Thread.join.
-            done: threading.Barrier = threading.Barrier(running_threads + 1)
             final_part_size: int = part_size
             final_running_threads: int = running_threads
+
+            shm_total_bytes_read = shared_memory.SharedMemory(create=True, size=8 * final_running_threads)
+            shm_total_bytes_read_name = shm_total_bytes_read.name
+
+            shm_cancel_name = self.__shm_cancel.name
+            self.__shm_cancel.buf[0] = 0
+
+            fs: list[Future] = []
             for i in range(0, running_threads):
+                fs.append(self.__executor.submit(export_file, i, final_part_size,
+                                                 final_running_threads,
+                                                 file_size,
+                                                 file_to_export.get_real_file(),
+                                                 exported_file,
+                                                 shm_total_bytes_read_name,
+                                                 shm_cancel_name,
+                                                 # on_progress,
+                                                 self.__buffer_size,
+                                                 file_to_export.get_encryption_key(),
+                                                 integrity,
+                                                 file_to_export.get_hash_key(),
+                                                 file_to_export.get_requested_chunk_size(),
+                                                 SalmonFileExporter.__enableLogDetails))
+            total_bytes_read = 0
+            while True:
+                n_total_bytes_read = 0
+                for i in range(0, len(fs)):
+                    chunk_bytes_read = bytearray(shm_total_bytes_read.buf[i * 8:(i + 1) * 8])
+                    n_total_bytes_read += BitConverter.to_long(chunk_bytes_read, 0, 8)
 
-                def __export_file(index: int):
-                    nonlocal ex, total_bytes_written
+                if total_bytes_read != n_total_bytes_read:
+                    total_bytes_read = n_total_bytes_read
+                    on_progress(total_bytes_read, file_to_export.get_size())
 
-                    start: int = final_part_size * index
-                    length: int
-                    if index == final_running_threads - 1:
-                        length = file_size - start
-                    else:
-                        length = final_part_size
-                    try:
-                        self.__export_file_part(file_to_export, export_file, start, length, total_bytes_written,
-                                                on_progress)
-                    except Exception as e:
-                        print(e)
+                complete: bool = True
+                for f in fs:
+                    complete &= f.done()
+                if complete:
+                    break
+                time.sleep(0.25)
 
-                    done.wait()
+            for f in concurrent.futures.as_completed(fs):
+                try:
+                    # catch any errors within the children processes
+                    f.result()
+                except Exception as ex1:
+                    print(ex1)
+                    self.__lastException = ex1
+                    self.__failed = True
+                    # cancel all tasks
+                    self.stop()
 
-                self.__executor.submit(__export_file, i)
+            shm_total_bytes_read.close()
+            shm_total_bytes_read.unlink()
 
-            done.wait()
             if self.__stopped:
-                export_file.delete()
+                exported_file.delete()
             elif delete_source:
                 file_to_export.get_real_file().delete()
             if self.__lastException is not None:
                 raise self.__lastException
-            if self.__enableLog:
+            if SalmonFileExporter.__enableLog:
                 total: int = int(time.time() * 1000) - start_time
                 print("SalmonFileExporter AesType: " + SalmonStream.get_aes_provider_type().name
                       + " File: " + file_to_export.get_base_name() + " verified and exported "
@@ -232,73 +389,12 @@ class SalmonFileExporter:
             return None
 
         self.__stopped = True
-        return export_file
-
-    def __export_file_part(self, file_to_export: SalmonFile, export_file: IRealFile, start: int, count: int,
-                           total_bytes_written: list[int], on_progress: Callable[[int, int], Any] | None):
-        """
-         * Export a file part from the drive.
-         *
-         * @param file_to_export      The file the part belongs to
-         * @param export_file        The file to copy the exported part to
-         * @param start             The start position on the file
-         * @param count             The length of the bytes to be decrypted
-         * @param total_bytes_written The total bytes that were written to the external file
-        """
-        start_time: int = int(time.time() * 1000)
-        total_part_bytes_written: int = 0
-
-        target_stream: RandomAccessStream | None = None
-        source_stream: RandomAccessStream | None = None
-
-        try:
-            target_stream = export_file.get_output_stream()
-            target_stream.set_position(start)
-
-            source_stream = file_to_export.get_input_stream()
-            source_stream.set_position(start)
-
-            v_bytes: bytearray = bytearray(self.__buffer_size)
-            bytes_read: int
-            if self.__enableLogDetails:
-                print("SalmonFileExporter: FilePart: " + file_to_export.get_real_file().get_base_name() + ": "
-                      + file_to_export.get_base_name() + " start = " + str(start) + " count = " + str(count))
-
-            while (bytes_read := source_stream.read(v_bytes, 0,
-                                                    min(len(v_bytes), count - total_part_bytes_written))) > 0 \
-                    and total_part_bytes_written < count:
-                if self.__stopped:
-                    break
-
-                target_stream.write(v_bytes, 0, bytes_read)
-                total_part_bytes_written += bytes_read
-
-                total_bytes_written[0] += bytes_read
-                if on_progress is not None:
-                    on_progress(total_bytes_written[0], file_to_export.get_size())
-
-            if SalmonFileExporter.__enableLogDetails:
-                total: int = int(time.time() * 1000) - start_time
-                print("SalmonFileExporter: File Part: " + file_to_export.get_base_name() + " exported " + str(
-                    total_part_bytes_written)
-                      + " bytes in: " + str(total) + " ms"
-                      + ", avg speed: " + str(total_bytes_written[0] / float(total)) + " bytes/sec")
-
-        except Exception as ex:
-            print(ex)
-            self.__failed = True
-            self.__lastException = ex
-            self.stop()
-        finally:
-            if target_stream is not None:
-                target_stream.flush()
-                target_stream.close()
-
-            if source_stream is not None:
-                source_stream.close()
+        return exported_file
 
     def _finalize(self):
         self.close()
 
     def close(self):
         self.__executor.shutdown(False)
+        self.__shm_cancel.close()
+        self.__shm_cancel.unlink()
