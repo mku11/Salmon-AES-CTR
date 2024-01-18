@@ -24,7 +24,7 @@ SOFTWARE.
 '''
 import concurrent
 import math
-from concurrent.futures import ProcessPoolExecutor
+from concurrent.futures import ProcessPoolExecutor, ThreadPoolExecutor
 from multiprocessing import shared_memory
 from multiprocessing.shared_memory import SharedMemory
 
@@ -41,11 +41,12 @@ from salmon.salmon_security_exception import SalmonSecurityException
 from typeguard import typechecked
 
 
+@typechecked
 def decrypt_shm(index: int, part_size: int, running_threads: int,
                 data: bytearray, shm_out_name: str, shm_length: int, shm_cancel_name: str, key: bytearray,
                 nonce: bytearray,
-                header_data: bytearray,
-                integrity: bool, hash_key: bytearray, chunk_size: int, buffer_size: int):
+                header_data: bytearray | None,
+                integrity: bool, hash_key: bytearray | None, chunk_size: int | None, buffer_size: int):
     """
     Do not use directly use decrypt() instead.
     :param index:
@@ -79,6 +80,7 @@ def decrypt_shm(index: int, part_size: int, running_threads: int,
     shm_out_data[byte_start:byte_end] = out_data[byte_start:byte_end]
 
 
+@typechecked
 def decrypt_data(input_stream: RandomAccessStream, start: int, count: int, out_data: bytearray,
                  key: bytearray, nonce: bytearray,
                  header_data: bytearray | None, integrity: bool, hash_key: bytearray | None,
@@ -146,7 +148,7 @@ class SalmonDecryptor:
      * Utility class that decrypts byte arrays.
     """
 
-    def __init__(self, threads: int | None = None, buffer_size: int | None = None):
+    def __init__(self, threads: int | None = None, buffer_size: int | None = None, multi_cpu: bool = False):
         """
          * Instantiate an encryptor with parallel tasks and buffer size.
          *
@@ -154,6 +156,7 @@ class SalmonDecryptor:
          * @param buffer_size The buffer size to use. It is recommended for performance  to use
          *                   a multiple of the chunk size if you enabled integrity
          *                   otherwise a multiple of the AES block size (16 bytes).
+         * :multi_cpu:  Utilize multiple cpus. Windows does not have a fast fork() so it has a very slow startup
         """
 
         self.__threads: int = 0
@@ -175,7 +178,8 @@ class SalmonDecryptor:
             self.__threads = 1
         else:
             self.__threads = threads
-            self.__executor = ProcessPoolExecutor(threads)
+            self.__executor = ThreadPoolExecutor(self.__threads) if not multi_cpu else ProcessPoolExecutor(
+                self.__threads)
 
         if buffer_size is None:
             self.__buffer_size = SalmonIntegrity.DEFAULT_CHUNK_SIZE

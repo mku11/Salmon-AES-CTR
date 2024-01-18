@@ -24,9 +24,11 @@ SOFTWARE.
 """
 import concurrent
 import math
-from concurrent.futures import ProcessPoolExecutor
+from concurrent.futures import ProcessPoolExecutor, ThreadPoolExecutor
 from multiprocessing import shared_memory
 from multiprocessing.shared_memory import SharedMemory
+
+from typeguard import typechecked
 
 from convert.bit_converter import BitConverter
 from iostream.memory_stream import MemoryStream
@@ -38,11 +40,12 @@ from salmon.salmon_generator import SalmonGenerator
 from salmon.salmon_security_exception import SalmonSecurityException
 
 
+@typechecked
 def encrypt_shm(index: int, part_size: int, running_threads: int,
                 data: bytearray, shm_out_name: str, shm_length: int, shm_cancel_name: str, key: bytearray,
                 nonce: bytearray,
-                header_data: bytearray,
-                integrity: bool, hash_key: bytearray, chunk_size: int, buffer_size: int):
+                header_data: bytearray | None,
+                integrity: bool, hash_key: bytearray | None, chunk_size: int, buffer_size: int):
     """
     Do not use directly use encrypt() instead.
     :param index:
@@ -78,9 +81,10 @@ def encrypt_shm(index: int, part_size: int, running_threads: int,
     shm_out_data[byte_start:byte_end] = out_data[byte_start:byte_end]
 
 
+@typechecked
 def encrypt_data(input_stream: MemoryStream, start: int, count: int, out_data: bytearray,
-                 key: bytearray, nonce: bytearray, header_data: bytearray,
-                 integrity: bool, hash_key: bytearray, chunk_size: int, buffer_size: int,
+                 key: bytearray, nonce: bytearray, header_data: bytearray | None,
+                 integrity: bool, hash_key: bytearray | None, chunk_size: int, buffer_size: int,
                  shm_cancel_name: str | None = None) -> (
         int, int):
     """
@@ -140,12 +144,13 @@ def encrypt_data(input_stream: MemoryStream, start: int, count: int, out_data: b
     return start_pos, end_pos
 
 
+@typechecked
 class SalmonEncryptor:
     """
      * Encrypts byte arrays.
     """
 
-    def __init__(self, threads: int = None, buffer_size: int = None):
+    def __init__(self, threads: int | None = None, buffer_size: int | None = None, multi_cpu: bool = False):
         """
          * Instantiate an encryptor with parallel tasks and buffer size.
          *
@@ -153,6 +158,7 @@ class SalmonEncryptor:
          * @param buffer_size The buffer size to use. It is recommended for performance  to use
          *                   a multiple of the chunk size if you enabled integrity
          *                   otherwise a multiple of the AES block size (16 bytes).
+         * :multi_cpu:  Utilize multiple cpus. Windows does not have a fast fork() so it has a very slow startup
         """
 
         self.__threads: int = 0
@@ -174,7 +180,8 @@ class SalmonEncryptor:
             self.__threads = 1
         else:
             self.__threads = threads
-            self.__executor = ProcessPoolExecutor(threads)
+            self.__executor = ThreadPoolExecutor(self.__threads) if not multi_cpu else ProcessPoolExecutor(
+                self.__threads)
 
         if buffer_size is None:
             self.__buffer_size = SalmonIntegrity.DEFAULT_CHUNK_SIZE
@@ -244,7 +251,7 @@ class SalmonEncryptor:
         return out_data
 
     def __encrypt_data_parallel(self, data: bytearray, out_data: bytearray,
-                                key: bytearray, hash_key: bytearray, nonce: bytearray, header_data: bytearray,
+                                key: bytearray, hash_key: bytearray | None, nonce: bytearray, header_data: bytearray | None,
                                 chunk_size: int, integrity: bool):
         """
          * Encrypt stream using parallel threads.
@@ -286,8 +293,8 @@ class SalmonEncryptor:
                                    integrity, chunk_size)
 
     def __submit_encrypt_jobs(self, running_threads: int, part_size: int, data: bytearray, out_data: bytearray,
-                              key: bytearray, hash_key: bytearray, nonce: bytearray,
-                              header_data: bytearray, integrity: bool, chunk_size: int):
+                              key: bytearray, hash_key: bytearray | None, nonce: bytearray,
+                              header_data: bytearray | None, integrity: bool, chunk_size: int):
         """
          * Submit encryption parallel jobs.
          *
