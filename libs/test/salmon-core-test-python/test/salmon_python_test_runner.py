@@ -59,7 +59,7 @@ class SalmonPythonTestRunner(TestCase):
     TEST_IMPORT_MEDIUM_FILE = "d:\\tmp\\testdata\\medium_test.zip"
     TEST_IMPORT_LARGE_FILE = "d:\\tmp\\testdata\\large_test.mp4"
     TEST_IMPORT_HUGE_FILE = "d:\\tmp\\testdata\\huge.zip"
-    TEST_IMPORT_FILE = TEST_IMPORT_MEDIUM_FILE
+    TEST_IMPORT_FILE = TEST_IMPORT_LARGE_FILE
 
     def setUp(self):
         SalmonStream.set_aes_provider_type(ProviderType.Default)
@@ -149,10 +149,12 @@ class SalmonPythonTestRunner(TestCase):
                                                             TestHelper.TEST_NONCE_BYTES, False)
 
         self.assertEqual(v_bytes, dec_bytes_def)
-        enc_bytes = SalmonEncryptor().encrypt(v_bytes, TestHelper.TEST_KEY_BYTES, TestHelper.TEST_NONCE_BYTES, False)
+        enc_bytes = SalmonEncryptor(multi_cpu=TestHelper.ENABLE_MULTI_CPU).encrypt(v_bytes, TestHelper.TEST_KEY_BYTES,
+                                                                                   TestHelper.TEST_NONCE_BYTES, False)
 
         self.assertEqual(enc_bytes_def, enc_bytes)
-        dec_bytes = SalmonDecryptor().decrypt(enc_bytes, TestHelper.TEST_KEY_BYTES, TestHelper.TEST_NONCE_BYTES, False)
+        dec_bytes = SalmonDecryptor(multi_cpu=TestHelper.ENABLE_MULTI_CPU).decrypt(enc_bytes, TestHelper.TEST_KEY_BYTES,
+                                                                                   TestHelper.TEST_NONCE_BYTES, False)
 
         self.assertEqual(v_bytes, dec_bytes)
 
@@ -171,14 +173,22 @@ class SalmonPythonTestRunner(TestCase):
         threads = 1
         chunk_size = 256 * 1024
         self.assertEqual(v_bytes, dec_bytes_def)
-        enc_bytes = SalmonEncryptor(threads).encrypt(v_bytes, TestHelper.TEST_KEY_BYTES, TestHelper.TEST_NONCE_BYTES,
-                                                     False,
-                                                     True, TestHelper.TEST_HMAC_KEY_BYTES, chunk_size)
+        enc_bytes = SalmonEncryptor(threads, multi_cpu=TestHelper.ENABLE_MULTI_CPU).encrypt(v_bytes,
+                                                                                            TestHelper.TEST_KEY_BYTES,
+                                                                                            TestHelper.TEST_NONCE_BYTES,
+                                                                                            False,
+                                                                                            True,
+                                                                                            TestHelper.TEST_HMAC_KEY_BYTES,
+                                                                                            chunk_size)
 
         self.assertEqualWithIntegrity(enc_bytes_def, enc_bytes, chunk_size)
-        dec_bytes = SalmonDecryptor(threads).decrypt(enc_bytes, TestHelper.TEST_KEY_BYTES, TestHelper.TEST_NONCE_BYTES,
-                                                     False,
-                                                     True, TestHelper.TEST_HMAC_KEY_BYTES, chunk_size)
+        dec_bytes = SalmonDecryptor(threads, multi_cpu=TestHelper.ENABLE_MULTI_CPU).decrypt(enc_bytes,
+                                                                                            TestHelper.TEST_KEY_BYTES,
+                                                                                            TestHelper.TEST_NONCE_BYTES,
+                                                                                            False,
+                                                                                            True,
+                                                                                            TestHelper.TEST_HMAC_KEY_BYTES,
+                                                                                            chunk_size)
 
         self.assertEqual(v_bytes, dec_bytes)
 
@@ -481,11 +491,14 @@ class SalmonPythonTestRunner(TestCase):
     def test_encrypt_and_decrypt_array_multiple_threads(self):
         data = TestHelper.get_rand_array(1 * 1024 * 1024)
         t1 = time.time() * 1000
-        enc_data = SalmonEncryptor(2).encrypt(data, TestHelper.TEST_KEY_BYTES, TestHelper.TEST_NONCE_BYTES,
-                                              False)
+        enc_data = SalmonEncryptor(2, multi_cpu=TestHelper.ENABLE_MULTI_CPU).encrypt(data, TestHelper.TEST_KEY_BYTES,
+                                                                                     TestHelper.TEST_NONCE_BYTES,
+                                                                                     False)
         t2 = time.time() * 1000
-        dec_data = SalmonDecryptor(2).decrypt(enc_data, TestHelper.TEST_KEY_BYTES, TestHelper.TEST_NONCE_BYTES,
-                                              False)
+        dec_data = SalmonDecryptor(2, multi_cpu=TestHelper.ENABLE_MULTI_CPU).decrypt(enc_data,
+                                                                                     TestHelper.TEST_KEY_BYTES,
+                                                                                     TestHelper.TEST_NONCE_BYTES,
+                                                                                     False)
         t3 = time.time() * 1000
 
         self.assertEqual(data, dec_data)
@@ -496,11 +509,18 @@ class SalmonPythonTestRunner(TestCase):
         SalmonDefaultOptions.set_buffer_size(2 * 1024 * 1024)
         data = TestHelper.get_rand_array(1 * 1024 * 1024 + 3)
         t1 = time.time() * 1000
-        enc_data = SalmonEncryptor(2).encrypt(data, TestHelper.TEST_KEY_BYTES, TestHelper.TEST_NONCE_BYTES,
-                                              False, True, TestHelper.TEST_HMAC_KEY_BYTES, None)
+        enc_data = SalmonEncryptor(3, multi_cpu=TestHelper.ENABLE_MULTI_CPU).encrypt(data, TestHelper.TEST_KEY_BYTES,
+                                                                                     TestHelper.TEST_NONCE_BYTES,
+                                                                                     False, True,
+                                                                                     TestHelper.TEST_HMAC_KEY_BYTES,
+                                                                                     None)
         t2 = time.time() * 1000
-        dec_data = SalmonDecryptor(2).decrypt(enc_data, TestHelper.TEST_KEY_BYTES, TestHelper.TEST_NONCE_BYTES,
-                                              False, True, TestHelper.TEST_HMAC_KEY_BYTES, None)
+        dec_data = SalmonDecryptor(3, multi_cpu=TestHelper.ENABLE_MULTI_CPU).decrypt(enc_data,
+                                                                                     TestHelper.TEST_KEY_BYTES,
+                                                                                     TestHelper.TEST_NONCE_BYTES,
+                                                                                     False, True,
+                                                                                     TestHelper.TEST_HMAC_KEY_BYTES,
+                                                                                     None)
         t3 = time.time() * 1000
 
         self.assertEqual(data, dec_data)
@@ -510,11 +530,16 @@ class SalmonPythonTestRunner(TestCase):
     def test_encrypt_and_decrypt_array_multiple_threads_integrity_custom_chunk_size(self):
         data = TestHelper.get_rand_array(1 * 1024 * 1024)
         t1 = time.time() * 1000
-        enc_data = SalmonEncryptor(2).encrypt(data, TestHelper.TEST_KEY_BYTES, TestHelper.TEST_NONCE_BYTES,
-                                              False, True, TestHelper.TEST_HMAC_KEY_BYTES, 32)
+        enc_data = SalmonEncryptor(2, multi_cpu=TestHelper.ENABLE_MULTI_CPU).encrypt(data, TestHelper.TEST_KEY_BYTES,
+                                                                                     TestHelper.TEST_NONCE_BYTES,
+                                                                                     False, True,
+                                                                                     TestHelper.TEST_HMAC_KEY_BYTES, 32)
         t2 = time.time() * 1000
-        dec_data = SalmonDecryptor(2).decrypt(enc_data, TestHelper.TEST_KEY_BYTES, TestHelper.TEST_NONCE_BYTES,
-                                              False, True, TestHelper.TEST_HMAC_KEY_BYTES, 32)
+        dec_data = SalmonDecryptor(2, multi_cpu=TestHelper.ENABLE_MULTI_CPU).decrypt(enc_data,
+                                                                                     TestHelper.TEST_KEY_BYTES,
+                                                                                     TestHelper.TEST_NONCE_BYTES,
+                                                                                     False, True,
+                                                                                     TestHelper.TEST_HMAC_KEY_BYTES, 32)
         t3 = time.time() * 1000
 
         self.assertEqual(data, dec_data)
@@ -524,11 +549,14 @@ class SalmonPythonTestRunner(TestCase):
     def test_encrypt_and_decrypt_array_multiple_threads_integrity_custom_chunk_size_store_header(self):
         data = TestHelper.get_rand_array_same(129 * 1024)
         t1 = time.time() * 1000
-        enc_data = SalmonEncryptor().encrypt(data, TestHelper.TEST_KEY_BYTES, TestHelper.TEST_NONCE_BYTES,
-                                             True, True, TestHelper.TEST_HMAC_KEY_BYTES, 32)
+        enc_data = SalmonEncryptor(multi_cpu=TestHelper.ENABLE_MULTI_CPU).encrypt(data, TestHelper.TEST_KEY_BYTES,
+                                                                                  TestHelper.TEST_NONCE_BYTES,
+                                                                                  True, True,
+                                                                                  TestHelper.TEST_HMAC_KEY_BYTES, 32)
         t2 = time.time() * 1000
-        dec_data = SalmonDecryptor().decrypt(enc_data, TestHelper.TEST_KEY_BYTES,
-                                             None, True, True, TestHelper.TEST_HMAC_KEY_BYTES, None)
+        dec_data = SalmonDecryptor(multi_cpu=TestHelper.ENABLE_MULTI_CPU).decrypt(enc_data, TestHelper.TEST_KEY_BYTES,
+                                                                                  None, True, True,
+                                                                                  TestHelper.TEST_HMAC_KEY_BYTES, None)
         t3 = time.time() * 1000
 
         self.assertEqual(data, dec_data)
