@@ -198,7 +198,7 @@ class SalmonFile(VirtualFile):
 
         # check if we have an existing iv in the header
         nonce_bytes: bytearray = self.get_file_nonce()
-        if nonce_bytes is not None:
+        if nonce_bytes is not None and not self.__overwrite:
             raise SalmonSecurityException(
                 "You should not overwrite existing files for security instead delete the existing file and create a "
                 "new file. If this is a new file and you want to use parallel streams you can do "
