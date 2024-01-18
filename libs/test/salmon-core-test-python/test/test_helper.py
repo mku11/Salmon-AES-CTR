@@ -57,6 +57,8 @@ class TestHelper:
     ENC_EXPORT_THREADS = 4
     TEST_ENC_BUFFER_SIZE = 512 * 1024
     TEST_DEC_BUFFER_SIZE = 512 * 1024
+    ENABLE_MULTI_CPU = False
+
     TEST_PASSWORD = "test123"
     TEST_FALSE_PASSWORD = "Falsepass"
     TEST_EXPORT_DIR = "export.slma"
@@ -460,10 +462,15 @@ class TestHelper:
     @staticmethod
     def encrypt_and_decrypt_byte_array2(data, threads, enable_log):
         t1 = time.time() * 1000
-        enc_data = SalmonEncryptor(threads).encrypt(data, TestHelper.TEST_KEY_BYTES, TestHelper.TEST_NONCE_BYTES, False)
+        enc_data = SalmonEncryptor(threads, multi_cpu=TestHelper.ENABLE_MULTI_CPU).encrypt(data,
+                                                                                           TestHelper.TEST_KEY_BYTES,
+                                                                                           TestHelper.TEST_NONCE_BYTES,
+                                                                                           False)
         t2 = time.time() * 1000
-        dec_data = SalmonDecryptor(threads).decrypt(enc_data, TestHelper.TEST_KEY_BYTES, TestHelper.TEST_NONCE_BYTES,
-                                                    False)
+        dec_data = SalmonDecryptor(threads, multi_cpu=TestHelper.ENABLE_MULTI_CPU).decrypt(enc_data,
+                                                                                           TestHelper.TEST_KEY_BYTES,
+                                                                                           TestHelper.TEST_NONCE_BYTES,
+                                                                                           False)
         t3 = time.time() * 1000
 
         TestHelper.assert_array_equal(data, dec_data)
