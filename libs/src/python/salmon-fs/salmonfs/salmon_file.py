@@ -581,8 +581,8 @@ class SalmonFile(VirtualFile):
             raise SalmonIntegrityException("File requires hash_key, use SetVerifyIntegrity() to provide one")
 
         return SalmonIntegrity.get_total_hash_data_length(self.__realFile.length(), self.get_file_chunk_size(),
-                                                      SalmonGenerator.HASH_RESULT_LENGTH,
-                                                      SalmonGenerator.HASH_KEY_LENGTH)
+                                                          SalmonGenerator.HASH_RESULT_LENGTH,
+                                                          SalmonGenerator.HASH_KEY_LENGTH)
 
     # TODO: files with real same name can exists we can add checking all files in the dir
     #  and throw an Exception though this could be an expensive operation
@@ -711,7 +711,7 @@ class SalmonFile(VirtualFile):
         """
         return self.__tag
 
-    def move(self, v_dir: SalmonFile, on_progress_listener: Callable[[int,int], Any] | None = None) -> SalmonFile:
+    def move(self, v_dir: SalmonFile, on_progress_listener: Callable[[int, int], Any] | None = None) -> SalmonFile:
         """
          * Move file to another directory.
          *
@@ -723,7 +723,7 @@ class SalmonFile(VirtualFile):
         new_real_file: IRealFile = self.__realFile.move(v_dir.__realFile, None, on_progress_listener)
         return SalmonFile(new_real_file, self.__drive)
 
-    def copy(self, v_dir: SalmonFile, on_progress_listener: Callable[[int,int], Any] | None = None) -> SalmonFile:
+    def copy(self, v_dir: SalmonFile, on_progress_listener: Callable[[int, int], Any] | None = None) -> SalmonFile:
         """
          * Copy a file to another directory.
          *
