@@ -385,9 +385,8 @@ class SalmonDriveManager:
             hash_key: bytearray = bytearray(SalmonGenerator.HASH_KEY_LENGTH)
             comb_key: bytearray = SalmonDriveGenerator.generate_combined_key()
             drive_key[0: SalmonGenerator.KEY_LENGTH] = comb_key[0:SalmonGenerator.KEY_LENGTH]
-            hash_key[0:SalmonGenerator.HASH_KEY_LENGTH] = comb_key[
-                                                          SalmonGenerator.KEY_LENGTH:SalmonGenerator.KEY_LENGTH
-                                                                                     + SalmonGenerator.HASH_KEY_LENGTH]
+            length: int = SalmonGenerator.KEY_LENGTH + SalmonGenerator.HASH_KEY_LENGTH
+            hash_key[0:SalmonGenerator.HASH_KEY_LENGTH] = comb_key[SalmonGenerator.KEY_LENGTH:length]
             drive.set_drive_id(SalmonDriveGenerator.generate_drive_id())
 
         # Get the salt that we will use to encrypt the combined key (drive key + hash key)

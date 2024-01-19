@@ -750,8 +750,7 @@ class SalmonFile(VirtualFile):
         """
         on_failed_real_file: Callable[[IRealFile, Exception], Any] | None = None
         if on_failed is not None:
-            on_failed_real_file = lambda file, ex: \
-                on_failed(SalmonFile(file, self.get_drive()), ex)
+            on_failed_real_file = lambda file, ex: on_failed(SalmonFile(file, self.get_drive()), ex)
 
         rename_real_file: Callable[[IRealFile], str] | None = None
         # use auto rename only when we are using a drive
