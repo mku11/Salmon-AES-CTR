@@ -124,7 +124,7 @@ class SalmonFileCommander:
             elif sfile is not None and sfile.exists() and sfile.is_file() and auto_rename is not None:
                 sfile = import_dir.create_directory(auto_rename(file_to_import))
             if on_progress_changed is not None:
-                on_progress_changed(SalmonFileCommander.RealFileTaskProgress(file_to_import, 1, 1, count[0], total))
+                on_progress_changed(SalmonFileCommander.RealFileTaskProgress(file_to_import, 1, 1, count[0], total[0]))
             count[0] += 1
             n_existing_files: dict[str, SalmonFile] = self.__get_existing_salmon_files(sfile)
             for child in file_to_import.list_files():
@@ -135,7 +135,7 @@ class SalmonFileCommander:
                 file_to_import.delete()
         else:
             try:
-                filename: dict[str, SalmonFile] = file_to_import.get_base_name()
+                filename: str = file_to_import.get_base_name()
                 if sfile is not None and (sfile.exists() or sfile.is_directory()) and auto_rename is not None:
                     filename = auto_rename(file_to_import)
                 sfile = self.__fileImporter.import_file(file_to_import, import_dir, filename, delete_source, integrity,
@@ -143,7 +143,7 @@ class SalmonFileCommander:
                                                         self.__notify_real_file_progress(file_to_import,
                                                                                          v_bytes,
                                                                                          total_bytes2,
-                                                                                         count, total,
+                                                                                         count, total[0],
                                                                                          on_progress_changed2))
                 imported_files.append(sfile)
                 count[0] += 1
