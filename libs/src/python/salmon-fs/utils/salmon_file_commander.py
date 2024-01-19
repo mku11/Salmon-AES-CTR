@@ -82,12 +82,12 @@ class SalmonFileCommander:
         self.__stopJobs = False
         imported_files: list[SalmonFile] = []
 
-        total: int = 0
-        for i in range(0, files_to_import.length):
-            total += self.__get_real_files_count_recursively(files_to_import[i])
+        total: list[int] = [0]
+        for i in range(0, len(files_to_import)):
+            total[0] += self.__get_real_files_count_recursively(files_to_import[i])
         count: list[int] = [1]
         existing_files: dict[str, SalmonFile] = self.__get_existing_salmon_files(import_dir)
-        for i in range(0, files_to_import.length):
+        for i in range(0, len(files_to_import)):
             if self.__stopJobs:
                 break
             self.__import_recursively(files_to_import[i], import_dir,
@@ -118,7 +118,7 @@ class SalmonFileCommander:
             file_to_import.get_base_name()) if file_to_import.get_base_name() in existing_files else None
         if file_to_import.is_directory():
             if on_progress_changed is not None:
-                on_progress_changed(SalmonFileCommander.RealFileTaskProgress(file_to_import, 0, 1, count[0], total))
+                on_progress_changed(SalmonFileCommander.RealFileTaskProgress(file_to_import, 0, 1, count[0], total[0]))
             if sfile is None or not sfile.exists():
                 sfile = import_dir.create_directory(file_to_import.get_base_name())
             elif sfile is not None and sfile.exists() and sfile.is_file() and auto_rename is not None:
@@ -145,7 +145,7 @@ class SalmonFileCommander:
                                                                                          total_bytes2,
                                                                                          count, total,
                                                                                          on_progress_changed2))
-                imported_files.add(sfile)
+                imported_files.append(sfile)
                 count[0] += 1
             except SalmonSequenceException as ex:
                 raise ex
@@ -175,13 +175,13 @@ class SalmonFileCommander:
         exported_files: list[IRealFile] = []
 
         total: int = 0
-        for i in range(0, files_to_export.length):
+        for i in range(0, len(files_to_export)):
             total += self.__get_salmon_files_count_recursively(files_to_export[i])
 
         existing_files: dict[str, IRealFile] = self.__get_existing_real_files(export_dir)
 
         count: list[int] = [1]
-        for i in range(0, files_to_export.length):
+        for i in range(0, len(files_to_export)):
             if stop_jobs:
                 break
             self.__export_recursively(files_to_export[i], export_dir,
@@ -233,7 +233,7 @@ class SalmonFileCommander:
                                                         lambda v_bytes, total_bytes: self.__notify_salmon_file_progress(
                                                             file_to_export, v_bytes, total_bytes, count, total,
                                                             on_progress_changed))
-                exported_files.add(rfile)
+                exported_files.append(rfile)
                 count[0] += 1
             except SalmonSequenceException as ex:
                 raise ex
@@ -269,7 +269,7 @@ class SalmonFileCommander:
         self.__stopJobs = False
         count: list[int] = [1]
         total: int = 0
-        for i in range(0, files_to_delete.length):
+        for i in range(0, len(files_to_delete)):
             total += self.__get_salmon_files_count_recursively(files_to_delete[i])
         for salmonFile in files_to_delete:
             if self.__stopJobs:
