@@ -204,7 +204,6 @@ class SalmonFileExporter:
         Shared memory to notify for task cancellations 
         """
 
-
         self.__failed: bool = False
         """
          * Failed if last job was failed.

@@ -187,7 +187,7 @@ class IRealFile(ABC):
         pass
 
     def move(self, new_dir: IRealFile, new_name: str | None = None,
-             progress_listener: Callable[[int,int], Any] | None = None) -> IRealFile:
+             progress_listener: Callable[[int, int], Any] | None = None) -> IRealFile:
         """
          * Move this file to another directory.
          *
@@ -199,7 +199,7 @@ class IRealFile(ABC):
         pass
 
     def copy(self, new_dir: IRealFile, new_name: str | None = None,
-             progress_listener: Callable[[int,int], Any] | None = None) -> IRealFile:
+             progress_listener: Callable[[int, int], Any] | None = None) -> IRealFile:
         """
          * Copy this file to another directory.
          *
@@ -230,7 +230,7 @@ class IRealFile(ABC):
 
     @staticmethod
     def copy_file_contents(src: IRealFile, dest: IRealFile, delete: bool = False,
-                           progress_listener: Callable[[int,int], Any] | None = None) -> bool:
+                           progress_listener: Callable[[int, int], Any] | None = None) -> bool:
         """
          * Copy contents of a file to another file.
          *

@@ -251,7 +251,8 @@ class SalmonEncryptor:
         return out_data
 
     def __encrypt_data_parallel(self, data: bytearray, out_data: bytearray,
-                                key: bytearray, hash_key: bytearray | None, nonce: bytearray, header_data: bytearray | None,
+                                key: bytearray, hash_key: bytearray | None, nonce: bytearray,
+                                header_data: bytearray | None,
                                 chunk_size: int, integrity: bool):
         """
          * Encrypt stream using parallel threads.

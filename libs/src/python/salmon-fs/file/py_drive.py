@@ -33,6 +33,7 @@ from file.virtual_file import VirtualFile
 from salmonfs.salmon_drive import SalmonDrive
 from salmonfs.salmon_file import SalmonFile
 
+
 @typechecked
 class PyDrive(SalmonDrive):
     """

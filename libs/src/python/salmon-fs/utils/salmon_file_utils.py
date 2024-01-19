@@ -28,6 +28,7 @@ from typeguard import typechecked
 
 from salmonfs.salmon_file import SalmonFile
 
+
 @typechecked
 class SalmonFileUtils:
     @staticmethod

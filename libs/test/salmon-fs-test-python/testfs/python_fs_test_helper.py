@@ -420,7 +420,8 @@ class PythonFSTestHelper:
         # Example 1: encrypt byte array
         enc_bytes: bytearray = SalmonEncryptor().encrypt(v_bytes, key, nonce, False)
         # decrypt byte array
-        dec_bytes: bytearray = SalmonDecryptor(multi_cpu=TestHelper.ENABLE_MULTI_CPU).decrypt(enc_bytes, key, nonce, False)
+        dec_bytes: bytearray = SalmonDecryptor(multi_cpu=TestHelper.ENABLE_MULTI_CPU).decrypt(enc_bytes, key, nonce,
+                                                                                              False)
 
         PythonFSTestHelper.assert_array_equal(v_bytes, dec_bytes)
 
