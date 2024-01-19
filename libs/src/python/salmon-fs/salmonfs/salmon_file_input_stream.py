@@ -72,7 +72,7 @@ class SalmonFileInputStream(BufferedIOBase):
          * @param back_offset   The back offset.
         """
         self.__buffersCount: int
-        self.__buffers: list[SalmonFileInputStream.CacheBuffer] | None = None
+        self.__buffers: list[SalmonFileInputStream.CacheBuffer] | list[None] | None = None
         self.__streams: list[SalmonStream] | list[None] | None = None
         self.__salmonFile: SalmonFile | None = None
         self.__cacheBufferSize: int = 0
