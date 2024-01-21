@@ -1,5 +1,7 @@
-:: set the javafx library path
-set JAVA_FX_PATH="."
-set JAVA_FX_MODULES=--add-modules=javafx.controls --add-modules=javafx.swing --add-modules=javafx.fxml --add-modules=javafx.media --add-modules=javafx.graphics
+:: uncomment and enter the javafx library path
+:: set JAVAFX_HOME="D:\tools\javafx-sdk-17.0.10\lib"
 
-java --module-path %JAVA_FX_PATH% %JAVA_FX_MODULES% -cp "./*" com.mku.salmon.vault.main.Main
+set SALMON_PATH="./*"
+set JAVAFX_MODULES=--add-modules=javafx.controls --add-modules=javafx.swing --add-modules=javafx.fxml --add-modules=javafx.media --add-modules=javafx.graphics
+
+java --module-path %JAVAFX_HOME% %JAVAFX_MODULES% -cp %SALMON_PATH% com.mku.salmon.vault.main.Main

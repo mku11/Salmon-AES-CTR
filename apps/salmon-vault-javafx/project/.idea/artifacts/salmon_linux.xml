@@ -1,0 +1,34 @@
+<component name="ArtifactManager">
+  <artifact name="salmon-linux">
+    <output-path>$PROJECT_DIR$/../../../output/salmon-vault-javafx-linux</output-path>
+    <root id="root">
+      <element id="archive" name="salmon.main.jar">
+        <element id="module-output" name="salmon.main" />
+        <element id="dir-copy" path="$PROJECT_DIR$/src/main/resources" />
+        <element id="dir-copy" path="$PROJECT_DIR$/../../../common/common-res" />
+        <element id="dir-copy" path="$PROJECT_DIR$/../res" />
+      </element>
+      <element id="library" level="project" name="Gradle: net.java.dev.jna:jna-platform:5.13.0" />
+      <element id="library" level="project" name="Gradle: org.openjfx:javafx-graphics:17.0.2" />
+      <element id="library" level="project" name="Gradle: net.java.dev.jna:jna:5.13.0" />
+      <element id="library" level="project" name="Gradle: org.openjfx:javafx-base:17.0.2" />
+      <element id="file-copy" path="$PROJECT_DIR$/build/libs/natives/lib/salmon.dll" />
+      <element id="file-copy" path="$PROJECT_DIR$/../../../LICENSE" />
+      <element id="file-copy" path="$PROJECT_DIR$/README.txt" />
+      <element id="library" level="project" name="Gradle: com.mku.salmon:salmon-core:1.0.6-SNAPSHOT" />
+      <element id="library" level="project" name="Gradle: com.mku.salmon:salmon-fs:1.0.6-SNAPSHOT" />
+      <element id="library" level="project" name="Gradle: com.mku.salmon:salmon-win:1.0.6-SNAPSHOT" />
+      <element id="library" level="project" name="Gradle: org.openjfx:javafx-graphics:linux:17.0.2" />
+      <element id="library" level="project" name="Gradle: org.openjfx:javafx-media:17.0.2" />
+      <element id="library" level="project" name="Gradle: org.openjfx:javafx-media:linux:17.0.2" />
+      <element id="library" level="project" name="Gradle: org.openjfx:javafx-fxml:17.0.2" />
+      <element id="library" level="project" name="Gradle: org.openjfx:javafx-fxml:linux:17.0.2" />
+      <element id="library" level="project" name="Gradle: org.openjfx:javafx-base:linux:17.0.2" />
+      <element id="library" level="project" name="Gradle: org.openjfx:javafx-controls:17.0.2" />
+      <element id="library" level="project" name="Gradle: org.openjfx:javafx-controls:linux:17.0.2" />
+      <element id="library" level="project" name="Gradle: org.openjfx:javafx-swing:linux:17.0.2" />
+      <element id="library" level="project" name="Gradle: org.openjfx:javafx-swing:17.0.2" />
+      <element id="file-copy" path="$PROJECT_DIR$/scripts/start.sh" />
+    </root>
+  </artifact>
+</component>

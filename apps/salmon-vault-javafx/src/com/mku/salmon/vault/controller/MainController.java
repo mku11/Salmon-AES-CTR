@@ -150,7 +150,7 @@ public class MainController {
         return filesprogresstext.get();
     }
 
-    private SalmonWinVaultManager manager;
+    private SalmonVaultManager manager;
 
     public MainController() {
 
@@ -423,7 +423,10 @@ public class MainController {
             ServiceLocator.getInstance().register(IKeyboardService.class, new JavaFxKeyboardService());
             ServiceLocator.getInstance().register(IMediaPlayerService.class, new JavaFxMediaPlayerService());
 
-            manager = SalmonWinVaultManager.getInstance();
+            if (System.getProperty("os.name").toUpperCase().toUpperCase().startsWith("WINDOWS"))
+                manager = SalmonWinVaultManager.getInstance();
+            else
+                manager = SalmonVaultManager.getInstance();
             manager.openListItem = this::OpenListItem;
             manager.observePropertyChanges(this::managerPropertyChanged);
             manager.updateListItem = this::updateListItem;
