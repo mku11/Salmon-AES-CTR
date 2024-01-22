@@ -3,7 +3,7 @@
 #include "wincrypt.h"
 #include <iostream>
 extern "C" {
-#include "..\..\src\c\salmon\salmon.h"
+#include "salmon.h"
 }
 
 using namespace std;
