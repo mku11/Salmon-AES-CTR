@@ -1,5 +1,4 @@
 # salmon makefile
-
 SRC_ROOT=../../src/c
 SALMON_ROOT=$(SRC_ROOT)/salmon
 SALMON_JNI_ROOT=$(SRC_ROOT)/salmon-jni
@@ -26,6 +25,11 @@ else
   CFLAGS+=-maes
 endif
 
+VERSION=1.0.6-SNAPSHOT
+OS=linux
+PACKAGES_DIR=packages
+PACKAGE_NAME=salmon-$(OS)-$(ARCH).$(VERSION)
+
 CFLAGS+=-I$(SALMON_INCLUDE)
 CFLAGS+=-fPIC
 LIBS=-lm
@@ -40,7 +44,8 @@ ifeq ($(ENABLE_JNI),1)
 endif
 
 OBJ_DIR=obj
-LIB_DIR =lib/$(ARCH)
+MAIN_LIB_DIR=lib
+LIB_DIR =$(MAIN_LIB_DIR)/$(ARCH)
 
 _SRC=$(wildcard ../../src/c/salmon/*.c ../../src/c/salmon/salmon-aes-intr/*.c)
 
@@ -65,7 +70,7 @@ OBJECT := $(SRC:.c=.o)
 .PHONY: all
 all: libsalmon.so
 
-%.o: %.c $(SALMON_DEPS)
+%.o: %.c $(SALMON_DEPS) $(TINY_AES_DEPS)
 	@mkdir -p $(subst $(SRC_ROOT),$(OBJ_DIR),$(@D))
 	$(CC) -c -o $(subst $(SRC_ROOT),$(OBJ_DIR),$@) $< $(CFLAGS)
 
@@ -73,7 +78,17 @@ libsalmon.so: $(OBJECT)
 	@mkdir -p $(LIB_DIR)
 	$(CC) -shared -o $(LIB_DIR)/$@ $(subst $(SRC_ROOT),$(OBJ_DIR),$^) $(CFLAGS) $(LIBS)
 
+package: libsalmon.so
+	@mkdir -p $(PACKAGES_DIR)/$(PACKAGE_NAME)
+	rm -rf $(PACKAGES_DIR)/$(PACKAGE_NAME)
+	@mkdir -p $(PACKAGES_DIR)/$(PACKAGE_NAME)/include
+	cp -r $(SALMON_INCLUDE)/* $(PACKAGES_DIR)/$(PACKAGE_NAME)/include
+	@mkdir -p $(PACKAGES_DIR)/$(PACKAGE_NAME)/lib
+	cp -r $(LIB_DIR)/libsalmon.so $(PACKAGES_DIR)/$(PACKAGE_NAME)/lib
+	cp README.txt $(PACKAGES_DIR)/$(PACKAGE_NAME)
+	cd $(PACKAGES_DIR) && tar -czvf $(PACKAGE_NAME).tar.gz $(PACKAGE_NAME)/
+	
 .PHONY: all
 
 clean:
-	rm -rf $(OBJ_DIR)/* lib/* 
+	rm -rf $(OBJ_DIR)/* $(MAIN_LIB_DIR)/* $(PACKAGES_DIR)/*
