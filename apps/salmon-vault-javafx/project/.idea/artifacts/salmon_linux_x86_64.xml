@@ -1,6 +1,6 @@
 <component name="ArtifactManager">
-  <artifact name="salmon-linux">
-    <output-path>$PROJECT_DIR$/../../../output/salmon-vault-javafx-linux</output-path>
+  <artifact name="salmon-linux-x86-64">
+    <output-path>$PROJECT_DIR$/../../../output/salmon-vault-javafx-linux-x86_64</output-path>
     <root id="root">
       <element id="archive" name="salmon.main.jar">
         <element id="module-output" name="salmon.main" />
@@ -12,7 +12,6 @@
       <element id="library" level="project" name="Gradle: org.openjfx:javafx-graphics:17.0.2" />
       <element id="library" level="project" name="Gradle: net.java.dev.jna:jna:5.13.0" />
       <element id="library" level="project" name="Gradle: org.openjfx:javafx-base:17.0.2" />
-      <element id="file-copy" path="$PROJECT_DIR$/build/libs/natives/lib/salmon.dll" />
       <element id="file-copy" path="$PROJECT_DIR$/../../../LICENSE" />
       <element id="file-copy" path="$PROJECT_DIR$/README.txt" />
       <element id="library" level="project" name="Gradle: com.mku.salmon:salmon-core:1.0.6-SNAPSHOT" />
@@ -29,6 +28,7 @@
       <element id="library" level="project" name="Gradle: org.openjfx:javafx-swing:linux:17.0.2" />
       <element id="library" level="project" name="Gradle: org.openjfx:javafx-swing:17.0.2" />
       <element id="file-copy" path="$PROJECT_DIR$/scripts/start.sh" />
+      <element id="file-copy" path="$PROJECT_DIR$/../../../libs/projects/salmon-libs-gcc-linux/lib/x86_64/libsalmon.so" />
     </root>
   </artifact>
 </component>

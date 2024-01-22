@@ -28,7 +28,7 @@ SOFTWARE.
 #include <time.h>
 #include <math.h>
 #include "salmon-jni.h"
-#include "../salmon.h"
+#include "salmon.h"
 
 JNIEXPORT void JNICALL Java_com_mku_salmon_transform_NativeProxy_init(JNIEnv* env, jclass thiz,
     jint aesImpl) {

@@ -1,6 +1,6 @@
 <component name="ArtifactManager">
-  <artifact name="salmon-win">
-    <output-path>$PROJECT_DIR$/../../../output/salmon-vault-javafx-win</output-path>
+  <artifact name="salmon-win-x86_64">
+    <output-path>$PROJECT_DIR$/../../../output/salmon-vault-javafx-win-x86_64</output-path>
     <root id="root">
       <element id="archive" name="salmon.main.jar">
         <element id="module-output" name="salmon.main" />

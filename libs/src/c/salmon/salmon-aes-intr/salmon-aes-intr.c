@@ -31,7 +31,7 @@ SOFTWARE.
 #include <arm_acle.h>
 #include "../../tiny-AES-c/aes.h"
 #endif
-#include "salmon-aes-intr.h"
+#include "salmon-aes-intr/salmon-aes-intr.h"
 
 #if defined(_MSC_VER) || defined(__i386__) || defined(__x86_64__)
 // Instructions from:

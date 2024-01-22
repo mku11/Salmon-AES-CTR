@@ -51,7 +51,7 @@ public class SalmonConfig {
         } else if (os.startsWith("MAC")) {
             fileFolder = System.getProperty("user.home") + "/Library/Application";
         } else if (os.startsWith("LINUX")) {
-            fileFolder = System.getProperty("user.dir");
+            fileFolder = System.getProperty("user.home");
         }
         if (fileFolder == null)
             throw new RuntimeException("Operating System not supported");

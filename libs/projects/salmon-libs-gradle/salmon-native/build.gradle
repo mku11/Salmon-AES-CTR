@@ -57,11 +57,11 @@ model {
                 cCompiler.args '-DUSE_TINY_AES=1'
                 cCompiler.args '-DAES256=1'
 
-                // optimization for MSVC
-                cCompiler.args '/O2'
-
-                // optimization for gcc:
-                // cCompiler.args '-O3'
+				cCompiler.args '-I'+projectDir+'/../../../src/c/salmon/include'
+				cCompiler.args '-I'+projectDir+'/../../../src/c/salmon-jni/include'
+				
+                cCompiler.args '-O2'
+				cCompiler.args '-maes'
             }
             sources {
                 c {
@@ -69,7 +69,7 @@ model {
                         srcDirs "../../../../libs/src/c"
                         include "**/salmon/*.c"
                         include "**/salmon/salmon-aes-intr/*.c"
-                        include "**/salmon/salmon-jni/*.c"
+                        include "**/salmon-jni/*.c"
                         include "**/tiny-AES-c/aes.c"
                     }
                 }
