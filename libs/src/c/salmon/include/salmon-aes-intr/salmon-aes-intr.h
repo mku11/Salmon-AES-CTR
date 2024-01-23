@@ -31,6 +31,7 @@ SOFTWARE.
 
 #if defined(_MSC_VER) || defined(__i386__) || defined(__x86_64__)
 #include <wmmintrin.h>
+#include <immintrin.h>
 void KEY_256_ASSIST_1(__m128i* temp1, __m128i* temp2);
 void KEY_256_ASSIST_2(__m128i* temp1, __m128i* temp3);
 #endif
@@ -40,7 +41,7 @@ void KEY_256_ASSIST_2(__m128i* temp1, __m128i* temp3);
  *      For x86/64 it will use the arch intrinsics.
  *      For ARM64 arch this will use the Tiny AES key schedule algorithm.
  * @param userkey AES256 32 byte key.
- * @param expandedKey The expanded key (240 bytes).
+ * @param key The expanded key (240 bytes).
  */
 void aes_intr_key_expand(const unsigned char* userkey, unsigned char* key);
 

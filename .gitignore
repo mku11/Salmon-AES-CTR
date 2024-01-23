@@ -40,3 +40,14 @@ Resource.designer.cs
 inspectionProfiles
 deploymentTargetDropDown.xml
 /libs/projects/salmon-libs-gcc-linux/lib
+.DS_Store
+DerivedData
+project.xcworkspace
+xcuserdata
+/samples/MacCSamples/MacCSamples/salmon-lib
+/samples/GccSamples/salmon-lib
+*.o
+*.so
+*.tar.gz
+/samples/GccSamples/salmon_sample
+/samples/MacCSamples/*.dmg

@@ -1,0 +1,25 @@
+#!/bin/bash
+SRC_ROOT=../../../src/c
+SALMON_ROOT=$SRC_ROOT/salmon
+SALMON_JNI_ROOT=$SRC_ROOT/salmon-jni
+
+SALMON_INCLUDE=$SALMON_ROOT/include
+SALMON_JNI_INCLUDE=$SALMON_JNI_ROOT/include
+
+LIB_DIR=./DerivedData/salmon/Build/Products/Release
+
+VERSION=1.0.6-SNAPSHOT
+OS=macos
+PACKAGES_DIR=packages
+ARCH=x86_64
+PACKAGE_NAME=salmon-$OS-$ARCH.$VERSION
+
+echo $PACKAGES_DIR/$PACKAGE_NAME
+mkdir -p $PACKAGES_DIR/$PACKAGE_NAME
+rm -rf $PACKAGES_DIR/$PACKAGE_NAME/*
+mkdir -p $PACKAGES_DIR/$PACKAGE_NAME/include
+cp -r $SALMON_INCLUDE/* $PACKAGES_DIR/$PACKAGE_NAME/include
+mkdir -p $PACKAGES_DIR/$PACKAGE_NAME/lib
+cp $LIB_DIR/libsalmon.dylib $PACKAGES_DIR/$PACKAGE_NAME/lib
+cp README.txt $PACKAGES_DIR/$PACKAGE_NAME
+cd $PACKAGES_DIR && hdiutil create $PACKAGE_NAME.dmg -ov -volname "Salmon" -fs HFS+ -srcfolder $PACKAGE_NAME/
