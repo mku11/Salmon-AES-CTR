@@ -29,7 +29,7 @@ SOFTWARE.
 #elif defined(__aarch64__) && defined(__ARM_FEATURE_CRYPTO)
 #include <arm_neon.h>
 #include <arm_acle.h>
-#include "../../tiny-AES-c/aes.h"
+#include "aes.h"
 #endif
 #include "salmon-aes-intr/salmon-aes-intr.h"
 
