@@ -3,6 +3,8 @@ SRC_ROOT=../../src/c
 SALMON_ROOT=$(SRC_ROOT)/salmon
 SALMON_JNI_ROOT=$(SRC_ROOT)/salmon-jni
 TINY_AES_ROOT=$(SRC_ROOT)/tiny-AES-c
+OUTPUT_ROOT=../../../output
+OUTPUT_DIR=$(OUTPUT_ROOT)/linux
 
 SALMON_INCLUDE=$(SALMON_ROOT)/include
 SALMON_JNI_INCLUDE=$(SALMON_JNI_ROOT)/include
@@ -29,6 +31,7 @@ VERSION=1.0.6-SNAPSHOT
 OS=linux
 PACKAGES_DIR=packages
 PACKAGE_NAME=salmon-$(OS)-$(ARCH).$(VERSION)
+PACKAGE_FILE=$(PACKAGE_NAME).tar.gz
 
 CFLAGS+=-I$(SALMON_INCLUDE)
 CFLAGS+=-fPIC
@@ -86,7 +89,9 @@ package: libsalmon.so
 	@mkdir -p $(PACKAGES_DIR)/$(PACKAGE_NAME)/lib
 	cp $(LIB_DIR)/libsalmon.so $(PACKAGES_DIR)/$(PACKAGE_NAME)/lib
 	cp README.txt $(PACKAGES_DIR)/$(PACKAGE_NAME)
-	cd $(PACKAGES_DIR) && tar -czvf $(PACKAGE_NAME).tar.gz $(PACKAGE_NAME)/
+	cd $(PACKAGES_DIR) && tar -czvf $(PACKAGE_FILE) $(PACKAGE_NAME)/
+	@mkdir -p $(OUTPUT_DIR)
+	cp -f $(PACKAGES_DIR)/$(PACKAGE_FILE) $(OUTPUT_DIR)
 	
 .PHONY: all
 

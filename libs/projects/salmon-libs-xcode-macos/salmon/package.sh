@@ -2,6 +2,8 @@
 SRC_ROOT=../../../src/c
 SALMON_ROOT=$SRC_ROOT/salmon
 SALMON_JNI_ROOT=$SRC_ROOT/salmon-jni
+OUTPUT_ROOT=../../../../output
+OUTPUT_DIR=$OUTPUT_ROOT/macos
 
 SALMON_INCLUDE=$SALMON_ROOT/include
 SALMON_JNI_INCLUDE=$SALMON_JNI_ROOT/include
@@ -13,8 +15,10 @@ OS=macos
 PACKAGES_DIR=packages
 ARCH=x86_64
 PACKAGE_NAME=salmon-$OS-$ARCH.$VERSION
+PACKAGE_FILE=$PACKAGE_NAME.dmg
 
 echo $PACKAGES_DIR/$PACKAGE_NAME
+echo $OUTPUT_DIR
 mkdir -p $PACKAGES_DIR/$PACKAGE_NAME
 rm -rf $PACKAGES_DIR/$PACKAGE_NAME/*
 mkdir -p $PACKAGES_DIR/$PACKAGE_NAME/include
@@ -22,4 +26,6 @@ cp -r $SALMON_INCLUDE/* $PACKAGES_DIR/$PACKAGE_NAME/include
 mkdir -p $PACKAGES_DIR/$PACKAGE_NAME/lib
 cp $LIB_DIR/libsalmon.dylib $PACKAGES_DIR/$PACKAGE_NAME/lib
 cp README.txt $PACKAGES_DIR/$PACKAGE_NAME
-cd $PACKAGES_DIR && hdiutil create $PACKAGE_NAME.dmg -ov -volname "Salmon" -fs HFS+ -srcfolder $PACKAGE_NAME/
+cd $PACKAGES_DIR && hdiutil create $PACKAGE_FILE -ov -volname "Salmon" -fs HFS+ -srcfolder $PACKAGE_NAME/
+cd .. && mkdir -p $OUTPUT_DIR
+cp -f $PACKAGES_DIR/$PACKAGE_FILE $OUTPUT_DIR
