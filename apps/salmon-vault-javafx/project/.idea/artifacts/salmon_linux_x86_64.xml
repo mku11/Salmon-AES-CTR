@@ -28,7 +28,7 @@
       <element id="library" level="project" name="Gradle: org.openjfx:javafx-swing:linux:17.0.2" />
       <element id="library" level="project" name="Gradle: org.openjfx:javafx-swing:17.0.2" />
       <element id="file-copy" path="$PROJECT_DIR$/scripts/start.sh" />
-      <element id="file-copy" path="$PROJECT_DIR$/../../../libs/projects/salmon-libs-gcc-linux/lib/x86_64/libsalmon.so" />
+      <element id="file-copy" path="$PROJECT_DIR$/libs/linux/x86_64/libsalmon.so" />
     </root>
   </artifact>
 </component>
