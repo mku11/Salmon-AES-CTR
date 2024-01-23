@@ -49,7 +49,7 @@ public class SalmonConfig {
         if (os.startsWith("WINDOWS")) {
             fileFolder = System.getenv("LOCALAPPDATA");
         } else if (os.startsWith("MAC")) {
-            fileFolder = System.getProperty("user.home") + "/Library/Application";
+            fileFolder = System.getProperty("user.home") + "/Library/Application Support";
         } else if (os.startsWith("LINUX")) {
             fileFolder = System.getProperty("user.home");
         }
