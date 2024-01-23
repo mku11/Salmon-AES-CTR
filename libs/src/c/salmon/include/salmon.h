@@ -62,7 +62,7 @@ SOFTWARE.
 #define EXPORT_DLL
 #endif
 
-static inline int incrementCounter(long value, unsigned char * counter);
+static inline long incrementCounter(long value, unsigned char * counter);
 
 /**
  * Initialize the transformer.

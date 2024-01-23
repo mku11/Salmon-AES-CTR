@@ -42,7 +42,7 @@ void AES_ECB_decrypt(const struct AES_ctx* ctx, unsigned char* buf) {}
 
 static int aesImpl = AES_IMPL_AES_INTR;
 
-static inline int incrementCounter(long value, unsigned char* counter) {
+static inline long incrementCounter(long value, unsigned char* counter) {
 	if (value < 0) {
 		fprintf(stderr, "Value should be positive\n");
 		return -1;
