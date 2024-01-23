@@ -32,7 +32,6 @@ SOFTWARE.
 
 JNIEXPORT void JNICALL Java_com_mku_salmon_transform_NativeProxy_init(JNIEnv* env, jclass thiz,
     jint aesImpl) {
-    jboolean isCopy;
     salmon_init(aesImpl);
 }
 
