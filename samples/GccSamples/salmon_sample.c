@@ -43,7 +43,7 @@ void main(int argc, char** argv) {
 
 	// The text to encrypt:
 	char* bytes = "This is a plaintext that will be used for testing";
-	int length = strlen(bytes);
+	long length = strlen(bytes);
 	printf("%s\n", bytes);
 	uint8_t* origPlainText = (uint8_t*)bytes;
 
