@@ -80,11 +80,11 @@ libsalmon.so: $(OBJECT)
 
 package: libsalmon.so
 	@mkdir -p $(PACKAGES_DIR)/$(PACKAGE_NAME)
-	rm -rf $(PACKAGES_DIR)/$(PACKAGE_NAME)
+	rm -rf $(PACKAGES_DIR)/$(PACKAGE_NAME)/*
 	@mkdir -p $(PACKAGES_DIR)/$(PACKAGE_NAME)/include
 	cp -r $(SALMON_INCLUDE)/* $(PACKAGES_DIR)/$(PACKAGE_NAME)/include
 	@mkdir -p $(PACKAGES_DIR)/$(PACKAGE_NAME)/lib
-	cp -r $(LIB_DIR)/libsalmon.so $(PACKAGES_DIR)/$(PACKAGE_NAME)/lib
+	cp $(LIB_DIR)/libsalmon.so $(PACKAGES_DIR)/$(PACKAGE_NAME)/lib
 	cp README.txt $(PACKAGES_DIR)/$(PACKAGE_NAME)
 	cd $(PACKAGES_DIR) && tar -czvf $(PACKAGE_NAME).tar.gz $(PACKAGE_NAME)/
 	
