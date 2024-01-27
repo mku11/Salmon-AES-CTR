@@ -52,15 +52,15 @@ import java.util.TimerTask;
 public class MediaPlayerActivity extends AppCompatActivity implements SurfaceHolder.Callback {
     private static final String TAG = MediaPlayerActivity.class.getName();
 
-    private static final int MEDIA_BUFFERS = 4;
+    private static final int MEDIA_BUFFERS = 3;
 
     // make sure we use a large enough buffer for the MediaDataSource since some videos stall
-    private static final int MEDIA_BUFFER_SIZE = 4 * 1024 * 1024;
+    private static final int MEDIA_BUFFER_SIZE = 8 * 1024 * 1024;
 
     private static final int MEDIA_BACKOFFSET = 256 * 1024;
 
     // increase the threads if you have more cpus available for parallel processing
-    private static final int MEDIA_THREADS = 2;
+    private int mediaThreads = 1;
 
     private static final int THRESHOLD_SEEK = 30;
 
@@ -92,7 +92,11 @@ public class MediaPlayerActivity extends AppCompatActivity implements SurfaceHol
         pos = position;
         videos = mediaFiles;
     }
-
+	
+	protected void setMediaThreads(int threads) {
+		mediaThreads = threads;
+	}
+	
     @Override
     protected void onCreate(Bundle bundle) {
         super.onCreate(bundle);
@@ -150,6 +154,10 @@ public class MediaPlayerActivity extends AppCompatActivity implements SurfaceHol
     private void setupMediaPlayer() {
         try {
             mediaPlayer = new MediaPlayer();
+            mediaPlayer.setOnPreparedListener((MediaPlayer mp) -> {
+                resize(0);
+                start();
+            });
             gestureDetector = new GestureDetector(this, new MediaGestureListener(this));
             loadContent(videos[pos]);
         } catch (Exception ex) {
@@ -159,27 +167,23 @@ public class MediaPlayerActivity extends AppCompatActivity implements SurfaceHol
     }
 
     private void loadContentAsync() {
-        new Thread(() -> {
+        if (mediaPlayer.isPlaying()) {
+            mediaPlayer.stop();
+        }
+        mediaPlayer.reset();
+        mSurfaceView.postDelayed(()-> {
             try {
                 loadContent(videos[pos]);
             } catch (Exception e) {
                 e.printStackTrace();
             }
-        }).start();
+        },500);
     }
 
     protected void loadContent(SalmonFile file) throws Exception {
-        if (mediaPlayer.isPlaying()) {
-            mediaPlayer.stop();
-        }
-        mediaPlayer.reset();
         mTitle.setText(videos[pos].getBaseName());
-        source = new SalmonMediaDataSource(this, file, MEDIA_BUFFERS, MEDIA_BUFFER_SIZE, MEDIA_THREADS, MEDIA_BACKOFFSET);
+        source = new SalmonMediaDataSource(this, file, MEDIA_BUFFERS, MEDIA_BUFFER_SIZE, mediaThreads, MEDIA_BACKOFFSET);
         mediaPlayer.setDataSource(source);
-        mediaPlayer.setOnPreparedListener((MediaPlayer mp) -> {
-            resize(0);
-            start();
-        });
         mediaPlayer.prepareAsync();
     }
 

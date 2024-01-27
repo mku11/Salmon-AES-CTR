@@ -337,7 +337,7 @@ public class SalmonFileInputStream extends InputStream {
     private synchronized CacheBuffer getCacheBuffer(long position, int count) {
         for (int i = 0; i < buffers.length; i++) {
             CacheBuffer buffer = buffers[i];
-            if (position >= buffer.startPos && position + count <= buffer.startPos + buffer.count) {
+            if (buffer!=null && position >= buffer.startPos && position + count <= buffer.startPos + buffer.count) {
                 // promote buffer to the front
                 lruBuffersIndex.remove((Integer) i);
                 lruBuffersIndex.addFirst(i);
@@ -382,7 +382,7 @@ public class SalmonFileInputStream extends InputStream {
     /**
      * Clear all buffers.
      */
-    private void clearBuffers() {
+    private synchronized void clearBuffers() {
         for (int i = 0; i < buffers.length; i++) {
             if (buffers[i] != null)
                 buffers[i].clear();
@@ -395,7 +395,7 @@ public class SalmonFileInputStream extends InputStream {
      *
      * @throws IOException
      */
-    private void closeStreams() throws IOException {
+    private synchronized void closeStreams() throws IOException {
         for (int i = 0; i < threads; i++) {
             if (streams[i] != null)
                 streams[i].close();
