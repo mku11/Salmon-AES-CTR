@@ -33,7 +33,7 @@ import org.junit.jupiter.api.TestMethodOrder;
 
 @TestMethodOrder(MethodOrderer.OrderAnnotation.class)
 public class SalmonJavaPerfTestRunner {
-    public static int TEST_PERF_SIZE = 32 * 1024 * 1024;
+    public static int TEST_PERF_SIZE = 64 * 1024 * 1024;
 
     static {
         SalmonDefaultOptions.setBufferSize(256 * 1024);
@@ -54,16 +54,16 @@ public class SalmonJavaPerfTestRunner {
     public void EncryptAndDecryptStreamPerformanceSalmonDef() throws Exception {
         SalmonStream.setAesProviderType(SalmonStream.ProviderType.Default);
         // warm up
-        TestHelper.encryptAndDecryptByteArray(TEST_PERF_SIZE, false);
+        TestHelper.encryptAndDecryptByteArray(TEST_PERF_SIZE, 1, false);
         System.out.println("SalmonStream Salmon Def: ");
-        TestHelper.encryptAndDecryptByteArray(TEST_PERF_SIZE, true);
+        TestHelper.encryptAndDecryptByteArray(TEST_PERF_SIZE, 1, true);
         System.out.println();
     }
 
     @Test
     @Order(3)
     public void EncryptAndDecryptPerformanceSalmonIntrinsics() throws Exception {
-		SalmonStream.setAesProviderType(SalmonStream.ProviderType.AesIntrinsics);
+        SalmonStream.setAesProviderType(SalmonStream.ProviderType.AesIntrinsics);
         // warm up
         TestHelper.encryptAndDecryptByteArrayNative(TEST_PERF_SIZE, false);
         System.out.println("Salmon Native: ");
@@ -76,10 +76,10 @@ public class SalmonJavaPerfTestRunner {
     public void EncryptAndDecryptStreamPerformanceSalmonIntrinsics() throws Exception {
         SalmonStream.setAesProviderType(SalmonStream.ProviderType.AesIntrinsics);
         //warm up
-        TestHelper.encryptAndDecryptByteArray(TEST_PERF_SIZE, false);
+        TestHelper.encryptAndDecryptByteArray(TEST_PERF_SIZE, 1, false);
         System.out.println("SalmonStream Salmon Intrinsics: ");
         SalmonStream.setAesProviderType(SalmonStream.ProviderType.AesIntrinsics);
-        TestHelper.encryptAndDecryptByteArray(TEST_PERF_SIZE, true);
+        TestHelper.encryptAndDecryptByteArray(TEST_PERF_SIZE, 1, true);
         System.out.println();
     }
 
@@ -88,9 +88,9 @@ public class SalmonJavaPerfTestRunner {
     public void EncryptAndDecryptStreamPerformanceSalmonTinyAes() throws Exception {
         SalmonStream.setAesProviderType(SalmonStream.ProviderType.TinyAES);
         // warm up
-        TestHelper.encryptAndDecryptByteArray(TEST_PERF_SIZE, false);
+        TestHelper.encryptAndDecryptByteArray(TEST_PERF_SIZE, 1, false);
         System.out.println("SalmonStream Salmon TinyAES: ");
-        TestHelper.encryptAndDecryptByteArray(TEST_PERF_SIZE, true);
+        TestHelper.encryptAndDecryptByteArray(TEST_PERF_SIZE, 1, true);
         System.out.println();
     }
 }

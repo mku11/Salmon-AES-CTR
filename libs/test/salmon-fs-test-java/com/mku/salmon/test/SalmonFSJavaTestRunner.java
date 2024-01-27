@@ -40,6 +40,8 @@ import com.mku.sequence.SalmonFileSequencer;
 import com.mku.sequence.SalmonSequenceException;
 import com.mku.sequence.SalmonSequenceSerializer;
 import com.mku.utils.SalmonFileCommander;
+import com.mku.utils.SalmonFileExporter;
+import com.mku.utils.SalmonFileImporter;
 import org.junit.jupiter.api.Test;
 
 import java.io.ByteArrayInputStream;
@@ -124,7 +126,7 @@ public class SalmonFSJavaTestRunner extends SalmonJavaTestRunner {
         boolean integrityFailed = false;
         try {
             JavaFSTestHelper.importAndExport(TestHelper.generateFolder(TEST_VAULT2_DIR), TestHelper.TEST_PASSWORD, TEST_IMPORT_FILE,
-                    ENC_IMPORT_BUFFER_SIZE, ENC_IMPORT_THREADS, TestHelper.ENC_EXPORT_BUFFER_SIZE, TestHelper.ENC_EXPORT_THREADS,
+                    JavaFSTestHelper.ENC_IMPORT_BUFFER_SIZE, JavaFSTestHelper.ENC_IMPORT_THREADS, JavaFSTestHelper.ENC_EXPORT_BUFFER_SIZE, JavaFSTestHelper.ENC_EXPORT_THREADS,
                     false, true, 24 + 10, true, false, false);
         } catch (IOException ex) {
             if (ex.getCause() instanceof SalmonIntegrityException)
@@ -138,8 +140,12 @@ public class SalmonFSJavaTestRunner extends SalmonJavaTestRunner {
     public void shouldImportAndExportNoIntegrity() throws Exception {
         boolean integrityFailed = false;
         try {
+            SalmonFileImporter.setEnableLog(true);
+            SalmonFileImporter.setEnableLogDetails(true);
+            SalmonFileExporter.setEnableLog(true);
+            SalmonFileExporter.setEnableLogDetails(true);
             JavaFSTestHelper.importAndExport(TestHelper.generateFolder(TEST_VAULT2_DIR), TestHelper.TEST_PASSWORD, TEST_IMPORT_FILE,
-                    ENC_IMPORT_BUFFER_SIZE, ENC_IMPORT_THREADS, TestHelper.ENC_EXPORT_BUFFER_SIZE, TestHelper.ENC_EXPORT_THREADS,
+                    JavaFSTestHelper.ENC_IMPORT_BUFFER_SIZE, JavaFSTestHelper.ENC_IMPORT_THREADS, JavaFSTestHelper.ENC_EXPORT_BUFFER_SIZE, JavaFSTestHelper.ENC_EXPORT_THREADS,
                     false, false, 0, true, false,
                     false);
         } catch (IOException ex) {
@@ -153,7 +159,7 @@ public class SalmonFSJavaTestRunner extends SalmonJavaTestRunner {
     @Test
     public void shouldImportAndSearchFiles() throws Exception {
         JavaFSTestHelper.importAndSearch(TestHelper.generateFolder(TEST_VAULT2_DIR), TestHelper.TEST_PASSWORD, TEST_IMPORT_FILE,
-                ENC_IMPORT_BUFFER_SIZE, ENC_IMPORT_THREADS);
+                JavaFSTestHelper.ENC_IMPORT_BUFFER_SIZE, JavaFSTestHelper.ENC_IMPORT_THREADS);
     }
 
     @Test
@@ -161,7 +167,7 @@ public class SalmonFSJavaTestRunner extends SalmonJavaTestRunner {
         boolean integrityFailed = false;
         try {
             JavaFSTestHelper.importAndCopy(TestHelper.generateFolder(TEST_VAULT2_DIR), TestHelper.TEST_PASSWORD, TEST_IMPORT_FILE,
-                    ENC_IMPORT_BUFFER_SIZE, ENC_IMPORT_THREADS, "subdir", false);
+                    JavaFSTestHelper.ENC_IMPORT_BUFFER_SIZE, JavaFSTestHelper.ENC_IMPORT_THREADS, "subdir", false);
         } catch (IOException ex) {
             if (ex.getCause() instanceof SalmonIntegrityException)
                 integrityFailed = true;
@@ -175,7 +181,7 @@ public class SalmonFSJavaTestRunner extends SalmonJavaTestRunner {
         boolean integrityFailed = false;
         try {
             JavaFSTestHelper.importAndCopy(TestHelper.generateFolder(TEST_VAULT2_DIR), TestHelper.TEST_PASSWORD, TEST_IMPORT_FILE,
-                    ENC_IMPORT_BUFFER_SIZE, ENC_IMPORT_THREADS, "subdir", true);
+                    JavaFSTestHelper.ENC_IMPORT_BUFFER_SIZE, JavaFSTestHelper.ENC_IMPORT_THREADS, "subdir", true);
         } catch (IOException ex) {
             if (ex.getCause() instanceof SalmonIntegrityException)
                 integrityFailed = true;
@@ -189,7 +195,7 @@ public class SalmonFSJavaTestRunner extends SalmonJavaTestRunner {
         boolean integrityFailed = false;
         try {
             JavaFSTestHelper.importAndExport(TestHelper.generateFolder(TEST_VAULT2_DIR), TestHelper.TEST_PASSWORD, TEST_IMPORT_FILE,
-                    ENC_IMPORT_BUFFER_SIZE, ENC_IMPORT_THREADS, TestHelper.ENC_EXPORT_BUFFER_SIZE, TestHelper.ENC_EXPORT_THREADS,
+                    JavaFSTestHelper.ENC_IMPORT_BUFFER_SIZE, JavaFSTestHelper.ENC_IMPORT_THREADS, JavaFSTestHelper.ENC_EXPORT_BUFFER_SIZE, JavaFSTestHelper.ENC_EXPORT_THREADS,
                     true, true, 24 + 10, false, true, true);
         } catch (IOException ex) {
             if (ex.getCause() instanceof SalmonIntegrityException)
@@ -205,7 +211,7 @@ public class SalmonFSJavaTestRunner extends SalmonJavaTestRunner {
         boolean failed = false;
         try {
             JavaFSTestHelper.importAndExport(TestHelper.generateFolder(TEST_VAULT2_DIR), TestHelper.TEST_PASSWORD, TEST_IMPORT_FILE,
-                    ENC_IMPORT_BUFFER_SIZE, ENC_IMPORT_THREADS, TestHelper.ENC_EXPORT_BUFFER_SIZE, TestHelper.ENC_EXPORT_THREADS,
+                    JavaFSTestHelper.ENC_IMPORT_BUFFER_SIZE, JavaFSTestHelper.ENC_IMPORT_THREADS, JavaFSTestHelper.ENC_EXPORT_BUFFER_SIZE, JavaFSTestHelper.ENC_EXPORT_THREADS,
                     true, true, 24 + 10, false, false, false);
         } catch (IOException ex) {
             if (ex.getCause() instanceof SalmonIntegrityException)
@@ -224,7 +230,7 @@ public class SalmonFSJavaTestRunner extends SalmonJavaTestRunner {
         boolean failed = false;
         try {
             JavaFSTestHelper.importAndExport(TestHelper.generateFolder(TEST_VAULT2_DIR), TestHelper.TEST_PASSWORD, TEST_IMPORT_FILE,
-                    ENC_IMPORT_BUFFER_SIZE, ENC_IMPORT_THREADS, TestHelper.ENC_EXPORT_BUFFER_SIZE, TestHelper.ENC_EXPORT_THREADS,
+                    JavaFSTestHelper.ENC_IMPORT_BUFFER_SIZE, JavaFSTestHelper.ENC_IMPORT_THREADS, JavaFSTestHelper.ENC_EXPORT_BUFFER_SIZE, JavaFSTestHelper.ENC_EXPORT_THREADS,
                     true, false, 0, false,
                     false, true);
         } catch (Exception ex) {
@@ -239,7 +245,7 @@ public class SalmonFSJavaTestRunner extends SalmonJavaTestRunner {
         boolean failed = false;
         try {
             JavaFSTestHelper.importAndExport(TestHelper.generateFolder(TEST_VAULT2_DIR), TestHelper.TEST_PASSWORD, TEST_IMPORT_FILE,
-                    ENC_IMPORT_BUFFER_SIZE, ENC_IMPORT_THREADS, TestHelper.ENC_EXPORT_BUFFER_SIZE, TestHelper.ENC_EXPORT_THREADS,
+                    JavaFSTestHelper.ENC_IMPORT_BUFFER_SIZE, JavaFSTestHelper.ENC_IMPORT_THREADS, JavaFSTestHelper.ENC_EXPORT_BUFFER_SIZE, JavaFSTestHelper.ENC_EXPORT_THREADS,
                     true, true, 36, false,
                     true, false);
         } catch (IOException ex) {
@@ -255,7 +261,7 @@ public class SalmonFSJavaTestRunner extends SalmonJavaTestRunner {
         boolean failed = false;
         try {
             JavaFSTestHelper.importAndExport(TestHelper.generateFolder(TEST_VAULT2_DIR), TestHelper.TEST_PASSWORD, TEST_IMPORT_FILE,
-                    ENC_IMPORT_BUFFER_SIZE, ENC_IMPORT_THREADS, TestHelper.ENC_EXPORT_BUFFER_SIZE, TestHelper.ENC_EXPORT_THREADS,
+                    JavaFSTestHelper.ENC_IMPORT_BUFFER_SIZE, JavaFSTestHelper.ENC_IMPORT_THREADS, JavaFSTestHelper.ENC_EXPORT_BUFFER_SIZE, JavaFSTestHelper.ENC_EXPORT_THREADS,
                     true, false, 0, true,
                     true, false);
         } catch (IOException ex) {
@@ -271,7 +277,7 @@ public class SalmonFSJavaTestRunner extends SalmonJavaTestRunner {
         boolean integrityFailed = false;
         try {
             JavaFSTestHelper.importAndExport(TestHelper.generateFolder(TEST_VAULT2_DIR), TestHelper.TEST_PASSWORD, TEST_IMPORT_FILE,
-                    ENC_IMPORT_BUFFER_SIZE, ENC_IMPORT_THREADS, TestHelper.ENC_EXPORT_BUFFER_SIZE, TestHelper.ENC_EXPORT_THREADS,
+                    JavaFSTestHelper.ENC_IMPORT_BUFFER_SIZE, JavaFSTestHelper.ENC_IMPORT_THREADS, JavaFSTestHelper.ENC_EXPORT_BUFFER_SIZE, JavaFSTestHelper.ENC_EXPORT_THREADS,
                     true, true, 20, false,
                     true, true);
         } catch (IOException ex) {
@@ -287,8 +293,8 @@ public class SalmonFSJavaTestRunner extends SalmonJavaTestRunner {
         boolean importSuccess = true;
         try {
             JavaFSTestHelper.importAndExport(TestHelper.generateFolder(TEST_VAULT2_DIR), TestHelper.TEST_PASSWORD, TEST_IMPORT_FILE,
-                    ENC_IMPORT_BUFFER_SIZE, ENC_IMPORT_THREADS,
-                    TestHelper.ENC_EXPORT_BUFFER_SIZE, TestHelper.ENC_EXPORT_THREADS,
+                    JavaFSTestHelper.ENC_IMPORT_BUFFER_SIZE, JavaFSTestHelper.ENC_IMPORT_THREADS,
+                    JavaFSTestHelper.ENC_EXPORT_BUFFER_SIZE, JavaFSTestHelper.ENC_EXPORT_THREADS,
                     true, false, 0, true,
                     true, true);
         } catch (IOException ex) {
@@ -462,8 +468,8 @@ public class SalmonFSJavaTestRunner extends SalmonJavaTestRunner {
 
         assertFalse(wrongPassword);
     }
-	
-	@Test
+
+    @Test
     public void shouldCreateWinFileSequencer() throws SalmonSequenceException, IOException, SalmonRangeExceededException {
         JavaFSTestHelper.shouldTestFileSequencer();
     }
@@ -476,12 +482,9 @@ public class SalmonFSJavaTestRunner extends SalmonJavaTestRunner {
         JavaFile file = new JavaFile(TEST_IMPORT_TINY_FILE);
         IRealFile file1 = file.copy(dir);
         IRealFile file2;
-        try
-        {
+        try {
             file2 = file.copy(dir);
-        }
-        catch (Exception ex)
-        {
+        } catch (Exception ex) {
             System.err.println(ex);
             caught = true;
         }
@@ -517,12 +520,9 @@ public class SalmonFSJavaTestRunner extends SalmonJavaTestRunner {
 
         IRealFile file3 = file.copy(dir);
         caught = false;
-        try
-        {
+        try {
             file3.move(dir.getChild("folder1"));
-        }
-        catch (Exception ex)
-        {
+        } catch (Exception ex) {
             System.err.println(ex);
             caught = true;
         }
@@ -533,7 +533,7 @@ public class SalmonFSJavaTestRunner extends SalmonJavaTestRunner {
 
         IRealFile folder2 = dir.getChild("folder1").createDirectory("folder2");
         for (IRealFile rfile : dir.getChild("folder1").listFiles())
-        rfile.copy(folder2);
+            rfile.copy(folder2);
         assertEquals(4, dir.getChild("folder1").getChildrenCount());
         assertEquals(4, dir.getChild("folder1").getChild("folder2").getChildrenCount());
 
@@ -594,14 +594,14 @@ public class SalmonFSJavaTestRunner extends SalmonJavaTestRunner {
         SalmonFileSequencer sequencer = new SalmonFileSequencer(new JavaFile(vaultDir + "/" + TestHelper.TEST_SEQUENCER_FILE1), new SalmonSequenceSerializer());
         SalmonDriveManager.setSequencer(sequencer);
         SalmonDrive drive = SalmonDriveManager.createDrive(vaultDir, TestHelper.TEST_PASSWORD);
-        SalmonFile[] sfiles = new SalmonFileCommander(SalmonDefaultOptions.getBufferSize(),SalmonDefaultOptions.getBufferSize(), 2).importFiles(new IRealFile[] { file },
+        SalmonFile[] sfiles = new SalmonFileCommander(SalmonDefaultOptions.getBufferSize(), SalmonDefaultOptions.getBufferSize(), 2).importFiles(new IRealFile[]{file},
                 drive.getVirtualRoot(), false, true, null, null, null);
 
         SalmonFileInputStream fileInputStream1 = new SalmonFileInputStream(sfiles[0], 4, 4 * 1024 * 1024, 4, 256 * 1024);
         MessageDigest md51 = MessageDigest.getInstance("MD5");
         DigestInputStream dis = new DigestInputStream(fileInputStream1, md51);
         byte[] buff1 = new byte[SalmonDefaultOptions.getBufferSize()];
-        while (dis.read(buff1, 0, buff1.length) > -1);
+        while (dis.read(buff1, 0, buff1.length) > -1) ;
         byte[] hash1 = dis.getMessageDigest().digest();
         dis.close();
         String h1 = BitConverter.toHex(hash1);
@@ -610,7 +610,7 @@ public class SalmonFSJavaTestRunner extends SalmonJavaTestRunner {
         MessageDigest md52 = MessageDigest.getInstance("MD5");
         DigestInputStream dis2 = new DigestInputStream(fileInputStream2, md51);
         byte[] buff2 = new byte[SalmonDefaultOptions.getBufferSize()];
-        while (dis2.read(buff2, 0 , buff2.length) > -1);
+        while (dis2.read(buff2, 0, buff2.length) > -1) ;
         byte[] hash2 = dis2.getMessageDigest().digest();
         dis2.close();
         String h2 = BitConverter.toHex(hash2);
@@ -651,7 +651,7 @@ public class SalmonFSJavaTestRunner extends SalmonJavaTestRunner {
         InputStreamWrapper msa2 = new InputStreamWrapper(ms2);
         DigestInputStream dism2 = new DigestInputStream(msa2, m2);
         byte[] buffera2 = new byte[SalmonDefaultOptions.getBufferSize()];
-        while (dism2.read(buffera2, 0, buffera2.length) > -1);
+        while (dism2.read(buffera2, 0, buffera2.length) > -1) ;
         byte[] hash4 = dism2.getMessageDigest().digest();
         dism2.close();
         String h4 = BitConverter.toHex(hash4);

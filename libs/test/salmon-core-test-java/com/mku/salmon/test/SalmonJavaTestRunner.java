@@ -41,9 +41,6 @@ import java.nio.charset.Charset;
 import static org.junit.jupiter.api.Assertions.*;
 
 public class SalmonJavaTestRunner {
-
-    public static final int ENC_IMPORT_BUFFER_SIZE = 512 * 1024;
-    public static final int ENC_IMPORT_THREADS = 4;
     protected static final String TEST_OUTPUT_DIR = "d:\\tmp\\output";
     protected static final String TEST_VAULT_DIR = "d:\\tmp\\output\\enc";
     protected static final String TEST_VAULT2_DIR = "d:\\tmp\\output\\enc2";
@@ -53,7 +50,7 @@ public class SalmonJavaTestRunner {
     protected static final String TEST_IMPORT_MEDIUM_FILE = "d:\\tmp\\testdata\\medium_test.zip";
     protected static final String TEST_IMPORT_LARGE_FILE = "d:\\tmp\\testdata\\large_test.mp4";
     protected static final String TEST_IMPORT_HUGE_FILE = "d:\\tmp\\testdata\\huge.zip";
-    protected static final String TEST_IMPORT_FILE = TEST_IMPORT_MEDIUM_FILE;
+    protected static final String TEST_IMPORT_FILE = TEST_IMPORT_HUGE_FILE;
 
     @BeforeEach
     public void init() {

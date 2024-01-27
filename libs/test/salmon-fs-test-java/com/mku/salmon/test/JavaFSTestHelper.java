@@ -58,7 +58,13 @@ import static org.junit.jupiter.api.Assertions.*;
 public class JavaFSTestHelper {
 	public static String TEST_SEQUENCER_DIR = "D:\\tmp\\output";
     public static String TEST_SEQUENCER_FILENAME = "fileseq.xml";
-	
+
+
+    public static final int ENC_IMPORT_BUFFER_SIZE = 512 * 1024;
+    public static final int ENC_IMPORT_THREADS = 2;
+    public static final int ENC_EXPORT_BUFFER_SIZE = 512 * 1024;
+    public static final int ENC_EXPORT_THREADS = 2;
+
     public static String getChecksum(IRealFile realFile) throws NoSuchAlgorithmException, IOException {
         InputStream is = null;
         DigestInputStream dis = null;
