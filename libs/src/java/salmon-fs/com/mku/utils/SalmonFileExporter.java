@@ -159,7 +159,7 @@ public class SalmonFileExporter {
 
             // if we want to check integrity we align to the chunk size otherwise to the AES Block
             long minPartSize = SalmonFileUtils.getMinimumPartSize(fileToExport);
-            if (partSize > minPartSize) {
+            if (partSize > minPartSize && threads > 1) {
                 partSize = (int) Math.ceil(fileSize / (float) threads);
                 partSize -= partSize % minPartSize;
                 runningThreads = (int) (fileSize / partSize);
