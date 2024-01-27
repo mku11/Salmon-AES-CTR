@@ -140,10 +140,6 @@ public class SalmonFSJavaTestRunner extends SalmonJavaTestRunner {
     public void shouldImportAndExportNoIntegrity() throws Exception {
         boolean integrityFailed = false;
         try {
-            SalmonFileImporter.setEnableLog(true);
-            SalmonFileImporter.setEnableLogDetails(true);
-            SalmonFileExporter.setEnableLog(true);
-            SalmonFileExporter.setEnableLogDetails(true);
             JavaFSTestHelper.importAndExport(TestHelper.generateFolder(TEST_VAULT2_DIR), TestHelper.TEST_PASSWORD, TEST_IMPORT_FILE,
                     JavaFSTestHelper.ENC_IMPORT_BUFFER_SIZE, JavaFSTestHelper.ENC_IMPORT_THREADS, JavaFSTestHelper.ENC_EXPORT_BUFFER_SIZE, JavaFSTestHelper.ENC_EXPORT_THREADS,
                     false, false, 0, true, false,
