@@ -34,6 +34,7 @@ import com.mku.salmon.vault.viewmodel.SalmonFileViewModel;
 import com.mku.salmonfs.SalmonAuthException;
 import com.mku.salmonfs.SalmonDriveManager;
 import com.mku.salmonfs.SalmonFile;
+import com.mku.utils.SalmonFileImporter;
 import com.mku.utils.SalmonFileUtils;
 import javafx.application.Platform;
 import javafx.beans.property.SimpleBooleanProperty;
@@ -54,6 +55,7 @@ import java.util.stream.Collectors;
 
 public class MainController {
     private static final long MAX_TEXT_FILE = 1 * 1024 * 1024;
+    private static final int THREADS = 1;
     @FXML
     public final ObservableList<SalmonFileViewModel> fileItemList = FXCollections.observableArrayList();
 
@@ -423,10 +425,12 @@ public class MainController {
             ServiceLocator.getInstance().register(IKeyboardService.class, new JavaFxKeyboardService());
             ServiceLocator.getInstance().register(IMediaPlayerService.class, new JavaFxMediaPlayerService());
 
+            SalmonVaultManager.setThreads(THREADS);
             if (System.getProperty("os.name").toUpperCase().toUpperCase().startsWith("WINDOWS"))
                 manager = SalmonWinVaultManager.getInstance();
             else
                 manager = SalmonVaultManager.getInstance();
+
             manager.openListItem = this::OpenListItem;
             manager.observePropertyChanges(this::managerPropertyChanged);
             manager.updateListItem = this::updateListItem;

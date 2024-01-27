@@ -57,8 +57,8 @@ public class SalmonVaultManager implements IPropertyNotifier {
     protected static final String SEQUENCER_DIR_NAME = ".salmon";
     protected static final String SERVICE_PIPE_NAME = "SalmonService";
 
-    private static final int BUFFER_SIZE = 512 * 1024;
-    private static final int THREADS = 3;
+    private static int bufferSize = 512 * 1024;
+    private static int threads = 1;
 
     public static final int REQUEST_OPEN_VAULT_DIR = 1000;
     public static final int REQUEST_CREATE_VAULT_DIR = 1001;
@@ -67,7 +67,7 @@ public class SalmonVaultManager implements IPropertyNotifier {
     public static final int REQUEST_IMPORT_AUTH_FILE = 1004;
     public static final int REQUEST_EXPORT_AUTH_FILE = 1005;
 
-    private static ExecutorService executor = Executors.newFixedThreadPool(4);
+    private static ExecutorService executor = Executors.newFixedThreadPool(2);
 
     private String sequencerDefaultDirPath = SalmonConfig.getPrivateDir() + File.separator + SEQUENCER_DIR_NAME;
     private HashSet<BiConsumer<Object, String>> observers = new HashSet<>();
@@ -99,6 +99,22 @@ public class SalmonVaultManager implements IPropertyNotifier {
             instance = new SalmonVaultManager();
         }
         return instance;
+    }
+
+    public static int getBufferSize() {
+        return bufferSize;
+    }
+
+    public static void setBufferSize(int bufferSize) {
+        SalmonVaultManager.bufferSize = bufferSize;
+    }
+
+    public static int getThreads() {
+        return threads;
+    }
+
+    public static void setThreads(int threads) {
+        SalmonVaultManager.threads = threads;
     }
 
     private List<SalmonFile> fileItemList;
@@ -274,7 +290,7 @@ public class SalmonVaultManager implements IPropertyNotifier {
     }
 
     private void setupFileCommander() {
-        fileCommander = new SalmonFileCommander(BUFFER_SIZE, BUFFER_SIZE, THREADS);
+        fileCommander = new SalmonFileCommander(bufferSize, bufferSize, threads);
     }
 
     protected void setupRootDir() {
