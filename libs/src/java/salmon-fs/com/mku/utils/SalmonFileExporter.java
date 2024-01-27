@@ -154,26 +154,16 @@ public class SalmonFileExporter {
             fileToExport.setVerifyIntegrity(integrity, null);
 
             final long fileSize = fileToExport.getSize();
+            int runningThreads = 1;
             long partSize = fileSize;
-            int runningThreads;
-            if (fileSize > MIN_FILE_SIZE) {
+
+            // if we want to check integrity we align to the chunk size otherwise to the AES Block
+            long minPartSize = SalmonFileUtils.getMinimumPartSize(fileToExport);
+            if (partSize > minPartSize) {
                 partSize = (int) Math.ceil(fileSize / (float) threads);
-
-                // if we want to check integrity we align to the chunk size otherwise to the AES Block
-                long minPartSize = SalmonFileUtils.getMinimumPartSize(fileToExport);
-
-                // calculate the last part size
-                long rem = partSize % minPartSize;
-                if (rem != 0)
-                    partSize += minPartSize - rem;
-
-                runningThreads = (int) Math.ceil(fileSize / (double) partSize);
-            } else {
-                runningThreads = 1;
+                partSize -= partSize % minPartSize;
+                runningThreads = (int) (fileSize / partSize);
             }
-
-            if (runningThreads == 0)
-                runningThreads = 1;
 
             // we use a countdown latch which is better suited with executor than Thread.join.
             final CountDownLatch done = new CountDownLatch(runningThreads);

@@ -25,8 +25,10 @@ SOFTWARE.
 
 import com.mku.func.BiConsumer;
 import com.mku.io.RandomAccessStream;
+import com.mku.salmon.integrity.SalmonIntegrity;
 import com.mku.salmon.io.SalmonStream;
 import com.mku.file.IRealFile;
+import com.mku.salmon.transform.SalmonAES256CTRTransformer;
 import com.mku.salmonfs.SalmonFile;
 
 import java.io.IOException;
@@ -44,11 +46,6 @@ public class SalmonFileImporter {
      * The global default threads to use.
      */
     private static final int DEFAULT_THREADS = 1;
-
-    /**
-     * Minimum file size to use parallelism. Anything less will use single thread.
-     */
-    private static final int MIN_FILE_SIZE = 2 * 1024 * 1024;
 
     /**
      * True if multithreading is enabled.
@@ -171,27 +168,20 @@ public class SalmonFileImporter {
             salmonFile.setAllowOverwrite(true);
             // we use default chunk file size
             salmonFile.setApplyIntegrity(integrity, null, null);
+
             final long fileSize = fileToImport.length();
-            int runningThreads;
+            int runningThreads = 1;
             long partSize = fileSize;
 
-            if (fileSize > MIN_FILE_SIZE) {
+            // if we want to check integrity we align to the chunk size otherwise to the AES Block
+            long minPartSize = SalmonFileUtils.getMinimumPartSize(salmonFile);
+            if (partSize > minPartSize) {
                 partSize = (int) Math.ceil(fileSize / (float) threads);
-                // if we want to check integrity we align to the chunk size instead of the AES Block
-                long minimumPartSize = SalmonFileUtils.getMinimumPartSize(salmonFile);
-                long rem = partSize % minimumPartSize;
-                if (rem != 0)
-                    partSize += minimumPartSize - rem;
-
-                runningThreads = (int) Math.ceil(fileSize / (double) partSize);
-            } else {
-                runningThreads = 1;
+                partSize -= partSize % minPartSize;
+                runningThreads = (int) (fileSize / partSize);
             }
 
-            if (runningThreads == 0)
-                runningThreads = 1;
-
-            // we use a countdown latch which is better suited with executor than Thread.join.
+            // we use a countdown latch which is better suited with executor than Thread.join or CompletableFuture.
             final CountDownLatch done = new CountDownLatch(runningThreads);
             final long finalPartSize = partSize;
             final int finalRunningThreads = runningThreads;

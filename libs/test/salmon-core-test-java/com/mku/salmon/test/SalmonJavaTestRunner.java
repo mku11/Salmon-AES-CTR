@@ -532,7 +532,7 @@ public class SalmonJavaTestRunner {
 
     @Test
     public void ShouldEncryptAndDecryptArrayMultipleThreads() throws Exception {
-        byte[] data = TestHelper.getRandArray(1 * 1024 * 1024);
+        byte[] data = TestHelper.getRandArray(1 * 1024 * 1024 + 4);
         long t1 = System.currentTimeMillis();
         byte[] encData = new SalmonEncryptor(2).encrypt(data, TestHelper.TEST_KEY_BYTES, TestHelper.TEST_NONCE_BYTES,
                 false);

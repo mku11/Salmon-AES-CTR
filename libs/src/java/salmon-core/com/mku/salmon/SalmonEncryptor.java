@@ -58,7 +58,6 @@ public class SalmonEncryptor {
 
     /**
      * Instantiate an encryptor.
-     *
      */
     public SalmonEncryptor() {
         this.threads = 1;
@@ -70,7 +69,7 @@ public class SalmonEncryptor {
     /**
      * Instantiate an encryptor with parallel tasks and buffer size.
      *
-     * @param threads    The number of threads to use.
+     * @param threads The number of threads to use.
      */
     public SalmonEncryptor(int threads) {
         this.threads = threads;
@@ -200,17 +199,10 @@ public class SalmonEncryptor {
             minPartSize = SalmonIntegrity.DEFAULT_CHUNK_SIZE;
 
         if (partSize > minPartSize) {
-            partSize = (int) Math.ceil(partSize / (float) threads);
-            // if we want to check integrity we align to the chunk size instead of the AES Block
-            long rem = partSize % minPartSize;
-            if (rem != 0)
-                partSize += minPartSize - rem;
-
+            partSize = (int) Math.ceil(data.length / (float) threads);
+            partSize -= partSize % minPartSize;
             runningThreads = (int) (data.length / partSize);
-        } else
-            {
-                runningThreads = 1;
-            }
+        }
 
         submitEncryptJobs(runningThreads, partSize,
                 data, outData,
@@ -238,7 +230,6 @@ public class SalmonEncryptor {
                                    byte[] headerData, boolean integrity, Integer chunkSize) {
 
         final CountDownLatch done = new CountDownLatch(runningThreads);
-
         AtomicReference<Exception> ex = new AtomicReference<>();
         for (int i = 0; i < runningThreads; i++) {
             final int index = i;
@@ -260,8 +251,7 @@ public class SalmonEncryptor {
         }
         try {
             done.await();
-        } catch (InterruptedException ignored) {
-        }
+        } catch (InterruptedException ignored) {}
 
         if (ex.get() != null) {
             try {
@@ -323,8 +313,8 @@ public class SalmonEncryptor {
                 inputStream.close();
         }
     }
-	
-	@Override
+
+    @Override
     protected void finalize() {
         executor.shutdownNow();
     }
