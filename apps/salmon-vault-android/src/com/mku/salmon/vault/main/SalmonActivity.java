@@ -200,6 +200,8 @@ public class SalmonActivity extends AppCompatActivity {
 
                 adapter.selectAll(false);
                 adapter.setMultiSelect(false);
+            } else if (propertyName.equals("CurrentItem")) {
+                selectItem(manager.getCurrentItem());
             } else if (propertyName == "SelectedFiles") {
                 if (manager.getSelectedFiles().size() == 0) {
                     adapter.selectAll(false);
@@ -217,8 +219,10 @@ public class SalmonActivity extends AppCompatActivity {
                     if (!manager.isJobRunning())
                         statusText.setText("");
                 }, manager.isJobRunning() ? 0 : 1000);
-            } else if (propertyName == "Path") pathText.setText(manager.getPath());
-            else if (propertyName == "FileProgress") {
+            } else if (propertyName == "Path") {
+                pathText.setText(manager.getPath());
+                listView.scrollToPosition(0);
+            } else if (propertyName == "FileProgress") {
                 fileProgress.setProgress((int) (manager.getFileProgress() * 100));
                 fileProgressText.setText(fileProgress.getProgress() + " %");
             } else if (propertyName == "FilesProgress") {
@@ -226,6 +230,28 @@ public class SalmonActivity extends AppCompatActivity {
                 filesProgressText.setText(filesProgress.getProgress() + " %");
             }
         });
+    }
+
+    private void selectItem(SalmonFile file) {
+        try {
+            int index = 0;
+            for (SalmonFile viewFile : fileItemList) {
+                if (viewFile == file) {
+                    int finalIndex = index;
+                    WindowUtils.runOnMainThread(() -> {
+                        try {
+                            listView.scrollToPosition(finalIndex);
+                        } catch (Exception ex) {
+                            ex.printStackTrace();
+                        }
+                    });
+                    break;
+                }
+                index++;
+            }
+        } catch (Exception ex) {
+            ex.printStackTrace();
+        }
     }
 
     private void Adapter_PropertyChanged(Object owner, String propertyName) {
