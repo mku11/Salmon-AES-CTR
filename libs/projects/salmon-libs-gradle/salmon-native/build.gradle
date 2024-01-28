@@ -21,7 +21,7 @@ dependencies {
 sourceSets {
     // workaround: since we use external source directories the IDE
     // cannot see the c source so we add them here as java files
-    main.java.srcDirs += '../../../../c/src'
+    main.java.srcDirs += '../../../src/c'
 }
 
 model {
@@ -66,7 +66,7 @@ model {
             sources {
                 c {
                     source {
-                        srcDirs "../../../../libs/src/c"
+                        srcDirs "../../../src/c"
                         include "**/salmon/*.c"
                         include "**/salmon/salmon-aes-intr/*.c"
                         include "**/salmon-jni/*.c"
