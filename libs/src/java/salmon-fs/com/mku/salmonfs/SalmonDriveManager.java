@@ -218,6 +218,8 @@ public class SalmonDriveManager {
         IRealFile targetAppDriveConfigFile = dir.getChild(filename);
         if (targetAppDriveConfigFile == null || !targetAppDriveConfigFile.exists())
             targetAppDriveConfigFile = dir.createFile(filename);
+		else if (targetAppDriveConfigFile != null && targetAppDriveConfigFile.exists())
+			throw new SalmonAuthException(filename + " already exists, delete this file or choose another directory");
 
         byte[] pivotNonce = SalmonNonce.splitNonceRange(sequence.getNextNonce(), sequence.getMaxNonce());
         sequencer.setMaxNonce(sequence.getDriveID(), sequence.getAuthID(), pivotNonce);
