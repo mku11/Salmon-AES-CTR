@@ -198,7 +198,7 @@ public class SalmonFileExporter {
                 System.out.println("SalmonFileExporter AesType: " + SalmonStream.getAesProviderType()
                         + " File: " + fileToExport.getBaseName() + " verified and exported "
                         + totalBytesWritten[0] + " bytes in: " + total + " ms"
-                        + ", avg speed: " + totalBytesWritten[0] / (float) total + " bytes/sec");
+                        + ", avg speed: " + totalBytesWritten[0] / (float) total + " kbytes/sec");
             }
         } catch (Exception ex) {
             ex.printStackTrace();
@@ -262,7 +262,7 @@ public class SalmonFileExporter {
                 long total = System.currentTimeMillis() - startTime;
                 System.out.println("SalmonFileExporter: File Part: " + fileToExport.getBaseName() + " exported " + totalPartBytesWritten
                         + " bytes in: " + total + " ms"
-                        + ", avg speed: " + totalBytesWritten[0] / (float) total + " bytes/sec");
+                        + ", avg speed: " + totalBytesWritten[0] / (float) total + " kbytes/sec");
             }
         } catch (Exception ex) {
             ex.printStackTrace();

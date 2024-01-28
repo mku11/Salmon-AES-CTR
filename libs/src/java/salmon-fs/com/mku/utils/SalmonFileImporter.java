@@ -213,7 +213,7 @@ public class SalmonFileImporter {
                 long total = System.currentTimeMillis() - startTime;
                 System.out.println("SalmonFileImporter AesType: " + SalmonStream.getAesProviderType() + " File: " + fileToImport.getBaseName()
                         + " imported and signed " + totalBytesRead[0] + " bytes in total time: " + total + " ms"
-                        + ", avg speed: " + totalBytesRead[0] / (float) total + " bytes/sec");
+                        + ", avg speed: " + totalBytesRead[0] / (float) total + " kbytes/sec");
             }
         } catch (Exception ex) {
             ex.printStackTrace();
@@ -276,7 +276,7 @@ public class SalmonFileImporter {
                 long total = System.currentTimeMillis() - startTime;
                 System.out.println("SalmonFileImporter: File Part: " + fileToImport.getBaseName()
                         + " imported " + totalPartBytesRead + " bytes in: " + total + " ms"
-                        + ", avg speed: " + totalPartBytesRead / (float) total + " bytes/sec");
+                        + ", avg speed: " + totalPartBytesRead / (float) total + " kbytes/sec");
             }
         } catch (Exception ex) {
             ex.printStackTrace();
