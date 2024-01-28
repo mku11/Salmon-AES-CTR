@@ -76,6 +76,7 @@ import com.mku.utils.SalmonFileUtils;
 
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.HashSet;
 import java.util.List;
 import java.util.concurrent.Semaphore;
 
@@ -488,7 +489,7 @@ public class SalmonActivity extends AppCompatActivity {
     onContextItemSelected(MenuItem item) {
         int position = adapter.getPosition();
         SalmonFile ifile = fileItemList.get(position);
-        manager.getSelectedFiles().clear();
+        manager.setSelectedFiles(new HashSet<>());
         manager.getSelectedFiles().add(ifile);
 
         switch (ActionType.values()[item.getItemId()]) {
