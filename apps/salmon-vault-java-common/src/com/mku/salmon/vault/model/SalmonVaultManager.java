@@ -58,7 +58,7 @@ public class SalmonVaultManager implements IPropertyNotifier {
     protected static final String SERVICE_PIPE_NAME = "SalmonService";
 
     private static int bufferSize = 512 * 1024;
-    private static int threads = 1;
+    private static int threads = 2;
 
     public static final int REQUEST_OPEN_VAULT_DIR = 1000;
     public static final int REQUEST_CREATE_VAULT_DIR = 1001;
