@@ -60,7 +60,7 @@ public class MediaPlayerActivity extends AppCompatActivity implements SurfaceHol
     private static final int MEDIA_BACKOFFSET = 256 * 1024;
 
     // increase the threads if you have more cpus available for parallel processing
-    private int mediaThreads = 1;
+    private int mediaThreads = 2;
 
     private static final int THRESHOLD_SEEK = 30;
 
