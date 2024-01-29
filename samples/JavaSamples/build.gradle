@@ -32,7 +32,8 @@ dependencies {
     implementation 'com.mku.salmon:salmon-core:1.0.6-SNAPSHOT'
     implementation 'com.mku.salmon:salmon-fs:1.0.6-SNAPSHOT'
     // optional fast AES intrinsics and Tiny AES:
-    nativeBundle 'com.mku.salmon:salmon-native:1.0.6-SNAPSHOT'
+    implementation 'com.mku.salmon:salmon-native:1.0.6-SNAPSHOT:win-x86_64'
+    nativeBundle 'com.mku.salmon:salmon-native:1.0.6-SNAPSHOT:win-x86_64'
 }
 
 test {

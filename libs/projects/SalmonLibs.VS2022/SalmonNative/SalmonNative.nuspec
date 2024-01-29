@@ -10,7 +10,7 @@
     <icon>logo.png</icon>
     <projectUrl>https://github.com/mku11/Salmon-AES-CTR</projectUrl>
     <description>Salmon is an AES-256 CTR encryption library with HMAC SHA 256 integrity featuring seekable streams and parallel processing.</description>
-    <tags>AES,AES-256,CTR,Native</tags>
+    <tags>AES,AES-256,CTR,native</tags>
     <repository url="https://github.com/mku11/Salmon-AES-CTR" />
   </metadata>
 

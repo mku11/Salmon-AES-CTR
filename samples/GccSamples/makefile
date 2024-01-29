@@ -1,6 +1,6 @@
 # salmon makefile
 
-LIB_ROOT=salmon-lib
+LIB_ROOT=./salmon-lib
 SALMON_ROOT=$(LIB_ROOT)
 TINY_AES_ROOT=$(LIB_ROOT)/tiny-AES-c
 
@@ -40,7 +40,7 @@ all: salmon_sample
 	$(CC) -c -o $@ $< $(CFLAGS)
 
 salmon_sample: $(OBJECT)
-	cp -f $(LIB_ROOT)/lib/libsalmon.so .
+	cp -f $(LIB_ROOT)/lib/* .
 	$(CC) -o $@ $^ $(CFLAGS) $(LIB_INCLUDE) $(LIBS)
 	
 .PHONY: all

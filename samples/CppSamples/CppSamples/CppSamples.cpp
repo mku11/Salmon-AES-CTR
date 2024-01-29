@@ -9,7 +9,6 @@ using namespace std;
 
 int main()
 {
-
 	HCRYPTPROV   hCryptProv;
 	BYTE         key[32];
 	BYTE         nonce[8];
@@ -24,15 +23,10 @@ int main()
 	salmon_init(implType);
 
 	// set up the encryption key
-	uint8_t* encKey = NULL;
-	if (implType == AES_IMPL_TINY_AES)
+	uint8_t* encKey = key;
+	if (implType == AES_IMPL_AES_INTR)
 	{
-		encKey = key;
-	}
-	else
-	{
-		// or if we use the intrinsics we can expand the key
-		salmon_init(AES_IMPL_AES_INTR);
+		// if we use the intrinsics we expand the key
 		uint8_t expandedKey[240];
 		salmon_expandKey(key, expandedKey);
 		encKey = expandedKey;
@@ -40,18 +34,16 @@ int main()
 
 	// The text to encrypt:
 	string text = "This is a plaintext that will be used for testing";
+	cout << text.c_str() << endl;
 	char const* bytes = text.c_str();
 	int length = strlen(bytes);
-	cout << bytes << endl;
 	uint8_t* origPlainText = (uint8_t*)bytes;
 
-	// set the counter
 	BYTE	counter[16];
 	memset(counter, 0, 16);
-	memcpy(counter, nonce, 8);
-	
-	// encrypt the byte array
+	memcpy(counter, nonce, 8); // set the nonce
 	uint8_t encText[1024];
+	// encrypt the byte array
 	int bytesEncrypted = salmon_transform(
 		encKey, counter, AES_MODE_ENCRYPTION,
 		origPlainText, 0,
@@ -59,12 +51,11 @@ int main()
 
 	// reset the counter
 	memset(counter, 0, 16);
-	memcpy(counter, nonce, 8);
-	
+	memcpy(counter, nonce, 8); // set the nonce
 	uint8_t plainText[1024];
 	// decrypt the byte array
 	int bytesDecrypted = salmon_transform(
-		encKey, counter, AES_MODE_DECRYPTION,
+		encKey, counter, AES_MODE_ENCRYPTION,
 		encText, 0,
 		plainText, 0, length);
 

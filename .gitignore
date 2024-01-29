@@ -52,3 +52,5 @@ xcuserdata
 /samples/GccSamples/salmon_sample
 /samples/MacCSamples/*.dmg
 /apps/salmon-vault-javafx/project/libs
+*.dll
+*.exe
