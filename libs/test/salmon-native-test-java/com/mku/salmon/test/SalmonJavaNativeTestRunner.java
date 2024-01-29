@@ -50,7 +50,7 @@ public class SalmonJavaNativeTestRunner {
         SalmonDefaultOptions.setBufferSize(SalmonIntegrity.DEFAULT_CHUNK_SIZE);
 
         SalmonStream.setAesProviderType(SalmonStream.ProviderType.AesIntrinsics);
-//                SalmonStream.setAesProviderType(SalmonStream.ProviderType.TinyAES);
+        // SalmonStream.setAesProviderType(SalmonStream.ProviderType.TinyAES);
     }
 
     @Test
