@@ -44,6 +44,9 @@ public class SalmonAesIntrTransformer extends SalmonNativeTransformer {
     @Override
     public void init(byte[] key, byte[] nonce) throws SalmonSecurityException {
         getNativeProxy().salmonInit(AES_IMPL_AES_INTR);
+        byte[] expandedKey = new byte[SalmonAES256CTRTransformer.EXPANDED_KEY_SIZE];
+        getNativeProxy().salmonExpandKey(key, expandedKey);
+        setExpandedKey(expandedKey);
         super.init(key, nonce);
     }
 

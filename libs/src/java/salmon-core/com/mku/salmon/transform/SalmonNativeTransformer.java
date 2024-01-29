@@ -45,20 +45,6 @@ public class SalmonNativeTransformer extends SalmonAES256CTRTransformer {
     }
 
     /**
-     * Initialize the native transformer.
-     * @param key The AES key to use.
-     * @param nonce The nonce to use.
-     * @throws SalmonSecurityException
-     */
-    @Override
-    public void init(byte[] key, byte[] nonce) throws SalmonSecurityException {
-        super.init(key, nonce);
-        byte[] expandedKey = new byte[SalmonAES256CTRTransformer.EXPANDED_KEY_SIZE];
-        nativeProxy.salmonExpandKey(key, expandedKey);
-        setExpandedKey(expandedKey);
-    }
-
-    /**
      * Encrypt the data.
      * @param srcBuffer The source byte array.
      * @param srcOffset The source byte offset.
