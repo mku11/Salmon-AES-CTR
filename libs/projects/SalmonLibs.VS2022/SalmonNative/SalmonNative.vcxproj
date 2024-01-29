@@ -155,8 +155,8 @@
     </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClInclude Include="..\..\..\src\c\salmon\salmon-aes-intr\salmon-aes-intr.h" />
-    <ClInclude Include="..\..\..\src\c\salmon\salmon.h" />
+    <ClInclude Include="..\..\..\src\c\salmon\include\salmon-aes-intr\salmon-aes-intr.h" />
+    <ClInclude Include="..\..\..\src\c\salmon\include\salmon.h" />
     <ClInclude Include="..\..\..\src\c\tiny-AES-c\aes.h" />
     <ClInclude Include="framework.h" />
     <ClInclude Include="pch.h" />

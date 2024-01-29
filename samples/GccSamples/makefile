@@ -7,7 +7,7 @@ TINY_AES_ROOT=$(LIB_ROOT)/tiny-AES-c
 SALMON_INCLUDE=$(SALMON_ROOT)/include
 TINY_AES_INCLUDE=$(TINY_AES_ROOT)
 
-ifeq ($(ARCH),aarch64)
+ifeq ($(ARCH), aarch64)
   CC=aarch64-linux-gnu-gcc
   CFLAGS+=-march=armv8-a+crypto
 else
@@ -46,4 +46,4 @@ salmon_sample: $(OBJECT)
 .PHONY: all
 
 clean:
-	rm -rf *.o *.so salmon_sample
+	rm -rf *.o *.so *.dll *.dylib salmon_sample

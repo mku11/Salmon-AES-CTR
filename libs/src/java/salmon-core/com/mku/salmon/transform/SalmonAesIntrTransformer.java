@@ -60,7 +60,7 @@ public class SalmonAesIntrTransformer extends SalmonNativeTransformer {
     public int encryptData(byte[] srcBuffer, int srcOffset,
                            byte[] destBuffer, int destOffset, int count) {
         // AES intrinsics needs the expanded key
-        return getNativeProxy().salmonTransform(getExpandedKey(), getCounter(), SalmonStream.EncryptionMode.Encrypt.ordinal(),
+        return getNativeProxy().salmonTransform(getExpandedKey(), getCounter(),
                 srcBuffer, srcOffset,
                 destBuffer, destOffset, count);
     }
@@ -78,7 +78,7 @@ public class SalmonAesIntrTransformer extends SalmonNativeTransformer {
     public int decryptData(byte[] srcBuffer, int srcOffset,
                             byte[] destBuffer, int destOffset, int count) {
         // AES intrinsics needs the expanded key
-        return getNativeProxy().salmonTransform(getExpandedKey(), getCounter(), SalmonStream.EncryptionMode.Encrypt.ordinal(),
+        return getNativeProxy().salmonTransform(getExpandedKey(), getCounter(),
                 srcBuffer, srcOffset,
                 destBuffer, destOffset, count);
     }

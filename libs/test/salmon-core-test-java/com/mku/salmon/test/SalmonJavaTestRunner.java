@@ -50,7 +50,7 @@ public class SalmonJavaTestRunner {
     protected static final String TEST_IMPORT_MEDIUM_FILE = "d:\\tmp\\testdata\\medium_test.zip";
     protected static final String TEST_IMPORT_LARGE_FILE = "d:\\tmp\\testdata\\large_test.mp4";
     protected static final String TEST_IMPORT_HUGE_FILE = "d:\\tmp\\testdata\\huge.zip";
-    protected static final String TEST_IMPORT_FILE = TEST_IMPORT_HUGE_FILE;
+    protected static final String TEST_IMPORT_FILE = TEST_IMPORT_MEDIUM_FILE;
 
     @BeforeEach
     public void init() {

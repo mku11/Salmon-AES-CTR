@@ -38,9 +38,6 @@ SOFTWARE.
 #define AES_IMPL_AES_INTR 1
 #define AES_IMPL_TINY_AES 2
 
-#define AES_MODE_ENCRYPTION 0
-#define AES_MODE_DECRYPTION 1
-
 #ifdef __ANDROID__
 #include <android/log.h>
 #define printf(...) __android_log_print(ANDROID_LOG_VERBOSE, "salmon", __VA_ARGS__)
@@ -84,8 +81,6 @@ extern EXPORT_DLL void salmon_expandKey(const unsigned char* key, unsigned char*
  *      If you use AES_IMPL_AES_INTR you will need to use salmon_expandKey()
  *      to expand the key before you pass it to this function.
  * @param counter The counter to use.
- * @param encryption_mode The encryption mode
- *      see: AES_MODE_ENCRYPTION, AES_MODE_DECRYPTION
  * @param srcBuffer The source byte array.
  * @param srcOffset The source byte offset.
  * @param destBuffer The destination byte array.
@@ -94,7 +89,7 @@ extern EXPORT_DLL void salmon_expandKey(const unsigned char* key, unsigned char*
  * @return The number of bytes transformed.
  */
 extern EXPORT_DLL int salmon_transform(
-    const unsigned char* key, unsigned char* counter, int encryption_mode,
+    const unsigned char* key, unsigned char* counter,
     unsigned char *srcBuffer, int srcOffset,
     unsigned char *destBuffer, int destOffset, int count);
 

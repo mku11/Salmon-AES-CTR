@@ -56,7 +56,7 @@ namespace SalmonNativeTest
 			uint8_t encText[1024];
 			// encrypt the byte array
 			int bytesEncrypted = salmon_transform(
-				encKey, counter, AES_MODE_ENCRYPTION,
+				encKey, counter,
 				origPlainText, 0,
 				encText, 0, length);
 			Assert::AreEqual(length, bytesEncrypted);
@@ -67,7 +67,7 @@ namespace SalmonNativeTest
 			uint8_t plainText[1024];
 			// decrypt the byte array
 			int bytesDecrypted = salmon_transform(
-				encKey, counter, AES_MODE_ENCRYPTION,
+				encKey, counter,
 				encText, 0,
 				plainText, 0, length);
 			Assert::AreEqual(length, bytesDecrypted);

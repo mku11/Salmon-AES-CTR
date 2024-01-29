@@ -10,10 +10,7 @@ git submodule update --recursive --init
 
 Build:
 You can build from the windows command line:
-msbuild SalmonDotNetLibs.sln
-
-Make sure you use Debug/x64
-
+msbuild /p:Configuration=Release /p:Platform=x64
 
 To debug the native code check the option under Project Properties/Debug/Debug Launch UI profiles/Enable native code debugging
 Note that debugging the native code will probably disable the Edit and Continue for .NET code.

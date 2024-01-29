@@ -34,9 +34,9 @@ int main()
 
 	// The text to encrypt:
 	string text = "This is a plaintext that will be used for testing";
-	cout << text.c_str() << endl;
 	char const* bytes = text.c_str();
 	int length = strlen(bytes);
+	cout << bytes << endl;
 	uint8_t* origPlainText = (uint8_t*)bytes;
 
 	BYTE	counter[16];
@@ -45,7 +45,7 @@ int main()
 	uint8_t encText[1024];
 	// encrypt the byte array
 	int bytesEncrypted = salmon_transform(
-		encKey, counter, AES_MODE_ENCRYPTION,
+		encKey, counter,
 		origPlainText, 0,
 		encText, 0, length);
 
@@ -55,7 +55,7 @@ int main()
 	uint8_t plainText[1024];
 	// decrypt the byte array
 	int bytesDecrypted = salmon_transform(
-		encKey, counter, AES_MODE_ENCRYPTION,
+		encKey, counter,
 		encText, 0,
 		plainText, 0, length);
 

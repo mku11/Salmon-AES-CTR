@@ -37,7 +37,6 @@ SOFTWARE.
 struct AES_ctx { int dummy; };
 void AES_init_ctx(struct AES_ctx* ctx, const unsigned char* key) {}
 void AES_ECB_encrypt(const struct AES_ctx* ctx, unsigned char* buf) {}
-void AES_ECB_decrypt(const struct AES_ctx* ctx, unsigned char* buf) {}
 #endif
 
 static int aesImpl = AES_IMPL_AES_INTR;
@@ -71,7 +70,7 @@ extern EXPORT_DLL void salmon_expandKey(const unsigned char* key, unsigned char*
 }
 
 extern EXPORT_DLL int salmon_transform(
-	const unsigned char* key, unsigned char* counter, int encryption_mode,
+	const unsigned char* key, unsigned char* counter,
 	unsigned char* srcBuffer, int srcOffset,
 	unsigned char* destBuffer, int destOffset, int count) {
 
@@ -93,10 +92,7 @@ extern EXPORT_DLL int salmon_transform(
 		}
 		else if (aesImpl == AES_IMPL_TINY_AES) {
 			memcpy(encCounter, counter, AES_BLOCK_SIZE);
-			if (encryption_mode == AES_MODE_ENCRYPTION)
-				AES_ECB_encrypt(&ctx, encCounter);
-			else if (encryption_mode == AES_MODE_DECRYPTION)
-				AES_ECB_decrypt(&ctx, encCounter);
+			AES_ECB_encrypt(&ctx, encCounter);
 		}
 		// xor the plain text with the encrypted counter
 		for (int k = 0; k < AES_BLOCK_SIZE && i + k < count; k++) {

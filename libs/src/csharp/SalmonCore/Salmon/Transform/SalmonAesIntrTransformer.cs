@@ -64,7 +64,7 @@ public class SalmonAesIntrTransformer : SalmonNativeTransformer
                            byte[] destBuffer, int destOffset, int count)
     {
         // AES intrinsics needs the expanded key
-        return NativeProxy.SalmonTransform(ExpandedKey, Counter, (int)SalmonStream.EncryptionMode.Encrypt,
+        return NativeProxy.SalmonTransform(ExpandedKey, Counter,
                 srcBuffer, srcOffset,
                 destBuffer, destOffset, count);
     }
@@ -83,7 +83,7 @@ public class SalmonAesIntrTransformer : SalmonNativeTransformer
                             byte[] destBuffer, int destOffset, int count)
     {
         // AES intrinsics needs the expanded key
-        return NativeProxy.SalmonTransform(ExpandedKey, Counter, (int)SalmonStream.EncryptionMode.Decrypt,
+        return NativeProxy.SalmonTransform(ExpandedKey, Counter,
                 srcBuffer, srcOffset,
                 destBuffer, destOffset, count);
     }

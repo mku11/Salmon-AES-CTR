@@ -70,7 +70,7 @@ public class SalmonNativeTransformer extends SalmonAES256CTRTransformer {
     @Override
     public int encryptData(byte[] srcBuffer, int srcOffset,
                            byte[] destBuffer, int destOffset, int count) {
-        return nativeProxy.salmonTransform(getKey(), getCounter(), SalmonStream.EncryptionMode.Encrypt.ordinal(),
+        return nativeProxy.salmonTransform(getKey(), getCounter(),
                 srcBuffer, srcOffset,
                 destBuffer, destOffset, count);
     }
@@ -87,7 +87,7 @@ public class SalmonNativeTransformer extends SalmonAES256CTRTransformer {
     @Override
     public int decryptData(byte[] srcBuffer, int srcOffset,
                             byte[] destBuffer, int destOffset, int count) {
-        return nativeProxy.salmonTransform(getKey(), getCounter(), SalmonStream.EncryptionMode.Encrypt.ordinal(),
+        return nativeProxy.salmonTransform(getKey(), getCounter(),
                 srcBuffer, srcOffset,
                 destBuffer, destOffset, count);
     }

@@ -66,7 +66,7 @@ public class SalmonNativeTransformer : SalmonAES256CTRTransformer
     public int EncryptData(byte[] srcBuffer, int srcOffset,
                            byte[] destBuffer, int destOffset, int count)
     {
-        return NativeProxy.SalmonTransform(Key, Counter, (int)SalmonStream.EncryptionMode.Encrypt,
+        return NativeProxy.SalmonTransform(Key, Counter,
                 srcBuffer, srcOffset,
                 destBuffer, destOffset, count);
     }
@@ -84,7 +84,7 @@ public class SalmonNativeTransformer : SalmonAES256CTRTransformer
     public int DecryptData(byte[] srcBuffer, int srcOffset,
                             byte[] destBuffer, int destOffset, int count)
     {
-        return NativeProxy.SalmonTransform(Key, Counter, (int)SalmonStream.EncryptionMode.Encrypt,
+        return NativeProxy.SalmonTransform(Key, Counter,
                 srcBuffer, srcOffset,
                 destBuffer, destOffset, count);
     }

@@ -18,8 +18,8 @@
   </ItemGroup>
 
   <ItemGroup>
-    <PackageReference Include="Salmon.Core" Version="1.0.5" />
-    <PackageReference Include="Salmon.FS" Version="1.0.5" />
-    <PackageReference Include="Salmon.Native" Version="1.0.5" />
+    <PackageReference Include="Salmon.Core" Version="1.0.6-SNAPSHOT" />
+    <PackageReference Include="Salmon.FS" Version="1.0.6-SNAPSHOT" />
+    <PackageReference Include="Salmon.Native" Version="1.0.6-SNAPSHOT" />
   </ItemGroup>
 </Project>

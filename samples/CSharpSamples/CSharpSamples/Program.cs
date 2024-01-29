@@ -29,9 +29,9 @@ public class Sample
 
         // load the AES intrinsics for better performance (optional)
         // make sure you link the SalmonNative.dll to your project
-        SalmonStream.AesProviderType = SalmonStream.ProviderType.AesIntrinsics;
+        // SalmonStream.AesProviderType = SalmonStream.ProviderType.AesIntrinsics;
         // or TinyAES
-        //SalmonStream.AesProviderType = SalmonStream.ProviderType.TinyAES;
+        // SalmonStream.AesProviderType = SalmonStream.ProviderType.TinyAES;
 
         // you can create a key and reuse it:
         // byte[] key = SalmonGenerator.GetSecureRandomBytes(32);

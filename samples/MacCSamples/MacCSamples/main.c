@@ -50,7 +50,7 @@ int main(int argc, char** argv) {
 	// encrypt the byte array
 	uint8_t encText[1024];
 	int bytesEncrypted = salmon_transform(
-		encKey, counter, AES_MODE_ENCRYPTION,
+		encKey, counter,
 		origPlainText, 0,
 		encText, 0, length);
 
@@ -61,7 +61,7 @@ int main(int argc, char** argv) {
 	uint8_t plainText[1024];
 	// decrypt the byte array
 	int bytesDecrypted = salmon_transform(
-		encKey, counter, AES_MODE_DECRYPTION,
+		encKey, counter,
 		encText, 0,
 		plainText, 0, length);
 	plainText[bytesDecrypted] = '\0';
