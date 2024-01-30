@@ -54,3 +54,4 @@ xcuserdata
 /apps/salmon-vault-javafx/project/libs
 *.dll
 *.exe
+/libs/projects/salmon-libs-python/main.py
