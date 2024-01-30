@@ -194,6 +194,8 @@ public class SalmonDriveManager
         IRealFile targetAppDriveConfigFile = dir.GetChild(filename);
         if (targetAppDriveConfigFile == null || !targetAppDriveConfigFile.Exists)
             targetAppDriveConfigFile = dir.CreateFile(filename);
+        else if (targetAppDriveConfigFile != null && targetAppDriveConfigFile.Exists)
+            throw new SalmonAuthException(filename + " already exists, delete this file or choose another directory");
 
         byte[] pivotNonce = SalmonNonce.SplitNonceRange(sequence.NextNonce, sequence.MaxNonce);
         Sequencer.SetMaxNonce(sequence.DriveID, sequence.AuthID, pivotNonce);

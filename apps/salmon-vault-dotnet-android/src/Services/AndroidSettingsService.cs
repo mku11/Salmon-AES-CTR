@@ -113,6 +113,4 @@ public class AndroidSettingsService : ISettingsService
             editor.Apply();
         }
     }
-
-    public bool ExcludeFromRecents => prefs.GetBoolean("excludeFromRecents", false);
 }

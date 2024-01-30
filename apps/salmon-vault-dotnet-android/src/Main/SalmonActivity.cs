@@ -167,6 +167,7 @@ public class SalmonActivity : AppCompatActivity
             SalmonDriveManager.VirtualDriveClass = typeof(AndroidDrive);
 
             manager = CreateVaultManager();
+            manager.PromptExitOnBack = true;
             manager.OpenListItem = OpenListItem;
             manager.PropertyChanged += Manager_PropertyChanged;
             manager.UpdateListItem = UpdateListItem;
@@ -201,6 +202,10 @@ public class SalmonActivity : AppCompatActivity
                 adapter.SelectAll(false);
                 adapter.SetMultiSelect(false);
             }
+            else if (e.PropertyName.Equals("CurrentItem"))
+            {
+                SelectItem(manager.CurrentItem);
+            }
             else if (e.PropertyName == "SelectedFiles")
             {
                 if (manager.SelectedFiles.Count == 0)
@@ -226,7 +231,11 @@ public class SalmonActivity : AppCompatActivity
                         statusText.Text = "";
                 }, manager.IsJobRunning ? 0 : 1000);
             }
-            else if (e.PropertyName == "Path") pathText.Text = manager.Path;
+            else if (e.PropertyName == "Path")
+            {
+                pathText.Text = manager.Path;
+                listView.ScrollToPosition(0);
+            }
             else if (e.PropertyName == "FileProgress")
             {
                 fileProgress.Progress = (int)(manager.FileProgress * 100);
@@ -238,6 +247,38 @@ public class SalmonActivity : AppCompatActivity
                 filesProgressText.Text = filesProgress.Progress + " %";
             }
         });
+    }
+
+    private void SelectItem(SalmonFile file)
+    {
+        try
+        {
+            int index = 0;
+            foreach (SalmonFile viewFile in fileItemList)
+            {
+                if (viewFile == file)
+                {
+                    int finalIndex = index;
+                    WindowUtils.RunOnMainThread(() =>
+                    {
+                        try
+                        {
+                            listView.ScrollToPosition(finalIndex);
+                        }
+                        catch (Exception ex)
+                        {
+                            ex.PrintStackTrace();
+                        }
+                    });
+                    break;
+                }
+                index++;
+            }
+        }
+        catch (Exception ex)
+        {
+            ex.PrintStackTrace();
+        }
     }
 
     private void Adapter_PropertyChanged(object sender, PropertyChangedEventArgs e)
@@ -488,7 +529,7 @@ public class SalmonActivity : AppCompatActivity
     {
         int position = adapter.GetPosition();
         SalmonFile ifile = fileItemList[position];
-        manager.SelectedFiles.Clear();
+        manager.SelectedFiles = new HashSet<SalmonFile>();
         manager.SelectedFiles.Add(ifile);
 
         switch ((ActionType)item.ItemId)
@@ -612,7 +653,7 @@ public class SalmonActivity : AppCompatActivity
         Finish();
     }
 
-    private void StartSettings()
+    protected void StartSettings()
     {
         Intent intent = new Intent(this, typeof(SettingsActivity));
         StartActivity(intent);
@@ -817,10 +858,15 @@ public class SalmonActivity : AppCompatActivity
             i++;
         }
 
-        Intent intent = new Intent(this, typeof(MediaPlayerActivity));
+        Intent intent = GetMediaPlayerIntent();
         MediaPlayerActivity.SetMediaFiles(pos, salmonFiles.ToArray());
         intent.SetFlags(ActivityFlags.ClearTop | ActivityFlags.NewTask);
         StartActivity(intent);
+    }
+
+    protected Intent GetMediaPlayerIntent()
+    {
+        return new Intent(this, typeof(MediaPlayerActivity));
     }
 
     private void StartTextViewer(int position)
@@ -873,7 +919,7 @@ public class SalmonActivity : AppCompatActivity
                 }
                 i++;
             }
-            Intent intent = new Intent(this, typeof(WebViewerActivity));
+            Intent intent = GetWebViewerIntent();
             SalmonFile selectedFile = fileItemList[position];
             WebViewerActivity.SetContentFiles(pos, salmonFiles.ToArray());
             intent.SetFlags(ActivityFlags.ClearTop | ActivityFlags.NewTask);
@@ -886,10 +932,14 @@ public class SalmonActivity : AppCompatActivity
         }
     }
 
+    protected Intent GetWebViewerIntent()
+    {
+        return new Intent(this, typeof(WebViewerActivity));
+    }
+
     protected override void OnDestroy()
     {
         Logout();
-        WindowUtils.RemoveFromRecents(this, true);
         adapter.Stop();
         base.OnDestroy();
     }

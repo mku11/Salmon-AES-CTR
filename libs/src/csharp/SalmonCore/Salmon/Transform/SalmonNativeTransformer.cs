@@ -39,21 +39,6 @@ public class SalmonNativeTransformer : SalmonAES256CTRTransformer
     public static INativeProxy NativeProxy { get; set; }  = new NativeProxy();
    
     /// <summary>
-    ///  Initialize the native transformer.
-	/// </summary>
-	///  <param name="key">The AES key to use.</param>
-    ///  <param name="nonce">The nonce to use.</param>
-    ///  <exception cref="SalmonSecurityException"></exception>
-    override
-    public void Init(byte[] key, byte[] nonce)
-    {
-        base.Init(key, nonce);
-        byte[] expandedKey = new byte[SalmonAES256CTRTransformer.EXPANDED_KEY_SIZE];
-        NativeProxy.SalmonExpandKey(key, expandedKey);
-        ExpandedKey = expandedKey;
-    }
-
-    /// <summary>
     ///  Encrypt the data.
 	/// </summary>
 	///  <param name="srcBuffer">The source byte array.</param>

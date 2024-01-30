@@ -45,8 +45,8 @@ public class SalmonVaultManager : INotifyPropertyChanged
     protected static readonly string SEQUENCER_DIR_NAME = ".salmon";
     protected static readonly string SERVICE_PIPE_NAME = "SalmonService";
 
-    private static readonly int BUFFER_SIZE = 512 * 1024;
-    private static readonly int THREADS = 3;
+    private static int bufferSize = 512 * 1024;
+    private static int threads = 1;
 
     public static readonly int REQUEST_OPEN_VAULT_DIR = 1000;
     public static readonly int REQUEST_CREATE_VAULT_DIR = 1001;
@@ -85,6 +85,28 @@ public class SalmonVaultManager : INotifyPropertyChanged
         }
     }
 
+
+    public static int GetBufferSize()
+    {
+        return bufferSize;
+    }
+
+    public static void SetBufferSize(int bufferSize)
+    {
+        SalmonVaultManager.bufferSize = bufferSize;
+    }
+
+    public static int GetThreads()
+    {
+        return threads;
+    }
+
+    public static void SetThreads(int threads)
+    {
+        SalmonVaultManager.threads = threads;
+    }
+
+
     private List<SalmonFile> _fileItemList;
     public List<SalmonFile> FileItemList
     {
@@ -103,7 +125,7 @@ public class SalmonVaultManager : INotifyPropertyChanged
     public HashSet<SalmonFile> SelectedFiles
     {
         get => _SelectedFiles;
-        private set
+        set
         {
             if (value != _SelectedFiles)
             {
@@ -272,7 +294,7 @@ public class SalmonVaultManager : INotifyPropertyChanged
 
     private void SetupFileCommander()
     {
-        fileCommander = new SalmonFileCommander(BUFFER_SIZE, BUFFER_SIZE, THREADS);
+        fileCommander = new SalmonFileCommander(bufferSize, bufferSize, threads);
     }
 
     protected void SetupRootDir()
@@ -456,7 +478,7 @@ public class SalmonVaultManager : INotifyPropertyChanged
         ClearSelectedFiles();
     }
 
-    private void DeleteFiles(SalmonFile[] files)
+    public void DeleteFiles(SalmonFile[] files)
     {
         if (files == null)
             return;

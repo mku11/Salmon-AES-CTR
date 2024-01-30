@@ -31,7 +31,7 @@ namespace Mku.Salmon.Test;
 [TestClass]
 public class SalmonCSharpPerfTestRunner
 {
-    public static int TEST_PERF_SIZE = 32 * 1024 * 1024;
+    public static int TEST_PERF_SIZE = 64 * 1024 * 1024;
 
     static SalmonCSharpPerfTestRunner()
     {
@@ -53,9 +53,9 @@ public class SalmonCSharpPerfTestRunner
     {
         SalmonStream.AesProviderType = SalmonStream.ProviderType.Default;
         // warm up
-        TestHelper.EncryptAndDecryptByteArray(TEST_PERF_SIZE, false);
+        TestHelper.EncryptAndDecryptByteArray(TEST_PERF_SIZE, 1, false);
         Console.WriteLine("SalmonStream Salmon Def: ");
-        TestHelper.EncryptAndDecryptByteArray(TEST_PERF_SIZE, true);
+        TestHelper.EncryptAndDecryptByteArray(TEST_PERF_SIZE, 1, true);
         Console.WriteLine();
     }
 
@@ -75,9 +75,9 @@ public class SalmonCSharpPerfTestRunner
     {
         SalmonStream.AesProviderType = SalmonStream.ProviderType.AesIntrinsics;
         //warm up
-        TestHelper.EncryptAndDecryptByteArray(TEST_PERF_SIZE, false);
+        TestHelper.EncryptAndDecryptByteArray(TEST_PERF_SIZE, 1, false);
         Console.WriteLine("SalmonStream Salmon Intrinsics: ");
-        TestHelper.EncryptAndDecryptByteArray(TEST_PERF_SIZE, true);
+        TestHelper.EncryptAndDecryptByteArray(TEST_PERF_SIZE, 1,true);
         Console.WriteLine();
     }
 
@@ -86,9 +86,9 @@ public class SalmonCSharpPerfTestRunner
     {
         SalmonStream.AesProviderType = SalmonStream.ProviderType.TinyAES;
         // warm up
-        TestHelper.EncryptAndDecryptByteArray(TEST_PERF_SIZE, false);
+        TestHelper.EncryptAndDecryptByteArray(TEST_PERF_SIZE, 1,false);
         Console.WriteLine("SalmonStream Salmon TinyAES: ");
-        TestHelper.EncryptAndDecryptByteArray(TEST_PERF_SIZE, true);
+        TestHelper.EncryptAndDecryptByteArray(TEST_PERF_SIZE, 1, true);
         Console.WriteLine();
     }
 

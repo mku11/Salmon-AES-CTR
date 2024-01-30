@@ -74,8 +74,6 @@ public class SalmonAuthConfig
                                      byte[] configNonce)
     {
         SalmonFile salmonFile = new SalmonFile(authConfigFile, drive);
-		if(salmonFile.Exists)
-			salmonFile.Delete();
         salmonFile.AllowOverwrite = true;
         SalmonStream stream = salmonFile.GetOutputStream(configNonce);
         WriteToStream(stream, drive.DriveID, targetAuthID, targetStartingNonce, targetMaxNonce);

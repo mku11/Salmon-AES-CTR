@@ -146,6 +146,7 @@ public class SalmonFileCommander
                                 bytes, totalBytes, finalCount, total));
                     }
                 });
+                existingFiles[sfile.BaseName] = sfile;
                 importedFiles.Add(sfile);
                 count++;
             }
@@ -264,6 +265,7 @@ public class SalmonFileCommander
                                 bytes, totalBytes, finalCount, total));
                     }
                 });
+                existingFiles[rfile.BaseName] = rfile;
                 exportedFiles.Add(rfile);
                 count++;
             }

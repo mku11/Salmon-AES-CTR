@@ -47,7 +47,10 @@ public class SalmonAesIntrTransformer : SalmonNativeTransformer
     public void Init(byte[] key, byte[] nonce)
     {
         NativeProxy.SalmonInit(AES_IMPL_AES_INTR);
-		base.Init(key, nonce);
+        byte[] expandedKey = new byte[SalmonAES256CTRTransformer.EXPANDED_KEY_SIZE];
+        NativeProxy.SalmonExpandKey(key, expandedKey);
+        ExpandedKey = expandedKey;
+        base.Init(key, nonce);
     }
 
     /// <summary>

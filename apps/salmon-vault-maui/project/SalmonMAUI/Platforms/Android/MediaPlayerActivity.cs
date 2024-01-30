@@ -48,7 +48,7 @@ public class MediaPlayerActivity : AppCompatActivity, ISurfaceHolderCallback
 {
     private static readonly string TAG = nameof(MediaPlayerActivity);
 
-    private static readonly int MEDIA_BUFFERS = 4;
+    private static readonly int MEDIA_BUFFERS = 3;
 
     // make sure we use a large enough buffer for the MediaDataSource since some videos stall
     private static readonly int MEDIA_BUFFER_SIZE = 4 * 1024 * 1024;
@@ -56,7 +56,7 @@ public class MediaPlayerActivity : AppCompatActivity, ISurfaceHolderCallback
     private static readonly int MEDIA_BACKOFFSET = 256 * 1024;
 
     // increase the threads if you have more cpus available for parallel processing
-    private static readonly int MEDIA_THREADS = 2;
+    private int mediaThreads = 2;
 
     private static readonly int THRESHOLD_SEEK = 30;
 
@@ -89,6 +89,10 @@ public class MediaPlayerActivity : AppCompatActivity, ISurfaceHolderCallback
         pos = position;
         videos = mediaFiles;
     }
+	
+	protected void SetMediaThreads(int threads) {
+		mediaThreads = threads;
+	}
 
     override
     protected void OnCreate(Bundle bundle)
@@ -109,7 +113,7 @@ public class MediaPlayerActivity : AppCompatActivity, ISurfaceHolderCallback
         mRew.Click += (s, e) => PlayPrevious();
     }
 
-    private void PlayNext()
+    protected void PlayNext()
     {
         if (pos <= videos.Length)
         {
@@ -118,7 +122,7 @@ public class MediaPlayerActivity : AppCompatActivity, ISurfaceHolderCallback
         }
     }
 
-    private void PlayPrevious()
+    protected void PlayPrevious()
     {
         if (pos > 0)
         {
@@ -158,8 +162,13 @@ public class MediaPlayerActivity : AppCompatActivity, ISurfaceHolderCallback
         try
         {
             mediaPlayer = new MediaPlayer();
+			mediaPlayer.Prepared += (s, e) =>
+			{
+				Resize(0);
+				Start();
+			};
             gestureDetector = new GestureDetector(this, new MediaGestureListener(this));
-            LoadContent();
+            LoadContent(videos[pos]);
         }
         catch (Exception ex)
         {
@@ -169,34 +178,25 @@ public class MediaPlayerActivity : AppCompatActivity, ISurfaceHolderCallback
     }
     private void LoadContentAsync()
     {
-        Task.Run(() =>
-        {
-            try
-            {
-                LoadContent();
-            }
-            catch (Exception e)
-            {
-                Console.Error.WriteLine(e);
-            }
-        });
-    }
-
-    private void LoadContent()
-    {
-        if (mediaPlayer.IsPlaying)
+		if (mediaPlayer.IsPlaying)
         {
             mediaPlayer.Stop();
         }
         mediaPlayer.Reset();
-        mTitle.Text = videos[pos].BaseName;
-        source = new SalmonMediaDataSource(this, videos[pos], MEDIA_BUFFERS, MEDIA_BUFFER_SIZE, MEDIA_THREADS, MEDIA_BACKOFFSET);
+        mSurfaceView.PostDelayed(()=> {
+            try {
+                loadContent(videos[pos]);
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+        },500);
+    }
+
+    protected void LoadContent(SalmonFile file)
+    {
+        mTitle.Text = file.BaseName;
+        source = new SalmonMediaDataSource(this, file, MEDIA_BUFFERS, MEDIA_BUFFER_SIZE, MEDIA_THREADS, MEDIA_BACKOFFSET);
         mediaPlayer.SetDataSource(source);
-        mediaPlayer.Prepared += (s, e) =>
-        {
-            Resize(0);
-            Start();
-        };
         mediaPlayer.PrepareAsync();
     }
 
@@ -210,8 +210,10 @@ public class MediaPlayerActivity : AppCompatActivity, ISurfaceHolderCallback
         override
         public void Run()
         {
-            if (activity.mediaPlayer.IsPlaying)
-                activity.mSeekBar.Progress = (int)(activity.mediaPlayer.CurrentPosition / (float)activity.mediaPlayer.Duration * 100);
+			try {
+				if (activity.mediaPlayer != null && activity.mediaPlayer.IsPlaying)
+					activity.mSeekBar.Progress = (int)(activity.mediaPlayer.CurrentPosition / (float)activity.mediaPlayer.Duration * 100);
+			} catch (Exception ignored) {}
         }
     }
 
@@ -281,7 +283,6 @@ public class MediaPlayerActivity : AppCompatActivity, ISurfaceHolderCallback
     {
         mediaPlayer.Start();
         mediaPlayer.Looping = looping;
-        UpdateSpeed();
         if (timer != null)
         {
             timer.Cancel();
@@ -504,9 +505,24 @@ public class MediaPlayerActivity : AppCompatActivity, ISurfaceHolderCallback
         override
         public bool OnDoubleTap(MotionEvent e)
         {
-            activity.TogglePlay();
+            return activity.OnDoubleTap(e);
             return true;
         }
+		
+		override
+        public void OnLongPress(MotionEvent e) {
+            base.OnLongPress(e);
+            activity.OnLongPress(e);
+        }
+    }
+
+    protected boolean OnDoubleTap(MotionEvent e) {
+        TogglePlay();
+        return true;
+    }
+
+    protected void OnLongPress(MotionEvent e) {
+
     }
 
     class OnSurfaceTouchListener : Java.Lang.Object, Android.Views.View.IOnTouchListener

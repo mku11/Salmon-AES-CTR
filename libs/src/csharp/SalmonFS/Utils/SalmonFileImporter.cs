@@ -170,28 +170,19 @@ public class SalmonFileImporter
             salmonFile.AllowOverwrite = true;
             // we use default chunk file size
             salmonFile.SetApplyIntegrity(integrity, null, null);
+
             long fileSize = fileToImport.Length;
-            int runningThreads;
+            int runningThreads = 1;
             long partSize = fileSize;
 
-            if (fileSize > MIN_FILE_SIZE)
+            // if we want to check integrity we align to the chunk size otherwise to the AES Block
+            long minPartSize = SalmonFileUtils.GetMinimumPartSize(salmonFile);
+            if (partSize > minPartSize && threads > 1)
             {
                 partSize = (int)Math.Ceiling(fileSize / (float)threads);
-                // if we want to check integrity we align to the chunk size instead of the AES Block
-                long minimumPartSize = SalmonFileUtils.GetMinimumPartSize(salmonFile);
-                long rem = partSize % minimumPartSize;
-                if (rem != 0)
-                    partSize += minimumPartSize - rem;
-
-                runningThreads = (int)Math.Ceiling(fileSize / (double)partSize);
+                partSize -= partSize % minPartSize;
+                runningThreads = (int)(fileSize / partSize);
             }
-            else
-            {
-                runningThreads = 1;
-            }
-
-            if (runningThreads == 0)
-                runningThreads = 1;
 
             Task[] tasks = new Task[runningThreads];
             long finalPartSize = partSize;
@@ -229,7 +220,7 @@ public class SalmonFileImporter
                 long total = Mku.Time.Time.CurrentTimeMillis() - startTime;
                 Console.WriteLine("SalmonFileImporter AesType: " + SalmonStream.AesProviderType + " File: " + fileToImport.BaseName
                         + " imported and signed " + totalBytesRead[0] + " bytes in total time: " + total + " ms"
-                        + ", avg speed: " + totalBytesRead[0] / (float)total + " bytes/sec");
+                        + ", avg speed: " + totalBytesRead[0] / (float)total + " Kbytes/sec");
             }
         }
         catch (Exception ex)
@@ -299,7 +290,7 @@ public class SalmonFileImporter
                 long total = Mku.Time.Time.CurrentTimeMillis() - startTime;
                 Console.WriteLine("SalmonFileImporter: File Part: " + fileToImport.BaseName
                         + " imported " + totalPartBytesRead + " bytes in: " + total + " ms"
-                        + ", avg speed: " + totalPartBytesRead / (float)total + " bytes/sec");
+                        + ", avg speed: " + totalPartBytesRead / (float)total + " Kbytes/sec");
             }
         }
         catch (Exception ex)

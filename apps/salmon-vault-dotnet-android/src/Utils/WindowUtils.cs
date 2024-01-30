@@ -44,17 +44,4 @@ public class WindowUtils
             RunOnMainThread(action);
         });
     }
-
-    public static void RemoveFromRecents(Activity activity, bool value)
-    {
-        ActivityManager am = (ActivityManager)activity.GetSystemService(Context.ActivityService);
-        if (am != null)
-        {
-            var tasks = am.AppTasks;
-            if (tasks != null && tasks.Count > 0)
-            {
-                tasks[0].SetExcludeFromRecents(value);
-            }
-        }
-    }
 }

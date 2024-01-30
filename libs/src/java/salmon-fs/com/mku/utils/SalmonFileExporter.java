@@ -46,11 +46,6 @@ public class SalmonFileExporter {
     private static final int DEFAULT_THREADS = 1;
 
     /**
-     * Minimum file size to use parallelism. Anything less will use single thread.
-     */
-    private static final int MIN_FILE_SIZE = 2 * 1024 * 1024;
-
-    /**
      * True if multithreading is enabled.
      */
     private static final boolean enableMultiThread = true;
@@ -198,7 +193,7 @@ public class SalmonFileExporter {
                 System.out.println("SalmonFileExporter AesType: " + SalmonStream.getAesProviderType()
                         + " File: " + fileToExport.getBaseName() + " verified and exported "
                         + totalBytesWritten[0] + " bytes in: " + total + " ms"
-                        + ", avg speed: " + totalBytesWritten[0] / (float) total + " kbytes/sec");
+                        + ", avg speed: " + totalBytesWritten[0] / (float) total + " Kbytes/sec");
             }
         } catch (Exception ex) {
             ex.printStackTrace();
@@ -262,7 +257,7 @@ public class SalmonFileExporter {
                 long total = System.currentTimeMillis() - startTime;
                 System.out.println("SalmonFileExporter: File Part: " + fileToExport.getBaseName() + " exported " + totalPartBytesWritten
                         + " bytes in: " + total + " ms"
-                        + ", avg speed: " + totalBytesWritten[0] / (float) total + " kbytes/sec");
+                        + ", avg speed: " + totalPartBytesWritten / (float) total + " Kbytes/sec");
             }
         } catch (Exception ex) {
             ex.printStackTrace();

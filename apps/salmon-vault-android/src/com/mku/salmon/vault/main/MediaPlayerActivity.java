@@ -181,7 +181,7 @@ public class MediaPlayerActivity extends AppCompatActivity implements SurfaceHol
     }
 
     protected void loadContent(SalmonFile file) throws Exception {
-        mTitle.setText(videos[pos].getBaseName());
+        mTitle.setText(file.getBaseName());
         source = new SalmonMediaDataSource(this, file, MEDIA_BUFFERS, MEDIA_BUFFER_SIZE, mediaThreads, MEDIA_BACKOFFSET);
         mediaPlayer.setDataSource(source);
         mediaPlayer.prepareAsync();
