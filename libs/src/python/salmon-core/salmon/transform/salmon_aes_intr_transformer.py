@@ -23,6 +23,7 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 '''
 from salmon.iostream.encryption_mode import EncryptionMode
+from salmon.transform.salmon_aes256_ctr_transformer import SalmonAES256CTRTransformer
 from salmon.transform.salmon_native_transformer import SalmonNativeTransformer
 
 from typeguard import typechecked
@@ -47,6 +48,9 @@ class SalmonAesIntrTransformer(SalmonNativeTransformer):
          * @throws SalmonSecurityException
         """
         self.get_native_proxy().salmon_init(SalmonAesIntrTransformer.AES_IMPL_AES_INTR)
+        expanded_key: bytearray = bytearray(SalmonAES256CTRTransformer.EXPANDED_KEY_SIZE)
+        SalmonNativeTransformer.get_native_proxy().salmon_expand_key(key, expanded_key)
+        self.set_expanded_key(expanded_key)
         super().init(key, nonce)
 
     def encrypt_data(self, src_buffer: bytearray, src_offset: int,
@@ -62,7 +66,6 @@ class SalmonAesIntrTransformer(SalmonNativeTransformer):
         """
         # AES intrinsics needs the expanded key
         return self.get_native_proxy().salmon_transform(self.get_expanded_key(), self.get_counter(),
-                                                        int(EncryptionMode.Encrypt.value),
                                                         src_buffer, src_offset,
                                                         dest_buffer, dest_offset, count)
 
@@ -80,6 +83,5 @@ class SalmonAesIntrTransformer(SalmonNativeTransformer):
                      dest_buffer: bytearray, dest_offset: int, count: int) -> int:
         # AES intrinsics needs the expanded key
         return self.get_native_proxy().salmon_transform(self.get_expanded_key(), self.get_counter(),
-                                                        int(EncryptionMode.Encrypt.value),
                                                         src_buffer, src_offset,
                                                         dest_buffer, dest_offset, count)

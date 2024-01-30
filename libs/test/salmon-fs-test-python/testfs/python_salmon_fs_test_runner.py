@@ -109,10 +109,10 @@ class SalmonFSPythonTestRunner(SalmonPythonTestRunner):
         try:
             PythonFSTestHelper.import_and_export(TestHelper.generate_folder(SalmonPythonTestRunner.TEST_VAULT2_DIR),
                                                  TestHelper.TEST_PASSWORD, SalmonPythonTestRunner.TEST_IMPORT_FILE,
-                                                 SalmonPythonTestRunner.ENC_IMPORT_BUFFER_SIZE,
-                                                 SalmonPythonTestRunner.ENC_IMPORT_THREADS,
-                                                 TestHelper.ENC_EXPORT_BUFFER_SIZE,
-                                                 TestHelper.ENC_EXPORT_THREADS,
+                                                 PythonFSTestHelper.ENC_IMPORT_BUFFER_SIZE,
+                                                 PythonFSTestHelper.ENC_IMPORT_THREADS,
+                                                 PythonFSTestHelper.ENC_EXPORT_BUFFER_SIZE,
+                                                 PythonFSTestHelper.ENC_EXPORT_THREADS,
                                                  False, True, 24 + 10, False, False, False)
         except IOError as ex:
             if isinstance(ex.__cause__, SalmonIntegrityException):
@@ -125,10 +125,10 @@ class SalmonFSPythonTestRunner(SalmonPythonTestRunner):
         try:
             PythonFSTestHelper.import_and_export(TestHelper.generate_folder(SalmonPythonTestRunner.TEST_VAULT2_DIR),
                                                  TestHelper.TEST_PASSWORD, SalmonPythonTestRunner.TEST_IMPORT_FILE,
-                                                 SalmonPythonTestRunner.ENC_IMPORT_BUFFER_SIZE,
-                                                 SalmonPythonTestRunner.ENC_IMPORT_THREADS,
-                                                 TestHelper.ENC_EXPORT_BUFFER_SIZE,
-                                                 TestHelper.ENC_EXPORT_THREADS,
+                                                 PythonFSTestHelper.ENC_IMPORT_BUFFER_SIZE,
+                                                 PythonFSTestHelper.ENC_IMPORT_THREADS,
+                                                 PythonFSTestHelper.ENC_EXPORT_BUFFER_SIZE,
+                                                 PythonFSTestHelper.ENC_EXPORT_THREADS,
                                                  False, False, 0, True, False,
                                                  False)
         except Exception as ex:
@@ -140,16 +140,16 @@ class SalmonFSPythonTestRunner(SalmonPythonTestRunner):
     def test_import_and_search_files(self):
         PythonFSTestHelper.import_and_search(TestHelper.generate_folder(SalmonPythonTestRunner.TEST_VAULT2_DIR),
                                              TestHelper.TEST_PASSWORD, SalmonPythonTestRunner.TEST_IMPORT_FILE,
-                                             SalmonPythonTestRunner.ENC_IMPORT_BUFFER_SIZE,
-                                             SalmonPythonTestRunner.ENC_IMPORT_THREADS)
+                                             PythonFSTestHelper.ENC_IMPORT_BUFFER_SIZE,
+                                             PythonFSTestHelper.ENC_IMPORT_THREADS)
 
     def test_ImportAndCopyFile(self):
         integrity_failed: bool = False
         try:
             PythonFSTestHelper.import_and_copy(TestHelper.generate_folder(SalmonPythonTestRunner.TEST_VAULT2_DIR),
                                                TestHelper.TEST_PASSWORD, SalmonPythonTestRunner.TEST_IMPORT_FILE,
-                                               SalmonPythonTestRunner.ENC_IMPORT_BUFFER_SIZE,
-                                               SalmonPythonTestRunner.ENC_IMPORT_THREADS, "subdir", False)
+                                               PythonFSTestHelper.ENC_IMPORT_BUFFER_SIZE,
+                                               PythonFSTestHelper.ENC_IMPORT_THREADS, "subdir", False)
         except IOError as ex:
             if isinstance(ex.__cause__, SalmonIntegrityException):
                 integrity_failed = True
@@ -161,8 +161,8 @@ class SalmonFSPythonTestRunner(SalmonPythonTestRunner):
         try:
             PythonFSTestHelper.import_and_copy(TestHelper.generate_folder(SalmonPythonTestRunner.TEST_VAULT2_DIR),
                                                TestHelper.TEST_PASSWORD, SalmonPythonTestRunner.TEST_IMPORT_FILE,
-                                               SalmonPythonTestRunner.ENC_IMPORT_BUFFER_SIZE,
-                                               SalmonPythonTestRunner.ENC_IMPORT_THREADS,
+                                               PythonFSTestHelper.ENC_IMPORT_BUFFER_SIZE,
+                                               PythonFSTestHelper.ENC_IMPORT_THREADS,
                                                "subdir",
                                                True)
         except IOError as ex:
@@ -176,10 +176,10 @@ class SalmonFSPythonTestRunner(SalmonPythonTestRunner):
         try:
             PythonFSTestHelper.import_and_export(TestHelper.generate_folder(SalmonPythonTestRunner.TEST_VAULT2_DIR),
                                                  TestHelper.TEST_PASSWORD, SalmonPythonTestRunner.TEST_IMPORT_FILE,
-                                                 SalmonPythonTestRunner.ENC_IMPORT_BUFFER_SIZE,
-                                                 SalmonPythonTestRunner.ENC_IMPORT_THREADS,
-                                                 TestHelper.ENC_EXPORT_BUFFER_SIZE,
-                                                 TestHelper.ENC_EXPORT_THREADS,
+                                                 PythonFSTestHelper.ENC_IMPORT_BUFFER_SIZE,
+                                                 PythonFSTestHelper.ENC_IMPORT_THREADS,
+                                                 PythonFSTestHelper.ENC_EXPORT_BUFFER_SIZE,
+                                                 PythonFSTestHelper.ENC_EXPORT_THREADS,
                                                  True, True, 24 + 10, False, True, True)
         except Exception as ex:
             if isinstance(ex.__cause__, SalmonIntegrityException):
@@ -193,10 +193,10 @@ class SalmonFSPythonTestRunner(SalmonPythonTestRunner):
         try:
             PythonFSTestHelper.import_and_export(TestHelper.generate_folder(SalmonPythonTestRunner.TEST_VAULT2_DIR),
                                                  TestHelper.TEST_PASSWORD, SalmonPythonTestRunner.TEST_IMPORT_FILE,
-                                                 SalmonPythonTestRunner.ENC_IMPORT_BUFFER_SIZE,
-                                                 SalmonPythonTestRunner.ENC_IMPORT_THREADS,
-                                                 TestHelper.ENC_EXPORT_BUFFER_SIZE,
-                                                 TestHelper.ENC_EXPORT_THREADS,
+                                                 PythonFSTestHelper.ENC_IMPORT_BUFFER_SIZE,
+                                                 PythonFSTestHelper.ENC_IMPORT_THREADS,
+                                                 PythonFSTestHelper.ENC_EXPORT_BUFFER_SIZE,
+                                                 PythonFSTestHelper.ENC_EXPORT_THREADS,
                                                  True, True, 24 + 10, False, False, False)
         except IOError as ex:
             if isinstance(ex.__cause__, SalmonIntegrityException):
@@ -213,10 +213,10 @@ class SalmonFSPythonTestRunner(SalmonPythonTestRunner):
         try:
             PythonFSTestHelper.import_and_export(TestHelper.generate_folder(SalmonPythonTestRunner.TEST_VAULT2_DIR),
                                                  TestHelper.TEST_PASSWORD, SalmonPythonTestRunner.TEST_IMPORT_FILE,
-                                                 SalmonPythonTestRunner.ENC_IMPORT_BUFFER_SIZE,
-                                                 SalmonPythonTestRunner.ENC_IMPORT_THREADS,
-                                                 TestHelper.ENC_EXPORT_BUFFER_SIZE,
-                                                 TestHelper.ENC_EXPORT_THREADS,
+                                                 PythonFSTestHelper.ENC_IMPORT_BUFFER_SIZE,
+                                                 PythonFSTestHelper.ENC_IMPORT_THREADS,
+                                                 PythonFSTestHelper.ENC_EXPORT_BUFFER_SIZE,
+                                                 PythonFSTestHelper.ENC_EXPORT_THREADS,
                                                  True, False, 0, False,
                                                  False, True)
         except Exception as ex:
@@ -229,10 +229,10 @@ class SalmonFSPythonTestRunner(SalmonPythonTestRunner):
         try:
             PythonFSTestHelper.import_and_export(TestHelper.generate_folder(SalmonPythonTestRunner.TEST_VAULT2_DIR),
                                                  TestHelper.TEST_PASSWORD, SalmonPythonTestRunner.TEST_IMPORT_FILE,
-                                                 SalmonPythonTestRunner.ENC_IMPORT_BUFFER_SIZE,
-                                                 SalmonPythonTestRunner.ENC_IMPORT_THREADS,
-                                                 TestHelper.ENC_EXPORT_BUFFER_SIZE,
-                                                 TestHelper.ENC_EXPORT_THREADS,
+                                                 PythonFSTestHelper.ENC_IMPORT_BUFFER_SIZE,
+                                                 PythonFSTestHelper.ENC_IMPORT_THREADS,
+                                                 PythonFSTestHelper.ENC_EXPORT_BUFFER_SIZE,
+                                                 PythonFSTestHelper.ENC_EXPORT_THREADS,
                                                  True, True, 36, False,
                                                  True, False)
         except IOError as ex:
@@ -245,10 +245,10 @@ class SalmonFSPythonTestRunner(SalmonPythonTestRunner):
         try:
             PythonFSTestHelper.import_and_export(TestHelper.generate_folder(SalmonPythonTestRunner.TEST_VAULT2_DIR),
                                                  TestHelper.TEST_PASSWORD, SalmonPythonTestRunner.TEST_IMPORT_FILE,
-                                                 SalmonPythonTestRunner.ENC_IMPORT_BUFFER_SIZE,
-                                                 SalmonPythonTestRunner.ENC_IMPORT_THREADS,
-                                                 TestHelper.ENC_EXPORT_BUFFER_SIZE,
-                                                 TestHelper.ENC_EXPORT_THREADS,
+                                                 PythonFSTestHelper.ENC_IMPORT_BUFFER_SIZE,
+                                                 PythonFSTestHelper.ENC_IMPORT_THREADS,
+                                                 PythonFSTestHelper.ENC_EXPORT_BUFFER_SIZE,
+                                                 PythonFSTestHelper.ENC_EXPORT_THREADS,
                                                  True, False, 0, True,
                                                  True, False)
         except IOError as ex:
@@ -262,10 +262,10 @@ class SalmonFSPythonTestRunner(SalmonPythonTestRunner):
         try:
             PythonFSTestHelper.import_and_export(TestHelper.generate_folder(SalmonPythonTestRunner.TEST_VAULT2_DIR),
                                                  TestHelper.TEST_PASSWORD, SalmonPythonTestRunner.TEST_IMPORT_FILE,
-                                                 SalmonPythonTestRunner.ENC_IMPORT_BUFFER_SIZE,
-                                                 SalmonPythonTestRunner.ENC_IMPORT_THREADS,
-                                                 TestHelper.ENC_EXPORT_BUFFER_SIZE,
-                                                 TestHelper.ENC_EXPORT_THREADS,
+                                                 PythonFSTestHelper.ENC_IMPORT_BUFFER_SIZE,
+                                                 PythonFSTestHelper.ENC_IMPORT_THREADS,
+                                                 PythonFSTestHelper.ENC_EXPORT_BUFFER_SIZE,
+                                                 PythonFSTestHelper.ENC_EXPORT_THREADS,
                                                  True, True, 20, False,
                                                  True, True)
         except IOError as ex:
@@ -279,10 +279,10 @@ class SalmonFSPythonTestRunner(SalmonPythonTestRunner):
         try:
             PythonFSTestHelper.import_and_export(TestHelper.generate_folder(SalmonPythonTestRunner.TEST_VAULT2_DIR),
                                                  TestHelper.TEST_PASSWORD, SalmonPythonTestRunner.TEST_IMPORT_FILE,
-                                                 SalmonPythonTestRunner.ENC_IMPORT_BUFFER_SIZE,
-                                                 SalmonPythonTestRunner.ENC_IMPORT_THREADS,
-                                                 TestHelper.ENC_EXPORT_BUFFER_SIZE,
-                                                 TestHelper.ENC_EXPORT_THREADS,
+                                                 PythonFSTestHelper.ENC_IMPORT_BUFFER_SIZE,
+                                                 PythonFSTestHelper.ENC_IMPORT_THREADS,
+                                                 PythonFSTestHelper.ENC_EXPORT_BUFFER_SIZE,
+                                                 PythonFSTestHelper.ENC_EXPORT_THREADS,
                                                  True, False, 0, True,
                                                  True, True)
         except IOError as ex:

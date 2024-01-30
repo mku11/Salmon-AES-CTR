@@ -52,14 +52,13 @@ class INativeProxy(ABC):
         pass
 
     @abstractmethod
-    def salmon_transform(self, key: bytearray, counter: bytearray, encryption_mode: int,
+    def salmon_transform(self, key: bytearray, counter: bytearray,
                          src_buffer: bytearray, src_offset: int,
                          dest_buffer: bytearray, dest_offset: int, count: int) -> int:
         """
          * Proxy Transform the input byte array using AES 256 encryption or decryption mode.
          * @param key
          * @param counter
-         * @param encryption_mode
          * @param srcBuffer
          * @param srcOffset
          * @param destBuffer

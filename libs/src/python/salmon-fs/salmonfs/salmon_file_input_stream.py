@@ -340,7 +340,7 @@ class SalmonFileInputStream(BufferedIOBase):
         """
         for i in range(0, len(self.__buffers)):
             buffer: SalmonFileInputStream.CacheBuffer = self.__buffers[i]
-            if self.__position >= buffer.startPos and self.__position + count <= buffer.startPos + buffer.count:
+            if buffer is not None and self.__position >= buffer.startPos and self.__position + count <= buffer.startPos + buffer.count:
                 # promote buffer to the front
                 self.__lruBuffersIndex.remove(i)
                 self.__lruBuffersIndex.insert(0, i)
@@ -375,6 +375,7 @@ class SalmonFileInputStream(BufferedIOBase):
         self.__clear_buffers()
         self.__executor.shutdown()
 
+    @synchronized
     def __clear_buffers(self):
         """
          * Clear all buffers.
@@ -384,6 +385,7 @@ class SalmonFileInputStream(BufferedIOBase):
                 self.__buffers[i].clear()
             self.__buffers[i] = None
 
+    @synchronized
     def __close_streams(self):
         """
          * Close all back streams.

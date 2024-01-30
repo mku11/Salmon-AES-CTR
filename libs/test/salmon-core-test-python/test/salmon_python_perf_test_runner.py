@@ -38,7 +38,7 @@ from test.test_helper import TestHelper
 
 @typechecked
 class SalmonPythonPerfTestRunner(TestCase):
-    TEST_PERF_SIZE = 32 * 1024 * 1024
+    TEST_PERF_SIZE = 64 * 1024 * 1024
     SalmonDefaultOptions.set_buffer_size(256 * 1024)
     NativeProxy.set_library_path("../../projects/salmon-libs-gradle/salmon-native/build/libs/salmon/shared/salmon.dll")
 

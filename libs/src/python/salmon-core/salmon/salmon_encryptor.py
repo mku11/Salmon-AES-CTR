@@ -278,15 +278,9 @@ class SalmonEncryptor:
             min_part_size = SalmonIntegrity.DEFAULT_CHUNK_SIZE
 
         if part_size > min_part_size:
-            part_size = int(math.ceil(part_size / float(self.__threads)))
-            # if we want to check integrity we align to the chunk size instead of the AES Block
-            rem = part_size % min_part_size
-            if rem != 0:
-                part_size += min_part_size - rem
-
+            part_size = int(math.ceil(len(data) / float(self.__threads)))
+            part_size -= part_size % min_part_size
             running_threads = len(data) // part_size
-        else:
-            running_threads = 1
 
         self.__submit_encrypt_jobs(running_threads, part_size,
                                    data, out_data,

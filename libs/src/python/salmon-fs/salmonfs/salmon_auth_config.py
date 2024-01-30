@@ -108,8 +108,6 @@ class SalmonAuthConfig:
          * @throws Exception
         """
         salmon_file: SalmonFile = SalmonFile(auth_config_file, drive)
-        if salmon_file.exists():
-            salmon_file.delete()
         stream: SalmonStream = salmon_file.get_output_stream(config_nonce)
         SalmonAuthConfig.write_to_stream(stream, drive.get_drive_id(), target_auth_id, target_starting_nonce,
                                          target_max_nonce)

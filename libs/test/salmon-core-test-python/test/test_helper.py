@@ -53,8 +53,6 @@ from salmon.transform.salmon_transformer_factory import SalmonTransformerFactory
 
 @typechecked
 class TestHelper:
-    ENC_EXPORT_BUFFER_SIZE = 512 * 1024
-    ENC_EXPORT_THREADS = 4
     TEST_ENC_BUFFER_SIZE = 512 * 1024
     TEST_DEC_BUFFER_SIZE = 512 * 1024
     ENABLE_MULTI_CPU = False

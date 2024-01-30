@@ -229,6 +229,8 @@ class SalmonDriveManager:
         target_app_drive_config_file: IRealFile = v_dir.get_child(filename)
         if target_app_drive_config_file is None or not target_app_drive_config_file.exists():
             target_app_drive_config_file = v_dir.create_file(filename)
+        elif target_app_drive_config_file is not None and target_app_drive_config_file.exists():
+            raise SalmonAuthException(filename + " already exists, delete this file or choose another directory")
 
         pivot_nonce: bytearray = SalmonNonce.split_nonce_range(sequence.get_next_nonce(), sequence.get_max_nonce())
         SalmonDriveManager.__sequencer.set_max_nonce(sequence.get_drive_id(), sequence.get_auth_id(), pivot_nonce)

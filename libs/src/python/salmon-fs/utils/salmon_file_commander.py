@@ -145,6 +145,7 @@ class SalmonFileCommander:
                                                                                          total_bytes2,
                                                                                          count, total[0],
                                                                                          on_progress_changed2))
+                existing_files[sfile.get_base_name()] = sfile
                 imported_files.append(sfile)
                 count[0] += 1
             except SalmonSequenceException as ex:
@@ -233,6 +234,7 @@ class SalmonFileCommander:
                                                         lambda v_bytes, total_bytes: self.__notify_salmon_file_progress(
                                                             file_to_export, v_bytes, total_bytes, count, total,
                                                             on_progress_changed))
+                existing_files[rfile.get_base_name()] = rfile
                 exported_files.append(rfile)
                 count[0] += 1
             except SalmonSequenceException as ex:

@@ -130,7 +130,7 @@ def export_file_part(file_to_export: SalmonFile, real_file: IRealFile, start: in
             print("SalmonFileExporter: File Part: " + file_to_export.get_base_name() + " exported " + str(
                 total_part_bytes_written)
                   + " bytes in: " + str(total) + " ms"
-                  + ", avg speed: " + str(total_bytes_written[0] / float(total)) + " bytes/sec")
+                  + ", avg speed: " + str(total_part_bytes_written / float(total)) + " Kbytes/sec")
 
     except Exception as ex:
         print(ex)
@@ -158,11 +158,6 @@ class SalmonFileExporter:
     __DEFAULT_THREADS = 1
     """
      * The global default threads to use.
-    """
-
-    __MIN_FILE_SIZE = 2 * 1024 * 1024
-    """
-     * Minimum file size to use parallelism. Anything less will use single thread.
     """
 
     __enableMultiThread: bool = True
@@ -281,31 +276,20 @@ class SalmonFileExporter:
             file_to_export.set_verify_integrity(integrity, None)
 
             file_size: int = file_to_export.get_size()
+            running_threads: int = 1
             part_size: int = file_size
-            running_threads: int
 
-            # make sure we allocate enough space for the file
+            # for python we make sure to allocate enough space for the file
             target_stream: RandomAccessStream = exported_file.get_output_stream()
             target_stream.set_length(file_size)
             target_stream.close()
 
-            if file_size > SalmonFileExporter.__MIN_FILE_SIZE:
+            # if we want to check integrity we align to the chunk size otherwise to the AES Block
+            min_part_size: int = SalmonFileUtils.get_minimum_part_size(file_to_export)
+            if part_size > min_part_size and self.__threads > 1:
                 part_size = int(math.ceil(file_size / float(self.__threads)))
-
-                # if we want to check integrity we align to the chunk size otherwise to the AES Block
-                min_part_size: int = SalmonFileUtils.get_minimum_part_size(file_to_export)
-
-                # calculate the last part size
-                rem: int = part_size % min_part_size
-                if rem != 0:
-                    part_size += min_part_size - rem
-
-                running_threads = int(math.ceil(file_size / float(part_size)))
-            else:
-                running_threads = 1
-
-            if running_threads == 0:
-                running_threads = 1
+                part_size -= part_size % min_part_size
+                running_threads = int(file_size // part_size)
 
             final_part_size: int = part_size
             final_running_threads: int = running_threads
@@ -375,7 +359,7 @@ class SalmonFileExporter:
                 print("SalmonFileExporter AesType: " + SalmonStream.get_aes_provider_type().name
                       + " File: " + file_to_export.get_base_name() + " verified and exported "
                       + str(total_bytes_written[0]) + " bytes in: " + str(total) + " ms"
-                      + ", avg speed: " + str(total_bytes_written[0] / float(total)) + " bytes/sec")
+                      + ", avg speed: " + str(total_bytes_written[0] / float(total)) + " Kbytes/sec")
 
         except Exception as ex:
             print(ex)

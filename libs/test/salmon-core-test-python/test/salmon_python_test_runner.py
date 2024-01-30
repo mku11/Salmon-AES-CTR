@@ -48,8 +48,6 @@ from typeguard import typechecked, TypeCheckError
 
 @typechecked
 class SalmonPythonTestRunner(TestCase):
-    ENC_IMPORT_BUFFER_SIZE = 512 * 1024
-    ENC_IMPORT_THREADS = 4
     TEST_OUTPUT_DIR = "d:\\tmp\\output"
     TEST_VAULT_DIR = "d:\\tmp\\output\\enc"
     TEST_VAULT2_DIR = "d:\\tmp\\output\\enc2"
@@ -59,7 +57,7 @@ class SalmonPythonTestRunner(TestCase):
     TEST_IMPORT_MEDIUM_FILE = "d:\\tmp\\testdata\\medium_test.zip"
     TEST_IMPORT_LARGE_FILE = "d:\\tmp\\testdata\\large_test.mp4"
     TEST_IMPORT_HUGE_FILE = "d:\\tmp\\testdata\\huge.zip"
-    TEST_IMPORT_FILE = TEST_IMPORT_LARGE_FILE
+    TEST_IMPORT_FILE = TEST_IMPORT_MEDIUM_FILE
 
     def setUp(self):
         SalmonStream.set_aes_provider_type(ProviderType.Default)
@@ -489,7 +487,7 @@ class SalmonPythonTestRunner(TestCase):
         self.assertEqual(lnum1, lnum2)
 
     def test_encrypt_and_decrypt_array_multiple_threads(self):
-        data = TestHelper.get_rand_array(1 * 1024 * 1024)
+        data = TestHelper.get_rand_array(1 * 1024 * 1024 + 4)
         t1 = time.time() * 1000
         enc_data = SalmonEncryptor(2, multi_cpu=TestHelper.ENABLE_MULTI_CPU).encrypt(data, TestHelper.TEST_KEY_BYTES,
                                                                                      TestHelper.TEST_NONCE_BYTES,

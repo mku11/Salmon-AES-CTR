@@ -151,7 +151,7 @@ def import_file_part(file_to_import: IRealFile, salmon_file: SalmonFile, start: 
             total: int = int(time.time() * 1000) - start_time
             print("SalmonFileImporter: File Part: " + file_to_import.get_base_name()
                   + " imported " + str(total_part_bytes_read) + " bytes in: " + str(total) + " ms"
-                  + ", avg speed: " + str(total_part_bytes_read / float(total)) + " bytes/sec")
+                  + ", avg speed: " + str(total_part_bytes_read / float(total)) + " Kbytes/sec")
 
     except Exception as ex:
         print(ex)
@@ -179,11 +179,6 @@ class SalmonFileImporter:
     __DEFAULT_THREADS = 1
     """
      * The global default threads to use.
-    """
-
-    __MIN_FILE_SIZE = 2 * 1024 * 1024
-    """
-     * Minimum file size to use parallelism. Anything less will use single thread.
     """
 
     __enableMultiThread: bool = True
@@ -316,29 +311,22 @@ class SalmonFileImporter:
             salmon_file.set_allow_overwrite(True)
             # we use default chunk file size
             salmon_file.set_apply_integrity(integrity, None, None)
+
             file_size: int = file_to_import.length()
-            running_threads: int
+            running_threads: int = 1
             part_size: int = file_size
 
-            # make sure we allocate enough space for the file
+            # for python we make sure to allocate enough space for the file
             target_stream: SalmonStream = salmon_file.get_output_stream()
             target_stream.set_length(file_size)
             target_stream.close()
 
-            if file_size > SalmonFileImporter.__MIN_FILE_SIZE:
+            # if we want to check integrity we align to the chunk size otherwise to the AES Block
+            min_part_size: int = SalmonFileUtils.get_minimum_part_size(salmon_file)
+            if part_size > min_part_size and self.__threads > 1:
                 part_size = math.ceil(file_size / float(self.__threads))
-                # if we want to check integrity we align to the chunk size instead of the AES Block
-                minimum_part_size: int = SalmonFileUtils.get_minimum_part_size(salmon_file)
-                rem: int = part_size % minimum_part_size
-                if rem != 0:
-                    part_size += minimum_part_size - rem
-
-                running_threads = math.ceil(file_size / float(part_size))
-            else:
-                running_threads = 1
-
-            if running_threads == 0:
-                running_threads = 1
+                part_size -= part_size % min_part_size
+                running_threads = int(file_size // part_size)
 
             final_part_size: int = part_size
             final_running_threads: int = running_threads
@@ -409,7 +397,7 @@ class SalmonFileImporter:
                     "SalmonFileImporter AesType: " + SalmonStream.get_aes_provider_type().name
                     + ", File: " + file_to_import.get_base_name()
                     + " imported and signed " + str(total_bytes_read) + " bytes in total time: " + str(total) + " ms"
-                    + ", avg speed: " + str(total_bytes_read / float(total)) + " bytes/sec")
+                    + ", avg speed: " + str(total_bytes_read / float(total)) + " Kbytes/sec")
 
         except Exception as ex:
             print(ex)

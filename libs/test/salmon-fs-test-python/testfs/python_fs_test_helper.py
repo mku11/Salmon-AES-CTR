@@ -64,6 +64,12 @@ from utils.salmon_file_searcher import SalmonFileSearcher
 class PythonFSTestHelper:
     TEST_SEQUENCER_DIR = "D:\\tmp\\output"
     TEST_SEQUENCER_FILENAME = "fileseq.xml"
+
+    ENC_IMPORT_BUFFER_SIZE = 512 * 1024
+    ENC_IMPORT_THREADS = 2
+    ENC_EXPORT_BUFFER_SIZE = 512 * 1024
+    ENC_EXPORT_THREADS = 2
+
     ENABLE_LOG = True
     ENABLE_LOG_DETAILS = True
     ENABLE_FILE_PROGRESS = False

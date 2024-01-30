@@ -77,7 +77,7 @@ class NativeProxy(INativeProxy):
             NativeProxy.__expand_key.argtypes = [ctypes.c_char_p, ctypes.c_char_p]
 
             NativeProxy.__transform = lib.salmon_transform
-            NativeProxy.__transform.argtypes = [ctypes.c_char_p, ctypes.c_char_p, ctypes.c_int,
+            NativeProxy.__transform.argtypes = [ctypes.c_char_p, ctypes.c_char_p,
                                                 ctypes.c_char_p, ctypes.c_int,
                                                 ctypes.c_char_p, ctypes.c_int, ctypes.c_int]
             NativeProxy.__transform.restype = ctypes.c_int
@@ -99,7 +99,7 @@ class NativeProxy(INativeProxy):
         NativeProxy.__expand_key(c_key, c_expanded_key)
         expanded_key[0:len(expanded_key)] = bytearray(c_expanded_key)
 
-    def salmon_transform(self, key: bytearray, counter: bytearray, encryption_mode: int,
+    def salmon_transform(self, key: bytearray, counter: bytearray,
                          src_buffer: bytearray, src_offset: int, dest_buffer: bytearray, dest_offset: int,
                          count: int) -> int:
         """
@@ -107,7 +107,6 @@ class NativeProxy(INativeProxy):
          *
          * @param key
          * @param counter
-         * @param encryption_mode
          * @param srcBuffer
          * @param srcOffset
          * @param destBuffer
@@ -120,7 +119,7 @@ class NativeProxy(INativeProxy):
         c_counter = NativeProxy.get_char_array(counter)
         c_src_buffer = NativeProxy.get_char_array(src_buffer)
         c_dest_buffer = NativeProxy.get_char_array(dest_buffer)
-        v_bytes: int = NativeProxy.__transform(c_key, c_counter, encryption_mode,
+        v_bytes: int = NativeProxy.__transform(c_key, c_counter,
                                                c_src_buffer, src_offset,
                                                c_dest_buffer, dest_offset, count)
         dest_buffer[0:len(dest_buffer)] = bytearray(c_dest_buffer)
