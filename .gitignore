@@ -44,3 +44,16 @@ deploymentTargetDropDown.xml
 /libs/src/python/salmon-core/convert/testfile.py
 __pycache__
 /libs/projects/salmon-libs-python/main_threading.py
+*.so
+.DS_Store
+DerivedData
+*.o
+*.dylib
+/samples/MacCSamples/
+/samples/GccSamples/
+*.tar.gz
+*.dll
+*.exe
+project.xcworkspace
+*.dmg
+xcuserdata
