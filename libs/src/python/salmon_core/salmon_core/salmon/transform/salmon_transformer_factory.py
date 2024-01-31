@@ -22,12 +22,12 @@ LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 '''
-from salmon.iostream.provider_type import ProviderType
-from salmon.salmon_security_exception import SalmonSecurityException
-from salmon.transform.isalmon_ctr_transformer import ISalmonCTRTransformer
-from salmon.transform.salmon_aes_intr_transformer import SalmonAesIntrTransformer
-from salmon.transform.salmon_default_transformer import SalmonDefaultTransformer
-from salmon.transform.tiny_aes_transformer import TinyAesTransformer
+from salmon_core.salmon.iostream.provider_type import ProviderType
+from salmon_core.salmon.salmon_security_exception import SalmonSecurityException
+from salmon_core.salmon.transform.isalmon_ctr_transformer import ISalmonCTRTransformer
+from salmon_core.salmon.transform.salmon_aes_intr_transformer import SalmonAesIntrTransformer
+from salmon_core.salmon.transform.salmon_default_transformer import SalmonDefaultTransformer
+from salmon_core.salmon.transform.tiny_aes_transformer import TinyAesTransformer
 from typeguard import typechecked
 
 

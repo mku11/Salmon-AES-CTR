@@ -26,9 +26,9 @@ SOFTWARE.
 from Crypto.Cipher import AES
 from Crypto.Util import Counter
 
-from convert.bit_converter import BitConverter
-from salmon.salmon_security_exception import SalmonSecurityException
-from salmon.transform.salmon_aes256_ctr_transformer import SalmonAES256CTRTransformer
+from salmon_core.convert.bit_converter import BitConverter
+from salmon_core.salmon.salmon_security_exception import SalmonSecurityException
+from salmon_core.salmon.transform.salmon_aes256_ctr_transformer import SalmonAES256CTRTransformer
 
 from typeguard import typechecked
 

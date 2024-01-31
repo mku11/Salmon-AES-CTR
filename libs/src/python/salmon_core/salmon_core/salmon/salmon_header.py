@@ -23,9 +23,9 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 '''
 from __future__ import annotations
-from convert.bit_converter import BitConverter
-from iostream.random_access_stream import RandomAccessStream
-from salmon.salmon_generator import SalmonGenerator
+from salmon_core.convert.bit_converter import BitConverter
+from salmon_core.iostream.random_access_stream import RandomAccessStream
+from salmon_core.salmon.salmon_generator import SalmonGenerator
 
 from typeguard import typechecked
 

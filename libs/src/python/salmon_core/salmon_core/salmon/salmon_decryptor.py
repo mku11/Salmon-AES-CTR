@@ -28,15 +28,15 @@ from concurrent.futures import ProcessPoolExecutor, ThreadPoolExecutor
 from multiprocessing import shared_memory
 from multiprocessing.shared_memory import SharedMemory
 
-from iostream.memory_stream import MemoryStream
-from iostream.random_access_stream import RandomAccessStream
-from salmon.integrity.salmon_integrity import SalmonIntegrity
-from salmon.integrity.salmon_integrity_exception import SalmonIntegrityException
-from salmon.iostream.encryption_mode import EncryptionMode
-from salmon.iostream.salmon_stream import SalmonStream
-from salmon.salmon_generator import SalmonGenerator
-from salmon.salmon_header import SalmonHeader
-from salmon.salmon_security_exception import SalmonSecurityException
+from salmon_core.iostream.memory_stream import MemoryStream
+from salmon_core.iostream.random_access_stream import RandomAccessStream
+from salmon_core.salmon.integrity.salmon_integrity import SalmonIntegrity
+from salmon_core.salmon.integrity.salmon_integrity_exception import SalmonIntegrityException
+from salmon_core.salmon.iostream.encryption_mode import EncryptionMode
+from salmon_core.salmon.iostream.salmon_stream import SalmonStream
+from salmon_core.salmon.salmon_generator import SalmonGenerator
+from salmon_core.salmon.salmon_header import SalmonHeader
+from salmon_core.salmon.salmon_security_exception import SalmonSecurityException
 
 from typeguard import typechecked
 

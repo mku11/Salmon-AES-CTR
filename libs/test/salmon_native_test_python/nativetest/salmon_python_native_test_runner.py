@@ -28,16 +28,16 @@ from unittest import TestCase
 
 from typeguard import typechecked
 
-from salmon.integrity.salmon_integrity import SalmonIntegrity
-from salmon.iostream.provider_type import ProviderType
-from salmon.iostream.salmon_stream import SalmonStream
-from salmon.password.pbkdf_type import PbkdfType
-from salmon.password.salmon_password import SalmonPassword
-from salmon.salmon_decryptor import SalmonDecryptor
-from salmon.salmon_default_options import SalmonDefaultOptions
-from salmon.salmon_encryptor import SalmonEncryptor
-from salmon.salmon_generator import SalmonGenerator
-from salmon.transform.native_proxy import NativeProxy
+from salmon_core.salmon.integrity.salmon_integrity import SalmonIntegrity
+from salmon_core.salmon.iostream.provider_type import ProviderType
+from salmon_core.salmon.iostream.salmon_stream import SalmonStream
+from salmon_core.salmon.password.pbkdf_type import PbkdfType
+from salmon_core.salmon.password.salmon_password import SalmonPassword
+from salmon_core.salmon.salmon_decryptor import SalmonDecryptor
+from salmon_core.salmon.salmon_default_options import SalmonDefaultOptions
+from salmon_core.salmon.salmon_encryptor import SalmonEncryptor
+from salmon_core.salmon.salmon_generator import SalmonGenerator
+from salmon_core.salmon.transform.native_proxy import NativeProxy
 from test.test_helper import TestHelper
 
 
@@ -81,9 +81,8 @@ class SalmonPythonNativeTestRunner(TestCase):
 
     def test_encrypt_and_decrypt_native_stream_text_compatible(self):
         plain_text = TestHelper.TEST_TEXT
-        for i in range(0, 2):
+        for i in range(0, 13):
             plain_text += plain_text
-        plain_text = plain_text.substring(0, 16)
 
         v_bytes = bytearray(plain_text.encode('utf-8'))
         enc_bytes_def = TestHelper.default_aesctr_transform(v_bytes, TestHelper.TEST_KEY_BYTES,
@@ -108,14 +107,13 @@ class SalmonPythonNativeTestRunner(TestCase):
                                                                                    TestHelper.TEST_NONCE_BYTES,
                                                                                    False,
                                                                                    False, None, None)
-        self.assertEqual(bytes, dec_bytes)
+        self.assertEqual(v_bytes, dec_bytes)
 
     def test_encrypt_and_decrypt_native_stream_read_buffers_not_aligned_text_compatible(self):
         plain_text = TestHelper.TEST_TEXT
-        for i in range(0, 3):
+        for i in range(0, 13):
             plain_text += plain_text
 
-        plain_text = plain_text.substring(0, 64 + 6)
         v_bytes = bytearray(plain_text.encode('utf-8'))
         enc_bytes_def = TestHelper.default_aesctr_transform(v_bytes, TestHelper.TEST_KEY_BYTES,
                                                             TestHelper.TEST_NONCE_BYTES,
@@ -146,6 +144,7 @@ class SalmonPythonNativeTestRunner(TestCase):
         plain_text = TestHelper.TEST_TEXT
         for i in range(0, 13):
             plain_text += plain_text
+        plain_text = plain_text[0:16]
 
         v_bytes = bytearray(plain_text.encode('utf-8'))
         enc_bytes_def = TestHelper.default_aesctr_transform(v_bytes, TestHelper.TEST_KEY_BYTES,

@@ -27,25 +27,25 @@ from abc import abstractmethod
 
 from typeguard import typechecked
 
-from convert.bit_converter import BitConverter
-from file.ireal_file import IRealFile
-from file.virtual_drive import VirtualDrive
-from file.virtual_file import VirtualFile
-from iostream.memory_stream import MemoryStream
-from iostream.random_access_stream import RandomAccessStream
-from salmon.integrity.hmac_sha256_provider import HmacSHA256Provider
-from salmon.integrity.ihash_provider import IHashProvider
-from salmon.integrity.salmon_integrity import SalmonIntegrity
-from salmon.iostream.encryption_mode import EncryptionMode
-from salmon.iostream.salmon_stream import SalmonStream
-from salmon.password.salmon_password import SalmonPassword
-from salmon.salmon_generator import SalmonGenerator
-from salmon.salmon_security_exception import SalmonSecurityException
-from salmonfs.salmon_auth_exception import SalmonAuthException
-from salmonfs.salmon_drive_config import SalmonDriveConfig
-from salmonfs.salmon_drive_generator import SalmonDriveGenerator
-from salmonfs.salmon_key import SalmonKey
-from sequence.isalmon_sequencer import ISalmonSequencer
+from salmon_core.convert.bit_converter import BitConverter
+from salmon_fs.file.ireal_file import IRealFile
+from salmon_fs.file.virtual_drive import VirtualDrive
+from salmon_fs.file.virtual_file import VirtualFile
+from salmon_core.iostream.memory_stream import MemoryStream
+from salmon_core.iostream.random_access_stream import RandomAccessStream
+from salmon_core.salmon.integrity.hmac_sha256_provider import HmacSHA256Provider
+from salmon_core.salmon.integrity.ihash_provider import IHashProvider
+from salmon_core.salmon.integrity.salmon_integrity import SalmonIntegrity
+from salmon_core.salmon.iostream.encryption_mode import EncryptionMode
+from salmon_core.salmon.iostream.salmon_stream import SalmonStream
+from salmon_core.salmon.password.salmon_password import SalmonPassword
+from salmon_core.salmon.salmon_generator import SalmonGenerator
+from salmon_core.salmon.salmon_security_exception import SalmonSecurityException
+from salmon_fs.salmonfs.salmon_auth_exception import SalmonAuthException
+from salmon_fs.salmonfs.salmon_drive_config import SalmonDriveConfig
+from salmon_fs.salmonfs.salmon_drive_generator import SalmonDriveGenerator
+from salmon_fs.salmonfs.salmon_key import SalmonKey
+from salmon_fs.sequence.isalmon_sequencer import ISalmonSequencer
 
 
 @typechecked
@@ -93,7 +93,7 @@ class SalmonDrive(VirtualDrive):
                 # revert to original
                 self.__realRoot = original_real_root
 
-        virtual_root_real_file: IRealFile = self.__realRoot.get_child(SalmonDrive.__virtualDriveDirectoryName)
+        virtual_root_real_file: IRealFile | None = self.__realRoot.get_child(SalmonDrive.__virtualDriveDirectoryName)
         if create_if_not_exists and (virtual_root_real_file is None or not virtual_root_real_file.exists()):
             virtual_root_real_file = self.__realRoot.create_directory(SalmonDrive.__virtualDriveDirectoryName)
 

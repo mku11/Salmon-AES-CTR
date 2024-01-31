@@ -22,8 +22,8 @@ LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 '''
-from salmon.password.pbkdf_algo import PbkdfAlgo
-from salmon.salmon_security_exception import SalmonSecurityException
+from salmon_core.salmon.password.pbkdf_algo import PbkdfAlgo
+from salmon_core.salmon.salmon_security_exception import SalmonSecurityException
 from abc import ABC, abstractmethod
 from typeguard import typechecked
 

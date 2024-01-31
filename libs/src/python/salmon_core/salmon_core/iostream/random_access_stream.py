@@ -27,7 +27,7 @@ from abc import ABC, abstractmethod
 from enum import Enum
 from typing import Callable, Any
 
-from salmon.salmon_default_options import SalmonDefaultOptions
+from salmon_core.salmon.salmon_default_options import SalmonDefaultOptions
 from typeguard import typechecked
 
 

@@ -27,11 +27,11 @@ import platform
 
 from typeguard import typechecked
 
-from file.py_file import PyFile
-from file.ireal_file import IRealFile
-from file.virtual_file import VirtualFile
-from salmonfs.salmon_drive import SalmonDrive
-from salmonfs.salmon_file import SalmonFile
+from salmon_fs.file.py_file import PyFile
+from salmon_fs.file.ireal_file import IRealFile
+from salmon_fs.file.virtual_file import VirtualFile
+from salmon_fs.salmonfs.salmon_drive import SalmonDrive
+from salmon_fs.salmonfs.salmon_file import SalmonFile
 
 
 @typechecked

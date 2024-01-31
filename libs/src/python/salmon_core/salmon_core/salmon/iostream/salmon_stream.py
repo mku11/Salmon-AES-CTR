@@ -24,19 +24,19 @@ SOFTWARE.
 '''
 from __future__ import annotations
 
-from iostream.memory_stream import MemoryStream
-from iostream.random_access_stream import RandomAccessStream
-from salmon.integrity.hmac_sha256_provider import HmacSHA256Provider
-from salmon.integrity.salmon_integrity import SalmonIntegrity
-from salmon.integrity.salmon_integrity_exception import SalmonIntegrityException
-from salmon.iostream.encryption_mode import EncryptionMode
-from salmon.iostream.provider_type import ProviderType
-from salmon.salmon_default_options import SalmonDefaultOptions
-from salmon.salmon_generator import SalmonGenerator
-from salmon.salmon_range_exceeded_exception import SalmonRangeExceededException
-from salmon.salmon_security_exception import SalmonSecurityException
-from salmon.transform.isalmon_ctr_transformer import ISalmonCTRTransformer
-from salmon.transform.salmon_transformer_factory import SalmonTransformerFactory
+from salmon_core.iostream.memory_stream import MemoryStream
+from salmon_core.iostream.random_access_stream import RandomAccessStream
+from salmon_core.salmon.integrity.hmac_sha256_provider import HmacSHA256Provider
+from salmon_core.salmon.integrity.salmon_integrity import SalmonIntegrity
+from salmon_core.salmon.integrity.salmon_integrity_exception import SalmonIntegrityException
+from salmon_core.salmon.iostream.encryption_mode import EncryptionMode
+from salmon_core.salmon.iostream.provider_type import ProviderType
+from salmon_core.salmon.salmon_default_options import SalmonDefaultOptions
+from salmon_core.salmon.salmon_generator import SalmonGenerator
+from salmon_core.salmon.salmon_range_exceeded_exception import SalmonRangeExceededException
+from salmon_core.salmon.salmon_security_exception import SalmonSecurityException
+from salmon_core.salmon.transform.isalmon_ctr_transformer import ISalmonCTRTransformer
+from salmon_core.salmon.transform.salmon_transformer_factory import SalmonTransformerFactory
 
 from typeguard import typechecked
 

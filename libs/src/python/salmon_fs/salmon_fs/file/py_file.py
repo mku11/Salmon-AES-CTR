@@ -28,9 +28,9 @@ from typing import Any, Callable
 
 from typeguard import typechecked
 
-from file.ireal_file import IRealFile
-from file.py_file_stream import PyFileStream
-from iostream.random_access_stream import RandomAccessStream
+from salmon_fs.file.ireal_file import IRealFile
+from salmon_fs.file.py_file_stream import PyFileStream
+from salmon_core.iostream.random_access_stream import RandomAccessStream
 
 
 @typechecked

@@ -29,10 +29,10 @@ from xml.dom import minidom
 
 from typeguard import typechecked
 
-from salmon.encode.salmon_encoder import SalmonEncoder
-from sequence.isalmon_sequence_serializer import ISalmonSequenceSerializer
-from sequence.salmon_sequence import SalmonSequence
-from sequence.salmon_sequence_exception import SalmonSequenceException
+from salmon_core.salmon.encode.salmon_encoder import SalmonEncoder
+from salmon_fs.sequence.isalmon_sequence_serializer import ISalmonSequenceSerializer
+from salmon_fs.sequence.salmon_sequence import SalmonSequence
+from salmon_fs.sequence.salmon_sequence_exception import SalmonSequenceException
 
 
 @typechecked

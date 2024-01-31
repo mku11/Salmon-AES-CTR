@@ -27,7 +27,7 @@ from abc import ABC, abstractmethod
 
 from typeguard import typechecked
 
-from file.ireal_file import IRealFile
+from salmon_fs.file.ireal_file import IRealFile
 
 
 @typechecked

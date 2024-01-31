@@ -28,9 +28,9 @@ from abc import ABC
 
 from typeguard import typechecked
 
-from file.ireal_file import IRealFile
-from file.virtual_drive import VirtualDrive
-from iostream.random_access_stream import RandomAccessStream
+from salmon_fs.file.ireal_file import IRealFile
+from salmon_fs.file.virtual_drive import VirtualDrive
+from salmon_core.iostream.random_access_stream import RandomAccessStream
 
 
 @typechecked

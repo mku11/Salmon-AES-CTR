@@ -26,7 +26,7 @@ from io import RawIOBase, BufferedIOBase
 
 from typeguard import typechecked
 
-from iostream.random_access_stream import RandomAccessStream
+from salmon_core.iostream.random_access_stream import RandomAccessStream
 
 
 @typechecked

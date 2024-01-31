@@ -29,25 +29,25 @@ import random
 
 from typeguard import typechecked
 
-from file.py_drive import PyDrive
-from file.py_file import PyFile
-from file.virtual_file import VirtualFile
-from iostream.memory_stream import MemoryStream
-from salmon.integrity.salmon_integrity_exception import SalmonIntegrityException
-from salmon.salmon_default_options import SalmonDefaultOptions
-from salmonfs.salmon_auth_exception import SalmonAuthException
-from salmonfs.salmon_drive import SalmonDrive
-from salmonfs.salmon_drive_manager import SalmonDriveManager
-from salmonfs.salmon_file import SalmonFile, IRealFile
-from salmonfs.salmon_file_input_stream import SalmonFileInputStream
-from sequence.isalmon_sequence_serializer import ISalmonSequenceSerializer
-from sequence.salmon_file_sequencer import SalmonFileSequencer
+from salmon_fs.file.py_drive import PyDrive
+from salmon_fs.file.py_file import PyFile
+from salmon_fs.file.virtual_file import VirtualFile
+from salmon_core.iostream.memory_stream import MemoryStream
+from salmon_core.salmon.integrity.salmon_integrity_exception import SalmonIntegrityException
+from salmon_core.salmon.salmon_default_options import SalmonDefaultOptions
+from salmon_fs.salmonfs.salmon_auth_exception import SalmonAuthException
+from salmon_fs.salmonfs.salmon_drive import SalmonDrive
+from salmon_fs.salmonfs.salmon_drive_manager import SalmonDriveManager
+from salmon_fs.salmonfs.salmon_file import SalmonFile, IRealFile
+from salmon_fs.salmonfs.salmon_file_input_stream import SalmonFileInputStream
+from salmon_fs.sequence.isalmon_sequence_serializer import ISalmonSequenceSerializer
+from salmon_fs.sequence.salmon_file_sequencer import SalmonFileSequencer
 from testfs.python_fs_test_helper import PythonFSTestHelper
 
-from sequence.salmon_sequence_serializer import SalmonSequenceSerializer
+from salmon_fs.sequence.salmon_sequence_serializer import SalmonSequenceSerializer
 from test.salmon_python_test_runner import SalmonPythonTestRunner
 from test.test_helper import TestHelper
-from utils.salmon_file_commander import SalmonFileCommander
+from salmon_fs.utils.salmon_file_commander import SalmonFileCommander
 
 
 @typechecked

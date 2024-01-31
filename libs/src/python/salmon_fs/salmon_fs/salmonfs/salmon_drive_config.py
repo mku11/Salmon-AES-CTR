@@ -24,12 +24,12 @@ SOFTWARE.
 '''
 from typeguard import typechecked
 
-from convert.bit_converter import BitConverter
-from file.ireal_file import IRealFile
-from iostream.memory_stream import MemoryStream
-from iostream.random_access_stream import RandomAccessStream
-from salmon.salmon_generator import SalmonGenerator
-from salmonfs.salmon_drive_generator import SalmonDriveGenerator
+from salmon_core.convert.bit_converter import BitConverter
+from salmon_fs.file.ireal_file import IRealFile
+from salmon_core.iostream.memory_stream import MemoryStream
+from salmon_core.iostream.random_access_stream import RandomAccessStream
+from salmon_core.salmon.salmon_generator import SalmonGenerator
+from salmon_fs.salmonfs.salmon_drive_generator import SalmonDriveGenerator
 
 
 @typechecked

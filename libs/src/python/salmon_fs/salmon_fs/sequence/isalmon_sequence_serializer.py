@@ -28,7 +28,7 @@ from abc import ABC
 
 from typeguard import typechecked
 
-from sequence.salmon_sequence import SalmonSequence
+from salmon_fs.sequence.salmon_sequence import SalmonSequence
 
 
 @typechecked

@@ -27,17 +27,17 @@ from io import BufferedIOBase
 from typeguard import typechecked
 from wrapt import synchronized
 
-from convert.bit_converter import BitConverter
-from file.ireal_file import IRealFile
-from iostream.input_stream_wrapper import InputStreamWrapper
-from iostream.memory_stream import MemoryStream
-from iostream.random_access_stream import RandomAccessStream
-from salmon.salmon_generator import SalmonGenerator
-from salmon.salmon_nonce import SalmonNonce
-from sequence.isalmon_sequence_serializer import ISalmonSequenceSerializer
-from sequence.isalmon_sequencer import ISalmonSequencer
-from sequence.salmon_sequence import SalmonSequence
-from sequence.salmon_sequence_exception import SalmonSequenceException
+from salmon_core.convert.bit_converter import BitConverter
+from salmon_fs.file.ireal_file import IRealFile
+from salmon_core.iostream.input_stream_wrapper import InputStreamWrapper
+from salmon_core.iostream.memory_stream import MemoryStream
+from salmon_core.iostream.random_access_stream import RandomAccessStream
+from salmon_core.salmon.salmon_generator import SalmonGenerator
+from salmon_core.salmon.salmon_nonce import SalmonNonce
+from salmon_fs.sequence.isalmon_sequence_serializer import ISalmonSequenceSerializer
+from salmon_fs.sequence.isalmon_sequencer import ISalmonSequencer
+from salmon_fs.sequence.salmon_sequence import SalmonSequence
+from salmon_fs.sequence.salmon_sequence_exception import SalmonSequenceException
 
 
 @typechecked

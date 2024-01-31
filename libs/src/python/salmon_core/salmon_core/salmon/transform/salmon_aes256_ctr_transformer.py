@@ -24,9 +24,9 @@ SOFTWARE.
 '''
 from abc import ABC
 
-from salmon.salmon_generator import SalmonGenerator
-from salmon.salmon_range_exceeded_exception import SalmonRangeExceededException
-from salmon.transform.isalmon_ctr_transformer import ISalmonCTRTransformer
+from salmon_core.salmon.salmon_generator import SalmonGenerator
+from salmon_core.salmon.salmon_range_exceeded_exception import SalmonRangeExceededException
+from salmon_core.salmon.transform.isalmon_ctr_transformer import ISalmonCTRTransformer
 
 from typeguard import typechecked
 

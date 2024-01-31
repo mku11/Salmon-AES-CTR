@@ -26,13 +26,13 @@ SOFTWARE.
 from __future__ import annotations
 from unittest import TestCase
 
-from salmon.iostream.provider_type import ProviderType
-from salmon.iostream.salmon_stream import SalmonStream
-from salmon.salmon_default_options import SalmonDefaultOptions
+from salmon_core.salmon.iostream.provider_type import ProviderType
+from salmon_core.salmon.iostream.salmon_stream import SalmonStream
+from salmon_core.salmon.salmon_default_options import SalmonDefaultOptions
 
 from typeguard import typechecked
 
-from salmon.transform.native_proxy import NativeProxy
+from salmon_core.salmon.transform.native_proxy import NativeProxy
 from test.test_helper import TestHelper
 
 

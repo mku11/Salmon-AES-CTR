@@ -25,7 +25,7 @@ SOFTWARE.
 from typeguard import typechecked
 import base64
 
-from convert.ibase_64 import IBase64
+from salmon_core.convert.ibase_64 import IBase64
 
 
 @typechecked

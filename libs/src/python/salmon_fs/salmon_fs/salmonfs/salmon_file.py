@@ -29,20 +29,20 @@ from typing import Callable, Any
 from typeguard import typechecked
 from wrapt import synchronized
 
-from convert.bit_converter import BitConverter
-from file.ireal_file import IRealFile
-from file.virtual_file import VirtualFile
-from iostream.random_access_stream import RandomAccessStream
-from salmon.integrity.salmon_integrity import SalmonIntegrity
-from salmon.integrity.salmon_integrity_exception import SalmonIntegrityException
-from salmon.iostream.encryption_mode import EncryptionMode
-from salmon.iostream.salmon_stream import SalmonStream
-from salmon.salmon_generator import SalmonGenerator
-from salmon.salmon_header import SalmonHeader
-from salmon.salmon_security_exception import SalmonSecurityException
-from salmon.text.salmon_text_decryptor import SalmonTextDecryptor
-from salmon.text.salmon_text_encryptor import SalmonTextEncryptor
-from salmonfs.salmon_drive import SalmonDrive
+from salmon_core.convert.bit_converter import BitConverter
+from salmon_fs.file.ireal_file import IRealFile
+from salmon_fs.file.virtual_file import VirtualFile
+from salmon_core.iostream.random_access_stream import RandomAccessStream
+from salmon_core.salmon.integrity.salmon_integrity import SalmonIntegrity
+from salmon_core.salmon.integrity.salmon_integrity_exception import SalmonIntegrityException
+from salmon_core.salmon.iostream.encryption_mode import EncryptionMode
+from salmon_core.salmon.iostream.salmon_stream import SalmonStream
+from salmon_core.salmon.salmon_generator import SalmonGenerator
+from salmon_core.salmon.salmon_header import SalmonHeader
+from salmon_core.salmon.salmon_security_exception import SalmonSecurityException
+from salmon_core.salmon.text.salmon_text_decryptor import SalmonTextDecryptor
+from salmon_core.salmon.text.salmon_text_encryptor import SalmonTextEncryptor
+from salmon_fs.salmonfs.salmon_drive import SalmonDrive
 
 
 @typechecked

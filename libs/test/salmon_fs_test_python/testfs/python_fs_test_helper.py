@@ -32,32 +32,32 @@ from unittest import TestCase
 
 from typeguard import typechecked
 
-from convert.bit_converter import BitConverter
-from file.py_drive import PyDrive
-from file.py_file import PyFile
-from file.ireal_file import IRealFile
-from iostream.memory_stream import MemoryStream
-from iostream.random_access_stream import RandomAccessStream
-from salmon.iostream.encryption_mode import EncryptionMode
-from salmon.iostream.salmon_stream import SalmonStream
-from salmon.salmon_decryptor import SalmonDecryptor
-from salmon.salmon_default_options import SalmonDefaultOptions
-from salmon.salmon_encryptor import SalmonEncryptor
-from salmon.salmon_generator import SalmonGenerator
-from salmon.salmon_range_exceeded_exception import SalmonRangeExceededException
-from salmon.text.salmon_text_decryptor import SalmonTextDecryptor
-from salmon.text.salmon_text_encryptor import SalmonTextEncryptor
-from salmonfs.salmon_drive import SalmonDrive
-from salmonfs.salmon_drive_manager import SalmonDriveManager
-from salmonfs.salmon_file import SalmonFile
-from salmonfs.salmon_file_input_stream import SalmonFileInputStream
-from sequence.isalmon_sequence_serializer import ISalmonSequenceSerializer
-from sequence.salmon_file_sequencer import SalmonFileSequencer
-from sequence.salmon_sequence_serializer import SalmonSequenceSerializer
+from salmon_core.convert.bit_converter import BitConverter
+from salmon_fs.file.py_drive import PyDrive
+from salmon_fs.file.py_file import PyFile
+from salmon_fs.file.ireal_file import IRealFile
+from salmon_core.iostream.memory_stream import MemoryStream
+from salmon_core.iostream.random_access_stream import RandomAccessStream
+from salmon_core.salmon.iostream.encryption_mode import EncryptionMode
+from salmon_core.salmon.iostream.salmon_stream import SalmonStream
+from salmon_core.salmon.salmon_decryptor import SalmonDecryptor
+from salmon_core.salmon.salmon_default_options import SalmonDefaultOptions
+from salmon_core.salmon.salmon_encryptor import SalmonEncryptor
+from salmon_core.salmon.salmon_generator import SalmonGenerator
+from salmon_core.salmon.salmon_range_exceeded_exception import SalmonRangeExceededException
+from salmon_core.salmon.text.salmon_text_decryptor import SalmonTextDecryptor
+from salmon_core.salmon.text.salmon_text_encryptor import SalmonTextEncryptor
+from salmon_fs.salmonfs.salmon_drive import SalmonDrive
+from salmon_fs.salmonfs.salmon_drive_manager import SalmonDriveManager
+from salmon_fs.salmonfs.salmon_file import SalmonFile
+from salmon_fs.salmonfs.salmon_file_input_stream import SalmonFileInputStream
+from salmon_fs.sequence.isalmon_sequence_serializer import ISalmonSequenceSerializer
+from salmon_fs.sequence.salmon_file_sequencer import SalmonFileSequencer
+from salmon_fs.sequence.salmon_sequence_serializer import SalmonSequenceSerializer
 from test.test_helper import TestHelper
-from utils.salmon_file_exporter import SalmonFileExporter
-from utils.salmon_file_importer import SalmonFileImporter
-from utils.salmon_file_searcher import SalmonFileSearcher
+from salmon_fs.utils.salmon_file_exporter import SalmonFileExporter
+from salmon_fs.utils.salmon_file_importer import SalmonFileImporter
+from salmon_fs.utils.salmon_file_searcher import SalmonFileSearcher
 
 
 @typechecked

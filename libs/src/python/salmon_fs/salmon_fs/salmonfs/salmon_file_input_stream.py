@@ -32,11 +32,11 @@ from io import BufferedIOBase, RawIOBase
 from typeguard import typechecked
 from wrapt import synchronized
 
-from iostream.random_access_stream import RandomAccessStream
-from salmon.integrity.salmon_integrity_exception import SalmonIntegrityException
-from salmon.iostream.salmon_stream import SalmonStream
-from salmon.salmon_security_exception import SalmonSecurityException
-from salmonfs.salmon_file import SalmonFile
+from salmon_core.iostream.random_access_stream import RandomAccessStream
+from salmon_core.salmon.integrity.salmon_integrity_exception import SalmonIntegrityException
+from salmon_core.salmon.iostream.salmon_stream import SalmonStream
+from salmon_core.salmon.salmon_security_exception import SalmonSecurityException
+from salmon_fs.salmonfs.salmon_file import SalmonFile
 
 
 @typechecked

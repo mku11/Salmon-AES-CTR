@@ -23,8 +23,8 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 '''
 
-from convert.base_64 import Base64
-from convert.ibase_64 import IBase64
+from salmon_core.convert.base_64 import Base64
+from salmon_core.convert.ibase_64 import IBase64
 
 from typeguard import typechecked
 

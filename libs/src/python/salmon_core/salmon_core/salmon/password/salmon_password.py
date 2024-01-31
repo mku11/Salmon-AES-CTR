@@ -24,11 +24,11 @@ SOFTWARE.
 '''
 from __future__ import annotations
 
-from salmon.password.isalmon_pbkdf_provider import ISalmonPbkdfProvider
-from salmon.password.pbkdf_algo import PbkdfAlgo
-from salmon.password.pbkdf_type import PbkdfType
-from salmon.password.salmon_default_pbkdf_provider import SalmonDefaultPbkdfProvider
-from salmon.password.salmon_pbkdf_factory import SalmonPbkdfFactory
+from salmon_core.salmon.password.isalmon_pbkdf_provider import ISalmonPbkdfProvider
+from salmon_core.salmon.password.pbkdf_algo import PbkdfAlgo
+from salmon_core.salmon.password.pbkdf_type import PbkdfType
+from salmon_core.salmon.password.salmon_default_pbkdf_provider import SalmonDefaultPbkdfProvider
+from salmon_core.salmon.password.salmon_pbkdf_factory import SalmonPbkdfFactory
 
 from typeguard import typechecked
 

@@ -24,7 +24,7 @@ SOFTWARE.
 '''
 import ctypes
 
-from salmon.transform.inative_proxy import INativeProxy
+from salmon_core.salmon.transform.inative_proxy import INativeProxy
 
 from typeguard import typechecked
 

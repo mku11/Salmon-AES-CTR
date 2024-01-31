@@ -24,10 +24,10 @@ SOFTWARE.
 '''
 from builtins import int
 
-from salmon.integrity.ihash_provider import IHashProvider
-from salmon.integrity.salmon_integrity_exception import SalmonIntegrityException
-from salmon.salmon_generator import SalmonGenerator
-from salmon.salmon_security_exception import SalmonSecurityException
+from salmon_core.salmon.integrity.ihash_provider import IHashProvider
+from salmon_core.salmon.integrity.salmon_integrity_exception import SalmonIntegrityException
+from salmon_core.salmon.salmon_generator import SalmonGenerator
+from salmon_core.salmon.salmon_security_exception import SalmonSecurityException
 
 from typeguard import typechecked
 

@@ -34,12 +34,12 @@ from typing import Any, Callable
 
 from typeguard import typechecked
 
-from convert.bit_converter import BitConverter
-from file.ireal_file import IRealFile
-from iostream.random_access_stream import RandomAccessStream
-from salmon.iostream.salmon_stream import SalmonStream
-from salmonfs.salmon_file import SalmonFile
-from utils.salmon_file_utils import SalmonFileUtils
+from salmon_core.convert.bit_converter import BitConverter
+from salmon_fs.file.ireal_file import IRealFile
+from salmon_core.iostream.random_access_stream import RandomAccessStream
+from salmon_core.salmon.iostream.salmon_stream import SalmonStream
+from salmon_fs.salmonfs.salmon_file import SalmonFile
+from salmon_fs.utils.salmon_file_utils import SalmonFileUtils
 
 
 def import_file(index: int, final_part_size: int, final_running_threads: int, file_size: int,

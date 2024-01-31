@@ -26,8 +26,8 @@ from __future__ import annotations
 
 from typeguard import typechecked
 
-from convert.bit_converter import BitConverter
-from salmon.salmon_generator import SalmonGenerator
+from salmon_core.convert.bit_converter import BitConverter
+from salmon_core.salmon.salmon_generator import SalmonGenerator
 
 
 @typechecked

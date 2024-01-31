@@ -26,15 +26,15 @@ from __future__ import annotations
 
 from typeguard import typechecked
 
-from file.ireal_file import IRealFile
-from iostream.memory_stream import MemoryStream
-from salmon.integrity.salmon_integrity import SalmonIntegrity
-from salmon.iostream.salmon_stream import SalmonStream
-from salmon.salmon_generator import SalmonGenerator
-from salmonfs.salmon_auth_exception import SalmonAuthException
-from salmonfs.salmon_drive import SalmonDrive
-from salmonfs.salmon_drive_generator import SalmonDriveGenerator
-from salmonfs.salmon_file import SalmonFile
+from salmon_fs.file.ireal_file import IRealFile
+from salmon_core.iostream.memory_stream import MemoryStream
+from salmon_core.salmon.integrity.salmon_integrity import SalmonIntegrity
+from salmon_core.salmon.iostream.salmon_stream import SalmonStream
+from salmon_core.salmon.salmon_generator import SalmonGenerator
+from salmon_fs.salmonfs.salmon_auth_exception import SalmonAuthException
+from salmon_fs.salmonfs.salmon_drive import SalmonDrive
+from salmon_fs.salmonfs.salmon_drive_generator import SalmonDriveGenerator
+from salmon_fs.salmonfs.salmon_file import SalmonFile
 
 
 @typechecked

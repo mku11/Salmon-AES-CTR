@@ -26,21 +26,21 @@ import time
 import traceback
 from unittest import TestCase
 
-from convert.bit_converter import BitConverter
-from iostream.memory_stream import MemoryStream
-from salmon.integrity.salmon_integrity import SalmonIntegrity
-from salmon.integrity.salmon_integrity_exception import SalmonIntegrityException
-from salmon.iostream.encryption_mode import EncryptionMode
-from salmon.iostream.provider_type import ProviderType
-from salmon.iostream.salmon_stream import SalmonStream
-from salmon.salmon_decryptor import SalmonDecryptor
-from salmon.salmon_default_options import SalmonDefaultOptions
-from salmon.salmon_encryptor import SalmonEncryptor
-from salmon.salmon_generator import SalmonGenerator
-from salmon.salmon_range_exceeded_exception import SalmonRangeExceededException
-from salmon.salmon_security_exception import SalmonSecurityException
-from salmon.text.salmon_text_decryptor import SalmonTextDecryptor
-from salmon.text.salmon_text_encryptor import SalmonTextEncryptor
+from salmon_core.convert.bit_converter import BitConverter
+from salmon_core.iostream.memory_stream import MemoryStream
+from salmon_core.salmon.integrity.salmon_integrity import SalmonIntegrity
+from salmon_core.salmon.integrity.salmon_integrity_exception import SalmonIntegrityException
+from salmon_core.salmon.iostream.encryption_mode import EncryptionMode
+from salmon_core.salmon.iostream.provider_type import ProviderType
+from salmon_core.salmon.iostream.salmon_stream import SalmonStream
+from salmon_core.salmon.salmon_decryptor import SalmonDecryptor
+from salmon_core.salmon.salmon_default_options import SalmonDefaultOptions
+from salmon_core.salmon.salmon_encryptor import SalmonEncryptor
+from salmon_core.salmon.salmon_generator import SalmonGenerator
+from salmon_core.salmon.salmon_range_exceeded_exception import SalmonRangeExceededException
+from salmon_core.salmon.salmon_security_exception import SalmonSecurityException
+from salmon_core.salmon.text.salmon_text_decryptor import SalmonTextDecryptor
+from salmon_core.salmon.text.salmon_text_encryptor import SalmonTextEncryptor
 from test.test_helper import TestHelper
 
 from typeguard import typechecked, TypeCheckError

@@ -30,7 +30,7 @@ from typing import Callable, Any
 
 from typeguard import typechecked
 
-from salmonfs.salmon_file import SalmonFile
+from salmon_fs.salmonfs.salmon_file import SalmonFile
 
 
 @typechecked

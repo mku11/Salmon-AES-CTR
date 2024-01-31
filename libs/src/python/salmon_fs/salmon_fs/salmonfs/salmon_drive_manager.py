@@ -26,24 +26,24 @@ from typing import Type
 
 from typeguard import typechecked
 
-from convert.bit_converter import BitConverter
-from file.ireal_file import IRealFile
-from iostream.memory_stream import MemoryStream
-from salmon.integrity.salmon_integrity import SalmonIntegrity
-from salmon.iostream.encryption_mode import EncryptionMode
-from salmon.iostream.salmon_stream import SalmonStream
-from salmon.password.salmon_password import SalmonPassword
-from salmon.salmon_generator import SalmonGenerator
-from salmon.salmon_nonce import SalmonNonce
-from salmon.salmon_security_exception import SalmonSecurityException
-from salmonfs.salmon_auth_config import SalmonAuthConfig
-from salmonfs.salmon_auth_exception import SalmonAuthException
-from salmonfs.salmon_drive import SalmonDrive
-from salmonfs.salmon_drive_config import SalmonDriveConfig
-from salmonfs.salmon_drive_generator import SalmonDriveGenerator
-from salmonfs.salmon_file import SalmonFile
-from sequence.isalmon_sequencer import ISalmonSequencer
-from sequence.salmon_sequence import SalmonSequence
+from salmon_core.convert.bit_converter import BitConverter
+from salmon_fs.file.ireal_file import IRealFile
+from salmon_core.iostream.memory_stream import MemoryStream
+from salmon_core.salmon.integrity.salmon_integrity import SalmonIntegrity
+from salmon_core.salmon.iostream.encryption_mode import EncryptionMode
+from salmon_core.salmon.iostream.salmon_stream import SalmonStream
+from salmon_core.salmon.password.salmon_password import SalmonPassword
+from salmon_core.salmon.salmon_generator import SalmonGenerator
+from salmon_core.salmon.salmon_nonce import SalmonNonce
+from salmon_core.salmon.salmon_security_exception import SalmonSecurityException
+from salmon_fs.salmonfs.salmon_auth_config import SalmonAuthConfig
+from salmon_fs.salmonfs.salmon_auth_exception import SalmonAuthException
+from salmon_fs.salmonfs.salmon_drive import SalmonDrive
+from salmon_fs.salmonfs.salmon_drive_config import SalmonDriveConfig
+from salmon_fs.salmonfs.salmon_drive_generator import SalmonDriveGenerator
+from salmon_fs.salmonfs.salmon_file import SalmonFile
+from salmon_fs.sequence.isalmon_sequencer import ISalmonSequencer
+from salmon_fs.sequence.salmon_sequence import SalmonSequence
 from threading import RLock
 
 

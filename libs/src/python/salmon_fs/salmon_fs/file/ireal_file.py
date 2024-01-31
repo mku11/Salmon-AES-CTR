@@ -30,7 +30,7 @@ from typing import Callable, Any
 
 from typeguard import typechecked
 
-from iostream.random_access_stream import RandomAccessStream
+from salmon_core.iostream.random_access_stream import RandomAccessStream
 
 
 @typechecked

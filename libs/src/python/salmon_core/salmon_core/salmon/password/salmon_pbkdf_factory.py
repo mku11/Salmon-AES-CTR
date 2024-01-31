@@ -22,9 +22,9 @@ LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 '''
-from salmon.password.isalmon_pbkdf_provider import ISalmonPbkdfProvider
-from salmon.password.pbkdf_type import PbkdfType
-from salmon.password.salmon_default_pbkdf_provider import SalmonDefaultPbkdfProvider
+from salmon_core.salmon.password.isalmon_pbkdf_provider import ISalmonPbkdfProvider
+from salmon_core.salmon.password.pbkdf_type import PbkdfType
+from salmon_core.salmon.password.salmon_default_pbkdf_provider import SalmonDefaultPbkdfProvider
 
 from typeguard import typechecked
 

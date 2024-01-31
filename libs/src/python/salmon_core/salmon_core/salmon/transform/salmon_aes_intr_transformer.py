@@ -22,9 +22,8 @@ LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 '''
-from salmon.iostream.encryption_mode import EncryptionMode
-from salmon.transform.salmon_aes256_ctr_transformer import SalmonAES256CTRTransformer
-from salmon.transform.salmon_native_transformer import SalmonNativeTransformer
+from salmon_core.salmon.transform.salmon_aes256_ctr_transformer import SalmonAES256CTRTransformer
+from salmon_core.salmon.transform.salmon_native_transformer import SalmonNativeTransformer
 
 from typeguard import typechecked
 

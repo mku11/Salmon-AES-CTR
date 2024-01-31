@@ -1,5 +1,5 @@
 #!/bin/bash
-SRC_ROOT=.
+SRC_ROOT=../../src/python
 SALMON_CORE=$SRC_ROOT/salmon_core/salmon_core
 SALMON_CORE_TOML=$SRC_ROOT/salmon_core/pyproject.toml
 

@@ -22,10 +22,10 @@ LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 '''
-from convert.bit_converter import BitConverter
-from salmon.salmon_generator import SalmonGenerator
-from salmon.salmon_range_exceeded_exception import SalmonRangeExceededException
-from salmon.salmon_security_exception import SalmonSecurityException
+from salmon_core.convert.bit_converter import BitConverter
+from salmon_core.salmon.salmon_generator import SalmonGenerator
+from salmon_core.salmon.salmon_range_exceeded_exception import SalmonRangeExceededException
+from salmon_core.salmon.salmon_security_exception import SalmonSecurityException
 
 from typeguard import typechecked
 

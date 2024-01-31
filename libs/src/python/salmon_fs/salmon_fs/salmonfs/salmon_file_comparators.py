@@ -26,8 +26,8 @@ from __future__ import annotations
 
 from typeguard import typechecked
 
-from salmonfs.salmon_file import SalmonFile
-from utils.salmon_file_utils import SalmonFileUtils
+from salmon_fs.salmonfs.salmon_file import SalmonFile
+from salmon_fs.utils.salmon_file_utils import SalmonFileUtils
 
 
 @typechecked

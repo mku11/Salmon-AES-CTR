@@ -36,19 +36,19 @@ from Crypto.Cipher import AES
 from Crypto.Util import Counter
 from typeguard import typechecked
 
-from convert.bit_converter import BitConverter
-from iostream.memory_stream import MemoryStream
-from iostream.random_access_stream import RandomAccessStream
-from salmon.integrity.hmac_sha256_provider import HmacSHA256Provider
-from salmon.integrity.ihash_provider import IHashProvider
-from salmon.integrity.salmon_integrity import SalmonIntegrity
-from salmon.iostream.encryption_mode import EncryptionMode
-from salmon.iostream.provider_type import ProviderType
-from salmon.iostream.salmon_stream import SalmonStream
-from salmon.salmon_decryptor import SalmonDecryptor
-from salmon.salmon_encryptor import SalmonEncryptor
-from salmon.salmon_generator import SalmonGenerator
-from salmon.transform.salmon_transformer_factory import SalmonTransformerFactory
+from salmon_core.convert.bit_converter import BitConverter
+from salmon_core.iostream.memory_stream import MemoryStream
+from salmon_core.iostream.random_access_stream import RandomAccessStream
+from salmon_core.salmon.integrity.hmac_sha256_provider import HmacSHA256Provider
+from salmon_core.salmon.integrity.ihash_provider import IHashProvider
+from salmon_core.salmon.integrity.salmon_integrity import SalmonIntegrity
+from salmon_core.salmon.iostream.encryption_mode import EncryptionMode
+from salmon_core.salmon.iostream.provider_type import ProviderType
+from salmon_core.salmon.iostream.salmon_stream import SalmonStream
+from salmon_core.salmon.salmon_decryptor import SalmonDecryptor
+from salmon_core.salmon.salmon_encryptor import SalmonEncryptor
+from salmon_core.salmon.salmon_generator import SalmonGenerator
+from salmon_core.salmon.transform.salmon_transformer_factory import SalmonTransformerFactory
 
 
 @typechecked
