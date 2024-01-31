@@ -22,6 +22,9 @@ pip install packages/salmon_fs.tar.gz
 
 To disable the type checks run with -O optimization
 
+If you use intellij IDEA and the package names are not resolved make sure you add
+the salmon_core and salmon_fs path to the interpreter paths under File/Settings/Interpreters/Show All/Interpreter Paths
+
 To run with AES intrinsics set the path to the salmon native dll:
 NativeProxy.set_library_path("../../projects/salmon-libs-gradle/salmon-native/build/libs/salmon/shared/salmon.dll")
 SalmonStream.set_aes_provider_type(ProviderType.AesIntrinsics)
