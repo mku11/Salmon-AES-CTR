@@ -16,7 +16,7 @@ apps/salmon-vault-javafx/app/dist
 libs/src/python/**/.idea/*
 build
 
-libs/projects/salmon-libs-python/main.py
+/libs/projects/salmon_libs_python/main.py
 libs/src/python/**/func/
 
 **/output/
