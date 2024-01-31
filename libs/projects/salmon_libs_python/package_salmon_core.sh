@@ -3,12 +3,12 @@ SRC_ROOT=../../src/python
 SALMON_CORE=$SRC_ROOT/salmon_core/salmon_core
 SALMON_CORE_TOML=$SRC_ROOT/salmon_core/pyproject.toml
 
-OUTPUT_ROOT=../../../../output
+OUTPUT_ROOT=../../../output
 OUTPUT_DIR=$OUTPUT_ROOT/python
 
 VERSION=1.0.6-SNAPSHOT
 PACKAGES_DIR=packages
-SALMON_CORE_PACKAGE_NAME=salmon_core.$VERSION
+SALMON_CORE_PACKAGE_NAME=salmon_core_py.$VERSION
 
 SALMON_CORE_PACKAGE_FILE=$SALMON_CORE_PACKAGE_NAME.tar.gz
 

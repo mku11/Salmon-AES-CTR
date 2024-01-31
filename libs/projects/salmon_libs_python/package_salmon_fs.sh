@@ -3,12 +3,12 @@ SRC_ROOT=../../src/python
 SALMON_FS=$SRC_ROOT/salmon_fs/salmon_fs
 SALMON_FS_TOML=$SRC_ROOT/salmon_fs/pyproject.toml
 
-OUTPUT_ROOT=../../../../output
+OUTPUT_ROOT=../../../output
 OUTPUT_DIR=$OUTPUT_ROOT/python
 
 VERSION=1.0.6-SNAPSHOT
 PACKAGES_DIR=packages
-SALMON_FS_PACKAGE_NAME=salmon_fs.$VERSION
+SALMON_FS_PACKAGE_NAME=salmon_fs_py.$VERSION
 
 SALMON_FS_PACKAGE_FILE=$SALMON_FS_PACKAGE_NAME.tar.gz
 
