@@ -22,22 +22,17 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 */
 
-import { Buffer } from "buffer";
-import { IBase64 } from "./ibase64";
-// import ibase64 = require('./convert/ibase64');
-
-
 /**
- * Java default implementation of Base64 encoder/decoder.
+ * Typescript default implementation of Base64 encoder/decoder.
  */
-export class Base64 implements IBase64 {
+class Base64 implements IBase64 {
     /**
      * Decode text from Base64 string.
      * @param text String to be decoded
      * @return Byte array of decoded data.
      */
     public decode(text: string): Uint8Array {
-        return new TextEncoder().encode(Buffer.from(text, 'base64').toString('binary'));
+        return new TextEncoder().encode(atob(text));
     }
 
     /**
@@ -46,6 +41,6 @@ export class Base64 implements IBase64 {
      * @return String of encoded data.
      */
     public encode(data: Uint8Array): string {
-        return Buffer.from(data).toString('base64');
+        return btoa(String.fromCodePoint(...data));
     }
 }

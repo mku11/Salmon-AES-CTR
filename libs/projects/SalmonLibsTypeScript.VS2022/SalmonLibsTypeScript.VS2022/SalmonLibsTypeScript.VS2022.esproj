@@ -3,7 +3,6 @@
     <PublishAssetsDirectory>
     </PublishAssetsDirectory>
   </PropertyGroup>
-
   <!-- Add the items so they can be seen in the ui -->
   <ItemGroup>
     <None Include="..\..\..\src\typescript\salmon-core\convert\base64.ts">
@@ -16,7 +15,6 @@
       <Link>salmon-core\convert\bit_converter.ts</Link>
     </None>
   </ItemGroup>
-
   <!-- Add the items so they can be built -->
   <ItemGroup>
     <TypeScriptCompile Include="..\..\..\src\typescript\salmon-core\convert\base64.ts">
@@ -28,5 +26,20 @@
     <TypeScriptCompile Include="..\..\..\src\typescript\salmon-core\convert\bit_converter.ts">
       <Link>salmon-core\convert\bit_converter.ts</Link>
     </TypeScriptCompile>
+    <TypeScriptCompile Include="..\..\..\src\typescript\salmon-core\convert\testm.ts">
+      <Link>salmon-core\convert\testm.ts</Link>
+    </TypeScriptCompile>
+    <TypeScriptCompile Include="..\..\..\src\typescript\salmon-core\convert\itest.ts">
+      <Link>salmon-core\convert\itest.ts</Link>
+    </TypeScriptCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <TypeScriptConfiguration Remove="build\**" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Remove="build\**" />
+  </ItemGroup>
+  <ItemGroup>
+    <Folder Include="build\" />
   </ItemGroup>
 </Project>

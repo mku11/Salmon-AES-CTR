@@ -25,7 +25,7 @@ SOFTWARE.
 /**
  * Interface for Base64 conversion implementations.
  */
-export interface IBase64 {
+interface IBase64 {
     /**
      * Decode a Base64 string to byte array
      * @param text String to be converted.

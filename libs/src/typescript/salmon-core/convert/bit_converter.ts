@@ -64,8 +64,12 @@ class BitConverter {
      * @param data The byte array to be converted.
      * @return The hex string representation.
      */
-    public static toHex(data: Uint8Array) : string{
-        return Buffer.from(data).toString('hex');
+    public static toHex(data: Uint8Array): string{
+        let hexString: string = "";
+        for (let i = 0; i < data.length; i++) {
+            hexString += data[i].toString(16).padStart(2, "0");
+        }
+        return hexString;
     }
 
     /**
