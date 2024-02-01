@@ -42,6 +42,7 @@ import androidx.appcompat.app.AppCompatActivity;
 
 import com.mku.android.salmonfs.media.SalmonMediaDataSource;
 import com.mku.salmon.vault.android.R;
+import com.mku.salmon.vault.utils.WindowUtils;
 import com.mku.salmonfs.SalmonFile;
 
 import java.io.IOException;
@@ -51,15 +52,15 @@ import java.util.TimerTask;
 public class MediaPlayerActivity extends AppCompatActivity implements SurfaceHolder.Callback {
     private static final String TAG = MediaPlayerActivity.class.getName();
 
-    private static final int MEDIA_BUFFERS = 4;
+    private static final int MEDIA_BUFFERS = 3;
 
     // make sure we use a large enough buffer for the MediaDataSource since some videos stall
-    private static final int MEDIA_BUFFER_SIZE = 4 * 1024 * 1024;
+    private static final int MEDIA_BUFFER_SIZE = 8 * 1024 * 1024;
 
     private static final int MEDIA_BACKOFFSET = 256 * 1024;
 
     // increase the threads if you have more cpus available for parallel processing
-    private static final int MEDIA_THREADS = 2;
+    private int mediaThreads = 2;
 
     private static final int THRESHOLD_SEEK = 30;
 
@@ -91,7 +92,11 @@ public class MediaPlayerActivity extends AppCompatActivity implements SurfaceHol
         pos = position;
         videos = mediaFiles;
     }
-
+	
+	protected void setMediaThreads(int threads) {
+		mediaThreads = threads;
+	}
+	
     @Override
     protected void onCreate(Bundle bundle) {
         super.onCreate(bundle);
@@ -109,14 +114,14 @@ public class MediaPlayerActivity extends AppCompatActivity implements SurfaceHol
         mRew.setOnClickListener((View view) -> playPrevious());
     }
 
-    private void playNext() {
+    protected void playNext() {
         if (pos <= videos.length) {
             pos++;
             loadContentAsync();
         }
     }
 
-    private void playPrevious() {
+    protected void playPrevious() {
         if (pos > 0) {
             pos--;
             loadContentAsync();
@@ -149,8 +154,12 @@ public class MediaPlayerActivity extends AppCompatActivity implements SurfaceHol
     private void setupMediaPlayer() {
         try {
             mediaPlayer = new MediaPlayer();
+            mediaPlayer.setOnPreparedListener((MediaPlayer mp) -> {
+                resize(0);
+                start();
+            });
             gestureDetector = new GestureDetector(this, new MediaGestureListener(this));
-            loadContent();
+            loadContent(videos[pos]);
         } catch (Exception ex) {
             ex.printStackTrace();
             Toast.makeText(this, "Error: " + ex.getMessage(), Toast.LENGTH_LONG).show();
@@ -158,35 +167,33 @@ public class MediaPlayerActivity extends AppCompatActivity implements SurfaceHol
     }
 
     private void loadContentAsync() {
-        new Thread(() -> {
-            try {
-                loadContent();
-            } catch (Exception e) {
-                e.printStackTrace();
-            }
-        }).start();
-    }
-
-    private void loadContent() throws Exception {
         if (mediaPlayer.isPlaying()) {
             mediaPlayer.stop();
         }
         mediaPlayer.reset();
-        mTitle.setText(videos[pos].getBaseName());
-        source = new SalmonMediaDataSource(this, videos[pos], MEDIA_BUFFERS, MEDIA_BUFFER_SIZE, MEDIA_THREADS, MEDIA_BACKOFFSET);
+        mSurfaceView.postDelayed(()-> {
+            try {
+                loadContent(videos[pos]);
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+        },500);
+    }
+
+    protected void loadContent(SalmonFile file) throws Exception {
+        mTitle.setText(file.getBaseName());
+        source = new SalmonMediaDataSource(this, file, MEDIA_BUFFERS, MEDIA_BUFFER_SIZE, mediaThreads, MEDIA_BACKOFFSET);
         mediaPlayer.setDataSource(source);
-        mediaPlayer.setOnPreparedListener((MediaPlayer mp) -> {
-            resize(0);
-            start();
-        });
         mediaPlayer.prepareAsync();
     }
 
     private class MediaPlayerTimerTask extends TimerTask {
         @Override
         public void run() {
-            if (mediaPlayer.isPlaying())
-                mSeekBar.setProgress((int) (mediaPlayer.getCurrentPosition() / (float) mediaPlayer.getDuration() * 100));
+            try {
+                if (mediaPlayer != null && mediaPlayer.isPlaying())
+                    mSeekBar.setProgress((int) (mediaPlayer.getCurrentPosition() / (float) mediaPlayer.getDuration() * 100));
+            } catch (Exception ignored) {}
         }
     }
 
@@ -242,7 +249,6 @@ public class MediaPlayerActivity extends AppCompatActivity implements SurfaceHol
     private void start() {
         mediaPlayer.start();
         mediaPlayer.setLooping(looping);
-        updateSpeed();
         if (timer != null) {
             timer.cancel();
         }
@@ -396,7 +402,7 @@ public class MediaPlayerActivity extends AppCompatActivity implements SurfaceHol
         }
     }
 
-    private static class MediaGestureListener extends GestureDetector.SimpleOnGestureListener {
+    private class MediaGestureListener extends GestureDetector.SimpleOnGestureListener {
         MediaPlayerActivity activity;
 
         public MediaGestureListener(MediaPlayerActivity activity) {
@@ -416,9 +422,24 @@ public class MediaPlayerActivity extends AppCompatActivity implements SurfaceHol
 
         @Override
         public boolean onDoubleTap(MotionEvent e) {
-            activity.togglePlay();
-            return true;
+            return MediaPlayerActivity.this.onDoubleTap(e);
         }
+
+        @Override
+        public void onLongPress(MotionEvent e) {
+            super.onLongPress(e);
+            MediaPlayerActivity.this.onLongPress(e);
+        }
+
+    }
+
+    protected boolean onDoubleTap(MotionEvent e) {
+        togglePlay();
+        return true;
+    }
+
+    protected void onLongPress(MotionEvent e) {
+
     }
 
     static class OnSurfaceTouchListener implements View.OnTouchListener {

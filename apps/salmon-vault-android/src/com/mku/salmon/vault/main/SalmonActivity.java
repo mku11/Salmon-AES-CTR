@@ -76,6 +76,7 @@ import com.mku.utils.SalmonFileUtils;
 
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.HashSet;
 import java.util.List;
 import java.util.concurrent.Semaphore;
 
@@ -171,6 +172,7 @@ public class SalmonActivity extends AppCompatActivity {
     private void setupSalmonManager() {
         try {
             manager = createVaultManager();
+            manager.setPromptExitOnBack(true);
             manager.openListItem = this::openListItem;
             manager.observePropertyChanges(this::manager_PropertyChanged);
             manager.updateListItem = this::updateListItem;
@@ -199,6 +201,8 @@ public class SalmonActivity extends AppCompatActivity {
 
                 adapter.selectAll(false);
                 adapter.setMultiSelect(false);
+            } else if (propertyName.equals("CurrentItem")) {
+                selectItem(manager.getCurrentItem());
             } else if (propertyName == "SelectedFiles") {
                 if (manager.getSelectedFiles().size() == 0) {
                     adapter.selectAll(false);
@@ -216,8 +220,10 @@ public class SalmonActivity extends AppCompatActivity {
                     if (!manager.isJobRunning())
                         statusText.setText("");
                 }, manager.isJobRunning() ? 0 : 1000);
-            } else if (propertyName == "Path") pathText.setText(manager.getPath());
-            else if (propertyName == "FileProgress") {
+            } else if (propertyName == "Path") {
+                pathText.setText(manager.getPath());
+                listView.scrollToPosition(0);
+            } else if (propertyName == "FileProgress") {
                 fileProgress.setProgress((int) (manager.getFileProgress() * 100));
                 fileProgressText.setText(fileProgress.getProgress() + " %");
             } else if (propertyName == "FilesProgress") {
@@ -225,6 +231,28 @@ public class SalmonActivity extends AppCompatActivity {
                 filesProgressText.setText(filesProgress.getProgress() + " %");
             }
         });
+    }
+
+    private void selectItem(SalmonFile file) {
+        try {
+            int index = 0;
+            for (SalmonFile viewFile : fileItemList) {
+                if (viewFile == file) {
+                    int finalIndex = index;
+                    WindowUtils.runOnMainThread(() -> {
+                        try {
+                            listView.scrollToPosition(finalIndex);
+                        } catch (Exception ex) {
+                            ex.printStackTrace();
+                        }
+                    });
+                    break;
+                }
+                index++;
+            }
+        } catch (Exception ex) {
+            ex.printStackTrace();
+        }
     }
 
     private void Adapter_PropertyChanged(Object owner, String propertyName) {
@@ -461,7 +489,7 @@ public class SalmonActivity extends AppCompatActivity {
     onContextItemSelected(MenuItem item) {
         int position = adapter.getPosition();
         SalmonFile ifile = fileItemList.get(position);
-        manager.getSelectedFiles().clear();
+        manager.setSelectedFiles(new HashSet<>());
         manager.getSelectedFiles().add(ifile);
 
         switch (ActionType.values()[item.getItemId()]) {
@@ -589,7 +617,7 @@ public class SalmonActivity extends AppCompatActivity {
         finish();
     }
 
-    private void StartSettings() {
+    protected void StartSettings() {
         Intent intent = new Intent(this, SettingsActivity.class);
         startActivity(intent);
     }
@@ -767,10 +795,14 @@ public class SalmonActivity extends AppCompatActivity {
             i++;
         }
 
-        Intent intent = new Intent(this, MediaPlayerActivity.class);
+        Intent intent = getMediaPlayerIntent();
         MediaPlayerActivity.setMediaFiles(pos, salmonFiles.toArray(new SalmonFile[0]));
         intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_NEW_TASK);
         startActivity(intent);
+    }
+
+    protected Intent getMediaPlayerIntent() {
+        return new Intent(this, MediaPlayerActivity.class);
     }
 
     private void startTextViewer(int position) {
@@ -810,7 +842,7 @@ public class SalmonActivity extends AppCompatActivity {
                 }
                 i++;
             }
-            Intent intent = new Intent(this, WebViewerActivity.class);
+            Intent intent = getWebViewerIntent();
             SalmonFile selectedFile = fileItemList.get(position);
             WebViewerActivity.setContentFiles(pos, salmonFiles.toArray(new SalmonFile[0]));
             intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_NEW_TASK);
@@ -821,10 +853,13 @@ public class SalmonActivity extends AppCompatActivity {
         }
     }
 
+    protected Intent getWebViewerIntent() {
+        return new Intent(this, WebViewerActivity.class);
+    }
+
     @Override
     protected void onDestroy() {
         Logout();
-        WindowUtils.removeFromRecents(this, true);
         adapter.stop();
         super.onDestroy();
     }

@@ -29,6 +29,7 @@ using Salmon.Vault.Utils;
 using Salmon.Vault.DotNetAndroid;
 using System;
 using Salmon.Vault.Settings;
+using Android.Views;
 
 namespace Salmon.Vault.Main;
 
@@ -40,6 +41,7 @@ public class SettingsActivity : PreferenceActivity
     protected void OnCreate(Bundle SavedInstanceState)
     {
         base.OnCreate(SavedInstanceState);
+        Window.SetFlags(WindowManagerFlags.Secure, WindowManagerFlags.Secure);
         AddPreferencesFromResource(Resource.Xml.settings);
         UpdateSummaries();
         SetupListeners();
@@ -83,11 +85,6 @@ public class SettingsActivity : PreferenceActivity
         PreferenceManager.FindPreference("deleteAfterImport").PreferenceChange += (s, args) =>
         {
             SalmonSettings.GetInstance().DeleteAfterImport = (bool)args.NewValue;
-        };
-
-        PreferenceManager.FindPreference("excludeFromRecents").PreferenceChange += (s, args) =>
-        {
-            WindowUtils.RemoveFromRecents(this, (bool)args.NewValue);
         };
     }
 }

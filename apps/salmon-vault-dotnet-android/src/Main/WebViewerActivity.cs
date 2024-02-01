@@ -44,6 +44,7 @@ using System.IO;
 using System.Linq;
 using Salmon.Vault.Dialog;
 using System.Threading.Tasks;
+using System.Diagnostics;
 
 namespace Salmon.Vault.Main;
 
@@ -59,7 +60,7 @@ public class WebViewerActivity : AppCompatActivity
     private static SalmonFile[] fileList = null;
     private static int pos;
 
-    public WebView webView;
+    private WebView webView;
     private SalmonWebViewClient webViewClient;
     private BufferedInputStream stream;
     private TextView mTitle;
@@ -77,7 +78,7 @@ public class WebViewerActivity : AppCompatActivity
         {
             try
             {
-                LoadContent();
+                LoadContent(fileList[pos]);
             }
             catch (Exception e)
             {
@@ -92,9 +93,9 @@ public class WebViewerActivity : AppCompatActivity
         webView.SetWebViewClient(webViewClient);
     }
 
-    protected void LoadContent()
+    protected void LoadContent(SalmonFile file)
     {
-        string filename = fileList[pos].BaseName;
+        string filename = file.BaseName;
         string ext = SalmonFileUtils.GetExtensionFromFileName(filename).ToLower();
         string mimeType = null;
         try
@@ -112,7 +113,7 @@ public class WebViewerActivity : AppCompatActivity
 
         try
         {
-            SalmonStream encStream = fileList[pos].GetInputStream();
+            SalmonStream encStream = file.GetInputStream();
 
             // in order for the webview not to crash we suppress Exceptions
             encStream.FailSilently = true;
@@ -266,13 +267,14 @@ public class WebViewerActivity : AppCompatActivity
         override
         public bool OnDoubleTap(MotionEvent e)
         {
-            return false;
+            return activity.OnDoubleTap(e);
         }
 
         override
         public void OnLongPress(MotionEvent e)
         {
             base.OnLongPress(e);
+            activity.OnLongPress(e);
         }
 
         override
@@ -284,7 +286,7 @@ public class WebViewerActivity : AppCompatActivity
         override
         public bool OnSingleTapConfirmed(MotionEvent e)
         {
-            return false;
+            return activity.OnSingleTapConfirmed();
         }
 
         override
@@ -296,17 +298,38 @@ public class WebViewerActivity : AppCompatActivity
         override
         public bool OnFling(MotionEvent e1, MotionEvent e2, float velocityX, float velocityY)
         {
-            float distanceX = e2.GetX() - e1.GetX();
-            float distanceY = e2.GetY() - e1.GetY();
-            if (Math.Abs(distanceX) > Math.Abs(distanceY)
-                    && Math.Abs(distanceX) > SWIPE_DISTANCE_THRESHOLD
-                    && Math.Abs(velocityX) > SWIPE_VELOCITY_THRESHOLD)
-            {
-                activity.OnSwipe((int)(-1 * distanceX));
-                return true;
-            }
-            return false;
+            return activity.OnFling(e1, e2, velocityX, velocityY);
         }
+    }
+
+
+    protected bool OnSingleTapConfirmed()
+    {
+        return false;
+    }
+
+    protected bool OnDoubleTap(MotionEvent e)
+    {
+        return false;
+    }
+
+    protected bool OnFling(MotionEvent e1, MotionEvent e2, float velocityX, float velocityY)
+    {
+        float distanceX = e2.GetX() - e1.GetX();
+        float distanceY = e2.GetY() - e1.GetY();
+        if (Math.Abs(distanceX) > Math.Abs(distanceY)
+                && Math.Abs(distanceX) > SWIPE_DISTANCE_THRESHOLD
+                && Math.Abs(velocityX) > SWIPE_VELOCITY_THRESHOLD)
+        {
+            OnSwipe((int)(-1 * distanceX));
+            return true;
+        }
+        return false;
+    }
+
+    protected void OnLongPress(MotionEvent e)
+    {
+
     }
 
     private void OnSwipe(int interval)
@@ -325,7 +348,7 @@ public class WebViewerActivity : AppCompatActivity
     }
 
     [Synchronized]
-    private void PlayPreviousItem()
+    protected void PlayPreviousItem()
     {
         if (pos > 0)
         {
@@ -335,7 +358,7 @@ public class WebViewerActivity : AppCompatActivity
     }
 
     [Synchronized]
-    private void PlayNextItem()
+    protected void PlayNextItem()
     {
         if (pos < fileList.Length - 1)
         {
@@ -360,7 +383,7 @@ public class WebViewerActivity : AppCompatActivity
         base.OnConfigurationChanged(c);
         try
         {
-            LoadContent();
+            LoadContent(fileList[pos]);
         }
         catch (Exception exception)
         {

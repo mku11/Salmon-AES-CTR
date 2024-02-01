@@ -45,20 +45,6 @@ public class SalmonNativeTransformer extends SalmonAES256CTRTransformer {
     }
 
     /**
-     * Initialize the native transformer.
-     * @param key The AES key to use.
-     * @param nonce The nonce to use.
-     * @throws SalmonSecurityException
-     */
-    @Override
-    public void init(byte[] key, byte[] nonce) throws SalmonSecurityException {
-        super.init(key, nonce);
-        byte[] expandedKey = new byte[SalmonAES256CTRTransformer.EXPANDED_KEY_SIZE];
-        nativeProxy.salmonExpandKey(key, expandedKey);
-        setExpandedKey(expandedKey);
-    }
-
-    /**
      * Encrypt the data.
      * @param srcBuffer The source byte array.
      * @param srcOffset The source byte offset.
@@ -70,7 +56,7 @@ public class SalmonNativeTransformer extends SalmonAES256CTRTransformer {
     @Override
     public int encryptData(byte[] srcBuffer, int srcOffset,
                            byte[] destBuffer, int destOffset, int count) {
-        return nativeProxy.salmonTransform(getKey(), getCounter(), SalmonStream.EncryptionMode.Encrypt.ordinal(),
+        return nativeProxy.salmonTransform(getKey(), getCounter(),
                 srcBuffer, srcOffset,
                 destBuffer, destOffset, count);
     }
@@ -87,7 +73,7 @@ public class SalmonNativeTransformer extends SalmonAES256CTRTransformer {
     @Override
     public int decryptData(byte[] srcBuffer, int srcOffset,
                             byte[] destBuffer, int destOffset, int count) {
-        return nativeProxy.salmonTransform(getKey(), getCounter(), SalmonStream.EncryptionMode.Encrypt.ordinal(),
+        return nativeProxy.salmonTransform(getKey(), getCounter(),
                 srcBuffer, srcOffset,
                 destBuffer, destOffset, count);
     }

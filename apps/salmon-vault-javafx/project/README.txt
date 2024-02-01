@@ -3,7 +3,13 @@ version: 1.0.5
 project: https://github.com/mku11/Salmon-AES-CTR
 license: MIT License https://github.com/mku11/Salmon-AES-CTR/blob/main/LICENSE
 
-Open source projects inluded:
+Run:
+Make sure you have JavaFX installed on your machine you can download it from:
+https://openjfx.io/
+Set JAVAFX_HOME to the path you have installed it in your machine.
+If you use windows you can set the variable in the start.bat script or start.sh for MacOS and linux.
+
+Open source projects included:
 TinyAES
 project: https://github.com/kokke/tiny-AES-c
 license: The Unlicense https://github.com/kokke/tiny-AES-c/blob/master/unlicense.txt

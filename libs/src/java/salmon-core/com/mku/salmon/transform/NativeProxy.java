@@ -50,11 +50,10 @@ public class NativeProxy implements INativeProxy {
     private native static void expandkey(byte[] key, byte[] expandedKey);
 
     /**
-     * Native transform of the input byte array using AES 256 encryption or decryption mode.
+     * Native transform of the input byte array using AES-256 CTR mode
      *
      * @param key
      * @param counter
-     * @param encryption_mode
      * @param srcBuffer
      * @param srcOffset
      * @param destBuffer
@@ -62,7 +61,7 @@ public class NativeProxy implements INativeProxy {
      * @param count
      * @return
      */
-    private native static int transform(byte[] key, byte[] counter, int encryption_mode,
+    private native static int transform(byte[] key, byte[] counter,
                                                byte[] srcBuffer, int srcOffset,
                                                byte[] destBuffer, int destOffset, int count);
 
@@ -101,11 +100,10 @@ public class NativeProxy implements INativeProxy {
     }
 
     /**
-     * Proxy Transform the input byte array using AES 256 using encryption or decryption mode.
+     * Proxy Transform the input byte array using AES-256 CTR mode
      *
      * @param key
      * @param counter
-     * @param encryption_mode
      * @param srcBuffer
      * @param srcOffset
      * @param destBuffer
@@ -113,7 +111,7 @@ public class NativeProxy implements INativeProxy {
      * @param count
      * @return
      */
-    public int salmonTransform(byte[] key, byte[] counter, int encryption_mode, byte[] srcBuffer, int srcOffset, byte[] destBuffer, int destOffset, int count) {
-        return transform(key, counter, encryption_mode, srcBuffer, srcOffset, destBuffer, destOffset, count);
+    public int salmonTransform(byte[] key, byte[] counter, byte[] srcBuffer, int srcOffset, byte[] destBuffer, int destOffset, int count) {
+        return transform(key, counter, srcBuffer, srcOffset, destBuffer, destOffset, count);
     }
 }

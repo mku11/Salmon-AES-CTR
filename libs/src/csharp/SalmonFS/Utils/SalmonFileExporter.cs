@@ -44,11 +44,6 @@ public class SalmonFileExporter
     private static readonly int DEFAULT_THREADS = 1;
 
     /// <summary>
-    ///  Minimum file size to use parallelism. Anything less will use single thread.
-    /// </summary>
-    private static readonly int MIN_FILE_SIZE = 2 * 1024 * 1024;
-
-    /// <summary>
     ///  True if multithreading is enabled.
     /// </summary>
     private static readonly bool enableMultiThread = true;
@@ -169,28 +164,17 @@ public class SalmonFileExporter
             fileToExport.SetVerifyIntegrity(integrity, null);
 
             long fileSize = fileToExport.Size;
+            int runningThreads = 1;
             long partSize = fileSize;
-            int runningThreads;
-            if (fileSize > MIN_FILE_SIZE)
+
+            // if we want to check integrity we align to the chunk size otherwise to the AES Block
+            long minPartSize = SalmonFileUtils.GetMinimumPartSize(fileToExport);
+            if (partSize > minPartSize && threads > 1)
             {
                 partSize = (int)Math.Ceiling(fileSize / (float)threads);
-
-                // if we want to check integrity we align to the chunk size otherwise to the AES Block
-                long minPartSize = SalmonFileUtils.GetMinimumPartSize(fileToExport);
-
-                // calculate the last part size
-                long rem = partSize % minPartSize;
-                if (rem != 0)
-                    partSize += minPartSize - rem;
-
-                runningThreads = (int) Math.Ceiling(fileSize / (double) partSize);
+                partSize -= partSize % minPartSize;
+                runningThreads = (int)(fileSize / partSize);
             }
-			else
-            {
-                runningThreads = 1;
-            }
-            if (runningThreads == 0)
-                runningThreads = 1;
 
             Task[] tasks = new Task[runningThreads];
             long finalPartSize = partSize;
@@ -229,7 +213,7 @@ public class SalmonFileExporter
                 Console.WriteLine("SalmonFileExporter AesType: " + SalmonStream.AesProviderType 
                     + " File: " + fileToExport.BaseName + " verified and exported "
                         + totalBytesWritten[0] + " bytes in: " + total + " ms"
-                        + ", avg speed: " + totalBytesWritten[0] / (float)total + " bytes/sec");
+                        + ", avg speed: " + totalBytesWritten[0] / (float)total + " Kbytes/sec");
             }
         }
         catch (Exception ex)
@@ -300,7 +284,7 @@ public class SalmonFileExporter
                 long total = Mku.Time.Time.CurrentTimeMillis() - startTime;
                 Console.WriteLine("SalmonFileExporter: File Part: " + fileToExport.BaseName + " exported " + totalPartBytesWritten
                         + " bytes in: " + total + " ms"
-                        + ", avg speed: " + totalBytesWritten[0] / (float)total + " bytes/sec");
+                        + ", avg speed: " + totalPartBytesWritten / (float)total + " Kbytes/sec");
             }
         }
         catch (Exception ex)

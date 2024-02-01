@@ -29,9 +29,9 @@ SOFTWARE.
 #elif defined(__aarch64__) && defined(__ARM_FEATURE_CRYPTO)
 #include <arm_neon.h>
 #include <arm_acle.h>
-#include "../../tiny-AES-c/aes.h"
+#include "aes.h"
 #endif
-#include "salmon-aes-intr.h"
+#include "salmon-aes-intr/salmon-aes-intr.h"
 
 #if defined(_MSC_VER) || defined(__i386__) || defined(__x86_64__)
 // Instructions from:

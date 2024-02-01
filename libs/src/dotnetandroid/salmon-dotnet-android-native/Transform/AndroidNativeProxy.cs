@@ -63,7 +63,7 @@ public class AndroidNativeProxy : INativeProxy
     ///  <param name="count"></param>
     ///  <returns></returns>
     [DllImport(DllName)]
-    private extern static int salmon_transform(byte[] key, byte[] counter, int encryption_mode,
+    private extern static int salmon_transform(byte[] key, byte[] counter,
                                      byte[] srcBuffer, int srcOffset,
                                      byte[] destBuffer, int destOffset, int count);
 
@@ -100,8 +100,8 @@ public class AndroidNativeProxy : INativeProxy
     ///  <param name="destOffset"></param>
     ///  <param name="count"></param>
     ///  <returns></returns>
-    public int SalmonTransform(byte[] key, byte[] counter, int encryption_mode, byte[] srcBuffer, int srcOffset, byte[] destBuffer, int destOffset, int count)
+    public int SalmonTransform(byte[] key, byte[] counter, byte[] srcBuffer, int srcOffset, byte[] destBuffer, int destOffset, int count)
     {
-        return salmon_transform(key, counter, encryption_mode, srcBuffer, srcOffset, destBuffer, destOffset, count);
+        return salmon_transform(key, counter, srcBuffer, srcOffset, destBuffer, destOffset, count);
     }
 }

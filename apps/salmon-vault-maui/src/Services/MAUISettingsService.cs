@@ -97,10 +97,4 @@ public class MAUISettingsService : ISettingsService
             Preferences.Default.Set("deleteAfterImport", value);
         }
     }
-
-    public bool ExcludeFromRecents
-    {
-        get => throw new NotImplementedException();
-        set => throw new NotImplementedException();
-    }
 }

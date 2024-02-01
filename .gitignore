@@ -39,6 +39,7 @@ Resource.designer.cs
 
 inspectionProfiles
 deploymentTargetDropDown.xml
+
 node_modules
 /libs/projects/salmon-libs-gcc-linux/lib
 .DS_Store

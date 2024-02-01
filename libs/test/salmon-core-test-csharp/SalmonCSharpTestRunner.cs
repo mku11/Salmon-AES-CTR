@@ -30,16 +30,12 @@ using System;
 using System.IO;
 using System.Text;
 using BitConverter = Mku.Convert.BitConverter;
-using Mku.File;
 
 namespace Mku.Salmon.Test;
 
 [TestClass]
 public class SalmonCSharpTestRunner
 {
-
-    public static readonly int ENC_IMPORT_BUFFER_SIZE = 512 * 1024;
-    public static readonly int ENC_IMPORT_THREADS = 4;
     // NOTE: set to false out if you're building with gradle or running test cases for android
     public static readonly bool enableNativeLib = false;
     protected static readonly string TEST_OUTPUT_DIR = "d:\\tmp\\output";
@@ -638,7 +634,7 @@ public class SalmonCSharpTestRunner
     public void ShouldEncryptAndDecryptArrayMultipleThreads()
     {
         byte[]
-    data = TestHelper.GetRandArray(1 * 1024 * 1024);
+    data = TestHelper.GetRandArray(1 * 1024 * 1024 + 4);
         long t1 = Mku.Time.Time.CurrentTimeMillis();
         byte[] encData = new SalmonEncryptor(2).Encrypt(data, TestHelper.TEST_KEY_BYTES, TestHelper.TEST_NONCE_BYTES,
                 false);

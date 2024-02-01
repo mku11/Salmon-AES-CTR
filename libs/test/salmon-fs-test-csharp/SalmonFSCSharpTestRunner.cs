@@ -30,7 +30,6 @@ using Microsoft.VisualStudio.TestTools.UnitTesting;
 using System;
 using System.IO;
 using System.Text;
-using System.Diagnostics;
 using System.Collections.Generic;
 using Mku.Utils;
 using System.Security.Cryptography;
@@ -116,14 +115,13 @@ public class SalmonFSCSharpTestRunner : SalmonCSharpTestRunner
     }
 
     [TestMethod]
-
     public void ShouldImportAndExportNoIntegrityBitFlipDataNoCatch()
     {
         bool integrityFailed = false;
         try
         {
             CSharpFSTestHelper.ImportAndExport(TestHelper.GenerateFolder(TEST_VAULT2_DIR), TestHelper.TEST_PASSWORD, TEST_IMPORT_FILE,
-                    ENC_IMPORT_BUFFER_SIZE, ENC_IMPORT_THREADS, TestHelper.ENC_EXPORT_BUFFER_SIZE, TestHelper.ENC_EXPORT_THREADS,
+                    CSharpFSTestHelper.ENC_IMPORT_BUFFER_SIZE, CSharpFSTestHelper.ENC_IMPORT_THREADS, CSharpFSTestHelper.ENC_EXPORT_BUFFER_SIZE, CSharpFSTestHelper.ENC_EXPORT_THREADS,
                     false, true, 24 + 10, false, false, false);
         }
         catch (IOException ex)
@@ -143,7 +141,7 @@ public class SalmonFSCSharpTestRunner : SalmonCSharpTestRunner
         try
         {
             CSharpFSTestHelper.ImportAndExport(TestHelper.GenerateFolder(TEST_VAULT2_DIR), TestHelper.TEST_PASSWORD, TEST_IMPORT_FILE,
-                    ENC_IMPORT_BUFFER_SIZE, ENC_IMPORT_THREADS, TestHelper.ENC_EXPORT_BUFFER_SIZE, TestHelper.ENC_EXPORT_THREADS,
+                    CSharpFSTestHelper.ENC_IMPORT_BUFFER_SIZE, CSharpFSTestHelper.ENC_IMPORT_THREADS, CSharpFSTestHelper.ENC_EXPORT_BUFFER_SIZE, CSharpFSTestHelper.ENC_EXPORT_THREADS,
                     false, false, 0, true, false,
                     false);
         }
@@ -161,7 +159,7 @@ public class SalmonFSCSharpTestRunner : SalmonCSharpTestRunner
     public void ShouldImportAndSearchFiles()
     {
         CSharpFSTestHelper.ImportAndSearch(TestHelper.GenerateFolder(TEST_VAULT2_DIR), TestHelper.TEST_PASSWORD, TEST_IMPORT_FILE,
-                ENC_IMPORT_BUFFER_SIZE, ENC_IMPORT_THREADS);
+                CSharpFSTestHelper.ENC_IMPORT_BUFFER_SIZE, CSharpFSTestHelper.ENC_IMPORT_THREADS);
     }
 
     [TestMethod]
@@ -172,7 +170,7 @@ public class SalmonFSCSharpTestRunner : SalmonCSharpTestRunner
         try
         {
             CSharpFSTestHelper.ImportAndCopy(TestHelper.GenerateFolder(TEST_VAULT2_DIR), TestHelper.TEST_PASSWORD, TEST_IMPORT_FILE,
-                    ENC_IMPORT_BUFFER_SIZE, ENC_IMPORT_THREADS, "subdir", false);
+                    CSharpFSTestHelper.ENC_IMPORT_BUFFER_SIZE, CSharpFSTestHelper.ENC_IMPORT_THREADS, "subdir", false);
         }
         catch (IOException ex)
         {
@@ -191,7 +189,7 @@ public class SalmonFSCSharpTestRunner : SalmonCSharpTestRunner
         try
         {
             CSharpFSTestHelper.ImportAndCopy(TestHelper.GenerateFolder(TEST_VAULT2_DIR), TestHelper.TEST_PASSWORD, TEST_IMPORT_FILE,
-                    ENC_IMPORT_BUFFER_SIZE, ENC_IMPORT_THREADS, "subdir", true);
+                    CSharpFSTestHelper.ENC_IMPORT_BUFFER_SIZE, CSharpFSTestHelper.ENC_IMPORT_THREADS, "subdir", true);
         }
         catch (IOException ex)
         {
@@ -210,7 +208,7 @@ public class SalmonFSCSharpTestRunner : SalmonCSharpTestRunner
         try
         {
             CSharpFSTestHelper.ImportAndExport(TestHelper.GenerateFolder(TEST_VAULT2_DIR), TestHelper.TEST_PASSWORD, TEST_IMPORT_FILE,
-                    ENC_IMPORT_BUFFER_SIZE, ENC_IMPORT_THREADS, TestHelper.ENC_EXPORT_BUFFER_SIZE, TestHelper.ENC_EXPORT_THREADS,
+                    CSharpFSTestHelper.ENC_IMPORT_BUFFER_SIZE, CSharpFSTestHelper.ENC_IMPORT_THREADS, CSharpFSTestHelper.ENC_EXPORT_BUFFER_SIZE, CSharpFSTestHelper.ENC_EXPORT_THREADS,
                     true, true, 24 + 10, false, true, true);
         }
         catch (IOException ex)
@@ -232,7 +230,7 @@ public class SalmonFSCSharpTestRunner : SalmonCSharpTestRunner
         try
         {
             CSharpFSTestHelper.ImportAndExport(TestHelper.GenerateFolder(TEST_VAULT2_DIR), TestHelper.TEST_PASSWORD, TEST_IMPORT_FILE,
-                    ENC_IMPORT_BUFFER_SIZE, ENC_IMPORT_THREADS, TestHelper.ENC_EXPORT_BUFFER_SIZE, TestHelper.ENC_EXPORT_THREADS,
+                    CSharpFSTestHelper.ENC_IMPORT_BUFFER_SIZE, CSharpFSTestHelper.ENC_IMPORT_THREADS, CSharpFSTestHelper.ENC_EXPORT_BUFFER_SIZE, CSharpFSTestHelper.ENC_EXPORT_THREADS,
                     true, true, 24 + 10, false, false, false);
         }
         catch (IOException ex)
@@ -258,7 +256,7 @@ public class SalmonFSCSharpTestRunner : SalmonCSharpTestRunner
         try
         {
             CSharpFSTestHelper.ImportAndExport(TestHelper.GenerateFolder(TEST_VAULT2_DIR), TestHelper.TEST_PASSWORD, TEST_IMPORT_FILE,
-                    ENC_IMPORT_BUFFER_SIZE, ENC_IMPORT_THREADS, TestHelper.ENC_EXPORT_BUFFER_SIZE, TestHelper.ENC_EXPORT_THREADS,
+                    CSharpFSTestHelper.ENC_IMPORT_BUFFER_SIZE, CSharpFSTestHelper.ENC_IMPORT_THREADS, CSharpFSTestHelper.ENC_EXPORT_BUFFER_SIZE, CSharpFSTestHelper.ENC_EXPORT_THREADS,
                     true, false, 0, false,
                     false, true);
         }
@@ -278,7 +276,7 @@ public class SalmonFSCSharpTestRunner : SalmonCSharpTestRunner
         try
         {
             CSharpFSTestHelper.ImportAndExport(TestHelper.GenerateFolder(TEST_VAULT2_DIR), TestHelper.TEST_PASSWORD, TEST_IMPORT_FILE,
-                    ENC_IMPORT_BUFFER_SIZE, ENC_IMPORT_THREADS, TestHelper.ENC_EXPORT_BUFFER_SIZE, TestHelper.ENC_EXPORT_THREADS,
+                    CSharpFSTestHelper.ENC_IMPORT_BUFFER_SIZE, CSharpFSTestHelper.ENC_IMPORT_THREADS, CSharpFSTestHelper.ENC_EXPORT_BUFFER_SIZE, CSharpFSTestHelper.ENC_EXPORT_THREADS,
                     true, true, 36, false,
                     true, false);
         }
@@ -299,8 +297,8 @@ public class SalmonFSCSharpTestRunner : SalmonCSharpTestRunner
         try
         {
             CSharpFSTestHelper.ImportAndExport(TestHelper.GenerateFolder(TEST_VAULT2_DIR), TestHelper.TEST_PASSWORD, TEST_IMPORT_FILE,
-                    ENC_IMPORT_BUFFER_SIZE, ENC_IMPORT_THREADS,
-                    TestHelper.ENC_EXPORT_BUFFER_SIZE, TestHelper.ENC_EXPORT_THREADS,
+                    CSharpFSTestHelper.ENC_IMPORT_BUFFER_SIZE, CSharpFSTestHelper.ENC_IMPORT_THREADS,
+                    CSharpFSTestHelper.ENC_EXPORT_BUFFER_SIZE, CSharpFSTestHelper.ENC_EXPORT_THREADS,
                     true, false, 0, true,
                     true, false);
         }
@@ -321,7 +319,7 @@ public class SalmonFSCSharpTestRunner : SalmonCSharpTestRunner
         try
         {
             CSharpFSTestHelper.ImportAndExport(TestHelper.GenerateFolder(TEST_VAULT2_DIR), TestHelper.TEST_PASSWORD, TEST_IMPORT_FILE,
-                    ENC_IMPORT_BUFFER_SIZE, ENC_IMPORT_THREADS, TestHelper.ENC_EXPORT_BUFFER_SIZE, TestHelper.ENC_EXPORT_THREADS,
+                    CSharpFSTestHelper.ENC_IMPORT_BUFFER_SIZE, CSharpFSTestHelper.ENC_IMPORT_THREADS, CSharpFSTestHelper.ENC_EXPORT_BUFFER_SIZE, CSharpFSTestHelper.ENC_EXPORT_THREADS,
                     true, true, 20, false,
                     true, true);
         }
@@ -342,8 +340,8 @@ public class SalmonFSCSharpTestRunner : SalmonCSharpTestRunner
         try
         {
             CSharpFSTestHelper.ImportAndExport(TestHelper.GenerateFolder(TEST_VAULT2_DIR), TestHelper.TEST_PASSWORD, TEST_IMPORT_FILE,
-                    ENC_IMPORT_BUFFER_SIZE, ENC_IMPORT_THREADS,
-                    TestHelper.ENC_EXPORT_BUFFER_SIZE, TestHelper.ENC_EXPORT_THREADS,
+                    CSharpFSTestHelper.ENC_IMPORT_BUFFER_SIZE, CSharpFSTestHelper.ENC_IMPORT_THREADS,
+                    CSharpFSTestHelper.ENC_EXPORT_BUFFER_SIZE, CSharpFSTestHelper.ENC_EXPORT_THREADS,
                     true, false, 0, true,
                     true, true);
         }
@@ -595,7 +593,7 @@ public class SalmonFSCSharpTestRunner : SalmonCSharpTestRunner
         Assert.AreEqual(3, dir.ChildrenCount);
 
 
-        
+
         IRealFile folder1 = dir.CreateDirectory("folder2");
         Assert.IsTrue(folder1.Exists);
         bool renamed = folder1.RenameTo("folder3");
@@ -613,7 +611,7 @@ public class SalmonFSCSharpTestRunner : SalmonCSharpTestRunner
         file2.Move(dir.GetChild("folder1"));
 
         IRealFile file3 = file.Copy(dir);
-		caught = false;
+        caught = false;
         try
         {
             file3.Move(dir.GetChild("folder1"));
@@ -693,9 +691,9 @@ public class SalmonFSCSharpTestRunner : SalmonCSharpTestRunner
         SalmonFileSequencer sequencer = new SalmonFileSequencer(new DotNetFile(vaultDir + "/" + TestHelper.TEST_SEQUENCER_FILE1), new SalmonSequenceSerializer());
         SalmonDriveManager.Sequencer = sequencer;
         SalmonDrive drive = SalmonDriveManager.CreateDrive(vaultDir, TestHelper.TEST_PASSWORD);
-        SalmonFile[] sfiles = new SalmonFileCommander(0,0, 2).ImportFiles(new IRealFile[] { file },
+        SalmonFile[] sfiles = new SalmonFileCommander(0, 0, 2).ImportFiles(new IRealFile[] { file },
             drive.VirtualRoot, false, true, null, null, null);
-        
+
         SalmonFileInputStream fileInputStream1 = new SalmonFileInputStream(sfiles[0], 4, 4 * 1024 * 1024, 4, 256 * 1024);
         MD5 md51 = MD5.Create();
         byte[] hash1 = md51.ComputeHash(fileInputStream1);

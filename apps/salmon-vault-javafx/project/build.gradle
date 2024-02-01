@@ -1,7 +1,6 @@
 plugins {
     id 'java'
     id 'application'
-    id 'org.openjfx.javafxplugin' version '0.0.13'
 }
 
 group 'com.mku.salmon'
@@ -33,11 +32,6 @@ tasks.withType(JavaCompile) {
 application {
     mainModule = 'com.mku.salmon.vault.main'
     mainClass = 'com.mku.salmon.vault.main.Main'
-}
-
-javafx {
-    version = '17.0.2'
-    modules = ['javafx.controls', 'javafx.fxml', 'javafx.swing', 'javafx.media', 'javafx.graphics']
 }
 
 // path to download the native libraries
@@ -74,10 +68,36 @@ dependencies {
     implementation 'com.mku.salmon:salmon-fs:1.0.6-SNAPSHOT'
     implementation 'com.mku.salmon:salmon-win:1.0.6-SNAPSHOT'
     // optional fast AES intrinsics and Tiny AES:
-    nativeImplementation 'com.mku.salmon:salmon-native:1.0.6-SNAPSHOT'
+    implementation 'com.mku.salmon:salmon-native:1.0.6-SNAPSHOT:win-x86_64'
+    nativeImplementation 'com.mku.salmon:salmon-native:1.0.6-SNAPSHOT:win-x86_64'
 
     implementation 'net.java.dev.jna:jna:5.13.0'
     implementation 'net.java.dev.jna:jna-platform:5.13.0'
+
+    implementation 'org.openjfx:javafx-base:17.0.2'
+    implementation 'org.openjfx:javafx-base:17.0.2:win'
+    implementation 'org.openjfx:javafx-base:17.0.2:mac'
+    implementation 'org.openjfx:javafx-base:17.0.2:linux'
+    implementation 'org.openjfx:javafx-graphics:17.0.2'
+    implementation 'org.openjfx:javafx-graphics:17.0.2:win'
+    implementation 'org.openjfx:javafx-graphics:17.0.2:mac'
+    implementation 'org.openjfx:javafx-graphics:17.0.2:linux'
+    implementation 'org.openjfx:javafx-media:17.0.2'
+    implementation 'org.openjfx:javafx-media:17.0.2:win'
+    implementation 'org.openjfx:javafx-media:17.0.2:mac'
+    implementation 'org.openjfx:javafx-media:17.0.2:linux'
+    implementation 'org.openjfx:javafx-fxml:17.0.2'
+    implementation 'org.openjfx:javafx-fxml:17.0.2:win'
+    implementation 'org.openjfx:javafx-fxml:17.0.2:mac'
+    implementation 'org.openjfx:javafx-fxml:17.0.2:linux'
+    implementation 'org.openjfx:javafx-swing:17.0.2'
+    implementation 'org.openjfx:javafx-swing:17.0.2:win'
+    implementation 'org.openjfx:javafx-swing:17.0.2:mac'
+    implementation 'org.openjfx:javafx-swing:17.0.2:linux'
+    implementation 'org.openjfx:javafx-controls:17.0.2'
+    implementation 'org.openjfx:javafx-controls:17.0.2:win'
+    implementation 'org.openjfx:javafx-controls:17.0.2:mac'
+    implementation 'org.openjfx:javafx-controls:17.0.2:linux'
 
     testImplementation("org.junit.jupiter:junit-jupiter-api:${junitVersion}")
     testRuntimeOnly("org.junit.jupiter:junit-jupiter-engine:${junitVersion}")

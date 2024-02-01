@@ -43,6 +43,18 @@ public class SalmonConfig {
         return SalmonConfig.class.getPackage().getImplementationVersion();
     }
     public static String getPrivateDir() {
-        return System.getenv("LOCALAPPDATA");
+        String fileFolder = null;
+        String os = System.getProperty("os.name").toUpperCase();
+        System.out.println("Running on: " + os);
+        if (os.startsWith("WINDOWS")) {
+            fileFolder = System.getenv("LOCALAPPDATA");
+        } else if (os.startsWith("MAC")) {
+            fileFolder = System.getProperty("user.home") + "/Library/Application Support";
+        } else if (os.startsWith("LINUX")) {
+            fileFolder = System.getProperty("user.home");
+        }
+        if (fileFolder == null)
+            throw new RuntimeException("Operating System not supported");
+        return fileFolder;
     }
 }

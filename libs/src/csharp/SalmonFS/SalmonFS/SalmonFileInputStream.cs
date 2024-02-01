@@ -310,9 +310,7 @@ public class SalmonFileInputStream : Stream
         for (int i = 0; i < buffers.Length; i++)
         {
             CacheBuffer buffer = buffers[i];
-            if (buffer == null)
-                continue;
-            if (position >= buffer.startPos && position + count <= buffer.startPos + buffer.count)
+            if (buffer != null && position >= buffer.startPos && position + count <= buffer.startPos + buffer.count)
             {
                 // promote buffer to the front
                 lruBuffersIndex.Remove(i);
@@ -405,6 +403,7 @@ public class SalmonFileInputStream : Stream
     /// <summary>
     ///  Clear all buffers.
     /// </summary>
+    [MethodImpl(MethodImplOptions.Synchronized)]
     private void ClearBuffers()
     {
         for (int i = 0; i < buffers.Length; i++)
@@ -417,8 +416,9 @@ public class SalmonFileInputStream : Stream
 
     /// <summary>
     ///  Close all back streams.
-	/// </summary>
-	///  <exception cref="IOException"></exception>
+    /// </summary>
+    ///  <exception cref="IOException"></exception>
+    [MethodImpl(MethodImplOptions.Synchronized)]
     private void CloseStreams()
     {
         for (int i = 0; i < threads; i++)

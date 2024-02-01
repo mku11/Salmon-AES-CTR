@@ -190,16 +190,9 @@ public class SalmonDecryptor {
             minPartSize = SalmonIntegrity.DEFAULT_CHUNK_SIZE;
 
         if (partSize > minPartSize) {
-            partSize = (int) Math.ceil(partSize / (float) threads);
-            // if we want to check integrity we align to the chunk size instead of the AES Block
-            long rem = partSize % minPartSize;
-            if (rem != 0)
-                partSize += minPartSize - rem;
-
+            partSize = (int) Math.ceil(data.length / (float) threads);
+            partSize -= partSize % minPartSize;
             runningThreads = (int) (data.length / partSize);
-        } else
-            {
-                runningThreads = 1;
         }
 
         submitDecryptJobs(runningThreads, partSize,

@@ -45,6 +45,4 @@ public interface ISettingsService {
 
     public boolean getDeleteAfterImport();
     public void setDeleteAfterImport(boolean value);
-
-    public boolean getExcludeFromRecents();
 }

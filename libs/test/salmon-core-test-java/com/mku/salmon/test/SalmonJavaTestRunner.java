@@ -41,9 +41,6 @@ import java.nio.charset.Charset;
 import static org.junit.jupiter.api.Assertions.*;
 
 public class SalmonJavaTestRunner {
-
-    public static final int ENC_IMPORT_BUFFER_SIZE = 512 * 1024;
-    public static final int ENC_IMPORT_THREADS = 4;
     protected static final String TEST_OUTPUT_DIR = "d:\\tmp\\output";
     protected static final String TEST_VAULT_DIR = "d:\\tmp\\output\\enc";
     protected static final String TEST_VAULT2_DIR = "d:\\tmp\\output\\enc2";
@@ -532,7 +529,7 @@ public class SalmonJavaTestRunner {
 
     @Test
     public void ShouldEncryptAndDecryptArrayMultipleThreads() throws Exception {
-        byte[] data = TestHelper.getRandArray(1 * 1024 * 1024);
+        byte[] data = TestHelper.getRandArray(1 * 1024 * 1024 + 4);
         long t1 = System.currentTimeMillis();
         byte[] encData = new SalmonEncryptor(2).encrypt(data, TestHelper.TEST_KEY_BYTES, TestHelper.TEST_NONCE_BYTES,
                 false);

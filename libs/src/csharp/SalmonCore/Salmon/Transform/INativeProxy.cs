@@ -48,14 +48,13 @@ public interface INativeProxy
 	/// </summary>
 	///  <param name="key">The ex</param>
     ///  <param name="counter"></param>
-    ///  <param name="encryption_mode"></param>
     ///  <param name="srcBuffer"></param>
     ///  <param name="srcOffset"></param>
     ///  <param name="destBuffer"></param>
     ///  <param name="destOffset"></param>
     ///  <param name="count"></param>
     ///  <returns></returns>
-    public int SalmonTransform(byte[] key, byte[] counter, int encryption_mode,
+    public int SalmonTransform(byte[] key, byte[] counter,
                                      byte[] srcBuffer, int srcOffset,
                                      byte[] destBuffer, int destOffset, int count);
 }

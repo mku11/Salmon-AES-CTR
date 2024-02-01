@@ -40,6 +40,11 @@ namespace Mku.Salmon.Test;
 
 public class CSharpFSTestHelper
 {
+    public static readonly int ENC_IMPORT_BUFFER_SIZE = 512 * 1024;
+    public static readonly int ENC_IMPORT_THREADS = 2;
+    public static readonly int ENC_EXPORT_BUFFER_SIZE = 512 * 1024;
+    public static readonly int ENC_EXPORT_THREADS = 2;
+
     public static string TEST_SEQUENCER_DIR = @"D:\tmp\output";
     public static string TEST_SEQUENCER_FILENAME = "fileseq.xml";
 

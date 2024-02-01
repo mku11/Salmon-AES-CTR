@@ -34,7 +34,7 @@ JNIEXPORT void JNICALL Java_com_mku_salmon_transform_NativeProxy_expandkey(JNIEn
     jbyteArray jKey, jbyteArray jExpandedKey);
 
 JNIEXPORT jint JNICALL Java_com_mku_salmon_transform_NativeProxy_transform(JNIEnv* env, jclass thiz,
-    jbyteArray jKey, jbyteArray jCounter, jint encryption_mode,
+    jbyteArray jKey, jbyteArray jCounter,
     jbyteArray jSrcBuffer, jint srcOffset,
     jbyteArray jDestBuffer, jint destOffset, jint count);
 

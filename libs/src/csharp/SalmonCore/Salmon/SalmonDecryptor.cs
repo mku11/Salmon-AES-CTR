@@ -168,17 +168,9 @@ public class SalmonDecryptor
 
         if (partSize > minPartSize)
         {
-            partSize = (int)Math.Ceiling(partSize / (float)threads);
-            // if we want to check integrity we align to the chunk size instead of the AES Block
-            long rem = partSize % minPartSize;
-            if (rem != 0)
-                partSize += minPartSize - rem;
-
+            partSize = (int)Math.Ceiling(data.Length / (float)threads);
+            partSize -= partSize % minPartSize;
             runningThreads = (int)(data.Length / partSize);
-        }
-        else
-        {
-            runningThreads = 1;
         }
 
         SubmitDecryptJobs(runningThreads, partSize,

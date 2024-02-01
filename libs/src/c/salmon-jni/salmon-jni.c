@@ -28,11 +28,10 @@ SOFTWARE.
 #include <time.h>
 #include <math.h>
 #include "salmon-jni.h"
-#include "../salmon.h"
+#include "salmon.h"
 
 JNIEXPORT void JNICALL Java_com_mku_salmon_transform_NativeProxy_init(JNIEnv* env, jclass thiz,
     jint aesImpl) {
-    jboolean isCopy;
     salmon_init(aesImpl);
 }
 
@@ -50,7 +49,7 @@ JNIEXPORT void JNICALL Java_com_mku_salmon_transform_NativeProxy_expandkey(JNIEn
 }
 
 JNIEXPORT jint JNICALL Java_com_mku_salmon_transform_NativeProxy_transform(JNIEnv* env, jclass thiz,
-    jbyteArray jKey, jbyteArray jCounter, jint encryption_mode,
+    jbyteArray jKey, jbyteArray jCounter,
     jbyteArray jSrcBuffer, jint srcOffset,
     jbyteArray jDestBuffer, jint destOffset, jint count) {
 
@@ -60,7 +59,7 @@ JNIEXPORT jint JNICALL Java_com_mku_salmon_transform_NativeProxy_transform(JNIEn
     unsigned char *srcBuffer = (unsigned char *) (*env)->GetJavaArray(env, jSrcBuffer, &isCopy);
     unsigned char *destBuffer = (unsigned char *) (*env)->GetJavaArray(env, jDestBuffer, &isCopy);
 
-    int bytes = salmon_transform(key, counter, encryption_mode,
+    int bytes = salmon_transform(key, counter,
         srcBuffer, srcOffset,
         destBuffer, destOffset, count);
 

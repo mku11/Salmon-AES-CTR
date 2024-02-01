@@ -59,10 +59,9 @@ import static org.junit.jupiter.api.Assertions.assertArrayEquals;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 public class TestHelper {
-    public static final int ENC_EXPORT_BUFFER_SIZE = 512 * 1024;
-    public static final int ENC_EXPORT_THREADS = 4;
     public static final int TEST_ENC_BUFFER_SIZE = 512 * 1024;
     public static final int TEST_DEC_BUFFER_SIZE = 512 * 1024;
+
     public static final String TEST_PASSWORD = "test123";
     public static final String TEST_FALSE_PASSWORD = "falsepass";
     public static final String TEST_EXPORT_DIR = "export.slma";
@@ -477,7 +476,7 @@ public class TestHelper {
 
     public static void encryptAndDecryptByteArray(int size, int threads, boolean enableLog) throws Exception {
         byte[] data = TestHelper.getRandArray(size);
-        encryptAndDecryptByteArray(data, 1, enableLog);
+        encryptAndDecryptByteArray(data, threads, enableLog);
     }
 
     public static void encryptAndDecryptByteArray(byte[] data, int threads, boolean enableLog) throws Exception {

@@ -43,10 +43,9 @@ public interface INativeProxy
     void salmonExpandKey(byte[] key, byte[] expandedKey);
 
     /**
-     * Proxy Transform the input byte array using AES 256 encryption or decryption mode.
+     * Proxy Transform the input byte array using AES-256 CTR mode
      * @param key
      * @param counter
-     * @param encryption_mode
      * @param srcBuffer
      * @param srcOffset
      * @param destBuffer
@@ -54,7 +53,7 @@ public interface INativeProxy
      * @param count
      * @return
      */
-    int salmonTransform(byte[] key, byte[] counter, int encryption_mode,
+    int salmonTransform(byte[] key, byte[] counter,
                                byte[] srcBuffer, int srcOffset,
                                byte[] destBuffer, int destOffset, int count);
 }

@@ -56,7 +56,6 @@ public class NativeProxy : INativeProxy
 	/// </summary>
 	///  <param name="key">The ex</param>
     ///  <param name="counter"></param>
-    ///  <param name="encryption_mode"></param>
     ///  <param name="srcBuffer"></param>
     ///  <param name="srcOffset"></param>
     ///  <param name="destBuffer"></param>
@@ -64,7 +63,7 @@ public class NativeProxy : INativeProxy
     ///  <param name="count"></param>
     ///  <returns></returns>
     [DllImport(DllName)]
-    private extern static int salmon_transform(byte[] key, byte[] counter, int encryption_mode,
+    private extern static int salmon_transform(byte[] key, byte[] counter,
                                      byte[] srcBuffer, int srcOffset,
                                      byte[] destBuffer, int destOffset, int count);
 
@@ -100,8 +99,8 @@ public class NativeProxy : INativeProxy
     ///  <param name="destOffset"></param>
     ///  <param name="count"></param>
     ///  <returns></returns>
-    public int SalmonTransform(byte[] key, byte[] counter, int encryption_mode, byte[] srcBuffer, int srcOffset, byte[] destBuffer, int destOffset, int count)
+    public int SalmonTransform(byte[] key, byte[] counter, byte[] srcBuffer, int srcOffset, byte[] destBuffer, int destOffset, int count)
     {
-        return salmon_transform(key, counter, encryption_mode, srcBuffer, srcOffset, destBuffer, destOffset, count);
+        return salmon_transform(key, counter, srcBuffer, srcOffset, destBuffer, destOffset, count);
     }
 }

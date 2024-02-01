@@ -40,6 +40,8 @@ namespace Salmon.Vault.ViewModel;
 
 public class MainViewModel : INotifyPropertyChanged
 {
+    private static readonly int THREADS = 1;
+
     public delegate void OpenTextEditorView(SalmonFileViewModel item);
     public OpenTextEditorView OpenTextEditor;
 
@@ -177,6 +179,7 @@ public class MainViewModel : INotifyPropertyChanged
 
     public MainViewModel()
     {
+        SalmonVaultManager.SetThreads(THREADS);
         manager = SalmonWinVaultManager.Instance;
         manager.OpenListItem = OpenListItem;
         manager.PropertyChanged += Manager_PropertyChanged;

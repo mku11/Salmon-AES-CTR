@@ -103,8 +103,6 @@ public class SalmonAuthConfig {
                                      byte[] targetStartingNonce, byte[] targetMaxNonce,
                                      byte[] configNonce) throws Exception {
         SalmonFile salmonFile = new SalmonFile(authConfigFile, drive);
-		if(salmonFile.exists())
-			salmonFile.delete();
         SalmonStream stream = salmonFile.getOutputStream(configNonce);
         writeToStream(stream, drive.getDriveID(), targetAuthID, targetStartingNonce, targetMaxNonce);
     }

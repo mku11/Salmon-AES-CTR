@@ -42,10 +42,9 @@ namespace Mku.Salmon.Test;
 
 public class TestHelper
 {
-    public static readonly int ENC_EXPORT_BUFFER_SIZE = 512 * 1024;
-    public static readonly int ENC_EXPORT_THREADS = 4;
     public static readonly int TEST_ENC_BUFFER_SIZE = 512 * 1024;
     public static readonly int TEST_DEC_BUFFER_SIZE = 512 * 1024;
+
     public static readonly string TEST_PASSWORD = "test123";
     public static readonly string TEST_FALSE_PASSWORD = "falsepass";
     public static readonly string TEST_EXPORT_DIR = "export.slma";
@@ -481,7 +480,7 @@ public class TestHelper
     public static void EncryptAndDecryptByteArray(int size, int threads, bool enableLog)
     {
         byte[] data = TestHelper.GetRandArray(size);
-        EncryptAndDecryptByteArray(data, 1, enableLog);
+        EncryptAndDecryptByteArray(data, threads, enableLog);
     }
 
     public static void EncryptAndDecryptByteArray(byte[] data, int threads, bool enableLog)

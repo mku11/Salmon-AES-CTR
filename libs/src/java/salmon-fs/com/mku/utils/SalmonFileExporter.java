@@ -46,11 +46,6 @@ public class SalmonFileExporter {
     private static final int DEFAULT_THREADS = 1;
 
     /**
-     * Minimum file size to use parallelism. Anything less will use single thread.
-     */
-    private static final int MIN_FILE_SIZE = 2 * 1024 * 1024;
-
-    /**
      * True if multithreading is enabled.
      */
     private static final boolean enableMultiThread = true;
@@ -154,26 +149,16 @@ public class SalmonFileExporter {
             fileToExport.setVerifyIntegrity(integrity, null);
 
             final long fileSize = fileToExport.getSize();
+            int runningThreads = 1;
             long partSize = fileSize;
-            int runningThreads;
-            if (fileSize > MIN_FILE_SIZE) {
+
+            // if we want to check integrity we align to the chunk size otherwise to the AES Block
+            long minPartSize = SalmonFileUtils.getMinimumPartSize(fileToExport);
+            if (partSize > minPartSize && threads > 1) {
                 partSize = (int) Math.ceil(fileSize / (float) threads);
-
-                // if we want to check integrity we align to the chunk size otherwise to the AES Block
-                long minPartSize = SalmonFileUtils.getMinimumPartSize(fileToExport);
-
-                // calculate the last part size
-                long rem = partSize % minPartSize;
-                if (rem != 0)
-                    partSize += minPartSize - rem;
-
-                runningThreads = (int) Math.ceil(fileSize / (double) partSize);
-            } else {
-                runningThreads = 1;
+                partSize -= partSize % minPartSize;
+                runningThreads = (int) (fileSize / partSize);
             }
-
-            if (runningThreads == 0)
-                runningThreads = 1;
 
             // we use a countdown latch which is better suited with executor than Thread.join.
             final CountDownLatch done = new CountDownLatch(runningThreads);
@@ -208,7 +193,7 @@ public class SalmonFileExporter {
                 System.out.println("SalmonFileExporter AesType: " + SalmonStream.getAesProviderType()
                         + " File: " + fileToExport.getBaseName() + " verified and exported "
                         + totalBytesWritten[0] + " bytes in: " + total + " ms"
-                        + ", avg speed: " + totalBytesWritten[0] / (float) total + " bytes/sec");
+                        + ", avg speed: " + totalBytesWritten[0] / (float) total + " Kbytes/sec");
             }
         } catch (Exception ex) {
             ex.printStackTrace();
@@ -272,7 +257,7 @@ public class SalmonFileExporter {
                 long total = System.currentTimeMillis() - startTime;
                 System.out.println("SalmonFileExporter: File Part: " + fileToExport.getBaseName() + " exported " + totalPartBytesWritten
                         + " bytes in: " + total + " ms"
-                        + ", avg speed: " + totalBytesWritten[0] / (float) total + " bytes/sec");
+                        + ", avg speed: " + totalPartBytesWritten / (float) total + " Kbytes/sec");
             }
         } catch (Exception ex) {
             ex.printStackTrace();

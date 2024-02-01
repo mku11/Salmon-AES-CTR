@@ -98,8 +98,4 @@ public class JavaFxSettingsService implements ISettingsService {
     public void setLastImportDir(String value) {
         prefs.put(SalmonSettings.LAST_IMPORT_DIR_KEY, value);
     }
-
-    public boolean getExcludeFromRecents() {
-        throw new UnsupportedOperationException();
-    }
 }
