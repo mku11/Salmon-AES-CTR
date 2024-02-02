@@ -280,9 +280,9 @@ class SalmonEncryptor:
         if part_size > min_part_size:
             part_size = int(math.ceil(len(data) / float(self.__threads)))
             if part_size > min_part_size:
-				part_size -= part_size % min_part_size
-			else
-				part_size = min_part_size
+                part_size -= part_size % min_part_size
+            else:
+                part_size = min_part_size
             running_threads = len(data) // part_size
 
         self.__submit_encrypt_jobs(running_threads, part_size,
