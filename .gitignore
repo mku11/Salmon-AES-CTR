@@ -57,3 +57,5 @@ DerivedData
 project.xcworkspace
 *.dmg
 xcuserdata
+
+node_modules
