@@ -268,7 +268,10 @@ class SalmonDecryptor:
 
         if part_size > min_part_size:
             part_size = math.ceil(len(data) / float(self.__threads))
-            part_size -= part_size % min_part_size
+            if part_size > min_part_size:
+				part_size -= part_size % min_part_size
+			else
+				part_size = min_part_size
             running_threads = int(len(data) // part_size)
 
         self.__submit_decrypt_jobs(running_threads, part_size,

@@ -325,7 +325,10 @@ class SalmonFileImporter:
             min_part_size: int = SalmonFileUtils.get_minimum_part_size(salmon_file)
             if part_size > min_part_size and self.__threads > 1:
                 part_size = math.ceil(file_size / float(self.__threads))
-                part_size -= part_size % min_part_size
+                if part_size > min_part_size:
+                    part_size -= part_size % min_part_size
+                else
+                    part_size = min_part_size
                 running_threads = int(file_size // part_size)
 
             final_part_size: int = part_size
