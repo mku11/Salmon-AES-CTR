@@ -156,7 +156,10 @@ public class SalmonFileExporter {
             long minPartSize = SalmonFileUtils.getMinimumPartSize(fileToExport);
             if (partSize > minPartSize && threads > 1) {
                 partSize = (int) Math.ceil(fileSize / (float) threads);
-                partSize -= partSize % minPartSize;
+				if(partSize > minPartSize)
+					partSize -= partSize % minPartSize;
+				else
+					partSize = minPartSize;
                 runningThreads = (int) (fileSize / partSize);
             }
 

@@ -200,7 +200,10 @@ public class SalmonEncryptor {
 
         if (partSize > minPartSize) {
             partSize = (int) Math.ceil(data.length / (float) threads);
-            partSize -= partSize % minPartSize;
+            if(partSize > minPartSize)
+				partSize -= partSize % minPartSize;
+			else
+				partSize = minPartSize;
             runningThreads = (int) (data.length / partSize);
         }
 

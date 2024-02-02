@@ -169,7 +169,10 @@ public class SalmonDecryptor
         if (partSize > minPartSize)
         {
             partSize = (int)Math.Ceiling(data.Length / (float)threads);
-            partSize -= partSize % minPartSize;
+            if(partSize > minPartSize)
+				partSize -= partSize % minPartSize;
+			else
+				partSize = minPartSize;
             runningThreads = (int)(data.Length / partSize);
         }
 
