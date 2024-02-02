@@ -55,3 +55,5 @@ xcuserdata
 *.dll
 *.exe
 /libs/projects/salmon-libs-python/main.py
+
+node_modules
