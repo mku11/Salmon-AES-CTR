@@ -51,13 +51,11 @@ class SalmonSequenceSerializer(ISalmonSequenceSerializer):
         """
         if drive_auth_entries is None:
             drive_auth_entries = {}
-        root = Et.Element("root")
-        tree: Et.ElementTree = Et.ElementTree(root)
-        doc = Et.SubElement(root, "doc")
+        drives = Et.Element("drives")
+        tree: Et.ElementTree = Et.ElementTree(drives)
         try:
-            doc.insert(0, Et.Comment(
+            drives.insert(0, Et.Comment(
                 "WARNING! Do not edit or replace this file, security may be compromised if you do so"))
-            drives: Et.Element = Et.SubElement(root, "drives")
             for key in drive_auth_entries:
                 value: SalmonSequence = drive_auth_entries[key]
                 drive: Et.Element = Et.SubElement(drives, "drive",
@@ -65,14 +63,13 @@ class SalmonSequenceSerializer(ISalmonSequenceSerializer):
                                                   authID=value.get_auth_id(),
                                                   status=value.get_status().name)
                 if value.get_next_nonce() is not None:
-                    drive.attrib["next_nonce"] = SalmonEncoder.get_base64().encode(value.get_next_nonce())
+                    drive.attrib["nextNonce"] = SalmonEncoder.get_base64().encode(value.get_next_nonce())
                 if value.get_max_nonce() is not None:
-                    drive.attrib["max_nonce"] = SalmonEncoder.get_base64().encode(value.get_max_nonce())
+                    drive.attrib["maxNonce"] = SalmonEncoder.get_base64().encode(value.get_max_nonce())
         except Exception as ex:
             print(ex)
             raise SalmonSequenceException("Could not serialize sequences") from ex
-
-        return minidom.parseString(Et.tostring(root, encoding="utf8")).toprettyxml(indent="    ")
+        return minidom.parseString(Et.tostring(tree.getroot(), encoding="utf-8")).toprettyxml(indent="    ", encoding="utf-8").decode("utf-8")
 
     def deserialize(self, contents: str) -> dict[str, SalmonSequence]:
         """
@@ -84,9 +81,8 @@ class SalmonSequenceSerializer(ISalmonSequenceSerializer):
         """
 
         configs: dict[str, SalmonSequence] = {}
-        root: Et.Element = Et.fromstring(contents)
+        drives: Et.Element = Et.fromstring(contents)
         try:
-            drives: Et.Element = root.find("drives")
             if drives is not None:
                 children = list(drives.iter())
                 for i in range(0, len(children)):
@@ -98,10 +94,10 @@ class SalmonSequenceSerializer(ISalmonSequenceSerializer):
                     status: str = drive.attrib["status"]
                     next_nonce: bytearray | None = None
                     max_nonce: bytearray | None = None
-                    if "next_nonce" in drive.attrib:
-                        next_nonce = SalmonEncoder.get_base64().decode(drive.attrib["next_nonce"])
-                    if "max_nonce" in drive.attrib:
-                        max_nonce = SalmonEncoder.get_base64().decode(drive.attrib["max_nonce"])
+                    if "nextNonce" in drive.attrib:
+                        next_nonce = SalmonEncoder.get_base64().decode(drive.attrib["nextNonce"])
+                    if "maxNonce" in drive.attrib:
+                        max_nonce = SalmonEncoder.get_base64().decode(drive.attrib["maxNonce"])
 
                     sequence: SalmonSequence = SalmonSequence(drive_id, auth_id, next_nonce, max_nonce,
                                                               SalmonSequence.Status[status])
