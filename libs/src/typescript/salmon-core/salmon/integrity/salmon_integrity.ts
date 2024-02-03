@@ -44,7 +44,7 @@ class SalmonIntegrity {
     /**
      * Key to be used for integrity signing and validation.
      */
-    private readonly key: Uint8Array;
+    private readonly key: Uint8Array | null = null;
 
     /**
      * Hash result size;
@@ -70,7 +70,7 @@ class SalmonIntegrity {
      * @throws SalmonIntegrityException When integrity is comprimised
      * @throws SalmonSecurityException When security has failed
      */
-    public constructor(integrity: boolean, key: Uint8Array, chunkSize: number | null = null, provider: IHashProvider, hashSize: number = 0) {
+    public constructor(integrity: boolean, key: Uint8Array | null, chunkSize: number | null = null, provider: IHashProvider, hashSize: number = 0) {
         if (chunkSize != null && (chunkSize < 0 || (chunkSize > 0 && chunkSize < SalmonAES256CTRTransformer.BLOCK_SIZE)
             || (chunkSize > 0 && chunkSize % SalmonAES256CTRTransformer.BLOCK_SIZE != 0) || chunkSize > SalmonIntegrity.MAX_CHUNK_SIZE)) {
             throw new SalmonIntegrityException("Invalid chunk size, specify zero for default value or a positive number multiple of: "
@@ -167,6 +167,8 @@ class SalmonIntegrity {
      * @return The hash key.
      */
     public getKey(): Uint8Array {
+        if (this.key == null)
+            throw new SalmonSecurityException("Key is missing");
         return this.key;
     }
 

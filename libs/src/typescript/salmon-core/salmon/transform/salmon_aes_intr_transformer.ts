@@ -57,12 +57,15 @@ class SalmonAesIntrTransformer extends SalmonNativeTransformer {
 
     public override async encryptData(srcBuffer: Uint8Array, srcOffset: number,
         destBuffer: Uint8Array, destOffset: number, count: number): Promise<number> {
-        if (this.getExpandedKey() == null) //TODO: ToSync
+        let expKey: Uint8Array | null = this.getExpandedKey();
+        let ctr: Uint8Array | null = this.getCounter();
+
+        if (expKey == null) //TODO: ToSync
             throw new SalmonSecurityException("No expanded key found, run init first");
-        if (this.getCounter() == null) //TODO: ToSync
+        if (ctr == null) //TODO: ToSync
             throw new SalmonSecurityException("No counter found, run init first");
         // AES intrinsics needs the expanded key
-        return SalmonAesIntrTransformer.getNativeProxy().salmonTransform(this.getExpandedKey(), this.getCounter(),
+        return SalmonAesIntrTransformer.getNativeProxy().salmonTransform(expKey, ctr,
                 srcBuffer, srcOffset,
                 destBuffer, destOffset, count);
     }
@@ -78,12 +81,15 @@ class SalmonAesIntrTransformer extends SalmonNativeTransformer {
      */
     public override async decryptData(srcBuffer: Uint8Array, srcOffset: number,
         destBuffer: Uint8Array, destOffset: number, count: number): Promise<number> {
-        if (this.getExpandedKey() == null) //TODO: ToSync
+        let expKey: Uint8Array | null = this.getExpandedKey();
+        let ctr: Uint8Array | null = this.getCounter();
+
+        if (expKey == null) //TODO: ToSync
             throw new SalmonSecurityException("No expanded key found, run init first");
-        if (this.getCounter() == null) //TODO: ToSync
+        if (ctr == null) //TODO: ToSync
             throw new SalmonSecurityException("No counter found, run init first");
         // AES intrinsics needs the expanded key
-        return SalmonAesIntrTransformer.getNativeProxy().salmonTransform(this.getExpandedKey(), this.getCounter(),
+        return SalmonAesIntrTransformer.getNativeProxy().salmonTransform(expKey, ctr,
                 srcBuffer, srcOffset,
                 destBuffer, destOffset, count);
     }

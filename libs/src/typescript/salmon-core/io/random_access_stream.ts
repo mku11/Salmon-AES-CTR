@@ -81,7 +81,7 @@ abstract class RandomAccessStream {
      * @return
      * @throws IOException
      */
-    public abstract read(buffer: Uint8Array, offset: number, count: number): number;
+    public abstract read(buffer: Uint8Array, offset: number, count: number): Promise<number>;
 
     /**
      * Write the contents of the buffer to this stream.
@@ -90,7 +90,7 @@ abstract class RandomAccessStream {
      * @param count The count of bytes to be read from the buffer.
      * @throws IOException
      */
-    public abstract write(buffer: Uint8Array, offset: number, count: number): void;
+    public abstract write(buffer: Uint8Array, offset: number, count: number): Promise<void>;
 
     /**
      * Seek to a specific position in the stream.
@@ -119,19 +119,18 @@ abstract class RandomAccessStream {
      * @param progressListener The listener to notify when progress changes.
      * @throws IOException
      */
-    public copyTo(stream: RandomAccessStream, bufferSize: number = 0, progressListener?: OnProgressListener): void {
+    public async copyTo(stream: RandomAccessStream, bufferSize: number = 0, progressListener?: OnProgressListener): Promise<void> {
         if (!this.canRead())
             throw new Error("Target stream not readable");
         if (!stream.canWrite())
             throw new Error("Target stream not writable");
         if (bufferSize <= 0) {
-            //TODO:
-            //bufferSize = SalmonDefaultOptions.getBufferSize(); // TODO: remove ref to Salmon
+            bufferSize = SalmonDefaultOptions.getBufferSize(); // TODO: remove ref to Salmon
         }
         let bytesRead: number;
         let pos: number = this.getPosition();
         let buffer: Uint8Array = new Uint8Array(bufferSize);
-        while ((bytesRead = this.read(buffer, 0, bufferSize)) > 0) {
+        while ((bytesRead = await this.read(buffer, 0, bufferSize)) > 0) {
             stream.write(buffer, 0, bytesRead);
             if (progressListener != null)
                 progressListener.onProgressChanged(this.getPosition(), this.length());

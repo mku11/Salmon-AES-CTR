@@ -17,6 +17,10 @@
     <None Include="..\..\..\src\typescript\salmon-core\io\memory_stream.ts">
       <Link>salmon-core\io\memory_stream.ts</Link>
     </None>
+    <None Include="..\..\..\src\typescript\salmon-core\io\InputStreamWrapper.ts">
+      <Link>salmon-core\io\InputStreamWrapper.ts</Link>
+    </None>
+    
     <None Include="..\..\..\src\typescript\salmon-core\io\random_access_stream.ts">
       <Link>salmon-core\io\random_access_stream.ts</Link>
     </None>

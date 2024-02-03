@@ -57,16 +57,15 @@ abstract class SalmonAES256CTRTransformer implements ISalmonCTRTransformer {
      * @throws SalmonIntegrityException
      * @throws IOException
      */
-    //TODO:
-    //public static getActualSize(data: Uint8Array, key: Uint8Array, nonce?: Uint8Array, mode?: EncryptionMode,
-    //    headerData?: Uint8Array, integrity?: boolean, chunkSize?: number, hashKey?: Uint8Array): number {
-    //    let inputStream: MemoryStream = new MemoryStream(data);
-    //    let s: SalmonStream = new SalmonStream(key, nonce, mode, inputStream,
-    //        headerData, integrity, chunkSize, hashKey);
-    //    let size: number = s.actualLength();
-    //    s.close();
-    //    return size;
-    //}
+    public static getActualSize(data: Uint8Array, key: Uint8Array, nonce: Uint8Array, mode: EncryptionMode,
+        headerData: Uint8Array | null, integrity?: boolean, chunkSize?: number, hashKey?: Uint8Array): number {
+        let inputStream: MemoryStream = new MemoryStream(data);
+        let s: SalmonStream = new SalmonStream(key, nonce, mode, inputStream,
+            headerData, integrity, chunkSize, hashKey);
+        let size: number = s.actualLength();
+        s.close();
+        return size;
+    }
 
     /**
      * Salmon stream encryption block size, same as AES.

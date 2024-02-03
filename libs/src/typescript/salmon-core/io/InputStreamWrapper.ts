@@ -36,7 +36,7 @@ class InputStreamWrapper implements ReadableStream {
     public constructor(stream: RandomAccessStream) {
         this.stream = stream;
     }
-    locked: boolean;
+    locked: boolean = false;
     cancel(reason?: any): Promise<void> {
         throw new Error("Method not implemented.");
     }

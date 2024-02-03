@@ -135,7 +135,7 @@ class MemoryStream extends RandomAccessStream {
      * @return
      * @throws IOException
      */
-    public override read(buffer: Uint8Array, offset: number, count: number): number {
+    public override async read(buffer: Uint8Array, offset: number, count: number): Promise<number> {
         let bytesRead: number = Math.min(this._length - this.getPosition(), count);
         for (let i = 0; i < bytesRead; i++)
             buffer[offset + i] = this.bytes[this._position + i];
@@ -152,7 +152,7 @@ class MemoryStream extends RandomAccessStream {
      * @param count The number of bytes that will be written to the stream.
      * @throws IOException
      */
-    public override write(buffer: Uint8Array, offset: number, count: number): void {
+    public override async write(buffer: Uint8Array, offset: number, count: number): Promise<void> {
         this.checkAndResize(this._position + count);
         for (let i = 0; i < count; i++)
             this.bytes[this._position + i] = buffer[offset + i];

@@ -51,11 +51,14 @@ class SalmonNativeTransformer extends SalmonAES256CTRTransformer {
      */
     public override async encryptData(srcBuffer: Uint8Array, srcOffset: number,
         destBuffer: Uint8Array, destOffset: number, count: number): Promise<number> {
-        if (this.getKey() == null) //TODO: ToSync
+        let key: Uint8Array | null = this.getExpandedKey();
+        let ctr: Uint8Array | null = this.getCounter();
+
+        if (key == null) //TODO: ToSync
             throw new SalmonSecurityException("No key found, run init first");
-        if (this.getCounter() == null) //TODO: ToSync
+        if (ctr == null) //TODO: ToSync
             throw new SalmonSecurityException("No counter found, run init first");
-        return SalmonNativeTransformer.nativeProxy.salmonTransform(this.getKey(), this.getCounter(),
+        return SalmonNativeTransformer.nativeProxy.salmonTransform(key, ctr,
                 srcBuffer, srcOffset,
                 destBuffer, destOffset, count);
     }
@@ -71,11 +74,14 @@ class SalmonNativeTransformer extends SalmonAES256CTRTransformer {
      */
     public override async decryptData(srcBuffer: Uint8Array, srcOffset: number,
         destBuffer: Uint8Array, destOffset: number, count: number): Promise<number> {
-        if (this.getKey() == null) //TODO: ToSync
+        let key: Uint8Array | null = this.getExpandedKey();
+        let ctr: Uint8Array | null = this.getCounter();
+
+        if (key == null) //TODO: ToSync
             throw new SalmonSecurityException("No key found, run init first");
-        if (this.getCounter() == null) //TODO: ToSync
+        if (ctr == null) //TODO: ToSync
             throw new SalmonSecurityException("No counter found, run init first");
-        return SalmonNativeTransformer.nativeProxy.salmonTransform(this.getKey(), this.getCounter(),
+        return SalmonNativeTransformer.nativeProxy.salmonTransform(key, ctr,
                 srcBuffer, srcOffset,
                 destBuffer, destOffset, count);
     }
