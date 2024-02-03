@@ -77,7 +77,7 @@ class SalmonIntegrity {
                 + SalmonAES256CTRTransformer.BLOCK_SIZE + " and less than: " + SalmonIntegrity.MAX_CHUNK_SIZE + " bytes");
         }
         if (integrity && key == null)
-            throw new SalmonSecurityException("You need a hash to use with integrity");
+            throw new SalmonSecurityException("You need a hash key to use with integrity");
         if (integrity && (chunkSize == null || chunkSize == 0))
             this.chunkSize = SalmonIntegrity.DEFAULT_CHUNK_SIZE;
         else if (chunkSize != null && (integrity || chunkSize > 0)) // TODO: ToSync
