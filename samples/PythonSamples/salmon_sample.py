@@ -220,7 +220,10 @@ def create_drive_and_import_file(password: str):
     input_stream.close()
 
     # export the file
-    commander.export_files([file], PyFile("output"), False, True, export_progress, IRealFile.auto_rename_file,
+    export_dir: PyFile = PyFile("output")
+    if not export_dir.exists():
+        export_dir.get_parent().create_directory("output")
+    commander.export_files([file], export_dir, False, True, export_progress, IRealFile.auto_rename_file,
                            salmon_file_failed_to_export)
 
     # close the file commander
