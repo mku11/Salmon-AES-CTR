@@ -245,6 +245,8 @@ class SalmonFileSequencer(ISalmonSequencer):
         input_stream: MemoryStream | None = None
         output_stream: RandomAccessStream | None = None
         try:
+            if self.__sequenceFile.exists():
+                self.__sequenceFile.delete()
             output_stream = self.__sequenceFile.get_output_stream()
             input_stream = MemoryStream(bytearray(contents.strip().encode('utf-8')))
             buffer: bytearray = bytearray(32768)
