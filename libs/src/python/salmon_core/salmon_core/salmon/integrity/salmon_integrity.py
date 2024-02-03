@@ -96,7 +96,7 @@ class SalmonIntegrity:
                                         or chunk_size > SalmonIntegrity.MAX_CHUNK_SIZE)):
             raise SalmonIntegrityException(
                 "Invalid chunk size, specify zero for default value or a positive number multiple of: "
-                + SalmonGenerator.BLOCK_SIZE + " and less than: " + str(
+                + str(SalmonGenerator.BLOCK_SIZE) + " and less than: " + str(
                     SalmonIntegrity.MAX_CHUNK_SIZE) + " bytes")
         if integrity and key is None:
             raise SalmonSecurityException("You need a hash to use with integrity")
