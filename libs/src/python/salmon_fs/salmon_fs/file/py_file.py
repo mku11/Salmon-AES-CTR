@@ -129,7 +129,7 @@ class PyFile(IRealFile):
          * Get the parent directory of this file or directory.
          * @return The parent directory.
         """
-        dir_path: str = os.path.dirname(self.__file_path)
+        dir_path: str = os.path.dirname(self.get_absolute_path())
         parent: PyFile = PyFile(dir_path)
         return parent
 
