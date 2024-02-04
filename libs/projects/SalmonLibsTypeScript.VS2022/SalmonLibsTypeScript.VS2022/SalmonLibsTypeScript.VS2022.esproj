@@ -3,6 +3,10 @@
     <PublishAssetsDirectory>
     </PublishAssetsDirectory>
   </PropertyGroup>
+  <PropertyGroup>
+    <JavaScriptTestRoot>test\</JavaScriptTestRoot>
+    <JavaScriptTestFramework>Jest</JavaScriptTestFramework>
+  </PropertyGroup>
   <!-- Add the items so they can be seen in the ui -->
   <ItemGroup>
     <None Include="..\..\..\src\typescript\salmon-core\convert\base64.ts">
@@ -20,7 +24,6 @@
     <None Include="..\..\..\src\typescript\salmon-core\io\InputStreamWrapper.ts">
       <Link>salmon-core\io\InputStreamWrapper.ts</Link>
     </None>
-    
     <None Include="..\..\..\src\typescript\salmon-core\io\random_access_stream.ts">
       <Link>salmon-core\io\random_access_stream.ts</Link>
     </None>
@@ -81,11 +84,6 @@
     <None Include="..\..\..\src\typescript\salmon-core\salmon\io\salmon_stream.ts">
       <Link>salmon-core\salmon\io\salmon_stream.ts</Link>
     </None>
-    
-
-
-
-
     <None Include="..\..\..\src\typescript\salmon-core\salmon\transform\native_proxy.ts">
       <Link>salmon-core\salmon\transform\native_proxy.ts</Link>
     </None>
@@ -160,14 +158,8 @@
     </TypeScriptCompile>
     <TypeScriptCompile Remove="..\..\..\src\typescript\salmon-core\salmon\transform\tiny_aes_transformer.ts">
     </TypeScriptCompile>
-
     <TypeScriptCompile Remove="..\..\..\src\typescript\salmon-core\salmon\io\salmon_stream.ts">
     </TypeScriptCompile>
-    
-
-
-
-
     <TypeScriptCompile Remove="..\..\..\src\typescript\salmon-core\salmon\encode\salmon_encoder.ts">
     </TypeScriptCompile>
     <TypeScriptCompile Remove="..\..\..\src\typescript\salmon-core\salmon\password\isalmon_pbkdf_provider.ts">
