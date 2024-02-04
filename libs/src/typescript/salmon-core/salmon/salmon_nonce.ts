@@ -22,10 +22,15 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 */
 
+import { BitConverter } from "../convert/bit_converter.js";
+import { SalmonGenerator } from "./salmon_generator.js";
+import { SalmonRangeExceededException } from "./salmon_range_exceeded_exception.js";
+import { SalmonSecurityException } from "./salmon_security_exception.js";
+
 /**
  * Utility provides nonce operations.
  */
-class SalmonNonce {
+export class SalmonNonce {
     /**
      * Increase the sequential NONCE by a value of 1.
      * This implementation assumes that the NONCE length is 8 bytes or fewer so it can fit in a long.

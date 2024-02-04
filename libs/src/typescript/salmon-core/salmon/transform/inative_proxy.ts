@@ -25,7 +25,7 @@ SOFTWARE.
 /**
  * Proxy interface for use with native libraries for different platforms and operating systems.
  */
-interface INativeProxy {
+export interface INativeProxy {
     /**
      * Proxy Init the native code with AES implementation, and hash length options.
      * @param aesImpl

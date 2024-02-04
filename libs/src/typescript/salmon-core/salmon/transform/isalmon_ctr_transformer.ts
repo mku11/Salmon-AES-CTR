@@ -26,7 +26,7 @@ SOFTWARE.
  * Contract for the encryption/decryption transformers.
  * Note that Counter mode needs to be supported.
  */
-interface ISalmonCTRTransformer {
+export interface ISalmonCTRTransformer {
 
     /**
      * Initialize the transformer.
@@ -100,4 +100,3 @@ interface ISalmonCTRTransformer {
      */
     syncCounter(position: number): void;
 }
-

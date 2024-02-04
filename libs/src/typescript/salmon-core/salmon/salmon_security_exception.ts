@@ -25,7 +25,7 @@ SOFTWARE.
 /**
  * Salmon generic security exception.
  */
-class SalmonSecurityException extends Error {
+export class SalmonSecurityException extends Error {
     /**
      * Construct an exception with a specific message and inner exception.
      * @param msg The provided message.
@@ -35,4 +35,3 @@ class SalmonSecurityException extends Error {
         super(msg);
     }
 }
-

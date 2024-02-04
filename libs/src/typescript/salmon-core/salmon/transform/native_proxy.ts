@@ -25,7 +25,7 @@ SOFTWARE.
 /**
  * Proxy class for use with windows native library.
  */
-class NativeProxy implements INativeProxy {
+export class NativeProxy implements NativeProxy {
     private static loaded: boolean;
 
     /**

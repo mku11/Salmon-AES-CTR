@@ -25,7 +25,7 @@ SOFTWARE.
 /**
  * Utility class generates internal secure properties.
  */
-class SalmonGenerator {
+export class SalmonGenerator {
     /**
      * Version.
      */
@@ -97,8 +97,7 @@ class SalmonGenerator {
      */
     public static getSecureRandomBytes(size: number): Uint8Array {
         let bytes: Uint8Array = new Uint8Array(size);
-        self.crypto.getRandomValues(bytes);
+        crypto.getRandomValues(bytes);
         return bytes;
     }
 }
-

@@ -22,11 +22,17 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 */
 
+import { SalmonGenerator } from "../salmon_generator.js";
+import { SalmonSecurityException } from "../salmon_security_exception.js";
+import { SalmonAES256CTRTransformer } from "../transform/salmon_aes256_ctr_transformer.js";
+import { IHashProvider } from "./ihash_provider.js";
+import { SalmonIntegrityException } from "./salmon_integrity_exception.js";
+
 /**
  * Provide operations for calculating, storing, and verifying data integrity.
  * This class operates in chunks of data in buffers calculating the hash for each one.
  */
-class SalmonIntegrity {
+export class SalmonIntegrity {
     /**
      * Maximum chunk size for data integrity.
      */

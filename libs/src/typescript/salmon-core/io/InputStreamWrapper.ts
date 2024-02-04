@@ -22,11 +22,13 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 */
 
+import { RandomAccessStream } from "./random_access_stream.js";
+
 /***
  * Wrapper stream of AbsStream to Javascript's native InputStream interface.
  * Use this class to wrap any AbsStream to a less powerful but familiar and compatible Java InputStream.
  */
-class InputStreamWrapper implements ReadableStream {
+export class InputStreamWrapper implements ReadableStream {
     private readonly stream: RandomAccessStream;
 
     /**

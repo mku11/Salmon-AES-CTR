@@ -22,11 +22,14 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 */
 
+import { ISalmonPbkdfProvider } from "./isalmon_pbkdf_provider.js";
+import { SalmonDefaultPbkdfProvider } from "./salmon_default_pbkdf_provider.js";
+import { SalmonPbkdfFactory } from "./salmon_pbkdf_factory.js";
 
 /**
      * Pbkdf algorithm implementation type.
      */
-enum PbkdfAlgo {
+export enum PbkdfAlgo {
     /**
      * SHA1 hashing. DO NOT USE.
      */
@@ -41,7 +44,7 @@ enum PbkdfAlgo {
 /**
  * Pbkdf implementation type.
  */
-enum PbkdfType {
+export enum PbkdfType {
     /**
      * Default Java pbkdf implementation.
      */
@@ -51,7 +54,7 @@ enum PbkdfType {
 /**
  * Generates security keys based on text passwords.
  */
-class SalmonPassword {
+export class SalmonPassword {
 
     /**
      * WARNING! SHA1 is not secure anymore enable only if you know what you're doing!

@@ -22,10 +22,13 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 */
 
+import { IHashProvider } from "./ihash_provider.js";
+import { SalmonIntegrityException } from "./salmon_integrity_exception.js";
+
 /**
  * Provides Java HMAC256 hashing.
  */
-class HmacSHA256Provider implements IHashProvider {
+export class HmacSHA256Provider implements IHashProvider {
 
     /**
      * Calculate HMAC SHA256 hash for a byte buffer.

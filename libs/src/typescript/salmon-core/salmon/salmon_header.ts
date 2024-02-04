@@ -22,11 +22,15 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 */
 
+import { BitConverter } from "../convert/bit_converter.js";
+import { RandomAccessStream } from "../io/random_access_stream.js";
+import { SalmonGenerator } from "./salmon_generator.js";
+
 /**
  * Header embedded in the SalmonStream. Header contains nonce and other information for
  * decrypting the stream.
  */
-class SalmonHeader {
+export class SalmonHeader {
 
     /**
      * Magic bytes.

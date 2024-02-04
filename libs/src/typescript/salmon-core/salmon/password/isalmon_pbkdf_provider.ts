@@ -22,15 +22,18 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 */
 
+import { SalmonSecurityException } from "../salmon_security_exception.js";
+import { PbkdfAlgo } from "./salmon_password.js";
+
 /**
  * Java Cipher key for SHA256. See javax.crypto.SecretKeyFactory.
  */
-const PBKDF_SHA256: string = "SHA-256";
+export const PBKDF_SHA256: string = "SHA-256";
 /**
  * Java Cipher key for SHA1. See javax.crypto.SecretKeyFactory.
  * WARNING! SHA1 is considered insecure! Use PBKDF_SHA256 instead.
  */
-const PBKDF_SHA1: string = "SHA-1";
+export const PBKDF_SHA1: string = "SHA-1";
 
 /**
  * Get the PBKDF java cipher algorigthm string.
@@ -38,7 +41,7 @@ const PBKDF_SHA1: string = "SHA-1";
  * @param pbkdfAlgo The PBKDF algorithm to be used
  * @return The java cipher algorithm string. See javax.crypto.SecretKeyFactory.
  */
-function getPbkdfAlgoString(pbkdfAlgo: PbkdfAlgo): string {
+export function getPbkdfAlgoString(pbkdfAlgo: PbkdfAlgo): string {
     switch (pbkdfAlgo) {
         case PbkdfAlgo.SHA1:
             return PBKDF_SHA1;
@@ -52,8 +55,7 @@ function getPbkdfAlgoString(pbkdfAlgo: PbkdfAlgo): string {
 /**
  * Provides key derivation based on text passwords.
  */
-interface ISalmonPbkdfProvider {
-
+export interface ISalmonPbkdfProvider {
 
     /**
      * Get a key derived from a text password.

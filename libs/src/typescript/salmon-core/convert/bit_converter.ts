@@ -25,7 +25,7 @@ SOFTWARE.
 /**
  * Converts from/to byte arrays, integral values, and hex strings.
  */
-class BitConverter {
+export class BitConverter {
 
     /**
      * Converts a long value to byte array.

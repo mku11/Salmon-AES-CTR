@@ -22,10 +22,13 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 */
 
+import { Base64 } from "../../convert/base64.js";
+import { IBase64 } from "../../convert/ibase64.js";
+
 /**
  * Provides generic encoder (ie Base64).
  */
-class SalmonEncoder {
+export class SalmonEncoder {
     /**
      * Current global Base64 implementation for encrypting/decrypting text strings. To change use setBase64().
      */

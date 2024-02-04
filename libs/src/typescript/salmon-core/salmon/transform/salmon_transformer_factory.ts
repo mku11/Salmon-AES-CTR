@@ -22,10 +22,17 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 */
 
+import { ProviderType } from "../io/salmon_stream.js";
+import { SalmonSecurityException } from "../salmon_security_exception.js";
+import { ISalmonCTRTransformer } from "./isalmon_ctr_transformer.js";
+import { SalmonAesIntrTransformer } from "./salmon_aes_intr_transformer.js";
+import { SalmonDefaultTransformer } from "./salmon_default_transformer.js";
+import { TinyAesTransformer } from "./tiny_aes_transformer.js";
+
 /**
  * Creates an AES transformer object.
  */
-class SalmonTransformerFactory {
+export class SalmonTransformerFactory {
 
     /**
      * Create an encryption transformer implementation.

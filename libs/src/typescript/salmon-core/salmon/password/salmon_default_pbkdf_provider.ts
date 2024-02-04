@@ -22,10 +22,14 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 */
 
+import { SalmonSecurityException } from "../salmon_security_exception.js";
+import { ISalmonPbkdfProvider, getPbkdfAlgoString } from "./isalmon_pbkdf_provider.js";
+import { PbkdfAlgo } from "./salmon_password.js";
+
 /**
  * Provides pbkdf via Java default algorithm.
  */
-class SalmonDefaultPbkdfProvider implements ISalmonPbkdfProvider {
+export class SalmonDefaultPbkdfProvider implements ISalmonPbkdfProvider {
     /**
      * Get a key derived from a text password
      * @param password The text password.
@@ -40,9 +44,9 @@ class SalmonDefaultPbkdfProvider implements ISalmonPbkdfProvider {
         let pbkdfAlgoStr: string = getPbkdfAlgoString(pbkdfAlgo);
         let key: Uint8Array;
         try {
-            let importKey: CryptoKey = await window.crypto.subtle.importKey("raw",
+            let importKey: CryptoKey = await crypto.subtle.importKey("raw",
                 new TextEncoder().encode(password), { name: "PBKDF2" }, false, ["deriveBits", "deriveKey"]);
-            key = new Uint8Array(await window.crypto.subtle.deriveBits({
+            key = new Uint8Array(await crypto.subtle.deriveBits({
                 name: "PBKDF2", salt, iterations: iterations, hash: pbkdfAlgoStr
             }, importKey, outputBytes * 8));
         } catch (e) {

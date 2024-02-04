@@ -22,10 +22,13 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 */
 
+import { SalmonAesIntrTransformer } from "./salmon_aes_intr_transformer.js";
+import { SalmonNativeTransformer } from "./salmon_native_transformer.js";
+
 /**
  *  Salmon AES transformer implemented with TinyAES backend.
  */
-class TinyAesTransformer extends SalmonNativeTransformer {
+export class TinyAesTransformer extends SalmonNativeTransformer {
     /**
      * The constant to pass to the native code while initializing.
      */

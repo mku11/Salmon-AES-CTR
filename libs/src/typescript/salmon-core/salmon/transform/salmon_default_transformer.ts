@@ -22,10 +22,13 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 */
 
+import { SalmonSecurityException } from "../salmon_security_exception.js";
+import { SalmonAES256CTRTransformer } from "./salmon_aes256_ctr_transformer.js";
+
 /**
  * Salmon AES transformer based on the javax.crypto routines.
  */
-class SalmonDefaultTransformer extends SalmonAES256CTRTransformer {
+export class SalmonDefaultTransformer extends SalmonAES256CTRTransformer {
 
     /**
      * Key spec for the initial nonce (counter).
@@ -64,7 +67,7 @@ class SalmonDefaultTransformer extends SalmonAES256CTRTransformer {
             throw new SalmonSecurityException("No key defined, run init first");
         try {
             let counter: Uint8Array = this.getCounter();
-            let data = new Uint8Array(await window.crypto.subtle.encrypt(
+            let data = new Uint8Array(await crypto.subtle.encrypt(
                 {
                     name: "AES-CTR",
                     counter,
@@ -97,7 +100,7 @@ class SalmonDefaultTransformer extends SalmonAES256CTRTransformer {
             throw new SalmonSecurityException("No key defined, run init first");
         try {
             let counter: Uint8Array = this.getCounter();
-            let data = new Uint8Array(await window.crypto.subtle.decrypt(
+            let data = new Uint8Array(await crypto.subtle.decrypt(
                 {
                     name: "AES-CTR",
                     counter,

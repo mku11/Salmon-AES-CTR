@@ -22,10 +22,12 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 */
 
+import { IBase64 } from './ibase64.js';
+
 /**
  * Typescript default implementation of Base64 encoder/decoder.
  */
-class Base64 implements IBase64 {
+export class Base64 implements IBase64 {
     /**
      * Decode text from Base64 string.
      * @param text String to be decoded

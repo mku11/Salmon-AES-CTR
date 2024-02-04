@@ -22,10 +22,14 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 */
 
+import { ISalmonPbkdfProvider } from "./isalmon_pbkdf_provider.js";
+import { SalmonDefaultPbkdfProvider } from "./salmon_default_pbkdf_provider.js";
+import { PbkdfType } from "./salmon_password.js";
+
 /**
  * Creates AES transformer implementations.
  */
-class SalmonPbkdfFactory {
+export class SalmonPbkdfFactory {
     /**
      * Create an instance of a pbkdf provider.
      * @param type The pbkdf type.

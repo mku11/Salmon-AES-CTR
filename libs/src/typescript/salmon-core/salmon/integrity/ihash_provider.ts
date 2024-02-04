@@ -25,7 +25,7 @@ SOFTWARE.
 /**
  * Provides Hashing calculation.
  */
-interface IHashProvider {
+export interface IHashProvider {
 
     /**
      * Calculate the hash for the data provided.

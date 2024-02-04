@@ -22,10 +22,12 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 */
 
+import { SalmonIntegrity } from "./integrity/salmon_integrity.js";
+
 /**
  * Global options for salmon operations.
  */
-class SalmonDefaultOptions {
+export class SalmonDefaultOptions {
 
     /**
      * Get the default buffer size for all internal streams including Encryptors and Decryptors.

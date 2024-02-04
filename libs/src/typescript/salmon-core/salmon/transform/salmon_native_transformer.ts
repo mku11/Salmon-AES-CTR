@@ -22,11 +22,16 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 */
 
+import { SalmonSecurityException } from "../salmon_security_exception.js";
+import { INativeProxy } from "./inative_proxy.js";
+import { NativeProxy } from "./native_proxy.js";
+import { SalmonAES256CTRTransformer } from "./salmon_aes256_ctr_transformer.js";
+
 /**
  * Generic Native AES transformer. Extend this with your specific 
  * native transformer.
  */ 
-class SalmonNativeTransformer extends SalmonAES256CTRTransformer {
+export class SalmonNativeTransformer extends SalmonAES256CTRTransformer {
     private static nativeProxy: INativeProxy = new NativeProxy();
 
     /**

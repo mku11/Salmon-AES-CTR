@@ -22,10 +22,14 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 */
 
+import { SalmonSecurityException } from "../salmon_security_exception.js";
+import { SalmonAES256CTRTransformer } from "./salmon_aes256_ctr_transformer.js";
+import { SalmonNativeTransformer } from "./salmon_native_transformer.js";
+
 /**
  * Salmon AES transformer implemented with AES intrinsics.
  */
-class SalmonAesIntrTransformer extends SalmonNativeTransformer {
+export class SalmonAesIntrTransformer extends SalmonNativeTransformer {
     /**
      * The constant to pass to the native code while initializing.
      */

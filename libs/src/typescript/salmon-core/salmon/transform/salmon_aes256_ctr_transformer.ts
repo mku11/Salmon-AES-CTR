@@ -22,11 +22,18 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 */
 
+import { MemoryStream } from "../../io/memory_stream.js";
+import { EncryptionMode, SalmonStream } from "../io/salmon_stream.js";
+import { SalmonGenerator } from "../salmon_generator.js";
+import { SalmonRangeExceededException } from "../salmon_range_exceeded_exception.js";
+import { SalmonSecurityException } from "../salmon_security_exception.js";
+import { ISalmonCTRTransformer } from "./isalmon_ctr_transformer.js";
+
 /**
  * Abstract class for AES256 transformer implementations.
  *
  */
-abstract class SalmonAES256CTRTransformer implements ISalmonCTRTransformer {
+export abstract class SalmonAES256CTRTransformer implements ISalmonCTRTransformer {
 
     /**
      * Standard expansion key size for AES256 only.

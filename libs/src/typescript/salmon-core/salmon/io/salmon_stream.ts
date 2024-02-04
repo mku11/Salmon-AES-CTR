@@ -22,13 +22,24 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 */
 
+import { RandomAccessStream, SeekOrigin } from "../../io/random_access_stream.js";
+import { HmacSHA256Provider } from "../integrity/hmac_sha256_provider.js";
+import { SalmonIntegrity } from "../integrity/salmon_integrity.js";
+import { SalmonIntegrityException } from "../integrity/salmon_integrity_exception.js";
+import { SalmonDefaultOptions } from "../salmon_default_options.js";
+import { SalmonGenerator } from "../salmon_generator.js";
+import { SalmonSecurityException } from "../salmon_security_exception.js";
+import { ISalmonCTRTransformer } from "../transform/isalmon_ctr_transformer.js";
+import { SalmonAES256CTRTransformer } from "../transform/salmon_aes256_ctr_transformer.js";
+import { SalmonTransformerFactory } from "../transform/salmon_transformer_factory.js";
+
 /**
      * Encryption Mode
      *
      * @see #Encrypt
      * @see #Decrypt
      */
-enum EncryptionMode {
+export enum EncryptionMode {
     /**
      * Encryption Mode used with a base stream as a target.
      */
@@ -47,7 +58,7 @@ enum EncryptionMode {
  * @see #AesIntrinsics
  * @see #TinyAES
  */
-enum ProviderType {
+export enum ProviderType {
     /**
      * Default Java AES cipher.
      */
@@ -66,7 +77,7 @@ enum ProviderType {
  * Stream decorator provides AES256 encryption and decryption of stream.
  * Block data integrity is also supported.
  */
-class SalmonStream extends RandomAccessStream {
+export class SalmonStream extends RandomAccessStream {
 
     /**
      * Header data embedded in the stream if available.
@@ -82,12 +93,12 @@ class SalmonStream extends RandomAccessStream {
      * Allow seek and write.
      */
     private allowRangeWrite: boolean = false;
-	
-	/**
+
+    /**
      * Fail silently if integrity cannot be verified.
      */
     private failSilently: boolean = false;
-	
+
     /**
      * The base stream. When EncryptionMode is Encrypt this will be the target stream.
      * When EncryptionMode is Decrypt this will be the source stream.
@@ -109,14 +120,14 @@ class SalmonStream extends RandomAccessStream {
      */
     private salmonIntegrity: SalmonIntegrity = new SalmonIntegrity(false, null, null, new HmacSHA256Provider(), SalmonGenerator.HASH_RESULT_LENGTH);
 
-    
+
     /**
      * Instantiate a new Salmon stream with a base stream and optional header data and hash integrity.
      * <p>
      * If you read from the stream it will decrypt the data from the baseStream.
      * If you write to the stream it will encrypt the data from the baseStream.
      * The transformation is based on AES CTR Mode.
-	 * </p>
+     * </p>
      * Notes:
      * The initial value of the counter is a result of the concatenation of an 12 byte nonce and an additional 4 bytes counter.
      * The counter is then: incremented every block, encrypted by the key, and xored with the plain text.
@@ -199,7 +210,7 @@ class SalmonStream extends RandomAccessStream {
      * @return The current position of the stream.
      * @throws IOException
      */
-    public getPosition(): number{
+    public getPosition(): number {
         return this.getVirtualPosition();
     }
 
@@ -209,7 +220,7 @@ class SalmonStream extends RandomAccessStream {
      * @param value
      * @throws IOException
      */
-    public setPosition(value: number) : void {
+    public setPosition(value: number): void {
         if (this.canWrite() && !this.allowRangeWrite && value != 0) {
             throw new SalmonSecurityException("Range Write is not allowed for security (non-reusable IVs). " +
                 "If you still want to take the risk you need to use SetAllowRangeWrite(true)")
@@ -266,9 +277,9 @@ class SalmonStream extends RandomAccessStream {
      * @throws SalmonSecurityException
      * @throws SalmonIntegrityException
      */
-    private initIntegrity(integrity: boolean, hashKey: Uint8Array | null, chunkSize: number | null): void{
+    private initIntegrity(integrity: boolean, hashKey: Uint8Array | null, chunkSize: number | null): void {
         this.salmonIntegrity = new SalmonIntegrity(integrity, hashKey, chunkSize,
-                new HmacSHA256Provider(), SalmonGenerator.HASH_RESULT_LENGTH);
+            new HmacSHA256Provider(), SalmonGenerator.HASH_RESULT_LENGTH);
     }
 
     /**
@@ -276,7 +287,7 @@ class SalmonStream extends RandomAccessStream {
      *
      * @throws IOException
      */
-    private initStream() : void {
+    private initStream(): void {
         this.baseStream.setPosition(this.getHeaderLength());
     }
 
@@ -298,7 +309,7 @@ class SalmonStream extends RandomAccessStream {
      * For each data block we increase the Counter and apply the EAS encryption on the Counter.
      * The encrypted Counter then will be xor-ed with the actual data block.
      */
-    private initTransformer(key: Uint8Array, nonce: Uint8Array) : void {
+    private initTransformer(key: Uint8Array, nonce: Uint8Array): void {
         if (key == null)
             throw new SalmonSecurityException("Key is missing");
         if (nonce == null)
@@ -339,7 +350,7 @@ class SalmonStream extends RandomAccessStream {
     /**
      * Flushes any buffered data to the base stream.
      */
-    public flush() : void {
+    public flush(): void {
         if (this.baseStream != null) {
             this.baseStream.flush();
         }
@@ -350,7 +361,7 @@ class SalmonStream extends RandomAccessStream {
      *
      * @throws IOException
      */
-    public close() : void {
+    public close(): void {
         this.closeStreams();
     }
 
@@ -359,7 +370,7 @@ class SalmonStream extends RandomAccessStream {
      *
      * @return The current Counter value.
      */
-    public getCounter(): Uint8Array{
+    public getCounter(): Uint8Array {
         let ctr: Uint8Array | null = this.transformer.getCounter();
         if (ctr == null) //TODO: ToSync
             throw new SalmonSecurityException("No counter, init transformer first");
@@ -386,14 +397,14 @@ class SalmonStream extends RandomAccessStream {
     /**
      * Returns a copy of the hash key.
      */
-    public getHashKey() : Uint8Array{
+    public getHashKey(): Uint8Array {
         return this.salmonIntegrity.getKey().slice(0);
     }
 
     /**
      * Returns a copy of the initial vector.
      */
-    public getNonce(): Uint8Array{
+    public getNonce(): Uint8Array {
         let nonce: Uint8Array | null = this.transformer.getNonce();
         if (nonce == null) //TODO: ToSync
             throw new SalmonSecurityException("No nonce, init transformer first");
@@ -414,18 +425,18 @@ class SalmonStream extends RandomAccessStream {
      *
      * @param value True to allow byte range encryption write operations
      */
-    public setAllowRangeWrite(value: boolean) : void {
+    public setAllowRangeWrite(value: boolean): void {
         this.allowRangeWrite = value;
     }
-	
-	/**
+
+    /**
      * Set to True if you want the stream to fail silently when integrity cannot be verified.
      * In that case read() operations will return -1 instead of raising an exception.
-	 * This prevents 3rd party code like media players from crashing.
+     * This prevents 3rd party code like media players from crashing.
      *
      * @param value True to fail silently.
      */
-    public setFailSilently(value: boolean) : void {
+    public setFailSilently(value: boolean): void {
         this.failSilently = value;
     }
 
@@ -436,7 +447,7 @@ class SalmonStream extends RandomAccessStream {
      * @throws IOException
      * @throws SalmonRangeExceededException
      */
-    private setVirtualPosition(value: number) : void {
+    private setVirtualPosition(value: number): void {
         // we skip the header bytes and any hash values we have if the file has integrity set
         this.baseStream.setPosition(value);
         let totalHashBytes: number = this.salmonIntegrity.getHashDataLength(this.baseStream.getPosition(), 0);
@@ -449,7 +460,7 @@ class SalmonStream extends RandomAccessStream {
     /**
      * Returns the Virtual Position of the stream excluding the header and hash signatures.
      */
-    private getVirtualPosition(): number{
+    private getVirtualPosition(): number {
         let totalHashBytes: number;
         let hashOffset: number = this.salmonIntegrity.getChunkSize() > 0 ? SalmonGenerator.HASH_RESULT_LENGTH : 0;
         totalHashBytes = this.salmonIntegrity.getHashDataLength(this.baseStream.getPosition(), hashOffset);
@@ -459,7 +470,7 @@ class SalmonStream extends RandomAccessStream {
     /**
      * Close base stream
      */
-    private closeStreams() : void {
+    private closeStreams(): void {
         if (this.baseStream != null) {
             if (this.canWrite())
                 this.baseStream.flush();
@@ -566,7 +577,7 @@ class SalmonStream extends RandomAccessStream {
                 this.transformer.syncCounter(this.getPosition());
             } catch (ex) {
                 if (ex instanceof SalmonIntegrityException && this.failSilently)
-					return -1;
+                    return -1;
                 throw new Error("Could not read from stream: " + ex);
             }
         }
@@ -586,10 +597,10 @@ class SalmonStream extends RandomAccessStream {
     public async write(buffer: Uint8Array, offset: number, count: number): Promise<void> {
         if (this.salmonIntegrity.getChunkSize() > 0 && this.getPosition() % this.salmonIntegrity.getChunkSize() != 0)
             throw new SalmonIntegrityException("All write operations should be aligned to the chunks size: "
-                        + this.salmonIntegrity.getChunkSize());
+                + this.salmonIntegrity.getChunkSize());
         else if (this.salmonIntegrity.getChunkSize() == 0 && this.getPosition() % SalmonAES256CTRTransformer.BLOCK_SIZE != 0)
             throw new SalmonIntegrityException("All write operations should be aligned to the block size: "
-                            + SalmonAES256CTRTransformer.BLOCK_SIZE);
+                + SalmonAES256CTRTransformer.BLOCK_SIZE);
 
         // if there are not enough data in the buffer
         count = Math.min(count, buffer.length - offset);
@@ -657,7 +668,7 @@ class SalmonStream extends RandomAccessStream {
         } else {
             // buffer size should also be a multiple of the AES block size
             bufferSize = bufferSize / SalmonAES256CTRTransformer.BLOCK_SIZE
-                    * SalmonAES256CTRTransformer.BLOCK_SIZE;
+                * SalmonAES256CTRTransformer.BLOCK_SIZE;
         }
 
         return bufferSize;
@@ -685,7 +696,7 @@ class SalmonStream extends RandomAccessStream {
      * @return The number of bytes read.
      * @throws IOException
      */
-    private async readStreamData(count: number): Promise<Uint8Array>  {
+    private async readStreamData(count: number): Promise<Uint8Array> {
         let data: Uint8Array = new Uint8Array(Math.min(count, this.baseStream.length() - this.baseStream.getPosition()));
         this.baseStream.read(data, 0, data.length);
         return data;
@@ -696,7 +707,7 @@ class SalmonStream extends RandomAccessStream {
      *
      * @param srcBuffer  The source byte array.
      * @param srcOffset  The source byte offset.
-	 * @param destBuffer  The source byte array.
+     * @param destBuffer  The source byte array.
      * @param destOffset The destination byte offset.
      * @param count      The number of bytes to write.
      */
@@ -714,7 +725,7 @@ class SalmonStream extends RandomAccessStream {
      * @return The number of bytes written.
      * @throws IOException
      */
-    private async writeToStream(buffer: Uint8Array, chunkSize: number, hashes: Array<Uint8Array> | null): Promise<number>{
+    private async writeToStream(buffer: Uint8Array, chunkSize: number, hashes: Array<Uint8Array> | null): Promise<number> {
         let pos: number = 0;
         let chunk: number = 0;
         if (chunkSize <= 0)
@@ -767,7 +778,7 @@ class SalmonStream extends RandomAccessStream {
      *
      * @return
      */
-    public getEncryptionMode(): EncryptionMode{
+    public getEncryptionMode(): EncryptionMode {
         return this.encryptionMode;
     }
 
@@ -781,4 +792,3 @@ class SalmonStream extends RandomAccessStream {
         return this.allowRangeWrite;
     }
 }
-

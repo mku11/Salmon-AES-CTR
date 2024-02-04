@@ -22,11 +22,13 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 */
 
+import { RandomAccessStream, SeekOrigin } from "./random_access_stream.js";
+
 /**
  * Memory Stream for seeking, reading, and writing to a memory buffer (modeled after C# MemoryStream).
  * If the memory buffer is not specified then an internal resizable buffer will be created.
  */
-class MemoryStream extends RandomAccessStream {
+export class MemoryStream extends RandomAccessStream {
 
     /**
      * Increment to resize to when capacity is exhausted.

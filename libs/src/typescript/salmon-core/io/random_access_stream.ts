@@ -22,11 +22,13 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 */
 
+import { SalmonDefaultOptions } from "../salmon/salmon_default_options.js";
+
 /**
  * Abstract read-write seekable stream used by internal streams
  * (modeled after c# Stream class).
  */
-abstract class RandomAccessStream {
+export abstract class RandomAccessStream {
 
     /**
      * True if the stream is readable.
@@ -151,7 +153,7 @@ interface OnProgressListener {
 /**
  * Used to identify the start offset for seeking to a stream.
  */
-enum SeekOrigin {
+export enum SeekOrigin {
     /**
      * Start from the beginning of the stream.
      */
