@@ -65,7 +65,7 @@ export abstract class SalmonAES256CTRTransformer implements ISalmonCTRTransforme
      * @throws IOException
      */
     public static getActualSize(data: Uint8Array, key: Uint8Array, nonce: Uint8Array, mode: EncryptionMode,
-        headerData: Uint8Array | null, integrity?: boolean, chunkSize?: number, hashKey?: Uint8Array): number {
+        headerData: Uint8Array | null, integrity: boolean = false, chunkSize: number | null, hashKey: Uint8Array | null = null): number {
         let inputStream: MemoryStream = new MemoryStream(data);
         let s: SalmonStream = new SalmonStream(key, nonce, mode, inputStream,
             headerData, integrity, chunkSize, hashKey);
