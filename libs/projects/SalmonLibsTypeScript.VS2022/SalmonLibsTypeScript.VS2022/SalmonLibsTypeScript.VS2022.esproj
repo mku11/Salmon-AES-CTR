@@ -105,6 +105,9 @@
     <None Include="..\..\..\src\typescript\salmon-core\salmon\password\salmon_pbkdf_factory.ts">
       <Link>salmon-core\salmon\password\salmon_pbkdf_factory.ts</Link>
     </None>
+    <None Include="..\..\..\src\typescript\salmon-core\salmon\salmon_encryptor.ts">
+      <Link>salmon-core\salmon\salmon_encryptor.ts</Link>
+    </None>
   </ItemGroup>
   <!-- Add the items so they can be built -->
   <ItemGroup>
@@ -169,6 +172,8 @@
     <TypeScriptCompile Remove="..\..\..\src\typescript\salmon-core\salmon\password\salmon_default_pbkdf_provider.ts">
     </TypeScriptCompile>
     <TypeScriptCompile Remove="..\..\..\src\typescript\salmon-core\salmon\password\salmon_pbkdf_factory.ts">
+    </TypeScriptCompile>
+    <TypeScriptCompile Remove="..\..\..\src\typescript\salmon-core\salmon\salmon_encryptor.ts">
     </TypeScriptCompile>
   </ItemGroup>
   <ItemGroup>
