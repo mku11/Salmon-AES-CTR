@@ -26,6 +26,9 @@ SOFTWARE.
  * Thrown when Salmon Stream's data are corrupt or tampered with.
  */
 export class SalmonIntegrityException extends Error {
+
+    cause: Error | unknown | null = null;
+
     /**
      * Construct an exception with a specific message and inner exception
      * @param msg The provided message
@@ -33,5 +36,12 @@ export class SalmonIntegrityException extends Error {
      */
     public constructor(msg: string, ex?: Error | unknown) {
         super(msg);
+        if (ex != null) {
+            this.cause = ex;
+        }
+    }
+
+    public getCause(): Error | unknown | null {
+        return this.cause;
     }
 }
