@@ -8,11 +8,8 @@ to run the unit tests you will need:
 1. nodejs
 2. jest
 
-Create a folder link to test cases: 
-in windows:
-mklink /D test ..\..\..\test\salmon_core_test_ts
-in linux/macos:
-ln -s ../../../test/salmon_core_test_ts test
+Jest doesn't translate hard links in windows very well so 
+make sure you don't link any external unit test cases files
 
 Enable the experimental modules for jest via nodejs:
 for windows you can add this in the advance environment system variables.
