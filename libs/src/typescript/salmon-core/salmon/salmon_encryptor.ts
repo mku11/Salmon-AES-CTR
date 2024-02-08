@@ -222,8 +222,12 @@ export class SalmonEncryptor {
             //done.await();
         } catch (ignored) { }
 
-        //if (ex != null) {
-        //    throw ex;
+        //if (ex.get() != null) {
+        //    try {
+        //        throw ex.get();
+        //    } catch (Exception e) {
+        //        throw new RuntimeException(e);
+        //    }
         //}
     }
 
