@@ -22,25 +22,16 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 */
 
-import { ISalmonPbkdfProvider } from "./isalmon_pbkdf_provider.js";
-import { SalmonDefaultPbkdfProvider } from "./salmon_default_pbkdf_provider.js";
-import { PbkdfType } from "./pbkdf_type.js";
-
 /**
- * Creates AES transformer implementations.
+ * Pbkdf algorithm implementation type.
  */
-export class SalmonPbkdfFactory {
+export enum PbkdfAlgo {
     /**
-     * Create an instance of a pbkdf provider.
-     * @param type The pbkdf type.
-     * @return The provider.
+     * SHA1 hashing. DO NOT USE.
      */
-    public static create(type: PbkdfType): ISalmonPbkdfProvider {
-        switch (type) {
-            case PbkdfType.Default:
-                return new SalmonDefaultPbkdfProvider();
-            default:
-                throw new Error("Unknown Pbkdf provider type");
-        }
-    }
+    SHA1,
+    /**
+     * SHA256 hashing.
+     */
+    SHA256
 }

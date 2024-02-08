@@ -38,5 +38,5 @@ export interface IBase64 {
      * @param data The byte array to be converted.
      * @return Text string of converted data.
      */
-    encode(data: Uint8Array): String;
+    encode(data: Uint8Array): string;
 }

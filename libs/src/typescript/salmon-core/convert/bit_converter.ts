@@ -34,7 +34,7 @@ export class BitConverter {
      * @return A byte array representation of the value.
      */
     public static toBytes(value: number, length: number): Uint8Array {
-        let buffer = new Uint8Array(length);
+        const buffer = new Uint8Array(length);
         for (let i = length - 1; i >= 0; i--) {
             buffer[i] = value % 256;
             value /= 256;
@@ -53,7 +53,7 @@ export class BitConverter {
         let num = 0;
         let mul = 1;
         for (let i = index + length - 1; i >= index; i--) {
-            num += (bytes[i] & 0xFF) * mul;
+            num += bytes[i] * mul;
             mul *= 256;
         }
         return num;
@@ -78,7 +78,7 @@ export class BitConverter {
      * @return The byte array converted from the string.
      */
     public static hexToBytes(data: string): Uint8Array{
-        let bytes = new Uint8Array(data.length / 2);
+        const bytes = new Uint8Array(Math.floor(data.length / 2));
         let k = 0;
         for (let i = 0; i < data.length; i += 2) {
             bytes[k] = (16 * parseInt(data.charAt(i) + "", 16));

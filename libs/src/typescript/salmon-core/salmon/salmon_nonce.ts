@@ -66,6 +66,6 @@ export class SalmonNonce {
         // we reserve some nonces
         if (end - start < 256)
             throw new SalmonSecurityException("Not enough nonces left");
-        return BitConverter.toBytes(start + (end - start) / 2, SalmonGenerator.NONCE_LENGTH);
+        return BitConverter.toBytes(start + Math.floor((end - start) / 2), SalmonGenerator.NONCE_LENGTH);
     }
 }

@@ -22,7 +22,7 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 */
 
-import { ProviderType } from "../io/salmon_stream.js";
+import { ProviderType } from "../io/provider_type.js";
 import { SalmonSecurityException } from "../salmon_security_exception.js";
 import { ISalmonCTRTransformer } from "./isalmon_ctr_transformer.js";
 import { SalmonAesIntrTransformer } from "./salmon_aes_intr_transformer.js";

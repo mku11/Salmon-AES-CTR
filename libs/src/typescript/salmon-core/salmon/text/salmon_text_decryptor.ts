@@ -1,4 +1,3 @@
-package com.mku.salmon.text;
 /*
 MIT License
 
@@ -23,38 +22,16 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 */
 
-import java.io.IOException;
-import com.mku.salmon.*;
-import com.mku.salmon.encode.SalmonEncoder;
-import com.mku.salmon.integrity.SalmonIntegrityException;
-
-import java.nio.charset.Charset;
+import { SalmonDecryptor } from "../salmon_decryptor.js";
+import { SalmonEncoder } from "../encode/salmon_encoder.js";
 
 /**
  * Utility class that encrypts and decrypts text strings.
  */
-public class SalmonTextDecryptor {
-
-    private static final SalmonDecryptor decryptor = new SalmonDecryptor();
+export class SalmonTextDecryptor {
+    private static readonly decryptor: SalmonDecryptor = new SalmonDecryptor();
 
     /**
-     * Decrypts a text String using AES256 with the key and nonce provided.
-     *
-     * @param text  Text to be decrypted.
-     * @param key   The encryption key to be used.
-     * @param nonce The nonce to be used, set only if header=false.
-     * @param header Set to true if you encrypted the string with encrypt(header=true), set only if nonce=null
-     *               otherwise you will have to provide the original nonce.
-     * @return The decrypted text.
-     * @throws IOException
-     * @throws SalmonSecurityException
-     * @throws SalmonIntegrityException
-     */
-    public static String decryptString(String text, byte[] key, byte[] nonce, boolean header) 
-		throws IOException, SalmonSecurityException, SalmonIntegrityException {
-        return decryptString(text, key, nonce, header, false, null, null);
-    }
-
     /**
      * Decrypts a text String using AES256 with the key and nonce provided.
      *
@@ -71,12 +48,11 @@ public class SalmonTextDecryptor {
      * @throws SalmonSecurityException
      * @throws SalmonIntegrityException
      */
-    public static String decryptString(String text, byte[] key, byte[] nonce, boolean header,
-                                       boolean integrity, byte[] hashKey, Integer chunkSize)
-            throws IOException, SalmonSecurityException, SalmonIntegrityException {
-        byte[] bytes = SalmonEncoder.getBase64().decode(text);
-        byte[] decBytes = decryptor.decrypt(bytes, key, nonce, header, integrity, hashKey, chunkSize);
-        String decString = new String(decBytes, Charset.defaultCharset());
+    public static async decryptString(text: string, key: Uint8Array, nonce: Uint8Array, header: boolean,
+        integrity: boolean, hashKey: Uint8Array, chunkSize: number | null = null): Promise<string> {
+        let bytes: Uint8Array = SalmonEncoder.getBase64().decode(text);
+        let decBytes: Uint8Array = await this.decryptor.decrypt(bytes, key, nonce, header, integrity, hashKey, chunkSize);
+        let decString: string = new TextDecoder().decode(decBytes);
         return decString;
     }
 }

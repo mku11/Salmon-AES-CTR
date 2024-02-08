@@ -59,9 +59,9 @@ export class MemoryStream extends RandomAccessStream {
      * Create a memory stream backed by an existing byte-array.
      * @param bytes
      */
-    public constructor(bytes?: Uint8Array) {
+    public constructor(bytes: Uint8Array | null = null) {
         super();
-        if (bytes != null && bytes != undefined) {
+        if (bytes != null) {
             this._length = bytes.length;
             this.bytes = bytes;
             this._capacity = bytes.length;
@@ -138,7 +138,7 @@ export class MemoryStream extends RandomAccessStream {
      * @throws IOException
      */
     public override async read(buffer: Uint8Array, offset: number, count: number): Promise<number> {
-        let bytesRead: number = Math.min(this._length - this.getPosition(), count);
+        const bytesRead: number = Math.min(this._length - this.getPosition(), count);
         for (let i = 0; i < bytesRead; i++)
             buffer[offset + i] = this.bytes[this._position + i];
         this.setPosition(this.getPosition() + bytesRead);
@@ -167,10 +167,10 @@ export class MemoryStream extends RandomAccessStream {
      */
     private checkAndResize(newLength: number): void {
         if (this._capacity < newLength) {
-            let newCapacity: number = this._capacity + MemoryStream.CAPACITY_INCREMENT * ((newLength - this._capacity) / MemoryStream.CAPACITY_INCREMENT);
+            let newCapacity: number = this._capacity + MemoryStream.CAPACITY_INCREMENT * Math.floor((newLength - this._capacity) / MemoryStream.CAPACITY_INCREMENT);
             if (newCapacity < newLength)
                 newCapacity += MemoryStream.CAPACITY_INCREMENT;
-            let nBytes: Uint8Array = new Uint8Array(newCapacity);
+            const nBytes: Uint8Array = new Uint8Array(newCapacity);
             for (let i = 0; i < this._capacity; i++)
                 nBytes[i] = this.bytes[i];
             this._capacity = newCapacity;
@@ -186,13 +186,13 @@ export class MemoryStream extends RandomAccessStream {
      * @return
      * @throws IOException
      */
-    public override seek(offset: number, origin: SeekOrigin): number {
+    public override async seek(offset: number, origin: SeekOrigin): Promise<number> {
         let nPos: number = 0;
-        if (origin == SeekOrigin.Begin) {
+        if (origin === SeekOrigin.Begin) {
             nPos = offset;
-        } else if (origin == SeekOrigin.Current) {
+        } else if (origin === SeekOrigin.Current) {
             nPos = this.getPosition() + offset;
-        } else if (origin == SeekOrigin.End) {
+        } else if (origin === SeekOrigin.End) {
             nPos = (this.bytes.length - offset);
         }
         this.checkAndResize(nPos);
@@ -204,7 +204,7 @@ export class MemoryStream extends RandomAccessStream {
      * Flush the stream. Not-Applicable for memory stream.
      */
     public override flush(): void {
-
+        // noop
     }
 
     /**
@@ -212,7 +212,7 @@ export class MemoryStream extends RandomAccessStream {
      */
 
     public override close(): void {
-
+        // noop
     }
 
     /**
@@ -220,7 +220,7 @@ export class MemoryStream extends RandomAccessStream {
      * @return A byte array containing the data from the stream.
      */
     public toArray(): Uint8Array {
-        let nBytes: Uint8Array = new Uint8Array(this._length);
+        const nBytes: Uint8Array = new Uint8Array(this._length);
         for (let i = 0; i < this._length; i++)
             nBytes[i] = this.bytes[i];
         return nBytes;

@@ -17,8 +17,19 @@ NODE_OPTIONS=--experimental-vm-modules
 linux/macos set this in .bashrc or .profile:
 export NODE_OPTIONS=--experimental-vm-modules
 
+To build from the command line:
+npm run build
+
+To run the tests from the command line:
+npm run test
+
+To run static code analysis:
+npm run lint
+
 if build is failing and you're missing tsc as a node module type:
 npm install -g typescript
+
+if you're getting errors from node_modules set folder to hidden in file explorer and reload project
 
 
 

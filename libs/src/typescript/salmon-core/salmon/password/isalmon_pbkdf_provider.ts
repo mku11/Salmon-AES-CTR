@@ -23,7 +23,7 @@ SOFTWARE.
 */
 
 import { SalmonSecurityException } from "../salmon_security_exception.js";
-import { PbkdfAlgo } from "./salmon_password.js";
+import { PbkdfAlgo } from "./pbkdf_algo.js";
 
 /**
  * Java Cipher key for SHA256. See javax.crypto.SecretKeyFactory.

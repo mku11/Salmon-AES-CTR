@@ -34,7 +34,7 @@ export interface ISalmonCTRTransformer {
      * @param nonce The nonce to use.
      * @throws SalmonSecurityException
      */
-    init(key: Uint8Array, nonce: Uint8Array): void;
+    init(key: Uint8Array, nonce: Uint8Array): Promise<void>;
 
     /**
      * Encrypt the data.

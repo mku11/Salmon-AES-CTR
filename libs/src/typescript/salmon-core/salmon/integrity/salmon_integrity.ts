@@ -77,14 +77,14 @@ export class SalmonIntegrity {
      * @throws SalmonSecurityException When security has failed
      */
     public constructor(integrity: boolean, key: Uint8Array | null, chunkSize: number | null = null, provider: IHashProvider, hashSize: number = 0) {
-        if (chunkSize != null && (chunkSize < 0 || (chunkSize > 0 && chunkSize < SalmonAES256CTRTransformer.BLOCK_SIZE)
+        if (chunkSize !== null && (chunkSize < 0 || (chunkSize > 0 && chunkSize < SalmonAES256CTRTransformer.BLOCK_SIZE)
             || (chunkSize > 0 && chunkSize % SalmonAES256CTRTransformer.BLOCK_SIZE != 0) || chunkSize > SalmonIntegrity.MAX_CHUNK_SIZE)) {
             throw new SalmonIntegrityException("Invalid chunk size, specify zero for default value or a positive number multiple of: "
                 + SalmonAES256CTRTransformer.BLOCK_SIZE + " and less than: " + SalmonIntegrity.MAX_CHUNK_SIZE + " bytes");
         }
         if (integrity && key == null)
             throw new SalmonSecurityException("You need a hash key to use with integrity");
-        if (integrity && (chunkSize == null || chunkSize == 0))
+        if (integrity && (chunkSize === null || chunkSize == 0))
             this.chunkSize = SalmonIntegrity.DEFAULT_CHUNK_SIZE;
         else if (chunkSize != null && (integrity || chunkSize > 0)) // TODO: ToSync
             this.chunkSize = chunkSize;
@@ -108,7 +108,7 @@ export class SalmonIntegrity {
      * @return The hash.
      * @throws SalmonIntegrityException
      */
-    //TODO: we should avoid the header data for performance?
+    // TODO: we should avoid the header data for performance?
     public static async calculateHash(provider: IHashProvider, buffer: Uint8Array, offset: number, count: number,
         key: Uint8Array, includeData: Uint8Array | null): Promise<Uint8Array> {
 
@@ -124,7 +124,7 @@ export class SalmonIntegrity {
                 finalBuffer[includeData.length + i] = buffer[offset + i];
             finalOffset = 0;
         }
-        let hashValue: Uint8Array = await provider.calc(key, finalBuffer, finalOffset, finalCount);
+        const hashValue: Uint8Array = await provider.calc(key, finalBuffer, finalOffset, finalCount);
         return hashValue;
     }
 
@@ -141,7 +141,7 @@ export class SalmonIntegrity {
         hashOffset: number, hashLength: number): number {
         // if the stream is using multiple chunks for integrity
         let chunks: number = Math.floor(length / (chunkSize + hashOffset));
-        let rem: number = Math.floor(length % (chunkSize + hashOffset));
+        const rem: number = Math.floor(length % (chunkSize + hashOffset));
         if (rem > hashOffset)
             chunks++;
         return chunks * hashLength;

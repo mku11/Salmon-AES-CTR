@@ -23,33 +23,10 @@ SOFTWARE.
 */
 
 import { ISalmonPbkdfProvider } from "./isalmon_pbkdf_provider.js";
+import { PbkdfAlgo } from "./pbkdf_algo.js";
+import { PbkdfType } from "./pbkdf_type.js";
 import { SalmonDefaultPbkdfProvider } from "./salmon_default_pbkdf_provider.js";
 import { SalmonPbkdfFactory } from "./salmon_pbkdf_factory.js";
-
-/**
-     * Pbkdf algorithm implementation type.
-     */
-export enum PbkdfAlgo {
-    /**
-     * SHA1 hashing. DO NOT USE.
-     */
-    SHA1,
-    /**
-     * SHA256 hashing.
-     */
-    SHA256
-}
-
-
-/**
- * Pbkdf implementation type.
- */
-export enum PbkdfType {
-    /**
-     * Default Java pbkdf implementation.
-     */
-    Default
-}
 
 /**
  * Generates security keys based on text passwords.

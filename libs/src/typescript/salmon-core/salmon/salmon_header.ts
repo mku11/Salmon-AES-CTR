@@ -104,22 +104,22 @@ export class SalmonHeader {
      * @return
      * @throws IOException
      */
-    public static parseHeaderData(stream: RandomAccessStream): SalmonHeader  {
+    public static async parseHeaderData(stream: RandomAccessStream): Promise<SalmonHeader> {
         let header: SalmonHeader = new SalmonHeader();
         header.magicBytes = new Uint8Array(SalmonGenerator.MAGIC_LENGTH);
-        stream.read(header.magicBytes, 0, header.magicBytes.length);
+        await stream.read(header.magicBytes, 0, header.magicBytes.length);
         let versionBytes: Uint8Array = new Uint8Array(SalmonGenerator.VERSION_LENGTH);
-        stream.read(versionBytes, 0, SalmonGenerator.VERSION_LENGTH);
+        await stream.read(versionBytes, 0, SalmonGenerator.VERSION_LENGTH);
         header.version = versionBytes[0];
         let chunkSizeHeader: Uint8Array = new Uint8Array(SalmonGenerator.CHUNK_SIZE_LENGTH);
-        stream.read(chunkSizeHeader, 0, chunkSizeHeader.length);
+        await stream.read(chunkSizeHeader, 0, chunkSizeHeader.length);
         header.chunkSize = BitConverter.toLong(chunkSizeHeader, 0, SalmonGenerator.CHUNK_SIZE_LENGTH);
         header.nonce = new Uint8Array(SalmonGenerator.NONCE_LENGTH);
-        stream.read(header.nonce, 0, header.nonce.length);
+        await stream.read(header.nonce, 0, header.nonce.length);
         stream.setPosition(0);
         header.headerData = new Uint8Array(SalmonGenerator.MAGIC_LENGTH + SalmonGenerator.VERSION_LENGTH
-                + SalmonGenerator.CHUNK_SIZE_LENGTH + SalmonGenerator.NONCE_LENGTH);
-        stream.read(header.headerData, 0, header.headerData.length);
+            + SalmonGenerator.CHUNK_SIZE_LENGTH + SalmonGenerator.NONCE_LENGTH);
+        await stream.read(header.headerData, 0, header.headerData.length);
 
         return header;
     }
@@ -136,7 +136,7 @@ export class SalmonHeader {
      * Set the Salmon format version
      * @param version The format version
      */
-    public  setVersion(version: number): void {
+    public setVersion(version: number): void {
         this.version = version;
     }
 

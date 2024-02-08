@@ -21,8 +21,8 @@
     <None Include="..\..\..\src\typescript\salmon-core\io\memory_stream.ts">
       <Link>salmon-core\io\memory_stream.ts</Link>
     </None>
-    <None Include="..\..\..\src\typescript\salmon-core\io\InputStreamWrapper.ts">
-      <Link>salmon-core\io\InputStreamWrapper.ts</Link>
+    <None Include="..\..\..\src\typescript\salmon-core\io\input_stream_wrapper.ts">
+      <Link>salmon-core\io\input_stream_wrapper.ts</Link>
     </None>
     <None Include="..\..\..\src\typescript\salmon-core\io\random_access_stream.ts">
       <Link>salmon-core\io\random_access_stream.ts</Link>
@@ -108,6 +108,27 @@
     <None Include="..\..\..\src\typescript\salmon-core\salmon\salmon_encryptor.ts">
       <Link>salmon-core\salmon\salmon_encryptor.ts</Link>
     </None>
+    <None Include="..\..\..\src\typescript\salmon-core\salmon\salmon_decryptor.ts">
+      <Link>salmon-core\salmon\salmon_decryptor.ts</Link>
+    </None>
+    <None Include="..\..\..\src\typescript\salmon-core\salmon\text\salmon_text_encryptor.ts">
+      <Link>salmon-core\salmon\text\salmon_text_encryptor.ts</Link>
+    </None>
+    <None Include="..\..\..\src\typescript\salmon-core\salmon\text\salmon_text_decryptor.ts">
+      <Link>salmon-core\salmon\text\salmon_text_decryptor.ts</Link>
+    </None>
+    <None Include="..\..\..\src\typescript\salmon-core\salmon\io\provider_type.ts">
+      <Link>salmon-core\salmon\io\provider_type.ts</Link>
+    </None>
+    <None Include="..\..\..\src\typescript\salmon-core\salmon\io\encryption_mode.ts">
+      <Link>salmon-core\salmon\io\encryption_mode.ts</Link>
+    </None>
+    <None Include="..\..\..\src\typescript\salmon-core\salmon\password\pbkdf_algo.ts">
+      <Link>salmon-core\salmon\password\pbkdf_algo.ts</Link>
+    </None>
+    <None Include="..\..\..\src\typescript\salmon-core\salmon\password\pbkdf_type.ts">
+      <Link>salmon-core\salmon\password\pbkdf_type.ts</Link>
+    </None>
   </ItemGroup>
   <!-- Add the items so they can be built -->
   <ItemGroup>
@@ -175,14 +196,31 @@
     </TypeScriptCompile>
     <TypeScriptCompile Remove="..\..\..\src\typescript\salmon-core\salmon\salmon_encryptor.ts">
     </TypeScriptCompile>
+    <TypeScriptCompile Remove="..\..\..\src\typescript\salmon-core\salmon\salmon_decryptor.ts">
+    </TypeScriptCompile>
+    <TypeScriptCompile Remove="..\..\..\src\typescript\salmon-core\salmon\text\salmon_text_decryptor.ts">
+    </TypeScriptCompile>
+    <TypeScriptCompile Remove="..\..\..\src\typescript\salmon-core\salmon\text\salmon_text_decryptor.ts">
+    </TypeScriptCompile>
+    <TypeScriptCompile Remove="..\..\..\src\typescript\salmon-core\salmon\io\provider_type.ts">
+    </TypeScriptCompile>
+    <TypeScriptCompile Remove="..\..\..\src\typescript\salmon-core\salmon\io\encryption_mode.ts">
+    </TypeScriptCompile>
+    <TypeScriptCompile Remove="..\..\..\src\typescript\salmon-core\salmon\password\pbkdf_algo.ts">
+    </TypeScriptCompile>
+    <TypeScriptCompile Remove="..\..\..\src\typescript\salmon-core\salmon\password\pbkdf_type.ts">
+    </TypeScriptCompile>
   </ItemGroup>
   <ItemGroup>
-    <TypeScriptConfiguration Remove="build\**" />
+    <TypeScriptConfiguration Remove="lib\**" />
   </ItemGroup>
   <ItemGroup>
-    <None Remove="build\**" />
+    <None Remove="lib\**" />
   </ItemGroup>
   <ItemGroup>
-    <Folder Include="build\" />
+    <Folder Include="lib\" />
+  </ItemGroup>
+  <ItemGroup>
+    <Script Remove=".eslintrc.json" />
   </ItemGroup>
 </Project>

@@ -42,8 +42,8 @@ export class HmacSHA256Provider implements IHashProvider {
 
     public async calc(hashKey: Uint8Array, buffer: Uint8Array, offset: number, count: number): Promise<Uint8Array> {
         try {
-            let cryptoKey: CryptoKey = await crypto.subtle.importKey('raw', hashKey, { name: 'HMAC', hash: 'SHA-256' }, true, ['sign']);
-            let hashValue: Uint8Array = new Uint8Array(await crypto.subtle.sign('HMAC', cryptoKey, buffer.slice(offset, offset + count)));
+            const cryptoKey: CryptoKey = await crypto.subtle.importKey('raw', hashKey, { name: 'HMAC', hash: 'SHA-256' }, true, ['sign']);
+            const hashValue: Uint8Array = new Uint8Array(await crypto.subtle.sign('HMAC', cryptoKey, buffer.slice(offset, offset + count)));
             return hashValue;
         } catch (ex) {
             throw new SalmonIntegrityException("Could not calculate HMAC", ex);

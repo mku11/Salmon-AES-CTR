@@ -24,7 +24,7 @@ SOFTWARE.
 
 import { SalmonSecurityException } from "../salmon_security_exception.js";
 import { ISalmonPbkdfProvider, getPbkdfAlgoString } from "./isalmon_pbkdf_provider.js";
-import { PbkdfAlgo } from "./salmon_password.js";
+import { PbkdfAlgo } from "./pbkdf_algo.js";
 
 /**
  * Provides pbkdf via Java default algorithm.

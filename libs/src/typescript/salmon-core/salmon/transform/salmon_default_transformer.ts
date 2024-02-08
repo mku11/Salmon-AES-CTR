@@ -41,8 +41,8 @@ export class SalmonDefaultTransformer extends SalmonAES256CTRTransformer {
      * @param nonce The nonce to use.
      * @throws SalmonSecurityException
      */
-    public async init(key: Uint8Array, nonce: Uint8Array) {
-        super.init(key, nonce);
+    public async init(key: Uint8Array, nonce: Uint8Array): Promise<void> {
+        await super.init(key, nonce);
         try {
             this.encSecretKey = await crypto.subtle.importKey(
                 "raw", key, "AES-CTR", false, ["encrypt", "decrypt"]);
@@ -76,7 +76,7 @@ export class SalmonDefaultTransformer extends SalmonAES256CTRTransformer {
                 this.encSecretKey,
                 srcBuffer,
             ));
-            for (let i = 0; i < data.length; i++)
+            for (let i = 0; i < count; i++)
                 destBuffer[destOffset + i] = data[srcOffset + i];
             return data.length;
         } catch (ex) {
@@ -100,7 +100,7 @@ export class SalmonDefaultTransformer extends SalmonAES256CTRTransformer {
             throw new SalmonSecurityException("No key defined, run init first");
         try {
             let counter: Uint8Array = this.getCounter();
-            let data = new Uint8Array(await crypto.subtle.decrypt(
+            let data = new Uint8Array(await crypto.subtle.encrypt(
                 {
                     name: "AES-CTR",
                     counter,
@@ -109,7 +109,7 @@ export class SalmonDefaultTransformer extends SalmonAES256CTRTransformer {
                 this.encSecretKey,
                 srcBuffer,
             ));
-            for (let i = 0; i < data.length; i++)
+            for (let i = 0; i < count; i++)
                 destBuffer[destOffset + i] = data[srcOffset + i];
             return data.length;
         } catch (ex) {

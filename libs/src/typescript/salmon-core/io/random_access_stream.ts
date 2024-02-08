@@ -101,7 +101,7 @@ export abstract class RandomAccessStream {
      * @return The position after the seeking was complete.
      * @throws IOException
      */
-    public abstract seek(position: number, origin: SeekOrigin): number;
+    public abstract seek(position: number, origin: SeekOrigin): Promise<number>;
 
     /**
      * Flush buffers.
@@ -130,10 +130,10 @@ export abstract class RandomAccessStream {
             bufferSize = SalmonDefaultOptions.getBufferSize(); // TODO: remove ref to Salmon
         }
         let bytesRead: number;
-        let pos: number = this.getPosition();
-        let buffer: Uint8Array = new Uint8Array(bufferSize);
+        const pos: number = this.getPosition();
+        const buffer: Uint8Array = new Uint8Array(bufferSize);
         while ((bytesRead = await this.read(buffer, 0, bufferSize)) > 0) {
-            stream.write(buffer, 0, bytesRead);
+            await stream.write(buffer, 0, bytesRead);
             if (progressListener != null)
                 progressListener.onProgressChanged(this.getPosition(), this.length());
         }
@@ -144,8 +144,7 @@ export abstract class RandomAccessStream {
 
 /**
  * Progress listener for stream operations.
- * 
-*/
+ */
 interface OnProgressListener {
     onProgressChanged(position: number, length: number): void;
 }

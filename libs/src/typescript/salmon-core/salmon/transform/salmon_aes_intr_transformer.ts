@@ -41,12 +41,12 @@ export class SalmonAesIntrTransformer extends SalmonNativeTransformer {
      * @param nonce The nonce to use.
      * @throws SalmonSecurityException
      */
-    public init(key: Uint8Array, nonce: Uint8Array): void {
+    public async init(key: Uint8Array, nonce: Uint8Array): Promise<void> {
         SalmonAesIntrTransformer.getNativeProxy().salmonInit(SalmonAesIntrTransformer.AES_IMPL_AES_INTR);
         let expandedKey: Uint8Array = new Uint8Array(SalmonAES256CTRTransformer.EXPANDED_KEY_SIZE);
         SalmonAesIntrTransformer.getNativeProxy().salmonExpandKey(key, expandedKey);
         this.setExpandedKey(expandedKey);
-        super.init(key, nonce);
+        await super.init(key, nonce);
     }
 
     /**

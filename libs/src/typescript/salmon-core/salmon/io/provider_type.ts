@@ -22,25 +22,24 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 */
 
-import { ISalmonPbkdfProvider } from "./isalmon_pbkdf_provider.js";
-import { SalmonDefaultPbkdfProvider } from "./salmon_default_pbkdf_provider.js";
-import { PbkdfType } from "./pbkdf_type.js";
-
 /**
- * Creates AES transformer implementations.
+ * AES provider types. List of AES implementations that currently supported.
+ *
+ * @see #Default
+ * @see #AesIntrinsics
+ * @see #TinyAES
  */
-export class SalmonPbkdfFactory {
+export enum ProviderType {
     /**
-     * Create an instance of a pbkdf provider.
-     * @param type The pbkdf type.
-     * @return The provider.
+     * Default Java AES cipher.
      */
-    public static create(type: PbkdfType): ISalmonPbkdfProvider {
-        switch (type) {
-            case PbkdfType.Default:
-                return new SalmonDefaultPbkdfProvider();
-            default:
-                throw new Error("Unknown Pbkdf provider type");
-        }
-    }
+    Default,
+    /**
+     * Salmon builtin AES intrinsics. This needs the SalmonNative library to be loaded. @see <a href="https://github.com/mku11/Salmon-AES-CTR#readme">Salmon README.md</a>
+     */
+    AesIntrinsics,
+    /**
+     * Tiny AES implementation. This needs the SalmonNative library to be loaded. @see <a href="https://github.com/mku11/Salmon-AES-CTR#readme">Salmon README.md</a>
+     */
+    TinyAES
 }

@@ -22,25 +22,20 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 */
 
-import { ISalmonPbkdfProvider } from "./isalmon_pbkdf_provider.js";
-import { SalmonDefaultPbkdfProvider } from "./salmon_default_pbkdf_provider.js";
-import { PbkdfType } from "./pbkdf_type.js";
-
 /**
- * Creates AES transformer implementations.
+ * Encryption Mode
+ *
+ * @see #Encrypt
+ * @see #Decrypt
  */
-export class SalmonPbkdfFactory {
+export enum EncryptionMode {
     /**
-     * Create an instance of a pbkdf provider.
-     * @param type The pbkdf type.
-     * @return The provider.
+     * Encryption Mode used with a base stream as a target.
      */
-    public static create(type: PbkdfType): ISalmonPbkdfProvider {
-        switch (type) {
-            case PbkdfType.Default:
-                return new SalmonDefaultPbkdfProvider();
-            default:
-                throw new Error("Unknown Pbkdf provider type");
-        }
-    }
+    Encrypt,
+    /**
+     * Decryption Mode used with a base stream as a source.
+     */
+    Decrypt
 }
+

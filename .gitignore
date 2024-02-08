@@ -57,3 +57,4 @@ xcuserdata
 *.dll
 *.exe
 /libs/projects/salmon-libs-python/main.py
+/libs/projects/SalmonLibsTypeScript.VS2022/SalmonLibsTypeScript.VS2022/lib

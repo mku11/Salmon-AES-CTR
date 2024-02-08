@@ -22,8 +22,6 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 */
 
-import { MemoryStream } from "../../io/memory_stream.js";
-import { EncryptionMode, SalmonStream } from "../io/salmon_stream.js";
 import { SalmonGenerator } from "../salmon_generator.js";
 import { SalmonRangeExceededException } from "../salmon_range_exceeded_exception.js";
 import { SalmonSecurityException } from "../salmon_security_exception.js";
@@ -43,37 +41,7 @@ export abstract class SalmonAES256CTRTransformer implements ISalmonCTRTransforme
     public abstract encryptData(srcBuffer: Uint8Array, srcOffset: number, destBuffer: Uint8Array, destOffset: number, count: number): Promise<number>;
 
     public abstract decryptData(srcBuffer: Uint8Array, srcOffset: number, destBuffer: Uint8Array, destOffset: number, count: number): Promise<number>;
-
-
-    /**
-     * Get the output size of the data to be transformed(encrypted or decrypted) including
-     * header and hash without executing any operations. This can be used to prevent over-allocating memory
-     * where creating your output buffers.
-     *
-     * @param data The data to be transformed.
-     * @param key The AES key.
-     * @param nonce The nonce for the CTR.
-     * @param mode The {@link SalmonStream.EncryptionMode} Encrypt or Decrypt.
-     * @param headerData The header data to be embedded if you use Encryption.
-     * @param integrity True if you want to enable integrity.
-     * @param chunkSize The chunk size for integrity chunks.
-     * @param hashKey The hash key to be used for integrity checks.
-     * @return The size of the output data.
-     *
-     * @throws SalmonSecurityException
-     * @throws SalmonIntegrityException
-     * @throws IOException
-     */
-    public static getActualSize(data: Uint8Array, key: Uint8Array, nonce: Uint8Array, mode: EncryptionMode,
-        headerData: Uint8Array | null, integrity: boolean = false, chunkSize: number | null, hashKey: Uint8Array | null = null): number {
-        let inputStream: MemoryStream = new MemoryStream(data);
-        let s: SalmonStream = new SalmonStream(key, nonce, mode, inputStream,
-            headerData, integrity, chunkSize, hashKey);
-        let size: number = s.actualLength();
-        s.close();
-        return size;
-    }
-
+    
     /**
      * Salmon stream encryption block size, same as AES.
      */
@@ -108,7 +76,7 @@ export abstract class SalmonAES256CTRTransformer implements ISalmonCTRTransforme
      * Resets the Counter and the block count.
      */
     public resetCounter(): void {
-        if (this.counter == null || this.nonce == null) //TODO: ToSync
+        if (this.nonce == null) //TODO: ToSync
             throw new SalmonSecurityException("No counter, run init first");
         this.counter = new Uint8Array(SalmonAES256CTRTransformer.BLOCK_SIZE);
         for (let i = 0; i < this.nonce.length; i++)
@@ -121,7 +89,7 @@ export abstract class SalmonAES256CTRTransformer implements ISalmonCTRTransforme
      * The block count is already excluding the header and the hash signatures.
      */
     public syncCounter(position: number): void {
-        let currBlock: number = position / SalmonAES256CTRTransformer.BLOCK_SIZE;
+        let currBlock: number = Math.floor(position / SalmonAES256CTRTransformer.BLOCK_SIZE);
         this.resetCounter();
         this.increaseCounter(currBlock);
         this.block = currBlock;
@@ -144,9 +112,9 @@ export abstract class SalmonAES256CTRTransformer implements ISalmonCTRTransforme
             if (index <= SalmonAES256CTRTransformer.BLOCK_SIZE - SalmonGenerator.NONCE_LENGTH)
                 throw new SalmonRangeExceededException("Current CTR max blocks exceeded");
             let val: number = (value + carriage) % 256;
-            carriage = ((this.counter[index] & 0xFF) + val) / 256;
+            carriage = Math.floor(((this.counter[index] & 0xFF) + val) / 256);
             this.counter[index--] += val;
-            value /= 256;
+            value = Math.floor(value / 256);
         }
     }
 
@@ -157,7 +125,7 @@ export abstract class SalmonAES256CTRTransformer implements ISalmonCTRTransforme
      * @param nonce
      * @throws SalmonSecurityException
      */
-    public init(key: Uint8Array, nonce: Uint8Array): void {
+    public async init(key: Uint8Array, nonce: Uint8Array): Promise<void> {
         this.key = key;
         this.nonce = nonce;
     }
