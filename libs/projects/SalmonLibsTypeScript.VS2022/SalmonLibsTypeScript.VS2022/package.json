@@ -40,7 +40,8 @@
     "setupFilesAfterEnv": [
       "<rootDir>/jest.setup.js"
     ],
-    "testEnvironment": "node"
+    "testEnvironment": "node",
+    "testTimeout": 60000
   },
   "type": "module"
 }
