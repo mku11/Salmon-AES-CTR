@@ -34,7 +34,7 @@ export class Base64 implements IBase64 {
      * @return Byte array of decoded data.
      */
     public decode(text: string): Uint8Array {
-        return new TextEncoder().encode(atob(text));
+        return Uint8Array.from(atob(text), x => x.charCodeAt(0));
     }
 
     /**
