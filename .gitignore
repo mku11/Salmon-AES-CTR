@@ -58,3 +58,5 @@ xcuserdata
 *.exe
 /libs/projects/salmon-libs-python/main.py
 /libs/projects/SalmonLibsTypeScript.VS2022/SalmonLibsTypeScript.VS2022/lib
+/libs/projects/SalmonLibsTypeScript.VS2022/SalmonLibsTypeScript.VS2022/eslintreport.txt
+/libs/projects/SalmonLibsTypeScript.VS2022/SalmonLibsTypeScript.VS2022/lintreport.txt
