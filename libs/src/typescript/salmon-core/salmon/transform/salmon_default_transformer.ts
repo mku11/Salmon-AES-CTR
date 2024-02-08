@@ -70,7 +70,7 @@ export class SalmonDefaultTransformer extends SalmonAES256CTRTransformer {
             let data = new Uint8Array(await crypto.subtle.encrypt(
                 {
                     name: "AES-CTR",
-                    counter,
+                    counter: counter,
                     length: 64,
                 },
                 this.encSecretKey,
@@ -103,7 +103,7 @@ export class SalmonDefaultTransformer extends SalmonAES256CTRTransformer {
             let data = new Uint8Array(await crypto.subtle.encrypt(
                 {
                     name: "AES-CTR",
-                    counter,
+                    counter: counter,
                     length: 64,
                 },
                 this.encSecretKey,
