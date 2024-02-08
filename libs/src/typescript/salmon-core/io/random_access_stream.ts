@@ -23,6 +23,7 @@ SOFTWARE.
 */
 
 import { SalmonDefaultOptions } from "../salmon/salmon_default_options.js";
+import { IOException } from "./io_exception.js";
 
 /**
  * Abstract read-write seekable stream used by internal streams
@@ -123,9 +124,9 @@ export abstract class RandomAccessStream {
      */
     public async copyTo(stream: RandomAccessStream, bufferSize: number = 0, progressListener?: OnProgressListener): Promise<void> {
         if (!this.canRead())
-            throw new Error("Target stream not readable");
+            throw new IOException("Target stream not readable");
         if (!stream.canWrite())
-            throw new Error("Target stream not writable");
+            throw new IOException("Target stream not writable");
         if (bufferSize <= 0) {
             bufferSize = SalmonDefaultOptions.getBufferSize(); // TODO: remove ref to Salmon
         }

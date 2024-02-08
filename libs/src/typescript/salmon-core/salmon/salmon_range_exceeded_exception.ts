@@ -26,11 +26,21 @@ SOFTWARE.
  * Thrown when maximum nonce range is exceeded.
  */
 export class SalmonRangeExceededException extends Error {
+
+    cause: Error | unknown | null = null;
+
     /**
      * Construct an exception with a specific message.
      * @param msg The message.
      */
-    public constructor(msg: string, ex?: Error | unknown) {
-        super(msg);
+    public constructor(msg: string, ex: Error | unknown | null = null) {
+        super(msg ?? "");
+        if (ex != null) {
+            this.cause = ex;
+        }
+    }
+
+    public getCause(): Error | unknown | null {
+        return this.cause;
     }
 }

@@ -21,6 +21,9 @@
     <None Include="..\..\..\src\typescript\salmon-core\io\memory_stream.ts">
       <Link>salmon-core\io\memory_stream.ts</Link>
     </None>
+    <None Include="..\..\..\src\typescript\salmon-core\io\io_exception.ts">
+      <Link>salmon-core\io\io_exception.ts</Link>
+    </None>
     <None Include="..\..\..\src\typescript\salmon-core\io\input_stream_wrapper.ts">
       <Link>salmon-core\io\input_stream_wrapper.ts</Link>
     </None>
@@ -139,6 +142,8 @@
     <TypeScriptCompile Remove="..\..\..\src\typescript\salmon-core\convert\bit_converter.ts">
     </TypeScriptCompile>
     <TypeScriptCompile Remove="..\..\..\src\typescript\salmon-core\io\input_stream_wrapper.ts">
+    </TypeScriptCompile>
+    <TypeScriptCompile Remove="..\..\..\src\typescript\salmon-core\io\io_exception.ts">
     </TypeScriptCompile>
     <TypeScriptCompile Remove="..\..\..\src\typescript\salmon-core\io\memory_stream.ts">
     </TypeScriptCompile>

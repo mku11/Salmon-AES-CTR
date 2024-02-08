@@ -22,6 +22,7 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 */
 
+import { IOException } from "../../io/io_exception.js";
 import { MemoryStream } from "../../io/memory_stream.js";
 import { RandomAccessStream, SeekOrigin } from "../../io/random_access_stream.js";
 import { HmacSHA256Provider } from "../integrity/hmac_sha256_provider.js";
@@ -218,13 +219,13 @@ export class SalmonStream extends RandomAccessStream {
      */
     public async setPosition(value: number): Promise<void> {
         if (this.canWrite() && !this.allowRangeWrite && value != 0) {
-            throw new SalmonSecurityException("Range Write is not allowed for security (non-reusable IVs). " +
-                "If you still want to take the risk you need to use SetAllowRangeWrite(true)")
+            throw new IOException(null, new SalmonSecurityException("Range Write is not allowed for security (non-reusable IVs). " +
+                "If you still want to take the risk you need to use SetAllowRangeWrite(true)"));
         }
         try {
             await this.setVirtualPosition(value);
         } catch (e) {
-            throw e;
+            throw new IOException(null, e);
         }
     }
 
@@ -345,7 +346,7 @@ export class SalmonStream extends RandomAccessStream {
      * @param value
      */
     public setLength(value: number): void {
-        throw new Error();
+        throw new Error("Unsupported Operation");
     }
 
     /**
@@ -549,9 +550,9 @@ export class SalmonStream extends RandomAccessStream {
         if (this.getPosition() == this.length())
             return 0;
         if (this.salmonIntegrity.getChunkSize() > 0 && this.getPosition() % this.salmonIntegrity.getChunkSize() != 0)
-            throw new Error("All reads should be aligned to the chunks size: " + this.salmonIntegrity.getChunkSize());
+            throw new IOException("All reads should be aligned to the chunks size: " + this.salmonIntegrity.getChunkSize());
         else if (this.salmonIntegrity.getChunkSize() == 0 && this.getPosition() % SalmonAES256CTRTransformer.BLOCK_SIZE != 0)
-            throw new Error("All reads should be aligned to the block size: " + SalmonAES256CTRTransformer.BLOCK_SIZE);
+            throw new IOException("All reads should be aligned to the block size: " + SalmonAES256CTRTransformer.BLOCK_SIZE);
 
         let pos: number = this.getPosition();
 
@@ -591,7 +592,7 @@ export class SalmonStream extends RandomAccessStream {
             } catch (ex) {
                 if (ex instanceof SalmonIntegrityException && this.failSilently)
                     return -1;
-                throw new Error("Could not read from stream: " + ex);
+                throw new IOException("Could not read from stream: " + ex);
             }
         }
         return bytes;
@@ -611,11 +612,11 @@ export class SalmonStream extends RandomAccessStream {
         await this.initTransformer(this.key, this.nonce);
 
         if (this.salmonIntegrity.getChunkSize() > 0 && this.getPosition() % this.salmonIntegrity.getChunkSize() != 0)
-            throw new SalmonIntegrityException("All write operations should be aligned to the chunks size: "
-                + this.salmonIntegrity.getChunkSize());
+            throw new IOException(null, new SalmonIntegrityException("All write operations should be aligned to the chunks size: "
+                + this.salmonIntegrity.getChunkSize()));
         else if (this.salmonIntegrity.getChunkSize() == 0 && this.getPosition() % SalmonAES256CTRTransformer.BLOCK_SIZE != 0)
-            throw new SalmonIntegrityException("All write operations should be aligned to the block size: "
-                + SalmonAES256CTRTransformer.BLOCK_SIZE);
+            throw new IOException(null, new SalmonIntegrityException("All write operations should be aligned to the block size: "
+                + SalmonAES256CTRTransformer.BLOCK_SIZE));
 
         // if there are not enough data in the buffer
         count = Math.min(count, buffer.length - offset);
@@ -637,7 +638,7 @@ export class SalmonStream extends RandomAccessStream {
                 pos += await this.writeToStream(destBuffer, this.getChunkSize(), integrityHashes);
                 this.transformer.syncCounter(this.getPosition());
             } catch (ex) {
-                throw new Error("Could not write to stream: " + ex);
+                throw new IOException("Could not write to stream: ", ex);
             }
         }
     }

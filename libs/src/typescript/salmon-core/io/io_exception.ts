@@ -23,9 +23,9 @@ SOFTWARE.
 */
 
 /**
- * Thrown when Salmon Stream's data are corrupt or tampered with.
+ * Thrown when an io operation has errored
  */
-export class SalmonIntegrityException extends Error {
+export class IOException extends Error {
 
     cause: Error | unknown | null = null;
 
@@ -34,7 +34,7 @@ export class SalmonIntegrityException extends Error {
      * @param msg The provided message
      * @param ex The inner exception
      */
-    public constructor(msg: string, ex: Error | unknown | null = null) {
+    public constructor(msg: string | null = null, ex: Error | unknown | null = null) {
         super(msg ?? "");
         if (ex != null) {
             this.cause = ex;

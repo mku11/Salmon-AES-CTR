@@ -26,12 +26,22 @@ SOFTWARE.
  * Salmon generic security exception.
  */
 export class SalmonSecurityException extends Error {
+
+    cause: Error | unknown | null = null;
+
     /**
      * Construct an exception with a specific message and inner exception.
      * @param msg The provided message.
      * @param ex The inner exception.
      */
-    public constructor(msg: string, ex?: Error | unknown) {
-        super(msg);
+    public constructor(msg: string | null = null, ex: Error | unknown | null = null) {
+        super(msg ?? "");
+        if (ex != null) {
+            this.cause = ex;
+        }
+    }
+
+    public getCause(): Error | unknown | null {
+        return this.cause;
     }
 }
