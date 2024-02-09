@@ -152,7 +152,6 @@ export class SalmonStream extends RandomAccessStream {
         this.initIntegrity(integrity, hashKey, chunkSize);
         this.key = key;
         this.nonce = nonce;
-        this.initStream();
     }
 
     /**
@@ -278,16 +277,7 @@ export class SalmonStream extends RandomAccessStream {
         this.salmonIntegrity = new SalmonIntegrity(integrity, hashKey, chunkSize,
             new HmacSHA256Provider(), SalmonGenerator.HASH_RESULT_LENGTH);
     }
-
-    /**
-     * Init the stream.
-     *
-     * @throws IOException
-     */
-    private initStream(): void {
-        this.baseStream.setPosition(this.getHeaderLength());
-    }
-
+    
     /**
      * The length of the header data if the stream was initialized with a header.
      *
@@ -308,7 +298,7 @@ export class SalmonStream extends RandomAccessStream {
      * Note: for typescript since its async and we cannot run it in the constructor we delay 
      * until we run an opearation using the transformer.
      */
-    private async initTransformer(key: Uint8Array, nonce: Uint8Array): Promise<void> {
+    private async init(key: Uint8Array, nonce: Uint8Array): Promise<void> {
         // init only once
         if (this.transformer.getKey() != null)
             return;
@@ -317,9 +307,12 @@ export class SalmonStream extends RandomAccessStream {
             throw new SalmonSecurityException("Key is missing");
         if (nonce == null)
             throw new SalmonSecurityException("Nonce is missing");
+
         this.transformer = SalmonTransformerFactory.create(SalmonStream.providerType);
         await this.transformer.init(key, nonce);
         this.transformer.resetCounter();
+
+        await this.baseStream.setPosition(this.getHeaderLength());
     }
 
     /**
@@ -373,7 +366,7 @@ export class SalmonStream extends RandomAccessStream {
      * @return The current Counter value.
      */
     public async getCounter(): Promise<Uint8Array> {
-        await this.initTransformer(this.key, this.nonce);
+        await this.init(this.key, this.nonce);
 
         let ctr: Uint8Array | null = this.transformer.getCounter();
         if (ctr == null) //TODO: ToSync
@@ -385,7 +378,7 @@ export class SalmonStream extends RandomAccessStream {
      * Returns the current Block value
      */
     public async getBlock(): Promise<number> {
-        await this.initTransformer(this.key, this.nonce);
+        await this.init(this.key, this.nonce);
 
         return this.transformer.getBlock();
     }
@@ -394,7 +387,7 @@ export class SalmonStream extends RandomAccessStream {
      * Returns a copy of the encryption key.
      */
     public async getKey(): Promise<Uint8Array> {
-        await this.initTransformer(this.key, this.nonce);
+        await this.init(this.key, this.nonce);
 
         let key: Uint8Array | null = this.transformer.getKey();
         if (key == null) //TODO: ToSync
@@ -413,7 +406,7 @@ export class SalmonStream extends RandomAccessStream {
      * Returns a copy of the initial vector.
      */
     public async getNonce(): Promise<Uint8Array> {
-        await this.initTransformer(this.key, this.nonce);
+        await this.init(this.key, this.nonce);
 
         let nonce: Uint8Array | null = this.transformer.getNonce();
         if (nonce == null) //TODO: ToSync
@@ -458,13 +451,13 @@ export class SalmonStream extends RandomAccessStream {
      * @throws SalmonRangeExceededException
      */
     private async setVirtualPosition(value: number): Promise<void> {
-        await this.initTransformer(this.key, this.nonce);
+        await this.init(this.key, this.nonce);
 
         // we skip the header bytes and any hash values we have if the file has integrity set
-        this.baseStream.setPosition(value);
+        await this.baseStream.setPosition(value);
         let totalHashBytes: number = this.salmonIntegrity.getHashDataLength(this.baseStream.getPosition(), 0);
-        this.baseStream.setPosition(this.baseStream.getPosition() + totalHashBytes);
-        this.baseStream.setPosition(this.baseStream.getPosition() + this.getHeaderLength());
+        await this.baseStream.setPosition(this.baseStream.getPosition() + totalHashBytes);
+        await this.baseStream.setPosition(this.baseStream.getPosition() + this.getHeaderLength());
         this.transformer.resetCounter();
         this.transformer.syncCounter(this.getPosition());
     }
@@ -545,7 +538,7 @@ export class SalmonStream extends RandomAccessStream {
      * @throws IOException Thrown if stream is not aligned.
      */
     private async readFromStream(buffer: Uint8Array, offset: number, count: number): Promise<number> {
-        await this.initTransformer(this.key, this.nonce);
+        await this.init(this.key, this.nonce);
 
         if (this.getPosition() == this.length())
             return 0;
@@ -592,7 +585,7 @@ export class SalmonStream extends RandomAccessStream {
             } catch (ex) {
                 if (ex instanceof SalmonIntegrityException && this.failSilently)
                     return -1;
-                throw new IOException("Could not read from stream: " + ex);
+                throw new IOException("Could not read from stream: ", ex);
             }
         }
         return bytes;
@@ -609,7 +602,7 @@ export class SalmonStream extends RandomAccessStream {
      *
      */
     public async write(buffer: Uint8Array, offset: number, count: number): Promise<void> {
-        await this.initTransformer(this.key, this.nonce);
+        await this.init(this.key, this.nonce);
 
         if (this.salmonIntegrity.getChunkSize() > 0 && this.getPosition() % this.salmonIntegrity.getChunkSize() != 0)
             throw new IOException(null, new SalmonIntegrityException("All write operations should be aligned to the chunks size: "

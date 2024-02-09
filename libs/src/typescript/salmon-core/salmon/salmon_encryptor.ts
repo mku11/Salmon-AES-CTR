@@ -122,7 +122,7 @@ export class SalmonEncryptor {
         let realSize: number = SalmonStream.getActualSize(data, key, nonce, EncryptionMode.Encrypt,
             headerData, integrity, chunkSize, hashKey);
         let outData: Uint8Array = new Uint8Array(realSize);
-        outputStream.setPosition(0);
+        await outputStream.setPosition(0);
         await outputStream.read(outData, 0, outputStream.length());
         outputStream.close();
 
@@ -254,7 +254,7 @@ export class SalmonEncryptor {
         let outputStream: MemoryStream = new MemoryStream(outData);
         let stream: SalmonStream | null = null;
         try {
-            inputStream.setPosition(start);
+            await inputStream.setPosition(start);
             stream = new SalmonStream(key, nonce, EncryptionMode.Encrypt, outputStream, headerData,
                 integrity, chunkSize, hashKey);
             stream.setAllowRangeWrite(true);

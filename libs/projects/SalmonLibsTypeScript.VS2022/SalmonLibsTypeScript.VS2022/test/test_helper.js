@@ -30,9 +30,9 @@ import { SalmonDecryptor } from '../lib/salmon/salmon_decryptor.js';
 import { SalmonTransformerFactory } from '../lib/salmon/transform/salmon_transformer_factory.js';
 import { HmacSHA256Provider } from '../lib/salmon/integrity/hmac_sha256_provider.js';
 import { SalmonIntegrity } from '../lib/salmon/integrity/salmon_integrity.js';
-import { RandomAccessStream } from '../lib/io/random_access_stream.js';
+import { SeekOrigin } from '../lib/io/random_access_stream.js';
 import { SalmonAES256CTRTransformer } from '../lib/salmon/transform/salmon_aes256_ctr_transformer.js';
-import { SalmonStream} from '../lib/salmon/io/salmon_stream.js';
+import { SalmonStream } from '../lib/salmon/io/salmon_stream.js';
 import { EncryptionMode } from '../lib/salmon/io/encryption_mode.js';
 
 export class TestHelper {
@@ -80,7 +80,7 @@ export class TestHelper {
             await encOuts2.write(bytes, 0, bytesRead);
             totalBytesRead += bytesRead;
         }
-        let decText1 = new TextDecoder().encode(encOuts2.toArray());
+        let decText1 = new TextDecoder().decode(encOuts2.toArray());
         encOuts2.close();
         return decText1;
     }
@@ -105,7 +105,7 @@ export class TestHelper {
         let encBytes = await TestHelper.encrypt(inputBytes, key, iv, encBufferSize,
             testIntegrity, chunkSize, hashKey, header);
         if (flipBits)
-            encBytes[encBytes.length / 2] = 0;
+            encBytes[Math.floor(encBytes.length / 2)] = 0;
 
         // Use SalmonStream to read from cipher byte array and MemoryStream to Write to byte array
         let outputByte2 = await TestHelper.decrypt(encBytes, key, iv, decBufferSize,
@@ -209,51 +209,51 @@ export class TestHelper {
         let decText;
 
         correctText = plainText.substring(0, 6);
-        decText = TestHelper.seekAndGetSubstringByRead(decReader, 0, 6, RandomAccessStream.SeekOrigin.Begin);
+        decText = await TestHelper.seekAndGetSubstringByRead(decReader, 0, 6, SeekOrigin.Begin);
 
         expect(decText).toBe(correctText);
-        TestHelper.testCounter(decReader);
+        await TestHelper.testCounter(decReader);
 
         correctText = plainText.substring(0, 6);
-        decText = TestHelper.seekAndGetSubstringByRead(decReader, 0, 6, RandomAccessStream.SeekOrigin.Begin);
+        decText = await TestHelper.seekAndGetSubstringByRead(decReader, 0, 6, SeekOrigin.Begin);
 
         expect(decText).toBe(correctText);
-        TestHelper.testCounter(decReader);
+        await TestHelper.testCounter(decReader);
 
         correctText = plainText.substring(decReader.getPosition() + 4, decReader.getPosition() + 4 + 4);
-        decText = TestHelper.seekAndGetSubstringByRead(decReader, 4, 4, RandomAccessStream.SeekOrigin.Current);
+        decText = await TestHelper.seekAndGetSubstringByRead(decReader, 4, 4, SeekOrigin.Current);
 
         expect(decText).toBe(correctText);
-        TestHelper.testCounter(decReader);
+        await TestHelper.testCounter(decReader);
 
         correctText = plainText.substring(decReader.getPosition() + 6, decReader.getPosition() + 6 + 4);
-        decText = TestHelper.seekAndGetSubstringByRead(decReader, 6, 4, RandomAccessStream.SeekOrigin.Current);
+        decText = await TestHelper.seekAndGetSubstringByRead(decReader, 6, 4, SeekOrigin.Current);
 
         expect(decText).toBe(correctText);
-        TestHelper.testCounter(decReader);
+        await TestHelper.testCounter(decReader);
 
         correctText = plainText.substring(decReader.getPosition() + 10, decReader.getPosition() + 10 + 6);
-        decText = TestHelper.seekAndGetSubstringByRead(decReader, 10, 6, RandomAccessStream.SeekOrigin.Current);
+        decText = await TestHelper.seekAndGetSubstringByRead(decReader, 10, 6, SeekOrigin.Current);
 
         expect(decText).toBe(correctText);
-        TestHelper.testCounter(decReader);
+        await TestHelper.testCounter(decReader);
 
         correctText = plainText.substring(12, 12 + 8);
-        decText = TestHelper.seekAndGetSubstringByRead(decReader, 12, 8, RandomAccessStream.SeekOrigin.Begin);
+        decText = await TestHelper.seekAndGetSubstringByRead(decReader, 12, 8, SeekOrigin.Begin);
 
         expect(decText).toBe(correctText);
-        TestHelper.testCounter(decReader);
+        await TestHelper.testCounter(decReader);
 
-        correctText = plainText.substring(plainText.length() - 14, plainText.length() - 14 + 7);
-        decText = TestHelper.seekAndGetSubstringByRead(decReader, 14, 7, RandomAccessStream.SeekOrigin.End);
-
-        expect(decText).toBe(correctText);
-
-        correctText = plainText.substring(plainText.length() - 27, plainText.length() - 27 + 12);
-        decText = TestHelper.seekAndGetSubstringByRead(decReader, 27, 12, RandomAccessStream.SeekOrigin.End);
+        correctText = plainText.substring(plainText.length - 14, plainText.length - 14 + 7);
+        decText = await TestHelper.seekAndGetSubstringByRead(decReader, 14, 7, SeekOrigin.End);
 
         expect(decText).toBe(correctText);
-        TestHelper.testCounter(decReader);
+
+        correctText = plainText.substring(plainText.length - 27, plainText.length - 27 + 12);
+        decText = await TestHelper.seekAndGetSubstringByRead(decReader, 27, 12, SeekOrigin.End);
+
+        expect(decText).toBe(correctText);
+        await TestHelper.testCounter(decReader);
         encIns.close();
         decReader.close();
     }
@@ -263,9 +263,9 @@ export class TestHelper {
 
         let tBuilder = "";
         for (let i = 0; i < TestHelper.TEXT_ITERATIONS; i++) {
-            tBuilder.append(text);
+            tBuilder += text;
         }
-        let plainText = tBuilder.to();
+        const plainText = tBuilder;
 
         // Use SalmonStream read from text byte array and MemoryStream to Write to byte array
         let inputBytes = new TextEncoder().encode(plainText);
@@ -285,26 +285,26 @@ export class TestHelper {
             null, integrity, chunkSize, hashKey);
         for (let i = 0; i < 100; i++) {
             await decReader.setPosition(decReader.getPosition() + 7);
-            TestHelper.testCounter(decReader);
+            await TestHelper.testCounter(decReader);
         }
 
         encIns.close();
         decReader.close();
     }
 
-    static testCounter(decReader) {
-        let expectedBlock = decReader.getPosition() / SalmonAES256CTRTransformer.BLOCK_SIZE;
+    static async testCounter(decReader) {
+        let expectedBlock = Math.floor(decReader.getPosition() / SalmonAES256CTRTransformer.BLOCK_SIZE);
 
-        expect(decReader.getBlock()).toBe(expectedBlock);
+        expect(await decReader.getBlock()).toBe(expectedBlock);
 
-        let counterBlock = BitConverter.toLong(decReader.getCounter(), SalmonGenerator.NONCE_LENGTH,
+        let counterBlock = BitConverter.toLong(await decReader.getCounter(), SalmonGenerator.NONCE_LENGTH,
             SalmonGenerator.BLOCK_SIZE - SalmonGenerator.NONCE_LENGTH);
-        let expectedCounterValue = decReader.getBlock();
+        let expectedCounterValue = await decReader.getBlock();
 
         expect(counterBlock).toBe(expectedCounterValue);
 
-        let nonce = BitConverter.toLong(decReader.getCounter(), 0, SalmonGenerator.NONCE_LENGTH);
-        let expectedNonce = BitConverter.toLong(decReader.getNonce(), 0, SalmonGenerator.NONCE_LENGTH);
+        let nonce = BitConverter.toLong(await decReader.getCounter(), 0, SalmonGenerator.NONCE_LENGTH);
+        let expectedNonce = BitConverter.toLong(await decReader.getNonce(), 0, SalmonGenerator.NONCE_LENGTH);
 
         expect(nonce).toBe(expectedNonce);
     }
@@ -345,7 +345,7 @@ export class TestHelper {
         // set to allow rewrite
         if (setAllowRangeWrite)
             partialWriter.setAllowRangeWrite(setAllowRangeWrite);
-        await partialWriter.seek(alignedPosition, RandomAccessStream.SeekOrigin.Begin);
+        await partialWriter.seek(alignedPosition, SeekOrigin.Begin);
         await partialWriter.write(writeBytes, 0, count);
         partialWriter.close();
         pOuts.close();
@@ -354,14 +354,14 @@ export class TestHelper {
         let encIns = new MemoryStream(encBytes);
         let decReader = new SalmonStream(key, iv, EncryptionMode.Decrypt, encIns,
             null, integrity, chunkSize, hashKey);
-        let decText = TestHelper.seekAndGetSubstringByRead(decReader, 0, text.length(), RandomAccessStream.SeekOrigin.Begin);
+        let decText = await TestHelper.seekAndGetSubstringByRead(decReader, 0, text.length, SeekOrigin.Begin);
 
-        expect(decText.sub(0, seek)).toBe(text.sub(0, seek));
+        expect(decText.substring(0, seek)).toBe(text.substring(0, seek));
 
-        expect(decText.sub(seek, seek + writeCount)).toBe(textToWrite);
+        expect(decText.substring(seek, seek + writeCount)).toBe(textToWrite);
 
-        expect(decText.sub(seek + writeCount)).toBe(text.sub(seek + writeCount));
-        TestHelper.testCounter(decReader);
+        expect(decText.substring(seek + writeCount)).toBe(text.substring(seek + writeCount));
+        await TestHelper.testCounter(decReader);
 
         encIns.close();
         decReader.close();
@@ -521,7 +521,7 @@ export class TestHelper {
         let decData = TestHelper.defaultAESCTRTransform(encData, TestHelper.TEST_KEY_BYTES, TestHelper.TEST_NONCE_BYTES, false);
         let t3 = Date.now();
 
-        expect(decData.sort()).toEqual(data);
+        TestHelper.assertArrayEquals(decData, data);
         if (enableLog) {
             console.log("enc: " + (t2 - t1));
             console.log("dec: " + (t3 - t2));
@@ -543,14 +543,14 @@ export class TestHelper {
         let output = ms.toArray();
         console.log("write: " + output);
         let buff = new Uint8Array(16);
-        ms.setPosition(0);
+        await ms.setPosition(0);
         await ms.read(buff, 1, 4);
         console.log("read: " + buff);
     }
 
     static async copyFromMemStream(size, bufferSize) {
         let testData = TestHelper.getRandArray(size);
-        let digest = crypto.subtle.digest("MD5", testData);
+        let digest = crypto.subtle.digest("SHA-256", testData);
 
         let ms1 = new MemoryStream(testData);
         let ms2 = new MemoryStream();
@@ -561,11 +561,11 @@ export class TestHelper {
 
         expect(data2.length).toBe(testData.length);
 
-        let digest2 = crypto.subtle.digest("MD5", data2);
+        let digest2 = crypto.subtle.digest("SHA-256", data2);
         ms1.close();
         ms2.close();
 
-        expect(digest2.sort()).toEqual(digest);
+        TestHelper.assertArrayEquals(digest2, digest);
 
     }
 
@@ -574,7 +574,7 @@ export class TestHelper {
         bufferSize) {
 
         let testData = TestHelper.getRandArray(size);
-        let digest = crypto.subtle.digest("MD5", testData);
+        let digest = await crypto.subtle.digest("SHA-256", testData); // TODO: ToSync MD5 not avail in subtle
 
         // copy to a mem byte stream
         let ms1 = new MemoryStream(testData);
@@ -583,7 +583,7 @@ export class TestHelper {
         ms1.close();
 
         // encrypt to a memory byte stream
-        ms2.getPosition(0);
+        ms2.setPosition(0);
         let ms3 = new MemoryStream();
         let salmonStream = new SalmonStream(key, nonce, EncryptionMode.Encrypt, ms3,
             null, integrity, chunkSize, hashKey);
@@ -594,18 +594,19 @@ export class TestHelper {
         salmonStream.close();
         ms2.close();
         let encData = ms3.toArray();
+        ms3.close();
 
         // decrypt
         ms3 = new MemoryStream(encData);
-        ms3.getPosition(0);
+        ms3.setPosition(0);
         let ms4 = new MemoryStream();
         let salmonStream2 = new SalmonStream(key, nonce, EncryptionMode.Decrypt, ms3,
             null, integrity, chunkSize, hashKey);
         await salmonStream2.copyTo(ms4, bufferSize, null);
         salmonStream2.close();
         ms3.close();
-        ms4.setPosition(0);
-        let digest2 = crypto.subtle.digest("MD5", ms4.toArray());
+        await ms4.setPosition(0);
+        let digest2 = await crypto.subtle.digest("SHA-256", ms4.toArray());
         ms4.close();
     }
 
@@ -614,5 +615,15 @@ export class TestHelper {
         let salmonIntegrity = new SalmonIntegrity(true, hashKey, null, new HmacSHA256Provider(),
             SalmonGenerator.HASH_RESULT_LENGTH);
         return SalmonIntegrity.calculateHash(TestHelper.hashProvider, bytes, offset, length, hashKey, includeData);
+    }
+
+
+    // jest's toEqual assertion is very slow
+    static assertArrayEquals(arr1, arr2) {
+        expect(arr1.length).toBe(arr2.length);
+        for (let i = 0; i < arr1.length; i++) {
+            if (arr1[i] != arr2[i])
+                expect(false).toBe(true);
+        }
     }
 }

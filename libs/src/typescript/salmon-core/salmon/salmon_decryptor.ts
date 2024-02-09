@@ -246,7 +246,7 @@ export class SalmonDecryptor {
         let outputStream: MemoryStream | null = null;
         try {
             outputStream = new MemoryStream(outData);
-            outputStream.setPosition(start);
+            await outputStream.setPosition(start);
             stream = new SalmonStream(key, nonce, EncryptionMode.Decrypt, inputStream,
                 headerData, integrity, chunkSize, hashKey);
             await stream.setPosition(start);

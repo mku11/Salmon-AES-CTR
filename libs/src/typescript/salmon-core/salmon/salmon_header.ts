@@ -116,7 +116,7 @@ export class SalmonHeader {
         header.chunkSize = BitConverter.toLong(chunkSizeHeader, 0, SalmonGenerator.CHUNK_SIZE_LENGTH);
         header.nonce = new Uint8Array(SalmonGenerator.NONCE_LENGTH);
         await stream.read(header.nonce, 0, header.nonce.length);
-        stream.setPosition(0);
+        await stream.setPosition(0);
         header.headerData = new Uint8Array(SalmonGenerator.MAGIC_LENGTH + SalmonGenerator.VERSION_LENGTH
             + SalmonGenerator.CHUNK_SIZE_LENGTH + SalmonGenerator.NONCE_LENGTH);
         await stream.read(header.headerData, 0, header.headerData.length);

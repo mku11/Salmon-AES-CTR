@@ -23,6 +23,12 @@ npm run build
 To run the tests from the command line:
 npm run test
 
+To run a specific suite:
+npm run test -- salmon-core
+
+To run a specific test case:
+npm run test -- salmon-core -t="shouldEncryptAndDecryptText"
+
 To run static code analysis:
 npm run lint
 

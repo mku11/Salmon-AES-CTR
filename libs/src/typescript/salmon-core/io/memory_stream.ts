@@ -114,7 +114,7 @@ export class MemoryStream extends RandomAccessStream {
      * @param value The new position of the stream.
      * @throws IOException
      */
-    public override setPosition(value: number): void {
+    public override async setPosition(value: number): Promise<void> {
         this._position = value;
     }
 
@@ -141,7 +141,7 @@ export class MemoryStream extends RandomAccessStream {
         const bytesRead: number = Math.min(this._length - this.getPosition(), count);
         for (let i = 0; i < bytesRead; i++)
             buffer[offset + i] = this.bytes[this._position + i];
-        this.setPosition(this.getPosition() + bytesRead);
+        await this.setPosition(this.getPosition() + bytesRead);
         if (bytesRead <= 0)
             return -1;
         return bytesRead;
@@ -158,7 +158,7 @@ export class MemoryStream extends RandomAccessStream {
         this.checkAndResize(this._position + count);
         for (let i = 0; i < count; i++)
             this.bytes[this._position + i] = buffer[offset + i];
-        this.setPosition(this.getPosition() + count);
+        await this.setPosition(this.getPosition() + count);
     }
 
     /**
@@ -196,7 +196,7 @@ export class MemoryStream extends RandomAccessStream {
             nPos = (this.bytes.length - offset);
         }
         this.checkAndResize(nPos);
-        this.setPosition(nPos);
+        await this.setPosition(nPos);
         return this.getPosition();
     }
 

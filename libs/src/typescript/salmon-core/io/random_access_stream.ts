@@ -67,7 +67,7 @@ export abstract class RandomAccessStream {
      * @param value The new position.
      * @throws IOException
      */
-    public abstract setPosition(value: number): void;
+    public abstract setPosition(value: number): Promise<void>;
 
     /**
      * Set the length of this stream.
@@ -139,7 +139,7 @@ export abstract class RandomAccessStream {
                 progressListener.onProgressChanged(this.getPosition(), this.length());
         }
         stream.flush();
-        this.setPosition(pos);
+        await this.setPosition(pos);
     }
 }
 
