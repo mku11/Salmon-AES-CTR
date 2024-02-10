@@ -146,7 +146,7 @@ export abstract class RandomAccessStream {
 /**
  * Progress listener for stream operations.
  */
-interface OnProgressListener {
+export interface OnProgressListener {
     onProgressChanged(position: number, length: number): void;
 }
 
