@@ -34,6 +34,7 @@ import { SeekOrigin } from '../lib/io/random_access_stream.js';
 import { SalmonAES256CTRTransformer } from '../lib/salmon/transform/salmon_aes256_ctr_transformer.js';
 import { SalmonStream } from '../lib/salmon/io/salmon_stream.js';
 import { EncryptionMode } from '../lib/salmon/io/encryption_mode.js';
+import { ProviderType } from '../lib/salmon/io/provider_type.js';
 
 export class TestHelper {
     static TEST_ENC_BUFFER_SIZE = 512 * 1024;
@@ -367,31 +368,31 @@ export class TestHelper {
         decReader.close();
     }
 
-    static testCounterValue(text, key, nonce, counter) {
-        SalmonStream.setAesProviderType(SalmonStream.ProviderType.Default);
+    static async testCounterValue(text, key, nonce, counter) {
+        SalmonStream.setAesProviderType(ProviderType.Default);
         let testTextBytes = new TextEncoder().encode(text);
         let ms = new MemoryStream(testTextBytes);
         let stream = new SalmonStream(key, nonce, EncryptionMode.Encrypt, ms,
             null, false, null, null);
         stream.setAllowRangeWrite(true);
 
-        // creating enormous files to test is overkill and since the law was made for man
-        // we use reflection to test this.
-        //TODO:
-        //    Field transformerField = SalmonStream.class.getDeclaredField("transformer");
-        //transformerField.setAccessible(true);
-        //    SalmonAES256CTRTransformer transformer = (SalmonAES256CTRTransformer) transformerField.get(stream);
+        // WORKAROUND: first we need to run an operation that will init the transformer
+        let currCounter = await stream.getCounter();
 
-        //    Method incrementCounter = SalmonAES256CTRTransformer.class.getDeclaredMethod("increaseCounter", long.class);
-        //incrementCounter.setAccessible(true);
-        //try {
-        //    incrementCounter.invoke(transformer, counter);
-        //} catch (Exception ex) {
-        //    if (ex.getCause() != null)
-        //        throw ex.getCause();
-        //}  ly {
-        //    stream.close();
-        //}
+        // creating enormous files to test is overkill and since the law was made for man
+        // we execute a "private" method
+        //TODO: add # prefix to make private properties
+        try {
+            stream.transformer.increaseCounter(counter);
+        } catch (ex) {
+            console.error(ex);
+            if (typeof ex.getCause !== 'undefined' && ex.getCause() != null)
+                throw ex.getCause();
+            else
+                throw ex;
+        }  finally {
+            stream.close();
+        }
     }
 
     static async defaultAESCTRTransform(plainText, testKeyBytes, testNonceBytes, encrypt) {

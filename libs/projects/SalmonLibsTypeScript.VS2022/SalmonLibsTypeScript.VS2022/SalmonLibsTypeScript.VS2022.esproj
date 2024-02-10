@@ -111,8 +111,20 @@
     <None Include="..\..\..\src\typescript\salmon-core\salmon\salmon_encryptor.ts">
       <Link>salmon-core\salmon\salmon_encryptor.ts</Link>
     </None>
+    <None Include="..\..\..\src\typescript\salmon-core\salmon\salmon_encryptor_worker.ts">
+      <Link>salmon-core\salmon\salmon_encryptor_worker.ts</Link>
+    </None>
+    <None Include="..\..\..\src\typescript\salmon-core\salmon\salmon_encryptor_helper.ts">
+      <Link>salmon-core\salmon\salmon_encryptor_helper.ts</Link>
+    </None>
     <None Include="..\..\..\src\typescript\salmon-core\salmon\salmon_decryptor.ts">
       <Link>salmon-core\salmon\salmon_decryptor.ts</Link>
+    </None>
+    <None Include="..\..\..\src\typescript\salmon-core\salmon\salmon_decryptor_worker.ts">
+      <Link>salmon-core\salmon\salmon_decryptor_worker.ts</Link>
+    </None>
+    <None Include="..\..\..\src\typescript\salmon-core\salmon\salmon_decryptor_helper.ts">
+      <Link>salmon-core\salmon\salmon_decryptor_helper.ts</Link>
     </None>
     <None Include="..\..\..\src\typescript\salmon-core\salmon\text\salmon_text_encryptor.ts">
       <Link>salmon-core\salmon\text\salmon_text_encryptor.ts</Link>
@@ -201,7 +213,15 @@
     </TypeScriptCompile>
     <TypeScriptCompile Remove="..\..\..\src\typescript\salmon-core\salmon\salmon_encryptor.ts">
     </TypeScriptCompile>
+    <TypeScriptCompile Remove="..\..\..\src\typescript\salmon-core\salmon\salmon_encryptor_worker.ts">
+    </TypeScriptCompile>
+    <TypeScriptCompile Remove="..\..\..\src\typescript\salmon-core\salmon\salmon_encryptor_helper.ts">
+    </TypeScriptCompile>
     <TypeScriptCompile Remove="..\..\..\src\typescript\salmon-core\salmon\salmon_decryptor.ts">
+    </TypeScriptCompile>
+    <TypeScriptCompile Remove="..\..\..\src\typescript\salmon-core\salmon\salmon_decryptor_worker.ts">
+    </TypeScriptCompile>
+    <TypeScriptCompile Remove="..\..\..\src\typescript\salmon-core\salmon\salmon_decryptor_helper.ts">
     </TypeScriptCompile>
     <TypeScriptCompile Remove="..\..\..\src\typescript\salmon-core\salmon\text\salmon_text_decryptor.ts">
     </TypeScriptCompile>
