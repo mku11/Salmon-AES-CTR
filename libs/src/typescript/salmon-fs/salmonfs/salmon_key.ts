@@ -27,9 +27,9 @@ SOFTWARE.
  */
 export class SalmonKey {
 
-    private masterKey: Uint8Array| null = null;
-    private driveKey: Uint8Array| null = null;
-    private hashKey: Uint8Array| null = null;
+    private masterKey: Uint8Array | null = null;
+    private driveKey: Uint8Array | null = null;
+    private hashKey: Uint8Array | null = null;
     private iterations: number = 0;
 
     /**
@@ -45,24 +45,24 @@ export class SalmonKey {
             this.hashKey.fill(0);
         this.hashKey = null;
 
-        if(this.masterKey != null)
+        if (this.masterKey != null)
             this.masterKey.fill(0);
         this.masterKey = null;
-        
+
         this.iterations = 0;
     }
 
     /**
      * Function returns the encryption key that will be used to encrypt/decrypt the files
      */
-    public getDriveKey(): Uint8Array | null{
+    public getDriveKey(): Uint8Array | null {
         return this.driveKey;
     }
 
     /**
      * Function returns the hash key that will be used to sign the file chunks
      */
-    public getHashKey():Uint8Array | null{
+    public getHashKey(): Uint8Array | null {
         return this.hashKey;
     }
 
@@ -70,7 +70,7 @@ export class SalmonKey {
      * Set the drive key.
      * @param this.driveKey
      */
-    public setDriveKey( driveKey: Uint8Array| null) : void{
+    public setDriveKey(driveKey: Uint8Array | null): void {
         this.driveKey = driveKey;
     }
 
@@ -78,7 +78,7 @@ export class SalmonKey {
      * Set the hash key.
      * @param hashKey
      */
-    public setHashKey(hashKey: Uint8Array| null): void {
+    public setHashKey(hashKey: Uint8Array | null): void {
         this.hashKey = hashKey;
     }
 
@@ -86,7 +86,7 @@ export class SalmonKey {
      * Get the master key.
      * @return
      */
-    public getMasterKey(): Uint8Array | null{
+    public getMasterKey(): Uint8Array | null {
         return this.masterKey;
     }
 
@@ -94,7 +94,7 @@ export class SalmonKey {
      * Set the master key.
      * @param masterKey
      */
-    public setMasterKey( masterKey: Uint8Array| null): void {
+    public setMasterKey(masterKey: Uint8Array | null): void {
         this.masterKey = masterKey;
     }
 
