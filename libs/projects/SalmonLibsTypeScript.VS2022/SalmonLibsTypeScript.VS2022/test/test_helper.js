@@ -44,7 +44,8 @@ export class TestHelper {
     static TEST_FALSE_PASSWORD = "falsepass";
     static TEST_EXPORT_DIR = "export.slma";
 
-    static MAX_ENC_COUNTER = Math.pow(256, 7);
+    // Javascript has its own limit on safe math 
+    static MAX_ENC_COUNTER = Math.min(Math.pow(256, 7), Number.MAX_SAFE_INTEGER + 1);
     // a nonce ready to overflow if a new file is imported
     static TEXT_VAULT_MAX_FILE_NONCE = new Uint8Array([
         0x7F, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF

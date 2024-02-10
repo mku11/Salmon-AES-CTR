@@ -106,6 +106,9 @@ export abstract class SalmonAES256CTRTransformer implements ISalmonCTRTransforme
             throw new SalmonSecurityException("No counter, run init first");
         if (value < 0)
             throw new Error("Value should be positive");
+        // Javascript has its own limit for safe integer math
+        if (value > Number.MAX_SAFE_INTEGER)
+            throw new SalmonRangeExceededException("Current CTR max safe blocks exceeded");
         let index: number = SalmonAES256CTRTransformer.BLOCK_SIZE - 1;
         let carriage: number = 0;
         while (index >= 0 && value + carriage > 0) {
