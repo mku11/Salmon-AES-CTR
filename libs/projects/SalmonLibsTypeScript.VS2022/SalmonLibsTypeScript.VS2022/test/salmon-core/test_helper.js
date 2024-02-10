@@ -22,19 +22,19 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 */
 
-import { BitConverter } from '../lib/convert/bit_converter.js';
-import { MemoryStream } from '../lib/io/memory_stream.js';
-import { SalmonGenerator } from '../lib/salmon/salmon_generator.js';
-import { SalmonEncryptor } from '../lib/salmon/salmon_encryptor.js';
-import { SalmonDecryptor } from '../lib/salmon/salmon_decryptor.js';
-import { SalmonTransformerFactory } from '../lib/salmon/transform/salmon_transformer_factory.js';
-import { HmacSHA256Provider } from '../lib/salmon/integrity/hmac_sha256_provider.js';
-import { SalmonIntegrity } from '../lib/salmon/integrity/salmon_integrity.js';
-import { SeekOrigin } from '../lib/io/random_access_stream.js';
-import { SalmonAES256CTRTransformer } from '../lib/salmon/transform/salmon_aes256_ctr_transformer.js';
-import { SalmonStream } from '../lib/salmon/io/salmon_stream.js';
-import { EncryptionMode } from '../lib/salmon/io/encryption_mode.js';
-import { ProviderType } from '../lib/salmon/io/provider_type.js';
+import { BitConverter } from '../../lib/salmon-core/convert/bit_converter.js';
+import { MemoryStream } from '../../lib/salmon-core/io/memory_stream.js';
+import { SalmonGenerator } from '../../lib/salmon-core/salmon/salmon_generator.js';
+import { SalmonEncryptor } from '../../lib/salmon-core/salmon/salmon_encryptor.js';
+import { SalmonDecryptor } from '../../lib/salmon-core/salmon/salmon_decryptor.js';
+import { SalmonTransformerFactory } from '../../lib/salmon-core/salmon/transform/salmon_transformer_factory.js';
+import { HmacSHA256Provider } from '../../lib/salmon-core/salmon/integrity/hmac_sha256_provider.js';
+import { SalmonIntegrity } from '../../lib/salmon-core/salmon/integrity/salmon_integrity.js';
+import { SeekOrigin } from '../../lib/salmon-core/io/random_access_stream.js';
+import { SalmonAES256CTRTransformer } from '../../lib/salmon-core/salmon/transform/salmon_aes256_ctr_transformer.js';
+import { SalmonStream } from '../../lib/salmon-core/salmon/io/salmon_stream.js';
+import { EncryptionMode } from '../../lib/salmon-core/salmon/io/encryption_mode.js';
+import { ProviderType } from '../../lib/salmon-core/salmon/io/provider_type.js';
 
 export class TestHelper {
     static TEST_ENC_BUFFER_SIZE = 512 * 1024;

@@ -32,6 +32,8 @@ import { SalmonSecurityException } from "./salmon_security_exception.js";
 import { SalmonAES256CTRTransformer } from "./transform/salmon_aes256_ctr_transformer.js";
 import { encryptData } from "./salmon_encryptor_helper.js";
 
+const workerPath = './lib/salmon-core/salmon/salmon_encryptor_worker.js';
+
 /**
  * Encrypts byte arrays.
  */
@@ -193,7 +195,7 @@ export class SalmonEncryptor {
             promises.push(new Promise(async (resolve, reject) => {
                 var worker: any;
                 if (typeof process !== 'object') {
-                    worker = new Worker('./lib/salmon/salmon_encryptor_worker.js', { type: 'module' });
+                    worker = new Worker(workerPath, { type: 'module' });
                     worker.addEventListener('message', (event: { data: unknown }) => {
                         resolve(event.data);
                     });
@@ -202,7 +204,7 @@ export class SalmonEncryptor {
                     });
                 } else {
                     const { Worker } = await import("worker_threads");
-                    worker = new Worker('./lib/salmon/salmon_encryptor_worker.js');
+                    worker = new Worker(workerPath);
                     worker.on('message', (event: any) => {
                         resolve(event);
                         worker.terminate();

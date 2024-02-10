@@ -22,34 +22,27 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 */
 
-import { BitConverter } from '../lib/convert/bit_converter.js';
-import { Base64 } from '../lib/convert/base64.js';
-import { SalmonGenerator } from '../lib/salmon/salmon_generator.js';
-import { HmacSHA256Provider } from '../lib/salmon/integrity/hmac_sha256_provider.js';
-import { PBKDF_SHA256, PBKDF_SHA1, getPbkdfAlgoString } from '../lib/salmon/password/isalmon_pbkdf_provider.js';
-import { SalmonDefaultPbkdfProvider } from '../lib/salmon/password/salmon_default_pbkdf_provider.js';
-import { PbkdfAlgo } from '../lib/salmon/password/pbkdf_algo.js';
-import { PbkdfType } from '../lib/salmon/password/pbkdf_type.js';
-import { SalmonPassword } from '../lib/salmon/password/salmon_password.js';
-import { MemoryStream } from '../lib/io/memory_stream.js';
-import { EncryptionMode } from '../lib/salmon/io/encryption_mode.js';
+import { BitConverter } from '../../lib/salmon-core/convert/bit_converter.js';
+import { SalmonGenerator } from '../../lib/salmon-core/salmon/salmon_generator.js';
+import { MemoryStream } from '../../lib/salmon-core/io/memory_stream.js';
+import { EncryptionMode } from '../../lib/salmon-core/salmon/io/encryption_mode.js';
 
 
-import { SalmonIntegrityException } from '../lib/salmon/integrity/salmon_integrity_exception.js';
-import { SalmonEncryptor } from '../lib/salmon/salmon_encryptor.js';
-import { SalmonDecryptor } from '../lib/salmon/salmon_decryptor.js';
+import { SalmonIntegrityException } from '../../lib/salmon-core/salmon/integrity/salmon_integrity_exception.js';
+import { SalmonEncryptor } from '../../lib/salmon-core/salmon/salmon_encryptor.js';
+import { SalmonDecryptor } from '../../lib/salmon-core/salmon/salmon_decryptor.js';
 
-import { SalmonTextEncryptor } from '../lib/salmon/text/salmon_text_encryptor.js';
-import { SalmonTextDecryptor } from '../lib/salmon/text/salmon_text_decryptor.js';
+import { SalmonTextEncryptor } from '../../lib/salmon-core/salmon/text/salmon_text_encryptor.js';
+import { SalmonTextDecryptor } from '../../lib/salmon-core/salmon/text/salmon_text_decryptor.js';
 
-import { SalmonIntegrity } from '../lib/salmon/integrity/salmon_integrity.js';
-import { SalmonStream } from '../lib/salmon/io/salmon_stream.js';
-import { ProviderType } from '../lib/salmon/io/provider_type.js';
-import { SalmonDefaultOptions } from '../lib/salmon/salmon_default_options.js';
+import { SalmonIntegrity } from '../../lib/salmon-core/salmon/integrity/salmon_integrity.js';
+import { SalmonStream } from '../../lib/salmon-core/salmon/io/salmon_stream.js';
+import { ProviderType } from '../../lib/salmon-core/salmon/io/provider_type.js';
+import { SalmonDefaultOptions } from '../../lib/salmon-core/salmon/salmon_default_options.js';
 
 import { TestHelper } from './test_helper.js';
-import { SalmonSecurityException } from '../lib/salmon/salmon_security_exception.js';
-import { SalmonRangeExceededException } from '../lib/salmon/salmon_range_exceeded_exception.js';
+import { SalmonSecurityException } from '../../lib/salmon-core/salmon/salmon_security_exception.js';
+import { SalmonRangeExceededException } from '../../lib/salmon-core/salmon/salmon_range_exceeded_exception.js';
 
 
 
