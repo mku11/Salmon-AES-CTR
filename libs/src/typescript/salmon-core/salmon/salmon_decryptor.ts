@@ -29,6 +29,7 @@ import { SalmonStream } from "./io/salmon_stream.js";
 import { SalmonHeader } from "./salmon_header.js";
 import { SalmonSecurityException } from "./salmon_security_exception.js";
 import { SalmonAES256CTRTransformer } from "./transform/salmon_aes256_ctr_transformer.js";
+import { decryptData } from "./salmon_decryptor_helper.js";
 
 /**
  * Utility class that decrypts byte arrays.
@@ -120,8 +121,8 @@ export class SalmonDecryptor {
         let outData: Uint8Array = new Uint8Array(realSize);
 
         if (this.threads == 1) {
-            await this.decryptData(inputStream, 0, inputStream.length(), outData,
-                key, nonce, headerData, integrity, hashKey, chunkSize);
+            await decryptData(data, 0, data.length, outData,
+                key, nonce, headerData, integrity, hashKey, chunkSize, this.bufferSize);
         } else {
             await this.decryptDataParallel(data, outData,
                 key, hashKey, nonce, headerData,
@@ -142,9 +143,9 @@ export class SalmonDecryptor {
      * @param chunkSize The chunk size.
      * @param integrity True to verify integrity.
      */
-    private decryptDataParallel(data: Uint8Array, outData: Uint8Array,
+    private async decryptDataParallel(data: Uint8Array, outData: Uint8Array,
         key: Uint8Array, hashKey: Uint8Array | null, nonce: Uint8Array, headerData: Uint8Array | null,
-        chunkSize: number | null, integrity: boolean): void {
+        chunkSize: number | null, integrity: boolean): Promise<void> {
         let runningThreads: number = 1;
         let partSize: number = data.length;
 
@@ -164,7 +165,7 @@ export class SalmonDecryptor {
             runningThreads = Math.floor(data.length / partSize);
         }
 
-        this.submitDecryptJobs(runningThreads, partSize,
+        await this.submitDecryptJobs(runningThreads, partSize,
             data, outData,
             key, hashKey, nonce, headerData,
             integrity, chunkSize);
@@ -184,93 +185,55 @@ export class SalmonDecryptor {
      * @param integrity True to verify the data integrity.
      * @param chunkSize The chunk size.
      */
-    private submitDecryptJobs(runningThreads: number, partSize: number, data: Uint8Array, outData: Uint8Array,
+    private async submitDecryptJobs(runningThreads: number, partSize: number, data: Uint8Array, outData: Uint8Array,
         key: Uint8Array, hashKey: Uint8Array | null, nonce: Uint8Array,
-        headerData: Uint8Array | null, integrity: boolean, chunkSize: number | null): void {
-        // final CountDownLatch done = new CountDownLatch(runningThreads);
-        //   AtomicReference<Exception> ex = new AtomicReference<>();
-        //   for (int i = 0; i < runningThreads; i++) {
-        //       final int index = i;
-        //       executor.submit(() ->
-        //       {
-        //           try {
-        //               long start = partSize * index;
-        //               long length;
-        //if(index == runningThreads - 1)
-        //	length = data.length-start;
-        //else
-        //	length = partSize;
-        //               MemoryStream ins = new MemoryStream(data);
-        //               decryptData(ins, start, length, outData, key, nonce, headerData,
-        //                       integrity, hashKey, chunkSize);
-        //           } catch (Exception ex1) {
-        //               ex.set(ex1);
-        //           }
-        //           done.countDown();
-        //       });
-        //   }
+        headerData: Uint8Array | null, integrity: boolean, chunkSize: number | null): Promise<void> {
+        let promises = [];
+        for (let i = 0; i < runningThreads; i++) {
+            promises.push(new Promise(async (resolve, reject) => {
+                var worker: any;
+                if (typeof process !== 'object') {
+                    worker = new Worker('./lib/salmon/salmon_decryptor_worker.js', { type: 'module' });
+                    worker.addEventListener('message', (event: { data: unknown }) => {
+                        resolve(event.data);
+                    });
+                    worker.addEventListener('error', (event: any) => {
+                        reject(event);
+                    });
+                } else {
+                    const { Worker } = await import("worker_threads");
+                    worker = new Worker('./lib/salmon/salmon_decryptor_worker.js');
+                    worker.on('message', (event: any) => {
+                        resolve(event);
+                        worker.terminate();
+                    });
+                    worker.on('error', (event: any) => {
+                        reject(event);
+                    });
+                }
 
-        try {
-            //done.await();
-        } catch (ignored) { }
+                let start: number = partSize * i;
+                let length: number;
+                if (i == runningThreads - 1)
+                    length = data.length - start;
+                else
+                    length = partSize;
 
-        //if (ex != null) {
-        //    try {
-        //        throw ex.get();
-        //    } catch (Exception e) {
-        //        throw new RuntimeException(e);
-        //    }
-        //}
-    }
-
-    /**
-     * Decrypt the data stream.
-     * @param inputStream The Stream to be decrypted.
-     * @param start The start position of the stream to be decrypted.
-     * @param count The number of bytes to be decrypted.
-     * @param outData The buffer with the decrypted data.
-     * @param key The AES key to be used.
-     * @param nonce The nonce to be used.
-     * @param headerData The header data to be used.
-     * @param integrity True to verify integrity.
-     * @param hashKey The hash key to be used for integrity verification.
-     * @param chunkSize The chunk size.
-     * @  Thrown if there is an error with the stream.
-     * @throws SalmonSecurityException Thrown if there is a security exception with the stream.
-     * @throws SalmonIntegrityException Thrown if the stream is corrupt or tampered with.
-     */
-    private async decryptData(inputStream: MemoryStream, start: number, count: number, outData: Uint8Array,
-        key: Uint8Array, nonce: Uint8Array, headerData: Uint8Array | null,
-        integrity: boolean, hashKey: Uint8Array | null, chunkSize: number | null): Promise<void> {
-        let stream: SalmonStream | null = null;
-        let outputStream: MemoryStream | null = null;
-        try {
-            outputStream = new MemoryStream(outData);
-            await outputStream.setPosition(start);
-            stream = new SalmonStream(key, nonce, EncryptionMode.Decrypt, inputStream,
-                headerData, integrity, chunkSize, hashKey);
-            await stream.setPosition(start);
-            let totalChunkBytesRead: number = 0;
-            // align to the chunksize if available
-            let buffSize: number = Math.max(this.bufferSize, stream.getChunkSize());
-            let buff: Uint8Array = new Uint8Array(buffSize);
-            let bytesRead: number;
-            while ((bytesRead = await stream.read(buff, 0, Math.min(buff.length, count - totalChunkBytesRead))) > 0
-                && totalChunkBytesRead < count) {
-                await outputStream.write(buff, 0, bytesRead);
-                totalChunkBytesRead += bytesRead;
-            }
-            outputStream.flush();
-        } catch (ex) {
-            console.error(ex);
-            throw new SalmonSecurityException("Could not decrypt data", ex);
-        } finally {
-            if (inputStream != null)
-                inputStream.close();
-            if (stream != null)
-                stream.close();
-            if (outputStream != null)
-                outputStream.close();
+                worker.postMessage({
+                    index: i, data: data, out_size: outData.length, start: start, length: length, key: key, nonce: nonce,
+                    headerData: headerData, integrity: integrity, hashKey: hashKey, chunkSize: chunkSize, bufferSize: this.bufferSize
+                });
+            }));
         }
+        await Promise.all(promises).then((results: any) => {
+            for (let i = 0; i < results.length; i++) {
+                for (let j = results[i].startPos; j < results[i].endPos; j++) {
+                    outData[j] = results[i].outData[j];
+                }
+            }
+        }).catch(function(err) {
+            console.error(err);
+            throw err;
+        });
     }
 }

@@ -30,6 +30,7 @@ import { EncryptionMode } from "./io/encryption_mode.js";
 import { SalmonGenerator } from "./salmon_generator.js";
 import { SalmonSecurityException } from "./salmon_security_exception.js";
 import { SalmonAES256CTRTransformer } from "./transform/salmon_aes256_ctr_transformer.js";
+import { encryptData } from "./salmon_encryptor_helper.js";
 
 /**
  * Encrypts byte arrays.
@@ -40,11 +41,6 @@ export class SalmonEncryptor {
      * The number of parallel threads to use.
      */
     private readonly threads: number;
-
-    /**
-     * Executor for parallel tasks.
-     */
-    private workers: Array<SharedWorker> | null = null;
 
     /**
      * The buffer size to use.
@@ -64,7 +60,6 @@ export class SalmonEncryptor {
             this.threads = 1;
         } else {
             this.threads = threads;
-            this.workers = new Array(threads);
         }
         if (bufferSize == 0) {
             // we use the chunks size as default this keeps buffers aligned in case
@@ -127,9 +122,8 @@ export class SalmonEncryptor {
         outputStream.close();
 
         if (this.threads == 1) {
-            let inputStream: MemoryStream = new MemoryStream(data);
-            await this.encryptData(inputStream, 0, data.length, outData,
-                key, nonce, headerData, integrity, hashKey, chunkSize);
+            await encryptData(data, 0, data.length, outData,
+                key, nonce, headerData, integrity, hashKey, chunkSize, this.bufferSize);
         } else {
             await this.encryptDataParallel(data, outData,
                 key, hashKey, nonce, headerData,
@@ -173,10 +167,7 @@ export class SalmonEncryptor {
             runningThreads = Math.floor(data.length / partSize);
         }
 
-        await this.submitEncryptJobs(runningThreads, partSize,
-            data, outData,
-            key, hashKey, nonce, headerData,
-            integrity, chunkSize);
+        await this.submitEncryptJobs(runningThreads, partSize, data, outData, key, hashKey, nonce, headerData, integrity, chunkSize);
     }
 
     /**
@@ -197,88 +188,52 @@ export class SalmonEncryptor {
     private async submitEncryptJobs(runningThreads: number, partSize: number, data: Uint8Array, outData: Uint8Array,
         key: Uint8Array, hashKey: Uint8Array | null, nonce: Uint8Array,
         headerData: Uint8Array | null, integrity: boolean, chunkSize: number | null): Promise<void> {
-
-        //const done: CountDownLatch = new CountDownLatch(runningThreads);
-        var ex: Error;
+        let promises = [];
         for (let i = 0; i < runningThreads; i++) {
-            const index: number = i;
-            //executor.submit(() -> {
-            //    try {
-            //        long start = partSize * index;
-            //        long length;
-            //        if (index == runningThreads - 1)
-            //            length = data.length - start;
-            //        else
-            //            length = partSize;
-            //        MemoryStream ins = new MemoryStream(data);
-            //        encryptData(ins, start, length, outData, key, nonce, headerData, integrity, hashKey, chunkSize);
-            //    } catch (Exception ex1) {
-            //        ex.set(ex1);
-            //    }
-            //    done.countDown();
-            //});
+            promises.push(new Promise(async (resolve, reject) => {
+                var worker: any;
+                if (typeof process !== 'object') {
+                    worker = new Worker('./lib/salmon/salmon_encryptor_worker.js', { type: 'module' });
+                    worker.addEventListener('message', (event: { data: unknown }) => {
+                        resolve(event.data);
+                    });
+                    worker.addEventListener('error', (event: any) => {
+                        reject(event);
+                    });
+                } else {
+                    const { Worker } = await import("worker_threads");
+                    worker = new Worker('./lib/salmon/salmon_encryptor_worker.js');
+                    worker.on('message', (event: any) => {
+                        resolve(event);
+                        worker.terminate();
+                    });
+                    worker.on('error', (event: any) => {
+                        reject(event);
+                    });
+                }
+
+                let start: number = partSize * i;
+                let length: number;
+                if (i == runningThreads - 1)
+                    length = data.length - start;
+                else
+                    length = partSize;
+
+                worker.postMessage({
+                    index: i, data: data, out_size: outData.length, start: start, length: length, key: key, nonce: nonce,
+                    headerData: headerData, integrity: integrity, hashKey: hashKey, chunkSize: chunkSize, bufferSize: this.bufferSize
+                });
+            }));
         }
-        try {
-            //done.await();
-        } catch (ignored) { }
-
-        //if (ex.get() != null) {
-        //    try {
-        //        throw ex.get();
-        //    } catch (Exception e) {
-        //        throw new RuntimeException(e);
-        //    }
-        //}
-    }
-
-    /**
-     * Encrypt the data stream.
-     *
-     * @param inputStream The Stream to be encrypted.
-     * @param start       The start position of the stream to be encrypted.
-     * @param count       The number of bytes to be encrypted.
-     * @param outData     The buffer with the encrypted data.
-     * @param key         The AES key to be used.
-     * @param nonce       The nonce to be used.
-     * @param headerData  The header data to be used.
-     * @param integrity   True to apply integrity.
-     * @param hashKey     The key to be used for integrity application.
-     * @param chunkSize   The chunk size.
-     * @              Thrown if there is an error with the stream.
-     * @throws SalmonSecurityException  Thrown if there is a security exception with the stream.
-     * @throws SalmonIntegrityException Thrown if integrity cannot be applied.
-     */
-    private async encryptData(inputStream: MemoryStream, start: number, count: number, outData: Uint8Array,
-        key: Uint8Array, nonce: Uint8Array, headerData: Uint8Array | null,
-        integrity: boolean, hashKey: Uint8Array | null, chunkSize: number | null): Promise<void> {
-        let outputStream: MemoryStream = new MemoryStream(outData);
-        let stream: SalmonStream | null = null;
-        try {
-            await inputStream.setPosition(start);
-            stream = new SalmonStream(key, nonce, EncryptionMode.Encrypt, outputStream, headerData,
-                integrity, chunkSize, hashKey);
-            stream.setAllowRangeWrite(true);
-            await stream.setPosition(start);
-            let totalChunkBytesRead: number = 0;
-            // align to the chunk size if available
-            let buffSize: number = Math.max(this.bufferSize, stream.getChunkSize());
-            let buff: Uint8Array = new Uint8Array(buffSize);
-            let bytesRead: number;
-            while ((bytesRead = await inputStream.read(buff, 0, Math.min(buff.length, count - totalChunkBytesRead))) > 0
-                && totalChunkBytesRead < count) {
-                await stream.write(buff, 0, bytesRead);
-                totalChunkBytesRead += bytesRead;
+        await Promise.all(promises).then((results: any) => {
+            for (let i = 0; i < results.length; i++) {
+                for (let j = results[i].startPos; j < results[i].endPos; j++) {
+                    outData[j] = results[i].outData[j];
+                }
             }
-            stream.flush();
-        } catch (ex) {
-            console.error(ex);
-            throw ex;
-        } finally {
-            outputStream.close();
-            if (stream != null)
-                stream.close();
-            if (inputStream != null)
-                inputStream.close();
-        }
+        }).catch(function(err) {
+            console.error(err);
+            throw err;
+        });
     }
 }
