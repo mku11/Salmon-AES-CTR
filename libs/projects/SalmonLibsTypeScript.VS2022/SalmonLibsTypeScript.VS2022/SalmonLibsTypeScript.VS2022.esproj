@@ -144,6 +144,10 @@
     <None Include="..\..\..\src\typescript\salmon-core\salmon\password\pbkdf_type.ts">
       <Link>salmon-core\salmon\password\pbkdf_type.ts</Link>
     </None>
+
+    <None Include="..\..\..\src\typescript\salmon-fs\salmonfs\salmon_key.ts">
+      <Link>salmon-fs\salmonfs\salmon_key.ts</Link>
+    </None>
   </ItemGroup>
   <!-- Add the items so they can be built -->
   <ItemGroup>
@@ -235,6 +239,10 @@
     </TypeScriptCompile>
     <TypeScriptCompile Remove="..\..\..\src\typescript\salmon-core\salmon\password\pbkdf_type.ts">
     </TypeScriptCompile>
+    
+    <TypeScriptCompile Remove="..\..\..\src\typescript\salmon-fs\salmonfs\salmon_key.ts">
+    </TypeScriptCompile>
+
   </ItemGroup>
   <ItemGroup>
     <TypeScriptConfiguration Remove="lib\**" />
