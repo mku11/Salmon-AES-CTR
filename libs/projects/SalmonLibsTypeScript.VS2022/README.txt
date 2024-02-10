@@ -29,6 +29,17 @@ npm run test -- salmon-core
 To run a specific test case:
 npm run test -- salmon-core -t="shouldEncryptAndDecryptText"
 
+To run test cases from Visual Studio:
+Open Visual studio
+Rebuild Project
+Open Test Explorer and run test cases as per usual
+
+To run test cases in the browser:
+Include the following in your html, all output will be in the console.
+Make sure you only include 1 suite file (ie: salmon-core.test.js or salmon-fs.test.js)
+<script type="module" src="test/setup_browser_test_runner.js"/></script>
+<script type="module" src="test/salmon-core/salmon-core.test.js"/></script>
+
 To run static code analysis:
 npm run lint
 
