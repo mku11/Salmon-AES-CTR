@@ -74,21 +74,21 @@ export class MemoryStream extends RandomAccessStream {
     /**
      * @return Always True.
      */
-    public override canRead(): boolean {
+    public override async canRead(): Promise<boolean> {
         return true;
     }
 
     /**
      * @return Always True.
      */
-    public override canWrite(): boolean {
+    public override async canWrite(): Promise<boolean> {
         return true;
     }
 
     /**
      * @return Always True.
      */
-    public override canSeek(): boolean {
+    public override async canSeek(): Promise<boolean> {
         return true;
     }
 
@@ -96,7 +96,7 @@ export class MemoryStream extends RandomAccessStream {
      *
      * @return The length of the stream.
      */
-    public override length(): number {
+    public override async length(): Promise<number> {
         return this._length;
     }
 
@@ -105,7 +105,7 @@ export class MemoryStream extends RandomAccessStream {
      * @return The position of the stream.
      * @throws IOException
      */
-    public override getPosition(): number {
+    public override async getPosition(): Promise<number> {
         return this._position;
     }
 
@@ -124,7 +124,7 @@ export class MemoryStream extends RandomAccessStream {
      * @param value
      * @throws IOException
      */
-    public override setLength(value: number): void {
+    public override async setLength(value: number): Promise<void> {
         this.checkAndResize(value);
         this._capacity = value;
     }
@@ -138,10 +138,10 @@ export class MemoryStream extends RandomAccessStream {
      * @throws IOException
      */
     public override async read(buffer: Uint8Array, offset: number, count: number): Promise<number> {
-        const bytesRead: number = Math.min(this._length - this.getPosition(), count);
+        const bytesRead: number = Math.min(this._length - await this.getPosition(), count);
         for (let i = 0; i < bytesRead; i++)
             buffer[offset + i] = this.bytes[this._position + i];
-        await this.setPosition(this.getPosition() + bytesRead);
+        await this.setPosition(await this.getPosition() + bytesRead);
         if (bytesRead <= 0)
             return -1;
         return bytesRead;
@@ -158,7 +158,7 @@ export class MemoryStream extends RandomAccessStream {
         this.checkAndResize(this._position + count);
         for (let i = 0; i < count; i++)
             this.bytes[this._position + i] = buffer[offset + i];
-        await this.setPosition(this.getPosition() + count);
+        await this.setPosition(await this.getPosition() + count);
     }
 
     /**
@@ -191,19 +191,19 @@ export class MemoryStream extends RandomAccessStream {
         if (origin === SeekOrigin.Begin) {
             nPos = offset;
         } else if (origin === SeekOrigin.Current) {
-            nPos = this.getPosition() + offset;
+            nPos = await this.getPosition() + offset;
         } else if (origin === SeekOrigin.End) {
             nPos = (this.bytes.length - offset);
         }
         this.checkAndResize(nPos);
         await this.setPosition(nPos);
-        return this.getPosition();
+        return await this.getPosition();
     }
 
     /**
      * Flush the stream. Not-Applicable for memory stream.
      */
-    public override flush(): void {
+    public override async flush(): Promise<void> {
         // noop
     }
 
@@ -211,7 +211,7 @@ export class MemoryStream extends RandomAccessStream {
      * Close any resources the stream is using. Not-Applicable for memory stream.
      */
 
-    public override close(): void {
+    public override async close(): Promise<void> {
         // noop
     }
 

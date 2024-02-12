@@ -8,7 +8,7 @@
     "clean": "tsc --build --clean",
     "test": "jest",
     "lint": "tslint --config tslint.json --project tsconfig.json",
-    "eslint": "eslint ./test/*.js --ext .js"
+    "eslint": "eslint ./test/**/*.js --ext .js"
   },
   "keywords": [],
   "author": "",

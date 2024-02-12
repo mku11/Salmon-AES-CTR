@@ -150,7 +150,12 @@
     <None Include="..\..\..\src\typescript\salmon-fs\file\ireal_file.ts">
       <Link>salmon-fs\file\ireal_file.ts</Link>
     </None>
-  
+    <None Include="..\..\..\src\typescript\salmon-fs\file\js_http_file.ts">
+      <Link>salmon-fs\file\js_http_file.ts</Link>
+    </None>
+    <None Include="..\..\..\src\typescript\salmon-fs\file\js_http_file_stream.ts">
+      <Link>salmon-fs\file\js_http_file_stream.ts</Link>
+    </None>
   </ItemGroup>
   <!-- Add the items so they can be built -->
   <ItemGroup>
@@ -243,6 +248,12 @@
     <TypeScriptCompile Remove="..\..\..\src\typescript\salmon-core\salmon\password\pbkdf_type.ts">
     </TypeScriptCompile>
     <TypeScriptCompile Remove="..\..\..\src\typescript\salmon-fs\salmonfs\salmon_key.ts">
+    </TypeScriptCompile>
+    <TypeScriptCompile Remove="..\..\..\src\typescript\salmon-fs\file\ireal_file.ts">
+    </TypeScriptCompile>
+    <TypeScriptCompile Remove="..\..\..\src\typescript\salmon-fs\file\js_http_file.ts">
+    </TypeScriptCompile>
+    <TypeScriptCompile Remove="..\..\..\src\typescript\salmon-fs\file\js_http_file_stream.ts">
     </TypeScriptCompile>
   </ItemGroup>
   <ItemGroup>

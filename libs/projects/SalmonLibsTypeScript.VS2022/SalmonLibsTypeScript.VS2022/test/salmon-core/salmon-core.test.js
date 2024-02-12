@@ -59,7 +59,7 @@ const TEST_IMPORT_FILE = TEST_IMPORT_MEDIUM_FILE;
 
 describe('salmon-core', () => {
 
-    beforeEach(() => {
+    beforeEach(async () => {
         SalmonStream.setAesProviderType(ProviderType.Default);
         SalmonDefaultOptions.setBufferSize(SalmonIntegrity.DEFAULT_CHUNK_SIZE);
     });
@@ -368,9 +368,9 @@ describe('salmon-core', () => {
         } catch (ex) {
             caught = true;
         }
-        ins.close();
-        encWriter.flush();
-        encWriter.close();
+        await ins.close();
+        await encWriter.flush();
+        await encWriter.close();
 
         expect(caught).toBeTruthy();
     });
@@ -395,9 +395,9 @@ describe('salmon-core', () => {
         } catch (ex) {
             caught = true;
         }
-        ins.close();
-        encWriter.flush();
-        encWriter.close();
+        await ins.close();
+        await encWriter.flush();
+        await encWriter.close();
 
         expect(caught).toBeTruthy();
     });

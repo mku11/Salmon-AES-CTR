@@ -56,7 +56,7 @@ export async function decryptData(data: Uint8Array, start: number, count: number
         stream = new SalmonStream(key, nonce, EncryptionMode.Decrypt, inputStream,
             headerData, integrity, chunkSize, hashKey);
         await stream.setPosition(start);
-        startPos = outputStream.getPosition();
+        startPos = await outputStream.getPosition();
         let totalChunkBytesRead: number = 0;
         // align to the chunksize if available
         let buffSize: number = Math.max(bufferSize, stream.getChunkSize());
@@ -67,18 +67,18 @@ export async function decryptData(data: Uint8Array, start: number, count: number
             await outputStream.write(buff, 0, bytesRead);
             totalChunkBytesRead += bytesRead;
         }
-        outputStream.flush();
+        await outputStream.flush();
     } catch (ex) {
         console.error(ex);
         throw new SalmonSecurityException("Could not decrypt data", ex);
     } finally {
         if (inputStream != null)
-            inputStream.close();
+            await inputStream.close();
         if (stream != null)
-            stream.close();
+            await stream.close();
         if (outputStream != null)
-            outputStream.close();
+            await outputStream.close();
     }
-    let endPos: number = outputStream.getPosition();
+    let endPos: number = await outputStream.getPosition();
     return { startPos: startPos, endPos: endPos };
 }

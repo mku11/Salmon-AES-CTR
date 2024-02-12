@@ -112,16 +112,16 @@ export class SalmonEncryptor {
             let chunkSizeBytes: Uint8Array = BitConverter.toBytes(chunkSize, SalmonGenerator.CHUNK_SIZE_LENGTH);
             await outputStream.write(chunkSizeBytes, 0, chunkSizeBytes.length);
             await outputStream.write(nonce, 0, nonce.length);
-            outputStream.flush();
+            await outputStream.flush();
             headerData = outputStream.toArray();
         }
 
-        let realSize: number = SalmonStream.getActualSize(data, key, nonce, EncryptionMode.Encrypt,
+        let realSize: number = await SalmonStream.getActualSize(data, key, nonce, EncryptionMode.Encrypt,
             headerData, integrity, chunkSize, hashKey);
         let outData: Uint8Array = new Uint8Array(realSize);
         await outputStream.setPosition(0);
-        await outputStream.read(outData, 0, outputStream.length());
-        outputStream.close();
+        await outputStream.read(outData, 0, await outputStream.length());
+        await outputStream.close();
 
         if (this.threads == 1) {
             await encryptData(data, 0, data.length, outData,

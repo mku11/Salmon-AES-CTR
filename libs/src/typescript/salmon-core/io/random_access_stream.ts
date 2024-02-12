@@ -35,32 +35,32 @@ export abstract class RandomAccessStream {
      * True if the stream is readable.
      * @return
      */
-    public abstract canRead(): boolean;
+    public abstract canRead(): Promise<boolean>;
 
     /**
      * True if the stream is writeable.
      * @return
      */
-    public abstract canWrite(): boolean;
+    public abstract canWrite(): Promise<boolean>;
 
     /**
      * True if the stream is seekable.
      * @return
      */
-    public abstract canSeek(): boolean;
+    public abstract canSeek(): Promise<boolean>;
 
     /**
      * Get the length of the stream.
      * @return
      */
-    public abstract length(): number;
+    public abstract length(): Promise<number>;
 
     /**
      * Get the current position of the stream.
      * @return The current position.
      * @throws IOException
      */
-    public abstract getPosition(): number;
+    public abstract getPosition(): Promise<number>;
 
     /**
      * Change the current position of the stream.
@@ -74,7 +74,7 @@ export abstract class RandomAccessStream {
      * @param value The length.
      * @throws IOException
      */
-    public abstract setLength(value: number): void;
+    public abstract setLength(value: number): Promise<void>;
 
     /**
      *
@@ -107,13 +107,13 @@ export abstract class RandomAccessStream {
     /**
      * Flush buffers.
      */
-    public abstract flush(): void;
+    public abstract flush(): Promise<void>;
 
     /**
      * Close the stream and associated resources.
      * @throws IOException
      */
-    public abstract close(): void;
+    public abstract close(): Promise<void>;
 
     /**
      * Write stream contents to another stream.
@@ -122,32 +122,25 @@ export abstract class RandomAccessStream {
      * @param progressListener The listener to notify when progress changes.
      * @throws IOException
      */
-    public async copyTo(stream: RandomAccessStream, bufferSize: number = 0, progressListener?: OnProgressListener): Promise<void> {
-        if (!this.canRead())
+    public async copyTo(stream: RandomAccessStream, bufferSize: number = 0, progressListener: (position: number, length: number) => void | null): Promise<void> {
+        if (!(await this.canRead()))
             throw new IOException("Target stream not readable");
-        if (!stream.canWrite())
+        if (!(await stream.canWrite()))
             throw new IOException("Target stream not writable");
         if (bufferSize <= 0) {
             bufferSize = SalmonDefaultOptions.getBufferSize(); // TODO: remove ref to Salmon
         }
         let bytesRead: number;
-        const pos: number = this.getPosition();
+        const pos: number = await this.getPosition();
         const buffer: Uint8Array = new Uint8Array(bufferSize);
         while ((bytesRead = await this.read(buffer, 0, bufferSize)) > 0) {
             await stream.write(buffer, 0, bytesRead);
             if (progressListener != null)
-                progressListener.onProgressChanged(this.getPosition(), this.length());
+                progressListener(await this.getPosition(), await this.length());
         }
-        stream.flush();
+        await stream.flush();
         await this.setPosition(pos);
     }
-}
-
-/**
- * Progress listener for stream operations.
- */
-export interface OnProgressListener {
-    onProgressChanged(position: number, length: number): void;
 }
 
 /**

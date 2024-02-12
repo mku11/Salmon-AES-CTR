@@ -7,7 +7,7 @@ var stopOnError = false;
 var totalTestCases = 0;
 var passedTestCases = 0;
 // set to run specific case
-//var testFilter = "shouldEncryptAndDecryptArrayMultipleThreads1";
+//var testFilter = "shouldNotReadFromStreamEncryptionMode";
 
 async function it(testCaseName, callback) {
     testCases.push({
@@ -22,7 +22,7 @@ async function beforeEach(callback) {
 async function describe(testClass, callback) {
     testCat = testClass;
     await callback();
-    submitNext(0);
+    await submitNext(0);
 }
 
 async function submitNext(testCaseNum) {
@@ -46,7 +46,7 @@ async function submitNext(testCaseNum) {
         passedTestCases += success ? 1 : 0;
     }
     if (success || !stopOnError)
-        submitNext(testCaseNum + 1);
+        await submitNext(testCaseNum + 1);
 }
 
 

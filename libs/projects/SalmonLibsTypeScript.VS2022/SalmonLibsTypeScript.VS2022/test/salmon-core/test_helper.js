@@ -83,7 +83,7 @@ export class TestHelper {
             totalBytesRead += bytesRead;
         }
         let decText1 = new TextDecoder().decode(encOuts2.toArray());
-        encOuts2.close();
+        await encOuts2.close();
         return decText1;
     }
 
@@ -144,10 +144,10 @@ export class TestHelper {
                 await writer.write(buffer, 0, bytesRead);
             }
         }
-        writer.flush();
+        await writer.flush();
         let bytes = outs.toArray();
-        writer.close();
-        ins.close();
+        await writer.close();
+        await ins.close();
         return bytes;
     }
 
@@ -174,10 +174,10 @@ export class TestHelper {
                 await outs.write(buffer, 0, bytesRead);
             }
         }
-        outs.flush();
+        await outs.flush();
         let bytes = outs.toArray();
-        reader.close();
-        outs.close();
+        await reader.close();
+        await outs.close();
         return bytes;
     }
 
@@ -198,9 +198,9 @@ export class TestHelper {
         let encWriter = new SalmonStream(key, iv, EncryptionMode.Encrypt, outs,
             null, integrity, chunkSize, hashKey);
         await ins.copyTo(encWriter);
-        ins.close();
-        encWriter.flush();
-        encWriter.close();
+        await ins.close();
+        await encWriter.flush();
+        await encWriter.close();
         let encBytes = outs.toArray();
 
         // Use SalmonStrem to read from cipher text and seek and read to different positions in the stream
@@ -222,19 +222,19 @@ export class TestHelper {
         expect(decText).toBe(correctText);
         await TestHelper.testCounter(decReader);
 
-        correctText = plainText.substring(decReader.getPosition() + 4, decReader.getPosition() + 4 + 4);
+        correctText = plainText.substring(await decReader.getPosition() + 4, await decReader.getPosition() + 4 + 4);
         decText = await TestHelper.seekAndGetSubstringByRead(decReader, 4, 4, SeekOrigin.Current);
 
         expect(decText).toBe(correctText);
         await TestHelper.testCounter(decReader);
 
-        correctText = plainText.substring(decReader.getPosition() + 6, decReader.getPosition() + 6 + 4);
+        correctText = plainText.substring(await decReader.getPosition() + 6, await decReader.getPosition() + 6 + 4);
         decText = await TestHelper.seekAndGetSubstringByRead(decReader, 6, 4, SeekOrigin.Current);
 
         expect(decText).toBe(correctText);
         await TestHelper.testCounter(decReader);
 
-        correctText = plainText.substring(decReader.getPosition() + 10, decReader.getPosition() + 10 + 6);
+        correctText = plainText.substring(await decReader.getPosition() + 10, await decReader.getPosition() + 10 + 6);
         decText = await TestHelper.seekAndGetSubstringByRead(decReader, 10, 6, SeekOrigin.Current);
 
         expect(decText).toBe(correctText);
@@ -256,8 +256,8 @@ export class TestHelper {
 
         expect(decText).toBe(correctText);
         await TestHelper.testCounter(decReader);
-        encIns.close();
-        decReader.close();
+        await encIns.close();
+        await decReader.close();
     }
 
     static async seekTestCounterAndBlock(text, key, iv,
@@ -276,9 +276,9 @@ export class TestHelper {
         let encWriter = new SalmonStream(key, iv, EncryptionMode.Encrypt, outs,
             null, integrity, chunkSize, hashKey);
         await ins.copyTo(encWriter);
-        ins.close();
-        encWriter.flush();
-        encWriter.close();
+        await ins.close();
+        await encWriter.flush();
+        await encWriter.close();
         let encBytes = outs.toArray();
 
         // Use SalmonStream to read from cipher text and seek and read to different positions in the stream
@@ -286,16 +286,16 @@ export class TestHelper {
         let decReader = new SalmonStream(key, iv, EncryptionMode.Decrypt, encIns,
             null, integrity, chunkSize, hashKey);
         for (let i = 0; i < 100; i++) {
-            await decReader.setPosition(decReader.getPosition() + 7);
+            await decReader.setPosition(await decReader.getPosition() + 7);
             await TestHelper.testCounter(decReader);
         }
 
-        encIns.close();
-        decReader.close();
+        await encIns.close();
+        await decReader.close();
     }
 
     static async testCounter(decReader) {
-        let expectedBlock = Math.floor(decReader.getPosition() / SalmonAES256CTRTransformer.BLOCK_SIZE);
+        let expectedBlock = Math.floor(await decReader.getPosition() / SalmonAES256CTRTransformer.BLOCK_SIZE);
 
         expect(await decReader.getBlock()).toBe(expectedBlock);
 
@@ -330,9 +330,9 @@ export class TestHelper {
         let encWriter = new SalmonStream(key, iv, EncryptionMode.Encrypt, outs,
             null, integrity, chunkSize, hashKey);
         await ins.copyTo(encWriter);
-        ins.close();
-        encWriter.flush();
-        encWriter.close();
+        await ins.close();
+        await encWriter.flush();
+        await encWriter.close();
         let encBytes = outs.toArray();
 
         // partial write
@@ -349,8 +349,8 @@ export class TestHelper {
             partialWriter.setAllowRangeWrite(setAllowRangeWrite);
         await partialWriter.seek(alignedPosition, SeekOrigin.Begin);
         await partialWriter.write(writeBytes, 0, count);
-        partialWriter.close();
-        pOuts.close();
+        await partialWriter.close();
+        await pOuts.close();
 
         // Use SalmonStrem to read from cipher text and test if writing was successful
         let encIns = new MemoryStream(encBytes);
@@ -365,8 +365,8 @@ export class TestHelper {
         expect(decText.substring(seek + writeCount)).toBe(text.substring(seek + writeCount));
         await TestHelper.testCounter(decReader);
 
-        encIns.close();
-        decReader.close();
+        await encIns.close();
+        await decReader.close();
     }
 
     static async testCounterValue(text, key, nonce, counter) {
@@ -392,7 +392,7 @@ export class TestHelper {
             else
                 throw ex;
         }  finally {
-            stream.close();
+            await stream.close();
         }
     }
 
@@ -557,15 +557,15 @@ export class TestHelper {
         let ms1 = new MemoryStream(testData);
         let ms2 = new MemoryStream();
         await ms1.copyTo(ms2, bufferSize, null);
-        ms1.close();
-        ms2.close();
+        await ms1.close();
+        await ms2.close();
         let data2 = ms2.toArray();
 
         expect(data2.length).toBe(testData.length);
 
         let digest2 = crypto.subtle.digest("SHA-256", data2);
-        ms1.close();
-        ms2.close();
+        await ms1.close();
+        await ms2.close();
 
         TestHelper.assertArrayEquals(digest2, digest);
 
@@ -582,10 +582,10 @@ export class TestHelper {
         let ms1 = new MemoryStream(testData);
         let ms2 = new MemoryStream();
         await ms1.copyTo(ms2, bufferSize, null);
-        ms1.close();
+        await ms1.close();
 
         // encrypt to a memory byte stream
-        ms2.setPosition(0);
+        await ms2.setPosition(0);
         let ms3 = new MemoryStream();
         let salmonStream = new SalmonStream(key, nonce, EncryptionMode.Encrypt, ms3,
             null, integrity, chunkSize, hashKey);
@@ -593,23 +593,23 @@ export class TestHelper {
         if (integrity)
             bufferSize = salmonStream.getChunkSize();
         await ms2.copyTo(salmonStream, bufferSize, null);
-        salmonStream.close();
-        ms2.close();
+        await salmonStream.close();
+        await ms2.close();
         let encData = ms3.toArray();
-        ms3.close();
+        await ms3.close();
 
         // decrypt
         ms3 = new MemoryStream(encData);
-        ms3.setPosition(0);
+        await ms3.setPosition(0);
         let ms4 = new MemoryStream();
         let salmonStream2 = new SalmonStream(key, nonce, EncryptionMode.Decrypt, ms3,
             null, integrity, chunkSize, hashKey);
         await salmonStream2.copyTo(ms4, bufferSize, null);
-        salmonStream2.close();
-        ms3.close();
+        await salmonStream2.close();
+        await ms3.close();
         await ms4.setPosition(0);
         let digest2 = await crypto.subtle.digest("SHA-256", ms4.toArray());
-        ms4.close();
+        await ms4.close();
     }
 
     static calculateHMAC(bytes, offset, length,

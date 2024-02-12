@@ -55,7 +55,7 @@ export async function encryptData(data: Uint8Array, start: number, count: number
         stream = new SalmonStream(key, nonce, EncryptionMode.Encrypt, outputStream, headerData, integrity, chunkSize, hashKey);
         stream.setAllowRangeWrite(true);
         await stream.setPosition(start);
-        startPos = outputStream.getPosition();
+        startPos = await outputStream.getPosition();
         let totalChunkBytesRead = 0;
         // align to the chunk size if available
         let buffSize = Math.max(bufferSize, stream.getChunkSize());
@@ -66,20 +66,20 @@ export async function encryptData(data: Uint8Array, start: number, count: number
             await stream.write(buff, 0, bytesRead);
             totalChunkBytesRead += bytesRead;
         }
-        stream.flush();
+        await stream.flush();
     }
     catch (ex) {
         console.error(ex);
         throw ex;
     }
     finally {
-        outputStream.close();
+        await outputStream.close();
         if (stream != null)
-            stream.close();
+            await stream.close();
         if (inputStream != null)
-            inputStream.close();
+            await inputStream.close();
     }
-    let endPos: number = outputStream.getPosition();
+    let endPos: number = await outputStream.getPosition();
     return { startPos: startPos, endPos: endPos };
 
 }

@@ -22,7 +22,7 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 */
 
-import { OnProgressListener, RandomAccessStream } from "../../salmon-core/io/random_access_stream";
+import { RandomAccessStream } from "../../salmon-core/io/random_access_stream";
 
 /**
  * Interface that represents a real file. This class is used internally by the virtual disk to
@@ -36,14 +36,14 @@ export interface IRealFile {
      *
      * @return
      */
-    exists(): boolean;
+    exists(): Promise<boolean>;
 
     /**
      * Delete this file.
      *
      * @return
      */
-    delete(): boolean;
+    delete(): Promise<boolean>;
 
     /**
      * Get a stream for reading the file.
@@ -51,7 +51,7 @@ export interface IRealFile {
      * @return
      * @throws FileNotFoundException
      */
-    getInputStream(): RandomAccessStream;
+    getInputStream(): Promise<RandomAccessStream>;
 
     /**
      * Get a stream for writing to the file.
@@ -59,7 +59,7 @@ export interface IRealFile {
      * @return
      * @throws FileNotFoundException
      */
-    getOutputStream(): RandomAccessStream;
+    getOutputStream(): Promise<RandomAccessStream>;
 
     /**
      * Rename file.
@@ -68,35 +68,35 @@ export interface IRealFile {
      * @return True if success.
      * @throws FileNotFoundException
      */
-    renameTo(newFilename: string): boolean;
+    renameTo(newFilename: string): Promise<boolean>;
 
     /**
      * Get the length for the file.
      *
      * @return The length.
      */
-    length(): number;
+    length(): Promise<number>;
 
     /**
      * Get the count of files and subdirectories
      *
      * @return
      */
-    getChildrenCount(): number;
+    getChildrenCount(): Promise<number>;
 
     /**
      * Get the last modified date of the file.
      *
      * @return
      */
-    lastModified(): number;
+    lastModified(): Promise<number>;
 
     /**
      * Get the absolute path of the file on disk.
      *
      * @return
      */
-    getAbsolutePath(): string;
+    getAbsolutePath(): Promise<string>;
 
     /**
      * Get the original filepath of this file. This might symlinks or merged folders. To get the absolute path
@@ -111,21 +111,21 @@ export interface IRealFile {
      *
      * @return
      */
-    isFile(): boolean;
+    isFile(): Promise<boolean>;
 
     /**
      * True if this is a directory.
      *
      * @return
      */
-    isDirectory(): boolean;
+    isDirectory(): Promise<boolean>;
 
     /**
      * Get all files and directories under this directory.
      *
      * @return
      */
-    listFiles(): Array<IRealFile>;
+    listFiles(): Promise<Array<IRealFile>>;
 
     /**
      * Get the basename of the file.
@@ -140,14 +140,14 @@ export interface IRealFile {
      * @param dirName Directory name.
      * @return The newly created directory.
      */
-    createDirectory(dirName: string): IRealFile;
+    createDirectory(dirName: string): Promise<IRealFile>;
 
     /**
      * Get the parent directory of this file/directory.
      *
      * @return The parent directory.
      */
-    getParent(): IRealFile;
+    getParent(): Promise<IRealFile>;
 
     /**
      * Create an empty file with the provided name.
@@ -156,24 +156,7 @@ export interface IRealFile {
      * @return The newly create file.
      * @throws IOException
      */
-    createFile(filename: string): IRealFile;
-
-    /**
-     * Move this file to another directory.
-     *
-     * @param newDir The target directory.
-     * @return The file after the move. Use this instance for any subsequent file operations.
-     */
-    move(newDir: IRealFile): IRealFile;
-
-    /**
-     * Move this file to another directory.
-     *
-     * @param newDir  The target directory.
-     * @param newName The new filename.
-     * @return The file after the move. Use this instance for any subsequent file operations.
-     */
-    move(newDir: IRealFile, newName: string): IRealFile;
+    createFile(filename: string): Promise<IRealFile>;
 
     /**
      * Move this file to another directory.
@@ -183,7 +166,7 @@ export interface IRealFile {
      * @param progressListener Observer to notify of the move progress.
      * @return The file after the move. Use this instance for any subsequent file operations.
      */
-    move(newDir: IRealFile, newName: string, progressListener: OnProgressListener): IRealFile;
+    move(newDir: IRealFile, newName: string, progressListener: ((position: number, length: number) => void) | null): Promise<IRealFile>;
 
     /**
      * Copy this file to another directory.
@@ -192,7 +175,7 @@ export interface IRealFile {
      * @return The file after the copy. Use this instance for any subsequent file operations.
      * @throws IOException
      */
-    copy(newDir: IRealFile): IRealFile;
+    copy(newDir: IRealFile): Promise<IRealFile>;
 
     /**
      * Copy this file to another directory.
@@ -202,7 +185,7 @@ export interface IRealFile {
      * @return The file after the copy. Use this instance for any subsequent file operations.
      * @throws IOException
      */
-    copy(newDir: IRealFile, newName: string): IRealFile;
+    copy(newDir: IRealFile, newName: string): Promise<IRealFile>;
 
     /**
      * Copy this file to another directory.
@@ -213,7 +196,7 @@ export interface IRealFile {
      * @return The file after the copy. Use this instance for any subsequent file operations.
      * @throws IOException
      */
-    copy(newDir: IRealFile, newName: string, progressListener: OnProgressListener): IRealFile;
+    copy(newDir: IRealFile, newName: string, progressListener: (position: number, length: number) => void): Promise<IRealFile>;
 
     /**
      * Get the file/directory matching the name provided under this directory.
@@ -221,17 +204,16 @@ export interface IRealFile {
      * @param filename The name of the file or directory to match.
      * @return The file that was matched.
      */
-    getChild(filename: string): IRealFile;
+    getChild(filename: string): Promise<IRealFile | null>;
 
     /**
      * Create a directory with the current filepath.
      *
      * @return
      */
-    mkdir(): boolean;
+    mkdir(): Promise<boolean>;
 
 }
-
 
 /**
  * Copy contents of a file to another file.
@@ -243,35 +225,23 @@ export interface IRealFile {
  * @return
  * @throws IOException
  */
-//TODO:
-//static copyFileContents(src: IRealFile, dest: IRealFile, deleteAfter: boolean,
-//progressListener: RandomAccessStream.OnProgressListener): boolean {
-//    let source: RandomAccessStream = src.getInputStream();
-//    let target: RandomAccessStream = dest.getOutputStream();
-//    try {
-//        source.copyTo(target, progressListener);
-//    } catch (Exception ex) {
-//        dest.delete();
-//        return false;
-//    } finally {
-//        source.close();
-//        target.close();
-//    }
-//    if (delete)
-//        src.delete();
-//    return true;
-//}
-
-/**
- * Copy a directory recursively
- *
- * @param dest
- * @throws IOException
- */
-//TODO:
-//default void copyRecursively(IRealFile dest) throws IOException {
-//    copyRecursively(dest, null, null, true, null);
-//}
+export async function copyFileContents(src: IRealFile, dest: IRealFile, deleteAfter: boolean,
+    progressListener: (position: number, length: number) => void): Promise<boolean> {
+    let source: RandomAccessStream = await src.getInputStream();
+    let target: RandomAccessStream = await dest.getOutputStream();
+    try {
+        await source.copyTo(target, 0, progressListener);
+    } catch (ex) {
+        await dest.delete();
+        return false;
+    } finally {
+        await source.close();
+        await target.close();
+    }
+    if (deleteAfter)
+        await src.delete();
+    return true;
+}
 
 /**
  * Copy a directory recursively
@@ -283,56 +253,45 @@ export interface IRealFile {
  * @param onFailed
  * @throws IOException
  */
-// TODO:
-//default void copyRecursively(IRealFile dest,
-//                             TriConsumer<IRealFile, Long, Long> progressListener,
-//                             Function<IRealFile, String> autoRename,
-//                             boolean autoRenameFolders,
-//                             BiConsumer<IRealFile, Exception> onFailed) throws IOException {
-//    String newFilename = getBaseName();
-//    IRealFile newFile;
-//    newFile = dest.getChild(newFilename);
-//    if (isFile()) {
-//        if (newFile != null && newFile.exists()) {
-//            if (autoRename != null) {
-//                newFilename = autoRename.apply(this);
-//            } else {
-//                if (onFailed != null)
-//                    onFailed.accept(this, new Exception("Another file exists"));
-//                return;
-//            }
-//        }
-//        this.copy(dest, newFilename, (position, length) ->
-//        {
-//            if (progressListener != null) {
-//                progressListener.accept(this, position, length);
-//            }
-//        });
-//    } else if (this.isDirectory()) {
-//        if (progressListener != null)
-//            progressListener.accept(this, 0L, 1L);
-//        if (newFile != null && newFile.exists() && autoRename != null && autoRenameFolders)
-//            newFile = dest.createDirectory(autoRename.apply(this));
-//        else if (newFile == null || !newFile.exists())
-//            newFile = dest.createDirectory(newFilename);
-//        if (progressListener != null)
-//            progressListener.accept(this, 1L, 1L);
-
-//        for (IRealFile child : this.listFiles()) {
-//            child.copyRecursively(newFile, progressListener, autoRename, autoRenameFolders, onFailed);
-//        }
-//    }
-//}
-
-/**
- * Move a directory recursively
- *
- * @param dest The target directory
- */
-// TODO:
-//default void moveRecursively(IRealFile dest) throws IOException {
-//    moveRecursively(dest, null, null, true, null);
-//}
+export async function copyRecursively(src: IRealFile, dest: IRealFile,
+    progressListener: ((realfile: IRealFile, position: number, length: number) => void) | null,
+    autoRename: (realfile: IRealFile) => string,
+    autoRenameFolders: boolean = true,
+    onFailed: (realfile: IRealFile, ex: Error) => void | null): Promise<void> {
+    let newFilename: string = src.getBaseName();
+    let newFile: IRealFile | null;
+    newFile = await dest.getChild(newFilename);
+    if (await src.isFile()) {
+        if (newFile != null && await newFile.exists()) {
+            if (autoRename != null) {
+                newFilename = autoRename(src);
+            } else {
+                if (onFailed != null)
+                    onFailed(src, new Error("Another file exists"));
+                return;
+            }
+        }
+        await src.copy(dest, newFilename, (position, length) => {
+            if (progressListener != null) {
+                progressListener(src, position, length);
+            }
+        });
+    } else if (await src.isDirectory()) {
+        if (progressListener != null)
+            progressListener(src, 0, 1);
+        if (newFile != null && await newFile.exists() && autoRename != null && autoRenameFolders)
+            newFile = await dest.createDirectory(autoRename(src));
+        else if (newFile == null || !newFile.exists())
+            newFile = await dest.createDirectory(newFilename);
+        if (progressListener != null)
+            progressListener(src, 1, 1);
+        (await src.listFiles()).forEach(async (child: IRealFile) => {
+            if (newFile == null)
+                throw new Error("Could not get new file");
+            await copyRecursively(child, newFile, progressListener, autoRename, autoRenameFolders, onFailed);
+        });
+    }
+}
 
 /**
  * Move a directory recursively
@@ -343,96 +302,97 @@ export interface IRealFile {
  * @param autoRenameFolders Apply autorename to folders also (default is true)
  * @param onFailed
  */
-// TODO:
-//default void moveRecursively(IRealFile dest,
-//                             TriConsumer<IRealFile, Long, Long> progressListener,
-//                             Function<IRealFile, String> autoRename,
-//                             boolean autoRenameFolders,
-//                             BiConsumer<IRealFile, Exception> onFailed) throws IOException {
-//    // target directory is the same
-//    if (getParent().getPath().equals(dest.getPath())) {
-//        if (progressListener != null) {
-//            progressListener.accept(this, 0L, 1L);
-//            progressListener.accept(this, 1L, 1L);
-//        }
-//        return;
-//    }
+export async function moveRecursively(file: IRealFile, dest: IRealFile,
+    progressListener: ((realFile: IRealFile, position: number, length: number) => void) | null = null,
+    autoRename: ((realFile: IRealFile) => string) | null = null,
+    autoRenameFolders: boolean = true,
+    onFailed: ((realFile: IRealFile, ex: Error) => void) | null = null): Promise<void> {
+    // target directory is the same
+    if ((await file.getParent()).getPath() == dest.getPath()) {
+        if (progressListener != null) {
+            progressListener(file, 0, 1);
+            progressListener(file, 1, 1);
+        }
+        return;
+    }
 
-//    String newFilename = getBaseName();
-//    IRealFile newFile;
-//    newFile = dest.getChild(newFilename);
-//    if (isFile()) {
-//        if (newFile != null && newFile.exists()) {
-//            if (newFile.getPath().equals(this.getPath()))
-//                return;
-//            if (autoRename != null) {
-//                newFilename = autoRename.apply(this);
-//            } else {
-//                if (onFailed != null)
-//                    onFailed.accept(this, new Exception("Another file exists"));
-//                return;
-//            }
-//        }
-//        this.move(dest, newFilename, (position, length) ->
-//        {
-//            if (progressListener != null) {
-//                progressListener.accept(this, position, length);
-//            }
-//        });
-//    } else if (this.isDirectory()) {
-//        if (progressListener != null)
-//            progressListener.accept(this, 0L, 1L);
-//        if ((newFile != null && newFile.exists() && autoRename != null && autoRenameFolders)
-//                || newFile == null || !newFile.exists()) {
-//            newFile = move(dest, autoRename.apply(this));
-//            return;
-//        }
-//        if (progressListener != null)
-//            progressListener.accept(this, 1L, 1L);
+    let newFilename: string = file.getBaseName();
+    let newFile: IRealFile | null;
+    newFile = await dest.getChild(newFilename);
+    if (await file.isFile()) {
+        if (newFile != null && await newFile.exists()) {
+            if (newFile.getPath() == file.getPath())
+                return;
+            if (autoRename != null) {
+                newFilename = autoRename(file);
+            } else {
+                if (onFailed != null)
+                    onFailed(file, new Error("Another file exists"));
+                return;
+            }
+        }
+        await file.move(dest, newFilename, (position: number, length: number) => {
+            if (progressListener != null) {
+                progressListener(file, position, length);
+            }
+        });
+    } else if (await file.isDirectory()) {
+        if (progressListener != null)
+            progressListener(file, 0, 1);
+        if ((newFile != null && await newFile.exists() && autoRename != null && autoRenameFolders)
+            || newFile == null || !newFile.exists()) {
+            if (autoRename != null)
+                newFile = await file.move(dest, autoRename(file), null);
+            return;
+        }
+        if (progressListener != null)
+            progressListener(file, 1, 1);
 
-//        for (IRealFile child : this.listFiles()) {
-//            child.moveRecursively(newFile, progressListener, autoRename, autoRenameFolders, onFailed);
-//        }
-//        if (!this.delete()) {
-//            onFailed.accept(this, new Exception("Could not delete source directory"));
-//            return;
-//        }
-//    }
-//}
+        (await file.listFiles()).forEach(async (child: IRealFile) => {
+            if (newFile == null)
+                throw new Error("Could not get new file");
+            await moveRecursively(child, newFile, progressListener, autoRename, autoRenameFolders, onFailed);
+        });
+
+        if (await !file.delete()) {
+            if(onFailed!=null)
+                onFailed(file, new Error("Could not delete source directory"));
+            return;
+        }
+    }
+}
 
 /**
  * Delete a directory recursively
  * @param progressListener
  * @param onFailed
  */
-//TODO:
-//default void deleteRecursively(TriConsumer<IRealFile, Long, Long> progressListener,
-//                               BiConsumer<IRealFile, Exception> onFailed) {
-//    if (isFile()) {
-//        progressListener.accept(this, 0L, 1L);
-//        if (!this.delete()) {
-//            onFailed.accept(this, new Exception("Could not delete file"));
-//            return;
-//        }
-//        progressListener.accept(this, 1L, 1L);
-//    } else if (this.isDirectory()) {
-//        for (IRealFile child : this.listFiles()) {
-//            child.deleteRecursively(progressListener, onFailed);
-//        }
-//        if (!this.delete()) {
-//            onFailed.accept(this, new Exception("Could not delete directory"));
-//            return;
-//        }
-//    }
-//}
+export async function deleteRecursively(file: IRealFile, progressListener: (realfile: IRealFile, position: number, length: number) => void,
+    onFailed: (realFile: IRealFile, ex: Error) => void): Promise<void> {
+    if (await file.isFile()) {
+        progressListener(file, 0, 1);
+        if (!file.delete()) {
+            onFailed(file, new Error("Could not delete file"));
+            return;
+        }
+        progressListener(file, 1, 1);
+    } else if (await file.isDirectory()) {
+        (await file.listFiles()).forEach(async (child: IRealFile) => {
+            await deleteRecursively(child, progressListener, onFailed);
+        });
+        if (await !file.delete()) {
+            onFailed(file, new Error("Could not delete directory"));
+            return;
+        }
+    }
+}
 
 /**
  * Get an auto generated copy of the name for a file.
  */
-//TODO:
-//public static Function<IRealFile, String> autoRename = (IRealFile file) -> {
-//    return autoRename(file.getBaseName());
-//};
+export async function autoRenameFile(file: IRealFile) {
+    return autoRename(file.getBaseName());
+};
 
 /**
  * Get an auto generated copy of a filename
@@ -440,17 +400,28 @@ export interface IRealFile {
  * @param filename
  * @return
  */
-// TODO:
-//export function autoRename(filename: string): string {
-//    let ext: string = SalmonFileUtils.getExtensionFromFileName(filename);
-//    let filenameNoExt: string;
-//    if (ext.length > 0)
-//        filenameNoExt = filename.substring(0, filename.length - ext.length - 1);
-//    else
-//        filenameNoExt = filename;
-//    let newFilename: string = filenameNoExt + " (" + new SimpleDateFormat("HHmmssSSS").format(Calendar.getInstance().getTime()) + ")";
-//    if (ext.length > 0)
-//        newFilename += "." + ext;
-//    return newFilename;
-//}
+export function autoRename(filename: string): string {
+    let ext: string = getExtension(filename);
+    let filenameNoExt: string;
+    if (ext.length > 0)
+        filenameNoExt = filename.substring(0, filename.length - ext.length - 1);
+    else
+        filenameNoExt = filename;
+    let date: Date = new Date();
+    let newFilename: string = filenameNoExt + " (" + date.getHours().toString().padStart(2, "0")
+        + date.getHours().toString().padStart(2, "0") + date.getMinutes().toString().padStart(2, "0")
+        + date.getSeconds().toString().padStart(2, "0") + date.getMilliseconds().toString().padStart(3, "0") + ")";
+    if (ext.length > 0)
+        newFilename += "." + ext;
+    return newFilename;
+}
 
+export function getExtension(fileName: string): string {
+    if (fileName == null)
+        return "";
+    let index: number = fileName.lastIndexOf(".");
+    if (index >= 0) {
+        return fileName.substring(index + 1);
+    } else
+        return "";
+}

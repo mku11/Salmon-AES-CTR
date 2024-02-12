@@ -118,7 +118,7 @@ export class SalmonDecryptor {
         if (nonce == null)
             throw new SalmonSecurityException("Nonce is missing");
 
-        let realSize: number = SalmonStream.getActualSize(data, key, nonce, EncryptionMode.Decrypt,
+        let realSize: number = await SalmonStream.getActualSize(data, key, nonce, EncryptionMode.Decrypt,
             headerData, integrity, chunkSize, hashKey);
         let outData: Uint8Array = new Uint8Array(realSize);
 
