@@ -166,26 +166,7 @@ export interface IRealFile {
      * @param progressListener Observer to notify of the move progress.
      * @return The file after the move. Use this instance for any subsequent file operations.
      */
-    move(newDir: IRealFile, newName: string, progressListener: ((position: number, length: number) => void) | null): Promise<IRealFile>;
-
-    /**
-     * Copy this file to another directory.
-     *
-     * @param newDir The target directory.
-     * @return The file after the copy. Use this instance for any subsequent file operations.
-     * @throws IOException
-     */
-    copy(newDir: IRealFile): Promise<IRealFile>;
-
-    /**
-     * Copy this file to another directory.
-     *
-     * @param newDir  The target directory.
-     * @param newName The new filename.
-     * @return The file after the copy. Use this instance for any subsequent file operations.
-     * @throws IOException
-     */
-    copy(newDir: IRealFile, newName: string): Promise<IRealFile>;
+    move(newDir: IRealFile, newName: string | null, progressListener: ((position: number, length: number) => void) | null): Promise<IRealFile>;
 
     /**
      * Copy this file to another directory.
@@ -196,7 +177,7 @@ export interface IRealFile {
      * @return The file after the copy. Use this instance for any subsequent file operations.
      * @throws IOException
      */
-    copy(newDir: IRealFile, newName: string, progressListener: (position: number, length: number) => void): Promise<IRealFile>;
+    copy(newDir: IRealFile, newName: string | null, progressListener: ((position: number, length: number) => void) | null): Promise<IRealFile>;
 
     /**
      * Get the file/directory matching the name provided under this directory.
@@ -255,9 +236,9 @@ export async function copyFileContents(src: IRealFile, dest: IRealFile, deleteAf
  */
 export async function copyRecursively(src: IRealFile, dest: IRealFile,
     progressListener: ((realfile: IRealFile, position: number, length: number) => void) | null,
-    autoRename: (realfile: IRealFile) => string,
+    autoRename: ((realfile: IRealFile) => string) | null,
     autoRenameFolders: boolean = true,
-    onFailed: (realfile: IRealFile, ex: Error) => void | null): Promise<void> {
+    onFailed: ((realfile: IRealFile, ex: Error) => void) | null): Promise<void> {
     let newFilename: string = src.getBaseName();
     let newFile: IRealFile | null;
     newFile = await dest.getChild(newFilename);
@@ -355,7 +336,7 @@ export async function moveRecursively(file: IRealFile, dest: IRealFile,
         });
 
         if (await !file.delete()) {
-            if(onFailed!=null)
+            if (onFailed != null)
                 onFailed(file, new Error("Could not delete source directory"));
             return;
         }
@@ -368,11 +349,12 @@ export async function moveRecursively(file: IRealFile, dest: IRealFile,
  * @param onFailed
  */
 export async function deleteRecursively(file: IRealFile, progressListener: (realfile: IRealFile, position: number, length: number) => void,
-    onFailed: (realFile: IRealFile, ex: Error) => void): Promise<void> {
+    onFailed: ((realFile: IRealFile, ex: Error) => void) | null): Promise<void> {
     if (await file.isFile()) {
         progressListener(file, 0, 1);
         if (!file.delete()) {
-            onFailed(file, new Error("Could not delete file"));
+            if (onFailed != null)
+                onFailed(file, new Error("Could not delete file"));
             return;
         }
         progressListener(file, 1, 1);
@@ -381,7 +363,8 @@ export async function deleteRecursively(file: IRealFile, progressListener: (real
             await deleteRecursively(child, progressListener, onFailed);
         });
         if (await !file.delete()) {
-            onFailed(file, new Error("Could not delete directory"));
+            if (onFailed != null)
+                onFailed(file, new Error("Could not delete directory"));
             return;
         }
     }

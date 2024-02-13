@@ -48,8 +48,8 @@ export class SalmonTextDecryptor {
      * @throws SalmonSecurityException
      * @throws SalmonIntegrityException
      */
-    public static async decryptString(text: string, key: Uint8Array, nonce: Uint8Array, header: boolean,
-        integrity: boolean, hashKey: Uint8Array, chunkSize: number | null = null): Promise<string> {
+    public static async decryptString(text: string, key: Uint8Array, nonce: Uint8Array | null, header: boolean,
+        integrity: boolean = false, hashKey: Uint8Array | null = null, chunkSize: number | null = null): Promise<string> {
         let bytes: Uint8Array = SalmonEncoder.getBase64().decode(text);
         let decBytes: Uint8Array = await this.decryptor.decrypt(bytes, key, nonce, header, integrity, hashKey, chunkSize);
         let decString: string = new TextDecoder().decode(decBytes);

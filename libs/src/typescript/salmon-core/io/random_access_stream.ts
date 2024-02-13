@@ -122,12 +122,12 @@ export abstract class RandomAccessStream {
      * @param progressListener The listener to notify when progress changes.
      * @throws IOException
      */
-    public async copyTo(stream: RandomAccessStream, bufferSize: number = 0, progressListener: (position: number, length: number) => void | null): Promise<void> {
+    public async copyTo(stream: RandomAccessStream, bufferSize: number | null = null, progressListener: ((position: number, length: number) => void) | null = null): Promise<void> {
         if (!(await this.canRead()))
             throw new IOException("Target stream not readable");
         if (!(await stream.canWrite()))
             throw new IOException("Target stream not writable");
-        if (bufferSize <= 0) {
+        if (bufferSize == null || bufferSize <= 0) {
             bufferSize = SalmonDefaultOptions.getBufferSize(); // TODO: remove ref to Salmon
         }
         let bytesRead: number;

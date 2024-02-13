@@ -48,7 +48,7 @@ export class SalmonTextEncryptor {
      * @throws IOException
      */
     public static async encryptString(text: string, key: Uint8Array, nonce: Uint8Array, header: boolean,
-        integrity: boolean, hashKey: Uint8Array, chunkSize: number | null): Promise<string> {
+        integrity: boolean = false, hashKey: Uint8Array | null = null, chunkSize: number | null = null): Promise<string> {
         let bytes: Uint8Array = new TextEncoder().encode(text);
         let encBytes: Uint8Array = await this.encryptor.encrypt(bytes, key, nonce, header, integrity, hashKey, chunkSize);
         let encString: string = SalmonEncoder.getBase64().encode(encBytes).replace("\n", "");
