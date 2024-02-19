@@ -25,15 +25,20 @@ SOFTWARE.
 import { RandomAccessStream } from '../../salmon-core/io/random_access_stream.js';
 import { IRealFile, copyFileContents } from './ireal_file.js';
 import { JsHttpFileStream } from './js_http_file_stream.js';
+import { IOException } from '../../salmon-core/io/io_exception.js';
+import { MemoryStream } from '../../salmon-core/io/memory_stream.js';
 
 /**
  * Salmon RealFile implementation for Java.
  */
 export class JsHttpFile implements IRealFile {
     public static readonly separator: string = "/";
+    public static readonly SMALL_FILE_MAX_LENGTH: number = 1 * 1024 * 1024;
 
     private filePath: string;
     private _response: Response | null = null;
+    private _length: number | null = null;
+    private _lastModified: number | null = null;
 
     /**
      * Instantiate a real file represented by the filepath provided.
@@ -81,7 +86,7 @@ export class JsHttpFile implements IRealFile {
      * @return
      */
     public async exists(): Promise<boolean> {
-        return (await this.getResponse()).status == 200;
+        return (await this.getResponse()).status == 200 || (await this.getResponse()).status == 206;
     }
 
     /**
@@ -112,7 +117,6 @@ export class JsHttpFile implements IRealFile {
      */
     public async getInputStream(): Promise<RandomAccessStream> {
         let fileStream: JsHttpFileStream = new JsHttpFileStream(this, "r");
-        await fileStream.getStream();
         return fileStream;
     }
 
@@ -130,7 +134,8 @@ export class JsHttpFile implements IRealFile {
      * @return The parent directory.
      */
     public async getParent(): Promise<IRealFile> {
-        throw new Error("Unsupported Operation");
+        let parentFilePath: string = new URL(".", this.filePath).toString();
+        return new JsHttpFile(parentFilePath);
     }
 
     /**
@@ -170,12 +175,15 @@ export class JsHttpFile implements IRealFile {
      * @return
      */
     public async lastModified(): Promise<number> {
+        if (this._lastModified != null)
+            return this._lastModified;
         let headers: Headers = (await this.getResponse()).headers;
-        let lastDateModified: string | null = headers.get("Last-Modified");
+        let lastDateModified: string | null = headers.get("last-modified");
         if (lastDateModified == null)
             throw new Error("Could not get last modified");
         let date: Date = new Date(lastDateModified);
-        return date.getTime();
+        this._lastModified = date.getTime();
+        return this._lastModified;
     }
 
     /**
@@ -183,25 +191,66 @@ export class JsHttpFile implements IRealFile {
      * @return
      */
     public async length(): Promise<number> {
-        let len: string | null = (await this.getResponse()).headers.get("Content-Length");
-        if (len == null)
-            throw new Error("Could not get length");
-        return parseInt(len);
+        if (this._length != null)
+            return this._length;
+        let res: Response = (await this.getResponse());
+        if (res == null)
+            throw new IOException("Could not get response");
+
+        let lenStr: string | null = res.headers.get("content-length");
+        if (lenStr != null) {
+            this._length = parseInt(lenStr);
+        }
+        else {
+            if (res.body == null)
+                throw new IOException("Could not get length from content. No response body.");
+            let totalLength: number = 0;
+            let buff: Uint8Array;
+            let reader: ReadableStreamDefaultReader = await res.body.getReader();
+            while (true) {
+                let readResult: ReadableStreamReadResult<any> = await reader.read();
+                if (readResult.value === undefined || readResult.value.length == 0)
+                    break;
+                totalLength += readResult.value.length;
+                if (totalLength > JsHttpFile.SMALL_FILE_MAX_LENGTH) {
+                    throw new IOException("Could not get length from file. If this is a large file make sure the server responds with a Content-Length");
+                }
+            }
+            this._length = totalLength;
+        }
+        return this._length;
     }
 
     /**
      * Get the count of files and subdirectories
      * @return
      */
-    public getChildrenCount(): Promise<number> {
-        throw new Error("Unsupported Operation");
+    public async getChildrenCount(): Promise<number> {
+        return (await this.listFiles()).length;
     }
     /**
      * List all files under this directory.
      * @return The list of files.
      */
-    public async listFiles(): Promise<Array<IRealFile>> {
-        throw new Error("Unsupported Operation");
+    public async listFiles(): Promise<IRealFile[]> {
+        let files: IRealFile[] = [];
+        let stream: RandomAccessStream = await this.getInputStream();
+        let ms: MemoryStream = new MemoryStream();
+        await stream.copyTo(ms);
+        await ms.close();
+        let contents: string = new TextDecoder().decode(ms.toArray());
+        let matches = contents.matchAll(/HREF\=\"(.+?)\"/ig);
+        for (const match of matches) {
+            let filename: string = match[1];
+            if (filename.includes(":") || filename.includes(".."))
+                continue;
+            if (filename.includes("%2")){
+                filename = decodeURIComponent(filename);
+            }
+            let file: IRealFile = new JsHttpFile(this.filePath + JsHttpFile.separator + filename);
+            files.push(file);
+        }
+        return files;
     }
 
     /**

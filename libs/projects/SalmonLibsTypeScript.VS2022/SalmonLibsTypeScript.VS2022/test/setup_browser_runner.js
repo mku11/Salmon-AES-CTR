@@ -7,7 +7,8 @@ var stopOnError = false;
 var totalTestCases = 0;
 var passedTestCases = 0;
 // set to run specific case
-//var testFilter = "shouldNotReadFromStreamEncryptionMode";
+// var testFilter = "shouldListFilesFromDrive";
+
 
 async function it(testCaseName, callback) {
     testCases.push({
@@ -49,7 +50,6 @@ async function submitNext(testCaseNum) {
         await submitNext(testCaseNum + 1);
 }
 
-
 function expect(actual) {
     return {
         toBe: (val) => {
@@ -63,6 +63,10 @@ function expect(actual) {
         toBeFalsy: () => {
             if (actual !== false)
                 throw Error("assert failed: " + actual + " != false");
+        },
+        toBeDefined: () => {
+            if (typeof actual === 'undefined')
+                throw Error("assert failed: " + actual + " is not defined");
         }
     };
 }

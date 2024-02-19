@@ -22,7 +22,7 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 */
 
-import { SalmonFile } from "../salmonfs/salmon_file";
+import { SalmonFile } from "../salmonfs/salmon_file.js";
 
 export class SalmonFileUtils {
 

@@ -22,7 +22,7 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 */
 
-import { RandomAccessStream } from "../../salmon-core/io/random_access_stream";
+import { RandomAccessStream } from "../../salmon-core/io/random_access_stream.js";
 
 /**
  * Interface that represents a real file. This class is used internally by the virtual disk to
@@ -125,7 +125,7 @@ export interface IRealFile {
      *
      * @return
      */
-    listFiles(): Promise<Array<IRealFile>>;
+    listFiles(): Promise<IRealFile[]>;
 
     /**
      * Get the basename of the file.
@@ -262,7 +262,7 @@ export async function copyRecursively(src: IRealFile, dest: IRealFile,
             progressListener(src, 0, 1);
         if (newFile != null && await newFile.exists() && autoRename != null && autoRenameFolders)
             newFile = await dest.createDirectory(autoRename(src));
-        else if (newFile == null || !newFile.exists())
+        else if (newFile == null || !await newFile.exists())
             newFile = await dest.createDirectory(newFilename);
         if (progressListener != null)
             progressListener(src, 1, 1);
@@ -321,7 +321,7 @@ export async function moveRecursively(file: IRealFile, dest: IRealFile,
         if (progressListener != null)
             progressListener(file, 0, 1);
         if ((newFile != null && await newFile.exists() && autoRename != null && autoRenameFolders)
-            || newFile == null || !newFile.exists()) {
+            || newFile == null || !await newFile.exists()) {
             if (autoRename != null)
                 newFile = await file.move(dest, autoRename(file), null);
             return;

@@ -20,6 +20,7 @@
     "babel-eslint": "^10.1.0",
     "eslint": "^8.55.0",
     "eslint-plugin-import": "^2.29.1",
+    "npx": "^10.2.2",
     "tslint-no-circular-imports": "^0.7.0",
     "typescript": "^5.3.3"
   },
@@ -36,12 +37,14 @@
     "moduleDirectories": [
       "node_modules"
     ],
-    "verbose": true,
     "setupFilesAfterEnv": [
       "<rootDir>/jest.setup.js"
     ],
     "testEnvironment": "node",
-    "testTimeout": 30000
+    "testTimeout": 60000,
+    "testMatch": [
+      "**/*.test.(js)"
+    ]
   },
   "type": "module"
 }

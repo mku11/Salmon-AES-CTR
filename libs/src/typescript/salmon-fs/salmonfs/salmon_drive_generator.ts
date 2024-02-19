@@ -124,7 +124,7 @@ export class SalmonDriveGenerator {
      * @return The current iterations for the key derivation.
      */
     public static getIterations(): number {
-        return this.iterations;
+        return SalmonDriveGenerator.iterations;
     }
 
     /**

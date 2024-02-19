@@ -22,12 +22,12 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 */
 
-import { BitConverter } from "../../salmon-core/convert/bit_converter";
-import { MemoryStream } from "../../salmon-core/io/memory_stream";
-import { RandomAccessStream } from "../../salmon-core/io/random_access_stream";
-import { SalmonGenerator } from "../../salmon-core/salmon/salmon_generator";
-import { IRealFile } from "../file/ireal_file";
-import { SalmonDriveGenerator } from "./salmon_drive_generator";
+import { BitConverter } from "../../salmon-core/convert/bit_converter.js";
+import { MemoryStream } from "../../salmon-core/io/memory_stream.js";
+import { RandomAccessStream } from "../../salmon-core/io/random_access_stream.js";
+import { SalmonGenerator } from "../../salmon-core/salmon/salmon_generator.js";
+import { IRealFile } from "../file/ireal_file.js";
+import { SalmonDriveGenerator } from "./salmon_drive_generator.js";
 
 /**
  * Represents a configuration file for a drive. The properties are encrypted in the file

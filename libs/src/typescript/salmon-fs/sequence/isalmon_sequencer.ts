@@ -22,7 +22,7 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 */
 
-import { SalmonSequence } from "./salmon_sequence";
+import { SalmonSequence } from "./salmon_sequence.js";
 
 
 /**

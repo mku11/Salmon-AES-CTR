@@ -22,8 +22,9 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 */
 
+import { IOException } from "../../salmon-core/io/io_exception.js";
 import { RandomAccessStream, SeekOrigin } from "../../salmon-core/io/random_access_stream.js";
-import { JsHttpFile } from "./js_http_file.js";
+import { IRealFile } from "./ireal_file.js";
 
 /**
  * An advanced Salmon File Stream implementation for java files.
@@ -34,11 +35,16 @@ export class JsHttpFileStream extends RandomAccessStream {
     /**
      * The java file associated with this stream.
      */
-    private readonly file: JsHttpFile;
+    private readonly file: IRealFile;
 
     private _position: number = 0;
 
+    private _buffer: Uint8Array | null = null;
+    private _bufferPosition: number = 0;
+
     private _stream: ReadableStream<Uint8Array> | null = null;
+    private _reader: ReadableStreamDefaultReader<Uint8Array> | null = null;
+    private _closed: boolean = false;
 
     /**
      * Construct a file stream from an AndroidFile.
@@ -47,7 +53,7 @@ export class JsHttpFileStream extends RandomAccessStream {
      * @param file The AndroidFile that will be used to get the read/write stream
      * @param mode The mode "r" for read "rw" for write
      */
-    public constructor(file: JsHttpFile, mode: string) {
+    public constructor(file: IRealFile, mode: string) {
         super();
         this.file = file;
         if (mode == "rw") {
@@ -55,10 +61,29 @@ export class JsHttpFileStream extends RandomAccessStream {
         }
     }
 
-    public async getStream(): Promise<ReadableStream<Uint8Array> | null> {
+    private async getStream(): Promise<ReadableStream<Uint8Array>> {
+        if(this._closed)
+            throw new IOException("Stream is closed");
+        if (this._stream == null) {
+            let headers: any = null;
+            if (this._position > 0) {
+                let range: string = "bytes=" + this._position + "-";
+                headers = { "Range": range };
+                this._stream = (await (fetch(this.file.getPath(), { headers: headers }))).body;
+            } else {
+                this._stream = (await (fetch(this.file.getPath()))).body;
+            }
+        }
         if (this._stream == null)
-            this._stream = (await fetch(this.file.getPath())).body;
+            throw new IOException("Could not retrieve stream");
         return this._stream;
+    }
+
+    private async getReader(): Promise<ReadableStreamDefaultReader> {
+        if (this._reader == null) {
+            this._reader = (await this.getStream()).getReader();
+        }
+        return this._reader;
     }
 
     /**
@@ -108,7 +133,8 @@ export class JsHttpFileStream extends RandomAccessStream {
      * @throws IOException
      */
     public override async setPosition(value: number): Promise<void> {
-        // TODO: get a new stream with Byte-Range
+        this._position = value;
+        this.#reset();
     }
 
     /**
@@ -130,6 +156,31 @@ export class JsHttpFileStream extends RandomAccessStream {
      */
     public override async read(buffer: Uint8Array, offset: number, count: number): Promise<number> {
         let bytesRead: number = 0;
+        if (this._buffer != null && this._bufferPosition < this._buffer.length) {
+            for (; this._bufferPosition < this._buffer.length;) {
+                buffer[offset + bytesRead++] = this._buffer[this._bufferPosition++];
+                if (bytesRead == count)
+                    break;
+            }
+        }
+        let reader: ReadableStreamDefaultReader = await this.getReader();
+        let res: ReadableStreamReadResult<any> | null = null;
+        while (bytesRead < count) {
+            res = await reader.read();
+            if (res.value !== undefined) {
+                let i = 0;
+                let len = Math.min(res.value.length, count - bytesRead);
+                for (; i < len; i++) {
+                    buffer[offset + bytesRead++] = res.value[i];
+                }
+                if (count == bytesRead) {
+                    this._buffer = res.value;
+                    this._bufferPosition = i;
+                }
+            } else {
+                break;
+            }
+        }
         return bytesRead;
     }
 
@@ -161,9 +212,9 @@ export class JsHttpFileStream extends RandomAccessStream {
         else if (origin == SeekOrigin.End)
             pos = await this.file.length() - offset;
 
-        this._position = pos;
+        this.setPosition(pos);
+        await this.getStream();
         return this._position;
-
     }
 
     /**
@@ -178,8 +229,16 @@ export class JsHttpFileStream extends RandomAccessStream {
      * @throws IOException
      */
     public override async close(): Promise<void> {
-        let stream: ReadableStream<Uint8Array> | null = await this.getStream();
-        if (stream != null)
-            await stream.cancel();
+        if (this._reader != null)
+            await this._reader.cancel();
+        this.#reset();
+        this._closed = true;
+    }
+
+    #reset(): void {
+        this._reader = null;
+        this._stream = null;
+        this._buffer = null;
+        this._bufferPosition = 0;
     }
 }

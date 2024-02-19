@@ -3,6 +3,7 @@ Salmon library for Javascript
 To build the javascript libraries you will need:
 1. tsc compiler
 2. Visual Studio (optional)
+3. Visual Studio Code (recommended)
 
 to run the unit tests you will need:
 1. nodejs
@@ -14,8 +15,23 @@ make sure you don't link any external unit test cases files
 Enable the experimental modules for jest via nodejs:
 for windows you can add this in the advance environment system variables.
 NODE_OPTIONS=--experimental-vm-modules
-linux/macos set this in .bashrc or .profile:
+for linux/macos add this line in .bashrc or .profile:
 export NODE_OPTIONS=--experimental-vm-modules
+if you use Visual Studio Code install the "Jest" extension and add this to the extension settings:
+"jest.nodeEnv": {
+	"NODE_OPTIONS": "--experimental-vm-modules"
+}
+to be able to debug test cases add the following to user file settings.json:
+"debug.javascript.terminalOptions": {
+	"env": {"NODE_OPTIONS": "--experimental-vm-modules"}
+}
+if the above does not work and you're getting an error about importing modules then edit file:
+%LOCALAPPDATA%\Programs\Microsoft VS Code\resources\app\extensions\ms-vscode.js-debug\extensions.js
+and add the node experimental option before the addition of the plugin path:
+c={NODE_OPTIONS:` --experimental-vm-modules --require ${s.interpolatedPath} `
+
+To turn off auto running test cases:
+"jest.autoRun": "off",
 
 To build from the command line:
 npm run build

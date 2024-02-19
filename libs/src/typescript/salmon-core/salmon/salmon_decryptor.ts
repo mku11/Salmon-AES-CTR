@@ -46,7 +46,7 @@ export class SalmonDecryptor {
     /**
      * Executor for parallel tasks.
      */
-    private workers: Array<SharedWorker> | null = null;
+    private workers: SharedWorker[] | null = null;
 
     /**
      * The buffer size to use.
@@ -193,7 +193,7 @@ export class SalmonDecryptor {
         let promises = [];
         for (let i = 0; i < runningThreads; i++) {
             promises.push(new Promise(async (resolve, reject) => {
-                var worker: any;
+                let worker: any;
                 if (typeof process !== 'object') {
                     worker = new Worker(workerPath, { type: 'module' });
                     worker.addEventListener('message', (event: { data: unknown }) => {

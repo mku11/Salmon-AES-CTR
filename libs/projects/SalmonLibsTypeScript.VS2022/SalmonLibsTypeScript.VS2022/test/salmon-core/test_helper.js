@@ -552,7 +552,7 @@ export class TestHelper {
 
     static async copyFromMemStream(size, bufferSize) {
         let testData = TestHelper.getRandArray(size);
-        let digest = crypto.subtle.digest("SHA-256", testData);
+        let digest = await crypto.subtle.digest("SHA-256", testData);
 
         let ms1 = new MemoryStream(testData);
         let ms2 = new MemoryStream();
@@ -563,7 +563,7 @@ export class TestHelper {
 
         expect(data2.length).toBe(testData.length);
 
-        let digest2 = crypto.subtle.digest("SHA-256", data2);
+        let digest2 = await crypto.subtle.digest("SHA-256", data2);
         await ms1.close();
         await ms2.close();
 

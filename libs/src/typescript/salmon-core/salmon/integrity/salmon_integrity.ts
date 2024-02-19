@@ -193,12 +193,12 @@ export class SalmonIntegrity {
      * @return The hash signatures.
      * @throws SalmonIntegrityException
      */
-    public async generateHashes(buffer: Uint8Array, includeHeaderData: Uint8Array | null): Promise<Array<Uint8Array> | null> {
+    public async generateHashes(buffer: Uint8Array, includeHeaderData: Uint8Array | null): Promise<Uint8Array[] | null> {
         if (!this.integrity)
             return null;
-        let hashes: Array<Uint8Array> = new Array<Uint8Array>();
+        const hashes: Uint8Array[] = [];
         for (let i: number = 0; i < buffer.length; i += this.chunkSize) {
-            let len: number = Math.min(this.chunkSize, buffer.length - i);
+            const len: number = Math.min(this.chunkSize, buffer.length - i);
             hashes.push(await SalmonIntegrity.calculateHash(this.provider, buffer, i, len, this.getKey(), i == 0 ? includeHeaderData : null));
         }
         return hashes;
@@ -209,10 +209,10 @@ export class SalmonIntegrity {
      * @param buffer The buffer that contains the data chunks.
      * @return The hash signatures.
      */
-    public getHashes(buffer: Uint8Array): Array<Uint8Array> | null {
+    public getHashes(buffer: Uint8Array): Uint8Array[] | null {
         if (!this.integrity)
             return null;
-        let hashes: Array<Uint8Array> = new Array();
+        let hashes: Uint8Array[] = new Array();
         for (let i: number = 0; i < buffer.length; i += SalmonGenerator.HASH_KEY_LENGTH + this.chunkSize) {
             let hash: Uint8Array = new Uint8Array(SalmonGenerator.HASH_KEY_LENGTH);
             for (let j = 0; j < SalmonGenerator.HASH_KEY_LENGTH; j++)
@@ -229,7 +229,7 @@ export class SalmonIntegrity {
      * @param includeHeaderData
      * @throws SalmonIntegrityException
      */
-    public async verifyHashes(hashes: Array<Uint8Array>, buffer: Uint8Array, includeHeaderData: Uint8Array | null) {
+    public async verifyHashes(hashes: Uint8Array[], buffer: Uint8Array, includeHeaderData: Uint8Array | null) {
         let chunk: number = 0;
         for (let i: number = 0; i < buffer.length; i += this.chunkSize) {
             let nChunkSize: number = Math.min(this.chunkSize, buffer.length - i);

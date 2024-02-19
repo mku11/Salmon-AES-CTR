@@ -24,8 +24,8 @@
     <None Include="..\..\..\src\typescript\salmon-core\io\io_exception.ts">
       <Link>salmon-core\io\io_exception.ts</Link>
     </None>
-    <None Include="..\..\..\src\typescript\salmon-core\io\input_stream_wrapper.ts">
-      <Link>salmon-core\io\input_stream_wrapper.ts</Link>
+    <None Include="..\..\..\src\typescript\salmon-core\io\readable_stream_wrapper.ts">
+      <Link>salmon-core\io\readable_stream_wrapper.ts</Link>
     </None>
     <None Include="..\..\..\src\typescript\salmon-core\io\random_access_stream.ts">
       <Link>salmon-core\io\random_access_stream.ts</Link>
@@ -177,6 +177,12 @@
     <None Include="..\..\..\src\typescript\salmon-fs\salmonfs\salmon_drive_generator.ts">
       <Link>salmon-fs\salmonfs\salmon_drive_generator.ts</Link>
     </None>
+    <None Include="..\..\..\src\typescript\salmon-fs\file\virtual_file.ts">
+      <Link>salmon-fs\file\virtual_file.ts</Link>
+    </None>
+    <None Include="..\..\..\src\typescript\salmon-fs\file\virtual_drive.ts">
+      <Link>salmon-fs\file\virtual_drive.ts</Link>
+    </None>
     <None Include="..\..\..\src\typescript\salmon-fs\salmonfs\salmon_file.ts">
       <Link>salmon-fs\salmonfs\salmon_file.ts</Link>
     </None>
@@ -192,6 +198,9 @@
     <None Include="..\..\..\src\typescript\salmon-fs\utils\salmon_file_utils.ts">
       <Link>salmon-fs\utils\salmon_file_utils.ts</Link>
     </None>
+    <None Include="..\..\..\src\typescript\salmon-fs\service\salmon_service_worker.ts">
+      <Link>salmon-fs\service\salmon_service_worker.ts</Link>
+    </None>
   </ItemGroup>
   <!-- Add the items so they can be built -->
   <ItemGroup>
@@ -201,7 +210,7 @@
     </TypeScriptCompile>
     <TypeScriptCompile Remove="..\..\..\src\typescript\salmon-core\convert\bit_converter.ts">
     </TypeScriptCompile>
-    <TypeScriptCompile Remove="..\..\..\src\typescript\salmon-core\io\input_stream_wrapper.ts">
+    <TypeScriptCompile Remove="..\..\..\src\typescript\salmon-core\io\readable_stream_wrapper.ts">
     </TypeScriptCompile>
     <TypeScriptCompile Remove="..\..\..\src\typescript\salmon-core\io\io_exception.ts">
     </TypeScriptCompile>
@@ -313,6 +322,12 @@
     </TypeScriptCompile>
     <TypeScriptCompile Remove="..\..\..\src\typescript\salmon-fs\utils\salmon_file_utils.ts">
     </TypeScriptCompile>
+    <TypeScriptCompile Remove="..\..\..\src\typescript\salmon-fs\file\virtual_file.ts">
+    </TypeScriptCompile>
+    <TypeScriptCompile Remove="..\..\..\src\typescript\salmon-fs\file\virtual_drive.ts">
+    </TypeScriptCompile>
+    <TypeScriptCompile Remove="..\..\..\src\typescript\salmon-fs\service\salmon_service_worker.ts">
+    </TypeScriptCompile>
   </ItemGroup>
   <ItemGroup>
     <TypeScriptConfiguration Remove="lib\**" />
@@ -321,7 +336,7 @@
     <None Remove="lib\**" />
   </ItemGroup>
   <ItemGroup>
-    <Folder Include="lib\" />
+    <Folder Include="lib\salmon-fs\" />
   </ItemGroup>
   <ItemGroup>
     <Script Remove=".eslintrc.json" />

@@ -8,7 +8,10 @@
       "skipFiles": [ "<node_internals>/**" ],
       "program": "${workspaceFolder}/app.js",
       "cwd": "${workspaceFolder}",
-      "console": "externalTerminal"
+      "console": "externalTerminal",
+	  "env": {
+		  "NODE_OPTIONS": "--experimental-vm-modules"
+		}
     }
   ]
 }

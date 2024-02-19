@@ -25,6 +25,8 @@ SOFTWARE.
 import { SalmonDrive } from "../salmonfs/salmon_drive.js";
 import { JsHttpFile } from "./js_http_file.js";
 import { IRealFile } from "./ireal_file.js";
+import { SalmonFile } from "../salmonfs/salmon_file.js";
+import { VirtualFile } from "./virtual_file.js";
 
 /**
  * SalmonDrive implementation for standard Java file API. This provides a virtual drive implementation
@@ -74,5 +76,9 @@ export class JsHttpDrive extends SalmonDrive {
      */
     protected override onAuthenticationError(): void {
 
+    }
+
+    protected createVirtualRoot(virtualRootRealFile: IRealFile): VirtualFile {
+        return new SalmonFile(virtualRootRealFile, this);
     }
 }

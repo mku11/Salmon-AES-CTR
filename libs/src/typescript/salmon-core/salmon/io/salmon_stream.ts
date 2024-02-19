@@ -178,6 +178,7 @@ export class SalmonStream extends RandomAccessStream {
      * @return The length of the stream.
      */
     public async length(): Promise<number> {
+        await this.init(this.key, this.nonce);
         let totalHashBytes: number;
         let hashOffset: number = this.salmonIntegrity.getChunkSize() > 0 ? SalmonGenerator.HASH_RESULT_LENGTH : 0;
         totalHashBytes = this.salmonIntegrity.getHashDataLength(await this.baseStream.length() - 1, hashOffset);
@@ -466,6 +467,7 @@ export class SalmonStream extends RandomAccessStream {
      * Returns the Virtual Position of the stream excluding the header and hash signatures.
      */
     private async getVirtualPosition(): Promise<number> {
+        await this.init(this.key, this.nonce);
         let totalHashBytes: number;
         let hashOffset: number = this.salmonIntegrity.getChunkSize() > 0 ? SalmonGenerator.HASH_RESULT_LENGTH : 0;
         totalHashBytes = this.salmonIntegrity.getHashDataLength(await this.baseStream.getPosition(), hashOffset);
@@ -492,6 +494,8 @@ export class SalmonStream extends RandomAccessStream {
      * @return The number of data bytes that were decrypted.
      */
     public async read(buffer: Uint8Array, offset: number, count: number): Promise<number> {
+        await this.init(this.key, this.nonce);
+
         if (await this.getPosition() == await this.length())
             return -1;
         let alignedOffset: number = await this.getAlignedOffset();
@@ -521,7 +525,7 @@ export class SalmonStream extends RandomAccessStream {
         // the base stream position should now be aligned
         // now we can now read the rest of the data.
         pos = await this.getPosition();
-        let nBytes: number = await this.readFromStream(buffer, bytes + offset, count - bytes);
+        let nBytes: number = await this.#readFromStream(buffer, bytes + offset, count - bytes);
         await this.setPosition(pos + nBytes);
         return bytes + nBytes;
     }
@@ -537,9 +541,7 @@ export class SalmonStream extends RandomAccessStream {
      * @return The number of data bytes that were decrypted.
      * @throws IOException Thrown if stream is not aligned.
      */
-    private async readFromStream(buffer: Uint8Array, offset: number, count: number): Promise<number> {
-        await this.init(this.key, this.nonce);
-
+    async #readFromStream(buffer: Uint8Array, offset: number, count: number): Promise<number> {
         if (await this.getPosition() == await this.length())
             return 0;
         if (this.salmonIntegrity.getChunkSize() > 0 && await this.getPosition() % this.salmonIntegrity.getChunkSize() != 0)
@@ -566,7 +568,7 @@ export class SalmonStream extends RandomAccessStream {
             // read data and integrity signatures
             let srcBuffer: Uint8Array = await this.readStreamData(bufferSize);
             try {
-                let integrityHashes: Array<Uint8Array> | null = null;
+                let integrityHashes: Uint8Array[] | null = null;
                 // if there are integrity hashes strip them and get the data chunks only
                 if (this.salmonIntegrity.getChunkSize() > 0) {
                     // get the integrity signatures
@@ -627,7 +629,7 @@ export class SalmonStream extends RandomAccessStream {
             let destBuffer: Uint8Array = new Uint8Array(srcBuffer.length);
             try {
                 await this.transformer.encryptData(srcBuffer, 0, destBuffer, 0, srcBuffer.length);
-                let integrityHashes: Array<Uint8Array> | null = await this.salmonIntegrity.generateHashes(destBuffer, await this.getPosition() == 0 ? this.headerData : null);
+                let integrityHashes: Uint8Array[] | null = await this.salmonIntegrity.generateHashes(destBuffer, await this.getPosition() == 0 ? this.headerData : null);
                 pos += await this.writeToStream(destBuffer, this.getChunkSize(), integrityHashes);
                 this.transformer.syncCounter(await this.getPosition());
             } catch (ex) {
@@ -734,7 +736,7 @@ export class SalmonStream extends RandomAccessStream {
      * @return The number of bytes written.
      * @throws IOException
      */
-    private async writeToStream(buffer: Uint8Array, chunkSize: number, hashes: Array<Uint8Array> | null): Promise<number> {
+    private async writeToStream(buffer: Uint8Array, chunkSize: number, hashes: Uint8Array[] | null): Promise<number> {
         let pos: number = 0;
         let chunk: number = 0;
         if (chunkSize <= 0)

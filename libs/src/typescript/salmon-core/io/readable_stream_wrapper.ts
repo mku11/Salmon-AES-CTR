@@ -22,31 +22,37 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 */
 
+import { SalmonDefaultOptions } from "../salmon/salmon_default_options.js";
 import { RandomAccessStream } from "./random_access_stream.js";
 
 /***
  * Wrapper stream of AbsStream to Javascript's native InputStream interface.
  * Use this class to wrap any AbsStream to a less powerful but familiar and compatible Java InputStream.
  */
-export class InputStreamWrapper implements ReadableStream {
+export class ReadableStreamWrapper implements ReadableStream {
     private readonly stream: RandomAccessStream;
+    private reader: ReadableStreamWrapperReader;
 
     /**
-     * Instantiates an InputStreamWrapper with a base stream.
+     * Instantiates an ReadableStreamWrapper with a base stream.
      * @param stream The base AbsStream that you want to wrap.
      */
     public constructor(stream: RandomAccessStream) {
         this.stream = stream;
+        this.reader = new ReadableStreamWrapperReader(this.stream);
     }
     locked: boolean = false;
     cancel(reason?: any): Promise<void> {
         throw new Error("Method not implemented.");
     }
-    getReader(options: { mode: "byob"; }): ReadableStreamBYOBReader;
-    getReader(): ReadableStreamDefaultReader<any>;
-    getReader(options?: ReadableStreamGetReaderOptions): ReadableStreamReader<any>;
-    getReader(options?: unknown): ReadableStreamReader<any> {
-        throw new Error("Method not implemented.");
+    //getReader(options: { mode: "byob"; }): ReadableStreamBYOBReader;
+    //getReader(): ReadableStreamDefaultReader<any>;
+    //getReader(options?: ReadableStreamGetReaderOptions): ReadableStreamReader<any>;
+    //getReader(options?: unknown): ReadableStreamReader<any> {
+    //    throw new Error("Method not implemented.");
+    //}
+    getReader(): ReadableStreamDefaultReader {
+        return this.reader;
     }
     pipeThrough<T>(transform: ReadableWritablePair<T, any>, options?: StreamPipeOptions): ReadableStream<T> {
         throw new Error("Method not implemented.");
@@ -55,6 +61,26 @@ export class InputStreamWrapper implements ReadableStream {
         throw new Error("Method not implemented.");
     }
     tee(): [ReadableStream<any>, ReadableStream<any>] {
+        throw new Error("Method not implemented.");
+    }
+}
+
+export class ReadableStreamWrapperReader implements ReadableStreamDefaultReader {
+    private stream: RandomAccessStream;
+    constructor(stream: RandomAccessStream) {
+        this.stream = stream;
+    }
+
+    async read(): Promise<ReadableStreamReadResult<Uint8Array>> {
+        let buff: Uint8Array = new Uint8Array(SalmonDefaultOptions.getBufferSize());
+        await this.stream.read(buff, 0, buff.length);
+        return { value: buff, done: true };
+    }
+    releaseLock(): void {
+        throw new Error("Method not implemented.");
+    }
+    closed: Promise<undefined> = Promise.resolve(undefined);
+    cancel(reason?: any): Promise<void> {
         throw new Error("Method not implemented.");
     }
 }
