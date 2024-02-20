@@ -136,17 +136,15 @@ Install the salmon packages like you usually do.
 API usage is pretty much the same across Java/C#/Javascript/Python and various platforms with slight variations on naming conventions.  
 Worth to note that the Typescript/Javascript library api is based on async IO so make sure you await.  
   
-**Recommended**: Use the SalmonDrive and the virtual drive API to create a drive with a text password and then import your files. This will take care of all the details so you don't want have to worry about them. 
-  
-For samples using the SalmonDrive and the sequential nonce sequencer see: [Samples](https://github.com/mku11/Salmon-AES-CTR/tree/main/samples)  
-For a full fledge demo app see: [Salmon Vault](https://github.com/mku11/Salmon-Vault)  
+For more samples using the SalmonStream, SalmonDrive, and the sequential nonce sequencer see: [Samples](https://github.com/mku11/Salmon-AES-CTR/tree/main/samples)  
+For a full fledge app see: [Salmon Vault](https://github.com/mku11/Salmon-Vault)  
 For a simple usage sample see below.
 
 
-##### Recommended: Use SalmonDrive and the virtual file system API:
+##### Recommended usage: SalmonDrive and the virtual file system API:
 ```
-// If you don't care much about encryption and just want to encrypt data you can just use the SalmonDrive
-// which will create a virtual drive and all the important details for you.
+// If you don't care much about encryption and just want to encrypt data you can just create 
+// a virtual drive that will take care all the important details for you:
 SalmonDrive drive = SalmonDriveManager.createDrive("c:\path\to\your\drive", password);
 
 // setup our importer with 2 threads for parallel processing and import our files:
@@ -217,7 +215,7 @@ SalmonStream.setAesProviderType(SalmonStream.ProviderType.TinyAES);
 For more detailed examples see the Samples folder.
 
 #### C/C++  
-There is no stream support for C/C++ but you can use the Salmon native AES-NI subroutines directly as in the example below.
+There is no SalmonDrive and SalmonStream support for C/C++ but you can use the Salmon native AES-NI subroutines directly.
 For a full working C++ sample see: [Samples](https://github.com/mku11/Salmon-AES-CTR/tree/main/samples)
 
 ### Specifications
