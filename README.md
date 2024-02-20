@@ -35,10 +35,7 @@ Salmon is an AES-256 CTR encryption library with HMAC SHA-256 integrity, paralle
 
 ## Applications
 For a complete showcase of the Salmon API check out the Salmon Vault app offered on several different platforms:  
-[**JavaFX**](https://github.com/mku11/Salmon-AES-CTR/tree/main/apps/salmon-vault-javafx) | [**WPF**](https://github.com/mku11/Salmon-AES-CTR/tree/main/apps/salmon-vault-wpf) | [**Android**](https://github.com/mku11/Salmon-AES-CTR/tree/main/apps/salmon-vault-android) | [**.NET Android**](https://github.com/mku11/Salmon-AES-CTR/tree/main/apps/salmon-vault-dotnet-android) | [**MAUI**](https://github.com/mku11/Salmon-AES-CTR/tree/main/apps/salmon-vault-maui)   
-
-[**Downloads**](https://github.com/mku11/Salmon-AES-CTR/releases)
-
+[**Salmon Vault**](https://github.com/mku11/Salmon-Vault)
 ---
 
 ### Gradle  
@@ -136,12 +133,11 @@ Install the salmon packages like you usually do.
 ---
 
 ### Examples
+API usage is pretty much the same across Java/C#/Javascript/Python and various platforms with slight variations on naming conventions.  
+Worth to note that the Typescript/Javascript library api is based on async IO so make sure you await.
   
-#### Java / C#
-The API is consistent across platforms with slight variations on naming conventions between Java and C#.  
-  
-For a sample using the SalmonDrive and the sequential nonce sequencer see: [Samples](https://github.com/mku11/Salmon-AES-CTR/tree/main/samples)  
-For a full fledge demo app see: [Salmon Vault](https://github.com/mku11/Salmon-AES-CTR/tree/main/apps)  
+For samples using the SalmonDrive and the sequential nonce sequencer see: [Samples](https://github.com/mku11/Salmon-AES-CTR/tree/main/samples)  
+For a full fledge demo app see: [Salmon Vault](https://github.com/mku11/Salmon-Vault)  
 For a simple usage sample see below.
 
 ##### Simple encryption/decryption
