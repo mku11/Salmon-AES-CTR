@@ -38,101 +38,6 @@ Salmon is an AES-256 CTR encryption library with HMAC SHA-256 integrity, paralle
 For a complete showcase of the Salmon API check out the Salmon Vault app offered on several different platforms:  
 [**Salmon Vault**](https://github.com/mku11/Salmon-Vault)
 
-
-### Gradle  
-
-To integrate the Salmon libraries to your gradle project add the salmon repository:  
-
-```
-repositories {
-    maven {
-        url 'https://github.com/mku11/Repo/raw/main/maven/releases'
-    }
-    ...
-}
-```
-
-Add the java libraries to your project:
-```
-dependencies {
-    implementation 'com.mku.salmon:salmon-core:1.0.5'
-    implementation 'com.mku.salmon:salmon-fs:1.0.5'
-	
-    // for android
-    implementation 'com.mku.salmon:salmon-fs-android:1.0.5'
-    
-    // optional fast AES intrinsics and Tiny AES
-    // make sure you use SalmonStream.setProviderType() to set the provider in java
-    implementation 'com.mku.salmon:salmon-native-android:1.0.5'
-}
-```
-
-### Windows native library in Gradle
-To add the native library for windows to your gradle project add the task below:
-
-```
-// unzipping the native library
-configurations {
-    nativeImplementation
-}
-task unzipNative(type: Sync) {
-    from {
-        configurations.nativeImplementation.collect { zipTree(it) }
-    }
-    into file(project.nativeLibsDir)
-}
-build.dependsOn unzipNative
-dependencies {
-    implementation 'com.mku.salmon:salmon-core:1.0.5'
-    implementation 'com.mku.salmon:salmon-fs:1.0.5'
-	
-    // use SalmonStream.setProviderType() within your code
-    // and make sure you add the dll libary to the java.library.path  
-    unzipNative 'com.mku.salmon:salmon-native:1.0.5'
-}
-```
-
-### Maven
-
-To integrate the Salmon libraries to your maven project add the salmon repository:
-```
-<repositories>
-    <repository>
-        <id>mku-salmon-repo</id>
-        <url>https://github.com/mku11/Repo/raw/main/maven/releases</url>
-    </repository>     
-    ...
-</repositories>
-```
-
-Now add the dependencies:
-```
-<dependencies>
-    <dependency>
-        <groupId>com.mku.salmon</groupId>
-        <artifactId>salmon-core</artifactId>
-        <version>1.0.5</version>
-    </dependency>
-	<dependency>
-        <groupId>com.mku.salmon</groupId>
-        <artifactId>salmon-fs</artifactId>
-        <version>1.0.5</version>
-    </dependency>
-    ...
-</dependencies>
-```
-
-### Nuget
-
-To integrate the Salmon libraries to your Visual Studio project:
-Download the Nuget packages from [Salmon nuget repo](https://github.com/mku11/Repo/tree/main/nuget/releases)  
-Within Visual Studio go to Tools / Optons / Nuget Package Manager / Package Sources  
-Create a new source with a name like "Salmon Repo" and add the local dir that has the downloaded packages.  
-Then bring up the Nuget Package Manager and change the Package Source to "Salmon Repo".  
-Install the salmon packages like you usually do.  
-
----
-
 ### Examples
 API usage is pretty much the same across Java/C#/Javascript/Python and various platforms with slight variations on naming conventions.  
 Worth to note that the Typescript/Javascript library api is based on async IO so make sure you await.  
@@ -141,6 +46,8 @@ For more samples using the SalmonStream, SalmonDrive, and the sequential nonce s
 For a full fledge app see: [Salmon Vault](https://github.com/mku11/Salmon-Vault)  
 For a simple usage sample see below.
 
+### Package Management
+To learn how to integrate the Salmon library packages into your project with Maven, Gradle, or VS Studio see [Package Management](https://github.com/mku11/Salmon-AES-CTR/docs/Package_Management)  
 
 ##### Recommended usage: SalmonDrive and the virtual file system API:
 ```
