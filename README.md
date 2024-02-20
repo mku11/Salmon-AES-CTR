@@ -46,9 +46,6 @@ For more samples using the SalmonStream, SalmonDrive, and the sequential nonce s
 For a full fledge app see: [Salmon Vault](https://github.com/mku11/Salmon-Vault)  
 For a simple usage sample see below.
 
-### Package Management
-To learn how to integrate the Salmon library packages into your project with Maven, Gradle, or VS Studio see [Package Management](https://github.com/mku11/Salmon-AES-CTR/docs/Package_Management)  
-
 ##### Recommended usage: SalmonDrive and the virtual file system API:
 ```
 // If you don't want to deal with encryption details but just want your data encrypted then 
@@ -133,6 +130,9 @@ For more detailed examples see the Samples folder.
 #### C/C++  
 There is no SalmonDrive and SalmonStream support for C/C++ but you can use the Salmon native AES-NI subroutines directly.
 For a full working C++ sample see: [Samples](https://github.com/mku11/Salmon-AES-CTR/tree/main/samples)
+
+### Package Management
+To learn how to integrate the Salmon library packages into your project with Maven, Gradle, or VS Studio see [Package Management](https://github.com/mku11/Salmon-AES-CTR/docs/Package_Management.md)  
 
 ### Specifications
 Want to know more about Salmon specs and subprojects?  

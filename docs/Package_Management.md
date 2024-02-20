@@ -91,6 +91,18 @@ Create a new source with a name like "Salmon Repo" and add the local dir that ha
 Then bring up the Nuget Package Manager and change the Package Source to "Salmon Repo".  
 Install the salmon packages like you usually do.  
 
+### C/C++ Visual Studio
+Same as the NuGet process. Download the native Salmon NuGet package. When installed under the packages folder the include and lib folders will contain everything you need.
+
+### C/C++ Linux
+Download the tar.gz package from [Salmon linux repo](https://github.com/mku11/Repo/tree/main/linux)  
+Extract the packages and link in your makefile.
+See the Samples folder for an example.
+
+### C/C++ MacOS
+Download the dmg package from [Salmon macos repo](https://github.com/mku11/Repo/tree/main/macos)  
+Extract the packages and link to your xcode project.
+See the Samples folder for an example.
 
 ### Python
 To integrate the Salmon libraries to your Python project:
