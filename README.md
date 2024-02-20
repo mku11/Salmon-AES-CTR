@@ -1,7 +1,7 @@
 ![alt text](https://github.com/mku11/Salmon-AES-CTR/blob/wip/common/common-res/icons/logo.png)
 
 # Salmon
-Salmon is an AES-256 CTR encryption library with HMAC SHA-256 integrity, parallel file operations (read/write), and seekable stream support. It provides a high level, low-ceremony, consistent API for encrypting streams and files in Java and C#. Salmon is using a fast native library for Intel x86 and ARM64 that you can include in your C/C++ projects.
+Salmon is an AES-256 CTR encryption library with HMAC SHA-256 integrity, parallel file operations (read/write), and seekable stream support. It provides a high level, low-ceremony, consistent API for encrypting streams and files. Salmon is using a fast native library for Intel x86 and ARM64 that you can include in your C/C++ projects.
   
 
 [![License: MIT](https://img.shields.io/github/license/mku11/Salmon-AES-CTR.svg)](LICENSE)
@@ -21,6 +21,17 @@ Salmon is an AES-256 CTR encryption library with HMAC SHA-256 integrity, paralle
 * Protected file-based nonce sequencer with encrypted SHA-256 checksum.
 * System protected nonce sequencer with encrypted SHA-256 checksum via an optional Windows Service.
 
+## Language/Plaform Support and Tested
+
+Java 11
+Android 23+
+C# .NET 8
+Python 3.11+
+Typescript/Javascript ES2020
+Windows 10 x86_64
+MacOS 10.11+
+Linux Debian 11+
+
 ## Why Salmon?
 
 * Native implementation: Fast AES-NI intrinsics subroutines.
@@ -38,7 +49,8 @@ Salmon is an AES-256 CTR encryption library with HMAC SHA-256 integrity, paralle
 For a complete showcase of the Salmon API check out the Salmon Vault app offered on several different platforms:  
 [**Salmon Vault**](https://github.com/mku11/Salmon-Vault)
 
-## Examples
+## Samples
+
 API usage is pretty much the same across Java/C#/Javascript/Python and various platforms with slight variations on naming conventions.  
 Worth to note that the Typescript/Javascript library api is based on async IO so make sure you **await**.  
 The Javascript SalmonFS library does not support creating drive only reading/decrypting.
@@ -48,6 +60,7 @@ For a full fledge app see: [Salmon Vault](https://github.com/mku11/Salmon-Vault)
 For a simple usage sample see below.
 
 ### Recommended usage: SalmonDrive and the virtual file system API:
+
 ```
 // If you don't want to deal with encryption details but just want your data encrypted then 
 // you can create a virtual drive provided a location and a text password:
@@ -75,6 +88,7 @@ inputStream.read(...);
 ```
 
 ### Adhoc: data encryption/decryption
+
 ```
 // To encrypt byte data or text without using a vault you need to generate your
 // own key and nonce. This is not terribly difficult with Salmon 
@@ -100,6 +114,7 @@ String decText = SalmonTextEncryptor.decryptString(encText, key, null, true);
 ```
 
 ### Usability: Inject the SalmonStream into 3rd party code
+
 ```
 // The C# implementation already provides a SalmonStream that is a standard Stream and you can use anywhere with other libaries.
 // Though if you work with other languages and need to use it with other libaries you have to wrap the SalmonStream
@@ -115,12 +130,14 @@ InputStreamWrapper stream = new InputStreamWrapper(decStream);
 ```
 
 ### Performance: Enable the AES-NI intrinsics
+
 ```
 // To set the fast native AesIntrinsics:
 SalmonStream.setAesProviderType(SalmonStream.ProviderType.AesIntrinsics);
 ```
 
 ### Compatibility: Enable the TinyAES library
+
 ```
 // If you're platform does not support AES-NI intrinsics you can use the TinyAES library:
 SalmonStream.setAesProviderType(SalmonStream.ProviderType.TinyAES);
@@ -133,14 +150,17 @@ There is no SalmonDrive and SalmonStream support for C/C++ but you can use the S
 For a full working C++ sample see: [Samples](https://github.com/mku11/Salmon-AES-CTR/tree/main/samples)
 
 ## Package Management
+
 To learn how to integrate the Salmon library packages into your project with Maven, Gradle, or VS Studio see [Package Management](https://github.com/mku11/Salmon-AES-CTR/docs/Package_Management.md)  
 
 ## Specifications
+
 Want to know more about Salmon specs and subprojects?  
 Click on [Salmon specifications and formats](https://github.com/mku11/Salmon-AES-CTR/tree/main/docs)   
 For how to compile and build each subproject see README.md in its respective folder.
 
 ## Limitations
+
 * SalmonStream is seekable only if the backed resource supports random access (disk, memory, network).
 * SalmonStream is not Thread Safe! If you want to use parallel processing you need to use SalmonEncryptor/SalmonDecryptor.
 * SalmonFile is seekable only if the backed resource supports random access (disk, memory, network).
@@ -154,10 +174,12 @@ For how to compile and build each subproject see README.md in its respective fol
 * Maximum number of drive files: 2^62 (64 bit nonces used for the filename and the file contents.
 
 ## Contributions
+
 Code contributions are not accepted.  
 Bug reports and security POCs are more than welcome!  
   
 ## License
+
 Salmon is released under MIT Licence, see [LICENSE](https://github.com/mku11/Salmon-AES-CTR/blob/main/LICENSE) file.
 Make sure you read the LICENSE file and display proper attribution if you decide to use this software.
 Dependency libraries from Github, Maven, and NuGet are covered by their own license  
