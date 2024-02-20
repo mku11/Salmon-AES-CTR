@@ -144,8 +144,8 @@ For a simple usage sample see below.
 
 ##### Recommended usage: SalmonDrive and the virtual file system API:
 ```
-// If you don't care much about encryption and just want to encrypt data you can just create 
-// a virtual drive that will take care all the important details for you:
+// If you don't want to deal with encryption details but just want your data encrypted then 
+// you can create a virtual drive provided a location and a text password:
 SalmonDrive drive = SalmonDriveManager.createDrive("c:\path\to\your\drive", password);
 
 // setup our importer with 2 threads for parallel processing and import our files:
@@ -171,7 +171,10 @@ inputStream.read(...);
 
 ##### Adhoc: data encryption/decryption
 ```
-// To encrypt byte data or text without using a vault:
+// To encrypt byte data or text without using a vault you need to generate your
+// own key and nonce. This is not terribly difficult with Salmon 
+// Below is an example of doing just that.
+
 // Get a fresh secure random key and keep this somewhere safe.
 // For text passwords see the Samples folder.
 // For the more secure sequential nonces see the SalmonDrive sample.
