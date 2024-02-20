@@ -76,6 +76,8 @@ export class TsFsTestHelper {
     static TEST_FILE = TsFsTestHelper.SERVER_TEST_DATA_URL + "/" + TsFsTestHelper.TEST_ENC_HTTP_FILE;
 
     static async testExamples() {
+		SalmonDriveManager.setVirtualDriveClass(JsHttpDrive);
+		
         let text = "This is a plaintext that will be used for testing";
         let bytes = new TextEncoder().encode(text);
         let key = SalmonGenerator.getSecureRandomBytes(32); // 256-bit key
