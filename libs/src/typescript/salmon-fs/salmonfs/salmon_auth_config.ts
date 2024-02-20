@@ -38,17 +38,17 @@ import { SalmonFile } from "./salmon_file.js";
  */
 export class SalmonAuthConfig {
 
-    private readonly driveID: Uint8Array = new Uint8Array(SalmonDriveGenerator.DRIVE_ID_LENGTH);
-    private readonly authID: Uint8Array = new Uint8Array(SalmonDriveGenerator.AUTH_ID_SIZE);
-    private readonly startNonce: Uint8Array = new Uint8Array(SalmonGenerator.NONCE_LENGTH);
-    private readonly maxNonce: Uint8Array = new Uint8Array(SalmonGenerator.NONCE_LENGTH);
+    readonly #driveID: Uint8Array = new Uint8Array(SalmonDriveGenerator.DRIVE_ID_LENGTH);
+    readonly #authID: Uint8Array = new Uint8Array(SalmonDriveGenerator.AUTH_ID_SIZE);
+    readonly #startNonce: Uint8Array = new Uint8Array(SalmonGenerator.NONCE_LENGTH);
+    readonly #maxNonce: Uint8Array = new Uint8Array(SalmonGenerator.NONCE_LENGTH);
 
     /**
      * Get the drive ID to grant authorization for.
      * @return
      */
     public getDriveID(): Uint8Array {
-        return this.driveID;
+        return this.#driveID;
     }
 
     /**
@@ -56,7 +56,7 @@ export class SalmonAuthConfig {
      * @return
      */
     public getAuthID(): Uint8Array {
-        return this.authID;
+        return this.#authID;
     }
 
     /**
@@ -64,7 +64,7 @@ export class SalmonAuthConfig {
      * @return
      */
     public getStartNonce(): Uint8Array {
-        return this.startNonce;
+        return this.#startNonce;
     }
 
     /**
@@ -72,7 +72,7 @@ export class SalmonAuthConfig {
      * @return
      */
     public getMaxNonce(): Uint8Array {
-        return this.maxNonce;
+        return this.#maxNonce;
     }
 
     /**
@@ -85,10 +85,10 @@ export class SalmonAuthConfig {
 
     public async init(contents: Uint8Array): Promise<void> {
         let ms: MemoryStream = new MemoryStream(contents);
-        await ms.read(this.driveID, 0, SalmonDriveGenerator.DRIVE_ID_LENGTH);
-        await ms.read(this.authID, 0, SalmonDriveGenerator.AUTH_ID_SIZE);
-        await ms.read(this.startNonce, 0, SalmonGenerator.NONCE_LENGTH);
-        await ms.read(this.maxNonce, 0, SalmonGenerator.NONCE_LENGTH);
+        await ms.read(this.#driveID, 0, SalmonDriveGenerator.DRIVE_ID_LENGTH);
+        await ms.read(this.#authID, 0, SalmonDriveGenerator.AUTH_ID_SIZE);
+        await ms.read(this.#startNonce, 0, SalmonGenerator.NONCE_LENGTH);
+        await ms.read(this.#maxNonce, 0, SalmonGenerator.NONCE_LENGTH);
         await ms.close();
     }
 

@@ -36,7 +36,7 @@ export class SalmonPassword {
     /**
      * WARNING! SHA1 is not secure anymore enable only if you know what you're doing!
      */
-    private static readonly ENABLE_SHA1: boolean = false;
+    static readonly #ENABLE_SHA1: boolean = false;
 
     /**
      * Global PBKDF algorithm option that will be used for the master key derivation.
@@ -46,7 +46,7 @@ export class SalmonPassword {
     /**
      * Pbkdf provider.
      */
-    private static provider: ISalmonPbkdfProvider = new SalmonDefaultPbkdfProvider();
+    static #provider: ISalmonPbkdfProvider = new SalmonDefaultPbkdfProvider();
 
     /**
      * Returns the current global PBKDF algorithm.
@@ -72,7 +72,7 @@ export class SalmonPassword {
      * @param pbkdfType
      */
     public static setPbkdfType(pbkdfType: PbkdfType): void {
-        SalmonPassword.provider = SalmonPbkdfFactory.create(pbkdfType);
+        SalmonPassword.#provider = SalmonPbkdfFactory.create(pbkdfType);
     }
 
     /**
@@ -81,7 +81,7 @@ export class SalmonPassword {
      * @param pbkdfProvider
      */
     public static setPbkdfProvider(pbkdfProvider: ISalmonPbkdfProvider): void {
-        SalmonPassword.provider = pbkdfProvider;
+        SalmonPassword.#provider = pbkdfProvider;
     }
 
     /**
@@ -110,9 +110,9 @@ export class SalmonPassword {
      * @throws SalmonSecurityException
      */
     public static async getKeyFromPassword(password: string, salt: Uint8Array, iterations: number, outputBytes: number): Promise<Uint8Array> {
-        if (SalmonPassword.pbkdfAlgo == PbkdfAlgo.SHA1 && !SalmonPassword.ENABLE_SHA1)
+        if (SalmonPassword.pbkdfAlgo == PbkdfAlgo.SHA1 && !SalmonPassword.#ENABLE_SHA1)
             throw new Error("Cannot use SHA1, SHA1 is not secure anymore use SHA256!");
-        return SalmonPassword.provider.getKey(password, salt, iterations, outputBytes, SalmonPassword.pbkdfAlgo);
+        return SalmonPassword.#provider.getKey(password, salt, iterations, outputBytes, SalmonPassword.pbkdfAlgo);
     }
 
 }

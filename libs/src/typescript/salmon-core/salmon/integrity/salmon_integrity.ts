@@ -45,24 +45,24 @@ export class SalmonIntegrity {
     /**
      * The chunk size to be used for integrity.
      */
-    private chunkSize: number = -1;
+    #chunkSize: number = -1;
 
     /**
      * Key to be used for integrity signing and validation.
      */
-    private readonly key: Uint8Array | null = null;
+    readonly #key: Uint8Array | null = null;
 
     /**
      * Hash result size;
      */
-    private readonly hashSize: number = 0;
+    readonly #hashSize: number = 0;
 
     /**
      * The hash provider.
      */
-    private readonly provider: IHashProvider;
+    readonly #provider: IHashProvider;
 
-    private readonly integrity: boolean;
+    readonly #integrity: boolean;
 
     /**
      * Instantiate an object to be used for applying and verifying hash signatures for each of the data chunks.
@@ -85,15 +85,15 @@ export class SalmonIntegrity {
         if (integrity && key == null)
             throw new SalmonSecurityException("You need a hash key to use with integrity");
         if (integrity && (chunkSize === null || chunkSize == 0))
-            this.chunkSize = SalmonIntegrity.DEFAULT_CHUNK_SIZE;
+            this.#chunkSize = SalmonIntegrity.DEFAULT_CHUNK_SIZE;
         else if (chunkSize != null && (integrity || chunkSize > 0)) // TODO: ToSync
-            this.chunkSize = chunkSize;
+            this.#chunkSize = chunkSize;
         if (hashSize < 0)
             throw new SalmonSecurityException("Hash size should be a positive number");
-        this.key = key;
-        this.provider = provider;
-        this.integrity = integrity;
-        this.hashSize = hashSize;
+        this.#key = key;
+        this.#provider = provider;
+        this.#integrity = integrity;
+        this.#hashSize = hashSize;
     }
 
     /**
@@ -155,9 +155,9 @@ export class SalmonIntegrity {
      * @return The number of bytes all hash signatures occupy
      */
     public getHashDataLength(count: number, hashOffset: number): number {
-        if (this.chunkSize <= 0)
+        if (this.#chunkSize <= 0)
             return 0;
-        return SalmonIntegrity.getTotalHashDataLength(count, this.chunkSize, hashOffset, this.hashSize);
+        return SalmonIntegrity.getTotalHashDataLength(count, this.#chunkSize, hashOffset, this.#hashSize);
     }
 
     /**
@@ -165,7 +165,7 @@ export class SalmonIntegrity {
      * @return The chunk size.
      */
     public getChunkSize(): number {
-        return this.chunkSize;
+        return this.#chunkSize;
     }
 
     /**
@@ -173,9 +173,9 @@ export class SalmonIntegrity {
      * @return The hash key.
      */
     public getKey(): Uint8Array {
-        if (this.key == null)
+        if (this.#key == null)
             throw new SalmonSecurityException("Key is missing");
-        return this.key;
+        return this.#key;
     }
 
     /**
@@ -183,7 +183,7 @@ export class SalmonIntegrity {
      * @return True if integrity is enabled.
      */
     public useIntegrity(): boolean {
-        return this.integrity;
+        return this.#integrity;
     }
 
     /**
@@ -194,12 +194,12 @@ export class SalmonIntegrity {
      * @throws SalmonIntegrityException
      */
     public async generateHashes(buffer: Uint8Array, includeHeaderData: Uint8Array | null): Promise<Uint8Array[] | null> {
-        if (!this.integrity)
+        if (!this.#integrity)
             return null;
         const hashes: Uint8Array[] = [];
-        for (let i: number = 0; i < buffer.length; i += this.chunkSize) {
-            const len: number = Math.min(this.chunkSize, buffer.length - i);
-            hashes.push(await SalmonIntegrity.calculateHash(this.provider, buffer, i, len, this.getKey(), i == 0 ? includeHeaderData : null));
+        for (let i: number = 0; i < buffer.length; i += this.#chunkSize) {
+            const len: number = Math.min(this.#chunkSize, buffer.length - i);
+            hashes.push(await SalmonIntegrity.calculateHash(this.#provider, buffer, i, len, this.getKey(), i == 0 ? includeHeaderData : null));
         }
         return hashes;
     }
@@ -210,10 +210,10 @@ export class SalmonIntegrity {
      * @return The hash signatures.
      */
     public getHashes(buffer: Uint8Array): Uint8Array[] | null {
-        if (!this.integrity)
+        if (!this.#integrity)
             return null;
         let hashes: Uint8Array[] = new Array();
-        for (let i: number = 0; i < buffer.length; i += SalmonGenerator.HASH_KEY_LENGTH + this.chunkSize) {
+        for (let i: number = 0; i < buffer.length; i += SalmonGenerator.HASH_KEY_LENGTH + this.#chunkSize) {
             let hash: Uint8Array = new Uint8Array(SalmonGenerator.HASH_KEY_LENGTH);
             for (let j = 0; j < SalmonGenerator.HASH_KEY_LENGTH; j++)
                 hash[j] = buffer[i + j];
@@ -231,9 +231,9 @@ export class SalmonIntegrity {
      */
     public async verifyHashes(hashes: Uint8Array[], buffer: Uint8Array, includeHeaderData: Uint8Array | null) {
         let chunk: number = 0;
-        for (let i: number = 0; i < buffer.length; i += this.chunkSize) {
-            let nChunkSize: number = Math.min(this.chunkSize, buffer.length - i);
-            let hash: Uint8Array = await SalmonIntegrity.calculateHash(this.provider, buffer, i, nChunkSize, this.getKey(), i == 0 ? includeHeaderData : null);
+        for (let i: number = 0; i < buffer.length; i += this.#chunkSize) {
+            let nChunkSize: number = Math.min(this.#chunkSize, buffer.length - i);
+            let hash: Uint8Array = await SalmonIntegrity.calculateHash(this.#provider, buffer, i, nChunkSize, this.getKey(), i == 0 ? includeHeaderData : null);
             for (let k: number = 0; k < hash.length; k++) {
                 if (hash[k] != hashes[chunk][k]) {
                     throw new SalmonIntegrityException("Data corrupt or tampered");

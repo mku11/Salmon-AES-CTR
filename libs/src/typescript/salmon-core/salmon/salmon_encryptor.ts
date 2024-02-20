@@ -42,12 +42,12 @@ export class SalmonEncryptor {
     /**
      * The number of parallel threads to use.
      */
-    private readonly threads: number;
+    readonly #threads: number;
 
     /**
      * The buffer size to use.
      */
-    private readonly bufferSize: number;
+    readonly #bufferSize: number;
 
     /**
      * Instantiate an encryptor with parallel tasks and buffer size.
@@ -59,16 +59,16 @@ export class SalmonEncryptor {
      */
     public constructor(threads: number = 0, bufferSize: number = 0) {
         if (threads == 0) {
-            this.threads = 1;
+            this.#threads = 1;
         } else {
-            this.threads = threads;
+            this.#threads = threads;
         }
         if (bufferSize == 0) {
             // we use the chunks size as default this keeps buffers aligned in case
             // integrity is enabled.
-            this.bufferSize = SalmonIntegrity.DEFAULT_CHUNK_SIZE;
+            this.#bufferSize = SalmonIntegrity.DEFAULT_CHUNK_SIZE;
         } else {
-            this.bufferSize = bufferSize;
+            this.#bufferSize = bufferSize;
         }
     }
 
@@ -123,11 +123,11 @@ export class SalmonEncryptor {
         await outputStream.read(outData, 0, await outputStream.length());
         await outputStream.close();
 
-        if (this.threads == 1) {
+        if (this.#threads == 1) {
             await encryptData(data, 0, data.length, outData,
-                key, nonce, headerData, integrity, hashKey, chunkSize, this.bufferSize);
+                key, nonce, headerData, integrity, hashKey, chunkSize, this.#bufferSize);
         } else {
-            await this.encryptDataParallel(data, outData,
+            await this.#encryptDataParallel(data, outData,
                 key, hashKey, nonce, headerData,
                 chunkSize, integrity);
         }
@@ -146,7 +146,7 @@ export class SalmonEncryptor {
      * @param chunkSize  The chunk size.
      * @param integrity  True to apply integrity.
      */
-    private async encryptDataParallel(data: Uint8Array, outData: Uint8Array,
+    async #encryptDataParallel(data: Uint8Array, outData: Uint8Array,
         key: Uint8Array, hashKey: Uint8Array | null, nonce: Uint8Array, headerData: Uint8Array | null,
         chunkSize: number | null, integrity: boolean): Promise<void> {
 
@@ -161,7 +161,7 @@ export class SalmonEncryptor {
             minPartSize = SalmonIntegrity.DEFAULT_CHUNK_SIZE;
 
         if (partSize > minPartSize) {
-            partSize = Math.ceil(data.length / this.threads);
+            partSize = Math.ceil(data.length / this.#threads);
             if (partSize > minPartSize)
                 partSize -= partSize % minPartSize;
             else
@@ -169,7 +169,7 @@ export class SalmonEncryptor {
             runningThreads = Math.floor(data.length / partSize);
         }
 
-        await this.submitEncryptJobs(runningThreads, partSize, data, outData, key, hashKey, nonce, headerData, integrity, chunkSize);
+        await this.#submitEncryptJobs(runningThreads, partSize, data, outData, key, hashKey, nonce, headerData, integrity, chunkSize);
     }
 
     /**
@@ -187,10 +187,10 @@ export class SalmonEncryptor {
      * @param integrity      True to apply the data integrity.
      * @param chunkSize      The chunk size.
      */
-    private async submitEncryptJobs(runningThreads: number, partSize: number, data: Uint8Array, outData: Uint8Array,
+    async #submitEncryptJobs(runningThreads: number, partSize: number, data: Uint8Array, outData: Uint8Array,
         key: Uint8Array, hashKey: Uint8Array | null, nonce: Uint8Array,
         headerData: Uint8Array | null, integrity: boolean, chunkSize: number | null): Promise<void> {
-        let promises = [];
+            let promises: Promise<any>[] = [];
         for (let i = 0; i < runningThreads; i++) {
             promises.push(new Promise(async (resolve, reject) => {
                 let worker: any;
@@ -223,7 +223,7 @@ export class SalmonEncryptor {
 
                 worker.postMessage({
                     index: i, data: data, out_size: outData.length, start: start, length: length, key: key, nonce: nonce,
-                    headerData: headerData, integrity: integrity, hashKey: hashKey, chunkSize: chunkSize, bufferSize: this.bufferSize
+                    headerData: headerData, integrity: integrity, hashKey: hashKey, chunkSize: chunkSize, bufferSize: this.#bufferSize
                 });
             }));
         }

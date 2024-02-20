@@ -27,43 +27,43 @@ SOFTWARE.
  */
 export class SalmonKey {
 
-    private masterKey: Uint8Array | null = null;
-    private driveKey: Uint8Array | null = null;
-    private hashKey: Uint8Array | null = null;
-    private iterations: number = 0;
+    #masterKey: Uint8Array | null = null;
+    #driveKey: Uint8Array | null = null;
+    #hashKey: Uint8Array | null = null;
+    #iterations: number = 0;
 
     /**
      * Clear the properties from memory.
      */
     public clear(): void {
 
-        if (this.driveKey != null)
-            this.driveKey.fill(0);
-        this.driveKey = null;
+        if (this.#driveKey != null)
+            this.#driveKey.fill(0);
+        this.#driveKey = null;
 
-        if (this.hashKey != null)
-            this.hashKey.fill(0);
-        this.hashKey = null;
+        if (this.#hashKey != null)
+            this.#hashKey.fill(0);
+        this.#hashKey = null;
 
-        if (this.masterKey != null)
-            this.masterKey.fill(0);
-        this.masterKey = null;
+        if (this.#masterKey != null)
+            this.#masterKey.fill(0);
+        this.#masterKey = null;
 
-        this.iterations = 0;
+        this.#iterations = 0;
     }
 
     /**
      * Function returns the encryption key that will be used to encrypt/decrypt the files
      */
     public getDriveKey(): Uint8Array | null {
-        return this.driveKey;
+        return this.#driveKey;
     }
 
     /**
      * Function returns the hash key that will be used to sign the file chunks
      */
     public getHashKey(): Uint8Array | null {
-        return this.hashKey;
+        return this.#hashKey;
     }
 
     /**
@@ -71,7 +71,7 @@ export class SalmonKey {
      * @param this.driveKey
      */
     public setDriveKey(driveKey: Uint8Array | null): void {
-        this.driveKey = driveKey;
+        this.#driveKey = driveKey;
     }
 
     /**
@@ -79,7 +79,7 @@ export class SalmonKey {
      * @param hashKey
      */
     public setHashKey(hashKey: Uint8Array | null): void {
-        this.hashKey = hashKey;
+        this.#hashKey = hashKey;
     }
 
     /**
@@ -87,7 +87,7 @@ export class SalmonKey {
      * @return
      */
     public getMasterKey(): Uint8Array | null {
-        return this.masterKey;
+        return this.#masterKey;
     }
 
     /**
@@ -95,7 +95,7 @@ export class SalmonKey {
      * @param masterKey
      */
     public setMasterKey(masterKey: Uint8Array | null): void {
-        this.masterKey = masterKey;
+        this.#masterKey = masterKey;
     }
 
     /**
@@ -103,7 +103,7 @@ export class SalmonKey {
      * @return
      */
     public getIterations(): number {
-        return this.iterations;
+        return this.#iterations;
     }
 
     /**
@@ -111,6 +111,6 @@ export class SalmonKey {
      * @param iterations
      */
     public setIterations(iterations: number): void {
-        this.iterations = iterations;
+        this.#iterations = iterations;
     }
 }

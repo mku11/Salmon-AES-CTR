@@ -29,7 +29,7 @@ import { SalmonEncoder } from "../encode/salmon_encoder.js";
  * Utility class that encrypts and decrypts text strings.
  */
 export class SalmonTextDecryptor {
-    private static readonly decryptor: SalmonDecryptor = new SalmonDecryptor();
+    static readonly #decryptor: SalmonDecryptor = new SalmonDecryptor();
 
     /**
     /**
@@ -51,7 +51,7 @@ export class SalmonTextDecryptor {
     public static async decryptString(text: string, key: Uint8Array, nonce: Uint8Array | null, header: boolean,
         integrity: boolean = false, hashKey: Uint8Array | null = null, chunkSize: number | null = null): Promise<string> {
         let bytes: Uint8Array = SalmonEncoder.getBase64().decode(text);
-        let decBytes: Uint8Array = await this.decryptor.decrypt(bytes, key, nonce, header, integrity, hashKey, chunkSize);
+        let decBytes: Uint8Array = await this.#decryptor.decrypt(bytes, key, nonce, header, integrity, hashKey, chunkSize);
         let decString: string = new TextDecoder().decode(decBytes);
         return decString;
     }

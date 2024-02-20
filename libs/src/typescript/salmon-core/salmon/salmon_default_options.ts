@@ -34,13 +34,13 @@ export class SalmonDefaultOptions {
      * @return
      */
     public static getBufferSize(): number{
-        return SalmonDefaultOptions.bufferSize;
+        return SalmonDefaultOptions.#bufferSize;
     }
 
     /**
      * Default buffer size for all internal streams including Encryptors and Decryptors
      */
-    private static bufferSize: number = SalmonIntegrity.DEFAULT_CHUNK_SIZE;
+    static #bufferSize: number = SalmonIntegrity.DEFAULT_CHUNK_SIZE;
 
     /**
      * Set the default buffer size for all internal streams including Encryptors and Decryptors.
@@ -48,6 +48,6 @@ export class SalmonDefaultOptions {
      * @param bufferSize
      */
     public static setBufferSize(bufferSize: number): void {
-        SalmonDefaultOptions.bufferSize = bufferSize;
+        SalmonDefaultOptions.#bufferSize = bufferSize;
     }
 }

@@ -60,7 +60,7 @@ export class SalmonDriveGenerator {
     /**
      * Global default iterations that will be used for the master key derivation.
      */
-    private static iterations: number = 65536;
+    static #iterations: number = 65536;
 
     /**
      * Generate a Drive ID.
@@ -124,7 +124,7 @@ export class SalmonDriveGenerator {
      * @return The current iterations for the key derivation.
      */
     public static getIterations(): number {
-        return SalmonDriveGenerator.iterations;
+        return SalmonDriveGenerator.#iterations;
     }
 
     /**
@@ -132,6 +132,6 @@ export class SalmonDriveGenerator {
      * @param iterations
      */
     public static setIterations(iterations: number): void {
-        SalmonDriveGenerator.iterations = iterations;
+        SalmonDriveGenerator.#iterations = iterations;
     }
 }

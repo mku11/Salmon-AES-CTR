@@ -33,27 +33,27 @@ export class MemoryStream extends RandomAccessStream {
     /**
      * Increment to resize to when capacity is exhausted.
      */
-    private static readonly CAPACITY_INCREMENT: number = 128 * 1024;
+    static readonly #CAPACITY_INCREMENT: number = 128 * 1024;
 
     /**
      * Buffer to store the data. This can be provided via the constructor.
      */
-    private bytes: Uint8Array;
+    #bytes: Uint8Array;
 
     /**
      * Current position of the stream.
      */
-    private _position: number = 0;
+    #_position: number = 0;
 
     /**
      * Current capacity.
      */
-    private _capacity: number = 0;
+    #_capacity: number = 0;
 
     /**
      * Current length of the stream.
      */
-    private _length: number = 0;
+    #_length: number = 0;
 
     /**
      * Create a memory stream backed by an existing byte-array.
@@ -62,12 +62,12 @@ export class MemoryStream extends RandomAccessStream {
     public constructor(bytes: Uint8Array | null = null) {
         super();
         if (bytes != null) {
-            this._length = bytes.length;
-            this.bytes = bytes;
-            this._capacity = bytes.length;
+            this.#_length = bytes.length;
+            this.#bytes = bytes;
+            this.#_capacity = bytes.length;
         } else {
-            this.bytes = new Uint8Array(MemoryStream.CAPACITY_INCREMENT);
-            this._capacity = MemoryStream.CAPACITY_INCREMENT;
+            this.#bytes = new Uint8Array(MemoryStream.#CAPACITY_INCREMENT);
+            this.#_capacity = MemoryStream.#CAPACITY_INCREMENT;
         }
     }
 
@@ -97,7 +97,7 @@ export class MemoryStream extends RandomAccessStream {
      * @return The length of the stream.
      */
     public override async length(): Promise<number> {
-        return this._length;
+        return this.#_length;
     }
 
     /**
@@ -106,7 +106,7 @@ export class MemoryStream extends RandomAccessStream {
      * @throws IOException
      */
     public override async getPosition(): Promise<number> {
-        return this._position;
+        return this.#_position;
     }
 
     /**
@@ -115,7 +115,7 @@ export class MemoryStream extends RandomAccessStream {
      * @throws IOException
      */
     public override async setPosition(value: number): Promise<void> {
-        this._position = value;
+        this.#_position = value;
     }
 
     /**
@@ -125,8 +125,8 @@ export class MemoryStream extends RandomAccessStream {
      * @throws IOException
      */
     public override async setLength(value: number): Promise<void> {
-        this.checkAndResize(value);
-        this._capacity = value;
+        this.#checkAndResize(value);
+        this.#_capacity = value;
     }
 
     /**
@@ -138,9 +138,9 @@ export class MemoryStream extends RandomAccessStream {
      * @throws IOException
      */
     public override async read(buffer: Uint8Array, offset: number, count: number): Promise<number> {
-        const bytesRead: number = Math.min(this._length - await this.getPosition(), count);
+        const bytesRead: number = Math.min(this.#_length - await this.getPosition(), count);
         for (let i = 0; i < bytesRead; i++)
-            buffer[offset + i] = this.bytes[this._position + i];
+            buffer[offset + i] = this.#bytes[this.#_position + i];
         await this.setPosition(await this.getPosition() + bytesRead);
         if (bytesRead <= 0)
             return -1;
@@ -155,9 +155,9 @@ export class MemoryStream extends RandomAccessStream {
      * @throws IOException
      */
     public override async write(buffer: Uint8Array, offset: number, count: number): Promise<void> {
-        this.checkAndResize(this._position + count);
+        this.#checkAndResize(this.#_position + count);
         for (let i = 0; i < count; i++)
-            this.bytes[this._position + i] = buffer[offset + i];
+            this.#bytes[this.#_position + i] = buffer[offset + i];
         await this.setPosition(await this.getPosition() + count);
     }
 
@@ -165,18 +165,18 @@ export class MemoryStream extends RandomAccessStream {
      * Check if there is no more space in the byte array and increase the capacity.
      * @param newLength The new length of the stream.
      */
-    private checkAndResize(newLength: number): void {
-        if (this._capacity < newLength) {
-            let newCapacity: number = this._capacity + MemoryStream.CAPACITY_INCREMENT * Math.floor((newLength - this._capacity) / MemoryStream.CAPACITY_INCREMENT);
+    #checkAndResize(newLength: number): void {
+        if (this.#_capacity < newLength) {
+            let newCapacity: number = this.#_capacity + MemoryStream.#CAPACITY_INCREMENT * Math.floor((newLength - this.#_capacity) / MemoryStream.#CAPACITY_INCREMENT);
             if (newCapacity < newLength)
-                newCapacity += MemoryStream.CAPACITY_INCREMENT;
+                newCapacity += MemoryStream.#CAPACITY_INCREMENT;
             const nBytes: Uint8Array = new Uint8Array(newCapacity);
-            for (let i = 0; i < this._capacity; i++)
-                nBytes[i] = this.bytes[i];
-            this._capacity = newCapacity;
-            this.bytes = nBytes;
+            for (let i = 0; i < this.#_capacity; i++)
+                nBytes[i] = this.#bytes[i];
+            this.#_capacity = newCapacity;
+            this.#bytes = nBytes;
         }
-        this._length = newLength;
+        this.#_length = newLength;
     }
 
     /**
@@ -193,9 +193,9 @@ export class MemoryStream extends RandomAccessStream {
         } else if (origin === SeekOrigin.Current) {
             nPos = await this.getPosition() + offset;
         } else if (origin === SeekOrigin.End) {
-            nPos = (this.bytes.length - offset);
+            nPos = (this.#bytes.length - offset);
         }
-        this.checkAndResize(nPos);
+        this.#checkAndResize(nPos);
         await this.setPosition(nPos);
         return await this.getPosition();
     }
@@ -220,9 +220,9 @@ export class MemoryStream extends RandomAccessStream {
      * @return A byte array containing the data from the stream.
      */
     public toArray(): Uint8Array {
-        const nBytes: Uint8Array = new Uint8Array(this._length);
-        for (let i = 0; i < this._length; i++)
-            nBytes[i] = this.bytes[i];
+        const nBytes: Uint8Array = new Uint8Array(this.#_length);
+        for (let i = 0; i < this.#_length; i++)
+            nBytes[i] = this.#bytes[i];
         return nBytes;
     }
 }

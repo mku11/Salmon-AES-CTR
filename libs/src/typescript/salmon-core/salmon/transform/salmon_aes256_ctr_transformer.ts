@@ -50,38 +50,38 @@ export abstract class SalmonAES256CTRTransformer implements ISalmonCTRTransforme
     /**
      * Key to be used for AES transformation.
      */
-    private key: Uint8Array | null = null;
+    #key: Uint8Array | null = null;
 
     /**
      * Expanded key.
      */
-    private expandedKey: Uint8Array = new Uint8Array(SalmonAES256CTRTransformer.EXPANDED_KEY_SIZE);
+    #expandedKey: Uint8Array = new Uint8Array(SalmonAES256CTRTransformer.EXPANDED_KEY_SIZE);
 
     /**
      * Nonce to be used for CTR mode.
      */
-    private nonce: Uint8Array | null = null;
+    #nonce: Uint8Array | null = null;
 
     /**
      * Current operation block.
      */
-    private block: number = 0;
+    #block: number = 0;
 
     /**
      * Current operation counter.
      */
-    private counter: Uint8Array | null = null;
+    #counter: Uint8Array | null = null;
 
     /**
      * Resets the Counter and the block count.
      */
     public resetCounter(): void {
-        if (this.nonce == null) //TODO: ToSync
+        if (this.#nonce == null) //TODO: ToSync
             throw new SalmonSecurityException("No counter, run init first");
-        this.counter = new Uint8Array(SalmonAES256CTRTransformer.BLOCK_SIZE);
-        for (let i = 0; i < this.nonce.length; i++)
-            this.counter[i] = this.nonce[i];
-        this.block = 0;
+        this.#counter = new Uint8Array(SalmonAES256CTRTransformer.BLOCK_SIZE);
+        for (let i = 0; i < this.#nonce.length; i++)
+            this.#counter[i] = this.#nonce[i];
+        this.#block = 0;
     }
 
     /**
@@ -92,7 +92,7 @@ export abstract class SalmonAES256CTRTransformer implements ISalmonCTRTransforme
         let currBlock: number = Math.floor(position / SalmonAES256CTRTransformer.BLOCK_SIZE);
         this.resetCounter();
         this.increaseCounter(currBlock);
-        this.block = currBlock;
+        this.#block = currBlock;
     }
 
     /**
@@ -102,7 +102,7 @@ export abstract class SalmonAES256CTRTransformer implements ISalmonCTRTransforme
      * @param value value to increase counter by
      */
     protected increaseCounter(value: number): void {
-        if (this.counter == null || this.nonce == null) //TODO: ToSync
+        if (this.#counter == null || this.#nonce == null) //TODO: ToSync
             throw new SalmonSecurityException("No counter, run init first");
         if (value < 0)
             throw new Error("Value should be positive");
@@ -115,8 +115,8 @@ export abstract class SalmonAES256CTRTransformer implements ISalmonCTRTransforme
             if (index <= SalmonAES256CTRTransformer.BLOCK_SIZE - SalmonGenerator.NONCE_LENGTH)
                 throw new SalmonRangeExceededException("Current CTR max blocks exceeded");
             let val: number = (value + carriage) % 256;
-            carriage = Math.floor(((this.counter[index] & 0xFF) + val) / 256);
-            this.counter[index--] += val;
+            carriage = Math.floor(((this.#counter[index] & 0xFF) + val) / 256);
+            this.#counter[index--] += val;
             value = Math.floor(value / 256);
         }
     }
@@ -129,8 +129,8 @@ export abstract class SalmonAES256CTRTransformer implements ISalmonCTRTransforme
      * @throws SalmonSecurityException
      */
     public async init(key: Uint8Array, nonce: Uint8Array): Promise<void> {
-        this.key = key;
-        this.nonce = nonce;
+        this.#key = key;
+        this.#nonce = nonce;
     }
 
     /**
@@ -138,9 +138,9 @@ export abstract class SalmonAES256CTRTransformer implements ISalmonCTRTransforme
      * @return
      */
     public getCounter(): Uint8Array {
-        if (this.counter == null) //TODO: ToSync
+        if (this.#counter == null) //TODO: ToSync
             throw new SalmonSecurityException("No counter, run init and resetCounter");
-        return this.counter;
+        return this.#counter;
     }
 
     /**
@@ -148,7 +148,7 @@ export abstract class SalmonAES256CTRTransformer implements ISalmonCTRTransforme
      * @return
      */
     public getBlock(): number {
-        return this.block;
+        return this.#block;
     }
 
     /**
@@ -156,7 +156,7 @@ export abstract class SalmonAES256CTRTransformer implements ISalmonCTRTransforme
      * @return
      */
     public getKey(): Uint8Array | null{
-        return this.key;
+        return this.#key;
     }
 
     /**
@@ -164,7 +164,7 @@ export abstract class SalmonAES256CTRTransformer implements ISalmonCTRTransforme
      * @return
      */
     protected getExpandedKey(): Uint8Array | null {
-        return this.expandedKey;
+        return this.#expandedKey;
     }
 
     /**
@@ -172,7 +172,7 @@ export abstract class SalmonAES256CTRTransformer implements ISalmonCTRTransforme
      * @return
      */
     public getNonce(): Uint8Array | null{
-        return this.nonce;
+        return this.#nonce;
     }
 
     /**
@@ -180,6 +180,6 @@ export abstract class SalmonAES256CTRTransformer implements ISalmonCTRTransforme
      * @param expandedKey
      */
     public setExpandedKey(expandedKey: Uint8Array): void {
-        this.expandedKey = expandedKey;
+        this.#expandedKey = expandedKey;
     }
 }

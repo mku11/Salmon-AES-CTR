@@ -46,46 +46,46 @@ export class SalmonStream extends RandomAccessStream {
     /**
      * Header data embedded in the stream if available.
      */
-    private readonly headerData: Uint8Array | null = null;
+    readonly #headerData: Uint8Array | null = null;
 
     /**
      * Mode to be used for this stream. This can only be set once.
      */
-    private readonly encryptionMode: EncryptionMode;
+    readonly #encryptionMode: EncryptionMode;
 
     /**
      * Allow seek and write.
      */
-    private allowRangeWrite: boolean = false;
+    #allowRangeWrite: boolean = false;
 
     /**
      * Fail silently if integrity cannot be verified.
      */
-    private failSilently: boolean = false;
+    #failSilently: boolean = false;
 
     /**
      * The base stream. When EncryptionMode is Encrypt this will be the target stream.
      * When EncryptionMode is Decrypt this will be the source stream.
      */
-    private readonly baseStream: RandomAccessStream;
+    readonly #baseStream: RandomAccessStream;
 
     /**
      * Current global AES provider type.
      */
-    private static providerType: ProviderType = ProviderType.Default;
+    static #providerType: ProviderType = ProviderType.Default;
 
     /**
      * The transformer to use for encryption.
      */
-    private transformer: ISalmonCTRTransformer = SalmonTransformerFactory.create(SalmonStream.providerType);
+    #transformer: ISalmonCTRTransformer = SalmonTransformerFactory.create(SalmonStream.#providerType);
 
     /**
      * The integrity to use for hash signature creation and validation.
      */
-    private salmonIntegrity: SalmonIntegrity = new SalmonIntegrity(false, null, null, new HmacSHA256Provider(), SalmonGenerator.HASH_RESULT_LENGTH);
+    #salmonIntegrity: SalmonIntegrity = new SalmonIntegrity(false, null, null, new HmacSHA256Provider(), SalmonGenerator.HASH_RESULT_LENGTH);
 
-    private key: Uint8Array;
-    private nonce: Uint8Array;
+    #key: Uint8Array;
+    #nonce: Uint8Array;
 
 
     /**
@@ -145,13 +145,13 @@ export class SalmonStream extends RandomAccessStream {
         baseStream: RandomAccessStream, headerData: Uint8Array | null = null,
         integrity: boolean = false, chunkSize: number | null = null, hashKey: Uint8Array | null = null) {
         super();
-        this.encryptionMode = encryptionMode;
-        this.baseStream = baseStream;
-        this.headerData = headerData;
+        this.#encryptionMode = encryptionMode;
+        this.#baseStream = baseStream;
+        this.#headerData = headerData;
 
-        this.initIntegrity(integrity, hashKey, chunkSize);
-        this.key = key;
-        this.nonce = nonce;
+        this.#initIntegrity(integrity, hashKey, chunkSize);
+        this.#key = key;
+        this.#nonce = nonce;
     }
 
     /**
@@ -160,7 +160,7 @@ export class SalmonStream extends RandomAccessStream {
      * @param providerType The provider Type.
      */
     public static setAesProviderType(providerType: ProviderType): void {
-        SalmonStream.providerType = providerType;
+        SalmonStream.#providerType = providerType;
     }
 
     /**
@@ -169,7 +169,7 @@ export class SalmonStream extends RandomAccessStream {
      * @return The provider Type.
      */
     public static getAesProviderType(): ProviderType {
-        return SalmonStream.providerType;
+        return SalmonStream.#providerType;
     }
 
     /**
@@ -178,12 +178,12 @@ export class SalmonStream extends RandomAccessStream {
      * @return The length of the stream.
      */
     public async length(): Promise<number> {
-        await this.init(this.key, this.nonce);
+        await this.#init(this.#key, this.#nonce);
         let totalHashBytes: number;
-        let hashOffset: number = this.salmonIntegrity.getChunkSize() > 0 ? SalmonGenerator.HASH_RESULT_LENGTH : 0;
-        totalHashBytes = this.salmonIntegrity.getHashDataLength(await this.baseStream.length() - 1, hashOffset);
+        let hashOffset: number = this.#salmonIntegrity.getChunkSize() > 0 ? SalmonGenerator.HASH_RESULT_LENGTH : 0;
+        totalHashBytes = this.#salmonIntegrity.getHashDataLength(await this.#baseStream.length() - 1, hashOffset);
 
-        return await this.baseStream.length() - this.getHeaderLength() - totalHashBytes;
+        return await this.#baseStream.length() - this.#getHeaderLength() - totalHashBytes;
     }
 
     /**
@@ -193,11 +193,11 @@ export class SalmonStream extends RandomAccessStream {
      */
     public async actualLength(): Promise<number> {
         let totalHashBytes: number = 0;
-        totalHashBytes += this.salmonIntegrity.getHashDataLength(await this.baseStream.length() - 1, 0);
+        totalHashBytes += this.#salmonIntegrity.getHashDataLength(await this.#baseStream.length() - 1, 0);
         if (await this.canRead())
             return this.length();
         else if (await this.canWrite())
-            return await this.baseStream.length() + this.getHeaderLength() + totalHashBytes;
+            return await this.#baseStream.length() + this.#getHeaderLength() + totalHashBytes;
         return 0;
     }
 
@@ -208,7 +208,7 @@ export class SalmonStream extends RandomAccessStream {
      * @throws IOException
      */
     public async getPosition(): Promise<number> {
-        return this.getVirtualPosition();
+        return this.#getVirtualPosition();
     }
 
     /**
@@ -218,12 +218,12 @@ export class SalmonStream extends RandomAccessStream {
      * @throws IOException
      */
     public async setPosition(value: number): Promise<void> {
-        if (await this.canWrite() && !this.allowRangeWrite && value != 0) {
+        if (await this.canWrite() && !this.#allowRangeWrite && value != 0) {
             throw new IOException(null, new SalmonSecurityException("Range Write is not allowed for security (non-reusable IVs). " +
                 "If you still want to take the risk you need to use SetAllowRangeWrite(true)"));
         }
         try {
-            await this.setVirtualPosition(value);
+            await this.#setVirtualPosition(value);
         } catch (e) {
             throw new IOException(null, e);
         }
@@ -235,7 +235,7 @@ export class SalmonStream extends RandomAccessStream {
      * @return True if mode is decryption.
      */
     public async canRead(): Promise<boolean> {
-        return await this.baseStream.canRead() && this.encryptionMode == EncryptionMode.Decrypt;
+        return await this.#baseStream.canRead() && this.#encryptionMode == EncryptionMode.Decrypt;
     }
 
     /**
@@ -244,7 +244,7 @@ export class SalmonStream extends RandomAccessStream {
      * @return True if stream is seekable.
      */
     public async canSeek(): Promise<boolean> {
-        return this.baseStream.canSeek();
+        return this.#baseStream.canSeek();
     }
 
     /**
@@ -253,7 +253,7 @@ export class SalmonStream extends RandomAccessStream {
      * @return True if mode is decryption.
      */
     public async canWrite(): Promise<boolean> {
-        return await this.baseStream.canWrite() && this.encryptionMode == EncryptionMode.Encrypt;
+        return await this.#baseStream.canWrite() && this.#encryptionMode == EncryptionMode.Encrypt;
     }
 
     /**
@@ -274,8 +274,8 @@ export class SalmonStream extends RandomAccessStream {
      * @throws SalmonSecurityException
      * @throws SalmonIntegrityException
      */
-    private initIntegrity(integrity: boolean, hashKey: Uint8Array | null, chunkSize: number | null): void {
-        this.salmonIntegrity = new SalmonIntegrity(integrity, hashKey, chunkSize,
+    #initIntegrity(integrity: boolean, hashKey: Uint8Array | null, chunkSize: number | null): void {
+        this.#salmonIntegrity = new SalmonIntegrity(integrity, hashKey, chunkSize,
             new HmacSHA256Provider(), SalmonGenerator.HASH_RESULT_LENGTH);
     }
     
@@ -284,11 +284,11 @@ export class SalmonStream extends RandomAccessStream {
      *
      * @return The header data length.
      */
-    private getHeaderLength(): number {
-        if (this.headerData == null)
+    #getHeaderLength(): number {
+        if (this.#headerData == null)
             return 0;
         else
-            return this.headerData.length;
+            return this.#headerData.length;
     }
 
     /**
@@ -299,9 +299,9 @@ export class SalmonStream extends RandomAccessStream {
      * Note: for typescript since its async and we cannot run it in the constructor we delay 
      * until we run an opearation using the transformer.
      */
-    private async init(key: Uint8Array, nonce: Uint8Array): Promise<void> {
+    async #init(key: Uint8Array, nonce: Uint8Array): Promise<void> {
         // init only once
-        if (this.transformer.getKey() != null)
+        if (this.#transformer.getKey() != null)
             return;
 
         if (key == null)
@@ -309,11 +309,11 @@ export class SalmonStream extends RandomAccessStream {
         if (nonce == null)
             throw new SalmonSecurityException("Nonce is missing");
 
-        this.transformer = SalmonTransformerFactory.create(SalmonStream.providerType);
-        await this.transformer.init(key, nonce);
-        this.transformer.resetCounter();
+        this.#transformer = SalmonTransformerFactory.create(SalmonStream.#providerType);
+        await this.#transformer.init(key, nonce);
+        this.#transformer.resetCounter();
 
-        await this.baseStream.setPosition(this.getHeaderLength());
+        await this.#baseStream.setPosition(this.#getHeaderLength());
     }
 
     /**
@@ -347,8 +347,8 @@ export class SalmonStream extends RandomAccessStream {
      * Flushes any buffered data to the base stream.
      */
     public async flush(): Promise<void> {
-        if (this.baseStream != null) {
-            await this.baseStream.flush();
+        if (this.#baseStream != null) {
+            await this.#baseStream.flush();
         }
     }
 
@@ -358,7 +358,7 @@ export class SalmonStream extends RandomAccessStream {
      * @throws IOException
      */
     public async close(): Promise<void> {
-        await this.closeStreams();
+        await this.#closeStreams();
     }
 
     /**
@@ -367,9 +367,9 @@ export class SalmonStream extends RandomAccessStream {
      * @return The current Counter value.
      */
     public async getCounter(): Promise<Uint8Array> {
-        await this.init(this.key, this.nonce);
+        await this.#init(this.#key, this.#nonce);
 
-        let ctr: Uint8Array | null = this.transformer.getCounter();
+        let ctr: Uint8Array | null = this.#transformer.getCounter();
         if (ctr == null) //TODO: ToSync
             throw new SalmonSecurityException("No counter, init transformer first");
         return ctr.slice(0);
@@ -379,18 +379,18 @@ export class SalmonStream extends RandomAccessStream {
      * Returns the current Block value
      */
     public async getBlock(): Promise<number> {
-        await this.init(this.key, this.nonce);
+        await this.#init(this.#key, this.#nonce);
 
-        return this.transformer.getBlock();
+        return this.#transformer.getBlock();
     }
 
     /**
      * Returns a copy of the encryption key.
      */
     public async getKey(): Promise<Uint8Array> {
-        await this.init(this.key, this.nonce);
+        await this.#init(this.#key, this.#nonce);
 
-        let key: Uint8Array | null = this.transformer.getKey();
+        let key: Uint8Array | null = this.#transformer.getKey();
         if (key == null) //TODO: ToSync
             throw new SalmonSecurityException("No key, init transformer first");
         return key.slice(0);
@@ -400,16 +400,16 @@ export class SalmonStream extends RandomAccessStream {
      * Returns a copy of the hash key.
      */
     public getHashKey(): Uint8Array {
-        return this.salmonIntegrity.getKey().slice(0);
+        return this.#salmonIntegrity.getKey().slice(0);
     }
 
     /**
      * Returns a copy of the initial vector.
      */
     public async getNonce(): Promise<Uint8Array> {
-        await this.init(this.key, this.nonce);
+        await this.#init(this.#key, this.#nonce);
 
-        let nonce: Uint8Array | null = this.transformer.getNonce();
+        let nonce: Uint8Array | null = this.#transformer.getNonce();
         if (nonce == null) //TODO: ToSync
             throw new SalmonSecurityException("No nonce, init transformer first");
         return nonce.slice(0);
@@ -419,7 +419,7 @@ export class SalmonStream extends RandomAccessStream {
      * Returns the Chunk size used to apply hash signature
      */
     public getChunkSize(): number {
-        return this.salmonIntegrity.getChunkSize();
+        return this.#salmonIntegrity.getChunkSize();
     }
 
     /**
@@ -430,7 +430,7 @@ export class SalmonStream extends RandomAccessStream {
      * @param value True to allow byte range encryption write operations
      */
     public setAllowRangeWrite(value: boolean): void {
-        this.allowRangeWrite = value;
+        this.#allowRangeWrite = value;
     }
 
     /**
@@ -441,7 +441,7 @@ export class SalmonStream extends RandomAccessStream {
      * @param value True to fail silently.
      */
     public setFailSilently(value: boolean): void {
-        this.failSilently = value;
+        this.#failSilently = value;
     }
 
     /**
@@ -451,37 +451,37 @@ export class SalmonStream extends RandomAccessStream {
      * @throws IOException
      * @throws SalmonRangeExceededException
      */
-    private async setVirtualPosition(value: number): Promise<void> {
-        await this.init(this.key, this.nonce);
+    async #setVirtualPosition(value: number): Promise<void> {
+        await this.#init(this.#key, this.#nonce);
 
         // we skip the header bytes and any hash values we have if the file has integrity set
-        await this.baseStream.setPosition(value);
-        let totalHashBytes: number = this.salmonIntegrity.getHashDataLength(await this.baseStream.getPosition(), 0);
-        await this.baseStream.setPosition(await this.baseStream.getPosition() + totalHashBytes);
-        await this.baseStream.setPosition(await this.baseStream.getPosition() + this.getHeaderLength());
-        this.transformer.resetCounter();
-        this.transformer.syncCounter(await this.getPosition());
+        await this.#baseStream.setPosition(value);
+        let totalHashBytes: number = this.#salmonIntegrity.getHashDataLength(await this.#baseStream.getPosition(), 0);
+        await this.#baseStream.setPosition(await this.#baseStream.getPosition() + totalHashBytes);
+        await this.#baseStream.setPosition(await this.#baseStream.getPosition() + this.#getHeaderLength());
+        this.#transformer.resetCounter();
+        this.#transformer.syncCounter(await this.getPosition());
     }
 
     /**
      * Returns the Virtual Position of the stream excluding the header and hash signatures.
      */
-    private async getVirtualPosition(): Promise<number> {
-        await this.init(this.key, this.nonce);
+    async #getVirtualPosition(): Promise<number> {
+        await this.#init(this.#key, this.#nonce);
         let totalHashBytes: number;
-        let hashOffset: number = this.salmonIntegrity.getChunkSize() > 0 ? SalmonGenerator.HASH_RESULT_LENGTH : 0;
-        totalHashBytes = this.salmonIntegrity.getHashDataLength(await this.baseStream.getPosition(), hashOffset);
-        return await this.baseStream.getPosition() - this.getHeaderLength() - totalHashBytes;
+        let hashOffset: number = this.#salmonIntegrity.getChunkSize() > 0 ? SalmonGenerator.HASH_RESULT_LENGTH : 0;
+        totalHashBytes = this.#salmonIntegrity.getHashDataLength(await this.#baseStream.getPosition(), hashOffset);
+        return await this.#baseStream.getPosition() - this.#getHeaderLength() - totalHashBytes;
     }
 
     /**
      * Close base stream
      */
-    private async closeStreams(): Promise<void> {
-        if (this.baseStream != null) {
+    async #closeStreams(): Promise<void> {
+        if (this.#baseStream != null) {
             if (await this.canWrite())
-                await this.baseStream.flush();
-            await this.baseStream.close();
+                await this.#baseStream.flush();
+            await this.#baseStream.close();
         }
     }
 
@@ -494,11 +494,11 @@ export class SalmonStream extends RandomAccessStream {
      * @return The number of data bytes that were decrypted.
      */
     public async read(buffer: Uint8Array, offset: number, count: number): Promise<number> {
-        await this.init(this.key, this.nonce);
+        await this.#init(this.#key, this.#nonce);
 
         if (await this.getPosition() == await this.length())
             return -1;
-        let alignedOffset: number = await this.getAlignedOffset();
+        let alignedOffset: number = await this.#getAlignedOffset();
         let bytes: number = 0;
         let pos: number = await this.getPosition();
 
@@ -506,7 +506,7 @@ export class SalmonStream extends RandomAccessStream {
         if (alignedOffset != 0) {
             // read partially once
             await this.setPosition(await this.getPosition() - alignedOffset);
-            let nCount: number = this.salmonIntegrity.getChunkSize() > 0 ? this.salmonIntegrity.getChunkSize() : SalmonGenerator.BLOCK_SIZE;
+            let nCount: number = this.#salmonIntegrity.getChunkSize() > 0 ? this.#salmonIntegrity.getChunkSize() : SalmonGenerator.BLOCK_SIZE;
             let buff: Uint8Array = new Uint8Array(nCount);
             bytes = await this.read(buff, 0, nCount);
             bytes = Math.min(bytes - alignedOffset, count);
@@ -544,9 +544,9 @@ export class SalmonStream extends RandomAccessStream {
     async #readFromStream(buffer: Uint8Array, offset: number, count: number): Promise<number> {
         if (await this.getPosition() == await this.length())
             return 0;
-        if (this.salmonIntegrity.getChunkSize() > 0 && await this.getPosition() % this.salmonIntegrity.getChunkSize() != 0)
-            throw new IOException("All reads should be aligned to the chunks size: " + this.salmonIntegrity.getChunkSize());
-        else if (this.salmonIntegrity.getChunkSize() == 0 && await this.getPosition() % SalmonAES256CTRTransformer.BLOCK_SIZE != 0)
+        if (this.#salmonIntegrity.getChunkSize() > 0 && await this.getPosition() % this.#salmonIntegrity.getChunkSize() != 0)
+            throw new IOException("All reads should be aligned to the chunks size: " + this.#salmonIntegrity.getChunkSize());
+        else if (this.#salmonIntegrity.getChunkSize() == 0 && await this.getPosition() % SalmonAES256CTRTransformer.BLOCK_SIZE != 0)
             throw new IOException("All reads should be aligned to the block size: " + SalmonAES256CTRTransformer.BLOCK_SIZE);
 
         let pos: number = await this.getPosition();
@@ -561,31 +561,31 @@ export class SalmonStream extends RandomAccessStream {
             return 0;
 
         // make sure our buffer size is also aligned to the block or chunk
-        let bufferSize: number = this.getNormalizedBufferSize(true);
+        let bufferSize: number = this.#getNormalizedBufferSize(true);
 
         let bytes: number = 0;
         while (bytes < count) {
             // read data and integrity signatures
-            let srcBuffer: Uint8Array = await this.readStreamData(bufferSize);
+            let srcBuffer: Uint8Array = await this.#readStreamData(bufferSize);
             try {
                 let integrityHashes: Uint8Array[] | null = null;
                 // if there are integrity hashes strip them and get the data chunks only
-                if (this.salmonIntegrity.getChunkSize() > 0) {
+                if (this.#salmonIntegrity.getChunkSize() > 0) {
                     // get the integrity signatures
-                    integrityHashes = this.salmonIntegrity.getHashes(srcBuffer);
-                    srcBuffer = this.stripSignatures(srcBuffer, this.salmonIntegrity.getChunkSize());
+                    integrityHashes = this.#salmonIntegrity.getHashes(srcBuffer);
+                    srcBuffer = this.#stripSignatures(srcBuffer, this.#salmonIntegrity.getChunkSize());
                 }
                 let destBuffer: Uint8Array = new Uint8Array(srcBuffer.length);
-                if (this.salmonIntegrity.useIntegrity() && integrityHashes != null) {
-                    await this.salmonIntegrity.verifyHashes(integrityHashes, srcBuffer, pos == 0 && bytes == 0 ? this.headerData : null);
+                if (this.#salmonIntegrity.useIntegrity() && integrityHashes != null) {
+                    await this.#salmonIntegrity.verifyHashes(integrityHashes, srcBuffer, pos == 0 && bytes == 0 ? this.#headerData : null);
                 }
-                await this.transformer.decryptData(srcBuffer, 0, destBuffer, 0, srcBuffer.length);
+                await this.#transformer.decryptData(srcBuffer, 0, destBuffer, 0, srcBuffer.length);
                 let len: number = Math.min(count - bytes, destBuffer.length);
-                this.writeToBuffer(destBuffer, 0, buffer, bytes + offset, len);
+                this.#writeToBuffer(destBuffer, 0, buffer, bytes + offset, len);
                 bytes += len;
-                this.transformer.syncCounter(await this.getPosition());
+                this.#transformer.syncCounter(await this.getPosition());
             } catch (ex) {
-                if (ex instanceof SalmonIntegrityException && this.failSilently)
+                if (ex instanceof SalmonIntegrityException && this.#failSilently)
                     return -1;
                 throw new IOException("Could not read from stream: ", ex);
             }
@@ -604,12 +604,12 @@ export class SalmonStream extends RandomAccessStream {
      *
      */
     public async write(buffer: Uint8Array, offset: number, count: number): Promise<void> {
-        await this.init(this.key, this.nonce);
+        await this.#init(this.#key, this.#nonce);
 
-        if (this.salmonIntegrity.getChunkSize() > 0 && await this.getPosition() % this.salmonIntegrity.getChunkSize() != 0)
+        if (this.#salmonIntegrity.getChunkSize() > 0 && await this.getPosition() % this.#salmonIntegrity.getChunkSize() != 0)
             throw new IOException(null, new SalmonIntegrityException("All write operations should be aligned to the chunks size: "
-                + this.salmonIntegrity.getChunkSize()));
-        else if (this.salmonIntegrity.getChunkSize() == 0 && await this.getPosition() % SalmonAES256CTRTransformer.BLOCK_SIZE != 0)
+                + this.#salmonIntegrity.getChunkSize()));
+        else if (this.#salmonIntegrity.getChunkSize() == 0 && await this.getPosition() % SalmonAES256CTRTransformer.BLOCK_SIZE != 0)
             throw new IOException(null, new SalmonIntegrityException("All write operations should be aligned to the block size: "
                 + SalmonAES256CTRTransformer.BLOCK_SIZE));
 
@@ -617,21 +617,21 @@ export class SalmonStream extends RandomAccessStream {
         count = Math.min(count, buffer.length - offset);
 
         // if there
-        let bufferSize: number = this.getNormalizedBufferSize(false);
+        let bufferSize: number = this.#getNormalizedBufferSize(false);
 
         let pos: number = 0;
         while (pos < count) {
             let nBufferSize: number = Math.min(bufferSize, count - pos);
 
-            let srcBuffer: Uint8Array = this.readBufferData(buffer, pos, nBufferSize);
+            let srcBuffer: Uint8Array = this.#readBufferData(buffer, pos, nBufferSize);
             if (srcBuffer.length == 0)
                 break;
             let destBuffer: Uint8Array = new Uint8Array(srcBuffer.length);
             try {
-                await this.transformer.encryptData(srcBuffer, 0, destBuffer, 0, srcBuffer.length);
-                let integrityHashes: Uint8Array[] | null = await this.salmonIntegrity.generateHashes(destBuffer, await this.getPosition() == 0 ? this.headerData : null);
-                pos += await this.writeToStream(destBuffer, this.getChunkSize(), integrityHashes);
-                this.transformer.syncCounter(await this.getPosition());
+                await this.#transformer.encryptData(srcBuffer, 0, destBuffer, 0, srcBuffer.length);
+                let integrityHashes: Uint8Array[] | null = await this.#salmonIntegrity.generateHashes(destBuffer, await this.getPosition() == 0 ? this.#headerData : null);
+                pos += await this.#writeToStream(destBuffer, this.getChunkSize(), integrityHashes);
+                this.#transformer.syncCounter(await this.getPosition());
             } catch (ex) {
                 throw new IOException("Could not write to stream: ", ex);
             }
@@ -645,10 +645,10 @@ export class SalmonStream extends RandomAccessStream {
      *
      * @return
      */
-    private async getAlignedOffset(): Promise<number> {
+    async #getAlignedOffset(): Promise<number> {
         let alignOffset: number;
-        if (this.salmonIntegrity.getChunkSize() > 0) {
-            alignOffset = (await this.getPosition() % this.salmonIntegrity.getChunkSize());
+        if (this.#salmonIntegrity.getChunkSize() > 0) {
+            alignOffset = (await this.getPosition() % this.#salmonIntegrity.getChunkSize());
         } else {
             alignOffset = (await this.getPosition() % SalmonAES256CTRTransformer.BLOCK_SIZE);
         }
@@ -662,7 +662,7 @@ export class SalmonStream extends RandomAccessStream {
      *
      * @return
      */
-    private getNormalizedBufferSize(includeHashes: boolean): number {
+    #getNormalizedBufferSize(includeHashes: boolean): number {
         let bufferSize: number = SalmonDefaultOptions.getBufferSize();
         if (this.getChunkSize() > 0) {
             // buffer size should be a multiple of the chunk size if integrity is enabled
@@ -693,7 +693,7 @@ export class SalmonStream extends RandomAccessStream {
      * @param count  The number of requested bytes to read.
      * @return The array with the data that were read.
      */
-    private readBufferData(buffer: Uint8Array, offset: number, count: number): Uint8Array {
+    #readBufferData(buffer: Uint8Array, offset: number, count: number): Uint8Array {
         let data: Uint8Array = new Uint8Array(Math.min(count, buffer.length - offset));
         for (let i = 0; i < data.length; i++)
             data[i] = buffer[offset + i];
@@ -707,9 +707,9 @@ export class SalmonStream extends RandomAccessStream {
      * @return The number of bytes read.
      * @throws IOException
      */
-    private async readStreamData(count: number): Promise<Uint8Array> {
-        let data: Uint8Array = new Uint8Array(Math.min(count, await this.baseStream.length() - await this.baseStream.getPosition()));
-        await this.baseStream.read(data, 0, data.length);
+    async #readStreamData(count: number): Promise<Uint8Array> {
+        let data: Uint8Array = new Uint8Array(Math.min(count, await this.#baseStream.length() - await this.#baseStream.getPosition()));
+        await this.#baseStream.read(data, 0, data.length);
         return data;
     }
 
@@ -722,7 +722,7 @@ export class SalmonStream extends RandomAccessStream {
      * @param destOffset The destination byte offset.
      * @param count      The number of bytes to write.
      */
-    private writeToBuffer(srcBuffer: Uint8Array, srcOffset: number, destBuffer: Uint8Array, destOffset: number, count: number): void {
+    #writeToBuffer(srcBuffer: Uint8Array, srcOffset: number, destBuffer: Uint8Array, destOffset: number, count: number): void {
         for (let i = 0; i < count; i++)
             destBuffer[destOffset + i] = srcBuffer[srcOffset + i];
     }
@@ -736,17 +736,17 @@ export class SalmonStream extends RandomAccessStream {
      * @return The number of bytes written.
      * @throws IOException
      */
-    private async writeToStream(buffer: Uint8Array, chunkSize: number, hashes: Uint8Array[] | null): Promise<number> {
+    async #writeToStream(buffer: Uint8Array, chunkSize: number, hashes: Uint8Array[] | null): Promise<number> {
         let pos: number = 0;
         let chunk: number = 0;
         if (chunkSize <= 0)
             chunkSize = buffer.length;
         while (pos < buffer.length) {
             if (hashes != null) {
-                await this.baseStream.write(hashes[chunk], 0, hashes[chunk].length);
+                await this.#baseStream.write(hashes[chunk], 0, hashes[chunk].length);
             }
             let len: number = Math.min(chunkSize, buffer.length - pos);
-            await this.baseStream.write(buffer, pos, len);
+            await this.#baseStream.write(buffer, pos, len);
             pos += len;
             chunk++;
         }
@@ -760,7 +760,7 @@ export class SalmonStream extends RandomAccessStream {
      * @param chunkSize The chunk size.
      * @return
      */
-    private stripSignatures(buffer: Uint8Array, chunkSize: number): Uint8Array {
+    #stripSignatures(buffer: Uint8Array, chunkSize: number): Uint8Array {
         let bytes: number = Math.floor(buffer.length / (chunkSize + SalmonGenerator.HASH_RESULT_LENGTH)) * chunkSize;
         if (buffer.length % (chunkSize + SalmonGenerator.HASH_RESULT_LENGTH) != 0)
             bytes += buffer.length % (chunkSize + SalmonGenerator.HASH_RESULT_LENGTH) - SalmonGenerator.HASH_RESULT_LENGTH;
@@ -781,7 +781,7 @@ export class SalmonStream extends RandomAccessStream {
      * @return
      */
     public isIntegrityEnabled(): boolean {
-        return this.salmonIntegrity.useIntegrity();
+        return this.#salmonIntegrity.useIntegrity();
     }
 
     /**
@@ -790,7 +790,7 @@ export class SalmonStream extends RandomAccessStream {
      * @return
      */
     public getEncryptionMode(): EncryptionMode {
-        return this.encryptionMode;
+        return this.#encryptionMode;
     }
 
     /**
@@ -800,6 +800,6 @@ export class SalmonStream extends RandomAccessStream {
      * @return True if the stream allowed to seek and write.
      */
     public isAllowRangeWrite(): boolean {
-        return this.allowRangeWrite;
+        return this.#allowRangeWrite;
     }
 }

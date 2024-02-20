@@ -26,19 +26,19 @@ SOFTWARE.
  * Proxy class for use with windows native library.
  */
 export class NativeProxy implements NativeProxy {
-    private static loaded: boolean;
+    static #loaded: boolean;
 
     /**
      * The dll name for the salmon library.
      */
-    private static readonly libraryName: string = "salmon";
+    static readonly #libraryName: string = "salmon";
 
     /**
      * Init the native code with AES implementation, and hash length options.
      *
      * @param aesImpl
      */
-    //private native static init(aesImpl: number): void;
+    //native static #init(aesImpl: number): void;
 
     /**
      * Native Key schedule algorithm for expanding the 32 byte key to 240 bytes required
@@ -46,7 +46,7 @@ export class NativeProxy implements NativeProxy {
      * @param key
      * @param expandedKey
      */
-    //private native static expandkey(key: Uint8Array, expandedKey: Uint8Array): void;
+    //native static #expandkey(key: Uint8Array, expandedKey: Uint8Array): void;
 
     /**
      * Native transform of the input byte array using AES-256 CTR mode
@@ -60,7 +60,7 @@ export class NativeProxy implements NativeProxy {
      * @param count
      * @return
      */
-    //private native static transform(key: Uint8Array, counter: Uint8Array,
+    //native static #transform(key: Uint8Array, counter: Uint8Array,
     //    srcBuffer: Uint8Array, srcOffset: number,
     //    destBuffer: Uint8Array, destOffset: number, count: number): void;
 
@@ -78,14 +78,14 @@ export class NativeProxy implements NativeProxy {
      * Load the native library
      */
     protected loadLibrary(): void{
-        if(NativeProxy.loaded)
+        if(NativeProxy.#loaded)
             return;
         try {
             //System.loadLibrary(NativeProxy.libraryName);
         } catch (ex) {
             console.error(ex);
         }
-        NativeProxy.loaded = true;
+        NativeProxy.#loaded = true;
     }
 
     /**

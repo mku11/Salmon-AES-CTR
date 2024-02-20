@@ -47,9 +47,9 @@ import { SalmonDriveConfig } from "./salmon_drive_config.js";
  * Currently only one drive and one nonce sequencer are supported.
  */
 export class SalmonDriveManager {
-    private static driveClassType: any | null = null;
-    private static drive: SalmonDrive | null = null;
-    private static sequencer: ISalmonSequencer;
+    static #driveClassType: any | null = null;
+    static #drive: SalmonDrive | null = null;
+    static #sequencer: ISalmonSequencer;
 
     /**
      * Set the global drive class. Currently only one drive is supported.
@@ -57,7 +57,7 @@ export class SalmonDriveManager {
      * @param driveClassType
      */
     public static setVirtualDriveClass(driveClassType: any): void {
-        SalmonDriveManager.driveClassType = driveClassType;
+        SalmonDriveManager.#driveClassType = driveClassType;
     }
 
     /**
@@ -66,7 +66,7 @@ export class SalmonDriveManager {
      * @return
      */
     public static getSequencer(): ISalmonSequencer {
-        return SalmonDriveManager.sequencer;
+        return SalmonDriveManager.#sequencer;
     }
 
     /**
@@ -75,14 +75,14 @@ export class SalmonDriveManager {
      * @param sequencer
      */
     public static setSequencer(sequencer: ISalmonSequencer): void {
-        SalmonDriveManager.sequencer = sequencer;
+        SalmonDriveManager.#sequencer = sequencer;
     }
 
     /**
      * Get the current virtual drive.
      */
     public static getDrive(): SalmonDrive | null {
-        return SalmonDriveManager.drive;
+        return SalmonDriveManager.#drive;
     }
 
     /**
@@ -93,11 +93,11 @@ export class SalmonDriveManager {
      */
     public static async openDrive(dirPath: string): Promise<SalmonDrive> {
         this.closeDrive();
-        let drive: SalmonDrive = await SalmonDriveManager.createDriveInstance(dirPath, false);
+        let drive: SalmonDrive = await SalmonDriveManager.#createDriveInstance(dirPath, false);
         if (!await drive.hasConfig()) {
             throw new Error("Drive does not exist");
         }
-        SalmonDriveManager.drive = drive;
+        SalmonDriveManager.#drive = drive;
         return drive;
     }
 
@@ -112,10 +112,10 @@ export class SalmonDriveManager {
      */
     public static async createDrive(dirPath: string, password: string): Promise<SalmonDrive> {
         this.closeDrive();
-        let drive: SalmonDrive = await SalmonDriveManager.createDriveInstance(dirPath, true);
+        let drive: SalmonDrive = await SalmonDriveManager.#createDriveInstance(dirPath, true);
         if (await drive.hasConfig())
             throw new SalmonSecurityException("Drive already exists");
-        SalmonDriveManager.drive = drive;
+        SalmonDriveManager.#drive = drive;
         await SalmonDriveManager.setPassword(drive, password);
         return drive;
     }
@@ -128,9 +128,9 @@ export class SalmonDriveManager {
      * @return
      * @throws SalmonSecurityException
      */
-    private static async createDriveInstance(dirPath: string, createIfNotExists: boolean): Promise<SalmonDrive> {
+    static async #createDriveInstance(dirPath: string, createIfNotExists: boolean): Promise<SalmonDrive> {
         try {
-            let drive: SalmonDrive = new this.driveClassType;
+            let drive: SalmonDrive = new this.#driveClassType;
             await drive.init(dirPath, createIfNotExists);
             return drive;
         } catch (e) {
@@ -142,9 +142,9 @@ export class SalmonDriveManager {
      * Close the current drive.
      */
     public static closeDrive(): void {
-        if (SalmonDriveManager.drive != null) {
-            SalmonDriveManager.drive.close();
-            SalmonDriveManager.drive = null;
+        if (SalmonDriveManager.#drive != null) {
+            SalmonDriveManager.#drive.close();
+            SalmonDriveManager.#drive = null;
         }
     }
 
@@ -162,12 +162,12 @@ export class SalmonDriveManager {
         if (driveId == null)
             throw new Error("Could not get drive id, make sure you init the drive first");
         let drvStr: string = BitConverter.toHex(driveId);
-        let sequence: SalmonSequence = this.sequencer.getSequence(drvStr);
+        let sequence: SalmonSequence = this.#sequencer.getSequence(drvStr);
         if (sequence == null) {
             let authID: Uint8Array = SalmonDriveGenerator.generateAuthId();
             this.createSequence(driveId, authID);
         }
-        sequence = this.sequencer.getSequence(drvStr);
+        sequence = this.#sequencer.getSequence(drvStr);
         return BitConverter.hexToBytes(sequence.getAuthID());
     }
 
@@ -185,7 +185,7 @@ export class SalmonDriveManager {
         if (driveId == null)
             throw new Error("Could not get drive id, make sure you init the drive first");
 
-        let sequence: SalmonSequence = this.sequencer.getSequence(BitConverter.toHex(driveId));
+        let sequence: SalmonSequence = this.#sequencer.getSequence(BitConverter.toHex(driveId));
         if (sequence != null && sequence.getStatus() == Status.Active)
             throw new Error("Device is already authorized");
 
@@ -201,7 +201,7 @@ export class SalmonDriveManager {
         )
             throw new Error("Auth file doesn't match driveID or authID");
 
-        SalmonDriveManager.importSequence(authConfig);
+        SalmonDriveManager.#importSequence(authConfig);
     }
 
     /**
@@ -228,9 +228,9 @@ export class SalmonDriveManager {
             throw new Error("Could not get drive id, make sure you init the drive first");
 
 
-        let cfgNonce: Uint8Array = this.sequencer.nextNonce(BitConverter.toHex(driveId));
+        let cfgNonce: Uint8Array = this.#sequencer.nextNonce(BitConverter.toHex(driveId));
 
-        let sequence: SalmonSequence = this.sequencer.getSequence(BitConverter.toHex(driveId));
+        let sequence: SalmonSequence = this.#sequencer.getSequence(BitConverter.toHex(driveId));
         if (sequence == null)
             throw new Error("Device is not authorized to export");
         let dir: IRealFile = drive.getRealFile(targetDir, true);
@@ -241,7 +241,7 @@ export class SalmonDriveManager {
             throw new SalmonAuthException(filename + " already exists, delete this file or choose another directory");
 
         let pivotNonce: Uint8Array = SalmonNonce.splitNonceRange(sequence.getNextNonce(), sequence.getMaxNonce());
-        this.sequencer.setMaxNonce(sequence.getDriveID(), sequence.getAuthID(), pivotNonce);
+        this.#sequencer.setMaxNonce(sequence.getDriveID(), sequence.getAuthID(), pivotNonce);
         await SalmonAuthConfig.writeAuthFile(targetAppDriveConfigFile, drive,
             BitConverter.hexToBytes(targetAuthID),
             pivotNonce, sequence.getMaxNonce(),
@@ -259,7 +259,7 @@ export class SalmonDriveManager {
     static createSequence(driveID: Uint8Array, authID: Uint8Array): void {
         let drvStr: string = BitConverter.toHex(driveID);
         let authStr: string = BitConverter.toHex(authID);
-        this.sequencer.createSequence(drvStr, authStr);
+        this.#sequencer.createSequence(drvStr, authStr);
     }
 
     /**
@@ -275,7 +275,7 @@ export class SalmonDriveManager {
         let maxNonce: Uint8Array = SalmonDriveGenerator.getMaxNonce();
         let drvStr: string = BitConverter.toHex(driveID);
         let authStr: string = BitConverter.toHex(authID);
-        this.sequencer.initSequence(drvStr, authStr, startingNonce, maxNonce);
+        this.#sequencer.initSequence(drvStr, authStr, startingNonce, maxNonce);
     }
 
     /**
@@ -287,12 +287,12 @@ export class SalmonDriveManager {
      * @see <a href="https://github.com/mku11/Salmon-AES-CTR#readme">Salmon README.md</a>
      */
     public static revokeAuthorization(): void {
-        if (SalmonDriveManager.drive == null)
+        if (SalmonDriveManager.#drive == null)
             throw new Error("No drive opened");
-        let driveID: Uint8Array | null = SalmonDriveManager.drive.getDriveID();
+        let driveID: Uint8Array | null = SalmonDriveManager.#drive.getDriveID();
         if (driveID == null)
             throw new Error("Could not get revoke, make sure you initialize the drive first");
-        this.sequencer.revokeSequence(BitConverter.toHex(driveID));
+        this.#sequencer.revokeSequence(BitConverter.toHex(driveID));
     }
 
     /**
@@ -302,7 +302,7 @@ export class SalmonDriveManager {
      * @return
      * @throws Exception
      */
-    private static verifyAuthID(authID: Uint8Array): boolean {
+    static #verifyAuthID(authID: Uint8Array): boolean {
         return authID.every((val, index) => val === SalmonDriveManager.getAuthIDBytes()[index]);
     }
 
@@ -312,10 +312,10 @@ export class SalmonDriveManager {
      * @param authConfig
      * @throws Exception
      */
-    private static importSequence(authConfig: SalmonAuthConfig): void {
+    static #importSequence(authConfig: SalmonAuthConfig): void {
         let drvStr: string = BitConverter.toHex(authConfig.getDriveID());
         let authStr: string = BitConverter.toHex(authConfig.getAuthID());
-        this.sequencer.initSequence(drvStr, authStr, authConfig.getStartNonce(), authConfig.getMaxNonce());
+        this.#sequencer.initSequence(drvStr, authStr, authConfig.getStartNonce(), authConfig.getMaxNonce());
     }
 
     /**
@@ -337,7 +337,7 @@ export class SalmonDriveManager {
         await stream.close();
         let driveConfig: SalmonAuthConfig = new SalmonAuthConfig();
         await driveConfig.init(ms.toArray());
-        if (!this.verifyAuthID(driveConfig.getAuthID()))
+        if (!this.#verifyAuthID(driveConfig.getAuthID()))
             throw new SalmonSecurityException("Could not authorize this device, the authentication id does not match");
         return driveConfig;
     }
@@ -362,7 +362,7 @@ export class SalmonDriveManager {
      *                 encrypt the combined key (encryption key + hash key)
      */
     //TODO: partial refactor to SalmonDriveConfig
-    private static async createConfig(drive: SalmonDrive, password: string): Promise<void> {
+    static async #createConfig(drive: SalmonDrive, password: string): Promise<void> {
         let key: SalmonKey | null = drive.getKey();
         if (key == null)
             throw new Error("Cannot create config, no key found, make sure you init the drive first");
@@ -457,6 +457,6 @@ export class SalmonDriveManager {
      * @throws SalmonSequenceException
      */
     public static async setPassword(drive: SalmonDrive, pass: string): Promise<void> {
-        await SalmonDriveManager.createConfig(drive, pass);
+        await SalmonDriveManager.#createConfig(drive, pass);
     }
 }

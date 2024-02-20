@@ -74,13 +74,13 @@ export class SalmonGenerator {
     /**
      * Magic bytes.
      */
-    private static readonly MAGIC_BYTES: string = "SLM";
+    static readonly #MAGIC_BYTES: string = "SLM";
 
     /**
      * Gets the fixed magic bytes array
      */
     public static getMagicBytes(): Uint8Array {
-        return new TextEncoder().encode(SalmonGenerator.MAGIC_BYTES);
+        return new TextEncoder().encode(SalmonGenerator.#MAGIC_BYTES);
     }
 
     /**

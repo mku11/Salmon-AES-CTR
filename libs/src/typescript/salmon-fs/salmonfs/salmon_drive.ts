@@ -48,47 +48,47 @@ import { BitConverter } from "../../salmon-core/convert/bit_converter.js";
  * Drive implementations needs to be realized together with {@link IRealFile}.
  */
 export abstract class SalmonDrive extends VirtualDrive {
-    private static readonly DEFAULT_FILE_CHUNK_SIZE: number = 256 * 1024;
+    static readonly #DEFAULT_FILE_CHUNK_SIZE: number = 256 * 1024;
 
-    private static configFilename: string = "vault.slmn";
-    private static authConfigFilename: string = "auth.slma";
-    private static virtualDriveDirectoryName: string = "fs";
-    private static shareDirectoryName: string = "share";
-    private static exportDirectoryName: string = "export";
+    static #configFilename: string = "vault.slmn";
+    static #authConfigFilename: string = "auth.slma";
+    static #virtualDriveDirectoryName: string = "fs";
+    static #shareDirectoryName: string = "share";
+    static #exportDirectoryName: string = "export";
 
-    private defaultFileChunkSize: number = SalmonDrive.DEFAULT_FILE_CHUNK_SIZE;
-    private key: SalmonKey | null = null;
-    private driveID: Uint8Array | null = null;
-    private realRoot: IRealFile | null = null;
-    private virtualRoot: VirtualFile | null = null;
+    #defaultFileChunkSize: number = SalmonDrive.#DEFAULT_FILE_CHUNK_SIZE;
+    #key: SalmonKey | null = null;
+    #driveID: Uint8Array | null = null;
+    #realRoot: IRealFile | null = null;
+    #virtualRoot: VirtualFile | null = null;
 
-    private readonly hashProvider: IHashProvider = new HmacSHA256Provider();
-    private sequencer: ISalmonSequencer | null = null;
+    readonly #hashProvider: IHashProvider = new HmacSHA256Provider();
+    #sequencer: ISalmonSequencer | null = null;
 
     public async init(realRootPath: string, createIfNotExists: boolean): Promise<void> {
         this.close();
         if (realRootPath == null)
             return;
-        this.realRoot = this.getRealFile(realRootPath, true);
-        if (!createIfNotExists && ! await this.hasConfig() && await this.realRoot.getParent() != null && await (await this.realRoot.getParent()).exists()) {
+        this.#realRoot = this.getRealFile(realRootPath, true);
+        if (!createIfNotExists && ! await this.hasConfig() && await this.#realRoot.getParent() != null && await (await this.#realRoot.getParent()).exists()) {
             // try the parent if this is the filesystem folder 
-            let originalRealRoot: IRealFile = this.realRoot;
-            this.realRoot = await this.realRoot.getParent();
+            let originalRealRoot: IRealFile = this.#realRoot;
+            this.#realRoot = await this.#realRoot.getParent();
             if (! await this.hasConfig()) {
                 // revert to original
-                this.realRoot = originalRealRoot;
+                this.#realRoot = originalRealRoot;
             }
         }
 
-        let virtualRootRealFile: IRealFile | null = await this.realRoot.getChild(SalmonDrive.virtualDriveDirectoryName);
+        let virtualRootRealFile: IRealFile | null = await this.#realRoot.getChild(SalmonDrive.#virtualDriveDirectoryName);
         if (createIfNotExists && (virtualRootRealFile == null || !await virtualRootRealFile.exists())) {
-            virtualRootRealFile = await this.realRoot.createDirectory(SalmonDrive.virtualDriveDirectoryName);
+            virtualRootRealFile = await this.#realRoot.createDirectory(SalmonDrive.#virtualDriveDirectoryName);
         }
         if (virtualRootRealFile == null)
             throw new Error("Could not create directory for the virtual file system");
-        this.virtualRoot = this.createVirtualRoot(virtualRootRealFile);
-        this.registerOnProcessClose();
-        this.key = new SalmonKey();
+        this.#virtualRoot = this.createVirtualRoot(virtualRootRealFile);
+        this.#registerOnProcessClose();
+        this.#key = new SalmonKey();
     }
 
     /**
@@ -111,49 +111,49 @@ export abstract class SalmonDrive extends VirtualDrive {
     protected abstract onAuthenticationError(): void;
 
     public static getConfigFilename(): string {
-        return this.configFilename;
+        return this.#configFilename;
     }
 
     public static setConfigFilename(configFilename: string) {
-        SalmonDrive.configFilename = configFilename;
+        SalmonDrive.#configFilename = configFilename;
     }
 
     public static getAuthConfigFilename(): string {
-        return this.authConfigFilename;
+        return this.#authConfigFilename;
     }
 
     public static setAuthConfigFilename(authConfigFilename: string): void {
-        SalmonDrive.authConfigFilename = authConfigFilename;
+        SalmonDrive.#authConfigFilename = authConfigFilename;
     }
 
     public static getVirtualDriveDirectoryName(): string {
-        return this.virtualDriveDirectoryName;
+        return this.#virtualDriveDirectoryName;
     }
 
     public static setVirtualDriveDirectoryName(virtualDriveDirectoryName: string): void {
-        SalmonDrive.virtualDriveDirectoryName = virtualDriveDirectoryName;
+        SalmonDrive.#virtualDriveDirectoryName = virtualDriveDirectoryName;
     }
 
     public static getExportDirectoryName(): string {
-        return SalmonDrive.exportDirectoryName;
+        return SalmonDrive.#exportDirectoryName;
     }
 
     public static setExportDirectoryName(exportDirectoryName: string): void {
-        SalmonDrive.exportDirectoryName = exportDirectoryName;
+        SalmonDrive.#exportDirectoryName = exportDirectoryName;
     }
 
     public static getShareDirectoryName(): string {
-        return this.shareDirectoryName;
+        return this.#shareDirectoryName;
     }
 
     public static setShareDirectoryName(shareDirectoryName: string): void {
-        SalmonDrive.shareDirectoryName = shareDirectoryName;
+        SalmonDrive.#shareDirectoryName = shareDirectoryName;
     }
 
     /**
      * Clear sensitive information when app is close.
      */
-    private registerOnProcessClose(): void {
+    #registerOnProcessClose(): void {
         // TODO: exec close() on exit
     }
 
@@ -162,7 +162,7 @@ export abstract class SalmonDrive extends VirtualDrive {
      * @return The default chunk size.
      */
     public getDefaultFileChunkSize(): number {
-        return this.defaultFileChunkSize;
+        return this.#defaultFileChunkSize;
     }
 
     /**
@@ -170,7 +170,7 @@ export abstract class SalmonDrive extends VirtualDrive {
      * @param fileChunkSize
      */
     public setDefaultFileChunkSize(fileChunkSize: number): void {
-        this.defaultFileChunkSize = fileChunkSize;
+        this.#defaultFileChunkSize = fileChunkSize;
     }
 
     /**
@@ -178,7 +178,7 @@ export abstract class SalmonDrive extends VirtualDrive {
      * @return
      */
     public getKey(): SalmonKey | null {
-        return this.key;
+        return this.#key;
     }
 
     /**
@@ -187,17 +187,17 @@ export abstract class SalmonDrive extends VirtualDrive {
      * @throws SalmonAuthException
      */
     public async getVirtualRoot(): Promise<VirtualFile | null> {
-        if (this.realRoot == null || !await this.realRoot.exists())
+        if (this.#realRoot == null || !await this.#realRoot.exists())
             return null;
         if (!this.isAuthenticated())
             throw new SalmonAuthException("Not authenticated");
-        if (this.virtualRoot == null)
+        if (this.#virtualRoot == null)
             throw new SalmonSecurityException("No virtual root, make sure you init the drive first");
-        return this.virtualRoot;
+        return this.#virtualRoot;
     }
 
     public getRealRoot(): IRealFile | null {
-        return this.realRoot;
+        return this.#realRoot;
     }
 
     /**
@@ -243,11 +243,11 @@ export abstract class SalmonDrive extends VirtualDrive {
 
             // to make sure we have the right key we get the hash portion
             // and try to verify the drive nonce
-            await this.verifyHash(salmonConfig, encData, hashKey);
+            await this.#verifyHash(salmonConfig, encData, hashKey);
 
             // set the combined key (drive key + hash key) and the drive nonce
             this.setKey(masterKey, driveKey, hashKey, iterations);
-            this.driveID = driveID;
+            this.#driveID = driveID;
             await this.initFS();
             this.onAuthenticationSuccess();
         } catch (ex) {
@@ -267,12 +267,12 @@ export abstract class SalmonDrive extends VirtualDrive {
      * @param iterations
      */
     public setKey(masterKey: Uint8Array, driveKey: Uint8Array, hashKey: Uint8Array, iterations: number): void {
-        if (this.key == null)
+        if (this.#key == null)
             throw new Error("You need to init the drive first");
-        this.key.setMasterKey(masterKey);
-        this.key.setDriveKey(driveKey);
-        this.key.setHashKey(hashKey);
-        this.key.setIterations(iterations);
+        this.#key.setMasterKey(masterKey);
+        this.#key.setDriveKey(driveKey);
+        this.#key.setHashKey(hashKey);
+        this.#key.setIterations(iterations);
     }
 
     /**
@@ -282,9 +282,9 @@ export abstract class SalmonDrive extends VirtualDrive {
      * @param data
      * @param hashKey
      */
-    private async verifyHash(salmonConfig: SalmonDriveConfig, data: Uint8Array, hashKey: Uint8Array): Promise<void> {
+    async #verifyHash(salmonConfig: SalmonDriveConfig, data: Uint8Array, hashKey: Uint8Array): Promise<void> {
         let hashSignature: Uint8Array = salmonConfig.getHashSignature();
-        let hash: Uint8Array = await SalmonIntegrity.calculateHash(this.hashProvider, data, 0, data.length, hashKey, null);
+        let hash: Uint8Array = await SalmonIntegrity.calculateHash(this.#hashProvider, data, 0, data.length, hashKey, null);
         for (let i = 0; i < hashKey.length; i++)
             if (hashSignature[i] != hash[i])
                 throw new SalmonAuthException("Could not authenticate");
@@ -296,14 +296,14 @@ export abstract class SalmonDrive extends VirtualDrive {
      * @throws Exception
      */
     getNextNonce(): Uint8Array {
-        if (this.sequencer == null)
+        if (this.#sequencer == null)
             throw new SalmonAuthException("No sequencer found use setSequencer");
         if (!this.isAuthenticated())
             throw new SalmonAuthException("Not authenticated");
         let driveId: Uint8Array | null = this.getDriveID();
         if (driveId == null)
             throw new SalmonSecurityException("Could not get drive Id");
-        return this.sequencer.nextNonce(BitConverter.toHex(driveId));
+        return this.#sequencer.nextNonce(BitConverter.toHex(driveId));
     }
 
     /**
@@ -339,10 +339,10 @@ export abstract class SalmonDrive extends VirtualDrive {
     /**
      * Return the drive configuration file.
      */
-    private async getDriveConfigFile(): Promise<IRealFile | null> {
-        if (this.realRoot == null || !await this.realRoot.exists())
+    async #getDriveConfigFile(): Promise<IRealFile | null> {
+        if (this.#realRoot == null || !await this.#realRoot.exists())
             return null;
-        let file: IRealFile | null = await this.realRoot.getChild(SalmonDrive.configFilename);
+        let file: IRealFile | null = await this.#realRoot.getChild(SalmonDrive.#configFilename);
         return file;
     }
 
@@ -351,11 +351,11 @@ export abstract class SalmonDrive extends VirtualDrive {
      * @return The file on the real filesystem.
      */
     public async getExportDir(): Promise<IRealFile> {
-        if (this.realRoot == null)
+        if (this.#realRoot == null)
             throw new SalmonSecurityException("Cannot export, make sure you init the drive first");
-        let virtualThumbnailsRealDir: IRealFile | null = await this.realRoot.getChild(SalmonDrive.exportDirectoryName);
+        let virtualThumbnailsRealDir: IRealFile | null = await this.#realRoot.getChild(SalmonDrive.#exportDirectoryName);
         if (virtualThumbnailsRealDir == null || !await virtualThumbnailsRealDir.exists())
-            virtualThumbnailsRealDir = await this.realRoot.createDirectory(SalmonDrive.exportDirectoryName);
+            virtualThumbnailsRealDir = await this.#realRoot.createDirectory(SalmonDrive.#exportDirectoryName);
         return virtualThumbnailsRealDir;
     }
 
@@ -363,7 +363,7 @@ export abstract class SalmonDrive extends VirtualDrive {
      * Return the configuration properties of this drive.
      */
     protected async getDriveConfig(): Promise<SalmonDriveConfig | null> {
-        let configFile: IRealFile | null = await this.getDriveConfigFile();
+        let configFile: IRealFile | null = await this.#getDriveConfigFile();
         if (configFile == null || !await configFile.exists())
             return null;
         let bytes: Uint8Array = await this.getBytesFromRealFile(configFile.getPath(), 0);
@@ -391,54 +391,54 @@ export abstract class SalmonDrive extends VirtualDrive {
      * @return
      */
     public getDriveID(): Uint8Array | null {
-        return this.driveID;
+        return this.#driveID;
     }
 
     /**
      * Close the drive and associated resources.
      */
     public close(): void {
-        this.realRoot = null;
-        this.virtualRoot = null;
-        this.driveID = null;
-        if (this.key != null)
-            this.key.clear();
-        this.key = null;
+        this.#realRoot = null;
+        this.#virtualRoot = null;
+        this.#driveID = null;
+        if (this.#key != null)
+            this.#key.clear();
+        this.#key = null;
     }
     
     /**
      * Initialize the drive virtual filesystem.
      */
     public async initFS(): Promise<void> {
-        if (this.realRoot == null)
+        if (this.#realRoot == null)
             throw new SalmonSecurityException("Could not initialize virtual file system, make sure you run init first");
-        let virtualRootRealFile: IRealFile | null = await this.realRoot.getChild(SalmonDrive.virtualDriveDirectoryName);
+        let virtualRootRealFile: IRealFile | null = await this.#realRoot.getChild(SalmonDrive.#virtualDriveDirectoryName);
         if (virtualRootRealFile == null || !await virtualRootRealFile.exists()) {
             try {
-                virtualRootRealFile = await this.realRoot.createDirectory(SalmonDrive.virtualDriveDirectoryName);
+                virtualRootRealFile = await this.#realRoot.createDirectory(SalmonDrive.#virtualDriveDirectoryName);
             } catch (ex) {
                 console.error(ex);
             }
         }
         if (virtualRootRealFile != null)
-            this.virtualRoot = this.createVirtualRoot(virtualRootRealFile);
+            this.#virtualRoot = this.createVirtualRoot(virtualRootRealFile);
     }
 
     protected abstract createVirtualRoot(virtualRootRealFile: IRealFile): VirtualFile;
 
     public getHashProvider(): IHashProvider {
-        return this.hashProvider;
+        return this.#hashProvider;
     }
 
     public getSequencer(): ISalmonSequencer | null {
-        return this.sequencer;
+        return this.#sequencer;
     }
 
     public setSequencer(sequencer: ISalmonSequencer): void {
-        this.sequencer = sequencer;
+        this.#sequencer = sequencer;
     }
 
     public setDriveID(driveID: Uint8Array): void {
-        this.driveID = driveID;
+        this.#driveID = driveID;
     }
 }

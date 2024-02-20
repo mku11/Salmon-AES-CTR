@@ -32,17 +32,17 @@ import { SalmonAES256CTRTransformer } from "./salmon_aes256_ctr_transformer.js";
  * native transformer.
  */ 
 export class SalmonNativeTransformer extends SalmonAES256CTRTransformer {
-    private static nativeProxy: INativeProxy = new NativeProxy();
+    static #nativeProxy: INativeProxy = new NativeProxy();
 
     /**
      * The native proxy to use for loading libraries for different platforms and operating systems.
      */
     public static setNativeProxy(proxy: INativeProxy): void {
-        SalmonNativeTransformer.nativeProxy = proxy;
+        SalmonNativeTransformer.#nativeProxy = proxy;
     }
 
     public static getNativeProxy(): INativeProxy  {
-        return SalmonNativeTransformer.nativeProxy;
+        return SalmonNativeTransformer.#nativeProxy;
     }
 
     /**
@@ -63,7 +63,7 @@ export class SalmonNativeTransformer extends SalmonAES256CTRTransformer {
             throw new SalmonSecurityException("No key found, run init first");
         if (ctr == null) //TODO: ToSync
             throw new SalmonSecurityException("No counter found, run init first");
-        return SalmonNativeTransformer.nativeProxy.salmonTransform(key, ctr,
+        return SalmonNativeTransformer.#nativeProxy.salmonTransform(key, ctr,
                 srcBuffer, srcOffset,
                 destBuffer, destOffset, count);
     }
@@ -86,7 +86,7 @@ export class SalmonNativeTransformer extends SalmonAES256CTRTransformer {
             throw new SalmonSecurityException("No key found, run init first");
         if (ctr == null) //TODO: ToSync
             throw new SalmonSecurityException("No counter found, run init first");
-        return SalmonNativeTransformer.nativeProxy.salmonTransform(key, ctr,
+        return SalmonNativeTransformer.#nativeProxy.salmonTransform(key, ctr,
                 srcBuffer, srcOffset,
                 destBuffer, destOffset, count);
     }

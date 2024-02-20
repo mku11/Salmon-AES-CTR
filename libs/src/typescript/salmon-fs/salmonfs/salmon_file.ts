@@ -52,20 +52,20 @@ import { VirtualFile } from "../file/virtual_file.js";
 export class SalmonFile extends VirtualFile {
     public static readonly separator: string = "/";
 
-    private readonly drive: SalmonDrive;
-    private readonly realFile: IRealFile;
+    readonly #drive: SalmonDrive;
+    readonly #realFile: IRealFile;
 
     //cached values
-    private _baseName: string | null = null;
-    private _header: SalmonHeader | null = null;
+    #_baseName: string | null = null;
+    #_header: SalmonHeader | null = null;
 
-    private overwrite: boolean = false;
-    private integrity: boolean = false;
-    private reqChunkSize: number | null = null;
-    private encryptionKey: Uint8Array | null = null;
-    private hashKey: Uint8Array | null = null;
-    private requestedNonce: Uint8Array | null = null;
-    private tag: object | null = null;
+    #overwrite: boolean = false;
+    #integrity: boolean = false;
+    #reqChunkSize: number | null = null;
+    #encryptionKey: Uint8Array | null = null;
+    #hashKey: Uint8Array | null = null;
+    #requestedNonce: Uint8Array | null = null;
+    #tag: object | null = null;
 
 
     /**
@@ -77,14 +77,14 @@ export class SalmonFile extends VirtualFile {
      */
     public constructor(realFile: IRealFile, drive: SalmonDrive) {
         super();
-        this.drive = drive;
-        this.realFile = realFile;
-        if (this.integrity)
-            this.reqChunkSize = drive.getDefaultFileChunkSize();
+        this.#drive = drive;
+        this.#realFile = realFile;
+        if (this.#integrity)
+            this.#reqChunkSize = drive.getDefaultFileChunkSize();
         if (drive != null && drive.getKey() != null) {
             let key: SalmonKey | null = drive.getKey();
             if (key != null)
-                this.hashKey = key.getHashKey();
+                this.#hashKey = key.getHashKey();
         }
     }
 
@@ -92,7 +92,7 @@ export class SalmonFile extends VirtualFile {
      * Return the current chunk size requested that will be used for integrity
      */
     public getRequestedChunkSize(): number | null {
-        return this.reqChunkSize;
+        return this.#reqChunkSize;
     }
 
     /**
@@ -117,12 +117,12 @@ export class SalmonFile extends VirtualFile {
     public async getHeader(): Promise<SalmonHeader | null> {
         if (!(await this.exists()))
             return null;
-        if (this._header != null)
-            return this._header;
+        if (this.#_header != null)
+            return this.#_header;
         let header: SalmonHeader = new SalmonHeader();
         let stream: RandomAccessStream | null = null;
         try {
-            stream = await this.realFile.getInputStream();
+            stream = await this.#realFile.getInputStream();
             let bytesRead: number = await stream.read(header.getMagicBytes(), 0, header.getMagicBytes().length);
             if (bytesRead != header.getMagicBytes().length)
                 return null;
@@ -131,8 +131,8 @@ export class SalmonFile extends VirtualFile {
             if (bytesRead != SalmonGenerator.VERSION_LENGTH)
                 return null;
             header.setVersion(buff[0]);
-            bytesRead = await stream.read(buff, 0, this.getChunkSizeLength());
-            if (bytesRead != this.getChunkSizeLength())
+            bytesRead = await stream.read(buff, 0, this.#getChunkSizeLength());
+            if (bytesRead != this.#getChunkSizeLength())
                 return null;
             header.setChunkSize(BitConverter.toLong(buff, 0, bytesRead));
             let nonce = new Uint8Array(SalmonGenerator.NONCE_LENGTH);
@@ -148,7 +148,7 @@ export class SalmonFile extends VirtualFile {
                 await stream.close();
             }
         }
-        this._header = header;
+        this.#_header = header;
         return header;
     }
 
@@ -164,16 +164,16 @@ export class SalmonFile extends VirtualFile {
         if (!(await this.exists()))
             throw new IOException("File does not exist");
 
-        let realStream: RandomAccessStream = await this.realFile.getInputStream();
+        let realStream: RandomAccessStream = await this.#realFile.getInputStream();
         await realStream.seek(SalmonGenerator.MAGIC_LENGTH + SalmonGenerator.VERSION_LENGTH,
             SeekOrigin.Begin);
 
-        let fileChunkSizeBytes: Uint8Array = new Uint8Array(this.getChunkSizeLength());
+        let fileChunkSizeBytes: Uint8Array = new Uint8Array(this.#getChunkSizeLength());
         let bytesRead: number = await realStream.read(fileChunkSizeBytes, 0, fileChunkSizeBytes.length);
         if (bytesRead == 0)
             throw new IOException("Could not parse chunks size from file header");
         let chunkSize: number = BitConverter.toLong(fileChunkSizeBytes, 0, 4);
-        if (this.integrity && chunkSize == 0)
+        if (this.#integrity && chunkSize == 0)
             throw new SalmonSecurityException("Cannot check integrity if file doesn't support it");
 
         let nonceBytes: Uint8Array = new Uint8Array(SalmonGenerator.NONCE_LENGTH);
@@ -182,7 +182,7 @@ export class SalmonFile extends VirtualFile {
             throw new IOException("Could not parse nonce from file header");
 
         await realStream.setPosition(0);
-        let headerData: Uint8Array = new Uint8Array(this.getHeaderLength());
+        let headerData: Uint8Array = new Uint8Array(this.#getHeaderLength());
         await realStream.read(headerData, 0, headerData.length);
 
         let key: Uint8Array | null = this.getEncryptionKey();
@@ -191,7 +191,7 @@ export class SalmonFile extends VirtualFile {
 
         let stream: SalmonStream = new SalmonStream(key,
             nonceBytes, EncryptionMode.Decrypt, realStream, headerData,
-            this.integrity, await this.getFileChunkSize(), this.getHashKey());
+            this.#integrity, await this.getFileChunkSize(), this.#getHashKey());
         return stream;
     }
 
@@ -203,28 +203,28 @@ export class SalmonFile extends VirtualFile {
      * @return The output stream.
      * @throws Exception
      */
-    async getOutputStream(nonce: Uint8Array | null = null): Promise<SalmonStream> {
+    public async getOutputStream(nonce: Uint8Array | null = null): Promise<SalmonStream> {
 
         // check if we have an existing iv in the header
         let nonceBytes: Uint8Array | null = await this.getFileNonce();
-        if (nonceBytes != null && !this.overwrite)
+        if (nonceBytes != null && !this.#overwrite)
             throw new SalmonSecurityException("You should not overwrite existing files for security instead delete the existing file and create a new file. If this is a new file and you want to use parallel streams you can   this with SetAllowOverwrite(true)");
 
         if (nonceBytes == null) {
             if (nonce == null)
                 throw new SalmonSecurityException("Need to provide a nonce since the file does not have one");
-            await this.createHeader(nonce);
+            await this.#createHeader(nonce);
         }
         nonceBytes = await this.getFileNonce();
 
         // we also get the header data to include in the hash
-        let headerData: Uint8Array = await this.getRealFileHeaderData(this.realFile);
+        let headerData: Uint8Array = await this.#getRealFileHeaderData(this.#realFile);
 
         // create a stream with the file chunk size specified which will be used to host the integrity hash
         // we also specify if stream ranges can be overwritten which is generally dangerous if the file is existing
         // but practical if the file is brand new and multithreaded writes for performance need to be used.
-        let realStream: RandomAccessStream = await this.realFile.getOutputStream();
-        await realStream.seek(this.getHeaderLength(), SeekOrigin.Begin);
+        let realStream: RandomAccessStream = await this.#realFile.getOutputStream();
+        await realStream.seek(this.#getHeaderLength(), SeekOrigin.Begin);
 
         let key: Uint8Array | null = this.getEncryptionKey();
         if (key == null)
@@ -238,8 +238,8 @@ export class SalmonFile extends VirtualFile {
 
         let stream: SalmonStream = new SalmonStream(key, nonceBytes,
             EncryptionMode.Encrypt, realStream, headerData,
-            this.integrity, requestedChunkSize, this.getHashKey());
-        stream.setAllowRangeWrite(this.overwrite);
+            this.#integrity, requestedChunkSize, this.#getHashKey());
+        stream.setAllowRangeWrite(this.#overwrite);
         return stream;
     }
 
@@ -247,10 +247,10 @@ export class SalmonFile extends VirtualFile {
      * Returns the current encryption key
      */
     public getEncryptionKey(): Uint8Array | null {
-        if (this.encryptionKey != null)
-            return this.encryptionKey;
-        if (this.drive != null) {
-            let key: SalmonKey | null = this.drive.getKey();
+        if (this.#encryptionKey != null)
+            return this.#encryptionKey;
+        if (this.#drive != null) {
+            let key: SalmonKey | null = this.#drive.getKey();
             if (key != null)
                 return key.getDriveKey();
         }
@@ -263,7 +263,7 @@ export class SalmonFile extends VirtualFile {
      * @param encryptionKey The AES encryption key to be used
      */
     public setEncryptionKey(encryptionKey: Uint8Array | null): void {
-        this.encryptionKey = encryptionKey;
+        this.#encryptionKey = encryptionKey;
     }
 
     /**
@@ -271,9 +271,9 @@ export class SalmonFile extends VirtualFile {
      *
      * @param realFile The real file containing the data
      */
-    private async getRealFileHeaderData(realFile: IRealFile): Promise<Uint8Array> {
+    async #getRealFileHeaderData(realFile: IRealFile): Promise<Uint8Array> {
         let realStream: RandomAccessStream = await realFile.getInputStream();
-        let headerData: Uint8Array = new Uint8Array(this.getHeaderLength());
+        let headerData: Uint8Array = new Uint8Array(this.#getHeaderLength());
         await realStream.read(headerData, 0, headerData.length);
         await realStream.close();
         return headerData;
@@ -282,8 +282,8 @@ export class SalmonFile extends VirtualFile {
     /**
      * Retrieve the current hash key that is used to encrypt / decrypt the file contents.
      */
-    private getHashKey(): Uint8Array | null {
-        return this.hashKey;
+    #getHashKey(): Uint8Array | null {
+        return this.#hashKey;
     }
 
     /**
@@ -293,14 +293,14 @@ export class SalmonFile extends VirtualFile {
      * @param hashKey   The hash key to be used for verification
      */
     public async setVerifyIntegrity(integrity: boolean, hashKey: Uint8Array | null): Promise<void> {
-        if (integrity && hashKey == null && this.drive != null) {
-            let key: SalmonKey | null = this.drive.getKey();
+        if (integrity && hashKey == null && this.#drive != null) {
+            let key: SalmonKey | null = this.#drive.getKey();
             if (key != null)
                 hashKey = key.getHashKey();
         }
-        this.integrity = integrity;
-        this.hashKey = hashKey;
-        this.reqChunkSize = await this.getFileChunkSize();
+        this.#integrity = integrity;
+        this.#hashKey = hashKey;
+        this.#reqChunkSize = await this.getFileChunkSize();
     }
 
     /**
@@ -319,16 +319,16 @@ export class SalmonFile extends VirtualFile {
         if (integrity && fileChunkSize != null && fileChunkSize == 0)
             throw new SalmonIntegrityException("Cannot enable integrity if the file is not created with integrity, export file and reimport with integrity");
 
-        if (integrity && hashKey == null && this.drive != null) {
-            let key: SalmonKey | null = this.drive.getKey();
+        if (integrity && hashKey == null && this.#drive != null) {
+            let key: SalmonKey | null = this.#drive.getKey();
             if (key != null)
                 hashKey = key.getHashKey();
         }
-        this.integrity = integrity;
-        this.reqChunkSize = requestChunkSize;
-        if (integrity && this.reqChunkSize == null && this.drive != null)
-            this.reqChunkSize = this.drive.getDefaultFileChunkSize();
-        this.hashKey = hashKey;
+        this.#integrity = integrity;
+        this.#reqChunkSize = requestChunkSize;
+        if (integrity && this.#reqChunkSize == null && this.#drive != null)
+            this.#reqChunkSize = this.#drive.getDefaultFileChunkSize();
+        this.#hashKey = hashKey;
     }
 
     /**
@@ -339,22 +339,22 @@ export class SalmonFile extends VirtualFile {
      * @param value True to allow overwriting operations
      */
     public setAllowOverwrite(value: boolean): void {
-        this.overwrite = value;
+        this.#overwrite = value;
     }
 
     /**
      * Returns the file chunk size
      */
-    private getChunkSizeLength(): number {
+    #getChunkSizeLength(): number {
         return SalmonGenerator.CHUNK_SIZE_LENGTH;
     }
 
     /**
      * Returns the length of the header in bytes
      */
-    private getHeaderLength(): number {
+    #getHeaderLength(): number {
         return SalmonGenerator.MAGIC_LENGTH + SalmonGenerator.VERSION_LENGTH +
-            this.getChunkSizeLength() + SalmonGenerator.NONCE_LENGTH;
+            this.#getChunkSizeLength() + SalmonGenerator.NONCE_LENGTH;
     }
 
     /**
@@ -374,9 +374,9 @@ export class SalmonFile extends VirtualFile {
      * @throws SalmonSecurityException
      */
     public setRequestedNonce(nonce: Uint8Array): void {
-        if (this.drive != null)
+        if (this.#drive != null)
             throw new SalmonSecurityException("Nonce is already set by the drive");
-        this.requestedNonce = nonce;
+        this.#requestedNonce = nonce;
     }
 
     /**
@@ -385,41 +385,41 @@ export class SalmonFile extends VirtualFile {
      * @return
      */
     public getRequestedNonce(): Uint8Array | null {
-        return this.requestedNonce;
+        return this.#requestedNonce;
     }
 
     /**
      * Create the header for the file
      */
-    private async createHeader(nonce: Uint8Array): Promise<void> {
+    async #createHeader(nonce: Uint8Array): Promise<void> {
         // set it to zero (disabled integrity) or get the default chunk
         // size defined by the drive
-        if (this.integrity && this.reqChunkSize == null && this.drive != null)
-            this.reqChunkSize = this.drive.getDefaultFileChunkSize();
-        else if (!this.integrity)
-            this.reqChunkSize = 0;
-        if (this.reqChunkSize == null)
+        if (this.#integrity && this.#reqChunkSize == null && this.#drive != null)
+            this.#reqChunkSize = this.#drive.getDefaultFileChunkSize();
+        else if (!this.#integrity)
+            this.#reqChunkSize = 0;
+        if (this.#reqChunkSize == null)
             throw new SalmonIntegrityException("File requires a chunk size");
 
         if (nonce != null)
-            this.requestedNonce = nonce;
-        else if (this.requestedNonce == null && this.drive != null)
-            this.requestedNonce = this.drive.getNextNonce();
+            this.#requestedNonce = nonce;
+        else if (this.#requestedNonce == null && this.#drive != null)
+            this.#requestedNonce = this.#drive.getNextNonce();
 
-        if (this.requestedNonce == null)
+        if (this.#requestedNonce == null)
             throw new SalmonSecurityException("File requires a nonce");
 
-        let realStream: RandomAccessStream = await this.realFile.getOutputStream();
+        let realStream: RandomAccessStream = await this.#realFile.getOutputStream();
         let magicBytes: Uint8Array = SalmonGenerator.getMagicBytes();
         await realStream.write(magicBytes, 0, magicBytes.length);
 
         let version: number = SalmonGenerator.getVersion();
         await realStream.write(new Uint8Array([version]), 0, SalmonGenerator.VERSION_LENGTH);
 
-        let chunkSizeBytes: Uint8Array = BitConverter.toBytes(this.reqChunkSize, 4);
+        let chunkSizeBytes: Uint8Array = BitConverter.toBytes(this.#reqChunkSize, 4);
         await realStream.write(chunkSizeBytes, 0, chunkSizeBytes.length);
 
-        await realStream.write(this.requestedNonce, 0, this.requestedNonce.length);
+        await realStream.write(this.#requestedNonce, 0, this.#requestedNonce.length);
 
         await realStream.flush();
         await realStream.close();
@@ -438,17 +438,17 @@ export class SalmonFile extends VirtualFile {
      * @return
      */
     public async getChildrenCount(): Promise<number> {
-        return await this.realFile.getChildrenCount();
+        return await this.#realFile.getChildrenCount();
     }
 
     /**
      * Lists files and directories under this directory
      */
     public async listFiles(): Promise<VirtualFile[]> {
-        let files: IRealFile[] = await this.realFile.listFiles();
+        let files: IRealFile[] = await this.#realFile.listFiles();
         let salmonFiles: VirtualFile[] = [];
         files.forEach((iRealFile: IRealFile) => {
-            let file: VirtualFile = new SalmonFile(iRealFile, this.drive);
+            let file: VirtualFile = new SalmonFile(iRealFile, this.#drive);
             salmonFiles.push(file);
         });
         return salmonFiles;
@@ -481,39 +481,39 @@ export class SalmonFile extends VirtualFile {
      * @param dirNameNonce The nonce to be used for encrypting the directory name
      */
     public async createDirectory(dirName: string, key: Uint8Array, dirNameNonce: Uint8Array): Promise<SalmonFile> {
-        if (this.drive == null)
+        if (this.#drive == null)
             throw new SalmonSecurityException("Need to pass the key and dirNameNonce nonce if not using a drive");
         let encryptedDirName: string = await this.getEncryptedFilename(dirName, key, dirNameNonce);
-        let realDir: IRealFile = await this.realFile.createDirectory(encryptedDirName);
-        return new SalmonFile(realDir, this.drive);
+        let realDir: IRealFile = await this.#realFile.createDirectory(encryptedDirName);
+        return new SalmonFile(realDir, this.#drive);
     }
 
     /**
      * Return the real file
      */
     public getRealFile(): IRealFile {
-        return this.realFile;
+        return this.#realFile;
     }
 
     /**
      * Returns true if this is a file
      */
     public async isFile(): Promise<boolean> {
-        return await this.realFile.isFile();
+        return await this.#realFile.isFile();
     }
 
     /**
      * Returns True if this is a directory
      */
     public async isDirectory(): Promise<boolean> {
-        return await this.realFile.isDirectory();
+        return await this.#realFile.isDirectory();
     }
 
     /**
      * Return the path of the real file stored
      */
     public async getPath(): Promise<string> {
-        let realPath: string = await this.realFile.getAbsolutePath();
+        let realPath: string = await this.#realFile.getAbsolutePath();
         return this.#getPath(realPath);
     }
 
@@ -524,8 +524,8 @@ export class SalmonFile extends VirtualFile {
      */
     async #getPath(realPath: string | null = null): Promise<string> {
         if (realPath == null)
-            realPath = await this.realFile.getAbsolutePath();
-        let relativePath: string = await this.getRelativePath(realPath);
+            realPath = await this.#realFile.getAbsolutePath();
+        let relativePath: string = await this.#getRelativePath(realPath);
         let path: string = "";
         let parts: string[] = relativePath.split(SalmonFile.separator);
         parts.forEach(async (part: string, index: number, arr: string[]) => {
@@ -541,7 +541,7 @@ export class SalmonFile extends VirtualFile {
      * Return the path of the real file
      */
     public getRealPath(): string {
-        return this.realFile.getPath();
+        return this.#realFile.getPath();
     }
 
     /**
@@ -549,8 +549,8 @@ export class SalmonFile extends VirtualFile {
      *
      * @param realPath The path of the real file
      */
-    private async getRelativePath(realPath: string): Promise<string> {
-        let virtualRoot: VirtualFile | null = await this.drive.getVirtualRoot();
+    async #getRelativePath(realPath: string): Promise<string> {
+        let virtualRoot: VirtualFile | null = await this.#drive.getVirtualRoot();
         if (virtualRoot == null)
             throw new Error("Could not find virtual root, if this file is part of a drive make sure you init first");
         let virtualRootPath: string = await virtualRoot.getRealFile().getAbsolutePath();
@@ -564,10 +564,10 @@ export class SalmonFile extends VirtualFile {
      * Returns the basename for the file
      */
     public async getBaseName(): Promise<string> {
-        if (this._baseName != null)
-            return this._baseName;
-        if (this.drive != null) {
-            let virtualRoot: VirtualFile | null = await this.drive.getVirtualRoot();
+        if (this.#_baseName != null)
+            return this.#_baseName;
+        if (this.#drive != null) {
+            let virtualRoot: VirtualFile | null = await this.#drive.getVirtualRoot();
             if (virtualRoot == null) {
                 throw new SalmonSecurityException("Could not get virtual root, you need to init drive first");
             }
@@ -575,9 +575,9 @@ export class SalmonFile extends VirtualFile {
                 return "";
         }
 
-        let realBaseName: string = this.realFile.getBaseName();
-        this._baseName = await this.getDecryptedFilename(realBaseName);
-        return this._baseName;
+        let realBaseName: string = this.#realFile.getBaseName();
+        this.#_baseName = await this.getDecryptedFilename(realBaseName);
+        return this.#_baseName;
     }
 
     /**
@@ -585,9 +585,9 @@ export class SalmonFile extends VirtualFile {
      */
     public async getParent(): Promise<VirtualFile | null> {
         try {
-            if (this.drive == null)
+            if (this.#drive == null)
                 return null;
-            let virtualRoot: VirtualFile | null = await this.drive.getVirtualRoot();
+            let virtualRoot: VirtualFile | null = await this.#drive.getVirtualRoot();
             if (virtualRoot == null)
                 throw new SalmonSecurityException("Could not get virtual root, you need to init drive first");
             if (virtualRoot.getRealFile().getPath() == this.getRealFile().getPath()) {
@@ -597,8 +597,8 @@ export class SalmonFile extends VirtualFile {
             console.error(exception);
             return null;
         }
-        let realDir: IRealFile = await this.realFile.getParent();
-        let dir: VirtualFile = new SalmonFile(realDir, this.drive);
+        let realDir: IRealFile = await this.#realFile.getParent();
+        let dir: VirtualFile = new SalmonFile(realDir, this.#drive);
         return dir;
     }
 
@@ -606,7 +606,7 @@ export class SalmonFile extends VirtualFile {
      * Delete this file.
      */
     public async delete(): Promise<void> {
-        await this.realFile.delete();
+        await this.#realFile.delete();
     }
 
     /**
@@ -620,33 +620,33 @@ export class SalmonFile extends VirtualFile {
      * Returns the last date modified in milliseconds
      */
     public async getLastDateTimeModified(): Promise<number> {
-        return await this.realFile.lastModified();
+        return await this.#realFile.lastModified();
     }
 
     /**
      * Return the virtual size of the file excluding the header and hash signatures.
      */
     public async getSize(): Promise<number> {
-        let rSize: number = await this.realFile.length();
+        let rSize: number = await this.#realFile.length();
         if (rSize == 0)
             return rSize;
-        return rSize - this.getHeaderLength() - await this.getHashTotalBytesLength();
+        return rSize - this.#getHeaderLength() - await this.#getHashTotalBytesLength();
     }
 
     /**
      * Returns the hash total bytes occupied by signatures
      */
-    private async getHashTotalBytesLength(): Promise<number> {
+    async #getHashTotalBytesLength(): Promise<number> {
         // file does not support integrity
         let fileChunkSize: number | null = await this.getFileChunkSize();
         if (fileChunkSize == null || fileChunkSize <= 0)
             return 0;
 
         // integrity has been requested but hash is missing
-        if (this.integrity && this.getHashKey() == null)
+        if (this.#integrity && this.#getHashKey() == null)
             throw new SalmonIntegrityException("File requires hashKey, use SetVerifyIntegrity() to provide one");
 
-        return SalmonIntegrity.getTotalHashDataLength(await this.realFile.length(), fileChunkSize,
+        return SalmonIntegrity.getTotalHashDataLength(await this.#realFile.length(), fileChunkSize,
             SalmonGenerator.HASH_RESULT_LENGTH, SalmonGenerator.HASH_KEY_LENGTH);
     }
 
@@ -658,7 +658,7 @@ export class SalmonFile extends VirtualFile {
     //TODO: files with real same name can exists we can add checking all files in the dir
     // and throw an Exception though this could be an expensive operation
     public async createFile(realFilename: string): Promise<SalmonFile> {
-        if (this.drive == null)
+        if (this.#drive == null)
             throw new SalmonSecurityException("Need to pass the key, filename nonce, and file nonce if not using a drive");
         return await this.#createFile(realFilename, null, null, null);
     }
@@ -675,15 +675,15 @@ export class SalmonFile extends VirtualFile {
     // and throw an Exception though this could be an expensive operation
     async #createFile(realFilename: string, key: Uint8Array | null = null, fileNameNonce: Uint8Array | null = null, fileNonce: Uint8Array | null = null): Promise<SalmonFile> {
         let encryptedFilename: string = await this.getEncryptedFilename(realFilename, key, fileNameNonce);
-        let file: IRealFile = await this.realFile.createFile(encryptedFilename);
-        let salmonFile: SalmonFile = new SalmonFile(file, this.drive);
+        let file: IRealFile = await this.#realFile.createFile(encryptedFilename);
+        let salmonFile: SalmonFile = new SalmonFile(file, this.#drive);
         salmonFile.setEncryptionKey(key);
-        salmonFile.integrity = this.integrity;
-        if (this.drive != null && (fileNonce != null || fileNameNonce != null))
+        salmonFile.#integrity = this.#integrity;
+        if (this.#drive != null && (fileNonce != null || fileNameNonce != null))
             throw new SalmonSecurityException("Nonce is already set by the drive");
-        if (this.drive != null && key != null)
+        if (this.#drive != null && key != null)
             throw new SalmonSecurityException("Key is already set by the drive");
-        salmonFile.requestedNonce = fileNonce;
+        salmonFile.#requestedNonce = fileNonce;
         return salmonFile;
     }
 
@@ -695,21 +695,21 @@ export class SalmonFile extends VirtualFile {
      */
     public async rename(newFilename: string, nonce: Uint8Array | null = null): Promise<void> {
 
-        if (this.drive == null && (this.encryptionKey == null || this.requestedNonce == null))
+        if (this.#drive == null && (this.#encryptionKey == null || this.#requestedNonce == null))
             throw new SalmonSecurityException("Need to pass a nonce if not using a drive");
 
         let newEncryptedFilename: string = await this.getEncryptedFilename(newFilename, null, nonce);
-        await this.realFile.renameTo(newEncryptedFilename);
-        this._baseName = null;
+        await this.#realFile.renameTo(newEncryptedFilename);
+        this.#_baseName = null;
     }
 
     /**
      * Returns true if this file exists
      */
     public async exists(): Promise<boolean> {
-        if (this.realFile == null)
+        if (this.#realFile == null)
             return false;
-        return await this.realFile.exists();
+        return await this.#realFile.exists();
     }
 
     /**
@@ -718,7 +718,7 @@ export class SalmonFile extends VirtualFile {
      * @param filename The filename of a real file
      */
     async #getDecryptedFilename(filename: string): Promise<string> {
-        if (this.drive == null && (this.encryptionKey == null || this.requestedNonce == null))
+        if (this.#drive == null && (this.#encryptionKey == null || this.#requestedNonce == null))
             throw new SalmonSecurityException("Need to use a drive or pass key and nonce");
         return await this.getDecryptedFilename(filename);
     }
@@ -732,15 +732,15 @@ export class SalmonFile extends VirtualFile {
      */
     protected async getDecryptedFilename(filename: string, key: Uint8Array | null = null, nonce: Uint8Array | null = null): Promise<string> {
         let rfilename: string = filename.replace("-", "/");
-        if (this.drive != null && nonce != null)
+        if (this.#drive != null && nonce != null)
             throw new SalmonSecurityException("Filename nonce is already set by the drive");
-        if (this.drive != null && key != null)
+        if (this.#drive != null && key != null)
             throw new SalmonSecurityException("Key is already set by the drive");
 
         if (key == null)
-            key = this.encryptionKey;
-        if (key == null && this.drive != null) {
-            let salmonKey: SalmonKey | null = this.drive.getKey();
+            key = this.#encryptionKey;
+        if (key == null && this.#drive != null) {
+            let salmonKey: SalmonKey | null = this.#drive.getKey();
             if (salmonKey == null) {
                 throw new SalmonSecurityException("Could not get the key, make sure you init the drive first");
             }
@@ -761,14 +761,14 @@ export class SalmonFile extends VirtualFile {
      * @param nonce    The nonce if the file doesn't belong to a drive
      */
     protected async getEncryptedFilename(filename: string, key: Uint8Array | null = null, nonce: Uint8Array | null = null): Promise<string> {
-        if (this.drive != null && nonce != null)
+        if (this.#drive != null && nonce != null)
             throw new SalmonSecurityException("Filename nonce is already set by the drive");
-        if (this.drive != null)
-            nonce = this.drive.getNextNonce();
-        if (this.drive != null && key != null)
+        if (this.#drive != null)
+            nonce = this.#drive.getNextNonce();
+        if (this.#drive != null && key != null)
             throw new SalmonSecurityException("Key is already set by the drive");
-        if (this.drive != null) {
-            let salmonKey: SalmonKey | null = this.drive.getKey();
+        if (this.#drive != null) {
+            let salmonKey: SalmonKey | null = this.#drive.getKey();
             if (salmonKey == null) {
                 throw new SalmonSecurityException("Could not get the key, make sure you init the drive first");
             }
@@ -790,7 +790,7 @@ export class SalmonFile extends VirtualFile {
      * @return
      */
     public getDrive(): SalmonDrive {
-        return this.drive;
+        return this.#drive;
     }
 
     /**
@@ -799,7 +799,7 @@ export class SalmonFile extends VirtualFile {
      * @param tag
      */
     public setTag(tag: object): void {
-        this.tag = tag;
+        this.#tag = tag;
     }
 
     /**
@@ -808,7 +808,7 @@ export class SalmonFile extends VirtualFile {
      * @return The file tag.
      */
     public getTag(): object | null {
-        return this.tag;
+        return this.#tag;
     }
 
     /**
@@ -820,8 +820,8 @@ export class SalmonFile extends VirtualFile {
      * @throws IOException
      */
     public async move(dir: SalmonFile, OnProgressListener: ((position: number, length: number) => void) | null = null): Promise<SalmonFile> {
-        let newRealFile: IRealFile = await this.realFile.move(dir.realFile, null, OnProgressListener);
-        return new SalmonFile(newRealFile, this.drive);
+        let newRealFile: IRealFile = await this.#realFile.move(dir.#realFile, null, OnProgressListener);
+        return new SalmonFile(newRealFile, this.#drive);
     }
 
     /**
@@ -833,8 +833,8 @@ export class SalmonFile extends VirtualFile {
      * @throws IOException
      */
     public async copy(dir: SalmonFile, OnProgressListener: ((position: number, length: number) => void) | null = null): Promise<SalmonFile> {
-        let newRealFile: IRealFile = await this.realFile.copy(dir.realFile, null, OnProgressListener);
-        return new SalmonFile(newRealFile, this.drive);
+        let newRealFile: IRealFile = await this.#realFile.copy(dir.#realFile, null, OnProgressListener);
+        return new SalmonFile(newRealFile, this.#drive);
     }
 
     /**
@@ -866,9 +866,9 @@ export class SalmonFile extends VirtualFile {
                     return file.getBaseName();
                 }
             };
-        await IRealFileCopyRecursively(this.realFile, dest.realFile, (file, position, length) => {
+        await IRealFileCopyRecursively(this.#realFile, dest.#realFile, (file, position, length) => {
             if (progressListener != null)
-                progressListener(new SalmonFile(file, this.drive), position, length);
+                progressListener(new SalmonFile(file, this.#drive), position, length);
         },
             RenameRealFile, autoRenameFolders, onFailedRealFile);
     }
@@ -903,9 +903,9 @@ export class SalmonFile extends VirtualFile {
                     return file.getBaseName();
                 }
             };
-        await IRealFileMoveRecursively(this.realFile, dest.getRealFile(), (file, position, length) => {
+        await IRealFileMoveRecursively(this.#realFile, dest.getRealFile(), (file, position, length) => {
             if (progressListener != null)
-                progressListener(new SalmonFile(file, this.drive), position, length);
+                progressListener(new SalmonFile(file, this.#drive), position, length);
         },
             renameRealFile, autoRenameFolders, onFailedRealFile);
     }
@@ -917,12 +917,12 @@ export class SalmonFile extends VirtualFile {
         if (onFailed != null) {
             onFailedRealFile = (file, ex) => {
                 if (onFailed != null)
-                    onFailed(new SalmonFile(file, this.drive), ex);
+                    onFailed(new SalmonFile(file, this.#drive), ex);
             };
         }
         await IRealFileDeleteRecursively(this.getRealFile(), (file, position, length) => {
             if (progressListener != null)
-                progressListener(new SalmonFile(file, this.drive), position, length);
+                progressListener(new SalmonFile(file, this.#drive), position, length);
         }, onFailedRealFile);
     }
 

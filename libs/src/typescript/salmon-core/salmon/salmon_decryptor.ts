@@ -41,17 +41,17 @@ export class SalmonDecryptor {
     /**
      * The number of parallel threads to use.
      */
-    private readonly threads: number;
+    readonly #threads: number;
 
     /**
      * Executor for parallel tasks.
      */
-    private workers: SharedWorker[] | null = null;
+    #workers: SharedWorker[] | null = null;
 
     /**
      * The buffer size to use.
      */
-    private readonly bufferSize: number;
+    readonly #bufferSize: number;
 
 
     /**
@@ -64,17 +64,17 @@ export class SalmonDecryptor {
      */
     public constructor(threads: number = 0, bufferSize: number = 0) {
         if (threads == 0) {
-            this.threads = 1;
+            this.#threads = 1;
         } else {
-            this.threads = threads;
-            this.workers = new Array(threads);
+            this.#threads = threads;
+            this.#workers = new Array(threads);
         }
         if (bufferSize == 0) {
             // we use the chunks size as default this keeps buffers aligned in case
             // integrity is enabled.
-            this.bufferSize = SalmonIntegrity.DEFAULT_CHUNK_SIZE;
+            this.#bufferSize = SalmonIntegrity.DEFAULT_CHUNK_SIZE;
         } else {
-            this.bufferSize = bufferSize;
+            this.#bufferSize = bufferSize;
         }
     }
 
@@ -122,11 +122,11 @@ export class SalmonDecryptor {
             headerData, integrity, chunkSize, hashKey);
         let outData: Uint8Array = new Uint8Array(realSize);
 
-        if (this.threads == 1) {
+        if (this.#threads == 1) {
             await decryptData(data, 0, data.length, outData,
-                key, nonce, headerData, integrity, hashKey, chunkSize, this.bufferSize);
+                key, nonce, headerData, integrity, hashKey, chunkSize, this.#bufferSize);
         } else {
-            await this.decryptDataParallel(data, outData,
+            await this.#decryptDataParallel(data, outData,
                 key, hashKey, nonce, headerData,
                 chunkSize, integrity);
         }
@@ -145,7 +145,7 @@ export class SalmonDecryptor {
      * @param chunkSize The chunk size.
      * @param integrity True to verify integrity.
      */
-    private async decryptDataParallel(data: Uint8Array, outData: Uint8Array,
+    async #decryptDataParallel(data: Uint8Array, outData: Uint8Array,
         key: Uint8Array, hashKey: Uint8Array | null, nonce: Uint8Array, headerData: Uint8Array | null,
         chunkSize: number | null, integrity: boolean): Promise<void> {
         let runningThreads: number = 1;
@@ -159,7 +159,7 @@ export class SalmonDecryptor {
             minPartSize = SalmonIntegrity.DEFAULT_CHUNK_SIZE;
 
         if (partSize > minPartSize) {
-            partSize = Math.ceil(data.length / this.threads);
+            partSize = Math.ceil(data.length / this.#threads);
             if (partSize > minPartSize)
                 partSize -= partSize % minPartSize;
             else
@@ -167,7 +167,7 @@ export class SalmonDecryptor {
             runningThreads = Math.floor(data.length / partSize);
         }
 
-        await this.submitDecryptJobs(runningThreads, partSize,
+        await this.#submitDecryptJobs(runningThreads, partSize,
             data, outData,
             key, hashKey, nonce, headerData,
             integrity, chunkSize);
@@ -187,10 +187,10 @@ export class SalmonDecryptor {
      * @param integrity True to verify the data integrity.
      * @param chunkSize The chunk size.
      */
-    private async submitDecryptJobs(runningThreads: number, partSize: number, data: Uint8Array, outData: Uint8Array,
+    async #submitDecryptJobs(runningThreads: number, partSize: number, data: Uint8Array, outData: Uint8Array,
         key: Uint8Array, hashKey: Uint8Array | null, nonce: Uint8Array,
         headerData: Uint8Array | null, integrity: boolean, chunkSize: number | null): Promise<void> {
-        let promises = [];
+        let promises: Promise<any>[] = [];
         for (let i = 0; i < runningThreads; i++) {
             promises.push(new Promise(async (resolve, reject) => {
                 let worker: any;
@@ -223,7 +223,7 @@ export class SalmonDecryptor {
 
                 worker.postMessage({
                     index: i, data: data, out_size: outData.length, start: start, length: length, key: key, nonce: nonce,
-                    headerData: headerData, integrity: integrity, hashKey: hashKey, chunkSize: chunkSize, bufferSize: this.bufferSize
+                    headerData: headerData, integrity: integrity, hashKey: hashKey, chunkSize: chunkSize, bufferSize: this.#bufferSize
                 });
             }));
         }

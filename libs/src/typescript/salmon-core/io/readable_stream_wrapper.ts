@@ -30,29 +30,23 @@ import { RandomAccessStream } from "./random_access_stream.js";
  * Use this class to wrap any AbsStream to a less powerful but familiar and compatible Java InputStream.
  */
 export class ReadableStreamWrapper implements ReadableStream {
-    private readonly stream: RandomAccessStream;
-    private reader: ReadableStreamWrapperReader;
+    readonly #stream: RandomAccessStream;
+    #reader: ReadableStreamWrapperReader;
 
     /**
      * Instantiates an ReadableStreamWrapper with a base stream.
      * @param stream The base AbsStream that you want to wrap.
      */
     public constructor(stream: RandomAccessStream) {
-        this.stream = stream;
-        this.reader = new ReadableStreamWrapperReader(this.stream);
+        this.#stream = stream;
+        this.#reader = new ReadableStreamWrapperReader(this.#stream);
     }
     locked: boolean = false;
     cancel(reason?: any): Promise<void> {
         throw new Error("Method not implemented.");
     }
-    //getReader(options: { mode: "byob"; }): ReadableStreamBYOBReader;
-    //getReader(): ReadableStreamDefaultReader<any>;
-    //getReader(options?: ReadableStreamGetReaderOptions): ReadableStreamReader<any>;
-    //getReader(options?: unknown): ReadableStreamReader<any> {
-    //    throw new Error("Method not implemented.");
-    //}
     getReader(): ReadableStreamDefaultReader {
-        return this.reader;
+        return this.#reader;
     }
     pipeThrough<T>(transform: ReadableWritablePair<T, any>, options?: StreamPipeOptions): ReadableStream<T> {
         throw new Error("Method not implemented.");
@@ -66,14 +60,14 @@ export class ReadableStreamWrapper implements ReadableStream {
 }
 
 export class ReadableStreamWrapperReader implements ReadableStreamDefaultReader {
-    private stream: RandomAccessStream;
+    #stream: RandomAccessStream;
     constructor(stream: RandomAccessStream) {
-        this.stream = stream;
+        this.#stream = stream;
     }
 
     async read(): Promise<ReadableStreamReadResult<Uint8Array>> {
         let buff: Uint8Array = new Uint8Array(SalmonDefaultOptions.getBufferSize());
-        await this.stream.read(buff, 0, buff.length);
+        await this.#stream.read(buff, 0, buff.length);
         return { value: buff, done: true };
     }
     releaseLock(): void {

@@ -35,35 +35,35 @@ export class SalmonHeader {
     /**
      * Magic bytes.
      */
-    private magicBytes: Uint8Array = new Uint8Array(SalmonGenerator.MAGIC_LENGTH);
+    #magicBytes: Uint8Array = new Uint8Array(SalmonGenerator.MAGIC_LENGTH);
 
     /**
      * Format version from {@link SalmonGenerator#VERSION}.
      */
-    private version: number = 0;
+    #version: number = 0;
 
     /**
      * Chunk size used for data integrity.
      */
-    private chunkSize: number = 0;
+    #chunkSize: number = 0;
 
     /**
      * Starting nonce for the CTR mode. This is the upper part of the Counter.
      *
      */
-    private nonce: Uint8Array | null = null;
+    #nonce: Uint8Array | null = null;
 
     /**
      * Binary data.
      */
-    private headerData: Uint8Array | null = null;
+    #headerData: Uint8Array | null = null;
 
     /**
      * Get the nonce.
      * @return The nonce
      */
     public getNonce(): Uint8Array | null {
-        return this.nonce;
+        return this.#nonce;
     }
 
     /**
@@ -71,7 +71,7 @@ export class SalmonHeader {
      * @return Chunk size
      */
     public getChunkSize(): number {
-        return this.chunkSize;
+        return this.#chunkSize;
     }
 
     /**
@@ -79,7 +79,7 @@ export class SalmonHeader {
      * @return Header data
      */
     public getHeaderData(): Uint8Array | null {
-        return this.headerData;
+        return this.#headerData;
     }
 
     /**
@@ -87,7 +87,7 @@ export class SalmonHeader {
      * @return The format version
      */
     public getVersion(): number {
-        return this.version;
+        return this.#version;
     }
 
     /**
@@ -95,7 +95,7 @@ export class SalmonHeader {
      * @return Magic bytes
      */
     public getMagicBytes(): Uint8Array {
-        return this.magicBytes;
+        return this.#magicBytes;
     }
 
     /**
@@ -106,20 +106,20 @@ export class SalmonHeader {
      */
     public static async parseHeaderData(stream: RandomAccessStream): Promise<SalmonHeader> {
         let header: SalmonHeader = new SalmonHeader();
-        header.magicBytes = new Uint8Array(SalmonGenerator.MAGIC_LENGTH);
-        await stream.read(header.magicBytes, 0, header.magicBytes.length);
+        header.#magicBytes = new Uint8Array(SalmonGenerator.MAGIC_LENGTH);
+        await stream.read(header.#magicBytes, 0, header.#magicBytes.length);
         let versionBytes: Uint8Array = new Uint8Array(SalmonGenerator.VERSION_LENGTH);
         await stream.read(versionBytes, 0, SalmonGenerator.VERSION_LENGTH);
-        header.version = versionBytes[0];
+        header.#version = versionBytes[0];
         let chunkSizeHeader: Uint8Array = new Uint8Array(SalmonGenerator.CHUNK_SIZE_LENGTH);
         await stream.read(chunkSizeHeader, 0, chunkSizeHeader.length);
-        header.chunkSize = BitConverter.toLong(chunkSizeHeader, 0, SalmonGenerator.CHUNK_SIZE_LENGTH);
-        header.nonce = new Uint8Array(SalmonGenerator.NONCE_LENGTH);
-        await stream.read(header.nonce, 0, header.nonce.length);
+        header.#chunkSize = BitConverter.toLong(chunkSizeHeader, 0, SalmonGenerator.CHUNK_SIZE_LENGTH);
+        header.#nonce = new Uint8Array(SalmonGenerator.NONCE_LENGTH);
+        await stream.read(header.#nonce, 0, header.#nonce.length);
         await stream.setPosition(0);
-        header.headerData = new Uint8Array(SalmonGenerator.MAGIC_LENGTH + SalmonGenerator.VERSION_LENGTH
+        header.#headerData = new Uint8Array(SalmonGenerator.MAGIC_LENGTH + SalmonGenerator.VERSION_LENGTH
             + SalmonGenerator.CHUNK_SIZE_LENGTH + SalmonGenerator.NONCE_LENGTH);
-        await stream.read(header.headerData, 0, header.headerData.length);
+        await stream.read(header.#headerData, 0, header.#headerData.length);
 
         return header;
     }
@@ -129,7 +129,7 @@ export class SalmonHeader {
      * @param chunkSize The chunk size
      */
     public setChunkSize(chunkSize: number): void {
-        this.chunkSize = chunkSize;
+        this.#chunkSize = chunkSize;
     }
 
     /**
@@ -137,7 +137,7 @@ export class SalmonHeader {
      * @param version The format version
      */
     public setVersion(version: number): void {
-        this.version = version;
+        this.#version = version;
     }
 
     /**
@@ -145,6 +145,6 @@ export class SalmonHeader {
      * @param nonce The nonce
      */
     public setNonce(nonce: Uint8Array): void {
-        this.nonce = nonce;
+        this.#nonce = nonce;
     }
 }

@@ -33,7 +33,7 @@ export class SalmonDefaultTransformer extends SalmonAES256CTRTransformer {
     /**
      * Key spec for the initial nonce (counter).
      */
-    private encSecretKey: CryptoKey | null = null;
+    #encSecretKey: CryptoKey | null = null;
 
     /**
      * Initialize the default Java AES cipher transformer.
@@ -44,7 +44,7 @@ export class SalmonDefaultTransformer extends SalmonAES256CTRTransformer {
     public async init(key: Uint8Array, nonce: Uint8Array): Promise<void> {
         await super.init(key, nonce);
         try {
-            this.encSecretKey = await crypto.subtle.importKey(
+            this.#encSecretKey = await crypto.subtle.importKey(
                 "raw", key, "AES-CTR", false, ["encrypt", "decrypt"]);
         } catch (e) {
             throw new SalmonSecurityException("Could not init AES transformer", e);
@@ -63,7 +63,7 @@ export class SalmonDefaultTransformer extends SalmonAES256CTRTransformer {
      */
     public async encryptData(srcBuffer: Uint8Array, srcOffset: number,
         destBuffer: Uint8Array, destOffset: number, count: number): Promise<number> {
-        if (this.encSecretKey == null) //TODO: ToSync
+        if (this.#encSecretKey == null) //TODO: ToSync
             throw new SalmonSecurityException("No key defined, run init first");
         try {
             let counter: Uint8Array = this.getCounter();
@@ -73,7 +73,7 @@ export class SalmonDefaultTransformer extends SalmonAES256CTRTransformer {
                     counter: counter,
                     length: 64,
                 },
-                this.encSecretKey,
+                this.#encSecretKey,
                 srcBuffer,
             ));
             for (let i = 0; i < count; i++)
@@ -96,7 +96,7 @@ export class SalmonDefaultTransformer extends SalmonAES256CTRTransformer {
      */
     public async decryptData(srcBuffer: Uint8Array, srcOffset: number,
         destBuffer: Uint8Array, destOffset: number, count: number): Promise<number> {
-        if (this.encSecretKey == null) //TODO: ToSync
+        if (this.#encSecretKey == null) //TODO: ToSync
             throw new SalmonSecurityException("No key defined, run init first");
         try {
             let counter: Uint8Array = this.getCounter();
@@ -106,7 +106,7 @@ export class SalmonDefaultTransformer extends SalmonAES256CTRTransformer {
                     counter: counter,
                     length: 64,
                 },
-                this.encSecretKey,
+                this.#encSecretKey,
                 srcBuffer,
             ));
             for (let i = 0; i < count; i++)

@@ -35,23 +35,23 @@ export class JsHttpFile implements IRealFile {
     public static readonly separator: string = "/";
     public static readonly SMALL_FILE_MAX_LENGTH: number = 1 * 1024 * 1024;
 
-    private filePath: string;
-    private _response: Response | null = null;
-    private _length: number | null = null;
-    private _lastModified: number | null = null;
+    #filePath: string;
+    #_response: Response | null = null;
+    #_length: number | null = null;
+    #_lastModified: number | null = null;
 
     /**
      * Instantiate a real file represented by the filepath provided.
      * @param path The filepath.
      */
     public constructor(path: string) {
-        this.filePath = path;
+        this.#filePath = path;
     }
 
-    private async getResponse(): Promise<Response> {
-        if (this._response == null)
-            this._response = (await fetch(this.filePath));
-        return this._response;
+    async #getResponse(): Promise<Response> {
+        if (this.#_response == null)
+            this.#_response = (await fetch(this.#filePath));
+        return this.#_response;
     }
 
     /**
@@ -86,7 +86,7 @@ export class JsHttpFile implements IRealFile {
      * @return
      */
     public async exists(): Promise<boolean> {
-        return (await this.getResponse()).status == 200 || (await this.getResponse()).status == 206;
+        return (await this.#getResponse()).status == 200 || (await this.#getResponse()).status == 206;
     }
 
     /**
@@ -94,7 +94,7 @@ export class JsHttpFile implements IRealFile {
      * @return The absolute path.
      */
     public async getAbsolutePath(): Promise<string> {
-        return this.filePath;
+        return this.#filePath;
     }
 
     /**
@@ -102,9 +102,9 @@ export class JsHttpFile implements IRealFile {
      * @return The name of this file or directory.
      */
     public getBaseName(): string {
-        if (this.filePath == null)
+        if (this.#filePath == null)
             throw new Error("Filepath is not assigned");
-        let nFilePath = this.filePath;
+        let nFilePath = this.#filePath;
         if(nFilePath.endsWith("/"))
             nFilePath = nFilePath.substring(0,nFilePath.length-1);
         let basename: string | undefined = nFilePath.split(JsHttpFile.separator).pop();
@@ -140,7 +140,7 @@ export class JsHttpFile implements IRealFile {
      * @return The parent directory.
      */
     public async getParent(): Promise<IRealFile> {
-        let parentFilePath: string = new URL(".", this.filePath).toString();
+        let parentFilePath: string = new URL(".", this.#filePath).toString();
         return new JsHttpFile(parentFilePath);
     }
 
@@ -149,7 +149,7 @@ export class JsHttpFile implements IRealFile {
      * @return
      */
     public getPath(): string {
-        return this.filePath;
+        return this.#filePath;
     }
 
     /**
@@ -157,7 +157,7 @@ export class JsHttpFile implements IRealFile {
      * @return
      */
     public async isDirectory(): Promise<boolean> {
-        return this.filePath.endsWith("/");
+        return this.#filePath.endsWith("/");
     }
 
     /**
@@ -173,15 +173,15 @@ export class JsHttpFile implements IRealFile {
      * @return
      */
     public async lastModified(): Promise<number> {
-        if (this._lastModified != null)
-            return this._lastModified;
-        let headers: Headers = (await this.getResponse()).headers;
+        if (this.#_lastModified != null)
+            return this.#_lastModified;
+        let headers: Headers = (await this.#getResponse()).headers;
         let lastDateModified: string | null = headers.get("last-modified");
         if (lastDateModified == null)
             throw new Error("Could not get last modified");
         let date: Date = new Date(lastDateModified);
-        this._lastModified = date.getTime();
-        return this._lastModified;
+        this.#_lastModified = date.getTime();
+        return this.#_lastModified;
     }
 
     /**
@@ -189,15 +189,15 @@ export class JsHttpFile implements IRealFile {
      * @return
      */
     public async length(): Promise<number> {
-        if (this._length != null)
-            return this._length;
-        let res: Response = (await this.getResponse());
+        if (this.#_length != null)
+            return this.#_length;
+        let res: Response = (await this.#getResponse());
         if (res == null)
             throw new IOException("Could not get response");
 
         let lenStr: string | null = res.headers.get("content-length");
         if (lenStr != null) {
-            this._length = parseInt(lenStr);
+            this.#_length = parseInt(lenStr);
         }
         else {
             if (res.body == null)
@@ -214,9 +214,9 @@ export class JsHttpFile implements IRealFile {
                     throw new IOException("Could not get length from file. If this is a large file make sure the server responds with a Content-Length");
                 }
             }
-            this._length = totalLength;
+            this.#_length = totalLength;
         }
-        return this._length;
+        return this.#_length;
     }
 
     /**
@@ -245,7 +245,7 @@ export class JsHttpFile implements IRealFile {
             if (filename.includes("%")){
                 filename = decodeURIComponent(filename);
             }
-            let file: IRealFile = new JsHttpFile(this.filePath + JsHttpFile.separator + filename);
+            let file: IRealFile = new JsHttpFile(this.#filePath + JsHttpFile.separator + filename);
             files.push(file);
         }
         return files;
@@ -282,7 +282,7 @@ export class JsHttpFile implements IRealFile {
     public async getChild(filename: string): Promise<IRealFile | null> {
         if (await this.isFile())
             return null;
-        let child: JsHttpFile = new JsHttpFile(this.filePath + JsHttpFile.separator + filename);
+        let child: JsHttpFile = new JsHttpFile(this.#filePath + JsHttpFile.separator + filename);
         return child;
     }
 
@@ -307,6 +307,6 @@ export class JsHttpFile implements IRealFile {
      * Returns a string representation of this object
      */
     public toString(): string {
-        return this.filePath;
+        return this.#filePath;
     }
 }

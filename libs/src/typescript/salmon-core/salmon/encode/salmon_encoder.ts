@@ -32,14 +32,14 @@ export class SalmonEncoder {
     /**
      * Current global Base64 implementation for encrypting/decrypting text strings. To change use setBase64().
      */
-    private static base64: IBase64 = new Base64();
+    static #base64: IBase64 = new Base64();
 
     /**
      * Change the current global Base64 implementation.
      * @param base64 The new Base64 implementation.
      */
     public static setBase64(base64: IBase64): void {
-        SalmonEncoder.base64 = base64;
+        SalmonEncoder.#base64 = base64;
     }
 
     /**
@@ -47,6 +47,6 @@ export class SalmonEncoder {
      * @return The Base64 implementation.
      */
     public static getBase64(): IBase64 {
-        return SalmonEncoder.base64;
+        return SalmonEncoder.#base64;
     }
 }

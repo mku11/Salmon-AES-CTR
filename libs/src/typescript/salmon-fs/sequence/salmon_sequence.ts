@@ -29,27 +29,27 @@ export class SalmonSequence {
     /**
      * The drive ID.
      */
-    private driveID: string;
+    #driveID: string;
 
     /**
      * The authentication id of the device for the specific drive.
      */
-    private authID: string;
+    #authID: string;
 
     /**
      * Then next available nonce.
      */
-    private nextNonce: Uint8Array;
+    #nextNonce: Uint8Array;
 
     /**
      * The maximum nonce.
      */
-    private maxNonce: Uint8Array;
+    #maxNonce: Uint8Array;
 
     /**
      * The current status of the sequence.
      */
-    private status: Status;
+    #status: Status;
 
     /**
      * Instantiate a nonce sequence for a drive with the provided authentication id.
@@ -60,11 +60,11 @@ export class SalmonSequence {
      * @param status The status of the sequencer.
      */
     public constructor(driveID: string, authID: string, nextNonce: Uint8Array, maxNonce: Uint8Array, status: Status) {
-        this.driveID = driveID;
-        this.authID = authID;
-        this.nextNonce = nextNonce;
-        this.maxNonce = maxNonce;
-        this.status = status;
+        this.#driveID = driveID;
+        this.#authID = authID;
+        this.#nextNonce = nextNonce;
+        this.#maxNonce = maxNonce;
+        this.#status = status;
     }
 
     /**
@@ -72,7 +72,7 @@ export class SalmonSequence {
      * @return
      */
     public getDriveID(): string {
-        return this.driveID;
+        return this.#driveID;
     }
 
     /**
@@ -80,7 +80,7 @@ export class SalmonSequence {
      * @param driveID
      */
     setDriveID(driveID: string): void {
-        this.driveID = driveID;
+        this.#driveID = driveID;
     }
 
     /**
@@ -88,7 +88,7 @@ export class SalmonSequence {
      * @return
      */
     public getAuthID(): string {
-        return this.authID;
+        return this.#authID;
     }
 
     /**
@@ -96,7 +96,7 @@ export class SalmonSequence {
      * @param authID
      */
     setAuthID(authID: string): void {
-        this.authID = authID;
+        this.#authID = authID;
     }
 
     /**
@@ -104,7 +104,7 @@ export class SalmonSequence {
      * @return
      */
     public getNextNonce(): Uint8Array {
-        return this.nextNonce;
+        return this.#nextNonce;
     }
 
     /**
@@ -112,7 +112,7 @@ export class SalmonSequence {
      * @param nextNonce
      */
     setNextNonce(nextNonce: Uint8Array): void {
-        this.nextNonce = nextNonce;
+        this.#nextNonce = nextNonce;
     }
 
     /**
@@ -120,7 +120,7 @@ export class SalmonSequence {
      * @return
      */
     getMaxNonce(): Uint8Array {
-        return this.maxNonce;
+        return this.#maxNonce;
     }
 
     /**
@@ -128,7 +128,7 @@ export class SalmonSequence {
      * @param maxNonce
      */
     setMaxNonce(maxNonce: Uint8Array): void {
-        this.maxNonce = maxNonce;
+        this.#maxNonce = maxNonce;
     }
 
     /**
@@ -136,7 +136,7 @@ export class SalmonSequence {
      * @return
      */
     getStatus(): Status {
-        return this.status;
+        return this.#status;
     }
 
     /**
@@ -144,7 +144,7 @@ export class SalmonSequence {
      * @param status
      */
     setStatus(status: Status): void {
-        this.status = status;
+        this.#status = status;
     }
 }
 
