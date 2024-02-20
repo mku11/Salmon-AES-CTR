@@ -39,6 +39,11 @@ Resource.designer.cs
 
 inspectionProfiles
 deploymentTargetDropDown.xml
+<<<<<<< HEAD
+=======
+
+node_modules
+>>>>>>> wip-typescript
 /libs/projects/salmon-libs-gcc-linux/lib
 .DS_Store
 DerivedData
@@ -55,5 +60,12 @@ xcuserdata
 *.dll
 *.exe
 /libs/projects/salmon-libs-python/main.py
+<<<<<<< HEAD
 
 node_modules
+=======
+/libs/projects/SalmonLibsTypeScript.VS2022/SalmonLibsTypeScript.VS2022/lib
+/libs/projects/SalmonLibsTypeScript.VS2022/SalmonLibsTypeScript.VS2022/eslintreport.txt
+/libs/projects/SalmonLibsTypeScript.VS2022/SalmonLibsTypeScript.VS2022/lintreport.txt
+/libs/projects/SalmonLibsTypeScript.VS2022/SalmonLibsTypeScript.VS2022/test/data
+>>>>>>> wip-typescript

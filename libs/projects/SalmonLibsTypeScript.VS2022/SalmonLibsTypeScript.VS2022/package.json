@@ -1,0 +1,50 @@
+{
+  "name": "salmonlibstypescript.vs2022",
+  "version": "1.0.0",
+  "description": "",
+  "main": "app.js",
+  "scripts": {
+    "build": "tsc --build",
+    "clean": "tsc --build --clean",
+    "test": "jest",
+    "lint": "tslint --config tslint.json --project tsconfig.json",
+    "eslint": "eslint ./test/**/*.js --ext .js"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "devDependencies": {
+    "@types/node": "^20.11.19",
+    "@typescript-eslint/eslint-plugin": "^6.13.2",
+    "@typescript-eslint/parser": "^6.13.2",
+    "babel-eslint": "^10.1.0",
+    "eslint": "^8.55.0",
+    "eslint-plugin-import": "^2.29.1",
+    "npx": "^10.2.2",
+    "tslint-no-circular-imports": "^0.7.0",
+    "typescript": "^5.3.3"
+  },
+  "dependencies": {
+    "jest": "^29.7.0",
+    "jest-editor-support": "^31.1.2"
+  },
+  "jest": {
+    "rootDir": "./test/",
+    "moduleFileExtensions": [
+      "js",
+      "jsx"
+    ],
+    "moduleDirectories": [
+      "node_modules"
+    ],
+    "setupFilesAfterEnv": [
+      "<rootDir>/jest.setup.js"
+    ],
+    "testEnvironment": "node",
+    "testTimeout": 60000,
+    "testMatch": [
+      "**/*.test.(js)"
+    ]
+  },
+  "type": "module"
+}
