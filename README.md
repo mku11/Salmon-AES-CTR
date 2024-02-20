@@ -158,10 +158,15 @@ SalmonFile root = drive.getVirtualRoot();
 SalmonFile[] files = root.listFiles();
 SalmonFile file = root.getChild("file1.txt");
 
-// now read/seek from the stream using parallel threads and caching:
-SalmonFileInputStream inputStream = new SalmonFileInputStream(file, 2, 4 * 1024 * 1024, 2, 256 * 1024);
+// get a stream that you can read/decrypt the data from:
+SalmonStream stream = file.getInputStream();
 inputStream.read(...);
 inputStream.seek(...);
+
+// or use a more powerful SalmonFileInputStream with parallel processing and caching:
+SalmonFileInputStream inputStream = new SalmonFileInputStream(file, 2, 4 * 1024 * 1024, 2, 256 * 1024);
+inputStream.read(...);
+
 ```
 
 ##### Adhoc: data encryption/decryption
