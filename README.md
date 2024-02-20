@@ -247,7 +247,7 @@ inputStream.read(...);
 For more detailed examples see the Samples folder.
 
 #### C/C++  
-There is no stream support for C/C++ but you can use the native AES-NI subroutines directly as in the example below.
+There is no stream support for C/C++ but you can use the Salmon native AES-NI subroutines directly as in the example below.
 For a full working C++ sample see: [Samples](https://github.com/mku11/Salmon-AES-CTR/tree/main/samples)
 
 ```
