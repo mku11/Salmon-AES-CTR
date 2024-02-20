@@ -221,7 +221,7 @@ InputStreamWrapper stream = new InputStreamWrapper(decStream);
 // stream.read(...); 
 ```
 
-##### Use the SalmonDrive and the virtual Filesystem API:
+##### Recommended: Use the SalmonDrive and the virtual Filesystem API:
 ```
 // If you don't want to deal with the above you can directly use the SalmonDrive
 // which will a) take care of generating secure sequential nonces, b) use a text password based key,
