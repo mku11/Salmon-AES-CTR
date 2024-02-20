@@ -135,6 +135,7 @@ Install the salmon packages like you usually do.
 ### Examples
 API usage is pretty much the same across Java/C#/Javascript/Python and various platforms with slight variations on naming conventions.  
 Worth to note that the Typescript/Javascript library api is based on async IO so make sure you await.
+It is *recommended* to use directly the SalmonDrive and the virtual drive API to create the drive with the a text password and import your files. This will take care of all the details so you don't want have to worry about them.
   
 For samples using the SalmonDrive and the sequential nonce sequencer see: [Samples](https://github.com/mku11/Salmon-AES-CTR/tree/main/samples)  
 For a full fledge demo app see: [Salmon Vault](https://github.com/mku11/Salmon-Vault)  
