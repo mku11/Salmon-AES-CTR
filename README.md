@@ -157,9 +157,9 @@ commander.importFiles(files, drive.getVirtualRoot(), false, true);
 // use the virtual filesystem API to list or directly get the file:
 SalmonFile root = drive.getVirtualRoot();
 SalmonFile[] files = root.listFiles();
-SalmonFile file = root.getChild("file.txt");
+SalmonFile file = root.getChild("file1.txt");
 
-// now read from the stream using parallel threads and caching:
+// now read/seek from the stream using parallel threads and caching:
 SalmonFileInputStream inputStream = new SalmonFileInputStream(file, 2, 4 * 1024 * 1024, 2, 256 * 1024);
 inputStream.read(...);
 inputStream.seek(...);
@@ -187,22 +187,32 @@ String encText = SalmonTextEncryptor.encryptString(text, key, nonce, true);
 String decText = SalmonTextEncryptor.decryptString(encText, key, null, true);
 ```
 
+##### Usability: Inject the SalmonStream into 3rd party code
+```
+// The C# implementation already provides a SalmonStream that is a standard Stream and you can use anywhere with other libaries.
+// Though if you work with other languages and need to use it with other libaries you have to wrap the SalmonStream
+// to a platform standard stream implementation for the language/platform you work on.
+//
+// Currently the following are provided:
+// Java: InputStreamWrapper extends InputStream
+// Typescript/Javascript: ReadableStreamWrapper extends ReadableStream
+// Python: BufferedIOWrapper(BufferedIOBase)
+
+SalmonStream decStream = new SalmonStream(key, nonce, EncryptionMode.Decrypt, byteStream);
+InputStreamWrapper stream = new InputStreamWrapper(decStream);
+```
+
 ##### Performance: Enable the AES-NI intrinsics
 ```
 // To set the fast native AesIntrinsics:
 SalmonStream.setAesProviderType(SalmonStream.ProviderType.AesIntrinsics);
 ```
 
-##### Usability: Inject the SalmonStream into 3rd party code
+##### Compatibility: Enable the TinyAES library
 ```
-// If you work with Java and want to inject a SalmonStream to 3rd party code to read the contents
-// Wrap it with InputStreamWrapper which is a standard Java InputStream:
-SalmonStream decStream = new SalmonStream(key, nonce, EncryptionMode.Decrypt, byteStream);
-InputStreamWrapper stream = new InputStreamWrapper(decStream);
-// somewhere inside the 3rd party code the data will be decrypted and read transparently
-// stream.read(...); 
+// If you're platform does not support AES-NI intrinsics you can use the TinyAES library:
+SalmonStream.setAesProviderType(SalmonStream.ProviderType.TinyAES);
 ```
-
 
 For more detailed examples see the Samples folder.
 
