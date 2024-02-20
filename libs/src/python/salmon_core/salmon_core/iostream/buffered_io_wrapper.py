@@ -38,7 +38,7 @@ class BufferedIOWrapper(BufferedIOBase):
 
     def __init__(self, stream: RandomAccessStream):
         """
-         * Instantiates an InputStreamWrapper with a base stream.
+         * Instantiates an BufferedIOWrapper with a base stream.
          * @param stream The base AbsStream that you want to wrap.
         """
 

@@ -29,7 +29,7 @@ from wrapt import synchronized
 
 from salmon_core.convert.bit_converter import BitConverter
 from salmon_fs.file.ireal_file import IRealFile
-from salmon_core.iostream.input_stream_wrapper import InputStreamWrapper
+from salmon_core.iostream.buffered_io_wrapper import BufferedIOWrapper
 from salmon_core.iostream.memory_stream import MemoryStream
 from salmon_core.iostream.random_access_stream import RandomAccessStream
 from salmon_core.salmon.salmon_generator import SalmonGenerator
@@ -161,7 +161,7 @@ class SalmonFileSequencer(ISalmonSequencer):
         stream: BufferedIOBase | None = None
         output_stream: MemoryStream | None = None
         try:
-            stream = InputStreamWrapper(self.__sequenceFile.get_input_stream())
+            stream = BufferedIOWrapper(self.__sequenceFile.get_input_stream())
             output_stream = MemoryStream()
             buffer: bytearray = bytearray(32768)
             bytes_read: int
