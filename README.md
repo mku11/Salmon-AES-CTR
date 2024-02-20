@@ -33,7 +33,8 @@ Salmon is an AES-256 CTR encryption library with HMAC SHA-256 integrity, paralle
 * Tamper-Proof nonce sequences: Tampering is detected using an encrypted SHA256 checksum (Win10/11 only).
 * Admin-Protected nonce sequences: Additional protection from non-admin users (Salmon Windows Service Win10/11 only).
 
-## Applications
+### Applications
+
 For a complete showcase of the Salmon API check out the Salmon Vault app offered on several different platforms:  
 [**Salmon Vault**](https://github.com/mku11/Salmon-Vault)
 ---
