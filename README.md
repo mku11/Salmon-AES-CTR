@@ -151,8 +151,7 @@ SalmonDrive drive = SalmonDriveManager.createDrive("c:\path\to\your\drive", pass
 
 // setup our importer with 2 threads for parallel processing and import our files:
 SalmonFileCommander commander = new SalmonFileCommander(SalmonDefaultOptions.getBufferSize(), SalmonDefaultOptions.getBufferSize(), 2);
-JavaFile[] files = new JavaFile[]{new JavaFile("data/file.txt")};
-JavaFile[] files = new JavaFile[]{new JavaFile("data/file.txt")};
+JavaFile[] files = new JavaFile[]{new JavaFile("data/file1.txt"), new JavaFile("data/file2.txt")};
 commander.importFiles(files, drive.getVirtualRoot(), false, true);
 
 // use the virtual filesystem API to list or directly get the file:
