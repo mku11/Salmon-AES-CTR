@@ -141,6 +141,11 @@ export class TsFsTestHelper {
         await SalmonDriveManager.openDrive(TsFsTestHelper.VAULT_DIR_URL);
         await SalmonDriveManager.getDrive().authenticate(TestHelper.TEST_PASSWORD);
         let virtualRoot = await SalmonDriveManager.getDrive().getVirtualRoot();
+        let files = await virtualRoot.listFiles();
+        console.log("Listing files in HTTP drive:\n");
+        for(let i=0; i<files.length; i++)
+			console.log(await files[i].getBaseName() + "\n");
+            console.log("\n");
         encFile2 = await virtualRoot.getChild(TsFsTestHelper.TEST_HTTP_TINY_FILE);
         stream2 = await encFile2.getInputStream();
         decBuff = new Uint8Array(1024);

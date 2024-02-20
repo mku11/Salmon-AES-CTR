@@ -63,7 +63,7 @@ let TEST_PASSWORD = "test123";
         await decryptor.close();
         await encInputStream.close();
 
-        // Example 4: decrypt a file from an HTTP URL (readonly)
+        // Example 4: decrypt a file from an HTTP URL (standalone)
         let httpText = "This is a file with some contents";
         let httpKey = "ABCDEFGHIJKLMNOPABCDEFGHIJKLMNOP"; // 256-bit key
         let httpKeyBytes = new TextEncoder().encode(httpKey);
@@ -74,18 +74,24 @@ let TEST_PASSWORD = "test123";
         // decrypt and read data with a single call, you can also Seek() to any position before Read()
         let encBytesRead = await stream2.read(decBuff, 0, decBuff.length);
         let decString2 = new TextDecoder().decode(decBuff.slice(0, encBytesRead));
-		output.value += "Decrypted text from an HTTP file:\n" + decString2 + "\n\n";        
+		output.value += "Decrypted text from a standalone HTTP encrypted file:\n" + decString2 + "\n\n";        
         await stream2.close();
 
-        // Example 5: or decrypt a file from an HTTP URL drive (readonly)
+        // Example 5: or decrypt a file from an HTTP URL drive (readonly filesystem)
         await SalmonDriveManager.openDrive("http://localhost/saltest/test/data/vault");
         await SalmonDriveManager.getDrive().authenticate(TEST_PASSWORD);
         let virtualRoot = await SalmonDriveManager.getDrive().getVirtualRoot();
+		let files = await virtualRoot.listFiles();
+		output.value += "Listing files in HTTP drive:\n";
+		for(let i=0; i<files.length; i++) {
+			output.value += await files[i].getBaseName() + "\n";
+		}
+		output.value += "\n";
         encFile2 = await virtualRoot.getChild("tiny_test.txt");
         stream2 = await encFile2.getInputStream();
         decBuff = new Uint8Array(1024);
         // decrypt and read data with a single call, you can also Seek() to any position before Read()
         encBytesRead = await stream2.read(decBuff, 0, decBuff.length);
         decString2 = new TextDecoder().decode(decBuff.slice(0, encBytesRead));
-		output.value += "Decrypted text from an HTTP drive:\n" + decString2 + "\n\n";        
+		output.value += "Decrypted text from tiny_test.txt:\n" + decString2 + "\n\n";        
         await stream2.close();

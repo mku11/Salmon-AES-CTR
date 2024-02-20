@@ -104,9 +104,15 @@ export class JsHttpFile implements IRealFile {
     public getBaseName(): string {
         if (this.filePath == null)
             throw new Error("Filepath is not assigned");
-        let basename: string | undefined = this.filePath.split(JsHttpFile.separator).pop();
+        let nFilePath = this.filePath;
+        if(nFilePath.endsWith("/"))
+            nFilePath = nFilePath.substring(0,nFilePath.length-1);
+        let basename: string | undefined = nFilePath.split(JsHttpFile.separator).pop();
         if (basename === undefined)
             throw new Error("Could not get basename");
+        if (basename.includes("%")){
+            basename = decodeURIComponent(basename);
+        }
         return basename;
     }
 
@@ -151,15 +157,7 @@ export class JsHttpFile implements IRealFile {
      * @return
      */
     public async isDirectory(): Promise<boolean> {
-        let res: Response = (await this.getResponse());
-        if (res == null)
-            throw new Error("Could not get response");
-        if (res.headers == null)
-            throw new Error("Could not get headers");
-        let contentType: string | null = res.headers.get("Content-Type");
-        if (contentType == null)
-            throw new Error("Could not get content type");
-        return contentType.startsWith("text/html");
+        return this.filePath.endsWith("/");
     }
 
     /**
@@ -244,7 +242,7 @@ export class JsHttpFile implements IRealFile {
             let filename: string = match[1];
             if (filename.includes(":") || filename.includes(".."))
                 continue;
-            if (filename.includes("%2")){
+            if (filename.includes("%")){
                 filename = decodeURIComponent(filename);
             }
             let file: IRealFile = new JsHttpFile(this.filePath + JsHttpFile.separator + filename);
