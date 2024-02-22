@@ -72,7 +72,7 @@ public class SalmonFileSequencer implements ISalmonSequencer {
      * Create a sequence for the drive ID and auth ID provided.
      *
      * @param driveID The drive ID.
-     * @param authID  The authentication ID of the drive.
+     * @param authID  The authorization ID of the drive.
      * @throws SalmonSequenceException
      */
     @Override

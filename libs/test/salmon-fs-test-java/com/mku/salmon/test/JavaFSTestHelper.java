@@ -277,7 +277,7 @@ public class JavaFSTestHelper {
         // set to the first sequencer and create the vault
         SalmonDriveManager.setSequencer(sequencer1);
         SalmonDriveManager.createDrive(vault, TestHelper.TEST_PASSWORD);
-        SalmonDriveManager.getDrive().authenticate(TestHelper.TEST_PASSWORD);
+        SalmonDriveManager.getDrive().unlock(TestHelper.TEST_PASSWORD);
         // import a test file
         SalmonFile salmonRootDir = SalmonDriveManager.getDrive().getVirtualRoot();
         IRealFile fileToImport = new JavaFile(importFilePath);
@@ -289,7 +289,7 @@ public class JavaFSTestHelper {
         // open with another device (different sequencer) and export auth id
         SalmonDriveManager.setSequencer(sequencer2);
         SalmonDriveManager.openDrive(vault);
-        SalmonDriveManager.getDrive().authenticate(TestHelper.TEST_PASSWORD);
+        SalmonDriveManager.getDrive().unlock(TestHelper.TEST_PASSWORD);
         String authID = SalmonDriveManager.getAuthID();
         boolean success = false;
         try {
@@ -309,7 +309,7 @@ public class JavaFSTestHelper {
         //reopen with first device sequencer and export the auth file with the auth id from the second device
         SalmonDriveManager.setSequencer(sequencer1);
         SalmonDriveManager.openDrive(vault);
-        SalmonDriveManager.getDrive().authenticate(TestHelper.TEST_PASSWORD);
+        SalmonDriveManager.getDrive().unlock(TestHelper.TEST_PASSWORD);
         SalmonDriveManager.exportAuthFile(authID, vault, TestHelper.TEST_EXPORT_DIR);
         IRealFile configFile = new JavaFile(exportAuthFilePath);
         SalmonFile salmonCfgFile = new SalmonFile(configFile, SalmonDriveManager.getDrive());
@@ -325,7 +325,7 @@ public class JavaFSTestHelper {
         //reopen with second device(sequencer) and import auth file
         SalmonDriveManager.setSequencer(sequencer2);
         SalmonDriveManager.openDrive(vault);
-        SalmonDriveManager.getDrive().authenticate(TestHelper.TEST_PASSWORD);
+        SalmonDriveManager.getDrive().unlock(TestHelper.TEST_PASSWORD);
         SalmonDriveManager.importAuthFile(exportAuthFilePath);
         // now import a 3rd file
         salmonRootDir = SalmonDriveManager.getDrive().getVirtualRoot();
@@ -362,7 +362,7 @@ public class JavaFSTestHelper {
             SalmonDriveManager.setSequencer(sequencer);
             try {
                 SalmonDrive drive = SalmonDriveManager.openDrive(vaultDir);
-                drive.authenticate(TestHelper.TEST_PASSWORD);
+                drive.unlock(TestHelper.TEST_PASSWORD);
             } catch (Exception ex) {
                 SalmonDriveManager.createDrive(vaultDir, TestHelper.TEST_PASSWORD);
             }

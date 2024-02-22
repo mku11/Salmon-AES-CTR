@@ -143,7 +143,7 @@ export class SalmonDriveManager {
      */
     public static closeDrive(): void {
         if (SalmonDriveManager.#drive != null) {
-            SalmonDriveManager.#drive.close();
+            SalmonDriveManager.#drive.lock();
             SalmonDriveManager.#drive = null;
         }
     }
@@ -214,7 +214,7 @@ export class SalmonDriveManager {
     }
 
     /**
-     * @param targetAuthID The authentication id of the target device.
+     * @param targetAuthID The authorization id of the target device.
      * @param targetDir    The target dir the file will be written to.
      * @param filename     The filename of the auth config file.
      * @throws Exception
@@ -249,7 +249,7 @@ export class SalmonDriveManager {
     }
 
     /**
-     * Create a nonce sequence for the drive id and the authentication id provided. Should be called
+     * Create a nonce sequence for the drive id and the authorization id provided. Should be called
      * once per driveID/authID combination.
      *
      * @param driveID The driveID
@@ -267,7 +267,7 @@ export class SalmonDriveManager {
      * once per driveID/authID combination.
      *
      * @param driveID Drive ID.
-     * @param authID  Authentication ID.
+     * @param authID  Authorization ID.
      * @throws Exception
      */
     static initSequence(driveID: Uint8Array, authID: Uint8Array): void {
@@ -296,9 +296,9 @@ export class SalmonDriveManager {
     }
 
     /**
-     * Verify the authentication id with the current drive auth id.
+     * Verify the authorization id with the current drive auth id.
      *
-     * @param authID The authentication id to verify.
+     * @param authID The authorization id to verify.
      * @return
      * @throws Exception
      */
@@ -321,8 +321,8 @@ export class SalmonDriveManager {
     /**
      * Get the app drive pair configuration properties for this drive
      *
-     * @param authFile The encrypted authentication file.
-     * @return The decrypted authentication file.
+     * @param authFile The encrypted authorization file.
+     * @return The decrypted authorization file.
      * @throws Exception
      */
     public static async getAuthConfig(authFile: IRealFile): Promise<SalmonAuthConfig> {
@@ -338,12 +338,12 @@ export class SalmonDriveManager {
         let driveConfig: SalmonAuthConfig = new SalmonAuthConfig();
         await driveConfig.init(ms.toArray());
         if (!this.#verifyAuthID(driveConfig.getAuthID()))
-            throw new SalmonSecurityException("Could not authorize this device, the authentication id does not match");
+            throw new SalmonSecurityException("Could not authorize this device, the authorization id does not match");
         return driveConfig;
     }
 
     /**
-     * Get the authentication ID for the current device.
+     * Get the authorization ID for the current device.
      *
      * @return
      * @throws SalmonSequenceException
@@ -373,11 +373,6 @@ export class SalmonDriveManager {
             throw new Error("Cannot create config, no root found, make sure you init the drive first");
         let configFile: IRealFile | null = await realRoot.getChild(SalmonDrive.getConfigFilename());
 
-        // if it's an existing config that we need to update with
-        // the new password then we prefer to be authenticate
-        // TODO: we should probably call Authenticate() rather than assume
-        //  that the key != null. Though the user can anyway manually delete the config file
-        //  so it doesn't matter.
         if (driveKey == null && configFile != null && await configFile.exists())
             throw new SalmonAuthException("Not authenticated");
 

@@ -35,7 +35,7 @@ public interface ISalmonSequencer {
     /**
      * Create a sequence.
      * @param driveID The drive ID.
-     * @param authID The authentication ID of the drive.
+     * @param authID The authorization ID of the drive.
      * @throws SalmonSequenceException
      */
     void createSequence(String driveID, String authID) throws SalmonSequenceException;

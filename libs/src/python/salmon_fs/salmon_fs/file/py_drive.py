@@ -80,15 +80,15 @@ class PyDrive(SalmonDrive):
         py_file: PyFile = PyFile(filepath)
         return py_file
 
-    def _on_authentication_success(self):
+    def _on_unlock_success(self):
         """
-         * When authentication succeed.
+         * When authorization succeed.
         """
         pass
 
-    def _on_authentication_error(self):
+    def _on_unlock_error(self):
         """
-         * When authentication succeeds.
+         * When authorization succeeds.
         """
         pass
 

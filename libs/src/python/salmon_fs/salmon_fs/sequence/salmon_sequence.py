@@ -38,9 +38,9 @@ class SalmonSequence:
     def __init__(self, drive_id: str, auth_id: str | None, next_nonce: bytearray | None, max_nonce: bytearray | None,
                  status: SalmonSequence.Status):
         """
-         * Instantiate a nonce sequence for a drive with the provided authentication id.
+         * Instantiate a nonce sequence for a drive with the provided authorization id.
          * @param drive_id The drive ID.
-         * @param auth_id The authentication id for this device and drive.
+         * @param auth_id The authorization id for this device and drive.
          * @param next_nonce The next available nonce to be used.
          * @param max_nonce The maximum nonce.
          * @param status The status of the sequencer.
@@ -53,7 +53,7 @@ class SalmonSequence:
 
         self.__authID: str
         """
-         * The authentication id of the device for the specific drive.
+         * The authorization id of the device for the specific drive.
         """
 
         self.__nextNonce: bytearray
@@ -116,14 +116,14 @@ class SalmonSequence:
 
     def get_auth_id(self) -> str:
         """
-         * Get the authentication id of the device.
+         * Get the authorization id of the device.
          * @return
         """
         return self.__authID
 
     def set_auth_id(self, auth_id: str):
         """
-         * Set the authentication ID of the device.
+         * Set the authorization ID of the device.
          * @param auth_id
         """
         self.__authID = auth_id

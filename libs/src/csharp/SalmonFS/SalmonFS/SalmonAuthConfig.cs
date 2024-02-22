@@ -63,7 +63,7 @@ public class SalmonAuthConfig
 	/// </summary>
 	///  <param name="authConfigFile"></param>
     ///  <param name="drive">The drive you want to create an auth config for.</param>
-    ///  <param name="targetAuthID">Authentication ID of the target device.</param>
+    ///  <param name="targetAuthID">Authorization ID of the target device.</param>
     ///  <param name="targetStartingNonce">Starting nonce for the target device.</param>
     ///  <param name="targetMaxNonce">Maximum nonce for the target device.</param>
     ///  <exception cref="Exception"></exception>

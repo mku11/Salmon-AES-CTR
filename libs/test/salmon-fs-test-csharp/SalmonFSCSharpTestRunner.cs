@@ -46,7 +46,7 @@ public class SalmonFSCSharpTestRunner : SalmonCSharpTestRunner
     }
 
     [TestMethod]
-    public void ShouldAuthenticateNegative()
+    public void ShouldUnlockNegative()
     {
         string vaultDir = TestHelper.GenerateFolder(TEST_VAULT2_DIR);
         SalmonFileSequencer sequencer = new SalmonFileSequencer(new DotNetFile(vaultDir + "/" + TestHelper.TEST_SEQUENCER_FILE1), new SalmonSequenceSerializer());
@@ -57,7 +57,7 @@ public class SalmonFSCSharpTestRunner : SalmonCSharpTestRunner
         rootDir.ListFiles();
         try
         {
-            SalmonDriveManager.Drive.Authenticate(TestHelper.TEST_FALSE_PASSWORD);
+            SalmonDriveManager.Drive.Unlock(TestHelper.TEST_FALSE_PASSWORD);
         }
         catch (SalmonAuthException)
         {
@@ -68,14 +68,14 @@ public class SalmonFSCSharpTestRunner : SalmonCSharpTestRunner
     }
 
     [TestMethod]
-    public void ShouldCatchNotAuthenticatedNegative()
+    public void ShouldCatchNotUnlockdNegative()
     {
         string vaultDir = TestHelper.GenerateFolder(TEST_VAULT2_DIR);
         SalmonFileSequencer sequencer = new SalmonFileSequencer(new DotNetFile(vaultDir + "/" + TestHelper.TEST_SEQUENCER_FILE1), new SalmonSequenceSerializer());
         SalmonDriveManager.Sequencer = sequencer;
         SalmonDriveManager.CreateDrive(vaultDir, TestHelper.TEST_PASSWORD);
         bool wrongPassword = false;
-        SalmonDriveManager.CloseDrive();
+        SalmonDriveManager.LockDrive();
         try
         {
             SalmonDriveManager.OpenDrive(vaultDir);
@@ -92,18 +92,18 @@ public class SalmonFSCSharpTestRunner : SalmonCSharpTestRunner
     }
 
     [TestMethod]
-    public void ShouldAuthenticatePositive()
+    public void ShouldUnlockPositive()
     {
         string vaultDir = TestHelper.GenerateFolder(TEST_VAULT2_DIR);
         SalmonFileSequencer sequencer = new SalmonFileSequencer(new DotNetFile(vaultDir + "/" + TestHelper.TEST_SEQUENCER_FILE1), new SalmonSequenceSerializer());
         SalmonDriveManager.Sequencer = sequencer;
         SalmonDriveManager.CreateDrive(vaultDir, TestHelper.TEST_PASSWORD);
         bool wrongPassword = false;
-        SalmonDriveManager.CloseDrive();
+        SalmonDriveManager.LockDrive();
         try
         {
             SalmonDriveManager.OpenDrive(vaultDir);
-            SalmonDriveManager.Drive.Authenticate(TestHelper.TEST_PASSWORD);
+            SalmonDriveManager.Drive.Unlock(TestHelper.TEST_PASSWORD);
             SalmonFile virtualRoot = SalmonDriveManager.Drive.VirtualRoot;
         }
         catch (SalmonAuthException)
@@ -536,14 +536,14 @@ public class SalmonFSCSharpTestRunner : SalmonCSharpTestRunner
         bool wrongPassword = false;
         SalmonFile rootDir = SalmonDriveManager.Drive.VirtualRoot;
         rootDir.ListFiles();
-        SalmonDriveManager.Drive.Close();
+        SalmonDriveManager.Drive.Lock();
 
         // reopen but open the fs folder instead it should still login
         try
         {
             SalmonDrive drive = SalmonDriveManager.OpenDrive(vaultDir + "/fs");
             Assert.IsTrue(drive.HasConfig());
-            SalmonDriveManager.Drive.Authenticate(TestHelper.TEST_PASSWORD);
+            SalmonDriveManager.Drive.Unlock(TestHelper.TEST_PASSWORD);
         }
         catch (SalmonAuthException)
         {

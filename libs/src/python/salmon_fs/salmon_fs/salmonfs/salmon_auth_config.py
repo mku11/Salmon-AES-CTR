@@ -53,7 +53,7 @@ class SalmonAuthConfig:
 
     def get_auth_id(self) -> bytearray:
         """
-         * Get the authentication ID for the target device.
+         * Get the authorization ID for the target device.
          * @return
         """
         return self.__authID
@@ -102,7 +102,7 @@ class SalmonAuthConfig:
          * The new device will then be authorized editing operations ie: import, rename files, etc.
          * @param auth_config_file
          * @param drive The drive you want to create an auth config for.
-         * @param target_auth_id Authentication ID of the target device.
+         * @param target_auth_id authorization ID of the target device.
          * @param target_starting_nonce Starting nonce for the target device.
          * @param target_max_nonce Maximum nonce for the target device.
          * @throws Exception

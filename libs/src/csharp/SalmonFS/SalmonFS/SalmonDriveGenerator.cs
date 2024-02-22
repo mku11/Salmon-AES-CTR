@@ -77,9 +77,9 @@ public class SalmonDriveGenerator
     }
 
     /// <summary>
-    ///  Generate a secure random authentication ID.
+    ///  Generate a secure random authorization ID.
 	/// </summary>
-	///  <returns>The authentication Id (16 bytes).</returns>
+	///  <returns>The authorization Id (16 bytes).</returns>
     public static byte[] GenerateAuthId()
     {
         return SalmonGenerator.GetSecureRandomBytes(AUTH_ID_SIZE);

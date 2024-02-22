@@ -71,8 +71,8 @@ export class SalmonDriveGenerator {
     }
 
     /**
-     * Generate a secure random authentication ID.
-     * @return The authentication Id (16 bytes).
+     * Generate a secure random authorization ID.
+     * @return The authorization Id (16 bytes).
      */
     public static generateAuthId(): Uint8Array {
         return SalmonGenerator.getSecureRandomBytes(SalmonDriveGenerator.AUTH_ID_SIZE);

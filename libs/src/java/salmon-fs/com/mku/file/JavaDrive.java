@@ -77,7 +77,7 @@ public class JavaDrive extends SalmonDrive {
      * When authentication succeed.
      */
     @Override
-    protected void onAuthenticationSuccess() {
+    protected void onUnlockSuccess() {
 
     }
 
@@ -85,7 +85,7 @@ public class JavaDrive extends SalmonDrive {
      * When authentication succeeds.
      */
     @Override
-    protected void onAuthenticationError() {
+    protected void onUnlockError() {
 
     }
 }

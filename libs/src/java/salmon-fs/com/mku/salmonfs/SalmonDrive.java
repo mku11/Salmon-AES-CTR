@@ -66,7 +66,7 @@ public abstract class SalmonDrive {
 	 * @param createIfNotExists Create the drive if it does not exist
      */
     public SalmonDrive(String realRootPath, boolean createIfNotExists) {
-        close();
+        lock();
         if (realRootPath == null)
             return;
         realRoot = getRealFile(realRootPath, true);
@@ -100,14 +100,14 @@ public abstract class SalmonDrive {
     public abstract IRealFile getRealFile(String filepath, boolean isDirectory);
 
     /**
-     * Method is called when the user is authenticated
+     * Method is called when the drive is unlocked
      */
-    protected abstract void onAuthenticationSuccess();
+    protected abstract void onUnlockSuccess();
 
     /**
-     * Method is called when the user authentication has failed
+     * Method is called when unlocking the drive has failed
      */
-    protected abstract void onAuthenticationError();
+    protected abstract void onUnlockError();
 
     public static String getConfigFilename() {
         return configFilename;
@@ -153,7 +153,7 @@ public abstract class SalmonDrive {
      * Clear sensitive information when app is close.
      */
     private void registerOnProcessClose() {
-        Runtime.getRuntime().addShutdownHook(new Thread(this::close));
+        Runtime.getRuntime().addShutdownHook(new Thread(this::lock));
     }
 
     /**
@@ -223,7 +223,7 @@ public abstract class SalmonDrive {
      *                 This password will be used to derive the master key that will be used to
      *                 encrypt the combined key (encryption key + hash key)
      */
-    //TODO: partial refactor to SalmonDriveConfig
+
     private void createConfig(String password)
             throws SalmonAuthException, IOException, SalmonSecurityException,
             SalmonIntegrityException, SalmonSequenceException {
@@ -232,13 +232,8 @@ public abstract class SalmonDrive {
 
         IRealFile configFile = realRoot.getChild(configFilename);
 
-        // if it's an existing config that we need to update with
-        // the new password then we prefer to be authenticate
-        // TODO: we should probably call Authenticate() rather than assume
-        //  that the key != null. Though the user can anyway manually delete the config file
-        //  so it doesn't matter.
         if (driveKey == null && configFile != null && configFile.exists())
-            throw new SalmonAuthException("Not authenticated");
+            throw new SalmonAuthException("Not authorized");
 
         // delete the old config file and create a new one
         if (configFile != null && configFile.exists())
@@ -309,8 +304,8 @@ public abstract class SalmonDrive {
     public SalmonFile getVirtualRoot() throws SalmonAuthException {
         if (realRoot == null || !realRoot.exists())
             return null;
-        if (!isAuthenticated())
-            throw new SalmonAuthException("Not authenticated");
+        if (!isUnlocked())
+            throw new SalmonAuthException("Not authorized");
         return virtualRoot;
     }
 	
@@ -323,7 +318,7 @@ public abstract class SalmonDrive {
      *
      * @param password The password.
      */
-    public void authenticate(String password) throws Exception {
+    public void unlock(String password) throws Exception {
         SalmonStream stream = null;
         try {
             if (password == null) {
@@ -364,9 +359,9 @@ public abstract class SalmonDrive {
             setKey(masterKey, driveKey, hashKey, iterations);
             this.driveID = driveID;
 			initFS();
-            onAuthenticationSuccess();
+            onUnlockSuccess();
         } catch (Exception ex) {
-			onAuthenticationError();
+			onUnlockError();
             throw ex;
         } finally {
             if (stream != null)
@@ -400,7 +395,7 @@ public abstract class SalmonDrive {
         byte[] hash = SalmonIntegrity.calculateHash(hashProvider, data, 0, data.length, hashKey, null);
         for (int i = 0; i < hashKey.length; i++)
             if (hashSignature[i] != hash[i])
-                throw new SalmonAuthException("Could not authenticate");
+                throw new SalmonAuthException("Could not authorize");
     }
 
     /**
@@ -409,15 +404,15 @@ public abstract class SalmonDrive {
      * @throws Exception
      */
     byte[] getNextNonce() throws SalmonAuthException, SalmonSequenceException, SalmonRangeExceededException {
-        if (!isAuthenticated())
-            throw new SalmonAuthException("Not authenticated");
+        if (!isUnlocked())
+            throw new SalmonAuthException("Not authorized");
         return SalmonDriveManager.getNextNonce(this);
     }
 
     /**
-     * Returns true if password authentication has succeeded.
+     * Returns true if password authorization has succeeded.
      */
-    public boolean isAuthenticated() {
+    public boolean isUnlocked() {
         SalmonKey key = getKey();
         if (key == null)
             return false;
@@ -500,9 +495,9 @@ public abstract class SalmonDrive {
     }
 
     /**
-     * Close the drive and associated resources.
+     * Lock the drive and close associated resources.
      */
-    public void close() {
+    public void lock() {
         realRoot = null;
         virtualRoot = null;
         driveID = null;

@@ -113,22 +113,22 @@ public class AndroidDrive : SalmonDrive
     }
 
     /// <summary>
-    ///  Fired when authentication succeeds.
+    ///  Fired when drive unlocks
 	/// </summary>
 	///
     override
-    protected void OnAuthenticationSuccess()
+    protected void OnUnlockSuccess()
     {
         AndroidSharedFileObserver.ClearFileObservers();
         ClearCache(context.CacheDir);
     }
 
     /// <summary>
-    ///  Fired when authentication fails.
+    ///  Fired when authorization fails.
 	/// </summary>
 	///
     override
-    protected void OnAuthenticationError()
+    protected void OnUnlockError()
     {
         AndroidSharedFileObserver.ClearFileObservers();
         ClearCache(context.CacheDir);

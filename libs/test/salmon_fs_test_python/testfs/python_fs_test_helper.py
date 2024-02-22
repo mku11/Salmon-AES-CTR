@@ -303,7 +303,7 @@ class PythonFSTestHelper:
         # set to the first sequencer and create the vault
         SalmonDriveManager.set_sequencer(sequencer1)
         SalmonDriveManager.create_drive(vault, TestHelper.TEST_PASSWORD)
-        SalmonDriveManager.get_drive().authenticate(TestHelper.TEST_PASSWORD)
+        SalmonDriveManager.get_drive().unlock(TestHelper.TEST_PASSWORD)
         # import a test file
         salmon_root_dir: SalmonFile = SalmonDriveManager.get_drive().get_virtual_root()
         file_to_import: IRealFile = PyFile(import_file_path)
@@ -316,7 +316,7 @@ class PythonFSTestHelper:
         # open with another device (different sequencer) and export auth id
         SalmonDriveManager.set_sequencer(sequencer2)
         SalmonDriveManager.open_drive(vault)
-        SalmonDriveManager.get_drive().authenticate(TestHelper.TEST_PASSWORD)
+        SalmonDriveManager.get_drive().unlock(TestHelper.TEST_PASSWORD)
         auth_id: str = SalmonDriveManager.get_auth_id()
         success: bool = False
         try:
@@ -334,7 +334,7 @@ class PythonFSTestHelper:
         # reopen with first device sequencer and export the auth file with the auth id from the second device
         SalmonDriveManager.set_sequencer(sequencer1)
         SalmonDriveManager.open_drive(vault)
-        SalmonDriveManager.get_drive().authenticate(TestHelper.TEST_PASSWORD)
+        SalmonDriveManager.get_drive().unlock(TestHelper.TEST_PASSWORD)
         SalmonDriveManager.export_auth_file(auth_id, vault, TestHelper.TEST_EXPORT_DIR)
         config_file: IRealFile = PyFile(export_auth_file_path)
         salmon_cfg_file: SalmonFile = SalmonFile(config_file, SalmonDriveManager.get_drive())
@@ -351,7 +351,7 @@ class PythonFSTestHelper:
         # reopen with second device(sequencer) and import auth file
         SalmonDriveManager.set_sequencer(sequencer2)
         SalmonDriveManager.open_drive(vault)
-        SalmonDriveManager.get_drive().authenticate(TestHelper.TEST_PASSWORD)
+        SalmonDriveManager.get_drive().unlock(TestHelper.TEST_PASSWORD)
         SalmonDriveManager.import_auth_file(export_auth_file_path)
         # now import a 3rd file
         salmon_root_dir = SalmonDriveManager.get_drive().get_virtual_root()
@@ -395,7 +395,7 @@ class PythonFSTestHelper:
             SalmonDriveManager.set_sequencer(sequencer)
             try:
                 drive: SalmonDrive = SalmonDriveManager.open_drive(vault_dir)
-                drive.authenticate(TestHelper.TEST_PASSWORD)
+                drive.unlock(TestHelper.TEST_PASSWORD)
             except Exception as ex:
                 SalmonDriveManager.create_drive(vault_dir, TestHelper.TEST_PASSWORD)
             root_dir: SalmonFile = SalmonDriveManager.get_drive().get_virtual_root()

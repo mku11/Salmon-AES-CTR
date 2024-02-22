@@ -382,9 +382,8 @@ export class TestHelper {
 
         // creating enormous files to test is overkill and since the law was made for man
         // we execute a "private" method
-        //TODO: add # prefix to make private properties
         try {
-            stream.transformer.increaseCounter(counter);
+            stream.getTransformer().increaseCounter(counter);
         } catch (ex) {
             console.error(ex);
             if (typeof ex.getCause !== 'undefined' && ex.getCause() != null)

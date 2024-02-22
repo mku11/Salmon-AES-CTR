@@ -101,7 +101,7 @@ export abstract class SalmonAES256CTRTransformer implements ISalmonCTRTransforme
      *
      * @param value value to increase counter by
      */
-    protected increaseCounter(value: number): void {
+    public increaseCounter(value: number): void {
         if (this.#counter == null || this.#nonce == null) //TODO: ToSync
             throw new SalmonSecurityException("No counter, run init first");
         if (value < 0)

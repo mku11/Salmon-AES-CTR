@@ -31,12 +31,11 @@ import { SalmonSecurityException } from "./salmon_security_exception.js";
 import { SalmonAES256CTRTransformer } from "./transform/salmon_aes256_ctr_transformer.js";
 import { decryptData } from "./salmon_decryptor_helper.js";
 
-const workerPath = './lib/salmon-core/salmon/salmon_decryptor_worker.js';
-
 /**
  * Utility class that decrypts byte arrays.
  */
 export class SalmonDecryptor {
+    static #workerPath = './lib/salmon-core/salmon/salmon_decryptor_worker.js';
 
     /**
      * The number of parallel threads to use.
@@ -195,7 +194,7 @@ export class SalmonDecryptor {
             promises.push(new Promise(async (resolve, reject) => {
                 let worker: any;
                 if (typeof process !== 'object') {
-                    worker = new Worker(workerPath, { type: 'module' });
+                    worker = new Worker(SalmonDecryptor.#workerPath, { type: 'module' });
                     worker.addEventListener('message', (event: { data: unknown }) => {
                         resolve(event.data);
                     });
@@ -204,7 +203,7 @@ export class SalmonDecryptor {
                     });
                 } else {
                     const { Worker } = await import("worker_threads");
-                    worker = new Worker(workerPath);
+                    worker = new Worker(SalmonDecryptor.#workerPath);
                     worker.on('message', (event: any) => {
                         resolve(event);
                         worker.terminate();
@@ -237,5 +236,9 @@ export class SalmonDecryptor {
             console.error(err);
             throw err;
         });
+    }
+
+    public static setWorkerPath(path: string) {
+        SalmonDecryptor.#workerPath = path;
     }
 }

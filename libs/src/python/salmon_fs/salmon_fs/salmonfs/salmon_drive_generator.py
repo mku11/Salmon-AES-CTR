@@ -89,8 +89,8 @@ class SalmonDriveGenerator:
     @staticmethod
     def generate_auth_id() -> bytearray:
         """
-         * Generate a secure random authentication ID.
-         * @return The authentication Id (16 bytes).
+         * Generate a secure random authorization ID.
+         * @return The authorization Id (16 bytes).
         """
         return SalmonGenerator.get_secure_random_bytes(SalmonDriveGenerator.AUTH_ID_SIZE)
 

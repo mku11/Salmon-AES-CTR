@@ -154,7 +154,7 @@ class SalmonDriveManager:
          * Close the current drive.
         """
         if SalmonDriveManager.__drive is not None:
-            SalmonDriveManager.__drive.close()
+            SalmonDriveManager.__drive.lock()
             SalmonDriveManager.__drive = None
 
     @staticmethod
@@ -213,7 +213,7 @@ class SalmonDriveManager:
     @staticmethod
     def export_auth_file(target_auth_id: str, target_dir: str, filename: str):
         """
-         * @param target_auth_id The authentication id of the target device.
+         * @param target_auth_id The authorization id of the target device.
          * @param target_dir    The target dir the file will be written to.
          * @param filename     The filename of the auth config file.
          * @throws Exception
@@ -242,7 +242,7 @@ class SalmonDriveManager:
     @staticmethod
     def create_sequence(drive_id: bytearray, auth_id: bytearray):
         """
-         * Create a nonce sequence for the drive id and the authentication id provided. Should be called
+         * Create a nonce sequence for the drive id and the authorization id provided. Should be called
          * once per drive_id/auth_id combination.
          *
          * @param drive_id The drive_id
@@ -260,7 +260,7 @@ class SalmonDriveManager:
          * once per drive_id/auth_id combination.
          *
          * @param drive_id Drive ID.
-         * @param auth_id  Authentication ID.
+         * @param auth_id  authorization ID.
          * @throws Exception
         """
         starting_nonce: bytearray = SalmonDriveGenerator.get_starting_nonce()
@@ -285,9 +285,9 @@ class SalmonDriveManager:
     @staticmethod
     def __verify_auth_id(auth_id: bytearray) -> bool:
         """
-         * Verify the authentication id with the current drive auth id.
+         * Verify the authorization id with the current drive auth id.
          *
-         * @param auth_id The authentication id to verify.
+         * @param auth_id The authorization id to verify.
          * @return
          * @throws Exception
         """
@@ -311,8 +311,8 @@ class SalmonDriveManager:
         """
          * Get the app drive pair configuration properties for this drive
          *
-         * @param auth_file The encrypted authentication file.
-         * @return The decrypted authentication file.
+         * @param auth_file The encrypted authorization file.
+         * @return The decrypted authorization file.
          * @throws Exception
         """
         salmon_file: SalmonFile = SalmonFile(auth_file, SalmonDriveManager.get_drive())
@@ -323,13 +323,13 @@ class SalmonDriveManager:
         stream.close()
         drive_config: SalmonAuthConfig = SalmonAuthConfig(ms.to_array())
         if not SalmonDriveManager.__verify_auth_id(drive_config.get_auth_id()):
-            raise SalmonSecurityException("Could not authorize this device, the authentication id does not match")
+            raise SalmonSecurityException("Could not authorize this device, the authorization id does not match")
         return drive_config
 
     @staticmethod
     def get_auth_id() -> str:
         """
-         * Get the authentication ID for the current device.
+         * Get the authorization ID for the current device.
          *
          * @return
          * @throws SalmonSequenceException
@@ -359,14 +359,8 @@ class SalmonDriveManager:
         hash_key: bytearray | None = drive.get_key().get_hash_key()
 
         config_file: IRealFile = drive.get_real_root().get_child(SalmonDrive.get_config_filename())
-
-        # if it's an existing config that we need to update with
-        # the new password then we prefer to be authenticate
-        # TODO: we should probably call Authenticate() rather than assume
-        #  that the key is not None. Though the user can anyway manually delete the config file
-        #  so it doesn't matter.
         if drive_key is None and config_file is not None and config_file.exists():
-            raise SalmonAuthException("Not authenticated")
+            raise SalmonAuthException("Not authorized")
 
         # delete the old config file and create a new one
         if config_file is not None and config_file.exists():

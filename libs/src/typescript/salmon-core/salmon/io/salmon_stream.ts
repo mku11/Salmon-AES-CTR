@@ -802,4 +802,8 @@ export class SalmonStream extends RandomAccessStream {
     public isAllowRangeWrite(): boolean {
         return this.#allowRangeWrite;
     }
+
+    public getTransformer(): ISalmonCTRTransformer {
+        return this.#transformer;
+    }
 }

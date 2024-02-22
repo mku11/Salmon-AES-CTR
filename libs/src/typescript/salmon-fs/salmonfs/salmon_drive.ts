@@ -66,7 +66,7 @@ export abstract class SalmonDrive extends VirtualDrive {
     #sequencer: ISalmonSequencer | null = null;
 
     public async init(realRootPath: string, createIfNotExists: boolean): Promise<void> {
-        this.close();
+        this.lock();
         if (realRootPath == null)
             return;
         this.#realRoot = this.getRealFile(realRootPath, true);
@@ -103,12 +103,12 @@ export abstract class SalmonDrive extends VirtualDrive {
     /**
      * Method is called when the user is authenticated
      */
-    protected abstract onAuthenticationSuccess(): void;
+    protected abstract onUnlockSuccess(): void;
 
     /**
-     * Method is called when the user authentication has failed
+     * Method is called when unlocking the drive has failed
      */
-    protected abstract onAuthenticationError(): void;
+    protected abstract onUnlockError(): void;
 
     public static getConfigFilename(): string {
         return this.#configFilename;
@@ -189,8 +189,8 @@ export abstract class SalmonDrive extends VirtualDrive {
     public async getVirtualRoot(): Promise<VirtualFile | null> {
         if (this.#realRoot == null || !await this.#realRoot.exists())
             return null;
-        if (!this.isAuthenticated())
-            throw new SalmonAuthException("Not authenticated");
+        if (!this.isUnlocked())
+            throw new SalmonAuthException("Not authorized");
         if (this.#virtualRoot == null)
             throw new SalmonSecurityException("No virtual root, make sure you init the drive first");
         return this.#virtualRoot;
@@ -205,7 +205,7 @@ export abstract class SalmonDrive extends VirtualDrive {
      *
      * @param password The password.
      */
-    public async authenticate(password: string): Promise<void> {
+    public async unlock(password: string): Promise<void> {
         let stream: SalmonStream | null = null;
         try {
             if (password == null) {
@@ -249,9 +249,9 @@ export abstract class SalmonDrive extends VirtualDrive {
             this.setKey(masterKey, driveKey, hashKey, iterations);
             this.#driveID = driveID;
             await this.initFS();
-            this.onAuthenticationSuccess();
+            this.onUnlockSuccess();
         } catch (ex) {
-            this.onAuthenticationError();
+            this.onUnlockError();
             throw ex;
         } finally {
             if (stream != null)
@@ -298,7 +298,7 @@ export abstract class SalmonDrive extends VirtualDrive {
     getNextNonce(): Uint8Array {
         if (this.#sequencer == null)
             throw new SalmonAuthException("No sequencer found use setSequencer");
-        if (!this.isAuthenticated())
+        if (!this.isUnlocked())
             throw new SalmonAuthException("Not authenticated");
         let driveId: Uint8Array | null = this.getDriveID();
         if (driveId == null)
@@ -307,9 +307,9 @@ export abstract class SalmonDrive extends VirtualDrive {
     }
 
     /**
-     * Returns true if password authentication has succeeded.
+     * Returns true if password authorization has succeeded.
      */
-    public isAuthenticated(): boolean {
+    public isUnlocked(): boolean {
         let key: SalmonKey | null = this.getKey();
         if (key == null)
             return false;
@@ -395,9 +395,9 @@ export abstract class SalmonDrive extends VirtualDrive {
     }
 
     /**
-     * Close the drive and associated resources.
+     * Lock the drive and close associated resources.
      */
-    public close(): void {
+    public lock(): void {
         this.#realRoot = null;
         this.#virtualRoot = null;
         this.#driveID = null;

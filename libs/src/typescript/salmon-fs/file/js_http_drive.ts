@@ -65,16 +65,16 @@ export class JsHttpDrive extends SalmonDrive {
     }
 
     /**
-     * When authentication succeed.
+     * When authorization succeed.
      */
-    protected override onAuthenticationSuccess(): void {
+    protected override onUnlockSuccess(): void {
 
     }
 
     /**
-     * When authentication succeeds.
+     * When authorization succeeds.
      */
-    protected override onAuthenticationError(): void {
+    protected override onUnlockError(): void {
 
     }
 

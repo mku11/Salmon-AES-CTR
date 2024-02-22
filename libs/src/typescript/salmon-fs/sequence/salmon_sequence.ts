@@ -32,7 +32,7 @@ export class SalmonSequence {
     #driveID: string;
 
     /**
-     * The authentication id of the device for the specific drive.
+     * The authorization id of the device for the specific drive.
      */
     #authID: string;
 
@@ -52,9 +52,9 @@ export class SalmonSequence {
     #status: Status;
 
     /**
-     * Instantiate a nonce sequence for a drive with the provided authentication id.
+     * Instantiate a nonce sequence for a drive with the provided authorization id.
      * @param driveID The drive ID.
-     * @param authID The authentication id for this device and drive.
+     * @param authID The authorization id for this device and drive.
      * @param nextNonce The next available nonce to be used.
      * @param maxNonce The maximum nonce.
      * @param status The status of the sequencer.
@@ -84,7 +84,7 @@ export class SalmonSequence {
     }
 
     /**
-     * Get the authentication id of the device.
+     * Get the authorization id of the device.
      * @return
      */
     public getAuthID(): string {
@@ -92,7 +92,7 @@ export class SalmonSequence {
     }
 
     /**
-     * Set the authentication ID of the device.
+     * Set the authorization ID of the device.
      * @param authID
      */
     setAuthID(authID: string): void {

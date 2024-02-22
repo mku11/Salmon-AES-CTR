@@ -258,19 +258,19 @@ public class CSharpFSTestHelper
         // set to the first sequencer and create the vault
         SalmonDriveManager.Sequencer = sequencer1;
         SalmonDriveManager.CreateDrive(vault, TestHelper.TEST_PASSWORD);
-        SalmonDriveManager.Drive.Authenticate(TestHelper.TEST_PASSWORD);
+        SalmonDriveManager.Drive.Unlock(TestHelper.TEST_PASSWORD);
         // import a test file
         SalmonFile salmonRootDir = SalmonDriveManager.Drive.VirtualRoot;
         IRealFile fileToImport = new DotNetFile(importFilePath);
         SalmonFileImporter fileImporter = new SalmonFileImporter(0, 0);
         SalmonFile salmonFileA1 = fileImporter.ImportFile(fileToImport, salmonRootDir, null, false, false, null);
         long nonceA1 = BitConverter.ToLong(salmonFileA1.RequestedNonce, 0, SalmonGenerator.NONCE_LENGTH);
-        SalmonDriveManager.CloseDrive();
+        SalmonDriveManager.LockDrive();
 
         // open with another device (different sequencer) and export auth id
         SalmonDriveManager.Sequencer = sequencer2;
         SalmonDriveManager.OpenDrive(vault);
-        SalmonDriveManager.Drive.Authenticate(TestHelper.TEST_PASSWORD);
+        SalmonDriveManager.Drive.Unlock(TestHelper.TEST_PASSWORD);
         string authID = SalmonDriveManager.GetAuthID();
         bool success = false;
         try
@@ -288,12 +288,12 @@ public class CSharpFSTestHelper
         }
 
         Assert.IsFalse(success);
-        SalmonDriveManager.CloseDrive();
+        SalmonDriveManager.LockDrive();
 
         //reopen with first device sequencer and export the auth file with the auth id from the second device
         SalmonDriveManager.Sequencer = sequencer1;
         SalmonDriveManager.OpenDrive(vault);
-        SalmonDriveManager.Drive.Authenticate(TestHelper.TEST_PASSWORD);
+        SalmonDriveManager.Drive.Unlock(TestHelper.TEST_PASSWORD);
         SalmonDriveManager.ExportAuthFile(authID, vault, TestHelper.TEST_EXPORT_DIR);
         IRealFile configFile = new DotNetFile(exportAuthFilePath);
         SalmonFile salmonCfgFile = new SalmonFile(configFile, SalmonDriveManager.Drive);
@@ -304,12 +304,12 @@ public class CSharpFSTestHelper
         fileImporter = new SalmonFileImporter(0, 0);
         SalmonFile salmonFileA2 = fileImporter.ImportFile(fileToImport, salmonRootDir, null, false, false, null);
         long nonceA2 = BitConverter.ToLong(salmonFileA2.FileNonce, 0, SalmonGenerator.NONCE_LENGTH);
-        SalmonDriveManager.CloseDrive();
+        SalmonDriveManager.LockDrive();
 
         //reopen with second device(sequencer) and import auth file
         SalmonDriveManager.Sequencer = sequencer2;
         SalmonDriveManager.OpenDrive(vault);
-        SalmonDriveManager.Drive.Authenticate(TestHelper.TEST_PASSWORD);
+        SalmonDriveManager.Drive.Unlock(TestHelper.TEST_PASSWORD);
         SalmonDriveManager.ImportAuthFile(exportAuthFilePath);
         // now import a 3rd file
         salmonRootDir = SalmonDriveManager.Drive.VirtualRoot;
@@ -318,7 +318,7 @@ public class CSharpFSTestHelper
         long nonceB1 = BitConverter.ToLong(salmonFileB1.FileNonce, 0, SalmonGenerator.NONCE_LENGTH);
         SalmonFile salmonFileB2 = fileImporter.ImportFile(fileToImport, salmonRootDir, null, false, false, null);
         long nonceB2 = BitConverter.ToLong(salmonFileB2.FileNonce, 0, SalmonGenerator.NONCE_LENGTH);
-        SalmonDriveManager.CloseDrive();
+        SalmonDriveManager.LockDrive();
 
 
         Assert.AreEqual(nonceA1, nonceCfg - 1);
@@ -343,7 +343,7 @@ public class CSharpFSTestHelper
             try
             {
                 SalmonDrive drive = SalmonDriveManager.OpenDrive(vaultDir);
-                drive.Authenticate(TestHelper.TEST_PASSWORD);
+                drive.Unlock(TestHelper.TEST_PASSWORD);
             }
             catch (Exception ex)
             {

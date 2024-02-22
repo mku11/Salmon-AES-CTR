@@ -139,7 +139,7 @@ export class TsFsTestHelper {
 
         // Example 5: or decrypt a file from an HTTP URL drive (readonly)
         await SalmonDriveManager.openDrive(TsFsTestHelper.VAULT_DIR_URL);
-        await SalmonDriveManager.getDrive().authenticate(TestHelper.TEST_PASSWORD);
+        await SalmonDriveManager.getDrive().unlock(TestHelper.TEST_PASSWORD);
         let virtualRoot = await SalmonDriveManager.getDrive().getVirtualRoot();
         let files = await virtualRoot.listFiles();
         console.log("Listing files in HTTP drive:\n");

@@ -39,7 +39,7 @@ class ISalmonSequencer(ABC):
         """
          * Create a sequence.
          * @param drive_id The drive ID.
-         * @param auth_id The authentication ID of the drive.
+         * @param auth_id The authorization ID of the drive.
          * @throws SalmonSequenceException
         """
         pass

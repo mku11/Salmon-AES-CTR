@@ -111,19 +111,19 @@ public class AndroidDrive extends SalmonDrive {
     }
 
     /**
-     * Fired when authentication succeeds.
+     * Fired when unlock succeeds.
      */
     @Override
-    public void onAuthenticationSuccess() {
+    public void onUnlockSuccess() {
         AndroidSharedFileObserver.clearFileObservers();
         clearCache(context.getCacheDir());
     }
 
     /**
-     * Fired when authentication fails.
+     * Fired when unlock fails.
      */
     @Override
-    protected void onAuthenticationError() {
+    protected void onUnlockError() {
         AndroidSharedFileObserver.clearFileObservers();
         clearCache(context.getCacheDir());
     }

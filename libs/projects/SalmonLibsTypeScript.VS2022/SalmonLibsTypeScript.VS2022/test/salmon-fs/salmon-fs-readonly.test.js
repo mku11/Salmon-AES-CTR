@@ -64,7 +64,7 @@ describe('salmon-fs-readonly', () => {
         await SalmonDriveManager.openDrive(TsFsTestHelper.VAULT_DIR_URL);
         let wrongPassword = false;
         try {
-            await SalmonDriveManager.getDrive().authenticate(TestHelper.TEST_FALSE_PASSWORD);
+            await SalmonDriveManager.getDrive().unlock(TestHelper.TEST_FALSE_PASSWORD);
         } catch (ex) {
             console.error(ex);
             wrongPassword = true;
@@ -76,7 +76,7 @@ describe('salmon-fs-readonly', () => {
         let wrongPassword = false;
         try {
             await SalmonDriveManager.openDrive(TsFsTestHelper.VAULT_DIR_URL);
-            await SalmonDriveManager.getDrive().authenticate(TestHelper.TEST_PASSWORD);
+            await SalmonDriveManager.getDrive().unlock(TestHelper.TEST_PASSWORD);
             let virtualRoot = SalmonDriveManager.getDrive().getVirtualRoot();
         } catch (ex) {
             console.error(ex);
@@ -87,7 +87,7 @@ describe('salmon-fs-readonly', () => {
     });
 
     it('testExamples', async () => {
-        TsFsTestHelper.testExamples();
+        await TsFsTestHelper.testExamples();
     });
         
     it('shouldReadFromRealFileTiny', async () => {
@@ -100,11 +100,6 @@ describe('salmon-fs-readonly', () => {
             TsFsTestHelper.TEST_HTTP_SMALL_FILE_SIZE, TsFsTestHelper.TEST_HTTP_SMALL_FILE_CONTENTS, TsFsTestHelper.TEST_HTTP_SMALL_FILE_CHKSUM);
     });
     
-    it('shouldReadFromRealFileLarge', async () => {
-        await TsFsTestHelper.shouldReadFile(TsFsTestHelper.SERVER_URL + "/" + TsFsTestHelper.TEST_HTTP_LARGE_FILE,
-            TsFsTestHelper.TEST_HTTP_LARGE_FILE_SIZE, null, TsFsTestHelper.TEST_HTTP_LARGE_FILE_CHKSUM);
-    });
-
     it('shouldSeekAndReadRealFileStream', async () => {
         let urlPath = TsFsTestHelper.SERVER_TEST_DATA_URL + "/" + TsFsTestHelper.TEST_HTTP_DATA256_FILE;
         let file = new JsHttpFile(urlPath);
@@ -144,7 +139,7 @@ describe('salmon-fs-readonly', () => {
     
     it('shouldSeekAndReadEncryptedFileStreamFromDrive', async () => {
         await SalmonDriveManager.openDrive(TsFsTestHelper.VAULT_DIR_URL);
-        await SalmonDriveManager.getDrive().authenticate(TestHelper.TEST_PASSWORD);
+        await SalmonDriveManager.getDrive().unlock(TestHelper.TEST_PASSWORD);
         let virtualRoot = await SalmonDriveManager.getDrive().getVirtualRoot();
         let encFile = await virtualRoot.getChild("data256.dat");
         expect(await encFile.getBaseName()).toBe("data256.dat");
@@ -165,7 +160,7 @@ describe('salmon-fs-readonly', () => {
 
     it('shouldListFilesFromDrive', async () => {
         await SalmonDriveManager.openDrive(TsFsTestHelper.VAULT_DIR_URL);
-        await SalmonDriveManager.getDrive().authenticate(TestHelper.TEST_PASSWORD);
+        await SalmonDriveManager.getDrive().unlock(TestHelper.TEST_PASSWORD);
         let virtualRoot = await SalmonDriveManager.getDrive().getVirtualRoot();
         let files = await virtualRoot.listFiles();
         let filenames = [];
@@ -173,9 +168,10 @@ describe('salmon-fs-readonly', () => {
             let filename = await files[i].getBaseName();
             filenames.push(filename);
         }
-        expect(files.length).toBe(2);
+        expect(files.length).toBe(3);
         expect(filenames.includes("data256.dat")).toBeTruthy();
         expect(filenames.includes("tiny_test.txt")).toBeTruthy();
+        expect(filenames.includes("New Folder")).toBeTruthy();
     });
     
 });

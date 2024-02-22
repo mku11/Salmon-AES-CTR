@@ -80,7 +80,7 @@ class SalmonDrive(VirtualDrive):
         self.__hashProvider: IHashProvider = HmacSHA256Provider()
         self.__sequencer: ISalmonSequencer | None = None
 
-        self.close()
+        self.lock()
         if real_root_path is None:
             return
         self.__realRoot = self.get_real_file(real_root_path, True)
@@ -113,15 +113,15 @@ class SalmonDrive(VirtualDrive):
         pass
 
     @abstractmethod
-    def _on_authentication_success(self):
+    def _on_unlock_success(self):
         """
-         * Method is called when the user is authenticated
+         * Method is called when the drive is unlocked
         """
         pass
 
-    def _on_authentication_error(self):
+    def _on_unlock_error(self):
         """
-         * Method is called when the user authentication has failed
+         * Method is called when unlocking the drive has failed
         """
         pass
 
@@ -202,14 +202,14 @@ class SalmonDrive(VirtualDrive):
         """
         if self.__realRoot is None or not self.__realRoot.exists():
             return None
-        if not self.is_authenticated():
-            raise SalmonAuthException("Not authenticated")
+        if not self.is_unlocked():
+            raise SalmonAuthException("Not authorized")
         return self.__virtualRoot
 
     def get_real_root(self) -> IRealFile:
         return self.__realRoot
 
-    def authenticate(self, password: str):
+    def unlock(self, password: str):
         """
          * Verify if the user password is correct otherwise it throws a SalmonAuthException
          *
@@ -256,9 +256,9 @@ class SalmonDrive(VirtualDrive):
             self.set_key(master_key, drive_key, hash_key, iterations)
             self.__driveID = drive_id
             self.init_fs()
-            self._on_authentication_success()
+            self._on_unlock_success()
         except Exception as ex:
-            self._on_authentication_error()
+            self._on_unlock_error()
             raise ex
         finally:
             if stream is not None:
@@ -289,7 +289,7 @@ class SalmonDrive(VirtualDrive):
         v_hash: bytearray = SalmonIntegrity.calculate_hash(self.__hashProvider, data, 0, len(data), hash_key, None)
         for i in range(0, len(hash_key)):
             if hash_signature[i] != v_hash[i]:
-                raise SalmonAuthException("Could not authenticate")
+                raise SalmonAuthException("Could not authorize")
 
     def get_next_nonce(self) -> bytearray:
         """
@@ -297,13 +297,13 @@ class SalmonDrive(VirtualDrive):
          * @return
          * @throws Exception
         """
-        if not self.is_authenticated():
-            raise SalmonAuthException("Not authenticated")
+        if not self.is_unlocked():
+            raise SalmonAuthException("Not authorized")
         return self.__sequencer.next_nonce(BitConverter.to_hex(self.get_drive_id()))
 
-    def is_authenticated(self) -> bool:
+    def is_unlocked(self) -> bool:
         """
-         * Returns True if password authentication has succeeded.
+         * Returns True if password authorization has succeeded.
         """
         key: SalmonKey = self.get_key()
         if key is None:
@@ -379,9 +379,9 @@ class SalmonDrive(VirtualDrive):
         """
         return self.__driveID
 
-    def close(self):
+    def lock(self):
         """
-         * Close the drive and associated resources.
+         * Lock the drive and close associated resources.
         """
         self.__realRoot = None
         self.__virtualRoot = None

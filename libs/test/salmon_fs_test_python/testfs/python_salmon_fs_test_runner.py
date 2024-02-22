@@ -54,7 +54,7 @@ from salmon_fs.utils.salmon_file_commander import SalmonFileCommander
 class SalmonFSPythonTestRunner(SalmonPythonTestRunner):
     SalmonDriveManager.set_virtual_drive_class(PyDrive)
 
-    def test_AuthenticateNegative(self):
+    def test_AuthorizeNegative(self):
         vault_dir: str = TestHelper.generate_folder(SalmonPythonTestRunner.TEST_VAULT2_DIR)
         sequencer: SalmonFileSequencer = SalmonFileSequencer(PyFile(vault_dir + "/" + TestHelper.TEST_SEQUENCER_FILE1),
                                                              SalmonSequenceSerializer())
@@ -64,13 +64,13 @@ class SalmonFSPythonTestRunner(SalmonPythonTestRunner):
         root_dir: VirtualFile = SalmonDriveManager.get_drive().get_virtual_root()
         root_dir.list_files()
         try:
-            SalmonDriveManager.get_drive().authenticate(TestHelper.TEST_FALSE_PASSWORD)
+            SalmonDriveManager.get_drive().unlock(TestHelper.TEST_FALSE_PASSWORD)
         except SalmonAuthException as ex:
             wrong_password = True
 
         self.assertTrue(wrong_password)
 
-    def test_CatchNotAuthenticatedNegative(self):
+    def test_CatchNotAuthorizedNegative(self):
         vault_dir: str = TestHelper.generate_folder(SalmonPythonTestRunner.TEST_VAULT2_DIR)
         sequencer: SalmonFileSequencer = SalmonFileSequencer(PyFile(vault_dir + "/" + TestHelper.TEST_SEQUENCER_FILE1),
                                                              SalmonSequenceSerializer())
@@ -87,7 +87,7 @@ class SalmonFSPythonTestRunner(SalmonPythonTestRunner):
 
         self.assertTrue(wrong_password)
 
-    def test_AuthenticatePositive(self):
+    def test_AuthorizedPositive(self):
         vault_dir: str = TestHelper.generate_folder(SalmonPythonTestRunner.TEST_VAULT2_DIR)
         sequencer: SalmonFileSequencer = SalmonFileSequencer(PyFile(vault_dir + "/" + TestHelper.TEST_SEQUENCER_FILE1),
                                                              SalmonSequenceSerializer())
@@ -97,7 +97,7 @@ class SalmonFSPythonTestRunner(SalmonPythonTestRunner):
         SalmonDriveManager.close_drive()
         try:
             SalmonDriveManager.open_drive(vault_dir)
-            SalmonDriveManager.get_drive().authenticate(TestHelper.TEST_PASSWORD)
+            SalmonDriveManager.get_drive().unlock(TestHelper.TEST_PASSWORD)
             virtual_root: VirtualFile = SalmonDriveManager.get_drive().get_virtual_root()
         except SalmonAuthException as ex:
             wrong_password = True
@@ -435,13 +435,13 @@ class SalmonFSPythonTestRunner(SalmonPythonTestRunner):
         wrong_password: bool = False
         root_dir: VirtualFile = SalmonDriveManager.get_drive().get_virtual_root()
         root_dir.list_files()
-        SalmonDriveManager.get_drive().close()
+        SalmonDriveManager.get_drive().lock()
 
         # reopen but open the fs folder instead it should still login
         try:
             drive: SalmonDrive = SalmonDriveManager.open_drive(vault_dir + "/fs")
             self.assertTrue(drive.has_config())
-            SalmonDriveManager.get_drive().authenticate(TestHelper.TEST_PASSWORD)
+            SalmonDriveManager.get_drive().unlock(TestHelper.TEST_PASSWORD)
         except SalmonAuthException as ignored:
             wrong_password = True
 

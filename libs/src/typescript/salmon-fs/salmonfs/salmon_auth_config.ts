@@ -52,7 +52,7 @@ export class SalmonAuthConfig {
     }
 
     /**
-     * Get the authentication ID for the target device.
+     * Get the authorization ID for the target device.
      * @return
      */
     public getAuthID(): Uint8Array {
@@ -97,7 +97,7 @@ export class SalmonAuthConfig {
      * The new device will then be authorized editing operations ie: import, rename files, etc.
      * @param authConfigFile
      * @param drive The drive you want to create an auth config for.
-     * @param targetAuthID Authentication ID of the target device.
+     * @param targetAuthID Authorization ID of the target device.
      * @param targetStartingNonce Starting nonce for the target device.
      * @param targetMaxNonce Maximum nonce for the target device.
      * @throws Exception

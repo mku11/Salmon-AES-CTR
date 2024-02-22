@@ -33,7 +33,7 @@ public class SalmonSequence {
     private String driveID;
 
     /**
-     * The authentication id of the device for the specific drive.
+     * The authorization id of the device for the specific drive.
      */
     private String authID;
 
@@ -53,9 +53,9 @@ public class SalmonSequence {
     private Status status;
 
     /**
-     * Instantiate a nonce sequence for a drive with the provided authentication id.
+     * Instantiate a nonce sequence for a drive with the provided authorization id.
      * @param driveID The drive ID.
-     * @param authID The authentication id for this device and drive.
+     * @param authID The authorization id for this device and drive.
      * @param nextNonce The next available nonce to be used.
      * @param maxNonce The maximum nonce.
      * @param status The status of the sequencer.
@@ -108,7 +108,7 @@ public class SalmonSequence {
     }
 
     /**
-     * Get the authentication id of the device.
+     * Get the authorization id of the device.
      * @return
      */
     public String getAuthID() {
@@ -116,7 +116,7 @@ public class SalmonSequence {
     }
 
     /**
-     * Set the authentication ID of the device.
+     * Set the authorization ID of the device.
      * @param authID
      */
     void setAuthID(String authID) {

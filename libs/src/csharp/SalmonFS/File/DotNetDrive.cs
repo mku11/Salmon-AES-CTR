@@ -72,19 +72,19 @@ public class DotNetDrive : SalmonDrive
     }
 
     /// <summary>
-    ///  When authentication succeed.
+    ///  When authorization succeed.
 	/// </summary>
-	    override
-    protected void OnAuthenticationSuccess()
+	override
+    protected void OnUnlockSuccess()
     {
 
     }
 
     /// <summary>
-    ///  When authentication succeeds.
+    ///  When authorization succeeds.
 	/// </summary>
-	    override
-    protected void OnAuthenticationError()
+	override
+    protected void OnUnlockError()
     {
 
     }

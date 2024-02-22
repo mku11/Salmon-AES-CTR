@@ -65,7 +65,7 @@ public class SalmonFSJavaTestRunner extends SalmonJavaTestRunner {
     }
 
     @Test
-    public void shouldAuthenticateNegative() throws Exception {
+    public void shouldAuthorizeNegative() throws Exception {
         String vaultDir = TestHelper.generateFolder(TEST_VAULT2_DIR);
         SalmonFileSequencer sequencer = new SalmonFileSequencer(new JavaFile(vaultDir + "/" + TestHelper.TEST_SEQUENCER_FILE1), new SalmonSequenceSerializer());
         SalmonDriveManager.setSequencer(sequencer);
@@ -74,7 +74,7 @@ public class SalmonFSJavaTestRunner extends SalmonJavaTestRunner {
         SalmonFile rootDir = SalmonDriveManager.getDrive().getVirtualRoot();
         rootDir.listFiles();
         try {
-            SalmonDriveManager.getDrive().authenticate(TestHelper.TEST_FALSE_PASSWORD);
+            SalmonDriveManager.getDrive().unlock(TestHelper.TEST_FALSE_PASSWORD);
         } catch (SalmonAuthException ex) {
             wrongPassword = true;
         }
@@ -83,7 +83,7 @@ public class SalmonFSJavaTestRunner extends SalmonJavaTestRunner {
     }
 
     @Test
-    public void shouldCatchNotAuthenticatedNegative() throws Exception {
+    public void shouldCatchNotAuthorizeNegative() throws Exception {
         String vaultDir = TestHelper.generateFolder(TEST_VAULT2_DIR);
         SalmonFileSequencer sequencer = new SalmonFileSequencer(new JavaFile(vaultDir + "/" + TestHelper.TEST_SEQUENCER_FILE1), new SalmonSequenceSerializer());
         SalmonDriveManager.setSequencer(sequencer);
@@ -103,7 +103,7 @@ public class SalmonFSJavaTestRunner extends SalmonJavaTestRunner {
     }
 
     @Test
-    public void shouldAuthenticatePositive() throws Exception {
+    public void shouldAuthorizePositive() throws Exception {
         String vaultDir = TestHelper.generateFolder(TEST_VAULT2_DIR);
         SalmonFileSequencer sequencer = new SalmonFileSequencer(new JavaFile(vaultDir + "/" + TestHelper.TEST_SEQUENCER_FILE1), new SalmonSequenceSerializer());
         SalmonDriveManager.setSequencer(sequencer);
@@ -112,7 +112,7 @@ public class SalmonFSJavaTestRunner extends SalmonJavaTestRunner {
         SalmonDriveManager.closeDrive();
         try {
             SalmonDriveManager.openDrive(vaultDir);
-            SalmonDriveManager.getDrive().authenticate(TestHelper.TEST_PASSWORD);
+            SalmonDriveManager.getDrive().unlock(TestHelper.TEST_PASSWORD);
             SalmonFile virtualRoot = SalmonDriveManager.getDrive().getVirtualRoot();
         } catch (SalmonAuthException ex) {
             wrongPassword = true;
@@ -451,13 +451,13 @@ public class SalmonFSJavaTestRunner extends SalmonJavaTestRunner {
         boolean wrongPassword = false;
         SalmonFile rootDir = SalmonDriveManager.getDrive().getVirtualRoot();
         rootDir.listFiles();
-        SalmonDriveManager.getDrive().close();
+        SalmonDriveManager.getDrive().lock();
 
         // reopen but open the fs folder instead it should still login
         try {
             SalmonDrive drive = SalmonDriveManager.openDrive(vaultDir + "/fs");
             assertTrue(drive.hasConfig());
-            SalmonDriveManager.getDrive().authenticate(TestHelper.TEST_PASSWORD);
+            SalmonDriveManager.getDrive().unlock(TestHelper.TEST_PASSWORD);
         } catch (SalmonAuthException ignored) {
             wrongPassword = true;
         }

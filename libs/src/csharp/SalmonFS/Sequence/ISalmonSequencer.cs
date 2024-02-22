@@ -34,7 +34,7 @@ public interface ISalmonSequencer
     ///  Create a sequence.
 	/// </summary>
 	///  <param name="driveID">The drive ID.</param>
-    ///  <param name="authID">The authentication ID of the drive.</param>
+    ///  <param name="authID">The authorization ID of the drive.</param>
     ///  <exception cref="SalmonSequenceException"></exception>
     void CreateSequence(string driveID, string authID);
 

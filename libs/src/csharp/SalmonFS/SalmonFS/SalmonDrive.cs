@@ -92,7 +92,7 @@ public abstract class SalmonDrive
     ///  <param name="createIfNotExists">Create the drive if it does not exist</param>
     protected SalmonDrive(string realRootPath, bool createIfNotExists = false)
     {
-        Close();
+        Lock();
         if (realRootPath == null)
             return;
         RealRoot = GetRealFile(realRootPath, true);
@@ -128,14 +128,14 @@ public abstract class SalmonDrive
     public abstract IRealFile GetRealFile(string filepath, bool isDirectory);
 
     /// <summary>
-    ///  Method is called when the user is authenticated
+    ///  Method is called when the drive is unlocked
     /// </summary>
-    protected abstract void OnAuthenticationSuccess();
+    protected abstract void OnUnlockSuccess();
 
     /// <summary>
-    ///  Method is called when the user authentication has failed
+    ///  Method is called when unlocking the drive has failed
     /// </summary>
-    protected abstract void OnAuthenticationError();
+    protected abstract void OnUnlockError();
 
     /// <summary>
     ///  Clear sensitive information when app is close.
@@ -191,7 +191,6 @@ public abstract class SalmonDrive
 	///  <param name="password">The new password to be saved in the configuration</param>
     ///                  This password will be used to derive the master key that will be used to
     ///                  encrypt the combined key (encryption key + hash key)
-    //TODO: partial refactor to SalmonDriveConfig
     private void CreateConfig(string password)
     {
         byte[] driveKey = Key.DriveKey;
@@ -199,13 +198,8 @@ public abstract class SalmonDrive
 
         IRealFile configFile = RealRoot.GetChild(ConfigFilename);
 
-        // if it's an existing config that we need to update with
-        // the new password then we prefer to be authenticate
-        // TODO: we should probably call Authenticate() rather than assume
-        //  that the key != null. Though the user can anyway manually delete the config file
-        //  so it doesn't matter.
         if (driveKey == null && configFile != null && configFile.Exists)
-            throw new SalmonAuthException("Not authenticated");
+            throw new SalmonAuthException("Not authorized");
 
         // delete the old config file and create a new one
         if (configFile != null && configFile.Exists)
@@ -281,8 +275,8 @@ public abstract class SalmonDrive
         {
             if (RealRoot == null || !RealRoot.Exists)
                 return null;
-            if (!IsAuthenticated)
-                throw new SalmonAuthException("Not authenticated");
+            if (!IsUnlocked)
+                throw new SalmonAuthException("Not authorized");
             return virtualRoot;
         }
     }
@@ -291,7 +285,7 @@ public abstract class SalmonDrive
     ///  Verify if the user password is correct otherwise it will throw a SalmonAuthException
 	/// </summary>
 	///  <param name="password">The password.</param>
-    public void Authenticate(string password)
+    public void Unlock(string password)
     {
         SalmonStream stream = null;
         try
@@ -335,11 +329,11 @@ public abstract class SalmonDrive
             SetKey(masterKey, driveKey, hashKey, iterations);
             this.DriveID = driveID;
             InitFS();
-            OnAuthenticationSuccess();
+            OnUnlockSuccess();
         }
         catch (Exception ex)
         {
-            OnAuthenticationError();
+            OnUnlockError();
             throw ex;
         }
         finally
@@ -376,7 +370,7 @@ public abstract class SalmonDrive
         byte[] hash = SalmonIntegrity.CalculateHash(hashProvider, data, 0, data.Length, hashKey, null);
         for (int i = 0; i < hashKey.Length; i++)
             if (hashSignature[i] != hash[i])
-                throw new SalmonAuthException("Could not authenticate");
+                throw new SalmonAuthException("Could not authorize");
     }
 
     /// <summary>
@@ -386,15 +380,15 @@ public abstract class SalmonDrive
     ///  <exception cref="Exception"></exception>
     internal byte[] GetNextNonce()
     {
-        if (!IsAuthenticated)
-            throw new SalmonAuthException("Not authenticated");
+        if (!IsUnlocked)
+            throw new SalmonAuthException("Not authorized");
         return SalmonDriveManager.GetNextNonce(this);
     }
 
     /// <summary>
-    ///  Returns true if password authentication has succeeded.
+    ///  Returns true if password authorization has succeeded.
     /// </summary>
-    public bool IsAuthenticated
+    public bool IsUnlocked
     {
         get
         {
@@ -484,9 +478,9 @@ public abstract class SalmonDrive
 
 
     /// <summary>
-    ///  Close the drive and associated resources.
+    ///  Lock the drive and close associated resources.
     /// </summary>
-    public void Close()
+    public void Lock()
     {
         RealRoot = null;
         virtualRoot = null;

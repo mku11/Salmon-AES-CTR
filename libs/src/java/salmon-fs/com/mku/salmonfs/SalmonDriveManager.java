@@ -146,7 +146,7 @@ public class SalmonDriveManager {
      */
     public static void closeDrive() {
         if (drive != null) {
-            drive.close();
+            drive.lock();
             drive = null;
         }
     }
@@ -203,7 +203,7 @@ public class SalmonDriveManager {
     }
 
     /**
-     * @param targetAuthID The authentication id of the target device.
+     * @param targetAuthID The authorization id of the target device.
      * @param targetDir    The target dir the file will be written to.
      * @param filename     The filename of the auth config file.
      * @throws Exception
@@ -242,7 +242,7 @@ public class SalmonDriveManager {
     }
 
     /**
-     * Create a nonce sequence for the drive id and the authentication id provided. Should be called
+     * Create a nonce sequence for the drive id and the authorization id provided. Should be called
      * once per driveID/authID combination.
      *
      * @param driveID The driveID
@@ -260,7 +260,7 @@ public class SalmonDriveManager {
      * once per driveID/authID combination.
      *
      * @param driveID Drive ID.
-     * @param authID  Authentication ID.
+     * @param authID  Authorization ID.
      * @throws Exception
      */
     static void initSequence(byte[] driveID, byte[] authID) throws SalmonSequenceException, IOException {
@@ -285,9 +285,9 @@ public class SalmonDriveManager {
     }
 
     /**
-     * Verify the authentication id with the current drive auth id.
+     * Verify the authorization id with the current drive auth id.
      *
-     * @param authID The authentication id to verify.
+     * @param authID The authorization id to verify.
      * @return
      * @throws Exception
      */
@@ -310,8 +310,8 @@ public class SalmonDriveManager {
     /**
      * Get the app drive pair configuration properties for this drive
      *
-     * @param authFile The encrypted authentication file.
-     * @return The decrypted authentication file.
+     * @param authFile The encrypted authorization file.
+     * @return The decrypted authorization file.
      * @throws Exception
      */
     public static SalmonAuthConfig getAuthConfig(IRealFile authFile) throws Exception {
@@ -323,12 +323,12 @@ public class SalmonDriveManager {
         stream.close();
         SalmonAuthConfig driveConfig = new SalmonAuthConfig(ms.toArray());
         if (!verifyAuthID(driveConfig.getAuthID()))
-            throw new SalmonSecurityException("Could not authorize this device, the authentication id does not match");
+            throw new SalmonSecurityException("Could not authorize this device, the authorization id does not match");
         return driveConfig;
     }
 
     /**
-     * Get the authentication ID for the current device.
+     * Get the authorization ID for the current device.
      *
      * @return
      * @throws SalmonSequenceException

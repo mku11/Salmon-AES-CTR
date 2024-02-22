@@ -61,7 +61,7 @@ public class SalmonDriveManager
 	///  <param name="dirPath">The directory path that will be used for storing the contents of the drive</param>
     public static SalmonDrive OpenDrive(string dirPath)
     {
-        CloseDrive();
+        LockDrive();
         SalmonDrive drive = CreateDriveInstance(dirPath);
         if (drive == null || !drive.HasConfig())
         {
@@ -81,7 +81,7 @@ public class SalmonDriveManager
     ///  <exception cref="SalmonSequenceException"></exception>
     public static SalmonDrive CreateDrive(string dirPath, string password)
     {
-        CloseDrive();
+        LockDrive();
         SalmonDrive drive = CreateDriveInstance(dirPath, true);
         if (drive.HasConfig())
             throw new SalmonSecurityException("Drive already exists");
@@ -114,13 +114,13 @@ public class SalmonDriveManager
     }
 
     /// <summary>
-    ///  Close the current drive.
+    ///  Lock the current drive.
     /// </summary>
-    public static void CloseDrive()
+    public static void LockDrive()
     {
         if (Drive != null)
         {
-            Drive.Close();
+            Drive.Lock();
             Drive = null;
         }
     }
@@ -178,7 +178,7 @@ public class SalmonDriveManager
     }
 
     /// <summary>
-    ///  <param name="targetAuthID">The authentication id of the target device.</param>
+    ///  <param name="targetAuthID">The authorization id of the target device.</param>
 	/// </summary>
 	///  <param name="targetDir">   The target dir the file will be written to.</param>
     ///  <param name="filename">    The filename of the auth config file.</param>
@@ -218,7 +218,7 @@ public class SalmonDriveManager
     }
 
     /// <summary>
-    ///  Create a nonce sequence for the drive id and the authentication id provided. Should be called
+    ///  Create a nonce sequence for the drive id and the authorization id provided. Should be called
     ///  once per driveID/authID combination.
 	/// </summary>
 	///  <param name="driveID">The driveID</param>
@@ -236,7 +236,7 @@ public class SalmonDriveManager
     ///  once per driveID/authID combination.
 	/// </summary>
 	///  <param name="driveID">Drive ID.</param>
-    ///  <param name="authID"> Authentication ID.</param>
+    ///  <param name="authID"> Authorization ID.</param>
     ///  <exception cref="Exception"></exception>
     internal static void InitSequence(byte[] driveID, byte[] authID)
     {
@@ -261,9 +261,9 @@ public class SalmonDriveManager
     }
 
     /// <summary>
-    ///  Verify the authentication id with the current drive auth id.
+    ///  Verify the authorization id with the current drive auth id.
 	/// </summary>
-	///  <param name="authID">The authentication id to verify.</param>
+	///  <param name="authID">The authorization id to verify.</param>
     ///  <returns></returns>
     ///  <exception cref="Exception"></exception>
     private static bool VerifyAuthID(byte[] authID)
@@ -286,8 +286,8 @@ public class SalmonDriveManager
     /// <summary>
     ///  Get the app drive pair configuration properties for this drive
 	/// </summary>
-	///  <param name="authFile">The encrypted authentication file.</param>
-    ///  <returns>The decrypted authentication file.</returns>
+	///  <param name="authFile">The encrypted authorization file.</param>
+    ///  <returns>The decrypted authorization file.</returns>
     ///  <exception cref="Exception"></exception>
     public static SalmonAuthConfig GetAuthConfig(IRealFile authFile)
     {
@@ -299,12 +299,12 @@ public class SalmonDriveManager
         stream.Close();
         SalmonAuthConfig driveConfig = new SalmonAuthConfig(ms.ToArray());
         if (!VerifyAuthID(driveConfig.AuthID))
-            throw new SalmonSecurityException("Could not authorize this device, the authentication id does not match");
+            throw new SalmonSecurityException("Could not authorize this device, the authorization id does not match");
         return driveConfig;
     }
 
     /// <summary>
-    ///  Get the authentication ID for the current device.
+    ///  Get the authorization ID for the current device.
 	/// </summary>
 	///  <returns></returns>
     ///  <exception cref="SalmonSequenceException"></exception>

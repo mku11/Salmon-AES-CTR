@@ -34,7 +34,7 @@ public class SalmonSequence
     public string DriveID { get; internal set; }
 
     /// <summary>
-    ///  The authentication id of the device for the specific drive.
+    ///  The authorization id of the device for the specific drive.
     /// </summary>
     public string AuthID { get; internal set; }
 
@@ -54,10 +54,10 @@ public class SalmonSequence
     public Status SequenceStatus { get; internal set; }
 
     /// <summary>
-    ///  Instantiate a nonce sequence for a drive with the provided authentication id.
+    ///  Instantiate a nonce sequence for a drive with the provided authorization id.
 	/// </summary>
 	///  <param name="driveID">The drive ID.</param>
-    ///  <param name="authID">The authentication id for this device and drive.</param>
+    ///  <param name="authID">The authorization id for this device and drive.</param>
     ///  <param name="nextNonce">The next available nonce to be used.</param>
     ///  <param name="maxNonce">The maximum nonce.</param>
     ///  <param name="status">The status of the sequencer.</param>
