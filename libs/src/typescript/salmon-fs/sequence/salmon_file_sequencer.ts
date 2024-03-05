@@ -43,7 +43,7 @@ export class SalmonFileSequencer implements ISalmonSequencer {
     /**
      * Instantiate a nonce file sequencer.
      *
-     * @param sequenceFile The sequence file.
+     * @param sequenceFile The sequence file (json format).
      * @param serializer   The serializer to be used.
      * @throws IOException
      * @throws SalmonSequenceException
