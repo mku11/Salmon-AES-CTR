@@ -51,9 +51,8 @@ def export_file(index: int, final_part_size: int, final_running_threads: int, fi
                 buffer_size: int, key: bytearray, integrity: bool, hash_key: bytearray | None, chunk_size: int,
                 enable_log_details: bool = False):
     file_to_export: SalmonFile = SalmonFile(real_file_to_export)
-    file_to_export.set_allow_overwrite(True)
     file_to_export.set_encryption_key(key)
-    file_to_export.set_apply_integrity(integrity, hash_key, chunk_size)
+    file_to_export.set_verify_integrity(integrity, hash_key)
 
     shm_total_bytes_read = SharedMemory(shm_total_bytes_read_name)
     total_bytes_written = memoryview(shm_total_bytes_read.buf[index * 8:(index + 1) * 8])
@@ -312,7 +311,6 @@ class SalmonFileExporter:
                                                  exported_file,
                                                  shm_total_bytes_read_name,
                                                  shm_cancel_name,
-                                                 # on_progress,
                                                  self.__buffer_size,
                                                  file_to_export.get_encryption_key(),
                                                  integrity,

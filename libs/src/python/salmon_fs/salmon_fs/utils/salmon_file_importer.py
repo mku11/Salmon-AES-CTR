@@ -316,7 +316,8 @@ class SalmonFileImporter:
             running_threads: int = 1
             part_size: int = file_size
 
-            # for python we make sure to allocate enough space for the file
+            # for python we make sure to allocate enough space for the file 
+            # this will also create the header
             target_stream: SalmonStream = salmon_file.get_output_stream()
             target_stream.set_length(file_size)
             target_stream.close()
@@ -348,7 +349,6 @@ class SalmonFileImporter:
                                                  salmon_file.get_real_file(),
                                                  shm_total_bytes_read_name,
                                                  shm_cancel_name,
-                                                 # on_progress,
                                                  self.__buffer_size,
                                                  salmon_file.get_encryption_key(),
                                                  integrity,
