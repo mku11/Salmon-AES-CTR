@@ -1,0 +1,22 @@
+{
+	"folders": [
+		{
+			"path": "."
+		},
+		{
+			"path": "../../../src/typescript/salmon-core"
+		},
+		{
+			"path": "../../../src/typescript/salmon-fs"
+		}
+	],
+	"settings": {
+		"jest.nodeEnv": {
+			"NODE_OPTIONS": "--experimental-vm-modules"
+		},
+		"jest.runMode": "on-demand",
+		"debug.javascript.terminalOptions": {
+			"env": {"NODE_OPTIONS": "'--experimental-vm-modules'"}
+		}
+	}
+}
