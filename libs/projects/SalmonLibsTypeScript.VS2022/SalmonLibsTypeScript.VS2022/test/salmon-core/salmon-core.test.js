@@ -44,20 +44,14 @@ import { TestHelper } from './test_helper.js';
 import { SalmonSecurityException } from '../../lib/salmon-core/salmon/salmon_security_exception.js';
 import { SalmonRangeExceededException } from '../../lib/salmon-core/salmon/salmon_range_exceeded_exception.js';
 
-
-
-const TEST_OUTPUT_DIR = "d:\\tmp\\output";
-const TEST_VAULT_DIR = "d:\\tmp\\output\\enc";
-const TEST_VAULT2_DIR = "d:\\tmp\\output\\enc2";
-const TEST_EXPORT_AUTH_DIR = "d:\\tmp\\output\\export";
-const TEST_IMPORT_TINY_FILE = "d:\\tmp\\testdata\\tiny_test.txt";
-const TEST_IMPORT_SMALL_FILE = "d:\\tmp\\testdata\\small_test.zip";
-const TEST_IMPORT_MEDIUM_FILE = "d:\\tmp\\testdata\\medium_test.zip";
-const TEST_IMPORT_LARGE_FILE = "d:\\tmp\\testdata\\large_test.mp4";
-const TEST_IMPORT_HUGE_FILE = "d:\\tmp\\testdata\\huge.zip";
-const TEST_IMPORT_FILE = TEST_IMPORT_MEDIUM_FILE;
-
 describe('salmon-core', () => {
+    beforeAll(()=> {
+        TestHelper.initialize();
+    });
+
+    afterAll(()=> {
+        TestHelper.close();
+    });
 
     beforeEach(async () => {
         SalmonStream.setAesProviderType(ProviderType.Default);
@@ -150,10 +144,10 @@ describe('salmon-core', () => {
         const decBytesDef = await TestHelper.defaultAESCTRTransform(encBytesDef, TestHelper.TEST_KEY_BYTES, TestHelper.TEST_NONCE_BYTES, false);
 
         TestHelper.assertArrayEquals(decBytesDef, bytes);
-        let encBytes = await new SalmonEncryptor().encrypt(bytes, TestHelper.TEST_KEY_BYTES, TestHelper.TEST_NONCE_BYTES, false);
+        let encBytes = await TestHelper.getEncryptor().encrypt(bytes, TestHelper.TEST_KEY_BYTES, TestHelper.TEST_NONCE_BYTES, false);
 
         TestHelper.assertArrayEquals(encBytes, encBytesDef);
-        let decBytes = await new SalmonDecryptor().decrypt(encBytes, TestHelper.TEST_KEY_BYTES, TestHelper.TEST_NONCE_BYTES, false);
+        let decBytes = await TestHelper.getDecryptor().decrypt(encBytes, TestHelper.TEST_KEY_BYTES, TestHelper.TEST_NONCE_BYTES, false);
 
         TestHelper.assertArrayEquals(decBytes, bytes);
     });
@@ -167,14 +161,13 @@ describe('salmon-core', () => {
         const encBytesDef = await TestHelper.defaultAESCTRTransform(bytes, TestHelper.TEST_KEY_BYTES, TestHelper.TEST_NONCE_BYTES, true);
         const decBytesDef = await TestHelper.defaultAESCTRTransform(encBytesDef, TestHelper.TEST_KEY_BYTES, TestHelper.TEST_NONCE_BYTES, false);
 
-        const threads = 1;
         const chunkSize = 256 * 1024;
         TestHelper.assertArrayEquals(decBytesDef, bytes);
-        const encBytes = await new SalmonEncryptor(threads).encrypt(bytes, TestHelper.TEST_KEY_BYTES, TestHelper.TEST_NONCE_BYTES, false,
+        const encBytes = await TestHelper.getEncryptor().encrypt(bytes, TestHelper.TEST_KEY_BYTES, TestHelper.TEST_NONCE_BYTES, false,
             true, TestHelper.TEST_HMAC_KEY_BYTES, chunkSize);
 
         assertArrayEqualsWithIntegrity(encBytesDef, encBytes, chunkSize);
-        const decBytes = await new SalmonDecryptor(threads).decrypt(encBytes, TestHelper.TEST_KEY_BYTES, TestHelper.TEST_NONCE_BYTES, false,
+        const decBytes = await TestHelper.getDecryptor().decrypt(encBytes, TestHelper.TEST_KEY_BYTES, TestHelper.TEST_NONCE_BYTES, false,
             true, TestHelper.TEST_HMAC_KEY_BYTES, chunkSize);
 
         TestHelper.assertArrayEquals(decBytes, bytes);
@@ -485,7 +478,6 @@ describe('salmon-core', () => {
         const bytes = await new TextEncoder().encode(TestHelper.TEST_TEXT);
         const hash = await TestHelper.calculateHMAC(bytes, 0, bytes.length, TestHelper.TEST_HMAC_KEY_BYTES, null);
         console.log(BitConverter.toHex(hash)); // TODO: ToSync
-        console.log();
     });
 
     it('shouldConvert', async () => {
@@ -503,13 +495,13 @@ describe('salmon-core', () => {
 
     });
 
-    it('shouldEncryptAndDecryptArrayMultipleThreads', async () => {
+    it('shouldEncryptAndDecryptArray', async () => {
         const data = TestHelper.getRandArray(1 * 1024 * 1024 + 4);
         const t1 = Date.now();
-        const encData = await new SalmonEncryptor(2).encrypt(data, TestHelper.TEST_KEY_BYTES, TestHelper.TEST_NONCE_BYTES,
+        const encData = await TestHelper.getEncryptor().encrypt(data, TestHelper.TEST_KEY_BYTES, TestHelper.TEST_NONCE_BYTES,
             false);
         const t2 = Date.now();
-        const decData = await new SalmonDecryptor(2).decrypt(encData, TestHelper.TEST_KEY_BYTES, TestHelper.TEST_NONCE_BYTES,
+        const decData = await TestHelper.getDecryptor().decrypt(encData, TestHelper.TEST_KEY_BYTES, TestHelper.TEST_NONCE_BYTES,
             false);
         const t3 = Date.now();
 
@@ -518,14 +510,14 @@ describe('salmon-core', () => {
         console.log("dec time: " + (t3 - t2));
     });
 
-    it('shouldEncryptAndDecryptArrayMultipleThreadsIntegrity', async () => {
+    it('shouldEncryptAndDecryptArrayIntegrity', async () => {
         SalmonDefaultOptions.setBufferSize(2 * 1024 * 1024);
         const data = TestHelper.getRandArray(1 * 1024 * 1024 + 3);
         let t1 = Date.now();
-        const encData = await new SalmonEncryptor(2).encrypt(data, TestHelper.TEST_KEY_BYTES, TestHelper.TEST_NONCE_BYTES,
+        const encData = await TestHelper.getEncryptor().encrypt(data, TestHelper.TEST_KEY_BYTES, TestHelper.TEST_NONCE_BYTES,
             false, true, TestHelper.TEST_HMAC_KEY_BYTES, null);
         let t2 = Date.now();
-        const decData = await new SalmonDecryptor(2).decrypt(encData, TestHelper.TEST_KEY_BYTES, TestHelper.TEST_NONCE_BYTES,
+        const decData = await TestHelper.getDecryptor().decrypt(encData, TestHelper.TEST_KEY_BYTES, TestHelper.TEST_NONCE_BYTES,
             false, true, TestHelper.TEST_HMAC_KEY_BYTES, null);
         const t3 = Date.now();
         1
@@ -534,13 +526,13 @@ describe('salmon-core', () => {
         console.log("dec time: " + (t3 - t2));
     });
 
-    it('shouldEncryptAndDecryptArrayMultipleThreadsIntegrityCustomChunkSize', async () => {
+    it('shouldEncryptAndDecryptArrayIntegrityCustomChunkSize', async () => {
         const data = TestHelper.getRandArray(1 * 1024 * 1024);
         const t1 = Date.now();
-        const encData = await new SalmonEncryptor(2).encrypt(data, TestHelper.TEST_KEY_BYTES, TestHelper.TEST_NONCE_BYTES,
+        const encData = await TestHelper.getEncryptor().encrypt(data, TestHelper.TEST_KEY_BYTES, TestHelper.TEST_NONCE_BYTES,
             false, true, TestHelper.TEST_HMAC_KEY_BYTES, 32);
         const t2 = Date.now();
-        const decData = await new SalmonDecryptor(2).decrypt(encData, TestHelper.TEST_KEY_BYTES, TestHelper.TEST_NONCE_BYTES,
+        const decData = await TestHelper.getDecryptor().decrypt(encData, TestHelper.TEST_KEY_BYTES, TestHelper.TEST_NONCE_BYTES,
             false, true, TestHelper.TEST_HMAC_KEY_BYTES, 32);
         const t3 = Date.now();
 
@@ -549,13 +541,13 @@ describe('salmon-core', () => {
         console.log("dec time: " + (t3 - t2));
     });
 
-    it('shouldEncryptAndDecryptArrayMultipleThreadsIntegrityCustomChunkSizeStoreHeader', async () => {
+    it('shouldEncryptAndDecryptArrayIntegrityCustomChunkSizeStoreHeader', async () => {
         const data = TestHelper.getRandArraySame(129 * 1024);
         const t1 = Date.now();
-        const encData = await new SalmonEncryptor().encrypt(data, TestHelper.TEST_KEY_BYTES, TestHelper.TEST_NONCE_BYTES,
+        const encData = await TestHelper.getEncryptor().encrypt(data, TestHelper.TEST_KEY_BYTES, TestHelper.TEST_NONCE_BYTES,
             true, true, TestHelper.TEST_HMAC_KEY_BYTES, 32);
         const t2 = Date.now();
-        const decData = await new SalmonDecryptor().decrypt(encData, TestHelper.TEST_KEY_BYTES,
+        const decData = await TestHelper.getDecryptor().decrypt(encData, TestHelper.TEST_KEY_BYTES,
             null, true, true, TestHelper.TEST_HMAC_KEY_BYTES, null);
         const t3 = Date.now();
 

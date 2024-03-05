@@ -38,20 +38,17 @@ import { ProviderType } from '../../lib/salmon-core/salmon/io/provider_type.js';
 
 export class TestHelper {
     static TEST_ENC_BUFFER_SIZE = 512 * 1024;
+    static TEST_ENC_THREADS = 2;
     static TEST_DEC_BUFFER_SIZE = 512 * 1024;
+    static TEST_DEC_THREADS = 2;
 
     static TEST_PASSWORD = "test123";
     static TEST_FALSE_PASSWORD = "falsepass";
-    static TEST_EXPORT_DIR = "export.slma";
 
     // Javascript has its own limit on safe math 
     static MAX_ENC_COUNTER = Math.min(Math.pow(256, 7), Number.MAX_SAFE_INTEGER + 1);
     // a nonce ready to overflow if a new file is imported
-    static TEXT_VAULT_MAX_FILE_NONCE = new Uint8Array([
-        0x7F, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF
-    ]);
-    static TEST_SEQUENCER_FILE1 = "seq1.xml";
-    static TEST_SEQUENCER_FILE2 = "seq2.xml";
+    static TEXT_VAULT_MAX_FILE_NONCE = BitConverter.toBytes(Number.MAX_SAFE_INTEGER + 1, 8);
 
     static TEXT_ITERATIONS = 1;
     static TEST_KEY = "ABCDEFGHIJKLMNOPABCDEFGHIJKLMNOP"; // 256bit
@@ -68,8 +65,29 @@ export class TestHelper {
     static TEST_TEXT = "This is another test that could be very long if used correctly.";
     static TEST_TEXT_WRITE = "THIS*TEXT*IS*NOW*OVERWRITTEN*WITH*THIS";
 
-    static hashProvider = new HmacSHA256Provider();
+    static hashProvider;
+    static encryptor;
+    static decryptor;
 
+    static initialize() {
+        TestHelper.hashProvider = new HmacSHA256Provider();
+        TestHelper.encryptor = new SalmonEncryptor(TestHelper.TEST_ENC_THREADS);
+        TestHelper.decryptor = new SalmonDecryptor(TestHelper.TEST_DEC_THREADS);
+    }
+
+    static getEncryptor() {
+        return TestHelper.encryptor;
+    }
+    
+    static getDecryptor() {
+        return TestHelper.decryptor;
+    }
+
+    static close() {
+        TestHelper.encryptor.close();
+        TestHelper.decryptor.close();
+    }
+    
     static async seekAndGetSubstringByRead(reader, seek, readCount, seekOrigin) {
         await reader.seek(seek, seekOrigin);
         let encOuts2 = new MemoryStream();
@@ -468,16 +486,16 @@ export class TestHelper {
         return data;
     }
 
-    static encryptAndDecryptByteArray(size, threads = 1, enableLog) {
+    static encryptAndDecryptByteArray(size, enableLog) {
         let data = TestHelper.getRandArray(size);
-        TestHelper.encryptAndDecryptByteArray2(data, threads, enableLog);
+        TestHelper.encryptAndDecryptByteArray2(data, enableLog);
     }
 
-    static encryptAndDecryptByteArray2(data, threads = 1, enableLog) {
+    static encryptAndDecryptByteArray2(data, enableLog) {
         let t1 = Date.now();
-        let encData = new SalmonEncryptor(threads).encrypt(data, TestHelper.TEST_KEY_BYTES, TestHelper.TEST_NONCE_BYTES, false);
+        let encData = TestHelper.getEncryptor().encrypt(data, TestHelper.TEST_KEY_BYTES, TestHelper.TEST_NONCE_BYTES, false);
         let t2 = Date.now();
-        let decData = new SalmonDecryptor(threads).decrypt(encData, TestHelper.TEST_KEY_BYTES, TestHelper.TEST_NONCE_BYTES, false);
+        let decData = TestHelper.getDecryptor().decrypt(encData, TestHelper.TEST_KEY_BYTES, TestHelper.TEST_NONCE_BYTES, false);
         let t3 = Date.now();
 
         expect(decData).toBe(data);

@@ -1,0 +1,32 @@
+<!DOCTYPE HTML>
+<html>
+<body>
+<title>Salmon Test Runner</title>
+<script type="module" src="test/setup_browser_runner.js"/></script>
+<script type="module" src="test/salmon-core/salmon-core.test.js"/></script>
+<script type="module" src="test/salmon-fs/salmon-fs-http-readonly.test.js"/></script>
+<script type="module" src="test/salmon-fs/salmon-fs.test.js"/></script>
+<div>
+<label for="testSuite">Test Suite</label>
+<select name="Test Suite" id="testSuite">
+  <option value="salmon-core">salmon-core</option>
+  <option value="salmon-fs-http-readonly">salmon-fs-http-readonly</option>
+  <option value="salmon-fs">salmon-fs</option>
+</select>
+<script type="module">
+  let output = document.getElementById("text-edit");
+  setLogArea(output);
+  window.execute = function() {
+    let testSuite = document.getElementById("testSuite").value;
+    executeTestSuite(testSuite);
+  }
+</script>
+<button onclick="javascript:selectTestFolder()" id="selectTextFolder">Test Folder</button>
+<button onclick="javascript:execute()" id="selectTextFolder">Execute</button>
+</div>
+<textarea id="text-edit" name="text-edit" rows="32" cols="100" style="margin: 4px;">
+</textarea>
+<div><span>See console for errors</span></div>
+<div><span>Make sure you set the correct test mode in the test scripts</span></div>
+</body>
+</html>

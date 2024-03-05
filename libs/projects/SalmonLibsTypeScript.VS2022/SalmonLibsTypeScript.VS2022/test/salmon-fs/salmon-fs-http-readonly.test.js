@@ -22,49 +22,38 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 */
 
-import { BitConverter } from '../../lib/salmon-core/convert/bit_converter.js';
-import { SalmonGenerator } from '../../lib/salmon-core/salmon/salmon_generator.js';
 import { MemoryStream } from '../../lib/salmon-core/io/memory_stream.js';
-import { EncryptionMode } from '../../lib/salmon-core/salmon/io/encryption_mode.js';
-
-
-import { SalmonIntegrityException } from '../../lib/salmon-core/salmon/integrity/salmon_integrity_exception.js';
-import { SalmonEncryptor } from '../../lib/salmon-core/salmon/salmon_encryptor.js';
-import { SalmonDecryptor } from '../../lib/salmon-core/salmon/salmon_decryptor.js';
-
-import { SalmonTextEncryptor } from '../../lib/salmon-core/salmon/text/salmon_text_encryptor.js';
-import { SalmonTextDecryptor } from '../../lib/salmon-core/salmon/text/salmon_text_decryptor.js';
-
-import { SalmonIntegrity } from '../../lib/salmon-core/salmon/integrity/salmon_integrity.js';
-import { SalmonStream } from '../../lib/salmon-core/salmon/io/salmon_stream.js';
-import { ProviderType } from '../../lib/salmon-core/salmon/io/provider_type.js';
-import { SalmonDefaultOptions } from '../../lib/salmon-core/salmon/salmon_default_options.js';
-
-import { SalmonSecurityException } from '../../lib/salmon-core/salmon/salmon_security_exception.js';
-import { SalmonRangeExceededException } from '../../lib/salmon-core/salmon/salmon_range_exceeded_exception.js'
-
-import { TestHelper } from '../salmon-core/test_helper.js';
-import { TsFsTestHelper } from './ts_fs_test_helper.js';
-
-import { SalmonDriveManager } from '../../lib/salmon-fs/salmonfs/salmon_drive_manager.js';
-import { JsHttpDrive } from '../../lib/salmon-fs/file/js_http_drive.js';
-import { JsHttpFile } from '../../lib/salmon-fs/file/js_http_file.js';
-import { JsHttpFileStream } from '../../lib/salmon-fs/file/js_http_file_stream.js';
+import { SalmonDrive } from '../../lib/salmon-fs/salmonfs/salmon_drive.js';
 import { SalmonFile } from '../../lib/salmon-fs/salmonfs/salmon_file.js';
+import { TestHelper } from '../salmon-core/test_helper.js';
+import { setTestMode, TestMode, getFile, getFileStream, TsFsTestHelper } from './ts_fs_test_helper.js';
 
-SalmonDriveManager.setVirtualDriveClass(JsHttpDrive);
+await setTestMode(TestMode.Http);
 
-describe('salmon-fs-readonly', () => {
-
-    beforeEach(() => {
+describe('salmon-fs-http-readonly', () => {
+    beforeAll(() => {
+        TsFsTestHelper.TEST_FILE_INPUT_STREAM_THREADS = 2;
+        TsFsTestHelper.TEST_USE_FILE_INPUT_STREAM = true;
         
+        TestHelper.initialize();
+        TsFsTestHelper.initialize();
     });
 
-    it('shouldCatchNotAuthenticatedNegative', async () => {
-        await SalmonDriveManager.openDrive(TsFsTestHelper.VAULT_DIR_URL);
+    afterAll(() => {
+        TsFsTestHelper.close();
+        TestHelper.close();
+    });
+
+    beforeEach(() => {
+
+    });
+
+    it('shouldCatchNotAuthorizeNegative', async () => {
+        let vaultDir = await getFile(TsFsTestHelper.VAULT_DIR_URL);
+        let drive = await SalmonDrive.openDrive(vaultDir, TsFsTestHelper.driveClassType);
         let wrongPassword = false;
         try {
-            await SalmonDriveManager.getDrive().unlock(TestHelper.TEST_FALSE_PASSWORD);
+            await drive.unlock(TestHelper.TEST_FALSE_PASSWORD);
         } catch (ex) {
             console.error(ex);
             wrongPassword = true;
@@ -72,12 +61,13 @@ describe('salmon-fs-readonly', () => {
         expect(wrongPassword).toBeTruthy();
     });
 
-    it('shouldAuthenticatePositive', async () => {
+    it('shouldAuthorizePositive', async () => {
         let wrongPassword = false;
+        let vaultDir = await getFile(TsFsTestHelper.VAULT_DIR_URL);
         try {
-            await SalmonDriveManager.openDrive(TsFsTestHelper.VAULT_DIR_URL);
-            await SalmonDriveManager.getDrive().unlock(TestHelper.TEST_PASSWORD);
-            let virtualRoot = SalmonDriveManager.getDrive().getVirtualRoot();
+            let drive = await SalmonDrive.openDrive(vaultDir, TsFsTestHelper.driveClassType);
+            await drive.unlock(TestHelper.TEST_PASSWORD);
+            let virtualRoot = drive.getVirtualRoot();
         } catch (ex) {
             console.error(ex);
             wrongPassword = true;
@@ -86,43 +76,43 @@ describe('salmon-fs-readonly', () => {
         expect(wrongPassword).toBeFalsy();
     });
 
-    it('testExamples', async () => {
-        await TsFsTestHelper.testExamples();
+    it('testHttpReadonlyExamples', async () => {
+        await TsFsTestHelper.testHttpReadonlyExamples();
     });
-        
+
     it('shouldReadFromRealFileTiny', async () => {
         await TsFsTestHelper.shouldReadFile(TsFsTestHelper.SERVER_URL + "/" + TsFsTestHelper.TEST_HTTP_TINY_FILE,
-            TsFsTestHelper.TEST_HTTP_TINY_FILE_SIZE, TsFsTestHelper.TEST_HTTP_TINY_FILE_CONTENTS, TsFsTestHelper.TEST_HTTP_TINY_FILE_CHKSUM);     
+            TsFsTestHelper.TEST_HTTP_TINY_FILE_SIZE, TsFsTestHelper.TEST_HTTP_TINY_FILE_CONTENTS, TsFsTestHelper.TEST_HTTP_TINY_FILE_CHKSUM);
     });
 
     it('shouldReadFromRealFileSmall', async () => {
         await TsFsTestHelper.shouldReadFile(TsFsTestHelper.SERVER_URL + "/" + TsFsTestHelper.TEST_HTTP_SMALL_FILE,
             TsFsTestHelper.TEST_HTTP_SMALL_FILE_SIZE, TsFsTestHelper.TEST_HTTP_SMALL_FILE_CONTENTS, TsFsTestHelper.TEST_HTTP_SMALL_FILE_CHKSUM);
     });
-    
+
     it('shouldSeekAndReadRealFileStream', async () => {
         let urlPath = TsFsTestHelper.SERVER_TEST_DATA_URL + "/" + TsFsTestHelper.TEST_HTTP_DATA256_FILE;
-        let file = new JsHttpFile(urlPath);
-        let stream = new JsHttpFileStream(file);
+        let file = await getFile(urlPath);
+        let stream = getFileStream(file);
         let ms = new MemoryStream();
         await stream.copyTo(ms);
         let data = ms.toArray();
         await ms.close();
         await stream.close();
 
-        file = new JsHttpFile(urlPath);
-        await TsFsTestHelper.seekAndReadFile(data, file, false, false, 3, 50, 2, 12);
+        file = await getFile(urlPath);
+        await TsFsTestHelper.seekAndReadFile(data, file, false, false, 3, 50, 12);
     });
 
     it('shouldSeekAndReadEncryptedFileStreamWithoutDrive', async () => {
         let urlPath = TsFsTestHelper.SERVER_TEST_DATA_URL + "/" + TsFsTestHelper.TEST_HTTP_ENCDATA256_FILE;
-        let file = new JsHttpFile(urlPath);
+        let file = await getFile(urlPath);
         let encFile = new SalmonFile(file);
         let size = await encFile.getSize();
         expect(size).toBe(256);
         encFile.setEncryptionKey(TestHelper.TEST_KEY_BYTES);
         encFile.setVerifyIntegrity(true, TestHelper.TEST_HMAC_KEY_BYTES);
-        let encStream = await encFile.getInputStream(); 
+        let encStream = await encFile.getInputStream();
         let length = await encStream.length();
         expect(length).toBe(256);
         let ms = new MemoryStream();
@@ -131,21 +121,22 @@ describe('salmon-fs-readonly', () => {
         expect(data.length).toBe(256);
         await ms.close();
         await encStream.close();
-        file = new JsHttpFile(urlPath);
+        file = await getFile(urlPath);
 
-        await TsFsTestHelper.seekAndReadFile(data, encFile, false, true, 3, 50, 2, 12);
+        await TsFsTestHelper.seekAndReadFile(data, encFile, true, 3, 50, 12);
     });
 
-    
+
     it('shouldSeekAndReadEncryptedFileStreamFromDrive', async () => {
-        await SalmonDriveManager.openDrive(TsFsTestHelper.VAULT_DIR_URL);
-        await SalmonDriveManager.getDrive().unlock(TestHelper.TEST_PASSWORD);
-        let virtualRoot = await SalmonDriveManager.getDrive().getVirtualRoot();
+        let vaultDir = await getFile(TsFsTestHelper.VAULT_DIR_URL);
+        let drive = await SalmonDrive.openDrive(vaultDir, TsFsTestHelper.driveClassType);
+        await drive.unlock(TestHelper.TEST_PASSWORD);
+        let virtualRoot = await drive.getVirtualRoot();
         let encFile = await virtualRoot.getChild("data256.dat");
         expect(await encFile.getBaseName()).toBe("data256.dat");
         let size = await encFile.getSize();
         expect(size).toBe(256);
-        let encStream = await encFile.getInputStream(); 
+        let encStream = await encFile.getInputStream();
         let length = await encStream.length();
         expect(length).toBe(256);
         let ms = new MemoryStream();
@@ -155,23 +146,24 @@ describe('salmon-fs-readonly', () => {
         await ms.close();
         await encStream.close();
 
-        await TsFsTestHelper.seekAndReadFile(data, encFile, false, true, 3, 50, 2, 12);
+        await TsFsTestHelper.seekAndReadFile(data, encFile, true, 3, 50, 12);
     });
 
     it('shouldListFilesFromDrive', async () => {
-        await SalmonDriveManager.openDrive(TsFsTestHelper.VAULT_DIR_URL);
-        await SalmonDriveManager.getDrive().unlock(TestHelper.TEST_PASSWORD);
-        let virtualRoot = await SalmonDriveManager.getDrive().getVirtualRoot();
+        let vaultDir = await getFile(TsFsTestHelper.VAULT_DIR_URL);
+        let drive = await SalmonDrive.openDrive(vaultDir, TsFsTestHelper.driveClassType);
+        await drive.unlock(TestHelper.TEST_PASSWORD);
+        let virtualRoot = await drive.getVirtualRoot();
         let files = await virtualRoot.listFiles();
         let filenames = [];
-        for(let i=0; i<files.length; i++) {
+        for (let i = 0; i < files.length; i++) {
             let filename = await files[i].getBaseName();
             filenames.push(filename);
         }
-        expect(files.length).toBe(3);
+        expect(files.length).toBe(5);
         expect(filenames.includes("data256.dat")).toBeTruthy();
         expect(filenames.includes("tiny_test.txt")).toBeTruthy();
         expect(filenames.includes("New Folder")).toBeTruthy();
     });
-    
+
 });
