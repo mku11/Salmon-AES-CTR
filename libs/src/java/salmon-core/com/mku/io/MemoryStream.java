@@ -175,6 +175,7 @@ public class MemoryStream extends RandomAccessStream {
      * Check if there is no more space in the byte array and increase the capacity.
      * @param newLength The new length of the stream.
      */
+	 // TODO: SyncTo typescript - resize by doubling for performance
     private void checkAndResize(long newLength) {
         if(_capacity < newLength) {
             long newCapacity = _capacity + CAPACITY_INCREMENT * ((newLength - _capacity) / CAPACITY_INCREMENT);
