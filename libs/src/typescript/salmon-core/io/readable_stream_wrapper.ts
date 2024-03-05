@@ -23,7 +23,7 @@ SOFTWARE.
 */
 
 import { SalmonDefaultOptions } from "../salmon/salmon_default_options.js";
-import { RandomAccessStream } from "./random_access_stream.js";
+import { RandomAccessStream, SeekOrigin } from "./random_access_stream.js";
 
 /***
  * Wrapper stream of AbsStream to Javascript's native InputStream interface.
@@ -42,8 +42,9 @@ export class ReadableStreamWrapper implements ReadableStream {
         this.#reader = new ReadableStreamWrapperReader(this.#stream);
     }
     locked: boolean = false;
-    cancel(reason?: any): Promise<void> {
-        throw new Error("Method not implemented.");
+    async cancel(reason?: any): Promise<void> {
+        if(this.#reader != null)
+            await this.#reader.cancel(reason);
     }
     getReader(): ReadableStreamDefaultReader {
         return this.#reader;
@@ -64,7 +65,9 @@ export class ReadableStreamWrapperReader implements ReadableStreamDefaultReader 
     constructor(stream: RandomAccessStream) {
         this.#stream = stream;
     }
-
+    public async skip(bytes: number): Promise<number> {
+        return await this.#stream.seek(bytes, SeekOrigin.Current);
+    }
     async read(): Promise<ReadableStreamReadResult<Uint8Array>> {
         let buff: Uint8Array = new Uint8Array(SalmonDefaultOptions.getBufferSize());
         await this.#stream.read(buff, 0, buff.length);
@@ -74,7 +77,8 @@ export class ReadableStreamWrapperReader implements ReadableStreamDefaultReader 
         throw new Error("Method not implemented.");
     }
     closed: Promise<undefined> = Promise.resolve(undefined);
-    cancel(reason?: any): Promise<void> {
-        throw new Error("Method not implemented.");
+    async cancel(reason?: any): Promise<void> {
+        if(this.#stream!=null)
+            await this.#stream.close();
     }
 }

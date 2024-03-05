@@ -46,10 +46,10 @@ import { EncryptionMode } from "./io/encryption_mode.js";
 export async function encryptData(data: Uint8Array, start: number, count: number, outData: Uint8Array,
     key: Uint8Array, nonce: Uint8Array, headerData: Uint8Array | null,
     integrity: boolean, hashKey: Uint8Array | null, chunkSize: number | null, bufferSize: number): Promise<{startPos: number,endPos: number}> {
-    let inputStream = new MemoryStream(data);
-    let outputStream = new MemoryStream(outData);
-    let stream = null;
-    let startPos = null;
+    let inputStream: MemoryStream = new MemoryStream(data);
+    let outputStream: MemoryStream = new MemoryStream(outData);
+    let stream: SalmonStream | null = null;
+    let startPos: number;
     try {
         await inputStream.setPosition(start);
         stream = new SalmonStream(key, nonce, EncryptionMode.Encrypt, outputStream, headerData, integrity, chunkSize, hashKey);

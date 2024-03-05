@@ -340,7 +340,9 @@ export class SalmonStream extends RandomAccessStream {
      * @param value
      */
     public async setLength(value: number): Promise<void> {
-        throw new Error("Unsupported Operation");
+        let pos: number = await this.getPosition();
+        await this.setPosition(value);
+        await this.setPosition(pos);
     }
 
     /**

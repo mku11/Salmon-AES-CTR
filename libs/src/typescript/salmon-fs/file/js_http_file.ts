@@ -23,7 +23,7 @@ SOFTWARE.
 */
 
 import { RandomAccessStream } from '../../salmon-core/io/random_access_stream.js';
-import { IRealFile, copyFileContents } from './ireal_file.js';
+import { IRealFile } from './ireal_file.js';
 import { JsHttpFileStream } from './js_http_file_stream.js';
 import { IOException } from '../../salmon-core/io/io_exception.js';
 import { MemoryStream } from '../../salmon-core/io/memory_stream.js';
@@ -37,8 +37,6 @@ export class JsHttpFile implements IRealFile {
 
     #filePath: string;
     #_response: Response | null = null;
-    #_length: number | null = null;
-    #_lastModified: number | null = null;
 
     /**
      * Instantiate a real file represented by the filepath provided.
@@ -93,7 +91,7 @@ export class JsHttpFile implements IRealFile {
      * Get the absolute path on the physical disk. For java this is the same as the filepath.
      * @return The absolute path.
      */
-    public async getAbsolutePath(): Promise<string> {
+    public getAbsolutePath(): string {
         return this.#filePath;
     }
 
@@ -157,7 +155,15 @@ export class JsHttpFile implements IRealFile {
      * @return
      */
     public async isDirectory(): Promise<boolean> {
-        return this.#filePath.endsWith("/");
+        let res: Response = (await this.#getResponse());
+        if (res == null)
+            throw new Error("Could not get response");
+        if (res.headers == null)
+            throw new Error("Could not get headers");
+        let contentType: string | null = res.headers.get("Content-Type");
+        if (contentType == null)
+            throw new Error("Could not get content type");
+        return contentType.startsWith("text/html");
     }
 
     /**
@@ -165,7 +171,7 @@ export class JsHttpFile implements IRealFile {
      * @return
      */
     public async isFile(): Promise<boolean> {
-        return await !this.isDirectory();
+        return !await this.isDirectory();
     }
 
     /**
@@ -173,15 +179,13 @@ export class JsHttpFile implements IRealFile {
      * @return
      */
     public async lastModified(): Promise<number> {
-        if (this.#_lastModified != null)
-            return this.#_lastModified;
         let headers: Headers = (await this.#getResponse()).headers;
         let lastDateModified: string | null = headers.get("last-modified");
         if (lastDateModified == null)
             throw new Error("Could not get last modified");
         let date: Date = new Date(lastDateModified);
-        this.#_lastModified = date.getTime();
-        return this.#_lastModified;
+        let lastModified = date.getTime();
+        return lastModified;
     }
 
     /**
@@ -189,21 +193,19 @@ export class JsHttpFile implements IRealFile {
      * @return
      */
     public async length(): Promise<number> {
-        if (this.#_length != null)
-            return this.#_length;
         let res: Response = (await this.#getResponse());
         if (res == null)
             throw new IOException("Could not get response");
 
+        let length: number = 0;
         let lenStr: string | null = res.headers.get("content-length");
         if (lenStr != null) {
-            this.#_length = parseInt(lenStr);
+            length = parseInt(lenStr);
         }
         else {
             if (res.body == null)
                 throw new IOException("Could not get length from content. No response body.");
             let totalLength: number = 0;
-            let buff: Uint8Array;
             let reader: ReadableStreamDefaultReader = await res.body.getReader();
             while (true) {
                 let readResult: ReadableStreamReadResult<any> = await reader.read();
@@ -214,9 +216,9 @@ export class JsHttpFile implements IRealFile {
                     throw new IOException("Could not get length from file. If this is a large file make sure the server responds with a Content-Length");
                 }
             }
-            this.#_length = totalLength;
+            length = totalLength;
         }
-        return this.#_length;
+        return length;
     }
 
     /**

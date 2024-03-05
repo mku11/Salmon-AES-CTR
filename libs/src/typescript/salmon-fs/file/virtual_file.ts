@@ -77,4 +77,7 @@ export abstract class VirtualFile {
 
     public abstract exists(): Promise<boolean>;
 
+    public abstract createDirectory(dirName: string, key: Uint8Array | null, dirNameNonce: Uint8Array | null): Promise<VirtualFile>;
+
+    public abstract createFile(realFilename: string): Promise<VirtualFile>;
 }

@@ -49,7 +49,7 @@ export async function decryptData(data: Uint8Array, start: number, count: number
     let stream: SalmonStream | null = null;
     let inputStream = new MemoryStream(data);
     let outputStream: MemoryStream | null = null;
-    let startPos = null;
+    let startPos: number;
     try {
         outputStream = new MemoryStream(outData);
         await outputStream.setPosition(start);

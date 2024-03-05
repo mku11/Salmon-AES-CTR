@@ -23,14 +23,14 @@ SOFTWARE.
 */
 
 import { SalmonDrive } from "../salmonfs/salmon_drive.js";
-import { JsHttpFile } from "./js_http_file.js";
 import { IRealFile } from "./ireal_file.js";
 import { SalmonFile } from "../salmonfs/salmon_file.js";
 import { VirtualFile } from "./virtual_file.js";
+import { ISalmonSequencer } from "../sequence/isalmon_sequencer.js";
 
 /**
- * SalmonDrive implementation for standard Java file API. This provides a virtual drive implementation
- * that you can use to store and access encrypted files.
+ * SalmonDrive implementation for standard javascript file API via HTTP. This provides a virtual drive implementation
+ * that you can use to store and access encrypted files remotely.
  */
 export class JsHttpDrive extends SalmonDrive {
 
@@ -44,6 +44,14 @@ export class JsHttpDrive extends SalmonDrive {
         super();
     }
 
+    public static async open(dir: IRealFile, sequencer: ISalmonSequencer | null = null): Promise<SalmonDrive> {
+        return await SalmonDrive.openDrive(dir, JsHttpDrive, sequencer);
+    }
+    
+    public static async create(dir: IRealFile, sequencer: ISalmonSequencer, password: string): Promise<SalmonDrive> {
+        return await SalmonDrive.createDrive(dir, JsHttpDrive, sequencer, password);
+    }
+
     /**
      * Get a private dir for sharing files with external applications.
      * @return
@@ -51,17 +59,6 @@ export class JsHttpDrive extends SalmonDrive {
      */
     public static getPrivateDir(): string {
         throw new Error("Unsupported Operation");
-    }
-
-    /**
-     * Get a file from the real filesystem.
-     * @param filepath The file path.
-     * @param isDirectory True if filepath corresponds to a directory.
-     * @return
-     */
-    public override getRealFile(filepath: string, isDirectory: boolean): IRealFile {
-        let jsFile: JsHttpFile = new JsHttpFile(filepath);
-        return jsFile;
     }
 
     /**

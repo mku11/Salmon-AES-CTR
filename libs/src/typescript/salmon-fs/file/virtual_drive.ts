@@ -22,14 +22,9 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 */
 
-import { IRealFile } from "./ireal_file";
-
-
 
 export abstract class VirtualDrive {
     /*
      * Virtual Drive
      */
-
-    public abstract getRealFile(filepath: string, is_directory: boolean): IRealFile;
 }

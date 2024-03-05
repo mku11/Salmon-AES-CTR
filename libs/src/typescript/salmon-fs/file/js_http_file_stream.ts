@@ -27,8 +27,8 @@ import { RandomAccessStream, SeekOrigin } from "../../salmon-core/io/random_acce
 import { IRealFile } from "./ireal_file.js";
 
 /**
- * An advanced Salmon File Stream implementation for java files.
- * This class is used internally for random file access of physical (real) files.
+ * An advanced file stream implementation for remote HTTP files.
+ * This class can be used for random file access of remote files.
  */
 export class JsHttpFileStream extends RandomAccessStream {
 
@@ -212,7 +212,7 @@ export class JsHttpFileStream extends RandomAccessStream {
         else if (origin == SeekOrigin.End)
             pos = await this.#file.length() - offset;
 
-        this.setPosition(pos);
+        await this.setPosition(pos);
         await this.#getStream();
         return this.#_position;
     }

@@ -167,9 +167,7 @@ export class MemoryStream extends RandomAccessStream {
      */
     #checkAndResize(newLength: number): void {
         if (this.#_capacity < newLength) {
-            let newCapacity: number = this.#_capacity + MemoryStream.#CAPACITY_INCREMENT * Math.floor((newLength - this.#_capacity) / MemoryStream.#CAPACITY_INCREMENT);
-            if (newCapacity < newLength)
-                newCapacity += MemoryStream.#CAPACITY_INCREMENT;
+            let newCapacity: number = newLength * 2;
             const nBytes: Uint8Array = new Uint8Array(newCapacity);
             for (let i = 0; i < this.#_capacity; i++)
                 nBytes[i] = this.#bytes[i];

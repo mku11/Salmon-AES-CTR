@@ -29,6 +29,7 @@ import { SalmonSequence } from "./salmon_sequence.js";
  * Salmon nonce sequencer.
  */
 export interface ISalmonSequencer {
+    initialize(): Promise<void>;
 
     /**
      * Create a sequence.
@@ -36,7 +37,7 @@ export interface ISalmonSequencer {
      * @param authID The authorization ID of the drive.
      * @throws SalmonSequenceException
      */
-    createSequence(driveID: string, authID: string): void;
+    createSequence(driveID: string, authID: string): Promise<void>;
 
     /**
      * Initialize the sequence.
@@ -47,7 +48,7 @@ export interface ISalmonSequencer {
      * @throws SalmonSequenceException
      * @throws IOException
      */
-    initSequence(driveID: string, authID: string, startNonce: Uint8Array, maxNonce: Uint8Array): void;
+    initSequence(driveID: string, authID: string, startNonce: Uint8Array, maxNonce: Uint8Array): Promise<void>;
 
     /**
      * Set the max nonce
@@ -58,7 +59,7 @@ export interface ISalmonSequencer {
      * @throws SalmonSequenceException
      * @throws IOException
      */
-    setMaxNonce(driveID: string, authID: string, maxNonce: Uint8Array): void;
+    setMaxNonce(driveID: string, authID: string, maxNonce: Uint8Array): Promise<void>;
 
     /**
      * Get the next nonce.
@@ -68,14 +69,14 @@ export interface ISalmonSequencer {
      * @throws SalmonSequenceException
      * @throws SalmonRangeExceededException
      */
-    nextNonce(driveID: string): Uint8Array;
+    nextNonce(driveID: string): Promise<Uint8Array | null>;
 
     /**
      * Revoke the sequencer. This terminates the sequencer and de-authorizes the device
      * @param driveID
      * @throws SalmonSequenceException
      */
-    revokeSequence(driveID: string): void;
+    revokeSequence(driveID: string): Promise<void>;
 
     /**
      * Get the sequence used for this drive.
@@ -83,7 +84,7 @@ export interface ISalmonSequencer {
      * @return The current sequence.
      * @throws SalmonSequenceException
      */
-    getSequence(driveID: string): SalmonSequence;
+    getSequence(driveID: string): Promise<SalmonSequence | null>;
 
     /**
      * Close the sequencer and any associated resources.

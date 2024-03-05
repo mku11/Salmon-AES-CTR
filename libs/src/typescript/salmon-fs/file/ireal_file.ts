@@ -92,19 +92,19 @@ export interface IRealFile {
     lastModified(): Promise<number>;
 
     /**
-     * Get the absolute path of the file on disk.
+     * Get the absolute path or handle of the file on disk.
      *
      * @return
      */
-    getAbsolutePath(): Promise<string>;
+    getAbsolutePath(): string;
 
     /**
-     * Get the original filepath of this file. This might symlinks or merged folders. To get the absolute path
+     * Get the original filepath of this file. This might represent a symlinks or merged folders or a FileHandle. To get the absolute path
      * use {@link #getAbsolutePath()}.
      *
      * @return
      */
-    getPath(): string;
+    getPath(): any;
 
     /**
      * True if this is a file.
@@ -147,7 +147,7 @@ export interface IRealFile {
      *
      * @return The parent directory.
      */
-    getParent(): Promise<IRealFile>;
+    getParent(): Promise<IRealFile | null>;
 
     /**
      * Create an empty file with the provided name.
@@ -177,7 +177,7 @@ export interface IRealFile {
      * @return The file after the copy. Use this instance for any subsequent file operations.
      * @throws IOException
      */
-    copy(newDir: IRealFile, newName: string | null, progressListener: ((position: number, length: number) => void) | null): Promise<IRealFile>;
+    copy(newDir: IRealFile, newName: string | null, progressListener: ((position: number, length: number) => void) | null): Promise<IRealFile | null>;
 
     /**
      * Get the file/directory matching the name provided under this directory.
@@ -207,7 +207,7 @@ export interface IRealFile {
  * @throws IOException
  */
 export async function copyFileContents(src: IRealFile, dest: IRealFile, deleteAfter: boolean,
-    progressListener: (position: number, length: number) => void): Promise<boolean> {
+    progressListener: ((position: number, length: number) => void) | null): Promise<boolean> {
     let source: RandomAccessStream = await src.getInputStream();
     let target: RandomAccessStream = await dest.getOutputStream();
     try {
@@ -236,7 +236,7 @@ export async function copyFileContents(src: IRealFile, dest: IRealFile, deleteAf
  */
 export async function copyRecursively(src: IRealFile, dest: IRealFile,
     progressListener: ((realfile: IRealFile, position: number, length: number) => void) | null,
-    autoRename: ((realfile: IRealFile) => string) | null,
+    autoRename: ((realfile: IRealFile) => Promise<string>) | null,
     autoRenameFolders: boolean = true,
     onFailed: ((realfile: IRealFile, ex: Error) => void) | null): Promise<void> {
     let newFilename: string = src.getBaseName();
@@ -245,7 +245,7 @@ export async function copyRecursively(src: IRealFile, dest: IRealFile,
     if (await src.isFile()) {
         if (newFile != null && await newFile.exists()) {
             if (autoRename != null) {
-                newFilename = autoRename(src);
+                newFilename = await autoRename(src);
             } else {
                 if (onFailed != null)
                     onFailed(src, new Error("Another file exists"));
@@ -261,16 +261,16 @@ export async function copyRecursively(src: IRealFile, dest: IRealFile,
         if (progressListener != null)
             progressListener(src, 0, 1);
         if (newFile != null && await newFile.exists() && autoRename != null && autoRenameFolders)
-            newFile = await dest.createDirectory(autoRename(src));
+            newFile = await dest.createDirectory(await autoRename(src));
         else if (newFile == null || !await newFile.exists())
             newFile = await dest.createDirectory(newFilename);
         if (progressListener != null)
             progressListener(src, 1, 1);
-        (await src.listFiles()).forEach(async (child: IRealFile) => {
+        for (let child of await src.listFiles()) {
             if (newFile == null)
                 throw new Error("Could not get new file");
             await copyRecursively(child, newFile, progressListener, autoRename, autoRenameFolders, onFailed);
-        });
+        }
     }
 }
 
@@ -285,11 +285,12 @@ export async function copyRecursively(src: IRealFile, dest: IRealFile,
  */
 export async function moveRecursively(file: IRealFile, dest: IRealFile,
     progressListener: ((realFile: IRealFile, position: number, length: number) => void) | null = null,
-    autoRename: ((realFile: IRealFile) => string) | null = null,
+    autoRename: ((realFile: IRealFile) => Promise<string>) | null = null,
     autoRenameFolders: boolean = true,
     onFailed: ((realFile: IRealFile, ex: Error) => void) | null = null): Promise<void> {
     // target directory is the same
-    if ((await file.getParent()).getPath() == dest.getPath()) {
+    let parent: IRealFile | null = await file.getParent();
+    if (parent != null && parent.getAbsolutePath() == dest.getAbsolutePath()) {
         if (progressListener != null) {
             progressListener(file, 0, 1);
             progressListener(file, 1, 1);
@@ -302,10 +303,10 @@ export async function moveRecursively(file: IRealFile, dest: IRealFile,
     newFile = await dest.getChild(newFilename);
     if (await file.isFile()) {
         if (newFile != null && await newFile.exists()) {
-            if (newFile.getPath() == file.getPath())
+            if (newFile.getAbsolutePath() == file.getAbsolutePath())
                 return;
             if (autoRename != null) {
-                newFilename = autoRename(file);
+                newFilename = await autoRename(file);
             } else {
                 if (onFailed != null)
                     onFailed(file, new Error("Another file exists"));
@@ -323,19 +324,19 @@ export async function moveRecursively(file: IRealFile, dest: IRealFile,
         if ((newFile != null && await newFile.exists() && autoRename != null && autoRenameFolders)
             || newFile == null || !await newFile.exists()) {
             if (autoRename != null)
-                newFile = await file.move(dest, autoRename(file), null);
+                newFile = await file.move(dest, await autoRename(file), null);
             return;
         }
         if (progressListener != null)
             progressListener(file, 1, 1);
 
-        (await file.listFiles()).forEach(async (child: IRealFile) => {
+        for (let child of await file.listFiles()) {
             if (newFile == null)
                 throw new Error("Could not get new file");
             await moveRecursively(child, newFile, progressListener, autoRename, autoRenameFolders, onFailed);
-        });
+        }
 
-        if (await !file.delete()) {
+        if (!await file.delete()) {
             if (onFailed != null)
                 onFailed(file, new Error("Could not delete source directory"));
             return;
@@ -359,9 +360,9 @@ export async function deleteRecursively(file: IRealFile, progressListener: (real
         }
         progressListener(file, 1, 1);
     } else if (await file.isDirectory()) {
-        (await file.listFiles()).forEach(async (child: IRealFile) => {
+        for (let child of await file.listFiles()) {
             await deleteRecursively(child, progressListener, onFailed);
-        });
+        }
         if (await !file.delete()) {
             if (onFailed != null)
                 onFailed(file, new Error("Could not delete directory"));

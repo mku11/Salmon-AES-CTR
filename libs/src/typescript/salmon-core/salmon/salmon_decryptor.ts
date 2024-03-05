@@ -43,15 +43,12 @@ export class SalmonDecryptor {
     readonly #threads: number;
 
     /**
-     * Executor for parallel tasks.
-     */
-    #workers: SharedWorker[] | null = null;
-
-    /**
      * The buffer size to use.
      */
     readonly #bufferSize: number;
 
+    #promises: Promise<any>[] = [];
+    #workers: any[] = [];
 
     /**
      * Instantiate a decryptor with parallel tasks and buffer size.
@@ -66,7 +63,6 @@ export class SalmonDecryptor {
             this.#threads = 1;
         } else {
             this.#threads = threads;
-            this.#workers = new Array(threads);
         }
         if (bufferSize == 0) {
             // we use the chunks size as default this keeps buffers aligned in case
@@ -189,26 +185,26 @@ export class SalmonDecryptor {
     async #submitDecryptJobs(runningThreads: number, partSize: number, data: Uint8Array, outData: Uint8Array,
         key: Uint8Array, hashKey: Uint8Array | null, nonce: Uint8Array,
         headerData: Uint8Array | null, integrity: boolean, chunkSize: number | null): Promise<void> {
-        let promises: Promise<any>[] = [];
+        this.#promises = [];
         for (let i = 0; i < runningThreads; i++) {
-            promises.push(new Promise(async (resolve, reject) => {
-                let worker: any;
+            this.#promises.push(new Promise(async (resolve, reject) => {
                 if (typeof process !== 'object') {
-                    worker = new Worker(SalmonDecryptor.#workerPath, { type: 'module' });
-                    worker.addEventListener('message', (event: { data: unknown }) => {
+                    if(this.#workers[i] == null)
+                        this.#workers[i] = new Worker(SalmonDecryptor.#workerPath, { type: 'module' });
+                    this.#workers[i].addEventListener('message', (event: { data: unknown }) => {
                         resolve(event.data);
                     });
-                    worker.addEventListener('error', (event: any) => {
+                    this.#workers[i].addEventListener('error', (event: any) => {
                         reject(event);
                     });
                 } else {
                     const { Worker } = await import("worker_threads");
-                    worker = new Worker(SalmonDecryptor.#workerPath);
-                    worker.on('message', (event: any) => {
+                    if(this.#workers[i] == null)
+                        this.#workers[i] = new Worker(SalmonDecryptor.#workerPath);
+                    this.#workers[i].on('message', (event: any) => {
                         resolve(event);
-                        worker.terminate();
                     });
-                    worker.on('error', (event: any) => {
+                    this.#workers[i].on('error', (event: any) => {
                         reject(event);
                     });
                 }
@@ -220,25 +216,37 @@ export class SalmonDecryptor {
                 else
                     length = partSize;
 
-                worker.postMessage({
+                this.#workers[i].postMessage({
                     index: i, data: data, out_size: outData.length, start: start, length: length, key: key, nonce: nonce,
                     headerData: headerData, integrity: integrity, hashKey: hashKey, chunkSize: chunkSize, bufferSize: this.#bufferSize
                 });
             }));
         }
-        await Promise.all(promises).then((results: any) => {
+        await Promise.all(this.#promises).then((results: any) => {
             for (let i = 0; i < results.length; i++) {
                 for (let j = results[i].startPos; j < results[i].endPos; j++) {
                     outData[j] = results[i].outData[j];
                 }
             }
-        }).catch(function(err) {
+        }).catch((err) => {
             console.error(err);
             throw err;
         });
     }
 
+    public close(): void {
+        for(let i=0; i<this.#workers.length; i++) {
+            this.#workers[i].terminate();
+            this.#workers[i] = null;
+        }
+        this.#promises = [];
+    }
+
     public static setWorkerPath(path: string) {
         SalmonDecryptor.#workerPath = path;
+    }
+
+    public static getWorkerPath(): string {
+        return SalmonDecryptor.#workerPath;
     }
 }
