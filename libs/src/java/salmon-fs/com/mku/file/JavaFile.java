@@ -235,10 +235,15 @@ public class JavaFile implements IRealFile {
      */
     public IRealFile move(IRealFile newDir, String newName, RandomAccessStream.OnProgressListener progressListener) {
         newName = newName != null?newName:getBaseName();
-        String nFilePath = newDir.getPath() + File.separator + newName;
+		//TODO: ToSync
+		if (newDir == null || !newDir.exists())
+            throw new IOException("Target directory does not exists");
+        IRealFile newFile = newDir.getChild(newName);
+        if (newFile != null && newFile.exists())
+            throw new IOException("Another file/directory already exists");
         boolean res = new File(filePath).renameTo(new File(nFilePath));
         if(!res)
-            throw new RuntimeException("directory already exists");
+            throw new RuntimeException("Could not move file/directory");
         return new JavaFile(nFilePath);
     }
 
@@ -282,7 +287,7 @@ public class JavaFile implements IRealFile {
         if (newFile != null && newFile.exists())
             throw new IOException("Another file/directory already exists");
         if (isDirectory()) {
-            return newDir.createDirectory(newName);
+            throw new IOException("Could not copy directory use IRealFile copyRecursively() instead");
         } else {
             newFile = newDir.createFile(newName);
             boolean res = IRealFile.copyFileContents(this, newFile, false, progressListener);
