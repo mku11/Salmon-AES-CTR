@@ -26,9 +26,8 @@ import { RandomAccessStream } from '../../salmon-core/io/random_access_stream.js
 import { IRealFile, copyFileContents } from './ireal_file.js';
 import { JsNodeFileStream } from './js_node_file_stream.js';
 import { IOException } from '../../salmon-core/io/io_exception.js';
-import { MemoryStream } from '../../salmon-core/io/memory_stream.js';
-import { mkdir, stat, readdir, rename, open, FileHandle, unlink, rmdir } from 'node:fs/promises';
-import { Stats, existsSync, rmdirSync, unlinkSync } from 'node:fs';
+import { mkdir, stat, readdir, rename, open, FileHandle } from 'node:fs/promises';
+import { Stats, rmdirSync, unlinkSync } from 'node:fs';
 import path from 'node:path';
 
 /**
