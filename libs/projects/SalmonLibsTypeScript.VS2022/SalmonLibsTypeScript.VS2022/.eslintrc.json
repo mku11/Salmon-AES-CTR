@@ -25,5 +25,16 @@
     "browser": true,
     "node": true
   },
-  "ignorePatterns": [ "**/node_modules/**" ]
+  "ignorePatterns": [ "**/node_modules/**" ],
+  "overrides": [
+    {
+      "files": [
+        "**/*.test.js",
+        "**/*test_helper.js"
+      ],
+      "env": {
+        "jest": true
+      }
+    }
+  ]
 }

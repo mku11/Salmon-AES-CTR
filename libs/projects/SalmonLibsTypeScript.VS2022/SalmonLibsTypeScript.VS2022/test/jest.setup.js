@@ -1,3 +1,3 @@
 // jest setup
-import { expect, jest, test } from '@jest/globals';
+import { jest } from '@jest/globals';
 jest.retryTimes(0);
