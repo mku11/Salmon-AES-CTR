@@ -150,7 +150,7 @@ class PythonFSTestHelper:
         file_exporter.set_enable_log(PythonFSTestHelper.ENABLE_LOG)
         file_exporter.set_enable_log_details(PythonFSTestHelper.ENABLE_LOG_DETAILS)
         print_export_progress = lambda vb, tb: print(
-            "exporting file: " + file_to_import.get_base_name() + ": " + str(vb) + "/" + str(
+            "exporting file: " + salmon_file.get_base_name() + ": " + str(vb) + "/" + str(
                 tb)) if PythonFSTestHelper.ENABLE_FILE_PROGRESS else None
 
         if bitflip:
