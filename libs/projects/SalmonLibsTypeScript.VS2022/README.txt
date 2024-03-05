@@ -26,9 +26,10 @@ to be able to debug test cases add the following to user file settings.json:
 	"env": {"NODE_OPTIONS": "--experimental-vm-modules"}
 }
 if the above does not work and you're getting an error about importing modules then edit file:
-%LOCALAPPDATA%\Programs\Microsoft VS Code\resources\app\extensions\ms-vscode.js-debug\extensions.js
+%LOCALAPPDATA%\Programs\Microsoft VS Code\resources\app\extensions\ms-vscode.js-debug\src\extension.js
 and add the node experimental option before the addition of the plugin path:
 c={NODE_OPTIONS:` --experimental-vm-modules --require ${s.interpolatedPath} `
+make sure you restart VS code.
 
 To turn off auto running test cases:
 "jest.autoRun": "off",
