@@ -25,6 +25,10 @@ SOFTWARE.
 import { RandomAccessStream, SeekOrigin } from "../../salmon-core/io/random_access_stream.js";
 import { IRealFile } from "./ireal_file.js";
 
+// File operations on the local file system may be slow due to
+// web browser specificallly Chrome malware scans
+// see: https://issues.chromium.org/issues/40743502
+
 /**
  * An advanced file stream implementation for local files.
  * This class can be used for random file access of local files using the browser.
