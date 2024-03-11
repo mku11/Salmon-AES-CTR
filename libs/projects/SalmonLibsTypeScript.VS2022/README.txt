@@ -65,5 +65,5 @@ npm install -g typescript
 
 if you're getting errors from node_modules set folder to hidden in file explorer and reload project
 
-
-
+To create the packages run:
+./package.sh
