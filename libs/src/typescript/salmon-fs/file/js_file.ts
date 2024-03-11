@@ -189,7 +189,7 @@ export class JsFile implements IRealFile {
      * @return
      */
     public async isDirectory(): Promise<boolean> {
-        return this.#fileHandle instanceof FileSystemDirectoryHandle;
+        return this.#fileHandle != null && this.#fileHandle.kind == 'directory';
     }
 
     /**
@@ -197,7 +197,7 @@ export class JsFile implements IRealFile {
      * @return
      */
     public async isFile(): Promise<boolean> {
-        return !await this.isDirectory();
+        return this.#fileHandle != null && !await this.isDirectory();
     }
 
     /**
@@ -236,10 +236,15 @@ export class JsFile implements IRealFile {
     public async listFiles(): Promise<IRealFile[]> {
         let files: IRealFile[] = [];
         let lFiles = this.#fileHandle.entries();
+		let nFiles: IRealFile[] = [];
         for await (const [key, value] of lFiles) {
             let file: IRealFile = new JsFile(value, this);
-            files.push(file);
+			if(await file.isFile())
+				nFiles.push(file);
+			else
+				files.push(file);
         }
+		files = files.concat(nFiles);
         return files;
     }
 
@@ -331,13 +336,13 @@ export class JsFile implements IRealFile {
      */
     public async renameTo(newFilename: string): Promise<boolean> {
         if (typeof (this.#fileHandle.move) !== 'undefined')
-            this.#fileHandle.move(newFilename);
+            await this.#fileHandle.move(newFilename);
         else if (this.#parent == null) {
             return false;
         } else {
             await this.move(this.#parent, newFilename);
         }
-        return true;
+        return this.#fileHandle.name == newFilename;
     }
 
     /**

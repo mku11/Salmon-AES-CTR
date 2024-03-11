@@ -599,7 +599,7 @@ export class SalmonFile extends VirtualFile {
             if (virtualRoot == null)
                 throw new SalmonSecurityException("Could not get virtual root, you need to init drive first");
             if (virtualRoot.getRealFile().getPath() == this.getRealFile().getPath()) {
-
+                return null;
             }
         } catch (exception) {
             console.error(exception);
@@ -927,10 +927,12 @@ export class SalmonFile extends VirtualFile {
                 progressListener(new SalmonFile(file, this.#drive), position, length);
         }, onFailedRealFile);
     }
+}
 
-    public static async autoRename(file: SalmonFile): Promise<string> {
+
+    export async function autoRename(file: SalmonFile): Promise<string> {
         try {
-            return await SalmonFile.autoRenameFile(file);
+            return await autoRenameFile(file);
         } catch (ex) {
             try {
                 return await file.getBaseName();
@@ -938,14 +940,14 @@ export class SalmonFile extends VirtualFile {
                 return "";
             }
         }
-    };
+    }
 
     /// <summary>
     /// Get an auto generated copy of the name for the file.
     /// </summary>
     /// <param name="file"></param>
     /// <returns></returns>
-    public static async autoRenameFile(file: SalmonFile): Promise<string> {
+    export async function autoRenameFile(file: SalmonFile): Promise<string> {
         let filename: string = IRealFileAutoRename(await file.getBaseName());
         let drive: SalmonDrive | null = file.getDrive();
         if (drive == null)
@@ -963,4 +965,3 @@ export class SalmonFile extends VirtualFile {
         encryptedPath = encryptedPath.replace(/\//g, "-");
         return encryptedPath;
     }
-}

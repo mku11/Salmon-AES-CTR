@@ -59,7 +59,8 @@ export class JsLocalStorageFile implements IRealFile {
      * @throws IOException
      */
     public async createFile(filename: string): Promise<IRealFile> {
-        throw new Error("Not supported");
+		let child: IRealFile = new JsLocalStorageFile(this.#filePath + JsLocalStorageFile.separator + filename);
+		return child;
     }
 
     /**
@@ -76,7 +77,7 @@ export class JsLocalStorageFile implements IRealFile {
      * @return
      */
     public async exists(): Promise<boolean> {
-        return localStorage.getItem("username") != null;
+        return localStorage.getItem(this.#filePath) != null;
     }
 
     /**
@@ -122,7 +123,10 @@ export class JsLocalStorageFile implements IRealFile {
      * @return The parent directory.
      */
     public async getParent(): Promise<IRealFile> {
-        throw new Error("Not supported");
+		let index: number = this.#filePath.lastIndexOf(JsLocalStorageFile.separator);
+		let dirPath: string = this.#filePath.substring(0, index);
+		let dir: IRealFile = new JsLocalStorageFile(dirPath);
+        return dir;
     }
 
     /**
@@ -212,7 +216,8 @@ export class JsLocalStorageFile implements IRealFile {
      * @return
      */
     public async getChild(filename: string): Promise<IRealFile | null> {
-        throw new Error("Not supported");
+        let child: IRealFile = new JsLocalStorageFile(this.#filePath + JsLocalStorageFile.separator + filename);
+		return child;
     }
 
     /**

@@ -554,7 +554,7 @@ export abstract class SalmonDrive extends VirtualDrive {
      * @param filename     The filename of the auth config file.
      * @throws Exception
      */
-    public async exportAuthFile(targetAuthID: string, dir: IRealFile, filename: string): Promise<void> {
+    public async exportAuthFile(targetAuthID: string, file: IRealFile): Promise<void> {
         let driveId: Uint8Array | null = this.getDriveID();
         if (driveId == null)
             throw new Error("Could not get drive id, make sure you init the drive first");
@@ -566,11 +566,17 @@ export abstract class SalmonDrive extends VirtualDrive {
         let sequence: SalmonSequence | null = await this.getSequencer().getSequence(BitConverter.toHex(driveId));
         if (sequence == null)
             throw new Error("Device is not authorized to export");
-        let targetAppDriveConfigFile: IRealFile | null = await dir.getChild(filename);
-        if (targetAppDriveConfigFile == null || !await targetAppDriveConfigFile.exists())
-            targetAppDriveConfigFile = await dir.createFile(filename);
-        else if (targetAppDriveConfigFile != null && await targetAppDriveConfigFile.exists())
-            throw new SalmonAuthException(filename + " already exists, delete this file or choose another directory");
+        if(await file.exists() && await file.length() > 0) {
+            let outStream: RandomAccessStream | null = null;
+            try {
+            outStream = await file.getOutputStream();
+            outStream.setLength(0);
+            } catch(ex) {
+            } finally {
+                if(outStream != null)
+                    outStream.close();
+            }
+        }
         let maxNonce: Uint8Array | null = sequence.getMaxNonce();
         if (maxNonce == null)
             throw new SalmonSequenceException("Could not get current max nonce");
@@ -582,7 +588,7 @@ export abstract class SalmonDrive extends VirtualDrive {
         if(authID == null)
             throw new SalmonSequenceException("Could not get auth id");
         await this.getSequencer().setMaxNonce(sequence.getDriveID(), authID, pivotNonce);
-        await SalmonAuthConfig.writeAuthFile(targetAppDriveConfigFile, this,
+        await SalmonAuthConfig.writeAuthFile(file, this,
             BitConverter.hexToBytes(targetAuthID),
             pivotNonce, maxNonce,
             cfgNonce);

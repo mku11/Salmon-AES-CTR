@@ -56,7 +56,7 @@ export class JsLocalStorageFileStream extends RandomAccessStream {
             this.#canWrite = true;
             this.#stream = new MemoryStream();
         } else {
-            let contents: string | null = localStorage.getItem(this.#file.getPath());
+            let contents: string | null = localStorage.getItem(this.#file.getAbsolutePath());
             if(contents == null)
                 contents = "";
             this.#stream = new MemoryStream(this.#base64.decode(contents));
@@ -120,7 +120,7 @@ export class JsLocalStorageFileStream extends RandomAccessStream {
      * @throws IOException
      */
     public override async setLength(value: number): Promise<void> {
-        throw new Error("Not supported");
+        
     }
 
     /**
@@ -163,7 +163,8 @@ export class JsLocalStorageFileStream extends RandomAccessStream {
      */
     public override async flush(): Promise<void> {
         let contents: string = this.#base64.encode(this.#stream.toArray());
-        localStorage.setItem(this.#file.getPath(), contents);
+        let key: string = this.#file.getAbsolutePath();
+        localStorage.setItem(key, contents);
     }
 
     /**
