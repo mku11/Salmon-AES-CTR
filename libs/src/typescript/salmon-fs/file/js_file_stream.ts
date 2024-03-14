@@ -60,7 +60,8 @@ export class JsFileStream extends RandomAccessStream {
     }
     async #getBlob(): Promise<any> {
         if (this.#fileBlob == null) {
-            this.#fileBlob = await (await this.#file.getPath()).getFile();
+            let fileHandle = await this.#file.getPath();
+            this.#fileBlob = await fileHandle.getFile();
         }
         return this.#fileBlob;
     }
@@ -130,7 +131,15 @@ export class JsFileStream extends RandomAccessStream {
         this.#_position = value;
         if (await this.canWrite()) {
             let stream: FileSystemWritableFileStream = (await this.#getStream());
-            await stream.seek(this.#_position);
+			try {
+				if(await this.#file.length() < value)
+					stream.truncate(value);
+				else
+					await stream.seek(this.#_position);
+			} catch(ex) {
+				console.error(ex);
+				throw ex;
+			}
         }
     }
 
