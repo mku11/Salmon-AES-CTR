@@ -138,7 +138,10 @@ export class JsHttpFile implements IRealFile {
      * @return The parent directory.
      */
     public async getParent(): Promise<IRealFile> {
-        let parentFilePath: string = new URL(".", this.#filePath).toString();
+		let path: string = this.#filePath;
+		if(path.endsWith(JsHttpFile.separator))
+			path = path.slice(0,-1);
+        let parentFilePath: string = path.substring(0, path.lastIndexOf(JsHttpFile.separator));
         return new JsHttpFile(parentFilePath);
     }
 
@@ -181,8 +184,12 @@ export class JsHttpFile implements IRealFile {
     public async lastModified(): Promise<number> {
         let headers: Headers = (await this.#getResponse()).headers;
         let lastDateModified: string | null = headers.get("last-modified");
-        if (lastDateModified == null)
-            throw new Error("Could not get last modified");
+        if (lastDateModified == null) {
+			lastDateModified = headers.get("date");
+		}
+		if (lastDateModified == null) {
+			lastDateModified = "0";
+		}
         let date: Date = new Date(lastDateModified);
         let lastModified = date.getTime();
         return lastModified;
