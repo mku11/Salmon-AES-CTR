@@ -86,9 +86,10 @@ export class JsFile implements IRealFile {
      * @return True if deletion is successful.
      */
     public async delete(): Promise<boolean> {
-        if (this.#parent == null)
-            throw new IOException("Could not get parent");
-        await (this.#parent.getPath() as FileSystemDirectoryHandle).removeEntry(this.getBaseName(), {recursive: true});
+		if (this.#fileHandle != null && this.#fileHandle.remove != undefined)
+			this.#fileHandle.remove();
+        if (this.#parent != null)
+			await (this.#parent.getPath() as FileSystemDirectoryHandle).removeEntry(this.getBaseName(), {recursive: true});
         return !await this.exists();
     }
 
