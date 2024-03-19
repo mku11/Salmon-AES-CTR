@@ -29,56 +29,37 @@ import { RandomAccessStream, SeekOrigin } from "./random_access_stream.js";
  * Wrapper stream of AbsStream to Javascript's native InputStream interface.
  * Use this class to wrap any AbsStream to a less powerful but familiar and compatible Java InputStream.
  */
-export class ReadableStreamWrapper implements ReadableStream {
-    readonly #stream: RandomAccessStream;
-    #reader: ReadableStreamWrapperReader;
+export class ReadableStreamWrapper {
+    static BUFFER_SIZE = 4 * 1024 * 1024;
 
     /**
      * Instantiates an ReadableStreamWrapper with a base stream.
      * @param stream The base AbsStream that you want to wrap.
      */
-    public constructor(stream: RandomAccessStream) {
-        this.#stream = stream;
-        this.#reader = new ReadableStreamWrapperReader(this.#stream);
-    }
-    locked: boolean = false;
-    async cancel(reason?: any): Promise<void> {
-        if(this.#reader != null)
-            await this.#reader.cancel(reason);
-    }
-    getReader(): ReadableStreamDefaultReader {
-        return this.#reader;
-    }
-    pipeThrough<T>(transform: ReadableWritablePair<T, any>, options?: StreamPipeOptions): ReadableStream<T> {
-        throw new Error("Method not implemented.");
-    }
-    pipeTo(destination: WritableStream<any>, options?: StreamPipeOptions): Promise<void> {
-        throw new Error("Method not implemented.");
-    }
-    tee(): [ReadableStream<any>, ReadableStream<any>] {
-        throw new Error("Method not implemented.");
-    }
-}
-
-export class ReadableStreamWrapperReader implements ReadableStreamDefaultReader {
-    #stream: RandomAccessStream;
-    constructor(stream: RandomAccessStream) {
-        this.#stream = stream;
-    }
-    public async skip(bytes: number): Promise<number> {
-        return await this.#stream.seek(bytes, SeekOrigin.Current);
-    }
-    async read(): Promise<ReadableStreamReadResult<Uint8Array>> {
-        let buff: Uint8Array = new Uint8Array(SalmonDefaultOptions.getBufferSize());
-        await this.#stream.read(buff, 0, buff.length);
-        return { value: buff, done: true };
-    }
-    releaseLock(): void {
-        throw new Error("Method not implemented.");
-    }
-    closed: Promise<undefined> = Promise.resolve(undefined);
-    async cancel(reason?: any): Promise<void> {
-        if(this.#stream!=null)
-            await this.#stream.close();
+    public static create(stream: RandomAccessStream): ReadableStream {
+        let readableStream: any = new ReadableStream({
+            type: 'bytes',
+            async pull(controller: any) {
+                let size: number = ReadableStreamWrapper.BUFFER_SIZE;
+                let buffer: Uint8Array = new Uint8Array(size);
+                let bytesRead: number = 0;
+                let tBytesRead: number = 0;
+                while ((bytesRead = await stream.read(buffer, 0, buffer.length)) > 0
+                    && tBytesRead < size) {
+                    controller.enqueue(new Uint8Array(buffer, 0, bytesRead));
+                    tBytesRead += bytesRead;
+                }
+            },
+            async cancel(reason?: any): Promise<void> {
+                await stream.close();
+            }
+        });
+        readableStream.reset = function(): void {
+            stream.setPosition(0);
+        }
+        readableStream.skip = async function(position: number): Promise<number> {
+            return await stream.seek(position, SeekOrigin.Current);
+        }
+        return readableStream;
     }
 }
