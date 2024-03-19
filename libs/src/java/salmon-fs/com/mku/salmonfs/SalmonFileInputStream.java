@@ -150,6 +150,7 @@ public class SalmonFileInputStream extends InputStream {
      * @return
      */
     public long skip(long bytes) {
+		bytes += positionStart;
         long currPos = this.position;
         if (this.position + bytes > this.size)
             this.position = this.size;
