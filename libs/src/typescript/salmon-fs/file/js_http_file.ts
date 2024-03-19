@@ -48,7 +48,7 @@ export class JsHttpFile implements IRealFile {
 
     async #getResponse(): Promise<Response> {
         if (this.#_response == null)
-            this.#_response = (await fetch(this.#filePath));
+            this.#_response = (await fetch(this.#filePath, {method: 'HEAD'}));
         return this.#_response;
     }
 
