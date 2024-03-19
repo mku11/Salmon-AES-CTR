@@ -631,8 +631,8 @@ export class TsFsTestHelper {
     static async seekAndReadFileInputStream(data, fileInputStream, start, length, readOffset, shouldReadLength) {
         let buffer = new Uint8Array(length + readOffset);
         let reader = fileInputStream.getReader();
-        await reader.reset();
-        await reader.skip(start);
+        await fileInputStream.reset();
+        await fileInputStream.skip(start);
         let buff = await reader.read();
         if (buff.value == undefined)
             throw new Error("Could not read from stream");
@@ -643,6 +643,7 @@ export class TsFsTestHelper {
         for (let i = 0; i < shouldReadLength; i++)
             tdata[readOffset + i] = data[start + i];
         TestHelper.assertArrayEquals(tdata, buffer);
+        reader.releaseLock();
     }
 
     static async shouldTestFileSequencer() {
@@ -704,6 +705,8 @@ export class TsFsTestHelper {
             await dest.write(buffer, 0, bytesRead);
         }
         await dest.flush();
+        reader.releaseLock();
+        src.cancel();
     }
 
 
@@ -851,7 +854,7 @@ export class TsFsTestHelper {
         let stream = null;
         if (TsFsTestHelper.TEST_USE_FILE_INPUT_STREAM && isEncrypted) {
             // multi threaded
-            stream = new SalmonFileReadableStream(file, buffersCount, bufferSize, TsFsTestHelper.TEST_FILE_INPUT_STREAM_THREADS, backOffset);
+            stream = SalmonFileReadableStream.create(file, buffersCount, bufferSize, TsFsTestHelper.TEST_FILE_INPUT_STREAM_THREADS, backOffset);
         } else {
             let fileStream;
             if (isEncrypted) {
@@ -862,7 +865,7 @@ export class TsFsTestHelper {
             stream = new ReadableStreamWrapper(fileStream);
         }
         let reader = await stream.getReader();
-        await stream.getReader().skip(start);
+        await stream.skip(start);
         let res = await reader.read();
         expect(res.value).toBeDefined();
         for (let i = 0; i < length; i++) {
@@ -874,6 +877,7 @@ export class TsFsTestHelper {
         }
         console.log(tdata);
         console.log(buffer);
+        reader.releaseLock();
         stream.cancel();
         TestHelper.assertArrayEquals(tdata, buffer);
     }

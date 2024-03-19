@@ -36,7 +36,7 @@ import { SalmonAuthException } from "./salmon_auth_exception.js";
  * This class provides a seekable source with parallel substreams and cached buffers
  * for performance.
  */
-export class SalmonFileReadableStream implements ReadableStream {
+export class SalmonFileReadableStream {
     static #workerPath = './lib/salmon-fs/salmonfs/salmon_file_readable_stream_worker.js';
 
     // Default cache buffer should be high enough for some mpeg videos to work
@@ -47,20 +47,6 @@ export class SalmonFileReadableStream implements ReadableStream {
     public static readonly DEFAULT_BUFFERS: number = 3;
     public static readonly MAX_BUFFERS: number = 6;
 
-    private readonly buffersCount: number;
-    private readonly salmonFile: SalmonFile;
-    private readonly cacheBufferSize: number;
-    private readonly threads: number;
-
-    /**
-         * Negative offset for the buffers. Some stream consumers might request data right before
-         * the last request. We provide this offset so we don't make multiple requests for filling
-         * the buffers ending up with too much overlapping data.
-         */
-    private readonly backOffset: number;
-
-    #reader: ReadableStreamFileReader | null = null;
-
     /**
      * Instantiate a seekable stream from an encrypted file source
      *
@@ -68,11 +54,12 @@ export class SalmonFileReadableStream implements ReadableStream {
      * @param buffersCount Number of buffers to use.
      * @param bufferSize   The length of each buffer.
      * @param threads      The number of threads/streams to source the file in parallel.
-     * @param backOffset   The back offset.
+     * @param backOffset   The back offset.  Negative offset for the buffers. Some stream consumers might request data right before
+     * the last request. We provide this offset so we don't make multiple requests for filling
+     * the buffers ending up with too much overlapping data.
      */
-    public constructor(salmonFile: SalmonFile,
-        buffersCount: number, bufferSize: number, threads: number, backOffset: number) {
-        this.salmonFile = salmonFile;
+    public static create(salmonFile: SalmonFile,
+        buffersCount: number = 0, bufferSize: number = 0, threads: number = 0, backOffset: number = 0) {
         if (buffersCount == 0)
             buffersCount = SalmonFileReadableStream.DEFAULT_BUFFERS;
         if (buffersCount > SalmonFileReadableStream.MAX_BUFFERS)
@@ -84,46 +71,38 @@ export class SalmonFileReadableStream implements ReadableStream {
         if (threads == 0)
             threads = SalmonFileReadableStream.DEFAULT_THREADS;
 
-        this.buffersCount = buffersCount;
-        this.cacheBufferSize = bufferSize;
-        this.threads = threads;
-        this.backOffset = backOffset;
-    }
-
-    locked: boolean = false;
-    getReader(): ReadableStreamDefaultReader {
-        if (this.#reader == null || !this.#reader.locked) {
-            this.#reader = new ReadableStreamFileReader(this.salmonFile,
-                this.buffersCount, this.cacheBufferSize, this.threads, this.backOffset);
-            this.locked = true;
+        let reader: ReadableStreamFileReader = new ReadableStreamFileReader(salmonFile,
+            buffersCount, bufferSize, threads, backOffset);
+        let readableStreamReader: any;
+        let readableStream: any = new ReadableStream({
+            type: 'bytes',
+            async pull(controller: any) {
+                let buff = await reader.read();
+                controller.enqueue(buff);
+            },
+            async cancel(reason?: any): Promise<void> {
+                await reader.cancel();
+            }
+        });
+        readableStream.reset = function (): void {
+            reader.reset();
         }
-        return this.#reader;
-    }
-
-    pipeThrough<T>(transform: ReadableWritablePair<T, any>, options?: StreamPipeOptions): ReadableStream<T> {
-        throw new Error("Method not supported.");
-    }
-    pipeTo(destination: WritableStream<any>, options?: StreamPipeOptions): Promise<void> {
-        throw new Error("Method not supported.");
-    }
-    tee(): [ReadableStream<any>, ReadableStream<any>] {
-        throw new Error("Method not supported.");
-    }
-
-
-    /**
-     * Close the stream and associated backed streams and clear buffers.
-     *
-     * @throws IOException
-     */
-    public async cancel(reason?: any): Promise<void> {
-        if (this.#reader != null) {
-            await this.#reader.cancel();
-            this.#reader = null;
-            this.locked = false;
+        readableStream.skip = async function (position: number): Promise<number> {
+            return await reader.skip(position);
         }
+        readableStream.getPositionStart = function (): number {
+            return reader.getPositionStart();
+        }
+        readableStream.setPositionStart = async function (position: any): Promise<void> {
+            await reader.setPositionStart(position);
+        }
+        readableStream.setPositionEnd = async function (position: any): Promise<void> {
+            await reader.setPositionEnd(position);
+        }
+        
+        return readableStream;
     }
-    
+
     public static setWorkerPath(path: string) {
         SalmonFileReadableStream.#workerPath = path;
     }
@@ -133,7 +112,7 @@ export class SalmonFileReadableStream implements ReadableStream {
     }
 }
 
-export class ReadableStreamFileReader implements ReadableStreamDefaultReader {
+export class ReadableStreamFileReader {
     private readonly buffersCount: number;
     private readonly salmonFile: SalmonFile;
     private readonly cacheBufferSize: number;
@@ -146,8 +125,6 @@ export class ReadableStreamFileReader implements ReadableStreamDefaultReader {
     #promises: Promise<any>[] = [];
 
     #workers: any[] = [];
-    
-    locked: boolean = false;
 
     // private ExecutorService executor;
     private position: number = 0;
@@ -167,24 +144,24 @@ export class ReadableStreamFileReader implements ReadableStreamDefaultReader {
         this.cacheBufferSize = bufferSize;
         this.threads = threads;
         this.backOffset = backOffset;
-        this.locked = true;
     }
 
     public async initialize(): Promise<void> {
         this.size = await this.salmonFile.getSize();
+        this.positionStart = 0;
         this.positionEnd = this.size - 1;
         this.createBuffers();
-        if(this.threads == 1) {
+        if (this.threads == 1) {
             await this.createStream();
         }
     }
 
-    async read(): Promise<ReadableStreamReadResult<Uint8Array>> {
+    async read(): Promise<Uint8Array> {
         if (this.buffers == null)
             await this.initialize();
         let buff: Uint8Array = new Uint8Array(SalmonDefaultOptions.getBufferSize());
-        await this.readStream(buff, 0, buff.length);
-        return { value: buff, done: true };
+        let bytesRead: number = await this.readStream(buff, 0, buff.length);
+        return new Uint8Array(buff, 0, bytesRead);
     }
 
 
@@ -216,6 +193,7 @@ export class ReadableStreamFileReader implements ReadableStreamDefaultReader {
     public async skip(bytes: number): Promise<number> {
         if (this.buffers == null)
             await this.initialize();
+        bytes += this.positionStart;
         let currPos: number = this.position;
         if (this.position + bytes > this.size)
             this.position = this.size;
@@ -280,7 +258,7 @@ export class ReadableStreamFileReader implements ReadableStreamDefaultReader {
      * @param cacheBuffer The cache buffer that will store the decrypted contents
      * @param bufferSize  The length of the data requested
      */
-    private async fillBuffer(cacheBuffer: CacheBuffer, startPosition: number, bufferSize: number): Promise<number> {        
+    private async fillBuffer(cacheBuffer: CacheBuffer, startPosition: number, bufferSize: number): Promise<number> {
         let bytesRead: number;
         if (this.threads == 1) {
             if (this.stream == null)
@@ -308,7 +286,7 @@ export class ReadableStreamFileReader implements ReadableStreamDefaultReader {
             this.#promises.push(new Promise(async (resolve, reject) => {
                 let fileToReadHandle: any = await this.salmonFile.getRealFile().getPath();
                 if (typeof process !== 'object') {
-                    
+
                     if (this.#workers[i] == null)
                         this.#workers[i] = new Worker(SalmonFileReadableStream.getWorkerPath(), { type: 'module' });
                     this.#workers[i].addEventListener('message', (event: any) => {
@@ -359,7 +337,7 @@ export class ReadableStreamFileReader implements ReadableStreamDefaultReader {
             for (let i = 0; i < results.length; i++) {
                 bytesRead += results[i].chunkBytesRead;
                 let chunkStart = results[i].start;
-                for(let j=0; j<results[i].chunkBytesRead; j++)
+                for (let j = 0; j < results[i].chunkBytesRead; j++)
                     cacheBuffer.buffer[chunkStart + j] = results[i].cacheBuffer[chunkStart + j];
             }
         }).catch((err) => {
@@ -429,11 +407,15 @@ export class ReadableStreamFileReader implements ReadableStreamDefaultReader {
     public getPositionStart(): number {
         return this.positionStart;
     }
-    public setPositionStart(pos: number): void {
+    public async setPositionStart(pos: number): Promise<void> {
+        if (this.buffers == null)
+            await this.initialize();
         this.positionStart = pos;
     }
     private positionEnd: number = 0;
-    public setPositionEnd(pos: number): void {
+    public async setPositionEnd(pos: number): Promise<void> {
+        if (this.buffers == null)
+            await this.initialize();
         this.positionEnd = pos;
     }
 
@@ -463,18 +445,13 @@ export class ReadableStreamFileReader implements ReadableStreamDefaultReader {
         this.stream = null;
     }
 
-    releaseLock(): void {
-        setTimeout(async () => { await this.cancel() });
-        this.locked = false;
-    }
-
     closed: Promise<undefined> = Promise.resolve(undefined);
 
     async cancel(reason?: any): Promise<void> {
         await this.closeStream();
         this.clearBuffers();
-        for(let i=0; i<this.#workers.length; i++) {
-            this.#workers[i].postMessage({message: 'close'});
+        for (let i = 0; i < this.#workers.length; i++) {
+            this.#workers[i].postMessage({ message: 'close' });
             this.#workers[i].terminate();
             this.#workers[i] = null;
         }

@@ -35,14 +35,18 @@ import { SalmonFileCommander } from '../../lib/salmon-fs/utils/salmon_file_comma
 import { SalmonDefaultOptions } from '../../lib/salmon-core/salmon/salmon_default_options.js';
 import { SalmonAuthException } from '../../lib/salmon-fs/salmonfs/salmon_auth_exception.js'
 
-// change to Local to run on the browser
-// change to Node to run on the command line or VS code
-await setTestMode(TestMode.Local);
+// Local to run on the browser
+// Node to run on the command line or VS code
+if (typeof process === 'object') {
+    await setTestMode(TestMode.Node);
+} else {
+    await setTestMode(TestMode.Local);
+}
 
 describe('salmon-fs', () => {
 
     beforeAll(() => {
-        TsFsTestHelper.TEST_IMPORT_FILE = TsFsTestHelper.TEST_IMPORT_MEDIUM_FILE;
+        TsFsTestHelper.TEST_IMPORT_FILE = TsFsTestHelper.TEST_IMPORT_SMALL_FILE;
 
         TsFsTestHelper.ENC_IMPORT_BUFFER_SIZE = 512 * 1024;
         TsFsTestHelper.ENC_IMPORT_THREADS = 2;
@@ -404,7 +408,7 @@ describe('salmon-fs', () => {
             true, true, 64, TestHelper.TEST_HMAC_KEY_BYTES,
             TestHelper.TEST_FILENAME_NONCE_BYTES, TestHelper.TEST_NONCE_BYTES, TsFsTestHelper.TEST_OUTPUT_DIR,
             false, -1, true);
-        let fileInputStream = new SalmonFileReadableStream(file,
+        let fileInputStream = SalmonFileReadableStream.create(file,
             3, 50, TsFsTestHelper.TEST_FILE_INPUT_STREAM_THREADS, 12);
 
         await TsFsTestHelper.seekAndReadFileInputStream(data, fileInputStream, 0, 32, 0, 32);
@@ -414,6 +418,7 @@ describe('salmon-fs', () => {
         await TsFsTestHelper.seekAndReadFileInputStream(data, fileInputStream, 50, 40, 0, 40);
         await TsFsTestHelper.seekAndReadFileInputStream(data, fileInputStream, 124, 50, 0, 50);
         await TsFsTestHelper.seekAndReadFileInputStream(data, fileInputStream, 250, 10, 0, 6);
+        fileInputStream.cancel();
     });
 
     it('shouldCreateDriveAndOpenFsFolder', async () => {
@@ -571,18 +576,16 @@ describe('salmon-fs', () => {
         let sfiles = await fileCommander.importFiles([file],
             await drive.getVirtualRoot(), false, true, null, null, null);
 
-        let fileInputStream1 = new SalmonFileReadableStream(sfiles[0], 4, 4 * 1024 * 1024, 4, 256 * 1024);
+        let fileInputStream1 = SalmonFileReadableStream.create(sfiles[0], 4, 4 * 1024 * 1024, 4, 256 * 1024);
         let ms = new MemoryStream();
-        TsFsTestHelper.copyReadableStream(fileInputStream1, ms);
-        await fileInputStream1.cancel();
+        await TsFsTestHelper.copyReadableStream(fileInputStream1, ms);
         await ms.flush();
         await ms.close();
         let h1 = BitConverter.toHex(new Uint8Array(await crypto.subtle.digest("SHA-256", ms.toArray())));
 
-        let fileInputStream2 = new SalmonFileReadableStream(sfiles[0], 4, 4 * 1024 * 1024, 1, 256 * 1024);
+        let fileInputStream2 = SalmonFileReadableStream.create(sfiles[0], 4, 4 * 1024 * 1024, 1, 256 * 1024);
         let ms52 = new MemoryStream();
-        TsFsTestHelper.copyReadableStream(fileInputStream2, ms52);
-        await fileInputStream2.cancel();
+        await TsFsTestHelper.copyReadableStream(fileInputStream2, ms52);
         await ms52.flush();
         await ms52.close();
         let h2 = BitConverter.toHex(new Uint8Array(await crypto.subtle.digest("SHA-256", ms52.toArray())));
