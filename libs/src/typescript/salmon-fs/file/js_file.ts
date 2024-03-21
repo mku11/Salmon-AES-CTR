@@ -23,7 +23,7 @@ SOFTWARE.
 */
 
 import { RandomAccessStream } from '../../salmon-core/io/random_access_stream.js';
-import { IRealFile, copyFileContents } from './ireal_file.js';
+import { IRealFile, copyFileContents, moveRecursively } from './ireal_file.js';
 import { JsFileStream } from './js_file_stream.js';
 import { IOException } from '../../salmon-core/io/io_exception.js';
 
@@ -88,7 +88,7 @@ export class JsFile implements IRealFile {
     public async delete(): Promise<boolean> {
 		if (this.#fileHandle != null && this.#fileHandle.remove != undefined)
 			this.#fileHandle.remove();
-        if (this.#parent != null)
+        else if (this.#parent != null)
 			await (this.#parent.getPath() as FileSystemDirectoryHandle).removeEntry(this.getBaseName(), {recursive: true});
         return !await this.exists();
     }
@@ -340,8 +340,11 @@ export class JsFile implements IRealFile {
             await this.#fileHandle.move(newFilename);
         else if (this.#parent == null) {
             return false;
-        } else {
-            await this.move(this.#parent, newFilename);
+        } else if(await this.isDirectory() && (await this.listFiles()).length > 0) {
+            throw new Error("Cannot rename non-empty directory. Create a new directory manually and moveRecursively() instead");
+        }else {
+            let nFile: IRealFile = await this.move(this.#parent, newFilename);
+            this.#fileHandle = nFile.getPath();
         }
         return this.#fileHandle.name == newFilename;
     }
