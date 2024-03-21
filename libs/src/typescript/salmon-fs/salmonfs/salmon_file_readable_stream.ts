@@ -73,7 +73,6 @@ export class SalmonFileReadableStream {
 
         let reader: ReadableStreamFileReader = new ReadableStreamFileReader(salmonFile,
             buffersCount, bufferSize, threads, backOffset);
-        let readableStreamReader: any;
         let readableStream: any = new ReadableStream({
             type: 'bytes',
             async pull(controller: any) {
