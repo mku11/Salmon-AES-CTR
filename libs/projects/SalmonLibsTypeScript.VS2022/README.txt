@@ -3,7 +3,7 @@ Salmon library for Javascript
 To build the javascript libraries you will need:
 1. tsc compiler
 2. Visual Studio (optional)
-3. Visual Studio Code (recommended)
+3. Visual Studio Code (recommended - right click on the workspace file and "Open with Code")
 
 to run the unit tests you will need:
 1. nodejs
