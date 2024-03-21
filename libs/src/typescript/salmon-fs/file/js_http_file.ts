@@ -35,21 +35,21 @@ export class JsHttpFile implements IRealFile {
     public static readonly separator: string = "/";
     public static readonly SMALL_FILE_MAX_LENGTH: number = 1 * 1024 * 1024;
 
-    #filePath: string;
-    #_response: Response | null = null;
+    filePath: string;
+    response: Response | null = null;
 
     /**
      * Instantiate a real file represented by the filepath provided.
      * @param path The filepath.
      */
     public constructor(path: string) {
-        this.#filePath = path;
+        this.filePath = path;
     }
 
-    async #getResponse(): Promise<Response> {
-        if (this.#_response == null)
-            this.#_response = (await fetch(this.#filePath, {method: 'HEAD'}));
-        return this.#_response;
+    async getResponse(): Promise<Response> {
+        if (this.response == null)
+            this.response = (await fetch(this.filePath, {method: 'HEAD'}));
+        return this.response;
     }
 
     /**
@@ -84,7 +84,7 @@ export class JsHttpFile implements IRealFile {
      * @return
      */
     public async exists(): Promise<boolean> {
-        return (await this.#getResponse()).status == 200 || (await this.#getResponse()).status == 206;
+        return (await this.getResponse()).status == 200 || (await this.getResponse()).status == 206;
     }
 
     /**
@@ -92,7 +92,7 @@ export class JsHttpFile implements IRealFile {
      * @return The absolute path.
      */
     public getAbsolutePath(): string {
-        return this.#filePath;
+        return this.filePath;
     }
 
     /**
@@ -100,9 +100,9 @@ export class JsHttpFile implements IRealFile {
      * @return The name of this file or directory.
      */
     public getBaseName(): string {
-        if (this.#filePath == null)
+        if (this.filePath == null)
             throw new Error("Filepath is not assigned");
-        let nFilePath = this.#filePath;
+        let nFilePath = this.filePath;
         if(nFilePath.endsWith("/"))
             nFilePath = nFilePath.substring(0,nFilePath.length-1);
         let basename: string | undefined = nFilePath.split(JsHttpFile.separator).pop();
@@ -138,7 +138,7 @@ export class JsHttpFile implements IRealFile {
      * @return The parent directory.
      */
     public async getParent(): Promise<IRealFile> {
-		let path: string = this.#filePath;
+		let path: string = this.filePath;
 		if(path.endsWith(JsHttpFile.separator))
 			path = path.slice(0,-1);
         let parentFilePath: string = path.substring(0, path.lastIndexOf(JsHttpFile.separator));
@@ -150,7 +150,7 @@ export class JsHttpFile implements IRealFile {
      * @return
      */
     public getPath(): string {
-        return this.#filePath;
+        return this.filePath;
     }
 
     /**
@@ -158,7 +158,7 @@ export class JsHttpFile implements IRealFile {
      * @return
      */
     public async isDirectory(): Promise<boolean> {
-        let res: Response = (await this.#getResponse());
+        let res: Response = (await this.getResponse());
         if (res == null)
             throw new Error("Could not get response");
         if (res.headers == null)
@@ -182,7 +182,7 @@ export class JsHttpFile implements IRealFile {
      * @return
      */
     public async lastModified(): Promise<number> {
-        let headers: Headers = (await this.#getResponse()).headers;
+        let headers: Headers = (await this.getResponse()).headers;
         let lastDateModified: string | null = headers.get("last-modified");
         if (lastDateModified == null) {
 			lastDateModified = headers.get("date");
@@ -200,7 +200,7 @@ export class JsHttpFile implements IRealFile {
      * @return
      */
     public async length(): Promise<number> {
-        let res: Response = (await this.#getResponse());
+        let res: Response = (await this.getResponse());
         if (res == null)
             throw new IOException("Could not get response");
 
@@ -210,6 +210,7 @@ export class JsHttpFile implements IRealFile {
             length = parseInt(lenStr);
         }
         else {
+            res = (await fetch(this.filePath, {method: 'GET'}));
             if (res.body == null)
                 throw new IOException("Could not get length from content. No response body.");
             let totalLength: number = 0;
@@ -224,6 +225,7 @@ export class JsHttpFile implements IRealFile {
                 }
             }
             length = totalLength;
+            await reader.releaseLock();
         }
         return length;
     }
@@ -254,7 +256,7 @@ export class JsHttpFile implements IRealFile {
             if (filename.includes("%")){
                 filename = decodeURIComponent(filename);
             }
-            let file: IRealFile = new JsHttpFile(this.#filePath + JsHttpFile.separator + filename);
+            let file: IRealFile = new JsHttpFile(this.filePath + JsHttpFile.separator + filename);
             files.push(file);
         }
         return files;
@@ -291,7 +293,7 @@ export class JsHttpFile implements IRealFile {
     public async getChild(filename: string): Promise<IRealFile | null> {
         if (await this.isFile())
             return null;
-        let child: JsHttpFile = new JsHttpFile(this.#filePath + JsHttpFile.separator + filename);
+        let child: JsHttpFile = new JsHttpFile(this.filePath + JsHttpFile.separator + filename);
         return child;
     }
 
@@ -316,6 +318,6 @@ export class JsHttpFile implements IRealFile {
      * Returns a string representation of this object
      */
     public toString(): string {
-        return this.#filePath;
+        return this.filePath;
     }
 }
