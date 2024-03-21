@@ -21,6 +21,8 @@ LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 */
+import { ReadableStreamWrapper } from "../../salmon-core/io/readable_stream_wrapper.js";
+import { SalmonStream } from "../../salmon-core/salmon/io/salmon_stream.js";
 import { IRealFile } from "../file/ireal_file.js";
 import { JsFile } from "../file/js_file.js";
 import { JsHttpFile } from "../file/js_http_file.js";
@@ -29,10 +31,11 @@ import { SalmonFileReadableStream } from "../salmonfs/salmon_file_readable_strea
 
 export class SalmonServiceWorker {
 	static BUFFERS = 4;
-    static BUFFER_SIZE = 4 * 1024 * 1024;
-    // Workers are not available inside service worker see: https://github.com/whatwg/html/issues/411
-    static THREADS = 1;
+	static BUFFER_SIZE = 4 * 1024 * 1024;
+	// Workers are not available inside service worker see: https://github.com/whatwg/html/issues/411
+	static THREADS = 1;
 	static BACK_OFFSET = 256 * 1024;
+	static #useFileReadableStream = false;
 
 	requests: any = {};
 
@@ -58,30 +61,39 @@ export class SalmonServiceWorker {
 
 	async getResponse(request: Request) {
 		let position: number = this.getPosition(request.headers);
-        let params: any = this.requests[request.url];
-        let file: IRealFile = await this.getFile(params.fileClass, params.fileHandle);
-        let salmonFile: SalmonFile = new SalmonFile(file);
-        salmonFile.setEncryptionKey(params.key);
-        await salmonFile.setVerifyIntegrity(params.integrity, params.hash_key);
-		let stream: any = SalmonFileReadableStream.create(salmonFile, 
-            SalmonServiceWorker.BUFFERS, SalmonServiceWorker.BUFFER_SIZE, 
-            SalmonServiceWorker.THREADS, SalmonServiceWorker.BACK_OFFSET);
-        await stream.setPositionStart(position);
-        stream.reset();
-        await stream.skip(0);
-		let streamSize: number = await salmonFile.getSize() - position;
-        let status: number = position==null?200:206;
+		let params: any = this.requests[request.url];
+		let file: IRealFile = await this.getFile(params.fileClass, params.fileHandle);
+		let salmonFile: SalmonFile = new SalmonFile(file);
+		salmonFile.setEncryptionKey(params.key);
+		await salmonFile.setVerifyIntegrity(params.integrity, params.hash_key);
 
-        let headers: Headers = new Headers();
-        let contentLength: number = await salmonFile.getSize();
-        headers.append("Content-Length", (streamSize) + "");
-        if(position != null)
-            headers.append("Content-Range", "bytes " + position + "-" + (position + streamSize - 1) + "/" + contentLength);
-        headers.append("Content-Type", params.mimeType);
-        return new Response(stream, {
-            headers: headers,
-            status: status
-        });
+		let stream: any;
+		if (SalmonServiceWorker.#useFileReadableStream) {
+			stream = SalmonFileReadableStream.create(salmonFile,
+				SalmonServiceWorker.BUFFERS, SalmonServiceWorker.BUFFER_SIZE,
+				SalmonServiceWorker.THREADS, SalmonServiceWorker.BACK_OFFSET);
+			await stream.setPositionStart(position);
+			stream.reset();
+			await stream.skip(0);
+		} else {
+			let encStream: SalmonStream = await salmonFile.getInputStream();
+			stream = ReadableStreamWrapper.create(encStream);
+			stream.reset();
+			await stream.skip(position);
+		}
+
+		let streamSize: number = await salmonFile.getSize() - position;
+		let status: number = position == null ? 200 : 206;
+		let headers: Headers = new Headers();
+		let contentLength: number = await salmonFile.getSize();
+		headers.append("Content-Length", (streamSize) + "");
+		if (position != null)
+			headers.append("Content-Range", "bytes " + position + "-" + (position + streamSize - 1) + "/" + contentLength);
+		headers.append("Content-Type", params.mimeType);
+		return new Response(stream, {
+			headers: headers,
+			status: status
+		});
 	}
 
 	registerRequest(path: string, params: any): void {
