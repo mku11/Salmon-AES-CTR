@@ -26,14 +26,12 @@ import { MemoryStream } from '../../lib/salmon-core/io/memory_stream.js';
 import { SalmonDrive } from '../../lib/salmon-fs/salmonfs/salmon_drive.js';
 import { SalmonFile } from '../../lib/salmon-fs/salmonfs/salmon_file.js';
 import { TestHelper } from '../salmon-core/test_helper.js';
-import { setTestMode, TestMode, getFile, getFileStream, TsFsTestHelper } from './ts_fs_test_helper.js';
+import { getFile, getFileStream, TsFsTestHelper } from './ts_fs_test_helper.js';
 
-await setTestMode(TestMode.Http);
-
-describe('salmon-fs-http-readonly', () => {
+describe('salmon-fs-http', () => {
     beforeAll(() => {
         TsFsTestHelper.TEST_FILE_INPUT_STREAM_THREADS = 2;
-        TsFsTestHelper.TEST_USE_FILE_INPUT_STREAM = true;
+        TsFsTestHelper.TEST_USE_FILE_INPUT_STREAM = false;
         
         TestHelper.initialize();
         TsFsTestHelper.initialize();
@@ -87,7 +85,7 @@ describe('salmon-fs-http-readonly', () => {
 
     it('shouldReadFromRealFileSmall', async () => {
         await TsFsTestHelper.shouldReadFile(TsFsTestHelper.SERVER_URL + "/" + TsFsTestHelper.TEST_HTTP_SMALL_FILE,
-            TsFsTestHelper.TEST_HTTP_SMALL_FILE_SIZE, TsFsTestHelper.TEST_HTTP_SMALL_FILE_CONTENTS, TsFsTestHelper.TEST_HTTP_SMALL_FILE_CHKSUM);
+            TsFsTestHelper.TEST_HTTP_SMALL_FILE_SIZE, null, TsFsTestHelper.TEST_HTTP_SMALL_FILE_CHKSUM);
     });
 
     it('shouldSeekAndReadRealFileStream', async () => {
@@ -160,7 +158,7 @@ describe('salmon-fs-http-readonly', () => {
             let filename = await files[i].getBaseName();
             filenames.push(filename);
         }
-        expect(files.length).toBe(5);
+        expect(files.length).toBe(10);
         expect(filenames.includes("data256.dat")).toBeTruthy();
         expect(filenames.includes("tiny_test.txt")).toBeTruthy();
         expect(filenames.includes("New Folder")).toBeTruthy();

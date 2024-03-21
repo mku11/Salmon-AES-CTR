@@ -51,7 +51,7 @@
       "<rootDir>/jest.setup.js"
     ],
     "testEnvironment": "node",
-    "testTimeout": 120000,
+    "testTimeout": 60000,
     "testMatch": [
       "**/*.test.(js)"
     ],

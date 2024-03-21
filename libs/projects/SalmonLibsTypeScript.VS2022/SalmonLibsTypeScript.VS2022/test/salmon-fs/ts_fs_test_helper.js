@@ -447,7 +447,8 @@ export class TsFsTestHelper {
         //reopen with first device sequencer and export the auth file with the auth id from the second device
         drive = await SalmonDrive.openDrive(vault, TsFsTestHelper.driveClassType, sequencer1);
         await drive.unlock(TestHelper.TEST_PASSWORD);
-        await drive.exportAuthFile(authID, vault, TsFsTestHelper.TEST_EXPORT_FILENAME);
+        let exportFile = await getFile(vault, TsFsTestHelper.TEST_EXPORT_FILENAME);
+        await drive.exportAuthFile(authID, exportFile);
         let exportAuthFile = await getFile(vault, TsFsTestHelper.TEST_EXPORT_FILENAME);
         let salmonCfgFile = new SalmonFile(exportAuthFile, drive);
         let nonceCfg = BitConverter.toLong(await salmonCfgFile.getFileNonce(), 0, SalmonGenerator.NONCE_LENGTH);
@@ -862,7 +863,7 @@ export class TsFsTestHelper {
             } else {
                 fileStream = getFileStream(file);
             }
-            stream = new ReadableStreamWrapper(fileStream);
+            stream = ReadableStreamWrapper.create(fileStream);
         }
         let reader = await stream.getReader();
         await stream.skip(start);

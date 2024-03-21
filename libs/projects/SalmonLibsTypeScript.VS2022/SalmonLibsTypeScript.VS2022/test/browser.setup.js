@@ -1,7 +1,12 @@
-import { TsFsTestHelper } from "./salmon-fs/ts_fs_test_helper.js";
+import { setTestMode, TestMode, TsFsTestHelper } from "./salmon-fs/ts_fs_test_helper.js";
+// Local to run on the browser
+// Node to run on the command line or VS code
+// Http to run on a remotely drive (browser and node)
+await setTestMode(TestMode.Http);
 
 // browser test runner somewhat compatible with jest assertions
 var beforeTest = null;
+var afterTest = null;
 var beforeTestSuite = null;
 var afterTestSuite = null;
 
@@ -15,19 +20,33 @@ var passedTestCases = 0;
 var testDirHandle;
 
 // set to run specific case
-// var testFilter = "shouldImportAndExportIntegrity";
+// var testFilter = "shouldPerformOperationsRealFiles";
 
 var logReport = null;
+var enableLogReport = false;
+
+let output = document.getElementById("text-edit");
+if(enableLogReport) {
+    setLogArea(output);
+    redirectLog();
+} else {
+    output.style.display = "none";
+}
+
+window.execute = function () {
+    let testSuite = document.getElementById("testSuite").value;
+    executeTestSuite(testSuite);
+}
 
 function setLogArea(element) {
     logReport = element;
 }
 
 async function selectTestFolder() {
-	testDirHandle = await showDirectoryPicker({ id: 1, mode: "readwrite", multiple: false});
-	TsFsTestHelper.setTestDirHandle(testDirHandle);
+    testDirHandle = await showDirectoryPicker({ id: 1, mode: "readwrite", multiple: false });
+    TsFsTestHelper.setTestDirHandle(testDirHandle);
 }
-	
+
 async function it(testCaseName, callback) {
     testCases.push({
         testCaseName: testCaseName, callback: callback
@@ -36,6 +55,10 @@ async function it(testCaseName, callback) {
 
 async function beforeEach(callback) {
     beforeTest = callback;
+}
+
+async function afterEach(callback) {
+    afterTest = callback;
 }
 
 async function beforeAll(callback) {
@@ -49,13 +72,14 @@ async function afterAll(callback) {
 async function describe(testSuite, callback) {
     testSuites[testSuite] = callback;
     beforeTest = null;
+    afterTest = null;
     beforeTestSuite = null;
     afterTestSuite = null;
 }
 
 async function submitNext(testSuite, testCaseNum) {
     if (testCaseNum >= testCases.length) {
-        if(afterTestSuite != null)
+        if (afterTestSuite != null)
             await afterTestSuite();
         console.log("Test suite complete: " + testSuite);
         console.log("Test cases passed: " + passedTestCases + "/" + totalTestCases);
@@ -64,13 +88,16 @@ async function submitNext(testSuite, testCaseNum) {
     let success = true;
     if (typeof testFilter === 'undefined' || testFilter == null || testFilter === testCases[testCaseNum].testCaseName) {
         console.log("\nRunning test: " + testCases[testCaseNum].testCaseName);
-        await beforeTest();
+        if(beforeTest)
+            await beforeTest();
         try {
             await testCases[testCaseNum].callback();
         } catch (ex) {
             success = false;
             console.error(ex);
         }
+        if(afterTest)
+            await afterTest();
         console.log("Test case: " + testCases[testCaseNum].testCaseName + ", result: " + (success ? "PASS" : "FAILED"));
         totalTestCases++;
         passedTestCases += success ? 1 : 0;
@@ -110,7 +137,7 @@ class Expect {
         else if (typeof this.#actual !== 'undefined' && this.#isNot)
             throw Error("assert failed: " + actual + " is defined");
     }
-    get not(){
+    get not() {
         let expected = new Expect(this.#actual, true);
         Object.defineProperty(this, "not", {
             value: expected,
@@ -127,44 +154,43 @@ function expect(actual) {
 }
 
 async function executeTestSuite(testSuite) {
-    if(logReport != null)
+    if (logReport != null)
         logReport.value = "";
     let callback = testSuites[testSuite];
     testCases = [];
     passedTestCases = 0;
     totalTestCases = 0;
     await callback();
-    if(beforeTestSuite != null)
+    if (beforeTestSuite != null)
         await beforeTestSuite();
     await submitNext(testSuite, 0);
 }
 
-(function(){
+function redirectLog() {
     var consoleLog = console.log;
     console.log = function (message) {
-        if(message == undefined)
+        if (message == undefined)
             message = "";
-        if(logReport != null) {
+        if (logReport != null) {
             logReport.value += message + "\n";
         }
         consoleLog.apply(console, arguments);
     };
-})();
 
-(function(){
     var consoleError = console.error;
     console.error = function (message) {
-        if(message == undefined)
+        if (message == undefined)
             message = "";
-        if(logReport != null) {
+        if (logReport != null) {
             logReport.value += message + "\n";
         }
         consoleError.apply(console, arguments);
     };
-})();
+}
 
 window.it = it;
 window.beforeEach = beforeEach;
+window.afterEach = afterEach;
 window.beforeAll = beforeAll;
 window.afterAll = afterAll;
 window.describe = describe;
@@ -172,3 +198,7 @@ window.expect = expect;
 window.selectTestFolder = selectTestFolder;
 window.executeTestSuite = executeTestSuite;
 window.setLogArea = setLogArea;
+
+const {} = await import('./salmon-core/salmon-core.test.js');
+const {} = await import('./salmon-fs/salmon-fs-http.test.js');
+const {} = await import('./salmon-fs/salmon-fs.test.js');

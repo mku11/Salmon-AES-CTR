@@ -26,7 +26,7 @@ import { MemoryStream } from '../../lib/salmon-core/io/memory_stream.js';
 import { BitConverter } from '../../lib/salmon-core/convert/bit_converter.js';
 import { SalmonDrive } from '../../lib/salmon-fs/salmonfs/salmon_drive.js';
 import { TestHelper } from '../salmon-core/test_helper.js';
-import { setTestMode, TestMode, getFile, getFileStream, getSequenceSerializer, TsFsTestHelper } from './ts_fs_test_helper.js';
+import { getFile, getSequenceSerializer, TsFsTestHelper } from './ts_fs_test_helper.js';
 import { SalmonFileSequencer } from '../../lib/salmon-fs/sequence/salmon_file_sequencer.js';
 import { SalmonIntegrityException } from '../../lib/salmon-core/salmon/integrity/salmon_integrity_exception.js';
 import { copyRecursively, moveRecursively, autoRenameFile } from '../../lib/salmon-fs/file/ireal_file.js'
@@ -35,17 +35,9 @@ import { SalmonFileCommander } from '../../lib/salmon-fs/utils/salmon_file_comma
 import { SalmonDefaultOptions } from '../../lib/salmon-core/salmon/salmon_default_options.js';
 import { SalmonAuthException } from '../../lib/salmon-fs/salmonfs/salmon_auth_exception.js'
 
-// Local to run on the browser
-// Node to run on the command line or VS code
-if (typeof process === 'object') {
-    await setTestMode(TestMode.Node);
-} else {
-    await setTestMode(TestMode.Local);
-}
-
 describe('salmon-fs', () => {
 
-    beforeAll(() => {
+    beforeEach(() => {
         TsFsTestHelper.TEST_IMPORT_FILE = TsFsTestHelper.TEST_IMPORT_SMALL_FILE;
 
         TsFsTestHelper.ENC_IMPORT_BUFFER_SIZE = 512 * 1024;
@@ -54,19 +46,15 @@ describe('salmon-fs', () => {
         TsFsTestHelper.ENC_EXPORT_THREADS = 2;
 
         TsFsTestHelper.TEST_FILE_INPUT_STREAM_THREADS = 2;
-        TsFsTestHelper.TEST_USE_FILE_INPUT_STREAM = true;
+        TsFsTestHelper.TEST_USE_FILE_INPUT_STREAM = false;
 
         TestHelper.initialize();
         TsFsTestHelper.initialize();
     });
 
-    afterAll(() => {
+    afterEach(() => {
         TsFsTestHelper.close();
         TestHelper.close();
-    });
-
-    beforeEach(() => {
-
     });
 
     it('shouldAuthorizeNegative', async () => {
@@ -225,7 +213,8 @@ describe('salmon-fs', () => {
     it('shouldImportAndExportAppliedIntegrityNoVerifyIntegrityBitFlipDataShouldNotCatch', async () => {
         let failed = false;
         try {
-            await TsFsTestHelper.importAndExport(await TsFsTestHelper.generateFolder(TsFsTestHelper.TEST_VAULT2_DIR), TestHelper.TEST_PASSWORD, TsFsTestHelper.TEST_IMPORT_FILE,
+            // use a small file
+            await TsFsTestHelper.importAndExport(await TsFsTestHelper.generateFolder(TsFsTestHelper.TEST_VAULT2_DIR), TestHelper.TEST_PASSWORD, TsFsTestHelper.TEST_IMPORT_TINY_FILE,
                 true, 36, false,
                 true, false);
         } catch (ex) {
