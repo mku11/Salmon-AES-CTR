@@ -44,8 +44,7 @@ export class ReadableStreamWrapper {
                 let buffer: Uint8Array = new Uint8Array(size);
                 let bytesRead: number = 0;
                 let tBytesRead: number = 0;
-                while ((bytesRead = await stream.read(buffer, 0, buffer.length)) > 0
-                    && tBytesRead < size) {
+                while (tBytesRead < size && (bytesRead = await stream.read(buffer, 0, buffer.length)) > 0) {
                     controller.enqueue(new Uint8Array(buffer, 0, bytesRead));
                     tBytesRead += bytesRead;
                 }
