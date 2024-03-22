@@ -35,8 +35,7 @@ export class SalmonServiceWorker {
 	// Workers are not available inside service worker see: https://github.com/whatwg/html/issues/411
 	static THREADS = 1;
 	static BACK_OFFSET = 256 * 1024;
-	static #useFileReadableStream = false;
-
+	
 	requests: any = {};
 
 	getPosition(headers: Headers) {
@@ -68,7 +67,7 @@ export class SalmonServiceWorker {
 		await salmonFile.setVerifyIntegrity(params.integrity, params.hash_key);
 
 		let stream: any;
-		if (SalmonServiceWorker.#useFileReadableStream) {
+		if (params.useFileReadableStream) {
 			stream = SalmonFileReadableStream.create(salmonFile,
 				SalmonServiceWorker.BUFFERS, SalmonServiceWorker.BUFFER_SIZE,
 				SalmonServiceWorker.THREADS, SalmonServiceWorker.BACK_OFFSET);
