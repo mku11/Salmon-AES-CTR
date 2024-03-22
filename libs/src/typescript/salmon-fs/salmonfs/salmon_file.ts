@@ -865,6 +865,7 @@ export class SalmonFile extends VirtualFile {
                 try {
                     return await autoRename(new SalmonFile(file, this.getDrive()));
                 } catch (e) {
+                    console.error(e);
                     return file.getBaseName();
                 }
             };
