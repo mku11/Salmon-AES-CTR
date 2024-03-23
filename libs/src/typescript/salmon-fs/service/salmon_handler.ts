@@ -74,6 +74,7 @@ export class SalmonHandler {
 					}
 				}).catch(function (error) {
 					console.error('Could not register service worker: ' + error);
+					reject(error);
 				});
 			}
 		});
