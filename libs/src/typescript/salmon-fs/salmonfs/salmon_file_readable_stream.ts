@@ -77,7 +77,10 @@ export class SalmonFileReadableStream {
             type: 'bytes',
             async pull(controller: any) {
                 let buff = await reader.read();
-                controller.enqueue(buff);
+                if (buff != null)
+                    controller.enqueue(buff);
+                else
+                    controller.close();
             },
             async cancel(reason?: any): Promise<void> {
                 await reader.cancel();
@@ -98,7 +101,7 @@ export class SalmonFileReadableStream {
         readableStream.setPositionEnd = async function (position: any): Promise<void> {
             await reader.setPositionEnd(position);
         }
-        
+
         return readableStream;
     }
 
@@ -155,12 +158,14 @@ export class ReadableStreamFileReader {
         }
     }
 
-    async read(): Promise<Uint8Array> {
+    async read(): Promise<Uint8Array | null> {
         if (this.buffers == null)
             await this.initialize();
-        let buff: Uint8Array = new Uint8Array(SalmonDefaultOptions.getBufferSize());
+        let buff: Uint8Array = new Uint8Array(this.cacheBufferSize);
         let bytesRead: number = await this.readStream(buff, 0, buff.length);
-        return new Uint8Array(buff, 0, bytesRead);
+        if (bytesRead <= 0)
+            return null;
+        return buff.slice(0, bytesRead);
     }
 
 

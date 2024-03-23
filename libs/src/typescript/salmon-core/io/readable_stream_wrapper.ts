@@ -45,18 +45,21 @@ export class ReadableStreamWrapper {
                 let bytesRead: number = 0;
                 let tBytesRead: number = 0;
                 while (tBytesRead < size && (bytesRead = await stream.read(buffer, 0, buffer.length)) > 0) {
-                    controller.enqueue(new Uint8Array(buffer, 0, bytesRead));
+                    controller.enqueue(buffer.slice(0, bytesRead));
                     tBytesRead += bytesRead;
+                }
+                if (tBytesRead <= 0) {
+                    controller.close();
                 }
             },
             async cancel(reason?: any): Promise<void> {
                 await stream.close();
             }
         });
-        readableStream.reset = function(): void {
+        readableStream.reset = function (): void {
             stream.setPosition(0);
         }
-        readableStream.skip = async function(position: number): Promise<number> {
+        readableStream.skip = async function (position: number): Promise<number> {
             return await stream.seek(position, SeekOrigin.Current);
         }
         return readableStream;

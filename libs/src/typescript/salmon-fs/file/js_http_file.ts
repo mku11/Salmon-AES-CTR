@@ -225,7 +225,7 @@ export class JsHttpFile implements IRealFile {
                 }
             }
             length = totalLength;
-            await reader.releaseLock();
+            reader.releaseLock();
         }
         return length;
     }
