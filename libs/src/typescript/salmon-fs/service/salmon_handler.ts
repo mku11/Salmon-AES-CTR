@@ -51,10 +51,10 @@ export class SalmonHandler {
 				navigator.serviceWorker.register(workerPath, {
 					type: 'module'
 				}).then((reg: ServiceWorkerRegistration) => {
-					if (path == null)
+					if (path == null && !remove)
 						resolve(null);
 					if (reg.active) {
-						if (path != null) {
+						if (path != null || remove) {
 							var messageChannel = new MessageChannel();
 							messageChannel.port1.onmessage = function (event) {
 								if (event.data.status == 'ok') {
@@ -80,7 +80,7 @@ export class SalmonHandler {
 		});
 	}
 
-	public async unregister(path: string) {
+	public async unregister(path: string | null = null) {
 		await this.register(path, null, true);
 	}
 

@@ -99,8 +99,11 @@ export class SalmonServiceWorker {
 		this.requests[path] = params;
 	}
 
-	unregisterRequest(path: string): void {
-		delete this.requests[path];
+	unregisterRequest(path: string | null = null): void {
+		if(path!=null)
+			delete this.requests[path];
+		else
+			this.requests = {};
 	}
 
 	onMessage(event: any): void {
