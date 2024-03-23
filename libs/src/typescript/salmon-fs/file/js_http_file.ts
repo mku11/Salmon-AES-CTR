@@ -58,7 +58,7 @@ export class JsHttpFile implements IRealFile {
      * @return The newly created directory.
      */
     public async createDirectory(dirName: string): Promise<IRealFile> {
-        throw new Error("Unsupported Operation");
+        throw new Error("Unsupported Operation, readonly filesystem");
     }
 
     /**
@@ -68,7 +68,7 @@ export class JsHttpFile implements IRealFile {
      * @throws IOException
      */
     public createFile(filename: string): Promise<IRealFile> {
-        throw new Error("Unsupported Operation");
+        throw new Error("Unsupported Operation, readonly filesystem");
     }
 
     /**
@@ -76,7 +76,7 @@ export class JsHttpFile implements IRealFile {
      * @return True if deletion is successful.
      */
     public async delete(): Promise<boolean> {
-        throw new Error("Unsupported Operation");
+        throw new Error("Unsupported Operation, readonly filesystem");
     }
 
     /**
@@ -130,7 +130,7 @@ export class JsHttpFile implements IRealFile {
      * @throws FileNotFoundException
      */
     public getOutputStream(): Promise<RandomAccessStream> {
-        throw new Error("Unsupported Operation");
+        throw new Error("Unsupported Operation, readonly filesystem");
     }
 
     /**
@@ -270,7 +270,7 @@ export class JsHttpFile implements IRealFile {
      * @return The moved file. Use this file for subsequent operations instead of the original.
      */
     public async move(newDir: IRealFile, newName: string | null = null, progressListener: ((position: number, length: number) => void) | null = null): Promise<IRealFile> {
-        throw new Error("Unsupported Operation");
+        throw new Error("Unsupported Operation, readonly filesystem");
     }
 
     /**
@@ -282,7 +282,7 @@ export class JsHttpFile implements IRealFile {
      * @throws IOException
      */
     public async copy(newDir: IRealFile, newName: string | null = null, progressListener: ((position: number, length: number) => void) | null = null): Promise<IRealFile> {
-        throw new Error("Unsupported Operation");
+        throw new Error("Unsupported Operation, readonly filesystem");
     }
 
     /**
@@ -303,7 +303,7 @@ export class JsHttpFile implements IRealFile {
      * @return True if successfully renamed.
      */
     public async renameTo(newFilename: string): Promise<boolean> {
-        throw new Error("Unsupported Operation");
+        throw new Error("Unsupported Operation, readonly filesystem");
     }
 
     /**
@@ -311,7 +311,7 @@ export class JsHttpFile implements IRealFile {
      * @return True if created.
      */
     public async mkdir(): Promise<boolean> {
-        throw new Error("Unsupported Operation");
+        throw new Error("Unsupported Operation, readonly filesystem");
     }
 
     /**

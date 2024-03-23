@@ -58,7 +58,7 @@ export class JsHttpFileStream extends RandomAccessStream {
         super();
         this.file = file;
         if (mode == "rw") {
-            throw new Error("Unsupported Operation");
+            throw new Error("Unsupported Operation, readonly filesystem");
         }
     }
 
@@ -146,7 +146,7 @@ export class JsHttpFileStream extends RandomAccessStream {
      * @throws IOException
      */
     public override async setLength(value: number): Promise<void> {
-        throw new Error("Unsupported Operation");
+        throw new Error("Unsupported Operation, readonly filesystem");
     }
 
     /**
@@ -200,7 +200,7 @@ export class JsHttpFileStream extends RandomAccessStream {
      * @throws IOException
      */
     public override async write(buffer: Uint8Array, offset: number, count: number): Promise<void> {
-        throw new Error("Unsupported Operation");
+        throw new Error("Unsupported Operation, readonly filesystem");
     }
 
     /**
@@ -229,7 +229,7 @@ export class JsHttpFileStream extends RandomAccessStream {
      * Flush the buffers to the associated file.
      */
     public override flush(): Promise<void> {
-        throw new Error("Unsupported Operation");
+        throw new Error("Unsupported Operation, readonly filesystem");
     }
 
     /**
