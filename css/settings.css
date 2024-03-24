@@ -1,0 +1,25 @@
+.settings-container {
+  min-width: 400pt;
+  max-width: 800pt;
+}
+
+.settings-checkbox {
+  float: right;
+}
+
+.settings-dropdown {
+  float: right;
+}
+
+.settings-section {
+  padding: 4pt;
+}
+
+.settings-row {
+  padding: 2pt;
+}
+
+.settings-header {
+  font-weight: bold;
+  padding: 2pt;
+}

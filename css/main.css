@@ -1,0 +1,204 @@
+.app-container {
+  position: absolute;
+  top: 15%;
+  left: 0;
+  right: 0;
+  margin: auto;
+  width: 75%;
+  border-style: solid;  
+  border-width: 1pt;
+  border-radius: 2pt;
+  border-color: gray;
+}
+
+.app-icon {
+  height: 1.5em;
+  vertical-align: middle;
+}
+
+.app-title {
+  vertical-align: middle;
+  align-content: center;
+  border-top-left-radius: 2pt;
+  border-top-right-radius: 2pt;
+  padding: 2pt;
+}
+
+.app-title-text {
+  display: inline-block;
+  vertical-align: middle;
+}
+
+.path-container {
+  padding: 4pt;
+  display: flex;
+  flex-direction: row;
+}
+
+.path-button {
+  vertical-align: middle;
+  display: table-cell;
+}
+
+.path-button-image {
+  vertical-align: middle;
+  width: 1em;
+  height: 1em;
+}
+
+.path-input {
+  display: table-cell;
+  width: 100%;
+  margin-left: 4pt;
+  margin-right: 4pt;
+
+}
+
+.table-container {
+  overflow: auto;
+  height: 300pt;
+  border-style: solid;
+  border-width: 1pt;
+  margin: 4pt;
+}
+
+.table-container th {
+  background:#eee; 
+  position: sticky;
+  top: 0pt;
+  z-index: 2;
+}
+
+.table {
+  border-collapse: collapse;
+}
+
+table td {
+  border-collapse: collapse;
+  position: relative;
+}
+
+.th-resizable {
+  resize: horizontal;
+  overflow: auto;
+  -moz-resize: horizontal;
+}
+
+.data-file-image img {
+  display: block;
+  width: 32pt;
+  height: 32pt;
+  margin-left: auto;
+  margin-right: auto;
+  text-align: center;
+}
+
+.data-file-size {
+  text-align: right;
+}
+
+.th-file-image {
+  margin-left: auto;
+  margin-right: auto;
+  width: 48pt;
+}
+
+.th-file-name {
+  min-width: 240pt;
+  text-align: left;
+}
+
+.th-file-date {
+  min-width: 180pt;
+  text-align: left;
+}
+
+.th-file-type {
+  min-width: 80pt;
+  text-align: left;
+}
+
+.th-file-size {
+  min-width: 80pt;
+  text-align: left;
+}
+
+.td-cell {
+  -webkit-user-select: none;
+  -ms-user-select: none;
+  user-select: none;
+  padding: 4pt;
+}
+
+.tr-row {
+  height: 42pt;
+}
+
+.tr-row-selected {
+  background-color: grey;
+}
+
+.file-progress-text {
+  font-size: 0.75em;
+  appearance: none;
+  display: table;
+  margin: 0 auto;
+}
+
+.file-progress {
+  width: 100%;
+  height: 10pt;
+  display: table;
+  margin: 0 auto;
+  accent-color: gray;
+}
+
+.progress-layout-container {
+  display: none;
+  flex-direction: row;
+  justify-content: flex-end;
+  margin: 4pt;
+}
+
+.progress-layout-containers {
+  display: flex;
+  flex-direction: row;
+  justify-content: flex-end;
+  width: 100%;
+}
+
+.progress-containers {
+  display: flex;
+  flex-direction: row;
+  justify-content: flex-end;
+  width: 120pt;
+}
+
+.file-progress-container {
+  width: 60pt;
+  padding: 1pt;
+}
+
+.status-container {
+  display: flex;
+  justify-content: flex-end;
+  height: 1em;
+  overflow: auto;
+  margin: 4pt;
+}
+
+.status {
+  font-size: 10pt;
+}
+
+.debug-console-container {
+  display: none;
+  overflow: auto;
+  margin: 4pt;
+}
+
+.debug-console {
+  overflow: auto;
+  width: 100%;
+  border-collapse: collapse;
+}
