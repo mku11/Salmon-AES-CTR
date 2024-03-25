@@ -88,7 +88,7 @@ export class SalmonFile extends VirtualFile {
         }
     }
 
-    
+
     /**
      * Return if integrity is set
      */
@@ -180,7 +180,12 @@ export class SalmonFile extends VirtualFile {
         let bytesRead: number = await realStream.read(fileChunkSizeBytes, 0, fileChunkSizeBytes.length);
         if (bytesRead == 0)
             throw new IOException("Could not parse chunks size from file header");
+
         let chunkSize: number = BitConverter.toLong(fileChunkSizeBytes, 0, 4);
+        // if user not requesting integrity we default to true if there are integrity chunks
+        if (chunkSize > 0 && this.#reqChunkSize == null) {
+            this.setVerifyIntegrity(true, null);
+        }
         if (this.#integrity && chunkSize == 0)
             throw new SalmonSecurityException("Cannot check integrity if file doesn't support it");
 
@@ -304,9 +309,13 @@ export class SalmonFile extends VirtualFile {
             if (key != null)
                 hashKey = key.getHashKey();
         }
+        this.#reqChunkSize = await this.getFileChunkSize();
+        if (integrity && this.#reqChunkSize == 0) {
+            console.log("warning: cannot enable integrity because file does not contain integrity chunks");
+            return;
+        }
         this.#integrity = integrity;
         this.#hashKey = hashKey;
-        this.#reqChunkSize = await this.getFileChunkSize();
     }
 
     /**
@@ -453,7 +462,7 @@ export class SalmonFile extends VirtualFile {
     public async listFiles(): Promise<VirtualFile[]> {
         let files: IRealFile[] = await this.#realFile.listFiles();
         let salmonFiles: VirtualFile[] = [];
-        for(let iRealFile of await files) {
+        for (let iRealFile of await files) {
             let file: VirtualFile = new SalmonFile(iRealFile, this.#drive);
             salmonFiles.push(file);
         }
@@ -534,7 +543,7 @@ export class SalmonFile extends VirtualFile {
         let relativePath: string = await this.#getRelativePath(realPath);
         let path: string = "";
         let parts: string[] = relativePath.split(SalmonFile.separator);
-        for(let part of parts) {
+        for (let part of parts) {
             if (part != "") {
                 path += SalmonFile.separator;
                 path += await this.getDecryptedFilename(part);
@@ -556,7 +565,7 @@ export class SalmonFile extends VirtualFile {
      * @param realPath The path of the real file
      */
     async #getRelativePath(realPath: string): Promise<string> {
-        if(this.#drive == null)
+        if (this.#drive == null)
             throw new Error("File is not part of a drive");
         let virtualRoot: VirtualFile | null = await this.#drive.getVirtualRoot();
         if (virtualRoot == null)
@@ -606,7 +615,7 @@ export class SalmonFile extends VirtualFile {
             return null;
         }
         let realDir: IRealFile | null = await this.#realFile.getParent();
-        if(realDir == null)
+        if (realDir == null)
             throw new Error("Could not get parent");
         let dir: VirtualFile = new SalmonFile(realDir, this.#drive);
         return dir;
@@ -873,7 +882,7 @@ export class SalmonFile extends VirtualFile {
             if (progressListener != null)
                 progressListener(new SalmonFile(file, this.#drive), position, length);
         },
-        renameRealFile, autoRenameFolders, onFailedRealFile);
+            renameRealFile, autoRenameFolders, onFailedRealFile);
     }
 
     /**
@@ -931,38 +940,38 @@ export class SalmonFile extends VirtualFile {
 }
 
 
-    export async function autoRename(file: SalmonFile): Promise<string> {
+export async function autoRename(file: SalmonFile): Promise<string> {
+    try {
+        return await autoRenameFile(file);
+    } catch (ex) {
         try {
-            return await autoRenameFile(file);
-        } catch (ex) {
-            try {
-                return await file.getBaseName();
-            } catch (ex1) {
-                return "";
-            }
+            return await file.getBaseName();
+        } catch (ex1) {
+            return "";
         }
     }
+}
 
-    /// <summary>
-    /// Get an auto generated copy of the name for the file.
-    /// </summary>
-    /// <param name="file"></param>
-    /// <returns></returns>
-    export async function autoRenameFile(file: SalmonFile): Promise<string> {
-        let filename: string = IRealFileAutoRename(await file.getBaseName());
-        let drive: SalmonDrive | null = file.getDrive();
-        if (drive == null)
-            throw new IOException("Autorename is not supported without a drive");
-        let nonce: Uint8Array | null = await drive.getNextNonce();
-        if (nonce == null)
-            throw new IOException("Could not get nonce");
-        let salmonKey: SalmonKey | null = drive.getKey();
-        if (salmonKey == null)
-            throw new IOException("Could not get key, make sure you init the drive first");
-        let key: Uint8Array | null = salmonKey.getDriveKey();
-        if (key == null)
-            throw new IOException("Set an encryption key to the file first");
-        let encryptedPath: string = await SalmonTextEncryptor.encryptString(filename, key, nonce, true);
-        encryptedPath = encryptedPath.replace(/\//g, "-");
-        return encryptedPath;
-    }
+/// <summary>
+/// Get an auto generated copy of the name for the file.
+/// </summary>
+/// <param name="file"></param>
+/// <returns></returns>
+export async function autoRenameFile(file: SalmonFile): Promise<string> {
+    let filename: string = IRealFileAutoRename(await file.getBaseName());
+    let drive: SalmonDrive | null = file.getDrive();
+    if (drive == null)
+        throw new IOException("Autorename is not supported without a drive");
+    let nonce: Uint8Array | null = await drive.getNextNonce();
+    if (nonce == null)
+        throw new IOException("Could not get nonce");
+    let salmonKey: SalmonKey | null = drive.getKey();
+    if (salmonKey == null)
+        throw new IOException("Could not get key, make sure you init the drive first");
+    let key: Uint8Array | null = salmonKey.getDriveKey();
+    if (key == null)
+        throw new IOException("Set an encryption key to the file first");
+    let encryptedPath: string = await SalmonTextEncryptor.encryptString(filename, key, nonce, true);
+    encryptedPath = encryptedPath.replace(/\//g, "-");
+    return encryptedPath;
+}

@@ -196,20 +196,6 @@ describe('salmon-fs', () => {
         expect(failed).toBeFalsy();
     });
 
-    it('shouldImportAndExportNoAppliedIntegrityYesVerifyIntegrityNoBitFlipDataShouldCatch', async () => {
-        let failed = false;
-        try {
-            await TsFsTestHelper.importAndExport(await TsFsTestHelper.generateFolder(TsFsTestHelper.TEST_VAULT2_DIR), TestHelper.TEST_PASSWORD, TsFsTestHelper.TEST_IMPORT_FILE,
-                false, 0, false,
-                false, true);
-        } catch (ex) {
-            console.error(ex);
-            failed = true;
-        }
-
-        expect(failed).toBeTruthy();
-    });
-
     it('shouldImportAndExportAppliedIntegrityNoVerifyIntegrityBitFlipDataShouldNotCatch', async () => {
         let failed = false;
         try {

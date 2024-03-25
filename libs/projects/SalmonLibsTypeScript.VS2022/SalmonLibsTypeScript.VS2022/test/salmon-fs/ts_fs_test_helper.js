@@ -265,6 +265,9 @@ export class TsFsTestHelper {
 
         }
         let salmonFile = await TsFsTestHelper.fileImporter.importFile(fileToImport, salmonRootDir, null, false, applyFileIntegrity, printImportProgress);
+        expect(salmonFile.exists()).toBeTruthy();
+        // get fresh copy of the file
+        salmonFile = (await rootDir.listFiles())[0];
 
         expect(salmonFile != null).toBeTruthy();
         expect(await salmonFile.exists()).toBeTruthy();
