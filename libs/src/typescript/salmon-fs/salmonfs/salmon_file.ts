@@ -731,7 +731,7 @@ export class SalmonFile extends VirtualFile {
      * @param nonce    The nonce if the file doesn't belong to a drive
      */
     protected async getDecryptedFilename(filename: string, key: Uint8Array | null = null, nonce: Uint8Array | null = null): Promise<string> {
-        let rfilename: string = filename.replace("-", "/");
+        let rfilename: string = filename.replace(/-/g, "/");
         if (this.#drive != null && nonce != null)
             throw new SalmonSecurityException("Filename nonce is already set by the drive");
         if (this.#drive != null && key != null)
