@@ -74,9 +74,9 @@ public class SalmonIntegrity {
      * @param chunkSize The chunk size. Use 0 to enable integrity on the whole file (1 chunk).
      *                  Use a positive number to specify integrity chunks.
      * @param provider  Hash implementation provider.
-     * @param hashSize The hash size.
+     * @param hashSize  The hash size.
      * @throws SalmonIntegrityException When integrity is comprimised
-     * @throws SalmonSecurityException When security has failed
+     * @throws SalmonSecurityException  When security has failed
      */
     public SalmonIntegrity(boolean integrity, byte[] key, Integer chunkSize,
                            IHashProvider provider, int hashSize)
@@ -131,12 +131,13 @@ public class SalmonIntegrity {
     }
 
     /**
-	 * Get the total number of bytes for all hash signatures for data of a specific length.
-     * @param length 		The length of the data.
-     * @param chunkSize      The byte size of the stream chunk that will be used to calculate the hash.
-     *                       The length should be fixed value except for the last chunk which might be lesser since we don't use padding
-     * @param hashOffset     The hash key length that will be used as an offset.
-     * @param hashLength     The hash length.
+     * Get the total number of bytes for all hash signatures for data of a specific length.
+     *
+     * @param length     The length of the data.
+     * @param chunkSize  The byte size of the stream chunk that will be used to calculate the hash.
+     *                   The length should be fixed value except for the last chunk which might be lesser since we don't use padding
+     * @param hashOffset The hash key length that will be used as an offset.
+     * @param hashLength The hash length.
      * @return
      */
     public static long getTotalHashDataLength(long length, int chunkSize,
@@ -164,6 +165,7 @@ public class SalmonIntegrity {
 
     /**
      * Get the chunk size.
+     *
      * @return The chunk size.
      */
     public int getChunkSize() {
@@ -172,6 +174,7 @@ public class SalmonIntegrity {
 
     /**
      * Get the hash key.
+     *
      * @return The hash key.
      */
     public byte[] getKey() {
@@ -180,6 +183,7 @@ public class SalmonIntegrity {
 
     /**
      * Get the integrity enabled option.
+     *
      * @return True if integrity is enabled.
      */
     public boolean useIntegrity() {
@@ -188,7 +192,8 @@ public class SalmonIntegrity {
 
     /**
      * Generate a hash signatures for each data chunk.
-     * @param buffer The buffer containing the data chunks.
+     *
+     * @param buffer            The buffer containing the data chunks.
      * @param includeHeaderData Include the header data in the first chunk.
      * @return The hash signatures.
      * @throws SalmonIntegrityException
@@ -206,6 +211,7 @@ public class SalmonIntegrity {
 
     /**
      * Get the hashes for each data chunk.
+     *
      * @param buffer The buffer that contains the data chunks.
      * @return The hash signatures.
      */
@@ -223,8 +229,9 @@ public class SalmonIntegrity {
 
     /**
      * Verify the buffer chunks against the hash signatures.
-     * @param hashes The hashes to verify.
-     * @param buffer The buffer that contains the chunks to verify the hashes.
+     *
+     * @param hashes            The hashes to verify.
+     * @param buffer            The buffer that contains the chunks to verify the hashes.
      * @param includeHeaderData
      * @throws SalmonIntegrityException
      */

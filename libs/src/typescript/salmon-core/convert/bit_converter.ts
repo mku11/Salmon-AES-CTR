@@ -23,15 +23,15 @@ SOFTWARE.
 */
 
 /**
- * Converts from/to byte arrays, integral values, and hex strings.
+ * Converts from/to: byte arrays, integral values, and hex strings.
  */
 export class BitConverter {
 
     /**
      * Converts a long value to byte array.
-     * @param value The value to be converted.
-     * @param length The length of the byte array to be returned.
-     * @return A byte array representation of the value.
+     * @param {number} value The value to be converted.
+     * @param {number} length The length of the byte array to be returned.
+     * @return {Uint8Array} A byte array representation of the value.
      */
     public static toBytes(value: number, length: number): Uint8Array {
         const buffer = new Uint8Array(length);
@@ -44,10 +44,10 @@ export class BitConverter {
 
     /**
      * Converts a byte array to a long value. Little endian only.
-     * @param bytes The byte array to be converted.
-     * @param index The starting index of the data in the array that will be converted.
-     * @param length The length of the data that will be converted.
-     * @return The long value representation of the byte array.
+     * @param {Uint8Array} bytes The byte array to be converted.
+     * @param {number} index The starting index of the data in the array that will be converted.
+     * @param {number} length The length of the data that will be converted.
+     * @return {number} The long value representation of the byte array.
      */
     public static toLong(bytes: Uint8Array, index: number, length: number): number {
         let num = 0;
@@ -61,10 +61,10 @@ export class BitConverter {
 
     /**
      * Convert a byte array to a hex representation.
-     * @param data The byte array to be converted.
-     * @return The hex string representation.
+     * @param {Uint8Array} data The byte array to be converted.
+     * @return {string} The hex string representation.
      */
-    public static toHex(data: Uint8Array): string{
+    public static toHex(data: Uint8Array): string {
         let hexString: string = "";
         for (let i = 0; i < data.length; i++) {
             hexString += data[i].toString(16).padStart(2, "0");
@@ -74,10 +74,10 @@ export class BitConverter {
 
     /**
      * Convert a hex string to a byte array.
-     * @param data The hex string to be converted.
-     * @return The byte array converted from the string.
+     * @param {string} data The hex string to be converted.
+     * @return {Uint8Array} The byte array converted from the string.
      */
-    public static hexToBytes(data: string): Uint8Array{
+    public static hexToBytes(data: string): Uint8Array {
         const bytes = new Uint8Array(Math.floor(data.length / 2));
         let k = 0;
         for (let i = 0; i < data.length; i += 2) {

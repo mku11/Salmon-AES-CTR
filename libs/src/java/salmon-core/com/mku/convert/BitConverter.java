@@ -24,13 +24,14 @@ SOFTWARE.
 */
 
 /**
- * Converts from/to byte arrays, integral values, and hex strings.
+ * Converts from/to: byte arrays, integral values, and hex strings.
  */
 public class BitConverter {
 
     /**
      * Converts a long value to byte array.
-     * @param value The value to be converted.
+     *
+     * @param value  The value to be converted.
      * @param length The length of the byte array to be returned.
      * @return A byte array representation of the value.
      */
@@ -45,8 +46,9 @@ public class BitConverter {
 
     /**
      * Converts a byte array to a long value. Little endian only.
-     * @param bytes The byte array to be converted.
-     * @param index The starting index of the data in the array that will be converted.
+     *
+     * @param bytes  The byte array to be converted.
+     * @param index  The starting index of the data in the array that will be converted.
      * @param length The length of the data that will be converted.
      * @return The long value representation of the byte array.
      */
@@ -62,6 +64,7 @@ public class BitConverter {
 
     /**
      * Convert a byte array to a hex representation.
+     *
      * @param data The byte array to be converted.
      * @return The hex string representation.
      */
@@ -74,11 +77,12 @@ public class BitConverter {
 
     /**
      * Convert a hex string to a byte array.
+     *
      * @param data The hex string to be converted.
      * @return The byte array converted from the string.
      */
     public static byte[] toBytes(String data) {
-        byte[] bytes = new byte[data.length()/2];
+        byte[] bytes = new byte[data.length() / 2];
         int k = 0;
         for (int i = 0; i < data.length(); i += 2) {
             bytes[k] = (byte) (16 * Byte.parseByte(data.charAt(i) + "", 16));

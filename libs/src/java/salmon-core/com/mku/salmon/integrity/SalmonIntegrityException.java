@@ -29,6 +29,7 @@ SOFTWARE.
 public class SalmonIntegrityException extends Exception {
     /**
      * Construct an exception with a specific message.
+     *
      * @param msg The message
      */
     public SalmonIntegrityException(String msg) {
@@ -37,8 +38,9 @@ public class SalmonIntegrityException extends Exception {
 
     /**
      * Construct an exception with a specific message and inner exception
+     *
      * @param msg The provided message
-     * @param ex The inner exception
+     * @param ex  The inner exception
      */
     public SalmonIntegrityException(String msg, Exception ex) {
         super(msg, ex);

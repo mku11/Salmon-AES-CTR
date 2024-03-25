@@ -26,20 +26,19 @@ import { IHashProvider } from "./ihash_provider.js";
 import { SalmonIntegrityException } from "./salmon_integrity_exception.js";
 
 /**
- * Provides Java HMAC256 hashing.
+ * Provides HMAC SHA-256 hashing.
  */
 export class HmacSHA256Provider implements IHashProvider {
 
     /**
      * Calculate HMAC SHA256 hash for a byte buffer.
-     * @param hashKey The HMAC SHA256 key to use for hashing (32 bytes).
-     * @param buffer The buffer to read the data from.
-     * @param offset The position reading will start from.
-     * @param count The count of bytes to be read.
-     * @return The HMAC SHA256 hash.
+     * @param {Uint8Array} hashKey The HMAC SHA256 key to use for hashing (32 bytes).
+     * @param {Uint8Array} buffer The buffer to read the data from.
+     * @param {number} offset The position reading will start from.
+     * @param {number} count The count of bytes to be read.
+     * @return {Promise<Uint8Array>} The HMAC SHA256 hash.
      * @throws SalmonIntegrityException thrown if hash cannot be calculated
      */
-
     public async calc(hashKey: Uint8Array, buffer: Uint8Array, offset: number, count: number): Promise<Uint8Array> {
         try {
             const cryptoKey: CryptoKey = await crypto.subtle.importKey('raw', hashKey, { name: 'HMAC', hash: 'SHA-256' }, true, ['sign']);

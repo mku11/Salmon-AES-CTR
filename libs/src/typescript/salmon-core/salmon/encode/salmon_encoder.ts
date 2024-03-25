@@ -26,7 +26,7 @@ import { Base64 } from "../../convert/base64.js";
 import { IBase64 } from "../../convert/ibase64.js";
 
 /**
- * Provides generic encoder (ie Base64).
+ * Provides generic Base64 encoder utility.
  */
 export class SalmonEncoder {
     /**
@@ -36,7 +36,7 @@ export class SalmonEncoder {
 
     /**
      * Change the current global Base64 implementation.
-     * @param base64 The new Base64 implementation.
+     * @param {IBase64} base64 The new Base64 implementation.
      */
     public static setBase64(base64: IBase64): void {
         SalmonEncoder.#base64 = base64;
@@ -44,7 +44,7 @@ export class SalmonEncoder {
 
     /**
      * Get the global default Base64 implementation.
-     * @return The Base64 implementation.
+     * @return {IBase64} The Base64 implementation.
      */
     public static getBase64(): IBase64 {
         return SalmonEncoder.#base64;

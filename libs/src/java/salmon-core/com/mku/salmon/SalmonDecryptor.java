@@ -282,10 +282,10 @@ public class SalmonDecryptor {
         MemoryStream outputStream = null;
         try {
             outputStream = new MemoryStream(outData);
-            outputStream.position(start);
+            outputStream.setPosition(start);
             stream = new SalmonStream(key, nonce, SalmonStream.EncryptionMode.Decrypt, inputStream,
                     headerData, integrity, chunkSize, hashKey);
-            stream.position(start);
+            stream.setPosition(start);
             long totalChunkBytesRead = 0;
             // align to the chunksize if available
             int buffSize = Math.max(bufferSize, stream.getChunkSize());

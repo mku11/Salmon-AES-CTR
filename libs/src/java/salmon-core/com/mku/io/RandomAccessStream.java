@@ -35,54 +35,60 @@ public abstract class RandomAccessStream {
 
     /**
      * True if the stream is readable.
+     *
      * @return
      */
     public abstract boolean canRead();
 
     /**
      * True if the stream is writeable.
+     *
      * @return
      */
     public abstract boolean canWrite();
 
     /**
      * True if the stream is seekable.
+     *
      * @return
      */
     public abstract boolean canSeek();
 
     /**
      * Get the length of the stream.
+     *
      * @return
      */
     public abstract long length();
 
     /**
      * Get the current position of the stream.
+     *
      * @return The current position.
      * @throws IOException
      */
-    public abstract long position() throws IOException;
+    public abstract long getPosition() throws IOException;
 
     /**
      * Change the current position of the stream.
+     *
      * @param value The new position.
      * @throws IOException
      */
-    public abstract void position(long value) throws IOException;
+    public abstract void setPosition(long value) throws IOException;
 
     /**
      * Set the length of this stream.
+     *
      * @param value The length.
      * @throws IOException
      */
     public abstract void setLength(long value) throws IOException;
 
     /**
-     *
      * @param buffer
      * @param offset
-     * @param count The number of bytes that were read. If the stream reached the end return -1.
+     * @param count  The number of bytes that were read. If the stream reached the end return -1.
      * @return
      * @throws IOException
      */
@@ -90,17 +96,19 @@ public abstract class RandomAccessStream {
 
     /**
      * Write the contents of the buffer to this stream.
+     *
      * @param buffer The buffer to read the contents from.
      * @param offset The position the reading will start from.
-     * @param count The count of bytes to be read from the buffer.
+     * @param count  The count of bytes to be read from the buffer.
      * @throws IOException
      */
     public abstract void write(byte[] buffer, int offset, int count) throws IOException;
 
     /**
      * Seek to a specific position in the stream.
+     *
      * @param position The new position.
-     * @param origin The origin type.
+     * @param origin   The origin type.
      * @return The position after the seeking was complete.
      * @throws IOException
      */
@@ -113,20 +121,21 @@ public abstract class RandomAccessStream {
 
     /**
      * Close the stream and associated resources.
+     *
      * @throws IOException
      */
     public abstract void close() throws IOException;
 
-	/**
+    /**
      * Progress listener for stream operations.
-     * 
-	 */
+     */
     public interface OnProgressListener {
         void onProgressChanged(long position, long length);
     }
 
     /**
      * Write stream contents to another stream.
+     *
      * @param stream The target stream.
      * @throws IOException
      */
@@ -136,7 +145,8 @@ public abstract class RandomAccessStream {
 
     /**
      * Write stream contents to another stream.
-     * @param stream The target stream.
+     *
+     * @param stream           The target stream.
      * @param progressListener The listener to notify when progress changes.
      * @throws IOException
      */
@@ -147,8 +157,9 @@ public abstract class RandomAccessStream {
 
     /**
      * Write stream contents to another stream.
-     * @param stream The target stream.
-     * @param bufferSize The buffer size to be used when copying.
+     *
+     * @param stream           The target stream.
+     * @param bufferSize       The buffer size to be used when copying.
      * @param progressListener The listener to notify when progress changes.
      * @throws IOException
      */
@@ -161,15 +172,15 @@ public abstract class RandomAccessStream {
         if (bufferSize <= 0)
             bufferSize = SalmonDefaultOptions.getBufferSize();
         int bytesRead;
-        long pos = position();
+        long pos = getPosition();
         byte[] buffer = new byte[bufferSize];
         while ((bytesRead = read(buffer, 0, bufferSize)) > 0) {
             stream.write(buffer, 0, bytesRead);
             if (progressListener != null)
-                progressListener.onProgressChanged(position(), length());
+                progressListener.onProgressChanged(getPosition(), length());
         }
         stream.flush();
-        position(pos);
+        setPosition(pos);
     }
 
     /**

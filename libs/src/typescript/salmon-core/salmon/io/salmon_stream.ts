@@ -208,7 +208,11 @@ export class SalmonStream extends RandomAccessStream {
      * @throws IOException
      */
     public async getPosition(): Promise<number> {
-        return this.#getVirtualPosition();
+        await this.#init(this.#key, this.#nonce);
+        let totalHashBytes: number;
+        let hashOffset: number = this.#salmonIntegrity.getChunkSize() > 0 ? SalmonGenerator.HASH_RESULT_LENGTH : 0;
+        totalHashBytes = this.#salmonIntegrity.getHashDataLength(await this.#baseStream.getPosition(), hashOffset);
+        return await this.#baseStream.getPosition() - this.#getHeaderLength() - totalHashBytes;
     }
 
     /**
@@ -463,17 +467,6 @@ export class SalmonStream extends RandomAccessStream {
         await this.#baseStream.setPosition(await this.#baseStream.getPosition() + this.#getHeaderLength());
         this.#transformer.resetCounter();
         this.#transformer.syncCounter(await this.getPosition());
-    }
-
-    /**
-     * Returns the Virtual Position of the stream excluding the header and hash signatures.
-     */
-    async #getVirtualPosition(): Promise<number> {
-        await this.#init(this.#key, this.#nonce);
-        let totalHashBytes: number;
-        let hashOffset: number = this.#salmonIntegrity.getChunkSize() > 0 ? SalmonGenerator.HASH_RESULT_LENGTH : 0;
-        totalHashBytes = this.#salmonIntegrity.getHashDataLength(await this.#baseStream.getPosition(), hashOffset);
-        return await this.#baseStream.getPosition() - this.#getHeaderLength() - totalHashBytes;
     }
 
     /**

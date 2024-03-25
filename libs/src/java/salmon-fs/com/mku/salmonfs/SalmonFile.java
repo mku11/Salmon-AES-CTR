@@ -184,7 +184,7 @@ public class SalmonFile {
         if (ivBytesRead == 0)
             throw new IOException("Could not parse nonce from file header");
 
-        realStream.position(0);
+        realStream.setPosition(0);
         byte[] headerData = new byte[getHeaderLength()];
         realStream.read(headerData, 0, headerData.length);
 

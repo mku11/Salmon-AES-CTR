@@ -217,7 +217,7 @@ public class JavaFSTestHelper {
 
     private static void flipBit(SalmonFile salmonFile, long position) throws Exception {
         RandomAccessStream stream = salmonFile.getRealFile().getOutputStream();
-        stream.position(position);
+        stream.setPosition(position);
         stream.write(new byte[]{1}, 0, 1);
         stream.flush();
         stream.close();
@@ -243,7 +243,7 @@ public class JavaFSTestHelper {
         if (flipBit) {
             IRealFile realTmpFile = newFile.getRealFile();
             RandomAccessStream realStream = realTmpFile.getOutputStream();
-            realStream.position(flipPosition);
+            realStream.setPosition(flipPosition);
             realStream.write(new byte[]{0}, 0, 1);
             realStream.flush();
             realStream.close();
@@ -415,7 +415,7 @@ public class JavaFSTestHelper {
         // encrypt and write with a single call, you can also Seek() and Write()
         encryptor.write(bytes, 0, bytes.length);
         // encrypted data are now written to the encOutStream.
-        encOutStream.position(0);
+        encOutStream.setPosition(0);
         byte[] encData = encOutStream.toArray();
         encryptor.flush();
         encryptor.close();
@@ -465,7 +465,7 @@ public class JavaFSTestHelper {
         SalmonStream encryptor = new SalmonStream(key, nonce, SalmonStream.EncryptionMode.Encrypt, encOutStream);
         RandomAccessStream inputStream = new MemoryStream(data);
         inputStream.copyTo(encryptor);
-        encOutStream.position(0);
+        encOutStream.setPosition(0);
         byte[] encData = encOutStream.toArray();
         encryptor.flush();
         encryptor.close();
@@ -476,7 +476,7 @@ public class JavaFSTestHelper {
         SalmonStream decryptor = new SalmonStream(key, nonce, SalmonStream.EncryptionMode.Decrypt, encInputStream);
         MemoryStream outStream = new MemoryStream();
         decryptor.copyTo(outStream);
-        outStream.position(0);
+        outStream.setPosition(0);
         byte[] decData = outStream.toArray();
         decryptor.close();
         encInputStream.close();
@@ -490,7 +490,7 @@ public class JavaFSTestHelper {
         RandomAccessStream ins = file.getInputStream();
         MemoryStream outs = new MemoryStream();
         ins.copyTo(outs);
-        outs.position(0);
+        outs.setPosition(0);
         outs.flush();
         outs.close();
         return outs.toArray();

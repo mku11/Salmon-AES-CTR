@@ -432,7 +432,7 @@ public abstract class SalmonDrive {
         MemoryStream ms = new MemoryStream();
         stream.copyTo(ms, bufferSize, null);
         ms.flush();
-        ms.position(0);
+        ms.setPosition(0);
         byte[] byteContents = ms.toArray();
         ms.close();
         stream.close();

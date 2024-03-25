@@ -27,21 +27,25 @@ SOFTWARE.
  */
 export class IOException extends Error {
 
-    cause: Error | unknown | null = null;
+    #cause: Error | unknown | null = null;
 
     /**
      * Construct an exception with a specific message and inner exception
-     * @param msg The provided message
-     * @param ex The inner exception
+     * @param {string | null} msg The provided message
+     * @param {Error | unknown | null} ex The inner exception
      */
     public constructor(msg: string | null = null, ex: Error | unknown | null = null) {
         super(msg ?? "");
         if (ex != null) {
-            this.cause = ex;
+            this.#cause = ex;
         }
     }
 
+    /**
+     * Get the cause (inner exception) of this exception.
+     * @returns {Error | unknown | null} The inner exception.
+     */
     public getCause(): Error | unknown | null {
-        return this.cause;
+        return this.#cause;
     }
 }

@@ -32,7 +32,6 @@ import com.mku.io.InputStreamWrapper;
 import com.mku.io.MemoryStream;
 import com.mku.salmon.SalmonDefaultOptions;
 import com.mku.salmon.SalmonRangeExceededException;
-import com.mku.salmon.SalmonSecurityException;
 import com.mku.salmon.integrity.SalmonIntegrityException;
 import com.mku.salmonfs.*;
 import com.mku.sequence.ISalmonSequenceSerializer;
@@ -40,21 +39,14 @@ import com.mku.sequence.SalmonFileSequencer;
 import com.mku.sequence.SalmonSequenceException;
 import com.mku.sequence.SalmonSequenceSerializer;
 import com.mku.utils.SalmonFileCommander;
-import com.mku.utils.SalmonFileExporter;
-import com.mku.utils.SalmonFileImporter;
 import org.junit.jupiter.api.Test;
 
-import java.io.ByteArrayInputStream;
-import java.io.ByteArrayOutputStream;
 import java.io.IOException;
-import java.io.StringReader;
 import java.nio.charset.Charset;
 import java.security.DigestInputStream;
 import java.security.MessageDigest;
-import java.security.NoSuchAlgorithmException;
 import java.util.ArrayList;
 import java.util.Random;
-import java.util.concurrent.atomic.AtomicReference;
 
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -619,7 +611,7 @@ public class SalmonFSJavaTestRunner extends SalmonJavaTestRunner {
         MemoryStream ms1 = new MemoryStream();
         JavaFSTestHelper.copyStream(fileInputStream1, ms1);
         ms1.flush();
-        ms1.position(0);
+        ms1.setPosition(0);
         fileInputStream1.reset();
         MessageDigest m1 = MessageDigest.getInstance("MD5");
         InputStreamWrapper msa1 = new InputStreamWrapper(ms1);
@@ -642,7 +634,7 @@ public class SalmonFSJavaTestRunner extends SalmonJavaTestRunner {
         MemoryStream ms2 = new MemoryStream();
         JavaFSTestHelper.copyStream(fileInputStream2, ms2);
         ms2.flush();
-        ms2.position(0);
+        ms2.setPosition(0);
         MessageDigest m2 = MessageDigest.getInstance("MD5");
         InputStreamWrapper msa2 = new InputStreamWrapper(ms2);
         DigestInputStream dism2 = new DigestInputStream(msa2, m2);

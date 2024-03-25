@@ -22,25 +22,24 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 */
 
-import { SalmonDefaultOptions } from "../salmon/salmon_default_options.js";
 import { RandomAccessStream, SeekOrigin } from "./random_access_stream.js";
 
 /***
- * Wrapper stream of AbsStream to Javascript's native InputStream interface.
+ * Wrapper stream of AbsStream to a native ReadableStream interface.
  * Use this class to wrap any AbsStream to a less powerful but familiar and compatible Java InputStream.
  */
 export class ReadableStreamWrapper {
-    static BUFFER_SIZE = 4 * 1024 * 1024;
+    static readonly #BUFFER_SIZE = 4 * 1024 * 1024;
 
     /**
-     * Instantiates an ReadableStreamWrapper with a base stream.
-     * @param stream The base AbsStream that you want to wrap.
+     * Instantiates an ReadableStreamWrapper from a RandomAccessStream.
+     * @param {RandomAccessStream} stream The stream that you want to wrap.
      */
     public static create(stream: RandomAccessStream): ReadableStream {
         let readableStream: any = new ReadableStream({
             type: 'bytes',
             async pull(controller: any) {
-                let size: number = ReadableStreamWrapper.BUFFER_SIZE;
+                let size: number = ReadableStreamWrapper.#BUFFER_SIZE;
                 let buffer: Uint8Array = new Uint8Array(size);
                 let bytesRead: number = 0;
                 let tBytesRead: number = 0;

@@ -232,10 +232,10 @@ public class SalmonFileExporter {
 
         try {
             targetStream = exportFile.getOutputStream();
-            targetStream.position(start);
+            targetStream.setPosition(start);
 
             sourceStream = fileToExport.getInputStream();
-            sourceStream.position(start);
+            sourceStream.setPosition(start);
 
             byte[] bytes = new byte[bufferSize];
             int bytesRead;

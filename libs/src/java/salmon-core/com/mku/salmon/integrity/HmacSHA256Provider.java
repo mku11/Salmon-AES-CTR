@@ -27,7 +27,7 @@ import javax.crypto.Mac;
 import javax.crypto.spec.SecretKeySpec;
 
 /**
- * Provides Java HMAC256 hashing.
+ * Provides HMAC SHA-256 hashing.
  */
 public class HmacSHA256Provider implements IHashProvider {
 

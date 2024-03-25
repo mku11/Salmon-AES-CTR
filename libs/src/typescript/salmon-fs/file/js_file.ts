@@ -255,6 +255,7 @@ export class JsFile implements IRealFile {
      * @param newName The new filename
      * @param progressListener Observer to notify when progress changes.
      * @return The moved file. Use this file for subsequent operations instead of the original.
+     * @throws IOException
      */
     public async move(newDir: IRealFile, newName: string | null = null, progressListener: ((position: number, length: number) => void) | null = null): Promise<IRealFile> {
         newName = newName != null ? newName : this.getBaseName();

@@ -234,8 +234,11 @@ public class SalmonStream extends RandomAccessStream {
      * @throws IOException
      */
 	@Override
-    public long position() throws IOException {
-        return getVirtualPosition();
+    public long getPosition() throws IOException {
+        long totalHashBytes;
+        int hashOffset = salmonIntegrity.getChunkSize() > 0 ? SalmonGenerator.HASH_RESULT_LENGTH : 0;
+        totalHashBytes = salmonIntegrity.getHashDataLength(baseStream.getPosition(), hashOffset);
+        return baseStream.getPosition() - getHeaderLength() - totalHashBytes;
     }
 
     /**
@@ -245,7 +248,7 @@ public class SalmonStream extends RandomAccessStream {
      * @throws IOException
      */
 	@Override
-    public void position(long value) throws IOException {
+    public void setPosition(long value) throws IOException {
         if (canWrite() && !allowRangeWrite && value != 0) {
             throw new IOException(
                     new SalmonSecurityException("Range Write is not allowed for security (non-reusable IVs). " +
@@ -315,7 +318,7 @@ public class SalmonStream extends RandomAccessStream {
      * @throws IOException
      */
     private void initStream() throws IOException {
-        baseStream.position(getHeaderLength());
+        baseStream.setPosition(getHeaderLength());
     }
 
     /**
@@ -358,12 +361,12 @@ public class SalmonStream extends RandomAccessStream {
     @Override
     public long seek(long offset, SeekOrigin origin) throws IOException {
         if (origin == SeekOrigin.Begin)
-            position(offset);
+            setPosition(offset);
         else if (origin == SeekOrigin.Current)
-            position(position() + offset);
+            setPosition(getPosition() + offset);
         else if (origin == SeekOrigin.End)
-            position(length() - offset);
-        return position();
+            setPosition(length() - offset);
+        return getPosition();
     }
 
     /**
@@ -471,22 +474,12 @@ public class SalmonStream extends RandomAccessStream {
      */
     private void setVirtualPosition(long value) throws IOException, SalmonRangeExceededException {
         // we skip the header bytes and any hash values we have if the file has integrity set
-        baseStream.position(value);
-        long totalHashBytes = salmonIntegrity.getHashDataLength(baseStream.position(), 0);
-        baseStream.position(baseStream.position() + totalHashBytes);
-        baseStream.position(baseStream.position() + getHeaderLength());
+        baseStream.setPosition(value);
+        long totalHashBytes = salmonIntegrity.getHashDataLength(baseStream.getPosition(), 0);
+        baseStream.setPosition(baseStream.getPosition() + totalHashBytes);
+        baseStream.setPosition(baseStream.getPosition() + getHeaderLength());
         transformer.resetCounter();
-        transformer.syncCounter(position());
-    }
-
-    /**
-     * Returns the Virtual Position of the stream excluding the header and hash signatures.
-     */
-    private long getVirtualPosition() throws IOException {
-        long totalHashBytes;
-        int hashOffset = salmonIntegrity.getChunkSize() > 0 ? SalmonGenerator.HASH_RESULT_LENGTH : 0;
-        totalHashBytes = salmonIntegrity.getHashDataLength(baseStream.position(), hashOffset);
-        return baseStream.position() - getHeaderLength() - totalHashBytes;
+        transformer.syncCounter(getPosition());
     }
 
     /**
@@ -510,16 +503,16 @@ public class SalmonStream extends RandomAccessStream {
      */
     @Override
     public int read(byte[] buffer, int offset, int count) throws IOException {
-        if (position() == length())
+        if (getPosition() == length())
             return -1;
         int alignedOffset = getAlignedOffset();
         int bytes = 0;
-        long pos = position();
+        long pos = getPosition();
 
         // if the base stream is not aligned for read
         if (alignedOffset != 0) {
             // read partially once
-            position(position() - alignedOffset);
+            setPosition(getPosition() - alignedOffset);
             int nCount = salmonIntegrity.getChunkSize() > 0 ? salmonIntegrity.getChunkSize() : SalmonGenerator.BLOCK_SIZE;
             byte[] buff = new byte[nCount];
             bytes = read(buff, 0, nCount);
@@ -528,7 +521,7 @@ public class SalmonStream extends RandomAccessStream {
             if (bytes <= 0)
                 return -1;
             System.arraycopy(buff, alignedOffset, buffer, offset, bytes);
-            position(pos + bytes);
+            setPosition(pos + bytes);
 
         }
         // if we have all bytes originally requested
@@ -537,9 +530,9 @@ public class SalmonStream extends RandomAccessStream {
 
         // the base stream position should now be aligned
         // now we can now read the rest of the data.
-        pos = position();
+        pos = getPosition();
         int nBytes = readFromStream(buffer, bytes + offset, count - bytes);
-        position(pos + nBytes);
+        setPosition(pos + nBytes);
         return bytes + nBytes;
     }
 
@@ -555,17 +548,17 @@ public class SalmonStream extends RandomAccessStream {
      * @throws IOException Thrown if stream is not aligned.
      */
     private int readFromStream(byte[] buffer, int offset, int count) throws IOException {
-        if (position() == length())
+        if (getPosition() == length())
             return 0;
-        if (salmonIntegrity.getChunkSize() > 0 && position() % salmonIntegrity.getChunkSize() != 0)
+        if (salmonIntegrity.getChunkSize() > 0 && getPosition() % salmonIntegrity.getChunkSize() != 0)
             throw new IOException("All reads should be aligned to the chunks size: " + salmonIntegrity.getChunkSize());
-        else if (salmonIntegrity.getChunkSize() == 0 && position() % SalmonAES256CTRTransformer.BLOCK_SIZE != 0)
+        else if (salmonIntegrity.getChunkSize() == 0 && getPosition() % SalmonAES256CTRTransformer.BLOCK_SIZE != 0)
             throw new IOException("All reads should be aligned to the block size: " + SalmonAES256CTRTransformer.BLOCK_SIZE);
 
-        long pos = position();
+        long pos = getPosition();
 
         // if there are not enough data in the stream
-        count = (int) Math.min(count, length() - position());
+        count = (int) Math.min(count, length() - getPosition());
 
         // if there are not enough space in the buffer
         count = Math.min(count, buffer.length - offset);
@@ -596,7 +589,7 @@ public class SalmonStream extends RandomAccessStream {
                 int len = Math.min(count - bytes, destBuffer.length);
                 writeToBuffer(destBuffer, 0, buffer, bytes + offset, len);
                 bytes += len;
-                transformer.syncCounter(position());
+                transformer.syncCounter(getPosition());
             } catch (SalmonSecurityException | SalmonRangeExceededException | SalmonIntegrityException ex) {
 				if(ex instanceof SalmonIntegrityException && failSilently)
 					return -1;
@@ -618,11 +611,11 @@ public class SalmonStream extends RandomAccessStream {
      */
     @Override
     public void write(byte[] buffer, int offset, int count) throws IOException {
-        if (salmonIntegrity.getChunkSize() > 0 && position() % salmonIntegrity.getChunkSize() != 0)
+        if (salmonIntegrity.getChunkSize() > 0 && getPosition() % salmonIntegrity.getChunkSize() != 0)
             throw new IOException(
                     new SalmonIntegrityException("All write operations should be aligned to the chunks size: "
                             + salmonIntegrity.getChunkSize()));
-        else if (salmonIntegrity.getChunkSize() == 0 && position() % SalmonAES256CTRTransformer.BLOCK_SIZE != 0)
+        else if (salmonIntegrity.getChunkSize() == 0 && getPosition() % SalmonAES256CTRTransformer.BLOCK_SIZE != 0)
             throw new IOException(
                     new SalmonIntegrityException("All write operations should be aligned to the block size: "
                             + SalmonAES256CTRTransformer.BLOCK_SIZE));
@@ -643,9 +636,9 @@ public class SalmonStream extends RandomAccessStream {
             byte[] destBuffer = new byte[srcBuffer.length];
             try {
                 transformer.encryptData(srcBuffer, 0, destBuffer, 0, srcBuffer.length);
-                byte[][] integrityHashes = salmonIntegrity.generateHashes(destBuffer, position() == 0 ? headerData : null);
+                byte[][] integrityHashes = salmonIntegrity.generateHashes(destBuffer, getPosition() == 0 ? headerData : null);
                 pos += writeToStream(destBuffer, getChunkSize(), integrityHashes);
-                transformer.syncCounter(position());
+                transformer.syncCounter(getPosition());
             } catch (SalmonSecurityException | SalmonRangeExceededException | SalmonIntegrityException ex) {
                 throw new IOException("Could not write to stream: ", ex);
             }
@@ -662,9 +655,9 @@ public class SalmonStream extends RandomAccessStream {
     private int getAlignedOffset() throws IOException {
         int alignOffset;
         if (salmonIntegrity.getChunkSize() > 0) {
-            alignOffset = (int) (position() % salmonIntegrity.getChunkSize());
+            alignOffset = (int) (getPosition() % salmonIntegrity.getChunkSize());
         } else {
-            alignOffset = (int) (position() % SalmonAES256CTRTransformer.BLOCK_SIZE);
+            alignOffset = (int) (getPosition() % SalmonAES256CTRTransformer.BLOCK_SIZE);
         }
         return alignOffset;
     }
@@ -721,7 +714,7 @@ public class SalmonStream extends RandomAccessStream {
      * @throws IOException
      */
     private byte[] readStreamData(int count) throws IOException {
-        byte[] data = new byte[(int) Math.min(count, baseStream.length() - baseStream.position())];
+        byte[] data = new byte[(int) Math.min(count, baseStream.length() - baseStream.getPosition())];
         baseStream.read(data, 0, data.length);
         return data;
     }

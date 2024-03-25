@@ -27,15 +27,16 @@ import java.io.IOException;
 import java.io.InputStream;
 
 /***
- * Wrapper stream of AbsStream to Java's native InputStream interface.
- * Use this class to wrap any AbsStream to a less powerful but familiar and compatible Java InputStream.
+ * Wrapper stream of RandomAccessStream to a native InputStream implementation.
+ * Use this class to wrap any RandomAccessStream to a less powerful but familiar and compatible Java InputStream.
  */
 public class InputStreamWrapper extends InputStream {
     private final RandomAccessStream stream;
 
     /**
-     * Instantiates an InputStreamWrapper with a base stream.
-     * @param stream The base AbsStream that you want to wrap.
+     * Instantiates an InputStreamWrapper from a RandomAccessStream.
+     *
+     * @param stream The stream that you want to wrap.
      */
     public InputStreamWrapper(RandomAccessStream stream) {
         this.stream = stream;
@@ -43,6 +44,7 @@ public class InputStreamWrapper extends InputStream {
 
     /**
      * Read a byte from the stream. Blocking is dependent on the base stream.
+     *
      * @return -1 if there are no more bytes from the stream otherwise the next byte value (0-255).
      * @throws IOException
      */
@@ -50,17 +52,18 @@ public class InputStreamWrapper extends InputStream {
     public int read() throws IOException {
         byte[] buffer = new byte[1];
         int bytesRead = read(buffer, 0, 1);
-        if(bytesRead <= 0)
+        if (bytesRead <= 0)
             return -1;
         return buffer[0];
     }
 
     /**
      * Read a sequance of bytes from the base stream into the buffer provided.
-     * @param buffer     the buffer into which the data is read.
-     * @param offset   the start offset in array <code>b</code>
-     *                   at which the data is written.
-     * @param count   the maximum number of bytes to read.
+     *
+     * @param buffer the buffer into which the data is read.
+     * @param offset the start offset in array <code>b</code>
+     *               at which the data is written.
+     * @param count  the maximum number of bytes to read.
      * @return The number of bytes read.
      * @throws IOException with an optional inner Exception if the base stream is a SalmonStream
      */
@@ -77,6 +80,7 @@ public class InputStreamWrapper extends InputStream {
 
     /**
      * Closes the base stream.
+     *
      * @throws IOException
      */
     @Override
@@ -86,25 +90,27 @@ public class InputStreamWrapper extends InputStream {
 
     /**
      * Reset the stream.
+     *
      * @throws IOException
      */
-	@Override
-	public void reset() throws IOException {
-		stream.position(0);
-	}
+    @Override
+    public void reset() throws IOException {
+        stream.setPosition(0);
+    }
 
     /**
      * Skip number of bytes on the stream.
-     * @param pos   the number of bytes to be skipped.
+     *
+     * @param pos the number of bytes to be skipped.
      * @return
      * @throws IOException
      */
-	@Override
-	public long skip(long pos) throws IOException {
-		if (pos > stream.length())
-            stream.position(stream.length());	
-		else
-			stream.position(stream.position() + pos);	
-		return stream.position();
-	}
+    @Override
+    public long skip(long pos) throws IOException {
+        if (pos > stream.length())
+            stream.setPosition(stream.length());
+        else
+            stream.setPosition(stream.getPosition() + pos);
+        return stream.getPosition();
+    }
 }

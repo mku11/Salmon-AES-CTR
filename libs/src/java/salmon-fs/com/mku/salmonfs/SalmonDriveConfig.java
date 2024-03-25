@@ -88,7 +88,7 @@ public class SalmonDriveConfig {
         ms2.write(encryptedData, 0, encryptedData.length);
         ms2.write(hashSignature, 0, hashSignature.length);
         ms2.flush();
-        ms2.position(0);
+        ms2.setPosition(0);
 
         // we write the contents to the config file
         RandomAccessStream outputStream = configFile.getOutputStream();

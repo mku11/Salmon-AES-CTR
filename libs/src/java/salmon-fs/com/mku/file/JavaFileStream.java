@@ -55,10 +55,10 @@ public class JavaFileStream extends RandomAccessStream {
     private boolean canWrite;
 
     /**
-     * Construct a file stream from an AndroidFile.
+     * Construct a file stream from a JavaFile.
      * This will create a wrapper stream that will route read() and write() to the FileChannel
      *
-     * @param file The AndroidFile that will be used to get the read/write stream
+     * @param file The JavaFile that will be used to get the read/write stream
      * @param mode The mode "r" for read "rw" for write
      */
     public JavaFileStream(JavaFile file, String mode) throws FileNotFoundException {
@@ -112,7 +112,7 @@ public class JavaFileStream extends RandomAccessStream {
      * @throws IOException
      */
     @Override
-    public long position() throws IOException {
+    public long getPosition() throws IOException {
         return fileChannel.position();
     }
 
@@ -122,7 +122,7 @@ public class JavaFileStream extends RandomAccessStream {
      * @throws IOException
      */
     @Override
-    public void position(long value) throws IOException {
+    public void setPosition(long value) throws IOException {
         fileChannel.position(value);
     }
 

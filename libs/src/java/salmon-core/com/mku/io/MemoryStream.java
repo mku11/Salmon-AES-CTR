@@ -34,12 +34,12 @@ public class MemoryStream extends RandomAccessStream {
     /**
      * Increment to resize to when capacity is exhausted.
      */
-    private static final int CAPACITY_INCREMENT = 128 * 1024;
+    private static final int _INITIAL_CAPACITY = 128 * 1024;
 
     /**
      * Buffer to store the data. This can be provided via the constructor.
      */
-    private byte[] bytes;
+    private byte[] _bytes;
 
     /**
      * Current position of the stream.
@@ -57,12 +57,13 @@ public class MemoryStream extends RandomAccessStream {
     private long _length;
 
     /**
-     * Create a memory stream backed by an existing byte-array.
-     * @param bytes
+     * Create a memory stream.
+     *
+     * @param bytes Existing byte array to use as backing buffer.
      */
     public MemoryStream(byte[] bytes) {
         this._length = bytes.length;
-        this.bytes = bytes;
+        this._bytes = bytes;
         this._capacity = bytes.length;
     }
 
@@ -70,12 +71,12 @@ public class MemoryStream extends RandomAccessStream {
      * Create a memory stream.
      */
     public MemoryStream() {
-        bytes = new byte[CAPACITY_INCREMENT];
-        this._capacity = CAPACITY_INCREMENT;
+        _bytes = new byte[_INITIAL_CAPACITY];
+        this._capacity = _INITIAL_CAPACITY;
     }
 
     /**
-     * @return Always True.
+     * @return If the stream can be used for reading.
      */
     @Override
     public boolean canRead() {
@@ -83,7 +84,7 @@ public class MemoryStream extends RandomAccessStream {
     }
 
     /**
-     * @return Always True.
+     * @return If the stream can be used for writing.
      */
     @Override
     public boolean canWrite() {
@@ -91,7 +92,7 @@ public class MemoryStream extends RandomAccessStream {
     }
 
     /**
-     * @return Always True.
+     * @return If the stream is seekable.
      */
     @Override
     public boolean canSeek() {
@@ -99,7 +100,6 @@ public class MemoryStream extends RandomAccessStream {
     }
 
     /**
-     *
      * @return The length of the stream.
      */
     @Override
@@ -108,50 +108,49 @@ public class MemoryStream extends RandomAccessStream {
     }
 
     /**
-     *
      * @return The position of the stream.
-     * @throws IOException
      */
     @Override
-    public long position() throws IOException {
+    public long getPosition() {
         return _position;
     }
 
     /**
      * Changes the current position of the stream. For more options use seek() method.
+     *
      * @param value The new position of the stream.
-     * @throws IOException
      */
     @Override
-    public void position(long value) throws IOException {
+    public void setPosition(long value) {
         _position = value;
     }
 
     /**
      * Changes the length of the stream. The capacity of the stream might also change if the value is lesser than the
      * current capacity.
-     * @param value
-     * @throws IOException
+     *
+     * @param value The new file length.
      */
     @Override
-    public void setLength(long value) throws IOException {
+    public void setLength(long value) {
         checkAndResize(value);
         _capacity = value;
     }
 
     /**
      * Read a sequence of bytes into the provided buffer.
+     *
      * @param buffer The buffer to write the bytes that are read from the stream.
      * @param offset The offset of the buffer that will be used to write the bytes.
-     * @param count The length of the bytes that can be read from the stream and written to the buffer.
-     * @return
+     * @param count  The length of the bytes that can be read from the stream and written to the buffer.
+     * @return The number of bytes read.
      * @throws IOException
      */
     @Override
     public int read(byte[] buffer, int offset, int count) throws IOException {
-        int bytesRead = (int) Math.min(_length - position(), count);
-        System.arraycopy(bytes, (int) _position, buffer, offset, bytesRead);
-        position(position() + bytesRead);
+        int bytesRead = (int) Math.min(_length - getPosition(), count);
+        System.arraycopy(_bytes, (int) _position, buffer, offset, bytesRead);
+        setPosition(getPosition() + bytesRead);
         if (bytesRead <= 0)
             return -1;
         return bytesRead;
@@ -159,56 +158,57 @@ public class MemoryStream extends RandomAccessStream {
 
     /**
      * Write a sequence of bytes into the stream.
+     *
      * @param buffer The buffer that the bytes will be read from.
      * @param offset The position offset that will be used to read from the buffer.
-     * @param count The number of bytes that will be written to the stream.
-     * @throws IOException
+     * @param count  The number of bytes that will be written to the stream.
      */
     @Override
-    public void write(byte[] buffer, int offset, int count) throws IOException {
+    public void write(byte[] buffer, int offset, int count) {
         checkAndResize(_position + count);
-        System.arraycopy(buffer, offset, bytes, (int) _position, count);
-        position(position() + count);
+        System.arraycopy(buffer, offset, _bytes, (int) _position, count);
+        setPosition(getPosition() + count);
     }
 
     /**
      * Check if there is no more space in the byte array and increase the capacity.
+     *
      * @param newLength The new length of the stream.
      */
-	 // TODO: SyncTo typescript - resize by doubling for performance
     private void checkAndResize(long newLength) {
-        if(_capacity < newLength) {
-            long newCapacity = _capacity + CAPACITY_INCREMENT * ((newLength - _capacity) / CAPACITY_INCREMENT);
-            if(newCapacity < newLength)
-                newCapacity += CAPACITY_INCREMENT;
-            byte [] nBytes = new byte[(int) newCapacity];
-            System.arraycopy(bytes, 0, nBytes, 0, (int) _capacity);
-            _capacity = newCapacity;
-            bytes = nBytes;
+        if (this._capacity < newLength) {
+            long newCapacity = newLength * 2;
+            if (newCapacity > Integer.MAX_VALUE)
+                throw new RuntimeException("Size too large");
+            byte[] nBytes = new byte[(int) newCapacity];
+            for (int i = 0; i < this._capacity; i++)
+                nBytes[i] = this._bytes[i];
+            this._capacity = newCapacity;
+            this._bytes = nBytes;
         }
-        _length = newLength;
+        this._length = newLength;
     }
 
     /**
      * Seek to a position in the stream.
-     * @param offset
+     *
+     * @param offset The offset to use.
      * @param origin Possible Values: Begin, Current, End
-     * @return
-     * @throws IOException
+     * @return The new position after seeking.
      */
     @Override
-    public long seek(long offset, SeekOrigin origin) throws IOException {
+    public long seek(long offset, SeekOrigin origin) {
         long nPos = 0;
         if (origin == SeekOrigin.Begin) {
             nPos = (int) offset;
         } else if (origin == SeekOrigin.Current) {
-            nPos = position() + offset;
+            nPos = getPosition() + offset;
         } else if (origin == SeekOrigin.End) {
-            nPos = (int) (bytes.length - offset);
+            nPos = (int) (_bytes.length - offset);
         }
         checkAndResize(nPos);
-        position(nPos);
-        return position();
+        setPosition(nPos);
+        return getPosition();
     }
 
     /**
@@ -216,24 +216,25 @@ public class MemoryStream extends RandomAccessStream {
      */
     @Override
     public void flush() {
-
+        // nop
     }
 
     /**
      * Close any resources the stream is using. Not-Applicable for memory stream.
      */
     @Override
-    public void close() throws IOException {
-
+    public void close() {
+        // nop
     }
 
     /**
      * Convert the stream to an array:
+     *
      * @return A byte array containing the data from the stream.
      */
     public byte[] toArray() {
-        byte [] nBytes = new byte[(int) _length];
-        System.arraycopy(this.bytes, 0, nBytes, 0, (int) _length);
+        byte[] nBytes = new byte[(int) _length];
+        System.arraycopy(this._bytes, 0, nBytes, 0, (int) _length);
         return nBytes;
     }
 }

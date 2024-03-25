@@ -26,83 +26,82 @@ import { SalmonDefaultOptions } from "../salmon/salmon_default_options.js";
 import { IOException } from "./io_exception.js";
 
 /**
- * Abstract read-write seekable stream used by internal streams
- * (modeled after c# Stream class).
+ * Base class for read-write seekable streams.
  */
 export abstract class RandomAccessStream {
 
     /**
      * True if the stream is readable.
-     * @return
+     * @return {Promise<boolean>} True if can read.
      */
     public abstract canRead(): Promise<boolean>;
 
     /**
      * True if the stream is writeable.
-     * @return
+     * @return {Promise<boolean>} True if can write.
      */
     public abstract canWrite(): Promise<boolean>;
 
     /**
      * True if the stream is seekable.
-     * @return
+     * @return {Promise<boolean>} True if can seek.
      */
     public abstract canSeek(): Promise<boolean>;
 
     /**
      * Get the length of the stream.
-     * @return
+     * @return {Promise<number>} The length of the stream.
      */
     public abstract length(): Promise<number>;
 
     /**
      * Get the current position of the stream.
-     * @return The current position.
+     * @return {Promise<number>} The current position.
      * @throws IOException
      */
     public abstract getPosition(): Promise<number>;
 
     /**
      * Change the current position of the stream.
-     * @param value The new position.
+     * @param {number} value The new position.
      * @throws IOException
      */
     public abstract setPosition(value: number): Promise<void>;
 
     /**
      * Set the length of this stream.
-     * @param value The length.
+     * @param {number} value The new length.
      * @throws IOException
      */
     public abstract setLength(value: number): Promise<void>;
 
     /**
      *
-     * @param buffer
-     * @param offset
-     * @param count The number of bytes that were read. If the stream reached the end return -1.
-     * @return
+     * @param {Uint8Array} buffer The buffer to read into.
+     * @param {number} offset The offset to start reading into the buffer.
+     * @param {number} count The number of bytes that were read. If the stream reached the end return -1.
+     * @return {Promise<number>} The number of bytes read.
      * @throws IOException
      */
     public abstract read(buffer: Uint8Array, offset: number, count: number): Promise<number>;
 
     /**
      * Write the contents of the buffer to this stream.
-     * @param buffer The buffer to read the contents from.
-     * @param offset The position the reading will start from.
-     * @param count The count of bytes to be read from the buffer.
+     * @param {Uint8Array} buffer The buffer to read the contents from.
+     * @param {number} offset The position the reading will start from.
+     * @param {number} count The count of bytes to be read from the buffer.
      * @throws IOException
      */
     public abstract write(buffer: Uint8Array, offset: number, count: number): Promise<void>;
 
     /**
      * Seek to a specific position in the stream.
-     * @param position The new position.
-     * @param origin The origin type.
-     * @return The position after the seeking was complete.
+     * @param {number} position The offset to use.
+     * @param {SeekOrigin} origin The origin type.
+     * @return {Promise<number>} The position after the seeking was complete.
      * @throws IOException
      */
-    public abstract seek(position: number, origin: SeekOrigin): Promise<number>;
+    public abstract seek(offset: number, origin: SeekOrigin): Promise<number>;
 
     /**
      * Flush buffers.
@@ -117,12 +116,13 @@ export abstract class RandomAccessStream {
 
     /**
      * Write stream contents to another stream.
-     * @param stream The target stream.
-     * @param bufferSize The buffer size to be used when copying.
-     * @param progressListener The listener to notify when progress changes.
+     * @param {RandomAccessStream} stream The target stream.
+     * @param {number | null} bufferSize The buffer size to be used when copying.
+     * @param {((position: number, length: number) => void) | null} progressListener The listener to notify when progress changes.
      * @throws IOException
      */
-    public async copyTo(stream: RandomAccessStream, bufferSize: number | null = null, progressListener: ((position: number, length: number) => void) | null = null): Promise<void> {
+    public async copyTo(stream: RandomAccessStream, bufferSize: number | null = null, 
+        progressListener: ((position: number, length: number) => void) | null = null): Promise<void> {
         if (!(await this.canRead()))
             throw new IOException("Target stream not readable");
         if (!(await stream.canWrite()))

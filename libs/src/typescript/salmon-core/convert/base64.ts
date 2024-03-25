@@ -25,13 +25,13 @@ SOFTWARE.
 import { IBase64 } from './ibase64.js';
 
 /**
- * Typescript default implementation of Base64 encoder/decoder.
+ * Base64 encoder/decoder.
  */
 export class Base64 implements IBase64 {
     /**
      * Decode text from Base64 string.
-     * @param text String to be decoded
-     * @return Byte array of decoded data.
+     * @param {string} text String to be decoded
+     * @returns {Uint8Array} Byte array of decoded data.
      */
     public decode(text: string): Uint8Array {
         return Uint8Array.from(atob(text), x => x.charCodeAt(0));
@@ -39,8 +39,8 @@ export class Base64 implements IBase64 {
 
     /**
      * Encode byte array to a text string.
-     * @param data Byte array to be encoded.
-     * @return String of encoded data.
+     * @param {Uint8Array} data Byte array to be encoded.
+     * @return {string} String of encoded data.
      */
     public encode(data: Uint8Array): string {
         return btoa(String.fromCodePoint(...data));

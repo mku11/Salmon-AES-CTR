@@ -33,7 +33,7 @@ export class MemoryStream extends RandomAccessStream {
     /**
      * Increment to resize to when capacity is exhausted.
      */
-    static readonly #CAPACITY_INCREMENT: number = 128 * 1024;
+    static readonly #INITIAL_CAPACITY: number = 128 * 1024;
 
     /**
      * Buffer to store the data. This can be provided via the constructor.
@@ -43,50 +43,51 @@ export class MemoryStream extends RandomAccessStream {
     /**
      * Current position of the stream.
      */
-    #_position: number = 0;
+    #position: number = 0;
 
     /**
      * Current capacity.
      */
-    #_capacity: number = 0;
+    #capacity: number = 0;
 
     /**
      * Current length of the stream.
      */
-    #_length: number = 0;
+    #length: number = 0;
 
     /**
-     * Create a memory stream backed by an existing byte-array.
-     * @param bytes
+     * Create a memory stream.
+     * @param {Uint8Array} bytes Optional existing byte array to use as backing buffer.
+     * If omitted a new backing array will be created automatically.
      */
     public constructor(bytes: Uint8Array | null = null) {
         super();
         if (bytes != null) {
-            this.#_length = bytes.length;
+            this.#length = bytes.length;
             this.#bytes = bytes;
-            this.#_capacity = bytes.length;
+            this.#capacity = bytes.length;
         } else {
-            this.#bytes = new Uint8Array(MemoryStream.#CAPACITY_INCREMENT);
-            this.#_capacity = MemoryStream.#CAPACITY_INCREMENT;
+            this.#bytes = new Uint8Array(MemoryStream.#INITIAL_CAPACITY);
+            this.#capacity = MemoryStream.#INITIAL_CAPACITY;
         }
     }
 
     /**
-     * @return Always True.
+     * @return {Promise<boolean>} If the stream can be used for reading.
      */
     public override async canRead(): Promise<boolean> {
         return true;
     }
 
     /**
-     * @return Always True.
+     * @return {Promise<boolean>} If the stream can be used for writing.
      */
     public override async canWrite(): Promise<boolean> {
         return true;
     }
 
     /**
-     * @return Always True.
+     * @return {Promise<boolean>} If the stream is seekable.
      */
     public override async canSeek(): Promise<boolean> {
         return true;
@@ -94,53 +95,50 @@ export class MemoryStream extends RandomAccessStream {
 
     /**
      *
-     * @return The length of the stream.
+     * @return {Promise<number>} The length of the stream.
      */
     public override async length(): Promise<number> {
-        return this.#_length;
+        return this.#length;
     }
 
     /**
      *
-     * @return The position of the stream.
-     * @throws IOException
+     * @return {Promise<number>} The position of the stream.
      */
     public override async getPosition(): Promise<number> {
-        return this.#_position;
+        return this.#position;
     }
 
     /**
      * Changes the current position of the stream. For more options use seek() method.
      * @param value The new position of the stream.
-     * @throws IOException
      */
     public override async setPosition(value: number): Promise<void> {
-        this.#_position = value;
+        this.#position = value;
     }
 
     /**
      * Changes the length of the stream. The capacity of the stream might also change if the value is lesser than the
      * current capacity.
-     * @param value
-     * @throws IOException
+     * @param {Promise<number>} value The new position of the stream.
      */
     public override async setLength(value: number): Promise<void> {
         this.#checkAndResize(value);
-        this.#_capacity = value;
+        this.#capacity = value;
     }
 
     /**
      * Read a sequence of bytes into the provided buffer.
-     * @param buffer The buffer to write the bytes that are read from the stream.
-     * @param offset The offset of the buffer that will be used to write the bytes.
-     * @param count The length of the bytes that can be read from the stream and written to the buffer.
-     * @return
+     * @param {Uint8Array} buffer The buffer to write the bytes that are read from the stream.
+     * @param {number} offset The offset of the buffer that will be used to write the bytes.
+     * @param {number} count The length of the bytes that can be read from the stream and written to the buffer.
+     * @return {Promise<number>} The number of bytes read.
      * @throws IOException
      */
     public override async read(buffer: Uint8Array, offset: number, count: number): Promise<number> {
-        const bytesRead: number = Math.min(this.#_length - await this.getPosition(), count);
+        const bytesRead: number = Math.min(this.#length - await this.getPosition(), count);
         for (let i = 0; i < bytesRead; i++)
-            buffer[offset + i] = this.#bytes[this.#_position + i];
+            buffer[offset + i] = this.#bytes[this.#position + i];
         await this.setPosition(await this.getPosition() + bytesRead);
         if (bytesRead <= 0)
             return -1;
@@ -149,40 +147,40 @@ export class MemoryStream extends RandomAccessStream {
 
     /**
      * Write a sequence of bytes into the stream.
-     * @param buffer The buffer that the bytes will be read from.
-     * @param offset The position offset that will be used to read from the buffer.
-     * @param count The number of bytes that will be written to the stream.
-     * @throws IOException
+     * @param {Uint8Array} buffer The buffer that the bytes will be read from.
+     * @param {number} offset The position offset that will be used to read from the buffer.
+     * @param {number} count The number of bytes that will be written to the stream.
      */
     public override async write(buffer: Uint8Array, offset: number, count: number): Promise<void> {
-        this.#checkAndResize(this.#_position + count);
+        this.#checkAndResize(this.#position + count);
         for (let i = 0; i < count; i++)
-            this.#bytes[this.#_position + i] = buffer[offset + i];
+            this.#bytes[this.#position + i] = buffer[offset + i];
         await this.setPosition(await this.getPosition() + count);
     }
 
     /**
      * Check if there is no more space in the byte array and increase the capacity.
-     * @param newLength The new length of the stream.
+     * @param {number} newLength The new length of the stream.
      */
     #checkAndResize(newLength: number): void {
-        if (this.#_capacity < newLength) {
+        if (this.#capacity < newLength) {
             let newCapacity: number = newLength * 2;
+            if (newCapacity > Number.MAX_SAFE_INTEGER)
+                throw new Error("Size too large");
             const nBytes: Uint8Array = new Uint8Array(newCapacity);
-            for (let i = 0; i < this.#_capacity; i++)
+            for (let i = 0; i < this.#capacity; i++)
                 nBytes[i] = this.#bytes[i];
-            this.#_capacity = newCapacity;
+            this.#capacity = newCapacity;
             this.#bytes = nBytes;
         }
-        this.#_length = newLength;
+        this.#length = newLength;
     }
 
     /**
      * Seek to a position in the stream.
-     * @param offset
-     * @param origin Possible Values: Begin, Current, End
-     * @return
-     * @throws IOException
+     * @param {number} offset The offset to use.
+     * @param {SeekOrigin.Begin} origin The origin type.
+     * @return {Promise<number>} The position after the seeking was complete.
      */
     public override async seek(offset: number, origin: SeekOrigin): Promise<number> {
         let nPos: number = 0;
@@ -202,24 +200,23 @@ export class MemoryStream extends RandomAccessStream {
      * Flush the stream. Not-Applicable for memory stream.
      */
     public override async flush(): Promise<void> {
-        // noop
+        // nop
     }
 
     /**
      * Close any resources the stream is using. Not-Applicable for memory stream.
      */
-
     public override async close(): Promise<void> {
-        // noop
+        // nop
     }
 
     /**
      * Convert the stream to an array:
-     * @return A byte array containing the data from the stream.
+     * @return {Uint8Array} A byte array containing the data from the stream.
      */
     public toArray(): Uint8Array {
-        const nBytes: Uint8Array = new Uint8Array(this.#_length);
-        for (let i = 0; i < this.#_length; i++)
+        const nBytes: Uint8Array = new Uint8Array(this.#length);
+        for (let i = 0; i < this.#length; i++)
             nBytes[i] = this.#bytes[i];
         return nBytes;
     }

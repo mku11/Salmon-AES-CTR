@@ -156,7 +156,7 @@ public class SalmonEncryptor {
         int realSize = (int) SalmonAES256CTRTransformer.getActualSize(data, key, nonce, SalmonStream.EncryptionMode.Encrypt,
                 headerData, integrity, chunkSize, hashKey);
         byte[] outData = new byte[realSize];
-        outputStream.position(0);
+        outputStream.setPosition(0);
         outputStream.read(outData, 0, (int) outputStream.length());
         outputStream.close();
 
@@ -289,11 +289,11 @@ public class SalmonEncryptor {
         MemoryStream outputStream = new MemoryStream(outData);
         SalmonStream stream = null;
         try {
-            inputStream.position(start);
+            inputStream.setPosition(start);
             stream = new SalmonStream(key, nonce, SalmonStream.EncryptionMode.Encrypt, outputStream, headerData,
                     integrity, chunkSize, hashKey);
             stream.setAllowRangeWrite(true);
-            stream.position(start);
+            stream.setPosition(start);
             long totalChunkBytesRead = 0;
             // align to the chunk size if available
             int buffSize = Math.max(bufferSize, stream.getChunkSize());

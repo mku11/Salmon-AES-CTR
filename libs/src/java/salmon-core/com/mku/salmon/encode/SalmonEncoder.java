@@ -27,7 +27,7 @@ import com.mku.convert.Base64;
 import com.mku.convert.IBase64;
 
 /**
- * Provides generic encoder (ie Base64).
+ * Provides generic Base64 encoder utility.
  */
 public class SalmonEncoder {
 

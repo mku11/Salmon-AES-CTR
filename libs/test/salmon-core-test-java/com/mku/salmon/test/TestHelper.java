@@ -244,19 +244,19 @@ public class TestHelper {
         assertEquals(correctText, decText);
         testCounter(decReader);
 
-        correctText = plainText.substring((int) decReader.position() + 4, (int) decReader.position() + 4 + 4);
+        correctText = plainText.substring((int) decReader.getPosition() + 4, (int) decReader.getPosition() + 4 + 4);
         decText = TestHelper.seekAndGetSubstringByRead(decReader, 4, 4, RandomAccessStream.SeekOrigin.Current);
 
         assertEquals(correctText, decText);
         testCounter(decReader);
 
-        correctText = plainText.substring((int) decReader.position() + 6, (int) decReader.position() + 6 + 4);
+        correctText = plainText.substring((int) decReader.getPosition() + 6, (int) decReader.getPosition() + 6 + 4);
         decText = TestHelper.seekAndGetSubstringByRead(decReader, 6, 4, RandomAccessStream.SeekOrigin.Current);
 
         assertEquals(correctText, decText);
         testCounter(decReader);
 
-        correctText = plainText.substring((int) decReader.position() + 10, (int) decReader.position() + 10 + 6);
+        correctText = plainText.substring((int) decReader.getPosition() + 10, (int) decReader.getPosition() + 10 + 6);
         decText = TestHelper.seekAndGetSubstringByRead(decReader, 10, 6, RandomAccessStream.SeekOrigin.Current);
 
         assertEquals(correctText, decText);
@@ -308,7 +308,7 @@ public class TestHelper {
         SalmonStream decReader = new SalmonStream(key, iv, SalmonStream.EncryptionMode.Decrypt, encIns,
                 null, integrity, chunkSize, hashKey);
         for (int i = 0; i < 100; i++) {
-            decReader.position(decReader.position() + 7);
+            decReader.setPosition(decReader.getPosition() + 7);
             testCounter(decReader);
         }
 
@@ -317,7 +317,7 @@ public class TestHelper {
     }
 
     private static void testCounter(SalmonStream decReader) throws IOException {
-        long expectedBlock = decReader.position() / SalmonAES256CTRTransformer.BLOCK_SIZE;
+        long expectedBlock = decReader.getPosition() / SalmonAES256CTRTransformer.BLOCK_SIZE;
 
         assertEquals(expectedBlock, decReader.getBlock());
 
@@ -550,7 +550,7 @@ public class TestHelper {
         byte[] output = ms.toArray();
         System.out.println("write: " + Arrays.toString(output));
         byte[] buff = new byte[16];
-        ms.position(0);
+        ms.setPosition(0);
         ms.read(buff, 1, 4);
         System.out.println("read: " + Arrays.toString(buff));
     }
@@ -604,7 +604,7 @@ public class TestHelper {
         ms1.close();
 
         // encrypt to a memory byte stream
-        ms2.position(0);
+        ms2.setPosition(0);
         MemoryStream ms3 = new MemoryStream();
         SalmonStream salmonStream = new SalmonStream(key, nonce, SalmonStream.EncryptionMode.Encrypt, ms3,
                 null, integrity, chunkSize, hashKey);
@@ -618,14 +618,14 @@ public class TestHelper {
 
         // decrypt
 		ms3 = new MemoryStream(encData);
-        ms3.position(0);
+        ms3.setPosition(0);
         MemoryStream ms4 = new MemoryStream();
         SalmonStream salmonStream2 = new SalmonStream(key, nonce, SalmonStream.EncryptionMode.Decrypt, ms3,
                 null, integrity, chunkSize, hashKey);
         salmonStream2.copyTo(ms4, bufferSize, null);
         salmonStream2.close();
         ms3.close();
-        ms4.position(0);
+        ms4.setPosition(0);
         MessageDigest md2 = MessageDigest.getInstance("MD5");
         DigestInputStream dis2 = new DigestInputStream(new InputStreamWrapper(ms4), md2);
         byte[] digest2 = md2.digest();

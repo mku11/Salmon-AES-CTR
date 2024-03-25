@@ -25,16 +25,17 @@ SOFTWARE.
 */
 
 /**
- * Provides Hashing calculation.
+ * Interface for hashing providers.
  */
 public interface IHashProvider {
 
     /**
      * Calculate the hash for the data provided.
-     * @param key The key to be used for hashing.
+     *
+     * @param key    The key to be used for hashing.
      * @param buffer The buffer to read the data from.
      * @param offset The position that reading will start from.
-     * @param count The count of bytes to read from.
+     * @param count  The count of bytes to read from.
      * @return The calculated hash.
      * @throws SalmonIntegrityException thrown if hash cannot be calculated
      */

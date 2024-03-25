@@ -45,10 +45,10 @@ export class JsFileStream extends RandomAccessStream {
     #canWrite: boolean = false;
 
     /**
-     * Construct a file stream from an AndroidFile.
+     * Construct a file stream from an JsFile.
      * This will create a wrapper stream that will route read() and write() to the FileChannel
      *
-     * @param file The AndroidFile that will be used to get the read/write stream
+     * @param file The JsFile that will be used to get the read/write stream
      * @param mode The mode "r" for read "rw" for write
      */
     public constructor(file: IRealFile, mode: string) {

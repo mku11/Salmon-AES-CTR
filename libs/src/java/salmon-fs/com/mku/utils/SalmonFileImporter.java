@@ -25,10 +25,8 @@ SOFTWARE.
 
 import com.mku.func.BiConsumer;
 import com.mku.io.RandomAccessStream;
-import com.mku.salmon.integrity.SalmonIntegrity;
 import com.mku.salmon.io.SalmonStream;
 import com.mku.file.IRealFile;
-import com.mku.salmon.transform.SalmonAES256CTRTransformer;
 import com.mku.salmonfs.SalmonFile;
 
 import java.io.IOException;
@@ -252,10 +250,10 @@ public class SalmonFileImporter {
 
         try {
             targetStream = salmonFile.getOutputStream();
-            targetStream.position(start);
+            targetStream.setPosition(start);
 
             sourceStream = fileToImport.getInputStream();
-            sourceStream.position(start);
+            sourceStream.setPosition(start);
 
             byte[] bytes = new byte[bufferSize];
             int bytesRead;

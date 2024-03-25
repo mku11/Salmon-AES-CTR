@@ -23,17 +23,17 @@ SOFTWARE.
 */
 
 /**
- * Provides Hashing calculation.
+ * Interface for hashing providers.
  */
 export interface IHashProvider {
 
     /**
      * Calculate the hash for the data provided.
-     * @param key The key to be used for hashing.
-     * @param buffer The buffer to read the data from.
-     * @param offset The position that reading will start from.
-     * @param count The count of bytes to read from.
-     * @return The calculated hash.
+     * @param {Uint8Array} key The key to be used for hashing.
+     * @param {number} buffer The buffer to read the data from.
+     * @param {number} offset The position that reading will start from.
+     * @param {number} count The count of bytes to read from.
+     * @return {Promise<Uint8Array>} The calculated hash.
      * @throws SalmonIntegrityException thrown if hash cannot be calculated
      */
     calc(key: Uint8Array, buffer: Uint8Array, offset: number, count: number): Promise<Uint8Array>;

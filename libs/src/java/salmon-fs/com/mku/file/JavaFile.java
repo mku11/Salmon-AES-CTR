@@ -39,6 +39,7 @@ public class JavaFile implements IRealFile {
 
     /**
      * Instantiate a real file represented by the filepath provided.
+     *
      * @param path The filepath.
      */
     public JavaFile(String path) {
@@ -47,13 +48,14 @@ public class JavaFile implements IRealFile {
 
     /**
      * Create a directory under this directory.
+     *
      * @param dirName The name of the new directory.
      * @return The newly created directory.
      */
     public IRealFile createDirectory(String dirName) {
         String nDirPath = filePath + File.separator + dirName;
         File file = new File(nDirPath);
-        if(!file.mkdirs())
+        if (!file.mkdirs())
             throw new RuntimeException("directory already exists");
         JavaFile dotNetDir = new JavaFile(nDirPath);
         return dotNetDir;
@@ -61,6 +63,7 @@ public class JavaFile implements IRealFile {
 
     /**
      * Create a file under this directory.
+     *
      * @param filename The name of the new file.
      * @return The newly created file.
      * @throws IOException
@@ -74,6 +77,7 @@ public class JavaFile implements IRealFile {
 
     /**
      * Delete this file or directory.
+     *
      * @return True if deletion is successful.
      */
     public boolean delete() {
@@ -88,6 +92,7 @@ public class JavaFile implements IRealFile {
 
     /**
      * True if file or directory exists.
+     *
      * @return
      */
     public boolean exists() {
@@ -96,6 +101,7 @@ public class JavaFile implements IRealFile {
 
     /**
      * Get the absolute path on the physical disk. For java this is the same as the filepath.
+     *
      * @return The absolute path.
      */
     public String getAbsolutePath() {
@@ -104,6 +110,7 @@ public class JavaFile implements IRealFile {
 
     /**
      * Get the name of this file or directory.
+     *
      * @return The name of this file or directory.
      */
     public String getBaseName() {
@@ -112,6 +119,7 @@ public class JavaFile implements IRealFile {
 
     /**
      * Get a stream for reading the file.
+     *
      * @return The stream to read from.
      * @throws FileNotFoundException
      */
@@ -121,6 +129,7 @@ public class JavaFile implements IRealFile {
 
     /**
      * Get a stream for writing to this file.
+     *
      * @return The stream to write to.
      * @throws FileNotFoundException
      */
@@ -130,6 +139,7 @@ public class JavaFile implements IRealFile {
 
     /**
      * Get the parent directory of this file or directory.
+     *
      * @return The parent directory.
      */
     public IRealFile getParent() {
@@ -140,6 +150,7 @@ public class JavaFile implements IRealFile {
 
     /**
      * Get the path of this file. For java this is the same as the absolute filepath.
+     *
      * @return
      */
     public String getPath() {
@@ -148,6 +159,7 @@ public class JavaFile implements IRealFile {
 
     /**
      * True if this is a directory.
+     *
      * @return
      */
     public boolean isDirectory() {
@@ -156,6 +168,7 @@ public class JavaFile implements IRealFile {
 
     /**
      * True if this is a file.
+     *
      * @return
      */
     public boolean isFile() {
@@ -164,6 +177,7 @@ public class JavaFile implements IRealFile {
 
     /**
      * Get the last modified date on disk.
+     *
      * @return
      */
     public long lastModified() {
@@ -172,6 +186,7 @@ public class JavaFile implements IRealFile {
 
     /**
      * Get the size of the file on disk.
+     *
      * @return
      */
     public long length() {
@@ -180,35 +195,39 @@ public class JavaFile implements IRealFile {
 
     /**
      * Get the count of files and subdirectories
+     *
      * @return
      */
     public int getChildrenCount() {
-        return isDirectory()?new File(filePath).listFiles().length:0;
+        return isDirectory() ? new File(filePath).listFiles().length : 0;
     }
+
     /**
      * List all files under this directory.
+     *
      * @return The list of files.
      */
     public IRealFile[] listFiles() {
         File[] files = new File(filePath).listFiles();
-		if (files == null)
+        if (files == null)
             return new JavaFile[0];
-		
-		List<JavaFile> realFiles = new ArrayList<>();
-		List<JavaFile> realDirs = new ArrayList<>();
-		for (int i = 0; i < files.length; i++) {
+
+        List<JavaFile> realFiles = new ArrayList<>();
+        List<JavaFile> realDirs = new ArrayList<>();
+        for (int i = 0; i < files.length; i++) {
             JavaFile file = new JavaFile(files[i].getPath());
-			if(file.isDirectory())
-				realDirs.add(file);
-			else
-				realFiles.add(file);
+            if (file.isDirectory())
+                realDirs.add(file);
+            else
+                realFiles.add(file);
         }
-		realDirs.addAll(realFiles);
+        realDirs.addAll(realFiles);
         return realDirs.toArray(new JavaFile[0]);
     }
 
     /**
      * Move this file or directory under a new directory.
+     *
      * @param newDir The target directory.
      * @return The moved file. Use this file for subsequent operations instead of the original.
      */
@@ -218,7 +237,8 @@ public class JavaFile implements IRealFile {
 
     /**
      * Move this file or directory under a new directory.
-     * @param newDir The target directory.
+     *
+     * @param newDir  The target directory.
      * @param newName The new filename
      * @return The moved file. Use this file for subsequent operations instead of the original.
      */
@@ -228,27 +248,31 @@ public class JavaFile implements IRealFile {
 
     /**
      * Move this file or directory under a new directory.
-     * @param newDir The target directory.
-     * @param newName The new filename
+     *
+     * @param newDir           The target directory.
+     * @param newName          The new filename
      * @param progressListener Observer to notify when progress changes.
      * @return The moved file. Use this file for subsequent operations instead of the original.
+     * @throws IOException
      */
     public IRealFile move(IRealFile newDir, String newName, RandomAccessStream.OnProgressListener progressListener) {
-        newName = newName != null?newName:getBaseName();
-		//TODO: ToSync
-		if (newDir == null || !newDir.exists())
-            throw new IOException("Target directory does not exists");
+        newName = newName != null ? newName : getBaseName();
+        //TODO: ToSync
+        if (newDir == null || !newDir.exists())
+            throw new RuntimeException("Target directory does not exists");
         IRealFile newFile = newDir.getChild(newName);
         if (newFile != null && newFile.exists())
-            throw new IOException("Another file/directory already exists");
-        boolean res = new File(filePath).renameTo(new File(nFilePath));
-        if(!res)
+            throw new RuntimeException("Another file/directory already exists");
+        File nFile = new File(newFile.getAbsolutePath());
+        boolean res = new File(filePath).renameTo(nFile);
+        if (!res)
             throw new RuntimeException("Could not move file/directory");
-        return new JavaFile(nFilePath);
+        return new JavaFile(nFile.getPath());
     }
 
     /**
      * Move this file or directory under a new directory.
+     *
      * @param newDir The target directory.
      * @return The copied file. Use this file for subsequent operations instead of the original.
      * @throws IOException
@@ -260,8 +284,9 @@ public class JavaFile implements IRealFile {
 
     /**
      * Move this file or directory under a new directory.
-     * @param newDir The target directory.
-     * @param newName   New filename
+     *
+     * @param newDir  The target directory.
+     * @param newName New filename
      * @return The copied file. Use this file for subsequent operations instead of the original.
      * @throws IOException
      */
@@ -272,15 +297,16 @@ public class JavaFile implements IRealFile {
 
     /**
      * Move this file or directory under a new directory.
-     * @param newDir    The target directory.
-     * @param newName   New filename
+     *
+     * @param newDir           The target directory.
+     * @param newName          New filename
      * @param progressListener Observer to notify when progress changes.
      * @return The copied file. Use this file for subsequent operations instead of the original.
      * @throws IOException
      */
     @Override
     public IRealFile copy(IRealFile newDir, String newName, RandomAccessStream.OnProgressListener progressListener) throws IOException {
-        newName = newName != null?newName:getBaseName();
+        newName = newName != null ? newName : getBaseName();
         if (newDir == null || !newDir.exists())
             throw new IOException("Target directory does not exists");
         IRealFile newFile = newDir.getChild(newName);
@@ -297,6 +323,7 @@ public class JavaFile implements IRealFile {
 
     /**
      * Get the file or directory under this directory with the provided name.
+     *
      * @param filename The name of the file or directory.
      * @return
      */
@@ -309,6 +336,7 @@ public class JavaFile implements IRealFile {
 
     /**
      * Rename the current file or directory.
+     *
      * @param newFilename The new name for the file or directory.
      * @return True if successfully renamed.
      */
@@ -322,19 +350,19 @@ public class JavaFile implements IRealFile {
 
     /**
      * Create this directory under the current filepath.
+     *
      * @return True if created.
      */
     public boolean mkdir() {
         File file = new File(filePath);
         return file.mkdir();
     }
-	
-	/**
+
+    /**
      * Returns a string representation of this object
      */
     @Override
-    public String toString()
-    {
+    public String toString() {
         return filePath;
     }
 }
