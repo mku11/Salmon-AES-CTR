@@ -23,6 +23,7 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 */
 
+import com.mku.io.MemoryStream;
 import com.mku.io.RandomAccessStream;
 import com.mku.salmon.*;
 import com.mku.salmon.integrity.HmacSHA256Provider;
@@ -81,26 +82,35 @@ public class SalmonStream extends RandomAccessStream {
      */
     private SalmonIntegrity salmonIntegrity;
 
+
     /**
-     * AES provider types. List of AES implementations that currently supported.
+     * Get the output size of the data to be transformed(encrypted or decrypted) including
+     * header and hash without executing any operations. This can be used to prevent over-allocating memory
+     * where creating your output buffers.
      *
-     * @see #Default
-     * @see #AesIntrinsics
-     * @see #TinyAES
+     * @param data The data to be transformed.
+     * @param key The AES key.
+     * @param nonce The nonce for the CTR.
+     * @param mode The {@link EncryptionMode} Encrypt or Decrypt.
+     * @param headerData The header data to be embedded if you use Encryption.
+     * @param integrity True if you want to enable integrity.
+     * @param chunkSize The chunk size for integrity chunks.
+     * @param hashKey The hash key to be used for integrity checks.
+     * @return The size of the output data.
+     *
+     * @throws SalmonSecurityException
+     * @throws SalmonIntegrityException
+     * @throws IOException
      */
-    public enum ProviderType {
-        /**
-         * Default Java AES cipher.
-         */
-        Default,
-        /**
-         * Salmon builtin AES intrinsics. This needs the SalmonNative library to be loaded. @see <a href="https://github.com/mku11/Salmon-AES-CTR#readme">Salmon README.md</a>
-         */
-        AesIntrinsics,
-        /**
-         * Tiny AES implementation. This needs the SalmonNative library to be loaded. @see <a href="https://github.com/mku11/Salmon-AES-CTR#readme">Salmon README.md</a>
-         */
-        TinyAES
+    public static long getActualSize(byte[] data, byte[] key, byte[] nonce, EncryptionMode mode,
+                                     byte[] headerData, boolean integrity, Integer chunkSize, byte[] hashKey)
+            throws SalmonSecurityException, SalmonIntegrityException, IOException {
+        MemoryStream inputStream = new MemoryStream(data);
+        SalmonStream s = new SalmonStream(key, nonce, mode, inputStream,
+                headerData, integrity, chunkSize, hashKey);
+        long size = s.actualLength();
+        s.close();
+        return size;
     }
 
     /**
@@ -178,6 +188,50 @@ public class SalmonStream extends RandomAccessStream {
         initIntegrity(integrity, hashKey, chunkSize);
         initTransformer(key, nonce);
         initStream();
+    }
+
+    /**
+     * Initialize the integrity validator. This object is always associated with the
+     * stream because in the case of a decryption stream that has already embedded integrity
+     * we still need to calculate/skip the chunks.
+     *
+     * @param integrity
+     * @param hashKey
+     * @param chunkSize
+     * @throws SalmonSecurityException
+     * @throws SalmonIntegrityException
+     */
+    private void initIntegrity(boolean integrity, byte[] hashKey, Integer chunkSize)
+            throws SalmonSecurityException, SalmonIntegrityException {
+        salmonIntegrity = new SalmonIntegrity(integrity, hashKey, chunkSize,
+                new HmacSHA256Provider(), SalmonGenerator.HASH_RESULT_LENGTH);
+    }
+
+
+    /**
+     * To create the AES CTR mode we use ECB for AES with No Padding.
+     * Initailize the Counter to the initial vector provided.
+     * For each data block we increase the Counter and apply the EAS encryption on the Counter.
+     * The encrypted Counter then will be xor-ed with the actual data block.
+     */
+    private void initTransformer(byte[] key, byte[] nonce) throws SalmonSecurityException {
+        if (key == null)
+            throw new SalmonSecurityException("Key is missing");
+        if (nonce == null)
+            throw new SalmonSecurityException("Nonce is missing");
+
+        transformer = SalmonTransformerFactory.create(providerType);
+        transformer.init(key, nonce);
+        transformer.resetCounter();
+    }
+
+    /**
+     * Init the stream.
+     *
+     * @throws IOException
+     */
+    private void initStream() throws IOException {
+        baseStream.setPosition(getHeaderLength());
     }
 
     /**
@@ -296,32 +350,6 @@ public class SalmonStream extends RandomAccessStream {
     }
 
     /**
-     * Initialize the integrity validator. This object is always associated with the
-     * stream because in the case of a decryption stream that has already embedded integrity
-     * we still need to calculate/skip the chunks.
-     *
-     * @param integrity
-     * @param hashKey
-     * @param chunkSize
-     * @throws SalmonSecurityException
-     * @throws SalmonIntegrityException
-     */
-    private void initIntegrity(boolean integrity, byte[] hashKey, Integer chunkSize)
-            throws SalmonSecurityException, SalmonIntegrityException {
-        salmonIntegrity = new SalmonIntegrity(integrity, hashKey, chunkSize,
-                new HmacSHA256Provider(), SalmonGenerator.HASH_RESULT_LENGTH);
-    }
-
-    /**
-     * Init the stream.
-     *
-     * @throws IOException
-     */
-    private void initStream() throws IOException {
-        baseStream.setPosition(getHeaderLength());
-    }
-
-    /**
      * The length of the header data if the stream was initialized with a header.
      *
      * @return The header data length.
@@ -331,23 +359,6 @@ public class SalmonStream extends RandomAccessStream {
             return 0;
         else
             return headerData.length;
-    }
-
-    /**
-     * To create the AES CTR mode we use ECB for AES with No Padding.
-     * Initailize the Counter to the initial vector provided.
-     * For each data block we increase the Counter and apply the EAS encryption on the Counter.
-     * The encrypted Counter then will be xor-ed with the actual data block.
-     */
-    private void initTransformer(byte[] key, byte[] nonce) throws SalmonSecurityException {
-        if (key == null)
-            throw new SalmonSecurityException("Key is missing");
-        if (nonce == null)
-            throw new SalmonSecurityException("Nonce is missing");
-
-        transformer = SalmonTransformerFactory.create(providerType);
-        transformer.init(key, nonce);
-        transformer.resetCounter();
     }
 
     /**
@@ -437,7 +448,7 @@ public class SalmonStream extends RandomAccessStream {
     }
 
     /**
-     * Returns the Chunk size used to apply hash signature
+     * Returns the chunk size used to apply hash signature
      */
     public int getChunkSize() {
         return salmonIntegrity.getChunkSize();
@@ -777,23 +788,6 @@ public class SalmonStream extends RandomAccessStream {
             index += nChunkSize;
         }
         return buff;
-    }
-
-    /**
-     * Encryption Mode
-     *
-     * @see #Encrypt
-     * @see #Decrypt
-     */
-    public enum EncryptionMode {
-        /**
-         * Encryption Mode used with a base stream as a target.
-         */
-        Encrypt,
-        /**
-         * Decryption Mode used with a base stream as a source.
-         */
-        Decrypt
     }
 
     /**

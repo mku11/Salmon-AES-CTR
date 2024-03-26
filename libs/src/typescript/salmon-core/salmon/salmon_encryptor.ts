@@ -54,8 +54,8 @@ export class SalmonEncryptor {
     /**
      * Instantiate an encryptor with parallel tasks and buffer size.
      *
-     * @param threads The number of threads to use.
-     * @param bufferSize The buffer size to use. It is recommended for performance  to use
+     * @param {number} threads The number of threads to use.
+     * @param {number} bufferSize The buffer size to use. It is recommended for performance  to use
      *                   a multiple of the chunk size if you enabled integrity
      *                   otherwise a multiple of the AES block size (16 bytes).
      */
@@ -77,15 +77,15 @@ export class SalmonEncryptor {
     /**
      * Encrypts a byte array using the provided key and nonce.
      *
-     * @param data            The byte array to be encrypted.
-     * @param key             The AES key to be used.
-     * @param nonce           The nonce to be used.
-     * @param storeHeaderData True if you want to store a header data with the nonce. False if you store
+     * @param {Uint8Array} data            The byte array to be encrypted.
+     * @param {Uint8Array} key             The AES key to be used.
+     * @param {Uint8Array} nonce           The nonce to be used.
+     * @param {boolean} storeHeaderData True if you want to store a header data with the nonce. False if you store
      *                        the nonce external. Note that you will need to provide the nonce when decrypting.
-     * @param integrity       True if you want to calculate and store hash signatures for each chunkSize.
-     * @param hashKey         Hash key to be used for all chunks.
-     * @param chunkSize       The chunk size.
-     * @return The byte array with the encrypted data.
+     * @param {boolean} integrity       True if you want to calculate and store hash signatures for each chunkSize.
+     * @param {Uint8Array} hashKey         Hash key to be used for all chunks.
+     * @param {number} chunkSize       The chunk size.
+     * @return {Promise<Uint8Array>} The byte array with the encrypted data.
      * @throws SalmonSecurityException
      * @throws IOException
      * @throws SalmonIntegrityException
@@ -139,14 +139,14 @@ export class SalmonEncryptor {
     /**
      * Encrypt stream using parallel threads.
      *
-     * @param data       The input data to be encrypted
-     * @param outData    The output buffer with the encrypted data.
-     * @param key        The AES key.
-     * @param hashKey    The hash key.
-     * @param nonce      The nonce to be used for encryption.
-     * @param headerData The header data.
-     * @param chunkSize  The chunk size.
-     * @param integrity  True to apply integrity.
+     * @param {Uint8Array} data       The input data to be encrypted
+     * @param {Uint8Array} outData    The output buffer with the encrypted data.
+     * @param {Uint8Array} key        The AES key.
+     * @param {Uint8Array | null} hashKey    The hash key.
+     * @param {Uint8Array} nonce      The nonce to be used for encryption.
+     * @param {Uint8Array | null} headerData The header data.
+     * @param {number} chunkSize  The chunk size.
+     * @param {boolean} integrity  True to apply integrity.
      */
     async #encryptDataParallel(data: Uint8Array, outData: Uint8Array,
         key: Uint8Array, hashKey: Uint8Array | null, nonce: Uint8Array, headerData: Uint8Array | null,
@@ -247,10 +247,21 @@ export class SalmonEncryptor {
         this.#promises = [];
     }
 
+    
+    /**
+     * Set the path where the decryptor worker. This needs to be a relative path starting from
+     * the root of your main javascript app.
+     * @param {string} path The path to the worker javascript.
+     */
     public static setWorkerPath(path: string) {
         SalmonEncryptor.#workerPath = path;
     }
 
+    
+    /**
+     * Get the current path for the worker javascript.
+     * @returns {string} The path to the worker javascript.
+     */
     public static getWorkerPath(): string {
         return SalmonEncryptor.#workerPath;
     }

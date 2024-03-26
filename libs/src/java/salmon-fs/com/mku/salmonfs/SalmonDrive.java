@@ -31,6 +31,7 @@ import com.mku.salmon.integrity.HmacSHA256Provider;
 import com.mku.salmon.integrity.IHashProvider;
 import com.mku.salmon.integrity.SalmonIntegrity;
 import com.mku.salmon.integrity.SalmonIntegrityException;
+import com.mku.salmon.io.EncryptionMode;
 import com.mku.salmon.io.SalmonStream;
 import com.mku.salmon.password.SalmonPassword;
 import com.mku.sequence.SalmonSequenceException;
@@ -271,7 +272,7 @@ public abstract class SalmonDrive {
 
         // encrypt the combined key (drive key + hash key) using the masterKey and the masterKeyIv
         MemoryStream ms = new MemoryStream();
-        SalmonStream stream = new SalmonStream(masterKey, masterKeyIv, SalmonStream.EncryptionMode.Encrypt, ms,
+        SalmonStream stream = new SalmonStream(masterKey, masterKeyIv, EncryptionMode.Encrypt, ms,
                 null, false, null, null);
         stream.write(driveKey, 0, driveKey.length);
         stream.write(hashKey, 0, hashKey.length);
@@ -339,7 +340,7 @@ public abstract class SalmonDrive {
 
             // decrypt the combined key (drive key + hash key) using the master key
             MemoryStream ms = new MemoryStream(encData);
-            stream = new SalmonStream(masterKey, masterKeyIv, SalmonStream.EncryptionMode.Decrypt, ms,
+            stream = new SalmonStream(masterKey, masterKeyIv, EncryptionMode.Decrypt, ms,
                     null, false, null, null);
 
             byte[] driveKey = new byte[SalmonGenerator.KEY_LENGTH];

@@ -35,9 +35,9 @@ export class SalmonNonce {
      * Increase the sequential NONCE by a value of 1.
      * This implementation assumes that the NONCE length is 8 bytes or fewer so it can fit in a long.
      *
-     * @param startNonce
-     * @param endNonce
-     * @return
+     * @param {Uint8Array} startNonce
+     * @param {Uint8Array} endNonce
+     * @return {Uint8Array}
      * @throws SalmonRangeExceededException
      */
     public static increaseNonce(startNonce: Uint8Array, endNonce: Uint8Array): Uint8Array {
@@ -56,9 +56,9 @@ export class SalmonNonce {
      * then the long transient variables will not hold. In that case you will need to
      * override with your own implementation.
      *
-     * @param startNonce The starting nonce.
-     * @param endNonce The ending nonce in the sequence.
-     * @return The byte array with the middle nonce.
+     * @param {Uint8Array} startNonce The starting nonce.
+     * @param {Uint8Array} endNonce The ending nonce in the sequence.
+     * @return {Uint8Array} The byte array with the middle nonce.
      * @throws SalmonSecurityException
      */
     public static splitNonceRange(startNonce: Uint8Array, endNonce: Uint8Array): Uint8Array {

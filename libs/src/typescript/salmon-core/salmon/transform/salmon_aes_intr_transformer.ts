@@ -37,8 +37,8 @@ export class SalmonAesIntrTransformer extends SalmonNativeTransformer {
 
     /**
      * Initialize the native Aes intrinsics transformer.
-     * @param key The AES key to use.
-     * @param nonce The nonce to use.
+     * @param {Uint8Array} key The AES key to use.
+     * @param {Uint8Array} nonce The nonce to use.
      * @throws SalmonSecurityException
      */
     public async init(key: Uint8Array, nonce: Uint8Array): Promise<void> {
@@ -51,14 +51,13 @@ export class SalmonAesIntrTransformer extends SalmonNativeTransformer {
 
     /**
      * Encrypt the data.
-     * @param srcBuffer The source byte array.
-     * @param srcOffset The source byte offset.
-     * @param destBuffer The destination byte array.
-     * @param destOffset The destination byte offset.
-     * @param count The number of bytes to transform.
+     * @param {Uint8Array} srcBuffer The source byte array.
+     * @param {number} srcOffset The source byte offset.
+     * @param {Uint8Array} destBuffer The destination byte array.
+     * @param {number} destOffset The destination byte offset.
+     * @param {number} count The number of bytes to transform.
      * @return The number of bytes transformed.
      */
-
     public override async encryptData(srcBuffer: Uint8Array, srcOffset: number,
         destBuffer: Uint8Array, destOffset: number, count: number): Promise<number> {
         let expKey: Uint8Array | null = this.getExpandedKey();
@@ -76,12 +75,12 @@ export class SalmonAesIntrTransformer extends SalmonNativeTransformer {
 
     /**
      * Decrypt the data.
-     * @param srcBuffer The source byte array.
-     * @param srcOffset The source byte offset.
-     * @param destBuffer The destination byte array.
-     * @param destOffset The destination byte offset.
-     * @param count The number of bytes to transform.
-     * @return The number of bytes transformed.
+     * @param {Uint8Array} srcBuffer The source byte array.
+     * @param {number} srcOffset The source byte offset.
+     * @param {Uint8Array} destBuffer The destination byte array.
+     * @param {number} destOffset The destination byte offset.
+     * @param {number} count The number of bytes to transform.
+     * @return {Promise<number>} The number of bytes transformed.
      */
     public override async decryptData(srcBuffer: Uint8Array, srcOffset: number,
         destBuffer: Uint8Array, destOffset: number, count: number): Promise<number> {

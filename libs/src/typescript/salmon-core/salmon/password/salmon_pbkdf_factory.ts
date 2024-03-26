@@ -32,7 +32,7 @@ import { PbkdfType } from "./pbkdf_type.js";
 export class SalmonPbkdfFactory {
     /**
      * Create an instance of a pbkdf provider.
-     * @param type The pbkdf type.
+     * @param {PbkdfType} type The pbkdf type.
      * @return The provider.
      */
     public static create(type: PbkdfType): ISalmonPbkdfProvider {

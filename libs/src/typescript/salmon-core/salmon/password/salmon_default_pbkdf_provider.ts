@@ -27,17 +27,17 @@ import { ISalmonPbkdfProvider, getPbkdfAlgoString } from "./isalmon_pbkdf_provid
 import { PbkdfAlgo } from "./pbkdf_algo.js";
 
 /**
- * Provides pbkdf via Java default algorithm.
+ * Provides pbkdf algorithm.
  */
 export class SalmonDefaultPbkdfProvider implements ISalmonPbkdfProvider {
     /**
      * Get a key derived from a text password
-     * @param password The text password.
-     * @param salt The salt needs to be at least 24 bytes.
-     * @param iterations Iterations to use. Make sure you use a high number according to your hardware specs.
-     * @param outputBytes The length of the output key.
-     * @param pbkdfAlgo The hash algorithm to use.
-     * @return The key.
+     * @param {string} password The text password.
+     * @param {Uint8Array} salt The salt needs to be at least 24 bytes.
+     * @param {number} iterations Iterations to use. Make sure you use a high number according to your hardware specs.
+     * @param {number} outputBytes The length of the output key.
+     * @param {PbkdfAlgo} pbkdfAlgo The hash algorithm to use.
+     * @return {Promise<Uint8Array>} The key.
      * @throws SalmonSecurityException
      */
     public async getKey(password: string, salt: Uint8Array, iterations: number, outputBytes: number, pbkdfAlgo: PbkdfAlgo): Promise<Uint8Array> {

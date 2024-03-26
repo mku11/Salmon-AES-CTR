@@ -38,7 +38,7 @@ public class SalmonPassword {
     /**
      * Global PBKDF algorithm option that will be used for the master key derivation.
      */
-    static PbkdfAlgo pbkdfAlgo = PbkdfAlgo.SHA256;
+    private static PbkdfAlgo pbkdfAlgo = PbkdfAlgo.SHA256;
 
     /**
      * Pbkdf provider.

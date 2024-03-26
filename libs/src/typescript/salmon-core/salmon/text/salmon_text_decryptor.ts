@@ -32,18 +32,17 @@ export class SalmonTextDecryptor {
     static readonly #decryptor: SalmonDecryptor = new SalmonDecryptor();
 
     /**
-    /**
      * Decrypts a text String using AES256 with the key and nonce provided.
      *
-     * @param text  Text to be decrypted.
-     * @param key   The encryption key to be used.
-     * @param nonce The nonce to be used, set only if header=false.
-     * @param header Set to true if you encrypted the string with encrypt(header=true), set only if nonce=null
+     * @param {string} text  Text to be decrypted.
+     * @param {string} key   The encryption key to be used.
+     * @param {Uint8Array | null} nonce The nonce to be used, set only if header=false.
+     * @param {boolean} header Set to true if you encrypted the string with encrypt(header=true), set only if nonce=null
      *               otherwise you will have to provide the original nonce.
-     * @param integrity True if you want to calculate and store hash signatures for each chunkSize
-     * @param hashKey Hash key to be used for all chunks.
-     * @param chunkSize The chunk size.
-     * @return The decrypted text.
+     * @param {boolean} integrity True if you want to calculate and store hash signatures for each chunkSize
+     * @param {Uint8Array | null} hashKey Hash key to be used for all chunks.
+     * @param {chunkSize: number | null} chunkSize The chunk size.
+     * @return {Promise<string>} The decrypted text.
      * @throws IOException
      * @throws SalmonSecurityException
      * @throws SalmonIntegrityException

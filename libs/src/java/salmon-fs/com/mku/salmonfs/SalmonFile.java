@@ -32,6 +32,7 @@ import com.mku.salmon.*;
 import com.mku.convert.BitConverter;
 import com.mku.salmon.integrity.SalmonIntegrity;
 import com.mku.salmon.integrity.SalmonIntegrityException;
+import com.mku.salmon.io.EncryptionMode;
 import com.mku.salmon.io.SalmonStream;
 import com.mku.salmon.text.SalmonTextDecryptor;
 import com.mku.salmon.text.SalmonTextEncryptor;
@@ -189,7 +190,7 @@ public class SalmonFile {
         realStream.read(headerData, 0, headerData.length);
 
         SalmonStream stream = new SalmonStream(getEncryptionKey(),
-                nonceBytes, SalmonStream.EncryptionMode.Decrypt, realStream, headerData,
+                nonceBytes, EncryptionMode.Decrypt, realStream, headerData,
                 integrity, getFileChunkSize(), getHashKey());
         return stream;
     }
@@ -237,7 +238,7 @@ public class SalmonFile {
         realStream.seek(getHeaderLength(), RandomAccessStream.SeekOrigin.Begin);
 
         SalmonStream stream = new SalmonStream(getEncryptionKey(), nonceBytes,
-                SalmonStream.EncryptionMode.Encrypt, realStream, headerData,
+                EncryptionMode.Encrypt, realStream, headerData,
                 integrity, getRequestedChunkSize() > 0 ? getRequestedChunkSize() : null, getHashKey());
         stream.setAllowRangeWrite(overwrite);
         return stream;

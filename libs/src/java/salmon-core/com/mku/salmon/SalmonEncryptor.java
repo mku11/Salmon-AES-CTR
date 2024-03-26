@@ -27,6 +27,7 @@ import com.mku.convert.BitConverter;
 import com.mku.io.MemoryStream;
 import com.mku.salmon.integrity.SalmonIntegrity;
 import com.mku.salmon.integrity.SalmonIntegrityException;
+import com.mku.salmon.io.EncryptionMode;
 import com.mku.salmon.io.SalmonStream;
 import com.mku.salmon.transform.SalmonAES256CTRTransformer;
 
@@ -153,7 +154,7 @@ public class SalmonEncryptor {
             headerData = outputStream.toArray();
         }
 
-        int realSize = (int) SalmonAES256CTRTransformer.getActualSize(data, key, nonce, SalmonStream.EncryptionMode.Encrypt,
+        int realSize = (int) SalmonStream.getActualSize(data, key, nonce, EncryptionMode.Encrypt,
                 headerData, integrity, chunkSize, hashKey);
         byte[] outData = new byte[realSize];
         outputStream.setPosition(0);
@@ -290,7 +291,7 @@ public class SalmonEncryptor {
         SalmonStream stream = null;
         try {
             inputStream.setPosition(start);
-            stream = new SalmonStream(key, nonce, SalmonStream.EncryptionMode.Encrypt, outputStream, headerData,
+            stream = new SalmonStream(key, nonce, EncryptionMode.Encrypt, outputStream, headerData,
                     integrity, chunkSize, hashKey);
             stream.setAllowRangeWrite(true);
             stream.setPosition(start);

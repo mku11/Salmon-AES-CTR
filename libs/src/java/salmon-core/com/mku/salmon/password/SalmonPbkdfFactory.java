@@ -31,12 +31,13 @@ import com.mku.salmon.SalmonSecurityException;
 public class SalmonPbkdfFactory {
     /**
      * Create an instance of a pbkdf provider.
+     *
      * @param type The pbkdf type.
      * @return The provider.
      */
     @SuppressWarnings("SwitchStatementWithTooFewBranches")
     public static ISalmonPbkdfProvider create(SalmonPassword.PbkdfType type) {
-        switch(type) {
+        switch (type) {
             case Default:
                 return new SalmonDefaultPbkdfProvider();
         }

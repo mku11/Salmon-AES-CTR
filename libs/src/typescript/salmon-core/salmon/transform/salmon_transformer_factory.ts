@@ -36,8 +36,8 @@ export class SalmonTransformerFactory {
 
     /**
      * Create an encryption transformer implementation.
-     * @param type The supported provider type.
-     * @return The transformer.
+     * @param {ProviderType} type The supported provider type.
+     * @return {ISalmonCTRTransformer} The transformer.
      * @throws SalmonSecurityException
      */
     public static create(type: ProviderType): ISalmonCTRTransformer {

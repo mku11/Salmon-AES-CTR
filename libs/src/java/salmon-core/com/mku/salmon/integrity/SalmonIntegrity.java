@@ -32,7 +32,7 @@ import java.util.List;
 
 /**
  * Provide operations for calculating, storing, and verifying data integrity.
- * This class operates in chunks of data in buffers calculating the hash for each one.
+ * This class operates on chunks of byte arrays calculating hashes for each one.
  */
 public class SalmonIntegrity {
     /**

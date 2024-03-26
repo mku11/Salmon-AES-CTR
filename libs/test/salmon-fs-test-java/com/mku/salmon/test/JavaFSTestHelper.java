@@ -31,6 +31,7 @@ import com.mku.file.JavaFile;
 import com.mku.io.RandomAccessStream;
 import com.mku.io.MemoryStream;
 import com.mku.salmon.*;
+import com.mku.salmon.io.EncryptionMode;
 import com.mku.salmon.io.SalmonStream;
 import com.mku.salmon.text.SalmonTextDecryptor;
 import com.mku.salmon.text.SalmonTextEncryptor;
@@ -410,7 +411,7 @@ public class JavaFSTestHelper {
         MemoryStream encOutStream = new MemoryStream(); // or any other writeable Stream like to a file
         nonce = SalmonGenerator.getSecureRandomBytes(8); // always get a fresh nonce!
         // pass the output stream to the SalmonStream
-        SalmonStream encryptor = new SalmonStream(key, nonce, SalmonStream.EncryptionMode.Encrypt, encOutStream,
+        SalmonStream encryptor = new SalmonStream(key, nonce, EncryptionMode.Encrypt, encOutStream,
                 null, false, null, null);
         // encrypt and write with a single call, you can also Seek() and Write()
         encryptor.write(bytes, 0, bytes.length);
@@ -422,7 +423,7 @@ public class JavaFSTestHelper {
         encOutStream.close();
         //decrypt a stream with encoded data
         RandomAccessStream encInputStream = new MemoryStream(encData); // or any other readable Stream like from a file
-        SalmonStream decryptor = new SalmonStream(key, nonce, SalmonStream.EncryptionMode.Decrypt, encInputStream,
+        SalmonStream decryptor = new SalmonStream(key, nonce, EncryptionMode.Decrypt, encInputStream,
                 null, false, null, null);
         byte[] decBuffer = new byte[1024];
         // decrypt and read data with a single call, you can also Seek() before Read()
@@ -462,7 +463,7 @@ public class JavaFSTestHelper {
 
     public static void encryptAndDecryptStream(byte[] data, byte[] key, byte[] nonce) throws Exception {
         MemoryStream encOutStream = new MemoryStream();
-        SalmonStream encryptor = new SalmonStream(key, nonce, SalmonStream.EncryptionMode.Encrypt, encOutStream);
+        SalmonStream encryptor = new SalmonStream(key, nonce, EncryptionMode.Encrypt, encOutStream);
         RandomAccessStream inputStream = new MemoryStream(data);
         inputStream.copyTo(encryptor);
         encOutStream.setPosition(0);
@@ -473,7 +474,7 @@ public class JavaFSTestHelper {
         inputStream.close();
 
         RandomAccessStream encInputStream = new MemoryStream(encData);
-        SalmonStream decryptor = new SalmonStream(key, nonce, SalmonStream.EncryptionMode.Decrypt, encInputStream);
+        SalmonStream decryptor = new SalmonStream(key, nonce, EncryptionMode.Decrypt, encInputStream);
         MemoryStream outStream = new MemoryStream();
         decryptor.copyTo(outStream);
         outStream.setPosition(0);

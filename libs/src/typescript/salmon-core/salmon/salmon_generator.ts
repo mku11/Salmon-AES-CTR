@@ -23,7 +23,7 @@ SOFTWARE.
 */
 
 /**
- * Utility class generates internal secure properties.
+ * Utility class that generates secure random byte arrays.
  */
 export class SalmonGenerator {
     /**
@@ -78,6 +78,7 @@ export class SalmonGenerator {
 
     /**
      * Gets the fixed magic bytes array
+     * @returns {Uint8Array} The magic bytes 
      */
     public static getMagicBytes(): Uint8Array {
         return new TextEncoder().encode(SalmonGenerator.#MAGIC_BYTES);
@@ -85,6 +86,7 @@ export class SalmonGenerator {
 
     /**
      * Returns the current Salmon format version.
+     * @returns {number} The current version
      */
     public static getVersion(): number {
         return SalmonGenerator.VERSION;
@@ -92,7 +94,7 @@ export class SalmonGenerator {
 
     /**
      * Returns a secure random byte array. To be used when generating keys, initial vectors, and nonces.
-     * @param size The size of the byte array.
+     * @param {number} size The size of the byte array.
      * @return The random secure byte array.
      */
     public static getSecureRandomBytes(size: number): Uint8Array {

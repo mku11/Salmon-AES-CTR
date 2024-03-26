@@ -1,3 +1,4 @@
+package com.mku.salmon.io;
 /*
 MIT License
 
@@ -23,35 +24,18 @@ SOFTWARE.
 */
 
 /**
- * Proxy interface for use with native libraries (TinyAES wasm).
+ * Encryption Mode
+ *
+ * @see #Encrypt
+ * @see #Decrypt
  */
-export interface INativeProxy {
+public enum EncryptionMode {
     /**
-     * Proxy Init the native code with AES implementation, and hash length options.
-     * @param {number} aesImpl
+     * Encryption Mode used with a base stream as a target.
      */
-    salmonInit(aesImpl: number): void;
-
+    Encrypt,
     /**
-     * Proxy Key schedule algorithm for expanding the 32 byte key to 240 bytes required
-     * for AES 256.
-     * @param {Uint8Array} key
-     * @param {Uint8Array} expandedKey
+     * Decryption Mode used with a base stream as a source.
      */
-    salmonExpandKey(key: Uint8Array, expandedKey: Uint8Array): void;
-
-    /**
-     * Proxy Transform the input byte array using AES-256 CTR mode
-     * @param {Uint8Array} key
-     * @param {number} counter
-     * @param {Uint8Array} srcBuffer
-     * @param {number} srcOffset
-     * @param {Uint8Array} destBuffer
-     * @param {number} destOffset
-     * @param {number} count
-     * @return {number} The number of bytes that were transformed.
-     */
-    salmonTransform(key: Uint8Array, counter: Uint8Array,
-        srcBuffer: Uint8Array, srcOffset: number,
-        destBuffer: Uint8Array, destOffset: number, count: number): number;
+    Decrypt
 }

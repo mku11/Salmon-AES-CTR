@@ -1,3 +1,4 @@
+package com.mku.salmon.io;
 /*
 MIT License
 
@@ -23,35 +24,23 @@ SOFTWARE.
 */
 
 /**
- * Proxy interface for use with native libraries (TinyAES wasm).
+ * AES provider types. List of AES implementations that currently supported.
+ *
+ * @see #Default
+ * @see #AesIntrinsics
+ * @see #TinyAES
  */
-export interface INativeProxy {
+public enum ProviderType {
     /**
-     * Proxy Init the native code with AES implementation, and hash length options.
-     * @param {number} aesImpl
+     * Default Java AES cipher.
      */
-    salmonInit(aesImpl: number): void;
-
+    Default,
     /**
-     * Proxy Key schedule algorithm for expanding the 32 byte key to 240 bytes required
-     * for AES 256.
-     * @param {Uint8Array} key
-     * @param {Uint8Array} expandedKey
+     * Salmon builtin AES intrinsics. This needs the SalmonNative library to be loaded. @see <a href="https://github.com/mku11/Salmon-AES-CTR#readme">Salmon README.md</a>
      */
-    salmonExpandKey(key: Uint8Array, expandedKey: Uint8Array): void;
-
+    AesIntrinsics,
     /**
-     * Proxy Transform the input byte array using AES-256 CTR mode
-     * @param {Uint8Array} key
-     * @param {number} counter
-     * @param {Uint8Array} srcBuffer
-     * @param {number} srcOffset
-     * @param {Uint8Array} destBuffer
-     * @param {number} destOffset
-     * @param {number} count
-     * @return {number} The number of bytes that were transformed.
+     * Tiny AES implementation. This needs the SalmonNative library to be loaded. @see <a href="https://github.com/mku11/Salmon-AES-CTR#readme">Salmon README.md</a>
      */
-    salmonTransform(key: Uint8Array, counter: Uint8Array,
-        srcBuffer: Uint8Array, srcOffset: number,
-        destBuffer: Uint8Array, destOffset: number, count: number): number;
+    TinyAES
 }

@@ -37,8 +37,8 @@ export class SalmonDefaultTransformer extends SalmonAES256CTRTransformer {
 
     /**
      * Initialize the default Java AES cipher transformer.
-     * @param key The AES256 key to use.
-     * @param nonce The nonce to use.
+     * @param {Uint8Array} key The AES256 key to use.
+     * @param {Uint8Array} nonce The nonce to use.
      * @throws SalmonSecurityException
      */
     public async init(key: Uint8Array, nonce: Uint8Array): Promise<void> {
@@ -53,12 +53,12 @@ export class SalmonDefaultTransformer extends SalmonAES256CTRTransformer {
 
     /**
      * Encrypt the data.
-     * @param srcBuffer The source byte array.
-     * @param srcOffset The source byte offset.
-     * @param destBuffer The destination byte array.
-     * @param destOffset The destination byte offset.
-     * @param count The number of bytes to transform.
-     * @return The number of bytes transformed.
+     * @param {Uint8Array} srcBuffer The source byte array.
+     * @param {number} srcOffset The source byte offset.
+     * @param {Uint8Array} destBuffer The destination byte array.
+     * @param {number} destOffset The destination byte offset.
+     * @param {number} count The number of bytes to transform.
+     * @return {Promise<number>} The number of bytes transformed.
      * @throws SalmonSecurityException
      */
     public async encryptData(srcBuffer: Uint8Array, srcOffset: number,
@@ -86,12 +86,12 @@ export class SalmonDefaultTransformer extends SalmonAES256CTRTransformer {
 
     /**
      * Decrypt the data.
-     * @param srcBuffer The source byte array.
-     * @param srcOffset The source byte offset.
-     * @param destBuffer The destination byte array.
-     * @param destOffset The destination byte offset.
-     * @param count The number of bytes to transform.
-     * @return The number of bytes transformed.
+     * @param {Uint8Array} srcBuffer The source byte array.
+     * @param {number} srcOffset The source byte offset.
+     * @param {Uint8Array} destBuffer The destination byte array.
+     * @param {number} destOffset The destination byte offset.
+     * @param {number} count The number of bytes to transform.
+     * @return {Promise<number>} The number of bytes transformed.
      * @throws SalmonSecurityException
      */
     public async decryptData(srcBuffer: Uint8Array, srcOffset: number,

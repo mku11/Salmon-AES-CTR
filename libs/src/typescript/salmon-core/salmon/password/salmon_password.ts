@@ -41,7 +41,7 @@ export class SalmonPassword {
     /**
      * Global PBKDF algorithm option that will be used for the master key derivation.
      */
-    static pbkdfAlgo: PbkdfAlgo = PbkdfAlgo.SHA256;
+    static #pbkdfAlgo: PbkdfAlgo = PbkdfAlgo.SHA256;
 
     /**
      * Pbkdf provider.
@@ -51,25 +51,25 @@ export class SalmonPassword {
     /**
      * Returns the current global PBKDF algorithm.
      *
-     * @return The PBKDF algorithm to be used.
+     * @return {PbkdfAlgo} The PBKDF algorithm to be used.
      */
     public static getPbkdfAlgo(): PbkdfAlgo {
-        return SalmonPassword.pbkdfAlgo;
+        return SalmonPassword.#pbkdfAlgo;
     }
 
     /**
      * Set the global PDKDF algorithm to be used for key derivation.
      *
-     * @param pbkdfAlgo
+     * @param {PbkdfAlgo} pbkdfAlgo The Pbkdf algorithm
      */
     public static setPbkdfAlgo(pbkdfAlgo: PbkdfAlgo): void {
-        SalmonPassword.pbkdfAlgo = pbkdfAlgo;
+        SalmonPassword.#pbkdfAlgo = pbkdfAlgo;
     }
 
     /**
      * Set the global PBKDF implementation to be used for text key derivation.
      *
-     * @param pbkdfType
+     * @param {PbkdfType} pbkdfType The pbkdf implementation type.
      */
     public static setPbkdfType(pbkdfType: PbkdfType): void {
         SalmonPassword.#provider = SalmonPbkdfFactory.create(pbkdfType);
@@ -78,7 +78,7 @@ export class SalmonPassword {
     /**
      * Set the global PBKDF provider to be used for text key derivation.
      *
-     * @param pbkdfProvider
+     * @param {ISalmonPbkdfProvider} pbkdfProvider The PBKDF provider.
      */
     public static setPbkdfProvider(pbkdfProvider: ISalmonPbkdfProvider): void {
         SalmonPassword.#provider = pbkdfProvider;
@@ -87,11 +87,11 @@ export class SalmonPassword {
     /**
      * Derives the key from a text password
      *
-     * @param pass       The text password to be used
-     * @param salt       The salt to be used for the key derivation
-     * @param iterations The number of iterations the key derivation algorithm will use
-     * @param length     The length of master key to return
-     * @return The derived master key.
+     * @param {string} pass       The text password to be used
+     * @param {Uint8Array} salt       The salt to be used for the key derivation
+     * @param {number} iterations The number of iterations the key derivation algorithm will use
+     * @param {number} length     The length of master key to return
+     * @return {Promise<Uint8Array>} The derived master key.
      * @throws SalmonSecurityException
      */
     public static async getMasterKey(pass: string, salt: Uint8Array, iterations: number, length: number): Promise<Uint8Array> {
@@ -102,17 +102,17 @@ export class SalmonPassword {
     /**
      * Function will derive a key from a text password
      *
-     * @param password    The password that will be used to derive the key
-     * @param salt        The salt byte array that will be used together with the password
-     * @param iterations  The iterations to be used with Pbkdf2
-     * @param outputBytes The number of bytes for the key
-     * @return The derived key.
+     * @param {string} password    The password that will be used to derive the key
+     * @param {Uint8Array} salt        The salt byte array that will be used together with the password
+     * @param {number} iterations  The iterations to be used with Pbkdf2
+     * @param {number} outputBytes The number of bytes for the key
+     * @return {Promise<Uint8Array>} The derived key.
      * @throws SalmonSecurityException
      */
     public static async getKeyFromPassword(password: string, salt: Uint8Array, iterations: number, outputBytes: number): Promise<Uint8Array> {
-        if (SalmonPassword.pbkdfAlgo == PbkdfAlgo.SHA1 && !SalmonPassword.#ENABLE_SHA1)
+        if (SalmonPassword.#pbkdfAlgo == PbkdfAlgo.SHA1 && !SalmonPassword.#ENABLE_SHA1)
             throw new Error("Cannot use SHA1, SHA1 is not secure anymore use SHA256!");
-        return SalmonPassword.#provider.getKey(password, salt, iterations, outputBytes, SalmonPassword.pbkdfAlgo);
+        return SalmonPassword.#provider.getKey(password, salt, iterations, outputBytes, SalmonPassword.#pbkdfAlgo);
     }
 
 }

@@ -34,14 +34,15 @@ export class SalmonTextEncryptor {
     /**
      * Encrypts a text String using AES256 with the key and nonce provided.
      *
-     * @param text  Text to be encrypted.
-     * @param key   The encryption key to be used.
-     * @param nonce The nonce to be used.
-     * @param header Set to true to store a header with information like nonce and/or chunk size,
+     * @param {string} text  Text to be encrypted.
+     * @param {Uint8Array} key   The encryption key to be used.
+     * @param {Uint8Array} nonce The nonce to be used.
+     * @param {boolean} header Set to true to store a header with information like nonce and/or chunk size,
      *               otherwise you will have to store that information externally.
-     * @param integrity True if you want to calculate and store hash signatures for each chunkSize
-     * @param hashKey Hash key to be used for all chunks.
-     * @param chunkSize The chunk size.
+     * @param {boolean} integrity True if you want to calculate and store hash signatures for each chunkSize
+     * @param {Uint8Array | null} hashKey Hash key to be used for all chunks.
+     * @param {Promise<string>} chunkSize The chunk size.
+     * @returns {Promise<string>} The encrypted string.
      * @throws IOException
      * @throws SalmonSecurityException
      * @throws SalmonIntegrityException

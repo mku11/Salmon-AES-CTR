@@ -28,24 +28,25 @@ import { EncryptionMode } from "./io/encryption_mode.js";
 import { SalmonSecurityException } from "./salmon_security_exception.js";
 
 /**
- * Decrypt the data stream.
- * @param inputStream The Stream to be decrypted.
- * @param start The start position of the stream to be decrypted.
- * @param count The number of bytes to be decrypted.
- * @param outData The buffer with the decrypted data.
- * @param key The AES key to be used.
- * @param nonce The nonce to be used.
- * @param headerData The header data to be used.
- * @param integrity True to verify integrity.
- * @param hashKey The hash key to be used for integrity verification.
- * @param chunkSize The chunk size.
- * @  Thrown if there is an error with the stream.
+ * Decrypt the data.
+ * @param {Uint8Array} data The data to be decrypted.
+ * @param {number} start The start position of the stream to be decrypted.
+ * @param {number} count The number of bytes to be decrypted.
+ * @param {Uint8Array} outData The buffer with the decrypted data.
+ * @param {Uint8Array} key The AES key to be used.
+ * @param {Uint8Array} nonce The nonce to be used.
+ * @param {Uint8Array | null} headerData The header data to be used.
+ * @param {boolean} integrity True to verify integrity.
+ * @param {Uint8Array | null} hashKey The hash key to be used for integrity verification.
+ * @param {number} chunkSize The chunk size. Thrown if there is an error with the stream.
+ * @returns {Promise<{ startPos: number, endPos: number }>} The number of bytes decrypted.
  * @throws SalmonSecurityException Thrown if there is a security exception with the stream.
  * @throws SalmonIntegrityException Thrown if the stream is corrupt or tampered with.
  */
 export async function decryptData(data: Uint8Array, start: number, count: number, outData: Uint8Array,
     key: Uint8Array, nonce: Uint8Array, headerData: Uint8Array | null,
-    integrity: boolean, hashKey: Uint8Array | null, chunkSize: number | null, bufferSize: number): Promise<{ startPos: number, endPos: number }> {
+    integrity: boolean, hashKey: Uint8Array | null, chunkSize: number | null, bufferSize: number): 
+        Promise<{ startPos: number, endPos: number }> {
     let stream: SalmonStream | null = null;
     let inputStream = new MemoryStream(data);
     let outputStream: MemoryStream | null = null;

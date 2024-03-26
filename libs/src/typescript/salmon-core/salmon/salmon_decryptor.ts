@@ -53,8 +53,8 @@ export class SalmonDecryptor {
     /**
      * Instantiate a decryptor with parallel tasks and buffer size.
      *
-     * @param threads The number of threads to use.
-     * @param bufferSize The buffer size to use. It is recommended for performance  to use
+     * @param {number} threads The number of threads to use.
+     * @param {number} bufferSize The buffer size to use. It is recommended for performance  to use
      *                   a multiple of the chunk size if you enabled integrity
      *                   otherwise a multiple of the AES block size (16 bytes).
      */
@@ -75,14 +75,14 @@ export class SalmonDecryptor {
 
     /**
      * Decrypt a byte array using AES256 based on the provided key and nonce.
-     * @param data The input data to be decrypted.
-     * @param key The AES key to use for decryption.
-     * @param nonce The nonce to use for decryption.
-     * @param hasHeaderData The header data.
-     * @param integrity Verify hash integrity in the data.
-     * @param hashKey The hash key to be used for integrity.
-     * @param chunkSize The chunk size.
-     * @return The byte array with the decrypted data.
+     * @param {Uint8Array} data The input data to be decrypted.
+     * @param {Uint8Array} key The AES key to use for decryption.
+     * @param {Uint8Array | null} nonce The nonce to use for decryption.
+     * @param {boolean} hasHeaderData The header data.
+     * @param {boolean} integrity Verify hash integrity in the data.
+     * @param {Uint8Array | null} hashKey The hash key to be used for integrity.
+     * @param {number | null} chunkSize The chunk size.
+     * @return {Promise<Uint8Array>} The byte array with the decrypted data.
      * @ Thrown if there is a problem with decoding the array.
      * @throws SalmonSecurityException Thrown if the key and nonce are not provided.
      * @throws IOException
@@ -131,7 +131,7 @@ export class SalmonDecryptor {
 
     /**
      * Decrypt stream using parallel threads.
-     * @param data The input data to be decrypted
+     * @param {Uint8Array} data The input data to be decrypted
      * @param outData The output buffer with the decrypted data.
      * @param key The AES key.
      * @param hashKey The hash key.
@@ -189,7 +189,7 @@ export class SalmonDecryptor {
         for (let i = 0; i < runningThreads; i++) {
             this.#promises.push(new Promise(async (resolve, reject) => {
                 if (typeof process !== 'object') {
-                    if(this.#workers[i] == null)
+                    if (this.#workers[i] == null)
                         this.#workers[i] = new Worker(SalmonDecryptor.#workerPath, { type: 'module' });
                     this.#workers[i].addEventListener('message', (event: { data: unknown }) => {
                         resolve(event.data);
@@ -199,7 +199,7 @@ export class SalmonDecryptor {
                     });
                 } else {
                     const { Worker } = await import("worker_threads");
-                    if(this.#workers[i] == null)
+                    if (this.#workers[i] == null)
                         this.#workers[i] = new Worker(SalmonDecryptor.#workerPath);
                     this.#workers[i].on('message', (event: any) => {
                         resolve(event);
@@ -234,18 +234,30 @@ export class SalmonDecryptor {
         });
     }
 
+    /**
+     * Close the decryptor and release associated resources
+     */
     public close(): void {
-        for(let i=0; i<this.#workers.length; i++) {
+        for (let i = 0; i < this.#workers.length; i++) {
             this.#workers[i].terminate();
             this.#workers[i] = null;
         }
         this.#promises = [];
     }
 
+    /**
+     * Set the path where the decryptor worker. This needs to be a relative path starting from
+     * the root of your main javascript app.
+     * @param {string} path The path to the worker javascript.
+     */
     public static setWorkerPath(path: string) {
         SalmonDecryptor.#workerPath = path;
     }
 
+    /**
+     * Get the current path for the worker javascript.
+     * @returns {string} The path to the worker javascript.
+     */
     public static getWorkerPath(): string {
         return SalmonDecryptor.#workerPath;
     }

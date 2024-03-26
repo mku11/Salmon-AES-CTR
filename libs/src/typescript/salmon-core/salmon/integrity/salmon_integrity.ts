@@ -29,8 +29,8 @@ import { IHashProvider } from "./ihash_provider.js";
 import { SalmonIntegrityException } from "./salmon_integrity_exception.js";
 
 /**
- * Provide operations for calculating, storing, and verifying data integrity.
- * This class operates in chunks of data in buffers calculating the hash for each one.
+ * Operations for calculating, storing, and verifying data integrity.
+ * This class operates on chunks of byte arrays calculating hashes for each one.
  */
 export class SalmonIntegrity {
     /**
@@ -67,12 +67,12 @@ export class SalmonIntegrity {
     /**
      * Instantiate an object to be used for applying and verifying hash signatures for each of the data chunks.
      *
-     * @param integrity True to enable integrity checks.
-     * @param key       The key to use for hashing.
-     * @param chunkSize The chunk size. Use 0 to enable integrity on the whole file (1 chunk).
+     * @param {boolean} integrity True to enable integrity checks.
+     * @param {Uint8Array} key       The key to use for hashing.
+     * @param {number | null} chunkSize The chunk size. Use 0 to enable integrity on the whole file (1 chunk).
      *                  Use a positive number to specify integrity chunks.
-     * @param provider  Hash implementation provider.
-     * @param hashSize The hash size.
+     * @param {IHashProvider} provider  Hash implementation provider.
+     * @param {number} hashSize The hash size.
      * @throws SalmonIntegrityException When integrity is comprimised
      * @throws SalmonSecurityException When security has failed
      */
@@ -99,16 +99,15 @@ export class SalmonIntegrity {
     /**
      * Calculate hash of the data provided.
      *
-     * @param provider    Hash implementation provider.
-     * @param buffer      Data to calculate the hash.
-     * @param offset      Offset of the buffer that the hashing calculation will start from
-     * @param count       Length of the buffer that will be used to calculate the hash.
-     * @param key         Key that will be used
-     * @param includeData Additional data to be included in the calculation.
-     * @return The hash.
+     * @param {IHashProvider} provider    Hash implementation provider.
+     * @param {Uint8Array} buffer      Data to calculate the hash.
+     * @param {number} offset      Offset of the buffer that the hashing calculation will start from
+     * @param {number} count       Length of the buffer that will be used to calculate the hash.
+     * @param {Uint8Array} key         Key that will be used
+     * @param {Uint8Array | null} includeData Additional data to be included in the calculation.
+     * @return {Promise<Uint8Array>} The hash.
      * @throws SalmonIntegrityException
      */
-    // TODO: we should avoid the header data for performance?
     public static async calculateHash(provider: IHashProvider, buffer: Uint8Array, offset: number, count: number,
         key: Uint8Array, includeData: Uint8Array | null): Promise<Uint8Array> {
 
@@ -130,12 +129,12 @@ export class SalmonIntegrity {
 
     /**
      * Get the total number of bytes for all hash signatures for data of a specific length.
-     * @param length 		The length of the data.
-     * @param chunkSize      The byte size of the stream chunk that will be used to calculate the hash.
+     * @param {number} length 		The length of the data.
+     * @param {number} chunkSize      The byte size of the stream chunk that will be used to calculate the hash.
      *                       The length should be fixed value except for the last chunk which might be lesser since we don't use padding
-     * @param hashOffset     The hash key length that will be used as an offset.
-     * @param hashLength     The hash length.
-     * @return
+     * @param {number} hashOffset     The hash key length that will be used as an offset.
+     * @param {number} hashLength     The hash length.
+     * @return {number} The total number of bytes for all hash signatures.
      */
     public static getTotalHashDataLength(length: number, chunkSize: number,
         hashOffset: number, hashLength: number): number {
@@ -150,9 +149,9 @@ export class SalmonIntegrity {
     /**
      * Return the number of bytes that all hash signatures occupy for each chunk size
      *
-     * @param count      Actual length of the real data int the base stream including header and hash signatures.
-     * @param hashOffset The hash key length
-     * @return The number of bytes all hash signatures occupy
+     * @param {number} count      Actual length of the real data int the base stream including header and hash signatures.
+     * @param {number} hashOffset The hash key length
+     * @return {number} The number of bytes all hash signatures occupy
      */
     public getHashDataLength(count: number, hashOffset: number): number {
         if (this.#chunkSize <= 0)
@@ -162,7 +161,7 @@ export class SalmonIntegrity {
 
     /**
      * Get the chunk size.
-     * @return The chunk size.
+     * @return {number} The chunk size.
      */
     public getChunkSize(): number {
         return this.#chunkSize;
@@ -170,7 +169,7 @@ export class SalmonIntegrity {
 
     /**
      * Get the hash key.
-     * @return The hash key.
+     * @return {Uint8Array} The hash key.
      */
     public getKey(): Uint8Array {
         if (this.#key == null)
@@ -180,7 +179,7 @@ export class SalmonIntegrity {
 
     /**
      * Get the integrity enabled option.
-     * @return True if integrity is enabled.
+     * @return {boolean} True if integrity is enabled.
      */
     public useIntegrity(): boolean {
         return this.#integrity;
@@ -188,9 +187,9 @@ export class SalmonIntegrity {
 
     /**
      * Generate a hash signatures for each data chunk.
-     * @param buffer The buffer containing the data chunks.
-     * @param includeHeaderData Include the header data in the first chunk.
-     * @return The hash signatures.
+     * @param {Uint8Array} buffer The buffer containing the data chunks.
+     * @param {boolean} includeHeaderData Include the header data in the first chunk.
+     * @return {Promise<Uint8Array[] | null>} The hash signatures.
      * @throws SalmonIntegrityException
      */
     public async generateHashes(buffer: Uint8Array, includeHeaderData: Uint8Array | null): Promise<Uint8Array[] | null> {
@@ -206,8 +205,8 @@ export class SalmonIntegrity {
 
     /**
      * Get the hashes for each data chunk.
-     * @param buffer The buffer that contains the data chunks.
-     * @return The hash signatures.
+     * @param {Uint8Array} buffer The buffer that contains the data chunks.
+     * @return {Uint8Array[] | null} The hash signatures.
      */
     public getHashes(buffer: Uint8Array): Uint8Array[] | null {
         if (!this.#integrity)
@@ -224,9 +223,9 @@ export class SalmonIntegrity {
 
     /**
      * Verify the buffer chunks against the hash signatures.
-     * @param hashes The hashes to verify.
-     * @param buffer The buffer that contains the chunks to verify the hashes.
-     * @param includeHeaderData
+     * @param {Uint8Array[]} hashes The hashes to verify.
+     * @param {number} buffer The buffer that contains the chunks to verify the hashes.
+     * @param {boolean| null} includeHeaderData
      * @throws SalmonIntegrityException
      */
     public async verifyHashes(hashes: Uint8Array[], buffer: Uint8Array, includeHeaderData: Uint8Array | null) {

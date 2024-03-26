@@ -87,22 +87,20 @@ export class SalmonStream extends RandomAccessStream {
     #key: Uint8Array;
     #nonce: Uint8Array;
 
-
     /**
      * Get the output size of the data to be transformed(encrypted or decrypted) including
      * header and hash without executing any operations. This can be used to prevent over-allocating memory
      * where creating your output buffers.
      *
-     * @param data The data to be transformed.
-     * @param key The AES key.
-     * @param nonce The nonce for the CTR.
-     * @param mode The {@link EncryptionMode} Encrypt or Decrypt.
-     * @param headerData The header data to be embedded if you use Encryption.
-     * @param integrity True if you want to enable integrity.
-     * @param chunkSize The chunk size for integrity chunks.
-     * @param hashKey The hash key to be used for integrity checks.
-     * @return The size of the output data.
-     *
+     * @param {Uint8Array} data The data to be transformed.
+     * @param {Uint8Array} key The AES key.
+     * @param {Uint8Array} nonce The nonce for the CTR.
+     * @param {EncryptionMode} mode The EncryptionMode Encrypt or Decrypt.
+     * @param {Uint8Array|null} headerData The header data to be embedded if you use Encryption.
+     * @param {boolean} integrity True if you want to enable integrity.
+     * @param {number | null} The chunk size for integrity chunks.
+     * @param {Uint8Array | null} hashKey The hash key to be used for integrity checks.
+     * @return {Promise<number>} The size of the output data.
      * @throws SalmonSecurityException
      * @throws SalmonIntegrityException
      * @throws IOException
@@ -119,24 +117,22 @@ export class SalmonStream extends RandomAccessStream {
 
     /**
      * Instantiate a new Salmon stream with a base stream and optional header data and hash integrity.
-     * <p>
      * If you read from the stream it will decrypt the data from the baseStream.
      * If you write to the stream it will encrypt the data from the baseStream.
      * The transformation is based on AES CTR Mode.
-     * </p>
      * Notes:
      * The initial value of the counter is a result of the concatenation of an 12 byte nonce and an additional 4 bytes counter.
      * The counter is then: incremented every block, encrypted by the key, and xored with the plain text.
-     * @see <a href="https://en.wikipedia.org/wiki/Block_cipher_mode_of_operation#Counter_(CTR)">Salmon README.md</a>
+     * @see {@link https://en.wikipedia.org/wiki/Block_cipher_mode_of_operation#Counter_(CTR)|Salmon README.md}
      *
-     * @param key            The AES key that is used to encrypt decrypt
-     * @param nonce          The nonce used for the initial counter
-     * @param encryptionMode Encryption mode Encrypt or Decrypt this cannot change later
-     * @param baseStream     The base Stream that will be used to read the data
-     * @param headerData     The data to store in the header when encrypting.
-     * @param integrity      enable integrity
-     * @param chunkSize      the chunk size to be used with integrity
-     * @param hashKey        Hash key to be used with integrity
+     * @param {Uint8Array} key            The AES key that is used to encrypt decrypt
+     * @param {Uint8Array} nonce          The nonce used for the initial counter
+     * @param {EncryptionMode} encryptionMode Encryption mode Encrypt or Decrypt this cannot change later
+     * @param {RandomAccessStream} baseStream     The base Stream that will be used to read the data
+     * @param {Uint8Array | null} headerData     The data to store in the header when encrypting.
+     * @param {boolean} integrity      enable integrity
+     * @param {number | null} chunkSize      the chunk size to be used with integrity
+     * @param {Uint8Array | null} hashKey        Hash key to be used with integrity
      * @throws IOException
      * @throws SalmonSecurityException
      * @throws SalmonIntegrityException
@@ -153,11 +149,52 @@ export class SalmonStream extends RandomAccessStream {
         this.#key = key;
         this.#nonce = nonce;
     }
+    
+    /**
+     * Initialize the salmon stream.
+     * @param {Uint8Array} key The encryption key
+     * @param {Uint8Array} nonce The nonce
+     */
+    async #init(key: Uint8Array, nonce: Uint8Array): Promise<void> {
+        // init only once
+        if (this.#transformer.getKey() != null)
+            return;
+        await this.#initTransformer(key, nonce);
+        await this.#initStream();
+    }
+
+    /**
+     * To create the AES CTR mode we use ECB for AES with No Padding.
+     * Initailize the Counter to the initial vector provided.
+     * For each data block we increase the Counter and apply the EAS encryption on the Counter.
+     * The encrypted Counter then will be xor-ed with the actual data block.
+     * Note: for typescript since its async and we cannot run it in the constructor we delay 
+     * until we run an opearation using the transformer.
+     */
+    async #initTransformer(key: Uint8Array, nonce: Uint8Array): Promise<void> {
+        if (key == null)
+            throw new SalmonSecurityException("Key is missing");
+        if (nonce == null)
+            throw new SalmonSecurityException("Nonce is missing");
+
+        this.#transformer = SalmonTransformerFactory.create(SalmonStream.#providerType);
+        await this.#transformer.init(key, nonce);
+        this.#transformer.resetCounter();        
+    }
+
+    /**
+     * Init the stream.
+     *
+     * @throws IOException
+     */
+    async #initStream() {
+        await this.#baseStream.setPosition(this.#getHeaderLength());
+    }
 
     /**
      * Set the global AES provider type. Supported types: {@link ProviderType}.
      *
-     * @param providerType The provider Type.
+     * @param {ProviderType} providerType The provider Type.
      */
     public static setAesProviderType(providerType: ProviderType): void {
         SalmonStream.#providerType = providerType;
@@ -166,7 +203,7 @@ export class SalmonStream extends RandomAccessStream {
     /**
      * Get the global AES provider type. Supported types: {@link ProviderType}.
      *
-     * @return The provider Type.
+     * @return {ProviderType} The provider Type.
      */
     public static getAesProviderType(): ProviderType {
         return SalmonStream.#providerType;
@@ -175,7 +212,7 @@ export class SalmonStream extends RandomAccessStream {
     /**
      * Provides the length of the actual transformed data (minus the header and integrity data).
      *
-     * @return The length of the stream.
+     * @return {Promise<number>} The length of the stream.
      */
     public async length(): Promise<number> {
         await this.#init(this.#key, this.#nonce);
@@ -189,7 +226,7 @@ export class SalmonStream extends RandomAccessStream {
     /**
      * Provides the total length of the base stream including header and integrity data if available.
      *
-     * @return The actual length of the base stream.
+     * @return {Promise<number>} The actual length of the base stream.
      */
     public async actualLength(): Promise<number> {
         let totalHashBytes: number = 0;
@@ -204,7 +241,7 @@ export class SalmonStream extends RandomAccessStream {
     /**
      * Provides the position of the stream relative to the data to be transformed.
      *
-     * @return The current position of the stream.
+     * @return {Promise<number>} The current position of the stream.
      * @throws IOException
      */
     public async getPosition(): Promise<number> {
@@ -218,7 +255,8 @@ export class SalmonStream extends RandomAccessStream {
     /**
      * Sets the current position of the stream relative to the data to be transformed.
      *
-     * @param value
+     * @param {number} value
+     * @return {Promise<void>}
      * @throws IOException
      */
     public async setPosition(value: number): Promise<void> {
@@ -236,7 +274,7 @@ export class SalmonStream extends RandomAccessStream {
     /**
      * If the stream is readable (only if EncryptionMode == Decrypted)
      *
-     * @return True if mode is decryption.
+     * @return {Promise<boolean>} True if mode is decryption.
      */
     public async canRead(): Promise<boolean> {
         return await this.#baseStream.canRead() && this.#encryptionMode == EncryptionMode.Decrypt;
@@ -245,7 +283,7 @@ export class SalmonStream extends RandomAccessStream {
     /**
      * If the stream is seekable (supported only if base stream is seekable).
      *
-     * @return True if stream is seekable.
+     * @return {Promise<boolean>} True if stream is seekable.
      */
     public async canSeek(): Promise<boolean> {
         return this.#baseStream.canSeek();
@@ -254,7 +292,7 @@ export class SalmonStream extends RandomAccessStream {
     /**
      * If the stream is writeable (only if EncryptionMode is Encrypt)
      *
-     * @return True if mode is decryption.
+     * @return {Promise<boolean>} True if mode is decryption.
      */
     public async canWrite(): Promise<boolean> {
         return await this.#baseStream.canWrite() && this.#encryptionMode == EncryptionMode.Encrypt;
@@ -262,6 +300,7 @@ export class SalmonStream extends RandomAccessStream {
 
     /**
      * If the stream has integrity enabled
+     * @returns {boolean}
      */
     public hasIntegrity(): boolean {
         return this.getChunkSize() > 0;
@@ -272,9 +311,9 @@ export class SalmonStream extends RandomAccessStream {
      * stream because in the case of a decryption stream that has already embedded integrity
      * we still need to calculate/skip the chunks.
      *
-     * @param integrity
-     * @param hashKey
-     * @param chunkSize
+     * @param {boolean} integrity
+     * @param {Uint8Array | null} hashKey
+     * @param {number | null} chunkSize
      * @throws SalmonSecurityException
      * @throws SalmonIntegrityException
      */
@@ -282,11 +321,11 @@ export class SalmonStream extends RandomAccessStream {
         this.#salmonIntegrity = new SalmonIntegrity(integrity, hashKey, chunkSize,
             new HmacSHA256Provider(), SalmonGenerator.HASH_RESULT_LENGTH);
     }
-    
+
     /**
      * The length of the header data if the stream was initialized with a header.
      *
-     * @return The header data length.
+     * @return {number} The header data length.
      */
     #getHeaderLength(): number {
         if (this.#headerData == null)
@@ -296,37 +335,13 @@ export class SalmonStream extends RandomAccessStream {
     }
 
     /**
-     * To create the AES CTR mode we use ECB for AES with No Padding.
-     * Initailize the Counter to the initial vector provided.
-     * For each data block we increase the Counter and apply the EAS encryption on the Counter.
-     * The encrypted Counter then will be xor-ed with the actual data block.
-     * Note: for typescript since its async and we cannot run it in the constructor we delay 
-     * until we run an opearation using the transformer.
-     */
-    async #init(key: Uint8Array, nonce: Uint8Array): Promise<void> {
-        // init only once
-        if (this.#transformer.getKey() != null)
-            return;
-
-        if (key == null)
-            throw new SalmonSecurityException("Key is missing");
-        if (nonce == null)
-            throw new SalmonSecurityException("Nonce is missing");
-
-        this.#transformer = SalmonTransformerFactory.create(SalmonStream.#providerType);
-        await this.#transformer.init(key, nonce);
-        this.#transformer.resetCounter();
-
-        await this.#baseStream.setPosition(this.#getHeaderLength());
-    }
-
-    /**
      * Seek to a specific position on the stream. This does not include the header and any hash Signatures.
      *
-     * @param offset The offset that seek will use
-     * @param origin If it is Begin the offset will be the absolute position from the start of the stream
+     * @param {number} offset The offset that seek will use
+     * @param {SeekOrigin.Begin} origin If it is Begin the offset will be the absolute position from the start of the stream
      *               If it is Current the offset will be added to the current position of the stream
      *               If it is End the offset will be the absolute position starting from the end of the stream.
+     * @returns {Promise<number>} The new position after seeking.
      */
     public async seek(offset: number, origin: SeekOrigin): Promise<number> {
         if (origin == SeekOrigin.Begin)
@@ -341,7 +356,7 @@ export class SalmonStream extends RandomAccessStream {
     /**
      * Set the length of the base stream. Currently unsupported.
      *
-     * @param value
+     * @param {number} value The new length.
      */
     public async setLength(value: number): Promise<void> {
         let pos: number = await this.getPosition();
@@ -370,7 +385,7 @@ export class SalmonStream extends RandomAccessStream {
     /**
      * Returns the current Counter value.
      *
-     * @return The current Counter value.
+     * @return {Promise<Uint8Array>} The current Counter value.
      */
     public async getCounter(): Promise<Uint8Array> {
         await this.#init(this.#key, this.#nonce);
@@ -383,15 +398,16 @@ export class SalmonStream extends RandomAccessStream {
 
     /**
      * Returns the current Block value
+     * @returns {Promise<number>} The current block value.
      */
     public async getBlock(): Promise<number> {
         await this.#init(this.#key, this.#nonce);
-
         return this.#transformer.getBlock();
     }
 
     /**
      * Returns a copy of the encryption key.
+     * @returns {Promise<Uint8Array>} A copy of the key.
      */
     public async getKey(): Promise<Uint8Array> {
         await this.#init(this.#key, this.#nonce);
@@ -404,6 +420,7 @@ export class SalmonStream extends RandomAccessStream {
 
     /**
      * Returns a copy of the hash key.
+     * @returns {Uint8Array} A copy of the hash key
      */
     public getHashKey(): Uint8Array {
         return this.#salmonIntegrity.getKey().slice(0);
@@ -411,6 +428,7 @@ export class SalmonStream extends RandomAccessStream {
 
     /**
      * Returns a copy of the initial vector.
+     * @returns {Promise<Uint8Array>} A copy of the initial vector
      */
     public async getNonce(): Promise<Uint8Array> {
         await this.#init(this.#key, this.#nonce);
@@ -422,7 +440,8 @@ export class SalmonStream extends RandomAccessStream {
     }
 
     /**
-     * Returns the Chunk size used to apply hash signature
+     * Returns the chunk size used to apply hash signature
+     * @returns {number} The chunk size
      */
     public getChunkSize(): number {
         return this.#salmonIntegrity.getChunkSize();
@@ -433,7 +452,7 @@ export class SalmonStream extends RandomAccessStream {
      * This is not recommended if you use the stream on storing files or generally data if prior version can be inspected by others.
      * You should only use this setting for initial encryption with parallel streams and not for overwriting!
      *
-     * @param value True to allow byte range encryption write operations
+     * @param {boolean} value True to allow byte range encryption write operations
      */
     public setAllowRangeWrite(value: boolean): void {
         this.#allowRangeWrite = value;
@@ -444,7 +463,7 @@ export class SalmonStream extends RandomAccessStream {
      * In that case read() operations will return -1 instead of raising an exception.
      * This prevents 3rd party code like media players from crashing.
      *
-     * @param value True to fail silently.
+     * @param {boolean} value True to fail silently.
      */
     public setFailSilently(value: boolean): void {
         this.#failSilently = value;
@@ -453,7 +472,7 @@ export class SalmonStream extends RandomAccessStream {
     /**
      * Set the virtual position of the stream.
      *
-     * @param value
+     * @param {number} value
      * @throws IOException
      * @throws SalmonRangeExceededException
      */
@@ -483,10 +502,10 @@ export class SalmonStream extends RandomAccessStream {
     /**
      * Decrypts the data from the baseStream and stores them in the buffer provided.
      *
-     * @param buffer The buffer that the data will be stored after decryption
-     * @param offset The start position on the buffer that data will be written.
-     * @param count  The requested count of the data bytes that should be decrypted
-     * @return The number of data bytes that were decrypted.
+     * @param {Uint8Array} buffer The buffer that the data will be stored after decryption
+     * @param {number} offset The start position on the buffer that data will be written.
+     * @param {number} count  The requested count of the data bytes that should be decrypted
+     * @return {Promise<number>} The number of data bytes that were decrypted.
      */
     public async read(buffer: Uint8Array, offset: number, count: number): Promise<number> {
         await this.#init(this.#key, this.#nonce);
@@ -530,10 +549,10 @@ export class SalmonStream extends RandomAccessStream {
      * Use this only after you align the base stream to the chunk if integrity is enabled
      * or to the encryption block size.
      *
-     * @param buffer The buffer that the data will be stored after decryption
-     * @param offset The start position on the buffer that data will be written.
-     * @param count  The requested count of the data bytes that should be decrypted
-     * @return The number of data bytes that were decrypted.
+     * @param {Uint8Array} buffer The buffer that the data will be stored after decryption
+     * @param {number} offset The start position on the buffer that data will be written.
+     * @param {number} count  The requested count of the data bytes that should be decrypted
+     * @return {Promise<number>} The number of data bytes that were decrypted.
      * @throws IOException Thrown if stream is not aligned.
      */
     async #readFromStream(buffer: Uint8Array, offset: number, count: number): Promise<number> {
@@ -593,9 +612,9 @@ export class SalmonStream extends RandomAccessStream {
      * If you are using integrity you will need to align all write operations to the chunk size
      * otherwise align to the encryption block size.
      *
-     * @param buffer The buffer that contains the data that will be encrypted
-     * @param offset The offset in the buffer that the bytes will be encrypted.
-     * @param count  The length of the bytes that will be encrypted.
+     * @param {Uint8Array} buffer The buffer that contains the data that will be encrypted
+     * @param {number} offset The offset in the buffer that the bytes will be encrypted.
+     * @param {number} count  The length of the bytes that will be encrypted.
      *
      */
     public async write(buffer: Uint8Array, offset: number, count: number): Promise<void> {
@@ -773,7 +792,7 @@ export class SalmonStream extends RandomAccessStream {
     /**
      * True if the stream has integrity enabled.
      *
-     * @return
+     * @return {boolean} If integrity is enabled for this stream.
      */
     public isIntegrityEnabled(): boolean {
         return this.#salmonIntegrity.useIntegrity();
@@ -782,7 +801,7 @@ export class SalmonStream extends RandomAccessStream {
     /**
      * Get the encryption mode.
      *
-     * @return
+     * @return {EncryptionMode} The encryption mode.
      */
     public getEncryptionMode(): EncryptionMode {
         return this.#encryptionMode;
@@ -792,12 +811,16 @@ export class SalmonStream extends RandomAccessStream {
      * Get the allowed range write option. This can check if you can use random access write.
      * This is generally not a good option since it prevents reusing the same nonce/counter.
      *
-     * @return True if the stream allowed to seek and write.
+     * @return {boolean} True if the stream allowed to seek and write.
      */
     public isAllowRangeWrite(): boolean {
         return this.#allowRangeWrite;
     }
 
+    /**
+     * Get the current transformer for this stream.
+     * @returns {ISalmonCTRTransformer}
+     */
     public getTransformer(): ISalmonCTRTransformer {
         return this.#transformer;
     }

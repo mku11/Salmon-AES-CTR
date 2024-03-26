@@ -36,22 +36,27 @@ export class SalmonNativeTransformer extends SalmonAES256CTRTransformer {
 
     /**
      * The native proxy to use for loading libraries for different platforms and operating systems.
+     * @param {INativeProxy} proxy The proxy.
      */
     public static setNativeProxy(proxy: INativeProxy): void {
         SalmonNativeTransformer.#nativeProxy = proxy;
     }
 
+    /**
+     * The current proxy used for loading native library.
+     * @returns {INativeProxy} The proxy.
+     */
     public static getNativeProxy(): INativeProxy  {
         return SalmonNativeTransformer.#nativeProxy;
     }
 
     /**
      * Encrypt the data.
-     * @param srcBuffer The source byte array.
-     * @param srcOffset The source byte offset.
-     * @param destBuffer The destination byte array.
-     * @param destOffset The destination byte offset.
-     * @param count The number of bytes to transform.
+     * @param {Uint8Array} srcBuffer The source byte array.
+     * @param {number} srcOffset The source byte offset.
+     * @param {Uint8Array} destBuffer The destination byte array.
+     * @param {number} destOffset The destination byte offset.
+     * @param {number} count The number of bytes to transform.
      * @return The number of bytes transformed.
      */
     public override async encryptData(srcBuffer: Uint8Array, srcOffset: number,
@@ -70,12 +75,12 @@ export class SalmonNativeTransformer extends SalmonAES256CTRTransformer {
 
     /**
      * Decrypt the data.
-     * @param srcBuffer The source byte array.
-     * @param srcOffset The source byte offset.
-     * @param destBuffer The destination byte array.
-     * @param destOffset The destination byte offset.
-     * @param count The number of bytes to transform.
-     * @return The number of bytes transformed.
+     * @param {Uint8Array} srcBuffer The source byte array.
+     * @param {number} srcOffset The source byte offset.
+     * @param {Uint8Array} destBuffer The destination byte array.
+     * @param {number} destOffset The destination byte offset.
+     * @param {number} count The number of bytes to transform.
+     * @return {Promise<number>} The number of bytes transformed.
      */
     public override async decryptData(srcBuffer: Uint8Array, srcOffset: number,
         destBuffer: Uint8Array, destOffset: number, count: number): Promise<number> {

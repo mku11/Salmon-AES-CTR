@@ -34,7 +34,7 @@ export class SalmonIntegrityException extends Error {
      * @param {string | null} msg The provided message
      * @param {Error | unknown | null} ex The inner exception
      */
-    public constructor(msg: string, ex: Error | unknown | null = null) {
+    public constructor(msg: string | null, ex: Error | unknown | null = null) {
         super(msg ?? "");
         if (ex != null) {
             this.#cause = ex;

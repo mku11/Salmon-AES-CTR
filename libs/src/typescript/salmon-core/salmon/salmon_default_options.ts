@@ -31,7 +31,7 @@ export class SalmonDefaultOptions {
 
     /**
      * Get the default buffer size for all internal streams including Encryptors and Decryptors.
-     * @return
+     * @return {number} The buffer size.
      */
     public static getBufferSize(): number{
         return SalmonDefaultOptions.#bufferSize;
@@ -45,7 +45,7 @@ export class SalmonDefaultOptions {
     /**
      * Set the default buffer size for all internal streams including Encryptors and Decryptors.
      *
-     * @param bufferSize
+     * @param {number} bufferSize The new buffer size.
      */
     public static setBufferSize(bufferSize: number): void {
         SalmonDefaultOptions.#bufferSize = bufferSize;

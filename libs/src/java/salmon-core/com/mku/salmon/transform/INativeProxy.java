@@ -51,7 +51,7 @@ public interface INativeProxy
      * @param destBuffer
      * @param destOffset
      * @param count
-     * @return
+     * @return The number of bytes that were transformed.
      */
     int salmonTransform(byte[] key, byte[] counter,
                                byte[] srcBuffer, int srcOffset,

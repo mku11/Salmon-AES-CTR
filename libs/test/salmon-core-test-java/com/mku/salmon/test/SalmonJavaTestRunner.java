@@ -29,6 +29,8 @@ import com.mku.io.MemoryStream;
 import com.mku.salmon.*;
 import com.mku.salmon.integrity.SalmonIntegrity;
 import com.mku.salmon.integrity.SalmonIntegrityException;
+import com.mku.salmon.io.EncryptionMode;
+import com.mku.salmon.io.ProviderType;
 import com.mku.salmon.io.SalmonStream;
 import com.mku.salmon.text.SalmonTextDecryptor;
 import com.mku.salmon.text.SalmonTextEncryptor;
@@ -54,7 +56,7 @@ public class SalmonJavaTestRunner {
 
     @BeforeEach
     public void init() {
-        SalmonStream.setAesProviderType(SalmonStream.ProviderType.Default);
+        SalmonStream.setAesProviderType(ProviderType.Default);
         SalmonDefaultOptions.setBufferSize(SalmonIntegrity.DEFAULT_CHUNK_SIZE);
     }
 
@@ -375,7 +377,7 @@ public class SalmonJavaTestRunner {
         byte[] inputBytes = plainText.getBytes(Charset.defaultCharset());
         MemoryStream ins = new MemoryStream(inputBytes);
         MemoryStream outs = new MemoryStream();
-        SalmonStream encWriter = new SalmonStream(TestHelper.TEST_KEY_BYTES, TestHelper.TEST_NONCE_BYTES, SalmonStream.EncryptionMode.Encrypt, outs,
+        SalmonStream encWriter = new SalmonStream(TestHelper.TEST_KEY_BYTES, TestHelper.TEST_NONCE_BYTES, EncryptionMode.Encrypt, outs,
                 null, false, null, null);
         try {
             encWriter.copyTo(outs);
@@ -403,7 +405,7 @@ public class SalmonJavaTestRunner {
         byte[] encBytes = TestHelper.encrypt(inputBytes, TestHelper.TEST_KEY_BYTES, TestHelper.TEST_NONCE_BYTES, TestHelper.TEST_ENC_BUFFER_SIZE, false, 0, null, null);
 
         MemoryStream ins = new MemoryStream(encBytes);
-        SalmonStream encWriter = new SalmonStream(TestHelper.TEST_KEY_BYTES, TestHelper.TEST_NONCE_BYTES, SalmonStream.EncryptionMode.Decrypt, ins,
+        SalmonStream encWriter = new SalmonStream(TestHelper.TEST_KEY_BYTES, TestHelper.TEST_NONCE_BYTES, EncryptionMode.Decrypt, ins,
                 null, false, null, null);
         try {
             ins.copyTo(encWriter);

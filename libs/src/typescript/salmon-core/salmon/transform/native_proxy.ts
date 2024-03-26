@@ -34,44 +34,12 @@ export class NativeProxy implements NativeProxy {
     static readonly #libraryName: string = "salmon";
 
     /**
-     * Init the native code with AES implementation, and hash length options.
-     *
-     * @param aesImpl
-     */
-    //native static #init(aesImpl: number): void;
-
-    /**
-     * Native Key schedule algorithm for expanding the 32 byte key to 240 bytes required
-     *
-     * @param key
-     * @param expandedKey
-     */
-    //native static #expandkey(key: Uint8Array, expandedKey: Uint8Array): void;
-
-    /**
-     * Native transform of the input byte array using AES-256 CTR mode
-     *
-     * @param key
-     * @param counter
-     * @param srcBuffer
-     * @param srcOffset
-     * @param destBuffer
-     * @param destOffset
-     * @param count
-     * @return
-     */
-    //native static #transform(key: Uint8Array, counter: Uint8Array,
-    //    srcBuffer: Uint8Array, srcOffset: number,
-    //    destBuffer: Uint8Array, destOffset: number, count: number): void;
-
-    /**
      * Proxy Init the native code with AES implementation, and hash length options.
      *
-     * @param aesImpl
+     * @param {number} aesImpl
      */
     public salmonInit(aesImpl: number): void {
         this.loadLibrary();
-        //this.init(aesImpl);
     }
 
     /**
@@ -80,38 +48,32 @@ export class NativeProxy implements NativeProxy {
     protected loadLibrary(): void{
         if(NativeProxy.#loaded)
             return;
-        try {
-            //System.loadLibrary(NativeProxy.libraryName);
-        } catch (ex) {
-            console.error(ex);
-        }
         NativeProxy.#loaded = true;
     }
 
     /**
      * Proxy Key schedule algorithm for expanding the 32 byte key to 240 bytes required
      *
-     * @param key
-     * @param expandedKey
+     * @param {Uint8Array} key
+     * @param {Uint8Array} expandedKey
      */
     public salmonExpandKey(key: Uint8Array, expandedKey: Uint8Array): void {
-        //this.expandkey(key, expandedKey);
+        throw new Error("Not supported");
     }
 
     /**
      * Proxy Transform the input byte array using AES-256 CTR mode
      *
-     * @param key
-     * @param counter
-     * @param srcBuffer
-     * @param srcOffset
-     * @param destBuffer
-     * @param destOffset
-     * @param count
-     * @return
+     * @param {Uint8Array} key
+     * @param {Uint8Array} counter
+     * @param {Uint8Array} srcBuffer
+     * @param {number} srcOffset
+     * @param {Uint8Array} destBuffer
+     * @param {number} destOffset
+     * @param {number} count
+     * @return {number}
      */
     public salmonTransform(key: Uint8Array, counter: Uint8Array, srcBuffer: Uint8Array, srcOffset: number, destBuffer: Uint8Array, destOffset: number, count: number): number {
-        //return this.transform(key, counter, srcBuffer, srcOffset, destBuffer, destOffset, count);
-        return 0;
+        throw new Error("Not supported");
     }
 }

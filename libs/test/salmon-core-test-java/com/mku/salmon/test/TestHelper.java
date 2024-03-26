@@ -36,6 +36,8 @@ import com.mku.salmon.integrity.HmacSHA256Provider;
 import com.mku.salmon.integrity.IHashProvider;
 import com.mku.salmon.integrity.SalmonIntegrity;
 import com.mku.salmon.integrity.SalmonIntegrityException;
+import com.mku.salmon.io.EncryptionMode;
+import com.mku.salmon.io.ProviderType;
 import com.mku.salmon.io.SalmonStream;
 import com.mku.salmon.transform.ISalmonCTRTransformer;
 import com.mku.salmon.transform.SalmonAES256CTRTransformer;
@@ -153,7 +155,7 @@ public class TestHelper {
             headerData = header.getBytes(Charset.defaultCharset());
             outs.write(headerData, 0, headerData.length);
         }
-        SalmonStream writer = new SalmonStream(key, iv, SalmonStream.EncryptionMode.Encrypt, outs,
+        SalmonStream writer = new SalmonStream(key, iv, EncryptionMode.Encrypt, outs,
                 headerData, integrity, chunkSize, hashKey);
 
         if (bufferSize == 0) // use the internal buffer size of the memorystream to copy
@@ -183,7 +185,7 @@ public class TestHelper {
             headerData = new byte[(int) headerLength];
             ins.read(headerData, 0, headerData.length);
         }
-        SalmonStream reader = new SalmonStream(key, iv, SalmonStream.EncryptionMode.Decrypt, ins,
+        SalmonStream reader = new SalmonStream(key, iv, EncryptionMode.Decrypt, ins,
                 headerData, integrity, chunkSize, hashKey);
 
         if (bufferSize == 0) // use the internal buffersize of the memorystream to copy
@@ -217,7 +219,7 @@ public class TestHelper {
         byte[] inputBytes = plainText.getBytes(Charset.defaultCharset());
         MemoryStream ins = new MemoryStream(inputBytes);
         MemoryStream outs = new MemoryStream();
-        SalmonStream encWriter = new SalmonStream(key, iv, SalmonStream.EncryptionMode.Encrypt, outs,
+        SalmonStream encWriter = new SalmonStream(key, iv, EncryptionMode.Encrypt, outs,
                 null, integrity, chunkSize, hashKey);
         ins.copyTo(encWriter);
         ins.close();
@@ -227,7 +229,7 @@ public class TestHelper {
 
         // Use SalmonStrem to read from cipher text and seek and read to different positions in the stream
         MemoryStream encIns = new MemoryStream(encBytes);
-        SalmonStream decReader = new SalmonStream(key, iv, SalmonStream.EncryptionMode.Decrypt, encIns,
+        SalmonStream decReader = new SalmonStream(key, iv, EncryptionMode.Decrypt, encIns,
                 null, integrity, chunkSize, hashKey);
         String correctText;
         String decText;
@@ -295,7 +297,7 @@ public class TestHelper {
         byte[] inputBytes = plainText.getBytes(Charset.defaultCharset());
         MemoryStream ins = new MemoryStream(inputBytes);
         MemoryStream outs = new MemoryStream();
-        SalmonStream encWriter = new SalmonStream(key, iv, SalmonStream.EncryptionMode.Encrypt, outs,
+        SalmonStream encWriter = new SalmonStream(key, iv, EncryptionMode.Encrypt, outs,
                 null, integrity, chunkSize, hashKey);
         ins.copyTo(encWriter);
         ins.close();
@@ -305,7 +307,7 @@ public class TestHelper {
 
         // Use SalmonStream to read from cipher text and seek and read to different positions in the stream
         MemoryStream encIns = new MemoryStream(encBytes);
-        SalmonStream decReader = new SalmonStream(key, iv, SalmonStream.EncryptionMode.Decrypt, encIns,
+        SalmonStream decReader = new SalmonStream(key, iv, EncryptionMode.Decrypt, encIns,
                 null, integrity, chunkSize, hashKey);
         for (int i = 0; i < 100; i++) {
             decReader.setPosition(decReader.getPosition() + 7);
@@ -349,7 +351,7 @@ public class TestHelper {
         byte[] inputBytes = plainText.getBytes(Charset.defaultCharset());
         MemoryStream ins = new MemoryStream(inputBytes);
         MemoryStream outs = new MemoryStream();
-        SalmonStream encWriter = new SalmonStream(key, iv, SalmonStream.EncryptionMode.Encrypt, outs,
+        SalmonStream encWriter = new SalmonStream(key, iv, EncryptionMode.Encrypt, outs,
                 null, integrity, chunkSize, hashKey);
         ins.copyTo(encWriter);
         ins.close();
@@ -360,7 +362,7 @@ public class TestHelper {
         // partial write
         byte[] writeBytes = textToWrite.getBytes(Charset.defaultCharset());
         MemoryStream pOuts = new MemoryStream(encBytes);
-        SalmonStream partialWriter = new SalmonStream(key, iv, SalmonStream.EncryptionMode.Encrypt, pOuts,
+        SalmonStream partialWriter = new SalmonStream(key, iv, EncryptionMode.Encrypt, pOuts,
                 null, integrity, chunkSize, hashKey);
         long alignedPosition = seek;
         int alignOffset = 0;
@@ -376,7 +378,7 @@ public class TestHelper {
 
         // Use SalmonStrem to read from cipher text and test if writing was successful
         MemoryStream encIns = new MemoryStream(encBytes);
-        SalmonStream decReader = new SalmonStream(key, iv, SalmonStream.EncryptionMode.Decrypt, encIns,
+        SalmonStream decReader = new SalmonStream(key, iv, EncryptionMode.Decrypt, encIns,
                 null, integrity, chunkSize, hashKey);
         String decText = TestHelper.seekAndGetSubstringByRead(decReader, 0, text.length(), RandomAccessStream.SeekOrigin.Begin);
 
@@ -392,10 +394,10 @@ public class TestHelper {
     }
 
     public static void testCounterValue(String text, byte[] key, byte[] nonce, long counter) throws Throwable {
-        SalmonStream.setAesProviderType(SalmonStream.ProviderType.Default);
+        SalmonStream.setAesProviderType(ProviderType.Default);
         byte[] testTextBytes = text.getBytes(Charset.defaultCharset());
         MemoryStream ms = new MemoryStream(testTextBytes);
-        SalmonStream stream = new SalmonStream(key, nonce, SalmonStream.EncryptionMode.Encrypt, ms,
+        SalmonStream stream = new SalmonStream(key, nonce, EncryptionMode.Encrypt, ms,
                 null, false, null, null);
         stream.setAllowRangeWrite(true);
 
@@ -438,7 +440,7 @@ public class TestHelper {
     }
 
     public static byte[] nativeCTRTransform(byte[] input, byte[] testKeyBytes, byte[] testNonceBytes,
-                                            boolean encrypt, SalmonStream.ProviderType providerType)
+                                            boolean encrypt, ProviderType providerType)
             throws Exception {
         if (testNonceBytes.length < 16) {
             byte[] tmp = new byte[16];
@@ -606,7 +608,7 @@ public class TestHelper {
         // encrypt to a memory byte stream
         ms2.setPosition(0);
         MemoryStream ms3 = new MemoryStream();
-        SalmonStream salmonStream = new SalmonStream(key, nonce, SalmonStream.EncryptionMode.Encrypt, ms3,
+        SalmonStream salmonStream = new SalmonStream(key, nonce, EncryptionMode.Encrypt, ms3,
                 null, integrity, chunkSize, hashKey);
         // we always align the writes to the chunk size if we enable integrity
         if (integrity)
@@ -620,7 +622,7 @@ public class TestHelper {
 		ms3 = new MemoryStream(encData);
         ms3.setPosition(0);
         MemoryStream ms4 = new MemoryStream();
-        SalmonStream salmonStream2 = new SalmonStream(key, nonce, SalmonStream.EncryptionMode.Decrypt, ms3,
+        SalmonStream salmonStream2 = new SalmonStream(key, nonce, EncryptionMode.Decrypt, ms3,
                 null, integrity, chunkSize, hashKey);
         salmonStream2.copyTo(ms4, bufferSize, null);
         salmonStream2.close();

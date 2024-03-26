@@ -26,6 +26,7 @@ SOFTWARE.
 
 import com.mku.salmon.*;
 import com.mku.salmon.integrity.SalmonIntegrity;
+import com.mku.salmon.io.ProviderType;
 import com.mku.salmon.io.SalmonStream;
 import com.mku.salmon.password.SalmonPassword;
 import org.junit.jupiter.api.BeforeEach;
@@ -49,7 +50,7 @@ public class SalmonJavaNativeTestRunner {
     public void init() {
         SalmonDefaultOptions.setBufferSize(SalmonIntegrity.DEFAULT_CHUNK_SIZE);
 
-        SalmonStream.setAesProviderType(SalmonStream.ProviderType.AesIntrinsics);
+        SalmonStream.setAesProviderType(ProviderType.AesIntrinsics);
         // SalmonStream.setAesProviderType(SalmonStream.ProviderType.TinyAES);
     }
 

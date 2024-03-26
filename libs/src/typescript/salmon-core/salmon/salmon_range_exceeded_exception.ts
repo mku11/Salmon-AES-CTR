@@ -27,20 +27,24 @@ SOFTWARE.
  */
 export class SalmonRangeExceededException extends Error {
 
-    cause: Error | unknown | null = null;
+    #cause: Error | unknown | null = null;
 
     /**
      * Construct an exception with a specific message.
      * @param msg The message.
      */
-    public constructor(msg: string, ex: Error | unknown | null = null) {
+    public constructor(msg: string | null, ex: Error | unknown | null = null) {
         super(msg ?? "");
         if (ex != null) {
-            this.cause = ex;
+            this.#cause = ex;
         }
     }
 
+    /**
+     * Get the cause (inner exception) of this exception.
+     * @returns {Error | unknown | null} The inner exception.
+     */
     public getCause(): Error | unknown | null {
-        return this.cause;
+        return this.#cause;
     }
 }

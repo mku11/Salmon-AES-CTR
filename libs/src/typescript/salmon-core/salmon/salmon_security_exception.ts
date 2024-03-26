@@ -27,7 +27,7 @@ SOFTWARE.
  */
 export class SalmonSecurityException extends Error {
 
-    cause: Error | unknown | null = null;
+    #cause: Error | unknown | null = null;
 
     /**
      * Construct an exception with a specific message and inner exception.
@@ -37,11 +37,15 @@ export class SalmonSecurityException extends Error {
     public constructor(msg: string | null = null, ex: Error | unknown | null = null) {
         super(msg ?? "");
         if (ex != null) {
-            this.cause = ex;
+            this.#cause = ex;
         }
     }
 
+    /**
+     * Get the cause (inner exception) of this exception.
+     * @returns {Error | unknown | null} The inner exception.
+     */
     public getCause(): Error | unknown | null {
-        return this.cause;
+        return this.#cause;
     }
 }

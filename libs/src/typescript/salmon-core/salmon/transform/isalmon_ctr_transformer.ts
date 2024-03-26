@@ -30,20 +30,20 @@ export interface ISalmonCTRTransformer {
 
     /**
      * Initialize the transformer.
-     * @param key The AES key to use.
-     * @param nonce The nonce to use.
+     * @param {Uint8Array} key The AES key to use.
+     * @param {Uint8Array} nonce The nonce to use.
      * @throws SalmonSecurityException
      */
     init(key: Uint8Array, nonce: Uint8Array): Promise<void>;
 
     /**
      * Encrypt the data.
-     * @param srcBuffer The source byte array.
-     * @param srcOffset The source byte offset.
-     * @param destBuffer The destination byte array.
-     * @param destOffset The destination byte offset.
-     * @param count The number of bytes to transform.
-     * @return The number of bytes transformed.
+     * @param {Uint8Array} srcBuffer The source byte array.
+     * @param {number} srcOffset The source byte offset.
+     * @param {Uint8Array} destBuffer The destination byte array.
+     * @param {number} destOffset The destination byte offset.
+     * @param {number} count The number of bytes to transform.
+     * @return {Promise<number>} The number of bytes transformed.
      * @throws SalmonSecurityException
      * @throws SalmonRangeExceededException
      */
@@ -51,12 +51,12 @@ export interface ISalmonCTRTransformer {
 
     /**
      * Decrypt the data.
-     * @param srcBuffer The source byte array.
-     * @param srcOffset The source byte offset.
-     * @param destBuffer The destination byte array.
-     * @param destOffset The destination byte offset.
-     * @param count The number of bytes to transform.
-     * @return The number of bytes transformed.
+     * @param {Uint8Array} srcBuffer The source byte array.
+     * @param {number} srcOffset The source byte offset.
+     * @param {Uint8Array} destBuffer The destination byte array.
+     * @param {number} destOffset The destination byte offset.
+     * @param {number} count The number of bytes to transform.
+     * @return {Promise<number>} The number of bytes transformed.
      * @throws SalmonSecurityException
      * @throws SalmonRangeExceededException
      */
@@ -64,25 +64,25 @@ export interface ISalmonCTRTransformer {
 
     /**
      * Get the current counter.
-     * @return
+     * @return {Uint8Array | null} The current counter.
      */
     getCounter(): Uint8Array | null;
 
     /**
      * Get the current encryption key.
-     * @return
+     * @return {Uint8Array | null}
      */
     getKey(): Uint8Array | null;
 
     /**
      * Get the current block.
-     * @return
+     * @return {number}
      */
     getBlock(): number;
 
     /**
      * Get the nonce (initial counter) to be used for the data.
-     * @return
+     * @return {Uint8Array | null}
      */
     getNonce(): Uint8Array | null;
 
@@ -95,7 +95,7 @@ export interface ISalmonCTRTransformer {
      * Calculate the value of the counter based on the current block. After an encryption
      * operation (ie sync or read) the block will be incremented. This method calculates
      * the Counter.
-     * @param position
+     * @param {number} position
      * @throws SalmonRangeExceededException
      */
     syncCounter(position: number): void;

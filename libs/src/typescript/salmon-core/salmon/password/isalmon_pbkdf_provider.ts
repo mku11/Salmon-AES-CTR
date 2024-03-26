@@ -38,8 +38,8 @@ export const PBKDF_SHA1: string = "SHA-1";
 /**
  * Get the PBKDF java cipher algorigthm string.
  *
- * @param pbkdfAlgo The PBKDF algorithm to be used
- * @return The java cipher algorithm string. See javax.crypto.SecretKeyFactory.
+ * @param {PbkdfAlgo.SHA256} pbkdfAlgo The PBKDF algorithm to be used
+ * @return {string} The java cipher algorithm string. See javax.crypto.SecretKeyFactory.
  */
 export function getPbkdfAlgoString(pbkdfAlgo: PbkdfAlgo): string {
     switch (pbkdfAlgo) {
@@ -59,12 +59,12 @@ export interface ISalmonPbkdfProvider {
 
     /**
      * Get a key derived from a text password.
-     * @param password The text password.
-     * @param salt The salt needs to be at least 24 bytes.
-     * @param iterations Iterations to use. Make sure you use a high number according to your hardware specs.
-     * @param outputBytes The length of the output key.
-     * @param pbkdfAlgo The hash algorithm to use.
-     * @return The key.
+     * @param {string} password The text password.
+     * @param {Uint8Array} salt The salt needs to be at least 24 bytes.
+     * @param {number} iterations Iterations to use. Make sure you use a high number according to your hardware specs.
+     * @param {number} outputBytes The length of the output key.
+     * @param {PbkdfAlgo} pbkdfAlgo The hash algorithm to use.
+     * @return {Promise<Uint8Array>} The key.
      * @throws SalmonSecurityException
      */
     getKey(password: string, salt: Uint8Array, iterations: number, outputBytes: number, pbkdfAlgo: PbkdfAlgo): Promise<Uint8Array>;

@@ -32,7 +32,7 @@ import java.security.NoSuchAlgorithmException;
 import java.security.spec.InvalidKeySpecException;
 
 /**
- * Provides pbkdf via Java default algorithm.
+ * Provides pbkdf algorithm.
  */
 public class SalmonDefaultPbkdfProvider  implements ISalmonPbkdfProvider{
     /**

@@ -27,6 +27,7 @@ import com.mku.io.RandomAccessStream;
 import com.mku.io.MemoryStream;
 import com.mku.salmon.integrity.SalmonIntegrity;
 import com.mku.salmon.integrity.SalmonIntegrityException;
+import com.mku.salmon.io.EncryptionMode;
 import com.mku.salmon.io.SalmonStream;
 import com.mku.salmon.transform.SalmonAES256CTRTransformer;
 
@@ -58,7 +59,6 @@ public class SalmonDecryptor {
 
     /**
      * Instantiate an encryptor.
-     *
      */
     public SalmonDecryptor() {
         this.threads = 1;
@@ -70,7 +70,7 @@ public class SalmonDecryptor {
     /**
      * Instantiate an encryptor with parallel tasks and buffer size.
      *
-     * @param threads    The number of threads to use.
+     * @param threads The number of threads to use.
      */
     public SalmonDecryptor(int threads) {
         this.threads = threads;
@@ -94,13 +94,14 @@ public class SalmonDecryptor {
 
     /**
      * Decrypts a byte array using parallel threads.
-     * @param data The input data to be decrypted.
-     * @param key The AES key to use for decryption.
-     * @param nonce The nonce to use for decryption.
+     *
+     * @param data          The input data to be decrypted.
+     * @param key           The AES key to use for decryption.
+     * @param nonce         The nonce to use for decryption.
      * @param hasHeaderData The header data.
      * @return The output buffer containing the decrypted data.
-     * @throws IOException  Thrown if there is an error with the stream.
-     * @throws SalmonSecurityException Thrown if there is a security exception with the stream.
+     * @throws IOException              Thrown if there is an error with the stream.
+     * @throws SalmonSecurityException  Thrown if there is a security exception with the stream.
      * @throws SalmonIntegrityException Thrown if the data are corrupt or tampered with.
      */
     public byte[] decrypt(byte[] data, byte[] key, byte[] nonce, boolean hasHeaderData)
@@ -110,22 +111,23 @@ public class SalmonDecryptor {
 
     /**
      * Decrypt a byte array using AES256 based on the provided key and nonce.
-     * @param data The input data to be decrypted.
-     * @param key The AES key to use for decryption.
-     * @param nonce The nonce to use for decryption.
+     *
+     * @param data          The input data to be decrypted.
+     * @param key           The AES key to use for decryption.
+     * @param nonce         The nonce to use for decryption.
      * @param hasHeaderData The header data.
-     * @param integrity Verify hash integrity in the data.
-     * @param hashKey The hash key to be used for integrity.
-     * @param chunkSize The chunk size.
+     * @param integrity     Verify hash integrity in the data.
+     * @param hashKey       The hash key to be used for integrity.
+     * @param chunkSize     The chunk size.
      * @return The byte array with the decrypted data.
-     * @throws IOException Thrown if there is a problem with decoding the array.
-     * @throws SalmonSecurityException Thrown if the key and nonce are not provided.
+     * @throws IOException              Thrown if there is a problem with decoding the array.
+     * @throws SalmonSecurityException  Thrown if the key and nonce are not provided.
      * @throws IOException
      * @throws SalmonIntegrityException
      */
     public byte[] decrypt(byte[] data, byte[] key, byte[] nonce,
-                                 boolean hasHeaderData,
-                                 boolean integrity, byte[] hashKey, Integer chunkSize)
+                          boolean hasHeaderData,
+                          boolean integrity, byte[] hashKey, Integer chunkSize)
             throws SalmonSecurityException, IOException, SalmonIntegrityException {
         if (key == null)
             throw new SalmonSecurityException("Key is missing");
@@ -149,7 +151,7 @@ public class SalmonDecryptor {
         if (nonce == null)
             throw new SalmonSecurityException("Nonce is missing");
 
-        int realSize = (int) SalmonAES256CTRTransformer.getActualSize(data, key, nonce, SalmonStream.EncryptionMode.Decrypt,
+        int realSize = (int) SalmonStream.getActualSize(data, key, nonce, EncryptionMode.Decrypt,
                 headerData, integrity, chunkSize, hashKey);
         byte[] outData = new byte[realSize];
 
@@ -167,18 +169,19 @@ public class SalmonDecryptor {
 
     /**
      * Decrypt stream using parallel threads.
-     * @param data The input data to be decrypted
-     * @param outData The output buffer with the decrypted data.
-     * @param key The AES key.
-     * @param hashKey The hash key.
-     * @param nonce The nonce to be used for decryption.
+     *
+     * @param data       The input data to be decrypted
+     * @param outData    The output buffer with the decrypted data.
+     * @param key        The AES key.
+     * @param hashKey    The hash key.
+     * @param nonce      The nonce to be used for decryption.
      * @param headerData The header data.
-     * @param chunkSize The chunk size.
-     * @param integrity True to verify integrity.
+     * @param chunkSize  The chunk size.
+     * @param integrity  True to verify integrity.
      */
     private void decryptDataParallel(byte[] data, byte[] outData,
-                                            byte[] key, byte[] hashKey, byte[] nonce, byte[] headerData,
-                                            Integer chunkSize, boolean integrity) {
+                                     byte[] key, byte[] hashKey, byte[] nonce, byte[] headerData,
+                                     Integer chunkSize, boolean integrity) {
         int runningThreads = 1;
         long partSize = data.length;
 
@@ -191,10 +194,10 @@ public class SalmonDecryptor {
 
         if (partSize > minPartSize) {
             partSize = (int) Math.ceil(data.length / (float) threads);
-            if(partSize > minPartSize)
-				partSize -= partSize % minPartSize;
-			else
-				partSize = minPartSize;
+            if (partSize > minPartSize)
+                partSize -= partSize % minPartSize;
+            else
+                partSize = minPartSize;
             runningThreads = (int) (data.length / partSize);
         }
 
@@ -206,22 +209,23 @@ public class SalmonDecryptor {
 
     /**
      * Submit decryption parallel jobs.
+     *
      * @param runningThreads The number of threads to submit.
-     * @param partSize The data length of each part that belongs to each thread.
-     * @param data The buffer of data you want to decrypt. This is a shared byte array across all threads where each
-     *             thread will read each own part.
-     * @param outData The buffer of data containing the decrypted data.
-     * @param key The AES key.
-     * @param hashKey The hash key for integrity validation.
-     * @param nonce The nonce for the data.
-     * @param headerData The header data common to all parts.
-     * @param integrity True to verify the data integrity.
-     * @param chunkSize The chunk size.
+     * @param partSize       The data length of each part that belongs to each thread.
+     * @param data           The buffer of data you want to decrypt. This is a shared byte array across all threads where each
+     *                       thread will read each own part.
+     * @param outData        The buffer of data containing the decrypted data.
+     * @param key            The AES key.
+     * @param hashKey        The hash key for integrity validation.
+     * @param nonce          The nonce for the data.
+     * @param headerData     The header data common to all parts.
+     * @param integrity      True to verify the data integrity.
+     * @param chunkSize      The chunk size.
      */
     private void submitDecryptJobs(int runningThreads, long partSize,
-                                          byte[] data, byte[] outData,
-                                          byte[] key, byte[] hashKey, byte[] nonce, byte[] headerData,
-                                          boolean integrity, Integer chunkSize) {
+                                   byte[] data, byte[] outData,
+                                   byte[] key, byte[] hashKey, byte[] nonce, byte[] headerData,
+                                   boolean integrity, Integer chunkSize) {
         final CountDownLatch done = new CountDownLatch(runningThreads);
         AtomicReference<Exception> ex = new AtomicReference<>();
         for (int i = 0; i < runningThreads; i++) {
@@ -231,10 +235,10 @@ public class SalmonDecryptor {
                 try {
                     long start = partSize * index;
                     long length;
-					if(index == runningThreads - 1)
-						length = data.length-start;
-					else
-						length = partSize;
+                    if (index == runningThreads - 1)
+                        length = data.length - start;
+                    else
+                        length = partSize;
                     MemoryStream ins = new MemoryStream(data);
                     decryptData(ins, start, length, outData, key, nonce, headerData,
                             integrity, hashKey, chunkSize);
@@ -247,7 +251,8 @@ public class SalmonDecryptor {
 
         try {
             done.await();
-        } catch (InterruptedException ignored) {}
+        } catch (InterruptedException ignored) {
+        }
 
         if (ex.get() != null) {
             try {
@@ -260,30 +265,31 @@ public class SalmonDecryptor {
 
     /**
      * Decrypt the data stream.
+     *
      * @param inputStream The Stream to be decrypted.
-     * @param start The start position of the stream to be decrypted.
-     * @param count The number of bytes to be decrypted.
-     * @param outData The buffer with the decrypted data.
-     * @param key The AES key to be used.
-     * @param nonce The nonce to be used.
-     * @param headerData The header data to be used.
-     * @param integrity True to verify integrity.
-     * @param hashKey The hash key to be used for integrity verification.
-     * @param chunkSize The chunk size.
-     * @throws IOException  Thrown if there is an error with the stream.
-     * @throws SalmonSecurityException Thrown if there is a security exception with the stream.
+     * @param start       The start position of the stream to be decrypted.
+     * @param count       The number of bytes to be decrypted.
+     * @param outData     The buffer with the decrypted data.
+     * @param key         The AES key to be used.
+     * @param nonce       The nonce to be used.
+     * @param headerData  The header data to be used.
+     * @param integrity   True to verify integrity.
+     * @param hashKey     The hash key to be used for integrity verification.
+     * @param chunkSize   The chunk size.
+     * @throws IOException              Thrown if there is an error with the stream.
+     * @throws SalmonSecurityException  Thrown if there is a security exception with the stream.
      * @throws SalmonIntegrityException Thrown if the stream is corrupt or tampered with.
      */
     private void decryptData(RandomAccessStream inputStream, long start, long count, byte[] outData,
-                                    byte[] key, byte[] nonce,
-                                    byte[] headerData, boolean integrity, byte[] hashKey, Integer chunkSize)
+                             byte[] key, byte[] nonce,
+                             byte[] headerData, boolean integrity, byte[] hashKey, Integer chunkSize)
             throws IOException, SalmonSecurityException, SalmonIntegrityException {
         SalmonStream stream = null;
         MemoryStream outputStream = null;
         try {
             outputStream = new MemoryStream(outData);
             outputStream.setPosition(start);
-            stream = new SalmonStream(key, nonce, SalmonStream.EncryptionMode.Decrypt, inputStream,
+            stream = new SalmonStream(key, nonce, EncryptionMode.Decrypt, inputStream,
                     headerData, integrity, chunkSize, hashKey);
             stream.setPosition(start);
             long totalChunkBytesRead = 0;
@@ -309,9 +315,17 @@ public class SalmonDecryptor {
                 outputStream.close();
         }
     }
-	
-	@Override
+
+    /**
+     * Close the decryptor and release associated resources
+     */
+    public void close() {
+        if (executor != null)
+            executor.shutdownNow();
+    }
+
+    @Override
     protected void finalize() {
-        executor.shutdownNow();
+        close();
     }
 }

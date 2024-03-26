@@ -25,6 +25,7 @@ SOFTWARE.
 */
 
 import com.mku.salmon.SalmonDefaultOptions;
+import com.mku.salmon.io.ProviderType;
 import com.mku.salmon.io.SalmonStream;
 import com.mku.salmon.test.TestHelper;
 import org.bouncycastle.jce.provider.BouncyCastleProvider;
@@ -53,19 +54,19 @@ public class SalmonBenchmark {
 
     @Benchmark
     public void EncryptAndDecryptSalmonNativeDef() throws Exception {
-        SalmonStream.setAesProviderType(SalmonStream.ProviderType.Default);
+        SalmonStream.setAesProviderType(ProviderType.Default);
         TestHelper.encryptAndDecryptByteArrayNative(TEST_PERF_SIZE, false);
     }
 
     @Benchmark
     public void EncryptAndDecryptStreamSalmonDef() throws Exception {
-        SalmonStream.setAesProviderType(SalmonStream.ProviderType.Default);
+        SalmonStream.setAesProviderType(ProviderType.Default);
         TestHelper.encryptAndDecryptByteArrayNative(TEST_PERF_SIZE, false);
     }
 
     @Benchmark
     public void EncryptAndDecryptStreamSalmonIntrinsics() throws Exception {
-        SalmonStream.setAesProviderType(SalmonStream.ProviderType.AesIntrinsics);
+        SalmonStream.setAesProviderType(ProviderType.AesIntrinsics);
         TestHelper.encryptAndDecryptByteArray(TEST_PERF_SIZE, false);
     }
 
@@ -81,7 +82,7 @@ public class SalmonBenchmark {
 
     @Benchmark
     public void EncryptAndDecryptStreamPerformanceSalmonTinyAes() throws Exception {
-        SalmonStream.setAesProviderType(SalmonStream.ProviderType.TinyAES);
+        SalmonStream.setAesProviderType(ProviderType.TinyAES);
         TestHelper.encryptAndDecryptByteArray(TEST_PERF_SIZE, false);
     }
 }

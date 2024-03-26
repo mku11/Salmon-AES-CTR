@@ -23,14 +23,9 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 */
 
-import com.mku.io.MemoryStream;
 import com.mku.salmon.SalmonGenerator;
 import com.mku.salmon.SalmonRangeExceededException;
 import com.mku.salmon.SalmonSecurityException;
-import com.mku.salmon.integrity.SalmonIntegrityException;
-import com.mku.salmon.io.SalmonStream;
-
-import java.io.IOException;
 
 /**
  * Abstract class for AES256 transformer implementations.
@@ -42,36 +37,6 @@ public abstract class SalmonAES256CTRTransformer implements ISalmonCTRTransforme
      * Standard expansion key size for AES256 only.
      */
     public static final int EXPANDED_KEY_SIZE = 240;
-
-    /**
-     * Get the output size of the data to be transformed(encrypted or decrypted) including
-     * header and hash without executing any operations. This can be used to prevent over-allocating memory
-     * where creating your output buffers.
-     *
-     * @param data The data to be transformed.
-     * @param key The AES key.
-     * @param nonce The nonce for the CTR.
-     * @param mode The {@link SalmonStream.EncryptionMode} Encrypt or Decrypt.
-     * @param headerData The header data to be embedded if you use Encryption.
-     * @param integrity True if you want to enable integrity.
-     * @param chunkSize The chunk size for integrity chunks.
-     * @param hashKey The hash key to be used for integrity checks.
-     * @return The size of the output data.
-     *
-     * @throws SalmonSecurityException
-     * @throws SalmonIntegrityException
-     * @throws IOException
-     */
-    public static long getActualSize(byte[] data, byte[] key, byte[] nonce, SalmonStream.EncryptionMode mode,
-                                     byte[] headerData, boolean integrity, Integer chunkSize, byte[] hashKey)
-            throws SalmonSecurityException, SalmonIntegrityException, IOException {
-        MemoryStream inputStream = new MemoryStream(data);
-        SalmonStream s = new SalmonStream(key, nonce, mode, inputStream,
-                headerData, integrity, chunkSize, hashKey);
-        long size = s.actualLength();
-        s.close();
-        return size;
-    }
 
     /**
      * Salmon stream encryption block size, same as AES.
@@ -161,6 +126,8 @@ public abstract class SalmonAES256CTRTransformer implements ISalmonCTRTransforme
      * @return
      */
     public byte[] getCounter() {
+        if (this.counter == null)
+            throw new RuntimeException("No counter, run init() and resetCounter()");
         return counter;
     }
 
