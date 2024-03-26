@@ -29,8 +29,9 @@ import { VirtualFile } from "./virtual_file.js";
 import { ISalmonSequencer } from "../sequence/isalmon_sequencer.js";
 
 /**
- * SalmonDrive implementation for standard javascript local file API. This provides a virtual drive implementation
- * that you can use to store and access encrypted files locally using your browser.
+ * Drive implementation for standard javascript local file API. This provides a virtual drive implementation
+ * that you can use to store and access encrypted files locally using your browser. 
+ * Supported only by Chrome browser.
  */
 export class JsDrive extends SalmonDrive {
 

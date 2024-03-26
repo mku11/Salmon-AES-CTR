@@ -38,7 +38,6 @@ import java.util.Calendar;
  * Interface that represents a real file. This class is used internally by the virtual disk to
  * import, store, and export the encrypted files.
  * Extend this to provide an interface to any file system, platform, or API ie: on disk, memory, network, or cloud.
- * See: {@link JavaFile}
  */
 public interface IRealFile {
     /**

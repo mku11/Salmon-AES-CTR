@@ -28,20 +28,19 @@ import { RandomAccessStream } from "../../salmon-core/io/random_access_stream.js
  * Interface that represents a real file. This class is used internally by the virtual disk to
  * import, store, and export the encrypted files.
  * Extend this to provide an interface to any file system, platform, or API ie: on disk, memory, network, or cloud.
- * See: {@link JsHttpFile}
  */
 export interface IRealFile {
     /**
      * True if this file exists.
      *
-     * @return
+     * @return {Promise<boolean>}
      */
     exists(): Promise<boolean>;
 
     /**
      * Delete this file.
      *
-     * @return
+     * @return {Promise<boolean>}
      */
     delete(): Promise<boolean>;
 
@@ -49,7 +48,7 @@ export interface IRealFile {
      * Get a stream for reading the file.
      *
      * @return
-     * @throws FileNotFoundException
+     * @throws {Promise<RandomAccessStream>} FileNotFoundException
      */
     getInputStream(): Promise<RandomAccessStream>;
 
@@ -57,7 +56,7 @@ export interface IRealFile {
      * Get a stream for writing to the file.
      *
      * @return
-     * @throws FileNotFoundException
+     * @throws {Promise<RandomAccessStream>} FileNotFoundException
      */
     getOutputStream(): Promise<RandomAccessStream>;
 
@@ -65,7 +64,7 @@ export interface IRealFile {
      * Rename file.
      *
      * @param newFilename The new filename
-     * @return True if success.
+     * @return {Promise<boolean>} True if success.
      * @throws FileNotFoundException
      */
     renameTo(newFilename: string): Promise<boolean>;
@@ -73,28 +72,28 @@ export interface IRealFile {
     /**
      * Get the length for the file.
      *
-     * @return The length.
+     * @return {Promise<number>} The length.
      */
     length(): Promise<number>;
 
     /**
      * Get the count of files and subdirectories
      *
-     * @return
+     * @return {Promise<number>}
      */
     getChildrenCount(): Promise<number>;
 
     /**
      * Get the last modified date of the file.
      *
-     * @return
+     * @return {Promise<number>}
      */
     lastModified(): Promise<number>;
 
     /**
      * Get the absolute path or handle of the file on disk.
      *
-     * @return
+     * @return {string}
      */
     getAbsolutePath(): string;
 
@@ -109,51 +108,51 @@ export interface IRealFile {
     /**
      * True if this is a file.
      *
-     * @return
+     * @return {Promise<boolean>}
      */
     isFile(): Promise<boolean>;
 
     /**
      * True if this is a directory.
      *
-     * @return
+     * @return {Promise<boolean>}
      */
     isDirectory(): Promise<boolean>;
 
     /**
      * Get all files and directories under this directory.
      *
-     * @return
+     * @return {Promise<IRealFile[]>}
      */
     listFiles(): Promise<IRealFile[]>;
 
     /**
      * Get the basename of the file.
      *
-     * @return
+     * @return {string}
      */
     getBaseName(): string;
 
     /**
      * Create the directory with the name provided under this directory.
      *
-     * @param dirName Directory name.
-     * @return The newly created directory.
+     * @param {string} dirName Directory name.
+     * @return {Promise<IRealFile>} The newly created directory.
      */
     createDirectory(dirName: string): Promise<IRealFile>;
 
     /**
      * Get the parent directory of this file/directory.
      *
-     * @return The parent directory.
+     * @return {Promise<IRealFile | null>} The parent directory.
      */
     getParent(): Promise<IRealFile | null>;
 
     /**
      * Create an empty file with the provided name.
      *
-     * @param filename The name for the new file.
-     * @return The newly create file.
+     * @param {string} filename The name for the new file.
+     * @return {Promise<IRealFile>} The newly create file.
      * @throws IOException
      */
     createFile(filename: string): Promise<IRealFile>;
@@ -161,20 +160,20 @@ export interface IRealFile {
     /**
      * Move this file to another directory.
      *
-     * @param newDir           The target directory.
-     * @param newName          The new filename.
-     * @param progressListener Observer to notify of the move progress.
-     * @return The file after the move. Use this instance for any subsequent file operations.
+     * @param {IRealFile} newDir           The target directory.
+     * @param {string | null} newName          The new filename.
+     * @param {((position: number, length: number) => void) | null} progressListener Observer to notify of the move progress.
+     * @return {Promise<IRealFile>} The file after the move. Use this instance for any subsequent file operations.
      */
     move(newDir: IRealFile, newName: string | null, progressListener: ((position: number, length: number) => void) | null): Promise<IRealFile>;
 
     /**
      * Copy this file to another directory.
      *
-     * @param newDir           The target directory.
-     * @param newName          The new filename.
-     * @param progressListener Observer to notify of the copy progress.
-     * @return The file after the copy. Use this instance for any subsequent file operations.
+     * @param {IRealFile} newDir           The target directory.
+     * @param {string | null} newName          The new filename.
+     * @param {((position: number, length: number) => void) | null} progressListener Observer to notify of the copy progress.
+     * @return {Promise<IRealFile | null>} The file after the copy. Use this instance for any subsequent file operations.
      * @throws IOException
      */
     copy(newDir: IRealFile, newName: string | null, progressListener: ((position: number, length: number) => void) | null): Promise<IRealFile | null>;
@@ -182,15 +181,15 @@ export interface IRealFile {
     /**
      * Get the file/directory matching the name provided under this directory.
      *
-     * @param filename The name of the file or directory to match.
-     * @return The file that was matched.
+     * @param {string} filename The name of the file or directory to match.
+     * @return {Promise<IRealFile | null>} The file that was matched.
      */
     getChild(filename: string): Promise<IRealFile | null>;
 
     /**
      * Create a directory with the current filepath.
      *
-     * @return
+     * @return {Promise<boolean>}
      */
     mkdir(): Promise<boolean>;
 
