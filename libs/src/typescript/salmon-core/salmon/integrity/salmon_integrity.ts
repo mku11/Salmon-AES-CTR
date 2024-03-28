@@ -25,7 +25,7 @@ SOFTWARE.
 import { SalmonGenerator } from "../salmon_generator.js";
 import { SalmonSecurityException } from "../salmon_security_exception.js";
 import { SalmonAES256CTRTransformer } from "../transform/salmon_aes256_ctr_transformer.js";
-import { IHashProvider } from "./ihash_provider.js";
+import { IHashProvider } from "../../integrity/ihash_provider.js";
 import { SalmonIntegrityException } from "./salmon_integrity_exception.js";
 
 /**

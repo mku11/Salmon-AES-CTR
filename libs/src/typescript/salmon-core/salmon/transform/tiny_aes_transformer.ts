@@ -26,7 +26,7 @@ import { SalmonAesIntrTransformer } from "./salmon_aes_intr_transformer.js";
 import { SalmonNativeTransformer } from "./salmon_native_transformer.js";
 
 /**
- *  Salmon AES transformer implemented with TinyAES backend.
+ * Salmon AES transformer implemented with TinyAES backend.
  */
 export class TinyAesTransformer extends SalmonNativeTransformer {
     /**
@@ -42,7 +42,7 @@ export class TinyAesTransformer extends SalmonNativeTransformer {
      * @throws SalmonSecurityException
      */
     public override async init(key: Uint8Array, nonce: Uint8Array): Promise<void> {
-        SalmonAesIntrTransformer.getNativeProxy().salmonInit(TinyAesTransformer.AES_IMPL_TINY_AES);
+        SalmonAesIntrTransformer.getNativeProxy().init(TinyAesTransformer.AES_IMPL_TINY_AES);
         await super.init(key, nonce);
     }
 }

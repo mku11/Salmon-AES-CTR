@@ -32,8 +32,8 @@ import { SalmonIntegrityException } from '../../lib/salmon-core/salmon/integrity
 import { copyRecursively, moveRecursively, autoRenameFile } from '../../lib/salmon-fs/file/ireal_file.js'
 import { SalmonFileReadableStream } from '../../lib/salmon-fs/salmonfs/salmon_file_readable_stream.js';
 import { SalmonFileCommander } from '../../lib/salmon-fs/utils/salmon_file_commander.js';
-import { SalmonDefaultOptions } from '../../lib/salmon-core/salmon/salmon_default_options.js';
 import { SalmonAuthException } from '../../lib/salmon-fs/salmonfs/salmon_auth_exception.js'
+import { SalmonIntegrity } from '../../lib/salmon-core/salmon/integrity/salmon_integrity.js';
 
 describe('salmon-fs', () => {
 
@@ -62,7 +62,7 @@ describe('salmon-fs', () => {
         let sequencer = new SalmonFileSequencer(await getFile(vaultDir, TsFsTestHelper.TEST_SEQUENCER_FILE1), getSequenceSerializer());
         let drive = await SalmonDrive.createDrive(vaultDir, TsFsTestHelper.driveClassType, sequencer, TestHelper.TEST_PASSWORD);
         let wrongPassword = false;
-        let rootDir = await drive.getVirtualRoot();
+        let rootDir = await drive.getRoot();
         await rootDir.listFiles();
         try {
             await drive.unlock(TestHelper.TEST_FALSE_PASSWORD);
@@ -82,7 +82,7 @@ describe('salmon-fs', () => {
         drive.lock();
         try {
             let drive = await SalmonDrive.openDrive(vaultDir, TsFsTestHelper.driveClassType, sequencer);
-            let rootDir = await drive.getVirtualRoot();
+            let rootDir = await drive.getRoot();
             await rootDir.listFiles();
         } catch (ex) {
             console.error(ex);
@@ -101,7 +101,7 @@ describe('salmon-fs', () => {
         try {
             drive = await SalmonDrive.openDrive(vaultDir, TsFsTestHelper.driveClassType, sequencer);
             await drive.unlock(TestHelper.TEST_PASSWORD);
-            let virtualRoot = await drive.getVirtualRoot();
+            let virtualRoot = await drive.getRoot();
         } catch (ex) {
             console.error(ex);
             wrongPassword = true;
@@ -403,7 +403,7 @@ describe('salmon-fs', () => {
         let sequencer = new SalmonFileSequencer(sequenceFile, serializer);
         let drive = await SalmonDrive.createDrive(vaultDir, TsFsTestHelper.driveClassType, sequencer, TestHelper.TEST_PASSWORD);
         let wrongPassword = false;
-        let rootDir = await drive.getVirtualRoot();
+        let rootDir = await drive.getRoot();
         rootDir.listFiles();
         drive.lock();
 
@@ -547,9 +547,9 @@ describe('salmon-fs', () => {
 
         let sequencer = new SalmonFileSequencer(await getFile(vaultDir, TsFsTestHelper.TEST_SEQUENCER_FILE1), getSequenceSerializer());
         let drive = await SalmonDrive.createDrive(vaultDir, TsFsTestHelper.driveClassType, sequencer, TestHelper.TEST_PASSWORD);
-        let fileCommander = new SalmonFileCommander(SalmonDefaultOptions.getBufferSize(), SalmonDefaultOptions.getBufferSize(), 2)
+        let fileCommander = new SalmonFileCommander(SalmonIntegrity.DEFAULT_CHUNK_SIZE, SalmonIntegrity.DEFAULT_CHUNK_SIZE, 2)
         let sfiles = await fileCommander.importFiles([file],
-            await drive.getVirtualRoot(), false, true, null, null, null);
+            await drive.getRoot(), false, true, null, null, null);
 
         let fileInputStream1 = SalmonFileReadableStream.create(sfiles[0], 4, 4 * 1024 * 1024, 4, 256 * 1024);
         let ms = new MemoryStream();

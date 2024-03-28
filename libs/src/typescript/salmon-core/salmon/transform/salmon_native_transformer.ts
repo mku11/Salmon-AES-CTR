@@ -23,8 +23,8 @@ SOFTWARE.
 */
 
 import { SalmonSecurityException } from "../salmon_security_exception.js";
-import { INativeProxy } from "./inative_proxy.js";
-import { NativeProxy } from "./native_proxy.js";
+import { INativeProxy } from "../../native/inative_proxy.js";
+import { SalmonNativeProxy } from "../native/salmon_native_proxy.js";
 import { SalmonAES256CTRTransformer } from "./salmon_aes256_ctr_transformer.js";
 
 /**
@@ -32,7 +32,7 @@ import { SalmonAES256CTRTransformer } from "./salmon_aes256_ctr_transformer.js";
  * native transformer.
  */ 
 export class SalmonNativeTransformer extends SalmonAES256CTRTransformer {
-    static #nativeProxy: INativeProxy = new NativeProxy();
+    static #nativeProxy: INativeProxy = new SalmonNativeProxy();
 
     /**
      * The native proxy to use for loading libraries for different platforms and operating systems.
@@ -68,7 +68,7 @@ export class SalmonNativeTransformer extends SalmonAES256CTRTransformer {
             throw new SalmonSecurityException("No key found, run init first");
         if (ctr == null) //TODO: ToSync
             throw new SalmonSecurityException("No counter found, run init first");
-        return SalmonNativeTransformer.#nativeProxy.salmonTransform(key, ctr,
+        return SalmonNativeTransformer.#nativeProxy.transform(key, ctr,
                 srcBuffer, srcOffset,
                 destBuffer, destOffset, count);
     }
@@ -91,7 +91,7 @@ export class SalmonNativeTransformer extends SalmonAES256CTRTransformer {
             throw new SalmonSecurityException("No key found, run init first");
         if (ctr == null) //TODO: ToSync
             throw new SalmonSecurityException("No counter found, run init first");
-        return SalmonNativeTransformer.#nativeProxy.salmonTransform(key, ctr,
+        return SalmonNativeTransformer.#nativeProxy.transform(key, ctr,
                 srcBuffer, srcOffset,
                 destBuffer, destOffset, count);
     }

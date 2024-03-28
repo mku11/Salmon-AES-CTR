@@ -42,9 +42,9 @@ export class SalmonAesIntrTransformer extends SalmonNativeTransformer {
      * @throws SalmonSecurityException
      */
     public async init(key: Uint8Array, nonce: Uint8Array): Promise<void> {
-        SalmonAesIntrTransformer.getNativeProxy().salmonInit(SalmonAesIntrTransformer.AES_IMPL_AES_INTR);
+        SalmonAesIntrTransformer.getNativeProxy().init(SalmonAesIntrTransformer.AES_IMPL_AES_INTR);
         let expandedKey: Uint8Array = new Uint8Array(SalmonAES256CTRTransformer.EXPANDED_KEY_SIZE);
-        SalmonAesIntrTransformer.getNativeProxy().salmonExpandKey(key, expandedKey);
+        SalmonAesIntrTransformer.getNativeProxy().expandKey(key, expandedKey);
         this.setExpandedKey(expandedKey);
         await super.init(key, nonce);
     }
@@ -68,7 +68,7 @@ export class SalmonAesIntrTransformer extends SalmonNativeTransformer {
         if (ctr == null) //TODO: ToSync
             throw new SalmonSecurityException("No counter found, run init first");
         // AES intrinsics needs the expanded key
-        return SalmonAesIntrTransformer.getNativeProxy().salmonTransform(expKey, ctr,
+        return SalmonAesIntrTransformer.getNativeProxy().transform(expKey, ctr,
                 srcBuffer, srcOffset,
                 destBuffer, destOffset, count);
     }
@@ -92,7 +92,7 @@ export class SalmonAesIntrTransformer extends SalmonNativeTransformer {
         if (ctr == null) //TODO: ToSync
             throw new SalmonSecurityException("No counter found, run init first");
         // AES intrinsics needs the expanded key
-        return SalmonAesIntrTransformer.getNativeProxy().salmonTransform(expKey, ctr,
+        return SalmonAesIntrTransformer.getNativeProxy().transform(expKey, ctr,
                 srcBuffer, srcOffset,
                 destBuffer, destOffset, count);
     }

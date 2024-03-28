@@ -25,10 +25,9 @@ SOFTWARE.
 import { IOException } from "../../io/io_exception.js";
 import { MemoryStream } from "../../io/memory_stream.js";
 import { RandomAccessStream, SeekOrigin } from "../../io/random_access_stream.js";
-import { HmacSHA256Provider } from "../integrity/hmac_sha256_provider.js";
+import { HmacSHA256Provider } from "../../integrity/hmac_sha256_provider.js";
 import { SalmonIntegrity } from "../integrity/salmon_integrity.js";
 import { SalmonIntegrityException } from "../integrity/salmon_integrity_exception.js";
-import { SalmonDefaultOptions } from "../salmon_default_options.js";
 import { SalmonGenerator } from "../salmon_generator.js";
 import { SalmonSecurityException } from "../salmon_security_exception.js";
 import { ISalmonCTRTransformer } from "../transform/isalmon_ctr_transformer.js";
@@ -83,6 +82,12 @@ export class SalmonStream extends RandomAccessStream {
      * The integrity to use for hash signature creation and validation.
      */
     #salmonIntegrity: SalmonIntegrity = new SalmonIntegrity(false, null, null, new HmacSHA256Provider(), SalmonGenerator.HASH_RESULT_LENGTH);
+
+    
+    /**
+     * Internal buffer size by default should be aligned to the integrity for better performance
+     */
+    #bufferSize: number = SalmonIntegrity.DEFAULT_CHUNK_SIZE;
 
     #key: Uint8Array;
     #nonce: Uint8Array;
@@ -677,7 +682,7 @@ export class SalmonStream extends RandomAccessStream {
      * @return
      */
     #getNormalizedBufferSize(includeHashes: boolean): number {
-        let bufferSize: number = SalmonDefaultOptions.getBufferSize();
+        let bufferSize: number = this.#bufferSize;
         if (this.getChunkSize() > 0) {
             // buffer size should be a multiple of the chunk size if integrity is enabled
             let partSize: number = this.getChunkSize();
@@ -823,5 +828,22 @@ export class SalmonStream extends RandomAccessStream {
      */
     public getTransformer(): ISalmonCTRTransformer {
         return this.#transformer;
+    }
+
+    /**
+     * Get the internal buffer size.
+     * @return {number} The buffer size.
+     */
+    public getBufferSize(): number{
+        return this.#bufferSize;
+    }
+
+    /**
+     * Set the internal buffer size.
+     *
+     * @param {number} bufferSize The new buffer size.
+     */
+    public setBufferSize(bufferSize: number): void {
+        this.#bufferSize = bufferSize;
     }
 }

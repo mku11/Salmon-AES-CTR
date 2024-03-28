@@ -22,29 +22,20 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 */
 
-import { IRealFile } from "./ireal_file";
-import { VirtualFile } from "./virtual_file";
+import { IRealFile } from "../../file/ireal_file.js";
+import { VirtualFile } from "../../file/virtual_file.js";
+import { FileImporterWorker } from "../../utils/file_importer_worker.js";
+import { FileUtils } from "../../utils/file_utils.js";
+import { SalmonFile } from "../salmon_file.js";
 
-/*
- * Virtual Drive 
- */
-export abstract class VirtualDrive {
+export class SalmonFileImporterWorker extends FileImporterWorker {
 
-    /**
-     * Get the virtual root directory backed by a real directory
-     * @param {IRealFile} virtualRootRealFile The real directory
-     * @returns {VirtualFile} The virtual root directory.
-     */
-    protected abstract getVirtualRoot(virtualRootRealFile: IRealFile): VirtualFile;
-
-    /**
-     * Method is called when the user is authenticated
-     */
-    protected abstract onUnlockSuccess(): void;
-
-    /**
-     * Method is called when unlocking the drive has failed
-     */
-    protected abstract onUnlockError(): void;
-
+    async getTargetFile(params: any): Promise<VirtualFile | null> {
+        let realFile: IRealFile = await FileUtils.getInstance(params.importedFileClassType, params.importedFileHandle);
+        let targetFile: SalmonFile = new SalmonFile(realFile, null);
+        targetFile.setAllowOverwrite(true);
+        targetFile.setEncryptionKey(params.key);
+        await targetFile.setApplyIntegrity(params.integrity, params.hash_key, params.chunk_size);
+        return targetFile;
+    }
 }

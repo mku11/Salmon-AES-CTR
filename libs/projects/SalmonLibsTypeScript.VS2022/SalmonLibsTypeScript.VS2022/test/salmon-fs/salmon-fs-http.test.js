@@ -65,7 +65,7 @@ describe('salmon-fs-http', () => {
         try {
             let drive = await SalmonDrive.openDrive(vaultDir, TsFsTestHelper.driveClassType);
             await drive.unlock(TestHelper.TEST_PASSWORD);
-            let virtualRoot = drive.getVirtualRoot();
+            let root = drive.getRoot();
         } catch (ex) {
             console.error(ex);
             wrongPassword = true;
@@ -129,8 +129,8 @@ describe('salmon-fs-http', () => {
         let vaultDir = await getFile(TsFsTestHelper.VAULT_DIR_URL);
         let drive = await SalmonDrive.openDrive(vaultDir, TsFsTestHelper.driveClassType);
         await drive.unlock(TestHelper.TEST_PASSWORD);
-        let virtualRoot = await drive.getVirtualRoot();
-        let encFile = await virtualRoot.getChild("data256.dat");
+        let root = await drive.getRoot();
+        let encFile = await root.getChild("data256.dat");
         expect(await encFile.getBaseName()).toBe("data256.dat");
         let size = await encFile.getSize();
         expect(size).toBe(256);
@@ -151,14 +151,14 @@ describe('salmon-fs-http', () => {
         let vaultDir = await getFile(TsFsTestHelper.VAULT_DIR_URL);
         let drive = await SalmonDrive.openDrive(vaultDir, TsFsTestHelper.driveClassType);
         await drive.unlock(TestHelper.TEST_PASSWORD);
-        let virtualRoot = await drive.getVirtualRoot();
-        let files = await virtualRoot.listFiles();
+        let root = await drive.getRoot();
+        let files = await root.listFiles();
         let filenames = [];
         for (let i = 0; i < files.length; i++) {
             let filename = await files[i].getBaseName();
             filenames.push(filename);
         }
-        expect(files.length).toBe(10);
+        expect(files.length).toBe(14);
         expect(filenames.includes("data256.dat")).toBeTruthy();
         expect(filenames.includes("tiny_test.txt")).toBeTruthy();
         expect(filenames.includes("New Folder")).toBeTruthy();

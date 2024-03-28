@@ -22,29 +22,26 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 */
 
-import { IRealFile } from "./ireal_file";
-import { VirtualFile } from "./virtual_file";
+import { NonceSequence } from "./nonce_sequence.js";
 
-/*
- * Virtual Drive 
+/**
+ * Serializes/Deserializes nonce sequences.
  */
-export abstract class VirtualDrive {
+export interface INonceSequenceSerializer {
 
     /**
-     * Get the virtual root directory backed by a real directory
-     * @param {IRealFile} virtualRootRealFile The real directory
-     * @returns {VirtualFile} The virtual root directory.
+     * Parse nonce sequences from text contents.
+     * @param contents The contents containing the nonce sequences.
+     * @return The nonce sequences.
+     * @throws SalmonSequenceException
      */
-    protected abstract getVirtualRoot(virtualRootRealFile: IRealFile): VirtualFile;
+    deserialize(contents: string): {[key: string]: NonceSequence};
 
     /**
-     * Method is called when the user is authenticated
+     * Generates the contents from sequences.
+     * @param sequences The sequences to convert to text.
+     * @return The string contents.
+     * @throws SalmonSequenceException
      */
-    protected abstract onUnlockSuccess(): void;
-
-    /**
-     * Method is called when unlocking the drive has failed
-     */
-    protected abstract onUnlockError(): void;
-
+    serialize(sequences: {[key: string]: NonceSequence} ): string;
 }

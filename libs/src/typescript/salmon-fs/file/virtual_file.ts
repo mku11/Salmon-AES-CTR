@@ -30,54 +30,39 @@ export abstract class VirtualFile {
      * A virtual file. Read-only operations are included. Since write operations can be implementation
      * specific ie for encryption they can be implemented by extending this class.
      */
-
     public abstract getInputStream(): Promise<RandomAccessStream>;
-
-    public abstract getOutputStream(nonce: Uint8Array): Promise<RandomAccessStream>;
-
-
+    public abstract getOutputStream(nonce: Uint8Array | null): Promise<RandomAccessStream>;
     public abstract listFiles(): Promise<VirtualFile[]>;
-
-
     public abstract getChild(filename: string): Promise<VirtualFile | null>;
-
-
     public abstract isFile(): Promise<boolean>;
-
-
     public abstract isDirectory(): Promise<boolean>;
-
-
     public abstract getPath(): Promise<string>;
-
-
     public abstract getRealPath(): string;
-
-
     public abstract getRealFile(): IRealFile;
-
-
     public abstract getBaseName(): Promise<string>;
-
-
     public abstract getParent(): Promise<VirtualFile | null>;
-
-
     public abstract delete(): void;
-
-
     public abstract mkdir(): void;
-
-
     public abstract getLastDateTimeModified(): Promise<number>;
-
-
     public abstract getSize(): Promise<number>;
-
-
     public abstract exists(): Promise<boolean>;
-
     public abstract createDirectory(dirName: string, key: Uint8Array | null, dirNameNonce: Uint8Array | null): Promise<VirtualFile>;
-
     public abstract createFile(realFilename: string): Promise<VirtualFile>;
+    public abstract rename(newFilename: string): Promise<void>;
+    public abstract rename(newFilename: string, nonce: Uint8Array | null): Promise<void>;
+    public abstract move(dir: VirtualFile, OnProgressListener: ((position: number, length: number) => void) | null): Promise<VirtualFile>;
+    public abstract copy(dir: VirtualFile, OnProgressListener: ((position: number, length: number) => void) | null): Promise<VirtualFile>;
+    public abstract copyRecursively(dest: VirtualFile,
+        progressListener: ((salmonFile: VirtualFile, position: number, length: number) => void) | null,
+        autoRename: ((salmonFile: VirtualFile) => Promise<string>) | null,
+        autoRenameFolders: boolean,
+        onFailed: ((salmonFile: VirtualFile, ex: Error) => void) | null): Promise<void>;
+    public abstract moveRecursively(dest: VirtualFile,
+        progressListener: ((salmonFile: VirtualFile, position: number, length: number) => void) | null,
+        autoRename: ((salmonFile: VirtualFile) => Promise<string>) | null,
+        autoRenameFolders: boolean,
+        onFailed: ((salmonFile: VirtualFile, ex: Error) => void) | null): Promise<void>;
+    public abstract deleteRecursively(
+        progressListener: ((salmonFile: VirtualFile, position: number, length: number) => void) | null,
+        onFailed: ((salmonFile: VirtualFile, ex: Error) => void) | null): Promise<void>;
 }

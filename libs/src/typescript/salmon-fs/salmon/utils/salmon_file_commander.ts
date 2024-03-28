@@ -22,29 +22,32 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 */
 
-import { IRealFile } from "./ireal_file";
-import { VirtualFile } from "./virtual_file";
+import { FileSearcher } from "../../utils/file_searcher.js";
+import { FileCommander } from "../../utils/file_commander.js";
+import { SalmonFileExporter } from "./salmon_file_exporter.js";
+import { SalmonFileImporter } from "./salmon_file_importer.js";
+import { SalmonSequenceException } from "../sequence/salmon_sequence_exception.js";
 
-/*
- * Virtual Drive 
+/**
+ * Facade class for file operations.
  */
-export abstract class VirtualDrive {
+export class SalmonFileCommander extends FileCommander {
 
     /**
-     * Get the virtual root directory backed by a real directory
-     * @param {IRealFile} virtualRootRealFile The real directory
-     * @returns {VirtualFile} The virtual root directory.
+     * Instantiate a new file commander object.
+     *
+     * @param importBufferSize The buffer size to use for importing files.
+     * @param exportBufferSize The buffer size to use for exporting files.
      */
-    protected abstract getVirtualRoot(virtualRootRealFile: IRealFile): VirtualFile;
+    public constructor(importBufferSize: number, exportBufferSize: number, threads: number) {
+        super(new SalmonFileImporter(importBufferSize, threads), 
+            new SalmonFileExporter(exportBufferSize, threads),
+            new FileSearcher());
+    }
 
-    /**
-     * Method is called when the user is authenticated
-     */
-    protected abstract onUnlockSuccess(): void;
-
-    /**
-     * Method is called when unlocking the drive has failed
-     */
-    protected abstract onUnlockError(): void;
-
+    onError(ex: Error | unknown | null): boolean {
+        if (ex instanceof SalmonSequenceException)
+            throw ex;
+        return true;
+    }
 }

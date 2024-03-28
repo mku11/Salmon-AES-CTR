@@ -38,7 +38,6 @@ import { SalmonTextDecryptor } from '../../lib/salmon-core/salmon/text/salmon_te
 import { SalmonIntegrity } from '../../lib/salmon-core/salmon/integrity/salmon_integrity.js';
 import { SalmonStream } from '../../lib/salmon-core/salmon/io/salmon_stream.js';
 import { ProviderType } from '../../lib/salmon-core/salmon/io/provider_type.js';
-import { SalmonDefaultOptions } from '../../lib/salmon-core/salmon/salmon_default_options.js';
 
 import { TestHelper } from './test_helper.js';
 import { SalmonSecurityException } from '../../lib/salmon-core/salmon/salmon_security_exception.js';
@@ -47,7 +46,6 @@ import { SalmonRangeExceededException } from '../../lib/salmon-core/salmon/salmo
 describe('salmon-core', () => {
     beforeEach(() => {
         SalmonStream.setAesProviderType(ProviderType.Default);
-        SalmonDefaultOptions.setBufferSize(SalmonIntegrity.DEFAULT_CHUNK_SIZE);
         TestHelper.initialize();
     });
 
@@ -508,7 +506,6 @@ describe('salmon-core', () => {
     });
 
     it('shouldEncryptAndDecryptArrayIntegrity', async () => {
-        SalmonDefaultOptions.setBufferSize(2 * 1024 * 1024);
         const data = TestHelper.getRandArray(1 * 1024 * 1024 + 3);
         let t1 = Date.now();
         const encData = await TestHelper.getEncryptor().encrypt(data, TestHelper.TEST_KEY_BYTES, TestHelper.TEST_NONCE_BYTES,

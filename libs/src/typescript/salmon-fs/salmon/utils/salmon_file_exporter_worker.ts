@@ -22,29 +22,23 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 */
 
-import { IRealFile } from "./ireal_file";
-import { VirtualFile } from "./virtual_file";
+import { IRealFile } from "../../file/ireal_file.js";
+import { VirtualFile } from "../../file/virtual_file.js";
+import { FileExporterWorker } from "../../utils/file_exporter_worker.js";
+import { FileUtils } from "../../utils/file_utils.js";
+import { SalmonFile } from "../salmon_file.js";
 
-/*
- * Virtual Drive 
- */
-export abstract class VirtualDrive {
-
+export class SalmonFileExporterWorker extends FileExporterWorker {
     /**
-     * Get the virtual root directory backed by a real directory
-     * @param {IRealFile} virtualRootRealFile The real directory
-     * @returns {VirtualFile} The virtual root directory.
+     * Get an instance of the file to export
+     * @param params 
+     * @returns 
      */
-    protected abstract getVirtualRoot(virtualRootRealFile: IRealFile): VirtualFile;
-
-    /**
-     * Method is called when the user is authenticated
-     */
-    protected abstract onUnlockSuccess(): void;
-
-    /**
-     * Method is called when unlocking the drive has failed
-     */
-    protected abstract onUnlockError(): void;
-
+    async getSourceFile(params: any): Promise<VirtualFile | null> {
+        let realFile: IRealFile = await FileUtils.getInstance(params.exportFileClassType, params.fileToExportHandle);
+        let fileToExport: SalmonFile = new SalmonFile(realFile, null);
+        fileToExport.setEncryptionKey(params.key);
+        await fileToExport.setVerifyIntegrity(params.integrity, params.hash_key);
+        return fileToExport;
+    }
 }

@@ -22,29 +22,36 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 */
 
-import { IRealFile } from "./ireal_file";
-import { VirtualFile } from "./virtual_file";
-
-/*
- * Virtual Drive 
+/**
+ * Proxy interface for use with native libraries (TinyAES wasm).
  */
-export abstract class VirtualDrive {
+export interface INativeProxy {
+    /**
+     * Proxy Init the native code with AES implementation, and hash length options.
+     * @param {number} aesImpl
+     */
+    init(aesImpl: number): void;
 
     /**
-     * Get the virtual root directory backed by a real directory
-     * @param {IRealFile} virtualRootRealFile The real directory
-     * @returns {VirtualFile} The virtual root directory.
+     * Proxy Key schedule algorithm for expanding the 32 byte key to 240 bytes required
+     * for AES 256.
+     * @param {Uint8Array} key
+     * @param {Uint8Array} expandedKey
      */
-    protected abstract getVirtualRoot(virtualRootRealFile: IRealFile): VirtualFile;
+    expandKey(key: Uint8Array, expandedKey: Uint8Array): void;
 
     /**
-     * Method is called when the user is authenticated
+     * Proxy Transform the input byte array using AES-256 CTR mode
+     * @param {Uint8Array} key
+     * @param {number} counter
+     * @param {Uint8Array} srcBuffer
+     * @param {number} srcOffset
+     * @param {Uint8Array} destBuffer
+     * @param {number} destOffset
+     * @param {number} count
+     * @return {number} The number of bytes that were transformed.
      */
-    protected abstract onUnlockSuccess(): void;
-
-    /**
-     * Method is called when unlocking the drive has failed
-     */
-    protected abstract onUnlockError(): void;
-
+    transform(key: Uint8Array, counter: Uint8Array,
+        srcBuffer: Uint8Array, srcOffset: number,
+        destBuffer: Uint8Array, destOffset: number, count: number): number;
 }

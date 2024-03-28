@@ -160,8 +160,6 @@ export class TsFsTestHelper {
     static TEST_FILE_INPUT_STREAM_THREADS = 1;
     static TEST_USE_FILE_INPUT_STREAM = false;
 
-    static ENABLE_LOG = true;
-    static ENABLE_LOG_DETAILS = true;
     static ENABLE_FILE_PROGRESS = false;
 
     static TEST_SEQUENCER_FILE1 = "seq1.json";
@@ -248,17 +246,15 @@ export class TsFsTestHelper {
 
         let sequencer = new SalmonFileSequencer(await getFile(vaultDir, TsFsTestHelper.TEST_SEQUENCER_FILE1), getSequenceSerializer());
         let drive = await SalmonDrive.createDrive(vaultDir, TsFsTestHelper.driveClassType, sequencer, pass);
-        let rootDir = await drive.getVirtualRoot();
+        let rootDir = await drive.getRoot();
         await rootDir.listFiles();
 
-        let salmonRootDir = await drive.getVirtualRoot();
+        let salmonRootDir = await drive.getRoot();
 
         let fileToImport = await getFile(importFile);
         let hashPreImport = await TsFsTestHelper.getChecksum(fileToImport);
 
         // import
-        SalmonFileImporter.setEnableLog(TsFsTestHelper.ENABLE_LOG);
-        SalmonFileImporter.setEnableLogDetails(TsFsTestHelper.ENABLE_LOG_DETAILS);
         let printImportProgress = async (position, length) => {
             if (TsFsTestHelper.ENABLE_FILE_PROGRESS)
                 console.log("importing file: " + fileToImport.getBaseName() + ": " + position + "/" + length);
@@ -271,7 +267,7 @@ export class TsFsTestHelper {
 
         expect(salmonFile != null).toBeTruthy();
         expect(await salmonFile.exists()).toBeTruthy();
-        let salmonFiles = await (await drive.getVirtualRoot()).listFiles();
+        let salmonFiles = await (await drive.getRoot()).listFiles();
         let realFileSize = await fileToImport.length();
         for (let file of salmonFiles) {
             if ((await file.getBaseName()) == fileToImport.getBaseName()) {
@@ -284,8 +280,6 @@ export class TsFsTestHelper {
         }
 
         // export
-        SalmonFileExporter.setEnableLog(TsFsTestHelper.ENABLE_LOG);
-        SalmonFileExporter.setEnableLogDetails(TsFsTestHelper.ENABLE_LOG_DETAILS);
         let printExportProgress = async (position, length) => {
             if (TsFsTestHelper.ENABLE_FILE_PROGRESS)
                 console.log("exporting file: " + await salmonFile.getBaseName() + ": " + position + "/" + length);
@@ -305,9 +299,9 @@ export class TsFsTestHelper {
     static async importAndSearch(vaultDir, pass, importFile) {
         let sequencer = new SalmonFileSequencer(await getFile(vaultDir, TsFsTestHelper.TEST_SEQUENCER_FILE1), getSequenceSerializer());
         let drive = await SalmonDrive.createDrive(vaultDir, TsFsTestHelper.driveClassType, sequencer, pass);
-        let rootDir = await drive.getVirtualRoot();
+        let rootDir = await drive.getRoot();
         await rootDir.listFiles();
-        let salmonRootDir = await drive.getVirtualRoot();
+        let salmonRootDir = await drive.getRoot();
         let fileToImport = await getFile(importFile);
         let rbasename = fileToImport.getBaseName();
 
@@ -332,9 +326,9 @@ export class TsFsTestHelper {
     static async importAndCopy(vaultDir, pass, importFile, newDir, move) {
         let sequencer = new SalmonFileSequencer(await getFile(vaultDir, TsFsTestHelper.TEST_SEQUENCER_FILE1), getSequenceSerializer());
         let drive = await SalmonDrive.createDrive(vaultDir, TsFsTestHelper.driveClassType, sequencer, pass);
-        let rootDir = await drive.getVirtualRoot();
+        let rootDir = await drive.getRoot();
         rootDir.listFiles();
-        let salmonRootDir = await drive.getVirtualRoot();
+        let salmonRootDir = await drive.getRoot();
         let fileToImport = await getFile(importFile);
         let rbasename = fileToImport.getBaseName();
 
@@ -425,7 +419,7 @@ export class TsFsTestHelper {
         // set to the first sequencer and create the vault
         let drive = await SalmonDrive.createDrive(vault, TsFsTestHelper.driveClassType, sequencer1, TestHelper.TEST_PASSWORD);
         // import a test file
-        let salmonRootDir = await drive.getVirtualRoot();
+        let salmonRootDir = await drive.getRoot();
         let fileToImport = await getFile(importFilePath);
         let salmonFileA1 = await TsFsTestHelper.fileImporter.importFile(fileToImport, salmonRootDir, null, false, false, null);
         let nonceA1 = BitConverter.toLong(salmonFileA1.getRequestedNonce(), 0, SalmonGenerator.NONCE_LENGTH);
@@ -438,7 +432,7 @@ export class TsFsTestHelper {
         let success = false;
         try {
             // import a test file should fail because not authorized
-            salmonRootDir = await drive.getVirtualRoot();
+            salmonRootDir = await drive.getRoot();
             fileToImport = await getFile(importFilePath);
             await TsFsTestHelper.fileImporter.importFile(fileToImport, salmonRootDir, null, false, false, null);
             success = true;
@@ -456,7 +450,7 @@ export class TsFsTestHelper {
         let salmonCfgFile = new SalmonFile(exportAuthFile, drive);
         let nonceCfg = BitConverter.toLong(await salmonCfgFile.getFileNonce(), 0, SalmonGenerator.NONCE_LENGTH);
         // import another test file
-        salmonRootDir = await drive.getVirtualRoot();
+        salmonRootDir = await drive.getRoot();
         fileToImport = await getFile(importFilePath);
         let salmonFileA2 = await TsFsTestHelper.fileImporter.importFile(fileToImport, salmonRootDir, null, false, false, null);
         let nonceA2 = BitConverter.toLong(await salmonFileA2.getFileNonce(), 0, SalmonGenerator.NONCE_LENGTH);
@@ -467,7 +461,7 @@ export class TsFsTestHelper {
         await drive.unlock(TestHelper.TEST_PASSWORD);
         await drive.importAuthFile(exportAuthFile);
         // now import a 3rd file
-        salmonRootDir = await drive.getVirtualRoot();
+        salmonRootDir = await drive.getRoot();
         fileToImport = await getFile(importFilePath);
         let salmonFileB1 = await TsFsTestHelper.fileImporter.importFile(fileToImport, salmonRootDir, null, false, false, null);
         let nonceB1 = BitConverter.toLong(await salmonFileB1.getFileNonce(), 0, SalmonGenerator.NONCE_LENGTH);
@@ -500,9 +494,9 @@ export class TsFsTestHelper {
             } catch (ex) {
                 drive = await SalmonDrive.createDrive(vaultDir, TsFsTestHelper.driveClassType, sequencer, TestHelper.TEST_PASSWORD);
             }
-            let rootDir = await drive.getVirtualRoot();
+            let rootDir = await drive.getRoot();
             await rootDir.listFiles();
-            let salmonRootDir = await drive.getVirtualRoot();
+            let salmonRootDir = await drive.getRoot();
             let fileToImport = await getFile(importFile);
             let salmonFile = await TsFsTestHelper.fileImporter.importFile(fileToImport, salmonRootDir, null, false, false, null);
             importSuccess = salmonFile != null;
@@ -770,6 +764,7 @@ export class TsFsTestHelper {
         let httpKey = "ABCDEFGHIJKLMNOPABCDEFGHIJKLMNOP"; // 256-bit key
         let httpKeyBytes = new TextEncoder().encode(httpKey);
         let encFile2 = new SalmonFile(await getFile(TsFsTestHelper.TEST_FILE), null);
+        encFile2.setVerifyIntegrity(false);
         encFile2.setEncryptionKey(httpKeyBytes);
         let stream2 = await encFile2.getInputStream();
         let decBuff = new Uint8Array(1024);
@@ -783,7 +778,7 @@ export class TsFsTestHelper {
         let vaultDir = await getFile(TsFsTestHelper.VAULT_DIR_URL);
         let drive = await SalmonDrive.openDrive(vaultDir, TsFsTestHelper.driveClassType);
         await drive.unlock(TestHelper.TEST_PASSWORD);
-        let virtualRoot = await drive.getVirtualRoot();
+        let virtualRoot = await drive.getRoot();
         let files = await virtualRoot.listFiles();
         console.log("Listing files in HTTP drive:\n");
         for (let i = 0; i < files.length; i++)

@@ -22,13 +22,13 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 */
 
-import { SalmonDefaultOptions } from "../salmon/salmon_default_options.js";
 import { IOException } from "./io_exception.js";
 
 /**
  * Base class for read-write seekable streams.
  */
 export abstract class RandomAccessStream {
+    static #DEFAULT_BUFFER_SIZE = 256 * 1024;
 
     /**
      * True if the stream is readable.
@@ -128,7 +128,7 @@ export abstract class RandomAccessStream {
         if (!(await stream.canWrite()))
             throw new IOException("Target stream not writable");
         if (bufferSize == null || bufferSize <= 0) {
-            bufferSize = SalmonDefaultOptions.getBufferSize(); // TODO: remove ref to Salmon
+            bufferSize = RandomAccessStream.#DEFAULT_BUFFER_SIZE;
         }
         let bytesRead: number;
         const pos: number = await this.getPosition();
