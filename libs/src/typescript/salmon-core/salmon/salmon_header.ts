@@ -23,7 +23,7 @@ SOFTWARE.
 */
 
 import { BitConverter } from "../convert/bit_converter.js";
-import { RandomAccessStream } from "../io/random_access_stream.js";
+import { RandomAccessStream } from "../iostream/random_access_stream.js";
 import { SalmonGenerator } from "./salmon_generator.js";
 
 /**

@@ -23,7 +23,7 @@ SOFTWARE.
 */
 
 import { IRealFile } from "./ireal_file";
-import { VirtualFile } from "./virtual_file";
+import { IVirtualFile } from "./ivirtual_file";
 
 /*
  * Virtual Drive 
@@ -33,18 +33,19 @@ export abstract class VirtualDrive {
     /**
      * Get the virtual root directory backed by a real directory
      * @param {IRealFile} virtualRootRealFile The real directory
-     * @returns {VirtualFile} The virtual root directory.
+     * @returns {IVirtualFile} The virtual root directory.
      */
-    protected abstract getVirtualRoot(virtualRootRealFile: IRealFile): VirtualFile;
+    protected abstract getVirtualRoot(virtualRootRealFile: IRealFile): IVirtualFile;
 
     /**
      * Method is called when the user is authenticated
      */
-    protected abstract onUnlockSuccess(): void;
+    public abstract onUnlockSuccess(): void;
 
     /**
      * Method is called when unlocking the drive has failed
      */
-    protected abstract onUnlockError(): void;
+    public abstract onUnlockError(): void;
 
+    public abstract getPrivateDir(): string;
 }

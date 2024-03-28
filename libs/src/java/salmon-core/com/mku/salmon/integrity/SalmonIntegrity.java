@@ -23,6 +23,7 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 */
 
+import com.mku.integrity.IHashProvider;
 import com.mku.salmon.SalmonGenerator;
 import com.mku.salmon.SalmonSecurityException;
 import com.mku.salmon.transform.SalmonAES256CTRTransformer;
@@ -79,8 +80,7 @@ public class SalmonIntegrity {
      * @throws SalmonSecurityException  When security has failed
      */
     public SalmonIntegrity(boolean integrity, byte[] key, Integer chunkSize,
-                           IHashProvider provider, int hashSize)
-            throws SalmonIntegrityException, SalmonSecurityException {
+                           IHashProvider provider, int hashSize) {
         if (chunkSize != null && (chunkSize < 0 || (chunkSize > 0 && chunkSize < SalmonAES256CTRTransformer.BLOCK_SIZE)
                 || (chunkSize > 0 && chunkSize % SalmonAES256CTRTransformer.BLOCK_SIZE != 0) || chunkSize > MAX_CHUNK_SIZE)) {
             throw new SalmonIntegrityException("Invalid chunk size, specify zero for default value or a positive number multiple of: "

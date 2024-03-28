@@ -23,8 +23,8 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 */
 
-import com.mku.salmonfs.SalmonFile;
-import com.mku.salmonfs.SalmonFileInputStream;
+import com.mku.salmon.SalmonFile;
+import com.mku.salmon.iostream.SalmonFileInputStream;
 
 import java.net.URLStreamHandler;
 import java.net.URLStreamHandlerFactory;

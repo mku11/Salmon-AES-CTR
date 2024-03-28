@@ -112,30 +112,6 @@ public class SalmonPassword {
             throw new RuntimeException("Cannot use SHA1, SHA1 is not secure anymore use SHA256!");
         return provider.getKey(password, salt, iterations, outputBytes, pbkdfAlgo);
     }
-	
-	/**
-	 * Pbkdf implementation type.
-	 */
-    public enum PbkdfType {
-        /**
-         * Default Java pbkdf implementation.
-         */
-        Default
-    }
 
-	/**
-	 * Pbkdf algorithm implementation type.
-	 */
-    public enum PbkdfAlgo {
-        /**
-         * SHA1 hashing. DO NOT USE.
-         */
-        @Deprecated
-        SHA1,
-        /**
-         * SHA256 hashing.
-         */
-        SHA256
-    }
 }
 

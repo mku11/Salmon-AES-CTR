@@ -23,9 +23,9 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 */
 
-import com.mku.sequence.ISalmonSequencer;
-import com.mku.sequence.SalmonSequenceException;
-import com.mku.sequence.SalmonSequence;
+import com.mku.sequence.INonceSequencer;
+import com.mku.salmon.sequence.SalmonSequenceException;
+import com.mku.sequence.NonceSequence;
 import com.sun.jna.platform.win32.AccCtrl;
 import com.sun.jna.platform.win32.Advapi32;
 import com.sun.jna.platform.win32.Kernel32;
@@ -50,7 +50,7 @@ import java.io.*;
 import java.nio.charset.StandardCharsets;
 import java.util.Base64;
 
-public class WinClientSequencer implements ISalmonSequencer, Closeable {
+public class WinClientSequencer implements INonceSequencer, Closeable {
     private String pipeName;
     private RandomAccessFile namedPipe;
 
@@ -115,11 +115,11 @@ public class WinClientSequencer implements ISalmonSequencer, Closeable {
         return Advapi32.INSTANCE.EqualSid(pSid, ppSid);
     }
 
-    public void createSequence(String driveID, String authID)
+    public void createSequence(String driveId, String authId)
             throws SalmonSequenceException {
         Response res;
         try {
-            String request = generateRequest(driveID, authID, RequestType.CreateSequence, null, null);
+            String request = generateRequest(driveId, authId, RequestType.CreateSequence, null, null);
             write(request);
             String response = read();
             res = Response.Parse(response);
@@ -130,10 +130,10 @@ public class WinClientSequencer implements ISalmonSequencer, Closeable {
             throw new SalmonSequenceException("Could not create sequence: " + res.error);
     }
 
-    public SalmonSequence getSequence(String driveID) throws SalmonSequenceException {
+    public NonceSequence getSequence(String driveId) throws SalmonSequenceException {
         Response res;
         try {
-            String request = generateRequest(driveID, null, RequestType.GetSequence, null, null);
+            String request = generateRequest(driveId, null, RequestType.GetSequence, null, null);
             write(request);
             String response = read();
             res = Response.Parse(response);
@@ -144,15 +144,15 @@ public class WinClientSequencer implements ISalmonSequencer, Closeable {
             throw new SalmonSequenceException("Could not get sequence: " + res.error);
         if (res.status == Response.ResponseStatus.NotFound)
             return null;
-        return new SalmonSequence(res.driveID, res.authID,
+        return new NonceSequence(res.driveId, res.authId,
                 res.nextNonce, res.maxNonce, res.seqStatus);
     }
 
-    public void initSequence(String driveID, String authID, byte[] startNonce, byte[] maxNonce)
+    public void initializeSequence(String driveId, String authId, byte[] startNonce, byte[] maxNonce)
             throws SalmonSequenceException {
         Response res;
         try {
-            String request = generateRequest(driveID, authID, RequestType.InitSequence,
+            String request = generateRequest(driveId, authId, RequestType.InitSequence,
                     startNonce, maxNonce);
             write(request);
             String response = read();
@@ -164,10 +164,10 @@ public class WinClientSequencer implements ISalmonSequencer, Closeable {
             throw new SalmonSequenceException("Could not init sequence: " + res.error);
     }
 
-    public byte[] nextNonce(String driveID) throws SalmonSequenceException {
+    public byte[] nextNonce(String driveId) throws SalmonSequenceException {
         Response res;
         try {
-            String request = generateRequest(driveID, null, RequestType.NextNonce, null, null);
+            String request = generateRequest(driveId, null, RequestType.NextNonce, null, null);
             write(request);
             String response = read();
             res = Response.Parse(response);
@@ -179,10 +179,10 @@ public class WinClientSequencer implements ISalmonSequencer, Closeable {
         return res.nextNonce;
     }
 
-    public void revokeSequence(String driveID) throws SalmonSequenceException {
+    public void revokeSequence(String driveId) throws SalmonSequenceException {
         Response res;
         try {
-            String request = generateRequest(driveID, null, RequestType.RevokeSequence, null, null);
+            String request = generateRequest(driveId, null, RequestType.RevokeSequence, null, null);
             write(request);
             String response = read();
             res = Response.Parse(response);
@@ -193,9 +193,9 @@ public class WinClientSequencer implements ISalmonSequencer, Closeable {
             throw new SalmonSequenceException("Could not revoke Sequence: " + res.error);
     }
 
-    public void setMaxNonce(String driveID, String authID, byte[] maxNonce)
+    public void setMaxNonce(String driveId, String authId, byte[] maxNonce)
             throws SalmonSequenceException, IOException {
-        String request = generateRequest(driveID, authID, RequestType.SetMaxNonce,
+        String request = generateRequest(driveId, authId, RequestType.SetMaxNonce,
                 null, maxNonce);
         write(request);
         String response = read();
@@ -209,7 +209,7 @@ public class WinClientSequencer implements ISalmonSequencer, Closeable {
             throw new SalmonSequenceException("Could not revoke Sequence: " + res.error);
     }
 
-    public String generateRequest(String driveID, String authID, RequestType type,
+    public String generateRequest(String driveId, String authId, RequestType type,
                                          byte[] nextNonce, byte[] maxNonce)
             throws IOException {
         ByteArrayOutputStream stream = new ByteArrayOutputStream();
@@ -219,9 +219,9 @@ public class WinClientSequencer implements ISalmonSequencer, Closeable {
             out = outputFactory.createXMLStreamWriter(stream, "UTF-8");
             out.writeStartDocument("UTF-8", "1.0");
             out.writeStartElement("drive");
-            out.writeAttribute("driveID", driveID);
-            if (authID != null)
-                out.writeAttribute("authID", authID);
+            out.writeAttribute("driveId", driveId);
+            if (authId != null)
+                out.writeAttribute("authId", authId);
             out.writeAttribute("type", type.toString());
             if (nextNonce != null)
                 out.writeAttribute("nextNonce", Base64.getEncoder().encodeToString(nextNonce));
@@ -258,10 +258,10 @@ public class WinClientSequencer implements ISalmonSequencer, Closeable {
     }
 
     private static class Response {
-        String driveID;
-        String authID;
+        String driveId;
+        String authId;
         ResponseStatus status;
-        SalmonSequence.Status seqStatus;
+        NonceSequence.Status seqStatus;
         byte[] nextNonce;
         byte[] maxNonce;
         String error;
@@ -280,11 +280,11 @@ public class WinClientSequencer implements ISalmonSequencer, Closeable {
                 XPath xPath = XPathFactory.newInstance().newXPath();
                 Node drive = (Node) xPath.compile("/drive").evaluate(xmlDocument, XPathConstants.NODE);
                 if (drive != null) {
-                    response.driveID = drive.getAttributes().getNamedItem("driveID").getNodeValue();
-                    response.authID = drive.getAttributes().getNamedItem("authID").getNodeValue();
+                    response.driveId = drive.getAttributes().getNamedItem("driveId").getNodeValue();
+                    response.authId = drive.getAttributes().getNamedItem("authId").getNodeValue();
                     response.status = ResponseStatus.valueOf(drive.getAttributes().getNamedItem("status").getNodeValue());
                     if (drive.getAttributes().getNamedItem("nextNonce") != null) {
-                        response.seqStatus = SalmonSequence.Status.valueOf(drive.getAttributes().getNamedItem("seqStatus").getNodeValue());
+                        response.seqStatus = NonceSequence.Status.valueOf(drive.getAttributes().getNamedItem("seqStatus").getNodeValue());
                     }
                     if (drive.getAttributes().getNamedItem("nextNonce") != null) {
                         response.nextNonce = Base64.getDecoder().decode(drive.getAttributes().getNamedItem("nextNonce").getNodeValue());

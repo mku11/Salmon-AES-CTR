@@ -45,7 +45,7 @@ public class SalmonDefaultPbkdfProvider  implements ISalmonPbkdfProvider{
      * @return The key.
      * @throws SalmonSecurityException
      */
-    public byte[] getKey(String password, byte[] salt, int iterations, int outputBytes, SalmonPassword.PbkdfAlgo pbkdfAlgo)
+    public byte[] getKey(String password, byte[] salt, int iterations, int outputBytes, PbkdfAlgo pbkdfAlgo)
             throws SalmonSecurityException {
         PBEKeySpec keySpec = new PBEKeySpec(password.toCharArray(), salt, iterations, outputBytes * 8);
         String pbkdfAlgoStr = ISalmonPbkdfProvider.getPbkdfAlgoString(pbkdfAlgo);

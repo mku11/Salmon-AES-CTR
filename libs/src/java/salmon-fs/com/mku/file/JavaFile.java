@@ -23,7 +23,8 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 */
 
-import com.mku.io.RandomAccessStream;
+import com.mku.func.BiConsumer;
+import com.mku.iostream.RandomAccessStream;
 
 import java.io.File;
 import java.io.FileNotFoundException;
@@ -255,7 +256,7 @@ public class JavaFile implements IRealFile {
      * @return The moved file. Use this file for subsequent operations instead of the original.
      * @throws IOException
      */
-    public IRealFile move(IRealFile newDir, String newName, RandomAccessStream.OnProgressListener progressListener) {
+    public IRealFile move(IRealFile newDir, String newName, BiConsumer<Long, Long> progressListener) {
         newName = newName != null ? newName : getBaseName();
         //TODO: ToSync
         if (newDir == null || !newDir.exists())
@@ -305,7 +306,7 @@ public class JavaFile implements IRealFile {
      * @throws IOException
      */
     @Override
-    public IRealFile copy(IRealFile newDir, String newName, RandomAccessStream.OnProgressListener progressListener) throws IOException {
+    public IRealFile copy(IRealFile newDir, String newName, BiConsumer<Long, Long> progressListener) throws IOException {
         newName = newName != null ? newName : getBaseName();
         if (newDir == null || !newDir.exists())
             throw new IOException("Target directory does not exists");

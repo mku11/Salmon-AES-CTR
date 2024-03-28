@@ -23,10 +23,10 @@ SOFTWARE.
 */
 
 import { IRealFile } from "../file/ireal_file.js";
-import { VirtualFile } from "../file/virtual_file.js";
+import { IVirtualFile } from "../file/ivirtual_file.js";
 import { exportFilePart } from "./file_exporter_helper.js";
-import { RandomAccessStream } from "../../salmon-core/io/random_access_stream.js";
-import { IOException } from "../../salmon-core/io/io_exception.js";
+import { RandomAccessStream } from "../../salmon-core/iostream/random_access_stream.js";
+import { IOException } from "../../salmon-core/iostream/io_exception.js";
 
 export abstract class FileExporter {
     #workerPath = './lib/salmon-fs/utils/file_exporter_worker.js';
@@ -75,12 +75,12 @@ export abstract class FileExporter {
 
     #workers: any[] = [];
 
-    abstract getWorkerMessage(index: number, sourceFile: VirtualFile, targetFile: IRealFile,
+    abstract getWorkerMessage(index: number, sourceFile: IVirtualFile, targetFile: IRealFile,
         runningThreads: number, partSize: number, fileSize: number, bufferSize: number, integrity: boolean): Promise<any>;
 
-    abstract getMinimumPartSize(file: VirtualFile): Promise<number>;
+    abstract getMinimumPartSize(file: IVirtualFile): Promise<number>;
 
-    abstract onPrepare(targetFile: VirtualFile, integrity: boolean): Promise<void>;
+    abstract onPrepare(targetFile: IVirtualFile, integrity: boolean): Promise<void>;
 
     public initialize(bufferSize: number, threads: number) {
         if (bufferSize == 0)
@@ -119,7 +119,7 @@ export abstract class FileExporter {
      * @param deleteSource Delete the source file when the export finishes successfully
      * @param integrity    True to verify integrity
      */
-    public async exportFile(fileToExport: VirtualFile, exportDir: IRealFile, filename: string,
+    public async exportFile(fileToExport: IVirtualFile, exportDir: IRealFile, filename: string,
         deleteSource: boolean, integrity: boolean, onProgress: ((position: number, length: number) => void | null)): Promise<IRealFile | null> {
         if (this.isRunning())
             throw new Error("Another export is running");
@@ -190,7 +190,7 @@ export abstract class FileExporter {
         return exportFile;
     }
 
-    async #submitExportJobs(runningThreads: number, partSize: number, fileToExport: VirtualFile, exportedFile: IRealFile,
+    async #submitExportJobs(runningThreads: number, partSize: number, fileToExport: IVirtualFile, exportedFile: IRealFile,
         totalBytesWritten: number[], integrity: boolean, onProgress: ((position: number, length: number) => void) | null) {
         let fileSize: number = await fileToExport.getSize();
         let bytesWritten: number[] = new Array(runningThreads);

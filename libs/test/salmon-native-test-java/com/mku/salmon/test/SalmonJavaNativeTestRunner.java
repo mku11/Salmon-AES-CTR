@@ -26,8 +26,9 @@ SOFTWARE.
 
 import com.mku.salmon.*;
 import com.mku.salmon.integrity.SalmonIntegrity;
-import com.mku.salmon.io.ProviderType;
-import com.mku.salmon.io.SalmonStream;
+import com.mku.salmon.iostream.ProviderType;
+import com.mku.salmon.iostream.SalmonStream;
+import com.mku.salmon.password.PbkdfType;
 import com.mku.salmon.password.SalmonPassword;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -43,7 +44,7 @@ public class SalmonJavaNativeTestRunner {
     static int DEC_THREADS = 1;
 
     static {
-        SalmonPassword.setPbkdfType(SalmonPassword.PbkdfType.Default);
+        SalmonPassword.setPbkdfType(PbkdfType.Default);
     }
 
     @BeforeEach

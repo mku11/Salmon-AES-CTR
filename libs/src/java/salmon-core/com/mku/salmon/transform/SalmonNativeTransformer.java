@@ -23,8 +23,8 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 */
 
-import com.mku.salmon.SalmonSecurityException;
-import com.mku.salmon.io.SalmonStream;
+import com.mku.bridge.INativeProxy;
+import com.mku.salmon.bridge.NativeProxy;
 
 /**
  * Generic Native AES transformer. Extend this with your specific 

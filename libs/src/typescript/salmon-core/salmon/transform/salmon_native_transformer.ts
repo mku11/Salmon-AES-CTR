@@ -23,8 +23,8 @@ SOFTWARE.
 */
 
 import { SalmonSecurityException } from "../salmon_security_exception.js";
-import { INativeProxy } from "../../native/inative_proxy.js";
-import { SalmonNativeProxy } from "../native/salmon_native_proxy.js";
+import { INativeProxy } from "../../bridge/inative_proxy.js";
+import { SalmonNativeProxy } from "../bridge/salmon_native_proxy.js";
 import { SalmonAES256CTRTransformer } from "./salmon_aes256_ctr_transformer.js";
 
 /**

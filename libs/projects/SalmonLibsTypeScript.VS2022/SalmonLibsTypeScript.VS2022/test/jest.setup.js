@@ -6,4 +6,4 @@ import { setTestMode, TestMode } from "./salmon-fs/ts_fs_test_helper.js";
 // Local to run on the browser
 // Node to run on the command line or VS code
 // Http to run on a remotely drive (browser and node)
-await setTestMode(TestMode.Http);
+await setTestMode(TestMode.Node);

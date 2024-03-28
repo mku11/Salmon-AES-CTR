@@ -24,7 +24,6 @@ SOFTWARE.
 */
 
 import com.mku.salmon.SalmonSecurityException;
-import com.mku.salmon.io.SalmonStream;
 
 /**
  * Salmon AES transformer implemented with AES intrinsics.

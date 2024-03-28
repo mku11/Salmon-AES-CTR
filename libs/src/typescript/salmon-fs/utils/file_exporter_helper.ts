@@ -23,8 +23,8 @@ SOFTWARE.
 */
 
 import { IRealFile } from "../file/ireal_file.js";
-import { VirtualFile } from "../file/virtual_file.js";
-import { RandomAccessStream } from "../../salmon-core/io/random_access_stream.js";
+import { IVirtualFile } from "../file/ivirtual_file.js";
+import { RandomAccessStream } from "../../salmon-core/iostream/random_access_stream.js";
 
 /**
  * Export a file part from the drive.
@@ -35,7 +35,7 @@ import { RandomAccessStream } from "../../salmon-core/io/random_access_stream.js
  * @param count             The length of the bytes to be decrypted
  * @param totalBytesWritten The total bytes that were written to the external file
  */
-export async function exportFilePart(fileToExport: VirtualFile, exportFile: IRealFile, start: number, count: number,
+export async function exportFilePart(fileToExport: IVirtualFile, exportFile: IRealFile, start: number, count: number,
     totalBytesWritten: number[], onProgress: ((position: number, length: number) => void) | null, 
     bufferSize: number, stopped: boolean[]): Promise<void> {
     let totalPartBytesWritten: number = 0;

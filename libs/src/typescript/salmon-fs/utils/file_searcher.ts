@@ -22,7 +22,7 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 */
 
-import { VirtualFile } from "../file/virtual_file.js";
+import { IVirtualFile } from "../file/ivirtual_file.js";
 
 /**
  * Class searches for files in a SalmonDrive by filename.
@@ -60,12 +60,12 @@ export class FileSearcher {
      * @param onSearchEvent Callback interface to receive status events.
      * @return An array with all the results found.
      */
-    public async search(dir: VirtualFile, terms: string, any: boolean,
-        OnResultFound: (searchResult: VirtualFile) => void,
-        onSearchEvent: (event: SearchEvent) => void | null): Promise<VirtualFile[]> {
+    public async search(dir: IVirtualFile, terms: string, any: boolean,
+        OnResultFound: (searchResult: IVirtualFile) => void,
+        onSearchEvent: (event: SearchEvent) => void | null): Promise<IVirtualFile[]> {
         this.#running = true;
         this.#quit = false;
-        let searchResults: { [key: string]: VirtualFile } = {};
+        let searchResults: { [key: string]: IVirtualFile } = {};
         if (onSearchEvent != null)
             onSearchEvent(SearchEvent.SearchingFiles);
         await this.#searchDir(dir, terms, any, OnResultFound, searchResults);
@@ -107,15 +107,15 @@ export class FileSearcher {
      * @param OnResultFound Callback interface to receive notifications when results found.
      * @param searchResults The array to store the search results.
      */
-    async #searchDir(dir: VirtualFile, terms: string, any: boolean,
-        OnResultFound: (file: VirtualFile) => void,
-        searchResults: { [key: string]: VirtualFile }): Promise<void> {
+    async #searchDir(dir: IVirtualFile, terms: string, any: boolean,
+        OnResultFound: (file: IVirtualFile) => void,
+        searchResults: { [key: string]: IVirtualFile }): Promise<void> {
         if (this.#quit)
             return;
-        let files: VirtualFile[] = await dir.listFiles();
+        let files: IVirtualFile[] = await dir.listFiles();
         let termsArray: string[] = terms.split(" ");
         for (let i = 0; i < files.length; i++) {
-            let file: VirtualFile = files[i];
+            let file: IVirtualFile = files[i];
             if (this.#quit)
                 break;
             if (await file.isDirectory()) {

@@ -22,11 +22,11 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 */
 
-import { RandomAccessStream } from '../../salmon-core/io/random_access_stream.js';
+import { RandomAccessStream } from '../../salmon-core/iostream/random_access_stream.js';
 import { IRealFile } from './ireal_file.js';
 import { JsHttpFileStream } from './js_http_file_stream.js';
-import { IOException } from '../../salmon-core/io/io_exception.js';
-import { MemoryStream } from '../../salmon-core/io/memory_stream.js';
+import { IOException } from '../../salmon-core/iostream/io_exception.js';
+import { MemoryStream } from '../../salmon-core/iostream/memory_stream.js';
 
 /**
  * Salmon RealFile implementation for Java.

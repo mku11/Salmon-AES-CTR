@@ -23,7 +23,7 @@ SOFTWARE.
 */
 
 import { IRealFile } from "../file/ireal_file.js";
-import { VirtualFile } from "../file/virtual_file.js";
+import { IVirtualFile } from "../file/ivirtual_file.js";
 import { importFilePart } from "./file_importer_helper.js";
 import { FileUtils } from "./file_utils.js";
 
@@ -44,7 +44,7 @@ export class FileImporterWorker {
      * @param params 
      * @returns 
      */
-    async getTargetFile(params: any): Promise<VirtualFile | null> {
+    async getTargetFile(params: any): Promise<IVirtualFile | null> {
         return null;
     }
 
@@ -75,7 +75,7 @@ export class FileImporterWorker {
             };
             let totalBytesRead: number[] = [0];
             let fileToImport = await this.getSourceFile(params);
-            let importedFile: VirtualFile | null = await this.getTargetFile(params);
+            let importedFile: IVirtualFile | null = await this.getTargetFile(params);
             if (importedFile == null)
                 throw new Error("Could not obtain a target file, override getTargetFile()");
 

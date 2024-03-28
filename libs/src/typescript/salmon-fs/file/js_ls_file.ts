@@ -22,7 +22,7 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 */
 
-import { RandomAccessStream } from '../../salmon-core/io/random_access_stream.js';
+import { RandomAccessStream } from '../../salmon-core/iostream/random_access_stream.js';
 import { IRealFile } from './ireal_file.js';
 import { JsLocalStorageFileStream } from './js_ls_file_stream.js';
 

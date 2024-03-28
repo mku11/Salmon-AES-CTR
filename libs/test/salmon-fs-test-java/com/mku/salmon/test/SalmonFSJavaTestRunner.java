@@ -26,18 +26,20 @@ SOFTWARE.
 
 import com.mku.convert.BitConverter;
 import com.mku.file.IRealFile;
-import com.mku.file.JavaDrive;
+import com.mku.salmon.drive.JavaDrive;
 import com.mku.file.JavaFile;
-import com.mku.io.InputStreamWrapper;
-import com.mku.io.MemoryStream;
+import com.mku.iostream.InputStreamWrapper;
+import com.mku.iostream.MemoryStream;
 import com.mku.salmon.SalmonDefaultOptions;
 import com.mku.salmon.SalmonRangeExceededException;
+import com.mku.salmon.SalmonAuthException;
 import com.mku.salmon.integrity.SalmonIntegrityException;
-import com.mku.salmonfs.*;
-import com.mku.sequence.ISalmonSequenceSerializer;
-import com.mku.sequence.SalmonFileSequencer;
-import com.mku.sequence.SalmonSequenceException;
-import com.mku.sequence.SalmonSequenceSerializer;
+import com.mku.salmon.*;
+import com.mku.salmon.iostream.SalmonFileInputStream;
+import com.mku.sequence.INonceSequenceSerializer;
+import com.mku.salmon.sequence.SalmonFileSequencer;
+import com.mku.salmon.sequence.SalmonSequenceException;
+import com.mku.salmon.sequence.SalmonSequenceSerializer;
 import com.mku.utils.SalmonFileCommander;
 import org.junit.jupiter.api.Test;
 
@@ -63,7 +65,7 @@ public class SalmonFSJavaTestRunner extends SalmonJavaTestRunner {
         SalmonDriveManager.setSequencer(sequencer);
         SalmonDriveManager.createDrive(vaultDir, TestHelper.TEST_PASSWORD);
         boolean wrongPassword = false;
-        SalmonFile rootDir = SalmonDriveManager.getDrive().getVirtualRoot();
+        SalmonFile rootDir = SalmonDriveManager.getDrive().getRoot();
         rootDir.listFiles();
         try {
             SalmonDriveManager.getDrive().unlock(TestHelper.TEST_FALSE_PASSWORD);
@@ -84,7 +86,7 @@ public class SalmonFSJavaTestRunner extends SalmonJavaTestRunner {
         SalmonDriveManager.closeDrive();
         try {
             SalmonDriveManager.openDrive(vaultDir);
-            SalmonFile rootDir = SalmonDriveManager.getDrive().getVirtualRoot();
+            SalmonFile rootDir = SalmonDriveManager.getDrive().getRoot();
             rootDir.listFiles();
         } catch (SalmonAuthException ex) {
             wrongPassword = true;
@@ -105,7 +107,7 @@ public class SalmonFSJavaTestRunner extends SalmonJavaTestRunner {
         try {
             SalmonDriveManager.openDrive(vaultDir);
             SalmonDriveManager.getDrive().unlock(TestHelper.TEST_PASSWORD);
-            SalmonFile virtualRoot = SalmonDriveManager.getDrive().getVirtualRoot();
+            SalmonFile virtualRoot = SalmonDriveManager.getDrive().getRoot();
         } catch (SalmonAuthException ex) {
             wrongPassword = true;
         }
@@ -436,12 +438,12 @@ public class SalmonFSJavaTestRunner extends SalmonJavaTestRunner {
     public void shouldCreateDriveAndOpenFsFolder() throws Exception {
         String vaultDir = TestHelper.generateFolder(TEST_VAULT2_DIR);
         JavaFile sequenceFile = new JavaFile(vaultDir + "/" + TestHelper.TEST_SEQUENCER_FILE1);
-        ISalmonSequenceSerializer serializer = new SalmonSequenceSerializer();
+        INonceSequenceSerializer serializer = new SalmonSequenceSerializer();
         SalmonFileSequencer sequencer = new SalmonFileSequencer(sequenceFile, serializer);
         SalmonDriveManager.setSequencer(sequencer);
         SalmonDriveManager.createDrive(vaultDir, TestHelper.TEST_PASSWORD);
         boolean wrongPassword = false;
-        SalmonFile rootDir = SalmonDriveManager.getDrive().getVirtualRoot();
+        SalmonFile rootDir = SalmonDriveManager.getDrive().getRoot();
         rootDir.listFiles();
         SalmonDriveManager.getDrive().lock();
 
@@ -583,7 +585,7 @@ public class SalmonFSJavaTestRunner extends SalmonJavaTestRunner {
         SalmonDriveManager.setSequencer(sequencer);
         SalmonDrive drive = SalmonDriveManager.createDrive(vaultDir, TestHelper.TEST_PASSWORD);
         SalmonFile[] sfiles = new SalmonFileCommander(SalmonDefaultOptions.getBufferSize(), SalmonDefaultOptions.getBufferSize(), 2).importFiles(new IRealFile[]{file},
-                drive.getVirtualRoot(), false, true, null, null, null);
+                drive.getRoot(), false, true, null, null, null);
 
         SalmonFileInputStream fileInputStream1 = new SalmonFileInputStream(sfiles[0], 4, 4 * 1024 * 1024, 4, 256 * 1024);
         MessageDigest md51 = MessageDigest.getInstance("MD5");

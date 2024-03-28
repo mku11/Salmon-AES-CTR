@@ -25,20 +25,20 @@ SOFTWARE.
 */
 
 import com.mku.convert.BitConverter;
-import com.mku.io.InputStreamWrapper;
-import com.mku.io.MemoryStream;
-import com.mku.io.RandomAccessStream;
+import com.mku.iostream.InputStreamWrapper;
+import com.mku.iostream.MemoryStream;
+import com.mku.iostream.RandomAccessStream;
 import com.mku.salmon.SalmonDecryptor;
 import com.mku.salmon.SalmonEncryptor;
 import com.mku.salmon.SalmonGenerator;
 import com.mku.salmon.SalmonSecurityException;
-import com.mku.salmon.integrity.HmacSHA256Provider;
-import com.mku.salmon.integrity.IHashProvider;
+import com.mku.integrity.HmacSHA256Provider;
+import com.mku.integrity.IHashProvider;
 import com.mku.salmon.integrity.SalmonIntegrity;
 import com.mku.salmon.integrity.SalmonIntegrityException;
-import com.mku.salmon.io.EncryptionMode;
-import com.mku.salmon.io.ProviderType;
-import com.mku.salmon.io.SalmonStream;
+import com.mku.salmon.iostream.EncryptionMode;
+import com.mku.salmon.iostream.ProviderType;
+import com.mku.salmon.iostream.SalmonStream;
 import com.mku.salmon.transform.ISalmonCTRTransformer;
 import com.mku.salmon.transform.SalmonAES256CTRTransformer;
 import com.mku.salmon.transform.SalmonTransformerFactory;

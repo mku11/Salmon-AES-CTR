@@ -25,13 +25,13 @@ SOFTWARE.
 */
 
 import com.mku.convert.BitConverter;
-import com.mku.io.MemoryStream;
+import com.mku.iostream.MemoryStream;
 import com.mku.salmon.*;
 import com.mku.salmon.integrity.SalmonIntegrity;
 import com.mku.salmon.integrity.SalmonIntegrityException;
-import com.mku.salmon.io.EncryptionMode;
-import com.mku.salmon.io.ProviderType;
-import com.mku.salmon.io.SalmonStream;
+import com.mku.salmon.iostream.EncryptionMode;
+import com.mku.salmon.iostream.ProviderType;
+import com.mku.salmon.iostream.SalmonStream;
 import com.mku.salmon.text.SalmonTextDecryptor;
 import com.mku.salmon.text.SalmonTextEncryptor;
 import org.junit.jupiter.api.BeforeEach;

@@ -26,7 +26,7 @@ SOFTWARE.
 /**
  * Thrown when Salmon Stream's data are corrupt or tampered with.
  */
-public class SalmonIntegrityException extends Exception {
+public class SalmonIntegrityException extends RuntimeException {
     /**
      * Construct an exception with a specific message.
      *

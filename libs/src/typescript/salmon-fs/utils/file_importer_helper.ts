@@ -22,9 +22,9 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 */
 
-import { RandomAccessStream } from "../../salmon-core/io/random_access_stream.js";
+import { RandomAccessStream } from "../../salmon-core/iostream/random_access_stream.js";
 import { IRealFile } from "../file/ireal_file.js";
-import { VirtualFile } from "../file/virtual_file.js";
+import { IVirtualFile } from "../file/ivirtual_file.js";
 
 /**
  * Import a file part into a file in the drive.
@@ -36,7 +36,7 @@ import { VirtualFile } from "../file/virtual_file.js";
  * @param totalBytesRead The total bytes read from the external file
  * @param onProgress 	 Progress observer
  */
-export async function importFilePart(fileToImport: IRealFile, salmonFile: VirtualFile,
+export async function importFilePart(fileToImport: IRealFile, salmonFile: IVirtualFile,
     start: number, count: number, totalBytesRead: number[], onProgress: ((position: number, length: number) => void) | null,
     bufferSize: number, stopped: boolean[]): Promise<void> {
     let totalPartBytesRead: number = 0;

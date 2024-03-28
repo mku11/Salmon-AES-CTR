@@ -23,10 +23,10 @@ SOFTWARE.
 */
 
 import { IRealFile } from "../file/ireal_file.js";
-import { VirtualFile } from "../file/virtual_file.js";
+import { IVirtualFile } from "../file/ivirtual_file.js";
 import { importFilePart } from "./file_importer_helper.js";
-import { IOException } from "../../salmon-core/io/io_exception.js";
-import { RandomAccessStream } from "../../salmon-core/io/random_access_stream.js";
+import { IOException } from "../../salmon-core/iostream/io_exception.js";
+import { RandomAccessStream } from "../../salmon-core/iostream/random_access_stream.js";
 
 export abstract class FileImporter {
     #workerPath = './lib/salmon-fs/utils/file_importer_worker.js';
@@ -75,12 +75,12 @@ export abstract class FileImporter {
 
     #workers: any[] = [];
 
-    abstract getWorkerMessage(index: number, sourceFile: IRealFile, targetFile: VirtualFile,
+    abstract getWorkerMessage(index: number, sourceFile: IRealFile, targetFile: IVirtualFile,
         runningThreads: number, partSize: number, fileSize: number, bufferSize: number, integrity: boolean): Promise<any>;
 
-    abstract getMinimumPartSize(file: VirtualFile): Promise<number>;
+    abstract getMinimumPartSize(file: IVirtualFile): Promise<number>;
 
-    abstract onPrepare(targetFile: VirtualFile, integrity: boolean): Promise<void>;
+    abstract onPrepare(targetFile: IVirtualFile, integrity: boolean): Promise<void>;
 
     /**
      * Constructs a file importer that can be used to import files to the drive
@@ -132,8 +132,8 @@ export abstract class FileImporter {
 	 * @param integrity    Apply data integrity
 	 * @param onProgress   Progress to notify
      */
-    public async importFile(fileToImport: IRealFile, dir: VirtualFile , filename: string,
-                                 deleteSource: boolean, integrity: boolean, onProgress: ((position: number, length: number)=>void) | null): Promise<VirtualFile | null>{
+    public async importFile(fileToImport: IRealFile, dir: IVirtualFile , filename: string,
+                                 deleteSource: boolean, integrity: boolean, onProgress: ((position: number, length: number)=>void) | null): Promise<IVirtualFile | null>{
         if (this.isRunning())
             throw new Error("Another import is running");
         if (await fileToImport.isDirectory())
@@ -141,14 +141,14 @@ export abstract class FileImporter {
 
         filename = filename != null ? filename : fileToImport.getBaseName();
         let totalBytesRead: number[] = [0];
-        let importedFile: VirtualFile | null = null;
+        let importedFile: IVirtualFile | null = null;
         try {
             if (!FileImporter.#enableMultiThread && this.#threads != 1)
                 throw new Error("Multithreading is not supported");
             this.#stopped[0] = false;
             this.#lastException = null;
             this.#failed = false;
-            importedFile = await dir.createFile(filename) as VirtualFile;
+            importedFile = await dir.createFile(filename) as IVirtualFile;
             this.onPrepare(importedFile, integrity);
 
             let fileSize: number = await fileToImport.length();
@@ -199,7 +199,7 @@ export abstract class FileImporter {
         return importedFile;
     }
 
-    async #submitImportJobs(runningThreads: number, partSize: number, fileToImport: IRealFile, importedFile: VirtualFile, 
+    async #submitImportJobs(runningThreads: number, partSize: number, fileToImport: IRealFile, importedFile: IVirtualFile, 
         totalBytesRead: number[], integrity: boolean, onProgress: ((position: number, length: number)=>void) | null) {
             let fileSize: number = await fileToImport.length();
             let bytesRead: number[] = new Array(runningThreads);

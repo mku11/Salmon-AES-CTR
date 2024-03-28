@@ -23,7 +23,7 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 */
 
-import com.mku.io.RandomAccessStream;
+import com.mku.iostream.RandomAccessStream;
 
 import java.io.FileNotFoundException;
 import java.io.IOException;

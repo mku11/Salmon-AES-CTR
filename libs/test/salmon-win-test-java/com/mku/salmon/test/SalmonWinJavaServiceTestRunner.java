@@ -26,15 +26,14 @@ SOFTWARE.
 
 import com.mku.file.IRealFile;
 import com.mku.file.JavaFile;
-import com.mku.file.JavaDrive;
+import com.mku.salmon.drive.JavaDrive;
 import com.mku.convert.BitConverter;
 import com.mku.salmon.SalmonRangeExceededException;
 import com.mku.salmon.win.registry.SalmonRegistry;
 import com.mku.salmon.win.sequencer.WinClientSequencer;
 import com.mku.salmon.win.sequencer.WinFileSequencer;
-import com.mku.salmonfs.SalmonDriveManager;
-import com.mku.sequence.SalmonSequenceException;
-import com.mku.sequence.SalmonSequenceSerializer;
+import com.mku.salmon.sequence.SalmonSequenceException;
+import com.mku.salmon.sequence.SalmonSequenceSerializer;
 import com.sun.jna.platform.win32.Crypt32Util;
 import org.junit.jupiter.api.Test;
 
@@ -96,7 +95,7 @@ public class SalmonWinJavaServiceTestRunner {
                 TEST_REG_CHCKSUM_KEY);
 
         sequencer.createSequence("AAAA", "AAAA");
-        sequencer.initSequence("AAAA", "AAAA",
+        sequencer.initializeSequence("AAAA", "AAAA",
                 BitConverter.toBytes(1, 8),
                 BitConverter.toBytes(4, 8));
         byte[] nonce = sequencer.nextNonce("AAAA");

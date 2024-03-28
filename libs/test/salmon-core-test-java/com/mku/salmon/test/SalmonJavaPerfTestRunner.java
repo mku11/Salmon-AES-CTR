@@ -25,8 +25,8 @@ SOFTWARE.
 */
 
 import com.mku.salmon.SalmonDefaultOptions;
-import com.mku.salmon.io.ProviderType;
-import com.mku.salmon.io.SalmonStream;
+import com.mku.salmon.iostream.ProviderType;
+import com.mku.salmon.iostream.SalmonStream;
 import org.junit.jupiter.api.MethodOrderer;
 import org.junit.jupiter.api.Order;
 import org.junit.jupiter.api.Test;

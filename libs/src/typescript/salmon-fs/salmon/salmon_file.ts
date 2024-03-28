@@ -23,11 +23,11 @@ SOFTWARE.
 */
 
 import { BitConverter } from "../../salmon-core/convert/bit_converter.js";
-import { IOException } from "../../salmon-core/io/io_exception.js";
-import { RandomAccessStream, SeekOrigin } from "../../salmon-core/io/random_access_stream.js";
+import { IOException } from "../../salmon-core/iostream/io_exception.js";
+import { RandomAccessStream, SeekOrigin } from "../../salmon-core/iostream/random_access_stream.js";
 import { SalmonGenerator } from "../../salmon-core/salmon/salmon_generator.js";
 import { SalmonHeader } from "../../salmon-core/salmon/salmon_header.js";
-import { SalmonStream } from "../../salmon-core/salmon/io/salmon_stream.js";
+import { SalmonStream } from "../../salmon-core/salmon/iostream/salmon_stream.js";
 import {
     IRealFile, autoRename as IRealFileAutoRename,
     copyRecursively as IRealFileCopyRecursively,
@@ -35,21 +35,21 @@ import {
     deleteRecursively as IRealFileDeleteRecursively
 } from "../file/ireal_file.js";
 import { SalmonDrive } from "./salmon_drive.js";
-import { EncryptionMode } from "../../salmon-core/salmon/io/encryption_mode.js";
+import { EncryptionMode } from "../../salmon-core/salmon/iostream/encryption_mode.js";
 import { SalmonSecurityException } from "../../salmon-core/salmon/salmon_security_exception.js";
 import { SalmonIntegrityException } from "../../salmon-core/salmon/integrity/salmon_integrity_exception.js";
 import { SalmonTextDecryptor } from "../../salmon-core/salmon/text/salmon_text_decryptor.js";
 import { SalmonTextEncryptor } from "../../salmon-core/salmon/text/salmon_text_encryptor.js";
 import { SalmonIntegrity } from "../../salmon-core/salmon/integrity/salmon_integrity.js";
 import { SalmonDriveKey } from "./salmon_drive_key.js";
-import { VirtualFile } from "../file/virtual_file.js";
+import { IVirtualFile } from "../file/ivirtual_file.js";
 
 /**
  * A virtual file backed by an encrypted {@link IRealFile} on the real filesystem.
  * Supports operations for retrieving {@link SalmonStream} for reading/decrypting
  * and writing/encrypting contents.
  */
-export class SalmonFile extends VirtualFile {
+export class SalmonFile implements IVirtualFile {
     public static readonly separator: string = "/";
 
     readonly #drive: SalmonDrive | null = null;
@@ -76,7 +76,6 @@ export class SalmonFile extends VirtualFile {
      * @param realFile The real file
      */
     public constructor(realFile: IRealFile, drive: SalmonDrive | null = null) {
-        super();
         this.#drive = drive;
         this.#realFile = realFile;
         if (this.#integrity && drive != null)
@@ -459,11 +458,11 @@ export class SalmonFile extends VirtualFile {
     /**
      * Lists files and directories under this directory
      */
-    public async listFiles(): Promise<VirtualFile[]> {
+    public async listFiles(): Promise<IVirtualFile[]> {
         let files: IRealFile[] = await this.#realFile.listFiles();
-        let salmonFiles: VirtualFile[] = [];
+        let salmonFiles: IVirtualFile[] = [];
         for (let iRealFile of await files) {
-            let file: VirtualFile = new SalmonFile(iRealFile, this.#drive);
+            let file: IVirtualFile = new SalmonFile(iRealFile, this.#drive);
             salmonFiles.push(file);
         }
         return salmonFiles;
@@ -479,8 +478,8 @@ export class SalmonFile extends VirtualFile {
      * @throws IOException
      * @throws SalmonAuthException
      */
-    public async getChild(filename: string): Promise<VirtualFile | null> {
-        let files: VirtualFile[] = await this.listFiles();
+    public async getChild(filename: string): Promise<IVirtualFile | null> {
+        let files: IVirtualFile[] = await this.listFiles();
         for (let i = 0; i < files.length; i++) {
             if ((await files[i].getBaseName()) == filename)
                 return files[i];
@@ -495,7 +494,7 @@ export class SalmonFile extends VirtualFile {
      * @param key          The key that will be used to encrypt the directory name
      * @param dirNameNonce The nonce to be used for encrypting the directory name
      */
-    public async createDirectory(dirName: string, key: Uint8Array | null = null, dirNameNonce: Uint8Array | null = null): Promise<VirtualFile> {
+    public async createDirectory(dirName: string, key: Uint8Array | null = null, dirNameNonce: Uint8Array | null = null): Promise<IVirtualFile> {
         if (this.#drive == null)
             throw new SalmonSecurityException("Need to pass the key and dirNameNonce nonce if not using a drive");
         let encryptedDirName: string = await this.getEncryptedFilename(dirName, key, dirNameNonce);
@@ -567,7 +566,7 @@ export class SalmonFile extends VirtualFile {
     async #getRelativePath(realPath: string): Promise<string> {
         if (this.#drive == null)
             throw new Error("File is not part of a drive");
-        let virtualRoot: VirtualFile | null = await this.#drive.getRoot();
+        let virtualRoot: IVirtualFile | null = await this.#drive.getRoot();
         if (virtualRoot == null)
             throw new Error("Could not find virtual root, if this file is part of a drive make sure you init first");
         let virtualRootPath: string = virtualRoot.getRealFile().getAbsolutePath();
@@ -584,7 +583,7 @@ export class SalmonFile extends VirtualFile {
         if (this.#_baseName != null)
             return this.#_baseName;
         if (this.#drive != null) {
-            let virtualRoot: VirtualFile | null = await this.#drive.getRoot();
+            let virtualRoot: IVirtualFile | null = await this.#drive.getRoot();
             if (virtualRoot == null) {
                 throw new SalmonSecurityException("Could not get virtual root, you need to init drive first");
             }
@@ -600,11 +599,11 @@ export class SalmonFile extends VirtualFile {
     /**
      * Returns the virtual parent directory
      */
-    public async getParent(): Promise<VirtualFile | null> {
+    public async getParent(): Promise<IVirtualFile | null> {
         try {
             if (this.#drive == null)
                 return null;
-            let virtualRoot: VirtualFile | null = await this.#drive.getRoot();
+            let virtualRoot: IVirtualFile | null = await this.#drive.getRoot();
             if (virtualRoot == null)
                 throw new SalmonSecurityException("Could not get virtual root, you need to init drive first");
             if (virtualRoot.getRealFile().getPath() == this.getRealFile().getPath()) {
@@ -617,7 +616,7 @@ export class SalmonFile extends VirtualFile {
         let realDir: IRealFile | null = await this.#realFile.getParent();
         if (realDir == null)
             throw new Error("Could not get parent");
-        let dir: VirtualFile = new SalmonFile(realDir, this.#drive);
+        let dir: IVirtualFile = new SalmonFile(realDir, this.#drive);
         return dir;
     }
 
@@ -828,7 +827,7 @@ export class SalmonFile extends VirtualFile {
      * @return
      * @throws IOException
      */
-    public async move(dir: VirtualFile, OnProgressListener: ((position: number, length: number) => void) | null = null): Promise<VirtualFile> {
+    public async move(dir: IVirtualFile, OnProgressListener: ((position: number, length: number) => void) | null = null): Promise<IVirtualFile> {
         let newRealFile: IRealFile = await this.#realFile.move(dir.getRealFile(), null, OnProgressListener);
         return new SalmonFile(newRealFile, this.#drive);
     }
@@ -841,7 +840,7 @@ export class SalmonFile extends VirtualFile {
      * @return
      * @throws IOException
      */
-    public async copy(dir: VirtualFile, OnProgressListener: ((position: number, length: number) => void) | null = null): Promise<VirtualFile> {
+    public async copy(dir: IVirtualFile, OnProgressListener: ((position: number, length: number) => void) | null = null): Promise<IVirtualFile> {
         let newRealFile: IRealFile | null = await this.#realFile.copy(dir.getRealFile(), null, OnProgressListener);
         if (newRealFile == null)
             throw new IOException("Could not copy file");
@@ -856,9 +855,9 @@ export class SalmonFile extends VirtualFile {
      * @param autoRename
      * @param onFailed
      */
-    public async copyRecursively(dest: VirtualFile,
-        progressListener: ((salmonFile: VirtualFile, position: number, length: number) => void) | null = null,
-        autoRename: ((salmonFile: VirtualFile) => Promise<string>) | null = null,
+    public async copyRecursively(dest: IVirtualFile,
+        progressListener: ((salmonFile: IVirtualFile, position: number, length: number) => void) | null = null,
+        autoRename: ((salmonFile: IVirtualFile) => Promise<string>) | null = null,
         autoRenameFolders: boolean,
         onFailed: ((salmonFile: SalmonFile, ex: Error) => void) | null = null): Promise<void> {
         let onFailedRealFile: ((realFile: IRealFile, ex: Error) => void) | null = null;

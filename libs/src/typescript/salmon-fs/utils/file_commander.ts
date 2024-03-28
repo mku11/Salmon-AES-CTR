@@ -26,7 +26,7 @@ import { IRealFile } from "../file/ireal_file.js";
 import { FileImporter } from "./file_importer.js";
 import { FileExporter } from "./file_exporter.js";
 import { SearchEvent, FileSearcher } from "./file_searcher.js";
-import { VirtualFile } from "../file/virtual_file.js";
+import { IVirtualFile } from "../file/ivirtual_file.js";
 
 /**
  * Facade class for file operations.
@@ -40,8 +40,6 @@ export class FileCommander {
     /**
      * Instantiate a new file commander object.
      *
-     * @param importBufferSize The buffer size to use for importing files.
-     * @param exportBufferSize The buffer size to use for exporting files.
      */
     public constructor(fileImporter: FileImporter, fileExporter: FileExporter, fileSearcher: FileSearcher) {
         this.fileImporter = fileImporter;
@@ -62,19 +60,19 @@ export class FileCommander {
      * @return The imported files if completes successfully.
      * @throws Exception
      */
-    public async importFiles(filesToImport: IRealFile[], importDir: VirtualFile,
+    public async importFiles(filesToImport: IRealFile[], importDir: IVirtualFile,
         deleteSource: boolean, integrity: boolean,
         onProgressChanged: ((progress: RealFileTaskProgress) => void | null),
         autoRename: ((file: IRealFile) => Promise<string>) | null,
-        onFailed: ((file: IRealFile, error: Error | unknown) => void | null)): Promise<VirtualFile[]> {
+        onFailed: ((file: IRealFile, error: Error | unknown) => void | null)): Promise<IVirtualFile[]> {
         this.stopJobs = false;
-        let importedFiles: VirtualFile[] = [];
+        let importedFiles: IVirtualFile[] = [];
 
         let total: number = 0;
         for (let i = 0; i < filesToImport.length; i++)
             total += await this.getRealFilesCountRecursively(filesToImport[i]);
         let count: number[] = [0];
-        let existingFiles: { [key: string]: VirtualFile } = await this.getExistingVirtualFiles(importDir);
+        let existingFiles: { [key: string]: IVirtualFile } = await this.getExistingIVirtualFiles(importDir);
         for (let i = 0; i < filesToImport.length; i++) {
             if (this.stopJobs)
                 break;
@@ -87,11 +85,11 @@ export class FileCommander {
         return importedFiles;
     }
 
-    private async getExistingVirtualFiles(importDir: VirtualFile): Promise<{ [key: string]: VirtualFile }> {
-        let files: { [key: string]: VirtualFile } = {};
-        let realFiles: VirtualFile[] = await importDir.listFiles();
+    private async getExistingIVirtualFiles(importDir: IVirtualFile): Promise<{ [key: string]: IVirtualFile }> {
+        let files: { [key: string]: IVirtualFile } = {};
+        let realFiles: IVirtualFile[] = await importDir.listFiles();
         for (let i = 0; i < realFiles.length; i++) {
-            let file: VirtualFile = realFiles[i];
+            let file: IVirtualFile = realFiles[i];
             try {
                 files[await file.getBaseName()] = file;
             } catch (ignored) {
@@ -100,14 +98,14 @@ export class FileCommander {
         return files;
     }
 
-    private async importRecursively(fileToImport: IRealFile, importDir: VirtualFile,
+    private async importRecursively(fileToImport: IRealFile, importDir: IVirtualFile,
         deleteSource: boolean, integrity: boolean,
         onProgressChanged: ((progress: RealFileTaskProgress) => void) | null,
         autoRename: ((realFile: IRealFile) => Promise<string>) | null,
         onFailed: ((realFile: IRealFile, error: Error | unknown) => void) | null,
-        importedFiles: VirtualFile[], count: number[], total: number,
-        existingFiles: { [key: string]: VirtualFile }): Promise<void> {
-        let sfile: VirtualFile | null = fileToImport.getBaseName() in existingFiles
+        importedFiles: IVirtualFile[], count: number[], total: number,
+        existingFiles: { [key: string]: IVirtualFile }): Promise<void> {
+        let sfile: IVirtualFile | null = fileToImport.getBaseName() in existingFiles
             ? existingFiles[fileToImport.getBaseName()] : null;
         if (await fileToImport.isDirectory()) {
             if (onProgressChanged != null)
@@ -121,7 +119,7 @@ export class FileCommander {
             count[0]++;
             if (sfile == null)
                 throw new Error("Could not get import directory");
-            let nExistingFiles: { [key: string]: VirtualFile } = await this.getExistingVirtualFiles(sfile);
+            let nExistingFiles: { [key: string]: IVirtualFile } = await this.getExistingIVirtualFiles(sfile);
             let lFiles = await fileToImport.listFiles();
             for (let i = 0; i < lFiles.length; i++) {
                 let child: IRealFile = lFiles[i];
@@ -170,17 +168,17 @@ export class FileCommander {
      * @return The exported files
      * @throws Exception
      */
-    public async exportFiles(filesToExport: VirtualFile[], exportDir: IRealFile,
+    public async exportFiles(filesToExport: IVirtualFile[], exportDir: IRealFile,
         deleteSource: boolean, integrity: boolean,
-        onProgressChanged: ((progress: VirtualFileTaskProgress) => void) | null,
+        onProgressChanged: ((progress: IVirtualFileTaskProgress) => void) | null,
         autoRename: ((realFile: IRealFile) => Promise<string>) | null,
-        onFailed: ((file: VirtualFile, error: Error | unknown) => void) | null): Promise<IRealFile[]> {
+        onFailed: ((file: IVirtualFile, error: Error | unknown) => void) | null): Promise<IRealFile[]> {
         this.stopJobs = false;
         let exportedFiles: IRealFile[] = [];
 
         let total: number = 0;
         for (let i = 0; i < filesToExport.length; i++)
-            total += await this.getVirtualFilesCountRecursively(filesToExport[i]);
+            total += await this.getIVirtualFilesCountRecursively(filesToExport[i]);
 
         let existingFiles: { [key: string]: IRealFile } = await this.getExistingRealFiles(exportDir);
 
@@ -207,11 +205,11 @@ export class FileCommander {
         return files;
     }
 
-    private async exportRecursively(fileToExport: VirtualFile, exportDir: IRealFile,
+    private async exportRecursively(fileToExport: IVirtualFile, exportDir: IRealFile,
         deleteSource: boolean, integrity: boolean,
-        onProgressChanged: ((progress: VirtualFileTaskProgress) => void) | null,
+        onProgressChanged: ((progress: IVirtualFileTaskProgress) => void) | null,
         autoRename: ((file: IRealFile) => Promise<string>) | null,
-        onFailed: ((file: VirtualFile, error: Error | unknown) => void) | null,
+        onFailed: ((file: IVirtualFile, error: Error | unknown) => void) | null,
         exportedFiles: IRealFile[], count: number[], total: number,
         existingFiles: { [key: string]: IRealFile }): Promise<void> {
         let rfile: IRealFile | null = await fileToExport.getBaseName() in existingFiles
@@ -223,12 +221,12 @@ export class FileCommander {
             else if (rfile != null && await rfile.isFile() && autoRename != null)
                 rfile = await exportDir.createDirectory(await autoRename(rfile));
             if (onProgressChanged != null)
-                onProgressChanged(new VirtualFileTaskProgress(fileToExport as VirtualFile, 1, 1, count[0], total));
+                onProgressChanged(new IVirtualFileTaskProgress(fileToExport as IVirtualFile, 1, 1, count[0], total));
             count[0]++;
             let nExistingFiles: { [key: string]: IRealFile } = await this.getExistingRealFiles(rfile);
-            let lFiles: VirtualFile[] = await fileToExport.listFiles();
+            let lFiles: IVirtualFile[] = await fileToExport.listFiles();
             for (let i = 0; i < lFiles.length; i++) {
-                let child: VirtualFile = lFiles[i];
+                let child: IVirtualFile = lFiles[i];
                 await this.exportRecursively(child, rfile, deleteSource, integrity, onProgressChanged,
                     autoRename, onFailed, exportedFiles, count, total,
                     nExistingFiles);
@@ -241,10 +239,10 @@ export class FileCommander {
                 let filename: string = await fileToExport.getBaseName();
                 if (rfile != null && await rfile.exists() && autoRename != null)
                     filename = await autoRename(rfile);
-                rfile = await this.fileExporter.exportFile(fileToExport as VirtualFile, exportDir, filename, deleteSource, integrity,
+                rfile = await this.fileExporter.exportFile(fileToExport as IVirtualFile, exportDir, filename, deleteSource, integrity,
                     (bytes, totalBytes) => {
                         if (onProgressChanged != null) {
-                            onProgressChanged(new VirtualFileTaskProgress(fileToExport as VirtualFile,
+                            onProgressChanged(new IVirtualFileTaskProgress(fileToExport as IVirtualFile,
                                 bytes, totalBytes, count[0], total));
                         }
                     });
@@ -256,19 +254,19 @@ export class FileCommander {
             } catch (ex) {
                 if(!this.onError(ex)){
                     if (onFailed != null)
-                        onFailed(fileToExport as VirtualFile, ex);
+                        onFailed(fileToExport as IVirtualFile, ex);
                 }
             }
         }
     }
 
-    private async getVirtualFilesCountRecursively(file: VirtualFile): Promise<number> {
+    private async getIVirtualFilesCountRecursively(file: IVirtualFile): Promise<number> {
         let count: number = 1;
         if (await file.isDirectory()) {
-            let lFiles: VirtualFile[] = await file.listFiles();
+            let lFiles: IVirtualFile[] = await file.listFiles();
             for (let i = 0; i < lFiles.length; i++) {
-                let child: VirtualFile = lFiles[i];
-                count += await this.getVirtualFilesCountRecursively(child);
+                let child: IVirtualFile = lFiles[i];
+                count += await this.getIVirtualFilesCountRecursively(child);
             }
         }
         return count;
@@ -293,15 +291,15 @@ export class FileCommander {
      * @param OnProgressChanged The observer to notify when each file is deleted.
      * @param onFailed The observer to notify when a file has failed.
      */
-    public async deleteFiles(filesToDelete: VirtualFile[], OnProgressChanged: ((progress: VirtualFileTaskProgress) => void) | null,
-        onFailed: ((file: VirtualFile, error: Error | unknown) => void) | null): Promise<void> {
+    public async deleteFiles(filesToDelete: IVirtualFile[], OnProgressChanged: ((progress: IVirtualFileTaskProgress) => void) | null,
+        onFailed: ((file: IVirtualFile, error: Error | unknown) => void) | null): Promise<void> {
         this.stopJobs = false;
         let count: number[] = [0];
         let total: number = 0;
         for (let i = 0; i < filesToDelete.length; i++)
-            total += await this.getVirtualFilesCountRecursively(filesToDelete[i]);
+            total += await this.getIVirtualFilesCountRecursively(filesToDelete[i]);
         for (let i = 0; i < filesToDelete.length; i++) {
-            let fileToDelete: VirtualFile = filesToDelete[i];
+            let fileToDelete: IVirtualFile = filesToDelete[i];
             if (this.stopJobs)
                 break;
             let finalTotal: number = total;
@@ -310,7 +308,7 @@ export class FileCommander {
                     throw new Error();
                 if (OnProgressChanged != null) {
                     try {
-                        OnProgressChanged(new VirtualFileTaskProgress(
+                        OnProgressChanged(new IVirtualFileTaskProgress(
                             file, position, length, count[0], finalTotal));
                     }
                     catch (ex) {
@@ -333,18 +331,18 @@ export class FileCommander {
      * @param onFailed          The observer to notify when failures occur
      * @throws Exception
      */
-    public async copyFiles(filesToCopy: VirtualFile[], dir: VirtualFile, move: boolean,
-        onProgressChanged: ((progress: VirtualFileTaskProgress) => void) | null,
-        autoRename: ((file: VirtualFile) => Promise<string>) | null,
-        autoRenameFolders: boolean, onFailed: ((file: VirtualFile, error: Error | unknown) => void) | null): Promise<void> {
+    public async copyFiles(filesToCopy: IVirtualFile[], dir: IVirtualFile, move: boolean,
+        onProgressChanged: ((progress: IVirtualFileTaskProgress) => void) | null,
+        autoRename: ((file: IVirtualFile) => Promise<string>) | null,
+        autoRenameFolders: boolean, onFailed: ((file: IVirtualFile, error: Error | unknown) => void) | null): Promise<void> {
         this.stopJobs = false;
         let count: number[] = [0];
         let total: number = 0;
         for (let i = 0; i < filesToCopy.length; i++)
-            total += await this.getVirtualFilesCountRecursively(filesToCopy[i]);
+            total += await this.getIVirtualFilesCountRecursively(filesToCopy[i]);
         const finalTotal: number = total;
         for (let i = 0; i < filesToCopy.length; i++) {
-            let fileToCopy: VirtualFile = filesToCopy[i];
+            let fileToCopy: IVirtualFile = filesToCopy[i];
             if (dir.getRealFile().getAbsolutePath().startsWith(fileToCopy.getRealFile().getAbsolutePath()))
                 continue;
 
@@ -357,7 +355,7 @@ export class FileCommander {
                         throw new Error();
                     if (onProgressChanged != null) {
                         try {
-                            onProgressChanged(new VirtualFileTaskProgress(
+                            onProgressChanged(new IVirtualFileTaskProgress(
                                 file, position, length, count[0], finalTotal));
                         } catch (ex) {
                         }
@@ -371,7 +369,7 @@ export class FileCommander {
                         throw new Error();
                     if (onProgressChanged != null) {
                         try {
-                            onProgressChanged(new VirtualFileTaskProgress(file, position, length, count[0], finalTotal));
+                            onProgressChanged(new IVirtualFileTaskProgress(file, position, length, count[0], finalTotal));
                         } catch (ignored) {
                         }
                     }
@@ -436,9 +434,9 @@ export class FileCommander {
      * @param OnSearchEvent Callback interface to receive status events.
      * @return An array with all the results found.
      */
-    public async search(dir: VirtualFile, terms: string, anyTerm: boolean,
-        OnResultFound: (searchResult: VirtualFile) => void,
-        OnSearchEvent: (event: SearchEvent) => void): Promise<VirtualFile[]> {
+    public async search(dir: IVirtualFile, terms: string, anyTerm: boolean,
+        OnResultFound: (searchResult: IVirtualFile) => void,
+        OnSearchEvent: (event: SearchEvent) => void): Promise<IVirtualFile[]> {
         return await this.fileSearcher.search(dir, terms, anyTerm, OnResultFound, OnSearchEvent);
     }
 
@@ -457,10 +455,10 @@ export class FileCommander {
      * @param files Total number of files and files under subdirectories.
      * @return
      */
-    private async getFiles(files: VirtualFile[]): Promise<number> {
+    private async getFiles(files: IVirtualFile[]): Promise<number> {
         let total = 0;
         for (let i = 0; i < files.length; i++) {
-            let file: VirtualFile = files[i];
+            let file: IVirtualFile = files[i];
             total++;
             if (await file.isDirectory()) {
                 total += await this.getFiles(await file.listFiles());
@@ -478,7 +476,7 @@ export class FileCommander {
      * Rename an encrypted file
      *
      */
-    public async renameFile(ifile: VirtualFile, newFilename: string): Promise<void> {
+    public async renameFile(ifile: IVirtualFile, newFilename: string): Promise<void> {
         await ifile.rename(newFilename);
     }
 
@@ -526,14 +524,14 @@ export class FileTaskProgress {
     }
 }
 
-export class VirtualFileTaskProgress extends FileTaskProgress {
-    private readonly file: VirtualFile;
+export class IVirtualFileTaskProgress extends FileTaskProgress {
+    private readonly file: IVirtualFile;
 
-    public getFile(): VirtualFile {
+    public getFile(): IVirtualFile {
         return this.file;
     }
 
-    public constructor(file: VirtualFile, processedBytes: number, totalBytes: number,
+    public constructor(file: IVirtualFile, processedBytes: number, totalBytes: number,
         processedFiles: number, totalFiles: number) {
         super(processedBytes, totalBytes, processedFiles, totalFiles);
         this.file = file;

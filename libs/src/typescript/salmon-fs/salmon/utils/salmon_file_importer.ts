@@ -23,9 +23,9 @@ SOFTWARE.
 */
 
 import { IRealFile } from "../../file/ireal_file.js";
-import { VirtualFile } from "../../file/virtual_file.js";
+import { IVirtualFile } from "../../file/ivirtual_file.js";
 import { SalmonIntegrityException } from "../../../salmon-core/salmon/integrity/salmon_integrity_exception.js";
-import { SalmonAuthException } from "../auth/salmon_auth_exception.js";
+import { SalmonAuthException } from "../salmon_auth_exception.js";
 import { FileImporter } from "../../utils/file_importer.js";
 import { SalmonFile } from "../salmon_file.js";
 
@@ -45,13 +45,13 @@ export class SalmonFileImporter extends FileImporter {
         super.initialize(bufferSize, threads);
     }
 
-    async onPrepare(targetFile: VirtualFile, integrity: boolean) {
+    async onPrepare(targetFile: IVirtualFile, integrity: boolean) {
         (targetFile as SalmonFile).setAllowOverwrite(true);
         // we use default chunk file size
         await (targetFile as SalmonFile).setApplyIntegrity(integrity, null, null);
     }
 
-    async getMinimumPartSize(file: VirtualFile): Promise<number> {
+    async getMinimumPartSize(file: IVirtualFile): Promise<number> {
         return await (file as SalmonFile).getMinimumPartSize();
     }
 
@@ -66,7 +66,7 @@ export class SalmonFileImporter extends FileImporter {
                 err = new Error(err.error);
         }
     }
-    async getWorkerMessage(index: number, sourceFile: IRealFile, targetFile: VirtualFile,
+    async getWorkerMessage(index: number, sourceFile: IRealFile, targetFile: IVirtualFile,
         runningThreads: number, partSize: number, fileSize: number, bufferSize: number, integrity: boolean) {
         let importedFile = targetFile as SalmonFile;
         let fileToImportHandle: any = await sourceFile.getPath();

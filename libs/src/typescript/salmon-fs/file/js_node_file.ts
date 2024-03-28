@@ -22,10 +22,10 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 */
 
-import { RandomAccessStream } from '../../salmon-core/io/random_access_stream.js';
+import { RandomAccessStream } from '../../salmon-core/iostream/random_access_stream.js';
 import { IRealFile, copyFileContents } from './ireal_file.js';
 import { JsNodeFileStream } from './js_node_file_stream.js';
-import { IOException } from '../../salmon-core/io/io_exception.js';
+import { IOException } from '../../salmon-core/iostream/io_exception.js';
 import { mkdir, stat, readdir, rename, open, FileHandle } from 'node:fs/promises';
 import { Stats, rmdirSync, unlinkSync } from 'node:fs';
 import path from 'node:path';

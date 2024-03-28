@@ -23,7 +23,7 @@ SOFTWARE.
 */
 
 import { IRealFile } from "../file/ireal_file.js";
-import { VirtualFile } from "../file/virtual_file.js";
+import { IVirtualFile } from "../file/ivirtual_file.js";
 import { exportFilePart } from "./file_exporter_helper.js";
 import { FileUtils } from "./file_utils.js";
 
@@ -35,7 +35,7 @@ export class FileExporterWorker {
      * @param params 
      * @returns 
      */
-    async getSourceFile(params: any): Promise<VirtualFile | null> {
+    async getSourceFile(params: any): Promise<IVirtualFile | null> {
         return null;
     }
 
@@ -74,7 +74,7 @@ export class FileExporterWorker {
                     postMessage(msg);
             };
             let totalBytesWritten: number[] = [0];
-            let fileToExport: VirtualFile | null = await this.getSourceFile(params);
+            let fileToExport: IVirtualFile | null = await this.getSourceFile(params);
             let exportedFile = await this.getTargetFile(params);
 
             if(fileToExport == null)

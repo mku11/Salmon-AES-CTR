@@ -25,9 +25,9 @@ SOFTWARE.
 
 import com.mku.file.IRealFile;
 import com.mku.salmon.win.registry.SalmonRegistry;
-import com.mku.sequence.ISalmonSequenceSerializer;
-import com.mku.sequence.SalmonFileSequencer;
-import com.mku.sequence.SalmonSequenceException;
+import com.mku.sequence.INonceSequenceSerializer;
+import com.mku.salmon.sequence.SalmonFileSequencer;
+import com.mku.salmon.sequence.SalmonSequenceException;
 import com.sun.jna.platform.win32.Crypt32Util;
 
 import java.io.IOException;
@@ -70,7 +70,7 @@ public class WinFileSequencer extends SalmonFileSequencer
      * @throws SalmonSequenceException
      * @throws IOException
      */
-    public WinFileSequencer(IRealFile sequenceFile, ISalmonSequenceSerializer serializer, String regCheckSumKey) throws SalmonSequenceException, IOException {
+    public WinFileSequencer(IRealFile sequenceFile, INonceSequenceSerializer serializer, String regCheckSumKey) throws SalmonSequenceException, IOException {
         super(sequenceFile, serializer);
 		if(regCheckSumKey == null)
 			throw new SalmonSequenceException("Registry checksum key cannot be null");

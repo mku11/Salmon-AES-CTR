@@ -24,11 +24,11 @@ SOFTWARE.
 */
 
 import com.mku.convert.BitConverter;
-import com.mku.io.MemoryStream;
+import com.mku.iostream.MemoryStream;
 import com.mku.salmon.integrity.SalmonIntegrity;
 import com.mku.salmon.integrity.SalmonIntegrityException;
-import com.mku.salmon.io.EncryptionMode;
-import com.mku.salmon.io.SalmonStream;
+import com.mku.salmon.iostream.EncryptionMode;
+import com.mku.salmon.iostream.SalmonStream;
 import com.mku.salmon.transform.SalmonAES256CTRTransformer;
 
 import java.io.IOException;

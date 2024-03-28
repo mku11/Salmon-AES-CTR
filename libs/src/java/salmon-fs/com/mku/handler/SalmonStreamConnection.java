@@ -24,10 +24,9 @@ SOFTWARE.
 */
 
 import com.mku.file.JavaFile;
-import com.mku.salmonfs.SalmonFileInputStream;
+import com.mku.salmon.iostream.SalmonFileInputStream;
 import com.mku.file.IRealFile;
-import com.mku.salmonfs.SalmonDriveManager;
-import com.mku.salmonfs.SalmonFile;
+import com.mku.salmon.SalmonFile;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -106,7 +105,8 @@ public class SalmonStreamConnection extends HttpURLConnection {
     private void setFile(String path) {
         path = URLDecoder.decode(path, Charset.defaultCharset());
         IRealFile rfile = new JavaFile(path);
-        salmonFile = new SalmonFile(rfile, SalmonDriveManager.getDrive());
+        //TODO: pass the drive
+        salmonFile = new SalmonFile(rfile, null);
     }
 
     /**

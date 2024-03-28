@@ -23,10 +23,10 @@ SOFTWARE.
 */
 
 import { BitConverter } from "../convert/bit_converter.js";
-import { MemoryStream } from "../io/memory_stream.js";
+import { MemoryStream } from "../iostream/memory_stream.js";
 import { SalmonIntegrity } from "./integrity/salmon_integrity.js";
-import { SalmonStream } from "./io/salmon_stream.js";
-import { EncryptionMode } from "./io/encryption_mode.js";
+import { SalmonStream } from "./iostream/salmon_stream.js";
+import { EncryptionMode } from "./iostream/encryption_mode.js";
 import { SalmonGenerator } from "./salmon_generator.js";
 import { SalmonSecurityException } from "./salmon_security_exception.js";
 import { SalmonAES256CTRTransformer } from "./transform/salmon_aes256_ctr_transformer.js";

@@ -23,7 +23,7 @@ SOFTWARE.
 */
 
 import { IRealFile } from "../../file/ireal_file.js";
-import { VirtualFile } from "../../file/virtual_file.js";
+import { IVirtualFile } from "../../file/ivirtual_file.js";
 import { FileExporterWorker } from "../../utils/file_exporter_worker.js";
 import { FileUtils } from "../../utils/file_utils.js";
 import { SalmonFile } from "../salmon_file.js";
@@ -34,7 +34,7 @@ export class SalmonFileExporterWorker extends FileExporterWorker {
      * @param params 
      * @returns 
      */
-    async getSourceFile(params: any): Promise<VirtualFile | null> {
+    async getSourceFile(params: any): Promise<IVirtualFile | null> {
         let realFile: IRealFile = await FileUtils.getInstance(params.exportFileClassType, params.fileToExportHandle);
         let fileToExport: SalmonFile = new SalmonFile(realFile, null);
         fileToExport.setEncryptionKey(params.key);

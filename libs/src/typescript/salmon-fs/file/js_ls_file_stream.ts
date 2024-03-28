@@ -22,8 +22,8 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 */
 
-import { MemoryStream } from "../../salmon-core/io/memory_stream.js";
-import { RandomAccessStream, SeekOrigin } from "../../salmon-core/io/random_access_stream.js";
+import { MemoryStream } from "../../salmon-core/iostream/memory_stream.js";
+import { RandomAccessStream, SeekOrigin } from "../../salmon-core/iostream/random_access_stream.js";
 import { IRealFile } from "./ireal_file.js";
 import { Base64 } from "../../salmon-core/convert/base64.js";
 

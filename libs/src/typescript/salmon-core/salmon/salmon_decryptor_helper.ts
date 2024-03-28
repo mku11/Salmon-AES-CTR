@@ -22,9 +22,9 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 */
 
-import { MemoryStream } from "../io/memory_stream.js";
-import { SalmonStream } from "./io/salmon_stream.js";
-import { EncryptionMode } from "./io/encryption_mode.js";
+import { MemoryStream } from "../iostream/memory_stream.js";
+import { SalmonStream } from "./iostream/salmon_stream.js";
+import { EncryptionMode } from "./iostream/encryption_mode.js";
 import { SalmonSecurityException } from "./salmon_security_exception.js";
 
 /**

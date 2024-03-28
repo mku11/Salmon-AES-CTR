@@ -26,8 +26,8 @@ SOFTWARE.
 import com.mku.func.BiConsumer;
 import com.mku.func.Function;
 import com.mku.func.TriConsumer;
-import com.mku.io.RandomAccessStream;
-import com.mku.utils.SalmonFileUtils;
+import com.mku.iostream.RandomAccessStream;
+import com.mku.utils.FileUtils;
 
 import java.io.FileNotFoundException;
 import java.io.IOException;
@@ -192,7 +192,7 @@ public interface IRealFile {
      * @param progressListener Observer to notify of the move progress.
      * @return The file after the move. Use this instance for any subsequent file operations.
      */
-    IRealFile move(IRealFile newDir, String newName, RandomAccessStream.OnProgressListener progressListener) throws IOException;
+    IRealFile move(IRealFile newDir, String newName, BiConsumer<Long, Long> progressListener) throws IOException;
 
     /**
      * Copy this file to another directory.
@@ -222,7 +222,7 @@ public interface IRealFile {
      * @return The file after the copy. Use this instance for any subsequent file operations.
      * @throws IOException
      */
-    IRealFile copy(IRealFile newDir, String newName, RandomAccessStream.OnProgressListener progressListener) throws IOException;
+    IRealFile copy(IRealFile newDir, String newName, BiConsumer<Long, Long> progressListener) throws IOException;
 
     /**
      * Get the file/directory matching the name provided under this directory.
@@ -250,7 +250,7 @@ public interface IRealFile {
      * @throws IOException
      */
     static boolean copyFileContents(IRealFile src, IRealFile dest, boolean delete,
-                                    RandomAccessStream.OnProgressListener progressListener)
+                                    BiConsumer<Long, Long> progressListener)
             throws IOException {
         RandomAccessStream source = src.getInputStream();
         RandomAccessStream target = dest.getOutputStream();
@@ -441,7 +441,7 @@ public interface IRealFile {
      * @return
      */
     static String autoRename(String filename) {
-        String ext = SalmonFileUtils.getExtensionFromFileName(filename);
+        String ext = FileUtils.getExtensionFromFileName(filename);
         String filenameNoExt;
         if (ext.length() > 0)
             filenameNoExt = filename.substring(0, filename.length() - ext.length() - 1);

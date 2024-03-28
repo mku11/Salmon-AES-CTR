@@ -24,9 +24,9 @@ SOFTWARE.
 
 import { SalmonIntegrityException } from "../../../salmon-core/salmon/integrity/salmon_integrity_exception.js";
 import { IRealFile } from "../../file/ireal_file.js";
-import { VirtualFile } from "../../file/virtual_file.js";
+import { IVirtualFile } from "../../file/ivirtual_file.js";
 import { FileExporter } from "../../utils/file_exporter.js";
-import { SalmonAuthException } from "../auth/salmon_auth_exception.js";
+import { SalmonAuthException } from "../salmon_auth_exception.js";
 import { SalmonFile } from "../salmon_file.js";
 
 export class SalmonFileExporter extends FileExporter {
@@ -36,11 +36,11 @@ export class SalmonFileExporter extends FileExporter {
         super.initialize(bufferSize, threads);
     }
 
-    async getMinimumPartSize(file: VirtualFile): Promise<number> {
+    async getMinimumPartSize(file: IVirtualFile): Promise<number> {
         return await (file as SalmonFile).getMinimumPartSize();
     }
 
-    async onPrepare(sourceFile: VirtualFile, integrity: boolean): Promise<void> {
+    async onPrepare(sourceFile: IVirtualFile, integrity: boolean): Promise<void> {
         // we use the drive hash key for integrity verification
         await (sourceFile as SalmonFile).setVerifyIntegrity(integrity, null);
     }
@@ -57,7 +57,7 @@ export class SalmonFileExporter extends FileExporter {
         return err;
     }
 
-    async getWorkerMessage(index: number, sourceFile: VirtualFile, targetFile: IRealFile,
+    async getWorkerMessage(index: number, sourceFile: IVirtualFile, targetFile: IRealFile,
         runningThreads: number, partSize: number, fileSize: number, bufferSize: number, integrity: boolean) {
         let fileToExport = sourceFile as SalmonFile;
         let fileToExportHandle: any = await fileToExport.getRealFile().getPath();

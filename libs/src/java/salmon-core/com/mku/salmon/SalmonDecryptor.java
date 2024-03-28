@@ -23,12 +23,12 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 */
 
-import com.mku.io.RandomAccessStream;
-import com.mku.io.MemoryStream;
+import com.mku.iostream.RandomAccessStream;
+import com.mku.iostream.MemoryStream;
 import com.mku.salmon.integrity.SalmonIntegrity;
 import com.mku.salmon.integrity.SalmonIntegrityException;
-import com.mku.salmon.io.EncryptionMode;
-import com.mku.salmon.io.SalmonStream;
+import com.mku.salmon.iostream.EncryptionMode;
+import com.mku.salmon.iostream.SalmonStream;
 import com.mku.salmon.transform.SalmonAES256CTRTransformer;
 
 import java.io.IOException;

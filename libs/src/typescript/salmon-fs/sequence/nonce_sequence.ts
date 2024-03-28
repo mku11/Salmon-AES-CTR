@@ -52,7 +52,7 @@ export class NonceSequence {
     status: Status | null = null;
 
     /**
-     * Instantiate a nonce sequence for a drive with the provided authorization id.
+     * Instantiate a nonce sequence with the provided authorization id.
      * @param id The Id for this sequence.
      * @param authId The authorization id for this device and drive.
      * @param nextNonce The next available nonce to be used.

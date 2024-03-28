@@ -23,14 +23,14 @@ SOFTWARE.
 */
 
 import { IRealFile } from "../../file/ireal_file.js";
-import { VirtualFile } from "../../file/virtual_file.js";
+import { IVirtualFile } from "../../file/ivirtual_file.js";
 import { FileImporterWorker } from "../../utils/file_importer_worker.js";
 import { FileUtils } from "../../utils/file_utils.js";
 import { SalmonFile } from "../salmon_file.js";
 
 export class SalmonFileImporterWorker extends FileImporterWorker {
 
-    async getTargetFile(params: any): Promise<VirtualFile | null> {
+    async getTargetFile(params: any): Promise<IVirtualFile | null> {
         let realFile: IRealFile = await FileUtils.getInstance(params.importedFileClassType, params.importedFileHandle);
         let targetFile: SalmonFile = new SalmonFile(realFile, null);
         targetFile.setAllowOverwrite(true);

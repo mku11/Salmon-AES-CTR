@@ -25,7 +25,7 @@ SOFTWARE.
 import { NonceSequence } from "./nonce_sequence.js";
 
 /**
- * Salmon nonce sequencer.
+ * Nonce sequencer.
  */
 export interface INonceSequencer {
     initialize(): Promise<void>;
