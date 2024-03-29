@@ -63,7 +63,7 @@ export class SalmonDefaultTransformer extends SalmonAES256CTRTransformer {
      */
     public async encryptData(srcBuffer: Uint8Array, srcOffset: number,
         destBuffer: Uint8Array, destOffset: number, count: number): Promise<number> {
-        if (this.#encSecretKey == null) //TODO: ToSync
+        if (this.#encSecretKey == null)
             throw new SalmonSecurityException("No key defined, run init first");
         try {
             let counter: Uint8Array = this.getCounter();
@@ -96,7 +96,7 @@ export class SalmonDefaultTransformer extends SalmonAES256CTRTransformer {
      */
     public async decryptData(srcBuffer: Uint8Array, srcOffset: number,
         destBuffer: Uint8Array, destOffset: number, count: number): Promise<number> {
-        if (this.#encSecretKey == null) //TODO: ToSync
+        if (this.#encSecretKey == null)
             throw new SalmonSecurityException("No key defined, run init first");
         try {
             let counter: Uint8Array = this.getCounter();

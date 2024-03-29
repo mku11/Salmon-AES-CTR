@@ -27,13 +27,13 @@ SOFTWARE.
 #include <jni.h>
 #include <stdint.h>
 
-JNIEXPORT void JNICALL Java_com_mku_salmon_transform_NativeProxy_init(JNIEnv* env, jclass thiz,
+JNIEXPORT void JNICALL Java_com_mku_salmon_bridge_NativeProxy_init(JNIEnv* env, jclass thiz,
     jint aesImpl);
 
-JNIEXPORT void JNICALL Java_com_mku_salmon_transform_NativeProxy_expandkey(JNIEnv* env, jclass thiz,
+JNIEXPORT void JNICALL Java_com_mku_salmon_bridge_NativeProxy_expandkey(JNIEnv* env, jclass thiz,
     jbyteArray jKey, jbyteArray jExpandedKey);
 
-JNIEXPORT jint JNICALL Java_com_mku_salmon_transform_NativeProxy_transform(JNIEnv* env, jclass thiz,
+JNIEXPORT jint JNICALL Java_com_mku_salmon_bridge_NativeProxy_transform(JNIEnv* env, jclass thiz,
     jbyteArray jKey, jbyteArray jCounter,
     jbyteArray jSrcBuffer, jint srcOffset,
     jbyteArray jDestBuffer, jint destOffset, jint count);

@@ -260,7 +260,7 @@ public class JavaFile implements IRealFile {
         newName = newName != null ? newName : getBaseName();
         //TODO: ToSync
         if (newDir == null || !newDir.exists())
-            throw new RuntimeException("Target directory does not exists");
+            throw new RuntimeException("Target directory does not exist");
         IRealFile newFile = newDir.getChild(newName);
         if (newFile != null && newFile.exists())
             throw new RuntimeException("Another file/directory already exists");

@@ -23,16 +23,12 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 */
 
+import com.mku.salmon.SalmonFile;
+
 /*
  * Virtual Drive
  */
 public abstract class VirtualDrive {
-    /**
-     * Get the virtual root directory backed by a real directory
-     * @param {IRealFile} virtualRootRealFile The real directory
-     * @returns {VirtualFile} The virtual root directory.
-     */
-    protected abstract IVirtualFile getVirtualRoot(IRealFile virtualRootRealFile);
 
     /**
      * Method is called when the user is authenticated
@@ -45,5 +41,7 @@ public abstract class VirtualDrive {
     public abstract void onUnlockError();
 
     public abstract String getPrivateDir() throws Exception;
+
+    public abstract IVirtualFile getRoot();
 
 }

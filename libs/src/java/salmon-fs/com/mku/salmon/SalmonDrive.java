@@ -26,7 +26,6 @@ SOFTWARE.
 import com.mku.convert.BitConverter;
 import com.mku.file.IRealFile;
 import com.mku.file.VirtualDrive;
-import com.mku.file.IVirtualFile;
 import com.mku.iostream.RandomAccessStream;
 import com.mku.iostream.MemoryStream;
 import com.mku.integrity.HmacSHA256Provider;
@@ -62,7 +61,7 @@ public abstract class SalmonDrive extends VirtualDrive {
     private SalmonDriveKey key = null;
     private byte[] driveId;
     private IRealFile realRoot = null;
-    private IVirtualFile virtualRoot = null;
+    private SalmonFile virtualRoot = null;
 
     private final IHashProvider hashProvider = new HmacSHA256Provider();
     private INonceSequencer sequencer;
@@ -74,7 +73,7 @@ public abstract class SalmonDrive extends VirtualDrive {
 	 * @param createIfNotExists Create the drive if it does not exist
      */
     public void initialize(IRealFile realRoot, boolean createIfNotExists) {
-        lock();
+        close();
         if (realRoot == null)
             return;
         this.realRoot = realRoot;
@@ -97,7 +96,7 @@ public abstract class SalmonDrive extends VirtualDrive {
         }
         if (virtualRootRealFile == null)
             throw new Error("Could not create directory for the virtual file system");
-        virtualRoot = getVirtualRoot(virtualRootRealFile);
+        virtualRoot = new SalmonFile(virtualRootRealFile, this);
         registerOnProcessClose();
         key = new SalmonDriveKey();
     }
@@ -146,7 +145,7 @@ public abstract class SalmonDrive extends VirtualDrive {
      * Clear sensitive information when app is close.
      */
     private void registerOnProcessClose() {
-        Runtime.getRuntime().addShutdownHook(new Thread(this::lock));
+        Runtime.getRuntime().addShutdownHook(new Thread(this::close));
     }
 
     /**
@@ -182,9 +181,7 @@ public abstract class SalmonDrive extends VirtualDrive {
      * @throws SalmonIntegrityException
      * @throws SalmonSequenceException
      */
-    public void setPassword(String pass)
-            throws IOException, SalmonAuthException, SalmonSecurityException,
-            SalmonIntegrityException, SalmonSequenceException {
+    public void setPassword(String pass) throws IOException {
         synchronized (this) {
             createConfig(pass);
         }
@@ -202,7 +199,7 @@ public abstract class SalmonDrive extends VirtualDrive {
                 ex.printStackTrace();
             }
         }
-        virtualRoot = getVirtualRoot(virtualRootRealFile);
+        virtualRoot = new SalmonFile(virtualRootRealFile, this);
     }
 
     /**
@@ -211,13 +208,15 @@ public abstract class SalmonDrive extends VirtualDrive {
      *
      * @param dir The directory path that will be used for storing the contents of the drive
      */
-    public static SalmonDrive openDrive(IRealFile dir, Class<?> driveClassType, INonceSequencer sequencer)
-            throws Exception {
+    public static SalmonDrive openDrive(IRealFile dir, Class<?> driveClassType,
+                                        String password, INonceSequencer sequencer)
+            throws IOException {
         SalmonDrive drive = createDriveInstance(dir, false,
                 driveClassType, sequencer);
         if (!drive.hasConfig()) {
-            throw new Exception("Drive does not exist");
+            throw new IOException("Drive does not exist");
         }
+        drive.unlock(password);
         return drive;
     }
 
@@ -230,12 +229,12 @@ public abstract class SalmonDrive extends VirtualDrive {
      * @throws SalmonIntegrityException
      * @throws SalmonSequenceException
      */
-    public static SalmonDrive createDrive(IRealFile dir, Class<?> driveClassType, INonceSequencer sequencer,
-                                          String password) throws IOException {
+    public static SalmonDrive createDrive(IRealFile dir, Class<?> driveClassType,
+                                          String password, INonceSequencer sequencer) throws IOException {
         SalmonDrive drive = createDriveInstance(dir, true,
                 driveClassType, sequencer);
         if (drive.hasConfig())
-            throw new SalmonSecurityException("Drive already exists");
+            throw new IOException("Drive already exists");
         drive.setPassword(password);
         return drive;
     }
@@ -249,15 +248,16 @@ public abstract class SalmonDrive extends VirtualDrive {
      * @throws SalmonSecurityException
      */
     private static SalmonDrive createDriveInstance(IRealFile dir, boolean createIfNotExists,
-                                                   Class<?> driveClassType, INonceSequencer sequencer)
-            throws SalmonSecurityException {
+                                                   Class<?> driveClassType, INonceSequencer sequencer) {
         Class<?> clazz;
         SalmonDrive drive;
         try {
             clazz = Class.forName(driveClassType.getName());
-            Constructor<?> constructor = clazz.getConstructor(String.class, boolean.class);
-            drive = (SalmonDrive) constructor.newInstance(new Object[]{dir, createIfNotExists});
+            Constructor<?> constructor = clazz.getDeclaredConstructor();
+            constructor.setAccessible(true);
+            drive = (SalmonDrive) constructor.newInstance();
             drive.initialize(dir, createIfNotExists);
+            drive.sequencer = sequencer;
         } catch (Exception e) {
             throw new SalmonSecurityException("Could not create drive instance", e);
         }
@@ -471,9 +471,7 @@ public abstract class SalmonDrive extends VirtualDrive {
      *                 encrypt the combined key (encryption key + hash key)
      */
 
-    private void createConfig(String password)
-            throws SalmonAuthException, IOException, SalmonSecurityException,
-            SalmonIntegrityException, SalmonSequenceException {
+    private void createConfig(String password) throws IOException {
         byte[] driveKey = getKey().getDriveKey();
         byte[] hashKey = getKey().getHashKey();
 
@@ -548,11 +546,9 @@ public abstract class SalmonDrive extends VirtualDrive {
      * @return
      * @throws SalmonAuthException
      */
-    public IVirtualFile getRoot() throws SalmonAuthException {
+    public SalmonFile getRoot() {
         if (realRoot == null || !realRoot.exists())
             return null;
-        if (!isUnlocked())
-            throw new SalmonAuthException("Not authorized");
         return virtualRoot;
     }
 	
@@ -565,7 +561,7 @@ public abstract class SalmonDrive extends VirtualDrive {
      *
      * @param password The password.
      */
-    public void unlock(String password) throws Exception {
+    private void unlock(String password) throws IOException {
         SalmonStream stream = null;
         try {
             if (password == null) {
@@ -607,7 +603,7 @@ public abstract class SalmonDrive extends VirtualDrive {
             this.driveId = driveId;
 			initFS();
             onUnlockSuccess();
-        } catch (Exception ex) {
+        } catch (RuntimeException | IOException ex) {
 			onUnlockError();
             throw ex;
         } finally {
@@ -637,7 +633,7 @@ public abstract class SalmonDrive extends VirtualDrive {
      * @param data
      * @param hashKey
      */
-    private void verifyHash(SalmonDriveConfig salmonConfig, byte[] data, byte[] hashKey) throws Exception {
+    private void verifyHash(SalmonDriveConfig salmonConfig, byte[] data, byte[] hashKey) {
         byte[] hashSignature = salmonConfig.getHashSignature();
         byte[] hash = SalmonIntegrity.calculateHash(hashProvider, data, 0, data.length, hashKey, null);
         for (int i = 0; i < hashKey.length; i++)
@@ -652,22 +648,9 @@ public abstract class SalmonDrive extends VirtualDrive {
     byte[] getNextNonce() {
         if (this.sequencer == null)
             throw new SalmonAuthException("No sequencer found use setSequencer");
-        if (!isUnlocked())
-            throw new SalmonAuthException("Not authorized");
         if (this.getDriveId() == null)
             throw new SalmonSecurityException("Could not get drive Id");
         return sequencer.nextNonce(BitConverter.toHex(this.getDriveId()));
-    }
-
-    /**
-     * Returns true if password authorization has succeeded.
-     */
-    public boolean isUnlocked() {
-        SalmonDriveKey key = getKey();
-        if (key == null)
-            return false;
-        byte[] encKey = key.getDriveKey();
-        return encKey != null;
     }
 
     /**
@@ -676,7 +659,7 @@ public abstract class SalmonDrive extends VirtualDrive {
      * @param file The file
      * @param bufferSize The buffer to be used when reading
      */
-    public byte[] getBytesFromRealFile(IRealFile file, int bufferSize) throws Exception {
+    public byte[] getBytesFromRealFile(IRealFile file, int bufferSize) throws IOException {
         RandomAccessStream stream = file.getInputStream();
         MemoryStream ms = new MemoryStream();
         stream.copyTo(ms, bufferSize, null);
@@ -712,7 +695,7 @@ public abstract class SalmonDrive extends VirtualDrive {
     /**
      * Return the configuration properties of this drive.
      */
-    protected SalmonDriveConfig getDriveConfig() throws Exception {
+    protected SalmonDriveConfig getDriveConfig() throws IOException {
         IRealFile configFile = getDriveConfigFile();
         if (configFile == null || !configFile.exists())
             return null;
@@ -746,7 +729,7 @@ public abstract class SalmonDrive extends VirtualDrive {
     /**
      * Lock the drive and close associated resources.
      */
-    public void lock() {
+    public void close() {
         realRoot = null;
         virtualRoot = null;
         driveId = null;

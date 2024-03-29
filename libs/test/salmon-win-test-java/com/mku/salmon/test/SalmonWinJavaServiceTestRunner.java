@@ -52,10 +52,6 @@ public class SalmonWinJavaServiceTestRunner {
     public static String TEST_SERVICE_PIPE_NAME = "SalmonService";
     public static SalmonRegistry registry = new SalmonRegistry();
 
-    static {
-        SalmonDriveManager.setVirtualDriveClass(JavaDrive.class);
-    }
-
     @Test
     public void testServerSid() throws Exception {
         boolean res = WinClientSequencer.isServiceAdmin(TEST_SERVICE_PIPE_NAME);
@@ -66,8 +62,8 @@ public class SalmonWinJavaServiceTestRunner {
     @Test
     public void shouldConnectAndDisconnectToService() throws Exception {
         for (int i = 0; i < 12; i++) {
-            SalmonDriveManager.setSequencer(new WinClientSequencer(TEST_SERVICE_PIPE_NAME));
-            SalmonDriveManager.getSequencer().close();
+            WinClientSequencer sequencer = new WinClientSequencer(TEST_SERVICE_PIPE_NAME);
+            sequencer.close();
             Thread.sleep(1000);
         }
     }

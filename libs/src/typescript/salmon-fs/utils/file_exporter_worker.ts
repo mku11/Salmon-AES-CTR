@@ -45,14 +45,14 @@ export class FileExporterWorker {
      * @returns 
      */
     async getTargetFile(params: any): Promise<IRealFile> {
-        return FileUtils.getInstance(params.importFileClassType, params.fileToImportHandle);
+        return FileUtils.getInstance(params.exportedFileClassType, params.exportedFileHandle);
     }
 
-    async receive(event: any) {
+    async receive(worker: FileExporterWorker, event: any) {
         if (event.message = 'start')
-            await this.startExport(event);
+            await worker.startExport(event);
         else if (event.message = 'stop')
-            this.stopExport();
+            worker.stopExport();
     }
 
     stopExport() {
@@ -106,14 +106,4 @@ export class FileExporterWorker {
                 postMessage(msgError);
         }
     }
-}
-
-let worker = new FileExporterWorker();
-if (typeof process === 'object') {
-    const { parentPort } = await import("worker_threads");
-    if (parentPort != null)
-        parentPort.addListener('message', worker.receive);
-}
-else {
-    addEventListener('message', worker.receive);
 }

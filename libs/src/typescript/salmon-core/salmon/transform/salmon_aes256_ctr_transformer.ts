@@ -94,7 +94,7 @@ export abstract class SalmonAES256CTRTransformer implements ISalmonCTRTransforme
      * Resets the Counter and the block count.
      */
     public resetCounter(): void {
-        if (this.#nonce == null) //TODO: ToSync
+        if (this.#nonce == null)
             throw new SalmonSecurityException("No counter, run init first");
         this.#counter = new Uint8Array(SalmonAES256CTRTransformer.BLOCK_SIZE);
         for (let i = 0; i < this.#nonce.length; i++)
@@ -121,7 +121,7 @@ export abstract class SalmonAES256CTRTransformer implements ISalmonCTRTransforme
      * @param {number} value value to increase counter by
      */
     public increaseCounter(value: number): void {
-        if (this.#counter == null || this.#nonce == null) //TODO: ToSync
+        if (this.#counter == null || this.#nonce == null)
             throw new SalmonSecurityException("No counter, run init first");
         if (value < 0)
             throw new Error("Value should be positive");

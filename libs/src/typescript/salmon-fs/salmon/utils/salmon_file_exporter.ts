@@ -32,7 +32,7 @@ import { SalmonFile } from "../salmon_file.js";
 export class SalmonFileExporter extends FileExporter {
     public constructor(bufferSize: number, threads: number) {
         super();
-        super.setWorkerPath('./lib/salmon-fs/utils/salmon_file_exporter_worker.js');
+        super.setWorkerPath('./lib/salmon-fs/salmon/utils/salmon_file_exporter_worker.js');
         super.initialize(bufferSize, threads);
     }
 

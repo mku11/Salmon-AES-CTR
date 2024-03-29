@@ -29,14 +29,6 @@ import { IVirtualFile } from "./ivirtual_file";
  * Virtual Drive 
  */
 export abstract class VirtualDrive {
-
-    /**
-     * Get the virtual root directory backed by a real directory
-     * @param {IRealFile} virtualRootRealFile The real directory
-     * @returns {IVirtualFile} The virtual root directory.
-     */
-    protected abstract getVirtualRoot(virtualRootRealFile: IRealFile): IVirtualFile;
-
     /**
      * Method is called when the user is authenticated
      */

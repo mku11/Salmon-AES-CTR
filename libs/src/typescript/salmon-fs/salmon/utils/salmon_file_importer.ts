@@ -41,7 +41,7 @@ export class SalmonFileImporter extends FileImporter {
      */
     public constructor(bufferSize: number, threads: number) {
         super();
-        super.setWorkerPath('./lib/salmon-fs/utils/salmon_file_importer_worker.js');
+        super.setWorkerPath('./lib/salmon-fs/salmon/utils/salmon_file_importer_worker.js');
         super.initialize(bufferSize, threads);
     }
 
@@ -65,6 +65,7 @@ export class SalmonFileImporter extends FileImporter {
             else
                 err = new Error(err.error);
         }
+        return err;
     }
     async getWorkerMessage(index: number, sourceFile: IRealFile, targetFile: IVirtualFile,
         runningThreads: number, partSize: number, fileSize: number, bufferSize: number, integrity: boolean) {
@@ -83,7 +84,7 @@ export class SalmonFileImporter extends FileImporter {
             message: 'start',
             index: index,
             fileToImportHandle: fileToImportHandle,
-            importFileClassType: importedFile.constructor.name,
+            importFileClassType: sourceFile.constructor.name,
             start: start, length: length,
             importedFileHandle: importedFileHandle,
             importedFileClassType: importedFile.getRealFile().constructor.name,

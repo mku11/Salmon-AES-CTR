@@ -48,11 +48,11 @@ export class FileImporterWorker {
         return null;
     }
 
-    async receive(event: any) {
+    async receive(worker: FileImporterWorker, event: any) {
         if (event.message = 'start')
-            await this.startImport(event);
+            await worker.startImport(event);
         else if (event.message = 'stop')
-            this.stopImport();
+            worker.stopImport();
     }
 
     stopImport() {
@@ -105,14 +105,4 @@ export class FileImporterWorker {
                 postMessage(msgError);
         }
     }
-}
-
-let worker = new FileImporterWorker();
-if (typeof process === 'object') {
-    const { parentPort } = await import("worker_threads");
-    if (parentPort != null)
-        parentPort.addListener('message', worker.receive);
-}
-else {
-    addEventListener('message', worker.receive);
 }

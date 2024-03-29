@@ -63,9 +63,9 @@ export class SalmonAesIntrTransformer extends SalmonNativeTransformer {
         let expKey: Uint8Array | null = this.getExpandedKey();
         let ctr: Uint8Array | null = this.getCounter();
 
-        if (expKey == null) //TODO: ToSync
+        if (expKey == null)
             throw new SalmonSecurityException("No expanded key found, run init first");
-        if (ctr == null) //TODO: ToSync
+        if (ctr == null)
             throw new SalmonSecurityException("No counter found, run init first");
         // AES intrinsics needs the expanded key
         return SalmonAesIntrTransformer.getNativeProxy().transform(expKey, ctr,
@@ -87,9 +87,9 @@ export class SalmonAesIntrTransformer extends SalmonNativeTransformer {
         let expKey: Uint8Array | null = this.getExpandedKey();
         let ctr: Uint8Array | null = this.getCounter();
 
-        if (expKey == null) //TODO: ToSync
+        if (expKey == null)
             throw new SalmonSecurityException("No expanded key found, run init first");
-        if (ctr == null) //TODO: ToSync
+        if (ctr == null)
             throw new SalmonSecurityException("No counter found, run init first");
         // AES intrinsics needs the expanded key
         return SalmonAesIntrTransformer.getNativeProxy().transform(expKey, ctr,

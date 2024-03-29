@@ -435,9 +435,9 @@ public class SalmonFile implements IVirtualFile {
     /**
      * Lists files and directories under this directory
      */
-    public IVirtualFile[] listFiles() {
+    public SalmonFile[] listFiles() {
         IRealFile[] files = realFile.listFiles();
-        List<IVirtualFile> salmonFiles = new ArrayList<>();
+        List<SalmonFile> salmonFiles = new ArrayList<>();
         for (IRealFile iRealFile : files) {
             SalmonFile file = new SalmonFile(iRealFile, drive);
             salmonFiles.add(file);
@@ -455,9 +455,9 @@ public class SalmonFile implements IVirtualFile {
      * @throws IOException
      * @throws SalmonAuthException
      */
-    public IVirtualFile getChild(String filename) throws IOException {
-        IVirtualFile[] files = listFiles();
-        for (IVirtualFile file : files) {
+    public SalmonFile getChild(String filename) throws IOException {
+        SalmonFile[] files = listFiles();
+        for (SalmonFile file : files) {
             if (file.getBaseName().equals(filename))
                 return file;
         }
@@ -469,7 +469,7 @@ public class SalmonFile implements IVirtualFile {
      *
      * @param dirName The name of the directory to be created
      */
-    public IVirtualFile createDirectory(String dirName) throws IOException {
+    public SalmonFile createDirectory(String dirName) throws IOException {
         if (drive == null)
             throw new SalmonSecurityException("Need to pass the key and dirNameNonce nonce if not using a drive");
         return createDirectory(dirName, null, null);
@@ -549,7 +549,7 @@ public class SalmonFile implements IVirtualFile {
      * @param realPath The path of the real file
      */
     private String getRelativePath(String realPath) throws SalmonAuthException {
-        IVirtualFile virtualRoot = drive.getRoot();
+        SalmonFile virtualRoot = drive.getRoot();
         String virtualRootPath = virtualRoot.getRealFile().getAbsolutePath();
         if (realPath.startsWith(virtualRootPath)) {
             return realPath.replace(virtualRootPath, "");
@@ -709,7 +709,7 @@ public class SalmonFile implements IVirtualFile {
      *
      * @param filename The filename of a real file
      */
-    private String getDecryptedFilename(String filename) throws IOException, SalmonSecurityException, SalmonIntegrityException {
+    private String getDecryptedFilename(String filename) throws IOException {
         if (drive == null && (encryptionKey == null || requestedNonce == null))
             throw new SalmonSecurityException("Need to use a drive or pass key and nonce");
         return getDecryptedFilename(filename, null, null);
@@ -796,8 +796,7 @@ public class SalmonFile implements IVirtualFile {
      * @return
      * @throws IOException
      */
-    public IVirtualFile move(IVirtualFile dir, BiConsumer<Long, Long> OnProgressListener)
-            throws IOException {
+    public SalmonFile move(IVirtualFile dir, BiConsumer<Long, Long> OnProgressListener) throws IOException{
         IRealFile newRealFile = realFile.move(dir.getRealFile(), null, OnProgressListener);
         return new SalmonFile(newRealFile, drive);
     }
@@ -810,7 +809,7 @@ public class SalmonFile implements IVirtualFile {
      * @return
      * @throws IOException
      */
-    public IVirtualFile copy(IVirtualFile dir, BiConsumer<Long, Long> OnProgressListener)
+    public SalmonFile copy(IVirtualFile dir, BiConsumer<Long, Long> OnProgressListener)
             throws IOException {
         IRealFile newRealFile = realFile.copy(dir.getRealFile(), null, OnProgressListener);
         return new SalmonFile(newRealFile, drive);
@@ -895,8 +894,7 @@ public class SalmonFile implements IVirtualFile {
     }
 
     public void deleteRecursively(TriConsumer<IVirtualFile, Long, Long> progressListener,
-                                  BiConsumer<IVirtualFile, Exception> onFailed)
-    {
+                           BiConsumer<IVirtualFile, Exception> onFailed) {
         BiConsumer<IRealFile, Exception> onFailedRealFile = null;
         if (onFailed != null)
         {

@@ -33,9 +33,9 @@ if(enableLogReport) {
     output.style.display = "none";
 }
 
-window.execute = function () {
+window.execute = async function () {
     let testSuite = document.getElementById("testSuite").value;
-    executeTestSuite(testSuite);
+    await executeTestSuite(testSuite);
 }
 
 function setLogArea(element) {
@@ -199,6 +199,7 @@ window.selectTestFolder = selectTestFolder;
 window.executeTestSuite = executeTestSuite;
 window.setLogArea = setLogArea;
 
+// source the test suites so the test can be populated
 const {} = await import('./salmon-core/salmon-core.test.js');
 const {} = await import('./salmon-fs/salmon-fs-http.test.js');
 const {} = await import('./salmon-fs/salmon-fs.test.js');

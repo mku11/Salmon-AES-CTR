@@ -65,13 +65,13 @@ export abstract class SalmonDrive extends VirtualDrive {
     #key: SalmonDriveKey | null = null;
     #driveID: Uint8Array | null = null;
     #realRoot: IRealFile | null = null;
-    #virtualRoot: IVirtualFile | null = null;
+    #virtualRoot: SalmonFile | null = null;
 
     readonly #hashProvider: IHashProvider = new HmacSHA256Provider();
     #sequencer: INonceSequencer | null = null;
 
     public async initialize(realRoot: IRealFile, createIfNotExists: boolean): Promise<void> {
-        this.lock();
+        this.close();
         if (realRoot == null)
             return;
         this.#realRoot = realRoot;
@@ -94,7 +94,8 @@ export abstract class SalmonDrive extends VirtualDrive {
         }
         if (virtualRootRealFile == null)
             throw new Error("Could not create directory for the virtual file system");
-        this.#virtualRoot = this.getVirtualRoot(virtualRootRealFile);
+
+        this.#virtualRoot = new SalmonFile(virtualRootRealFile, this);
         this.#registerOnProcessClose();
         this.#key = new SalmonDriveKey();
     }
@@ -175,14 +176,12 @@ export abstract class SalmonDrive extends VirtualDrive {
      * @return
      * @throws SalmonAuthException
      */
-    public async getRoot(): Promise<IVirtualFile | null> {
+    public async getRoot(): Promise<SalmonFile | null> {
         if (this.#realRoot == null || !await this.#realRoot.exists())
             return null;
-        if (!this.isUnlocked())
-            throw new SalmonAuthException("Not authorized");
         if (this.#virtualRoot == null)
             throw new SalmonSecurityException("No virtual root, make sure you init the drive first");
-        return this.#virtualRoot;
+        return this.#virtualRoot as SalmonFile;
     }
 
     public getRealRoot(): IRealFile | null {
@@ -194,7 +193,7 @@ export abstract class SalmonDrive extends VirtualDrive {
      *
      * @param password The password.
      */
-    public async unlock(password: string): Promise<void> {
+    async #unlock(password: string): Promise<void> {
         let stream: SalmonStream | null = null;
         try {
             if (password == null) {
@@ -287,23 +286,10 @@ export abstract class SalmonDrive extends VirtualDrive {
     async getNextNonce(): Promise<Uint8Array | null> {
         if (this.#sequencer == null)
             throw new SalmonAuthException("No sequencer found use setSequencer");
-        if (!this.isUnlocked())
-            throw new SalmonAuthException("Not authenticated");
         let driveId: Uint8Array | null = this.getDriveId();
         if (driveId == null)
             throw new SalmonSecurityException("Could not get drive Id");
         return await this.#sequencer.nextNonce(BitConverter.toHex(driveId));
-    }
-
-    /**
-     * Returns true if password authorization has succeeded.
-     */
-    public isUnlocked(): boolean {
-        let key: SalmonDriveKey | null = this.getKey();
-        if (key == null)
-            return false;
-        let encKey: Uint8Array | null = key.getDriveKey();
-        return encKey != null;
     }
 
     /**
@@ -383,9 +369,9 @@ export abstract class SalmonDrive extends VirtualDrive {
     }
 
     /**
-     * Lock the drive and close associated resources.
+     * Close the drive and associated resources.
      */
-    public lock(): void {
+    public close(): void {
         this.#realRoot = null;
         this.#virtualRoot = null;
         this.#driveID = null;
@@ -409,7 +395,7 @@ export abstract class SalmonDrive extends VirtualDrive {
             }
         }
         if (virtualRootRealFile != null)
-            this.#virtualRoot = this.getVirtualRoot(virtualRootRealFile);
+            this.#virtualRoot = new SalmonFile(virtualRootRealFile, this);
     }
 
     public getHashProvider(): IHashProvider {
@@ -424,26 +410,32 @@ export abstract class SalmonDrive extends VirtualDrive {
      * Set the drive location to an external directory.
      * This requires you previously use SetDriveClass() to provide a class for the drive
      *
-     * @param dirPath The directory path that will be used for storing the contents of the drive
+     * @param dir The directory path that will be used for storing the contents of the drive
+     * @param driveClassType The driver class type (ie JsDrive).
+     * @param password Text password to encrypt the drive configuration.
+     * @param sequencer The sequencer to use.
      */
-    public static async openDrive(dir: IRealFile, driveClassType: any, sequencer: INonceSequencer | null = null): Promise<SalmonDrive> {
+    public static async openDrive(dir: IRealFile, driveClassType: any, password: string, sequencer: INonceSequencer | null = null): Promise<SalmonDrive> {
         let drive: SalmonDrive = await SalmonDrive.#createDriveInstance(dir, false, driveClassType, sequencer);
         if (!await drive.hasConfig()) {
             throw new Error("Drive does not exist");
         }
+        await drive.#unlock(password);
         return drive;
     }
 
     /**
      * Create a new drive in the provided location.
      *
-     * @param dirPath  Directory to store the drive configuration and virtual filesystem.
-     * @param password Master password to encrypt the drive configuration.
+     * @param dir  Directory to store the drive configuration and virtual filesystem.
+     * @param driveClassType The driver class type (ie JsDrive).
+     * @param password Text password to encrypt the drive configuration.
+     * @param sequencer The sequencer to use.
      * @return The newly created drive.
      * @throws SalmonIntegrityException
      * @throws SalmonSequenceException
      */
-    public static async createDrive(dir: IRealFile, driveClassType: any, sequencer: INonceSequencer, password: string): Promise<SalmonDrive> {
+    public static async createDrive(dir: IRealFile, driveClassType: any, password: string, sequencer: INonceSequencer): Promise<SalmonDrive> {
         let drive: SalmonDrive = await SalmonDrive.#createDriveInstance(dir, true, driveClassType, sequencer);
         if (await drive.hasConfig())
             throw new SalmonSecurityException("Drive already exists");
@@ -605,7 +597,7 @@ export abstract class SalmonDrive extends VirtualDrive {
      * @param authID  Authorization ID.
      * @throws Exception
      */
-    async initSequence(driveID: Uint8Array, authID: Uint8Array): Promise<void> {
+    async initializeSequence(driveID: Uint8Array, authID: Uint8Array): Promise<void> {
         let startingNonce: Uint8Array = SalmonDriveGenerator.getStartingNonce();
         let maxNonce: Uint8Array = SalmonDriveGenerator.getMaxNonce();
         let drvStr: string = BitConverter.toHex(driveID);
@@ -768,7 +760,7 @@ export abstract class SalmonDrive extends VirtualDrive {
             // create a full sequence for nonces
             let authID: Uint8Array = SalmonDriveGenerator.generateAuthId();
             await this.createSequence(driveID, authID);
-            await this.initSequence(driveID, authID);
+            await this.initializeSequence(driveID, authID);
         }
         await this.initFS();
     }

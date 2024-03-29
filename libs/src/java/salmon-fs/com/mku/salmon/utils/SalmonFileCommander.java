@@ -29,6 +29,7 @@ import com.mku.func.BiConsumer;
 import com.mku.func.Consumer;
 import com.mku.func.Function;
 import com.mku.salmon.SalmonAuthException;
+import com.mku.salmon.SalmonFile;
 import com.mku.salmon.SalmonRangeExceededException;
 import com.mku.salmon.SalmonSecurityException;
 import com.mku.salmon.integrity.SalmonIntegrityException;
@@ -40,8 +41,10 @@ import com.mku.utils.FileSearcher;
 
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.concurrent.CancellationException;
+import java.util.stream.Collectors;
 
 /**
  * Facade class for file operations.
@@ -57,5 +60,15 @@ public class SalmonFileCommander extends FileCommander {
         super(new SalmonFileImporter(importBufferSize, threads),
                 new SalmonFileExporter(exportBufferSize, threads),
                 new FileSearcher());
+    }
+
+    public SalmonFile[] importFiles(IRealFile[] filesToImport, IVirtualFile importDir,
+                                      boolean deleteSource, boolean integrity,
+                                      Consumer<RealFileTaskProgress> onProgressChanged,
+                                      Function<IRealFile, String> autoRename,
+                                      BiConsumer<IRealFile, Exception> onFailed) throws Exception {
+        IVirtualFile[] files = super.importFiles(filesToImport, importDir, deleteSource, integrity, onProgressChanged,
+                autoRename, onFailed);
+        return Arrays.stream(files).map((x) -> (SalmonFile) x).collect(Collectors.toList()).toArray(new SalmonFile[0]);
     }
 }

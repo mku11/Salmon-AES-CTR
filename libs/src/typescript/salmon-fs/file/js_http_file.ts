@@ -24,7 +24,7 @@ SOFTWARE.
 
 import { RandomAccessStream } from '../../salmon-core/iostream/random_access_stream.js';
 import { IRealFile } from './ireal_file.js';
-import { JsHttpFileStream } from './js_http_file_stream.js';
+import { JsHttpFileStream } from '../iostream/js_http_file_stream.js';
 import { IOException } from '../../salmon-core/iostream/io_exception.js';
 import { MemoryStream } from '../../salmon-core/iostream/memory_stream.js';
 

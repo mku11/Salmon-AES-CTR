@@ -64,9 +64,9 @@ export class SalmonNativeTransformer extends SalmonAES256CTRTransformer {
         let key: Uint8Array | null = this.getExpandedKey();
         let ctr: Uint8Array | null = this.getCounter();
 
-        if (key == null) //TODO: ToSync
+        if (key == null)
             throw new SalmonSecurityException("No key found, run init first");
-        if (ctr == null) //TODO: ToSync
+        if (ctr == null)
             throw new SalmonSecurityException("No counter found, run init first");
         return SalmonNativeTransformer.#nativeProxy.transform(key, ctr,
                 srcBuffer, srcOffset,
@@ -87,9 +87,9 @@ export class SalmonNativeTransformer extends SalmonAES256CTRTransformer {
         let key: Uint8Array | null = this.getExpandedKey();
         let ctr: Uint8Array | null = this.getCounter();
 
-        if (key == null) //TODO: ToSync
+        if (key == null)
             throw new SalmonSecurityException("No key found, run init first");
-        if (ctr == null) //TODO: ToSync
+        if (ctr == null)
             throw new SalmonSecurityException("No counter found, run init first");
         return SalmonNativeTransformer.#nativeProxy.transform(key, ctr,
                 srcBuffer, srcOffset,

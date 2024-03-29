@@ -318,8 +318,15 @@ public class SalmonEncryptor {
         }
     }
 
+    /**
+     * Close the decryptor and release associated resources
+     */
+    public void close() {
+        if (executor != null)
+            executor.shutdownNow();
+    }
     @Override
     protected void finalize() {
-        executor.shutdownNow();
+        close();
     }
 }

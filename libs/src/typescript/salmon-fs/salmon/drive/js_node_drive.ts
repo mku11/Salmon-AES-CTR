@@ -24,13 +24,12 @@ SOFTWARE.
 
 import { SalmonDrive } from "../salmon_drive.js";
 import { IRealFile } from "../../file/ireal_file.js";
-import { SalmonFile } from "../salmon_file.js";
-import { IVirtualFile } from "../../file/ivirtual_file.js";
 import { INonceSequencer } from "../../sequence/inonce_sequencer.js";
 
 /**
  * SalmonDrive implementation for standard node js file system. This provides a virtual drive implementation
  * that you can use to store and access encrypted files on the local server.
+ * Use static methods open() or create() to create an instance.
  */
 export class JsNodeDrive extends SalmonDrive {
 
@@ -43,22 +42,24 @@ export class JsNodeDrive extends SalmonDrive {
 
     /**
      * Helper method that opens and initializes a JsDrive
-     * @param {IRealFile} dir The directory that will host the drive.
-     * @param {ISalmonSequencer} sequencer The nonce sequencer that will be used for encryption.
+     * @param {IRealFile} dir The real directory that contains the drive.
+     * @param {string} password Text password to use with this drive.
+     * @param {ISalmonSequencer} sequencer Optional nonce sequencer that will be used for importing files.
      * @returns {Promise<SalmonDrive>} The drive.
      */
-    public static async open(dir: IRealFile, sequencer: INonceSequencer | null = null): Promise<SalmonDrive> {
-        return await SalmonDrive.openDrive(dir, JsNodeDrive, sequencer);
+    public static async open(dir: IRealFile, password: string, sequencer: INonceSequencer | null = null): Promise<SalmonDrive> {
+        return await SalmonDrive.openDrive(dir, JsNodeDrive, password, sequencer);
     }
     
     /**
      * Helper method that creates and initializes a JsDrive
-     * @param {IRealFile} dir The directory that will host the drive.
+     * @param {IRealFile} dir The real directory that will contain the drive.
+     * @param {string} password Text password to use with this drive.
      * @param {ISalmonSequencer} sequencer The nonce sequencer that will be used for encryption.
      * @returns {Promise<SalmonDrive>} The drive.
      */
-    public static async create(dir: IRealFile, sequencer: INonceSequencer, password: string): Promise<SalmonDrive> {
-        return await SalmonDrive.createDrive(dir, JsNodeDrive, sequencer, password);
+    public static async create(dir: IRealFile, password: string, sequencer: INonceSequencer): Promise<SalmonDrive> {
+        return await SalmonDrive.createDrive(dir, JsNodeDrive, password, sequencer);
     }
 
     /**
@@ -82,14 +83,5 @@ export class JsNodeDrive extends SalmonDrive {
      */
     public override onUnlockError(): void {
         console.error("drive failed to unlock");
-    }
-
-    /**
-     * Get the virtual root directory for this drive.
-     * @param {IRealFile} virtualRootRealFile 
-     * @returns {IVirtualFile} The root directory.
-     */
-    protected getVirtualRoot(virtualRootRealFile: IRealFile): IVirtualFile {
-        return new SalmonFile(virtualRootRealFile, this);
     }
 }

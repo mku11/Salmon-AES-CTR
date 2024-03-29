@@ -55,7 +55,7 @@ export class SalmonSequenceSerializer implements INonceSequenceSerializer {
         let configs: { [key: string]: NonceSequence } = {};
         for (let key in configsObj) {
             let seq = configsObj[key];
-            configs[key] = new NonceSequence(seq.driveId, seq.authId, this.#objToArray(seq.nextNonce), this.#objToArray(seq.maxNonce), seq.status);
+            configs[key] = new NonceSequence(seq.id, seq.authId, this.#objToArray(seq.nextNonce), this.#objToArray(seq.maxNonce), seq.status);
         }
         return configs;
     }

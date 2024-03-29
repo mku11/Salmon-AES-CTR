@@ -22,67 +22,47 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 */
 
-import { IOException } from "../../salmon-core/iostream/io_exception.js";
+import { MemoryStream } from "../../salmon-core/iostream/memory_stream.js";
 import { RandomAccessStream, SeekOrigin } from "../../salmon-core/iostream/random_access_stream.js";
-import { IRealFile } from "./ireal_file.js";
-import { truncate } from 'node:fs/promises';
-import { openSync } from "node:fs";
-import fs from "fs";
+import { IRealFile } from "../file/ireal_file.js";
+import { Base64 } from "../../salmon-core/convert/base64.js";
 
 /**
- * An advanced file stream implementation for local files.
- * This class can be used for random file access of local files using node js.
+ * An advanced file stream implementation for localStorage files.
+ * This class can be used to read and write small file in localStorage.
  */
-export class JsNodeFileStream extends RandomAccessStream {
+export class JsLocalStorageFileStream extends RandomAccessStream {
 
     /**
      * The java file associated with this stream.
      */
     readonly #file: IRealFile;
-
-    #_position: number = 0;
-
-    #_buffer: Uint8Array | null = null;
-    #_bufferPosition: number = 0;
-
-    #fd: number = 0;
-    #_closed: boolean = false;
-
+    #stream: MemoryStream;
     #canWrite: boolean = false;
+    #base64: Base64;
 
     /**
-     * Construct a file stream from an JsNodeFile.
+     * Construct a file stream from an JsLocalStorageFile.
      * This will create a wrapper stream that will route read() and write() to the FileChannel
      *
-     * @param file The JsNodeFile that will be used to get the read/write stream
+     * @param file The JsLocalStorageFile that will be used to get the read/write stream
      * @param mode The mode "r" for read "rw" for write
      */
     public constructor(file: IRealFile, mode: string) {
         super();
         this.#file = file;
+        this.#base64 = new Base64();
         if (mode == "rw") {
             this.#canWrite = true;
+            this.#stream = new MemoryStream();
+        } else {
+            let contents: string | null = localStorage.getItem(this.#file.getAbsolutePath());
+            if(contents == null)
+                contents = "";
+            this.#stream = new MemoryStream(this.#base64.decode(contents));
         }
     }
 
-    async #getFd(): Promise<number> {
-        if (this.#_closed)
-            throw new IOException("Stream is closed");
-        if (this.#fd == 0) {
-            if (await this.canRead()) {
-                this.#fd = openSync(this.#file.getPath(), "r");
-            } else if (await this.canWrite()) {
-                if(!await this.#file.exists()) {
-                    let fdt: number = openSync(this.#file.getPath(), 'a');
-                    fs.closeSync(fdt);
-                }
-                this.#fd = openSync(this.#file.getPath(), "r+");
-            }
-        }
-        if (this.#fd == null)
-            throw new IOException("Could not retrieve file descriptor");
-        return this.#fd;
-    }
 
     /**
      * True if stream can read from file.
@@ -122,7 +102,7 @@ export class JsNodeFileStream extends RandomAccessStream {
      * @throws IOException
      */
     public override async getPosition(): Promise<number> {
-        return this.#_position;
+        return await this.#stream.getPosition();
     }
 
     /**
@@ -131,8 +111,7 @@ export class JsNodeFileStream extends RandomAccessStream {
      * @throws IOException
      */
     public override async setPosition(value: number): Promise<void> {
-        this.#_position = value;
-        this.#reset();
+        await this.#stream.setPosition(value);
     }
 
     /**
@@ -141,7 +120,7 @@ export class JsNodeFileStream extends RandomAccessStream {
      * @throws IOException
      */
     public override async setLength(value: number): Promise<void> {
-        await truncate(this.#file.getAbsolutePath(), value);
+        
     }
 
     /**
@@ -153,10 +132,7 @@ export class JsNodeFileStream extends RandomAccessStream {
      * @throws IOException
      */
     public override async read(buffer: Uint8Array, offset: number, count: number): Promise<number> {
-        let fd: number = await this.#getFd();
-        let bytesRead: number = fs.readSync(fd, buffer, offset, count, this.#_position);
-        this.#_position += bytesRead;
-        return bytesRead;
+        return await this.#stream.read(buffer, offset, count);
     }
 
     /**
@@ -167,9 +143,7 @@ export class JsNodeFileStream extends RandomAccessStream {
      * @throws IOException
      */
     public override async write(buffer: Uint8Array, offset: number, count: number): Promise<void> {
-        let fd: number = await this.#getFd();
-        let bytesWritten: number = fs.writeSync(fd, buffer, offset, count, this.#_position);
-        this.#_position += bytesWritten;
+        await this.#stream.write(buffer, offset, count);
     }
 
     /**
@@ -180,28 +154,17 @@ export class JsNodeFileStream extends RandomAccessStream {
      * @throws IOException
      */
     public override async seek(offset: number, origin: SeekOrigin): Promise<number> {
-        let pos: number = this.#_position;
-
-        if (origin == SeekOrigin.Begin)
-            pos = offset;
-        else if (origin == SeekOrigin.Current)
-            pos += offset;
-        else if (origin == SeekOrigin.End)
-            pos = await this.#file.length() - offset;
-
-        await this.setPosition(pos);
-        return this.#_position;
+        await this.#stream.seek(offset, origin);
+        return await this.#stream.getPosition(); 
     }
 
     /**
      * Flush the buffers to the associated file.
      */
     public override async flush(): Promise<void> {
-        if (await this.canWrite()) {
-            if (this.#fd != null) {
-                // nop
-            }
-        }
+        let contents: string = this.#base64.encode(this.#stream.toArray());
+        let key: string = this.#file.getAbsolutePath();
+        localStorage.setItem(key, contents);
     }
 
     /**
@@ -209,14 +172,7 @@ export class JsNodeFileStream extends RandomAccessStream {
      * @throws IOException
      */
     public override async close(): Promise<void> {
-        if (this.#fd)
-            fs.close(this.#fd);
-        this.#reset();
-        this.#_closed = true;
-    }
-
-    #reset(): void {
-        this.#_buffer = null;
-        this.#_bufferPosition = 0;
+        this.flush();
+        this.#stream.close();
     }
 }

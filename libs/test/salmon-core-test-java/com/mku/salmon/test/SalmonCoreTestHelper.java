@@ -47,7 +47,6 @@ import javax.crypto.Cipher;
 import javax.crypto.spec.IvParameterSpec;
 import javax.crypto.spec.SecretKeySpec;
 import java.io.ByteArrayInputStream;
-import java.io.File;
 import java.io.IOException;
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
@@ -60,21 +59,20 @@ import java.util.Random;
 import static org.junit.jupiter.api.Assertions.assertArrayEquals;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
-public class TestHelper {
+public class SalmonCoreTestHelper {
     public static final int TEST_ENC_BUFFER_SIZE = 512 * 1024;
+    public static final int TEST_ENC_THREADS = 2;
     public static final int TEST_DEC_BUFFER_SIZE = 512 * 1024;
+    public static final int TEST_DEC_THREADS = 2;
 
     public static final String TEST_PASSWORD = "test123";
     public static final String TEST_FALSE_PASSWORD = "falsepass";
-    public static final String TEST_EXPORT_DIR = "export.slma";
 
     public static final long MAX_ENC_COUNTER = (long) Math.pow(256, 7);
     // a nonce ready to overflow if a new file is imported
     public static final byte[] TEXT_VAULT_MAX_FILE_NONCE = {
             0x7F, (byte) 0xFF, (byte) 0xFF, (byte) 0xFF, (byte) 0xFF, (byte) 0xFF, (byte) 0xFF, (byte) 0xFF
     };
-    public static final String TEST_SEQUENCER_FILE1 = "seq1.xml";
-    public static final String TEST_SEQUENCER_FILE2 = "seq2.xml";
 
     private static final int TEXT_ITERATIONS = 1;
     public static String TEST_KEY = "ABCDEFGHIJKLMNOPABCDEFGHIJKLMNOP"; // 256bit
@@ -92,7 +90,29 @@ public class TestHelper {
     public static String TEST_TEXT_WRITE = "THIS*TEXT*IS*NOW*OVERWRITTEN*WITH*THIS";
 
     private static final Random random = new Random(System.currentTimeMillis());
-    private static final IHashProvider hashProvider = new HmacSHA256Provider();
+    private static IHashProvider hashProvider;
+    private static SalmonEncryptor encryptor;
+    private static SalmonDecryptor decryptor;
+
+    static void initialize() {
+        SalmonCoreTestHelper.hashProvider = new HmacSHA256Provider();
+        SalmonCoreTestHelper.encryptor = new SalmonEncryptor(SalmonCoreTestHelper.TEST_ENC_THREADS);
+        SalmonCoreTestHelper.decryptor = new SalmonDecryptor(SalmonCoreTestHelper.TEST_DEC_THREADS);
+    }
+
+    static SalmonEncryptor getEncryptor() {
+        return SalmonCoreTestHelper.encryptor;
+    }
+
+    static SalmonDecryptor getDecryptor() {
+        return SalmonCoreTestHelper.decryptor;
+    }
+
+    static void close() {
+        SalmonCoreTestHelper.encryptor.close();
+        SalmonCoreTestHelper.decryptor.close();
+    }
+
 
     public static String seekAndGetSubstringByRead(SalmonStream reader, int seek, int readCount, RandomAccessStream.SeekOrigin seekOrigin) throws Exception {
         reader.seek(seek, seekOrigin);
@@ -235,48 +255,48 @@ public class TestHelper {
         String decText;
 
         correctText = plainText.substring(0, 6);
-        decText = TestHelper.seekAndGetSubstringByRead(decReader, 0, 6, RandomAccessStream.SeekOrigin.Begin);
+        decText = SalmonCoreTestHelper.seekAndGetSubstringByRead(decReader, 0, 6, RandomAccessStream.SeekOrigin.Begin);
 
         assertEquals(correctText, decText);
         testCounter(decReader);
 
         correctText = plainText.substring(0, 6);
-        decText = TestHelper.seekAndGetSubstringByRead(decReader, 0, 6, RandomAccessStream.SeekOrigin.Begin);
+        decText = SalmonCoreTestHelper.seekAndGetSubstringByRead(decReader, 0, 6, RandomAccessStream.SeekOrigin.Begin);
 
         assertEquals(correctText, decText);
         testCounter(decReader);
 
         correctText = plainText.substring((int) decReader.getPosition() + 4, (int) decReader.getPosition() + 4 + 4);
-        decText = TestHelper.seekAndGetSubstringByRead(decReader, 4, 4, RandomAccessStream.SeekOrigin.Current);
+        decText = SalmonCoreTestHelper.seekAndGetSubstringByRead(decReader, 4, 4, RandomAccessStream.SeekOrigin.Current);
 
         assertEquals(correctText, decText);
         testCounter(decReader);
 
         correctText = plainText.substring((int) decReader.getPosition() + 6, (int) decReader.getPosition() + 6 + 4);
-        decText = TestHelper.seekAndGetSubstringByRead(decReader, 6, 4, RandomAccessStream.SeekOrigin.Current);
+        decText = SalmonCoreTestHelper.seekAndGetSubstringByRead(decReader, 6, 4, RandomAccessStream.SeekOrigin.Current);
 
         assertEquals(correctText, decText);
         testCounter(decReader);
 
         correctText = plainText.substring((int) decReader.getPosition() + 10, (int) decReader.getPosition() + 10 + 6);
-        decText = TestHelper.seekAndGetSubstringByRead(decReader, 10, 6, RandomAccessStream.SeekOrigin.Current);
+        decText = SalmonCoreTestHelper.seekAndGetSubstringByRead(decReader, 10, 6, RandomAccessStream.SeekOrigin.Current);
 
         assertEquals(correctText, decText);
         testCounter(decReader);
 
         correctText = plainText.substring(12, 12 + 8);
-        decText = TestHelper.seekAndGetSubstringByRead(decReader, 12, 8, RandomAccessStream.SeekOrigin.Begin);
+        decText = SalmonCoreTestHelper.seekAndGetSubstringByRead(decReader, 12, 8, RandomAccessStream.SeekOrigin.Begin);
 
         assertEquals(correctText, decText);
         testCounter(decReader);
 
         correctText = plainText.substring(plainText.length() - 14, plainText.length() - 14 + 7);
-        decText = TestHelper.seekAndGetSubstringByRead(decReader, 14, 7, RandomAccessStream.SeekOrigin.End);
+        decText = SalmonCoreTestHelper.seekAndGetSubstringByRead(decReader, 14, 7, RandomAccessStream.SeekOrigin.End);
 
         assertEquals(correctText, decText);
 
         correctText = plainText.substring(plainText.length() - 27, plainText.length() - 27 + 12);
-        decText = TestHelper.seekAndGetSubstringByRead(decReader, 27, 12, RandomAccessStream.SeekOrigin.End);
+        decText = SalmonCoreTestHelper.seekAndGetSubstringByRead(decReader, 27, 12, RandomAccessStream.SeekOrigin.End);
 
         assertEquals(correctText, decText);
         testCounter(decReader);
@@ -380,7 +400,7 @@ public class TestHelper {
         MemoryStream encIns = new MemoryStream(encBytes);
         SalmonStream decReader = new SalmonStream(key, iv, EncryptionMode.Decrypt, encIns,
                 null, integrity, chunkSize, hashKey);
-        String decText = TestHelper.seekAndGetSubstringByRead(decReader, 0, text.length(), RandomAccessStream.SeekOrigin.Begin);
+        String decText = SalmonCoreTestHelper.seekAndGetSubstringByRead(decReader, 0, text.length(), RandomAccessStream.SeekOrigin.Begin);
 
         assertEquals(text.substring(0, (int) seek), decText.substring(0, (int) seek));
 
@@ -477,15 +497,15 @@ public class TestHelper {
     }
 
     public static void encryptAndDecryptByteArray(int size, int threads, boolean enableLog) throws Exception {
-        byte[] data = TestHelper.getRandArray(size);
+        byte[] data = SalmonCoreTestHelper.getRandArray(size);
         encryptAndDecryptByteArray(data, threads, enableLog);
     }
 
     public static void encryptAndDecryptByteArray(byte[] data, int threads, boolean enableLog) throws Exception {
         long t1 = System.currentTimeMillis();
-        byte[] encData = new SalmonEncryptor(threads).encrypt(data, TestHelper.TEST_KEY_BYTES, TestHelper.TEST_NONCE_BYTES, false);
+        byte[] encData = new SalmonEncryptor(threads).encrypt(data, SalmonCoreTestHelper.TEST_KEY_BYTES, SalmonCoreTestHelper.TEST_NONCE_BYTES, false);
         long t2 = System.currentTimeMillis();
-        byte[] decData = new SalmonDecryptor(threads).decrypt(encData, TestHelper.TEST_KEY_BYTES, TestHelper.TEST_NONCE_BYTES, false);
+        byte[] decData = new SalmonDecryptor(threads).decrypt(encData, SalmonCoreTestHelper.TEST_KEY_BYTES, SalmonCoreTestHelper.TEST_NONCE_BYTES, false);
         long t3 = System.currentTimeMillis();
 
         assertArrayEquals(data, decData);
@@ -497,16 +517,16 @@ public class TestHelper {
     }
 	
     public static void encryptAndDecryptByteArrayNative(int size, boolean enableLog) throws Exception {
-        byte[] data = TestHelper.getRandArray(size);
+        byte[] data = SalmonCoreTestHelper.getRandArray(size);
         encryptAndDecryptByteArrayNative(data, enableLog);
     }
 
     public static void encryptAndDecryptByteArrayNative(byte[] data, boolean enableLog) throws Exception {
         long t1 = System.currentTimeMillis();
-        byte[] encData = TestHelper.nativeCTRTransform(data, TestHelper.TEST_KEY_BYTES, TestHelper.TEST_NONCE_BYTES, true,
+        byte[] encData = SalmonCoreTestHelper.nativeCTRTransform(data, SalmonCoreTestHelper.TEST_KEY_BYTES, SalmonCoreTestHelper.TEST_NONCE_BYTES, true,
                 SalmonStream.getAesProviderType());
         long t2 = System.currentTimeMillis();
-        byte[] decData = TestHelper.nativeCTRTransform(encData, TestHelper.TEST_KEY_BYTES, TestHelper.TEST_NONCE_BYTES, false,
+        byte[] decData = SalmonCoreTestHelper.nativeCTRTransform(encData, SalmonCoreTestHelper.TEST_KEY_BYTES, SalmonCoreTestHelper.TEST_NONCE_BYTES, false,
                 SalmonStream.getAesProviderType());
         long t3 = System.currentTimeMillis();
 
@@ -519,15 +539,15 @@ public class TestHelper {
     }
 
     public static void encryptAndDecryptByteArrayDef(int size, boolean enableLog) throws Exception {
-        byte[] data = TestHelper.getRandArray(size);
+        byte[] data = SalmonCoreTestHelper.getRandArray(size);
         encryptAndDecryptByteArrayDef(data, enableLog);
     }
 
     public static void encryptAndDecryptByteArrayDef(byte[] data, boolean enableLog) throws Exception {
         long t1 = System.currentTimeMillis();
-        byte[] encData = TestHelper.defaultAESCTRTransform(data, TestHelper.TEST_KEY_BYTES, TestHelper.TEST_NONCE_BYTES, true);
+        byte[] encData = SalmonCoreTestHelper.defaultAESCTRTransform(data, SalmonCoreTestHelper.TEST_KEY_BYTES, SalmonCoreTestHelper.TEST_NONCE_BYTES, true);
         long t2 = System.currentTimeMillis();
-        byte[] decData = TestHelper.defaultAESCTRTransform(encData, TestHelper.TEST_KEY_BYTES, TestHelper.TEST_NONCE_BYTES, false);
+        byte[] decData = SalmonCoreTestHelper.defaultAESCTRTransform(encData, SalmonCoreTestHelper.TEST_KEY_BYTES, SalmonCoreTestHelper.TEST_NONCE_BYTES, false);
         long t3 = System.currentTimeMillis();
 
         assertArrayEquals(data, decData);
@@ -540,7 +560,7 @@ public class TestHelper {
 
     public static void CopyMemory(int size) throws IOException {
         long t1 = System.currentTimeMillis();
-        byte[] data = TestHelper.getRandArray(size);
+        byte[] data = SalmonCoreTestHelper.getRandArray(size);
         long t2 = System.currentTimeMillis();
         long t3 = System.currentTimeMillis();
         System.out.println("gen time: " + (t2 - t1));
@@ -559,7 +579,7 @@ public class TestHelper {
 
     public static void copyFromMemStream(int size, int bufferSize) throws Exception {
         byte[] testData = getRandArray(size);
-        MessageDigest md = MessageDigest.getInstance("MD5");
+        MessageDigest md = MessageDigest.getInstance("SHA-256"); // TODO: replace MD5 with sha256
         ByteArrayInputStream is = new ByteArrayInputStream(testData);
         DigestInputStream dis = new DigestInputStream(is, md);
         byte[] digest = md.digest();
@@ -575,7 +595,7 @@ public class TestHelper {
 
         assertEquals(testData.length, data2.length);
 
-        MessageDigest md2 = MessageDigest.getInstance("MD5");
+        MessageDigest md2 = MessageDigest.getInstance("SHA-256");
         ByteArrayInputStream is2 = new ByteArrayInputStream(data2);
         DigestInputStream dis2 = new DigestInputStream(is2, md2);
         byte[] digest2 = md2.digest();
@@ -592,7 +612,7 @@ public class TestHelper {
                                                        int bufferSize) throws Exception {
 
         byte[] testData = getRandArray(size);
-        MessageDigest md = MessageDigest.getInstance("MD5");
+        MessageDigest md = MessageDigest.getInstance("SHA-256");
         ByteArrayInputStream is = new ByteArrayInputStream(testData);
         DigestInputStream dis = new DigestInputStream(is, md);
         byte[] digest = md.digest();
@@ -628,19 +648,11 @@ public class TestHelper {
         salmonStream2.close();
         ms3.close();
         ms4.setPosition(0);
-        MessageDigest md2 = MessageDigest.getInstance("MD5");
+        MessageDigest md2 = MessageDigest.getInstance("SHA-256");
         DigestInputStream dis2 = new DigestInputStream(new InputStreamWrapper(ms4), md2);
         byte[] digest2 = md2.digest();
         ms4.close();
         dis2.close();
-    }
-
-    public static String generateFolder(String dirPath) {
-        long time = System.currentTimeMillis();
-        File dir = new File(dirPath + "_" + time);
-        if(!dir.mkdir())
-            return null;
-        return dir.getPath();
     }
 
     public static byte[] calculateHMAC(byte[] bytes, int offset, int length,

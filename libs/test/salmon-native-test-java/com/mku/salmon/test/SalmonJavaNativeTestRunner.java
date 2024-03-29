@@ -25,7 +25,6 @@ SOFTWARE.
 */
 
 import com.mku.salmon.*;
-import com.mku.salmon.integrity.SalmonIntegrity;
 import com.mku.salmon.iostream.ProviderType;
 import com.mku.salmon.iostream.SalmonStream;
 import com.mku.salmon.password.PbkdfType;
@@ -49,98 +48,95 @@ public class SalmonJavaNativeTestRunner {
 
     @BeforeEach
     public void init() {
-        SalmonDefaultOptions.setBufferSize(SalmonIntegrity.DEFAULT_CHUNK_SIZE);
-
         SalmonStream.setAesProviderType(ProviderType.AesIntrinsics);
         // SalmonStream.setAesProviderType(SalmonStream.ProviderType.TinyAES);
     }
 
     @Test
     public void shouldEncryptAndDecryptNativeTextCompatible() throws Exception {
-        String plainText = TestHelper.TEST_TEXT;//.substring(1, 1 + 2*16+2);
+        String plainText = SalmonCoreTestHelper.TEST_TEXT;//.substring(1, 1 + 2*16+2);
         for (int i = 0; i < 13; i++)
             plainText += plainText;
 
         byte[] bytes = plainText.getBytes(Charset.defaultCharset());
-        byte[] encBytesDef = TestHelper.defaultAESCTRTransform(bytes, TestHelper.TEST_KEY_BYTES, TestHelper.TEST_NONCE_BYTES, true);
+        byte[] encBytesDef = SalmonCoreTestHelper.defaultAESCTRTransform(bytes, SalmonCoreTestHelper.TEST_KEY_BYTES, SalmonCoreTestHelper.TEST_NONCE_BYTES, true);
 
-        byte[] decBytesDef = TestHelper.defaultAESCTRTransform(encBytesDef, TestHelper.TEST_KEY_BYTES, TestHelper.TEST_NONCE_BYTES, false);
+        byte[] decBytesDef = SalmonCoreTestHelper.defaultAESCTRTransform(encBytesDef, SalmonCoreTestHelper.TEST_KEY_BYTES, SalmonCoreTestHelper.TEST_NONCE_BYTES, false);
         assertArrayEquals(bytes, decBytesDef);
 
-        byte[] encBytes = TestHelper.nativeCTRTransform(bytes, TestHelper.TEST_KEY_BYTES, TestHelper.TEST_NONCE_BYTES, true,
+        byte[] encBytes = SalmonCoreTestHelper.nativeCTRTransform(bytes, SalmonCoreTestHelper.TEST_KEY_BYTES, SalmonCoreTestHelper.TEST_NONCE_BYTES, true,
                 SalmonStream.getAesProviderType());
         assertArrayEquals(encBytesDef, encBytes);
-        byte[] decBytes = TestHelper.nativeCTRTransform(encBytes, TestHelper.TEST_KEY_BYTES, TestHelper.TEST_NONCE_BYTES, false,
+        byte[] decBytes = SalmonCoreTestHelper.nativeCTRTransform(encBytes, SalmonCoreTestHelper.TEST_KEY_BYTES, SalmonCoreTestHelper.TEST_NONCE_BYTES, false,
                 SalmonStream.getAesProviderType());
         assertArrayEquals(bytes, decBytes);
     }
 
     @Test
     public void shouldEncryptAndDecryptNativeStreamTextCompatible() throws Exception {
-        String plainText = TestHelper.TEST_TEXT;
+        String plainText = SalmonCoreTestHelper.TEST_TEXT;
         for (int i = 0; i < 2; i++)
             plainText += plainText;
         plainText = plainText.substring(0, 16);
 
         byte[] bytes = plainText.getBytes(Charset.defaultCharset());
-        byte[] encBytesDef = TestHelper.defaultAESCTRTransform(bytes, TestHelper.TEST_KEY_BYTES, TestHelper.TEST_NONCE_BYTES,
+        byte[] encBytesDef = SalmonCoreTestHelper.defaultAESCTRTransform(bytes, SalmonCoreTestHelper.TEST_KEY_BYTES, SalmonCoreTestHelper.TEST_NONCE_BYTES,
                 true);
-        byte[] decBytesDef = TestHelper.defaultAESCTRTransform(encBytesDef, TestHelper.TEST_KEY_BYTES, TestHelper.TEST_NONCE_BYTES,
+        byte[] decBytesDef = SalmonCoreTestHelper.defaultAESCTRTransform(encBytesDef, SalmonCoreTestHelper.TEST_KEY_BYTES, SalmonCoreTestHelper.TEST_NONCE_BYTES,
                 false);
         assertArrayEquals(bytes, decBytesDef);
 
-        byte[] encBytes = new SalmonEncryptor(ENC_THREADS).encrypt(bytes, TestHelper.TEST_KEY_BYTES, TestHelper.TEST_NONCE_BYTES, false,
+        byte[] encBytes = new SalmonEncryptor(ENC_THREADS).encrypt(bytes, SalmonCoreTestHelper.TEST_KEY_BYTES, SalmonCoreTestHelper.TEST_NONCE_BYTES, false,
                 false, null, null);
         assertArrayEquals(encBytesDef, encBytes);
 
-        byte[] decBytes = new SalmonDecryptor(DEC_THREADS).decrypt(encBytes, TestHelper.TEST_KEY_BYTES, TestHelper.TEST_NONCE_BYTES, false,
+        byte[] decBytes = new SalmonDecryptor(DEC_THREADS).decrypt(encBytes, SalmonCoreTestHelper.TEST_KEY_BYTES, SalmonCoreTestHelper.TEST_NONCE_BYTES, false,
                 false, null, null);
         assertArrayEquals(bytes, decBytes);
     }
 
     @Test
     public void shouldEncryptAndDecryptNativeStreamReadBuffersNotAlignedTextCompatible() throws Exception {
-        String plainText = TestHelper.TEST_TEXT;
+        String plainText = SalmonCoreTestHelper.TEST_TEXT;
         for (int i = 0; i < 3; i++)
             plainText += plainText;
 
         plainText = plainText.substring(0, 64 + 6);
 
         byte[] bytes = plainText.getBytes(Charset.defaultCharset());
-        byte[] encBytesDef = TestHelper.defaultAESCTRTransform(bytes, TestHelper.TEST_KEY_BYTES, TestHelper.TEST_NONCE_BYTES,
+        byte[] encBytesDef = SalmonCoreTestHelper.defaultAESCTRTransform(bytes, SalmonCoreTestHelper.TEST_KEY_BYTES, SalmonCoreTestHelper.TEST_NONCE_BYTES,
                 true);
-        byte[] decBytesDef = TestHelper.defaultAESCTRTransform(encBytesDef, TestHelper.TEST_KEY_BYTES, TestHelper.TEST_NONCE_BYTES,
+        byte[] decBytesDef = SalmonCoreTestHelper.defaultAESCTRTransform(encBytesDef, SalmonCoreTestHelper.TEST_KEY_BYTES, SalmonCoreTestHelper.TEST_NONCE_BYTES,
                 false);
         assertArrayEquals(bytes, decBytesDef);
 
-        byte[] encBytes = new SalmonEncryptor(ENC_THREADS).encrypt(bytes, TestHelper.TEST_KEY_BYTES, TestHelper.TEST_NONCE_BYTES, false,
+        byte[] encBytes = new SalmonEncryptor(ENC_THREADS).encrypt(bytes, SalmonCoreTestHelper.TEST_KEY_BYTES, SalmonCoreTestHelper.TEST_NONCE_BYTES, false,
                 false, null, null);
         assertArrayEquals(encBytesDef, encBytes);
-
-        SalmonDefaultOptions.setBufferSize(32 + 2);
-        byte[] decBytes = new SalmonDecryptor(DEC_THREADS).decrypt(encBytes, TestHelper.TEST_KEY_BYTES, TestHelper.TEST_NONCE_BYTES, false,
+        SalmonDecryptor decryptor = new SalmonDecryptor(DEC_THREADS, 32 + 2);
+        byte[] decBytes = decryptor.decrypt(encBytes, SalmonCoreTestHelper.TEST_KEY_BYTES, SalmonCoreTestHelper.TEST_NONCE_BYTES, false,
                 false, null, null);
         assertArrayEquals(bytes, decBytes);
     }
 
     @Test
     public void shouldEncryptAndDecryptNativeStreamCompatibleWithIntegrity() throws Exception {
-        String plainText = TestHelper.TEST_TEXT;
+        String plainText = SalmonCoreTestHelper.TEST_TEXT;
         for (int i = 0; i < 13; i++)
             plainText += plainText;
 
         byte[] bytes = plainText.getBytes(Charset.defaultCharset());
-        byte[] encBytesDef = TestHelper.defaultAESCTRTransform(bytes, TestHelper.TEST_KEY_BYTES, TestHelper.TEST_NONCE_BYTES, true);
-        byte[] decBytesDef = TestHelper.defaultAESCTRTransform(encBytesDef, TestHelper.TEST_KEY_BYTES, TestHelper.TEST_NONCE_BYTES, false);
+        byte[] encBytesDef = SalmonCoreTestHelper.defaultAESCTRTransform(bytes, SalmonCoreTestHelper.TEST_KEY_BYTES, SalmonCoreTestHelper.TEST_NONCE_BYTES, true);
+        byte[] decBytesDef = SalmonCoreTestHelper.defaultAESCTRTransform(encBytesDef, SalmonCoreTestHelper.TEST_KEY_BYTES, SalmonCoreTestHelper.TEST_NONCE_BYTES, false);
 
         int chunkSize = 256 * 1024;
         assertArrayEquals(bytes, decBytesDef);
-        byte[] encBytes = new SalmonEncryptor(ENC_THREADS).encrypt(bytes, TestHelper.TEST_KEY_BYTES, TestHelper.TEST_NONCE_BYTES, false,
-                true, TestHelper.TEST_HMAC_KEY_BYTES, chunkSize);
+        byte[] encBytes = new SalmonEncryptor(ENC_THREADS).encrypt(bytes, SalmonCoreTestHelper.TEST_KEY_BYTES, SalmonCoreTestHelper.TEST_NONCE_BYTES, false,
+                true, SalmonCoreTestHelper.TEST_HMAC_KEY_BYTES, chunkSize);
 
         assertArrayEqualsWithIntegrity(encBytesDef, encBytes, chunkSize);
-        byte[] decBytes = new SalmonDecryptor(DEC_THREADS).decrypt(encBytes, TestHelper.TEST_KEY_BYTES, TestHelper.TEST_NONCE_BYTES, false,
-                true, TestHelper.TEST_HMAC_KEY_BYTES, chunkSize);
+        byte[] decBytes = new SalmonDecryptor(DEC_THREADS).decrypt(encBytes, SalmonCoreTestHelper.TEST_KEY_BYTES, SalmonCoreTestHelper.TEST_NONCE_BYTES, false,
+                true, SalmonCoreTestHelper.TEST_HMAC_KEY_BYTES, chunkSize);
 
         assertArrayEquals(bytes, decBytes);
     }

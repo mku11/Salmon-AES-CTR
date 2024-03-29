@@ -29,7 +29,7 @@ import { IOException } from "../../salmon-core/iostream/io_exception.js";
 import { RandomAccessStream } from "../../salmon-core/iostream/random_access_stream.js";
 
 export abstract class FileImporter {
-    #workerPath = './lib/salmon-fs/utils/file_importer_worker.js';
+    #workerPath = './lib/salmon-fs/salmon/utils/file_importer_worker.js';
 
     /**
      * The global default buffer size to use when reading/writing on the SalmonStream.
@@ -250,7 +250,7 @@ export abstract class FileImporter {
                             reject(event);
                         });
                     }
-                    let msg = this.getWorkerMessage(i,
+                    let msg = await this.getWorkerMessage(i,
                             fileToImport, importedFile,
                             runningThreads, partSize, fileSize, this.#bufferSize, integrity);
                     this.#workers[i].postMessage(msg);

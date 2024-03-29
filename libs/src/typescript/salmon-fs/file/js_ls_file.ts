@@ -24,7 +24,7 @@ SOFTWARE.
 
 import { RandomAccessStream } from '../../salmon-core/iostream/random_access_stream.js';
 import { IRealFile } from './ireal_file.js';
-import { JsLocalStorageFileStream } from './js_ls_file_stream.js';
+import { JsLocalStorageFileStream } from '../iostream/js_ls_file_stream.js';
 
 /**
  * Salmon localStorage implementation. This can be used to store small files.

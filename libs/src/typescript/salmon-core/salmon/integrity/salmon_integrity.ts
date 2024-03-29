@@ -86,7 +86,7 @@ export class SalmonIntegrity {
             throw new SalmonSecurityException("You need a hash key to use with integrity");
         if (integrity && (chunkSize === null || chunkSize == 0))
             this.#chunkSize = SalmonIntegrity.DEFAULT_CHUNK_SIZE;
-        else if (chunkSize != null && (integrity || chunkSize > 0)) // TODO: ToSync
+        else if (chunkSize != null && (integrity || chunkSize > 0))
             this.#chunkSize = chunkSize;
         if (hashSize < 0)
             throw new SalmonSecurityException("Hash size should be a positive number");

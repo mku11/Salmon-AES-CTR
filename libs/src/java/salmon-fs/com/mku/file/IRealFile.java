@@ -281,21 +281,21 @@ public interface IRealFile {
     /**
      * Copy a directory recursively
      *
-     * @param dest
+     * @param destDir
      * @param progressListener
      * @param autoRename
      * @param autoRenameFolders Apply autorename to folders also (default is true)
      * @param onFailed
      * @throws IOException
      */
-    default void copyRecursively(IRealFile dest,
+    default void copyRecursively(IRealFile destDir,
                                  TriConsumer<IRealFile, Long, Long> progressListener,
                                  Function<IRealFile, String> autoRename,
                                  boolean autoRenameFolders,
                                  BiConsumer<IRealFile, Exception> onFailed) throws IOException {
         String newFilename = getBaseName();
         IRealFile newFile;
-        newFile = dest.getChild(newFilename);
+        newFile = destDir.getChild(newFilename);
         if (isFile()) {
             if (newFile != null && newFile.exists()) {
                 if (autoRename != null) {
@@ -306,7 +306,7 @@ public interface IRealFile {
                     return;
                 }
             }
-            this.copy(dest, newFilename, (position, length) ->
+            this.copy(destDir, newFilename, (position, length) ->
             {
                 if (progressListener != null) {
                     progressListener.accept(this, position, length);
@@ -315,10 +315,15 @@ public interface IRealFile {
         } else if (this.isDirectory()) {
             if (progressListener != null)
                 progressListener.accept(this, 0L, 1L);
+            if (destDir.getAbsolutePath().startsWith(this.getAbsolutePath())) {
+                if (progressListener != null)
+                    progressListener.accept(this, 1L, 1L);
+                return;
+            }
             if (newFile != null && newFile.exists() && autoRename != null && autoRenameFolders)
-                newFile = dest.createDirectory(autoRename.apply(this));
+                newFile = destDir.createDirectory(autoRename.apply(this));
             else if (newFile == null || !newFile.exists())
-                newFile = dest.createDirectory(newFilename);
+                newFile = destDir.createDirectory(newFilename);
             if (progressListener != null)
                 progressListener.accept(this, 1L, 1L);
 
@@ -340,19 +345,19 @@ public interface IRealFile {
     /**
      * Move a directory recursively
      *
-     * @param dest              The target directory
+     * @param destDir              The target directory
      * @param progressListener
      * @param autoRename
      * @param autoRenameFolders Apply autorename to folders also (default is true)
      * @param onFailed
      */
-    default void moveRecursively(IRealFile dest,
+    default void moveRecursively(IRealFile destDir,
                                  TriConsumer<IRealFile, Long, Long> progressListener,
                                  Function<IRealFile, String> autoRename,
                                  boolean autoRenameFolders,
                                  BiConsumer<IRealFile, Exception> onFailed) throws IOException {
         // target directory is the same
-        if (getParent().getPath().equals(dest.getPath())) {
+        if (getParent().getPath().equals(destDir.getPath())) {
             if (progressListener != null) {
                 progressListener.accept(this, 0L, 1L);
                 progressListener.accept(this, 1L, 1L);
@@ -362,7 +367,7 @@ public interface IRealFile {
 
         String newFilename = getBaseName();
         IRealFile newFile;
-        newFile = dest.getChild(newFilename);
+        newFile = destDir.getChild(newFilename);
         if (isFile()) {
             if (newFile != null && newFile.exists()) {
                 if (newFile.getPath().equals(this.getPath()))
@@ -375,7 +380,7 @@ public interface IRealFile {
                     return;
                 }
             }
-            this.move(dest, newFilename, (position, length) ->
+            this.move(destDir, newFilename, (position, length) ->
             {
                 if (progressListener != null) {
                     progressListener.accept(this, position, length);
@@ -384,9 +389,14 @@ public interface IRealFile {
         } else if (this.isDirectory()) {
             if (progressListener != null)
                 progressListener.accept(this, 0L, 1L);
+            if (destDir.getAbsolutePath().startsWith(this.getAbsolutePath())) {
+                if (progressListener != null)
+                    progressListener.accept(this, 1L, 1L);
+                return;
+            }
             if ((newFile != null && newFile.exists() && autoRename != null && autoRenameFolders)
                     || newFile == null || !newFile.exists()) {
-                newFile = move(dest, autoRename.apply(this));
+                newFile = move(destDir, autoRename.apply(this));
                 return;
             }
             if (progressListener != null)

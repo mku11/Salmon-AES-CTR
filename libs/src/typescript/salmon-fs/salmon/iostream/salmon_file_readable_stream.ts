@@ -36,7 +36,7 @@ import { SalmonAuthException } from "../salmon_auth_exception.js";
  * for performance.
  */
 export class SalmonFileReadableStream {
-    static #workerPath = './lib/salmon-fs/salmonfs/salmon_file_readable_stream_worker.js';
+    static #workerPath = './lib/salmon-fs/salmon/iostream/salmon_file_readable_stream_worker.js';
 
     // Default cache buffer should be high enough for some mpeg videos to work
     // the cache buffers should be aligned to the SalmonFile chunk size for efficiency

@@ -226,21 +226,22 @@ export async function copyFileContents(src: IRealFile, dest: IRealFile, deleteAf
 /**
  * Copy a directory recursively
  *
- * @param dest
- * @param progressListener
- * @param autoRename
- * @param autoRenameFolders Apply autorename to folders also (default is true)
- * @param onFailed
+ * @param {IRealFile} src Source directory
+ * @param {IRealFile} destDir Destination directory to copy into.
+ * @param {((realfile: IRealFile, position: number, length: number) => void) | null} progressListener Progress listener
+ * @param {((realfile: IRealFile) => Promise<string>) | null} autoRename Autorename callback (default is none).
+ * @param {boolean} autoRenameFolders Apply autorename to folders also (default is true)
+ * @param {((realfile: IRealFile, ex: Error) => void) | null} onFailed OnFailed callback
  * @throws IOException
  */
-export async function copyRecursively(src: IRealFile, dest: IRealFile,
-    progressListener: ((realfile: IRealFile, position: number, length: number) => void) | null,
-    autoRename: ((realfile: IRealFile) => Promise<string>) | null,
+export async function copyRecursively(src: IRealFile, destDir: IRealFile,
+    progressListener: ((realfile: IRealFile, position: number, length: number) => void) | null = null,
+    autoRename: ((realfile: IRealFile) => Promise<string>) | null = null,
     autoRenameFolders: boolean = true,
-    onFailed: ((realfile: IRealFile, ex: Error) => void) | null): Promise<void> {
+    onFailed: ((realfile: IRealFile, ex: Error) => void) | null = null): Promise<void> {
     let newFilename: string = src.getBaseName();
     let newFile: IRealFile | null;
-    newFile = await dest.getChild(newFilename);
+    newFile = await destDir.getChild(newFilename);
     if (await src.isFile()) {
         if (newFile != null && await newFile.exists()) {
             if (autoRename != null) {
@@ -251,7 +252,7 @@ export async function copyRecursively(src: IRealFile, dest: IRealFile,
                 return;
             }
         }
-        await src.copy(dest, newFilename, (position, length) => {
+        await src.copy(destDir, newFilename, (position, length) => {
             if (progressListener != null) {
                 progressListener(src, position, length);
             }
@@ -259,10 +260,15 @@ export async function copyRecursively(src: IRealFile, dest: IRealFile,
     } else if (await src.isDirectory()) {
         if (progressListener != null)
             progressListener(src, 0, 1);
+        if (destDir.getAbsolutePath().startsWith(src.getAbsolutePath())) {
+            if (progressListener != null)
+                progressListener(src, 1, 1);
+            return;
+        }
         if (newFile != null && await newFile.exists() && autoRename != null && autoRenameFolders)
-            newFile = await dest.createDirectory(await autoRename(src));
+            newFile = await destDir.createDirectory(await autoRename(src));
         else if (newFile == null || !await newFile.exists())
-            newFile = await dest.createDirectory(newFilename);
+            newFile = await destDir.createDirectory(newFilename);
         if (progressListener != null)
             progressListener(src, 1, 1);
         for (let child of await src.listFiles()) {
@@ -276,20 +282,21 @@ export async function copyRecursively(src: IRealFile, dest: IRealFile,
 /**
  * Move a directory recursively
  *
- * @param dest              The target directory
- * @param progressListener
- * @param autoRename
- * @param autoRenameFolders Apply autorename to folders also (default is true)
- * @param onFailed
+ * @param {IRealFile} src Source directory
+ * @param {IRealFile} destDir Destination directory to move into.
+ * @param {((realfile: IRealFile, position: number, length: number) => void) | null} progressListener Progress listener
+ * @param {((realfile: IRealFile) => Promise<string>) | null} autoRename Autorename callback (default is none).
+ * @param {boolean} autoRenameFolders Apply autorename to folders also (default is true)
+ * @param {((realfile: IRealFile, ex: Error) => void) | null} onFailed OnFailed callback
  */
-export async function moveRecursively(file: IRealFile, dest: IRealFile,
+export async function moveRecursively(file: IRealFile, destDir: IRealFile,
     progressListener: ((realFile: IRealFile, position: number, length: number) => void) | null = null,
     autoRename: ((realFile: IRealFile) => Promise<string>) | null = null,
     autoRenameFolders: boolean = true,
     onFailed: ((realFile: IRealFile, ex: Error) => void) | null = null): Promise<void> {
     // target directory is the same
     let parent: IRealFile | null = await file.getParent();
-    if (parent != null && parent.getAbsolutePath() == dest.getAbsolutePath()) {
+    if (parent != null && parent.getAbsolutePath() == destDir.getAbsolutePath()) {
         if (progressListener != null) {
             progressListener(file, 0, 1);
             progressListener(file, 1, 1);
@@ -299,7 +306,7 @@ export async function moveRecursively(file: IRealFile, dest: IRealFile,
 
     let newFilename: string = file.getBaseName();
     let newFile: IRealFile | null;
-    newFile = await dest.getChild(newFilename);
+    newFile = await destDir.getChild(newFilename);
     if (await file.isFile()) {
         if (newFile != null && await newFile.exists()) {
             if (newFile.getAbsolutePath() == file.getAbsolutePath())
@@ -312,7 +319,7 @@ export async function moveRecursively(file: IRealFile, dest: IRealFile,
                 return;
             }
         }
-        await file.move(dest, newFilename, (position: number, length: number) => {
+        await file.move(destDir, newFilename, (position: number, length: number) => {
             if (progressListener != null) {
                 progressListener(file, position, length);
             }
@@ -320,10 +327,15 @@ export async function moveRecursively(file: IRealFile, dest: IRealFile,
     } else if (await file.isDirectory()) {
         if (progressListener != null)
             progressListener(file, 0, 1);
+        if (destDir.getAbsolutePath().startsWith(file.getAbsolutePath())) {
+            if (progressListener != null)
+                progressListener(file, 1, 1);
+            return;
+        }
         if ((newFile != null && await newFile.exists() && autoRename != null && autoRenameFolders)
             || newFile == null || !await newFile.exists()) {
             if (autoRename != null)
-                newFile = await file.move(dest, await autoRename(file), null);
+                newFile = await file.move(destDir, await autoRename(file), null);
             return;
         }
         if (progressListener != null)

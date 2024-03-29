@@ -34,11 +34,12 @@ import java.io.IOException;
 /**
  * SalmonDrive implementation for standard Java file API. This provides a virtual drive implementation
  * that you can use to store and access encrypted files.
+ * Use static methods open() or create() to create an instance.
  */
 public class JavaDrive extends SalmonDrive {
 
     /**
-     * Private constructor, use open() and create() instead.
+     * Private constructor, use open() or create() instead.
      */
     private JavaDrive() {
 
@@ -51,8 +52,8 @@ public class JavaDrive extends SalmonDrive {
      * @param {ISalmonSequencer} sequencer The nonce sequencer that will be used for encryption.
      * @returns {Promise<SalmonDrive>} The drive.
      */
-    public static SalmonDrive open(IRealFile dir, INonceSequencer sequencer) throws Exception {
-        return SalmonDrive.openDrive(dir, JavaDrive.class, sequencer);
+    public static SalmonDrive open(IRealFile dir, String password, INonceSequencer sequencer) throws Exception {
+        return SalmonDrive.openDrive(dir, JavaDrive.class, password, sequencer);
     }
 
     /**
@@ -61,8 +62,8 @@ public class JavaDrive extends SalmonDrive {
      * @param {ISalmonSequencer} sequencer The nonce sequencer that will be used for encryption.
      * @returns {Promise<SalmonDrive>} The drive.
      */
-    public static SalmonDrive create(IRealFile dir, INonceSequencer sequencer, String password) throws IOException {
-        return SalmonDrive.createDrive(dir, JavaDrive.class, sequencer, password);
+    public static SalmonDrive create(IRealFile dir, String password, INonceSequencer sequencer) throws IOException {
+        return SalmonDrive.createDrive(dir, JavaDrive.class, password, sequencer);
     }
 
     /**
@@ -99,9 +100,5 @@ public class JavaDrive extends SalmonDrive {
     @Override
     public void onUnlockError() {
 
-    }
-
-    protected SalmonFile getVirtualRoot(IRealFile virtualRootRealFile) {
-        return new SalmonFile(virtualRootRealFile, this);
     }
 }

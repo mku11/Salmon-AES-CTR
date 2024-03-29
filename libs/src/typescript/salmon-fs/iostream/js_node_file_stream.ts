@@ -24,69 +24,64 @@ SOFTWARE.
 
 import { IOException } from "../../salmon-core/iostream/io_exception.js";
 import { RandomAccessStream, SeekOrigin } from "../../salmon-core/iostream/random_access_stream.js";
-import { IRealFile } from "./ireal_file.js";
+import { IRealFile } from "../file/ireal_file.js";
+import { truncate } from 'node:fs/promises';
+import { openSync } from "node:fs";
+import fs from "fs";
 
 /**
- * An advanced file stream implementation for remote HTTP files.
- * This class can be used for random file access of remote files.
+ * An advanced file stream implementation for local files.
+ * This class can be used for random file access of local files using node js.
  */
-export class JsHttpFileStream extends RandomAccessStream {
-    static MAX_LEN_PER_REQUEST = 8 * 1024 * 1024;
+export class JsNodeFileStream extends RandomAccessStream {
+
     /**
      * The java file associated with this stream.
      */
-    readonly file: IRealFile;
+    readonly #file: IRealFile;
 
-    position: number = 0;
-    end_position: number = 0;
+    #_position: number = 0;
 
-    buffer: Uint8Array | null = null;
-    bufferPosition: number = 0;
+    #_buffer: Uint8Array | null = null;
+    #_bufferPosition: number = 0;
 
-    stream: ReadableStream<Uint8Array> | null = null;
-    reader: ReadableStreamDefaultReader<Uint8Array> | null = null;
-    closed: boolean = false;
+    #fd: number = 0;
+    #_closed: boolean = false;
+
+    #canWrite: boolean = false;
 
     /**
-     * Construct a file stream from an JsHttpFile.
+     * Construct a file stream from an JsNodeFile.
      * This will create a wrapper stream that will route read() and write() to the FileChannel
      *
-     * @param file The JsHttpFile that will be used to get the read/write stream
+     * @param file The JsNodeFile that will be used to get the read/write stream
      * @param mode The mode "r" for read "rw" for write
      */
     public constructor(file: IRealFile, mode: string) {
         super();
-        this.file = file;
+        this.#file = file;
         if (mode == "rw") {
-            throw new Error("Unsupported Operation, readonly filesystem");
+            this.#canWrite = true;
         }
     }
 
-    async getStream(): Promise<ReadableStream<Uint8Array>> {
-        if (this.closed)
+    async #getFd(): Promise<number> {
+        if (this.#_closed)
             throw new IOException("Stream is closed");
-        if (this.stream == null) {
-            let headers: any = {};
-            let end = await this.length() - 1;
-            if (end >= this.position + JsHttpFileStream.MAX_LEN_PER_REQUEST) {
-                end = this.position + JsHttpFileStream.MAX_LEN_PER_REQUEST - 1;
-                headers.range = "bytes=" + this.position + "-" + end;
-            } else if (this.position > 0) {
-                headers.range = "bytes=" + this.position + "-";
+        if (this.#fd == 0) {
+            if (await this.canRead()) {
+                this.#fd = openSync(this.#file.getPath(), "r");
+            } else if (await this.canWrite()) {
+                if(!await this.#file.exists()) {
+                    let fdt: number = openSync(this.#file.getPath(), 'a');
+                    fs.closeSync(fdt);
+                }
+                this.#fd = openSync(this.#file.getPath(), "r+");
             }
-            this.stream = (await (fetch(this.file.getPath(), { cache: "no-store", keepalive: true, headers: headers }))).body;
-            this.end_position = end;
         }
-        if (this.stream == null)
-            throw new IOException("Could not retrieve stream");
-        return this.stream;
-    }
-
-    async getReader(): Promise<ReadableStreamDefaultReader> {
-        if (this.reader == null) {
-            this.reader = (await this.getStream()).getReader();
-        }
-        return this.reader;
+        if (this.#fd == null)
+            throw new IOException("Could not retrieve file descriptor");
+        return this.#fd;
     }
 
     /**
@@ -94,7 +89,7 @@ export class JsHttpFileStream extends RandomAccessStream {
      * @return
      */
     public override async canRead(): Promise<boolean> {
-        return true;
+        return !this.#canWrite;
     }
 
     /**
@@ -102,7 +97,7 @@ export class JsHttpFileStream extends RandomAccessStream {
      * @return
      */
     public override async canWrite(): Promise<boolean> {
-        return false;
+        return this.#canWrite;
     }
 
     /**
@@ -118,7 +113,7 @@ export class JsHttpFileStream extends RandomAccessStream {
      * @return
      */
     public override async length(): Promise<number> {
-        return await this.file.length();
+        return await this.#file.length();
     }
 
     /**
@@ -127,7 +122,7 @@ export class JsHttpFileStream extends RandomAccessStream {
      * @throws IOException
      */
     public override async getPosition(): Promise<number> {
-        return this.position;
+        return this.#_position;
     }
 
     /**
@@ -136,8 +131,8 @@ export class JsHttpFileStream extends RandomAccessStream {
      * @throws IOException
      */
     public override async setPosition(value: number): Promise<void> {
-        this.position = value;
-        await this.reset();
+        this.#_position = value;
+        this.#reset();
     }
 
     /**
@@ -146,7 +141,7 @@ export class JsHttpFileStream extends RandomAccessStream {
      * @throws IOException
      */
     public override async setLength(value: number): Promise<void> {
-        throw new Error("Unsupported Operation, readonly filesystem");
+        await truncate(this.#file.getAbsolutePath(), value);
     }
 
     /**
@@ -158,37 +153,9 @@ export class JsHttpFileStream extends RandomAccessStream {
      * @throws IOException
      */
     public override async read(buffer: Uint8Array, offset: number, count: number): Promise<number> {
-        let bytesRead: number = 0;
-        if (this.buffer != null && this.bufferPosition < this.buffer.length) {
-            for (; this.bufferPosition < this.buffer.length;) {
-                buffer[offset + bytesRead++] = this.buffer[this.bufferPosition++];
-                if (bytesRead == count)
-                    break;
-            }
-            this.position += bytesRead;
-        }
-        if(bytesRead < count && this.position == this.end_position - 1 && this.position < await this.file.length()) {
-            await this.reset();
-        }
-        let reader: ReadableStreamDefaultReader = await this.getReader();
-        let res: ReadableStreamReadResult<any> | null = null;
-        while (bytesRead < count) {
-            res = await reader.read();
-            if (res.value !== undefined) {
-                let i = 0;
-                let len = Math.min(res.value.length, count - bytesRead);
-                for (; i < len; i++) {
-                    buffer[offset + bytesRead++] = res.value[i];
-                }
-                this.position += len;
-                if (count == bytesRead) {
-                    this.buffer = res.value;
-                    this.bufferPosition = i;
-                }
-            } else {
-                break;
-            }
-        }
+        let fd: number = await this.#getFd();
+        let bytesRead: number = fs.readSync(fd, buffer, offset, count, this.#_position);
+        this.#_position += bytesRead;
         return bytesRead;
     }
 
@@ -200,7 +167,9 @@ export class JsHttpFileStream extends RandomAccessStream {
      * @throws IOException
      */
     public override async write(buffer: Uint8Array, offset: number, count: number): Promise<void> {
-        throw new Error("Unsupported Operation, readonly filesystem");
+        let fd: number = await this.#getFd();
+        let bytesWritten: number = fs.writeSync(fd, buffer, offset, count, this.#_position);
+        this.#_position += bytesWritten;
     }
 
     /**
@@ -211,25 +180,28 @@ export class JsHttpFileStream extends RandomAccessStream {
      * @throws IOException
      */
     public override async seek(offset: number, origin: SeekOrigin): Promise<number> {
-        let pos: number = this.position;
+        let pos: number = this.#_position;
 
         if (origin == SeekOrigin.Begin)
             pos = offset;
         else if (origin == SeekOrigin.Current)
             pos += offset;
         else if (origin == SeekOrigin.End)
-            pos = await this.file.length() - offset;
+            pos = await this.#file.length() - offset;
 
         await this.setPosition(pos);
-        await this.getStream();
-        return this.position;
+        return this.#_position;
     }
 
     /**
      * Flush the buffers to the associated file.
      */
-    public override flush(): Promise<void> {
-        throw new Error("Unsupported Operation, readonly filesystem");
+    public override async flush(): Promise<void> {
+        if (await this.canWrite()) {
+            if (this.#fd != null) {
+                // nop
+            }
+        }
     }
 
     /**
@@ -237,20 +209,14 @@ export class JsHttpFileStream extends RandomAccessStream {
      * @throws IOException
      */
     public override async close(): Promise<void> {
-        await this.reset();
-        this.closed = true;
+        if (this.#fd)
+            fs.close(this.#fd);
+        this.#reset();
+        this.#_closed = true;
     }
 
-    async reset(): Promise<void> {
-        if (this.reader != null) {
-            if(this.stream?.locked)
-                this.reader.releaseLock();
-        }
-        this.reader = null;
-        if(this.stream != null)
-            await this.stream.cancel();
-        this.stream = null;
-        this.buffer = null;
-        this.bufferPosition = 0;
+    #reset(): void {
+        this.#_buffer = null;
+        this.#_bufferPosition = 0;
     }
 }

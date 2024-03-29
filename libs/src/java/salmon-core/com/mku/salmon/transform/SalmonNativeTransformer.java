@@ -24,6 +24,7 @@ SOFTWARE.
 */
 
 import com.mku.bridge.INativeProxy;
+import com.mku.salmon.SalmonSecurityException;
 import com.mku.salmon.bridge.NativeProxy;
 
 /**
@@ -56,6 +57,10 @@ public class SalmonNativeTransformer extends SalmonAES256CTRTransformer {
     @Override
     public int encryptData(byte[] srcBuffer, int srcOffset,
                            byte[] destBuffer, int destOffset, int count) {
+        if (getKey() == null) //TODO: ToSync
+            throw new SalmonSecurityException("No key found, run init first");
+        if (getCounter() == null) //TODO: ToSync
+            throw new SalmonSecurityException("No counter found, run init first");
         return nativeProxy.salmonTransform(getKey(), getCounter(),
                 srcBuffer, srcOffset,
                 destBuffer, destOffset, count);
@@ -73,6 +78,10 @@ public class SalmonNativeTransformer extends SalmonAES256CTRTransformer {
     @Override
     public int decryptData(byte[] srcBuffer, int srcOffset,
                             byte[] destBuffer, int destOffset, int count) {
+        if (getKey() == null) //TODO: ToSync
+            throw new SalmonSecurityException("No key found, run init first");
+        if (getCounter() == null) //TODO: ToSync
+            throw new SalmonSecurityException("No counter found, run init first");
         return nativeProxy.salmonTransform(getKey(), getCounter(),
                 srcBuffer, srcOffset,
                 destBuffer, destOffset, count);

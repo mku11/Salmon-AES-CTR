@@ -72,6 +72,8 @@ public abstract class SalmonAES256CTRTransformer implements ISalmonCTRTransforme
      * Resets the Counter and the block count.
      */
     public void resetCounter() {
+        if (this.nonce == null) //TODO: ToSync
+            throw new SalmonSecurityException("No counter, run init first");
         counter = new byte[BLOCK_SIZE];
         System.arraycopy(nonce, 0, counter, 0, nonce.length);
         block = 0;
@@ -95,6 +97,8 @@ public abstract class SalmonAES256CTRTransformer implements ISalmonCTRTransforme
      * @param value value to increase counter by
      */
     protected void increaseCounter(long value) throws SalmonRangeExceededException {
+        if (this.counter == null || this.nonce == null) //TODO: ToSync
+            throw new SalmonSecurityException("No counter, run init first");
         if (value < 0)
             throw new IllegalArgumentException("Value should be positive");
         int index = BLOCK_SIZE - 1;

@@ -396,7 +396,7 @@ export class SalmonStream extends RandomAccessStream {
         await this.#init(this.#key, this.#nonce);
 
         let ctr: Uint8Array | null = this.#transformer.getCounter();
-        if (ctr == null) //TODO: ToSync
+        if (ctr == null)
             throw new SalmonSecurityException("No counter, init transformer first");
         return ctr.slice(0);
     }
@@ -418,7 +418,7 @@ export class SalmonStream extends RandomAccessStream {
         await this.#init(this.#key, this.#nonce);
 
         let key: Uint8Array | null = this.#transformer.getKey();
-        if (key == null) //TODO: ToSync
+        if (key == null)
             throw new SalmonSecurityException("No key, init transformer first");
         return key.slice(0);
     }
@@ -439,7 +439,7 @@ export class SalmonStream extends RandomAccessStream {
         await this.#init(this.#key, this.#nonce);
 
         let nonce: Uint8Array | null = this.#transformer.getNonce();
-        if (nonce == null) //TODO: ToSync
+        if (nonce == null)
             throw new SalmonSecurityException("No nonce, init transformer first");
         return nonce.slice(0);
     }

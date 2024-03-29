@@ -23,7 +23,9 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 */
 
+import com.mku.file.IRealFile;
 import com.mku.file.IVirtualFile;
+import com.mku.func.BiConsumer;
 import com.mku.salmon.SalmonFile;
 import com.mku.utils.FileImporter;
 
@@ -42,5 +44,10 @@ public class SalmonFileImporter extends FileImporter {
 
     protected long getMinimumPartSize(IVirtualFile file) throws IOException {
         return ((SalmonFile) file).getMinimumPartSize();
+    }
+
+    public SalmonFile importFile(IRealFile fileToImport, IVirtualFile dir, String filename,
+                                   boolean deleteSource, boolean integrity, BiConsumer<Long,Long> onProgress) throws Exception {
+        return (SalmonFile) super.importFile(fileToImport, dir, filename, deleteSource, integrity, onProgress);
     }
 }

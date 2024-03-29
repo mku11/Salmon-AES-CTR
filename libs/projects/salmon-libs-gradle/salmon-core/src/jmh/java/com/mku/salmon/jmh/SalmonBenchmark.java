@@ -27,7 +27,7 @@ SOFTWARE.
 import com.mku.salmon.SalmonDefaultOptions;
 import com.mku.salmon.iostream.ProviderType;
 import com.mku.salmon.iostream.SalmonStream;
-import com.mku.salmon.test.TestHelper;
+import com.mku.salmon.test.SalmonCoreTestHelper;
 import org.bouncycastle.jce.provider.BouncyCastleProvider;
 import org.openjdk.jmh.annotations.Benchmark;
 import org.openjdk.jmh.annotations.Scope;
@@ -43,38 +43,37 @@ public class SalmonBenchmark {
     private static final Provider bouncycastleProvider;
 
     static {
-        SalmonDefaultOptions.setBufferSize(256 * 1024);
         bouncycastleProvider = new BouncyCastleProvider();
     }
 
     @Benchmark
     public void EncryptAndDecryptSysDefault() throws Exception {
-        TestHelper.encryptAndDecryptByteArrayDef(TEST_PERF_SIZE, false);
+        SalmonCoreTestHelper.encryptAndDecryptByteArrayDef(TEST_PERF_SIZE, false);
     }
 
     @Benchmark
     public void EncryptAndDecryptSalmonNativeDef() throws Exception {
         SalmonStream.setAesProviderType(ProviderType.Default);
-        TestHelper.encryptAndDecryptByteArrayNative(TEST_PERF_SIZE, false);
+        SalmonCoreTestHelper.encryptAndDecryptByteArrayNative(TEST_PERF_SIZE, false);
     }
 
     @Benchmark
     public void EncryptAndDecryptStreamSalmonDef() throws Exception {
         SalmonStream.setAesProviderType(ProviderType.Default);
-        TestHelper.encryptAndDecryptByteArrayNative(TEST_PERF_SIZE, false);
+        SalmonCoreTestHelper.encryptAndDecryptByteArrayNative(TEST_PERF_SIZE, false);
     }
 
     @Benchmark
     public void EncryptAndDecryptStreamSalmonIntrinsics() throws Exception {
         SalmonStream.setAesProviderType(ProviderType.AesIntrinsics);
-        TestHelper.encryptAndDecryptByteArray(TEST_PERF_SIZE, false);
+        SalmonCoreTestHelper.encryptAndDecryptByteArray(TEST_PERF_SIZE, false);
     }
 
     @Benchmark
     public void EncryptAndDecryptStreamBouncyCastle() throws Exception {
         if (!Security.getProviders()[0].getName().equals("BC"))
             Security.insertProviderAt(bouncycastleProvider, 1);
-        TestHelper.encryptAndDecryptByteArrayDef(TEST_PERF_SIZE, false);
+        SalmonCoreTestHelper.encryptAndDecryptByteArrayDef(TEST_PERF_SIZE, false);
         if (Security.getProviders()[0].getName().equals("BC")) {
             Security.removeProvider(Security.getProviders()[0].getName());
         }
@@ -83,6 +82,6 @@ public class SalmonBenchmark {
     @Benchmark
     public void EncryptAndDecryptStreamPerformanceSalmonTinyAes() throws Exception {
         SalmonStream.setAesProviderType(ProviderType.TinyAES);
-        TestHelper.encryptAndDecryptByteArray(TEST_PERF_SIZE, false);
+        SalmonCoreTestHelper.encryptAndDecryptByteArray(TEST_PERF_SIZE, false);
     }
 }

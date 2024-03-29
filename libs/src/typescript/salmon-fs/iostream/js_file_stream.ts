@@ -23,7 +23,7 @@ SOFTWARE.
 */
 
 import { RandomAccessStream, SeekOrigin } from "../../salmon-core/iostream/random_access_stream.js";
-import { IRealFile } from "./ireal_file.js";
+import { IRealFile } from "../file/ireal_file.js";
 
 // File operations on the local file system may be slow due to
 // web browser specificallly Chrome malware scans

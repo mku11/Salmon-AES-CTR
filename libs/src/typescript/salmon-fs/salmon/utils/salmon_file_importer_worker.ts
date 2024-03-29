@@ -39,3 +39,13 @@ export class SalmonFileImporterWorker extends FileImporterWorker {
         return targetFile;
     }
 }
+
+let worker = new SalmonFileImporterWorker();
+if (typeof process === 'object') {
+    const { parentPort } = await import("worker_threads");
+    if (parentPort != null)
+        parentPort.addListener('message', (event: any) => worker.receive(worker, event));
+}
+else {
+    addEventListener('message', (event: any) => worker.receive(worker, event));
+}

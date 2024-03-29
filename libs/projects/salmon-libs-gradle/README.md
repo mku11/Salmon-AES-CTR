@@ -36,7 +36,7 @@ To create the maven packages (see root folder output dir):
 test files for core, fs, and native subprojects are included in respective test sourceSets (See build.gradle).  
 To run a specific test case:
 ```
-gradlew :salmon-fs:test --tests "com.mku.salmon.test.SalmonFSJavaTestRunner.shouldAuthorizePositive" --rerun-tasks  
+gradlew :salmon-fs:test --tests "com.mku.salmon.test.SalmonFSTests.shouldAuthorizePositive" --rerun-tasks  
 ```
 
 see salmon-core/src/jmh folder for benchmarks. To run from the command line:  

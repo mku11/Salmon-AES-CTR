@@ -43,7 +43,6 @@ export class SalmonNonce {
     public static increaseNonce(startNonce: Uint8Array, endNonce: Uint8Array): Uint8Array {
         let nonce: number = BitConverter.toLong(startNonce, 0, SalmonGenerator.NONCE_LENGTH);
         let maxNonce: number = BitConverter.toLong(endNonce, 0, SalmonGenerator.NONCE_LENGTH);
-        // TODO: ToSync
         if (nonce >= maxNonce)
             throw new SalmonRangeExceededException("Cannot increase nonce, maximum nonce exceeded");
         nonce++;

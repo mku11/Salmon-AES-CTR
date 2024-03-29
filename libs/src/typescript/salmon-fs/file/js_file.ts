@@ -24,7 +24,7 @@ SOFTWARE.
 
 import { RandomAccessStream } from '../../salmon-core/iostream/random_access_stream.js';
 import { IRealFile, copyFileContents, moveRecursively } from './ireal_file.js';
-import { JsFileStream } from './js_file_stream.js';
+import { JsFileStream } from '../iostream/js_file_stream.js';
 import { IOException } from '../../salmon-core/iostream/io_exception.js';
 
 /**
@@ -260,7 +260,7 @@ export class JsFile implements IRealFile {
     public async move(newDir: IRealFile, newName: string | null = null, progressListener: ((position: number, length: number) => void) | null = null): Promise<IRealFile> {
         newName = newName != null ? newName : this.getBaseName();
         if (newDir == null || !await newDir.exists())
-            throw new IOException("Target directory does not exists");
+            throw new IOException("Target directory does not exist");
         let newFile: IRealFile | null = await newDir.getChild(newName);
         if (newFile != null && await newFile.exists())
             throw new IOException("Another file/directory already exists");
@@ -300,7 +300,7 @@ export class JsFile implements IRealFile {
         if (newFile != null && await newFile.exists())
             throw new IOException("Another file/directory already exists");
         if (await this.isDirectory()) {
-            return newDir.createDirectory(newName);
+            throw new IOException("Could not copy directory use IRealFile copyRecursively() instead");
         } else {
             newFile = await newDir.createFile(newName);
             let res: boolean = await copyFileContents(this, newFile, false, progressListener);

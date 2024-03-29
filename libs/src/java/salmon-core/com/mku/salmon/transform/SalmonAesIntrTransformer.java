@@ -62,6 +62,10 @@ public class SalmonAesIntrTransformer extends SalmonNativeTransformer {
     public int encryptData(byte[] srcBuffer, int srcOffset,
                            byte[] destBuffer, int destOffset, int count) {
         // AES intrinsics needs the expanded key
+        if (this.getExpandedKey() == null) //TODO: ToSync
+            throw new SalmonSecurityException("No expanded key found, run init first");
+        if (this.getCounter() == null) //TODO: ToSync
+            throw new SalmonSecurityException("No counter found, run init first");
         return getNativeProxy().salmonTransform(getExpandedKey(), getCounter(),
                 srcBuffer, srcOffset,
                 destBuffer, destOffset, count);
@@ -80,6 +84,10 @@ public class SalmonAesIntrTransformer extends SalmonNativeTransformer {
     public int decryptData(byte[] srcBuffer, int srcOffset,
                             byte[] destBuffer, int destOffset, int count) {
         // AES intrinsics needs the expanded key
+        if (this.getExpandedKey() == null) //TODO: ToSync
+            throw new SalmonSecurityException("No expanded key found, run init first");
+        if (this.getCounter() == null) //TODO: ToSync
+            throw new SalmonSecurityException("No counter found, run init first");
         return getNativeProxy().salmonTransform(getExpandedKey(), getCounter(),
                 srcBuffer, srcOffset,
                 destBuffer, destOffset, count);

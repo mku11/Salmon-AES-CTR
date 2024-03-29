@@ -24,7 +24,7 @@ SOFTWARE.
 
 import { RandomAccessStream } from '../../salmon-core/iostream/random_access_stream.js';
 import { IRealFile, copyFileContents } from './ireal_file.js';
-import { JsNodeFileStream } from './js_node_file_stream.js';
+import { JsNodeFileStream } from '../iostream/js_node_file_stream.js';
 import { IOException } from '../../salmon-core/iostream/io_exception.js';
 import { mkdir, stat, readdir, rename, open, FileHandle } from 'node:fs/promises';
 import { Stats, rmdirSync, unlinkSync } from 'node:fs';
@@ -248,7 +248,7 @@ export class JsNodeFile implements IRealFile {
         if (newFile != null && await newFile.exists())
             throw new IOException("Another file/directory already exists");
         if (await this.isDirectory()) {
-            return newDir.createDirectory(newName);
+            throw new IOException("Could not copy directory use IRealFile copyRecursively() instead");
         } else {
             newFile = await newDir.createFile(newName);
             let res: boolean = await copyFileContents(this, newFile, false, progressListener);
