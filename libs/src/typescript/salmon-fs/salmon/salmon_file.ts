@@ -869,12 +869,7 @@ export class SalmonFile implements IVirtualFile {
         // use auto rename only when we are using a drive
         if (autoRename != null && this.getDrive() != null)
             renameRealFile = async (file: IRealFile): Promise<string> => {
-                try {
-                    return await autoRename(new SalmonFile(file, this.getDrive()));
-                } catch (e) {
-                    console.error(e);
-                    return file.getBaseName();
-                }
+                return await autoRename(new SalmonFile(file, this.getDrive()));
             };
         await IRealFileCopyRecursively(this.#realFile, dest.getRealFile(), (file, position, length) => {
             if (progressListener != null)
@@ -907,11 +902,7 @@ export class SalmonFile implements IVirtualFile {
         // use auto rename only when we are using a drive
         if (autoRename != null && this.getDrive() != null)
             renameRealFile = async (file: IRealFile): Promise<string> => {
-                try {
-                    return await autoRename(new SalmonFile(file, this.getDrive()));
-                } catch (e) {
-                    return file.getBaseName();
-                }
+				return await autoRename(new SalmonFile(file, this.getDrive()));
             };
         await IRealFileMoveRecursively(this.#realFile, dest.getRealFile(), (file, position, length) => {
             if (progressListener != null)
