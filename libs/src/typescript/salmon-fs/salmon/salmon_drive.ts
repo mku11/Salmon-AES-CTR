@@ -63,7 +63,7 @@ export abstract class SalmonDrive extends VirtualDrive {
 
     #defaultFileChunkSize: number = SalmonDrive.#DEFAULT_FILE_CHUNK_SIZE;
     #key: SalmonDriveKey | null = null;
-    #driveID: Uint8Array | null = null;
+    #driveId: Uint8Array | null = null;
     #realRoot: IRealFile | null = null;
     #virtualRoot: SalmonFile | null = null;
 
@@ -226,8 +226,8 @@ export abstract class SalmonDrive extends VirtualDrive {
             let hashKey: Uint8Array = new Uint8Array(SalmonGenerator.HASH_KEY_LENGTH);
             await stream.read(hashKey, 0, hashKey.length);
 
-            let driveID: Uint8Array = new Uint8Array(SalmonDriveGenerator.DRIVE_ID_LENGTH);
-            await stream.read(driveID, 0, driveID.length);
+            let driveId: Uint8Array = new Uint8Array(SalmonDriveGenerator.DRIVE_ID_LENGTH);
+            await stream.read(driveId, 0, driveId.length);
 
             // to make sure we have the right key we get the hash portion
             // and try to verify the drive nonce
@@ -235,7 +235,7 @@ export abstract class SalmonDrive extends VirtualDrive {
 
             // set the combined key (drive key + hash key) and the drive nonce
             this.setKey(masterKey, driveKey, hashKey, iterations);
-            this.#driveID = driveID;
+            this.#driveId = driveId;
             await this.initFS();
             this.onUnlockSuccess();
         } catch (ex) {
@@ -275,7 +275,7 @@ export abstract class SalmonDrive extends VirtualDrive {
         let hash: Uint8Array = await SalmonIntegrity.calculateHash(this.#hashProvider, data, 0, data.length, hashKey, null);
         for (let i = 0; i < hashKey.length; i++)
             if (hashSignature[i] != hash[i])
-                throw new SalmonAuthException("Could not authenticate");
+                throw new SalmonAuthException("Wrong Password");
     }
 
     /**
@@ -365,7 +365,7 @@ export abstract class SalmonDrive extends VirtualDrive {
      * @return
      */
     public getDriveId(): Uint8Array | null {
-        return this.#driveID;
+        return this.#driveId;
     }
 
     /**
@@ -374,7 +374,7 @@ export abstract class SalmonDrive extends VirtualDrive {
     public close(): void {
         this.#realRoot = null;
         this.#virtualRoot = null;
-        this.#driveID = null;
+        this.#driveId = null;
         if (this.#key != null)
             this.#key.clear();
         this.#key = null;
@@ -402,8 +402,8 @@ export abstract class SalmonDrive extends VirtualDrive {
         return this.#hashProvider;
     }
 
-    public setDriveID(driveID: Uint8Array): void {
-        this.#driveID = driveID;
+    public setDriveID(driveId: Uint8Array): void {
+        this.#driveId = driveId;
     }
     
     /**
@@ -479,8 +479,8 @@ export abstract class SalmonDrive extends VirtualDrive {
         let drvStr: string = BitConverter.toHex(driveId);
         let sequence: NonceSequence | null = await this.getSequencer().getSequence(drvStr);
         if (sequence == null) {
-            let authID: Uint8Array = SalmonDriveGenerator.generateAuthId();
-            await this.createSequence(driveId, authID);
+            let authId: Uint8Array = SalmonDriveGenerator.generateAuthId();
+            await this.createSequence(driveId, authId);
         }
         sequence = await this.getSequencer().getSequence(drvStr);
         if (sequence == null)
@@ -515,7 +515,7 @@ export abstract class SalmonDrive extends VirtualDrive {
         if (!authConfig.getAuthId().every((val, index) => val === authIdBytes[index])
             || !authConfig.getDriveId().every((val, index) => driveId != null && val == driveId[index])
         )
-            throw new Error("Auth file doesn't match driveID or authID");
+            throw new Error("Auth file doesn't match driveId or authId");
 
         await this.#importSequence(authConfig);
     }
@@ -565,10 +565,10 @@ export abstract class SalmonDrive extends VirtualDrive {
         if (nextNonce == null)
             throw new SalmonSequenceException("Could not get next nonce");
         let pivotNonce: Uint8Array = SalmonNonce.splitNonceRange(nextNonce, maxNonce);
-        let authID: string | null = sequence.getAuthId();
-        if(authID == null)
+        let authId: string | null = sequence.getAuthId();
+        if(authId == null)
             throw new SalmonSequenceException("Could not get auth id");
-        await this.getSequencer().setMaxNonce(sequence.getId(), authID, pivotNonce);
+        await this.getSequencer().setMaxNonce(sequence.getId(), authId, pivotNonce);
         await SalmonAuthConfig.writeAuthFile(file, this,
             BitConverter.hexToBytes(targetAuthId),
             pivotNonce, maxNonce,
@@ -577,31 +577,31 @@ export abstract class SalmonDrive extends VirtualDrive {
 
     /**
      * Create a nonce sequence for the drive id and the authorization id provided. Should be called
-     * once per driveID/authID combination.
+     * once per driveId/authId combination.
      *
-     * @param driveID The driveID
-     * @param authID  The authID
+     * @param driveId The driveId
+     * @param authId  The authId
      * @throws Exception
      */
-    async createSequence(driveID: Uint8Array, authID: Uint8Array): Promise<void> {
-        let drvStr: string = BitConverter.toHex(driveID);
-        let authStr: string = BitConverter.toHex(authID);
+    async createSequence(driveId: Uint8Array, authId: Uint8Array): Promise<void> {
+        let drvStr: string = BitConverter.toHex(driveId);
+        let authStr: string = BitConverter.toHex(authId);
         await this.getSequencer().createSequence(drvStr, authStr);
     }
 
     /**
      * Initialize the nonce sequencer with the current drive nonce range. Should be called
-     * once per driveID/authID combination.
+     * once per driveId/authId combination.
      *
-     * @param driveID Drive ID.
-     * @param authID  Authorization ID.
+     * @param driveId Drive ID.
+     * @param authId  Authorization ID.
      * @throws Exception
      */
-    async initializeSequence(driveID: Uint8Array, authID: Uint8Array): Promise<void> {
+    async initializeSequence(driveId: Uint8Array, authId: Uint8Array): Promise<void> {
         let startingNonce: Uint8Array = SalmonDriveGenerator.getStartingNonce();
         let maxNonce: Uint8Array = SalmonDriveGenerator.getMaxNonce();
-        let drvStr: string = BitConverter.toHex(driveID);
-        let authStr: string = BitConverter.toHex(authID);
+        let drvStr: string = BitConverter.toHex(driveId);
+        let authStr: string = BitConverter.toHex(authId);
         await this.getSequencer().initializeSequence(drvStr, authStr, startingNonce, maxNonce);
     }
 
@@ -614,22 +614,22 @@ export abstract class SalmonDrive extends VirtualDrive {
      * @see <a href="https://github.com/mku11/Salmon-AES-CTR#readme">Salmon README.md</a>
      */
     public async revokeAuthorization(): Promise<void> {
-        let driveID: Uint8Array | null = this.getDriveId();
-        if (driveID == null)
+        let driveId: Uint8Array | null = this.getDriveId();
+        if (driveId == null)
             throw new Error("Could not get revoke, make sure you initialize the drive first");
-        await this.getSequencer().revokeSequence(BitConverter.toHex(driveID));
+        await this.getSequencer().revokeSequence(BitConverter.toHex(driveId));
     }
 
     /**
      * Verify the authorization id with the current drive auth id.
      *
-     * @param authID The authorization id to verify.
+     * @param authId The authorization id to verify.
      * @return
      * @throws Exception
      */
-    async #verifyAuthID(authID: Uint8Array): Promise<boolean> {
+    async #verifyAuthId(authId: Uint8Array): Promise<boolean> {
         let authIdBytes: Uint8Array = await this.getAuthIdBytes();
-        return authID.every(async (val, index) => val === authIdBytes[index]);
+        return authId.every(async (val, index) => val === authIdBytes[index]);
     }
 
     /**
@@ -660,7 +660,7 @@ export abstract class SalmonDrive extends VirtualDrive {
         await stream.close();
         let driveConfig: SalmonAuthConfig = new SalmonAuthConfig();
         await driveConfig.init(ms.toArray());
-        if (!await this.#verifyAuthID(driveConfig.getAuthId()))
+        if (!await this.#verifyAuthId(driveConfig.getAuthId()))
             throw new SalmonSecurityException("Could not authorize this device, the authorization id does not match");
         return driveConfig;
     }
@@ -735,8 +735,8 @@ export abstract class SalmonDrive extends VirtualDrive {
         // create a key that will encrypt both the (drive key and the hash key)
         let masterKey: Uint8Array = await SalmonPassword.getMasterKey(password, salt, iterations, SalmonDriveGenerator.MASTER_KEY_LENGTH);
 
-        let driveID: Uint8Array | null = this.getDriveId();
-        if (driveKey == null || hashKey == null || driveID == null)
+        let driveId: Uint8Array | null = this.getDriveId();
+        if (driveKey == null || hashKey == null || driveId == null)
             throw new Error("Make sure you init the drive first");
         // encrypt the combined key (drive key + hash key) using the masterKey and the masterKeyIv
         let ms: MemoryStream = new MemoryStream();
@@ -744,7 +744,7 @@ export abstract class SalmonDrive extends VirtualDrive {
             null, false, null, null);
         await stream.write(driveKey, 0, driveKey.length);
         await stream.write(hashKey, 0, hashKey.length);
-        await stream.write(driveID, 0, driveID.length);
+        await stream.write(driveId, 0, driveId.length);
         await stream.flush();
         await stream.close();
         let encData: Uint8Array = ms.toArray();
@@ -758,9 +758,9 @@ export abstract class SalmonDrive extends VirtualDrive {
 
         if (newDrive) {
             // create a full sequence for nonces
-            let authID: Uint8Array = SalmonDriveGenerator.generateAuthId();
-            await this.createSequence(driveID, authID);
-            await this.initializeSequence(driveID, authID);
+            let authId: Uint8Array = SalmonDriveGenerator.generateAuthId();
+            await this.createSequence(driveId, authId);
+            await this.initializeSequence(driveId, authId);
         }
         await this.initFS();
     }

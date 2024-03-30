@@ -412,7 +412,7 @@ export class SalmonFSTestHelper {
 
         // open with another device (different sequencer) and export auth id
         drive = await SalmonDrive.openDrive(vault, SalmonFSTestHelper.driveClassType, SalmonCoreTestHelper.TEST_PASSWORD, sequencer2);
-        let authID = await drive.getAuthId();
+        let authId = await drive.getAuthId();
         let success = false;
         try {
             // import a test file should fail because not authorized
@@ -428,7 +428,7 @@ export class SalmonFSTestHelper {
         //reopen with first device sequencer and export the auth file with the auth id from the second device
         drive = await SalmonDrive.openDrive(vault, SalmonFSTestHelper.driveClassType, SalmonCoreTestHelper.TEST_PASSWORD, sequencer1);
         let exportFile = await getFile(vault, SalmonFSTestHelper.TEST_EXPORT_FILENAME);
-        await drive.exportAuthFile(authID, exportFile);
+        await drive.exportAuthFile(authId, exportFile);
         let exportAuthFile = await getFile(vault, SalmonFSTestHelper.TEST_EXPORT_FILENAME);
         let salmonCfgFile = new SalmonFile(exportAuthFile, drive);
         let nonceCfg = BitConverter.toLong(await salmonCfgFile.getFileNonce(), 0, SalmonGenerator.NONCE_LENGTH);
@@ -461,11 +461,11 @@ export class SalmonFSTestHelper {
         let importSuccess;
         try {
             class TestSalmonFileSequencer extends SalmonFileSequencer {
-                async initializeSequence(driveID, authID, startNonce, maxNonce) {
+                async initializeSequence(driveId, authId, startNonce, maxNonce) {
                     let nMaxNonce = BitConverter.toLong(testMaxNonce, 0, SalmonGenerator.NONCE_LENGTH);
                     startNonce = BitConverter.toBytes(nMaxNonce + offset, SalmonGenerator.NONCE_LENGTH);
                     maxNonce = BitConverter.toBytes(nMaxNonce, SalmonGenerator.NONCE_LENGTH);
-                    await super.initializeSequence(driveID, authID, startNonce, maxNonce);
+                    await super.initializeSequence(driveId, authId, startNonce, maxNonce);
                 }
             }
             let sequencer = new TestSalmonFileSequencer(seqFile, getSequenceSerializer());

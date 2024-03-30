@@ -94,10 +94,10 @@ export class NonceSequence {
 
     /**
      * Set the authorization Id for a specific device.
-     * @param authID
+     * @param authId
      */
-    setAuthId(authID: string): void {
-        this.authId = authID;
+    setAuthId(authId: string): void {
+        this.authId = authId;
     }
 
     /**

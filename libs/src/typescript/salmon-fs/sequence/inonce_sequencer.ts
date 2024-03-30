@@ -53,12 +53,12 @@ export interface INonceSequencer {
      * Set the max nonce
      *
      * @param id The drive ID.
-     * @param authID The auth ID of the device for the drive.
+     * @param authId The auth ID of the device for the drive.
      * @param maxNonce The maximum nonce.
      * @throws SalmonSequenceException
      * @throws IOException
      */
-    setMaxNonce(id: string, authID: string, maxNonce: Uint8Array): Promise<void>;
+    setMaxNonce(id: string, authId: string, maxNonce: Uint8Array): Promise<void>;
 
     /**
      * Get the next nonce.

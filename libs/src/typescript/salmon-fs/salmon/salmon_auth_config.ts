@@ -39,8 +39,8 @@ import { RandomAccessStream } from "../../salmon-core/iostream/random_access_str
  */
 export class SalmonAuthConfig {
 
-    readonly #driveID: Uint8Array = new Uint8Array(SalmonDriveGenerator.DRIVE_ID_LENGTH);
-    readonly #authID: Uint8Array = new Uint8Array(SalmonDriveGenerator.AUTH_ID_SIZE);
+    readonly #driveId: Uint8Array = new Uint8Array(SalmonDriveGenerator.DRIVE_ID_LENGTH);
+    readonly #authId: Uint8Array = new Uint8Array(SalmonDriveGenerator.AUTH_ID_SIZE);
     readonly #startNonce: Uint8Array = new Uint8Array(SalmonGenerator.NONCE_LENGTH);
     readonly #maxNonce: Uint8Array = new Uint8Array(SalmonGenerator.NONCE_LENGTH);
 
@@ -49,7 +49,7 @@ export class SalmonAuthConfig {
      * @return
      */
     public getDriveId(): Uint8Array {
-        return this.#driveID;
+        return this.#driveId;
     }
 
     /**
@@ -57,7 +57,7 @@ export class SalmonAuthConfig {
      * @return
      */
     public getAuthId(): Uint8Array {
-        return this.#authID;
+        return this.#authId;
     }
 
     /**
@@ -86,8 +86,8 @@ export class SalmonAuthConfig {
 
     public async init(contents: Uint8Array): Promise<void> {
         let ms: MemoryStream = new MemoryStream(contents);
-        await ms.read(this.#driveID, 0, SalmonDriveGenerator.DRIVE_ID_LENGTH);
-        await ms.read(this.#authID, 0, SalmonDriveGenerator.AUTH_ID_SIZE);
+        await ms.read(this.#driveId, 0, SalmonDriveGenerator.DRIVE_ID_LENGTH);
+        await ms.read(this.#authId, 0, SalmonDriveGenerator.AUTH_ID_SIZE);
         await ms.read(this.#startNonce, 0, SalmonGenerator.NONCE_LENGTH);
         await ms.read(this.#maxNonce, 0, SalmonGenerator.NONCE_LENGTH);
         await ms.close();
@@ -119,18 +119,18 @@ export class SalmonAuthConfig {
     /**
      * Write authorization configuration to a SalmonStream.
      * @param stream The stream to write to.
-     * @param driveID The drive id.
-     * @param authID The auth id of the new device.
+     * @param driveId The drive id.
+     * @param authId The auth id of the new device.
      * @param nextNonce The next nonce to be used by the new device.
      * @param maxNonce The max nonce to be used byte the new device.
      * @throws Exception
      */
-    public static async writeToStream(stream: RandomAccessStream, driveID: Uint8Array, authID: Uint8Array,
+    public static async writeToStream(stream: RandomAccessStream, driveId: Uint8Array, authId: Uint8Array,
         nextNonce: Uint8Array, maxNonce: Uint8Array): Promise<void> {
         let ms: MemoryStream = new MemoryStream();
         try {
-            await ms.write(driveID, 0, driveID.length);
-            await ms.write(authID, 0, authID.length);
+            await ms.write(driveId, 0, driveId.length);
+            await ms.write(authId, 0, authId.length);
             await ms.write(nextNonce, 0, nextNonce.length);
             await ms.write(maxNonce, 0, maxNonce.length);
             let content: Uint8Array = ms.toArray();
