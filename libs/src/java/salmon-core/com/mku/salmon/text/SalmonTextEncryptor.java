@@ -74,7 +74,7 @@ public class SalmonTextEncryptor {
     public static String encryptString(String text, byte[] key, byte[] nonce, boolean header,
                                        boolean integrity, byte[] hashKey, Integer chunkSize)
             throws SalmonSecurityException, SalmonIntegrityException, IOException {
-        byte[] bytes = text.getBytes(Charset.defaultCharset());
+        byte[] bytes = text.getBytes("UTF-8");
         byte[] encBytes = encryptor.encrypt(bytes, key, nonce, header, integrity, hashKey, chunkSize);
         String encString = SalmonEncoder.getBase64().encode(encBytes).replace("\n", "");
         return encString;

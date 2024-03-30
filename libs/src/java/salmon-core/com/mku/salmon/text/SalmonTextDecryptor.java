@@ -76,7 +76,7 @@ public class SalmonTextDecryptor {
             throws IOException, SalmonSecurityException, SalmonIntegrityException {
         byte[] bytes = SalmonEncoder.getBase64().decode(text);
         byte[] decBytes = decryptor.decrypt(bytes, key, nonce, header, integrity, hashKey, chunkSize);
-        String decString = new String(decBytes, Charset.defaultCharset());
+        String decString = new String(decBytes, "UTF-8");
         return decString;
     }
 }
