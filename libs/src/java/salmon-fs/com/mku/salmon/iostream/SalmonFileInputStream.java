@@ -91,7 +91,7 @@ public class SalmonFileInputStream extends InputStream {
      */
     public SalmonFileInputStream(SalmonFile salmonFile,
                                  int buffersCount, int bufferSize, int threads, int backOffset)
-            throws IOException, SalmonIntegrityException {
+            throws IOException {
         this.salmonFile = salmonFile;
         this.size = salmonFile.getSize();
         if (buffersCount == 0)
