@@ -94,7 +94,7 @@ public class JavaFile implements IRealFile {
     /**
      * True if file or directory exists.
      *
-     * @return
+     * @return True if exists.
      */
     public boolean exists() {
         return new File(filePath).exists();
@@ -152,7 +152,7 @@ public class JavaFile implements IRealFile {
     /**
      * Get the path of this file. For java this is the same as the absolute filepath.
      *
-     * @return
+     * @return The path
      */
     public String getPath() {
         return filePath;
@@ -161,7 +161,7 @@ public class JavaFile implements IRealFile {
     /**
      * True if this is a directory.
      *
-     * @return
+     * @return True if it's a directory.
      */
     public boolean isDirectory() {
         return new File(filePath).isDirectory();
@@ -170,7 +170,7 @@ public class JavaFile implements IRealFile {
     /**
      * True if this is a file.
      *
-     * @return
+     * @return True if it's a file
      */
     public boolean isFile() {
         return !isDirectory();
@@ -254,7 +254,6 @@ public class JavaFile implements IRealFile {
      * @param newName          The new filename
      * @param progressListener Observer to notify when progress changes.
      * @return The moved file. Use this file for subsequent operations instead of the original.
-     * @throws IOException
      */
     public IRealFile move(IRealFile newDir, String newName, BiConsumer<Long, Long> progressListener) {
         newName = newName != null ? newName : getBaseName();

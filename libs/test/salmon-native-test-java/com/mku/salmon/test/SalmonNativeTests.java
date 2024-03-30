@@ -37,7 +37,7 @@ import java.nio.charset.Charset;
 import static org.junit.jupiter.api.Assertions.assertArrayEquals;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
-public class SalmonJavaNativeTestRunner {
+public class SalmonNativeTests {
 
     static int ENC_THREADS = 1;
     static int DEC_THREADS = 1;

@@ -44,7 +44,7 @@ public class SalmonRegistry
 
     /**
      * Read a value from the registry
-     * @param key
+     * @param key The key
      * @return
      */
     @SuppressWarnings("unchecked")
@@ -55,7 +55,7 @@ public class SalmonRegistry
 
     /**
      * Write a value from the registry
-     * @param key
+     * @param key The key
      * @param value
      */
     public void write(String key, Object value)
@@ -78,7 +78,7 @@ public class SalmonRegistry
 
     /**
      * Delete a value
-     * @param key
+     * @param key The key
      */
     public void delete(String key)
     {
@@ -87,7 +87,7 @@ public class SalmonRegistry
 
     /**
      * True if value exists
-     * @param key
+     * @param key The key
      * @return
      */
     public boolean exists(String key){

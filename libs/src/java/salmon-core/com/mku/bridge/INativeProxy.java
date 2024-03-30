@@ -30,27 +30,27 @@ public interface INativeProxy
 {
     /**
      * Proxy Init the native code with AES implementation, and hash length options.
-     * @param aesImpl
+     * @param aesImpl Aes Implementation
      */
     void salmonInit(int aesImpl);
 
     /**
      * Proxy Key schedule algorithm for expanding the 32 byte key to 240 bytes required
      * for AES 256.
-     * @param key
-     * @param expandedKey
+     * @param key The key
+     * @param expandedKey The expanded key
      */
     void salmonExpandKey(byte[] key, byte[] expandedKey);
 
     /**
      * Proxy Transform the input byte array using AES-256 CTR mode
-     * @param key
-     * @param counter
-     * @param srcBuffer
-     * @param srcOffset
-     * @param destBuffer
-     * @param destOffset
-     * @param count
+     * @param key The key
+     * @param counter The counter
+     * @param srcBuffer The source byte array.
+     * @param srcOffset The source byte offset.
+     * @param destBuffer The destination byte array.
+     * @param destOffset The destination byte offset.
+     * @param count The count of bytes to transform.
      * @return The number of bytes that were transformed.
      */
     int salmonTransform(byte[] key, byte[] counter,

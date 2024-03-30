@@ -26,7 +26,6 @@ SOFTWARE.
 
 import com.mku.file.IRealFile;
 import com.mku.file.JavaFile;
-import com.mku.salmon.drive.JavaDrive;
 import com.mku.convert.BitConverter;
 import com.mku.salmon.SalmonRangeExceededException;
 import com.mku.salmon.win.registry.SalmonRegistry;
@@ -44,7 +43,7 @@ import java.util.Random;
 
 import static org.junit.jupiter.api.Assertions.*;
 
-public class SalmonWinJavaServiceTestRunner {
+public class SalmonWinServiceTests {
     public static String TEST_SEQUENCER_DIR = "D:\\tmp\\output";
     public static String TEST_SEQUENCER_FILENAME = "winfileseq.xml";
     private static String TEST_REG_CHCKSUM_KEY = "TestChkSum";

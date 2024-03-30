@@ -68,7 +68,7 @@ public class SalmonDriveGenerator {
      * Generate a Drive ID.
      * @return The Drive ID.
      */
-    public static byte[] generateDriveID() {
+    public static byte[] generateDriveId() {
         return SalmonGenerator.getSecureRandomBytes(DRIVE_ID_LENGTH);
     }
 

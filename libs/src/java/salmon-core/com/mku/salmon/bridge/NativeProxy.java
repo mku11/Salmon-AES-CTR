@@ -46,7 +46,7 @@ public class NativeProxy implements INativeProxy {
     /**
      * Native Key schedule algorithm for expanding the 32 byte key to 240 bytes required
      *
-     * @param key
+     * @param key The key
      * @param expandedKey
      */
     private native static void expandkey(byte[] key, byte[] expandedKey);
@@ -54,14 +54,14 @@ public class NativeProxy implements INativeProxy {
     /**
      * Native transform of the input byte array using AES-256 CTR mode
      *
-     * @param key
-     * @param counter
-     * @param srcBuffer
-     * @param srcOffset
-     * @param destBuffer
-     * @param destOffset
-     * @param count
-     * @return
+     * @param key The key
+     * @param counter The counter
+     * @param srcBuffer The source byte array.
+     * @param srcOffset The source byte offset.
+     * @param destBuffer The destination byte array.
+     * @param destOffset The destination byte offset.
+     * @param count The count of bytes to transform.
+     * @return The number of bytes transformed
      */
     private native static int transform(byte[] key, byte[] counter,
                                                byte[] srcBuffer, int srcOffset,
@@ -94,7 +94,7 @@ public class NativeProxy implements INativeProxy {
     /**
      * Proxy Key schedule algorithm for expanding the 32 byte key to 240 bytes required
      *
-     * @param key
+     * @param key The key
      * @param expandedKey
      */
     public void salmonExpandKey(byte[] key, byte[] expandedKey) {
@@ -104,13 +104,13 @@ public class NativeProxy implements INativeProxy {
     /**
      * Proxy Transform the input byte array using AES-256 CTR mode
      *
-     * @param key
-     * @param counter
-     * @param srcBuffer
-     * @param srcOffset
-     * @param destBuffer
-     * @param destOffset
-     * @param count
+     * @param key The key
+     * @param counter The counter
+     * @param srcBuffer The source byte array.
+     * @param srcOffset The source byte offset.
+     * @param destBuffer The destination byte array.
+     * @param destOffset The destination byte offset.
+     * @param count The count of bytes to be transform.
      * @return
      */
     public int salmonTransform(byte[] key, byte[] counter, byte[] srcBuffer, int srcOffset, byte[] destBuffer, int destOffset, int count) {

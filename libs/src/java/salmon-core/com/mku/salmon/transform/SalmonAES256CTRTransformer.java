@@ -116,7 +116,7 @@ public abstract class SalmonAES256CTRTransformer implements ISalmonCTRTransforme
     /**
      * Initialize the transformer. Most common operations include precalculating expansion keys or
      * any other prior initialization for efficiency.
-     * @param key
+     * @param key The key
      * @param nonce
      * @throws SalmonSecurityException
      */

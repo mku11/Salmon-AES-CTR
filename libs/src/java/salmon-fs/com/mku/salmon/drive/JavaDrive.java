@@ -48,9 +48,9 @@ public class JavaDrive extends SalmonDrive {
 
     /**
      * Helper method that opens and initializes a JsDrive
-     * @param {IRealFile} dir The directory that will host the drive.
-     * @param {ISalmonSequencer} sequencer The nonce sequencer that will be used for encryption.
-     * @returns {Promise<SalmonDrive>} The drive.
+     * @param dir The directory that will host the drive.
+     * @param sequencer The nonce sequencer that will be used for encryption.
+     * @return The drive.
      */
     public static SalmonDrive open(IRealFile dir, String password, INonceSequencer sequencer) throws Exception {
         return SalmonDrive.openDrive(dir, JavaDrive.class, password, sequencer);
@@ -58,9 +58,9 @@ public class JavaDrive extends SalmonDrive {
 
     /**
      * Helper method that creates and initializes a JsDrive
-     * @param {IRealFile} dir The directory that will host the drive.
-     * @param {ISalmonSequencer} sequencer The nonce sequencer that will be used for encryption.
-     * @returns {Promise<SalmonDrive>} The drive.
+     * @param dir The directory that will host the drive.
+     * @param sequencer The nonce sequencer that will be used for encryption.
+     * @return The drive.
      */
     public static SalmonDrive create(IRealFile dir, String password, INonceSequencer sequencer) throws IOException {
         return SalmonDrive.createDrive(dir, JavaDrive.class, password, sequencer);

@@ -500,7 +500,7 @@ public abstract class SalmonDrive extends VirtualDrive {
             byte[] combKey = SalmonDriveGenerator.generateCombinedKey();
             System.arraycopy(combKey, 0, driveKey, 0, SalmonGenerator.KEY_LENGTH);
             System.arraycopy(combKey, SalmonGenerator.KEY_LENGTH, hashKey, 0, SalmonGenerator.HASH_KEY_LENGTH);
-            driveId = SalmonDriveGenerator.generateDriveID();
+            driveId = SalmonDriveGenerator.generateDriveId();
         }
 
         // Get the salt that we will use to encrypt the combined key (drive key + hash key)

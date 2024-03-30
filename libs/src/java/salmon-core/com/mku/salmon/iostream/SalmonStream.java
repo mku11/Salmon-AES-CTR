@@ -139,7 +139,7 @@ public class SalmonStream extends RandomAccessStream {
     /**
      * Instantiate a new Salmon stream with a base stream and embedded header data.
      *
-     * @param key
+     * @param key The key
      * @param nonce
      * @param encryptionMode
      * @param baseStream     If EncryptionMode is Encrypt this will be the target stream

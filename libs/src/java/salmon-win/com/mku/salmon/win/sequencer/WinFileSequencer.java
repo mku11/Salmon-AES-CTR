@@ -57,7 +57,7 @@ public class WinFileSequencer extends SalmonFileSequencer
 
     /**
      * Set the registry key to save the checksum.
-     * @param key
+     * @param key The key
      */
     public  void setCheckSumKey(String key) {
         this.checkSumKey = key;
