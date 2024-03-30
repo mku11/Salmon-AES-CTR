@@ -42,7 +42,7 @@ public class TinyAesTransformer extends SalmonNativeTransformer {
      * @throws SalmonSecurityException
      */
     @Override
-    public void init(byte[] key, byte[] nonce) throws SalmonSecurityException {
+    public void init(byte[] key, byte[] nonce) {
 		getNativeProxy().salmonInit(AES_IMPL_TINY_AES);
         super.init(key, nonce);
     }

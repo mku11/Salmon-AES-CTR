@@ -47,7 +47,7 @@ public interface ISalmonPbkdfProvider {
      * @return The java cipher algorithm string. See javax.crypto.SecretKeyFactory.
      */
     @SuppressWarnings("deprecation")
-    static String getPbkdfAlgoString(PbkdfAlgo pbkdfAlgo) throws SalmonSecurityException {
+    static String getPbkdfAlgoString(PbkdfAlgo pbkdfAlgo) {
         switch (pbkdfAlgo) {
             case SHA1:
                 return ISalmonPbkdfProvider.PBKDF_SHA1;
@@ -67,5 +67,5 @@ public interface ISalmonPbkdfProvider {
      * @return The key.
      * @throws SalmonSecurityException
      */
-    byte[] getKey(String password, byte[] salt, int iterations, int outputBytes, PbkdfAlgo pbkdfAlgo) throws SalmonSecurityException;
+    byte[] getKey(String password, byte[] salt, int iterations, int outputBytes, PbkdfAlgo pbkdfAlgo);
 }

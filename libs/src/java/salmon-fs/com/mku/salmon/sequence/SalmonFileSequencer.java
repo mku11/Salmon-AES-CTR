@@ -79,8 +79,7 @@ public class SalmonFileSequencer implements INonceSequencer {
      * @throws SalmonSequenceException
      */
     @Override
-    public void createSequence(String driveId, String authId)
-            throws SalmonSequenceException {
+    public void createSequence(String driveId, String authId) {
         String xmlContents = getContents();
         HashMap<String, NonceSequence> configs = serializer.deserialize(xmlContents);
         NonceSequence sequence = getSequence(configs, driveId);
@@ -102,7 +101,7 @@ public class SalmonFileSequencer implements INonceSequencer {
      * @throws IOException
      */
     @Override
-    public void initializeSequence(String driveId, String authId, byte[] startNonce, byte[] maxNonce) throws SalmonSequenceException, IOException {
+    public void initializeSequence(String driveId, String authId, byte[] startNonce, byte[] maxNonce) throws IOException {
         String xmlContents = getContents();
         HashMap<String, NonceSequence> configs = serializer.deserialize(xmlContents);
         NonceSequence sequence = getSequence(configs, driveId);
@@ -125,7 +124,7 @@ public class SalmonFileSequencer implements INonceSequencer {
      * @throws SalmonSequenceException
      */
     @Override
-    public void setMaxNonce(String driveId, String authId, byte[] maxNonce) throws SalmonSequenceException {
+    public void setMaxNonce(String driveId, String authId, byte[] maxNonce) {
         String xmlContents = getContents();
         HashMap<String, NonceSequence> configs = serializer.deserialize(xmlContents);
         NonceSequence sequence = getSequence(configs, driveId);
@@ -147,7 +146,7 @@ public class SalmonFileSequencer implements INonceSequencer {
      * @throws SalmonRangeExceededException
      */
     @Override
-    public byte[] nextNonce(String driveId) throws SalmonSequenceException, SalmonRangeExceededException {
+    public byte[] nextNonce(String driveId) {
         String xmlContents = getContents();
         HashMap<String, NonceSequence> configs = serializer.deserialize(xmlContents);
         NonceSequence sequence = getSequence(configs, driveId);
@@ -167,7 +166,7 @@ public class SalmonFileSequencer implements INonceSequencer {
      * @return
      * @throws SalmonSequenceException
      */
-    protected synchronized String getContents() throws SalmonSequenceException {
+    protected synchronized String getContents() {
         BufferedInputStream stream = null;
         ByteArrayOutputStream outputStream = null;
         try {
@@ -208,7 +207,7 @@ public class SalmonFileSequencer implements INonceSequencer {
      * @throws SalmonSequenceException
      */
     @Override
-    public void revokeSequence(String driveId) throws SalmonSequenceException {
+    public void revokeSequence(String driveId) {
         String xmlContents = getContents();
         HashMap<String, NonceSequence> configs = serializer.deserialize(xmlContents);
         NonceSequence sequence = getSequence(configs, driveId);
@@ -228,7 +227,7 @@ public class SalmonFileSequencer implements INonceSequencer {
      * @throws SalmonSequenceException
      */
     @Override
-    public NonceSequence getSequence(String driveId) throws SalmonSequenceException {
+    public NonceSequence getSequence(String driveId) {
         String xmlContents = getContents();
         HashMap<String, NonceSequence> configs = serializer.deserialize(xmlContents);
         NonceSequence sequence = getSequence(configs, driveId);
@@ -249,8 +248,7 @@ public class SalmonFileSequencer implements INonceSequencer {
      * @param sequences The sequences.
      * @throws SalmonSequenceException
      */
-    protected void saveSequenceFile(HashMap<String, NonceSequence> sequences)
-            throws SalmonSequenceException {
+    protected void saveSequenceFile(HashMap<String, NonceSequence> sequences) {
         try {
             String contents = serializer.serialize(sequences);
             saveContents(contents);
@@ -264,7 +262,7 @@ public class SalmonFileSequencer implements INonceSequencer {
      * Save the contets of the file
      * @param contents
      */
-    protected synchronized void saveContents(String contents) throws SalmonSequenceException {
+    protected synchronized void saveContents(String contents) {
         ByteArrayInputStream inputStream = null;
         RandomAccessStream outputStream = null;
         try {
@@ -305,8 +303,7 @@ public class SalmonFileSequencer implements INonceSequencer {
      * @return
      * @throws SalmonSequenceException
      */
-    private static NonceSequence getSequence(HashMap<String, NonceSequence> configs, String driveId)
-            throws SalmonSequenceException {
+    private static NonceSequence getSequence(HashMap<String, NonceSequence> configs, String driveId) {
         NonceSequence sequence = null;
         for (NonceSequence seq : configs.values()) {
             if (driveId.toUpperCase().equals(seq.getId().toUpperCase())) {

@@ -38,7 +38,7 @@ public interface INonceSequenceSerializer {
      * @return The nonce sequences.
      * @throws SalmonSequenceException
      */
-    HashMap<String, NonceSequence> deserialize(String contents) throws SalmonSequenceException;
+    HashMap<String, NonceSequence> deserialize(String contents);
 
     /**
      * Generates the contents from sequences.
@@ -46,5 +46,5 @@ public interface INonceSequenceSerializer {
      * @return The string contents.
      * @throws SalmonSequenceException
      */
-    String serialize(HashMap<String, NonceSequence> sequences) throws SalmonSequenceException;
+    String serialize(HashMap<String, NonceSequence> sequences);
 }

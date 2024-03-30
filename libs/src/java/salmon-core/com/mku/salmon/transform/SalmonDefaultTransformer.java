@@ -53,7 +53,7 @@ public class SalmonDefaultTransformer extends SalmonAES256CTRTransformer {
      * @param nonce The nonce to use.
      * @throws SalmonSecurityException
      */
-    public void init(byte[] key, byte[] nonce) throws SalmonSecurityException {
+    public void init(byte[] key, byte[] nonce) {
         super.init(key, nonce);
         try {
             encSecretKey = new SecretKeySpec(key, "AES");

@@ -83,7 +83,7 @@ public abstract class SalmonAES256CTRTransformer implements ISalmonCTRTransforme
      * Syncs the Counter based on what AES block position the stream is at.
      * The block count is already excluding the header and the hash signatures.
      */
-    public void syncCounter(long position) throws SalmonRangeExceededException {
+    public void syncCounter(long position) {
         long currBlock = position / BLOCK_SIZE;
         resetCounter();
         increaseCounter(currBlock);
@@ -96,7 +96,7 @@ public abstract class SalmonAES256CTRTransformer implements ISalmonCTRTransforme
      *
      * @param value value to increase counter by
      */
-    protected void increaseCounter(long value) throws SalmonRangeExceededException {
+    protected void increaseCounter(long value) {
         if (this.counter == null || this.nonce == null) //TODO: ToSync
             throw new SalmonSecurityException("No counter, run init first");
         if (value < 0)
@@ -120,7 +120,7 @@ public abstract class SalmonAES256CTRTransformer implements ISalmonCTRTransforme
      * @param nonce
      * @throws SalmonSecurityException
      */
-    public void init(byte[] key, byte[] nonce) throws SalmonSecurityException {
+    public void init(byte[] key, byte[] nonce) {
         this.key = key;
         this.nonce = nonce;
     }

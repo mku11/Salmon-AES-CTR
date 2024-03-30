@@ -271,7 +271,7 @@ public abstract class SalmonDrive extends VirtualDrive {
      * @return
      * @throws Exception
      */
-    private byte[] getAuthIdBytes() throws SalmonSequenceException {
+    private byte[] getAuthIdBytes() {
         byte[] driveId = this.getDriveId();
         if (driveId == null)
             throw new Error("Could not get drive id, make sure you init the drive first");
@@ -374,7 +374,7 @@ public abstract class SalmonDrive extends VirtualDrive {
      * @param authId  The authId
      * @throws Exception
      */
-    void createSequence(byte[] driveId, byte[] authId) throws SalmonSequenceException {
+    void createSequence(byte[] driveId, byte[] authId) {
         String drvStr = BitConverter.toHex(driveId);
         String authStr = BitConverter.toHex(authId);
         this.sequencer.createSequence(drvStr, authStr);
@@ -388,7 +388,7 @@ public abstract class SalmonDrive extends VirtualDrive {
      * @param authId  Authorization ID.
      * @throws Exception
      */
-    void initSequence(byte[] driveId, byte[] authId) throws SalmonSequenceException, IOException {
+    void initSequence(byte[] driveId, byte[] authId) throws IOException {
         byte[] startingNonce = SalmonDriveGenerator.getStartingNonce();
         byte[] maxNonce = SalmonDriveGenerator.getMaxNonce();
         String drvStr = BitConverter.toHex(driveId);
@@ -459,7 +459,7 @@ public abstract class SalmonDrive extends VirtualDrive {
      * @throws SalmonSequenceException
      * @throws SalmonAuthException
      */
-    public String getAuthId() throws SalmonSequenceException, SalmonAuthException {
+    public String getAuthId() {
         return BitConverter.toHex(this.getAuthIdBytes());
     }
 
@@ -638,7 +638,7 @@ public abstract class SalmonDrive extends VirtualDrive {
         byte[] hash = SalmonIntegrity.calculateHash(hashProvider, data, 0, data.length, hashKey, null);
         for (int i = 0; i < hashKey.length; i++)
             if (hashSignature[i] != hash[i])
-                throw new SalmonAuthException("Could not authorize");
+                throw new SalmonAuthException("Wrong Password");
     }
 
     /**

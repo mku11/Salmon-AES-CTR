@@ -70,7 +70,7 @@ public class WinFileSequencer extends SalmonFileSequencer
      * @throws SalmonSequenceException
      * @throws IOException
      */
-    public WinFileSequencer(IRealFile sequenceFile, INonceSequenceSerializer serializer, String regCheckSumKey) throws SalmonSequenceException, IOException {
+    public WinFileSequencer(IRealFile sequenceFile, INonceSequenceSerializer serializer, String regCheckSumKey) throws IOException {
         super(sequenceFile, serializer);
 		if(regCheckSumKey == null)
 			throw new SalmonSequenceException("Registry checksum key cannot be null");
@@ -83,7 +83,7 @@ public class WinFileSequencer extends SalmonFileSequencer
      * @throws SalmonSequenceException
      */
     @Override
-    protected String getContents() throws SalmonSequenceException {
+    protected String getContents() {
         String contents = super.getContents();
 		contents = contents.trim();
         String hash = getChecksum(contents);
@@ -109,7 +109,7 @@ public class WinFileSequencer extends SalmonFileSequencer
      * @throws SalmonSequenceException
      */
     @Override
-    protected void saveContents(String contents) throws SalmonSequenceException {
+    protected void saveContents(String contents) {
 		contents = contents.trim();
         super.saveContents(contents);
         String hash = getChecksum(contents);
@@ -126,7 +126,7 @@ public class WinFileSequencer extends SalmonFileSequencer
      * @return
      * @throws SalmonSequenceException
      */
-    private String getChecksum(String contents) throws SalmonSequenceException {
+    private String getChecksum(String contents) {
         try {
             MessageDigest sha256 = MessageDigest.getInstance("SHA-256");
             byte[] inputBytes = contents.getBytes();
@@ -148,7 +148,7 @@ public class WinFileSequencer extends SalmonFileSequencer
      *Reset the sequences. The device will be de-authorized for all drives.
      * @param clearChecksumOnly True to only clear the registry checksum, use only if you know what you're doing. Default value is false)
      */
-    public void reset(boolean clearChecksumOnly) throws SalmonSequenceException {
+    public void reset(boolean clearChecksumOnly) {
         if (!clearChecksumOnly)
         {
             if (getSequenceFile().exists())

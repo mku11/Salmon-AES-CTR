@@ -114,7 +114,7 @@ public class SalmonIntegrity {
      */
     //TODO: we should avoid the header data for performance?
     public static byte[] calculateHash(IHashProvider provider, byte[] buffer, int offset, int count,
-                                       byte[] key, byte[] includeData) throws SalmonIntegrityException {
+                                       byte[] key, byte[] includeData) {
 
         byte[] finalBuffer = buffer;
         int finalOffset = offset;
@@ -198,7 +198,7 @@ public class SalmonIntegrity {
      * @return The hash signatures.
      * @throws SalmonIntegrityException
      */
-    public byte[][] generateHashes(byte[] buffer, byte[] includeHeaderData) throws SalmonIntegrityException {
+    public byte[][] generateHashes(byte[] buffer, byte[] includeHeaderData) {
         if (!integrity)
             return null;
         List<byte[]> hashes = new LinkedList<>();
@@ -235,7 +235,7 @@ public class SalmonIntegrity {
      * @param includeHeaderData
      * @throws SalmonIntegrityException
      */
-    public void verifyHashes(byte[][] hashes, byte[] buffer, byte[] includeHeaderData) throws SalmonIntegrityException {
+    public void verifyHashes(byte[][] hashes, byte[] buffer, byte[] includeHeaderData) {
         int chunk = 0;
         for (int i = 0; i < buffer.length; i += chunkSize) {
             int nChunkSize = Math.min(chunkSize, buffer.length - i);

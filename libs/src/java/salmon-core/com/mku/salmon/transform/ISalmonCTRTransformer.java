@@ -39,7 +39,7 @@ public interface ISalmonCTRTransformer {
      * @param nonce The nonce to use.
      * @throws SalmonSecurityException
      */
-    void init(byte[] key, byte[] nonce) throws SalmonSecurityException;
+    void init(byte[] key, byte[] nonce);
 
     /**
      * Encrypt the data.
@@ -107,6 +107,6 @@ public interface ISalmonCTRTransformer {
      * @param position
      * @throws SalmonRangeExceededException
      */
-    void syncCounter(long position) throws SalmonRangeExceededException;
+    void syncCounter(long position);
 }
 

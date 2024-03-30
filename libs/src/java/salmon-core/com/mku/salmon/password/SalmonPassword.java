@@ -107,7 +107,7 @@ public class SalmonPassword {
      * @return The derived key.
      * @throws SalmonSecurityException
      */
-    public static byte[] getKeyFromPassword(String password, byte[] salt, int iterations, int outputBytes) throws SalmonSecurityException {
+    public static byte[] getKeyFromPassword(String password, byte[] salt, int iterations, int outputBytes) {
         if (pbkdfAlgo == PbkdfAlgo.SHA1 && !ENABLE_SHA1)
             throw new RuntimeException("Cannot use SHA1, SHA1 is not secure anymore use SHA256!");
         return provider.getKey(password, salt, iterations, outputBytes, pbkdfAlgo);

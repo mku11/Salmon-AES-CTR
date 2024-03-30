@@ -37,7 +37,7 @@ public class SalmonTransformerFactory {
      * @return The transformer.
      * @throws SalmonSecurityException
      */
-    public static ISalmonCTRTransformer create(ProviderType type) throws SalmonSecurityException {
+    public static ISalmonCTRTransformer create(ProviderType type) {
         switch(type) {
             case Default:
                 return new SalmonDefaultTransformer();

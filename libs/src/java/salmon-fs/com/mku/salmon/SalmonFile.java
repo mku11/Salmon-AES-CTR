@@ -302,8 +302,7 @@ public class SalmonFile implements IVirtualFile {
      * @param requestChunkSize 0 use default file chunk.
      *                         A positive number to specify integrity chunks.
      */
-    public void setApplyIntegrity(boolean integrity, byte[] hashKey, Integer requestChunkSize)
-            throws SalmonIntegrityException, IOException {
+    public void setApplyIntegrity(boolean integrity, byte[] hashKey, Integer requestChunkSize) throws IOException {
         Integer fileChunkSize = getFileChunkSize();
 
         if (fileChunkSize != null)
@@ -364,7 +363,7 @@ public class SalmonFile implements IVirtualFile {
      * @param nonce Nonce to be used.
      * @throws SalmonSecurityException
      */
-    public void setRequestedNonce(byte[] nonce) throws SalmonSecurityException {
+    public void setRequestedNonce(byte[] nonce) {
         if (drive != null)
             throw new SalmonSecurityException("Nonce is already set by the drive");
         this.requestedNonce = nonce;
@@ -548,7 +547,7 @@ public class SalmonFile implements IVirtualFile {
      *
      * @param realPath The path of the real file
      */
-    private String getRelativePath(String realPath) throws SalmonAuthException {
+    private String getRelativePath(String realPath) {
         SalmonFile virtualRoot = drive.getRoot();
         String virtualRootPath = virtualRoot.getRealFile().getAbsolutePath();
         if (realPath.startsWith(virtualRootPath)) {
@@ -925,9 +924,9 @@ public class SalmonFile implements IVirtualFile {
         return this.getBlockSize();
     }
 
-    public static Function<SalmonFile, String> autoRename = (SalmonFile file) -> {
+    public static Function<IVirtualFile, String> autoRename = (IVirtualFile file) -> {
         try {
-            return autoRename(file);
+            return autoRename((SalmonFile) file);
         } catch (Exception ex) {
             try {
                 return file.getBaseName();
@@ -942,8 +941,7 @@ public class SalmonFile implements IVirtualFile {
     /// </summary>
     /// <param name="file"></param>
     /// <returns></returns>
-    public static String autoRename(SalmonFile file)
-            throws Exception {
+    public static String autoRename(SalmonFile file) throws Exception {
         String filename = IRealFile.autoRename(file.getBaseName());
         byte[] nonce = file.getDrive().getNextNonce();
         byte[] key = file.getDrive().getKey().getDriveKey();

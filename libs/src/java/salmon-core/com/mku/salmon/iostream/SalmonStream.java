@@ -217,7 +217,7 @@ public class SalmonStream extends RandomAccessStream {
      * For each data block we increase the Counter and apply the EAS encryption on the Counter.
      * The encrypted Counter then will be xor-ed with the actual data block.
      */
-    private void initTransformer(byte[] key, byte[] nonce) throws SalmonSecurityException {
+    private void initTransformer(byte[] key, byte[] nonce) {
         if (key == null)
             throw new SalmonSecurityException("Key is missing");
         if (nonce == null)

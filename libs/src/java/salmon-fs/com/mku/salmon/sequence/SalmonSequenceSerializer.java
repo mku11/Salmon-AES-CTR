@@ -57,8 +57,7 @@ public class SalmonSequenceSerializer implements INonceSequenceSerializer {
      * @return
      * @throws SalmonSequenceException
      */
-    public String serialize(HashMap<String, NonceSequence> driveAuthEntries)
-            throws SalmonSequenceException {
+    public String serialize(HashMap<String, NonceSequence> driveAuthEntries) {
         ByteArrayOutputStream stream = new ByteArrayOutputStream();
         XMLStreamWriter out = null;
         try {
@@ -72,8 +71,8 @@ public class SalmonSequenceSerializer implements INonceSequenceSerializer {
             out.writeCharacters(System.getProperty("line.separator"));
             for (Map.Entry<String, NonceSequence> entry : driveAuthEntries.entrySet()) {
                 out.writeStartElement("drive");
-                out.writeAttribute("driveId", entry.getValue().getId());
-                out.writeAttribute("authId", entry.getValue().getAuthId());
+                out.writeAttribute("driveID", entry.getValue().getId());
+                out.writeAttribute("authID", entry.getValue().getAuthId());
                 out.writeAttribute("status", entry.getValue().getStatus().toString());
                 if (entry.getValue().getNextNonce() != null)
                     out.writeAttribute("nextNonce", Base64.getEncoder().encodeToString(entry.getValue().getNextNonce()));
@@ -112,7 +111,7 @@ public class SalmonSequenceSerializer implements INonceSequenceSerializer {
      * @return
      * @throws SalmonSequenceException
      */
-    public HashMap<String, NonceSequence> deserialize(String contents) throws SalmonSequenceException {
+    public HashMap<String, NonceSequence> deserialize(String contents) {
         HashMap<String, NonceSequence> configs = new HashMap<>();
         ByteArrayInputStream stream = new ByteArrayInputStream(contents.getBytes(StandardCharsets.UTF_8));
         try {
@@ -126,8 +125,8 @@ public class SalmonSequenceSerializer implements INonceSequenceSerializer {
                     Node drive = drives.getChildNodes().item(i);
                     if (!drive.getNodeName().equals("drive"))
                         continue;
-                    String driveId = drive.getAttributes().getNamedItem("driveId").getNodeValue();
-                    String authId = drive.getAttributes().getNamedItem("authId").getNodeValue();
+                    String driveId = drive.getAttributes().getNamedItem("driveID").getNodeValue();
+                    String authId = drive.getAttributes().getNamedItem("authID").getNodeValue();
                     String status = drive.getAttributes().getNamedItem("status").getNodeValue();
                     byte[] nextNonce = null;
                     byte[] maxNonce = null;

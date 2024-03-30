@@ -115,8 +115,7 @@ public class WinClientSequencer implements INonceSequencer, Closeable {
         return Advapi32.INSTANCE.EqualSid(pSid, ppSid);
     }
 
-    public void createSequence(String driveId, String authId)
-            throws SalmonSequenceException {
+    public void createSequence(String driveId, String authId) {
         Response res;
         try {
             String request = generateRequest(driveId, authId, RequestType.CreateSequence, null, null);
@@ -130,7 +129,7 @@ public class WinClientSequencer implements INonceSequencer, Closeable {
             throw new SalmonSequenceException("Could not create sequence: " + res.error);
     }
 
-    public NonceSequence getSequence(String driveId) throws SalmonSequenceException {
+    public NonceSequence getSequence(String driveId) {
         Response res;
         try {
             String request = generateRequest(driveId, null, RequestType.GetSequence, null, null);
@@ -148,8 +147,7 @@ public class WinClientSequencer implements INonceSequencer, Closeable {
                 res.nextNonce, res.maxNonce, res.seqStatus);
     }
 
-    public void initializeSequence(String driveId, String authId, byte[] startNonce, byte[] maxNonce)
-            throws SalmonSequenceException {
+    public void initializeSequence(String driveId, String authId, byte[] startNonce, byte[] maxNonce) {
         Response res;
         try {
             String request = generateRequest(driveId, authId, RequestType.InitSequence,
@@ -164,7 +162,7 @@ public class WinClientSequencer implements INonceSequencer, Closeable {
             throw new SalmonSequenceException("Could not init sequence: " + res.error);
     }
 
-    public byte[] nextNonce(String driveId) throws SalmonSequenceException {
+    public byte[] nextNonce(String driveId) {
         Response res;
         try {
             String request = generateRequest(driveId, null, RequestType.NextNonce, null, null);
@@ -179,7 +177,7 @@ public class WinClientSequencer implements INonceSequencer, Closeable {
         return res.nextNonce;
     }
 
-    public void revokeSequence(String driveId) throws SalmonSequenceException {
+    public void revokeSequence(String driveId) {
         Response res;
         try {
             String request = generateRequest(driveId, null, RequestType.RevokeSequence, null, null);
@@ -193,8 +191,7 @@ public class WinClientSequencer implements INonceSequencer, Closeable {
             throw new SalmonSequenceException("Could not revoke Sequence: " + res.error);
     }
 
-    public void setMaxNonce(String driveId, String authId, byte[] maxNonce)
-            throws SalmonSequenceException, IOException {
+    public void setMaxNonce(String driveId, String authId, byte[] maxNonce) throws IOException {
         String request = generateRequest(driveId, authId, RequestType.SetMaxNonce,
                 null, maxNonce);
         write(request);

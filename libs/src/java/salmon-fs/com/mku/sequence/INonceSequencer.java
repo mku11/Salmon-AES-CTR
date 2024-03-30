@@ -39,7 +39,7 @@ public interface INonceSequencer {
      * @param authId The authorization ID of the drive.
      * @throws SalmonSequenceException
      */
-    void createSequence(String driveId, String authId) throws SalmonSequenceException;
+    void createSequence(String driveId, String authId);
 
     /**
      * Initialize the sequence.
@@ -50,7 +50,7 @@ public interface INonceSequencer {
      * @throws SalmonSequenceException
      * @throws IOException
      */
-    void initializeSequence(String driveId, String authId, byte[] startNonce, byte[] maxNonce) throws SalmonSequenceException, IOException;
+    void initializeSequence(String driveId, String authId, byte[] startNonce, byte[] maxNonce) throws IOException;
 
     /**
      * Set the max nonce
@@ -61,7 +61,7 @@ public interface INonceSequencer {
      * @throws SalmonSequenceException
      * @throws IOException
      */
-    void setMaxNonce(String driveId, String authId, byte[] maxNonce) throws SalmonSequenceException, IOException;
+    void setMaxNonce(String driveId, String authId, byte[] maxNonce) throws IOException;
 
     /**
      * Get the next nonce.
@@ -71,14 +71,14 @@ public interface INonceSequencer {
      * @throws SalmonSequenceException
      * @throws SalmonRangeExceededException
      */
-    byte[] nextNonce(String driveId) throws SalmonSequenceException, SalmonRangeExceededException;
+    byte[] nextNonce(String driveId);
 
     /**
      * Revoke the sequencer. This terminates the sequencer and de-authorizes the device
      * @param driveId
      * @throws SalmonSequenceException
      */
-    void revokeSequence(String driveId) throws SalmonSequenceException;
+    void revokeSequence(String driveId);
 
     /**
      * Get the sequence used for this drive.
@@ -86,7 +86,7 @@ public interface INonceSequencer {
      * @return The current sequence.
      * @throws SalmonSequenceException
      */
-    NonceSequence getSequence(String driveId) throws SalmonSequenceException;
+    NonceSequence getSequence(String driveId);
 
     /**
      * Close the sequencer and any associated resources.
