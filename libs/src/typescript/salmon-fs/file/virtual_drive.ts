@@ -38,6 +38,8 @@ export abstract class VirtualDrive {
      * Method is called when unlocking the drive has failed
      */
     public abstract onUnlockError(): void;
+	
+	public abstract getPrivateDir(): IRealFile;
 
     public abstract getPrivateDir(): string;
 }
