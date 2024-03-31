@@ -71,7 +71,7 @@ public class JavaDrive extends SalmonDrive {
      * @return
      * @throws Exception
      */
-    public String getPrivateDir() throws Exception {
+    public IRealFile getPrivateDir() throws Exception {
         String fileFolder = null;
         String os = System.getProperty("os.name").toUpperCase();
         if (os.toUpperCase().contains("WIN")) {
@@ -83,7 +83,7 @@ public class JavaDrive extends SalmonDrive {
         }
         if (fileFolder == null)
             throw new Exception("Operating System not supported");
-        return fileFolder;
+        return new JavaFile(fileFolder);
     }
 
     /**

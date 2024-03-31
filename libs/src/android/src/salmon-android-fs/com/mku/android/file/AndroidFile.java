@@ -31,14 +31,16 @@ import android.provider.DocumentsContract;
 
 import androidx.documentfile.provider.DocumentFile;
 
+import com.mku.android.iostream.AndroidFileStream;
+import com.mku.android.salmon.drive.AndroidDrive;
 import com.mku.file.IRealFile;
-import com.mku.io.RandomAccessStream;
+import com.mku.func.BiConsumer;
+import com.mku.iostream.RandomAccessStream;
 
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Random;
 
 /**
  * Implementation of the IRealFile for Android using Storage Access Framework that supports read/write to external SD cards.
@@ -170,6 +172,8 @@ public class AndroidFile implements IRealFile {
      */
     public IRealFile getParent() {
         DocumentFile parentDocumentFile = documentFile.getParentFile();
+		if(parentDocumentFile == null)
+			return null;
         AndroidFile parent = new AndroidFile(parentDocumentFile, AndroidDrive.getContext());
         return parent;
     }
@@ -294,7 +298,7 @@ public class AndroidFile implements IRealFile {
      * @return
      * @throws IOException
      */
-    public IRealFile move(IRealFile newDir, String newName, RandomAccessStream.OnProgressListener progressListener)
+    public IRealFile move(IRealFile newDir, String newName, BiConsumer<Long, Long> progressListener)
             throws IOException {
         // target directory is the same
         if(getParent().getPath().equals(newDir.getPath()))
@@ -306,7 +310,7 @@ public class AndroidFile implements IRealFile {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N)
         {
             if (progressListener != null)
-                progressListener.onProgressChanged(0, 1);
+                progressListener.accept(0L, 1L);
             if (newName != null)
                 renameTo(System.currentTimeMillis() + ".dat");
 
@@ -314,7 +318,7 @@ public class AndroidFile implements IRealFile {
             Uri uri = DocumentsContract.moveDocument(AndroidDrive.getContext().getContentResolver(),
                     documentFile.getUri(), documentFile.getParentFile().getUri(), androidDir.documentFile.getUri());
             if (progressListener != null)
-                progressListener.onProgressChanged(1, 1);
+                progressListener.accept(1L, 1L);
             IRealFile file = androidDir.getChild(getBaseName());
             if (file != null && newName != null)
                 file.renameTo(newName);
@@ -362,8 +366,7 @@ public class AndroidFile implements IRealFile {
      * @return
      * @throws IOException
      */
-    public IRealFile copy(IRealFile newDir, String newName,
-                          RandomAccessStream.OnProgressListener progressListener)
+    public IRealFile copy(IRealFile newDir, String newName, BiConsumer<Long,Long> progressListener)
             throws IOException {
         return copy(newDir, newName, false, progressListener);
     }
@@ -378,7 +381,7 @@ public class AndroidFile implements IRealFile {
      * @throws IOException
      */
     private IRealFile copy(IRealFile newDir, String newName,
-                           boolean delete, RandomAccessStream.OnProgressListener progressListener)
+                           boolean delete, BiConsumer<Long,Long> progressListener)
             throws IOException {
         if (newDir == null || !newDir.exists())
             throw new IOException("Target directory does not exists");

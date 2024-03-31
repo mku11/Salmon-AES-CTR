@@ -40,7 +40,7 @@ public abstract class VirtualDrive {
      */
     public abstract void onUnlockError();
 
-    public abstract String getPrivateDir() throws Exception;
+    public abstract IRealFile getPrivateDir() throws Exception;
 
     public abstract IVirtualFile getRoot();
 

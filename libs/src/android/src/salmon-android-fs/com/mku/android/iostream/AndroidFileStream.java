@@ -1,4 +1,4 @@
-package com.mku.android.file;
+package com.mku.android.iostream;
 /*
 MIT License
 
@@ -25,7 +25,8 @@ SOFTWARE.
 
 import android.os.ParcelFileDescriptor;
 
-import com.mku.io.RandomAccessStream;
+import com.mku.android.file.AndroidFile;
+import com.mku.iostream.RandomAccessStream;
 
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
@@ -81,7 +82,7 @@ public class AndroidFileStream extends RandomAccessStream {
      * @return
      * @throws IOException
      */
-    public long position() throws IOException {
+    public long getPosition() throws IOException {
         return fileChannel.position();
     }
 
@@ -90,7 +91,7 @@ public class AndroidFileStream extends RandomAccessStream {
      * @param value The new position.
      * @throws IOException
      */
-    public void position(long value) throws IOException {
+    public void setPosition(long value) throws IOException {
         fileChannel.position(value);
     }
 

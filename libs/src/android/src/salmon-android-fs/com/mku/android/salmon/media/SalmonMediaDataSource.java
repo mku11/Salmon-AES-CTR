@@ -1,4 +1,4 @@
-package com.mku.android.salmonfs.media;
+package com.mku.android.salmon.media;
 /*
 MIT License
 
@@ -28,18 +28,15 @@ import android.media.MediaDataSource;
 import android.util.Log;
 import android.widget.Toast;
 
-import com.mku.android.file.AndroidDrive;
-import com.mku.io.InputStreamWrapper;
-import com.mku.io.RandomAccessStream;
+import com.mku.android.salmon.drive.AndroidDrive;
+import com.mku.iostream.InputStreamWrapper;
+import com.mku.salmon.SalmonFile;
 import com.mku.salmon.integrity.SalmonIntegrityException;
-import com.mku.salmon.io.SalmonStream;
-import com.mku.salmonfs.SalmonFile;
-import com.mku.salmonfs.SalmonFileInputStream;
+import com.mku.salmon.iostream.SalmonFileInputStream;
+import com.mku.salmon.iostream.SalmonStream;
 
-import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
-import java.util.Arrays;
 
 /**
  * This class provides a parallel processing seekable source for encrypted media content

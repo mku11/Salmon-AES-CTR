@@ -30,7 +30,7 @@ import androidx.annotation.Nullable;
 import androidx.annotation.RequiresApi;
 
 import com.mku.func.Consumer;
-import com.mku.salmonfs.SalmonFile;
+import com.mku.salmon.SalmonFile;
 
 import java.io.File;
 import java.util.HashMap;

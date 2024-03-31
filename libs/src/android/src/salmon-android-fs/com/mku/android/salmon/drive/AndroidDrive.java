@@ -1,4 +1,4 @@
-package com.mku.android.file;
+package com.mku.android.salmon.drive;
 /*
 MIT License
 
@@ -28,11 +28,15 @@ import android.net.Uri;
 
 import androidx.documentfile.provider.DocumentFile;
 
-import com.mku.salmon.integrity.SalmonIntegrityException;
+import com.mku.android.file.AndroidFile;
+import com.mku.android.file.AndroidSharedFileObserver;
+import com.mku.file.JavaFile;
+import com.mku.salmon.SalmonDrive;
+import com.mku.salmon.SalmonFile;
 import com.mku.file.IRealFile;
-import com.mku.salmonfs.SalmonDrive;
-import com.mku.salmonfs.SalmonFile;
-import com.mku.utils.SalmonFileExporter;
+import com.mku.salmon.utils.SalmonFileExporter;
+
+import java.io.File;
 
 /**
  * Implementation of a virtual drive for android.
@@ -61,17 +65,14 @@ public class AndroidDrive extends SalmonDrive {
     }
 
     /**
-     * Instantiate a virtual Drive for android under a real directory path
-     *
-     * @param realRoot The path of the real directory
-     * @param createIfNotExists Create the drive if it doesn't exist.
+     * Private constructor, use open() and create() instead.
      */
-    public AndroidDrive(String realRoot, boolean createIfNotExists) {
-        super(realRoot, createIfNotExists);
+    private AndroidDrive() {
+        super();
     }
 
-    public java.io.File copyToSharedFolder(SalmonFile salmonFile) throws Exception {
-        java.io.File privateDir = getPrivateDir();
+    public File copyToSharedFolder(SalmonFile salmonFile) throws Exception {
+        File privateDir = new File(getPrivateDir().getAbsolutePath());
         java.io.File cacheFile = new java.io.File(privateDir, salmonFile.getBaseName());
         AndroidSharedFileObserver.removeFileObserver(cacheFile);
         cacheFile.delete();
@@ -87,25 +88,25 @@ public class AndroidDrive extends SalmonDrive {
      * other apps on the android device.
      * @return
      */
-    protected java.io.File getPrivateDir() {
+    public IRealFile getPrivateDir() {
         java.io.File sharedDir = new java.io.File(context.getCacheDir(), getShareDirectoryName());
         if (!sharedDir.exists())
             sharedDir.mkdir();
-        return sharedDir;
+        return new JavaFile(sharedDir.getAbsolutePath());
     }
 
     /**
      * Get the real file hosted on the android device.
-     * @param filepath
+     * @param uri
      * @param isDirectory True if filepath corresponds to a directory.
      * @return
      */
-    public IRealFile getRealFile(String filepath, boolean isDirectory) {
+    public IRealFile getRealFile(String uri, boolean isDirectory) {
         DocumentFile docFile;
         if (isDirectory)
-            docFile = DocumentFile.fromTreeUri(context, Uri.parse(filepath));
+            docFile = DocumentFile.fromTreeUri(context, Uri.parse(uri));
         else
-            docFile = DocumentFile.fromSingleUri(context, Uri.parse(filepath));
+            docFile = DocumentFile.fromSingleUri(context, Uri.parse(uri));
         AndroidFile file = new AndroidFile(docFile, context);
         return file;
     }
@@ -123,7 +124,7 @@ public class AndroidDrive extends SalmonDrive {
      * Fired when unlock fails.
      */
     @Override
-    protected void onUnlockError() {
+    public void onUnlockError() {
         AndroidSharedFileObserver.clearFileObservers();
         clearCache(context.getCacheDir());
     }
