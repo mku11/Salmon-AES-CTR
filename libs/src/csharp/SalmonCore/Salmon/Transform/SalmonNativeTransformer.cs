@@ -22,7 +22,8 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 */
 
-using Mku.Salmon.IO;
+using Mku.Bridge;
+using Mku.Salmon.Bridge;
 
 namespace Mku.Salmon.Transform;
 

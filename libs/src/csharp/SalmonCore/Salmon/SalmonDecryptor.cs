@@ -23,7 +23,7 @@ SOFTWARE.
 */
 
 using Mku.Salmon.Integrity;
-using Mku.Salmon.IO;
+using Mku.Salmon.Streams;
 using Mku.Salmon.Transform;
 using System;
 using System.IO;
@@ -122,7 +122,7 @@ public class SalmonDecryptor
         if (nonce == null)
             throw new SalmonSecurityException("Nonce is missing");
 
-        int realSize = (int)SalmonAES256CTRTransformer.GetActualSize(data, key, nonce, SalmonStream.EncryptionMode.Decrypt,
+        int realSize = (int)SalmonAES256CTRTransformer.GetActualSize(data, key, nonce, EncryptionMode.Decrypt,
                 headerData, integrity, chunkSize, hashKey);
         byte[] outData = new byte[realSize];
 
@@ -260,12 +260,14 @@ public class SalmonDecryptor
         {
             outputStream = new MemoryStream(outData);
             outputStream.Position = start;
-            stream = new SalmonStream(key, nonce, SalmonStream.EncryptionMode.Decrypt, inputStream,
+            stream = new SalmonStream(key, nonce, EncryptionMode.Decrypt, inputStream,
                     headerData, integrity, chunkSize, hashKey);
             stream.Position = start;
             long totalChunkBytesRead = 0;
             // align to the chunksize if available
             int buffSize = Math.Max(bufferSize, stream.ChunkSize);
+            // set the same buffer size for the internal stream
+            stream.BufferSize = buffSize;
             byte[] buff = new byte[buffSize];
             int bytesRead;
             while ((bytesRead = stream.Read(buff, 0, Math.Min(buff.Length, (int)(count - totalChunkBytesRead)))) > 0
@@ -290,5 +292,13 @@ public class SalmonDecryptor
             if (outputStream != null)
                 outputStream.Close();
         }
+    }
+
+    /// <summary>
+    /// Close all associated resources
+    /// </summary>
+    public void Close()
+    {
+
     }
 }

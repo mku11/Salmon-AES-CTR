@@ -23,7 +23,7 @@ SOFTWARE.
 */
 
 using Mku.Salmon.Integrity;
-using Mku.Salmon.IO;
+using Mku.Salmon.Streams;
 using Mku.Salmon.Transform;
 using System;
 using System.IO;
@@ -127,7 +127,7 @@ public class SalmonEncryptor
             headerData = outputStream.ToArray();
         }
 
-        int realSize = (int)SalmonAES256CTRTransformer.GetActualSize(data, key, nonce, SalmonStream.EncryptionMode.Encrypt,
+        int realSize = (int)SalmonAES256CTRTransformer.GetActualSize(data, key, nonce, EncryptionMode.Encrypt,
                 headerData, integrity, chunkSize, hashKey);
         byte[] outData = new byte[realSize];
         outputStream.Position = 0;
@@ -265,13 +265,15 @@ public class SalmonEncryptor
         try
         {
             inputStream.Position = start;
-            stream = new SalmonStream(key, nonce, SalmonStream.EncryptionMode.Encrypt, outputStream, headerData,
+            stream = new SalmonStream(key, nonce, EncryptionMode.Encrypt, outputStream, headerData,
                     integrity, chunkSize, hashKey);
             stream.AllowRangeWrite = true;
             stream.Position = start;
             long totalChunkBytesRead = 0;
             // align to the chunk size if available
             int buffSize = Math.Max(bufferSize, stream.ChunkSize);
+            // set the same buffer size for the internal stream
+            stream.BufferSize = buffSize;
             byte[] buff = new byte[buffSize];
             int bytesRead;
             while ((bytesRead = inputStream.Read(buff, 0, Math.Min(buff.Length, (int)(count - totalChunkBytesRead)))) > 0
@@ -295,5 +297,13 @@ public class SalmonEncryptor
             if (inputStream != null)
                 inputStream.Close();
         }
+    }
+
+    /// <summary>
+    /// Close all associated resources
+    /// </summary>
+    public void Close()
+    {
+
     }
 }

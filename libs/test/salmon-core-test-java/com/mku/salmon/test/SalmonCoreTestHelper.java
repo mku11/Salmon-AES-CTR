@@ -60,10 +60,10 @@ import static org.junit.jupiter.api.Assertions.assertArrayEquals;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 public class SalmonCoreTestHelper {
-    public static final int TEST_ENC_BUFFER_SIZE = 512 * 1024;
-    public static final int TEST_ENC_THREADS = 2;
-    public static final int TEST_DEC_BUFFER_SIZE = 512 * 1024;
-    public static final int TEST_DEC_THREADS = 2;
+    public static int TEST_ENC_BUFFER_SIZE = 512 * 1024;
+    public static int TEST_ENC_THREADS = 2;
+    public static int TEST_DEC_BUFFER_SIZE = 512 * 1024;
+    public static int TEST_DEC_THREADS = 2;
 
     public static final String TEST_PASSWORD = "test123";
     public static final String TEST_FALSE_PASSWORD = "falsepass";
@@ -493,19 +493,15 @@ public class SalmonCoreTestHelper {
     }
 
     public static void encryptAndDecryptByteArray(int size, boolean enableLog) throws Exception {
-        encryptAndDecryptByteArray(size, 1, enableLog);
-    }
-
-    public static void encryptAndDecryptByteArray(int size, int threads, boolean enableLog) throws Exception {
         byte[] data = SalmonCoreTestHelper.getRandArray(size);
-        encryptAndDecryptByteArray(data, threads, enableLog);
+        encryptAndDecryptByteArray(data, enableLog);
     }
 
-    public static void encryptAndDecryptByteArray(byte[] data, int threads, boolean enableLog) throws Exception {
+    public static void encryptAndDecryptByteArray(byte[] data, boolean enableLog) throws Exception {
         long t1 = System.currentTimeMillis();
-        byte[] encData = new SalmonEncryptor(threads).encrypt(data, SalmonCoreTestHelper.TEST_KEY_BYTES, SalmonCoreTestHelper.TEST_NONCE_BYTES, false);
+        byte[] encData = encryptor.encrypt(data, SalmonCoreTestHelper.TEST_KEY_BYTES, SalmonCoreTestHelper.TEST_NONCE_BYTES, false);
         long t2 = System.currentTimeMillis();
-        byte[] decData = new SalmonDecryptor(threads).decrypt(encData, SalmonCoreTestHelper.TEST_KEY_BYTES, SalmonCoreTestHelper.TEST_NONCE_BYTES, false);
+        byte[] decData = decryptor.decrypt(encData, SalmonCoreTestHelper.TEST_KEY_BYTES, SalmonCoreTestHelper.TEST_NONCE_BYTES, false);
         long t3 = System.currentTimeMillis();
 
         assertArrayEquals(data, decData);

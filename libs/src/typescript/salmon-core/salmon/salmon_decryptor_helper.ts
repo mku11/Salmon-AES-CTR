@@ -61,6 +61,8 @@ export async function decryptData(data: Uint8Array, start: number, count: number
         let totalChunkBytesRead: number = 0;
         // align to the chunksize if available
         let buffSize: number = Math.max(bufferSize, stream.getChunkSize());
+		// set the same buffer size for the internal stream
+		stream.setBufferSize(buffSize);
         let buff: Uint8Array = new Uint8Array(buffSize);
         let bytesRead: number;
         while ((bytesRead = await stream.read(buff, 0, Math.min(buff.length, count - totalChunkBytesRead))) > 0

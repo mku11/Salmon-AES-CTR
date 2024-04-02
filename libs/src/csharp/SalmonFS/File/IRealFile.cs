@@ -23,7 +23,9 @@ SOFTWARE.
 */
 
 using Mku.Utils;
-using static Mku.IO.RandomAccessStreamExtensions;
+using System;
+using System.IO;
+using static Mku.Streams.RandomAccessStreamExtensions;
 
 namespace Mku.File;
 
@@ -154,7 +156,7 @@ public interface IRealFile
     ///  <param name="progressListener">Observer to notify of the move progress.</param>
     ///  <returns>The file after the move. Use this instance for any subsequent file operations.</returns>
     ///  <exception cref="IOException"></exception>
-    IRealFile Move(IRealFile newDir, string newName = null, OnProgressListener progressListener = null);
+    IRealFile Move(IRealFile newDir, string newName = null, Action<long, long> progressListener = null);
 
     /// <summary>
     ///  Copy this file or directory recursively to another directory.
@@ -164,7 +166,7 @@ public interface IRealFile
     ///  <param name="progressListener">Observer to notify of the copy progress.</param>
     ///  <returns>The file after the copy. Use this instance for any subsequent file operations.</returns>
     ///  <exception cref="IOException"></exception>
-    IRealFile Copy(IRealFile newDir, string newName = null, OnProgressListener progressListener = null);
+    IRealFile Copy(IRealFile newDir, string newName = null, Action<long,long> progressListener = null);
 
     /// <summary>
     ///  Get the file/directory matching the name provided under this directory.
@@ -187,7 +189,7 @@ public interface IRealFile
     /// <param name="delete">True to delete the source file on success</param>
     /// <param name="progressListener"></param>
     /// <returns>True if success</returns>
-    public static bool CopyFileContents(IRealFile src, IRealFile dest, bool delete, OnProgressListener progressListener)
+    public static bool CopyFileContents(IRealFile src, IRealFile dest, bool delete, Action<long,long> progressListener)
     {
         Stream source = src.GetInputStream();
         Stream target = dest.GetOutputStream();
@@ -393,7 +395,7 @@ public interface IRealFile
     /// <returns></returns>
     public static string AutoRename(string filename)
     {
-        string ext = SalmonFileUtils.GetExtensionFromFileName(filename);
+        string ext = FileUtils.GetExtensionFromFileName(filename);
         string filenameNoExt;
         if (ext.Length > 0)
             filenameNoExt = filename.Substring(0, filename.Length - ext.Length - 1);

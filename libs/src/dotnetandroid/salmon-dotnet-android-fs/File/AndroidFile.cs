@@ -29,7 +29,10 @@ using global::Android.Content;
 using global::Android.OS;
 using global::Android.Provider;
 using Mku.File;
-using static Mku.IO.RandomAccessStreamExtensions;
+using System.IO;
+using System;
+using System.Collections.Generic;
+using Mku.Android.Salmon.Drive;
 
 namespace Mku.Android.File;
 
@@ -44,7 +47,7 @@ public class AndroidFile : IRealFile
     private DocumentFile documentFile;
 
     // the DocumentFile interface can be slow so we cache some attrs
-    private String _basename = null;
+    private string _basename = null;
     private long? _length;
     private long? _lastModified;
     private int? _childrenCount;
@@ -288,7 +291,7 @@ public class AndroidFile : IRealFile
     ///  <returns></returns>
     ///  <exception cref="IOException"></exception>
     public IRealFile Move(IRealFile newDir, string newName = null,
-        OnProgressListener progressListener = null)
+        Action<long,long> progressListener = null)
     {
         // target directory is the same
         if(Parent.Path.Equals(newDir.Path))
@@ -331,7 +334,7 @@ public class AndroidFile : IRealFile
     ///  <returns></returns>
     ///  <exception cref="IOException"></exception>
     public IRealFile Copy(IRealFile newDir, string newName = null,
-        OnProgressListener progressListener = null)
+        Action<long,long> progressListener = null)
     {
         return Copy(newDir, newName, false, progressListener);
     }
@@ -345,7 +348,7 @@ public class AndroidFile : IRealFile
     ///  <returns></returns>
     ///  <exception cref="IOException"></exception>
     private IRealFile Copy(IRealFile newDir, string newName = null,
-        bool delete = false, OnProgressListener progressListener = null)
+        bool delete = false, Action<long,long> progressListener = null)
     {
         if (newDir == null || !newDir.Exists)
             throw new IOException("Target directory does not exists");

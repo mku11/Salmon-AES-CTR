@@ -2,7 +2,7 @@
   <PropertyGroup>
     <TargetFramework>net7.0-android</TargetFramework>
     <SupportedOSPlatformVersion>26</SupportedOSPlatformVersion>
-    <ImplicitUsings>enable</ImplicitUsings>
+    <ImplicitUsings>false</ImplicitUsings>
     <LangVersion>10</LangVersion>
     <Title>Salmon AES256 CTR Android native ARM64 encryption library</Title>
     <GeneratePackageOnBuild>True</GeneratePackageOnBuild>

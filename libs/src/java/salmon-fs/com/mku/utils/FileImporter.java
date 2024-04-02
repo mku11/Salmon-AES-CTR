@@ -50,9 +50,6 @@ public abstract class FileImporter {
      */
     private static final boolean enableMultiThread = true;
 
-    private static boolean enableLog;
-    private static boolean enableLogDetails;
-
     /**
      * Current buffer size.
      */
@@ -105,24 +102,6 @@ public abstract class FileImporter {
     }
 
     /**
-     * Enable logging when importing.
-     *
-     * @param value True to enable logging.
-     */
-    public static void setEnableLog(boolean value) {
-        enableLog = value;
-    }
-
-    /**
-     * Enable logging details when importing.
-     *
-     * @param value True to enable logging details.
-     */
-    public static void setEnableLogDetails(boolean value) {
-        enableLogDetails = value;
-    }
-
-    /**
      * Stops all current importing tasks
      */
     public void stop() {
@@ -155,16 +134,12 @@ public abstract class FileImporter {
             throw new Exception("Cannot import directory, use SalmonFileCommander instead");
 
         filename = filename != null ? filename : fileToImport.getBaseName();
-        long startTime = 0;
         final long[] totalBytesRead = new long[]{0};
         final IVirtualFile importedFile;
         try {
             if (!enableMultiThread && threads != 1)
                 throw new UnsupportedOperationException("Multithreading is not supported");
             stopped = false;
-            if (enableLog) {
-                startTime = System.currentTimeMillis();
-            }
             failed = false;
             importedFile = dir.createFile(filename);
             this.onPrepare(importedFile, integrity);
@@ -212,12 +187,6 @@ public abstract class FileImporter {
                 fileToImport.delete();
             if (lastException != null)
                 throw lastException;
-            if (enableLog) {
-                long total = System.currentTimeMillis() - startTime;
-                System.out.println("SalmonFileImporter AesType: " + SalmonStream.getAesProviderType() + " File: " + fileToImport.getBaseName()
-                        + " imported and signed " + totalBytesRead[0] + " bytes in total time: " + total + " ms"
-                        + ", avg speed: " + totalBytesRead[0] / (float) total + " Kbytes/sec");
-            }
         } catch (Exception ex) {
             ex.printStackTrace();
             failed = true;
@@ -244,7 +213,6 @@ public abstract class FileImporter {
      */
     private void importFilePart(IRealFile fileToImport, IVirtualFile salmonFile,
                                 long start, long count, long[] totalBytesRead, BiConsumer<Long,Long> onProgress) throws IOException {
-        long startTime = System.currentTimeMillis();
         long totalPartBytesRead = 0;
 
         RandomAccessStream targetStream = null;
@@ -259,10 +227,6 @@ public abstract class FileImporter {
 
             byte[] bytes = new byte[bufferSize];
             int bytesRead;
-            if (enableLogDetails) {
-                System.out.println("SalmonFileImporter: FilePart: " + salmonFile.getRealFile().getBaseName() + ": " + salmonFile.getBaseName()
-                        + " start = " + start + " count = " + count);
-            }
             while ((bytesRead = sourceStream.read(bytes, 0, Math.min(bytes.length, (int) (count - totalPartBytesRead)))) > 0
                     && totalPartBytesRead < count) {
                 if (stopped)
@@ -274,12 +238,6 @@ public abstract class FileImporter {
                 totalBytesRead[0] += bytesRead;
                 if (onProgress != null)
                     onProgress.accept(totalBytesRead[0], fileToImport.length());
-            }
-            if (enableLogDetails) {
-                long total = System.currentTimeMillis() - startTime;
-                System.out.println("SalmonFileImporter: File Part: " + fileToImport.getBaseName()
-                        + " imported " + totalPartBytesRead + " bytes in: " + total + " ms"
-                        + ", avg speed: " + totalPartBytesRead / (float) total + " kbytes/sec");
             }
         } catch (Exception ex) {
             ex.printStackTrace();

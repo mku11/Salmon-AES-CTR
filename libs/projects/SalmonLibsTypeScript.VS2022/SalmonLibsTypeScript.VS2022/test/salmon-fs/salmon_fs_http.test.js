@@ -31,6 +31,10 @@ import { getFile, getFileStream, SalmonFSTestHelper } from './salmon_fs_test_hel
 
 describe('salmon-fs-http', () => {
     beforeAll(() => {
+		
+		//SalmonCoreTestHelper.TEST_ENC_BUFFER_SIZE = 1 * 1024 * 1024;
+		//SalmonCoreTestHelper.TEST_DEC_BUFFER_SIZE = 1 * 1024 * 1024;
+		
         SalmonFSTestHelper.TEST_FILE_INPUT_STREAM_THREADS = 2;
         SalmonFSTestHelper.TEST_USE_FILE_INPUT_STREAM = false;
 

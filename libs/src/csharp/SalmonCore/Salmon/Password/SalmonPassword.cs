@@ -22,8 +22,6 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 */
 
-using System;
-
 namespace Mku.Salmon.Password;
 
 /// <summary>
@@ -99,33 +97,6 @@ public class SalmonPassword
         if (PbkdfAlgorithm == PbkdfAlgo.SHA1 && !ENABLE_SHA1)
             throw new SalmonSecurityException("Cannot use SHA1, SHA1 is not secure anymore use SHA256!");
         return provider.GetKey(password, salt, iterations, outputBytes, PbkdfAlgorithm);
-    }
-
-    /// <summary>
-    /// Pbkdf implementation type.
-    /// </summary>
-    public enum PbkdfType
-    {
-        /// <summary>
-        ///  Default C# pbkdf implementation.
-        /// </summary>
-        Default
-    }
-
-    /// <summary>
-    /// Pbkdf algorithm implementation type.
-    /// </summary>
-    public enum PbkdfAlgo
-    {
-        /// <summary>
-        ///  SHA1 hashing. DO NOT USE.
-        /// </summary>
-        [Obsolete("SHA1 is deprecated, use SHA256 instead.")]
-        SHA1,
-        /// <summary>
-        ///  SHA256 hashing.
-        /// </summary>
-        SHA256
     }
 }
 

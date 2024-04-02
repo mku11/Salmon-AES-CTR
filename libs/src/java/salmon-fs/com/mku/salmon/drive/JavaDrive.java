@@ -45,10 +45,10 @@ public class JavaDrive extends SalmonDrive {
 
     }
 
-
     /**
      * Helper method that opens and initializes a JsDrive
      * @param dir The directory that will host the drive.
+	 * @param dir The password.
      * @param sequencer The nonce sequencer that will be used for encryption.
      * @return The drive.
      */
@@ -59,6 +59,7 @@ public class JavaDrive extends SalmonDrive {
     /**
      * Helper method that creates and initializes a JsDrive
      * @param dir The directory that will host the drive.
+	 * @param dir The password.
      * @param sequencer The nonce sequencer that will be used for encryption.
      * @return The drive.
      */

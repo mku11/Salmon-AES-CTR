@@ -24,16 +24,20 @@ SOFTWARE.
 
 namespace Salmon.Win.Sequencer;
 
+using Mku.Salmon.Sequence;
 using Mku.Sequence;
+using System;
+using System.IO;
 using System.IO.Pipes;
 using System.Security.Principal;
 using System.Text;
+using System.Threading;
 using System.Xml;
 
 /// <summary>
 /// Sequencer client that connects to the windows service.
 /// </summary>
-public class WinClientSequencer : ISalmonSequencer
+public class WinClientSequencer : INonceSequencer
 {
     private string pipeName;
     private NamedPipeClientStream client;
@@ -124,15 +128,15 @@ public class WinClientSequencer : ISalmonSequencer
     /// <summary>
     /// Send a request to create the sequence.
     /// </summary>
-    /// <param name="driveID"></param>
-    /// <param name="authID"></param>
+    /// <param name="driveId"></param>
+    /// <param name="authId"></param>
     /// <exception cref="SalmonSequenceException"></exception>
-    public void CreateSequence(string driveID, string authID)
+    public void CreateSequence(string driveId, string authId)
     {
         Response res;
         try
         {
-            string request = GenerateRequest(driveID, authID, RequestType.CreateSequence);
+            string request = GenerateRequest(driveId, authId, RequestType.CreateSequence);
             client.WaitForPipeDrain();
             writer.WriteLine(request);
             writer.Flush();
@@ -150,15 +154,15 @@ public class WinClientSequencer : ISalmonSequencer
     /// <summary>
     /// Send a request to get the current sequence
     /// </summary>
-    /// <param name="driveID"></param>
+    /// <param name="driveId"></param>
     /// <returns></returns>
     /// <exception cref="SalmonSequenceException"></exception>
-    public SalmonSequence GetSequence(string driveID)
+    public NonceSequence GetSequence(string driveId)
     {
         Response res;
         try
         {
-            string request = GenerateRequest(driveID, null, RequestType.GetSequence);
+            string request = GenerateRequest(driveId, null, RequestType.GetSequence);
             client.WaitForPipeDrain();
             writer.WriteLine(request);
             writer.Flush();
@@ -173,24 +177,24 @@ public class WinClientSequencer : ISalmonSequencer
             throw new SalmonSequenceException("Could not get sequence: " + res.error);
         if (res.status == Response.ResponseStatus.NotFound)
             return null;
-        return new SalmonSequence(res.driveID, res.authID,
+        return new NonceSequence(res.driveId, res.authId,
             res.nextNonce, res.maxNonce, res.seqStatus);
     }
 
     /// <summary>
     /// Send a request to initialize the sequence, can only be run once.
     /// </summary>
-    /// <param name="driveID"></param>
-    /// <param name="authID"></param>
+    /// <param name="driveId"></param>
+    /// <param name="authId"></param>
     /// <param name="startNonce"></param>
     /// <param name="maxNonce"></param>
     /// <exception cref="SalmonSequenceException"></exception>
-    public void InitSequence(string driveID, string authID, byte[] startNonce, byte[] maxNonce)
+    public void InitSequence(string driveId, string authId, byte[] startNonce, byte[] maxNonce)
     {
         Response res;
         try
         {
-            string request = GenerateRequest(driveID, authID, RequestType.InitSequence,
+            string request = GenerateRequest(driveId, authId, RequestType.InitSequence,
                 startNonce, maxNonce);
             client.WaitForPipeDrain();
             writer.WriteLine(request);
@@ -209,15 +213,15 @@ public class WinClientSequencer : ISalmonSequencer
     /// <summary>
     /// Send a request to get the next nonce.
     /// </summary>
-    /// <param name="driveID"></param>
+    /// <param name="driveId"></param>
     /// <returns></returns>
     /// <exception cref="SalmonSequenceException"></exception>
-    public byte[] NextNonce(string driveID)
+    public byte[] NextNonce(string driveId)
     {
         Response res;
         try
         {
-            string request = GenerateRequest(driveID, null, RequestType.NextNonce);
+            string request = GenerateRequest(driveId, null, RequestType.NextNonce);
             client.WaitForPipeDrain();
             writer.WriteLine(request);
             writer.Flush();
@@ -236,14 +240,14 @@ public class WinClientSequencer : ISalmonSequencer
     /// <summary>
     /// Send a request to revoke the current sequence
     /// </summary>
-    /// <param name="driveID"></param>
+    /// <param name="driveId"></param>
     /// <exception cref="SalmonSequenceException"></exception>
-    public void RevokeSequence(string driveID)
+    public void RevokeSequence(string driveId)
     {
         Response res;
         try
         {
-            string request = GenerateRequest(driveID, null, RequestType.RevokeSequence);
+            string request = GenerateRequest(driveId, null, RequestType.RevokeSequence);
             client.WaitForPipeDrain();
             writer.WriteLine(request);
             writer.Flush();
@@ -261,13 +265,13 @@ public class WinClientSequencer : ISalmonSequencer
     /// <summary>
     /// Send a request to set the max nonce.
     /// </summary>
-    /// <param name="driveID"></param>
-    /// <param name="authID"></param>
+    /// <param name="driveId"></param>
+    /// <param name="authId"></param>
     /// <param name="maxNonce"></param>
     /// <exception cref="SalmonSequenceException"></exception>
-    public void SetMaxNonce(string driveID, string authID, byte[] maxNonce)
+    public void SetMaxNonce(string driveId, string authId, byte[] maxNonce)
     {
-        string request = GenerateRequest(driveID, authID, RequestType.SetMaxNonce,
+        string request = GenerateRequest(driveId, authId, RequestType.SetMaxNonce,
             maxNonce: maxNonce);
         client.WaitForPipeDrain();
         writer.WriteLine(request);
@@ -289,13 +293,13 @@ public class WinClientSequencer : ISalmonSequencer
     /// <summary>
     /// Send a request to generate the sequence
     /// </summary>
-    /// <param name="driveID"></param>
-    /// <param name="authID"></param>
+    /// <param name="driveId"></param>
+    /// <param name="authId"></param>
     /// <param name="type"></param>
     /// <param name="nextNonce"></param>
     /// <param name="maxNonce"></param>
     /// <returns></returns>
-    public string GenerateRequest(string driveID, string authID, RequestType type,
+    public string GenerateRequest(string driveId, string authId, RequestType type,
             byte[] nextNonce = null, byte[] maxNonce = null)
     {
         MemoryStream stream = new MemoryStream();
@@ -306,9 +310,9 @@ public class WinClientSequencer : ISalmonSequencer
             writer = XmlWriter.Create(stream, settings);
             writer.WriteStartDocument();
             writer.WriteStartElement("drive");
-            writer.WriteAttributeString("driveID", driveID);
-            if (authID != null)
-                writer.WriteAttributeString("authID", authID);
+            writer.WriteAttributeString("driveId", driveId);
+            if (authId != null)
+                writer.WriteAttributeString("authId", authId);
             writer.WriteAttributeString("type", type.ToString());
             if (nextNonce != null)
                 writer.WriteAttributeString("nextNonce", Convert.ToBase64String(nextNonce));
@@ -362,10 +366,10 @@ public class WinClientSequencer : ISalmonSequencer
     /// </summary>
     private class Response
     {
-        internal string driveID;
-        internal string authID;
+        internal string driveId;
+        internal string authId;
         internal ResponseStatus status;
-        internal SalmonSequence.Status seqStatus;
+        internal NonceSequence.Status seqStatus;
         internal byte[] nextNonce;
         internal byte[] maxNonce;
         internal string error;
@@ -393,11 +397,11 @@ public class WinClientSequencer : ISalmonSequencer
                 XmlDocument document = new XmlDocument();
                 document.Load(stream);
                 XmlNode drive = document.SelectSingleNode("/drive");
-                request.driveID = drive.Attributes.GetNamedItem("driveID").Value;
-                request.authID = drive.Attributes.GetNamedItem("authID").Value;
+                request.driveId = drive.Attributes.GetNamedItem("driveId").Value;
+                request.authId = drive.Attributes.GetNamedItem("authId").Value;
                 request.status = (ResponseStatus)Enum.Parse(typeof(ResponseStatus), drive.Attributes.GetNamedItem("status").Value);
                 if (drive.Attributes.GetNamedItem("seqStatus") != null)
-                    request.seqStatus = (SalmonSequence.Status)Enum.Parse(typeof(SalmonSequence.Status), drive.Attributes.GetNamedItem("seqStatus").Value);
+                    request.seqStatus = (NonceSequence.Status)Enum.Parse(typeof(NonceSequence.Status), drive.Attributes.GetNamedItem("seqStatus").Value);
                 if (drive.Attributes.GetNamedItem("nextNonce") != null)
                     request.nextNonce = Convert.FromBase64String(drive.Attributes.GetNamedItem("nextNonce").Value);
                 if (drive.Attributes.GetNamedItem("maxNonce") != null)

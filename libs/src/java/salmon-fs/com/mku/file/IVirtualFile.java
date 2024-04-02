@@ -38,7 +38,7 @@ import java.io.IOException;
  * specific ie for encryption they can be implemented by extending this class.
  */
 public interface IVirtualFile {
-    RandomAccessStream getInputStream() throws IOException, SalmonSecurityException, SalmonIntegrityException;
+    RandomAccessStream getInputStream() throws IOException;
     RandomAccessStream getOutputStream() throws IOException;
     IVirtualFile[] listFiles();
     IVirtualFile getChild(String filename) throws IOException;

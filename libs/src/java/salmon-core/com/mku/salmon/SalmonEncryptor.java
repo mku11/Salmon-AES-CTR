@@ -298,6 +298,8 @@ public class SalmonEncryptor {
             long totalChunkBytesRead = 0;
             // align to the chunk size if available
             int buffSize = Math.max(bufferSize, stream.getChunkSize());
+			// set the same buffer size for the internal stream
+			stream.setBufferSize(buffSize);
             byte[] buff = new byte[buffSize];
             int bytesRead;
             while ((bytesRead = inputStream.read(buff, 0, Math.min(buff.length, (int) (count - totalChunkBytesRead)))) > 0

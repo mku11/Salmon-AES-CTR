@@ -49,9 +49,6 @@ public abstract class FileExporter {
      */
     private static final boolean enableMultiThread = true;
 
-    private static boolean enableLog;
-    private static boolean enableLogDetails;
-
     /**
      * Current buffer size.
      */
@@ -95,14 +92,6 @@ public abstract class FileExporter {
         this.threads = threads;
     }
 
-    public static void setEnableLog(boolean value) {
-        enableLog = value;
-    }
-
-    public static void setEnableLogDetails(boolean value) {
-        enableLogDetails = value;
-    }
-
     public boolean isRunning() {
         return !stopped;
     }
@@ -137,11 +126,7 @@ public abstract class FileExporter {
             if (!enableMultiThread && threads != 1)
                 throw new UnsupportedOperationException("Multithreading is not supported");
 
-            long startTime = 0;
             stopped = false;
-            if (enableLog) {
-                startTime = System.currentTimeMillis();
-            }
             final long[] totalBytesWritten = new long[]{0};
             failed = false;
 
@@ -193,12 +178,6 @@ public abstract class FileExporter {
                 fileToExport.getRealFile().delete();
             if (lastException != null)
                 throw lastException;
-            if (enableLog) {
-                long total = System.currentTimeMillis() - startTime;
-                System.out.println("VirtualFileExporter File: " + fileToExport.getBaseName()
-                        + " verified and exported " + totalBytesWritten[0] + " bytes in: " + total + " ms"
-                        + ", avg speed: " + totalBytesWritten[0] / (float) total + " Kbytes/sec");
-            }
         } catch (Exception ex) {
             ex.printStackTrace();
             failed = true;
@@ -240,11 +219,6 @@ public abstract class FileExporter {
 
             byte[] bytes = new byte[bufferSize];
             int bytesRead;
-            if (enableLogDetails) {
-                System.out.println("VirtualFileExporter: FilePart: " + fileToExport.getRealFile().getBaseName() + ": "
-                        + fileToExport.getBaseName() + " start = " + start + " count = " + count);
-            }
-
             while ((bytesRead = sourceStream.read(bytes, 0, Math.min(bytes.length,
                     (int) (count - totalPartBytesWritten)))) > 0 && totalPartBytesWritten < count) {
                 if (stopped)
@@ -256,12 +230,6 @@ public abstract class FileExporter {
                 totalBytesWritten[0] += bytesRead;
                 if(onProgress != null)
                     onProgress.accept(totalBytesWritten[0], fileToExport.getSize());
-            }
-            if (enableLogDetails) {
-                long total = System.currentTimeMillis() - startTime;
-                System.out.println("VirtualFileExporter: File Part: " + fileToExport.getBaseName() + " exported " + totalPartBytesWritten
-                        + " bytes in: " + total + " ms"
-                        + ", avg speed: " + totalPartBytesWritten / (float) total + " Kbytes/sec");
             }
         } catch (Exception ex) {
             ex.printStackTrace();

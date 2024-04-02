@@ -1,10 +1,3 @@
-using System;
-using System.Collections.Generic;
-using System.IO;
-using System.Linq;
-using static Mku.IO.RandomAccessStreamExtensions;
-
-namespace Mku.File;
 /*
 MIT License
 
@@ -29,6 +22,12 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 */
 
+using System;
+using System.Collections.Generic;
+using System.IO;
+using System.Linq;
+
+namespace Mku.File;
 
 /// <summary>
 ///  Salmon RealFile implementation for C#.
@@ -221,7 +220,7 @@ public class DotNetFile : IRealFile
 	///  <param name="newDir">The target directory.</param>
     ///  <param name="progressListener">Observer to notify when progress changes.</param>
     ///  <returns>The moved file. Use this file for subsequent operations instead of the original.</returns>
-    public IRealFile Move(IRealFile newDir, string newName = null, OnProgressListener progressListener = null)
+    public IRealFile Move(IRealFile newDir, string newName = null, Action<long,long> progressListener = null)
     {
         newName = newName ?? BaseName;
         string nFilePath = newDir.AbsolutePath + System.IO.Path.DirectorySeparatorChar + newName;
@@ -240,7 +239,7 @@ public class DotNetFile : IRealFile
     ///  <param name="progressListener">Observer to notify when progress changes.</param>
     ///  <returns>The copied file. Use this file for subsequent operations instead of the original.</returns>
     ///  <exception cref="IOException"></exception>
-    public IRealFile Copy(IRealFile newDir, string newName = null, OnProgressListener progressListener = null)
+    public IRealFile Copy(IRealFile newDir, string newName = null, Action<long,long> progressListener = null)
     {
         newName = newName ?? BaseName;
         if (newDir == null || !newDir.Exists)

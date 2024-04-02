@@ -54,12 +54,14 @@ import java.util.Random;
 
 import static org.junit.jupiter.api.Assertions.*;
 
-public class SalmonFSTests extends SalmonCoreTests {
+public class SalmonFSTests {
     @BeforeAll
     static void beforeAll() {
         SalmonFSTestHelper.setDriveClassType(JavaDrive.class);
+		//SalmonCoreTestHelper.TEST_ENC_BUFFER_SIZE = 1 * 1024 * 1024;
+		//SalmonCoreTestHelper.TEST_DEC_BUFFER_SIZE = 1 * 1024 * 1024;
     }
-
+	
     @BeforeEach
     void beforeEach() {
         SalmonFSTestHelper.TEST_IMPORT_FILE = SalmonFSTestHelper.TEST_IMPORT_SMALL_FILE;
@@ -75,8 +77,6 @@ public class SalmonFSTests extends SalmonCoreTests {
         SalmonCoreTestHelper.initialize();
         SalmonFSTestHelper.initialize();
     }
-
-    ;
 
     @AfterEach
     void afterEach() {

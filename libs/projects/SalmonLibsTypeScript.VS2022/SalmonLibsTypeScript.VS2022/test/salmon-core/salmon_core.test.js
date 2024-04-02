@@ -36,6 +36,13 @@ import { SalmonSecurityException } from '../../lib/salmon-core/salmon/salmon_sec
 import { SalmonRangeExceededException } from '../../lib/salmon-core/salmon/salmon_range_exceeded_exception.js';
 
 describe('salmon-core', () => {
+	beforeAll(() => {
+		//SalmonCoreTestHelper.TEST_ENC_BUFFER_SIZE = 1 * 1024 * 1024;
+		//SalmonCoreTestHelper.TEST_DEC_BUFFER_SIZE = 1 * 1024 * 1024;
+		SalmonCoreTestHelper.TEST_ENC_THREADS = 1;
+		SalmonCoreTestHelper.TEST_DEC_THREADS = 1;
+	}
+	
     beforeEach(() => {
         SalmonStream.setAesProviderType(ProviderType.Default);
         SalmonCoreTestHelper.initialize();

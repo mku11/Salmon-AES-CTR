@@ -60,6 +60,8 @@ export async function encryptData(data: Uint8Array, start: number, count: number
         let totalChunkBytesRead = 0;
         // align to the chunk size if available
         let buffSize = Math.max(bufferSize, stream.getChunkSize());
+		// set the same buffer size for the internal stream
+		stream.setBufferSize(buffSize);
         let buff = new Uint8Array(buffSize);
         let bytesRead;
         while ((bytesRead = await inputStream.read(buff, 0, Math.min(buff.length, count - totalChunkBytesRead))) > 0

@@ -22,7 +22,7 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 */
 
-using Mku.Salmon.IO;
+using Mku.Salmon.Streams;
 using System;
 using System.IO;
 
@@ -47,7 +47,7 @@ public abstract class SalmonAES256CTRTransformer : ISalmonCTRTransformer
 	///  <param name="data">The data to be transformed.</param>
     ///  <param name="key">The AES key.</param>
     ///  <param name="nonce">The nonce for the CTR.</param>
-    ///  <param name="mode">The <see cref="SalmonStream.EncryptionMode"/> Encrypt or Decrypt.</param>
+    ///  <param name="mode">The <see cref="EncryptionMode"/> Encrypt or Decrypt.</param>
     ///  <param name="headerData">The header data to be embedded if you use Encryption.</param>
     ///  <param name="integrity">True if you want to enable integrity.</param>
     ///  <param name="chunkSize">The chunk size for integrity chunks.</param>
@@ -56,7 +56,7 @@ public abstract class SalmonAES256CTRTransformer : ISalmonCTRTransformer
     ///  <exception cref="SalmonSecurityException"></exception>
     ///  <exception cref="Integrity.SalmonIntegrityException"></exception>
     ///  <exception cref="IOException"></exception>
-    public static long GetActualSize(byte[] data, byte[] key, byte[] nonce, SalmonStream.EncryptionMode mode,
+    public static long GetActualSize(byte[] data, byte[] key, byte[] nonce, EncryptionMode mode,
                                      byte[] headerData, bool integrity, int? chunkSize, byte[] hashKey)
     {
         MemoryStream inputStream = new MemoryStream(data);

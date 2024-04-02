@@ -1,7 +1,7 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <TargetFramework>net6.0-windows</TargetFramework>
+    <TargetFramework>net7.0-windows</TargetFramework>
 
     <IsPackable>false</IsPackable>
   </PropertyGroup>
@@ -14,14 +14,14 @@
 
 
   <ItemGroup>
-    <Compile Include="..\..\..\test\salmon-core-test-csharp\SalmonCSharpPerfTestRunner.cs" Link="salmon-core-test-csharp\SalmonCSharpPerfTestRunner.cs" />
-    <Compile Include="..\..\..\test\salmon-core-test-csharp\SalmonCSharpTestRunner.cs" Link="salmon-core-test-csharp\SalmonCSharpTestRunner.cs" />
-    <Compile Include="..\..\..\test\salmon-core-test-csharp\TestHelper.cs" Link="salmon-core-test-csharp\TestHelper.cs" />
+    <Compile Include="..\..\..\test\salmon-core-test-csharp\SalmonCorePerfTests.cs" Link="salmon-core-test-csharp\SalmonCorePerfTests.cs" />
+    <Compile Include="..\..\..\test\salmon-core-test-csharp\SalmonCoreTests.cs" Link="salmon-core-test-csharp\SalmonCoreTests.cs" />
+    <Compile Include="..\..\..\test\salmon-core-test-csharp\SalmonCoreTestHelper.cs" Link="salmon-core-test-csharp\SalmonCoreTestHelper.cs" />
     
-    <Compile Include="..\..\..\test\salmon-fs-test-csharp\CSharpFSTestHelper.cs" Link="salmon-fs-test-csharp\CSharpFSTestHelper.cs" />
-    <Compile Include="..\..\..\test\salmon-fs-test-csharp\SalmonFSCSharpTestRunner.cs" Link="salmon-fs-test-csharp\SalmonFSCSharpTestRunner.cs" />
+    <Compile Include="..\..\..\test\salmon-fs-test-csharp\SalmonFSTestHelper.cs" Link="salmon-fs-test-csharp\SalmonFSTestHelper.cs" />
+    <Compile Include="..\..\..\test\salmon-fs-test-csharp\SalmonFSTests.cs" Link="salmon-fs-test-csharp\SalmonFSTests.cs" />
 
-    <Compile Include="..\..\..\test\salmon-native-test-csharp\SalmonCSharpNativeTestRunner.cs" Link="salmon-native-test-csharp\SalmonCSharpNativeTestRunner.cs" />
+    <Compile Include="..\..\..\test\salmon-native-test-csharp\SalmonNativeTests.cs" Link="salmon-native-test-csharp\SalmonNativeTests.cs" />
     
   </ItemGroup>
   
@@ -35,20 +35,19 @@
   </ItemGroup>
 
   <ItemGroup>
-    <PackageReference Include="Microsoft.NET.Test.Sdk" Version="16.5.0" />
-    <PackageReference Include="MSTest.TestAdapter" Version="2.1.0" />
-    <PackageReference Include="MSTest.TestFramework" Version="2.1.0" />
-    <PackageReference Include="coverlet.collector" Version="1.2.0" />
-    <PackageReference Include="Portable.BouncyCastle" Version="1.9.0" />
-  </ItemGroup>
-
-  <ItemGroup>
     <Content Include="..\x64\Debug\SalmonNative.exp" Link="SalmonNative.exp">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
     <Content Include="..\x64\Debug\SalmonNative.lib" Link="SalmonNative.lib">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Microsoft.NET.Test.Sdk" Version="17.9.0" />
+    <PackageReference Include="MSTest.TestAdapter" Version="3.2.2" />
+    <PackageReference Include="MSTest.TestFramework" Version="3.2.2" />
+    <PackageReference Include="Portable.BouncyCastle" Version="1.9.0" />
   </ItemGroup>
 
   <ItemGroup>

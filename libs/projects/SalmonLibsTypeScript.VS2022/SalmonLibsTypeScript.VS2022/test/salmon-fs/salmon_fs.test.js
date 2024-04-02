@@ -36,7 +36,13 @@ import { SalmonAuthException } from '../../lib/salmon-fs/salmon/salmon_auth_exce
 import { SalmonIntegrity } from '../../lib/salmon-core/salmon/integrity/salmon_integrity.js';
 
 describe('salmon-fs', () => {
-
+	beforeAll(() => {
+		//SalmonCoreTestHelper.TEST_ENC_BUFFER_SIZE = 1 * 1024 * 1024;
+		//SalmonCoreTestHelper.TEST_DEC_BUFFER_SIZE = 1 * 1024 * 1024;
+		SalmonCoreTestHelper.TEST_ENC_THREADS = 1;
+		SalmonCoreTestHelper.TEST_DEC_THREADS = 1;
+	}
+	
     beforeEach(() => {
         SalmonFSTestHelper.TEST_IMPORT_FILE = SalmonFSTestHelper.TEST_IMPORT_SMALL_FILE;
 

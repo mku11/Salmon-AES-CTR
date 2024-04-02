@@ -23,6 +23,7 @@ SOFTWARE.
 */
 
 using Mku.Convert;
+using System.IO;
 using BitConverter = Mku.Convert.BitConverter;
 
 namespace Mku.Salmon;

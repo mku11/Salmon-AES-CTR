@@ -32,6 +32,14 @@ import org.junit.jupiter.api.*;
 public class SalmonCorePerfTests {
     public static int TEST_PERF_SIZE = 64 * 1024 * 1024;
 
+    @BeforeAll
+    static void beforeAll() {
+		//SalmonCoreTestHelper.TEST_ENC_BUFFER_SIZE = 1 * 1024 * 1024;
+		//SalmonCoreTestHelper.TEST_DEC_BUFFER_SIZE = 1 * 1024 * 1024;
+		SalmonCoreTestHelper.TEST_ENC_THREADS = 1;
+		SalmonCoreTestHelper.TEST_DEC_THREADS = 1;
+    }
+
     @BeforeEach
     void beforeEach(){
         SalmonCoreTestHelper.initialize();

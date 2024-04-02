@@ -45,6 +45,15 @@ import java.nio.charset.Charset;
 import static org.junit.jupiter.api.Assertions.*;
 
 public class SalmonCoreTests {
+
+    @BeforeAll
+    static void beforeAll() {
+		//SalmonCoreTestHelper.TEST_ENC_BUFFER_SIZE = 1 * 1024 * 1024;
+		//SalmonCoreTestHelper.TEST_DEC_BUFFER_SIZE = 1 * 1024 * 1024;
+		SalmonCoreTestHelper.TEST_ENC_THREADS = 1;
+		SalmonCoreTestHelper.TEST_DEC_THREADS = 1;
+    }
+
     @BeforeEach
     public void init() {
         SalmonStream.setAesProviderType(ProviderType.Default);
@@ -54,7 +63,7 @@ public class SalmonCoreTests {
     @AfterEach
     void afterEach(){
         SalmonCoreTestHelper.close();
-    };
+    }
 
     @Test
     public void shouldEncryptAndDecryptText() throws Exception {

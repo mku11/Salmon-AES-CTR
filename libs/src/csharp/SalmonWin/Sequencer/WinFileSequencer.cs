@@ -25,8 +25,10 @@ SOFTWARE.
 namespace Salmon.Win.Sequencer;
 
 using Mku.File;
+using Mku.Salmon.Sequence;
 using Mku.Sequence;
 using Salmon.Win.Registry;
+using System;
 using System.Security.Cryptography;
 
 /// <summary>
@@ -43,7 +45,7 @@ public class WinFileSequencer : SalmonFileSequencer
     /// <summary>
     /// Instantiate a windows file sequencer.
     /// </summary>
-    public WinFileSequencer(IRealFile sequenceFile, ISalmonSequenceSerializer serializer, String regCheckSumKey) 
+    public WinFileSequencer(IRealFile sequenceFile, INonceSequenceSerializer serializer, string regCheckSumKey) 
         : base(sequenceFile, serializer)
     {
 		if(regCheckSumKey == null)

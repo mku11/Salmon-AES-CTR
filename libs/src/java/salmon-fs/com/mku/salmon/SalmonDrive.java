@@ -293,7 +293,7 @@ public abstract class SalmonDrive extends VirtualDrive {
      */
     public void importAuthFile(IRealFile authConfigFile) throws Exception {
         if (this.getDriveId() == null)
-            throw new Error("Could not get drive id, make sure you init the drive first");
+            throw new Exception("Could not get drive id, make sure you init the drive first");
 
         NonceSequence sequence = this.sequencer.getSequence(BitConverter.toHex(this.getDriveId()));
         if (sequence != null && sequence.getStatus() == NonceSequence.Status.Active)
@@ -328,7 +328,7 @@ public abstract class SalmonDrive extends VirtualDrive {
      */
     public void exportAuthFile(String targetAuthId, IRealFile file) throws Exception {
         if (this.getDriveId() == null)
-            throw new Error("Could not get drive id, make sure you init the drive first");
+            throw new Exception("Could not get drive id, make sure you init the drive first");
 
         byte[] cfgNonce = this.sequencer.nextNonce(BitConverter.toHex(this.getDriveId()));
 

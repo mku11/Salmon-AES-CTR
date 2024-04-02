@@ -27,6 +27,8 @@ using Java.IO;
 using Java.Nio;
 using Java.Nio.Channels;
 using Mku.Android.File;
+using System;
+using System.IO;
 
 namespace Mku.Android.File;
 
@@ -95,7 +97,7 @@ public class AndroidFileStream : Stream
 	/// </summary>
 	///  <param name="file">The AndroidFile that will be used to get the read/write stream</param>
     ///  <param name="mode">The mode "r" for read "rw" for write</param>
-    public AndroidFileStream(AndroidFile file, String mode)
+    public AndroidFileStream(AndroidFile file, string mode)
     {
         this.file = file;
         if (mode.Equals("rw"))

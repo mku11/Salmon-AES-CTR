@@ -40,11 +40,11 @@ public class HmacSHA256Provider implements IHashProvider {
      * @param offset The position reading will start from.
      * @param count The count of bytes to be read.
      * @return The HMAC SHA256 hash.
-     * @throws SalmonIntegrityException thrown if hash cannot be calculated
+     * @throws Exception thrown if hash cannot be calculated
      */
     @Override
     public byte[] calc(byte[] hashKey, byte[] buffer, int offset, int count)
-            throws SalmonIntegrityException {
+            throws Exception {
         try {
             Mac hmac = Mac.getInstance("HmacSHA256");
             SecretKeySpec secret_key = new SecretKeySpec(hashKey, "HmacSHA256");
@@ -53,7 +53,7 @@ public class HmacSHA256Provider implements IHashProvider {
             byte[] hashValue = hmac.doFinal();
             return hashValue;
         } catch (Exception ex) {
-            throw new SalmonIntegrityException("Could not calculate HMAC", ex);
+            throw new IOException("Could not calculate HMAC", ex);
         }
     }
 }

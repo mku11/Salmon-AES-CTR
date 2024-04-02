@@ -1,3 +1,4 @@
+using Mku.Salmon.Sequence;
 using System;
 
 namespace Mku.Sequence;

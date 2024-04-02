@@ -24,7 +24,7 @@ SOFTWARE.
 
 namespace Salmon.Transform;
 
-using Mku.Salmon.Transform;
+using Mku.Bridge;
 using System.Runtime.InteropServices;
 
 public class AndroidNativeProxy : INativeProxy
