@@ -544,8 +544,6 @@ public abstract class SalmonDrive : VirtualDrive
         {
             if (RealRoot == null || !RealRoot.Exists)
                 return null;
-            if (!IsUnlocked)
-                throw new SalmonAuthException("Not authorized");
             return virtualRoot;
         }
     }
@@ -649,24 +647,7 @@ public abstract class SalmonDrive : VirtualDrive
     ///  <exception cref="Exception"></exception>
     internal byte[] GetNextNonce()
     {
-        if (!IsUnlocked)
-            throw new SalmonAuthException("Not authorized");
         return GetNextNonce(this);
-    }
-
-    /// <summary>
-    ///  Returns true if password authorization has succeeded.
-    /// </summary>
-    public bool IsUnlocked
-    {
-        get
-        {
-            SalmonDriveKey key = Key;
-            if (key == null)
-                return false;
-            byte[] encKey = key.DriveKey;
-            return encKey != null;
-        }
     }
 
     /// <summary>

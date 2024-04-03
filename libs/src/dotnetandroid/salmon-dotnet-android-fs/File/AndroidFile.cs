@@ -179,6 +179,8 @@ public class AndroidFile : IRealFile
         get
         {
             DocumentFile parentDocumentFile = documentFile.ParentFile;
+            if (parentDocumentFile == null)
+                return null;
             AndroidFile parent = new AndroidFile(parentDocumentFile, AndroidDrive.Context);
             return parent;
         }
