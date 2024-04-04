@@ -25,8 +25,8 @@ SOFTWARE.
 import { IRealFile } from "../file/ireal_file.js";
 import { IVirtualFile } from "../file/ivirtual_file.js";
 import { importFilePart } from "./file_importer_helper.js";
-import { IOException } from "../../salmon-core/iostream/io_exception.js";
-import { RandomAccessStream } from "../../salmon-core/iostream/random_access_stream.js";
+import { IOException } from "../../salmon-core/streams/io_exception.js";
+import { RandomAccessStream } from "../../salmon-core/streams/random_access_stream.js";
 
 export abstract class FileImporter {
     #workerPath = './lib/salmon-fs/salmon/utils/file_importer_worker.js';
@@ -149,7 +149,7 @@ export abstract class FileImporter {
             this.#lastException = null;
             this.#failed = false;
             importedFile = await dir.createFile(filename) as IVirtualFile;
-            this.onPrepare(importedFile, integrity);
+            await this.onPrepare(importedFile, integrity);
 
             let fileSize: number = await fileToImport.length();
             let runningThreads: number = 1;

@@ -23,10 +23,10 @@ SOFTWARE.
 */
 
 import { BitConverter } from "../convert/bit_converter.js";
-import { MemoryStream } from "../iostream/memory_stream.js";
+import { MemoryStream } from "../streams/memory_stream.js";
 import { SalmonIntegrity } from "./integrity/salmon_integrity.js";
-import { SalmonStream } from "./iostream/salmon_stream.js";
-import { EncryptionMode } from "./iostream/encryption_mode.js";
+import { SalmonStream } from "./streams/salmon_stream.js";
+import { EncryptionMode } from "./streams/encryption_mode.js";
 import { SalmonGenerator } from "./salmon_generator.js";
 import { SalmonSecurityException } from "./salmon_security_exception.js";
 import { SalmonAES256CTRTransformer } from "./transform/salmon_aes256_ctr_transformer.js";
@@ -88,7 +88,7 @@ export class SalmonEncryptor {
      * @return {Promise<Uint8Array>} The byte array with the encrypted data.
      * @throws SalmonSecurityException
      * @throws IOException
-     * @throws SalmonIntegrityException
+     * @throws IntegrityException
      */
     public async encrypt(data: Uint8Array, key: Uint8Array, nonce: Uint8Array,
         storeHeaderData: boolean,

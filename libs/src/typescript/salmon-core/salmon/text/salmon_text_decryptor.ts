@@ -45,7 +45,7 @@ export class SalmonTextDecryptor {
      * @return {Promise<string>} The decrypted text.
      * @throws IOException
      * @throws SalmonSecurityException
-     * @throws SalmonIntegrityException
+     * @throws IntegrityException
      */
     public static async decryptString(text: string, key: Uint8Array, nonce: Uint8Array | null, header: boolean,
         integrity: boolean = false, hashKey: Uint8Array | null = null, chunkSize: number | null = null): Promise<string> {

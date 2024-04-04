@@ -21,13 +21,13 @@ LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 */
-import { ReadableStreamWrapper } from "../../../salmon-core/iostream/readable_stream_wrapper.js";
-import { SalmonStream } from "../../../salmon-core/salmon/iostream/salmon_stream.js";
+import { ReadableStreamWrapper } from "../../../salmon-core/streams/readable_stream_wrapper.js";
+import { SalmonStream } from "../../../salmon-core/salmon/streams/salmon_stream.js";
 import { IRealFile } from "../../file/ireal_file.js";
 import { JsFile } from "../../file/js_file.js";
 import { JsHttpFile } from "../../file/js_http_file.js";
 import { SalmonFile } from "../salmon_file.js";
-import { SalmonFileReadableStream } from "../iostream/salmon_file_readable_stream.js";
+import { SalmonFileReadableStream } from "../streams/salmon_file_readable_stream.js";
 
 export class SalmonServiceWorker {
 	static BUFFERS = 4;
@@ -77,7 +77,7 @@ export class SalmonServiceWorker {
 		} else {
 			let encStream: SalmonStream = await salmonFile.getInputStream();
 			stream = ReadableStreamWrapper.create(encStream);
-			stream.reset();
+			await stream.reset();
 			await stream.skip(position);
 		}
 

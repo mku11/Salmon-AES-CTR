@@ -22,9 +22,9 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 */
 
-import { MemoryStream } from "../iostream/memory_stream.js";
-import { SalmonStream } from "./iostream/salmon_stream.js";
-import { EncryptionMode } from "./iostream/encryption_mode.js";
+import { MemoryStream } from "../streams/memory_stream.js";
+import { SalmonStream } from "./streams/salmon_stream.js";
+import { EncryptionMode } from "./streams/encryption_mode.js";
 import { SalmonSecurityException } from "./salmon_security_exception.js";
 
 /**
@@ -41,7 +41,7 @@ import { SalmonSecurityException } from "./salmon_security_exception.js";
  * @param {number} chunkSize The chunk size. Thrown if there is an error with the stream.
  * @returns {Promise<{ startPos: number, endPos: number }>} The number of bytes decrypted.
  * @throws SalmonSecurityException Thrown if there is a security exception with the stream.
- * @throws SalmonIntegrityException Thrown if the stream is corrupt or tampered with.
+ * @throws IntegrityException Thrown if the stream is corrupt or tampered with.
  */
 export async function decryptData(data: Uint8Array, start: number, count: number, outData: Uint8Array,
     key: Uint8Array, nonce: Uint8Array, headerData: Uint8Array | null,

@@ -55,8 +55,8 @@ export class ReadableStreamWrapper {
                 await stream.close();
             }
         });
-        readableStream.reset = function (): void {
-            stream.setPosition(0);
+        readableStream.reset = async function(): Promise<void> {
+            await stream.setPosition(0);
         }
         readableStream.skip = async function (position: number): Promise<number> {
             return await stream.seek(position, SeekOrigin.Current);

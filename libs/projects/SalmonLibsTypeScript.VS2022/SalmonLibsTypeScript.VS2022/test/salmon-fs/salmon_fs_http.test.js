@@ -22,7 +22,7 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 */
 
-import { MemoryStream } from '../../lib/salmon-core/iostream/memory_stream.js';
+import { MemoryStream } from '../../lib/salmon-core/streams/memory_stream.js';
 import { JsHttpDrive } from '../../lib/salmon-fs/salmon/drive/js_http_drive.js';
 import { SalmonDrive } from '../../lib/salmon-fs/salmon/salmon_drive.js';
 import { SalmonFile } from '../../lib/salmon-fs/salmon/salmon_file.js';

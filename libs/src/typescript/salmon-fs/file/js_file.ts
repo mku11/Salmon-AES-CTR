@@ -22,10 +22,10 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 */
 
-import { RandomAccessStream } from '../../salmon-core/iostream/random_access_stream.js';
+import { RandomAccessStream } from '../../salmon-core/streams/random_access_stream.js';
 import { IRealFile, copyFileContents, moveRecursively } from './ireal_file.js';
-import { JsFileStream } from '../iostream/js_file_stream.js';
-import { IOException } from '../../salmon-core/iostream/io_exception.js';
+import { JsFileStream } from '../streams/js_file_stream.js';
+import { IOException } from '../../salmon-core/streams/io_exception.js';
 
 /**
  * Salmon real local filesystem implementation for Javascript. This can be used only with the 

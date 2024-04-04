@@ -45,7 +45,7 @@ export class SalmonTextEncryptor {
      * @returns {Promise<string>} The encrypted string.
      * @throws IOException
      * @throws SalmonSecurityException
-     * @throws SalmonIntegrityException
+     * @throws IntegrityException
      * @throws IOException
      */
     public static async encryptString(text: string, key: Uint8Array, nonce: Uint8Array, header: boolean,

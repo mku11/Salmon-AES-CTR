@@ -25,8 +25,8 @@ SOFTWARE.
 import { IRealFile } from "../file/ireal_file.js";
 import { IVirtualFile } from "../file/ivirtual_file.js";
 import { exportFilePart } from "./file_exporter_helper.js";
-import { RandomAccessStream } from "../../salmon-core/iostream/random_access_stream.js";
-import { IOException } from "../../salmon-core/iostream/io_exception.js";
+import { RandomAccessStream } from "../../salmon-core/streams/random_access_stream.js";
+import { IOException } from "../../salmon-core/streams/io_exception.js";
 
 export abstract class FileExporter {
     #workerPath = './lib/salmon-fs/salmon/utils/file_exporter_worker.js';

@@ -23,15 +23,20 @@ SOFTWARE.
 */
 
 import { SalmonGenerator } from "../../salmon-core/salmon/salmon_generator.js";
-import { MemoryStream } from "../../salmon-core/iostream/memory_stream.js";
-import { SalmonStream } from "../../salmon-core/salmon/iostream/salmon_stream.js";
+import { MemoryStream } from "../../salmon-core/streams/memory_stream.js";
+import { SalmonStream } from "../../salmon-core/salmon/streams/salmon_stream.js";
 import { SalmonIntegrity } from "../../salmon-core/salmon/integrity/salmon_integrity.js";
 import { SalmonDriveGenerator } from "./salmon_drive_generator.js";
 import { IRealFile } from "../file/ireal_file.js";
 import { SalmonAuthException } from "./salmon_auth_exception.js";
 import { SalmonDrive } from "./salmon_drive.js";
 import { SalmonFile } from "./salmon_file.js";
-import { RandomAccessStream } from "../../salmon-core/iostream/random_access_stream.js";
+import { RandomAccessStream } from "../../salmon-core/streams/random_access_stream.js";
+import { NonceSequence, Status } from "../sequence/nonce_sequence.js";
+import { SalmonSequenceException } from "./sequence/salmon_sequence_exception.js";
+import { SalmonSecurityException } from "../../salmon-core/salmon/salmon_security_exception.js";
+import { SalmonNonce } from "../../salmon-core/salmon/salmon_nonce.js";
+import { BitConverter } from "../../salmon-core/convert/bit_converter.js";
 
 /**
  * Device Authorization Configuration. This represents the authorization that will be provided
@@ -103,7 +108,7 @@ export class SalmonAuthConfig {
      * @param targetMaxNonce Maximum nonce for the target device.
      * @throws Exception
      */
-    public static async writeAuthFile(authConfigFile: IRealFile,
+    static async #writeAuthFile(authConfigFile: IRealFile,
         drive: SalmonDrive,
         targetAuthId: Uint8Array,
         targetStartingNonce: Uint8Array, targetMaxNonce: Uint8Array,
@@ -113,7 +118,7 @@ export class SalmonAuthConfig {
             throw new Error("Could not write auth file, no drive id found");
         let salmonFile: SalmonFile = new SalmonFile(authConfigFile, drive);
         let stream: RandomAccessStream = await salmonFile.getOutputStream(configNonce);
-        await SalmonAuthConfig.writeToStream(stream, driveId, targetAuthId, targetStartingNonce, targetMaxNonce);
+        await SalmonAuthConfig.#writeToStream(stream, driveId, targetAuthId, targetStartingNonce, targetMaxNonce);
     }
 
     /**
@@ -125,7 +130,7 @@ export class SalmonAuthConfig {
      * @param maxNonce The max nonce to be used byte the new device.
      * @throws Exception
      */
-    public static async writeToStream(stream: RandomAccessStream, driveId: Uint8Array, authId: Uint8Array,
+    static async #writeToStream(stream: RandomAccessStream, driveId: Uint8Array, authId: Uint8Array,
         nextNonce: Uint8Array, maxNonce: Uint8Array): Promise<void> {
         let ms: MemoryStream = new MemoryStream();
         try {
@@ -147,4 +152,128 @@ export class SalmonAuthConfig {
             await stream.close();
         }
     }
+    
+    /**
+     * Get the app drive pair configuration properties for this drive
+     *
+     * @param authFile The drive.
+     * @param authFile The encrypted authorization file.
+     * @return The decrypted authorization file.
+     * @throws Exception
+     */
+    static async #getAuthConfig(drive: SalmonDrive, authFile: IRealFile): Promise<SalmonAuthConfig> {
+        let salmonFile: SalmonFile = new SalmonFile(authFile, drive);
+        let stream: SalmonStream = await salmonFile.getInputStream();
+        let ms: MemoryStream = new MemoryStream();
+        await stream.copyTo(ms);
+        await ms.close();
+        await stream.close();
+        let driveConfig: SalmonAuthConfig = new SalmonAuthConfig();
+        await driveConfig.init(ms.toArray());
+        if (!await SalmonAuthConfig.#verifyAuthId(drive, driveConfig.getAuthId()))
+            throw new SalmonSecurityException("Could not authorize this device, the authorization id does not match");
+        return driveConfig;
+    }
+
+    
+    /**
+     * Verify the authorization id with the current drive auth id.
+     *
+     * @param authId The authorization id to verify.
+     * @return
+     * @throws Exception
+     */
+    static async #verifyAuthId(drive: SalmonDrive, authId: Uint8Array): Promise<boolean> {
+        let authIdBytes: Uint8Array = await drive.getAuthIdBytes();
+        return authId.every(async (val, index) => val === authIdBytes[index]);
+    }
+
+    /**
+     * Import sequence into the current drive.
+     *
+     * @param {SalmonDrive} drive
+     * @param {SalmonAuthConfig} authConfig
+     * @throws Exception
+     */
+    static async #importSequence(drive: SalmonDrive, authConfig: SalmonAuthConfig): Promise<void> {
+        let drvStr: string = BitConverter.toHex(authConfig.getDriveId());
+        let authStr: string = BitConverter.toHex(authConfig.getAuthId());
+        await drive.getSequencer().initializeSequence(drvStr, authStr, authConfig.getStartNonce(), authConfig.getMaxNonce());
+    }
+    
+    /**
+     * Import the device authorization file.
+     *
+     * @param authConfigFile The filepath to the authorization file.
+     * @throws Exception
+     */
+    public static async importAuthFile(drive: SalmonDrive, authConfigFile: IRealFile): Promise<void> {
+        let driveId: Uint8Array | null = drive.getDriveId();
+        if (driveId == null)
+            throw new Error("Could not get drive id, make sure you init the drive first");
+
+        let sequence: NonceSequence | null = await drive.getSequencer().getSequence(BitConverter.toHex(driveId));
+        if (sequence != null && sequence.getStatus() == Status.Active)
+            throw new Error("Device is already authorized");
+
+        if (authConfigFile == null || !await authConfigFile.exists())
+            throw new Error("Could not import file");
+
+        let authConfig: SalmonAuthConfig = await SalmonAuthConfig.#getAuthConfig(drive, authConfigFile);
+
+        let authIdBytes: Uint8Array = await drive.getAuthIdBytes();
+        if (!authConfig.getAuthId().every((val, index) => val === authIdBytes[index])
+            || !authConfig.getDriveId().every((val, index) => driveId != null && val == driveId[index])
+        )
+            throw new Error("Auth file doesn't match driveId or authId");
+
+        await SalmonAuthConfig.#importSequence(drive, authConfig);
+    }
+    
+    /**
+     * @param targetAuthId The authorization id of the target device.
+     * @param targetDir    The target dir the file will be written to.
+     * @param filename     The filename of the auth config file.
+     * @throws Exception
+     */
+    public static async exportAuthFile(drive: SalmonDrive, targetAuthId: string, file: IRealFile): Promise<void> {
+        let driveId: Uint8Array | null = drive.getDriveId();
+        if (driveId == null)
+            throw new Error("Could not get drive id, make sure you init the drive first");
+
+        let cfgNonce: Uint8Array | null = await drive.getSequencer().nextNonce(BitConverter.toHex(driveId));
+        if (cfgNonce == null)
+            throw new Error("Could not get config nonce");
+
+        let sequence: NonceSequence | null = await drive.getSequencer().getSequence(BitConverter.toHex(driveId));
+        if (sequence == null)
+            throw new Error("Device is not authorized to export");
+        if(await file.exists() && await file.length() > 0) {
+            let outStream: RandomAccessStream | null = null;
+            try {
+            outStream = await file.getOutputStream();
+            await outStream.setLength(0);
+            } catch(ex) {
+            } finally {
+                if(outStream != null)
+                    await outStream.close();
+            }
+        }
+        let maxNonce: Uint8Array | null = sequence.getMaxNonce();
+        if (maxNonce == null)
+            throw new SalmonSequenceException("Could not get current max nonce");
+        let nextNonce: Uint8Array | null = sequence.getNextNonce();
+        if (nextNonce == null)
+            throw new SalmonSequenceException("Could not get next nonce");
+        let pivotNonce: Uint8Array = SalmonNonce.splitNonceRange(nextNonce, maxNonce);
+        let authId: string | null = sequence.getAuthId();
+        if(authId == null)
+            throw new SalmonSequenceException("Could not get auth id");
+        await drive.getSequencer().setMaxNonce(sequence.getId(), authId, pivotNonce);
+        await SalmonAuthConfig.#writeAuthFile(file, drive,
+            BitConverter.hexToBytes(targetAuthId),
+            pivotNonce, maxNonce,
+            cfgNonce);
+    }
+
 }

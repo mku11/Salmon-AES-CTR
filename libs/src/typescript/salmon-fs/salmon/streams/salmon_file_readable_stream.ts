@@ -22,11 +22,11 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 */
 
-import { IOException } from "../../../salmon-core/iostream/io_exception.js";
-import { SalmonStream } from "../../../salmon-core/salmon/iostream/salmon_stream.js";
+import { IOException } from "../../../salmon-core/streams/io_exception.js";
+import { SalmonStream } from "../../../salmon-core/salmon/streams/salmon_stream.js";
 import { SalmonFile } from "../salmon_file.js";
 import { CacheBuffer, fillBufferPart } from "./salmon_file_readable_stream_helper.js";
-import { SalmonIntegrityException } from "../../../salmon-core/salmon/integrity/salmon_integrity_exception.js";
+import { IntegrityException } from "../../../salmon-core/integrity/integrity_exception.js";
 import { SalmonAuthException } from "../salmon_auth_exception.js";
 
 
@@ -36,7 +36,7 @@ import { SalmonAuthException } from "../salmon_auth_exception.js";
  * for performance.
  */
 export class SalmonFileReadableStream {
-    static #workerPath = './lib/salmon-fs/salmon/iostream/salmon_file_readable_stream_worker.js';
+    static #workerPath = './lib/salmon-fs/salmon/streams/salmon_file_readable_stream_worker.js';
 
     // Default cache buffer should be high enough for some mpeg videos to work
     // the cache buffers should be aligned to the SalmonFile chunk size for efficiency
@@ -346,8 +346,8 @@ export class ReadableStreamFileReader {
         }).catch((err) => {
             // deserialize the error
             if (err.error != undefined) {
-                if (err.type == 'SalmonIntegrityException')
-                    err = new SalmonIntegrityException(err.error);
+                if (err.type == 'IntegrityException')
+                    err = new IntegrityException(err.error);
                 else if (err.type == 'SalmonAuthException')
                     err = new SalmonAuthException(err.error);
                 else

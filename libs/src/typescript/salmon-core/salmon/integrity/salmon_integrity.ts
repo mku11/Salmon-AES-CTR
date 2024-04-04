@@ -26,7 +26,7 @@ import { SalmonGenerator } from "../salmon_generator.js";
 import { SalmonSecurityException } from "../salmon_security_exception.js";
 import { SalmonAES256CTRTransformer } from "../transform/salmon_aes256_ctr_transformer.js";
 import { IHashProvider } from "../../integrity/ihash_provider.js";
-import { SalmonIntegrityException } from "./salmon_integrity_exception.js";
+import { IntegrityException } from "../../integrity/integrity_exception.js";
 
 /**
  * Operations for calculating, storing, and verifying data integrity.
@@ -73,13 +73,13 @@ export class SalmonIntegrity {
      *                  Use a positive number to specify integrity chunks.
      * @param {IHashProvider} provider  Hash implementation provider.
      * @param {number} hashSize The hash size.
-     * @throws SalmonIntegrityException When integrity is comprimised
+     * @throws IntegrityException When integrity is comprimised
      * @throws SalmonSecurityException When security has failed
      */
     public constructor(integrity: boolean, key: Uint8Array | null, chunkSize: number | null = null, provider: IHashProvider, hashSize: number = 0) {
         if (chunkSize !== null && (chunkSize < 0 || (chunkSize > 0 && chunkSize < SalmonAES256CTRTransformer.BLOCK_SIZE)
             || (chunkSize > 0 && chunkSize % SalmonAES256CTRTransformer.BLOCK_SIZE != 0) || chunkSize > SalmonIntegrity.MAX_CHUNK_SIZE)) {
-            throw new SalmonIntegrityException("Invalid chunk size, specify zero for default value or a positive number multiple of: "
+            throw new IntegrityException("Invalid chunk size, specify zero for default value or a positive number multiple of: "
                 + SalmonAES256CTRTransformer.BLOCK_SIZE + " and less than: " + SalmonIntegrity.MAX_CHUNK_SIZE + " bytes");
         }
         if (integrity && key == null)
@@ -106,7 +106,7 @@ export class SalmonIntegrity {
      * @param {Uint8Array} key         Key that will be used
      * @param {Uint8Array | null} includeData Additional data to be included in the calculation.
      * @return {Promise<Uint8Array>} The hash.
-     * @throws SalmonIntegrityException
+     * @throws IntegrityException
      */
     public static async calculateHash(provider: IHashProvider, buffer: Uint8Array, offset: number, count: number,
         key: Uint8Array, includeData: Uint8Array | null): Promise<Uint8Array> {
@@ -190,7 +190,7 @@ export class SalmonIntegrity {
      * @param {Uint8Array} buffer The buffer containing the data chunks.
      * @param {boolean} includeHeaderData Include the header data in the first chunk.
      * @return {Promise<Uint8Array[] | null>} The hash signatures.
-     * @throws SalmonIntegrityException
+     * @throws IntegrityException
      */
     public async generateHashes(buffer: Uint8Array, includeHeaderData: Uint8Array | null): Promise<Uint8Array[] | null> {
         if (!this.#integrity)
@@ -226,7 +226,7 @@ export class SalmonIntegrity {
      * @param {Uint8Array[]} hashes The hashes to verify.
      * @param {number} buffer The buffer that contains the chunks to verify the hashes.
      * @param {boolean| null} includeHeaderData
-     * @throws SalmonIntegrityException
+     * @throws IntegrityException
      */
     public async verifyHashes(hashes: Uint8Array[], buffer: Uint8Array, includeHeaderData: Uint8Array | null) {
         let chunk: number = 0;
@@ -235,7 +235,7 @@ export class SalmonIntegrity {
             let hash: Uint8Array = await SalmonIntegrity.calculateHash(this.#provider, buffer, i, nChunkSize, this.getKey(), i == 0 ? includeHeaderData : null);
             for (let k: number = 0; k < hash.length; k++) {
                 if (hash[k] != hashes[chunk][k]) {
-                    throw new SalmonIntegrityException("Data corrupt or tampered");
+                    throw new IntegrityException("Data corrupt or tampered");
                 }
             }
             chunk++;

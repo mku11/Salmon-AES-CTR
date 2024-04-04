@@ -23,18 +23,18 @@ SOFTWARE.
 */
 
 import { BitConverter } from '../../lib/salmon-core/convert/bit_converter.js';
-import { MemoryStream } from '../../lib/salmon-core/iostream/memory_stream.js';
+import { MemoryStream } from '../../lib/salmon-core/streams/memory_stream.js';
 import { SalmonGenerator } from '../../lib/salmon-core/salmon/salmon_generator.js';
 import { SalmonEncryptor } from '../../lib/salmon-core/salmon/salmon_encryptor.js';
 import { SalmonDecryptor } from '../../lib/salmon-core/salmon/salmon_decryptor.js';
 import { SalmonTransformerFactory } from '../../lib/salmon-core/salmon/transform/salmon_transformer_factory.js';
 import { HmacSHA256Provider } from '../../lib/salmon-core/integrity/hmac_sha256_provider.js';
 import { SalmonIntegrity } from '../../lib/salmon-core/salmon/integrity/salmon_integrity.js';
-import { SeekOrigin } from '../../lib/salmon-core/iostream/random_access_stream.js';
+import { SeekOrigin } from '../../lib/salmon-core/streams/random_access_stream.js';
 import { SalmonAES256CTRTransformer } from '../../lib/salmon-core/salmon/transform/salmon_aes256_ctr_transformer.js';
-import { SalmonStream } from '../../lib/salmon-core/salmon/iostream/salmon_stream.js';
-import { EncryptionMode } from '../../lib/salmon-core/salmon/iostream/encryption_mode.js';
-import { ProviderType } from '../../lib/salmon-core/salmon/iostream/provider_type.js';
+import { SalmonStream } from '../../lib/salmon-core/salmon/streams/salmon_stream.js';
+import { EncryptionMode } from '../../lib/salmon-core/salmon/streams/encryption_mode.js';
+import { ProviderType } from '../../lib/salmon-core/salmon/streams/provider_type.js';
 
 export class SalmonCoreTestHelper {
     static TEST_ENC_BUFFER_SIZE = 512 * 1024;

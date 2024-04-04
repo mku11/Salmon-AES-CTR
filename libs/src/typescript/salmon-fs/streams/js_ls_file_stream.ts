@@ -22,8 +22,8 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 */
 
-import { MemoryStream } from "../../salmon-core/iostream/memory_stream.js";
-import { RandomAccessStream, SeekOrigin } from "../../salmon-core/iostream/random_access_stream.js";
+import { MemoryStream } from "../../salmon-core/streams/memory_stream.js";
+import { RandomAccessStream, SeekOrigin } from "../../salmon-core/streams/random_access_stream.js";
 import { IRealFile } from "../file/ireal_file.js";
 import { Base64 } from "../../salmon-core/convert/base64.js";
 
@@ -172,7 +172,7 @@ export class JsLocalStorageFileStream extends RandomAccessStream {
      * @throws IOException
      */
     public override async close(): Promise<void> {
-        this.flush();
-        this.#stream.close();
+        await this.flush();
+        await this.#stream.close();
     }
 }

@@ -23,11 +23,11 @@ SOFTWARE.
 */
 
 import { BitConverter } from "../../salmon-core/convert/bit_converter.js";
-import { IOException } from "../../salmon-core/iostream/io_exception.js";
-import { RandomAccessStream, SeekOrigin } from "../../salmon-core/iostream/random_access_stream.js";
+import { IOException } from "../../salmon-core/streams/io_exception.js";
+import { RandomAccessStream, SeekOrigin } from "../../salmon-core/streams/random_access_stream.js";
 import { SalmonGenerator } from "../../salmon-core/salmon/salmon_generator.js";
 import { SalmonHeader } from "../../salmon-core/salmon/salmon_header.js";
-import { SalmonStream } from "../../salmon-core/salmon/iostream/salmon_stream.js";
+import { SalmonStream } from "../../salmon-core/salmon/streams/salmon_stream.js";
 import {
     IRealFile, autoRename as IRealFileAutoRename,
     copyRecursively as IRealFileCopyRecursively,
@@ -35,9 +35,9 @@ import {
     deleteRecursively as IRealFileDeleteRecursively
 } from "../file/ireal_file.js";
 import { SalmonDrive } from "./salmon_drive.js";
-import { EncryptionMode } from "../../salmon-core/salmon/iostream/encryption_mode.js";
+import { EncryptionMode } from "../../salmon-core/salmon/streams/encryption_mode.js";
 import { SalmonSecurityException } from "../../salmon-core/salmon/salmon_security_exception.js";
-import { SalmonIntegrityException } from "../../salmon-core/salmon/integrity/salmon_integrity_exception.js";
+import { IntegrityException } from "../../salmon-core/integrity/integrity_exception.js";
 import { SalmonTextDecryptor } from "../../salmon-core/salmon/text/salmon_text_decryptor.js";
 import { SalmonTextEncryptor } from "../../salmon-core/salmon/text/salmon_text_encryptor.js";
 import { SalmonIntegrity } from "../../salmon-core/salmon/integrity/salmon_integrity.js";
@@ -164,7 +164,7 @@ export class SalmonFile implements IVirtualFile {
      * @return
      * @throws IOException
      * @throws SalmonSecurityException
-     * @throws SalmonIntegrityException
+     * @throws IntegrityException
      */
     public async getInputStream(): Promise<SalmonStream> {
         if (!(await this.exists()))
@@ -182,7 +182,7 @@ export class SalmonFile implements IVirtualFile {
         let chunkSize: number = BitConverter.toLong(fileChunkSizeBytes, 0, 4);
         // if user not requesting integrity we default to true if there are integrity chunks
         if (chunkSize > 0 && this.#reqChunkSize == null) {
-            this.setVerifyIntegrity(true, null);
+            await this.setVerifyIntegrity(true, null);
         }
         if (this.#integrity && chunkSize == 0)
             throw new SalmonSecurityException("Cannot check integrity if file doesn't support it");
@@ -325,11 +325,11 @@ export class SalmonFile implements IVirtualFile {
     public async setApplyIntegrity(integrity: boolean, hashKey: Uint8Array | null, requestChunkSize: number | null): Promise<void> {
         let fileChunkSize: number | null = await this.getFileChunkSize();
         if (fileChunkSize != null && !this.#overwrite)
-            throw new SalmonIntegrityException("Cannot redefine chunk size, delete file and recreate");
+            throw new IntegrityException("Cannot redefine chunk size, delete file and recreate");
         if (requestChunkSize != null && requestChunkSize < 0)
-            throw new SalmonIntegrityException("Chunk size needs to be zero for default chunk size or a positive value");
+            throw new IntegrityException("Chunk size needs to be zero for default chunk size or a positive value");
         if (integrity && fileChunkSize != null && fileChunkSize == 0)
-            throw new SalmonIntegrityException("Cannot enable integrity if the file is not created with integrity, export file and reimport with integrity");
+            throw new IntegrityException("Cannot enable integrity if the file is not created with integrity, export file and reimport with integrity");
 
         if (integrity && hashKey == null && this.#drive != null) {
             let key: SalmonDriveKey | null = this.#drive.getKey();
@@ -411,7 +411,7 @@ export class SalmonFile implements IVirtualFile {
         else if (!this.#integrity)
             this.#reqChunkSize = 0;
         if (this.#reqChunkSize == null)
-            throw new SalmonIntegrityException("File requires a chunk size");
+            throw new IntegrityException("File requires a chunk size");
 
         if (nonce != null)
             this.#requestedNonce = nonce;
@@ -473,7 +473,7 @@ export class SalmonFile implements IVirtualFile {
      * @param filename The filename to search for
      * @return
      * @throws SalmonSecurityException
-     * @throws SalmonIntegrityException
+     * @throws IntegrityException
      * @throws IOException
      * @throws SalmonAuthException
      */
@@ -565,7 +565,7 @@ export class SalmonFile implements IVirtualFile {
     async #getRelativePath(realPath: string): Promise<string> {
         if (this.#drive == null)
             throw new Error("File is not part of a drive");
-        let virtualRoot: SalmonFile | null = await this.#drive.getRoot();
+        let virtualRoot: IVirtualFile | null = await this.#drive.getRoot();
         if (virtualRoot == null)
             throw new Error("Could not find virtual root, if this file is part of a drive make sure you init first");
         let virtualRootPath: string = virtualRoot.getRealFile().getAbsolutePath();
@@ -582,7 +582,7 @@ export class SalmonFile implements IVirtualFile {
         if (this.#_baseName != null)
             return this.#_baseName;
         if (this.#drive != null) {
-            let virtualRoot: SalmonFile | null = await this.#drive.getRoot();
+            let virtualRoot: IVirtualFile | null = await this.#drive.getRoot();
             if (virtualRoot == null) {
                 throw new SalmonSecurityException("Could not get virtual root, you need to init drive first");
             }
@@ -602,7 +602,7 @@ export class SalmonFile implements IVirtualFile {
         try {
             if (this.#drive == null)
                 return null;
-            let virtualRoot: SalmonFile | null = await this.#drive.getRoot();
+            let virtualRoot: IVirtualFile | null = await this.#drive.getRoot();
             if (virtualRoot == null)
                 throw new SalmonSecurityException("Could not get virtual root, you need to init drive first");
             if (virtualRoot.getRealFile().getPath() == this.getRealFile().getPath()) {
@@ -661,7 +661,7 @@ export class SalmonFile implements IVirtualFile {
 
         // integrity has been requested but hash is missing
         if (this.#integrity && this.getHashKey() == null)
-            throw new SalmonIntegrityException("File requires hashKey, use SetVerifyIntegrity() to provide one");
+            throw new IntegrityException("File requires hashKey, use SetVerifyIntegrity() to provide one");
 
         return SalmonIntegrity.getTotalHashDataLength(await this.#realFile.length(), fileChunkSize,
             SalmonGenerator.HASH_RESULT_LENGTH, SalmonGenerator.HASH_KEY_LENGTH);

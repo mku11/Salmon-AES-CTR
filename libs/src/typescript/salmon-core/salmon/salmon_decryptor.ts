@@ -22,10 +22,10 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 */
 
-import { MemoryStream } from "../iostream/memory_stream.js";
+import { MemoryStream } from "../streams/memory_stream.js";
 import { SalmonIntegrity } from "./integrity/salmon_integrity.js";
-import { EncryptionMode } from "./iostream/encryption_mode.js";
-import { SalmonStream } from "./iostream/salmon_stream.js";
+import { EncryptionMode } from "./streams/encryption_mode.js";
+import { SalmonStream } from "./streams/salmon_stream.js";
 import { SalmonHeader } from "./salmon_header.js";
 import { SalmonSecurityException } from "./salmon_security_exception.js";
 import { SalmonAES256CTRTransformer } from "./transform/salmon_aes256_ctr_transformer.js";
@@ -86,7 +86,7 @@ export class SalmonDecryptor {
      * @ Thrown if there is a problem with decoding the array.
      * @throws SalmonSecurityException Thrown if the key and nonce are not provided.
      * @throws IOException
-     * @throws SalmonIntegrityException
+     * @throws IntegrityException
      */
     public async decrypt(data: Uint8Array, key: Uint8Array, nonce: Uint8Array | null,
         hasHeaderData: boolean,

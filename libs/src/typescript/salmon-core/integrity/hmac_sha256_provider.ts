@@ -23,7 +23,7 @@ SOFTWARE.
 */
 
 import { IHashProvider } from "./ihash_provider.js";
-import { SalmonIntegrityException } from "../salmon/integrity/salmon_integrity_exception.js";
+import { IntegrityException } from "./integrity_exception.js";
 
 /**
  * Provides HMAC SHA-256 hashing.
@@ -37,7 +37,7 @@ export class HmacSHA256Provider implements IHashProvider {
      * @param {number} offset The position reading will start from.
      * @param {number} count The count of bytes to be read.
      * @return {Promise<Uint8Array>} The HMAC SHA256 hash.
-     * @throws SalmonIntegrityException thrown if hash cannot be calculated
+     * @throws IntegrityException thrown if hash cannot be calculated
      */
     public async calc(hashKey: Uint8Array, buffer: Uint8Array, offset: number, count: number): Promise<Uint8Array> {
         try {
@@ -45,7 +45,7 @@ export class HmacSHA256Provider implements IHashProvider {
             const hashValue: Uint8Array = new Uint8Array(await crypto.subtle.sign('HMAC', cryptoKey, buffer.slice(offset, offset + count)));
             return hashValue;
         } catch (ex) {
-            throw new SalmonIntegrityException("Could not calculate HMAC", ex);
+            throw new IntegrityException("Could not calculate HMAC", ex);
         }
     }
 }

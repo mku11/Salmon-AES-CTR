@@ -23,13 +23,13 @@ SOFTWARE.
 */
 
 import { BitConverter } from '../../lib/salmon-core/convert/bit_converter.js';
-import { MemoryStream } from '../../lib/salmon-core/iostream/memory_stream.js';
+import { MemoryStream } from '../../lib/salmon-core/streams/memory_stream.js';
 import { SalmonGenerator } from '../../lib/salmon-core/salmon/salmon_generator.js';
 import { SalmonEncryptor } from '../../lib/salmon-core/salmon/salmon_encryptor.js';
 import { SalmonDecryptor } from '../../lib/salmon-core/salmon/salmon_decryptor.js';
-import { SalmonStream } from '../../lib/salmon-core/salmon/iostream/salmon_stream.js';
-import { EncryptionMode } from '../../lib/salmon-core/salmon/iostream/encryption_mode.js';
-import { ReadableStreamWrapper } from '../../lib/salmon-core/iostream/readable_stream_wrapper.js';
+import { SalmonStream } from '../../lib/salmon-core/salmon/streams/salmon_stream.js';
+import { EncryptionMode } from '../../lib/salmon-core/salmon/streams/encryption_mode.js';
+import { ReadableStreamWrapper } from '../../lib/salmon-core/streams/readable_stream_wrapper.js';
 import { SalmonCoreTestHelper } from '../salmon-core/salmon_core_test_helper.js';
 import { SalmonTextEncryptor } from '../../lib/salmon-core/salmon/text/salmon_text_encryptor.js';
 import { SalmonTextDecryptor } from '../../lib/salmon-core/salmon/text/salmon_text_decryptor.js';
@@ -40,8 +40,9 @@ import { SalmonFileSequencer } from '../../lib/salmon-fs/salmon/sequence/salmon_
 import { SalmonFileImporter } from '../../lib/salmon-fs/salmon/utils/salmon_file_importer.js';
 import { SalmonFileExporter } from '../../lib/salmon-fs/salmon/utils/salmon_file_exporter.js';
 import { FileSearcher } from '../../lib/salmon-fs/utils/file_searcher.js';
-import { SalmonFileReadableStream } from '../../lib/salmon-fs/salmon/iostream/salmon_file_readable_stream.js';
+import { SalmonFileReadableStream } from '../../lib/salmon-fs/salmon/streams/salmon_file_readable_stream.js';
 import { JsHttpDrive } from '../../lib/salmon-fs/salmon/drive/js_http_drive.js';
+import { SalmonAuthConfig } from '../../lib/salmon-fs/salmon/salmon_auth_config.js';
 
 export const TestMode = {
     Local: { name: 'Local', ordinal: 0 },
@@ -55,7 +56,7 @@ export async function setTestMode(testMode) {
     if (testMode == TestMode.Local) {
         const { JsDrive } = await import('../../lib/salmon-fs/salmon/drive/js_drive.js');
         const { JsFile } = await import('../../lib/salmon-fs/file/js_file.js');
-        const { JsFileStream } = await import('../../lib/salmon-fs/iostream/js_file_stream.js');
+        const { JsFileStream } = await import('../../lib/salmon-fs/streams/js_file_stream.js');
 
         SalmonFSTestHelper.driveClassType = JsDrive;
         getFile = async (filepath, filename) => {
@@ -105,7 +106,7 @@ export async function setTestMode(testMode) {
     } else if (testMode == TestMode.Node) {
         const { JsNodeDrive } = await import('../../lib/salmon-fs/salmon/drive/js_node_drive.js');
         const { JsNodeFile } = await import('../../lib/salmon-fs/file/js_node_file.js');
-        const { JsNodeFileStream } = await import('../../lib/salmon-fs/iostream/js_node_file_stream.js');
+        const { JsNodeFileStream } = await import('../../lib/salmon-fs/streams/js_node_file_stream.js');
 
         SalmonFSTestHelper.driveClassType = JsNodeDrive;
         getFile = async (filepath, filename) => {
@@ -117,10 +118,10 @@ export async function setTestMode(testMode) {
     } else if (testMode == TestMode.Http) {
         const { JsHttpDrive } = await import('../../lib/salmon-fs/salmon/drive/js_http_drive.js');
         const { JsHttpFile } = await import('../../lib/salmon-fs/file/js_http_file.js');
-        const { JsHttpFileStream } = await import('../../lib/salmon-fs/iostream/js_http_file_stream.js');
+        const { JsHttpFileStream } = await import('../../lib/salmon-fs/streams/js_http_file_stream.js');
 
         SalmonFSTestHelper.driveClassType = JsHttpDrive;
-        getFile = async (filepath) => {
+        getFile = async (filepath, filename) => {
             if (typeof (filename) != 'undefined')
                 filepath += JsHttpFile.separator + filename
             return new JsHttpFile(filepath);
@@ -384,6 +385,8 @@ export class SalmonFSTestHelper {
         readFile.setRequestedNonce(fileNonce);
         if (verifyIntegrity)
             await readFile.setVerifyIntegrity(true, hashKey);
+        else
+        await readFile.setVerifyIntegrity(false, null);
         let inStream = await readFile.getInputStream();
         let textBytes = new Uint8Array(testBytes.length);
         await inStream.read(textBytes, 0, textBytes.length);
@@ -428,7 +431,7 @@ export class SalmonFSTestHelper {
         //reopen with first device sequencer and export the auth file with the auth id from the second device
         drive = await SalmonDrive.openDrive(vault, SalmonFSTestHelper.driveClassType, SalmonCoreTestHelper.TEST_PASSWORD, sequencer1);
         let exportFile = await getFile(vault, SalmonFSTestHelper.TEST_EXPORT_FILENAME);
-        await drive.exportAuthFile(authId, exportFile);
+        await SalmonAuthConfig.exportAuthFile(drive, authId, exportFile);
         let exportAuthFile = await getFile(vault, SalmonFSTestHelper.TEST_EXPORT_FILENAME);
         let salmonCfgFile = new SalmonFile(exportAuthFile, drive);
         let nonceCfg = BitConverter.toLong(await salmonCfgFile.getFileNonce(), 0, SalmonGenerator.NONCE_LENGTH);
@@ -441,7 +444,7 @@ export class SalmonFSTestHelper {
 
         //reopen with second device(sequencer) and import auth file
         drive = await SalmonDrive.openDrive(vault, SalmonFSTestHelper.driveClassType, SalmonCoreTestHelper.TEST_PASSWORD, sequencer2);
-        await drive.importAuthFile(exportAuthFile);
+        await SalmonAuthConfig.importAuthFile(drive, exportAuthFile);
         // now import a 3rd file
         rootDir = await drive.getRoot();
         fileToImport = await getFile(importFilePath);
@@ -856,7 +859,7 @@ export class SalmonFSTestHelper {
         console.log(tdata);
         console.log(buffer);
         reader.releaseLock();
-        stream.cancel();
+        await stream.cancel();
         SalmonCoreTestHelper.assertArrayEquals(tdata, buffer);
     }
 }

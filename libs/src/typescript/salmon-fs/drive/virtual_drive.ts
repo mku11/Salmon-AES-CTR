@@ -22,8 +22,8 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 */
 
-import { IRealFile } from "./ireal_file";
-import { IVirtualFile } from "./ivirtual_file";
+import { IRealFile } from "../file/ireal_file";
+import { IVirtualFile } from "../file/ivirtual_file";
 
 /*
  * Virtual Drive 
@@ -39,7 +39,14 @@ export abstract class VirtualDrive {
      */
     public abstract onUnlockError(): void;
 	
+    /**
+     * Get a private dir for sharing files with other apps.
+     */
 	public abstract getPrivateDir(): IRealFile;
 
-    public abstract getPrivateDir(): string;
+    /**
+     * Get a virtual file backed by a real file.
+     * @param file 
+     */
+    public abstract getFile(file: IRealFile): IVirtualFile;
 }

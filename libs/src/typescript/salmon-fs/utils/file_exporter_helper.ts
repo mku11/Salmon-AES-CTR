@@ -24,7 +24,7 @@ SOFTWARE.
 
 import { IRealFile } from "../file/ireal_file.js";
 import { IVirtualFile } from "../file/ivirtual_file.js";
-import { RandomAccessStream } from "../../salmon-core/iostream/random_access_stream.js";
+import { RandomAccessStream } from "../../salmon-core/streams/random_access_stream.js";
 
 /**
  * Export a file part from the drive.

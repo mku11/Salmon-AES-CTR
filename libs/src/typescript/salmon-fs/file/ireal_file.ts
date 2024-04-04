@@ -22,7 +22,7 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 */
 
-import { RandomAccessStream } from "../../salmon-core/iostream/random_access_stream.js";
+import { RandomAccessStream } from "../../salmon-core/streams/random_access_stream.js";
 
 /**
  * Interface that represents a real file. This class is used internally by the virtual disk to

@@ -24,7 +24,7 @@ SOFTWARE.
 
 import { IRealFile } from "../../file/ireal_file.js";
 import { IVirtualFile } from "../../file/ivirtual_file.js";
-import { SalmonIntegrityException } from "../../../salmon-core/salmon/integrity/salmon_integrity_exception.js";
+import { IntegrityException } from "../../../salmon-core/integrity/integrity_exception.js";
 import { SalmonAuthException } from "../salmon_auth_exception.js";
 import { FileImporter } from "../../utils/file_importer.js";
 import { SalmonFile } from "../salmon_file.js";
@@ -58,8 +58,8 @@ export class SalmonFileImporter extends FileImporter {
     getError(err: any) {
         // deserialize the error
         if (err.error != undefined ) {
-            if(err.type == 'SalmonIntegrityException')
-                err = new SalmonIntegrityException(err.error);
+            if(err.type == 'IntegrityException')
+                err = new IntegrityException(err.error);
             else if(err.type == 'SalmonAuthException')
                 err = new SalmonAuthException(err.error);
             else

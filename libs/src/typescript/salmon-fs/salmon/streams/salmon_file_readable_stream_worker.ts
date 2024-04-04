@@ -22,7 +22,7 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 */
 
-import { SalmonStream } from "../../../salmon-core/salmon/iostream/salmon_stream.js";
+import { SalmonStream } from "../../../salmon-core/salmon/streams/salmon_stream.js";
 import { IRealFile } from "../../file/ireal_file.js";
 import { SalmonFile } from "../salmon_file.js";
 import { fillBufferPart, CacheBuffer } from "./salmon_file_readable_stream_helper.js";

@@ -22,7 +22,7 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 */
 
-import { SalmonIntegrityException } from "../../../salmon-core/salmon/integrity/salmon_integrity_exception.js";
+import { IntegrityException } from "../../../salmon-core/integrity/integrity_exception.js";
 import { IRealFile } from "../../file/ireal_file.js";
 import { IVirtualFile } from "../../file/ivirtual_file.js";
 import { FileExporter } from "../../utils/file_exporter.js";
@@ -47,8 +47,8 @@ export class SalmonFileExporter extends FileExporter {
 
     getError(err: any) {
         if (err.error != undefined) {
-            if (err.type == 'SalmonIntegrityException')
-                err = new SalmonIntegrityException(err.error);
+            if (err.type == 'IntegrityException')
+                err = new IntegrityException(err.error);
             else if (err.type == 'SalmonAuthException')
                 err = new SalmonAuthException(err.error);
             else

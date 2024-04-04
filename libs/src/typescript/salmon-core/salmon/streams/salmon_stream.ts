@@ -22,12 +22,12 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 */
 
-import { IOException } from "../../iostream/io_exception.js";
-import { MemoryStream } from "../../iostream/memory_stream.js";
-import { RandomAccessStream, SeekOrigin } from "../../iostream/random_access_stream.js";
+import { IOException } from "../../streams/io_exception.js";
+import { MemoryStream } from "../../streams/memory_stream.js";
+import { RandomAccessStream, SeekOrigin } from "../../streams/random_access_stream.js";
 import { HmacSHA256Provider } from "../../integrity/hmac_sha256_provider.js";
 import { SalmonIntegrity } from "../integrity/salmon_integrity.js";
-import { SalmonIntegrityException } from "../integrity/salmon_integrity_exception.js";
+import { IntegrityException } from "../../integrity/integrity_exception.js";
 import { SalmonGenerator } from "../salmon_generator.js";
 import { SalmonSecurityException } from "../salmon_security_exception.js";
 import { ISalmonCTRTransformer } from "../transform/isalmon_ctr_transformer.js";
@@ -107,7 +107,7 @@ export class SalmonStream extends RandomAccessStream {
      * @param {Uint8Array | null} hashKey The hash key to be used for integrity checks.
      * @return {Promise<number>} The size of the output data.
      * @throws SalmonSecurityException
-     * @throws SalmonIntegrityException
+     * @throws IntegrityException
      * @throws IOException
      */
     public static async getActualSize(data: Uint8Array, key: Uint8Array, nonce: Uint8Array, mode: EncryptionMode,
@@ -140,7 +140,7 @@ export class SalmonStream extends RandomAccessStream {
      * @param {Uint8Array | null} hashKey        Hash key to be used with integrity
      * @throws IOException
      * @throws SalmonSecurityException
-     * @throws SalmonIntegrityException
+     * @throws IntegrityException
      */
     public constructor(key: Uint8Array, nonce: Uint8Array, encryptionMode: EncryptionMode,
         baseStream: RandomAccessStream, headerData: Uint8Array | null = null,
@@ -320,7 +320,7 @@ export class SalmonStream extends RandomAccessStream {
      * @param {Uint8Array | null} hashKey
      * @param {number | null} chunkSize
      * @throws SalmonSecurityException
-     * @throws SalmonIntegrityException
+     * @throws IntegrityException
      */
     #initIntegrity(integrity: boolean, hashKey: Uint8Array | null, chunkSize: number | null): void {
         this.#salmonIntegrity = new SalmonIntegrity(integrity, hashKey, chunkSize,
@@ -604,7 +604,7 @@ export class SalmonStream extends RandomAccessStream {
                 bytes += len;
                 this.#transformer.syncCounter(await this.getPosition());
             } catch (ex) {
-                if (ex instanceof SalmonIntegrityException && this.#failSilently)
+                if (ex instanceof IntegrityException && this.#failSilently)
                     return -1;
                 throw new IOException("Could not read from stream: ", ex);
             }
@@ -626,10 +626,10 @@ export class SalmonStream extends RandomAccessStream {
         await this.#init(this.#key, this.#nonce);
 
         if (this.#salmonIntegrity.getChunkSize() > 0 && await this.getPosition() % this.#salmonIntegrity.getChunkSize() != 0)
-            throw new IOException(null, new SalmonIntegrityException("All write operations should be aligned to the chunks size: "
+            throw new IOException(null, new IntegrityException("All write operations should be aligned to the chunks size: "
                 + this.#salmonIntegrity.getChunkSize()));
         else if (this.#salmonIntegrity.getChunkSize() == 0 && await this.getPosition() % SalmonAES256CTRTransformer.BLOCK_SIZE != 0)
-            throw new IOException(null, new SalmonIntegrityException("All write operations should be aligned to the block size: "
+            throw new IOException(null, new IntegrityException("All write operations should be aligned to the block size: "
                 + SalmonAES256CTRTransformer.BLOCK_SIZE));
 
         // if there are not enough data in the buffer

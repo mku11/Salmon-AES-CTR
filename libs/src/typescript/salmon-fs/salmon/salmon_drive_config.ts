@@ -23,8 +23,8 @@ SOFTWARE.
 */
 
 import { BitConverter } from "../../salmon-core/convert/bit_converter.js";
-import { MemoryStream } from "../../salmon-core/iostream/memory_stream.js";
-import { RandomAccessStream } from "../../salmon-core/iostream/random_access_stream.js";
+import { MemoryStream } from "../../salmon-core/streams/memory_stream.js";
+import { RandomAccessStream } from "../../salmon-core/streams/random_access_stream.js";
 import { SalmonGenerator } from "../../salmon-core/salmon/salmon_generator.js";
 import { IRealFile } from "../file/ireal_file.js";
 import { SalmonDriveGenerator } from "./salmon_drive_generator.js";

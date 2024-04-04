@@ -22,7 +22,7 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 */
 
-import { RandomAccessStream } from "../../salmon-core/iostream/random_access_stream"
+import { RandomAccessStream } from "../../salmon-core/streams/random_access_stream"
 import { IRealFile } from "./ireal_file";
 
 export interface IVirtualFile {

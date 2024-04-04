@@ -22,15 +22,15 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 */
 
-import { MemoryStream } from '../../lib/salmon-core/iostream/memory_stream.js';
+import { MemoryStream } from '../../lib/salmon-core/streams/memory_stream.js';
 import { BitConverter } from '../../lib/salmon-core/convert/bit_converter.js';
 import { SalmonDrive } from '../../lib/salmon-fs/salmon/salmon_drive.js';
 import { SalmonCoreTestHelper } from '../salmon-core/salmon_core_test_helper.js';
 import { getFile, getSequenceSerializer, SalmonFSTestHelper } from './salmon_fs_test_helper.js';
 import { SalmonFileSequencer } from '../../lib/salmon-fs/salmon/sequence/salmon_file_sequencer.js';
-import { SalmonIntegrityException } from '../../lib/salmon-core/salmon/integrity/salmon_integrity_exception.js';
+import { IntegrityException } from '../../lib/salmon-core/integrity/integrity_exception.js';
 import { copyRecursively, moveRecursively, autoRenameFile } from '../../lib/salmon-fs/file/ireal_file.js'
-import { SalmonFileReadableStream } from '../../lib/salmon-fs/salmon/iostream/salmon_file_readable_stream.js';
+import { SalmonFileReadableStream } from '../../lib/salmon-fs/salmon/streams/salmon_file_readable_stream.js';
 import { SalmonFileCommander } from '../../lib/salmon-fs/salmon/utils/salmon_file_commander.js';
 import { SalmonAuthException } from '../../lib/salmon-fs/salmon/salmon_auth_exception.js'
 import { SalmonIntegrity } from '../../lib/salmon-core/salmon/integrity/salmon_integrity.js';
@@ -41,7 +41,7 @@ describe('salmon-fs', () => {
 		//SalmonCoreTestHelper.TEST_DEC_BUFFER_SIZE = 1 * 1024 * 1024;
 		SalmonCoreTestHelper.TEST_ENC_THREADS = 1;
 		SalmonCoreTestHelper.TEST_DEC_THREADS = 1;
-	}
+	});
 	
     beforeEach(() => {
         SalmonFSTestHelper.TEST_IMPORT_FILE = SalmonFSTestHelper.TEST_IMPORT_SMALL_FILE;
@@ -104,7 +104,7 @@ describe('salmon-fs', () => {
                 true, 24 + 10, true, false, false);
         } catch (ex) {
             console.error(ex);
-            if (ex.getCause != undefined && ex.getCause() instanceof SalmonIntegrityException)
+            if (ex.getCause != undefined && ex.getCause() instanceof IntegrityException)
                 integrityFailed = true;
         }
         expect(integrityFailed).toBeFalsy();
@@ -161,7 +161,7 @@ describe('salmon-fs', () => {
                 true, 24 + 10, false, true, true);
         } catch (ex) {
             console.error(ex);
-            if (ex.getCause != undefined && ex.getCause() instanceof SalmonIntegrityException)
+            if (ex.getCause != undefined && ex.getCause() instanceof IntegrityException)
                 integrityFailed = true;
         }
 
@@ -176,7 +176,7 @@ describe('salmon-fs', () => {
                 true, 24 + 10, false, false, false);
         } catch (ex) {
             console.error(ex);
-            if (ex.getCause != undefined && ex.getCause() instanceof SalmonIntegrityException)
+            if (ex.getCause != undefined && ex.getCause() instanceof IntegrityException)
                 integrityFailed = true;
             failed = true;
         }
@@ -193,7 +193,7 @@ describe('salmon-fs', () => {
                 true, false);
         } catch (ex) {
             console.error(ex);
-            if (ex.getCause != undefined && ex.getCause() instanceof SalmonIntegrityException)
+            if (ex.getCause != undefined && ex.getCause() instanceof IntegrityException)
                 failed = true;
         }
 
@@ -208,7 +208,7 @@ describe('salmon-fs', () => {
                 true, false);
         } catch (ex) {
             console.error(ex);
-            if (ex.getCause != undefined && ex.getCause() instanceof SalmonIntegrityException)
+            if (ex.getCause != undefined && ex.getCause() instanceof IntegrityException)
                 failed = true;
         }
 
@@ -223,7 +223,7 @@ describe('salmon-fs', () => {
                 true, true);
         } catch (ex) {
             console.error(ex);
-            if (ex.getCause != undefined && ex.getCause() instanceof SalmonIntegrityException)
+            if (ex.getCause != undefined && ex.getCause() instanceof IntegrityException)
                 integrityFailed = true;
         }
 
@@ -239,7 +239,7 @@ describe('salmon-fs', () => {
                 true, true);
         } catch (ex) {
             console.error(ex);
-            if (ex.getCause != undefined && ex.getCause() instanceof SalmonIntegrityException)
+            if (ex.getCause != undefined && ex.getCause() instanceof IntegrityException)
                 integrityCaught = true;
             importSuccess = false;
         }
@@ -293,7 +293,7 @@ describe('salmon-fs', () => {
                 true, 45, true);
         } catch (ex) {
             console.error(ex);
-            if (ex.getCause != undefined && ex.getCause() instanceof SalmonIntegrityException)
+            if (ex.getCause != undefined && ex.getCause() instanceof IntegrityException)
                 caught = true;
         }
 
@@ -312,7 +312,7 @@ describe('salmon-fs', () => {
                     SalmonFSTestHelper.TEST_OUTPUT_DIR, true, i, false);
             } catch (ex) {
                 console.error(ex);
-                if (ex.getCause != undefined && ex.getCause() instanceof SalmonIntegrityException)
+                if (ex.getCause != undefined && ex.getCause() instanceof IntegrityException)
                     caught = true;
                 failed = true;
             }
@@ -333,7 +333,7 @@ describe('salmon-fs', () => {
                 true, 24 + 32 + 5, true);
         } catch (ex) {
             console.error(ex);
-            if (ex.getCause != undefined && ex.getCause() instanceof SalmonIntegrityException)
+            if (ex.getCause != undefined && ex.getCause() instanceof IntegrityException)
                 caught = true;
             else
                 failed = true;
@@ -377,7 +377,7 @@ describe('salmon-fs', () => {
         await SalmonFSTestHelper.seekAndReadFileInputStream(data, fileInputStream, 50, 40, 0, 40);
         await SalmonFSTestHelper.seekAndReadFileInputStream(data, fileInputStream, 124, 50, 0, 50);
         await SalmonFSTestHelper.seekAndReadFileInputStream(data, fileInputStream, 250, 10, 0, 6);
-        fileInputStream.cancel();
+        await fileInputStream.cancel();
     });
 
     it('shouldCreateDriveAndOpenFsFolder', async () => {

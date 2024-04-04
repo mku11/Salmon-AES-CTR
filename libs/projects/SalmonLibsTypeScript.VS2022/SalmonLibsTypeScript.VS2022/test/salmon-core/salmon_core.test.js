@@ -24,13 +24,13 @@ SOFTWARE.
 
 import { BitConverter } from '../../lib/salmon-core/convert/bit_converter.js';
 import { SalmonGenerator } from '../../lib/salmon-core/salmon/salmon_generator.js';
-import { MemoryStream } from '../../lib/salmon-core/iostream/memory_stream.js';
-import { EncryptionMode } from '../../lib/salmon-core/salmon/iostream/encryption_mode.js';
-import { SalmonIntegrityException } from '../../lib/salmon-core/salmon/integrity/salmon_integrity_exception.js';
+import { MemoryStream } from '../../lib/salmon-core/streams/memory_stream.js';
+import { EncryptionMode } from '../../lib/salmon-core/salmon/streams/encryption_mode.js';
+import { IntegrityException } from '../../lib/salmon-core/integrity/integrity_exception.js';
 import { SalmonTextEncryptor } from '../../lib/salmon-core/salmon/text/salmon_text_encryptor.js';
 import { SalmonTextDecryptor } from '../../lib/salmon-core/salmon/text/salmon_text_decryptor.js';
-import { SalmonStream } from '../../lib/salmon-core/salmon/iostream/salmon_stream.js';
-import { ProviderType } from '../../lib/salmon-core/salmon/iostream/provider_type.js';
+import { SalmonStream } from '../../lib/salmon-core/salmon/streams/salmon_stream.js';
+import { ProviderType } from '../../lib/salmon-core/salmon/streams/provider_type.js';
 import { SalmonCoreTestHelper } from './salmon_core_test_helper.js';
 import { SalmonSecurityException } from '../../lib/salmon-core/salmon/salmon_security_exception.js';
 import { SalmonRangeExceededException } from '../../lib/salmon-core/salmon/salmon_range_exceeded_exception.js';
@@ -41,7 +41,7 @@ describe('salmon-core', () => {
 		//SalmonCoreTestHelper.TEST_DEC_BUFFER_SIZE = 1 * 1024 * 1024;
 		SalmonCoreTestHelper.TEST_ENC_THREADS = 1;
 		SalmonCoreTestHelper.TEST_DEC_THREADS = 1;
-	}
+	});
 	
     beforeEach(() => {
         SalmonStream.setAesProviderType(ProviderType.Default);
@@ -260,7 +260,7 @@ describe('salmon-core', () => {
             await SalmonCoreTestHelper.encryptWriteDecryptRead(SalmonCoreTestHelper.TEST_TEXT, SalmonCoreTestHelper.TEST_KEY_BYTES, SalmonCoreTestHelper.TEST_NONCE_BYTES, 16 * 2 + 3, 16 * 2,
                 true, 32, SalmonCoreTestHelper.TEST_HMAC_KEY_BYTES, false, null, null);
         } catch (ex) {
-            if (ex.getCause() instanceof SalmonIntegrityException)
+            if (ex.getCause() instanceof IntegrityException)
                 caught = true;
         }
 
@@ -275,7 +275,7 @@ describe('salmon-core', () => {
                 true, null, SalmonCoreTestHelper.TEST_HMAC_KEY_BYTES, false, null, null
             );
         } catch (ex) {
-            if (ex.getCause() instanceof SalmonIntegrityException)
+            if (ex.getCause() instanceof IntegrityException)
                 caught = true;
         }
 
@@ -297,7 +297,7 @@ describe('salmon-core', () => {
                 true, null, SalmonCoreTestHelper.TEST_HMAC_KEY_BYTES, false, null, null
             );
         } catch (ex) {
-            if (ex.getCause() instanceof SalmonIntegrityException)
+            if (ex.getCause() instanceof IntegrityException)
                 caught = true;
         }
 
@@ -313,7 +313,7 @@ describe('salmon-core', () => {
                 true, null, SalmonCoreTestHelper.TEST_HMAC_KEY_BYTES, true, null, null
             );
         } catch (ex) {
-            if (ex.getCause() instanceof SalmonIntegrityException)
+            if (ex.getCause() instanceof IntegrityException)
                 caught = true;
         }
 
@@ -328,7 +328,7 @@ describe('salmon-core', () => {
                 true, 32, SalmonCoreTestHelper.TEST_HMAC_KEY_BYTES, true, null, null
             );
         } catch (ex) {
-            if (ex.getCause() instanceof SalmonIntegrityException)
+            if (ex.getCause() instanceof IntegrityException)
                 caught = true;
         }
 
@@ -435,7 +435,7 @@ describe('salmon-core', () => {
                 5, SalmonCoreTestHelper.TEST_TEXT_WRITE.length, SalmonCoreTestHelper.TEST_TEXT_WRITE, false,
                 32, SalmonCoreTestHelper.TEST_HMAC_KEY_BYTES, true);
         } catch (ex) {
-            if (ex.getCause() instanceof SalmonIntegrityException)
+            if (ex.getCause() instanceof IntegrityException)
                 caught = true;
         }
 

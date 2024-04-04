@@ -30,8 +30,8 @@ import { INonceSequencer } from "../../sequence/inonce_sequencer.js";
 import { Status, NonceSequence } from "../../sequence/nonce_sequence.js";
 import { SalmonNonce } from "../../../salmon-core/salmon/salmon_nonce.js";
 import { SalmonSequenceException } from "./salmon_sequence_exception.js";
-import { MemoryStream } from "../../../salmon-core/iostream/memory_stream.js";
-import { RandomAccessStream } from "../../../salmon-core/iostream/random_access_stream.js";
+import { MemoryStream } from "../../../salmon-core/streams/memory_stream.js";
+import { RandomAccessStream } from "../../../salmon-core/streams/random_access_stream.js";
 
 /**
  * Generates nonces based on a sequencer backed by a file.

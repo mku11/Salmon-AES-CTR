@@ -22,7 +22,7 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 */
 
-import { RandomAccessStream, SeekOrigin } from "../../salmon-core/iostream/random_access_stream.js";
+import { RandomAccessStream, SeekOrigin } from "../../salmon-core/streams/random_access_stream.js";
 import { IRealFile } from "../file/ireal_file.js";
 
 // File operations on the local file system may be slow due to
@@ -133,7 +133,7 @@ export class JsFileStream extends RandomAccessStream {
             let stream: FileSystemWritableFileStream = (await this.#getStream());
 			try {
 				if(await this.#file.length() < value)
-					stream.truncate(value);
+					await stream.truncate(value);
 				else
 					await stream.seek(this.#_position);
 			} catch(ex) {

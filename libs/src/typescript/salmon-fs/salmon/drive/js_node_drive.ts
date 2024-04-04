@@ -25,6 +25,8 @@ SOFTWARE.
 import { SalmonDrive } from "../salmon_drive.js";
 import { IRealFile } from "../../file/ireal_file.js";
 import { INonceSequencer } from "../../sequence/inonce_sequencer.js";
+import { SalmonFile } from "../salmon_file.js";
+import { IVirtualFile } from "../../file/ivirtual_file.js";
 
 /**
  * SalmonDrive implementation for standard node js file system. This provides a virtual drive implementation
@@ -64,10 +66,10 @@ export class JsNodeDrive extends SalmonDrive {
 
     /**
      * Get a private dir for sharing files with external applications.
-     * @return
+     * @return {IRealFile} The private dir
      * @throws Exception
      */
-    public getPrivateDir(): string {
+    public getPrivateDir(): IRealFile {
         throw new Error("Unsupported Operation");
     }
 
@@ -83,5 +85,14 @@ export class JsNodeDrive extends SalmonDrive {
      */
     public override onUnlockError(): void {
         console.error("drive failed to unlock");
+    }
+
+    /**
+     * 
+     * @param file The real file.
+     * @returns The encrypted file.
+     */
+    public override getFile(file: IRealFile): SalmonFile {
+        return new SalmonFile(file, this);
     }
 }

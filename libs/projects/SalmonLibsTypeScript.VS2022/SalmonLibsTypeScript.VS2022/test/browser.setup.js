@@ -43,7 +43,7 @@ function setLogArea(element) {
 }
 
 async function selectTestFolder() {
-    testDirHandle = await showDirectoryPicker({ id: 1, mode: "readwrite", multiple: false });
+    testDirHandle = await document.showDirectoryPicker({ id: 1, mode: "readwrite", multiple: false });
     TsFsTestHelper.setTestDirHandle(testDirHandle);
 }
 
@@ -133,9 +133,9 @@ class Expect {
     }
     toBeDefined() {
         if (typeof this.#actual === 'undefined' && !this.#isNot)
-            throw Error("assert failed: " + actual + " is not defined");
+            throw Error("assert failed: var is not defined");
         else if (typeof this.#actual !== 'undefined' && this.#isNot)
-            throw Error("assert failed: " + actual + " is defined");
+            throw Error("assert failed: var is defined");
     }
     get not() {
         let expected = new Expect(this.#actual, true);

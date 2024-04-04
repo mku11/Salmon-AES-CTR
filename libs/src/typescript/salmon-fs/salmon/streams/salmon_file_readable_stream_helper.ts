@@ -22,8 +22,8 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 */
 
-import { SalmonStream } from "../../../salmon-core/salmon/iostream/salmon_stream.js";
-import { SeekOrigin } from "../../../salmon-core/iostream/random_access_stream.js";
+import { SalmonStream } from "../../../salmon-core/salmon/streams/salmon_stream.js";
+import { SeekOrigin } from "../../../salmon-core/streams/random_access_stream.js";
 
 /**
  * Fills a cache buffer with the decrypted data from a part of an encrypted file served as a salmon stream
