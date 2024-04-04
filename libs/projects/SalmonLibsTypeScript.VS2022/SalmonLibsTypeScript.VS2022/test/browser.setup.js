@@ -1,8 +1,8 @@
-import { setTestMode, TestMode, TsFsTestHelper } from "./salmon-fs/ts_fs_test_helper.js";
+import { setTestMode, TestMode, SalmonFSTestHelper } from "./salmon-fs/salmon_fs_test_helper.js";
 // Local to run on the browser
 // Node to run on the command line or VS code
 // Http to run on a remotely drive (browser and node)
-await setTestMode(TestMode.Http);
+await setTestMode(TestMode.Local);
 
 // browser test runner somewhat compatible with jest assertions
 var beforeTest = null;
@@ -20,7 +20,7 @@ var passedTestCases = 0;
 var testDirHandle;
 
 // set to run specific case
-// var testFilter = "shouldPerformOperationsRealFiles";
+// var testFilter = "shouldImportAndExportNoIntegrity";
 
 var logReport = null;
 var enableLogReport = false;
@@ -43,8 +43,8 @@ function setLogArea(element) {
 }
 
 async function selectTestFolder() {
-    testDirHandle = await document.showDirectoryPicker({ id: 1, mode: "readwrite", multiple: false });
-    TsFsTestHelper.setTestDirHandle(testDirHandle);
+    testDirHandle = await showDirectoryPicker({ id: 1, mode: "readwrite", multiple: false });
+    SalmonFSTestHelper.setTestDirHandle(testDirHandle);
 }
 
 async function it(testCaseName, callback) {
@@ -200,6 +200,6 @@ window.executeTestSuite = executeTestSuite;
 window.setLogArea = setLogArea;
 
 // source the test suites so the test can be populated
-const {} = await import('./salmon-core/salmon-core.test.js');
-const {} = await import('./salmon-fs/salmon-fs-http.test.js');
-const {} = await import('./salmon-fs/salmon-fs.test.js');
+const {} = await import('./salmon-core/salmon_core.test.js');
+const {} = await import('./salmon-fs/salmon_fs_http.test.js');
+const {} = await import('./salmon-fs/salmon_fs.test.js');

@@ -248,7 +248,10 @@ export class JsNodeFile implements IRealFile {
         if (newFile != null && await newFile.exists())
             throw new IOException("Another file/directory already exists");
         if (await this.isDirectory()) {
-            throw new IOException("Could not copy directory use IRealFile copyRecursively() instead");
+            let parent: IRealFile | null = await this.getParent();
+            if(await this.getChildrenCount() > 0 || parent == null)
+                throw new IOException("Could not copy directory use IRealFile copyRecursively() instead");
+            return parent.createDirectory(newName);
         } else {
             newFile = await newDir.createFile(newName);
             let res: boolean = await copyFileContents(this, newFile, false, progressListener);

@@ -52,7 +52,12 @@ export const TestMode = {
 export async function getFile(fp) { }
 export function getFileStream(fl) { }
 export function getSequenceSerializer() { return new SalmonSequenceSerializer(); }
+let currTestMode = null;
+export function getTestMode() {
+	return currTestMode;
+}
 export async function setTestMode(testMode) {
+	currTestMode = testMode;
     if (testMode == TestMode.Local) {
         const { JsDrive } = await import('../../lib/salmon-fs/salmon/drive/js_drive.js');
         const { JsFile } = await import('../../lib/salmon-fs/file/js_file.js');
@@ -256,7 +261,7 @@ export class SalmonFSTestHelper {
                 console.log("importing file: " + position + "/" + length);
         }
         let salmonFile = await SalmonFSTestHelper.fileImporter.importFile(fileToImport, rootDir, null, false, applyFileIntegrity, printImportProgress);
-        expect(salmonFile.exists()).toBeTruthy();
+        expect(await salmonFile.exists()).toBeTruthy();
         // get fresh copy of the file
         salmonFile = (await rootDir.listFiles())[0];
 

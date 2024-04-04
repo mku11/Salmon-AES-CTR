@@ -22,38 +22,30 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 */
 
-import { IRealFile } from "../file/ireal_file";
-import { IVirtualFile } from "../file/ivirtual_file";
-
-/*
- * Virtual Drive 
+/**
+ * Thrown when data are corrupt or tampered with.
  */
-export abstract class VirtualDrive {
-    /**
-     * Method is called when the user is authenticated
-     */
-    public abstract onUnlockSuccess(): void;
+export class IntegrityException extends Error {
+
+    #cause: Error | unknown | null = null;
 
     /**
-     * Method is called when unlocking the drive has failed
+     * Construct an exception with a specific message and inner exception
+     * @param {string | null} msg The provided message
+     * @param {Error | unknown | null} ex The inner exception
      */
-    public abstract onUnlockError(): void;
-	
-    /**
-     * Get a private dir for sharing files with other apps.
-     */
-	public abstract getPrivateDir(): IRealFile;
+    public constructor(msg: string | null, ex: Error | unknown | null = null) {
+        super(msg ?? "");
+        if (ex != null) {
+            this.#cause = ex;
+        }
+    }
 
     /**
-     * Get a virtual file backed by a real file.
-     * @param file 
+     * Get the cause (inner exception) of this exception.
+     * @returns {Error | unknown | null} The inner exception.
      */
-    public abstract getFile(file: IRealFile): IVirtualFile;
-	
-	/**
-     * Return the virtual root directory of the drive.
-     * @return
-     * @throws SalmonAuthException
-     */
-	public abstract getRoot(): Promise<IVirtualFile | null>;
+    public getCause(): Error | unknown | null {
+        return this.#cause;
+    }
 }

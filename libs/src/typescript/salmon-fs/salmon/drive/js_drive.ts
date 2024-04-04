@@ -87,7 +87,6 @@ export class JsDrive extends SalmonDrive {
     public override onUnlockError(): void {
         console.error("drive failed to unlock");
     }
-
     
     /**
      * 

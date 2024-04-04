@@ -28,9 +28,13 @@ import { SalmonDrive } from '../../lib/salmon-fs/salmon/salmon_drive.js';
 import { SalmonFile } from '../../lib/salmon-fs/salmon/salmon_file.js';
 import { SalmonCoreTestHelper } from '../salmon-core/salmon_core_test_helper.js';
 import { getFile, getFileStream, SalmonFSTestHelper } from './salmon_fs_test_helper.js';
+import { getTestMode, setTestMode, TestMode } from "./salmon_fs_test_helper.js";
 
 describe('salmon-fs-http', () => {
-    beforeAll(() => {
+    let oldTestMode = null;
+    beforeAll(async () => {
+		oldTestMode = await getTestMode();
+		await setTestMode(TestMode.Http);
 		
 		//SalmonCoreTestHelper.TEST_ENC_BUFFER_SIZE = 1 * 1024 * 1024;
 		//SalmonCoreTestHelper.TEST_DEC_BUFFER_SIZE = 1 * 1024 * 1024;
@@ -42,9 +46,10 @@ describe('salmon-fs-http', () => {
         SalmonFSTestHelper.initialize();
     });
 
-    afterAll(() => {
+    afterAll(async () => {
         SalmonFSTestHelper.close();
         SalmonCoreTestHelper.close();
+		await setTestMode(oldTestMode);
     });
 
     beforeEach(() => {

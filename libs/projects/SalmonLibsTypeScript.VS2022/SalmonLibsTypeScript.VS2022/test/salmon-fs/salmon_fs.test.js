@@ -34,6 +34,7 @@ import { SalmonFileReadableStream } from '../../lib/salmon-fs/salmon/streams/sal
 import { SalmonFileCommander } from '../../lib/salmon-fs/salmon/utils/salmon_file_commander.js';
 import { SalmonAuthException } from '../../lib/salmon-fs/salmon/salmon_auth_exception.js'
 import { SalmonIntegrity } from '../../lib/salmon-core/salmon/integrity/salmon_integrity.js';
+import { getTestMode, TestMode } from "./salmon_fs_test_helper.js";
 
 describe('salmon-fs', () => {
 	beforeAll(() => {
@@ -41,10 +42,14 @@ describe('salmon-fs', () => {
 		//SalmonCoreTestHelper.TEST_DEC_BUFFER_SIZE = 1 * 1024 * 1024;
 		SalmonCoreTestHelper.TEST_ENC_THREADS = 1;
 		SalmonCoreTestHelper.TEST_DEC_THREADS = 1;
+		
+		if(getTestMode() != TestMode.Node && getTestMode() != TestMode.Local) {
+			throw Error("Please specify Node for backend testing or Local for browser");
+		}
 	});
 	
     beforeEach(() => {
-        SalmonFSTestHelper.TEST_IMPORT_FILE = SalmonFSTestHelper.TEST_IMPORT_SMALL_FILE;
+        SalmonFSTestHelper.TEST_IMPORT_FILE = SalmonFSTestHelper.TEST_IMPORT_TINY_FILE;
 
         SalmonFSTestHelper.ENC_IMPORT_BUFFER_SIZE = 512 * 1024;
         SalmonFSTestHelper.ENC_IMPORT_THREADS = 2;
