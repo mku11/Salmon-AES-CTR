@@ -49,9 +49,9 @@ class SalmonNonce:
         """
         nonce: int = BitConverter.to_long(start_nonce, 0, SalmonGenerator.NONCE_LENGTH)
         max_nonce: int = BitConverter.to_long(end_nonce, 0, SalmonGenerator.NONCE_LENGTH)
-        nonce += 1
-        if nonce <= 0 or nonce > max_nonce:
+        if nonce + 1 <= 0 or nonce >= max_nonce:
             raise SalmonRangeExceededException("Cannot increase nonce, maximum nonce exceeded")
+        nonce += 1
         return BitConverter.to_bytes(nonce, 8)
 
     """

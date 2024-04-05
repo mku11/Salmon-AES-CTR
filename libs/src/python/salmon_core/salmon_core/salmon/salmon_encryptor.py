@@ -31,11 +31,11 @@ from multiprocessing.shared_memory import SharedMemory
 from typeguard import typechecked
 
 from salmon_core.convert.bit_converter import BitConverter
-from salmon_core.iostream.memory_stream import MemoryStream
+from salmon_core.streams.memory_stream import MemoryStream
 from salmon_core.salmon.integrity.salmon_integrity import SalmonIntegrity
-from salmon_core.salmon.integrity.salmon_integrity_exception import SalmonIntegrityException
-from salmon_core.salmon.iostream.encryption_mode import EncryptionMode
-from salmon_core.salmon.iostream.salmon_stream import SalmonStream
+from salmon_core.integrity.integrity_exception import IntegrityException
+from salmon_core.salmon.streams.encryption_mode import EncryptionMode
+from salmon_core.salmon.streams.salmon_stream import SalmonStream
 from salmon_core.salmon.salmon_generator import SalmonGenerator
 from salmon_core.salmon.salmon_security_exception import SalmonSecurityException
 
@@ -102,7 +102,7 @@ def encrypt_data(input_stream: MemoryStream, start: int, count: int, out_data: b
      * @param chunkSize   The chunk size.
      * @throws IOError              Thrown if there is an error with the stream.
      * @throws SalmonSecurityException  Thrown if there is a security exception with the stream.
-     * @throws SalmonIntegrityException Thrown if integrity cannot be applied.
+     * @throws IntegrityException Thrown if integrity cannot be applied.
     """
     shm_cancel_data: memoryview | None = None
     if shm_cancel_name is not None:
@@ -122,6 +122,8 @@ def encrypt_data(input_stream: MemoryStream, start: int, count: int, out_data: b
         total_chunk_bytes_read: int = 0
         # align to the chunk size if available
         buff_size: int = max(buffer_size, stream.get_chunk_size())
+        # set the same buffer size for the internal stream
+        stream.set_buffer_size(buff_size)
         buff: bytearray = bytearray(buff_size)
         bytes_read: int
         while (bytes_read := input_stream.read(buff, 0, min(len(buff), count - total_chunk_bytes_read))) > 0 \
@@ -131,7 +133,7 @@ def encrypt_data(input_stream: MemoryStream, start: int, count: int, out_data: b
             stream.write(buff, 0, bytes_read)
             total_chunk_bytes_read += bytes_read
         stream.flush()
-    except (IOError, SalmonSecurityException, SalmonIntegrityException) as ex:
+    except (IOError, SalmonSecurityException, IntegrityException) as ex:
         print(ex)
         raise SalmonSecurityException("Could not encrypt data") from ex
     finally:
@@ -205,7 +207,7 @@ class SalmonEncryptor:
          * @return The byte array with the encrypted data.
          * @throws SalmonSecurityException
          * @throws IOError
-         * @throws SalmonIntegrityException
+         * @throws IntegrityException
         """
 
         if key is None:
@@ -346,7 +348,9 @@ class SalmonEncryptor:
             except Exception as e:
                 raise RuntimeError() from e
 
-    def __del__(self):
-        pass
+    def close(self):
         if self.__executor is not None:
             self.__executor.shutdown(False)
+
+    def __del__(self):
+        self.close()

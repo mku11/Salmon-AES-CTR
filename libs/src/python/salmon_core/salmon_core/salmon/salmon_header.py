@@ -24,7 +24,7 @@ SOFTWARE.
 '''
 from __future__ import annotations
 from salmon_core.convert.bit_converter import BitConverter
-from salmon_core.iostream.random_access_stream import RandomAccessStream
+from salmon_core.streams.random_access_stream import RandomAccessStream
 from salmon_core.salmon.salmon_generator import SalmonGenerator
 
 from typeguard import typechecked

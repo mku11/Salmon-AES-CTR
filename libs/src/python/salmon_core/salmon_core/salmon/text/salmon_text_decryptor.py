@@ -54,7 +54,7 @@ class SalmonTextDecryptor:
          * @return The decrypted text.
          * @throws IOError
          * @throws SalmonSecurityException
-         * @throws SalmonIntegrityException
+         * @throws IntegrityException
         """
         v_bytes: bytearray = SalmonEncoder.get_base64().decode(text)
         dec_bytes: bytearray = SalmonTextDecryptor.__decryptor.decrypt(v_bytes, key, nonce, header, integrity, hash_key,

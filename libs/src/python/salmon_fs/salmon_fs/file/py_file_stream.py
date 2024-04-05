@@ -29,7 +29,7 @@ from typing import BinaryIO
 from typeguard import typechecked
 
 from salmon_fs.file.ireal_file import IRealFile
-from salmon_core.iostream.random_access_stream import RandomAccessStream
+from salmon_core.streams.random_access_stream import RandomAccessStream
 
 
 @typechecked

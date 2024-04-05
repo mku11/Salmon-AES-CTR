@@ -24,8 +24,8 @@ SOFTWARE.
 '''
 from builtins import int
 
-from salmon_core.salmon.integrity.ihash_provider import IHashProvider
-from salmon_core.salmon.integrity.salmon_integrity_exception import SalmonIntegrityException
+from salmon_core.integrity.ihash_provider import IHashProvider
+from salmon_core.integrity.integrity_exception import IntegrityException
 from salmon_core.salmon.salmon_generator import SalmonGenerator
 from salmon_core.salmon.salmon_security_exception import SalmonSecurityException
 
@@ -58,7 +58,7 @@ class SalmonIntegrity:
      *                  Use a positive number to specify integrity chunks.
      * @param provider  Hash implementation provider.
      * @param hashSize The hash size.
-     * @throws SalmonIntegrityException When integrity is comprimised
+     * @throws IntegrityException When integrity is comprimised
      * @throws SalmonSecurityException When security has failed
      """
 
@@ -94,7 +94,7 @@ class SalmonIntegrity:
                                         or (0 < chunk_size < SalmonGenerator.BLOCK_SIZE)
                                         or (chunk_size > 0 and chunk_size % SalmonGenerator.BLOCK_SIZE != 0)
                                         or chunk_size > SalmonIntegrity.MAX_CHUNK_SIZE)):
-            raise SalmonIntegrityException(
+            raise IntegrityException(
                 "Invalid chunk size, specify zero for default value or a positive number multiple of: "
                 + str(SalmonGenerator.BLOCK_SIZE) + " and less than: " + str(
                     SalmonIntegrity.MAX_CHUNK_SIZE) + " bytes")
@@ -121,7 +121,7 @@ class SalmonIntegrity:
      * @param key         Key that will be used
      * @param includeData Additional data to be included in the calculation.
      * @return The hash.
-     * @throws SalmonIntegrityException
+     * @throws IntegrityException
      """
 
     @staticmethod
@@ -199,7 +199,7 @@ class SalmonIntegrity:
      * @param buffer The buffer containing the data chunks.
      * @param includeHeaderData Include the header data in the first chunk.
      * @return The hash signatures.
-     * @throws SalmonIntegrityException
+     * @throws IntegrityException
      """
 
     def generate_hashes(self, buffer: bytearray, include_header_data: bytearray | None) -> list[bytearray] | None:
@@ -233,7 +233,7 @@ class SalmonIntegrity:
          * @param hashes The hashes to verify.
          * @param buffer The buffer that contains the chunks to verify the hashes.
          * @param includeHeaderData
-         * @throws SalmonIntegrityException
+         * @throws IntegrityException
         """
         chunk: int = 0
         for i in range(0, len(buffer), self._chunkSize):
@@ -242,5 +242,5 @@ class SalmonIntegrity:
                                                     include_header_data if i == 0 else None)
             for k in range(0, len(v_hash)):
                 if v_hash[k] != hashes[chunk][k]:
-                    raise SalmonIntegrityException("Data corrupt or tampered")
+                    raise IntegrityException("Data corrupt or tampered")
             chunk += 1

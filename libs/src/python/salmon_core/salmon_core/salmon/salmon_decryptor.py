@@ -28,12 +28,12 @@ from concurrent.futures import ProcessPoolExecutor, ThreadPoolExecutor
 from multiprocessing import shared_memory
 from multiprocessing.shared_memory import SharedMemory
 
-from salmon_core.iostream.memory_stream import MemoryStream
-from salmon_core.iostream.random_access_stream import RandomAccessStream
+from salmon_core.streams.memory_stream import MemoryStream
+from salmon_core.streams.random_access_stream import RandomAccessStream
 from salmon_core.salmon.integrity.salmon_integrity import SalmonIntegrity
-from salmon_core.salmon.integrity.salmon_integrity_exception import SalmonIntegrityException
-from salmon_core.salmon.iostream.encryption_mode import EncryptionMode
-from salmon_core.salmon.iostream.salmon_stream import SalmonStream
+from salmon_core.integrity.integrity_exception import IntegrityException
+from salmon_core.salmon.streams.encryption_mode import EncryptionMode
+from salmon_core.salmon.streams.salmon_stream import SalmonStream
 from salmon_core.salmon.salmon_generator import SalmonGenerator
 from salmon_core.salmon.salmon_header import SalmonHeader
 from salmon_core.salmon.salmon_security_exception import SalmonSecurityException
@@ -99,7 +99,7 @@ def decrypt_data(input_stream: RandomAccessStream, start: int, count: int, out_d
      * @param chunkSize The chunk size.
      * @throws IOError  Thrown if there is an error with the stream.
      * @throws SalmonSecurityException Thrown if there is a security exception with the stream.
-     * @throws SalmonIntegrityException Thrown if the stream is corrupt or tampered with.
+     * @throws IntegrityException Thrown if the stream is corrupt or tampered with.
     """
     shm_cancel_data: memoryview | None = None
     if shm_cancel_name is not None:
@@ -119,6 +119,8 @@ def decrypt_data(input_stream: RandomAccessStream, start: int, count: int, out_d
         total_chunk_bytes_read: int = 0
         # align to the chunk size if available
         buff_size: int = max(buffer_size, stream.get_chunk_size())
+        # set the same buffer size for the internal stream
+        stream.set_buffer_size(buff_size)
         buff: bytearray = bytearray(buff_size)
         bytes_read: int
         while (bytes_read := stream.read(buff, 0, min(len(buff), (
@@ -128,7 +130,7 @@ def decrypt_data(input_stream: RandomAccessStream, start: int, count: int, out_d
             output_stream.write(buff, 0, bytes_read)
             total_chunk_bytes_read += bytes_read
         output_stream.flush()
-    except (IOError, SalmonSecurityException, SalmonIntegrityException) as ex:
+    except (IOError, SalmonSecurityException, IntegrityException) as ex:
         print(ex)
         raise SalmonSecurityException("Could not decrypt data") from ex
     finally:
@@ -202,7 +204,7 @@ class SalmonDecryptor:
          * @throws IOError Thrown if there is a problem with decoding the array.
          * @throws SalmonSecurityException Thrown if the key and nonce are not provided.
          * @throws IOError
-         * @throws SalmonIntegrityException
+         * @throws IntegrityException
         """
         if key is None:
             raise SalmonSecurityException("Key is missing")
@@ -337,7 +339,9 @@ class SalmonDecryptor:
             except Exception as e:
                 raise RuntimeError() from e
 
-    def __del__(self):
-        pass
+    def close(self):
         if self.__executor is not None:
             self.__executor.shutdown(False)
+
+    def __del__(self):
+        self.close()

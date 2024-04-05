@@ -51,7 +51,7 @@ class SalmonTextEncryptor:
          * @param chunkSize The chunk size.
          * @throws IOError
          * @throws SalmonSecurityException
-         * @throws SalmonIntegrityException
+         * @throws IntegrityException
          * @throws IOError
         """
         v_bytes: bytearray = bytearray(text.encode('utf-8'))
