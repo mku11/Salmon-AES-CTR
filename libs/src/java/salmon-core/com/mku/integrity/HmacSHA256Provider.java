@@ -42,7 +42,7 @@ public class HmacSHA256Provider implements IHashProvider {
      * @param offset  The position reading will start from.
      * @param count   The count of bytes to be read.
      * @return The HMAC SHA256 hash.
-     * @throws Exception thrown if hash cannot be calculated
+     * @throws IntegrityException thrown if hash cannot be calculated
      */
     @Override
     public byte[] calc(byte[] hashKey, byte[] buffer, int offset, int count)

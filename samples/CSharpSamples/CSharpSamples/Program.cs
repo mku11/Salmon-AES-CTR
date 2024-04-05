@@ -14,48 +14,61 @@ namespace com.mku.salmon.samples;
 
 public class Sample
 {
-    public static void Main(string[] args)
+    static string text = "This is plaintext that will be encrypted";
+    static byte[] data = new byte[2 * 1024 * 1024];
+    static string password = "MYS@LMONP@$$WORD";
+    static Sample()
     {
-        string password = "MYS@LMONP@$$WORD";
-
-        // some test to encrypt
-        string text = "This is a plaintext that will be used for testing";
-        byte[] bytes = UTF8Encoding.UTF8.GetBytes(text);
-
-        // some data to encrypt
-        byte[] data = new byte[1 * 1024 * 1024];
+        // some random data to encrypt
         Random r = new Random();
         r.NextBytes(data);
+    }
 
-        // load the AES intrinsics for better performance (optional)
-        // make sure you link the SalmonNative.dll to your project
-        SalmonStream.AesProviderType = ProviderType.AesIntrinsics;
-        // or TinyAES
-        // SalmonStream.AesProviderType = ProviderType.TinyAES;
+    public static void Main(string[] args)
+    {
+        // uncomment to load the AES intrinsics for better performance
+        // make sure you add option -Djava.library.path=C:\path\to\salmonlib\
+        // SalmonStream.setAesProviderType(ProviderType.AesIntrinsics);
 
-        // you can create a key and reuse it:
-        // byte[] key = SalmonGenerator.GetSecureRandomBytes(32);
+        // Samples
+        FileSamples();
+        StreamSamples();
+    }
 
-        // or get one derived from a text password, make sure the iterations are a large enough number
+    public static void FileSamples()
+    {
+        // use the password to create a drive and import the file
+        CreateDriveAndImportFile(password);
+
+        // or encrypt and decrypt text a standalone file without a drive:
+        byte[] key = GetKeyFromPassword(password);
+        EncryptAndDecryptTextToFile(text, key);
+
+    }
+
+    private static byte[] GetKeyFromPassword(string password)
+    {
+        // get a key from a text password:
         byte[] salt = SalmonGenerator.GetSecureRandomBytes(24);
+        // make sure the iterations are a large enough number
         byte[] key = SalmonPassword.GetKeyFromPassword(password, salt, 60000, 32);
+        return key;
+    }
 
-        // encrypt and decrypt byte array using multiple threads:
-        EncryptAndDecryptUsingMultipleThreads(data, key);
+    public static void StreamSamples()
+    {
+        // get a fresh key
+        byte[] key = SalmonGenerator.GetSecureRandomBytes(32);
 
         // encrypt and decrypt a text string:
         EncryptAndDecryptTextEmbeddingNonce(text, key);
 
         // encrypt and decrypt data to a byte array stream:
-        EncryptAndDecryptDataToByteArrayStream(bytes, key);
+        EncryptAndDecryptDataToByteArrayStream(UTF8Encoding.UTF8.GetBytes(text), key);
 
-        // encrypt and decrypt text to a file:
-        EncryptAndDecryptTextToFile(text, key);
-
-        // create a drive import, read the encrypted content, and export
-        CreateDriveAndImportFile(password);
+        // encrypt and decrypt byte array using multiple threads:
+        EncryptAndDecryptUsingMultipleThreads(data, key);
     }
-
 
     private static void EncryptAndDecryptUsingMultipleThreads(byte[] bytes, byte[] key)
     {
@@ -65,13 +78,17 @@ public class Sample
         byte[] nonce = SalmonGenerator.GetSecureRandomBytes(8);
 
         // encrypt a byte array using 2 threads
-        byte[] encBytes = new SalmonEncryptor(2).Encrypt(bytes, key, nonce, false);
+        SalmonEncryptor encryptor = new SalmonEncryptor(2);
+        byte[] encBytes = encryptor.Encrypt(bytes, key, nonce, false);
         Console.WriteLine("Encrypted bytes: " + BitConverter.ToHex(encBytes).Substring(0, 24) + "...");
+        encryptor.Close();
 
         // decrypt byte array using 2 threads
-        byte[] decBytes = new SalmonDecryptor(2).Decrypt(encBytes, key, nonce, false);
+        SalmonDecryptor decryptor = new SalmonDecryptor(2);
+        byte[] decBytes = decryptor.Decrypt(encBytes, key, nonce, false);
         Console.WriteLine("Decrypted bytes: " + BitConverter.ToHex(decBytes).Substring(0, 24) + "...");
         Console.WriteLine();
+        decryptor.Close();
     }
 
     private static void EncryptAndDecryptTextEmbeddingNonce(string text, byte[] key)
@@ -79,7 +96,8 @@ public class Sample
         Console.WriteLine("Encrypting text with nonce embedded: " + text);
 
         // Always request a new random secure nonce.
-        byte[] nonce = SalmonGenerator.GetSecureRandomBytes(8);
+        byte[]
+    nonce = SalmonGenerator.GetSecureRandomBytes(8);
 
         // encrypt string and save the nonce in the header
         string encText = SalmonTextEncryptor.EncryptString(text, key, nonce, true);
@@ -102,39 +120,38 @@ public class Sample
         MemoryStream encOutStream = new MemoryStream(); // or use your custom output stream by extending RandomAccessStream
 
         // pass the output stream to the SalmonStream
-        SalmonStream encrypter = new SalmonStream(key, nonce, EncryptionMode.Encrypt,
+        SalmonStream encStream = new SalmonStream(key, nonce, EncryptionMode.Encrypt,
                 encOutStream, null,
                 false, null, null);
 
         // encrypt and write with a single call, you can also Seek() and Write()
-        encrypter.Write(bytes, 0, bytes.Length);
+        encStream.Write(bytes, 0, bytes.Length);
 
         // encrypted data are now written to the encOutStream.
         encOutStream.Position = 0;
         byte[] encData = encOutStream.ToArray();
-        encrypter.Flush();
-        encrypter.Close();
+        encStream.Flush();
+        encStream.Close();
         encOutStream.Close();
 
         //decrypt a stream with encoded data
         Stream encInputStream = new MemoryStream(encData); // or use your custom input stream by extending AbsStream
-        SalmonStream decrypter = new SalmonStream(key, nonce, EncryptionMode.Decrypt,
+        SalmonStream decStream = new SalmonStream(key, nonce, EncryptionMode.Decrypt,
                 encInputStream, null,
                 false, null, null);
-        byte[] decBuffer = new byte[(int)decrypter.Length];
+        byte[] decBuffer = new byte[(int)decStream.Length];
 
         // seek to the beginning or any position in the stream
-        decrypter.Seek(0, SeekOrigin.Begin);
+        decStream.Seek(0, SeekOrigin.Begin);
 
         // decrypt and read data with a single call, you can also Seek() before Read()
-        int bytesRead = decrypter.Read(decBuffer, 0, decBuffer.Length);
-        decrypter.Close();
+        int bytesRead = decStream.Read(decBuffer, 0, decBuffer.Length);
+        decStream.Close();
         encInputStream.Close();
 
         Console.WriteLine("Decrypted data: " + BitConverter.ToHex(decBuffer));
         Console.WriteLine();
     }
-
 
     private static void EncryptAndDecryptTextToFile(string text, byte[] key)
     {
@@ -149,14 +166,10 @@ public class Sample
 
         byte[] bytes = UTF8Encoding.UTF8.GetBytes(text);
 
-
-
-        // Always request a new random secure nonce. Though if you will be re-using
-        // the same key you should create a SalmonDrive to keep the nonces unique.
+        // Always request a new random secure nonce
         byte[] nonce = SalmonGenerator.GetSecureRandomBytes(8); // 64 bit nonce
 
         SalmonFile encFile = new SalmonFile(new DotNetFile(testFile), null);
-        nonce = SalmonGenerator.GetSecureRandomBytes(8); // always get a fresh nonce!
         encFile.EncryptionKey = key;
         encFile.RequestedNonce = nonce;
         Stream stream = encFile.GetOutputStream();
@@ -174,34 +187,30 @@ public class Sample
 
         // read data with a single call
         int encBytesRead = stream2.Read(decBuff, 0, decBuff.Length);
-        string decstring2 = UTF8Encoding.UTF8.GetString(decBuff, 0, encBytesRead);
-        Console.WriteLine("Decrypted text: " + decstring2);
+        string decString2 = UTF8Encoding.UTF8.GetString(decBuff, 0, encBytesRead);
+        Console.WriteLine("Decrypted text: " + decString2);
         stream2.Close();
         Console.WriteLine();
     }
 
     private static void CreateDriveAndImportFile(string password)
     {
-        // create a file nonce sequencer
-        string seqFilename = "sequencer.xml";
-        DotNetFile dir = new DotNetFile("output");
-        if (!dir.Exists)
-            dir.Mkdir();
-        IRealFile sequenceFile = dir.GetChild(seqFilename);
-        SalmonFileSequencer fileSequencer = new SalmonFileSequencer(sequenceFile, new SalmonSequenceSerializer());
+        // create a file sequencer:
+        SalmonFileSequencer sequencer = CreateSequencer();
 
         // create a drive
-        string dirPath = @".\" + dir.Path + @"\vault" + new Random().Next();
-        SalmonDrive drive = DotNetDrive.Create(new DotNetFile(dirPath), password, fileSequencer);
+        string vaultName = "vault_" + BitConverter.ToHex(SalmonGenerator.GetSecureRandomBytes(6));
+        DotNetFile vaultDir = new DotNetFile(vaultName);
+        SalmonDrive drive = DotNetDrive.Create(vaultDir, password, sequencer);
         SalmonFileCommander commander = new SalmonFileCommander(256 * 1024, 256 * 1024, 2);
-        DotNetFile[] files = new DotNetFile[] { new DotNetFile(@".\data\file.txt") };
 
         // import multiple files
+        DotNetFile[] files = new DotNetFile[] { new DotNetFile("data/file.txt") };
         commander.ImportFiles(files, drive.Root, false, true,
                 (taskProgress) =>
                 {
-                    Console.WriteLine("file importing: " + taskProgress.File.BaseName + ": " 
-                        + taskProgress.ProcessedBytes + "/" + taskProgress.TotalBytes + " bytes");
+                    Console.WriteLine("file importing: " + taskProgress.File.BaseName + ": "
+                            + taskProgress.ProcessedBytes + "/" + taskProgress.TotalBytes + " bytes");
                 }, IRealFile.AutoRename, (file, ex) =>
                 {
                     // file failed to import
@@ -211,8 +220,8 @@ public class Sample
         SalmonFile file = drive.Root.GetChild("file.txt");
 
         // read from the stream with parallel threads and caching
-        SalmonFileInputStream inputStream = new SalmonFileInputStream(file,
-                4, 4 * 1024 * 1024, 2, 256 * 1024);
+        SalmonFileInputStream inputStream = new SalmonFileInputStream(file, 
+            4, 4 * 1024 * 1024, 2, 256 * 1024);
         // inputStream.read(...);
         inputStream.Close();
 
@@ -222,8 +231,8 @@ public class Sample
                 {
                     try
                     {
-                        Console.WriteLine("file exporting: " + taskProgress.File.BaseName + ": " 
-                            + taskProgress.ProcessedBytes + "/" + taskProgress.TotalBytes + " bytes");
+                        Console.WriteLine("file exporting: " + taskProgress.File.BaseName + ": "
+                                + taskProgress.ProcessedBytes + "/" + taskProgress.TotalBytes + " bytes");
                     }
                     catch (Exception e)
                     {
@@ -239,5 +248,19 @@ public class Sample
 
         // close the drive
         drive.Close();
+    }
+
+    private static SalmonFileSequencer CreateSequencer()
+    {
+        // create a file nonce sequencer and place it in a private space
+        // make sure you never edit or back up this file.
+        string seqFilename = "sequencer.xml";
+        IRealFile privateDir = new DotNetFile(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData));
+        IRealFile sequencerDir = privateDir.GetChild("SalmonSequencer");
+        if (!sequencerDir.Exists)
+            sequencerDir.Mkdir();
+        IRealFile sequenceFile = sequencerDir.GetChild(seqFilename);
+        SalmonFileSequencer fileSequencer = new SalmonFileSequencer(sequenceFile, new SalmonSequenceSerializer());
+        return fileSequencer;
     }
 }
