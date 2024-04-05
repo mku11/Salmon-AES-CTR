@@ -33,7 +33,7 @@ import { SalmonDrive } from "./salmon_drive.js";
 import { SalmonFile } from "./salmon_file.js";
 import { RandomAccessStream } from "../../salmon-core/streams/random_access_stream.js";
 import { NonceSequence, Status } from "../sequence/nonce_sequence.js";
-import { SalmonSequenceException } from "./sequence/salmon_sequence_exception.js";
+import { SequenceException } from "../sequence/sequence_exception.js";
 import { SalmonSecurityException } from "../../salmon-core/salmon/salmon_security_exception.js";
 import { SalmonNonce } from "../../salmon-core/salmon/salmon_nonce.js";
 import { BitConverter } from "../../salmon-core/convert/bit_converter.js";
@@ -251,8 +251,8 @@ export class SalmonAuthConfig {
         if(await file.exists() && await file.length() > 0) {
             let outStream: RandomAccessStream | null = null;
             try {
-            outStream = await file.getOutputStream();
-            await outStream.setLength(0);
+				outStream = await file.getOutputStream();
+				await outStream.setLength(0);
             } catch(ex) {
             } finally {
                 if(outStream != null)
@@ -261,14 +261,14 @@ export class SalmonAuthConfig {
         }
         let maxNonce: Uint8Array | null = sequence.getMaxNonce();
         if (maxNonce == null)
-            throw new SalmonSequenceException("Could not get current max nonce");
+            throw new SequenceException("Could not get current max nonce");
         let nextNonce: Uint8Array | null = sequence.getNextNonce();
         if (nextNonce == null)
-            throw new SalmonSequenceException("Could not get next nonce");
+            throw new SequenceException("Could not get next nonce");
         let pivotNonce: Uint8Array = SalmonNonce.splitNonceRange(nextNonce, maxNonce);
         let authId: string | null = sequence.getAuthId();
         if(authId == null)
-            throw new SalmonSequenceException("Could not get auth id");
+            throw new SequenceException("Could not get auth id");
         await drive.getSequencer().setMaxNonce(sequence.getId(), authId, pivotNonce);
         await SalmonAuthConfig.#writeAuthFile(file, drive,
             BitConverter.hexToBytes(targetAuthId),

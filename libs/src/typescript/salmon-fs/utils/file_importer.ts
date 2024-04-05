@@ -200,7 +200,7 @@ export abstract class FileImporter {
     }
 
     async #submitImportJobs(runningThreads: number, partSize: number, fileToImport: IRealFile, importedFile: IVirtualFile, 
-        totalBytesRead: number[], integrity: boolean, onProgress: ((position: number, length: number)=>void) | null) {
+        totalBytesRead: number[], integrity: boolean, onProgress: ((position: number, length: number)=>void) | null): Promise<void> {
             let fileSize: number = await fileToImport.length();
             let bytesRead: number[] = new Array(runningThreads);
             bytesRead.fill(0);

@@ -291,7 +291,7 @@ export abstract class SalmonDrive extends VirtualDrive {
     /**
      * Get the byte contents of a file from the real filesystem.
      *
-     * @param sourcePath The path of the file
+     * @param file The file
      * @param bufferSize The buffer to be used when reading
      */
     public async getBytesFromRealFile(file: IRealFile, bufferSize: number): Promise<Uint8Array> {
@@ -425,7 +425,7 @@ export abstract class SalmonDrive extends VirtualDrive {
      * @param sequencer The sequencer to use.
      * @return The newly created drive.
      * @throws IntegrityException
-     * @throws SalmonSequenceException
+     * @throws SequenceException
      */
     public static async createDrive(dir: IRealFile, driveClassType: any, password: string, sequencer: INonceSequencer): Promise<SalmonDrive> {
         let drive: SalmonDrive = await SalmonDrive.#createDriveInstance(dir, true, driveClassType, sequencer);
@@ -541,7 +541,7 @@ export abstract class SalmonDrive extends VirtualDrive {
      * Get the authorization ID for the current device.
      *
      * @return
-     * @throws SalmonSequenceException
+     * @throws SequenceException
      * @throws SalmonAuthException
      */
     public async getAuthId(): Promise<string> {
@@ -643,7 +643,7 @@ export abstract class SalmonDrive extends VirtualDrive {
      * @throws SalmonAuthException
      * @throws SalmonSecurityException
      * @throws IntegrityException
-     * @throws SalmonSequenceException
+     * @throws SequenceException
      */
     public async setPassword(pass: string): Promise<void> {
         await this.#createConfig(pass);

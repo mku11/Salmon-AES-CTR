@@ -33,7 +33,7 @@ export interface INonceSequenceSerializer {
      * Parse nonce sequences from text contents.
      * @param contents The contents containing the nonce sequences.
      * @return The nonce sequences.
-     * @throws SalmonSequenceException
+     * @throws SequenceException
      */
     deserialize(contents: string): {[key: string]: NonceSequence};
 
@@ -41,7 +41,7 @@ export interface INonceSequenceSerializer {
      * Generates the contents from sequences.
      * @param sequences The sequences to convert to text.
      * @return The string contents.
-     * @throws SalmonSequenceException
+     * @throws SequenceException
      */
     serialize(sequences: {[key: string]: NonceSequence} ): string;
 }

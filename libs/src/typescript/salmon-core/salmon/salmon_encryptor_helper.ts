@@ -27,22 +27,22 @@ import { SalmonStream } from "./streams/salmon_stream.js";
 import { EncryptionMode } from "./streams/encryption_mode.js";
 
 /**
-* Encrypt the data.
-*
-* @param {Uint8Array} data The data to be encrypted.
-* @param {number} start       The start position of the stream to be encrypted.
-* @param {number} count       The number of bytes to be encrypted.
-* @param {Uint8Array} outData     The buffer with the encrypted data.
-* @param {Uint8Array} key         The AES key to be used.
-* @param {Uint8Array} nonce       The nonce to be used.
-* @param {Uint8Array | null} headerData  The header data to be used.
-* @param {boolean} integrity   True to apply integrity.
-* @param {Uint8Array | null} hashKey     The key to be used for integrity application.
-* @param {number | null} chunkSize   The chunk size. Thrown if there is an error with the stream.
-* @returns {Promise<{startPos: number,endPos: number}>} The number of bytes encrypted.
-* @throws SalmonSecurityException  Thrown if there is a security exception with the stream.
-* @throws IntegrityException Thrown if integrity cannot be applied.
-*/
+ * Encrypt the data.
+ *
+ * @param {Uint8Array} data The data to be encrypted.
+ * @param {number} start       The start position of the stream to be encrypted.
+ * @param {number} count       The number of bytes to be encrypted.
+ * @param {Uint8Array} outData     The buffer with the encrypted data.
+ * @param {Uint8Array} key         The AES key to be used.
+ * @param {Uint8Array} nonce       The nonce to be used.
+ * @param {Uint8Array | null} headerData  The header data to be used.
+ * @param {boolean} integrity   True to apply integrity.
+ * @param {Uint8Array | null} hashKey     The key to be used for integrity application.
+ * @param {number | null} chunkSize   The chunk size. Thrown if there is an error with the stream.
+ * @returns {Promise<{startPos: number,endPos: number}>} The number of bytes encrypted.
+ * @throws SalmonSecurityException  Thrown if there is a security exception with the stream.
+ * @throws IntegrityException Thrown if integrity cannot be applied.
+ */
 export async function encryptData(data: Uint8Array, start: number, count: number, outData: Uint8Array,
     key: Uint8Array, nonce: Uint8Array, headerData: Uint8Array | null,
     integrity: boolean, hashKey: Uint8Array | null, chunkSize: number | null, bufferSize: number): 

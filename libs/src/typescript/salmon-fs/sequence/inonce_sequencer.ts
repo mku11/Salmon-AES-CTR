@@ -34,7 +34,7 @@ export interface INonceSequencer {
      * Create a sequence.
      * @param id The Id.
      * @param authId The authorization ID of the drive.
-     * @throws SalmonSequenceException
+     * @throws SequenceException
      */
     createSequence(id: string, authId: string): Promise<void>;
 
@@ -44,7 +44,7 @@ export interface INonceSequencer {
      * @param authId The auth ID of the device for the drive.
      * @param startNonce The starting nonce.
      * @param maxNonce The maximum nonce.
-     * @throws SalmonSequenceException
+     * @throws SequenceException
      * @throws IOException
      */
     initializeSequence(id: string, authId: string, startNonce: Uint8Array, maxNonce: Uint8Array): Promise<void>;
@@ -55,7 +55,7 @@ export interface INonceSequencer {
      * @param id The drive ID.
      * @param authId The auth ID of the device for the drive.
      * @param maxNonce The maximum nonce.
-     * @throws SalmonSequenceException
+     * @throws SequenceException
      * @throws IOException
      */
     setMaxNonce(id: string, authId: string, maxNonce: Uint8Array): Promise<void>;
@@ -65,7 +65,7 @@ export interface INonceSequencer {
      *
      * @param id The drive ID.
      * @return The next nonce.
-     * @throws SalmonSequenceException
+     * @throws SequenceException
      * @throws SalmonRangeExceededException
      */
     nextNonce(id: string): Promise<Uint8Array | null>;
@@ -73,7 +73,7 @@ export interface INonceSequencer {
     /**
      * Revoke the sequencer. This terminates the sequencer and de-authorizes the device
      * @param id
-     * @throws SalmonSequenceException
+     * @throws SequenceException
      */
     revokeSequence(id: string): Promise<void>;
 
@@ -81,7 +81,7 @@ export interface INonceSequencer {
      * Get the sequence used for this drive.
      * @param id The drive ID.
      * @return The current sequence.
-     * @throws SalmonSequenceException
+     * @throws SequenceException
      */
     getSequence(id: string): Promise<NonceSequence | null>;
 

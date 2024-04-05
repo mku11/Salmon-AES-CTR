@@ -29,7 +29,7 @@ import { INonceSequenceSerializer } from "../../sequence/inonce_sequence_seriali
 import { INonceSequencer } from "../../sequence/inonce_sequencer.js";
 import { Status, NonceSequence } from "../../sequence/nonce_sequence.js";
 import { SalmonNonce } from "../../../salmon-core/salmon/salmon_nonce.js";
-import { SalmonSequenceException } from "./salmon_sequence_exception.js";
+import { SequenceException } from "../../sequence/sequence_exception.js";
 import { MemoryStream } from "../../../salmon-core/streams/memory_stream.js";
 import { RandomAccessStream } from "../../../salmon-core/streams/random_access_stream.js";
 
@@ -46,7 +46,7 @@ export class SalmonFileSequencer implements INonceSequencer {
      * @param sequenceFile The sequence file (json format).
      * @param serializer   The serializer to be used.
      * @throws IOException
-     * @throws SalmonSequenceException
+     * @throws SequenceException
      */
     public constructor(sequenceFile: IRealFile, serializer: INonceSequenceSerializer) {
         this.#sequenceFile = sequenceFile;
@@ -72,14 +72,14 @@ export class SalmonFileSequencer implements INonceSequencer {
      *
      * @param driveId The drive ID.
      * @param authId  The authorization ID of the drive.
-     * @throws SalmonSequenceException
+     * @throws SequenceException
      */
     public async createSequence(driveId: string, authId: string): Promise<void> {
         let contents: string = await this.getContents();
         let configs: { [key: string]: NonceSequence } = this.#serializer.deserialize(contents);
         let sequence: NonceSequence | null = SalmonFileSequencer.#getSequence(configs, driveId);
         if (sequence != null)
-            throw new SalmonSequenceException("Sequence already exists");
+            throw new SequenceException("Sequence already exists");
         let nsequence: NonceSequence = new NonceSequence(driveId, authId, null, null, Status.New);
         configs[driveId + ":" + authId] = nsequence;
         await this.saveSequenceFile(configs);
@@ -92,7 +92,7 @@ export class SalmonFileSequencer implements INonceSequencer {
      * @param authId     The auth ID of the device for the drive.
      * @param startNonce The starting nonce.
      * @param maxNonce   The maximum nonce.
-     * @throws SalmonSequenceException
+     * @throws SequenceException
      * @throws IOException
      */
     public async initializeSequence(driveId: string, authId: string, startNonce: Uint8Array, maxNonce: Uint8Array): Promise<void> {
@@ -100,9 +100,9 @@ export class SalmonFileSequencer implements INonceSequencer {
         let configs: { [key: string]: NonceSequence } = this.#serializer.deserialize(contents);
         let sequence: NonceSequence | null = SalmonFileSequencer.#getSequence(configs, driveId);
         if (sequence == null)
-            throw new SalmonSequenceException("Sequence does not exist");
+            throw new SequenceException("Sequence does not exist");
         if (sequence.getNextNonce() != null)
-            throw new SalmonSequenceException("Cannot reinitialize sequence");
+            throw new SequenceException("Cannot reinitialize sequence");
         sequence.setNextNonce(startNonce);
         sequence.setMaxNonce(maxNonce);
         sequence.setStatus(Status.Active);
@@ -115,20 +115,20 @@ export class SalmonFileSequencer implements INonceSequencer {
      * @param driveId  The drive ID.
      * @param authId   The auth ID of the device for the drive.
      * @param maxNonce The maximum nonce.
-     * @throws SalmonSequenceException
+     * @throws SequenceException
      */
     public async setMaxNonce(driveId: string, authId: string, maxNonce: Uint8Array): Promise<void> {
         let contents: string = await this.getContents();
         let configs: { [key: string]: NonceSequence } = this.#serializer.deserialize(contents);
         let sequence: NonceSequence | null = SalmonFileSequencer.#getSequence(configs, driveId);
         if (sequence == null || sequence.getStatus() == Status.Revoked)
-            throw new SalmonSequenceException("Sequence does not exist");
+            throw new SequenceException("Sequence does not exist");
         let currMaxNonce: Uint8Array | null = sequence.getMaxNonce();
         if (currMaxNonce == null)
-            throw new SalmonSequenceException("Could not find current max nonce");
+            throw new SequenceException("Could not find current max nonce");
         if (BitConverter.toLong(currMaxNonce, 0, SalmonGenerator.NONCE_LENGTH)
             < BitConverter.toLong(maxNonce, 0, SalmonGenerator.NONCE_LENGTH))
-            throw new SalmonSequenceException("Max nonce cannot be increased");
+            throw new SequenceException("Max nonce cannot be increased");
         sequence.setMaxNonce(maxNonce);
         await this.saveSequenceFile(configs);
     }
@@ -138,7 +138,7 @@ export class SalmonFileSequencer implements INonceSequencer {
      *
      * @param driveId The drive ID.
      * @return
-     * @throws SalmonSequenceException
+     * @throws SequenceException
      * @throws SalmonRangeExceededException
      */
     public async nextNonce(driveId: string): Promise<Uint8Array | null> {
@@ -146,16 +146,16 @@ export class SalmonFileSequencer implements INonceSequencer {
         let configs: { [key: string]: NonceSequence } = this.#serializer.deserialize(contents);
         let sequence: NonceSequence | null = SalmonFileSequencer.#getSequence(configs, driveId);
         if (sequence == null || sequence.getNextNonce() == null || sequence.getMaxNonce() == null)
-            throw new SalmonSequenceException("Device not Authorized");
+            throw new SequenceException("Device not Authorized");
 
         //We get the next nonce
         let nextNonce: Uint8Array | null = sequence.getNextNonce();
         let incrNonce: Uint8Array | null = sequence.getNextNonce();
         if (incrNonce == null)
-            throw new SalmonSequenceException("Could not increase nonce");
+            throw new SequenceException("Could not increase nonce");
         let currMaxNonce: Uint8Array | null = sequence.getMaxNonce();
         if (currMaxNonce == null)
-            throw new SalmonSequenceException("Could not get current max nonce");
+            throw new SequenceException("Could not get current max nonce");
         sequence.setNextNonce(SalmonNonce.increaseNonce(incrNonce, currMaxNonce));
         await this.saveSequenceFile(configs);
         return nextNonce;
@@ -165,7 +165,7 @@ export class SalmonFileSequencer implements INonceSequencer {
      * Get the contents of a sequence file.
      *
      * @return
-     * @throws SalmonSequenceException
+     * @throws SequenceException
      */
     protected async getContents(): Promise<string> {
         let stream: RandomAccessStream | null = null;
@@ -176,13 +176,13 @@ export class SalmonFileSequencer implements INonceSequencer {
             await stream.copyTo(outputStream);
         } catch (ex) {
             console.error(ex);
-            throw new SalmonSequenceException("Could not get contents", ex);
+            throw new SequenceException("Could not get contents", ex);
         } finally {
             if (stream != null) {
                 try {
                     await stream.close();
                 } catch (e) {
-                    throw new SalmonSequenceException("Could not get contents", e);
+                    throw new SequenceException("Could not get contents", e);
                 }
             }
             if (outputStream != null) {
@@ -190,7 +190,7 @@ export class SalmonFileSequencer implements INonceSequencer {
         			await outputStream.flush();
                     await outputStream.close();
                 } catch (e) {
-                    throw new SalmonSequenceException("Could not get contents", e);
+                    throw new SequenceException("Could not get contents", e);
                 }
             }
         }
@@ -201,16 +201,16 @@ export class SalmonFileSequencer implements INonceSequencer {
      * Revoke the current sequence for a specific drive.
      *
      * @param driveId The drive ID.
-     * @throws SalmonSequenceException
+     * @throws SequenceException
      */
     public async revokeSequence(driveId: string): Promise<void> {
         let contents: string = await this.getContents();
         let configs: { [key: string]: NonceSequence } = this.#serializer.deserialize(contents);
         let sequence: NonceSequence | null = SalmonFileSequencer.#getSequence(configs, driveId);
         if (sequence == null)
-            throw new SalmonSequenceException("Sequence does not exist");
+            throw new SequenceException("Sequence does not exist");
         if (sequence.getStatus() == Status.Revoked)
-            throw new SalmonSequenceException("Sequence already revoked");
+            throw new SequenceException("Sequence already revoked");
         sequence.setStatus(Status.Revoked);
         await this.saveSequenceFile(configs);
     }
@@ -220,7 +220,7 @@ export class SalmonFileSequencer implements INonceSequencer {
      *
      * @param driveId The drive ID.
      * @return
-     * @throws SalmonSequenceException
+     * @throws SequenceException
      */
     public async getSequence(driveId: string): Promise<NonceSequence | null> {
         let contents: string = await this.getContents();
@@ -240,7 +240,7 @@ export class SalmonFileSequencer implements INonceSequencer {
      * Save the sequence file.
      *
      * @param sequences The sequences.
-     * @throws SalmonSequenceException
+     * @throws SequenceException
      */
     protected async saveSequenceFile(sequences: { [key: string]: NonceSequence }): Promise<void> {
         try {
@@ -248,7 +248,7 @@ export class SalmonFileSequencer implements INonceSequencer {
             await this.saveContents(contents);
         } catch (ex) {
             console.error(ex);
-            throw new SalmonSequenceException("Could not serialize sequences", ex);
+            throw new SequenceException("Could not serialize sequences", ex);
         }
     }
 
@@ -272,21 +272,21 @@ export class SalmonFileSequencer implements INonceSequencer {
             }
         } catch (ex) {
             console.error(ex);
-            throw new SalmonSequenceException("Could not save sequence file", ex);
+            throw new SequenceException("Could not save sequence file", ex);
         } finally {
             if (outputStream != null) {
                 await outputStream.flush();
                 try {
                     await outputStream.close();
                 } catch (e) {
-                    throw new SalmonSequenceException("Could not save sequence file", e);
+                    throw new SequenceException("Could not save sequence file", e);
                 }
             }
             if (inputStream != null) {
                 try {
                     await inputStream.close();
                 } catch (e) {
-                    throw new SalmonSequenceException("Could not save sequence file", e);
+                    throw new SequenceException("Could not save sequence file", e);
                 }
             }
         }
@@ -300,7 +300,7 @@ export class SalmonFileSequencer implements INonceSequencer {
      * @param configs All sequence configurations.
      * @param driveId The drive ID.
      * @return
-     * @throws SalmonSequenceException
+     * @throws SequenceException
      */
     static #getSequence(configs: { [key: string]: NonceSequence }, driveId: string): NonceSequence | null {
         let sequence: NonceSequence | null = null;
@@ -309,7 +309,7 @@ export class SalmonFileSequencer implements INonceSequencer {
                 // there should be only one sequence available
                 if (seq.getStatus() == Status.Active || seq.getStatus() == Status.New) {
                     if (sequence != null)
-                        throw new SalmonSequenceException("Corrupt sequence config");
+                        throw new SequenceException("Corrupt sequence config");
                     sequence = seq;
                 }
             }

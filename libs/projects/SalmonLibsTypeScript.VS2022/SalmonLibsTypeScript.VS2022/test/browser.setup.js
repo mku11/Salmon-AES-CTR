@@ -20,7 +20,7 @@ var passedTestCases = 0;
 var testDirHandle;
 
 // set to run specific case
-// var testFilter = "shouldImportAndExportNoIntegrity";
+// var testFilter = "shouldImportAndExportIntegrity";
 
 var logReport = null;
 var enableLogReport = false;

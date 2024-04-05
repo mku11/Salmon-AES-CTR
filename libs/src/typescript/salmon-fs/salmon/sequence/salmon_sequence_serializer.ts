@@ -34,7 +34,7 @@ export class SalmonSequenceSerializer implements INonceSequenceSerializer {
      *
      * @param driveAuthEntries The sequences to convert to text.
      * @return
-     * @throws SalmonSequenceException
+     * @throws SequenceException
      */
     public serialize(driveAuthEntries: { [key: string]: NonceSequence }): string {
         let contents: string = JSON.stringify(driveAuthEntries);
@@ -46,7 +46,7 @@ export class SalmonSequenceSerializer implements INonceSequenceSerializer {
      *
      * @param contents The contents containing the nonce sequences.
      * @return
-     * @throws SalmonSequenceException
+     * @throws SequenceException
      */
     public deserialize(contents: string): { [key: string]: NonceSequence } {
         if(contents == '')

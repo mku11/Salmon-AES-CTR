@@ -25,7 +25,7 @@ SOFTWARE.
 /**
  * Thrown when there is a failure in the nonce sequencer.
  */
-export class SalmonSequenceException extends Error {
+export class SequenceException extends Error {
 
     cause: Error | unknown | null = null;
 

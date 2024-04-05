@@ -191,7 +191,7 @@ export abstract class FileExporter {
     }
 
     async #submitExportJobs(runningThreads: number, partSize: number, fileToExport: IVirtualFile, exportedFile: IRealFile,
-        totalBytesWritten: number[], integrity: boolean, onProgress: ((position: number, length: number) => void) | null) {
+        totalBytesWritten: number[], integrity: boolean, onProgress: ((position: number, length: number) => void) | null): Promise<void> {
         let fileSize: number = await fileToExport.getSize();
         let bytesWritten: number[] = new Array(runningThreads);
         bytesWritten.fill(0);

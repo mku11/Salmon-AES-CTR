@@ -49,12 +49,12 @@ describe('salmon-fs', () => {
 	});
 	
     beforeEach(() => {
-        SalmonFSTestHelper.TEST_IMPORT_FILE = SalmonFSTestHelper.TEST_IMPORT_TINY_FILE;
+        SalmonFSTestHelper.TEST_IMPORT_FILE = SalmonFSTestHelper.TEST_IMPORT_SMALL_FILE;
 
         SalmonFSTestHelper.ENC_IMPORT_BUFFER_SIZE = 512 * 1024;
-        SalmonFSTestHelper.ENC_IMPORT_THREADS = 2;
+        SalmonFSTestHelper.ENC_IMPORT_THREADS = 1;
         SalmonFSTestHelper.ENC_EXPORT_BUFFER_SIZE = 512 * 1024;
-        SalmonFSTestHelper.ENC_EXPORT_THREADS = 2;
+        SalmonFSTestHelper.ENC_EXPORT_THREADS = 1;
 
         SalmonFSTestHelper.TEST_FILE_INPUT_STREAM_THREADS = 2;
         SalmonFSTestHelper.TEST_USE_FILE_INPUT_STREAM = false;
