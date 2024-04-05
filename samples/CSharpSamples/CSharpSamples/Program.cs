@@ -1,25 +1,25 @@
 ﻿
 using Mku.File;
 using Mku.Salmon;
-using Mku.Salmon.IO;
+using Mku.Salmon.Streams;
 using Mku.Salmon.Password;
 using Mku.Salmon.Text;
-using Mku.SalmonFS;
-using Mku.Sequence;
-using Mku.Utils;
 using System.Text;
 using BitConverter = Mku.Convert.BitConverter;
+using Mku.Salmon.Sequence;
+using Mku.Salmon.Drive;
+using Mku.Salmon.Utils;
 
 namespace com.mku.salmon.samples;
 
 public class Sample
 {
-    public static void Main(String[] args)
+    public static void Main(string[] args)
     {
-        String password = "MYS@LMONP@$$WORD";
+        string password = "MYS@LMONP@$$WORD";
 
         // some test to encrypt
-        String text = "This is a plaintext that will be used for testing";
+        string text = "This is a plaintext that will be used for testing";
         byte[] bytes = UTF8Encoding.UTF8.GetBytes(text);
 
         // some data to encrypt
@@ -29,9 +29,9 @@ public class Sample
 
         // load the AES intrinsics for better performance (optional)
         // make sure you link the SalmonNative.dll to your project
-        // SalmonStream.AesProviderType = SalmonStream.ProviderType.AesIntrinsics;
+        SalmonStream.AesProviderType = ProviderType.AesIntrinsics;
         // or TinyAES
-        // SalmonStream.AesProviderType = SalmonStream.ProviderType.TinyAES;
+        // SalmonStream.AesProviderType = ProviderType.TinyAES;
 
         // you can create a key and reuse it:
         // byte[] key = SalmonGenerator.GetSecureRandomBytes(32);
@@ -74,7 +74,7 @@ public class Sample
         Console.WriteLine();
     }
 
-    private static void EncryptAndDecryptTextEmbeddingNonce(String text, byte[] key)
+    private static void EncryptAndDecryptTextEmbeddingNonce(string text, byte[] key)
     {
         Console.WriteLine("Encrypting text with nonce embedded: " + text);
 
@@ -82,11 +82,11 @@ public class Sample
         byte[] nonce = SalmonGenerator.GetSecureRandomBytes(8);
 
         // encrypt string and save the nonce in the header
-        String encText = SalmonTextEncryptor.EncryptString(text, key, nonce, true);
+        string encText = SalmonTextEncryptor.EncryptString(text, key, nonce, true);
         Console.WriteLine("Encrypted text: " + encText);
 
         // decrypt string without the need to provide the nonce since it's stored in the header
-        String decText = SalmonTextDecryptor.DecryptString(encText, key, null, true);
+        string decText = SalmonTextDecryptor.DecryptString(encText, key, null, true);
         Console.WriteLine("Decrypted text: " + decText);
         Console.WriteLine();
     }
@@ -102,7 +102,7 @@ public class Sample
         MemoryStream encOutStream = new MemoryStream(); // or use your custom output stream by extending RandomAccessStream
 
         // pass the output stream to the SalmonStream
-        SalmonStream encrypter = new SalmonStream(key, nonce, SalmonStream.EncryptionMode.Encrypt,
+        SalmonStream encrypter = new SalmonStream(key, nonce, EncryptionMode.Encrypt,
                 encOutStream, null,
                 false, null, null);
 
@@ -118,7 +118,7 @@ public class Sample
 
         //decrypt a stream with encoded data
         Stream encInputStream = new MemoryStream(encData); // or use your custom input stream by extending AbsStream
-        SalmonStream decrypter = new SalmonStream(key, nonce, SalmonStream.EncryptionMode.Decrypt,
+        SalmonStream decrypter = new SalmonStream(key, nonce, EncryptionMode.Decrypt,
                 encInputStream, null,
                 false, null, null);
         byte[] decBuffer = new byte[(int)decrypter.Length];
@@ -136,11 +136,11 @@ public class Sample
     }
 
 
-    private static void EncryptAndDecryptTextToFile(String text, byte[] key)
+    private static void EncryptAndDecryptTextToFile(string text, byte[] key)
     {
         // encrypt to a file, the SalmonFile has a virtual file system API
         Console.WriteLine("Encrypting text to File: " + text);
-        String testFile = "D:/tmp/salmontestfile.txt";
+        string testFile = "D:/tmp/salmontestfile.txt";
 
         // the real file:
         IRealFile tFile = new DotNetFile(testFile);
@@ -174,32 +174,30 @@ public class Sample
 
         // read data with a single call
         int encBytesRead = stream2.Read(decBuff, 0, decBuff.Length);
-        String decString2 = UTF8Encoding.UTF8.GetString(decBuff, 0, encBytesRead);
-        Console.WriteLine("Decrypted text: " + decString2);
+        string decstring2 = UTF8Encoding.UTF8.GetString(decBuff, 0, encBytesRead);
+        Console.WriteLine("Decrypted text: " + decstring2);
         stream2.Close();
         Console.WriteLine();
     }
 
-    private static void CreateDriveAndImportFile(String password)
+    private static void CreateDriveAndImportFile(string password)
     {
         // create a file nonce sequencer
-        String seqFilename = "sequencer.xml";
+        string seqFilename = "sequencer.xml";
         DotNetFile dir = new DotNetFile("output");
         if (!dir.Exists)
             dir.Mkdir();
         IRealFile sequenceFile = dir.GetChild(seqFilename);
         SalmonFileSequencer fileSequencer = new SalmonFileSequencer(sequenceFile, new SalmonSequenceSerializer());
-        SalmonDriveManager.VirtualDriveClass = typeof(DotNetDrive);
-        SalmonDriveManager.Sequencer = fileSequencer;
 
         // create a drive
-        SalmonDrive drive = SalmonDriveManager.CreateDrive(@".\" + dir.Path + @"\vault" + new Random().Next(), password);
-        SalmonFileCommander commander = new SalmonFileCommander(
-                SalmonDefaultOptions.BufferSize, SalmonDefaultOptions.BufferSize, 2);
+        string dirPath = @".\" + dir.Path + @"\vault" + new Random().Next();
+        SalmonDrive drive = DotNetDrive.Create(new DotNetFile(dirPath), password, fileSequencer);
+        SalmonFileCommander commander = new SalmonFileCommander(256 * 1024, 256 * 1024, 2);
         DotNetFile[] files = new DotNetFile[] { new DotNetFile(@".\data\file.txt") };
 
         // import multiple files
-        commander.ImportFiles(files, drive.VirtualRoot, false, true,
+        commander.ImportFiles(files, drive.Root, false, true,
                 (taskProgress) =>
                 {
                     Console.WriteLine("file importing: " + taskProgress.File.BaseName + ": " 
@@ -210,7 +208,7 @@ public class Sample
                 });
 
         // query for the file from the drive
-        SalmonFile file = drive.VirtualRoot.GetChild("file.txt");
+        SalmonFile file = drive.Root.GetChild("file.txt");
 
         // read from the stream with parallel threads and caching
         SalmonFileInputStream inputStream = new SalmonFileInputStream(file,
