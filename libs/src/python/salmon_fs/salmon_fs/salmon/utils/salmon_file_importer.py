@@ -42,34 +42,18 @@ from salmon_fs.salmon.salmon_file import SalmonFile
 from salmon_fs.utils.file_utils import FileUtils
 
 
+@typechecked
 def import_file(index: int, final_part_size: int, final_running_threads: int, file_size: int,
                 file_to_import: IRealFile,
                 salmon_real_file: IRealFile,
                 shm_total_bytes_read_name: str,
                 shm_cancel_name: str,
-                buffer_size: int, key: bytearray, integrity: bool, hash_key: bytearray, chunk_size: int):
-    """
-    Do not use directly use encrypt() instead.
-    :param index:
-    :param final_part_size:
-    :param final_running_threads:
-    :param file_size:
-    :param file_to_import:
-    :param salmon_real_file:
-    :param shm_total_bytes_read_name:
-    :param shm_cancel_name:
-    :param buffer_size:
-    :param key:
-    :param integrity:
-    :param hash_key:
-    :param chunk_size:
-    :return:
-    """
-
-    salmon_file: SalmonFile = SalmonFile(salmon_real_file)
-    salmon_file.set_allow_overwrite(True)
-    salmon_file.set_encryption_key(key)
-    salmon_file.set_apply_integrity(integrity, hash_key, chunk_size)
+                buffer_size: int, key: bytearray,
+                integrity: bool, hash_key: bytearray, chunk_size: int):
+    imported_file: SalmonFile = SalmonFile(salmon_real_file)
+    imported_file.set_allow_overwrite(True)
+    imported_file.set_encryption_key(key)
+    imported_file.set_apply_integrity(integrity, hash_key, chunk_size)
 
     shm_total_bytes_read = SharedMemory(shm_total_bytes_read_name)
     total_bytes_read = memoryview(shm_total_bytes_read.buf[index * 8:(index + 1) * 8])
@@ -82,7 +66,7 @@ def import_file(index: int, final_part_size: int, final_running_threads: int, fi
         length = final_part_size
 
     try:
-        import_file_part(file_to_import, salmon_file, start, length, total_bytes_read,
+        import_file_part(file_to_import, imported_file, start, length, total_bytes_read,
                          buffer_size,
                          shm_cancel_name)
         pass
@@ -95,9 +79,12 @@ def import_file(index: int, final_part_size: int, final_running_threads: int, fi
             shm_total_bytes_read.unlink()
 
 
+@typechecked
 def import_file_part(file_to_import: IRealFile, salmon_file: SalmonFile, start: int, count: int,
-                     total_bytes_read: memoryview, buffer_size: int,
-                     shm_cancel_name: str | None = None):
+                     total_bytes_read: memoryview | None, buffer_size: int,
+                     shm_cancel_name: str | None = None,
+                     stopped: list[bool] | None = None,
+                     on_progress: Callable[[int, int], Any] | None = None):
     """
      * Import a file part into a file in the drive.
      *
@@ -133,13 +120,15 @@ def import_file_part(file_to_import: IRealFile, salmon_file: SalmonFile, start: 
         while (bytes_read := source_stream.read(
                 v_bytes, 0,
                 min(len(v_bytes), count - total_part_bytes_read))) > 0 and total_part_bytes_read < count:
-            if shm_cancel_data is not None and shm_cancel_data[0]:
+            if (shm_cancel_data is not None and shm_cancel_data[0]) or (stopped is not None and stopped[0]):
                 break
 
             target_stream.write(v_bytes, 0, bytes_read)
             total_part_bytes_read += bytes_read
-            total_bytes_read[:8] = BitConverter.to_bytes(total_part_bytes_read, 8)[0:8]
-
+            if total_bytes_read is not None:
+                total_bytes_read[:8] = BitConverter.to_bytes(total_part_bytes_read, 8)[0:8]
+            if on_progress:
+                on_progress(total_part_bytes_read, count)
     except Exception as ex:
         print(ex)
         raise ex
@@ -194,7 +183,7 @@ class SalmonFileImporter:
          * Current threads.
         """
 
-        self.__stopped: bool = True
+        self.__stopped: list[bool] = [True]
         """
          * True if last job was stopped by the user.
         """
@@ -232,7 +221,7 @@ class SalmonFileImporter:
         """
          * Stops all current importing tasks
         """
-        self.__stopped = True
+        self.__stopped[0] = True
         # cancel all tasks
         self.__shm_cancel.buf[0] = 1
 
@@ -242,7 +231,7 @@ class SalmonFileImporter:
          *
          * @return
         """
-        return not self.__stopped
+        return not self.__stopped[0]
 
     def import_file(self, file_to_import: IRealFile, v_dir: SalmonFile, filename: str | None, delete_source: bool,
                     integrity: bool,
@@ -262,17 +251,16 @@ class SalmonFileImporter:
             raise Exception("Cannot import directory, use SalmonFileCommander instead")
 
         filename = filename if filename is not None else file_to_import.get_base_name()
-        total_bytes_read: int = 0
-        salmon_file: SalmonFile
+        imported_file: SalmonFile
         try:
             if not SalmonFileImporter.__enableMultiThread and self.__threads != 1:
                 raise NotImplementedError("Multithreading is not supported")
-            self.__stopped = False
+            self.__stopped[0] = False
             self.__failed = False
-            salmon_file = v_dir.create_file(filename)
-            salmon_file.set_allow_overwrite(True)
+            imported_file = v_dir.create_file(filename)
+            imported_file.set_allow_overwrite(True)
             # we use default chunk file size
-            salmon_file.set_apply_integrity(integrity, None, None)
+            imported_file.set_apply_integrity(integrity, None, None)
 
             file_size: int = file_to_import.length()
             running_threads: int = 1
@@ -280,12 +268,12 @@ class SalmonFileImporter:
 
             # for python we make sure to allocate enough space for the file 
             # this will also create the header
-            target_stream: SalmonStream = salmon_file.get_output_stream()
+            target_stream: SalmonStream = imported_file.get_output_stream()
             target_stream.set_length(file_size)
             target_stream.close()
 
             # if we want to check integrity we align to the chunk size otherwise to the AES Block
-            min_part_size: int = FileUtils.get_minimum_part_size(salmon_file)
+            min_part_size: int = FileUtils.get_minimum_part_size(imported_file)
             if part_size > min_part_size and self.__threads > 1:
                 part_size = math.ceil(file_size / float(self.__threads))
                 if part_size > min_part_size:
@@ -294,63 +282,15 @@ class SalmonFileImporter:
                     part_size = min_part_size
                 running_threads = int(file_size // part_size)
 
-            final_part_size: int = part_size
-            final_running_threads: int = running_threads
+            if running_threads == 1:
+                import_file_part(file_to_import, imported_file, 0, file_size, None, self.__buffer_size,
+                                 None, self.__stopped, on_progress)
+            else:
+                self.__submit_import_jobs(running_threads, part_size, file_to_import, imported_file,
+                                          integrity, on_progress)
 
-            shm_total_bytes_read = shared_memory.SharedMemory(create=True, size=8 * final_running_threads)
-            shm_total_bytes_read_name = shm_total_bytes_read.name
-
-            shm_cancel_name = self.__shm_cancel.name
-            self.__shm_cancel.buf[0] = 0
-
-            fs: list[Future] = []
-            for i in range(0, running_threads):
-                fs.append(self.__executor.submit(import_file, i, final_part_size, final_running_threads,
-                                                 file_size,
-                                                 file_to_import,
-                                                 salmon_file.get_real_file(),
-                                                 shm_total_bytes_read_name,
-                                                 shm_cancel_name,
-                                                 self.__buffer_size,
-                                                 salmon_file.get_encryption_key(),
-                                                 integrity,
-                                                 salmon_file.get_hash_key(),
-                                                 salmon_file.get_requested_chunk_size()))
-            total_bytes_read = 0
-            while True:
-                n_total_bytes_read = 0
-                for i in range(0, len(fs)):
-                    chunk_bytes_read = bytearray(shm_total_bytes_read.buf[i * 8:(i + 1) * 8])
-                    n_total_bytes_read += BitConverter.to_long(chunk_bytes_read, 0, 8)
-
-                if total_bytes_read != n_total_bytes_read:
-                    total_bytes_read = n_total_bytes_read
-                    if on_progress:
-                        on_progress(total_bytes_read, salmon_file.get_size())
-
-                complete: bool = True
-                for f in fs:
-                    complete &= f.done()
-                if complete:
-                    break
-                time.sleep(0.25)
-
-            for f in concurrent.futures.as_completed(fs):
-                try:
-                    # catch any errors within the children processes
-                    f.result()
-                except Exception as ex1:
-                    print(ex1)
-                    self.__lastException = ex1
-                    self.__failed = True
-                    # cancel all tasks
-                    self.stop()
-
-            shm_total_bytes_read.close()
-            shm_total_bytes_read.unlink()
-
-            if self.__stopped:
-                salmon_file.get_real_file().delete()
+            if self.__stopped[0]:
+                imported_file.get_real_file().delete()
             elif delete_source:
                 file_to_import.delete()
             if self.__lastException is not None:
@@ -358,15 +298,72 @@ class SalmonFileImporter:
         except Exception as ex:
             print(ex)
             self.__failed = True
-            self.__stopped = True
+            self.__stopped[0] = True
             raise ex
 
-        if self.__stopped or self.__failed:
-            self.__stopped = True
+        if self.__stopped[0] or self.__failed:
+            self.__stopped[0] = True
             return None
 
-        self.__stopped = True
-        return salmon_file
+        self.__stopped[0] = True
+        return imported_file
+
+    def __submit_import_jobs(self, running_threads: int, part_size: int, file_to_import: IRealFile,
+                             imported_file: SalmonFile,
+                             integrity: bool,
+                             on_progress: Callable[[int, int], Any] | None):
+
+        shm_total_bytes_read = shared_memory.SharedMemory(create=True, size=8 * running_threads)
+        shm_total_bytes_read_name = shm_total_bytes_read.name
+        file_size: int = file_to_import.length()
+        shm_cancel_name = self.__shm_cancel.name
+        self.__shm_cancel.buf[0] = 0
+
+        fs: list[Future] = []
+        for i in range(0, running_threads):
+            fs.append(self.__executor.submit(import_file, i, part_size, running_threads,
+                                             file_size,
+                                             file_to_import,
+                                             imported_file.get_real_file(),
+                                             shm_total_bytes_read_name,
+                                             shm_cancel_name,
+                                             self.__buffer_size,
+                                             imported_file.get_encryption_key(),
+                                             integrity,
+                                             imported_file.get_hash_key(),
+                                             imported_file.get_requested_chunk_size()))
+        total_bytes_read = 0
+        while True:
+            n_total_bytes_read = 0
+            for i in range(0, len(fs)):
+                chunk_bytes_read = bytearray(shm_total_bytes_read.buf[i * 8:(i + 1) * 8])
+                n_total_bytes_read += BitConverter.to_long(chunk_bytes_read, 0, 8)
+
+            if total_bytes_read != n_total_bytes_read:
+                total_bytes_read = n_total_bytes_read
+                if on_progress:
+                    on_progress(total_bytes_read, file_size)
+
+            complete: bool = True
+            for f in fs:
+                complete &= f.done()
+            if complete:
+                break
+            time.sleep(0.25)
+
+        for f in concurrent.futures.as_completed(fs):
+            try:
+                # catch any errors within the children processes
+                f.result()
+            except Exception as ex1:
+                print(ex1)
+                self.__lastException = ex1
+                self.__failed = True
+                # cancel all tasks
+                self.stop()
+
+        shm_total_bytes_read.close()
+        shm_total_bytes_read.unlink()
 
     def _finalize(self):
         self.close()

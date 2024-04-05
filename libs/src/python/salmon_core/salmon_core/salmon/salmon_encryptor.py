@@ -334,7 +334,8 @@ class SalmonEncryptor:
                 # cancel all tasks
                 shm_cancel.buf[0] = 1
 
-        out_data[:] = shm_out.buf[:]
+        start = len(header_data) if header_data is not None else 0
+        out_data[start:] = shm_out.buf[start:]
 
         shm_cancel.close()
         shm_cancel.unlink()

@@ -48,7 +48,9 @@ def export_file(index: int, final_part_size: int, final_running_threads: int, fi
                 real_file: IRealFile,
                 shm_total_bytes_read_name: str,
                 shm_cancel_name: str,
-                buffer_size: int, key: bytearray, integrity: bool, hash_key: bytearray | None, chunk_size: int):
+                buffer_size: int, key: bytearray,
+                integrity: bool, hash_key: bytearray | None, chunk_size: int):
+
     file_to_export: SalmonFile = SalmonFile(real_file_to_export)
     file_to_export.set_encryption_key(key)
     file_to_export.set_verify_integrity(integrity, hash_key)
@@ -64,7 +66,7 @@ def export_file(index: int, final_part_size: int, final_running_threads: int, fi
         length = final_part_size
     try:
         export_file_part(file_to_export, real_file, start, length, total_bytes_written,
-                         buffer_size)
+                         buffer_size, shm_cancel_name)
     except Exception as ex:
         raise ex
     finally:
@@ -76,8 +78,10 @@ def export_file(index: int, final_part_size: int, final_running_threads: int, fi
 
 @typechecked
 def export_file_part(file_to_export: SalmonFile, real_file: IRealFile, start: int, count: int,
-                     total_bytes_written: memoryview, buffer_size: int,
-                     shm_cancel_name: str | None = None):
+                     total_bytes_written: memoryview | None, buffer_size: int,
+                     shm_cancel_name: str | None = None,
+                     stopped: list[bool] | None = None,
+                     on_progress: Callable[[int, int], Any] | None = None):
     """
      * Export a file part from the drive.
      *
@@ -113,12 +117,14 @@ def export_file_part(file_to_export: SalmonFile, real_file: IRealFile, start: in
         while (bytes_read := source_stream.read(v_bytes, 0,
                                                 min(len(v_bytes), count - total_part_bytes_written))) > 0 \
                 and total_part_bytes_written < count:
-            if shm_cancel_data is not None and shm_cancel_data[0]:
+            if (shm_cancel_data is not None and shm_cancel_data[0]) or (stopped is not None and stopped[0]):
                 break
             target_stream.write(v_bytes, 0, bytes_read)
             total_part_bytes_written += bytes_read
-            total_bytes_written[:8] = BitConverter.to_bytes(total_part_bytes_written, 8)[0:8]
-
+            if total_bytes_written is not None:
+                total_bytes_written[:8] = BitConverter.to_bytes(total_part_bytes_written, 8)[0:8]
+            if on_progress:
+                on_progress(total_part_bytes_written, count)
     except Exception as ex:
         print(ex)
         raise ex
@@ -173,7 +179,7 @@ class SalmonFileExporter:
          * Current threads.
         """
 
-        self.__stopped: bool = True
+        self.__stopped: list[bool] = [True]
         """
          * True if last job was stopped by the user.
         """
@@ -198,24 +204,32 @@ class SalmonFileExporter:
          * The executor to be used for running parallel exports.
         """
 
-        if buffer_size == 0:
-            buffer_size = SalmonFileExporter.__DEFAULT_BUFFER_SIZE
-        if threads == 0:
-            threads = SalmonFileExporter.__DEFAULT_THREADS
         self.__buffer_size = buffer_size
+        if self.__buffer_size == 0:
+            self.__buffer_size = SalmonFileImporter.__DEFAULT_BUFFER_SIZE
         self.__threads = threads
+        if self.__threads == 0:
+            self.__threads = SalmonFileImporter.__DEFAULT_THREADS
 
         self.__executor = ThreadPoolExecutor(self.__threads) if not multi_cpu else ProcessPoolExecutor(self.__threads)
 
-    def is_running(self) -> bool:
-        return not self.__stopped
-
     def stop(self):
-        self.__stopped = True
+        self.__stopped[0] = True
+        # cancel all tasks
+        self.__shm_cancel.buf[0] = 1
+
+    def is_running(self) -> bool:
+        """
+         * True if exporter is currently running a job.
+         *
+         * @return
+        """
+        return not self.__stopped[0]
 
     def export_file(self, file_to_export: SalmonFile, export_dir: IRealFile, filename: str | None,
                     delete_source: bool,
-                    integrity: bool, on_progress: Callable[[int, int], Any] | None) -> IRealFile | None:
+                    integrity: bool,
+                    on_progress: Callable[[int, int], Any] | None) -> IRealFile | None:
         """
          * Export a file from the drive to the external directory path
          *
@@ -237,7 +251,7 @@ class SalmonFileExporter:
             if not self.__enableMultiThread and self.__threads != 1:
                 raise NotImplementedError("Multithreading is not supported")
 
-            self.__stopped = False
+            self.__stopped[0] = False
             total_bytes_written = [0]
             self.__failed = False
 
@@ -265,63 +279,15 @@ class SalmonFileExporter:
                 else:
                     part_size = min_part_size
                 running_threads = int(file_size // part_size)
+            
+            if running_threads == 1:
+                export_file_part(file_to_export, exported_file, 0, file_size, None, self.__buffer_size,
+                                 None, self.__stopped, on_progress)
+            else:
+                self.__submit_export_jobs(running_threads, part_size, file_to_export, exported_file,
+                                          integrity, on_progress)
 
-            final_part_size: int = part_size
-            final_running_threads: int = running_threads
-
-            shm_total_bytes_read = shared_memory.SharedMemory(create=True, size=8 * final_running_threads)
-            shm_total_bytes_read_name = shm_total_bytes_read.name
-
-            shm_cancel_name = self.__shm_cancel.name
-            self.__shm_cancel.buf[0] = 0
-
-            fs: list[Future] = []
-            for i in range(0, running_threads):
-                fs.append(self.__executor.submit(export_file, i, final_part_size,
-                                                 final_running_threads,
-                                                 file_size,
-                                                 file_to_export.get_real_file(),
-                                                 exported_file,
-                                                 shm_total_bytes_read_name,
-                                                 shm_cancel_name,
-                                                 self.__buffer_size,
-                                                 file_to_export.get_encryption_key(),
-                                                 integrity,
-                                                 file_to_export.get_hash_key(),
-                                                 file_to_export.get_requested_chunk_size()))
-            total_bytes_read = 0
-            while True:
-                n_total_bytes_read = 0
-                for i in range(0, len(fs)):
-                    chunk_bytes_read = bytearray(shm_total_bytes_read.buf[i * 8:(i + 1) * 8])
-                    n_total_bytes_read += BitConverter.to_long(chunk_bytes_read, 0, 8)
-
-                if total_bytes_read != n_total_bytes_read:
-                    total_bytes_read = n_total_bytes_read
-                    on_progress(total_bytes_read, file_to_export.get_size())
-
-                complete: bool = True
-                for f in fs:
-                    complete &= f.done()
-                if complete:
-                    break
-                time.sleep(0.25)
-
-            for f in concurrent.futures.as_completed(fs):
-                try:
-                    # catch any errors within the children processes
-                    f.result()
-                except Exception as ex1:
-                    print(ex1)
-                    self.__lastException = ex1
-                    self.__failed = True
-                    # cancel all tasks
-                    self.stop()
-
-            shm_total_bytes_read.close()
-            shm_total_bytes_read.unlink()
-
-            if self.__stopped:
+            if self.__stopped[0]:
                 exported_file.delete()
             elif delete_source:
                 file_to_export.get_real_file().delete()
@@ -330,16 +296,71 @@ class SalmonFileExporter:
         except Exception as ex:
             print(ex)
             self.__failed = True
-            self.__stopped = True
+            self.__stopped[0] = True
             raise ex
 
-        if self.__stopped or self.__failed:
-            self.__stopped = True
+        if self.__stopped[0] or self.__failed:
+            self.__stopped[0] = True
             return None
 
-        self.__stopped = True
+        self.__stopped[0] = True
         return exported_file
 
+    def __submit_export_jobs(self, running_threads: int, part_size: int, file_to_export: SalmonFile, exported_file: IRealFile,
+                             integrity: bool, on_progress: Callable[[int, int], Any] | None):
+
+        shm_total_bytes_read = shared_memory.SharedMemory(create=True, size=8 * running_threads)
+        shm_total_bytes_read_name = shm_total_bytes_read.name
+        file_size: int = file_to_export.get_size()
+        shm_cancel_name = self.__shm_cancel.name
+        self.__shm_cancel.buf[0] = 0
+
+        fs: list[Future] = []
+        for i in range(0, running_threads):
+            fs.append(self.__executor.submit(export_file, i, part_size,
+                                             running_threads,
+                                             file_size,
+                                             file_to_export.get_real_file(),
+                                             exported_file,
+                                             shm_total_bytes_read_name,
+                                             shm_cancel_name,
+                                             self.__buffer_size,
+                                             file_to_export.get_encryption_key(),
+                                             integrity,
+                                             file_to_export.get_hash_key(),
+                                             file_to_export.get_requested_chunk_size()))
+        total_bytes_written = 0
+        while True:
+            n_total_bytes_read = 0
+            for i in range(0, len(fs)):
+                chunk_bytes_read = bytearray(shm_total_bytes_read.buf[i * 8:(i + 1) * 8])
+                n_total_bytes_read += BitConverter.to_long(chunk_bytes_read, 0, 8)
+
+            if total_bytes_written != n_total_bytes_read:
+                total_bytes_written = n_total_bytes_read
+            if on_progress:
+                on_progress(total_bytes_written, file_size)
+
+            complete: bool = True
+            for f in fs:
+                complete &= f.done()
+            if complete:
+                break
+            time.sleep(0.25)
+
+        for f in concurrent.futures.as_completed(fs):
+            try:
+                # catch any errors within the children processes
+                f.result()
+            except Exception as ex1:
+                print(ex1)
+                self.__lastException = ex1
+                self.__failed = True
+                # cancel all tasks
+                self.stop()
+
+        shm_total_bytes_read.close()
+        shm_total_bytes_read.unlink()
     def _finalize(self):
         self.close()
 

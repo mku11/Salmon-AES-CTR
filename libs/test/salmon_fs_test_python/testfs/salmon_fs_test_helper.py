@@ -95,7 +95,7 @@ class SalmonFSTestHelper:
 
     TEST_FILE_INPUT_STREAM_THREADS = 1
     TEST_USE_FILE_INPUT_STREAM = False
-    ENABLE_FILE_PROGRESS = False
+    ENABLE_FILE_PROGRESS = True
 
     TEST_SEQUENCER_FILE1 = "seq1.json"
     TEST_SEQUENCER_FILE2 = "seq2.json"
