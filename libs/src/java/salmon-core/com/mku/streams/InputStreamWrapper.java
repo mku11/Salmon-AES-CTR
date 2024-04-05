@@ -1,4 +1,4 @@
-package com.mku.iostream;
+package com.mku.streams;
 /*
 MIT License
 

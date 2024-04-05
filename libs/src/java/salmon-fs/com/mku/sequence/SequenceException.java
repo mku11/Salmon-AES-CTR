@@ -26,12 +26,12 @@ SOFTWARE.
 /**
  * Thrown when there is a failure in the nonce sequencer.
  */
-public class SalmonSequenceException extends RuntimeException {
+public class SequenceException extends RuntimeException {
     /**
      * Construct an exception with a specific message.
      * @param msg
      */
-    public SalmonSequenceException(String msg) {
+    public SequenceException(String msg) {
         super(msg);
     }
 
@@ -40,7 +40,7 @@ public class SalmonSequenceException extends RuntimeException {
      * @param msg The provided message
      * @param ex The inner exception
      */
-    public SalmonSequenceException(String msg, Exception ex) {
+    public SequenceException(String msg, Exception ex) {
         super(msg, ex);
     }
 }

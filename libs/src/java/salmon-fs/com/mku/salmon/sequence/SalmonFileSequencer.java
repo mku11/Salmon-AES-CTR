@@ -24,8 +24,8 @@ SOFTWARE.
 */
 
 import com.mku.convert.BitConverter;
-import com.mku.iostream.RandomAccessStream;
-import com.mku.iostream.InputStreamWrapper;
+import com.mku.streams.RandomAccessStream;
+import com.mku.streams.InputStreamWrapper;
 import com.mku.salmon.SalmonGenerator;
 
 import com.mku.file.IRealFile;
@@ -55,10 +55,10 @@ public class SalmonFileSequencer implements INonceSequencer {
      * @param sequenceFile The sequence file.
      * @param serializer   The serializer to be used.
      * @throws IOException
-     * @throws SalmonSequenceException
+     * @throws SequenceException
      */
     public SalmonFileSequencer(IRealFile sequenceFile, INonceSequenceSerializer serializer)
-            throws IOException, SalmonSequenceException {
+            throws IOException, SequenceException {
         this.sequenceFile = sequenceFile;
         this.serializer = serializer;
         if (!sequenceFile.exists()) {
@@ -76,7 +76,7 @@ public class SalmonFileSequencer implements INonceSequencer {
      *
      * @param driveId The drive ID.
      * @param authId  The authorization ID of the drive.
-     * @throws SalmonSequenceException
+     * @throws SequenceException
      */
     @Override
     public void createSequence(String driveId, String authId) {
@@ -84,7 +84,7 @@ public class SalmonFileSequencer implements INonceSequencer {
         HashMap<String, NonceSequence> configs = serializer.deserialize(xmlContents);
         NonceSequence sequence = getSequence(configs, driveId);
         if (sequence != null)
-            throw new SalmonSequenceException("Sequence already exists");
+            throw new SequenceException("Sequence already exists");
         NonceSequence nsequence = new NonceSequence(driveId, authId, null, null, NonceSequence.Status.New);
         configs.put(driveId + ":" + authId, nsequence);
         saveSequenceFile(configs);
@@ -97,7 +97,7 @@ public class SalmonFileSequencer implements INonceSequencer {
      * @param authId     The auth ID of the device for the drive.
      * @param startNonce The starting nonce.
      * @param maxNonce   The maximum nonce.
-     * @throws SalmonSequenceException
+     * @throws SequenceException
      * @throws IOException
      */
     @Override
@@ -106,9 +106,9 @@ public class SalmonFileSequencer implements INonceSequencer {
         HashMap<String, NonceSequence> configs = serializer.deserialize(xmlContents);
         NonceSequence sequence = getSequence(configs, driveId);
         if (sequence == null)
-            throw new SalmonSequenceException("Sequence does not exist");
+            throw new SequenceException("Sequence does not exist");
         if (sequence.getNextNonce() != null)
-            throw new SalmonSequenceException("Cannot reinitialize sequence");
+            throw new SequenceException("Cannot reinitialize sequence");
         sequence.setNextNonce(startNonce);
         sequence.setMaxNonce(maxNonce);
         sequence.setStatus(NonceSequence.Status.Active);
@@ -121,7 +121,7 @@ public class SalmonFileSequencer implements INonceSequencer {
      * @param driveId  The drive ID.
      * @param authId   The auth ID of the device for the drive.
      * @param maxNonce The maximum nonce.
-     * @throws SalmonSequenceException
+     * @throws SequenceException
      */
     @Override
     public void setMaxNonce(String driveId, String authId, byte[] maxNonce) {
@@ -129,10 +129,10 @@ public class SalmonFileSequencer implements INonceSequencer {
         HashMap<String, NonceSequence> configs = serializer.deserialize(xmlContents);
         NonceSequence sequence = getSequence(configs, driveId);
         if (sequence == null || sequence.getStatus() == NonceSequence.Status.Revoked)
-            throw new SalmonSequenceException("Sequence does not exist");
+            throw new SequenceException("Sequence does not exist");
         if (BitConverter.toLong(sequence.getMaxNonce(), 0, SalmonGenerator.NONCE_LENGTH)
                 < BitConverter.toLong(maxNonce, 0, SalmonGenerator.NONCE_LENGTH))
-            throw new SalmonSequenceException("Max nonce cannot be increased");
+            throw new SequenceException("Max nonce cannot be increased");
         sequence.setMaxNonce(maxNonce);
         saveSequenceFile(configs);
     }
@@ -142,7 +142,7 @@ public class SalmonFileSequencer implements INonceSequencer {
      *
      * @param driveId The drive ID.
      * @return
-     * @throws SalmonSequenceException
+     * @throws SequenceException
      * @throws SalmonRangeExceededException
      */
     @Override
@@ -151,7 +151,7 @@ public class SalmonFileSequencer implements INonceSequencer {
         HashMap<String, NonceSequence> configs = serializer.deserialize(xmlContents);
         NonceSequence sequence = getSequence(configs, driveId);
         if (sequence == null || sequence.getNextNonce() == null || sequence.getMaxNonce() == null)
-            throw new SalmonSequenceException("Device not Authorized");
+            throw new SequenceException("Device not Authorized");
 
         //We get the next nonce
         byte[] nextNonce = sequence.getNextNonce();
@@ -164,7 +164,7 @@ public class SalmonFileSequencer implements INonceSequencer {
      * Get the contents of a sequence file.
      *
      * @return
-     * @throws SalmonSequenceException
+     * @throws SequenceException
      */
     protected synchronized String getContents() {
         BufferedInputStream stream = null;
@@ -179,13 +179,13 @@ public class SalmonFileSequencer implements INonceSequencer {
             }
         } catch (IOException ex) {
             ex.printStackTrace();
-            throw new SalmonSequenceException("Could not get XML Contents", ex);
+            throw new SequenceException("Could not get XML Contents", ex);
         } finally {
             if (stream != null) {
                 try {
                     stream.close();
                 } catch (IOException e) {
-                    throw new SalmonSequenceException("Could not get contents", e);
+                    throw new SequenceException("Could not get contents", e);
                 }
             }
             if (outputStream != null) {
@@ -193,7 +193,7 @@ public class SalmonFileSequencer implements INonceSequencer {
 					outputStream.flush();
                     outputStream.close();
                 } catch (IOException e) {
-                    throw new SalmonSequenceException("Could not get contents", e);
+                    throw new SequenceException("Could not get contents", e);
                 }
             }
         }
@@ -204,7 +204,7 @@ public class SalmonFileSequencer implements INonceSequencer {
      * Revoke the current sequence for a specific drive.
      *
      * @param driveId The drive ID.
-     * @throws SalmonSequenceException
+     * @throws SequenceException
      */
     @Override
     public void revokeSequence(String driveId) {
@@ -212,9 +212,9 @@ public class SalmonFileSequencer implements INonceSequencer {
         HashMap<String, NonceSequence> configs = serializer.deserialize(xmlContents);
         NonceSequence sequence = getSequence(configs, driveId);
         if (sequence == null)
-            throw new SalmonSequenceException("Sequence does not exist");
+            throw new SequenceException("Sequence does not exist");
         if (sequence.getStatus() == NonceSequence.Status.Revoked)
-            throw new SalmonSequenceException("Sequence already revoked");
+            throw new SequenceException("Sequence already revoked");
         sequence.setStatus(NonceSequence.Status.Revoked);
         saveSequenceFile(configs);
     }
@@ -224,7 +224,7 @@ public class SalmonFileSequencer implements INonceSequencer {
      *
      * @param driveId The drive ID.
      * @return
-     * @throws SalmonSequenceException
+     * @throws SequenceException
      */
     @Override
     public NonceSequence getSequence(String driveId) {
@@ -246,7 +246,7 @@ public class SalmonFileSequencer implements INonceSequencer {
      * Save the sequence file.
      *
      * @param sequences The sequences.
-     * @throws SalmonSequenceException
+     * @throws SequenceException
      */
     protected void saveSequenceFile(HashMap<String, NonceSequence> sequences) {
         try {
@@ -254,7 +254,7 @@ public class SalmonFileSequencer implements INonceSequencer {
             saveContents(contents);
         } catch (Exception ex) {
             ex.printStackTrace();
-            throw new SalmonSequenceException("Could not serialize sequences", ex);
+            throw new SequenceException("Could not serialize sequences", ex);
         }
     }
 
@@ -275,21 +275,21 @@ public class SalmonFileSequencer implements INonceSequencer {
             }
         } catch (Exception ex) {
             ex.printStackTrace();
-            throw new SalmonSequenceException("Could not save sequence file", ex);
+            throw new SequenceException("Could not save sequence file", ex);
         } finally {
             if (outputStream != null) {
                 outputStream.flush();
                 try {
                     outputStream.close();
                 } catch (IOException e) {
-                    throw new SalmonSequenceException("Could not save sequence file", e);
+                    throw new SequenceException("Could not save sequence file", e);
                 }
             }
             if (inputStream != null) {
                 try {
                     inputStream.close();
                 } catch (IOException e) {
-                    throw new SalmonSequenceException("Could not save sequence file", e);
+                    throw new SequenceException("Could not save sequence file", e);
                 }
             }
         }
@@ -301,7 +301,7 @@ public class SalmonFileSequencer implements INonceSequencer {
      * @param configs All sequence configurations.
      * @param driveId The drive ID.
      * @return
-     * @throws SalmonSequenceException
+     * @throws SequenceException
      */
     private static NonceSequence getSequence(HashMap<String, NonceSequence> configs, String driveId) {
         NonceSequence sequence = null;
@@ -310,7 +310,7 @@ public class SalmonFileSequencer implements INonceSequencer {
                 // there should be only one sequence available
                 if (seq.getStatus() == NonceSequence.Status.Active || seq.getStatus() == NonceSequence.Status.New) {
                     if (sequence != null)
-                        throw new SalmonSequenceException("Corrupt sequence config");
+                        throw new SequenceException("Corrupt sequence config");
                     sequence = seq;
                 }
             }

@@ -1,4 +1,4 @@
-package com.mku.salmon.iostream;
+package com.mku.salmon.streams;
 /*
 MIT License
 

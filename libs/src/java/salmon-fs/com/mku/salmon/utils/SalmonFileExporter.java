@@ -26,7 +26,7 @@ SOFTWARE.
 import com.mku.file.IRealFile;
 import com.mku.file.IVirtualFile;
 import com.mku.func.BiConsumer;
-import com.mku.iostream.RandomAccessStream;
+import com.mku.streams.RandomAccessStream;
 import com.mku.salmon.SalmonFile;
 import com.mku.utils.FileExporter;
 import com.mku.utils.FileImporter;

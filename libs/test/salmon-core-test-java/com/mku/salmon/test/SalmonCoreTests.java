@@ -25,17 +25,18 @@ SOFTWARE.
 */
 
 import com.mku.convert.BitConverter;
-import com.mku.iostream.MemoryStream;
+import com.mku.streams.MemoryStream;
 import com.mku.salmon.SalmonGenerator;
 import com.mku.salmon.SalmonRangeExceededException;
 import com.mku.salmon.SalmonSecurityException;
-import com.mku.salmon.integrity.SalmonIntegrityException;
-import com.mku.salmon.iostream.EncryptionMode;
-import com.mku.salmon.iostream.ProviderType;
-import com.mku.salmon.iostream.SalmonStream;
+import com.mku.salmon.integrity.IntegrityException;
+import com.mku.salmon.streams.EncryptionMode;
+import com.mku.salmon.streams.ProviderType;
+import com.mku.salmon.streams.SalmonStream;
 import com.mku.salmon.text.SalmonTextDecryptor;
 import com.mku.salmon.text.SalmonTextEncryptor;
 import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
@@ -48,10 +49,10 @@ public class SalmonCoreTests {
 
     @BeforeAll
     static void beforeAll() {
-		//SalmonCoreTestHelper.TEST_ENC_BUFFER_SIZE = 1 * 1024 * 1024;
-		//SalmonCoreTestHelper.TEST_DEC_BUFFER_SIZE = 1 * 1024 * 1024;
-		SalmonCoreTestHelper.TEST_ENC_THREADS = 1;
-		SalmonCoreTestHelper.TEST_DEC_THREADS = 1;
+        //SalmonCoreTestHelper.TEST_ENC_BUFFER_SIZE = 1 * 1024 * 1024;
+        //SalmonCoreTestHelper.TEST_DEC_BUFFER_SIZE = 1 * 1024 * 1024;
+        SalmonCoreTestHelper.TEST_ENC_THREADS = 1;
+        SalmonCoreTestHelper.TEST_DEC_THREADS = 1;
     }
 
     @BeforeEach
@@ -61,13 +62,13 @@ public class SalmonCoreTests {
     }
 
     @AfterEach
-    void afterEach(){
+    void afterEach() {
         SalmonCoreTestHelper.close();
     }
 
     @Test
     public void shouldEncryptAndDecryptText() throws Exception {
-        String plainText = SalmonCoreTestHelper.TEST_TINY_TEXT;
+        String plainText = SalmonCoreTestHelper.TEST_TEXT;
 
         String encText = SalmonTextEncryptor.encryptString(plainText, SalmonCoreTestHelper.TEST_KEY_BYTES, SalmonCoreTestHelper.TEST_NONCE_BYTES, false);
         String decText = SalmonTextDecryptor.decryptString(encText, SalmonCoreTestHelper.TEST_KEY_BYTES, SalmonCoreTestHelper.TEST_NONCE_BYTES, false);
@@ -291,7 +292,7 @@ public class SalmonCoreTests {
             SalmonCoreTestHelper.encryptWriteDecryptRead(SalmonCoreTestHelper.TEST_TEXT, SalmonCoreTestHelper.TEST_KEY_BYTES, SalmonCoreTestHelper.TEST_NONCE_BYTES, 16 * 2 + 3, 16 * 2,
                     true, 32, SalmonCoreTestHelper.TEST_HMAC_KEY_BYTES, false, null, null);
         } catch (IOException ex) {
-            if (ex.getCause() instanceof SalmonIntegrityException)
+            if (ex.getCause() instanceof IntegrityException)
                 caught = true;
         }
 
@@ -306,7 +307,7 @@ public class SalmonCoreTests {
                     true, null, SalmonCoreTestHelper.TEST_HMAC_KEY_BYTES, false, null, null
             );
         } catch (IOException ex) {
-            if (ex.getCause() instanceof SalmonIntegrityException)
+            if (ex.getCause() instanceof IntegrityException)
                 caught = true;
         }
 
@@ -329,7 +330,7 @@ public class SalmonCoreTests {
                     true, null, SalmonCoreTestHelper.TEST_HMAC_KEY_BYTES, false, null, null
             );
         } catch (IOException ex) {
-            if (ex.getCause() instanceof SalmonIntegrityException)
+            if (ex.getCause() instanceof IntegrityException)
                 caught = true;
         }
 
@@ -346,7 +347,7 @@ public class SalmonCoreTests {
                     true, null, SalmonCoreTestHelper.TEST_HMAC_KEY_BYTES, true, null, null
             );
         } catch (IOException ex) {
-            if (ex.getCause() instanceof SalmonIntegrityException)
+            if (ex.getCause() instanceof IntegrityException)
                 caught = true;
         }
 
@@ -362,7 +363,7 @@ public class SalmonCoreTests {
                     true, 32, SalmonCoreTestHelper.TEST_HMAC_KEY_BYTES, true, null, null
             );
         } catch (IOException ex) {
-            if (ex.getCause() instanceof SalmonIntegrityException)
+            if (ex.getCause() instanceof IntegrityException)
                 caught = true;
         }
 
@@ -382,7 +383,8 @@ public class SalmonCoreTests {
         byte[] inputBytes = plainText.getBytes(Charset.defaultCharset());
         MemoryStream ins = new MemoryStream(inputBytes);
         MemoryStream outs = new MemoryStream();
-        SalmonStream encWriter = new SalmonStream(SalmonCoreTestHelper.TEST_KEY_BYTES, SalmonCoreTestHelper.TEST_NONCE_BYTES, EncryptionMode.Encrypt, outs,
+        SalmonStream encWriter = new SalmonStream(SalmonCoreTestHelper.TEST_KEY_BYTES,
+                SalmonCoreTestHelper.TEST_NONCE_BYTES, EncryptionMode.Encrypt, outs,
                 null, false, null, null);
         try {
             encWriter.copyTo(outs);
@@ -475,7 +477,7 @@ public class SalmonCoreTests {
                     5, SalmonCoreTestHelper.TEST_TEXT_WRITE.length(), SalmonCoreTestHelper.TEST_TEXT_WRITE, false,
                     32, SalmonCoreTestHelper.TEST_HMAC_KEY_BYTES, true);
         } catch (IOException ex) {
-            if (ex.getCause() instanceof SalmonIntegrityException)
+            if (ex.getCause() instanceof IntegrityException)
                 caught = true;
         }
 

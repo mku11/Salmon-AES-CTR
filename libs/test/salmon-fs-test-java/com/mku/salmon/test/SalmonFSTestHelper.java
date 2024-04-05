@@ -30,18 +30,18 @@ import com.mku.func.BiConsumer;
 import com.mku.salmon.drive.JavaDrive;
 import com.mku.file.JavaFile;
 import com.mku.file.IVirtualFile;
-import com.mku.iostream.RandomAccessStream;
-import com.mku.iostream.MemoryStream;
+import com.mku.streams.RandomAccessStream;
+import com.mku.streams.MemoryStream;
 import com.mku.salmon.*;
-import com.mku.salmon.iostream.EncryptionMode;
-import com.mku.salmon.iostream.SalmonStream;
+import com.mku.salmon.streams.EncryptionMode;
+import com.mku.salmon.streams.SalmonStream;
 import com.mku.salmon.text.SalmonTextDecryptor;
 import com.mku.salmon.text.SalmonTextEncryptor;
 import com.mku.salmon.SalmonDrive;
 import com.mku.salmon.SalmonFile;
-import com.mku.salmon.iostream.SalmonFileInputStream;
+import com.mku.salmon.streams.SalmonFileInputStream;
 import com.mku.salmon.sequence.SalmonFileSequencer;
-import com.mku.salmon.sequence.SalmonSequenceException;
+import com.mku.salmon.sequence.SequenceException;
 import com.mku.salmon.sequence.SalmonSequenceSerializer;
 import com.mku.salmon.utils.SalmonFileExporter;
 import com.mku.salmon.utils.SalmonFileImporter;
@@ -154,7 +154,6 @@ public class SalmonFSTestHelper {
         SalmonFileSequencer sequencer = new SalmonFileSequencer(new JavaFile(vaultDir + "/" + SalmonFSTestHelper.TEST_SEQUENCER_FILE1), getSequenceSerializer());
         SalmonDrive drive = SalmonDrive.createDrive(vaultDir, SalmonFSTestHelper.driveClassType, pass, sequencer);
         IVirtualFile rootDir = drive.getRoot();
-        rootDir.listFiles();
         JavaFile fileToImport = new JavaFile(importFile);
         String hashPreImport = SalmonFSTestHelper.getChecksum(fileToImport);
 
@@ -201,7 +200,6 @@ public class SalmonFSTestHelper {
         SalmonFileSequencer sequencer = new SalmonFileSequencer(new JavaFile(vaultDir + "/" + SalmonFSTestHelper.TEST_SEQUENCER_FILE1), getSequenceSerializer());
         SalmonDrive drive = SalmonDrive.createDrive(vaultDir, SalmonFSTestHelper.driveClassType, pass, sequencer);
         IVirtualFile rootDir = drive.getRoot();
-        rootDir.listFiles();
         JavaFile fileToImport = new JavaFile(importFile);
         String rbasename = fileToImport.getBaseName();
 
@@ -221,7 +219,7 @@ public class SalmonFSTestHelper {
 
     public static void importAndCopy(IRealFile vaultDir, String pass, String importFile,
                                      int importBufferSize, int importThreads, String newDir, boolean move) throws Exception {
-        SalmonFileSequencer sequencer = new SalmonFileSequencer(new JavaFile(vaultDir + "/" + SalmonFSTestHelper.TEST_SEQUENCER_FILE1), getSequenceSerializer());
+        SalmonFileSequencer sequencer = new SalmonFileSequencer(vaultDir.getChild( SalmonFSTestHelper.TEST_SEQUENCER_FILE1), getSequenceSerializer());
         SalmonDrive drive = SalmonDrive.createDrive(vaultDir, SalmonFSTestHelper.driveClassType, pass, sequencer);
         IVirtualFile rootDir = drive.getRoot();
         rootDir.listFiles();
@@ -356,7 +354,7 @@ public class SalmonFSTestHelper {
 
         //reopen with second device(sequencer) and import auth file
         drive = SalmonDrive.openDrive(vault, SalmonFSTestHelper.driveClassType, SalmonCoreTestHelper.TEST_PASSWORD, sequencer2);
-        drive.importAuthFile(exportAuthFile);
+        SalmonAuthConfig.importAuthFile(drive, exportAuthFile);
         // now import a 3rd file
         rootDir = drive.getRoot();
         fileToImport = new JavaFile(importFilePath);
@@ -382,7 +380,7 @@ public class SalmonFSTestHelper {
             SalmonFileSequencer sequencer = new SalmonFileSequencer(seqFile, getSequenceSerializer()) {
                 @Override
                 public void initializeSequence(String driveId, String authId, byte[] startNonce, byte[] maxNonce)
-                        throws SalmonSequenceException, IOException {
+                        throws SequenceException, IOException {
                     long nMaxNonce = BitConverter.toLong(testMaxNonce, 0, SalmonGenerator.NONCE_LENGTH);
                     startNonce = BitConverter.toBytes(nMaxNonce + offset, SalmonGenerator.NONCE_LENGTH);
                     maxNonce = BitConverter.toBytes(nMaxNonce, SalmonGenerator.NONCE_LENGTH);
@@ -536,7 +534,7 @@ public class SalmonFSTestHelper {
         assertArrayEquals(tdata, buffer);
     }
 
-    public static void shouldTestFileSequencer() throws SalmonSequenceException, IOException, SalmonRangeExceededException {
+    public static void shouldTestFileSequencer() throws SequenceException, IOException, SalmonRangeExceededException {
         IRealFile file = new JavaFile(TEST_SEQUENCER_DIR + "\\" + TEST_SEQUENCER_FILENAME);
         if (file.exists())
             file.delete();

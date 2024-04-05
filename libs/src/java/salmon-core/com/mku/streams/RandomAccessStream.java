@@ -1,4 +1,4 @@
-package com.mku.iostream;
+package com.mku.streams;
 /*
 MIT License
 
@@ -33,7 +33,7 @@ import java.io.IOException;
  * (modeled after c# Stream class).
  */
 public abstract class RandomAccessStream {
-    private static readonly int DEFAULT_BUFFER_SIZE = 256 * 1024;
+    private static final int DEFAULT_BUFFER_SIZE = 256 * 1024;
 
     /**
      * True if the stream is readable.

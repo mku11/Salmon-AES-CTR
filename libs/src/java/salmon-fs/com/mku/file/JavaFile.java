@@ -24,7 +24,7 @@ SOFTWARE.
 */
 
 import com.mku.func.BiConsumer;
-import com.mku.iostream.RandomAccessStream;
+import com.mku.streams.RandomAccessStream;
 
 import java.io.File;
 import java.io.FileNotFoundException;

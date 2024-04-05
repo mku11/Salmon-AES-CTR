@@ -23,10 +23,11 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 */
 
-import com.mku.salmon.integrity.SalmonIntegrityException;
+import com.mku.salmon.integrity.IntegrityException;
 
 import javax.crypto.Mac;
 import javax.crypto.spec.SecretKeySpec;
+import java.io.IOException;
 
 /**
  * Provides HMAC SHA-256 hashing.
@@ -35,16 +36,17 @@ public class HmacSHA256Provider implements IHashProvider {
 
     /**
      * Calculate HMAC SHA256 hash for a byte buffer.
+     *
      * @param hashKey The HMAC SHA256 key to use for hashing (32 bytes).
-     * @param buffer The buffer to read the data from.
-     * @param offset The position reading will start from.
-     * @param count The count of bytes to be read.
+     * @param buffer  The buffer to read the data from.
+     * @param offset  The position reading will start from.
+     * @param count   The count of bytes to be read.
      * @return The HMAC SHA256 hash.
      * @throws Exception thrown if hash cannot be calculated
      */
     @Override
     public byte[] calc(byte[] hashKey, byte[] buffer, int offset, int count)
-            throws Exception {
+            throws IntegrityException {
         try {
             Mac hmac = Mac.getInstance("HmacSHA256");
             SecretKeySpec secret_key = new SecretKeySpec(hashKey, "HmacSHA256");
@@ -53,7 +55,7 @@ public class HmacSHA256Provider implements IHashProvider {
             byte[] hashValue = hmac.doFinal();
             return hashValue;
         } catch (Exception ex) {
-            throw new IOException("Could not calculate HMAC", ex);
+            throw new IntegrityException("Could not calculate HMAC", ex);
         }
     }
 }

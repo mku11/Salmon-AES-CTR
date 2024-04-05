@@ -25,7 +25,7 @@ SOFTWARE.
 
 import com.mku.file.IVirtualFile;
 import com.mku.salmon.SalmonFile;
-import com.mku.salmon.iostream.SalmonFileInputStream;
+import com.mku.salmon.streams.SalmonFileInputStream;
 
 import java.io.IOException;
 import java.io.InputStream;

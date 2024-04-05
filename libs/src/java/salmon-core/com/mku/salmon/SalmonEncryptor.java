@@ -24,11 +24,11 @@ SOFTWARE.
 */
 
 import com.mku.convert.BitConverter;
-import com.mku.iostream.MemoryStream;
+import com.mku.streams.MemoryStream;
 import com.mku.salmon.integrity.SalmonIntegrity;
-import com.mku.salmon.integrity.SalmonIntegrityException;
-import com.mku.salmon.iostream.EncryptionMode;
-import com.mku.salmon.iostream.SalmonStream;
+import com.mku.salmon.integrity.IntegrityException;
+import com.mku.salmon.streams.EncryptionMode;
+import com.mku.salmon.streams.SalmonStream;
 import com.mku.salmon.transform.SalmonAES256CTRTransformer;
 
 import java.io.IOException;
@@ -101,11 +101,11 @@ public class SalmonEncryptor {
      * @param storeHeaderData True to store header data in output byte array.
      * @return
      * @throws SalmonSecurityException
-     * @throws SalmonIntegrityException
+     * @throws IntegrityException
      * @throws IOException
      */
     public byte[] encrypt(byte[] data, byte[] key, byte[] nonce, boolean storeHeaderData)
-            throws SalmonSecurityException, SalmonIntegrityException, IOException {
+            throws SalmonSecurityException, IntegrityException, IOException {
         return encrypt(data, key, nonce, storeHeaderData, false, null, null);
     }
 
@@ -123,12 +123,12 @@ public class SalmonEncryptor {
      * @return The byte array with the encrypted data.
      * @throws SalmonSecurityException
      * @throws IOException
-     * @throws SalmonIntegrityException
+     * @throws IntegrityException
      */
     public byte[] encrypt(byte[] data, byte[] key, byte[] nonce,
                           boolean storeHeaderData,
                           boolean integrity, byte[] hashKey, Integer chunkSize)
-            throws SalmonSecurityException, IOException, SalmonIntegrityException {
+            throws SalmonSecurityException, IOException, IntegrityException {
         if (key == null)
             throw new SalmonSecurityException("Key is missing");
         if (nonce == null)
@@ -281,12 +281,12 @@ public class SalmonEncryptor {
      * @param chunkSize   The chunk size.
      * @throws IOException              Thrown if there is an error with the stream.
      * @throws SalmonSecurityException  Thrown if there is a security exception with the stream.
-     * @throws SalmonIntegrityException Thrown if integrity cannot be applied.
+     * @throws IntegrityException Thrown if integrity cannot be applied.
      */
     private void encryptData(MemoryStream inputStream, long start, long count, byte[] outData,
                              byte[] key, byte[] nonce, byte[] headerData,
                              boolean integrity, byte[] hashKey, Integer chunkSize)
-            throws IOException, SalmonSecurityException, SalmonIntegrityException {
+            throws IOException, SalmonSecurityException, IntegrityException {
         MemoryStream outputStream = new MemoryStream(outData);
         SalmonStream stream = null;
         try {

@@ -27,7 +27,7 @@ import com.mku.file.IRealFile;
 import com.mku.salmon.win.registry.SalmonRegistry;
 import com.mku.sequence.INonceSequenceSerializer;
 import com.mku.salmon.sequence.SalmonFileSequencer;
-import com.mku.salmon.sequence.SalmonSequenceException;
+import com.mku.salmon.sequence.SequenceException;
 import com.sun.jna.platform.win32.Crypt32Util;
 
 import java.io.IOException;
@@ -67,20 +67,20 @@ public class WinFileSequencer extends SalmonFileSequencer
      * Instantiate a windows file sequencer.
      * @param sequenceFile
      * @param serializer
-     * @throws SalmonSequenceException
+     * @throws SequenceException
      * @throws IOException
      */
     public WinFileSequencer(IRealFile sequenceFile, INonceSequenceSerializer serializer, String regCheckSumKey) throws IOException {
         super(sequenceFile, serializer);
 		if(regCheckSumKey == null)
-			throw new SalmonSequenceException("Registry checksum key cannot be null");
+			throw new SequenceException("Registry checksum key cannot be null");
 		checkSumKey = regCheckSumKey;
     }
 
     /**
      * Gets the checksum the registry and verifies the contents.
      * @return
-     * @throws SalmonSequenceException
+     * @throws SequenceException
      */
     @Override
     protected String getContents() {
@@ -106,7 +106,7 @@ public class WinFileSequencer extends SalmonFileSequencer
      * 	with the User windows credentials using ProtectedData.
      * 	from rainbow attacks
      * @param contents
-     * @throws SalmonSequenceException
+     * @throws SequenceException
      */
     @Override
     protected void saveContents(String contents) {
@@ -124,7 +124,7 @@ public class WinFileSequencer extends SalmonFileSequencer
      * Get the checksum of the contents.
      * @param contents
      * @return
-     * @throws SalmonSequenceException
+     * @throws SequenceException
      */
     private String getChecksum(String contents) {
         try {
@@ -140,7 +140,7 @@ public class WinFileSequencer extends SalmonFileSequencer
             }
             return hexString.toString().toUpperCase();
         } catch (Exception ex) {
-            throw new SalmonSequenceException("Could not calculate chksum", ex);
+            throw new SequenceException("Could not calculate chksum", ex);
         }
     }
 
@@ -154,7 +154,7 @@ public class WinFileSequencer extends SalmonFileSequencer
             if (getSequenceFile().exists())
                 getSequenceFile().delete();
             if (getSequenceFile().exists())
-                throw new SalmonSequenceException("Could not delete sequence file: " + getSequenceFile().getPath());
+                throw new SequenceException("Could not delete sequence file: " + getSequenceFile().getPath());
         }
         registry.delete(getCheckSumKey());
     }

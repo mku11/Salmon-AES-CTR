@@ -26,7 +26,7 @@ SOFTWARE.
 import com.mku.salmon.SalmonEncryptor;
 import com.mku.salmon.SalmonSecurityException;
 import com.mku.salmon.encode.SalmonEncoder;
-import com.mku.salmon.integrity.SalmonIntegrityException;
+import com.mku.salmon.integrity.IntegrityException;
 
 import java.io.IOException;
 import java.nio.charset.Charset;
@@ -47,11 +47,11 @@ public class SalmonTextEncryptor {
      *               otherwise you will have to store that information externally.
      * @throws IOException
      * @throws SalmonSecurityException
-     * @throws SalmonIntegrityException
+     * @throws IntegrityException
      * @throws IOException
      */
     public static String encryptString(String text, byte[] key, byte[] nonce, boolean header)
-            throws SalmonSecurityException, SalmonIntegrityException, IOException {
+            throws SalmonSecurityException, IntegrityException, IOException {
         return encryptString(text, key, nonce, header, false, null, null);
     }
 
@@ -68,12 +68,12 @@ public class SalmonTextEncryptor {
      * @param chunkSize The chunk size.
      * @throws IOException
      * @throws SalmonSecurityException
-     * @throws SalmonIntegrityException
+     * @throws IntegrityException
      * @throws IOException
      */
     public static String encryptString(String text, byte[] key, byte[] nonce, boolean header,
                                        boolean integrity, byte[] hashKey, Integer chunkSize)
-            throws SalmonSecurityException, SalmonIntegrityException, IOException {
+            throws SalmonSecurityException, IntegrityException, IOException {
         byte[] bytes = text.getBytes("UTF-8");
         byte[] encBytes = encryptor.encrypt(bytes, key, nonce, header, integrity, hashKey, chunkSize);
         String encString = SalmonEncoder.getBase64().encode(encBytes).replace("\n", "");

@@ -25,8 +25,8 @@ SOFTWARE.
 */
 
 import com.mku.salmon.*;
-import com.mku.salmon.iostream.ProviderType;
-import com.mku.salmon.iostream.SalmonStream;
+import com.mku.salmon.streams.ProviderType;
+import com.mku.salmon.streams.SalmonStream;
 import com.mku.salmon.password.PbkdfType;
 import com.mku.salmon.password.SalmonPassword;
 import org.junit.jupiter.api.BeforeEach;

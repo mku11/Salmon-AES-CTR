@@ -24,7 +24,7 @@ SOFTWARE.
 */
 
 import com.mku.salmon.SalmonSecurityException;
-import com.mku.salmon.iostream.ProviderType;
+import com.mku.salmon.streams.ProviderType;
 
 /**
  * Creates an AES transformer object.

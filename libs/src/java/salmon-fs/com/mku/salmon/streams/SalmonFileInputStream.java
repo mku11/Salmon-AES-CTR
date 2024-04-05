@@ -1,4 +1,4 @@
-package com.mku.salmon.iostream;
+package com.mku.salmon.streams;
 /*
 MIT License
 
@@ -23,10 +23,10 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 */
 
-import com.mku.iostream.RandomAccessStream;
+import com.mku.streams.RandomAccessStream;
 import com.mku.salmon.SalmonFile;
 import com.mku.salmon.SalmonSecurityException;
-import com.mku.salmon.integrity.SalmonIntegrityException;
+import com.mku.salmon.integrity.IntegrityException;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -126,7 +126,7 @@ public class SalmonFileInputStream extends InputStream {
             for (int i = 0; i < threads; i++) {
                 streams[i] = salmonFile.getInputStream();
             }
-        } catch (SalmonSecurityException | SalmonIntegrityException ex) {
+        } catch (SalmonSecurityException | IntegrityException ex) {
             throw new IOException("Could not create streams", ex);
         }
     }

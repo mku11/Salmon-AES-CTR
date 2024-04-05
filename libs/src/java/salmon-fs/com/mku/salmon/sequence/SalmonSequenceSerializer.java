@@ -55,7 +55,7 @@ public class SalmonSequenceSerializer implements INonceSequenceSerializer {
      *
      * @param driveAuthEntries The sequences to convert to text.
      * @return
-     * @throws SalmonSequenceException
+     * @throws SequenceException
      */
     public String serialize(HashMap<String, NonceSequence> driveAuthEntries) {
         ByteArrayOutputStream stream = new ByteArrayOutputStream();
@@ -86,7 +86,7 @@ public class SalmonSequenceSerializer implements INonceSequenceSerializer {
             out.writeEndDocument();
         } catch (XMLStreamException ex) {
 			ex.printStackTrace();
-            throw new SalmonSequenceException("Could not serialize sequences", ex);
+            throw new SequenceException("Could not serialize sequences", ex);
         } finally {
             if (out != null) {
                 try {
@@ -109,7 +109,7 @@ public class SalmonSequenceSerializer implements INonceSequenceSerializer {
      *
      * @param contents The contents containing the nonce sequences.
      * @return
-     * @throws SalmonSequenceException
+     * @throws SequenceException
      */
     public HashMap<String, NonceSequence> deserialize(String contents) {
         HashMap<String, NonceSequence> configs = new HashMap<>();
@@ -143,13 +143,13 @@ public class SalmonSequenceSerializer implements INonceSequenceSerializer {
         } catch (XPathExpressionException | ParserConfigurationException
                  | IOException | SAXException ex) {
             ex.printStackTrace();
-            throw new SalmonSequenceException("Could not deserialize sequences", ex);
+            throw new SequenceException("Could not deserialize sequences", ex);
         } finally {
             if (stream != null) {
                 try {
                     stream.close();
                 } catch (IOException e) {
-                    throw new SalmonSequenceException("Could not get sequence", e);
+                    throw new SequenceException("Could not get sequence", e);
                 }
             }
         }

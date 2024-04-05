@@ -25,8 +25,8 @@ SOFTWARE.
 */
 
 import com.mku.salmon.SalmonDefaultOptions;
-import com.mku.salmon.iostream.ProviderType;
-import com.mku.salmon.iostream.SalmonStream;
+import com.mku.salmon.streams.ProviderType;
+import com.mku.salmon.streams.SalmonStream;
 import com.mku.salmon.test.SalmonCoreTestHelper;
 import org.bouncycastle.jce.provider.BouncyCastleProvider;
 import org.openjdk.jmh.annotations.Benchmark;

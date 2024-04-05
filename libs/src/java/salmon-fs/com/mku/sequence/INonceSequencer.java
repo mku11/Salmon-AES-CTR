@@ -24,7 +24,7 @@ SOFTWARE.
 */
 
 import com.mku.salmon.SalmonRangeExceededException;
-import com.mku.salmon.sequence.SalmonSequenceException;
+import com.mku.salmon.sequence.SequenceException;
 
 import java.io.IOException;
 
@@ -37,7 +37,7 @@ public interface INonceSequencer {
      * Create a sequence.
      * @param driveId The drive ID.
      * @param authId The authorization ID of the drive.
-     * @throws SalmonSequenceException
+     * @throws SequenceException
      */
     void createSequence(String driveId, String authId);
 
@@ -47,7 +47,7 @@ public interface INonceSequencer {
      * @param authId The auth ID of the device for the drive.
      * @param startNonce The starting nonce.
      * @param maxNonce The maximum nonce.
-     * @throws SalmonSequenceException
+     * @throws SequenceException
      * @throws IOException
      */
     void initializeSequence(String driveId, String authId, byte[] startNonce, byte[] maxNonce) throws IOException;
@@ -58,7 +58,7 @@ public interface INonceSequencer {
      * @param driveId The drive ID.
      * @param authId The auth ID of the device for the drive.
      * @param maxNonce The maximum nonce.
-     * @throws SalmonSequenceException
+     * @throws SequenceException
      * @throws IOException
      */
     void setMaxNonce(String driveId, String authId, byte[] maxNonce) throws IOException;
@@ -68,7 +68,7 @@ public interface INonceSequencer {
      *
      * @param driveId The drive ID.
      * @return The next nonce.
-     * @throws SalmonSequenceException
+     * @throws SequenceException
      * @throws SalmonRangeExceededException
      */
     byte[] nextNonce(String driveId);
@@ -76,7 +76,7 @@ public interface INonceSequencer {
     /**
      * Revoke the sequencer. This terminates the sequencer and de-authorizes the device
      * @param driveId
-     * @throws SalmonSequenceException
+     * @throws SequenceException
      */
     void revokeSequence(String driveId);
 
@@ -84,7 +84,7 @@ public interface INonceSequencer {
      * Get the sequence used for this drive.
      * @param driveId The drive ID.
      * @return The current sequence.
-     * @throws SalmonSequenceException
+     * @throws SequenceException
      */
     NonceSequence getSequence(String driveId);
 

@@ -24,7 +24,7 @@ SOFTWARE.
 */
 
 import com.mku.convert.BitConverter;
-import com.mku.iostream.RandomAccessStream;
+import com.mku.streams.RandomAccessStream;
 
 import java.io.IOException;
 

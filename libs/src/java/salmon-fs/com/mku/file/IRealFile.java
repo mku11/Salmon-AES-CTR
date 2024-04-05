@@ -26,7 +26,7 @@ SOFTWARE.
 import com.mku.func.BiConsumer;
 import com.mku.func.Function;
 import com.mku.func.TriConsumer;
-import com.mku.iostream.RandomAccessStream;
+import com.mku.streams.RandomAccessStream;
 import com.mku.utils.FileUtils;
 
 import java.io.FileNotFoundException;

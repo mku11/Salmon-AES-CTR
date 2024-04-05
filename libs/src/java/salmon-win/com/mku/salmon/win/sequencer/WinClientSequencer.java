@@ -24,7 +24,7 @@ SOFTWARE.
 */
 
 import com.mku.sequence.INonceSequencer;
-import com.mku.salmon.sequence.SalmonSequenceException;
+import com.mku.salmon.sequence.SequenceException;
 import com.mku.sequence.NonceSequence;
 import com.sun.jna.platform.win32.AccCtrl;
 import com.sun.jna.platform.win32.Advapi32;
@@ -123,10 +123,10 @@ public class WinClientSequencer implements INonceSequencer, Closeable {
             String response = read();
             res = Response.Parse(response);
         } catch (Exception e) {
-            throw new SalmonSequenceException("Could not create sequence: ", e);
+            throw new SequenceException("Could not create sequence: ", e);
         }
         if (res.status != Response.ResponseStatus.Ok)
-            throw new SalmonSequenceException("Could not create sequence: " + res.error);
+            throw new SequenceException("Could not create sequence: " + res.error);
     }
 
     public NonceSequence getSequence(String driveId) {
@@ -137,10 +137,10 @@ public class WinClientSequencer implements INonceSequencer, Closeable {
             String response = read();
             res = Response.Parse(response);
         } catch (Exception e) {
-            throw new SalmonSequenceException("Could not get sequence", e);
+            throw new SequenceException("Could not get sequence", e);
         }
         if(res.status == Response.ResponseStatus.Error)
-            throw new SalmonSequenceException("Could not get sequence: " + res.error);
+            throw new SequenceException("Could not get sequence: " + res.error);
         if (res.status == Response.ResponseStatus.NotFound)
             return null;
         return new NonceSequence(res.driveId, res.authId,
@@ -156,10 +156,10 @@ public class WinClientSequencer implements INonceSequencer, Closeable {
             String response = read();
             res = Response.Parse(response);
         } catch (Exception e) {
-            throw new SalmonSequenceException("Could not init sequence", e);
+            throw new SequenceException("Could not init sequence", e);
         }
         if (res.status != Response.ResponseStatus.Ok)
-            throw new SalmonSequenceException("Could not init sequence: " + res.error);
+            throw new SequenceException("Could not init sequence: " + res.error);
     }
 
     public byte[] nextNonce(String driveId) {
@@ -170,10 +170,10 @@ public class WinClientSequencer implements INonceSequencer, Closeable {
             String response = read();
             res = Response.Parse(response);
         } catch (Exception e) {
-            throw new SalmonSequenceException("Could not get next nonce", e);
+            throw new SequenceException("Could not get next nonce", e);
         }
         if (res.status != Response.ResponseStatus.Ok)
-            throw new SalmonSequenceException("Could not get next nonce: " + res.error);
+            throw new SequenceException("Could not get next nonce: " + res.error);
         return res.nextNonce;
     }
 
@@ -185,10 +185,10 @@ public class WinClientSequencer implements INonceSequencer, Closeable {
             String response = read();
             res = Response.Parse(response);
         } catch (Exception e) {
-            throw new SalmonSequenceException("Could not revoke Sequence", e);
+            throw new SequenceException("Could not revoke Sequence", e);
         }
         if (res.status != Response.ResponseStatus.Ok)
-            throw new SalmonSequenceException("Could not revoke Sequence: " + res.error);
+            throw new SequenceException("Could not revoke Sequence: " + res.error);
     }
 
     public void setMaxNonce(String driveId, String authId, byte[] maxNonce) throws IOException {
@@ -200,10 +200,10 @@ public class WinClientSequencer implements INonceSequencer, Closeable {
         try {
             res = Response.Parse(response);
         } catch (Exception e) {
-            throw new SalmonSequenceException("Could not revoke Sequence: " + e);
+            throw new SequenceException("Could not revoke Sequence: " + e);
         }
         if (res.status != Response.ResponseStatus.Ok)
-            throw new SalmonSequenceException("Could not revoke Sequence: " + res.error);
+            throw new SequenceException("Could not revoke Sequence: " + res.error);
     }
 
     public String generateRequest(String driveId, String authId, RequestType type,

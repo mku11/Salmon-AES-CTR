@@ -23,12 +23,12 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 */
 
-import com.mku.iostream.RandomAccessStream;
-import com.mku.iostream.MemoryStream;
+import com.mku.streams.RandomAccessStream;
+import com.mku.streams.MemoryStream;
 import com.mku.salmon.integrity.SalmonIntegrity;
-import com.mku.salmon.integrity.SalmonIntegrityException;
-import com.mku.salmon.iostream.EncryptionMode;
-import com.mku.salmon.iostream.SalmonStream;
+import com.mku.salmon.integrity.IntegrityException;
+import com.mku.salmon.streams.EncryptionMode;
+import com.mku.salmon.streams.SalmonStream;
 import com.mku.salmon.transform.SalmonAES256CTRTransformer;
 
 import java.io.IOException;
@@ -102,10 +102,10 @@ public class SalmonDecryptor {
      * @return The output buffer containing the decrypted data.
      * @throws IOException              Thrown if there is an error with the stream.
      * @throws SalmonSecurityException  Thrown if there is a security exception with the stream.
-     * @throws SalmonIntegrityException Thrown if the data are corrupt or tampered with.
+     * @throws IntegrityException Thrown if the data are corrupt or tampered with.
      */
     public byte[] decrypt(byte[] data, byte[] key, byte[] nonce, boolean hasHeaderData)
-            throws SalmonSecurityException, SalmonIntegrityException, IOException {
+            throws SalmonSecurityException, IntegrityException, IOException {
         return decrypt(data, key, nonce, hasHeaderData, false, null, null);
     }
 
@@ -123,12 +123,12 @@ public class SalmonDecryptor {
      * @throws IOException              Thrown if there is a problem with decoding the array.
      * @throws SalmonSecurityException  Thrown if the key and nonce are not provided.
      * @throws IOException
-     * @throws SalmonIntegrityException
+     * @throws IntegrityException
      */
     public byte[] decrypt(byte[] data, byte[] key, byte[] nonce,
                           boolean hasHeaderData,
                           boolean integrity, byte[] hashKey, Integer chunkSize)
-            throws SalmonSecurityException, IOException, SalmonIntegrityException {
+            throws SalmonSecurityException, IOException, IntegrityException {
         if (key == null)
             throw new SalmonSecurityException("Key is missing");
         if (!hasHeaderData && nonce == null)
@@ -278,12 +278,12 @@ public class SalmonDecryptor {
      * @param chunkSize   The chunk size.
      * @throws IOException              Thrown if there is an error with the stream.
      * @throws SalmonSecurityException  Thrown if there is a security exception with the stream.
-     * @throws SalmonIntegrityException Thrown if the stream is corrupt or tampered with.
+     * @throws IntegrityException Thrown if the stream is corrupt or tampered with.
      */
     private void decryptData(RandomAccessStream inputStream, long start, long count, byte[] outData,
                              byte[] key, byte[] nonce,
                              byte[] headerData, boolean integrity, byte[] hashKey, Integer chunkSize)
-            throws IOException, SalmonSecurityException, SalmonIntegrityException {
+            throws IOException, SalmonSecurityException, IntegrityException {
         SalmonStream stream = null;
         MemoryStream outputStream = null;
         try {
@@ -305,7 +305,7 @@ public class SalmonDecryptor {
                 totalChunkBytesRead += bytesRead;
             }
             outputStream.flush();
-        } catch (IOException | SalmonSecurityException | SalmonIntegrityException ex) {
+        } catch (IOException | SalmonSecurityException | IntegrityException ex) {
             ex.printStackTrace();
             throw new SalmonSecurityException("Could not decrypt data", ex);
         } finally {

@@ -24,15 +24,15 @@ SOFTWARE.
 */
 
 /**
- * Thrown when Salmon Stream's data are corrupt or tampered with.
+ * Thrown when data are corrupt or tampered with.
  */
-public class SalmonIntegrityException extends RuntimeException {
+public class IntegrityException extends RuntimeException {
     /**
      * Construct an exception with a specific message.
      *
      * @param msg The message
      */
-    public SalmonIntegrityException(String msg) {
+    public IntegrityException(String msg) {
         super(msg);
     }
 
@@ -42,7 +42,7 @@ public class SalmonIntegrityException extends RuntimeException {
      * @param msg The provided message
      * @param ex  The inner exception
      */
-    public SalmonIntegrityException(String msg, Exception ex) {
+    public IntegrityException(String msg, Exception ex) {
         super(msg, ex);
     }
 }

@@ -28,15 +28,15 @@ import com.mku.file.IVirtualFile;
 import com.mku.func.BiConsumer;
 import com.mku.func.Function;
 import com.mku.func.TriConsumer;
-import com.mku.iostream.RandomAccessStream;
+import com.mku.streams.RandomAccessStream;
 import com.mku.convert.BitConverter;
 import com.mku.salmon.integrity.SalmonIntegrity;
-import com.mku.salmon.integrity.SalmonIntegrityException;
-import com.mku.salmon.iostream.EncryptionMode;
-import com.mku.salmon.iostream.SalmonStream;
+import com.mku.salmon.integrity.IntegrityException;
+import com.mku.salmon.streams.EncryptionMode;
+import com.mku.salmon.streams.SalmonStream;
 import com.mku.salmon.text.SalmonTextDecryptor;
 import com.mku.salmon.text.SalmonTextEncryptor;
-import com.mku.salmon.sequence.SalmonSequenceException;
+import com.mku.salmon.sequence.SequenceException;
 
 import java.io.File;
 import java.io.IOException;
@@ -162,7 +162,7 @@ public class SalmonFile implements IVirtualFile {
      * @return
      * @throws IOException
      * @throws SalmonSecurityException
-     * @throws SalmonIntegrityException
+     * @throws IntegrityException
      */
     public SalmonStream getInputStream() throws IOException {
         if (!exists())
@@ -200,8 +200,8 @@ public class SalmonFile implements IVirtualFile {
      *
      * @return
      * @throws SalmonSecurityException
-     * @throws SalmonIntegrityException
-     * @throws SalmonSequenceException
+     * @throws IntegrityException
+     * @throws SequenceException
      */
     public synchronized RandomAccessStream getOutputStream() throws IOException {
         return getOutputStream(null);
@@ -306,11 +306,11 @@ public class SalmonFile implements IVirtualFile {
         Integer fileChunkSize = getFileChunkSize();
 
         if (fileChunkSize != null)
-            throw new SalmonIntegrityException("Cannot redefine chunk size, delete file and recreate");
+            throw new IntegrityException("Cannot redefine chunk size, delete file and recreate");
         if (requestChunkSize != null && requestChunkSize < 0)
-            throw new SalmonIntegrityException("Chunk size needs to be zero for default chunk size or a positive value");
+            throw new IntegrityException("Chunk size needs to be zero for default chunk size or a positive value");
         if (integrity && fileChunkSize != null && fileChunkSize == 0)
-            throw new SalmonIntegrityException("Cannot enable integrity if the file is not created with integrity, export file and reimport with integrity");
+            throw new IntegrityException("Cannot enable integrity if the file is not created with integrity, export file and reimport with integrity");
 
         if (integrity && hashKey == null && drive != null)
             hashKey = drive.getKey().getHashKey();
@@ -389,7 +389,7 @@ public class SalmonFile implements IVirtualFile {
         else if (!integrity)
             reqChunkSize = 0;
         if (reqChunkSize == null)
-            throw new SalmonIntegrityException("File requires a chunk size");
+            throw new IntegrityException("File requires a chunk size");
 
         if (nonce != null)
             requestedNonce = nonce;
@@ -450,7 +450,7 @@ public class SalmonFile implements IVirtualFile {
      * @param filename The filename to search for
      * @return
      * @throws SalmonSecurityException
-     * @throws SalmonIntegrityException
+     * @throws IntegrityException
      * @throws IOException
      * @throws SalmonAuthException
      */
@@ -522,7 +522,7 @@ public class SalmonFile implements IVirtualFile {
      * @param realPath The path of the real file
      */
     private String getPath(String realPath)
-            throws IOException, SalmonAuthException, SalmonSecurityException, SalmonIntegrityException {
+            throws IOException, SalmonAuthException, SalmonSecurityException, IntegrityException {
         String relativePath = getRelativePath(realPath);
         StringBuilder path = new StringBuilder();
         String[] parts = relativePath.split(Pattern.quote(File.separator));
@@ -620,14 +620,14 @@ public class SalmonFile implements IVirtualFile {
     /**
      * Returns the hash total bytes occupied by signatures
      */
-    private long getHashTotalBytesLength() throws IOException, SalmonIntegrityException {
+    private long getHashTotalBytesLength() throws IOException, IntegrityException {
         // file does not support integrity
         if (getFileChunkSize() == null || getFileChunkSize() <= 0)
             return 0;
 
         // integrity has been requested but hash is missing
         if (integrity && getHashKey() == null)
-            throw new SalmonIntegrityException("File requires hashKey, use SetVerifyIntegrity() to provide one");
+            throw new IntegrityException("File requires hashKey, use SetVerifyIntegrity() to provide one");
 
         return SalmonIntegrity.getTotalHashDataLength(realFile.length(), getFileChunkSize(),
                 SalmonGenerator.HASH_RESULT_LENGTH, SalmonGenerator.HASH_KEY_LENGTH);
@@ -722,7 +722,7 @@ public class SalmonFile implements IVirtualFile {
      * @param nonce    The nonce if the file doesn't belong to a drive
      */
     protected String getDecryptedFilename(String filename, byte[] key, byte[] nonce)
-            throws IOException, SalmonSecurityException, SalmonIntegrityException {
+            throws IOException, SalmonSecurityException, IntegrityException {
         String rfilename = filename.replaceAll("-", "/");
         if (drive != null && nonce != null)
             throw new SalmonSecurityException("Filename nonce is already set by the drive");
@@ -745,8 +745,8 @@ public class SalmonFile implements IVirtualFile {
      * @param nonce    The nonce if the file doesn't belong to a drive
      */
     protected String getEncryptedFilename(String filename, byte[] key, byte[] nonce)
-            throws IOException, SalmonSecurityException, SalmonIntegrityException, SalmonAuthException,
-            SalmonSequenceException, SalmonRangeExceededException {
+            throws IOException, SalmonSecurityException, IntegrityException, SalmonAuthException,
+            SequenceException, SalmonRangeExceededException {
         if (drive != null && nonce != null)
             throw new SalmonSecurityException("Filename nonce is already set by the drive");
         if (drive != null)

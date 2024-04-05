@@ -25,8 +25,8 @@ SOFTWARE.
 
 import com.mku.file.IRealFile;
 import com.mku.convert.BitConverter;
-import com.mku.iostream.RandomAccessStream;
-import com.mku.iostream.MemoryStream;
+import com.mku.streams.RandomAccessStream;
+import com.mku.streams.MemoryStream;
 
 import java.io.IOException;
 import java.util.Arrays;

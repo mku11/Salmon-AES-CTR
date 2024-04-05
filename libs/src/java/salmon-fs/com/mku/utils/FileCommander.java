@@ -33,11 +33,7 @@ import com.mku.func.BiConsumer;
 import com.mku.func.Consumer;
 import com.mku.file.IRealFile;
 import com.mku.func.Function;
-import com.mku.salmon.SalmonSecurityException;
-import com.mku.salmon.SalmonRangeExceededException;
-import com.mku.salmon.integrity.SalmonIntegrityException;
-import com.mku.salmon.SalmonAuthException;
-import com.mku.salmon.sequence.SalmonSequenceException;
+import com.mku.salmon.sequence.SequenceException;
 
 /**
  * Facade class for file operations.
@@ -148,7 +144,7 @@ public class FileCommander {
 				existingFiles.put(sfile.getBaseName(), sfile);
                 importedFiles.add(sfile);
                 count[0]++;
-            } catch (SalmonSequenceException ex) {
+            } catch (SequenceException ex) {
                 throw ex;
             } catch (Exception ex) {
                 if (onFailed != null)
@@ -248,7 +244,7 @@ public class FileCommander {
 				existingFiles.put(rfile.getBaseName(), rfile);
                 exportedFiles.add(rfile);
                 count[0]++;
-            } catch (SalmonSequenceException ex) {
+            } catch (SequenceException ex) {
                 throw ex;
             } catch (Exception ex) {
                 if (onFailed != null)
@@ -474,10 +470,7 @@ public class FileCommander {
      * Rename an encrypted file
      *
      */
-	public void renameFile(IVirtualFile ifile, String newFilename)
-		throws IOException, SalmonSecurityException, SalmonIntegrityException, 
-		SalmonAuthException, SalmonSequenceException, SalmonRangeExceededException
-    {
+	public void renameFile(IVirtualFile ifile, String newFilename) throws IOException {
         ifile.rename(newFilename);
     }
 

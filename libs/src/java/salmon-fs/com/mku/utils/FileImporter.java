@@ -25,8 +25,7 @@ SOFTWARE.
 
 import com.mku.file.IVirtualFile;
 import com.mku.func.BiConsumer;
-import com.mku.iostream.RandomAccessStream;
-import com.mku.salmon.iostream.SalmonStream;
+import com.mku.streams.RandomAccessStream;
 import com.mku.file.IRealFile;
 
 import java.io.IOException;
@@ -36,7 +35,7 @@ import java.util.concurrent.Executors;
 
 public abstract class FileImporter {
     /**
-     * The global default buffer size to use when reading/writing on the SalmonStream.
+     * The global default buffer size to use when reading/writing on streams.
      */
     private static final int DEFAULT_BUFFER_SIZE = 512 * 1024;
 

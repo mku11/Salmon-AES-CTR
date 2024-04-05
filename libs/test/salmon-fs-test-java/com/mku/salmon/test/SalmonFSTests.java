@@ -28,18 +28,18 @@ import com.mku.convert.BitConverter;
 import com.mku.file.IRealFile;
 import com.mku.salmon.drive.JavaDrive;
 import com.mku.file.JavaFile;
-import com.mku.iostream.InputStreamWrapper;
-import com.mku.iostream.MemoryStream;
+import com.mku.streams.InputStreamWrapper;
+import com.mku.streams.MemoryStream;
 import com.mku.salmon.SalmonRangeExceededException;
 import com.mku.salmon.SalmonAuthException;
 import com.mku.salmon.integrity.SalmonIntegrity;
-import com.mku.salmon.integrity.SalmonIntegrityException;
+import com.mku.salmon.integrity.IntegrityException;
 import com.mku.salmon.*;
-import com.mku.salmon.iostream.SalmonFileInputStream;
+import com.mku.salmon.streams.SalmonFileInputStream;
 import com.mku.salmon.utils.SalmonFileCommander;
 import com.mku.sequence.INonceSequenceSerializer;
 import com.mku.salmon.sequence.SalmonFileSequencer;
-import com.mku.salmon.sequence.SalmonSequenceException;
+import com.mku.salmon.sequence.SequenceException;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
@@ -132,7 +132,7 @@ public class SalmonFSTests {
             SalmonFSTestHelper.importAndExport(SalmonFSTestHelper.generateFolder(SalmonFSTestHelper.TEST_VAULT2_DIR), SalmonCoreTestHelper.TEST_PASSWORD, SalmonFSTestHelper.TEST_IMPORT_FILE,
                     true, 24 + 10, true, false, false);
         } catch (IOException ex) {
-            if (ex.getCause() instanceof SalmonIntegrityException)
+            if (ex.getCause() instanceof IntegrityException)
                 integrityFailed = true;
         }
 
@@ -148,7 +148,7 @@ public class SalmonFSTests {
                     false, 0, true, false,
                     false);
         } catch (IOException ex) {
-            if (ex.getCause() instanceof SalmonIntegrityException)
+            if (ex.getCause() instanceof IntegrityException)
                 integrityFailed = true;
         }
 
@@ -168,7 +168,7 @@ public class SalmonFSTests {
             SalmonFSTestHelper.importAndCopy(SalmonFSTestHelper.generateFolder(SalmonFSTestHelper.TEST_VAULT2_DIR), SalmonCoreTestHelper.TEST_PASSWORD, SalmonFSTestHelper.TEST_IMPORT_FILE,
                     SalmonFSTestHelper.ENC_IMPORT_BUFFER_SIZE, SalmonFSTestHelper.ENC_IMPORT_THREADS, "subdir", false);
         } catch (IOException ex) {
-            if (ex.getCause() instanceof SalmonIntegrityException)
+            if (ex.getCause() instanceof IntegrityException)
                 integrityFailed = true;
         }
 
@@ -182,7 +182,7 @@ public class SalmonFSTests {
             SalmonFSTestHelper.importAndCopy(SalmonFSTestHelper.generateFolder(SalmonFSTestHelper.TEST_VAULT2_DIR), SalmonCoreTestHelper.TEST_PASSWORD, SalmonFSTestHelper.TEST_IMPORT_FILE,
                     SalmonFSTestHelper.ENC_IMPORT_BUFFER_SIZE, SalmonFSTestHelper.ENC_IMPORT_THREADS, "subdir", true);
         } catch (IOException ex) {
-            if (ex.getCause() instanceof SalmonIntegrityException)
+            if (ex.getCause() instanceof IntegrityException)
                 integrityFailed = true;
         }
 
@@ -197,7 +197,7 @@ public class SalmonFSTests {
                     SalmonCoreTestHelper.TEST_PASSWORD, SalmonFSTestHelper.TEST_IMPORT_FILE,
                     true, 24 + 10, false, true, true);
         } catch (IOException ex) {
-            if (ex.getCause() instanceof SalmonIntegrityException)
+            if (ex.getCause() instanceof IntegrityException)
                 integrityFailed = true;
         }
 
@@ -213,7 +213,7 @@ public class SalmonFSTests {
                     SalmonCoreTestHelper.TEST_PASSWORD, SalmonFSTestHelper.TEST_IMPORT_FILE,
                     true, 24 + 10, false, false, false);
         } catch (IOException ex) {
-            if (ex.getCause() instanceof SalmonIntegrityException)
+            if (ex.getCause() instanceof IntegrityException)
                 integrityFailed = true;
         } catch (Exception ex) {
             failed = true;
@@ -233,7 +233,7 @@ public class SalmonFSTests {
                     true, 36, false,
                     true, false);
         } catch (IOException ex) {
-            if (ex.getCause() instanceof SalmonIntegrityException)
+            if (ex.getCause() instanceof IntegrityException)
                 failed = true;
         }
 
@@ -249,7 +249,7 @@ public class SalmonFSTests {
                     false, 0, true,
                     true, false);
         } catch (IOException ex) {
-            if (ex.getCause() instanceof SalmonIntegrityException)
+            if (ex.getCause() instanceof IntegrityException)
                 failed = true;
         }
 
@@ -265,7 +265,7 @@ public class SalmonFSTests {
                     true, 20, false,
                     true, true);
         } catch (IOException ex) {
-            if (ex.getCause() instanceof SalmonIntegrityException)
+            if (ex.getCause() instanceof IntegrityException)
                 integrityFailed = true;
         }
 
@@ -282,7 +282,7 @@ public class SalmonFSTests {
                     true, true);
         } catch (IOException ex) {
             ex.printStackTrace();
-            if (ex.getCause() instanceof SalmonIntegrityException)
+            if (ex.getCause() instanceof IntegrityException)
                 importSuccess = false;
         }
         assertTrue(importSuccess);
@@ -331,7 +331,7 @@ public class SalmonFSTests {
                     SalmonCoreTestHelper.TEST_FILENAME_NONCE_BYTES, SalmonCoreTestHelper.TEST_NONCE_BYTES, SalmonFSTestHelper.TEST_OUTPUT_DIR,
                     true, 45, true);
         } catch (IOException ex) {
-            if (ex.getCause() instanceof SalmonIntegrityException)
+            if (ex.getCause() instanceof IntegrityException)
                 caught = true;
         }
 
@@ -350,7 +350,7 @@ public class SalmonFSTests {
                         SalmonCoreTestHelper.TEST_HMAC_KEY_BYTES, SalmonCoreTestHelper.TEST_FILENAME_NONCE_BYTES, SalmonCoreTestHelper.TEST_NONCE_BYTES,
                         SalmonFSTestHelper.TEST_OUTPUT_DIR, true, i, false);
             } catch (IOException ex) {
-                if (ex.getCause() instanceof SalmonIntegrityException)
+                if (ex.getCause() instanceof IntegrityException)
                     caught = true;
             } catch (Exception ex) {
                 ex.printStackTrace();
@@ -374,7 +374,7 @@ public class SalmonFSTests {
                     SalmonFSTestHelper.TEST_OUTPUT_DIR,
                     true, 24 + 32 + 5, true);
         } catch (IOException ex) {
-            if (ex.getCause() instanceof SalmonIntegrityException)
+            if (ex.getCause() instanceof IntegrityException)
                 caught = true;
         } catch (Error ex) {
             failed = true;
@@ -449,7 +449,7 @@ public class SalmonFSTests {
     }
 
     @Test
-    public void shouldCreateWinFileSequencer() throws SalmonSequenceException, IOException, SalmonRangeExceededException {
+    public void shouldCreateWinFileSequencer() throws SequenceException, IOException, SalmonRangeExceededException {
         SalmonFSTestHelper.shouldTestFileSequencer();
     }
 

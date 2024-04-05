@@ -23,12 +23,12 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 */
 
-import com.mku.salmon.sequence.SalmonSequenceException;
+import com.mku.salmon.sequence.SequenceException;
 
 /// <summary>
 ///  Thrown when tampering has been detected in the nonce sequencer.
 /// </summary>
-public class WinSequenceTamperedException extends SalmonSequenceException
+public class WinSequenceTamperedException extends SequenceException
 {
     /**
      * Construct an exception with a specific message.

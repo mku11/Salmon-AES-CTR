@@ -26,7 +26,7 @@ SOFTWARE.
 import java.io.IOException;
 import com.mku.salmon.*;
 import com.mku.salmon.encode.SalmonEncoder;
-import com.mku.salmon.integrity.SalmonIntegrityException;
+import com.mku.salmon.integrity.IntegrityException;
 
 import java.nio.charset.Charset;
 
@@ -48,10 +48,10 @@ public class SalmonTextDecryptor {
      * @return The decrypted text.
      * @throws IOException
      * @throws SalmonSecurityException
-     * @throws SalmonIntegrityException
+     * @throws IntegrityException
      */
     public static String decryptString(String text, byte[] key, byte[] nonce, boolean header) 
-		throws IOException, SalmonSecurityException, SalmonIntegrityException {
+		throws IOException, SalmonSecurityException, IntegrityException {
         return decryptString(text, key, nonce, header, false, null, null);
     }
 
@@ -69,11 +69,11 @@ public class SalmonTextDecryptor {
      * @return The decrypted text.
      * @throws IOException
      * @throws SalmonSecurityException
-     * @throws SalmonIntegrityException
+     * @throws IntegrityException
      */
     public static String decryptString(String text, byte[] key, byte[] nonce, boolean header,
                                        boolean integrity, byte[] hashKey, Integer chunkSize)
-            throws IOException, SalmonSecurityException, SalmonIntegrityException {
+            throws IOException, SalmonSecurityException, IntegrityException {
         byte[] bytes = SalmonEncoder.getBase64().decode(text);
         byte[] decBytes = decryptor.decrypt(bytes, key, nonce, header, integrity, hashKey, chunkSize);
         String decString = new String(decBytes, "UTF-8");

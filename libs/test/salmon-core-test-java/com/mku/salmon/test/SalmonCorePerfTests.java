@@ -24,8 +24,8 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 */
 
-import com.mku.salmon.iostream.ProviderType;
-import com.mku.salmon.iostream.SalmonStream;
+import com.mku.salmon.streams.ProviderType;
+import com.mku.salmon.streams.SalmonStream;
 import org.junit.jupiter.api.*;
 
 @TestMethodOrder(MethodOrderer.OrderAnnotation.class)
@@ -65,9 +65,9 @@ public class SalmonCorePerfTests {
     public void EncryptAndDecryptStreamPerformanceSalmonDef() throws Exception {
         SalmonStream.setAesProviderType(ProviderType.Default);
         // warm up
-        SalmonCoreTestHelper.encryptAndDecryptByteArray(TEST_PERF_SIZE, 1, false);
+        SalmonCoreTestHelper.encryptAndDecryptByteArray(TEST_PERF_SIZE, false);
         System.out.println("SalmonStream Salmon Def: ");
-        SalmonCoreTestHelper.encryptAndDecryptByteArray(TEST_PERF_SIZE, 1, true);
+        SalmonCoreTestHelper.encryptAndDecryptByteArray(TEST_PERF_SIZE, true);
         System.out.println();
     }
 
@@ -87,10 +87,10 @@ public class SalmonCorePerfTests {
     public void EncryptAndDecryptStreamPerformanceSalmonIntrinsics() throws Exception {
         SalmonStream.setAesProviderType(ProviderType.AesIntrinsics);
         //warm up
-        SalmonCoreTestHelper.encryptAndDecryptByteArray(TEST_PERF_SIZE, 1, false);
+        SalmonCoreTestHelper.encryptAndDecryptByteArray(TEST_PERF_SIZE, false);
         System.out.println("SalmonStream Salmon Intrinsics: ");
         SalmonStream.setAesProviderType(ProviderType.AesIntrinsics);
-        SalmonCoreTestHelper.encryptAndDecryptByteArray(TEST_PERF_SIZE, 1, true);
+        SalmonCoreTestHelper.encryptAndDecryptByteArray(TEST_PERF_SIZE, true);
         System.out.println();
     }
 
@@ -99,9 +99,9 @@ public class SalmonCorePerfTests {
     public void EncryptAndDecryptStreamPerformanceSalmonTinyAes() throws Exception {
         SalmonStream.setAesProviderType(ProviderType.TinyAES);
         // warm up
-        SalmonCoreTestHelper.encryptAndDecryptByteArray(TEST_PERF_SIZE, 1, false);
+        SalmonCoreTestHelper.encryptAndDecryptByteArray(TEST_PERF_SIZE, false);
         System.out.println("SalmonStream Salmon TinyAES: ");
-        SalmonCoreTestHelper.encryptAndDecryptByteArray(TEST_PERF_SIZE, 1, true);
+        SalmonCoreTestHelper.encryptAndDecryptByteArray(TEST_PERF_SIZE, true);
         System.out.println();
     }
 }
