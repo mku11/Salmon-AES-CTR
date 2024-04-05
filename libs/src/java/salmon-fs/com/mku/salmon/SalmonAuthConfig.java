@@ -108,7 +108,7 @@ public class SalmonAuthConfig {
                                      byte[] configNonce) throws Exception {
         byte[] driveId = drive.getDriveId();
         if (driveId == null)
-            throw new Error("Could not write auth file, no drive id found");
+            throw new Exception("Could not write auth file, no drive id found");
         SalmonFile salmonFile = new SalmonFile(authConfigFile, drive);
         RandomAccessStream stream = salmonFile.getOutputStream(configNonce);
         writeToStream(stream, driveId, targetAuthId, targetStartingNonce, targetMaxNonce);
