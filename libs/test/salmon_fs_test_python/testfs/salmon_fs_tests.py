@@ -55,7 +55,7 @@ class SalmonFSTests(SalmonCoreTests):
     # SalmonCoreTestHelper.TEST_DEC_BUFFER_SIZE = 1 * 1024 * 1024
 
     def setUp(self):
-        SalmonFSTestHelper.TEST_IMPORT_FILE = SalmonFSTestHelper.TEST_IMPORT_LARGE_FILE
+        SalmonFSTestHelper.TEST_IMPORT_FILE = SalmonFSTestHelper.TEST_IMPORT_SMALL_FILE
 
         SalmonFSTestHelper.ENC_IMPORT_BUFFER_SIZE = 512 * 1024
         SalmonFSTestHelper.ENC_IMPORT_THREADS = 2
@@ -84,7 +84,7 @@ class SalmonFSTests(SalmonCoreTests):
         drive.close()
         try:
             drive = SalmonDrive.open_drive(vault_dir, SalmonFSTestHelper.drive_class_type,
-                                          SalmonCoreTestHelper.TEST_FALSE_PASSWORD, sequencer)
+                                           SalmonCoreTestHelper.TEST_FALSE_PASSWORD, sequencer)
             root_dir: SalmonFile = drive.getRoot()
             root_dir.listFiles()
         except SalmonAuthException as ex:
@@ -114,7 +114,8 @@ class SalmonFSTests(SalmonCoreTests):
         integrity_failed: bool = False
         try:
             SalmonFSTestHelper.import_and_export(SalmonFSTestHelper.generate_folder(SalmonFSTestHelper.TEST_VAULT2_DIR),
-                                                 SalmonCoreTestHelper.TEST_PASSWORD, SalmonFSTestHelper.TEST_IMPORT_FILE,
+                                                 SalmonCoreTestHelper.TEST_PASSWORD,
+                                                 SalmonFSTestHelper.TEST_IMPORT_FILE,
                                                  SalmonFSTestHelper.ENC_IMPORT_BUFFER_SIZE,
                                                  SalmonFSTestHelper.ENC_IMPORT_THREADS,
                                                  SalmonFSTestHelper.ENC_EXPORT_BUFFER_SIZE,
@@ -130,7 +131,8 @@ class SalmonFSTests(SalmonCoreTests):
         integrity_failed: bool = False
         try:
             SalmonFSTestHelper.import_and_export(SalmonFSTestHelper.generate_folder(SalmonFSTestHelper.TEST_VAULT2_DIR),
-                                                 SalmonCoreTestHelper.TEST_PASSWORD, SalmonFSTestHelper.TEST_IMPORT_FILE,
+                                                 SalmonCoreTestHelper.TEST_PASSWORD,
+                                                 SalmonFSTestHelper.TEST_IMPORT_FILE,
                                                  SalmonFSTestHelper.ENC_IMPORT_BUFFER_SIZE,
                                                  SalmonFSTestHelper.ENC_IMPORT_THREADS,
                                                  SalmonFSTestHelper.ENC_EXPORT_BUFFER_SIZE,
@@ -181,7 +183,8 @@ class SalmonFSTests(SalmonCoreTests):
         integrity_failed: bool = False
         try:
             SalmonFSTestHelper.import_and_export(SalmonFSTestHelper.generate_folder(SalmonFSTestHelper.TEST_VAULT2_DIR),
-                                                 SalmonCoreTestHelper.TEST_PASSWORD, SalmonFSTestHelper.TEST_IMPORT_FILE,
+                                                 SalmonCoreTestHelper.TEST_PASSWORD,
+                                                 SalmonFSTestHelper.TEST_IMPORT_FILE,
                                                  SalmonFSTestHelper.ENC_IMPORT_BUFFER_SIZE,
                                                  SalmonFSTestHelper.ENC_IMPORT_THREADS,
                                                  SalmonFSTestHelper.ENC_EXPORT_BUFFER_SIZE,
@@ -198,7 +201,8 @@ class SalmonFSTests(SalmonCoreTests):
         failed: bool = False
         try:
             SalmonFSTestHelper.import_and_export(SalmonFSTestHelper.generate_folder(SalmonFSTestHelper.TEST_VAULT2_DIR),
-                                                 SalmonCoreTestHelper.TEST_PASSWORD, SalmonFSTestHelper.TEST_IMPORT_FILE,
+                                                 SalmonCoreTestHelper.TEST_PASSWORD,
+                                                 SalmonFSTestHelper.TEST_IMPORT_FILE,
                                                  SalmonFSTestHelper.ENC_IMPORT_BUFFER_SIZE,
                                                  SalmonFSTestHelper.ENC_IMPORT_THREADS,
                                                  SalmonFSTestHelper.ENC_EXPORT_BUFFER_SIZE,
@@ -218,7 +222,8 @@ class SalmonFSTests(SalmonCoreTests):
         failed: bool = False
         try:
             SalmonFSTestHelper.import_and_export(SalmonFSTestHelper.generate_folder(SalmonFSTestHelper.TEST_VAULT2_DIR),
-                                                 SalmonCoreTestHelper.TEST_PASSWORD, SalmonFSTestHelper.TEST_IMPORT_FILE,
+                                                 SalmonCoreTestHelper.TEST_PASSWORD,
+                                                 SalmonFSTestHelper.TEST_IMPORT_FILE,
                                                  SalmonFSTestHelper.ENC_IMPORT_BUFFER_SIZE,
                                                  SalmonFSTestHelper.ENC_IMPORT_THREADS,
                                                  SalmonFSTestHelper.ENC_EXPORT_BUFFER_SIZE,
@@ -234,7 +239,8 @@ class SalmonFSTests(SalmonCoreTests):
         failed: bool = False
         try:
             SalmonFSTestHelper.import_and_export(SalmonFSTestHelper.generate_folder(SalmonFSTestHelper.TEST_VAULT2_DIR),
-                                                 SalmonCoreTestHelper.TEST_PASSWORD, SalmonFSTestHelper.TEST_IMPORT_FILE,
+                                                 SalmonCoreTestHelper.TEST_PASSWORD,
+                                                 SalmonFSTestHelper.TEST_IMPORT_FILE,
                                                  SalmonFSTestHelper.ENC_IMPORT_BUFFER_SIZE,
                                                  SalmonFSTestHelper.ENC_IMPORT_THREADS,
                                                  SalmonFSTestHelper.ENC_EXPORT_BUFFER_SIZE,
@@ -250,7 +256,8 @@ class SalmonFSTests(SalmonCoreTests):
         failed: bool = False
         try:
             SalmonFSTestHelper.import_and_export(SalmonFSTestHelper.generate_folder(SalmonFSTestHelper.TEST_VAULT2_DIR),
-                                                 SalmonCoreTestHelper.TEST_PASSWORD, SalmonFSTestHelper.TEST_IMPORT_FILE,
+                                                 SalmonCoreTestHelper.TEST_PASSWORD,
+                                                 SalmonFSTestHelper.TEST_IMPORT_FILE,
                                                  SalmonFSTestHelper.ENC_IMPORT_BUFFER_SIZE,
                                                  SalmonFSTestHelper.ENC_IMPORT_THREADS,
                                                  SalmonFSTestHelper.ENC_EXPORT_BUFFER_SIZE,
@@ -267,7 +274,8 @@ class SalmonFSTests(SalmonCoreTests):
         integrity_failed: bool = False
         try:
             SalmonFSTestHelper.import_and_export(SalmonFSTestHelper.generate_folder(SalmonFSTestHelper.TEST_VAULT2_DIR),
-                                                 SalmonCoreTestHelper.TEST_PASSWORD, SalmonFSTestHelper.TEST_IMPORT_FILE,
+                                                 SalmonCoreTestHelper.TEST_PASSWORD,
+                                                 SalmonFSTestHelper.TEST_IMPORT_FILE,
                                                  SalmonFSTestHelper.ENC_IMPORT_BUFFER_SIZE,
                                                  SalmonFSTestHelper.ENC_IMPORT_THREADS,
                                                  SalmonFSTestHelper.ENC_EXPORT_BUFFER_SIZE,
@@ -284,7 +292,8 @@ class SalmonFSTests(SalmonCoreTests):
         import_success: bool = True
         try:
             SalmonFSTestHelper.import_and_export(SalmonFSTestHelper.generate_folder(SalmonFSTestHelper.TEST_VAULT2_DIR),
-                                                 SalmonCoreTestHelper.TEST_PASSWORD, SalmonFSTestHelper.TEST_IMPORT_FILE,
+                                                 SalmonCoreTestHelper.TEST_PASSWORD,
+                                                 SalmonFSTestHelper.TEST_IMPORT_FILE,
                                                  SalmonFSTestHelper.ENC_IMPORT_BUFFER_SIZE,
                                                  SalmonFSTestHelper.ENC_IMPORT_THREADS,
                                                  SalmonFSTestHelper.ENC_EXPORT_BUFFER_SIZE,
@@ -317,7 +326,7 @@ class SalmonFSTests(SalmonCoreTests):
                                           SalmonCoreTestHelper.TEXT_VAULT_MAX_FILE_NONCE, 0, False)
 
         vault_dir = SalmonFSTestHelper.generate_folder(SalmonFSTestHelper.TEST_VAULT2_DIR)
-        seq_file = vault_dir.get_child( SalmonFSTestHelper.TEST_SEQUENCER_FILE1)
+        seq_file = vault_dir.get_child(SalmonFSTestHelper.TEST_SEQUENCER_FILE1)
         SalmonFSTestHelper.test_max_files(vault_dir, seq_file, SalmonFSTestHelper.TEST_IMPORT_TINY_FILE,
                                           SalmonCoreTestHelper.TEXT_VAULT_MAX_FILE_NONCE, 1, False)
 

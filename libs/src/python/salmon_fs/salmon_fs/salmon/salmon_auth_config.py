@@ -28,6 +28,7 @@ from typeguard import typechecked
 
 from salmon_fs.file.ireal_file import IRealFile
 from salmon_core.streams.memory_stream import MemoryStream
+from salmon_core.streams.random_access_stream import RandomAccessStream
 from salmon_core.salmon.integrity.salmon_integrity import SalmonIntegrity
 from salmon_core.salmon.streams.salmon_stream import SalmonStream
 from salmon_core.salmon.salmon_generator import SalmonGenerator
@@ -39,6 +40,7 @@ from salmon_fs.salmon.salmon_drive import SalmonDrive
 from salmon_core.convert.bit_converter import BitConverter
 from salmon_fs.sequence.nonce_sequence import NonceSequence
 from salmon_core.salmon.salmon_nonce import SalmonNonce
+from salmon_fs.sequence.sequence_exception import SequenceException
 
 
 @typechecked
@@ -215,7 +217,7 @@ class SalmonAuthConfig:
         if not SalmonAuthConfig.__arrays_equal(
                 auth_config.get_auth_id(), drive.get_auth_id_bytes()) \
                 or not SalmonAuthConfig.__arrays_equal(auth_config.get_drive_id(),
-                                                  drive.get_drive_id()):
+                                                       drive.get_drive_id()):
             raise Exception("Auth file doesn't match drive_id or auth_id")
 
         SalmonAuthConfig.import_sequence(drive, auth_config)
@@ -237,24 +239,24 @@ class SalmonAuthConfig:
             raise Exception("Device is not authorized to export")
 
         if file.exists() and file.length() > 0:
-            outStream: RandomAccessStream | None = None
+            out_stream: RandomAccessStream | None = None
             try:
-                outStream = file.getOutputStream()
-                outStream.setLength(0)
+                out_stream = file.getOutputStream()
+                out_stream.setLength(0)
             finally:
-                if outStream is not None:
-                    outStream.close()
-        maxNonce: bytearray | None = sequence.get_max_nonce();
-        if maxNonce is None:
-            raise SalmonSequenceException("Could not get current max nonce")
-        nextNonce: bytearray | None = sequence.get_next_nonce()
-        if nextNonce is None:
-            raise SalmonSequenceException("Could not get next nonce");
+                if out_stream is not None:
+                    out_stream.close()
+        max_nonce: bytearray | None = sequence.get_max_nonce()
+        if max_nonce is None:
+            raise SequenceException("Could not get current max nonce")
+        next_nonce: bytearray | None = sequence.get_next_nonce()
+        if next_nonce is None:
+            raise SequenceException("Could not get next nonce")
 
         pivot_nonce: bytearray = SalmonNonce.split_nonce_range(sequence.get_next_nonce(), sequence.get_max_nonce())
-        authId: str | None = sequence.get_auth_id();
-        if authId is None:
-            raise SalmonSequenceException("Could not get auth id");
+        auth_id: str | None = sequence.get_auth_id()
+        if auth_id is None:
+            raise SequenceException("Could not get auth id")
         drive.get_sequencer().set_max_nonce(sequence.get_drive_id(), sequence.get_auth_id(), pivot_nonce)
         SalmonAuthConfig.write_auth_file(file, drive,
                                          BitConverter.hex_to_bytes(target_auth_id),

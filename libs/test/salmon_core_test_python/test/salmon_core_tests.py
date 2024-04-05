@@ -298,7 +298,7 @@ class SalmonCoreTests(TestCase):
 
         self.assertTrue(caught)
 
-    def test_encrypt_decrypt_using_stream_test_integrity_multiple_chunks_no_buffer_specified_enc_buffer_not_aligned_negative(
+    def test_encrypt_decrypt_stream_test_integrity_multiple_chunks_no_buffer_specified_enc_buffer_not_aligned_negative(
             self):
         caught = False
         try:
@@ -321,7 +321,7 @@ class SalmonCoreTests(TestCase):
                                                         True, 32, SalmonCoreTestHelper.TEST_HMAC_KEY_BYTES, False, None,
                                                         None)
 
-    def test_encrypt_decrypt_using_stream_test_integrity_multiple_chunks_no_buffer_specified_dec_buffer_not_aligned_negative(
+    def test_encrypt_decrypt_stream_test_integrity_multiple_chunks_no_buffer_specified_dec_buffer_not_aligned_negative(
             self):
         caught = False
         try:
@@ -590,10 +590,10 @@ class SalmonCoreTests(TestCase):
                                                                 32)
         t2 = time.time() * 1000
         dec_data = SalmonCoreTestHelper.get_decryptor().decrypt(enc_data,
-                                                               SalmonCoreTestHelper.TEST_KEY_BYTES,
-                                                               None, True, True,
-                                                               SalmonCoreTestHelper.TEST_HMAC_KEY_BYTES,
-                                                               None)
+                                                                SalmonCoreTestHelper.TEST_KEY_BYTES,
+                                                                None, True, True,
+                                                                SalmonCoreTestHelper.TEST_HMAC_KEY_BYTES,
+                                                                None)
         t3 = time.time() * 1000
 
         self.assertEqual(data, dec_data)

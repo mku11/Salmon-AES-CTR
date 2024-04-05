@@ -30,7 +30,6 @@ import time
 from typing import BinaryIO, Type
 from unittest import TestCase
 
-from file.ivirtual_file import IVirtualFile
 from typeguard import typechecked
 
 from salmon_core.convert.bit_converter import BitConverter
@@ -405,7 +404,7 @@ class SalmonFSTestHelper:
                                        SalmonCoreTestHelper.TEST_PASSWORD, sequencer1)
         export_file: IRealFile = vault.get_child(SalmonFSTestHelper.TEST_EXPORT_FILENAME)
         SalmonAuthConfig.export_auth_file(drive, auth_id, export_file)
-        export_auth_file: IRealFile = vault.get_child(SalmonFSTestHelper.TEST_EXPORT_FILENAME);
+        export_auth_file: IRealFile = vault.get_child(SalmonFSTestHelper.TEST_EXPORT_FILENAME)
         salmon_cfg_file: SalmonFile = SalmonFile(export_auth_file, drive)
         nonce_cfg: int = BitConverter.to_long(salmon_cfg_file.get_file_nonce(), 0, SalmonGenerator.NONCE_LENGTH)
         #  import another test file

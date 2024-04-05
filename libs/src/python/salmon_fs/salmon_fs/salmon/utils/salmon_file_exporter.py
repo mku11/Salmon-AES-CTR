@@ -37,7 +37,6 @@ from typeguard import typechecked
 from salmon_core.convert.bit_converter import BitConverter
 from salmon_fs.file.ireal_file import IRealFile
 from salmon_core.streams.random_access_stream import RandomAccessStream
-from salmon_core.salmon.streams.salmon_stream import SalmonStream
 from salmon_fs.salmon.salmon_file import SalmonFile
 from salmon_fs.utils.file_utils import FileUtils
 
@@ -50,7 +49,6 @@ def export_file(index: int, final_part_size: int, final_running_threads: int, fi
                 shm_cancel_name: str,
                 buffer_size: int, key: bytearray,
                 integrity: bool, hash_key: bytearray | None, chunk_size: int):
-
     file_to_export: SalmonFile = SalmonFile(real_file_to_export)
     file_to_export.set_encryption_key(key)
     file_to_export.set_verify_integrity(integrity, hash_key)
@@ -206,10 +204,10 @@ class SalmonFileExporter:
 
         self.__buffer_size = buffer_size
         if self.__buffer_size == 0:
-            self.__buffer_size = SalmonFileImporter.__DEFAULT_BUFFER_SIZE
+            self.__buffer_size = SalmonFileExporter.__DEFAULT_BUFFER_SIZE
         self.__threads = threads
         if self.__threads == 0:
-            self.__threads = SalmonFileImporter.__DEFAULT_THREADS
+            self.__threads = SalmonFileExporter.__DEFAULT_THREADS
 
         self.__executor = ThreadPoolExecutor(self.__threads) if not multi_cpu else ProcessPoolExecutor(self.__threads)
 
@@ -279,7 +277,7 @@ class SalmonFileExporter:
                 else:
                     part_size = min_part_size
                 running_threads = int(file_size // part_size)
-            
+
             if running_threads == 1:
                 export_file_part(file_to_export, exported_file, 0, file_size, None, self.__buffer_size,
                                  None, self.__stopped, on_progress)
@@ -306,7 +304,8 @@ class SalmonFileExporter:
         self.__stopped[0] = True
         return exported_file
 
-    def __submit_export_jobs(self, running_threads: int, part_size: int, file_to_export: SalmonFile, exported_file: IRealFile,
+    def __submit_export_jobs(self, running_threads: int, part_size: int, file_to_export: SalmonFile,
+                             exported_file: IRealFile,
                              integrity: bool, on_progress: Callable[[int, int], Any] | None):
 
         shm_total_bytes_read = shared_memory.SharedMemory(create=True, size=8 * running_threads)
@@ -361,6 +360,7 @@ class SalmonFileExporter:
 
         shm_total_bytes_read.close()
         shm_total_bytes_read.unlink()
+
     def _finalize(self):
         self.close()
 

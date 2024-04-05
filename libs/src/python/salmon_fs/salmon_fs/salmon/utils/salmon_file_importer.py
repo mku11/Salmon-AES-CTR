@@ -49,7 +49,7 @@ def import_file(index: int, final_part_size: int, final_running_threads: int, fi
                 shm_total_bytes_read_name: str,
                 shm_cancel_name: str,
                 buffer_size: int, key: bytearray,
-                integrity: bool, hash_key: bytearray, chunk_size: int):
+                integrity: bool, hash_key: bytearray | None, chunk_size: int | None):
     imported_file: SalmonFile = SalmonFile(salmon_real_file)
     imported_file.set_allow_overwrite(True)
     imported_file.set_encryption_key(key)
