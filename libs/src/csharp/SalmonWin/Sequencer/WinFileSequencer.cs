@@ -49,7 +49,7 @@ public class WinFileSequencer : SalmonFileSequencer
         : base(sequenceFile, serializer)
     {
 		if(regCheckSumKey == null)
-			throw new SalmonSequenceException("Registry checksum key cannot be null");
+			throw new SequenceException("Registry checksum key cannot be null");
         CheckSumKey = regCheckSumKey;
     }
 
@@ -104,7 +104,7 @@ public class WinFileSequencer : SalmonFileSequencer
     /// Reset the sequences. The device will be de-authorized for all drives.
     /// </summary>
     /// <param name="clearChecksumOnly">True to only clear the registry checksum, use only if you know what you're doing. Default value is false).</param>
-    /// <exception cref="SalmonSequenceException"></exception>
+    /// <exception cref="SequenceException"></exception>
     public void Reset(bool clearChecksumOnly = false)
     {
         if (!clearChecksumOnly)
@@ -112,7 +112,7 @@ public class WinFileSequencer : SalmonFileSequencer
             if (SequenceFile.Exists)
                 SequenceFile.Delete();
             if (SequenceFile.Exists)
-                throw new SalmonSequenceException("Could not delete sequence file: " + SequenceFile.Path);
+                throw new SequenceException("Could not delete sequence file: " + SequenceFile.Path);
         }
         registry.Delete(CheckSumKey);
     }

@@ -40,7 +40,7 @@ public class HmacSHA256Provider : IHashProvider
     ///  <param name="offset">The position reading will start from.</param>
     ///  <param name="count">The count of bytes to be read.</param>
     ///  <returns>The HMAC SHA256 hash.</returns>
-    ///  <exception cref="SalmonIntegrityException">thrown if the hash cannot be calculated</exception>
+    ///  <exception cref="IntegrityException">thrown if the hash cannot be calculated</exception>
     public byte[] Calc(byte[] hashKey, byte[] buffer, int offset, int count)
     {
 

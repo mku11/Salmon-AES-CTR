@@ -47,7 +47,7 @@ public class SalmonTextEncryptor
     ///  <param name="hashKey">        Hash key to be used for all chunks.</param>
     ///  <param name="chunkSize">      The chunk size.</param>
     ///  <exception cref="SalmonSecurityException"></exception>
-    ///  <exception cref="SalmonIntegrityException"></exception>
+    ///  <exception cref="IntegrityException"></exception>
     ///  <exception cref="IOException"></exception>
     public static string EncryptString(string text, byte[] key, byte[] nonce, bool header, 
         bool integrity = false, byte[] hashKey = null, int? chunkSize = null)

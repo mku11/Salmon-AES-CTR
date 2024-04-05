@@ -43,7 +43,7 @@ public class SalmonSequenceSerializer : INonceSequenceSerializer
 	/// </summary>
 	///  <param name="sequences">The sequences to convert to text.</param>
     ///  <returns></returns>
-    ///  <exception cref="SalmonSequenceException"></exception>
+    ///  <exception cref="SequenceException"></exception>
     public string Serialize(Dictionary<string, NonceSequence> sequences)
     {
         MemoryStream stream = new MemoryStream();
@@ -79,7 +79,7 @@ public class SalmonSequenceSerializer : INonceSequenceSerializer
         catch (Exception ex)
         {
             Console.Error.WriteLine(ex);
-            throw new SalmonSequenceException("Could not serialize sequences", ex);
+            throw new SequenceException("Could not serialize sequences", ex);
         }
         finally
         {
@@ -99,7 +99,7 @@ public class SalmonSequenceSerializer : INonceSequenceSerializer
 	/// </summary>
 	///  <param name="contents">The contents containing the nonce sequences.</param>
     ///  <returns></returns>
-    ///  <exception cref="SalmonSequenceException"></exception>
+    ///  <exception cref="SequenceException"></exception>
     public Dictionary<string, NonceSequence> Deserialize(string contents)
     {
         Dictionary<string, NonceSequence> configs = new Dictionary<string, NonceSequence>();
@@ -138,7 +138,7 @@ public class SalmonSequenceSerializer : INonceSequenceSerializer
         catch (Exception ex)
         {
             Console.Error.WriteLine(ex);
-            throw new SalmonSequenceException("Could not deserialize sequences", ex);
+            throw new SequenceException("Could not deserialize sequences", ex);
         }
         finally
         {

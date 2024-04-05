@@ -38,6 +38,6 @@ public interface IHashProvider
     ///  <param name="offset">The position that reading will start from.</param>
     ///  <param name="count">The count of bytes to read from.</param>
     ///  <returns>The calculated hash.</returns>
-    ///  <exception cref="SalmonIntegrityException">thrown if hash cannot be calculated</exception>
+    ///  <exception cref="IntegrityException">thrown if hash cannot be calculated</exception>
     byte[] Calc(byte[] key, byte[] buffer, int offset, int count);
 }

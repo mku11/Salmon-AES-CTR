@@ -102,7 +102,7 @@ public class SalmonMediaDataSource : MediaDataSource
         catch (IOException ex)
         {
             Console.Error.WriteLine(ex);
-            if (ex.InnerException != null && ex.InnerException.GetType() == typeof(SalmonIntegrityException) && !integrityFailed)
+            if (ex.InnerException != null && ex.InnerException.GetType() == typeof(IntegrityException) && !integrityFailed)
             {
                 // showing integrity error only once
                 integrityFailed = true;

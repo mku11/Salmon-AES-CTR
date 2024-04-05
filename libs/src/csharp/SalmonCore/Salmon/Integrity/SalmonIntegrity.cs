@@ -76,7 +76,7 @@ public class SalmonIntegrity
     ///                   Use a positive number to specify integrity chunks.
     ///  <param name="provider"> Hash implementation provider.</param>
     ///  <param name="hashSize">The hash size.</param>
-    ///  <exception cref="SalmonIntegrityException"></exception>
+    ///  <exception cref="IntegrityException"></exception>
     ///  <exception cref="SalmonSecurityException"></exception>
     public SalmonIntegrity(bool integrity, byte[] key, int? chunkSize,
                            IHashProvider provider, int hashSize)
@@ -84,7 +84,7 @@ public class SalmonIntegrity
         if (chunkSize != null && (chunkSize < 0 || (chunkSize > 0 && chunkSize < SalmonAES256CTRTransformer.BLOCK_SIZE)
                 || (chunkSize > 0 && chunkSize % SalmonAES256CTRTransformer.BLOCK_SIZE != 0) || chunkSize > MAX_CHUNK_SIZE))
         {
-            throw new SalmonIntegrityException("Invalid chunk size, specify zero for default value or a positive number multiple of: "
+            throw new IntegrityException("Invalid chunk size, specify zero for default value or a positive number multiple of: "
                     + SalmonAES256CTRTransformer.BLOCK_SIZE + " and less than: " + SalmonIntegrity.MAX_CHUNK_SIZE + " bytes");
         }
         if (integrity && key == null)
@@ -111,7 +111,7 @@ public class SalmonIntegrity
     ///  <param name="key">        Key that will be used</param>
     ///  <param name="includeData">Additional data to be included in the calculation.</param>
     ///  <returns>The hash.</returns>
-    ///  <exception cref="SalmonIntegrityException"></exception>
+    ///  <exception cref="IntegrityException"></exception>
     public static byte[] CalculateHash(IHashProvider provider, byte[] buffer, int offset, int count,
                                        byte[] key, byte[] includeData)
     {
@@ -176,7 +176,7 @@ public class SalmonIntegrity
 	///  <param name="buffer">The buffer containing the data chunks.</param>
     ///  <param name="includeHeaderData">Include the header data in the first chunk.</param>
     ///  <returns>The hash signatures.</returns>
-    ///  <exception cref="SalmonIntegrityException"></exception>
+    ///  <exception cref="IntegrityException"></exception>
     public byte[][] GenerateHashes(byte[] buffer, byte[] includeHeaderData)
     {
         if (!integrity)
@@ -215,7 +215,7 @@ public class SalmonIntegrity
 	///  <param name="hashes">The hashes to verify.</param>
     ///  <param name="buffer">The buffer that contains the chunks to verify the hashes.</param>
     ///  <param name="includeHeaderData"></param>
-    ///  <exception cref="SalmonIntegrityException"></exception>
+    ///  <exception cref="IntegrityException"></exception>
     public void VerifyHashes(byte[][] hashes, byte[] buffer, byte[] includeHeaderData)
     {
         int chunk = 0;
@@ -227,7 +227,7 @@ public class SalmonIntegrity
             {
                 if (hash[k] != hashes[chunk][k])
                 {
-                    throw new SalmonIntegrityException("Data corrupt or tampered");
+                    throw new IntegrityException("Data corrupt or tampered");
                 }
             }
             chunk++;

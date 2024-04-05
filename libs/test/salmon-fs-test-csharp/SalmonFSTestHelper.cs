@@ -323,7 +323,7 @@ public class SalmonFSTestHelper
         //reopen with first device sequencer and export the auth file with the auth id from the second device
         drive = SalmonDrive.OpenDrive(vault, SalmonFSTestHelper.DriveClassType, SalmonCoreTestHelper.TEST_PASSWORD, sequencer1);
         IRealFile exportFile = vault.GetChild(SalmonFSTestHelper.TEST_EXPORT_FILENAME);
-        drive.ExportAuthFile(authId, exportFile);
+        SalmonAuthConfig.ExportAuthFile(drive, authId, exportFile);
         IRealFile exportAuthFile = vault.GetChild(SalmonFSTestHelper.TEST_EXPORT_FILENAME);
         SalmonFile salmonCfgFile = new SalmonFile(exportAuthFile, drive);
         long nonceCfg = BitConverter.ToLong(salmonCfgFile.FileNonce, 0, SalmonGenerator.NONCE_LENGTH);
@@ -337,7 +337,7 @@ public class SalmonFSTestHelper
 
         //reopen with second device(sequencer) and import auth file
         drive = SalmonDrive.OpenDrive(vault, SalmonFSTestHelper.DriveClassType, SalmonCoreTestHelper.TEST_PASSWORD, sequencer2);
-        drive.ImportAuthFile(exportAuthFile);
+        SalmonAuthConfig.ImportAuthFile(drive, exportAuthFile);
         // now import a 3rd file
         rootDir = drive.Root;
         fileToImport = new DotNetFile(importFilePath);

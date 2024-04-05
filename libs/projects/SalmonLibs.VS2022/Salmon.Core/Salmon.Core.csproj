@@ -37,7 +37,7 @@
     <Compile Include="..\..\..\src\csharp\SalmonCore\Integrity\HmacSHA256Provider.cs" Link="Integrity\HmacSHA256Provider.cs" />
     <Compile Include="..\..\..\src\csharp\SalmonCore\Integrity\IHashProvider.cs" Link="Integrity\IHashProvider.cs" />
     <Compile Include="..\..\..\src\csharp\SalmonCore\Salmon\Integrity\SalmonIntegrity.cs" Link="Salmon\Integrity\SalmonIntegrity.cs" />
-    <Compile Include="..\..\..\src\csharp\SalmonCore\Salmon\Integrity\SalmonIntegrityException.cs" Link="Salmon\Integrity\SalmonIntegrityException.cs" />
+    <Compile Include="..\..\..\src\csharp\SalmonCore\Integrity\IntegrityException.cs" Link="Integrity\IntegrityException.cs" />
 
     <Compile Include="..\..\..\src\csharp\SalmonCore\Salmon\Streams\SalmonStream.cs" Link="Salmon\Streams\SalmonStream.cs" />
     <Compile Include="..\..\..\src\csharp\SalmonCore\Salmon\Streams\EncryptionMode.cs" Link="Salmon\Streams\EncryptionMode.cs" />

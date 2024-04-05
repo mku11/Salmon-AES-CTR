@@ -44,7 +44,7 @@
     <Compile Include="..\..\..\src\csharp\SalmonFS\Sequence\INonceSequenceSerializer.cs" Link="Sequence\INonceSequenceSerializer.cs" />
     <Compile Include="..\..\..\src\csharp\SalmonFS\Sequence\NonceSequence.cs" Link="Sequence\NonceSequence.cs" />
     <Compile Include="..\..\..\src\csharp\SalmonFS\Salmon\Sequence\SalmonFileSequencer.cs" Link="Salmon\Sequence\SalmonFileSequencer.cs" />
-    <Compile Include="..\..\..\src\csharp\SalmonFS\Salmon\Sequence\SalmonSequenceException.cs" Link="Salmon\Sequence\SalmonSequenceException.cs" />
+    <Compile Include="..\..\..\src\csharp\SalmonFS\Sequence\SequenceException.cs" Link="Sequence\SequenceException.cs" />
     <Compile Include="..\..\..\src\csharp\SalmonFS\Salmon\Sequence\SalmonSequenceSerializer.cs" Link="Salmon\Sequence\SalmonSequenceSerializer.cs" />
 
     <Compile Include="..\..\..\src\csharp\SalmonFS\Salmon\Utils\SalmonFileCommander.cs" Link="Salmon\Utils\SalmonFileCommander.cs" />

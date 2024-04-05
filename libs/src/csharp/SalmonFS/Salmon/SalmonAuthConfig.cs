@@ -25,8 +25,12 @@ SOFTWARE.
 using Mku.File;
 using Mku.Salmon.Integrity;
 using Mku.Salmon.Streams;
+using Mku.Sequence;
 using System;
 using System.IO;
+using System.Linq;
+using static System.Runtime.InteropServices.JavaScript.JSType;
+using BitConverter = Mku.Convert.BitConverter;
 
 namespace Mku.Salmon;
 
@@ -72,10 +76,13 @@ public class SalmonAuthConfig
                                      byte[] targetStartingNonce, byte[] targetMaxNonce,
                                      byte[] configNonce)
     {
+        byte[] driveId = drive.DriveId;
+        if (driveId == null)
+            throw new Exception("Could not write auth file, no drive id found");
         SalmonFile salmonFile = new SalmonFile(authConfigFile, drive);
         salmonFile.AllowOverwrite = true;
         SalmonStream stream = salmonFile.GetOutputStream(configNonce);
-        WriteToStream(stream, drive.DriveId, targetAuthId, targetStartingNonce, targetMaxNonce);
+        WriteToStream(stream, driveId, targetAuthId, targetStartingNonce, targetMaxNonce);
     }
 
     /// <summary>
@@ -113,5 +120,133 @@ public class SalmonAuthConfig
             stream.Flush();
             stream.Close();
         }
+    }
+
+
+    /// <summary>
+    ///  Get the app drive pair configuration properties for this drive
+    /// </summary>
+    ///  <param name="authFile">The encrypted authorization file.</param>
+    ///  <returns>The decrypted authorization file.</returns>
+    ///  <exception cref="Exception"></exception>
+    public static SalmonAuthConfig GetAuthConfig(SalmonDrive drive, IRealFile authFile)
+    {
+        SalmonFile salmonFile = new SalmonFile(authFile, drive);
+        SalmonStream stream = salmonFile.GetInputStream();
+        MemoryStream ms = new MemoryStream();
+        stream.CopyTo(ms);
+        ms.Close();
+        stream.Close();
+        SalmonAuthConfig driveConfig = new SalmonAuthConfig(ms.ToArray());
+        if (!VerifyAuthId(drive, driveConfig.AuthId))
+            throw new SalmonSecurityException("Could not authorize this device, the authorization id does not match");
+        return driveConfig;
+    }
+
+
+    /// <summary>
+    ///  Verify the authorization id with the current drive auth id.
+    /// </summary>
+    ///  <param name="authId">The authorization id to verify.</param>
+    ///  <returns></returns>
+    ///  <exception cref="Exception"></exception>
+    private static bool VerifyAuthId(SalmonDrive drive, byte[] authId)
+    {
+        return Enumerable.SequenceEqual(authId, drive.GetAuthIdBytes());
+    }
+
+
+    /// <summary>
+    ///  Import sequence into the current drive.
+    /// </summary>
+    ///  <param name="authConfig"></param>
+    ///  <exception cref="Exception"></exception>
+    private static void ImportSequence(SalmonDrive drive, SalmonAuthConfig authConfig)
+    {
+        string drvStr = BitConverter.ToHex(authConfig.DriveId);
+        string authStr = BitConverter.ToHex(authConfig.AuthId);
+        drive.Sequencer.InitSequence(drvStr, authStr, authConfig.StartNonce, authConfig.MaxNonce);
+    }
+
+
+    /// <summary>
+    ///  Import the device authorization file.
+    /// </summary>
+    ///  <param name="filePath">The filepath to the authorization file.</param>
+    ///  <exception cref="Exception"></exception>
+    public static void ImportAuthFile(SalmonDrive drive, IRealFile authConfigFile)
+    {
+        if (drive.DriveId == null)
+            throw new Exception("Could not get drive id, make sure you init the drive first");
+
+        NonceSequence sequence = drive.Sequencer.GetSequence(BitConverter.ToHex(drive.DriveId));
+        if (sequence != null && sequence.SequenceStatus == NonceSequence.Status.Active)
+            throw new Exception("Device is already authorized");
+
+        if (authConfigFile == null || !authConfigFile.Exists)
+            throw new Exception("Could not import file");
+
+        SalmonAuthConfig authConfig = GetAuthConfig(drive, authConfigFile);
+
+        if (!Enumerable.SequenceEqual(authConfig.AuthId, drive.GetAuthIdBytes())
+                || !Enumerable.SequenceEqual(authConfig.DriveId, drive.DriveId)
+        )
+            throw new Exception("Auth file doesn't match driveId or authId");
+
+        ImportSequence(drive,authConfig);
+    }
+
+
+    /// <summary>
+    ///  <param name="targetAuthId">The authorization id of the target device.</param>
+    /// </summary>
+    ///  <param name="targetDir">   The target dir the file will be written to.</param>
+    ///  <param name="filename">    The filename of the auth config file.</param>
+    ///  <exception cref="Exception"></exception>
+    public static void ExportAuthFile(SalmonDrive drive, string targetAuthId, IRealFile file)
+    {
+        if (drive.DriveId == null)
+            throw new Exception("Could not get drive id, make sure you init the drive first");
+
+        byte[] cfgNonce = drive.Sequencer.NextNonce(BitConverter.ToHex(drive.DriveId));
+
+        NonceSequence sequence = drive.Sequencer.GetSequence(BitConverter.ToHex(drive.DriveId));
+        if (sequence == null)
+            throw new Exception("Device is not authorized to export");
+
+        if (file.Exists && file.Length > 0)
+        {
+            Stream outStream = null;
+            try
+            {
+                outStream = file.GetOutputStream();
+                outStream.SetLength(0);
+            }
+            catch (Exception ex)
+            {
+            }
+            finally
+            {
+                if (outStream != null)
+                    outStream.Close();
+            }
+        }
+        byte[] maxNonce = sequence.MaxNonce;
+        if (maxNonce == null)
+            throw new SequenceException("Could not get current max nonce");
+        byte[] nextNonce = sequence.NextNonce;
+        if (nextNonce == null)
+            throw new SequenceException("Could not get next nonce");
+
+        byte[] pivotNonce = SalmonNonce.SplitNonceRange(sequence.NextNonce, sequence.MaxNonce);
+        string authId = sequence.AuthId;
+        if (authId == null)
+            throw new SequenceException("Could not get auth id");
+
+        drive.Sequencer.SetMaxNonce(sequence.DriveId, sequence.AuthId, pivotNonce);
+        SalmonAuthConfig.WriteAuthFile(file, drive,
+                BitConverter.ToBytes(targetAuthId),
+                pivotNonce, sequence.MaxNonce,
+                cfgNonce);
     }
 }

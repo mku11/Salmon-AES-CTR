@@ -42,8 +42,6 @@ public class DotNetDrive : SalmonDrive
 
     }
 
-
-
     /// <summary>
     /// Helper method that opens and initializes a JsDrive
     /// </summary>
@@ -96,4 +94,7 @@ public class DotNetDrive : SalmonDrive
     {
 
     }
+	
+	override 
+	public SalmonFile Root => (SalmonFile) base.Root;
 }

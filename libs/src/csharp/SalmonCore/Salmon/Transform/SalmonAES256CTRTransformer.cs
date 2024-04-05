@@ -54,7 +54,7 @@ public abstract class SalmonAES256CTRTransformer : ISalmonCTRTransformer
     ///  <param name="hashKey">The hash key to be used for integrity checks.</param>
     ///  <returns>The size of the output data.</returns>
     ///  <exception cref="SalmonSecurityException"></exception>
-    ///  <exception cref="Integrity.SalmonIntegrityException"></exception>
+    ///  <exception cref="Integrity.IntegrityException"></exception>
     ///  <exception cref="IOException"></exception>
     public static long GetActualSize(byte[] data, byte[] key, byte[] nonce, EncryptionMode mode,
                                      byte[] headerData, bool integrity, int? chunkSize, byte[] hashKey)

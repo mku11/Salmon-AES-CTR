@@ -490,7 +490,7 @@ public class SalmonStream : Stream
             }
             catch (Exception ex)
             {
-                if (ex.GetType() == typeof(SalmonIntegrityException) && FailSilently)
+                if (ex.GetType() == typeof(IntegrityException) && FailSilently)
                     return -1;
                 throw new IOException("Could not read from stream: ", ex);
             }
@@ -511,11 +511,11 @@ public class SalmonStream : Stream
     {
         if (salmonIntegrity.ChunkSize > 0 && Position % salmonIntegrity.ChunkSize != 0)
             throw new IOException("Could not write to stream",
-                    new SalmonIntegrityException("All write operations should be aligned to the chunks size: "
+                    new IntegrityException("All write operations should be aligned to the chunks size: "
                             + salmonIntegrity.ChunkSize));
         else if (salmonIntegrity.ChunkSize == 0 && Position % SalmonAES256CTRTransformer.BLOCK_SIZE != 0)
             throw new IOException("Could not write to stream",
-                    new SalmonIntegrityException("All write operations should be aligned to the block size: "
+                    new IntegrityException("All write operations should be aligned to the block size: "
                             + SalmonAES256CTRTransformer.BLOCK_SIZE));
 
         // if there are not enough data in the buffer

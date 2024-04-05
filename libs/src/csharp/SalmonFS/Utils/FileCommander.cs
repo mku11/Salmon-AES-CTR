@@ -23,7 +23,7 @@ SOFTWARE.
 */
 
 using Mku.File;
-using Mku.Salmon.Sequence;
+using Mku.Sequence;
 using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
@@ -149,7 +149,7 @@ public class FileCommander
                 importedFiles.Add(sfile);
                 count++;
             }
-            catch (SalmonSequenceException ex)
+            catch (SequenceException ex)
             {
                 throw ex;
             }
@@ -268,7 +268,7 @@ public class FileCommander
                 exportedFiles.Add(rfile);
                 count++;
             }
-            catch (SalmonSequenceException ex)
+            catch (SequenceException ex)
             {
                 throw ex;
             }

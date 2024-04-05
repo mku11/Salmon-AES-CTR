@@ -29,7 +29,7 @@ SOFTWARE.
 /// <summary>
 ///  Thrown when tampering has been detected in the nonce sequencer.
 /// </summary>
-public class WinSequenceTamperedException : SalmonSequenceException
+public class WinSequenceTamperedException : SequenceException
 {
     /// <summary>
     ///  Construct an exception with a specific message.

@@ -129,7 +129,7 @@ public class SalmonFSTests
         }
         catch (IOException ex)
         {
-            if (ex.InnerException.GetType() == typeof(SalmonIntegrityException))
+            if (ex.InnerException.GetType() == typeof(IntegrityException))
                 integrityFailed = true;
         }
 
@@ -150,7 +150,7 @@ public class SalmonFSTests
         }
         catch (IOException ex)
         {
-            if (ex.GetType() == typeof(SalmonIntegrityException))
+            if (ex.GetType() == typeof(IntegrityException))
                 integrityFailed = true;
         }
 
@@ -177,7 +177,7 @@ public class SalmonFSTests
         }
         catch (IOException ex)
         {
-            if (ex.GetType() == typeof(SalmonIntegrityException))
+            if (ex.GetType() == typeof(IntegrityException))
                 integrityFailed = true;
         }
 
@@ -196,7 +196,7 @@ public class SalmonFSTests
         }
         catch (IOException ex)
         {
-            if (ex.GetType() == typeof(SalmonIntegrityException))
+            if (ex.GetType() == typeof(IntegrityException))
                 integrityFailed = true;
         }
 
@@ -216,7 +216,7 @@ public class SalmonFSTests
         }
         catch (IOException ex)
         {
-            if (ex.InnerException.GetType() == typeof(SalmonIntegrityException))
+            if (ex.InnerException.GetType() == typeof(IntegrityException))
                 integrityFailed = true;
         }
 
@@ -238,7 +238,7 @@ public class SalmonFSTests
         }
         catch (IOException ex)
         {
-            if (ex.GetType() == typeof(SalmonIntegrityException))
+            if (ex.GetType() == typeof(IntegrityException))
                 integrityFailed = true;
         }
         catch (Exception)
@@ -285,7 +285,7 @@ public class SalmonFSTests
         }
         catch (IOException ex)
         {
-            if (ex.GetType() == typeof(SalmonIntegrityException))
+            if (ex.GetType() == typeof(IntegrityException))
                 failed = true;
         }
 
@@ -307,7 +307,7 @@ public class SalmonFSTests
         }
         catch (IOException ex)
         {
-            if (ex.InnerException.GetType() == typeof(SalmonIntegrityException))
+            if (ex.InnerException.GetType() == typeof(IntegrityException))
                 failed = true;
         }
 
@@ -328,7 +328,7 @@ public class SalmonFSTests
         }
         catch (IOException ex)
         {
-            if (ex.InnerException.GetType() == typeof(SalmonIntegrityException))
+            if (ex.InnerException.GetType() == typeof(IntegrityException))
                 integrityFailed = true;
         }
 
@@ -351,7 +351,7 @@ public class SalmonFSTests
         catch (IOException ex)
         {
             Console.Error.WriteLine(ex);
-            if (ex.GetType() == typeof(SalmonIntegrityException))
+            if (ex.GetType() == typeof(IntegrityException))
                 importSuccess = false;
         }
         Assert.IsTrue(importSuccess);
@@ -408,7 +408,7 @@ public class SalmonFSTests
         }
         catch (IOException ex)
         {
-            if (ex.InnerException.GetType() == typeof(SalmonIntegrityException))
+            if (ex.InnerException.GetType() == typeof(IntegrityException))
                 caught = true;
         }
 
@@ -433,7 +433,7 @@ public class SalmonFSTests
             }
             catch (IOException ex)
             {
-                if (ex.GetType() == typeof(SalmonIntegrityException))
+                if (ex.GetType() == typeof(IntegrityException))
                     caught = true;
             }
             catch (Exception ex)
@@ -464,7 +464,7 @@ public class SalmonFSTests
         }
         catch (IOException ex)
         {
-            if (ex.GetType() == typeof(SalmonIntegrityException))
+            if (ex.GetType() == typeof(IntegrityException))
                 caught = true;
         }
         catch (Exception)

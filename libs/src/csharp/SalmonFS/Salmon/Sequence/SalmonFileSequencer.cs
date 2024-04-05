@@ -51,7 +51,7 @@ public class SalmonFileSequencer : INonceSequencer
 	///  <param name="sequenceFile">The sequence file.</param>
     ///  <param name="serializer">The serializer to be used.</param>
     ///  <exception cref="IOException"></exception>
-    ///  <exception cref="SalmonSequenceException"></exception>
+    ///  <exception cref="SequenceException"></exception>
     public SalmonFileSequencer(IRealFile sequenceFile, INonceSequenceSerializer serializer)
     {
         this.SequenceFile = sequenceFile;
@@ -68,14 +68,14 @@ public class SalmonFileSequencer : INonceSequencer
 	/// </summary>
 	///  <param name="driveId">The drive ID.</param>
     ///  <param name="authId">The authorization ID of the drive.</param>
-    ///  <exception cref="SalmonSequenceException"></exception>
+    ///  <exception cref="SequenceException"></exception>
     public void CreateSequence(string driveId, string authId)
     {
         string xmlContents = GetContents();
         Dictionary<string, NonceSequence> configs = serializer.Deserialize(xmlContents);
         NonceSequence sequence = GetSequence(configs, driveId);
         if (sequence != null)
-            throw new SalmonSequenceException("Sequence already exists");
+            throw new SequenceException("Sequence already exists");
         NonceSequence nsequence = new NonceSequence(driveId, authId, null, null, NonceSequence.Status.New);
         configs[driveId + ":" + authId] = nsequence;
         SaveSequenceFile(configs);
@@ -88,7 +88,7 @@ public class SalmonFileSequencer : INonceSequencer
     ///  <param name="authId">The auth ID of the device for the drive.</param>
     ///  <param name="startNonce">The starting nonce.</param>
     ///  <param name="maxNonce">The maximum nonce.</param>
-    ///  <exception cref="SalmonSequenceException"></exception>
+    ///  <exception cref="SequenceException"></exception>
     ///  <exception cref="IOException"></exception>
     public virtual void InitSequence(string driveId, string authId, byte[] startNonce, byte[] maxNonce)
     {
@@ -96,9 +96,9 @@ public class SalmonFileSequencer : INonceSequencer
         Dictionary<string, NonceSequence> configs = serializer.Deserialize(xmlContents);
         NonceSequence sequence = GetSequence(configs, driveId);
         if (sequence == null)
-            throw new SalmonSequenceException("Sequence does not exist");
+            throw new SequenceException("Sequence does not exist");
         if (sequence.NextNonce != null)
-            throw new SalmonSequenceException("Cannot reinitialize sequence");
+            throw new SequenceException("Cannot reinitialize sequence");
         sequence.NextNonce = startNonce;
         sequence.MaxNonce = maxNonce;
         sequence.SequenceStatus = NonceSequence.Status.Active;
@@ -111,17 +111,17 @@ public class SalmonFileSequencer : INonceSequencer
 	///  <param name="driveId">The drive ID.</param>
     ///  <param name="authId">The auth ID of the device for the drive.</param>
     ///  <param name="maxNonce">The maximum nonce.</param>
-    ///  <exception cref="SalmonSequenceException"></exception>
+    ///  <exception cref="SequenceException"></exception>
     public virtual void SetMaxNonce(string driveId, string authId, byte[] maxNonce)
     {
         string xmlContents = GetContents();
         Dictionary<string, NonceSequence> configs = serializer.Deserialize(xmlContents);
         NonceSequence sequence = GetSequence(configs, driveId);
         if (sequence == null || sequence.SequenceStatus == NonceSequence.Status.Revoked)
-            throw new SalmonSequenceException("Sequence does not exist");
+            throw new SequenceException("Sequence does not exist");
         if (BitConverter.ToLong(sequence.MaxNonce, 0, SalmonGenerator.NONCE_LENGTH)
                 < BitConverter.ToLong(maxNonce, 0, SalmonGenerator.NONCE_LENGTH))
-            throw new SalmonSequenceException("Max nonce cannot be increased");
+            throw new SequenceException("Max nonce cannot be increased");
         sequence.MaxNonce = maxNonce;
         SaveSequenceFile(configs);
     }
@@ -131,7 +131,7 @@ public class SalmonFileSequencer : INonceSequencer
 	/// </summary>
 	///  <param name="driveId">The drive ID.</param>
     ///  <returns></returns>
-    ///  <exception cref="SalmonSequenceException"></exception>
+    ///  <exception cref="SequenceException"></exception>
     ///  <exception cref="SalmonRangeExceededException"></exception>
     public virtual byte[] NextNonce(string driveId)
     {
@@ -139,7 +139,7 @@ public class SalmonFileSequencer : INonceSequencer
         Dictionary<string, NonceSequence> configs = serializer.Deserialize(xmlContents);
         NonceSequence sequence = GetSequence(configs, driveId);
         if (sequence == null || sequence.NextNonce == null || sequence.MaxNonce == null)
-            throw new SalmonSequenceException("Device not Authorized");
+            throw new SequenceException("Device not Authorized");
 
         //We get the next nonce
         byte[] nextNonce = sequence.NextNonce;
@@ -152,7 +152,7 @@ public class SalmonFileSequencer : INonceSequencer
     ///  Get the contents of a sequence file.
 	/// </summary>
 	///  <returns></returns>
-    ///  <exception cref="SalmonSequenceException"></exception>
+    ///  <exception cref="SequenceException"></exception>
 	[MethodImpl(MethodImplOptions.Synchronized)]
     protected virtual string GetContents()
     {
@@ -167,7 +167,7 @@ public class SalmonFileSequencer : INonceSequencer
         catch (Exception ex)
         {
             Console.Error.WriteLine(ex);
-            throw new SalmonSequenceException("Could not get XML Contents", ex);
+            throw new SequenceException("Could not get XML Contents", ex);
         }
         finally
         {
@@ -179,7 +179,7 @@ public class SalmonFileSequencer : INonceSequencer
                 }
                 catch (IOException e)
                 {
-                    throw new SalmonSequenceException("Could not get contents", e);
+                    throw new SequenceException("Could not get contents", e);
                 }
             }
             if (outputStream != null)
@@ -191,7 +191,7 @@ public class SalmonFileSequencer : INonceSequencer
                 }
                 catch (IOException e)
                 {
-                    throw new SalmonSequenceException("Could not get contents", e);
+                    throw new SequenceException("Could not get contents", e);
                 }
             }
         }
@@ -202,16 +202,16 @@ public class SalmonFileSequencer : INonceSequencer
     ///  Revoke the current sequence for a specific drive.
 	/// </summary>
 	///  <param name="driveId">The drive ID.</param>
-    ///  <exception cref="SalmonSequenceException"></exception>
+    ///  <exception cref="SequenceException"></exception>
     public virtual void RevokeSequence(string driveId)
     {
         string xmlContents = GetContents();
         Dictionary<string, NonceSequence> configs = serializer.Deserialize(xmlContents);
         NonceSequence sequence = GetSequence(configs, driveId);
         if (sequence == null)
-            throw new SalmonSequenceException("Sequence does not exist");
+            throw new SequenceException("Sequence does not exist");
         if (sequence.SequenceStatus == NonceSequence.Status.Revoked)
-            throw new SalmonSequenceException("Sequence already revoked");
+            throw new SequenceException("Sequence already revoked");
         sequence.SequenceStatus = NonceSequence.Status.Revoked;
         SaveSequenceFile(configs);
     }
@@ -221,7 +221,7 @@ public class SalmonFileSequencer : INonceSequencer
 	/// </summary>
 	///  <param name="driveId">The drive ID.</param>
     ///  <returns></returns>
-    ///  <exception cref="SalmonSequenceException"></exception>
+    ///  <exception cref="SequenceException"></exception>
     public virtual NonceSequence GetSequence(string driveId)
     {
         string xmlContents = GetContents();
@@ -242,7 +242,7 @@ public class SalmonFileSequencer : INonceSequencer
     ///  Save the sequence file.
 	/// </summary>
     ///  <param name="sequences">The sequences.</param>
-    ///  <exception cref="SalmonSequenceException"></exception>
+    ///  <exception cref="SequenceException"></exception>
     protected virtual void SaveSequenceFile(Dictionary<string, NonceSequence> sequences)
     {
         try
@@ -253,7 +253,7 @@ public class SalmonFileSequencer : INonceSequencer
         catch (Exception ex)
         {
             Console.Error.WriteLine(ex);
-            throw new SalmonSequenceException("Could not serialize sequences", ex);
+            throw new SequenceException("Could not serialize sequences", ex);
         }
     }
 
@@ -261,7 +261,7 @@ public class SalmonFileSequencer : INonceSequencer
     /// Save the contets of the file
     /// </summary>
     /// <param name="contents"></param>
-    /// <exception cref="SalmonSequenceException"></exception>
+    /// <exception cref="SequenceException"></exception>
 	[MethodImpl(MethodImplOptions.Synchronized)]
     protected virtual void SaveContents(string contents)
     {
@@ -277,7 +277,7 @@ public class SalmonFileSequencer : INonceSequencer
         catch (Exception ex)
         {
             Console.Error.WriteLine(ex);
-            throw new SalmonSequenceException("Could not save sequence file", ex);
+            throw new SequenceException("Could not save sequence file", ex);
         }
         finally
         {
@@ -290,7 +290,7 @@ public class SalmonFileSequencer : INonceSequencer
                 }
                 catch (IOException e)
                 {
-                    throw new SalmonSequenceException("Could not save sequence file", e);
+                    throw new SequenceException("Could not save sequence file", e);
                 }
             }
             if (inputStream != null)
@@ -301,7 +301,7 @@ public class SalmonFileSequencer : INonceSequencer
                 }
                 catch (IOException e)
                 {
-                    throw new SalmonSequenceException("Could not save sequence file", e);
+                    throw new SequenceException("Could not save sequence file", e);
                 }
             }
         }
@@ -314,7 +314,7 @@ public class SalmonFileSequencer : INonceSequencer
 	///  <param name="configs">All sequence configurations.</param>
     ///  <param name="driveId">The drive ID.</param>
     ///  <returns></returns>
-    ///  <exception cref="SalmonSequenceException"></exception>
+    ///  <exception cref="SequenceException"></exception>
     private static NonceSequence GetSequence(Dictionary<string, NonceSequence> configs, string driveId)
     {
         NonceSequence sequence = null;
@@ -326,7 +326,7 @@ public class SalmonFileSequencer : INonceSequencer
                 if (seq.SequenceStatus == NonceSequence.Status.Active || seq.SequenceStatus == NonceSequence.Status.New)
                 {
                     if (sequence != null)
-                        throw new SalmonSequenceException("Corrupt sequence config");
+                        throw new SequenceException("Corrupt sequence config");
                     sequence = seq;
                 }
             }

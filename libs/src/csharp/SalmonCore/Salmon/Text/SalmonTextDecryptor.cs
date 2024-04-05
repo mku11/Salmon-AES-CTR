@@ -50,7 +50,7 @@ public class SalmonTextDecryptor
     ///  <returns>The decrypted text.</returns>
     ///  <exception cref="IOException"></exception>
     ///  <exception cref="SalmonSecurityException"></exception>
-    ///  <exception cref="SalmonIntegrityException"></exception>
+    ///  <exception cref="IntegrityException"></exception>
     public static string DecryptString(string text, byte[] key, byte[] nonce, bool header,
         bool integrity = false, byte[] hashKey = null, int? chunkSize = null)
     {

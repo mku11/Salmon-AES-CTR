@@ -27,15 +27,15 @@ using System;
 namespace Mku.Salmon.Integrity;
 
 /// <summary>
-///  Thrown when Salmon Stream's data are corrupt or tampered with.
+/// Thrown when data are corrupt or tampered with.
 /// </summary>
-public class SalmonIntegrityException : Exception
+public class IntegrityException : Exception
 {
     /// <summary>
     ///  Construct an exception with a specific message.
 	/// </summary>
 	///  <param name="msg">The message</param>
-    public SalmonIntegrityException(string msg) : base(msg)
+    public IntegrityException(string msg) : base(msg)
     {
 
     }
@@ -45,7 +45,7 @@ public class SalmonIntegrityException : Exception
 	/// </summary>
 	///  <param name="msg">The provided message</param>
     ///  <param name="ex">The inner exception</param>
-    public SalmonIntegrityException(string msg, Exception ex) : base(msg, ex)
+    public IntegrityException(string msg, Exception ex) : base(msg, ex)
     {
 
     }

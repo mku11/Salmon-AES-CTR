@@ -1,6 +1,6 @@
 using System;
 
-namespace Mku.Salmon.Sequence;
+namespace Mku.Sequence;
 /*
 MIT License
 
@@ -28,13 +28,13 @@ SOFTWARE.
 /// <summary>
 ///  Thrown when there is a failure in the nonce sequencer.
 /// </summary>
-public class SalmonSequenceException : Exception
+public class SequenceException : Exception
 {
     /// <summary>
     ///  Construct an exception with a specific message.
 	/// </summary>
 	///  <param name="msg"></param>
-    public SalmonSequenceException(string msg) : base(msg)
+    public SequenceException(string msg) : base(msg)
     {
 
     }
@@ -44,7 +44,7 @@ public class SalmonSequenceException : Exception
 	/// </summary>
 	///  <param name="msg">The provided message</param>
     ///  <param name="ex">The inner exception</param>
-    public SalmonSequenceException(string msg, Exception ex) : base(msg, ex)
+    public SequenceException(string msg, Exception ex) : base(msg, ex)
     {
 
     }

@@ -326,7 +326,7 @@ public class SalmonCoreTests
         }
         catch (IOException ex)
         {
-            if (ex.InnerException.GetType() == typeof(SalmonIntegrityException))
+            if (ex.InnerException.GetType() == typeof(IntegrityException))
                 caught = true;
         }
 
@@ -346,7 +346,7 @@ public class SalmonCoreTests
         }
         catch (IOException ex)
         {
-            if (ex.InnerException.GetType() == typeof(SalmonIntegrityException))
+            if (ex.InnerException.GetType() == typeof(IntegrityException))
                 caught = true;
         }
 
@@ -377,7 +377,7 @@ public class SalmonCoreTests
         }
         catch (IOException ex)
         {
-            if (ex.InnerException.GetType() == typeof(SalmonIntegrityException))
+            if (ex.InnerException.GetType() == typeof(IntegrityException))
                 caught = true;
         }
 
@@ -399,7 +399,7 @@ public class SalmonCoreTests
         }
         catch (IOException ex)
         {
-            if (ex.InnerException.GetType() == typeof(SalmonIntegrityException))
+            if (ex.InnerException.GetType() == typeof(IntegrityException))
                 caught = true;
         }
 
@@ -419,7 +419,7 @@ public class SalmonCoreTests
         }
         catch (IOException ex)
         {
-            if (ex.InnerException.GetType() == typeof(SalmonIntegrityException))
+            if (ex.InnerException.GetType() == typeof(IntegrityException))
                 caught = true;
         }
 
@@ -557,7 +557,7 @@ public class SalmonCoreTests
         }
         catch (IOException ex)
         {
-            if (ex.InnerException.GetType() == typeof(SalmonIntegrityException))
+            if (ex.InnerException.GetType() == typeof(IntegrityException))
                 caught = true;
         }
 

@@ -35,7 +35,7 @@ namespace Mku.Utils;
 public abstract class FileExporter
 {
     /// <summary>
-    ///  The global default buffer size to use when reading/writing on the SalmonStream.
+    ///  The global default buffer size to use when reading/writing on streams.
     /// </summary>
     private static readonly int DEFAULT_BUFFER_SIZE = 512 * 1024;
 

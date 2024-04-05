@@ -96,7 +96,7 @@ public class SalmonEncryptor
     ///  <returns>The byte array with the encrypted data.</returns>
     ///  <exception cref="SalmonSecurityException"></exception>
     ///  <exception cref="IOException"></exception>
-    ///  <exception cref="SalmonIntegrityException"></exception>
+    ///  <exception cref="IntegrityException"></exception>
     public byte[] Encrypt(byte[] data, byte[] key, byte[] nonce,
                           bool storeHeaderData = false,
                           bool integrity = false, byte[] hashKey = null, int? chunkSize = null)
@@ -255,7 +255,7 @@ public class SalmonEncryptor
     ///  <param name="chunkSize">  The chunk size.</param>
     ///  <exception cref="IOException">             Thrown if there is an error with the stream.</exception>
     ///  <exception cref="SalmonSecurityException"> Thrown if there is a security exception with the stream.</exception>
-    ///  <exception cref="SalmonIntegrityException">Thrown if integrity cannot be applied.</exception>
+    ///  <exception cref="IntegrityException">Thrown if integrity cannot be applied.</exception>
     private void EncryptData(MemoryStream inputStream, long start, long count, byte[] outData,
                              byte[] key, byte[] nonce, byte[] headerData,
                              bool integrity, byte[] hashKey, int? chunkSize)

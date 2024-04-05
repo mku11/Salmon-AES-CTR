@@ -37,7 +37,7 @@ public interface INonceSequenceSerializer
 	/// </summary>
 	///  <param name="contents">The contents containing the nonce sequences.</param>
     ///  <returns>The nonce sequences.</returns>
-    ///  <exception cref="SalmonSequenceException"></exception>
+    ///  <exception cref="SequenceException"></exception>
     Dictionary<string, NonceSequence> Deserialize(string contents);
 
     /// <summary>
@@ -45,6 +45,6 @@ public interface INonceSequenceSerializer
 	/// </summary>
 	///  <param name="sequences">The sequences to convert to text.</param>
     ///  <returns>The string contents.</returns>
-    ///  <exception cref="SalmonSequenceException"></exception>
+    ///  <exception cref="SequenceException"></exception>
     string Serialize(Dictionary<string, NonceSequence> sequences);
 }

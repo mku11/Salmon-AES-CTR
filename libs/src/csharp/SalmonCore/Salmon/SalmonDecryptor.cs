@@ -94,7 +94,7 @@ public class SalmonDecryptor
     ///  <exception cref="IOException">Thrown if there is a problem with decoding the array.</exception>
     ///  <exception cref="SalmonSecurityException">Thrown if the key and nonce are not provided.</exception>
     ///  <exception cref="IOException"></exception>
-    ///  <exception cref="SalmonIntegrityException"></exception>
+    ///  <exception cref="IntegrityException"></exception>
     public byte[] Decrypt(byte[] data, byte[] key, byte[] nonce,
                                  bool hasHeaderData = false,
                                  bool integrity = false, byte[] hashKey = null, int? chunkSize = null)
@@ -249,7 +249,7 @@ public class SalmonDecryptor
     ///  <param name="chunkSize">The chunk size.</param>
     ///  <exception cref="IOException"> Thrown if there is an error with the stream.</exception>
     ///  <exception cref="SalmonSecurityException">Thrown if there is a security exception with the stream.</exception>
-    ///  <exception cref="SalmonIntegrityException">Thrown if the stream is corrupt or tampered with.</exception>
+    ///  <exception cref="IntegrityException">Thrown if the stream is corrupt or tampered with.</exception>
     private void DecryptData(Stream inputStream, long start, long count, byte[] outData,
                                     byte[] key, byte[] nonce,
                                     byte[] headerData, bool integrity, byte[] hashKey, int? chunkSize)

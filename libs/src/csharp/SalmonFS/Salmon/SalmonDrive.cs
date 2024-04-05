@@ -145,8 +145,8 @@ public abstract class SalmonDrive : VirtualDrive
     ///  <exception cref="IOException"></exception>
     ///  <exception cref="SalmonAuthException"></exception>
     ///  <exception cref="SalmonSecurityException"></exception>
-    ///  <exception cref="SalmonIntegrityException"></exception>
-    ///  <exception cref="Sequence.SalmonSequenceException"></exception>
+    ///  <exception cref="IntegrityException"></exception>
+    ///  <exception cref="Sequence.SequenceException"></exception>
     [MethodImpl(MethodImplOptions.Synchronized)]
     public void SetPassword(string pass)
     {
@@ -197,8 +197,8 @@ public abstract class SalmonDrive : VirtualDrive
 	///  <param name="dirPath"> Directory to store the drive configuration and virtual filesystem.</param>
     ///  <param name="password">Master password to encrypt the drive configuration.</param>
     ///  <returns>The newly created drive.</returns>
-    ///  <exception cref="SalmonIntegrityException"></exception>
-    ///  <exception cref="SalmonSequenceException"></exception>
+    ///  <exception cref="IntegrityException"></exception>
+    ///  <exception cref="SequenceException"></exception>
     public static SalmonDrive CreateDrive(IRealFile dir, Type driveClassType,
         string password, INonceSequencer sequencer)
     {
@@ -242,7 +242,7 @@ public abstract class SalmonDrive : VirtualDrive
     /// </summary>
     ///  <returns></returns>
     ///  <exception cref="Exception"></exception>
-    byte[] GetAuthIdBytes()
+    public byte[] GetAuthIdBytes()
     {
         string drvStr = BitConverter.ToHex(DriveId);
         NonceSequence sequence = Sequencer.GetSequence(drvStr);
@@ -255,32 +255,6 @@ public abstract class SalmonDrive : VirtualDrive
         return BitConverter.ToBytes(sequence.AuthId);
     }
 
-    /// <summary>
-    ///  Import the device authorization file.
-	/// </summary>
-	///  <param name="filePath">The filepath to the authorization file.</param>
-    ///  <exception cref="Exception"></exception>
-    public void ImportAuthFile(IRealFile authConfigFile)
-    {
-        if (this.DriveId == null)
-            throw new Exception("Could not get drive id, make sure you init the drive first");
-
-        NonceSequence sequence = Sequencer.GetSequence(BitConverter.ToHex(DriveId));
-        if (sequence != null && sequence.SequenceStatus == NonceSequence.Status.Active)
-            throw new Exception("Device is already authorized");
-
-        if (authConfigFile == null || !authConfigFile.Exists)
-            throw new Exception("Could not import file");
-
-        SalmonAuthConfig authConfig = GetAuthConfig(authConfigFile);
-
-        if (!Enumerable.SequenceEqual(authConfig.AuthId, GetAuthIdBytes())
-                || !Enumerable.SequenceEqual(authConfig.DriveId, DriveId)
-        )
-            throw new Exception("Auth file doesn't match driveId or authId");
-
-        ImportSequence(authConfig);
-    }
 
     /// <summary>
     ///  Get the default auth config filename.
@@ -291,65 +265,13 @@ public abstract class SalmonDrive : VirtualDrive
         return SalmonDrive.AuthConfigFilename;
     }
 
-    /// <summary>
-    ///  <param name="targetAuthId">The authorization id of the target device.</param>
-	/// </summary>
-	///  <param name="targetDir">   The target dir the file will be written to.</param>
-    ///  <param name="filename">    The filename of the auth config file.</param>
-    ///  <exception cref="Exception"></exception>
-    public void ExportAuthFile(string targetAuthId, IRealFile file)
-    {
-        if (this.DriveId == null)
-            throw new Exception("Could not get drive id, make sure you init the drive first");
-
-        byte[] cfgNonce = Sequencer.NextNonce(BitConverter.ToHex(DriveId));
-
-        NonceSequence sequence = Sequencer.GetSequence(BitConverter.ToHex(DriveId));
-        if (sequence == null)
-            throw new Exception("Device is not authorized to export");
-
-        if (file.Exists && file.Length > 0)
-        {
-            Stream outStream = null;
-            try
-            {
-                outStream = file.GetOutputStream();
-                outStream.SetLength(0);
-            }
-            catch (Exception ex)
-            {
-            }
-            finally
-            {
-                if (outStream != null)
-                    outStream.Close();
-            }
-        }
-        byte[] maxNonce = sequence.MaxNonce;
-        if (maxNonce == null)
-            throw new SalmonSequenceException("Could not get current max nonce");
-        byte[] nextNonce = sequence.NextNonce;
-        if (nextNonce == null)
-            throw new SalmonSequenceException("Could not get next nonce");
-
-        byte[] pivotNonce = SalmonNonce.SplitNonceRange(sequence.NextNonce, sequence.MaxNonce);
-        string authId = sequence.AuthId;
-        if (authId == null)
-            throw new SalmonSequenceException("Could not get auth id");
-
-        Sequencer.SetMaxNonce(sequence.DriveId, sequence.AuthId, pivotNonce);
-        SalmonAuthConfig.WriteAuthFile(file, this,
-                BitConverter.ToBytes(targetAuthId),
-                pivotNonce, sequence.MaxNonce,
-                cfgNonce);
-    }
 
     /// <summary>
     ///  Get the next nonce for the drive. This operation IS atomic as per transaction.
 	/// </summary>
 	///  <param name="salmonDrive"></param>
     ///  <returns></returns>
-    ///  <exception cref="SalmonSequenceException"></exception>
+    ///  <exception cref="SequenceException"></exception>
     ///  <exception cref="SalmonRangeExceededException"></exception>
     public byte[] GetNextNonce(SalmonDrive salmonDrive)
     {
@@ -399,54 +321,13 @@ public abstract class SalmonDrive : VirtualDrive
         Sequencer.RevokeSequence(BitConverter.ToHex(driveId));
     }
 
-    /// <summary>
-    ///  Verify the authorization id with the current drive auth id.
-	/// </summary>
-	///  <param name="authId">The authorization id to verify.</param>
-    ///  <returns></returns>
-    ///  <exception cref="Exception"></exception>
-    private bool VerifyAuthId(byte[] authId)
-    {
-        return Enumerable.SequenceEqual(authId, GetAuthIdBytes());
-    }
 
-    /// <summary>
-    ///  Import sequence into the current drive.
-	/// </summary>
-	///  <param name="authConfig"></param>
-    ///  <exception cref="Exception"></exception>
-    private void ImportSequence(SalmonAuthConfig authConfig)
-    {
-        string drvStr = BitConverter.ToHex(authConfig.DriveId);
-        string authStr = BitConverter.ToHex(authConfig.AuthId);
-        Sequencer.InitSequence(drvStr, authStr, authConfig.StartNonce, authConfig.MaxNonce);
-    }
-
-    /// <summary>
-    ///  Get the app drive pair configuration properties for this drive
-	/// </summary>
-	///  <param name="authFile">The encrypted authorization file.</param>
-    ///  <returns>The decrypted authorization file.</returns>
-    ///  <exception cref="Exception"></exception>
-    public SalmonAuthConfig GetAuthConfig(IRealFile authFile)
-    {
-        SalmonFile salmonFile = new SalmonFile(authFile, this);
-        SalmonStream stream = salmonFile.GetInputStream();
-        MemoryStream ms = new MemoryStream();
-        stream.CopyTo(ms);
-        ms.Close();
-        stream.Close();
-        SalmonAuthConfig driveConfig = new SalmonAuthConfig(ms.ToArray());
-        if (!VerifyAuthId(driveConfig.AuthId))
-            throw new SalmonSecurityException("Could not authorize this device, the authorization id does not match");
-        return driveConfig;
-    }
 
     /// <summary>
     ///  Get the authorization ID for the current device.
 	/// </summary>
 	///  <returns></returns>
-    ///  <exception cref="SalmonSequenceException"></exception>
+    ///  <exception cref="SequenceException"></exception>
     ///  <exception cref="SalmonAuthException"></exception>
     public string GetAuthId()
     {

@@ -35,7 +35,7 @@ public interface INonceSequencer
 	/// </summary>
 	///  <param name="driveId">The drive ID.</param>
     ///  <param name="authId">The authorization ID of the drive.</param>
-    ///  <exception cref="SalmonSequenceException"></exception>
+    ///  <exception cref="SequenceException"></exception>
     void CreateSequence(string driveId, string authId);
 
     /// <summary>
@@ -45,7 +45,7 @@ public interface INonceSequencer
     ///  <param name="authId">The auth ID of the device for the drive.</param>
     ///  <param name="startNonce">The starting nonce.</param>
     ///  <param name="maxNonce">The maximum nonce.</param>
-    ///  <exception cref="SalmonSequenceException"></exception>
+    ///  <exception cref="SequenceException"></exception>
     ///  <exception cref="IOException"></exception>
     void InitSequence(string driveId, string authId, byte[] startNonce, byte[] maxNonce);
 
@@ -55,7 +55,7 @@ public interface INonceSequencer
 	///  <param name="driveId">The drive ID.</param>
     ///  <param name="authId">The auth ID of the device for the drive.</param>
     ///  <param name="maxNonce">The maximum nonce.</param>
-    ///  <exception cref="SalmonSequenceException"></exception>
+    ///  <exception cref="SequenceException"></exception>
     ///  <exception cref="IOException"></exception>
     void SetMaxNonce(string driveId, string authId, byte[] maxNonce);
 
@@ -64,7 +64,7 @@ public interface INonceSequencer
 	/// </summary>
 	///  <param name="driveId">The drive ID.</param>
     ///  <returns>The next nonce.</returns>
-    ///  <exception cref="SalmonSequenceException"></exception>
+    ///  <exception cref="SequenceException"></exception>
     ///  <exception cref="Salmon.SalmonRangeExceededException"></exception>
     byte[] NextNonce(string driveId);
 
@@ -72,7 +72,7 @@ public interface INonceSequencer
     ///  Revoke the sequencer. This terminates the sequencer and de-authorizes the device
 	/// </summary>
 	///  <param name="driveId"></param>
-    ///  <exception cref="SalmonSequenceException"></exception>
+    ///  <exception cref="SequenceException"></exception>
     void RevokeSequence(string driveId);
 
     /// <summary>
@@ -80,7 +80,7 @@ public interface INonceSequencer
 	/// </summary>
 	///  <param name="driveId">The drive ID.</param>
     ///  <returns>The current sequence.</returns>
-    ///  <exception cref="SalmonSequenceException"></exception>
+    ///  <exception cref="SequenceException"></exception>
     NonceSequence GetSequence(string driveId);
 
     /// <summary>

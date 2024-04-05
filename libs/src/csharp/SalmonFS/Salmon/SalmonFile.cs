@@ -243,7 +243,7 @@ public class SalmonFile : IVirtualFile
 	///  <returns></returns>
     ///  <exception cref="IOException"></exception>
     ///  <exception cref="SalmonSecurityException"></exception>
-    ///  <exception cref="SalmonIntegrityException"></exception>
+    ///  <exception cref="IntegrityException"></exception>
     override
     public SalmonStream GetInputStream()
     {
@@ -282,8 +282,8 @@ public class SalmonFile : IVirtualFile
 	/// </summary>
 	///  <returns></returns>
     ///  <exception cref="SalmonSecurityException"></exception>
-    ///  <exception cref="SalmonIntegrityException"></exception>
-    ///  <exception cref="Sequence.SalmonSequenceException"></exception>
+    ///  <exception cref="IntegrityException"></exception>
+    ///  <exception cref="Sequence.SequenceException"></exception>
     [MethodImpl(MethodImplOptions.Synchronized)]
     override
     public SalmonStream GetOutputStream()
@@ -385,11 +385,11 @@ public class SalmonFile : IVirtualFile
         int? fileChunkSize = FileChunkSize;
 
         if (fileChunkSize != null)
-            throw new SalmonIntegrityException("Cannot redefine chunk size, delete file and recreate");
+            throw new IntegrityException("Cannot redefine chunk size, delete file and recreate");
         if (requestChunkSize != null && requestChunkSize < 0)
-            throw new SalmonIntegrityException("Chunk size needs to be zero for default chunk size or a positive value");
+            throw new IntegrityException("Chunk size needs to be zero for default chunk size or a positive value");
         if (integrity && fileChunkSize != null && fileChunkSize == 0)
-            throw new SalmonIntegrityException("Cannot enable integrity if the file is not created with integrity, export file and reimport with integrity");
+            throw new IntegrityException("Cannot enable integrity if the file is not created with integrity, export file and reimport with integrity");
 
         if (integrity && hashKey == null && Drive != null)
             hashKey = Drive.Key.HashKey;
@@ -462,7 +462,7 @@ public class SalmonFile : IVirtualFile
         else if (!IsIntegrityEnabled)
             reqChunkSize = 0;
         if (reqChunkSize == null)
-            throw new SalmonIntegrityException("File requires a chunk size");
+            throw new IntegrityException("File requires a chunk size");
 
         if (nonce != null)
             requestedNonce = nonce;
@@ -666,7 +666,7 @@ public class SalmonFile : IVirtualFile
 
         // integrity has been requested but hash is missing
         if (IsIntegrityEnabled && HashKey == null)
-            throw new SalmonIntegrityException("File requires hashKey, use SetVerifyIntegrity() to provide one");
+            throw new IntegrityException("File requires hashKey, use SetVerifyIntegrity() to provide one");
 
         return SalmonIntegrity.GetTotalHashDataLength(RealFile.Length, (int)FileChunkSize,
                 SalmonGenerator.HASH_RESULT_LENGTH, SalmonGenerator.HASH_KEY_LENGTH);
