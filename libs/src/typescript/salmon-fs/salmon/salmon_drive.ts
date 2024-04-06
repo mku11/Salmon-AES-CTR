@@ -323,10 +323,10 @@ export abstract class SalmonDrive extends VirtualDrive {
     public async getExportDir(): Promise<IRealFile> {
         if (this.#realRoot == null)
             throw new SalmonSecurityException("Cannot export, make sure you init the drive first");
-        let virtualThumbnailsRealDir: IRealFile | null = await this.#realRoot.getChild(SalmonDrive.#exportDirectoryName);
-        if (virtualThumbnailsRealDir == null || !await virtualThumbnailsRealDir.exists())
-            virtualThumbnailsRealDir = await this.#realRoot.createDirectory(SalmonDrive.#exportDirectoryName);
-        return virtualThumbnailsRealDir;
+        let exportDir: IRealFile | null = await this.#realRoot.getChild(SalmonDrive.#exportDirectoryName);
+        if (exportDir == null || !await exportDir.exists())
+            exportDir = await this.#realRoot.createDirectory(SalmonDrive.#exportDirectoryName);
+        return exportDir;
     }
 
     /**

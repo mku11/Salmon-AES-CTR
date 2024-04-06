@@ -234,7 +234,8 @@ export class JsLocalStorageFile implements IRealFile {
      * @return True if created.
      */
     public async mkdir(): Promise<boolean> {
-        throw new Error("Not supported");
+        // no-op
+        return true;
     }
 
     /**

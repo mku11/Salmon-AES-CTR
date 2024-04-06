@@ -236,9 +236,8 @@ export class JsFile implements IRealFile {
      */
     public async listFiles(): Promise<IRealFile[]> {
         let files: IRealFile[] = [];
-        let lFiles = this.#fileHandle.entries();
 		let nFiles: IRealFile[] = [];
-        for await (const [key, value] of lFiles) {
+        for await (const [key, value] of this.#fileHandle.entries()) {
             let file: IRealFile = new JsFile(value, this);
 			if(await file.isFile())
 				nFiles.push(file);

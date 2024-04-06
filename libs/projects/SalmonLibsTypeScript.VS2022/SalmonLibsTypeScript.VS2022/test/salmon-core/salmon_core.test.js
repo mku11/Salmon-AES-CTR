@@ -130,7 +130,7 @@ describe('salmon-core', () => {
 
     it('shouldEncryptAndDecryptTextCompatible', async () => {
         let plainText = SalmonCoreTestHelper.TEST_TEXT;
-        for (let i = 0; i < 1; i++)
+        for (let i = 0; i < 14; i++)
             plainText += plainText;
 
         const bytes = new TextEncoder().encode(plainText);
@@ -148,7 +148,7 @@ describe('salmon-core', () => {
 
     it('shouldEncryptAndDecryptTextCompatibleWithIntegrity', async () => {
         let plainText = SalmonCoreTestHelper.TEST_TEXT;
-        for (let i = 0; i < 13; i++)
+        for (let i = 0; i < 14; i++)
             plainText += plainText;
 
         const bytes = new TextEncoder().encode(plainText);

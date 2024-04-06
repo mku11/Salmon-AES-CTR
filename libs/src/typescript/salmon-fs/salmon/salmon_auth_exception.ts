@@ -46,3 +46,5 @@ export class SalmonAuthException extends Error {
     }
 }
 
+let oldToString = SalmonAuthException.prototype.toString;
+

@@ -20,7 +20,7 @@ var passedTestCases = 0;
 var testDirHandle;
 
 // set to run specific case
-// var testFilter = "shouldImportAndExportIntegrity";
+var testFilter = "shouldEncryptAndDecryptTextCompatible";
 
 var logReport = null;
 var enableLogReport = false;
