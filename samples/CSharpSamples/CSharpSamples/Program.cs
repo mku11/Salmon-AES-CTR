@@ -24,26 +24,28 @@ public class Sample
         r.NextBytes(data);
     }
 
+	SalmonEncryptor encryptor = new SalmonEncryptor(2);
+    SalmonDecryptor decryptor = new SalmonDecryptor(2);
+		
     public static void Main(string[] args)
     {
         // uncomment to load the AES intrinsics for better performance
         // make sure you add option -Djava.library.path=C:\path\to\salmonlib\
         // SalmonStream.setAesProviderType(ProviderType.AesIntrinsics);
 
-        // Samples
-        FileSamples();
+        // use the password to create a drive and import a file
+		string vaultPath = "vault_" + BitConverter.ToHex(SalmonGenerator.GetSecureRandomBytes(6));
+        DotNetFile vaultDir = new DotNetFile(vaultPath);
+		DotNetFile[] filesToImport = new DotNetFile[] { new DotNetFile("data/file.txt") };
+        CreateDriveAndImportFile(vaultDir, filesToImport);
+
+        // or encrypt text into a standalone file without a drive:
+		string filePath = "vault_" + BitConverter.ToHex(SalmonGenerator.GetSecureRandomBytes(6));
+		DotNetFile file = new DotNetFile(filePath);
+        EncryptAndDecryptTextToFile(file);
+		
+		// misc stream samples
         StreamSamples();
-    }
-
-    public static void FileSamples()
-    {
-        // use the password to create a drive and import the file
-        CreateDriveAndImportFile(password);
-
-        // or encrypt and decrypt text a standalone file without a drive:
-        byte[] key = GetKeyFromPassword(password);
-        EncryptAndDecryptTextToFile(text, key);
-
     }
 
     private static byte[] GetKeyFromPassword(string password)
@@ -78,13 +80,11 @@ public class Sample
         byte[] nonce = SalmonGenerator.GetSecureRandomBytes(8);
 
         // encrypt a byte array using 2 threads
-        SalmonEncryptor encryptor = new SalmonEncryptor(2);
         byte[] encBytes = encryptor.Encrypt(bytes, key, nonce, false);
         Console.WriteLine("Encrypted bytes: " + BitConverter.ToHex(encBytes).Substring(0, 24) + "...");
         encryptor.Close();
 
         // decrypt byte array using 2 threads
-        SalmonDecryptor decryptor = new SalmonDecryptor(2);
         byte[] decBytes = decryptor.Decrypt(encBytes, key, nonce, false);
         Console.WriteLine("Decrypted bytes: " + BitConverter.ToHex(decBytes).Substring(0, 24) + "...");
         Console.WriteLine();
@@ -153,23 +153,20 @@ public class Sample
         Console.WriteLine();
     }
 
-    private static void EncryptAndDecryptTextToFile(string text, byte[] key)
+    private static void EncryptAndDecryptTextToFile(string text, byte[] key, IRealFile file)
     {
         // encrypt to a file, the SalmonFile has a virtual file system API
         Console.WriteLine("Encrypting text to File: " + text);
-        string testFile = "D:/tmp/salmontestfile.txt";
-
-        // the real file:
-        IRealFile tFile = new DotNetFile(testFile);
-        if (tFile.Exists)
-            tFile.Delete();
 
         byte[] bytes = UTF8Encoding.UTF8.GetBytes(text);
+		
+		// derive the key from the password
+		byte[] key = GetKeyFromPassword(password);
 
         // Always request a new random secure nonce
         byte[] nonce = SalmonGenerator.GetSecureRandomBytes(8); // 64 bit nonce
 
-        SalmonFile encFile = new SalmonFile(new DotNetFile(testFile), null);
+        SalmonFile encFile = new SalmonFile(file);
         encFile.EncryptionKey = key;
         encFile.RequestedNonce = nonce;
         Stream stream = encFile.GetOutputStream();
@@ -180,7 +177,7 @@ public class Sample
         stream.Close();
 
         // Decrypt the file
-        SalmonFile encFile2 = new SalmonFile(new DotNetFile(testFile), null);
+        SalmonFile encFile2 = new SalmonFile(file);
         encFile2.EncryptionKey = key;
         Stream stream2 = encFile2.GetInputStream();
         byte[] decBuff = new byte[1024];
@@ -193,20 +190,17 @@ public class Sample
         Console.WriteLine();
     }
 
-    private static void CreateDriveAndImportFile(string password)
+    private static void CreateDriveAndImportFile(IRealFile vaultDir, IRealFile[] filesToImport)
     {
         // create a file sequencer:
         SalmonFileSequencer sequencer = CreateSequencer();
 
         // create a drive
-        string vaultName = "vault_" + BitConverter.ToHex(SalmonGenerator.GetSecureRandomBytes(6));
-        DotNetFile vaultDir = new DotNetFile(vaultName);
         SalmonDrive drive = DotNetDrive.Create(vaultDir, password, sequencer);
         SalmonFileCommander commander = new SalmonFileCommander(256 * 1024, 256 * 1024, 2);
 
         // import multiple files
-        DotNetFile[] files = new DotNetFile[] { new DotNetFile("data/file.txt") };
-        commander.ImportFiles(files, drive.Root, false, true,
+        SalmonFile[] filesImported = commander.ImportFiles(filesToImport, drive.Root, false, true,
                 (taskProgress) =>
                 {
                     Console.WriteLine("file importing: " + taskProgress.File.BaseName + ": "
@@ -215,18 +209,23 @@ public class Sample
                 {
                     // file failed to import
                 });
+	
+		Console.WriteLine("Files imported");
 
         // query for the file from the drive
-        SalmonFile file = drive.Root.GetChild("file.txt");
+        SalmonDrive root = drive.getRoot();
+        SalmonFile[] files = root.listFiles();
 
-        // read from the stream with parallel threads and caching
+        // read from a native stream wrapper with parallel threads and caching
+		// or use file.getInputStream() to get a low level RandomAccessStream
+		SalmonFile file = files[0];
         SalmonFileInputStream inputStream = new SalmonFileInputStream(file, 
             4, 4 * 1024 * 1024, 2, 256 * 1024);
         // inputStream.read(...);
         inputStream.Close();
 
-        // export the file
-        commander.ExportFiles(new SalmonFile[] { file }, new DotNetFile("output"), false, true,
+        // export the files
+        IRealFile[] filesExported = commander.ExportFiles(files, new DotNetFile("output"), false, true,
                 (taskProgress) =>
                 {
                     try
@@ -242,6 +241,8 @@ public class Sample
                 {
                     // file failed to import
                 });
+
+		Console.WriteLine("Files exported");
 
         // close the file commander
         commander.Close();
