@@ -615,10 +615,10 @@ public abstract class SalmonDrive extends VirtualDrive {
      * @return The file on the real filesystem.
      */
     public IRealFile getExportDir() {
-        IRealFile virtualThumbnailsRealDir = realRoot.getChild(exportDirectoryName);
-        if (virtualThumbnailsRealDir == null || !virtualThumbnailsRealDir.exists())
-            virtualThumbnailsRealDir = realRoot.createDirectory(exportDirectoryName);
-        return virtualThumbnailsRealDir;
+        IRealFile exportDir = realRoot.getChild(exportDirectoryName);
+        if (exportDir == null || !exportDir.exists())
+            exportDir = realRoot.createDirectory(exportDirectoryName);
+        return exportDir;
     }
 
     /**

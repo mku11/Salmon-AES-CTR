@@ -305,7 +305,7 @@ public class SalmonFile : IVirtualFile
         // check if we have an existing iv in the header
         byte[] nonceBytes = FileNonce;
         if (nonceBytes != null && !AllowOverwrite)
-            throw new SalmonSecurityException("You should not overwrite existing files for security instead delete the existing file and create a new file. If this is a new file and you want to use parallel streams you can   this with SetAllowOverwrite(true)");
+            throw new SalmonSecurityException("You should not overwrite existing files for security instead delete the existing file and create a new file. If this is a new file and you want to use parallel streams call SetAllowOverwrite(true)");
 
         if (nonceBytes == null)
             CreateHeader(nonce);

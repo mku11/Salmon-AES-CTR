@@ -201,8 +201,7 @@ class SalmonFile(IVirtualFile):
         if nonce_bytes is not None and not self.__overwrite:
             raise SalmonSecurityException(
                 "You should not overwrite existing files for security instead delete the existing file and create a "
-                "new file. If this is a new file and you want to use parallel streams you can do "
-                "this with set_allow_overwrite(True)")
+                "new file. If this is a new file and you want to use parallel streams call set_allow_overwrite(True)")
 
         if nonce_bytes is None:
             self.__create_header(nonce)

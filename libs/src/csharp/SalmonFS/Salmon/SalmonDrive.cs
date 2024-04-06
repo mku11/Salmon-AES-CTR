@@ -568,10 +568,10 @@ public abstract class SalmonDrive : VirtualDrive
     {
         get
         {
-            IRealFile virtualThumbnailsRealDir = RealRoot.GetChild(ExportDirectoryName);
-            if (virtualThumbnailsRealDir == null || !virtualThumbnailsRealDir.Exists)
-                virtualThumbnailsRealDir = RealRoot.CreateDirectory(ExportDirectoryName);
-            return virtualThumbnailsRealDir;
+            IRealFile exportDir = RealRoot.GetChild(ExportDirectoryName);
+            if (exportDir == null || !exportDir.Exists)
+                exportDir = RealRoot.CreateDirectory(ExportDirectoryName);
+            return exportDir;
         }
     }
 

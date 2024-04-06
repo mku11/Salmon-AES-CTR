@@ -325,10 +325,10 @@ class SalmonDrive(VirtualDrive, ABC):
          * Return the default external export dir that all file can be exported to.
          * @return The file on the real filesystem.
         """
-        virtual_thumbnails_real_dir: IRealFile = self.__realRoot.get_child(SalmonDrive.__exportDirectoryName)
-        if virtual_thumbnails_real_dir is None or not virtual_thumbnails_real_dir.exists():
-            virtual_thumbnails_real_dir = self.__realRoot.create_directory(SalmonDrive.__exportDirectoryName)
-        return virtual_thumbnails_real_dir
+        export_dir: IRealFile = self.__realRoot.get_child(SalmonDrive.__exportDirectoryName)
+        if export_dir is None or not export_dir.exists():
+            export_dir = self.__realRoot.create_directory(SalmonDrive.__exportDirectoryName)
+        return export_dir
 
     def __get_drive_config(self) -> SalmonDriveConfig | None:
         """
