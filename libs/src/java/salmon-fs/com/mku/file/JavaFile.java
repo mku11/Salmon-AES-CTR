@@ -56,6 +56,7 @@ public class JavaFile implements IRealFile {
     public IRealFile createDirectory(String dirName) {
         String nDirPath = filePath + File.separator + dirName;
         File file = new File(nDirPath);
+        file.mkdirs();
         JavaFile dotNetDir = new JavaFile(nDirPath);
         return dotNetDir;
     }

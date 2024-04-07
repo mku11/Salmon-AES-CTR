@@ -42,11 +42,12 @@ def main():
     # use the password to create a drive and import a file
     vault_path: str = "vault_" + BitConverter.to_hex(SalmonGenerator.get_secure_random_bytes(6))
     vault_dir: PyFile = PyFile(vault_path)
+    vault_dir.mkdir()
     files_to_import: list[PyFile] = [PyFile("data/file.txt")]
     create_drive_and_import_file(vault_dir, files_to_import)
 
     # or encrypt text into a standalone file without a drive:
-    file_path: str = "vault_" + BitConverter.to_hex(SalmonGenerator.get_secure_random_bytes(6))
+    file_path: str = "data_" + BitConverter.to_hex(SalmonGenerator.get_secure_random_bytes(6))
     file: PyFile = PyFile(file_path)
     encrypt_and_decrypt_text_to_file(file)
 
@@ -219,7 +220,7 @@ def create_drive_and_import_file(vault_dir: IRealFile, files_to_import: list[IRe
     input_stream.close()
 
     # export the files
-    files_exported: list[IRealFile] = commander.export_files(files, PyFile("output"), False, True,
+    files_exported: list[IRealFile] = commander.export_files(files, drive.get_export_dir(), False, True,
                                                              export_progress, IRealFile.auto_rename,
                                                              salmon_file_failed_to_export)
 

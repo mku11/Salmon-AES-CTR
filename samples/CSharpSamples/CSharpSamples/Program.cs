@@ -33,11 +33,12 @@ public class Sample
         // use the password to create a drive and import a file
 		string vaultPath = "vault_" + BitConverter.ToHex(SalmonGenerator.GetSecureRandomBytes(6));
         DotNetFile vaultDir = new DotNetFile(vaultPath);
+		vaultDir.Mkdir();
 		DotNetFile[] filesToImport = new DotNetFile[] { new DotNetFile("data/file.txt") };
         CreateDriveAndImportFile(vaultDir, filesToImport);
 
         // or encrypt text into a standalone file without a drive:
-		string filePath = "vault_" + BitConverter.ToHex(SalmonGenerator.GetSecureRandomBytes(6));
+		string filePath = "data_" + BitConverter.ToHex(SalmonGenerator.GetSecureRandomBytes(6));
 		DotNetFile file = new DotNetFile(filePath);
         EncryptAndDecryptTextToFile(file);
 		
@@ -212,8 +213,8 @@ public class Sample
 		Console.WriteLine("Files imported");
 
         // query for the file from the drive
-        SalmonDrive root = drive.getRoot();
-        SalmonFile[] files = root.listFiles();
+        SalmonFile root = drive.Root;
+        SalmonFile[] files = root.ListFiles();
 
         // read from a native stream wrapper with parallel threads and caching
 		// or use file.getInputStream() to get a low level RandomAccessStream
@@ -224,7 +225,7 @@ public class Sample
         inputStream.Close();
 
         // export the files
-        IRealFile[] filesExported = commander.ExportFiles(files, new DotNetFile("output"), false, true,
+        IRealFile[] filesExported = commander.ExportFiles(files, drive.ExportDir, false, true,
                 (taskProgress) =>
                 {
                     try

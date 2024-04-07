@@ -25,6 +25,7 @@ public class Main {
     static String text = "This is plaintext that will be encrypted";
     static byte[] data = new byte[2 * 1024 * 1024];
     static String password = "MYS@LMONP@$$WORD";
+
     static {
         // some random data to encrypt
         Random r = new Random();
@@ -37,18 +38,19 @@ public class Main {
         // SalmonStream.setAesProviderType(ProviderType.AesIntrinsics);
 
         // use the password to create a drive and import the file
-		String vaultPath = "vault_" + BitConverter.toHex(SalmonGenerator.getSecureRandomBytes(6));
+        String vaultPath = "vault_" + BitConverter.toHex(SalmonGenerator.getSecureRandomBytes(6));
         JavaFile vaultDir = new JavaFile(vaultPath);
-		JavaFile[] filesToImport = new JavaFile[] { new JavaFile("data/file.txt") };
+		vaultDir.mkdir();
+        JavaFile[] filesToImport = new JavaFile[]{new JavaFile("data/file.txt")};
         createDriveAndImportFile(vaultDir, filesToImport);
-		
-		// or encrypt text into a standalone file without a drive:
-		string filePath = "vault_" + BitConverter.toHex(SalmonGenerator.getSecureRandomBytes(6));
-		JavaFile file = new JavaFile(filePath);
+
+        // or encrypt text into a standalone file without a drive:
+        String filePath = "data_" + BitConverter.toHex(SalmonGenerator.getSecureRandomBytes(6));
+        JavaFile file = new JavaFile(filePath);
         encryptAndDecryptTextToFile(file);
-        
-		// misc stream samples
-		streamSamples();
+
+        // misc stream samples
+        streamSamples();
     }
 
     private static byte[] getKeyFromPassword(String password) {
@@ -81,13 +83,13 @@ public class Main {
         byte[] nonce = SalmonGenerator.getSecureRandomBytes(8);
 
         // encrypt a byte array using 2 threads
-		SalmonEncryptor encryptor = new SalmonEncryptor(2);
+        SalmonEncryptor encryptor = new SalmonEncryptor(2);
         byte[] encBytes = encryptor.encrypt(bytes, key, nonce, false);
         System.out.println("Encrypted bytes: " + BitConverter.toHex(encBytes).substring(0, 24) + "...");
         encryptor.close();
 
         // decrypt byte array using 2 threads
-		SalmonDecryptor decryptor = new SalmonDecryptor(2);
+        SalmonDecryptor decryptor = new SalmonDecryptor(2);
         byte[] decBytes = decryptor.decrypt(encBytes, key, nonce, false);
         System.out.println("Decrypted bytes: " + BitConverter.toHex(decBytes).substring(0, 24) + "...");
         System.out.println();
@@ -153,18 +155,18 @@ public class Main {
         System.out.println();
     }
 
-    private static void encryptAndDecryptTextToFile(String text, byte[] key) throws IOException {
+    private static void encryptAndDecryptTextToFile(IRealFile file) throws IOException {
         // encrypt to a file, the SalmonFile has a virtual file system API
         System.out.println("Encrypting text to File: " + text);
         byte[] bytes = text.getBytes();
 
-		// derive the key from the password
-		byte[] key = getKeyFromPassword(password);
-		
+        // derive the key from the password
+        byte[] key = getKeyFromPassword(password);
+
         // Always request a new random secure nonce
         byte[] nonce = SalmonGenerator.getSecureRandomBytes(8); // 64 bit nonce
 
-        SalmonFile encFile = new SalmonFile(testFile);
+        SalmonFile encFile = new SalmonFile(file);
         encFile.setEncryptionKey(key);
         encFile.setRequestedNonce(nonce);
         RandomAccessStream stream = encFile.getOutputStream();
@@ -175,12 +177,12 @@ public class Main {
         stream.close();
 
         // Decrypt the file
-        SalmonFile encFile2 = new SalmonFile(testFile);
+        SalmonFile encFile2 = new SalmonFile(file);
         encFile2.setEncryptionKey(key);
         RandomAccessStream stream2 = encFile2.getInputStream();
 
         // read/decrypt data with a single call
-		byte[] decBuff = new byte[1024];
+        byte[] decBuff = new byte[1024];
         int encBytesRead = stream2.read(decBuff, 0, decBuff.length);
         String decString2 = new String(decBuff, 0, encBytesRead);
         System.out.println("Decrypted text: " + decString2);
@@ -204,23 +206,23 @@ public class Main {
                 }, IRealFile.autoRename, (file, ex) -> {
                     // file failed to import
                 });
-		
-		System.out.println("Files imported");
-		
+
+        System.out.println("Files imported");
+
         // query for the file from the drive
-        SalmonDrive root = drive.getRoot();
+        SalmonFile root = drive.getRoot();
         SalmonFile[] files = root.listFiles();
 
         // read from a native stream wrapper with parallel threads and caching
-		// or use file.getInputStream() to get a low level RandomAccessStream
-		SalmonFile file = files[0];
+        // or use file.getInputStream() to get a low level RandomAccessStream
+        SalmonFile file = files[0];
         SalmonFileInputStream inputStream = new SalmonFileInputStream(file,
                 4, 4 * 1024 * 1024, 2, 256 * 1024);
         // inputStream.read(...);
         inputStream.close();
 
         // export the file
-        IRealFile[] filesExported = commander.exportFiles(files, new JavaFile("output"), false, true,
+        IRealFile[] filesExported = commander.exportFiles(files, drive.getExportDir(), false, true,
                 (taskProgress) -> {
                     try {
                         System.out.println("file exporting: " + taskProgress.getFile().getBaseName() + ": "
@@ -231,8 +233,8 @@ public class Main {
                 }, IRealFile.autoRename, (sfile, ex) -> {
                     // file failed to import
                 });
-				
-		System.out.println("Files exported");
+
+        System.out.println("Files exported");
 
         // close the file commander
         commander.close();

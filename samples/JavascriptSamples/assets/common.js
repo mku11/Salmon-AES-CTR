@@ -195,7 +195,7 @@ export class Sample {
 		else if(vaultDir.constructor.name === 'JsHttpFile') // remote
 			drive = await JsHttpDrive.create(vaultDir, password, sequencer);
 		else if(vaultDir.constructor.name === 'JsNodeFile') { // node.js
-			const JsNodeDrive = await import('../lib/salmon-fs/salmon/drive/js_node_drive.js');
+			const { JsNodeDrive } = await import('../lib/salmon-fs/salmon/drive/js_node_drive.js');
 			drive = await JsNodeDrive.create(vaultDir, password, sequencer);
 		}
 		
@@ -250,9 +250,15 @@ export class Sample {
     static async createSequencer() {
         // create a file nonce sequencer and place it in a private space
         // make sure you never edit or back up this file.
-        let seqFilename = "sequencer.xml";
-        let privateDir = new JsLocalStorageFile(".");
-        let sequencerDir = await privateDir.getChild("SalmonSequencer");
+        let seqFilename = "sequencer.json";
+        let privateDir;
+		if (typeof process === 'object') { // node
+			const { JsNodeFile } = await import('../lib/salmon-fs/file/js_node_file.js');
+			privateDir = new JsNodeFile(process.env.LOCALAPPDATA);
+		} else { // browser
+			privateDir = new JsLocalStorageFile(".");
+		}
+        let sequencerDir = await privateDir.getChild("JsNodeSalmonSequencer");
         if (!await sequencerDir.exists())
             await sequencerDir.mkdir();
         let sequenceFile = await sequencerDir.getChild(seqFilename);
