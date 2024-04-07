@@ -99,10 +99,15 @@ class SalmonDrive(VirtualDrive, ABC):
             if not self.has_config():
                 # revert to original
                 self.__realRoot = original_real_root
+        if self.__realRoot is None:
+            raise Exception("Could not initialize root folder")
 
         virtual_root_real_file: IRealFile | None = self.__realRoot.get_child(SalmonDrive.__virtualDriveDirectoryName)
         if create_if_not_exists and (virtual_root_real_file is None or not virtual_root_real_file.exists()):
             virtual_root_real_file = self.__realRoot.create_directory(SalmonDrive.__virtualDriveDirectoryName)
+
+        if virtual_root_real_file is None:
+            raise Exception("Could not create directory for the virtual file system")
 
         self.__virtualRoot = self.get_file(virtual_root_real_file)
         self.__register_on_process_close()
