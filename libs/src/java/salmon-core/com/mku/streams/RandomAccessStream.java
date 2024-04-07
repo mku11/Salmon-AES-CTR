@@ -38,28 +38,28 @@ public abstract class RandomAccessStream {
     /**
      * True if the stream is readable.
      *
-     * @return
+     * @return True if readable
      */
     public abstract boolean canRead();
 
     /**
-     * True if the stream is writeable.
+     * True if the stream is writable.
      *
-     * @return
+     * @return True if writable
      */
     public abstract boolean canWrite();
 
     /**
      * True if the stream is seekable.
      *
-     * @return
+     * @return True if seekable
      */
     public abstract boolean canSeek();
 
     /**
      * Get the length of the stream.
      *
-     * @return
+     * @return The length
      */
     public abstract long length();
 
@@ -67,7 +67,7 @@ public abstract class RandomAccessStream {
      * Get the current position of the stream.
      *
      * @return The current position.
-     * @throws IOException
+     * @throws IOException Thrown if there is an IO error.
      */
     public abstract long getPosition() throws IOException;
 
@@ -75,7 +75,7 @@ public abstract class RandomAccessStream {
      * Change the current position of the stream.
      *
      * @param value The new position.
-     * @throws IOException
+     * @throws IOException Thrown if there is an IO error.
      */
     public abstract void setPosition(long value) throws IOException;
 
@@ -83,16 +83,16 @@ public abstract class RandomAccessStream {
      * Set the length of this stream.
      *
      * @param value The length.
-     * @throws IOException
+     * @throws IOException Thrown if there is an IO error.
      */
     public abstract void setLength(long value) throws IOException;
 
     /**
-     * @param buffer
-     * @param offset
+     * @param buffer The buffer to read into
+     * @param offset The offset to start reading into
      * @param count  The number of bytes that were read. If the stream reached the end return -1.
-     * @return
-     * @throws IOException
+     * @return The bytes read
+     * @throws IOException Thrown if there is an IO error.
      */
     public abstract int read(byte[] buffer, int offset, int count) throws IOException;
 
@@ -102,7 +102,7 @@ public abstract class RandomAccessStream {
      * @param buffer The buffer to read the contents from.
      * @param offset The position the reading will start from.
      * @param count  The count of bytes to be read from the buffer.
-     * @throws IOException
+     * @throws IOException Thrown if there is an IO error.
      */
     public abstract void write(byte[] buffer, int offset, int count) throws IOException;
 
@@ -112,7 +112,7 @@ public abstract class RandomAccessStream {
      * @param position The new position.
      * @param origin   The origin type.
      * @return The position after the seeking was complete.
-     * @throws IOException
+     * @throws IOException Thrown if there is an IO error.
      */
     public abstract long seek(long position, SeekOrigin origin) throws IOException;
 
@@ -124,7 +124,7 @@ public abstract class RandomAccessStream {
     /**
      * Close the stream and associated resources.
      *
-     * @throws IOException
+     * @throws IOException Thrown if there is an IO error.
      */
     public abstract void close() throws IOException;
 
@@ -132,7 +132,7 @@ public abstract class RandomAccessStream {
      * Write stream contents to another stream.
      *
      * @param stream The target stream.
-     * @throws IOException
+     * @throws IOException Thrown if there is an IO error.
      */
     public void copyTo(RandomAccessStream stream) throws IOException {
         copyTo(stream, 0, null);
@@ -143,7 +143,7 @@ public abstract class RandomAccessStream {
      *
      * @param stream           The target stream.
      * @param progressListener The listener to notify when progress changes.
-     * @throws IOException
+     * @throws IOException Thrown if there is an IO error.
      */
     public void copyTo(RandomAccessStream stream, BiConsumer<Long, Long> progressListener)
             throws IOException {
@@ -156,7 +156,7 @@ public abstract class RandomAccessStream {
      * @param stream           The target stream.
      * @param bufferSize       The buffer size to be used when copying.
      * @param progressListener The listener to notify when progress changes.
-     * @throws IOException
+     * @throws IOException Thrown if there is an IO error.
      */
     public void copyTo(RandomAccessStream stream, int bufferSize, BiConsumer<Long, Long> progressListener)
             throws IOException {

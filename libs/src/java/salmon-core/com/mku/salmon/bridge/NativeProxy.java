@@ -70,7 +70,7 @@ public class NativeProxy implements INativeProxy {
     /**
      * Proxy Init the native code with AES implementation, and hash length options.
      *
-     * @param aesImpl
+     * @param aesImpl AES implementation type (Aes Intrinsics = 1, TinyAES = 2)
      */
     public void salmonInit(int aesImpl) {
         loadLibrary();
@@ -95,7 +95,7 @@ public class NativeProxy implements INativeProxy {
      * Proxy Key schedule algorithm for expanding the 32 byte key to 240 bytes required
      *
      * @param key The key
-     * @param expandedKey
+     * @param expandedKey The expanded key
      */
     public void salmonExpandKey(byte[] key, byte[] expandedKey) {
         expandkey(key, expandedKey);
@@ -111,7 +111,7 @@ public class NativeProxy implements INativeProxy {
      * @param destBuffer The destination byte array.
      * @param destOffset The destination byte offset.
      * @param count The count of bytes to be transform.
-     * @return
+     * @return The transformed data.
      */
     public int salmonTransform(byte[] key, byte[] counter, byte[] srcBuffer, int srcOffset, byte[] destBuffer, int destOffset, int count) {
         return transform(key, counter, srcBuffer, srcOffset, destBuffer, destOffset, count);

@@ -31,11 +31,9 @@ import com.mku.streams.RandomAccessStream;
 import com.mku.salmon.SalmonDecryptor;
 import com.mku.salmon.SalmonEncryptor;
 import com.mku.salmon.SalmonGenerator;
-import com.mku.salmon.SalmonSecurityException;
 import com.mku.integrity.HmacSHA256Provider;
 import com.mku.integrity.IHashProvider;
 import com.mku.salmon.integrity.SalmonIntegrity;
-import com.mku.salmon.integrity.IntegrityException;
 import com.mku.salmon.streams.EncryptionMode;
 import com.mku.salmon.streams.ProviderType;
 import com.mku.salmon.streams.SalmonStream;
@@ -652,7 +650,7 @@ public class SalmonCoreTestHelper {
     }
 
     public static byte[] calculateHMAC(byte[] bytes, int offset, int length,
-                                       byte[] hashKey, byte[] includeData) throws IntegrityException, SalmonSecurityException {
+                                       byte[] hashKey, byte[] includeData) {
         SalmonIntegrity salmonIntegrity = new SalmonIntegrity(true, hashKey, null, new HmacSHA256Provider(),
                 SalmonGenerator.HASH_RESULT_LENGTH);
         return SalmonIntegrity.calculateHash(hashProvider, bytes, offset, length, hashKey, includeData);

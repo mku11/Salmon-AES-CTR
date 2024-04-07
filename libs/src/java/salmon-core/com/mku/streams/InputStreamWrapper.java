@@ -46,7 +46,7 @@ public class InputStreamWrapper extends InputStream {
      * Read a byte from the stream. Blocking is dependent on the base stream.
      *
      * @return -1 if there are no more bytes from the stream otherwise the next byte value (0-255).
-     * @throws IOException
+     * @throws IOException Thrown if there is an IO error.
      */
     @Override
     public int read() throws IOException {
@@ -81,7 +81,7 @@ public class InputStreamWrapper extends InputStream {
     /**
      * Closes the base stream.
      *
-     * @throws IOException
+     * @throws IOException Thrown if there is an IO error.
      */
     @Override
     public void close() throws IOException {
@@ -91,7 +91,7 @@ public class InputStreamWrapper extends InputStream {
     /**
      * Reset the stream.
      *
-     * @throws IOException
+     * @throws IOException Thrown if there is an IO error.
      */
     @Override
     public void reset() throws IOException {
@@ -102,8 +102,8 @@ public class InputStreamWrapper extends InputStream {
      * Skip number of bytes on the stream.
      *
      * @param pos the number of bytes to be skipped.
-     * @return
-     * @throws IOException
+     * @return The number of bytes that were skipped.
+     * @throws IOException Thrown if there is an IO error.
      */
     @Override
     public long skip(long pos) throws IOException {

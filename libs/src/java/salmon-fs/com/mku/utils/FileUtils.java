@@ -68,8 +68,8 @@ public class FileUtils {
 
     /**
      * Detect if filename is a pdf file.
-     * @param filename
-     * @return
+     * @param filename The file name
+     * @return True if pdf
      */
     public static boolean isPdf(String filename)
     {
@@ -80,7 +80,8 @@ public class FileUtils {
     /**
      * Return the extension of a filename.
      *
-     * @param fileName
+     * @param fileName The file name
+     * @return The file extension
      */
     public static String getExtensionFromFileName(String fileName) {
         if (fileName == null)
@@ -95,7 +96,8 @@ public class FileUtils {
     /**
      * Return a filename without extension
      *
-     * @param fileName
+     * @param fileName The file name
+     * @return The file name without extension
      */
     public static String getFileNameWithoutExtension(String fileName) {
         if (fileName == null)

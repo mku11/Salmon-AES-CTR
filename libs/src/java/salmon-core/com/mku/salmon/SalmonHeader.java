@@ -103,8 +103,8 @@ public class SalmonHeader {
     /**
      * Parse the header data from the stream
      * @param stream The stream.
-     * @return
-     * @throws IOException
+     * @return The header data.
+     * @throws IOException Thrown if there is an IO error.
      */
     public static SalmonHeader parseHeaderData(RandomAccessStream stream) throws IOException {
         SalmonHeader header = new SalmonHeader();

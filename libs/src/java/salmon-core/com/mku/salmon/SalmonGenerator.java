@@ -82,6 +82,7 @@ public class SalmonGenerator {
 
     /**
      * Gets the fixed magic bytes array
+     * @return The magic bytes
      */
     public static byte[] getMagicBytes() {
         return MAGIC_BYTES.getBytes(Charset.defaultCharset());
@@ -89,6 +90,7 @@ public class SalmonGenerator {
 
     /**
      * Returns the current Salmon format version.
+     * @return The version number
      */
     public static byte getVersion() {
         return VERSION;

@@ -23,11 +23,8 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 */
 
-import com.mku.salmon.integrity.IntegrityException;
-
 import javax.crypto.Mac;
 import javax.crypto.spec.SecretKeySpec;
-import java.io.IOException;
 
 /**
  * Provides HMAC SHA-256 hashing.
@@ -45,8 +42,7 @@ public class HmacSHA256Provider implements IHashProvider {
      * @throws IntegrityException thrown if hash cannot be calculated
      */
     @Override
-    public byte[] calc(byte[] hashKey, byte[] buffer, int offset, int count)
-            throws IntegrityException {
+    public byte[] calc(byte[] hashKey, byte[] buffer, int offset, int count) {
         try {
             Mac hmac = Mac.getInstance("HmacSHA256");
             SecretKeySpec secret_key = new SecretKeySpec(hashKey, "HmacSHA256");

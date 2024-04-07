@@ -90,6 +90,7 @@ public class SalmonDriveGenerator {
 
     /**
      * Generates the initial vector that will be used with the master key to encrypt the combined key (drive key + hash key)
+     * @return The master key initial vector
      */
     public static byte[] generateMasterKeyIV() {
         return SalmonGenerator.getSecureRandomBytes(IV_LENGTH);
@@ -131,7 +132,7 @@ public class SalmonDriveGenerator {
 
     /**
      * Set the default iterations.
-     * @param iterations
+     * @param iterations The iterations
      */
     public static void setIterations(int iterations) {
         SalmonDriveGenerator.iterations = iterations;

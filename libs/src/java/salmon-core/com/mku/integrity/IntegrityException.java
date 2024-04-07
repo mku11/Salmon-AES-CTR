@@ -1,4 +1,4 @@
-package com.mku.salmon.integrity;
+package com.mku.integrity;
 /*
 MIT License
 

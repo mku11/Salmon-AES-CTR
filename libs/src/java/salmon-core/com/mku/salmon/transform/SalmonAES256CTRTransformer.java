@@ -117,8 +117,8 @@ public abstract class SalmonAES256CTRTransformer implements ISalmonCTRTransforme
      * Initialize the transformer. Most common operations include precalculating expansion keys or
      * any other prior initialization for efficiency.
      * @param key The key
-     * @param nonce
-     * @throws SalmonSecurityException
+     * @param nonce The nonce
+     * @throws SalmonSecurityException Thrown if there is a security exception
      */
     public void init(byte[] key, byte[] nonce) {
         this.key = key;
@@ -127,7 +127,7 @@ public abstract class SalmonAES256CTRTransformer implements ISalmonCTRTransforme
 
     /**
      * Get the current Counter.
-     * @return
+     * @return The current counter
      */
     public byte[] getCounter() {
         if (this.counter == null)
@@ -137,7 +137,7 @@ public abstract class SalmonAES256CTRTransformer implements ISalmonCTRTransforme
 
     /**
      * Get the current block.
-     * @return
+     * @return The current block
      */
     public long getBlock() {
         return block;
@@ -145,7 +145,7 @@ public abstract class SalmonAES256CTRTransformer implements ISalmonCTRTransforme
 
     /**
      * Get the current encryption key.
-     * @return
+     * @return The encryption key
      */
     public byte[] getKey() {
         return key;
@@ -153,7 +153,7 @@ public abstract class SalmonAES256CTRTransformer implements ISalmonCTRTransforme
 
     /**
      * Get the expanded key if available.
-     * @return
+     * @return The expanded key
      */
     protected byte[] getExpandedKey() {
         return expandedKey;
@@ -161,7 +161,7 @@ public abstract class SalmonAES256CTRTransformer implements ISalmonCTRTransforme
 
     /**
      * Get the nonce (initial counter)
-     * @return
+     * @return The nonce
      */
     public byte[] getNonce() {
         return nonce;
@@ -169,7 +169,7 @@ public abstract class SalmonAES256CTRTransformer implements ISalmonCTRTransforme
 
     /**
      * Set the expanded key. This should be called once during initialization phase.
-     * @param expandedKey
+     * @param expandedKey The expanded key
      */
     public void setExpandedKey(byte[] expandedKey) {
         this.expandedKey = expandedKey;

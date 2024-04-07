@@ -27,7 +27,7 @@ import com.mku.integrity.IHashProvider;
 import com.mku.salmon.SalmonGenerator;
 import com.mku.salmon.SalmonSecurityException;
 import com.mku.salmon.transform.SalmonAES256CTRTransformer;
-
+import com.mku.integrity.IntegrityException;
 import java.util.LinkedList;
 import java.util.List;
 
@@ -76,7 +76,7 @@ public class SalmonIntegrity {
      *                  Use a positive number to specify integrity chunks.
      * @param provider  Hash implementation provider.
      * @param hashSize  The hash size.
-     * @throws IntegrityException When integrity is comprimised
+     * @throws IntegrityException Thrown if the data are corrupt or tampered with.
      * @throws SalmonSecurityException  When security has failed
      */
     public SalmonIntegrity(boolean integrity, byte[] key, Integer chunkSize,
@@ -110,7 +110,7 @@ public class SalmonIntegrity {
      * @param key         Key that will be used
      * @param includeData Additional data to be included in the calculation.
      * @return The hash.
-     * @throws IntegrityException
+     * @throws IntegrityException Thrown if the data are corrupt or tampered with.
      */
     //TODO: we should avoid the header data for performance?
     public static byte[] calculateHash(IHashProvider provider, byte[] buffer, int offset, int count,
@@ -138,7 +138,7 @@ public class SalmonIntegrity {
      *                   The length should be fixed value except for the last chunk which might be lesser since we don't use padding
      * @param hashOffset The hash key length that will be used as an offset.
      * @param hashLength The hash length.
-     * @return
+     * @return The total hash data length
      */
     public static long getTotalHashDataLength(long length, int chunkSize,
                                               int hashOffset, int hashLength) {
@@ -196,7 +196,7 @@ public class SalmonIntegrity {
      * @param buffer            The buffer containing the data chunks.
      * @param includeHeaderData Include the header data in the first chunk.
      * @return The hash signatures.
-     * @throws IntegrityException
+     * @throws IntegrityException Thrown if the data are corrupt or tampered with.
      */
     public byte[][] generateHashes(byte[] buffer, byte[] includeHeaderData) {
         if (!integrity)
@@ -232,8 +232,8 @@ public class SalmonIntegrity {
      *
      * @param hashes            The hashes to verify.
      * @param buffer            The buffer that contains the chunks to verify the hashes.
-     * @param includeHeaderData
-     * @throws IntegrityException
+     * @param includeHeaderData The header data to include
+     * @throws IntegrityException Thrown if the data are corrupt or tampered with.
      */
     public void verifyHashes(byte[][] hashes, byte[] buffer, byte[] includeHeaderData) {
         int chunk = 0;

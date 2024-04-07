@@ -24,7 +24,7 @@ SOFTWARE.
 */
 
 import com.mku.salmon.SalmonRangeExceededException;
-import com.mku.salmon.sequence.SequenceException;
+import com.mku.sequence.SequenceException;
 
 import java.io.IOException;
 
@@ -37,7 +37,7 @@ public interface INonceSequencer {
      * Create a sequence.
      * @param driveId The drive ID.
      * @param authId The authorization ID of the drive.
-     * @throws SequenceException
+     * @throws SequenceException Thrown if there is an error with the nonce sequence
      */
     void createSequence(String driveId, String authId);
 
@@ -47,8 +47,8 @@ public interface INonceSequencer {
      * @param authId The auth ID of the device for the drive.
      * @param startNonce The starting nonce.
      * @param maxNonce The maximum nonce.
-     * @throws SequenceException
-     * @throws IOException
+     * @throws SequenceException Thrown if there is an error with the nonce sequence
+     * @throws IOException Thrown if there is an IO error.
      */
     void initializeSequence(String driveId, String authId, byte[] startNonce, byte[] maxNonce) throws IOException;
 
@@ -58,8 +58,8 @@ public interface INonceSequencer {
      * @param driveId The drive ID.
      * @param authId The auth ID of the device for the drive.
      * @param maxNonce The maximum nonce.
-     * @throws SequenceException
-     * @throws IOException
+     * @throws SequenceException Thrown if there is an error with the nonce sequence
+     * @throws IOException Thrown if there is an IO error.
      */
     void setMaxNonce(String driveId, String authId, byte[] maxNonce) throws IOException;
 
@@ -68,15 +68,15 @@ public interface INonceSequencer {
      *
      * @param driveId The drive ID.
      * @return The next nonce.
-     * @throws SequenceException
-     * @throws SalmonRangeExceededException
+     * @throws SequenceException Thrown if there is an error with the nonce sequence
+     * @throws SalmonRangeExceededException Thrown if the nonce exceeds its range
      */
     byte[] nextNonce(String driveId);
 
     /**
      * Revoke the sequencer. This terminates the sequencer and de-authorizes the device
-     * @param driveId
-     * @throws SequenceException
+     * @param driveId The drive Id
+     * @throws SequenceException Thrown if there is an error with the nonce sequence
      */
     void revokeSequence(String driveId);
 
@@ -84,7 +84,7 @@ public interface INonceSequencer {
      * Get the sequence used for this drive.
      * @param driveId The drive ID.
      * @return The current sequence.
-     * @throws SequenceException
+     * @throws SequenceException Thrown if there is an error with the nonce sequence
      */
     NonceSequence getSequence(String driveId);
 

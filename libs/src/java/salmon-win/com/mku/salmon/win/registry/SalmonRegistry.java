@@ -45,7 +45,8 @@ public class SalmonRegistry
     /**
      * Read a value from the registry
      * @param key The key
-     * @return
+     * @param <T> The class value
+     * @return The value
      */
     @SuppressWarnings("unchecked")
     public <T> T read(String key)
@@ -56,7 +57,7 @@ public class SalmonRegistry
     /**
      * Write a value from the registry
      * @param key The key
-     * @param value
+     * @param value The value
      */
     public void write(String key, Object value)
     {
@@ -88,7 +89,7 @@ public class SalmonRegistry
     /**
      * True if value exists
      * @param key The key
-     * @return
+     * @return True if value exists
      */
     public boolean exists(String key){
         return Advapi32Util.registryValueExists(WinReg.HKEY_CURRENT_USER, SETTINGS_PATH, key);

@@ -27,7 +27,7 @@ import com.mku.file.IRealFile;
 import com.mku.salmon.win.registry.SalmonRegistry;
 import com.mku.sequence.INonceSequenceSerializer;
 import com.mku.salmon.sequence.SalmonFileSequencer;
-import com.mku.salmon.sequence.SequenceException;
+import com.mku.sequence.SequenceException;
 import com.sun.jna.platform.win32.Crypt32Util;
 
 import java.io.IOException;
@@ -49,7 +49,7 @@ public class WinFileSequencer extends SalmonFileSequencer
     }
     /**
      * Get the registry key to save the checksum.
-     * @return
+     * @return The key
      */
     public String getCheckSumKey() {
         return checkSumKey;
@@ -65,10 +65,11 @@ public class WinFileSequencer extends SalmonFileSequencer
 
     /**
      * Instantiate a windows file sequencer.
-     * @param sequenceFile
-     * @param serializer
-     * @throws SequenceException
-     * @throws IOException
+     * @param sequenceFile The sequence file
+     * @param serializer The serializer
+     * @param regCheckSumKey The registry key to use for the checksum.
+     * @throws SequenceException Thrown if there is an error with the nonce sequence
+     * @throws IOException Thrown if there is an IO error.
      */
     public WinFileSequencer(IRealFile sequenceFile, INonceSequenceSerializer serializer, String regCheckSumKey) throws IOException {
         super(sequenceFile, serializer);
@@ -79,8 +80,8 @@ public class WinFileSequencer extends SalmonFileSequencer
 
     /**
      * Gets the checksum the registry and verifies the contents.
-     * @return
-     * @throws SequenceException
+     * @return The contents
+     * @throws SequenceException Thrown if there is an error with the nonce sequence
      */
     @Override
     protected String getContents() {
@@ -105,8 +106,8 @@ public class WinFileSequencer extends SalmonFileSequencer
      * 	SHA256 but to further protected from rainbow attacks we also encrypt it
      * 	with the User windows credentials using ProtectedData.
      * 	from rainbow attacks
-     * @param contents
-     * @throws SequenceException
+     * @param contents The contents
+     * @throws SequenceException Thrown if there is an error with the nonce sequence
      */
     @Override
     protected void saveContents(String contents) {
@@ -124,7 +125,7 @@ public class WinFileSequencer extends SalmonFileSequencer
      * Get the checksum of the contents.
      * @param contents
      * @return
-     * @throws SequenceException
+     * @throws SequenceException Thrown if there is an error with the nonce sequence
      */
     private String getChecksum(String contents) {
         try {

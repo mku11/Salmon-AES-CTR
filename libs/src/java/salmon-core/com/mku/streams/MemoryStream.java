@@ -144,7 +144,7 @@ public class MemoryStream extends RandomAccessStream {
      * @param offset The offset of the buffer that will be used to write the bytes.
      * @param count  The length of the bytes that can be read from the stream and written to the buffer.
      * @return The number of bytes read.
-     * @throws IOException
+     * @throws IOException Thrown if there is an IO error.
      */
     @Override
     public int read(byte[] buffer, int offset, int count) throws IOException {

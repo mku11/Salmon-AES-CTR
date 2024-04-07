@@ -36,6 +36,7 @@ public class SalmonNativeTransformer extends SalmonAES256CTRTransformer {
 
     /**
      * The native proxy to use for loading libraries for different platforms and operating systems.
+     * @param proxy The proxy
      */
     public static void setNativeProxy(INativeProxy proxy) {
         nativeProxy = proxy;

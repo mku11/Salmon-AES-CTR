@@ -28,22 +28,11 @@ import com.mku.file.IVirtualFile;
 import com.mku.func.BiConsumer;
 import com.mku.func.Consumer;
 import com.mku.func.Function;
-import com.mku.salmon.SalmonAuthException;
 import com.mku.salmon.SalmonFile;
-import com.mku.salmon.SalmonRangeExceededException;
-import com.mku.salmon.SalmonSecurityException;
-import com.mku.salmon.integrity.IntegrityException;
-import com.mku.salmon.sequence.SequenceException;
 import com.mku.utils.FileCommander;
-import com.mku.utils.FileExporter;
-import com.mku.utils.FileImporter;
 import com.mku.utils.FileSearcher;
 
-import java.io.IOException;
-import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.HashMap;
-import java.util.concurrent.CancellationException;
 import java.util.stream.Collectors;
 
 /**
@@ -55,6 +44,7 @@ public class SalmonFileCommander extends FileCommander {
      *
      * @param importBufferSize The buffer size to use for importing files.
      * @param exportBufferSize The buffer size to use for exporting files.
+     * @param threads The threads to use for import and export
      */
     public SalmonFileCommander(int importBufferSize, int exportBufferSize, int threads) {
         super(new SalmonFileImporter(importBufferSize, threads),

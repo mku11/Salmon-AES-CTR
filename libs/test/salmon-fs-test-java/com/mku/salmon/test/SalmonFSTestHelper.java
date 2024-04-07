@@ -41,7 +41,7 @@ import com.mku.salmon.SalmonDrive;
 import com.mku.salmon.SalmonFile;
 import com.mku.salmon.streams.SalmonFileInputStream;
 import com.mku.salmon.sequence.SalmonFileSequencer;
-import com.mku.salmon.sequence.SequenceException;
+import com.mku.sequence.SequenceException;
 import com.mku.salmon.sequence.SalmonSequenceSerializer;
 import com.mku.salmon.utils.SalmonFileExporter;
 import com.mku.salmon.utils.SalmonFileImporter;
@@ -380,7 +380,7 @@ public class SalmonFSTestHelper {
             SalmonFileSequencer sequencer = new SalmonFileSequencer(seqFile, getSequenceSerializer()) {
                 @Override
                 public void initializeSequence(String driveId, String authId, byte[] startNonce, byte[] maxNonce)
-                        throws SequenceException, IOException {
+                        throws IOException {
                     long nMaxNonce = BitConverter.toLong(testMaxNonce, 0, SalmonGenerator.NONCE_LENGTH);
                     startNonce = BitConverter.toBytes(nMaxNonce + offset, SalmonGenerator.NONCE_LENGTH);
                     maxNonce = BitConverter.toBytes(nMaxNonce, SalmonGenerator.NONCE_LENGTH);
@@ -433,7 +433,7 @@ public class SalmonFSTestHelper {
         assertEquals(text, decText);
 
         // Example 3: encrypt data to an output stream
-        MemoryStream encOutStream = new MemoryStream(); // or any other writeable Stream like to a file
+        MemoryStream encOutStream = new MemoryStream(); // or any other writable Stream like to a file
         nonce = SalmonGenerator.getSecureRandomBytes(8); // always get a fresh nonce!
         // pass the output stream to the SalmonStream
         SalmonStream encryptor = new SalmonStream(key, nonce, EncryptionMode.Encrypt, encOutStream,
@@ -534,7 +534,7 @@ public class SalmonFSTestHelper {
         assertArrayEquals(tdata, buffer);
     }
 
-    public static void shouldTestFileSequencer() throws SequenceException, IOException, SalmonRangeExceededException {
+    public static void shouldTestFileSequencer() throws IOException {
         IRealFile file = new JavaFile(TEST_SEQUENCER_DIR + "\\" + TEST_SEQUENCER_FILENAME);
         if (file.exists())
             file.delete();

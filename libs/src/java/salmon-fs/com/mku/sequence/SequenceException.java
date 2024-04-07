@@ -1,4 +1,4 @@
-package com.mku.salmon.sequence;
+package com.mku.sequence;
 /*
 MIT License
 
@@ -29,7 +29,7 @@ SOFTWARE.
 public class SequenceException extends RuntimeException {
     /**
      * Construct an exception with a specific message.
-     * @param msg
+     * @param msg The message
      */
     public SequenceException(String msg) {
         super(msg);

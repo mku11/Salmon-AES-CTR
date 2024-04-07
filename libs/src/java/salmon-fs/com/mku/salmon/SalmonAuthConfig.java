@@ -25,7 +25,7 @@ SOFTWARE.
 
 import com.mku.convert.BitConverter;
 import com.mku.file.IRealFile;
-import com.mku.salmon.sequence.SequenceException;
+import com.mku.sequence.SequenceException;
 import com.mku.sequence.NonceSequence;
 import com.mku.streams.MemoryStream;
 import com.mku.streams.RandomAccessStream;
@@ -48,7 +48,7 @@ public class SalmonAuthConfig {
 
     /**
      * Get the drive ID to grant authorization for.
-     * @return
+     * @return The drive ID
      */
     public byte[] getDriveId() {
         return driveId;
@@ -56,15 +56,15 @@ public class SalmonAuthConfig {
 
     /**
      * Get the authorization ID for the target device.
-     * @return
+     * @return The authorization Id
      */
     public byte[] getAuthId() {
         return authId;
     }
 
     /**
-     * Get the nonce maximum value the target device will use.
-     * @return
+     * Get the nonce starting value the target device will use.
+     * @return The starting nonce
      */
     public byte[] getStartNonce() {
         return startNonce;
@@ -72,7 +72,7 @@ public class SalmonAuthConfig {
 
     /**
      * Get the nonce maximum value the target device will use.
-     * @return
+     * @return The maximum nonce
      */
     public byte[] getMaxNonce() {
         return maxNonce;
@@ -81,6 +81,7 @@ public class SalmonAuthConfig {
     /**
      * Instantiate a class with the properties of the authorization config file.
      * @param contents The byte array that contains the contents of the auth config file.
+     * @throws IOException Thrown if there is an IO error.
      */
     public SalmonAuthConfig(byte[] contents) throws IOException {
         MemoryStream ms = new MemoryStream(contents);
@@ -94,17 +95,19 @@ public class SalmonAuthConfig {
     /**
      * Write the properties of the auth configuration to a config file that will be imported by another device.
      * The new device will then be authorized editing operations ie: import, rename files, etc.
-     * @param authConfigFile
+     * @param authConfigFile The authorization configuration file
      * @param drive The drive you want to create an auth config for.
      * @param targetAuthId Authorization ID of the target device.
      * @param targetStartingNonce Starting nonce for the target device.
      * @param targetMaxNonce Maximum nonce for the target device.
-     * @throws Exception
+     * @param configNonce Nonce for the file itself
+     * @throws Exception Thrown if error occurs during writing the file
      */
     public static void writeAuthFile(IRealFile authConfigFile,
                                      SalmonDrive drive,
                                      byte[] targetAuthId,
-                                     byte[] targetStartingNonce, byte[] targetMaxNonce,
+                                     byte[] targetStartingNonce,
+                                     byte[] targetMaxNonce,
                                      byte[] configNonce) throws Exception {
         byte[] driveId = drive.getDriveId();
         if (driveId == null)
@@ -121,7 +124,7 @@ public class SalmonAuthConfig {
      * @param authId The auth id of the new device.
      * @param nextNonce The next nonce to be used by the new device.
      * @param maxNonce The max nonce to be used byte the new device.
-     * @throws Exception
+     * @throws Exception Thrown if error occurs during writing
      */
     public static void writeToStream(RandomAccessStream stream, byte[] driveId, byte[] authId,
                                      byte[] nextNonce, byte[] maxNonce) throws Exception {
@@ -148,10 +151,10 @@ public class SalmonAuthConfig {
 
     /**
      * Get the app drive pair configuration properties for this drive
-     *
+     * @param drive The drive
      * @param authFile The encrypted authorization file.
      * @return The decrypted authorization file.
-     * @throws Exception
+     * @throws Exception Thrown if error occurs during reading
      */
     public static SalmonAuthConfig getAuthConfig(SalmonDrive drive, IRealFile authFile) throws Exception {
         SalmonFile salmonFile = new SalmonFile(authFile, drive);
@@ -194,9 +197,9 @@ public class SalmonAuthConfig {
 
     /**
      * Import the device authorization file.
-     *
+     * @param drive The drive
      * @param authConfigFile The filepath to the authorization file.
-     * @throws Exception
+     * @throws Exception Thrown if error occurs during import
      */
     public static void importAuthFile(SalmonDrive drive, IRealFile authConfigFile) throws Exception {
         if (drive.getDriveId() == null)
@@ -221,9 +224,11 @@ public class SalmonAuthConfig {
 
 
     /**
+     * Export an authorization file for a drive and a specific device auth id.
+     * @param drive The drive
      * @param targetAuthId The authorization id of the target device.
      * @param file     The config file.
-     * @throws Exception
+     * @throws Exception Thrown if error occurs during export
      */
     public static void exportAuthFile(SalmonDrive drive, String targetAuthId, IRealFile file) throws Exception {
         if (drive.getDriveId() == null)

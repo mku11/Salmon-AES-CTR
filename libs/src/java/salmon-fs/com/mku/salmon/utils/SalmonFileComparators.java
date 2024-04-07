@@ -127,7 +127,7 @@ public class SalmonFileComparators {
     /**
      * Get default comparator. This is the fastest sorting comparator as it simply lists folders first.
      * The rest of the files will be listed without sorting.
-     * @return
+     * @return The default comparator
      */
     public static Comparator<SalmonFile> getDefaultComparator() {
         return defaultComparator;
@@ -135,7 +135,7 @@ public class SalmonFileComparators {
 
     /**
      * Get Filename Ascending Comparator.
-     * @return
+     * @return The filename scending comparator.
      */
     public static Comparator<SalmonFile> getFilenameAscComparator() {
         return filenameAscComparator;
@@ -143,7 +143,7 @@ public class SalmonFileComparators {
 
     /**
      * Get Filename Descending Comparator.
-     * @return
+     * @return filename descending comparator
      */
     public static Comparator<SalmonFile> getFilenameDescComparator() {
         return filenameDescComparator;
@@ -151,7 +151,7 @@ public class SalmonFileComparators {
 
     /**
      * Get Size Ascending Comparator.
-     * @return
+     * @return The size ascending comparator
      */
     public static Comparator<SalmonFile> getSizeAscComparator() {
         return sizeAscComparator;
@@ -159,7 +159,7 @@ public class SalmonFileComparators {
 
     /**
      * Get Size Descending Comparator.
-     * @return
+     * @return The size descending comparator
      */
     public static Comparator<SalmonFile> getSizeDescComparator() {
         return sizeDescComparator;
@@ -167,7 +167,7 @@ public class SalmonFileComparators {
 
     /**
      * Get File Type Ascending Comparator.
-     * @return
+     * @return The file type ascending comparator
      */
     public static Comparator<SalmonFile> getTypeAscComparator() {
         return typeAscComparator;
@@ -175,7 +175,7 @@ public class SalmonFileComparators {
 
     /**
      * Get File Type Descending Comparator.
-     * @return
+     * @return The file type descending comparator
      */
     public static Comparator<SalmonFile> getTypeDescComparator() {
         return typeDescComparator;
@@ -183,7 +183,7 @@ public class SalmonFileComparators {
 
     /**
      * Get Date Ascending Comparator.
-     * @return
+     * @return The date ascending comparator
      */
     public static Comparator<SalmonFile> getDateAscComparator() {
         return dateAscComparator;
@@ -191,7 +191,7 @@ public class SalmonFileComparators {
 
     /**
      * Get Date Descending Comparator.
-     * @return
+     * @return The date descending comparator
      */
     public static Comparator<SalmonFile> getDateDescComparator() {
         return dateDescComparator;
@@ -200,7 +200,7 @@ public class SalmonFileComparators {
     /**
      * Get Relevant Comparator. This will sort by the search result relevancy in the Tag member. Most relevant results
      * will be listed first.
-     * @return
+     * @return The relevancy comparator
      */
     public static Comparator<SalmonFile> getRelevanceComparator() {
         return relevanceComparator;
@@ -208,8 +208,8 @@ public class SalmonFileComparators {
 
     /**
      * Get the SalmonFile basename if available.
-     * @param salmonFile
-     * @return
+     * @param salmonFile The file
+     * @return The base name
      */
     private static String tryGetBasename(SalmonFile salmonFile) {
         try {
@@ -223,7 +223,7 @@ public class SalmonFileComparators {
     /**
      * Get the SalmonFile file type extension if available.
      * @param salmonFile
-     * @return
+     * @return The file type
      */
     private static String tryGetType(SalmonFile salmonFile) {
         try {
@@ -238,8 +238,8 @@ public class SalmonFileComparators {
 
     /**
      * Get the SalmonFile size if available.
-     * @param salmonFile
-     * @return
+     * @param salmonFile The file
+     * @return The size
      */
     private static long tryGetSize(SalmonFile salmonFile) {
         try {
@@ -257,8 +257,8 @@ public class SalmonFileComparators {
 
     /**
      * Get the SalmonFile date if available.
-     * @param salmonFile
-     * @return
+     * @param salmonFile The file
+     * @return The date in milliseconds
      */
     private static long tryGetDate(SalmonFile salmonFile) {
         try {

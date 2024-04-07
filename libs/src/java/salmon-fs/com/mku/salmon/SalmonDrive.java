@@ -31,17 +31,16 @@ import com.mku.streams.MemoryStream;
 import com.mku.integrity.HmacSHA256Provider;
 import com.mku.integrity.IHashProvider;
 import com.mku.salmon.integrity.SalmonIntegrity;
-import com.mku.salmon.integrity.IntegrityException;
+import com.mku.integrity.IntegrityException;
 import com.mku.salmon.streams.EncryptionMode;
 import com.mku.salmon.streams.SalmonStream;
 import com.mku.salmon.password.SalmonPassword;
-import com.mku.salmon.sequence.SequenceException;
+import com.mku.sequence.SequenceException;
 import com.mku.sequence.INonceSequencer;
 import com.mku.sequence.NonceSequence;
 
 import java.io.IOException;
 import java.lang.reflect.Constructor;
-import java.util.Arrays;
 
 /**
  * Class provides an abstract virtual drive that can be extended for use with
@@ -69,27 +68,26 @@ public abstract class SalmonDrive extends VirtualDrive {
     /**
      * Initialize a virtual drive at the directory path provided
      *
-     * @param realRoot The root of the real directory
-	 * @param createIfNotExists Create the drive if it does not exist
+     * @param realRoot          The root of the real directory
+     * @param createIfNotExists Create the drive if it does not exist
      */
     public void initialize(IRealFile realRoot, boolean createIfNotExists) {
         close();
         if (realRoot == null)
             return;
         this.realRoot = realRoot;
-        if (!createIfNotExists && !hasConfig() && realRoot.getParent() != null && realRoot.getParent().exists())
-        {
+        if (!createIfNotExists && !hasConfig() && realRoot.getParent() != null && realRoot.getParent().exists()) {
             // try the parent if this is the filesystem folder 
             IRealFile originalRealRoot = this.realRoot;
             this.realRoot = this.realRoot.getParent();
             if (!hasConfig()) {
-				// revert to original
+                // revert to original
                 this.realRoot = originalRealRoot;
-			}
+            }
         }
         if (this.realRoot == null)
             throw new Error("Could not initialize root folder");
-		
+
         IRealFile virtualRootRealFile = this.realRoot.getChild(virtualDriveDirectoryName);
         if (createIfNotExists && (virtualRootRealFile == null || !virtualRootRealFile.exists())) {
             virtualRootRealFile = realRoot.createDirectory(virtualDriveDirectoryName);
@@ -132,8 +130,8 @@ public abstract class SalmonDrive extends VirtualDrive {
     public static void setExportDirectoryName(String exportDirectoryName) {
         SalmonDrive.exportDirectoryName = exportDirectoryName;
     }
-	
-	public static String getShareDirectoryName() {
+
+    public static String getShareDirectoryName() {
         return shareDirectoryName;
     }
 
@@ -150,6 +148,7 @@ public abstract class SalmonDrive extends VirtualDrive {
 
     /**
      * Return the default file chunk size
+     *
      * @return The default chunk size.
      */
     public int getDefaultFileChunkSize() {
@@ -158,7 +157,8 @@ public abstract class SalmonDrive extends VirtualDrive {
 
     /**
      * Set the default file chunk size to be used with hash integrity.
-     * @param fileChunkSize
+     *
+     * @param fileChunkSize The file chunk size
      */
     public void setDefaultFileChunkSize(int fileChunkSize) {
         defaultFileChunkSize = fileChunkSize;
@@ -166,7 +166,8 @@ public abstract class SalmonDrive extends VirtualDrive {
 
     /**
      * Return the encryption key that is used for encryption / decryption
-     * @return
+     *
+     * @return The drive key
      */
     public SalmonDriveKey getKey() {
         return key;
@@ -174,12 +175,13 @@ public abstract class SalmonDrive extends VirtualDrive {
 
     /**
      * Change the user password.
+     *
      * @param pass The new password.
-     * @throws IOException
-     * @throws SalmonAuthException
-     * @throws SalmonSecurityException
-     * @throws IntegrityException
-     * @throws SequenceException
+     * @throws IOException             Thrown if there is an IO error.
+     * @throws SalmonAuthException     Thrown if there is an Authorization error
+     * @throws SalmonSecurityException Thrown if there is a security exception
+     * @throws IntegrityException      Thrown if the data are corrupt or tampered with.
+     * @throws SequenceException       Thrown if there is an error with the nonce sequence
      */
     public void setPassword(String pass) throws IOException {
         synchronized (this) {
@@ -206,7 +208,12 @@ public abstract class SalmonDrive extends VirtualDrive {
      * Set the drive location to an external directory.
      * This requires you previously use SetDriveClass() to provide a class for the drive
      *
-     * @param dir The directory path that will be used for storing the contents of the drive
+     * @param dir            The directory path that will be used for storing the contents of the drive
+     * @param driveClassType The class type of the drive to open (ie: JavaDrive.class)
+     * @param password       The password
+     * @param sequencer      The sequencer to use for this drive
+     * @return The drive
+     * @throws IOException Thrown if there is an IO error.
      */
     public static SalmonDrive openDrive(IRealFile dir, Class<?> driveClassType,
                                         String password, INonceSequencer sequencer)
@@ -222,11 +229,14 @@ public abstract class SalmonDrive extends VirtualDrive {
     /**
      * Create a new drive in the provided location.
      *
-     * @param dir  Directory to store the drive configuration and virtual filesystem.
-     * @param password Master password to encrypt the drive configuration.
+     * @param dir            Directory to store the drive configuration and virtual filesystem.
+     * @param driveClassType The class type of the drive to create (ie: JavaDrive.class)
+     * @param password       The password
+     * @param sequencer      The sequencer to use for this drive
      * @return The newly created drive.
-     * @throws IntegrityException
-     * @throws SequenceException
+     * @throws IntegrityException Thrown if the data are corrupt or tampered with.
+     * @throws SequenceException  Thrown if there is an error with the nonce sequence
+     * @throws IOException        Thrown if there is an IO error.
      */
     public static SalmonDrive createDrive(IRealFile dir, Class<?> driveClassType,
                                           String password, INonceSequencer sequencer) throws IOException {
@@ -240,10 +250,10 @@ public abstract class SalmonDrive extends VirtualDrive {
     /**
      * Create a drive instance.
      *
-     * @param dir The target directory where the drive is located.
+     * @param dir               The target directory where the drive is located.
      * @param createIfNotExists Create the drive if it does not exist
      * @return
-     * @throws SalmonSecurityException
+     * @throws SalmonSecurityException Thrown if there is a security exception
      */
     private static SalmonDrive createDriveInstance(IRealFile dir, boolean createIfNotExists,
                                                    Class<?> driveClassType, INonceSequencer sequencer) {
@@ -286,7 +296,7 @@ public abstract class SalmonDrive extends VirtualDrive {
     /**
      * Get the default auth config filename.
      *
-     * @return
+     * @return The default auth config filename
      */
     public static String getDefaultAuthConfigFilename() {
         return SalmonDrive.getAuthConfigFilename();
@@ -294,8 +304,8 @@ public abstract class SalmonDrive extends VirtualDrive {
 
     /**
      * @param targetAuthId The authorization id of the target device.
-     * @param file     The config file.
-     * @throws Exception
+     * @param file         The config file.
+     * @throws Exception Thrown if error during exporting
      */
     public void exportAuthFile(String targetAuthId, IRealFile file) throws Exception {
         if (this.getDriveId() == null)
@@ -307,14 +317,14 @@ public abstract class SalmonDrive extends VirtualDrive {
         if (sequence == null)
             throw new Exception("Device is not authorized to export");
 
-        if(file.exists() && file.length() > 0) {
+        if (file.exists() && file.length() > 0) {
             RandomAccessStream outStream = null;
             try {
                 outStream = file.getOutputStream();
                 outStream.setLength(0);
-            } catch(Exception ex) {
+            } catch (Exception ex) {
             } finally {
-                if(outStream != null)
+                if (outStream != null)
                     outStream.close();
             }
         }
@@ -324,9 +334,9 @@ public abstract class SalmonDrive extends VirtualDrive {
         byte[] nextNonce = sequence.getNextNonce();
         if (nextNonce == null)
             throw new SequenceException("Could not get next nonce");
-        byte[] pivotNonce  = SalmonNonce.splitNonceRange(nextNonce, maxNonce);
+        byte[] pivotNonce = SalmonNonce.splitNonceRange(nextNonce, maxNonce);
         String authId = sequence.getAuthId();
-        if(authId == null)
+        if (authId == null)
             throw new SequenceException("Could not get auth id");
 
         sequencer.setMaxNonce(sequence.getId(), sequence.getAuthId(), pivotNonce);
@@ -372,10 +382,9 @@ public abstract class SalmonDrive extends VirtualDrive {
      * by the current device. Warning: If you need to authorize write operations to the device again you will need
      * to have another device to export an authorization config file and reimport it.
      *
-     * @throws Exception
      * @see <a href="https://github.com/mku11/Salmon-AES-CTR#readme">Salmon README.md</a>
      */
-    public void revokeAuthorization() throws Exception {
+    public void revokeAuthorization() {
         byte[] driveId = this.getDriveId();
         this.sequencer.revokeSequence(BitConverter.toHex(driveId));
     }
@@ -384,9 +393,9 @@ public abstract class SalmonDrive extends VirtualDrive {
     /**
      * Get the authorization ID for the current device.
      *
-     * @return
-     * @throws SequenceException
-     * @throws SalmonAuthException
+     * @return The authorization id.
+     * @throws SequenceException   Thrown if there is an error with the nonce sequence
+     * @throws SalmonAuthException Thrown if there is an Authorization error
      */
     public String getAuthId() {
         return BitConverter.toHex(this.getAuthIdBytes());
@@ -467,21 +476,22 @@ public abstract class SalmonDrive extends VirtualDrive {
             createSequence(driveId, authId);
             initSequence(driveId, authId);
         }
-		initFS();
+        initFS();
     }
 
     /**
      * Return the virtual root directory of the drive.
-     * @return
-     * @throws SalmonAuthException
+     *
+     * @return The virtual root directory of the drive
+     * @throws SalmonAuthException Thrown if there is an Authorization error
      */
     public SalmonFile getRoot() {
         if (realRoot == null || !realRoot.exists())
             return null;
         return virtualRoot;
     }
-	
-	protected IRealFile getRealRoot() {
+
+    protected IRealFile getRealRoot() {
         return realRoot;
     }
 
@@ -530,10 +540,10 @@ public abstract class SalmonDrive extends VirtualDrive {
             // set the combined key (drive key + hash key) and the drive nonce
             setKey(masterKey, driveKey, hashKey, iterations);
             this.driveId = driveId;
-			initFS();
+            initFS();
             onUnlockSuccess();
         } catch (RuntimeException | IOException ex) {
-			onUnlockError();
+            onUnlockError();
             throw ex;
         } finally {
             if (stream != null)
@@ -543,9 +553,10 @@ public abstract class SalmonDrive extends VirtualDrive {
 
     /**
      * Sets the key properties.
-     * @param masterKey The master key.
-     * @param driveKey The drive key used for enc/dec of files and filenames.
-     * @param hashKey The hash key used for data integrity.
+     *
+     * @param masterKey  The master key.
+     * @param driveKey   The drive key used for enc/dec of files and filenames.
+     * @param hashKey    The hash key used for data integrity.
      * @param iterations
      */
     private void setKey(byte[] masterKey, byte[] driveKey, byte[] hashKey, int iterations) {
@@ -572,6 +583,7 @@ public abstract class SalmonDrive extends VirtualDrive {
 
     /**
      * Get the next nonce from the sequencer. This advanced the sequencer so unique nonce are used.
+     *
      * @return The next nonce
      */
     byte[] getNextNonce() {
@@ -585,8 +597,10 @@ public abstract class SalmonDrive extends VirtualDrive {
     /**
      * Get the byte contents of a file from the real filesystem.
      *
-     * @param file The file
+     * @param file       The file
      * @param bufferSize The buffer to be used when reading
+     * @return The contents of the file
+     * @throws IOException Thrown if there is an IO error.
      */
     public byte[] getBytesFromRealFile(IRealFile file, int bufferSize) throws IOException {
         RandomAccessStream stream = file.getInputStream();
@@ -612,6 +626,7 @@ public abstract class SalmonDrive extends VirtualDrive {
 
     /**
      * Return the default external export dir that all file can be exported to.
+     *
      * @return The file on the real filesystem.
      */
     public IRealFile getExportDir() {
@@ -623,6 +638,9 @@ public abstract class SalmonDrive extends VirtualDrive {
 
     /**
      * Return the configuration properties of this drive.
+     *
+     * @return The drive configuration.
+     * @throws IOException Thrown if there is an IO error.
      */
     protected SalmonDriveConfig getDriveConfig() throws IOException {
         IRealFile configFile = getDriveConfigFile();
@@ -635,13 +653,14 @@ public abstract class SalmonDrive extends VirtualDrive {
 
     /**
      * Return true if the drive is already created and has a configuration file.
+     * @return True if already created
      */
     public boolean hasConfig() {
         SalmonDriveConfig salmonConfig;
         try {
             salmonConfig = getDriveConfig();
         } catch (Exception ex) {
-			ex.printStackTrace();
+            ex.printStackTrace();
             return false;
         }
         return salmonConfig != null;
@@ -649,7 +668,8 @@ public abstract class SalmonDrive extends VirtualDrive {
 
     /**
      * Get the drive ID.
-     * @return
+     *
+     * @return The drive ID
      */
     public byte[] getDriveId() {
         return driveId;
@@ -670,11 +690,11 @@ public abstract class SalmonDrive extends VirtualDrive {
     /**
      * Get the nonce sequencer used for the current drive.
      *
-     * @return
+     * @return The nonce sequencer
      */
     public INonceSequencer getSequencer() {
-        if(this.sequencer == null)
-        throw new Error("Could not find a sequencer");
+        if (this.sequencer == null)
+            throw new Error("Could not find a sequencer");
         return this.sequencer;
     }
 }

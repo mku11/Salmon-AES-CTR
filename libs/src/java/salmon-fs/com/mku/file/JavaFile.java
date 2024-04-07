@@ -66,7 +66,7 @@ public class JavaFile implements IRealFile {
      *
      * @param filename The name of the new file.
      * @return The newly created file.
-     * @throws IOException
+     * @throws IOException Thrown if there is an IO error.
      */
     public IRealFile createFile(String filename) throws IOException {
         String nFilePath = filePath + File.separator + filename;
@@ -121,7 +121,7 @@ public class JavaFile implements IRealFile {
      * Get a stream for reading the file.
      *
      * @return The stream to read from.
-     * @throws FileNotFoundException
+     * @throws FileNotFoundException Thrown if file not found
      */
     public RandomAccessStream getInputStream() throws FileNotFoundException {
         return new JavaFileStream(this, "r");
@@ -131,7 +131,7 @@ public class JavaFile implements IRealFile {
      * Get a stream for writing to this file.
      *
      * @return The stream to write to.
-     * @throws FileNotFoundException
+     * @throws FileNotFoundException Thrown if file not found
      */
     public RandomAccessStream getOutputStream() throws FileNotFoundException {
         return new JavaFileStream(this, "rw");
@@ -178,7 +178,7 @@ public class JavaFile implements IRealFile {
     /**
      * Get the last modified date on disk.
      *
-     * @return
+     * @return The last modified date in milliseconds
      */
     public long lastModified() {
         return new File(filePath).lastModified();
@@ -187,7 +187,7 @@ public class JavaFile implements IRealFile {
     /**
      * Get the size of the file on disk.
      *
-     * @return
+     * @return The length
      */
     public long length() {
         return new File(filePath).length();
@@ -196,7 +196,7 @@ public class JavaFile implements IRealFile {
     /**
      * Get the count of files and subdirectories
      *
-     * @return
+     * @return The children count
      */
     public int getChildrenCount() {
         return isDirectory() ? new File(filePath).listFiles().length : 0;
@@ -274,7 +274,7 @@ public class JavaFile implements IRealFile {
      *
      * @param newDir The target directory.
      * @return The copied file. Use this file for subsequent operations instead of the original.
-     * @throws IOException
+     * @throws IOException Thrown if there is an IO error.
      */
     @Override
     public IRealFile copy(IRealFile newDir) throws IOException {
@@ -287,7 +287,7 @@ public class JavaFile implements IRealFile {
      * @param newDir  The target directory.
      * @param newName New filename
      * @return The copied file. Use this file for subsequent operations instead of the original.
-     * @throws IOException
+     * @throws IOException Thrown if there is an IO error.
      */
     @Override
     public IRealFile copy(IRealFile newDir, String newName) throws IOException {
@@ -301,7 +301,7 @@ public class JavaFile implements IRealFile {
      * @param newName          New filename
      * @param progressListener Observer to notify when progress changes.
      * @return The copied file. Use this file for subsequent operations instead of the original.
-     * @throws IOException
+     * @throws IOException Thrown if there is an IO error.
      */
     @Override
     public IRealFile copy(IRealFile newDir, String newName, BiConsumer<Long, Long> progressListener) throws IOException {
@@ -324,7 +324,7 @@ public class JavaFile implements IRealFile {
      * Get the file or directory under this directory with the provided name.
      *
      * @param filename The name of the file or directory.
-     * @return
+     * @return The child
      */
     public IRealFile getChild(String filename) {
         if (isFile())

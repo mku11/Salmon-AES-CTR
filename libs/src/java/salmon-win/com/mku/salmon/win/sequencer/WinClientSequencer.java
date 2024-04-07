@@ -24,7 +24,7 @@ SOFTWARE.
 */
 
 import com.mku.sequence.INonceSequencer;
-import com.mku.salmon.sequence.SequenceException;
+import com.mku.sequence.SequenceException;
 import com.mku.sequence.NonceSequence;
 import com.sun.jna.platform.win32.AccCtrl;
 import com.sun.jna.platform.win32.Advapi32;

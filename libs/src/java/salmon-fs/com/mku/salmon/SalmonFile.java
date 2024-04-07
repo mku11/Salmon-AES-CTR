@@ -31,12 +31,12 @@ import com.mku.func.TriConsumer;
 import com.mku.streams.RandomAccessStream;
 import com.mku.convert.BitConverter;
 import com.mku.salmon.integrity.SalmonIntegrity;
-import com.mku.salmon.integrity.IntegrityException;
+import com.mku.integrity.IntegrityException;
 import com.mku.salmon.streams.EncryptionMode;
 import com.mku.salmon.streams.SalmonStream;
 import com.mku.salmon.text.SalmonTextDecryptor;
 import com.mku.salmon.text.SalmonTextEncryptor;
-import com.mku.salmon.sequence.SequenceException;
+import com.mku.sequence.SequenceException;
 
 import java.io.File;
 import java.io.IOException;
@@ -95,6 +95,7 @@ public class SalmonFile implements IVirtualFile {
 
     /**
      * Return the current chunk size requested that will be used for integrity
+     * @return The requested chunk size
      */
     public synchronized Integer getRequestedChunkSize() {
         return reqChunkSize;
@@ -116,8 +117,8 @@ public class SalmonFile implements IVirtualFile {
     /**
      * Get the custom {@link SalmonHeader} from this file.
      *
-     * @return
-     * @throws IOException
+     * @return The header
+     * @throws IOException Thrown if there is an IO error.
      */
     public SalmonHeader getHeader() throws IOException {
         if (!exists())
@@ -159,10 +160,10 @@ public class SalmonFile implements IVirtualFile {
     /**
      * Retrieves a SalmonStream that will be used for decrypting the file contents.
      *
-     * @return
-     * @throws IOException
-     * @throws SalmonSecurityException
-     * @throws IntegrityException
+     * @return The input stream
+     * @throws IOException Thrown if there is an IO error.
+     * @throws SalmonSecurityException Thrown if there is a security exception
+     * @throws IntegrityException Thrown if the data are corrupt or tampered with.
      */
     public SalmonStream getInputStream() throws IOException {
         if (!exists())
@@ -198,10 +199,10 @@ public class SalmonFile implements IVirtualFile {
     /**
      * Get a {@link SalmonStream} for encrypting/writing contents using the nonce in the header.
      *
-     * @return
-     * @throws SalmonSecurityException
-     * @throws IntegrityException
-     * @throws SequenceException
+     * @return The output stream
+     * @throws SalmonSecurityException Thrown if there is a security exception
+     * @throws IntegrityException Thrown if the data are corrupt or tampered with.
+     * @throws SequenceException Thrown if there is an error with the nonce sequence
      */
     public synchronized RandomAccessStream getOutputStream() throws IOException {
         return getOutputStream(null);
@@ -244,6 +245,7 @@ public class SalmonFile implements IVirtualFile {
 
     /**
      * Returns the current encryption key
+     * @return The encryption key
      */
     public byte[] getEncryptionKey() {
         if (this.encryptionKey != null)
@@ -287,6 +289,7 @@ public class SalmonFile implements IVirtualFile {
      *
      * @param integrity True if enable integrity verification
      * @param hashKey   The hash key to be used for verification
+     * @throws IOException Thrown if there is an IO error.
      */
     public void setVerifyIntegrity(boolean integrity, byte[] hashKey) throws IOException {
         if (integrity && hashKey == null && drive != null)
@@ -297,10 +300,12 @@ public class SalmonFile implements IVirtualFile {
     }
 
     /**
-     * @param integrity
-     * @param hashKey
+     * Enable integrity with this file.
+     * @param integrity True to enable integrity
+     * @param hashKey The hash key to use
      * @param requestChunkSize 0 use default file chunk.
      *                         A positive number to specify integrity chunks.
+     * @throws IOException Thrown if there is an IO error.
      */
     public void setApplyIntegrity(boolean integrity, byte[] hashKey, Integer requestChunkSize) throws IOException {
         Integer fileChunkSize = getFileChunkSize();
@@ -341,6 +346,7 @@ public class SalmonFile implements IVirtualFile {
 
     /**
      * Returns the length of the header in bytes
+     * @return The header length
      */
     private int getHeaderLength() {
         return SalmonGenerator.MAGIC_LENGTH + SalmonGenerator.VERSION_LENGTH +
@@ -349,6 +355,8 @@ public class SalmonFile implements IVirtualFile {
 
     /**
      * Returns the initial vector that is used for encryption / decryption
+     * @return The file nonce
+     * @throws IOException Thrown if there is an IO error.
      */
     public byte[] getFileNonce() throws IOException {
         SalmonHeader header = getHeader();
@@ -361,7 +369,7 @@ public class SalmonFile implements IVirtualFile {
      * Set the nonce for encryption/decryption for this file.
      *
      * @param nonce Nonce to be used.
-     * @throws SalmonSecurityException
+     * @throws SalmonSecurityException Thrown if there is a security exception
      */
     public void setRequestedNonce(byte[] nonce) {
         if (drive != null)
@@ -372,7 +380,7 @@ public class SalmonFile implements IVirtualFile {
     /**
      * Get the nonce that is used for encryption/decryption of this file.
      *
-     * @return
+     * @return The requested nonce
      */
     public byte[] getRequestedNonce() {
         return requestedNonce;
@@ -417,6 +425,7 @@ public class SalmonFile implements IVirtualFile {
 
     /**
      * Return the AES block size for encryption / decryption
+     * @return The block size
      */
     public int getBlockSize() {
         return SalmonGenerator.BLOCK_SIZE;
@@ -425,7 +434,7 @@ public class SalmonFile implements IVirtualFile {
     /**
      * Get the count of files and subdirectories
      *
-     * @return
+     * @return The children count
      */
     public int getChildrenCount() {
         return realFile.getChildrenCount();
@@ -448,11 +457,11 @@ public class SalmonFile implements IVirtualFile {
      * Get a child with this filename.
      *
      * @param filename The filename to search for
-     * @return
-     * @throws SalmonSecurityException
-     * @throws IntegrityException
-     * @throws IOException
-     * @throws SalmonAuthException
+     * @return The child file
+     * @throws SalmonSecurityException Thrown if there is a security exception
+     * @throws IntegrityException Thrown if the data are corrupt or tampered with.
+     * @throws IOException Thrown if there is an IO error.
+     * @throws SalmonAuthException Thrown if there is an Authorization error
      */
     public SalmonFile getChild(String filename) throws IOException {
         SalmonFile[] files = listFiles();
@@ -521,8 +530,7 @@ public class SalmonFile implements IVirtualFile {
      *
      * @param realPath The path of the real file
      */
-    private String getPath(String realPath)
-            throws IOException, SalmonAuthException, SalmonSecurityException, IntegrityException {
+    private String getPath(String realPath) throws IOException {
         String relativePath = getRelativePath(realPath);
         StringBuilder path = new StringBuilder();
         String[] parts = relativePath.split(Pattern.quote(File.separator));
@@ -620,7 +628,7 @@ public class SalmonFile implements IVirtualFile {
     /**
      * Returns the hash total bytes occupied by signatures
      */
-    private long getHashTotalBytesLength() throws IOException, IntegrityException {
+    private long getHashTotalBytesLength() throws IOException {
         // file does not support integrity
         if (getFileChunkSize() == null || getFileChunkSize() <= 0)
             return 0;
@@ -653,6 +661,8 @@ public class SalmonFile implements IVirtualFile {
      * @param key           The key that will be used for encryption
      * @param fileNameNonce The nonce for the encrypting the filename
      * @param fileNonce     The nonce for the encrypting the file contents
+     * @return The file
+     * @throws IOException Thrown if there is an IO error.
      */
     //TODO: files with real same name can exists we can add checking all files in the dir
     // and throw an Exception though this could be an expensive operation
@@ -720,9 +730,11 @@ public class SalmonFile implements IVirtualFile {
      * @param filename The filename of a real file
      * @param key      The encryption key if the file doesn't belong to a drive
      * @param nonce    The nonce if the file doesn't belong to a drive
+     * @return The decrypted filename
+     * @throws IOException Thrown if there is an IO error.
      */
     protected String getDecryptedFilename(String filename, byte[] key, byte[] nonce)
-            throws IOException, SalmonSecurityException, IntegrityException {
+            throws IOException {
         String rfilename = filename.replaceAll("-", "/");
         if (drive != null && nonce != null)
             throw new SalmonSecurityException("Filename nonce is already set by the drive");
@@ -743,10 +755,11 @@ public class SalmonFile implements IVirtualFile {
      * @param filename The virtual filename
      * @param key      The encryption key if the file doesn't belong to a drive
      * @param nonce    The nonce if the file doesn't belong to a drive
+     * @return The encrypted file name
+     * @throws IOException Thrown if there is an IO error.
      */
     protected String getEncryptedFilename(String filename, byte[] key, byte[] nonce)
-            throws IOException, SalmonSecurityException, IntegrityException, SalmonAuthException,
-            SequenceException, SalmonRangeExceededException {
+            throws IOException {
         if (drive != null && nonce != null)
             throw new SalmonSecurityException("Filename nonce is already set by the drive");
         if (drive != null)
@@ -761,9 +774,9 @@ public class SalmonFile implements IVirtualFile {
     }
 
     /**
-     * Get the drive.
+     * Get the drive this file belongs to.
      *
-     * @return
+     * @return The drive
      */
     public SalmonDrive getDrive() {
         return drive;
@@ -772,7 +785,7 @@ public class SalmonFile implements IVirtualFile {
     /**
      * Set the tag for this file.
      *
-     * @param tag
+     * @param tag The file tag
      */
     public void setTag(Object tag) {
         this.tag = tag;
@@ -792,8 +805,8 @@ public class SalmonFile implements IVirtualFile {
      *
      * @param dir                Target directory.
      * @param OnProgressListener Observer to notify when move progress changes.
-     * @return
-     * @throws IOException
+     * @return The file
+     * @throws IOException Thrown if there is an IO error.
      */
     public SalmonFile move(IVirtualFile dir, BiConsumer<Long, Long> OnProgressListener) throws IOException{
         IRealFile newRealFile = realFile.move(dir.getRealFile(), null, OnProgressListener);
@@ -805,8 +818,8 @@ public class SalmonFile implements IVirtualFile {
      *
      * @param dir                Target directory.
      * @param OnProgressListener Observer to notify when copy progress changes.
-     * @return
-     * @throws IOException
+     * @return The file
+     * @throws IOException Thrown if there is an IO error.
      */
     public SalmonFile copy(IVirtualFile dir, BiConsumer<Long, Long> OnProgressListener)
             throws IOException {
@@ -817,10 +830,10 @@ public class SalmonFile implements IVirtualFile {
     /**
      * Copy a directory recursively
      *
-     * @param dest
-     * @param progressListener
-     * @param autoRename
-     * @param onFailed
+     * @param dest The destination directory
+     * @param progressListener The progress listener
+     * @param autoRename The autorename function
+     * @param onFailed The callback when file copying has failed
      */
     public void copyRecursively(IVirtualFile dest,
                                 TriConsumer<IVirtualFile, Long, Long> progressListener,
@@ -855,10 +868,10 @@ public class SalmonFile implements IVirtualFile {
     /**
      * Move a directory recursively
      *
-     * @param dest
-     * @param progressListener
-     * @param autoRename
-     * @param onFailed
+     * @param dest The destination directory
+     * @param progressListener The progress listener
+     * @param autoRename The autorename function
+     * @param onFailed Callback when move fails
      */
     public void moveRecursively(IVirtualFile dest,
                                 TriConsumer<IVirtualFile, Long, Long> progressListener,
@@ -914,6 +927,8 @@ public class SalmonFile implements IVirtualFile {
     /**
      * Returns the minimum part size that can be encrypted / decrypted in parallel
      * aligning to the integrity chunk size if available.
+     * @return The minimum part size
+     * @throws IOException Thrown if there is an IO error.
      */
     public long getMinimumPartSize() throws IOException {
         Integer currChunkSize = this.getFileChunkSize();

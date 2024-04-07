@@ -25,6 +25,7 @@ SOFTWARE.
 
 import com.mku.sequence.INonceSequenceSerializer;
 import com.mku.sequence.NonceSequence;
+import com.mku.sequence.SequenceException;
 import org.w3c.dom.Document;
 import org.w3c.dom.Node;
 import org.xml.sax.SAXException;
@@ -54,8 +55,8 @@ public class SalmonSequenceSerializer implements INonceSequenceSerializer {
      * Serialize the sequences to an XML string.
      *
      * @param driveAuthEntries The sequences to convert to text.
-     * @return
-     * @throws SequenceException
+     * @return The serialized contents
+     * @throws SequenceException Thrown if there is an error with the nonce sequence
      */
     public String serialize(HashMap<String, NonceSequence> driveAuthEntries) {
         ByteArrayOutputStream stream = new ByteArrayOutputStream();
@@ -108,8 +109,8 @@ public class SalmonSequenceSerializer implements INonceSequenceSerializer {
      * Deserialize sequences from XML string.
      *
      * @param contents The contents containing the nonce sequences.
-     * @return
-     * @throws SequenceException
+     * @return The deserialized sequences
+     * @throws SequenceException Thrown if there is an error with the nonce sequence
      */
     public HashMap<String, NonceSequence> deserialize(String contents) {
         HashMap<String, NonceSequence> configs = new HashMap<>();

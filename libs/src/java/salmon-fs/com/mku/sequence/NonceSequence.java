@@ -93,7 +93,7 @@ public class NonceSequence {
 
     /**
      * Get the id.
-     * @return
+     * @return The sequence id
      */
     public String getId() {
         return id;
@@ -101,7 +101,7 @@ public class NonceSequence {
 
     /**
      * Set the id.
-     * @param id
+     * @param id The sequence id
      */
     void setid(String id) {
         this.id = id;
@@ -109,7 +109,7 @@ public class NonceSequence {
 
     /**
      * Get the authorization id of the device.
-     * @return
+     * @return The authorization id
      */
     public String getAuthId() {
         return authId;
@@ -125,7 +125,7 @@ public class NonceSequence {
 
     /**
      * Get the next nonce.
-     * @return
+     * @return The next nonce
      */
     public byte[] getNextNonce() {
         return nextNonce;
@@ -133,7 +133,7 @@ public class NonceSequence {
 
     /**
      * Set the next nonce.
-     * @param nextNonce
+     * @param nextNonce The next nonce
      */
     public void setNextNonce(byte[] nextNonce) {
         this.nextNonce = nextNonce;
@@ -141,7 +141,7 @@ public class NonceSequence {
 
     /**
      * Get the max nonce.
-     * @return
+     * @return The max nonce
      */
     public byte[] getMaxNonce() {
         return maxNonce;
@@ -149,7 +149,7 @@ public class NonceSequence {
 
     /**
      * Set the max nonce.
-     * @param maxNonce
+     * @param maxNonce The maximum nonce
      */
     public void setMaxNonce(byte[] maxNonce) {
         this.maxNonce = maxNonce;
@@ -157,7 +157,7 @@ public class NonceSequence {
 
     /**
      * Get the sequence status.
-     * @return
+     * @return The sequence status
      */
     public Status getStatus() {
         return status;
@@ -165,7 +165,7 @@ public class NonceSequence {
 
     /**
      * Set the sequence status.
-     * @param status
+     * @param status The sequence status
      */
     public void setStatus(Status status) {
         this.status = status;

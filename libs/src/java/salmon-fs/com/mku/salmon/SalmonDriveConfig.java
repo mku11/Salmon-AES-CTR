@@ -49,6 +49,7 @@ public class SalmonDriveConfig {
      * Provide a class that hosts the properties of the drive config file
      *
      * @param contents The byte array that contains the contents of the config file
+     * @throws IOException Thrown if there is an IO error.
      */
     public SalmonDriveConfig(byte[] contents) throws IOException {
         MemoryStream ms = new MemoryStream(contents);
@@ -73,6 +74,7 @@ public class SalmonDriveConfig {
      * @param keyIv                        The initial vector that was used with the master password to encrypt the combined key
      * @param encryptedData The encrypted combined key and drive id
      * @param hashSignature                The hash signature of the drive id
+     * @throws IOException Thrown if there is an IO error.
      */
     public static void writeDriveConfig(IRealFile configFile, byte[] magicBytes, byte version, byte[] salt,
                                         int iterations, byte[] keyIv,
@@ -112,7 +114,7 @@ public class SalmonDriveConfig {
 
     /**
      * Get the magic bytes from the config file.
-     * @return
+     * @return The magic bytes
      */
     public byte[] getMagicBytes() {
         return magicBytes;
@@ -120,7 +122,7 @@ public class SalmonDriveConfig {
 
     /**
      * Get the salt to be used for the password key derivation.
-     * @return
+     * @return The salt
      */
     public byte[] getSalt() {
         return salt;
@@ -128,7 +130,7 @@ public class SalmonDriveConfig {
 
     /**
      * Get the iterations to be used for the key derivation.
-     * @return
+     * @return The iterations
      */
     public int getIterations() {
         if (iterations == null)
@@ -138,7 +140,7 @@ public class SalmonDriveConfig {
 
     /**
      * Get encrypted data using the master key: drive key, hash key, drive id.
-     * @return
+     * @return The encrypted data
      */
     byte[] getEncryptedData() {
         return encryptedData;
@@ -146,7 +148,7 @@ public class SalmonDriveConfig {
 
     /**
      * Get the initial vector that was used to encrypt this drive configuration.
-     * @return
+     * @return The initial vector
      */
     public byte[] getIv() {
         return iv;
@@ -154,7 +156,7 @@ public class SalmonDriveConfig {
 
     /**
      * Get the hash signature that was used to sign this drive configuration.
-     * @return
+     * @return The hash signature
      */
     public byte[] getHashSignature() {
         return hashSignature;

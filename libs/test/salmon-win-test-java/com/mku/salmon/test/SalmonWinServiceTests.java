@@ -31,7 +31,7 @@ import com.mku.salmon.SalmonRangeExceededException;
 import com.mku.salmon.win.registry.SalmonRegistry;
 import com.mku.salmon.win.sequencer.WinClientSequencer;
 import com.mku.salmon.win.sequencer.WinFileSequencer;
-import com.mku.salmon.sequence.SequenceException;
+import com.mku.sequence.SequenceException;
 import com.mku.salmon.sequence.SalmonSequenceSerializer;
 import com.sun.jna.platform.win32.Crypt32Util;
 import org.junit.jupiter.api.Test;
@@ -78,7 +78,7 @@ public class SalmonWinServiceTests {
     }
 
     @Test
-    public void shouldCreateWinFileSequencer() throws SequenceException, IOException, SalmonRangeExceededException {
+    public void shouldCreateWinFileSequencer() throws IOException {
         if(registry.exists(TEST_REG_CHCKSUM_KEY))
             registry.delete(TEST_REG_CHCKSUM_KEY);
 

@@ -29,7 +29,7 @@ SOFTWARE.
 public class SalmonAuthException extends RuntimeException {
     /**
      * Construct an exception with a specific message.
-     * @param msg
+     * @param msg The message
      */
     public SalmonAuthException(String msg) {
         super(msg);

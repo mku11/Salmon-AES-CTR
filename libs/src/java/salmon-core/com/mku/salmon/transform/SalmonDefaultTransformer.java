@@ -51,7 +51,7 @@ public class SalmonDefaultTransformer extends SalmonAES256CTRTransformer {
      * Initialize the default Java AES cipher transformer.
      * @param key The AES256 key to use.
      * @param nonce The nonce to use.
-     * @throws SalmonSecurityException
+     * @throws SalmonSecurityException Thrown if there is a security exception
      */
     public void init(byte[] key, byte[] nonce) {
         super.init(key, nonce);
@@ -71,11 +71,10 @@ public class SalmonDefaultTransformer extends SalmonAES256CTRTransformer {
      * @param destOffset The destination byte offset.
      * @param count The number of bytes to transform.
      * @return The number of bytes transformed.
-     * @throws SalmonSecurityException
+     * @throws SalmonSecurityException Thrown if there is a security exception
      */
     public int encryptData(byte[] srcBuffer, int srcOffset,
-                           byte[] destBuffer, int destOffset, int count)
-            throws SalmonSecurityException {
+                           byte[] destBuffer, int destOffset, int count) {
         if (this.encSecretKey == null) //TODO: ToSync
             throw new SalmonSecurityException("No key defined, run init first");
         try {
@@ -97,11 +96,10 @@ public class SalmonDefaultTransformer extends SalmonAES256CTRTransformer {
      * @param destOffset The destination byte offset.
      * @param count The number of bytes to transform.
      * @return The number of bytes transformed.
-     * @throws SalmonSecurityException
+     * @throws SalmonSecurityException Thrown if there is a security exception
      */
     public int decryptData(byte[] srcBuffer, int srcOffset,
-                            byte[] destBuffer, int destOffset, int count)
-            throws SalmonSecurityException {
+                            byte[] destBuffer, int destOffset, int count) {
         if (this.encSecretKey == null) //TODO: ToSync
             throw new SalmonSecurityException("No key defined, run init first");
         try {

@@ -89,7 +89,7 @@ public abstract class FileImporter {
      * @param bufferSize Buffer size to be used when encrypting files.
      *                   If using integrity this value has to be a multiple of the Chunk size.
      *                   If not using integrity it should be a multiple of the AES block size for better performance
-     * @param threads
+     * @param threads The threads to use for import
      */
     public void initialize(int bufferSize, int threads) {
         this.bufferSize = bufferSize;
@@ -110,7 +110,7 @@ public abstract class FileImporter {
     /**
      * True if importer is currently running a job.
      *
-     * @return
+     * @return True if running
      */
     public boolean isRunning() {
         return !stopped;
@@ -121,9 +121,12 @@ public abstract class FileImporter {
      *
      * @param fileToImport The source file that will be imported in to the drive.
      * @param dir          The target directory in the drive that the file will be imported
+     * @param filename The filename to use
      * @param deleteSource If true delete the source file.
 	 * @param integrity    Apply data integrity
 	 * @param onProgress   Progress to notify
+     * @return The imported file
+     * @throws Exception Thrown if error occurs during import
      */
     public IVirtualFile importFile(IRealFile fileToImport, IVirtualFile dir, String filename,
                                    boolean deleteSource, boolean integrity, BiConsumer<Long,Long> onProgress) throws Exception {

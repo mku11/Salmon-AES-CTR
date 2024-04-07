@@ -34,6 +34,7 @@ import com.mku.salmon.SalmonRangeExceededException;
 import com.mku.sequence.INonceSequenceSerializer;
 import com.mku.sequence.INonceSequencer;
 import com.mku.sequence.NonceSequence;
+import com.mku.sequence.SequenceException;
 
 import java.io.BufferedInputStream;
 import java.io.ByteArrayInputStream;
@@ -54,11 +55,11 @@ public class SalmonFileSequencer implements INonceSequencer {
      *
      * @param sequenceFile The sequence file.
      * @param serializer   The serializer to be used.
-     * @throws IOException
-     * @throws SequenceException
+     * @throws IOException Thrown if there is an IO error.
+     * @throws SequenceException Thrown if there is an error with the nonce sequence
      */
     public SalmonFileSequencer(IRealFile sequenceFile, INonceSequenceSerializer serializer)
-            throws IOException, SequenceException {
+            throws IOException {
         this.sequenceFile = sequenceFile;
         this.serializer = serializer;
         if (!sequenceFile.exists()) {
@@ -76,7 +77,7 @@ public class SalmonFileSequencer implements INonceSequencer {
      *
      * @param driveId The drive ID.
      * @param authId  The authorization ID of the drive.
-     * @throws SequenceException
+     * @throws SequenceException Thrown if there is an error with the nonce sequence
      */
     @Override
     public void createSequence(String driveId, String authId) {
@@ -97,8 +98,8 @@ public class SalmonFileSequencer implements INonceSequencer {
      * @param authId     The auth ID of the device for the drive.
      * @param startNonce The starting nonce.
      * @param maxNonce   The maximum nonce.
-     * @throws SequenceException
-     * @throws IOException
+     * @throws SequenceException Thrown if there is an error with the nonce sequence
+     * @throws IOException Thrown if there is an IO error.
      */
     @Override
     public void initializeSequence(String driveId, String authId, byte[] startNonce, byte[] maxNonce) throws IOException {
@@ -121,7 +122,7 @@ public class SalmonFileSequencer implements INonceSequencer {
      * @param driveId  The drive ID.
      * @param authId   The auth ID of the device for the drive.
      * @param maxNonce The maximum nonce.
-     * @throws SequenceException
+     * @throws SequenceException Thrown if there is an error with the nonce sequence
      */
     @Override
     public void setMaxNonce(String driveId, String authId, byte[] maxNonce) {
@@ -141,9 +142,9 @@ public class SalmonFileSequencer implements INonceSequencer {
      * Get the next nonce.
      *
      * @param driveId The drive ID.
-     * @return
-     * @throws SequenceException
-     * @throws SalmonRangeExceededException
+     * @return The next nonce
+     * @throws SequenceException Thrown if there is an error with the nonce sequence
+     * @throws SalmonRangeExceededException Thrown if the nonce exceeds its range
      */
     @Override
     public byte[] nextNonce(String driveId) {
@@ -163,8 +164,8 @@ public class SalmonFileSequencer implements INonceSequencer {
     /**
      * Get the contents of a sequence file.
      *
-     * @return
-     * @throws SequenceException
+     * @return The contents
+     * @throws SequenceException Thrown if there is an error with the nonce sequence
      */
     protected synchronized String getContents() {
         BufferedInputStream stream = null;
@@ -204,7 +205,7 @@ public class SalmonFileSequencer implements INonceSequencer {
      * Revoke the current sequence for a specific drive.
      *
      * @param driveId The drive ID.
-     * @throws SequenceException
+     * @throws SequenceException Thrown if there is an error with the nonce sequence
      */
     @Override
     public void revokeSequence(String driveId) {
@@ -223,8 +224,8 @@ public class SalmonFileSequencer implements INonceSequencer {
      * Get the sequence by the drive ID.
      *
      * @param driveId The drive ID.
-     * @return
-     * @throws SequenceException
+     * @return The sequence
+     * @throws SequenceException Thrown if there is an error with the nonce sequence
      */
     @Override
     public NonceSequence getSequence(String driveId) {
@@ -246,7 +247,7 @@ public class SalmonFileSequencer implements INonceSequencer {
      * Save the sequence file.
      *
      * @param sequences The sequences.
-     * @throws SequenceException
+     * @throws SequenceException Thrown if there is an error with the nonce sequence
      */
     protected void saveSequenceFile(HashMap<String, NonceSequence> sequences) {
         try {
@@ -259,8 +260,8 @@ public class SalmonFileSequencer implements INonceSequencer {
     }
 
     /**
-     * Save the contets of the file
-     * @param contents
+     * Save the contents of the file
+     * @param contents The contents
      */
     protected synchronized void saveContents(String contents) {
         ByteArrayInputStream inputStream = null;
@@ -301,7 +302,7 @@ public class SalmonFileSequencer implements INonceSequencer {
      * @param configs All sequence configurations.
      * @param driveId The drive ID.
      * @return
-     * @throws SequenceException
+     * @throws SequenceException Thrown if there is an error with the nonce sequence
      */
     private static NonceSequence getSequence(HashMap<String, NonceSequence> configs, String driveId) {
         NonceSequence sequence = null;

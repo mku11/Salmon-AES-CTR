@@ -30,16 +30,15 @@ import com.mku.salmon.drive.JavaDrive;
 import com.mku.file.JavaFile;
 import com.mku.streams.InputStreamWrapper;
 import com.mku.streams.MemoryStream;
-import com.mku.salmon.SalmonRangeExceededException;
 import com.mku.salmon.SalmonAuthException;
 import com.mku.salmon.integrity.SalmonIntegrity;
-import com.mku.salmon.integrity.IntegrityException;
+import com.mku.integrity.IntegrityException;
 import com.mku.salmon.*;
 import com.mku.salmon.streams.SalmonFileInputStream;
 import com.mku.salmon.utils.SalmonFileCommander;
 import com.mku.sequence.INonceSequenceSerializer;
 import com.mku.salmon.sequence.SalmonFileSequencer;
-import com.mku.salmon.sequence.SequenceException;
+import com.mku.sequence.SequenceException;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
@@ -449,7 +448,7 @@ public class SalmonFSTests {
     }
 
     @Test
-    public void shouldCreateWinFileSequencer() throws SequenceException, IOException, SalmonRangeExceededException {
+    public void shouldCreateWinFileSequencer() throws IOException {
         SalmonFSTestHelper.shouldTestFileSequencer();
     }
 

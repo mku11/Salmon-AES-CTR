@@ -57,7 +57,7 @@ public class SalmonDriveKey {
 
     /**
      * Finalize.
-     * @throws Throwable
+     * @throws Throwable Thrown if error occurs during finalization
      */
     //TODO: replace with Phantom References
     @SuppressWarnings("deprecation")
@@ -69,6 +69,7 @@ public class SalmonDriveKey {
 
     /**
      * Function returns the encryption key that will be used to encrypt/decrypt the files
+     * @return The encryption key
      */
     public byte[] getDriveKey() {
         return driveKey;
@@ -76,6 +77,7 @@ public class SalmonDriveKey {
 
     /**
      * Function returns the hash key that will be used to sign the file chunks
+     * @return The hash key
      */
     public byte[] getHashKey() {
         return hashKey;
@@ -83,7 +85,7 @@ public class SalmonDriveKey {
 
     /**
      * Set the drive key.
-     * @param driveKey
+     * @param driveKey The drive key
      */
     public void setDriveKey(byte[] driveKey) {
         this.driveKey = driveKey;
@@ -91,7 +93,7 @@ public class SalmonDriveKey {
 
     /**
      * Set the hash key.
-     * @param hashKey
+     * @param hashKey The hash key
      */
     public void setHashKey(byte[] hashKey) {
         this.hashKey = hashKey;
@@ -99,7 +101,7 @@ public class SalmonDriveKey {
 
     /**
      * Get the master key.
-     * @return
+     * @return The master key
      */
     public byte[] getMasterKey() {
         return masterKey;
@@ -107,7 +109,7 @@ public class SalmonDriveKey {
 
     /**
      * Set the master key.
-     * @param masterKey
+     * @param masterKey The master key
      */
     public void setMasterKey(byte[] masterKey) {
         this.masterKey = masterKey;
@@ -115,7 +117,7 @@ public class SalmonDriveKey {
 
     /**
      * Get the number of iterations for the master key derivation.
-     * @return
+     * @return The iterations
      */
     public int getIterations() {
         return iterations;
@@ -123,7 +125,7 @@ public class SalmonDriveKey {
 
     /**
      * Set the number of iterations for the master key derivation.
-     * @param iterations
+     * @param iterations The iterations
      */
     public void setIterations(int iterations) {
         this.iterations = iterations;

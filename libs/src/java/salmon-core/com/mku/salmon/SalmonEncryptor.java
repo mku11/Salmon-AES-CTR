@@ -26,7 +26,7 @@ SOFTWARE.
 import com.mku.convert.BitConverter;
 import com.mku.streams.MemoryStream;
 import com.mku.salmon.integrity.SalmonIntegrity;
-import com.mku.salmon.integrity.IntegrityException;
+import com.mku.integrity.IntegrityException;
 import com.mku.salmon.streams.EncryptionMode;
 import com.mku.salmon.streams.SalmonStream;
 import com.mku.salmon.transform.SalmonAES256CTRTransformer;
@@ -99,13 +99,13 @@ public class SalmonEncryptor {
      * @param key             The key to use.
      * @param nonce           Nonce to use.
      * @param storeHeaderData True to store header data in output byte array.
-     * @return
-     * @throws SalmonSecurityException
-     * @throws IntegrityException
-     * @throws IOException
+     * @return The encrypted data
+     * @throws SalmonSecurityException Thrown if there is a security exception
+     * @throws IntegrityException Thrown if the data are corrupt or tampered with.
+     * @throws IOException Thrown if there is an IO error.
      */
     public byte[] encrypt(byte[] data, byte[] key, byte[] nonce, boolean storeHeaderData)
-            throws SalmonSecurityException, IntegrityException, IOException {
+            throws IOException {
         return encrypt(data, key, nonce, storeHeaderData, false, null, null);
     }
 
@@ -121,14 +121,14 @@ public class SalmonEncryptor {
      * @param hashKey         Hash key to be used for all chunks.
      * @param chunkSize       The chunk size.
      * @return The byte array with the encrypted data.
-     * @throws SalmonSecurityException
-     * @throws IOException
-     * @throws IntegrityException
+     * @throws SalmonSecurityException Thrown if there is a security exception
+     * @throws IOException Thrown if there is an IO error.
+     * @throws IntegrityException Thrown if the data are corrupt or tampered with.
      */
     public byte[] encrypt(byte[] data, byte[] key, byte[] nonce,
                           boolean storeHeaderData,
                           boolean integrity, byte[] hashKey, Integer chunkSize)
-            throws SalmonSecurityException, IOException, IntegrityException {
+            throws IOException {
         if (key == null)
             throw new SalmonSecurityException("Key is missing");
         if (nonce == null)
@@ -286,7 +286,7 @@ public class SalmonEncryptor {
     private void encryptData(MemoryStream inputStream, long start, long count, byte[] outData,
                              byte[] key, byte[] nonce, byte[] headerData,
                              boolean integrity, byte[] hashKey, Integer chunkSize)
-            throws IOException, SalmonSecurityException, IntegrityException {
+            throws IOException {
         MemoryStream outputStream = new MemoryStream(outData);
         SalmonStream stream = null;
         try {

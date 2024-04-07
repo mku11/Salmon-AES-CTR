@@ -33,7 +33,7 @@ import com.mku.func.BiConsumer;
 import com.mku.func.Consumer;
 import com.mku.file.IRealFile;
 import com.mku.func.Function;
-import com.mku.salmon.sequence.SequenceException;
+import com.mku.sequence.SequenceException;
 
 /**
  * Facade class for file operations.
@@ -47,8 +47,11 @@ public class FileCommander {
     /**
      * Instantiate a new file commander object.
      *
+     * @param fileImporter The importer to use
+     * @param fileExporter The exporter to use
+     * @param fileSearcher The searcher to use
      */
-    public FileCommander( FileImporter fileImporter,FileExporter  fileExporter, FileSearcher fileSearcher) {
+    public FileCommander(FileImporter fileImporter, FileExporter fileExporter, FileSearcher fileSearcher) {
         this.fileImporter = fileImporter;
         this.fileExporter = fileExporter;
         this.fileSearcher = fileSearcher;
@@ -66,7 +69,7 @@ public class FileCommander {
      * @param autoRename        Function to rename file if another file with the same filename exists
      * @param onFailed          Observer to notify when a file fails importing
      * @return The imported files if completes successfully.
-     * @throws Exception
+     * @throws Exception Thrown if error occurs during import
      */
     public IVirtualFile[] importFiles(IRealFile[] filesToImport, IVirtualFile importDir,
                                       boolean deleteSource, boolean integrity,
@@ -111,7 +114,7 @@ public class FileCommander {
                                    ArrayList<IVirtualFile> importedFiles, int[] count, int total,
                                    HashMap<String, IVirtualFile> existingFiles) throws IOException {
         IVirtualFile sfile = existingFiles.containsKey(fileToImport.getBaseName())
-			?existingFiles.get(fileToImport.getBaseName()):null;
+                ? existingFiles.get(fileToImport.getBaseName()) : null;
         if (fileToImport.isDirectory()) {
             if (onProgressChanged != null)
                 onProgressChanged.accept(new RealFileTaskProgress(fileToImport, 0, 1, count[0], total));
@@ -121,7 +124,7 @@ public class FileCommander {
                 sfile = importDir.createDirectory(autoRename.apply(fileToImport));
             if (onProgressChanged != null)
                 onProgressChanged.accept(new RealFileTaskProgress(fileToImport, 1, 1, count[0], total));
-			count[0]++;
+            count[0]++;
             HashMap<String, IVirtualFile> nExistingFiles = getExistingFiles(sfile);
             for (IRealFile child : fileToImport.listFiles())
                 importRecursively(child, sfile, deleteSource, integrity, onProgressChanged,
@@ -141,7 +144,7 @@ public class FileCommander {
                                         bytes, totalBytes, count[0], total));
                             }
                         });
-				existingFiles.put(sfile.getBaseName(), sfile);
+                existingFiles.put(sfile.getBaseName(), sfile);
                 importedFiles.add(sfile);
                 count[0]++;
             } catch (SequenceException ex) {
@@ -164,7 +167,7 @@ public class FileCommander {
      * @param autoRename        Function to rename file if another file with the same filename exists
      * @param onFailed          Observer to notify when a file fails exporting
      * @return The exported files
-     * @throws Exception
+     * @throws Exception Thrown if error occurs during export
      */
     public IRealFile[] exportFiles(IVirtualFile[] filesToExport, IRealFile exportDir,
                                    boolean deleteSource, boolean integrity,
@@ -211,16 +214,16 @@ public class FileCommander {
                                    HashMap<String, IRealFile> existingFiles)
             throws Exception {
         IRealFile rfile = existingFiles.containsKey(fileToExport.getBaseName())
-			?existingFiles.get(fileToExport.getBaseName()):null;
+                ? existingFiles.get(fileToExport.getBaseName()) : null;
 
         if (fileToExport.isDirectory()) {
             if (rfile == null || !rfile.exists())
                 rfile = exportDir.createDirectory(fileToExport.getBaseName());
             else if (rfile != null && rfile.isFile() && autoRename != null)
                 rfile = exportDir.createDirectory(autoRename.apply(rfile));
-			if (onProgressChanged != null)
+            if (onProgressChanged != null)
                 onProgressChanged.accept(new VirtualFileTaskProgress(fileToExport, 1, 1, count[0], total));
-			count[0]++;
+            count[0]++;
             HashMap<String, IRealFile> nExistingFiles = getExistingFiles(rfile);
             for (IVirtualFile child : fileToExport.listFiles())
                 exportRecursively(child, rfile, deleteSource, integrity, onProgressChanged,
@@ -241,7 +244,7 @@ public class FileCommander {
                                         bytes, totalBytes, count[0], total));
                             }
                         });
-				existingFiles.put(rfile.getBaseName(), rfile);
+                existingFiles.put(rfile.getBaseName(), rfile);
                 exportedFiles.add(rfile);
                 count[0]++;
             } catch (SequenceException ex) {
@@ -276,20 +279,18 @@ public class FileCommander {
     /**
      * Delete files.
      *
-     * @param filesToDelete         The files to delete.
+     * @param filesToDelete     The files to delete.
      * @param onProgressChanged The observer to notify when each file is deleted.
-     * @param onFailed The observer to notify when a file has failed.
+     * @param onFailed          The observer to notify when a file has failed.
      */
     public void deleteFiles(IVirtualFile[] filesToDelete, Consumer<VirtualFileTaskProgress> onProgressChanged,
-                            BiConsumer<IVirtualFile, Exception> onFailed)
-    {
+                            BiConsumer<IVirtualFile, Exception> onFailed) {
         stopJobs = false;
         int[] count = new int[1];
         int total = 0;
         for (int i = 0; i < filesToDelete.length; i++)
             total += getCountRecursively(filesToDelete[i]);
-        for (IVirtualFile virtualFile : filesToDelete)
-        {
+        for (IVirtualFile virtualFile : filesToDelete) {
             if (stopJobs)
                 break;
             int finalTotal = total;
@@ -297,19 +298,15 @@ public class FileCommander {
             {
                 if (stopJobs)
                     throw new CancellationException();
-                if (onProgressChanged != null)
-                {
-                    try
-                    {
+                if (onProgressChanged != null) {
+                    try {
                         onProgressChanged.accept(new VirtualFileTaskProgress(
                                 file, position, length, count[0], finalTotal));
-                    }
-                    catch (Exception ex)
-                    {
+                    } catch (Exception ex) {
                     }
                 }
-				if (position == (long) length)
-					count[0]++;
+                if (position == (long) length)
+                    count[0]++;
             }, onFailed);
         }
     }
@@ -322,8 +319,9 @@ public class FileCommander {
      * @param move              True if moving files instead of copying.
      * @param onProgressChanged The progress change observer to notify.
      * @param autoRename        The auto rename function to use when files with same filename are found
+     * @param autoRenameFolders True to autorename folders
      * @param onFailed          The observer to notify when failures occur
-     * @throws Exception
+     * @throws Exception Thrown if error occurs during copying
      */
     public void copyFiles(IVirtualFile[] filesToCopy, IVirtualFile dir, boolean move, Consumer<VirtualFileTaskProgress> onProgressChanged,
                           Function<IVirtualFile, String> autoRename,
@@ -354,7 +352,7 @@ public class FileCommander {
                         } catch (Exception ex) {
                         }
                     }
-					if (position == (long) length)
+                    if (position == (long) length)
                         count[0]++;
                 }, autoRename, autoRenameFolders, onFailed);
             } else {
@@ -368,7 +366,7 @@ public class FileCommander {
                         } catch (Exception ignored) {
                         }
                     }
-					if (position == (long) length)
+                    if (position == (long) length)
                         count[0]++;
                 }, autoRename, autoRenameFolders, onFailed);
             }
@@ -388,7 +386,7 @@ public class FileCommander {
     /**
      * True if the file search is currently running.
      *
-     * @return
+     * @return True if search is running
      */
     public boolean isFileSearcherRunning() {
         return fileSearcher.isRunning();
@@ -397,7 +395,7 @@ public class FileCommander {
     /**
      * True if jobs are currently running.
      *
-     * @return
+     * @return True if a job is running
      */
     public boolean isRunning() {
         return fileSearcher.isRunning() || fileImporter.isRunning() || fileExporter.isRunning();
@@ -406,7 +404,7 @@ public class FileCommander {
     /**
      * True if file search stopped.
      *
-     * @return
+     * @return True if file search is stopped
      */
     public boolean isFileSearcherStopped() {
         return fileSearcher.isStopped();
@@ -438,7 +436,7 @@ public class FileCommander {
     /**
      * True if all jobs are stopped.
      *
-     * @return
+     * @return True if jobs are stopped
      */
     public boolean areJobsStopped() {
         return stopJobs;
@@ -465,12 +463,14 @@ public class FileCommander {
         fileImporter.close();
         fileExporter.close();
     }
-	
-	/**
+
+    /**
      * Rename an encrypted file
-     *
+     * @param ifile The file to rename
+     * @param newFilename The new file name
+     * @throws IOException Thrown if there is an IO error.
      */
-	public void renameFile(IVirtualFile ifile, String newFilename) throws IOException {
+    public void renameFile(IVirtualFile ifile, String newFilename) throws IOException {
         ifile.rename(newFilename);
     }
 

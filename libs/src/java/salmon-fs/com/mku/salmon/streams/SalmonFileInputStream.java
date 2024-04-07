@@ -23,10 +23,10 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 */
 
+import com.mku.integrity.IntegrityException;
 import com.mku.streams.RandomAccessStream;
 import com.mku.salmon.SalmonFile;
 import com.mku.salmon.SalmonSecurityException;
-import com.mku.salmon.integrity.IntegrityException;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -88,6 +88,7 @@ public class SalmonFileInputStream extends InputStream {
      * @param bufferSize   The length of each buffer.
      * @param threads      The number of threads/streams to source the file in parallel.
      * @param backOffset   The back offset.
+     * @throws IOException Thrown if there is an IO error.
      */
     public SalmonFileInputStream(SalmonFile salmonFile,
                                  int buffersCount, int bufferSize, int threads, int backOffset)
@@ -147,7 +148,7 @@ public class SalmonFileInputStream extends InputStream {
      * Skip a number of bytes.
      *
      * @param bytes the number of bytes to be skipped.
-     * @return
+     * @return The byte skipped
      */
     public long skip(long bytes) {
 		bytes += positionStart;
@@ -167,8 +168,8 @@ public class SalmonFileInputStream extends InputStream {
     /**
      * Read a byte from the stream.
      *
-     * @return
-     * @throws IOException
+     * @return The bytes read
+     * @throws IOException Thrown if there is an IO error.
      */
     @Override
     public int read() throws IOException {
@@ -351,7 +352,7 @@ public class SalmonFileInputStream extends InputStream {
     /**
      * Get the size of the stream.
      *
-     * @return
+     * @return The size
      */
     public long getSize() {
         return positionEnd - positionStart + 1;
@@ -372,7 +373,7 @@ public class SalmonFileInputStream extends InputStream {
     /**
      * Close the stream and associated backed streams and clear buffers.
      *
-     * @throws IOException
+     * @throws IOException Thrown if there is an IO error.
      */
     public void close() throws IOException {
         closeStreams();
@@ -394,7 +395,7 @@ public class SalmonFileInputStream extends InputStream {
     /**
      * Close all back streams.
      *
-     * @throws IOException
+     * @throws IOException Thrown if there is an IO error.
      */
     private synchronized void closeStreams() throws IOException {
         for (int i = 0; i < threads; i++) {
@@ -417,7 +418,7 @@ public class SalmonFileInputStream extends InputStream {
         /**
          * Instantiate a cache buffer.
          *
-         * @param bufferSize
+         * @param bufferSize The buffer size
          */
         public CacheBuffer(int bufferSize) {
             buffer = new byte[bufferSize];

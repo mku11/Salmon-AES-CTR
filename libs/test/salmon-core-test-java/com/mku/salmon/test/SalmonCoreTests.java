@@ -29,7 +29,7 @@ import com.mku.streams.MemoryStream;
 import com.mku.salmon.SalmonGenerator;
 import com.mku.salmon.SalmonRangeExceededException;
 import com.mku.salmon.SalmonSecurityException;
-import com.mku.salmon.integrity.IntegrityException;
+import com.mku.integrity.IntegrityException;
 import com.mku.salmon.streams.EncryptionMode;
 import com.mku.salmon.streams.ProviderType;
 import com.mku.salmon.streams.SalmonStream;

@@ -23,7 +23,7 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 */
 
-import com.mku.salmon.sequence.SequenceException;
+import com.mku.sequence.SequenceException;
 
 import java.util.HashMap;
 
@@ -36,7 +36,7 @@ public interface INonceSequenceSerializer {
      * Parse nonce sequences from text contents.
      * @param contents The contents containing the nonce sequences.
      * @return The nonce sequences.
-     * @throws SequenceException
+     * @throws SequenceException Thrown if there is an error with the nonce sequence
      */
     HashMap<String, NonceSequence> deserialize(String contents);
 
@@ -44,7 +44,7 @@ public interface INonceSequenceSerializer {
      * Generates the contents from sequences.
      * @param sequences The sequences to convert to text.
      * @return The string contents.
-     * @throws SequenceException
+     * @throws SequenceException Thrown if there is an error with the nonce sequence
      */
     String serialize(HashMap<String, NonceSequence> sequences);
 }

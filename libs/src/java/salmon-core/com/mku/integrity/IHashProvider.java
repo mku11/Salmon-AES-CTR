@@ -24,8 +24,6 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 */
 
-import com.mku.salmon.integrity.IntegrityException;
-
 /**
  * Interface for hashing providers.
  */
@@ -41,6 +39,5 @@ public interface IHashProvider {
      * @return The calculated hash.
      * @throws IntegrityException thrown if hash cannot be calculated
      */
-    byte[] calc(byte[] key, byte[] buffer, int offset, int count)
-            throws IntegrityException;
+    byte[] calc(byte[] key, byte[] buffer, int offset, int count);
 }

@@ -111,6 +111,9 @@ public abstract class FileExporter {
      * @param filename     The filename to use
      * @param deleteSource Delete the source file when the export finishes successfully
      * @param integrity    True to verify integrity
+     * @param onProgress Progress listener
+     * @return The exported file
+     * @throws Exception Thrown if error occurs during export
      */
     public IRealFile exportFile(IVirtualFile fileToExport, IRealFile exportDir, String filename,
                                 boolean deleteSource, boolean integrity, BiConsumer<Long,Long> onProgress) throws Exception {

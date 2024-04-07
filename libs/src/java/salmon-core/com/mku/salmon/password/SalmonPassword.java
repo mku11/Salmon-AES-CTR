@@ -57,7 +57,7 @@ public class SalmonPassword {
     /**
      * Set the global PDKDF algorithm to be used for key derivation.
      *
-     * @param pbkdfAlgo
+     * @param pbkdfAlgo The PBKDF algorithm to use
      */
     public static void setPbkdfAlgo(PbkdfAlgo pbkdfAlgo) {
         SalmonPassword.pbkdfAlgo = pbkdfAlgo;
@@ -66,7 +66,7 @@ public class SalmonPassword {
     /**
      * Set the global PBKDF implementation to be used for text key derivation.
      *
-     * @param pbkdfType
+     * @param pbkdfType The PBKDF implementation to use
      */
     public static void setPbkdfType(PbkdfType pbkdfType) {
         provider = SalmonPbkdfFactory.create(pbkdfType);
@@ -75,7 +75,7 @@ public class SalmonPassword {
 	/**
      * Set the global PBKDF provider to be used for text key derivation.
      *
-     * @param pbkdfProvider
+     * @param pbkdfProvider The PBKDF provider
      */
     public static void setPbkdfProvider(ISalmonPbkdfProvider pbkdfProvider) {
         provider = pbkdfProvider;
@@ -89,10 +89,9 @@ public class SalmonPassword {
      * @param iterations The number of iterations the key derivation algorithm will use
 	 * @param length     The length of master key to return
      * @return The derived master key.
-     * @throws SalmonSecurityException
+     * @throws SalmonSecurityException Thrown if there is a security exception
      */
-    public static byte[] getMasterKey(String pass, byte[] salt, int iterations, int length)
-            throws SalmonSecurityException {
+    public static byte[] getMasterKey(String pass, byte[] salt, int iterations, int length) {
         byte[] masterKey = getKeyFromPassword(pass, salt, iterations, length);
         return masterKey;
     }
@@ -105,7 +104,7 @@ public class SalmonPassword {
      * @param iterations  The iterations to be used with Pbkdf2
      * @param outputBytes The number of bytes for the key
      * @return The derived key.
-     * @throws SalmonSecurityException
+     * @throws SalmonSecurityException Thrown if there is a security exception
      */
     public static byte[] getKeyFromPassword(String password, byte[] salt, int iterations, int outputBytes) {
         if (pbkdfAlgo == PbkdfAlgo.SHA1 && !ENABLE_SHA1)

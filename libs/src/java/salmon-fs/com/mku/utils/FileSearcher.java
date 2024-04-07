@@ -59,7 +59,7 @@ public class FileSearcher {
 
     /**
      * True if a search is running.
-     * @return
+     * @return True if running
      */
     public boolean isRunning() {
         return running;
@@ -67,7 +67,7 @@ public class FileSearcher {
 
     /**
      * True if last search was stopped by user.
-     * @return
+     * @return True if user stopped
      */
     public boolean isStopped() {
         return quit;

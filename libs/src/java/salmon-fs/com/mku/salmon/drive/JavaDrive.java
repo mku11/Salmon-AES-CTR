@@ -48,20 +48,22 @@ public class JavaDrive extends SalmonDrive {
     /**
      * Helper method that opens and initializes a JavaDrive
      * @param dir The directory that hosts the drive.
-	 * @param dir The password.
+	 * @param password The password.
      * @param sequencer The nonce sequencer that will be used for encryption.
      * @return The drive.
+     * @throws IOException Thrown if error occurs during opening the drive.
      */
-    public static SalmonDrive open(IRealFile dir, String password, INonceSequencer sequencer) throws Exception {
+    public static SalmonDrive open(IRealFile dir, String password, INonceSequencer sequencer) throws IOException {
         return SalmonDrive.openDrive(dir, JavaDrive.class, password, sequencer);
     }
 
     /**
      * Helper method that creates and initializes a JavaDrive
      * @param dir The directory that will host the drive.
-	 * @param dir The password.
+	 * @param password The password.
      * @param sequencer The nonce sequencer that will be used for encryption.
      * @return The drive.
+     * @throws IOException If error occurs during creating the drive.
      */
     public static SalmonDrive create(IRealFile dir, String password, INonceSequencer sequencer) throws IOException {
         return SalmonDrive.createDrive(dir, JavaDrive.class, password, sequencer);
@@ -69,8 +71,8 @@ public class JavaDrive extends SalmonDrive {
 
     /**
      * Get a private dir for sharing files with external applications.
-     * @return
-     * @throws Exception
+     * @return The private directory
+     * @throws Exception Thrown if error occurs
      */
     public IRealFile getPrivateDir() throws Exception {
         String fileFolder = null;
