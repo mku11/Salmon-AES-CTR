@@ -30,9 +30,6 @@ public class Main {
         Random r = new Random();
         r.nextBytes(data);
     }
-	
-	SalmonEncryptor encryptor = new SalmonEncryptor(2);
-	SalmonDecryptor decryptor = new SalmonDecryptor(2);
 
     public static void main(String[] args) throws Exception {
         // uncomment to load the AES intrinsics for better performance
@@ -84,11 +81,13 @@ public class Main {
         byte[] nonce = SalmonGenerator.getSecureRandomBytes(8);
 
         // encrypt a byte array using 2 threads
+		SalmonEncryptor encryptor = new SalmonEncryptor(2);
         byte[] encBytes = encryptor.encrypt(bytes, key, nonce, false);
         System.out.println("Encrypted bytes: " + BitConverter.toHex(encBytes).substring(0, 24) + "...");
         encryptor.close();
 
         // decrypt byte array using 2 threads
+		SalmonDecryptor decryptor = new SalmonDecryptor(2);
         byte[] decBytes = decryptor.decrypt(encBytes, key, nonce, false);
         System.out.println("Decrypted bytes: " + BitConverter.toHex(decBytes).substring(0, 24) + "...");
         System.out.println();
@@ -125,7 +124,7 @@ public class Main {
                 encOutStream, null,
                 false, null, null);
 
-        // encrypt and write with a single call, you can also Seek() and Write()
+        // encrypt/write data in a single call, you can also Seek() before Write()
         encStream.write(bytes, 0, bytes.length);
 
         // encrypted data are now written to the encOutStream.
@@ -145,7 +144,7 @@ public class Main {
         // seek to the beginning or any position in the stream
         decStream.seek(0, RandomAccessStream.SeekOrigin.Begin);
 
-        // decrypt and read data with a single call, you can also Seek() before Read()
+        // read/decrypt data in a single call, you can also Seek() before Read()
         int bytesRead = decStream.read(decBuffer, 0, decBuffer.length);
         decStream.close();
         encInputStream.close();
@@ -170,7 +169,7 @@ public class Main {
         encFile.setRequestedNonce(nonce);
         RandomAccessStream stream = encFile.getOutputStream();
 
-        // encrypt data and write with a single call
+        // encrypt/write data with a single call
         stream.write(bytes, 0, bytes.length);
         stream.flush();
         stream.close();
@@ -179,9 +178,9 @@ public class Main {
         SalmonFile encFile2 = new SalmonFile(testFile);
         encFile2.setEncryptionKey(key);
         RandomAccessStream stream2 = encFile2.getInputStream();
-        byte[] decBuff = new byte[1024];
 
-        // read data with a single call
+        // read/decrypt data with a single call
+		byte[] decBuff = new byte[1024];
         int encBytesRead = stream2.read(decBuff, 0, decBuff.length);
         String decString2 = new String(decBuff, 0, encBytesRead);
         System.out.println("Decrypted text: " + decString2);

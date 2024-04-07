@@ -23,9 +23,6 @@ public class Sample
         Random r = new Random();
         r.NextBytes(data);
     }
-
-	SalmonEncryptor encryptor = new SalmonEncryptor(2);
-    SalmonDecryptor decryptor = new SalmonDecryptor(2);
 		
     public static void Main(string[] args)
     {
@@ -80,11 +77,13 @@ public class Sample
         byte[] nonce = SalmonGenerator.GetSecureRandomBytes(8);
 
         // encrypt a byte array using 2 threads
+		SalmonEncryptor encryptor = new SalmonEncryptor(2);
         byte[] encBytes = encryptor.Encrypt(bytes, key, nonce, false);
         Console.WriteLine("Encrypted bytes: " + BitConverter.ToHex(encBytes).Substring(0, 24) + "...");
         encryptor.Close();
 
         // decrypt byte array using 2 threads
+		SalmonDecryptor decryptor = new SalmonDecryptor(2);
         byte[] decBytes = decryptor.Decrypt(encBytes, key, nonce, false);
         Console.WriteLine("Decrypted bytes: " + BitConverter.ToHex(decBytes).Substring(0, 24) + "...");
         Console.WriteLine();
@@ -124,7 +123,7 @@ public class Sample
                 encOutStream, null,
                 false, null, null);
 
-        // encrypt and write with a single call, you can also Seek() and Write()
+        // encrypt/write data in a single call, you can also Seek() before Write()
         encStream.Write(bytes, 0, bytes.Length);
 
         // encrypted data are now written to the encOutStream.
@@ -144,7 +143,7 @@ public class Sample
         // seek to the beginning or any position in the stream
         decStream.Seek(0, SeekOrigin.Begin);
 
-        // decrypt and read data with a single call, you can also Seek() before Read()
+        // read/decrypt data with a single call, you can also Seek() before Read()
         int bytesRead = decStream.Read(decBuffer, 0, decBuffer.Length);
         decStream.Close();
         encInputStream.Close();
@@ -153,7 +152,7 @@ public class Sample
         Console.WriteLine();
     }
 
-    private static void EncryptAndDecryptTextToFile(string text, byte[] key, IRealFile file)
+    private static void EncryptAndDecryptTextToFile(IRealFile file)
     {
         // encrypt to a file, the SalmonFile has a virtual file system API
         Console.WriteLine("Encrypting text to File: " + text);
@@ -171,7 +170,7 @@ public class Sample
         encFile.RequestedNonce = nonce;
         Stream stream = encFile.GetOutputStream();
 
-        // encrypt data and write with a single call
+        // encrypt/write data with a single call
         stream.Write(bytes, 0, bytes.Length);
         stream.Flush();
         stream.Close();
@@ -180,9 +179,9 @@ public class Sample
         SalmonFile encFile2 = new SalmonFile(file);
         encFile2.EncryptionKey = key;
         Stream stream2 = encFile2.GetInputStream();
-        byte[] decBuff = new byte[1024];
 
-        // read data with a single call
+        // read/decrypt data with a single call
+        byte[] decBuff = new byte[1024];
         int encBytesRead = stream2.Read(decBuff, 0, decBuff.Length);
         string decString2 = UTF8Encoding.UTF8.GetString(decBuff, 0, encBytesRead);
         Console.WriteLine("Decrypted text: " + decString2);

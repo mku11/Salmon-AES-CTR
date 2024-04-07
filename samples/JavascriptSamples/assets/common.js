@@ -44,7 +44,7 @@ function print(msg) {
 	else
 		console.log("");
 }
-
+		
 export class Sample {
 
     static async getKeyFromPassword(password) {
@@ -76,13 +76,13 @@ export class Sample {
         let nonce = SalmonGenerator.getSecureRandomBytes(8);
 
         // encrypt a byte array using 2 threads
-        let encryptor = new SalmonEncryptor(2);
+		let encryptor = new SalmonEncryptor(2);
         let encBytes = await encryptor.encrypt(bytes, key, nonce, false);
         print( "Encrypted bytes: " + BitConverter.toHex(encBytes).substring(0, 24) + "..." );
         encryptor.close();
 
         // decrypt byte array using 2 threads
-        let decryptor = new SalmonDecryptor(2);
+		let decryptor = new SalmonDecryptor(2);
         let decBytes = await decryptor.decrypt(encBytes, key, nonce, false);
         print( "Decrypted bytes: " + BitConverter.toHex(decBytes).substring(0, 24) + "..." );
         print();
@@ -119,7 +119,7 @@ export class Sample {
                 encOutStream, null,
                 false, null, null);
 
-        // encrypt and write with a single call, you can also Seek() and Write()
+        // encrypt/write data in a single call, you can also Seek() and Write()
         await encStream.write(bytes, 0, bytes.length);
 
         // encrypted data are now written to the encOutStream.
@@ -139,7 +139,7 @@ export class Sample {
         // seek to the beginning or any position in the stream
         await decStream.seek(0, SeekOrigin.Begin);
 
-        // decrypt and read data with a single call, you can also Seek() before Read()
+        // decrypt/read data in a single call, you can also Seek() before Read()
         let bytesRead = await decStream.read(decBuffer, 0, decBuffer.length);
         await decStream.close();
         await encInputStream.close();
@@ -165,7 +165,7 @@ export class Sample {
         encFile.setRequestedNonce(nonce);
         let stream = await encFile.getOutputStream();
 
-        // encrypt data and write with a single call
+        // encrypt/write data in a single call
         await stream.write(bytes, 0, bytes.length);
         await stream.flush();
         await stream.close();
@@ -176,7 +176,7 @@ export class Sample {
         let stream2 = await encFile2.getInputStream();
         let decBuff = new Uint8Array(1024);
 
-        // read data with a single call
+        // read/decrypt data in a single call
         let encBytesRead = await stream2.read(decBuff, 0, decBuff.length);
         let decString2 = new TextDecoder().decode(decBuff.slice(0,encBytesRead));
         print( "Decrypted text: " + decString2);
