@@ -54,7 +54,7 @@ export class JsNodeFile implements IRealFile {
      */
     public async createDirectory(dirName: string): Promise<IRealFile> {
         let nDirPath: string = this.#filePath + JsNodeFile.separator + dirName;
-        await mkdir(nDirPath);
+        await mkdir(nDirPath, { recursive: true });
         let dotNetDir: JsNodeFile = new JsNodeFile(nDirPath);
         return dotNetDir;
     }
@@ -288,7 +288,7 @@ export class JsNodeFile implements IRealFile {
      * @return True if created.
      */
     public async mkdir(): Promise<boolean> {
-        await mkdir(this.#filePath);
+        await mkdir(this.#filePath, { recursive: true });
         return await this.exists();
     }
 

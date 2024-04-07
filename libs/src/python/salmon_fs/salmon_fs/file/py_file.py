@@ -54,9 +54,7 @@ class PyFile(IRealFile):
          * @return The newly created directory.
         """
         n_dir_path: str = self.__file_path + os.sep + dir_name
-        os.mkdir(n_dir_path)
-        if not os.path.exists(n_dir_path):
-            raise RuntimeError("directory already exists")
+        os.makedirs(n_dir_path)
         ndir: PyFile = PyFile(n_dir_path)
         return ndir
 
@@ -262,7 +260,7 @@ class PyFile(IRealFile):
          * Create this directory under the current filepath.
          * @return True if created.
         """
-        os.mkdir(self.__file_path)
+        os.makedirs(self.__file_path)
         return self.exists()
 
     def __str__(self) -> str:
