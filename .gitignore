@@ -63,3 +63,5 @@ node_modules
 /libs/projects/SalmonLibsTypeScript.VS2022/SalmonLibsTypeScript.VS2022/test/data
 
 /samples/JavascriptSamples/lib
+/samples/PythonSamples/lib
+vault_*
