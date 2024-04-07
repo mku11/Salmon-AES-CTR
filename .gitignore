@@ -65,3 +65,4 @@ node_modules
 /samples/JavascriptSamples/lib
 /samples/PythonSamples/lib
 vault_*
+data_*
