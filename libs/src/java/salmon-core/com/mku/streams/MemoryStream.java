@@ -59,7 +59,8 @@ public class MemoryStream extends RandomAccessStream {
     /**
      * Create a memory stream.
      *
-     * @param bytes Existing byte array to use as backing buffer.
+     * @param bytes Optional existing byte array to use as backing buffer.
+     * If omitted a new backing array will be created automatically.
      */
     public MemoryStream(byte[] bytes) {
         this._length = bytes.length;

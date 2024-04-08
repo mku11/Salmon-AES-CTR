@@ -28,7 +28,7 @@ import java.io.InputStream;
 
 /***
  * Wrapper stream of RandomAccessStream to a native InputStream implementation.
- * Use this class to wrap any RandomAccessStream to a less powerful but familiar and compatible Java InputStream.
+ * Use this class to wrap any RandomAccessStream to a  Java InputStream.
  */
 public class InputStreamWrapper extends InputStream {
     private final RandomAccessStream stream;

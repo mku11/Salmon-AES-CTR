@@ -29,8 +29,7 @@ import com.mku.salmon.SalmonDefaultOptions;
 import java.io.IOException;
 
 /**
- * Abstract read-write seekable stream used by internal streams
- * (modeled after c# Stream class).
+ * Base class for read-write seekable streams.
  */
 public abstract class RandomAccessStream {
     private static final int DEFAULT_BUFFER_SIZE = 256 * 1024;
