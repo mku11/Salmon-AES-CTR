@@ -170,7 +170,7 @@ export abstract class SalmonDrive extends VirtualDrive {
     /**
      * Return the virtual root directory of the drive.
      * @return
-     * @throws SalmonAuthException
+     * @throws SalmonAuthException Thrown when error during authorization
      */
     public async getRoot(): Promise<IVirtualFile | null> {
         if (this.#realRoot == null || !await this.#realRoot.exists())
@@ -248,7 +248,7 @@ export abstract class SalmonDrive extends VirtualDrive {
      * @param masterKey The master key.
      * @param driveKey The drive key used for enc/dec of files and filenames.
      * @param hashKey The hash key used for data integrity.
-     * @param iterations
+     * @param iterations The iterations
      */
     public setKey(masterKey: Uint8Array, driveKey: Uint8Array, hashKey: Uint8Array, iterations: number): void {
         if (this.#key == null)
@@ -262,9 +262,9 @@ export abstract class SalmonDrive extends VirtualDrive {
     /**
      * Verify that the hash signature is correct
      *
-     * @param salmonConfig
-     * @param data
-     * @param hashKey
+     * @param salmonConfig The drive configuration
+     * @param data The data
+     * @param hashKey The hash key
      */
     async #verifyHash(salmonConfig: SalmonDriveConfig, data: Uint8Array, hashKey: Uint8Array): Promise<void> {
         let hashSignature: Uint8Array = salmonConfig.getHashSignature();
@@ -424,8 +424,8 @@ export abstract class SalmonDrive extends VirtualDrive {
      * @param password Text password to encrypt the drive configuration.
      * @param sequencer The sequencer to use.
      * @return The newly created drive.
-     * @throws IntegrityException
-     * @throws SequenceException
+     * @throws IntegrityException Thrown if the data are corrupt or tampered with.
+     * @throws SequenceException Thrown if error with the nonce sequence
      */
     public static async createDrive(dir: IRealFile, driveClassType: any, password: string, sequencer: INonceSequencer): Promise<SalmonDrive> {
         let drive: SalmonDrive = await SalmonDrive.#createDriveInstance(dir, true, driveClassType, sequencer);
@@ -441,7 +441,7 @@ export abstract class SalmonDrive extends VirtualDrive {
      * @param dirPath The target directory where the drive is located.
      * @param createIfNotExists Create the drive if it does not exist
      * @return
-     * @throws SalmonSecurityException
+     * @throws SalmonSecurityException Thrown when error with security
      */
     static async #createDriveInstance(dir: IRealFile, createIfNotExists: boolean, 
         driveClassType: any, sequencer: INonceSequencer | null = null): Promise<SalmonDrive> {
@@ -541,8 +541,8 @@ export abstract class SalmonDrive extends VirtualDrive {
      * Get the authorization ID for the current device.
      *
      * @return
-     * @throws SequenceException
-     * @throws SalmonAuthException
+     * @throws SequenceException Thrown if error with the nonce sequence
+     * @throws SalmonAuthException Thrown when error during authorization
      */
     public async getAuthId(): Promise<string> {
         return BitConverter.toHex(await this.getAuthIdBytes());
@@ -639,11 +639,11 @@ export abstract class SalmonDrive extends VirtualDrive {
     /**
      * Change the user password.
      * @param pass The new password.
-     * @throws IOException
-     * @throws SalmonAuthException
-     * @throws SalmonSecurityException
-     * @throws IntegrityException
-     * @throws SequenceException
+     * @throws IOException Thrown if there is an IO error.
+     * @throws SalmonAuthException Thrown when error during authorization
+     * @throws SalmonSecurityException Thrown when error with security
+     * @throws IntegrityException Thrown if the data are corrupt or tampered with.
+     * @throws SequenceException Thrown if error with the nonce sequence
      */
     public async setPassword(pass: string): Promise<void> {
         await this.#createConfig(pass);

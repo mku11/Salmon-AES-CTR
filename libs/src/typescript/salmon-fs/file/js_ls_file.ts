@@ -56,7 +56,7 @@ export class JsLocalStorageFile implements IRealFile {
      * Create a file under this directory.
      * @param filename The name of the new file.
      * @return The newly created file.
-     * @throws IOException
+     * @throws IOException Thrown if there is an IO error.
      */
     public async createFile(filename: string): Promise<IRealFile> {
 		let child: IRealFile = new JsLocalStorageFile(this.#filePath + JsLocalStorageFile.separator + filename);
@@ -204,7 +204,7 @@ export class JsLocalStorageFile implements IRealFile {
      * @param newName   New filename
      * @param progressListener Observer to notify when progress changes.
      * @return The copied file. Use this file for subsequent operations instead of the original.
-     * @throws IOException
+     * @throws IOException Thrown if there is an IO error.
      */
     public async copy(newDir: IRealFile, newName: string | null = null, progressListener: ((position: number, length: number) => void) | null = null): Promise<IRealFile | null> {
         throw new Error("Not supported");

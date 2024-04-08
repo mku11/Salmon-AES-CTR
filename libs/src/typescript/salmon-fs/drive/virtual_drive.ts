@@ -46,14 +46,14 @@ export abstract class VirtualDrive {
 
     /**
      * Get a virtual file backed by a real file.
-     * @param file 
+     * @param file The real file
      */
     public abstract getFile(file: IRealFile): IVirtualFile;
 	
 	/**
      * Return the virtual root directory of the drive.
      * @return
-     * @throws SalmonAuthException
+     * @throws SalmonAuthException Thrown when error during authorization
      */
 	public abstract getRoot(): Promise<IVirtualFile | null>;
 }

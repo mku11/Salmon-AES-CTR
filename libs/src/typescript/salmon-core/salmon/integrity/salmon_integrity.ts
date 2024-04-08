@@ -106,7 +106,7 @@ export class SalmonIntegrity {
      * @param {Uint8Array} key         Key that will be used
      * @param {Uint8Array | null} includeData Additional data to be included in the calculation.
      * @return {Promise<Uint8Array>} The hash.
-     * @throws IntegrityException
+     * @throws IntegrityException Thrown if the data are corrupt or tampered with.
      */
     public static async calculateHash(provider: IHashProvider, buffer: Uint8Array, offset: number, count: number,
         key: Uint8Array, includeData: Uint8Array | null): Promise<Uint8Array> {
@@ -190,7 +190,7 @@ export class SalmonIntegrity {
      * @param {Uint8Array} buffer The buffer containing the data chunks.
      * @param {boolean} includeHeaderData Include the header data in the first chunk.
      * @return {Promise<Uint8Array[] | null>} The hash signatures.
-     * @throws IntegrityException
+     * @throws IntegrityException Thrown if the data are corrupt or tampered with.
      */
     public async generateHashes(buffer: Uint8Array, includeHeaderData: Uint8Array | null): Promise<Uint8Array[] | null> {
         if (!this.#integrity)
@@ -226,7 +226,7 @@ export class SalmonIntegrity {
      * @param {Uint8Array[]} hashes The hashes to verify.
      * @param {number} buffer The buffer that contains the chunks to verify the hashes.
      * @param {boolean| null} includeHeaderData
-     * @throws IntegrityException
+     * @throws IntegrityException Thrown if the data are corrupt or tampered with.
      */
     public async verifyHashes(hashes: Uint8Array[], buffer: Uint8Array, includeHeaderData: Uint8Array | null) {
         let chunk: number = 0;

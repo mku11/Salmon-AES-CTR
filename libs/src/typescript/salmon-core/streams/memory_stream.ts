@@ -133,7 +133,7 @@ export class MemoryStream extends RandomAccessStream {
      * @param {number} offset The offset of the buffer that will be used to write the bytes.
      * @param {number} count The length of the bytes that can be read from the stream and written to the buffer.
      * @return {Promise<number>} The number of bytes read.
-     * @throws IOException
+     * @throws IOException Thrown if there is an IO error.
      */
     public override async read(buffer: Uint8Array, offset: number, count: number): Promise<number> {
         const bytesRead: number = Math.min(this.#length - await this.getPosition(), count);

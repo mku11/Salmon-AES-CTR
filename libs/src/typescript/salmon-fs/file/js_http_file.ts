@@ -65,7 +65,7 @@ export class JsHttpFile implements IRealFile {
      * Create a file under this directory.
      * @param filename The name of the new file.
      * @return The newly created file.
-     * @throws IOException
+     * @throws IOException Thrown if there is an IO error.
      */
     public createFile(filename: string): Promise<IRealFile> {
         throw new Error("Unsupported Operation, readonly filesystem");
@@ -279,7 +279,7 @@ export class JsHttpFile implements IRealFile {
      * @param newName   New filename
      * @param progressListener Observer to notify when progress changes.
      * @return The copied file. Use this file for subsequent operations instead of the original.
-     * @throws IOException
+     * @throws IOException Thrown if there is an IO error.
      */
     public async copy(newDir: IRealFile, newName: string | null = null, progressListener: ((position: number, length: number) => void) | null = null): Promise<IRealFile> {
         throw new Error("Unsupported Operation, readonly filesystem");

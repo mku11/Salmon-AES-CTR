@@ -105,7 +105,7 @@ export abstract class SalmonAES256CTRTransformer implements ISalmonCTRTransforme
     /**
      * Syncs the Counter based on what AES block position the stream is at.
      * The block count is already excluding the header and the hash signatures.
-     * @param {number} position
+     * @param {number} position The new position to sync to
      */
     public syncCounter(position: number): void {
         let currBlock: number = Math.floor(position / SalmonAES256CTRTransformer.BLOCK_SIZE);
@@ -143,9 +143,9 @@ export abstract class SalmonAES256CTRTransformer implements ISalmonCTRTransforme
     /**
      * Initialize the transformer. Most common operations include precalculating expansion keys or
      * any other prior initialization for efficiency.
-     * @param {Uint8Array} key
-     * @param {Uint8Array} nonce
-     * @throws SalmonSecurityException
+     * @param {Uint8Array} key The key
+     * @param {Uint8Array} nonce The nonce
+     * @throws SalmonSecurityException Thrown when error with security
      */
     public async init(key: Uint8Array, nonce: Uint8Array): Promise<void> {
         this.#key = key;
@@ -196,7 +196,7 @@ export abstract class SalmonAES256CTRTransformer implements ISalmonCTRTransforme
 
     /**
      * Set the expanded key. This should be called once during initialization phase.
-     * @param {Uint8Array} expandedKey
+     * @param {Uint8Array} expandedKey The expanded key
      */
     public setExpandedKey(expandedKey: Uint8Array): void {
         this.#expandedKey = expandedKey;

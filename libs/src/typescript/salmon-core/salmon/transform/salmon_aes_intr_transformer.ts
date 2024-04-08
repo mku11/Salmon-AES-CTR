@@ -39,7 +39,7 @@ export class SalmonAesIntrTransformer extends SalmonNativeTransformer {
      * Initialize the native Aes intrinsics transformer.
      * @param {Uint8Array} key The AES key to use.
      * @param {Uint8Array} nonce The nonce to use.
-     * @throws SalmonSecurityException
+     * @throws SalmonSecurityException Thrown when error with security
      */
     public async init(key: Uint8Array, nonce: Uint8Array): Promise<void> {
         SalmonAesIntrTransformer.getNativeProxy().init(SalmonAesIntrTransformer.AES_IMPL_AES_INTR);

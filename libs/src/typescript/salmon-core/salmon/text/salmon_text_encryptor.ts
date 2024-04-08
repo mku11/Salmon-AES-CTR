@@ -43,10 +43,9 @@ export class SalmonTextEncryptor {
      * @param {Uint8Array | null} hashKey Hash key to be used for all chunks.
      * @param {Promise<string>} chunkSize The chunk size.
      * @returns {Promise<string>} The encrypted string.
-     * @throws IOException
-     * @throws SalmonSecurityException
-     * @throws IntegrityException
-     * @throws IOException
+     * @throws IOException Thrown if there is an IO error.
+     * @throws SalmonSecurityException Thrown when error with security
+     * @throws IntegrityException Thrown if the data are corrupt or tampered with.
      */
     public static async encryptString(text: string, key: Uint8Array, nonce: Uint8Array, header: boolean,
         integrity: boolean = false, hashKey: Uint8Array | null = null, chunkSize: number | null = null): Promise<string> {

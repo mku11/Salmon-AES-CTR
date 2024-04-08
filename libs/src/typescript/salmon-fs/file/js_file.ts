@@ -72,7 +72,7 @@ export class JsFile implements IRealFile {
      * Create a file under this directory.
      * @param filename The name of the new file.
      * @return The newly created file.
-     * @throws IOException
+     * @throws IOException Thrown if there is an IO error.
      */
     public async createFile(filename: string): Promise<IRealFile> {
         let nFileHandle: FileSystemFileHandle = await (this.#fileHandle as FileSystemDirectoryHandle)
@@ -254,7 +254,7 @@ export class JsFile implements IRealFile {
      * @param newName The new filename
      * @param progressListener Observer to notify when progress changes.
      * @return The moved file. Use this file for subsequent operations instead of the original.
-     * @throws IOException
+     * @throws IOException Thrown if there is an IO error.
      */
     public async move(newDir: IRealFile, newName: string | null = null, progressListener: ((position: number, length: number) => void) | null = null): Promise<IRealFile> {
         newName = newName != null ? newName : this.getBaseName();
@@ -289,7 +289,7 @@ export class JsFile implements IRealFile {
      * @param newName   New filename
      * @param progressListener Observer to notify when progress changes.
      * @return The copied file. Use this file for subsequent operations instead of the original.
-     * @throws IOException
+     * @throws IOException Thrown if there is an IO error.
      */
     public async copy(newDir: IRealFile, newName: string | null = null, progressListener: ((position: number, length: number) => void) | null = null): Promise<IRealFile | null> {
         newName = newName != null ? newName : this.getBaseName();

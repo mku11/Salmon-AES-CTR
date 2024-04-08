@@ -35,10 +35,10 @@ export class SalmonNonce {
      * Increase the sequential NONCE by a value of 1.
      * This implementation assumes that the NONCE length is 8 bytes or fewer so it can fit in a long.
      *
-     * @param {Uint8Array} startNonce
-     * @param {Uint8Array} endNonce
-     * @return {Uint8Array}
-     * @throws SalmonRangeExceededException
+     * @param {Uint8Array} startNonce The starting nonce
+     * @param {Uint8Array} endNonce The end nonce
+     * @return {Uint8Array} The nonce after incrementing
+     * @throws SalmonRangeExceededException Thrown if nonce has exceeded range
      */
     public static increaseNonce(startNonce: Uint8Array, endNonce: Uint8Array): Uint8Array {
         let nonce: number = BitConverter.toLong(startNonce, 0, SalmonGenerator.NONCE_LENGTH);
@@ -58,7 +58,7 @@ export class SalmonNonce {
      * @param {Uint8Array} startNonce The starting nonce.
      * @param {Uint8Array} endNonce The ending nonce in the sequence.
      * @return {Uint8Array} The byte array with the middle nonce.
-     * @throws SalmonSecurityException
+     * @throws SalmonSecurityException Thrown when error with security
      */
     public static splitNonceRange(startNonce: Uint8Array, endNonce: Uint8Array): Uint8Array {
         let start: number = BitConverter.toLong(startNonce, 0, SalmonGenerator.NONCE_LENGTH);

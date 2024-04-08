@@ -153,7 +153,7 @@ export interface IRealFile {
      *
      * @param {string} filename The name for the new file.
      * @return {Promise<IRealFile>} The newly create file.
-     * @throws IOException
+     * @throws IOException Thrown if there is an IO error.
      */
     createFile(filename: string): Promise<IRealFile>;
 
@@ -174,7 +174,7 @@ export interface IRealFile {
      * @param {string | null} newName          The new filename.
      * @param {((position: number, length: number) => void) | null} progressListener Observer to notify of the copy progress.
      * @return {Promise<IRealFile | null>} The file after the copy. Use this instance for any subsequent file operations.
-     * @throws IOException
+     * @throws IOException Thrown if there is an IO error.
      */
     copy(newDir: IRealFile, newName: string | null, progressListener: ((position: number, length: number) => void) | null): Promise<IRealFile | null>;
 
@@ -203,7 +203,7 @@ export interface IRealFile {
  * @param delete           True to delete the source files when complete
  * @param progressListener The progress listener
  * @return
- * @throws IOException
+ * @throws IOException Thrown if there is an IO error.
  */
 export async function copyFileContents(src: IRealFile, dest: IRealFile, deleteAfter: boolean,
     progressListener: ((position: number, length: number) => void) | null): Promise<boolean> {
@@ -232,7 +232,7 @@ export async function copyFileContents(src: IRealFile, dest: IRealFile, deleteAf
  * @param {((realfile: IRealFile) => Promise<string>) | null} autoRename Autorename callback (default is none).
  * @param {boolean} autoRenameFolders Apply autorename to folders also (default is true)
  * @param {((realfile: IRealFile, ex: Error) => void) | null} onFailed OnFailed callback
- * @throws IOException
+ * @throws IOException Thrown if there is an IO error.
  */
 export async function copyRecursively(src: IRealFile, destDir: IRealFile,
     progressListener: ((realfile: IRealFile, position: number, length: number) => void) | null = null,
@@ -357,8 +357,8 @@ export async function moveRecursively(file: IRealFile, destDir: IRealFile,
 
 /**
  * Delete a directory recursively
- * @param progressListener
- * @param onFailed
+ * @param progressListener The progress listener
+ * @param onFailed Callback when delete fails
  */
 export async function deleteRecursively(file: IRealFile, progressListener: (realfile: IRealFile, position: number, length: number) => void,
     onFailed: ((realFile: IRealFile, ex: Error) => void) | null): Promise<void> {

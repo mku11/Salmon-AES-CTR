@@ -56,24 +56,24 @@ export class SalmonNativeProxy implements INativeProxy {
     /**
      * Proxy Key schedule algorithm for expanding the 32 byte key to 240 bytes required
      *
-     * @param {Uint8Array} key
-     * @param {Uint8Array} expandedKey
+     * @param {Uint8Array} key The key
+     * @param {Uint8Array} expandedKey The expanded key
      */
     public expandKey(key: Uint8Array, expandedKey: Uint8Array): void {
         throw new Error("Not supported");
     }
 
     /**
-     * Proxy Transform the input byte array using AES-256 CTR mode
+     * Transform the input byte array using AES-256 CTR mode
      *
-     * @param {Uint8Array} key
-     * @param {Uint8Array} counter
-     * @param {Uint8Array} srcBuffer
-     * @param {number} srcOffset
-     * @param {Uint8Array} destBuffer
-     * @param {number} destOffset
-     * @param {number} count
-     * @return {number}
+     * @param {Uint8Array} key The key
+     * @param {Uint8Array} counter The counter
+     * @param {Uint8Array} srcBuffer The source buffer
+     * @param {number} srcOffset The source buffer offset
+     * @param {Uint8Array} destBuffer The destination buffer
+     * @param {number} destOffset The destination buffer offset
+     * @param {number} count The number of bytes to transform
+     * @return {number} The number of bytes transformed
      */
     public transform(key: Uint8Array, counter: Uint8Array, srcBuffer: Uint8Array, srcOffset: number, destBuffer: Uint8Array, destOffset: number, count: number): number {
         throw new Error("Not supported");

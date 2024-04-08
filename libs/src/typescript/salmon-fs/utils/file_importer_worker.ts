@@ -32,7 +32,7 @@ export class FileImporterWorker {
 
     /**
      * Override if you want to source from another source
-     * @param params 
+     * @param params The parameters object
      * @returns 
      */
     async getSourceFile(params: any): Promise<IRealFile> {

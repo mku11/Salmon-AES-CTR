@@ -52,7 +52,7 @@ export class CacheBuffer {
     /**
      * Instantiate a cache buffer.
      *
-     * @param bufferSize
+     * @param bufferSize The buffer size
      */
     public constructor(bufferSize: number) {
         this.buffer = new Uint8Array(bufferSize);

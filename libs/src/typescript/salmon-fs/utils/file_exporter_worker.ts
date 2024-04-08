@@ -32,7 +32,7 @@ export class FileExporterWorker {
     
     /**
      * Override to specify the target file.
-     * @param params 
+     * @param params The parameters
      * @returns 
      */
     async getSourceFile(params: any): Promise<IVirtualFile | null> {
@@ -41,7 +41,7 @@ export class FileExporterWorker {
 
     /**
      * Override if you want to source from another source
-     * @param params 
+     * @param params The parameters
      * @returns 
      */
     async getTargetFile(params: any): Promise<IRealFile> {

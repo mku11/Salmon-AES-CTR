@@ -28,6 +28,10 @@ import { importFilePart } from "./file_importer_helper.js";
 import { IOException } from "../../salmon-core/streams/io_exception.js";
 import { RandomAccessStream } from "../../salmon-core/streams/random_access_stream.js";
 
+/**
+ * Abstract class for importing files to a drive.
+ * Make sure you use setWorkerPath() with the correct worker script.
+ */
 export abstract class FileImporter {
     #workerPath = './lib/salmon-fs/salmon/utils/file_importer_worker.js';
 
@@ -88,7 +92,7 @@ export abstract class FileImporter {
      * @param bufferSize Buffer size to be used when encrypting files.
      *                   If using integrity this value has to be a multiple of the Chunk size.
      *                   If not using integrity it should be a multiple of the AES block size for better performance
-     * @param threads
+     * @param threads The threads
      */
     public initialize(bufferSize: number, threads: number) {
         this.#bufferSize = bufferSize;

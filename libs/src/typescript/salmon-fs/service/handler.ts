@@ -26,13 +26,14 @@ SOFTWARE.
 /**
  * Provides a handler that uses a service worker to inject decrypt streams
  * for specific urls. It can be used with Elements like video, img, etc.
+ * Make sure you use setWorkerPath() with the correct worker script.
  */
 export class Handler {
 	static #instance: Handler | null = null;
-	static #workerPath: string | null = null;
+	#workerPath: string | null = null;
 
-	public static setWorkerPath(workerPath: string) {
-		Handler.#workerPath = workerPath;
+	public setWorkerPath(workerPath: string) {
+		this.#workerPath = workerPath;
 	}
 
 	public static getInstance() {
@@ -44,7 +45,7 @@ export class Handler {
 
 	public async register(path: string | null = null, params: any = null, remove: boolean = false) {
 		return new Promise((resolve, reject) => {
-			let workerPath: string | null = Handler.#workerPath;
+			let workerPath: string | null = this.#workerPath;
 			if(workerPath == null)
 				throw new Error("Worker path is not set");
 			if ('serviceWorker' in navigator) {

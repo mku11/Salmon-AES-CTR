@@ -25,8 +25,8 @@ SOFTWARE.
 import { RandomAccessStream, SeekOrigin } from "./random_access_stream.js";
 
 /***
- * Wrapper stream of AbsStream to a native ReadableStream interface.
- * Use this class to wrap any AbsStream to a less powerful but familiar and compatible Java InputStream.
+ * Wrapper stream of RandomAccessStream to a native ReadableStream interface.
+ * Use this class to wrap any RandomAccessStream to a javascript ReadableStream.
  */
 export class ReadableStreamWrapper {
     static readonly #BUFFER_SIZE = 4 * 1024 * 1024;

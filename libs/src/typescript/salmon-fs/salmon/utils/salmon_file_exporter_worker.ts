@@ -31,7 +31,7 @@ import { SalmonFile } from "../salmon_file.js";
 export class SalmonFileExporterWorker extends FileExporterWorker {
     /**
      * Get an instance of the file to export
-     * @param params 
+     * @param params The parameters
      * @returns 
      */
     async getSourceFile(params: any): Promise<IVirtualFile | null> {

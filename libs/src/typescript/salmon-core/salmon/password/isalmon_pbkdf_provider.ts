@@ -65,7 +65,7 @@ export interface ISalmonPbkdfProvider {
      * @param {number} outputBytes The length of the output key.
      * @param {PbkdfAlgo} pbkdfAlgo The hash algorithm to use.
      * @return {Promise<Uint8Array>} The key.
-     * @throws SalmonSecurityException
+     * @throws SalmonSecurityException Thrown when error with security
      */
     getKey(password: string, salt: Uint8Array, iterations: number, outputBytes: number, pbkdfAlgo: PbkdfAlgo): Promise<Uint8Array>;
 }

@@ -33,9 +33,10 @@ import { decryptData } from "./salmon_decryptor_helper.js";
 
 /**
  * Utility class that decrypts byte arrays.
+ * Make sure you use setWorkerPath() with the correct worker script.
  */
 export class SalmonDecryptor {
-    static #workerPath = './lib/salmon-core/salmon/salmon_decryptor_worker.js';
+    #workerPath = './lib/salmon-core/salmon/salmon_decryptor_worker.js';
 
     /**
      * The number of parallel threads to use.
@@ -85,8 +86,8 @@ export class SalmonDecryptor {
      * @return {Promise<Uint8Array>} The byte array with the decrypted data.
      * @ Thrown if there is a problem with decoding the array.
      * @throws SalmonSecurityException Thrown if the key and nonce are not provided.
-     * @throws IOException
-     * @throws IntegrityException
+     * @throws IOException Thrown if there is an IO error.
+     * @throws IntegrityException Thrown if the data are corrupt or tampered with.
      */
     public async decrypt(data: Uint8Array, key: Uint8Array, nonce: Uint8Array | null,
         hasHeaderData: boolean,
@@ -190,7 +191,7 @@ export class SalmonDecryptor {
             this.#promises.push(new Promise(async (resolve, reject) => {
                 if (typeof process !== 'object') {
                     if (this.#workers[i] == null)
-                        this.#workers[i] = new Worker(SalmonDecryptor.#workerPath, { type: 'module' });
+                        this.#workers[i] = new Worker(this.#workerPath, { type: 'module' });
                     this.#workers[i].addEventListener('message', (event: { data: unknown }) => {
                         resolve(event.data);
                     });
@@ -200,7 +201,7 @@ export class SalmonDecryptor {
                 } else {
                     const { Worker } = await import("worker_threads");
                     if (this.#workers[i] == null)
-                        this.#workers[i] = new Worker(SalmonDecryptor.#workerPath);
+                        this.#workers[i] = new Worker(this.#workerPath);
                     this.#workers[i].on('message', (event: any) => {
                         resolve(event);
                     });
@@ -250,15 +251,15 @@ export class SalmonDecryptor {
      * the root of your main javascript app.
      * @param {string} path The path to the worker javascript.
      */
-    public static setWorkerPath(path: string) {
-        SalmonDecryptor.#workerPath = path;
+    public setWorkerPath(path: string) {
+        this.#workerPath = path;
     }
 
     /**
      * Get the current path for the worker javascript.
      * @returns {string} The path to the worker javascript.
      */
-    public static getWorkerPath(): string {
-        return SalmonDecryptor.#workerPath;
+    public getWorkerPath(): string {
+        return this.#workerPath;
     }
 }

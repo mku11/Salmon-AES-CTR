@@ -23,7 +23,7 @@ SOFTWARE.
 */
 
 /**
- * Proxy interface for use with native libraries (TinyAES wasm).
+ * Proxy interface for use with native libraries.
  */
 export interface INativeProxy {
     /**

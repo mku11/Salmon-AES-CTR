@@ -129,7 +129,7 @@ export class SalmonDriveGenerator {
 
     /**
      * Set the default iterations.
-     * @param iterations
+     * @param iterations The iterations
      */
     public static setIterations(iterations: number): void {
         SalmonDriveGenerator.#iterations = iterations;

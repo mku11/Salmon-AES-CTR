@@ -119,7 +119,7 @@ export class JsNodeFileStream extends RandomAccessStream {
     /**
      * Get the current position of the stream.
      * @return
-     * @throws IOException
+     * @throws IOException Thrown if there is an IO error.
      */
     public override async getPosition(): Promise<number> {
         return this.#_position;
@@ -128,7 +128,7 @@ export class JsNodeFileStream extends RandomAccessStream {
     /**
      * Set the current position of the stream.
      * @param value The new position.
-     * @throws IOException
+     * @throws IOException Thrown if there is an IO error.
      */
     public override async setPosition(value: number): Promise<void> {
         this.#_position = value;
@@ -138,7 +138,7 @@ export class JsNodeFileStream extends RandomAccessStream {
     /**
      * Set the length of the stream. This is applicable for write streams only.
      * @param value The new length.
-     * @throws IOException
+     * @throws IOException Thrown if there is an IO error.
      */
     public override async setLength(value: number): Promise<void> {
         await truncate(this.#file.getAbsolutePath(), value);
@@ -150,7 +150,7 @@ export class JsNodeFileStream extends RandomAccessStream {
      * @param offset The offset of the buffer to start writing the data.
      * @param count The maximum number of bytes to read from.
      * @return
-     * @throws IOException
+     * @throws IOException Thrown if there is an IO error.
      */
     public override async read(buffer: Uint8Array, offset: number, count: number): Promise<number> {
         let fd: number = await this.#getFd();
@@ -164,7 +164,7 @@ export class JsNodeFileStream extends RandomAccessStream {
      * @param buffer The buffer to read the data from.
      * @param offset The offset of the buffer to start reading the data.
      * @param count The maximum number of bytes to read from the buffer.
-     * @throws IOException
+     * @throws IOException Thrown if there is an IO error.
      */
     public override async write(buffer: Uint8Array, offset: number, count: number): Promise<void> {
         let fd: number = await this.#getFd();
@@ -177,7 +177,7 @@ export class JsNodeFileStream extends RandomAccessStream {
      * @param offset The position to seek to.
      * @param origin The type of origin {@link RandomAccessStream.SeekOrigin}
      * @return The new position after seeking.
-     * @throws IOException
+     * @throws IOException Thrown if there is an IO error.
      */
     public override async seek(offset: number, origin: SeekOrigin): Promise<number> {
         let pos: number = this.#_position;
@@ -206,7 +206,7 @@ export class JsNodeFileStream extends RandomAccessStream {
 
     /**
      * Close this stream and associated resources.
-     * @throws IOException
+     * @throws IOException Thrown if there is an IO error.
      */
     public override async close(): Promise<void> {
         if (this.#fd)

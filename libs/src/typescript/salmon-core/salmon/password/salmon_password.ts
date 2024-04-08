@@ -92,7 +92,7 @@ export class SalmonPassword {
      * @param {number} iterations The number of iterations the key derivation algorithm will use
      * @param {number} length     The length of master key to return
      * @return {Promise<Uint8Array>} The derived master key.
-     * @throws SalmonSecurityException
+     * @throws SalmonSecurityException Thrown when error with security
      */
     public static async getMasterKey(pass: string, salt: Uint8Array, iterations: number, length: number): Promise<Uint8Array> {
         let masterKey: Uint8Array = await SalmonPassword.getKeyFromPassword(pass, salt, iterations, length);
@@ -107,7 +107,7 @@ export class SalmonPassword {
      * @param {number} iterations  The iterations to be used with Pbkdf2
      * @param {number} outputBytes The number of bytes for the key
      * @return {Promise<Uint8Array>} The derived key.
-     * @throws SalmonSecurityException
+     * @throws SalmonSecurityException Thrown when error with security
      */
     public static async getKeyFromPassword(password: string, salt: Uint8Array, iterations: number, outputBytes: number): Promise<Uint8Array> {
         if (SalmonPassword.#pbkdfAlgo == PbkdfAlgo.SHA1 && !SalmonPassword.#ENABLE_SHA1)

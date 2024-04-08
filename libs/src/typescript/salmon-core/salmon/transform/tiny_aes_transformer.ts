@@ -39,7 +39,7 @@ export class TinyAesTransformer extends SalmonNativeTransformer {
      *
      * @param {Uint8Array} key   The AES key to use.
      * @param {Uint8Array} nonce The nonce to use.
-     * @throws SalmonSecurityException
+     * @throws SalmonSecurityException Thrown when error with security
      */
     public override async init(key: Uint8Array, nonce: Uint8Array): Promise<void> {
         SalmonAesIntrTransformer.getNativeProxy().init(TinyAesTransformer.AES_IMPL_TINY_AES);

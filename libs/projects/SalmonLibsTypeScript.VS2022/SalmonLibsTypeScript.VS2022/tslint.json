@@ -8,7 +8,9 @@
   "rules": {
     "no-circular-imports": { "severity": "warn" },
     "no-floating-promises": true,
-    "triple-equals":  false
+    "triple-equals":  false,
+    "jsdoc-format": true,
+    "jsdoc": true
   },
   "rulesDirectory": []
 }

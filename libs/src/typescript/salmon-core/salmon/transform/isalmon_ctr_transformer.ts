@@ -32,7 +32,7 @@ export interface ISalmonCTRTransformer {
      * Initialize the transformer.
      * @param {Uint8Array} key The AES key to use.
      * @param {Uint8Array} nonce The nonce to use.
-     * @throws SalmonSecurityException
+     * @throws SalmonSecurityException Thrown when error with security
      */
     init(key: Uint8Array, nonce: Uint8Array): Promise<void>;
 
@@ -44,8 +44,8 @@ export interface ISalmonCTRTransformer {
      * @param {number} destOffset The destination byte offset.
      * @param {number} count The number of bytes to transform.
      * @return {Promise<number>} The number of bytes transformed.
-     * @throws SalmonSecurityException
-     * @throws SalmonRangeExceededException
+     * @throws SalmonSecurityException Thrown when error with security
+     * @throws SalmonRangeExceededException Thrown if nonce has exceeded range
      */
     encryptData(srcBuffer: Uint8Array, srcOffset: number, destBuffer: Uint8Array, destOffset: number, count: number): Promise<number>;
 
@@ -57,8 +57,8 @@ export interface ISalmonCTRTransformer {
      * @param {number} destOffset The destination byte offset.
      * @param {number} count The number of bytes to transform.
      * @return {Promise<number>} The number of bytes transformed.
-     * @throws SalmonSecurityException
-     * @throws SalmonRangeExceededException
+     * @throws SalmonSecurityException Thrown when error with security
+     * @throws SalmonRangeExceededException Thrown if nonce has exceeded range
      */
     decryptData(srcBuffer: Uint8Array, srcOffset: number, destBuffer: Uint8Array, destOffset: number, count: number): Promise<number>;
 
@@ -95,8 +95,8 @@ export interface ISalmonCTRTransformer {
      * Calculate the value of the counter based on the current block. After an encryption
      * operation (ie sync or read) the block will be incremented. This method calculates
      * the Counter.
-     * @param {number} position
-     * @throws SalmonRangeExceededException
+     * @param {number} position The position to sync to
+     * @throws SalmonRangeExceededException Thrown if nonce has exceeded range
      */
     syncCounter(position: number): void;
 }

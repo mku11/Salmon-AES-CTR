@@ -118,7 +118,7 @@ export class SalmonFile implements IVirtualFile {
      * Get the custom {@link SalmonHeader} from this file.
      *
      * @return
-     * @throws IOException
+     * @throws IOException Thrown if there is an IO error.
      */
     public async getHeader(): Promise<SalmonHeader | null> {
         if (!(await this.exists()))
@@ -162,9 +162,9 @@ export class SalmonFile implements IVirtualFile {
      * Retrieves a SalmonStream that will be used for decrypting the file contents.
      *
      * @return
-     * @throws IOException
-     * @throws SalmonSecurityException
-     * @throws IntegrityException
+     * @throws IOException Thrown if there is an IO error.
+     * @throws SalmonSecurityException Thrown when error with security
+     * @throws IntegrityException Thrown if the data are corrupt or tampered with.
      */
     public async getInputStream(): Promise<SalmonStream> {
         if (!(await this.exists()))
@@ -317,8 +317,10 @@ export class SalmonFile implements IVirtualFile {
     }
 
     /**
-     * @param integrity
-     * @param hashKey
+     * Appy integrity when writing to file.
+     * 
+     * @param integrity True to apply integrity
+     * @param hashKey The hash key
      * @param requestChunkSize 0 use default file chunk.
      *                         A positive number to specify integrity chunks.
      */
@@ -383,7 +385,7 @@ export class SalmonFile implements IVirtualFile {
      * Set the nonce for encryption/decryption for this file.
      *
      * @param nonce Nonce to be used.
-     * @throws SalmonSecurityException
+     * @throws SalmonSecurityException Thrown when error with security
      */
     public setRequestedNonce(nonce: Uint8Array): void {
         if (this.#drive != null)
@@ -472,10 +474,10 @@ export class SalmonFile implements IVirtualFile {
      *
      * @param filename The filename to search for
      * @return
-     * @throws SalmonSecurityException
-     * @throws IntegrityException
-     * @throws IOException
-     * @throws SalmonAuthException
+     * @throws SalmonSecurityException Thrown when error with security
+     * @throws IntegrityException Thrown if the data are corrupt or tampered with.
+     * @throws IOException Thrown if there is an IO error.
+     * @throws SalmonAuthException Thrown when error during authorization
      */
     public async getChild(filename: string): Promise<SalmonFile | null> {
         let files: SalmonFile[] = await this.listFiles();
@@ -824,7 +826,7 @@ export class SalmonFile implements IVirtualFile {
      * @param dir                Target directory.
      * @param OnProgressListener Observer to notify when move progress changes.
      * @return
-     * @throws IOException
+     * @throws IOException Thrown if there is an IO error.
      */
     public async move(dir: SalmonFile, OnProgressListener: ((position: number, length: number) => void) | null = null): Promise<SalmonFile> {
         let newRealFile: IRealFile = await this.#realFile.move(dir.getRealFile(), null, OnProgressListener);
@@ -837,7 +839,7 @@ export class SalmonFile implements IVirtualFile {
      * @param dir                Target directory.
      * @param OnProgressListener Observer to notify when copy progress changes.
      * @return
-     * @throws IOException
+     * @throws IOException Thrown if there is an IO error.
      */
     public async copy(dir: SalmonFile, OnProgressListener: ((position: number, length: number) => void) | null = null): Promise<SalmonFile> {
         let newRealFile: IRealFile | null = await this.#realFile.copy(dir.getRealFile(), null, OnProgressListener);
@@ -849,10 +851,10 @@ export class SalmonFile implements IVirtualFile {
     /**
      * Copy a directory recursively
      *
-     * @param dest
-     * @param progressListener
-     * @param autoRename
-     * @param onFailed
+     * @param dest The destination directory
+     * @param progressListener The progress listener
+     * @param autoRename The autorename function
+     * @param onFailed Callback when copy has failed
      */
     public async copyRecursively(dest: SalmonFile,
         progressListener: ((salmonFile: SalmonFile, position: number, length: number) => void) | null = null,
@@ -881,10 +883,10 @@ export class SalmonFile implements IVirtualFile {
     /**
      * Move a directory recursively
      *
-     * @param dest
-     * @param progressListener
-     * @param autoRename
-     * @param onFailed
+     * @param dest The destination directory
+     * @param progressListener The progress listener
+     * @param autoRename The autorename function
+     * @param onFailed Callback when move has failed
      */
     public async moveRecursively(dest: SalmonFile,
         progressListener: ((salmonFile: SalmonFile, position: number, length: number) => void) | null,

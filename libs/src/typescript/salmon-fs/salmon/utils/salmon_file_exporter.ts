@@ -29,6 +29,10 @@ import { FileExporter } from "../../utils/file_exporter.js";
 import { SalmonAuthException } from "../salmon_auth_exception.js";
 import { SalmonFile } from "../salmon_file.js";
 
+/**
+ * Exports files from a drive.
+ * Make sure you use setWorkerPath() with the correct worker script.
+ */
 export class SalmonFileExporter extends FileExporter {
     public constructor(bufferSize: number, threads: number) {
         super();

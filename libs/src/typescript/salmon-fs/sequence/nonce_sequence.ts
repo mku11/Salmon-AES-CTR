@@ -77,8 +77,8 @@ export class NonceSequence {
     }
 
     /**
-     * Set the drive ID.
-     * @param id
+     * Set the id.
+     * @param id The sequence id
      */
     setId(id: string): void {
         this.id = id;
@@ -94,7 +94,7 @@ export class NonceSequence {
 
     /**
      * Set the authorization Id for a specific device.
-     * @param authId
+     * @param authId The authorization id
      */
     setAuthId(authId: string): void {
         this.authId = authId;
@@ -110,7 +110,7 @@ export class NonceSequence {
 
     /**
      * Set the next nonce.
-     * @param nextNonce
+     * @param nextNonce The next nonce
      */
     setNextNonce(nextNonce: Uint8Array): void {
         this.nextNonce = nextNonce;
@@ -126,7 +126,7 @@ export class NonceSequence {
 
     /**
      * Set the max nonce.
-     * @param maxNonce
+     * @param maxNonce The max nonce
      */
     setMaxNonce(maxNonce: Uint8Array): void {
         this.maxNonce = maxNonce;
@@ -142,7 +142,7 @@ export class NonceSequence {
 
     /**
      * Set the sequence status.
-     * @param status
+     * @param status The status
      */
     setStatus(status: Status): void {
         this.status = status;

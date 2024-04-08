@@ -68,7 +68,7 @@ export class SalmonDriveKey {
 
     /**
      * Set the drive key.
-     * @param this.driveKey
+     * @param this.driveKey The drive key
      */
     public setDriveKey(driveKey: Uint8Array | null): void {
         this.#driveKey = driveKey;
@@ -76,7 +76,7 @@ export class SalmonDriveKey {
 
     /**
      * Set the hash key.
-     * @param hashKey
+     * @param hashKey The hash key
      */
     public setHashKey(hashKey: Uint8Array | null): void {
         this.#hashKey = hashKey;
@@ -92,7 +92,7 @@ export class SalmonDriveKey {
 
     /**
      * Set the master key.
-     * @param masterKey
+     * @param masterKey The master key
      */
     public setMasterKey(masterKey: Uint8Array | null): void {
         this.#masterKey = masterKey;
@@ -108,7 +108,7 @@ export class SalmonDriveKey {
 
     /**
      * Set the number of iterations for the master key derivation.
-     * @param iterations
+     * @param iterations The iterations
      */
     public setIterations(iterations: number): void {
         this.#iterations = iterations;

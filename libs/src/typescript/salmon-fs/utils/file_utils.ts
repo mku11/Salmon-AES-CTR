@@ -66,7 +66,7 @@ export class FileUtils {
 
     /**
      * Detect if filename is a pdf file.
-     * @param filename
+     * @param filename The file name
      * @return
      */
     public static isPdf(filename: string): boolean {
@@ -77,7 +77,7 @@ export class FileUtils {
     /**
      * Return the extension of a filename.
      *
-     * @param fileName
+     * @param fileName The file name
      */
     public static getExtensionFromFileName(fileName: string): string {
         if (fileName == null)
@@ -92,7 +92,7 @@ export class FileUtils {
     /**
      * Return a filename without extension
      *
-     * @param fileName
+     * @param fileName The file name
      */
     public static getFileNameWithoutExtension(fileName: string): string {
         if (fileName == null)

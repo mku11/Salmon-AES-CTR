@@ -102,7 +102,7 @@ export class SalmonHeader {
      * Parse the header data from the stream
      * @param {RandomAccessStream} stream The stream.
      * @return {Promise<SalmonHeader>} The header
-     * @throws IOException
+     * @throws IOException Thrown if there is an IO error.
      */
     public static async parseHeaderData(stream: RandomAccessStream): Promise<SalmonHeader> {
         let header: SalmonHeader = new SalmonHeader();

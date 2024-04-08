@@ -29,6 +29,10 @@ import { SalmonAuthException } from "../salmon_auth_exception.js";
 import { FileImporter } from "../../utils/file_importer.js";
 import { SalmonFile } from "../salmon_file.js";
 
+/**
+ * Imports files to a drive.
+ * Make sure you use setWorkerPath() with the correct worker script.
+ */
 export class SalmonFileImporter extends FileImporter {
 
     /**
@@ -37,7 +41,7 @@ export class SalmonFileImporter extends FileImporter {
      * @param bufferSize Buffer size to be used when encrypting files.
      *                   If using integrity this value has to be a multiple of the Chunk size.
      *                   If not using integrity it should be a multiple of the AES block size for better performance
-     * @param threads
+     * @param threads The threads to use
      */
     public constructor(bufferSize: number, threads: number) {
         super();

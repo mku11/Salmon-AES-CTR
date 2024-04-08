@@ -34,9 +34,9 @@ import { SalmonAuthException } from "../salmon_auth_exception.js";
  * Implementation of a javascript ReadableStream for seeking and reading a SalmonFile.
  * This class provides a seekable source with parallel substreams and cached buffers
  * for performance.
+ * Make sure you use setWorkerPath() with the correct worker script.
  */
 export class SalmonFileReadableStream {
-    static #workerPath = './lib/salmon-fs/salmon/streams/salmon_file_readable_stream_worker.js';
 
     // Default cache buffer should be high enough for some mpeg videos to work
     // the cache buffers should be aligned to the SalmonFile chunk size for efficiency
@@ -100,20 +100,18 @@ export class SalmonFileReadableStream {
         readableStream.setPositionEnd = async function (position: any): Promise<void> {
             await reader.setPositionEnd(position);
         }
-
+        readableStream.setWorkerPath = function (path: string) {
+            reader.setWorkerPath(path);
+        }
+        readableStream.getWorkerPath = function (): string {
+            return reader.getWorkerPath();
+        }
         return readableStream;
-    }
-
-    public static setWorkerPath(path: string) {
-        SalmonFileReadableStream.#workerPath = path;
-    }
-
-    public static getWorkerPath(): string {
-        return SalmonFileReadableStream.#workerPath;
     }
 }
 
 export class ReadableStreamFileReader {
+    private workerPath = './lib/salmon-fs/salmon/streams/salmon_file_readable_stream_worker.js';
     private readonly buffersCount: number;
     private readonly salmonFile: SalmonFile;
     private readonly cacheBufferSize: number;
@@ -291,7 +289,7 @@ export class ReadableStreamFileReader {
                 if (typeof process !== 'object') {
 
                     if (this.#workers[i] == null)
-                        this.#workers[i] = new Worker(SalmonFileReadableStream.getWorkerPath(), { type: 'module' });
+                        this.#workers[i] = new Worker(this.getWorkerPath(), { type: 'module' });
                     this.#workers[i].addEventListener('message', (event: any) => {
                         resolve(event.data);
                     });
@@ -301,7 +299,7 @@ export class ReadableStreamFileReader {
                 } else {
                     const { Worker } = await import("worker_threads");
                     if (this.#workers[i] == null)
-                        this.#workers[i] = new Worker(SalmonFileReadableStream.getWorkerPath());
+                        this.#workers[i] = new Worker(this.getWorkerPath());
                     this.#workers[i].on('message', (event: any) => {
                         if (event.message == 'complete') {
                             resolve(event);
@@ -440,7 +438,7 @@ export class ReadableStreamFileReader {
     /**
      * Close all back streams.
      *
-     * @throws IOException
+     * @throws IOException Thrown if there is an IO error.
      */
     private async closeStream(): Promise<void> {
         if (this.stream != null)
@@ -458,5 +456,12 @@ export class ReadableStreamFileReader {
             this.#workers[i].terminate();
             this.#workers[i] = null;
         }
+    }
+
+    setWorkerPath(path: string) {
+        this.workerPath = path;
+    }
+    getWorkerPath(): string {
+        return this.workerPath;
     }
 }

@@ -28,6 +28,10 @@ import { exportFilePart } from "./file_exporter_helper.js";
 import { RandomAccessStream } from "../../salmon-core/streams/random_access_stream.js";
 import { IOException } from "../../salmon-core/streams/io_exception.js";
 
+/**
+ * Abstract class for exporting files from a drive.
+ * Make sure you use setWorkerPath() with the correct worker script.
+ */
 export abstract class FileExporter {
     #workerPath = './lib/salmon-fs/salmon/utils/file_exporter_worker.js';
 
@@ -265,7 +269,7 @@ export abstract class FileExporter {
 
     /**
      * Override with your specific error transformation
-     * @param err 
+     * @param err The error
      * @returns 
      */
     getError(err: any) {

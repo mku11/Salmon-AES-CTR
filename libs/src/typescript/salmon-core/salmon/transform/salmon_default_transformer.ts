@@ -39,7 +39,7 @@ export class SalmonDefaultTransformer extends SalmonAES256CTRTransformer {
      * Initialize the default Java AES cipher transformer.
      * @param {Uint8Array} key The AES256 key to use.
      * @param {Uint8Array} nonce The nonce to use.
-     * @throws SalmonSecurityException
+     * @throws SalmonSecurityException Thrown when error with security
      */
     public async init(key: Uint8Array, nonce: Uint8Array): Promise<void> {
         await super.init(key, nonce);
@@ -59,7 +59,7 @@ export class SalmonDefaultTransformer extends SalmonAES256CTRTransformer {
      * @param {number} destOffset The destination byte offset.
      * @param {number} count The number of bytes to transform.
      * @return {Promise<number>} The number of bytes transformed.
-     * @throws SalmonSecurityException
+     * @throws SalmonSecurityException Thrown when error with security
      */
     public async encryptData(srcBuffer: Uint8Array, srcOffset: number,
         destBuffer: Uint8Array, destOffset: number, count: number): Promise<number> {
@@ -92,7 +92,7 @@ export class SalmonDefaultTransformer extends SalmonAES256CTRTransformer {
      * @param {number} destOffset The destination byte offset.
      * @param {number} count The number of bytes to transform.
      * @return {Promise<number>} The number of bytes transformed.
-     * @throws SalmonSecurityException
+     * @throws SalmonSecurityException Thrown when error with security
      */
     public async decryptData(srcBuffer: Uint8Array, srcOffset: number,
         destBuffer: Uint8Array, destOffset: number, count: number): Promise<number> {

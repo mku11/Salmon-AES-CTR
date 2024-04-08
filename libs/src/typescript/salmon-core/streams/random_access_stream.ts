@@ -57,21 +57,21 @@ export abstract class RandomAccessStream {
     /**
      * Get the current position of the stream.
      * @return {Promise<number>} The current position.
-     * @throws IOException
+     * @throws IOException Thrown if there is an IO error.
      */
     public abstract getPosition(): Promise<number>;
 
     /**
      * Change the current position of the stream.
      * @param {number} value The new position.
-     * @throws IOException
+     * @throws IOException Thrown if there is an IO error.
      */
     public abstract setPosition(value: number): Promise<void>;
 
     /**
      * Set the length of this stream.
      * @param {number} value The new length.
-     * @throws IOException
+     * @throws IOException Thrown if there is an IO error.
      */
     public abstract setLength(value: number): Promise<void>;
 
@@ -81,7 +81,7 @@ export abstract class RandomAccessStream {
      * @param {number} offset The offset to start reading into the buffer.
      * @param {number} count The number of bytes that were read. If the stream reached the end return -1.
      * @return {Promise<number>} The number of bytes read.
-     * @throws IOException
+     * @throws IOException Thrown if there is an IO error.
      */
     public abstract read(buffer: Uint8Array, offset: number, count: number): Promise<number>;
 
@@ -90,7 +90,7 @@ export abstract class RandomAccessStream {
      * @param {Uint8Array} buffer The buffer to read the contents from.
      * @param {number} offset The position the reading will start from.
      * @param {number} count The count of bytes to be read from the buffer.
-     * @throws IOException
+     * @throws IOException Thrown if there is an IO error.
      */
     public abstract write(buffer: Uint8Array, offset: number, count: number): Promise<void>;
 
@@ -99,7 +99,7 @@ export abstract class RandomAccessStream {
      * @param {number} position The offset to use.
      * @param {SeekOrigin} origin The origin type.
      * @return {Promise<number>} The position after the seeking was complete.
-     * @throws IOException
+     * @throws IOException Thrown if there is an IO error.
      */
     public abstract seek(offset: number, origin: SeekOrigin): Promise<number>;
 
@@ -110,7 +110,7 @@ export abstract class RandomAccessStream {
 
     /**
      * Close the stream and associated resources.
-     * @throws IOException
+     * @throws IOException Thrown if there is an IO error.
      */
     public abstract close(): Promise<void>;
 
@@ -119,7 +119,7 @@ export abstract class RandomAccessStream {
      * @param {RandomAccessStream} stream The target stream.
      * @param {number | null} bufferSize The buffer size to be used when copying.
      * @param {((position: number, length: number) => void) | null} progressListener The listener to notify when progress changes.
-     * @throws IOException
+     * @throws IOException Thrown if there is an IO error.
      */
     public async copyTo(stream: RandomAccessStream, bufferSize: number | null = null, 
         progressListener: ((position: number, length: number) => void) | null = null): Promise<void> {

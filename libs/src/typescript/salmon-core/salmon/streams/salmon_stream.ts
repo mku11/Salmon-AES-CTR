@@ -106,9 +106,9 @@ export class SalmonStream extends RandomAccessStream {
      * @param {number | null} The chunk size for integrity chunks.
      * @param {Uint8Array | null} hashKey The hash key to be used for integrity checks.
      * @return {Promise<number>} The size of the output data.
-     * @throws SalmonSecurityException
-     * @throws IntegrityException
-     * @throws IOException
+     * @throws SalmonSecurityException Thrown when error with security
+     * @throws IntegrityException Thrown if the data are corrupt or tampered with.
+     * @throws IOException Thrown if there is an IO error.
      */
     public static async getActualSize(data: Uint8Array, key: Uint8Array, nonce: Uint8Array, mode: EncryptionMode,
         headerData: Uint8Array | null, integrity: boolean = false, chunkSize: number | null, hashKey: Uint8Array | null = null): Promise<number> {
@@ -138,9 +138,9 @@ export class SalmonStream extends RandomAccessStream {
      * @param {boolean} integrity      enable integrity
      * @param {number | null} chunkSize      the chunk size to be used with integrity
      * @param {Uint8Array | null} hashKey        Hash key to be used with integrity
-     * @throws IOException
-     * @throws SalmonSecurityException
-     * @throws IntegrityException
+     * @throws IOException Thrown if there is an IO error.
+     * @throws SalmonSecurityException Thrown when error with security
+     * @throws IntegrityException Thrown if the data are corrupt or tampered with.
      */
     public constructor(key: Uint8Array, nonce: Uint8Array, encryptionMode: EncryptionMode,
         baseStream: RandomAccessStream, headerData: Uint8Array | null = null,
@@ -190,7 +190,7 @@ export class SalmonStream extends RandomAccessStream {
     /**
      * Init the stream.
      *
-     * @throws IOException
+     * @throws IOException Thrown if there is an IO error.
      */
     async #initStream() {
         await this.#baseStream.setPosition(this.#getHeaderLength());
@@ -247,7 +247,7 @@ export class SalmonStream extends RandomAccessStream {
      * Provides the position of the stream relative to the data to be transformed.
      *
      * @return {Promise<number>} The current position of the stream.
-     * @throws IOException
+     * @throws IOException Thrown if there is an IO error.
      */
     public async getPosition(): Promise<number> {
         await this.#init(this.#key, this.#nonce);
@@ -260,9 +260,9 @@ export class SalmonStream extends RandomAccessStream {
     /**
      * Sets the current position of the stream relative to the data to be transformed.
      *
-     * @param {number} value
+     * @param {number} value The new position
      * @return {Promise<void>}
-     * @throws IOException
+     * @throws IOException Thrown if there is an IO error.
      */
     public async setPosition(value: number): Promise<void> {
         if (await this.canWrite() && !this.#allowRangeWrite && value != 0) {
@@ -316,11 +316,11 @@ export class SalmonStream extends RandomAccessStream {
      * stream because in the case of a decryption stream that has already embedded integrity
      * we still need to calculate/skip the chunks.
      *
-     * @param {boolean} integrity
-     * @param {Uint8Array | null} hashKey
-     * @param {number | null} chunkSize
-     * @throws SalmonSecurityException
-     * @throws IntegrityException
+     * @param {boolean} integrity True to enable integrity
+     * @param {Uint8Array | null} hashKey The hash key for integrity
+     * @param {number | null} chunkSize The chunk size
+     * @throws SalmonSecurityException Thrown when error with security
+     * @throws IntegrityException Thrown if the data are corrupt or tampered with.
      */
     #initIntegrity(integrity: boolean, hashKey: Uint8Array | null, chunkSize: number | null): void {
         this.#salmonIntegrity = new SalmonIntegrity(integrity, hashKey, chunkSize,
@@ -381,7 +381,7 @@ export class SalmonStream extends RandomAccessStream {
     /**
      * Closes the stream and all resources associated with it (including the base stream).
      *
-     * @throws IOException
+     * @throws IOException Thrown if there is an IO error.
      */
     public async close(): Promise<void> {
         await this.#closeStreams();
@@ -477,9 +477,9 @@ export class SalmonStream extends RandomAccessStream {
     /**
      * Set the virtual position of the stream.
      *
-     * @param {number} value
-     * @throws IOException
-     * @throws SalmonRangeExceededException
+     * @param {number} value The new position
+     * @throws IOException Thrown if there is an IO error.
+     * @throws SalmonRangeExceededException Thrown if nonce has exceeded range
      */
     async #setVirtualPosition(value: number): Promise<void> {
         await this.#init(this.#key, this.#nonce);
@@ -724,7 +724,7 @@ export class SalmonStream extends RandomAccessStream {
      *
      * @param count The number of bytes to read.
      * @return The number of bytes read.
-     * @throws IOException
+     * @throws IOException Thrown if there is an IO error.
      */
     async #readStreamData(count: number): Promise<Uint8Array> {
         let data: Uint8Array = new Uint8Array(Math.min(count, await this.#baseStream.length() - await this.#baseStream.getPosition()));
@@ -753,7 +753,7 @@ export class SalmonStream extends RandomAccessStream {
      * @param chunkSize The chunk segment size to use when writing the buffer.
      * @param hashes    The hash signature to write at the beginning of each chunk.
      * @return The number of bytes written.
-     * @throws IOException
+     * @throws IOException Thrown if there is an IO error.
      */
     async #writeToStream(buffer: Uint8Array, chunkSize: number, hashes: Uint8Array[] | null): Promise<number> {
         let pos: number = 0;

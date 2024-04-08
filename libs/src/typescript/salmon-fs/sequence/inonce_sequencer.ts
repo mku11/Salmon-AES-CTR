@@ -34,7 +34,7 @@ export interface INonceSequencer {
      * Create a sequence.
      * @param id The Id.
      * @param authId The authorization ID of the drive.
-     * @throws SequenceException
+     * @throws SequenceException Thrown if error with the nonce sequence
      */
     createSequence(id: string, authId: string): Promise<void>;
 
@@ -44,8 +44,8 @@ export interface INonceSequencer {
      * @param authId The auth ID of the device for the drive.
      * @param startNonce The starting nonce.
      * @param maxNonce The maximum nonce.
-     * @throws SequenceException
-     * @throws IOException
+     * @throws SequenceException Thrown if error with the nonce sequence
+     * @throws IOException Thrown if there is an IO error.
      */
     initializeSequence(id: string, authId: string, startNonce: Uint8Array, maxNonce: Uint8Array): Promise<void>;
 
@@ -55,8 +55,8 @@ export interface INonceSequencer {
      * @param id The drive ID.
      * @param authId The auth ID of the device for the drive.
      * @param maxNonce The maximum nonce.
-     * @throws SequenceException
-     * @throws IOException
+     * @throws SequenceException Thrown if error with the nonce sequence
+     * @throws IOException Thrown if there is an IO error.
      */
     setMaxNonce(id: string, authId: string, maxNonce: Uint8Array): Promise<void>;
 
@@ -65,23 +65,23 @@ export interface INonceSequencer {
      *
      * @param id The drive ID.
      * @return The next nonce.
-     * @throws SequenceException
-     * @throws SalmonRangeExceededException
+     * @throws SequenceException Thrown if error with the nonce sequence
+     * @throws SalmonRangeExceededException Thrown if nonce has exceeded range
      */
     nextNonce(id: string): Promise<Uint8Array | null>;
 
     /**
      * Revoke the sequencer. This terminates the sequencer and de-authorizes the device
-     * @param id
-     * @throws SequenceException
+     * @param id The sequence id
+     * @throws SequenceException Thrown if error with the nonce sequence
      */
     revokeSequence(id: string): Promise<void>;
 
     /**
      * Get the sequence used for this drive.
-     * @param id The drive ID.
+     * @param id The sequence Id.
      * @return The current sequence.
-     * @throws SequenceException
+     * @throws SequenceException Thrown if error with the nonce sequence
      */
     getSequence(id: string): Promise<NonceSequence | null>;
 
