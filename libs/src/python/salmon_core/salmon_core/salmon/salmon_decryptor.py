@@ -49,21 +49,20 @@ def decrypt_shm(index: int, part_size: int, running_threads: int,
                 integrity: bool, hash_key: bytearray | None, chunk_size: int | None, buffer_size: int):
     """
     Do not use directly use decrypt() instead.
-    :param index:
-    :param part_size:
-    :param running_threads:
-    :param data:
-    :param shm_out_name:
-    :param shm_length:
-    :param shm_cancel_name:
-    :param key:
-    :param nonce:
-    :param header_data:
-    :param integrity:
-    :param hash_key:
-    :param chunk_size:
-    :param buffer_size:
-    :return:
+    :param index: The worker index
+    :param part_size: The part size
+    :param running_threads: The threads
+    :param data: The data to decrypt
+    :param shm_out_name: The shared memory name
+    :param shm_length: The shared memory length
+    :param shm_cancel_name: The shared memory for cancelation
+    :param key: The encryption key
+    :param nonce: The nonce
+    :param header_data: The header data
+    :param integrity: True to verify integrity
+    :param hash_key: The hash key
+    :param chunk_size: The chunk size
+    :param buffer_size: The buffer size
     """
     start: int = part_size * index
     length: int
@@ -203,8 +202,8 @@ class SalmonDecryptor:
          * @return The byte array with the decrypted data.
          * @throws IOError Thrown if there is a problem with decoding the array.
          * @throws SalmonSecurityException Thrown if the key and nonce are not provided.
-         * @throws IOError
-         * @throws IntegrityException
+         * @throws IOError Thrown if there is an IO error.
+         * @throws IntegrityException Thrown when data are corrupt or tampered with.
         """
         if key is None:
             raise SalmonSecurityException("Key is missing")

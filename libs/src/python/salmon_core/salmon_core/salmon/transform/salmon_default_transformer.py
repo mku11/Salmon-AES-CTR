@@ -47,7 +47,7 @@ class SalmonDefaultTransformer(SalmonAES256CTRTransformer):
          * Initialize the default Python AES cipher transformer.
          * @param key The AES256 key to use.
          * @param nonce The nonce to use.
-         * @throws SalmonSecurityException
+         * @throws IntegrityException Thrown when security error
         """
         super().init(key, nonce)
 
@@ -61,7 +61,7 @@ class SalmonDefaultTransformer(SalmonAES256CTRTransformer):
          * @param destOffset The destination byte offset.
          * @param count The number of bytes to transform.
          * @return The number of bytes transformed.
-         * @throws SalmonSecurityException
+         * @throws IntegrityException Thrown when security error
         """
         try:
             counter: bytearray = self.get_counter()
@@ -83,7 +83,7 @@ class SalmonDefaultTransformer(SalmonAES256CTRTransformer):
          * @param destOffset The destination byte offset.
          * @param count The number of bytes to transform.
          * @return The number of bytes transformed.
-         * @throws SalmonSecurityException
+         * @throws IntegrityException Thrown when security error
         """
         try:
             counter: bytearray = self.get_counter()

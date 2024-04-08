@@ -47,7 +47,7 @@ class SalmonSequenceSerializer(INonceSequenceSerializer):
          *
          * @param drive_auth_entries The sequences to convert to text.
          * @return
-         * @throws SequenceException
+         * @throws SequenceException Thrown when there is a failure in the nonce sequencer.
         """
         if drive_auth_entries is None:
             drive_auth_entries = {}
@@ -78,7 +78,7 @@ class SalmonSequenceSerializer(INonceSequenceSerializer):
          *
          * @param contents The contents containing the nonce sequences.
          * @return
-         * @throws SequenceException
+         * @throws SequenceException Thrown when there is a failure in the nonce sequencer.
         """
 
         configs: dict[str, NonceSequence] = {}

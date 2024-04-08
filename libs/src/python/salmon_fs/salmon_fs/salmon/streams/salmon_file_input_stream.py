@@ -371,7 +371,7 @@ class SalmonFileInputStream(BufferedIOBase):
         """
          * Close the stream and associated backed streams and clear buffers.
          *
-         * @throws IOError
+         * @throws IOError Thrown if there is an IO error.
         """
         self.__close_streams()
         self.__clear_buffers()
@@ -392,7 +392,7 @@ class SalmonFileInputStream(BufferedIOBase):
         """
          * Close all back streams.
          *
-         * @throws IOError
+         * @throws IOError Thrown if there is an IO error.
         """
         for i in range(0, self.__threads):
             if self.__streams[i] is not None:

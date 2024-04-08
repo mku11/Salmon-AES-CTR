@@ -111,7 +111,7 @@ class SalmonAuthConfig:
          * @param target_auth_id authorization ID of the target device.
          * @param target_starting_nonce Starting nonce for the target device.
          * @param target_max_nonce Maximum nonce for the target device.
-         * @throws Exception
+         * @throws Exception Thrown when error during writing file
         """
         drive_id: bytearray = drive.get_drive_id()
         if drive_id is None:
@@ -131,7 +131,7 @@ class SalmonAuthConfig:
          * @param auth_id The auth id of the new device.
          * @param next_nonce The next nonce to be used by the new device.
          * @param max_nonce The max nonce to be used byte the new device.f
-         * @throws Exception
+         * @throws Exception Thrown when error during writing to stream
         """
 
         ms: MemoryStream = MemoryStream()
@@ -159,7 +159,7 @@ class SalmonAuthConfig:
          *
          * @param auth_file The encrypted authorization file.
          * @return The decrypted authorization file.
-         * @throws Exception
+         * @throws Exception Thrown when error during reading file
         """
         salmon_file: SalmonFile = SalmonFile(auth_file, drive)
         stream: SalmonStream = salmon_file.get_input_stream()
@@ -179,7 +179,7 @@ class SalmonAuthConfig:
          *
          * @param auth_id The authorization id to verify.
          * @return
-         * @throws Exception
+         * @throws Exception Thrown when verification failed
         """
         return SalmonAuthConfig.__arrays_equal(auth_id, drive.get_auth_id_bytes())
 
@@ -189,7 +189,7 @@ class SalmonAuthConfig:
          * Import sequence into the current drive.
          *
          * @param auth_config
-         * @throws Exception
+         * @throws Exception Thrown when error during importing sequence
         """
         drv_str: str = BitConverter.to_hex(auth_config.get_drive_id())
         auth_str: str = BitConverter.to_hex(auth_config.get_auth_id())
@@ -202,7 +202,7 @@ class SalmonAuthConfig:
          * Import the device authorization file.
          *
          * @param file_path The filepath to the authorization file.
-         * @throws Exception
+         * @throws Exception  Thrown when error during
         """
         sequence: NonceSequence = drive.get_sequencer().get_sequence(
             BitConverter.to_hex(drive.get_drive_id()))

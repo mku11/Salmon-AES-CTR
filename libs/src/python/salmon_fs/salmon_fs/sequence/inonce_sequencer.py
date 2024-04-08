@@ -40,7 +40,7 @@ class INonceSequencer(ABC):
          * Create a sequence.
          * @param drive_id The drive ID.
          * @param auth_id The authorization ID of the drive.
-         * @throws SequenceException
+         * @throws SequenceException Thrown when there is a failure in the nonce sequencer.
         """
         pass
 
@@ -51,8 +51,8 @@ class INonceSequencer(ABC):
          * @param auth_id The auth ID of the device for the drive.
          * @param start_nonce The starting nonce.
          * @param max_nonce The maximum nonce.
-         * @throws SequenceException
-         * @throws IOError
+         * @throws SequenceException Thrown when there is a failure in the nonce sequencer.
+         * @throws IOError Thrown if there is an IO error.
         """
         pass
 
@@ -63,8 +63,8 @@ class INonceSequencer(ABC):
          * @param drive_id The drive ID.
          * @param auth_id The auth ID of the device for the drive.
          * @param max_nonce The maximum nonce.
-         * @throws SequenceException
-         * @throws IOError
+         * @throws SequenceException Thrown when there is a failure in the nonce sequencer.
+         * @throws IOError Thrown if there is an IO error.
         """
         pass
 
@@ -74,8 +74,8 @@ class INonceSequencer(ABC):
          *
          * @param drive_id The drive ID.
          * @return The next nonce.
-         * @throws SequenceException
-         * @throws SalmonRangeExceededException
+         * @throws SequenceException Thrown when there is a failure in the nonce sequencer.
+         * @throws SalmonRangeExceededException Thrown when maximum nonce range is exceeded.
         """
         pass
 
@@ -83,7 +83,7 @@ class INonceSequencer(ABC):
         """
          * Revoke the sequencer. This terminates the sequencer and de-authorizes the device
          * @param drive_id
-         * @throws SequenceException
+         * @throws SequenceException Thrown when there is a failure in the nonce sequencer.
         """
         pass
 
@@ -92,7 +92,7 @@ class INonceSequencer(ABC):
          * Get the sequence used for this drive.
          * @param drive_id The drive ID.
          * @return The current sequence.
-         * @throws SequenceException
+         * @throws SequenceException Thrown when there is a failure in the nonce sequencer.
         """
         pass
 

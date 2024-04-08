@@ -44,7 +44,7 @@ class TinyAesTransformer(SalmonNativeTransformer):
          *
          * @param key   The AES key to use.
          * @param nonce The nonce to use.
-         * @throws SalmonSecurityException
+         * @throws IntegrityException Thrown when security error
         """
         self.get_native_proxy().salmon_init(TinyAesTransformer.AES_IMPL_TINY_AES)
         super().init(key, nonce)

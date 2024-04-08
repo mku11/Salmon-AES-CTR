@@ -42,10 +42,10 @@ class SalmonNonce:
          * Increase the sequential NONCE by a value of 1.
          * This implementation assumes that the NONCE length is 8 bytes or fewer so it can fit in a long.
          *
-         * @param start_nonce
-         * @param endNonce
-         * @return
-         * @throws SalmonRangeExceededException
+         * @param start_nonce The starting nonce
+         * @param endNonce The ending nonce
+         * @return The nonce after increasing
+         * @throws SalmonRangeExceededException Thrown when maximum nonce range is exceeded.
         """
         nonce: int = BitConverter.to_long(start_nonce, 0, SalmonGenerator.NONCE_LENGTH)
         max_nonce: int = BitConverter.to_long(end_nonce, 0, SalmonGenerator.NONCE_LENGTH)
@@ -63,7 +63,7 @@ class SalmonNonce:
      * @param start_nonce The starting nonce.
      * @param endNonce The ending nonce in the sequence.
      * @return The byte array with the middle nonce.
-     * @throws SalmonSecurityException
+     * @throws IntegrityException Thrown when security error
     """
 
     @staticmethod

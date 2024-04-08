@@ -48,21 +48,20 @@ def encrypt_shm(index: int, part_size: int, running_threads: int,
                 integrity: bool, hash_key: bytearray | None, chunk_size: int, buffer_size: int):
     """
     Do not use directly use encrypt() instead.
-    :param index:
-    :param part_size:
-    :param running_threads:
-    :param data:
-    :param shm_out_name:
-    :param shm_length:
-    :param shm_cancel_name:
-    :param key:
-    :param nonce:
-    :param header_data:
-    :param integrity:
-    :param hash_key:
-    :param chunk_size:
-    :param buffer_size:
-    :return:
+    :param index: The worker index
+    :param part_size: The part size
+    :param running_threads: The threads
+    :param data: The data to encrypt
+    :param shm_out_name: The shared memory name
+    :param shm_length: The shared memory length
+    :param shm_cancel_name: The shared memory for cancelation
+    :param key: The encryption key
+    :param nonce: The nonce
+    :param header_data: The header date
+    :param integrity: True to apply integrity when encrypting
+    :param hash_key: The hash key for integrity
+    :param chunk_size: The chunk size for integrity
+    :param buffer_size: The buffer size
     """
 
     start: int = part_size * index
@@ -205,9 +204,9 @@ class SalmonEncryptor:
          * @param hash_key         Hash key to be used for all chunks.
          * @param chunkSize       The chunk size.
          * @return The byte array with the encrypted data.
-         * @throws SalmonSecurityException
-         * @throws IOError
-         * @throws IntegrityException
+         * @throws IntegrityException Thrown when security error
+         * @throws IOError Thrown if there is an IO error.
+         * @throws IntegrityException Thrown when data are corrupt or tampered with.
         """
 
         if key is None:

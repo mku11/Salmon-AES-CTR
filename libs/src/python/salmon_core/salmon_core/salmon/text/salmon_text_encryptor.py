@@ -49,10 +49,10 @@ class SalmonTextEncryptor:
          * @param integrity True if you want to calculate and store hash signatures for each chunkSize
          * @param hash_key Hash key to be used for all chunks.
          * @param chunkSize The chunk size.
-         * @throws IOError
-         * @throws SalmonSecurityException
-         * @throws IntegrityException
-         * @throws IOError
+         * @throws IOError Thrown if there is an IO error.
+         * @throws IntegrityException Thrown when security error
+         * @throws IntegrityException Thrown when data are corrupt or tampered with.
+         * @throws IOError Thrown if there is an IO error.
         """
         v_bytes: bytearray = bytearray(text.encode('utf-8'))
         enc_bytes: bytearray = SalmonTextEncryptor.__encryptor.encrypt(v_bytes, key, nonce, header, integrity, hash_key,

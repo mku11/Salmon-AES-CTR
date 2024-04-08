@@ -42,7 +42,7 @@ class INonceSequenceSerializer(ABC):
          * Parse nonce sequences from text contents.
          * @param contents The contents containing the nonce sequences.
          * @return The nonce sequences.
-         * @throws SequenceException
+         * @throws SequenceException Thrown when there is a failure in the nonce sequencer.
         """
         pass
 
@@ -51,6 +51,6 @@ class INonceSequenceSerializer(ABC):
          * Generates the contents from sequences.
          * @param sequences The sequences to convert to text.
          * @return The string contents.
-         * @throws SequenceException
+         * @throws SequenceException Thrown when there is a failure in the nonce sequencer.
         """
         pass

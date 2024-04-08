@@ -52,8 +52,8 @@ class SalmonFileSequencer(INonceSequencer):
          *
          * @param sequence_file The sequence file.
          * @param serializer   The serializer to be used.
-         * @throws IOError
-         * @throws SequenceException
+         * @throws IOError Thrown if there is an IO error.
+         * @throws SequenceException Thrown when there is a failure in the nonce sequencer.
         """
         self.__sequenceFile: IRealFile
         self.__serializer: INonceSequenceSerializer
@@ -73,7 +73,7 @@ class SalmonFileSequencer(INonceSequencer):
          *
          * @param drive_id The drive ID.
          * @param auth_id  The authorization ID of the drive.
-         * @throws SequenceException
+         * @throws SequenceException Thrown when there is a failure in the nonce sequencer.
         """
 
         xml_contents: str = self.__get_contents()
@@ -93,8 +93,8 @@ class SalmonFileSequencer(INonceSequencer):
          * @param auth_id     The auth ID of the device for the drive.
          * @param start_nonce The starting nonce.
          * @param max_nonce   The maximum nonce.
-         * @throws SequenceException
-         * @throws IOError
+         * @throws SequenceException Thrown when there is a failure in the nonce sequencer.
+         * @throws IOError Thrown if there is an IO error.
         """
 
         xml_contents: str = self.__get_contents()
@@ -116,7 +116,7 @@ class SalmonFileSequencer(INonceSequencer):
          * @param drive_id  The drive ID.
          * @param auth_id   The auth ID of the device for the drive.
          * @param max_nonce The maximum nonce.
-         * @throws SequenceException
+         * @throws SequenceException Thrown when there is a failure in the nonce sequencer.
         """
         xml_contents: str = self.__get_contents()
         configs: dict[str, NonceSequence] = self.__serializer.deserialize(xml_contents)
@@ -135,8 +135,8 @@ class SalmonFileSequencer(INonceSequencer):
          *
          * @param drive_id The drive ID.
          * @return
-         * @throws SequenceException
-         * @throws SalmonRangeExceededException
+         * @throws SequenceException Thrown when there is a failure in the nonce sequencer.
+         * @throws SalmonRangeExceededException Thrown when maximum nonce range is exceeded.
         """
         xml_contents: str = self.__get_contents()
         configs: dict[str, NonceSequence] = self.__serializer.deserialize(xml_contents)
@@ -156,7 +156,7 @@ class SalmonFileSequencer(INonceSequencer):
          * Get the contents of a sequence file.
          *
          * @return
-         * @throws SequenceException
+         * @throws SequenceException Thrown when there is a failure in the nonce sequencer.
         """
         stream: BufferedIOBase | None = None
         output_stream: MemoryStream | None = None
@@ -190,7 +190,7 @@ class SalmonFileSequencer(INonceSequencer):
          * Revoke the current sequence for a specific drive.
          *
          * @param drive_id The drive ID.
-         * @throws SequenceException
+         * @throws SequenceException Thrown when there is a failure in the nonce sequencer.
         """
 
         xml_contents: str = self.__get_contents()
@@ -209,7 +209,7 @@ class SalmonFileSequencer(INonceSequencer):
          *
          * @param drive_id The drive ID.
          * @return
-         * @throws SequenceException
+         * @throws SequenceException Thrown when there is a failure in the nonce sequencer.
         """
         xml_contents: str = self.__get_contents()
         configs: dict[str, NonceSequence] = self.__serializer.deserialize(xml_contents)
@@ -227,7 +227,7 @@ class SalmonFileSequencer(INonceSequencer):
          * Save the sequence file.
          *
          * @param sequences The sequences.
-         * @throws SequenceException
+         * @throws SequenceException Thrown when there is a failure in the nonce sequencer.
         """
         try:
             contents: str = self.__serializer.serialize(sequences)
@@ -278,7 +278,7 @@ class SalmonFileSequencer(INonceSequencer):
          * @param configs All sequence configurations.
          * @param drive_id The drive ID.
          * @return
-         * @throws SequenceException
+         * @throws SequenceException Thrown when there is a failure in the nonce sequencer.
         """
         sequence: NonceSequence | None = None
         for seq in configs.values():

@@ -48,7 +48,7 @@ class SalmonDefaultPbkdfProvider(ISalmonPbkdfProvider):
          * @param outputBytes The length of the output key.
          * @param pbkdfAlgo The hash algorithm to use.
          * @return The key.
-         * @throws SalmonSecurityException
+         * @throws IntegrityException Thrown when security error
         """
         # PBEKeySpec
         # keySpec = new

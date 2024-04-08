@@ -41,7 +41,7 @@ class ISalmonCTRTransformer(ABC):
          * Initialize the transformer.
          * @param key The AES key to use.
          * @param nonce The nonce to use.
-         * @throws SalmonSecurityException
+         * @throws IntegrityException Thrown when security error
         """
         pass
 
@@ -56,8 +56,8 @@ class ISalmonCTRTransformer(ABC):
          * @param destOffset The destination byte offset.
          * @param count The number of bytes to transform.
          * @return The number of bytes transformed.
-         * @throws SalmonSecurityException
-         * @throws SalmonRangeExceededException
+         * @throws IntegrityException Thrown when security error
+         * @throws SalmonRangeExceededException Thrown when maximum nonce range is exceeded.
         """
         pass
 
@@ -72,8 +72,8 @@ class ISalmonCTRTransformer(ABC):
          * @param destOffset The destination byte offset.
          * @param count The number of bytes to transform.
          * @return The number of bytes transformed.
-         * @throws SalmonSecurityException
-         * @throws SalmonRangeExceededException
+         * @throws IntegrityException Thrown when security error
+         * @throws SalmonRangeExceededException Thrown when maximum nonce range is exceeded.
         """
         pass
 
@@ -123,6 +123,6 @@ class ISalmonCTRTransformer(ABC):
          * operation (ie sync or read) the block will be incremented. This method calculates
          * the Counter.
          * @param position
-         * @throws SalmonRangeExceededException
+         * @throws SalmonRangeExceededException Thrown when maximum nonce range is exceeded.
         """
         pass

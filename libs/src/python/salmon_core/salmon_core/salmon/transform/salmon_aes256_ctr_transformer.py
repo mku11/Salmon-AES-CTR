@@ -113,7 +113,7 @@ class SalmonAES256CTRTransformer(ISalmonCTRTransformer, ABC):
          * any other prior initialization for efficiency.
          * @param key
          * @param nonce
-         * @throws SalmonSecurityException
+         * @throws IntegrityException Thrown when security error
         """
         self.__key = key
         self.__nonce = nonce

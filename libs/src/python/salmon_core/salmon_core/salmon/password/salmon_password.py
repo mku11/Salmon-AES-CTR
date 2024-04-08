@@ -100,7 +100,7 @@ class SalmonPassword:
          * @param iterations The number of iterations the key derivation algorithm will use
          * @param length     The length of master key to return
          * @return The derived master key.
-         * @throws SalmonSecurityException
+         * @throws IntegrityException Thrown when security error
         """
         master_key: bytearray = SalmonPassword.get_key_from_password(password, salt, iterations, length)
         return master_key
@@ -115,7 +115,7 @@ class SalmonPassword:
          * @param iterations  The iterations to be used with Pbkdf2
          * @param outputBytes The number of bytes for the key
          * @return The derived key.
-         * @throws SalmonSecurityException
+         * @throws IntegrityException Thrown when security error
         """
         if SalmonPassword.__pbkdfAlgo == PbkdfAlgo.SHA1 and not SalmonPassword.ENABLE_SHA1:
             raise RuntimeError("Cannot use SHA1, SHA1 is not secure anymore use SHA256!")

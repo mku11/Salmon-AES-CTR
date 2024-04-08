@@ -76,8 +76,8 @@ class FileUtils:
     def is_pdf(filename: str) -> bool:
         """
          * Detect if filename is a pdf file.
-         * @param filename
-         * @return
+         * @param filename The file name
+         * @return True if is a pdf
         """
         ext: str = FileUtils.get_extension_from_file_name(filename).lower()
         return ext == "pdf"
@@ -87,7 +87,8 @@ class FileUtils:
         """
          * Return the extension of a filename.
          *
-         * @param file_name
+         * @param file_name The file name
+        :returns The extension
         """
         if file_name is None:
             return ""
@@ -102,7 +103,8 @@ class FileUtils:
         """
          * Return a filename without extension
          *
-         * @param file_name
+         * @param file_name The file name
+         :return The file name without the extension
         """
         if file_name is None:
             return ""

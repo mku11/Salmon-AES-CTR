@@ -43,7 +43,7 @@ class SalmonTransformerFactory:
          * Create an encryption transformer implementation.
          * @param type The supported provider type.
          * @return The transformer.
-         * @throws SalmonSecurityException
+         * @throws IntegrityException Thrown when security error
         """
         match v_type:
             case ProviderType.Default:

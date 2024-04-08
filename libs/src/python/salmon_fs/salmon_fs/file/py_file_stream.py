@@ -118,7 +118,7 @@ class PyFileStream(RandomAccessStream):
         """
          * Set the current position of the stream.
          * @param value The new position.
-         * @throws IOError
+         * @throws IOError Thrown if there is an IO error.
         """
         self.seek(value, RandomAccessStream.SeekOrigin.Begin)
 
@@ -133,7 +133,7 @@ class PyFileStream(RandomAccessStream):
          * @param offset The offset of the buffer to start writing the data.
          * @param count The maximum number of bytes to read from.
          * @return
-         * @throws IOError
+         * @throws IOError Thrown if there is an IO error.
         """
         buff: bytes = self.__raf.read(count)
         bytes_read: int = len(buff)
@@ -148,7 +148,7 @@ class PyFileStream(RandomAccessStream):
          * @param buffer The buffer to read the data from.
          * @param offset The offset of the buffer to start reading the data.
          * @param count The maximum number of bytes to read from the buffer.
-         * @throws IOError
+         * @throws IOError Thrown if there is an IO error.
         """
         if self.__mm:
             if self.get_position() + count > self.__file.length():
@@ -163,7 +163,7 @@ class PyFileStream(RandomAccessStream):
          * @param offset The position to seek to.
          * @param origin The type of origin {@link RandomAccessStream.SeekOrigin}
          * @return The new position after seeking.
-         * @throws IOError
+         * @throws IOError Thrown if there is an IO error.
         """
         pos: int = self.__mm.tell() if self.__mm else self.__raf.tell()
         if origin == RandomAccessStream.SeekOrigin.Begin:
@@ -191,7 +191,7 @@ class PyFileStream(RandomAccessStream):
     def close(self):
         """
          * Close this stream and associated resources.
-         * @throws IOError
+         * @throws IOError Thrown if there is an IO error.
         """
         if self.__mm:
             self.__mm.close()

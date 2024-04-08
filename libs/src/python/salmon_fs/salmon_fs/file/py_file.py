@@ -63,7 +63,7 @@ class PyFile(IRealFile):
          * Create a file under this directory.
          * @param filename The name of the new file.
          * @return The newly created file.
-         * @throws IOError
+         * @throws IOError Thrown if there is an IO error.
         """
         n_file_path: str = self.__file_path + os.sep + filename
         open(n_file_path, 'a').close()
@@ -219,7 +219,7 @@ class PyFile(IRealFile):
          * @param new_name   New filename
          * @param progress_listener Observer to notify when progress changes.
          * @return The copied file. Use this file for subsequent operations instead of the original.
-         * @throws IOError
+         * @throws IOError Thrown if there is an IO error.
         """
         new_name = new_name if new_name is not None else self.get_base_name()
         if new_dir is None or not new_dir.exists():

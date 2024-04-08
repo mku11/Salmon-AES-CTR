@@ -44,7 +44,7 @@ class SalmonAesIntrTransformer(SalmonNativeTransformer):
          * Initialize the native Aes intrinsics transformer.
          * @param key The AES key to use.
          * @param nonce The nonce to use.
-         * @throws SalmonSecurityException
+         * @throws IntegrityException Thrown when security error
         """
         self.get_native_proxy().salmon_init(SalmonAesIntrTransformer.AES_IMPL_AES_INTR)
         expanded_key: bytearray = bytearray(SalmonAES256CTRTransformer.EXPANDED_KEY_SIZE)

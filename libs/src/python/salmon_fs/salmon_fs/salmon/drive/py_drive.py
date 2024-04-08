@@ -105,8 +105,8 @@ class PyDrive(SalmonDrive):
     def get_file(self, file: IRealFile) -> IVirtualFile | None:
         """
         Get the virtual file backed by a real file
-        :param file:
-        :return:
+        :param file: The file
+        :return: The
         """
         return SalmonFile(file, self)
 

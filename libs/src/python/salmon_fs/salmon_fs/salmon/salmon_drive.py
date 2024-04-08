@@ -186,7 +186,7 @@ class SalmonDrive(VirtualDrive, ABC):
         """
          * Return the virtual root directory of the drive.
          * @return
-         * @throws SalmonAuthException
+         * @throws SalmonAuthException Thrown when there is a failure in the nonce sequencer.
         """
         if self.__realRoot is None or not self.__realRoot.exists():
             return None
@@ -419,8 +419,8 @@ class SalmonDrive(VirtualDrive, ABC):
          * @param dir  Directory to store the drive configuration and virtual filesystem.
          * @param password Master password to encrypt the drive configuration.
          * @return The newly created drive.
-         * @throws IntegrityException
-         * @throws SequenceException
+         * @throws IntegrityException Thrown when data are corrupt or tampered with.
+         * @throws SequenceException Thrown when there is a failure in the nonce sequencer.
         """
         drive: SalmonDrive = SalmonDrive.__create_drive_instance(v_dir, True, drive_class_type, sequencer)
         if drive.has_config():
@@ -437,7 +437,7 @@ class SalmonDrive(VirtualDrive, ABC):
          * @param dir The target directory where the drive is located.
          * @param create_if_not_exists Create the drive if it does not exist
          * @return
-         * @throws SalmonSecurityException
+         * @throws IntegrityException Thrown when security error
         """
         drive: SalmonDrive | None = None
         try:
@@ -520,8 +520,8 @@ class SalmonDrive(VirtualDrive, ABC):
          * Get the authorization ID for the current device.
          *
          * @return
-         * @throws SequenceException
-         * @throws SalmonAuthException
+         * @throws SequenceException Thrown when there is a failure in the nonce sequencer.
+         * @throws SalmonAuthException Thrown when there is a failure in the nonce sequencer.
         """
         return BitConverter.to_hex(self.get_auth_id_bytes())
 
@@ -608,11 +608,11 @@ class SalmonDrive(VirtualDrive, ABC):
         """
          * Change the user password.
          * @param pass The new password.
-         * @throws IOError
-         * @throws SalmonAuthException
-         * @throws SalmonSecurityException
-         * @throws IntegrityException
-         * @throws SequenceException
+         * @throws IOError Thrown if there is an IO error.
+         * @throws SalmonAuthException Thrown when there is a failure in the nonce sequencer.
+         * @throws IntegrityException Thrown when security error
+         * @throws IntegrityException Thrown when data are corrupt or tampered with.
+         * @throws SequenceException Thrown when there is a failure in the nonce sequencer.
         """
         self.__create_config(password)
 

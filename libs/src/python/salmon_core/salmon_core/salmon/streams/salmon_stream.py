@@ -72,9 +72,9 @@ class SalmonStream(RandomAccessStream):
          * @param hash_key The hash key to be used for integrity checks.
          * @return The size of the output data.
          *
-         * @throws SalmonSecurityException
-         * @throws IntegrityException
-         * @throws IOError
+         * @throws IntegrityException Thrown when security error
+         * @throws IntegrityException Thrown when data are corrupt or tampered with.
+         * @throws IOError Thrown if there is an IO error.
         """
         input_stream: MemoryStream = MemoryStream(data)
         s: SalmonStream = SalmonStream(key, nonce, mode, input_stream, header_data, integrity, chunk_size, hash_key)
@@ -106,9 +106,9 @@ class SalmonStream(RandomAccessStream):
          * @param integrity      enable integrity
          * @param chunkSize      the chunk size to be used with integrity
          * @param hash_key        Hash key to be used with integrity
-         * @throws IOError
-         * @throws SalmonSecurityException
-         * @throws IntegrityException
+         * @throws IOError Thrown if there is an IO error.
+         * @throws IntegrityException Thrown when security error
+         * @throws IntegrityException Thrown when data are corrupt or tampered with.
         """
         self.__headerData: bytearray
         """
@@ -207,7 +207,7 @@ class SalmonStream(RandomAccessStream):
          * Provides the position of the stream relative to the data to be transformed.
          *
          * @return The current position of the stream.
-         * @throws IOError
+         * @throws IOError Thrown if there is an IO error.
         """
         return self.__get_virtual_position()
 
@@ -216,7 +216,7 @@ class SalmonStream(RandomAccessStream):
          * Sets the current position of the stream relative to the data to be transformed.
          *
          * @param value
-         * @throws IOError
+         * @throws IOError Thrown if there is an IO error.
         """
         if self.can_write() and not self.__allowRangeWrite and value != 0:
             raise IOError() from \
@@ -266,8 +266,8 @@ class SalmonStream(RandomAccessStream):
          * @param integrity
          * @param hash_key
          * @param chunkSize
-         * @throws SalmonSecurityException
-         * @throws IntegrityException
+         * @throws IntegrityException Thrown when security error
+         * @throws IntegrityException Thrown when data are corrupt or tampered with.
         """
         self.__salmonIntegrity = SalmonIntegrity(integrity, hash_key, chunk_size,
                                                  HmacSHA256Provider(), SalmonGenerator.HASH_RESULT_LENGTH)
@@ -276,7 +276,7 @@ class SalmonStream(RandomAccessStream):
         """
          * Init the stream.
          *
-         * @throws IOError
+         * @throws IOError Thrown if there is an IO error.
         """
         self.__baseStream.set_position(self.get_header_length())
 
@@ -345,7 +345,7 @@ class SalmonStream(RandomAccessStream):
         """
          * Closes the stream and all resources associated with it (including the base stream).
          *
-         * @throws IOError
+         * @throws IOError Thrown if there is an IO error.
         """
         self.__close_streams()
 
@@ -414,8 +414,8 @@ class SalmonStream(RandomAccessStream):
          * Set the virtual position of the stream.
          *
          * @param value
-         * @throws IOError
-         * @throws SalmonRangeExceededException
+         * @throws IOError Thrown if there is an IO error.
+         * @throws SalmonRangeExceededException Thrown when maximum nonce range is exceeded.
         """
         # we skip the header bytes and any hash values we have if the file has integrity set
         self.__baseStream.set_position(value)
@@ -652,7 +652,7 @@ class SalmonStream(RandomAccessStream):
          *
          * @param count The number of bytes to read.
          * @return The number of bytes read.
-         * @throws IOError
+         * @throws IOError Thrown if there is an IO error.
         """
         data: bytearray = bytearray(min(count, self.__baseStream.length() - self.__baseStream.get_position()))
         self.__baseStream.read(data, 0, len(data))
@@ -679,7 +679,7 @@ class SalmonStream(RandomAccessStream):
          * @param chunkSize The chunk segment size to use when writing the buffer.
          * @param hashes    The hash signature to write at the beginning of each chunk.
          * @return The number of bytes written.
-         * @throws IOError
+         * @throws IOError Thrown if there is an IO error.
         """
         pos: int = 0
         chunk: int = 0

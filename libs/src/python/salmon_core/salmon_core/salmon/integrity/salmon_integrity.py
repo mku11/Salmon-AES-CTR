@@ -121,7 +121,7 @@ class SalmonIntegrity:
      * @param key         Key that will be used
      * @param includeData Additional data to be included in the calculation.
      * @return The hash.
-     * @throws IntegrityException
+     * @throws IntegrityException Thrown when data are corrupt or tampered with.
      """
 
     @staticmethod
@@ -199,7 +199,7 @@ class SalmonIntegrity:
      * @param buffer The buffer containing the data chunks.
      * @param includeHeaderData Include the header data in the first chunk.
      * @return The hash signatures.
-     * @throws IntegrityException
+     * @throws IntegrityException Thrown when data are corrupt or tampered with.
      """
 
     def generate_hashes(self, buffer: bytearray, include_header_data: bytearray | None) -> list[bytearray] | None:
@@ -233,7 +233,7 @@ class SalmonIntegrity:
          * @param hashes The hashes to verify.
          * @param buffer The buffer that contains the chunks to verify the hashes.
          * @param includeHeaderData
-         * @throws IntegrityException
+         * @throws IntegrityException Thrown when data are corrupt or tampered with.
         """
         chunk: int = 0
         for i in range(0, len(buffer), self._chunkSize):

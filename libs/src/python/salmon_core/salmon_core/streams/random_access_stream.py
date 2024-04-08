@@ -76,7 +76,7 @@ class RandomAccessStream(ABC):
         """
          * Get the current position of the stream.
          * @return The current position.
-         * @throws IOError
+         * @throws IOError Thrown if there is an IO error.
         """
         pass
 
@@ -85,7 +85,7 @@ class RandomAccessStream(ABC):
         """
          * Change the current position of the stream.
          * @param value The new position.
-         * @throws IOError
+         * @throws IOError Thrown if there is an IO error.
         """
         pass
 
@@ -94,7 +94,7 @@ class RandomAccessStream(ABC):
         """
          * Set the length of this stream.
          * @param value The length.
-         * @throws IOError
+         * @throws IOError Thrown if there is an IO error.
         """
         pass
 
@@ -106,7 +106,7 @@ class RandomAccessStream(ABC):
          * @param offset
          * @param count The number of bytes that were read. If the stream reached the end return -1.
          * @return
-         * @throws IOError
+         * @throws IOError Thrown if there is an IO error.
         """
         pass
 
@@ -117,7 +117,7 @@ class RandomAccessStream(ABC):
          * @param buffer The buffer to read the contents from.
          * @param offset The position the reading will start from.
          * @param count The count of bytes to be read from the buffer.
-         * @throws IOError
+         * @throws IOError Thrown if there is an IO error.
         """
         pass
 
@@ -128,7 +128,7 @@ class RandomAccessStream(ABC):
          * @param position The new position.
          * @param origin The origin type.
          * @return The position after the seeking was complete.
-         * @throws IOError
+         * @throws IOError Thrown if there is an IO error.
         """
         pass
 
@@ -143,7 +143,7 @@ class RandomAccessStream(ABC):
     def close(self):
         """
          * Close the stream and associated resources.
-         * @throws IOError
+         * @throws IOError Thrown if there is an IO error.
         """
         pass
 
@@ -154,7 +154,7 @@ class RandomAccessStream(ABC):
          * @param stream The target stream.
          * @param buffer_size The buffer size to be used when copying.
          * @param progress_listener The listener to notify when progress changes.
-         * @throws IOError
+         * @throws IOError Thrown if there is an IO error.
         """
         if not self.can_read():
             raise IOError("Target stream not readable")

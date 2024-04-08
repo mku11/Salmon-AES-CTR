@@ -77,7 +77,7 @@ class BufferedIOWrapper(BufferedIOBase):
     def close(self):
         """
          * Closes the base stream.
-         * @throws IOError
+         * @throws IOError Thrown if there is an IO error.
         """
         self.__stream.close()
 
@@ -86,7 +86,7 @@ class BufferedIOWrapper(BufferedIOBase):
          * Skip number of bytes on the stream.
          * @param pos   the number of bytes to be skipped.
          * @return
-         * @throws IOError
+         * @throws IOError Thrown if there is an IO error.
         """
         if pos > self.__stream.length():
             self.__stream.set_position(self.__stream.length())

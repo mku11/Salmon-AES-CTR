@@ -182,7 +182,7 @@ class IRealFile(ABC):
          *
          * @param filename The name for the new file.
          * @return The newly create file.
-         * @throws IOError
+         * @throws IOError Thrown if there is an IO error.
         """
         pass
 
@@ -207,7 +207,7 @@ class IRealFile(ABC):
          * @param new_name          The new filename.
          * @param progress_listener Observer to notify of the copy progress.
          * @return The file after the copy. Use this instance for any subsequent file operations.
-         * @throws IOError
+         * @throws IOError Thrown if there is an IO error.
         """
         pass
 
@@ -239,7 +239,7 @@ class IRealFile(ABC):
          * @param delete           True to delete the source files when complete
          * @param progress_listener The progress listener
          * @return
-         * @throws IOError
+         * @throws IOError Thrown if there is an IO error.
         """
         source: RandomAccessStream = src.get_input_stream()
         target: RandomAccessStream = dest.get_output_stream()
@@ -268,7 +268,7 @@ class IRealFile(ABC):
          * @param auto_rename
          * @param auto_rename_folders Apply autorename to folders also (default is True)
          * @param on_failed
-         * @throws IOError
+         * @throws IOError Thrown if there is an IO error.
         """
         new_filename: str = self.get_base_name()
         new_file: IRealFile

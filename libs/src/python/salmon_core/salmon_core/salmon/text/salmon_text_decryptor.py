@@ -52,9 +52,9 @@ class SalmonTextDecryptor:
          * @param hash_key Hash key to be used for all chunks.
          * @param chunkSize The chunk size.
          * @return The decrypted text.
-         * @throws IOError
-         * @throws SalmonSecurityException
-         * @throws IntegrityException
+         * @throws IOError Thrown if there is an IO error.
+         * @throws IntegrityException Thrown when security error
+         * @throws IntegrityException Thrown when data are corrupt or tampered with.
         """
         v_bytes: bytearray = SalmonEncoder.get_base64().decode(text)
         dec_bytes: bytearray = SalmonTextDecryptor.__decryptor.decrypt(v_bytes, key, nonce, header, integrity, hash_key,

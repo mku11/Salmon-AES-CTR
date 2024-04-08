@@ -111,7 +111,7 @@ class SalmonFile(IVirtualFile):
          * Get the custom {@link SalmonHeader} from this file.
          *
          * @return
-         * @throws IOError
+         * @throws IOError Thrown if there is an IO error.
         """
         if not self.exists():
             return None
@@ -152,9 +152,9 @@ class SalmonFile(IVirtualFile):
          * Retrieves a SalmonStream that will be used for decrypting the file contents.
          *
          * @return
-         * @throws IOError
-         * @throws SalmonSecurityException
-         * @throws IntegrityException
+         * @throws IOError Thrown if there is an IO error.
+         * @throws IntegrityException Thrown when security error
+         * @throws IntegrityException Thrown when data are corrupt or tampered with.
         """
         if not self.exists():
             raise IOError("File does not exist")
@@ -341,7 +341,7 @@ class SalmonFile(IVirtualFile):
          * Set the nonce for encryption/decryption for this file.
          *
          * @param nonce Nonce to be used.
-         * @throws SalmonSecurityException
+         * @throws IntegrityException Thrown when security error
         """
         if self.__drive is not None:
             raise SalmonSecurityException("Nonce is already set by the drive")
@@ -423,10 +423,10 @@ class SalmonFile(IVirtualFile):
          *
          * @param filename The filename to search for
          * @return
-         * @throws SalmonSecurityException
-         * @throws IntegrityException
-         * @throws IOError
-         * @throws SalmonAuthException
+         * @throws IntegrityException Thrown when security error
+         * @throws IntegrityException Thrown when data are corrupt or tampered with.
+         * @throws IOError Thrown if there is an IO error.
+         * @throws SalmonAuthException Thrown when there is a failure in the nonce sequencer.
         """
         files: list[SalmonFile] = self.list_files()
         for file in files:
@@ -717,7 +717,7 @@ class SalmonFile(IVirtualFile):
          * @param dir                Target directory.
          * @param on_progress_listener Observer to notify when move progress changes.
          * @return
-         * @throws IOError
+         * @throws IOError Thrown if there is an IO error.
         """
         new_real_file: IRealFile = self.__realFile.move(v_dir.__realFile, None, on_progress_listener)
         return SalmonFile(new_real_file, self.__drive)
@@ -729,7 +729,7 @@ class SalmonFile(IVirtualFile):
          * @param dir                Target directory.
          * @param on_progress_listener Observer to notify when copy progress changes.
          * @return
-         * @throws IOError
+         * @throws IOError Thrown if there is an IO error.
         """
         new_real_file: IRealFile = self.__realFile.copy(v_dir.__realFile, None, on_progress_listener)
         return SalmonFile(new_real_file, self.__drive)
