@@ -29,11 +29,11 @@ import android.util.Log;
 import android.widget.Toast;
 
 import com.mku.android.salmon.drive.AndroidDrive;
-import com.mku.iostream.InputStreamWrapper;
+import com.mku.streams.InputStreamWrapper;
 import com.mku.salmon.SalmonFile;
-import com.mku.salmon.integrity.SalmonIntegrityException;
-import com.mku.salmon.iostream.SalmonFileInputStream;
-import com.mku.salmon.iostream.SalmonStream;
+import com.mku.integrity.IntegrityException;
+import com.mku.salmon.streams.SalmonFileInputStream;
+import com.mku.salmon.streams.SalmonStream;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -55,11 +55,13 @@ public class SalmonMediaDataSource extends MediaDataSource {
     /**
      * Construct a seekable source for the media player from an encrypted file source
      *
-     * @param activity   Activity that this data source will be used with. This is usually the activity the MediaPlayer is attached to
+     * @param activity   Activity this data source will be used with. This is usually the activity the MediaPlayer is attached to
      * @param salmonFile SalmonFile that will be used as a source
+     * @param buffers The buffers
      * @param bufferSize Buffer size
      * @param threads    Threads for parallel processing
      * @param backOffset The backwards offset to use when reading buffers
+     * @throws Exception Thrown if error occured
      */
     public SalmonMediaDataSource(Activity activity, SalmonFile salmonFile,
                                  int buffers, int bufferSize, int threads, int backOffset) throws Exception {
@@ -97,7 +99,7 @@ public class SalmonMediaDataSource extends MediaDataSource {
             return bytesRead;
         } catch (IOException ex) {
             ex.printStackTrace();
-            if (ex.getCause() instanceof SalmonIntegrityException && !integrityFailed) {
+            if (ex.getCause() instanceof IntegrityException && !integrityFailed) {
                 // showing integrity error only once
                 integrityFailed = true;
                 if (activity != null) {
@@ -122,7 +124,7 @@ public class SalmonMediaDataSource extends MediaDataSource {
     /**
      * Close the source and all associated resources.
      *
-     * @throws IOException
+     * @throws IOException Thrown if error during IO
      */
     public void close() throws IOException {
         stream.close();

@@ -489,6 +489,8 @@ public class SalmonFile implements IVirtualFile {
      * @param dirName      The name of the directory to be created
      * @param key          The key that will be used to encrypt the directory name
      * @param dirNameNonce The nonce to be used for encrypting the directory name
+     * @return The directory that was created
+     * @throws IOException Thrown when error during IO
      */
     public SalmonFile createDirectory(String dirName, byte[] key, byte[] dirNameNonce) throws IOException{
         String encryptedDirName = getEncryptedFilename(dirName, key, dirNameNonce);
@@ -697,6 +699,7 @@ public class SalmonFile implements IVirtualFile {
      *
      * @param newFilename The new filename this file will be renamed to
      * @param nonce       The nonce to use
+     * @throws IOException Thrown when error during IO
      */
     public void rename(String newFilename, byte[] nonce) throws IOException {
         String newEncryptedFilename = getEncryptedFilename(newFilename, null, nonce);

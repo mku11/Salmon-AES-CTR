@@ -1,4 +1,4 @@
-package com.mku.android.iostream;
+package com.mku.android.streams;
 /*
 MIT License
 
@@ -26,7 +26,7 @@ SOFTWARE.
 import android.os.ParcelFileDescriptor;
 
 import com.mku.android.file.AndroidFile;
-import com.mku.iostream.RandomAccessStream;
+import com.mku.streams.RandomAccessStream;
 
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
@@ -47,7 +47,7 @@ public class AndroidFileStream extends RandomAccessStream {
 
     /**
      * True if the stream is readable.
-     * @return
+     * @return True if readable
      */
     public boolean canRead() {
         return fileChannel.isOpen() && !canWrite;
@@ -55,7 +55,7 @@ public class AndroidFileStream extends RandomAccessStream {
 
     /**
      * True if the stream is writeable.
-     * @return
+     * @return True if writeable
      */
     public boolean canWrite() {
         return fileChannel.isOpen() && canWrite;
@@ -63,15 +63,15 @@ public class AndroidFileStream extends RandomAccessStream {
 
     /**
      * True if the stream is seekable (random access).
-     * @return
+     * @return True if seekable
      */
     public boolean canSeek() {
         return true;
     }
 
     /**
-     * Get the size of the stream.
-     * @return
+     * Get the length of the stream.
+     * @return The length
      */
     public long length() {
         return file.length();
@@ -79,8 +79,8 @@ public class AndroidFileStream extends RandomAccessStream {
 
     /**
      * Get the current position of the stream.
-     * @return
-     * @throws IOException
+     * @return The current position
+     * @throws IOException Thrown if error during IO
      */
     public long getPosition() throws IOException {
         return fileChannel.position();
@@ -89,7 +89,7 @@ public class AndroidFileStream extends RandomAccessStream {
     /**
      * Set the current position of the stream.
      * @param value The new position.
-     * @throws IOException
+     * @throws IOException Thrown if error during IO
      */
     public void setPosition(long value) throws IOException {
         fileChannel.position(value);
@@ -101,6 +101,7 @@ public class AndroidFileStream extends RandomAccessStream {
      *
      * @param file The AndroidFile that will be used to get the read/write stream
      * @param mode The mode "r" for read "rw" for write
+     * @throws FileNotFoundException Thrown if file is not found
      */
     public AndroidFileStream(AndroidFile file, String mode) throws FileNotFoundException {
         this.file = file;
@@ -120,7 +121,7 @@ public class AndroidFileStream extends RandomAccessStream {
     /**
      * Set the length of the stream.
      * @param value The length.
-     * @throws IOException
+     * @throws IOException Thrown if error during IO
      */
     public void setLength(long value) throws IOException {
         fileChannel.position(value);
@@ -128,11 +129,11 @@ public class AndroidFileStream extends RandomAccessStream {
 
     /**
      * Read data from the stream into the buffer.
-     * @param buffer
-     * @param offset
-     * @param count
-     * @return
-     * @throws IOException
+     * @param buffer The buffer to read into
+     * @param offset The offset to start reading into
+     * @param count The number of bytes to read
+     * @return The number of bytes read.
+     * @throws IOException Thrown if error during IO
      */
     public int read(byte[] buffer, int offset, int count) throws IOException {
         ByteBuffer buf = ByteBuffer.allocate(count);
@@ -149,7 +150,7 @@ public class AndroidFileStream extends RandomAccessStream {
      * @param buffer The buffer to read the contents from.
      * @param offset The position the reading will start from.
      * @param count The count of bytes to be read from the buffer.
-     * @throws IOException
+     * @throws IOException Thrown if error during IO
      */
     public void write(byte[] buffer, int offset, int count) throws IOException {
         ByteBuffer buf = ByteBuffer.allocate(count);
@@ -162,8 +163,8 @@ public class AndroidFileStream extends RandomAccessStream {
      * Seek to the requested position.
      * @param offset The new position.
      * @param origin The origin type.
-     * @return
-     * @throws IOException
+     * @return The current position after seeking
+     * @throws IOException Thrown if error during IO
      */
     public long seek(long offset, SeekOrigin origin) throws IOException {
         long pos = fileChannel.position();
@@ -195,7 +196,7 @@ public class AndroidFileStream extends RandomAccessStream {
 
     /**
      * Close the stream.
-     * @throws IOException
+     * @throws IOException Thrown if error during IO
      */
     public void close() throws IOException {
         fileChannel.close();

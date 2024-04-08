@@ -36,40 +36,59 @@ import java.io.IOException;
  */
 public interface IVirtualFile {
     RandomAccessStream getInputStream() throws IOException;
+
     RandomAccessStream getOutputStream() throws IOException;
+
     IVirtualFile[] listFiles();
+
     IVirtualFile getChild(String filename) throws IOException;
+
     boolean isFile();
+
     boolean isDirectory();
+
     String getPath() throws IOException;
+
     String getRealPath();
+
     IRealFile getRealFile();
+
     String getBaseName() throws IOException;
+
     IVirtualFile getParent();
+
     void delete();
+
     void mkdir();
+
     long getLastDateTimeModified();
+
     long getSize() throws IOException;
+
     boolean exists();
+
     IVirtualFile createDirectory(String dirName) throws IOException;
-    IVirtualFile createDirectory(String dirName, byte[] key, byte[] dirNameNonce) throws IOException;
+
     IVirtualFile createFile(String realFilename) throws IOException;
+
     void rename(String newFilename) throws IOException;
-    void rename(String newFilename, byte[] nonce) throws IOException;
+
     IVirtualFile move(IVirtualFile dir, BiConsumer<Long, Long> OnProgressListener) throws IOException;
+
     IVirtualFile copy(IVirtualFile dir, BiConsumer<Long, Long> OnProgressListener) throws IOException;
 
     void moveRecursively(IVirtualFile dest,
-                                TriConsumer<IVirtualFile, Long, Long> progressListener,
-                                Function<IVirtualFile, String> autoRename,
-                                boolean autoRenameFolders,
-                                BiConsumer<IVirtualFile, Exception> onFailed)
+                         TriConsumer<IVirtualFile, Long, Long> progressListener,
+                         Function<IVirtualFile, String> autoRename,
+                         boolean autoRenameFolders,
+                         BiConsumer<IVirtualFile, Exception> onFailed)
             throws IOException;
+
     void copyRecursively(IVirtualFile dest,
-                                TriConsumer<IVirtualFile, Long, Long> progressListener,
-                                Function<IVirtualFile, String> autoRename,
-                                boolean autoRenameFolders,
-                                BiConsumer<IVirtualFile, Exception> onFailed)
+                         TriConsumer<IVirtualFile, Long, Long> progressListener,
+                         Function<IVirtualFile, String> autoRename,
+                         boolean autoRenameFolders,
+                         BiConsumer<IVirtualFile, Exception> onFailed)
             throws IOException;
 
     void deleteRecursively(TriConsumer<IVirtualFile, Long, Long> progressListener,

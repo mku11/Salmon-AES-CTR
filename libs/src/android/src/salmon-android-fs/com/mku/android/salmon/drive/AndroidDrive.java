@@ -42,7 +42,7 @@ import java.io.File;
  * Implementation of a virtual drive for android.
  */
 public class AndroidDrive extends SalmonDrive {
-    public static final String TAG = AndroidDrive.class.getName();
+    private static final String TAG = AndroidDrive.class.getName();
     private static final int ENC_BUFFER_SIZE = 5 * 1024 * 1024;
     private static final int ENC_THREADS = 4;
     private static Context context;
@@ -50,7 +50,7 @@ public class AndroidDrive extends SalmonDrive {
     /**
      * Initialize the Android Drive. This needs to run before you attempt to
      * create or open any virtual drives.
-     * @param context
+     * @param context The context
      */
     public static void initialize(Context context) {
         AndroidDrive.context = context.getApplicationContext();
@@ -58,7 +58,7 @@ public class AndroidDrive extends SalmonDrive {
 
     /**
      * Get the Android context.
-     * @return
+     * @return The Android context
      */
     public static Context getContext(){
         return context;
@@ -71,6 +71,12 @@ public class AndroidDrive extends SalmonDrive {
         super();
     }
 
+    /**
+     * Copy file to shared folder
+     * @param salmonFile The file
+     * @return The shared file
+     * @throws Exception Thrown when error occured
+     */
     public File copyToSharedFolder(SalmonFile salmonFile) throws Exception {
         File privateDir = new File(getPrivateDir().getAbsolutePath());
         java.io.File cacheFile = new java.io.File(privateDir, salmonFile.getBaseName());
@@ -86,7 +92,7 @@ public class AndroidDrive extends SalmonDrive {
     /**
      * Get the private directory that will be used for sharing encrypted context with
      * other apps on the android device.
-     * @return
+     * @return The private directory
      */
     public IRealFile getPrivateDir() {
         java.io.File sharedDir = new java.io.File(context.getCacheDir(), getShareDirectoryName());
@@ -97,9 +103,9 @@ public class AndroidDrive extends SalmonDrive {
 
     /**
      * Get the real file hosted on the android device.
-     * @param uri
+     * @param uri The real file uri
      * @param isDirectory True if filepath corresponds to a directory.
-     * @return
+     * @return The real file
      */
     public IRealFile getRealFile(String uri, boolean isDirectory) {
         DocumentFile docFile;

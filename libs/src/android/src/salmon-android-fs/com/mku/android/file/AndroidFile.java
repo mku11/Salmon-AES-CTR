@@ -31,11 +31,11 @@ import android.provider.DocumentsContract;
 
 import androidx.documentfile.provider.DocumentFile;
 
-import com.mku.android.iostream.AndroidFileStream;
+import com.mku.android.streams.AndroidFileStream;
 import com.mku.android.salmon.drive.AndroidDrive;
 import com.mku.file.IRealFile;
 import com.mku.func.BiConsumer;
-import com.mku.iostream.RandomAccessStream;
+import com.mku.streams.RandomAccessStream;
 
 import java.io.FileNotFoundException;
 import java.io.IOException;
@@ -108,7 +108,7 @@ public class AndroidFile implements IRealFile {
     /**
      * True if file exists.
      *
-     * @return
+     * @return True if exists
      */
     public boolean exists() {
         return documentFile.exists();
@@ -117,7 +117,7 @@ public class AndroidFile implements IRealFile {
     /**
      * Get the absolute path on the physical drive.
      *
-     * @return
+     * @return The absolute path
      */
     public String getAbsolutePath() {
         try {
@@ -132,7 +132,7 @@ public class AndroidFile implements IRealFile {
     /**
      * Get the base name of this file.
      *
-     * @return
+     * @return The base name
      */
     public String getBaseName() {
         if (_basename != null)
@@ -146,8 +146,8 @@ public class AndroidFile implements IRealFile {
     /**
      * Get a stream for reading.
      *
-     * @return
-     * @throws FileNotFoundException
+     * @return The input stream
+     * @throws FileNotFoundException Thrown if file is not found
      */
     public RandomAccessStream getInputStream() throws FileNotFoundException {
         AndroidFileStream androidFileStream = new AndroidFileStream(this, "r");
@@ -157,8 +157,8 @@ public class AndroidFile implements IRealFile {
     /**
      * Get a stream for writing.
      *
-     * @return
-     * @throws FileNotFoundException
+     * @return The output stream
+     * @throws FileNotFoundException Thrown if file not found
      */
     public RandomAccessStream getOutputStream() throws FileNotFoundException {
         AndroidFileStream androidFileStream = new AndroidFileStream(this, "rw");
@@ -168,7 +168,7 @@ public class AndroidFile implements IRealFile {
     /**
      * Get the parent directory.
      *
-     * @return
+     * @return The parent directory
      */
     public IRealFile getParent() {
         DocumentFile parentDocumentFile = documentFile.getParentFile();
@@ -181,7 +181,7 @@ public class AndroidFile implements IRealFile {
     /**
      * Get the path.
      *
-     * @return
+     * @return The file path
      */
     public String getPath() {
         return documentFile.getUri().toString();
@@ -190,7 +190,7 @@ public class AndroidFile implements IRealFile {
     /**
      * True if it is a directory.
      *
-     * @return
+     * @return True if directory
      */
     public boolean isDirectory() {
         if (_isDirectory != null)
@@ -202,16 +202,16 @@ public class AndroidFile implements IRealFile {
     /**
      * True if it is a file.
      *
-     * @return
+     * @return True if is file
      */
     public boolean isFile() {
         return !isDirectory();
     }
 
     /**
-     * Get the last modified time in milliseconds.
+     * Get the last modified date in milliseconds.
      *
-     * @return
+     * @return Last modified date in milliseconds
      */
     public long lastModified() {
         if (_lastModified != null)
@@ -223,7 +223,7 @@ public class AndroidFile implements IRealFile {
     /**
      * Get the size of the file.
      *
-     * @return
+     * @return The size
      */
     public long length() {
         if (_length != null)
@@ -248,7 +248,7 @@ public class AndroidFile implements IRealFile {
     /**
      * List files and directories.
      *
-     * @return
+     * @return The files and subdirectories
      */
     public IRealFile[] listFiles() {
         DocumentFile[] files = documentFile.listFiles();
@@ -268,35 +268,35 @@ public class AndroidFile implements IRealFile {
     }
 
     /**
-     * Move this fiel to another directory.
+     * Move this file to another directory.
      *
      * @param newDir           The target directory.
-     * @return
-     * @throws IOException
+     * @return The moved file
+     * @throws IOException Thrown if error during IO
      */
     public IRealFile move(IRealFile newDir) throws IOException {
         return move(newDir, null, null);
     }
 
     /**
-     * Move this fiel to another directory.
+     * Move this file to another directory.
      *
      * @param newDir           The target directory.
      * @param newName          The new filename
-     * @return
-     * @throws IOException
+     * @return The moved file
+     * @throws IOException Thrown if error during IO
      */
     public IRealFile move(IRealFile newDir, String newName) throws IOException {
         return move(newDir, newName, null);
     }
 
     /**
-     * Move this fiel to another directory.
+     * Move this file to another directory.
      *
      * @param newDir           The target directory.
      * @param progressListener Observer to notify of the move progress.
-     * @return
-     * @throws IOException
+     * @return The moved file
+     * @throws IOException Thrown if error during IO
      */
     public IRealFile move(IRealFile newDir, String newName, BiConsumer<Long, Long> progressListener)
             throws IOException {
@@ -338,8 +338,8 @@ public class AndroidFile implements IRealFile {
      * Copy this file to another directory.
      *
      * @param newDir           The target directory.
-     * @return
-     * @throws IOException
+     * @return The new file
+     * @throws IOException Thrown if error during IO
      */
     public IRealFile copy(IRealFile newDir) throws IOException {
         return copy(newDir, null, null);
@@ -350,8 +350,8 @@ public class AndroidFile implements IRealFile {
      *
      * @param newDir           The target directory.
      * @param newName          The new filename
-     * @return
-     * @throws IOException
+     * @return The new file
+     * @throws IOException Thrown if error during IO
      */
     public IRealFile copy(IRealFile newDir, String newName) throws IOException {
         return copy(newDir, newName, null);
@@ -363,8 +363,8 @@ public class AndroidFile implements IRealFile {
      * @param newDir           The target directory.
      * @param newName          The new filename
      * @param progressListener Observer to notify of the copy progress.
-     * @return
-     * @throws IOException
+     * @return The new file
+     * @throws IOException Thrown if error during IO
      */
     public IRealFile copy(IRealFile newDir, String newName, BiConsumer<Long,Long> progressListener)
             throws IOException {
@@ -407,7 +407,7 @@ public class AndroidFile implements IRealFile {
      * Get a child file in this directory.
      *
      * @param filename The name of the file or directory to match.
-     * @return
+     * @return The child file
      */
     public IRealFile getChild(String filename) {
         DocumentFile[] documentFiles = documentFile.listFiles();
@@ -422,8 +422,8 @@ public class AndroidFile implements IRealFile {
      * Rename file.
      *
      * @param newFilename The new filename
-     * @return
-     * @throws FileNotFoundException
+     * @return True if file renamed
+     * @throws FileNotFoundException Thrown if file is not found
      */
     public boolean renameTo(String newFilename) throws FileNotFoundException {
         DocumentsContract.renameDocument(context.getContentResolver(), documentFile.getUri(), newFilename);
@@ -437,7 +437,7 @@ public class AndroidFile implements IRealFile {
     /**
      * Create this directory.
      *
-     * @return
+     * @return True if directory created
      */
     public boolean mkdir() {
         IRealFile parent = getParent();
@@ -451,9 +451,9 @@ public class AndroidFile implements IRealFile {
     /**
      * Get a file descriptor corresponding to this file.
      *
-     * @param mode
-     * @return
-     * @throws FileNotFoundException
+     * @param mode The mode
+     * @return The parcel file descriptor
+     * @throws FileNotFoundException Thrown if file is not found
      */
     public ParcelFileDescriptor getFileDescriptor(String mode) throws FileNotFoundException {
         return AndroidDrive.getContext().getContentResolver().openFileDescriptor(documentFile.getUri(), mode);
@@ -467,6 +467,9 @@ public class AndroidFile implements IRealFile {
         return documentFile.getUri().toString();
     }
 
+    /**
+     * Clear the cache
+     */
     public void clearCache()
     {
         _basename = null;

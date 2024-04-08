@@ -35,7 +35,7 @@ import java.io.StringWriter;
 
 import android.util.Base64;
 
-import com.mku.salmon.sequence.SalmonSequenceException;
+import com.mku.sequence.SequenceException;
 import com.mku.sequence.INonceSequenceSerializer;
 import com.mku.sequence.NonceSequence;
 
@@ -53,10 +53,10 @@ public class AndroidSequenceSerializer implements INonceSequenceSerializer {
     /**
      * Serialize nonce sequences.
      * @param sequences The sequences to convert to text.
-     * @return
-     * @throws SalmonSequenceException
+     * @return The serialized contents
+     * @throws SequenceException Thrown if error with the sequence
      */
-    public String serialize(HashMap<String, NonceSequence> sequences) throws SalmonSequenceException {
+    public String serialize(HashMap<String, NonceSequence> sequences) throws SequenceException {
         String contents = null;
         XmlSerializer out = Xml.newSerializer();
         StringWriter writer = new StringWriter();
@@ -80,7 +80,7 @@ public class AndroidSequenceSerializer implements INonceSequenceSerializer {
             contents = writer.toString();
         } catch (IOException ex) {
             ex.printStackTrace();
-            throw new SalmonSequenceException("Could not serialize sequences", ex);
+            throw new SequenceException("Could not serialize sequences", ex);
         } finally {
             try {
                 writer.close();
@@ -95,9 +95,9 @@ public class AndroidSequenceSerializer implements INonceSequenceSerializer {
      * Deserialize nonce sequences.
      * @param contents The contents containing the nonce sequences.
      * @return The sequences.
-     * @throws SalmonSequenceException
+     * @throws SequenceException Thrown if error with the nonce sequence
      */
-    public HashMap<String, NonceSequence> deserialize(String contents) throws SalmonSequenceException {
+    public HashMap<String, NonceSequence> deserialize(String contents) throws SequenceException {
         HashMap<String, NonceSequence> configs = new HashMap<>();
         try {
             XPathFactory factory = XPathFactory.newInstance();
@@ -126,7 +126,7 @@ public class AndroidSequenceSerializer implements INonceSequenceSerializer {
             }
         } catch (Exception ex) {
             ex.printStackTrace();
-            throw new SalmonSequenceException("Could not deserialize sequences", ex);
+            throw new SequenceException("Could not deserialize sequences", ex);
         }
         return configs;
     }
