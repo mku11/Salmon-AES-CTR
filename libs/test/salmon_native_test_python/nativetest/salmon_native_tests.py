@@ -45,7 +45,6 @@ class SalmonNativeTests(TestCase):
     DEC_THREADS = 1
 
     SalmonPassword.set_pbkdf_type(PbkdfType.Default)
-    testCase: TestCase = TestCase()
 
     def setUp(self):
         NativeProxy.set_library_path(
@@ -150,15 +149,14 @@ class SalmonNativeTests(TestCase):
                      False, True,
                      SalmonCoreTestHelper.TEST_HMAC_KEY_BYTES, chunk_size)
 
-        SalmonNativeTests.assert_equal_with_integrity(enc_bytes_def, enc_bytes, chunk_size)
-        dec_bytes = SalmonDecryptor(SalmonNativeTests.DEC_THREADS, multi_cpu=SalmonCoreTestHelper.ENABLE_MULTI_CPU)\
+        self.assert_equal_with_integrity(enc_bytes_def, enc_bytes, chunk_size)
+        dec_bytes = SalmonDecryptor(SalmonNativeTests.DEC_THREADS, multi_cpu=SalmonCoreTestHelper.ENABLE_MULTI_CPU) \
             .decrypt(enc_bytes, SalmonCoreTestHelper.TEST_KEY_BYTES, SalmonCoreTestHelper.TEST_NONCE_BYTES,
                      False, True, SalmonCoreTestHelper.TEST_HMAC_KEY_BYTES, chunk_size)
 
         self.assertEqual(v_bytes, dec_bytes)
 
-    @staticmethod
-    def assert_equal_with_integrity(v_buffer: bytearray, buffer_with_integrity: bytearray, chunk_size):
+    def assert_equal_with_integrity(self, v_buffer: bytearray, buffer_with_integrity: bytearray, chunk_size):
         index = 0
         for i in range(0, len(v_buffer), chunk_size):
             n_chunk_size = min(chunk_size, len(v_buffer) - i)
@@ -169,6 +167,6 @@ class SalmonNativeTests(TestCase):
             end = index + SalmonGenerator.HASH_RESULT_LENGTH + n_chunk_size
             buff2[0:n_chunk_size] = buffer_with_integrity[index + SalmonGenerator.HASH_RESULT_LENGTH:end]
 
-            SalmonNativeTests.testCase.assertEqual(buff1, buff2)
+            self.assertEqual(buff1, buff2)
             index += n_chunk_size + SalmonGenerator.HASH_RESULT_LENGTH
-            SalmonNativeTests.testCase.assertEqual(len(buffer_with_integrity), index)
+            self.assertEqual(len(buffer_with_integrity), index)

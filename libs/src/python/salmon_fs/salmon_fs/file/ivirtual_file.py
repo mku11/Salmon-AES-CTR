@@ -25,7 +25,7 @@ SOFTWARE.
 from __future__ import annotations
 
 from abc import ABC
-
+from typing import Any, Callable
 from typeguard import typechecked
 
 from salmon_fs.file.ireal_file import IRealFile
@@ -89,4 +89,37 @@ class IVirtualFile(ABC):
         pass
 
     def exists(self) -> bool:
+        pass
+
+    def create_directory(self, dir_name: str) -> IVirtualFile:
+        pass
+
+    def create_file(self, real_filename: str) -> IVirtualFile:
+        pass
+
+    def rename(self, new_filename: str):
+        pass
+
+    def move(self, v_dir: IVirtualFile, on_progress_listener: Callable[[int, int], Any] | None = None) -> IVirtualFile:
+        pass
+
+    def copy(self, v_dir: IVirtualFile, on_progress_listener: Callable[[int, int], Any] | None = None) -> IVirtualFile:
+        pass
+
+    def copy_recursively(self, dest: IVirtualFile,
+                         progress_listener: Callable[[IVirtualFile, int, int], Any],
+                         auto_rename: Callable[[IVirtualFile], str],
+                         auto_rename_folders: bool,
+                         on_failed: Callable[[IVirtualFile, Exception], Any]):
+        pass
+
+    def move_recursively(self, dest: IVirtualFile,
+                         progress_listener: Callable[[IVirtualFile, int, int], Any],
+                         auto_rename: Callable[[IVirtualFile], str],
+                         auto_rename_folders: bool,
+                         on_failed: Callable[[IVirtualFile, Exception], Any]):
+        pass
+
+    def delete_recursively(self, progress_listener: Callable[[IVirtualFile, int, int], Any],
+                           on_failed: Callable[[IVirtualFile, Exception], Any]):
         pass
