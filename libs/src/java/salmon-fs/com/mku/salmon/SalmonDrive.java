@@ -303,51 +303,6 @@ public abstract class SalmonDrive extends VirtualDrive {
     }
 
     /**
-     * @param targetAuthId The authorization id of the target device.
-     * @param file         The config file.
-     * @throws Exception Thrown if error during exporting
-     */
-    public void exportAuthFile(String targetAuthId, IRealFile file) throws Exception {
-        if (this.getDriveId() == null)
-            throw new Exception("Could not get drive id, make sure you init the drive first");
-
-        byte[] cfgNonce = this.sequencer.nextNonce(BitConverter.toHex(this.getDriveId()));
-
-        NonceSequence sequence = sequencer.getSequence(BitConverter.toHex(getDriveId()));
-        if (sequence == null)
-            throw new Exception("Device is not authorized to export");
-
-        if (file.exists() && file.length() > 0) {
-            RandomAccessStream outStream = null;
-            try {
-                outStream = file.getOutputStream();
-                outStream.setLength(0);
-            } catch (Exception ex) {
-            } finally {
-                if (outStream != null)
-                    outStream.close();
-            }
-        }
-        byte[] maxNonce = sequence.getMaxNonce();
-        if (maxNonce == null)
-            throw new SequenceException("Could not get current max nonce");
-        byte[] nextNonce = sequence.getNextNonce();
-        if (nextNonce == null)
-            throw new SequenceException("Could not get next nonce");
-        byte[] pivotNonce = SalmonNonce.splitNonceRange(nextNonce, maxNonce);
-        String authId = sequence.getAuthId();
-        if (authId == null)
-            throw new SequenceException("Could not get auth id");
-
-        sequencer.setMaxNonce(sequence.getId(), sequence.getAuthId(), pivotNonce);
-        SalmonAuthConfig.writeAuthFile(file, this,
-                BitConverter.toBytes(targetAuthId),
-                pivotNonce, sequence.getMaxNonce(),
-                cfgNonce);
-    }
-
-
-    /**
      * Create a nonce sequence for the drive id and the authorization id provided. Should be called
      * once per driveId/authId combination.
      *

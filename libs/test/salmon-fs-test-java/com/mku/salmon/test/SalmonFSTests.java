@@ -38,7 +38,6 @@ import com.mku.salmon.streams.SalmonFileInputStream;
 import com.mku.salmon.utils.SalmonFileCommander;
 import com.mku.sequence.INonceSequenceSerializer;
 import com.mku.salmon.sequence.SalmonFileSequencer;
-import com.mku.sequence.SequenceException;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;

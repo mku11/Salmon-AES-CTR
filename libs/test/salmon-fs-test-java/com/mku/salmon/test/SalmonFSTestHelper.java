@@ -341,7 +341,7 @@ public class SalmonFSTestHelper {
         //reopen with first device sequencer and export the auth file with the auth id from the second device
         drive = SalmonDrive.openDrive(vault, SalmonFSTestHelper.driveClassType, SalmonCoreTestHelper.TEST_PASSWORD, sequencer1);
         IRealFile exportFile = vault.getChild(SalmonFSTestHelper.TEST_EXPORT_FILENAME);
-        drive.exportAuthFile(authId, exportFile);
+        SalmonAuthConfig.exportAuthFile(drive, authId, exportFile);
         IRealFile exportAuthFile = vault.getChild(SalmonFSTestHelper.TEST_EXPORT_FILENAME);
         SalmonFile salmonCfgFile = new SalmonFile(exportAuthFile, drive);
         long nonceCfg = BitConverter.toLong(salmonCfgFile.getFileNonce(), 0, SalmonGenerator.NONCE_LENGTH);
