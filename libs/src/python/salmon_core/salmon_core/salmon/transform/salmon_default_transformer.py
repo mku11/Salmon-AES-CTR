@@ -36,7 +36,7 @@ from typeguard import typechecked
 @typechecked
 class SalmonDefaultTransformer(SalmonAES256CTRTransformer):
     """
-     * Salmon AES transformer based on the cryptodome routines.
+    Salmon AES transformer based on the cryptodome routines.
     """
 
     def __init__(self):
@@ -44,24 +44,24 @@ class SalmonDefaultTransformer(SalmonAES256CTRTransformer):
 
     def init(self, key: bytearray, nonce: bytearray):
         """
-         * Initialize the default Python AES cipher transformer.
-         * @param key The AES256 key to use.
-         * @param nonce The nonce to use.
-         * @throws IntegrityException Thrown when security error
+        Initialize the default Python AES cipher transformer.
+        :param key: The AES256 key to use.
+        :param nonce: The nonce to use.
+        :raises IntegrityException: Thrown when security error
         """
         super().init(key, nonce)
 
     def encrypt_data(self, src_buffer: bytearray, src_offset: int,
                      dest_buffer: bytearray, dest_offset: int, count: int) -> int:
         """
-         * Encrypt the data.
-         * @param srcBuffer The source byte array.
-         * @param srcOffset The source byte offset.
-         * @param destBuffer The destination byte array.
-         * @param destOffset The destination byte offset.
-         * @param count The number of bytes to transform.
-         * @return The number of bytes transformed.
-         * @throws IntegrityException Thrown when security error
+        Encrypt the data.
+        :param src_offset: The source byte array.
+        :param src_buffer: The source byte offset.
+        :param dest_buffer: The destination byte array.
+        :param dest_offset: The destination byte offset.
+        :param count: The number of bytes to transform.
+        :return: The number of bytes transformed.
+        :raises IntegrityException: Thrown when security error
         """
         try:
             counter: bytearray = self.get_counter()
@@ -76,14 +76,14 @@ class SalmonDefaultTransformer(SalmonAES256CTRTransformer):
     def decrypt_data(self, src_buffer: bytearray, src_offset: int,
                      dest_buffer: bytearray, dest_offset: int, count: int) -> int:
         """
-         * Decrypt the data.
-         * @param srcBuffer The source byte array.
-         * @param srcOffset The source byte offset.
-         * @param destBuffer The destination byte array.
-         * @param destOffset The destination byte offset.
-         * @param count The number of bytes to transform.
-         * @return The number of bytes transformed.
-         * @throws IntegrityException Thrown when security error
+        Decrypt the data.
+        :param src_buffer: The source byte array.
+        :param src_offset: The source byte offset.
+        :param dest_buffer: The destination byte array.
+        :param dest_offset: The destination byte offset.
+        :param count: The number of bytes to transform.
+        :return: The number of bytes transformed.
+        :raises IntegrityException: Thrown when security error
         """
         try:
             counter: bytearray = self.get_counter()

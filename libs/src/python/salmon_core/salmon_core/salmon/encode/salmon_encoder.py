@@ -32,26 +32,26 @@ from typeguard import typechecked
 @typechecked
 class SalmonEncoder:
     """
-     * Provides generic encoder (ie Base64).
+    Provides generic encoder (ie Base64).
     """
 
     __base64: IBase64 = Base64()
     """
-     * Current global Base64 implementation for encrypting/decrypting text strings. To change use set_base64().
+    Current global Base64 implementation for encrypting/decrypting text strings. To change use set_base64().
     """
 
     @staticmethod
     def set_base64(base64: IBase64):
         """
-         * Change the current global Base64 implementation.
-         * @param base64 The new Base64 implementation.
+        Change the current global Base64 implementation.
+        :param base64: The new Base64 implementation.
         """
         SalmonEncoder.base64 = base64
 
     @staticmethod
     def get_base64() -> IBase64:
         """
-         * Get the global default Base64 implementation.
-         * @return The Base64 implementation.
+        Get the global default Base64 implementation.
+        :return: The Base64 implementation.
         """
         return SalmonEncoder.__base64

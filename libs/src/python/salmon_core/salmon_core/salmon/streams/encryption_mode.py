@@ -31,18 +31,18 @@ from typeguard import typechecked
 @typechecked
 class EncryptionMode(Enum):
     """
-     * Encryption Mode
-     *
-     * @see #Encrypt
-     * @see #Decrypt
+    Encryption Mode
+    
+    @see #Encrypt
+    @see #Decrypt
     """
 
     Encrypt = 0
     """
-     * Encryption Mode used with a base stream as a target.
+    Encryption Mode used with a base stream as a target.
     """
 
     Decrypt = 1
     """
-     * Decryption Mode used with a base stream as a source.
+    Decryption Mode used with a base stream as a source.
     """

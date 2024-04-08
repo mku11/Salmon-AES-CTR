@@ -42,9 +42,9 @@ from salmon_fs.salmon.salmon_file import SalmonFile
 @typechecked
 class SalmonFileInputStream(BufferedIOBase):
     """
-     * Implementation of a Python InputStream for seeking and reading a SalmonFile.
-     * This class provides a seekable source with parallel substreams and cached buffers
-     * for performance.
+    Implementation of a Python InputStream for seeking and reading a SalmonFile.
+    This class provides a seekable source with parallel substreams and cached buffers
+    for performance.
     """
 
     # TAG: str = type(SalmonFileInputStream.__class__).__name__
@@ -63,13 +63,13 @@ class SalmonFileInputStream(BufferedIOBase):
     def __init__(self, salmon_file: SalmonFile, buffers_count: int, buffer_size: int, threads: int, back_offset: int):
 
         """
-         * Instantiate a seekable stream from an encrypted file source
-         *
-         * @param salmon_file   The source file.
-         * @param buffers_count Number of buffers to use.
-         * @param buffer_size   The length of each buffer.
-         * @param threads      The number of threads/streams to source the file in parallel.
-         * @param back_offset   The back offset.
+        Instantiate a seekable stream from an encrypted file source
+        
+        :param salmon_file:   The source file.
+        :param buffers_count: Number of buffers to use.
+        :param buffer_size:   The length of each buffer.
+        :param threads:      The number of threads/streams to source the file in parallel.
+        :param back_offset:   The back offset.
         """
         self.__buffersCount: int
         self.__buffers: list[SalmonFileInputStream.CacheBuffer] | list[None] | None = None
@@ -83,16 +83,16 @@ class SalmonFileInputStream(BufferedIOBase):
 
         self.__lruBuffersIndex: list[int] = []
         """
-         * We reuse the least recently used buffer. Since the buffer count is relative
-         * small (see {@link #MAX_BUFFERS}) there is no need for a fast-access lru queue
-         * so a simple linked list of keeping the indexes is adequately fast.
+        We reuse the least recently used buffer. Since the buffer count is relative
+        small (see {@link #MAX_BUFFERS}) there is no need for a fast-access lru queue
+        so a simple linked list of keeping the indexes is adequately fast.
         """
 
         self.__backOffset: int
         """
-         * Negative offset for the buffers. Some stream consumers might request data right before
-         * the last request. We provide this offset so we don't make multiple requests for filling
-         * the buffers ending up with too much overlapping data.
+        Negative offset for the buffers. Some stream consumers might request data right before
+        the last request. We provide this offset so we don't make multiple requests for filling
+        the buffers ending up with too much overlapping data.
         """
 
         self.__salmonFile = salmon_file
@@ -123,7 +123,7 @@ class SalmonFileInputStream(BufferedIOBase):
 
     def __create_streams(self):
         """
-         * Method creates the parallel streams for reading from the file
+        Method creates the parallel streams for reading from the file
         """
         self.__executor = ThreadPoolExecutor(self.__threads)
         self.__streams = [None] * self.__threads
@@ -136,10 +136,10 @@ class SalmonFileInputStream(BufferedIOBase):
 
     def create_buffers(self):
         """
-         * Create cache buffers that will be used for sourcing the files.
-         * These will help reducing multiple small decryption reads from the encrypted source.
-         * The first buffer will be sourcing at the start of the encrypted file where the header and indexing are
-         * The rest of the buffers can be placed to whatever position the user slides to
+        Create cache buffers that will be used for sourcing the files.
+        These will help reducing multiple small decryption reads from the encrypted source.
+        The first buffer will be sourcing at the start of the encrypted file where the header and indexing are
+        The rest of the buffers can be placed to whatever position the user slides to
         """
         self.__buffers: list[SalmonFileInputStream.CacheBuffer] | list[None] = [None] * self.__buffersCount
         for i in range(0, self.__buffersCount):
@@ -147,11 +147,11 @@ class SalmonFileInputStream(BufferedIOBase):
 
     def seek(self, v_bytes: int, whence: int = ...) -> int:
         """
-         * Seek to a position in the stream
-         *
-         * @param v_bytes the number of bytes to
-         * @whence 0: from the start, 1: from the current position, 2: from the end of the stream
-         * @return
+        Seek to a position in the stream
+        
+        :param v_bytes: the number of bytes to
+        :param whence: Origin: 0: from the start, 1: from the current position, 2: from the end of the stream
+        :return: The current position after seeking
         """
         if whence == 0:
             self.__position = v_bytes
@@ -163,11 +163,9 @@ class SalmonFileInputStream(BufferedIOBase):
 
     def readinto(self, buffer: bytearray | memoryview) -> int:
         """
-         * Reads and decrypts the contents of an encrypted file
-         *
-         * @param buffer The buffer that will store the decrypted contents
-         * @param offset The position on the buffer that the decrypted data will start
-         * @param count  The length of the data requested
+        Reads and decrypts the contents of an encrypted file
+        
+        :param buffer: The buffer that will store the decrypted contents
         """
 
         if self.__position >= self.__positionEnd + 1:
@@ -228,10 +226,10 @@ class SalmonFileInputStream(BufferedIOBase):
     def __fill_buffer(self, cache_buffer: SalmonFileInputStream.CacheBuffer, start_position: int,
                       buffer_size: int) -> int:
         """
-         * Fills a cache buffer with the decrypted data from the encrypted source file.
-         *
-         * @param cache_buffer The cache buffer that will store the decrypted contents
-         * @param buffer_size  The length of the data requested
+        Fills a cache buffer with the decrypted data from the encrypted source file.
+        
+        :param cache_buffer: The cache buffer that will store the decrypted contents
+        :param buffer_size:  The length of the data requested
         """
 
         bytes_read: int
@@ -246,11 +244,11 @@ class SalmonFileInputStream(BufferedIOBase):
                            buffer_size: int,
                            salmon_stream: SalmonStream) -> int:
         """
-         * Fills a cache buffer with the decrypted data from a part of an encrypted file served as a salmon stream
-         *
-         * @param cache_buffer  The cache buffer that will store the decrypted contents
-         * @param buffer_size   The length of the data requested
-         * @param salmon_stream The stream that will be used to read from
+        Fills a cache buffer with the decrypted data from a part of an encrypted file served as a salmon stream
+        
+        :param cache_buffer:  The cache buffer that will store the decrypted contents
+        :param buffer_size:   The length of the data requested
+        :param salmon_stream: The stream that will be used to read from
         """
         salmon_stream.seek(start, RandomAccessStream.SeekOrigin.Begin)
         total_bytes_read: int = salmon_stream.read(cache_buffer.buffer, offset, buffer_size)
@@ -259,11 +257,11 @@ class SalmonFileInputStream(BufferedIOBase):
     def __fill_buffer_multi(self, cache_buffer: SalmonFileInputStream.CacheBuffer, start_position: int,
                             buffer_size: int) -> int:
         """
-         * Fill the buffer using parallel streams for performance
-         *
-         * @param cache_buffer   The cache buffer that will store the decrypted data
-         * @param start_position The source file position the read will start from
-         * @param buffer_size    The buffer size that will be used to read from the file
+        Fill the buffer using parallel streams for performance
+        
+        :param cache_buffer:   The cache buffer that will store the decrypted data
+        :param start_position: The source file position the read will start from
+        :param buffer_size:    The buffer size that will be used to read from the file
         """
         bytes_read = [0]
         ex: Exception | None = None
@@ -311,7 +309,7 @@ class SalmonFileInputStream(BufferedIOBase):
     @synchronized
     def __get_avail_cache_buffer(self) -> SalmonFileInputStream.CacheBuffer | None:
         """
-         * Returns an available cache buffer if there is none then reuse the least recently used one.
+        Returns an available cache buffer if there is none then reuse the least recently used one.
         """
         if len(self.__lruBuffersIndex) == self.__buffersCount:
             # getting least recently used buffer
@@ -335,9 +333,9 @@ class SalmonFileInputStream(BufferedIOBase):
     @synchronized
     def __get_cache_buffer(self, position: int, count: int) -> SalmonFileInputStream.CacheBuffer | None:
         """
-         * Returns the buffer that contains the data requested.
-         *
-         * @param position The source file position of the data to be read
+        Returns the buffer that contains the data requested.
+        
+        :param position: The source file position of the data to be read
         """
         for i in range(0, len(self.__buffers)):
             buffer: SalmonFileInputStream.CacheBuffer = self.__buffers[i]
@@ -352,9 +350,9 @@ class SalmonFileInputStream(BufferedIOBase):
 
     def get_size(self) -> int:
         """
-         * Get the size of the stream.
-         *
-         * @return
+        Get the size of the stream.
+        
+        :return: The size
         """
         return self.__positionEnd - self.__positionStart + 1
 
@@ -369,9 +367,9 @@ class SalmonFileInputStream(BufferedIOBase):
 
     def close(self):
         """
-         * Close the stream and associated backed streams and clear buffers.
-         *
-         * @throws IOError Thrown if there is an IO error.
+        Close the stream and associated backed streams and clear buffers.
+        
+        :raises IOError: Thrown if there is an IO error.
         """
         self.__close_streams()
         self.__clear_buffers()
@@ -380,7 +378,7 @@ class SalmonFileInputStream(BufferedIOBase):
     @synchronized
     def __clear_buffers(self):
         """
-         * Clear all buffers.
+        Clear all buffers.
         """
         for i in range(0, len(self.__buffers)):
             if self.__buffers[i] is not None:
@@ -390,9 +388,9 @@ class SalmonFileInputStream(BufferedIOBase):
     @synchronized
     def __close_streams(self):
         """
-         * Close all back streams.
-         *
-         * @throws IOError Thrown if there is an IO error.
+        Close all back streams.
+        
+        :raises IOError: Thrown if there is an IO error.
         """
         for i in range(0, self.__threads):
             if self.__streams[i] is not None:
@@ -402,16 +400,15 @@ class SalmonFileInputStream(BufferedIOBase):
     # TODO: replace the CacheBuffer with a MemoryStream to simplify the code
     class CacheBuffer:
         """
-         * Class will be used to cache decrypted data that can later be read via the ReadAt() method
-         * without requesting frequent decryption reads.
+        Class will be used to cache decrypted data that can later be read via the ReadAt() method
+        without requesting frequent decryption reads.
         """
 
         def __init__(self, buffer_size: int):
             """
-             * Instantiate a cache buffer.
-             *
-             * @param buffer_size
-            """
+            Instantiate a cache buffer.
+            
+            :param buffer_size:             """
             self.buffer: bytearray
             self.startPos: int = 0
             self.count: int = 0
@@ -420,7 +417,7 @@ class SalmonFileInputStream(BufferedIOBase):
 
         def clear(self):
             """
-             * Clear the buffer.
+            Clear the buffer.
             """
             if self.buffer is not None:
                 self.buffer[0:len(self.buffer)] = [0] * len(self.buffer)

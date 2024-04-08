@@ -33,19 +33,19 @@ from typeguard import typechecked
 @typechecked
 class SalmonNonce:
     """
-     * Utility provides nonce operations.
+    Utility provides nonce operations.
     """
 
     @staticmethod
     def increase_nonce(start_nonce: bytearray, end_nonce: bytearray) -> bytearray:
         """
-         * Increase the sequential NONCE by a value of 1.
-         * This implementation assumes that the NONCE length is 8 bytes or fewer so it can fit in a long.
-         *
-         * @param start_nonce The starting nonce
-         * @param endNonce The ending nonce
-         * @return The nonce after increasing
-         * @throws SalmonRangeExceededException Thrown when maximum nonce range is exceeded.
+        Increase the sequential NONCE by a value of 1.
+        This implementation assumes that the NONCE length is 8 bytes or fewer so it can fit in a long.
+        
+        :param start_nonce: The starting nonce
+        :param end_nonce: The ending nonce
+        :return: The nonce after increasing
+        :raises SalmonRangeExceededException: Thrown when maximum nonce range is exceeded.
         """
         nonce: int = BitConverter.to_long(start_nonce, 0, SalmonGenerator.NONCE_LENGTH)
         max_nonce: int = BitConverter.to_long(end_nonce, 0, SalmonGenerator.NONCE_LENGTH)
@@ -55,15 +55,15 @@ class SalmonNonce:
         return BitConverter.to_bytes(nonce, 8)
 
     """
-     * Returns the middle nonce in the provided range.
-     * Note: This assumes the nonce is 8 bytes, if you need to increase the nonce length
-     * then the long transient variables will not hold. In that case you will need to
-     * override with your own implementation.
-     *
-     * @param start_nonce The starting nonce.
-     * @param endNonce The ending nonce in the sequence.
-     * @return The byte array with the middle nonce.
-     * @throws IntegrityException Thrown when security error
+    Returns the middle nonce in the provided range.
+    Note: This assumes the nonce is 8 bytes, if you need to increase the nonce length
+    then the long transient variables will not hold. In that case you will need to
+    override with your own implementation.
+    
+    :param start_nonce: The starting nonce.
+    :param endNonce: The ending nonce in the sequence.
+    :return: The byte array with the middle nonce.
+    :raises IntegrityException: Thrown when security error
     """
 
     @staticmethod

@@ -32,13 +32,13 @@ from typeguard import typechecked
 @typechecked
 class SalmonNativeTransformer(SalmonAES256CTRTransformer):
     """
-     * Generic Native AES transformer. Extend this with your specific
-     * native transformer.
+    Generic Native AES transformer. Extend this with your specific
+    native transformer.
     """
 
     __nativeProxy: INativeProxy = NativeProxy()
     """
-     * The native proxy to use for loading libraries for different platforms and operating systems.
+    The native proxy to use for loading libraries for different platforms and operating systems.
     """
 
     @staticmethod
@@ -50,13 +50,13 @@ class SalmonNativeTransformer(SalmonAES256CTRTransformer):
         return SalmonNativeTransformer.__nativeProxy
 
     """
-     * Encrypt the data.
-     * @param srcBuffer The source byte array.
-     * @param srcOffset The source byte offset.
-     * @param destBuffer The destination byte array.
-     * @param destOffset The destination byte offset.
-     * @param count The number of bytes to transform.
-     * @return The number of bytes transformed.
+    Encrypt the data.
+    :param srcBuffer: The source byte array.
+    :param srcOffset: The source byte offset.
+    :param destBuffer: The destination byte array.
+    :param destOffset: The destination byte offset.
+    :param count: The number of bytes to transform.
+    :return: The number of bytes transformed.
     """
 
     def encrypt_data(self, src_buffer: bytearray, src_offset: int,
@@ -66,13 +66,13 @@ class SalmonNativeTransformer(SalmonAES256CTRTransformer):
                                                                       dest_buffer, dest_offset, count)
 
     """
-     * Decrypt the data.
-     * @param srcBuffer The source byte array.
-     * @param srcOffset The source byte offset.
-     * @param destBuffer The destination byte array.
-     * @param destOffset The destination byte offset.
-     * @param count The number of bytes to transform.
-     * @return The number of bytes transformed.
+    Decrypt the data.
+    :param srcBuffer: The source byte array.
+    :param srcOffset: The source byte offset.
+    :param destBuffer: The destination byte array.
+    :param destOffset: The destination byte offset.
+    :param count: The number of bytes to transform.
+    :return: The number of bytes transformed.
     """
 
     def decrypt_data(self, src_buffer: bytearray, src_offset: int,

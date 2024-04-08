@@ -33,19 +33,19 @@ from salmon_fs.file.ireal_file import IRealFile
 @typechecked
 class VirtualDrive(ABC):
     """
-     * Virtual Drive
+    Virtual Drive
     """
 
     @abstractmethod
     def _on_unlock_success(self):
         """
-         * Method is called when the drive is unlocked
+        Method is called when the drive is unlocked
         """
         pass
 
     def _on_unlock_error(self):
         """
-         * Method is called when unlocking the drive has failed
+        Method is called when unlocking the drive has failed
         """
         pass
 

@@ -35,8 +35,8 @@ from typeguard import typechecked
 @typechecked
 class SalmonIntegrity:
     """
-     * Provide operations for calculating, storing, and verifying data integrity.
-     * This class operates in chunks of data in buffers calculating the hash for each one.
+    Provide operations for calculating, storing, and verifying data integrity.
+    This class operates in chunks of data in buffers calculating the hash for each one.
      """
 
     MAX_CHUNK_SIZE = 8 * 1024 * 1024
@@ -46,20 +46,20 @@ class SalmonIntegrity:
 
     DEFAULT_CHUNK_SIZE = 256 * 1024
     """
-     * Default chunk size for integrity.
+    Default chunk size for integrity.
     """
 
     """
-     * Instantiate an object to be used for applying and verifying hash signatures for each of the data chunks.
-     *
-     * @param integrity True to enable integrity checks.
-     * @param key       The key to use for hashing.
-     * @param chunkSize The chunk size. Use 0 to enable integrity on the whole file (1 chunk).
-     *                  Use a positive number to specify integrity chunks.
-     * @param provider  Hash implementation provider.
-     * @param hashSize The hash size.
-     * @throws IntegrityException When integrity is comprimised
-     * @throws SalmonSecurityException When security has failed
+    Instantiate an object to be used for applying and verifying hash signatures for each of the data chunks.
+    
+    :param integrity: True to enable integrity checks.
+    :param key:       The key to use for hashing.
+    :param chunkSize: The chunk size. Use 0 to enable integrity on the whole file (1 chunk).
+                     Use a positive number to specify integrity chunks.
+    :param provider:  Hash implementation provider.
+    :param hashSize: The hash size.
+    :raises IntegrityException: When integrity is comprimised
+    :raises SalmonSecurityException: When security has failed
      """
 
     def __init__(self, integrity: bool, key: bytearray | None, chunk_size: int | None,
@@ -67,27 +67,27 @@ class SalmonIntegrity:
 
         self._chunkSize: int = -1
         """
-         * The chunk size to be used for integrity.
+        The chunk size to be used for integrity.
         """
 
         self._key: bytearray
         """
-         * Key to be used for integrity signing and validation.
+        Key to be used for integrity signing and validation.
         """
 
         self._hashSize: int
         """
-         * Hash result size
+        Hash result size
         """
 
         self._provider: IHashProvider
         """
-         * The hash provider.
+        The hash provider.
         """
 
         _integrity: bool
         """
-        * True to use integrity, false to skip the chunks
+       True to use integrity, false to skip the chunks
         """
 
         if (chunk_size is not None and (chunk_size < 0
@@ -112,16 +112,16 @@ class SalmonIntegrity:
         self._hashSize = hash_size
 
     """
-     * Calculate hash of the data provided.
-     *
-     * @param provider    Hash implementation provider.
-     * @param buffer      Data to calculate the hash.
-     * @param offset      Offset of the buffer that the hashing calculation will start from
-     * @param count       Length of the buffer that will be used to calculate the hash.
-     * @param key         Key that will be used
-     * @param includeData Additional data to be included in the calculation.
-     * @return The hash.
-     * @throws IntegrityException Thrown when data are corrupt or tampered with.
+    Calculate hash of the data provided.
+    
+    :param provider:    Hash implementation provider.
+    :param buffer:      Data to calculate the hash.
+    :param offset:      Offset of the buffer that the hashing calculation will start from
+    :param count:       Length of the buffer that will be used to calculate the hash.
+    :param key:         Key that will be used
+    :param includeData: Additional data to be included in the calculation.
+    :return: The hash.
+    :raises IntegrityException: Thrown when data are corrupt or tampered with.
      """
 
     @staticmethod
@@ -144,14 +144,14 @@ class SalmonIntegrity:
     def get_total_hash_data_length(length: int, chunk_size: int,
                                    hash_offset: int, hash_length: int) -> int:
         """
-         * Get the total number of bytes for all hash signatures for data of a specific length.
-         * @param length 		The length of the data.
-         * @param chunkSize      The byte size of the stream chunk that will be used to calculate the hash.
-         *                       The length should be fixed value except for the last chunk which might be lesser since
-         *                       we don't use padding
-         * @param hashOffset     The hash key length that will be used as an offset.
-         * @param hashLength     The hash length.
-         * @return
+        Get the total number of bytes for all hash signatures for data of a specific length.
+        :param length: 		The length of the data.
+        :param chunk_size:      The byte size of the stream chunk that will be used to calculate the hash.
+                              The length should be fixed value except for the last chunk which might be lesser since
+                              we don't use padding
+        :param hash_offset:     The hash key length that will be used as an offset.
+        :param hash_length:     The hash length.
+        :return: The total hash length
         """
         # if the stream is using multiple chunks for integrity
         chunks: int = int(length // (chunk_size + hash_offset))
@@ -162,11 +162,11 @@ class SalmonIntegrity:
 
     def get_hash_data_length(self, count: int, hash_offset: int) -> int:
         """
-         * Return the number of bytes that all hash signatures occupy for each chunk size
-         *
-         * @param count      Actual length of the real data int the base stream including header and hash signatures.
-         * @param hashOffset The hash key length
-         * @return The number of bytes all hash signatures occupy
+        Return the number of bytes that all hash signatures occupy for each chunk size
+        
+        :param count:      Actual length of the real data int the base stream including header and hash signatures.
+        :param hash_offset: The hash key length
+        :return: The number of bytes all hash signatures occupy
         """
         if self._chunkSize <= 0:
             return 0
@@ -174,35 +174,34 @@ class SalmonIntegrity:
 
     def get_chunk_size(self) -> int:
         """
-         * Get the chunk size.
-         * @return The chunk size.
+        Get the chunk size.
+        :return: The chunk size.
         """
         return self._chunkSize
 
     def get_key(self) -> bytearray:
         """
-         * Get the hash key.
-         * @return The hash key.
+        Get the hash key.
+        :return: The hash key.
         """
         return self._key
 
     """
-     * Get the integrity enabled option.
-     * @return True if integrity is enabled.
+    Get the integrity enabled option.
+    :return: True if integrity is enabled.
      """
 
     def use_integrity(self) -> bool:
         return self._integrity
 
-    """
-     * Generate a hash signatures for each data chunk.
-     * @param buffer The buffer containing the data chunks.
-     * @param includeHeaderData Include the header data in the first chunk.
-     * @return The hash signatures.
-     * @throws IntegrityException Thrown when data are corrupt or tampered with.
-     """
-
     def generate_hashes(self, buffer: bytearray, include_header_data: bytearray | None) -> list[bytearray] | None:
+        """
+        Generate a hash signatures for each data chunk.
+        :param buffer: The buffer containing the data chunks.
+        :param include_header_data: Include the header data in the first chunk.
+        :return: The hash signatures.
+        :raises IntegrityException: Thrown when data are corrupt or tampered with.
+         """
         if not self._integrity:
             return None
         hashes: list[bytearray] = []
@@ -214,9 +213,9 @@ class SalmonIntegrity:
 
     def get_hashes(self, buffer: bytearray) -> list[bytearray] | None:
         """
-         * Get the hashes for each data chunk.
-         * @param buffer The buffer that contains the data chunks.
-         * @return The hash signatures.
+        Get the hashes for each data chunk.
+        :param buffer: The buffer that contains the data chunks.
+        :return: The hash signatures.
         """
         if not self._integrity:
             return None
@@ -229,11 +228,11 @@ class SalmonIntegrity:
 
     def verify_hashes(self, hashes: list | None, buffer: bytearray, include_header_data: bytearray | None):
         """
-         * Verify the buffer chunks against the hash signatures.
-         * @param hashes The hashes to verify.
-         * @param buffer The buffer that contains the chunks to verify the hashes.
-         * @param includeHeaderData
-         * @throws IntegrityException Thrown when data are corrupt or tampered with.
+        Verify the buffer chunks against the hash signatures.
+        :param hashes: The hashes to verify.
+        :param buffer: The buffer that contains the chunks to verify the hashes.
+        :param include_header_data: Header data to include in the hash
+        :raises IntegrityException: Thrown when data are corrupt or tampered with.
         """
         chunk: int = 0
         for i in range(0, len(buffer), self._chunkSize):

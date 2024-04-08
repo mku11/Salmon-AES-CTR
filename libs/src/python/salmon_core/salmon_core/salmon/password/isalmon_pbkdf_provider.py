@@ -31,25 +31,25 @@ from typeguard import typechecked
 @typechecked
 class ISalmonPbkdfProvider(ABC):
     """
-     * Provides key derivation based on text passwords.
+    Provides key derivation based on text passwords.
     """
 
     PBKDF_SHA256: str = "sha256"
     """
-     * Python Cipher key for SHA256. See cryptodome
+    Python Cipher key for SHA256. See cryptodome
     """
 
     PBKDF_SHA1: str = "sha1"
     """
-     * Cipher key for SHA1. See cryptodome
-     * WARNING! SHA1 is considered insecure! Use PBKDF_SHA256 instead.
+    Cipher key for SHA1. See cryptodome
+    WARNING! SHA1 is considered insecure! Use PBKDF_SHA256 instead.
     """
 
     """
-     * Get the PBKDF python cipher algorithm string.
-     *
-     * @param pbkdfAlgo The PBKDF algorithm to be used
-     * @return The python cipher algorithm string. See cryptodome
+    Get the PBKDF python cipher algorithm string.
+    
+    :param pbkdfAlgo: The PBKDF algorithm to be used
+    :return: The python cipher algorithm string. See cryptodome
     """
 
     @staticmethod

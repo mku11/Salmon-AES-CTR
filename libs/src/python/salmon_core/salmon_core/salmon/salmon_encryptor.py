@@ -87,21 +87,23 @@ def encrypt_data(input_stream: MemoryStream, start: int, count: int, out_data: b
                  shm_cancel_name: str | None = None) -> (
         int, int):
     """
-     * Encrypt the data stream. Do not use directly use encrypt() instead.
-     *
-     * @param inputStream The Stream to be encrypted.
-     * @param start       The start position of the stream to be encrypted.
-     * @param count       The number of bytes to be encrypted.
-     * @param outData     The buffer with the encrypted data.
-     * @param key         The AES key to be used.
-     * @param nonce       The nonce to be used.
-     * @param headerData  The header data to be used.
-     * @param integrity   True to apply integrity.
-     * @param hash_key     The key to be used for integrity application.
-     * @param chunkSize   The chunk size.
-     * @throws IOError              Thrown if there is an error with the stream.
-     * @throws SalmonSecurityException  Thrown if there is a security exception with the stream.
-     * @throws IntegrityException Thrown if integrity cannot be applied.
+    Encrypt the data stream. Do not use directly use encrypt() instead.
+
+    :param input_stream: The Stream to be encrypted.
+    :param start:       The start position of the stream to be encrypted.
+    :param count:       The number of bytes to be encrypted.
+    :param out_data:     The buffer with the encrypted data.
+    :param key:         The AES key to be used.
+    :param nonce:       The nonce to be used.
+    :param header_data:  The header data to be used.
+    :param integrity:   True to apply integrity.
+    :param hash_key:     The key to be used for integrity application.
+    :param chunk_size:   The chunk size.
+    :param buffer_size:   The chunk size.
+    :param shm_cancel_name: The shared memory cancelation name.
+    :raises IOError:             Thrown if there is an error with the stream.
+    :raises SalmonSecurityException: Thrown if there is a security exception with the stream.
+    :raises IntegrityException: Thrown if integrity cannot be applied.
     """
     shm_cancel_data: memoryview | None = None
     if shm_cancel_name is not None:
@@ -148,33 +150,33 @@ def encrypt_data(input_stream: MemoryStream, start: int, count: int, out_data: b
 @typechecked
 class SalmonEncryptor:
     """
-     * Encrypts byte arrays.
+    Encrypts byte arrays.
     """
 
     def __init__(self, threads: int | None = None, buffer_size: int | None = None, multi_cpu: bool = False):
         """
-         * Instantiate an encryptor with parallel tasks and buffer size.
-         *
-         * @param threads    The number of threads to use.
-         * @param buffer_size The buffer size to use. It is recommended for performance  to use
-         *                   a multiple of the chunk size if you enabled integrity
-         *                   otherwise a multiple of the AES block size (16 bytes).
-         * :multi_cpu:  Utilize multiple cpus. Windows does not have a fast fork() so it has a very slow startup
+        Instantiate an encryptor with parallel tasks and buffer size.
+        
+        :param threads:    The number of threads to use.
+        :param buffer_size: The buffer size to use. It is recommended for performance  to use
+                          a multiple of the chunk size if you enabled integrity
+                          otherwise a multiple of the AES block size (16 bytes).
+        :multi_cpu:  Utilize multiple cpus. Windows does not have a fast fork() so it has a very slow startup
         """
 
         self.__threads: int = 0
         """
-         * The number of parallel threads to use.
+        The number of parallel threads to use.
         """
 
         self.__executor: ProcessPoolExecutor | None = None
         """
-         * Executor for parallel tasks.
+        Executor for parallel tasks.
         """
 
         __buffer_size: int = 0
         """
-         * The buffer size to use.
+        The buffer size to use.
         """
 
         if threads is None or threads <= 0:
@@ -193,20 +195,20 @@ class SalmonEncryptor:
                 store_header_data: bool,
                 integrity: bool = False, hash_key: bytearray | None = None, chunk_size: int | None = None) -> bytearray:
         """
-         * Encrypts a byte array using the provided key and nonce.
-         *
-         * @param data            The byte array to be encrypted.
-         * @param key             The AES key to be used.
-         * @param nonce           The nonce to be used.
-         * @param storeHeaderData True if you want to store a header data with the nonce. False if you store
-         *                        the nonce external. Note that you will need to provide the nonce when decrypting.
-         * @param integrity       True if you want to calculate and store hash signatures for each chunkSize.
-         * @param hash_key         Hash key to be used for all chunks.
-         * @param chunkSize       The chunk size.
-         * @return The byte array with the encrypted data.
-         * @throws IntegrityException Thrown when security error
-         * @throws IOError Thrown if there is an IO error.
-         * @throws IntegrityException Thrown when data are corrupt or tampered with.
+        Encrypts a byte array using the provided key and nonce.
+        
+        :param data:            The byte array to be encrypted.
+        :param key:             The AES key to be used.
+        :param nonce:           The nonce to be used.
+        :param store_header_data: True if you want to store a header data with the nonce. False if you store
+                               the nonce external. Note that you will need to provide the nonce when decrypting.
+        :param integrity:       True if you want to calculate and store hash signatures for each chunkSize.
+        :param hash_key:         Hash key to be used for all chunks.
+        :param chunk_size:       The chunk size.
+        :return: The byte array with the encrypted data.
+        :raises IntegrityException: Thrown when security error
+        :raises IOError: Thrown if there is an IO error.
+        :raises IntegrityException: Thrown when data are corrupt or tampered with.
         """
 
         if key is None:
@@ -256,16 +258,16 @@ class SalmonEncryptor:
                                 header_data: bytearray | None,
                                 chunk_size: int, integrity: bool):
         """
-         * Encrypt stream using parallel threads.
-         *
-         * @param data       The input data to be encrypted
-         * @param outData    The output buffer with the encrypted data.
-         * @param key        The AES key.
-         * @param hash_key    The hash key.
-         * @param nonce      The nonce to be used for encryption.
-         * @param headerData The header data.
-         * @param chunkSize  The chunk size.
-         * @param integrity  True to apply integrity.
+        Encrypt stream using parallel threads.
+        
+        :param data:       The input data to be encrypted
+        :param out_data:    The output buffer with the encrypted data.
+        :param key:        The AES key.
+        :param hash_key:    The hash key.
+        :param nonce:      The nonce to be used for encryption.
+        :param header_data: The header data.
+        :param chunk_size:  The chunk size.
+        :param integrity:  True to apply integrity.
         """
 
         running_threads: int = 1
@@ -295,19 +297,19 @@ class SalmonEncryptor:
                               key: bytearray, hash_key: bytearray | None, nonce: bytearray,
                               header_data: bytearray | None, integrity: bool, chunk_size: int):
         """
-         * Submit encryption parallel jobs.
-         *
-         * @param runningThreads The number of threads to submit.
-         * @param partSize       The data length of each part that belongs to each thread.
-         * @param data           The buffer of data you want to decrypt. This is a shared byte array across all threads
+        Submit encryption parallel jobs.
+        
+        :param running_threads: The number of threads to submit.
+        :param part_size:       The data length of each part that belongs to each thread.
+        :param data:           The buffer of data you want to decrypt. This is a shared byte array across all threads
                                  where each thread will read each own part.
-         * @param outData        The buffer of data containing the encrypted data.
-         * @param key            The AES key.
-         * @param hash_key        The hash key for integrity.
-         * @param nonce          The nonce for the data.
-         * @param headerData     The header data common to all parts.
-         * @param integrity      True to apply the data integrity.
-         * @param chunkSize      The chunk size.
+        :param out_data:        The buffer of data containing the encrypted data.
+        :param key:            The AES key.
+        :param hash_key:        The hash key for integrity.
+        :param nonce:          The nonce for the data.
+        :param header_data:     The header data common to all parts.
+        :param integrity:      True to apply the data integrity.
+        :param chunk_size:      The chunk size.
         """
 
         shm_out = shared_memory.SharedMemory(create=True, size=len(out_data))

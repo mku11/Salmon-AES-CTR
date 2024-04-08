@@ -33,7 +33,7 @@ from salmon_fs.utils.file_utils import FileUtils
 @typechecked
 class SalmonFileComparators:
     """
-     * Useful comparators for SalmonFile.
+    Useful comparators for SalmonFile.
     """
 
     @staticmethod
@@ -128,9 +128,9 @@ class SalmonFileComparators:
     @staticmethod
     def __try_get_basename(salmon_file: SalmonFile) -> str:
         """
-         * Get the SalmonFile basename if available.
-         * @param salmon_file
-         * @return
+        Get the SalmonFile basename if available.
+        :param salmon_file:
+        :return: The base name
         """
         try:
             return salmon_file.get_base_name()
@@ -142,9 +142,9 @@ class SalmonFileComparators:
     @staticmethod
     def __try_get_type(salmon_file: SalmonFile) -> str:
         """
-         * Get the SalmonFile file type extension if available.
-         * @param salmon_file
-         * @return
+        Get the SalmonFile file type extension if available.
+        :param salmon_file:
+        :return: The file type
         """
         try:
             if salmon_file.is_directory():
@@ -158,9 +158,9 @@ class SalmonFileComparators:
     @staticmethod
     def __try_get_size(salmon_file: SalmonFile) -> int:
         """
-         * Get the SalmonFile size if available.
-         * @param salmon_file
-         * @return
+        Get the SalmonFile size if available.
+        :param salmon_file:
+        :return: The size
         """
         try:
             if salmon_file.is_directory():
@@ -177,9 +177,9 @@ class SalmonFileComparators:
     @staticmethod
     def __try_get_date(salmon_file: SalmonFile) -> int:
         """
-         * Get the SalmonFile date if available.
-         * @param salmon_file
-         * @return
+        Get the SalmonFile date if available.
+        :param salmon_file:
+        :return: The date
         """
         try:
             return salmon_file.get_last_date_time_modified()

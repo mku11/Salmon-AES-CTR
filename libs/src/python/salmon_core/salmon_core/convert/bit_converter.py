@@ -28,16 +28,16 @@ from typeguard import typechecked
 @typechecked
 class BitConverter:
     """
-     * Converts from/to byte arrays, integral values, and hex strings.
+    Converts from/to byte arrays, integral values, and hex strings.
     """
 
     @staticmethod
     def to_bytes(value: int, length: int) -> bytearray:
         """
-         * Converts a long value to byte array.
-         * @param value The value to be converted.
-         * @param length The length of the byte array to be returned.
-         * @return A byte array representation of the value.
+        Converts a long value to byte array.
+        :param value: The value to be converted.
+        :param length: The length of the byte array to be returned.
+        :return: A byte array representation of the value.
         """
         buffer: bytearray = bytearray(length)
         for i in range(length - 1, -1, -1):
@@ -48,11 +48,11 @@ class BitConverter:
     @staticmethod
     def to_long(v_bytes: bytearray, index: int, length: int) -> int:
         """
-         * Converts a byte array to a long value. Little endian only.
-         * @param bytes The byte array to be converted.
-         * @param index The starting index of the data in the array that will be converted.
-         * @param length The length of the data that will be converted.
-         * @return The long value representation of the byte array.
+        Converts a byte array to a long value. Little endian only.
+        :param v_bytes: The byte array to be converted.
+        :param index: The starting index of the data in the array that will be converted.
+        :param length: The length of the data that will be converted.
+        :return: The long value representation of the byte array.
         """
         num: int = 0
         mul: int = 1
@@ -62,9 +62,9 @@ class BitConverter:
         return num
 
     """
-     * Convert a byte array to a hex representation.
-     * @param data The byte array to be converted.
-     * @return The hex string representation.
+    Convert a byte array to a hex representation.
+    :param data: The byte array to be converted.
+    :return: The hex string representation.
     """
 
     @staticmethod
@@ -77,9 +77,9 @@ class BitConverter:
     @staticmethod
     def hex_to_bytes(data: str) -> bytearray:
         """
-        * Convert a hex string to a byte array.
-        * @param data The hex string to be converted.
-        * @return The byte array converted from the string.
+       Convert a hex string to a byte array.
+       :param data: The hex string to be converted.
+       :return: The byte array converted from the string.
         """
         v_bytes: bytearray = bytearray(bytes.fromhex(data))
         return v_bytes

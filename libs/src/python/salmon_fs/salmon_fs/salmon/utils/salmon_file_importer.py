@@ -86,14 +86,17 @@ def import_file_part(file_to_import: IRealFile, salmon_file: SalmonFile, start: 
                      stopped: list[bool] | None = None,
                      on_progress: Callable[[int, int], Any] | None = None):
     """
-     * Import a file part into a file in the drive.
-     *
-     * @param file_to_import   The external file that will be imported
-     * @param salmon_file     The file that will be imported to
-     * @param start          The start position of the byte data that will be imported
-     * @param count          The length of the file content that will be imported
-     * @param total_bytes_read The total bytes read from the external file
-     * @param on_progress 	 Progress observer
+    Import a file part into a file in the drive.
+    
+    :param file_to_import:   The external file that will be imported
+    :param salmon_file:     The file that will be imported to
+    :param start:          The start position of the byte data that will be imported
+    :param count:          The length of the file content that will be imported
+    :param total_bytes_read: The total bytes read from the external file
+    :param buffer_size: The buffer size
+    :param shm_cancel_name: The shared memory for cancelation
+    :param stopped: The stopped flag
+    :param on_progress: 	 Progress observer
     """
     shm_cancel_data: memoryview | None = None
     shm_cancel: SharedMemory | None = None
@@ -149,43 +152,43 @@ def import_file_part(file_to_import: IRealFile, salmon_file: SalmonFile, start: 
 class SalmonFileImporter:
     __DEFAULT_BUFFER_SIZE = 512 * 1024
     """
-     * The global default buffer size to use when reading/writing on the SalmonStream.
+    The global default buffer size to use when reading/writing on the SalmonStream.
     """
 
     __DEFAULT_THREADS = 1
     """
-     * The global default threads to use.
+    The global default threads to use.
     """
 
     __enableMultiThread: bool = True
     """
-     * True if multithreading is enabled.
+    True if multithreading is enabled.
     """
 
     def __init__(self, buffer_size: int, threads: int, multi_cpu: bool = False):
         """
-         * Constructs a file importer that can be used to import files to the drive
-         *
-         * @param buffer_size Buffer size to be used when encrypting files.
-         *                   If using integrity self value has to be a multiple of the Chunk size.
-         *                   If not using integrity it should be a multiple of the AES block size for better performance
-         * @param threads
-         * :multi_cpu:  Utilize multiple cpus. Windows does not have a fast fork() so it has a very slow startup
+        Constructs a file importer that can be used to import files to the drive
+        
+        :param buffer_size: Buffer size to be used when encrypting files.
+                          If using integrity self value has to be a multiple of the Chunk size.
+                          If not using integrity it should be a multiple of the AES block size for better performance
+        :param threads: The threads to use
+        :multi_cpu:  Utilize multiple cpus. Windows does not have a fast fork() so it has a very slow startup
         """
 
         self.__buffer_size: int = 0
         """
-         * Current buffer size.
+        Current buffer size.
         """
 
         self.__threads: int = 0
         """
-         * Current threads.
+        Current threads.
         """
 
         self.__stopped: list[bool] = [True]
         """
-         * True if last job was stopped by the user.
+        True if last job was stopped by the user.
         """
 
         self.__shm_cancel = shared_memory.SharedMemory(create=True, size=1)
@@ -195,17 +198,17 @@ class SalmonFileImporter:
 
         self.__failed: bool = False
         """
-         * Failed if last job was failed.
+        Failed if last job was failed.
         """
 
         self.__lastException: Exception | None = None
         """
-         * Last exception occurred.
+        Last exception occurred.
         """
 
         self.__executor: ThreadPoolExecutor | ProcessPoolExecutor | None = None
         """
-         * The executor to be used for running parallel exports.
+        The executor to be used for running parallel exports.
         """
 
         self.__buffer_size = buffer_size
@@ -219,7 +222,7 @@ class SalmonFileImporter:
 
     def stop(self):
         """
-         * Stops all current importing tasks
+        Stops all current importing tasks
         """
         self.__stopped[0] = True
         # cancel all tasks
@@ -227,9 +230,9 @@ class SalmonFileImporter:
 
     def is_running(self) -> bool:
         """
-         * True if importer is currently running a job.
-         *
-         * @return
+        True if importer is currently running a job.
+        
+        :return: Tru if running
         """
         return not self.__stopped[0]
 
@@ -237,13 +240,14 @@ class SalmonFileImporter:
                     integrity: bool,
                     on_progress: Callable[[int, int], Any] | None) -> SalmonFile | None:
         """
-         * Imports a real file into the drive.
-         *
-         * @param file_to_import The source file that will be imported in to the drive.
-         * @param dir          The target directory in the drive that the file will be imported
-         * @param delete_source If True delete the source file.
-         * @param integrity    Apply data integrity
-         * @param on_progress   Progress to notify
+        Imports a real file into the drive.
+        
+        :param file_to_import: The source file that will be imported in to the drive.
+        :param v_dir:          The target directory in the drive that the file will be imported
+        :param filename:    The file name
+        :param delete_source: If True delete the source file.
+        :param integrity:    Apply data integrity
+        :param on_progress:   Progress to notify
          """
         if self.is_running():
             raise Exception("Another import is running")

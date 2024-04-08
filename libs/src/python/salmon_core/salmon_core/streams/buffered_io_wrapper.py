@@ -32,25 +32,25 @@ from salmon_core.streams.random_access_stream import RandomAccessStream
 @typechecked
 class BufferedIOWrapper(BufferedIOBase):
     """
-     * Wrapper stream of AbsStream to Python's native IOBase interface.
-     * Use this class to wrap any AbsStream to a less powerful but familiar and compatible Python InputStream.
+    Wrapper stream of AbsStream to Python's native IOBase interface.
+    Use this class to wrap any AbsStream to a less powerful but familiar and compatible Python InputStream.
     """
 
     def __init__(self, stream: RandomAccessStream):
         """
-         * Instantiates an BufferedIOWrapper with a base stream.
-         * @param stream The base AbsStream that you want to wrap.
+        Instantiates an BufferedIOWrapper with a base stream.
+        :param stream: The base AbsStream that you want to wrap.
         """
 
         self.__stream = stream
 
     def readinto(self, buffer: bytearray) -> int:
         """
-         * Read a sequence of bytes from the base stream into the buffer provided.
-         * to specify the count and offset pass a memoryview instead
-         * @param buffer     the buffer into which the data is read.
-         * @return The number of bytes read.
-         * @throws IOError with an optional inner Exception if the base stream is a SalmonStream
+        Read a sequence of bytes from the base stream into the buffer provided.
+        to specify the count and offset pass a memoryview instead
+        :param buffer:     the buffer into which the data is read.
+        :return: The number of bytes read.
+        :raises IOError: with an optional inner Exception if the base stream is a SalmonStream
         """
         bytes_read: int
         try:
@@ -76,18 +76,23 @@ class BufferedIOWrapper(BufferedIOBase):
 
     def close(self):
         """
-         * Closes the base stream.
-         * @throws IOError Thrown if there is an IO error.
+        Closes the base stream.
+        :raises IOError: Thrown if there is an IO error.
         """
         self.__stream.close()
 
     def seek(self, pos: int, whence: int = ...) -> int:
         """
-         * Skip number of bytes on the stream.
-         * @param pos   the number of bytes to be skipped.
-         * @return
-         * @throws IOError Thrown if there is an IO error.
+        Skip number of bytes on the stream.
+        :param pos:   the number of bytes to be skipped.
+        :param whence: Origin: 0: from the start, 1: from the current position, 2: from the end of the stream
+        :return: The number of bytes skipped
+        :raises IOError: Thrown if there is an IO error.
         """
+        if whence == 1:
+            pos += self.__stream.get_position()
+        elif whence == 2:
+            pos = self.__stream.length() - pos
         if pos > self.__stream.length():
             self.__stream.set_position(self.__stream.length())
         else:

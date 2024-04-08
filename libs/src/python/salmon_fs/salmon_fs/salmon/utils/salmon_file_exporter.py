@@ -75,19 +75,23 @@ def export_file(index: int, final_part_size: int, final_running_threads: int, fi
 
 
 @typechecked
-def export_file_part(file_to_export: SalmonFile, real_file: IRealFile, start: int, count: int,
+def export_file_part(file_to_export: SalmonFile, exported_file: IRealFile, start: int, count: int,
                      total_bytes_written: memoryview | None, buffer_size: int,
                      shm_cancel_name: str | None = None,
                      stopped: list[bool] | None = None,
                      on_progress: Callable[[int, int], Any] | None = None):
     """
-     * Export a file part from the drive.
-     *
-     * @param file_to_export      The file the part belongs to
-     * @param export_file        The file to copy the exported part to
-     * @param start             The start position on the file
-     * @param count             The length of the bytes to be decrypted
-     * @param total_bytes_written The total bytes that were written to the external file
+    Export a file part from the drive.
+    
+    :param file_to_export:      The file the part belongs to
+    :param exported_file:        The file to copy the exported part to
+    :param start:             The start position on the file
+    :param count:             The length of the bytes to be decrypted
+    :param total_bytes_written: The total bytes that were written to the external file
+    :param buffer_size: The buffer size
+    :param shm_cancel_name: The shared memory for cancelation
+    :param stopped: The stopped flag
+    :param on_progress: The progress listener
     """
 
     shm_cancel_data: memoryview | None = None
@@ -103,7 +107,7 @@ def export_file_part(file_to_export: SalmonFile, real_file: IRealFile, start: in
     source_stream: RandomAccessStream | None = None
 
     try:
-        target_stream = real_file.get_output_stream()
+        target_stream = exported_file.get_output_stream()
         target_stream.set_position(start)
 
         source_stream = file_to_export.get_input_stream()
@@ -143,43 +147,43 @@ def export_file_part(file_to_export: SalmonFile, real_file: IRealFile, start: in
 class SalmonFileExporter:
     __DEFAULT_BUFFER_SIZE = 512 * 1024
     """
-     * The global default buffer size to use when reading/writing on the SalmonStream.
+    The global default buffer size to use when reading/writing on the SalmonStream.
     """
 
     __DEFAULT_THREADS = 1
     """
-     * The global default threads to use.
+    The global default threads to use.
     """
 
     __enableMultiThread: bool = True
     """
-     * True if multithreading is enabled.
+    True if multithreading is enabled.
     """
 
     def __init__(self, buffer_size: int, threads: int, multi_cpu: bool = False):
         """
-         * Constructs a file exporter that can be used to export files from the drive
-         *
-         * @param buffer_size Buffer size to be used when decrypting files.
-         *                   If using integrity self value has to be a multiple of the Chunk size.
-         *                   If not using integrity it should be a multiple of the AES block size for better performance
-         * @param threads
-         * :multi_cpu:  Utilize multiple cpus. Windows does not have a fast fork() so it has a very slow startup
+        Constructs a file exporter that can be used to export files from the drive
+        
+        :param buffer_size: Buffer size to be used when decrypting files.
+                          If using integrity self value has to be a multiple of the Chunk size.
+                          If not using integrity it should be a multiple of the AES block size for better performance
+        :param threads: The threads to use
+        :multi_cpu:  Utilize multiple cpus. Windows does not have a fast fork() so it has a very slow startup
         """
 
         self.__buffer_size: int = 0
         """
-         * Current buffer size.
+        Current buffer size.
         """
 
         self.__threads: int = 0
         """
-         * Current threads.
+        Current threads.
         """
 
         self.__stopped: list[bool] = [True]
         """
-         * True if last job was stopped by the user.
+        True if last job was stopped by the user.
         """
 
         self.__shm_cancel = shared_memory.SharedMemory(create=True, size=1)
@@ -189,17 +193,17 @@ class SalmonFileExporter:
 
         self.__failed: bool = False
         """
-         * Failed if last job was failed.
+        Failed if last job was failed.
         """
 
         self.__lastException: Exception | None = None
         """
-         * Last exception occurred.
+        Last exception occurred.
         """
 
         self.__executor: ThreadPoolExecutor | ProcessPoolExecutor | None = None
         """
-         * The executor to be used for running parallel exports.
+        The executor to be used for running parallel exports.
         """
 
         self.__buffer_size = buffer_size
@@ -218,9 +222,9 @@ class SalmonFileExporter:
 
     def is_running(self) -> bool:
         """
-         * True if exporter is currently running a job.
-         *
-         * @return
+        True if exporter is currently running a job.
+        
+        :return: True if running
         """
         return not self.__stopped[0]
 
@@ -229,13 +233,14 @@ class SalmonFileExporter:
                     integrity: bool,
                     on_progress: Callable[[int, int], Any] | None) -> IRealFile | None:
         """
-         * Export a file from the drive to the external directory path
-         *
-         * @param file_to_export The file that will be exported
-         * @param export_dir    The external directory the file will be exported to
-         * @param filename     The filename to use
-         * @param delete_source Delete the source file when the export finishes successfully
-         * @param integrity    True to verify integrity
+        Export a file from the drive to the external directory path
+        
+        :param file_to_export: The file that will be exported
+        :param export_dir:    The external directory the file will be exported to
+        :param filename:     The filename to use
+        :param delete_source: Delete the source file when the export finishes successfully
+        :param integrity:    True to verify integrity
+        :param on_progress: Progress listener
         """
 
         if self.is_running():

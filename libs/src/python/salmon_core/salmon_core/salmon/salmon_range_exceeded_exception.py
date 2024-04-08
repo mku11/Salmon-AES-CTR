@@ -29,12 +29,12 @@ from typeguard import typechecked
 @typechecked
 class SalmonRangeExceededException(Exception):
     """
-     * Thrown when maximum nonce range is exceeded.
+    Thrown when maximum nonce range is exceeded.
     """
 
     def __init__(self, msg: str):
         """
-         * Construct an exception with a specific message.
-         * @param msg The message.
+        Construct an exception with a specific message.
+        :param msg: The message.
         """
         super().__init__(msg)

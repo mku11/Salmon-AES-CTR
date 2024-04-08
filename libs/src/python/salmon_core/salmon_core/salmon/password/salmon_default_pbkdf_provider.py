@@ -35,20 +35,20 @@ from typeguard import typechecked
 @typechecked
 class SalmonDefaultPbkdfProvider(ISalmonPbkdfProvider):
     """
-     * Provides pbkdf via Python default algorithm.
+    Provides pbkdf via Python default algorithm.
     """
 
     def get_key(self, password: str, salt: bytearray, iterations: int, output_bytes: int,
                 pbkdf_algo: PbkdfAlgo) -> bytearray:
         """
-         * Get a key derived from a text password
-         * @param password The text password.
-         * @param salt The salt needs to be at least 24 bytes.
-         * @param iterations Iterations to use. Make sure you use a high number according to your hardware specs.
-         * @param outputBytes The length of the output key.
-         * @param pbkdfAlgo The hash algorithm to use.
-         * @return The key.
-         * @throws IntegrityException Thrown when security error
+        Get a key derived from a text password
+        :param password: The text password.
+        :param salt: The salt needs to be at least 24 bytes.
+        :param iterations: Iterations to use. Make sure you use a high number according to your hardware specs.
+        :param output_bytes: The length of the output key.
+        :param pbkdf_algo: The hash algorithm to use.
+        :return: The key.
+        :raises IntegrityException: Thrown when security error
         """
         # PBEKeySpec
         # keySpec = new

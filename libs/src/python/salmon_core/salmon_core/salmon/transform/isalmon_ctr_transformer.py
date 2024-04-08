@@ -31,17 +31,17 @@ from typeguard import typechecked
 @typechecked
 class ISalmonCTRTransformer(ABC):
     """
-     * Contract for the encryption/decryption transformers.
-     * Note that Counter mode needs to be supported.
+    Contract for the encryption/decryption transformers.
+    Note that Counter mode needs to be supported.
     """
 
     @abstractmethod
     def init(self, key: bytearray, nonce: bytearray):
         """
-         * Initialize the transformer.
-         * @param key The AES key to use.
-         * @param nonce The nonce to use.
-         * @throws IntegrityException Thrown when security error
+        Initialize the transformer.
+        :param key: The AES key to use.
+        :param nonce: The nonce to use.
+        :raises IntegrityException: Thrown when security error
         """
         pass
 
@@ -49,15 +49,15 @@ class ISalmonCTRTransformer(ABC):
     def encrypt_data(self, src_buffer: bytearray, src_offset: int,
                      dest_buffer: bytearray, dest_offset: int, count: int) -> int:
         """
-         * Encrypt the data.
-         * @param srcBuffer The source byte array.
-         * @param srcOffset The source byte offset.
-         * @param destBuffer The destination byte array.
-         * @param destOffset The destination byte offset.
-         * @param count The number of bytes to transform.
-         * @return The number of bytes transformed.
-         * @throws IntegrityException Thrown when security error
-         * @throws SalmonRangeExceededException Thrown when maximum nonce range is exceeded.
+        Encrypt the data.
+        :param src_buffer: The source byte array.
+        :param src_offset: The source byte offset.
+        :param dest_buffer: The destination byte array.
+        :param dest_offset: The destination byte offset.
+        :param count: The number of bytes to transform.
+        :return: The number of bytes transformed.
+        :raises IntegrityException: Thrown when security error
+        :raises SalmonRangeExceededException: Thrown when maximum nonce range is exceeded.
         """
         pass
 
@@ -65,64 +65,63 @@ class ISalmonCTRTransformer(ABC):
     def decrypt_data(self, src_buffer: bytearray, src_offset: int,
                      dest_buffer: bytearray, dest_offset: int, count: int) -> int:
         """
-         * Decrypt the data.
-         * @param srcBuffer The source byte array.
-         * @param srcOffset The source byte offset.
-         * @param destBuffer The destination byte array.
-         * @param destOffset The destination byte offset.
-         * @param count The number of bytes to transform.
-         * @return The number of bytes transformed.
-         * @throws IntegrityException Thrown when security error
-         * @throws SalmonRangeExceededException Thrown when maximum nonce range is exceeded.
+        Decrypt the data.
+        :param src_buffer: The source byte array.
+        :param src_offset: The source byte offset.
+        :param dest_buffer: The destination byte array.
+        :param dest_offset: The destination byte offset.
+        :param count: The number of bytes to transform.
+        :return: The number of bytes transformed.
+        :raises IntegrityException: Thrown when security error
+        :raises SalmonRangeExceededException: Thrown when maximum nonce range is exceeded.
         """
         pass
 
     @abstractmethod
     def get_counter(self) -> bytearray:
         """
-         * Get the current counter.
-         * @return
+        Get the current counter.
+        :return: The counter
         """
         pass
 
     @abstractmethod
     def get_key(self) -> bytearray:
         """
-         * Get the current encryption key.
-         * @return
+        Get the current encryption key.
+        :return: The key
         """
         pass
 
     @abstractmethod
     def get_block(self) -> int:
         """
-         * Get the current block.
-         * @return
+        Get the current block.
+        :return: The block
         """
         pass
 
     @abstractmethod
     def get_nonce(self) -> bytearray:
         """
-         * Get the nonce (initial counter) to be used for the data.
-         * @return
+        Get the nonce (initial counter) to be used for the data.
+        :return: The nonce
         """
         pass
 
     @abstractmethod
     def reset_counter(self):
         """
-         * Reset the counter to the nonce (initial counter).
+        Reset the counter to the nonce (initial counter).
         """
         pass
 
     @abstractmethod
     def sync_counter(self, position: int):
         """
-         * Calculate the value of the counter based on the current block. After an encryption
-         * operation (ie sync or read) the block will be incremented. This method calculates
-         * the Counter.
-         * @param position
-         * @throws SalmonRangeExceededException Thrown when maximum nonce range is exceeded.
+        Calculate the value of the counter based on the current block. After an encryption
+        operation (ie sync or read) the block will be incremented. This method calculates
+        the Counter.
+        :param position:         :raises SalmonRangeExceededException: Thrown when maximum nonce range is exceeded.
         """
         pass

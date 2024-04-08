@@ -34,23 +34,23 @@ from salmon_fs.sequence.nonce_sequence import NonceSequence
 @typechecked
 class INonceSequenceSerializer(ABC):
     """
-     * Serializes/Deserializes nonce sequences.
+    Serializes/Deserializes nonce sequences.
     """
 
     def deserialize(self, contents: str) -> dict[str, NonceSequence]:
         """
-         * Parse nonce sequences from text contents.
-         * @param contents The contents containing the nonce sequences.
-         * @return The nonce sequences.
-         * @throws SequenceException Thrown when there is a failure in the nonce sequencer.
+        Parse nonce sequences from text contents.
+        :param contents: The contents containing the nonce sequences.
+        :return: The nonce sequences.
+        :raises SequenceException: Thrown when there is a failure in the nonce sequencer.
         """
         pass
 
     def serialize(self, sequences: dict[str, NonceSequence] | None):
         """
-         * Generates the contents from sequences.
-         * @param sequences The sequences to convert to text.
-         * @return The string contents.
-         * @throws SequenceException Thrown when there is a failure in the nonce sequencer.
+        Generates the contents from sequences.
+        :param sequences: The sequences to convert to text.
+        :return: The string contents.
+        :raises SequenceException: Thrown when there is a failure in the nonce sequencer.
         """
         pass

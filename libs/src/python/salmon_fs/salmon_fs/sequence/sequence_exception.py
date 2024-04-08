@@ -28,12 +28,11 @@ from typeguard import typechecked
 @typechecked
 class SequenceException(Exception):
     """
-     * Thrown when there is a failure in the nonce sequencer.
+    Thrown when there is a failure in the nonce sequencer.
     """
 
     def __init__(self, msg: str):
         """
-         * Construct an exception with a specific message.
-         * @param msg
-        """
+        Construct an exception with a specific message.
+        :param msg:         """
         super().__init__(msg)

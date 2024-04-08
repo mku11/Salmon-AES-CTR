@@ -31,15 +31,15 @@ from typeguard import typechecked
 @typechecked
 class PbkdfAlgo(Enum):
     """
-     * Pbkdf algorithm implementation type.
+    Pbkdf algorithm implementation type.
     """
 
     SHA1 = 1
     """
-     * SHA1 hashing. DO NOT USE.
+    SHA1 hashing. DO NOT USE.
     """
 
     SHA256 = 2
     """
-     * SHA256 hashing.
+    SHA256 hashing.
     """

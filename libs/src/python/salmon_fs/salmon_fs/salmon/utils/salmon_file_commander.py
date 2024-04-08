@@ -41,16 +41,16 @@ from salmon_fs.utils.file_searcher import FileSearcher
 @typechecked
 class SalmonFileCommander:
     """
-     * Facade class for file operations.
+    Facade class for file operations.
     """
 
     def __init__(self, import_buffer_size: int, export_buffer_size: int, threads: int, multi_cpu: False = False):
         """
-         * Instantiate a new file commander object.
-         *
-         * @param import_buffer_size The buffer size to use for importing files.
-         * @param export_buffer_size The buffer size to use for exporting files.
-         * :multi_cpu:  Utilize multiple cpus. Windows does not have a fast fork() so it has a very slow startup
+        Instantiate a new file commander object.
+        
+        :param import_buffer_size: The buffer size to use for importing files.
+        :param export_buffer_size: The buffer size to use for exporting files.
+        :multi_cpu:  Utilize multiple cpus. Windows does not have a fast fork() so it has a very slow startup
         """
         self.__fileImporter: SalmonFileImporter
         self.__fileExporter: SalmonFileExporter
@@ -67,18 +67,17 @@ class SalmonFileCommander:
                      auto_rename: Callable[[IRealFile], str] = None,
                      on_failed: Callable[[IRealFile, Exception], Any] = None) -> list[SalmonFile]:
         """
-         * Import files to the drive.
-         *
-         * @param files_to_import     The files to import.
-         * @param import_dir         The target directory.
-         * @param delete_source      True if you want to delete the source files when import complete.
-         * @param integrity         True to apply integrity to imported files.
-         * @param on_progress_changed Observer to notify when progress changes.
-         * @param auto_rename        Function to rename file if another file with the same filename exists
-         * @param on_failed          Observer to notify when a file fails importing
-         * @return The imported files if completes successfully.
-         * @throws Exception
-        """
+        Import files to the drive.
+        
+        :param files_to_import:     The files to import.
+        :param import_dir:         The target directory.
+        :param delete_source:      True if you want to delete the source files when import complete.
+        :param integrity:         True to apply integrity to imported files.
+        :param on_progress_changed: Observer to notify when progress changes.
+        :param auto_rename:        Function to rename file if another file with the same filename exists
+        :param on_failed:          Observer to notify when a file fails importing
+        :return: The imported files if completes successfully.
+        :raises Exception:         """
         self.__stopJobs = False
         imported_files: list[SalmonFile] = []
 
@@ -160,18 +159,17 @@ class SalmonFileCommander:
                      auto_rename: Callable[[IRealFile], str], on_failed: Callable[[SalmonFile, Exception], Any]) \
             -> list[IRealFile]:
         """
-         * Export a file from a drive.
-         *
-         * @param files_to_export     The files to export.
-         * @param export_dir         The export target directory
-         * @param delete_source      True if you want to delete the source files
-         * @param integrity         True to use integrity verification before exporting files
-         * @param on_progress_changed Observer to notify when progress changes.
-         * @param auto_rename        Function to rename file if another file with the same filename exists
-         * @param on_failed          Observer to notify when a file fails exporting
-         * @return The exported files
-         * @throws Exception
-        """
+        Export a file from a drive.
+        
+        :param files_to_export:     The files to export.
+        :param export_dir:         The export target directory
+        :param delete_source:      True if you want to delete the source files
+        :param integrity:         True to use integrity verification before exporting files
+        :param on_progress_changed: Observer to notify when progress changes.
+        :param auto_rename:        Function to rename file if another file with the same filename exists
+        :param on_failed:          Observer to notify when a file fails exporting
+        :return: The exported files
+        :raises Exception:         """
         stop_jobs = False
         exported_files: list[IRealFile] = []
 
@@ -262,11 +260,11 @@ class SalmonFileCommander:
                      on_progress_changed: Callable[[SalmonFileCommander.SalmonFileTaskProgress], Any],
                      on_failed: Callable[[SalmonFile, Exception], Any]):
         """
-         * Delete files.
-         *
-         * @param files_to_delete         The files to delete.
-         * @param on_progress_changed The observer to notify when each file is deleted.
-         * @param on_failed The observer to notify when a file has failed.
+        Delete files.
+        
+        :param files_to_delete:         The files to delete.
+        :param on_progress_changed: The observer to notify when each file is deleted.
+        :param on_failed: The observer to notify when a file has failed.
         """
         self.__stopJobs = False
         count: list[int] = [1]
@@ -299,16 +297,16 @@ class SalmonFileCommander:
                    auto_rename: Callable[[SalmonFile, str], Any], auto_rename_folders: bool,
                    on_failed: Callable[[SalmonFile, Exception], Any]):
         """
-         * Copy files to another directory.
-         *
-         * @param files_to_copy       The array of files to copy.
-         * @param dir               The target directory.
-         * @param move              True if moving files instead of copying.
-         * @param on_progress_changed The progress change observer to notify.
-         * @param auto_rename        The auto rename function to use when files with same filename are found
-         * @param on_failed          The observer to notify when failures occur
-         * @throws Exception
-        """
+        Copy files to another directory.
+        
+        :param files_to_copy:       The array of files to copy.
+        :param v_dir:               The target directory.
+        :param move:              True if moving files instead of copying.
+        :param on_progress_changed: The progress change observer to notify.
+        :param auto_rename:        The auto rename function to use when files with same filename are found
+        :param auto_rename_folders: True to auto rename folders
+        :param on_failed:          The observer to notify when failures occur
+        :raises Exception:         """
         self.__stopJobs = False
         count: list[int] = [1]
         total: int = 0
@@ -341,7 +339,7 @@ class SalmonFileCommander:
 
     def cancel(self):
         """
-         * Cancel all jobs.
+        Cancel all jobs.
         """
         self.__stopJobs = True
         self.__fileImporter.stop()
@@ -350,31 +348,31 @@ class SalmonFileCommander:
 
     def is_file_searcher_running(self) -> bool:
         """
-         * True if the file search is currently running.
-         *
-         * @return
+        True if the file search is currently running.
+        
+        :return: True if search running
         """
         return self.__fileSearcher.is_running()
 
     def is_running(self) -> bool:
         """
-         * True if jobs are currently running.
-         *
-         * @return
+        True if jobs are currently running.
+        
+        :return: True if running
         """
         return self.__fileSearcher.is_running() or self.__fileImporter.is_running() or self.__fileExporter.is_running()
 
     def is_file_searcher_stopped(self) -> bool:
         """
-         * True if file search stopped.
-         *
-         * @return
+        True if file search stopped.
+        
+        :return: True if search stopped
         """
         return self.__fileSearcher.is_stopped()
 
     def stop_file_search(self):
         """
-         * Stop file search.
+        Stop file search.
         """
         self.__fileSearcher.stop()
 
@@ -382,32 +380,32 @@ class SalmonFileCommander:
                on_result_found: FileSearcher.OnResultFoundListener,
                on_search_event: Callable[[FileSearcher.SearchEvent], Any]) -> [SalmonFile]:
         """
-         * Search
-         *
-         * @param dir           The directory to start the search.
-         * @param terms         The terms to search for.
-         * @param any           True if you want to match any term otherwise match all terms.
-         * @param on_result_found Callback interface to receive notifications when results found.
-         * @param on_search_event Callback interface to receive status events.
-         * @return An array with all the results found.
+        Search
+        
+        :param v_dir:           The directory to start the search.
+        :param terms:         The terms to search for.
+        :param any_term:           True if you want to match any term otherwise match all terms.
+        :param on_result_found: Callback interface to receive notifications when results found.
+        :param on_search_event: Callback interface to receive status events.
+        :return: An array with all the results found.
         """
 
         return self.__fileSearcher.search(v_dir, terms, any_term, on_result_found, on_search_event)
 
     def are_jobs_stopped(self) -> bool:
         """
-         * True if all jobs are stopped.
-         *
-         * @return
+        True if all jobs are stopped.
+        
+        :return: True if stopped
         """
         return self.__stopJobs
 
     def __get_files(self, files: list[SalmonFile]) -> int:
         """
-         * Get number of files recursively for the files provided.
-         *
-         * @param files Total number of files and files under subdirectories.
-         * @return
+        Get number of files recursively for the files provided.
+        
+        :param files: Total number of files and files under subdirectories.
+        :return: The files
         """
         total: int = 0
         for file in files:
@@ -423,14 +421,14 @@ class SalmonFileCommander:
 
     def rename_file(self, ifile: SalmonFile, new_filename: str):
         """
-         * Rename an encrypted file
-         *
+        Rename an encrypted file
+        
         """
         ifile.rename(new_filename)
 
     class FileTaskProgress:
         """
-         * File task progress class.
+        File task progress class.
         """
 
         def get_total_bytes(self) -> int:

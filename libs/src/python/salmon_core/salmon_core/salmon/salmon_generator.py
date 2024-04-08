@@ -30,7 +30,7 @@ from typeguard import typechecked
 @typechecked
 class SalmonGenerator:
     """
-     * Utility class generates internal secure properties.
+    Utility class generates internal secure properties.
     """
 
     VERSION = 2
@@ -40,67 +40,67 @@ class SalmonGenerator:
 
     MAGIC_LENGTH = 3
     """
-     * Length for the magic bytes.
+    Length for the magic bytes.
     """
 
     VERSION_LENGTH = 1
     """
-     * Length for the Version in the data header.
+    Length for the Version in the data header.
     """
 
     BLOCK_SIZE = 16
     """
-     * Should be 16 for AES256 the same as the iv.
+    Should be 16 for AES256 the same as the iv.
     """
 
     KEY_LENGTH = 32
     """
-     * Encryption key length for AES256.
+    Encryption key length for AES256.
     """
 
     HASH_KEY_LENGTH = 32
     """
-     * HASH Key length for integrity, currently we use HMAC SHA256.
+    HASH Key length for integrity, currently we use HMAC SHA256.
     """
 
     HASH_RESULT_LENGTH = 32
     """
-     * Hash signature size for integrity, currently we use HMAC SHA256.
+    Hash signature size for integrity, currently we use HMAC SHA256.
     """
 
     NONCE_LENGTH = 8
     """
-     * Nonce size.
+    Nonce size.
     """
 
     CHUNK_SIZE_LENGTH = 4
     """
-     * Chunk size format length.
+    Chunk size format length.
     """
 
     MAGIC_BYTES = "SLM"
     """
-     * Magic bytes.
+    Magic bytes.
     """
 
     """
-     * Gets the fixed magic bytes array
+    Gets the fixed magic bytes array
     """
     @staticmethod
     def get_magic_bytes() -> bytearray:
         return bytearray(SalmonGenerator.MAGIC_BYTES.encode('utf-8'))
 
     """
-     * Returns the current Salmon format version.
+    Returns the current Salmon format version.
     """
     @staticmethod
     def get_version() -> int:
         return SalmonGenerator.VERSION
 
     """
-     * Returns a secure random byte array. To be used when generating keys, initial vectors, and nonces.
-     * @param size The size of the byte array.
-     * @return The random secure byte array.
+    Returns a secure random byte array. To be used when generating keys, initial vectors, and nonces.
+    :param size: The size of the byte array.
+    :return: The random secure byte array.
     """
     @staticmethod
     def get_secure_random_bytes(size: int) -> bytearray:

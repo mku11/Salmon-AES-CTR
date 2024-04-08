@@ -38,16 +38,16 @@ from salmon_fs.sequence.sequence_exception import SequenceException
 @typechecked
 class SalmonSequenceSerializer(INonceSequenceSerializer):
     """
-     * Serializes sequences for all the drives the device is authorized.
+    Serializes sequences for all the drives the device is authorized.
     """
 
     def serialize(self, drive_auth_entries: dict[str, NonceSequence] | None) -> str:
         """
-         * Serialize the sequences to an XML string.
-         *
-         * @param drive_auth_entries The sequences to convert to text.
-         * @return
-         * @throws SequenceException Thrown when there is a failure in the nonce sequencer.
+        Serialize the sequences to an XML string.
+        
+        :param drive_auth_entries: The sequences to convert to text.
+        :return: The serialized contents
+        :raises SequenceException: Thrown when there is a failure in the nonce sequencer.
         """
         if drive_auth_entries is None:
             drive_auth_entries = {}
@@ -74,11 +74,11 @@ class SalmonSequenceSerializer(INonceSequenceSerializer):
 
     def deserialize(self, contents: str) -> dict[str, NonceSequence]:
         """
-         * Deserialize sequences from XML string.
-         *
-         * @param contents The contents containing the nonce sequences.
-         * @return
-         * @throws SequenceException Thrown when there is a failure in the nonce sequencer.
+        Deserialize sequences from XML string.
+        
+        :param contents: The contents containing the nonce sequences.
+        :return: The deserialized sequences
+        :raises SequenceException: Thrown when there is a failure in the nonce sequencer.
         """
 
         configs: dict[str, NonceSequence] = {}

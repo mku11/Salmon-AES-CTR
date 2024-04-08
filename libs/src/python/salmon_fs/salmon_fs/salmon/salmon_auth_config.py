@@ -46,42 +46,42 @@ from salmon_fs.sequence.sequence_exception import SequenceException
 @typechecked
 class SalmonAuthConfig:
     """
-     * Device Authorization Configuration. This represents the authorization that will be provided
-     * to the target device to allow writing operations for a virtual drive.
+    Device Authorization Configuration. This represents the authorization that will be provided
+    to the target device to allow writing operations for a virtual drive.
     """
 
     def get_drive_id(self) -> bytearray:
         """
-         * Get the drive ID to grant authorization for.
-         * @return
+        Get the drive ID to grant authorization for.
+        :return: The drive id
         """
         return self.__driveID
 
     def get_auth_id(self) -> bytearray:
         """
-         * Get the authorization ID for the target device.
-         * @return
+        Get the authorization ID for the target device.
+        :return: The authorization id
         """
         return self.__authID
 
     def get_start_nonce(self) -> bytearray:
         """
-         * Get the nonce maximum value the target device will use.
-         * @return
+        Get the nonce maximum value the target device will use.
+        :return: The starting nonce
         """
         return self.__startNonce
 
     def get_max_nonce(self) -> bytearray:
         """
-         * Get the nonce maximum value the target device will use.
-         * @return
+        Get the nonce maximum value the target device will use.
+        :return: The max nonce
         """
         return self.__maxNonce
 
     def __init__(self, contents: bytearray):
         """
-         * Instantiate a class with the properties of the authorization config file.
-         * @param contents The byte array that contains the contents of the auth config file.
+        Instantiate a class with the properties of the authorization config file.
+        :param contents: The byte array that contains the contents of the auth config file.
         """
 
         self.__driveID: bytearray = bytearray(SalmonDriveGenerator.DRIVE_ID_LENGTH)
@@ -104,14 +104,15 @@ class SalmonAuthConfig:
                         target_max_nonce: bytearray,
                         config_nonce: bytearray):
         """
-         * Write the properties of the auth configuration to a config file that will be imported by another device.
-         * The new device will then be authorized editing operations ie: import, rename files, etc.
-         * @param auth_config_file
-         * @param drive The drive you want to create an auth config for.
-         * @param target_auth_id authorization ID of the target device.
-         * @param target_starting_nonce Starting nonce for the target device.
-         * @param target_max_nonce Maximum nonce for the target device.
-         * @throws Exception Thrown when error during writing file
+        Write the properties of the auth configuration to a config file that will be imported by another device.
+        The new device will then be authorized editing operations ie: import, rename files, etc.
+        :param auth_config_file:
+        :param drive: The drive you want to create an auth config for.
+        :param target_auth_id: authorization ID of the target device.
+        :param target_starting_nonce: Starting nonce for the target device.
+        :param target_max_nonce: Maximum nonce for the target device.
+        :param config_nonce: The nonce for the config file itself.
+        :raises Exception: Thrown when error during writing file
         """
         drive_id: bytearray = drive.get_drive_id()
         if drive_id is None:
@@ -125,13 +126,13 @@ class SalmonAuthConfig:
     def write_to_stream(stream: SalmonStream, drive_id: bytearray, auth_id: bytearray,
                         next_nonce: bytearray, max_nonce: bytearray):
         """
-         * Write authorization configuration to a SalmonStream.
-         * @param stream The stream to write to.
-         * @param drive_id The drive id.
-         * @param auth_id The auth id of the new device.
-         * @param next_nonce The next nonce to be used by the new device.
-         * @param max_nonce The max nonce to be used byte the new device.f
-         * @throws Exception Thrown when error during writing to stream
+        Write authorization configuration to a SalmonStream.
+        :param stream: The stream to write to.
+        :param drive_id: The drive id.
+        :param auth_id: The auth id of the new device.
+        :param next_nonce: The next nonce to be used by the new device.
+        :param max_nonce: The max nonce to be used byte the new device.f
+        :raises Exception: Thrown when error during writing to stream
         """
 
         ms: MemoryStream = MemoryStream()
@@ -155,11 +156,11 @@ class SalmonAuthConfig:
     @staticmethod
     def get_auth_config(drive: SalmonDrive, auth_file: IRealFile) -> SalmonAuthConfig:
         """
-         * Get the app drive pair configuration properties for this drive
-         *
-         * @param auth_file The encrypted authorization file.
-         * @return The decrypted authorization file.
-         * @throws Exception Thrown when error during reading file
+        Get the app drive pair configuration properties for this drive
+        :param drive: The drive
+        :param auth_file: The encrypted authorization file.
+        :return: The decrypted authorization file.
+        :raises Exception: Thrown when error during reading file
         """
         salmon_file: SalmonFile = SalmonFile(auth_file, drive)
         stream: SalmonStream = salmon_file.get_input_stream()
@@ -175,21 +176,20 @@ class SalmonAuthConfig:
     @staticmethod
     def __verify_auth_id(drive: SalmonDrive, auth_id: bytearray) -> bool:
         """
-         * Verify the authorization id with the current drive auth id.
-         *
-         * @param auth_id The authorization id to verify.
-         * @return
-         * @throws Exception Thrown when verification failed
+        Verify the authorization id with the current drive auth id.
+        
+        :param auth_id: The authorization id to verify.
+        :return: True if verifcation succeded
+        :raises Exception: Thrown when verification failed
         """
         return SalmonAuthConfig.__arrays_equal(auth_id, drive.get_auth_id_bytes())
 
     @staticmethod
     def import_sequence(drive: SalmonDrive, auth_config: SalmonAuthConfig):
         """
-         * Import sequence into the current drive.
-         *
-         * @param auth_config
-         * @throws Exception Thrown when error during importing sequence
+        Import sequence into the current drive.
+        :param drive: The drive
+        :param auth_config:         :raises Exception: Thrown when error during importing sequence
         """
         drv_str: str = BitConverter.to_hex(auth_config.get_drive_id())
         auth_str: str = BitConverter.to_hex(auth_config.get_auth_id())
@@ -199,10 +199,10 @@ class SalmonAuthConfig:
     @staticmethod
     def import_auth_file(drive: SalmonDrive, auth_config_file: IRealFile):
         """
-         * Import the device authorization file.
-         *
-         * @param file_path The filepath to the authorization file.
-         * @throws Exception  Thrown when error during
+        Import the device authorization file.
+        :param drive: The drive
+        :param auth_config_file: The config file
+        :raises Exception: Thrown when error during
         """
         sequence: NonceSequence = drive.get_sequencer().get_sequence(
             BitConverter.to_hex(drive.get_drive_id()))
@@ -225,11 +225,10 @@ class SalmonAuthConfig:
     @staticmethod
     def export_auth_file(drive: SalmonDrive, target_auth_id: str, file: IRealFile):
         """
-         * @param target_auth_id The authorization id of the target device.
-         * @param target_dir    The target dir the file will be written to.
-         * @param filename     The filename of the auth config file.
-         * @throws Exception
-        """
+        :param drive: The drive
+        :param target_auth_id: The authorization id of the target device.
+        :param file:     The auth config file.
+        :raises Exception:         """
         cfg_nonce: bytearray = drive.get_sequencer().next_nonce(
             BitConverter.to_hex(drive.get_drive_id()))
 

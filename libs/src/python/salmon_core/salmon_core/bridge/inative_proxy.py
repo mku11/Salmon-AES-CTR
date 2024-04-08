@@ -30,24 +30,23 @@ from typeguard import typechecked
 @typechecked
 class INativeProxy(ABC):
     """
-     * Proxy interface for use with native libraries for different platforms and operating systems.
+    Proxy interface for use with native libraries for different platforms and operating systems.
     """
 
     @abstractmethod
     def salmon_init(self, aes_impl: int):
         """
-         * Proxy Init the native code with AES implementation, and hash length options.
-         * @param aesImpl
-        """
+        Proxy Init the native code with AES implementation, and hash length options.
+        :param aes_impl:         """
         pass
 
     @abstractmethod
     def salmon_expand_key(self, key: bytearray, expanded_key: bytearray):
         """
-         * Proxy Key schedule algorithm for expanding the 32 byte key to 240 bytes required
-         * for AES 256.
-         * @param key
-         * @param expandedKey
+        Proxy Key schedule algorithm for expanding the 32 byte key to 240 bytes required
+        for AES 256.
+        :param key: The key
+        :param expanded_key: The expanded key
         """
         pass
 
@@ -56,14 +55,14 @@ class INativeProxy(ABC):
                          src_buffer: bytearray, src_offset: int,
                          dest_buffer: bytearray, dest_offset: int, count: int) -> int:
         """
-         * Proxy Transform the input byte array using AES 256 encryption or decryption mode.
-         * @param key
-         * @param counter
-         * @param srcBuffer
-         * @param srcOffset
-         * @param destBuffer
-         * @param destOffset
-         * @param count
-         * @return
+        Proxy Transform the input byte array using AES 256 encryption or decryption mode.
+        :param key: The encryption key
+        :param counter: The counter
+        :param src_buffer: The source buffer
+        :param src_offset: The source buffer offset
+        :param dest_buffer: The destination buffer
+        :param dest_offset: The destination buffer offset
+        :param count: The number of bytes to transform
+        :return: The number of bytes transformed
         """
         pass

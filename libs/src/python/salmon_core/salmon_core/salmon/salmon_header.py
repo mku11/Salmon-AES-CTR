@@ -33,79 +33,79 @@ from typeguard import typechecked
 @typechecked
 class SalmonHeader:
     """
-     * Header embedded in the SalmonStream. Header contains nonce and other information for
-     * decrypting the stream.
+    Header embedded in the SalmonStream. Header contains nonce and other information for
+    decrypting the stream.
     """
 
     def __init__(self):
         self.__magicBytes: bytearray = bytearray(SalmonGenerator.MAGIC_LENGTH)
         """
-         * Magic bytes.
+        Magic bytes.
         """
 
         self.__version: int = 0
         """
-         * Format version from {@link SalmonGenerator#VERSION}.
+        Format version from {@link SalmonGenerator#VERSION}.
         """
 
         self.__chunkSize: int = 0
         """
-         * Chunk size used for data integrity.
+        Chunk size used for data integrity.
         """
 
         self.__nonce: bytearray = bytearray()
         """
-         * Starting nonce for the CTR mode. This is the upper part of the Counter.
-         *
+        Starting nonce for the CTR mode. This is the upper part of the Counter.
+        
         """
 
         self.__headerData: bytearray = bytearray()
         """
-         * Binary data.
+        Binary data.
         """
 
     def get_nonce(self) -> bytearray:
         """
-         * Get the nonce.
-         * @return The nonce
+        Get the nonce.
+        :return: The nonce
         """
         return self.__nonce
 
     def get_chunk_size(self) -> int:
         """
-         * Get the chunk size.
-         * @return Chunk size
+        Get the chunk size.
+        :return: Chunk size
         """
         return self.__chunkSize
 
     def get_header_data(self) -> bytearray:
         """
-         * Get the raw header data.
-         * @return Header data
+        Get the raw header data.
+        :return: Header data
         """
         return self.__headerData
 
     def get_version(self) -> int:
         """
-         * Get the Salmon format  version
-         * @return The format version
+        Get the Salmon format  version
+        :return: The format version
         """
         return self.__version
 
     def get_magic_bytes(self) -> bytearray:
         """
-         * Get the magic bytes
-         * @return Magic bytes
+        Get the magic bytes
+        :return: Magic bytes
         """
         return self.__magicBytes
 
     @staticmethod
     def parse_header_data(stream: RandomAccessStream) -> SalmonHeader:
         """
-         * Parse the header data from the stream
-         * @param stream The stream.
-         * @return
-         * @throws IOError Thrown if there is an IO error.
+        Parse the header data from the stream
+        :param stream: The stream.
+        :return: The header
+        :raises IOError: Thrown if there is an IO error.
         """
         header: SalmonHeader = SalmonHeader()
         header.__magicBytes = bytearray(SalmonGenerator.MAGIC_LENGTH)
@@ -125,8 +125,8 @@ class SalmonHeader:
         return header
 
     """
-     * Set the header chunk size
-     * @param chunkSize The chunk size
+    Set the header chunk size
+    :param chunkSize: The chunk size
     """
 
     def set_chunk_size(self, chunk_size: int):
@@ -134,14 +134,14 @@ class SalmonHeader:
 
     def set_version(self, version: int):
         """
-         * Set the Salmon format version
-         * @param version The format version
+        Set the Salmon format version
+        :param version: The format version
         """
         self.__version = version
 
     def set_nonce(self, nonce: bytearray):
         """
-         * Set the nonce to be used.
-         * @param nonce The nonce
+        Set the nonce to be used.
+        :param nonce: The nonce
         """
         self.__nonce = nonce

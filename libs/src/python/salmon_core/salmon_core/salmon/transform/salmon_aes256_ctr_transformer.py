@@ -34,44 +34,44 @@ from typeguard import typechecked
 @typechecked
 class SalmonAES256CTRTransformer(ISalmonCTRTransformer, ABC):
     """
-     * Abstract class for AES256 transformer implementations.
-     *
+    Abstract class for AES256 transformer implementations.
+    
     """
 
     EXPANDED_KEY_SIZE = 240
     """
-     * Standard expansion key size for AES256 only.
+    Standard expansion key size for AES256 only.
     """
 
     def __init__(self):
         self.__key: bytearray | None = None
         """
-         * Key to be used for AES transformation.
+        Key to be used for AES transformation.
         """
 
         self.__expandedKey: bytearray = bytearray(SalmonAES256CTRTransformer.EXPANDED_KEY_SIZE)
         """
-         * Expanded key.
+        Expanded key.
         """
 
         self.__nonce: bytearray | None = None
         """
-         * Nonce to be used for CTR mode.
+        Nonce to be used for CTR mode.
         """
 
         self.__block: int = 0
         """
-         * Current operation block.
+        Current operation block.
         """
 
         self.__counter: bytearray | None = None
         """
-         * Current operation counter.
+        Current operation counter.
         """
 
     def reset_counter(self):
         """
-         * Resets the Counter and the block count.
+        Resets the Counter and the block count.
         """
         self.__counter: bytearray = bytearray(SalmonGenerator.BLOCK_SIZE)
         self.__counter[0:len(self.__nonce)] = self.__nonce[0:]
@@ -79,8 +79,8 @@ class SalmonAES256CTRTransformer(ISalmonCTRTransformer, ABC):
 
     def sync_counter(self, position: int):
         """
-         * Syncs the Counter based on what AES block position the stream is at.
-         * The block count is already excluding the header and the hash signatures.
+        Syncs the Counter based on what AES block position the stream is at.
+        The block count is already excluding the header and the hash signatures.
         """
         curr_block: int = position // SalmonGenerator.BLOCK_SIZE
         self.reset_counter()
@@ -89,10 +89,10 @@ class SalmonAES256CTRTransformer(ISalmonCTRTransformer, ABC):
 
     def _increase_counter(self, value: int):
         """
-         * Increase the Counter
-         * We use only big endianness for AES regardless of the machine architecture
-         *
-         * @param value value to increase counter by
+        Increase the Counter
+        We use only big endianness for AES regardless of the machine architecture
+        
+        :param value: value to increase counter by
         """
         if value < 0:
             raise ValueError("Value should be positive")
@@ -109,53 +109,53 @@ class SalmonAES256CTRTransformer(ISalmonCTRTransformer, ABC):
 
     def init(self, key: bytearray, nonce: bytearray):
         """
-         * Initialize the transformer. Most common operations include precalculating expansion keys or
-         * any other prior initialization for efficiency.
-         * @param key
-         * @param nonce
-         * @throws IntegrityException Thrown when security error
+        Initialize the transformer. Most common operations include precalculating expansion keys or
+        any other prior initialization for efficiency.
+        :param key: The key
+        :param nonce: The nonce
+        :raises IntegrityException: Thrown when security error
         """
         self.__key = key
         self.__nonce = nonce
 
     def get_counter(self) -> bytearray:
         """
-         * Get the current Counter.
-         * @return
+        Get the current Counter.
+        :return: The counter
         """
         return self.__counter
 
     def get_block(self) -> int:
         """
-         * Get the current block.
-         * @return
+        Get the current block.
+        :return: The block
         """
         return self.__block
 
     def get_key(self) -> bytearray:
         """
-         * Get the current encryption key.
-         * @return
+        Get the current encryption key.
+        :return: The key
         """
         return self.__key
 
     def get_expanded_key(self) -> bytearray:
         """
-         * Get the expanded key if available.
-         * @return
+        Get the expanded key if available.
+        :return: The expanded key
         """
         return self.__expandedKey
 
     def get_nonce(self) -> bytearray:
         """
-         * Get the nonce (initial counter)
-         * @return
+        Get the nonce (initial counter)
+        :return: The nonce
         """
         return self.__nonce
 
     def set_expanded_key(self, expanded_key: bytearray):
         """
-         * Set the expanded key. This should be called once during initialization phase.
-         * @param expandedKey
+        Set the expanded key. This should be called once during initialization phase.
+        :param expanded_key: The expanded key
         """
         self.__expandedKey = expanded_key

@@ -30,21 +30,21 @@ from typeguard import typechecked
 @typechecked
 class TinyAesTransformer(SalmonNativeTransformer):
     """
-     *  Salmon AES transformer implemented with TinyAES backend.
+     Salmon AES transformer implemented with TinyAES backend.
     """
 
     AES_IMPL_TINY_AES = 2
     """
-     * The constant to pass to the native code while initializing.
+    The constant to pass to the native code while initializing.
     """
 
     def init(self, key: bytearray, nonce: bytearray):
         """
-         * Initialiaze the native transformer to use the Tiny AES implementation.
-         *
-         * @param key   The AES key to use.
-         * @param nonce The nonce to use.
-         * @throws IntegrityException Thrown when security error
+        Initialiaze the native transformer to use the Tiny AES implementation.
+        
+        :param key:   The AES key to use.
+        :param nonce: The nonce to use.
+        :raises IntegrityException: Thrown when security error
         """
         self.get_native_proxy().salmon_init(TinyAesTransformer.AES_IMPL_TINY_AES)
         super().init(key, nonce)

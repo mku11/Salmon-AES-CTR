@@ -29,12 +29,12 @@ from typeguard import typechecked
 @typechecked
 class IntegrityException (Exception):
     """
-     * Thrown when data are corrupt or tampered with.
+    Thrown when data are corrupt or tampered with.
     """
 
     def __init__(self, msg: str):
         """
-         * Construct an exception with a specific message.
-         * @param msg The message
+        Construct an exception with a specific message.
+        :param msg: The message
         """
         super().__init__(msg)

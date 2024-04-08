@@ -53,9 +53,9 @@ from salmon_fs.sequence.nonce_sequence import NonceSequence
 @typechecked
 class SalmonDrive(VirtualDrive, ABC):
     """
-     * Class provides an abstract virtual drive that can be extended for use with
-     * any filesystem ie disk, net, cloud, etc.
-     * Drive implementations needs to be realized together with {@link IRealFile}.
+    Class provides an abstract virtual drive that can be extended for use with
+    any filesystem ie disk, net, cloud, etc.
+    Drive implementations needs to be realized together with {@link IRealFile}.
     """
 
     __DEFAULT_FILE_CHUNK_SIZE: int = 256 * 1024
@@ -68,7 +68,7 @@ class SalmonDrive(VirtualDrive, ABC):
 
     def __init__(self):
         """
-         * Create a virtual drive
+        Create a virtual drive
         """
         super().__init__()
         self.__defaultFileChunkSize: int = SalmonDrive.__DEFAULT_FILE_CHUNK_SIZE
@@ -81,10 +81,10 @@ class SalmonDrive(VirtualDrive, ABC):
 
     def initialize(self, real_root: IRealFile, create_if_not_exists: bool):
         """
-         * Initialize a virtual drive at the directory path provided
-         *
-         * @param real_root_path The path of the real directory
-         * @param create_if_not_exists Create the drive if it does not exist
+        Initialize a virtual drive at the directory path provided
+        
+        :param real_root: The directory for the drive
+        :param create_if_not_exists: Create the drive if it does not exist
         """
 
         self.close()
@@ -155,7 +155,7 @@ class SalmonDrive(VirtualDrive, ABC):
 
     def __register_on_process_close(self):
         """
-        * Clear sensitive information when app is close.
+       Clear sensitive information when app is close.
         """
         # TODO:
         # Runtime.getRuntime().addShutdownHook(new Thread(this::close))
@@ -163,30 +163,29 @@ class SalmonDrive(VirtualDrive, ABC):
 
     def get_default_file_chunk_size(self) -> int:
         """
-         * Return the default file chunk size
-         * @return The default chunk size.
+        Return the default file chunk size
+        :return: The default chunk size.
         """
         return self.__defaultFileChunkSize
 
     def set_default_file_chunk_size(self, file_chunk_size: int):
         """
-         * Set the default file chunk size to be used with hash integrity.
-         * @param file_chunk_size
-        """
+        Set the default file chunk size to be used with hash integrity.
+        :param file_chunk_size:         """
         self.__defaultFileChunkSize = file_chunk_size
 
     def get_key(self) -> SalmonKey | None:
         """
-         * Return the encryption key that is used for encryption / decryption
-         * @return
+        Return the encryption key that is used for encryption / decryption
+        :return: The key
         """
         return self.__key
 
     def get_root(self) -> IVirtualFile | None:
         """
-         * Return the virtual root directory of the drive.
-         * @return
-         * @throws SalmonAuthException Thrown when there is a failure in the nonce sequencer.
+        Return the virtual root directory of the drive.
+        :return: The drive root directory
+        :raises SalmonAuthException: Thrown when there is a failure in the nonce sequencer.
         """
         if self.__realRoot is None or not self.__realRoot.exists():
             return None
@@ -199,9 +198,9 @@ class SalmonDrive(VirtualDrive, ABC):
 
     def __unlock(self, password: str):
         """
-         * Verify if the user password is correct otherwise it throws a SalmonAuthException
-         *
-         * @param password The password.
+        Verify if the user password is correct otherwise it throws a SalmonAuthException
+        
+        :param password: The password.
         """
         stream: SalmonStream | None = None
         try:
@@ -254,12 +253,11 @@ class SalmonDrive(VirtualDrive, ABC):
 
     def set_key(self, master_key: bytearray, drive_key: bytearray, hash_key: bytearray, iterations: int):
         """
-         * Sets the key properties.
-         * @param master_key The master key.
-         * @param drive_key The drive key used for enc/dec of files and filenames.
-         * @param hash_key The hash key used for data integrity.
-         * @param iterations
-        """
+        Sets the key properties.
+        :param master_key: The master key.
+        :param drive_key: The drive key used for enc/dec of files and filenames.
+        :param hash_key: The hash key used for data integrity.
+        :param iterations:         """
         self.__key.set_master_key(master_key)
         self.__key.set_drive_key(drive_key)
         self.__key.set_hash_key(hash_key)
@@ -267,12 +265,9 @@ class SalmonDrive(VirtualDrive, ABC):
 
     def __verify_hash(self, salmon_config: SalmonDriveConfig, data: bytearray, hash_key: bytearray):
         """
-         * Verify that the hash signature is correct
-         *
-         * @param salmon_config
-         * @param data
-         * @param hash_key
-        """
+        Verify that the hash signature is correct
+        
+        :param salmon_config:         :param data:         :param hash_key:         """
         hash_signature: bytearray = salmon_config.get_hash_signature()
         v_hash: bytearray = SalmonIntegrity.calculate_hash(self.__hashProvider, data, 0, len(data), hash_key, None)
         for i in range(0, len(hash_key)):
@@ -281,17 +276,16 @@ class SalmonDrive(VirtualDrive, ABC):
 
     def get_next_nonce(self) -> bytearray:
         """
-         * Get the next nonce from the sequencer. This advanced the sequencer so unique nonce are used.
-         * @return
-         * @throws Exception
-        """
+        Get the next nonce from the sequencer. This advanced the sequencer so unique nonce are used.
+        :return: The next nonce
+        :raises Exception:         """
         if not self.is_unlocked():
             raise SalmonAuthException("Not authorized")
         return self.__sequencer.next_nonce(BitConverter.to_hex(self.get_drive_id()))
 
     def is_unlocked(self) -> bool:
         """
-         * Returns True if password authorization has succeeded.
+        Returns True if password authorization has succeeded.
         """
         key: SalmonKey = self.get_key()
         if key is None:
@@ -301,10 +295,10 @@ class SalmonDrive(VirtualDrive, ABC):
 
     def get_bytes_from_real_file(self, file: IRealFile, buffer_size: int) -> bytearray:
         """
-         * Get the byte contents of a file from the real filesystem.
-         *
-         * @param file The file
-         * @param buffer_size The buffer to be used when reading
+        Get the byte contents of a file from the real filesystem.
+        
+        :param file: The file
+        :param buffer_size: The buffer to be used when reading
         """
         stream: RandomAccessStream = file.get_input_stream()
         ms: MemoryStream = MemoryStream()
@@ -318,7 +312,7 @@ class SalmonDrive(VirtualDrive, ABC):
 
     def get_drive_config_file(self) -> IRealFile | None:
         """
-         * Return the drive configuration file.
+        Return the drive configuration file.
         """
         if self.__realRoot is None or not self.__realRoot.exists():
             return None
@@ -327,8 +321,8 @@ class SalmonDrive(VirtualDrive, ABC):
 
     def get_export_dir(self) -> IRealFile:
         """
-         * Return the default external export dir that all file can be exported to.
-         * @return The file on the real filesystem.
+        Return the default external export dir that all file can be exported to.
+        :return: The file on the real filesystem.
         """
         export_dir: IRealFile = self.__realRoot.get_child(SalmonDrive.__exportDirectoryName)
         if export_dir is None or not export_dir.exists():
@@ -337,7 +331,7 @@ class SalmonDrive(VirtualDrive, ABC):
 
     def __get_drive_config(self) -> SalmonDriveConfig | None:
         """
-         * Return the configuration properties of this drive.
+        Return the configuration properties of this drive.
         """
         config_file: IRealFile = self.get_drive_config_file()
         if config_file is None or not config_file.exists():
@@ -348,7 +342,7 @@ class SalmonDrive(VirtualDrive, ABC):
 
     def has_config(self) -> bool:
         """
-         * Return True if the drive is already created and has a configuration file.
+        Return True if the drive is already created and has a configuration file.
         """
         salmon_config: SalmonDriveConfig | None = None
         try:
@@ -361,14 +355,14 @@ class SalmonDrive(VirtualDrive, ABC):
 
     def get_drive_id(self) -> bytearray:
         """
-         * Get the drive ID.
-         * @return
+        Get the drive ID.
+        :return: The drive id
         """
         return self.__driveID
 
     def close(self):
         """
-         * Close the drive and close associated resources.
+        Close the drive and close associated resources.
         """
         self.__realRoot = None
         self.__virtualRoot = None
@@ -379,7 +373,7 @@ class SalmonDrive(VirtualDrive, ABC):
 
     def init_fs(self):
         """
-         * Initialize the drive virtual filesystem.
+        Initialize the drive virtual filesystem.
         """
         virtual_root_real_file: IRealFile = self.get_real_root().get_child(
             SalmonDrive.get_virtual_drive_directory_name())
@@ -399,10 +393,13 @@ class SalmonDrive(VirtualDrive, ABC):
     def open_drive(v_dir: IRealFile, drive_class_type: Type, password: str,
                    sequencer: INonceSequencer | None = None) -> SalmonDrive:
         """
-         * Set the drive location to an external directory.
-         * This requires you previously use SetDriveClass() to provide a class for the drive
-         *
-         * @param dir_path The directory path that will be used for storing the contents of the drive
+        Set the drive location to an external directory.
+        This requires you previously use SetDriveClass() to provide a class for the drive
+        
+        :param v_dir: The directory path that will be used for storing the contents of the drive
+        :param drive_class_type: The drive class type (ie: PyDrive)
+        :param password: The password
+        :param sequencer: The sequencer
         """
         drive: SalmonDrive = SalmonDrive.__create_drive_instance(v_dir, False, drive_class_type, sequencer)
         if not drive.has_config():
@@ -414,13 +411,15 @@ class SalmonDrive(VirtualDrive, ABC):
     def create_drive(v_dir: IRealFile, drive_class_type: Type, password: str,
                      sequencer: INonceSequencer) -> SalmonDrive:
         """
-         * Create a new drive in the provided location.
-         *
-         * @param dir  Directory to store the drive configuration and virtual filesystem.
-         * @param password Master password to encrypt the drive configuration.
-         * @return The newly created drive.
-         * @throws IntegrityException Thrown when data are corrupt or tampered with.
-         * @throws SequenceException Thrown when there is a failure in the nonce sequencer.
+        Create a new drive in the provided location.
+        
+        :param v_dir:  Directory to store the drive configuration and virtual filesystem.
+        :param password: Master password to encrypt the drive configuration.
+        :param drive_class_type: The drive class type (ie: PyDrive)
+        :param sequencer: The sequencer
+        :return: The newly created drive.
+        :raises IntegrityException: Thrown when data are corrupt or tampered with.
+        :raises SequenceException: Thrown when there is a failure in the nonce sequencer.
         """
         drive: SalmonDrive = SalmonDrive.__create_drive_instance(v_dir, True, drive_class_type, sequencer)
         if drive.has_config():
@@ -432,12 +431,12 @@ class SalmonDrive(VirtualDrive, ABC):
     def __create_drive_instance(v_dir: IRealFile, create_if_not_exists: bool,
                                 drive_class_type: Type, sequencer: INonceSequencer | None = None) -> SalmonDrive:
         """
-         * Create a drive instance.
-         *
-         * @param dir The target directory where the drive is located.
-         * @param create_if_not_exists Create the drive if it does not exist
-         * @return
-         * @throws IntegrityException Thrown when security error
+        Create a drive instance.
+        
+        :param v_dir: The target directory where the drive is located.
+        :param create_if_not_exists: Create the drive if it does not exist
+        :return: The drive created
+        :raises IntegrityException: Thrown when security error
         """
         drive: SalmonDrive | None = None
         try:
@@ -452,11 +451,10 @@ class SalmonDrive(VirtualDrive, ABC):
 
     def get_auth_id_bytes(self) -> bytearray:
         """
-         * Get the device authorization byte array for the current drive.
-         *
-         * @return
-         * @throws Exception
-        """
+        Get the device authorization byte array for the current drive.
+        
+        :return: The auth id
+        :raises Exception:         """
         drv_str: str = BitConverter.to_hex(self.get_drive_id())
         sequence: NonceSequence | None = self.__sequencer.get_sequence(drv_str)
         if sequence is None:
@@ -469,34 +467,32 @@ class SalmonDrive(VirtualDrive, ABC):
     @staticmethod
     def get_default_auth_config_filename() -> str:
         """
-         * Get the default auth config filename.
-         *
-         * @return
+        Get the default auth config filename.
+        
+        :return: The default auth config file name
         """
         return SalmonDrive.get_auth_config_filename()
 
     def create_sequence(self, drive_id: bytearray, auth_id: bytearray):
         """
-         * Create a nonce sequence for the drive id and the authorization id provided. Should be called
-         * once per drive_id/auth_id combination.
-         *
-         * @param drive_id The drive_id
-         * @param auth_id  The auth_id
-         * @throws Exception
-        """
+        Create a nonce sequence for the drive id and the authorization id provided. Should be called
+        once per drive_id/auth_id combination.
+        
+        :param drive_id: The drive_id
+        :param auth_id:  The auth_id
+        :raises Exception:         """
         drv_str: str = BitConverter.to_hex(drive_id)
         auth_str: str = BitConverter.to_hex(auth_id)
         self.__sequencer.create_sequence(drv_str, auth_str)
 
     def init_sequence(self, drive_id: bytearray, auth_id: bytearray):
         """
-         * Initialize the nonce sequencer with the current drive nonce range. Should be called
-         * once per drive_id/auth_id combination.
-         *
-         * @param drive_id Drive ID.
-         * @param auth_id  authorization ID.
-         * @throws Exception
-        """
+        Initialize the nonce sequencer with the current drive nonce range. Should be called
+        once per drive_id/auth_id combination.
+        
+        :param drive_id: Drive ID.
+        :param auth_id:  authorization ID.
+        :raises Exception:         """
         starting_nonce: bytearray = SalmonDriveGenerator.get_starting_nonce()
         max_nonce: bytearray = SalmonDriveGenerator.get_max_nonce()
         drv_str: str = BitConverter.to_hex(drive_id)
@@ -505,33 +501,32 @@ class SalmonDrive(VirtualDrive, ABC):
 
     def revoke_authorization(self):
         """
-         * Revoke authorization for this device. This will effectively terminate write operations on the current disk
-         * by the current device. Warning: If you need to authorize write operations to the device again you will need
-         * to have another device to export an authorization config file and reimport it.
-         *
-         * @throws Exception
-         * @see <a href="https://github.com/mku11/Salmon-AES-CTR#readme">Salmon README.md</a>
+        Revoke authorization for this device. This will effectively terminate write operations on the current disk
+        by the current device. Warning: If you need to authorize write operations to the device again you will need
+        to have another device to export an authorization config file and reimport it.
+        
+        :raises Exception:         @see <a href="https://github.com/mku11/Salmon-AES-CTR#readme">Salmon README.md</a>
         """
         drive_id: bytearray = self.get_drive_id()
         self.__sequencer.revoke_sequence(BitConverter.to_hex(drive_id))
 
     def get_auth_id(self) -> str:
         """
-         * Get the authorization ID for the current device.
-         *
-         * @return
-         * @throws SequenceException Thrown when there is a failure in the nonce sequencer.
-         * @throws SalmonAuthException Thrown when there is a failure in the nonce sequencer.
+        Get the authorization ID for the current device.
+        
+        :return: The authorization id
+        :raises SequenceException: Thrown when there is a failure in the nonce sequencer.
+        :raises SalmonAuthException: Thrown when there is a failure in the nonce sequencer.
         """
         return BitConverter.to_hex(self.get_auth_id_bytes())
 
     def __create_config(self, password: str):
         """
-         * Create a configuration file for the drive.
-         *
-         * @param password The new password to be saved in the configuration
-         *                 This password will be used to derive the master key that will be used to
-         *                 encrypt the combined key (encryption key + hash key)
+        Create a configuration file for the drive.
+        
+        :param password: The new password to be saved in the configuration
+                        This password will be used to derive the master key that will be used to
+                        encrypt the combined key (encryption key + hash key)
         """
         drive_key: bytearray | None = self.get_key().get_drive_key()
         hash_key: bytearray | None = self.get_key().get_hash_key()
@@ -606,13 +601,13 @@ class SalmonDrive(VirtualDrive, ABC):
 
     def set_password(self, password: str):
         """
-         * Change the user password.
-         * @param pass The new password.
-         * @throws IOError Thrown if there is an IO error.
-         * @throws SalmonAuthException Thrown when there is a failure in the nonce sequencer.
-         * @throws IntegrityException Thrown when security error
-         * @throws IntegrityException Thrown when data are corrupt or tampered with.
-         * @throws SequenceException Thrown when there is a failure in the nonce sequencer.
+        Change the user password.
+        :param password: The new password.
+        :raises IOError: Thrown if there is an IO error.
+        :raises SalmonAuthException: Thrown when there is a failure in the nonce sequencer.
+        :raises IntegrityException: Thrown when security error
+        :raises IntegrityException: Thrown when data are corrupt or tampered with.
+        :raises SequenceException: Thrown when there is a failure in the nonce sequencer.
         """
         self.__create_config(password)
 

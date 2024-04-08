@@ -36,195 +36,192 @@ from salmon_core.streams.random_access_stream import RandomAccessStream
 @typechecked
 class IRealFile(ABC):
     """
-     * Interface that represents a real file. This class is used internally by the virtual disk to
-     * import, store, and export the encrypted files.
-     * Extend this to provide an interface to any file system, platform, or API ie: on disk, memory, network, or cloud.
-     * See: {@link PyFile}
+    Interface that represents a real file. This class is used internally by the virtual disk to
+    import, store, and export the encrypted files.
+    Extend this to provide an interface to any file system, platform, or API ie: on disk, memory, network, or cloud.
+    See: {@link PyFile}
     """
 
     def exists(self) -> bool:
         """
-         * True if this file exists.
-         *
-         * @return
+        True if this file exists.
+        
+        :return: True if exists
         """
         pass
 
     def delete(self) -> bool:
         """
-         * Delete this file.
-         *
-         * @return
+        Delete this file.
+        
+        :return: True if file deleted
         """
         pass
 
     def get_input_stream(self) -> RandomAccessStream:
         """
-         * Get a stream for reading the file.
-         *
-         * @return
-         * @throws FileNotFoundException
-        """
+        Get a stream for reading the file.
+        
+        :return: The stream
+        :raises FileNotFoundException:         """
         pass
 
     def get_output_stream(self) -> RandomAccessStream:
         """
-         * Get a stream for writing to the file.
-         *
-         * @return
-         * @throws FileNotFoundException
-        """
+        Get a stream for writing to the file.
+        
+        :return: The stream
+        :raises FileNotFoundException:         """
         pass
 
     def rename_to(self, new_filename: str) -> bool:
         """
-         * Rename file.
-         *
-         * @param new_filename The new filename
-         * @return True if success.
-         * @throws FileNotFoundException
-        """
+        Rename file.
+        
+        :param new_filename: The new filename
+        :return: True if success.
+        :raises FileNotFoundException:         """
         pass
 
     def length(self) -> int:
         """
-         * Get the length for the file.
-         *
-         * @return The length.
+        Get the length for the file.
+        
+        :return: The length.
         """
         pass
 
     def get_children_count(self) -> int:
         """
-         * Get the count of files and subdirectories
-         *
-         * @return
+        Get the count of files and subdirectories
+        
+        :return: The children count
         """
         pass
 
     def last_modified(self) -> int:
         """
-         * Get the last modified date of the file.
-         *
-         * @return
+        Get the last modified date of the file.
+        
+        :return: The last modified date in milliseconds
         """
         pass
 
     def get_absolute_path(self) -> str:
         """
-         * Get the absolute path of the file on disk.
-         *
-         * @return
+        Get the absolute path of the file on disk.
+        
+        :return: The absolute path
         """
         pass
 
     def get_path(self) -> str:
         """
-         * Get the original filepath of this file. This might symlinks or merged folders. To get the absolute path
-         * use {@link #getAbsolutePath()}.
-         *
-         * @return
+        Get the original filepath of this file. This might symlinks or merged folders. To get the absolute path
+        use {@link #getAbsolutePath()}.
+        
+        :return: The path
         """
         pass
 
     def is_file(self) -> bool:
         """
-         * True if this is a file.
-         *
-         * @return
+        True if this is a file.
+        
+        :return: True if file
         """
         pass
 
     def is_directory(self) -> bool:
         """
-         * True if this is a directory.
-         *
-         * @return
+        True if this is a directory.
+        
+        :return: True if directory
         """
         pass
 
     def list_files(self) -> list[IRealFile]:
         """
-         * Get all files and directories under this directory.
-         *
-         * @return
+        Get all files and directories under this directory.
+        
+        :return: The files
         """
         pass
 
     def get_base_name(self) -> str:
         """
-         * Get the basename of the file.
-         *
-         * @return
+        Get the basename of the file.
+        
+        :return: The base name
         """
         pass
 
     def create_directory(self, dir_name: str) -> IRealFile:
         """
-         * Create the directory with the name provided under this directory.
-         *
-         * @param dir_name Directory name.
-         * @return The newly created directory.
+        Create the directory with the name provided under this directory.
+        
+        :param dir_name: Directory name.
+        :return: The newly created directory.
         """
         pass
 
     def get_parent(self) -> IRealFile:
         """
-         * Get the parent directory of this file/directory.
-         *
-         * @return The parent directory.
+        Get the parent directory of this file/directory.
+        
+        :return: The parent directory.
         """
         pass
 
     def create_file(self, filename: str) -> IRealFile:
         """
-         * Create an empty file with the provided name.
-         *
-         * @param filename The name for the new file.
-         * @return The newly create file.
-         * @throws IOError Thrown if there is an IO error.
+        Create an empty file with the provided name.
+        
+        :param filename: The name for the new file.
+        :return: The newly create file.
+        :raises IOError: Thrown if there is an IO error.
         """
         pass
 
     def move(self, new_dir: IRealFile, new_name: str | None = None,
              progress_listener: Callable[[int, int], Any] | None = None) -> IRealFile:
         """
-         * Move this file to another directory.
-         *
-         * @param new_dir           The target directory.
-         * @param new_name          The new filename.
-         * @param progress_listener Observer to notify of the move progress.
-         * @return The file after the move. Use this instance for any subsequent file operations.
+        Move this file to another directory.
+        
+        :param new_dir:           The target directory.
+        :param new_name:          The new filename.
+        :param progress_listener: Observer to notify of the move progress.
+        :return: The file after the move. Use this instance for any subsequent file operations.
         """
         pass
 
     def copy(self, new_dir: IRealFile, new_name: str | None = None,
              progress_listener: Callable[[int, int], Any] | None = None) -> IRealFile:
         """
-         * Copy this file to another directory.
-         *
-         * @param new_dir           The target directory.
-         * @param new_name          The new filename.
-         * @param progress_listener Observer to notify of the copy progress.
-         * @return The file after the copy. Use this instance for any subsequent file operations.
-         * @throws IOError Thrown if there is an IO error.
+        Copy this file to another directory.
+        
+        :param new_dir:           The target directory.
+        :param new_name:          The new filename.
+        :param progress_listener: Observer to notify of the copy progress.
+        :return: The file after the copy. Use this instance for any subsequent file operations.
+        :raises IOError: Thrown if there is an IO error.
         """
         pass
 
     def get_child(self, filename: str) -> IRealFile:
         """
-         * Get the file/directory matching the name provided under this directory.
-         *
-         * @param filename The name of the file or directory to match.
-         * @return The file that was matched.
+        Get the file/directory matching the name provided under this directory.
+        
+        :param filename: The name of the file or directory to match.
+        :return: The file that was matched.
         """
         pass
 
     def mkdir(self) -> bool:
         """
-         * Create a directory with the current filepath.
-         *
-         * @return
+        Create a directory with the current filepath.
+        
+        :return: True if directory created
         """
         pass
 
@@ -232,14 +229,14 @@ class IRealFile(ABC):
     def copy_file_contents(src: IRealFile, dest: IRealFile, delete: bool = False,
                            progress_listener: Callable[[int, int], Any] | None = None) -> bool:
         """
-         * Copy contents of a file to another file.
-         *
-         * @param src              The source directory
-         * @param dest             The target directory
-         * @param delete           True to delete the source files when complete
-         * @param progress_listener The progress listener
-         * @return
-         * @throws IOError Thrown if there is an IO error.
+        Copy contents of a file to another file.
+        
+        :param src:              The source directory
+        :param dest:             The target directory
+        :param delete:           True to delete the source files when complete
+        :param progress_listener: The progress listener
+        :return: True if contents copied
+        :raises IOError: Thrown if there is an IO error.
         """
         source: RandomAccessStream = src.get_input_stream()
         target: RandomAccessStream = dest.get_output_stream()
@@ -261,14 +258,14 @@ class IRealFile(ABC):
                          auto_rename_folders: bool = True,
                          on_failed: Callable[[IRealFile, Exception], Any] | None = None):
         """
-         * Copy a directory recursively
-         *
-         * @param dest
-         * @param progress_listener
-         * @param auto_rename
-         * @param auto_rename_folders Apply autorename to folders also (default is True)
-         * @param on_failed
-         * @throws IOError Thrown if there is an IO error.
+        Copy a directory recursively
+        
+        :param dest: The destination directory
+        :param progress_listener: The progress listener
+        :param auto_rename: The autorename function
+        :param auto_rename_folders: Apply autorename to folders also (default is True)
+        :param on_failed: Callback when copy failed
+        :raises IOError: Thrown if there is an IO error.
         """
         new_filename: str = self.get_base_name()
         new_file: IRealFile
@@ -302,13 +299,13 @@ class IRealFile(ABC):
                          auto_rename_folders: bool = True,
                          on_failed: Callable[[IRealFile, Exception], Any] | None = None):
         """
-         * Move a directory recursively
-         *
-         * @param dest              The target directory
-         * @param progress_listener
-         * @param auto_rename
-         * @param auto_rename_folders Apply autorename to folders also (default is True)
-         * @param on_failed
+        Move a directory recursively
+        
+        :param dest:              The target directory
+        :param progress_listener: The progress listener
+        :param auto_rename: The autorename function
+        :param auto_rename_folders: Apply autorename to folders also (default is True)
+        :param on_failed: Callback when move failed
         """
         # target directory is the same
         if self.get_parent().get_path() == dest.get_path():
@@ -353,9 +350,9 @@ class IRealFile(ABC):
     def delete_recursively(self, progress_listener: Callable[[IRealFile, int, int], Any],
                            on_failed: Callable[[IRealFile, Exception], Any]):
         """
-         * Delete a directory recursively
-         * @param progress_listener
-         * @param on_failed
+        Delete a directory recursively
+        :param progress_listener: Progress listener
+        :param on_failed: Callback when delete fails
         """
         if self.is_file():
             progress_listener(self, 0, 1)
@@ -375,17 +372,17 @@ class IRealFile(ABC):
     @staticmethod
     def auto_rename_file(file: IRealFile) -> str:
         """
-         * Get an auto generated copy of the name for a file.
+        Get an auto generated copy of the name for a file.
         """
         return IRealFile.auto_rename(file.get_base_name())
 
     @staticmethod
     def auto_rename(filename: str) -> str:
         """
-         * Get an auto generated copy of a filename
-         *
-         * @param filename
-         * @return
+        Get an auto generated copy of a filename
+        
+        :param filename:
+        :return: The new file name
         """
         ext: str = IRealFile.__get_extension(filename)
         filename_no_ext: str | None = None

@@ -31,10 +31,10 @@ from typeguard import typechecked
 @typechecked
 class PbkdfType(Enum):
     """
-      * Pbkdf implementation type.
+     Pbkdf implementation type.
      """
 
     Default = 1
     """
-      * Default Python pbkdf implementation.
+     Default Python pbkdf implementation.
      """

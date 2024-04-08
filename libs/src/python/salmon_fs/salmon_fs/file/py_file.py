@@ -36,22 +36,22 @@ from salmon_core.streams.random_access_stream import RandomAccessStream
 @typechecked
 class PyFile(IRealFile):
     """
-     * Salmon RealFile implementation for Python.
+    Salmon RealFile implementation for Python.
     """
 
     def __init__(self, path: str):
         """
-         * Instantiate a real file represented by the filepath provided.
-         * @param path The filepath.
+        Instantiate a real file represented by the filepath provided.
+        :param path: The filepath.
         """
         self.__file_path: str | None = None
         self.__file_path = path
 
     def create_directory(self, dir_name: str) -> IRealFile:
         """
-         * Create a directory under this directory.
-         * @param dir_name The name of the new directory.
-         * @return The newly created directory.
+        Create a directory under this directory.
+        :param dir_name: The name of the new directory.
+        :return: The newly created directory.
         """
         n_dir_path: str = self.__file_path + os.sep + dir_name
         os.makedirs(n_dir_path)
@@ -60,10 +60,10 @@ class PyFile(IRealFile):
 
     def create_file(self, filename: str) -> IRealFile:
         """
-         * Create a file under this directory.
-         * @param filename The name of the new file.
-         * @return The newly created file.
-         * @throws IOError Thrown if there is an IO error.
+        Create a file under this directory.
+        :param filename: The name of the new file.
+        :return: The newly created file.
+        :raises IOError: Thrown if there is an IO error.
         """
         n_file_path: str = self.__file_path + os.sep + filename
         open(n_file_path, 'a').close()
@@ -72,8 +72,8 @@ class PyFile(IRealFile):
 
     def delete(self) -> bool:
         """
-         * Delete this file or directory.
-         * @return True if deletion is successful.
+        Delete this file or directory.
+        :return: True if deletion is successful.
         """
         if self.is_directory():
             p_files: list[IRealFile] = self.list_files()
@@ -86,22 +86,22 @@ class PyFile(IRealFile):
 
     def exists(self) -> bool:
         """
-         * True if file or directory exists.
-         * @return
+        True if file or directory exists.
+        :return: True if exists
         """
         return os.path.exists(self.__file_path)
 
     def get_absolute_path(self) -> str:
         """
-         * Get the absolute path on the physical disk.
-         * @return The absolute path.
+        Get the absolute path on the physical disk.
+        :return: The absolute path.
         """
         return os.path.abspath(self.__file_path)
 
     def get_base_name(self) -> str:
         """
-         * Get the name of this file or directory.
-         * @return The name of this file or directory.
+        Get the name of this file or directory.
+        :return: The name of this file or directory.
         """
         return os.path.basename(self.__file_path)
 
@@ -109,23 +109,21 @@ class PyFile(IRealFile):
         return PyFileStream(self, "r")
 
     """
-     * Get a stream for reading the file.
-     * @return The stream to read from.
-     * @throws FileNotFoundException
-    """
+    Get a stream for reading the file.
+    :return: The stream to read from.
+    :raises FileNotFoundException:     """
 
     def get_output_stream(self) -> RandomAccessStream:
         """
-         * Get a stream for writing to this file.
-         * @return The stream to write to.
-         * @throws FileNotFoundException
-        """
+        Get a stream for writing to this file.
+        :return: The stream to write to.
+        :raises FileNotFoundException:         """
         return PyFileStream(self, "rw")
 
     def get_parent(self) -> IRealFile:
         """
-         * Get the parent directory of this file or directory.
-         * @return The parent directory.
+        Get the parent directory of this file or directory.
+        :return: The parent directory.
         """
         dir_path: str = os.path.dirname(self.get_absolute_path())
         parent: PyFile = PyFile(dir_path)
@@ -133,50 +131,50 @@ class PyFile(IRealFile):
 
     def get_path(self) -> str:
         """
-         * Get the path of this file. For python this is the same as the absolute filepath.
-         * @return
+        Get the path of this file. For python this is the same as the absolute filepath.
+        :return: The path
         """
         return self.__file_path
 
     def is_directory(self) -> bool:
         """
-         * True if this is a directory.
-         * @return
+        True if this is a directory.
+        :return: True if directory
         """
         return os.path.isdir(self.__file_path)
 
     def is_file(self) -> bool:
         """
-         * True if this is a file.
-         * @return
+        True if this is a file.
+        :return: True if file
         """
         return not self.is_directory()
 
     def last_modified(self) -> int:
         """
-         * Get the last modified date on disk.
-         * @return
+        Get the last modified date on disk.
+        :return: The last modified date in milliseconds
         """
         return int(os.path.getmtime(self.__file_path))
 
     def length(self) -> int:
         """
-         * Get the size of the file on disk.
-         * @return
+        Get the size of the file on disk.
+        :return: The size
         """
         return os.path.getsize(self.__file_path)
 
     def get_children_count(self) -> int:
         """
-         * Get the count of files and subdirectories
-         * @return
+        Get the count of files and subdirectories
+        :return: The children
         """
         return len(os.listdir(self.__file_path)) if self.is_directory() else 0
 
     def list_files(self) -> list[IRealFile]:
         """
-         * List all files under this directory.
-         * @return The list of files.
+        List all files under this directory.
+        :return: The list of files.
         """
         files: list[str] = os.listdir(self.__file_path)
         if files is None:
@@ -198,11 +196,11 @@ class PyFile(IRealFile):
     def move(self, new_dir: IRealFile, new_name: str | None = None,
              progress_listener: Callable[[int, int], Any] | None = None) -> IRealFile:
         """
-         * Move this file or directory under a new directory.
-         * @param new_dir The target directory.
-         * @param new_name The new filename
-         * @param progress_listener Observer to notify when progress changes.
-         * @return The moved file. Use this file for subsequent operations instead of the original.
+        Move this file or directory under a new directory.
+        :param new_dir: The target directory.
+        :param new_name: The new filename
+        :param progress_listener: Observer to notify when progress changes.
+        :return: The moved file. Use this file for subsequent operations instead of the original.
         """
         new_name = new_name if new_name is not None else self.get_base_name()
         n_file_path: str = new_dir.get_path() + os.sep + new_name
@@ -214,12 +212,12 @@ class PyFile(IRealFile):
     def copy(self, new_dir: IRealFile, new_name: str | None = None,
              progress_listener: Callable[[int, int], Any] | None = None) -> IRealFile:
         """
-         * Move this file or directory under a new directory.
-         * @param new_dir    The target directory.
-         * @param new_name   New filename
-         * @param progress_listener Observer to notify when progress changes.
-         * @return The copied file. Use this file for subsequent operations instead of the original.
-         * @throws IOError Thrown if there is an IO error.
+        Move this file or directory under a new directory.
+        :param new_dir:    The target directory.
+        :param new_name:   New filename
+        :param progress_listener: Observer to notify when progress changes.
+        :return: The copied file. Use this file for subsequent operations instead of the original.
+        :raises IOError: Thrown if there is an IO error.
         """
         new_name = new_name if new_name is not None else self.get_base_name()
         if new_dir is None or not new_dir.exists():
@@ -236,9 +234,9 @@ class PyFile(IRealFile):
 
     def get_child(self, filename: str) -> IRealFile | None:
         """
-         * Get the file or directory under this directory with the provided name.
-         * @param filename The name of the file or directory.
-         * @return
+        Get the file or directory under this directory with the provided name.
+        :param filename: The name of the file or directory.
+        :return: The child file
         """
         if self.is_file():
             return None
@@ -247,9 +245,9 @@ class PyFile(IRealFile):
 
     def rename_to(self, new_filename: str) -> bool:
         """
-         * Rename the current file or directory.
-         * @param new_filename The new name for the file or directory.
-         * @return True if successfully renamed.
+        Rename the current file or directory.
+        :param new_filename: The new name for the file or directory.
+        :return: True if successfully renamed.
         """
         v_dir = os.path.dirname(self.__file_path)
         os.rename(self.__file_path, v_dir + os.sep + new_filename)
@@ -257,14 +255,14 @@ class PyFile(IRealFile):
 
     def mkdir(self) -> bool:
         """
-         * Create this directory under the current filepath.
-         * @return True if created.
+        Create this directory under the current filepath.
+        :return: True if created.
         """
         os.makedirs(self.__file_path)
         return self.exists()
 
     def __str__(self) -> str:
         """
-         * Returns a string representation of this object
+        Returns a string representation of this object
         """
         return self.__file_path

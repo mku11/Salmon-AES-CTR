@@ -32,17 +32,17 @@ from typeguard import typechecked
 @typechecked
 class NativeProxy(INativeProxy):
     """
-     * Proxy class for use with windows native library.
+    Proxy class for use with windows native library.
     """
 
     __loaded: bool = False
     """
-     * If proxy is loaded 
+    If proxy is loaded 
     """
 
     __library_path: str = "salmon.dll"
     """
-     * The dll path for the salmon library.
+    The dll path for the salmon library.
     """
 
     @staticmethod
@@ -55,16 +55,14 @@ class NativeProxy(INativeProxy):
 
     def salmon_init(self, aes_impl: int):
         """
-         * Proxy Init the native code with AES implementation, and hash length options.
-         *
-         * @param aesImpl
-        """
+        Proxy Init the native code with AES implementation, and hash length options.
+        :param aes_impl:         """
         self._load_library()
         NativeProxy.__init(aes_impl)
 
     def _load_library(self):
         """
-         * Load the native library
+        Load the native library
         """
         if NativeProxy.__loaded:
             return
@@ -89,10 +87,9 @@ class NativeProxy(INativeProxy):
 
     def salmon_expand_key(self, key: bytearray, expanded_key: bytearray):
         """
-         * Proxy Key schedule algorithm for expanding the 32 byte key to 240 bytes required
-         *
-         * @param key
-         * @param expandedKey
+        Proxy Key schedule algorithm for expanding the 32 byte key to 240 bytes required
+        :param key: The key
+        :param expanded_key: The expanded key
         """
         c_key = NativeProxy.get_char_array(key)
         c_expanded_key = NativeProxy.get_char_array(expanded_key)
@@ -103,16 +100,15 @@ class NativeProxy(INativeProxy):
                          src_buffer: bytearray, src_offset: int, dest_buffer: bytearray, dest_offset: int,
                          count: int) -> int:
         """
-         * Proxy Transform the input byte array using AES 256 using encryption or decryption mode.
-         *
-         * @param key
-         * @param counter
-         * @param srcBuffer
-         * @param srcOffset
-         * @param destBuffer
-         * @param destOffset
-         * @param count
-         * @return
+        Proxy Transform the input byte array using AES 256 using encryption or decryption mode.
+        :param key: The encryption key
+        :param counter: The counter
+        :param src_buffer: The source buffer
+        :param src_offset: The source buffer offset
+        :param dest_buffer: The destination buffer
+        :param dest_offset: The destination buffer offset
+        :param count: The number of bytes to transform
+        :return: The number of bytes transformed
         """
 
         c_key = NativeProxy.get_char_array(key)

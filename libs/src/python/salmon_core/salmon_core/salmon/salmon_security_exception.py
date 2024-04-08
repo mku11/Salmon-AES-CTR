@@ -29,12 +29,12 @@ from typeguard import typechecked
 @typechecked
 class SalmonSecurityException(Exception):
     """
-     * Salmon generic security exception.
+    Salmon generic security exception.
     """
 
     def __init__(self, msg: str):
         """
-         * Construct an exception with a specific message.
-         * @param msg The provided message.
+        Construct an exception with a specific message.
+        :param msg: The provided message.
         """
         super().__init__(msg)

@@ -31,20 +31,20 @@ from typeguard import typechecked
 @typechecked
 class SalmonAesIntrTransformer(SalmonNativeTransformer):
     """
-     * Salmon AES transformer implemented with AES intrinsics.
+    Salmon AES transformer implemented with AES intrinsics.
     """
 
     AES_IMPL_AES_INTR = 1
     """
-     * The constant to pass to the native code while initializing.
+    The constant to pass to the native code while initializing.
     """
 
     def init(self, key: bytearray, nonce: bytearray):
         """
-         * Initialize the native Aes intrinsics transformer.
-         * @param key The AES key to use.
-         * @param nonce The nonce to use.
-         * @throws IntegrityException Thrown when security error
+        Initialize the native Aes intrinsics transformer.
+        :param key: The AES key to use.
+        :param nonce: The nonce to use.
+        :raises IntegrityException: Thrown when security error
         """
         self.get_native_proxy().salmon_init(SalmonAesIntrTransformer.AES_IMPL_AES_INTR)
         expanded_key: bytearray = bytearray(SalmonAES256CTRTransformer.EXPANDED_KEY_SIZE)
@@ -55,13 +55,13 @@ class SalmonAesIntrTransformer(SalmonNativeTransformer):
     def encrypt_data(self, src_buffer: bytearray, src_offset: int,
                      dest_buffer: bytearray, dest_offset: int, count: int) -> int:
         """
-         * Encrypt the data.
-         * @param srcBuffer The source byte array.
-         * @param srcOffset The source byte offset.
-         * @param destBuffer The destination byte array.
-         * @param destOffset The destination byte offset.
-         * @param count The number of bytes to transform.
-         * @return The number of bytes transformed.
+        Encrypt the data.
+        :param src_buffer: The source byte array.
+        :param src_offset: The source byte offset.
+        :param dest_buffer: The destination byte array.
+        :param dest_offset: The destination byte offset.
+        :param count: The number of bytes to transform.
+        :return: The number of bytes transformed.
         """
         # AES intrinsics needs the expanded key
         return self.get_native_proxy().salmon_transform(self.get_expanded_key(), self.get_counter(),
@@ -69,13 +69,13 @@ class SalmonAesIntrTransformer(SalmonNativeTransformer):
                                                         dest_buffer, dest_offset, count)
 
     """
-     * Decrypt the data.
-     * @param srcBuffer The source byte array.
-     * @param srcOffset The source byte offset.
-     * @param destBuffer The destination byte array.
-     * @param destOffset The destination byte offset.
-     * @param count The number of bytes to transform.
-     * @return The number of bytes transformed.
+    Decrypt the data.
+    :param srcBuffer: The source byte array.
+    :param srcOffset: The source byte offset.
+    :param destBuffer: The destination byte array.
+    :param destOffset: The destination byte offset.
+    :param count: The number of bytes to transform.
+    :return: The number of bytes transformed.
     """
 
     def decrypt_data(self, src_buffer: bytearray, src_offset: int,

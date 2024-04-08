@@ -36,7 +36,7 @@ from salmon_fs.salmon.salmon_file import SalmonFile
 @typechecked
 class FileSearcher:
     """
-     * Class searches for files in a SalmonDrive by filename.
+    Class searches for files in a SalmonDrive by filename.
     """
 
     def __init__(self):
@@ -45,7 +45,7 @@ class FileSearcher:
 
     class SearchEvent(Enum):
         """
-         * Event status types.
+        Event status types.
         """
         SearchingFiles = 0
         SearchingFinished = 1
@@ -55,27 +55,27 @@ class FileSearcher:
 
     class OnResultFoundListener(ABC):
         """
-         * Functional interface to notify when result is found.
+        Functional interface to notify when result is found.
         """
 
         def on_result_found(self, search_result: SalmonFile):
             """
-             * Fired when search result found.
-             * @param search_result The search result.
+            Fired when search result found.
+            :param search_result: The search result.
             """
             pass
 
     def is_running(self) -> bool:
         """
-         * True if a search is running.
-         * @return
+        True if a search is running.
+        :return: True if running
         """
         return self.__running
 
     def is_stopped(self) -> bool:
         """
-         * True if last search was stopped by user.
-         * @return
+        True if last search was stopped by user.
+        :return: True if stopped
         """
         return self.__quit
 
@@ -83,13 +83,13 @@ class FileSearcher:
                on_result_found: FileSearcher.OnResultFoundListener | None = None,
                on_search_event: Callable[[FileSearcher.SearchEvent], Any] | None = None) -> list[SalmonFile]:
         """
-         * Search files in directory and its subdirectories recursively for matching terms.
-         * @param dir The directory to start the search.
-         * @param terms The terms to search for.
-         * @param any True if you want to match any term otherwise match all terms.
-         * @param on_result_found Callback interface to receive notifications when results found.
-         * @param on_search_event Callback interface to receive status events.
-         * @return An array with all the results found.
+        Search files in directory and its subdirectories recursively for matching terms.
+        :param v_dir: The directory to start the search.
+        :param terms: The terms to search for.
+        :param any_term: True if you want to match any term otherwise match all terms.
+        :param on_result_found: Callback interface to receive notifications when results found.
+        :param on_search_event: Callback interface to receive status events.
+        :return: An array with all the results found.
         """
         self.__running = True
         self.__quit = False
@@ -104,11 +104,11 @@ class FileSearcher:
 
     def __get_search_results(self, filename: str, terms: list[str], any_term: bool) -> int:
         """
-         * Match the current terms in the filename.
-         * @param filename The filename to match.
-         * @param terms The terms to match.
-         * @param any True if you want to match any term otherwise match all terms.
-         * @return A count of all matches.
+        Match the current terms in the filename.
+        :param filename: The filename to match.
+        :param terms: The terms to match.
+        :param any_term: True if you want to match any term otherwise match all terms.
+        :return: A count of all matches.
         """
         count: int = 0
         term: str
@@ -126,12 +126,12 @@ class FileSearcher:
                      on_result_found: FileSearcher.OnResultFoundListener | None,
                      search_results: dict[str, SalmonFile]):
         """
-         * Search a directory for all filenames matching the terms supplied.
-         * @param dir The directory to start the search.
-         * @param terms The terms to search for.
-         * @param any True if you want to match any term otherwise match all terms.
-         * @param on_result_found Callback interface to receive notifications when results found.
-         * @param search_results The array to store the search results.
+        Search a directory for all filenames matching the terms supplied.
+        :param v_dir: The directory to start the search.
+        :param terms: The terms to search for.
+        :param anyterm: True if you want to match any term otherwise match all terms.
+        :param on_result_found: Callback interface to receive notifications when results found.
+        :param search_results: The array to store the search results.
         """
         if self.__quit:
             return

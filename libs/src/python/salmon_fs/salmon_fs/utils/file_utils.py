@@ -34,9 +34,9 @@ class FileUtils:
     @staticmethod
     def is_text(filename: str) -> bool:
         """
-         * Detect if filename is a text file.
-         * @param filename The filename.
-         * @return True if text file.
+        Detect if filename is a text file.
+        :param filename: The filename.
+        :return: True if text file.
         """
         ext: str = FileUtils.get_extension_from_file_name(filename).lower()
         return ext == "txt"
@@ -44,9 +44,9 @@ class FileUtils:
     @staticmethod
     def is_image(filename: str) -> bool:
         """
-         * Detect if filename is an image file.
-         * @param filename The filename.
-         * @return True if image file.
+        Detect if filename is an image file.
+        :param filename: The filename.
+        :return: True if image file.
         """
         ext: str = FileUtils.get_extension_from_file_name(filename).lower()
         return ext == "png" or ext == "jpg" or ext == "jpeg" or ext == "bmp" or ext == "webp" or ext == "gif" \
@@ -55,9 +55,9 @@ class FileUtils:
     @staticmethod
     def is_audio(filename: str) -> bool:
         """
-         * Detect if filename is an audio file.
-         * @param filename The filename.
-         * @return True if audio file.
+        Detect if filename is an audio file.
+        :param filename: The filename.
+        :return: True if audio file.
         """
         ext: str = FileUtils.get_extension_from_file_name(filename).lower()
         return ext == "wav" or ext == "mp3"
@@ -65,9 +65,9 @@ class FileUtils:
     @staticmethod
     def is_video(filename: str) -> bool:
         """
-         * Detect if filename is a video file.
-         * @param filename The filename.
-         * @return True if video file.
+        Detect if filename is a video file.
+        :param filename: The filename.
+        :return: True if video file.
         """
         ext: str = FileUtils.get_extension_from_file_name(filename).lower()
         return ext == "mp4"
@@ -75,9 +75,9 @@ class FileUtils:
     @staticmethod
     def is_pdf(filename: str) -> bool:
         """
-         * Detect if filename is a pdf file.
-         * @param filename The file name
-         * @return True if is a pdf
+        Detect if filename is a pdf file.
+        :param filename: The file name
+        :return: True if is a pdf
         """
         ext: str = FileUtils.get_extension_from_file_name(filename).lower()
         return ext == "pdf"
@@ -85,9 +85,9 @@ class FileUtils:
     @staticmethod
     def get_extension_from_file_name(file_name: str) -> str:
         """
-         * Return the extension of a filename.
-         *
-         * @param file_name The file name
+        Return the extension of a filename.
+        
+        :param file_name: The file name
         :returns The extension
         """
         if file_name is None:
@@ -101,9 +101,9 @@ class FileUtils:
     @staticmethod
     def get_file_name_without_extension(file_name: str) -> str:
         """
-         * Return a filename without extension
-         *
-         * @param file_name The file name
+        Return a filename without extension
+        
+        :param file_name: The file name
          :return The file name without the extension
         """
         if file_name is None:

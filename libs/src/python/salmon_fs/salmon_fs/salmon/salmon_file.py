@@ -48,20 +48,20 @@ from salmon_fs.salmon.salmon_drive import SalmonDrive
 @typechecked
 class SalmonFile(IVirtualFile):
     """
-     * A virtual file backed by an encrypted {@link IRealFile} on the real filesystem.
-     * Supports operations for retrieving {@link SalmonStream} for reading/decrypting
-     * and writing/encrypting contents.
+    A virtual file backed by an encrypted {@link IRealFile} on the real filesystem.
+    Supports operations for retrieving {@link SalmonStream} for reading/decrypting
+    and writing/encrypting contents.
     """
 
     separator: str = "/"
 
     def __init__(self, real_file: IRealFile, drive: SalmonDrive | None = None):
         """
-         * Provides a file handle that can be used to create encrypted files.
-         * Requires a virtual drive that supports the underlying filesystem, see PyFile implementation.
-         *
-         * @param drive    The file virtual system that will be used with file operations
-         * @param real_file The real file
+        Provides a file handle that can be used to create encrypted files.
+        Requires a virtual drive that supports the underlying filesystem, see PyFile implementation.
+        
+        :param drive:    The file virtual system that will be used with file operations
+        :param real_file: The real file
         """
 
         super().__init__(real_file, drive)
@@ -90,16 +90,16 @@ class SalmonFile(IVirtualFile):
     @synchronized
     def get_requested_chunk_size(self) -> int | None:
         """
-         * Return the current chunk size requested that will be used for integrity
+        Return the current chunk size requested that will be used for integrity
         """
         return self.__reqChunkSize
 
     def get_file_chunk_size(self) -> int | None:
         """
-         * Get the file chunk size from the header.
-         *
-         * @return The chunk size.
-         * @throws IOError Throws exceptions if the format is corrupt.
+        Get the file chunk size from the header.
+        
+        :return: The chunk size.
+        :raises IOError: Throws exceptions if the format is corrupt.
         """
         header: SalmonHeader | None = self.get_header()
         if header is None:
@@ -108,10 +108,10 @@ class SalmonFile(IVirtualFile):
 
     def get_header(self) -> SalmonHeader | None:
         """
-         * Get the custom {@link SalmonHeader} from this file.
-         *
-         * @return
-         * @throws IOError Thrown if there is an IO error.
+        Get the custom {@link SalmonHeader} from this file.
+        
+        :return: The header
+        :raises IOError: Thrown if there is an IO error.
         """
         if not self.exists():
             return None
@@ -149,12 +149,12 @@ class SalmonFile(IVirtualFile):
 
     def get_input_stream(self) -> SalmonStream:
         """
-         * Retrieves a SalmonStream that will be used for decrypting the file contents.
-         *
-         * @return
-         * @throws IOError Thrown if there is an IO error.
-         * @throws IntegrityException Thrown when security error
-         * @throws IntegrityException Thrown when data are corrupt or tampered with.
+        Retrieves a SalmonStream that will be used for decrypting the file contents.
+        
+        :return: The stream
+        :raises IOError: Thrown if there is an IO error.
+        :raises IntegrityException: Thrown when security error
+        :raises IntegrityException: Thrown when data are corrupt or tampered with.
         """
         if not self.exists():
             raise IOError("File does not exist")
@@ -188,13 +188,12 @@ class SalmonFile(IVirtualFile):
     @synchronized
     def get_output_stream(self, nonce: bytearray | None = None) -> SalmonStream:
         """
-         * Get a {@link SalmonStream} for encrypting/writing contents to this file.
-         *
-         * @param nonce Nonce to be used for encryption. Note that each file should have
-         *              a unique nonce see {@link SalmonDrive#getNextNonce()}.
-         * @return The output stream.
-         * @throws Exception
-        """
+        Get a {@link SalmonStream} for encrypting/writing contents to this file.
+        
+        :param nonce: Nonce to be used for encryption. Note that each file should have
+                     a unique nonce see {@link SalmonDrive#getNextNonce()}.
+        :return: The output stream.
+        :raises Exception:         """
 
         # check if we have an existing iv in the header
         nonce_bytes: bytearray = self.get_file_nonce()
@@ -227,7 +226,7 @@ class SalmonFile(IVirtualFile):
 
     def get_encryption_key(self) -> bytearray | None:
         """
-         * Returns the current encryption key
+        Returns the current encryption key
         """
         if self.__encryptionKey is not None:
             return self.__encryptionKey
@@ -237,17 +236,17 @@ class SalmonFile(IVirtualFile):
 
     def set_encryption_key(self, encryption_key: bytearray | None):
         """
-         * Sets the encryption key
-         *
-         * @param encryption_key The AES encryption key to be used
+        Sets the encryption key
+        
+        :param encryption_key: The AES encryption key to be used
         """
         self.__encryptionKey = encryption_key
 
     def __get_real_file_header_data(self, real_file: IRealFile) -> bytearray:
         """
-         * Return the current header data that are stored in the file
-         *
-         * @param real_file The real file containing the data
+        Return the current header data that are stored in the file
+        
+        :param real_file: The real file containing the data
         """
         real_stream: RandomAccessStream = self.__realFile.get_input_stream()
         header_data: bytearray = bytearray(self.__get_header_length())
@@ -257,17 +256,17 @@ class SalmonFile(IVirtualFile):
 
     def get_hash_key(self) -> bytearray | None:
         """
-         * Retrieve the current hash key that is used to encrypt / decrypt the file contents.
+        Retrieve the current hash key that is used to encrypt / decrypt the file contents.
         """
         return self.__hash_key
 
     def set_verify_integrity(self, integrity: bool, hash_key: bytearray | None):
 
         """
-         * Enabled verification of file integrity during read() and write()
-         *
-         * @param integrity True if enable integrity verification
-         * @param hash_key   The hash key to be used for verification
+        Enabled verification of file integrity during read() and write()
+        
+        :param integrity: True if enable integrity verification
+        :param hash_key:   The hash key to be used for verification
         """
         if integrity and hash_key is None and self.__drive is not None:
             hash_key = self.__drive.get_key().get_hash_key()
@@ -277,10 +276,10 @@ class SalmonFile(IVirtualFile):
 
     def set_apply_integrity(self, integrity: bool, hash_key: bytearray | None, request_chunk_size: int | None):
         """
-         * @param integrity
-         * @param hash_key
-         * @param request_chunk_size 0 use default file chunk.
-         *                         A positive number to specify integrity chunks.
+        Apply integrity when writing to file
+        :param integrity: True to apply integrity
+        :param hash_key: The hash key
+        :param request_chunk_size: 0 use default file chunk. A positive number to specify integrity chunks.
         """
 
         file_chunk_size: int | None = self.get_file_chunk_size()
@@ -304,32 +303,32 @@ class SalmonFile(IVirtualFile):
 
     def set_allow_overwrite(self, value: bool):
         """
-         * Warning! Allow overwriting on a current stream. Overwriting is not a good idea because it will
-         * re-use the same IV.
-         * This is not recommended if you use the stream on storing files or generally data if prior version can
-         * be inspected by others.
-         * You should only use this setting for initial encryption with parallel streams and not for overwriting!
-         *
-         * @param value True to allow overwriting operations
+        Warning! Allow overwriting on a current stream. Overwriting is not a good idea because it will
+        re-use the same IV.
+        This is not recommended if you use the stream on storing files or generally data if prior version can
+        be inspected by others.
+        You should only use this setting for initial encryption with parallel streams and not for overwriting!
+        
+        :param value: True to allow overwriting operations
         """
         self.__overwrite = value
 
     def __get_chunk_size_length(self) -> int:
         """
-         * Returns the file chunk size
+        Returns the file chunk size
         """
         return SalmonGenerator.CHUNK_SIZE_LENGTH
 
     def __get_header_length(self) -> int:
         """
-         * Returns the length of the header in bytes
+        Returns the length of the header in bytes
         """
         return SalmonGenerator.MAGIC_LENGTH + SalmonGenerator.VERSION_LENGTH + self.__get_chunk_size_length() \
             + SalmonGenerator.NONCE_LENGTH
 
     def get_file_nonce(self) -> bytearray | None:
         """
-         * Returns the initial vector that is used for encryption / decryption
+        Returns the initial vector that is used for encryption / decryption
         """
         header: SalmonHeader | None = self.get_header()
         if header is None:
@@ -338,10 +337,10 @@ class SalmonFile(IVirtualFile):
 
     def set_requested_nonce(self, nonce: bytearray):
         """
-         * Set the nonce for encryption/decryption for this file.
-         *
-         * @param nonce Nonce to be used.
-         * @throws IntegrityException Thrown when security error
+        Set the nonce for encryption/decryption for this file.
+        
+        :param nonce: Nonce to be used.
+        :raises IntegrityException: Thrown when security error
         """
         if self.__drive is not None:
             raise SalmonSecurityException("Nonce is already set by the drive")
@@ -349,15 +348,15 @@ class SalmonFile(IVirtualFile):
 
     def get_requested_nonce(self) -> bytearray | None:
         """
-         * Get the nonce that is used for encryption/decryption of this file.
-         *
-         * @return
+        Get the nonce that is used for encryption/decryption of this file.
+        
+        :return: The requested nonce
         """
         return self.__requestedNonce
 
     def __create_header(self, nonce: bytearray | None):
         """
-         * Create the header for the file
+        Create the header for the file
         """
         # set it to zero (disabled integrity) or get the default chunk
         # size defined by the drive
@@ -393,21 +392,21 @@ class SalmonFile(IVirtualFile):
 
     def get_block_size(self) -> int:
         """
-         * Return the AES block size for encryption / decryption
+        Return the AES block size for encryption / decryption
         """
         return SalmonGenerator.BLOCK_SIZE
 
     def get_children_count(self) -> int:
         """
-         * Get the count of files and subdirectories
-         *
-         * @return
+        Get the count of files and subdirectories
+        
+        :return: The children count
         """
         return self.__realFile.get_children_count()
 
     def list_files(self) -> list[SalmonFile]:
         """
-         * Lists files and directories under this directory
+        Lists files and directories under this directory
         """
         files: list[IRealFile] = self.__realFile.list_files()
         salmon_files: list[SalmonFile] = []
@@ -419,14 +418,14 @@ class SalmonFile(IVirtualFile):
 
     def get_child(self, filename: str) -> SalmonFile | None:
         """
-         * Get a child with this filename.
-         *
-         * @param filename The filename to search for
-         * @return
-         * @throws IntegrityException Thrown when security error
-         * @throws IntegrityException Thrown when data are corrupt or tampered with.
-         * @throws IOError Thrown if there is an IO error.
-         * @throws SalmonAuthException Thrown when there is a failure in the nonce sequencer.
+        Get a child with this filename.
+        
+        :param filename: The filename to search for
+        :return: The child file
+        :raises IntegrityException: Thrown when security error
+        :raises IntegrityException: Thrown when data are corrupt or tampered with.
+        :raises IOError: Thrown if there is an IO error.
+        :raises SalmonAuthException: Thrown when there is a failure in the nonce sequencer.
         """
         files: list[SalmonFile] = self.list_files()
         for file in files:
@@ -437,11 +436,11 @@ class SalmonFile(IVirtualFile):
     def create_directory(self, dir_name: str, key: bytearray | None = None,
                          dir_name_nonce: bytearray | None = None) -> SalmonFile:
         """
-         * Creates a directory under this directory
-         *
-         * @param dir_name      The name of the directory to be created
-         * @param key          The key that will be used to encrypt the directory name
-         * @param dir_name_nonce The nonce to be used for encrypting the directory name
+        Creates a directory under this directory
+        
+        :param dir_name:      The name of the directory to be created
+        :param key:          The key that will be used to encrypt the directory name
+        :param dir_name_nonce: The nonce to be used for encrypting the directory name
         """
         if self.__drive is None:
             raise SalmonSecurityException("Need to pass the key and dir_name_nonce nonce if not using a drive")
@@ -452,34 +451,34 @@ class SalmonFile(IVirtualFile):
 
     def get_real_file(self) -> IRealFile:
         """
-         * Return the real file
+        Return the real file
         """
         return self.__realFile
 
     def is_file(self) -> bool:
         """
-         * Returns True if this is a file
+        Returns True if this is a file
         """
         return self.__realFile.is_file()
 
     def is_directory(self) -> bool:
         """
-         * Returns True if this is a directory
+        Returns True if this is a directory
         """
         return self.__realFile.is_directory()
 
     def get_path(self) -> str:
         """
-         * Return the path of the real file stored
+        Return the path of the real file stored
         """
         real_path: str = self.__realFile.get_absolute_path()
         return self.__get_path(real_path)
 
     def __get_path(self, real_path: str) -> str:
         """
-         * Returns the virtual path for the drive and the file provided
-         *
-         * @param real_path The path of the real file
+        Returns the virtual path for the drive and the file provided
+        
+        :param real_path: The path of the real file
         """
         relative_path: str = self.__get_relative_path(real_path)
         path: str = ""
@@ -494,15 +493,15 @@ class SalmonFile(IVirtualFile):
 
     def get_real_path(self) -> str:
         """
-         * Return the path of the real file
+        Return the path of the real file
         """
         return self.__realFile.get_path()
 
     def __get_relative_path(self, real_path: str) -> str:
         """
-         * Return the virtual relative path of the file belonging to a drive
-         *
-         * @param real_path The path of the real file
+        Return the virtual relative path of the file belonging to a drive
+        
+        :param real_path: The path of the real file
         """
         virtual_root: IVirtualFile = self.__drive.get_root()
         virtual_root_path: str = virtual_root.get_real_file().get_absolute_path()
@@ -513,7 +512,7 @@ class SalmonFile(IVirtualFile):
 
     def get_base_name(self) -> str:
         """
-         * Returns the basename for the file
+        Returns the basename for the file
         """
         if self.__baseName is not None:
             return self.__baseName
@@ -526,7 +525,7 @@ class SalmonFile(IVirtualFile):
 
     def get_parent(self) -> SalmonFile | None:
         """
-         * Returns the virtual parent directory
+        Returns the virtual parent directory
         """
         try:
             if self.__drive is None or self.__drive.get_root().get_real_file().get_path() == \
@@ -542,25 +541,25 @@ class SalmonFile(IVirtualFile):
 
     def delete(self):
         """
-         * Delete this file.
+        Delete this file.
         """
         self.__realFile.delete()
 
     def mkdir(self):
         """
-         * Create this directory. Currently Not Supported
+        Create this directory. Currently Not Supported
         """
         raise NotImplemented()
 
     def get_last_date_time_modified(self) -> int:
         """
-         * Returns the last date modified in milliseconds
+        Returns the last modified date in milliseconds
         """
         return self.__realFile.last_modified()
 
     def get_size(self) -> int:
         """
-         * Return the virtual size of the file excluding the header and hash signatures.
+        Return the virtual size of the file excluding the header and hash signatures.
         """
         r_size: int = self.__realFile.length()
         if r_size == 0:
@@ -569,7 +568,7 @@ class SalmonFile(IVirtualFile):
 
     def __get_hash_total_bytes_length(self) -> int:
         """
-         * Returns the hash total bytes occupied by signatures
+        Returns the hash total bytes occupied by signatures
         """
         # file does not support integrity
         if self.get_file_chunk_size() is None or self.get_file_chunk_size() <= 0:
@@ -588,12 +587,12 @@ class SalmonFile(IVirtualFile):
     def create_file(self, real_filename: str, key: bytearray | None = None, file_name_nonce: bytearray | None = None,
                     file_nonce: bytearray | None = None) -> SalmonFile:
         """
-         * Create a file under this directory
-         *
-         * @param real_filename  The real file name of the file (encrypted)
-         * @param key           The key that will be used for encryption
-         * @param file_name_nonce The nonce for the encrypting the filename
-         * @param file_nonce     The nonce for the encrypting the file contents
+        Create a file under this directory
+        
+        :param real_filename:  The real file name of the file (encrypted)
+        :param key:           The key that will be used for encryption
+        :param file_name_nonce: The nonce for the encrypting the filename
+        :param file_nonce:     The nonce for the encrypting the file contents
         """
 
         if self.__drive is None and (key is None or file_name_nonce is None or file_nonce is None):
@@ -613,10 +612,10 @@ class SalmonFile(IVirtualFile):
 
     def rename(self, new_filename: str, nonce: bytearray = None):
         """
-         * Rename the virtual file name
-         *
-         * @param new_filename The new filename this file will be renamed to
-         * @param nonce       The nonce to use
+        Rename the virtual file name
+        
+        :param new_filename: The new filename this file will be renamed to
+        :param nonce:       The nonce to use
         """
 
         if self.__drive is None and (self.__encryptionKey is None or self.__requestedNonce is None):
@@ -629,7 +628,7 @@ class SalmonFile(IVirtualFile):
 
     def exists(self) -> bool:
         """
-         * Returns True if this file exists
+        Returns True if this file exists
         """
         if self.__realFile is None:
             return False
@@ -637,9 +636,9 @@ class SalmonFile(IVirtualFile):
 
     def __get_decrypted_filename(self, filename: str) -> str:
         """
-         * Return the decrypted filename of a real filename
-         *
-         * @param filename The filename of a real file
+        Return the decrypted filename of a real filename
+        
+        :param filename: The filename of a real file
         """
         if self.__drive is None and (self.__encryptionKey is None or self.__requestedNonce is None):
             SalmonSecurityException("Need to use a drive or pass key and nonce")
@@ -647,11 +646,11 @@ class SalmonFile(IVirtualFile):
 
     def _get_decrypted_filename(self, filename: str, key: bytearray | None, nonce: bytearray | None) -> str:
         """
-         * Return the decrypted filename of a real filename
-         *
-         * @param filename The filename of a real file
-         * @param key      The encryption key if the file doesn't belong to a drive
-         * @param nonce    The nonce if the file doesn't belong to a drive
+        Return the decrypted filename of a real filename
+        
+        :param filename: The filename of a real file
+        :param key:      The encryption key if the file doesn't belong to a drive
+        :param nonce:    The nonce if the file doesn't belong to a drive
         """
         rfilename: str = filename.replace("-", "/")
         if self.__drive is not None and nonce is not None:
@@ -668,11 +667,11 @@ class SalmonFile(IVirtualFile):
 
     def _get_encrypted_filename(self, filename: str, key: bytearray | None, nonce: bytearray | None) -> str:
         """
-         * Return the encrypted filename of a virtual filename
-         *
-         * @param filename The virtual filename
-         * @param key      The encryption key if the file doesn't belong to a drive
-         * @param nonce    The nonce if the file doesn't belong to a drive
+        Return the encrypted filename of a virtual filename
+        
+        :param filename: The virtual filename
+        :param key:      The encryption key if the file doesn't belong to a drive
+        :param nonce:    The nonce if the file doesn't belong to a drive
         """
         if self.__drive is not None and nonce is not None:
             raise SalmonSecurityException("Filename nonce is already set by the drive")
@@ -688,48 +687,47 @@ class SalmonFile(IVirtualFile):
 
     def get_drive(self) -> SalmonDrive:
         """
-         * Get the drive.
-         *
-         * @return
+        Get the drive.
+        
+        :return: The drive
         """
         return self.__drive
 
     def set_tag(self, tag: object):
         """
-         * Set the tag for this file.
-         *
-         * @param tag
-        """
+        Set the tag for this file.
+        
+        :param tag:         """
         self.__tag = tag
 
     def get_tag(self) -> object:
         """
-         * Get the file tag.
-         *
-         * @return The file tag.
+        Get the file tag.
+        
+        :return: The file tag.
         """
         return self.__tag
 
     def move(self, v_dir: SalmonFile, on_progress_listener: Callable[[int, int], Any] | None = None) -> SalmonFile:
         """
-         * Move file to another directory.
-         *
-         * @param dir                Target directory.
-         * @param on_progress_listener Observer to notify when move progress changes.
-         * @return
-         * @throws IOError Thrown if there is an IO error.
+        Move file to another directory.
+        
+        :param v_dir:                Target directory.
+        :param on_progress_listener: Observer to notify when move progress changes.
+        :return: The new file
+        :raises IOError: Thrown if there is an IO error.
         """
         new_real_file: IRealFile = self.__realFile.move(v_dir.__realFile, None, on_progress_listener)
         return SalmonFile(new_real_file, self.__drive)
 
     def copy(self, v_dir: SalmonFile, on_progress_listener: Callable[[int, int], Any] | None = None) -> SalmonFile:
         """
-         * Copy a file to another directory.
-         *
-         * @param dir                Target directory.
-         * @param on_progress_listener Observer to notify when copy progress changes.
-         * @return
-         * @throws IOError Thrown if there is an IO error.
+        Copy a file to another directory.
+        
+        :param v_dir:                Target directory.
+        :param on_progress_listener: Observer to notify when copy progress changes.
+        :return: The new file
+        :raises IOError: Thrown if there is an IO error.
         """
         new_real_file: IRealFile = self.__realFile.copy(v_dir.__realFile, None, on_progress_listener)
         return SalmonFile(new_real_file, self.__drive)
@@ -740,12 +738,13 @@ class SalmonFile(IVirtualFile):
                          auto_rename_folders: bool,
                          on_failed: Callable[[SalmonFile, Exception], Any]):
         """
-         * Copy a directory recursively
-         *
-         * @param dest
-         * @param progress_listener
-         * @param auto_rename
-         * @param on_failed
+        Copy a directory recursively
+        
+        :param dest: Destination directory
+        :param progress_listener: The progress listener
+        :param auto_rename: The autorename function
+        :param auto_rename_folders: Use autorename for folders also
+        :param on_failed: Callback when copy fails
         """
         on_failed_real_file: Callable[[IRealFile, Exception], Any] | None = None
         if on_failed is not None:
@@ -767,12 +766,13 @@ class SalmonFile(IVirtualFile):
                          auto_rename_folders: bool,
                          on_failed: Callable[[SalmonFile, Exception], Any]):
         """
-         * Move a directory recursively
-         *
-         * @param dest
-         * @param progress_listener
-         * @param auto_rename
-         * @param on_failed
+        Move a directory recursively
+        
+        :param dest: The destination directory
+        :param progress_listener: The progress listener
+        :param auto_rename: The autorename function
+        :param auto_rename_folders: Use autorename for folders also
+        :param on_failed: Callback when move fails
         """
 
         on_failed_real_file: Callable[[IRealFile, Exception], Any] | None = None

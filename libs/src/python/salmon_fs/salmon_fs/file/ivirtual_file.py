@@ -36,8 +36,8 @@ from salmon_core.streams.random_access_stream import RandomAccessStream
 @typechecked
 class IVirtualFile(ABC):
     """
-     * A virtual file. Read-only operations are included. Since write operations can be implementation
-     * specific ie for encryption they can be implemented by extending this class.
+    A virtual file. Read-only operations are included. Since write operations can be implementation
+    specific ie for encryption they can be implemented by extending this class.
     """
 
     def __init__(self, real_file: IRealFile, drive: VirtualDrive | None = None):

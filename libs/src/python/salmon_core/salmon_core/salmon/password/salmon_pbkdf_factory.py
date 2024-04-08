@@ -32,15 +32,15 @@ from typeguard import typechecked
 @typechecked
 class SalmonPbkdfFactory:
     """
-     * Creates AES transformer implementations.
+    Creates AES transformer implementations.
     """
 
     @staticmethod
     def create(pbkdf_type: PbkdfType) -> ISalmonPbkdfProvider:
         """
-         * Create an instance of a pbkdf provider.
-         * @param type The pbkdf type.
-         * @return The provider.
+        Create an instance of a pbkdf provider.
+        :param pbkdf_type: The pbkdf type.
+        :return: The provider.
         """
         match pbkdf_type:
             case PbkdfType.Default:

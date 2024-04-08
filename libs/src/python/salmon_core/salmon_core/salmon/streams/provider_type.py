@@ -31,26 +31,26 @@ from typeguard import typechecked
 @typechecked
 class ProviderType(Enum):
     """
-     * AES provider types. List of AES implementations that currently supported.
-     *
-     * @see #Default
-     * @see #AesIntrinsics
-     * @see #TinyAES
+    AES provider types. List of AES implementations that currently supported.
+    
+    @see #Default
+    @see #AesIntrinsics
+    @see #TinyAES
     """
 
     Default = 0
     """
-     * Default AES cipher.
+    Default AES cipher.
     """
 
     AesIntrinsics = 1
     """
-     * Salmon builtin AES intrinsics. This needs the SalmonNative library to be loaded. 
+    Salmon builtin AES intrinsics. This needs the SalmonNative library to be loaded. 
      @see <a href="https://github.com/mku11/Salmon-AES-CTR#readme">Salmon README.md</a>
     """
 
     TinyAES = 2
     """
-     * Tiny AES implementation. This needs the SalmonNative library to be loaded. 
+    Tiny AES implementation. This needs the SalmonNative library to be loaded. 
      @see <a href="https://github.com/mku11/Salmon-AES-CTR#readme">Salmon README.md</a>
     """

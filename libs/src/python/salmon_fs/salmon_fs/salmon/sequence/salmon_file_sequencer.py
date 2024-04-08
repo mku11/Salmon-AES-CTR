@@ -43,17 +43,17 @@ from salmon_fs.sequence.sequence_exception import SequenceException
 @typechecked
 class SalmonFileSequencer(INonceSequencer):
     """
-     * Generates nonces based on a sequencer backed by a file.
+    Generates nonces based on a sequencer backed by a file.
     """
 
     def __init__(self, sequence_file: IRealFile, serializer: INonceSequenceSerializer):
         """
-         * Instantiate a nonce file sequencer.
-         *
-         * @param sequence_file The sequence file.
-         * @param serializer   The serializer to be used.
-         * @throws IOError Thrown if there is an IO error.
-         * @throws SequenceException Thrown when there is a failure in the nonce sequencer.
+        Instantiate a nonce file sequencer.
+        
+        :param sequence_file: The sequence file.
+        :param serializer:   The serializer to be used.
+        :raises IOError: Thrown if there is an IO error.
+        :raises SequenceException: Thrown when there is a failure in the nonce sequencer.
         """
         self.__sequenceFile: IRealFile
         self.__serializer: INonceSequenceSerializer
@@ -69,11 +69,11 @@ class SalmonFileSequencer(INonceSequencer):
 
     def create_sequence(self, drive_id: str, auth_id: str):
         """
-         * Create a sequence for the drive ID and auth ID provided.
-         *
-         * @param drive_id The drive ID.
-         * @param auth_id  The authorization ID of the drive.
-         * @throws SequenceException Thrown when there is a failure in the nonce sequencer.
+        Create a sequence for the drive ID and auth ID provided.
+        
+        :param drive_id: The drive ID.
+        :param auth_id:  The authorization ID of the drive.
+        :raises SequenceException: Thrown when there is a failure in the nonce sequencer.
         """
 
         xml_contents: str = self.__get_contents()
@@ -87,14 +87,14 @@ class SalmonFileSequencer(INonceSequencer):
 
     def init_sequence(self, drive_id: str, auth_id: str, start_nonce: bytearray, max_nonce: bytearray):
         """
-         * Initialize the sequence.
-         *
-         * @param drive_id    The drive ID.
-         * @param auth_id     The auth ID of the device for the drive.
-         * @param start_nonce The starting nonce.
-         * @param max_nonce   The maximum nonce.
-         * @throws SequenceException Thrown when there is a failure in the nonce sequencer.
-         * @throws IOError Thrown if there is an IO error.
+        Initialize the sequence.
+        
+        :param drive_id:    The drive ID.
+        :param auth_id:     The auth ID of the device for the drive.
+        :param start_nonce: The starting nonce.
+        :param max_nonce:   The maximum nonce.
+        :raises SequenceException: Thrown when there is a failure in the nonce sequencer.
+        :raises IOError: Thrown if there is an IO error.
         """
 
         xml_contents: str = self.__get_contents()
@@ -111,12 +111,12 @@ class SalmonFileSequencer(INonceSequencer):
 
     def set_max_nonce(self, drive_id: str, auth_id: str, max_nonce: bytearray):
         """
-         * Set the maximum nonce.
-         *
-         * @param drive_id  The drive ID.
-         * @param auth_id   The auth ID of the device for the drive.
-         * @param max_nonce The maximum nonce.
-         * @throws SequenceException Thrown when there is a failure in the nonce sequencer.
+        Set the maximum nonce.
+        
+        :param drive_id:  The drive ID.
+        :param auth_id:   The auth ID of the device for the drive.
+        :param max_nonce: The maximum nonce.
+        :raises SequenceException: Thrown when there is a failure in the nonce sequencer.
         """
         xml_contents: str = self.__get_contents()
         configs: dict[str, NonceSequence] = self.__serializer.deserialize(xml_contents)
@@ -131,12 +131,12 @@ class SalmonFileSequencer(INonceSequencer):
 
     def next_nonce(self, drive_id: str) -> bytearray:
         """
-         * Get the next nonce.
-         *
-         * @param drive_id The drive ID.
-         * @return
-         * @throws SequenceException Thrown when there is a failure in the nonce sequencer.
-         * @throws SalmonRangeExceededException Thrown when maximum nonce range is exceeded.
+        Get the next nonce.
+        
+        :param drive_id: The drive ID.
+        :return: The next nonce
+        :raises SequenceException: Thrown when there is a failure in the nonce sequencer.
+        :raises SalmonRangeExceededException: Thrown when maximum nonce range is exceeded.
         """
         xml_contents: str = self.__get_contents()
         configs: dict[str, NonceSequence] = self.__serializer.deserialize(xml_contents)
@@ -153,10 +153,10 @@ class SalmonFileSequencer(INonceSequencer):
     @synchronized
     def __get_contents(self) -> str:
         """
-         * Get the contents of a sequence file.
-         *
-         * @return
-         * @throws SequenceException Thrown when there is a failure in the nonce sequencer.
+        Get the contents of a sequence file.
+        
+        :return: The contents
+        :raises SequenceException: Thrown when there is a failure in the nonce sequencer.
         """
         stream: BufferedIOBase | None = None
         output_stream: MemoryStream | None = None
@@ -187,10 +187,10 @@ class SalmonFileSequencer(INonceSequencer):
 
     def revoke_sequence(self, drive_id: str):
         """
-         * Revoke the current sequence for a specific drive.
-         *
-         * @param drive_id The drive ID.
-         * @throws SequenceException Thrown when there is a failure in the nonce sequencer.
+        Revoke the current sequence for a specific drive.
+        
+        :param drive_id: The drive ID.
+        :raises SequenceException: Thrown when there is a failure in the nonce sequencer.
         """
 
         xml_contents: str = self.__get_contents()
@@ -205,11 +205,11 @@ class SalmonFileSequencer(INonceSequencer):
 
     def get_sequence(self, drive_id: str) -> NonceSequence | None:
         """
-         * Get the sequence by the drive ID.
-         *
-         * @param drive_id The drive ID.
-         * @return
-         * @throws SequenceException Thrown when there is a failure in the nonce sequencer.
+        Get the sequence by the drive ID.
+        
+        :param drive_id: The drive ID.
+        :return: The sequence
+        :raises SequenceException: Thrown when there is a failure in the nonce sequencer.
         """
         xml_contents: str = self.__get_contents()
         configs: dict[str, NonceSequence] = self.__serializer.deserialize(xml_contents)
@@ -218,16 +218,16 @@ class SalmonFileSequencer(INonceSequencer):
 
     def close(self):
         """
-         * Close this file sequencer.
+        Close this file sequencer.
         """
         pass
 
     def _save_sequence_file(self, sequences: dict[str, NonceSequence] | None):
         """
-         * Save the sequence file.
-         *
-         * @param sequences The sequences.
-         * @throws SequenceException Thrown when there is a failure in the nonce sequencer.
+        Save the sequence file.
+        
+        :param sequences: The sequences.
+        :raises SequenceException: Thrown when there is a failure in the nonce sequencer.
         """
         try:
             contents: str = self.__serializer.serialize(sequences)
@@ -239,9 +239,8 @@ class SalmonFileSequencer(INonceSequencer):
     @synchronized
     def _save_contents(self, contents: str):
         """
-         * Save the contets of the file
-         * @param contents
-        """
+        Save the contets of the file
+        :param contents:         """
         input_stream: MemoryStream | None = None
         output_stream: RandomAccessStream | None = None
         try:
@@ -273,12 +272,12 @@ class SalmonFileSequencer(INonceSequencer):
 
     def __get_sequence(self, configs: dict[str, NonceSequence], drive_id: str) -> NonceSequence | None:
         """
-         * Get the sequence for the drive provided.
-         *
-         * @param configs All sequence configurations.
-         * @param drive_id The drive ID.
-         * @return
-         * @throws SequenceException Thrown when there is a failure in the nonce sequencer.
+        Get the sequence for the drive provided.
+        
+        :param configs: All sequence configurations.
+        :param drive_id: The drive ID.
+        :return: The sequence
+        :raises SequenceException: Thrown when there is a failure in the nonce sequencer.
         """
         sequence: NonceSequence | None = None
         for seq in configs.values():

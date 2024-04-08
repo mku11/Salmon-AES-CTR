@@ -34,16 +34,16 @@ from typeguard import typechecked
 @typechecked
 class SalmonTransformerFactory:
     """
-     * Creates an AES transformer object.
+    Creates an AES transformer object.
     """
 
     @staticmethod
     def create(v_type: ProviderType) -> ISalmonCTRTransformer:
         """
-         * Create an encryption transformer implementation.
-         * @param type The supported provider type.
-         * @return The transformer.
-         * @throws IntegrityException Thrown when security error
+        Create an encryption transformer implementation.
+        :param v_type: The supported provider type.
+        :return: The transformer.
+        :raises IntegrityException: Thrown when security error
         """
         match v_type:
             case ProviderType.Default:

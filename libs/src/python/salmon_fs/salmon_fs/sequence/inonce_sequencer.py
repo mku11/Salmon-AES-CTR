@@ -32,72 +32,71 @@ from salmon_fs.sequence.nonce_sequence import NonceSequence
 @typechecked
 class INonceSequencer(ABC):
     """
-     * Salmon nonce sequencer.
+    Salmon nonce sequencer.
     """
 
     def create_sequence(self, drive_id: str, auth_id: str):
         """
-         * Create a sequence.
-         * @param drive_id The drive ID.
-         * @param auth_id The authorization ID of the drive.
-         * @throws SequenceException Thrown when there is a failure in the nonce sequencer.
+        Create a sequence.
+        :param drive_id: The drive ID.
+        :param auth_id: The authorization ID of the drive.
+        :raises SequenceException: Thrown when there is a failure in the nonce sequencer.
         """
         pass
 
     def init_sequence(self, drive_id: str, auth_id: str, start_nonce: bytearray, max_nonce: bytearray):
         """
-         * Initialize the sequence.
-         * @param drive_id The drive ID.
-         * @param auth_id The auth ID of the device for the drive.
-         * @param start_nonce The starting nonce.
-         * @param max_nonce The maximum nonce.
-         * @throws SequenceException Thrown when there is a failure in the nonce sequencer.
-         * @throws IOError Thrown if there is an IO error.
+        Initialize the sequence.
+        :param drive_id: The drive ID.
+        :param auth_id: The auth ID of the device for the drive.
+        :param start_nonce: The starting nonce.
+        :param max_nonce: The maximum nonce.
+        :raises SequenceException: Thrown when there is a failure in the nonce sequencer.
+        :raises IOError: Thrown if there is an IO error.
         """
         pass
 
     def set_max_nonce(self, drive_id: str, auth_id: str, max_nonce: bytearray):
         """
-         * Set the max nonce
-         *
-         * @param drive_id The drive ID.
-         * @param auth_id The auth ID of the device for the drive.
-         * @param max_nonce The maximum nonce.
-         * @throws SequenceException Thrown when there is a failure in the nonce sequencer.
-         * @throws IOError Thrown if there is an IO error.
+        Set the max nonce
+        
+        :param drive_id: The drive ID.
+        :param auth_id: The auth ID of the device for the drive.
+        :param max_nonce: The maximum nonce.
+        :raises SequenceException: Thrown when there is a failure in the nonce sequencer.
+        :raises IOError: Thrown if there is an IO error.
         """
         pass
 
     def next_nonce(self, drive_id: str) -> bytearray:
         """
-         * Get the next nonce.
-         *
-         * @param drive_id The drive ID.
-         * @return The next nonce.
-         * @throws SequenceException Thrown when there is a failure in the nonce sequencer.
-         * @throws SalmonRangeExceededException Thrown when maximum nonce range is exceeded.
+        Get the next nonce.
+        
+        :param drive_id: The drive ID.
+        :return: The next nonce.
+        :raises SequenceException: Thrown when there is a failure in the nonce sequencer.
+        :raises SalmonRangeExceededException: Thrown when maximum nonce range is exceeded.
         """
         pass
 
     def revoke_sequence(self, drive_id: str):
         """
-         * Revoke the sequencer. This terminates the sequencer and de-authorizes the device
-         * @param drive_id
-         * @throws SequenceException Thrown when there is a failure in the nonce sequencer.
+        Revoke the sequencer. This terminates the sequencer and de-authorizes the device
+        :param drive_id:         :raises SequenceException: Thrown when there is a failure in the nonce sequencer.
         """
         pass
 
     def get_sequence(self, drive_id: str) -> NonceSequence:
         """
-         * Get the sequence used for this drive.
-         * @param drive_id The drive ID.
-         * @return The current sequence.
-         * @throws SequenceException Thrown when there is a failure in the nonce sequencer.
+        Get the sequence used for this drive.
+        :param drive_id: The drive ID.
+        :return: The current sequence.
+        :raises SequenceException: Thrown when there is a failure in the nonce sequencer.
         """
         pass
 
     def close(self):
         """
-         * Close the sequencer and any associated resources.
+        Close the sequencer and any associated resources.
         """
         pass

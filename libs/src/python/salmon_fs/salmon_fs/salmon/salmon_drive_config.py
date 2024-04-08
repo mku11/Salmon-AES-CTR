@@ -35,15 +35,15 @@ from salmon_fs.salmon.salmon_drive_generator import SalmonDriveGenerator
 @typechecked
 class SalmonDriveConfig:
     """
-     * Represents a configuration file for a drive. The properties are encrypted in the file
-     * with a master key which is password derived.
+    Represents a configuration file for a drive. The properties are encrypted in the file
+    with a master key which is password derived.
     """
 
     def __init__(self, contents: bytearray):
         """
-         * Provide a class that hosts the properties of the drive config file
-         *
-         * @param contents The byte array that contains the contents of the config file
+        Provide a class that hosts the properties of the drive config file
+        
+        :param contents: The byte array that contains the contents of the config file
         """
         self.__magicBytes: bytearray = bytearray(SalmonGenerator.MAGIC_LENGTH)
         self.__version: bytearray = bytearray(SalmonGenerator.VERSION_LENGTH)
@@ -69,18 +69,18 @@ class SalmonDriveConfig:
                            iterations: int, key_iv: bytearray,
                            encrypted_data: bytearray, hash_signature: bytearray):
         """
-         * Write the properties of a drive to a config file
-         *
-         * @param config_file                   The configuration file that will be used to write the content into
-         * @param magic_bytes                   The magic bytes for the header
-         * @param version                      The version of the file format
-         * @param salt                         The salt that will be used for encryption of the combined key
-         * @param iterations                   The iteration that will be used to derive the master key from a text
-         *                                      password
-         * @param key_iv                        The initial vector that was used with the master password to encrypt
-         *                                      the combined key
-         * @param encrypted_data The encrypted combined key and drive id
-         * @param hash_signature                The hash signature of the drive id
+        Write the properties of a drive to a config file
+        
+        :param config_file:                   The configuration file that will be used to write the content into
+        :param magic_bytes:                   The magic bytes for the header
+        :param version:                      The version of the file format
+        :param salt:                         The salt that will be used for encryption of the combined key
+        :param iterations:                   The iteration that will be used to derive the master key from a text
+                                             password
+        :param key_iv:                        The initial vector that was used with the master password to encrypt
+                                             the combined key
+        :param encrypted_data: The encrypted combined key and drive id
+        :param hash_signature:                The hash signature of the drive id
         """
 
         # construct the contents of the config file
@@ -104,7 +104,7 @@ class SalmonDriveConfig:
 
     def clear(self):
         """
-         * Clear properties.
+        Clear properties.
         """
         self.__magicBytes[0:len(self.__magicBytes)] = [0] * len(self.__magicBytes)
         self.__salt[0:len(self.__salt)] = [0] * len(self.__salt)
@@ -115,22 +115,22 @@ class SalmonDriveConfig:
 
     def get_magic_bytes(self) -> bytearray:
         """
-         * Get the magic bytes from the config file.
-         * @return
+        Get the magic bytes from the config file.
+        :return: The magic bytes
         """
         return self.__magicBytes
 
     def get_salt(self) -> bytearray:
         """
-         * Get the salt to be used for the password key derivation.
-         * @return
+        Get the salt to be used for the password key derivation.
+        :return: The salt
         """
         return self.__salt
 
     def get_iterations(self) -> int:
         """
-         * Get the iterations to be used for the key derivation.
-         * @return
+        Get the iterations to be used for the key derivation.
+        :return: The iterations
         """
         if self.__iterations is None:
             return 0
@@ -138,21 +138,21 @@ class SalmonDriveConfig:
 
     def get_encrypted_data(self) -> bytearray:
         """
-         * Get encrypted data using the master key: drive key, hash key, drive id.
-         * @return
+        Get encrypted data using the master key: drive key, hash key, drive id.
+        :return: The encrypted data
         """
         return self.__encryptedData
 
     def get_iv(self) -> bytearray:
         """
-         * Get the initial vector that was used to encrypt this drive configuration.
-         * @return
+        Get the initial vector that was used to encrypt this drive configuration.
+        :return: The initial vector
         """
         return self.__iv
 
     def get_hash_signature(self) -> bytearray:
         """
-         * Get the hash signature that was used to sign this drive configuration.
-         * @return
+        Get the hash signature that was used to sign this drive configuration.
+        :return: The hash signature
         """
         return self.__hashSignature

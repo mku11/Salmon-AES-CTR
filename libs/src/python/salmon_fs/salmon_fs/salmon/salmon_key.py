@@ -28,7 +28,7 @@ from typeguard import typechecked
 @typechecked
 class SalmonKey:
     """
-     * Encryption keys and properties.
+    Encryption keys and properties.
     """
 
     def __init__(self):
@@ -39,7 +39,7 @@ class SalmonKey:
 
     def clear(self):
         """
-         * Clear the properties from memory.
+        Clear the properties from memory.
         """
         if self.__driveKey is not None:
             self.__driveKey[0:len(self.__driveKey)] = [0] * len(self.__driveKey)
@@ -57,61 +57,56 @@ class SalmonKey:
     # TODO:
     def _finalize(self):
         """
-         * Finalize.
-         * @throws Throwable
-        """
+        Finalize.
+        :raises Throwable:         """
         self.clear()
 
     def get_drive_key(self) -> bytearray | None:
         """
-         * Function returns the encryption key that will be used to encrypt/decrypt the files
+        Function returns the encryption key that will be used to encrypt/decrypt the files
         """
         return self.__driveKey
 
     def get_hash_key(self) -> bytearray | None:
         """
-         * Function returns the hash key that will be used to sign the file chunks
+        Function returns the hash key that will be used to sign the file chunks
         """
         return self.__hash_key
 
     def set_drive_key(self, drive_key: bytearray):
         """
-         * Set the drive key.
-         * @param drive_key
-        """
+        Set the drive key.
+        :param drive_key:         """
         self.__driveKey = drive_key
 
     def set_hash_key(self, hash_key: bytearray):
         """
-         * Set the hash key.
-         * @param hash_key
-        """
+        Set the hash key.
+        :param hash_key:         """
         self.__hash_key = hash_key
 
     def get_master_key(self) -> bytearray:
         """
-         * Get the master key.
-         * @return
+        Get the master key.
+        :return: The master key
         """
         return self.__masterKey
 
     def set_master_key(self, master_key: bytearray):
         """
-         * Set the master key.
-         * @param master_key
-        """
+        Set the master key.
+        :param master_key:         """
         self.__masterKey = master_key
 
     def get_iterations(self) -> int:
         """
-         * Get the number of iterations for the master key derivation.
-         * @return
+        Get the number of iterations for the master key derivation.
+        :return: The iterations
         """
         return self.__iterations
 
     def set_iterations(self, iterations: int):
         """
-         * Set the number of iterations for the master key derivation.
-         * @param iterations
-        """
+        Set the number of iterations for the master key derivation.
+        :param iterations:         """
         self.__iterations = iterations

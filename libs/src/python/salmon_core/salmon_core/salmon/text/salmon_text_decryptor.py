@@ -31,7 +31,7 @@ from typeguard import typechecked
 @typechecked
 class SalmonTextDecryptor:
     """
-     * Utility class that encrypts and decrypts text strings.
+    Utility class that encrypts and decrypts text strings.
     """
 
     __decryptor: SalmonDecryptor = SalmonDecryptor()
@@ -41,20 +41,20 @@ class SalmonTextDecryptor:
                        integrity: bool = False, hash_key: bytearray | None = None,
                        chunk_size: int | None = None) -> str:
         """
-         * Decrypts a text String using AES256 with the key and nonce provided.
-         *
-         * @param text  Text to be decrypted.
-         * @param key   The encryption key to be used.
-         * @param nonce The nonce to be used, set only if header=false.
-         * @param header Set to true if you encrypted the string with encrypt(header=true), set only if nonce=None
-         *               otherwise you will have to provide the original nonce.
-         * @param integrity True if you want to calculate and store hash signatures for each chunkSize
-         * @param hash_key Hash key to be used for all chunks.
-         * @param chunkSize The chunk size.
-         * @return The decrypted text.
-         * @throws IOError Thrown if there is an IO error.
-         * @throws IntegrityException Thrown when security error
-         * @throws IntegrityException Thrown when data are corrupt or tampered with.
+        Decrypts a text String using AES256 with the key and nonce provided.
+        
+        :param text:  Text to be decrypted.
+        :param key:   The encryption key to be used.
+        :param nonce: The nonce to be used, set only if header=false.
+        :param header: Set to true if you encrypted the string with encrypt(header=true), set only if nonce=None
+                      otherwise you will have to provide the original nonce.
+        :param integrity: True if you want to calculate and store hash signatures for each chunkSize
+        :param hash_key: Hash key to be used for all chunks.
+        :param chunk_size: The chunk size.
+        :return: The decrypted text.
+        :raises IOError: Thrown if there is an IO error.
+        :raises IntegrityException: Thrown when security error
+        :raises IntegrityException: Thrown when data are corrupt or tampered with.
         """
         v_bytes: bytearray = SalmonEncoder.get_base64().decode(text)
         dec_bytes: bytearray = SalmonTextDecryptor.__decryptor.decrypt(v_bytes, key, nonce, header, integrity, hash_key,

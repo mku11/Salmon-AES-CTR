@@ -38,13 +38,13 @@ from salmon_fs.sequence.inonce_sequencer import INonceSequencer
 @typechecked
 class PyDrive(SalmonDrive):
     """
-     * SalmonDrive implementation for standard Python file API. This provides a virtual drive implementation
-     * that you can use to store and access encrypted files.
+    SalmonDrive implementation for standard Python file API. This provides a virtual drive implementation
+    that you can use to store and access encrypted files.
     """
 
     def __init__(self):
         """
-         * Private constructor, use open() or create() instead.
+        Private constructor, use open() or create() instead.
         """
         super().__init__()
         pass
@@ -73,10 +73,9 @@ class PyDrive(SalmonDrive):
 
     def get_private_dir(self) -> IRealFile:
         """
-         * Get a private dir for sharing files with external applications.
-         * @return
-         * @throws Exception
-        """
+        Get a private dir for sharing files with external applications.
+        :return: The private file
+        :raises Exception:         """
         file_folder: str | None = None
         platform_os: str = platform.system().upper()
         if "WIN" in platform_os:
@@ -92,13 +91,13 @@ class PyDrive(SalmonDrive):
 
     def _on_unlock_success(self):
         """
-         * When authorization succeed.
+        When authorization succeed.
         """
         print("drive unlocked")
 
     def _on_unlock_error(self):
         """
-         * When authorization succeeds.
+        When authorization succeeds.
         """
         print("drive failed to unlock")
 
@@ -113,6 +112,6 @@ class PyDrive(SalmonDrive):
     def get_root(self) -> SalmonFile | None:
         """
         Get the drive root
-        :return:
+        :return: The drive root directory
         """
         return super().get_root()
