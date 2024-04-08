@@ -31,7 +31,7 @@ export interface IVirtualFile {
      * specific ie for encryption they can be implemented by extending this class.
      */
     getInputStream(): Promise<RandomAccessStream>;
-    getOutputStream(nonce: Uint8Array | null): Promise<RandomAccessStream>;
+    getOutputStream(): Promise<RandomAccessStream>;
     listFiles(): Promise<IVirtualFile[]>;
     getChild(filename: string): Promise<IVirtualFile | null>;
     isFile(): Promise<boolean>;
@@ -46,23 +46,22 @@ export interface IVirtualFile {
     getLastDateTimeModified(): Promise<number>;
     getSize(): Promise<number>;
     exists(): Promise<boolean>;
-    createDirectory(dirName: string, key: Uint8Array | null, dirNameNonce: Uint8Array | null): Promise<IVirtualFile>;
+    createDirectory(dirName: string): Promise<IVirtualFile>;
     createFile(realFilename: string): Promise<IVirtualFile>;
     rename(newFilename: string): Promise<void>;
-    rename(newFilename: string, nonce: Uint8Array | null): Promise<void>;
     move(dir: IVirtualFile, OnProgressListener: ((position: number, length: number) => void) | null): Promise<IVirtualFile>;
     copy(dir: IVirtualFile, OnProgressListener: ((position: number, length: number) => void) | null): Promise<IVirtualFile>;
     copyRecursively(dest: IVirtualFile,
-        progressListener: ((salmonFile: IVirtualFile, position: number, length: number) => void) | null,
-        autoRename: ((salmonFile: IVirtualFile) => Promise<string>) | null,
+        progressListener: ((file: IVirtualFile, position: number, length: number) => void) | null,
+        autoRename: ((file: IVirtualFile) => Promise<string>) | null,
         autoRenameFolders: boolean,
-        onFailed: ((salmonFile: IVirtualFile, ex: Error) => void) | null): Promise<void>;
+        onFailed: ((file: IVirtualFile, ex: Error) => void) | null): Promise<void>;
     moveRecursively(dest: IVirtualFile,
-        progressListener: ((salmonFile: IVirtualFile, position: number, length: number) => void) | null,
-        autoRename: ((salmonFile: IVirtualFile) => Promise<string>) | null,
+        progressListener: ((file: IVirtualFile, position: number, length: number) => void) | null,
+        autoRename: ((file: IVirtualFile) => Promise<string>) | null,
         autoRenameFolders: boolean,
-        onFailed: ((salmonFile: IVirtualFile, ex: Error) => void) | null): Promise<void>;
+        onFailed: ((file: IVirtualFile, ex: Error) => void) | null): Promise<void>;
     deleteRecursively(
-        progressListener: ((salmonFile: IVirtualFile, position: number, length: number) => void) | null,
-        onFailed: ((salmonFile: IVirtualFile, ex: Error) => void) | null): Promise<void>;
+        progressListener: ((file: IVirtualFile, position: number, length: number) => void) | null,
+        onFailed: ((file: IVirtualFile, ex: Error) => void) | null): Promise<void>;
 }

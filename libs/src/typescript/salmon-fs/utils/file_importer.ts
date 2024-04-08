@@ -161,7 +161,7 @@ export abstract class FileImporter {
 
             // for js we make sure to allocate enough space for the file 
             // this will also create the header
-            let targetStream: RandomAccessStream = await importedFile.getOutputStream(null);
+            let targetStream: RandomAccessStream = await importedFile.getOutputStream();
             await targetStream.setLength(fileSize);
             await targetStream.close();
 

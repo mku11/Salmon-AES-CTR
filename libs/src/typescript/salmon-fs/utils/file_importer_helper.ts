@@ -45,7 +45,7 @@ export async function importFilePart(fileToImport: IRealFile, salmonFile: IVirtu
     let sourceStream: RandomAccessStream | null = null;
 
     try {
-        targetStream = await salmonFile.getOutputStream(null);
+        targetStream = await salmonFile.getOutputStream();
         await targetStream.setPosition(start);
 
         sourceStream = await fileToImport.getInputStream();
