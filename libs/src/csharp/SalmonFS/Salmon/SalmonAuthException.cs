@@ -34,7 +34,7 @@ public class SalmonAuthException : Exception
     /// <summary>
     ///  Construct an exception with a specific message.
 	/// </summary>
-	///  <param name="msg"></param>
+	///  <param name="msg">The message</param>
     public SalmonAuthException(string msg) : base(msg)
     {
 

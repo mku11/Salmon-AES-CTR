@@ -36,10 +36,10 @@ public class SalmonNonce
     ///  Increase the sequential NONCE by a value of 1.
     ///  This implementation assumes that the NONCE length is 8 bytes or fewer so it can fit in a long.
 	/// </summary>
-	///  <param name="startNonce"></param>
-    ///  <param name="endNonce"></param>
-    ///  <returns></returns>
-    ///  <exception cref="SalmonRangeExceededException"></exception>
+	///  <param name="startNonce">The starting nonce</param>
+    ///  <param name="endNonce">The ending nonce</param>
+    ///  <returns>The nonce after increasing</returns>
+    ///  <exception cref="SalmonRangeExceededException">Thrown when maximum nonce range is exceeded.</exception>
     public static byte[] IncreaseNonce(byte[] startNonce, byte[] endNonce)
     {
         long nonce = BitConverter.ToLong(startNonce, 0, SalmonGenerator.NONCE_LENGTH);
@@ -59,7 +59,7 @@ public class SalmonNonce
 	///  <param name="startNonce">The starting nonce.</param>
     ///  <param name="endNonce">The ending nonce in the sequence.</param>
     ///  <returns>The byte array with the middle nonce.</returns>
-    ///  <exception cref="SalmonSecurityException"></exception>
+    ///  <exception cref="SalmonSecurityException">Thrown when error with security</exception>
     public static byte[] SplitNonceRange(byte[] startNonce, byte[] endNonce)
     {
         long start = BitConverter.ToLong(startNonce, 0, SalmonGenerator.NONCE_LENGTH);

@@ -114,7 +114,7 @@ namespace Mku.Salmon;
     /// <summary>
     ///  Get the iterations to be used for the key derivation.
 	/// </summary>
-	///  <returns></returns>
+	///  <returns>The iterations</returns>
     public int GetIterations()
     {
         if (Iterations == null)

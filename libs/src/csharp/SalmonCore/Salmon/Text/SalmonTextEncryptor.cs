@@ -46,9 +46,9 @@ public class SalmonTextEncryptor
     ///  <param name="integrity">      True if you want to calculate and store hash signatures for each chunkSize.</param>
     ///  <param name="hashKey">        Hash key to be used for all chunks.</param>
     ///  <param name="chunkSize">      The chunk size.</param>
-    ///  <exception cref="SalmonSecurityException"></exception>
-    ///  <exception cref="IntegrityException"></exception>
-    ///  <exception cref="IOException"></exception>
+    ///  <exception cref="SalmonSecurityException">Thrown when error with security</exception>
+    ///  <exception cref="IntegrityException">Thrown when data are corrupt or tampered with.</exception>
+    ///  <exception cref="IOException">Thrown if error during IO</exception>
     public static string EncryptString(string text, byte[] key, byte[] nonce, bool header, 
         bool integrity = false, byte[] hashKey = null, int? chunkSize = null)
     {

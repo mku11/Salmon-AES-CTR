@@ -37,7 +37,7 @@ public class SalmonTransformerFactory
 	/// </summary>
 	///  <param name="type">The supported provider type.</param>
     ///  <returns>The transformer.</returns>
-    ///  <exception cref="SalmonSecurityException"></exception>
+    ///  <exception cref="SalmonSecurityException">Thrown when error with security</exception>
     public static ISalmonCTRTransformer Create(ProviderType type)
     {
         switch (type)

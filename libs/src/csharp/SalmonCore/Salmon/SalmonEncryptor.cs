@@ -94,9 +94,9 @@ public class SalmonEncryptor
     ///  <param name="hashKey">        Hash key to be used for all chunks.</param>
     ///  <param name="chunkSize">      The chunk size.</param>
     ///  <returns>The byte array with the encrypted data.</returns>
-    ///  <exception cref="SalmonSecurityException"></exception>
-    ///  <exception cref="IOException"></exception>
-    ///  <exception cref="IntegrityException"></exception>
+    ///  <exception cref="SalmonSecurityException">Thrown when error with security</exception>
+    ///  <exception cref="IOException">Thrown if error during IO</exception>
+    ///  <exception cref="IntegrityException">Thrown when data are corrupt or tampered with.</exception>
     public byte[] Encrypt(byte[] data, byte[] key, byte[] nonce,
                           bool storeHeaderData = false,
                           bool integrity = false, byte[] hashKey = null, int? chunkSize = null)

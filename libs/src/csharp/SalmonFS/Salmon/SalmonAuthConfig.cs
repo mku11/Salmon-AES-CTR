@@ -40,9 +40,24 @@ namespace Mku.Salmon;
 /// </summary>
 public class SalmonAuthConfig
 {
+    /// <summary>
+    /// The drive id
+    /// </summary>
     public byte[] DriveId { get; private set; } = new byte[SalmonDriveGenerator.DRIVE_ID_LENGTH];
+
+    /// <summary>
+    /// The authorization id
+    /// </summary>
     public byte[] AuthId { get; private set; } = new byte[SalmonDriveGenerator.AUTH_ID_SIZE];
+
+    /// <summary>
+    /// The starting nonce
+    /// </summary>
     public byte[] StartNonce { get; private set; } = new byte[SalmonGenerator.NONCE_LENGTH];
+
+    /// <summary>
+    /// The maximum nonce allowed
+    /// </summary>
     public byte[] MaxNonce { get; private set; } = new byte[SalmonGenerator.NONCE_LENGTH];
 
 
@@ -64,16 +79,18 @@ public class SalmonAuthConfig
     ///  Write the properties of the auth configuration to a config file that will be imported by another device.
     ///  The new device will then be authorized editing operations ie: import, rename files, etc.
 	/// </summary>
-	///  <param name="authConfigFile"></param>
+	///  <param name="authConfigFile">The authorization configuration file</param>
     ///  <param name="drive">The drive you want to create an auth config for.</param>
     ///  <param name="targetAuthId">Authorization ID of the target device.</param>
     ///  <param name="targetStartingNonce">Starting nonce for the target device.</param>
     ///  <param name="targetMaxNonce">Maximum nonce for the target device.</param>
-    ///  <exception cref="Exception"></exception>
+    ///  <param name="configNonce">The nonce for the configuration file itself</param>
+    ///  <exception cref="Exception">Thrown if error during operation</exception>
     public static void WriteAuthFile(IRealFile authConfigFile,
                                      SalmonDrive drive,
                                      byte[] targetAuthId,
-                                     byte[] targetStartingNonce, byte[] targetMaxNonce,
+                                     byte[] targetStartingNonce, 
+                                     byte[] targetMaxNonce,
                                      byte[] configNonce)
     {
         byte[] driveId = drive.DriveId;
@@ -93,7 +110,7 @@ public class SalmonAuthConfig
     ///  <param name="authId">The auth id of the new device.</param>
     ///  <param name="nextNonce">The next nonce to be used by the new device.</param>
     ///  <param name="maxNonce">The max nonce to be used byte the new device.</param>
-    ///  <exception cref="Exception"></exception>
+    ///  <exception cref="Exception">Thrown if error during operation</exception>
     public static void WriteToStream(SalmonStream stream, byte[] driveId, byte[] authId,
                                      byte[] nextNonce, byte[] maxNonce)
     {
@@ -126,9 +143,10 @@ public class SalmonAuthConfig
     /// <summary>
     ///  Get the app drive pair configuration properties for this drive
     /// </summary>
+    ///  <param name="drive">The drive.</param>
     ///  <param name="authFile">The encrypted authorization file.</param>
     ///  <returns>The decrypted authorization file.</returns>
-    ///  <exception cref="Exception"></exception>
+    ///  <exception cref="Exception">Thrown if error during operation</exception>
     public static SalmonAuthConfig GetAuthConfig(SalmonDrive drive, IRealFile authFile)
     {
         SalmonFile salmonFile = new SalmonFile(authFile, drive);
@@ -145,11 +163,12 @@ public class SalmonAuthConfig
 
 
     /// <summary>
-    ///  Verify the authorization id with the current drive auth id.
+    ///  Verify the authorization id with the current drive authorization id.
     /// </summary>
+    ///  <param name="drive">The drive.</param>
     ///  <param name="authId">The authorization id to verify.</param>
-    ///  <returns></returns>
-    ///  <exception cref="Exception"></exception>
+    ///  <returns>The authorization configuration file</returns>
+    ///  <exception cref="Exception">Thrown if error during operation</exception>
     private static bool VerifyAuthId(SalmonDrive drive, byte[] authId)
     {
         return Enumerable.SequenceEqual(authId, drive.GetAuthIdBytes());
@@ -159,8 +178,9 @@ public class SalmonAuthConfig
     /// <summary>
     ///  Import sequence into the current drive.
     /// </summary>
-    ///  <param name="authConfig"></param>
-    ///  <exception cref="Exception"></exception>
+    ///  <param name="drive">The drive</param>
+    ///  <param name="authConfig">The authorization configuration file</param>
+    ///  <exception cref="Exception">Thrown if error during operation</exception>
     private static void ImportSequence(SalmonDrive drive, SalmonAuthConfig authConfig)
     {
         string drvStr = BitConverter.ToHex(authConfig.DriveId);
@@ -172,8 +192,9 @@ public class SalmonAuthConfig
     /// <summary>
     ///  Import the device authorization file.
     /// </summary>
-    ///  <param name="filePath">The filepath to the authorization file.</param>
-    ///  <exception cref="Exception"></exception>
+    ///  <param name="drive">The drive</param>
+    ///  <param name="authConfigFile">The authorization configuration file to import.</param>
+    ///  <exception cref="Exception">Thrown if error during operation</exception>
     public static void ImportAuthFile(SalmonDrive drive, IRealFile authConfigFile)
     {
         if (drive.DriveId == null)
@@ -198,11 +219,12 @@ public class SalmonAuthConfig
 
 
     /// <summary>
-    ///  <param name="targetAuthId">The authorization id of the target device.</param>
+    ///  Export an authorization file that can be used to authorize a device.
     /// </summary>
-    ///  <param name="targetDir">   The target dir the file will be written to.</param>
-    ///  <param name="filename">    The filename of the auth config file.</param>
-    ///  <exception cref="Exception"></exception>
+    ///  <param name="drive">   The drive</param>
+    ///  <param name="targetAuthId">   The authorization id of the target device.</param>
+    ///  <param name="file">    The file to export</param>
+    ///  <exception cref="Exception">Thrown if error during operation</exception>
     public static void ExportAuthFile(SalmonDrive drive, string targetAuthId, IRealFile file)
     {
         if (drive.DriveId == null)

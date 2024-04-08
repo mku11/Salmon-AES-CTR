@@ -27,6 +27,7 @@ using Mku.File;
 using Mku.Salmon.Integrity;
 using Mku.Salmon.Streams;
 using Mku.Salmon.Text;
+using Mku.Sequence;
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -61,7 +62,7 @@ public class SalmonFile : IVirtualFile
     private SalmonHeader _header;
 
     /// <summary>
-    ///  Return the path of the real file stored
+    ///  The path of the real file stored
     /// </summary>
     override
     public string Path
@@ -75,19 +76,19 @@ public class SalmonFile : IVirtualFile
 
 
     /// <summary>
-    ///  Return the path of the real file
+    ///  The path of the real file
     /// </summary>
     override
     public string RealPath => RealFile.Path;
 
     /// <summary>
-    ///  Returns the last date modified in milliseconds
+    ///  The last date modified in milliseconds
     /// </summary>
     override
     public long LastDateTimeModified => RealFile.LastModified;
 
     /// <summary>
-    ///  Return the virtual size of the file excluding the header and hash signatures.
+    ///  The virtual size of the file excluding the header and hash signatures.
     /// </summary>
     override
     public long Size
@@ -102,13 +103,13 @@ public class SalmonFile : IVirtualFile
     }
 
     /// <summary>
-    ///  Returns true if this is a file
+    ///  True if this is a file
     /// </summary>
     override
     public bool IsFile => RealFile.IsFile;
 
     /// <summary>
-    ///  Returns True if this is a directory
+    ///  True if this is a directory
     /// </summary>
     override
     public bool IsDirectory => RealFile.IsDirectory;
@@ -189,7 +190,7 @@ public class SalmonFile : IVirtualFile
     /// <summary>
     ///  The custom <see cref="SalmonHeader"></see> from this file.
 	/// </summary>
-	///  <exception cref="IOException"></exception>
+	///  <exception cref="IOException">Thrown if error during IO</exception>
     public SalmonHeader Header
     {
         get
@@ -238,12 +239,12 @@ public class SalmonFile : IVirtualFile
     }
 
     /// <summary>
-    ///  Retrieves a SalmonStream that will be used for decrypting the file contents.
+    ///  Opens a SalmonStream that will be used for reading/decrypting the file contents.
 	/// </summary>
-	///  <returns></returns>
-    ///  <exception cref="IOException"></exception>
-    ///  <exception cref="SalmonSecurityException"></exception>
-    ///  <exception cref="IntegrityException"></exception>
+	///  <returns>The input stream</returns>
+    ///  <exception cref="IOException">Thrown if error during IO</exception>
+    ///  <exception cref="SalmonSecurityException">Thrown when error with security</exception>
+    ///  <exception cref="IntegrityException">Thrown when data are corrupt or tampered with.</exception>
     override
     public SalmonStream GetInputStream()
     {
@@ -278,12 +279,12 @@ public class SalmonFile : IVirtualFile
     }
 
     /// <summary>
-    ///  Get a <see cref="SalmonStream"/> for encrypting/writing contents using the nonce in the header.
+    ///  Opens a SalmonStream for encrypting/writing contents.
 	/// </summary>
-	///  <returns></returns>
-    ///  <exception cref="SalmonSecurityException"></exception>
-    ///  <exception cref="IntegrityException"></exception>
-    ///  <exception cref="Sequence.SequenceException"></exception>
+	///  <returns>The output stream</returns>
+    ///  <exception cref="SalmonSecurityException">Thrown when error with security</exception>
+    ///  <exception cref="IntegrityException">Thrown when data are corrupt or tampered with.</exception>
+    ///  <exception cref="SequenceException">Thrown when there is a failure in the nonce sequencer.</exception>
     [MethodImpl(MethodImplOptions.Synchronized)]
     override
     public SalmonStream GetOutputStream()
@@ -297,7 +298,7 @@ public class SalmonFile : IVirtualFile
     ///               a unique nonce see <see cref="SalmonDrive.GetNextNonce()"/>.
     /// </summary>
     ///  <returns>The output stream.</returns>
-    ///  <exception cref="Exception"></exception>
+    ///  <exception cref="Exception">Thrown if error during operation</exception>
     [MethodImpl(MethodImplOptions.Synchronized)]
     internal SalmonStream GetOutputStream(byte[] nonce)
     {
@@ -375,9 +376,10 @@ public class SalmonFile : IVirtualFile
     }
 
     /// <summary>
-    ///  <param name="integrity"></param>
-	/// </summary>
-	///  <param name="hashKey"></param>
+    ///  Enable integrity when writing contents
+    /// </summary>
+    ///  <param name="hashKey">The hash key</param>
+    ///  <param name="integrity">The integrity</param>
     ///  <param name="requestChunkSize">0 use default file chunk.</param>
     ///                          A positive number to specify integrity chunks.
     public void SetApplyIntegrity(bool integrity, byte[] hashKey, int? requestChunkSize)
@@ -434,7 +436,7 @@ public class SalmonFile : IVirtualFile
     /// <summary>
     ///  Get the nonce that is used for encryption/decryption of this file.
 	/// </summary>
-	///  <returns></returns>
+	///  <returns>The requested nonce</returns>
     public byte[] RequestedNonce
     {
         get
@@ -496,12 +498,13 @@ public class SalmonFile : IVirtualFile
     /// <summary>
     ///  Get the count of files and subdirectories
 	/// </summary>
-	///  <returns></returns>
+	///  <returns>The children count</returns>
     public int ChildrenCount => RealFile.ChildrenCount;
 
     /// <summary>
     ///  Lists files and directories under this directory
     /// </summary>
+    /// <returns>An array of files and subdirectories</returns>
     override
     public SalmonFile[] ListFiles()
     {
@@ -516,10 +519,10 @@ public class SalmonFile : IVirtualFile
     }
 
     /// <summary>
-    /// Get a child with this filename.
+    /// Get a file/subdirectory with this filename.
     /// </summary>
-    /// <param name="filename"></param>
-    /// <returns></returns>
+    /// <param name="filename">The filename to match</param>
+    /// <returns>The file/subdirectory</returns>
     override
     public SalmonFile GetChild(string filename)
     {
@@ -550,7 +553,6 @@ public class SalmonFile : IVirtualFile
 	///  <param name="dirName">     The name of the directory to be created</param>
     ///  <param name="key">         The key that will be used to encrypt the directory name</param>
     ///  <param name="dirNameNonce">The nonce to be used for encrypting the directory name</param>
-    override
     public SalmonFile CreateDirectory(string dirName, byte[] key, byte[] dirNameNonce)
 
     {
@@ -595,7 +597,7 @@ public class SalmonFile : IVirtualFile
     }
 
     /// <summary>
-    ///  Returns the basename for the file
+    ///  The base name for the file
     /// </summary>
     override
     public string BaseName
@@ -727,7 +729,6 @@ public class SalmonFile : IVirtualFile
 	/// </summary>
 	///  <param name="newFilename">The new filename this file will be renamed to</param>
     ///  <param name="nonce">The nonce to be used</param>
-    override
     public void Rename(string newFilename, byte[] nonce)
     {
         string newEncryptedFilename = GetEncryptedFilename(newFilename, null, nonce);
@@ -736,7 +737,7 @@ public class SalmonFile : IVirtualFile
     }
 
     /// <summary>
-    ///  Returns true if this file exists
+    ///  True if this file/directory exists
     /// </summary>
     override
     public bool Exists
@@ -808,8 +809,8 @@ public class SalmonFile : IVirtualFile
 	/// </summary>
 	///  <param name="dir">Target directory.</param>
     ///  <param name="OnProgressListener">Observer to notify when move progress changes.</param>
-    ///  <returns></returns>
-    ///  <exception cref="IOException"></exception>
+    ///  <returns>The moved file</returns>
+    ///  <exception cref="IOException">Thrown if error during IO</exception>
     override
     public SalmonFile Move(IVirtualFile dir, Action<long,long> OnProgressListener)
     {
@@ -822,8 +823,8 @@ public class SalmonFile : IVirtualFile
 	/// </summary>
 	///  <param name="dir">Target directory.</param>
     ///  <param name="OnProgressListener">Observer to notify when copy progress changes.</param>
-    ///  <returns></returns>
-    ///  <exception cref="IOException"></exception>
+    ///  <returns>The new file</returns>
+    ///  <exception cref="IOException">Thrown if error during IO</exception>
     override
     public SalmonFile Copy(IVirtualFile dir, Action<long,long> OnProgressListener)
     {
@@ -834,11 +835,11 @@ public class SalmonFile : IVirtualFile
     /// <summary>
     /// Copy a directory recursively
     /// </summary>
-    /// <param name="dest"></param>
-    /// <param name="progressListener"></param>
+    /// <param name="dest">The destination directory</param>
+    /// <param name="progressListener">The progress listener</param>
     /// <param name="AutoRename">The autorename function to use when renaming files if they exist</param>
     /// <param name="autoRenameFolders">Apply autorename to folders also (default is true)</param>
-    /// <param name="OnFailed"></param>
+    /// <param name="OnFailed">Callback when copy fails</param>
     override
     public void CopyRecursively(IVirtualFile dest,
         Action<IVirtualFile, long, long> progressListener, Func<IVirtualFile, string> AutoRename,
@@ -869,11 +870,11 @@ public class SalmonFile : IVirtualFile
     /// <summary>
     /// Move a directory recursively
     /// </summary>
-    /// <param name="dest"></param>
-    /// <param name="progressListener"></param>
-    /// <param name="AutoRename"></param>
+    /// <param name="dest">The destination directory</param>
+    /// <param name="progressListener">The progress listener</param>
+    /// <param name="AutoRename">The autorename function to use when renaming files if they exist</param>
     /// <param name="autoRenameFolders">Apply autorename to folders also (default is true)</param>
-    /// <param name="OnFailed"></param>
+    /// <param name="OnFailed">Callback when move fails</param>
     override
     public void MoveRecursively(IVirtualFile dest,
         Action<IVirtualFile, long, long> progressListener, Func<IVirtualFile, string> AutoRename,
@@ -904,8 +905,8 @@ public class SalmonFile : IVirtualFile
     /// <summary>
     /// Delete a directory recursively
     /// </summary>
-    /// <param name="progressListener"></param>
-    /// <param name="OnFailed"></param>
+    /// <param name="progressListener">The progress listener</param>
+    /// <param name="OnFailed">Callback when delete fails</param>
     override
     public void DeleteRecursively(Action<IVirtualFile, long, long> progressListener, Action<IVirtualFile, Exception> OnFailed)
     {
@@ -944,8 +945,8 @@ public class SalmonFile : IVirtualFile
     /// <summary>
     /// Get an auto generated copy of the name for the file.
     /// </summary>
-    /// <param name="file"></param>
-    /// <returns></returns>
+    /// <param name="file">The file</param>
+    /// <returns>The new file name</returns>
     public static string AutoRename(IVirtualFile file)
     {
         string filename = IRealFile.AutoRename(file.BaseName);

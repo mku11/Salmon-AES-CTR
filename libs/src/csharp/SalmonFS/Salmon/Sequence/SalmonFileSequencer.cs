@@ -50,8 +50,8 @@ public class SalmonFileSequencer : INonceSequencer
 	/// </summary>
 	///  <param name="sequenceFile">The sequence file.</param>
     ///  <param name="serializer">The serializer to be used.</param>
-    ///  <exception cref="IOException"></exception>
-    ///  <exception cref="SequenceException"></exception>
+    ///  <exception cref="IOException">Thrown if error during IO</exception>
+    ///  <exception cref="SequenceException">Thrown when there is a failure in the nonce sequencer.</exception>
     public SalmonFileSequencer(IRealFile sequenceFile, INonceSequenceSerializer serializer)
     {
         this.SequenceFile = sequenceFile;
@@ -68,7 +68,7 @@ public class SalmonFileSequencer : INonceSequencer
 	/// </summary>
 	///  <param name="driveId">The drive ID.</param>
     ///  <param name="authId">The authorization ID of the drive.</param>
-    ///  <exception cref="SequenceException"></exception>
+    ///  <exception cref="SequenceException">Thrown when there is a failure in the nonce sequencer.</exception>
     public void CreateSequence(string driveId, string authId)
     {
         string xmlContents = GetContents();
@@ -88,8 +88,8 @@ public class SalmonFileSequencer : INonceSequencer
     ///  <param name="authId">The auth ID of the device for the drive.</param>
     ///  <param name="startNonce">The starting nonce.</param>
     ///  <param name="maxNonce">The maximum nonce.</param>
-    ///  <exception cref="SequenceException"></exception>
-    ///  <exception cref="IOException"></exception>
+    ///  <exception cref="SequenceException">Thrown when there is a failure in the nonce sequencer.</exception>
+    ///  <exception cref="IOException">Thrown if error during IO</exception>
     public virtual void InitSequence(string driveId, string authId, byte[] startNonce, byte[] maxNonce)
     {
         string xmlContents = GetContents();
@@ -111,7 +111,7 @@ public class SalmonFileSequencer : INonceSequencer
 	///  <param name="driveId">The drive ID.</param>
     ///  <param name="authId">The auth ID of the device for the drive.</param>
     ///  <param name="maxNonce">The maximum nonce.</param>
-    ///  <exception cref="SequenceException"></exception>
+    ///  <exception cref="SequenceException">Thrown when there is a failure in the nonce sequencer.</exception>
     public virtual void SetMaxNonce(string driveId, string authId, byte[] maxNonce)
     {
         string xmlContents = GetContents();
@@ -130,9 +130,9 @@ public class SalmonFileSequencer : INonceSequencer
     ///  Get the next nonce.
 	/// </summary>
 	///  <param name="driveId">The drive ID.</param>
-    ///  <returns></returns>
-    ///  <exception cref="SequenceException"></exception>
-    ///  <exception cref="SalmonRangeExceededException"></exception>
+    ///  <returns>The next nonce</returns>
+    ///  <exception cref="SequenceException">Thrown when there is a failure in the nonce sequencer.</exception>
+    ///  <exception cref="SalmonRangeExceededException">Thrown when maximum nonce range is exceeded.</exception>
     public virtual byte[] NextNonce(string driveId)
     {
         string xmlContents = GetContents();
@@ -151,8 +151,8 @@ public class SalmonFileSequencer : INonceSequencer
     /// <summary>
     ///  Get the contents of a sequence file.
 	/// </summary>
-	///  <returns></returns>
-    ///  <exception cref="SequenceException"></exception>
+	///  <returns>The contents</returns>
+    ///  <exception cref="SequenceException">Thrown when there is a failure in the nonce sequencer.</exception>
 	[MethodImpl(MethodImplOptions.Synchronized)]
     protected virtual string GetContents()
     {
@@ -202,7 +202,7 @@ public class SalmonFileSequencer : INonceSequencer
     ///  Revoke the current sequence for a specific drive.
 	/// </summary>
 	///  <param name="driveId">The drive ID.</param>
-    ///  <exception cref="SequenceException"></exception>
+    ///  <exception cref="SequenceException">Thrown when there is a failure in the nonce sequencer.</exception>
     public virtual void RevokeSequence(string driveId)
     {
         string xmlContents = GetContents();
@@ -220,8 +220,8 @@ public class SalmonFileSequencer : INonceSequencer
     ///  Get the sequence by the drive ID.
 	/// </summary>
 	///  <param name="driveId">The drive ID.</param>
-    ///  <returns></returns>
-    ///  <exception cref="SequenceException"></exception>
+    ///  <returns>The sequence</returns>
+    ///  <exception cref="SequenceException">Thrown when there is a failure in the nonce sequencer.</exception>
     public virtual NonceSequence GetSequence(string driveId)
     {
         string xmlContents = GetContents();
@@ -242,7 +242,7 @@ public class SalmonFileSequencer : INonceSequencer
     ///  Save the sequence file.
 	/// </summary>
     ///  <param name="sequences">The sequences.</param>
-    ///  <exception cref="SequenceException"></exception>
+    ///  <exception cref="SequenceException">Thrown when there is a failure in the nonce sequencer.</exception>
     protected virtual void SaveSequenceFile(Dictionary<string, NonceSequence> sequences)
     {
         try
@@ -258,10 +258,10 @@ public class SalmonFileSequencer : INonceSequencer
     }
 
     /// <summary>
-    /// Save the contets of the file
+    /// Save the contents of the file
     /// </summary>
-    /// <param name="contents"></param>
-    /// <exception cref="SequenceException"></exception>
+    /// <param name="contents">The contents</param>
+    /// <exception cref="SequenceException">Thrown when there is a failure in the nonce sequencer.</exception>
 	[MethodImpl(MethodImplOptions.Synchronized)]
     protected virtual void SaveContents(string contents)
     {
@@ -313,8 +313,8 @@ public class SalmonFileSequencer : INonceSequencer
 	/// </summary>
 	///  <param name="configs">All sequence configurations.</param>
     ///  <param name="driveId">The drive ID.</param>
-    ///  <returns></returns>
-    ///  <exception cref="SequenceException"></exception>
+    ///  <returns>The sequence</returns>
+    ///  <exception cref="SequenceException">Thrown when there is a failure in the nonce sequencer.</exception>
     private static NonceSequence GetSequence(Dictionary<string, NonceSequence> configs, string driveId)
     {
         NonceSequence sequence = null;

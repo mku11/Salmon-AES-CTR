@@ -217,9 +217,9 @@ public class SalmonStream : Stream
     ///  stream because in the case of a decryption stream that has already embedded integrity
     ///  we still need to calculate/skip the chunks.
 	/// </summary>
-	///  <param name="integrity"></param>
-    ///  <param name="hashKey"></param>
-    ///  <param name="chunkSize"></param>
+	///  <param name="integrity">True to enable integrity</param>
+    ///  <param name="hashKey">The hash key</param>
+    ///  <param name="chunkSize">The chunk size</param>
     private void InitIntegrity(bool integrity, byte[] hashKey, int? chunkSize)
     {
         salmonIntegrity = new SalmonIntegrity(integrity, hashKey, chunkSize,
@@ -286,7 +286,7 @@ public class SalmonStream : Stream
     /// <summary>
     ///  Set the length of the base stream. Currently unsupported.
 	/// </summary>
-	///  <param name="value"></param>
+	///  <param name="value">The new length</param>
     override
     public void SetLength(long value)
     {
@@ -348,8 +348,8 @@ public class SalmonStream : Stream
     /// <summary>
     ///  Set the virtual position of the stream.
 	/// </summary>
-	///  <param name="value"></param>
-    ///  <exception cref="SalmonRangeExceededException"></exception>
+	///  <param name="value">The new position</param>
+    ///  <exception cref="SalmonRangeExceededException">Thrown when maximum nonce range is exceeded.</exception>
     private void SetVirtualPosition(long value)
     {
         // we skip the header bytes and any hash values we have if the file has integrity set
@@ -552,7 +552,7 @@ public class SalmonStream : Stream
     ///  wrt to the encryption block size. Use this method to align a position to the
     ///  start of the block or chunk.
 	/// </summary>
-	///  <returns></returns>
+	///  <returns>The aligned offset</returns>
     private int GetAlignedOffset()
     {
         int alignOffset;
@@ -572,7 +572,7 @@ public class SalmonStream : Stream
     ///  wrt to the encryption block size. Use this method to ensure that buffer sizes request
     ///  via the API are aligned for read/writes and integrity processing.
 	/// </summary>
-	///  <returns></returns>
+	///  <returns>The normalized buffer size</returns>
     private int GetNormalizedBufferSize(bool includeHashes)
     {
         int bufferSize = this.BufferSize;
@@ -672,9 +672,9 @@ public class SalmonStream : Stream
     /// <summary>
     ///  Strip hash signatures from the buffer.
 	/// </summary>
-	///  <param name="buffer">   The buffer.</param>
+	///  <param name="buffer">The buffer.</param>
     ///  <param name="chunkSize">The chunk size.</param>
-    ///  <returns></returns>
+    ///  <returns>The buffer without the hash signatures</returns>
     private byte[] StripSignatures(byte[] buffer, int chunkSize)
     {
         int bytes = buffer.Length / (chunkSize + SalmonGenerator.HASH_RESULT_LENGTH) * chunkSize;

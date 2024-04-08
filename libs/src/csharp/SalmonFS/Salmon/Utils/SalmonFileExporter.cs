@@ -33,11 +33,22 @@ namespace Mku.Salmon.Utils;
 /// </summary>
 public class SalmonFileExporter : FileExporter
 {
+    /// <summary>
+    /// Create an instance of an exporter for a SalmonDrive
+    /// </summary>
+    /// <param name="bufferSize">The buffer size</param>
+    /// <param name="threads">The threads</param>
     public SalmonFileExporter(int bufferSize, int threads)
     {
         base.Initialize(bufferSize, threads);
     }
 
+
+    /// <summary>
+    /// Prepare the files before export
+    /// </summary>
+    /// <param name="sourceFile">The file to export</param>
+    /// <param name="integrity">True to verify integrity</param>
     override
     protected void OnPrepare(IVirtualFile sourceFile, bool integrity)
     {
@@ -45,6 +56,11 @@ public class SalmonFileExporter : FileExporter
         ((SalmonFile)sourceFile).SetVerifyIntegrity(integrity, null);
     }
 
+    /// <summary>
+    /// Get the minimum required part size for splitting a virtual file
+    /// </summary>
+    /// <param name="file">The virtual file</param>
+    /// <returns>The part size</returns>
     override
     protected long GetMinimumPartSize(IVirtualFile file)
     {

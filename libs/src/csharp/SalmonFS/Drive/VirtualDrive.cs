@@ -42,8 +42,14 @@ public abstract class VirtualDrive
      */
     public abstract void OnUnlockError();
 
+    /// <summary>
+    /// Get the private directory for this drive
+    /// </summary>
     public abstract IRealFile PrivateDir { get; }
 
+    /// <summary>
+    /// Get the root directory
+    /// </summary>
     public abstract IVirtualFile Root { get; }
 
 }

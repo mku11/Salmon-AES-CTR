@@ -24,6 +24,9 @@ SOFTWARE.
 
 namespace Mku.Utils;
 
+/// <summary>
+/// File utilities
+/// </summary>
 public class FileUtils
 {
     /// <summary>
@@ -86,7 +89,7 @@ public class FileUtils
     /// <summary>
     ///  Return the extension of a filename.
 	/// </summary>
-	///  <param name="fileName"></param>
+	///  <param name="fileName">The file name</param>
     public static string GetExtensionFromFileName(string fileName)
     {
         if (fileName == null)
@@ -103,7 +106,7 @@ public class FileUtils
     /// <summary>
     ///  Return a filename without extension
 	/// </summary>
-	///  <param name="fileName"></param>
+	///  <param name="fileName">The file name</param>
     public static string GetFileNameWithoutExtension(string fileName)
     {
         if (fileName == null)

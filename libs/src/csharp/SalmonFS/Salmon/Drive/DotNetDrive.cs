@@ -69,8 +69,8 @@ public class DotNetDrive : SalmonDrive
     /// <summary>
     ///  Get a private dir for sharing files with external applications.
     /// </summary>
-    ///  <returns></returns>
-    ///  <exception cref="Exception"></exception>
+    ///  <returns>The private directory</returns>
+    ///  <exception cref="Exception">Thrown if error during operation</exception>
     override
     public IRealFile PrivateDir
     {
@@ -94,7 +94,12 @@ public class DotNetDrive : SalmonDrive
     {
 
     }
-	
-	override 
-	public SalmonFile Root => (SalmonFile) base.Root;
+
+    /// <summary>
+    ///  Return the virtual root directory of the drive.
+    /// </summary>
+    ///  <returns>The root directory</returns>
+    ///  <exception cref="SalmonAuthException">Thrown when there is a failure during authorization</exception>
+    override
+    public SalmonFile Root => (SalmonFile) base.Root;
 }

@@ -33,11 +33,21 @@ namespace Mku.Salmon.Utils;
 /// </summary>
 public class SalmonFileImporter : FileImporter
 {
+    /// <summary>
+    /// Construct an importer for importing files to SalmonDrive
+    /// </summary>
+    /// <param name="bufferSize">The buffer size</param>
+    /// <param name="threads">The threads to use</param>
     public SalmonFileImporter(int bufferSize, int threads)
     {
         base.Initialize(bufferSize, threads);
     }
 
+    /// <summary>
+    /// Prepare the files before import
+    /// </summary>
+    /// <param name="importedFile">The imported file</param>
+    /// <param name="integrity">True if apply integrity</param>
     override
     protected void OnPrepare(IVirtualFile importedFile, bool integrity)
     {
@@ -46,16 +56,32 @@ public class SalmonFileImporter : FileImporter
         ((SalmonFile)importedFile).SetApplyIntegrity(integrity, null, null);
     }
 
+    /// <summary>
+    /// Get the minimum required part size for splitting a virtual file
+    /// </summary>
+    /// <param name="file">The virtual file</param>
+    /// <returns>The part size</returns>
     override
     protected long GetMinimumPartSize(IVirtualFile file)
     {
         return ((SalmonFile)file).GetMinimumPartSize();
     }
 
+
+    /// <summary>
+    ///  Imports a real file into the drive.
+    /// </summary>
+    ///  <param name="fileToImport">The source file that will be imported in to the drive.</param>
+    ///  <param name="dir">         The target directory in the drive that the file will be imported</param>
+    ///  <param name="filename">The filename to use</param>
+    ///  <param name="deleteSource">If true delete the source file.</param>
+    ///  <param name="integrity">True to enable integrity</param>
+    ///  <param name="OnProgress">    Progress observer</param>
+    ///  <returns>The SalmonFile that was imported</returns>
     override
     public SalmonFile ImportFile(IRealFile fileToImport, IVirtualFile dir, String filename,
-                                   bool deleteSource, bool integrity, Action<long, long> onProgress)
+                                   bool deleteSource, bool integrity, Action<long, long> OnProgress)
     {
-        return (SalmonFile)base.ImportFile(fileToImport, dir, filename, deleteSource, integrity, onProgress);
+        return (SalmonFile)base.ImportFile(fileToImport, dir, filename, deleteSource, integrity, OnProgress);
     }
 }

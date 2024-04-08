@@ -47,7 +47,7 @@ public class AndroidDrive : SalmonDrive
     ///  Initialize the Android Drive. This needs to run before you attempt to
     ///  create or open any virtual drives.
 	/// </summary>
-	///  <param name="context"></param>
+	///  <param name="context">The context</param>
     public static void Initialize(Context context)
     {
         AndroidDrive.context = context.ApplicationContext;
@@ -56,7 +56,7 @@ public class AndroidDrive : SalmonDrive
     /// <summary>
     ///  Get the Android context.
 	/// </summary>
-	///  <returns></returns>
+	///  <returns>The context</returns>
     public static Context Context => context;
 
     /// <summary>
@@ -84,7 +84,7 @@ public class AndroidDrive : SalmonDrive
     ///  Get the private directory that will be used for sharing encrypted context with
     ///  other apps on the android device.
 	/// </summary>
-	///  <returns></returns>
+	///  <returns>The private directory</returns>
     override
     public IRealFile PrivateDir
     {
@@ -100,9 +100,9 @@ public class AndroidDrive : SalmonDrive
     /// <summary>
     ///  Get the real file hosted on the android device.
 	/// </summary>
-	///  <param name="filepath"></param>
+	///  <param name="filepath">The file path</param>
     ///  <param name="isDirectory">True if filepath corresponds to a directory.</param>
-    ///  <returns></returns>
+    ///  <returns>The file </returns>
     public IRealFile GetRealFile(string filepath, bool isDirectory)
     {
         DocumentFile docFile;
@@ -140,7 +140,7 @@ public class AndroidDrive : SalmonDrive
     ///  Clear the cache and the private folder that is used to share files with
     ///  other apps.
 	/// </summary>
-	///  <param name="file"></param>
+	///  <param name="file">The file</param>
     private void ClearCache(Java.IO.File file)
     {
         if (file.Exists() && file.IsDirectory)

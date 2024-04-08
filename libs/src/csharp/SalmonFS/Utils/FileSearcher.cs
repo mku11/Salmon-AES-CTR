@@ -41,9 +41,20 @@ public class FileSearcher
     /// </summary>
     public enum SearchEvent
     {
-        SearchingFiles, SearchingFinished
+        /// <summary>
+        /// Searching files
+        /// </summary>
+        SearchingFiles, 
+
+        /// <summary>
+        /// Searching is complete
+        /// </summary>
+        SearchingFinished
     }
 
+    /// <summary>
+    /// Stop all jobs
+    /// </summary>
     public void Stop()
     {
         this.quit = true;
@@ -58,7 +69,7 @@ public class FileSearcher
     /// <summary>
     ///  True if a search is running.
 	/// </summary>
-	///  <returns></returns>
+	///  <returns>True if running</returns>
     public bool IsRunning()
     {
         return running;
@@ -67,7 +78,7 @@ public class FileSearcher
     /// <summary>
     ///  True if last search was stopped by user.
 	/// </summary>
-	///  <returns></returns>
+	///  <returns>True if stopped</returns>
     public bool IsStopped()
     {
         return quit;

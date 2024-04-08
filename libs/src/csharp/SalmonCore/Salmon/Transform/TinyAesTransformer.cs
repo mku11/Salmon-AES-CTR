@@ -39,7 +39,7 @@ public class TinyAesTransformer : SalmonNativeTransformer
 	/// </summary>
 	///  <param name="key">  The AES key to use.</param>
     ///  <param name="nonce">The nonce to use.</param>
-    ///  <exception cref="SalmonSecurityException"></exception>
+    ///  <exception cref="SalmonSecurityException">Thrown when error with security</exception>
     override
     public void Init(byte[] key, byte[] nonce)
     {

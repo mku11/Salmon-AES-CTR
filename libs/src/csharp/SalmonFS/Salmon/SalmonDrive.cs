@@ -142,11 +142,11 @@ public abstract class SalmonDrive : VirtualDrive
     ///  Change the user password.
 	/// </summary>
 	///  <param name="pass">The new password.</param>
-    ///  <exception cref="IOException"></exception>
-    ///  <exception cref="SalmonAuthException"></exception>
-    ///  <exception cref="SalmonSecurityException"></exception>
-    ///  <exception cref="IntegrityException"></exception>
-    ///  <exception cref="Sequence.SequenceException"></exception>
+    ///  <exception cref="IOException">Thrown if error during IO</exception>
+    ///  <exception cref="SalmonAuthException">Thrown when there is a failure during authorization</exception>
+    ///  <exception cref="SalmonSecurityException">Thrown when error with security</exception>
+    ///  <exception cref="IntegrityException">Thrown when data are corrupt or tampered with.</exception>
+    ///  <exception cref="SequenceException">Thrown when there is a failure in the nonce sequencer.</exception>
     [MethodImpl(MethodImplOptions.Synchronized)]
     public void SetPassword(string pass)
     {
@@ -177,7 +177,10 @@ public abstract class SalmonDrive : VirtualDrive
     ///  Set the drive location to an external directory.
     ///  This requires you previously use SetDriveClass() to provide a class for the drive
     /// </summary>
-    ///  <param name="dirPath">The directory path that will be used for storing the contents of the drive</param>
+    ///  <param name="dir">The directory that will be used for storing the contents of the drive</param>
+    ///  <param name="driveClassType">The class type of the drive (ie: typeof(DotNetDrive))</param>
+    ///  <param name="password">password</param>
+    ///  <param name="sequencer">The sequencer</param>
     public static SalmonDrive OpenDrive(IRealFile dir, Type driveClassType,
                                         string password, INonceSequencer sequencer)
     {
@@ -194,11 +197,13 @@ public abstract class SalmonDrive : VirtualDrive
     /// <summary>
     ///  Create a new drive in the provided location.
 	/// </summary>
-	///  <param name="dirPath"> Directory to store the drive configuration and virtual filesystem.</param>
+	///  <param name="dir"> Directory to store the drive configuration and virtual filesystem.</param>
+    ///  <param name="driveClassType">The drive class type of this drive (ie typeof(DotNetDrive)) </param>
     ///  <param name="password">Master password to encrypt the drive configuration.</param>
+    ///  <param name="sequencer">The sequencer</param>
     ///  <returns>The newly created drive.</returns>
-    ///  <exception cref="IntegrityException"></exception>
-    ///  <exception cref="SequenceException"></exception>
+    ///  <exception cref="IntegrityException">Thrown when data are corrupt or tampered with.</exception>
+    ///  <exception cref="SequenceException">Thrown when there is a failure in the nonce sequencer.</exception>
     public static SalmonDrive CreateDrive(IRealFile dir, Type driveClassType,
         string password, INonceSequencer sequencer)
     {
@@ -213,10 +218,12 @@ public abstract class SalmonDrive : VirtualDrive
     /// <summary>
     ///  Create a drive instance.
 	/// </summary>
-	///  <param name="dirPath">The target directory where the drive is located.</param>
+	///  <param name="dir">The directory where the drive is located.</param>
     ///  <param name="createIfNotExists">Create the drive if it does not exist</param>
-    ///  <returns></returns>
-    ///  <exception cref="SalmonSecurityException"></exception>
+    ///  <param name="driveClassType">Create the drive if it does not exist</param>
+    ///  <param name="sequencer">Create the drive if it does not exist</param>
+    ///  <returns>The drive</returns>
+    ///  <exception cref="SalmonSecurityException">Thrown when error with security</exception>
     private static SalmonDrive CreateDriveInstance(IRealFile dir, bool createIfNotExists,
         Type driveClassType, INonceSequencer sequencer)
     {
@@ -240,8 +247,8 @@ public abstract class SalmonDrive : VirtualDrive
     /// <summary>
     ///  Get the device authorization byte array for the current drive.
     /// </summary>
-    ///  <returns></returns>
-    ///  <exception cref="Exception"></exception>
+    ///  <returns>The authorization id</returns>
+    ///  <exception cref="Exception">Thrown if error during operation</exception>
     public byte[] GetAuthIdBytes()
     {
         string drvStr = BitConverter.ToHex(DriveId);
@@ -257,9 +264,9 @@ public abstract class SalmonDrive : VirtualDrive
 
 
     /// <summary>
-    ///  Get the default auth config filename.
+    ///  Get the default authorization config filename.
 	/// </summary>
-	///  <returns></returns>
+	///  <returns>The default authorization configuration file name</returns>
     public string GetDefaultAuthConfigFilename()
     {
         return SalmonDrive.AuthConfigFilename;
@@ -269,10 +276,10 @@ public abstract class SalmonDrive : VirtualDrive
     /// <summary>
     ///  Get the next nonce for the drive. This operation IS atomic as per transaction.
 	/// </summary>
-	///  <param name="salmonDrive"></param>
-    ///  <returns></returns>
-    ///  <exception cref="SequenceException"></exception>
-    ///  <exception cref="SalmonRangeExceededException"></exception>
+	///  <param name="salmonDrive">The drive</param>
+    ///  <returns>The next nonce</returns>
+    ///  <exception cref="SequenceException">Thrown when there is a failure in the nonce sequencer.</exception>
+    ///  <exception cref="SalmonRangeExceededException">Thrown when maximum nonce range is exceeded.</exception>
     public byte[] GetNextNonce(SalmonDrive salmonDrive)
     {
         return Sequencer.NextNonce(BitConverter.ToHex(salmonDrive.DriveId));
@@ -284,7 +291,7 @@ public abstract class SalmonDrive : VirtualDrive
 	/// </summary>
 	///  <param name="driveId">The driveId</param>
     ///  <param name="authId"> The authId</param>
-    ///  <exception cref="Exception"></exception>
+    ///  <exception cref="Exception">Thrown if error during operation</exception>
     internal void CreateSequence(byte[] driveId, byte[] authId)
     {
         string drvStr = BitConverter.ToHex(driveId);
@@ -298,7 +305,7 @@ public abstract class SalmonDrive : VirtualDrive
 	/// </summary>
 	///  <param name="driveId">Drive ID.</param>
     ///  <param name="authId"> Authorization ID.</param>
-    ///  <exception cref="Exception"></exception>
+    ///  <exception cref="Exception">Thrown if error during operation</exception>
     internal void InitSequence(byte[] driveId, byte[] authId)
     {
         byte[] startingNonce = SalmonDriveGenerator.GetStartingNonce();
@@ -314,7 +321,7 @@ public abstract class SalmonDrive : VirtualDrive
     ///  to have another device to export an authorization config file and reimport it.
     /// <para>See: <see href="https://github.com/mku11/Salmon-AES-CTR#readme">README.md</see></para>
 	/// </summary>
-	///  <exception cref="Exception"></exception>
+	///  <exception cref="Exception">Thrown if error during operation</exception>
     public void RevokeAuthorization()
     {
         byte[] driveId = DriveId;
@@ -326,9 +333,9 @@ public abstract class SalmonDrive : VirtualDrive
     /// <summary>
     ///  Get the authorization ID for the current device.
 	/// </summary>
-	///  <returns></returns>
-    ///  <exception cref="SequenceException"></exception>
-    ///  <exception cref="SalmonAuthException"></exception>
+	///  <returns>The authorization id</returns>
+    ///  <exception cref="SequenceException">Thrown when there is a failure in the nonce sequencer.</exception>
+    ///  <exception cref="SalmonAuthException">Thrown when there is a failure during authorization</exception>
     public string GetAuthId()
     {
         return BitConverter.ToHex(GetAuthIdBytes());
@@ -416,8 +423,8 @@ public abstract class SalmonDrive : VirtualDrive
     /// <summary>
     ///  Return the virtual root directory of the drive.
 	/// </summary>
-	///  <returns></returns>
-    ///  <exception cref="SalmonAuthException"></exception>
+	///  <returns>The root directory</returns>
+    ///  <exception cref="SalmonAuthException">Thrown when there is a failure during authorization</exception>
     override
     public SalmonFile Root
     {
@@ -497,7 +504,7 @@ public abstract class SalmonDrive : VirtualDrive
 	///  <param name="masterKey">The master key.</param>
     ///  <param name="driveKey">The drive key used for enc/dec of files and filenames.</param>
     ///  <param name="hashKey">The hash key used for data integrity.</param>
-    ///  <param name="iterations"></param>
+    ///  <param name="iterations">The iterations</param>
     private void SetKey(byte[] masterKey, byte[] driveKey, byte[] hashKey, int iterations)
     {
         Key.MasterKey = masterKey;
@@ -509,9 +516,9 @@ public abstract class SalmonDrive : VirtualDrive
     /// <summary>
     ///  Verify that the hash signature is correct
 	/// </summary>
-	///  <param name="salmonConfig"></param>
-    ///  <param name="data"></param>
-    ///  <param name="hashKey"></param>
+	///  <param name="salmonConfig">The drive configuration file</param>
+    ///  <param name="data">The data</param>
+    ///  <param name="hashKey">The hash key</param>
     private void VerifyHash(SalmonDriveConfig salmonConfig, byte[] data, byte[] hashKey)
     {
         byte[] hashSignature = salmonConfig.HashSignature;
@@ -524,8 +531,8 @@ public abstract class SalmonDrive : VirtualDrive
     /// <summary>
     ///  Get the next nonce from the sequencer. This advanced the sequencer so unique nonce are used.
 	/// </summary>
-	///  <returns></returns>
-    ///  <exception cref="Exception"></exception>
+	///  <returns>The next nonce</returns>
+    ///  <exception cref="Exception">Thrown if error during operation</exception>
     internal byte[] GetNextNonce()
     {
         return GetNextNonce(this);
@@ -534,7 +541,7 @@ public abstract class SalmonDrive : VirtualDrive
     /// <summary>
     ///  Get the byte contents of a file from the real filesystem.
 	/// </summary>
-	///  <param name="sourcePath">The path of the file</param>
+	///  <param name="file">The file</param>
     ///  <param name="bufferSize">The buffer to be used when reading</param>
     public byte[] GetBytesFromRealFile(IRealFile file, int bufferSize)
     {

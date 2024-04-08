@@ -38,6 +38,7 @@ public class SalmonFileComparators
     ///  Get default Comparer. This is the fastest sorting Comparer as it simply lists folders first.
     ///  The rest of the files will be listed without sorting.
     /// </summary>
+    ///  <returns>The default comparer</returns>
     public static Comparer<SalmonFile> DefaultComparator { get; } = 
         Comparer<SalmonFile>.Create((SalmonFile c1, SalmonFile c2) =>
     {
@@ -51,7 +52,7 @@ public class SalmonFileComparators
     /// <summary>
     ///  Get Filename Ascending Comparer.
 	/// </summary>
-	///  <returns></returns>
+	///  <returns>The filename ascending comparer</returns>
     public static Comparer<SalmonFile> FilenameAscComparator { get; } = 
         Comparer<SalmonFile>.Create((SalmonFile c1, SalmonFile c2) =>
     {
@@ -66,7 +67,7 @@ public class SalmonFileComparators
     /// <summary>
     ///  Get Filename Descending Comparer.
 	/// </summary>
-	///  <returns></returns>
+	///  <returns>The filename descending comparer</returns>
     public static Comparer<SalmonFile> FilenameDescComparator { get; } = 
         Comparer<SalmonFile>.Create((SalmonFile c1, SalmonFile c2) =>
     {
@@ -81,7 +82,7 @@ public class SalmonFileComparators
     /// <summary>
     ///  Get Size Ascending Comparer.
 	/// </summary>
-	///  <returns></returns>
+	///  <returns>The size ascending comparer</returns>
     public static Comparer<SalmonFile> SizeAscComparator { get; } = 
         Comparer<SalmonFile>.Create((SalmonFile c1, SalmonFile c2) =>
     {
@@ -94,9 +95,9 @@ public class SalmonFileComparators
     });
 
     /// <summary>
-    ///  Get Filename Descending Comparer.
+    ///  Get Size Descending Comparer.
 	/// </summary>
-	///  <returns></returns>
+	///  <returns>The size descending comparer</returns>
     public static Comparer<SalmonFile> SizeDescComparator { get; } = 
         Comparer<SalmonFile>.Create((SalmonFile c1, SalmonFile c2) =>
     {
@@ -111,7 +112,7 @@ public class SalmonFileComparators
     /// <summary>
     ///  Get File Type Ascending Comparer.
 	/// </summary>
-	///  <returns></returns>
+	///  <returns>The file type ascending comparer</returns>
     public static Comparer<SalmonFile> TypeAscComparator { get; } = 
         Comparer<SalmonFile>.Create((SalmonFile c1, SalmonFile c2) =>
     {
@@ -124,9 +125,9 @@ public class SalmonFileComparators
     });
 
     /// <summary>
-    ///  Get Filename Descending Comparer.
+    ///  Get Filetype Descending Comparer.
 	/// </summary>
-	///  <returns></returns>
+	///  <returns>The file type descending comparer</returns>
     public static Comparer<SalmonFile> TypeDescComparator { get; } =
         Comparer<SalmonFile>.Create((SalmonFile c1, SalmonFile c2) =>
     {
@@ -141,7 +142,7 @@ public class SalmonFileComparators
     /// <summary>
     ///  Get Date Ascending Comparer.
 	/// </summary>
-	///  <returns></returns>
+	///  <returns>The date ascending comparer</returns>
     public static Comparer<SalmonFile> DateAscComparator { get; } = 
         Comparer<SalmonFile>.Create((SalmonFile c1, SalmonFile c2) =>
     {
@@ -156,7 +157,7 @@ public class SalmonFileComparators
     /// <summary>
     ///  Get Date Descending Comparer.
 	/// </summary>
-	///  <returns></returns>
+	///  <returns>The date descending comparer</returns>
     public static Comparer<SalmonFile> DateDescComparator { get; } = 
         Comparer<SalmonFile>.Create((SalmonFile c1, SalmonFile c2) =>
     {
@@ -172,17 +173,17 @@ public class SalmonFileComparators
     ///  Get Relevant Comparer. This will sort by the search result relevancy in the Tag member. Most relevant results
     ///  will be listed first.
 	/// </summary>
-	///  <returns></returns>
+	///  <returns>The relevance comparer</returns>
     public static Comparer<SalmonFile> RelevanceComparator { get; } = 
         Comparer<SalmonFile>.Create((SalmonFile c1, SalmonFile c2) =>
             (int)c2.Tag - (int)c1.Tag);
 
 
     /// <summary>
-    ///  Get the SalmonFile basename if available.
+    ///  Get the SalmonFile base name if available.
     /// </summary>
-    ///  <param name="salmonFile"></param>
-    ///  <returns></returns>
+    ///  <param name="salmonFile">The file</param>
+    ///  <returns>The base name</returns>
     private static string TryGetBasename(SalmonFile salmonFile)
     {
         try
@@ -199,8 +200,8 @@ public class SalmonFileComparators
     /// <summary>
     ///  Get the SalmonFile file type extension if available.
 	/// </summary>
-	///  <param name="salmonFile"></param>
-    ///  <returns></returns>
+	///  <param name="salmonFile">The file</param>
+    ///  <returns>The file type</returns>
     private static string TryGetType(SalmonFile salmonFile)
     {
         try
@@ -219,8 +220,8 @@ public class SalmonFileComparators
     /// <summary>
     ///  Get the SalmonFile size if available.
 	/// </summary>
-	///  <param name="salmonFile"></param>
-    ///  <returns></returns>
+	///  <param name="salmonFile">The file</param>
+    ///  <returns>The file size</returns>
     private static long TryGetSize(SalmonFile salmonFile)
     {
         try
@@ -242,8 +243,8 @@ public class SalmonFileComparators
     /// <summary>
     ///  Get the SalmonFile date if available.
 	/// </summary>
-	///  <param name="salmonFile"></param>
-    ///  <returns></returns>
+	///  <param name="salmonFile">The file</param>
+    ///  <returns>The file date in milliseconds</returns>
     private static long TryGetDate(SalmonFile salmonFile)
     {
         try

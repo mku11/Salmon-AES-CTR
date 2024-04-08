@@ -82,7 +82,7 @@ public class SalmonMediaDataSource : MediaDataSource
     /// <param name="buffer">The buffer that will store the decrypted contents</param>
     /// <param name="offset">The position on the buffer that the decrypted data will start</param>
     /// <param name="size">The length of the data requested</param>
-    /// <returns></returns>
+    /// <returns>The bytes read</returns>
     override
     public int ReadAt(long position, byte[] buffer, int offset, int size)
     {

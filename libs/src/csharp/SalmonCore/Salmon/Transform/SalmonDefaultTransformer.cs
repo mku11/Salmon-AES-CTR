@@ -43,7 +43,7 @@ public class SalmonDefaultTransformer : SalmonAES256CTRTransformer
 	/// </summary>
 	///  <param name="key">The AES256 key to use.</param>
     ///  <param name="nonce">The nonce to use.</param>
-    ///  <exception cref="SalmonSecurityException"></exception>
+    ///  <exception cref="SalmonSecurityException">Thrown when error with security</exception>
     override
     public void Init(byte[] key, byte[] nonce)
     {
@@ -72,7 +72,7 @@ public class SalmonDefaultTransformer : SalmonAES256CTRTransformer
     ///  <param name="destOffset">The destination byte offset.</param>
     ///  <param name="count">The number of bytes to transform.</param>
     ///  <returns>The number of bytes transformed.</returns>
-    ///  <exception cref="SalmonSecurityException"></exception>
+    ///  <exception cref="SalmonSecurityException">Thrown when error with security</exception>
     override
     public int EncryptData(byte[] srcBuffer, int srcOffset,
                            byte[] destBuffer, int destOffset, int count)
@@ -115,7 +115,7 @@ public class SalmonDefaultTransformer : SalmonAES256CTRTransformer
     ///  <param name="destOffset">The destination byte offset.</param>
     ///  <param name="count">The number of bytes to transform.</param>
     ///  <returns>The number of bytes transformed.</returns>
-    ///  <exception cref="SalmonSecurityException"></exception>
+    ///  <exception cref="SalmonSecurityException">Thrown when error with security</exception>
     override
     public int DecryptData(byte[] srcBuffer, int srcOffset,
                             byte[] destBuffer, int destOffset, int count)

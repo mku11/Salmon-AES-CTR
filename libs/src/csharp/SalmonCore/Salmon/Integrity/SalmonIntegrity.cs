@@ -76,8 +76,8 @@ public class SalmonIntegrity
     ///                   Use a positive number to specify integrity chunks.
     ///  <param name="provider"> Hash implementation provider.</param>
     ///  <param name="hashSize">The hash size.</param>
-    ///  <exception cref="IntegrityException"></exception>
-    ///  <exception cref="SalmonSecurityException"></exception>
+    ///  <exception cref="IntegrityException">Thrown when data are corrupt or tampered with.</exception>
+    ///  <exception cref="SalmonSecurityException">Thrown when error with security</exception>
     public SalmonIntegrity(bool integrity, byte[] key, int? chunkSize,
                            IHashProvider provider, int hashSize)
     {
@@ -111,7 +111,7 @@ public class SalmonIntegrity
     ///  <param name="key">        Key that will be used</param>
     ///  <param name="includeData">Additional data to be included in the calculation.</param>
     ///  <returns>The hash.</returns>
-    ///  <exception cref="IntegrityException"></exception>
+    ///  <exception cref="IntegrityException">Thrown when data are corrupt or tampered with.</exception>
     public static byte[] CalculateHash(IHashProvider provider, byte[] buffer, int offset, int count,
                                        byte[] key, byte[] includeData)
     {
@@ -139,7 +139,7 @@ public class SalmonIntegrity
     ///                        The length should be fixed value except for the last chunk which might be lesser since we don't use padding
     ///  <param name="hashOffset">    The hash key length that will be used as an offset</param>
     ///  <param name="hashLength">    The hash length.</param>
-    ///  <returns></returns>
+    ///  <returns>The total hash length</returns>
     public static long GetTotalHashDataLength(long length, int chunkSize,
                                               int hashOffset, int hashLength)
     {
@@ -176,7 +176,7 @@ public class SalmonIntegrity
 	///  <param name="buffer">The buffer containing the data chunks.</param>
     ///  <param name="includeHeaderData">Include the header data in the first chunk.</param>
     ///  <returns>The hash signatures.</returns>
-    ///  <exception cref="IntegrityException"></exception>
+    ///  <exception cref="IntegrityException">Thrown when data are corrupt or tampered with.</exception>
     public byte[][] GenerateHashes(byte[] buffer, byte[] includeHeaderData)
     {
         if (!integrity)
@@ -214,8 +214,8 @@ public class SalmonIntegrity
 	/// </summary>
 	///  <param name="hashes">The hashes to verify.</param>
     ///  <param name="buffer">The buffer that contains the chunks to verify the hashes.</param>
-    ///  <param name="includeHeaderData"></param>
-    ///  <exception cref="IntegrityException"></exception>
+    ///  <param name="includeHeaderData">The header data to include</param>
+    ///  <exception cref="IntegrityException">Thrown when data are corrupt or tampered with.</exception>
     public void VerifyHashes(byte[][] hashes, byte[] buffer, byte[] includeHeaderData)
     {
         int chunk = 0;

@@ -42,8 +42,8 @@ public class SalmonSequenceSerializer : INonceSequenceSerializer
     ///  Serialize the sequences to an XML string.
 	/// </summary>
 	///  <param name="sequences">The sequences to convert to text.</param>
-    ///  <returns></returns>
-    ///  <exception cref="SequenceException"></exception>
+    ///  <returns>The serialized contents</returns>
+    ///  <exception cref="SequenceException">Thrown when there is a failure in the nonce sequencer.</exception>
     public string Serialize(Dictionary<string, NonceSequence> sequences)
     {
         MemoryStream stream = new MemoryStream();
@@ -98,8 +98,8 @@ public class SalmonSequenceSerializer : INonceSequenceSerializer
     ///  Deserialize sequences from XML string.
 	/// </summary>
 	///  <param name="contents">The contents containing the nonce sequences.</param>
-    ///  <returns></returns>
-    ///  <exception cref="SequenceException"></exception>
+    ///  <returns>The deserialized sequences</returns>
+    ///  <exception cref="SequenceException">Thrown when there is a failure in the nonce sequencer.</exception>
     public Dictionary<string, NonceSequence> Deserialize(string contents)
     {
         Dictionary<string, NonceSequence> configs = new Dictionary<string, NonceSequence>();

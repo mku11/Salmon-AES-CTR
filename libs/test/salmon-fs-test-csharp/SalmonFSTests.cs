@@ -74,7 +74,7 @@ public class SalmonFSTests
 
 
     [TestMethod]
-    public void shouldCatchNotAuthorizeNegative()
+    public void ShouldCatchNotAuthorizeNegative()
     {
         IRealFile vaultDir = SalmonFSTestHelper.GenerateFolder(SalmonFSTestHelper.TEST_VAULT2_DIR);
         SalmonFileSequencer sequencer = new SalmonFileSequencer(new DotNetFile(vaultDir + "/" + SalmonFSTestHelper.TEST_SEQUENCER_FILE1), new SalmonSequenceSerializer());

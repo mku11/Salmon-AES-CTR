@@ -33,7 +33,7 @@ public class SequenceException : Exception
     /// <summary>
     ///  Construct an exception with a specific message.
 	/// </summary>
-	///  <param name="msg"></param>
+	///  <param name="msg">The message</param>
     public SequenceException(string msg) : base(msg)
     {
 

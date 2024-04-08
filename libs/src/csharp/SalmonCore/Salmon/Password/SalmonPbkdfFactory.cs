@@ -34,7 +34,7 @@ public class SalmonPbkdfFactory
 	/// </summary>
 	///  <param name="type">The pbkdf type.</param>
     ///  <returns>The provider.</returns>
-    ///  <exception cref="SalmonSecurityException"></exception>
+    ///  <exception cref="SalmonSecurityException">Thrown when error with security</exception>
     public static ISalmonPbkdfProvider Create(PbkdfType type)
     {
         switch (type)

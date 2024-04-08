@@ -22,6 +22,9 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 */
 
+using Mku.Salmon;
+using System.IO;
+
 namespace Mku.Sequence;
 
 /// <summary>
@@ -35,7 +38,7 @@ public interface INonceSequencer
 	/// </summary>
 	///  <param name="driveId">The drive ID.</param>
     ///  <param name="authId">The authorization ID of the drive.</param>
-    ///  <exception cref="SequenceException"></exception>
+    ///  <exception cref="SequenceException">Thrown when there is a failure in the nonce sequencer.</exception>
     void CreateSequence(string driveId, string authId);
 
     /// <summary>
@@ -45,8 +48,8 @@ public interface INonceSequencer
     ///  <param name="authId">The auth ID of the device for the drive.</param>
     ///  <param name="startNonce">The starting nonce.</param>
     ///  <param name="maxNonce">The maximum nonce.</param>
-    ///  <exception cref="SequenceException"></exception>
-    ///  <exception cref="IOException"></exception>
+    ///  <exception cref="SequenceException">Thrown when there is a failure in the nonce sequencer.</exception>
+    ///  <exception cref="IOException">Thrown if error during IO</exception>
     void InitSequence(string driveId, string authId, byte[] startNonce, byte[] maxNonce);
 
     /// <summary>
@@ -55,8 +58,8 @@ public interface INonceSequencer
 	///  <param name="driveId">The drive ID.</param>
     ///  <param name="authId">The auth ID of the device for the drive.</param>
     ///  <param name="maxNonce">The maximum nonce.</param>
-    ///  <exception cref="SequenceException"></exception>
-    ///  <exception cref="IOException"></exception>
+    ///  <exception cref="SequenceException">Thrown when there is a failure in the nonce sequencer.</exception>
+    ///  <exception cref="IOException">Thrown if error during IO</exception>
     void SetMaxNonce(string driveId, string authId, byte[] maxNonce);
 
     /// <summary>
@@ -64,15 +67,15 @@ public interface INonceSequencer
 	/// </summary>
 	///  <param name="driveId">The drive ID.</param>
     ///  <returns>The next nonce.</returns>
-    ///  <exception cref="SequenceException"></exception>
-    ///  <exception cref="Salmon.SalmonRangeExceededException"></exception>
+    ///  <exception cref="SequenceException">Thrown when there is a failure in the nonce sequencer.</exception>
+    ///  <exception cref="SalmonRangeExceededException">Thrown when maximum nonce range is exceeded.</exception>
     byte[] NextNonce(string driveId);
 
     /// <summary>
     ///  Revoke the sequencer. This terminates the sequencer and de-authorizes the device
 	/// </summary>
-	///  <param name="driveId"></param>
-    ///  <exception cref="SequenceException"></exception>
+	///  <param name="driveId">The drive id</param>
+    ///  <exception cref="SequenceException">Thrown when there is a failure in the nonce sequencer.</exception>
     void RevokeSequence(string driveId);
 
     /// <summary>
@@ -80,7 +83,7 @@ public interface INonceSequencer
 	/// </summary>
 	///  <param name="driveId">The drive ID.</param>
     ///  <returns>The current sequence.</returns>
-    ///  <exception cref="SequenceException"></exception>
+    ///  <exception cref="SequenceException">Thrown when there is a failure in the nonce sequencer.</exception>
     NonceSequence GetSequence(string driveId);
 
     /// <summary>

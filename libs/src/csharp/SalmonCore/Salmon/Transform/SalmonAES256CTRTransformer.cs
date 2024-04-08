@@ -22,6 +22,7 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 */
 
+using Mku.Salmon.Integrity;
 using Mku.Salmon.Streams;
 using System;
 using System.IO;
@@ -53,9 +54,9 @@ public abstract class SalmonAES256CTRTransformer : ISalmonCTRTransformer
     ///  <param name="chunkSize">The chunk size for integrity chunks.</param>
     ///  <param name="hashKey">The hash key to be used for integrity checks.</param>
     ///  <returns>The size of the output data.</returns>
-    ///  <exception cref="SalmonSecurityException"></exception>
-    ///  <exception cref="Integrity.IntegrityException"></exception>
-    ///  <exception cref="IOException"></exception>
+    ///  <exception cref="SalmonSecurityException">Thrown when error with security</exception>
+    ///  <exception cref="IntegrityException">Thrown when data are corrupt or tampered with</exception>
+    ///  <exception cref="IOException">Thrown if error during IO</exception>
     public static long GetActualSize(byte[] data, byte[] key, byte[] nonce, EncryptionMode mode,
                                      byte[] headerData, bool integrity, int? chunkSize, byte[] hashKey)
     {
@@ -145,9 +146,9 @@ public abstract class SalmonAES256CTRTransformer : ISalmonCTRTransformer
     ///  Initialize the transformer. Most common operations include precalculating expansion keys or
     ///  any other prior initialization for efficiency.
 	/// </summary>
-	///  <param name="key"></param>
-    ///  <param name="nonce"></param>
-    ///  <exception cref="SalmonSecurityException"></exception>
+	///  <param name="key">The key</param>
+    ///  <param name="nonce">The nonce</param>
+    ///  <exception cref="SalmonSecurityException">Thrown when error with security</exception>
     public virtual void Init(byte[] key, byte[] nonce)
     {
         this.Key = key;

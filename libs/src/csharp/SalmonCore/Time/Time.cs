@@ -33,7 +33,7 @@ public static class Time
     /// <summary>
     /// Returns the time since 1/1/1970 in milliseconds
     /// </summary>
-    /// <returns></returns>
+    /// <returns>The current time in milliseconds</returns>
     public static long CurrentTimeMillis()
     {
         return DateTimeOffset.Now.ToUnixTimeMilliseconds();

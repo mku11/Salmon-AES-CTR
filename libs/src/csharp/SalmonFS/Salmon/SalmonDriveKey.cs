@@ -31,10 +31,24 @@ namespace Mku.Salmon;
 /// </summary>
 public class SalmonDriveKey
 {
-
+    /// <summary>
+    /// The master key
+    /// </summary>
     public byte[] MasterKey { get; internal set; }
+
+    /// <summary>
+    /// The drive key
+    /// </summary>
     public byte[] DriveKey { get; internal set; }
+
+    /// <summary>
+    /// The hash key
+    /// </summary>
     public byte[] HashKey { get; internal set; }
+
+    /// <summary>
+    /// The iterations
+    /// </summary>
     public int Iterations { get; internal set; }
 
     /// <summary>
@@ -61,7 +75,7 @@ public class SalmonDriveKey
     /// <summary>
     ///  Finalize.
 	/// </summary>
-	///  <exception cref="Exception"></exception>
+	///  <exception cref="Exception">Thrown if error during operation</exception>
     ~SalmonDriveKey()
     {
         Clear();

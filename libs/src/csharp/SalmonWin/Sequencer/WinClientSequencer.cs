@@ -45,6 +45,7 @@ public class WinClientSequencer : INonceSequencer
     private StreamWriter writer;
     private bool localSystemOnly = true;
 
+#pragma warning disable CA1416 // Validate platform compatibility
     /// <summary>
     /// The request type
     /// </summary>
@@ -79,7 +80,8 @@ public class WinClientSequencer : INonceSequencer
     /// <summary>
     /// Instantiate a sequencer client that connects to the Salmon Windows Service.
     /// </summary>
-    /// <param name="pipeName"></param>
+    /// <param name="pipeName">The pipe name</param>
+    /// <param name="localSystemOnly">True to connect only when service is running as LocalSystem</param>
     public WinClientSequencer(string pipeName, bool localSystemOnly = true)
     {
         this.pipeName = pipeName;
@@ -90,7 +92,7 @@ public class WinClientSequencer : INonceSequencer
     /// <summary>
     /// Create the named pipe client
     /// </summary>
-    /// <exception cref="SequenceException"></exception>
+    /// <exception cref="SequenceException">Thrown when there is a failure in the nonce sequencer.</exception>
     private void CreatePipeClient()
     {
         if (localSystemOnly && !IsServiceAdmin(pipeName))
@@ -107,8 +109,8 @@ public class WinClientSequencer : INonceSequencer
     /// True if the service is started as Admin. This can be called to verify that 
     /// the named piped is not faux.
     /// </summary>
-    /// <param name="pipeName"></param>
-    /// <returns></returns>
+    /// <param name="pipeName">The pipe name</param>
+    /// <returns>True if started as service admin</returns>
     public static bool IsServiceAdmin(string pipeName)
     {
         NamedPipeClientStream tempClient = new NamedPipeClientStream(pipeName);
@@ -128,9 +130,9 @@ public class WinClientSequencer : INonceSequencer
     /// <summary>
     /// Send a request to create the sequence.
     /// </summary>
-    /// <param name="driveId"></param>
-    /// <param name="authId"></param>
-    /// <exception cref="SequenceException"></exception>
+    /// <param name="driveId">The drive id</param>
+    /// <param name="authId">The auth id</param>
+    /// <exception cref="SequenceException">Thrown when there is a failure in the nonce sequencer.</exception>
     public void CreateSequence(string driveId, string authId)
     {
         Response res;
@@ -154,9 +156,9 @@ public class WinClientSequencer : INonceSequencer
     /// <summary>
     /// Send a request to get the current sequence
     /// </summary>
-    /// <param name="driveId"></param>
-    /// <returns></returns>
-    /// <exception cref="SequenceException"></exception>
+    /// <param name="driveId">The drive id</param>
+    /// <returns>The sequence</returns>
+    /// <exception cref="SequenceException">Thrown when there is a failure in the nonce sequencer.</exception>
     public NonceSequence GetSequence(string driveId)
     {
         Response res;
@@ -184,11 +186,11 @@ public class WinClientSequencer : INonceSequencer
     /// <summary>
     /// Send a request to initialize the sequence, can only be run once.
     /// </summary>
-    /// <param name="driveId"></param>
-    /// <param name="authId"></param>
-    /// <param name="startNonce"></param>
-    /// <param name="maxNonce"></param>
-    /// <exception cref="SequenceException"></exception>
+    /// <param name="driveId">The drive id</param>
+    /// <param name="authId">The authorization id</param>
+    /// <param name="startNonce">The starting nonce</param>
+    /// <param name="maxNonce">The maximum nonce</param>
+    /// <exception cref="SequenceException">Thrown when there is a failure in the nonce sequencer.</exception>
     public void InitSequence(string driveId, string authId, byte[] startNonce, byte[] maxNonce)
     {
         Response res;
@@ -213,9 +215,9 @@ public class WinClientSequencer : INonceSequencer
     /// <summary>
     /// Send a request to get the next nonce.
     /// </summary>
-    /// <param name="driveId"></param>
-    /// <returns></returns>
-    /// <exception cref="SequenceException"></exception>
+    /// <param name="driveId">The drive id</param>
+    /// <returns>The next nonce</returns>
+    /// <exception cref="SequenceException">Thrown when there is a failure in the nonce sequencer.</exception>
     public byte[] NextNonce(string driveId)
     {
         Response res;
@@ -240,8 +242,8 @@ public class WinClientSequencer : INonceSequencer
     /// <summary>
     /// Send a request to revoke the current sequence
     /// </summary>
-    /// <param name="driveId"></param>
-    /// <exception cref="SequenceException"></exception>
+    /// <param name="driveId">The drive id</param>
+    /// <exception cref="SequenceException">Thrown when there is a failure in the nonce sequencer.</exception>
     public void RevokeSequence(string driveId)
     {
         Response res;
@@ -265,10 +267,10 @@ public class WinClientSequencer : INonceSequencer
     /// <summary>
     /// Send a request to set the max nonce.
     /// </summary>
-    /// <param name="driveId"></param>
-    /// <param name="authId"></param>
-    /// <param name="maxNonce"></param>
-    /// <exception cref="SequenceException"></exception>
+    /// <param name="driveId">The drive id</param>
+    /// <param name="authId">The authorization id</param>
+    /// <param name="maxNonce">The max nonce</param>
+    /// <exception cref="SequenceException">Thrown when there is a failure in the nonce sequencer.</exception>
     public void SetMaxNonce(string driveId, string authId, byte[] maxNonce)
     {
         string request = GenerateRequest(driveId, authId, RequestType.SetMaxNonce,
@@ -293,12 +295,12 @@ public class WinClientSequencer : INonceSequencer
     /// <summary>
     /// Send a request to generate the sequence
     /// </summary>
-    /// <param name="driveId"></param>
-    /// <param name="authId"></param>
-    /// <param name="type"></param>
-    /// <param name="nextNonce"></param>
-    /// <param name="maxNonce"></param>
-    /// <returns></returns>
+    /// <param name="driveId">The drive id</param>
+    /// <param name="authId">The authorization id</param>
+    /// <param name="type">The type</param>
+    /// <param name="nextNonce">The next nonce</param>
+    /// <param name="maxNonce">The max nonce</param>
+    /// <returns>The request</returns>
     public string GenerateRequest(string driveId, string authId, RequestType type,
             byte[] nextNonce = null, byte[] maxNonce = null)
     {
@@ -385,8 +387,8 @@ public class WinClientSequencer : INonceSequencer
         /// <summary>
         /// Parse the response
         /// </summary>
-        /// <param name="contents"></param>
-        /// <returns></returns>
+        /// <param name="contents">The contens</param>
+        /// <returns>The response</returns>
         internal static Response Parse(string contents)
         {
             Response request = new Response();
@@ -423,4 +425,5 @@ public class WinClientSequencer : INonceSequencer
             return request;
         }
     }
+#pragma warning restore CA1416 // Validate platform compatibility
 }

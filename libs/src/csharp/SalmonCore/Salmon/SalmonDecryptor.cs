@@ -93,8 +93,8 @@ public class SalmonDecryptor
     ///  <returns>The byte array with the decrypted data.</returns>
     ///  <exception cref="IOException">Thrown if there is a problem with decoding the array.</exception>
     ///  <exception cref="SalmonSecurityException">Thrown if the key and nonce are not provided.</exception>
-    ///  <exception cref="IOException"></exception>
-    ///  <exception cref="IntegrityException"></exception>
+    ///  <exception cref="IOException">Thrown if error during IO</exception>
+    ///  <exception cref="IntegrityException">Thrown when data are corrupt or tampered with.</exception>
     public byte[] Decrypt(byte[] data, byte[] key, byte[] nonce,
                                  bool hasHeaderData = false,
                                  bool integrity = false, byte[] hashKey = null, int? chunkSize = null)

@@ -42,7 +42,7 @@ public class SalmonPassword
     /// <summary>
     ///  Global PBKDF implementation to be used for text key derivation.
 	/// </summary>
-    ///  <exception cref="SalmonSecurityException"></exception>
+    ///  <exception cref="SalmonSecurityException">Thrown when error with security</exception>
     public static PbkdfType PbkdfImplType
     {
         set
@@ -54,7 +54,7 @@ public class SalmonPassword
     /// <summary>
     ///  Global PBKDF provider to be used for text key derivation.
 	/// </summary>
-    ///  <exception cref="SalmonSecurityException"></exception>
+    ///  <exception cref="SalmonSecurityException">Thrown when error with security</exception>
     public static ISalmonPbkdfProvider PbkdfImplProvider
     {
         set
@@ -76,7 +76,7 @@ public class SalmonPassword
     ///  <param name="iterations">The number of iterations the key derivation algorithm will use</param>
     ///  <param name="length">The length of key to return</param>
     ///  <returns>The derived master key.</returns>
-    ///  <exception cref="SalmonSecurityException"></exception>
+    ///  <exception cref="SalmonSecurityException">Thrown when error with security</exception>
     public static byte[] GetMasterKey(string pass, byte[] salt, int iterations, int length)
     {
         byte[] masterKey = GetKeyFromPassword(pass, salt, iterations, length);
@@ -91,7 +91,7 @@ public class SalmonPassword
     ///  <param name="iterations"> The iterations to be used with Pbkdf2</param>
     ///  <param name="outputBytes">The number of bytes for the key</param>
     ///  <returns>The derived key.</returns>
-    ///  <exception cref="SalmonSecurityException"></exception>
+    ///  <exception cref="SalmonSecurityException">Thrown when error with security</exception>
     public static byte[] GetKeyFromPassword(string password, byte[] salt, int iterations, int outputBytes)
     {
         if (PbkdfAlgorithm == PbkdfAlgo.SHA1 && !ENABLE_SHA1)

@@ -74,15 +74,25 @@ public abstract class FileExporter
     /// </summary>
     private Exception lastException;
 
-    protected abstract void OnPrepare(IVirtualFile importedFile, bool integrity);
+    /// <summary>
+    /// Prepare the files before export
+    /// </summary>
+    /// <param name="sourceFile">The file to export</param>
+    /// <param name="integrity">True to verify integrity</param>
+    protected abstract void OnPrepare(IVirtualFile sourceFile, bool integrity);
 
+    /// <summary>
+    /// Get the minimum required part size for splitting a virtual file for export
+    /// </summary>
+    /// <param name="file">The virtual file</param>
+    /// <returns>The part size</returns>
     protected abstract long GetMinimumPartSize(IVirtualFile file);
 
     /// <summary>
     /// Instantiate a file exporter.
     /// </summary>
-    /// <param name="bufferSize"></param>
-    /// <param name="threads"></param>
+    /// <param name="bufferSize">The buffer size</param>
+    /// <param name="threads">The threads</param>
     public void Initialize(int bufferSize, int threads)
     {
         if (bufferSize == 0)
@@ -96,7 +106,7 @@ public abstract class FileExporter
     /// <summary>
     /// True if an operation is currently running.
     /// </summary>
-    /// <returns></returns>
+    /// <returns>True if running</returns>
     public bool IsRunning()
     {
         return !stopped;
@@ -117,6 +127,7 @@ public abstract class FileExporter
     ///  <param name="filename">    The filename to use</param>
     ///  <param name="deleteSource">Delete the source file when the export finishes successfully</param>
     ///  <param name="integrity">True to verify integrity</param>
+    ///  <param name="OnProgress">Progress listener</param>
     public IRealFile ExportFile(IVirtualFile fileToExport, IRealFile exportDir, string filename,
         bool deleteSource, bool integrity, Action<long, long> OnProgress)
     {
@@ -132,7 +143,6 @@ public abstract class FileExporter
             if (!enableMultiThread && threads != 1)
                 throw new NotSupportedException("Multithreading is not supported");
 
-            long startTime = 0;
             stopped = false;
             long[] totalBytesWritten = new long[] { 0 };
             failed = false;
@@ -215,6 +225,7 @@ public abstract class FileExporter
     ///  <param name="start">            The start position on the file</param>
     ///  <param name="count">            The length of the bytes to be decrypted</param>
     ///  <param name="totalBytesWritten">The total bytes that were written to the external file</param>
+    ///  <param name="OnProgress">The progress listener</param>
     private void ExportFilePart(IVirtualFile fileToExport, IRealFile exportFile, long start, long count, 
         long[] totalBytesWritten, Action<long, long> OnProgress)
     {

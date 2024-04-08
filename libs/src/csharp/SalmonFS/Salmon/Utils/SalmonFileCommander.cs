@@ -46,15 +46,28 @@ public class SalmonFileCommander : FileCommander
                 new FileSearcher())
     {
 
-    } 
+    }
 
+    /// <summary>
+    ///  Import files to the drive.
+    /// </summary>
+    ///  <param name="filesToImport">The files to import.</param>
+    ///  <param name="importDir">The target directory.</param>
+    ///  <param name="deleteSource">True if you want to delete the source files.</param>
+    ///  <param name="integrity">True to apply integrity to imported files</param>
+    ///  <param name="OnProgressChanged">Observer to notify when progress changes.</param>
+    ///  <param name="AutoRename">Function to rename file if another file with the same filename exists.</param>
+    ///  <param name="OnFailed">Observer to notify when a file fails importing.</param>
+    ///  <returns>The imported files.</returns>
+    ///  <exception cref="Exception">Thrown if error during operation</exception>
+    override
     public SalmonFile[] ImportFiles(IRealFile[] filesToImport, IVirtualFile importDir,
-        bool deleteSource, bool integrity, Action<RealFileTaskProgress> onProgressChanged,
-                                      Func<IRealFile, string> autoRename,
-                                      Action<IRealFile, Exception> onFailed)
+        bool deleteSource, bool integrity, Action<RealFileTaskProgress> OnProgressChanged,
+                                      Func<IRealFile, string> AutoRename,
+                                      Action<IRealFile, Exception> OnFailed)
     {
-        IVirtualFile[] files = base.ImportFiles(filesToImport, importDir, deleteSource, integrity, onProgressChanged,
-                autoRename, onFailed);
+        IVirtualFile[] files = base.ImportFiles(filesToImport, importDir, deleteSource, integrity, OnProgressChanged,
+                AutoRename, OnFailed);
         return files.Cast<SalmonFile>().ToArray();
     }
 }

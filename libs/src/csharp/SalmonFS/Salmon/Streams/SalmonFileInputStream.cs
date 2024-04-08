@@ -209,8 +209,10 @@ public class SalmonFileInputStream : Stream
 
     /// <summary>
     ///  Fills a cache buffer with the decrypted data from a part of an encrypted file served as a salmon stream
-	/// </summary>
-	///  <param name="cacheBuffer"> The cache buffer that will store the decrypted contents</param>
+    /// </summary>
+    ///  <param name="cacheBuffer"> The cache buffer that will store the decrypted contents</param>
+    ///  <param name="start"> The start position to start reading from</param>
+    ///  <param name="offset"> The offset position for the buffer</param>
     ///  <param name="bufferSize">  The length of the data requested</param>
     ///  <param name="salmonStream">The stream that will be used to read from</param>
     private int FillBufferPart(CacheBuffer cacheBuffer, long start, int offset, int bufferSize,
@@ -326,7 +328,7 @@ public class SalmonFileInputStream : Stream
     /// <summary>
     ///  Get the size of the stream.
 	/// </summary>
-	///  <returns></returns>
+	///  <returns>The length</returns>
     override
     public long Length
     {
@@ -393,7 +395,7 @@ public class SalmonFileInputStream : Stream
     /// <summary>
     ///  Close the stream and associated backed streams and clear buffers.
 	/// </summary>
-	///  <exception cref="IOException"></exception>
+	///  <exception cref="IOException">Thrown if error during IO</exception>
     [MethodImpl(MethodImplOptions.Synchronized)]
     override
     public void Close()
@@ -419,7 +421,7 @@ public class SalmonFileInputStream : Stream
     /// <summary>
     ///  Close all back streams.
     /// </summary>
-    ///  <exception cref="IOException"></exception>
+    ///  <exception cref="IOException">Thrown if error during IO</exception>
     [MethodImpl(MethodImplOptions.Synchronized)]
     private void CloseStreams()
     {
@@ -442,9 +444,9 @@ public class SalmonFileInputStream : Stream
     /// <summary>
     /// Seek to specific position in the stream
     /// </summary>
-    /// <param name="offset"></param>
-    /// <param name="origin"></param>
-    /// <returns></returns>
+    /// <param name="offset">The offset</param>
+    /// <param name="origin">The origin</param>
+    /// <returns>The new position after seeking</returns>
     public override long Seek(long offset, SeekOrigin origin)
     {
         long nPos = 0;
@@ -467,8 +469,8 @@ public class SalmonFileInputStream : Stream
     /// <summary>
     /// Set the stream length, not used
     /// </summary>
-    /// <param name="value"></param>
-    /// <exception cref="NotSupportedException"></exception>
+    /// <param name="value">The new length</param>
+    /// <exception cref="NotSupportedException">Thrown if operation not supported</exception>
     public override void SetLength(long value)
     {
         throw new NotSupportedException();
@@ -477,10 +479,10 @@ public class SalmonFileInputStream : Stream
     /// <summary>
     /// Write to stream, not used
     /// </summary>
-    /// <param name="buffer"></param>
-    /// <param name="offset"></param>
-    /// <param name="count"></param>
-    /// <exception cref="NotSupportedException"></exception>
+    /// <param name="buffer">The buffer</param>
+    /// <param name="offset">The buffer offset</param>
+    /// <param name="count">The count of bytes to write</param>
+    /// <exception cref="NotSupportedException">Thrown if operation not supported</exception>
     public override void Write(byte[] buffer, int offset, int count)
     {
         throw new NotSupportedException();
@@ -493,14 +495,25 @@ public class SalmonFileInputStream : Stream
 	    //TODO: replace the CacheBuffer with a MemoryStream to simplify the code
     public class CacheBuffer
     {
+        /// <summary>
+        /// The buffer
+        /// </summary>
         public byte[] buffer;
+
+        /// <summary>
+        /// The starting position
+        /// </summary>
         public long startPos = 0;
+
+        /// <summary>
+        ///  The count of bytes used
+        /// </summary>
         public long count = 0;
 
         /// <summary>
         ///  Instantiate a cache buffer.
         /// </summary>
-        ///  <param name="bufferSize"></param>
+        ///  <param name="bufferSize">The buffer size</param>
         public CacheBuffer(int bufferSize)
         {
             buffer = new byte[bufferSize];

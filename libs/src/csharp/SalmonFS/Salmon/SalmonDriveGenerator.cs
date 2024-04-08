@@ -141,7 +141,7 @@ public class SalmonDriveGenerator
     /// <summary>
     ///  Set the default iterations.
 	/// </summary>
-	///  <param name="iterations"></param>
+	///  <param name="iterations">The iterations</param>
     public static void SetIterations(int iterations)
     {
         SalmonDriveGenerator.iterations = iterations;

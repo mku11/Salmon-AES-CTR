@@ -79,8 +79,18 @@ public abstract class FileImporter
     /// </summary>
     private Exception lastException;
 
+    /// <summary>
+    /// Prepare the files before import
+    /// </summary>
+    /// <param name="importedFile">The imported virtual file</param>
+    /// <param name="integrity">True if apply integrity</param>
     protected abstract void OnPrepare(IVirtualFile importedFile, bool integrity);
 
+    /// <summary>
+    /// Get the minimum required part size for splitting a virtual file
+    /// </summary>
+    /// <param name="file">The virtual file</param>
+    /// <returns>The part size</returns>
     protected abstract long GetMinimumPartSize(IVirtualFile file);
 
     /// <summary>
@@ -89,7 +99,7 @@ public abstract class FileImporter
 	///  <param name="bufferSize">Buffer size to be used when encrypting files.</param>
     ///                    If using integrity this value has to be a multiple of the Chunk size.
     ///                    If not using integrity it should be a multiple of the AES block size for better performance
-    ///  <param name="threads"></param>
+    ///  <param name="threads">The threads to use</param>
     public void Initialize(int bufferSize, int threads)
     {
         this.bufferSize = bufferSize;
@@ -111,7 +121,7 @@ public abstract class FileImporter
     /// <summary>
     ///  True if importer is currently running a job.
 	/// </summary>
-	///  <returns></returns>
+	///  <returns>True if running</returns>
     public bool IsRunning()
     {
         return !stopped;
@@ -126,6 +136,7 @@ public abstract class FileImporter
     ///  <param name="deleteSource">If true delete the source file.</param>
     ///  <param name="integrity">True to enable integrity</param>
     ///  <param name="OnProgress">    Progress observer</param>
+    ///  <returns>The IVirtualFile that was imported</returns>
     virtual
     public IVirtualFile ImportFile(IRealFile fileToImport, IVirtualFile dir, string filename,
         bool deleteSource, bool integrity, Action<long, long> OnProgress)
@@ -136,7 +147,6 @@ public abstract class FileImporter
             throw new Exception("Cannot import directory, use FileCommander instead");
 
         filename = filename ?? fileToImport.BaseName;
-        long startTime = 0;
         long[] totalBytesRead = new long[] { 0 };
         IVirtualFile salmonFile;
         try

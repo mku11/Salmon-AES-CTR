@@ -61,8 +61,8 @@ public class FileCommander
     ///  <param name="AutoRename">Function to rename file if another file with the same filename exists.</param>
     ///  <param name="OnFailed">Observer to notify when a file fails importing.</param>
     ///  <returns>The imported files.</returns>
-    ///  <exception cref="Exception"></exception>
-    public IVirtualFile[] ImportFiles(IRealFile[] filesToImport, IVirtualFile importDir,
+    ///  <exception cref="Exception">Thrown if error during operation</exception>
+    public virtual IVirtualFile[] ImportFiles(IRealFile[] filesToImport, IVirtualFile importDir,
         bool deleteSource, bool integrity,
         Action<RealFileTaskProgress> OnProgressChanged,
         Func<IRealFile, string> AutoRename,
@@ -172,7 +172,7 @@ public class FileCommander
     ///  <param name="AutoRename">Function to rename file if another file with the same filename exists.</param>
     ///  <param name="OnFailed">Observer to notify when a file fails exporting.</param>
     ///  <returns>True if complete successfully.</returns>
-    ///  <exception cref="Exception"></exception>
+    ///  <exception cref="Exception">Thrown if error during operation</exception>
     public IRealFile[] ExportFiles(IVirtualFile[] filesToExport, IRealFile exportDir,
         bool deleteSource, bool integrity,
         Action<IVirtualFileTaskProgress> OnProgressChanged,
@@ -313,7 +313,7 @@ public class FileCommander
 	///  <param name="filesToDelete">The array of files to delete.</param>
     ///  <param name="OnProgressChanged">The progress change observer to notify.</param>
     ///  <param name="OnFailed">The observer to notify when failures occur.</param>
-    ///  <exception cref="Exception"></exception>
+    ///  <exception cref="Exception">Thrown if error during operation</exception>
     public void DeleteFiles(IVirtualFile[] filesToDelete, Action<IVirtualFileTaskProgress> OnProgressChanged,
         Action<IVirtualFile, Exception> OnFailed)
     {
@@ -358,7 +358,7 @@ public class FileCommander
     ///  <param name="AutoRename">The auto rename function to use when files with same filename are found.</param>
     ///  <param name="autoRenameFolders">Apply autorename to folders also (default is true)</param>
     ///  <param name="OnFailed">The observer to notify when failures occur.</param>
-    ///  <exception cref="Exception"></exception>
+    ///  <exception cref="Exception">Thrown if error during operation</exception>
     public void CopyFiles(IVirtualFile[] filesToCopy, IVirtualFile dir, bool move,
         Action<IVirtualFileTaskProgress> OnProgressChanged,
         Func<IVirtualFile, string> AutoRename,
@@ -436,7 +436,7 @@ public class FileCommander
     /// <summary>
     ///  True if the file search is currently running.
 	/// </summary>
-	///  <returns></returns>
+	///  <returns>True if file search is running</returns>
     public bool IsFileSearcherRunning()
     {
         return fileSearcher.IsRunning();
@@ -445,7 +445,7 @@ public class FileCommander
     /// <summary>
     ///  True if jobs are currently running.
 	/// </summary>
-	///  <returns></returns>
+	///  <returns>True if running</returns>
     public bool IsRunning()
     {
         return fileSearcher.IsRunning() || fileImporter.IsRunning() || fileExporter.IsRunning();
@@ -454,7 +454,7 @@ public class FileCommander
     /// <summary>
     ///  True if file search stopped.
 	/// </summary>
-	///  <returns></returns>
+	///  <returns>True if file searcher is running</returns>
     public bool IsFileSearcherStopped()
     {
         return fileSearcher.IsStopped();
@@ -487,7 +487,7 @@ public class FileCommander
     /// <summary>
     ///  True if all jobs are stopped.
 	/// </summary>
-	///  <returns></returns>
+	///  <returns>True if jobs are stopped</returns>
     public bool AreJobsStopped()
     {
         return stopJobs;
@@ -505,11 +505,11 @@ public class FileCommander
     /// <summary>
     /// Rename an encrypted file
     /// </summary>
-    /// <param name="ifile"></param>
-    /// <param name="newFilename"></param>
-    public void RenameFile(IVirtualFile ifile, string newFilename)
+    /// <param name="file">The file</param>
+    /// <param name="newFilename">The new file name</param>
+    public void RenameFile(IVirtualFile file, string newFilename)
     {
-        ifile.Rename(newFilename);
+        file.Rename(newFilename);
     }
 
     /// <summary>
