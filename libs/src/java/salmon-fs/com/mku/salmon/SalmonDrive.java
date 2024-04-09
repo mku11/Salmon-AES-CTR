@@ -533,7 +533,7 @@ public abstract class SalmonDrive extends VirtualDrive {
         byte[] hash = SalmonIntegrity.calculateHash(hashProvider, data, 0, data.length, hashKey, null);
         for (int i = 0; i < hashKey.length; i++)
             if (hashSignature[i] != hash[i])
-                throw new SalmonAuthException("Wrong Password");
+                throw new SalmonAuthException("Wrong password");
     }
 
     /**

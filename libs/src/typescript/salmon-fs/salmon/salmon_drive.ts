@@ -271,7 +271,7 @@ export abstract class SalmonDrive extends VirtualDrive {
         let hash: Uint8Array = await SalmonIntegrity.calculateHash(this.#hashProvider, data, 0, data.length, hashKey, null);
         for (let i = 0; i < hashKey.length; i++)
             if (hashSignature[i] != hash[i])
-                throw new SalmonAuthException("Wrong Password");
+                throw new SalmonAuthException("Wrong password");
     }
 
     /**

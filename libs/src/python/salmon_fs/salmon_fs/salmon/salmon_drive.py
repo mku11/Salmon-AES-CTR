@@ -272,7 +272,7 @@ class SalmonDrive(VirtualDrive, ABC):
         v_hash: bytearray = SalmonIntegrity.calculate_hash(self.__hashProvider, data, 0, len(data), hash_key, None)
         for i in range(0, len(hash_key)):
             if hash_signature[i] != v_hash[i]:
-                raise SalmonAuthException("Could not authorize")
+                raise SalmonAuthException("Wrong password")
 
     def get_next_nonce(self) -> bytearray:
         """

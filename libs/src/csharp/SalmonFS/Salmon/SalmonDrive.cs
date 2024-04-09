@@ -525,7 +525,7 @@ public abstract class SalmonDrive : VirtualDrive
         byte[] hash = SalmonIntegrity.CalculateHash(hashProvider, data, 0, data.Length, hashKey, null);
         for (int i = 0; i < hashKey.Length; i++)
             if (hashSignature[i] != hash[i])
-                throw new SalmonAuthException("Could not authorize");
+                throw new SalmonAuthException("Wrong password");
     }
 
     /// <summary>
