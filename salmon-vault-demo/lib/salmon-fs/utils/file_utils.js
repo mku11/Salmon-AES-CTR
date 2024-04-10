@@ -21,6 +21,9 @@ LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 */
+/**
+ * File Utilities
+ */
 export class FileUtils {
     /**
      * Detect if filename is a text file.
@@ -62,7 +65,7 @@ export class FileUtils {
     /**
      * Detect if filename is a pdf file.
      * @param filename The file name
-     * @return
+     * @return True if pdf
      */
     static isPdf(filename) {
         let ext = FileUtils.getExtensionFromFileName(filename).toLowerCase();
@@ -72,6 +75,7 @@ export class FileUtils {
      * Return the extension of a filename.
      *
      * @param fileName The file name
+     * @returns File name extension
      */
     static getExtensionFromFileName(fileName) {
         if (fileName == null)
@@ -87,6 +91,7 @@ export class FileUtils {
      * Return a filename without extension
      *
      * @param fileName The file name
+     * @returns File name without extension
      */
     static getFileNameWithoutExtension(fileName) {
         if (fileName == null)
@@ -98,6 +103,12 @@ export class FileUtils {
         else
             return "";
     }
+    /**
+     *
+     * @param type The file class type string (ie: 'JsFile')
+     * @param param The file constructor parameter
+     * @returns A file object (ie: JsFile)
+     */
     static async getInstance(type, param) {
         switch (type) {
             case 'JsNodeFile':

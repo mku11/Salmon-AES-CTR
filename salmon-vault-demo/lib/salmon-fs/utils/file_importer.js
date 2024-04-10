@@ -32,7 +32,7 @@ var __classPrivateFieldGet = (this && this.__classPrivateFieldGet) || function (
     if (typeof state === "function" ? receiver !== state || !f : !state.has(receiver)) throw new TypeError("Cannot read private member from an object whose class did not declare it");
     return kind === "m" ? f : kind === "a" ? f.call(receiver) : f ? f.value : state.get(receiver);
 };
-var _FileImporter_instances, _a, _FileImporter_workerPath, _FileImporter_DEFAULT_BUFFER_SIZE, _FileImporter_DEFAULT_THREADS, _FileImporter_enableMultiThread, _FileImporter_bufferSize, _FileImporter_threads, _FileImporter_stopped, _FileImporter_failed, _FileImporter_lastException, _FileImporter_promises, _FileImporter_workers, _FileImporter_submitImportJobs;
+var _FileImporter_instances, _a, _FileImporter_workerPath, _FileImporter_DEFAULT_BUFFER_SIZE, _FileImporter_DEFAULT_THREADS, _FileImporter_enableMultiThread, _FileImporter_bufferSize, _FileImporter_threads, _FileImporter_stopped, _FileImporter_failed, _FileImporter_lastException, _FileImporter_promises, _FileImporter_workers, _FileImporter_submitImportJobs, _FileImporter_getError;
 import { importFilePart } from "./file_importer_helper.js";
 import { IOException } from "../../salmon-core/streams/io_exception.js";
 /**
@@ -99,19 +99,27 @@ export class FileImporter {
     /**
      * True if importer is currently running a job.
      *
-     * @return
+     * @return True if running
      */
     isRunning() {
         return !__classPrivateFieldGet(this, _FileImporter_stopped, "f")[0];
     }
     /**
+     * Progress listener
+     *
+     * @callback onProgress
+     * @param {number} position The current position
+     * @param {number} length The total length
+     */
+    /**
      * Imports a real file into the drive.
      *
-     * @param fileToImport The source file that will be imported in to the drive.
-     * @param dir          The target directory in the drive that the file will be imported
-     * @param deleteSource If true delete the source file.
-     * @param integrity    Apply data integrity
-     * @param onProgress   Progress to notify
+     * @param {IRealFile} fileToImport The source file that will be imported in to the drive.
+     * @param {IRealFile} dir          The target directory in the drive that the file will be imported
+     * @param {boolean} deleteSource If true delete the source file.
+     * @param {boolean} integrity    Apply data integrity
+     * @param {onProgress | null} onProgress   Progress to notify
+     * @returns {Promise<IVirtualFile | null>} A promise which resolves to a virtual file or null
      */
     async importFile(fileToImport, dir, filename, deleteSource, integrity, onProgress) {
         if (this.isRunning())
@@ -134,7 +142,7 @@ export class FileImporter {
             let partSize = fileSize;
             // for js we make sure to allocate enough space for the file 
             // this will also create the header
-            let targetStream = await importedFile.getOutputStream(null);
+            let targetStream = await importedFile.getOutputStream();
             await targetStream.setLength(fileSize);
             await targetStream.close();
             // if we want to check integrity we align to the chunk size otherwise to the AES Block
@@ -174,9 +182,9 @@ export class FileImporter {
         __classPrivateFieldGet(this, _FileImporter_stopped, "f")[0] = true;
         return importedFile;
     }
-    getError(err) {
-        return err;
-    }
+    /**
+     * Close the importer and associated resources
+     */
     close() {
         for (let i = 0; i < __classPrivateFieldGet(this, _FileImporter_workers, "f").length; i++) {
             __classPrivateFieldGet(this, _FileImporter_workers, "f")[i].terminate();
@@ -184,9 +192,17 @@ export class FileImporter {
         }
         __classPrivateFieldSet(this, _FileImporter_promises, [], "f");
     }
+    /**
+     * Set the path to the worker script to use
+     * @param path The path
+     */
     setWorkerPath(path) {
         __classPrivateFieldSet(this, _FileImporter_workerPath, path, "f");
     }
+    /**
+     * Get the current worker script path
+     * @returns The path
+     */
     getWorkerPath() {
         return __classPrivateFieldGet(this, _FileImporter_workerPath, "f");
     }
@@ -256,13 +272,15 @@ _a = FileImporter, _FileImporter_workerPath = new WeakMap(), _FileImporter_buffe
             totalBytesRead[0] += results[i].totalBytesRead;
         }
     }).catch((err) => {
-        err = this.getError(err);
+        err = __classPrivateFieldGet(this, _FileImporter_instances, "m", _FileImporter_getError).call(this, err);
         console.error(err);
         __classPrivateFieldSet(this, _FileImporter_failed, true, "f");
         __classPrivateFieldSet(this, _FileImporter_lastException, err, "f");
         this.stop();
         throw new IOException("Error during import", err);
     });
+}, _FileImporter_getError = function _FileImporter_getError(err) {
+    return err;
 };
 /**
  * The global default buffer size to use when reading/writing on the SalmonStream.

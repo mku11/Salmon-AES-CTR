@@ -485,7 +485,7 @@ async function _SalmonDrive_verifyHash(salmonConfig, data, hashKey) {
     let hash = await SalmonIntegrity.calculateHash(__classPrivateFieldGet(this, _SalmonDrive_hashProvider, "f"), data, 0, data.length, hashKey, null);
     for (let i = 0; i < hashKey.length; i++)
         if (hashSignature[i] != hash[i])
-            throw new SalmonAuthException("Wrong Password");
+            throw new SalmonAuthException("Wrong password");
 }, _SalmonDrive_getDriveConfigFile = 
 /**
  * Return the drive configuration file.

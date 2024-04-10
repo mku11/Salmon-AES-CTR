@@ -47,14 +47,14 @@ export class FileSearcher {
     }
     /**
      * True if a search is running.
-     * @return
+     * @return True if running
      */
     isRunning() {
         return __classPrivateFieldGet(this, _FileSearcher_running, "f");
     }
     /**
      * True if last search was stopped by user.
-     * @return
+     * @return True if stopped.
      */
     isStopped() {
         return __classPrivateFieldGet(this, _FileSearcher_quit, "f");
@@ -140,6 +140,12 @@ async function _FileSearcher_searchDir(dir, terms, any, OnResultFound, searchRes
  */
 export var SearchEvent;
 (function (SearchEvent) {
+    /**
+     * Search files
+     */
     SearchEvent[SearchEvent["SearchingFiles"] = 0] = "SearchingFiles";
+    /**
+     * Search is complete
+     */
     SearchEvent[SearchEvent["SearchingFinished"] = 1] = "SearchingFinished";
 })(SearchEvent || (SearchEvent = {}));

@@ -22,7 +22,7 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 */
 /**
- * Thrown when there is a failure in the nonce sequencer.
+ * Thrown when there is a failure during authorization.
  */
 export class SalmonAuthException extends Error {
     /**

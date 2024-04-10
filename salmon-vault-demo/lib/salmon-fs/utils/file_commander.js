@@ -83,9 +83,9 @@ export class FileCommander {
             if (onProgressChanged != null)
                 onProgressChanged(new RealFileTaskProgress(fileToImport, 0, 1, count[0], total));
             if (sfile == null || !await sfile.exists())
-                sfile = await importDir.createDirectory(fileToImport.getBaseName(), null, null);
+                sfile = await importDir.createDirectory(fileToImport.getBaseName());
             else if (sfile != null && await sfile.exists() && await sfile.isFile() && autoRename != null)
-                sfile = await importDir.createDirectory(await autoRename(fileToImport), null, null);
+                sfile = await importDir.createDirectory(await autoRename(fileToImport));
             if (onProgressChanged != null)
                 onProgressChanged(new RealFileTaskProgress(fileToImport, 1, 1, count[0], total));
             count[0]++;
