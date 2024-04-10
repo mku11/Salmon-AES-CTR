@@ -60,6 +60,9 @@ Make sure you only include 1 suite file (ie: salmon-core.test.js or salmon-fs.te
 To run static code analysis:
 npm run lint
 
+To generate the HTML docs:
+npm run docs
+
 if build is failing and you're missing tsc as a node module type:
 npm install -g typescript
 

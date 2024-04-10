@@ -22,6 +22,9 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 */
 
+/**
+ * File Utilities
+ */
 export class FileUtils {
     /**
      * Detect if filename is a text file.
@@ -67,7 +70,7 @@ export class FileUtils {
     /**
      * Detect if filename is a pdf file.
      * @param filename The file name
-     * @return
+     * @return True if pdf
      */
     public static isPdf(filename: string): boolean {
         let ext: string = FileUtils.getExtensionFromFileName(filename).toLowerCase();
@@ -78,6 +81,7 @@ export class FileUtils {
      * Return the extension of a filename.
      *
      * @param fileName The file name
+     * @returns File name extension
      */
     public static getExtensionFromFileName(fileName: string): string {
         if (fileName == null)
@@ -93,6 +97,7 @@ export class FileUtils {
      * Return a filename without extension
      *
      * @param fileName The file name
+     * @returns File name without extension
      */
     public static getFileNameWithoutExtension(fileName: string): string {
         if (fileName == null)
@@ -104,6 +109,12 @@ export class FileUtils {
             return "";
     }
 
+    /**
+     * 
+     * @param type The file class type string (ie: 'JsFile')
+     * @param param The file constructor parameter
+     * @returns A file object (ie: JsFile)
+     */
     public static async getInstance(type: string, param: any) {
         switch (type) {
             case 'JsNodeFile':

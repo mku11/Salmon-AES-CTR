@@ -61,6 +61,7 @@ node_modules
 /libs/projects/SalmonLibsTypeScript.VS2022/SalmonLibsTypeScript.VS2022/eslintreport.txt
 /libs/projects/SalmonLibsTypeScript.VS2022/SalmonLibsTypeScript.VS2022/lintreport.txt
 /libs/projects/SalmonLibsTypeScript.VS2022/SalmonLibsTypeScript.VS2022/test/data
+/libs/projects/SalmonLibsTypeScript.VS2022/SalmonLibsTypeScript.VS2022/jsdoc
 
 /samples/JavascriptSamples/lib
 /samples/PythonSamples/lib

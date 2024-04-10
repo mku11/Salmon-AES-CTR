@@ -121,20 +121,29 @@ export abstract class FileImporter {
     /**
      * True if importer is currently running a job.
      *
-     * @return
+     * @return True if running
      */
     public isRunning(): boolean {
         return !this.#stopped[0];
     }
 
     /**
+     * Progress listener
+     *
+     * @callback onProgress
+     * @param {number} position The current position
+     * @param {number} length The total length
+     */
+
+    /**
      * Imports a real file into the drive.
      *
-     * @param fileToImport The source file that will be imported in to the drive.
-     * @param dir          The target directory in the drive that the file will be imported
-     * @param deleteSource If true delete the source file.
-	 * @param integrity    Apply data integrity
-	 * @param onProgress   Progress to notify
+     * @param {IRealFile} fileToImport The source file that will be imported in to the drive.
+     * @param {IRealFile} dir          The target directory in the drive that the file will be imported
+     * @param {boolean} deleteSource If true delete the source file.
+	 * @param {boolean} integrity    Apply data integrity
+	 * @param {onProgress | null} onProgress   Progress to notify
+     * @returns {Promise<IVirtualFile | null>} A promise which resolves to a virtual file or null
      */
     public async importFile(fileToImport: IRealFile, dir: IVirtualFile , filename: string,
                                  deleteSource: boolean, integrity: boolean, onProgress: ((position: number, length: number)=>void) | null): Promise<IVirtualFile | null>{
@@ -266,7 +275,7 @@ export abstract class FileImporter {
                     totalBytesRead[0] += results[i].totalBytesRead;
                 }
             }).catch((err) => {
-                err = this.getError(err);
+                err = this.#getError(err);
                 console.error(err);
                 this.#failed = true;
                 this.#lastException = err;
@@ -275,10 +284,13 @@ export abstract class FileImporter {
             });
     }
 
-    public getError(err: any) {
+    #getError(err: any) {
         return err;
     }
 
+    /**
+     * Close the importer and associated resources
+     */
     public close(): void {
         for(let i=0; i<this.#workers.length; i++) {
             this.#workers[i].terminate();
@@ -287,10 +299,18 @@ export abstract class FileImporter {
         this.#promises = [];
     }
 
+    /**
+     * Set the path to the worker script to use
+     * @param path The path
+     */
     public setWorkerPath(path: string) {
         this.#workerPath = path;
     }
 
+    /**
+     * Get the current worker script path
+     * @returns The path
+     */
     public getWorkerPath(): string {
         return this.#workerPath;
     }

@@ -37,7 +37,7 @@ export class FileSearcher {
 
     /**
      * True if a search is running.
-     * @return
+     * @return True if running
      */
     public isRunning(): boolean {
         return this.#running;
@@ -45,7 +45,7 @@ export class FileSearcher {
 
     /**
      * True if last search was stopped by user.
-     * @return
+     * @return True if stopped.
      */
     public isStopped(): boolean {
         return this.#quit;
@@ -142,6 +142,13 @@ export class FileSearcher {
  * Event status types.
  */
 export enum SearchEvent {
-    SearchingFiles, SearchingFinished
+    /**
+     * Search files
+     */
+    SearchingFiles,
+    /**
+     * Search is complete
+     */ 
+    SearchingFinished
 }
 
