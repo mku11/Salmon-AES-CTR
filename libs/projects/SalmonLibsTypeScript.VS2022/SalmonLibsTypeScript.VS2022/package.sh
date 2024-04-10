@@ -5,7 +5,7 @@ OUTPUT_ROOT=../../../../output
 TS_OUTPUT_DIR=$OUTPUT_ROOT/typescript
 JS_OUTPUT_DIR=$OUTPUT_ROOT/javascript
 
-VERSION=1.0.6-SNAPSHOT
+VERSION=2.0.0
 PACKAGES_DIR=packages
 SALMON_CORE=salmon-core
 SALMON_FS=salmon-fs
