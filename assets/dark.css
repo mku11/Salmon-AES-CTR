@@ -1,0 +1,29 @@
+body {
+		background-color: black;
+	color: white;
+	font-family: monospace;
+	font-size: 12pt;
+}
+
+.site-container {
+	position: absolute;
+	top: 15%;
+	left: 0;
+	right: 0;
+	margin: auto;
+	width: 75%;
+}
+
+.app-icon-container {
+	text-align: center;
+}
+
+
+.demo-link-container {
+	text-align: center;
+	padding: 10pt;
+}
+
+.demo-link {
+	color: cyan;
+}

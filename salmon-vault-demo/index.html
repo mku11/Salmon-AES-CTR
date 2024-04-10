@@ -1,0 +1,142 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link rel="shortcut icon" href="./favicon.ico">
+    <title>Salmon Vault</title>
+    <link rel="stylesheet" type="text/css" href="css/navbar.css">
+    <link rel="stylesheet" type="text/css" href="css/main.css">
+    <link rel="stylesheet" type="text/css" href="css/modal.css">
+    <link rel="stylesheet" type="text/css" href="css/dialog.css">
+    <link rel="stylesheet" type="text/css" href="css/image-viewer.css">
+    <link rel="stylesheet" type="text/css" href="css/text-editor.css">
+    <link rel="stylesheet" type="text/css" href="css/media-player.css">
+    <link rel="stylesheet" type="text/css" href="css/settings.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/jquery-contextmenu/2.7.1/jquery.contextMenu.min.css">
+    <link rel="stylesheet" type="text/css" href="css/dark.css">
+</head>
+
+<body>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery-contextmenu/2.7.1/jquery.contextMenu.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery-contextmenu/2.7.1/jquery.ui.position.js"></script>
+    <script src="common/utils/navbar_utils.js"></script>
+    <script type="module" src="setup.js"></script>
+    <script type="module" src="vault/main/main.js"></script>
+    <div id="app-container" class="app-container">
+        <div id="app-title" class="app-title">
+            <img id="app-icon" class="app-icon" src="common-res/icons/logo_48x48.png">
+                <div id="app-title-text" class="app-title-text">Salmon Vault</div>
+        </div>
+        <div id="menu-container" class="menu-container">
+            <div id="fileMenu" class="dropdown">
+                <button onclick="onMenuClicked('fileDropdown')" class="dropbtn">File
+                    <i class="fa fa-caret-down"></i></button>
+                <div id="fileDropdown" class="dropdown-content">
+                    <a href="javascript:mainController.onOpenVault()">Open Vault (Ctrl-O)</a>
+                    <a href="javascript:mainController.onCreateVault()">New Vault (Ctrl-N)</a>
+                    <a href="javascript:mainController.onCloseVault()">Close Vault (Ctrl-Q)</a>
+                    <a href="javascript:mainController.onChangePassword()">Change Password</a>
+                    <SeparatorMenuItem />
+                    <a href="javascript:mainController.onImportAuth()">Import Auth File</a>
+                    <a href="javascript:mainController.onExportAuth()">Export Auth File</a>
+                    <a href="javascript:mainController.onRevokeAuth()">Revoke Auth</a>
+                    <a href="javascript:mainController.onDisplayAuthId()">Display Auth ID</a>
+                    <SeparatorMenuItem />
+                    <a href="javascript:mainController.onSettings()">Settings</a>
+                    <SeparatorMenuItem />
+                </div>
+            </div>
+            <div id="editMenu" class="dropdown">
+                <button onclick="onMenuClicked('editDropdown')" class="dropbtn">Edit</button>
+                <div id="editDropdown" class="dropdown-content">
+                    <a href="javascript:mainController.onNewFolder()">New Folder</a>
+                    <SeparatorMenuItem />
+                    <a href="javascript:mainController.onCopy()">Copy (Ctrl-C)</a>
+                    <a href="javascript:mainController.onCut()">Cut (Ctrl-X)</a>
+                    <a href="javascript:mainController.onPaste()">Paste (Ctrl-V)</a>
+                    <a href="javascript:mainController.onDelete()">Delete (Del)</a>
+                </div>
+            </div>
+            <div id="operationsMenu" class="dropdown">
+                <button onclick="onMenuClicked('operationsDropdown')" class="dropbtn">Operations</button>
+                <div id="operationsDropdown" class="dropdown-content">
+                    <a href="javascript:mainController.onImport()">Import Files (Ctrl-I)</a>
+                    <a href="javascript:mainController.onExport()">Export Files (Ctrl-E)</a>
+                    <a href="javascript:mainController.onExportAndDelete()">Export Files And Delete (Ctrl-U)</a>
+                    <a href="javascript:mainController.onSearch()">Search (Ctrl-F)</a>
+                    <a href="javascript:mainController.onRefresh()">Refresh (Ctrl-R)</a>
+                    <a href="javascript:mainController.onBack()">Back (Backspace)</a>
+                    <a href="javascript:mainController.onStop()">Stop</a>
+                </div>
+            </div>
+            <div id="helpMenu" class="dropdown">
+                <button onclick="onMenuClicked('helpDropdown')" class="dropbtn">Help</button>
+                <div id="helpDropdown" class="dropdown-content">
+                    <a href="javascript:mainController.onAbout()">About</a>
+                </div>
+            </div>
+        </div>
+        <div id="path-container" class="path-container">
+            <button onclick="mainController.onBack()" id="upButton" class="path-button">
+                <img id="upImage" class="path-button-image" src="common-res/icons/up.png" />
+            </button>
+            <input type="text" readonly="true" id="path" class="path-input" value=""></input>
+            <button onclick="mainController.onRefresh()" id="refreshButton" class="path-button">
+                <img id="refreshImage" class="path-button-image" src="common-res/icons/refresh.png" />
+            </button>
+        </div>
+        <div id="table-container" class="table-container">
+            <table id="table" class="table">
+                <thead class="table-header">
+                    <tr>
+                        <th name="image" type="image" class="th-file-image file-image">
+                            <div class="th-file-image"></div>
+                        </th>
+                        <th name="name" type="text" class="th-file-name file-name">
+                            <div class="th-text th-resizable th-file-name">Name</div>
+                        </th>
+                        <th name="date" type="text" class="th-file-date file-date">
+                            <div class="th-text th-resizable th-file-date">Date Modified</div>
+                        </th>
+                        <th name="type" type="text" class="th-file-type file-type">
+                            <div class="th-text th-resizable th-file-type">Type</div>
+                        </th>
+                        <th name="size" type="text" class="th-file-size file-size">
+                            <div class="th-text th-resizable th-file-size">Size</div>
+                        </th>
+                    </tr>
+                </thead>
+                <tbody id="table-body" class="table-body"></tbody>
+            </table>
+        </div>
+        <div id="progress-layout-container" class="progress-layout-container">
+            <div id="progress-layout-containers" class="progress-layout-containers">
+            <div id="progress-containers" class="progress-containers">
+                <div id="file-progress-container" class="file-progress-container">
+                    <span id="file-progress-text" class="file-progress-text">0%</span>
+                    <div>
+                        <progress id="file-progress" value="0" class="file-progress"></progress>
+                    </div>
+                </div>
+                <div id="files-progress-container" class="file-progress-container">
+                    <span id="files-progress-text" class="file-progress-text">0%</span>
+                    <div>
+                        <progress id="files-progress" value="0" class="file-progress"></progress>
+                    </div> 
+                </div>
+            </div>
+            </div>
+        </div>
+        <div id="status-container" class="status-container">
+            <span id="status" class="status"></span>
+        </div>
+        <div id="debug-console-container" class="debug-console-container">
+            <textarea id="debug-console" class="debug-console" rows="8" spellcheck="false"></textarea>
+        </div>
+    </div>
+</body>
+
+</html>

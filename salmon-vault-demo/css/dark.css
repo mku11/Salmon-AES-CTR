@@ -1,0 +1,147 @@
+body {
+    background-color: black;
+}
+
+.app-container {
+    background-color: #2d3343;
+}
+
+.app-title {
+    background-color: #485167bb;
+    color: white;
+}
+
+.menu-container {
+    background-color: white;
+    background-image: linear-gradient(to bottom, #2d3343BB, #2d3343FF);
+    margin: 4pt;
+    border-width: 1pt;
+    border-style: solid;
+}
+
+.menu-container a:hover,
+.dropdown:hover .dropbtn,
+.dropbtn:focus {
+    background: white;
+    background-color: #2d3343AA;
+}
+
+.dropdown-content {
+    border-end-start-radius: 2pt;
+    border-end-end-radius: 2pt;
+    box-shadow: #2d3343;
+}
+
+.dropdown-content a {
+    background-color: #2d3343DD;
+    color: white;
+}
+
+.div {
+    color: white;
+}
+
+.dialog-button {
+    background: white;
+    background-color: #2d3343;
+    color: white;
+}
+
+.dialog-button:hover {
+    background: white;
+    background-color: #485167bb;
+}
+
+.th-row {
+    background-color: black;
+    color: white;
+}
+
+.td-cell:selected {
+    background-color: #909090;
+    color: white;
+}
+
+.progress-bar {
+    color: #3f4f4f;
+}
+
+.path-button {
+    background: #2d3343BB;
+}
+
+.path-input {
+    background: white;
+    background-color: #485167bb;
+    color: white;
+}
+
+.td-cell {
+    color: white;
+}
+
+.table-container {
+    background-color: black;
+}
+
+.table-container th {
+    background-color: #2d3343FF;
+    color: white;
+}
+
+.image-text {
+    color: black;
+}
+
+.tr-row {
+    background-color: black;
+}
+
+.tr-row-selected {
+    background-color: #71727f;
+}
+
+.status {
+    color: white;
+}
+
+.debug-console {
+    color: white;
+    background-color: black;
+}
+
+.file-progress-text {
+    color:white;
+}
+
+.file-progress {
+    accent-color: #485167bb;
+}
+
+.modal-content {
+    background-color: #2d3343FF;
+    color: white;
+}
+
+.modal-close:hover {
+    background: white;
+    background-color: #2d3343AA;
+}
+
+.dialog-input {
+    background: white;
+    background-color: #485167bb;
+    color: white;
+}
+
+.text-editor-text {
+    background: white;
+    background-color: #485167bb;
+    color: white;
+}
+
+.search-text {
+    background: white;
+    background-color: #485167bb;
+    color: white;
+}
