@@ -52,7 +52,6 @@ import { TextEditorController } from "./text_editor_controller.js";
 import { SettingsController } from "./settings_controller.js";
 import { MediaPlayerController } from "./media_player_controller.js";
 import { Thumbnails } from "../image/thumbnails.js";
-import { SalmonConfig } from "../config/salmon_config.js";
 
 export class MainController {
     static MAX_TEXT_FILE = 1 * 1024 * 1024;
@@ -238,7 +237,7 @@ export class MainController {
     }
 
     onOpenVault() {
-        SalmonDialogs.promptOpenVault(SalmonConfig.OPEN_VAULT_MESSAGE);
+        SalmonDialogs.promptOpenVault();
     }
 
     onCreateVault() {

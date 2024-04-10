@@ -24,15 +24,12 @@ SOFTWARE.
 
 export class SalmonConfig {
     static APP_NAME = "Salmon Vault";
-    static VERSION = "2.0.0";
+    static VERSION = "1.0.6-SNAPSHOT";
     static ABOUT_TEXT = "License: MIT License\n\n" +
             "For more information visit the project website";
     static SourceCodeURL = "https://github.com/mku11/Salmon-AES-CTR";
     static FILE_SEQ_FILENAME = "config.json";
     static APP_ICON = "common-res/icons/logo_48x48.png";
-	static OPEN_VAULT_MESSAGE = "Choose Local to open a vault located in your computer.\n"
-            + "Choose Remote to specify a remote vault in a web host.\n\n"
-            + "* Local vault support is only available for Chrome desktop browser.";
     
     static getVersion() {
         return SalmonConfig.VERSION;

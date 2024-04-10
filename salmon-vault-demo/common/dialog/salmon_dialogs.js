@@ -227,8 +227,10 @@ export class SalmonDialogs {
             SalmonVaultManager.REQUEST_CREATE_VAULT_DIR);
     }
 
-    static promptOpenVault(msg) {
-        SalmonDialog.promptDialog("Open Vault", msg,
+    static promptOpenVault() {
+        SalmonDialog.promptDialog("Open Vault", "Choose Local to open a vault located in your computer.\n"
+            + "Choose Remote to specify a remote vault in a web host.\n\n"
+            + "* Local vault support is only available for Chrome desktop browser.",
             "Local", () => {
                 this.promptOpenLocalVault();
             }, "Remote", () => {
