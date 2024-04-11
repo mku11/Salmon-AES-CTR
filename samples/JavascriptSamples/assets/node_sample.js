@@ -5,8 +5,9 @@ import { SalmonDecryptor } from '../lib/salmon-core/salmon/salmon_decryptor.js';
 import { BitConverter } from '../lib/salmon-core/convert/bit_converter.js';
 import { SalmonGenerator } from '../lib/salmon-core/salmon/salmon_generator.js';
 
-SalmonEncryptor.setWorkerPath('../lib/salmon-core/salmon/salmon_decryptor_worker.js');
-SalmonDecryptor.setWorkerPath('../lib/salmon-core/salmon/salmon_decryptor_worker.js');
+// set the path for the multithreaded workers
+Sample.encryptorWorkerPath = '../lib/salmon-core/salmon/salmon_encryptor_worker.js';
+Sample.decryptorWorkerPath = '../lib/salmon-core/salmon/salmon_decryptor_worker.js';
 
 // use the password to create a drive and import the file
 let vaultPath = "vault_" + BitConverter.toHex(SalmonGenerator.getSecureRandomBytes(6));

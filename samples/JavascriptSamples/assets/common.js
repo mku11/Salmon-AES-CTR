@@ -20,7 +20,6 @@ import { SalmonFileCommander } from '../lib/salmon-fs/salmon/utils/salmon_file_c
 import { SalmonFileReadableStream } from '../lib/salmon-fs/salmon/streams/salmon_file_readable_stream.js';
 import { SalmonPassword } from '../lib/salmon-core/salmon/password/salmon_password.js';
 import { RandomAccessStream, SeekOrigin } from '../lib/salmon-core/streams/random_access_stream.js';
- 
 
 let text = "This is plaintext that will be encrypted";
 let data = new Uint8Array(1 * 1024 * 1024);
@@ -46,6 +45,8 @@ function print(msg) {
 }
 		
 export class Sample {
+	encryptorWorkerPath = null;
+	decryptorWorkerPath = null;
 
     static async getKeyFromPassword(password) {
         // get a key from a text password:
@@ -77,12 +78,16 @@ export class Sample {
 
         // encrypt a byte array using 2 threads
 		let encryptor = new SalmonEncryptor(2);
+		if(Sample.encryptorWorkerPath != null)
+			encryptor.setWorkerPath(Sample.encryptorWorkerPath);
         let encBytes = await encryptor.encrypt(bytes, key, nonce, false);
         print( "Encrypted bytes: " + BitConverter.toHex(encBytes).substring(0, 24) + "..." );
         encryptor.close();
 
         // decrypt byte array using 2 threads
 		let decryptor = new SalmonDecryptor(2);
+		if(Sample.decryptorWorkerPath != null)
+			decryptor.setWorkerPath(Sample.decryptorWorkerPath);
         let decBytes = await decryptor.decrypt(encBytes, key, nonce, false);
         print( "Decrypted bytes: " + BitConverter.toHex(decBytes).substring(0, 24) + "..." );
         print();
