@@ -36,15 +36,15 @@ Python 3.11+
 Typescript/Javascript ES2020  
   
 **Platforms/Browsers**:  
-Xamarin,MAUI,WPF  
+Xamarin, MAUI, WPF  
 JavaFX  
 Chrome (Local Drives)  
 Chrome, Firefox, Safari (Remote Drives read-only)  
   
-**Operating Systems**  
-Windows 10+ x86_64  
-MacOS 10.11+  
-Linux Debian 11+  
+**Operating Systems (Tested)**  
+Windows 10 x86_64  
+MacOS 10.11  
+Linux Debian 11  
 
 ## Why Salmon?
 
