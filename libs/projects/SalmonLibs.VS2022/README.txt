@@ -8,12 +8,12 @@ To build the native libraries you will need TinyAES
 To download Tiny Aes source code from the project root folder type:
 git submodule update --recursive --init
 
-Build:
-You can build from the windows command line:
-msbuild /p:Configuration=Release /p:Platform=x64
-
 Restore nuget packages:
 msbuild -t:restore 
+
+Build:
+You can build from the windows command line:
+msbuild /p:Configuration=Release
 
 To clean:
 msbuild -t:clean

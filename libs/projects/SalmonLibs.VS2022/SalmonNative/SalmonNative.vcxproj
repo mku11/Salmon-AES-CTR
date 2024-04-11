@@ -122,7 +122,7 @@
       <EnableUAC>false</EnableUAC>
     </Link>
     <PostBuildEvent>
-      <Command>..\packages\NuGet.CommandLine.6.7.0\tools\NuGet.exe pack SalmonNative.nuspec -outputDir ..\..\..\..\output\nuget\releases</Command>
+      <Command>NuGet.exe pack SalmonNative.nuspec -outputDir ..\..\..\..\output\nuget\releases</Command>
     </PostBuildEvent>
     <PostBuildEvent>
       <Message>Creating nuget package</Message>
@@ -148,7 +148,7 @@
       <EnableUAC>false</EnableUAC>
     </Link>
     <PostBuildEvent>
-      <Command>..\packages\NuGet.CommandLine.6.7.0\tools\NuGet.exe pack SalmonNative.nuspec -outputDir ..\..\..\..\output\nuget\releases</Command>
+      <Command>NuGet.exe pack SalmonNative.nuspec -outputDir ..\..\..\..\output\nuget\releases</Command>
     </PostBuildEvent>
     <PostBuildEvent>
       <Message>Creating nuget package</Message>
