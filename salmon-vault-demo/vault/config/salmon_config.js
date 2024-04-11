@@ -24,7 +24,7 @@ SOFTWARE.
 
 export class SalmonConfig {
     static APP_NAME = "Salmon Vault";
-    static VERSION = "1.0.6-SNAPSHOT";
+    static VERSION = "2.0.0";
     static ABOUT_TEXT = "License: MIT License\n\n" +
             "For more information visit the project website";
     static SourceCodeURL = "https://github.com/mku11/Salmon-AES-CTR";
