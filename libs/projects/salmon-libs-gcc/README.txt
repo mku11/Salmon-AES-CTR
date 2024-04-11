@@ -21,6 +21,10 @@ sudo apt install gcc-aarch64-linux-gnu
 To build on a macos machine you will need:
 brew install gcc make
 
+If you need TinyAES:
+To download Tiny Aes source code from the project root folder type:
+git submodule update --recursive --init
+
 Build:
 make PLATFORM=<value> ARCH=<value> USE_TINY_AES=<value> ENABLE_JNI=<value>
 PLATFORM is the target OS, value: win, linux, macos
@@ -35,7 +39,7 @@ For macos x86 64bit:
 make PLATFORM=macos ARCH=x86_64 USE_TINY_AES=1 ENABLE_JNI=1
 
 For linux x86 64bit:
-make PLATFORM=macos ARCH=x86_64 USE_TINY_AES=1 ENABLE_JNI=1
+make PLATFORM=linux ARCH=x86_64 USE_TINY_AES=1 ENABLE_JNI=1
 
 To build a package:  
-make package ARCH=x86_64 USE_TINY_AES=1 ENABLE_JNI=1
+make package PLATFORM=win ARCH=x86_64 USE_TINY_AES=1 ENABLE_JNI=1
