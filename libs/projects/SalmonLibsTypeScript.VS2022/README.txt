@@ -72,4 +72,5 @@ npm install @types/node --save-dev
 if you're getting errors from node_modules set folder to hidden in file explorer and reload project
 
 To create the packages run:
+dos2unix package.sh  
 ./package.sh
