@@ -35,7 +35,7 @@ internal class Response
     }
 
     public static string GenerateResponse(string driveID, string authID,
-        ResponseStatus status, SalmonSequence.Status? seqStatus = null,
+        ResponseStatus status, NonceSequence.Status? seqStatus = null,
         byte[] nextNonce = null, byte[] maxNonce = null, string error = null)
     {
         MemoryStream stream = new MemoryStream();

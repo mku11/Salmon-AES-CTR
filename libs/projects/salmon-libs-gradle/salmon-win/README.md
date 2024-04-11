@@ -14,9 +14,9 @@ repositories {
     ...
 }
 dependencies {
-	implementation 'com.mku.salmon:salmon-core:1.0.5'
-    implementation 'com.mku.salmon:salmon-fs:1.0.5'
-    implementation 'com.mku.salmon:salmon-win:1.0.5'
+	implementation 'com.mku.salmon:salmon-core:2.0.0'
+    implementation 'com.mku.salmon:salmon-fs:2.0.0'
+    implementation 'com.mku.salmon:salmon-win:2.0.0'
 }
 ```
 

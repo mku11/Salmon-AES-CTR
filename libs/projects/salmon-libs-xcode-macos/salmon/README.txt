@@ -1,5 +1,5 @@
 Salmon native library for MacOS
-version: 1.0.6-SNAPSHOT  
+version: 2.0.0  
 project: https://github.com/mku11/Salmon-AES-CTR  
 license: MIT License https://github.com/mku11/Salmon-AES-CTR/blob/main/LICENSE  
   

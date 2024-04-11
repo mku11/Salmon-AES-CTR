@@ -32,14 +32,14 @@ public class SequenceServer
 {
     public delegate void WriteLog(string entry, bool error = false);
     public delegate void OnError(Exception ex);
-    private ISalmonSequencer sequencer;
+    private INonceSequencer sequencer;
 
     private string pipeName;
     private WriteLog writeLog;
     private OnError onError;
     NamedPipeServerStream? server;
 
-    public SequenceServer(string pipeName, ISalmonSequencer sequencer,
+    public SequenceServer(string pipeName, INonceSequencer sequencer,
         WriteLog writeLog, OnError onError)
     {
         this.pipeName = pipeName;
@@ -125,33 +125,33 @@ public class SequenceServer
                 case RequestType.CreateSequence:
                     sequencer.CreateSequence(request.driveID, request.authID);
                     response = Response.GenerateResponse(request.driveID, request.authID,
-                            Response.ResponseStatus.Ok, SalmonSequence.Status.New);
+                            Response.ResponseStatus.Ok, NonceSequence.Status.New);
                     break;
                 case RequestType.InitSequence:
                     sequencer.InitSequence(request.driveID, request.authID,
                         request.nextNonce, request.maxNonce);
                     response = Response.GenerateResponse(request.driveID, request.authID,
-                            Response.ResponseStatus.Ok, SalmonSequence.Status.Active);
+                            Response.ResponseStatus.Ok, NonceSequence.Status.Active);
                     break;
                 case RequestType.SetMaxNonce:
                     sequencer.SetMaxNonce(request.driveID, request.authID,
                         request.maxNonce);
                     response = Response.GenerateResponse(request.driveID, request.authID,
-                            Response.ResponseStatus.Ok, SalmonSequence.Status.Active);
+                            Response.ResponseStatus.Ok, NonceSequence.Status.Active);
                     break;
                 case RequestType.NextNonce:
                     byte[] nonce = sequencer.NextNonce(request.driveID);
                     response = Response.GenerateResponse(request.driveID, request.authID,
-                        Response.ResponseStatus.Ok, SalmonSequence.Status.Active, nonce);
+                        Response.ResponseStatus.Ok, NonceSequence.Status.Active, nonce);
                     break;
                 case RequestType.RevokeSequence:
                     sequencer.RevokeSequence(request.driveID);
                     response = Response.GenerateResponse(request.driveID, request.authID,
-                            Response.ResponseStatus.Ok, SalmonSequence.Status.Revoked);
+                            Response.ResponseStatus.Ok, NonceSequence.Status.Revoked);
                     break;
                 case RequestType.GetSequence:
-                    SalmonSequence sequence = sequencer.GetSequence(request.driveID);
-                    response = Response.GenerateResponse(sequence.DriveID, sequence.AuthID,
+                    NonceSequence sequence = sequencer.GetSequence(request.driveID);
+                    response = Response.GenerateResponse(sequence.DriveId, sequence.AuthId,
                         Response.ResponseStatus.Ok, sequence.SequenceStatus, sequence.NextNonce, sequence.MaxNonce);
                     break;
             }

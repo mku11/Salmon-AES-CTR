@@ -23,7 +23,7 @@ SOFTWARE.
 */
 
 using Mku.File;
-using Mku.Sequence;
+using Mku.Salmon.Sequence;
 using Salmon.Config;
 using Salmon.Service.Sequence;
 using Salmon.Win.Sequencer;

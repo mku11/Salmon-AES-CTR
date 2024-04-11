@@ -5,7 +5,7 @@ plugins {
 
 group 'com.mku.salmon'
 description = 'Salmon AES256 CTR android native encryption library'
-version '1.0.6-SNAPSHOT'
+version '2.0.0'
 
 repositories {
     maven {
@@ -73,7 +73,7 @@ java {
 }
 
 dependencies {
-    implementation 'com.mku.salmon:salmon-core:1.0.6-SNAPSHOT'
+    implementation 'com.mku.salmon:salmon-core:2.0.0'
 }
 
 publishing {
