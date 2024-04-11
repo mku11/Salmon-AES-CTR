@@ -16,6 +16,7 @@ install dependencies:
 python -m pip install python-interface typeguard pycryptodome wrapt  
   
 to package:  
+dos2unix package_salmon_fs.sh  
 ./package_salmon_fs.sh  
   
 To install:  
