@@ -5,7 +5,7 @@ To build the javascript libraries you will need:
 2. Visual Studio (optional)
 3. Visual Studio Code (recommended - right click on the workspace file and "Open with Code")
 
-to run the unit tests you will need:
+To run the unit tests you will need:
 1. nodejs
 2. jest
 

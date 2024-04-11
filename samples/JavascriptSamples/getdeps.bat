@@ -1,4 +1,4 @@
-set version=1.0.6-SNAPSHOT
+set version=2.0.0
 rmdir packages /S /Q
 mkdir packages
 rmdir lib /S /Q
