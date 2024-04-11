@@ -34,7 +34,7 @@ make sure you restart VS code.
 To turn off auto running test cases:
 "jest.autoRun": "off",
 
-To build from the command line:
+To build/transpile from typescript to javascript from the command line:
 npm run build
 
 To run the tests from the command line:
@@ -51,20 +51,23 @@ Open Visual studio
 Rebuild Project
 Open Test Explorer and run test cases as per usual
 
-To run test cases in the browser:
-Include the following in your html, all output will be in the console.
-Make sure you only include 1 suite file (ie: salmon-core.test.js or salmon-fs.test.js)
-<script type="module" src="test/setup_browser_test_runner.js"/></script>
-<script type="module" src="test/salmon-core/salmon-core.test.js"/></script>
+To run test cases in Chrome:
+Open index.html in Chrome and choose the test suite then click execute.
+If you test salmon-fs you need to choose the root of your test folder, by default it's "d:\temp"
+then click execute.
 
 To run static code analysis:
 npm run lint
+npm run eslint
 
 To generate the HTML docs:
 npm run docs
 
 if build is failing and you're missing tsc as a node module type:
 npm install -g typescript
+
+if build is failed due to error TS2688: Cannot find type definition file for 'node'.
+npm install @types/node --save-dev
 
 if you're getting errors from node_modules set folder to hidden in file explorer and reload project
 
