@@ -62,6 +62,9 @@ ifeq ($(ENABLE_JNI),1)
   ifeq ($(PLATFORM),linux)
 	CFLAGS+=-I"$(JAVA_HOME)/include/linux"
   endif
+  ifeq ($(PLATFORM),macos)
+	CFLAGS+=-I"$(JAVA_HOME)/include/darwin"
+  endif
 endif
 
 OBJ_DIR=obj
