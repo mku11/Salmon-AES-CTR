@@ -26,8 +26,8 @@ SOFTWARE.
 import com.mku.func.BiConsumer;
 import com.mku.func.Function;
 import com.mku.func.TriConsumer;
-import com.mku.io.RandomAccessStream;
-import com.mku.utils.SalmonFileUtils;
+import com.mku.streams.RandomAccessStream;
+import com.mku.utils.FileUtils;
 
 import java.io.FileNotFoundException;
 import java.io.IOException;
@@ -38,36 +38,35 @@ import java.util.Calendar;
  * Interface that represents a real file. This class is used internally by the virtual disk to
  * import, store, and export the encrypted files.
  * Extend this to provide an interface to any file system, platform, or API ie: on disk, memory, network, or cloud.
- * See: {@link JavaFile}
  */
 public interface IRealFile {
     /**
      * True if this file exists.
      *
-     * @return
+     * @return True if file exists
      */
     boolean exists();
 
     /**
      * Delete this file.
      *
-     * @return
+     * @return True if file deleted.
      */
     boolean delete();
 
     /**
      * Get a stream for reading the file.
      *
-     * @return
-     * @throws FileNotFoundException
+     * @return The input stream
+     * @throws FileNotFoundException Thrown if file not found
      */
     RandomAccessStream getInputStream() throws FileNotFoundException;
 
     /**
      * Get a stream for writing to the file.
      *
-     * @return
-     * @throws FileNotFoundException
+     * @return The output stream
+     * @throws FileNotFoundException Thrown if file not found
      */
     RandomAccessStream getOutputStream() throws FileNotFoundException;
 
@@ -76,7 +75,7 @@ public interface IRealFile {
      *
      * @param newFilename The new filename
      * @return True if success.
-     * @throws FileNotFoundException
+     * @throws FileNotFoundException Thrown if file not found
      */
     boolean renameTo(String newFilename) throws FileNotFoundException;
 
@@ -90,21 +89,21 @@ public interface IRealFile {
     /**
      * Get the count of files and subdirectories
      *
-     * @return
+     * @return The children count
      */
     int getChildrenCount();
 
     /**
      * Get the last modified date of the file.
      *
-     * @return
+     * @return The last date modified in milliseconds
      */
     long lastModified();
 
     /**
      * Get the absolute path of the file on disk.
      *
-     * @return
+     * @return The absolute path
      */
     String getAbsolutePath();
 
@@ -112,35 +111,35 @@ public interface IRealFile {
      * Get the original filepath of this file. This might symlinks or merged folders. To get the absolute path
      * use {@link #getAbsolutePath()}.
      *
-     * @return
+     * @return The file path
      */
     String getPath();
 
     /**
      * True if this is a file.
      *
-     * @return
+     * @return True if this is a file
      */
     boolean isFile();
 
     /**
      * True if this is a directory.
      *
-     * @return
+     * @return True if this is a directory.
      */
     boolean isDirectory();
 
     /**
      * Get all files and directories under this directory.
      *
-     * @return
+     * @return The files
      */
     IRealFile[] listFiles();
 
     /**
      * Get the basename of the file.
      *
-     * @return
+     * @return The base name
      */
     String getBaseName();
 
@@ -159,13 +158,12 @@ public interface IRealFile {
      */
     IRealFile getParent();
 
-
     /**
      * Create an empty file with the provided name.
      *
      * @param filename The name for the new file.
      * @return The newly create file.
-     * @throws IOException
+     * @throws IOException Thrown if there is an IO error.
      */
     IRealFile createFile(String filename) throws IOException;
 
@@ -174,6 +172,7 @@ public interface IRealFile {
      *
      * @param newDir The target directory.
      * @return The file after the move. Use this instance for any subsequent file operations.
+     * @throws IOException Thrown if there is an IO error.
      */
     IRealFile move(IRealFile newDir) throws IOException;
 
@@ -183,6 +182,7 @@ public interface IRealFile {
      * @param newDir  The target directory.
      * @param newName The new filename.
      * @return The file after the move. Use this instance for any subsequent file operations.
+     * @throws IOException Thrown if there is an IO error.
      */
     IRealFile move(IRealFile newDir, String newName) throws IOException;
 
@@ -193,15 +193,16 @@ public interface IRealFile {
      * @param newName          The new filename.
      * @param progressListener Observer to notify of the move progress.
      * @return The file after the move. Use this instance for any subsequent file operations.
+     * @throws IOException Thrown if there is an IO error.
      */
-    IRealFile move(IRealFile newDir, String newName, RandomAccessStream.OnProgressListener progressListener) throws IOException;
+    IRealFile move(IRealFile newDir, String newName, BiConsumer<Long, Long> progressListener) throws IOException;
 
     /**
      * Copy this file to another directory.
      *
      * @param newDir The target directory.
      * @return The file after the copy. Use this instance for any subsequent file operations.
-     * @throws IOException
+     * @throws IOException Thrown if there is an IO error.
      */
     IRealFile copy(IRealFile newDir) throws IOException;
 
@@ -211,7 +212,7 @@ public interface IRealFile {
      * @param newDir  The target directory.
      * @param newName The new filename.
      * @return The file after the copy. Use this instance for any subsequent file operations.
-     * @throws IOException
+     * @throws IOException Thrown if there is an IO error.
      */
     IRealFile copy(IRealFile newDir, String newName) throws IOException;
 
@@ -222,9 +223,9 @@ public interface IRealFile {
      * @param newName          The new filename.
      * @param progressListener Observer to notify of the copy progress.
      * @return The file after the copy. Use this instance for any subsequent file operations.
-     * @throws IOException
+     * @throws IOException Thrown if there is an IO error.
      */
-    IRealFile copy(IRealFile newDir, String newName, RandomAccessStream.OnProgressListener progressListener) throws IOException;
+    IRealFile copy(IRealFile newDir, String newName, BiConsumer<Long, Long> progressListener) throws IOException;
 
     /**
      * Get the file/directory matching the name provided under this directory.
@@ -237,10 +238,9 @@ public interface IRealFile {
     /**
      * Create a directory with the current filepath.
      *
-     * @return
+     * @return True if directory was created
      */
     boolean mkdir();
-
 
     /**
      * Copy contents of a file to another file.
@@ -249,11 +249,11 @@ public interface IRealFile {
      * @param dest             The target directory
      * @param delete           True to delete the source files when complete
      * @param progressListener The progress listener
-     * @return
-     * @throws IOException
+     * @return True if contents were copied
+     * @throws IOException Thrown if there is an IO error.
      */
     static boolean copyFileContents(IRealFile src, IRealFile dest, boolean delete,
-                                    RandomAccessStream.OnProgressListener progressListener)
+                                    BiConsumer<Long, Long> progressListener)
             throws IOException {
         RandomAccessStream source = src.getInputStream();
         RandomAccessStream target = dest.getOutputStream();
@@ -274,8 +274,8 @@ public interface IRealFile {
     /**
      * Copy a directory recursively
      *
-     * @param dest
-     * @throws IOException
+     * @param dest Destination directory
+     * @throws IOException Thrown if there is an IO error.
      */
     default void copyRecursively(IRealFile dest) throws IOException {
         copyRecursively(dest, null, null, true, null);
@@ -284,21 +284,21 @@ public interface IRealFile {
     /**
      * Copy a directory recursively
      *
-     * @param dest
-     * @param progressListener
-     * @param autoRename
+     * @param destDir The destination directory
+     * @param progressListener The progress listener
+     * @param autoRename The autorename function
      * @param autoRenameFolders Apply autorename to folders also (default is true)
-     * @param onFailed
-     * @throws IOException
+     * @param onFailed Callback if copy failed
+     * @throws IOException Thrown if there is an IO error.
      */
-    default void copyRecursively(IRealFile dest,
+    default void copyRecursively(IRealFile destDir,
                                  TriConsumer<IRealFile, Long, Long> progressListener,
                                  Function<IRealFile, String> autoRename,
                                  boolean autoRenameFolders,
                                  BiConsumer<IRealFile, Exception> onFailed) throws IOException {
         String newFilename = getBaseName();
         IRealFile newFile;
-        newFile = dest.getChild(newFilename);
+        newFile = destDir.getChild(newFilename);
         if (isFile()) {
             if (newFile != null && newFile.exists()) {
                 if (autoRename != null) {
@@ -309,7 +309,7 @@ public interface IRealFile {
                     return;
                 }
             }
-            this.copy(dest, newFilename, (position, length) ->
+            this.copy(destDir, newFilename, (position, length) ->
             {
                 if (progressListener != null) {
                     progressListener.accept(this, position, length);
@@ -318,10 +318,15 @@ public interface IRealFile {
         } else if (this.isDirectory()) {
             if (progressListener != null)
                 progressListener.accept(this, 0L, 1L);
+            if (destDir.getAbsolutePath().startsWith(this.getAbsolutePath())) {
+                if (progressListener != null)
+                    progressListener.accept(this, 1L, 1L);
+                return;
+            }
             if (newFile != null && newFile.exists() && autoRename != null && autoRenameFolders)
-                newFile = dest.createDirectory(autoRename.apply(this));
+                newFile = destDir.createDirectory(autoRename.apply(this));
             else if (newFile == null || !newFile.exists())
-                newFile = dest.createDirectory(newFilename);
+                newFile = destDir.createDirectory(newFilename);
             if (progressListener != null)
                 progressListener.accept(this, 1L, 1L);
 
@@ -335,6 +340,7 @@ public interface IRealFile {
      * Move a directory recursively
      *
      * @param dest The target directory
+     * @throws IOException Thrown if there is an IO error.
      */
     default void moveRecursively(IRealFile dest) throws IOException {
         moveRecursively(dest, null, null, true, null);
@@ -343,19 +349,20 @@ public interface IRealFile {
     /**
      * Move a directory recursively
      *
-     * @param dest              The target directory
-     * @param progressListener
-     * @param autoRename
+     * @param destDir              The target directory
+     * @param progressListener The progress listener
+     * @param autoRename The autorename function
      * @param autoRenameFolders Apply autorename to folders also (default is true)
-     * @param onFailed
+     * @param onFailed Callback when move failed
+     * @throws IOException Thrown if there is an IO error.
      */
-    default void moveRecursively(IRealFile dest,
+    default void moveRecursively(IRealFile destDir,
                                  TriConsumer<IRealFile, Long, Long> progressListener,
                                  Function<IRealFile, String> autoRename,
                                  boolean autoRenameFolders,
                                  BiConsumer<IRealFile, Exception> onFailed) throws IOException {
         // target directory is the same
-        if (getParent().getPath().equals(dest.getPath())) {
+        if (getParent().getPath().equals(destDir.getPath())) {
             if (progressListener != null) {
                 progressListener.accept(this, 0L, 1L);
                 progressListener.accept(this, 1L, 1L);
@@ -365,7 +372,7 @@ public interface IRealFile {
 
         String newFilename = getBaseName();
         IRealFile newFile;
-        newFile = dest.getChild(newFilename);
+        newFile = destDir.getChild(newFilename);
         if (isFile()) {
             if (newFile != null && newFile.exists()) {
                 if (newFile.getPath().equals(this.getPath()))
@@ -378,7 +385,7 @@ public interface IRealFile {
                     return;
                 }
             }
-            this.move(dest, newFilename, (position, length) ->
+            this.move(destDir, newFilename, (position, length) ->
             {
                 if (progressListener != null) {
                     progressListener.accept(this, position, length);
@@ -387,9 +394,14 @@ public interface IRealFile {
         } else if (this.isDirectory()) {
             if (progressListener != null)
                 progressListener.accept(this, 0L, 1L);
+            if (destDir.getAbsolutePath().startsWith(this.getAbsolutePath())) {
+                if (progressListener != null)
+                    progressListener.accept(this, 1L, 1L);
+                return;
+            }
             if ((newFile != null && newFile.exists() && autoRename != null && autoRenameFolders)
                     || newFile == null || !newFile.exists()) {
-                newFile = move(dest, autoRename.apply(this));
+                newFile = move(destDir, autoRename.apply(this));
                 return;
             }
             if (progressListener != null)
@@ -407,8 +419,8 @@ public interface IRealFile {
 
     /**
      * Delete a directory recursively
-     * @param progressListener
-     * @param onFailed
+     * @param progressListener The progress listener
+     * @param onFailed Callback when delete failed
      */
     default void deleteRecursively(TriConsumer<IRealFile, Long, Long> progressListener,
                                    BiConsumer<IRealFile, Exception> onFailed) {
@@ -440,11 +452,11 @@ public interface IRealFile {
     /**
      * Get an auto generated copy of a filename
      *
-     * @param filename
-     * @return
+     * @param filename The file name
+     * @return The new file name
      */
     static String autoRename(String filename) {
-        String ext = SalmonFileUtils.getExtensionFromFileName(filename);
+        String ext = FileUtils.getExtensionFromFileName(filename);
         String filenameNoExt;
         if (ext.length() > 0)
             filenameNoExt = filename.substring(0, filename.length() - ext.length() - 1);

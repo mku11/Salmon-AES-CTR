@@ -23,7 +23,8 @@ SOFTWARE.
 */
 
 using Android.OS;
-using Mku.SalmonFS;
+using Mku.Salmon;
+using System.Collections.Generic;
 using static Android.OS.Build;
 
 namespace Mku.Android.File;
@@ -158,7 +159,7 @@ public class AndroidSharedFileObserver : FileObserver
     /// <summary>
     ///  Set the salmon file associated with the shared file to observer.
 	/// </summary>
-	///  <param name="salmonFile"></param>
+	///  <param name="salmonFile">The file</param>
     public void SetSalmonFile(SalmonFile salmonFile)
     {
         this.salmonFile = salmonFile;

@@ -30,14 +30,12 @@ namespace Mku.Time;
 /// </summary>
 public static class Time
 {
-    private static readonly DateTime UNIX_TIME = new DateTime(1970, 1, 1, 0, 0, 0, DateTimeKind.Utc);
-
     /// <summary>
     /// Returns the time since 1/1/1970 in milliseconds
     /// </summary>
-    /// <returns></returns>
+    /// <returns>The current time in milliseconds</returns>
     public static long CurrentTimeMillis()
     {
-        return (long)(DateTime.UtcNow - UNIX_TIME).TotalMilliseconds;
+        return DateTimeOffset.Now.ToUnixTimeMilliseconds();
     }
 }

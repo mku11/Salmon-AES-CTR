@@ -1,0 +1,344 @@
+﻿<Project Sdk="Microsoft.VisualStudio.JavaScript.Sdk/0.5.127-alpha">
+  <PropertyGroup>
+    <PublishAssetsDirectory>
+    </PublishAssetsDirectory>
+  </PropertyGroup>
+  <PropertyGroup>
+    <JavaScriptTestRoot>test\</JavaScriptTestRoot>
+    <JavaScriptTestFramework>Jest</JavaScriptTestFramework>
+  </PropertyGroup>
+  <!-- Add the items so they can be seen in the ui -->
+  <ItemGroup>
+    <None Include="..\..\..\src\typescript\salmon-core\convert\base64.ts">
+      <Link>salmon-core\convert\base64.ts</Link>
+    </None>
+    <None Include="..\..\..\src\typescript\salmon-core\convert\ibase64.ts">
+      <Link>salmon-core\convert\ibase64.ts</Link>
+    </None>
+    <None Include="..\..\..\src\typescript\salmon-core\convert\bit_converter.ts">
+      <Link>salmon-core\convert\bit_converter.ts</Link>
+    </None>
+    <None Include="..\..\..\src\typescript\salmon-core\io\memory_stream.ts">
+      <Link>salmon-core\io\memory_stream.ts</Link>
+    </None>
+    <None Include="..\..\..\src\typescript\salmon-core\io\io_exception.ts">
+      <Link>salmon-core\io\io_exception.ts</Link>
+    </None>
+    <None Include="..\..\..\src\typescript\salmon-core\io\readable_stream_wrapper.ts">
+      <Link>salmon-core\io\readable_stream_wrapper.ts</Link>
+    </None>
+    <None Include="..\..\..\src\typescript\salmon-core\io\random_access_stream.ts">
+      <Link>salmon-core\io\random_access_stream.ts</Link>
+    </None>
+    <None Include="..\..\..\src\typescript\salmon-core\salmon\salmon_default_options.ts">
+      <Link>salmon-core\salmon\salmon_default_options.ts</Link>
+    </None>
+    <None Include="..\..\..\src\typescript\salmon-core\salmon\salmon_generator.ts">
+      <Link>salmon-core\salmon\salmon_generator.ts</Link>
+    </None>
+    <None Include="..\..\..\src\typescript\salmon-core\salmon\salmon_security_exception.ts">
+      <Link>salmon-core\salmon\salmon_security_exception.ts</Link>
+    </None>
+    <None Include="..\..\..\src\typescript\salmon-core\salmon\salmon_security_exception.ts">
+      <Link>salmon-core\salmon\salmon_security_exception.ts</Link>
+    </None>
+    <None Include="..\..\..\src\typescript\salmon-core\salmon\salmon_range_exceeded_exception.ts">
+      <Link>salmon-core\salmon\salmon_range_exceeded_exception.ts</Link>
+    </None>
+    <None Include="..\..\..\src\typescript\salmon-core\salmon\salmon_header.ts">
+      <Link>salmon-core\salmon\salmon_header.ts</Link>
+    </None>
+    <None Include="..\..\..\src\typescript\salmon-core\salmon\salmon_nonce.ts">
+      <Link>salmon-core\salmon\salmon_nonce.ts</Link>
+    </None>
+    <None Include="..\..\..\src\typescript\salmon-core\salmon\integrity\salmon_integrity.ts">
+      <Link>salmon-core\salmon\integrity\salmon_integrity.ts</Link>
+    </None>
+    <None Include="..\..\..\src\typescript\salmon-core\salmon\integrity\hmac_sha256_provider.ts">
+      <Link>salmon-core\salmon\integrity\hmac_sha256_provider.ts</Link>
+    </None>
+    <None Include="..\..\..\src\typescript\salmon-core\salmon\integrity\salmon_integrity_exception.ts">
+      <Link>salmon-core\salmon\integrity\salmon_integrity_exception.ts</Link>
+    </None>
+    <None Include="..\..\..\src\typescript\salmon-core\salmon\integrity\ihash_provider.ts">
+      <Link>salmon-core\salmon\integrity\ihash_provider.ts</Link>
+    </None>
+    <None Include="..\..\..\src\typescript\salmon-core\salmon\transform\salmon_aes256_ctr_transformer.ts">
+      <Link>salmon-core\salmon\transform\salmon_aes256_ctr_transformer.ts</Link>
+    </None>
+    <None Include="..\..\..\src\typescript\salmon-core\salmon\transform\inative_proxy.ts">
+      <Link>salmon-core\salmon\transform\inative_proxy.ts</Link>
+    </None>
+    <None Include="..\..\..\src\typescript\salmon-core\salmon\transform\salmon_default_transformer.ts">
+      <Link>salmon-core\salmon\transform\salmon_default_transformer.ts</Link>
+    </None>
+    <None Include="..\..\..\src\typescript\salmon-core\salmon\transform\salmon_transformer_factory.ts">
+      <Link>salmon-core\salmon\transform\salmon_transformer_factory.ts</Link>
+    </None>
+    <None Include="..\..\..\src\typescript\salmon-core\salmon\transform\salmon_aes_intr_transformer.ts">
+      <Link>salmon-core\salmon\transform\salmon_aes_intr_transformer.ts</Link>
+    </None>
+    <None Include="..\..\..\src\typescript\salmon-core\salmon\transform\salmon_native_transformer.ts">
+      <Link>salmon-core\salmon\transform\salmon_native_transformer.ts</Link>
+    </None>
+    <None Include="..\..\..\src\typescript\salmon-core\salmon\transform\tiny_aes_transformer.ts">
+      <Link>salmon-core\salmon\transform\tiny_aes_transformer.ts</Link>
+    </None>
+    <None Include="..\..\..\src\typescript\salmon-core\salmon\io\salmon_stream.ts">
+      <Link>salmon-core\salmon\io\salmon_stream.ts</Link>
+    </None>
+    <None Include="..\..\..\src\typescript\salmon-core\salmon\transform\native_proxy.ts">
+      <Link>salmon-core\salmon\transform\native_proxy.ts</Link>
+    </None>
+    <None Include="..\..\..\src\typescript\salmon-core\salmon\transform\isalmon_ctr_transformer.ts">
+      <Link>salmon-core\salmon\transform\isalmon_ctr_transformer.ts</Link>
+    </None>
+    <None Include="..\..\..\src\typescript\salmon-core\salmon\encode\salmon_encoder.ts">
+      <Link>salmon-core\salmon\encode\salmon_encoder.ts</Link>
+    </None>
+    <None Include="..\..\..\src\typescript\salmon-core\salmon\password\isalmon_pbkdf_provider.ts">
+      <Link>salmon-core\salmon\password\isalmon_pbkdf_provider.ts</Link>
+    </None>
+    <None Include="..\..\..\src\typescript\salmon-core\salmon\password\salmon_password.ts">
+      <Link>salmon-core\salmon\password\salmon_password.ts</Link>
+    </None>
+    <None Include="..\..\..\src\typescript\salmon-core\salmon\password\salmon_default_pbkdf_provider.ts">
+      <Link>salmon-core\salmon\password\salmon_default_pbkdf_provider.ts</Link>
+    </None>
+    <None Include="..\..\..\src\typescript\salmon-core\salmon\password\salmon_pbkdf_factory.ts">
+      <Link>salmon-core\salmon\password\salmon_pbkdf_factory.ts</Link>
+    </None>
+    <None Include="..\..\..\src\typescript\salmon-core\salmon\salmon_encryptor.ts">
+      <Link>salmon-core\salmon\salmon_encryptor.ts</Link>
+    </None>
+    <None Include="..\..\..\src\typescript\salmon-core\salmon\salmon_encryptor_worker.ts">
+      <Link>salmon-core\salmon\salmon_encryptor_worker.ts</Link>
+    </None>
+    <None Include="..\..\..\src\typescript\salmon-core\salmon\salmon_encryptor_helper.ts">
+      <Link>salmon-core\salmon\salmon_encryptor_helper.ts</Link>
+    </None>
+    <None Include="..\..\..\src\typescript\salmon-core\salmon\salmon_decryptor.ts">
+      <Link>salmon-core\salmon\salmon_decryptor.ts</Link>
+    </None>
+    <None Include="..\..\..\src\typescript\salmon-core\salmon\salmon_decryptor_worker.ts">
+      <Link>salmon-core\salmon\salmon_decryptor_worker.ts</Link>
+    </None>
+    <None Include="..\..\..\src\typescript\salmon-core\salmon\salmon_decryptor_helper.ts">
+      <Link>salmon-core\salmon\salmon_decryptor_helper.ts</Link>
+    </None>
+    <None Include="..\..\..\src\typescript\salmon-core\salmon\text\salmon_text_encryptor.ts">
+      <Link>salmon-core\salmon\text\salmon_text_encryptor.ts</Link>
+    </None>
+    <None Include="..\..\..\src\typescript\salmon-core\salmon\text\salmon_text_decryptor.ts">
+      <Link>salmon-core\salmon\text\salmon_text_decryptor.ts</Link>
+    </None>
+    <None Include="..\..\..\src\typescript\salmon-core\salmon\io\provider_type.ts">
+      <Link>salmon-core\salmon\io\provider_type.ts</Link>
+    </None>
+    <None Include="..\..\..\src\typescript\salmon-core\salmon\io\encryption_mode.ts">
+      <Link>salmon-core\salmon\io\encryption_mode.ts</Link>
+    </None>
+    <None Include="..\..\..\src\typescript\salmon-core\salmon\password\pbkdf_algo.ts">
+      <Link>salmon-core\salmon\password\pbkdf_algo.ts</Link>
+    </None>
+    <None Include="..\..\..\src\typescript\salmon-core\salmon\password\pbkdf_type.ts">
+      <Link>salmon-core\salmon\password\pbkdf_type.ts</Link>
+    </None>
+    <None Include="..\..\..\src\typescript\salmon-fs\salmonfs\salmon_key.ts">
+      <Link>salmon-fs\salmonfs\salmon_key.ts</Link>
+    </None>
+    <None Include="..\..\..\src\typescript\salmon-fs\file\ireal_file.ts">
+      <Link>salmon-fs\file\ireal_file.ts</Link>
+    </None>
+    <None Include="..\..\..\src\typescript\salmon-fs\file\js_http_file.ts">
+      <Link>salmon-fs\file\js_http_file.ts</Link>
+    </None>
+    <None Include="..\..\..\src\typescript\salmon-fs\file\js_http_drive.ts">
+      <Link>salmon-fs\file\js_http_drive.ts</Link>
+    </None>
+    <None Include="..\..\..\src\typescript\salmon-fs\file\js_http_file_stream.ts">
+      <Link>salmon-fs\file\js_http_file_stream.ts</Link>
+    </None>
+    <None Include="..\..\..\src\typescript\salmon-fs\sequence\isalmon_sequencer.ts">
+      <Link>salmon-fs\sequence\isalmon_sequencer.ts</Link>
+    </None>
+    <None Include="..\..\..\src\typescript\salmon-fs\sequence\salmon_sequence.ts">
+      <Link>salmon-fs\sequence\salmon_sequence.ts</Link>
+    </None>
+    <None Include="..\..\..\src\typescript\salmon-fs\sequence\salmon_sequence_exception.ts">
+      <Link>salmon-fs\sequence\salmon_sequence_exception.ts</Link>
+    </None>
+    <None Include="..\..\..\src\typescript\salmon-fs\salmonfs\salmon_auth_config.ts">
+      <Link>salmon-fs\salmonfs\salmon_auth_config.ts</Link>
+    </None>
+    <None Include="..\..\..\src\typescript\salmon-fs\salmonfs\salmon_auth_exception.ts">
+      <Link>salmon-fs\salmonfs\salmon_auth_exception.ts</Link>
+    </None>
+    <None Include="..\..\..\src\typescript\salmon-fs\salmonfs\salmon_drive_generator.ts">
+      <Link>salmon-fs\salmonfs\salmon_drive_generator.ts</Link>
+    </None>
+    <None Include="..\..\..\src\typescript\salmon-fs\file\virtual_file.ts">
+      <Link>salmon-fs\file\virtual_file.ts</Link>
+    </None>
+    <None Include="..\..\..\src\typescript\salmon-fs\file\virtual_drive.ts">
+      <Link>salmon-fs\file\virtual_drive.ts</Link>
+    </None>
+    <None Include="..\..\..\src\typescript\salmon-fs\salmonfs\salmon_file.ts">
+      <Link>salmon-fs\salmonfs\salmon_file.ts</Link>
+    </None>
+    <None Include="..\..\..\src\typescript\salmon-fs\salmonfs\salmon_drive.ts">
+      <Link>salmon-fs\salmonfs\salmon_drive.ts</Link>
+    </None>
+    <None Include="..\..\..\src\typescript\salmon-fs\salmonfs\salmon_drive_config.ts">
+      <Link>salmon-fs\salmonfs\salmon_drive_config.ts</Link>
+    </None>
+    <None Include="..\..\..\src\typescript\salmon-fs\salmonfs\salmon_drive_manager.ts">
+      <Link>salmon-fs\salmonfs\salmon_drive_manager.ts</Link>
+    </None>
+    <None Include="..\..\..\src\typescript\salmon-fs\utils\salmon_file_utils.ts">
+      <Link>salmon-fs\utils\salmon_file_utils.ts</Link>
+    </None>
+    <None Include="..\..\..\src\typescript\salmon-fs\service\salmon_service_worker.ts">
+      <Link>salmon-fs\service\salmon_service_worker.ts</Link>
+    </None>
+  </ItemGroup>
+  <!-- Add the items so they can be built -->
+  <ItemGroup>
+    <TypeScriptCompile Remove="..\..\..\src\typescript\salmon-core\convert\base64.ts">
+    </TypeScriptCompile>
+    <TypeScriptCompile Remove="..\..\..\src\typescript\salmon-core\convert\ibase64.ts">
+    </TypeScriptCompile>
+    <TypeScriptCompile Remove="..\..\..\src\typescript\salmon-core\convert\bit_converter.ts">
+    </TypeScriptCompile>
+    <TypeScriptCompile Remove="..\..\..\src\typescript\salmon-core\io\readable_stream_wrapper.ts">
+    </TypeScriptCompile>
+    <TypeScriptCompile Remove="..\..\..\src\typescript\salmon-core\io\io_exception.ts">
+    </TypeScriptCompile>
+    <TypeScriptCompile Remove="..\..\..\src\typescript\salmon-core\io\memory_stream.ts">
+    </TypeScriptCompile>
+    <TypeScriptCompile Remove="..\..\..\src\typescript\salmon-core\io\random_access_stream.ts">
+    </TypeScriptCompile>
+    <TypeScriptCompile Remove="..\..\..\src\typescript\salmon-core\salmon\salmon_default_options.ts">
+    </TypeScriptCompile>
+    <TypeScriptCompile Remove="..\..\..\src\typescript\salmon-core\salmon\salmon_header.ts">
+    </TypeScriptCompile>
+    <TypeScriptCompile Remove="..\..\..\src\typescript\salmon-core\salmon\salmon_nonce.ts">
+    </TypeScriptCompile>
+    <TypeScriptCompile Remove="..\..\..\src\typescript\salmon-core\salmon\salmon_generator.ts">
+    </TypeScriptCompile>
+    <TypeScriptCompile Remove="..\..\..\src\typescript\salmon-core\salmon\salmon_security_exception.ts">
+    </TypeScriptCompile>
+    <TypeScriptCompile Remove="..\..\..\src\typescript\salmon-core\salmon\salmon_range_exceeded_exception.ts">
+    </TypeScriptCompile>
+    <TypeScriptCompile Remove="..\..\..\src\typescript\salmon-core\salmon\integrity\salmon_integrity.ts">
+    </TypeScriptCompile>
+    <TypeScriptCompile Remove="..\..\..\src\typescript\salmon-core\salmon\integrity\salmon_integrity_exception.ts">
+    </TypeScriptCompile>
+    <TypeScriptCompile Remove="..\..\..\src\typescript\salmon-core\salmon\integrity\ihash_provider.ts">
+    </TypeScriptCompile>
+    <TypeScriptCompile Remove="..\..\..\src\typescript\salmon-core\salmon\integrity\hmac_sha256_provider.ts">
+    </TypeScriptCompile>
+    <TypeScriptCompile Remove="..\..\..\src\typescript\salmon-core\salmon\transform\salmon_aes256_ctr_transformer.ts">
+    </TypeScriptCompile>
+    <TypeScriptCompile Remove="..\..\..\src\typescript\salmon-core\salmon\transform\isalmon_ctr_transformer.ts">
+    </TypeScriptCompile>
+    <TypeScriptCompile Remove="..\..\..\src\typescript\salmon-core\salmon\transform\inative_proxy.ts">
+    </TypeScriptCompile>
+    <TypeScriptCompile Remove="..\..\..\src\typescript\salmon-core\salmon\transform\native_proxy.ts">
+    </TypeScriptCompile>
+    <TypeScriptCompile Remove="..\..\..\src\typescript\salmon-core\salmon\transform\salmon_default_transformer.ts">
+    </TypeScriptCompile>
+    <TypeScriptCompile Remove="..\..\..\src\typescript\salmon-core\salmon\transform\salmon_transformer_factory.ts">
+    </TypeScriptCompile>
+    <TypeScriptCompile Remove="..\..\..\src\typescript\salmon-core\salmon\transform\salmon_aes_intr_transformer.ts">
+    </TypeScriptCompile>
+    <TypeScriptCompile Remove="..\..\..\src\typescript\salmon-core\salmon\transform\salmon_native_transformer.ts">
+    </TypeScriptCompile>
+    <TypeScriptCompile Remove="..\..\..\src\typescript\salmon-core\salmon\transform\tiny_aes_transformer.ts">
+    </TypeScriptCompile>
+    <TypeScriptCompile Remove="..\..\..\src\typescript\salmon-core\salmon\io\salmon_stream.ts">
+    </TypeScriptCompile>
+    <TypeScriptCompile Remove="..\..\..\src\typescript\salmon-core\salmon\encode\salmon_encoder.ts">
+    </TypeScriptCompile>
+    <TypeScriptCompile Remove="..\..\..\src\typescript\salmon-core\salmon\password\isalmon_pbkdf_provider.ts">
+    </TypeScriptCompile>
+    <TypeScriptCompile Remove="..\..\..\src\typescript\salmon-core\salmon\password\salmon_default_pbkdf_provider.ts">
+    </TypeScriptCompile>
+    <TypeScriptCompile Remove="..\..\..\src\typescript\salmon-core\salmon\password\salmon_default_pbkdf_provider.ts">
+    </TypeScriptCompile>
+    <TypeScriptCompile Remove="..\..\..\src\typescript\salmon-core\salmon\password\salmon_pbkdf_factory.ts">
+    </TypeScriptCompile>
+    <TypeScriptCompile Remove="..\..\..\src\typescript\salmon-core\salmon\salmon_encryptor.ts">
+    </TypeScriptCompile>
+    <TypeScriptCompile Remove="..\..\..\src\typescript\salmon-core\salmon\salmon_encryptor_worker.ts">
+    </TypeScriptCompile>
+    <TypeScriptCompile Remove="..\..\..\src\typescript\salmon-core\salmon\salmon_encryptor_helper.ts">
+    </TypeScriptCompile>
+    <TypeScriptCompile Remove="..\..\..\src\typescript\salmon-core\salmon\salmon_decryptor.ts">
+    </TypeScriptCompile>
+    <TypeScriptCompile Remove="..\..\..\src\typescript\salmon-core\salmon\salmon_decryptor_worker.ts">
+    </TypeScriptCompile>
+    <TypeScriptCompile Remove="..\..\..\src\typescript\salmon-core\salmon\salmon_decryptor_helper.ts">
+    </TypeScriptCompile>
+    <TypeScriptCompile Remove="..\..\..\src\typescript\salmon-core\salmon\text\salmon_text_decryptor.ts">
+    </TypeScriptCompile>
+    <TypeScriptCompile Remove="..\..\..\src\typescript\salmon-core\salmon\text\salmon_text_decryptor.ts">
+    </TypeScriptCompile>
+    <TypeScriptCompile Remove="..\..\..\src\typescript\salmon-core\salmon\io\provider_type.ts">
+    </TypeScriptCompile>
+    <TypeScriptCompile Remove="..\..\..\src\typescript\salmon-core\salmon\io\encryption_mode.ts">
+    </TypeScriptCompile>
+    <TypeScriptCompile Remove="..\..\..\src\typescript\salmon-core\salmon\password\pbkdf_algo.ts">
+    </TypeScriptCompile>
+    <TypeScriptCompile Remove="..\..\..\src\typescript\salmon-core\salmon\password\pbkdf_type.ts">
+    </TypeScriptCompile>
+    <TypeScriptCompile Remove="..\..\..\src\typescript\salmon-fs\salmonfs\salmon_key.ts">
+    </TypeScriptCompile>
+    <TypeScriptCompile Remove="..\..\..\src\typescript\salmon-fs\file\ireal_file.ts">
+    </TypeScriptCompile>
+    <TypeScriptCompile Remove="..\..\..\src\typescript\salmon-fs\file\js_http_file.ts">
+    </TypeScriptCompile>
+    <TypeScriptCompile Remove="..\..\..\src\typescript\salmon-fs\file\js_http_drive.ts">
+    </TypeScriptCompile>
+    <TypeScriptCompile Remove="..\..\..\src\typescript\salmon-fs\file\js_http_file_stream.ts">
+    </TypeScriptCompile>
+    <TypeScriptCompile Remove="..\..\..\src\typescript\salmon-fs\sequence\isalmon_sequencer.ts">
+    </TypeScriptCompile>
+    <TypeScriptCompile Remove="..\..\..\src\typescript\salmon-fs\sequence\salmon_sequence.ts">
+    </TypeScriptCompile>
+    <TypeScriptCompile Remove="..\..\..\src\typescript\salmon-fs\sequence\salmon_sequence_exception.ts">
+    </TypeScriptCompile>
+    <TypeScriptCompile Remove="..\..\..\src\typescript\salmon-fs\salmonfs\salmon_auth_config.ts">
+    </TypeScriptCompile>
+    <TypeScriptCompile Remove="..\..\..\src\typescript\salmon-fs\salmonfs\salmon_drive_generator.ts">
+    </TypeScriptCompile>
+    <TypeScriptCompile Remove="..\..\..\src\typescript\salmon-fs\salmonfs\salmon_file.ts">
+    </TypeScriptCompile>
+    <TypeScriptCompile Remove="..\..\..\src\typescript\salmon-fs\salmonfs\salmon_drive.ts">
+    </TypeScriptCompile>
+    <TypeScriptCompile Remove="..\..\..\src\typescript\salmon-fs\salmonfs\salmon_drive_config.ts">
+    </TypeScriptCompile>
+    <TypeScriptCompile Remove="..\..\..\src\typescript\salmon-fs\salmonfs\salmon_drive_manager.ts">
+    </TypeScriptCompile>
+    <TypeScriptCompile Remove="..\..\..\src\typescript\salmon-fs\utils\salmon_file_utils.ts">
+    </TypeScriptCompile>
+    <TypeScriptCompile Remove="..\..\..\src\typescript\salmon-fs\file\virtual_file.ts">
+    </TypeScriptCompile>
+    <TypeScriptCompile Remove="..\..\..\src\typescript\salmon-fs\file\virtual_drive.ts">
+    </TypeScriptCompile>
+    <TypeScriptCompile Remove="..\..\..\src\typescript\salmon-fs\service\salmon_service_worker.ts">
+    </TypeScriptCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <TypeScriptConfiguration Remove="lib\**" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Remove="lib\**" />
+  </ItemGroup>
+  <ItemGroup>
+    <Folder Include="lib\salmon-fs\" />
+  </ItemGroup>
+  <ItemGroup>
+    <Script Remove=".eslintrc.json" />
+  </ItemGroup>
+</Project>

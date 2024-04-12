@@ -22,7 +22,7 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 */
 
-using Mku.Salmon.IO;
+using Mku.Salmon.Streams;
 
 namespace Mku.Salmon.Transform;
 
@@ -37,16 +37,16 @@ public class SalmonTransformerFactory
 	/// </summary>
 	///  <param name="type">The supported provider type.</param>
     ///  <returns>The transformer.</returns>
-    ///  <exception cref="SalmonSecurityException"></exception>
-    public static ISalmonCTRTransformer Create(SalmonStream.ProviderType type)
+    ///  <exception cref="SalmonSecurityException">Thrown when error with security</exception>
+    public static ISalmonCTRTransformer Create(ProviderType type)
     {
         switch (type)
         {
-            case SalmonStream.ProviderType.Default:
+            case ProviderType.Default:
                 return new SalmonDefaultTransformer();
-            case SalmonStream.ProviderType.AesIntrinsics:
+            case ProviderType.AesIntrinsics:
                 return new SalmonAesIntrTransformer();
-            case SalmonStream.ProviderType.TinyAES:
+            case ProviderType.TinyAES:
                 return new TinyAesTransformer();
         }
         throw new SalmonSecurityException("Unknown Transformer type");

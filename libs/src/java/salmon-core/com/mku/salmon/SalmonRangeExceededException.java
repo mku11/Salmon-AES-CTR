@@ -26,7 +26,7 @@ SOFTWARE.
 /**
  * Thrown when maximum nonce range is exceeded.
  */
-public class SalmonRangeExceededException extends Exception {
+public class SalmonRangeExceededException extends RuntimeException {
     /**
      * Construct an exception with a specific message.
      * @param msg The message.

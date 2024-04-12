@@ -1,7 +1,7 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk.WindowsDesktop">
 
   <PropertyGroup>
-    <TargetFrameworks>net6.0</TargetFrameworks>
+    <TargetFrameworks>net7.0</TargetFrameworks>
     <PackageLicenseFile>LICENSE</PackageLicenseFile>
     <PackageRequireLicenseAcceptance>True</PackageRequireLicenseAcceptance>
     <IncludeSymbols>True</IncludeSymbols>
@@ -18,55 +18,58 @@
     <PackageOutputPath>..\..\..\..\output\nuget\releases</PackageOutputPath>
     <GenerateDocumentationFile>True</GenerateDocumentationFile>
     <DocumentationFile></DocumentationFile>
-    <ImplicitUsings>enable</ImplicitUsings>
+    <ImplicitUsings>false</ImplicitUsings>
     <LangVersion>10</LangVersion>
-    <Version>1.0.5</Version>
+    <Version>2.0.0</Version>
   </PropertyGroup>
 
   <ItemGroup>
-    <Compile Include="..\..\..\src\csharp\SalmonCore\time\Time.cs" Link="time\Time.cs" />
+    <Compile Include="..\..\..\src\csharp\SalmonCore\Time\Time.cs" Link="Time\Time.cs" />
 
-    <Compile Include="..\..\..\src\csharp\SalmonCore\convert\Base64.cs" Link="convert\Base64.cs" />
-    <Compile Include="..\..\..\src\csharp\SalmonCore\convert\BitConverter.cs" Link="convert\BitConverter.cs" />
-    <Compile Include="..\..\..\src\csharp\SalmonCore\convert\IBase64.cs" Link="convert\IBase64.cs" />
+    <Compile Include="..\..\..\src\csharp\SalmonCore\Convert\Base64.cs" Link="Convert\Base64.cs" />
+    <Compile Include="..\..\..\src\csharp\SalmonCore\Convert\BitConverter.cs" Link="Convert\BitConverter.cs" />
+    <Compile Include="..\..\..\src\csharp\SalmonCore\Convert\IBase64.cs" Link="Convert\IBase64.cs" />
 
-    <Compile Include="..\..\..\src\csharp\SalmonCore\io\RandomAccessStreamExtensions.cs" Link="io\RandomAccessStreamExtensions.cs" />
+    <Compile Include="..\..\..\src\csharp\SalmonCore\Streams\RandomAccessStreamExtensions.cs" Link="Streams\RandomAccessStreamExtensions.cs" />
 
-    <Compile Include="..\..\..\src\csharp\SalmonCore\salmon\encode\SalmonEncoder.cs" Link="salmon\encode\SalmonEncoder.cs" />
+    <Compile Include="..\..\..\src\csharp\SalmonCore\Salmon\Encode\SalmonEncoder.cs" Link="Salmon\Encode\SalmonEncoder.cs" />
 
-    <Compile Include="..\..\..\src\csharp\SalmonCore\salmon\integrity\HmacSHA256Provider.cs" Link="salmon\integrity\HmacSHA256Provider.cs" />
-    <Compile Include="..\..\..\src\csharp\SalmonCore\salmon\integrity\IHashProvider.cs" Link="salmon\integrity\IHashProvider.cs" />
-    <Compile Include="..\..\..\src\csharp\SalmonCore\salmon\integrity\SalmonIntegrity.cs" Link="salmon\integrity\SalmonIntegrity.cs" />
-    <Compile Include="..\..\..\src\csharp\SalmonCore\salmon\integrity\SalmonIntegrityException.cs" Link="salmon\integrity\SalmonIntegrityException.cs" />
+    <Compile Include="..\..\..\src\csharp\SalmonCore\Integrity\HmacSHA256Provider.cs" Link="Integrity\HmacSHA256Provider.cs" />
+    <Compile Include="..\..\..\src\csharp\SalmonCore\Integrity\IHashProvider.cs" Link="Integrity\IHashProvider.cs" />
+    <Compile Include="..\..\..\src\csharp\SalmonCore\Salmon\Integrity\SalmonIntegrity.cs" Link="Salmon\Integrity\SalmonIntegrity.cs" />
+    <Compile Include="..\..\..\src\csharp\SalmonCore\Integrity\IntegrityException.cs" Link="Integrity\IntegrityException.cs" />
 
-    <Compile Include="..\..\..\src\csharp\SalmonCore\salmon\io\SalmonStream.cs" Link="salmon\io\SalmonStream.cs" />
+    <Compile Include="..\..\..\src\csharp\SalmonCore\Salmon\Streams\SalmonStream.cs" Link="Salmon\Streams\SalmonStream.cs" />
+    <Compile Include="..\..\..\src\csharp\SalmonCore\Salmon\Streams\EncryptionMode.cs" Link="Salmon\Streams\EncryptionMode.cs" />
+    <Compile Include="..\..\..\src\csharp\SalmonCore\Salmon\Streams\ProviderType.cs" Link="Salmon\Streams\ProviderType.cs" />
 
-    <Compile Include="..\..\..\src\csharp\SalmonCore\salmon\password\ISalmonPbkdfProvider.cs" Link="salmon\password\ISalmonPbkdfProvider.cs" />
-    <Compile Include="..\..\..\src\csharp\SalmonCore\salmon\password\SalmonDefaultPbkdfProvider.cs" Link="salmon\password\SalmonDefaultPbkdfProvider.cs" />
-    <Compile Include="..\..\..\src\csharp\SalmonCore\salmon\password\SalmonPbkdfFactory.cs" Link="salmon\password\SalmonPbkdfFactory.cs" />
-    <Compile Include="..\..\..\src\csharp\SalmonCore\salmon\password\SalmonPassword.cs" Link="salmon\password\SalmonPassword.cs" />
+    <Compile Include="..\..\..\src\csharp\SalmonCore\Salmon\Password\ISalmonPbkdfProvider.cs" Link="Salmon\Password\ISalmonPbkdfProvider.cs" />
+    <Compile Include="..\..\..\src\csharp\SalmonCore\Salmon\Password\SalmonDefaultPbkdfProvider.cs" Link="Salmon\Password\SalmonDefaultPbkdfProvider.cs" />
+    <Compile Include="..\..\..\src\csharp\SalmonCore\Salmon\Password\SalmonPbkdfFactory.cs" Link="Salmon\Password\SalmonPbkdfFactory.cs" />
+    <Compile Include="..\..\..\src\csharp\SalmonCore\Salmon\Password\PbkdfAlgo.cs" Link="Salmon\Password\PbkdfAlgo.cs" />
+    <Compile Include="..\..\..\src\csharp\SalmonCore\Salmon\Password\PbkdfType.cs" Link="Salmon\Password\PbkdfType.cs" />
+    <Compile Include="..\..\..\src\csharp\SalmonCore\Salmon\Password\SalmonPassword.cs" Link="Salmon\Password\SalmonPassword.cs" />
 
-    <Compile Include="..\..\..\src\csharp\SalmonCore\salmon\text\SalmonTextDecryptor.cs" Link="salmon\text\SalmonTextDecryptor.cs" />
-    <Compile Include="..\..\..\src\csharp\SalmonCore\salmon\text\SalmonTextEncryptor.cs" Link="salmon\text\SalmonTextEncryptor.cs" />
+    <Compile Include="..\..\..\src\csharp\SalmonCore\Salmon\Text\SalmonTextDecryptor.cs" Link="Salmon\Text\SalmonTextDecryptor.cs" />
+    <Compile Include="..\..\..\src\csharp\SalmonCore\Salmon\Text\SalmonTextEncryptor.cs" Link="Salmon\Text\SalmonTextEncryptor.cs" />
 
-    <Compile Include="..\..\..\src\csharp\SalmonCore\salmon\transform\INativeProxy.cs" Link="salmon\transform\INativeProxy.cs" />
-    <Compile Include="..\..\..\src\csharp\SalmonCore\salmon\transform\NativeProxy.cs" Link="salmon\transform\NativeProxy.cs" />
-    <Compile Include="..\..\..\src\csharp\SalmonCore\salmon\transform\ISalmonCTRTransformer.cs" Link="salmon\transform\ISalmonCTRTransformer.cs" />
-    <Compile Include="..\..\..\src\csharp\SalmonCore\salmon\transform\SalmonAES256CTRTransformer.cs" Link="salmon\transform\SalmonAES256CTRTransformer.cs" />
-    <Compile Include="..\..\..\src\csharp\SalmonCore\salmon\transform\SalmonAesIntrTransformer.cs" Link="salmon\transform\SalmonAesIntrTransformer.cs" />
-    <Compile Include="..\..\..\src\csharp\SalmonCore\salmon\transform\SalmonDefaultTransformer.cs" Link="salmon\transform\SalmonDefaultTransformer.cs" />
-    <Compile Include="..\..\..\src\csharp\SalmonCore\salmon\transform\SalmonNativeTransformer.cs" Link="salmon\transform\SalmonNativeTransformer.cs" />
-    <Compile Include="..\..\..\src\csharp\SalmonCore\salmon\transform\TinyAesTransformer.cs" Link="salmon\transform\TinyAesTransformer.cs" />
-    <Compile Include="..\..\..\src\csharp\SalmonCore\salmon\transform\SalmonTransformerFactory.cs" Link="salmon\transform\SalmonTransformerFactory.cs" />
+    <Compile Include="..\..\..\src\csharp\SalmonCore\Bridge\INativeProxy.cs" Link="Bridge\INativeProxy.cs" />
+    <Compile Include="..\..\..\src\csharp\SalmonCore\Salmon\Bridge\NativeProxy.cs" Link="Salmon\Bridge\NativeProxy.cs" />
+    <Compile Include="..\..\..\src\csharp\SalmonCore\Salmon\Transform\ISalmonCTRTransformer.cs" Link="Salmon\Transform\ISalmonCTRTransformer.cs" />
+    <Compile Include="..\..\..\src\csharp\SalmonCore\Salmon\Transform\SalmonAES256CTRTransformer.cs" Link="Salmon\Transform\SalmonAES256CTRTransformer.cs" />
+    <Compile Include="..\..\..\src\csharp\SalmonCore\Salmon\Transform\SalmonAesIntrTransformer.cs" Link="Salmon\Transform\SalmonAesIntrTransformer.cs" />
+    <Compile Include="..\..\..\src\csharp\SalmonCore\Salmon\Transform\SalmonDefaultTransformer.cs" Link="Salmon\Transform\SalmonDefaultTransformer.cs" />
+    <Compile Include="..\..\..\src\csharp\SalmonCore\Salmon\Transform\SalmonNativeTransformer.cs" Link="Salmon\Transform\SalmonNativeTransformer.cs" />
+    <Compile Include="..\..\..\src\csharp\SalmonCore\Salmon\Transform\TinyAesTransformer.cs" Link="Salmon\Transform\TinyAesTransformer.cs" />
+    <Compile Include="..\..\..\src\csharp\SalmonCore\Salmon\Transform\SalmonTransformerFactory.cs" Link="Salmon\Transform\SalmonTransformerFactory.cs" />
 
-    <Compile Include="..\..\..\src\csharp\SalmonCore\salmon\SalmonDecryptor.cs" Link="salmon\SalmonDecryptor.cs" />
-    <Compile Include="..\..\..\src\csharp\SalmonCore\salmon\SalmonDefaultOptions.cs" Link="salmon\SalmonDefaultOptions.cs" />
-    <Compile Include="..\..\..\src\csharp\SalmonCore\salmon\SalmonEncryptor.cs" Link="salmon\SalmonEncryptor.cs" />
-    <Compile Include="..\..\..\src\csharp\SalmonCore\salmon\SalmonGenerator.cs" Link="salmon\SalmonGenerator.cs" />
-    <Compile Include="..\..\..\src\csharp\SalmonCore\salmon\SalmonHeader.cs" Link="salmon\SalmonHeader.cs" />
-    <Compile Include="..\..\..\src\csharp\SalmonCore\salmon\SalmonNonce.cs" Link="salmon\SalmonNonce.cs" />
-    <Compile Include="..\..\..\src\csharp\SalmonCore\salmon\SalmonRangeExceededException.cs" Link="salmon\SalmonRangeExceededException.cs" />
-    <Compile Include="..\..\..\src\csharp\SalmonCore\salmon\SalmonSecurityException.cs" Link="salmon\SalmonSecurityException.cs" />
+    <Compile Include="..\..\..\src\csharp\SalmonCore\Salmon\SalmonDecryptor.cs" Link="Salmon\SalmonDecryptor.cs" />
+    <Compile Include="..\..\..\src\csharp\SalmonCore\Salmon\SalmonEncryptor.cs" Link="Salmon\SalmonEncryptor.cs" />
+    <Compile Include="..\..\..\src\csharp\SalmonCore\Salmon\SalmonGenerator.cs" Link="Salmon\SalmonGenerator.cs" />
+    <Compile Include="..\..\..\src\csharp\SalmonCore\Salmon\SalmonHeader.cs" Link="Salmon\SalmonHeader.cs" />
+    <Compile Include="..\..\..\src\csharp\SalmonCore\Salmon\SalmonNonce.cs" Link="Salmon\SalmonNonce.cs" />
+    <Compile Include="..\..\..\src\csharp\SalmonCore\Salmon\SalmonRangeExceededException.cs" Link="Salmon\SalmonRangeExceededException.cs" />
+    <Compile Include="..\..\..\src\csharp\SalmonCore\Salmon\SalmonSecurityException.cs" Link="Salmon\SalmonSecurityException.cs" />
 
   </ItemGroup>
 

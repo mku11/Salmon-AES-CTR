@@ -1,14 +1,12 @@
 ![alt text](https://github.com/mku11/Salmon-AES-CTR/blob/wip/common/common-res/icons/logo.png)
 
 # Salmon
-Salmon is an AES-256 CTR encryption library with HMAC SHA-256 integrity, parallel file operations (read/write), and seekable stream support. It provides a high level, low-ceremony, consistent API for encrypting streams and files in Java and C#. Salmon is using a fast native library for Intel x86 and ARM64 that you can include in your C/C++ projects.
+Salmon is an AES-256 CTR encryption library with HMAC SHA-256 integrity, parallel file operations (read/write), and seekable stream support. It provides a high level, low-ceremony, consistent API for encrypting streams and files. Salmon is using a fast native library for Intel x86 and ARM64 that you can include in your C/C++ projects.
   
 
 [![License: MIT](https://img.shields.io/github/license/mku11/Salmon-AES-CTR.svg)](LICENSE)
-[![Version](https://img.shields.io/badge/version-1.0.5-blue)](https://github.com/mku11/Salmon-AES-CTR/releases)
-[![GitHub commit activity](https://img.shields.io/github/commit-activity/m/mku11/Salmon-AES-CTR)](https://github.com/mku11/Salmon-AES-CTR/commits/master)
-[![CodeFactor](https://www.codefactor.io/repository/github/mku11/salmon-AES-CTR/badge)](https://www.codefactor.io/repository/github/mku11/salmon-AES-CTR)
-<!-- [![GitHub Releases](https://img.shields.io/github/downloads/mku11/Salmon-AES-CTR/latest/total?logo=github)](https://github.com/mku11/Salmon-AES-CTR/releases) -->
+[![Version](https://img.shields.io/badge/version-2.0.0-blue)](https://github.com/mku11/Salmon-AES-CTR/releases)
+[![GitHub Releases](https://img.shields.io/github/downloads/mku11/Salmon-AES-CTR/latest/total?logo=github)](https://github.com/mku11/Salmon-AES-CTR/releases)
 
 ## Library Features
 * AES-256 standard AES-256 in CTR Mode.
@@ -20,6 +18,31 @@ Salmon is an AES-256 CTR encryption library with HMAC SHA-256 integrity, paralle
 * Extensible API interfaces for other filesystems, network files, and custom streams (UWP, Xamarin iOS, Dropbox, etc).
 * Protected file-based nonce sequencer with encrypted SHA-256 checksum.
 * System protected nonce sequencer with encrypted SHA-256 checksum via an optional Windows Service.
+
+## Applications
+
+For a complete showcase of the Salmon API visit the [Salmon Vault](https://github.com/mku11/Salmon-Vault) app offered on several different platforms  
+[**Salmon Vault - Live Web Demo**](https://mku11.github.io/Salmon-AES-CTR/demo)
+
+## Support
+
+**Languages**:  
+Java 11+  
+Android 23+  
+C# .NET 7+  
+Python 3.11+  
+Typescript/Javascript ES2020  
+  
+**Platforms/Browsers**:  
+Xamarin, MAUI, WPF  
+JavaFX  
+Chrome (Local Drives)  
+Chrome, Firefox, Safari (Remote Drives read-only)  
+  
+**Operating Systems (Tested)**  
+Windows 10 x86_64  
+MacOS 10.11  
+Linux Debian 11  
 
 ## Why Salmon?
 
@@ -33,283 +56,136 @@ Salmon is an AES-256 CTR encryption library with HMAC SHA-256 integrity, paralle
 * Tamper-Proof nonce sequences: Tampering is detected using an encrypted SHA256 checksum (Win10/11 only).
 * Admin-Protected nonce sequences: Additional protection from non-admin users (Salmon Windows Service Win10/11 only).
 
-## Applications
-For a complete showcase of the Salmon API check out the Salmon Vault app offered on several different platforms:  
-[**JavaFX**](https://github.com/mku11/Salmon-AES-CTR/tree/main/apps/salmon-vault-javafx) | [**WPF**](https://github.com/mku11/Salmon-AES-CTR/tree/main/apps/salmon-vault-wpf) | [**Android**](https://github.com/mku11/Salmon-AES-CTR/tree/main/apps/salmon-vault-android) | [**.NET Android**](https://github.com/mku11/Salmon-AES-CTR/tree/main/apps/salmon-vault-dotnet-android) | [**MAUI**](https://github.com/mku11/Salmon-AES-CTR/tree/main/apps/salmon-vault-maui)   
-
-[**Downloads**](https://github.com/mku11/Salmon-AES-CTR/releases)
-
----
-
-### Gradle  
-
-To integrate the Salmon libraries to your gradle project add the salmon repository:  
-
-```
-repositories {
-    maven {
-        url 'https://github.com/mku11/Repo/raw/main/maven/releases'
-    }
-    ...
-}
-```
-
-Add the java libraries to your project:
-```
-dependencies {
-    implementation 'com.mku.salmon:salmon-core:1.0.5'
-    implementation 'com.mku.salmon:salmon-fs:1.0.5'
-	
-    // for android
-    implementation 'com.mku.salmon:salmon-fs-android:1.0.5'
-    
-    // optional fast AES intrinsics and Tiny AES
-    // make sure you use SalmonStream.setProviderType() to set the provider in java
-    implementation 'com.mku.salmon:salmon-native-android:1.0.5'
-}
-```
-
-### Windows native library in Gradle
-To add the native library for windows to your gradle project add the task below:
-
-```
-// unzipping the native library
-configurations {
-    nativeImplementation
-}
-task unzipNative(type: Sync) {
-    from {
-        configurations.nativeImplementation.collect { zipTree(it) }
-    }
-    into file(project.nativeLibsDir)
-}
-build.dependsOn unzipNative
-dependencies {
-    implementation 'com.mku.salmon:salmon-core:1.0.5'
-    implementation 'com.mku.salmon:salmon-fs:1.0.5'
-	
-    // use SalmonStream.setProviderType() within your code
-    // and make sure you add the dll libary to the java.library.path  
-    unzipNative 'com.mku.salmon:salmon-native:1.0.5'
-}
-```
-
-### Maven
-
-To integrate the Salmon libraries to your maven project add the salmon repository:
-```
-<repositories>
-    <repository>
-        <id>mku-salmon-repo</id>
-        <url>https://github.com/mku11/Repo/raw/main/maven/releases</url>
-    </repository>     
-    ...
-</repositories>
-```
-
-Now add the dependencies:
-```
-<dependencies>
-    <dependency>
-        <groupId>com.mku.salmon</groupId>
-        <artifactId>salmon-core</artifactId>
-        <version>1.0.5</version>
-    </dependency>
-	<dependency>
-        <groupId>com.mku.salmon</groupId>
-        <artifactId>salmon-fs</artifactId>
-        <version>1.0.5</version>
-    </dependency>
-    ...
-</dependencies>
-```
-
-### Nuget
-
-To integrate the Salmon libraries to your Visual Studio project:
-Download the Nuget packages from [Salmon nuget repo](https://github.com/mku11/Repo/tree/main/nuget/releases)  
-Within Visual Studio go to Tools / Optons / Nuget Package Manager / Package Sources  
-Create a new source with a name like "Salmon Repo" and add the local dir that has the downloaded packages.  
-Then bring up the Nuget Package Manager and change the Package Source to "Salmon Repo".  
-Install the salmon packages like you usually do.  
-
----
-
-### Examples
+## Salmon API Samples
+**Java/C#/Python API**:
+API usage is consistent across platforms with slight variations on naming conventions.  
   
-#### Java / C#
-The API is consistent across platforms with slight variations on naming conventions between Java and C#.  
+**Typescript/Javascript API**:  
+The ts/js libraries are based on async IO so make sure when to use await.  
   
-For a sample using the SalmonDrive and the sequential nonce sequencer see: [Samples](https://github.com/mku11/Salmon-AES-CTR/tree/main/samples)  
-For a full fledge demo app see: [Salmon Vault](https://github.com/mku11/Salmon-AES-CTR/tree/main/apps)  
-For a simple usage sample see below.
+For detailed samples see: [**Samples**](https://github.com/mku11/Salmon-AES-CTR/tree/main/samples)  
+For an extensive use of the API see: [**Salmon Vault**](https://github.com/mku11/Salmon-Vault)  
+  
+For short code samples see below.
 
-##### Simple encryption/decryption
+### SalmonFS API:
 ```
+// Create a sequencer. Make sure this path is safe and does NOT get backed up!
+String sequencerPath = "c:\\users\\<username>\\AppData\\Local\\<somefolder>\\salmon_sequencer.xml";
+SalmonFileSequencer sequencer = new SalmonFileSequencer(new JavaFile(sequencerPath), new SalmonSequenceSerializer());
+
+// create() or open() a virtual drive provided a location and a text password
+// Supported drives: JavaDrive, DotNetDrive, PyDrive, JsDrive, JsHttpDrive (remote), JsNodeDrive (node.js)
+SalmonDrive drive = JavaDrive.create(new JavaFile("c:\\path\\to\\your\\salmon\\vault"), password, sequencer);
+
+// Create an importer with 2 threads for parallel processing
+SalmonFileCommander commander = new SalmonFileCommander(256 * 1024, 256 * 1024, 2);
+
+// and import multiple files
+JavaFile[] files = new JavaFile[]{new JavaFile("data/file1.txt"), new JavaFile("data/file2.txt")};
+commander.importFiles(files, drive.getRoot(), false, true, null, null, null);
+commander.close();
+
+// use the virtual filesystem API to list or directly get the files in the drive
+SalmonFile root = drive.getRoot();
+SalmonFile[] salmonFiles = root.listFiles();
+
+// or retrieve a file by filename
+SalmonFile file = root.getChild("file1.txt");
+
+// get a stream that you can read/decrypt the data from
+SalmonStream stream = file.getInputStream();
+// stream.read(...);
+// stream.seek(...);
+stream.close();
+
+// or use a SalmonFileInputStream with parallel processing and caching
+SalmonFileInputStream inputStream = new SalmonFileInputStream(file, 2, 4 * 1024 * 1024, 2, 256 * 1024);
+// inputStream.read(...);
+inputStream.close();
+drive.close();
+```
+
+### SalmonCore API: Data encryption/decryption
+```
+// To encrypt byte data or text without using a vault you need to generate your own key and nonce.
 // Get a fresh secure random key and keep this somewhere safe.
-// For text passwords see the Samples folder.
-// For the more secure sequential nonces see the SalmonDrive sample.
 byte[] key = SalmonGenerator.getSecureRandomBytes(32); // 256-bit key
 
 // Also get a fresh nonce, nonce is not a secret thought it must only be used once per content!
 byte[] nonce = SalmonGenerator.getSecureRandomBytes(8); // 64-bit nonce
 
-// Now you encrypt/decrypt a byte array using 2 parallel threads:
-byte[] encBytes = new SalmonEncryptor(2).encrypt(bytes, key, nonce, false);
-byte[] decBytes = new SalmonDecryptor(2).decrypt(encBytes, key, nonce, false);
+// Generate some sample data to encrypt
+byte[] bytes = SalmonGenerator.getSecureRandomBytes(1024);
 
-// Or encrypt a text string and save the nonce in the header:
+// encrypt a byte array using 2 parallel threads
+SalmonEncryptor encryptor = new SalmonEncryptor(2);
+byte[] encBytes = encryptor.encrypt(bytes, key, nonce, false);
+encryptor.close();
+
+// decrypt:
+SalmonDecryptor decryptor = new SalmonDecryptor(2);
+byte[] decBytes = decryptor.decrypt(encBytes, key, nonce, false);
+decryptor.close();
+
+// Or encrypt a text string
 nonce = SalmonGenerator.getSecureRandomBytes(8); // always get a fresh nonce!
 String encText = SalmonTextEncryptor.encryptString(text, key, nonce, true);
-// Decrypt the encrypted string:
-String decText = SalmonTextEncryptor.decryptString(encText, key, null, true);
+
+// Decrypt the encrypted string, no need to specify the nonce again since it's embedded in the data
+String decText = SalmonTextDecryptor.decryptString(encText, key, null, true);
 ```
 
-##### Use a SalmonStream to encrypt/write and decrypt/read using single operations
+### Performance: AES-NI intrinsics
 ```
-MemoryStream memoryStream = MemoryStream();
-SalmonStream encStream = new SalmonStream(key, nonce, SalmonStream.EncryptionMode.Encrypt, memoryStream);
-encStream.write(data, 0, count); // encrypt the data and write to the memoryStream with a single operation
-
-// Decrypt an existing encrypted byte stream with seek() and read():
-SalmonStream decStream = new SalmonStream(key, nonce, EncryptionMode.Decrypt, byteStream);
-encStream.seek(...);
-encStream.read(...); // single operation to decrypt and read
-```
-
-##### Encrypt and write directly to a file
-```
-// Instantiate a new real file on the disk:
-JavaFile file = new JavaFile(filePath);
-// or a DotNetFile for c#:
-// DotNetFile file = new DotNetFile(filePath);
-
-// always get a fresh nonce!
-nonce = SalmonGenerator.getSecureRandomBytes(8); 
-
-// Wrap the file in a SalmonFile:
-SalmonFile salmonFile = new SalmonFile(file);
-salmonFile.setEncryptionKey(key);
-salmonFile.setRequestedNonce(nonce);
-
-// Get an output stream for writing:
-SalmonStream outputStream = salmonFile.getOutputStream();
-// writing to the stream will automatically encrypt the data and write to the file.
-outputStream.write(...);
-
-// To decrypt and read directly from the encrypted file:
-SalmonFile fileToDecrypt = new SalmonFile(file);
-fileToDecrypt.setEncryptionKey(key);
-SalmonStream inputStream = fileToDecrypt.getInputStream();
-inputStream.read(...); // read and decrypt in a single operation
-
-// To use parallel tasks for decrypting a SalmonFile create a SalmonFileInputStream with 3 threads:
-SalmonFileInputStream fileInputStream = new SalmonFileInputStream(salmonFile, 1, 4*1024*1024, 3, 0);
-fileInputStream.read(...);
-```
-
-##### Enable the AES-NI intrinsics
-```
-// To set the fast native AesIntrinsics:
+// To set the Salmon native intrinsics:  
 SalmonStream.setAesProviderType(SalmonStream.ProviderType.AesIntrinsics);
 ```
 
-##### Inject the SalmonStream into 3rd party code
+### Portability: TinyAES library  
 ```
-// If you work with Java and want to inject a SalmonStream to 3rd party code to read the contents
-// Wrap it with InputStreamWrapper which is a standard Java InputStream:
-SalmonStream decStream = new SalmonStream(key, nonce, EncryptionMode.Decrypt, byteStream);
-InputStreamWrapper stream = new InputStreamWrapper(decStream);
-// somewhere inside the 3rd party code the data will be decrypted and read transparently
-// stream.read(...); 
+// If the platform/OS does not provide AES encryption algorithms and the hardware does not have AES-NI features you can use Salmon with the TinyAES library which is written in pure C code:
+SalmonStream.setAesProviderType(SalmonStream.ProviderType.TinyAES);
 ```
 
-##### Use the SalmonDrive and the virtual Filesystem API:
+### Portable Drives:
+Drives are portable and backable and can be read/decrypted by any device that can run Salmon API. If you need to import files to a salmon virtual drive using a different device you need to first requires authorize it. 
+
+The device that created the drive is by default authorized. Any authorized device can authorize other devices. The authorization works by allocating a new nonce range for each authorized device.
 ```
-// If you don't want to deal with the above you can directly use the SalmonDrive
-// which will a) take care of generating secure sequential nonces, b) use a text password based key,
-// and c) create a virtual drive in a folder which you can operate via a virtual filesystem API.
-SalmonDrive drive = SalmonDriveManager.createDrive("c:\path\to\your\drive", password);
-// use 2 threads for encrypting and importing files
-SalmonFileCommander commander = new SalmonFileCommander(SalmonDefaultOptions.getBufferSize(), SalmonDefaultOptions.getBufferSize(), 2);
-JavaFile[] files = new JavaFile[]{new JavaFile("data/file.txt")};
-// import file(s):
-JavaFile[] files = new JavaFile[]{new JavaFile("data/file.txt")};
-commander.importFiles(files, drive.getVirtualRoot(), false, true, (taskProgress) -> {
-	System.out.println("file importing: " + taskProgress.getFile().getBaseName() + ": "
-		+ taskProgress.getProcessedBytes() + "/" + taskProgress.getTotalBytes() + " bytes");
-	}, IRealFile.autoRename, (file, ex) -> {
-		// file failed to import
-	});
-// use the virtual filesystem API to get the file:
-SalmonFile file = drive.getVirtualRoot().getChild("file.txt");
-// now read from the stream using parallel threads and caching:
-SalmonFileInputStream inputStream = new SalmonFileInputStream(file, 4, 4 * 1024 * 1024, 2, 256 * 1024);
-inputStream.read(...);
+// Device authorization example:
+// open a copy of the drive on the target device and get the authorization id
+String authId = SalmonDrive.getAuthId();
+
+// open the drive on the source (authorized) device and export an 
+// authorization file with the authorization id of the target device
+SalmonAuthConfig.exportAuthFile(drive, authId, new JavaFile("c:\\path\\to\\auth_file\\auth.slma"));
+
+// finally import the authorization file in the target device
+SalmonAuthConfig.importAuthFile(drive, new JavaFile("c:\\path\\to\\auth_file\\auth.slma"));
 ```
 
-For more detailed examples see the Samples folder.
+### Interoperability: Injectable stream wrappers
+The C# implementation has a SalmonStream that inherits from .NET Stream so you can use it with other libraries or 3rd party code. For Java/Javascript/Typescript/Python you have to wrap the SalmonStream to built-in wrappers:   
+* Java: InputStreamWrapper for SalmonStream and SalmonFileInputStream for SalmonFile
+* Typescript/Javascript: ReadableStreamWrapper for SalmonStream and SalmonFileReadableStream for SalmonFile
+* Python: BufferedIOWrapper for SalmonStream and SalmonFileInputStream for SalmonFile
 
-#### C/C++  
-There is no stream support for C/C++ but you can use the native AES-NI subroutines directly as in the example below.
+### Native: C/C++  
+Although there is no drive and stream support for C/C++ you can use the Salmon native AES-NI subroutines directly.
 For a full working C++ sample see: [Samples](https://github.com/mku11/Salmon-AES-CTR/tree/main/samples)
 
-```
-// encrypt/decrypt byte array using low level subroutines
-#include "salmon.h"
-#include "wincrypt.h"
+## Package Management
+To learn how to integrate the Salmon library packages into your project with Maven, Gradle, or VS Studio see [Package Management](https://github.com/mku11/Salmon-AES-CTR/docs/Package_Management.md)  
 
-HCRYPTPROV   hCryptProv;
-BYTE         key[32];
-BYTE         nonce[8];
-	
-CryptAcquireContextW(&hCryptProv, 0, 0, PROV_RSA_FULL, CRYPT_VERIFYCONTEXT);
-CryptGenRandom(hCryptProv, 32, key); // generate a random key
-CryptGenRandom(hCryptProv, 8, nonce); // always use a fresh nonce
-
-// init the Salmon AES-NI intrinsics
-salmon_init(AES_IMPL_AES_INTR);
-
-// expand your AES 256-bit key
-uint8_t expandedKey[240];
-salmon_expandKey(key, expandedKey);
-
-// set the counter
-BYTE	counter[16];
-memset(counter, 0, 16);
-memcpy(counter, nonce, 8);
-
-// reset the counter
-memset(counter, 0, 16);
-memcpy(counter, nonce, 8);
-	
-// encrypt using your initial counter
-uint8_t encText[1024];
-int encBytes = salmon_transform(
-	expandedKey, counter, AES_MODE_ENCRYPTION,
-	plainText, 0,
-	encText, 0, length);
-
-// reset your counter and decrypt
-int decBytes = salmon_transform(
-	expandedKey, counter, AES_MODE_DECRYPTION,
-	encText, 0,
-	plainText, 0, length);	
-```
-
----
-
-### Specifications
+## Specifications
 Want to know more about Salmon specs and subprojects?  
 Click on [Salmon specifications and formats](https://github.com/mku11/Salmon-AES-CTR/tree/main/docs)   
 For how to compile and build each subproject see README.md in its respective folder.
 
-### Limitations
-* SalmonStream is seekable only if the backed resource supports random access (disk, memory, network).
-* SalmonStream is not Thread Safe! If you want to use parallel processing you need to use SalmonEncryptor/SalmonDecryptor.
-* SalmonFile is seekable only if the backed resource supports random access (disk, memory, network).
-* SalmonFile is not Thread Safe! If you want to use parallel processing you need to use SalmonFileImporter/SalmonFileExporter.
-* Importing files to a salmon virtual drive using different devices requires authorization by an already authorized device for each  virtual drive. The device that created the drive is by default authorized. The authorization mechanism protects against repeated access based attacks!
+## Limitations
+* Salmon streams are seekable only if the backed resource supports random access (disk, memory, network).
+* Salmon API is not Thread Safe! If you want to use parallel processing you need to use SalmonEncryptor/SalmonDecryptor and SalmonFileImporter/SalmonFileExporter.
 * Make sure that you never backup and restore the Nonce Sequencer files in your Windows Device! They are located in each user %LOCALAPPDATA%\\.salmon directory (including the LocalSystem user if you use the Salmon Windows Service). So make sure you exclude them from backups and restores.
 * The Windows user sequencer files are not secure from other apps! Also do not share your device account with other users! Salmon will attempt to notify you if it encounters tampering on the sequencer though for additional security you should use the Salmon Windows Service which protects the sequencer under the LocalSystem space.
 * Integrity is not supported for filenames only for file contents.
@@ -317,11 +193,10 @@ For how to compile and build each subproject see README.md in its respective fol
 * Maximum drive file size: 2^64 bytes
 * Maximum number of drive files: 2^62 (64 bit nonces used for the filename and the file contents.
 
-### Contributions
-Code contributions are not accepted.  
-Bug reports and security POCs are more than welcome!  
+## Contributions
+Unfortunately I cannot accept any code contributions. Though, bug reports and security POCs are more than welcome!  
   
-### License
+## License
 Salmon is released under MIT Licence, see [LICENSE](https://github.com/mku11/Salmon-AES-CTR/blob/main/LICENSE) file.
 Make sure you read the LICENSE file and display proper attribution if you decide to use this software.
 Dependency libraries from Github, Maven, and NuGet are covered by their own license  

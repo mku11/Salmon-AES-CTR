@@ -32,7 +32,7 @@ public class Base64 implements IBase64 {
     /**
      * Decode a string.
      * @param text String to be converted.
-     * @return
+     * @return The bytes with the decoded data.
      */
     public byte[] decode(String text){
         return android.util.Base64.decode(text, android.util.Base64.NO_WRAP);
@@ -41,7 +41,7 @@ public class Base64 implements IBase64 {
     /**
      * Encode a string.
      * @param data The byte array to be converted.
-     * @return
+     * @return The string with the text encoded
      */
     public String encode(byte [] data) {
         return android.util.Base64.encodeToString(data, android.util.Base64.NO_WRAP);

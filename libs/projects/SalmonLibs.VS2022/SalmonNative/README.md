@@ -1,5 +1,5 @@
 Salmon.Native  
-version: 1.0.5  
+version: 2.0.0  
 project: https://github.com/mku11/Salmon-AES-CTR  
 license: MIT License https://github.com/mku11/Salmon-AES-CTR/blob/main/LICENSE  
   
@@ -21,10 +21,12 @@ Package:
 To package the app click on Build in Visual Studio.  
   
 Packaging:  
-To create the nuget package for SalmonNative from the command line:  
-Make sure you have "Nuget command line package" installed from nuget.  
-Navigate to the SalmonNative folder then type:  
-..\packages\NuGet.CommandLine.6.7.0\tools\NuGet.exe pack SalmonNative.nuspec -outputDir ..\..\..\..\output\nuget\releases  
-  
-Alternatively you can add the command as a post build step in visual studio.  
+To create the nuget package for SalmonNative from the command line
+you need the Nuget executable. For instructions how to download it see:
+https://learn.microsoft.com/en-us/nuget/consume-packages/install-use-packages-nuget-cli
+And add the path to the PATH enviroment variable.
+Then you can either build the project, the task is post-build step.
+or package it manually:
+NuGet.exe pack SalmonNative.nuspec -outputDir ..\..\..\..\output\nuget\releases  
+
   

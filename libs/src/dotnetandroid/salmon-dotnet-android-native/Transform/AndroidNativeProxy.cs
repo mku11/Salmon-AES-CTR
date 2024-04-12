@@ -24,7 +24,7 @@ SOFTWARE.
 
 namespace Salmon.Transform;
 
-using Mku.Salmon.Transform;
+using Mku.Bridge;
 using System.Runtime.InteropServices;
 
 public class AndroidNativeProxy : INativeProxy
@@ -53,17 +53,16 @@ public class AndroidNativeProxy : INativeProxy
     /// <summary>
     ///  Native transform of the input byte array using AES 256 encryption or decryption mode.
     /// </summary>
-    ///  <param name="key">The ex</param>
-    ///  <param name="counter"></param>
-    ///  <param name="encryption_mode"></param>
-    ///  <param name="srcBuffer"></param>
-    ///  <param name="srcOffset"></param>
-    ///  <param name="destBuffer"></param>
-    ///  <param name="destOffset"></param>
-    ///  <param name="count"></param>
-    ///  <returns></returns>
+    ///  <param name="key">The key</param>
+    ///  <param name="counter">The counter</param>
+    ///  <param name="srcBuffer">The source buffer</param>
+    ///  <param name="srcOffset">The source offset</param>
+    ///  <param name="destBuffer">The destination buffer</param>
+    ///  <param name="destOffset">The destination offset</param>
+    ///  <param name="count">The number of bytes to transform</param>
+    ///  <returns>The number of bytes transformed</returns>
     [DllImport(DllName)]
-    private extern static int salmon_transform(byte[] key, byte[] counter, int encryption_mode,
+    private extern static int salmon_transform(byte[] key, byte[] counter,
                                      byte[] srcBuffer, int srcOffset,
                                      byte[] destBuffer, int destOffset, int count);
 
@@ -91,17 +90,16 @@ public class AndroidNativeProxy : INativeProxy
     /// <summary>
     ///  Proxy Transform the input byte array using AES 256 using encryption or decryption mode.
     /// </summary>
-    ///  <param name="key">The ex</param>
-    ///  <param name="counter"></param>
-    ///  <param name="encryption_mode"></param>
-    ///  <param name="srcBuffer"></param>
-    ///  <param name="srcOffset"></param>
-    ///  <param name="destBuffer"></param>
-    ///  <param name="destOffset"></param>
-    ///  <param name="count"></param>
-    ///  <returns></returns>
-    public int SalmonTransform(byte[] key, byte[] counter, int encryption_mode, byte[] srcBuffer, int srcOffset, byte[] destBuffer, int destOffset, int count)
+    ///  <param name="key">The key</param>
+    ///  <param name="counter">The counter</param>
+    ///  <param name="srcBuffer">The source buffer</param>
+    ///  <param name="srcOffset">The source offset</param>
+    ///  <param name="destBuffer">The destination buffer</param>
+    ///  <param name="destOffset">The destination offset</param>
+    ///  <param name="count">The number of bytes to transform</param>
+    ///  <returns>The number of bytes transformed</returns>
+    public int SalmonTransform(byte[] key, byte[] counter, byte[] srcBuffer, int srcOffset, byte[] destBuffer, int destOffset, int count)
     {
-        return salmon_transform(key, counter, encryption_mode, srcBuffer, srcOffset, destBuffer, destOffset, count);
+        return salmon_transform(key, counter, srcBuffer, srcOffset, destBuffer, destOffset, count);
     }
 }

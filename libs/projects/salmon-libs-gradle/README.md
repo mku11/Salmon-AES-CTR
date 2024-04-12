@@ -24,18 +24,23 @@ git submodule update --recursive --init
 
 To build the java and native libraries from the command line run:  
 ```
-./gradlew build -x test --rerun-tasks
+gradlew.bat build -x test --rerun-tasks
 ```
 
 To create the maven packages (see root folder output dir):  
 ```
-./gradlew publish --rerun-tasks  
+gradlew.bat publish -x test --rerun-tasks  
 ```
 
 ## Tests and Benchmarks:  
 test files for core, fs, and native subprojects are included in respective test sourceSets (See build.gradle).  
+To run a specific test case:
+```
+gradlew.bat :salmon-fs:test --tests "com.mku.salmon.test.SalmonFSTests.shouldAuthorizePositive" --rerun-tasks  
+```
+
 see salmon-core/src/jmh folder for benchmarks. To run from the command line:  
 
 ```
-./gradlew :salmon-core:jmh --rerun-tasks  
+gradlew.bat :salmon-core:jmh --rerun-tasks  
 ```

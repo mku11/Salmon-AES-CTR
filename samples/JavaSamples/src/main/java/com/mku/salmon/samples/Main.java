@@ -2,91 +2,101 @@ package com.mku.salmon.samples;
 
 import com.mku.convert.BitConverter;
 import com.mku.file.IRealFile;
-import com.mku.file.JavaDrive;
+import com.mku.salmon.drive.JavaDrive;
 import com.mku.file.JavaFile;
-import com.mku.io.MemoryStream;
-import com.mku.io.RandomAccessStream;
+import com.mku.salmon.streams.EncryptionMode;
+import com.mku.salmon.streams.ProviderType;
+import com.mku.salmon.streams.SalmonFileInputStream;
+import com.mku.streams.MemoryStream;
+import com.mku.streams.RandomAccessStream;
 import com.mku.salmon.*;
-import com.mku.salmon.integrity.SalmonIntegrityException;
-import com.mku.salmon.io.SalmonStream;
+import com.mku.salmon.streams.SalmonStream;
 import com.mku.salmon.password.SalmonPassword;
 import com.mku.salmon.text.SalmonTextDecryptor;
 import com.mku.salmon.text.SalmonTextEncryptor;
-import com.mku.salmonfs.*;
-import com.mku.sequence.SalmonFileSequencer;
-import com.mku.sequence.SalmonSequenceException;
-import com.mku.sequence.SalmonSequenceSerializer;
-import com.mku.utils.SalmonFileCommander;
+import com.mku.salmon.sequence.SalmonFileSequencer;
+import com.mku.salmon.sequence.SalmonSequenceSerializer;
+import com.mku.salmon.utils.SalmonFileCommander;
 
 import java.io.IOException;
 import java.util.Random;
 
 public class Main {
-    static {
-        // uncomment to load the AES intrinsics for better performance
-        // SalmonStream.setAesProviderType(SalmonStream.ProviderType.AesIntrinsics);
+    static String text = "This is plaintext that will be encrypted";
+    static byte[] data = new byte[2 * 1024 * 1024];
+    static String password = "MYS@LMONP@$$WORD";
 
-        // If you're getting an java.lang.UnsatisfiedLinkError add java param:
-        // -Djava.library.path=C:\path\to\salmonlib\
-        // Make sure you build from gradle so the native lib can be unpacked under: build/libs/natives
-        // > gradlew.bat build
+    static {
+        // some random data to encrypt
+        Random r = new Random();
+        r.nextBytes(data);
     }
 
     public static void main(String[] args) throws Exception {
-        String password = "MYS@LMONP@$$WORD";
+        // uncomment to load the AES intrinsics for better performance
+        // make sure you add option -Djava.library.path=C:\path\to\salmonlib\
+        // SalmonStream.setAesProviderType(ProviderType.AesIntrinsics);
 
-        // some test to encrypt
-        String text = "This is a plaintext that will be used for testing";
-        byte[] bytes = text.getBytes();
+        // use the password to create a drive and import the file
+        String vaultPath = "vault_" + BitConverter.toHex(SalmonGenerator.getSecureRandomBytes(6));
+        JavaFile vaultDir = new JavaFile(vaultPath);
+		vaultDir.mkdir();
+        JavaFile[] filesToImport = new JavaFile[]{new JavaFile("data/file.txt")};
+        createDriveAndImportFile(vaultDir, filesToImport);
 
-        // some data to encrypt
-        byte[] data = new byte[1 * 1024 * 1024];
-        Random r = new Random();
-        r.nextBytes(data);
+        // or encrypt text into a standalone file without a drive:
+        String filePath = "data_" + BitConverter.toHex(SalmonGenerator.getSecureRandomBytes(6));
+        JavaFile file = new JavaFile(filePath);
+        encryptAndDecryptTextToFile(file);
 
-        // you can create a key and reuse it:
-        //byte[] key = SalmonGenerator.getSecureRandomBytes(32);
-        // or get one derived from a text password:
+        // misc stream samples
+        streamSamples();
+    }
+
+    private static byte[] getKeyFromPassword(String password) {
+        // get a key from a text password:
         byte[] salt = SalmonGenerator.getSecureRandomBytes(24);
-
         // make sure the iterations are a large enough number
         byte[] key = SalmonPassword.getKeyFromPassword(password, salt, 60000, 32);
+        return key;
+    }
 
-        // encrypt and decrypt byte array using multiple threads:
-        encryptAndDecryptUsingMultipleThreads(data, key);
+    public static void streamSamples() throws IOException {
+        // get a fresh key
+        byte[] key = SalmonGenerator.getSecureRandomBytes(32);
 
         // encrypt and decrypt a text string:
         encryptAndDecryptTextEmbeddingNonce(text, key);
 
         // encrypt and decrypt data to a byte array stream:
-        encryptAndDecryptDataToByteArrayStream(bytes, key);
+        encryptAndDecryptDataToByteArrayStream(text.getBytes(), key);
 
-        // encrypt and decrypt text to a file:
-        encryptAndDecryptTextToFile(text, key);
-
-        // create a drive import, read the encrypted content, and export
-        createDriveAndImportFile(password);
+        // encrypt and decrypt byte array using multiple threads:
+        encryptAndDecryptUsingMultipleThreads(data, key);
     }
 
     private static void encryptAndDecryptUsingMultipleThreads(byte[] bytes, byte[] key)
-            throws SalmonSecurityException, SalmonIntegrityException, IOException {
+            throws IOException {
         System.out.println("Encrypting bytes using multiple threads: " + BitConverter.toHex(bytes).substring(0, 24) + "...");
 
         // Always request a new random secure nonce.
         byte[] nonce = SalmonGenerator.getSecureRandomBytes(8);
 
         // encrypt a byte array using 2 threads
-        byte[] encBytes = new SalmonEncryptor(2).encrypt(bytes, key, nonce, false);
+        SalmonEncryptor encryptor = new SalmonEncryptor(2);
+        byte[] encBytes = encryptor.encrypt(bytes, key, nonce, false);
         System.out.println("Encrypted bytes: " + BitConverter.toHex(encBytes).substring(0, 24) + "...");
+        encryptor.close();
 
         // decrypt byte array using 2 threads
-        byte[] decBytes = new SalmonDecryptor(2).decrypt(encBytes, key, nonce, false);
+        SalmonDecryptor decryptor = new SalmonDecryptor(2);
+        byte[] decBytes = decryptor.decrypt(encBytes, key, nonce, false);
         System.out.println("Decrypted bytes: " + BitConverter.toHex(decBytes).substring(0, 24) + "...");
         System.out.println();
+        decryptor.close();
     }
 
-    private static void encryptAndDecryptTextEmbeddingNonce(String text, byte[] key)
-            throws SalmonSecurityException, SalmonIntegrityException, IOException {
+    private static void encryptAndDecryptTextEmbeddingNonce(String text, byte[] key) throws IOException {
         System.out.println("Encrypting text with nonce embedded: " + text);
 
         // Always request a new random secure nonce.
@@ -102,8 +112,7 @@ public class Main {
         System.out.println();
     }
 
-    private static void encryptAndDecryptDataToByteArrayStream(byte[] bytes, byte[] key)
-            throws IOException, SalmonSecurityException, SalmonIntegrityException {
+    private static void encryptAndDecryptDataToByteArrayStream(byte[] bytes, byte[] key) throws IOException {
         System.out.println("Encrypting data to byte array stream: " + BitConverter.toHex(bytes));
 
         // Always request a new random secure nonce!
@@ -113,75 +122,67 @@ public class Main {
         MemoryStream encOutStream = new MemoryStream(); // or use your custom output stream by extending RandomAccessStream
 
         // pass the output stream to the SalmonStream
-        SalmonStream encrypter = new SalmonStream(key, nonce, SalmonStream.EncryptionMode.Encrypt,
+        SalmonStream encStream = new SalmonStream(key, nonce, EncryptionMode.Encrypt,
                 encOutStream, null,
                 false, null, null);
 
-        // encrypt and write with a single call, you can also Seek() and Write()
-        encrypter.write(bytes, 0, bytes.length);
+        // encrypt/write data in a single call, you can also Seek() before Write()
+        encStream.write(bytes, 0, bytes.length);
 
         // encrypted data are now written to the encOutStream.
-        encOutStream.position(0);
+        encOutStream.setPosition(0);
         byte[] encData = encOutStream.toArray();
-        encrypter.flush();
-        encrypter.close();
+        encStream.flush();
+        encStream.close();
         encOutStream.close();
 
         //decrypt a stream with encoded data
         RandomAccessStream encInputStream = new MemoryStream(encData); // or use your custom input stream by extending AbsStream
-        SalmonStream decrypter = new SalmonStream(key, nonce, SalmonStream.EncryptionMode.Decrypt,
+        SalmonStream decStream = new SalmonStream(key, nonce, EncryptionMode.Decrypt,
                 encInputStream, null,
                 false, null, null);
-        byte[] decBuffer = new byte[(int) decrypter.length()];
+        byte[] decBuffer = new byte[(int) decStream.length()];
 
         // seek to the beginning or any position in the stream
-        decrypter.seek(0, RandomAccessStream.SeekOrigin.Begin);
+        decStream.seek(0, RandomAccessStream.SeekOrigin.Begin);
 
-        // decrypt and read data with a single call, you can also Seek() before Read()
-        int bytesRead = decrypter.read(decBuffer, 0, decBuffer.length);
-        decrypter.close();
+        // read/decrypt data in a single call, you can also Seek() before Read()
+        int bytesRead = decStream.read(decBuffer, 0, decBuffer.length);
+        decStream.close();
         encInputStream.close();
 
         System.out.println("Decrypted data: " + BitConverter.toHex(decBuffer));
         System.out.println();
     }
 
-    private static void encryptAndDecryptTextToFile(String text, byte[] key)
-            throws SalmonSecurityException, SalmonIntegrityException, SalmonSequenceException,
-            IOException, SalmonRangeExceededException, SalmonAuthException {
+    private static void encryptAndDecryptTextToFile(IRealFile file) throws IOException {
         // encrypt to a file, the SalmonFile has a virtual file system API
         System.out.println("Encrypting text to File: " + text);
-        String testFile = "D:/tmp/salmontestfile.txt";
-
-        // the real file:
-        IRealFile tFile = new JavaFile(testFile);
-        if (tFile.exists())
-            tFile.delete();
-
         byte[] bytes = text.getBytes();
 
-        // Always request a new random secure nonce. Though if you will be re-using
-        // the same key you should create a SalmonDrive to keep the nonces unique.
+        // derive the key from the password
+        byte[] key = getKeyFromPassword(password);
+
+        // Always request a new random secure nonce
         byte[] nonce = SalmonGenerator.getSecureRandomBytes(8); // 64 bit nonce
 
-        SalmonFile encFile = new SalmonFile(new JavaFile(testFile), null);
-        nonce = SalmonGenerator.getSecureRandomBytes(8); // always get a fresh nonce!
+        SalmonFile encFile = new SalmonFile(file);
         encFile.setEncryptionKey(key);
         encFile.setRequestedNonce(nonce);
         RandomAccessStream stream = encFile.getOutputStream();
 
-        // encrypt data and write with a single call
+        // encrypt/write data with a single call
         stream.write(bytes, 0, bytes.length);
         stream.flush();
         stream.close();
 
         // Decrypt the file
-        SalmonFile encFile2 = new SalmonFile(new JavaFile(testFile), null);
+        SalmonFile encFile2 = new SalmonFile(file);
         encFile2.setEncryptionKey(key);
         RandomAccessStream stream2 = encFile2.getInputStream();
-        byte[] decBuff = new byte[1024];
 
-        // read data with a single call
+        // read/decrypt data with a single call
+        byte[] decBuff = new byte[1024];
         int encBytesRead = stream2.read(decBuff, 0, decBuff.length);
         String decString2 = new String(decBuff, 0, encBytesRead);
         System.out.println("Decrypted text: " + decString2);
@@ -189,47 +190,43 @@ public class Main {
         System.out.println();
     }
 
-    private static void createDriveAndImportFile(String password) throws Exception {
-        // create a file nonce sequencer
-        String seqFilename = "sequencer.xml";
-        JavaFile dir = new JavaFile("output");
-        if(!dir.exists())
-            dir.mkdir();
-        IRealFile sequenceFile = dir.getChild(seqFilename);
-        SalmonFileSequencer fileSequencer = new SalmonFileSequencer(sequenceFile, new SalmonSequenceSerializer());
-        SalmonDriveManager.setVirtualDriveClass(JavaDrive.class);
-        SalmonDriveManager.setSequencer(fileSequencer);
+    private static void createDriveAndImportFile(IRealFile vaultDir, IRealFile[] filesToImport) throws Exception {
+        // create a file sequencer:
+        SalmonFileSequencer sequencer = createSequencer();
 
         // create a drive
-        SalmonDrive drive = SalmonDriveManager.createDrive(dir.getPath() + "/vault" + new Random().nextInt(), password);
-        SalmonFileCommander commander = new SalmonFileCommander(
-                SalmonDefaultOptions.getBufferSize(), SalmonDefaultOptions.getBufferSize(), 2);
-        JavaFile[] files = new JavaFile[]{new JavaFile("data/file.txt")};
+        SalmonDrive drive = JavaDrive.create(vaultDir, password, sequencer);
+        SalmonFileCommander commander = new SalmonFileCommander(256 * 1024, 256 * 1024, 2);
 
         // import multiple files
-        commander.importFiles(files, drive.getVirtualRoot(), false, true,
+        SalmonFile[] filesImported = commander.importFiles(filesToImport, drive.getRoot(), false, true,
                 (taskProgress) -> {
-                    System.out.println("file importing: " + taskProgress.getFile().getBaseName() + ": " 
-					+ taskProgress.getProcessedBytes() + "/" + taskProgress.getTotalBytes() + " bytes");
+                    System.out.println("file importing: " + taskProgress.getFile().getBaseName() + ": "
+                            + taskProgress.getProcessedBytes() + "/" + taskProgress.getTotalBytes() + " bytes");
                 }, IRealFile.autoRename, (file, ex) -> {
                     // file failed to import
                 });
 
-        // query for the file from the drive
-        SalmonFile file = drive.getVirtualRoot().getChild("file.txt");
+        System.out.println("Files imported");
 
-        // read from the stream with parallel threads and caching
+        // query for the file from the drive
+        SalmonFile root = drive.getRoot();
+        SalmonFile[] files = root.listFiles();
+
+        // read from a native stream wrapper with parallel threads and caching
+        // or use file.getInputStream() to get a low level RandomAccessStream
+        SalmonFile file = files[0];
         SalmonFileInputStream inputStream = new SalmonFileInputStream(file,
                 4, 4 * 1024 * 1024, 2, 256 * 1024);
         // inputStream.read(...);
         inputStream.close();
 
         // export the file
-        commander.exportFiles(new SalmonFile[]{file}, new JavaFile("output"), false, true,
+        IRealFile[] filesExported = commander.exportFiles(files, drive.getExportDir(), false, true,
                 (taskProgress) -> {
                     try {
-                        System.out.println("file exporting: " + taskProgress.getFile().getBaseName() + ": " 
-						+ taskProgress.getProcessedBytes() + "/" + taskProgress.getTotalBytes() + " bytes");
+                        System.out.println("file exporting: " + taskProgress.getFile().getBaseName() + ": "
+                                + taskProgress.getProcessedBytes() + "/" + taskProgress.getTotalBytes() + " bytes");
                     } catch (Exception e) {
                         e.printStackTrace();
                     }
@@ -237,10 +234,25 @@ public class Main {
                     // file failed to import
                 });
 
+        System.out.println("Files exported");
+
         // close the file commander
         commander.close();
 
         // close the drive
         drive.close();
+    }
+
+    private static SalmonFileSequencer createSequencer() throws IOException {
+        // create a file nonce sequencer and place it in a private space
+        // make sure you never edit or back up this file.
+        String seqFilename = "sequencer.xml";
+        IRealFile privateDir = new JavaFile(System.getenv("LOCALAPPDATA"));
+        IRealFile sequencerDir = privateDir.getChild("SalmonSequencer");
+        if (!sequencerDir.exists())
+            sequencerDir.mkdir();
+        IRealFile sequenceFile = sequencerDir.getChild(seqFilename);
+        SalmonFileSequencer fileSequencer = new SalmonFileSequencer(sequenceFile, new SalmonSequenceSerializer());
+        return fileSequencer;
     }
 }

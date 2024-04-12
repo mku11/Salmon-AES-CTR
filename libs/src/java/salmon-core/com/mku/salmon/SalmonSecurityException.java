@@ -26,7 +26,7 @@ SOFTWARE.
 /**
  * Salmon generic security exception.
  */
-public class SalmonSecurityException extends Exception {
+public class SalmonSecurityException extends RuntimeException {
     /**
      * Construct an exception with a specific message.
      * @param msg The provided message.

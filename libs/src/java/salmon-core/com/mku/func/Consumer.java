@@ -22,8 +22,10 @@ LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 */
+
 /**
  * Backwards compatibility Consumer class for devices with Android 23 and prior.
+ *
  * @param <T> Type of argument
  */
 public interface Consumer<T> {

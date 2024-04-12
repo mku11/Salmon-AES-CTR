@@ -22,12 +22,12 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 */
 
-using Mku.Salmon.IO;
+using Mku.Salmon.Integrity;
+using Mku.Salmon.Streams;
 using System;
 using System.IO;
 
 namespace Mku.Salmon.Transform;
-
 
 /// <summary>
 ///  Abstract class for AES256 transformer implementations.
@@ -48,16 +48,16 @@ public abstract class SalmonAES256CTRTransformer : ISalmonCTRTransformer
 	///  <param name="data">The data to be transformed.</param>
     ///  <param name="key">The AES key.</param>
     ///  <param name="nonce">The nonce for the CTR.</param>
-    ///  <param name="mode">The <see cref="SalmonStream.EncryptionMode"/> Encrypt or Decrypt.</param>
+    ///  <param name="mode">The <see cref="EncryptionMode"/> Encrypt or Decrypt.</param>
     ///  <param name="headerData">The header data to be embedded if you use Encryption.</param>
     ///  <param name="integrity">True if you want to enable integrity.</param>
     ///  <param name="chunkSize">The chunk size for integrity chunks.</param>
     ///  <param name="hashKey">The hash key to be used for integrity checks.</param>
     ///  <returns>The size of the output data.</returns>
-    ///  <exception cref="SalmonSecurityException"></exception>
-    ///  <exception cref="Integrity.SalmonIntegrityException"></exception>
-    ///  <exception cref="IOException"></exception>
-    public static long GetActualSize(byte[] data, byte[] key, byte[] nonce, SalmonStream.EncryptionMode mode,
+    ///  <exception cref="SalmonSecurityException">Thrown when error with security</exception>
+    ///  <exception cref="IntegrityException">Thrown when data are corrupt or tampered with</exception>
+    ///  <exception cref="IOException">Thrown if error during IO</exception>
+    public static long GetActualSize(byte[] data, byte[] key, byte[] nonce, EncryptionMode mode,
                                      byte[] headerData, bool integrity, int? chunkSize, byte[] hashKey)
     {
         MemoryStream inputStream = new MemoryStream(data);
@@ -72,7 +72,6 @@ public abstract class SalmonAES256CTRTransformer : ISalmonCTRTransformer
     ///  Salmon stream encryption block size, same as AES.
     /// </summary>
     public static readonly int BLOCK_SIZE = 16;
-
 
     /// <summary>
     ///  Key to be used for AES transformation.
@@ -109,7 +108,6 @@ public abstract class SalmonAES256CTRTransformer : ISalmonCTRTransformer
         Block = 0;
     }
 
-
     /// <summary>
     ///  Syncs the Counter based on what AES block position the stream is at.
     ///  The block count is already excluding the header and the hash signatures.
@@ -144,14 +142,13 @@ public abstract class SalmonAES256CTRTransformer : ISalmonCTRTransformer
         }
     }
 
-
     /// <summary>
     ///  Initialize the transformer. Most common operations include precalculating expansion keys or
     ///  any other prior initialization for efficiency.
 	/// </summary>
-	///  <param name="key"></param>
-    ///  <param name="nonce"></param>
-    ///  <exception cref="SalmonSecurityException"></exception>
+	///  <param name="key">The key</param>
+    ///  <param name="nonce">The nonce</param>
+    ///  <exception cref="SalmonSecurityException">Thrown when error with security</exception>
     public virtual void Init(byte[] key, byte[] nonce)
     {
         this.Key = key;

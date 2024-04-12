@@ -23,8 +23,6 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 */
 
-using Mku.Salmon.IO;
-
 namespace Mku.Salmon.Transform;
 
 /// <summary>
@@ -42,12 +40,15 @@ public class SalmonAesIntrTransformer : SalmonNativeTransformer
 	/// </summary>
 	///  <param name="key">The AES key to use.</param>
     ///  <param name="nonce">The nonce to use.</param>
-    ///  <exception cref="SalmonSecurityException"></exception>
+    ///  <exception cref="SalmonSecurityException">Thrown when error with security</exception>
     override
     public void Init(byte[] key, byte[] nonce)
     {
         NativeProxy.SalmonInit(AES_IMPL_AES_INTR);
-		base.Init(key, nonce);
+        byte[] expandedKey = new byte[SalmonAES256CTRTransformer.EXPANDED_KEY_SIZE];
+        NativeProxy.SalmonExpandKey(key, expandedKey);
+        ExpandedKey = expandedKey;
+        base.Init(key, nonce);
     }
 
     /// <summary>
@@ -64,7 +65,7 @@ public class SalmonAesIntrTransformer : SalmonNativeTransformer
                            byte[] destBuffer, int destOffset, int count)
     {
         // AES intrinsics needs the expanded key
-        return NativeProxy.SalmonTransform(ExpandedKey, Counter, (int)SalmonStream.EncryptionMode.Encrypt,
+        return NativeProxy.SalmonTransform(ExpandedKey, Counter,
                 srcBuffer, srcOffset,
                 destBuffer, destOffset, count);
     }
@@ -83,9 +84,8 @@ public class SalmonAesIntrTransformer : SalmonNativeTransformer
                             byte[] destBuffer, int destOffset, int count)
     {
         // AES intrinsics needs the expanded key
-        return NativeProxy.SalmonTransform(ExpandedKey, Counter, (int)SalmonStream.EncryptionMode.Decrypt,
+        return NativeProxy.SalmonTransform(ExpandedKey, Counter,
                 srcBuffer, srcOffset,
                 destBuffer, destOffset, count);
     }
-
 }

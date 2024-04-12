@@ -6,7 +6,7 @@ plugins {
 
 group 'com.mku.salmon'
 description = 'Salmon AES256 CTR android filesystem encryption library'
-version '1.0.5'
+version '2.0.0'
 
 repositories {
     maven {
@@ -50,8 +50,8 @@ android {
 
 dependencies {
     implementation 'androidx.documentfile:documentfile:1.0.1'
-    implementation 'com.mku.salmon:salmon-core:1.0.5'
-    implementation 'com.mku.salmon:salmon-fs:1.0.5'
+    implementation 'com.mku.salmon:salmon-core:2.0.0'
+    implementation 'com.mku.salmon:salmon-fs:2.0.0'
 }
 
 task sourcesJar(type: Jar) {
@@ -84,7 +84,6 @@ publishing {
         salmon(MavenPublication) {
             groupId 'com.mku.salmon'
             artifactId 'salmon-fs-android'
-            version '1.0.5'
             artifact("$buildDir/outputs/aar/salmon-fs-android-release.aar")
             pom {
                 name = project.name
@@ -108,6 +107,15 @@ publishing {
                     developer {
                         id = 'mku'
                         name = 'Max Kas'
+                    }
+                }
+                withXml {
+                    def dependenciesNode = asNode().appendNode('dependencies')
+                    configurations.implementation.allDependencies.each {dependency ->
+                        def dependencyNode = dependenciesNode.appendNode('dependency')
+                        dependencyNode.appendNode('groupId', dependency.group)
+                        dependencyNode.appendNode('artifactId', dependency.name)
+                        dependencyNode.appendNode('version', dependency.version)
                     }
                 }
             }

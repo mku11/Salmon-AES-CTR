@@ -3,7 +3,7 @@
 #include "wincrypt.h"
 #include <iostream>
 extern "C" {
-#include "..\..\src\c\salmon\salmon.h"
+#include "salmon.h"
 }
 
 using namespace std;
@@ -33,14 +33,10 @@ namespace SalmonNativeTest
 			salmon_init(implType);
 
 			// set up the encryption key
-			uint8_t* encKey = NULL;
-			if(implType == AES_IMPL_TINY_AES)
+			uint8_t* encKey = key;
+			if(implType == AES_IMPL_AES_INTR)
 			{
-				encKey = key;
-			} else 
-			{
-				// or if we use the intrinsics we can expand the key
-				salmon_init(AES_IMPL_AES_INTR);
+				// if we use the intrinsics we expand the key
 				uint8_t expandedKey[240];
 				salmon_expandKey(key, expandedKey);
 				encKey = expandedKey;
@@ -60,7 +56,7 @@ namespace SalmonNativeTest
 			uint8_t encText[1024];
 			// encrypt the byte array
 			int bytesEncrypted = salmon_transform(
-				encKey, counter, AES_MODE_ENCRYPTION,
+				encKey, counter,
 				origPlainText, 0,
 				encText, 0, length);
 			Assert::AreEqual(length, bytesEncrypted);
@@ -71,7 +67,7 @@ namespace SalmonNativeTest
 			uint8_t plainText[1024];
 			// decrypt the byte array
 			int bytesDecrypted = salmon_transform(
-				encKey, counter, AES_MODE_ENCRYPTION,
+				encKey, counter,
 				encText, 0,
 				plainText, 0, length);
 			Assert::AreEqual(length, bytesDecrypted);

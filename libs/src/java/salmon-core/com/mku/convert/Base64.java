@@ -24,24 +24,26 @@ SOFTWARE.
 */
 
 /**
- * Java default implementation of Base64 encoder/decoder.
+ * Base64 encoder/decoder.
  */
 public class Base64 implements IBase64 {
     /**
      * Decode text from Base64 string.
+     *
      * @param text String to be decoded
      * @return Byte array of decoded data.
      */
-    public byte[] decode(String text){
+    public byte[] decode(String text) {
         return java.util.Base64.getDecoder().decode(text);
     }
 
     /**
      * Encode byte array to a text string.
+     *
      * @param data Byte array to be encoded.
      * @return String of encoded data.
      */
-    public String encode(byte [] data) {
+    public String encode(byte[] data) {
         return java.util.Base64.getEncoder().encodeToString(data);
     }
 }

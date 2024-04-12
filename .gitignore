@@ -21,6 +21,8 @@ csharp/lib/SalmonDotNetLibs/output/
 
 .cxx
 
+*.pyc
+
 *.pro
 *.filters
 *.user
@@ -37,3 +39,31 @@ Resource.designer.cs
 
 inspectionProfiles
 deploymentTargetDropDown.xml
+node_modules
+/libs/projects/salmon-libs-gcc-linux/lib
+.DS_Store
+DerivedData
+project.xcworkspace
+xcuserdata
+/samples/MacCSamples/MacCSamples/salmon-lib
+/samples/GccSamples/salmon-lib
+*.o
+*.so
+*.tar.gz
+/samples/GccSamples/salmon_sample
+/samples/MacCSamples/*.dmg
+/apps/salmon-vault-javafx/project/libs
+*.dll
+*.exe
+/libs/projects/salmon-libs-python/main.py
+node_modules
+/libs/projects/SalmonLibsTypeScript.VS2022/SalmonLibsTypeScript.VS2022/lib
+/libs/projects/SalmonLibsTypeScript.VS2022/SalmonLibsTypeScript.VS2022/eslintreport.txt
+/libs/projects/SalmonLibsTypeScript.VS2022/SalmonLibsTypeScript.VS2022/lintreport.txt
+/libs/projects/SalmonLibsTypeScript.VS2022/SalmonLibsTypeScript.VS2022/test/data
+/libs/projects/SalmonLibsTypeScript.VS2022/SalmonLibsTypeScript.VS2022/jsdoc
+
+/samples/JavascriptSamples/lib
+/samples/PythonSamples/lib
+vault_*
+data_*

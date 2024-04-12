@@ -1,0 +1,16 @@
+{
+  "defaultSeverity": "error",
+  "extends": [
+    "tslint:recommended",
+    "tslint-no-circular-imports"
+  ],
+  "jsRules": {},
+  "rules": {
+    "no-circular-imports": { "severity": "warn" },
+    "no-floating-promises": true,
+    "triple-equals":  false,
+    "jsdoc-format": true,
+    "jsdoc": true
+  },
+  "rulesDirectory": []
+}

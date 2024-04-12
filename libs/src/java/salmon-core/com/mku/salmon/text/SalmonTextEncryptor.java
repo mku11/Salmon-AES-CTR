@@ -23,13 +23,12 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 */
 
+import com.mku.integrity.IntegrityException;
 import com.mku.salmon.SalmonEncryptor;
 import com.mku.salmon.SalmonSecurityException;
 import com.mku.salmon.encode.SalmonEncoder;
-import com.mku.salmon.integrity.SalmonIntegrityException;
 
 import java.io.IOException;
-import java.nio.charset.Charset;
 
 /**
  * Utility class that encrypts and decrypts text strings.
@@ -45,16 +44,16 @@ public class SalmonTextEncryptor {
      * @param nonce The nonce to be used.
      * @param header Set to true to store a header with information like nonce and/or chunk size,
      *               otherwise you will have to store that information externally.
-     * @throws IOException
-     * @throws SalmonSecurityException
-     * @throws SalmonIntegrityException
-     * @throws IOException
+     * @throws IOException Thrown if there is an IO error.
+     * @throws SalmonSecurityException Thrown if there is a security exception
+     * @throws IntegrityException Thrown if the data are corrupt or tampered with.
+     * @return The encrypted string
+     * @throws IOException Thrown if there is an IO error.
      */
     public static String encryptString(String text, byte[] key, byte[] nonce, boolean header)
-            throws SalmonSecurityException, SalmonIntegrityException, IOException {
+            throws IOException {
         return encryptString(text, key, nonce, header, false, null, null);
     }
-
 
     /**
      * Encrypts a text String using AES256 with the key and nonce provided.
@@ -67,15 +66,16 @@ public class SalmonTextEncryptor {
      * @param integrity True if you want to calculate and store hash signatures for each chunkSize
      * @param hashKey Hash key to be used for all chunks.
      * @param chunkSize The chunk size.
-     * @throws IOException
-     * @throws SalmonSecurityException
-     * @throws SalmonIntegrityException
-     * @throws IOException
+     * @throws IOException Thrown if there is an IO error.
+     * @throws SalmonSecurityException Thrown if there is a security exception
+     * @throws IntegrityException Thrown if the data are corrupt or tampered with.
+     * @return The encrypted string.
+     * @throws IOException Thrown if there is an IO error.
      */
     public static String encryptString(String text, byte[] key, byte[] nonce, boolean header,
                                        boolean integrity, byte[] hashKey, Integer chunkSize)
-            throws SalmonSecurityException, SalmonIntegrityException, IOException {
-        byte[] bytes = text.getBytes(Charset.defaultCharset());
+            throws IOException {
+        byte[] bytes = text.getBytes("UTF-8");
         byte[] encBytes = encryptor.encrypt(bytes, key, nonce, header, integrity, hashKey, chunkSize);
         String encString = SalmonEncoder.getBase64().encode(encBytes).replace("\n", "");
         return encString;

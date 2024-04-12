@@ -37,6 +37,11 @@ public class SalmonRegistry
 
     private RegistryKey rkey;
 
+#pragma warning disable CA1416 // Validate platform compatibility
+
+    /// <summary>
+    /// Maps to the windows registry that can be used to store a key/value pair.
+    /// </summary>
     public SalmonRegistry()
     {
         rkey = Registry.CurrentUser.OpenSubKey(CATEGORY, true);
@@ -50,8 +55,8 @@ public class SalmonRegistry
     /// <summary>
     /// Read a value from the registry
     /// </summary>
-    /// <param name="key"></param>
-    /// <returns></returns>
+    /// <param name="key">The key</param>
+    /// <returns>The value</returns>
     public object Read(string key)
     {
         return rkey.GetValue(key);
@@ -60,8 +65,8 @@ public class SalmonRegistry
     /// <summary>
     /// Write a value from the registry
     /// </summary>
-    /// <param name="key"></param>
-    /// <param name="value"></param>
+    /// <param name="key">The key</param>
+    /// <param name="value">The value</param>
     public void Write(string key, object value)
     {
         rkey.SetValue(key, value);
@@ -71,7 +76,7 @@ public class SalmonRegistry
     /// <summary>
     /// Delete a value
     /// </summary>
-    /// <param name="key"></param>
+    /// <param name="key">The key</param>
     public void Delete(string key)
     {
         rkey.DeleteValue(key);
@@ -80,8 +85,9 @@ public class SalmonRegistry
 	/// <summary>
     /// True if value exists
     /// </summary>
-    /// <param name="key"></param>
+    /// <param name="key">The key</param>
 	public bool Exists(string key){
         return rkey.GetValue(key) != null;
     }
+#pragma warning restore CA1416 // Validate platform compatibility
 }

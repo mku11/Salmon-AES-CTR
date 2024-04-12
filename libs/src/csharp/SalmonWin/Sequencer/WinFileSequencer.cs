@@ -25,8 +25,10 @@ SOFTWARE.
 namespace Salmon.Win.Sequencer;
 
 using Mku.File;
+using Mku.Salmon.Sequence;
 using Mku.Sequence;
 using Salmon.Win.Registry;
+using System;
 using System.Security.Cryptography;
 
 /// <summary>
@@ -34,6 +36,7 @@ using System.Security.Cryptography;
 /// </summary>
 public class WinFileSequencer : SalmonFileSequencer
 {
+#pragma warning disable CA1416 // Validate platform compatibility
     /// <summary>
     /// The registry key to save the checksum.
     /// </summary>
@@ -43,18 +46,18 @@ public class WinFileSequencer : SalmonFileSequencer
     /// <summary>
     /// Instantiate a windows file sequencer.
     /// </summary>
-    public WinFileSequencer(IRealFile sequenceFile, ISalmonSequenceSerializer serializer, String regCheckSumKey) 
+    public WinFileSequencer(IRealFile sequenceFile, INonceSequenceSerializer serializer, string regCheckSumKey) 
         : base(sequenceFile, serializer)
     {
 		if(regCheckSumKey == null)
-			throw new SalmonSequenceException("Registry checksum key cannot be null");
+			throw new SequenceException("Registry checksum key cannot be null");
         CheckSumKey = regCheckSumKey;
     }
 
     /// <summary>
     /// Gets the checksum the registry and verifies the contents.
     /// </summary>
-    /// <returns></returns>
+    /// <returns>The contents</returns>
     protected override string GetContents()
     {
         string contents = base.GetContents();
@@ -78,7 +81,7 @@ public class WinFileSequencer : SalmonFileSequencer
 	/// with the User windows credentials using ProtectedData.
 	/// from rainbow attack
     /// </summary>
-    /// <param name="contents"></param>
+    /// <param name="contents">The contents</param>
     protected override void SaveContents(string contents)
     {
         contents = contents.Trim();
@@ -102,7 +105,7 @@ public class WinFileSequencer : SalmonFileSequencer
     /// Reset the sequences. The device will be de-authorized for all drives.
     /// </summary>
     /// <param name="clearChecksumOnly">True to only clear the registry checksum, use only if you know what you're doing. Default value is false).</param>
-    /// <exception cref="SalmonSequenceException"></exception>
+    /// <exception cref="SequenceException">Thrown when there is a failure in the nonce sequencer.</exception>
     public void Reset(bool clearChecksumOnly = false)
     {
         if (!clearChecksumOnly)
@@ -110,8 +113,10 @@ public class WinFileSequencer : SalmonFileSequencer
             if (SequenceFile.Exists)
                 SequenceFile.Delete();
             if (SequenceFile.Exists)
-                throw new SalmonSequenceException("Could not delete sequence file: " + SequenceFile.Path);
+                throw new SequenceException("Could not delete sequence file: " + SequenceFile.Path);
         }
         registry.Delete(CheckSumKey);
     }
+
+#pragma warning restore CA1416 // Validate platform compatibility
 }

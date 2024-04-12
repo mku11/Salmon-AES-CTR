@@ -25,6 +25,7 @@ SOFTWARE.
 
 /**
  * Backwards compatibility BiConsumer class for devices with Android 23 and prior.
+ *
  * @param <T1> Type of first argument
  * @param <T2> Type of second argument
  */

@@ -1,3 +1,4 @@
+using Mku.Salmon.Sequence;
 using System;
 
 namespace Mku.Sequence;
@@ -28,12 +29,12 @@ SOFTWARE.
 /// <summary>
 ///  Thrown when tampering has been detected in the nonce sequencer.
 /// </summary>
-public class WinSequenceTamperedException : SalmonSequenceException
+public class WinSequenceTamperedException : SequenceException
 {
     /// <summary>
     ///  Construct an exception with a specific message.
 	/// </summary>
-	///  <param name="msg"></param>
+	///  <param name="msg">The message</param>
     public WinSequenceTamperedException(string msg) : base(msg)
     {
 

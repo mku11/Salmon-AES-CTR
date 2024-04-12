@@ -23,6 +23,7 @@ SOFTWARE.
 */
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Mku.File;
+using Mku.Salmon.Sequence;
 using Mku.Sequence;
 using Salmon.Service.Sequence;
 using Salmon.Win.Sequencer;
@@ -205,7 +206,7 @@ public class WinServiceTests
         {
             nonce = sequencer.NextNonce("AAAA");
             Assert.AreNotEqual(5, Mku.Convert.BitConverter.ToLong(nonce, 0, 8));
-        } catch (SalmonSequenceException ex)
+        } catch (SequenceException ex)
         {
             Debug.WriteLine(ex);
             caught = true;

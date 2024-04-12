@@ -32,7 +32,7 @@ import java.security.NoSuchAlgorithmException;
 import java.security.spec.InvalidKeySpecException;
 
 /**
- * Provides pbkdf via Java default algorithm.
+ * Provides pbkdf algorithm.
  */
 public class SalmonDefaultPbkdfProvider  implements ISalmonPbkdfProvider{
     /**
@@ -41,12 +41,11 @@ public class SalmonDefaultPbkdfProvider  implements ISalmonPbkdfProvider{
      * @param salt The salt needs to be at least 24 bytes.
      * @param iterations Iterations to use. Make sure you use a high number according to your hardware specs.
      * @param outputBytes The length of the output key.
-     * @param pbkdfAlgo The hash algorithm to use.
+     * @param pbkdfAlgo The PBKDF algorithm to use
      * @return The key.
-     * @throws SalmonSecurityException
+     * @throws SalmonSecurityException Thrown if there is a security exception
      */
-    public byte[] getKey(String password, byte[] salt, int iterations, int outputBytes, SalmonPassword.PbkdfAlgo pbkdfAlgo)
-            throws SalmonSecurityException {
+    public byte[] getKey(String password, byte[] salt, int iterations, int outputBytes, PbkdfAlgo pbkdfAlgo) {
         PBEKeySpec keySpec = new PBEKeySpec(password.toCharArray(), salt, iterations, outputBytes * 8);
         String pbkdfAlgoStr = ISalmonPbkdfProvider.getPbkdfAlgoString(pbkdfAlgo);
         byte[] key;
@@ -54,7 +53,7 @@ public class SalmonDefaultPbkdfProvider  implements ISalmonPbkdfProvider{
             SecretKeyFactory factory = SecretKeyFactory.getInstance(pbkdfAlgoStr);
             key = factory.generateSecret(keySpec).getEncoded();
         } catch (NoSuchAlgorithmException | InvalidKeySpecException e) {
-            throw new SalmonSecurityException("Could not initialize pbkdf algo");
+            throw new SalmonSecurityException("Could not initialize pbkdf: " + e);
         }
         return key;
     }

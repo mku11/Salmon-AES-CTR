@@ -30,26 +30,4 @@ import com.mku.salmon.integrity.SalmonIntegrity;
  */
 public class SalmonDefaultOptions {
 
-    /**
-     * Get the default buffer size for all internal streams including Encryptors and Decryptors.
-     * @return
-     */
-    public static int getBufferSize() {
-        return bufferSize;
-    }
-
-    /**
-     * Default buffer size for all internal streams including Encryptors and Decryptors
-     */
-    private static int bufferSize = SalmonIntegrity.DEFAULT_CHUNK_SIZE;
-
-    /**
-     * Set the default buffer size for all internal streams including Encryptors and Decryptors.
-     *
-     * @param bufferSize
-     */
-    public static void setBufferSize(int bufferSize) {
-        SalmonDefaultOptions.bufferSize = bufferSize;
-    }
-
 }

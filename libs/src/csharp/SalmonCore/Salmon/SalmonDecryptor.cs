@@ -23,7 +23,7 @@ SOFTWARE.
 */
 
 using Mku.Salmon.Integrity;
-using Mku.Salmon.IO;
+using Mku.Salmon.Streams;
 using Mku.Salmon.Transform;
 using System;
 using System.IO;
@@ -93,8 +93,8 @@ public class SalmonDecryptor
     ///  <returns>The byte array with the decrypted data.</returns>
     ///  <exception cref="IOException">Thrown if there is a problem with decoding the array.</exception>
     ///  <exception cref="SalmonSecurityException">Thrown if the key and nonce are not provided.</exception>
-    ///  <exception cref="IOException"></exception>
-    ///  <exception cref="SalmonIntegrityException"></exception>
+    ///  <exception cref="IOException">Thrown if error during IO</exception>
+    ///  <exception cref="IntegrityException">Thrown when data are corrupt or tampered with.</exception>
     public byte[] Decrypt(byte[] data, byte[] key, byte[] nonce,
                                  bool hasHeaderData = false,
                                  bool integrity = false, byte[] hashKey = null, int? chunkSize = null)
@@ -122,7 +122,7 @@ public class SalmonDecryptor
         if (nonce == null)
             throw new SalmonSecurityException("Nonce is missing");
 
-        int realSize = (int)SalmonAES256CTRTransformer.GetActualSize(data, key, nonce, SalmonStream.EncryptionMode.Decrypt,
+        int realSize = (int)SalmonAES256CTRTransformer.GetActualSize(data, key, nonce, EncryptionMode.Decrypt,
                 headerData, integrity, chunkSize, hashKey);
         byte[] outData = new byte[realSize];
 
@@ -168,17 +168,12 @@ public class SalmonDecryptor
 
         if (partSize > minPartSize)
         {
-            partSize = (int)Math.Ceiling(partSize / (float)threads);
-            // if we want to check integrity we align to the chunk size instead of the AES Block
-            long rem = partSize % minPartSize;
-            if (rem != 0)
-                partSize += minPartSize - rem;
-
+            partSize = (int)Math.Ceiling(data.Length / (float)threads);
+            if(partSize > minPartSize)
+				partSize -= partSize % minPartSize;
+			else
+				partSize = minPartSize;
             runningThreads = (int)(data.Length / partSize);
-        }
-        else
-        {
-            runningThreads = 1;
         }
 
         SubmitDecryptJobs(runningThreads, partSize,
@@ -254,7 +249,7 @@ public class SalmonDecryptor
     ///  <param name="chunkSize">The chunk size.</param>
     ///  <exception cref="IOException"> Thrown if there is an error with the stream.</exception>
     ///  <exception cref="SalmonSecurityException">Thrown if there is a security exception with the stream.</exception>
-    ///  <exception cref="SalmonIntegrityException">Thrown if the stream is corrupt or tampered with.</exception>
+    ///  <exception cref="IntegrityException">Thrown if the stream is corrupt or tampered with.</exception>
     private void DecryptData(Stream inputStream, long start, long count, byte[] outData,
                                     byte[] key, byte[] nonce,
                                     byte[] headerData, bool integrity, byte[] hashKey, int? chunkSize)
@@ -265,12 +260,14 @@ public class SalmonDecryptor
         {
             outputStream = new MemoryStream(outData);
             outputStream.Position = start;
-            stream = new SalmonStream(key, nonce, SalmonStream.EncryptionMode.Decrypt, inputStream,
+            stream = new SalmonStream(key, nonce, EncryptionMode.Decrypt, inputStream,
                     headerData, integrity, chunkSize, hashKey);
             stream.Position = start;
             long totalChunkBytesRead = 0;
             // align to the chunksize if available
             int buffSize = Math.Max(bufferSize, stream.ChunkSize);
+            // set the same buffer size for the internal stream
+            stream.BufferSize = buffSize;
             byte[] buff = new byte[buffSize];
             int bytesRead;
             while ((bytesRead = stream.Read(buff, 0, Math.Min(buff.Length, (int)(count - totalChunkBytesRead)))) > 0
@@ -295,5 +292,13 @@ public class SalmonDecryptor
             if (outputStream != null)
                 outputStream.Close();
         }
+    }
+
+    /// <summary>
+    /// Close all associated resources
+    /// </summary>
+    public void Close()
+    {
+
     }
 }

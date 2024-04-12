@@ -24,10 +24,11 @@ SOFTWARE.
 */
 
 import com.mku.convert.BitConverter;
-import com.mku.io.MemoryStream;
+import com.mku.streams.MemoryStream;
 import com.mku.salmon.integrity.SalmonIntegrity;
-import com.mku.salmon.integrity.SalmonIntegrityException;
-import com.mku.salmon.io.SalmonStream;
+import com.mku.integrity.IntegrityException;
+import com.mku.salmon.streams.EncryptionMode;
+import com.mku.salmon.streams.SalmonStream;
 import com.mku.salmon.transform.SalmonAES256CTRTransformer;
 
 import java.io.IOException;
@@ -58,7 +59,6 @@ public class SalmonEncryptor {
 
     /**
      * Instantiate an encryptor.
-     *
      */
     public SalmonEncryptor() {
         this.threads = 1;
@@ -70,7 +70,7 @@ public class SalmonEncryptor {
     /**
      * Instantiate an encryptor with parallel tasks and buffer size.
      *
-     * @param threads    The number of threads to use.
+     * @param threads The number of threads to use.
      */
     public SalmonEncryptor(int threads) {
         this.threads = threads;
@@ -99,13 +99,13 @@ public class SalmonEncryptor {
      * @param key             The key to use.
      * @param nonce           Nonce to use.
      * @param storeHeaderData True to store header data in output byte array.
-     * @return
-     * @throws SalmonSecurityException
-     * @throws SalmonIntegrityException
-     * @throws IOException
+     * @return The encrypted data
+     * @throws SalmonSecurityException Thrown if there is a security exception
+     * @throws IntegrityException Thrown if the data are corrupt or tampered with.
+     * @throws IOException Thrown if there is an IO error.
      */
     public byte[] encrypt(byte[] data, byte[] key, byte[] nonce, boolean storeHeaderData)
-            throws SalmonSecurityException, SalmonIntegrityException, IOException {
+            throws IOException {
         return encrypt(data, key, nonce, storeHeaderData, false, null, null);
     }
 
@@ -121,14 +121,14 @@ public class SalmonEncryptor {
      * @param hashKey         Hash key to be used for all chunks.
      * @param chunkSize       The chunk size.
      * @return The byte array with the encrypted data.
-     * @throws SalmonSecurityException
-     * @throws IOException
-     * @throws SalmonIntegrityException
+     * @throws SalmonSecurityException Thrown if there is a security exception
+     * @throws IOException Thrown if there is an IO error.
+     * @throws IntegrityException Thrown if the data are corrupt or tampered with.
      */
     public byte[] encrypt(byte[] data, byte[] key, byte[] nonce,
                           boolean storeHeaderData,
                           boolean integrity, byte[] hashKey, Integer chunkSize)
-            throws SalmonSecurityException, IOException, SalmonIntegrityException {
+            throws IOException {
         if (key == null)
             throw new SalmonSecurityException("Key is missing");
         if (nonce == null)
@@ -154,10 +154,10 @@ public class SalmonEncryptor {
             headerData = outputStream.toArray();
         }
 
-        int realSize = (int) SalmonAES256CTRTransformer.getActualSize(data, key, nonce, SalmonStream.EncryptionMode.Encrypt,
+        int realSize = (int) SalmonStream.getActualSize(data, key, nonce, EncryptionMode.Encrypt,
                 headerData, integrity, chunkSize, hashKey);
         byte[] outData = new byte[realSize];
-        outputStream.position(0);
+        outputStream.setPosition(0);
         outputStream.read(outData, 0, (int) outputStream.length());
         outputStream.close();
 
@@ -172,7 +172,6 @@ public class SalmonEncryptor {
         }
         return outData;
     }
-
 
     /**
      * Encrypt stream using parallel threads.
@@ -201,17 +200,13 @@ public class SalmonEncryptor {
             minPartSize = SalmonIntegrity.DEFAULT_CHUNK_SIZE;
 
         if (partSize > minPartSize) {
-            partSize = (int) Math.ceil(partSize / (float) threads);
-            // if we want to check integrity we align to the chunk size instead of the AES Block
-            long rem = partSize % minPartSize;
-            if (rem != 0)
-                partSize += minPartSize - rem;
-
+            partSize = (int) Math.ceil(data.length / (float) threads);
+            if(partSize > minPartSize)
+				partSize -= partSize % minPartSize;
+			else
+				partSize = minPartSize;
             runningThreads = (int) (data.length / partSize);
-        } else
-            {
-                runningThreads = 1;
-            }
+        }
 
         submitEncryptJobs(runningThreads, partSize,
                 data, outData,
@@ -239,7 +234,6 @@ public class SalmonEncryptor {
                                    byte[] headerData, boolean integrity, Integer chunkSize) {
 
         final CountDownLatch done = new CountDownLatch(runningThreads);
-
         AtomicReference<Exception> ex = new AtomicReference<>();
         for (int i = 0; i < runningThreads; i++) {
             final int index = i;
@@ -261,8 +255,7 @@ public class SalmonEncryptor {
         }
         try {
             done.await();
-        } catch (InterruptedException ignored) {
-        }
+        } catch (InterruptedException ignored) {}
 
         if (ex.get() != null) {
             try {
@@ -288,23 +281,25 @@ public class SalmonEncryptor {
      * @param chunkSize   The chunk size.
      * @throws IOException              Thrown if there is an error with the stream.
      * @throws SalmonSecurityException  Thrown if there is a security exception with the stream.
-     * @throws SalmonIntegrityException Thrown if integrity cannot be applied.
+     * @throws IntegrityException Thrown if integrity cannot be applied.
      */
     private void encryptData(MemoryStream inputStream, long start, long count, byte[] outData,
                              byte[] key, byte[] nonce, byte[] headerData,
                              boolean integrity, byte[] hashKey, Integer chunkSize)
-            throws IOException, SalmonSecurityException, SalmonIntegrityException {
+            throws IOException {
         MemoryStream outputStream = new MemoryStream(outData);
         SalmonStream stream = null;
         try {
-            inputStream.position(start);
-            stream = new SalmonStream(key, nonce, SalmonStream.EncryptionMode.Encrypt, outputStream, headerData,
+            inputStream.setPosition(start);
+            stream = new SalmonStream(key, nonce, EncryptionMode.Encrypt, outputStream, headerData,
                     integrity, chunkSize, hashKey);
             stream.setAllowRangeWrite(true);
-            stream.position(start);
+            stream.setPosition(start);
             long totalChunkBytesRead = 0;
             // align to the chunk size if available
             int buffSize = Math.max(bufferSize, stream.getChunkSize());
+			// set the same buffer size for the internal stream
+			stream.setBufferSize(buffSize);
             byte[] buff = new byte[buffSize];
             int bytesRead;
             while ((bytesRead = inputStream.read(buff, 0, Math.min(buff.length, (int) (count - totalChunkBytesRead)))) > 0
@@ -324,9 +319,16 @@ public class SalmonEncryptor {
                 inputStream.close();
         }
     }
-	
-	@Override
+
+    /**
+     * Close the decryptor and release associated resources
+     */
+    public void close() {
+        if (executor != null)
+            executor.shutdownNow();
+    }
+    @Override
     protected void finalize() {
-        executor.shutdownNow();
+        close();
     }
 }

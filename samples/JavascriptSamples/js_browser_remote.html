@@ -1,0 +1,25 @@
+<!DOCTYPE HTML>
+<html>
+	<title>Salmon Sample - Remote</title>
+	<body>
+		<h5>Salmon Sample - Remote</h5>
+		<textarea id="text-edit" name="text-edit" rows="20" cols="80"></textarea>
+		<div style="padding: 8pt">
+			<h5>List remote vault</h5>
+			<div style="padding: 2pt">
+				<span>Vault Location: </span>
+				<input id="vault-url" placeholder="https://localhost/vault" value="https://localhost/vault"></input>
+			</div>
+			<div style="padding: 2pt">
+				<span>Password (use "test"): </span>
+				<input id="vault-password" type="password" value="test"></input>
+			</div>
+			<div>
+				<span>To use remote vaults with other domains you will need to modify the CORS header</span>
+			<div>
+			<button onclick="javascript:listRemoteVault()">List files</button>
+		</div>
+		<script type="module" src="assets/common.js"></script>
+		<script type="module" src="assets/browser_remote.js"></script>
+	</body>
+</html>

@@ -23,7 +23,7 @@ SOFTWARE.
 */
 
 using Mku.Salmon.Integrity;
-using Mku.Salmon.IO;
+using Mku.Salmon.Streams;
 using Mku.Salmon.Transform;
 using System;
 using System.IO;
@@ -94,9 +94,9 @@ public class SalmonEncryptor
     ///  <param name="hashKey">        Hash key to be used for all chunks.</param>
     ///  <param name="chunkSize">      The chunk size.</param>
     ///  <returns>The byte array with the encrypted data.</returns>
-    ///  <exception cref="SalmonSecurityException"></exception>
-    ///  <exception cref="IOException"></exception>
-    ///  <exception cref="SalmonIntegrityException"></exception>
+    ///  <exception cref="SalmonSecurityException">Thrown when error with security</exception>
+    ///  <exception cref="IOException">Thrown if error during IO</exception>
+    ///  <exception cref="IntegrityException">Thrown when data are corrupt or tampered with.</exception>
     public byte[] Encrypt(byte[] data, byte[] key, byte[] nonce,
                           bool storeHeaderData = false,
                           bool integrity = false, byte[] hashKey = null, int? chunkSize = null)
@@ -127,7 +127,7 @@ public class SalmonEncryptor
             headerData = outputStream.ToArray();
         }
 
-        int realSize = (int)SalmonAES256CTRTransformer.GetActualSize(data, key, nonce, SalmonStream.EncryptionMode.Encrypt,
+        int realSize = (int)SalmonAES256CTRTransformer.GetActualSize(data, key, nonce, EncryptionMode.Encrypt,
                 headerData, integrity, chunkSize, hashKey);
         byte[] outData = new byte[realSize];
         outputStream.Position = 0;
@@ -148,7 +148,6 @@ public class SalmonEncryptor
         }
         return outData;
     }
-
 
     /// <summary>
     ///  Encrypt stream using parallel threads.
@@ -178,17 +177,12 @@ public class SalmonEncryptor
 
         if (partSize > minPartSize)
         {
-            partSize = (int)Math.Ceiling(partSize / (float)threads);
-            // if we want to check integrity we align to the chunk size instead of the AES Block
-            long rem = partSize % minPartSize;
-            if (rem != 0)
-                partSize += minPartSize - rem;
-
+            partSize = (int)Math.Ceiling(data.Length / (float)threads);
+            if(partSize > minPartSize)
+				partSize -= partSize % minPartSize;
+			else
+				partSize = minPartSize;
             runningThreads = (int)(data.Length / partSize);
-        }
-        else
-        {
-            runningThreads = 1;
         }
 
         SubmitEncryptJobs(runningThreads, partSize,
@@ -261,7 +255,7 @@ public class SalmonEncryptor
     ///  <param name="chunkSize">  The chunk size.</param>
     ///  <exception cref="IOException">             Thrown if there is an error with the stream.</exception>
     ///  <exception cref="SalmonSecurityException"> Thrown if there is a security exception with the stream.</exception>
-    ///  <exception cref="SalmonIntegrityException">Thrown if integrity cannot be applied.</exception>
+    ///  <exception cref="IntegrityException">Thrown if integrity cannot be applied.</exception>
     private void EncryptData(MemoryStream inputStream, long start, long count, byte[] outData,
                              byte[] key, byte[] nonce, byte[] headerData,
                              bool integrity, byte[] hashKey, int? chunkSize)
@@ -271,13 +265,15 @@ public class SalmonEncryptor
         try
         {
             inputStream.Position = start;
-            stream = new SalmonStream(key, nonce, SalmonStream.EncryptionMode.Encrypt, outputStream, headerData,
+            stream = new SalmonStream(key, nonce, EncryptionMode.Encrypt, outputStream, headerData,
                     integrity, chunkSize, hashKey);
             stream.AllowRangeWrite = true;
             stream.Position = start;
             long totalChunkBytesRead = 0;
             // align to the chunk size if available
             int buffSize = Math.Max(bufferSize, stream.ChunkSize);
+            // set the same buffer size for the internal stream
+            stream.BufferSize = buffSize;
             byte[] buff = new byte[buffSize];
             int bytesRead;
             while ((bytesRead = inputStream.Read(buff, 0, Math.Min(buff.Length, (int)(count - totalChunkBytesRead)))) > 0
@@ -301,5 +297,13 @@ public class SalmonEncryptor
             if (inputStream != null)
                 inputStream.Close();
         }
+    }
+
+    /// <summary>
+    /// Close all associated resources
+    /// </summary>
+    public void Close()
+    {
+
     }
 }

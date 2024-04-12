@@ -29,7 +29,10 @@ using global::Android.Content;
 using global::Android.OS;
 using global::Android.Provider;
 using Mku.File;
-using static Mku.IO.RandomAccessStreamExtensions;
+using System.IO;
+using System;
+using System.Collections.Generic;
+using Mku.Android.Salmon.Drive;
 
 namespace Mku.Android.File;
 
@@ -44,7 +47,7 @@ public class AndroidFile : IRealFile
     private DocumentFile documentFile;
 
     // the DocumentFile interface can be slow so we cache some attrs
-    private String _basename = null;
+    private string _basename = null;
     private long? _length;
     private long? _lastModified;
     private int? _childrenCount;
@@ -101,14 +104,14 @@ public class AndroidFile : IRealFile
     /// <summary>
     ///  True if file exists.
 	/// </summary>
-	///  <returns></returns>
+	///  <returns>True if exists</returns>
     public bool Exists => documentFile.Exists();
 
 
     /// <summary>
     ///  Get the absolute path on the physical drive.
 	/// </summary>
-	///  <returns></returns>
+	///  <returns>The absolute path</returns>
     public string AbsolutePath
     {
         get
@@ -129,7 +132,7 @@ public class AndroidFile : IRealFile
     /// <summary>
     ///  Get the base name of this file.
 	/// </summary>
-	///  <returns></returns>
+	///  <returns>The base name</returns>
     public string BaseName
     {
         get
@@ -148,8 +151,8 @@ public class AndroidFile : IRealFile
     /// <summary>
     ///  Get a stream for reading.
 	/// </summary>
-	///  <returns></returns>
-    ///  <exception cref="FileNotFoundException"></exception>
+	///  <returns>The input stream</returns>
+    ///  <exception cref="FileNotFoundException">Thrown if file is not found</exception>
     public Stream GetInputStream()
     {
         AndroidFileStream androidFileStream = new AndroidFileStream(this, "r");
@@ -159,8 +162,8 @@ public class AndroidFile : IRealFile
     /// <summary>
     ///  Get a stream for writing.
 	/// </summary>
-	///  <returns></returns>
-    ///  <exception cref="FileNotFoundException"></exception>
+	///  <returns>The output stream</returns>
+    ///  <exception cref="FileNotFoundException">Thrown if file is not found</exception>
     public Stream GetOutputStream()
     {
         AndroidFileStream androidFileStream = new AndroidFileStream(this, "rw");
@@ -170,12 +173,14 @@ public class AndroidFile : IRealFile
     /// <summary>
     ///  Get the parent directory.
 	/// </summary>
-	///  <returns></returns>
+	///  <returns>The parent directory</returns>
     public IRealFile Parent
     {
         get
         {
             DocumentFile parentDocumentFile = documentFile.ParentFile;
+            if (parentDocumentFile == null)
+                return null;
             AndroidFile parent = new AndroidFile(parentDocumentFile, AndroidDrive.Context);
             return parent;
         }
@@ -184,13 +189,13 @@ public class AndroidFile : IRealFile
     /// <summary>
     ///  Get the path.
 	/// </summary>
-	///  <returns></returns>
+	///  <returns>The path</returns>
     public string Path => documentFile.Uri.ToString();
 
     /// <summary>
     ///  True if it is a directory.
 	/// </summary>
-	///  <returns></returns>
+	///  <returns>True if directory</returns>
 	// WORKAROUND: documentFile.isDirectory() is very slow so we try alternatively 
     public bool IsDirectory
     {
@@ -206,13 +211,13 @@ public class AndroidFile : IRealFile
     /// <summary>
     ///  True if it is a file.
 	/// </summary>
-	///  <returns></returns>
+	///  <returns>True if file</returns>
     public bool IsFile => !IsDirectory;
 
     /// <summary>
     ///  Get the last modified time in milliseconds.
 	/// </summary>
-	///  <returns></returns>
+	///  <returns>The last modified date in milliseconds</returns>
     public long LastModified
     {
         get
@@ -227,7 +232,7 @@ public class AndroidFile : IRealFile
     /// <summary>
     ///  Get the size of the file.
 	/// </summary>
-	///  <returns></returns>
+	///  <returns>The length</returns>
     public long Length
     {
         get
@@ -242,7 +247,7 @@ public class AndroidFile : IRealFile
     /// <summary>
     ///  Get the count of files and subdirectories
 	/// </summary>
-	///  <returns></returns>
+	///  <returns>The children count</returns>
     public int ChildrenCount
     {
         get
@@ -260,7 +265,7 @@ public class AndroidFile : IRealFile
     /// <summary>
     ///  List files and directories.
 	/// </summary>
-	///  <returns></returns>
+	///  <returns>The files and subdirectories</returns>
     public IRealFile[] ListFiles()
     {
         DocumentFile[] files = documentFile.ListFiles();
@@ -281,14 +286,14 @@ public class AndroidFile : IRealFile
     }
 
     /// <summary>
-    ///  Move this fiel to another directory.
+    ///  Move this file to another directory.
 	/// </summary>
 	///  <param name="newDir">The target directory.</param>
     ///  <param name="progressListener">Observer to notify of the move progress.</param>
-    ///  <returns></returns>
-    ///  <exception cref="IOException"></exception>
+    ///  <returns>The moved file</returns>
+    ///  <exception cref="IOException">Thrown if error during IO</exception>
     public IRealFile Move(IRealFile newDir, string newName = null,
-        OnProgressListener progressListener = null)
+        Action<long,long> progressListener = null)
     {
         // target directory is the same
         if(Parent.Path.Equals(newDir.Path))
@@ -328,10 +333,10 @@ public class AndroidFile : IRealFile
 	/// </summary>
 	///  <param name="newDir">The target directory.</param>
     ///  <param name="progressListener">Observer to notify of the copy progress.</param>
-    ///  <returns></returns>
-    ///  <exception cref="IOException"></exception>
+    ///  <returns>The new file</returns>
+    ///  <exception cref="IOException">Thrown if error during IO</exception>
     public IRealFile Copy(IRealFile newDir, string newName = null,
-        OnProgressListener progressListener = null)
+        Action<long,long> progressListener = null)
     {
         return Copy(newDir, newName, false, progressListener);
     }
@@ -339,13 +344,13 @@ public class AndroidFile : IRealFile
     /// <summary>
     ///  Copy to another directory
     /// </summary>
-    ///  <param name="newDir"></param>
-    ///  <param name="delete"></param>
-    ///  <param name="progressListener"></param>
-    ///  <returns></returns>
-    ///  <exception cref="IOException"></exception>
+    ///  <param name="newDir">The destination directory</param>
+    ///  <param name="delete">True to delete when complete</param>
+    ///  <param name="progressListener">The progess listener</param>
+    ///  <returns>The new file</returns>
+    ///  <exception cref="IOException">Thrown if error during IO</exception>
     private IRealFile Copy(IRealFile newDir, string newName = null,
-        bool delete = false, OnProgressListener progressListener = null)
+        bool delete = false, Action<long,long> progressListener = null)
     {
         if (newDir == null || !newDir.Exists)
             throw new IOException("Target directory does not exists");
@@ -371,7 +376,7 @@ public class AndroidFile : IRealFile
     ///  Get a child file in this directory.
 	/// </summary>
 	///  <param name="filename">The name of the file or directory to match.</param>
-    ///  <returns></returns>
+    ///  <returns>The child file</returns>
     public IRealFile GetChild(string filename)
     {
         DocumentFile[] documentFiles = documentFile.ListFiles();
@@ -387,8 +392,8 @@ public class AndroidFile : IRealFile
     ///  Rename file.
 	/// </summary>
 	///  <param name="newFilename">The new filename</param>
-    ///  <returns></returns>
-    ///  <exception cref="FileNotFoundException"></exception>
+    ///  <returns>True if renamed</returns>
+    ///  <exception cref="FileNotFoundException">Thrown if file is not found</exception>
     public bool RenameTo(string newFilename)
     {
         DocumentsContract.RenameDocument(context.ContentResolver, documentFile.Uri, newFilename);
@@ -402,7 +407,7 @@ public class AndroidFile : IRealFile
     /// <summary>
     ///  Create this directory.
 	/// </summary>
-	///  <returns></returns>
+	///  <returns>True if directory created</returns>
     public bool Mkdir()
     {
         IRealFile parent = Parent;
@@ -417,9 +422,9 @@ public class AndroidFile : IRealFile
     /// <summary>
     ///  Get a file descriptor corresponding to this file.
 	/// </summary>
-	///  <param name="mode"></param>
-    ///  <returns></returns>
-    ///  <exception cref="FileNotFoundException"></exception>
+	///  <param name="mode">The mode</param>
+    ///  <returns>The parcel file descriptor</returns>
+    ///  <exception cref="FileNotFoundException">Thrown if file is not found</exception>
     public ParcelFileDescriptor GetFileDescriptor(string mode)
     {
         return AndroidDrive.Context.ContentResolver.OpenFileDescriptor(documentFile.Uri, mode);
@@ -427,7 +432,7 @@ public class AndroidFile : IRealFile
 
     /// <summary>
     ///  Returns a string representation of this object
-    ///  <returns></returns>
+    ///  <returns>The string represenation</returns>
 	/// </summary>
 	///
     override

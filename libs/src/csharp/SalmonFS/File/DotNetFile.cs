@@ -1,10 +1,3 @@
-using System;
-using System.Collections.Generic;
-using System.IO;
-using System.Linq;
-using static Mku.IO.RandomAccessStreamExtensions;
-
-namespace Mku.File;
 /*
 MIT License
 
@@ -29,6 +22,12 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 */
 
+using System;
+using System.Collections.Generic;
+using System.IO;
+using System.Linq;
+
+namespace Mku.File;
 
 /// <summary>
 ///  Salmon RealFile implementation for C#.
@@ -64,7 +63,7 @@ public class DotNetFile : IRealFile
 	/// </summary>
 	///  <param name="filename">The name of the new file.</param>
     ///  <returns>The newly created file.</returns>
-    ///  <exception cref="IOException"></exception>
+    ///  <exception cref="IOException">Thrown if error during IO</exception>
     public IRealFile CreateFile(string filename)
     {
         string nFilePath = filePath + System.IO.Path.DirectorySeparatorChar + filename;
@@ -99,7 +98,7 @@ public class DotNetFile : IRealFile
     /// <summary>
     ///  True if file or directory exists.
 	/// </summary>
-	///  <returns></returns>
+	///  <returns>True if file/directory exists</returns>
     public bool Exists => System.IO.File.Exists(filePath) || Directory.Exists(filePath);
 
     /// <summary>
@@ -118,7 +117,7 @@ public class DotNetFile : IRealFile
     ///  Get a stream for reading the file.
 	/// </summary>
 	///  <returns>The stream to read from.</returns>
-    ///  <exception cref="FileNotFoundException"></exception>
+    ///  <exception cref="FileNotFoundException">Thrown if file is not found</exception>
     public Stream GetInputStream()
     {
         return System.IO.File.Open(filePath, FileMode.Open, FileAccess.Read, FileShare.ReadWrite);
@@ -128,7 +127,7 @@ public class DotNetFile : IRealFile
     ///  Get a stream for writing to this file.
 	/// </summary>
 	///  <returns>The stream to write to.</returns>
-    ///  <exception cref="FileNotFoundException"></exception>
+    ///  <exception cref="FileNotFoundException">Thrown if file is not found</exception>
     public Stream GetOutputStream()
     {
         return System.IO.File.Open(filePath, FileMode.OpenOrCreate, FileAccess.Write, FileShare.ReadWrite);
@@ -151,31 +150,31 @@ public class DotNetFile : IRealFile
     /// <summary>
     ///  Get the path of this file. For C# this is the same as the absolute filepath.
 	/// </summary>
-	///  <returns></returns>
+	///  <returns>The path</returns>
     public string Path => filePath;
 
     /// <summary>
     ///  True if this is a directory.
 	/// </summary>
-	///  <returns></returns>
+	///  <returns>True if directory</returns>
     public bool IsDirectory => Directory.Exists(filePath) && System.IO.File.GetAttributes(filePath).HasFlag(FileAttributes.Directory);
 
     /// <summary>
     ///  True if this is a file.
 	/// </summary>
-	///  <returns></returns>
+	///  <returns>True if file</returns>
     public bool IsFile => !IsDirectory;
 
     /// <summary>
     ///  Get the last modified date on disk.
 	/// </summary>
-	///  <returns></returns>
+	///  <returns>The last modified date</returns>
     public long LastModified => new DateTimeOffset(new FileInfo(filePath).LastWriteTime).ToUnixTimeMilliseconds();
 
     /// <summary>
     ///  Get the size of the file on disk.
 	/// </summary>
-	///  <returns></returns>
+	///  <returns>The length</returns>
     public long Length
     {
         get
@@ -190,7 +189,7 @@ public class DotNetFile : IRealFile
     /// <summary>
     ///  Get the count of files and subdirectories
 	/// </summary>
-	///  <returns></returns>
+	///  <returns>The children count</returns>
     public int ChildrenCount => IsDirectory?Directory.GetDirectories(filePath).Length + Directory.GetFiles(filePath).Length:0;
 
     /// <summary>
@@ -217,11 +216,12 @@ public class DotNetFile : IRealFile
 
     /// <summary>
     ///  Move this file or directory under a new directory.
-	/// </summary>
-	///  <param name="newDir">The target directory.</param>
+    /// </summary>
+    ///  <param name="newDir">The target directory.</param>
+    ///  <param name="newName">The new name.</param>
     ///  <param name="progressListener">Observer to notify when progress changes.</param>
     ///  <returns>The moved file. Use this file for subsequent operations instead of the original.</returns>
-    public IRealFile Move(IRealFile newDir, string newName = null, OnProgressListener progressListener = null)
+    public IRealFile Move(IRealFile newDir, string newName = null, Action<long,long> progressListener = null)
     {
         newName = newName ?? BaseName;
         string nFilePath = newDir.AbsolutePath + System.IO.Path.DirectorySeparatorChar + newName;
@@ -239,8 +239,8 @@ public class DotNetFile : IRealFile
     ///  <param name="newName">The new file name</param>
     ///  <param name="progressListener">Observer to notify when progress changes.</param>
     ///  <returns>The copied file. Use this file for subsequent operations instead of the original.</returns>
-    ///  <exception cref="IOException"></exception>
-    public IRealFile Copy(IRealFile newDir, string newName = null, OnProgressListener progressListener = null)
+    ///  <exception cref="IOException">Thrown if error during IO</exception>
+    public IRealFile Copy(IRealFile newDir, string newName = null, Action<long,long> progressListener = null)
     {
         newName = newName ?? BaseName;
         if (newDir == null || !newDir.Exists)
@@ -264,7 +264,7 @@ public class DotNetFile : IRealFile
     ///  Get the file or directory under this directory with the provided name.
 	/// </summary>
 	///  <param name="filename">The name of the file or directory.</param>
-    ///  <returns></returns>
+    ///  <returns>The child file</returns>
     public IRealFile GetChild(string filename)
     {
         if (IsFile)
@@ -302,7 +302,7 @@ public class DotNetFile : IRealFile
     /// <summary>
     /// Returns a string representation of this object
     /// </summary>
-    /// <returns></returns>
+    /// <returns>The string representation</returns>
     override
     public string ToString()
     {

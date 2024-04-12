@@ -24,7 +24,6 @@ SOFTWARE.
 */
 
 import com.mku.salmon.SalmonSecurityException;
-import com.mku.salmon.io.SalmonStream;
 
 /**
  * Salmon AES transformer implemented with AES intrinsics.
@@ -39,11 +38,14 @@ public class SalmonAesIntrTransformer extends SalmonNativeTransformer {
      * Initialize the native Aes intrinsics transformer.
      * @param key The AES key to use.
      * @param nonce The nonce to use.
-     * @throws SalmonSecurityException
+     * @throws SalmonSecurityException Thrown if there is a security exception
      */
     @Override
-    public void init(byte[] key, byte[] nonce) throws SalmonSecurityException {
+    public void init(byte[] key, byte[] nonce) {
         getNativeProxy().salmonInit(AES_IMPL_AES_INTR);
+        byte[] expandedKey = new byte[SalmonAES256CTRTransformer.EXPANDED_KEY_SIZE];
+        getNativeProxy().salmonExpandKey(key, expandedKey);
+        setExpandedKey(expandedKey);
         super.init(key, nonce);
     }
 
@@ -60,7 +62,11 @@ public class SalmonAesIntrTransformer extends SalmonNativeTransformer {
     public int encryptData(byte[] srcBuffer, int srcOffset,
                            byte[] destBuffer, int destOffset, int count) {
         // AES intrinsics needs the expanded key
-        return getNativeProxy().salmonTransform(getExpandedKey(), getCounter(), SalmonStream.EncryptionMode.Encrypt.ordinal(),
+        if (this.getExpandedKey() == null) //TODO: ToSync
+            throw new SalmonSecurityException("No expanded key found, run init first");
+        if (this.getCounter() == null) //TODO: ToSync
+            throw new SalmonSecurityException("No counter found, run init first");
+        return getNativeProxy().salmonTransform(getExpandedKey(), getCounter(),
                 srcBuffer, srcOffset,
                 destBuffer, destOffset, count);
     }
@@ -78,9 +84,12 @@ public class SalmonAesIntrTransformer extends SalmonNativeTransformer {
     public int decryptData(byte[] srcBuffer, int srcOffset,
                             byte[] destBuffer, int destOffset, int count) {
         // AES intrinsics needs the expanded key
-        return getNativeProxy().salmonTransform(getExpandedKey(), getCounter(), SalmonStream.EncryptionMode.Encrypt.ordinal(),
+        if (this.getExpandedKey() == null) //TODO: ToSync
+            throw new SalmonSecurityException("No expanded key found, run init first");
+        if (this.getCounter() == null) //TODO: ToSync
+            throw new SalmonSecurityException("No counter found, run init first");
+        return getNativeProxy().salmonTransform(getExpandedKey(), getCounter(),
                 srcBuffer, srcOffset,
                 destBuffer, destOffset, count);
     }
-
 }

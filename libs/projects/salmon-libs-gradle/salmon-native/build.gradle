@@ -8,7 +8,9 @@ plugins {
 
 group 'com.mku.salmon'
 description = 'Salmon AES256 CTR native encryption library'
-version '1.0.5'
+version '2.0.0'
+project.ext.set('arch', 'x86_64')
+project.ext.set('os', 'win')
 
 repositories {
     mavenCentral()
@@ -21,20 +23,20 @@ dependencies {
 sourceSets {
     // workaround: since we use external source directories the IDE
     // cannot see the c source so we add them here as java files
-    main.java.srcDirs += '../../../../c/src'
+    main.java.srcDirs += '../../../src/c'
 }
 
 model {
     platforms {
-        x64 {
-            architecture "x86_64"
+        currentPlatform {
+            architecture project.arch
         }
     }
     components {
-        // needs VC, cygwin GCC, or minGW in windows, or Linux GCC, MacOS Darwin GCC
+        // needs VS, cygwin GCC, or minGW in windows, or Linux GCC, MacOS Darwin GCC
         // the plugin will find it automatically
         salmon(NativeLibrarySpec) {
-            targetPlatform "x64"
+            targetPlatform "currentPlatform"
             binaries.all {
                 def jvmHome = Jvm.current().javaHome
                 if (targetPlatform.operatingSystem.macOsX) {
@@ -57,19 +59,19 @@ model {
                 cCompiler.args '-DUSE_TINY_AES=1'
                 cCompiler.args '-DAES256=1'
 
-                // optimization for MSVC
-                cCompiler.args '/O2'
+                cCompiler.args '-I' + projectDir + '/../../../src/c/salmon/include'
+                cCompiler.args '-I' + projectDir + '/../../../src/c/salmon-jni/include'
 
-                // optimization for gcc:
-                // cCompiler.args '-O3'
+                cCompiler.args '-O2'
+                cCompiler.args '-maes'
             }
             sources {
                 c {
                     source {
-                        srcDirs "../../../../libs/src/c"
+                        srcDirs "../../../src/c"
                         include "**/salmon/*.c"
                         include "**/salmon/salmon-aes-intr/*.c"
-                        include "**/salmon/salmon-jni/*.c"
+                        include "**/salmon-jni/*.c"
                         include "**/tiny-AES-c/aes.c"
                     }
                 }
@@ -80,26 +82,24 @@ model {
 
 task assembleArtifact(type: Zip, group: 'com.mku.salmon') {
     archiveName 'salmon-native.zip'
+    archiveClassifier.set(project.os + '-' + project.arch)
     destinationDir file("$buildDir/libs/")
     from("build/libs/salmon/shared") {
         into 'lib'
     }
     from '../../../../LICENSE'
     from '../../../../NOTICE'
-    from("../../../../c/src/salmon/") {
-        into 'headers/salmon'
+
+    from("../../../src/c/salmon/include/") {
+        into 'salmon/include'
         include '*.h'
     }
-    from("../../../src/c/salmon/salmon-aes-intr/") {
-        into 'headers/salmon/salmon-aes-intr'
+    from("../../../src/c/salmon-jni/include/") {
+        into 'salmon-jni/include'
         include '*.h'
     }
-    from("../../../src/c/salmon/salmon-jni/") {
-        into 'headers/salmon/salmon-jni'
-        include '*.h'
-    }
-    from("../../../src/c/src/tiny-AES-c") {
-        into 'headers/tiny-AES-c'
+    from("../../../src/c/tiny-AES-c") {
+        into 'tiny-AES-c/include'
         include '*.h'
         include 'unlicense.txt'
     }
@@ -109,10 +109,10 @@ task assembleArtifact(type: Zip, group: 'com.mku.salmon') {
 publishing {
     publications {
         mavenJava(MavenPublication) {
-            artifact source: assembleArtifact, extension: 'zip'
+            artifact source: assembleArtifact, extension: 'jar'
             pom {
                 name = project.name
-                packaging = 'zip'
+                packaging = 'jar'
                 description = project.description
                 url = 'https://github.com/mku11/Salmon-AES-CTR'
 
@@ -137,7 +137,7 @@ publishing {
         }
     }
     repositories {
-        maven  {
+        maven {
             url uri("${projectDir}/../../../../output/maven/releases")
         }
         mavenLocal()
@@ -149,6 +149,3 @@ jar {
         attributes 'Main-Class': 'salmon.Main'
     }
 }
-
-//TODO: is this needed to run as part of gradle build tasks?
-classes.dependsOn 'salmonSharedLibrary'

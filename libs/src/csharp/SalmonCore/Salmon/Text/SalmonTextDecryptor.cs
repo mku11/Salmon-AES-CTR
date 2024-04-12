@@ -48,9 +48,9 @@ public class SalmonTextDecryptor
     ///  <param name="hashKey">        Hash key to be used for all chunks.</param>
     ///  <param name="chunkSize">      The chunk size.</param>
     ///  <returns>The decrypted text.</returns>
-    ///  <exception cref="IOException"></exception>
-    ///  <exception cref="SalmonSecurityException"></exception>
-    ///  <exception cref="SalmonIntegrityException"></exception>
+    ///  <exception cref="IOException">Thrown if error during IO</exception>
+    ///  <exception cref="SalmonSecurityException">Thrown when error with security</exception>
+    ///  <exception cref="IntegrityException">Thrown when data are corrupt or tampered with.</exception>
     public static string DecryptString(string text, byte[] key, byte[] nonce, bool header,
         bool integrity = false, byte[] hashKey = null, int? chunkSize = null)
     {

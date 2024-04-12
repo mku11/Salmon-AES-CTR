@@ -23,25 +23,22 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 */
 
-import com.mku.salmon.SalmonSecurityException;
-
 /**
  * Creates AES transformer implementations.
  */
 public class SalmonPbkdfFactory {
     /**
      * Create an instance of a pbkdf provider.
+     *
      * @param type The pbkdf type.
      * @return The provider.
-     * @throws SalmonSecurityException
      */
     @SuppressWarnings("SwitchStatementWithTooFewBranches")
-    public static ISalmonPbkdfProvider create(SalmonPassword.PbkdfType type)
-            throws SalmonSecurityException {
-        switch(type) {
+    public static ISalmonPbkdfProvider create(PbkdfType type) {
+        switch (type) {
             case Default:
                 return new SalmonDefaultPbkdfProvider();
         }
-        throw new SalmonSecurityException("Unknown Pbkdf provider type");
+        throw new RuntimeException("Unknown Pbkdf provider type");
     }
 }

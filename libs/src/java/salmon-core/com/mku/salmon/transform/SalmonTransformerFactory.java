@@ -24,7 +24,7 @@ SOFTWARE.
 */
 
 import com.mku.salmon.SalmonSecurityException;
-import com.mku.salmon.io.SalmonStream;
+import com.mku.salmon.streams.ProviderType;
 
 /**
  * Creates an AES transformer object.
@@ -35,9 +35,9 @@ public class SalmonTransformerFactory {
      * Create an encryption transformer implementation.
      * @param type The supported provider type.
      * @return The transformer.
-     * @throws SalmonSecurityException
+     * @throws SalmonSecurityException Thrown if there is a security exception
      */
-    public static ISalmonCTRTransformer create(SalmonStream.ProviderType type) throws SalmonSecurityException {
+    public static ISalmonCTRTransformer create(ProviderType type) {
         switch(type) {
             case Default:
                 return new SalmonDefaultTransformer();

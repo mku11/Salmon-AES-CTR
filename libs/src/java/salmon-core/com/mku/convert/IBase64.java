@@ -29,6 +29,7 @@ SOFTWARE.
 public interface IBase64 {
     /**
      * Decode a Base64 string to byte array
+     *
      * @param text String to be converted.
      * @return Byte array of converted data.
      */
@@ -36,8 +37,9 @@ public interface IBase64 {
 
     /**
      * Encode a byte array to Base64 string.
+     *
      * @param data The byte array to be converted.
      * @return Text string of converted data.
      */
-    String encode(byte [] data);
+    String encode(byte[] data);
 }

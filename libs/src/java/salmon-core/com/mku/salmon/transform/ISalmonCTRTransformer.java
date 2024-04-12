@@ -37,9 +37,9 @@ public interface ISalmonCTRTransformer {
      * Initialize the transformer.
      * @param key The AES key to use.
      * @param nonce The nonce to use.
-     * @throws SalmonSecurityException
+     * @throws SalmonSecurityException Thrown if there is a security exception
      */
-    void init(byte[] key, byte[] nonce) throws SalmonSecurityException;
+    void init(byte[] key, byte[] nonce);
 
     /**
      * Encrypt the data.
@@ -49,13 +49,11 @@ public interface ISalmonCTRTransformer {
      * @param destOffset The destination byte offset.
      * @param count The number of bytes to transform.
      * @return The number of bytes transformed.
-     * @throws SalmonSecurityException
-     * @throws SalmonRangeExceededException
+     * @throws SalmonSecurityException Thrown if there is a security exception
+     * @throws SalmonRangeExceededException Thrown if the nonce exceeds its range
      */
     int encryptData(byte[] srcBuffer, int srcOffset,
-                    byte[] destBuffer, int destOffset, int count)
-            throws SalmonSecurityException, SalmonRangeExceededException;
-
+                    byte[] destBuffer, int destOffset, int count);
 
     /**
      * Decrypt the data.
@@ -65,35 +63,33 @@ public interface ISalmonCTRTransformer {
      * @param destOffset The destination byte offset.
      * @param count The number of bytes to transform.
      * @return The number of bytes transformed.
-     * @throws SalmonSecurityException
-     * @throws SalmonRangeExceededException
+     * @throws SalmonSecurityException Thrown if there is a security exception
+     * @throws SalmonRangeExceededException Thrown if the nonce exceeds its range
      */
     int decryptData(byte[] srcBuffer, int srcOffset,
-                    byte[] destBuffer, int destOffset, int count)
-            throws SalmonRangeExceededException, SalmonSecurityException;
+                    byte[] destBuffer, int destOffset, int count);
 
     /**
      * Get the current counter.
-     * @return
+     * @return The counter
      */
     byte[] getCounter();
 
     /**
      * Get the current encryption key.
-     * @return
+     * @return The key
      */
     byte[] getKey();
 
-
     /**
      * Get the current block.
-     * @return
+     * @return The block
      */
     long getBlock();
 
     /**
      * Get the nonce (initial counter) to be used for the data.
-     * @return
+     * @return The nonce
      */
     byte[] getNonce();
 
@@ -106,9 +102,9 @@ public interface ISalmonCTRTransformer {
      * Calculate the value of the counter based on the current block. After an encryption
      * operation (ie sync or read) the block will be incremented. This method calculates
      * the Counter.
-     * @param position
-     * @throws SalmonRangeExceededException
+     * @param position The position to sync the counter to
+     * @throws SalmonRangeExceededException Thrown if the nonce exceeds its range
      */
-    void syncCounter(long position) throws SalmonRangeExceededException;
+    void syncCounter(long position);
 }
 

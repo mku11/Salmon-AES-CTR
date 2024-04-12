@@ -2,7 +2,7 @@
 <package >
   <metadata>
     <id>Salmon.Native</id>
-    <version>1.0.5</version>
+    <version>2.0.0</version>
     <title>Salmon AES-256 CTR native encryption library</title>
     <authors>Max Kas</authors>
     <requireLicenseAcceptance>true</requireLicenseAcceptance>
@@ -10,7 +10,7 @@
     <icon>logo.png</icon>
     <projectUrl>https://github.com/mku11/Salmon-AES-CTR</projectUrl>
     <description>Salmon is an AES-256 CTR encryption library with HMAC SHA 256 integrity featuring seekable streams and parallel processing.</description>
-    <tags>AES,AES-256,CTR,Native</tags>
+    <tags>AES,AES-256,CTR,native</tags>
     <repository url="https://github.com/mku11/Salmon-AES-CTR" />
   </metadata>
 
@@ -18,10 +18,10 @@
     <!--Change the path to debug if you're in developement-->
     <file src="..\x64\Release\SalmonNative.dll"       target="runtimes\win-x64\native"/>
     <file src="..\x64\Release\SalmonNative.lib"       target="runtimes\win-x64\native"/>
-    <file src="..\..\..\src\c\salmon\salmon.h"   target="runtimes\win-x64\native\include\salmon"/>
-    <file src="..\..\..\src\c\salmon\salmon-jni\salmon-jni.h"   target="runtimes\win-x64\native\include\salmon\salmon-jni" />
-    <file src="..\..\..\src\c\salmon\salmon-aes-intr\salmon-aes-intr.h"   target="runtimes\win-x64\native\include\salmon\salmon-aes-intr"/>
-    <file src="..\..\..\src\c\tiny-AES-c\aes.h"   target="runtimes\win-x64\native\include\tiny-AES-c"/>
+    <file src="..\..\..\src\c\salmon\include\salmon.h"   target="runtimes\win-x64\native\salmon\include"/>
+    <file src="..\..\..\src\c\salmon\include\salmon-aes-intr\salmon-aes-intr.h"   target="runtimes\win-x64\native\salmon\include\salmon-aes-intr"/>
+    <file src="..\..\..\src\c\salmon-jni\include\salmon-jni.h"   target="runtimes\win-x64\native\salmon-jni\include" />
+    <file src="..\..\..\src\c\tiny-AES-c\aes.h"   target="runtimes\win-x64\native\tiny-AES-c\include"/>
     <file src="..\..\..\..\common\common-res\icons\logo.png"   target="" />
     <file src="..\..\..\..\README.md"   target="" />
     <file src="..\..\..\..\LICENSE"   target="LICENSE" />

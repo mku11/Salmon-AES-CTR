@@ -34,18 +34,18 @@ public class SalmonNonce {
      * Increase the sequential NONCE by a value of 1.
      * This implementation assumes that the NONCE length is 8 bytes or fewer so it can fit in a long.
      *
-     * @param startNonce
-     * @param endNonce
-     * @return
-     * @throws SalmonRangeExceededException
+     * @param startNonce The starting nonce.
+     * @param endNonce The ending nonce in the sequence.
+     * @return The next nonce after incrementing.
+     * @throws SalmonRangeExceededException Thrown if the nonce exceeds its range
      */
-    public static byte[] increaseNonce(byte[] startNonce, byte[] endNonce)
-            throws SalmonRangeExceededException {
+    public static byte[] increaseNonce(byte[] startNonce, byte[] endNonce) {
         long nonce = BitConverter.toLong(startNonce, 0, SalmonGenerator.NONCE_LENGTH);
         long maxNonce = BitConverter.toLong(endNonce, 0, SalmonGenerator.NONCE_LENGTH);
-        nonce++;
-        if (nonce <= 0 || nonce > maxNonce)
+        // TODO: ToSync
+        if (nonce + 1 <= 0 || nonce >= maxNonce)
             throw new SalmonRangeExceededException("Cannot increase nonce, maximum nonce exceeded");
+        nonce++;
         return BitConverter.toBytes(nonce, 8);
     }
 
@@ -58,10 +58,9 @@ public class SalmonNonce {
      * @param startNonce The starting nonce.
      * @param endNonce The ending nonce in the sequence.
      * @return The byte array with the middle nonce.
-     * @throws SalmonSecurityException
+     * @throws SalmonSecurityException Thrown if there is a security exception
      */
-    public static byte[] splitNonceRange(byte[] startNonce, byte[] endNonce)
-            throws SalmonSecurityException {
+    public static byte[] splitNonceRange(byte[] startNonce, byte[] endNonce) {
         long start = BitConverter.toLong(startNonce, 0, SalmonGenerator.NONCE_LENGTH);
         long end = BitConverter.toLong(endNonce, 0, SalmonGenerator.NONCE_LENGTH);
         // we reserve some nonces

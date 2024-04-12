@@ -23,10 +23,10 @@ SOFTWARE.
 */
 
 using Android.OS;
-using Java.IO;
 using Java.Nio;
 using Java.Nio.Channels;
-using Mku.Android.File;
+using System;
+using System.IO;
 
 namespace Mku.Android.File;
 
@@ -45,7 +45,7 @@ public class AndroidFileStream : Stream
     /// <summary>
     ///  True if the stream is readable.
 	/// </summary>
-	///  <returns></returns>
+	///  <returns>True if readable</returns>
     override
     public bool CanRead => fileChannel.IsOpen && !canWrite;
 
@@ -53,29 +53,29 @@ public class AndroidFileStream : Stream
     /// <summary>
     ///  True if the stream is writeable.
 	/// </summary>
-	///  <returns></returns>
+	///  <returns>True if writable</returns>
     override
     public bool CanWrite => fileChannel.IsOpen && canWrite;
 
     /// <summary>
     ///  True if the stream is seekable (random access).
 	/// </summary>
-	///  <returns></returns>
+	///  <returns>True if seekable</returns>
     override
     public bool CanSeek => true;
 
     /// <summary>
     ///  Get the size of the stream.
 	/// </summary>
-	///  <returns></returns>
+	///  <returns>The length</returns>
     override
     public long Length => file.Length;
 
     /// <summary>
     ///  Get the current position of the stream.
 	/// </summary>
-	///  <returns></returns>
-    ///  <exception cref="IOException"></exception>
+	///  <returns>The current position</returns>
+    ///  <exception cref="IOException">Thrown if error during IO</exception>
     override
     public long Position
     {
@@ -95,7 +95,7 @@ public class AndroidFileStream : Stream
 	/// </summary>
 	///  <param name="file">The AndroidFile that will be used to get the read/write stream</param>
     ///  <param name="mode">The mode "r" for read "rw" for write</param>
-    public AndroidFileStream(AndroidFile file, String mode)
+    public AndroidFileStream(AndroidFile file, string mode)
     {
         this.file = file;
         if (mode.Equals("rw"))
@@ -105,12 +105,12 @@ public class AndroidFileStream : Stream
         pfd = file.GetFileDescriptor(mode);
         if (canWrite)
         {
-            FileOutputStream outs = new FileOutputStream(pfd.FileDescriptor);
+            Java.IO.FileOutputStream outs = new Java.IO.FileOutputStream(pfd.FileDescriptor);
             fileChannel = outs.Channel;
         }
         else
         {
-            FileInputStream ins = new FileInputStream(pfd.FileDescriptor);
+            Java.IO.FileInputStream ins = new Java.IO.FileInputStream(pfd.FileDescriptor);
             fileChannel = ins.Channel;
         }
     }
@@ -119,7 +119,7 @@ public class AndroidFileStream : Stream
     ///  Set the length of the stream.
 	/// </summary>
 	///  <param name="value">The length.</param>
-    ///  <exception cref="IOException"></exception>
+    ///  <exception cref="IOException">Thrown if error during IO</exception>
     override
     public void SetLength(long value)
     {
@@ -129,11 +129,11 @@ public class AndroidFileStream : Stream
     /// <summary>
     ///  Read data from the stream into the buffer.
 	/// </summary>
-	///  <param name="buffer"></param>
-    ///  <param name="offset"></param>
-    ///  <param name="count"></param>
-    ///  <returns></returns>
-    ///  <exception cref="IOException"></exception>
+	///  <param name="buffer">The buffer</param>
+    ///  <param name="offset">The offset</param>
+    ///  <param name="count">The count</param>
+    ///  <returns>The bytes read</returns>
+    ///  <exception cref="IOException">Thrown if error during IO</exception>
     override
     public int Read(byte[] buffer, int offset, int count)
     {
@@ -152,7 +152,7 @@ public class AndroidFileStream : Stream
 	///  <param name="buffer">The buffer to read the contents from.</param>
     ///  <param name="offset">The position the reading will start from.</param>
     ///  <param name="count">The count of bytes to be read from the buffer.</param>
-    ///  <exception cref="IOException"></exception>
+    ///  <exception cref="IOException">Thrown if error during IO</exception>
     override
     public void Write(byte[] buffer, int offset, int count)
     {
@@ -167,8 +167,8 @@ public class AndroidFileStream : Stream
 	/// </summary>
 	///  <param name="offset">The new position.</param>
     ///  <param name="origin">The origin type.</param>
-    ///  <returns></returns>
-    ///  <exception cref="IOException"></exception>
+    ///  <returns>The current position after seeking</returns>
+    ///  <exception cref="IOException">Thrown if error during IO</exception>
     override
     public long Seek(long offset, SeekOrigin origin)
     {
@@ -209,7 +209,7 @@ public class AndroidFileStream : Stream
     /// <summary>
     ///  Close the stream.
 	/// </summary>
-	///  <exception cref="IOException"></exception>
+	///  <exception cref="IOException">Thrown if error during IO</exception>
     override
     public void Close()
     {

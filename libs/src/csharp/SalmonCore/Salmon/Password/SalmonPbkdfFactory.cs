@@ -34,12 +34,12 @@ public class SalmonPbkdfFactory
 	/// </summary>
 	///  <param name="type">The pbkdf type.</param>
     ///  <returns>The provider.</returns>
-    ///  <exception cref="SalmonSecurityException"></exception>
-    public static ISalmonPbkdfProvider Create(SalmonPassword.PbkdfType type)
+    ///  <exception cref="SalmonSecurityException">Thrown when error with security</exception>
+    public static ISalmonPbkdfProvider Create(PbkdfType type)
     {
         switch (type)
         {
-            case SalmonPassword.PbkdfType.Default:
+            case PbkdfType.Default:
                 return new SalmonDefaultPbkdfProvider();
         }
         throw new SalmonSecurityException("Unknown Pbkdf provider type");

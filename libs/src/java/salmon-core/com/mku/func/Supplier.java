@@ -25,6 +25,7 @@ SOFTWARE.
 
 /**
  * Backwards compatibility Function class for devices with Android 23 and prior.
+ *
  * @param <R> Return Type
  */
 public interface Supplier<R> {

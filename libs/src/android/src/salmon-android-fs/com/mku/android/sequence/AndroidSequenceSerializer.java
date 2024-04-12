@@ -35,9 +35,9 @@ import java.io.StringWriter;
 
 import android.util.Base64;
 
-import com.mku.sequence.ISalmonSequenceSerializer;
-import com.mku.sequence.SalmonSequence;
-import com.mku.sequence.SalmonSequenceException;
+import com.mku.sequence.SequenceException;
+import com.mku.sequence.INonceSequenceSerializer;
+import com.mku.sequence.NonceSequence;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -49,14 +49,14 @@ import javax.xml.xpath.XPathFactory;
 /**
  * Sequence parser for Android.
  */
-public class AndroidSequenceSerializer implements ISalmonSequenceSerializer {
+public class AndroidSequenceSerializer implements INonceSequenceSerializer {
     /**
      * Serialize nonce sequences.
      * @param sequences The sequences to convert to text.
-     * @return
-     * @throws SalmonSequenceException
+     * @return The serialized contents
+     * @throws SequenceException Thrown if error with the sequence
      */
-    public String serialize(HashMap<String, SalmonSequence> sequences) throws SalmonSequenceException {
+    public String serialize(HashMap<String, NonceSequence> sequences) throws SequenceException {
         String contents = null;
         XmlSerializer out = Xml.newSerializer();
         StringWriter writer = new StringWriter();
@@ -64,10 +64,10 @@ public class AndroidSequenceSerializer implements ISalmonSequenceSerializer {
             out.setOutput(writer);
             out.startDocument("UTF-8", true);
             out.startTag("", "drives");
-            for (Map.Entry<String, SalmonSequence> entry : sequences.entrySet()) {
+            for (Map.Entry<String, NonceSequence> entry : sequences.entrySet()) {
                 out.startTag("", "drive");
-                out.attribute("", "driveID", entry.getValue().getDriveID());
-                out.attribute("", "authID", entry.getValue().getAuthID());
+                out.attribute("", "driveID", entry.getValue().getId());
+                out.attribute("", "authID", entry.getValue().getAuthId());
                 out.attribute("", "status", entry.getValue().getStatus().toString());
                 if (entry.getValue().getNextNonce() != null)
                     out.attribute("", "nextNonce", Base64.encodeToString(entry.getValue().getNextNonce(), Base64.NO_WRAP));
@@ -80,7 +80,7 @@ public class AndroidSequenceSerializer implements ISalmonSequenceSerializer {
             contents = writer.toString();
         } catch (IOException ex) {
             ex.printStackTrace();
-            throw new SalmonSequenceException("Could not serialize sequences", ex);
+            throw new SequenceException("Could not serialize sequences", ex);
         } finally {
             try {
                 writer.close();
@@ -95,10 +95,10 @@ public class AndroidSequenceSerializer implements ISalmonSequenceSerializer {
      * Deserialize nonce sequences.
      * @param contents The contents containing the nonce sequences.
      * @return The sequences.
-     * @throws SalmonSequenceException
+     * @throws SequenceException Thrown if error with the nonce sequence
      */
-    public HashMap<String, SalmonSequence> deserialize(String contents) throws SalmonSequenceException {
-        HashMap<String, SalmonSequence> configs = new HashMap<>();
+    public HashMap<String, NonceSequence> deserialize(String contents) throws SequenceException {
+        HashMap<String, NonceSequence> configs = new HashMap<>();
         try {
             XPathFactory factory = XPathFactory.newInstance();
             XPath xPath = factory.newXPath();
@@ -120,13 +120,13 @@ public class AndroidSequenceSerializer implements ISalmonSequenceSerializer {
                     if (drive.getAttributes().getNamedItem("maxNonce") != null) {
                         maxNonce = Base64.decode(drive.getAttributes().getNamedItem("maxNonce").getNodeValue(), Base64.NO_WRAP);
                     }
-                    SalmonSequence sequence = new SalmonSequence(driveID, authID, nextNonce, maxNonce, SalmonSequence.Status.valueOf(status));
+                    NonceSequence sequence = new NonceSequence(driveID, authID, nextNonce, maxNonce, NonceSequence.Status.valueOf(status));
                     configs.put(driveID, sequence);
                 }
             }
         } catch (Exception ex) {
             ex.printStackTrace();
-            throw new SalmonSequenceException("Could not deserialize sequences", ex);
+            throw new SequenceException("Could not deserialize sequences", ex);
         }
         return configs;
     }

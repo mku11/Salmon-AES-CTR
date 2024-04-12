@@ -23,14 +23,9 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 */
 
-import com.mku.io.MemoryStream;
 import com.mku.salmon.SalmonGenerator;
 import com.mku.salmon.SalmonRangeExceededException;
 import com.mku.salmon.SalmonSecurityException;
-import com.mku.salmon.integrity.SalmonIntegrityException;
-import com.mku.salmon.io.SalmonStream;
-
-import java.io.IOException;
 
 /**
  * Abstract class for AES256 transformer implementations.
@@ -44,40 +39,9 @@ public abstract class SalmonAES256CTRTransformer implements ISalmonCTRTransforme
     public static final int EXPANDED_KEY_SIZE = 240;
 
     /**
-     * Get the output size of the data to be transformed(encrypted or decrypted) including
-     * header and hash without executing any operations. This can be used to prevent over-allocating memory
-     * where creating your output buffers.
-     *
-     * @param data The data to be transformed.
-     * @param key The AES key.
-     * @param nonce The nonce for the CTR.
-     * @param mode The {@link SalmonStream.EncryptionMode} Encrypt or Decrypt.
-     * @param headerData The header data to be embedded if you use Encryption.
-     * @param integrity True if you want to enable integrity.
-     * @param chunkSize The chunk size for integrity chunks.
-     * @param hashKey The hash key to be used for integrity checks.
-     * @return The size of the output data.
-     *
-     * @throws SalmonSecurityException
-     * @throws SalmonIntegrityException
-     * @throws IOException
-     */
-    public static long getActualSize(byte[] data, byte[] key, byte[] nonce, SalmonStream.EncryptionMode mode,
-                                     byte[] headerData, boolean integrity, Integer chunkSize, byte[] hashKey)
-            throws SalmonSecurityException, SalmonIntegrityException, IOException {
-        MemoryStream inputStream = new MemoryStream(data);
-        SalmonStream s = new SalmonStream(key, nonce, mode, inputStream,
-                headerData, integrity, chunkSize, hashKey);
-        long size = s.actualLength();
-        s.close();
-        return size;
-    }
-
-    /**
      * Salmon stream encryption block size, same as AES.
      */
     public static final int BLOCK_SIZE = 16;
-
 
     /**
      * Key to be used for AES transformation.
@@ -108,17 +72,18 @@ public abstract class SalmonAES256CTRTransformer implements ISalmonCTRTransforme
      * Resets the Counter and the block count.
      */
     public void resetCounter() {
+        if (this.nonce == null) //TODO: ToSync
+            throw new SalmonSecurityException("No counter, run init first");
         counter = new byte[BLOCK_SIZE];
         System.arraycopy(nonce, 0, counter, 0, nonce.length);
         block = 0;
     }
 
-
     /**
      * Syncs the Counter based on what AES block position the stream is at.
      * The block count is already excluding the header and the hash signatures.
      */
-    public void syncCounter(long position) throws SalmonRangeExceededException {
+    public void syncCounter(long position) {
         long currBlock = position / BLOCK_SIZE;
         resetCounter();
         increaseCounter(currBlock);
@@ -131,7 +96,9 @@ public abstract class SalmonAES256CTRTransformer implements ISalmonCTRTransforme
      *
      * @param value value to increase counter by
      */
-    protected void increaseCounter(long value) throws SalmonRangeExceededException {
+    protected void increaseCounter(long value) {
+        if (this.counter == null || this.nonce == null) //TODO: ToSync
+            throw new SalmonSecurityException("No counter, run init first");
         if (value < 0)
             throw new IllegalArgumentException("Value should be positive");
         int index = BLOCK_SIZE - 1;
@@ -146,30 +113,31 @@ public abstract class SalmonAES256CTRTransformer implements ISalmonCTRTransforme
         }
     }
 
-
     /**
      * Initialize the transformer. Most common operations include precalculating expansion keys or
      * any other prior initialization for efficiency.
-     * @param key
-     * @param nonce
-     * @throws SalmonSecurityException
+     * @param key The key
+     * @param nonce The nonce
+     * @throws SalmonSecurityException Thrown if there is a security exception
      */
-    public void init(byte[] key, byte[] nonce) throws SalmonSecurityException {
+    public void init(byte[] key, byte[] nonce) {
         this.key = key;
         this.nonce = nonce;
     }
 
     /**
      * Get the current Counter.
-     * @return
+     * @return The current counter
      */
     public byte[] getCounter() {
+        if (this.counter == null)
+            throw new RuntimeException("No counter, run init() and resetCounter()");
         return counter;
     }
 
     /**
      * Get the current block.
-     * @return
+     * @return The current block
      */
     public long getBlock() {
         return block;
@@ -177,7 +145,7 @@ public abstract class SalmonAES256CTRTransformer implements ISalmonCTRTransforme
 
     /**
      * Get the current encryption key.
-     * @return
+     * @return The encryption key
      */
     public byte[] getKey() {
         return key;
@@ -185,7 +153,7 @@ public abstract class SalmonAES256CTRTransformer implements ISalmonCTRTransforme
 
     /**
      * Get the expanded key if available.
-     * @return
+     * @return The expanded key
      */
     protected byte[] getExpandedKey() {
         return expandedKey;
@@ -193,7 +161,7 @@ public abstract class SalmonAES256CTRTransformer implements ISalmonCTRTransforme
 
     /**
      * Get the nonce (initial counter)
-     * @return
+     * @return The nonce
      */
     public byte[] getNonce() {
         return nonce;
@@ -201,7 +169,7 @@ public abstract class SalmonAES256CTRTransformer implements ISalmonCTRTransforme
 
     /**
      * Set the expanded key. This should be called once during initialization phase.
-     * @param expandedKey
+     * @param expandedKey The expanded key
      */
     public void setExpandedKey(byte[] expandedKey) {
         this.expandedKey = expandedKey;

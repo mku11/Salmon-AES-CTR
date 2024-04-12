@@ -34,16 +34,15 @@ public class TinyAesTransformer extends SalmonNativeTransformer {
      */
     public static final int AES_IMPL_TINY_AES = 2;
 
-
     /**
-     * Initialiaze the native transformer to use the Tiny AES implementation.
+     * Initialize the native transformer to use the Tiny AES implementation.
      *
      * @param key   The AES key to use.
      * @param nonce The nonce to use.
-     * @throws SalmonSecurityException
+     * @throws SalmonSecurityException Thrown if there is a security exception
      */
     @Override
-    public void init(byte[] key, byte[] nonce) throws SalmonSecurityException {
+    public void init(byte[] key, byte[] nonce) {
 		getNativeProxy().salmonInit(AES_IMPL_TINY_AES);
         super.init(key, nonce);
     }

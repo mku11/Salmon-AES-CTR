@@ -23,18 +23,16 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 */
 
-
 import com.mku.file.IRealFile;
 import com.mku.salmon.win.registry.SalmonRegistry;
-import com.mku.sequence.ISalmonSequenceSerializer;
-import com.mku.sequence.SalmonFileSequencer;
-import com.mku.sequence.SalmonSequenceException;
+import com.mku.sequence.INonceSequenceSerializer;
+import com.mku.salmon.sequence.SalmonFileSequencer;
+import com.mku.sequence.SequenceException;
 import com.sun.jna.platform.win32.Crypt32Util;
 
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.security.MessageDigest;
-
 
 /**
  * File Sequencer for Windows with tamper protection.
@@ -51,7 +49,7 @@ public class WinFileSequencer extends SalmonFileSequencer
     }
     /**
      * Get the registry key to save the checksum.
-     * @return
+     * @return The key
      */
     public String getCheckSumKey() {
         return checkSumKey;
@@ -59,7 +57,7 @@ public class WinFileSequencer extends SalmonFileSequencer
 
     /**
      * Set the registry key to save the checksum.
-     * @param key
+     * @param key The key
      */
     public  void setCheckSumKey(String key) {
         this.checkSumKey = key;
@@ -67,25 +65,26 @@ public class WinFileSequencer extends SalmonFileSequencer
 
     /**
      * Instantiate a windows file sequencer.
-     * @param sequenceFile
-     * @param serializer
-     * @throws SalmonSequenceException
-     * @throws IOException
+     * @param sequenceFile The sequence file
+     * @param serializer The serializer
+     * @param regCheckSumKey The registry key to use for the checksum.
+     * @throws SequenceException Thrown if there is an error with the nonce sequence
+     * @throws IOException Thrown if there is an IO error.
      */
-    public WinFileSequencer(IRealFile sequenceFile, ISalmonSequenceSerializer serializer, String regCheckSumKey) throws SalmonSequenceException, IOException {
+    public WinFileSequencer(IRealFile sequenceFile, INonceSequenceSerializer serializer, String regCheckSumKey) throws IOException {
         super(sequenceFile, serializer);
 		if(regCheckSumKey == null)
-			throw new SalmonSequenceException("Registry checksum key cannot be null");
+			throw new SequenceException("Registry checksum key cannot be null");
 		checkSumKey = regCheckSumKey;
     }
 
     /**
      * Gets the checksum the registry and verifies the contents.
-     * @return
-     * @throws SalmonSequenceException
+     * @return The contents
+     * @throws SequenceException Thrown if there is an error with the nonce sequence
      */
     @Override
-    protected String getContents() throws SalmonSequenceException {
+    protected String getContents() {
         String contents = super.getContents();
 		contents = contents.trim();
         String hash = getChecksum(contents);
@@ -107,11 +106,11 @@ public class WinFileSequencer extends SalmonFileSequencer
      * 	SHA256 but to further protected from rainbow attacks we also encrypt it
      * 	with the User windows credentials using ProtectedData.
      * 	from rainbow attacks
-     * @param contents
-     * @throws SalmonSequenceException
+     * @param contents The contents
+     * @throws SequenceException Thrown if there is an error with the nonce sequence
      */
     @Override
-    protected void saveContents(String contents) throws SalmonSequenceException {
+    protected void saveContents(String contents) {
 		contents = contents.trim();
         super.saveContents(contents);
         String hash = getChecksum(contents);
@@ -126,9 +125,9 @@ public class WinFileSequencer extends SalmonFileSequencer
      * Get the checksum of the contents.
      * @param contents
      * @return
-     * @throws SalmonSequenceException
+     * @throws SequenceException Thrown if there is an error with the nonce sequence
      */
-    private String getChecksum(String contents) throws SalmonSequenceException {
+    private String getChecksum(String contents) {
         try {
             MessageDigest sha256 = MessageDigest.getInstance("SHA-256");
             byte[] inputBytes = contents.getBytes();
@@ -142,7 +141,7 @@ public class WinFileSequencer extends SalmonFileSequencer
             }
             return hexString.toString().toUpperCase();
         } catch (Exception ex) {
-            throw new SalmonSequenceException("Could not calculate chksum", ex);
+            throw new SequenceException("Could not calculate chksum", ex);
         }
     }
 
@@ -150,13 +149,13 @@ public class WinFileSequencer extends SalmonFileSequencer
      *Reset the sequences. The device will be de-authorized for all drives.
      * @param clearChecksumOnly True to only clear the registry checksum, use only if you know what you're doing. Default value is false)
      */
-    public void reset(boolean clearChecksumOnly) throws SalmonSequenceException {
+    public void reset(boolean clearChecksumOnly) {
         if (!clearChecksumOnly)
         {
             if (getSequenceFile().exists())
                 getSequenceFile().delete();
             if (getSequenceFile().exists())
-                throw new SalmonSequenceException("Could not delete sequence file: " + getSequenceFile().getPath());
+                throw new SequenceException("Could not delete sequence file: " + getSequenceFile().getPath());
         }
         registry.delete(getCheckSumKey());
     }

@@ -44,8 +44,9 @@ public class SalmonRegistry
 
     /**
      * Read a value from the registry
-     * @param key
-     * @return
+     * @param key The key
+     * @param <T> The class value
+     * @return The value
      */
     @SuppressWarnings("unchecked")
     public <T> T read(String key)
@@ -55,8 +56,8 @@ public class SalmonRegistry
 
     /**
      * Write a value from the registry
-     * @param key
-     * @param value
+     * @param key The key
+     * @param value The value
      */
     public void write(String key, Object value)
     {
@@ -78,7 +79,7 @@ public class SalmonRegistry
 
     /**
      * Delete a value
-     * @param key
+     * @param key The key
      */
     public void delete(String key)
     {
@@ -87,11 +88,10 @@ public class SalmonRegistry
 
     /**
      * True if value exists
-     * @param key
-     * @return
+     * @param key The key
+     * @return True if value exists
      */
     public boolean exists(String key){
         return Advapi32Util.registryValueExists(WinReg.HKEY_CURRENT_USER, SETTINGS_PATH, key);
     }
-
 }

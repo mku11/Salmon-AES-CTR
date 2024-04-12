@@ -42,8 +42,8 @@ public class SalmonDefaultPbkdfProvider : ISalmonPbkdfProvider
     ///  <param name="outputBytes">The length of the output key.</param>
     ///  <param name="pbkdfAlgo">The hash algorithm to use.</param>
     ///  <returns>The key.</returns>
-    ///  <exception cref="SalmonSecurityException"></exception>
-    public byte[] GetKey(string password, byte[] salt, int iterations, int outputBytes, SalmonPassword.PbkdfAlgo pbkdfAlgo)
+    ///  <exception cref="SalmonSecurityException">Thrown when error with security</exception>
+    public byte[] GetKey(string password, byte[] salt, int iterations, int outputBytes, PbkdfAlgo pbkdfAlgo)
     {
 #if !NETSTANDARD
         // we are using SHA256

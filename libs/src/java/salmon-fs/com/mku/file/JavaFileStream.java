@@ -23,7 +23,7 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 */
 
-import com.mku.io.RandomAccessStream;
+import com.mku.streams.RandomAccessStream;
 
 import java.io.FileNotFoundException;
 import java.io.IOException;
@@ -55,11 +55,12 @@ public class JavaFileStream extends RandomAccessStream {
     private boolean canWrite;
 
     /**
-     * Construct a file stream from an AndroidFile.
+     * Construct a file stream from a JavaFile.
      * This will create a wrapper stream that will route read() and write() to the FileChannel
      *
-     * @param file The AndroidFile that will be used to get the read/write stream
+     * @param file The JavaFile that will be used to get the read/write stream
      * @param mode The mode "r" for read "rw" for write
+     * @throws FileNotFoundException Thrown if file not found
      */
     public JavaFileStream(JavaFile file, String mode) throws FileNotFoundException {
         this.file = file;
@@ -72,7 +73,7 @@ public class JavaFileStream extends RandomAccessStream {
 
     /**
      * True if stream can read from file.
-     * @return
+     * @return True if readable
      */
     @Override
     public boolean canRead() {
@@ -81,7 +82,7 @@ public class JavaFileStream extends RandomAccessStream {
 
     /**
      * True if stream can write to file.
-     * @return
+     * @return True if writable
      */
     @Override
     public boolean canWrite() {
@@ -90,7 +91,7 @@ public class JavaFileStream extends RandomAccessStream {
 
     /**
      * True if stream can seek.
-     * @return
+     * @return True if seekable
      */
     @Override
     public boolean canSeek() {
@@ -99,7 +100,7 @@ public class JavaFileStream extends RandomAccessStream {
 
     /**
      * Get the length of the stream. This is the same as the backed file.
-     * @return
+     * @return The file stream length
      */
     @Override
     public long length() {
@@ -108,28 +109,28 @@ public class JavaFileStream extends RandomAccessStream {
 
     /**
      * Get the current position of the stream.
-     * @return
-     * @throws IOException
+     * @return The current position
+     * @throws IOException Thrown if there is an IO error.
      */
     @Override
-    public long position() throws IOException {
+    public long getPosition() throws IOException {
         return fileChannel.position();
     }
 
     /**
      * Set the current position of the stream.
      * @param value The new position.
-     * @throws IOException
+     * @throws IOException Thrown if there is an IO error.
      */
     @Override
-    public void position(long value) throws IOException {
+    public void setPosition(long value) throws IOException {
         fileChannel.position(value);
     }
 
     /**
      * Set the length of the stream. This is applicable for write streams only.
      * @param value The new length.
-     * @throws IOException
+     * @throws IOException Thrown if there is an IO error.
      */
     @Override
     public void setLength(long value) throws IOException {
@@ -141,8 +142,8 @@ public class JavaFileStream extends RandomAccessStream {
      * @param buffer The buffer to write the data.
      * @param offset The offset of the buffer to start writing the data.
      * @param count The maximum number of bytes to read from.
-     * @return
-     * @throws IOException
+     * @return The bytes read
+     * @throws IOException Thrown if there is an IO error.
      */
     @Override
     public int read(byte[] buffer, int offset, int count) throws IOException {
@@ -160,7 +161,7 @@ public class JavaFileStream extends RandomAccessStream {
      * @param buffer The buffer to read the data from.
      * @param offset The offset of the buffer to start reading the data.
      * @param count The maximum number of bytes to read from the buffer.
-     * @throws IOException
+     * @throws IOException Thrown if there is an IO error.
      */
     @Override
     public void write(byte[] buffer, int offset, int count) throws IOException {
@@ -175,7 +176,7 @@ public class JavaFileStream extends RandomAccessStream {
      * @param offset The position to seek to.
      * @param origin The type of origin {@link RandomAccessStream.SeekOrigin}
      * @return The new position after seeking.
-     * @throws IOException
+     * @throws IOException Thrown if there is an IO error.
      */
     @Override
     public long seek(long offset, SeekOrigin origin) throws IOException {
@@ -208,7 +209,7 @@ public class JavaFileStream extends RandomAccessStream {
 
     /**
      * Close this stream and associated resources.
-     * @throws IOException
+     * @throws IOException Thrown if there is an IO error.
      */
     @Override
     public void close() throws IOException {
@@ -216,5 +217,4 @@ public class JavaFileStream extends RandomAccessStream {
         fileChannel.close();
         raf.close();
     }
-
 }

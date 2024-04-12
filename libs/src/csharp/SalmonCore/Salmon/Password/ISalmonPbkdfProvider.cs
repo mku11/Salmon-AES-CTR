@@ -48,13 +48,13 @@ public interface ISalmonPbkdfProvider
 	///  <param name="pbkdfAlgo">The PBKDF algorithm to be used</param>
     ///  <returns>The C# cipher algorithm string.</returns>
     [Obsolete("SHA1 is not secure use SHA256 instead")]
-    static string GetPbkdfAlgoString(SalmonPassword.PbkdfAlgo pbkdfAlgo)
+    static string GetPbkdfAlgoString(PbkdfAlgo pbkdfAlgo)
     {
         switch (pbkdfAlgo)
         {
-            case SalmonPassword.PbkdfAlgo.SHA1:
+            case PbkdfAlgo.SHA1:
                 return ISalmonPbkdfProvider.PBKDF_SHA1;
-            case SalmonPassword.PbkdfAlgo.SHA256:
+            case PbkdfAlgo.SHA256:
                 return ISalmonPbkdfProvider.PBKDF_SHA256;
         }
         throw new SalmonSecurityException("Unknown pbkdf algorithm");
@@ -69,6 +69,6 @@ public interface ISalmonPbkdfProvider
     ///  <param name="outputBytes">The length of the output key.</param>
     ///  <param name="pbkdfAlgo">The hash algorithm to use.</param>
     ///  <returns>The key.</returns>
-    ///  <exception cref="SalmonSecurityException"></exception>
-    byte[] GetKey(string password, byte[] salt, int iterations, int outputBytes, SalmonPassword.PbkdfAlgo pbkdfAlgo);
+    ///  <exception cref="SalmonSecurityException">Thrown when error with security</exception>
+    byte[] GetKey(string password, byte[] salt, int iterations, int outputBytes, PbkdfAlgo pbkdfAlgo);
 }

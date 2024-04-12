@@ -30,7 +30,7 @@ import androidx.annotation.Nullable;
 import androidx.annotation.RequiresApi;
 
 import com.mku.func.Consumer;
-import com.mku.salmonfs.SalmonFile;
+import com.mku.salmon.SalmonFile;
 
 import java.io.File;
 import java.util.HashMap;
@@ -90,6 +90,7 @@ public class AndroidSharedFileObserver extends FileObserver {
      * @param cacheFile             The temporary private decrypted cached file
      * @param salmonFile            The encrypted file that is associated with the shared file
      * @param onFileContentsChanged Action notifier when file contents change
+     * @return The shared file observer
      */
     public static AndroidSharedFileObserver createFileObserver(File cacheFile, SalmonFile salmonFile,
                                                                Consumer<AndroidSharedFileObserver> onFileContentsChanged) {
@@ -139,6 +140,7 @@ public class AndroidSharedFileObserver extends FileObserver {
 
     /**
      * Returns the encrypted salmon file that is associated with the shared file
+     * @return The file
      */
     public SalmonFile getSalmonFile() {
         return salmonFile;
@@ -146,7 +148,7 @@ public class AndroidSharedFileObserver extends FileObserver {
 
     /**
      * Set the salmon file associated with the shared file to observer.
-     * @param salmonFile
+     * @param salmonFile The file
      */
     public void setSalmonFile(SalmonFile salmonFile) {
         this.salmonFile = salmonFile;

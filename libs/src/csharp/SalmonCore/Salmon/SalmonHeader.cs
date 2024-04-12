@@ -23,6 +23,7 @@ SOFTWARE.
 */
 
 using Mku.Convert;
+using System.IO;
 using BitConverter = Mku.Convert.BitConverter;
 
 namespace Mku.Salmon;
@@ -62,8 +63,8 @@ public class SalmonHeader
     ///  Parse the header data from the stream
 	/// </summary>
 	///  <param name="stream">The stream.</param>
-    ///  <returns></returns>
-    ///  <exception cref="IOException"></exception>
+    ///  <returns>The header</returns>
+    ///  <exception cref="IOException">Thrown if error during IO</exception>
     public static SalmonHeader ParseHeaderData(Stream stream)
     {
         SalmonHeader header = new SalmonHeader();

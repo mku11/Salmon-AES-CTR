@@ -43,11 +43,11 @@ public interface ISalmonPbkdfProvider {
     /**
      * Get the PBKDF java cipher algorigthm string.
      *
-     * @param pbkdfAlgo The PBKDF algorithm to be used
+     * @param pbkdfAlgo The PBKDF algorithm to use
      * @return The java cipher algorithm string. See javax.crypto.SecretKeyFactory.
      */
     @SuppressWarnings("deprecation")
-    static String getPbkdfAlgoString(SalmonPassword.PbkdfAlgo pbkdfAlgo) throws SalmonSecurityException {
+    static String getPbkdfAlgoString(PbkdfAlgo pbkdfAlgo) {
         switch (pbkdfAlgo) {
             case SHA1:
                 return ISalmonPbkdfProvider.PBKDF_SHA1;
@@ -63,9 +63,9 @@ public interface ISalmonPbkdfProvider {
      * @param salt The salt needs to be at least 24 bytes.
      * @param iterations Iterations to use. Make sure you use a high number according to your hardware specs.
      * @param outputBytes The length of the output key.
-     * @param pbkdfAlgo The hash algorithm to use.
+     * @param pbkdfAlgo The PBKDF algorithm to use
      * @return The key.
-     * @throws SalmonSecurityException
+     * @throws SalmonSecurityException Thrown if there is a security exception
      */
-    byte[] getKey(String password, byte[] salt, int iterations, int outputBytes, SalmonPassword.PbkdfAlgo pbkdfAlgo) throws SalmonSecurityException;
+    byte[] getKey(String password, byte[] salt, int iterations, int outputBytes, PbkdfAlgo pbkdfAlgo);
 }

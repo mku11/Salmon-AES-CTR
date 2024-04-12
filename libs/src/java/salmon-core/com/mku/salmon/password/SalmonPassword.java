@@ -30,7 +30,6 @@ import com.mku.salmon.SalmonSecurityException;
  */
 public class SalmonPassword {
 
-
     /**
      * WARNING! SHA1 is not secure anymore enable only if you know what you're doing!
      */
@@ -39,7 +38,7 @@ public class SalmonPassword {
     /**
      * Global PBKDF algorithm option that will be used for the master key derivation.
      */
-    static PbkdfAlgo pbkdfAlgo = PbkdfAlgo.SHA256;
+    private static PbkdfAlgo pbkdfAlgo = PbkdfAlgo.SHA256;
 
     /**
      * Pbkdf provider.
@@ -58,7 +57,7 @@ public class SalmonPassword {
     /**
      * Set the global PDKDF algorithm to be used for key derivation.
      *
-     * @param pbkdfAlgo
+     * @param pbkdfAlgo The PBKDF algorithm to use
      */
     public static void setPbkdfAlgo(PbkdfAlgo pbkdfAlgo) {
         SalmonPassword.pbkdfAlgo = pbkdfAlgo;
@@ -67,11 +66,19 @@ public class SalmonPassword {
     /**
      * Set the global PBKDF implementation to be used for text key derivation.
      *
-     * @param pbkdfType
-     * @throws SalmonSecurityException
+     * @param pbkdfType The PBKDF implementation to use
      */
-    public static void setPbkdfType(PbkdfType pbkdfType) throws SalmonSecurityException {
+    public static void setPbkdfType(PbkdfType pbkdfType) {
         provider = SalmonPbkdfFactory.create(pbkdfType);
+    }
+	
+	/**
+     * Set the global PBKDF provider to be used for text key derivation.
+     *
+     * @param pbkdfProvider The PBKDF provider
+     */
+    public static void setPbkdfProvider(ISalmonPbkdfProvider pbkdfProvider) {
+        provider = pbkdfProvider;
     }
 
     /**
@@ -82,10 +89,9 @@ public class SalmonPassword {
      * @param iterations The number of iterations the key derivation algorithm will use
 	 * @param length     The length of master key to return
      * @return The derived master key.
-     * @throws SalmonSecurityException
+     * @throws SalmonSecurityException Thrown if there is a security exception
      */
-    public static byte[] getMasterKey(String pass, byte[] salt, int iterations, int length)
-            throws SalmonSecurityException {
+    public static byte[] getMasterKey(String pass, byte[] salt, int iterations, int length) {
         byte[] masterKey = getKeyFromPassword(pass, salt, iterations, length);
         return masterKey;
     }
@@ -98,37 +104,13 @@ public class SalmonPassword {
      * @param iterations  The iterations to be used with Pbkdf2
      * @param outputBytes The number of bytes for the key
      * @return The derived key.
-     * @throws SalmonSecurityException
+     * @throws SalmonSecurityException Thrown if there is a security exception
      */
-    public static byte[] getKeyFromPassword(String password, byte[] salt, int iterations, int outputBytes) throws SalmonSecurityException {
+    public static byte[] getKeyFromPassword(String password, byte[] salt, int iterations, int outputBytes) {
         if (pbkdfAlgo == PbkdfAlgo.SHA1 && !ENABLE_SHA1)
             throw new RuntimeException("Cannot use SHA1, SHA1 is not secure anymore use SHA256!");
         return provider.getKey(password, salt, iterations, outputBytes, pbkdfAlgo);
     }
-	
-	/**
-	 * Pbkdf implementation type.
-	 */
-    public enum PbkdfType {
-        /**
-         * Default Java pbkdf implementation.
-         */
-        Default
-    }
 
-	/**
-	 * Pbkdf algorithm implementation type.
-	 */
-    public enum PbkdfAlgo {
-        /**
-         * SHA1 hashing. DO NOT USE.
-         */
-        @Deprecated
-        SHA1,
-        /**
-         * SHA256 hashing.
-         */
-        SHA256
-    }
 }
 

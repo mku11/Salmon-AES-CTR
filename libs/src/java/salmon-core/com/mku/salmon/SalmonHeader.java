@@ -24,7 +24,7 @@ SOFTWARE.
 */
 
 import com.mku.convert.BitConverter;
-import com.mku.io.RandomAccessStream;
+import com.mku.streams.RandomAccessStream;
 
 import java.io.IOException;
 
@@ -84,7 +84,6 @@ public class SalmonHeader {
         return headerData;
     }
 
-
     /**
      * Get the Salmon format  version
      * @return The format version
@@ -104,8 +103,8 @@ public class SalmonHeader {
     /**
      * Parse the header data from the stream
      * @param stream The stream.
-     * @return
-     * @throws IOException
+     * @return The header data.
+     * @throws IOException Thrown if there is an IO error.
      */
     public static SalmonHeader parseHeaderData(RandomAccessStream stream) throws IOException {
         SalmonHeader header = new SalmonHeader();
@@ -119,7 +118,7 @@ public class SalmonHeader {
         header.chunkSize = (int) BitConverter.toLong(chunkSizeHeader, 0, SalmonGenerator.CHUNK_SIZE_LENGTH);
         header.nonce = new byte[SalmonGenerator.NONCE_LENGTH];
         stream.read(header.nonce, 0, header.nonce.length);
-        stream.position(0);
+        stream.setPosition(0);
         header.headerData = new byte[SalmonGenerator.MAGIC_LENGTH + SalmonGenerator.VERSION_LENGTH
                 + SalmonGenerator.CHUNK_SIZE_LENGTH + SalmonGenerator.NONCE_LENGTH];
         stream.read(header.headerData, 0, header.headerData.length);
