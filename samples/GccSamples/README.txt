@@ -1,7 +1,7 @@
-To compile Sample you will need:
+To compile the Gcc sample for Linux you will need:
 gcc, make
 
-cross compiling for ARM64 you need:
+cross compiling for Linux ARM64 you need:
 sudo apt install gcc-aarch64-linux-gnu
 
 download salmon-linux-<arch>.tar.gz and unzip in the same directory
