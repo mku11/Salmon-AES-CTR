@@ -1,5 +1,5 @@
 
-### Gradle  
+### Java Gradle  
 
 To integrate the Salmon libraries to your gradle project add the salmon repository:  
 
@@ -52,7 +52,7 @@ dependencies {
 }
 ```
 
-### Maven
+### Java Maven
 
 To integrate the Salmon libraries to your maven project add the salmon repository:
 ```
@@ -82,7 +82,7 @@ Now add the dependencies:
 </dependencies>
 ```
 
-### Nuget
+### C# Visual Studio Nuget
 
 To integrate the Salmon libraries to your Visual Studio project:
 Download the Nuget packages from [Salmon nuget repo](https://github.com/mku11/Repo/tree/main/nuget/releases)  
