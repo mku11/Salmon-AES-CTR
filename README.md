@@ -22,7 +22,7 @@ Salmon is an AES-256 CTR encryption library with HMAC SHA-256 integrity, paralle
 ## Applications
 
 For a complete showcase of the Salmon API visit the [Salmon Vault](https://github.com/mku11/Salmon-Vault) app offered on several different platforms  
-[**Salmon Vault - Live Web Demo**](https://mku11.github.io/Salmon-AES-CTR/demo)
+[**Live Web Demo**](https://mku11.github.io/Salmon-AES-CTR/demo)
 
 ## Support
 
