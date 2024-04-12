@@ -28,18 +28,18 @@ For a complete showcase of the Salmon API visit the [Salmon Vault](https://githu
 
 **Languages**:  
 Java 11+  
-Android 23+  
-C# .NET 7+   
+C# .NET 7+  
 Python 3.11+    
 Typescript/Javascript ES2020  
   
 **Platforms/Browsers**:  
-Xamarin, MAUI, WPF  
-JavaFX  
+JavaFX 17+  
+Android 23+  
+.NET Android 23+  
+WPF, Xamarin, and MAUI  
 Chrome (Local virtual drives)  
 Chrome, Firefox, Safari (Remote virtual drives read-only)  
 Node.js (experimental esm modules)  
-  
   
 ## AES-NI Intrinsics Support
 
@@ -63,6 +63,9 @@ ARM64
 * Protected nonce sequences: Sequence ranges are stored in app protected space (Android only).
 * Tamper-Proof nonce sequences: Tampering is detected using an encrypted SHA256 checksum (Win10/11 only).
 * Admin-Protected nonce sequences: Additional protection from non-admin users (Salmon Windows Service Win10/11 only).
+* Python parallel processing (multiple cpus) in Windows is very slow unlike Linux.
+* Javascript service worker handler does not support parallel processing.
+* Javascript implementation is ESM so to work in Node.js you need to use --experimental-vm-modules
 
 ## Salmon API Samples
 API usage is consistent across languages with slight variations on naming conventions. Note that the javascript/typescript libraries are based on async IO so you will need to use 'await' most of the time.
