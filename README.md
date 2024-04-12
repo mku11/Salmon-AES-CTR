@@ -88,8 +88,10 @@ SalmonDrive drive = JavaDrive.create(new JavaFile("c:\\path\\to\\your\\virtual\\
 // Create an importer with 2 threads for parallel processing
 SalmonFileCommander commander = new SalmonFileCommander(256 * 1024, 256 * 1024, 2);
 
-// import multiple files to encrypted drive
-JavaFile[] files = new JavaFile[]{new JavaFile("data/file1.txt"), new JavaFile("data/file2.txt")};
+// you can create a batch of multiple files for encryption
+JavaFile[] files = new JavaFile[]{new JavaFile("data/file1.txt"), new JavaFile("data/file2.jpg"), JavaFile("data/file3.mp4")};
+
+// now import the files under the root directory
 commander.importFiles(files, drive.getRoot(), false, true, null, null, null);
 commander.close();
 
