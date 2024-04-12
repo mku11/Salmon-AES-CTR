@@ -1,21 +1,21 @@
 ![alt text](https://github.com/mku11/Salmon-AES-CTR/blob/wip/common/common-res/icons/logo.png)
 
 # Salmon
-Salmon is an AES-256 encryption library with built-in integrity, parallel operations, and seekable stream support. It provides a high level API for encrypting data, streams, and a virtual drive API for encrypting files. Powered by a fast native library for Intel x86_64 and ARM64.
-  
 
+Salmon is an AES-256 encryption library with built-in integrity, parallel operations, and seekable stream support. It provides a high level API for encrypting data, streams, and a virtual drive API for encrypting files. Powered by a fast native library for Intel x86_64 and ARM64.  
+  
 [![License: MIT](https://img.shields.io/github/license/mku11/Salmon-AES-CTR.svg)](LICENSE)
 [![Version](https://img.shields.io/badge/version-2.0.0-blue)](https://github.com/mku11/Salmon-AES-CTR/releases)
 [![GitHub Releases](https://img.shields.io/github/downloads/mku11/Salmon-AES-CTR/latest/total?logo=github)](https://github.com/mku11/Salmon-AES-CTR/releases)
 
 ## Library Features
-* AES-256 standard AES-256 in CTR Mode.
-* Data integrity with standard HMAC SHA-256.
+
+* AES-256 in CTR Mode with HMAC SHA-256 authentication.
 * Password based key derivation with PBKDF2 SHA-256.
-* Fast native AES-NI intrinsics for Intel x86 and ARM64 for C/C++.
-* Fast parallel encryption/decryption operations and seek support for streams with a simple API in Java and C#.
-* Full filesystem API for creating virtual encrypted drives.
-* Extensible API interfaces for other filesystems, network files, and custom streams (UWP, Xamarin iOS, Dropbox, etc).
+* Fast parallel encryption/decryption operations with seekable stream support.
+* Virtual drive API for creating encrypted drives.
+* Abstract API for integrating with any filesystem, network files, and custom streams.
+* Fast native AES-NI intrinsics for Intel x86 and ARM64 written in C.
 * Protected file-based nonce sequencer with encrypted SHA-256 checksum.
 * System protected nonce sequencer with encrypted SHA-256 checksum via an optional Windows Service.
 
@@ -29,21 +29,28 @@ For a complete showcase of the Salmon API visit the [Salmon Vault](https://githu
 **Languages**:  
 Java 11+  
 Android 23+  
-C# .NET 7+  
-Python 3.11+  
+C# .NET 7+   
+Python 3.11+    
 Typescript/Javascript ES2020  
   
 **Platforms/Browsers**:  
 Xamarin, MAUI, WPF  
 JavaFX  
-Chrome (Local Drives)  
-Chrome, Firefox, Safari (Remote Drives read-only)  
-Node.js
+Chrome (Local virtual drives)  
+Chrome, Firefox, Safari (Remote virtual drives read-only)  
+Node.js (experimental esm modules)  
   
-**Operating Systems (Tested)**  
+  
+## AES-NI Intrinsics Support
+
+**Operating systems (Tested)**  
 Windows 10 x86_64  
 MacOS 10.11  
 Linux Debian 11  
+
+**CPU architectures (Tested)**  
+Intel x86_64  
+ARM64  
 
 ## Why Salmon?
 
@@ -58,11 +65,7 @@ Linux Debian 11
 * Admin-Protected nonce sequences: Additional protection from non-admin users (Salmon Windows Service Win10/11 only).
 
 ## Salmon API Samples
-**Java/C#/Python API**:
-API usage is consistent across platforms with slight variations on naming conventions.  
-  
-**Typescript/Javascript API**:  
-The ts/js libraries are based on async IO so make sure when to use await.  
+API usage is consistent across languages with slight variations on naming conventions. Note that the javascript/typescript libraries are based on async IO so you will need to use 'await' most of the time.
   
 For detailed samples see: [**Samples**](https://github.com/mku11/Salmon-AES-CTR/tree/main/samples)  
 For an extensive use of the API see: [**Salmon Vault**](https://github.com/mku11/Salmon-Vault)  
