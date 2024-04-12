@@ -77,7 +77,7 @@ For short code samples see below.
 
 ### SalmonFS API:
 ```
-// Create a sequencer. Make sure this path is safe and excluded from your backups
+// Create a sequencer. Make sure this path is secure and excluded from your backups.
 String sequencerPath = "c:\\users\\<username>\\AppData\\Local\\<somefolder>\\salmon_sequencer.xml";
 SalmonFileSequencer sequencer = new SalmonFileSequencer(new JavaFile(sequencerPath), new SalmonSequenceSerializer());
 
