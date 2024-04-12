@@ -1,7 +1,7 @@
 ![alt text](https://github.com/mku11/Salmon-AES-CTR/blob/wip/common/common-res/icons/logo.png)
 
 # Salmon
-Salmon is an AES-256 CTR encryption library with HMAC SHA-256 integrity, parallel file operations (read/write), and seekable stream support. It provides a high level, low-ceremony, consistent API for encrypting streams and files. Salmon is using a fast native library for Intel x86 and ARM64 that you can include in your C/C++ projects.
+Salmon is an AES-256 encryption library with built-in integrity, parallel operations, and seekable stream support. It provides a high level API for encrypting data, streams, and a virtual drive API for encrypting files. Powered by a fast native library for Intel x86_64 and ARM64.
   
 
 [![License: MIT](https://img.shields.io/github/license/mku11/Salmon-AES-CTR.svg)](LICENSE)
@@ -24,7 +24,7 @@ Salmon is an AES-256 CTR encryption library with HMAC SHA-256 integrity, paralle
 For a complete showcase of the Salmon API visit the [Salmon Vault](https://github.com/mku11/Salmon-Vault) app offered on several different platforms  
 [**Live Web Demo**](https://mku11.github.io/Salmon-AES-CTR/demo)
 
-## Support
+## API Support
 
 **Languages**:  
 Java 11+  
@@ -38,6 +38,7 @@ Xamarin, MAUI, WPF
 JavaFX  
 Chrome (Local Drives)  
 Chrome, Firefox, Safari (Remote Drives read-only)  
+Node.js
   
 **Operating Systems (Tested)**  
 Windows 10 x86_64  
@@ -70,23 +71,23 @@ For short code samples see below.
 
 ### SalmonFS API:
 ```
-// Create a sequencer. Make sure this path is safe and does NOT get backed up!
+// Create a sequencer. Make sure this path is safe and excluded from your backups
 String sequencerPath = "c:\\users\\<username>\\AppData\\Local\\<somefolder>\\salmon_sequencer.xml";
 SalmonFileSequencer sequencer = new SalmonFileSequencer(new JavaFile(sequencerPath), new SalmonSequenceSerializer());
 
-// create() or open() a virtual drive provided a location and a text password
+// create() or open() a virtual drive provided with a location and a text password
 // Supported drives: JavaDrive, DotNetDrive, PyDrive, JsDrive, JsHttpDrive (remote), JsNodeDrive (node.js)
-SalmonDrive drive = JavaDrive.create(new JavaFile("c:\\path\\to\\your\\salmon\\vault"), password, sequencer);
+SalmonDrive drive = JavaDrive.create(new JavaFile("c:\\path\\to\\your\\virtual\\drive"), password, sequencer);
 
 // Create an importer with 2 threads for parallel processing
 SalmonFileCommander commander = new SalmonFileCommander(256 * 1024, 256 * 1024, 2);
 
-// and import multiple files
+// import multiple files to encrypted drive
 JavaFile[] files = new JavaFile[]{new JavaFile("data/file1.txt"), new JavaFile("data/file2.txt")};
 commander.importFiles(files, drive.getRoot(), false, true, null, null, null);
 commander.close();
 
-// use the virtual filesystem API to list or directly get the files in the drive
+// use the virtual drive API to list the files
 SalmonFile root = drive.getRoot();
 SalmonFile[] salmonFiles = root.listFiles();
 
@@ -108,7 +109,7 @@ drive.close();
 
 ### SalmonCore API: Data encryption/decryption
 ```
-// To encrypt byte data or text without using a vault you need to generate your own key and nonce.
+// To encrypt byte data or text without using a drive you need to generate your own key and nonce.
 // Get a fresh secure random key and keep this somewhere safe.
 byte[] key = SalmonGenerator.getSecureRandomBytes(32); // 256-bit key
 
