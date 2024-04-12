@@ -15,15 +15,15 @@ repositories {
 Add the java libraries to your project:
 ```
 dependencies {
-    implementation 'com.mku.salmon:salmon-core:1.0.5'
-    implementation 'com.mku.salmon:salmon-fs:1.0.5'
+    implementation 'com.mku.salmon:salmon-core:2.0.0'
+    implementation 'com.mku.salmon:salmon-fs:2.0.0'
 	
     // for android
-    implementation 'com.mku.salmon:salmon-fs-android:1.0.5'
+    implementation 'com.mku.salmon:salmon-fs-android:2.0.0'
     
     // optional fast AES intrinsics and Tiny AES
     // make sure you use SalmonStream.setProviderType() to set the provider in java
-    implementation 'com.mku.salmon:salmon-native-android:1.0.5'
+    implementation 'com.mku.salmon:salmon-native-android:2.0.0'
 }
 ```
 
@@ -43,12 +43,12 @@ task unzipNative(type: Sync) {
 }
 build.dependsOn unzipNative
 dependencies {
-    implementation 'com.mku.salmon:salmon-core:1.0.5'
-    implementation 'com.mku.salmon:salmon-fs:1.0.5'
+    implementation 'com.mku.salmon:salmon-core:2.0.0'
+    implementation 'com.mku.salmon:salmon-fs:2.0.0'
 	
     // use SalmonStream.setProviderType() within your code
     // and make sure you add the dll libary to the java.library.path  
-    unzipNative 'com.mku.salmon:salmon-native:1.0.5'
+    unzipNative 'com.mku.salmon:salmon-native:2.0.0'
 }
 ```
 
@@ -65,18 +65,18 @@ To integrate the Salmon libraries to your maven project add the salmon repositor
 </repositories>
 ```
 
-Now add the dependencies:
+Now add the dependencies:  
 ```
 <dependencies>
     <dependency>
         <groupId>com.mku.salmon</groupId>
         <artifactId>salmon-core</artifactId>
-        <version>1.0.5</version>
+        <version>2.0.0</version>
     </dependency>
 	<dependency>
         <groupId>com.mku.salmon</groupId>
         <artifactId>salmon-fs</artifactId>
-        <version>1.0.5</version>
+        <version>2.0.0</version>
     </dependency>
     ...
 </dependencies>
@@ -90,26 +90,36 @@ Within Visual Studio go to Tools / Optons / Nuget Package Manager / Package Sour
 Create a new source with a name like "Salmon Repo" and add the local dir that has the downloaded packages.  
 Then bring up the Nuget Package Manager and change the Package Source to "Salmon Repo".  
 Install the salmon packages like you usually do.  
-
+  
 ### C/C++ Visual Studio
-Same as the NuGet process. Download the native Salmon NuGet package. When installed under the packages folder the include and lib folders will contain everything you need.
-
+Same as the NuGet process. Download the native Salmon NuGet package. When installed under the packages folder the include and lib folders will contain everything you need.  
+  
 ### C/C++ Linux
-Download the tar.gz package from [Salmon linux repo](https://github.com/mku11/Repo/tree/main/linux)  
-Extract the packages and link in your makefile.
-See the Samples folder for an example.
+Download the tar.gz package from [Releases](https://github.com/mku11/Salmon-AES-CTR/releases)  
+Extract the packages and link in your makefile.  
+See the Samples folder for an example.  
 
 ### C/C++ MacOS
-Download the dmg package from [Salmon macos repo](https://github.com/mku11/Repo/tree/main/macos)  
-Extract the packages and link to your xcode project.
-See the Samples folder for an example.
-
+Download the dmg package from [Releases](https://github.com/mku11/Salmon-AES-CTR/releases)  
+Extract the packages and link to your xcode project.  
+See the Samples folder for an example.  
+  
 ### Python
-To integrate the Salmon libraries to your Python project:
-Download the python packages from [Salmon python repo](https://github.com/mku11/Repo/tree/main/python)  
-Then run:
-pip install packages/salmon_core.tar.gz
-pip install packages/salmon_fs.tar.gz
+To integrate the Salmon libraries to your Python project:  
+Download the python packages from [Releases](https://github.com/mku11/Salmon-AES-CTR/releases)  
+  
+Then run:  
+pip install packages/salmon_core.tar.gz  
+pip install packages/salmon_fs.tar.gz  
 
 ### Typescript/Javascript
-TBD
+To integrate the Salmon libraries to your javascript/typescript project:  
+Download the packages from [Releases](https://github.com/mku11/Salmon-AES-CTR/releases)  
+  
+Then extract the zip files:  
+salmon-core.js.2.0.0.zip  
+salmon-fs.js.2.0.0.zip  
+  
+or typescript:  
+salmon-core.ts.2.0.0.zip  
+salmon-fs.ts.2.0.0.zip  

@@ -185,7 +185,7 @@ Although there is no drive and stream support for C/C++ you can use the Salmon n
 For a full working C++ sample see: [Samples](https://github.com/mku11/Salmon-AES-CTR/tree/main/samples)
 
 ## Package Management
-To learn how to integrate the Salmon library packages into your project with Maven, Gradle, or VS Studio see [Package Management](https://github.com/mku11/Salmon-AES-CTR/docs/Package_Management.md)  
+To learn how to integrate the Salmon library packages into your project with Maven, Gradle, or VS Studio see [Package Management](https://github.com/mku11/Salmon-AES-CTR/blob/main/docs/Package_Management.md)  
 
 ## Specifications
 Want to know more about Salmon specs and subprojects?  
