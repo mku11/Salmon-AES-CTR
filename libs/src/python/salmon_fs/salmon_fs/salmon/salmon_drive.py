@@ -611,5 +611,16 @@ class SalmonDrive(VirtualDrive, ABC):
         """
         self.__create_config(password)
 
-    def get_sequencer(self):
+    def get_sequencer(self) -> INonceSequencer | None:
+        """
+        Get the sequencer
+        :return: The nonce sequencer
+        """
         return self.__sequencer
+        
+    def get_sequencer(self, sequencer: INonceSequencer | None):
+        """
+        Set the sequencer
+        :param sequencer: The nonce sequencer
+        """
+        self.__sequencer = sequencer

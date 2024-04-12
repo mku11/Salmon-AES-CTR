@@ -652,4 +652,13 @@ public abstract class SalmonDrive extends VirtualDrive {
             throw new Error("Could not find a sequencer");
         return this.sequencer;
     }
+	
+	/**
+     * Set the nonce sequencer used for the current drive.
+     *
+     * @param sequencer The nonce sequencer
+     */
+    public void setSequencer(INonceSequencer sequencer) {
+        this.sequencer = sequencer;
+    }
 }

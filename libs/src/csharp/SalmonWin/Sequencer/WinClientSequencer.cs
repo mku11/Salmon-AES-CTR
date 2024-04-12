@@ -312,9 +312,9 @@ public class WinClientSequencer : INonceSequencer
             writer = XmlWriter.Create(stream, settings);
             writer.WriteStartDocument();
             writer.WriteStartElement("drive");
-            writer.WriteAttributeString("driveId", driveId);
+            writer.WriteAttributeString("driveID", driveId);
             if (authId != null)
-                writer.WriteAttributeString("authId", authId);
+                writer.WriteAttributeString("authID", authId);
             writer.WriteAttributeString("type", type.ToString());
             if (nextNonce != null)
                 writer.WriteAttributeString("nextNonce", Convert.ToBase64String(nextNonce));
@@ -399,8 +399,8 @@ public class WinClientSequencer : INonceSequencer
                 XmlDocument document = new XmlDocument();
                 document.Load(stream);
                 XmlNode drive = document.SelectSingleNode("/drive");
-                request.driveId = drive.Attributes.GetNamedItem("driveId").Value;
-                request.authId = drive.Attributes.GetNamedItem("authId").Value;
+                request.driveId = drive.Attributes.GetNamedItem("driveID").Value;
+                request.authId = drive.Attributes.GetNamedItem("authID").Value;
                 request.status = (ResponseStatus)Enum.Parse(typeof(ResponseStatus), drive.Attributes.GetNamedItem("status").Value);
                 if (drive.Attributes.GetNamedItem("seqStatus") != null)
                     request.seqStatus = (NonceSequence.Status)Enum.Parse(typeof(NonceSequence.Status), drive.Attributes.GetNamedItem("seqStatus").Value);

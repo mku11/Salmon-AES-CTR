@@ -151,8 +151,12 @@ public class SequenceServer
                     break;
                 case RequestType.GetSequence:
                     NonceSequence sequence = sequencer.GetSequence(request.driveID);
-                    response = Response.GenerateResponse(sequence.DriveId, sequence.AuthId,
-                        Response.ResponseStatus.Ok, sequence.SequenceStatus, sequence.NextNonce, sequence.MaxNonce);
+					if(sequence == null) {
+						response = Response.GenerateResponse(request.driveID, null, Response.ResponseStatus.NotFound, 
+							error: "Sequence not found");
+					} else {
+						response = Response.GenerateResponse(sequence.DriveId, sequence.AuthId, Response.ResponseStatus.Ok, sequence.SequenceStatus, sequence.NextNonce, sequence.MaxNonce);
+					}
                     break;
             }
         }

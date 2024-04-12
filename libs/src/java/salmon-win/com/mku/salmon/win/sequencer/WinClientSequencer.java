@@ -216,9 +216,9 @@ public class WinClientSequencer implements INonceSequencer, Closeable {
             out = outputFactory.createXMLStreamWriter(stream, "UTF-8");
             out.writeStartDocument("UTF-8", "1.0");
             out.writeStartElement("drive");
-            out.writeAttribute("driveId", driveId);
+            out.writeAttribute("driveID", driveId);
             if (authId != null)
-                out.writeAttribute("authId", authId);
+                out.writeAttribute("authID", authId);
             out.writeAttribute("type", type.toString());
             if (nextNonce != null)
                 out.writeAttribute("nextNonce", Base64.getEncoder().encodeToString(nextNonce));
@@ -277,8 +277,8 @@ public class WinClientSequencer implements INonceSequencer, Closeable {
                 XPath xPath = XPathFactory.newInstance().newXPath();
                 Node drive = (Node) xPath.compile("/drive").evaluate(xmlDocument, XPathConstants.NODE);
                 if (drive != null) {
-                    response.driveId = drive.getAttributes().getNamedItem("driveId").getNodeValue();
-                    response.authId = drive.getAttributes().getNamedItem("authId").getNodeValue();
+                    response.driveId = drive.getAttributes().getNamedItem("driveID").getNodeValue();
+                    response.authId = drive.getAttributes().getNamedItem("authID").getNodeValue();
                     response.status = ResponseStatus.valueOf(drive.getAttributes().getNamedItem("status").getNodeValue());
                     if (drive.getAttributes().getNamedItem("nextNonce") != null) {
                         response.seqStatus = NonceSequence.Status.valueOf(drive.getAttributes().getNamedItem("seqStatus").getNodeValue());

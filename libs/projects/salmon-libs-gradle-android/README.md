@@ -19,6 +19,9 @@ Either create a file local.properties with the following:
 sdk.dir=C\:\\Path\\To\\Android\\android-sdk
 Or open Android Studio and configured in settings.
 
+If you're in development and the snapshot dependencies have changed make sure you refresh:
+gradlew.bat --refresh-dependencies
+
 To build from the command line run:  
 gradlew.bat build -x test --rerun-tasks    
   
@@ -27,6 +30,3 @@ gradlew.bat assembleRelease -x test --rerun-tasks
   
 To publish the maven aar libs to a local directory:  
 gradlew.bat publish --rerun-tasks  
-
-If you're in development and the snapshot dependencies have changed make sure you refresh:
-gradlew.bat --refresh-dependencies

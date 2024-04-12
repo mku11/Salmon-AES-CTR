@@ -31,7 +31,7 @@ internal class Response
 {
     public enum ResponseStatus
     {
-        Ok, Error
+        Ok, NotFound, Error
     }
 
     public static string GenerateResponse(string driveID, string authID,

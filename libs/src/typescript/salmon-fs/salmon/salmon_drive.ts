@@ -652,11 +652,20 @@ export abstract class SalmonDrive extends VirtualDrive {
     /**
      * Get the nonce sequencer used for the current drive.
      *
-     * @return
+     * @return The nonce sequencer
      */
     public getSequencer(): INonceSequencer {
         if(this.#sequencer == null)
             throw new Error("Could not find a sequencer");
         return this.#sequencer;
+    }
+	
+	/**
+     * Set the nonce sequencer used for the current drive.
+     *
+     * @param The nonce sequencer
+     */
+    public setSequencer(sequencer: INonceSequencer) {
+        this.#sequencer = sequencer;
     }
 }

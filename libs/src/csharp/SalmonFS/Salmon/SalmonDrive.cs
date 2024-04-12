@@ -1,4 +1,3 @@
-
 /*
 MIT License
 
@@ -95,7 +94,7 @@ public abstract class SalmonDrive : VirtualDrive
     /// <summary>
     ///  Set the nonce sequencer used for the current drive.
 	/// </summary>
-    public INonceSequencer Sequencer { get; private set; }
+    public INonceSequencer Sequencer { get; set; }
 
     /// <summary>
     ///  Create a virtual drive at the directory path provided
