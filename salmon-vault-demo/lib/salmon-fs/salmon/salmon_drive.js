@@ -413,12 +413,20 @@ export class SalmonDrive extends VirtualDrive {
     /**
      * Get the nonce sequencer used for the current drive.
      *
-     * @return
+     * @return The nonce sequencer
      */
     getSequencer() {
         if (__classPrivateFieldGet(this, _SalmonDrive_sequencer, "f") == null)
             throw new Error("Could not find a sequencer");
         return __classPrivateFieldGet(this, _SalmonDrive_sequencer, "f");
+    }
+    /**
+     * Set the nonce sequencer used for the current drive.
+     *
+     * @param The nonce sequencer
+     */
+    setSequencer(sequencer) {
+        __classPrivateFieldSet(this, _SalmonDrive_sequencer, sequencer, "f");
     }
 }
 _a = SalmonDrive, _SalmonDrive_defaultFileChunkSize = new WeakMap(), _SalmonDrive_key = new WeakMap(), _SalmonDrive_driveId = new WeakMap(), _SalmonDrive_realRoot = new WeakMap(), _SalmonDrive_virtualRoot = new WeakMap(), _SalmonDrive_hashProvider = new WeakMap(), _SalmonDrive_sequencer = new WeakMap(), _SalmonDrive_instances = new WeakSet(), _SalmonDrive_registerOnProcessClose = function _SalmonDrive_registerOnProcessClose() {
