@@ -198,8 +198,9 @@ For how to compile and build each subproject see README.md in its respective fol
 ## Limitations
 * Salmon streams are seekable only if the backed resource supports random access (disk, memory, network).
 * Salmon API is not Thread Safe! If you want to use parallel processing you need to use SalmonEncryptor/SalmonDecryptor and SalmonFileImporter/SalmonFileExporter.
-* Make sure that you never backup and restore the Nonce Sequencer files in your Windows Device! They are located in each user %LOCALAPPDATA%\\.salmon directory (including the LocalSystem user if you use the Salmon Windows Service). So make sure you exclude them from backups and restores.
-* The Windows user sequencer files are not secure from other apps! Also do not share your device account with other users! Salmon will attempt to notify you if it encounters tampering on the sequencer though for additional security you should use the Salmon Windows Service which protects the sequencer under the LocalSystem space.
+* Importing files to a salmon virtual drive using different devices requires authorization by an already authorized device for each  virtual drive. The device that created the drive is by default authorized. The authorization mechanism protects against repeated access based attacks!
+* Make sure that you never backup and restore the Nonce Sequencer files in your Windows Device! You should always create them under a %LOCALAPPDATA% directory that is not backed up, this will prevent nonce reuse!
+* User Sequencer files are not secure from other apps. For Android you should create them in app space and not on external storage! For Windows Salmon will notify you if it detects file sequencer tampering though it is recommended for additional security that you should use the Salmon Windows Service. The Salmon service protects the sequencer files under the system administrator (LocalSystem) space. For Linux and Mac make sure you keep them in a safe place or implement your own tampering detection!
 * Integrity is not supported for filenames only for file contents.
 * Maximum guaranteed file size: 2^64 bytes or limited by the backed resource (disk, memory, network).
 * Maximum drive file size: 2^64 bytes
