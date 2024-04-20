@@ -29,17 +29,17 @@ For a complete showcase of the Salmon API visit the [Salmon Vault](https://githu
 **Languages**:  
 Java 11+  
 C# .NET 7+  
-Python 3.11+    
-Typescript/Javascript ES2020  
+Python 3.11+  
+Typescript/Javascript ESM/ES2020  
   
 **Platforms/Browsers**:  
 JavaFX 17+  
 Android 23+  
 .NET Android 23+  
 WPF, Xamarin, and MAUI  
-Chrome (Local virtual drives)  
-Chrome, Firefox, Safari (Remote virtual drives read-only)  
-Node.js (experimental esm modules)  
+Chrome, Firefox, Safari (Remote read-only drives)  
+Chrome (Local read-write drives)  
+Node.js (Reamote read-only and Local read-write drives)  
   
 ## AES-NI Intrinsics Support
 
