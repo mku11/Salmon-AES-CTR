@@ -1,4 +1,7 @@
 #!/usr/bin/env python3
+# Make sure you run with -O option to disable type checks during runtime
+# python -O salmon_sample.py
+
 from __future__ import annotations
 
 import os
@@ -237,6 +240,7 @@ def create_sequencer():
     # create a file nonce sequencer and place it in a private space
     # make sure you never edit or back up this file.
     seq_filename: str = "sequencer.xml"
+    # for Linux/Macos use 'HOME'
     private_dir: IRealFile = PyFile(os.environ['LOCALAPPDATA'])
     sequencer_dir: IRealFile = private_dir.get_child("PythonSalmonSequencer")
     if not sequencer_dir.exists():

@@ -6,5 +6,5 @@ Salmon libs:
 pip install salmon_core.tar.gz
 pip install salmon_fs.tar.gz
 
-To execute from the command line:
-python salmon_sample.py
+when running make sure you disable type checks with -O option
+python -O salmon_sample.py
