@@ -259,6 +259,7 @@ export class Sample {
         let privateDir;
 		if (typeof process === 'object') { // node
 			const { JsNodeFile } = await import('../lib/salmon-fs/file/js_node_file.js');
+			// if you use Linux/Macos use process.env.HOME
 			privateDir = new JsNodeFile(process.env.LOCALAPPDATA);
 		} else { // browser
 			privateDir = new JsLocalStorageFile(".");
