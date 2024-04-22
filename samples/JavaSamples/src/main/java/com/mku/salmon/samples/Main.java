@@ -247,6 +247,7 @@ public class Main {
         // create a file nonce sequencer and place it in a private space
         // make sure you never edit or back up this file.
         String seqFilename = "sequencer.xml";
+		// if you use Linux/Macos use 'HOME'
         IRealFile privateDir = new JavaFile(System.getenv("LOCALAPPDATA"));
         IRealFile sequencerDir = privateDir.getChild("SalmonSequencer");
         if (!sequencerDir.exists())
