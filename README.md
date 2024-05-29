@@ -13,10 +13,10 @@ Salmon is an AES-256 encryption library with built-in integrity, parallel operat
 * AES-256 in CTR Mode with HMAC SHA-256 authentication.
 * Password based key derivation with PBKDF2 SHA-256.
 * Fast parallel encryption/decryption operations with seekable stream support.
-* Virtual drive API for creating encrypted drives.
-* Abstract API for integrating with any filesystem, network files, and custom streams.
+* API for creating virtual encrypted drives.
+* Abstract API for extending with other filesystems, network files, and custom streams.
 * Fast native AES-NI intrinsics for Intel x86 and ARM64 written in C.
-* Protected file-based nonce sequencer with encrypted SHA-256 checksum.
+* Protected file-based nonce sequencer with encrypted SHA-256 checksum (Windows only).
 * System protected nonce sequencer with encrypted SHA-256 checksum via an optional Windows Service.
 
 ## Applications
@@ -45,8 +45,9 @@ Node.js (Reamote read-only and Local read-write drives)
 
 **Operating systems (Tested)**  
 Windows 10 x86_64  
-MacOS 10.11  
-Linux Debian 11  
+MacOS x86_64 10.11  
+Linux Debian 11 x86_64
+Linux Debian 12 aarch64
 
 **CPU architectures (Tested)**  
 Intel x86_64  
