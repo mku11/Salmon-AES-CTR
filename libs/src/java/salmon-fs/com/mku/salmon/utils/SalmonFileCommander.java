@@ -32,8 +32,7 @@ import com.mku.salmon.SalmonFile;
 import com.mku.utils.FileCommander;
 import com.mku.utils.FileSearcher;
 
-import java.util.Arrays;
-import java.util.stream.Collectors;
+import java.util.ArrayList;
 
 /**
  * Facade class for file operations.
@@ -59,6 +58,9 @@ public class SalmonFileCommander extends FileCommander {
                                       BiConsumer<IRealFile, Exception> onFailed) throws Exception {
         IVirtualFile[] files = super.importFiles(filesToImport, importDir, deleteSource, integrity, onProgressChanged,
                 autoRename, onFailed);
-        return Arrays.stream(files).map((x) -> (SalmonFile) x).collect(Collectors.toList()).toArray(new SalmonFile[0]);
+		ArrayList<SalmonFile> sfiles = new ArrayList<>();
+		for(IVirtualFile file : files)
+			sfiles.add((SalmonFile) file);
+		return sfiles.toArray(new SalmonFile[0]);
     }
 }

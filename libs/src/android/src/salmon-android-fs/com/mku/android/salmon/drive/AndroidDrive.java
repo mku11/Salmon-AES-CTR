@@ -65,9 +65,9 @@ public class AndroidDrive extends SalmonDrive {
     }
 
     /**
-     * Private constructor, use open() and create() instead.
+     * Protected constructor, use open() and create() instead.
      */
-    private AndroidDrive() {
+    protected AndroidDrive() {
         super();
     }
 

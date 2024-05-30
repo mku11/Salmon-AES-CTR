@@ -25,6 +25,7 @@ SOFTWARE.
 
 import com.mku.convert.BitConverter;
 import com.mku.file.IRealFile;
+import com.mku.file.IVirtualFile;
 import com.mku.file.VirtualDrive;
 import com.mku.streams.RandomAccessStream;
 import com.mku.streams.MemoryStream;
@@ -94,10 +95,14 @@ public abstract class SalmonDrive extends VirtualDrive {
         }
         if (virtualRootRealFile == null)
             throw new Error("Could not create directory for the virtual file system");
-        virtualRoot = new SalmonFile(virtualRootRealFile, this);
+        virtualRoot = getVirtualFile(virtualRootRealFile, this);
         registerOnProcessClose();
         key = new SalmonDriveKey();
     }
+	
+	protected SalmonFile getVirtualFile(IRealFile file, SalmonDrive drive) {
+		return new SalmonFile(file, drive);
+	}
 
     public static String getConfigFilename() {
         return configFilename;
@@ -201,7 +206,7 @@ public abstract class SalmonDrive extends VirtualDrive {
                 ex.printStackTrace();
             }
         }
-        virtualRoot = new SalmonFile(virtualRootRealFile, this);
+        virtualRoot = getVirtualFile(virtualRootRealFile, this);
     }
 
     /**
