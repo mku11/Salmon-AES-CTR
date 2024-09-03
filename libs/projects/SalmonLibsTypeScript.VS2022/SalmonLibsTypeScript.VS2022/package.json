@@ -21,6 +21,7 @@
     "babel-eslint": "^10.1.0",
     "eslint": "^8.55.0",
     "eslint-plugin-import": "^2.29.1",
+    "jsdoc": "^4.0.3",
     "npx": "^10.2.2",
     "tslint-no-circular-imports": "^0.7.0",
     "typescript": "^5.3.3",
