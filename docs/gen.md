@@ -1,13 +1,13 @@
 Java
 Use javadoc from JDK
 ```
-find ../libs/src -type f -name "*.java" | xargs ../output/docs/javadoc -d java --ignore-source-errors
+find ../libs/src -type f -name "*.java" | xargs javadoc -d ../output/docs/java/html --ignore-source-errors
 ```
 
 JavaScript
 Use JSDoc
 ```
-npx jsdoc lib -r -d ..\..\..\..\output\docs\javascript
+npx jsdoc ..\libs\projects\SalmonLibsTypeScript.VS2022\SalmonLibsTypeScript.VS2022\lib -r -d ..\output\docs\javascript\html
 ```
 
 
