@@ -1,0 +1,289 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <title>JSDoc: Source: salmon-fs/file/ireal_file.js</title>
+
+    <script src="scripts/prettify/prettify.js"> </script>
+    <script src="scripts/prettify/lang-css.js"> </script>
+    <!--[if lt IE 9]>
+      <script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script>
+    <![endif]-->
+    <link type="text/css" rel="stylesheet" href="styles/prettify-tomorrow.css">
+    <link type="text/css" rel="stylesheet" href="styles/jsdoc-default.css">
+</head>
+
+<body>
+
+<div id="main">
+
+    <h1 class="page-title">Source: salmon-fs/file/ireal_file.js</h1>
+
+    
+
+
+
+    
+    <section>
+        <article>
+            <pre class="prettyprint source linenums"><code>/*
+MIT License
+
+Copyright (c) 2021 Max Kas
+
+Permission is hereby granted, free of charge, to any person obtaining a copy
+of this software and associated documentation files (the "Software"), to deal
+in the Software without restriction, including without limitation the rights
+to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+copies of the Software, and to permit persons to whom the Software is
+furnished to do so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in all
+copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+SOFTWARE.
+*/
+/**
+ * Copy contents of a file to another file.
+ *
+ * @param src              The source directory
+ * @param dest             The target directory
+ * @param delete           True to delete the source files when complete
+ * @param progressListener The progress listener
+ * @return
+ * @throws IOException Thrown if there is an IO error.
+ */
+export async function copyFileContents(src, dest, deleteAfter, progressListener) {
+    let source = await src.getInputStream();
+    let target = await dest.getOutputStream();
+    try {
+        await source.copyTo(target, 0, progressListener);
+    }
+    catch (ex) {
+        await dest.delete();
+        return false;
+    }
+    finally {
+        await source.close();
+        await target.close();
+    }
+    if (deleteAfter)
+        await src.delete();
+    return true;
+}
+/**
+ * Copy a directory recursively
+ *
+ * @param {IRealFile} src Source directory
+ * @param {IRealFile} destDir Destination directory to copy into.
+ * @param {((realfile: IRealFile, position: number, length: number) => void) | null} progressListener Progress listener
+ * @param {((realfile: IRealFile) => Promise&lt;string>) | null} autoRename Autorename callback (default is none).
+ * @param {boolean} autoRenameFolders Apply autorename to folders also (default is true)
+ * @param {((realfile: IRealFile, ex: Error) => void) | null} onFailed OnFailed callback
+ * @throws IOException Thrown if there is an IO error.
+ */
+export async function copyRecursively(src, destDir, progressListener = null, autoRename = null, autoRenameFolders = true, onFailed = null) {
+    let newFilename = src.getBaseName();
+    let newFile;
+    newFile = await destDir.getChild(newFilename);
+    if (await src.isFile()) {
+        if (newFile != null &amp;&amp; await newFile.exists()) {
+            if (autoRename != null) {
+                newFilename = await autoRename(src);
+            }
+            else {
+                if (onFailed != null)
+                    onFailed(src, new Error("Another file exists"));
+                return;
+            }
+        }
+        await src.copy(destDir, newFilename, (position, length) => {
+            if (progressListener != null) {
+                progressListener(src, position, length);
+            }
+        });
+    }
+    else if (await src.isDirectory()) {
+        if (progressListener != null)
+            progressListener(src, 0, 1);
+        if (destDir.getAbsolutePath().startsWith(src.getAbsolutePath())) {
+            if (progressListener != null)
+                progressListener(src, 1, 1);
+            return;
+        }
+        if (newFile != null &amp;&amp; await newFile.exists() &amp;&amp; autoRename != null &amp;&amp; autoRenameFolders)
+            newFile = await destDir.createDirectory(await autoRename(src));
+        else if (newFile == null || !await newFile.exists())
+            newFile = await destDir.createDirectory(newFilename);
+        if (progressListener != null)
+            progressListener(src, 1, 1);
+        for (let child of await src.listFiles()) {
+            if (newFile == null)
+                throw new Error("Could not get new file");
+            await copyRecursively(child, newFile, progressListener, autoRename, autoRenameFolders, onFailed);
+        }
+    }
+}
+/**
+ * Move a directory recursively
+ *
+ * @param {IRealFile} src Source directory
+ * @param {IRealFile} destDir Destination directory to move into.
+ * @param {((realfile: IRealFile, position: number, length: number) => void) | null} progressListener Progress listener
+ * @param {((realfile: IRealFile) => Promise&lt;string>) | null} autoRename Autorename callback (default is none).
+ * @param {boolean} autoRenameFolders Apply autorename to folders also (default is true)
+ * @param {((realfile: IRealFile, ex: Error) => void) | null} onFailed OnFailed callback
+ */
+export async function moveRecursively(file, destDir, progressListener = null, autoRename = null, autoRenameFolders = true, onFailed = null) {
+    // target directory is the same
+    let parent = await file.getParent();
+    if (parent != null &amp;&amp; parent.getAbsolutePath() == destDir.getAbsolutePath()) {
+        if (progressListener != null) {
+            progressListener(file, 0, 1);
+            progressListener(file, 1, 1);
+        }
+        return;
+    }
+    let newFilename = file.getBaseName();
+    let newFile;
+    newFile = await destDir.getChild(newFilename);
+    if (await file.isFile()) {
+        if (newFile != null &amp;&amp; await newFile.exists()) {
+            if (newFile.getAbsolutePath() == file.getAbsolutePath())
+                return;
+            if (autoRename != null) {
+                newFilename = await autoRename(file);
+            }
+            else {
+                if (onFailed != null)
+                    onFailed(file, new Error("Another file exists"));
+                return;
+            }
+        }
+        await file.move(destDir, newFilename, (position, length) => {
+            if (progressListener != null) {
+                progressListener(file, position, length);
+            }
+        });
+    }
+    else if (await file.isDirectory()) {
+        if (progressListener != null)
+            progressListener(file, 0, 1);
+        if (destDir.getAbsolutePath().startsWith(file.getAbsolutePath())) {
+            if (progressListener != null)
+                progressListener(file, 1, 1);
+            return;
+        }
+        if ((newFile != null &amp;&amp; await newFile.exists() &amp;&amp; autoRename != null &amp;&amp; autoRenameFolders)
+            || newFile == null || !await newFile.exists()) {
+            if (autoRename != null)
+                newFile = await file.move(destDir, await autoRename(file), null);
+            return;
+        }
+        if (progressListener != null)
+            progressListener(file, 1, 1);
+        for (let child of await file.listFiles()) {
+            if (newFile == null)
+                throw new Error("Could not get new file");
+            await moveRecursively(child, newFile, progressListener, autoRename, autoRenameFolders, onFailed);
+        }
+        if (!await file.delete()) {
+            if (onFailed != null)
+                onFailed(file, new Error("Could not delete source directory"));
+            return;
+        }
+    }
+}
+/**
+ * Delete a directory recursively
+ * @param progressListener The progress listener
+ * @param onFailed Callback when delete fails
+ */
+export async function deleteRecursively(file, progressListener, onFailed) {
+    if (await file.isFile()) {
+        progressListener(file, 0, 1);
+        if (!file.delete()) {
+            if (onFailed != null)
+                onFailed(file, new Error("Could not delete file"));
+            return;
+        }
+        progressListener(file, 1, 1);
+    }
+    else if (await file.isDirectory()) {
+        for (let child of await file.listFiles()) {
+            await deleteRecursively(child, progressListener, onFailed);
+        }
+        if (await !file.delete()) {
+            if (onFailed != null)
+                onFailed(file, new Error("Could not delete directory"));
+            return;
+        }
+    }
+}
+/**
+ * Get an auto generated copy of the name for a file.
+ */
+export async function autoRenameFile(file) {
+    return autoRename(file.getBaseName());
+}
+;
+/**
+ * Get an auto generated copy of a filename
+ *
+ * @param filename
+ * @return
+ */
+export function autoRename(filename) {
+    let ext = getExtension(filename);
+    let filenameNoExt;
+    if (ext.length > 0)
+        filenameNoExt = filename.substring(0, filename.length - ext.length - 1);
+    else
+        filenameNoExt = filename;
+    let date = new Date();
+    let newFilename = filenameNoExt + " (" + date.getHours().toString().padStart(2, "0")
+        + date.getHours().toString().padStart(2, "0") + date.getMinutes().toString().padStart(2, "0")
+        + date.getSeconds().toString().padStart(2, "0") + date.getMilliseconds().toString().padStart(3, "0") + ")";
+    if (ext.length > 0)
+        newFilename += "." + ext;
+    return newFilename;
+}
+export function getExtension(fileName) {
+    if (fileName == null)
+        return "";
+    let index = fileName.lastIndexOf(".");
+    if (index >= 0) {
+        return fileName.substring(index + 1);
+    }
+    else
+        return "";
+}
+</code></pre>
+        </article>
+    </section>
+
+
+
+
+</div>
+
+<nav>
+    <h2><a href="index.html">Home</a></h2><h3>Classes</h3><ul><li><a href="Base64.html">Base64</a></li><li><a href="BitConverter.html">BitConverter</a></li><li><a href="CacheBuffer.html">CacheBuffer</a></li><li><a href="FileCommander.html">FileCommander</a></li><li><a href="FileExporter.html">FileExporter</a></li><li><a href="FileImporter.html">FileImporter</a></li><li><a href="FileSearcher.html">FileSearcher</a></li><li><a href="FileTaskProgress.html">FileTaskProgress</a></li><li><a href="FileUtils.html">FileUtils</a></li><li><a href="Handler.html">Handler</a></li><li><a href="HmacSHA256Provider.html">HmacSHA256Provider</a></li><li><a href="IOException.html">IOException</a></li><li><a href="IntegrityException.html">IntegrityException</a></li><li><a href="JsDrive.html">JsDrive</a></li><li><a href="JsFile.html">JsFile</a></li><li><a href="JsFileStream.html">JsFileStream</a></li><li><a href="JsHttpDrive.html">JsHttpDrive</a></li><li><a href="JsHttpFile.html">JsHttpFile</a></li><li><a href="JsHttpFileStream.html">JsHttpFileStream</a></li><li><a href="JsLocalStorageFile.html">JsLocalStorageFile</a></li><li><a href="JsLocalStorageFileStream.html">JsLocalStorageFileStream</a></li><li><a href="JsNodeDrive.html">JsNodeDrive</a></li><li><a href="JsNodeFile.html">JsNodeFile</a></li><li><a href="JsNodeFileStream.html">JsNodeFileStream</a></li><li><a href="MemoryStream.html">MemoryStream</a></li><li><a href="NonceSequence.html">NonceSequence</a></li><li><a href="RandomAccessStream.html">RandomAccessStream</a></li><li><a href="SalmonAES256CTRTransformer.html">SalmonAES256CTRTransformer</a></li><li><a href="SalmonAesIntrTransformer.html">SalmonAesIntrTransformer</a></li><li><a href="SalmonAuthConfig.html">SalmonAuthConfig</a></li><li><a href="SalmonAuthException.html">SalmonAuthException</a></li><li><a href="SalmonDecryptor.html">SalmonDecryptor</a></li><li><a href="SalmonDefaultPbkdfProvider.html">SalmonDefaultPbkdfProvider</a></li><li><a href="SalmonDefaultTransformer.html">SalmonDefaultTransformer</a></li><li><a href="SalmonDrive.html">SalmonDrive</a></li><li><a href="SalmonDriveConfig.html">SalmonDriveConfig</a></li><li><a href="SalmonDriveGenerator.html">SalmonDriveGenerator</a></li><li><a href="SalmonDriveKey.html">SalmonDriveKey</a></li><li><a href="SalmonEncoder.html">SalmonEncoder</a></li><li><a href="SalmonEncryptor.html">SalmonEncryptor</a></li><li><a href="SalmonFile.html">SalmonFile</a></li><li><a href="SalmonFileCommander.html">SalmonFileCommander</a></li><li><a href="SalmonFileExporter.html">SalmonFileExporter</a></li><li><a href="SalmonFileImporter.html">SalmonFileImporter</a></li><li><a href="SalmonFileReadableStream.html">SalmonFileReadableStream</a></li><li><a href="SalmonFileSequencer.html">SalmonFileSequencer</a></li><li><a href="SalmonGenerator.html">SalmonGenerator</a></li><li><a href="SalmonHeader.html">SalmonHeader</a></li><li><a href="SalmonIntegrity.html">SalmonIntegrity</a></li><li><a href="SalmonNativeProxy.html">SalmonNativeProxy</a></li><li><a href="SalmonNativeTransformer.html">SalmonNativeTransformer</a></li><li><a href="SalmonNonce.html">SalmonNonce</a></li><li><a href="SalmonPassword.html">SalmonPassword</a></li><li><a href="SalmonPbkdfFactory.html">SalmonPbkdfFactory</a></li><li><a href="SalmonRangeExceededException.html">SalmonRangeExceededException</a></li><li><a href="SalmonSecurityException.html">SalmonSecurityException</a></li><li><a href="SalmonSequenceSerializer.html">SalmonSequenceSerializer</a></li><li><a href="SalmonStream.html">SalmonStream</a></li><li><a href="SalmonTextDecryptor.html">SalmonTextDecryptor</a></li><li><a href="SalmonTextEncryptor.html">SalmonTextEncryptor</a></li><li><a href="SalmonTransformerFactory.html">SalmonTransformerFactory</a></li><li><a href="SequenceException.html">SequenceException</a></li><li><a href="TinyAesTransformer.html">TinyAesTransformer</a></li></ul><h3>Global</h3><ul><li><a href="global.html#EncryptionMode">EncryptionMode</a></li><li><a href="global.html#EncryptionMode%255Bundefined%255D">EncryptionMode[undefined]</a></li><li><a href="global.html#PBKDF_SHA1">PBKDF_SHA1</a></li><li><a href="global.html#PBKDF_SHA256">PBKDF_SHA256</a></li><li><a href="global.html#PbkdfAlgo">PbkdfAlgo</a></li><li><a href="global.html#PbkdfAlgo%255Bundefined%255D">PbkdfAlgo[undefined]</a></li><li><a href="global.html#PbkdfType">PbkdfType</a></li><li><a href="global.html#PbkdfType%255Bundefined%255D">PbkdfType[undefined]</a></li><li><a href="global.html#ProviderType">ProviderType</a></li><li><a href="global.html#ProviderType%255Bundefined%255D">ProviderType[undefined]</a></li><li><a href="global.html#SearchEvent">SearchEvent</a></li><li><a href="global.html#SearchEvent%255Bundefined%255D">SearchEvent[undefined]</a></li><li><a href="global.html#SeekOrigin">SeekOrigin</a></li><li><a href="global.html#SeekOrigin%255Bundefined%255D">SeekOrigin[undefined]</a></li><li><a href="global.html#Status">Status</a></li><li><a href="global.html#Status%255Bundefined%255D">Status[undefined]</a></li><li><a href="global.html#_FileExporter_DEFAULT_THREADS">_FileExporter_DEFAULT_THREADS</a></li><li><a href="global.html#_FileExporter_enableMultiThread">_FileExporter_enableMultiThread</a></li><li><a href="global.html#_FileImporter_DEFAULT_BUFFER_SIZE">_FileImporter_DEFAULT_BUFFER_SIZE</a></li><li><a href="global.html#_FileImporter_DEFAULT_THREADS">_FileImporter_DEFAULT_THREADS</a></li><li><a href="global.html#_FileImporter_enableMultiThread">_FileImporter_enableMultiThread</a></li><li><a href="global.html#_MemoryStream_INITIAL_CAPACITY">_MemoryStream_INITIAL_CAPACITY</a></li><li><a href="global.html#_SalmonDriveGenerator_iterations">_SalmonDriveGenerator_iterations</a></li><li><a href="global.html#_SalmonEncoder_base64">_SalmonEncoder_base64</a></li><li><a href="global.html#_SalmonGenerator_MAGIC_BYTES">_SalmonGenerator_MAGIC_BYTES</a></li><li><a href="global.html#_SalmonNativeProxy_libraryName">_SalmonNativeProxy_libraryName</a></li><li><a href="global.html#_SalmonPassword_ENABLE_SHA1">_SalmonPassword_ENABLE_SHA1</a></li><li><a href="global.html#_SalmonPassword_pbkdfAlgo">_SalmonPassword_pbkdfAlgo</a></li><li><a href="global.html#_SalmonPassword_provider">_SalmonPassword_provider</a></li><li><a href="global.html#_SalmonStream_providerType">_SalmonStream_providerType</a></li><li><a href="global.html#autoRename">autoRename</a></li><li><a href="global.html#autoRenameFile">autoRenameFile</a></li><li><a href="global.html#copyFileContents">copyFileContents</a></li><li><a href="global.html#copyRecursively">copyRecursively</a></li><li><a href="global.html#decryptData">decryptData</a></li><li><a href="global.html#deleteRecursively">deleteRecursively</a></li><li><a href="global.html#encryptData">encryptData</a></li><li><a href="global.html#exportFilePart">exportFilePart</a></li><li><a href="global.html#fillBufferPart">fillBufferPart</a></li><li><a href="global.html#getPbkdfAlgoString">getPbkdfAlgoString</a></li><li><a href="global.html#importFilePart">importFilePart</a></li><li><a href="global.html#moveRecursively">moveRecursively</a></li></ul>
+</nav>
+
+<br class="clear">
+
+<footer>
+    Documentation generated by <a href="https://github.com/jsdoc/jsdoc">JSDoc 4.0.3</a> on Tue Sep 03 2024 18:12:49 GMT+0300 (Eastern European Summer Time)
+</footer>
+
+<script> prettyPrint(); </script>
+<script src="scripts/linenumber.js"> </script>
+</body>
+</html>

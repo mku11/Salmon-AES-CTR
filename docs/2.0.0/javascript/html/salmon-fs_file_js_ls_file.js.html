@@ -1,0 +1,284 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <title>JSDoc: Source: salmon-fs/file/js_ls_file.js</title>
+
+    <script src="scripts/prettify/prettify.js"> </script>
+    <script src="scripts/prettify/lang-css.js"> </script>
+    <!--[if lt IE 9]>
+      <script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script>
+    <![endif]-->
+    <link type="text/css" rel="stylesheet" href="styles/prettify-tomorrow.css">
+    <link type="text/css" rel="stylesheet" href="styles/jsdoc-default.css">
+</head>
+
+<body>
+
+<div id="main">
+
+    <h1 class="page-title">Source: salmon-fs/file/js_ls_file.js</h1>
+
+    
+
+
+
+    
+    <section>
+        <article>
+            <pre class="prettyprint source linenums"><code>/*
+MIT License
+
+Copyright (c) 2021 Max Kas
+
+Permission is hereby granted, free of charge, to any person obtaining a copy
+of this software and associated documentation files (the "Software"), to deal
+in the Software without restriction, including without limitation the rights
+to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+copies of the Software, and to permit persons to whom the Software is
+furnished to do so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in all
+copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+SOFTWARE.
+*/
+var __classPrivateFieldSet = (this &amp;&amp; this.__classPrivateFieldSet) || function (receiver, state, value, kind, f) {
+    if (kind === "m") throw new TypeError("Private method is not writable");
+    if (kind === "a" &amp;&amp; !f) throw new TypeError("Private accessor was defined without a setter");
+    if (typeof state === "function" ? receiver !== state || !f : !state.has(receiver)) throw new TypeError("Cannot write private member to an object whose class did not declare it");
+    return (kind === "a" ? f.call(receiver, value) : f ? f.value = value : state.set(receiver, value)), value;
+};
+var __classPrivateFieldGet = (this &amp;&amp; this.__classPrivateFieldGet) || function (receiver, state, kind, f) {
+    if (kind === "a" &amp;&amp; !f) throw new TypeError("Private accessor was defined without a getter");
+    if (typeof state === "function" ? receiver !== state || !f : !state.has(receiver)) throw new TypeError("Cannot read private member from an object whose class did not declare it");
+    return kind === "m" ? f : kind === "a" ? f.call(receiver) : f ? f.value : state.get(receiver);
+};
+var _JsLocalStorageFile_filePath;
+import { JsLocalStorageFileStream } from '../streams/js_ls_file_stream.js';
+/**
+ * Salmon localStorage implementation. This can be used to store small files.
+ */
+export class JsLocalStorageFile {
+    /**
+     * Instantiate a real file represented by the filepath provided.
+     * @param path The filepath.
+     */
+    constructor(path) {
+        _JsLocalStorageFile_filePath.set(this, void 0);
+        __classPrivateFieldSet(this, _JsLocalStorageFile_filePath, path, "f");
+    }
+    /**
+     * Create a directory under this directory.
+     * @param dirName The name of the new directory.
+     * @return The newly created directory.
+     */
+    async createDirectory(dirName) {
+        throw new Error("Not supported");
+    }
+    /**
+     * Create a file under this directory.
+     * @param filename The name of the new file.
+     * @return The newly created file.
+     * @throws IOException Thrown if there is an IO error.
+     */
+    async createFile(filename) {
+        let child = new JsLocalStorageFile(__classPrivateFieldGet(this, _JsLocalStorageFile_filePath, "f") + JsLocalStorageFile.separator + filename);
+        return child;
+    }
+    /**
+     * Delete this file or directory.
+     * @return True if deletion is successful.
+     */
+    async delete() {
+        localStorage.removeItem(__classPrivateFieldGet(this, _JsLocalStorageFile_filePath, "f"));
+        return true;
+    }
+    /**
+     * True if file or directory exists.
+     * @return
+     */
+    async exists() {
+        return localStorage.getItem(__classPrivateFieldGet(this, _JsLocalStorageFile_filePath, "f")) != null;
+    }
+    /**
+     * Get the absolute path on the physical disk. For java this is the same as the filepath.
+     * @return The absolute path.
+     */
+    getAbsolutePath() {
+        return __classPrivateFieldGet(this, _JsLocalStorageFile_filePath, "f");
+    }
+    /**
+     * Get the name of this file or directory.
+     * @return The name of this file or directory.
+     */
+    getBaseName() {
+        if (__classPrivateFieldGet(this, _JsLocalStorageFile_filePath, "f") == null)
+            throw new Error("Filepath is not assigned");
+        return __classPrivateFieldGet(this, _JsLocalStorageFile_filePath, "f").split(JsLocalStorageFile.separator).pop();
+    }
+    /**
+     * Get a stream for reading the file.
+     * @return The stream to read from.
+     * @throws FileNotFoundException
+     */
+    async getInputStream() {
+        let fileStream = new JsLocalStorageFileStream(this, "r");
+        return fileStream;
+    }
+    /**
+     * Get a stream for writing to this file.
+     * @return The stream to write to.
+     * @throws FileNotFoundException
+     */
+    async getOutputStream() {
+        let fileStream = new JsLocalStorageFileStream(this, "rw");
+        return fileStream;
+    }
+    /**
+     * Get the parent directory of this file or directory.
+     * @return The parent directory.
+     */
+    async getParent() {
+        let index = __classPrivateFieldGet(this, _JsLocalStorageFile_filePath, "f").lastIndexOf(JsLocalStorageFile.separator);
+        let dirPath = __classPrivateFieldGet(this, _JsLocalStorageFile_filePath, "f").substring(0, index);
+        let dir = new JsLocalStorageFile(dirPath);
+        return dir;
+    }
+    /**
+     * Get the path of this file. For java this is the same as the absolute filepath.
+     * @return
+     */
+    getPath() {
+        return __classPrivateFieldGet(this, _JsLocalStorageFile_filePath, "f");
+    }
+    /**
+     * True if this is a directory.
+     * @return
+     */
+    async isDirectory() {
+        return false;
+    }
+    /**
+     * True if this is a file.
+     * @return
+     */
+    async isFile() {
+        return true;
+    }
+    /**
+     * Get the last modified date on disk.
+     * @return
+     */
+    async lastModified() {
+        throw new Error("Not supported");
+    }
+    /**
+     * Get the size of the file on disk.
+     * @return
+     */
+    async length() {
+        let contents = localStorage.getItem(__classPrivateFieldGet(this, _JsLocalStorageFile_filePath, "f"));
+        if (contents == null)
+            return 0;
+        return btoa(contents).length;
+    }
+    /**
+     * Get the count of files and subdirectories
+     * @return
+     */
+    async getChildrenCount() {
+        throw new Error("Not supported");
+    }
+    /**
+     * List all files under this directory.
+     * @return The list of files.
+     */
+    async listFiles() {
+        throw new Error("Not supported");
+    }
+    /**
+     * Move this file or directory under a new directory.
+     * @param newDir The target directory.
+     * @param newName The new filename
+     * @param progressListener Observer to notify when progress changes.
+     * @return The moved file. Use this file for subsequent operations instead of the original.
+     */
+    async move(newDir, newName = null, progressListener = null) {
+        throw new Error("Not supported");
+    }
+    /**
+     * Move this file or directory under a new directory.
+     * @param newDir    The target directory.
+     * @param newName   New filename
+     * @param progressListener Observer to notify when progress changes.
+     * @return The copied file. Use this file for subsequent operations instead of the original.
+     * @throws IOException Thrown if there is an IO error.
+     */
+    async copy(newDir, newName = null, progressListener = null) {
+        throw new Error("Not supported");
+    }
+    /**
+     * Get the file or directory under this directory with the provided name.
+     * @param filename The name of the file or directory.
+     * @return
+     */
+    async getChild(filename) {
+        let child = new JsLocalStorageFile(__classPrivateFieldGet(this, _JsLocalStorageFile_filePath, "f") + JsLocalStorageFile.separator + filename);
+        return child;
+    }
+    /**
+     * Rename the current file or directory.
+     * @param newFilename The new name for the file or directory.
+     * @return True if successfully renamed.
+     */
+    async renameTo(newFilename) {
+        throw new Error("Not supported");
+    }
+    /**
+     * Create this directory under the current filepath.
+     * @return True if created.
+     */
+    async mkdir() {
+        // no-op
+        return true;
+    }
+    /**
+     * Returns a string representation of this object
+     */
+    toString() {
+        return __classPrivateFieldGet(this, _JsLocalStorageFile_filePath, "f");
+    }
+}
+_JsLocalStorageFile_filePath = new WeakMap();
+JsLocalStorageFile.separator = "/";
+JsLocalStorageFile.SMALL_FILE_MAX_LENGTH = 1 * 1024 * 1024;
+</code></pre>
+        </article>
+    </section>
+
+
+
+
+</div>
+
+<nav>
+    <h2><a href="index.html">Home</a></h2><h3>Classes</h3><ul><li><a href="Base64.html">Base64</a></li><li><a href="BitConverter.html">BitConverter</a></li><li><a href="CacheBuffer.html">CacheBuffer</a></li><li><a href="FileCommander.html">FileCommander</a></li><li><a href="FileExporter.html">FileExporter</a></li><li><a href="FileImporter.html">FileImporter</a></li><li><a href="FileSearcher.html">FileSearcher</a></li><li><a href="FileTaskProgress.html">FileTaskProgress</a></li><li><a href="FileUtils.html">FileUtils</a></li><li><a href="Handler.html">Handler</a></li><li><a href="HmacSHA256Provider.html">HmacSHA256Provider</a></li><li><a href="IOException.html">IOException</a></li><li><a href="IntegrityException.html">IntegrityException</a></li><li><a href="JsDrive.html">JsDrive</a></li><li><a href="JsFile.html">JsFile</a></li><li><a href="JsFileStream.html">JsFileStream</a></li><li><a href="JsHttpDrive.html">JsHttpDrive</a></li><li><a href="JsHttpFile.html">JsHttpFile</a></li><li><a href="JsHttpFileStream.html">JsHttpFileStream</a></li><li><a href="JsLocalStorageFile.html">JsLocalStorageFile</a></li><li><a href="JsLocalStorageFileStream.html">JsLocalStorageFileStream</a></li><li><a href="JsNodeDrive.html">JsNodeDrive</a></li><li><a href="JsNodeFile.html">JsNodeFile</a></li><li><a href="JsNodeFileStream.html">JsNodeFileStream</a></li><li><a href="MemoryStream.html">MemoryStream</a></li><li><a href="NonceSequence.html">NonceSequence</a></li><li><a href="RandomAccessStream.html">RandomAccessStream</a></li><li><a href="SalmonAES256CTRTransformer.html">SalmonAES256CTRTransformer</a></li><li><a href="SalmonAesIntrTransformer.html">SalmonAesIntrTransformer</a></li><li><a href="SalmonAuthConfig.html">SalmonAuthConfig</a></li><li><a href="SalmonAuthException.html">SalmonAuthException</a></li><li><a href="SalmonDecryptor.html">SalmonDecryptor</a></li><li><a href="SalmonDefaultPbkdfProvider.html">SalmonDefaultPbkdfProvider</a></li><li><a href="SalmonDefaultTransformer.html">SalmonDefaultTransformer</a></li><li><a href="SalmonDrive.html">SalmonDrive</a></li><li><a href="SalmonDriveConfig.html">SalmonDriveConfig</a></li><li><a href="SalmonDriveGenerator.html">SalmonDriveGenerator</a></li><li><a href="SalmonDriveKey.html">SalmonDriveKey</a></li><li><a href="SalmonEncoder.html">SalmonEncoder</a></li><li><a href="SalmonEncryptor.html">SalmonEncryptor</a></li><li><a href="SalmonFile.html">SalmonFile</a></li><li><a href="SalmonFileCommander.html">SalmonFileCommander</a></li><li><a href="SalmonFileExporter.html">SalmonFileExporter</a></li><li><a href="SalmonFileImporter.html">SalmonFileImporter</a></li><li><a href="SalmonFileReadableStream.html">SalmonFileReadableStream</a></li><li><a href="SalmonFileSequencer.html">SalmonFileSequencer</a></li><li><a href="SalmonGenerator.html">SalmonGenerator</a></li><li><a href="SalmonHeader.html">SalmonHeader</a></li><li><a href="SalmonIntegrity.html">SalmonIntegrity</a></li><li><a href="SalmonNativeProxy.html">SalmonNativeProxy</a></li><li><a href="SalmonNativeTransformer.html">SalmonNativeTransformer</a></li><li><a href="SalmonNonce.html">SalmonNonce</a></li><li><a href="SalmonPassword.html">SalmonPassword</a></li><li><a href="SalmonPbkdfFactory.html">SalmonPbkdfFactory</a></li><li><a href="SalmonRangeExceededException.html">SalmonRangeExceededException</a></li><li><a href="SalmonSecurityException.html">SalmonSecurityException</a></li><li><a href="SalmonSequenceSerializer.html">SalmonSequenceSerializer</a></li><li><a href="SalmonStream.html">SalmonStream</a></li><li><a href="SalmonTextDecryptor.html">SalmonTextDecryptor</a></li><li><a href="SalmonTextEncryptor.html">SalmonTextEncryptor</a></li><li><a href="SalmonTransformerFactory.html">SalmonTransformerFactory</a></li><li><a href="SequenceException.html">SequenceException</a></li><li><a href="TinyAesTransformer.html">TinyAesTransformer</a></li></ul><h3>Global</h3><ul><li><a href="global.html#EncryptionMode">EncryptionMode</a></li><li><a href="global.html#EncryptionMode%255Bundefined%255D">EncryptionMode[undefined]</a></li><li><a href="global.html#PBKDF_SHA1">PBKDF_SHA1</a></li><li><a href="global.html#PBKDF_SHA256">PBKDF_SHA256</a></li><li><a href="global.html#PbkdfAlgo">PbkdfAlgo</a></li><li><a href="global.html#PbkdfAlgo%255Bundefined%255D">PbkdfAlgo[undefined]</a></li><li><a href="global.html#PbkdfType">PbkdfType</a></li><li><a href="global.html#PbkdfType%255Bundefined%255D">PbkdfType[undefined]</a></li><li><a href="global.html#ProviderType">ProviderType</a></li><li><a href="global.html#ProviderType%255Bundefined%255D">ProviderType[undefined]</a></li><li><a href="global.html#SearchEvent">SearchEvent</a></li><li><a href="global.html#SearchEvent%255Bundefined%255D">SearchEvent[undefined]</a></li><li><a href="global.html#SeekOrigin">SeekOrigin</a></li><li><a href="global.html#SeekOrigin%255Bundefined%255D">SeekOrigin[undefined]</a></li><li><a href="global.html#Status">Status</a></li><li><a href="global.html#Status%255Bundefined%255D">Status[undefined]</a></li><li><a href="global.html#_FileExporter_DEFAULT_THREADS">_FileExporter_DEFAULT_THREADS</a></li><li><a href="global.html#_FileExporter_enableMultiThread">_FileExporter_enableMultiThread</a></li><li><a href="global.html#_FileImporter_DEFAULT_BUFFER_SIZE">_FileImporter_DEFAULT_BUFFER_SIZE</a></li><li><a href="global.html#_FileImporter_DEFAULT_THREADS">_FileImporter_DEFAULT_THREADS</a></li><li><a href="global.html#_FileImporter_enableMultiThread">_FileImporter_enableMultiThread</a></li><li><a href="global.html#_MemoryStream_INITIAL_CAPACITY">_MemoryStream_INITIAL_CAPACITY</a></li><li><a href="global.html#_SalmonDriveGenerator_iterations">_SalmonDriveGenerator_iterations</a></li><li><a href="global.html#_SalmonEncoder_base64">_SalmonEncoder_base64</a></li><li><a href="global.html#_SalmonGenerator_MAGIC_BYTES">_SalmonGenerator_MAGIC_BYTES</a></li><li><a href="global.html#_SalmonNativeProxy_libraryName">_SalmonNativeProxy_libraryName</a></li><li><a href="global.html#_SalmonPassword_ENABLE_SHA1">_SalmonPassword_ENABLE_SHA1</a></li><li><a href="global.html#_SalmonPassword_pbkdfAlgo">_SalmonPassword_pbkdfAlgo</a></li><li><a href="global.html#_SalmonPassword_provider">_SalmonPassword_provider</a></li><li><a href="global.html#_SalmonStream_providerType">_SalmonStream_providerType</a></li><li><a href="global.html#autoRename">autoRename</a></li><li><a href="global.html#autoRenameFile">autoRenameFile</a></li><li><a href="global.html#copyFileContents">copyFileContents</a></li><li><a href="global.html#copyRecursively">copyRecursively</a></li><li><a href="global.html#decryptData">decryptData</a></li><li><a href="global.html#deleteRecursively">deleteRecursively</a></li><li><a href="global.html#encryptData">encryptData</a></li><li><a href="global.html#exportFilePart">exportFilePart</a></li><li><a href="global.html#fillBufferPart">fillBufferPart</a></li><li><a href="global.html#getPbkdfAlgoString">getPbkdfAlgoString</a></li><li><a href="global.html#importFilePart">importFilePart</a></li><li><a href="global.html#moveRecursively">moveRecursively</a></li></ul>
+</nav>
+
+<br class="clear">
+
+<footer>
+    Documentation generated by <a href="https://github.com/jsdoc/jsdoc">JSDoc 4.0.3</a> on Tue Sep 03 2024 18:12:49 GMT+0300 (Eastern European Summer Time)
+</footer>
+
+<script> prettyPrint(); </script>
+<script src="scripts/linenumber.js"> </script>
+</body>
+</html>

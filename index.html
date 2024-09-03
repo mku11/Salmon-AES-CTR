@@ -4,28 +4,141 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <link rel="shortcut icon" href="./favicon.ico">
+    <link rel="shortcut icon" href="/assets/images/favicon.ico">
     <title>Salmon</title>
 	<meta name="description" content="Salmon is an AES-256 CTR encryption library with HMAC SHA-256 integrity, parallel file operations (read/write), and seekable stream support. It provides a high level, low-ceremony, consistent API for encrypting streams and files in Java and C#. Salmon is using a fast native library for Intel x86 and ARM64 that you can include in your C/C++ projects.">
-    <meta name="keywords" content="HTML, CSS, JavaScript">
+    <meta name="keywords" content="Salmon,AES,CTR">
     <link rel="stylesheet" type="text/css" href="assets/css/dark.css">
 </head>
 
 <body>
     <div id="site-container" class="site-container">
 		<div class="app-icon-container">
-			<img src="salmon-vault-demo/common-res/icons/logo.png" class="app-icon"/>
+			<img src="assets/images/logo.png" class="app-icon"/>
 		</div>
 		<div>
-			Salmon is an AES-256 CTR encryption library with HMAC SHA-256 integrity, parallel file operations (read/write), and seekable stream support. It provides a high level, low-ceremony, consistent API for encrypting streams and files in Java and C#. Salmon is using a fast native library for Intel x86 and ARM64 that you can include in your C/C++ projects.
+			Salmon is an AES-256 encryption library with built-in integrity, parallel operations, and seekable stream support. It provides a high level API for encrypting data, streams, and a virtual drive API for encrypting files. Powered by a fast native library for Intel x86_64 and ARM64.  
 		<div>
 		<div class="link-container">
-			<a href="demo.html" class="demo-link">Live Demo</a>
-			<a href="https://raw.githubusercontent.com/mku11/Salmon-AES-CTR/main/LICENSE" target="_blank" class="license-link">MIT License</a>
+			<a href="../githubpage_app/demo.html" class="demo-link">Live Web Demo</a>
+			<a href="https://mku11.github.io/Salmon-Vault/demo" class="demo-link">Salmon Vault</a>
+			<a href="https://github.com/mku11/Salmon-AES-CTR/blob/main/LICENSE" target="_blank" class="license-link">MIT License</a>
 			<a href="https://github.com/mku11/Salmon-AES-CTR" target="_blank" class="project-link">Source Code</a><br>
+			<a href="docs" class="project-link">Documentation</a>
+			<a href="https://github.com/mku11/Salmon-AES-CTR/tree/main/samples" target="_blank" class="project-link">Samples</a><br>
 		</div>
-    </div>   
-	
+	</div>
+	<div class="features-container">
+		<H3>Library Features</H3>
+		<pre>
+AES-256 encryption in CTR Mode  
+HMAC SHA-256 authentication  
+SHA-256 PBKDF2 key derivation    
+AES-NI for Intel x86 and ARM64  
+Data and seekable stream encryption API  
+Virtual file system API  
+Nonce sequencer in app sandbox (Android Only)  
+Nonce sequencer with SHA-256 chksum (Windows Only)  
+Nonce sequencer via windows service (Windows Only)  
+		</pre>
+	</div>
+	<div>
+
+	<div class="why-salmon-container">
+		<H3>So why another encryption library?</H3>
+		<pre>
+Native implementation:  
+Fast native AES-NI intrinsics subroutines using SIMD for x86_64 and ARM64.  
+
+Parallel processing:  
+Fast multithreaded encryption and decryption of data and files.  
+The number of threads can be set in the parameters.
+
+Facade API:  
+Read/Write/Seek through encrypted streams and files via a low ceremony API.  
+
+Data integrity:  
+Samon is using CTR with interleaved HMAC signatures so you don't have to verify the whole content.
+That means it supports random access unlike GCM and it supports authentication unlike XTS. Seekable streams will simply fail when reading a data chunk that is tampered.  
+
+No birthday problem:  
+Salmon is using by default sequential nonces with strict ranges so no random nonces.  
+
+Backups:  
+Nonce sequence ranges reside outside of the virtual drive so you can safely keep raw backups.  
+
+Portability:  
+You can import new files in virtual drives using multiple authorized devices.  
+Move and decrypt files using any supported device.  
+
+Protected nonce sequences:  
+Sequence ranges are stored in app protected space (Android only).  
+Any tampering is detected using an encrypted SHA256 checksum (Win10/11 only).  
+Additional protection from non-admin users (Salmon Windows Service Win10/11 only).  
+
+Platform Support:  
+Salmon is implemented in several programming languages and supports most major platforms and operating systems.  
+
+Extensible API:  
+The implementation is based on abstract components which you can implement and inject easily in your custom solution. This make things easier if you want to support other file systems, or network files and cloud storage. You can also implement your own secure nonce sequencers by implemented the interfaces provided.
+
+
+Languages:  
+Java 11+  
+C# .NET 7+  
+C/C++ (data only, no streams, no fs)  
+Python 3.11+  
+Typescript ESM/ES2020  
+Javascript ESM/ES2020  
+
+  
+Platforms:  
+JavaFX 17+  
+Android 23+  
+.NET Android 23+  
+WPF, Xamarin, and MAUI  
+Chrome, Firefox, Safari (Remote read-only drives)  
+Chrome (Local read-write drives)  
+Node.js (Remote read-only and Local read-write drives)  
+  
+Operating Systems (Tested):  
+Windows 10 x86_64  
+MacOS x86_64 10.11  
+Linux Debian 11 x86_64  
+Linux Debian 12 aarch64  
+
+CPU architectures (Tested):  
+Intel x86_64  
+ARM64  
+		</pre>
+	</div>
+
+	<div class="security-limitations-container">
+		<H3>Security Limitations</H3>
+		<pre>
+- User sequencer files are not secure from other apps by default.  
+For Android: you must create sequencer files in protected app space and not on external storage! Android apps work on sandbox environments though this is true only if you have **NOT ROOTED** your devices.  
+For Windows: you can create sequencer files preferably within %LOCALAPPDATA% folder. Windows will notify you if it detects tampering though it is recommended for additional security you use the Salmon Windows Service. The Salmon windows service is a better solution because it protects the sequencer files under a system administrator (LocalSystem) account.  
+For Linux and Mac: make sure you keep the sequencer files in a safe place since salmon has no anti-tampering support for these OSes. What you can do is implement a secure nonce service or your own tampering detection! You can do that by extending SalmonFileSequencer class, for an example see WinFileSequencer.  
+- Importing files to a salmon virtual drive using different devices requires authorization by an already authorized device for each  virtual drive. The device that created the drive is by default authorized. The authorization mechanism works by assigning new nonce ranges for each authorized device which prevents nonce reuse.
+- Make sure that you never backup and restore the nonce sequencer files! You should always create them under a directory that is not backed up, this will prevent nonce reuse!  
+- Data integrity is not supported for filenames only for file contents.    
+		</pre>
+	</div>
+
+	<div class="functional-limitations-container">
+		<H3>Functional Limitations</H3>
+		<pre>
+- Salmon streams are seekable only if the backed resource supports random access (disk, memory, network).  
+- Salmon API is not Thread Safe! If you want to use parallel processing you need to use SalmonEncryptor/SalmonDecryptor and SalmonFileImporter/SalmonFileExporter.  
+- Maximum guaranteed file size: 2^64 bytes or limited by the backed resource (disk, memory, network).  
+- Maximum drive file size: 2^64 bytes  
+- Maximum number of drive files: 2^62 (64 bit nonces used for the filename and the file contents.  
+- Python parallel processing (multiple cpus) in Windows is slow due to python being single-threaded.  
+- Javascript service worker handler does not support parallel processing.  
+- Javascript implementation is ESM so in order to work in Node.js you need to use --experimental-vm-modules  
+		</pre>
+	</div>
 </body>
 
 </html>

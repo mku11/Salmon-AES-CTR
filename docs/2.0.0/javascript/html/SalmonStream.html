@@ -1,0 +1,4604 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <title>JSDoc: Class: SalmonStream</title>
+
+    <script src="scripts/prettify/prettify.js"> </script>
+    <script src="scripts/prettify/lang-css.js"> </script>
+    <!--[if lt IE 9]>
+      <script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script>
+    <![endif]-->
+    <link type="text/css" rel="stylesheet" href="styles/prettify-tomorrow.css">
+    <link type="text/css" rel="stylesheet" href="styles/jsdoc-default.css">
+</head>
+
+<body>
+
+<div id="main">
+
+    <h1 class="page-title">Class: SalmonStream</h1>
+
+    
+
+
+
+
+<section>
+
+<header>
+    
+        <h2><span class="attribs"><span class="type-signature"></span></span>SalmonStream<span class="signature">(key, nonce, encryptionMode, baseStream, headerData, integrity, chunkSize, hashKey)</span><span class="type-signature"></span></h2>
+        
+            <div class="class-description">Stream decorator provides AES256 encryption and decryption of stream.
+Block data integrity is also supported.</div>
+        
+    
+</header>
+
+<article>
+    <div class="container-overview">
+    
+        
+
+    
+    <h2>Constructor</h2>
+    
+
+    
+    <h4 class="name" id="SalmonStream"><span class="type-signature"></span>new SalmonStream<span class="signature">(key, nonce, encryptionMode, baseStream, headerData, integrity, chunkSize, hashKey)</span><span class="type-signature"></span></h4>
+    
+
+    
+
+
+
+<div class="description">
+    Instantiate a new Salmon stream with a base stream and optional header data and hash integrity.
+If you read from the stream it will decrypt the data from the baseStream.
+If you write to the stream it will encrypt the data from the baseStream.
+The transformation is based on AES CTR Mode.
+Notes:
+The initial value of the counter is a result of the concatenation of an 12 byte nonce and an additional 4 bytes counter.
+The counter is then: incremented every block, encrypted by the key, and xored with the plain text.
+</div>
+
+
+
+
+
+
+
+
+
+    <h5>Parameters:</h5>
+    
+
+<table class="params">
+    <thead>
+    <tr>
+        
+        <th>Name</th>
+        
+
+        <th>Type</th>
+
+        
+
+        
+        <th>Default</th>
+        
+
+        <th class="last">Description</th>
+    </tr>
+    </thead>
+
+    <tbody>
+    
+
+        <tr>
+            
+                <td class="name"><code>key</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">Uint8Array</span>
+
+
+            
+            </td>
+
+            
+
+            
+                <td class="default">
+                
+                </td>
+            
+
+            <td class="description last">The AES key that is used to encrypt decrypt</td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>nonce</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">Uint8Array</span>
+
+
+            
+            </td>
+
+            
+
+            
+                <td class="default">
+                
+                </td>
+            
+
+            <td class="description last">The nonce used for the initial counter</td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>encryptionMode</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type"><a href="global.html#EncryptionMode">EncryptionMode</a></span>
+
+
+            
+            </td>
+
+            
+
+            
+                <td class="default">
+                
+                </td>
+            
+
+            <td class="description last">Encryption mode Encrypt or Decrypt this cannot change later</td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>baseStream</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type"><a href="RandomAccessStream.html">RandomAccessStream</a></span>
+
+
+            
+            </td>
+
+            
+
+            
+                <td class="default">
+                
+                </td>
+            
+
+            <td class="description last">The base Stream that will be used to read the data</td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>headerData</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">Uint8Array</span>
+|
+
+<span class="param-type">null</span>
+
+
+            
+            </td>
+
+            
+
+            
+                <td class="default">
+                
+                    null
+                
+                </td>
+            
+
+            <td class="description last">The data to store in the header when encrypting.</td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>integrity</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">boolean</span>
+
+
+            
+            </td>
+
+            
+
+            
+                <td class="default">
+                
+                    false
+                
+                </td>
+            
+
+            <td class="description last">enable integrity</td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>chunkSize</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">number</span>
+|
+
+<span class="param-type">null</span>
+
+
+            
+            </td>
+
+            
+
+            
+                <td class="default">
+                
+                    null
+                
+                </td>
+            
+
+            <td class="description last">the chunk size to be used with integrity</td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>hashKey</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">Uint8Array</span>
+|
+
+<span class="param-type">null</span>
+
+
+            
+            </td>
+
+            
+
+            
+                <td class="default">
+                
+                    null
+                
+                </td>
+            
+
+            <td class="description last">Hash key to be used with integrity</td>
+        </tr>
+
+    
+    </tbody>
+</table>
+
+
+
+
+
+
+<dl class="details">
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+    <dt class="tag-source">Source:</dt>
+    <dd class="tag-source"><ul class="dummy"><li>
+        <a href="salmon-core_salmon_streams_salmon_stream.js.html">salmon-core/salmon/streams/salmon_stream.js</a>, <a href="salmon-core_salmon_streams_salmon_stream.js.html#line52">line 52</a>
+    </li></ul></dd>
+    
+
+    
+
+    
+    <dt class="tag-see">See:</dt>
+    <dd class="tag-see">
+        <ul>
+            <li><a href="https://en.wikipedia.org/wiki/Block_cipher_mode_of_operation#Counter_(CTR)">Salmon README.md</a></li>
+        </ul>
+    </dd>
+    
+
+    
+</dl>
+
+
+
+
+
+
+
+
+
+
+
+
+
+<h5>Throws:</h5>
+<ul>
+        <li>
+
+    <div class="param-desc">
+    
+        IOException Thrown if there is an IO error.
+    
+    </div>
+
+</li>
+    
+        <li>
+
+    <div class="param-desc">
+    
+        SalmonSecurityException Thrown when error with security
+    
+    </div>
+
+</li>
+    
+        <li>
+
+    <div class="param-desc">
+    
+        IntegrityException Thrown if the data are corrupt or tampered with.
+    
+    </div>
+
+</li>
+    </ul>
+
+
+
+
+
+
+
+    
+    </div>
+
+    
+
+    
+
+    
+        <h3 class="subsection-title">Classes</h3>
+
+        <dl>
+            <dt><a href="SalmonStream.html">SalmonStream</a></dt>
+            <dd></dd>
+        </dl>
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+        <h3 class="subsection-title">Methods</h3>
+
+        
+            
+
+    
+
+    
+    <h4 class="name" id="actualLength"><span class="type-signature">(async) </span>actualLength<span class="signature">()</span><span class="type-signature"> &rarr; {Promise.&lt;number>}</span></h4>
+    
+
+    
+
+
+
+<div class="description">
+    Provides the total length of the base stream including header and integrity data if available.
+</div>
+
+
+
+
+
+
+
+
+
+
+
+
+
+<dl class="details">
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+    <dt class="tag-source">Source:</dt>
+    <dd class="tag-source"><ul class="dummy"><li>
+        <a href="salmon-core_salmon_streams_salmon_stream.js.html">salmon-core/salmon/streams/salmon_stream.js</a>, <a href="salmon-core_salmon_streams_salmon_stream.js.html#line178">line 178</a>
+    </li></ul></dd>
+    
+
+    
+
+    
+
+    
+</dl>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<h5>Returns:</h5>
+
+        
+<div class="param-desc">
+    The actual length of the base stream.
+</div>
+
+
+
+<dl>
+    <dt>
+        Type
+    </dt>
+    <dd>
+        
+<span class="param-type">Promise.&lt;number></span>
+
+
+    </dd>
+</dl>
+
+    
+
+
+
+
+
+        
+            
+
+    
+
+    
+    <h4 class="name" id="canRead"><span class="type-signature">(async) </span>canRead<span class="signature">()</span><span class="type-signature"> &rarr; {Promise.&lt;boolean>}</span></h4>
+    
+
+    
+
+
+
+<div class="description">
+    If the stream is readable (only if EncryptionMode == Decrypted)
+</div>
+
+
+
+
+
+
+
+
+
+
+
+
+
+<dl class="details">
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+    <dt class="tag-source">Source:</dt>
+    <dd class="tag-source"><ul class="dummy"><li>
+        <a href="salmon-core_salmon_streams_salmon_stream.js.html">salmon-core/salmon/streams/salmon_stream.js</a>, <a href="salmon-core_salmon_streams_salmon_stream.js.html#line224">line 224</a>
+    </li></ul></dd>
+    
+
+    
+
+    
+
+    
+</dl>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<h5>Returns:</h5>
+
+        
+<div class="param-desc">
+    True if mode is decryption.
+</div>
+
+
+
+<dl>
+    <dt>
+        Type
+    </dt>
+    <dd>
+        
+<span class="param-type">Promise.&lt;boolean></span>
+
+
+    </dd>
+</dl>
+
+    
+
+
+
+
+
+        
+            
+
+    
+
+    
+    <h4 class="name" id="canSeek"><span class="type-signature">(async) </span>canSeek<span class="signature">()</span><span class="type-signature"> &rarr; {Promise.&lt;boolean>}</span></h4>
+    
+
+    
+
+
+
+<div class="description">
+    If the stream is seekable (supported only if base stream is seekable).
+</div>
+
+
+
+
+
+
+
+
+
+
+
+
+
+<dl class="details">
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+    <dt class="tag-source">Source:</dt>
+    <dd class="tag-source"><ul class="dummy"><li>
+        <a href="salmon-core_salmon_streams_salmon_stream.js.html">salmon-core/salmon/streams/salmon_stream.js</a>, <a href="salmon-core_salmon_streams_salmon_stream.js.html#line232">line 232</a>
+    </li></ul></dd>
+    
+
+    
+
+    
+
+    
+</dl>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<h5>Returns:</h5>
+
+        
+<div class="param-desc">
+    True if stream is seekable.
+</div>
+
+
+
+<dl>
+    <dt>
+        Type
+    </dt>
+    <dd>
+        
+<span class="param-type">Promise.&lt;boolean></span>
+
+
+    </dd>
+</dl>
+
+    
+
+
+
+
+
+        
+            
+
+    
+
+    
+    <h4 class="name" id="canWrite"><span class="type-signature">(async) </span>canWrite<span class="signature">()</span><span class="type-signature"> &rarr; {Promise.&lt;boolean>}</span></h4>
+    
+
+    
+
+
+
+<div class="description">
+    If the stream is writeable (only if EncryptionMode is Encrypt)
+</div>
+
+
+
+
+
+
+
+
+
+
+
+
+
+<dl class="details">
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+    <dt class="tag-source">Source:</dt>
+    <dd class="tag-source"><ul class="dummy"><li>
+        <a href="salmon-core_salmon_streams_salmon_stream.js.html">salmon-core/salmon/streams/salmon_stream.js</a>, <a href="salmon-core_salmon_streams_salmon_stream.js.html#line240">line 240</a>
+    </li></ul></dd>
+    
+
+    
+
+    
+
+    
+</dl>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<h5>Returns:</h5>
+
+        
+<div class="param-desc">
+    True if mode is decryption.
+</div>
+
+
+
+<dl>
+    <dt>
+        Type
+    </dt>
+    <dd>
+        
+<span class="param-type">Promise.&lt;boolean></span>
+
+
+    </dd>
+</dl>
+
+    
+
+
+
+
+
+        
+            
+
+    
+
+    
+    <h4 class="name" id="close"><span class="type-signature">(async) </span>close<span class="signature">()</span><span class="type-signature"></span></h4>
+    
+
+    
+
+
+
+<div class="description">
+    Closes the stream and all resources associated with it (including the base stream).
+</div>
+
+
+
+
+
+
+
+
+
+
+
+
+
+<dl class="details">
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+    <dt class="tag-source">Source:</dt>
+    <dd class="tag-source"><ul class="dummy"><li>
+        <a href="salmon-core_salmon_streams_salmon_stream.js.html">salmon-core/salmon/streams/salmon_stream.js</a>, <a href="salmon-core_salmon_streams_salmon_stream.js.html#line291">line 291</a>
+    </li></ul></dd>
+    
+
+    
+
+    
+
+    
+</dl>
+
+
+
+
+
+
+
+
+
+
+
+
+
+<h5>Throws:</h5>
+
+        
+
+    <div class="param-desc">
+    
+        IOException Thrown if there is an IO error.
+    
+    </div>
+
+
+    
+
+
+
+
+
+
+
+        
+            
+
+    
+
+    
+    <h4 class="name" id="flush"><span class="type-signature">(async) </span>flush<span class="signature">()</span><span class="type-signature"></span></h4>
+    
+
+    
+
+
+
+<div class="description">
+    Flushes any buffered data to the base stream.
+</div>
+
+
+
+
+
+
+
+
+
+
+
+
+
+<dl class="details">
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+    <dt class="tag-source">Source:</dt>
+    <dd class="tag-source"><ul class="dummy"><li>
+        <a href="salmon-core_salmon_streams_salmon_stream.js.html">salmon-core/salmon/streams/salmon_stream.js</a>, <a href="salmon-core_salmon_streams_salmon_stream.js.html#line281">line 281</a>
+    </li></ul></dd>
+    
+
+    
+
+    
+
+    
+</dl>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+        
+            
+
+    
+
+    
+    <h4 class="name" id="getBlock"><span class="type-signature">(async) </span>getBlock<span class="signature">()</span><span class="type-signature"> &rarr; {Promise.&lt;number>}</span></h4>
+    
+
+    
+
+
+
+<div class="description">
+    Returns the current Block value
+</div>
+
+
+
+
+
+
+
+
+
+
+
+
+
+<dl class="details">
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+    <dt class="tag-source">Source:</dt>
+    <dd class="tag-source"><ul class="dummy"><li>
+        <a href="salmon-core_salmon_streams_salmon_stream.js.html">salmon-core/salmon/streams/salmon_stream.js</a>, <a href="salmon-core_salmon_streams_salmon_stream.js.html#line310">line 310</a>
+    </li></ul></dd>
+    
+
+    
+
+    
+
+    
+</dl>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<h5>Returns:</h5>
+
+        
+<div class="param-desc">
+    The current block value.
+</div>
+
+
+
+<dl>
+    <dt>
+        Type
+    </dt>
+    <dd>
+        
+<span class="param-type">Promise.&lt;number></span>
+
+
+    </dd>
+</dl>
+
+    
+
+
+
+
+
+        
+            
+
+    
+
+    
+    <h4 class="name" id="getBufferSize"><span class="type-signature"></span>getBufferSize<span class="signature">()</span><span class="type-signature"> &rarr; {number}</span></h4>
+    
+
+    
+
+
+
+<div class="description">
+    Get the internal buffer size.
+</div>
+
+
+
+
+
+
+
+
+
+
+
+
+
+<dl class="details">
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+    <dt class="tag-source">Source:</dt>
+    <dd class="tag-source"><ul class="dummy"><li>
+        <a href="salmon-core_salmon_streams_salmon_stream.js.html">salmon-core/salmon/streams/salmon_stream.js</a>, <a href="salmon-core_salmon_streams_salmon_stream.js.html#line486">line 486</a>
+    </li></ul></dd>
+    
+
+    
+
+    
+
+    
+</dl>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<h5>Returns:</h5>
+
+        
+<div class="param-desc">
+    The buffer size.
+</div>
+
+
+
+<dl>
+    <dt>
+        Type
+    </dt>
+    <dd>
+        
+<span class="param-type">number</span>
+
+
+    </dd>
+</dl>
+
+    
+
+
+
+
+
+        
+            
+
+    
+
+    
+    <h4 class="name" id="getChunkSize"><span class="type-signature"></span>getChunkSize<span class="signature">()</span><span class="type-signature"> &rarr; {number}</span></h4>
+    
+
+    
+
+
+
+<div class="description">
+    Returns the chunk size used to apply hash signature
+</div>
+
+
+
+
+
+
+
+
+
+
+
+
+
+<dl class="details">
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+    <dt class="tag-source">Source:</dt>
+    <dd class="tag-source"><ul class="dummy"><li>
+        <a href="salmon-core_salmon_streams_salmon_stream.js.html">salmon-core/salmon/streams/salmon_stream.js</a>, <a href="salmon-core_salmon_streams_salmon_stream.js.html#line347">line 347</a>
+    </li></ul></dd>
+    
+
+    
+
+    
+
+    
+</dl>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<h5>Returns:</h5>
+
+        
+<div class="param-desc">
+    The chunk size
+</div>
+
+
+
+<dl>
+    <dt>
+        Type
+    </dt>
+    <dd>
+        
+<span class="param-type">number</span>
+
+
+    </dd>
+</dl>
+
+    
+
+
+
+
+
+        
+            
+
+    
+
+    
+    <h4 class="name" id="getCounter"><span class="type-signature">(async) </span>getCounter<span class="signature">()</span><span class="type-signature"> &rarr; {Promise.&lt;Uint8Array>}</span></h4>
+    
+
+    
+
+
+
+<div class="description">
+    Returns the current Counter value.
+</div>
+
+
+
+
+
+
+
+
+
+
+
+
+
+<dl class="details">
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+    <dt class="tag-source">Source:</dt>
+    <dd class="tag-source"><ul class="dummy"><li>
+        <a href="salmon-core_salmon_streams_salmon_stream.js.html">salmon-core/salmon/streams/salmon_stream.js</a>, <a href="salmon-core_salmon_streams_salmon_stream.js.html#line299">line 299</a>
+    </li></ul></dd>
+    
+
+    
+
+    
+
+    
+</dl>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<h5>Returns:</h5>
+
+        
+<div class="param-desc">
+    The current Counter value.
+</div>
+
+
+
+<dl>
+    <dt>
+        Type
+    </dt>
+    <dd>
+        
+<span class="param-type">Promise.&lt;Uint8Array></span>
+
+
+    </dd>
+</dl>
+
+    
+
+
+
+
+
+        
+            
+
+    
+
+    
+    <h4 class="name" id="getEncryptionMode"><span class="type-signature"></span>getEncryptionMode<span class="signature">()</span><span class="type-signature"> &rarr; {<a href="global.html#EncryptionMode">EncryptionMode</a>}</span></h4>
+    
+
+    
+
+
+
+<div class="description">
+    Get the encryption mode.
+</div>
+
+
+
+
+
+
+
+
+
+
+
+
+
+<dl class="details">
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+    <dt class="tag-source">Source:</dt>
+    <dd class="tag-source"><ul class="dummy"><li>
+        <a href="salmon-core_salmon_streams_salmon_stream.js.html">salmon-core/salmon/streams/salmon_stream.js</a>, <a href="salmon-core_salmon_streams_salmon_stream.js.html#line463">line 463</a>
+    </li></ul></dd>
+    
+
+    
+
+    
+
+    
+</dl>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<h5>Returns:</h5>
+
+        
+<div class="param-desc">
+    The encryption mode.
+</div>
+
+
+
+<dl>
+    <dt>
+        Type
+    </dt>
+    <dd>
+        
+<span class="param-type"><a href="global.html#EncryptionMode">EncryptionMode</a></span>
+
+
+    </dd>
+</dl>
+
+    
+
+
+
+
+
+        
+            
+
+    
+
+    
+    <h4 class="name" id="getHashKey"><span class="type-signature"></span>getHashKey<span class="signature">()</span><span class="type-signature"> &rarr; {Uint8Array}</span></h4>
+    
+
+    
+
+
+
+<div class="description">
+    Returns a copy of the hash key.
+</div>
+
+
+
+
+
+
+
+
+
+
+
+
+
+<dl class="details">
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+    <dt class="tag-source">Source:</dt>
+    <dd class="tag-source"><ul class="dummy"><li>
+        <a href="salmon-core_salmon_streams_salmon_stream.js.html">salmon-core/salmon/streams/salmon_stream.js</a>, <a href="salmon-core_salmon_streams_salmon_stream.js.html#line329">line 329</a>
+    </li></ul></dd>
+    
+
+    
+
+    
+
+    
+</dl>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<h5>Returns:</h5>
+
+        
+<div class="param-desc">
+    A copy of the hash key
+</div>
+
+
+
+<dl>
+    <dt>
+        Type
+    </dt>
+    <dd>
+        
+<span class="param-type">Uint8Array</span>
+
+
+    </dd>
+</dl>
+
+    
+
+
+
+
+
+        
+            
+
+    
+
+    
+    <h4 class="name" id="getKey"><span class="type-signature">(async) </span>getKey<span class="signature">()</span><span class="type-signature"> &rarr; {Promise.&lt;Uint8Array>}</span></h4>
+    
+
+    
+
+
+
+<div class="description">
+    Returns a copy of the encryption key.
+</div>
+
+
+
+
+
+
+
+
+
+
+
+
+
+<dl class="details">
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+    <dt class="tag-source">Source:</dt>
+    <dd class="tag-source"><ul class="dummy"><li>
+        <a href="salmon-core_salmon_streams_salmon_stream.js.html">salmon-core/salmon/streams/salmon_stream.js</a>, <a href="salmon-core_salmon_streams_salmon_stream.js.html#line318">line 318</a>
+    </li></ul></dd>
+    
+
+    
+
+    
+
+    
+</dl>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<h5>Returns:</h5>
+
+        
+<div class="param-desc">
+    A copy of the key.
+</div>
+
+
+
+<dl>
+    <dt>
+        Type
+    </dt>
+    <dd>
+        
+<span class="param-type">Promise.&lt;Uint8Array></span>
+
+
+    </dd>
+</dl>
+
+    
+
+
+
+
+
+        
+            
+
+    
+
+    
+    <h4 class="name" id="getNonce"><span class="type-signature">(async) </span>getNonce<span class="signature">()</span><span class="type-signature"> &rarr; {Promise.&lt;Uint8Array>}</span></h4>
+    
+
+    
+
+
+
+<div class="description">
+    Returns a copy of the initial vector.
+</div>
+
+
+
+
+
+
+
+
+
+
+
+
+
+<dl class="details">
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+    <dt class="tag-source">Source:</dt>
+    <dd class="tag-source"><ul class="dummy"><li>
+        <a href="salmon-core_salmon_streams_salmon_stream.js.html">salmon-core/salmon/streams/salmon_stream.js</a>, <a href="salmon-core_salmon_streams_salmon_stream.js.html#line336">line 336</a>
+    </li></ul></dd>
+    
+
+    
+
+    
+
+    
+</dl>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<h5>Returns:</h5>
+
+        
+<div class="param-desc">
+    A copy of the initial vector
+</div>
+
+
+
+<dl>
+    <dt>
+        Type
+    </dt>
+    <dd>
+        
+<span class="param-type">Promise.&lt;Uint8Array></span>
+
+
+    </dd>
+</dl>
+
+    
+
+
+
+
+
+        
+            
+
+    
+
+    
+    <h4 class="name" id="getPosition"><span class="type-signature">(async) </span>getPosition<span class="signature">()</span><span class="type-signature"> &rarr; {Promise.&lt;number>}</span></h4>
+    
+
+    
+
+
+
+<div class="description">
+    Provides the position of the stream relative to the data to be transformed.
+</div>
+
+
+
+
+
+
+
+
+
+
+
+
+
+<dl class="details">
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+    <dt class="tag-source">Source:</dt>
+    <dd class="tag-source"><ul class="dummy"><li>
+        <a href="salmon-core_salmon_streams_salmon_stream.js.html">salmon-core/salmon/streams/salmon_stream.js</a>, <a href="salmon-core_salmon_streams_salmon_stream.js.html#line193">line 193</a>
+    </li></ul></dd>
+    
+
+    
+
+    
+
+    
+</dl>
+
+
+
+
+
+
+
+
+
+
+
+
+
+<h5>Throws:</h5>
+
+        
+
+    <div class="param-desc">
+    
+        IOException Thrown if there is an IO error.
+    
+    </div>
+
+
+    
+
+
+<h5>Returns:</h5>
+
+        
+<div class="param-desc">
+    The current position of the stream.
+</div>
+
+
+
+<dl>
+    <dt>
+        Type
+    </dt>
+    <dd>
+        
+<span class="param-type">Promise.&lt;number></span>
+
+
+    </dd>
+</dl>
+
+    
+
+
+
+
+
+        
+            
+
+    
+
+    
+    <h4 class="name" id="getTransformer"><span class="type-signature"></span>getTransformer<span class="signature">()</span><span class="type-signature"> &rarr; {ISalmonCTRTransformer}</span></h4>
+    
+
+    
+
+
+
+<div class="description">
+    Get the current transformer for this stream.
+</div>
+
+
+
+
+
+
+
+
+
+
+
+
+
+<dl class="details">
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+    <dt class="tag-source">Source:</dt>
+    <dd class="tag-source"><ul class="dummy"><li>
+        <a href="salmon-core_salmon_streams_salmon_stream.js.html">salmon-core/salmon/streams/salmon_stream.js</a>, <a href="salmon-core_salmon_streams_salmon_stream.js.html#line479">line 479</a>
+    </li></ul></dd>
+    
+
+    
+
+    
+
+    
+</dl>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<h5>Returns:</h5>
+
+        
+
+
+<dl>
+    <dt>
+        Type
+    </dt>
+    <dd>
+        
+<span class="param-type">ISalmonCTRTransformer</span>
+
+
+    </dd>
+</dl>
+
+    
+
+
+
+
+
+        
+            
+
+    
+
+    
+    <h4 class="name" id="hasIntegrity"><span class="type-signature"></span>hasIntegrity<span class="signature">()</span><span class="type-signature"> &rarr; {boolean}</span></h4>
+    
+
+    
+
+
+
+<div class="description">
+    If the stream has integrity enabled
+</div>
+
+
+
+
+
+
+
+
+
+
+
+
+
+<dl class="details">
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+    <dt class="tag-source">Source:</dt>
+    <dd class="tag-source"><ul class="dummy"><li>
+        <a href="salmon-core_salmon_streams_salmon_stream.js.html">salmon-core/salmon/streams/salmon_stream.js</a>, <a href="salmon-core_salmon_streams_salmon_stream.js.html#line247">line 247</a>
+    </li></ul></dd>
+    
+
+    
+
+    
+
+    
+</dl>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<h5>Returns:</h5>
+
+        
+
+
+<dl>
+    <dt>
+        Type
+    </dt>
+    <dd>
+        
+<span class="param-type">boolean</span>
+
+
+    </dd>
+</dl>
+
+    
+
+
+
+
+
+        
+            
+
+    
+
+    
+    <h4 class="name" id="isAllowRangeWrite"><span class="type-signature"></span>isAllowRangeWrite<span class="signature">()</span><span class="type-signature"> &rarr; {boolean}</span></h4>
+    
+
+    
+
+
+
+<div class="description">
+    Get the allowed range write option. This can check if you can use random access write.
+This is generally not a good option since it prevents reusing the same nonce/counter.
+</div>
+
+
+
+
+
+
+
+
+
+
+
+
+
+<dl class="details">
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+    <dt class="tag-source">Source:</dt>
+    <dd class="tag-source"><ul class="dummy"><li>
+        <a href="salmon-core_salmon_streams_salmon_stream.js.html">salmon-core/salmon/streams/salmon_stream.js</a>, <a href="salmon-core_salmon_streams_salmon_stream.js.html#line472">line 472</a>
+    </li></ul></dd>
+    
+
+    
+
+    
+
+    
+</dl>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<h5>Returns:</h5>
+
+        
+<div class="param-desc">
+    True if the stream allowed to seek and write.
+</div>
+
+
+
+<dl>
+    <dt>
+        Type
+    </dt>
+    <dd>
+        
+<span class="param-type">boolean</span>
+
+
+    </dd>
+</dl>
+
+    
+
+
+
+
+
+        
+            
+
+    
+
+    
+    <h4 class="name" id="isIntegrityEnabled"><span class="type-signature"></span>isIntegrityEnabled<span class="signature">()</span><span class="type-signature"> &rarr; {boolean}</span></h4>
+    
+
+    
+
+
+
+<div class="description">
+    True if the stream has integrity enabled.
+</div>
+
+
+
+
+
+
+
+
+
+
+
+
+
+<dl class="details">
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+    <dt class="tag-source">Source:</dt>
+    <dd class="tag-source"><ul class="dummy"><li>
+        <a href="salmon-core_salmon_streams_salmon_stream.js.html">salmon-core/salmon/streams/salmon_stream.js</a>, <a href="salmon-core_salmon_streams_salmon_stream.js.html#line455">line 455</a>
+    </li></ul></dd>
+    
+
+    
+
+    
+
+    
+</dl>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<h5>Returns:</h5>
+
+        
+<div class="param-desc">
+    If integrity is enabled for this stream.
+</div>
+
+
+
+<dl>
+    <dt>
+        Type
+    </dt>
+    <dd>
+        
+<span class="param-type">boolean</span>
+
+
+    </dd>
+</dl>
+
+    
+
+
+
+
+
+        
+            
+
+    
+
+    
+    <h4 class="name" id="length"><span class="type-signature">(async) </span>length<span class="signature">()</span><span class="type-signature"> &rarr; {Promise.&lt;number>}</span></h4>
+    
+
+    
+
+
+
+<div class="description">
+    Provides the length of the actual transformed data (minus the header and integrity data).
+</div>
+
+
+
+
+
+
+
+
+
+
+
+
+
+<dl class="details">
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+    <dt class="tag-source">Source:</dt>
+    <dd class="tag-source"><ul class="dummy"><li>
+        <a href="salmon-core_salmon_streams_salmon_stream.js.html">salmon-core/salmon/streams/salmon_stream.js</a>, <a href="salmon-core_salmon_streams_salmon_stream.js.html#line166">line 166</a>
+    </li></ul></dd>
+    
+
+    
+
+    
+
+    
+</dl>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<h5>Returns:</h5>
+
+        
+<div class="param-desc">
+    The length of the stream.
+</div>
+
+
+
+<dl>
+    <dt>
+        Type
+    </dt>
+    <dd>
+        
+<span class="param-type">Promise.&lt;number></span>
+
+
+    </dd>
+</dl>
+
+    
+
+
+
+
+
+        
+            
+
+    
+
+    
+    <h4 class="name" id="read"><span class="type-signature">(async) </span>read<span class="signature">(buffer, offset, count)</span><span class="type-signature"> &rarr; {Promise.&lt;number>}</span></h4>
+    
+
+    
+
+
+
+<div class="description">
+    Decrypts the data from the baseStream and stores them in the buffer provided.
+</div>
+
+
+
+
+
+
+
+
+
+    <h5>Parameters:</h5>
+    
+
+<table class="params">
+    <thead>
+    <tr>
+        
+        <th>Name</th>
+        
+
+        <th>Type</th>
+
+        
+
+        
+
+        <th class="last">Description</th>
+    </tr>
+    </thead>
+
+    <tbody>
+    
+
+        <tr>
+            
+                <td class="name"><code>buffer</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">Uint8Array</span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last">The buffer that the data will be stored after decryption</td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>offset</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">number</span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last">The start position on the buffer that data will be written.</td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>count</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">number</span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last">The requested count of the data bytes that should be decrypted</td>
+        </tr>
+
+    
+    </tbody>
+</table>
+
+
+
+
+
+
+<dl class="details">
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+    <dt class="tag-source">Source:</dt>
+    <dd class="tag-source"><ul class="dummy"><li>
+        <a href="salmon-core_salmon_streams_salmon_stream.js.html">salmon-core/salmon/streams/salmon_stream.js</a>, <a href="salmon-core_salmon_streams_salmon_stream.js.html#line378">line 378</a>
+    </li></ul></dd>
+    
+
+    
+
+    
+
+    
+</dl>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<h5>Returns:</h5>
+
+        
+<div class="param-desc">
+    The number of data bytes that were decrypted.
+</div>
+
+
+
+<dl>
+    <dt>
+        Type
+    </dt>
+    <dd>
+        
+<span class="param-type">Promise.&lt;number></span>
+
+
+    </dd>
+</dl>
+
+    
+
+
+
+
+
+        
+            
+
+    
+
+    
+    <h4 class="name" id="seek"><span class="type-signature">(async) </span>seek<span class="signature">(offset, origin)</span><span class="type-signature"> &rarr; {Promise.&lt;number>}</span></h4>
+    
+
+    
+
+
+
+<div class="description">
+    Seek to a specific position on the stream. This does not include the header and any hash Signatures.
+</div>
+
+
+
+
+
+
+
+
+
+    <h5>Parameters:</h5>
+    
+
+<table class="params">
+    <thead>
+    <tr>
+        
+        <th>Name</th>
+        
+
+        <th>Type</th>
+
+        
+
+        
+
+        <th class="last">Description</th>
+    </tr>
+    </thead>
+
+    <tbody>
+    
+
+        <tr>
+            
+                <td class="name"><code>offset</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">number</span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last">The offset that seek will use</td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>origin</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">SeekOrigin.Begin</span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last">If it is Begin the offset will be the absolute position from the start of the stream
+              If it is Current the offset will be added to the current position of the stream
+              If it is End the offset will be the absolute position starting from the end of the stream.</td>
+        </tr>
+
+    
+    </tbody>
+</table>
+
+
+
+
+
+
+<dl class="details">
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+    <dt class="tag-source">Source:</dt>
+    <dd class="tag-source"><ul class="dummy"><li>
+        <a href="salmon-core_salmon_streams_salmon_stream.js.html">salmon-core/salmon/streams/salmon_stream.js</a>, <a href="salmon-core_salmon_streams_salmon_stream.js.html#line259">line 259</a>
+    </li></ul></dd>
+    
+
+    
+
+    
+
+    
+</dl>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<h5>Returns:</h5>
+
+        
+<div class="param-desc">
+    The new position after seeking.
+</div>
+
+
+
+<dl>
+    <dt>
+        Type
+    </dt>
+    <dd>
+        
+<span class="param-type">Promise.&lt;number></span>
+
+
+    </dd>
+</dl>
+
+    
+
+
+
+
+
+        
+            
+
+    
+
+    
+    <h4 class="name" id="setAllowRangeWrite"><span class="type-signature"></span>setAllowRangeWrite<span class="signature">(value)</span><span class="type-signature"></span></h4>
+    
+
+    
+
+
+
+<div class="description">
+    Warning! Allow byte range encryption writes on a current stream. Overwriting is not a good idea because it will re-use the same IV.
+This is not recommended if you use the stream on storing files or generally data if prior version can be inspected by others.
+You should only use this setting for initial encryption with parallel streams and not for overwriting!
+</div>
+
+
+
+
+
+
+
+
+
+    <h5>Parameters:</h5>
+    
+
+<table class="params">
+    <thead>
+    <tr>
+        
+        <th>Name</th>
+        
+
+        <th>Type</th>
+
+        
+
+        
+
+        <th class="last">Description</th>
+    </tr>
+    </thead>
+
+    <tbody>
+    
+
+        <tr>
+            
+                <td class="name"><code>value</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">boolean</span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last">True to allow byte range encryption write operations</td>
+        </tr>
+
+    
+    </tbody>
+</table>
+
+
+
+
+
+
+<dl class="details">
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+    <dt class="tag-source">Source:</dt>
+    <dd class="tag-source"><ul class="dummy"><li>
+        <a href="salmon-core_salmon_streams_salmon_stream.js.html">salmon-core/salmon/streams/salmon_stream.js</a>, <a href="salmon-core_salmon_streams_salmon_stream.js.html#line357">line 357</a>
+    </li></ul></dd>
+    
+
+    
+
+    
+
+    
+</dl>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+        
+            
+
+    
+
+    
+    <h4 class="name" id="setBufferSize"><span class="type-signature"></span>setBufferSize<span class="signature">(bufferSize)</span><span class="type-signature"></span></h4>
+    
+
+    
+
+
+
+<div class="description">
+    Set the internal buffer size.
+</div>
+
+
+
+
+
+
+
+
+
+    <h5>Parameters:</h5>
+    
+
+<table class="params">
+    <thead>
+    <tr>
+        
+        <th>Name</th>
+        
+
+        <th>Type</th>
+
+        
+
+        
+
+        <th class="last">Description</th>
+    </tr>
+    </thead>
+
+    <tbody>
+    
+
+        <tr>
+            
+                <td class="name"><code>bufferSize</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">number</span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last">The new buffer size.</td>
+        </tr>
+
+    
+    </tbody>
+</table>
+
+
+
+
+
+
+<dl class="details">
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+    <dt class="tag-source">Source:</dt>
+    <dd class="tag-source"><ul class="dummy"><li>
+        <a href="salmon-core_salmon_streams_salmon_stream.js.html">salmon-core/salmon/streams/salmon_stream.js</a>, <a href="salmon-core_salmon_streams_salmon_stream.js.html#line494">line 494</a>
+    </li></ul></dd>
+    
+
+    
+
+    
+
+    
+</dl>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+        
+            
+
+    
+
+    
+    <h4 class="name" id="setFailSilently"><span class="type-signature"></span>setFailSilently<span class="signature">(value)</span><span class="type-signature"></span></h4>
+    
+
+    
+
+
+
+<div class="description">
+    Set to True if you want the stream to fail silently when integrity cannot be verified.
+In that case read() operations will return -1 instead of raising an exception.
+This prevents 3rd party code like media players from crashing.
+</div>
+
+
+
+
+
+
+
+
+
+    <h5>Parameters:</h5>
+    
+
+<table class="params">
+    <thead>
+    <tr>
+        
+        <th>Name</th>
+        
+
+        <th>Type</th>
+
+        
+
+        
+
+        <th class="last">Description</th>
+    </tr>
+    </thead>
+
+    <tbody>
+    
+
+        <tr>
+            
+                <td class="name"><code>value</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">boolean</span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last">True to fail silently.</td>
+        </tr>
+
+    
+    </tbody>
+</table>
+
+
+
+
+
+
+<dl class="details">
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+    <dt class="tag-source">Source:</dt>
+    <dd class="tag-source"><ul class="dummy"><li>
+        <a href="salmon-core_salmon_streams_salmon_stream.js.html">salmon-core/salmon/streams/salmon_stream.js</a>, <a href="salmon-core_salmon_streams_salmon_stream.js.html#line367">line 367</a>
+    </li></ul></dd>
+    
+
+    
+
+    
+
+    
+</dl>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+        
+            
+
+    
+
+    
+    <h4 class="name" id="setLength"><span class="type-signature">(async) </span>setLength<span class="signature">(value)</span><span class="type-signature"></span></h4>
+    
+
+    
+
+
+
+<div class="description">
+    Set the length of the base stream. Currently unsupported.
+</div>
+
+
+
+
+
+
+
+
+
+    <h5>Parameters:</h5>
+    
+
+<table class="params">
+    <thead>
+    <tr>
+        
+        <th>Name</th>
+        
+
+        <th>Type</th>
+
+        
+
+        
+
+        <th class="last">Description</th>
+    </tr>
+    </thead>
+
+    <tbody>
+    
+
+        <tr>
+            
+                <td class="name"><code>value</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">number</span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last">The new length.</td>
+        </tr>
+
+    
+    </tbody>
+</table>
+
+
+
+
+
+
+<dl class="details">
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+    <dt class="tag-source">Source:</dt>
+    <dd class="tag-source"><ul class="dummy"><li>
+        <a href="salmon-core_salmon_streams_salmon_stream.js.html">salmon-core/salmon/streams/salmon_stream.js</a>, <a href="salmon-core_salmon_streams_salmon_stream.js.html#line273">line 273</a>
+    </li></ul></dd>
+    
+
+    
+
+    
+
+    
+</dl>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+        
+            
+
+    
+
+    
+    <h4 class="name" id="setPosition"><span class="type-signature">(async) </span>setPosition<span class="signature">(value)</span><span class="type-signature"> &rarr; {Promise.&lt;void>}</span></h4>
+    
+
+    
+
+
+
+<div class="description">
+    Sets the current position of the stream relative to the data to be transformed.
+</div>
+
+
+
+
+
+
+
+
+
+    <h5>Parameters:</h5>
+    
+
+<table class="params">
+    <thead>
+    <tr>
+        
+        <th>Name</th>
+        
+
+        <th>Type</th>
+
+        
+
+        
+
+        <th class="last">Description</th>
+    </tr>
+    </thead>
+
+    <tbody>
+    
+
+        <tr>
+            
+                <td class="name"><code>value</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">number</span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last">The new position</td>
+        </tr>
+
+    
+    </tbody>
+</table>
+
+
+
+
+
+
+<dl class="details">
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+    <dt class="tag-source">Source:</dt>
+    <dd class="tag-source"><ul class="dummy"><li>
+        <a href="salmon-core_salmon_streams_salmon_stream.js.html">salmon-core/salmon/streams/salmon_stream.js</a>, <a href="salmon-core_salmon_streams_salmon_stream.js.html#line207">line 207</a>
+    </li></ul></dd>
+    
+
+    
+
+    
+
+    
+</dl>
+
+
+
+
+
+
+
+
+
+
+
+
+
+<h5>Throws:</h5>
+
+        
+
+    <div class="param-desc">
+    
+        IOException Thrown if there is an IO error.
+    
+    </div>
+
+
+    
+
+
+<h5>Returns:</h5>
+
+        
+
+
+<dl>
+    <dt>
+        Type
+    </dt>
+    <dd>
+        
+<span class="param-type">Promise.&lt;void></span>
+
+
+    </dd>
+</dl>
+
+    
+
+
+
+
+
+        
+            
+
+    
+
+    
+    <h4 class="name" id="write"><span class="type-signature">(async) </span>write<span class="signature">(buffer, offset, count)</span><span class="type-signature"></span></h4>
+    
+
+    
+
+
+
+<div class="description">
+    Encrypts the data from the buffer and writes the result to the baseStream.
+If you are using integrity you will need to align all write operations to the chunk size
+otherwise align to the encryption block size.
+</div>
+
+
+
+
+
+
+
+
+
+    <h5>Parameters:</h5>
+    
+
+<table class="params">
+    <thead>
+    <tr>
+        
+        <th>Name</th>
+        
+
+        <th>Type</th>
+
+        
+
+        
+
+        <th class="last">Description</th>
+    </tr>
+    </thead>
+
+    <tbody>
+    
+
+        <tr>
+            
+                <td class="name"><code>buffer</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">Uint8Array</span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last">The buffer that contains the data that will be encrypted</td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>offset</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">number</span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last">The offset in the buffer that the bytes will be encrypted.</td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>count</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">number</span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last">The length of the bytes that will be encrypted.</td>
+        </tr>
+
+    
+    </tbody>
+</table>
+
+
+
+
+
+
+<dl class="details">
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+    <dt class="tag-source">Source:</dt>
+    <dd class="tag-source"><ul class="dummy"><li>
+        <a href="salmon-core_salmon_streams_salmon_stream.js.html">salmon-core/salmon/streams/salmon_stream.js</a>, <a href="salmon-core_salmon_streams_salmon_stream.js.html#line420">line 420</a>
+    </li></ul></dd>
+    
+
+    
+
+    
+
+    
+</dl>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+        
+            
+
+    
+
+    
+    <h4 class="name" id=".getActualSize"><span class="type-signature">(async, static) </span>getActualSize<span class="signature">(data, key, nonce, mode, headerData, integrity, The, hashKey)</span><span class="type-signature"> &rarr; {Promise.&lt;number>}</span></h4>
+    
+
+    
+
+
+
+<div class="description">
+    Get the output size of the data to be transformed(encrypted or decrypted) including
+header and hash without executing any operations. This can be used to prevent over-allocating memory
+where creating your output buffers.
+</div>
+
+
+
+
+
+
+
+
+
+    <h5>Parameters:</h5>
+    
+
+<table class="params">
+    <thead>
+    <tr>
+        
+        <th>Name</th>
+        
+
+        <th>Type</th>
+
+        
+
+        
+        <th>Default</th>
+        
+
+        <th class="last">Description</th>
+    </tr>
+    </thead>
+
+    <tbody>
+    
+
+        <tr>
+            
+                <td class="name"><code>data</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">Uint8Array</span>
+
+
+            
+            </td>
+
+            
+
+            
+                <td class="default">
+                
+                </td>
+            
+
+            <td class="description last">The data to be transformed.</td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>key</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">Uint8Array</span>
+
+
+            
+            </td>
+
+            
+
+            
+                <td class="default">
+                
+                </td>
+            
+
+            <td class="description last">The AES key.</td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>nonce</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">Uint8Array</span>
+
+
+            
+            </td>
+
+            
+
+            
+                <td class="default">
+                
+                </td>
+            
+
+            <td class="description last">The nonce for the CTR.</td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>mode</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type"><a href="global.html#EncryptionMode">EncryptionMode</a></span>
+
+
+            
+            </td>
+
+            
+
+            
+                <td class="default">
+                
+                </td>
+            
+
+            <td class="description last">The EncryptionMode Encrypt or Decrypt.</td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>headerData</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">Uint8Array</span>
+|
+
+<span class="param-type">null</span>
+
+
+            
+            </td>
+
+            
+
+            
+                <td class="default">
+                
+                </td>
+            
+
+            <td class="description last">The header data to be embedded if you use Encryption.</td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>integrity</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">boolean</span>
+
+
+            
+            </td>
+
+            
+
+            
+                <td class="default">
+                
+                    false
+                
+                </td>
+            
+
+            <td class="description last">True if you want to enable integrity.</td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>The</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">number</span>
+|
+
+<span class="param-type">null</span>
+
+
+            
+            </td>
+
+            
+
+            
+                <td class="default">
+                
+                </td>
+            
+
+            <td class="description last">chunk size for integrity chunks.</td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>hashKey</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">Uint8Array</span>
+|
+
+<span class="param-type">null</span>
+
+
+            
+            </td>
+
+            
+
+            
+                <td class="default">
+                
+                </td>
+            
+
+            <td class="description last">The hash key to be used for integrity checks.</td>
+        </tr>
+
+    
+    </tbody>
+</table>
+
+
+
+
+
+
+<dl class="details">
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+    <dt class="tag-source">Source:</dt>
+    <dd class="tag-source"><ul class="dummy"><li>
+        <a href="salmon-core_salmon_streams_salmon_stream.js.html">salmon-core/salmon/streams/salmon_stream.js</a>, <a href="salmon-core_salmon_streams_salmon_stream.js.html#line71">line 71</a>
+    </li></ul></dd>
+    
+
+    
+
+    
+
+    
+</dl>
+
+
+
+
+
+
+
+
+
+
+
+
+
+<h5>Throws:</h5>
+<ul>
+        <li>
+
+    <div class="param-desc">
+    
+        SalmonSecurityException Thrown when error with security
+    
+    </div>
+
+</li>
+    
+        <li>
+
+    <div class="param-desc">
+    
+        IntegrityException Thrown if the data are corrupt or tampered with.
+    
+    </div>
+
+</li>
+    
+        <li>
+
+    <div class="param-desc">
+    
+        IOException Thrown if there is an IO error.
+    
+    </div>
+
+</li>
+    </ul>
+
+
+<h5>Returns:</h5>
+
+        
+<div class="param-desc">
+    The size of the output data.
+</div>
+
+
+
+<dl>
+    <dt>
+        Type
+    </dt>
+    <dd>
+        
+<span class="param-type">Promise.&lt;number></span>
+
+
+    </dd>
+</dl>
+
+    
+
+
+
+
+
+        
+            
+
+    
+
+    
+    <h4 class="name" id=".getAesProviderType"><span class="type-signature">(static) </span>getAesProviderType<span class="signature">()</span><span class="type-signature"> &rarr; {<a href="global.html#ProviderType">ProviderType</a>}</span></h4>
+    
+
+    
+
+
+
+<div class="description">
+    Get the global AES provider type. Supported types: <a href="global.html#ProviderType">ProviderType</a>.
+</div>
+
+
+
+
+
+
+
+
+
+
+
+
+
+<dl class="details">
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+    <dt class="tag-source">Source:</dt>
+    <dd class="tag-source"><ul class="dummy"><li>
+        <a href="salmon-core_salmon_streams_salmon_stream.js.html">salmon-core/salmon/streams/salmon_stream.js</a>, <a href="salmon-core_salmon_streams_salmon_stream.js.html#line158">line 158</a>
+    </li></ul></dd>
+    
+
+    
+
+    
+
+    
+</dl>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<h5>Returns:</h5>
+
+        
+<div class="param-desc">
+    The provider Type.
+</div>
+
+
+
+<dl>
+    <dt>
+        Type
+    </dt>
+    <dd>
+        
+<span class="param-type"><a href="global.html#ProviderType">ProviderType</a></span>
+
+
+    </dd>
+</dl>
+
+    
+
+
+
+
+
+        
+            
+
+    
+
+    
+    <h4 class="name" id=".setAesProviderType"><span class="type-signature">(static) </span>setAesProviderType<span class="signature">(providerType)</span><span class="type-signature"></span></h4>
+    
+
+    
+
+
+
+<div class="description">
+    Set the global AES provider type. Supported types: <a href="global.html#ProviderType">ProviderType</a>.
+</div>
+
+
+
+
+
+
+
+
+
+    <h5>Parameters:</h5>
+    
+
+<table class="params">
+    <thead>
+    <tr>
+        
+        <th>Name</th>
+        
+
+        <th>Type</th>
+
+        
+
+        
+
+        <th class="last">Description</th>
+    </tr>
+    </thead>
+
+    <tbody>
+    
+
+        <tr>
+            
+                <td class="name"><code>providerType</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type"><a href="global.html#ProviderType">ProviderType</a></span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last">The provider Type.</td>
+        </tr>
+
+    
+    </tbody>
+</table>
+
+
+
+
+
+
+<dl class="details">
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+    <dt class="tag-source">Source:</dt>
+    <dd class="tag-source"><ul class="dummy"><li>
+        <a href="salmon-core_salmon_streams_salmon_stream.js.html">salmon-core/salmon/streams/salmon_stream.js</a>, <a href="salmon-core_salmon_streams_salmon_stream.js.html#line150">line 150</a>
+    </li></ul></dd>
+    
+
+    
+
+    
+
+    
+</dl>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+        
+    
+
+    
+
+    
+</article>
+
+</section>
+
+
+
+
+</div>
+
+<nav>
+    <h2><a href="index.html">Home</a></h2><h3>Classes</h3><ul><li><a href="Base64.html">Base64</a></li><li><a href="BitConverter.html">BitConverter</a></li><li><a href="CacheBuffer.html">CacheBuffer</a></li><li><a href="FileCommander.html">FileCommander</a></li><li><a href="FileExporter.html">FileExporter</a></li><li><a href="FileImporter.html">FileImporter</a></li><li><a href="FileSearcher.html">FileSearcher</a></li><li><a href="FileTaskProgress.html">FileTaskProgress</a></li><li><a href="FileUtils.html">FileUtils</a></li><li><a href="Handler.html">Handler</a></li><li><a href="HmacSHA256Provider.html">HmacSHA256Provider</a></li><li><a href="IOException.html">IOException</a></li><li><a href="IntegrityException.html">IntegrityException</a></li><li><a href="JsDrive.html">JsDrive</a></li><li><a href="JsFile.html">JsFile</a></li><li><a href="JsFileStream.html">JsFileStream</a></li><li><a href="JsHttpDrive.html">JsHttpDrive</a></li><li><a href="JsHttpFile.html">JsHttpFile</a></li><li><a href="JsHttpFileStream.html">JsHttpFileStream</a></li><li><a href="JsLocalStorageFile.html">JsLocalStorageFile</a></li><li><a href="JsLocalStorageFileStream.html">JsLocalStorageFileStream</a></li><li><a href="JsNodeDrive.html">JsNodeDrive</a></li><li><a href="JsNodeFile.html">JsNodeFile</a></li><li><a href="JsNodeFileStream.html">JsNodeFileStream</a></li><li><a href="MemoryStream.html">MemoryStream</a></li><li><a href="NonceSequence.html">NonceSequence</a></li><li><a href="RandomAccessStream.html">RandomAccessStream</a></li><li><a href="SalmonAES256CTRTransformer.html">SalmonAES256CTRTransformer</a></li><li><a href="SalmonAesIntrTransformer.html">SalmonAesIntrTransformer</a></li><li><a href="SalmonAuthConfig.html">SalmonAuthConfig</a></li><li><a href="SalmonAuthException.html">SalmonAuthException</a></li><li><a href="SalmonDecryptor.html">SalmonDecryptor</a></li><li><a href="SalmonDefaultPbkdfProvider.html">SalmonDefaultPbkdfProvider</a></li><li><a href="SalmonDefaultTransformer.html">SalmonDefaultTransformer</a></li><li><a href="SalmonDrive.html">SalmonDrive</a></li><li><a href="SalmonDriveConfig.html">SalmonDriveConfig</a></li><li><a href="SalmonDriveGenerator.html">SalmonDriveGenerator</a></li><li><a href="SalmonDriveKey.html">SalmonDriveKey</a></li><li><a href="SalmonEncoder.html">SalmonEncoder</a></li><li><a href="SalmonEncryptor.html">SalmonEncryptor</a></li><li><a href="SalmonFile.html">SalmonFile</a></li><li><a href="SalmonFileCommander.html">SalmonFileCommander</a></li><li><a href="SalmonFileExporter.html">SalmonFileExporter</a></li><li><a href="SalmonFileImporter.html">SalmonFileImporter</a></li><li><a href="SalmonFileReadableStream.html">SalmonFileReadableStream</a></li><li><a href="SalmonFileSequencer.html">SalmonFileSequencer</a></li><li><a href="SalmonGenerator.html">SalmonGenerator</a></li><li><a href="SalmonHeader.html">SalmonHeader</a></li><li><a href="SalmonIntegrity.html">SalmonIntegrity</a></li><li><a href="SalmonNativeProxy.html">SalmonNativeProxy</a></li><li><a href="SalmonNativeTransformer.html">SalmonNativeTransformer</a></li><li><a href="SalmonNonce.html">SalmonNonce</a></li><li><a href="SalmonPassword.html">SalmonPassword</a></li><li><a href="SalmonPbkdfFactory.html">SalmonPbkdfFactory</a></li><li><a href="SalmonRangeExceededException.html">SalmonRangeExceededException</a></li><li><a href="SalmonSecurityException.html">SalmonSecurityException</a></li><li><a href="SalmonSequenceSerializer.html">SalmonSequenceSerializer</a></li><li><a href="SalmonStream.html">SalmonStream</a></li><li><a href="SalmonTextDecryptor.html">SalmonTextDecryptor</a></li><li><a href="SalmonTextEncryptor.html">SalmonTextEncryptor</a></li><li><a href="SalmonTransformerFactory.html">SalmonTransformerFactory</a></li><li><a href="SequenceException.html">SequenceException</a></li><li><a href="TinyAesTransformer.html">TinyAesTransformer</a></li></ul><h3>Global</h3><ul><li><a href="global.html#EncryptionMode">EncryptionMode</a></li><li><a href="global.html#EncryptionMode%255Bundefined%255D">EncryptionMode[undefined]</a></li><li><a href="global.html#PBKDF_SHA1">PBKDF_SHA1</a></li><li><a href="global.html#PBKDF_SHA256">PBKDF_SHA256</a></li><li><a href="global.html#PbkdfAlgo">PbkdfAlgo</a></li><li><a href="global.html#PbkdfAlgo%255Bundefined%255D">PbkdfAlgo[undefined]</a></li><li><a href="global.html#PbkdfType">PbkdfType</a></li><li><a href="global.html#PbkdfType%255Bundefined%255D">PbkdfType[undefined]</a></li><li><a href="global.html#ProviderType">ProviderType</a></li><li><a href="global.html#ProviderType%255Bundefined%255D">ProviderType[undefined]</a></li><li><a href="global.html#SearchEvent">SearchEvent</a></li><li><a href="global.html#SearchEvent%255Bundefined%255D">SearchEvent[undefined]</a></li><li><a href="global.html#SeekOrigin">SeekOrigin</a></li><li><a href="global.html#SeekOrigin%255Bundefined%255D">SeekOrigin[undefined]</a></li><li><a href="global.html#Status">Status</a></li><li><a href="global.html#Status%255Bundefined%255D">Status[undefined]</a></li><li><a href="global.html#_FileExporter_DEFAULT_THREADS">_FileExporter_DEFAULT_THREADS</a></li><li><a href="global.html#_FileExporter_enableMultiThread">_FileExporter_enableMultiThread</a></li><li><a href="global.html#_FileImporter_DEFAULT_BUFFER_SIZE">_FileImporter_DEFAULT_BUFFER_SIZE</a></li><li><a href="global.html#_FileImporter_DEFAULT_THREADS">_FileImporter_DEFAULT_THREADS</a></li><li><a href="global.html#_FileImporter_enableMultiThread">_FileImporter_enableMultiThread</a></li><li><a href="global.html#_MemoryStream_INITIAL_CAPACITY">_MemoryStream_INITIAL_CAPACITY</a></li><li><a href="global.html#_SalmonDriveGenerator_iterations">_SalmonDriveGenerator_iterations</a></li><li><a href="global.html#_SalmonEncoder_base64">_SalmonEncoder_base64</a></li><li><a href="global.html#_SalmonGenerator_MAGIC_BYTES">_SalmonGenerator_MAGIC_BYTES</a></li><li><a href="global.html#_SalmonNativeProxy_libraryName">_SalmonNativeProxy_libraryName</a></li><li><a href="global.html#_SalmonPassword_ENABLE_SHA1">_SalmonPassword_ENABLE_SHA1</a></li><li><a href="global.html#_SalmonPassword_pbkdfAlgo">_SalmonPassword_pbkdfAlgo</a></li><li><a href="global.html#_SalmonPassword_provider">_SalmonPassword_provider</a></li><li><a href="global.html#_SalmonStream_providerType">_SalmonStream_providerType</a></li><li><a href="global.html#autoRename">autoRename</a></li><li><a href="global.html#autoRenameFile">autoRenameFile</a></li><li><a href="global.html#copyFileContents">copyFileContents</a></li><li><a href="global.html#copyRecursively">copyRecursively</a></li><li><a href="global.html#decryptData">decryptData</a></li><li><a href="global.html#deleteRecursively">deleteRecursively</a></li><li><a href="global.html#encryptData">encryptData</a></li><li><a href="global.html#exportFilePart">exportFilePart</a></li><li><a href="global.html#fillBufferPart">fillBufferPart</a></li><li><a href="global.html#getPbkdfAlgoString">getPbkdfAlgoString</a></li><li><a href="global.html#importFilePart">importFilePart</a></li><li><a href="global.html#moveRecursively">moveRecursively</a></li></ul>
+</nav>
+
+<br class="clear">
+
+<footer>
+    Documentation generated by <a href="https://github.com/jsdoc/jsdoc">JSDoc 4.0.3</a> on Tue Sep 03 2024 18:12:50 GMT+0300 (Eastern European Summer Time)
+</footer>
+
+<script> prettyPrint(); </script>
+<script src="scripts/linenumber.js"> </script>
+</body>
+</html>

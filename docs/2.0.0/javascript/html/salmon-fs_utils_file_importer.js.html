@@ -1,0 +1,347 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <title>JSDoc: Source: salmon-fs/utils/file_importer.js</title>
+
+    <script src="scripts/prettify/prettify.js"> </script>
+    <script src="scripts/prettify/lang-css.js"> </script>
+    <!--[if lt IE 9]>
+      <script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script>
+    <![endif]-->
+    <link type="text/css" rel="stylesheet" href="styles/prettify-tomorrow.css">
+    <link type="text/css" rel="stylesheet" href="styles/jsdoc-default.css">
+</head>
+
+<body>
+
+<div id="main">
+
+    <h1 class="page-title">Source: salmon-fs/utils/file_importer.js</h1>
+
+    
+
+
+
+    
+    <section>
+        <article>
+            <pre class="prettyprint source linenums"><code>/*
+MIT License
+
+Copyright (c) 2021 Max Kas
+
+Permission is hereby granted, free of charge, to any person obtaining a copy
+of this software and associated documentation files (the "Software"), to deal
+in the Software without restriction, including without limitation the rights
+to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+copies of the Software, and to permit persons to whom the Software is
+furnished to do so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in all
+copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+SOFTWARE.
+*/
+var __classPrivateFieldSet = (this &amp;&amp; this.__classPrivateFieldSet) || function (receiver, state, value, kind, f) {
+    if (kind === "m") throw new TypeError("Private method is not writable");
+    if (kind === "a" &amp;&amp; !f) throw new TypeError("Private accessor was defined without a setter");
+    if (typeof state === "function" ? receiver !== state || !f : !state.has(receiver)) throw new TypeError("Cannot write private member to an object whose class did not declare it");
+    return (kind === "a" ? f.call(receiver, value) : f ? f.value = value : state.set(receiver, value)), value;
+};
+var __classPrivateFieldGet = (this &amp;&amp; this.__classPrivateFieldGet) || function (receiver, state, kind, f) {
+    if (kind === "a" &amp;&amp; !f) throw new TypeError("Private accessor was defined without a getter");
+    if (typeof state === "function" ? receiver !== state || !f : !state.has(receiver)) throw new TypeError("Cannot read private member from an object whose class did not declare it");
+    return kind === "m" ? f : kind === "a" ? f.call(receiver) : f ? f.value : state.get(receiver);
+};
+var _FileImporter_instances, _a, _FileImporter_workerPath, _FileImporter_DEFAULT_BUFFER_SIZE, _FileImporter_DEFAULT_THREADS, _FileImporter_enableMultiThread, _FileImporter_bufferSize, _FileImporter_threads, _FileImporter_stopped, _FileImporter_failed, _FileImporter_lastException, _FileImporter_promises, _FileImporter_workers, _FileImporter_submitImportJobs, _FileImporter_getError;
+import { importFilePart } from "./file_importer_helper.js";
+import { IOException } from "../../salmon-core/streams/io_exception.js";
+/**
+ * Abstract class for importing files to a drive.
+ * Make sure you use setWorkerPath() with the correct worker script.
+ */
+export class FileImporter {
+    constructor() {
+        _FileImporter_instances.add(this);
+        _FileImporter_workerPath.set(this, './lib/salmon-fs/salmon/utils/file_importer_worker.js');
+        /**
+         * Current buffer size.
+         */
+        _FileImporter_bufferSize.set(this, 0);
+        /**
+         * Current threads.
+         */
+        _FileImporter_threads.set(this, 1);
+        /**
+         * True if last job was stopped by the user.
+         */
+        _FileImporter_stopped.set(this, [true]);
+        /**
+         * Failed if last job was failed.
+         */
+        _FileImporter_failed.set(this, false);
+        /**
+         * Last exception occurred.
+         */
+        _FileImporter_lastException.set(this, null);
+        _FileImporter_promises.set(this, []);
+        _FileImporter_workers.set(this, []);
+    }
+    /**
+     * Constructs a file importer that can be used to import files to the drive
+     *
+     * @param bufferSize Buffer size to be used when encrypting files.
+     *                   If using integrity this value has to be a multiple of the Chunk size.
+     *                   If not using integrity it should be a multiple of the AES block size for better performance
+     * @param threads The threads
+     */
+    initialize(bufferSize, threads) {
+        __classPrivateFieldSet(this, _FileImporter_bufferSize, bufferSize, "f");
+        if (__classPrivateFieldGet(this, _FileImporter_bufferSize, "f") == 0)
+            __classPrivateFieldSet(this, _FileImporter_bufferSize, __classPrivateFieldGet(_a, _a, "f", _FileImporter_DEFAULT_BUFFER_SIZE), "f");
+        __classPrivateFieldSet(this, _FileImporter_threads, threads, "f");
+        if (__classPrivateFieldGet(this, _FileImporter_threads, "f") == 0)
+            __classPrivateFieldSet(this, _FileImporter_threads, __classPrivateFieldGet(_a, _a, "f", _FileImporter_DEFAULT_THREADS), "f");
+        if (typeof process !== 'object') {
+            // multiple writers in the browser use crswap files that overwrite 
+            // each other so falling back to 1 thread
+            __classPrivateFieldSet(this, _FileImporter_threads, 1, "f");
+        }
+    }
+    /**
+     * Stops all current importing tasks
+     */
+    stop() {
+        __classPrivateFieldGet(this, _FileImporter_stopped, "f")[0] = true;
+        let msg = { message: 'stop' };
+        for (let i = 0; i &lt; __classPrivateFieldGet(this, _FileImporter_workers, "f").length; i++)
+            __classPrivateFieldGet(this, _FileImporter_workers, "f")[i].postMessage(msg);
+    }
+    /**
+     * True if importer is currently running a job.
+     *
+     * @return True if running
+     */
+    isRunning() {
+        return !__classPrivateFieldGet(this, _FileImporter_stopped, "f")[0];
+    }
+    /**
+     * Progress listener
+     *
+     * @callback onProgress
+     * @param {number} position The current position
+     * @param {number} length The total length
+     */
+    /**
+     * Imports a real file into the drive.
+     *
+     * @param {IRealFile} fileToImport The source file that will be imported in to the drive.
+     * @param {IRealFile} dir          The target directory in the drive that the file will be imported
+     * @param {boolean} deleteSource If true delete the source file.
+     * @param {boolean} integrity    Apply data integrity
+     * @param {onProgress | null} onProgress   Progress to notify
+     * @returns {Promise&lt;IVirtualFile | null>} A promise which resolves to a virtual file or null
+     */
+    async importFile(fileToImport, dir, filename, deleteSource, integrity, onProgress) {
+        if (this.isRunning())
+            throw new Error("Another import is running");
+        if (await fileToImport.isDirectory())
+            throw new Error("Cannot import directory, use FileCommander instead");
+        filename = filename != null ? filename : fileToImport.getBaseName();
+        let totalBytesRead = [0];
+        let importedFile = null;
+        try {
+            if (!__classPrivateFieldGet(_a, _a, "f", _FileImporter_enableMultiThread) &amp;&amp; __classPrivateFieldGet(this, _FileImporter_threads, "f") != 1)
+                throw new Error("Multithreading is not supported");
+            __classPrivateFieldGet(this, _FileImporter_stopped, "f")[0] = false;
+            __classPrivateFieldSet(this, _FileImporter_lastException, null, "f");
+            __classPrivateFieldSet(this, _FileImporter_failed, false, "f");
+            importedFile = await dir.createFile(filename);
+            await this.onPrepare(importedFile, integrity);
+            let fileSize = await fileToImport.length();
+            let runningThreads = 1;
+            let partSize = fileSize;
+            // for js we make sure to allocate enough space for the file 
+            // this will also create the header
+            let targetStream = await importedFile.getOutputStream();
+            await targetStream.setLength(fileSize);
+            await targetStream.close();
+            // if we want to check integrity we align to the chunk size otherwise to the AES Block
+            let minPartSize = await this.getMinimumPartSize(importedFile);
+            if (partSize > minPartSize &amp;&amp; __classPrivateFieldGet(this, _FileImporter_threads, "f") > 1) {
+                partSize = Math.ceil(fileSize / __classPrivateFieldGet(this, _FileImporter_threads, "f"));
+                if (partSize > minPartSize)
+                    partSize -= partSize % minPartSize;
+                else
+                    partSize = minPartSize;
+                runningThreads = Math.floor(fileSize / partSize);
+            }
+            if (runningThreads == 1) {
+                await importFilePart(fileToImport, importedFile, 0, fileSize, totalBytesRead, onProgress, __classPrivateFieldGet(this, _FileImporter_bufferSize, "f"), __classPrivateFieldGet(this, _FileImporter_stopped, "f"));
+            }
+            else {
+                await __classPrivateFieldGet(this, _FileImporter_instances, "m", _FileImporter_submitImportJobs).call(this, runningThreads, partSize, fileToImport, importedFile, totalBytesRead, integrity, onProgress);
+            }
+            if (__classPrivateFieldGet(this, _FileImporter_stopped, "f")[0])
+                await importedFile.getRealFile().delete();
+            else if (deleteSource)
+                await fileToImport.delete();
+            if (__classPrivateFieldGet(this, _FileImporter_lastException, "f") != null)
+                throw __classPrivateFieldGet(this, _FileImporter_lastException, "f");
+        }
+        catch (ex) {
+            console.log(ex);
+            __classPrivateFieldSet(this, _FileImporter_failed, true, "f");
+            __classPrivateFieldGet(this, _FileImporter_stopped, "f")[0] = true;
+            __classPrivateFieldSet(this, _FileImporter_lastException, ex, "f");
+            throw ex;
+        }
+        if (__classPrivateFieldGet(this, _FileImporter_stopped, "f")[0] || __classPrivateFieldGet(this, _FileImporter_failed, "f")) {
+            __classPrivateFieldGet(this, _FileImporter_stopped, "f")[0] = true;
+            return null;
+        }
+        __classPrivateFieldGet(this, _FileImporter_stopped, "f")[0] = true;
+        return importedFile;
+    }
+    /**
+     * Close the importer and associated resources
+     */
+    close() {
+        for (let i = 0; i &lt; __classPrivateFieldGet(this, _FileImporter_workers, "f").length; i++) {
+            __classPrivateFieldGet(this, _FileImporter_workers, "f")[i].terminate();
+            __classPrivateFieldGet(this, _FileImporter_workers, "f")[i] = null;
+        }
+        __classPrivateFieldSet(this, _FileImporter_promises, [], "f");
+    }
+    /**
+     * Set the path to the worker script to use
+     * @param path The path
+     */
+    setWorkerPath(path) {
+        __classPrivateFieldSet(this, _FileImporter_workerPath, path, "f");
+    }
+    /**
+     * Get the current worker script path
+     * @returns The path
+     */
+    getWorkerPath() {
+        return __classPrivateFieldGet(this, _FileImporter_workerPath, "f");
+    }
+}
+_a = FileImporter, _FileImporter_workerPath = new WeakMap(), _FileImporter_bufferSize = new WeakMap(), _FileImporter_threads = new WeakMap(), _FileImporter_stopped = new WeakMap(), _FileImporter_failed = new WeakMap(), _FileImporter_lastException = new WeakMap(), _FileImporter_promises = new WeakMap(), _FileImporter_workers = new WeakMap(), _FileImporter_instances = new WeakSet(), _FileImporter_submitImportJobs = async function _FileImporter_submitImportJobs(runningThreads, partSize, fileToImport, importedFile, totalBytesRead, integrity, onProgress) {
+    let fileSize = await fileToImport.length();
+    let bytesRead = new Array(runningThreads);
+    bytesRead.fill(0);
+    __classPrivateFieldSet(this, _FileImporter_promises, [], "f");
+    for (let i = 0; i &lt; runningThreads; i++) {
+        __classPrivateFieldGet(this, _FileImporter_promises, "f").push(new Promise(async (resolve, reject) => {
+            if (typeof process !== 'object') {
+                if (__classPrivateFieldGet(this, _FileImporter_workers, "f")[i] == null) {
+                    __classPrivateFieldGet(this, _FileImporter_workers, "f")[i] = new Worker(__classPrivateFieldGet(this, _FileImporter_workerPath, "f"), { type: 'module' });
+                }
+                __classPrivateFieldGet(this, _FileImporter_workers, "f")[i].addEventListener('message', (event) => {
+                    if (event.data.message == 'progress' &amp;&amp; onProgress != null) {
+                        bytesRead[event.data.index] = event.data.position;
+                        totalBytesRead[0] = 0;
+                        for (let i = 0; i &lt; bytesRead.length; i++) {
+                            totalBytesRead[0] += bytesRead[i];
+                        }
+                        onProgress(totalBytesRead[0], fileSize);
+                    }
+                    else if (event.data.message == 'complete') {
+                        resolve(event.data);
+                    }
+                    else if (event.data.message == 'error') {
+                        reject(event.data);
+                    }
+                });
+                __classPrivateFieldGet(this, _FileImporter_workers, "f")[i].addEventListener('error', (event) => {
+                    reject(event);
+                });
+            }
+            else {
+                const { Worker } = await import("worker_threads");
+                if (__classPrivateFieldGet(this, _FileImporter_workers, "f")[i] == null)
+                    __classPrivateFieldGet(this, _FileImporter_workers, "f")[i] = new Worker(__classPrivateFieldGet(this, _FileImporter_workerPath, "f"));
+                __classPrivateFieldGet(this, _FileImporter_workers, "f")[i].on('message', (event) => {
+                    if (event.message == 'progress' &amp;&amp; onProgress != null) {
+                        bytesRead[event.index] = event.position;
+                        totalBytesRead[0] = 0;
+                        for (let i = 0; i &lt; bytesRead.length; i++) {
+                            totalBytesRead[0] += bytesRead[i];
+                        }
+                        onProgress(totalBytesRead[0], fileSize);
+                    }
+                    else if (event.message == 'complete') {
+                        resolve(event);
+                    }
+                    else if (event.message == 'error') {
+                        reject(event);
+                    }
+                });
+                __classPrivateFieldGet(this, _FileImporter_workers, "f")[i].on('error', (event) => {
+                    reject(event);
+                });
+            }
+            let msg = await this.getWorkerMessage(i, fileToImport, importedFile, runningThreads, partSize, fileSize, __classPrivateFieldGet(this, _FileImporter_bufferSize, "f"), integrity);
+            __classPrivateFieldGet(this, _FileImporter_workers, "f")[i].postMessage(msg);
+        }));
+    }
+    await Promise.all(__classPrivateFieldGet(this, _FileImporter_promises, "f")).then((results) => {
+        totalBytesRead[0] = 0;
+        for (let i = 0; i &lt; results.length; i++) {
+            totalBytesRead[0] += results[i].totalBytesRead;
+        }
+    }).catch((err) => {
+        err = __classPrivateFieldGet(this, _FileImporter_instances, "m", _FileImporter_getError).call(this, err);
+        console.error(err);
+        __classPrivateFieldSet(this, _FileImporter_failed, true, "f");
+        __classPrivateFieldSet(this, _FileImporter_lastException, err, "f");
+        this.stop();
+        throw new IOException("Error during import", err);
+    });
+}, _FileImporter_getError = function _FileImporter_getError(err) {
+    return err;
+};
+/**
+ * The global default buffer size to use when reading/writing on the SalmonStream.
+ */
+_FileImporter_DEFAULT_BUFFER_SIZE = { value: 512 * 1024 };
+/**
+ * The global default threads to use.
+ */
+_FileImporter_DEFAULT_THREADS = { value: 1 };
+/**
+ * True if multithreading is enabled.
+ */
+_FileImporter_enableMultiThread = { value: true };
+</code></pre>
+        </article>
+    </section>
+
+
+
+
+</div>
+
+<nav>
+    <h2><a href="index.html">Home</a></h2><h3>Classes</h3><ul><li><a href="Base64.html">Base64</a></li><li><a href="BitConverter.html">BitConverter</a></li><li><a href="CacheBuffer.html">CacheBuffer</a></li><li><a href="FileCommander.html">FileCommander</a></li><li><a href="FileExporter.html">FileExporter</a></li><li><a href="FileImporter.html">FileImporter</a></li><li><a href="FileSearcher.html">FileSearcher</a></li><li><a href="FileTaskProgress.html">FileTaskProgress</a></li><li><a href="FileUtils.html">FileUtils</a></li><li><a href="Handler.html">Handler</a></li><li><a href="HmacSHA256Provider.html">HmacSHA256Provider</a></li><li><a href="IOException.html">IOException</a></li><li><a href="IntegrityException.html">IntegrityException</a></li><li><a href="JsDrive.html">JsDrive</a></li><li><a href="JsFile.html">JsFile</a></li><li><a href="JsFileStream.html">JsFileStream</a></li><li><a href="JsHttpDrive.html">JsHttpDrive</a></li><li><a href="JsHttpFile.html">JsHttpFile</a></li><li><a href="JsHttpFileStream.html">JsHttpFileStream</a></li><li><a href="JsLocalStorageFile.html">JsLocalStorageFile</a></li><li><a href="JsLocalStorageFileStream.html">JsLocalStorageFileStream</a></li><li><a href="JsNodeDrive.html">JsNodeDrive</a></li><li><a href="JsNodeFile.html">JsNodeFile</a></li><li><a href="JsNodeFileStream.html">JsNodeFileStream</a></li><li><a href="MemoryStream.html">MemoryStream</a></li><li><a href="NonceSequence.html">NonceSequence</a></li><li><a href="RandomAccessStream.html">RandomAccessStream</a></li><li><a href="SalmonAES256CTRTransformer.html">SalmonAES256CTRTransformer</a></li><li><a href="SalmonAesIntrTransformer.html">SalmonAesIntrTransformer</a></li><li><a href="SalmonAuthConfig.html">SalmonAuthConfig</a></li><li><a href="SalmonAuthException.html">SalmonAuthException</a></li><li><a href="SalmonDecryptor.html">SalmonDecryptor</a></li><li><a href="SalmonDefaultPbkdfProvider.html">SalmonDefaultPbkdfProvider</a></li><li><a href="SalmonDefaultTransformer.html">SalmonDefaultTransformer</a></li><li><a href="SalmonDrive.html">SalmonDrive</a></li><li><a href="SalmonDriveConfig.html">SalmonDriveConfig</a></li><li><a href="SalmonDriveGenerator.html">SalmonDriveGenerator</a></li><li><a href="SalmonDriveKey.html">SalmonDriveKey</a></li><li><a href="SalmonEncoder.html">SalmonEncoder</a></li><li><a href="SalmonEncryptor.html">SalmonEncryptor</a></li><li><a href="SalmonFile.html">SalmonFile</a></li><li><a href="SalmonFileCommander.html">SalmonFileCommander</a></li><li><a href="SalmonFileExporter.html">SalmonFileExporter</a></li><li><a href="SalmonFileImporter.html">SalmonFileImporter</a></li><li><a href="SalmonFileReadableStream.html">SalmonFileReadableStream</a></li><li><a href="SalmonFileSequencer.html">SalmonFileSequencer</a></li><li><a href="SalmonGenerator.html">SalmonGenerator</a></li><li><a href="SalmonHeader.html">SalmonHeader</a></li><li><a href="SalmonIntegrity.html">SalmonIntegrity</a></li><li><a href="SalmonNativeProxy.html">SalmonNativeProxy</a></li><li><a href="SalmonNativeTransformer.html">SalmonNativeTransformer</a></li><li><a href="SalmonNonce.html">SalmonNonce</a></li><li><a href="SalmonPassword.html">SalmonPassword</a></li><li><a href="SalmonPbkdfFactory.html">SalmonPbkdfFactory</a></li><li><a href="SalmonRangeExceededException.html">SalmonRangeExceededException</a></li><li><a href="SalmonSecurityException.html">SalmonSecurityException</a></li><li><a href="SalmonSequenceSerializer.html">SalmonSequenceSerializer</a></li><li><a href="SalmonStream.html">SalmonStream</a></li><li><a href="SalmonTextDecryptor.html">SalmonTextDecryptor</a></li><li><a href="SalmonTextEncryptor.html">SalmonTextEncryptor</a></li><li><a href="SalmonTransformerFactory.html">SalmonTransformerFactory</a></li><li><a href="SequenceException.html">SequenceException</a></li><li><a href="TinyAesTransformer.html">TinyAesTransformer</a></li></ul><h3>Global</h3><ul><li><a href="global.html#EncryptionMode">EncryptionMode</a></li><li><a href="global.html#EncryptionMode%255Bundefined%255D">EncryptionMode[undefined]</a></li><li><a href="global.html#PBKDF_SHA1">PBKDF_SHA1</a></li><li><a href="global.html#PBKDF_SHA256">PBKDF_SHA256</a></li><li><a href="global.html#PbkdfAlgo">PbkdfAlgo</a></li><li><a href="global.html#PbkdfAlgo%255Bundefined%255D">PbkdfAlgo[undefined]</a></li><li><a href="global.html#PbkdfType">PbkdfType</a></li><li><a href="global.html#PbkdfType%255Bundefined%255D">PbkdfType[undefined]</a></li><li><a href="global.html#ProviderType">ProviderType</a></li><li><a href="global.html#ProviderType%255Bundefined%255D">ProviderType[undefined]</a></li><li><a href="global.html#SearchEvent">SearchEvent</a></li><li><a href="global.html#SearchEvent%255Bundefined%255D">SearchEvent[undefined]</a></li><li><a href="global.html#SeekOrigin">SeekOrigin</a></li><li><a href="global.html#SeekOrigin%255Bundefined%255D">SeekOrigin[undefined]</a></li><li><a href="global.html#Status">Status</a></li><li><a href="global.html#Status%255Bundefined%255D">Status[undefined]</a></li><li><a href="global.html#_FileExporter_DEFAULT_THREADS">_FileExporter_DEFAULT_THREADS</a></li><li><a href="global.html#_FileExporter_enableMultiThread">_FileExporter_enableMultiThread</a></li><li><a href="global.html#_FileImporter_DEFAULT_BUFFER_SIZE">_FileImporter_DEFAULT_BUFFER_SIZE</a></li><li><a href="global.html#_FileImporter_DEFAULT_THREADS">_FileImporter_DEFAULT_THREADS</a></li><li><a href="global.html#_FileImporter_enableMultiThread">_FileImporter_enableMultiThread</a></li><li><a href="global.html#_MemoryStream_INITIAL_CAPACITY">_MemoryStream_INITIAL_CAPACITY</a></li><li><a href="global.html#_SalmonDriveGenerator_iterations">_SalmonDriveGenerator_iterations</a></li><li><a href="global.html#_SalmonEncoder_base64">_SalmonEncoder_base64</a></li><li><a href="global.html#_SalmonGenerator_MAGIC_BYTES">_SalmonGenerator_MAGIC_BYTES</a></li><li><a href="global.html#_SalmonNativeProxy_libraryName">_SalmonNativeProxy_libraryName</a></li><li><a href="global.html#_SalmonPassword_ENABLE_SHA1">_SalmonPassword_ENABLE_SHA1</a></li><li><a href="global.html#_SalmonPassword_pbkdfAlgo">_SalmonPassword_pbkdfAlgo</a></li><li><a href="global.html#_SalmonPassword_provider">_SalmonPassword_provider</a></li><li><a href="global.html#_SalmonStream_providerType">_SalmonStream_providerType</a></li><li><a href="global.html#autoRename">autoRename</a></li><li><a href="global.html#autoRenameFile">autoRenameFile</a></li><li><a href="global.html#copyFileContents">copyFileContents</a></li><li><a href="global.html#copyRecursively">copyRecursively</a></li><li><a href="global.html#decryptData">decryptData</a></li><li><a href="global.html#deleteRecursively">deleteRecursively</a></li><li><a href="global.html#encryptData">encryptData</a></li><li><a href="global.html#exportFilePart">exportFilePart</a></li><li><a href="global.html#fillBufferPart">fillBufferPart</a></li><li><a href="global.html#getPbkdfAlgoString">getPbkdfAlgoString</a></li><li><a href="global.html#importFilePart">importFilePart</a></li><li><a href="global.html#moveRecursively">moveRecursively</a></li></ul>
+</nav>
+
+<br class="clear">
+
+<footer>
+    Documentation generated by <a href="https://github.com/jsdoc/jsdoc">JSDoc 4.0.3</a> on Tue Sep 03 2024 18:12:49 GMT+0300 (Eastern European Summer Time)
+</footer>
+
+<script> prettyPrint(); </script>
+<script src="scripts/linenumber.js"> </script>
+</body>
+</html>
