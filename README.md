@@ -56,7 +56,7 @@ Salmon is implemented in several programming languages and supports most major p
 The implementation is based on abstract components which you can implement and inject easily in your custom solution. This make things easier if you want to support other file systems, or network files and cloud storage. You can also implement your own secure nonce sequencers by implemented the interfaces provided.
 
 
-**Languages**  
+**Languages:**  
 Java 11+  
 C# .NET 7+  
 C/C++ (data only, no streams, no fs)  
@@ -65,7 +65,7 @@ Typescript ESM/ES2020
 Javascript ESM/ES2020  
 
   
-**Platforms**  
+**Platforms:**  
 JavaFX 17+  
 Android 23+  
 .NET Android 23+  
@@ -74,13 +74,13 @@ Chrome, Firefox, Safari (Remote read-only drives)
 Chrome (Local read-write drives)  
 Node.js (Remote read-only and Local read-write drives)  
   
-**Operating Systems (Tested)**  
+**Operating Systems (Tested):**  
 Windows 10 x86_64  
 MacOS x86_64 10.11  
 Linux Debian 11 x86_64  
 Linux Debian 12 aarch64  
 
-**CPU architectures (Tested)**  
+**CPU architectures (Tested):**  
 Intel x86_64  
 ARM64  
 
