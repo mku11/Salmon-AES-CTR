@@ -8,185 +8,87 @@ Salmon is an AES-256 encryption library with built-in integrity, parallel operat
 [![Version](https://img.shields.io/badge/version-2.0.0-blue)](https://github.com/mku11/Salmon-AES-CTR/releases)
 [![GitHub Releases](https://img.shields.io/github/downloads/mku11/Salmon-AES-CTR/latest/total?logo=github)](https://github.com/mku11/Salmon-AES-CTR/releases)
 
-## Library Features
+**Library Features**  
+AES-256 encryption in CTR Mode  
+HMAC SHA-256 authentication  
+SHA-256 PBKDF2 key derivation    
+AES-NI for Intel x86 and ARM64  
+Data and seekable stream encryption API  
+Virtual file system API  
+Nonce sequencer in app sandbox (Android Only)  
+Nonce sequencer with SHA-256 chksum (Windows Only)  
+Nonce sequencer via windows service (Windows Only)  
 
-* AES-256 in CTR Mode with HMAC SHA-256 authentication.
-* Password based key derivation with PBKDF2 SHA-256.
-* Fast parallel encryption/decryption operations with seekable stream support.
-* API for creating virtual encrypted drives.
-* Abstract API for extending with other filesystems, network files, and custom streams.
-* Fast native AES-NI intrinsics for Intel x86 and ARM64 written in C.
-* Protected file-based nonce sequencer with encrypted SHA-256 checksum (Windows only).
-* System protected nonce sequencer with encrypted SHA-256 checksum via an optional Windows Service.
+## So why another encryption library?  
+**Native implementation:**  
+Fast native AES-NI intrinsics subroutines using SIMD for x86_64 and ARM64.  
 
-## Applications
+**Parallel processing:**  
+Fast multithreaded encryption and decryption of data and files.  
+The number of threads can be set in the parameters.
 
-For a complete showcase of the Salmon API visit the [Salmon Vault](https://github.com/mku11/Salmon-Vault) app offered on several different platforms  
-[**Live Web Demo**](https://mku11.github.io/Salmon-AES-CTR/demo)
+**Facade API:**  
+Read/Write/Seek through encrypted streams and files via a low ceremony API.  
 
-## API Support
+**Data integrity:**  
+Samon is using CTR with interleaved HMAC signatures so you don't have to verify the whole content.
+That means it supports random access unlike GCM and it supports authentication unlike XTS. Seekable streams will simply fail when reading a data chunk that is tampered.  
 
-**Languages**:  
+**No birthday problem:**  
+Salmon is using by default sequential nonces with strict ranges so no random nonces.  
+
+**Backups:**  
+Nonce sequence ranges reside outside of the virtual drive so you can safely keep raw backups.  
+
+**Portability:**  
+You can import new files in virtual drives using multiple authorized devices.  
+Move and decrypt files using any supported device.  
+
+**Protected nonce sequences:**  
+Sequence ranges are stored in app protected space (Android only).  
+Any tampering is detected using an encrypted SHA256 checksum (Win10/11 only).  
+Additional protection from non-admin users (Salmon Windows Service Win10/11 only).  
+
+**Platform Support:**  
+Salmon is implemented in several programming languages and supports most major platforms and operating systems.  
+
+**Extensible API:**  
+The implementation is based on abstract components which you can implement and inject easily in your custom solution. This make things easier if you want to support other file systems, or network files and cloud storage. You can also implement your own secure nonce sequencers by implemented the interfaces provided.
+
+
+**Languages**  
 Java 11+  
 C# .NET 7+  
+C/C++ (data only, no streams, no fs)  
 Python 3.11+  
-Typescript/Javascript ESM/ES2020  
+Typescript ESM/ES2020  
+Javascript ESM/ES2020  
+
   
-**Platforms/Browsers**:  
+**Platforms**  
 JavaFX 17+  
 Android 23+  
 .NET Android 23+  
 WPF, Xamarin, and MAUI  
 Chrome, Firefox, Safari (Remote read-only drives)  
 Chrome (Local read-write drives)  
-Node.js (Reamote read-only and Local read-write drives)  
+Node.js (Remote read-only and Local read-write drives)  
   
-## AES-NI Intrinsics Support
-
-**Operating systems (Tested)**  
+**Operating Systems (Tested)**  
 Windows 10 x86_64  
 MacOS x86_64 10.11  
-Linux Debian 11 x86_64
-Linux Debian 12 aarch64
+Linux Debian 11 x86_64  
+Linux Debian 12 aarch64  
 
 **CPU architectures (Tested)**  
 Intel x86_64  
 ARM64  
 
-## Why Salmon?
-
-* Native implementation: Fast AES-NI intrinsics subroutines.
-* Parallel processing: Multithreaded encryption/decryption of content in CTR mode.
-* Facade API: Read/Write/Seek through encrypted files and streams via a low ceremony API.
-* Data Integrity: Interleaved signatures with data chunks removes the need of processing the whole content.
-* No birthday problem: Strict nonce ranges for every authorized device eliminating random nonce collisions during encryption when using a Salmon Drive.
-* Backups/Portability: Nonce sequencer ranges reside outside of the encryption space so you can backup your Salmon Drive as many times you want and decrypt them using any device.
-* Protected nonce sequences: Sequence ranges are stored in app protected space (Android only).
-* Tamper-Proof nonce sequences: Tampering is detected using an encrypted SHA256 checksum (Win10/11 only).
-* Admin-Protected nonce sequences: Additional protection from non-admin users (Salmon Windows Service Win10/11 only).
-* Python parallel processing (multiple cpus) in Windows is very slow unlike Linux.
-* Javascript service worker handler does not support parallel processing.
-* Javascript implementation is ESM so to work in Node.js you need to use --experimental-vm-modules
-
-## Salmon API Samples
-API usage is consistent across languages with slight variations on naming conventions. Note that the javascript/typescript libraries are based on async IO so you will need to use 'await' most of the time.
-  
-For detailed samples see: [**Samples**](https://github.com/mku11/Salmon-AES-CTR/tree/main/samples)  
-For an extensive use of the API see: [**Salmon Vault**](https://github.com/mku11/Salmon-Vault)  
-  
-For short code samples see below.
-
-### SalmonFS API:
-```
-// Create a sequencer. Make sure this path is secure and excluded from your backups.
-String sequencerPath = "c:\\users\\<username>\\AppData\\Local\\<somefolder>\\salmon_sequencer.xml";
-SalmonFileSequencer sequencer = new SalmonFileSequencer(new JavaFile(sequencerPath), new SalmonSequenceSerializer());
-
-// create() or open() a virtual drive provided with a location and a text password
-// Supported drives: JavaDrive, DotNetDrive, PyDrive, JsDrive, JsHttpDrive (remote), JsNodeDrive (node.js)
-SalmonDrive drive = JavaDrive.create(new JavaFile("c:\\path\\to\\your\\virtual\\drive"), password, sequencer);
-
-// Create an importer with 2 threads for parallel processing
-SalmonFileCommander commander = new SalmonFileCommander(256 * 1024, 256 * 1024, 2);
-
-// you can create a batch of multiple files for encryption
-JavaFile[] files = new JavaFile[]{
-	new JavaFile("data/file1.txt"), 
-	new JavaFile("data/file2.jpg"), 
-	new JavaFile("data/file3.mp4")};
-
-// now import the files under the root directory
-commander.importFiles(files, drive.getRoot(), false, true, null, null, null);
-commander.close();
-
-// use the virtual drive API to list the files
-SalmonFile root = drive.getRoot();
-SalmonFile[] salmonFiles = root.listFiles();
-
-// or retrieve a file by filename
-SalmonFile file = root.getChild("file1.txt");
-
-// get a stream that you can read/decrypt the data from
-SalmonStream stream = file.getInputStream();
-// stream.read(...);
-// stream.seek(...);
-stream.close();
-
-// or use a SalmonFileInputStream with parallel processing and caching
-SalmonFileInputStream inputStream = new SalmonFileInputStream(file, 2, 4 * 1024 * 1024, 2, 256 * 1024);
-// inputStream.read(...);
-inputStream.close();
-drive.close();
-```
-
-### SalmonCore API: Data encryption/decryption
-```
-// To encrypt byte data or text without using a drive you need to generate your own key and nonce.
-// Get a fresh secure random key and keep this somewhere safe.
-byte[] key = SalmonGenerator.getSecureRandomBytes(32); // 256-bit key
-
-// Also get a fresh nonce, nonce is not a secret thought it must only be used once per content!
-byte[] nonce = SalmonGenerator.getSecureRandomBytes(8); // 64-bit nonce
-
-// Generate some sample data to encrypt
-byte[] bytes = SalmonGenerator.getSecureRandomBytes(1024);
-
-// encrypt a byte array using 2 parallel threads
-SalmonEncryptor encryptor = new SalmonEncryptor(2);
-byte[] encBytes = encryptor.encrypt(bytes, key, nonce, false);
-encryptor.close();
-
-// decrypt:
-SalmonDecryptor decryptor = new SalmonDecryptor(2);
-byte[] decBytes = decryptor.decrypt(encBytes, key, nonce, false);
-decryptor.close();
-
-// Or encrypt a text string
-nonce = SalmonGenerator.getSecureRandomBytes(8); // always get a fresh nonce!
-String encText = SalmonTextEncryptor.encryptString(text, key, nonce, true);
-
-// Decrypt the encrypted string, no need to specify the nonce again since it's embedded in the data
-String decText = SalmonTextDecryptor.decryptString(encText, key, null, true);
-```
-
-### Performance: AES-NI intrinsics
-```
-// To set the Salmon native intrinsics:  
-SalmonStream.setAesProviderType(SalmonStream.ProviderType.AesIntrinsics);
-```
-
-### Portability: TinyAES library  
-```
-// If the platform/OS does not provide AES encryption algorithms and the hardware does not have AES-NI features you can use Salmon with the TinyAES library which is written in pure C code:
-SalmonStream.setAesProviderType(SalmonStream.ProviderType.TinyAES);
-```
-
-### Portable Drives:
-Drives are portable and backable and can be read/decrypted by any device that can run Salmon API. If you need to import files to a salmon virtual drive using a different device you need to first requires authorize it. 
-
-The device that created the drive is by default authorized. Any authorized device can authorize other devices. The authorization works by allocating a new nonce range for each authorized device.
-```
-// Device authorization example:
-// open a copy of the drive on the target device and get the authorization id
-String authId = SalmonDrive.getAuthId();
-
-// open the drive on the source (authorized) device and export an 
-// authorization file with the authorization id of the target device
-SalmonAuthConfig.exportAuthFile(drive, authId, new JavaFile("c:\\path\\to\\auth_file\\auth.slma"));
-
-// finally import the authorization file in the target device
-SalmonAuthConfig.importAuthFile(drive, new JavaFile("c:\\path\\to\\auth_file\\auth.slma"));
-```
-
-### Interoperability: Injectable stream wrappers
-The C# implementation has a SalmonStream that inherits from .NET Stream so you can use it with other libraries or 3rd party code. For Java/Javascript/Typescript/Python you have to wrap the SalmonStream to built-in wrappers:   
-* Java: InputStreamWrapper for SalmonStream and SalmonFileInputStream for SalmonFile
-* Typescript/Javascript: ReadableStreamWrapper for SalmonStream and SalmonFileReadableStream for SalmonFile
-* Python: BufferedIOWrapper for SalmonStream and SalmonFileInputStream for SalmonFile
-
-### Native: C/C++  
-Although there is no drive and stream support for C/C++ you can use the Salmon native AES-NI subroutines directly.
-For a full working C++ sample see: [Samples](https://github.com/mku11/Salmon-AES-CTR/tree/main/samples)
+## Salmon API Samples  
+You can view some [Samples Documentation](https://github.com/mku11/Salmon-AES-CTR/tree/main/docs/Samples.md) for Java.  
+More [Samples](https://github.com/mku11/Salmon-AES-CTR/tree/main/samples) for C#, C, C++, JavaScript, and Python are included in the project so you can clone and run on your computer.  
+For a complete showcase of the Salmon API visit the [Salmon Vault App](https://github.com/mku11/Salmon-Vault) repository which contains a demo app offered on several different platforms.  
+Or view a [**Live Web Demo**](https://mku11.github.io/Salmon-AES-CTR/demo) on your browser.  
 
 ## Package Management
 To learn how to integrate the Salmon library packages into your project with Maven, Gradle, or VS Studio see [Package Management](https://github.com/mku11/Salmon-AES-CTR/blob/main/docs/Package_Management.md)  
@@ -196,16 +98,24 @@ Want to know more about Salmon specs and subprojects?
 Click on [Salmon specifications and formats](https://github.com/mku11/Salmon-AES-CTR/tree/main/docs)   
 For how to compile and build each subproject see README.md in its respective folder.
 
-## Limitations
-* Salmon streams are seekable only if the backed resource supports random access (disk, memory, network).
-* Salmon API is not Thread Safe! If you want to use parallel processing you need to use SalmonEncryptor/SalmonDecryptor and SalmonFileImporter/SalmonFileExporter.
-* Importing files to a salmon virtual drive using different devices requires authorization by an already authorized device for each  virtual drive. The device that created the drive is by default authorized. The authorization mechanism protects against repeated access based attacks!
-* Make sure that you never backup and restore the Nonce Sequencer files in your Windows Device! You should always create them under a %LOCALAPPDATA% directory that is not backed up, this will prevent nonce reuse!
-* User Sequencer files are not secure from other apps. For Android you should create them in app space and not on external storage! For Windows Salmon will notify you if it detects file sequencer tampering though it is recommended for additional security that you should use the Salmon Windows Service. The Salmon service protects the sequencer files under the system administrator (LocalSystem) space. For Linux and Mac make sure you keep them in a safe place or implement your own tampering detection!
-* Integrity is not supported for filenames only for file contents.
-* Maximum guaranteed file size: 2^64 bytes or limited by the backed resource (disk, memory, network).
-* Maximum drive file size: 2^64 bytes
-* Maximum number of drive files: 2^62 (64 bit nonces used for the filename and the file contents.
+## Security Limitations
+- User sequencer files are not secure from other apps by default.  
+**For Android:** you must create sequencer files in protected app space and not on external storage! Android apps work on sandbox environments though this is true only if you have **NOT ROOTED** your devices.  
+**For Windows:** you can create sequencer files preferably within %LOCALAPPDATA% folder. Windows will notify you if it detects tampering though it is recommended for additional security you use the Salmon Windows Service. The Salmon windows service is a better solution because it protects the sequencer files under a system administrator (LocalSystem) account.  
+**For Linux and Mac:** make sure you keep the sequencer files in a safe place since salmon has no anti-tampering support for these OSes. What you can do is implement a secure nonce service or your own tampering detection! You can do that by extending SalmonFileSequencer class, for an example see WinFileSequencer.  
+- Importing files to a salmon virtual drive using different devices requires authorization by an already authorized device for each  virtual drive. The device that created the drive is by default authorized. The authorization mechanism works by assigning new nonce ranges for each authorized device which prevents nonce reuse.
+- Make sure that you never backup and restore the nonce sequencer files! You should always create them under a directory that is not backed up, this will prevent nonce reuse!  
+- Data integrity is not supported for filenames only for file contents.    
+
+## Functional Limitations
+- Salmon streams are seekable only if the backed resource supports random access (disk, memory, network).  
+- Salmon API is not Thread Safe! If you want to use parallel processing you need to use SalmonEncryptor/SalmonDecryptor and SalmonFileImporter/SalmonFileExporter.  
+- Maximum guaranteed file size: 2^64 bytes or limited by the backed resource (disk, memory, network).  
+- Maximum drive file size: 2^64 bytes  
+- Maximum number of drive files: 2^62 (64 bit nonces used for the filename and the file contents.  
+- Python parallel processing (multiple cpus) in Windows is slow due to python being single-threaded.  
+- Javascript service worker handler does not support parallel processing.  
+- Javascript implementation is ESM so in order to work in Node.js you need to use --experimental-vm-modules  
 
 ## Contributions
 Unfortunately I cannot accept any code contributions. Though, bug reports and security POCs are more than welcome!  
