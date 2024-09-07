@@ -2,7 +2,9 @@
 
 ## Salmon
 
-Salmon is an AES-256 encryption library with built-in integrity, parallel operations, and seekable stream support. It provides a high level API for encrypting data, streams, and a virtual drive API for encrypting files. Powered by a fast native library for Intel x86_64 and ARM64.  
+Salmon is an AES-256 encryption library with built-in integrity, parallel operations, and seekable stream support.  
+It provides a high level API for encrypting data, streams, and a virtual drive API for encrypting files.  
+Powered by a fast native library for Intel x86_64 and ARM64.  
   
 [![License: MIT](https://img.shields.io/github/license/mku11/Salmon-AES-CTR.svg)](LICENSE)
 [![Version](https://img.shields.io/badge/version-2.0.0-blue)](https://github.com/mku11/Salmon-AES-CTR/releases)
@@ -96,7 +98,7 @@ For a complete showcase of the Salmon API visit the [Salmon Vault App](https://g
 Or view a [**Live Web Demo**](https://mku11.github.io/Salmon-Vault/demo) on your browser.  
 
 **Package Management**  
-To learn how to integrate the Salmon library packages into your project with Maven, Gradle, or VS Studio see [Package Management](https://github.com/mku11/Salmon-AES-CTR/blob/main/docs/Package_Management.md)  
+To learn how to integrate Salmon into your project with Maven, Gradle, or VS Studio see [Package Management](https://github.com/mku11/Salmon-AES-CTR/blob/main/docs/Package_Management.md)  
 
 **Specifications**  
 Want to know more about Salmon specs and subprojects?  
@@ -105,7 +107,7 @@ For how to compile and build each subproject see README.md in its respective fol
 
 **Security Limitations**  
 - User sequencer files are not secure from other apps by default.  
-For Android: you must create sequencer files in protected app space and not on external storage! Android apps work on sandbox environments though for ROOTED devices there is no such protection.  
+For Android: you must create sequencer files in protected app space and not on external storage! Android apps work on sandbox environments though for rooted devices there is no such protection.  
 For Windows: you can create sequencer files preferably within %LOCALAPPDATA% folder. Windows will notify you if it detects tampering though it is recommended for additional security you use the Salmon Windows Service. The Salmon windows service is a better solution because it protects the sequencer files under a system administrator (LocalSystem) account.  
 For Linux and Mac: make sure you keep the sequencer files in a safe place since salmon has no anti-tampering support for these OSes. What you can do is implement a secure nonce service or your own tampering detection! You can do that by extending SalmonFileSequencer class, for an example see WinFileSequencer.  
 - Importing files to a salmon virtual drive using different devices requires authorization by an already authorized device for each  virtual drive. The device that created the drive is by default authorized. The authorization mechanism works by assigning new nonce ranges for each authorized device which prevents nonce reuse.
@@ -129,4 +131,4 @@ Unfortunately I cannot accept any code contributions. Though, bug reports and se
 Salmon is released under MIT Licence, see [LICENSE](https://github.com/mku11/Salmon-AES-CTR/blob/main/LICENSE) file.
 Make sure you read the LICENSE file and display proper attribution if you decide to use this software.
 Dependency libraries from Github, Maven, and NuGet are covered by their own license  
-see [NOTICE](https://github.com/mku11/Salmon-AES-CTR/blob/main/LICENSE)  
+see [NOTICE](https://github.com/mku11/Salmon-AES-CTR/blob/main/NOTICE)  
