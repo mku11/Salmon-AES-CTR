@@ -40,7 +40,7 @@ Seekable streams will simply fail when reading a data chunk that is tampered.
 Salmon is using by default sequential nonces with strict ranges so no random nonces.  
 
 **Backups:**  
-Nonce sequence ranges reside outside of the virtual drive so you can safely keep raw backups.  
+Nonce sequence ranges reside outside of the virtual drive so you can safely keep fully operational clones and backups of your drive.  
 
 **Portability:**  
 You can import new files in virtual drives using multiple authorized devices.  
