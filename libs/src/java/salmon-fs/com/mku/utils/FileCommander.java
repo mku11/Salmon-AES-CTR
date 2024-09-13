@@ -80,8 +80,11 @@ public class FileCommander {
         ArrayList<IVirtualFile> importedFiles = new ArrayList<>();
 
         int total = 0;
-        for (int i = 0; i < filesToImport.length; i++)
+        for (int i = 0; i < filesToImport.length; i++) {
+            if (stopJobs)
+                break;
             total += getCountRecursively(filesToImport[i]);
+        }
         int[] count = new int[1];
         HashMap<String, IVirtualFile> existingFiles = getExistingFiles(importDir);
         for (int i = 0; i < filesToImport.length; i++) {
@@ -99,6 +102,8 @@ public class FileCommander {
     private HashMap<String, IVirtualFile> getExistingFiles(IVirtualFile importDir) {
         HashMap<String, IVirtualFile> files = new HashMap<>();
         for (IVirtualFile file : importDir.listFiles()) {
+            if (stopJobs)
+                break;
             try {
                 files.put(file.getBaseName(), file);
             } catch (Exception ignored) {
@@ -126,10 +131,13 @@ public class FileCommander {
                 onProgressChanged.accept(new RealFileTaskProgress(fileToImport, 1, 1, count[0], total));
             count[0]++;
             HashMap<String, IVirtualFile> nExistingFiles = getExistingFiles(sfile);
-            for (IRealFile child : fileToImport.listFiles())
+            for (IRealFile child : fileToImport.listFiles()) {
+                if (stopJobs)
+                    break;
                 importRecursively(child, sfile, deleteSource, integrity, onProgressChanged,
                         autoRename, onFailed, importedFiles, count, total,
                         nExistingFiles);
+            }
             if (deleteSource)
                 fileToImport.delete();
         } else {
@@ -179,8 +187,11 @@ public class FileCommander {
         ArrayList<IRealFile> exportedFiles = new ArrayList<>();
 
         int total = 0;
-        for (int i = 0; i < filesToExport.length; i++)
+        for (int i = 0; i < filesToExport.length; i++) {
+            if (stopJobs)
+                break;
             total += getCountRecursively(filesToExport[i]);
+        }
 
         HashMap<String, IRealFile> existingFiles = getExistingFiles(exportDir);
 
@@ -200,6 +211,8 @@ public class FileCommander {
     private HashMap<String, IRealFile> getExistingFiles(IRealFile exportDir) {
         HashMap<String, IRealFile> files = new HashMap<>();
         for (IRealFile file : exportDir.listFiles()) {
+            if (stopJobs)
+                break;
             files.put(file.getBaseName(), file);
         }
         return files;
@@ -225,10 +238,13 @@ public class FileCommander {
                 onProgressChanged.accept(new VirtualFileTaskProgress(fileToExport, 1, 1, count[0], total));
             count[0]++;
             HashMap<String, IRealFile> nExistingFiles = getExistingFiles(rfile);
-            for (IVirtualFile child : fileToExport.listFiles())
+            for (IVirtualFile child : fileToExport.listFiles()) {
+                if (stopJobs)
+                    break;
                 exportRecursively(child, rfile, deleteSource, integrity, onProgressChanged,
                         autoRename, onFailed, exportedFiles, count, total,
                         nExistingFiles);
+            }
             if (deleteSource) {
                 fileToExport.delete();
             }
@@ -260,6 +276,8 @@ public class FileCommander {
         int count = 1;
         if (file.isDirectory()) {
             for (IVirtualFile child : file.listFiles()) {
+                if (stopJobs)
+                    break;
                 count += getCountRecursively(child);
             }
         }
@@ -270,6 +288,8 @@ public class FileCommander {
         int count = 1;
         if (file.isDirectory()) {
             for (IRealFile child : file.listFiles()) {
+                if (stopJobs)
+                    break;
                 count += getCountRecursively(child);
             }
         }
@@ -288,8 +308,11 @@ public class FileCommander {
         stopJobs = false;
         int[] count = new int[1];
         int total = 0;
-        for (int i = 0; i < filesToDelete.length; i++)
+        for (int i = 0; i < filesToDelete.length; i++) {
+            if (stopJobs)
+                break;
             total += getCountRecursively(filesToDelete[i]);
+        }
         for (IVirtualFile virtualFile : filesToDelete) {
             if (stopJobs)
                 break;
@@ -330,16 +353,17 @@ public class FileCommander {
         stopJobs = false;
         int[] count = new int[1];
         int total = 0;
-        for (int i = 0; i < filesToCopy.length; i++)
-            total += getCountRecursively(filesToCopy[i]);
-        final int finalTotal = total;
-        for (IVirtualFile VirtualFile : filesToCopy) {
-            if (dir.getRealFile().getPath().startsWith(VirtualFile.getRealFile().getPath()))
-                continue;
-
+        for (int i = 0; i < filesToCopy.length; i++) {
             if (stopJobs)
                 break;
-
+            total += getCountRecursively(filesToCopy[i]);
+        }
+        final int finalTotal = total;
+        for (IVirtualFile VirtualFile : filesToCopy) {
+            if (stopJobs)
+                break;
+            if (dir.getRealFile().getPath().startsWith(VirtualFile.getRealFile().getPath()))
+                continue;
             if (move) {
                 VirtualFile.moveRecursively(dir, (file, position, length) ->
                 {
@@ -451,6 +475,8 @@ public class FileCommander {
     private int getFiles(IVirtualFile[] files) {
         int total = 0;
         for (IVirtualFile file : files) {
+            if (stopJobs)
+                break;
             total++;
             if (file.isDirectory()) {
                 total += getFiles(file.listFiles());

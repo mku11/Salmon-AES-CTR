@@ -143,6 +143,8 @@ public abstract class FileImporter {
                 throw new UnsupportedOperationException("Multithreading is not supported");
             stopped = false;
             failed = false;
+            lastException = null;
+
             importedFile = dir.createFile(filename);
             this.onPrepare(importedFile, integrity);
 

@@ -132,6 +132,7 @@ public abstract class FileExporter {
             stopped = false;
             final long[] totalBytesWritten = new long[]{0};
             failed = false;
+            lastException = null;
 
             if (!exportDir.exists())
                 exportDir.mkdir();
