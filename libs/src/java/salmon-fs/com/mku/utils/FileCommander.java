@@ -138,7 +138,7 @@ public class FileCommander {
                         autoRename, onFailed, importedFiles, count, total,
                         nExistingFiles);
             }
-            if (deleteSource)
+            if (deleteSource && !stopJobs)
                 fileToImport.delete();
         } else {
             try {
@@ -245,7 +245,7 @@ public class FileCommander {
                         autoRename, onFailed, exportedFiles, count, total,
                         nExistingFiles);
             }
-            if (deleteSource) {
+            if (deleteSource && !stopJobs) {
                 fileToExport.delete();
             }
         } else {
