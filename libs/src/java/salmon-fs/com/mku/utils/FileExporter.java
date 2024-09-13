@@ -223,8 +223,8 @@ public abstract class FileExporter {
 
             byte[] bytes = new byte[bufferSize];
             int bytesRead;
-            while ((bytesRead = sourceStream.read(bytes, 0, Math.min(bytes.length,
-                    (int) (count - totalPartBytesWritten)))) > 0 && totalPartBytesWritten < count) {
+            while ((bytesRead = sourceStream.read(bytes, 0, (int) Math.min((long) bytes.length,
+                    count - totalPartBytesWritten))) > 0 && totalPartBytesWritten < count) {
                 if (stopped)
                     break;
 
