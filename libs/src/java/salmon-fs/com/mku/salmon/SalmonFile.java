@@ -850,10 +850,10 @@ public class SalmonFile implements IVirtualFile {
                 onFailed.accept(new SalmonFile(file, getDrive()), ex);
             };
         }
-        Function<IRealFile, String> RenameRealFile = null;
+        Function<IRealFile, String> renameRealFile = null;
         // use auto rename only when we are using a drive
         if (autoRename != null && getDrive() != null)
-            RenameRealFile = (file) -> {
+            renameRealFile = (file) -> {
                 try {
                     return autoRename.apply(new SalmonFile(file, getDrive()));
                 } catch (Exception e) {
@@ -865,7 +865,7 @@ public class SalmonFile implements IVirtualFile {
                     if (progressListener != null)
                         progressListener.accept(new SalmonFile(file, drive), position, length);
                 },
-                RenameRealFile, autoRenameFolders, onFailedRealFile);
+                renameRealFile, autoRenameFolders, onFailedRealFile);
     }
 
     /**
