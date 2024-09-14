@@ -3,4 +3,5 @@ include 'salmon-core'
 include 'salmon-native'
 include 'salmon-fs'
 include 'salmon-win'
+include 'salmon-ws'
 

@@ -13,6 +13,7 @@
             <option value="$PROJECT_DIR$/salmon-fs" />
             <option value="$PROJECT_DIR$/salmon-native" />
             <option value="$PROJECT_DIR$/salmon-win" />
+            <option value="$PROJECT_DIR$/salmon-ws" />
           </set>
         </option>
       </GradleProjectSettings>
