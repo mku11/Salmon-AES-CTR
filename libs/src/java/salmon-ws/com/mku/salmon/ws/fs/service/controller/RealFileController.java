@@ -13,12 +13,16 @@ import java.util.List;
 @RestController
 @RequestMapping("/api")
 /**
- * Provides endpoints for manipulating the filesystem remotely.
+ * Provides endpoints for manipulating the filesystem remotely. The file system is expected to contain encrypted
+ * files. The function of these endpoints is to simply facilitate most common fs operations, all encryption and
+ * decryption will happen at the client side.
  */
 public class RealFileController {
 
     /**
-     * Get details about a file
+     * Get details about a file<br>
+     * example:
+     * curl -X GET "http://localhost:8080/api/info?path=/U0xNAgAAAABAAAAAAAADGOKoJtY0"
      * @param path The file path
      * @return
      */
@@ -28,12 +32,15 @@ public class RealFileController {
     }
 
     /**
-     * List files and directories under a directory
+     * List files and directories under a directory<br>
+     * example:
+     * curl -X GET "http://localhost:8080/api/list?path=/U0xNAgAAAABAAAAAAAADGOKoJtY0"
      * @param path The directory path
      * @return
      */
     @GetMapping("/list")
     public List<RealFileNode> list(String path) throws IOException {
+        System.out.println("listing");
         ArrayList<RealFileNode> list = new ArrayList<>();
         IRealFile file = FileSystem.getFile(path);
         if (file.isDirectory()) {
@@ -47,23 +54,25 @@ public class RealFileController {
     }
 
     /**
-     * Create a directory
+     * Create a directory<br>
+     * example:
+     * curl -X POST "http://localhost:8080/api/mkdir?path=/U0xNAgAAAABAAAAAAAADGOKoJtY0"
      * @param path The directory path
      * @return
      */
     @PostMapping("/mkdir")
-    public RealFileNode mkdir(String path, boolean isDirectory) throws IOException {
+    public RealFileNode mkdir(String path) throws IOException {
         IRealFile file = FileSystem.getFile(path);
         IRealFile parent = file.getParent();
-        if (isDirectory)
-            file = parent.createDirectory(file.getBaseName());
-        else
-            file = parent.createFile(file.getBaseName());
+        file = parent.createDirectory(file.getBaseName());
         return new RealFileNode(file);
     }
 
     /**
-     * Upload a file under a directory
+     * Upload a file under a directory<br>
+     * example:
+     * curl -X POST -F "file=@D:/tmp/testdata/image.jpg" "http://localhost:8080/api/upload?destDir=/U0xNAgAAAABAAAAAAAACB5s0xrH2KAs="
+     *
      * @param file The file
      * @param destDir The destination directory
      * @return
@@ -76,7 +85,9 @@ public class RealFileController {
     }
 
     /**
-     * Copy a file to the destination directory
+     * Copy a file to the destination directory<br>
+     * example:
+     *  curl -X PUT "http://localhost:8080/api/copy?sourcePath=/U0xNAgAAAABAAAAAAAAA5hTh7E6oVTYJzH0=&destDir=/U0xNAgAAAABAAAAAAAACB5s0xrH2KAs="
      * @param sourcePath The file to copy
      * @param destDir The destination directory
      * @return
@@ -96,7 +107,9 @@ public class RealFileController {
 
 
     /**
-     * Move a file to the destination directory
+     * Move a file to the destination directory<br>
+     * example:
+     *  curl -X PUT "http://localhost:8080/api/move?sourcePath=/U0xNAgAAAABAAAAAAAAA5hTh7E6oVTYJzH0=&destDir=/U0xNAgAAAABAAAAAAAACB5s0xrH2KAs="
      * @param sourcePath The file to move
      * @param destDir The destination directory
      * @return
@@ -115,7 +128,9 @@ public class RealFileController {
     }
 
     /**
-     * Rename a file or directory
+     * Rename a file or directory<br>
+     * example:
+     * curl -X PUT "http://localhost:8080/api/rename?path=/U0xNAgAAAABAAAAAAAADEWyHD6u05Tq-UQ==&filename=U0xNAgAAAABAAAAAAAAA5hTh7E6oVTYJzH0="
      * @param path The file or directory path
      * @param filename The new filename
      * @return
@@ -129,7 +144,9 @@ public class RealFileController {
     }
 
     /**
-     * Delete a file or directory
+     * Delete a file or directory<br>
+     * example:
+     * curl -X DELETE "http://localhost:8080/api/delete?path=/U0xNAgAAAABAAAAAAAADGOKoJtY0"
      * @param path The file or directory path
      * @return
      */

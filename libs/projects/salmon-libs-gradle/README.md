@@ -27,6 +27,12 @@ To build the java and native libraries from the command line run:
 gradlew.bat build -x test --rerun-tasks
 ```
 
+To build the java web service from the command line run:  
+```
+gradlew.bat bootWar -x test --rerun-tasks
+```
+Then build the artifacts from within IntelliJ IDEA
+
 To create the maven packages (see root folder output dir):  
 ```
 gradlew.bat publish -x test --rerun-tasks  
