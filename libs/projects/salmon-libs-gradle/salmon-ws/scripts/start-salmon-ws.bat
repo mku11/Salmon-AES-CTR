@@ -1,6 +1,5 @@
  @echo off
  SET CURRDIR=%~dp0
-@REM  SET LOGGING=-Dorg.apache.commons.logging.Log=org.apache.commons.logging.impl.NoOpLog
 
  if exist "%1" (
    java -cp %CURRDIR%salmon-ws-2.1.0.war org.springframework.boot.loader.WarLauncher %1

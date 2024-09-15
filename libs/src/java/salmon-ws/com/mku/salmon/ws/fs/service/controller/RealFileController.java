@@ -40,7 +40,6 @@ public class RealFileController {
      */
     @GetMapping("/list")
     public List<RealFileNode> list(String path) throws IOException {
-        System.out.println("listing");
         ArrayList<RealFileNode> list = new ArrayList<>();
         IRealFile file = FileSystem.getFile(path);
         if (file.isDirectory()) {
