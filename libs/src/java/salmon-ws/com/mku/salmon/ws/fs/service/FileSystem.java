@@ -42,7 +42,8 @@ public class FileSystem {
     }
 
     public static String getRelativePath(IRealFile file) {
-        return file.getPath().replace(getRoot().getPath(), "").replace("\\", "/");
+        return new JavaFile(file.getPath()).getAbsolutePath().replace(
+                new JavaFile(getRoot().getPath()).getAbsolutePath(), "").replace("\\", "/");
     }
 
     public static IRealFile copy(String destDir, MultipartFile file) throws IOException {
