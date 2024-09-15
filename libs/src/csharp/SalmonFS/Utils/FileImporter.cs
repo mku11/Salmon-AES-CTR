@@ -155,6 +155,8 @@ public abstract class FileImporter
                 throw new NotSupportedException("Multithreading is not supported");
             stopped = false;
             failed = false;
+            lastException = null;
+
             salmonFile = dir.CreateFile(filename);
             this.OnPrepare(salmonFile, integrity);
 

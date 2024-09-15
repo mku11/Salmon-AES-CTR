@@ -73,7 +73,11 @@ public class FileCommander
 
         int total = 0;
         for (int i = 0; i < filesToImport.Length; i++)
+        {
+            if (stopJobs)
+                break;
             total += GetCountRecursively(filesToImport[i]);
+        }
         int count = 0;
         Dictionary<string, IVirtualFile> existingFiles = GetExistingFiles(importDir);
         for (int i = 0; i < filesToImport.Length; i++)
@@ -94,6 +98,8 @@ public class FileCommander
         Dictionary<string, IVirtualFile> files = new Dictionary<string, IVirtualFile>();
         foreach (IVirtualFile file in importDir.ListFiles())
         {
+            if (stopJobs)
+                break;
             files[file.BaseName] = file;
         }
         return files;
@@ -121,6 +127,8 @@ public class FileCommander
             Dictionary<string, IVirtualFile> nExistingFiles = GetExistingFiles(sfile);
             foreach (IRealFile child in fileToImport.ListFiles())
             {
+                if (stopJobs)
+                    break;
                 ImportRecursively(child, sfile, deleteSource, integrity, OnProgressChanged,
                     AutoRename, OnFailed, importedFiles, ref count, total, nExistingFiles);
             }
@@ -184,8 +192,11 @@ public class FileCommander
 
         int total = 0;
         for (int i = 0; i < filesToExport.Length; i++)
+        {
+            if (stopJobs)
+                break;
             total += GetCountRecursively(filesToExport[i]);
-
+        }
         Dictionary<string, IRealFile> existingFiles = GetExistingFiles(exportDir);
 
         int count = 0;
@@ -209,6 +220,8 @@ public class FileCommander
         Dictionary<string, IRealFile> files = new Dictionary<string, IRealFile>();
         foreach (IRealFile file in exportDir.ListFiles())
         {
+            if (stopJobs)
+                break;
             files[file.BaseName] = file;
         }
         return files;
@@ -235,8 +248,12 @@ public class FileCommander
             count++;
             Dictionary<string, IRealFile> nExistingFiles = GetExistingFiles(rfile);
             foreach (IVirtualFile child in fileToExport.ListFiles())
+            {
+                if (stopJobs)
+                    break;
                 ExportRecursively(child, rfile, deleteSource, integrity, OnProgressChanged,
                     AutoRename, OnFailed, exportedFiles, ref count, total, nExistingFiles);
+            }
             if (deleteSource && !stopJobs)
             {
                 fileToExport.Delete();
@@ -288,6 +305,8 @@ public class FileCommander
         {
             foreach (IVirtualFile child in file.ListFiles())
             {
+                if (stopJobs)
+                    break;
                 count += GetCountRecursively(child);
             }
         }
@@ -301,6 +320,8 @@ public class FileCommander
         {
             foreach (IRealFile child in file.ListFiles())
             {
+                if (stopJobs)
+                    break;
                 count += GetCountRecursively(child);
             }
         }
@@ -321,7 +342,11 @@ public class FileCommander
         int count = 0;
         int total = 0;
         for (int i = 0; i < filesToDelete.Length; i++)
+        {
+            if (stopJobs)
+                break;
             total += GetCountRecursively(filesToDelete[i]);
+        }
         foreach (IVirtualFile IVirtualFile in filesToDelete)
         {
             if (stopJobs)
@@ -369,14 +394,18 @@ public class FileCommander
         int count = 0;
         int total = 0;
         for (int i = 0; i < filesToCopy.Length; i++)
-            total += GetCountRecursively(filesToCopy[i]);
-        foreach (IVirtualFile IVirtualFile in filesToCopy)
         {
-            if (dir.RealFile.Path.StartsWith(IVirtualFile.RealFile.Path))
-                continue;
-
             if (stopJobs)
                 break;
+            total += GetCountRecursively(filesToCopy[i]);
+        }
+            
+        foreach (IVirtualFile IVirtualFile in filesToCopy)
+        {
+            if (stopJobs)
+                break;
+            if (dir.RealFile.Path.StartsWith(IVirtualFile.RealFile.Path))
+                continue;
 
             if (move)
             {

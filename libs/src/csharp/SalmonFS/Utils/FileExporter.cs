@@ -146,6 +146,7 @@ public abstract class FileExporter
             stopped = false;
             long[] totalBytesWritten = new long[] { 0 };
             failed = false;
+            lastException = null;
 
             if (!exportDir.Exists)
                 exportDir.Mkdir();
