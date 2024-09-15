@@ -124,7 +124,7 @@ public class FileCommander
                 ImportRecursively(child, sfile, deleteSource, integrity, OnProgressChanged,
                     AutoRename, OnFailed, importedFiles, ref count, total, nExistingFiles);
             }
-            if (deleteSource)
+            if (deleteSource && !stopJobs)
                 fileToImport.Delete();
         }
         else
@@ -237,7 +237,7 @@ public class FileCommander
             foreach (IVirtualFile child in fileToExport.ListFiles())
                 ExportRecursively(child, rfile, deleteSource, integrity, OnProgressChanged,
                     AutoRename, OnFailed, exportedFiles, ref count, total, nExistingFiles);
-            if (deleteSource)
+            if (deleteSource && !stopJobs)
             {
                 fileToExport.Delete();
                 if (OnProgressChanged != null)
