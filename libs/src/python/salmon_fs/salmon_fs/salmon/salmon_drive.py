@@ -618,7 +618,7 @@ class SalmonDrive(VirtualDrive, ABC):
         """
         return self.__sequencer
         
-    def get_sequencer(self, sequencer: INonceSequencer | None):
+    def set_sequencer(self, sequencer: INonceSequencer | None):
         """
         Set the sequencer
         :param sequencer: The nonce sequencer
