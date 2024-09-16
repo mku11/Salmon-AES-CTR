@@ -1,0 +1,133 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <title>JSDoc: Source: salmon-core/salmon/salmon_encryptor_helper.js</title>
+
+    <script src="scripts/prettify/prettify.js"> </script>
+    <script src="scripts/prettify/lang-css.js"> </script>
+    <!--[if lt IE 9]>
+      <script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script>
+    <![endif]-->
+    <link type="text/css" rel="stylesheet" href="styles/prettify-tomorrow.css">
+    <link type="text/css" rel="stylesheet" href="styles/jsdoc-default.css">
+</head>
+
+<body>
+
+<div id="main">
+
+    <h1 class="page-title">Source: salmon-core/salmon/salmon_encryptor_helper.js</h1>
+
+    
+
+
+
+    
+    <section>
+        <article>
+            <pre class="prettyprint source linenums"><code>/*
+MIT License
+
+Copyright (c) 2021 Max Kas
+
+Permission is hereby granted, free of charge, to any person obtaining a copy
+of this software and associated documentation files (the "Software"), to deal
+in the Software without restriction, including without limitation the rights
+to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+copies of the Software, and to permit persons to whom the Software is
+furnished to do so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in all
+copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+SOFTWARE.
+*/
+import { MemoryStream } from "../streams/memory_stream.js";
+import { SalmonStream } from "./streams/salmon_stream.js";
+import { EncryptionMode } from "./streams/encryption_mode.js";
+/**
+ * Encrypt the data.
+ *
+ * @param {Uint8Array} data The data to be encrypted.
+ * @param {number} start       The start position of the stream to be encrypted.
+ * @param {number} count       The number of bytes to be encrypted.
+ * @param {Uint8Array} outData     The buffer with the encrypted data.
+ * @param {Uint8Array} key         The AES key to be used.
+ * @param {Uint8Array} nonce       The nonce to be used.
+ * @param {Uint8Array | null} headerData  The header data to be used.
+ * @param {boolean} integrity   True to apply integrity.
+ * @param {Uint8Array | null} hashKey     The key to be used for integrity application.
+ * @param {number | null} chunkSize   The chunk size. Thrown if there is an error with the stream.
+ * @returns {Promise&lt;{startPos: number,endPos: number}>} The number of bytes encrypted.
+ * @throws SalmonSecurityException  Thrown if there is a security exception with the stream.
+ * @throws IntegrityException Thrown if integrity cannot be applied.
+ */
+export async function encryptData(data, start, count, outData, key, nonce, headerData, integrity, hashKey, chunkSize, bufferSize) {
+    let inputStream = new MemoryStream(data);
+    let outputStream = new MemoryStream(outData);
+    let stream = null;
+    let startPos;
+    try {
+        await inputStream.setPosition(start);
+        stream = new SalmonStream(key, nonce, EncryptionMode.Encrypt, outputStream, headerData, integrity, chunkSize, hashKey);
+        stream.setAllowRangeWrite(true);
+        await stream.setPosition(start);
+        startPos = await outputStream.getPosition();
+        let totalChunkBytesRead = 0;
+        // align to the chunk size if available
+        let buffSize = Math.max(bufferSize, stream.getChunkSize());
+        // set the same buffer size for the internal stream
+        stream.setBufferSize(buffSize);
+        let buff = new Uint8Array(buffSize);
+        let bytesRead;
+        while ((bytesRead = await inputStream.read(buff, 0, Math.min(buff.length, count - totalChunkBytesRead))) > 0
+            &amp;&amp; totalChunkBytesRead &lt; count) {
+            await stream.write(buff, 0, bytesRead);
+            totalChunkBytesRead += bytesRead;
+        }
+        await stream.flush();
+    }
+    catch (ex) {
+        console.error(ex);
+        throw ex;
+    }
+    finally {
+        await outputStream.close();
+        if (stream != null)
+            await stream.close();
+        if (inputStream != null)
+            await inputStream.close();
+    }
+    let endPos = await outputStream.getPosition();
+    return { startPos: startPos, endPos: endPos };
+}
+</code></pre>
+        </article>
+    </section>
+
+
+
+
+</div>
+
+<nav>
+    <h2><a href="index.html">Home</a></h2><h3>Classes</h3><ul><li><a href="Base64.html">Base64</a></li><li><a href="BitConverter.html">BitConverter</a></li><li><a href="CacheBuffer.html">CacheBuffer</a></li><li><a href="FileCommander.html">FileCommander</a></li><li><a href="FileExporter.html">FileExporter</a></li><li><a href="FileImporter.html">FileImporter</a></li><li><a href="FileSearcher.html">FileSearcher</a></li><li><a href="FileTaskProgress.html">FileTaskProgress</a></li><li><a href="FileUtils.html">FileUtils</a></li><li><a href="Handler.html">Handler</a></li><li><a href="HmacSHA256Provider.html">HmacSHA256Provider</a></li><li><a href="IOException.html">IOException</a></li><li><a href="IntegrityException.html">IntegrityException</a></li><li><a href="JsDrive.html">JsDrive</a></li><li><a href="JsFile.html">JsFile</a></li><li><a href="JsFileStream.html">JsFileStream</a></li><li><a href="JsHttpDrive.html">JsHttpDrive</a></li><li><a href="JsHttpFile.html">JsHttpFile</a></li><li><a href="JsHttpFileStream.html">JsHttpFileStream</a></li><li><a href="JsLocalStorageFile.html">JsLocalStorageFile</a></li><li><a href="JsLocalStorageFileStream.html">JsLocalStorageFileStream</a></li><li><a href="JsNodeDrive.html">JsNodeDrive</a></li><li><a href="JsNodeFile.html">JsNodeFile</a></li><li><a href="JsNodeFileStream.html">JsNodeFileStream</a></li><li><a href="MemoryStream.html">MemoryStream</a></li><li><a href="NonceSequence.html">NonceSequence</a></li><li><a href="RandomAccessStream.html">RandomAccessStream</a></li><li><a href="SalmonAES256CTRTransformer.html">SalmonAES256CTRTransformer</a></li><li><a href="SalmonAesIntrTransformer.html">SalmonAesIntrTransformer</a></li><li><a href="SalmonAuthConfig.html">SalmonAuthConfig</a></li><li><a href="SalmonAuthException.html">SalmonAuthException</a></li><li><a href="SalmonDecryptor.html">SalmonDecryptor</a></li><li><a href="SalmonDefaultPbkdfProvider.html">SalmonDefaultPbkdfProvider</a></li><li><a href="SalmonDefaultTransformer.html">SalmonDefaultTransformer</a></li><li><a href="SalmonDrive.html">SalmonDrive</a></li><li><a href="SalmonDriveConfig.html">SalmonDriveConfig</a></li><li><a href="SalmonDriveGenerator.html">SalmonDriveGenerator</a></li><li><a href="SalmonDriveKey.html">SalmonDriveKey</a></li><li><a href="SalmonEncoder.html">SalmonEncoder</a></li><li><a href="SalmonEncryptor.html">SalmonEncryptor</a></li><li><a href="SalmonFile.html">SalmonFile</a></li><li><a href="SalmonFileCommander.html">SalmonFileCommander</a></li><li><a href="SalmonFileExporter.html">SalmonFileExporter</a></li><li><a href="SalmonFileImporter.html">SalmonFileImporter</a></li><li><a href="SalmonFileReadableStream.html">SalmonFileReadableStream</a></li><li><a href="SalmonFileSequencer.html">SalmonFileSequencer</a></li><li><a href="SalmonGenerator.html">SalmonGenerator</a></li><li><a href="SalmonHeader.html">SalmonHeader</a></li><li><a href="SalmonIntegrity.html">SalmonIntegrity</a></li><li><a href="SalmonNativeProxy.html">SalmonNativeProxy</a></li><li><a href="SalmonNativeTransformer.html">SalmonNativeTransformer</a></li><li><a href="SalmonNonce.html">SalmonNonce</a></li><li><a href="SalmonPassword.html">SalmonPassword</a></li><li><a href="SalmonPbkdfFactory.html">SalmonPbkdfFactory</a></li><li><a href="SalmonRangeExceededException.html">SalmonRangeExceededException</a></li><li><a href="SalmonSecurityException.html">SalmonSecurityException</a></li><li><a href="SalmonSequenceSerializer.html">SalmonSequenceSerializer</a></li><li><a href="SalmonStream.html">SalmonStream</a></li><li><a href="SalmonTextDecryptor.html">SalmonTextDecryptor</a></li><li><a href="SalmonTextEncryptor.html">SalmonTextEncryptor</a></li><li><a href="SalmonTransformerFactory.html">SalmonTransformerFactory</a></li><li><a href="SequenceException.html">SequenceException</a></li><li><a href="TinyAesTransformer.html">TinyAesTransformer</a></li></ul><h3>Global</h3><ul><li><a href="global.html#EncryptionMode">EncryptionMode</a></li><li><a href="global.html#EncryptionMode%255Bundefined%255D">EncryptionMode[undefined]</a></li><li><a href="global.html#PBKDF_SHA1">PBKDF_SHA1</a></li><li><a href="global.html#PBKDF_SHA256">PBKDF_SHA256</a></li><li><a href="global.html#PbkdfAlgo">PbkdfAlgo</a></li><li><a href="global.html#PbkdfAlgo%255Bundefined%255D">PbkdfAlgo[undefined]</a></li><li><a href="global.html#PbkdfType">PbkdfType</a></li><li><a href="global.html#PbkdfType%255Bundefined%255D">PbkdfType[undefined]</a></li><li><a href="global.html#ProviderType">ProviderType</a></li><li><a href="global.html#ProviderType%255Bundefined%255D">ProviderType[undefined]</a></li><li><a href="global.html#SearchEvent">SearchEvent</a></li><li><a href="global.html#SearchEvent%255Bundefined%255D">SearchEvent[undefined]</a></li><li><a href="global.html#SeekOrigin">SeekOrigin</a></li><li><a href="global.html#SeekOrigin%255Bundefined%255D">SeekOrigin[undefined]</a></li><li><a href="global.html#Status">Status</a></li><li><a href="global.html#Status%255Bundefined%255D">Status[undefined]</a></li><li><a href="global.html#_FileExporter_DEFAULT_THREADS">_FileExporter_DEFAULT_THREADS</a></li><li><a href="global.html#_FileExporter_enableMultiThread">_FileExporter_enableMultiThread</a></li><li><a href="global.html#_FileImporter_DEFAULT_BUFFER_SIZE">_FileImporter_DEFAULT_BUFFER_SIZE</a></li><li><a href="global.html#_FileImporter_DEFAULT_THREADS">_FileImporter_DEFAULT_THREADS</a></li><li><a href="global.html#_FileImporter_enableMultiThread">_FileImporter_enableMultiThread</a></li><li><a href="global.html#_MemoryStream_INITIAL_CAPACITY">_MemoryStream_INITIAL_CAPACITY</a></li><li><a href="global.html#_SalmonDriveGenerator_iterations">_SalmonDriveGenerator_iterations</a></li><li><a href="global.html#_SalmonEncoder_base64">_SalmonEncoder_base64</a></li><li><a href="global.html#_SalmonGenerator_MAGIC_BYTES">_SalmonGenerator_MAGIC_BYTES</a></li><li><a href="global.html#_SalmonNativeProxy_libraryName">_SalmonNativeProxy_libraryName</a></li><li><a href="global.html#_SalmonPassword_ENABLE_SHA1">_SalmonPassword_ENABLE_SHA1</a></li><li><a href="global.html#_SalmonPassword_pbkdfAlgo">_SalmonPassword_pbkdfAlgo</a></li><li><a href="global.html#_SalmonPassword_provider">_SalmonPassword_provider</a></li><li><a href="global.html#_SalmonStream_providerType">_SalmonStream_providerType</a></li><li><a href="global.html#autoRename">autoRename</a></li><li><a href="global.html#autoRenameFile">autoRenameFile</a></li><li><a href="global.html#copyFileContents">copyFileContents</a></li><li><a href="global.html#copyRecursively">copyRecursively</a></li><li><a href="global.html#decryptData">decryptData</a></li><li><a href="global.html#deleteRecursively">deleteRecursively</a></li><li><a href="global.html#encryptData">encryptData</a></li><li><a href="global.html#exportFilePart">exportFilePart</a></li><li><a href="global.html#fillBufferPart">fillBufferPart</a></li><li><a href="global.html#getPbkdfAlgoString">getPbkdfAlgoString</a></li><li><a href="global.html#importFilePart">importFilePart</a></li><li><a href="global.html#moveRecursively">moveRecursively</a></li></ul>
+</nav>
+
+<br class="clear">
+
+<footer>
+    Documentation generated by <a href="https://github.com/jsdoc/jsdoc">JSDoc 4.0.3</a> on Tue Sep 03 2024 18:12:49 GMT+0300 (Eastern European Summer Time)
+</footer>
+
+<script> prettyPrint(); </script>
+<script src="scripts/linenumber.js"> </script>
+</body>
+</html>
