@@ -69,8 +69,12 @@ export class FileCommander {
         let importedFiles: IVirtualFile[] = [];
 
         let total: number = 0;
-        for (let i = 0; i < filesToImport.length; i++)
+        for (let i = 0; i < filesToImport.length; i++) {
+            if (this.stopJobs)
+                break;
             total += await this.getRealFilesCountRecursively(filesToImport[i]);
+        }
+
         let count: number[] = [0];
         let existingFiles: { [key: string]: IVirtualFile } = await this.getExistingIVirtualFiles(importDir);
         for (let i = 0; i < filesToImport.length; i++) {
@@ -89,6 +93,8 @@ export class FileCommander {
         let files: { [key: string]: IVirtualFile } = {};
         let realFiles: IVirtualFile[] = await importDir.listFiles();
         for (let i = 0; i < realFiles.length; i++) {
+            if (this.stopJobs)
+                break;
             let file: IVirtualFile = realFiles[i];
             try {
                 files[await file.getBaseName()] = file;
@@ -105,6 +111,7 @@ export class FileCommander {
         onFailed: ((realFile: IRealFile, error: Error | unknown) => void) | null,
         importedFiles: IVirtualFile[], count: number[], total: number,
         existingFiles: { [key: string]: IVirtualFile }): Promise<void> {
+
         let sfile: IVirtualFile | null = fileToImport.getBaseName() in existingFiles
             ? existingFiles[fileToImport.getBaseName()] : null;
         if (await fileToImport.isDirectory()) {
@@ -122,12 +129,14 @@ export class FileCommander {
             let nExistingFiles: { [key: string]: IVirtualFile } = await this.getExistingIVirtualFiles(sfile);
             let lFiles = await fileToImport.listFiles();
             for (let i = 0; i < lFiles.length; i++) {
+                if (this.stopJobs)
+                    break;
                 let child: IRealFile = lFiles[i];
                 await this.importRecursively(child, sfile, deleteSource, integrity, onProgressChanged,
                     autoRename, onFailed, importedFiles, count, total,
                     nExistingFiles);
             }
-            if (deleteSource)
+            if (deleteSource && !this.stopJobs)
                 await fileToImport.delete();
         } else {
             try {
@@ -177,8 +186,11 @@ export class FileCommander {
         let exportedFiles: IRealFile[] = [];
 
         let total: number = 0;
-        for (let i = 0; i < filesToExport.length; i++)
+        for (let i = 0; i < filesToExport.length; i++) {
+            if (this.stopJobs)
+                break;
             total += await this.getIVirtualFilesCountRecursively(filesToExport[i]);
+        }
 
         let existingFiles: { [key: string]: IRealFile } = await this.getExistingRealFiles(exportDir);
 
@@ -199,6 +211,8 @@ export class FileCommander {
         let files: { [key: string]: IRealFile } = {};
         let lFiles: IRealFile[] = await exportDir.listFiles();
         for (let i = 0; i < lFiles.length; i++) {
+            if (this.stopJobs)
+                break;
             let file: IRealFile = lFiles[i]
             files[file.getBaseName()] = file;
         }
@@ -226,12 +240,14 @@ export class FileCommander {
             let nExistingFiles: { [key: string]: IRealFile } = await this.getExistingRealFiles(rfile);
             let lFiles: IVirtualFile[] = await fileToExport.listFiles();
             for (let i = 0; i < lFiles.length; i++) {
+                if (this.stopJobs)
+                    break;
                 let child: IVirtualFile = lFiles[i];
                 await this.exportRecursively(child, rfile, deleteSource, integrity, onProgressChanged,
                     autoRename, onFailed, exportedFiles, count, total,
                     nExistingFiles);
             }
-            if (deleteSource) {
+            if (deleteSource && !this.stopJobs) {
                 fileToExport.delete();
             }
         } else {
@@ -265,6 +281,8 @@ export class FileCommander {
         if (await file.isDirectory()) {
             let lFiles: IVirtualFile[] = await file.listFiles();
             for (let i = 0; i < lFiles.length; i++) {
+                if (this.stopJobs)
+                    break;
                 let child: IVirtualFile = lFiles[i];
                 count += await this.getIVirtualFilesCountRecursively(child);
             }
@@ -277,6 +295,8 @@ export class FileCommander {
         if (await file.isDirectory()) {
             let lFiles: IRealFile[] = await file.listFiles();
             for (let i = 0; i < lFiles.length; i++) {
+                if (this.stopJobs)
+                    break;
                 let child: IRealFile = lFiles[i];
                 count += await this.getRealFilesCountRecursively(child);
             }
@@ -296,8 +316,11 @@ export class FileCommander {
         this.stopJobs = false;
         let count: number[] = [0];
         let total: number = 0;
-        for (let i = 0; i < filesToDelete.length; i++)
+        for (let i = 0; i < filesToDelete.length; i++){
+            if (this.stopJobs)
+                break;
             total += await this.getIVirtualFilesCountRecursively(filesToDelete[i]);
+        }
         for (let i = 0; i < filesToDelete.length; i++) {
             let fileToDelete: IVirtualFile = filesToDelete[i];
             if (this.stopJobs)
@@ -338,10 +361,15 @@ export class FileCommander {
         this.stopJobs = false;
         let count: number[] = [0];
         let total: number = 0;
-        for (let i = 0; i < filesToCopy.length; i++)
+        for (let i = 0; i < filesToCopy.length; i++){
+            if (this.stopJobs)
+                break;
             total += await this.getIVirtualFilesCountRecursively(filesToCopy[i]);
+        }
         const finalTotal: number = total;
         for (let i = 0; i < filesToCopy.length; i++) {
+            if (this.stopJobs)
+                break;
             let fileToCopy: IVirtualFile = filesToCopy[i];
             if (dir.getRealFile().getAbsolutePath().startsWith(fileToCopy.getRealFile().getAbsolutePath()))
                 continue;
@@ -458,6 +486,8 @@ export class FileCommander {
     private async getFiles(files: IVirtualFile[]): Promise<number> {
         let total = 0;
         for (let i = 0; i < files.length; i++) {
+            if (this.stopJobs)
+                break;
             let file: IVirtualFile = files[i];
             total++;
             if (await file.isDirectory()) {

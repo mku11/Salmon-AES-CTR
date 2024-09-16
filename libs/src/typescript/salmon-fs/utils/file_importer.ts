@@ -161,6 +161,8 @@ export abstract class FileImporter {
             this.#stopped[0] = false;
             this.#lastException = null;
             this.#failed = false;
+            this.#lastException = null;
+
             importedFile = await dir.createFile(filename) as IVirtualFile;
             await this.onPrepare(importedFile, integrity);
 
