@@ -261,6 +261,8 @@ class SalmonFileImporter:
                 raise NotImplementedError("Multithreading is not supported")
             self.__stopped[0] = False
             self.__failed = False
+            self.__lastException = None
+
             imported_file = v_dir.create_file(filename)
             imported_file.set_allow_overwrite(True)
             # we use default chunk file size
