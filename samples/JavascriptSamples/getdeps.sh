@@ -1,4 +1,4 @@
-version=2.0.0
+version=2.1.0
 rm -rf packages
 mkdir packages
 rm -rf lib
@@ -14,7 +14,7 @@ SALMON_FS_LIB_FILENAME=$SALMON_FS_LIB.zip
 # use local repo
 # SALMON_LIBS_URL=http://localhost/repository/javascript
 # use salmon release
-SALMON_LIBS_URL=https://github.com/mku11/Salmon-AES-CTR/releases/download/v2.0.0
+SALMON_LIBS_URL=https://github.com/mku11/Salmon-AES-CTR/releases/download/v2.1.0
 
 SALMON_CORE_LIB_URL=$SALMON_LIBS_URL/$SALMON_CORE_LIB_FILENAME
 SALMON_FS_LIB_URL=$SALMON_LIBS_URL/$SALMON_FS_LIB_FILENAME

@@ -1,4 +1,4 @@
-set version=2.0.0
+set version=2.1.0
 rmdir packages /S /Q
 mkdir packages
 rmdir lib /S /Q
@@ -14,7 +14,7 @@ set SALMON_FS_LIB_FILENAME=%SALMON_FS_LIB%.zip
 :: use local repo
 :: set SALMON_LIBS_URL=http://localhost/repository/javascript
 :: use salmon release
-set SALMON_LIBS_URL=https://github.com/mku11/Salmon-AES-CTR/releases/download/v2.0.0
+set SALMON_LIBS_URL=https://github.com/mku11/Salmon-AES-CTR/releases/download/v2.1.0
 
 set SALMON_CORE_LIB_URL=%SALMON_LIBS_URL%/%SALMON_CORE_LIB_FILENAME%
 set SALMON_FS_LIB_URL=%SALMON_LIBS_URL%/%SALMON_FS_LIB_FILENAME%
