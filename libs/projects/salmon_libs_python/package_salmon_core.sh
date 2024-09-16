@@ -6,7 +6,7 @@ SALMON_CORE_TOML=$SRC_ROOT/salmon_core/pyproject.toml
 OUTPUT_ROOT=../../../output
 OUTPUT_DIR=$OUTPUT_ROOT/python
 
-VERSION=2.0.0
+VERSION=2.1.0
 PACKAGES_DIR=packages
 SALMON_CORE_PACKAGE_NAME=salmon_core_py.$VERSION
 
