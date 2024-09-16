@@ -7,7 +7,7 @@ It provides a high level API for encrypting data, streams, and a virtual drive A
 Powered by a fast native library for Intel x86_64 and ARM64.  
   
 [![License: MIT](https://img.shields.io/github/license/mku11/Salmon-AES-CTR.svg)](LICENSE)
-[![Version](https://img.shields.io/badge/version-2.0.0-blue)](https://github.com/mku11/Salmon-AES-CTR/releases)
+[![Version](https://img.shields.io/badge/version-2.1.0-blue)](https://github.com/mku11/Salmon-AES-CTR/releases)
 [![GitHub Releases](https://img.shields.io/github/downloads/mku11/Salmon-AES-CTR/latest/total?logo=github)](https://github.com/mku11/Salmon-AES-CTR/releases)
 
 **Library Features**  
