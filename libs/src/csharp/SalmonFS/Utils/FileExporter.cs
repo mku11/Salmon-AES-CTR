@@ -131,7 +131,7 @@ public abstract class FileExporter
     public IRealFile ExportFile(IVirtualFile fileToExport, IRealFile exportDir, string filename,
         bool deleteSource, bool integrity, Action<long, long> OnProgress)
     {
-        if(IsRunning())
+        if (IsRunning())
             throw new Exception("Another export is running");
         if (fileToExport.IsDirectory)
             throw new Exception("Cannot export directory, use FileCommander instead");
@@ -146,6 +146,7 @@ public abstract class FileExporter
             stopped = false;
             long[] totalBytesWritten = new long[] { 0 };
             failed = false;
+            lastException = null;
 
             if (!exportDir.Exists)
                 exportDir.Mkdir();
@@ -161,10 +162,10 @@ public abstract class FileExporter
             if (partSize > minPartSize && threads > 1)
             {
                 partSize = (int)Math.Ceiling(fileSize / (float)threads);
-                if(partSize > minPartSize)
-					partSize -= partSize % minPartSize;
-				else
-					partSize = minPartSize;
+                if (partSize > minPartSize)
+                    partSize -= partSize % minPartSize;
+                else
+                    partSize = minPartSize;
                 runningThreads = (int)(fileSize / partSize);
             }
 
@@ -226,7 +227,7 @@ public abstract class FileExporter
     ///  <param name="count">            The length of the bytes to be decrypted</param>
     ///  <param name="totalBytesWritten">The total bytes that were written to the external file</param>
     ///  <param name="OnProgress">The progress listener</param>
-    private void ExportFilePart(IVirtualFile fileToExport, IRealFile exportFile, long start, long count, 
+    private void ExportFilePart(IVirtualFile fileToExport, IRealFile exportFile, long start, long count,
         long[] totalBytesWritten, Action<long, long> OnProgress)
     {
         long totalPartBytesWritten = 0;
@@ -244,8 +245,8 @@ public abstract class FileExporter
 
             byte[] bytes = new byte[bufferSize];
             int bytesRead;
-            while ((bytesRead = sourceStream.Read(bytes, 0, Math.Min(bytes.Length,
-                    (int)(count - totalPartBytesWritten)))) > 0 && totalPartBytesWritten < count)
+            while ((bytesRead = sourceStream.Read(bytes, 0, (int)Math.Min((long)bytes.Length,
+                    count - totalPartBytesWritten))) > 0 && totalPartBytesWritten < count)
             {
                 if (stopped)
                     break;
@@ -284,6 +285,6 @@ public abstract class FileExporter
     /// </summary>
     public void Close()
     {
-        
+
     }
 }

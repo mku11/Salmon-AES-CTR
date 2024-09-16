@@ -31,6 +31,11 @@ and add the node experimental option before the addition of the plugin path:
 c={NODE_OPTIONS:` --experimental-vm-modules --require ${s.interpolatedPath} `
 make sure you restart VS code.
 
+To run the test cases click on the test icon in VS Code and run the test 
+If the library test providers won't work you try running the Provider:
+"Jest Test Provider (SalmonLibsTypeScript.VS2022)
+
+
 To turn off auto running test cases:
 "jest.autoRun": "off",
 

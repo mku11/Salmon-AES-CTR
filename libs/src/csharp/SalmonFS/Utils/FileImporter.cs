@@ -155,6 +155,8 @@ public abstract class FileImporter
                 throw new NotSupportedException("Multithreading is not supported");
             stopped = false;
             failed = false;
+            lastException = null;
+
             salmonFile = dir.CreateFile(filename);
             this.OnPrepare(salmonFile, integrity);
 
@@ -249,7 +251,7 @@ public abstract class FileImporter
 
             byte[] bytes = new byte[bufferSize];
             int bytesRead;
-            while ((bytesRead = sourceStream.Read(bytes, 0, Math.Min(bytes.Length, (int)(count - totalPartBytesRead)))) > 0
+            while ((bytesRead = sourceStream.Read(bytes, 0, (int)Math.Min((long)bytes.Length, count - totalPartBytesRead))) > 0
                     && totalPartBytesRead < count)
             {
                 if (stopped)

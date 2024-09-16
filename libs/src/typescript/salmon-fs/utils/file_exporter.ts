@@ -140,6 +140,7 @@ export abstract class FileExporter {
             this.#lastException = null;
             let totalBytesWritten: number[] = [0];
             this.#failed = false;
+            this.#lastException = null;
 
             if (!await exportDir.exists())
                 await exportDir.mkdir();

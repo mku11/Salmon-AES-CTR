@@ -143,6 +143,8 @@ public abstract class FileImporter {
                 throw new UnsupportedOperationException("Multithreading is not supported");
             stopped = false;
             failed = false;
+            lastException = null;
+
             importedFile = dir.createFile(filename);
             this.onPrepare(importedFile, integrity);
 
@@ -229,7 +231,7 @@ public abstract class FileImporter {
 
             byte[] bytes = new byte[bufferSize];
             int bytesRead;
-            while ((bytesRead = sourceStream.read(bytes, 0, Math.min(bytes.length, (int) (count - totalPartBytesRead)))) > 0
+            while ((bytesRead = sourceStream.read(bytes, 0, (int) Math.min((long) bytes.length, count - totalPartBytesRead))) > 0
                     && totalPartBytesRead < count) {
                 if (stopped)
                     break;

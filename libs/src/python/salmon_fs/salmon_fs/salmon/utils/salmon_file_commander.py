@@ -83,6 +83,8 @@ class SalmonFileCommander:
 
         total: list[int] = [0]
         for i in range(0, len(files_to_import)):
+            if self.__stopJobs:
+                break
             total[0] += self.__get_real_files_count_recursively(files_to_import[i])
         count: list[int] = [1]
         existing_files: dict[str, SalmonFile] = self.__get_existing_salmon_files(import_dir)
@@ -100,6 +102,8 @@ class SalmonFileCommander:
     def __get_existing_salmon_files(self, import_dir: SalmonFile) -> dict[str, SalmonFile]:
         files: dict[str, SalmonFile] = {}
         for file in import_dir.list_files():
+            if self.__stopJobs:
+                break
             try:
                 files[file.get_base_name()] = file
             except Exception as ignored:
@@ -127,10 +131,12 @@ class SalmonFileCommander:
             count[0] += 1
             n_existing_files: dict[str, SalmonFile] = self.__get_existing_salmon_files(sfile)
             for child in file_to_import.list_files():
+                if self.__stopJobs:
+                    break
                 self.__import_recursively(child, sfile, delete_source, integrity, on_progress_changed,
                                           auto_rename, on_failed, imported_files, count, total,
                                           n_existing_files)
-            if delete_source:
+            if delete_source and not self.__stopJobs:
                 file_to_import.delete()
         else:
             try:
@@ -175,6 +181,8 @@ class SalmonFileCommander:
 
         total: int = 0
         for i in range(0, len(files_to_export)):
+            if self.__stopJobs:
+                break
             total += self.__get_salmon_files_count_recursively(files_to_export[i])
 
         existing_files: dict[str, IRealFile] = self.__get_existing_real_files(export_dir)
@@ -218,10 +226,12 @@ class SalmonFileCommander:
             count[0] += 1
             n_existing_files: dict[str, IRealFile] = self.__get_existing_real_files(rfile)
             for child in file_to_export.list_files():
+                if self.__stopJobs:
+                    break
                 self.__export_recursively(child, rfile, delete_source, integrity, on_progress_changed,
                                           auto_rename, on_failed, exported_files, count, total,
                                           n_existing_files)
-            if delete_source:
+            if delete_source and not self.__stopJobs:
                 file_to_export.delete()
         else:
             try:
@@ -245,6 +255,8 @@ class SalmonFileCommander:
         count: int = 1
         if file.is_directory():
             for child in file.list_files():
+                if self.__stopJobs:
+                    break
                 count += self.__get_salmon_files_count_recursively(child)
         return count
 
@@ -252,6 +264,8 @@ class SalmonFileCommander:
         count: int = 1
         if file.is_directory():
             for child in file.list_files():
+                if self.__stopJobs:
+                    break
                 count += self.__get_real_files_count_recursively(child)
 
         return count
@@ -270,6 +284,8 @@ class SalmonFileCommander:
         count: list[int] = [1]
         total: int = 0
         for i in range(0, len(files_to_delete)):
+            if self.__stopJobs:
+                break
             total += self.__get_salmon_files_count_recursively(files_to_delete[i])
         for salmonFile in files_to_delete:
             if self.__stopJobs:
@@ -311,9 +327,13 @@ class SalmonFileCommander:
         count: list[int] = [1]
         total: int = 0
         for i in range(0, len(files_to_copy)):
+            if self.__stopJobs:
+                break
             total += self.__get_salmon_files_count_recursively(files_to_copy[i])
         final_total: int = total
         for salmonFile in files_to_copy:
+            if self.__stopJobs:
+                break
             if v_dir.get_real_file().get_path().startswith(salmonFile.get_real_file().get_path()):
                 continue
 
@@ -409,6 +429,8 @@ class SalmonFileCommander:
         """
         total: int = 0
         for file in files:
+            if self.__stopJobs:
+                break
             total += 1
             if file.is_directory():
                 total += self.__get_files(file.list_files())

@@ -257,6 +257,7 @@ class SalmonFileExporter:
             self.__stopped[0] = False
             total_bytes_written = [0]
             self.__failed = False
+            self.__lastException = None
 
             if not export_dir.exists():
                 export_dir.mkdir()
