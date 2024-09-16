@@ -1,6 +1,6 @@
 [project]
 name = "salmon_fs"
-version = "1.0.6"
+version = "2.1.0"
 authors = [
   { name="Max Kas"},
 ]
