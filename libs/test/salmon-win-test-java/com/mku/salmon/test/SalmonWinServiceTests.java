@@ -31,7 +31,6 @@ import com.mku.salmon.SalmonRangeExceededException;
 import com.mku.salmon.win.registry.SalmonRegistry;
 import com.mku.salmon.win.sequencer.WinClientSequencer;
 import com.mku.salmon.win.sequencer.WinFileSequencer;
-import com.mku.sequence.SequenceException;
 import com.mku.salmon.sequence.SalmonSequenceSerializer;
 import com.sun.jna.platform.win32.Crypt32Util;
 import org.junit.jupiter.api.Test;
