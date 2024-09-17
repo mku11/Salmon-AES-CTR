@@ -5,8 +5,6 @@ import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.context.ConfigurableApplicationContext;
 
-import java.util.Arrays;
-
 /**
  * Simple REST API Web Service for file vaults. Note this is only for the real files, all encryption
  * and decryption happens at the client side. So make sure you choose an appropriate protocol
