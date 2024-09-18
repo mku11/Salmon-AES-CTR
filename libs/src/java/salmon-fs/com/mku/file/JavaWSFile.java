@@ -647,7 +647,7 @@ public class JavaWSFile implements IRealFile {
     public boolean renameTo(String newFilename) {
         CloseableHttpResponse httpResponse = null;
         try {
-            URIBuilder uriBuilder = new URIBuilder(this.servicePath + "/api/copy");
+            URIBuilder uriBuilder = new URIBuilder(this.servicePath + "/api/rename");
             uriBuilder.addParameter(PATH, this.filePath);
             uriBuilder.addParameter(FILENAME, newFilename);
             HttpPut httpPut = new HttpPut(uriBuilder.build());
