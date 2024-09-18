@@ -11,7 +11,6 @@ import java.io.InputStream;
 
 /**
  * Utility for file system operations
- *
  */
 public class FileSystem {
     private static final int BUFF_LENGTH = 32768;
@@ -24,8 +23,7 @@ public class FileSystem {
 
     public static IRealFile getRoot() {
         IRealFile realRoot = new JavaFile(path);
-        IRealFile root = realRoot.getChild(SalmonDrive.getVirtualDriveDirectoryName());
-        return root;
+        return realRoot;
     }
 
     public static IRealFile getFile(String path) {
@@ -43,12 +41,15 @@ public class FileSystem {
 
     public static String getRelativePath(IRealFile file) {
         return new JavaFile(file.getPath()).getAbsolutePath().replace(
-                new JavaFile(getRoot().getPath()).getAbsolutePath(), "").replace("\\", "/");
+                new JavaFile(path).getAbsolutePath(), "").replace("\\", "/");
     }
 
-    public static IRealFile copy(String destDir, MultipartFile file) throws IOException {
-        IRealFile dir = getFile(destDir);
-        IRealFile rFile = dir.createFile(file.getOriginalFilename());
+    public static IRealFile write(String path, MultipartFile file) throws IOException {
+        IRealFile rFile = getFile(path);
+        if(!rFile.exists()) {
+            IRealFile dir = rFile.getParent();
+            rFile = dir.createFile(file.getOriginalFilename());
+        }
         InputStream inputStream = null;
         RandomAccessStream outputStream = null;
         try {
