@@ -23,31 +23,101 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 */
 
+import com.mku.file.IRealFile;
+import com.mku.file.IVirtualFile;
+import com.mku.file.JavaFile;
+import com.mku.file.JavaWSFile;
+import com.mku.salmon.SalmonAuthException;
+import com.mku.salmon.SalmonDrive;
+import com.mku.salmon.drive.JavaWSDrive;
+import com.mku.salmon.sequence.SalmonFileSequencer;
+import com.mku.salmon.test.SalmonFSTestHelper;
+import com.mku.salmon.test.SalmonFSTests;
+import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 
-import java.util.HashMap;
+import static org.junit.jupiter.api.Assertions.*;
 
+/**
+ * Basic tests for the Web Service, functional test cases see {@link SalmonFSTests}
+ */
 public class SalmonWSTests {
-    public static String TEST_SEQUENCER_DIR = "D:\\tmp\\output";
-    public static String TEST_SEQUENCER_FILENAME = "fileseq.xml";
-    public static String TEST_VAULT_DIR = "D:\\tmp\\tv2";
-    public static HashMap<String, String> users;
     @BeforeAll
-    public static void setupUsers() {
-        users = new HashMap<>();
-        users.put("user1", "pass1");
+    public static void setup() throws Exception {
+        SalmonWSTestHelper.startServer(SalmonWSTestHelper.TEST_WS_DIR, SalmonWSTestHelper.users);
     }
 
-    @Test
-    public void testAuthServer() throws Exception {
-        SalmonWSTestHelper.startServer(TEST_VAULT_DIR, users);
-        Thread.sleep(60000);
+    @AfterAll
+    public static void tearDown() throws Exception {
         SalmonWSTestHelper.stopServer();
     }
 
     @Test
-    public void testNoAuthServer() {
+    public void testStartServer() throws Exception {
+        // exploratory testing with CURL see RealFileController for examples
+        Thread.sleep(6000000);
+    }
 
+    @Test
+    public void testAuthServer() throws Exception {
+        JavaWSFile vaultDir = new JavaWSFile("/", SalmonWSTestHelper.VAULT_URL,
+                SalmonWSTestHelper.credentials1);
+        IRealFile seqfile = new JavaFile(SalmonWSTestHelper.TEST_SEQUENCER_DIR + "\\" + SalmonWSTestHelper.TEST_SEQUENCER_FILENAME);
+        SalmonFileSequencer sequencer = new SalmonFileSequencer(seqfile, SalmonFSTestHelper.getSequenceSerializer());
+        SalmonDrive drive = JavaWSDrive.open(vaultDir, SalmonWSTestHelper.VAULT_PASSWORD,
+                sequencer, SalmonWSTestHelper.credentials1.getServiceUser(),
+                SalmonWSTestHelper.credentials1.getServicePassword());
+        IVirtualFile rootDir = drive.getRoot();
+        IVirtualFile[] files = rootDir.listFiles();
+        for (IVirtualFile file : files) {
+            try {
+                System.out.println(file.getBaseName());
+            } catch (Exception ex) {
+                ex.printStackTrace();
+            }
+        }
+        assertTrue(files.length == 1);
+        assertEquals("test.txt", files[0].getBaseName());
+    }
+
+    @Test
+    public void testNoAuthServer() throws Exception {
+        JavaWSFile vaultDir = new JavaWSFile("/", SalmonWSTestHelper.VAULT_URL,
+                SalmonWSTestHelper.credentials1);
+        IRealFile seqfile = new JavaFile(SalmonWSTestHelper.TEST_SEQUENCER_DIR + "\\" + SalmonWSTestHelper.TEST_SEQUENCER_FILENAME);
+        SalmonFileSequencer sequencer = new SalmonFileSequencer(seqfile, SalmonFSTestHelper.getSequenceSerializer());
+        boolean unlocked = false;
+        try {
+            SalmonDrive drive = JavaWSDrive.open(vaultDir, SalmonWSTestHelper.VAULT_PASSWORD,
+                    sequencer, SalmonWSTestHelper.wrongCredentials1.getServiceUser(),
+                    SalmonWSTestHelper.wrongCredentials1.getServicePassword());
+            IVirtualFile rootDir = drive.getRoot();
+            IVirtualFile[] files = rootDir.listFiles();
+            unlocked = true;
+        } catch (Exception ex) {
+            ex.printStackTrace();
+        }
+        assertFalse(unlocked);
+    }
+
+
+    @Test
+    public void testNoPassAuthServer() throws Exception {
+        JavaWSFile vaultDir = new JavaWSFile("/", SalmonWSTestHelper.VAULT_URL,
+                SalmonWSTestHelper.credentials1);
+        IRealFile seqfile = new JavaFile(SalmonWSTestHelper.TEST_SEQUENCER_DIR + "\\" + SalmonWSTestHelper.TEST_SEQUENCER_FILENAME);
+        SalmonFileSequencer sequencer = new SalmonFileSequencer(seqfile, SalmonFSTestHelper.getSequenceSerializer());
+        boolean unlocked = false;
+        try {
+            SalmonDrive drive = JavaWSDrive.open(vaultDir, SalmonWSTestHelper.VAULT_WRONG_PASSWORD,
+                    sequencer, SalmonWSTestHelper.credentials1.getServiceUser(), SalmonWSTestHelper.credentials1.getServicePassword());
+            IVirtualFile rootDir = drive.getRoot();
+            IVirtualFile[] files = rootDir.listFiles();
+            unlocked = true;
+        } catch (SalmonAuthException ex) {
+            ex.printStackTrace();
+        }
+        assertFalse(unlocked);
     }
 }

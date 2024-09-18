@@ -23,24 +23,47 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 */
 
+import com.mku.file.JavaWSFile;
+import com.mku.salmon.drive.JavaWSDrive;
 import com.mku.salmon.ws.fs.service.SalmonWSApplication;
 import org.junit.jupiter.api.Test;
 
 import java.util.HashMap;
 
 public class SalmonWSTestHelper {
+    public static String VAULT_HOST = "http://localhost:8080";
+    public static String VAULT_URL = VAULT_HOST + ""; // same
+    public static String VAULT_PASSWORD = "test";
+    public static String VAULT_WRONG_PASSWORD = "wrongPassword";
+
+    public static String TEST_SEQUENCER_DIR = "D:\\tmp\\output";
+    public static String TEST_SEQUENCER_FILENAME = "fileseq.xml";
+//    public static String TEST_WS_DIR = "D:\\tmp\\test_vault";
+    public static String TEST_WS_DIR = "D:\\tmp\\output";
+    public static HashMap<String, String> users;
+    public static JavaWSFile.Credentials credentials1 = new JavaWSFile.Credentials("user1", "pass1");
+    public static JavaWSFile.Credentials wrongCredentials1 = new JavaWSFile.Credentials("wrongUser", "wrongPass");
+
+    static {
+        users = new HashMap<>();
+        users.put(credentials1.getServiceUser(), credentials1.getServicePassword());
+    }
 
     private static boolean serverStarted;
 
     public static void startServer(String vaultDir, HashMap<String, String> users) throws Exception {
-        if(serverStarted)
+        if (serverStarted)
             throw new Exception("Another instance is running, use stopServer to stop");
         SalmonWSApplication.removeAllUsers();
-        for(String user : users.keySet()) {
+        for (String user : users.keySet()) {
             SalmonWSApplication.addUser(user, users.get(user));
         }
-        SalmonWSApplication.main(new String[]{vaultDir, "-np"});
         serverStarted = true;
+        try {
+            SalmonWSApplication.main(new String[]{vaultDir, "-np"});
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
     }
 
     public static void stopServer() {
