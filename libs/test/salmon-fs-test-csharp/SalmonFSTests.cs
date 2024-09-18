@@ -43,7 +43,10 @@ public class SalmonFSTests
 {
     static SalmonFSTests()
     {
-        SalmonFSTestHelper.DriveClassType = typeof(DotNetDrive);
+        // SalmonFSTestHelper.DriveClassType = typeof(DotNetDrive);
+        // remote drive
+        // make sure you turn on the web service manually
+        SalmonFSTestHelper.DriveClassType = typeof(DotNetWSDrive);
     }
 
 
@@ -77,13 +80,13 @@ public class SalmonFSTests
     public void ShouldCatchNotAuthorizeNegative()
     {
         IRealFile vaultDir = SalmonFSTestHelper.GenerateFolder(SalmonFSTestHelper.TEST_VAULT2_DIR);
-        SalmonFileSequencer sequencer = new SalmonFileSequencer(new DotNetFile(vaultDir + "/" + SalmonFSTestHelper.TEST_SEQUENCER_FILE1), new SalmonSequenceSerializer());
-        SalmonDrive drive = SalmonDrive.CreateDrive(vaultDir, SalmonFSTestHelper.DriveClassType, SalmonCoreTestHelper.TEST_PASSWORD, sequencer);
+        SalmonFileSequencer sequencer = SalmonFSTestHelper.CreateSalmonFileSequencer(new DotNetFile(vaultDir + "/" + SalmonFSTestHelper.TEST_SEQUENCER_FILE1), new SalmonSequenceSerializer());
+        SalmonDrive drive = SalmonFSTestHelper.CreateDrive(vaultDir, SalmonFSTestHelper.DriveClassType, SalmonCoreTestHelper.TEST_PASSWORD, sequencer);
         bool wrongPassword = false;
         drive.Close();
         try
         {
-            drive = SalmonDrive.OpenDrive(vaultDir, SalmonFSTestHelper.DriveClassType, SalmonCoreTestHelper.TEST_FALSE_PASSWORD, sequencer);
+            drive = SalmonFSTestHelper.OpenDrive(vaultDir, SalmonFSTestHelper.DriveClassType, SalmonCoreTestHelper.TEST_FALSE_PASSWORD, sequencer);
             SalmonFile rootDir = drive.Root;
             rootDir.ListFiles();
         }
@@ -100,13 +103,13 @@ public class SalmonFSTests
     public void ShouldAuthorizePositive()
     {
         IRealFile vaultDir = SalmonFSTestHelper.GenerateFolder(SalmonFSTestHelper.TEST_VAULT2_DIR);
-        SalmonFileSequencer sequencer = new SalmonFileSequencer(new DotNetFile(vaultDir + "/" + SalmonFSTestHelper.TEST_SEQUENCER_FILE1), new SalmonSequenceSerializer());
-        SalmonDrive drive = SalmonDrive.CreateDrive(vaultDir, SalmonFSTestHelper.DriveClassType, SalmonCoreTestHelper.TEST_PASSWORD, sequencer);
+        SalmonFileSequencer sequencer = SalmonFSTestHelper.CreateSalmonFileSequencer(new DotNetFile(vaultDir + "/" + SalmonFSTestHelper.TEST_SEQUENCER_FILE1), new SalmonSequenceSerializer());
+        SalmonDrive drive = SalmonFSTestHelper.CreateDrive(vaultDir, SalmonFSTestHelper.DriveClassType, SalmonCoreTestHelper.TEST_PASSWORD, sequencer);
         bool wrongPassword = false;
         drive.Close();
         try
         {
-            drive = SalmonDrive.OpenDrive(vaultDir, SalmonFSTestHelper.DriveClassType, SalmonCoreTestHelper.TEST_PASSWORD, sequencer);
+            drive = SalmonFSTestHelper.OpenDrive(vaultDir, SalmonFSTestHelper.DriveClassType, SalmonCoreTestHelper.TEST_PASSWORD, sequencer);
             SalmonFile virtualRoot = drive.Root;
         }
         catch (SalmonAuthException)
@@ -531,8 +534,8 @@ public class SalmonFSTests
         IRealFile vaultDir = SalmonFSTestHelper.GenerateFolder(SalmonFSTestHelper.TEST_VAULT2_DIR);
         DotNetFile sequenceFile = new DotNetFile(vaultDir + "/" + SalmonFSTestHelper.TEST_SEQUENCER_FILE1);
         INonceSequenceSerializer serializer = new SalmonSequenceSerializer();
-        SalmonFileSequencer sequencer = new SalmonFileSequencer(sequenceFile, serializer);
-        SalmonDrive drive = SalmonDrive.CreateDrive(vaultDir, SalmonFSTestHelper.DriveClassType, SalmonCoreTestHelper.TEST_PASSWORD, sequencer);
+        SalmonFileSequencer sequencer = SalmonFSTestHelper.CreateSalmonFileSequencer(sequenceFile, serializer);
+        SalmonDrive drive = SalmonFSTestHelper.CreateDrive(vaultDir, SalmonFSTestHelper.DriveClassType, SalmonCoreTestHelper.TEST_PASSWORD, sequencer);
         bool wrongPassword = false;
         SalmonFile rootDir = drive.Root;
         rootDir.ListFiles();
@@ -541,7 +544,7 @@ public class SalmonFSTests
         // reopen but open the fs folder instead it should still login
         try
         {
-            drive = SalmonDrive.OpenDrive(vaultDir.GetChild("/fs"), SalmonFSTestHelper.DriveClassType, SalmonCoreTestHelper.TEST_PASSWORD, sequencer);
+            drive = SalmonFSTestHelper.OpenDrive(vaultDir.GetChild("/fs"), SalmonFSTestHelper.DriveClassType, SalmonCoreTestHelper.TEST_PASSWORD, sequencer);
             Assert.IsTrue(drive.HasConfig());
         }
         catch (SalmonAuthException)
@@ -685,8 +688,8 @@ public class SalmonFSTests
         IRealFile vaultDir = SalmonFSTestHelper.GenerateFolder(SalmonFSTestHelper.TEST_VAULT2_DIR);
         IRealFile file = new DotNetFile(SalmonFSTestHelper.TEST_IMPORT_LARGE_FILE);
 
-        SalmonFileSequencer sequencer = new SalmonFileSequencer(new DotNetFile(vaultDir + "/" + SalmonFSTestHelper.TEST_SEQUENCER_FILE1), new SalmonSequenceSerializer());
-        SalmonDrive drive = SalmonDrive.CreateDrive(vaultDir, SalmonFSTestHelper.DriveClassType, SalmonCoreTestHelper.TEST_PASSWORD, sequencer);
+        SalmonFileSequencer sequencer = SalmonFSTestHelper.CreateSalmonFileSequencer(new DotNetFile(vaultDir + "/" + SalmonFSTestHelper.TEST_SEQUENCER_FILE1), new SalmonSequenceSerializer());
+        SalmonDrive drive = SalmonFSTestHelper.CreateDrive(vaultDir, SalmonFSTestHelper.DriveClassType, SalmonCoreTestHelper.TEST_PASSWORD, sequencer);
         SalmonFile[] sfiles = new SalmonFileCommander(0, 0, 2).ImportFiles(new IRealFile[] { file },
             drive.Root, false, true, null, null, null);
 

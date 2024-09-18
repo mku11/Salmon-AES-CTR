@@ -101,7 +101,7 @@ public abstract class SalmonDrive : VirtualDrive
 	/// </summary>
 	///  <param name="realRoot">The root of the real directory</param>
     ///  <param name="createIfNotExists">Create the drive if it does not exist</param>
-    protected void Initialize(IRealFile realRoot, bool createIfNotExists = false)
+    protected virtual void Initialize(IRealFile realRoot, bool createIfNotExists = false)
     {
         Close();
         if (realRoot == null)
