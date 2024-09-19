@@ -6,6 +6,7 @@ import com.mku.streams.InputStreamWrapper;
 import com.mku.streams.RandomAccessStream;
 import org.springframework.core.io.InputStreamResource;
 import org.springframework.core.io.Resource;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -30,6 +31,7 @@ public class RealFileController {
      * Get details about a file<br>
      * example:
      * curl -X GET "http://localhost:8080/api/info?path=/fs/U0xNAgAAAABAAAAAAAADGOKoJtY0"
+     *
      * @param path The file path
      * @return
      */
@@ -42,6 +44,7 @@ public class RealFileController {
      * List files and directories under a directory<br>
      * example:
      * curl -X GET "http://localhost:8080/api/list?path=/fs/U0xNAgAAAABAAAAAAAADGOKoJtY0"
+     *
      * @param path The directory path
      * @return
      */
@@ -63,6 +66,7 @@ public class RealFileController {
      * Create a directory<br>
      * example:
      * curl -X POST "http://localhost:8080/api/mkdir?path=/fs/U0xNAgAAAABAAAAAAAADGOKoJtY0"
+     *
      * @param path The directory path
      * @return
      */
@@ -79,6 +83,7 @@ public class RealFileController {
      * Create a file<br>
      * example:
      * curl -X POST "http://localhost:8080/api/mkdir?path=/fs/U0xNAgAAAABAAAAAAAADGOKoJtY0"
+     *
      * @param path The directory path
      * @return
      */
@@ -91,28 +96,41 @@ public class RealFileController {
     }
 
     /**
-     * Upload a file under a directory<br>
+     * Upload a file<br>
      * example:
-     * curl -X POST -F "file=@D:/tmp/testdata/data.dat" "http://localhost:8080/api/upload?path=/fs/U0xNAgAAAABAAAAAAAACB5s0xrH2KAs="
+     * curl -X POST -F "file=@D:/tmp/testdata/data.dat" "http://localhost:8080/api/upload?path=/fs/U0xNAgAAAABAAAAAAAACB5s0xrH2KAs=&position=0"
      *
      * @param file The file data
      * @param path The path to the file
+     * @param path The byte position of the file that writing will start
      * @return
      * @throws IOException
      */
     @PostMapping("/upload")
-    public RealFileNode upload(@RequestParam("file") MultipartFile file, String path) throws IOException {
-        IRealFile rFile = FileSystem.write(path, file);
-        return new RealFileNode(rFile);
+    public ResponseEntity<RealFileNode> upload(@RequestParam("file") MultipartFile file, String path, long position) throws IOException {
+        IRealFile rFile = FileSystem.write(path, file, position);
+        return new ResponseEntity<>(new RealFileNode(rFile), position > 0 ? HttpStatus.PARTIAL_CONTENT : HttpStatus.OK);
     }
 
+    /**
+     * Get a file<br>
+     * example:
+     * curl -X GET "http://localhost:8080/api/get?path=/fs/U0xNAgAAAABAAAAAAAACB5s0xrH2KAs="
+     *
+     * @param path The path to the file
+     * @param path The byte position of the file that reading will start from
+     * @return
+     * @throws IOException
+     */
     @GetMapping(path = "/get")
-    public ResponseEntity<Resource> get(String path) throws IOException {
+    public ResponseEntity<Resource> get(String path, long position) throws IOException {
         IRealFile rFile = FileSystem.getFile(path);
-        InputStreamWrapper inputStreamWrapper = new InputStreamWrapper(rFile.getInputStream());
+        RandomAccessStream stream = rFile.getInputStream();
+        stream.setPosition(position);
+        InputStreamWrapper inputStreamWrapper = new InputStreamWrapper(stream);
         InputStreamResource resource = new InputStreamResource(inputStreamWrapper);
-        return ResponseEntity.ok()
-                .contentLength(rFile.length())
+        return ResponseEntity.status(position > 0?HttpStatus.PARTIAL_CONTENT : HttpStatus.OK)
+                .contentLength(rFile.length() - position)
                 .contentType(MediaType.APPLICATION_OCTET_STREAM)
                 .body(resource);
     }
@@ -120,9 +138,10 @@ public class RealFileController {
     /**
      * Copy a file to the destination directory<br>
      * example:
-     *  curl -X PUT "http://localhost:8080/api/copy?sourcePath=/U0xNAgAAAABAAAAAAAAA5hTh7E6oVTYJzH0=&destDir=/fs/U0xNAgAAAABAAAAAAAACB5s0xrH2KAs=&filename=U0xNAgAAAABAAAAAAAACB5s0xrH2KA1"
+     * curl -X PUT "http://localhost:8080/api/copy?sourcePath=/U0xNAgAAAABAAAAAAAAA5hTh7E6oVTYJzH0=&destDir=/fs/U0xNAgAAAABAAAAAAAACB5s0xrH2KAs=&filename=U0xNAgAAAABAAAAAAAACB5s0xrH2KA1"
+     *
      * @param sourcePath The file to copy
-     * @param destDir The destination directory
+     * @param destDir    The destination directory
      * @return
      * @throws IOException
      */
@@ -142,10 +161,11 @@ public class RealFileController {
     /**
      * Move a file to the destination directory<br>
      * example:
-     *  curl -X PUT "http://localhost:8080/api/move?sourcePath=/fs/U0xNAgAAAABAAAAAAAAA5hTh7E6oVTYJzH0=&destDir=/fs/U0xNAgAAAABAAAAAAAACB5s0xrH2KAs=&filename=U0xNAgAAAABAAAAAAAACB5s0xrH2KA1"
+     * curl -X PUT "http://localhost:8080/api/move?sourcePath=/fs/U0xNAgAAAABAAAAAAAAA5hTh7E6oVTYJzH0=&destDir=/fs/U0xNAgAAAABAAAAAAAACB5s0xrH2KAs=&filename=U0xNAgAAAABAAAAAAAACB5s0xrH2KA1"
+     *
      * @param sourcePath The file to move
-     * @param destDir The destination directory
-     * @param filename The new file name (optional)
+     * @param destDir    The destination directory
+     * @param filename   The new file name (optional)
      * @return
      * @throws IOException
      */
@@ -165,7 +185,8 @@ public class RealFileController {
      * Rename a file or directory<br>
      * example:
      * curl -X PUT "http://localhost:8080/api/rename?path=/fs/U0xNAgAAAABAAAAAAAADEWyHD6u05Tq-UQ==&filename=U0xNAgAAAABAAAAAAAAA5hTh7E6oVTYJzH0="
-     * @param path The file or directory path
+     *
+     * @param path     The file or directory path
      * @param filename The new filename
      * @return
      * @throws FileNotFoundException
@@ -181,6 +202,7 @@ public class RealFileController {
      * Delete a file or directory<br>
      * example:
      * curl -X DELETE "http://localhost:8080/api/delete?path=/fs/U0xNAgAAAABAAAAAAAADGOKoJtY0"
+     *
      * @param path The file or directory path
      * @return
      */
@@ -195,7 +217,8 @@ public class RealFileController {
      * Set the file length<br>
      * example:
      * curl -X PUT "http://localhost:8080/api/rename?path=/fs/U0xNAgAAAABAAAAAAAADEWyHD6u05Tq-UQ==&length=1204"
-     * @param path The file
+     *
+     * @param path   The file
      * @param length The new size
      * @return
      * @throws FileNotFoundException

@@ -44,7 +44,7 @@ public class FileSystem {
                 new JavaFile(path).getAbsolutePath(), "").replace("\\", "/");
     }
 
-    public static IRealFile write(String path, MultipartFile file) throws IOException {
+    public static IRealFile write(String path, MultipartFile file, long position) throws IOException {
         IRealFile rFile = getFile(path);
         if(!rFile.exists()) {
             IRealFile dir = rFile.getParent();
@@ -55,6 +55,7 @@ public class FileSystem {
         try {
             inputStream = file.getInputStream();
             outputStream = rFile.getOutputStream();
+            outputStream.setPosition(position);
 
             byte[] buff = new byte[BUFF_LENGTH];
             int bytesRead;

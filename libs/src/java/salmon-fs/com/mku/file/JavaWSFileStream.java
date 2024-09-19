@@ -24,7 +24,7 @@ SOFTWARE.
 */
 
 import com.mku.convert.Base64;
-import com.mku.streams.MemoryStream;
+import com.mku.streams.BlockingInputOutputAdapterStream;
 import com.mku.streams.RandomAccessStream;
 import org.apache.http.*;
 import org.apache.http.client.methods.CloseableHttpResponse;
@@ -46,6 +46,7 @@ import java.net.URISyntaxException;
  */
 public class JavaWSFileStream extends RandomAccessStream {
     private static final String PATH = "path";
+    private static final String POSITION = "position";
     public static CloseableHttpClient client = HttpClients.createDefault();
     /**
      * The network input stream associated.
@@ -90,21 +91,19 @@ public class JavaWSFileStream extends RandomAccessStream {
         if (this.closed)
             throw new IOException("Stream is closed");
         if (this.inputStream == null) {
+            long startPosition = this.getPosition();
             URIBuilder uriBuilder;
             httpResponse = null;
             try {
                 uriBuilder = new URIBuilder(file.getServicePath() + "/api/get");
                 uriBuilder.addParameter(PATH, this.file.getPath());
+                uriBuilder.addParameter(POSITION, String.valueOf(startPosition));
                 HttpGet httpGet = new HttpGet(uriBuilder.build());
                 httpGet.addHeader("Cache", "no-store");
                 httpGet.addHeader("KeepAlive", "true");
-                httpGet.addHeader("Byte-Range", "bytes=" + this.position + "-");
                 setServiceAuth(httpGet);
                 httpResponse = client.execute(httpGet);
-                if (this.position > 0)
-                    checkStatus(httpResponse, HttpStatus.SC_PARTIAL_CONTENT);
-                else
-                    checkStatus(httpResponse, HttpStatus.SC_OK);
+                checkStatus(httpResponse, startPosition > 0 ? HttpStatus.SC_PARTIAL_CONTENT : HttpStatus.SC_OK);
                 this.inputStream = httpResponse.getEntity().getContent();
             } catch (URISyntaxException e) {
                 throw new RuntimeException(e);
@@ -118,35 +117,36 @@ public class JavaWSFileStream extends RandomAccessStream {
     private OutputStream getOutputStream() throws IOException {
         if (this.closed)
             throw new IOException("Stream is closed");
+        BlockingInputOutputAdapterStream outputStream;
         if (this.outputStream == null) {
             URIBuilder uriBuilder;
             HttpPost httpPost = null;
-            OutputAdapterStream stream = null;
+            long startPosition = this.getPosition();
             try {
                 uriBuilder = new URIBuilder(file.getServicePath() + "/api/upload");
                 uriBuilder.addParameter(PATH, this.file.getPath());
+                uriBuilder.addParameter(POSITION, String.valueOf(startPosition));
                 httpPost = new HttpPost(uriBuilder.build());
                 httpPost.addHeader("Cache", "no-store");
                 httpPost.addHeader("KeepAlive", "true");
                 setServiceAuth(httpPost);
 
-                stream = new OutputAdapterStream();
-                this.outputStream = stream;
+                outputStream = new BlockingInputOutputAdapterStream();
+                this.outputStream = outputStream;
             } catch (URISyntaxException e) {
                 throw new RuntimeException(e);
             }
 
             HttpPost finalHttpPost = httpPost;
-            OutputAdapterStream finalStream = stream;
             new Thread(() -> {
                 try {
                     HttpEntity entity = MultipartEntityBuilder.create()
-                            .addPart("file", new InputStreamBody(finalStream.getBackStream(), file.getBaseName()))
+                            .addPart("file", new InputStreamBody(outputStream.getInputStream(), file.getBaseName()))
                             .build();
                     finalHttpPost.setEntity(entity);
                     outHttpResponse = client.execute(finalHttpPost);
-                    checkStatus(outHttpResponse, HttpStatus.SC_OK);
-                    finalStream.received();
+                    checkStatus(outHttpResponse, startPosition > 0 ? HttpStatus.SC_PARTIAL_CONTENT : HttpStatus.SC_OK);
+                    outputStream.setReceived(true);
                 } catch (Exception e) {
                     throw new RuntimeException(e);
                 } finally {
@@ -224,8 +224,9 @@ public class JavaWSFileStream extends RandomAccessStream {
      */
     @Override
     public void setPosition(long value) throws IOException {
+        if(this.position != value)
+            this.reset();
         this.position = value;
-        this.reset();
     }
 
     /**
@@ -331,6 +332,11 @@ public class JavaWSFileStream extends RandomAccessStream {
         if (outHttpResponse != null)
             outHttpResponse.close();
         this.closed = true;
+//        try {
+//            Thread.sleep(2000);
+//        } catch (InterruptedException e) {
+//            throw new RuntimeException(e);
+//        }
     }
 
     public void reset() throws IOException {
@@ -356,116 +362,5 @@ public class JavaWSFileStream extends RandomAccessStream {
         if (httpResponse.getStatusLine().getStatusCode() != status)
             throw new IOException(httpResponse.getStatusLine().getStatusCode()
                     + " " + httpResponse.getStatusLine().getReasonPhrase());
-    }
-
-    /**
-     * Redirection adapter for uploading a multipart file without loading all content at once
-     */
-    private class OutputAdapterStream extends OutputStream {
-        MemoryStream memoryStream = new MemoryStream();
-        private boolean pendingRead = false;
-        private final Object readWriteLock = new Object();
-        private final Object doneLock = new Object();
-        private final Object receivedLock = new Object();
-        private boolean closed;
-        private boolean received;
-
-        InputStream stream = new InputStream() {
-            @Override
-            public int read() throws IOException {
-                byte[] bytes = new byte[1];
-                return read(bytes, 0, bytes.length);
-            }
-
-            @Override
-            public int available() {
-                synchronized (readWriteLock) {
-                    if (closed)
-                        return 0;
-                    return (int) (memoryStream.length() - memoryStream.getPosition());
-                }
-            }
-
-            @Override
-            public int read(byte[] buffer, int offset, int count) throws IOException {
-                int bytesRead;
-                synchronized (readWriteLock) {
-                    while (!pendingRead && !closed) {
-                        try {
-                            readWriteLock.wait();
-                        } catch (InterruptedException e) {
-                        }
-                    }
-                    bytesRead = memoryStream.read(buffer, 0, count);
-                    // we read all pending data
-                    if (memoryStream.getPosition() == memoryStream.length()) {
-                        pendingRead = false;
-                        readWriteLock.notifyAll();
-                    }
-                }
-                return bytesRead;
-            }
-        };
-
-
-        @Override
-        public void write(int b) throws IOException {
-            this.write(new byte[]{(byte) b}, 0, 1);
-        }
-
-        @Override
-        public void write(byte[] buffer, int offset, int count) throws IOException {
-            synchronized (readWriteLock) {
-                while (pendingRead && !closed) {
-                    try {
-                        readWriteLock.wait();
-                    } catch (InterruptedException e) {
-                    }
-                }
-                memoryStream.setPosition(0);
-                memoryStream.write(buffer, offset, count);
-                memoryStream.setLength(count);
-                pendingRead = true;
-                memoryStream.setPosition(0);
-                readWriteLock.notifyAll();
-            }
-        }
-
-        public InputStream getBackStream() {
-            return stream;
-        }
-
-        @Override
-        public void close() throws IOException {
-            synchronized (readWriteLock) {
-                while (pendingRead) {
-                    try {
-                        readWriteLock.wait();
-                    } catch (InterruptedException e) {
-                    }
-                }
-            }
-            synchronized (readWriteLock) {
-                closed = true;
-                readWriteLock.notifyAll();
-            }
-            synchronized (receivedLock) {
-                while(!received) {
-                    try {
-                        receivedLock.wait();
-                    } catch (InterruptedException e) {
-                        throw new RuntimeException(e);
-                    }
-                }
-                super.close();
-            }
-        }
-
-        public void received() {
-            synchronized (receivedLock) {
-                received = true;
-                receivedLock.notify();
-            }
-        }
     }
 }
