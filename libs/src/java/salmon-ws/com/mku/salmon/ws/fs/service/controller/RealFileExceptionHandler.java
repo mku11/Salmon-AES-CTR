@@ -11,7 +11,7 @@ import java.io.IOException;
 @ControllerAdvice
 public class RealFileExceptionHandler {
     @ExceptionHandler
-    public ResponseEntity<Object> handleException(IOException e) {
+    public ResponseEntity<Object> handleException(Exception e) {
         RealFileError error = new RealFileError(HttpStatus.INTERNAL_SERVER_ERROR, e.getMessage());
         return new ResponseEntity<Object>(error, new HttpHeaders(), error.getStatus());
     }
