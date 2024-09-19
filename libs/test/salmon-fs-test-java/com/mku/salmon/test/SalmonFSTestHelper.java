@@ -32,6 +32,7 @@ import com.mku.salmon.drive.JavaDrive;
 import com.mku.file.JavaFile;
 import com.mku.file.IVirtualFile;
 import com.mku.salmon.drive.JavaWSDrive;
+import com.mku.streams.InputStreamWrapper;
 import com.mku.streams.RandomAccessStream;
 import com.mku.streams.MemoryStream;
 import com.mku.salmon.*;
@@ -150,7 +151,7 @@ public class SalmonFSTestHelper {
         DigestInputStream dis = null;
         try {
             MessageDigest md = MessageDigest.getInstance("SHA-256");
-            is = new FileInputStream(realFile.getPath());
+            is = new InputStreamWrapper(realFile.getInputStream());
             dis = new DigestInputStream(is, md);
             byte[] digest = md.digest();
 
