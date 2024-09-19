@@ -24,7 +24,6 @@ SOFTWARE.
 */
 
 import com.mku.file.JavaWSFile;
-import com.mku.salmon.drive.JavaWSDrive;
 import com.mku.salmon.ws.fs.service.SalmonWSApplication;
 import org.junit.jupiter.api.Test;
 
