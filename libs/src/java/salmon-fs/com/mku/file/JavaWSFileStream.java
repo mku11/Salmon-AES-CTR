@@ -38,7 +38,6 @@ import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.HttpClients;
 
 import java.io.*;
-import java.net.URISyntaxException;
 
 /**
  * An advanced Salmon File Stream implementation for java files.
@@ -105,7 +104,7 @@ public class JavaWSFileStream extends RandomAccessStream {
                 httpResponse = client.execute(httpGet);
                 checkStatus(httpResponse, startPosition > 0 ? HttpStatus.SC_PARTIAL_CONTENT : HttpStatus.SC_OK);
                 this.inputStream = httpResponse.getEntity().getContent();
-            } catch (URISyntaxException e) {
+            } catch (Exception e) {
                 throw new RuntimeException(e);
             }
         }
@@ -133,7 +132,7 @@ public class JavaWSFileStream extends RandomAccessStream {
 
                 outputStream = new BlockingInputOutputAdapterStream();
                 this.outputStream = outputStream;
-            } catch (URISyntaxException e) {
+            } catch (Exception e) {
                 throw new RuntimeException(e);
             }
 
@@ -332,11 +331,6 @@ public class JavaWSFileStream extends RandomAccessStream {
         if (outHttpResponse != null)
             outHttpResponse.close();
         this.closed = true;
-//        try {
-//            Thread.sleep(2000);
-//        } catch (InterruptedException e) {
-//            throw new RuntimeException(e);
-//        }
     }
 
     public void reset() throws IOException {
@@ -361,6 +355,7 @@ public class JavaWSFileStream extends RandomAccessStream {
     private void checkStatus(HttpResponse httpResponse, int status) throws IOException {
         if (httpResponse.getStatusLine().getStatusCode() != status)
             throw new IOException(httpResponse.getStatusLine().getStatusCode()
-                    + " " + httpResponse.getStatusLine().getReasonPhrase());
+                    + " " + httpResponse.getStatusLine().getReasonPhrase() + "\n"
+            + new String(httpResponse.getEntity().getContent().readAllBytes()));
     }
 }
