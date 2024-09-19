@@ -98,8 +98,7 @@ public class JavaWSFileStream extends RandomAccessStream {
                 uriBuilder.addParameter(PATH, this.file.getPath());
                 uriBuilder.addParameter(POSITION, String.valueOf(startPosition));
                 HttpGet httpGet = new HttpGet(uriBuilder.build());
-                httpGet.addHeader("Cache", "no-store");
-                httpGet.addHeader("KeepAlive", "true");
+                setDefaultHeaders(httpGet);
                 setServiceAuth(httpGet);
                 httpResponse = client.execute(httpGet);
                 checkStatus(httpResponse, startPosition > 0 ? HttpStatus.SC_PARTIAL_CONTENT : HttpStatus.SC_OK);
@@ -128,6 +127,7 @@ public class JavaWSFileStream extends RandomAccessStream {
                 httpPost = new HttpPost(uriBuilder.build());
                 httpPost.addHeader("Cache", "no-store");
                 httpPost.addHeader("KeepAlive", "true");
+                setDefaultHeaders(httpPost);
                 setServiceAuth(httpPost);
 
                 outputStream = new BlockingInputOutputAdapterStream();
@@ -237,6 +237,7 @@ public class JavaWSFileStream extends RandomAccessStream {
     @Override
     public void setLength(long value) throws IOException {
         HttpPut httpPut = new HttpPut(file.getServicePath() + "/api/setLength?path=" + file.getPath() + "&length=" + value);
+        setDefaultHeaders(httpPut);
         setServiceAuth(httpPut);
         CloseableHttpResponse httpResponse = null;
         try {
@@ -357,5 +358,10 @@ public class JavaWSFileStream extends RandomAccessStream {
             throw new IOException(httpResponse.getStatusLine().getStatusCode()
                     + " " + httpResponse.getStatusLine().getReasonPhrase() + "\n"
             + new String(httpResponse.getEntity().getContent().readAllBytes()));
+    }
+
+    private void setDefaultHeaders(HttpRequest request) {
+        request.addHeader("Cache", "no-store");
+        request.addHeader("KeepAlive", "true");
     }
 }

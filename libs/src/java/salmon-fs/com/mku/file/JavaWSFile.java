@@ -46,7 +46,7 @@ import java.util.List;
  */
 public class JavaWSFile implements IRealFile {
     private static final String PATH = "path";
-    private static final String DEST_DIR = "path";
+    private static final String DEST_DIR = "destDir";
     private static final String FILENAME = "filename";
     public static String Separator = "/";
     public static CloseableHttpClient client = HttpClients.createDefault();
@@ -130,6 +130,7 @@ public class JavaWSFile implements IRealFile {
         URIBuilder uriBuilder = new URIBuilder(this.servicePath + "/api/info");
         uriBuilder.addParameter(PATH, this.filePath);
         HttpGet httpGet = new HttpGet(uriBuilder.build());
+        setDefaultHeaders(httpGet);
         setServiceAuth(httpGet);
         Response response;
         CloseableHttpResponse httpResponse = null;
@@ -163,6 +164,7 @@ public class JavaWSFile implements IRealFile {
             URIBuilder uriBuilder = new URIBuilder(this.servicePath + "/api/mkdir");
             uriBuilder.addParameter(PATH, nDirPath);
             HttpPost httpPost = new HttpPost(uriBuilder.build());
+            setDefaultHeaders(httpPost);
             setServiceAuth(httpPost);
 
             httpResponse = client.execute(httpPost);
@@ -198,6 +200,7 @@ public class JavaWSFile implements IRealFile {
             uriBuilder = new URIBuilder(this.servicePath + "/api/create");
             uriBuilder.addParameter(PATH, nFilePath);
             HttpPost httpPost = new HttpPost(uriBuilder.build());
+            setDefaultHeaders(httpPost);
             setServiceAuth(httpPost);
             httpResponse = client.execute(httpPost);
             checkStatus(httpResponse, HttpStatus.SC_OK);
@@ -227,6 +230,7 @@ public class JavaWSFile implements IRealFile {
                     URIBuilder uriBuilder = new URIBuilder(this.servicePath + "/api/delete");
                     uriBuilder.addParameter(PATH, file.getPath());
                     HttpDelete httpDelete = new HttpDelete(uriBuilder.build());
+                    setDefaultHeaders(httpDelete);
                     setServiceAuth(httpDelete);
                     httpResponse = client.execute(httpDelete);
                     checkStatus(httpResponse, HttpStatus.SC_OK);
@@ -249,6 +253,7 @@ public class JavaWSFile implements IRealFile {
             URIBuilder dirUriBuilder = new URIBuilder(this.servicePath + "/api/delete");
             dirUriBuilder.addParameter(PATH, this.filePath);
             HttpDelete httpDelete = new HttpDelete(dirUriBuilder.build());
+            setDefaultHeaders(httpDelete);
             setServiceAuth(httpDelete);
             httpResponse = client.execute(httpDelete);
             checkStatus(httpResponse, HttpStatus.SC_OK);
@@ -408,6 +413,7 @@ public class JavaWSFile implements IRealFile {
                 URIBuilder uriBuilder = new URIBuilder(this.servicePath + "/api/list");
                 uriBuilder.addParameter(PATH, this.filePath);
                 HttpGet httpGet = new HttpGet(uriBuilder.build());
+                setDefaultHeaders(httpGet);
                 setServiceAuth(httpGet);
                 httpResponse = client.execute(httpGet);
                 checkStatus(httpResponse, HttpStatus.SC_OK);
@@ -460,6 +466,7 @@ public class JavaWSFile implements IRealFile {
                 URIBuilder uriBuilder = new URIBuilder(this.servicePath + "/api/list");
                 uriBuilder.addParameter(PATH, this.filePath);
                 HttpGet httpGet = new HttpGet(uriBuilder.build());
+                setDefaultHeaders(httpGet);
                 setServiceAuth(httpGet);
                 httpResponse = client.execute(httpGet);
                 checkStatus(httpResponse, HttpStatus.SC_OK);
@@ -542,11 +549,13 @@ public class JavaWSFile implements IRealFile {
                 uriBuilder.addParameter(FILENAME, newName);
 
                 HttpPut httpPut = new HttpPut(uriBuilder.build());
+                setDefaultHeaders(httpPut);
                 setServiceAuth(httpPut);
                 httpResponse = client.execute(httpPut);
                 checkStatus(httpResponse, HttpStatus.SC_OK);
-                Response res = new Response(httpResponse.getEntity().toString(), httpResponse.getAllHeaders());
-                newFile = new JavaWSFile(res.path, servicePath, credentials);
+                Response response = new Response(new String(httpResponse.getEntity().getContent().readAllBytes()),
+                        httpResponse.getAllHeaders());
+                newFile = new JavaWSFile(response.path, servicePath, credentials);
                 return newFile;
             } catch (Exception e) {
                 throw new RuntimeException(e);
@@ -602,19 +611,21 @@ public class JavaWSFile implements IRealFile {
         if (isDirectory()) {
             throw new IOException("Could not copy directory use IRealFile copyRecursively() instead");
         } else {
-            URIBuilder uriBuilder = null;
+            URIBuilder uriBuilder;
             CloseableHttpResponse httpResponse = null;
             try {
                 uriBuilder = new URIBuilder(this.servicePath + "/api/copy");
                 uriBuilder.addParameter(PATH, this.filePath);
                 uriBuilder.addParameter(DEST_DIR, newDir.getPath());
                 uriBuilder.addParameter(FILENAME, newName);
-                HttpPut httpPut = new HttpPut(uriBuilder.build());
-                setServiceAuth(httpPut);
-                httpResponse = client.execute(httpPut);
+                HttpPost httpPost = new HttpPost(uriBuilder.build());
+                setDefaultHeaders(httpPost);
+                setServiceAuth(httpPost);
+                httpResponse = client.execute(httpPost);
                 checkStatus(httpResponse, HttpStatus.SC_OK);
-                Response res = new Response(httpResponse.getEntity().toString(), httpResponse.getAllHeaders());
-                newFile = new JavaWSFile(res.path, this.servicePath, credentials);
+                Response response = new Response(new String(httpResponse.getEntity().getContent().readAllBytes()),
+                        httpResponse.getAllHeaders());
+                newFile = new JavaWSFile(response.path, this.servicePath, credentials);
                 return newFile;
             } catch (URISyntaxException e) {
                 throw new RuntimeException(e);
@@ -651,6 +662,7 @@ public class JavaWSFile implements IRealFile {
             uriBuilder.addParameter(PATH, this.filePath);
             uriBuilder.addParameter(FILENAME, newFilename);
             HttpPut httpPut = new HttpPut(uriBuilder.build());
+            setDefaultHeaders(httpPut);
             setServiceAuth(httpPut);
             httpResponse = client.execute(httpPut);
             checkStatus(httpResponse, HttpStatus.SC_OK);
@@ -680,6 +692,7 @@ public class JavaWSFile implements IRealFile {
             URIBuilder uriBuilder = new URIBuilder(this.servicePath + "/api/mkdir");
             uriBuilder.addParameter(PATH, this.filePath);
             HttpPost httpPost = new HttpPost(uriBuilder.build());
+            setDefaultHeaders(httpPost);
             setServiceAuth(httpPost);
             httpResponse = client.execute(httpPost);
             checkStatus(httpResponse, HttpStatus.SC_OK);
@@ -707,9 +720,14 @@ public class JavaWSFile implements IRealFile {
     }
 
     private void checkStatus(HttpResponse httpResponse, int status) throws IOException {
-        if (httpResponse.getStatusLine().getStatusCode() != status) {
+        if (httpResponse.getStatusLine().getStatusCode() != status)
             throw new IOException(httpResponse.getStatusLine().getStatusCode()
-                    + " " + httpResponse.getStatusLine().getReasonPhrase());
-        }
+                    + " " + httpResponse.getStatusLine().getReasonPhrase() + "\n"
+                    + new String(httpResponse.getEntity().getContent().readAllBytes()));
+    }
+
+    private void setDefaultHeaders(HttpRequest request) {
+        request.addHeader("Cache", "no-store");
+        request.addHeader("KeepAlive", "true");
     }
 }

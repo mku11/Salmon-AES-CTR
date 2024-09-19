@@ -162,14 +162,14 @@ public class RealFileController {
      * example:
      * curl -X PUT "http://localhost:8080/api/copy?sourcePath=/U0xNAgAAAABAAAAAAAAA5hTh7E6oVTYJzH0=&destDir=/fs/U0xNAgAAAABAAAAAAAACB5s0xrH2KAs=&filename=U0xNAgAAAABAAAAAAAACB5s0xrH2KA1"
      *
-     * @param sourcePath The file to copy
+     * @param path The file to copy
      * @param destDir    The destination directory
      * @return
      * @throws IOException
      */
     @PostMapping("/copy")
-    public RealFileNode copy(String sourcePath, String destDir, String filename) throws IOException {
-        IRealFile source = FileSystem.getFile(sourcePath);
+    public RealFileNode copy(String path, String destDir, String filename) throws IOException {
+        IRealFile source = FileSystem.getFile(path);
         IRealFile dest = FileSystem.getFile(destDir);
         IRealFile nFile;
         if (source.isDirectory()) {
@@ -185,15 +185,15 @@ public class RealFileController {
      * example:
      * curl -X PUT "http://localhost:8080/api/move?sourcePath=/fs/U0xNAgAAAABAAAAAAAAA5hTh7E6oVTYJzH0=&destDir=/fs/U0xNAgAAAABAAAAAAAACB5s0xrH2KAs=&filename=U0xNAgAAAABAAAAAAAACB5s0xrH2KA1"
      *
-     * @param sourcePath The file to move
+     * @param path The file to move
      * @param destDir    The destination directory
      * @param filename   The new file name (optional)
      * @return
      * @throws IOException
      */
     @PutMapping("/move")
-    public RealFileNode move(String sourcePath, String destDir, String filename) throws IOException {
-        IRealFile source = FileSystem.getFile(sourcePath);
+    public RealFileNode move(String path, String destDir, String filename) throws IOException {
+        IRealFile source = FileSystem.getFile(path);
         IRealFile dest = FileSystem.getFile(destDir);
         IRealFile nFile;
         if (source.isDirectory()) {

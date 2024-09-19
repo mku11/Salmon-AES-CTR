@@ -172,30 +172,30 @@ public class SalmonFSTests {
 
     @Test
     public void shouldImportAndCopyFile() throws Exception {
-        boolean integrityFailed = false;
+        boolean failed = false;
         try {
             SalmonFSTestHelper.importAndCopy(SalmonFSTestHelper.generateFolder(SalmonFSTestHelper.TEST_VAULT2_DIR), SalmonCoreTestHelper.TEST_PASSWORD, SalmonFSTestHelper.TEST_IMPORT_FILE,
                     SalmonFSTestHelper.ENC_IMPORT_BUFFER_SIZE, SalmonFSTestHelper.ENC_IMPORT_THREADS, "subdir", false);
-        } catch (IOException ex) {
-            if (ex.getCause() instanceof IntegrityException)
-                integrityFailed = true;
+        } catch (Exception ex) {
+            ex.printStackTrace();
+            failed = true;
         }
 
-        assertFalse(integrityFailed);
+        assertFalse(failed);
     }
 
     @Test
     public void shouldImportAndMoveFile() throws Exception {
-        boolean integrityFailed = false;
+        boolean failed = false;
         try {
             SalmonFSTestHelper.importAndCopy(SalmonFSTestHelper.generateFolder(SalmonFSTestHelper.TEST_VAULT2_DIR), SalmonCoreTestHelper.TEST_PASSWORD, SalmonFSTestHelper.TEST_IMPORT_FILE,
                     SalmonFSTestHelper.ENC_IMPORT_BUFFER_SIZE, SalmonFSTestHelper.ENC_IMPORT_THREADS, "subdir", true);
-        } catch (IOException ex) {
-            if (ex.getCause() instanceof IntegrityException)
-                integrityFailed = true;
+        } catch (Exception ex) {
+            ex.printStackTrace();
+            failed = true;
         }
 
-        assertFalse(integrityFailed);
+        assertFalse(failed);
     }
 
     @Test

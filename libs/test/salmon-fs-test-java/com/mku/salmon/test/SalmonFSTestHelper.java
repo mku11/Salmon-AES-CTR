@@ -275,11 +275,17 @@ public class SalmonFSTestHelper {
             newFile = salmonFile.move(newDir1, null);
         else
             newFile = salmonFile.copy(newDir1, null);
-
         assertNotNull(newFile);
-        String checkSumAfter = getChecksum(newFile.getRealFile());
 
+        IVirtualFile nNewFile = newDir1.getChild(newFile.getBaseName());
+        String checkSumAfter = getChecksum(nNewFile.getRealFile());
         assertEquals(checkSumBefore, checkSumAfter);
+
+        if(!move) {
+            IVirtualFile file = rootDir.getChild(fileToImport.getBaseName());
+            String checkSumOrigAfter = getChecksum(file.getRealFile());
+            assertEquals(checkSumBefore, checkSumOrigAfter);
+        }
 
         assertEquals(salmonFile.getBaseName(), newFile.getBaseName());
     }
