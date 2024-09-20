@@ -728,6 +728,6 @@ public class JavaWSFile implements IRealFile {
 
     private void setDefaultHeaders(HttpRequest request) {
         request.addHeader("Cache", "no-store");
-        request.addHeader("KeepAlive", "true");
+        request.addHeader("Keep-Alive", "true");
     }
 }
