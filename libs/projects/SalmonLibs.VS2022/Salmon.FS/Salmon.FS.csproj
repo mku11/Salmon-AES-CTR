@@ -26,6 +26,7 @@
 	<ItemGroup>
 		<Compile Include="..\..\..\src\csharp\SalmonFS\File\DotNetFile.cs" Link="File\DotNetFile.cs" />
 		<Compile Include="..\..\..\src\csharp\SalmonFS\File\DotNetWSFile.cs" Link="File\DotNetWSFile.cs" />
+		<Compile Include="..\..\..\src\csharp\SalmonFS\File\DotNetWSFileStream.cs" Link="File\DotNetWSFileStream.cs" />
 		<Compile Include="..\..\..\src\csharp\SalmonFS\File\IRealFile.cs" Link="File\IRealFile.cs" />
 		<Compile Include="..\..\..\src\csharp\SalmonFS\File\IVirtualFile.cs" Link="File\IVirtualFile.cs" />
 		<Compile Include="..\..\..\src\csharp\SalmonFS\Drive\VirtualDrive.cs" Link="Drive\VirtualDrive.cs" />

@@ -23,8 +23,10 @@ SOFTWARE.
 */
 
 using Mku.Convert;
+using Mku.Streams;
 using System;
 using System.Collections.Generic;
+using System.Collections.Specialized;
 using System.IO;
 using System.Net;
 using System.Net.Http;
@@ -32,6 +34,8 @@ using System.Net.Http.Headers;
 using System.Net.Http.Json;
 using System.Text;
 using System.Text.Json.Serialization;
+using System.Web;
+
 
 namespace Mku.File;
 
@@ -41,12 +45,13 @@ namespace Mku.File;
 public class DotNetWSFile : IRealFile
 {
     private static readonly string PATH = "path";
-    private static readonly string DEST_DIR = "path";
+    private static readonly string DEST_DIR = "destDir";
     private static readonly string FILENAME = "filename";
+    
     public static readonly string Separator = "/";
     private static HttpClient client = new HttpClient();
     private string filePath;
-    private string ServicePath { get; set; }
+    public string ServicePath { get; private set; }
     public Credentials ServiceCredentials { get; set; }
 
     /// <summary>
@@ -109,6 +114,7 @@ public class DotNetWSFile : IRealFile
             Dictionary<string, string> parameters = new Dictionary<string, string> { { PATH, nDirPath } };
             HttpRequestMessage requestMessage = new HttpRequestMessage(HttpMethod.Post, this.ServicePath + "/api/mkdir");
             requestMessage.Content = new FormUrlEncodedContent(parameters);
+            SetDefaultHeaders(requestMessage);
             SetServiceAuth(requestMessage);
             httpResponse = client.Send(requestMessage);
             CheckStatus(httpResponse, HttpStatusCode.OK);
@@ -126,7 +132,7 @@ public class DotNetWSFile : IRealFile
             {
                 try
                 {
-                    httpResponse.Content.Dispose();
+                    httpResponse.Dispose();
                 }
                 catch (IOException e)
                 {
@@ -143,7 +149,9 @@ public class DotNetWSFile : IRealFile
         Response response = null;
         try
         {
-            HttpRequestMessage requestMessage = new HttpRequestMessage(HttpMethod.Get, this.ServicePath + "/api/info?path=" + filePath);
+            HttpRequestMessage requestMessage = new HttpRequestMessage(HttpMethod.Get, this.ServicePath + "/api/info"
+                + "?" + PATH + "=" + filePath);
+            SetDefaultHeaders(requestMessage);
             SetServiceAuth(requestMessage);
             httpResponse = client.Send(requestMessage);
             CheckStatus(httpResponse, HttpStatusCode.OK);
@@ -153,15 +161,9 @@ public class DotNetWSFile : IRealFile
         finally
         {
             if (httpResponse != null)
-                httpResponse.Content.Dispose();
+                httpResponse.Dispose();
         }
         return response;
-    }
-
-    private void SetServiceAuth(HttpRequestMessage httpRequestMessage)
-    {
-        string encoding = new Base64().Encode(UTF8Encoding.UTF8.GetBytes(ServiceCredentials.ServiceUser + ":" + ServiceCredentials.ServicePassword));
-        httpRequestMessage.Headers.Authorization = new AuthenticationHeaderValue("Basic", encoding);
     }
 
     /// <summary>
@@ -172,19 +174,19 @@ public class DotNetWSFile : IRealFile
     ///  <exception cref="IOException">Thrown if error during IO</exception>
     public IRealFile CreateFile(string filename)
     {
-        //string nFilePath = filePath + System.IO.Path.DirectorySeparatorChar + filename;
-        //System.IO.File.Create(nFilePath).Close();
-        //DotNetFile dotNetFile = new DotNetFile(nFilePath);
-        //return dotNetFile;
-
         string nFilePath = filePath + Separator + filename;
 
         HttpResponseMessage httpResponse = null;
         try
         {
-            Dictionary<string, string> parameters = new Dictionary<string, string> { { PATH, nFilePath } };
-            HttpRequestMessage requestMessage = new HttpRequestMessage(HttpMethod.Post, this.ServicePath + "/api/create");
-            requestMessage.Content = new FormUrlEncodedContent(parameters);
+            UriBuilder builder = new UriBuilder(ServicePath + "/api/create");
+            NameValueCollection query = HttpUtility.ParseQueryString(builder.Query);
+            query[PATH] = nFilePath;
+            builder.Query = query.ToString();
+            string url = builder.ToString();
+
+            HttpRequestMessage requestMessage = new HttpRequestMessage(HttpMethod.Post, url);
+            SetDefaultHeaders(requestMessage);
             SetServiceAuth(requestMessage);
             httpResponse = client.Send(requestMessage);
             CheckStatus(httpResponse, HttpStatusCode.OK);
@@ -198,7 +200,7 @@ public class DotNetWSFile : IRealFile
         finally
         {
             if (httpResponse != null)
-                httpResponse.Content.Dispose();
+                httpResponse.Dispose();
         }
     }
 
@@ -216,9 +218,14 @@ public class DotNetWSFile : IRealFile
                 HttpResponseMessage httpResponse = null;
                 try
                 {
-                    Dictionary<string, string> parameters = new Dictionary<string, string> { { PATH, file.Path } };
-                    HttpRequestMessage requestMessage = new HttpRequestMessage(HttpMethod.Post, this.ServicePath + "/api/delete");
-                    requestMessage.Content = new FormUrlEncodedContent(parameters);
+                    UriBuilder builder = new UriBuilder(ServicePath + "/api/list");
+                    NameValueCollection query = HttpUtility.ParseQueryString(builder.Query);
+                    query[PATH] = file.Path;
+                    builder.Query = query.ToString();
+                    string url = builder.ToString();
+
+                    HttpRequestMessage requestMessage = new HttpRequestMessage(HttpMethod.Post, url);
+                    SetDefaultHeaders(requestMessage);
                     SetServiceAuth(requestMessage);
                     httpResponse = client.Send(requestMessage);
                     CheckStatus(httpResponse, HttpStatusCode.OK);
@@ -230,16 +237,21 @@ public class DotNetWSFile : IRealFile
                 finally
                 {
                     if (httpResponse != null)
-                        httpResponse.Content.Dispose();
+                        httpResponse.Dispose();
                 }
             }
         }
         HttpResponseMessage dirHttpResponse = null;
         try
         {
-            Dictionary<string, string> parameters = new Dictionary<string, string> { { PATH, filePath } };
-            HttpRequestMessage requestMessage = new HttpRequestMessage(HttpMethod.Delete, this.ServicePath + "/api/delete");
-            requestMessage.Content = new FormUrlEncodedContent(parameters);
+            UriBuilder builder = new UriBuilder(ServicePath + "/api/delete");
+            NameValueCollection query = HttpUtility.ParseQueryString(builder.Query);
+            query[PATH] = filePath;
+            builder.Query = query.ToString();
+            string url = builder.ToString();
+
+            HttpRequestMessage requestMessage = new HttpRequestMessage(HttpMethod.Delete, url);
+            SetDefaultHeaders(requestMessage);
             SetServiceAuth(requestMessage);
             dirHttpResponse = client.Send(requestMessage);
             CheckStatus(dirHttpResponse, HttpStatusCode.OK);
@@ -251,7 +263,7 @@ public class DotNetWSFile : IRealFile
         finally
         {
             if (dirHttpResponse != null)
-                dirHttpResponse.Content.Dispose();
+                dirHttpResponse.Dispose();
         }
         return !Exists;
     }
@@ -281,20 +293,7 @@ public class DotNetWSFile : IRealFile
     ///  <exception cref="FileNotFoundException">Thrown if file is not found</exception>
     public Stream GetInputStream()
     {
-        HttpResponseMessage httpResponse = null;
-        try
-        {
-            HttpRequestMessage requestMessage = new HttpRequestMessage(HttpMethod.Get, this.ServicePath + "/api/get?path=" + filePath);
-            SetServiceAuth(requestMessage);
-            httpResponse = client.Send(requestMessage);
-            CheckStatus(httpResponse, HttpStatusCode.OK);
-            Stream stream = httpResponse.Content.ReadAsStream();
-            return stream;
-        }
-        catch (Exception ex)
-        {
-            throw;
-        }
+        return new DotNetWSFileStream(this, FileAccess.Read);
     }
 
     /// <summary>
@@ -304,58 +303,58 @@ public class DotNetWSFile : IRealFile
     ///  <exception cref="FileNotFoundException">Thrown if file is not found</exception>
     public Stream GetOutputStream()
     {
-        //TODO: port JavaWSFile.OutputAdapterStream to C#
-        throw new NotSupportedException();
+        return new DotNetWSFileStream(this, FileAccess.Write);
     }
+
 
     /// <summary>
     ///  Get the parent directory of this file or directory.
-	/// </summary>
-	///  <returns>The parent directory.</returns>
+    /// </summary>
+    ///  <returns>The parent directory.</returns>
     public IRealFile Parent
     {
         get
         {
             string dirPath = Directory.GetParent(filePath).FullName;
-            DotNetFile parent = new DotNetFile(dirPath);
+            DotNetWSFile parent = new DotNetWSFile(dirPath, ServicePath, ServiceCredentials);
             return parent;
         }
     }
 
     /// <summary>
     ///  Get the path of this file. For C# this is the same as the absolute filepath.
-	/// </summary>
-	///  <returns>The path</returns>
+    /// </summary>
+    ///  <returns>The path</returns>
     public string Path => filePath;
 
     /// <summary>
     ///  True if this is a directory.
-	/// </summary>
-	///  <returns>True if directory</returns>
+    /// </summary>
+    ///  <returns>True if directory</returns>
     public bool IsDirectory => GetResponse().IsDirectory;
 
     /// <summary>
     ///  True if this is a file.
-	/// </summary>
-	///  <returns>True if file</returns>
+    /// </summary>
+    ///  <returns>True if file</returns>
     public bool IsFile => GetResponse().IsFile;
 
     /// <summary>
     ///  Get the last modified date on disk.
-	/// </summary>
-	///  <returns>The last modified date</returns>
+    /// </summary>
+    ///  <returns>The last modified date</returns>
     public long LastModified => GetResponse().LastModified;
 
     /// <summary>
     ///  Get the size of the file on disk.
-	/// </summary>
-	///  <returns>The length</returns>
+    /// </summary>
+    ///  <returns>The length</returns>
     public long Length => GetResponse().Length;
 
     /// <summary>
     ///  Get the count of files and subdirectories
-	/// </summary>
-	///  <returns>The children count</returns>
+    /// </summary>
+    ///  <returns>The children count</returns>
     public int ChildrenCount
     {
         get
@@ -368,9 +367,14 @@ public class DotNetWSFile : IRealFile
                     Response response = null;
                     try
                     {
-                        Dictionary<string, string> parameters = new Dictionary<string, string> { { PATH, this.filePath } };
-                        HttpRequestMessage requestMessage = new HttpRequestMessage(HttpMethod.Get, this.ServicePath + "/api/list");
-                        requestMessage.Content = new FormUrlEncodedContent(parameters);
+                        UriBuilder builder = new UriBuilder(ServicePath + "/api/list");
+                        NameValueCollection query = HttpUtility.ParseQueryString(builder.Query);
+                        query[PATH] = filePath;
+                        builder.Query = query.ToString();
+                        string url = builder.ToString();
+
+                        HttpRequestMessage requestMessage = new HttpRequestMessage(HttpMethod.Get, url);
+                        SetDefaultHeaders(requestMessage);
                         SetServiceAuth(requestMessage);
                         httpResponse = client.Send(requestMessage);
                         CheckStatus(httpResponse, HttpStatusCode.OK);
@@ -379,7 +383,7 @@ public class DotNetWSFile : IRealFile
                     finally
                     {
                         if (httpResponse != null)
-                            httpResponse.Content.Dispose();
+                            httpResponse.Dispose();
                     }
                 }
             }
@@ -406,17 +410,22 @@ public class DotNetWSFile : IRealFile
 
     /// <summary>
     ///  List all files under this directory.
-	/// </summary>
-	///  <returns>The list of files.</returns>
+    /// </summary>
+    ///  <returns>The list of files.</returns>
     public IRealFile[] ListFiles()
     {
         HttpResponseMessage httpResponse = null;
         Response[] files = null;
         try
         {
-            Dictionary<string, string> parameters = new Dictionary<string, string> { { PATH, this.filePath } };
-            HttpRequestMessage requestMessage = new HttpRequestMessage(HttpMethod.Get, this.ServicePath + "/api/list");
-            requestMessage.Content = new FormUrlEncodedContent(parameters);
+            UriBuilder builder = new UriBuilder(ServicePath + "/api/list");
+            NameValueCollection query = HttpUtility.ParseQueryString(builder.Query);
+            query[PATH] = filePath;
+            builder.Query = query.ToString();
+            string url = builder.ToString();
+
+            HttpRequestMessage requestMessage = new HttpRequestMessage(HttpMethod.Get, url);
+            SetDefaultHeaders(requestMessage);
             SetServiceAuth(requestMessage);
             httpResponse = client.Send(requestMessage);
             CheckStatus(httpResponse, HttpStatusCode.OK);
@@ -425,7 +434,7 @@ public class DotNetWSFile : IRealFile
         finally
         {
             if (httpResponse != null)
-                httpResponse.Content.Dispose();
+                httpResponse.Dispose();
         }
 
         if (files == null)
@@ -471,9 +480,16 @@ public class DotNetWSFile : IRealFile
             HttpResponseMessage httpResponse = null;
             try
             {
-                Dictionary<string, string> parameters = new Dictionary<string, string> { { PATH, filePath }, { DEST_DIR, newDir.Path }, { FILENAME, newName } };
-                HttpRequestMessage requestMessage = new HttpRequestMessage(HttpMethod.Put, this.ServicePath + "/api/move");
-                requestMessage.Content = new FormUrlEncodedContent(parameters);
+                UriBuilder builder = new UriBuilder(ServicePath + "/api/move");
+                NameValueCollection query = HttpUtility.ParseQueryString(builder.Query);
+                query[PATH] = filePath;
+                query[DEST_DIR] = newDir.Path;
+                query[FILENAME] = newName;
+                builder.Query = query.ToString();
+                string url = builder.ToString();
+
+                HttpRequestMessage requestMessage = new HttpRequestMessage(HttpMethod.Put, url);
+                SetDefaultHeaders(requestMessage);
                 SetServiceAuth(requestMessage);
                 httpResponse = client.Send(requestMessage);
                 CheckStatus(httpResponse, HttpStatusCode.OK);
@@ -489,7 +505,7 @@ public class DotNetWSFile : IRealFile
             finally
             {
                 if (httpResponse != null)
-                    httpResponse.Content.Dispose();
+                    httpResponse.Dispose();
             }
         }
     }
@@ -521,9 +537,16 @@ public class DotNetWSFile : IRealFile
             HttpResponseMessage httpResponse = null;
             try
             {
-                Dictionary<string, string> parameters = new Dictionary<string, string> { { PATH, filePath }, { DEST_DIR, newDir.Path }, { FILENAME, newName } };
-                HttpRequestMessage requestMessage = new HttpRequestMessage(HttpMethod.Put, this.ServicePath + "/api/copy");
-                requestMessage.Content = new FormUrlEncodedContent(parameters);
+                UriBuilder builder = new UriBuilder(ServicePath + "/api/copy");
+                NameValueCollection query = HttpUtility.ParseQueryString(builder.Query);
+                query[PATH] = filePath;
+                query[DEST_DIR] = newDir.Path;
+                query[FILENAME] = newName;
+                builder.Query = query.ToString();
+                string url = builder.ToString();
+
+                HttpRequestMessage requestMessage = new HttpRequestMessage(HttpMethod.Post, url);
+                SetDefaultHeaders(requestMessage);
                 SetServiceAuth(requestMessage);
                 httpResponse = client.Send(requestMessage);
                 CheckStatus(httpResponse, HttpStatusCode.OK);
@@ -539,37 +562,44 @@ public class DotNetWSFile : IRealFile
             finally
             {
                 if (httpResponse != null)
-                    httpResponse.Content.Dispose();
+                    httpResponse.Dispose();
             }
         }
     }
 
     /// <summary>
     ///  Get the file or directory under this directory with the provided name.
-	/// </summary>
-	///  <param name="filename">The name of the file or directory.</param>
+    /// </summary>
+    ///  <param name="filename">The name of the file or directory.</param>
     ///  <returns>The child file</returns>
     public IRealFile GetChild(string filename)
     {
         if (IsFile)
             return null;
-        DotNetFile child = new DotNetFile(filePath + System.IO.Path.DirectorySeparatorChar + filename);
+        DotNetWSFile child = new DotNetWSFile(filePath + System.IO.Path.DirectorySeparatorChar + filename,
+            ServicePath, ServiceCredentials);
         return child;
     }
 
     /// <summary>
     ///  Rename the current file or directory.
-	/// </summary>
-	///  <param name="newFilename">The new name for the file or directory.</param>
+    /// </summary>
+    ///  <param name="newFilename">The new name for the file or directory.</param>
     ///  <returns>True if successfully renamed.</returns>
     public bool RenameTo(string newFilename)
     {
         HttpResponseMessage httpResponse = null;
         try
         {
-            Dictionary<string, string> parameters = new Dictionary<string, string> { { PATH, filePath }, { FILENAME, newFilename } };
-            HttpRequestMessage requestMessage = new HttpRequestMessage(HttpMethod.Put, this.ServicePath + "/api/rename");
-            requestMessage.Content = new FormUrlEncodedContent(parameters);
+            UriBuilder builder = new UriBuilder(ServicePath + "/api/rename");
+            NameValueCollection query = HttpUtility.ParseQueryString(builder.Query);
+            query[PATH] = filePath;
+            query[FILENAME] = newFilename;
+            builder.Query = query.ToString();
+            string url = builder.ToString();
+
+            HttpRequestMessage requestMessage = new HttpRequestMessage(HttpMethod.Put, url);
+            SetDefaultHeaders(requestMessage);
             SetServiceAuth(requestMessage);
             httpResponse = client.Send(requestMessage);
             CheckStatus(httpResponse, HttpStatusCode.OK);
@@ -585,22 +615,27 @@ public class DotNetWSFile : IRealFile
         finally
         {
             if (httpResponse != null)
-                httpResponse.Content.Dispose();
+                httpResponse.Dispose();
         }
     }
 
     /// <summary>
     ///  Create this directory under the current filepath.
-	/// </summary>
-	///  <returns>True if created.</returns>
+    /// </summary>
+    ///  <returns>True if created.</returns>
     public bool Mkdir()
     {
         HttpResponseMessage httpResponse = null;
         try
         {
-            Dictionary<string, string> parameters = new Dictionary<string, string> { { PATH, filePath } };
-            HttpRequestMessage requestMessage = new HttpRequestMessage(HttpMethod.Post, this.ServicePath + "/api/mkdir");
-            requestMessage.Content = new FormUrlEncodedContent(parameters);
+            UriBuilder builder = new UriBuilder(ServicePath + "/api/mkdir");
+            NameValueCollection query = HttpUtility.ParseQueryString(builder.Query);
+            query[PATH] = filePath;
+            builder.Query = query.ToString();
+            string url = builder.ToString();
+
+            HttpRequestMessage requestMessage = new HttpRequestMessage(HttpMethod.Post, url);
+            SetDefaultHeaders(requestMessage);
             SetServiceAuth(requestMessage);
             httpResponse = client.Send(requestMessage);
             CheckStatus(httpResponse, HttpStatusCode.OK);
@@ -616,7 +651,7 @@ public class DotNetWSFile : IRealFile
         finally
         {
             if (httpResponse != null)
-                httpResponse.Content.Dispose();
+                httpResponse.Dispose();
         }
     }
 
@@ -634,8 +669,41 @@ public class DotNetWSFile : IRealFile
     {
         if (httpResponse.StatusCode != status)
         {
+            string msg = "";
+            Stream stream = null;
+            MemoryStream ms = null;
+            try
+            {
+                ms = new MemoryStream();
+                stream = httpResponse.Content.ReadAsStream();
+                stream.CopyTo(ms);
+                msg = UTF8Encoding.UTF8.GetString(ms.ToArray());
+            }
+            catch (Exception e)
+            {
+                Console.Error.WriteLine(e);
+            }
+            finally
+            {
+                if (ms != null)
+                    ms.Dispose();
+                if (stream != null)
+                    stream.Dispose();
+            }
             throw new IOException(httpResponse.StatusCode
-                    + " " + httpResponse.ReasonPhrase);
+                    + " " + httpResponse.ReasonPhrase + "\n"
+                    + msg);
         }
+    }
+    private void SetServiceAuth(HttpRequestMessage httpRequestMessage)
+    {
+        string encoding = new Base64().Encode(UTF8Encoding.UTF8.GetBytes(ServiceCredentials.ServiceUser + ":" + ServiceCredentials.ServicePassword));
+        httpRequestMessage.Headers.Authorization = new AuthenticationHeaderValue("Basic", encoding);
+    }
+
+    private void SetDefaultHeaders(HttpRequestMessage requestMessage)
+    {
+        requestMessage.Headers.Add("Cache", "no-store");
+        requestMessage.Headers.Add("Keep-Alive", "true");
     }
 }

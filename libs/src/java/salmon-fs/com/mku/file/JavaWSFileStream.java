@@ -46,6 +46,8 @@ import java.io.*;
 public class JavaWSFileStream extends RandomAccessStream {
     private static final String PATH = "path";
     private static final String POSITION = "position";
+	private static final String LENGTH = "length";
+	
     public static CloseableHttpClient client = HttpClients.createDefault();
     /**
      * The network input stream associated.
@@ -57,8 +59,6 @@ public class JavaWSFileStream extends RandomAccessStream {
      */
     private OutputStream outputStream;
 
-    private byte[] buffer = null;
-    private int bufferPosition = 0;
     private boolean closed;
 
     /**
@@ -125,8 +125,6 @@ public class JavaWSFileStream extends RandomAccessStream {
                 uriBuilder.addParameter(PATH, this.file.getPath());
                 uriBuilder.addParameter(POSITION, String.valueOf(startPosition));
                 httpPost = new HttpPost(uriBuilder.build());
-                httpPost.addHeader("Cache", "no-store");
-                httpPost.addHeader("KeepAlive", "true");
                 setDefaultHeaders(httpPost);
                 setServiceAuth(httpPost);
 
@@ -147,6 +145,7 @@ public class JavaWSFileStream extends RandomAccessStream {
                     checkStatus(outHttpResponse, startPosition > 0 ? HttpStatus.SC_PARTIAL_CONTENT : HttpStatus.SC_OK);
                     outputStream.setReceived(true);
                 } catch (Exception e) {
+					e.printStackTrace();
                     throw new RuntimeException(e);
                 } finally {
                     if (outHttpResponse != null) {
@@ -236,7 +235,10 @@ public class JavaWSFileStream extends RandomAccessStream {
      */
     @Override
     public void setLength(long value) throws IOException {
-        HttpPut httpPut = new HttpPut(file.getServicePath() + "/api/setLength?path=" + file.getPath() + "&length=" + value);
+        HttpPut httpPut = new HttpPut(file.getServicePath() + "/api/setLength"
+			+ "?" + PATH + "=" + file.getPath() 
+			+ "&" + LENGTH + "=" + value
+		);
         setDefaultHeaders(httpPut);
         setServiceAuth(httpPut);
         CloseableHttpResponse httpResponse = null;
@@ -247,6 +249,7 @@ public class JavaWSFileStream extends RandomAccessStream {
             if (httpResponse != null)
                 httpResponse.close();
         }
+		reset();
     }
 
     /**
@@ -342,9 +345,6 @@ public class JavaWSFileStream extends RandomAccessStream {
         if (this.outputStream != null)
             this.outputStream.close();
         this.outputStream = null;
-
-        this.buffer = null;
-        this.bufferPosition = 0;
     }
 
     private void setServiceAuth(HttpRequest httpRequest) {
@@ -362,6 +362,6 @@ public class JavaWSFileStream extends RandomAccessStream {
 
     private void setDefaultHeaders(HttpRequest request) {
         request.addHeader("Cache", "no-store");
-        request.addHeader("KeepAlive", "true");
+        request.addHeader("Keep-Alive", "true");
     }
 }
