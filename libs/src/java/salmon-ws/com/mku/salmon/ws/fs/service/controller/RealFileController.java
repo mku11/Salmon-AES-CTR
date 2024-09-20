@@ -129,7 +129,8 @@ public class RealFileController {
      * @throws IOException
      */
     @PostMapping("/upload")
-    public ResponseEntity<RealFileNode> upload(@RequestParam("file") MultipartFile file, String path, long position) throws IOException {
+    public ResponseEntity<RealFileNode> upload(@RequestParam("file") MultipartFile file, String path, Long position) throws IOException {
+		System.out.println("upload path="+path+",position="+position);
         IRealFile rFile = FileSystem.write(path, file, position);
         return new ResponseEntity<>(new RealFileNode(rFile), position > 0 ? HttpStatus.PARTIAL_CONTENT : HttpStatus.OK);
     }
@@ -145,7 +146,8 @@ public class RealFileController {
      * @throws IOException
      */
     @GetMapping(path = "/get")
-    public ResponseEntity<Resource> get(String path, long position) throws IOException {
+    public ResponseEntity<Resource> get(String path, Long position) throws IOException {
+		System.out.println("get: path="+path+",position="+position);
         IRealFile rFile = FileSystem.getFile(path);
         RandomAccessStream stream = rFile.getInputStream();
         stream.setPosition(position);
