@@ -124,7 +124,7 @@ public class SalmonFSTestHelper
     public static string GetChecksum(IRealFile realFile)
     {
         MD5 md5 = MD5.Create();
-        FileStream stream = System.IO.File.OpenRead(realFile.AbsolutePath);
+        Stream stream = realFile.GetInputStream();
         byte[] hash = md5.ComputeHash(stream);
         string hashstring = System.Convert.ToBase64String(hash);
         return hashstring;
@@ -249,11 +249,16 @@ public static void ImportAndSearch(IRealFile vaultDir, string pass, string impor
             newFile = salmonFile.Move(newDir1, null);
         else
             newFile = salmonFile.Copy(newDir1, null);
-
         Assert.IsNotNull(newFile);
         string checkSumAfter = GetChecksum(newFile.RealFile);
-
         Assert.AreEqual(checkSumBefore, checkSumAfter);
+
+        if (!move)
+        {
+            IVirtualFile file = rootDir.GetChild(fileToImport.BaseName);
+            string checkSumOrigAfter = GetChecksum(file.RealFile);
+            Assert.AreEqual(checkSumBefore, checkSumOrigAfter);
+        }
 
         Assert.AreEqual(salmonFile.BaseName, newFile.BaseName);
     }
