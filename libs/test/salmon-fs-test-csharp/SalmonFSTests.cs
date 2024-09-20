@@ -35,6 +35,7 @@ using Mku.Salmon.Utils;
 using Mku.Salmon.Sequence;
 using Mku.Salmon.Streams;
 using Mku.Salmon.Drive;
+using static System.Net.WebRequestMethods;
 
 namespace Mku.Salmon.Test;
 
@@ -143,7 +144,7 @@ public class SalmonFSTests
 
     public void ShouldImportAndExportNoIntegrity()
     {
-        bool integrityFailed = false;
+        bool failed = false;
         try
         {
             SalmonFSTestHelper.ImportAndExport(SalmonFSTestHelper.GenerateFolder(SalmonFSTestHelper.TEST_VAULT2_DIR), SalmonCoreTestHelper.TEST_PASSWORD, SalmonFSTestHelper.TEST_IMPORT_FILE,
@@ -153,11 +154,11 @@ public class SalmonFSTests
         }
         catch (IOException ex)
         {
-            if (ex.GetType() == typeof(IntegrityException))
-                integrityFailed = true;
+            Console.Error.WriteLine(ex);
+            failed = true;
         }
 
-        Assert.IsFalse(integrityFailed);
+        Assert.IsFalse(failed);
     }
 
     [TestMethod]
@@ -172,38 +173,38 @@ public class SalmonFSTests
 
     public void ShouldImportAndCopyFile()
     {
-        bool integrityFailed = false;
+        bool failed = false;
         try
         {
             SalmonFSTestHelper.ImportAndCopy(SalmonFSTestHelper.GenerateFolder(SalmonFSTestHelper.TEST_VAULT2_DIR), SalmonCoreTestHelper.TEST_PASSWORD, SalmonFSTestHelper.TEST_IMPORT_FILE,
                     SalmonFSTestHelper.ENC_IMPORT_BUFFER_SIZE, SalmonFSTestHelper.ENC_IMPORT_THREADS, "subdir", false);
         }
-        catch (IOException ex)
+        catch (Exception ex)
         {
-            if (ex.GetType() == typeof(IntegrityException))
-                integrityFailed = true;
+            Console.Error.WriteLine(ex);
+            failed = true;
         }
 
-        Assert.IsFalse(integrityFailed);
+        Assert.IsFalse(failed);
     }
 
     [TestMethod]
 
     public void ShouldImportAndMoveFile()
     {
-        bool integrityFailed = false;
+        bool failed = false;
         try
         {
             SalmonFSTestHelper.ImportAndCopy(SalmonFSTestHelper.GenerateFolder(SalmonFSTestHelper.TEST_VAULT2_DIR), SalmonCoreTestHelper.TEST_PASSWORD, SalmonFSTestHelper.TEST_IMPORT_FILE,
                     SalmonFSTestHelper.ENC_IMPORT_BUFFER_SIZE, SalmonFSTestHelper.ENC_IMPORT_THREADS, "subdir", true);
         }
-        catch (IOException ex)
+        catch (Exception ex)
         {
-            if (ex.GetType() == typeof(IntegrityException))
-                integrityFailed = true;
+            Console.Error.WriteLine(ex);
+            failed = true;
         }
 
-        Assert.IsFalse(integrityFailed);
+        Assert.IsFalse(failed);
     }
 
     [TestMethod]
