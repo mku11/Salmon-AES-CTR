@@ -47,7 +47,8 @@ public class JavaWSFileStream extends RandomAccessStream {
     private static final String PATH = "path";
     private static final String POSITION = "position";
 	private static final String LENGTH = "length";
-	
+    private static final long MAX_NET_STREAM_SKIP = 256 * 1024;
+
     public static CloseableHttpClient client = HttpClients.createDefault();
     /**
      * The network input stream associated.
@@ -102,7 +103,7 @@ public class JavaWSFileStream extends RandomAccessStream {
                 setServiceAuth(httpGet);
                 httpResponse = client.execute(httpGet);
                 checkStatus(httpResponse, startPosition > 0 ? HttpStatus.SC_PARTIAL_CONTENT : HttpStatus.SC_OK);
-                this.inputStream = httpResponse.getEntity().getContent();
+                this.inputStream = new BufferedInputStream(httpResponse.getEntity().getContent());
             } catch (Exception e) {
                 throw new RuntimeException(e);
             }
@@ -137,8 +138,9 @@ public class JavaWSFileStream extends RandomAccessStream {
             HttpPost finalHttpPost = httpPost;
             new Thread(() -> {
                 try {
+                    InputStream pipedInputStream = outputStream.getInputStream();
                     HttpEntity entity = MultipartEntityBuilder.create()
-                            .addPart("file", new InputStreamBody(outputStream.getInputStream(), file.getBaseName()))
+                            .addPart("file", new InputStreamBody(pipedInputStream, file.getBaseName()))
                             .build();
                     finalHttpPost.setEntity(entity);
                     outHttpResponse = client.execute(finalHttpPost);
@@ -148,6 +150,13 @@ public class JavaWSFileStream extends RandomAccessStream {
 					e.printStackTrace();
                     throw new RuntimeException(e);
                 } finally {
+                    if(this.outputStream != null) {
+                        try {
+                            this.outputStream.close();
+                        } catch (IOException e) {
+                            throw new RuntimeException(e);
+                        }
+                    }
                     if (outHttpResponse != null) {
                         try {
                             outHttpResponse.close();
@@ -222,8 +231,12 @@ public class JavaWSFileStream extends RandomAccessStream {
      */
     @Override
     public void setPosition(long value) throws IOException {
-        if(this.position != value)
-            this.reset();
+        if(this.position < value && value - position < MAX_NET_STREAM_SKIP && this.inputStream != null){
+            inputStream.skip(value - position);
+        } else
+            if(this.position != value) {
+                this.reset();
+        }
         this.position = value;
     }
 
@@ -263,7 +276,9 @@ public class JavaWSFileStream extends RandomAccessStream {
      */
     @Override
     public int read(byte[] buffer, int offset, int count) throws IOException {
-        return getInputStream().read(buffer, offset, count);
+        int res = getInputStream().read(buffer, offset, count);
+        position += res;
+        return res;
     }
 
     /**
@@ -277,6 +292,7 @@ public class JavaWSFileStream extends RandomAccessStream {
     @Override
     public void write(byte[] buffer, int offset, int count) throws IOException {
         getOutputStream().write(buffer, offset, count);
+        position += Math.min(buffer.length, count);
     }
 
     /**
@@ -299,12 +315,7 @@ public class JavaWSFileStream extends RandomAccessStream {
             pos = file.length() - offset;
 
         this.setPosition(pos);
-        if (inputStream != null)
-            this.getInputStream();
-        else if (outputStream != null)
-            this.getOutputStream();
         return this.position;
-
     }
 
     /**
@@ -328,12 +339,16 @@ public class JavaWSFileStream extends RandomAccessStream {
     public void close() throws IOException {
         if (inputStream != null)
             inputStream.close();
+        inputStream = null;
         if (outputStream != null)
             outputStream.close();
+        outputStream = null;
         if (httpResponse != null)
             httpResponse.close();
+        httpResponse = null;
         if (outHttpResponse != null)
             outHttpResponse.close();
+        outHttpResponse = null;
         this.closed = true;
     }
 
