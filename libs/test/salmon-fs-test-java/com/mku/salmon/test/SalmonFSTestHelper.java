@@ -147,14 +147,21 @@ public class SalmonFSTestHelper {
     }
 
     public static String getChecksum(IRealFile realFile) throws NoSuchAlgorithmException, IOException {
-        InputStream is = null;
+        RandomAccessStream stream = realFile.getInputStream();
+        InputStreamWrapper isw = new InputStreamWrapper(stream);
+        return getChecksum(isw);
+    }
+
+    public static String getChecksum(InputStream inputStream) throws NoSuchAlgorithmException, IOException {
         DigestInputStream dis = null;
         try {
             MessageDigest md = MessageDigest.getInstance("SHA-256");
-            is = new InputStreamWrapper(realFile.getInputStream());
-            dis = new DigestInputStream(is, md);
+            byte[] buffer = new byte[32768];
+            int bytesRead;
+            while ((bytesRead = inputStream.read(buffer, 0, buffer.length)) > 0) {
+                md.update(buffer, 0, bytesRead);
+            }
             byte[] digest = md.digest();
-
             StringBuilder hexString = new StringBuilder();
             for (byte b : digest) {
                 StringBuilder h = new StringBuilder(Integer.toHexString(0xFF & b));
@@ -166,8 +173,8 @@ public class SalmonFSTestHelper {
         } finally {
             if (dis != null)
                 dis.close();
-            if (is != null)
-                is.close();
+            if (inputStream != null)
+                inputStream.close();
         }
     }
 
@@ -185,10 +192,19 @@ public class SalmonFSTestHelper {
             if (SalmonFSTestHelper.ENABLE_FILE_PROGRESS)
                 System.out.println("importing file: " + position + "/" + length);
         };
-        IVirtualFile salmonFile = fileImporter.importFile(fileToImport, rootDir, null, false, applyFileIntegrity, printImportProgress);
+        SalmonFile salmonFile = fileImporter.importFile(fileToImport, rootDir, null, false, applyFileIntegrity, printImportProgress);
         assertTrue(salmonFile.exists());
+
+        Integer chunkSize = salmonFile.getFileChunkSize();
+        if (chunkSize != null && chunkSize > 0 && !verifyFileIntegrity)
+            salmonFile.setVerifyIntegrity(false, null);
+        String hashPostImport = SalmonFSTestHelper.getChecksum(new InputStreamWrapper(salmonFile.getInputStream()));
+        if (shouldBeEqual) {
+            assertEquals(hashPreImport, hashPostImport);
+        }
+
         // get fresh copy of the file
-        salmonFile = rootDir.listFiles()[0];
+        salmonFile = (SalmonFile) rootDir.listFiles()[0];
 
         IVirtualFile[] salmonFiles = rootDir.listFiles();
         long realFileSize = fileToImport.length();
@@ -212,7 +228,10 @@ public class SalmonFSTestHelper {
         };
         if (bitflip)
             flipBit(salmonFile, flipPosition);
-        IRealFile exportFile = fileExporter.exportFile(salmonFile, drive.getExportDir(), null, true, verifyFileIntegrity, null);
+        Integer chunkSize2 = salmonFile.getFileChunkSize();
+        if (chunkSize2 != null && chunkSize2 > 0 && verifyFileIntegrity)
+            salmonFile.setVerifyIntegrity(true, null);
+        IRealFile exportFile = fileExporter.exportFile(salmonFile, drive.getExportDir(), null, false, verifyFileIntegrity, printExportProgress);
         String hashPostExport = SalmonFSTestHelper.getChecksum(exportFile);
         if (shouldBeEqual) {
             assertEquals(hashPreImport, hashPostExport);
@@ -281,7 +300,7 @@ public class SalmonFSTestHelper {
         String checkSumAfter = getChecksum(nNewFile.getRealFile());
         assertEquals(checkSumBefore, checkSumAfter);
 
-        if(!move) {
+        if (!move) {
             IVirtualFile file = rootDir.getChild(fileToImport.getBaseName());
             String checkSumOrigAfter = getChecksum(file.getRealFile());
             assertEquals(checkSumBefore, checkSumOrigAfter);
