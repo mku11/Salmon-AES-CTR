@@ -739,7 +739,11 @@ public class SalmonStream extends RandomAccessStream {
      */
     private byte[] readStreamData(int count) throws IOException {
         byte[] data = new byte[(int) Math.min(count, baseStream.length() - baseStream.getPosition())];
-        baseStream.read(data, 0, data.length);
+        int bytesRead;
+        int totalBytesRead = 0;
+        while ((bytesRead = baseStream.read(data, totalBytesRead, data.length - totalBytesRead)) > 0) {
+            totalBytesRead += bytesRead;
+        }
         return data;
     }
 
