@@ -135,14 +135,10 @@ public class SalmonFSTests {
         boolean integrityFailed = false;
         try {
             SalmonFSTestHelper.importAndExport(SalmonFSTestHelper.generateFolder(SalmonFSTestHelper.TEST_VAULT2_DIR), SalmonCoreTestHelper.TEST_PASSWORD, SalmonFSTestHelper.TEST_IMPORT_FILE,
-                    true, 24 + 10, true, false, false);
-        } catch (IOException ex) {
-            if (ex.getCause() instanceof IntegrityException)
-                integrityFailed = true;
-            else
-                throw ex;
+                    true, 24 + 10, false, false, false);
+        } catch (Exception ex) {
+            integrityFailed = true;
         }
-
         assertFalse(integrityFailed);
     }
 
@@ -291,8 +287,7 @@ public class SalmonFSTests {
                     true, true);
         } catch (IOException ex) {
             ex.printStackTrace();
-            if (ex.getCause() instanceof IntegrityException)
-                importSuccess = false;
+            importSuccess = false;
         }
         assertTrue(importSuccess);
     }
