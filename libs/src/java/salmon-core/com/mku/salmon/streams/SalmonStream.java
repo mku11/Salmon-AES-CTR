@@ -499,10 +499,10 @@ public class SalmonStream extends RandomAccessStream {
      */
     private void setVirtualPosition(long value) throws IOException {
         // we skip the header bytes and any hash values we have if the file has integrity set
+        long totalHashBytes = salmonIntegrity.getHashDataLength(value, 0);
+        value += totalHashBytes + getHeaderLength();
         baseStream.setPosition(value);
-        long totalHashBytes = salmonIntegrity.getHashDataLength(baseStream.getPosition(), 0);
-        baseStream.setPosition(baseStream.getPosition() + totalHashBytes);
-        baseStream.setPosition(baseStream.getPosition() + getHeaderLength());
+
         transformer.resetCounter();
         transformer.syncCounter(getPosition());
     }
