@@ -565,7 +565,6 @@ public class SalmonFSTests {
 
     @Test
     public void ShouldReadFromFileMultithreaded() throws Exception {
-        boolean caught = false;
         IRealFile vaultDir = SalmonFSTestHelper.generateFolder(SalmonFSTestHelper.TEST_VAULT2_DIR);
         IRealFile file = new JavaFile(SalmonFSTestHelper.TEST_IMPORT_MEDIUM_FILE);
 
