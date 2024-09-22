@@ -97,6 +97,8 @@ public class RealFileController {
         IRealFile file = FileSystem.getFile(path);
         IRealFile parent = file.getParent();
         file = parent.createDirectory(file.getBaseName());
+		if(file == null || !file.exists() || !file.isDirectory())
+			throw new IOException("Could not create dir: " + file.getPath());
         return new RealFileNode(file);
     }
 
@@ -114,6 +116,8 @@ public class RealFileController {
         IRealFile file = FileSystem.getFile(path);
         IRealFile parent = file.getParent();
         file = parent.createFile(file.getBaseName());
+		if(file == null || !file.exists() || !file.isFile())
+			throw new IOException("Could not create file: " + file.getPath());
         return new RealFileNode(file);
     }
 
