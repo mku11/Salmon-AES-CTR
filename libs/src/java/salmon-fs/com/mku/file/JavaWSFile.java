@@ -418,7 +418,6 @@ public class JavaWSFile implements IRealFile {
                 httpResponse = client.execute(httpGet);
                 checkStatus(httpResponse, HttpStatus.SC_OK);
                 int res = getFileListCount(httpResponse.getEntity().getContent());
-                httpResponse.close();
                 return res;
             }
         } catch (Exception e) {
