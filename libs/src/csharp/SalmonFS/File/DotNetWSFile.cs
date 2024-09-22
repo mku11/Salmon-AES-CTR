@@ -35,6 +35,7 @@ using System.Net.Http.Json;
 using System.Text;
 using System.Text.Json.Serialization;
 using System.Web;
+using static Mku.File.DotNetWSFile;
 
 
 namespace Mku.File;
@@ -315,8 +316,15 @@ public class DotNetWSFile : IRealFile
     {
         get
         {
-            string dirPath = Directory.GetParent(filePath).FullName;
-            DotNetWSFile parent = new DotNetWSFile(dirPath, ServicePath, ServiceCredentials);
+            if (filePath.Length == 0 || filePath.Equals("/"))
+                return null;
+            string path = filePath;
+            if (path.EndsWith("/"))
+                path = path.Substring(0, path.Length - 1);
+            int index = path.LastIndexOf("/");
+            if (index == -1)
+                return null;
+            DotNetWSFile parent = new DotNetWSFile(path.Substring(0, index), ServicePath, ServiceCredentials);
             return parent;
         }
     }
@@ -576,7 +584,7 @@ public class DotNetWSFile : IRealFile
     {
         if (IsFile)
             return null;
-        DotNetWSFile child = new DotNetWSFile(filePath + System.IO.Path.DirectorySeparatorChar + filename,
+        DotNetWSFile child = new DotNetWSFile(filePath + Separator + filename,
             ServicePath, ServiceCredentials);
         return child;
     }
