@@ -271,16 +271,18 @@ public class JavaWSFileStream extends RandomAccessStream {
         createClient();
 		URIBuilder uriBuilder;
         HttpPost httpPost = null;
-		uriBuilder = new URIBuilder(file.getServicePath() + "/api/setLength");
-                uriBuilder.addParameter(PATH, this.file.getPath());
-                uriBuilder.addParameter(POSITION, String.valueOf(startPosition));
-        HttpGet httpPut = new HttpPut(uriBuilder.build());
-        setDefaultHeaders(httpPut);
-        setServiceAuth(httpPut);
-        CloseableHttpResponse httpResponse = null;
-        try {
+		try {
+			uriBuilder = new URIBuilder(file.getServicePath() + "/api/setLength");
+					uriBuilder.addParameter(PATH, this.file.getPath());
+					uriBuilder.addParameter(LENGTH, String.valueOf(value));
+			HttpPut httpPut = new HttpPut(uriBuilder.build());
+			setDefaultHeaders(httpPut);
+			setServiceAuth(httpPut);
+			CloseableHttpResponse httpResponse = null;
             httpResponse = client.execute(httpPut);
             checkStatus(httpResponse, HttpStatus.SC_OK);
+		} catch (Exception e) {
+			throw new RuntimeException(e);
         } finally {
             if (httpResponse != null)
                 httpResponse.close();
