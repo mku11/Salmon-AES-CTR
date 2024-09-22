@@ -46,10 +46,9 @@ import java.io.*;
 public class JavaWSFileStream extends RandomAccessStream {
     private static final String PATH = "path";
     private static final String POSITION = "position";
-	private static final String LENGTH = "length";
+    private static final String LENGTH = "length";
 
-    public CloseableHttpClient rclient = HttpClients.createDefault();
-    public CloseableHttpClient wclient = HttpClients.createDefault();
+    public CloseableHttpClient client;
 
     /**
      * The network input stream associated.
@@ -101,6 +100,7 @@ public class JavaWSFileStream extends RandomAccessStream {
         if (this.closed)
             throw new IOException("Stream is closed");
         if (this.inputStream == null) {
+            createClient();
             long startPosition = this.getPosition();
             URIBuilder uriBuilder;
             httpResponse = null;
@@ -111,7 +111,7 @@ public class JavaWSFileStream extends RandomAccessStream {
                 HttpGet httpGet = new HttpGet(uriBuilder.build());
                 setDefaultHeaders(httpGet);
                 setServiceAuth(httpGet);
-                httpResponse = rclient.execute(httpGet);
+                httpResponse = client.execute(httpGet);
                 checkStatus(httpResponse, startPosition > 0 ? HttpStatus.SC_PARTIAL_CONTENT : HttpStatus.SC_OK);
                 this.inputStream = new BufferedInputStream(httpResponse.getEntity().getContent());
             } catch (Exception e) {
@@ -123,11 +123,18 @@ public class JavaWSFileStream extends RandomAccessStream {
         return this.inputStream;
     }
 
+    private void createClient() throws IOException {
+        if (client != null)
+            throw new IOException("A connection is already open");
+        client = HttpClients.createDefault();
+    }
+
     private OutputStream getOutputStream() throws IOException {
         if (this.closed)
             throw new IOException("Stream is closed");
         BlockingInputOutputAdapterStream outputStream;
         if (this.outputStream == null) {
+            createClient();
             URIBuilder uriBuilder;
             HttpPost httpPost = null;
             long startPosition = this.getPosition();
@@ -153,14 +160,14 @@ public class JavaWSFileStream extends RandomAccessStream {
                             .addPart("file", new InputStreamBody(pipedInputStream, file.getBaseName()))
                             .build();
                     finalHttpPost.setEntity(entity);
-                    outHttpResponse = wclient.execute(finalHttpPost);
+                    outHttpResponse = client.execute(finalHttpPost);
                     checkStatus(outHttpResponse, startPosition > 0 ? HttpStatus.SC_PARTIAL_CONTENT : HttpStatus.SC_OK);
                     outputStream.setReceived(true);
                 } catch (Exception e) {
-					e.printStackTrace();
+                    e.printStackTrace();
                     throw new RuntimeException(e);
                 } finally {
-                    if(this.outputStream != null) {
+                    if (this.outputStream != null) {
                         try {
                             this.outputStream.close();
                         } catch (IOException e) {
@@ -242,9 +249,9 @@ public class JavaWSFileStream extends RandomAccessStream {
     @Override
     public void setPosition(long value) throws IOException {
         // if the new position is forwards we can skip a small amount rather opening up a new connection
-        if(this.position < value && value - position < maxNetBytesSkip && this.inputStream != null){
+        if (this.position < value && value - position < maxNetBytesSkip && this.inputStream != null) {
             inputStream.skip(value - position);
-        } else if(this.position != value) {
+        } else if (this.position != value) {
             // cannot reuse stream
             this.reset();
         }
@@ -259,21 +266,24 @@ public class JavaWSFileStream extends RandomAccessStream {
      */
     @Override
     public void setLength(long value) throws IOException {
+        if (this.closed)
+            throw new IOException("Stream is closed");
+        createClient();
         HttpPut httpPut = new HttpPut(file.getServicePath() + "/api/setLength"
-			+ "?" + PATH + "=" + file.getPath()
-			+ "&" + LENGTH + "=" + value
-		);
+                + "?" + PATH + "=" + file.getPath()
+                + "&" + LENGTH + "=" + value
+        );
         setDefaultHeaders(httpPut);
         setServiceAuth(httpPut);
         CloseableHttpResponse httpResponse = null;
         try {
-            httpResponse = wclient.execute(httpPut);
+            httpResponse = client.execute(httpPut);
             checkStatus(httpResponse, HttpStatus.SC_OK);
         } finally {
             if (httpResponse != null)
                 httpResponse.close();
         }
-		reset();
+        reset();
     }
 
     /**
@@ -348,18 +358,7 @@ public class JavaWSFileStream extends RandomAccessStream {
      */
     @Override
     public void close() throws IOException {
-        if (inputStream != null)
-            inputStream.close();
-        inputStream = null;
-        if (outputStream != null)
-            outputStream.close();
-        outputStream = null;
-        if (httpResponse != null)
-            httpResponse.close();
-        httpResponse = null;
-        if (outHttpResponse != null)
-            outHttpResponse.close();
-        outHttpResponse = null;
+        reset();
         this.closed = true;
     }
 
@@ -367,10 +366,21 @@ public class JavaWSFileStream extends RandomAccessStream {
         if (this.inputStream != null)
             this.inputStream.close();
         this.inputStream = null;
-
         if (this.outputStream != null)
             this.outputStream.close();
         this.outputStream = null;
+        if (inputStream != null)
+            inputStream.close();
+        inputStream = null;
+        if (outputStream != null)
+            outputStream.close();
+        outputStream = null;
+        if (client != null)
+            client.close();
+        client = null;
+        if (client != null)
+            client.close();
+        client = null;
     }
 
     private void setServiceAuth(HttpRequest httpRequest) {
@@ -383,7 +393,7 @@ public class JavaWSFileStream extends RandomAccessStream {
         if (httpResponse.getStatusLine().getStatusCode() != status)
             throw new IOException(httpResponse.getStatusLine().getStatusCode()
                     + " " + httpResponse.getStatusLine().getReasonPhrase() + "\n"
-            + new String(httpResponse.getEntity().getContent().readAllBytes()));
+                    + new String(httpResponse.getEntity().getContent().readAllBytes()));
     }
 
     private void setDefaultHeaders(HttpRequest request) {
