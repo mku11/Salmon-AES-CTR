@@ -44,17 +44,13 @@ import com.mku.salmon.SalmonDrive;
 import com.mku.salmon.SalmonFile;
 import com.mku.salmon.streams.SalmonFileInputStream;
 import com.mku.salmon.sequence.SalmonFileSequencer;
-import com.mku.sequence.SequenceException;
 import com.mku.salmon.sequence.SalmonSequenceSerializer;
 import com.mku.salmon.utils.SalmonFileExporter;
 import com.mku.salmon.utils.SalmonFileImporter;
 import com.mku.sequence.INonceSequenceSerializer;
-import com.mku.utils.FileExporter;
-import com.mku.utils.FileImporter;
 import com.mku.utils.FileSearcher;
 
 import java.io.File;
-import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.security.DigestInputStream;
@@ -92,6 +88,8 @@ public class SalmonFSTestHelper {
     static int ENC_IMPORT_THREADS = 1;
     static int ENC_EXPORT_BUFFER_SIZE = 512 * 1024;
     static int ENC_EXPORT_THREADS = 1;
+
+    private static final int REAL_FILE_BUFFER_SIZE = 512 * 1024;
 
     static int TEST_FILE_INPUT_STREAM_THREADS = 1;
     static boolean TEST_USE_FILE_INPUT_STREAM = false;
@@ -149,14 +147,14 @@ public class SalmonFSTestHelper {
     public static String getChecksum(IRealFile realFile) throws NoSuchAlgorithmException, IOException {
         RandomAccessStream stream = realFile.getInputStream();
         InputStreamWrapper isw = new InputStreamWrapper(stream);
-        return getChecksum(isw);
+        return getChecksum(isw, REAL_FILE_BUFFER_SIZE);
     }
 
-    public static String getChecksum(InputStream inputStream) throws NoSuchAlgorithmException, IOException {
+    public static String getChecksum(InputStream inputStream, int bufferSize) throws NoSuchAlgorithmException, IOException {
         DigestInputStream dis = null;
         try {
             MessageDigest md = MessageDigest.getInstance("SHA-256");
-            byte[] buffer = new byte[32768];
+            byte[] buffer = new byte[bufferSize];
             int bytesRead;
             while ((bytesRead = inputStream.read(buffer, 0, buffer.length)) > 0) {
                 md.update(buffer, 0, bytesRead);
@@ -198,7 +196,8 @@ public class SalmonFSTestHelper {
         Integer chunkSize = salmonFile.getFileChunkSize();
         if (chunkSize != null && chunkSize > 0 && !verifyFileIntegrity)
             salmonFile.setVerifyIntegrity(false, null);
-        String hashPostImport = SalmonFSTestHelper.getChecksum(new InputStreamWrapper(salmonFile.getInputStream()));
+        SalmonStream sstream = salmonFile.getInputStream();
+        String hashPostImport = SalmonFSTestHelper.getChecksum(new InputStreamWrapper(sstream), sstream.getBufferSize());
         if (shouldBeEqual) {
             assertEquals(hashPreImport, hashPostImport);
         }
