@@ -70,7 +70,7 @@ public class DotNetWSFile : IRealFile
         }
     }
 
-    private class Response
+    public class Response
     {
         [JsonPropertyName("path")]
         public string Path { get; set; }
@@ -112,9 +112,13 @@ public class DotNetWSFile : IRealFile
         HttpResponseMessage httpResponse = null;
         try
         {
-            Dictionary<string, string> parameters = new Dictionary<string, string> { { PATH, nDirPath } };
-            HttpRequestMessage requestMessage = new HttpRequestMessage(HttpMethod.Post, this.ServicePath + "/api/mkdir");
-            requestMessage.Content = new FormUrlEncodedContent(parameters);
+            UriBuilder builder = new UriBuilder(ServicePath + "/api/mkdir");
+            NameValueCollection query = HttpUtility.ParseQueryString(builder.Query);
+            query[PATH] = nDirPath;
+            builder.Query = query.ToString();
+            string url = builder.ToString();
+
+            HttpRequestMessage requestMessage = new HttpRequestMessage(HttpMethod.Post, url);
             SetDefaultHeaders(requestMessage);
             SetServiceAuth(requestMessage);
             httpResponse = client.Send(requestMessage);
@@ -150,8 +154,13 @@ public class DotNetWSFile : IRealFile
         Response response = null;
         try
         {
-            HttpRequestMessage requestMessage = new HttpRequestMessage(HttpMethod.Get, this.ServicePath + "/api/info"
-                + "?" + PATH + "=" + filePath);
+            UriBuilder builder = new UriBuilder(ServicePath + "/api/info");
+            NameValueCollection query = HttpUtility.ParseQueryString(builder.Query);
+            query[PATH] = filePath;
+            builder.Query = query.ToString();
+            string url = builder.ToString();
+
+            HttpRequestMessage requestMessage = new HttpRequestMessage(HttpMethod.Get, url);
             SetDefaultHeaders(requestMessage);
             SetServiceAuth(requestMessage);
             httpResponse = client.Send(requestMessage);
