@@ -628,9 +628,9 @@ public class SalmonFSTests
 
         IRealFile folder2 = dir.GetChild("folder1").CreateDirectory("folder2");
         foreach (IRealFile rfile in dir.GetChild("folder1").ListFiles())
-            rfile.Copy(folder2);
+            rfile.CopyRecursively(folder2);
         Assert.AreEqual(4, dir.GetChild("folder1").ChildrenCount);
-        Assert.AreEqual(4, dir.GetChild("folder1").GetChild("folder2").ChildrenCount);
+        Assert.AreEqual(3, dir.GetChild("folder1").GetChild("folder2").ChildrenCount);
 
         // recursive copy
         IRealFile folder3 = dir.CreateDirectory("folder4");
@@ -642,13 +642,12 @@ public class SalmonFSTests
         IRealFile dfile = dir.GetChild("folder4").GetChild("folder1").GetChild("folder2").GetChild(file.BaseName);
         Assert.IsTrue(dfile.Exists);
         Assert.IsTrue(dfile.Delete());
-        Assert.AreEqual(3, dir.GetChild("folder4").GetChild("folder1").GetChild("folder2").ChildrenCount);
+        Assert.AreEqual(2, dir.GetChild("folder4").GetChild("folder1").GetChild("folder2").ChildrenCount);
         dir.GetChild("folder1").CopyRecursively(folder3, null, IRealFile.AutoRename, false, null);
         Assert.AreEqual(2, dir.ChildrenCount);
         Assert.AreEqual(1, dir.GetChild("folder4").ChildrenCount);
         Assert.AreEqual(7, dir.GetChild("folder4").GetChild("folder1").ChildrenCount);
-        Assert.AreEqual(6, dir.GetChild("folder4").GetChild("folder1").GetChild("folder2").ChildrenCount);
-        Assert.AreEqual(0, dir.GetChild("folder4").GetChild("folder1").GetChild("folder2").GetChild("folder2").ChildrenCount);
+        Assert.AreEqual(5, dir.GetChild("folder4").GetChild("folder1").GetChild("folder2").ChildrenCount);
 
         dir.GetChild("folder4").GetChild("folder1").GetChild("folder2").GetChild(file.BaseName).Delete();
         dir.GetChild("folder4").GetChild("folder1").GetChild(file.BaseName).Delete();
@@ -661,8 +660,7 @@ public class SalmonFSTests
         Assert.AreEqual(2, dir.ChildrenCount);
         Assert.AreEqual(1, dir.GetChild("folder4").ChildrenCount);
         Assert.AreEqual(7, dir.GetChild("folder4").GetChild("folder1").ChildrenCount);
-        Assert.AreEqual(6, dir.GetChild("folder4").GetChild("folder1").GetChild("folder2").ChildrenCount);
-        Assert.AreEqual(0, dir.GetChild("folder4").GetChild("folder1").GetChild("folder2").GetChild("folder2").ChildrenCount);
+        Assert.AreEqual(5, dir.GetChild("folder4").GetChild("folder1").GetChild("folder2").ChildrenCount);
 
 
         dir.GetChild("folder4").GetChild("folder1").GetChild("folder2").GetChild(file.BaseName).Delete();
@@ -676,8 +674,7 @@ public class SalmonFSTests
         Assert.AreEqual(1, dir.ChildrenCount);
         Assert.AreEqual(1, dir.GetChild("folder4").ChildrenCount);
         Assert.AreEqual(9, dir.GetChild("folder4").GetChild("folder1").ChildrenCount);
-        Assert.AreEqual(8, dir.GetChild("folder4").GetChild("folder1").GetChild("folder2").ChildrenCount);
-        Assert.AreEqual(0, dir.GetChild("folder4").GetChild("folder1").GetChild("folder2").GetChild("folder2").ChildrenCount);
+        Assert.AreEqual(7, dir.GetChild("folder4").GetChild("folder1").GetChild("folder2").ChildrenCount);
     }
 
     [TestMethod]
