@@ -241,11 +241,11 @@ public class JavaWSFileStream extends RandomAccessStream {
      */
     @Override
     public void setPosition(long value) throws IOException {
+        // if the new position is forwards we can skip a small amount rather opening up a new connection
         if(this.position < value && value - position < maxNetBytesSkip && this.inputStream != null){
             inputStream.skip(value - position);
         } else if(this.position != value) {
-            if(this.inputStream != null)
-                System.out.println("could not reuse stream: " + (value - position));
+            // cannot reuse stream
             this.reset();
         }
         this.position = value;
