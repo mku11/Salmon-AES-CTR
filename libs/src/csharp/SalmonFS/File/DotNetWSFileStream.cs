@@ -47,7 +47,7 @@ public class DotNetWSFileStream : Stream
     private static readonly string POSITION = "position";
     private static readonly string LENGTH = "length";
 
-    private static HttpClient client = new HttpClient();
+    private HttpClient client;
     /**
      * The network input stream associated.
      */
@@ -59,6 +59,11 @@ public class DotNetWSFileStream : Stream
     private Stream outputStream;
     private bool closed;
     private DotNetWSFile file;
+    /**
+     * Maximum amount of bytes allowed to skip forwards when seeking otherwise will open a new connection
+     */
+    private long MaxNetBytesSkip { get; set; } = 32768;
+
     private bool canWrite;
     private long position;
     private HttpResponseMessage httpResponse;
@@ -85,17 +90,22 @@ public class DotNetWSFileStream : Stream
     {
         get
         {
-            if (inputStream != null)
-                return position + inputStream.Position;
-            else if (outputStream != null)
-                return position + outputStream.Position;
-            else
-                return position;
+            return position;
         }
         set
         {
-            if (this.position != value)
+            // if the new position is forwards we can skip a small amount rather opening up a new connection
+            if (this.position < value && value - position < MaxNetBytesSkip && this.inputStream != null)
+            {
+                inputStream.Seek(value, SeekOrigin.Begin);
+            }
+            else if (this.position != value)
+            {
+                // cannot reuse stream
+                if (this.inputStream != null)
+                    Console.WriteLine("cannot reuse: " + (value - position));
                 this.Reset();
+            }
             this.position = value;
         }
     }
@@ -115,7 +125,9 @@ public class DotNetWSFileStream : Stream
 
     public override int Read(byte[] buffer, int offset, int count)
     {
-        return GetInputStream().Read(buffer, offset, count);
+        int res = GetInputStream().Read(buffer, offset, count);
+        position += res;
+        return res;
     }
 
     public override long Seek(long offset, SeekOrigin origin)
@@ -130,22 +142,25 @@ public class DotNetWSFileStream : Stream
             pos = file.Length - offset;
 
         this.Position = pos;
-        if (inputStream != null)
-            this.GetInputStream();
-        else if (outputStream != null)
-            this.GetOutputStream();
         return this.position;
     }
 
     public override void SetLength(long value)
     {
+        if (this.closed)
+            throw new IOException("Stream is closed");
+        CreateClient();
         HttpResponseMessage httpResponse = null;
         try
         {
-            HttpRequestMessage requestMessage = new HttpRequestMessage(HttpMethod.Get, file.ServicePath + "/api/setLength"
-                + "?" + PATH + "=" + file.Path
-                + "&" + LENGTH + "=" + value
-                );
+            UriBuilder builder = new UriBuilder(file.ServicePath + "/api/setLength");
+            NameValueCollection query = HttpUtility.ParseQueryString(builder.Query);
+            query[PATH] = file.Path;
+            query[LENGTH] = value + "";
+            builder.Query = query.ToString();
+            string url = builder.ToString();
+
+            HttpRequestMessage requestMessage = new HttpRequestMessage(HttpMethod.Get, url);
             SetDefaultHeaders(requestMessage);
             SetServiceAuth(requestMessage);
             httpResponse = client.Send(requestMessage);
@@ -167,6 +182,7 @@ public class DotNetWSFileStream : Stream
     public override void Write(byte[] buffer, int offset, int count)
     {
         GetOutputStream().Write(buffer, offset, count);
+        position += Math.Min(buffer.Length, count);
     }
 
 
@@ -176,13 +192,14 @@ public class DotNetWSFileStream : Stream
             throw new IOException("Stream is closed");
         if (this.inputStream == null)
         {
+            CreateClient();
             long startPosition = this.Position;
             try
             {
                 UriBuilder builder = new UriBuilder(file.ServicePath + "/api/get");
                 NameValueCollection query = HttpUtility.ParseQueryString(builder.Query);
                 query[PATH] = file.Path;
-                query[POSITION] = startPosition+"";
+                query[POSITION] = startPosition + "";
                 builder.Query = query.ToString();
                 string url = builder.ToString();
 
@@ -191,7 +208,7 @@ public class DotNetWSFileStream : Stream
                 SetServiceAuth(requestMessage);
                 httpResponse = client.Send(requestMessage);
                 CheckStatus(httpResponse, startPosition > 0 ? HttpStatusCode.PartialContent : HttpStatusCode.OK);
-                Stream stream = httpResponse.Content.ReadAsStream();
+                Stream stream = new BufferedStream(httpResponse.Content.ReadAsStream());
                 this.inputStream = stream;
                 return stream;
             }
@@ -206,12 +223,20 @@ public class DotNetWSFileStream : Stream
         return this.inputStream;
     }
 
+    private void CreateClient()
+    {
+        if (client != null)
+            throw new IOException("A connection is already open");
+        client = new HttpClient();
+    }
+
     private Stream GetOutputStream()
     {
         if (this.closed)
             throw new IOException("Stream is closed");
         if (this.outputStream == null)
         {
+            CreateClient();
             HttpRequestMessage requestMessage = null;
             BlockingInputOutputAdapterStream outputStream = null;
             long startPosition = this.Position;
@@ -229,7 +254,8 @@ public class DotNetWSFileStream : Stream
 
                 requestMessage = new HttpRequestMessage(HttpMethod.Post, url);
                 MultipartFormDataContent content = new MultipartFormDataContent();
-                content.Add(new StreamContent(outputStream.InputStream), "file", file.BaseName);
+                Stream pipedInputStream = outputStream.InputStream;
+                content.Add(new StreamContent(pipedInputStream), "file", file.BaseName);
                 requestMessage.Content = content;
                 SetDefaultHeaders(requestMessage);
                 SetServiceAuth(requestMessage);
@@ -249,6 +275,18 @@ public class DotNetWSFileStream : Stream
                     }
                     finally
                     {
+                        if (this.outputStream != null)
+                        {
+                            try
+                            {
+                                this.outputStream.Close();
+                            }
+                            catch (IOException e)
+                            {
+                                Console.Error.WriteLine(e);
+                                throw;
+                            }
+                        }
                         if (outHttpResponse != null)
                         {
                             try
@@ -266,7 +304,8 @@ public class DotNetWSFileStream : Stream
             }
             catch (Exception e)
             {
-                throw e;
+                Console.Error.WriteLine(e);
+                throw;
             }
         }
         if (this.outputStream == null)
@@ -276,14 +315,7 @@ public class DotNetWSFileStream : Stream
 
     public override void Close()
     {
-        if (inputStream != null)
-            inputStream.Close();
-        if (outputStream != null)
-            outputStream.Close();
-        if (httpResponse != null)
-            httpResponse.Dispose();
-        if (outHttpResponse != null)
-            outHttpResponse.Dispose();
+        Reset();
         this.closed = true;
     }
 
@@ -296,6 +328,16 @@ public class DotNetWSFileStream : Stream
         if (this.outputStream != null)
             this.outputStream.Close();
         this.outputStream = null;
+
+        if (httpResponse != null)
+            httpResponse.Dispose();
+        if (outHttpResponse != null)
+            outHttpResponse.Dispose();
+
+        if (client != null)
+            client.Dispose();
+        client = null;
+
     }
 
     private void CheckStatus(HttpResponseMessage httpResponse, HttpStatusCode status)
