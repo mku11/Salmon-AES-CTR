@@ -48,8 +48,8 @@ public class JavaWSFileStream extends RandomAccessStream {
     private static final String POSITION = "position";
 	private static final String LENGTH = "length";
 
-    public static CloseableHttpClient rclient = HttpClients.createDefault();
-    public static CloseableHttpClient wclient = HttpClients.createDefault();
+    public CloseableHttpClient rclient = HttpClients.createDefault();
+    public CloseableHttpClient wclient = HttpClients.createDefault();
 
     /**
      * The network input stream associated.
