@@ -49,7 +49,9 @@ public class JavaWSFileStream extends RandomAccessStream {
 	private static final String LENGTH = "length";
     private static final long MAX_NET_STREAM_SKIP = 256 * 1024;
 
-    public static CloseableHttpClient client = HttpClients.createDefault();
+    public static CloseableHttpClient rclient = HttpClients.createDefault();
+    public static CloseableHttpClient wclient = HttpClients.createDefault();
+
     /**
      * The network input stream associated.
      */
@@ -101,7 +103,7 @@ public class JavaWSFileStream extends RandomAccessStream {
                 HttpGet httpGet = new HttpGet(uriBuilder.build());
                 setDefaultHeaders(httpGet);
                 setServiceAuth(httpGet);
-                httpResponse = client.execute(httpGet);
+                httpResponse = rclient.execute(httpGet);
                 checkStatus(httpResponse, startPosition > 0 ? HttpStatus.SC_PARTIAL_CONTENT : HttpStatus.SC_OK);
                 this.inputStream = new BufferedInputStream(httpResponse.getEntity().getContent());
             } catch (Exception e) {
@@ -143,7 +145,7 @@ public class JavaWSFileStream extends RandomAccessStream {
                             .addPart("file", new InputStreamBody(pipedInputStream, file.getBaseName()))
                             .build();
                     finalHttpPost.setEntity(entity);
-                    outHttpResponse = client.execute(finalHttpPost);
+                    outHttpResponse = wclient.execute(finalHttpPost);
                     checkStatus(outHttpResponse, startPosition > 0 ? HttpStatus.SC_PARTIAL_CONTENT : HttpStatus.SC_OK);
                     outputStream.setReceived(true);
                 } catch (Exception e) {
@@ -249,14 +251,14 @@ public class JavaWSFileStream extends RandomAccessStream {
     @Override
     public void setLength(long value) throws IOException {
         HttpPut httpPut = new HttpPut(file.getServicePath() + "/api/setLength"
-			+ "?" + PATH + "=" + file.getPath() 
+			+ "?" + PATH + "=" + file.getPath()
 			+ "&" + LENGTH + "=" + value
 		);
         setDefaultHeaders(httpPut);
         setServiceAuth(httpPut);
         CloseableHttpResponse httpResponse = null;
         try {
-            httpResponse = client.execute(httpPut);
+            httpResponse = wclient.execute(httpPut);
             checkStatus(httpResponse, HttpStatus.SC_OK);
         } finally {
             if (httpResponse != null)
