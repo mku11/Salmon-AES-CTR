@@ -47,7 +47,6 @@ public class JavaWSFileStream extends RandomAccessStream {
     private static final String PATH = "path";
     private static final String POSITION = "position";
 	private static final String LENGTH = "length";
-    private static final long MAX_NET_STREAM_SKIP = 256 * 1024;
 
     public static CloseableHttpClient rclient = HttpClients.createDefault();
     public static CloseableHttpClient wclient = HttpClients.createDefault();
@@ -68,6 +67,15 @@ public class JavaWSFileStream extends RandomAccessStream {
      * The java file associated with this stream.
      */
     private final JavaWSFile file;
+
+    private long maxNetBytesSkip = 32768;
+
+    /**
+     * Maximum amount of bytes allowed to skip forwards when seeking otherwise will open a new connection
+     */
+    public void setMaxNetBytesSkip(long maxNetBytesSkip) {
+        this.maxNetBytesSkip = maxNetBytesSkip;
+    }
 
     private boolean canWrite;
     private long position;
@@ -233,11 +241,12 @@ public class JavaWSFileStream extends RandomAccessStream {
      */
     @Override
     public void setPosition(long value) throws IOException {
-        if(this.position < value && value - position < MAX_NET_STREAM_SKIP && this.inputStream != null){
+        if(this.position < value && value - position < maxNetBytesSkip && this.inputStream != null){
             inputStream.skip(value - position);
-        } else
-            if(this.position != value) {
-                this.reset();
+        } else if(this.position != value) {
+            if(this.inputStream != null)
+                System.out.println("could not reuse stream: " + (value - position));
+            this.reset();
         }
         this.position = value;
     }
