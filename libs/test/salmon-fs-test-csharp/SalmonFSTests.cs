@@ -131,12 +131,10 @@ public class SalmonFSTests
                     SalmonFSTestHelper.ENC_IMPORT_BUFFER_SIZE, SalmonFSTestHelper.ENC_IMPORT_THREADS, SalmonFSTestHelper.ENC_EXPORT_BUFFER_SIZE, SalmonFSTestHelper.ENC_EXPORT_THREADS,
                     false, true, 24 + 10, false, false, false);
         }
-        catch (IOException ex)
+        catch (Exception ex)
         {
-            if (ex.InnerException.GetType() == typeof(IntegrityException))
-                integrityFailed = true;
+            integrityFailed = true;
         }
-
         Assert.IsFalse(integrityFailed);
     }
 
@@ -355,8 +353,7 @@ public class SalmonFSTests
         catch (IOException ex)
         {
             Console.Error.WriteLine(ex);
-            if (ex.GetType() == typeof(IntegrityException))
-                importSuccess = false;
+            importSuccess = false;
         }
         Assert.IsTrue(importSuccess);
     }
@@ -545,11 +542,12 @@ public class SalmonFSTests
         // reopen but open the fs folder instead it should still login
         try
         {
-            drive = SalmonFSTestHelper.OpenDrive(vaultDir.GetChild("/fs"), SalmonFSTestHelper.DriveClassType, SalmonCoreTestHelper.TEST_PASSWORD, sequencer);
+            drive = SalmonFSTestHelper.OpenDrive(vaultDir.GetChild("fs"), SalmonFSTestHelper.DriveClassType, SalmonCoreTestHelper.TEST_PASSWORD, sequencer);
             Assert.IsTrue(drive.HasConfig());
         }
-        catch (SalmonAuthException)
+        catch (Exception ex)
         {
+            Console.Error.WriteLine(ex);
             wrongPassword = true;
         }
 
@@ -685,7 +683,6 @@ public class SalmonFSTests
     [TestMethod]
     public void ShouldReadFromFileMultithreaded()
     {
-        bool caught = false;
         IRealFile vaultDir = SalmonFSTestHelper.GenerateFolder(SalmonFSTestHelper.TEST_VAULT2_DIR);
         IRealFile file = new DotNetFile(SalmonFSTestHelper.TEST_IMPORT_LARGE_FILE);
 
