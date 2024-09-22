@@ -623,9 +623,13 @@ public class SalmonStream : Stream
     ///  <returns>The number of bytes read.</returns>
     private byte[] ReadStreamData(int count)
     {
-        byte[]
-    data = new byte[(int)Math.Min(count, baseStream.Length - baseStream.Position)];
-        baseStream.Read(data, 0, data.Length);
+        byte[] data = new byte[(int)Math.Min(count, baseStream.Length - baseStream.Position)];
+        int bytesRead;
+        int totalBytesRead = 0;
+        while ((bytesRead = baseStream.Read(data, totalBytesRead, data.Length - totalBytesRead)) > 0)
+        {
+            totalBytesRead += bytesRead;
+        }
         return data;
     }
 
