@@ -256,6 +256,12 @@ public interface IRealFile
         {
             if (progressListener != null)
                 progressListener(this, 0, 1);
+            if (dest.AbsolutePath.StartsWith(this.AbsolutePath))
+            {
+                if (progressListener != null)
+                    progressListener(this, 1L, 1L);
+                return;
+            }
             if (newFile != null && newFile.Exists && AutoRename != null && autoRenameFolders)
                 newFile = dest.CreateDirectory(AutoRename(this));
             else if (newFile == null || !newFile.Exists)
