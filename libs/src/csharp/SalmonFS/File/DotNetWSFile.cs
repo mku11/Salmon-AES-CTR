@@ -396,6 +396,7 @@ public class DotNetWSFile : IRealFile
                         httpResponse = client.Send(requestMessage);
                         CheckStatus(httpResponse, HttpStatusCode.OK);
                         int res = getFileListCount(httpResponse.Content);
+                        return res;
                     }
                     finally
                     {
