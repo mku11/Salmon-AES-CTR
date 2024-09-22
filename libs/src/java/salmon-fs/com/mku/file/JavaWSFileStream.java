@@ -269,20 +269,16 @@ public class JavaWSFileStream extends RandomAccessStream {
         if (this.closed)
             throw new IOException("Stream is closed");
         createClient();
-		URIBuilder uriBuilder;
-        HttpPost httpPost = null;
-		try {
-			uriBuilder = new URIBuilder(file.getServicePath() + "/api/setLength");
-					uriBuilder.addParameter(PATH, this.file.getPath());
-					uriBuilder.addParameter(LENGTH, String.valueOf(value));
-			HttpPut httpPut = new HttpPut(uriBuilder.build());
-			setDefaultHeaders(httpPut);
-			setServiceAuth(httpPut);
-			CloseableHttpResponse httpResponse = null;
+        HttpPut httpPut = new HttpPut(file.getServicePath() + "/api/setLength"
+                + "?" + PATH + "=" + file.getPath()
+                + "&" + LENGTH + "=" + value
+        );
+        setDefaultHeaders(httpPut);
+        setServiceAuth(httpPut);
+        CloseableHttpResponse httpResponse = null;
+        try {
             httpResponse = client.execute(httpPut);
             checkStatus(httpResponse, HttpStatus.SC_OK);
-		} catch (Exception e) {
-			throw new RuntimeException(e);
         } finally {
             if (httpResponse != null)
                 httpResponse.close();
@@ -379,6 +375,9 @@ public class JavaWSFileStream extends RandomAccessStream {
         if (outputStream != null)
             outputStream.close();
         outputStream = null;
+        if (client != null)
+            client.close();
+        client = null;
         if (client != null)
             client.close();
         client = null;
