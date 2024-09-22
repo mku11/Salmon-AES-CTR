@@ -456,7 +456,7 @@ class SalmonFSTests(SalmonCoreTests):
 
         # reopen but open the fs folder instead it should still login
         try:
-            drive = SalmonDrive.open_drive(vault_dir.get_child("/fs"), SalmonFSTestHelper.drive_class_type,
+            drive = SalmonDrive.open_drive(vault_dir.get_child("fs"), SalmonFSTestHelper.drive_class_type,
                                            SalmonCoreTestHelper.TEST_PASSWORD, sequencer)
             self.assertTrue(drive.has_config())
         except SalmonAuthException as ignored:
