@@ -35,7 +35,6 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
-import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
@@ -58,8 +57,11 @@ public class RealFileController {
      * @return
      */
     @GetMapping("/info")
-    public RealFileNode info(String path) {
-        return new RealFileNode(FileSystem.getFile(path));
+    public RealFileNode info(String path) throws IOException {
+        IRealFile file = FileSystem.getFile(path);
+        if(file == null)
+            throw new IOException("File does not exist");
+        return new RealFileNode(file);
     }
 
     /**
@@ -74,6 +76,8 @@ public class RealFileController {
     public List<RealFileNode> list(String path) throws IOException {
         ArrayList<RealFileNode> list = new ArrayList<>();
         IRealFile file = FileSystem.getFile(path);
+        if(file == null)
+            throw new IOException("Directory does not exist");
         if (file.isDirectory()) {
             IRealFile[] files = file.listFiles();
             for (IRealFile rFile : files)
@@ -96,9 +100,11 @@ public class RealFileController {
     public RealFileNode mkdir(String path) throws IOException {
         IRealFile file = FileSystem.getFile(path);
         IRealFile parent = file.getParent();
+        if(parent == null || !parent.exists())
+            throw new IOException("Parent does not exist");
         file = parent.createDirectory(file.getBaseName());
 		if(file == null || !file.exists() || !file.isDirectory())
-			throw new IOException("Could not create dir: " + file.getPath());
+			throw new IOException("Could not create dir");
         return new RealFileNode(file);
     }
 
@@ -115,9 +121,11 @@ public class RealFileController {
     public RealFileNode create(String path) throws IOException {
         IRealFile file = FileSystem.getFile(path);
         IRealFile parent = file.getParent();
+        if(parent == null || !parent.exists() || !parent.isDirectory())
+            throw new IOException("Parent does not exist");
         file = parent.createFile(file.getBaseName());
 		if(file == null || !file.exists() || !file.isFile())
-			throw new IOException("Could not create file: " + file.getPath());
+			throw new IOException("Could not create file");
         return new RealFileNode(file);
     }
 
@@ -153,6 +161,8 @@ public class RealFileController {
     public ResponseEntity<Resource> get(String path, Long position) throws IOException {
 		System.out.println("get: path="+path+",position="+position);
         IRealFile rFile = FileSystem.getFile(path);
+        if(rFile == null || !rFile.exists() || !rFile.isFile())
+            throw new IOException("File does not exist");
         RandomAccessStream stream = rFile.getInputStream();
         stream.setPosition(position);
         InputStreamWrapper inputStreamWrapper = new InputStreamWrapper(stream);
@@ -176,7 +186,11 @@ public class RealFileController {
     @PostMapping("/copy")
     public RealFileNode copy(String path, String destDir, String filename) throws IOException {
         IRealFile source = FileSystem.getFile(path);
+        if(source == null || !source.exists())
+            throw new IOException("Path does not exist");
         IRealFile dest = FileSystem.getFile(destDir);
+        if(dest == null || !dest.exists() || !dest.isDirectory())
+            throw new IOException("Destination directory does not exist");
         IRealFile nFile;
         if (source.isDirectory()) {
             throw new IOException("Cannot copy directories, use createDirectory and copy recursively");
@@ -200,7 +214,11 @@ public class RealFileController {
     @PutMapping("/move")
     public RealFileNode move(String path, String destDir, String filename) throws IOException {
         IRealFile source = FileSystem.getFile(path);
+        if(source == null || !source.exists())
+            throw new IOException("Path does not exist");
         IRealFile dest = FileSystem.getFile(destDir);
+        if(dest == null || !dest.exists() || !dest.isDirectory())
+            throw new IOException("Destination directory does not exist");
         IRealFile nFile;
         if (source.isDirectory()) {
             throw new IOException("Cannot move directories, use createDirectory and move recursively");
@@ -217,11 +235,13 @@ public class RealFileController {
      * @param path     The file or directory path
      * @param filename The new filename
      * @return
-     * @throws FileNotFoundException
+     * @throws IOException
      */
     @PutMapping("/rename")
-    public RealFileNode rename(String path, String filename) throws FileNotFoundException {
+    public RealFileNode rename(String path, String filename) throws IOException {
         IRealFile file = FileSystem.getFile(path);
+        if(file == null || !file.exists())
+            throw new IOException("Path does not exist");
         file.renameTo(filename);
         return new RealFileNode(file);
     }
@@ -235,8 +255,10 @@ public class RealFileController {
      * @return
      */
     @DeleteMapping("/delete")
-    public RealFileNode delete(String path) {
+    public RealFileNode delete(String path) throws IOException {
         IRealFile file = FileSystem.getFile(path);
+        if(file == null || !file.exists())
+            throw new IOException("Path does not exist");
         file.delete();
         return new RealFileNode(file);
     }
@@ -249,13 +271,15 @@ public class RealFileController {
      * @param path   The file
      * @param length The new size
      * @return
-     * @throws FileNotFoundException
+     * @throws IOException
      */
     @PutMapping("/setLength")
     public RealFileNode setLength(String path, long length) throws IOException {
         RandomAccessStream stream = null;
         try {
             IRealFile file = FileSystem.getFile(path);
+            if(file == null || !file.exists())
+                throw new IOException("Path does not exist");
             stream = file.getOutputStream();
             stream.setLength(length);
             return new RealFileNode(file);
