@@ -40,7 +40,7 @@ public class SalmonWSTestHelper {
 //    public static String TEST_WS_DIR = "D:\\tmp\\test_vault";
     public static String TEST_WS_DIR = "D:\\tmp\\output";
     public static HashMap<String, String> users;
-    public static JavaWSFile.Credentials credentials1 = new JavaWSFile.Credentials("user1", "pass1");
+    public static JavaWSFile.Credentials credentials1 = new JavaWSFile.Credentials("user", "password");
     public static JavaWSFile.Credentials wrongCredentials1 = new JavaWSFile.Credentials("wrongUser", "wrongPass");
 
     static {
