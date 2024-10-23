@@ -26,8 +26,11 @@ SOFTWARE.
 
 #include <stdint.h>
 
+
+#define NONCE_SIZE 8
 #define AES_BLOCK_SIZE 16
 #define EXPANDED_KEY_SIZE 240
+#define ROUNDS 14
 
 #if defined(_MSC_VER) || defined(__i386__) || defined(__x86_64__)
 #include <wmmintrin.h>
@@ -56,4 +59,7 @@ void aes_intr_key_expand(const unsigned char* userkey, unsigned char* key);
  */
 void aes_intr_transform(const unsigned char* in, unsigned char* out, int length, unsigned char* key, int rounds);
 
+int aes_intr_transform_ctr(const unsigned char* key, unsigned char* counter,
+	unsigned char* srcBuffer, int srcOffset,
+	unsigned char* destBuffer, int destOffset, int count);
 #endif

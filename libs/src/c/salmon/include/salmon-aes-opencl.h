@@ -1,7 +1,7 @@
 /*
 MIT License
 
-Copyright (c) 2021 Max Kas
+Copyright (c) 2024 Max Kas
 
 Permission is hereby granted, free of charge, to any person obtaining a copy
 of this software and associated documentation files (the "Software"), to deal
@@ -21,34 +21,15 @@ LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 */
+#ifndef _SALMON_AES_OPENCL_H
+#define _SALMON_AES_OPENCL_H
 
-using Mku.Salmon.Streams;
+void aes_opencl_key_expand(const unsigned char* userkey, unsigned char* key);
 
-namespace Mku.Salmon.Transform;
+void aes_opencl_transform(const unsigned char* in, unsigned char* out, int length, unsigned char* key, int rounds);
 
-/// <summary>
-///  Creates an AES transformer object.
-/// </summary>
-public class SalmonTransformerFactory
-{
+void aes_opencl_transform_ctr(const unsigned char* key, unsigned char* counter,
+	unsigned char* srcBuffer, int srcOffset,
+	unsigned char* destBuffer, int destOffset, int count);
+#endif
 
-    /// <summary>
-    ///  Create an encryption transformer implementation.
-	/// </summary>
-	///  <param name="type">The supported provider type.</param>
-    ///  <returns>The transformer.</returns>
-    ///  <exception cref="SalmonSecurityException">Thrown when error with security</exception>
-    public static ISalmonCTRTransformer Create(ProviderType type)
-    {
-        switch (type)
-        {
-            case ProviderType.Default:
-                return new SalmonDefaultTransformer();
-            case ProviderType.AesIntrinsics:
-                return new SalmonAesIntrTransformer();
-            case ProviderType.Aes:
-                return new TinyAesTransformer();
-        }
-        throw new SalmonSecurityException("Unknown Transformer type");
-    }
-}

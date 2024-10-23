@@ -31,7 +31,25 @@ SOFTWARE.
 #include <arm_acle.h>
 #include "aes.h"
 #endif
-#include "salmon-aes-intr/salmon-aes-intr.h"
+#include "salmon-aes-intr.h"
+
+static inline long increment_counter(long value, unsigned char* counter) {
+	if (value < 0) {
+		return -1;
+	}
+	int index = AES_BLOCK_SIZE - 1;
+	int carriage = 0;
+	while (index >= 0 && value + carriage > 0) {
+		if (index < AES_BLOCK_SIZE - NONCE_SIZE) {
+			return -1;
+		}
+		long val = (value + carriage) % 256;
+		carriage = (int)(((counter[index] & 0xFF) + val) / 256);
+		counter[index--] += (unsigned char)val;
+		value /= 256;
+	}
+	return value;
+}
 
 #if defined(_MSC_VER) || defined(__i386__) || defined(__x86_64__)
 // Instructions from:
@@ -122,15 +140,60 @@ void aes_intr_transform(const unsigned char* in, unsigned char* out, int length,
 		_mm_storeu_si128(&((__m128i*) out)[i], tmp);
 	}
 }
+
+int aes_intr_transform_ctr(
+	const unsigned char* key, unsigned char* counter,
+	unsigned char* srcBuffer, int srcOffset,
+	unsigned char* destBuffer, int destOffset, int count) {
+
+	unsigned char encCounter[AES_BLOCK_SIZE];
+	// we make a copy of the expanded key in case it's allocated 
+	// from managed code and might get released/reallocated
+	unsigned char expKey[EXPANDED_KEY_SIZE];
+	memcpy(expKey, key, EXPANDED_KEY_SIZE);
+
+	__m128i src, dest, ctr;
+	char part[AES_BLOCK_SIZE];
+	int len;
+
+	int totalBytes = 0;
+	for (int i = 0; i < count; i += AES_BLOCK_SIZE) {
+		aes_intr_transform(counter, encCounter, AES_BLOCK_SIZE, expKey, ROUNDS);
+
+
+		ctr = _mm_loadu_si128((__m128i*) encCounter);
+		len = count - totalBytes;
+		if (len < AES_BLOCK_SIZE) {
+			// partial load
+			memcpy(part, srcBuffer + srcOffset + i, len);
+			src = _mm_loadu_si128((__m128i*) part);
+		}
+		else {
+			src = _mm_loadu_si128(&((__m128i*) srcBuffer)[(srcOffset + i) / AES_BLOCK_SIZE]);
+		}
+
+		// xor the plain text with the encrypted counter
+		dest = _mm_xor_si128(src, ctr);
+		if (len < AES_BLOCK_SIZE) {
+			// partial store
+			_mm_storeu_si128((__m128i*) part, dest);
+			memcpy(destBuffer + destOffset + i, part, len);
+		}
+		else {
+			_mm_storeu_si128(&((__m128i*) destBuffer)[(destOffset + i) / AES_BLOCK_SIZE], dest);
+		}
+
+		totalBytes += len < AES_BLOCK_SIZE ? len : AES_BLOCK_SIZE;
+		if (increment_counter(1, counter) < 0)
+			return -1;
+	}
+
+	return totalBytes;
+}
 #elif defined(__aarch64__) && defined(__ARM_FEATURE_CRYPTO)
-// We use the key expansion provided by tiny-aes
-// See: https://github.com/kokke/tiny-AES-c
-// License: https://github.com/kokke/tiny-AES-c/blob/master/unlicense.txt
-// To compile with tiny-aes read: c\src\tiny-aes\README.md
+// We use the key expansion in salmon aes implementation
 void aes_intr_key_expand(const unsigned char* key, unsigned char* roundKey) {
-	struct AES_ctx ctx;
-	AES_init_ctx(&ctx, key);
-	memcpy(roundKey, (&ctx)->RoundKey, EXPANDED_KEY_SIZE);
+	aes_key_expand(roundKey, key);
 }
 
 // Instructions from:
@@ -149,4 +212,7 @@ aes_intr_transform(const unsigned char* text, unsigned char* cipher, int length,
 #else
 void aes_intr_transform(const unsigned char* text, unsigned char* cipher, int length, unsigned char* keys, int rounds) {}
 void aes_intr_key_expand(const unsigned char* key, unsigned char* roundKey) {}
+int aes_intr_transform_ctr(const unsigned char* key, unsigned char* counter,
+	unsigned char* srcBuffer, int srcOffset,
+	unsigned char* destBuffer, int destOffset, int count) {}
 #endif

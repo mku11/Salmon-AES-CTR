@@ -44,6 +44,46 @@ public class TinyAesTransformer : SalmonNativeTransformer
     public void Init(byte[] key, byte[] nonce)
     {
 		NativeProxy.SalmonInit(AES_IMPL_TINY_AES);
+        byte[] expandedKey = new byte[SalmonAES256CTRTransformer.EXPANDED_KEY_SIZE];
+        NativeProxy.SalmonExpandKey(key, expandedKey);
+        ExpandedKey = expandedKey;
         base.Init(key, nonce);
+    }
+
+
+    /// <summary>
+    ///  Encrypt the data.
+    /// </summary>
+    ///  <param name="srcBuffer">The source byte array.</param>
+    ///  <param name="srcOffset">The source byte offset.</param>
+    ///  <param name="destBuffer">The destination byte array.</param>
+    ///  <param name="destOffset">The destination byte offset.</param>
+    ///  <param name="count">The number of bytes to transform.</param>
+    ///  <returns>The number of bytes transformed.</returns>
+    override
+    public int EncryptData(byte[] srcBuffer, int srcOffset,
+                           byte[] destBuffer, int destOffset, int count)
+    {
+        return NativeProxy.SalmonTransform(ExpandedKey, Counter,
+                srcBuffer, srcOffset,
+                destBuffer, destOffset, count);
+    }
+
+    /// <summary>
+    ///  Decrypt the data.
+	/// </summary>
+	///  <param name="srcBuffer">The source byte array.</param>
+    ///  <param name="srcOffset">The source byte offset.</param>
+    ///  <param name="destBuffer">The destination byte array.</param>
+    ///  <param name="destOffset">The destination byte offset.</param>
+    ///  <param name="count">The number of bytes to transform.</param>
+    ///  <returns>The number of bytes transformed.</returns>
+    override
+    public int DecryptData(byte[] srcBuffer, int srcOffset,
+                            byte[] destBuffer, int destOffset, int count)
+    {
+        return NativeProxy.SalmonTransform(ExpandedKey, Counter,
+                srcBuffer, srcOffset,
+                destBuffer, destOffset, count);
     }
 }

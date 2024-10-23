@@ -1,0 +1,8 @@
+{
+  "profiles": {
+    "Salmon.Test": {
+      "commandName": "Project",
+      "nativeDebugging": true
+    }
+  }
+}

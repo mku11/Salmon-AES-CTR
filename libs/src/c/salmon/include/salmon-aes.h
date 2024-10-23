@@ -1,7 +1,7 @@
 /*
 MIT License
 
-Copyright (c) 2021 Max Kas
+Copyright (c) 2024 Max Kas
 
 Permission is hereby granted, free of charge, to any person obtaining a copy
 of this software and associated documentation files (the "Software"), to deal
@@ -22,33 +22,12 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 */
 
-using Mku.Salmon.Streams;
+#ifndef _SALMON_AES_H_
+#define _SALMON_AES_H_
 
-namespace Mku.Salmon.Transform;
-
-/// <summary>
-///  Creates an AES transformer object.
-/// </summary>
-public class SalmonTransformerFactory
-{
-
-    /// <summary>
-    ///  Create an encryption transformer implementation.
-	/// </summary>
-	///  <param name="type">The supported provider type.</param>
-    ///  <returns>The transformer.</returns>
-    ///  <exception cref="SalmonSecurityException">Thrown when error with security</exception>
-    public static ISalmonCTRTransformer Create(ProviderType type)
-    {
-        switch (type)
-        {
-            case ProviderType.Default:
-                return new SalmonDefaultTransformer();
-            case ProviderType.AesIntrinsics:
-                return new SalmonAesIntrTransformer();
-            case ProviderType.Aes:
-                return new TinyAesTransformer();
-        }
-        throw new SalmonSecurityException("Unknown Transformer type");
-    }
-}
+void aes_key_expand(unsigned char* roundKey, const unsigned char* key);
+void aes_transform(unsigned char state[4][4], const unsigned char* roundKey);
+int aes_transform_ctr(const unsigned char* key, unsigned char* counter,
+    unsigned char* srcBuffer, int srcOffset,
+    unsigned char* destBuffer, int destOffset, int count);
+#endif // _SALMON_AES_H_
