@@ -98,7 +98,7 @@ public class SalmonCorePerfTests
     // [TestMethod]
     public void EncryptAndDecryptStreamPerformanceSalmonTinyAes()
     {
-        SalmonStream.AesProviderType = ProviderType.TinyAES;
+        SalmonStream.AesProviderType = ProviderType.Aes;
         // warm up
         SalmonCoreTestHelper.EncryptAndDecryptByteArray(TEST_PERF_SIZE, false);
         Console.WriteLine("SalmonStream Salmon TinyAES: ");
