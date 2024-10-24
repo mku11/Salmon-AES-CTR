@@ -53,9 +53,7 @@ namespace SalmonNativeTest
 		free(decrypted);
 	}
 
-	void transform(const unsigned char* input, unsigned char* output, const unsigned char* key, const char* nonce, int length, int implType) {
-		salmon_init(implType);
-
+	void transform(const unsigned char* input, unsigned char* output, const unsigned char* key, const char* nonce, int length) {
 		BYTE	counter[16];
 		memset(counter, 0, 16);
 		for (int i = 0; i < 8; i++)
@@ -76,19 +74,21 @@ namespace SalmonNativeTest
 		salmon_expandKey(key, expandedKey);
 		key = expandedKey;
 
+		salmon_init(implType);
+
 		char msg[2048];
 		chrono::steady_clock::time_point start, end;
 		chrono::milliseconds ms;
 
 		start = chrono::high_resolution_clock::now();
-		transform(input, encrypted, key, (const char*)nonce, length, implType);
+		transform(input, encrypted, key, (const char*)nonce, length);
 		end = chrono::high_resolution_clock::now();
 		ms = chrono::duration_cast<chrono::milliseconds>(end - start);
 		sprintf_s(msg, "%s Enc Time(ms): %d\n", implTypeStr, ms);
 		Logger::WriteMessage(msg);
 
 		start = chrono::high_resolution_clock::now();
-		transform(encrypted, decrypted, key, (const char*)nonce, length, implType);
+		transform(encrypted, decrypted, key, (const char*)nonce, length);
 		end = chrono::high_resolution_clock::now();
 		ms = chrono::duration_cast<chrono::milliseconds>(end - start);
 		sprintf_s(msg, "%s Dec Time(ms): %d\n", implTypeStr, ms);
@@ -111,7 +111,7 @@ namespace SalmonNativeTest
 			CryptGenRandom(hCryptProv, 8, nonce); // 8 bytes for the random nonce
 
 
-			const int length = 16 * 1024 * 1024;
+			const int length = 4 * 1024 * 1024;
 			BYTE* bytes = (BYTE*)malloc(length * sizeof(BYTE));
 			CryptGenRandom(hCryptProv, length, bytes); // 8 bytes for the random nonce
 
@@ -123,14 +123,14 @@ namespace SalmonNativeTest
 
 			time_transform((const unsigned char*)bytes, (const unsigned char*)key, (const char*)nonce, length, AES_IMPL_AES, "AES_IMPL_AES");
 			time_transform((const unsigned char*)bytes, (const unsigned char*)key, (const char*)nonce, length, AES_IMPL_AES_INTR, "AES_IMPL_AES_INTR");
-
-			// time_transform((const unsigned char*)bytes, (const unsigned char*)key, (const char*)nonce, length, AES_IMPL_AES_GPU, "AES_IMPL_AES_GPU");
+			time_transform((const unsigned char*)bytes, (const unsigned char*)key, (const char*)nonce, length, AES_IMPL_AES_GPU, "AES_IMPL_AES_GPU");
 
 			free(bytes);
 		}
 	};
 
 	void encrypt_and_decrypt(const unsigned char* input, const unsigned char* key, const char* nonce, int length, int implType) {
+		salmon_init(implType);
 
 		// we expand the key
 		uint8_t expandedKey[240];
@@ -142,15 +142,16 @@ namespace SalmonNativeTest
 		transform_expected((const unsigned char*)input, encrExpected, (char*)key, (char*)nonce, length);
 
 		unsigned char* encrypted = (unsigned char*)malloc(length * sizeof(unsigned char));
-		transform((const unsigned char*)input, encrypted, (const unsigned char*)key, (const char*)nonce, length, implType);
+		
+		transform((const unsigned char*)input, encrypted, (const unsigned char*)key, (const char*)nonce, length);
 
 		// encrypted string
-		string encrText = string((char*)encrypted, length);
+		/*string encrText = string((char*)encrypted, length);
 		Logger::WriteMessage(encrText.c_str());
 		Logger::WriteMessage("\n");
 		string expEncText = string((char*)encrExpected, length);
 		Logger::WriteMessage(expEncText.c_str());
-		Logger::WriteMessage("\n");
+		Logger::WriteMessage("\n");*/
 		Assert::IsTrue(strncmp((const char*)encrExpected, (const char*)encrypted, length) == 0);
 
 
@@ -159,15 +160,15 @@ namespace SalmonNativeTest
 		transform_expected((const unsigned char*)encrypted, decrExpected, (char*)key, (char*)nonce, length);
 
 		unsigned char* decrypted = (unsigned char*)malloc(length * sizeof(unsigned char));
-		transform((const unsigned char*)encrypted, decrypted, (const unsigned char*)key, (const char*)nonce, length, implType);
+		transform((const unsigned char*)encrypted, decrypted, (const unsigned char*)key, (const char*)nonce, length);
 
 		// encrypted string
-		string decrText = string((char*)decrypted, length);
+		/*string decrText = string((char*)decrypted, length);
 		Logger::WriteMessage(decrText.c_str());
 		Logger::WriteMessage("\n");
 		string expDecText = string((char*)decrExpected, length);
 		Logger::WriteMessage(expDecText.c_str());
-		Logger::WriteMessage("\n");
+		Logger::WriteMessage("\n");*/
 		Assert::IsTrue(strncmp((const char*)decrExpected, (const char*)decrypted, length) == 0);
 
 		free(encrypted);
@@ -184,14 +185,19 @@ namespace SalmonNativeTest
 			char* key = "ABCDEFGHIJKLMNOPABCDEFGHIJKLMNOP";
 			char* nonce = "ABCDEFGH\0\0\0\0\0\0\0\0";
 			string text = "This is a plaintext that will be used for testing";
+			for (int i = 0; i < 14; i++) 
+				text += text;
 			const char* bytes = (const char*)text.c_str();
 			int length = strlen(bytes);
-			Logger::WriteMessage(bytes);
-			Logger::WriteMessage("\n");
+			/*Logger::WriteMessage(bytes);
+			Logger::WriteMessage("\n");*/
 
+			printf("aes:\r\n");
 			encrypt_and_decrypt((const unsigned char*)bytes, (const unsigned char*)key, (const char*)nonce, length, AES_IMPL_AES);
-			encrypt_and_decrypt((const unsigned char*)bytes, (const unsigned char*)key, (const char*)nonce, length, AES_IMPL_AES_INTR);
-			// encrypt_and_decrypt((const unsigned char*)bytes, (const unsigned char*)key, (const char*)nonce, length, AES_IMPL_AES_GPU);
+			//printf("aes intr:\r\n");
+			// encrypt_and_decrypt((const unsigned char*)bytes, (const unsigned char*)key, (const char*)nonce, length, AES_IMPL_AES_INTR);
+			printf("aes gpu:\r\n");
+			encrypt_and_decrypt((const unsigned char*)bytes, (const unsigned char*)key, (const char*)nonce, length, AES_IMPL_AES_GPU);
 		}
 	};
 }

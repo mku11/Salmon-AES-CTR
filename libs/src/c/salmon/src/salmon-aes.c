@@ -21,16 +21,13 @@ LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 */
-
-#include "salmon-aes.h"
-
 #define ROUNDS 14
 #define NONCE_SIZE 8
 #define AES_BLOCK_SIZE 16
 #define WORD_LEN 8
 
 // https://en.wikipedia.org/wiki/Rijndael_S-box
-static const unsigned char* sbox[256] = {
+const unsigned char sbox[256] = {
   0x63, 0x7c, 0x77, 0x7b, 0xf2, 0x6b, 0x6f, 0xc5, 0x30, 0x01, 0x67, 0x2b, 0xfe, 0xd7, 0xab, 0x76,
   0xca, 0x82, 0xc9, 0x7d, 0xfa, 0x59, 0x47, 0xf0, 0xad, 0xd4, 0xa2, 0xaf, 0x9c, 0xa4, 0x72, 0xc0,
   0xb7, 0xfd, 0x93, 0x26, 0x36, 0x3f, 0xf7, 0xcc, 0x34, 0xa5, 0xe5, 0xf1, 0x71, 0xd8, 0x31, 0x15,
@@ -53,7 +50,7 @@ static const unsigned char* sbox[256] = {
 static const unsigned char Rcon[8] = { 0x00, 0x01, 0x02, 0x04, 0x08, 0x10, 0x20, 0x40 };
 
 // https://en.wikipedia.org/wiki/Advanced_Encryption_Standard#The_AddRoundKey
-static void add_round_key(unsigned char round, unsigned char state[4][4], const unsigned char roundKey[15][16])
+static inline void add_round_key(unsigned char round, unsigned char state[4][4], const unsigned char roundKey[15][16])
 {
 	int subKey;
 	for (int i = 0; i < 4; i++)
@@ -66,7 +63,7 @@ static void add_round_key(unsigned char round, unsigned char state[4][4], const 
 	}
 }
 
-static void sub_bytes(unsigned char state[4][4])
+static inline void sub_bytes(unsigned char state[4][4])
 {
 	for (int i = 0; i < 4; i++) {
 		for (int j = 0; j < 4; j++) {
@@ -75,7 +72,7 @@ static void sub_bytes(unsigned char state[4][4])
 	}
 }
 
-static void shift_rows(unsigned char state[4][4])
+static inline void shift_rows(unsigned char state[4][4])
 {
 	unsigned char swp = state[0][1];
 	state[0][1] = state[1][1];
@@ -96,7 +93,7 @@ static void shift_rows(unsigned char state[4][4])
 }
 
 // https://en.wikipedia.org/wiki/Rijndael_MixColumns#Implementation_example
-static void mix_columns(unsigned char state[4][4])
+static inline void mix_columns(unsigned char state[4][4])
 {
 	unsigned char a[4];
 	unsigned char b[4];
@@ -116,7 +113,7 @@ static void mix_columns(unsigned char state[4][4])
 	}
 }
 
-void rot_word(unsigned char word[4]) {
+static inline void rot_word(unsigned char word[4]) {
 	unsigned char swp = word[0];
 	word[0] = word[1];
 	word[1] = word[2];
@@ -124,7 +121,7 @@ void rot_word(unsigned char word[4]) {
 	word[3] = swp;
 }
 
-void sub_word(unsigned char word[4]) {
+static inline void sub_word(unsigned char word[4]) {
 	word[0] = sbox[word[0]];
 	word[1] = sbox[word[1]];
 	word[2] = sbox[word[2]];
@@ -171,7 +168,7 @@ void aes_transform(unsigned char state[4][4], const unsigned char* roundKey)
 			if (r != ROUNDS)
 				mix_columns(state);
 		}
-		add_round_key(r, state, roundKey);
+		add_round_key(r, state, (const unsigned char(*)[16]) roundKey);
 	}
 }
 
@@ -202,8 +199,11 @@ int aes_transform_ctr(const unsigned char* key, unsigned char* counter,
 
 	int totalBytes = 0;
 	for (int i = 0; i < count; i += AES_BLOCK_SIZE) {
-		memcpy(encCounter, counter, AES_BLOCK_SIZE);
-		aes_transform(encCounter, key);
+		for (int j = 0; j < AES_BLOCK_SIZE; j++) {
+			encCounter[j] = counter[j];
+		}
+
+		aes_transform((unsigned char(*)[4]) encCounter, key);
 		for (int k = 0; k < AES_BLOCK_SIZE && i + k < count; k++) {
 			destBuffer[destOffset + i + k] = srcBuffer[srcOffset + i + k] ^ encCounter[k];
 			totalBytes++;
@@ -214,3 +214,4 @@ int aes_transform_ctr(const unsigned char* key, unsigned char* counter,
 
 	return totalBytes;
 }
+ 

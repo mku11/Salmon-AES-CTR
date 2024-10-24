@@ -24,12 +24,17 @@ SOFTWARE.
 #ifndef _SALMON_AES_OPENCL_H
 #define _SALMON_AES_OPENCL_H
 
+#include "salmon-aes.h"
+
+int init_opencl();
 void aes_opencl_key_expand(const unsigned char* userkey, unsigned char* key);
 
-void aes_opencl_transform(const unsigned char* in, unsigned char* out, int length, unsigned char* key, int rounds);
-
-void aes_opencl_transform_ctr(const unsigned char* key, unsigned char* counter,
+int aes_opencl_transform(const unsigned char* key, unsigned char* counter,
 	unsigned char* srcBuffer, int srcOffset,
 	unsigned char* destBuffer, int destOffset, int count);
+
+int aes_opencl_transform_ctr(const unsigned char* key, unsigned char* counter,
+    unsigned char* srcBuffer, int srcOffset,
+    unsigned char* destBuffer, int destOffset, int count);
 #endif
 

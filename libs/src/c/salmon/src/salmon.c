@@ -38,6 +38,8 @@ static int aesImpl = AES_IMPL_AES_INTR;
 
 extern EXPORT_DLL void salmon_init(int _aesImpl) {
 	aesImpl = _aesImpl;
+	if (aesImpl == AES_IMPL_AES_GPU)
+		init_opencl();
 }
 
 extern EXPORT_DLL void salmon_expandKey(const unsigned char* key, unsigned char* expandedKey) {
@@ -58,6 +60,9 @@ extern EXPORT_DLL int salmon_transform(
 	}
 	else if (aesImpl == AES_IMPL_AES_INTR) {
 		return aes_intr_transform_ctr(key, counter, srcBuffer, srcOffset, destBuffer, destOffset, count);
+	}
+	else if (aesImpl == AES_IMPL_AES_GPU) {
+		return aes_opencl_transform_ctr(key, counter, srcBuffer, srcOffset, destBuffer, destOffset, count);
 	}
 	return 0;
 }

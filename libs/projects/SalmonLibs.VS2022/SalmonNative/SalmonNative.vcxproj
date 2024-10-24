@@ -25,6 +25,7 @@
     <RootNamespace>SalmonNative</RootNamespace>
     <WindowsTargetPlatformVersion>10.0</WindowsTargetPlatformVersion>
     <ProjectName>SalmonNative</ProjectName>
+    <PackageReadmeFile>README.md</PackageReadmeFile>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="Configuration">
@@ -176,9 +177,15 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="packages.config" />
-    <None Include="README.md" />
+    <None Include="README.md">
+      <DeploymentContent>false</DeploymentContent>
+      <FileType>Document</FileType>
+    </None>
     <None Include="..\..\..\..\LICENSE" />
     <None Include="..\..\..\..\NOTICE" />
+    <None Include="..\..\..\src\c\salmon\src\salmon-aes-kernel.cl">
+      <DeploymentContent>true</DeploymentContent>
+    </None>
     <None Include="SalmonNative.nuspec" />
     <None Include="SalmonNative.props" />
   </ItemGroup>
