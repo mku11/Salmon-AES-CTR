@@ -38,7 +38,8 @@ SOFTWARE.
 #define KERNEL_FILE "salmon-aes-kernel.cl"
 #define KERNEL_NAME "kernel_aes_transform_ctr"
 
-#define CHUNK_SIZE (16*1)
+#define BLOCKS_PER_WORKITEM 4
+#define DISABLE_OPT 0
 
 bool init = false;
 int platform_index = 0;
@@ -127,7 +128,7 @@ int init_opencl() {
 	strcpy(ptr, "\n\n");
 	ptr+=2;
 	char defines[1024];
-	sprintf(defines, "#define CHUNK_SIZE %d\n\n", CHUNK_SIZE);
+	sprintf(defines, "#define CHUNK_SIZE %d\n\n", 16*BLOCKS_PER_WORKITEM);
 	strcpy(ptr, defines);
 	ptr += strlen(defines);
 
@@ -149,7 +150,7 @@ int init_opencl() {
 	}
 
 	// Build the program executable
-	err = clBuildProgram(program, 0, NULL, "-cl-opt-disable", NULL, NULL);
+	err = clBuildProgram(program, 0, NULL, DISABLE_OPT?"-cl-opt-disable":NULL, NULL, NULL);
 	if (err != CL_SUCCESS) {
 		printf("Could not build program, code: %d\n", err);
 		if (err == CL_BUILD_PROGRAM_FAILURE) {
@@ -205,7 +206,7 @@ static int transform_opencl(const unsigned char* key, unsigned char* counter,
 	
 	cl_int err;
 	size_t local[1], global[1];
-	int chunks = (int) ceil(count / (double) CHUNK_SIZE);
+	int chunks = (int) ceil(count / (double) (16* BLOCKS_PER_WORKITEM));
 	local[0] = kernel_max_local_size;
 	global[0] = ((int) ceil(chunks / (double) local[0])) * local[0];
 
@@ -237,7 +238,7 @@ static int transform_opencl(const unsigned char* key, unsigned char* counter,
 		exit(1);
 	}
 	
-	printf("local_size: %d, global_size: %d\r\n", (int) local[0], (int) global[0]);
+	// printf("local_size: %d, global_size: %d\r\n", (int) local[0], (int) global[0]);
 
 	cl_event event;
 	cl_ulong time_start = 0;
@@ -263,7 +264,7 @@ static int transform_opencl(const unsigned char* key, unsigned char* counter,
 	}
 
 	time_passed_kernel = (time_end - time_start) / (double)1e9;
-	printf("kernel time (sec): %f\n", time_passed_kernel);
+	// printf("kernel time (sec): %f\n", time_passed_kernel);
 
 	// Wait for the command queue to get serviced before reading back results
 	clFinish(queue);
