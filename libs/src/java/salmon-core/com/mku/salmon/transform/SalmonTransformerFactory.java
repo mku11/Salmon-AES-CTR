@@ -41,10 +41,10 @@ public class SalmonTransformerFactory {
         switch(type) {
             case Default:
                 return new SalmonDefaultTransformer();
+            case Aes:
             case AesIntrinsics:
-                return new SalmonAesIntrTransformer();
-            case TinyAES:
-                return new TinyAesTransformer();
+            case AesGPU:
+                return new SalmonNativeTransformer(type.ordinal());
         }
         throw new SalmonSecurityException("Unknown Transformer type");
     }
