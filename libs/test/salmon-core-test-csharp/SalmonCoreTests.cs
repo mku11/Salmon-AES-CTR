@@ -47,7 +47,7 @@ public class SalmonCoreTests
     [TestInitialize]
     public void Init()
     {
-        SalmonStream.AesProviderType = ProviderType.Default;
+        SalmonStream.AesProviderType = ProviderType.AesGPU;
         SalmonCoreTestHelper.Initialize();
     }
 

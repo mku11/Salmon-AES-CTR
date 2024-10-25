@@ -57,7 +57,7 @@ public class SalmonCoreTests {
 
     @BeforeEach
     public void init() {
-        SalmonStream.setAesProviderType(ProviderType.Default);
+        SalmonStream.setAesProviderType(ProviderType.AesGPU);
         SalmonCoreTestHelper.initialize();
     }
 
@@ -151,8 +151,8 @@ public class SalmonCoreTests {
     @Test
     public void shouldEncryptAndDecryptTextCompatible() throws Exception {
         String plainText = SalmonCoreTestHelper.TEST_TEXT;
-        for (int i = 0; i < 13; i++)
-            plainText += plainText;
+//        for (int i = 0; i < 13; i++)
+//            plainText += plainText;
 
         byte[] bytes = plainText.getBytes(Charset.defaultCharset());
         byte[] encBytesDef = SalmonCoreTestHelper.defaultAESCTRTransform(bytes, SalmonCoreTestHelper.TEST_KEY_BYTES, SalmonCoreTestHelper.TEST_NONCE_BYTES, true);

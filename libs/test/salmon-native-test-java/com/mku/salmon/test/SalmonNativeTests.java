@@ -48,8 +48,7 @@ public class SalmonNativeTests {
 
     @BeforeEach
     public void init() {
-        SalmonStream.setAesProviderType(ProviderType.AesIntrinsics);
-        // SalmonStream.setAesProviderType(SalmonStream.ProviderType.TinyAES);
+        SalmonStream.setAesProviderType(ProviderType.AesGPU);
     }
 
     @Test
