@@ -37,6 +37,8 @@ from salmon_core.salmon.salmon_range_exceeded_exception import SalmonRangeExceed
 from salmon_core.salmon.salmon_security_exception import SalmonSecurityException
 from salmon_core.salmon.text.salmon_text_decryptor import SalmonTextDecryptor
 from salmon_core.salmon.text.salmon_text_encryptor import SalmonTextEncryptor
+
+from salmon_core.salmon.bridge.native_proxy import NativeProxy
 from test.salmon_core_test_helper import SalmonCoreTestHelper
 
 from typeguard import typechecked, TypeCheckError
@@ -48,9 +50,10 @@ class SalmonCoreTests(TestCase):
     SalmonCoreTestHelper.TEST_DEC_BUFFER_SIZE = 1 * 1024 * 1024
     SalmonCoreTestHelper.TEST_ENC_THREADS = 2
     SalmonCoreTestHelper.TEST_DEC_THREADS = 2
+    NativeProxy.set_library_path("../../projects/salmon-libs-gradle/salmon-native/build/libs/salmon/shared/salmon.dll")
 
     def setUp(self):
-        SalmonStream.set_aes_provider_type(ProviderType.Default)
+        SalmonStream.set_aes_provider_type(ProviderType.AesGPU)
         SalmonCoreTestHelper.initialize()
 
     def tearDown(self) -> None:

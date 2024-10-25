@@ -50,7 +50,6 @@ class SalmonNativeTests(TestCase):
         NativeProxy.set_library_path(
             "../../projects/salmon-libs-gradle/salmon-native/build/libs/salmon/shared/salmon.dll")
         SalmonStream.set_aes_provider_type(ProviderType.AesIntrinsics)
-        # SalmonStream.set_aes_provider_type(ProviderType.TinyAES)
 
     def test_encrypt_and_decrypt_native_text_compatible(self):
         plain_text = SalmonCoreTestHelper.TEST_TEXT  # [0:16]
