@@ -38,7 +38,37 @@ public class SalmonNativeTransformer : SalmonAES256CTRTransformer
     /// Default is the Salmon Native windows proxy.
     /// </summary>
     public static INativeProxy NativeProxy { get; set; }  = new NativeProxy();
-   
+
+    /// <summary>
+    ///  AES Implementation type
+    /// </summary>
+    public int ImplType { get; set; }
+
+    /// <summary>
+    /// Construct a SalmonNativeTransformer for using the native aes c library
+    /// </summary>
+    /// <param name="implType">The AES native implementation see ProviderType enum</param>
+    public SalmonNativeTransformer(int implType)
+    {
+        ImplType = implType;
+    }
+
+    /// <summary>
+    ///  Initialize the native Aes intrinsics transformer.
+	/// </summary>
+	///  <param name="key">The AES key to use.</param>
+    ///  <param name="nonce">The nonce to use.</param>
+    ///  <exception cref="SalmonSecurityException">Thrown when error with security</exception>
+    override
+    public void Init(byte[] key, byte[] nonce)
+    {
+        NativeProxy.SalmonInit(ImplType);
+        byte[] expandedKey = new byte[SalmonAES256CTRTransformer.EXPANDED_KEY_SIZE];
+        NativeProxy.SalmonExpandKey(key, expandedKey);
+        ExpandedKey = expandedKey;
+        base.Init(key, nonce);
+    }
+
     /// <summary>
     ///  Encrypt the data.
 	/// </summary>
@@ -52,7 +82,7 @@ public class SalmonNativeTransformer : SalmonAES256CTRTransformer
     public int EncryptData(byte[] srcBuffer, int srcOffset,
                            byte[] destBuffer, int destOffset, int count)
     {
-        return NativeProxy.SalmonTransform(Key, Counter,
+        return NativeProxy.SalmonTransform(ExpandedKey, Counter,
                 srcBuffer, srcOffset,
                 destBuffer, destOffset, count);
     }
@@ -70,7 +100,7 @@ public class SalmonNativeTransformer : SalmonAES256CTRTransformer
     public int DecryptData(byte[] srcBuffer, int srcOffset,
                             byte[] destBuffer, int destOffset, int count)
     {
-        return NativeProxy.SalmonTransform(Key, Counter,
+        return NativeProxy.SalmonTransform(ExpandedKey, Counter,
                 srcBuffer, srcOffset,
                 destBuffer, destOffset, count);
     }
