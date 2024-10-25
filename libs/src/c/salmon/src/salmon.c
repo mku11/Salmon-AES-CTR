@@ -29,10 +29,7 @@ SOFTWARE.
 #include "salmon.h"
 #include "salmon-aes.h"
 #include "salmon-aes-intr.h"
-
-#ifdef USE_OPENCL
 #include "salmon-aes-opencl.h"
-#endif
 
 static int aesImpl = AES_IMPL_AES_INTR;
 

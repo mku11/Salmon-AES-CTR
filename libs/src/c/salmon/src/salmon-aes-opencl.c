@@ -26,8 +26,12 @@ SOFTWARE.
 #include <stdint.h>
 #include <stdio.h>
 #include <stdbool.h>
-#include <CL/opencl.h>
+#include <string.h>
+#include <math.h>
 #include "salmon-aes-opencl.h"
+
+#if USE_OPENCL
+#include <CL/opencl.h>
 
 extern const char* KERNEL_SRC;
 
@@ -287,3 +291,15 @@ int aes_opencl_transform_ctr(const unsigned char* key, unsigned char* counter,
 	unsigned char* destBuffer, int destOffset, int count) {
 	return aes_opencl_transform(key, counter, srcBuffer, srcOffset, destBuffer, destOffset, count);
 }
+#else
+int init_opencl() {}
+void aes_opencl_key_expand(const unsigned char* userkey, unsigned char* key) {}
+
+int aes_opencl_transform(const unsigned char* key, unsigned char* counter,
+	unsigned char* srcBuffer, int srcOffset,
+	unsigned char* destBuffer, int destOffset, int count) {}
+
+int aes_opencl_transform_ctr(const unsigned char* key, unsigned char* counter,
+    unsigned char* srcBuffer, int srcOffset,
+    unsigned char* destBuffer, int destOffset, int count) {}
+#endif // USE_OPENCL
