@@ -126,7 +126,11 @@ void aes_intr_key_expand(const unsigned char* userkey, unsigned char* key) {
 void aes_intr_transform(const unsigned char* in, unsigned char* out, int length, unsigned char* key, int rounds) {
 	__m128i tmp;
 	int i, j;
-	for (i = 0; i < length; i+=AES_BLOCK_SIZE) {
+	if (length % AES_BLOCK_SIZE)
+        length = length / AES_BLOCK_SIZE + 1;
+    else
+        length = length / AES_BLOCK_SIZE;
+	for (i = 0; i < length; i++) {
 		tmp = _mm_loadu_si128(&((__m128i*) in)[i]);
 		tmp = _mm_xor_si128(tmp, ((__m128i*) key)[0]);
 		for (j = 1; j < rounds; j++) {
