@@ -47,7 +47,7 @@ public class SalmonCoreTests
     [TestInitialize]
     public void Init()
     {
-        SalmonStream.AesProviderType = ProviderType.Aes;
+        SalmonStream.AesProviderType = ProviderType.Default;
         SalmonCoreTestHelper.Initialize();
     }
 

@@ -111,7 +111,7 @@ namespace SalmonNativeTest
 			CryptGenRandom(hCryptProv, 8, nonce); // 8 bytes for the random nonce
 
 
-			const int length = 4 * 1024 * 1024;
+			const int length = 32 * 1024 * 1024;
 			BYTE* bytes = (BYTE*)malloc(length * sizeof(BYTE));
 			CryptGenRandom(hCryptProv, length, bytes); // 8 bytes for the random nonce
 
@@ -119,9 +119,8 @@ namespace SalmonNativeTest
 			sprintf_s(msg, "data size: %d\n", length);
 			Logger::WriteMessage(msg);
 
-			time_transform_expected((const unsigned char*)bytes, (const unsigned char*)key, (const char*)nonce, length);
-
-			time_transform((const unsigned char*)bytes, (const unsigned char*)key, (const char*)nonce, length, AES_IMPL_AES, "AES_IMPL_AES");
+			/*time_transform_expected((const unsigned char*)bytes, (const unsigned char*)key, (const char*)nonce, length);
+			time_transform((const unsigned char*)bytes, (const unsigned char*)key, (const char*)nonce, length, AES_IMPL_AES, "AES_IMPL_AES");*/
 			time_transform((const unsigned char*)bytes, (const unsigned char*)key, (const char*)nonce, length, AES_IMPL_AES_INTR, "AES_IMPL_AES_INTR");
 			time_transform((const unsigned char*)bytes, (const unsigned char*)key, (const char*)nonce, length, AES_IMPL_AES_GPU, "AES_IMPL_AES_GPU");
 
@@ -194,8 +193,8 @@ namespace SalmonNativeTest
 
 			printf("aes:\r\n");
 			encrypt_and_decrypt((const unsigned char*)bytes, (const unsigned char*)key, (const char*)nonce, length, AES_IMPL_AES);
-			//printf("aes intr:\r\n");
-			// encrypt_and_decrypt((const unsigned char*)bytes, (const unsigned char*)key, (const char*)nonce, length, AES_IMPL_AES_INTR);
+			printf("aes intr:\r\n");
+			encrypt_and_decrypt((const unsigned char*)bytes, (const unsigned char*)key, (const char*)nonce, length, AES_IMPL_AES_INTR);
 			printf("aes gpu:\r\n");
 			encrypt_and_decrypt((const unsigned char*)bytes, (const unsigned char*)key, (const char*)nonce, length, AES_IMPL_AES_GPU);
 		}
