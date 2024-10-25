@@ -49,7 +49,8 @@ void KEY_256_ASSIST_2(__m128i* temp1, __m128i* temp3);
 void aes_intr_key_expand(const unsigned char* userkey, unsigned char* key);
 
 /**
- * Transform the data using AES256 CTR mode.
+ * Transform the data using AES256. The length must be a multiple of 16 if not you should pad the buffers. 
+ * Make sure your hw supports AES NI.
  * @param in The input byte array.
  * @param out The output byte array.
  * @param length The number of bytes to transform.
@@ -59,6 +60,15 @@ void aes_intr_key_expand(const unsigned char* userkey, unsigned char* key);
  */
 void aes_intr_transform(const unsigned char* in, unsigned char* out, int length, unsigned char* key, int rounds);
 
+/**
+ * Transform the data using AES256 CTR mode.
+ * @param in The input byte array.
+ * @param out The output byte array.
+ * @param length The number of bytes to transform.
+ * @param key The AES expanded key to use. Use salmon_expandKey()
+ *      to derive the expanded Key
+ * @param rounds The rounds to use. From AES256 this should be 14.
+ */
 int aes_intr_transform_ctr(const unsigned char* key, unsigned char* counter,
 	unsigned char* srcBuffer, int srcOffset,
 	unsigned char* destBuffer, int destOffset, int count);
