@@ -29,13 +29,13 @@ SOFTWARE.
 #include <CL/opencl.h>
 #include "salmon-aes-opencl.h"
 
+extern const char* KERNEL_SRC;
+
 #define MAX_PLATFORMS 8
 #define MAX_DEVICES 8
 #define MAX_CHARS 1024
 #define MAX_SOURCE_SIZE 8*1024
 
-#define SALMON_AES_FILE "salmon-aes.c"
-#define KERNEL_FILE "salmon-aes-kernel.cl"
 #define KERNEL_NAME "kernel_aes_transform_ctr"
 
 #define BLOCKS_PER_WORKITEM 4
@@ -118,27 +118,10 @@ int init_opencl() {
 	// printf("max_shared_mem: %d\n", (int) max_shared_mem);
 
 	source_str = (char*)malloc(2*MAX_SOURCE_SIZE + 1);
-	char* ptr = source_str;
-	cl_code = fopen(SALMON_AES_FILE, "rb");
-	if (cl_code == NULL) {
-		printf("Could not open kernel file: %s\n", SALMON_AES_FILE);
-		goto error;
-	}
-	ptr += fread(ptr, 1, MAX_SOURCE_SIZE, cl_code);
-	strcpy(ptr, "\n\n");
-	ptr+=2;
 	char defines[1024];
-	sprintf(defines, "#define CHUNK_SIZE %d\n\n", 16*BLOCKS_PER_WORKITEM);
-	strcpy(ptr, defines);
-	ptr += strlen(defines);
-
-	cl_code1 = fopen(KERNEL_FILE, "rb");
-	if (cl_code1 == NULL) {
-		printf("Could not open kernel file: %s\n", KERNEL_FILE);
-		goto error;
-	}
-	ptr += fread(ptr, 1, MAX_SOURCE_SIZE, cl_code1);
-	strcpy(ptr, "\n\n");
+	sprintf(defines, "#define CHUNK_SIZE %d\n\n", 16 * BLOCKS_PER_WORKITEM);
+	strcpy(source_str, defines);
+	strcat(source_str, KERNEL_SRC);
 
 	// printf("kernel source: %s\n", source_str);
 

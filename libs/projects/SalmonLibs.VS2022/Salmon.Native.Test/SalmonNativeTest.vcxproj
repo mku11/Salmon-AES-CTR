@@ -104,8 +104,8 @@
       <AdditionalDependencies>%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
     <PostBuildEvent>
-      <Command>Copy /Y "$(SolutionDir)..\..\src\c\salmon\src\salmon-aes-kernel.cl" "$(TargetDir)"
-Copy /Y "$(SolutionDir)..\..\src\c\salmon\src\salmon-aes.c" "$(TargetDir)"</Command>
+      <Command>
+      </Command>
     </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
