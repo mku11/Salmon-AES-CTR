@@ -35,12 +35,13 @@ class ProviderType(Enum):
     
     @see #Default
     @see #AesIntrinsics
-    @see #TinyAES
+    @see #Aes
+    @see #AesGPU
     """
 
     Default = 0
     """
-    Default AES cipher.
+    Default AES pycryptodome algo.
     """
 
     AesIntrinsics = 1
@@ -49,8 +50,14 @@ class ProviderType(Enum):
      @see <a href="https://github.com/mku11/Salmon-AES-CTR#readme">Salmon README.md</a>
     """
 
-    TinyAES = 2
+    Aes = 2
     """
-    Tiny AES implementation. This needs the SalmonNative library to be loaded. 
+    Salmon AES implementation. This needs the SalmonNative library to be loaded. 
+     @see <a href="https://github.com/mku11/Salmon-AES-CTR#readme">Salmon README.md</a>
+    """
+
+    AesGPU = 3
+    """
+    Salmon builtin AES GPU. This needs OpenCL, a compatible Graphics card, and the SalmonNative library to be loaded. 
      @see <a href="https://github.com/mku11/Salmon-AES-CTR#readme">Salmon README.md</a>
     """

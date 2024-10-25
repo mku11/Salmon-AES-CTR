@@ -41,6 +41,8 @@ class SalmonNativeTransformer(SalmonAES256CTRTransformer):
     The native proxy to use for loading libraries for different platforms and operating systems.
     """
 
+    __implType: int = 1
+
     @staticmethod
     def set_native_proxy(proxy: INativeProxy):
         SalmonNativeTransformer.__nativeProxy = proxy
@@ -49,34 +51,55 @@ class SalmonNativeTransformer(SalmonAES256CTRTransformer):
     def get_native_proxy() -> INativeProxy:
         return SalmonNativeTransformer.__nativeProxy
 
-    """
-    Encrypt the data.
-    :param srcBuffer: The source byte array.
-    :param srcOffset: The source byte offset.
-    :param destBuffer: The destination byte array.
-    :param destOffset: The destination byte offset.
-    :param count: The number of bytes to transform.
-    :return: The number of bytes transformed.
-    """
+    def __init__(self, implType: int):
+        """
+        Constructs a transformer that will use the native aes implementations
+        :param implType: The AES native implementation see ProviderType enum
+        """
+        super().__init__()
+        self.__implType = implType
+
+    def init(self, key: bytearray, nonce: bytearray):
+        """
+        Initialize the native transformer.
+        :param key: The AES key to use.
+        :param nonce: The nonce to use.
+        :raises IntegrityException: Thrown when security error
+        """
+        self.get_native_proxy().salmon_init(self.__implType)
+        expanded_key: bytearray = bytearray(SalmonAES256CTRTransformer.EXPANDED_KEY_SIZE)
+        SalmonNativeTransformer.get_native_proxy().salmon_expand_key(key, expanded_key)
+        self.set_expanded_key(expanded_key)
+        super().init(key, nonce)
 
     def encrypt_data(self, src_buffer: bytearray, src_offset: int,
                      dest_buffer: bytearray, dest_offset: int, count: int) -> int:
-        return SalmonNativeTransformer.__nativeProxy.salmon_transform(self.get_key(), self.get_counter(),
+        """
+        Encrypt the data.
+        :param srcBuffer: The source byte array.
+        :param srcOffset: The source byte offset.
+        :param destBuffer: The destination byte array.
+        :param destOffset: The destination byte offset.
+        :param count: The number of bytes to transform.
+        :return: The number of bytes transformed.
+        """
+
+        return SalmonNativeTransformer.__nativeProxy.salmon_transform(self.get_expanded_key(), self.get_counter(),
                                                                       src_buffer, src_offset,
                                                                       dest_buffer, dest_offset, count)
 
-    """
-    Decrypt the data.
-    :param srcBuffer: The source byte array.
-    :param srcOffset: The source byte offset.
-    :param destBuffer: The destination byte array.
-    :param destOffset: The destination byte offset.
-    :param count: The number of bytes to transform.
-    :return: The number of bytes transformed.
-    """
-
     def decrypt_data(self, src_buffer: bytearray, src_offset: int,
                      dest_buffer: bytearray, dest_offset: int, count: int) -> int:
-        return SalmonNativeTransformer.__nativeProxy.salmon_transform(self.get_key(), self.get_counter(),
+        """
+        Decrypt the data.
+        :param srcBuffer: The source byte array.
+        :param srcOffset: The source byte offset.
+        :param destBuffer: The destination byte array.
+        :param destOffset: The destination byte offset.
+        :param count: The number of bytes to transform.
+        :return: The number of bytes transformed.
+        """
+
+        return SalmonNativeTransformer.__nativeProxy.salmon_transform(self.get_expanded_key(), self.get_counter(),
                                                                       src_buffer, src_offset,
                                                                       dest_buffer, dest_offset, count)
