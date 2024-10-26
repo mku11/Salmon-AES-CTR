@@ -132,3 +132,9 @@ Salmon is released under MIT Licence, see [LICENSE](https://github.com/mku11/Sal
 Make sure you read the LICENSE file and display proper attribution if you decide to use this software.
 Dependency libraries from Github, Maven, and NuGet are covered by their own license  
 see [NOTICE](https://github.com/mku11/Salmon-AES-CTR/blob/main/NOTICE)  
+
+**In Progress**  
+Next release: v2.2.0  
+- AES GPU acceleration  
+- Salmon AES intrinsics optimization  
+- Remote encrypted drives support (REST API Web Service)
