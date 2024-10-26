@@ -33,6 +33,8 @@ SOFTWARE.
 #endif
 #include "salmon-aes-intr.h"
 
+#define CHUNKS 8
+
 static inline long increment_counter(long value, unsigned char* counter) {
 	if (value < 0) {
 		return -1;
@@ -123,56 +125,104 @@ void aes_intr_key_expand(const unsigned char* userkey, unsigned char* key) {
 	Key_Schedule[14] = temp1;
 }
 
+
+inline void load_round_keys(__m128i* kvr, __m128i* kv) {
+	#pragma unroll
+	for (int i = 0; i <= ROUNDS; i++) {
+		kvr[i] = _mm_loadu_si128(&kv[i]);
+	}
+}
+
+// group SIMD ops calls for more efficient CPU pipelining
+inline void load_counters(__m128i* dest, unsigned char* counter) {
+	#pragma unroll
+	for(int i=0; i<CHUNKS; i++) {
+		dest[i] = _mm_loadu_si128(&((__m128i*) counter)[0]);
+		&((__m128i) dest[i])[15]++;
+		increment_counter(1, counter);
+	}
+}
+
+inline void encrypt_counters_round(__m128i* dest, __m128i* src1, __m128i src2) {
+	#pragma unroll
+	for(int i=0; i<CHUNKS; i++) {
+		dest[i] = _mm_aesenc_si128(src1[i], src2);
+	}
+}
+
+inline void encrypt_counters_last_round(__m128i* dest, __m128i* src1, __m128i src2) {
+	#pragma unroll
+	for(int i=0; i<CHUNKS; i++) {
+		dest[i] = _mm_aesenclast_si128(src1[i], src2);
+	}
+}
+
+inline void init_round(__m128i* dest, __m128i* src1, __m128i src2) {
+	#pragma unroll
+	for(int i=0; i<CHUNKS; i++) {
+		dest[i] = _mm_xor_si128(src1[i], src2);
+	}
+}
+
+inline void xor_source_counters(__m128i* dest, __m128i* src1, __m128i* src2) {
+	#pragma unroll
+	for(int i=0; i<CHUNKS; i++) {
+		dest[i] = _mm_xor_si128(src1[i], src2[i]);
+	}
+}
+
+inline void load_source(__m128i* src, unsigned char* srcBuffer, int offset) {
+	#pragma unroll
+	for(int i=0; i<CHUNKS; i++) {
+		src[i] = _mm_loadu_si128(&((__m128i*) srcBuffer)[offset + i]);
+	}
+}
 int aes_intr_transform_ctr(
 	const unsigned char* key, unsigned char* counter,
 	unsigned char* srcBuffer, int srcOffset,
 	unsigned char* destBuffer, int destOffset, int count) {
 
-	__m128i kv0, kvr, ecv, src;
+	__m128i kvr[ROUNDS+1], ecv[CHUNKS], src[CHUNKS];
 	__m128i* kv;
 	char part[AES_BLOCK_SIZE];
 	int len;
 	kv = (__m128i*) key;
-	kv0 = _mm_loadu_si128(&kv[0]);
 	int j;
 	int blength = count / AES_BLOCK_SIZE;
 	int totalBytes = 0;
 	int idx = srcOffset / AES_BLOCK_SIZE;
+	load_round_keys(kvr, kv);
 	
-	for (int i = 0; i < count; i += AES_BLOCK_SIZE) {
-		ecv = _mm_loadu_si128(&((__m128i*) counter)[0]);
-		ecv = _mm_xor_si128(ecv, kv0);
+	for (int i = 0; i < count; i += AES_BLOCK_SIZE * CHUNKS) {
+		load_counters(ecv, counter);
+		
+		// init with first round key
+		init_round(ecv, ecv, kvr[0]);
 		for (j = 1; j < ROUNDS; j++) {
-			kvr = _mm_loadu_si128(&kv[j]);
-			ecv = _mm_aesenc_si128(ecv, kvr);
+			encrypt_counters_round(ecv, ecv, kvr[j]);
 		}
-		kvr = _mm_loadu_si128(&kv[j]);
-		ecv = _mm_aesenclast_si128(ecv, kvr);
-		len = count - totalBytes;
-		if (len < AES_BLOCK_SIZE) {
-			// partial load
-			memcpy(part, srcBuffer + srcOffset + i, len);
-			src = _mm_loadu_si128((__m128i*) part);
+		encrypt_counters_last_round(ecv, ecv, kvr[j]);
+		
+		// load the source 
+		load_source(src, srcBuffer, idx);
+		
+		// xor the encrypted counter with the source for each chunk for each block
+		xor_source_counters(ecv, src, ecv);
+		
+		// store the encrypted text
+		for(int k=0; k<CHUNKS; k++) {
+			len = count - totalBytes;
+			if (len < AES_BLOCK_SIZE) {
+				// partial store
+				_mm_storeu_si128((__m128i*) part, ecv[k]);
+				memcpy(destBuffer + destOffset + i + k * AES_BLOCK_SIZE, part, len);
+			}
+			else {
+				_mm_storeu_si128(&((__m128i*) destBuffer)[(destOffset + i + k * AES_BLOCK_SIZE) / AES_BLOCK_SIZE], ecv[k]);
+			}
+			totalBytes += len < AES_BLOCK_SIZE ? len : AES_BLOCK_SIZE;
+			idx++;
 		}
-		else {
-			src = _mm_loadu_si128(&((__m128i*) srcBuffer)[idx]);
-		}
-
-		// xor the plain text with the encrypted counter
-		ecv = _mm_xor_si128(src, ecv);
-		if (len < AES_BLOCK_SIZE) {
-			// partial store
-			_mm_storeu_si128((__m128i*) part, ecv);
-			memcpy(destBuffer + destOffset + i, part, len);
-		}
-		else {
-			_mm_storeu_si128(&((__m128i*) destBuffer)[(destOffset + i) / AES_BLOCK_SIZE], ecv);
-		}
-
-		totalBytes += len < AES_BLOCK_SIZE ? len : AES_BLOCK_SIZE;
-		if (increment_counter(1, counter) < 0)
-			return -1;
-		idx ++;
 	}
 
 	return totalBytes;
