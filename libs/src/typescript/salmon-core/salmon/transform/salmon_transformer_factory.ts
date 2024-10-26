@@ -25,9 +25,8 @@ SOFTWARE.
 import { ProviderType } from "../streams/provider_type.js";
 import { SalmonSecurityException } from "../salmon_security_exception.js";
 import { ISalmonCTRTransformer } from "./isalmon_ctr_transformer.js";
-import { SalmonAesIntrTransformer } from "./salmon_aes_intr_transformer.js";
 import { SalmonDefaultTransformer } from "./salmon_default_transformer.js";
-import { TinyAesTransformer } from "./tiny_aes_transformer.js";
+import { SalmonNativeTransformer } from "./salmon_native_transformer.js";
 
 /**
  * Creates an AES transformer object.
@@ -45,9 +44,9 @@ export class SalmonTransformerFactory {
             case ProviderType.Default:
                 return new SalmonDefaultTransformer();
             case ProviderType.AesIntrinsics:
-                return new SalmonAesIntrTransformer();
-            case ProviderType.TinyAES:
-                return new TinyAesTransformer();
+            case ProviderType.Aes:
+            case ProviderType.AesGPU:
+                return new SalmonNativeTransformer(type);
             default:
                 throw new SalmonSecurityException("Unknown Transformer type");
         }

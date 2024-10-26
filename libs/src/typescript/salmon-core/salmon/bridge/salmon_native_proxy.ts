@@ -33,7 +33,20 @@ export class SalmonNativeProxy implements INativeProxy {
     /**
      * The dll name for the salmon library.
      */
-    static readonly #libraryName: string = "salmon";
+    static #libraryPath: string;
+
+    /**
+     * The native lib ffi handle
+     */
+    static #lib: any;
+
+    /**
+     * 
+     * @param libraryPath The library path to the native salmon library
+     */
+    public static setLibraryPath(libraryPath: string) {
+        SalmonNativeProxy.#libraryPath = libraryPath;
+    }
 
     /**
      * Proxy Init the native code with AES implementation, and hash length options.
@@ -42,6 +55,7 @@ export class SalmonNativeProxy implements INativeProxy {
      */
     public init(aesImpl: number): void {
         this.loadLibrary();
+        SalmonNativeProxy.#lib.init(aesImpl);
     }
 
     /**
