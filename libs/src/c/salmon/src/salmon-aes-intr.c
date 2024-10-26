@@ -138,7 +138,6 @@ inline void load_counters(__m128i* dest, unsigned char* counter) {
 	#pragma unroll
 	for(int i=0; i<CHUNKS; i++) {
 		dest[i] = _mm_loadu_si128(&((__m128i*) counter)[0]);
-		&((__m128i) dest[i])[15]++;
 		increment_counter(1, counter);
 	}
 }
