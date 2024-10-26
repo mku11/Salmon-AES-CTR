@@ -119,8 +119,8 @@ namespace SalmonNativeTest
 			sprintf_s(msg, "data size: %d\n", length);
 			Logger::WriteMessage(msg);
 
-			/*time_transform_expected((const unsigned char*)bytes, (const unsigned char*)key, (const char*)nonce, length);
-			time_transform((const unsigned char*)bytes, (const unsigned char*)key, (const char*)nonce, length, AES_IMPL_AES, "AES_IMPL_AES");*/
+			time_transform_expected((const unsigned char*)bytes, (const unsigned char*)key, (const char*)nonce, length);
+			time_transform((const unsigned char*)bytes, (const unsigned char*)key, (const char*)nonce, length, AES_IMPL_AES, "AES_IMPL_AES");
 			time_transform((const unsigned char*)bytes, (const unsigned char*)key, (const char*)nonce, length, AES_IMPL_AES_INTR, "AES_IMPL_AES_INTR");
 			time_transform((const unsigned char*)bytes, (const unsigned char*)key, (const char*)nonce, length, AES_IMPL_AES_GPU, "AES_IMPL_AES_GPU");
 
@@ -188,12 +188,15 @@ namespace SalmonNativeTest
 			char* key = "ABCDEFGHIJKLMNOPABCDEFGHIJKLMNOP";
 			char* nonce = "ABCDEFGH\0\0\0\0\0\0\0\0";
 			string text = "This is a plaintext that will be used for testing";
-			for (int i = 0; i < 14; i++) 
+			// string text = "This is a plaintext that will be";
+			//string text = "This is a plaintext that will be used for testing but we can do";
+			for (int i = 0; i < 3; i++) 
 				text += text;
 			const char* bytes = (const char*)text.c_str();
-			int length = strlen(bytes);
-			/*Logger::WriteMessage(bytes);
-			Logger::WriteMessage("\n");*/
+			int length = text.size();
+			printf("Data Size: %d\n", length);
+			// Logger::WriteMessage(bytes);
+			// Logger::WriteMessage("\n");
 
 			printf("aes:\r\n");
 			encrypt_and_decrypt((const unsigned char*)bytes, (const unsigned char*)key, (const char*)nonce, length, AES_IMPL_AES);
