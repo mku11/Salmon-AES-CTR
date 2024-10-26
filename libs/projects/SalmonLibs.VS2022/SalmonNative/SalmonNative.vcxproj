@@ -133,7 +133,7 @@
       <Message>Creating nuget package</Message>
     </PostBuildEvent>
     <PreBuildEvent>
-      <Command>"$(SolutionDir)SalmonNative\gen_kernel_header.bat"</Command>
+      
     </PreBuildEvent>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
