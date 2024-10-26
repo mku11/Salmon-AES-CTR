@@ -123,45 +123,31 @@ void aes_intr_key_expand(const unsigned char* userkey, unsigned char* key) {
 	Key_Schedule[14] = temp1;
 }
 
-void aes_intr_transform(const unsigned char* in, unsigned char* out, int length, unsigned char* key, int rounds) {
-	__m128i tmp;
-	int i, j;
-	if (length % AES_BLOCK_SIZE)
-        length = length / AES_BLOCK_SIZE + 1;
-    else
-        length = length / AES_BLOCK_SIZE;
-	for (i = 0; i < length; i++) {
-		tmp = _mm_loadu_si128(&((__m128i*) in)[i]);
-		tmp = _mm_xor_si128(tmp, ((__m128i*) key)[0]);
-		for (j = 1; j < rounds; j++) {
-			tmp = _mm_aesenc_si128(tmp, ((__m128i*) key)[j]);
-		}
-		tmp = _mm_aesenclast_si128(tmp, ((__m128i*) key)[j]);
-		_mm_storeu_si128(&((__m128i*) out)[i], tmp);
-	}
-}
-
 int aes_intr_transform_ctr(
 	const unsigned char* key, unsigned char* counter,
 	unsigned char* srcBuffer, int srcOffset,
 	unsigned char* destBuffer, int destOffset, int count) {
 
-	unsigned char encCounter[AES_BLOCK_SIZE];
-	// we make a copy of the expanded key in case it's allocated 
-	// from managed code and might get released/reallocated
-	unsigned char expKey[EXPANDED_KEY_SIZE];
-	memcpy(expKey, key, EXPANDED_KEY_SIZE);
-
-	__m128i src, dest, ctr;
+	__m128i kv0, kvr, ecv, src;
+	__m128i* kv;
 	char part[AES_BLOCK_SIZE];
 	int len;
-
+	kv = (__m128i*) key;
+	kv0 = _mm_loadu_si128(&kv[0]);
+	int j;
+	int blength = count / AES_BLOCK_SIZE;
 	int totalBytes = 0;
+	int idx = srcOffset / AES_BLOCK_SIZE;
+	
 	for (int i = 0; i < count; i += AES_BLOCK_SIZE) {
-		aes_intr_transform(counter, encCounter, AES_BLOCK_SIZE, expKey, ROUNDS);
-
-
-		ctr = _mm_loadu_si128((__m128i*) encCounter);
+		ecv = _mm_loadu_si128(&((__m128i*) counter)[0]);
+		ecv = _mm_xor_si128(ecv, kv0);
+		for (j = 1; j < ROUNDS; j++) {
+			kvr = _mm_loadu_si128(&kv[j]);
+			ecv = _mm_aesenc_si128(ecv, kvr);
+		}
+		kvr = _mm_loadu_si128(&kv[j]);
+		ecv = _mm_aesenclast_si128(ecv, kvr);
 		len = count - totalBytes;
 		if (len < AES_BLOCK_SIZE) {
 			// partial load
@@ -169,23 +155,24 @@ int aes_intr_transform_ctr(
 			src = _mm_loadu_si128((__m128i*) part);
 		}
 		else {
-			src = _mm_loadu_si128(&((__m128i*) srcBuffer)[(srcOffset + i) / AES_BLOCK_SIZE]);
+			src = _mm_loadu_si128(&((__m128i*) srcBuffer)[idx]);
 		}
 
 		// xor the plain text with the encrypted counter
-		dest = _mm_xor_si128(src, ctr);
+		ecv = _mm_xor_si128(src, ecv);
 		if (len < AES_BLOCK_SIZE) {
 			// partial store
-			_mm_storeu_si128((__m128i*) part, dest);
+			_mm_storeu_si128((__m128i*) part, ecv);
 			memcpy(destBuffer + destOffset + i, part, len);
 		}
 		else {
-			_mm_storeu_si128(&((__m128i*) destBuffer)[(destOffset + i) / AES_BLOCK_SIZE], dest);
+			_mm_storeu_si128(&((__m128i*) destBuffer)[(destOffset + i) / AES_BLOCK_SIZE], ecv);
 		}
 
 		totalBytes += len < AES_BLOCK_SIZE ? len : AES_BLOCK_SIZE;
 		if (increment_counter(1, counter) < 0)
 			return -1;
+		idx ++;
 	}
 
 	return totalBytes;
