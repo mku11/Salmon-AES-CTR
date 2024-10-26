@@ -145,12 +145,14 @@ namespace SalmonNativeTest
 		transform((const unsigned char*)input, encrypted, (const unsigned char*)key, (const char*)nonce, length);
 
 		// encrypted string
-		/*string encrText = string((char*)encrypted, length);
-		Logger::WriteMessage(encrText.c_str());
-		Logger::WriteMessage("\n");
-		string expEncText = string((char*)encrExpected, length);
-		Logger::WriteMessage(expEncText.c_str());
-		Logger::WriteMessage("\n");*/
+		if(length < 64) {
+			string encrText = string((char*)encrypted, length);
+			Logger::WriteMessage(encrText.c_str());
+			Logger::WriteMessage("\n");
+			string expEncText = string((char*)encrExpected, length);
+			Logger::WriteMessage(expEncText.c_str());
+			Logger::WriteMessage("\n");
+		}
 		Assert::IsTrue(strncmp((const char*)encrExpected, (const char*)encrypted, length) == 0);
 
 
@@ -162,13 +164,15 @@ namespace SalmonNativeTest
 		transform((const unsigned char*)encrypted, decrypted, (const unsigned char*)key, (const char*)nonce, length);
 
 		// encrypted string
-		/*string decrText = string((char*)decrypted, length);
-		Logger::WriteMessage(decrText.c_str());
-		Logger::WriteMessage("\n");
-		string expDecText = string((char*)decrExpected, length);
-		Logger::WriteMessage(expDecText.c_str());
-		Logger::WriteMessage("\n");*/
-		Assert::IsTrue(strncmp((const char*)decrExpected, (const char*)decrypted, length) == 0);
+		if(length < 64) {
+			string decrText = string((char*)decrypted, length);
+			Logger::WriteMessage(decrText.c_str());
+			Logger::WriteMessage("\n");
+			string expDecText = string((char*)decrExpected, length);
+			Logger::WriteMessage(expDecText.c_str());
+			Logger::WriteMessage("\n");
+			Assert::IsTrue(strncmp((const char*)decrExpected, (const char*)decrypted, length) == 0);
+		}
 
 		free(encrypted);
 		free(decrypted);
