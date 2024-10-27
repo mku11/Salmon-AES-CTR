@@ -415,7 +415,7 @@ class SalmonStream(RandomAccessStream):
         """
         # we skip the header bytes and any hash values we have if the file has integrity set
         total_hash_bytes: int = self.__salmonIntegrity.get_hash_data_length(value, 0)
-        value = value + totalHashBytes + self.get_header_length()
+        value = value + total_hash_bytes + self.get_header_length()
         self.__baseStream.set_position(value)
 
         self.__transformer.reset_counter()
