@@ -19,6 +19,11 @@ To test the native libraries you will need Tiny Aes
 To download Tiny Aes source code from the project root folder type:
 git submodule update --recursive --init
 
+To test C# library from the command line:
+vstest.console Salmon.Test\bin\Debug\net7.0-windows\Salmon.Test.dll /Tests:ShouldEncryptAndDecryptTextCompatible
+To test the native C library from the command line:
+vstest.console x64\Debug\Salmon.Native.Test.dll /Tests:TestExamples
+
 To debug the native code check the option under Project Properties/Debug/Debug Launch UI profiles/Enable native code debugging
 Note that debugging the native code will probably disable the Edit and Continue for .NET code.
 
