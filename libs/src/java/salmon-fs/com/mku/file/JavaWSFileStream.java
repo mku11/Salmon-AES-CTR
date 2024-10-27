@@ -71,6 +71,7 @@ public class JavaWSFileStream extends RandomAccessStream {
 
     /**
      * Maximum amount of bytes allowed to skip forwards when seeking otherwise will open a new connection
+     * @param maxNetBytesSkip The maximum number of bytes to skip
      */
     public void setMaxNetBytesSkip(long maxNetBytesSkip) {
         this.maxNetBytesSkip = maxNetBytesSkip;

@@ -100,7 +100,7 @@ public class SalmonFSTestHelper {
     public static String TEST_SEQUENCER_FILE2 = "seq2.xml";
 
     public static HashMap<String, String> users;
-    private static JavaWSFile.Credentials credentials1 = new JavaWSFile.Credentials("user1", "pass1");
+    private static JavaWSFile.Credentials credentials1 = new JavaWSFile.Credentials("user", "password");
 
     static SalmonFileImporter fileImporter;
     static SalmonFileExporter fileExporter;

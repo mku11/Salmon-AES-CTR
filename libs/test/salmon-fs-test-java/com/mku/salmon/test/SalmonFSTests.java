@@ -29,6 +29,8 @@ import com.mku.file.IRealFile;
 import com.mku.salmon.drive.JavaDrive;
 import com.mku.file.JavaFile;
 import com.mku.salmon.drive.JavaWSDrive;
+import com.mku.salmon.streams.ProviderType;
+import com.mku.salmon.streams.SalmonStream;
 import com.mku.streams.InputStreamWrapper;
 import com.mku.streams.MemoryStream;
 import com.mku.salmon.SalmonAuthException;
@@ -56,12 +58,14 @@ import static org.junit.jupiter.api.Assertions.*;
 public class SalmonFSTests {
     @BeforeAll
     static void beforeAll() {
+        SalmonStream.setAesProviderType(ProviderType.AesGPU);
         // local drive
-//        SalmonFSTestHelper.setDriveClassType(JavaDrive.class);
+        // SalmonFSTestHelper.setDriveClassType(JavaDrive.class);
 
         // remote drive
-        // make sure you turn on the web service manually
-         SalmonFSTestHelper.setDriveClassType(JavaWSDrive.class);
+        // make sure you turn on the web service either manually
+        // or by running test case SalmonWSTests.testStartServer
+        SalmonFSTestHelper.setDriveClassType(JavaWSDrive.class);
 
 		//SalmonCoreTestHelper.TEST_ENC_BUFFER_SIZE = 1 * 1024 * 1024;
 		//SalmonCoreTestHelper.TEST_DEC_BUFFER_SIZE = 1 * 1024 * 1024;

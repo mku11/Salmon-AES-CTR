@@ -32,13 +32,15 @@ import java.util.HashMap;
 public class SalmonWSTestHelper {
     public static String VAULT_HOST = "http://localhost:8080";
     public static String VAULT_URL = VAULT_HOST + ""; // same
-    public static String VAULT_PASSWORD = "test";
+
+    public static String VAULT_PASSWORD = "test123";
     public static String VAULT_WRONG_PASSWORD = "wrongPassword";
 
-    public static String TEST_SEQUENCER_DIR = "D:\\tmp\\output";
+    public static String TEST_SEQUENCER_DIR = "D:\\tmp\\output_ws";
     public static String TEST_SEQUENCER_FILENAME = "fileseq.xml";
 //    public static String TEST_WS_DIR = "D:\\tmp\\test_vault";
-    public static String TEST_WS_DIR = "D:\\tmp\\output";
+    public static String TEST_WS_DIR = "D:\\tmp\\output_ws";
+    public static String VAULT_PATH = "/test_vault"; // relative path to an existing vault on the server
     public static HashMap<String, String> users;
     public static JavaWSFile.Credentials credentials1 = new JavaWSFile.Credentials("user", "password");
     public static JavaWSFile.Credentials wrongCredentials1 = new JavaWSFile.Credentials("wrongUser", "wrongPass");

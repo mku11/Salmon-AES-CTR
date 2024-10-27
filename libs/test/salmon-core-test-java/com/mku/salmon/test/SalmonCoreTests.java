@@ -57,7 +57,7 @@ public class SalmonCoreTests {
 
     @BeforeEach
     public void init() {
-        SalmonStream.setAesProviderType(ProviderType.AesGPU);
+        SalmonStream.setAesProviderType(ProviderType.Aes);
         SalmonCoreTestHelper.initialize();
     }
 

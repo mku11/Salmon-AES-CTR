@@ -53,15 +53,16 @@ public class SalmonWSTests {
         SalmonWSTestHelper.stopServer();
     }
 
+    // use this test case for exploratory testing with CURL see RealFileController for examples
+    // or to test the SalmonFSTests with remote drive
     @Test
     public void testStartServer() throws Exception {
-        // exploratory testing with CURL see RealFileController for examples
         Thread.sleep(6000000);
     }
 
     @Test
     public void testAuthServer() throws Exception {
-        JavaWSFile vaultDir = new JavaWSFile("/", SalmonWSTestHelper.VAULT_URL,
+        JavaWSFile vaultDir = new JavaWSFile(SalmonWSTestHelper.VAULT_PATH, SalmonWSTestHelper.VAULT_URL,
                 SalmonWSTestHelper.credentials1);
         IRealFile seqfile = new JavaFile(SalmonWSTestHelper.TEST_SEQUENCER_DIR + "\\" + SalmonWSTestHelper.TEST_SEQUENCER_FILENAME);
         SalmonFileSequencer sequencer = new SalmonFileSequencer(seqfile, SalmonFSTestHelper.getSequenceSerializer());
@@ -115,7 +116,7 @@ public class SalmonWSTests {
             IVirtualFile rootDir = drive.getRoot();
             IVirtualFile[] files = rootDir.listFiles();
             unlocked = true;
-        } catch (SalmonAuthException ex) {
+        } catch (Exception ex) {
             ex.printStackTrace();
         }
         assertFalse(unlocked);

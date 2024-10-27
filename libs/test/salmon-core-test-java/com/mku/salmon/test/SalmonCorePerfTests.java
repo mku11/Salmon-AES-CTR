@@ -30,7 +30,7 @@ import org.junit.jupiter.api.*;
 
 @TestMethodOrder(MethodOrderer.OrderAnnotation.class)
 public class SalmonCorePerfTests {
-    public static int TEST_PERF_SIZE = 4 * 1024 * 1024;
+    public static int TEST_PERF_SIZE = 32 * 1024 * 1024;
 
     @BeforeAll
     static void beforeAll() {

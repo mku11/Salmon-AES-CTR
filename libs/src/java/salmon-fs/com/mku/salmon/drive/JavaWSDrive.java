@@ -69,11 +69,12 @@ public class JavaWSDrive extends SalmonDrive {
     }
 
     /**
-     * Helper method that creates and initializes a JavaHttpDrive
-     *
-     * @param dir       The directory that will host the drive.
-     * @param password  The password.
+     * Helper method that creates and initializes a JavaWSDrive
+     * @param dir The directory that will host the drive.
+     * @param password The password.
      * @param sequencer The nonce sequencer that will be used for encryption.
+     * @param serviceUser The web service username
+     * @param servicePassword The web service password
      * @return The drive.
      * @throws IOException If error occurs during creating the drive.
      */
