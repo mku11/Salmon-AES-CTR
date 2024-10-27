@@ -25,6 +25,8 @@ SOFTWARE.
 
 from __future__ import annotations
 from unittest import TestCase
+import os,sys
+sys.path.append(os.path.dirname(__file__) + '/../../src/python/salmon_core')
 
 from salmon_core.salmon.streams.provider_type import ProviderType
 from salmon_core.salmon.streams.salmon_stream import SalmonStream
@@ -32,7 +34,7 @@ from salmon_core.salmon.streams.salmon_stream import SalmonStream
 from typeguard import typechecked
 
 from salmon_core.salmon.bridge.native_proxy import NativeProxy
-from test.salmon_core_test_helper import SalmonCoreTestHelper
+from salmon_core_test_helper import SalmonCoreTestHelper
 
 
 @typechecked

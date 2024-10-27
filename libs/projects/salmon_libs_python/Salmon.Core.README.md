@@ -15,6 +15,10 @@ Python 3.11+
 install dependencies:  
 python -m pip install python-interface typeguard pycryptodome wrapt  
   
+to run tests from command line:
+cd libs\test\salmon_core_test_python\
+python -m unittest -v salmon_core_tests.SalmonCoreTests.test_shouldEncryptAndDecryptText
+
 to package:  
 dos2unix package_salmon_core.sh  
 ./package_salmon_core.sh  

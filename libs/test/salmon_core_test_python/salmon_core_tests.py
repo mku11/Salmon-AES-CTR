@@ -26,6 +26,9 @@ import time
 import traceback
 from unittest import TestCase
 
+import os,sys
+sys.path.append(os.path.dirname(__file__) + '/../../src/python/salmon_core')
+
 from salmon_core.convert.bit_converter import BitConverter
 from salmon_core.streams.memory_stream import MemoryStream
 from salmon_core.integrity.integrity_exception import IntegrityException
@@ -39,7 +42,7 @@ from salmon_core.salmon.text.salmon_text_decryptor import SalmonTextDecryptor
 from salmon_core.salmon.text.salmon_text_encryptor import SalmonTextEncryptor
 
 from salmon_core.salmon.bridge.native_proxy import NativeProxy
-from test.salmon_core_test_helper import SalmonCoreTestHelper
+from salmon_core_test_helper import SalmonCoreTestHelper
 
 from typeguard import typechecked, TypeCheckError
 
@@ -53,7 +56,7 @@ class SalmonCoreTests(TestCase):
     NativeProxy.set_library_path("../../projects/salmon-libs-gradle/salmon-native/build/libs/salmon/shared/salmon.dll")
 
     def setUp(self):
-        SalmonStream.set_aes_provider_type(ProviderType.AesGPU)
+        SalmonStream.set_aes_provider_type(ProviderType.Aes)
         SalmonCoreTestHelper.initialize()
 
     def tearDown(self) -> None:

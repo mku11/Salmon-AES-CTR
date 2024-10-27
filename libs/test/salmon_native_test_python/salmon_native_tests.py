@@ -28,6 +28,10 @@ from unittest import TestCase
 
 from typeguard import typechecked
 
+import os,sys
+sys.path.append(os.path.dirname(__file__) + '/../../src/python/salmon_core')
+sys.path.append(os.path.dirname(__file__) + '/../salmon_core_test_python')
+
 from salmon_core.salmon.streams.provider_type import ProviderType
 from salmon_core.salmon.streams.salmon_stream import SalmonStream
 from salmon_core.salmon.password.pbkdf_type import PbkdfType
@@ -36,7 +40,7 @@ from salmon_core.salmon.salmon_decryptor import SalmonDecryptor
 from salmon_core.salmon.salmon_encryptor import SalmonEncryptor
 from salmon_core.salmon.salmon_generator import SalmonGenerator
 from salmon_core.salmon.bridge.native_proxy import NativeProxy
-from test.salmon_core_test_helper import SalmonCoreTestHelper
+from salmon_core_test_helper import SalmonCoreTestHelper
 
 
 @typechecked
