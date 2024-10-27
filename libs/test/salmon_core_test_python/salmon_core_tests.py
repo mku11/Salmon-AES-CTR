@@ -54,6 +54,8 @@ class SalmonCoreTests(TestCase):
     SalmonCoreTestHelper.TEST_ENC_THREADS = 2
     SalmonCoreTestHelper.TEST_DEC_THREADS = 2
     NativeProxy.set_library_path("../../projects/salmon-libs-gradle/salmon-native/build/libs/salmon/shared/salmon.dll")
+    # linux
+    # NativeProxy.set_library_path("../../projects/salmon-libs-gradle/salmon-native/build/libs/salmon/shared/libsalmon.so")
 
     def setUp(self):
         SalmonStream.set_aes_provider_type(ProviderType.Aes)

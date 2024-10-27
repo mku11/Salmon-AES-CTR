@@ -51,9 +51,10 @@ class SalmonNativeTests(TestCase):
     SalmonPassword.set_pbkdf_type(PbkdfType.Default)
 
     def setUp(self):
-        NativeProxy.set_library_path(
-            "../../projects/salmon-libs-gradle/salmon-native/build/libs/salmon/shared/salmon.dll")
-        SalmonStream.set_aes_provider_type(ProviderType.AesIntrinsics)
+        NativeProxy.set_library_path("../../projects/salmon-libs-gradle/salmon-native/build/libs/salmon/shared/salmon.dll")
+        # linux
+        # NativeProxy.set_library_path("../../projects/salmon-libs-gradle/salmon-native/build/libs/salmon/shared/libsalmon.so")
+        SalmonStream.set_aes_provider_type(ProviderType.AesGPU)
 
     def test_encrypt_and_decrypt_native_text_compatible(self):
         plain_text = SalmonCoreTestHelper.TEST_TEXT  # [0:16]

@@ -52,50 +52,50 @@ const unsigned char sbox[256] = {
 static const unsigned char Rcon[8] = { 0x00, 0x01, 0x02, 0x04, 0x08, 0x10, 0x20, 0x40 };
 
 // https://en.wikipedia.org/wiki/Advanced_Encryption_Standard#The_AddRoundKey
-static inline void add_round_key(unsigned char round, unsigned char state[4][4], const unsigned char roundKey[15][16])
+static inline void add_round_key(unsigned char round, unsigned char* state, const unsigned char* roundKey)
 {
 	int subKey;
 	for (int i = 0; i < 4; i++)
 	{
 		for (int j = 0; j < 4; j++)
 		{
-			subKey = roundKey[round][4 * i + j];
-			state[i][j] = state[i][j] ^ subKey;
+			subKey = roundKey[round*16 + 4 * i + j];
+			state[i*4 + j] = state[i*4 + j] ^ subKey;
 		}
 	}
 }
 
-static inline void sub_bytes(unsigned char state[4][4])
+static inline void sub_bytes(unsigned char* state)
 {
 	for (int i = 0; i < 4; i++) {
 		for (int j = 0; j < 4; j++) {
-			state[i][j] = sbox[state[i][j]];
+			state[i*4 + j] = sbox[state[i*4 + j]];
 		}
 	}
 }
 
-static inline void shift_rows(unsigned char state[4][4])
+static inline void shift_rows(unsigned char* state)
 {
-	unsigned char swp = state[0][1];
-	state[0][1] = state[1][1];
-	state[1][1] = state[2][1];
-	state[2][1] = state[3][1];
-	state[3][1] = swp;
-	swp = state[0][2];
-	state[0][2] = state[2][2];
-	state[2][2] = swp;
-	swp = state[1][2];
-	state[1][2] = state[3][2];
-	state[3][2] = swp;
-	swp = state[0][3];
-	state[0][3] = state[3][3];
-	state[3][3] = state[2][3];
-	state[2][3] = state[1][3];
-	state[1][3] = swp;
+	unsigned char swp = state[0*4 + 1];
+	state[0*4 + 1] = state[1*4 + 1];
+	state[1*4 + 1] = state[2*4 + 1];
+	state[2*4 + 1] = state[3*4 + 1];
+	state[3*4 + 1] = swp;
+	swp = state[0*4 + 2];
+	state[0*4 + 2] = state[2*4 + 2];
+	state[2*4 + 2] = swp;
+	swp = state[1*4 + 2];
+	state[1*4 + 2] = state[3*4 + 2];
+	state[3*4 + 2] = swp;
+	swp = state[0*4 + 3];
+	state[0*4 + 3] = state[3*4 + 3];
+	state[3*4 + 3] = state[2*4 + 3];
+	state[2*4 + 3] = state[1*4 + 3];
+	state[1*4 + 3] = swp;
 }
 
 // https://en.wikipedia.org/wiki/Rijndael_MixColumns#Implementation_example
-static inline void mix_columns(unsigned char state[4][4])
+static inline void mix_columns(unsigned char* state)
 {
 	unsigned char a[4];
 	unsigned char b[4];
@@ -103,15 +103,15 @@ static inline void mix_columns(unsigned char state[4][4])
 	unsigned char h;
 	for (int i = 0; i < 4; i++) {
 		for (c = 0; c < 4; c++) {
-			a[c] = state[i][c];
-			h = state[i][c] >> 7;
-			b[c] = state[i][c] << 1;
+			a[c] = state[i*4 + c];
+			h = state[i*4 + c] >> 7;
+			b[c] = state[i*4 + c] << 1;
 			b[c] ^= h * 0x1B;
 		}
-		state[i][0] = b[0] ^ a[3] ^ a[2] ^ b[1] ^ a[1];
-		state[i][1] = b[1] ^ a[0] ^ a[3] ^ b[2] ^ a[2];
-		state[i][2] = b[2] ^ a[1] ^ a[0] ^ b[3] ^ a[3];
-		state[i][3] = b[3] ^ a[2] ^ a[1] ^ b[0] ^ a[0];
+		state[i*4 + 0] = b[0] ^ a[3] ^ a[2] ^ b[1] ^ a[1];
+		state[i*4 + 1] = b[1] ^ a[0] ^ a[3] ^ b[2] ^ a[2];
+		state[i*4 + 2] = b[2] ^ a[1] ^ a[0] ^ b[3] ^ a[3];
+		state[i*4 + 3] = b[3] ^ a[2] ^ a[1] ^ b[0] ^ a[0];
 	}
 }
 
@@ -160,7 +160,7 @@ void aes_key_expand(unsigned char* roundKey, const unsigned char* key)
 }
 
 // https://en.wikipedia.org/wiki/Advanced_Encryption_Standard#High-level_description_of_the_algorithm
-void aes_transform(unsigned char state[4][4], const unsigned char* roundKey)
+void aes_transform(unsigned char* state, const unsigned char* roundKey)
 {
 	for (int r = 0; r <= ROUNDS; r++)
 	{
@@ -170,7 +170,7 @@ void aes_transform(unsigned char state[4][4], const unsigned char* roundKey)
 			if (r != ROUNDS)
 				mix_columns(state);
 		}
-		add_round_key(r, state, (const unsigned char(*)[16]) roundKey);
+		add_round_key(r, state, roundKey);
 	}
 }
 
@@ -205,7 +205,7 @@ int aes_transform_ctr(const unsigned char* key, unsigned char* counter,
 			encCounter[j] = counter[j];
 		}
 
-		aes_transform((unsigned char(*)[4]) encCounter, key);
+		aes_transform(encCounter, key);
 		for (int k = 0; k < AES_BLOCK_SIZE && i + k < count; k++) {
 			destBuffer[destOffset + i + k] = srcBuffer[srcOffset + i + k] ^ encCounter[k];
 			totalBytes++;

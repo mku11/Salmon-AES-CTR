@@ -126,7 +126,7 @@ void aes_intr_key_expand(const unsigned char* userkey, unsigned char* key) {
 }
 
 
-inline void load_round_keys(__m128i* kvr, __m128i* kv) {
+inline static void load_round_keys(__m128i* kvr, __m128i* kv) {
 	#pragma unroll
 	for (int i = 0; i <= ROUNDS; i++) {
 		kvr[i] = _mm_loadu_si128(&kv[i]);
@@ -142,35 +142,35 @@ inline static void load_counters(__m128i* dest, unsigned char* counter) {
 	}
 }
 
-inline void encrypt_counters_round(__m128i* dest, __m128i* src1, __m128i src2) {
+inline static void encrypt_counters_round(__m128i* dest, __m128i* src1, __m128i src2) {
 	#pragma unroll
 	for(int i=0; i<CHUNKS; i++) {
 		dest[i] = _mm_aesenc_si128(src1[i], src2);
 	}
 }
 
-inline void encrypt_counters_last_round(__m128i* dest, __m128i* src1, __m128i src2) {
+inline static void encrypt_counters_last_round(__m128i* dest, __m128i* src1, __m128i src2) {
 	#pragma unroll
 	for(int i=0; i<CHUNKS; i++) {
 		dest[i] = _mm_aesenclast_si128(src1[i], src2);
 	}
 }
 
-inline void init_round(__m128i* dest, __m128i* src1, __m128i src2) {
+inline static void init_round(__m128i* dest, __m128i* src1, __m128i src2) {
 	#pragma unroll
 	for(int i=0; i<CHUNKS; i++) {
 		dest[i] = _mm_xor_si128(src1[i], src2);
 	}
 }
 
-inline void xor_source_counters(__m128i* dest, __m128i* src1, __m128i* src2) {
+inline static void xor_source_counters(__m128i* dest, __m128i* src1, __m128i* src2) {
 	#pragma unroll
 	for(int i=0; i<CHUNKS; i++) {
 		dest[i] = _mm_xor_si128(src1[i], src2[i]);
 	}
 }
 
-inline void load_source(__m128i* src, unsigned char* srcBuffer, int offset) {
+inline static void load_source(__m128i* src, unsigned char* srcBuffer, int offset) {
 	#pragma unroll
 	for(int i=0; i<CHUNKS; i++) {
 		src[i] = _mm_loadu_si128(&((__m128i*) srcBuffer)[offset + i]);
