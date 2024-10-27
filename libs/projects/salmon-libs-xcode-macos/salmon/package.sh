@@ -10,7 +10,7 @@ SALMON_JNI_INCLUDE=$SALMON_JNI_ROOT/include
 
 LIB_DIR=./DerivedData/salmon/Build/Products/Release
 
-VERSION=2.1.0
+VERSION=2.2.0
 OS=macos
 PACKAGES_DIR=packages
 ARCH=x86_64

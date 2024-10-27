@@ -6,7 +6,7 @@ SALMON_FS_TOML=$SRC_ROOT/salmon_fs/pyproject.toml
 OUTPUT_ROOT=../../../output
 OUTPUT_DIR=$OUTPUT_ROOT/python
 
-VERSION=2.1.0
+VERSION=2.2.0
 PACKAGES_DIR=packages
 SALMON_FS_PACKAGE_NAME=salmon_fs_py.$VERSION
 
