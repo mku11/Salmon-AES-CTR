@@ -21,7 +21,7 @@
     <PackageReference Include="Microsoft.Extensions.Hosting" Version="7.0.1" />
     <PackageReference Include="Microsoft.Extensions.Hosting.WindowsServices" Version="7.0.1" />
     <PackageReference Include="Microsoft.VisualStudio.Azure.Containers.Tools.Targets" Version="1.18.1" />
-    <PackageReference Include="Salmon.Win" Version="2.1.0" />
+    <PackageReference Include="Salmon.Win" Version="2.2.0" />
   </ItemGroup>
 
   <ItemGroup>
