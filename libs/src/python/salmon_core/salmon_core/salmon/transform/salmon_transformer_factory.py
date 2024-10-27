@@ -28,7 +28,7 @@ from salmon_core.salmon.transform.isalmon_ctr_transformer import ISalmonCTRTrans
 from salmon_core.salmon.transform.salmon_default_transformer import SalmonDefaultTransformer
 from typeguard import typechecked
 
-from salmon.transform.salmon_native_transformer import SalmonNativeTransformer
+from salmon_core.salmon.transform.salmon_native_transformer import SalmonNativeTransformer
 
 
 @typechecked
