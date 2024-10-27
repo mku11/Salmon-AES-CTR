@@ -1,6 +1,3 @@
-To build with Tiny AES support https://github.com/kokke/tiny-AES-c:
-git submodule update --init --recursive
-
 To create the nuget package:
 Make sure that a custombuild is in the vcxproj:
   <ItemGroup>

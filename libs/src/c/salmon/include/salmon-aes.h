@@ -1,8 +1,7 @@
-package com.mku.salmon.transform;
 /*
 MIT License
 
-Copyright (c) 2021 Max Kas
+Copyright (c) 2024 Max Kas
 
 Permission is hereby granted, free of charge, to any person obtaining a copy
 of this software and associated documentation files (the "Software"), to deal
@@ -23,27 +22,12 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 */
 
-import com.mku.salmon.SalmonSecurityException;
+#ifndef _SALMON_AES_H_
+#define _SALMON_AES_H_
 
-/**
- *  Salmon AES transformer implemented with TinyAES backend.
- */
-public class TinyAesTransformer extends SalmonNativeTransformer {
-    /**
-     * The constant to pass to the native code while initializing.
-     */
-    public static final int AES_IMPL_TINY_AES = 2;
-
-    /**
-     * Initialize the native transformer to use the Tiny AES implementation.
-     *
-     * @param key   The AES key to use.
-     * @param nonce The nonce to use.
-     * @throws SalmonSecurityException Thrown if there is a security exception
-     */
-    @Override
-    public void init(byte[] key, byte[] nonce) {
-		getNativeProxy().salmonInit(AES_IMPL_TINY_AES);
-        super.init(key, nonce);
-    }
-}
+void aes_key_expand(unsigned char* roundKey, const unsigned char* key);
+void aes_transform(unsigned char state[4][4], const unsigned char* roundKey);
+int aes_transform_ctr(const unsigned char* key, unsigned char* counter,
+    unsigned char* srcBuffer, int srcOffset,
+    unsigned char* destBuffer, int destOffset, int count);
+#endif // _SALMON_AES_H_

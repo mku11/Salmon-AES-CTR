@@ -33,15 +33,19 @@ namespace Mku.Salmon.Streams;
 public enum ProviderType
 {
     /// <summary>
-    ///  Default C# AES cipher.
+    ///  Default .NET AES cipher.
     /// </summary>
-    Default,
+    Default = 0,
     /// <summary>
     ///  Salmon builtin AES intrinsics. This needs the SalmonNative library to be loaded. See: <see href="https://github.com/mku11/Salmon-AES-CTR#readme">README.md</see>
     /// </summary>
-    AesIntrinsics,
+    AesIntrinsics = 1,
     /// <summary>
-    ///  Tiny AES implementation. This needs the SalmonNative library to be loaded. See: <see href="https://github.com/mku11/Salmon-AES-CTR#readme">README.md</see>
+    ///  Salmon builtin AES. Works with almost all hardware. This needs the SalmonNative library to be loaded. See: <see href="https://github.com/mku11/Salmon-AES-CTR#readme">README.md</see>
     /// </summary>
-    TinyAES
+    Aes = 2,
+    /// <summary>
+    ///  Salmon builtin AES GPU. This needs OpenCL, a compatible Graphics card, and the SalmonNative library to be loaded. See: <see href="https://github.com/mku11/Salmon-AES-CTR#readme">README.md</see>
+    /// </summary>
+    AesGPU = 3
 }

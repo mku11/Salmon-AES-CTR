@@ -29,6 +29,11 @@ import random
 
 from typeguard import typechecked
 
+import os,sys
+sys.path.append(os.path.dirname(__file__) + '/../../src/python/salmon_core')
+sys.path.append(os.path.dirname(__file__) + '/../../src/python/salmon_fs')
+sys.path.append(os.path.dirname(__file__) + '/../salmon_core_test_python')
+
 from salmon_fs.salmon.drive.py_drive import PyDrive
 from salmon_fs.file.py_file import PyFile
 from salmon_fs.file.ivirtual_file import IVirtualFile
@@ -40,11 +45,11 @@ from salmon_fs.salmon.salmon_file import SalmonFile, IRealFile
 from salmon_fs.salmon.streams.salmon_file_input_stream import SalmonFileInputStream
 from salmon_fs.sequence.inonce_sequence_serializer import INonceSequenceSerializer
 from salmon_fs.salmon.sequence.salmon_file_sequencer import SalmonFileSequencer
-from salmon.integrity.salmon_integrity import SalmonIntegrity
+from salmon_core.salmon.integrity.salmon_integrity import SalmonIntegrity
 from salmon_fs.salmon.utils.salmon_file_commander import SalmonFileCommander
-from test.salmon_core_tests import SalmonCoreTests
-from test.salmon_core_test_helper import SalmonCoreTestHelper
-from testfs.salmon_fs_test_helper import SalmonFSTestHelper
+from salmon_core_tests import SalmonCoreTests
+from salmon_core_test_helper import SalmonCoreTestHelper
+from salmon_fs_test_helper import SalmonFSTestHelper
 
 
 @typechecked

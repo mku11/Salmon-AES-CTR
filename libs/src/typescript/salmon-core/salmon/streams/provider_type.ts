@@ -31,7 +31,7 @@ SOFTWARE.
  */
 export enum ProviderType {
     /**
-     * Default Java AES cipher.
+     * Default JS AES cipher.
      */
     Default,
     /**
@@ -39,7 +39,11 @@ export enum ProviderType {
      */
     AesIntrinsics,
     /**
-     * Tiny AES implementation. This needs the SalmonNative library to be loaded. @see <a href="https://github.com/mku11/Salmon-AES-CTR#readme">Salmon README.md</a>
+     * Salmon AES implementation. This needs the SalmonNative library to be loaded. @see <a href="https://github.com/mku11/Salmon-AES-CTR#readme">Salmon README.md</a>
      */
-    TinyAES
+    Aes,
+	/**
+     * Salmon AES GPU implementation. This needs OpenCL, a compatible graphics card, and the SalmonNative library to be loaded. @see <a href="https://github.com/mku11/Salmon-AES-CTR#readme">Salmon README.md</a>
+     */
+    AesGPU
 }

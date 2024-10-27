@@ -29,9 +29,29 @@ SOFTWARE.
 #elif defined(__aarch64__) && defined(__ARM_FEATURE_CRYPTO)
 #include <arm_neon.h>
 #include <arm_acle.h>
-#include "aes.h"
+#include "salmon-aes.h"
 #endif
-#include "salmon-aes-intr/salmon-aes-intr.h"
+#include "salmon-aes-intr.h"
+
+#define CHUNKS 8
+
+static inline long increment_counter(long value, unsigned char* counter) {
+	if (value < 0) {
+		return -1;
+	}
+	int index = AES_BLOCK_SIZE - 1;
+	int carriage = 0;
+	while (index >= 0 && value + carriage > 0) {
+		if (index < AES_BLOCK_SIZE - NONCE_SIZE) {
+			return -1;
+		}
+		long val = (value + carriage) % 256;
+		carriage = (int)(((counter[index] & 0xFF) + val) / 256);
+		counter[index--] += (unsigned char)val;
+		value /= 256;
+	}
+	return value;
+}
 
 #if defined(_MSC_VER) || defined(__i386__) || defined(__x86_64__)
 // Instructions from:
@@ -105,32 +125,111 @@ void aes_intr_key_expand(const unsigned char* userkey, unsigned char* key) {
 	Key_Schedule[14] = temp1;
 }
 
-void aes_intr_transform(const unsigned char* in, unsigned char* out, int length, unsigned char* key, int rounds) {
-	__m128i tmp;
-	int i, j;
-	if (length % AES_BLOCK_SIZE)
-        length = length / AES_BLOCK_SIZE + 1;
-    else
-        length = length / AES_BLOCK_SIZE;
-	for (i = 0; i < length; i++) {
-		tmp = _mm_loadu_si128(&((__m128i*) in)[i]);
-		tmp = _mm_xor_si128(tmp, ((__m128i*) key)[0]);
-		for (j = 1; j < rounds; j++) {
-			tmp = _mm_aesenc_si128(tmp, ((__m128i*) key)[j]);
-		}
-		tmp = _mm_aesenclast_si128(tmp, ((__m128i*) key)[j]);
-		_mm_storeu_si128(&((__m128i*) out)[i], tmp);
+
+inline static void load_round_keys(__m128i* kvr, __m128i* kv) {
+	#pragma unroll
+	for (int i = 0; i <= ROUNDS; i++) {
+		kvr[i] = _mm_loadu_si128(&kv[i]);
 	}
 }
+
+// group SIMD ops calls for more efficient CPU pipelining
+inline static void load_counters(__m128i* dest, unsigned char* counter) {
+	#pragma unroll
+	for(int i=0; i<CHUNKS; i++) {
+		dest[i] = _mm_loadu_si128(&((__m128i*) counter)[0]);
+		increment_counter(1, counter);
+	}
+}
+
+inline static void encrypt_counters_round(__m128i* dest, __m128i* src1, __m128i src2) {
+	#pragma unroll
+	for(int i=0; i<CHUNKS; i++) {
+		dest[i] = _mm_aesenc_si128(src1[i], src2);
+	}
+}
+
+inline static void encrypt_counters_last_round(__m128i* dest, __m128i* src1, __m128i src2) {
+	#pragma unroll
+	for(int i=0; i<CHUNKS; i++) {
+		dest[i] = _mm_aesenclast_si128(src1[i], src2);
+	}
+}
+
+inline static void init_round(__m128i* dest, __m128i* src1, __m128i src2) {
+	#pragma unroll
+	for(int i=0; i<CHUNKS; i++) {
+		dest[i] = _mm_xor_si128(src1[i], src2);
+	}
+}
+
+inline static void xor_source_counters(__m128i* dest, __m128i* src1, __m128i* src2) {
+	#pragma unroll
+	for(int i=0; i<CHUNKS; i++) {
+		dest[i] = _mm_xor_si128(src1[i], src2[i]);
+	}
+}
+
+inline static void load_source(__m128i* src, unsigned char* srcBuffer, int offset) {
+	#pragma unroll
+	for(int i=0; i<CHUNKS; i++) {
+		src[i] = _mm_loadu_si128(&((__m128i*) srcBuffer)[offset + i]);
+	}
+}
+int aes_intr_transform_ctr(
+	const unsigned char* key, unsigned char* counter,
+	unsigned char* srcBuffer, int srcOffset,
+	unsigned char* destBuffer, int destOffset, int count) {
+
+	__m128i kvr[ROUNDS+1], ecv[CHUNKS], src[CHUNKS];
+	__m128i* kv;
+	char part[AES_BLOCK_SIZE];
+	int len;
+	kv = (__m128i*) key;
+	int j;
+	int blength = count / AES_BLOCK_SIZE;
+	int totalBytes = 0;
+	int idx = srcOffset / AES_BLOCK_SIZE;
+	load_round_keys(kvr, kv);
+	
+	for (int i = 0; i < count; i += AES_BLOCK_SIZE * CHUNKS) {
+		load_counters(ecv, counter);
+		
+		// init with first round key
+		init_round(ecv, ecv, kvr[0]);
+		for (j = 1; j < ROUNDS; j++) {
+			encrypt_counters_round(ecv, ecv, kvr[j]);
+		}
+		encrypt_counters_last_round(ecv, ecv, kvr[j]);
+		
+		// load the source 
+		load_source(src, srcBuffer, idx);
+		
+		// xor the encrypted counter with the source for each chunk for each block
+		xor_source_counters(ecv, src, ecv);
+		
+		// store the encrypted text
+		for(int k=0; k<CHUNKS; k++) {
+			len = count - totalBytes;
+			if (len < AES_BLOCK_SIZE) {
+				// partial store
+				_mm_storeu_si128((__m128i*) part, ecv[k]);
+				memcpy(destBuffer + destOffset + i + k * AES_BLOCK_SIZE, part, len);
+			}
+			else {
+				_mm_storeu_si128(&((__m128i*) destBuffer)[(destOffset + i + k * AES_BLOCK_SIZE) / AES_BLOCK_SIZE], ecv[k]);
+			}
+			totalBytes += len < AES_BLOCK_SIZE ? len : AES_BLOCK_SIZE;
+			idx++;
+		}
+	}
+
+	return totalBytes;
+}
 #elif defined(__aarch64__) && defined(__ARM_FEATURE_CRYPTO)
-// We use the key expansion provided by tiny-aes
-// See: https://github.com/kokke/tiny-AES-c
-// License: https://github.com/kokke/tiny-AES-c/blob/master/unlicense.txt
-// To compile with tiny-aes read: c\src\tiny-aes\README.md
+// We use the key expansion in salmon aes implementation
 void aes_intr_key_expand(const unsigned char* key, unsigned char* roundKey) {
-	struct AES_ctx ctx;
-	AES_init_ctx(&ctx, key);
-	memcpy(roundKey, (&ctx)->RoundKey, EXPANDED_KEY_SIZE);
+	aes_key_expand(roundKey, key);
 }
 
 // Instructions from:
@@ -146,7 +245,33 @@ aes_intr_transform(const unsigned char* text, unsigned char* cipher, int length,
 	vtext = veorq_u8(vtext, (uint8x16_t)vld1q_u8(keys + rounds * AES_BLOCK_SIZE));
 	vst1q_u8(cipher, vtext);
 }
+// https://en.wikipedia.org/wiki/Block_cipher_mode_of_operation#Counter_(CTR)
+int aes_intr_transform_ctr(const unsigned char* key, unsigned char* counter,
+	unsigned char* srcBuffer, int srcOffset,
+	unsigned char* destBuffer, int destOffset, int count) {
+	unsigned char encCounter[AES_BLOCK_SIZE];
+
+	int totalBytes = 0;
+	for (int i = 0; i < count; i += AES_BLOCK_SIZE) {
+		for (int j = 0; j < AES_BLOCK_SIZE; j++) {
+			encCounter[j] = counter[j];
+		}
+
+		aes_transform((unsigned char(*)[4]) encCounter, key);
+		for (int k = 0; k < AES_BLOCK_SIZE && i + k < count; k++) {
+			destBuffer[destOffset + i + k] = srcBuffer[srcOffset + i + k] ^ encCounter[k];
+			totalBytes++;
+		}
+		if (increment_counter(1, counter) < 0)
+			return -1;
+	}
+
+	return totalBytes;
+}
 #else
 void aes_intr_transform(const unsigned char* text, unsigned char* cipher, int length, unsigned char* keys, int rounds) {}
 void aes_intr_key_expand(const unsigned char* key, unsigned char* roundKey) {}
+int aes_intr_transform_ctr(const unsigned char* key, unsigned char* counter,
+	unsigned char* srcBuffer, int srcOffset,
+	unsigned char* destBuffer, int destOffset, int count) {}
 #endif

@@ -50,6 +50,45 @@ export class SalmonNativeTransformer extends SalmonAES256CTRTransformer {
         return SalmonNativeTransformer.#nativeProxy;
     }
 
+    #implType: number;
+    /**
+     * 
+     * @returns The native implementation type see ProviderType enum
+     */
+    public getImplType(): number {
+        return this.#implType;
+    }
+    /**
+     * 
+     * @param implType The native implementation type see ProviderType enum
+     */
+    public setImplType(implType: number) {
+        this.#implType = implType;
+    }
+
+    /**
+     * Construct a SalmonNativeTransformer for using the native aes c library
+     * @param implType The AES native implementation see ProviderType enum
+     */
+    public constructor(implType: number) {
+        super();
+        this.#implType = implType;
+    }
+
+    /**
+     * Initialize the native Aes intrinsics transformer.
+     * @param {Uint8Array} key The AES key to use.
+     * @param {Uint8Array} nonce The nonce to use.
+     * @throws SalmonSecurityException Thrown when error with security
+     */
+    public async init(key: Uint8Array, nonce: Uint8Array): Promise<void> {
+        SalmonNativeTransformer.getNativeProxy().init(this.#implType);
+        let expandedKey: Uint8Array = new Uint8Array(SalmonAES256CTRTransformer.EXPANDED_KEY_SIZE);
+        SalmonNativeTransformer.getNativeProxy().expandKey(key, expandedKey);
+        this.setExpandedKey(expandedKey);
+        await super.init(key, nonce);
+    }
+
     /**
      * Encrypt the data.
      * @param {Uint8Array} srcBuffer The source byte array.

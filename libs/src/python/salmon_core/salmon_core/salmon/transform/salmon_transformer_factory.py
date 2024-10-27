@@ -25,10 +25,10 @@ SOFTWARE.
 from salmon_core.salmon.streams.provider_type import ProviderType
 from salmon_core.salmon.salmon_security_exception import SalmonSecurityException
 from salmon_core.salmon.transform.isalmon_ctr_transformer import ISalmonCTRTransformer
-from salmon_core.salmon.transform.salmon_aes_intr_transformer import SalmonAesIntrTransformer
 from salmon_core.salmon.transform.salmon_default_transformer import SalmonDefaultTransformer
-from salmon_core.salmon.transform.tiny_aes_transformer import TinyAesTransformer
 from typeguard import typechecked
+
+from salmon_core.salmon.transform.salmon_native_transformer import SalmonNativeTransformer
 
 
 @typechecked
@@ -48,8 +48,6 @@ class SalmonTransformerFactory:
         match v_type:
             case ProviderType.Default:
                 return SalmonDefaultTransformer()
-            case ProviderType.AesIntrinsics:
-                return SalmonAesIntrTransformer()
-            case ProviderType.TinyAES:
-                return TinyAesTransformer()
+            case ProviderType.AesIntrinsics | ProviderType.Aes | ProviderType.AesGPU:
+                return SalmonNativeTransformer(v_type.value)
         raise SalmonSecurityException("Unknown Transformer type")

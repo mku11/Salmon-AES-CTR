@@ -52,8 +52,7 @@ public class SalmonNativeTests
     [TestInitialize]
     public void Init()
     {
-        SalmonStream.AesProviderType = ProviderType.AesIntrinsics;
-        //SalmonStream.AesProviderType = ProviderType.TinyAES;
+        SalmonStream.AesProviderType = ProviderType.Aes;
     }
 
     [TestMethod]

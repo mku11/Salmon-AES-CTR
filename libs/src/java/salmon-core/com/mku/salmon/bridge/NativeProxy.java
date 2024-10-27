@@ -70,7 +70,7 @@ public class NativeProxy implements INativeProxy {
     /**
      * Proxy Init the native code with AES implementation, and hash length options.
      *
-     * @param aesImpl AES implementation type (Aes Intrinsics = 1, TinyAES = 2)
+     * @param aesImpl AES implementation type (Aes Intrinsics = 1, Aes = 2, Aes GPU = 3)
      */
     public void salmonInit(int aesImpl) {
         loadLibrary();

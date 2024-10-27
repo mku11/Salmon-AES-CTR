@@ -1,7 +1,7 @@
 /*
 MIT License
 
-Copyright (c) 2021 Max Kas
+Copyright (c) 2024 Max Kas
 
 Permission is hereby granted, free of charge, to any person obtaining a copy
 of this software and associated documentation files (the "Software"), to deal
@@ -21,29 +21,20 @@ LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 */
+#ifndef _SALMON_AES_OPENCL_H
+#define _SALMON_AES_OPENCL_H
 
-namespace Mku.Salmon.Transform;
+#include "salmon-aes.h"
 
-/// <summary>
-///  Salmon AES transformer implemented with TinyAES backend.
-/// </summary>
-public class TinyAesTransformer : SalmonNativeTransformer
-{
-    /// <summary>
-    ///  The constant to pass to the native code while initializing.
-    /// </summary>
-    public static readonly int AES_IMPL_TINY_AES = 2;
+int init_opencl();
+void aes_opencl_key_expand(const unsigned char* userkey, unsigned char* key);
 
-    /// <summary>
-    ///  Initialiaze the native transformer to use the Tiny AES implementation.
-	/// </summary>
-	///  <param name="key">  The AES key to use.</param>
-    ///  <param name="nonce">The nonce to use.</param>
-    ///  <exception cref="SalmonSecurityException">Thrown when error with security</exception>
-    override
-    public void Init(byte[] key, byte[] nonce)
-    {
-		NativeProxy.SalmonInit(AES_IMPL_TINY_AES);
-        base.Init(key, nonce);
-    }
-}
+int aes_opencl_transform(const unsigned char* key, unsigned char* counter,
+	unsigned char* srcBuffer, int srcOffset,
+	unsigned char* destBuffer, int destOffset, int count);
+
+int aes_opencl_transform_ctr(const unsigned char* key, unsigned char* counter,
+    unsigned char* srcBuffer, int srcOffset,
+    unsigned char* destBuffer, int destOffset, int count);
+#endif
+

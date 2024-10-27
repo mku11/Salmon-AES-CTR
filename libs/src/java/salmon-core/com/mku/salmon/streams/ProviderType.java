@@ -28,19 +28,27 @@ SOFTWARE.
  *
  * @see #Default
  * @see #AesIntrinsics
- * @see #TinyAES
+ * @see #Aes
+ * @see #AesGPU
  */
 public enum ProviderType {
     /**
-     * Default Java AES cipher.
+     * Default Java AES cipher implementation.
      */
     Default,
+
     /**
-     * Salmon builtin AES intrinsics. This needs the SalmonNative library to be loaded. @see <a href="https://github.com/mku11/Salmon-AES-CTR#readme">Salmon README.md</a>
+     * Salmon builtin AES intrinsics. This needs the SalmonNative library to be loaded. See: https://github.com/mku11/Salmon-AES-CTR#readme
      */
     AesIntrinsics,
+
     /**
-     * Tiny AES implementation. This needs the SalmonNative library to be loaded. @see <a href="https://github.com/mku11/Salmon-AES-CTR#readme">Salmon README.md</a>
+     * Salmon Aes implementation. This needs the SalmonNative library to be loaded. See: https://github.com/mku11/Salmon-AES-CTR#readme
      */
-    TinyAES
+    Aes,
+
+    /**
+     * Salmon builtin AES GPU. This needs OpenCL, a compatible Graphics card, and the SalmonNative library to be loaded. See: https://github.com/mku11/Salmon-AES-CTR#readme
+     */
+    AesGPU
 }

@@ -46,6 +46,38 @@ public class SalmonNativeTransformer extends SalmonAES256CTRTransformer {
         return nativeProxy;
     }
 
+    private int implType;
+    public int getImplType() {
+        return implType;
+    }
+    public void setImplType(int implType) {
+        this.implType = implType;
+    }
+
+    /**
+     * Construct a SalmonNativeTransformer for using the native aes c library
+     * @param implType The AES native implementation see ProviderType enum
+     */
+    public SalmonNativeTransformer(int implType)
+    {
+        this.implType = implType;
+    }
+
+    /**
+     * Initialize the native Aes intrinsics transformer.
+     * @param key The AES key to use
+     * @param nonce The nonce to use
+     */
+    @Override
+    public void init(byte[] key, byte[] nonce)
+    {
+        nativeProxy.salmonInit(implType);
+        byte[] expandedKey = new byte[SalmonAES256CTRTransformer.EXPANDED_KEY_SIZE];
+        nativeProxy.salmonExpandKey(key, expandedKey);
+        setExpandedKey(expandedKey);
+        super.init(key, nonce);
+    }
+
     /**
      * Encrypt the data.
      * @param srcBuffer The source byte array.
@@ -62,7 +94,7 @@ public class SalmonNativeTransformer extends SalmonAES256CTRTransformer {
             throw new SalmonSecurityException("No key found, run init first");
         if (getCounter() == null) //TODO: ToSync
             throw new SalmonSecurityException("No counter found, run init first");
-        return nativeProxy.salmonTransform(getKey(), getCounter(),
+        return nativeProxy.salmonTransform(getExpandedKey(), getCounter(),
                 srcBuffer, srcOffset,
                 destBuffer, destOffset, count);
     }
@@ -83,7 +115,7 @@ public class SalmonNativeTransformer extends SalmonAES256CTRTransformer {
             throw new SalmonSecurityException("No key found, run init first");
         if (getCounter() == null) //TODO: ToSync
             throw new SalmonSecurityException("No counter found, run init first");
-        return nativeProxy.salmonTransform(getKey(), getCounter(),
+        return nativeProxy.salmonTransform(getExpandedKey(), getCounter(),
                 srcBuffer, srcOffset,
                 destBuffer, destOffset, count);
     }

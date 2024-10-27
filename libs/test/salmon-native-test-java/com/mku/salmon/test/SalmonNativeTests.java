@@ -48,9 +48,7 @@ public class SalmonNativeTests {
 
     @BeforeEach
     public void init() {
-        SalmonStream.setAesProviderType(ProviderType.AesIntrinsics);
-        // SalmonStream.setAesProviderType(ProviderType.TinyAES);
-    }
+        SalmonStream.setAesProviderType(ProviderType.AesIntrinsics);    }
 
     @Test
     public void shouldEncryptAndDecryptNativeTextCompatible() throws Exception {

@@ -52,7 +52,7 @@ from salmon_fs.salmon.streams.salmon_file_input_stream import SalmonFileInputStr
 from salmon_fs.sequence.inonce_sequence_serializer import INonceSequenceSerializer
 from salmon_fs.salmon.sequence.salmon_file_sequencer import SalmonFileSequencer
 from salmon_fs.salmon.sequence.salmon_sequence_serializer import SalmonSequenceSerializer
-from test.salmon_core_test_helper import SalmonCoreTestHelper
+from salmon_core_test_helper import SalmonCoreTestHelper
 from salmon_fs.salmon.utils.salmon_file_exporter import SalmonFileExporter
 from salmon_fs.salmon.utils.salmon_file_importer import SalmonFileImporter
 from salmon_fs.utils.file_searcher import FileSearcher

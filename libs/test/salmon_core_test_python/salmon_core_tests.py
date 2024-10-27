@@ -26,6 +26,9 @@ import time
 import traceback
 from unittest import TestCase
 
+import os,sys
+sys.path.append(os.path.dirname(__file__) + '/../../src/python/salmon_core')
+
 from salmon_core.convert.bit_converter import BitConverter
 from salmon_core.streams.memory_stream import MemoryStream
 from salmon_core.integrity.integrity_exception import IntegrityException
@@ -37,7 +40,9 @@ from salmon_core.salmon.salmon_range_exceeded_exception import SalmonRangeExceed
 from salmon_core.salmon.salmon_security_exception import SalmonSecurityException
 from salmon_core.salmon.text.salmon_text_decryptor import SalmonTextDecryptor
 from salmon_core.salmon.text.salmon_text_encryptor import SalmonTextEncryptor
-from test.salmon_core_test_helper import SalmonCoreTestHelper
+
+from salmon_core.salmon.bridge.native_proxy import NativeProxy
+from salmon_core_test_helper import SalmonCoreTestHelper
 
 from typeguard import typechecked, TypeCheckError
 
@@ -48,9 +53,12 @@ class SalmonCoreTests(TestCase):
     SalmonCoreTestHelper.TEST_DEC_BUFFER_SIZE = 1 * 1024 * 1024
     SalmonCoreTestHelper.TEST_ENC_THREADS = 2
     SalmonCoreTestHelper.TEST_DEC_THREADS = 2
+    NativeProxy.set_library_path("../../projects/salmon-libs-gradle/salmon-native/build/libs/salmon/shared/salmon.dll")
+    # linux
+    # NativeProxy.set_library_path("../../projects/salmon-libs-gradle/salmon-native/build/libs/salmon/shared/libsalmon.so")
 
     def setUp(self):
-        SalmonStream.set_aes_provider_type(ProviderType.Default)
+        SalmonStream.set_aes_provider_type(ProviderType.Aes)
         SalmonCoreTestHelper.initialize()
 
     def tearDown(self) -> None:

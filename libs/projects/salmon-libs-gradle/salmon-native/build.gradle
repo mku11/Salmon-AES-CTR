@@ -3,6 +3,7 @@ import org.gradle.internal.jvm.Jvm
 plugins {
     id 'java'
     id 'c'
+    id 'cpp'
     id 'maven-publish'
 }
 
@@ -11,6 +12,15 @@ description = 'Salmon AES256 CTR native encryption library'
 version '2.2.0'
 project.ext.set('arch', 'x86_64')
 project.ext.set('os', 'win')
+
+// set to true to enable opencl
+// windows
+project.ext.set('enable_opencl', true)
+project.ext.set('OPENCL_INCLUDE', 'D:\\tools\\OpenCL-SDK-v2024.05.08-Win-x64\\include')
+project.ext.set('OPENCL_LIB', 'D:\\tools\\OpenCL-SDK-v2024.05.08-Win-x64\\lib')
+// linux
+// project.ext.set('OPENCL_INCLUDE', '/usr/include')
+// project.ext.set('OPENCL_LIB', '/usr/lib/x86_64-linux-gnu/')
 
 repositories {
     mavenCentral()
@@ -55,12 +65,20 @@ model {
                     cCompiler.args '-I', "${jvmHome}/include"
                     cCompiler.args '-I', "${jvmHome}/include/freebsd"
                 }
-                // comment out if you don't want tiny-aes
-                cCompiler.args '-DUSE_TINY_AES=1'
-                cCompiler.args '-DAES256=1'
-
                 cCompiler.args '-I' + projectDir + '/../../../src/c/salmon/include'
                 cCompiler.args '-I' + projectDir + '/../../../src/c/salmon-jni/include'
+
+                if (project.enable_opencl) {
+                    cCompiler.args '-DUSE_OPENCL=1'
+					cCompiler.args '-I' + project.OPENCL_INCLUDE
+                    if (targetPlatform.operatingSystem.windows) {
+                        linker.args '/LIBPATH:' + project.OPENCL_LIB
+                        linker.args 'OpenCL.lib'
+                    } else if (targetPlatform.operatingSystem.linux) {
+                        linker.args '-L' + project.OPENCL_LIB
+                        linker.args '-lOpenCL'
+                    }
+                }
 
                 cCompiler.args '-O2'
                 cCompiler.args '-maes'
@@ -69,10 +87,14 @@ model {
                 c {
                     source {
                         srcDirs "../../../src/c"
-                        include "**/salmon/*.c"
-                        include "**/salmon/salmon-aes-intr/*.c"
-                        include "**/salmon-jni/*.c"
-                        include "**/tiny-AES-c/aes.c"
+                        include "**/salmon/src/*.c"
+                        include "**/salmon-jni/src/*.c"
+                    }
+                }
+                cpp {
+                    source {
+                        srcDirs "./"
+                        include "salmon-aes-kernel.cpp"
                     }
                 }
             }
@@ -97,11 +119,6 @@ task assembleArtifact(type: Zip, group: 'com.mku.salmon') {
     from("../../../src/c/salmon-jni/include/") {
         into 'salmon-jni/include'
         include '*.h'
-    }
-    from("../../../src/c/tiny-AES-c") {
-        into 'tiny-AES-c/include'
-        include '*.h'
-        include 'unlicense.txt'
     }
     description "Assemble archive $archiveName into ${relativePath(destinationDir)}"
 }

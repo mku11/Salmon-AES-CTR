@@ -30,13 +30,11 @@ SOFTWARE.
 #include <string.h>
 #include <time.h>
 #include <math.h>
-#include "salmon-aes-intr/salmon-aes-intr.h"
-
-#define ROUNDS 14
-#define NONCE_SIZE 8
+#include "salmon-aes-intr.h"
 
 #define AES_IMPL_AES_INTR 1
-#define AES_IMPL_TINY_AES 2
+#define AES_IMPL_AES 2
+#define AES_IMPL_AES_GPU 3
 
 #ifdef __ANDROID__
 #include <android/log.h>

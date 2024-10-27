@@ -18,10 +18,6 @@ TinyAES implementation. This is needed if your processor/arch does not support A
 Note: If you don't want to build the native library just remove the subproject from gradle.
 Salmon will use the Java default cipher for AES256.   
 
-To build the native libraries you will need TinyAES
-To download Tiny Aes source code from the project root folder type:
-git submodule update --recursive --init
-
 To build the java and native libraries from the command line run:  
 ```
 gradlew.bat build -x test --rerun-tasks

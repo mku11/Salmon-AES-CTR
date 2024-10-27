@@ -44,10 +44,10 @@ public class SalmonTransformerFactory
         {
             case ProviderType.Default:
                 return new SalmonDefaultTransformer();
+            case ProviderType.Aes:
             case ProviderType.AesIntrinsics:
-                return new SalmonAesIntrTransformer();
-            case ProviderType.TinyAES:
-                return new TinyAesTransformer();
+            case ProviderType.AesGPU:
+                return new SalmonNativeTransformer((int)type);
         }
         throw new SalmonSecurityException("Unknown Transformer type");
     }

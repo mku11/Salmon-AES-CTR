@@ -25,6 +25,7 @@
     <RootNamespace>SalmonNative</RootNamespace>
     <WindowsTargetPlatformVersion>10.0</WindowsTargetPlatformVersion>
     <ProjectName>SalmonNative</ProjectName>
+    <PackageReadmeFile>README.md</PackageReadmeFile>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="Configuration">
@@ -109,17 +110,21 @@
     <ClCompile>
       <WarningLevel>Level3</WarningLevel>
       <SDLCheck>true</SDLCheck>
-      <PreprocessorDefinitions>_DEBUG;SALMONNATIVE_EXPORTS;_WINDOWS;_USRDLL;%(PreprocessorDefinitions);USE_TINY_AES;AES256=1</PreprocessorDefinitions>
+      <PreprocessorDefinitions>_DEBUG;SALMONNATIVE_EXPORTS;_WINDOWS;_USRDLL;%(PreprocessorDefinitions);AES256=1;USE_OPENCL=1;CL_TARGET_OPENCL_VERSION=200</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
       <PrecompiledHeader>NotUsing</PrecompiledHeader>
       <PrecompiledHeaderFile>pch.h</PrecompiledHeaderFile>
       <IntrinsicFunctions>true</IntrinsicFunctions>
-      <AdditionalIncludeDirectories>$(ProjectDir)\..\..\..\src\c\tiny-AES-c;$(ProjectDir)\..\..\..\src\c\salmon\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>D:\tools\OpenCL-SDK-v2024.05.08-Win-x64\include;$(ProjectDir)\include;$(ProjectDir)\..\..\..\src\c\salmon\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <DisableSpecificWarnings>4996</DisableSpecificWarnings>
+      <CompileAs>Default</CompileAs>
+      <CallingConvention>Cdecl</CallingConvention>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <EnableUAC>false</EnableUAC>
+      <AdditionalDependencies>D:\tools\OpenCL-SDK-v2024.05.08-Win-x64\lib\OpenCL.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
     <PostBuildEvent>
       <Command>NuGet.exe pack SalmonNative.nuspec -outputDir ..\..\..\..\output\nuget\releases</Command>
@@ -127,6 +132,9 @@
     <PostBuildEvent>
       <Message>Creating nuget package</Message>
     </PostBuildEvent>
+    <PreBuildEvent>
+      
+    </PreBuildEvent>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <ClCompile>
@@ -138,7 +146,7 @@
       <ConformanceMode>true</ConformanceMode>
       <PrecompiledHeader>NotUsing</PrecompiledHeader>
       <PrecompiledHeaderFile>pch.h</PrecompiledHeaderFile>
-      <AdditionalIncludeDirectories>$(ProjectDir)\..\..\..\src\c\tiny-AES-c;$(ProjectDir)\..\..\..\src\c\salmon\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(ProjectDir)\..\..\..\src\c\tiny-AES-c;D:\tools\OpenCL-SDK-v2024.05.08-Win-x64\include;$(ProjectDir)\..\..\..\src\c\opencl-aes;$(ProjectDir)\..\..\..\src\c\salmon\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
@@ -155,24 +163,35 @@
     </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClInclude Include="..\..\..\src\c\salmon\include\salmon-aes-intr\salmon-aes-intr.h" />
+    <ClInclude Include="..\..\..\src\c\salmon\include\salmon-aes-intr.h" />
+    <ClInclude Include="..\..\..\src\c\salmon\include\salmon-aes-opencl.h" />
+    <ClInclude Include="..\..\..\src\c\salmon\include\salmon-aes.h" />
     <ClInclude Include="..\..\..\src\c\salmon\include\salmon.h" />
-    <ClInclude Include="..\..\..\src\c\tiny-AES-c\aes.h" />
     <ClInclude Include="framework.h" />
     <ClInclude Include="pch.h" />
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="..\..\..\src\c\salmon\salmon-aes-intr\salmon-aes-intr.c" />
-    <ClCompile Include="..\..\..\src\c\salmon\salmon.c" />
-    <ClCompile Include="..\..\..\src\c\tiny-AES-c\aes.c" />
+    <ClCompile Include="..\..\..\src\c\salmon\src\salmon-aes-intr.c" />
+    <ClCompile Include="..\..\..\src\c\salmon\src\salmon-aes-opencl.c" />
+    <ClCompile Include="..\..\..\src\c\salmon\src\salmon-aes.c" />
+    <ClCompile Include="..\..\..\src\c\salmon\src\salmon.c" />
     <ClCompile Include="dllmain.cpp" />
     <ClCompile Include="pch.cpp" />
+    <ClCompile Include="salmon-aes-kernel.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <None Include="gen_kernel_header.bat" />
+    <None Include="gen_kernel_header.sh" />
     <None Include="packages.config" />
-    <None Include="README.md" />
+    <None Include="README.md">
+      <DeploymentContent>false</DeploymentContent>
+      <FileType>Document</FileType>
+    </None>
     <None Include="..\..\..\..\LICENSE" />
     <None Include="..\..\..\..\NOTICE" />
+    <None Include="..\..\..\src\c\salmon\src\salmon-aes-kernel.cl">
+      <DeploymentContent>true</DeploymentContent>
+    </None>
     <None Include="SalmonNative.nuspec" />
     <None Include="SalmonNative.props" />
   </ItemGroup>

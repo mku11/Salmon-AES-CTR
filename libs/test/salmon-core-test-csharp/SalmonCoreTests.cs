@@ -47,7 +47,7 @@ public class SalmonCoreTests
     [TestInitialize]
     public void Init()
     {
-        SalmonStream.AesProviderType = ProviderType.Default;
+        SalmonStream.AesProviderType = ProviderType.AesGPU;
         SalmonCoreTestHelper.Initialize();
     }
 
@@ -375,7 +375,7 @@ public class SalmonCoreTests
                     true, null, SalmonCoreTestHelper.TEST_HMAC_KEY_BYTES, false, null, null
             );
         }
-        catch (IOException ex)
+        catch (Exception ex)
         {
             if (ex.InnerException.GetType() == typeof(IntegrityException))
                 caught = true;
