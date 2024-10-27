@@ -38,7 +38,7 @@ gradlew.bat publish -x test --rerun-tasks
 test files for core, fs, and native subprojects are included in respective test sourceSets (See build.gradle).  
 To run a specific test case:
 ```
-gradlew.bat :salmon-fs:test --tests "com.mku.salmon.test.SalmonFSTests.shouldAuthorizePositive" --rerun-tasks  
+gradlew.bat :salmon-fs:test --tests "com.mku.salmon.test.SalmonFSTests.shouldAuthorizePositive" --rerun-tasks -i   
 ```
 
 see salmon-core/src/jmh folder for benchmarks. To run from the command line:  
