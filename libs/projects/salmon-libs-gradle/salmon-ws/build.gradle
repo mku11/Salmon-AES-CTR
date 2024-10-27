@@ -1,0 +1,39 @@
+plugins {
+    id 'org.springframework.boot' version '2.7.0'
+    id 'io.spring.dependency-management' version '1.1.0'
+    id 'java'
+    id 'war'
+}
+
+group 'com.mku.salmon'
+version '2.2.0'
+sourceCompatibility = '11'
+
+repositories {
+    mavenCentral()
+}
+
+sourceSets {
+    main.java.srcDirs += '../../../src/java/salmon-ws/'
+    test.java.srcDirs += '../../../test/salmon-ws-test-java/'
+}
+
+dependencies {
+    testImplementation 'org.junit.jupiter:junit-jupiter-api:5.8.1'
+    testRuntimeOnly 'org.junit.jupiter:junit-jupiter-engine:5.8.1'
+
+    implementation project(path: ':salmon-core')
+    implementation project(path: ':salmon-fs')
+    testImplementation project(':salmon-core').sourceSets.test.output
+    testImplementation project(':salmon-fs').sourceSets.test.output
+
+
+    implementation 'org.springframework.boot:spring-boot-starter-web:2.5.5'
+    implementation 'org.springframework.boot:spring-boot-starter-security:2.5.5'
+    implementation 'org.springframework.boot:spring-boot-configuration-processor:2.5.5'
+    testImplementation 'org.springframework.boot:spring-boot-starter-test:2.5.5'
+}
+
+test {
+    useJUnitPlatform()
+}

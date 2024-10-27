@@ -131,8 +131,9 @@ export class JsNodeFileStream extends RandomAccessStream {
      * @throws IOException Thrown if there is an IO error.
      */
     public override async setPosition(value: number): Promise<void> {
+		if(this.#_position != value)
+			this.#reset();
         this.#_position = value;
-        this.#reset();
     }
 
     /**

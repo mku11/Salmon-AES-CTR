@@ -18,6 +18,10 @@ msbuild /p:Configuration=Release
 To clean:
 msbuild -t:clean
 
+To run tests:
+vstest.console Salmon.Test.dll /TestCaseFilter:SalmonCoreTests
+vstest.console Salmon.Test.dll /TestCaseFilter:SalmonFSTests
+
 To debug the native code check the option under Project Properties/Debug/Debug Launch UI profiles/Enable native code debugging
 Note that debugging the native code will probably disable the Edit and Continue for .NET code.
 

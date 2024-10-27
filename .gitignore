@@ -67,4 +67,4 @@ node_modules
 /samples/PythonSamples/lib
 vault_*
 data_*
-html
+/libs/projects/salmon-libs-gradle/salmon-ws/src/main/resources/*.p12

@@ -1,0 +1,8 @@
+<component name="ArtifactManager">
+  <artifact name="war">
+    <output-path>$PROJECT_DIR$/../../../output/java-ws/</output-path>
+    <root id="root">
+      <element id="file-copy" path="$PROJECT_DIR$/salmon-ws/build/libs/salmon-ws-2.2.0.war" />
+    </root>
+  </artifact>
+</component>

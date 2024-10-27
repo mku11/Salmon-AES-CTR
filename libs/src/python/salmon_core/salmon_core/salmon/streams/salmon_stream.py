@@ -414,10 +414,10 @@ class SalmonStream(RandomAccessStream):
         :raises SalmonRangeExceededException: Thrown when maximum nonce range is exceeded.
         """
         # we skip the header bytes and any hash values we have if the file has integrity set
+        total_hash_bytes: int = self.__salmonIntegrity.get_hash_data_length(value, 0)
+        value = value + totalHashBytes + self.get_header_length()
         self.__baseStream.set_position(value)
-        total_hash_bytes: int = self.__salmonIntegrity.get_hash_data_length(self.__baseStream.get_position(), 0)
-        self.__baseStream.set_position(self.__baseStream.get_position() + total_hash_bytes)
-        self.__baseStream.set_position(self.__baseStream.get_position() + self.get_header_length())
+
         self.__transformer.reset_counter()
         self.__transformer.sync_counter(self.get_position())
 

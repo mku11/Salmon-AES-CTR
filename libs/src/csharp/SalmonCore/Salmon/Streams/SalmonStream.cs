@@ -353,10 +353,10 @@ public class SalmonStream : Stream
     private void SetVirtualPosition(long value)
     {
         // we skip the header bytes and any hash values we have if the file has integrity set
+        long totalHashBytes = salmonIntegrity.GetHashDataLength(value, 0);
+        value += totalHashBytes + GetHeaderLength();
         baseStream.Position = value;
-        long totalHashBytes = salmonIntegrity.GetHashDataLength(baseStream.Position, 0);
-        baseStream.Position = baseStream.Position + totalHashBytes;
-        baseStream.Position = baseStream.Position + GetHeaderLength();
+		
         transformer.ResetCounter();
         transformer.SyncCounter(Position);
     }
@@ -623,9 +623,13 @@ public class SalmonStream : Stream
     ///  <returns>The number of bytes read.</returns>
     private byte[] ReadStreamData(int count)
     {
-        byte[]
-    data = new byte[(int)Math.Min(count, baseStream.Length - baseStream.Position)];
-        baseStream.Read(data, 0, data.Length);
+        byte[] data = new byte[(int)Math.Min(count, baseStream.Length - baseStream.Position)];
+        int bytesRead;
+        int totalBytesRead = 0;
+        while ((bytesRead = baseStream.Read(data, totalBytesRead, data.Length - totalBytesRead)) > 0)
+        {
+            totalBytesRead += bytesRead;
+        }
         return data;
     }
 

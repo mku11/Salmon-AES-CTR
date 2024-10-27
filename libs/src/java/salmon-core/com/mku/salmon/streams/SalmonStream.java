@@ -55,12 +55,12 @@ public class SalmonStream extends RandomAccessStream {
      * Allow seek and write.
      */
     private boolean allowRangeWrite;
-	
-	/**
+
+    /**
      * Fail silently if integrity cannot be verified.
      */
     private boolean failSilently;
-	
+
     /**
      * The base stream. When EncryptionMode is Encrypt this will be the target stream.
      * When EncryptionMode is Decrypt this will be the source stream.
@@ -92,19 +92,18 @@ public class SalmonStream extends RandomAccessStream {
      * header and hash without executing any operations. This can be used to prevent over-allocating memory
      * where creating your output buffers.
      *
-     * @param data The data to be transformed.
-     * @param key The AES key.
-     * @param nonce The nonce for the CTR.
-     * @param mode The {@link EncryptionMode} Encrypt or Decrypt.
+     * @param data       The data to be transformed.
+     * @param key        The AES key.
+     * @param nonce      The nonce for the CTR.
+     * @param mode       The {@link EncryptionMode} Encrypt or Decrypt.
      * @param headerData The header data to be embedded if you use Encryption.
-     * @param integrity True if you want to enable integrity.
-     * @param chunkSize The chunk size for integrity chunks.
-     * @param hashKey The hash key to be used for integrity checks.
+     * @param integrity  True if you want to enable integrity.
+     * @param chunkSize  The chunk size for integrity chunks.
+     * @param hashKey    The hash key to be used for integrity checks.
      * @return The size of the output data.
-     *
      * @throws SalmonSecurityException Thrown if there is a security exception
-     * @throws IntegrityException Thrown if the data are corrupt or tampered with.
-     * @throws IOException Thrown if there is an IO error.
+     * @throws IntegrityException      Thrown if the data are corrupt or tampered with.
+     * @throws IOException             Thrown if there is an IO error.
      */
     public static long getActualSize(byte[] data, byte[] key, byte[] nonce, EncryptionMode mode,
                                      byte[] headerData, boolean integrity, Integer chunkSize, byte[] hashKey)
@@ -126,9 +125,9 @@ public class SalmonStream extends RandomAccessStream {
      * @param baseStream     If EncryptionMode is Encrypt this will be the target stream
      *                       that data will be written to. If DecryptionMode is Decrypt this will be the
      *                       source stream to read the data from.
-     * @throws SalmonSecurityException  If the stream cannot be decrypted or missing key or nonce.
-     * @throws IntegrityException If the integrity of the stream is compromised.
-     * @throws IOException              If the base stream is corrupt.
+     * @throws SalmonSecurityException If the stream cannot be decrypted or missing key or nonce.
+     * @throws IntegrityException      If the integrity of the stream is compromised.
+     * @throws IOException             If the base stream is corrupt.
      */
     public SalmonStream(byte[] key, byte[] nonce, EncryptionMode encryptionMode,
                         RandomAccessStream baseStream)
@@ -139,16 +138,16 @@ public class SalmonStream extends RandomAccessStream {
     /**
      * Instantiate a new Salmon stream with a base stream and embedded header data.
      *
-     * @param key The key
-     * @param nonce The nonce to use
+     * @param key            The key
+     * @param nonce          The nonce to use
      * @param encryptionMode The encryption Mode see {@link EncryptionMode}
      * @param baseStream     If EncryptionMode is Encrypt this will be the target stream
      *                       that data will be written to. If DecryptionMode is Decrypt this will be the
      *                       source stream to read the data from.
      * @param headerData     The header data to embed if you use EncryptionMode = Encrypt.
-     * @throws SalmonSecurityException  If the stream cannot be decrypted or missing key or nonce.
-     * @throws IntegrityException If the integrity of the stream is compromised.
-     * @throws IOException              If the base stream is corrupt.
+     * @throws SalmonSecurityException If the stream cannot be decrypted or missing key or nonce.
+     * @throws IntegrityException      If the integrity of the stream is compromised.
+     * @throws IOException             If the base stream is corrupt.
      */
     public SalmonStream(byte[] key, byte[] nonce, EncryptionMode encryptionMode,
                         RandomAccessStream baseStream, byte[] headerData)
@@ -162,11 +161,10 @@ public class SalmonStream extends RandomAccessStream {
      * If you read from the stream it will decrypt the data from the baseStream.
      * If you write to the stream it will encrypt the data from the baseStream.
      * The transformation is based on AES CTR Mode.
-	 * </p>
+     * </p>
      * Notes:
      * The initial value of the counter is a result of the concatenation of an 12 byte nonce and an additional 4 bytes counter.
      * The counter is then: incremented every block, encrypted by the key, and xored with the plain text.
-     * @see <a href="https://en.wikipedia.org/wiki/Block_cipher_mode_of_operation#Counter_(CTR)">Salmon README.md</a>
      *
      * @param key            The AES key that is used to encrypt decrypt
      * @param nonce          The nonce used for the initial counter
@@ -176,9 +174,10 @@ public class SalmonStream extends RandomAccessStream {
      * @param integrity      enable integrity
      * @param chunkSize      the chunk size to be used with integrity
      * @param hashKey        Hash key to be used with integrity
-     * @throws IOException Thrown if there is an IO error.
+     * @throws IOException             Thrown if there is an IO error.
      * @throws SalmonSecurityException Thrown if there is a security exception
-     * @throws IntegrityException Thrown if the data are corrupt or tampered with.
+     * @throws IntegrityException      Thrown if the data are corrupt or tampered with.
+     * @see <a href="https://en.wikipedia.org/wiki/Block_cipher_mode_of_operation#Counter_(CTR)">Salmon README.md</a>
      */
     public SalmonStream(byte[] key, byte[] nonce, EncryptionMode encryptionMode,
                         RandomAccessStream baseStream, byte[] headerData,
@@ -203,7 +202,7 @@ public class SalmonStream extends RandomAccessStream {
      * @param hashKey
      * @param chunkSize
      * @throws SalmonSecurityException Thrown if there is a security exception
-     * @throws IntegrityException Thrown if the data are corrupt or tampered with.
+     * @throws IntegrityException      Thrown if the data are corrupt or tampered with.
      */
     private void initIntegrity(boolean integrity, byte[] hashKey, Integer chunkSize) {
         salmonIntegrity = new SalmonIntegrity(integrity, hashKey, chunkSize,
@@ -260,7 +259,7 @@ public class SalmonStream extends RandomAccessStream {
      *
      * @return The length of the stream.
      */
-	 @Override
+    @Override
     public long length() {
         long totalHashBytes;
         int hashOffset = salmonIntegrity.getChunkSize() > 0 ? SalmonGenerator.HASH_RESULT_LENGTH : 0;
@@ -290,7 +289,7 @@ public class SalmonStream extends RandomAccessStream {
      * @return The current position of the stream.
      * @throws IOException Thrown if there is an IO error.
      */
-	@Override
+    @Override
     public long getPosition() throws IOException {
         long totalHashBytes;
         int hashOffset = salmonIntegrity.getChunkSize() > 0 ? SalmonGenerator.HASH_RESULT_LENGTH : 0;
@@ -304,7 +303,7 @@ public class SalmonStream extends RandomAccessStream {
      * @param value The new position
      * @throws IOException Thrown if there is an IO error.
      */
-	@Override
+    @Override
     public void setPosition(long value) throws IOException {
         if (canWrite() && !allowRangeWrite && value != 0) {
             throw new IOException(
@@ -347,6 +346,7 @@ public class SalmonStream extends RandomAccessStream {
 
     /**
      * If the stream has integrity embedded.
+     *
      * @return True if the stream has integrity embedded.
      */
     public boolean hasIntegrity() {
@@ -425,6 +425,7 @@ public class SalmonStream extends RandomAccessStream {
 
     /**
      * Returns the current block value
+     *
      * @return The current block
      */
     public long getBlock() {
@@ -433,6 +434,7 @@ public class SalmonStream extends RandomAccessStream {
 
     /**
      * Returns a copy of the encryption key.
+     *
      * @return The current key
      */
     public byte[] getKey() {
@@ -441,6 +443,7 @@ public class SalmonStream extends RandomAccessStream {
 
     /**
      * Returns a copy of the hash key.
+     *
      * @return The current hash key
      */
     public byte[] getHashKey() {
@@ -449,6 +452,7 @@ public class SalmonStream extends RandomAccessStream {
 
     /**
      * Returns a copy of the nonce.
+     *
      * @return The nonce.
      */
     public byte[] getNonce() {
@@ -457,6 +461,7 @@ public class SalmonStream extends RandomAccessStream {
 
     /**
      * Returns the chunk size used to apply hash signature
+     *
      * @return The chunk size
      */
     public int getChunkSize() {
@@ -473,11 +478,11 @@ public class SalmonStream extends RandomAccessStream {
     public void setAllowRangeWrite(boolean value) {
         this.allowRangeWrite = value;
     }
-	
-	/**
+
+    /**
      * Set to True if you want the stream to fail silently when integrity cannot be verified.
      * In that case read() operations will return -1 instead of raising an exception.
-	 * This prevents 3rd party code like media players from crashing.
+     * This prevents 3rd party code like media players from crashing.
      *
      * @param value True to fail silently.
      */
@@ -489,15 +494,15 @@ public class SalmonStream extends RandomAccessStream {
      * Set the virtual position of the stream.
      *
      * @param value
-     * @throws IOException Thrown if there is an IO error.
+     * @throws IOException                  Thrown if there is an IO error.
      * @throws SalmonRangeExceededException Thrown if the nonce exceeds its range
      */
     private void setVirtualPosition(long value) throws IOException {
         // we skip the header bytes and any hash values we have if the file has integrity set
+        long totalHashBytes = salmonIntegrity.getHashDataLength(value, 0);
+        value += totalHashBytes + getHeaderLength();
         baseStream.setPosition(value);
-        long totalHashBytes = salmonIntegrity.getHashDataLength(baseStream.getPosition(), 0);
-        baseStream.setPosition(baseStream.getPosition() + totalHashBytes);
-        baseStream.setPosition(baseStream.getPosition() + getHeaderLength());
+
         transformer.resetCounter();
         transformer.syncCounter(getPosition());
     }
@@ -611,8 +616,8 @@ public class SalmonStream extends RandomAccessStream {
                 bytes += len;
                 transformer.syncCounter(getPosition());
             } catch (SalmonSecurityException | SalmonRangeExceededException | IntegrityException ex) {
-				if(ex instanceof IntegrityException && failSilently)
-					return -1;
+                if (ex instanceof IntegrityException && failSilently)
+                    return -1;
                 throw new IOException("Could not read from stream: ", ex);
             }
         }
@@ -627,7 +632,6 @@ public class SalmonStream extends RandomAccessStream {
      * @param buffer The buffer that contains the data that will be encrypted
      * @param offset The offset in the buffer that the bytes will be encrypted.
      * @param count  The length of the bytes that will be encrypted.
-     *
      */
     @Override
     public void write(byte[] buffer, int offset, int count) throws IOException {
@@ -735,7 +739,11 @@ public class SalmonStream extends RandomAccessStream {
      */
     private byte[] readStreamData(int count) throws IOException {
         byte[] data = new byte[(int) Math.min(count, baseStream.length() - baseStream.getPosition())];
-        baseStream.read(data, 0, data.length);
+        int bytesRead;
+        int totalBytesRead = 0;
+        while ((bytesRead = baseStream.read(data, totalBytesRead, data.length - totalBytesRead)) > 0) {
+            totalBytesRead += bytesRead;
+        }
         return data;
     }
 
@@ -744,7 +752,7 @@ public class SalmonStream extends RandomAccessStream {
      *
      * @param srcBuffer  The source byte array.
      * @param srcOffset  The source byte offset.
-	 * @param destBuffer  The source byte array.
+     * @param destBuffer The source byte array.
      * @param destOffset The destination byte offset.
      * @param count      The number of bytes to write.
      */
@@ -830,6 +838,7 @@ public class SalmonStream extends RandomAccessStream {
 
     /**
      * Get the internal buffer size.
+     *
      * @return The buffer size
      */
     public int getBufferSize() {

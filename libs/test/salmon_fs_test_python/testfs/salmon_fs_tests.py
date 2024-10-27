@@ -456,7 +456,7 @@ class SalmonFSTests(SalmonCoreTests):
 
         # reopen but open the fs folder instead it should still login
         try:
-            drive = SalmonDrive.open_drive(vault_dir.get_child("/fs"), SalmonFSTestHelper.drive_class_type,
+            drive = SalmonDrive.open_drive(vault_dir.get_child("fs"), SalmonFSTestHelper.drive_class_type,
                                            SalmonCoreTestHelper.TEST_PASSWORD, sequencer)
             self.assertTrue(drive.has_config())
         except SalmonAuthException as ignored:
@@ -524,9 +524,9 @@ class SalmonFSTests(SalmonCoreTests):
 
         folder2: IRealFile = v_dir.get_child("folder1").create_directory("folder2")
         for rfile in v_dir.get_child("folder1").list_files():
-            rfile.copy(folder2)
+            rfile.copy_recursively(folder2)
         self.assertEqual(4, v_dir.get_child("folder1").get_children_count())
-        self.assertEqual(4, v_dir.get_child("folder1").get_child("folder2").get_children_count())
+        self.assertEqual(3, v_dir.get_child("folder1").get_child("folder2").get_children_count())
 
         # recursive copy
         folder3: IRealFile = v_dir.create_directory("folder4")
@@ -539,14 +539,12 @@ class SalmonFSTests(SalmonCoreTests):
             file.get_base_name())
         self.assertTrue(dfile.exists())
         self.assertTrue(dfile.delete())
-        self.assertEqual(3, v_dir.get_child("folder4").get_child("folder1").get_child("folder2").get_children_count())
+        self.assertEqual(2, v_dir.get_child("folder4").get_child("folder1").get_child("folder2").get_children_count())
         v_dir.get_child("folder1").copy_recursively(folder3, None, IRealFile.auto_rename_file, False, None)
         self.assertEqual(2, v_dir.get_children_count())
         self.assertEqual(1, v_dir.get_child("folder4").get_children_count())
         self.assertEqual(7, v_dir.get_child("folder4").get_child("folder1").get_children_count())
-        self.assertEqual(6, v_dir.get_child("folder4").get_child("folder1").get_child("folder2").get_children_count())
-        self.assertEqual(0, v_dir.get_child("folder4").get_child("folder1").get_child("folder2").get_child(
-            "folder2").get_children_count())
+        self.assertEqual(5, v_dir.get_child("folder4").get_child("folder1").get_child("folder2").get_children_count())
 
         v_dir.get_child("folder4").get_child("folder1").get_child("folder2").get_child(file.get_base_name()).delete()
         v_dir.get_child("folder4").get_child("folder1").get_child(file.get_base_name()).delete()
@@ -557,9 +555,7 @@ class SalmonFSTests(SalmonCoreTests):
         self.assertEqual(2, v_dir.get_children_count())
         self.assertEqual(1, v_dir.get_child("folder4").get_children_count())
         self.assertEqual(7, v_dir.get_child("folder4").get_child("folder1").get_children_count())
-        self.assertEqual(6, v_dir.get_child("folder4").get_child("folder1").get_child("folder2").get_children_count())
-        self.assertEqual(0, v_dir.get_child("folder4").get_child("folder1").get_child("folder2").get_child(
-            "folder2").get_children_count())
+        self.assertEqual(5, v_dir.get_child("folder4").get_child("folder1").get_child("folder2").get_children_count())
 
         v_dir.get_child("folder4").get_child("folder1").get_child("folder2").get_child(file.get_base_name()).delete()
         v_dir.get_child("folder4").get_child("folder1").get_child(file.get_base_name()).delete()
@@ -570,9 +566,7 @@ class SalmonFSTests(SalmonCoreTests):
         self.assertEqual(1, v_dir.get_children_count())
         self.assertEqual(1, v_dir.get_child("folder4").get_children_count())
         self.assertEqual(9, v_dir.get_child("folder4").get_child("folder1").get_children_count())
-        self.assertEqual(8, v_dir.get_child("folder4").get_child("folder1").get_child("folder2").get_children_count())
-        self.assertEqual(0, v_dir.get_child("folder4").get_child("folder1").get_child("folder2").get_child(
-            "folder2").get_children_count())
+        self.assertEqual(7, v_dir.get_child("folder4").get_child("folder1").get_child("folder2").get_children_count())
 
     def ShouldReadFromFileMultithreaded(self):
         caught: bool = False

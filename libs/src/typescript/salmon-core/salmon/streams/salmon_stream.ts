@@ -485,10 +485,10 @@ export class SalmonStream extends RandomAccessStream {
         await this.#init(this.#key, this.#nonce);
 
         // we skip the header bytes and any hash values we have if the file has integrity set
+        let totalHashBytes: number = this.#salmonIntegrity.getHashDataLength(value, 0);
+		value += totalHashBytes + this.#getHeaderLength();
         await this.#baseStream.setPosition(value);
-        let totalHashBytes: number = this.#salmonIntegrity.getHashDataLength(await this.#baseStream.getPosition(), 0);
-        await this.#baseStream.setPosition(await this.#baseStream.getPosition() + totalHashBytes);
-        await this.#baseStream.setPosition(await this.#baseStream.getPosition() + this.#getHeaderLength());
+		
         this.#transformer.resetCounter();
         this.#transformer.syncCounter(await this.getPosition());
     }
