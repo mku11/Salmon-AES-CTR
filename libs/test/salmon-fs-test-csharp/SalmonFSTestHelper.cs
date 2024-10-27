@@ -85,7 +85,7 @@ public class SalmonFSTestHelper
     internal static string TEST_SEQUENCER_FILE2 = "seq2.xml";
 
     public static Dictionary<string, string> users;
-    private static DotNetWSFile.Credentials credentials1 = new DotNetWSFile.Credentials("user1", "pass1");
+    private static DotNetWSFile.Credentials credentials1 = new DotNetWSFile.Credentials("user", "password");
 
     internal static SalmonFileImporter fileImporter;
     internal static SalmonFileExporter fileExporter;
@@ -491,7 +491,7 @@ public class SalmonFSTestHelper
                     credentials1.ServiceUser, credentials1.ServicePassword);
         }
         else
-            return SalmonFSTestHelper.OpenDrive(vaultDir, driveClassType, testPassword, sequencer);
+            return DotNetDrive.OpenDrive(vaultDir, driveClassType, testPassword, sequencer);
     }
 
     public static void TestExamples()
