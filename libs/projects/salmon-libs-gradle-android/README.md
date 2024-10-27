@@ -20,6 +20,7 @@ gradlew.bat --refresh-dependencies
 
 To build from the command line run:  
 gradlew.bat build -x test --rerun-tasks    
+
   
 To build the release aar libs which can be used for the VS project:  
 gradlew.bat assembleRelease -x test --rerun-tasks  
