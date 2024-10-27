@@ -15,6 +15,10 @@ Python 3.11+
 install dependencies:  
 python -m pip install python-interface typeguard pycryptodome wrapt  
   
+to run tests from command line:
+cd libs\test\salmon_fs_test_python\
+python -m unittest -v salmon_fs_tests.SalmonFSTests.test_AuthorizedPositive
+  
 to package:  
 dos2unix package_salmon_fs.sh  
 ./package_salmon_fs.sh  
