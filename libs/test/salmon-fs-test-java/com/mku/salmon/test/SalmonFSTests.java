@@ -64,7 +64,8 @@ public class SalmonFSTests {
 
         // remote drive
         // make sure you turn on the web service either manually
-        // or by running test case SalmonWSTests.testStartServer
+        // or start the test case from gradle:
+        // gradlew.bat :salmon-ws:test --tests "com.mku.salmon.ws.fs.service.test.SalmonWSTests.testStartServer" --rerun-tasks
         SalmonFSTestHelper.setDriveClassType(JavaWSDrive.class);
 
 		//SalmonCoreTestHelper.TEST_ENC_BUFFER_SIZE = 1 * 1024 * 1024;
