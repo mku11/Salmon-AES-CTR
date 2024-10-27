@@ -20,7 +20,7 @@
     <DocumentationFile></DocumentationFile>
     <ImplicitUsings>false</ImplicitUsings>
     <LangVersion>10</LangVersion>
-    <Version>2.1.0</Version>
+    <Version>2.2.0</Version>
   </PropertyGroup>
 
 	<ItemGroup>
