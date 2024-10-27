@@ -33,20 +33,22 @@ public class Main {
     }
 
     public static void main(String[] args) throws Exception {
-        // uncomment to load the AES intrinsics for better performance
-        // make sure you add option -Djava.library.path=C:\path\to\salmonlib\
-        // SalmonStream.setAesProviderType(ProviderType.AesIntrinsics);
+        // uncomment to load the native AES library for better performance
+        // make sure you add jvm option: -Djava.library.path=C:\path\to\salmonlib\
+        SalmonStream.setAesProviderType(ProviderType.AesIntrinsics);
 
-        // use the password to create a drive and import the file
-        String vaultPath = "vault_" + BitConverter.toHex(SalmonGenerator.getSecureRandomBytes(6));
-        JavaFile vaultDir = new JavaFile(vaultPath);
+        JavaFile dir = new JavaFile("output");
+
+        // create a drive with a password and import a file
+        String vault = "vault_" + BitConverter.toHex(SalmonGenerator.getSecureRandomBytes(6));
+        IRealFile vaultDir = dir.createDirectory(vault);
 		vaultDir.mkdir();
         JavaFile[] filesToImport = new JavaFile[]{new JavaFile("data/file.txt")};
         createDriveAndImportFile(vaultDir, filesToImport);
 
         // or encrypt text into a standalone file without a drive:
         String filePath = "data_" + BitConverter.toHex(SalmonGenerator.getSecureRandomBytes(6));
-        JavaFile file = new JavaFile(filePath);
+        IRealFile file = dir.createFile(filePath);
         encryptAndDecryptTextToFile(file);
 
         // misc stream samples

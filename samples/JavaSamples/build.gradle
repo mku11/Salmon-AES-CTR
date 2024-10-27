@@ -8,11 +8,11 @@ version '2.1.0'
 repositories {
     maven {
         // uncomment for local repo
-        // allowInsecureProtocol true
-        // url 'http://localhost/repository/maven/releases'
+        allowInsecureProtocol true
+        url 'http://localhost/repository/maven/releases'
 
         // official salmon repo
-        url 'https://github.com/mku11/Repo/raw/main/maven/releases'
+        // url 'https://github.com/mku11/Repo/raw/main/maven/releases'
     }
     mavenCentral()
 }
@@ -29,8 +29,8 @@ dependencies {
     testRuntimeOnly 'org.junit.jupiter:junit-jupiter-engine:5.8.1'
 
     // salmon libs:
-    implementation 'com.mku.salmon:salmon-core:2.1.0'
-    implementation 'com.mku.salmon:salmon-fs:2.1.0'
+    implementation 'com.mku.salmon:salmon-core:2.2.0'
+    implementation 'com.mku.salmon:salmon-fs:2.2.0'
     // optional fast AES intrinsics and Tiny AES:
     implementation 'com.mku.salmon:salmon-native:2.1.0:win-x86_64'
     nativeBundle 'com.mku.salmon:salmon-native:2.1.0:win-x86_64'
@@ -58,5 +58,6 @@ task run(type: JavaExec) {
     description = "Run Main"
     classpath = sourceSets.main.runtimeClasspath
     main = javaMainClass
+    // this will add the library path to the native lib
     systemProperty "java.library.path", "build/libs/natives/lib"
 }
