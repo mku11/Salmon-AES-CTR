@@ -42,7 +42,7 @@ extern const char* KERNEL_SRC;
 
 #define KERNEL_NAME "kernel_aes_transform_ctr"
 
-#define BLOCKS_PER_WORKITEM 4
+#define BLOCKS_PER_WORKITEM 1
 #define DISABLE_OPT 0
 
 bool init = false;
