@@ -64,7 +64,7 @@ public class SalmonWSApplication {
 	}
 
 	private static void printUsage() {
-		System.out.println("usage: java -cp salmon-ws-2.1.0.war org.springframework.boot.loader.WarLauncher /path/to/drive [-np]");
+		System.out.println("usage: java -cp salmon-ws-2.2.0.war org.springframework.boot.loader.WarLauncher /path/to/drive [-np]");
 		System.out.println("-np: do not ask for password, use addUser() if you start from a Java application");
 		System.out.println("-h: print usage");
 	}
