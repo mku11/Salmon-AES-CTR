@@ -29,7 +29,7 @@ SOFTWARE.
 #elif defined(__aarch64__) && defined(__ARM_FEATURE_CRYPTO)
 #include <arm_neon.h>
 #include <arm_acle.h>
-#include "aes.h"
+#include "salmon-aes.h"
 #endif
 #include "salmon-aes-intr.h"
 
@@ -134,7 +134,7 @@ inline void load_round_keys(__m128i* kvr, __m128i* kv) {
 }
 
 // group SIMD ops calls for more efficient CPU pipelining
-inline void load_counters(__m128i* dest, unsigned char* counter) {
+inline static void load_counters(__m128i* dest, unsigned char* counter) {
 	#pragma unroll
 	for(int i=0; i<CHUNKS; i++) {
 		dest[i] = _mm_loadu_si128(&((__m128i*) counter)[0]);
@@ -244,6 +244,29 @@ aes_intr_transform(const unsigned char* text, unsigned char* cipher, int length,
 	vtext = vaeseq_u8(vtext, (uint8x16_t)vld1q_u8(keys + (rounds - 1) * AES_BLOCK_SIZE));
 	vtext = veorq_u8(vtext, (uint8x16_t)vld1q_u8(keys + rounds * AES_BLOCK_SIZE));
 	vst1q_u8(cipher, vtext);
+}
+// https://en.wikipedia.org/wiki/Block_cipher_mode_of_operation#Counter_(CTR)
+int aes_intr_transform_ctr(const unsigned char* key, unsigned char* counter,
+	unsigned char* srcBuffer, int srcOffset,
+	unsigned char* destBuffer, int destOffset, int count) {
+	unsigned char encCounter[AES_BLOCK_SIZE];
+
+	int totalBytes = 0;
+	for (int i = 0; i < count; i += AES_BLOCK_SIZE) {
+		for (int j = 0; j < AES_BLOCK_SIZE; j++) {
+			encCounter[j] = counter[j];
+		}
+
+		aes_transform((unsigned char(*)[4]) encCounter, key);
+		for (int k = 0; k < AES_BLOCK_SIZE && i + k < count; k++) {
+			destBuffer[destOffset + i + k] = srcBuffer[srcOffset + i + k] ^ encCounter[k];
+			totalBytes++;
+		}
+		if (increment_counter(1, counter) < 0)
+			return -1;
+	}
+
+	return totalBytes;
 }
 #else
 void aes_intr_transform(const unsigned char* text, unsigned char* cipher, int length, unsigned char* keys, int rounds) {}
