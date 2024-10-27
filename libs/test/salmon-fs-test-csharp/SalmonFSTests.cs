@@ -35,7 +35,6 @@ using Mku.Salmon.Utils;
 using Mku.Salmon.Sequence;
 using Mku.Salmon.Streams;
 using Mku.Salmon.Drive;
-using static System.Net.WebRequestMethods;
 
 namespace Mku.Salmon.Test;
 
@@ -44,10 +43,14 @@ public class SalmonFSTests
 {
     static SalmonFSTests()
     {
-        // SalmonFSTestHelper.DriveClassType = typeof(DotNetDrive);
+        SalmonStream.AesProviderType = ProviderType.AesIntrinsics;
+
+        SalmonFSTestHelper.DriveClassType = typeof(DotNetDrive);
         // remote drive
         // make sure you turn on the web service manually
-        SalmonFSTestHelper.DriveClassType = typeof(DotNetWSDrive);
+        // or start the test case from gradle:
+        // gradlew.bat :salmon-ws:test --tests "com.mku.salmon.ws.fs.service.test.SalmonWSTests.testStartServer" --rerun-tasks
+        // SalmonFSTestHelper.DriveClassType = typeof(DotNetWSDrive);
     }
 
 
