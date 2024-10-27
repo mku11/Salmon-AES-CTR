@@ -6,7 +6,7 @@ plugins {
 
 group 'com.mku.salmon'
 description = 'Salmon AES256 CTR android filesystem encryption library'
-version '2.1.0'
+version '2.2.0'
 
 repositories {
     maven {
@@ -50,8 +50,8 @@ android {
 
 dependencies {
     implementation 'androidx.documentfile:documentfile:1.0.1'
-    implementation 'com.mku.salmon:salmon-core:2.1.0'
-    implementation 'com.mku.salmon:salmon-fs:2.1.0'
+    implementation 'com.mku.salmon:salmon-core:2.2.0'
+    implementation 'com.mku.salmon:salmon-fs:2.2.0'
 }
 
 task sourcesJar(type: Jar) {
