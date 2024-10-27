@@ -51,22 +51,17 @@
 		<Compile Include="..\..\..\src\csharp\SalmonCore\Salmon\Password\PbkdfAlgo.cs" Link="Salmon\Password\PbkdfAlgo.cs" />
 		<Compile Include="..\..\..\src\csharp\SalmonCore\Salmon\Password\PbkdfType.cs" Link="Salmon\Password\PbkdfType.cs" />
 		<Compile Include="..\..\..\src\csharp\SalmonCore\Salmon\Password\SalmonPassword.cs" Link="Salmon\Password\SalmonPassword.cs" />
+		
+		<Compile Include="..\..\..\src\csharp\SalmonCore\Salmon\Text\SalmonTextDecryptor.cs" Link="Salmon\Text\SalmonTextDecryptor.cs" />
+		<Compile Include="..\..\..\src\csharp\SalmonCore\Salmon\Text\SalmonTextEncryptor.cs" Link="Salmon\Text\SalmonTextEncryptor.cs" />
 
-
-    <Compile Include="..\..\..\src\csharp\SalmonCore\Salmon\Transform\ISalmonCTRTransformer.cs" Link="Salmon\Transform\ISalmonCTRTransformer.cs" />
-    <Compile Include="..\..\..\src\csharp\SalmonCore\Salmon\Transform\SalmonAES256CTRTransformer.cs" Link="Salmon\Transform\SalmonAES256CTRTransformer.cs" />
-    <Compile Include="..\..\..\src\csharp\SalmonCore\Salmon\Transform\SalmonDefaultTransformer.cs" Link="Salmon\Transform\SalmonDefaultTransformer.cs" />
-    <Compile Include="..\..\..\src\csharp\SalmonCore\Salmon\Transform\SalmonNativeTransformer.cs" Link="Salmon\Transform\SalmonNativeTransformer.cs" />
-    <Compile Include="..\..\..\src\csharp\SalmonCore\Salmon\Transform\SalmonTransformerFactory.cs" Link="Salmon\Transform\SalmonTransformerFactory.cs" />
 
 		<Compile Include="..\..\..\src\csharp\SalmonCore\Bridge\INativeProxy.cs" Link="Bridge\INativeProxy.cs" />
 		<Compile Include="..\..\..\src\csharp\SalmonCore\Salmon\Bridge\NativeProxy.cs" Link="Salmon\Bridge\NativeProxy.cs" />
 		<Compile Include="..\..\..\src\csharp\SalmonCore\Salmon\Transform\ISalmonCTRTransformer.cs" Link="Salmon\Transform\ISalmonCTRTransformer.cs" />
 		<Compile Include="..\..\..\src\csharp\SalmonCore\Salmon\Transform\SalmonAES256CTRTransformer.cs" Link="Salmon\Transform\SalmonAES256CTRTransformer.cs" />
-		<Compile Include="..\..\..\src\csharp\SalmonCore\Salmon\Transform\SalmonAesIntrTransformer.cs" Link="Salmon\Transform\SalmonAesIntrTransformer.cs" />
 		<Compile Include="..\..\..\src\csharp\SalmonCore\Salmon\Transform\SalmonDefaultTransformer.cs" Link="Salmon\Transform\SalmonDefaultTransformer.cs" />
 		<Compile Include="..\..\..\src\csharp\SalmonCore\Salmon\Transform\SalmonNativeTransformer.cs" Link="Salmon\Transform\SalmonNativeTransformer.cs" />
-		<Compile Include="..\..\..\src\csharp\SalmonCore\Salmon\Transform\TinyAesTransformer.cs" Link="Salmon\Transform\TinyAesTransformer.cs" />
 		<Compile Include="..\..\..\src\csharp\SalmonCore\Salmon\Transform\SalmonTransformerFactory.cs" Link="Salmon\Transform\SalmonTransformerFactory.cs" />
 
 		<Compile Include="..\..\..\src\csharp\SalmonCore\Salmon\SalmonDecryptor.cs" Link="Salmon\SalmonDecryptor.cs" />
