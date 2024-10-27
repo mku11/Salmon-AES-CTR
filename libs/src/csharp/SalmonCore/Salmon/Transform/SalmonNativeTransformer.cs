@@ -24,6 +24,9 @@ SOFTWARE.
 
 using Mku.Bridge;
 using Mku.Salmon.Bridge;
+using System.Diagnostics.Metrics;
+using System.Reflection.Metadata;
+using System.Security.Cryptography;
 
 namespace Mku.Salmon.Transform;
 
@@ -38,6 +41,8 @@ public class SalmonNativeTransformer : SalmonAES256CTRTransformer
     /// Default is the Salmon Native windows proxy.
     /// </summary>
     public static INativeProxy NativeProxy { get; set; }  = new NativeProxy();
+
+    private static readonly object lockObj = new object();
 
     /// <summary>
     ///  AES Implementation type
@@ -82,9 +87,22 @@ public class SalmonNativeTransformer : SalmonAES256CTRTransformer
     public int EncryptData(byte[] srcBuffer, int srcOffset,
                            byte[] destBuffer, int destOffset, int count)
     {
-        return NativeProxy.SalmonTransform(ExpandedKey, Counter,
+        // we block for AES GPU since it's not entirely thread safe
+        if (ImplType == 3)
+        {
+            lock (lockObj)
+            {
+                return NativeProxy.SalmonTransform(ExpandedKey, Counter,
                 srcBuffer, srcOffset,
                 destBuffer, destOffset, count);
+            }
+        }
+        else
+        {
+            return NativeProxy.SalmonTransform(ExpandedKey, Counter,
+                srcBuffer, srcOffset,
+                destBuffer, destOffset, count);
+        }
     }
 
     /// <summary>
@@ -100,8 +118,20 @@ public class SalmonNativeTransformer : SalmonAES256CTRTransformer
     public int DecryptData(byte[] srcBuffer, int srcOffset,
                             byte[] destBuffer, int destOffset, int count)
     {
-        return NativeProxy.SalmonTransform(ExpandedKey, Counter,
+        // we block for AES GPU since it's not entirely thread safe
+        if (ImplType == 3)
+        {
+            lock (lockObj)
+            {
+                return NativeProxy.SalmonTransform(ExpandedKey, Counter,
                 srcBuffer, srcOffset,
                 destBuffer, destOffset, count);
+            }
+        } else
+        {
+            return NativeProxy.SalmonTransform(ExpandedKey, Counter,
+                srcBuffer, srcOffset,
+                destBuffer, destOffset, count);
+        }
     }
 }

@@ -27,7 +27,7 @@ from salmon_core.salmon.bridge.native_proxy import NativeProxy
 from salmon_core.salmon.transform.salmon_aes256_ctr_transformer import SalmonAES256CTRTransformer
 
 from typeguard import typechecked
-
+from threading import RLock
 
 @typechecked
 class SalmonNativeTransformer(SalmonAES256CTRTransformer):
@@ -41,6 +41,8 @@ class SalmonNativeTransformer(SalmonAES256CTRTransformer):
     The native proxy to use for loading libraries for different platforms and operating systems.
     """
 
+    __lock_object: RLock = RLock()
+    
     __implType: int = 1
 
     @staticmethod
@@ -84,7 +86,14 @@ class SalmonNativeTransformer(SalmonAES256CTRTransformer):
         :return: The number of bytes transformed.
         """
 
-        return SalmonNativeTransformer.__nativeProxy.salmon_transform(self.get_expanded_key(), self.get_counter(),
+        # we block for AES GPU since it's not entirely thread safe
+        if self.__implType == 3:
+            with SalmonNativeTransformer.__lock_object:
+                return SalmonNativeTransformer.__nativeProxy.salmon_transform(self.get_expanded_key(), self.get_counter(),
+                                                                      src_buffer, src_offset,
+                                                                      dest_buffer, dest_offset, count)
+        else:
+            return SalmonNativeTransformer.__nativeProxy.salmon_transform(self.get_expanded_key(), self.get_counter(),
                                                                       src_buffer, src_offset,
                                                                       dest_buffer, dest_offset, count)
 
@@ -99,7 +108,14 @@ class SalmonNativeTransformer(SalmonAES256CTRTransformer):
         :param count: The number of bytes to transform.
         :return: The number of bytes transformed.
         """
-
-        return SalmonNativeTransformer.__nativeProxy.salmon_transform(self.get_expanded_key(), self.get_counter(),
+        
+        # we block for AES GPU since it's not entirely thread safe
+        if self.__implType == 3:
+            with SalmonNativeTransformer.__lock_object:
+                return SalmonNativeTransformer.__nativeProxy.salmon_transform(self.get_expanded_key(), self.get_counter(),
+                                                                      src_buffer, src_offset,
+                                                                      dest_buffer, dest_offset, count)
+        else:
+            return SalmonNativeTransformer.__nativeProxy.salmon_transform(self.get_expanded_key(), self.get_counter(),
                                                                       src_buffer, src_offset,
                                                                       dest_buffer, dest_offset, count)

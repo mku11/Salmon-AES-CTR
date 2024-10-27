@@ -34,6 +34,8 @@ import com.mku.salmon.bridge.NativeProxy;
 public class SalmonNativeTransformer extends SalmonAES256CTRTransformer {
     private static INativeProxy nativeProxy = new NativeProxy();
 
+    private static final Object lockObj = new Object();
+	
     /**
      * The native proxy to use for loading libraries for different platforms and operating systems.
      * @param proxy The proxy
@@ -94,9 +96,23 @@ public class SalmonNativeTransformer extends SalmonAES256CTRTransformer {
             throw new SalmonSecurityException("No key found, run init first");
         if (getCounter() == null) //TODO: ToSync
             throw new SalmonSecurityException("No counter found, run init first");
-        return nativeProxy.salmonTransform(getExpandedKey(), getCounter(),
+		
+		// we block for AES GPU since it's not entirely thread safe
+        if (implType == 3)
+		{
+			synchronized (lockObj)
+			{
+				return nativeProxy.salmonTransform(getExpandedKey(), getCounter(),
                 srcBuffer, srcOffset,
                 destBuffer, destOffset, count);
+			}
+		}
+		else
+		{
+			return nativeProxy.salmonTransform(getExpandedKey(), getCounter(),
+                srcBuffer, srcOffset,
+                destBuffer, destOffset, count);
+		}
     }
 
     /**
@@ -115,8 +131,22 @@ public class SalmonNativeTransformer extends SalmonAES256CTRTransformer {
             throw new SalmonSecurityException("No key found, run init first");
         if (getCounter() == null) //TODO: ToSync
             throw new SalmonSecurityException("No counter found, run init first");
-        return nativeProxy.salmonTransform(getExpandedKey(), getCounter(),
+		
+		// we block for AES GPU since it's not entirely thread safe
+		if (implType == 3)
+		{
+			synchronized (lockObj)
+			{
+				return nativeProxy.salmonTransform(getExpandedKey(), getCounter(),
                 srcBuffer, srcOffset,
                 destBuffer, destOffset, count);
+			}
+		}
+		else
+		{
+			return nativeProxy.salmonTransform(getExpandedKey(), getCounter(),
+                srcBuffer, srcOffset,
+                destBuffer, destOffset, count);
+		}
     }
 }
