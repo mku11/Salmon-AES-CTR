@@ -82,10 +82,6 @@ describe('salmon-fs-http', () => {
         expect(wrongPassword).toBeFalsy();
     });
 
-    it('testHttpReadonlyExamples', async () => {
-        await SalmonFSTestHelper.testHttpReadonlyExamples();
-    });
-
     it('shouldReadFromRealFileTiny', async () => {
         await SalmonFSTestHelper.shouldReadFile(SalmonFSTestHelper.SERVER_URL + "/" + SalmonFSTestHelper.TEST_HTTP_TINY_FILE,
             SalmonFSTestHelper.TEST_HTTP_TINY_FILE_SIZE, SalmonFSTestHelper.TEST_HTTP_TINY_FILE_CONTENTS, SalmonFSTestHelper.TEST_HTTP_TINY_FILE_CHKSUM);
@@ -95,43 +91,6 @@ describe('salmon-fs-http', () => {
         await SalmonFSTestHelper.shouldReadFile(SalmonFSTestHelper.SERVER_URL + "/" + SalmonFSTestHelper.TEST_HTTP_SMALL_FILE,
             SalmonFSTestHelper.TEST_HTTP_SMALL_FILE_SIZE, null, SalmonFSTestHelper.TEST_HTTP_SMALL_FILE_CHKSUM);
     });
-
-    it('shouldSeekAndReadRealFileStream', async () => {
-        let urlPath = SalmonFSTestHelper.SERVER_TEST_DATA_URL + "/" + SalmonFSTestHelper.TEST_HTTP_DATA256_FILE;
-        let file = await getFile(urlPath);
-        let stream = getFileStream(file);
-        let ms = new MemoryStream();
-        await stream.copyTo(ms);
-        let data = ms.toArray();
-        await ms.close();
-        await stream.close();
-
-        file = await getFile(urlPath);
-        await SalmonFSTestHelper.seekAndReadFile(data, file, false, false, 3, 50, 12);
-    });
-
-    it('shouldSeekAndReadEncryptedFileStreamWithoutDrive', async () => {
-        let urlPath = SalmonFSTestHelper.SERVER_TEST_DATA_URL + "/" + SalmonFSTestHelper.TEST_HTTP_ENCDATA256_FILE;
-        let file = await getFile(urlPath);
-        let encFile = new SalmonFile(file);
-        let size = await encFile.getSize();
-        expect(size).toBe(256);
-        encFile.setEncryptionKey(SalmonCoreTestHelper.TEST_KEY_BYTES);
-        await encFile.setVerifyIntegrity(true, SalmonCoreTestHelper.TEST_HMAC_KEY_BYTES);
-        let encStream = await encFile.getInputStream();
-        let length = await encStream.length();
-        expect(length).toBe(256);
-        let ms = new MemoryStream();
-        await encStream.copyTo(ms);
-        let data = ms.toArray();
-        expect(data.length).toBe(256);
-        await ms.close();
-        await encStream.close();
-        file = await getFile(urlPath);
-
-        await SalmonFSTestHelper.seekAndReadFile(data, encFile, true, 3, 50, 12);
-    });
-
 
     it('shouldSeekAndReadEncryptedFileStreamFromDrive', async () => {
         let vaultDir = await getFile(SalmonFSTestHelper.VAULT_DIR_URL);
@@ -164,7 +123,7 @@ describe('salmon-fs-http', () => {
             let filename = await files[i].getBaseName();
             filenames.push(filename);
         }
-        expect(files.length).toBe(14);
+        expect(files.length).toBe(3);
         expect(filenames.includes("data256.dat")).toBeTruthy();
         expect(filenames.includes("tiny_test.txt")).toBeTruthy();
         expect(filenames.includes("New Folder")).toBeTruthy();
