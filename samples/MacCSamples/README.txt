@@ -16,4 +16,4 @@ MacCSamples
 
 To build and run use xcode
 make sure you update DYLD_LIBRARY_PATH and set the path to libsalmon.dylib
-
+or copy it to /usr/local/lib
