@@ -297,9 +297,13 @@ void aes_opencl_key_expand(const unsigned char* userkey, unsigned char* key) {}
 
 int aes_opencl_transform(const unsigned char* key, unsigned char* counter,
 	unsigned char* srcBuffer, int srcOffset,
-	unsigned char* destBuffer, int destOffset, int count) {}
+	unsigned char* destBuffer, int destOffset, int count) {
+	return 0;
+}
 
 int aes_opencl_transform_ctr(const unsigned char* key, unsigned char* counter,
     unsigned char* srcBuffer, int srcOffset,
-    unsigned char* destBuffer, int destOffset, int count) {}
+	unsigned char* destBuffer, int destOffset, int count) {
+	return 0;
+}
 #endif // USE_OPENCL
