@@ -12,6 +12,8 @@ from salmon_core.convert.bit_converter import BitConverter
 from salmon_core.streams.memory_stream import MemoryStream
 from salmon_core.streams.random_access_stream import RandomAccessStream
 from salmon_core.salmon.streams.encryption_mode import EncryptionMode
+from salmon_core.salmon.bridge.native_proxy import NativeProxy
+from salmon_core.salmon.streams.provider_type import ProviderType
 from salmon_core.salmon.streams.salmon_stream import SalmonStream
 from salmon_core.salmon.password.salmon_password import SalmonPassword
 from salmon_core.salmon.salmon_decryptor import SalmonDecryptor
@@ -39,8 +41,8 @@ def main():
     # uncomment to load the AES intrinsics for better performance
     # you can download the native libraries for your architecture from:
     # https:#github.com/mku11/Salmon-AES-CTR
-    # NativeProxy.set_library_path("../../projects/salmon-libs-gradle/salmon-native/build/libs/salmon/shared/salmon.dll")
-    # SalmonStream.set_aes_provider_type(ProviderType.AesIntrinsics)
+    #NativeProxy.set_library_path("../../libs/projects/salmon-libs-gradle/salmon-native/build/libs/salmon/shared/salmon.dll")
+    #SalmonStream.set_aes_provider_type(ProviderType.AesIntrinsics)
 
     # use the password to create a drive and import a file
     vault_path: str = "vault_" + BitConverter.to_hex(SalmonGenerator.get_secure_random_bytes(6))
