@@ -16,7 +16,7 @@ dependencies = [
   'python-interface >= 1.6.1',
   'typeguard >= 4.1.5',
   'pycryptodome >= 3.19.0',
-  'salmon_core == 2.1.0',
+  'salmon_core == 2.2.0',
   'wrapt >= 1.16.0',
 ]
 
