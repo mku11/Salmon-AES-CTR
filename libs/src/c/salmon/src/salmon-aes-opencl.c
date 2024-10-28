@@ -292,7 +292,7 @@ int aes_opencl_transform_ctr(const unsigned char* key, unsigned char* counter,
 	return aes_opencl_transform(key, counter, srcBuffer, srcOffset, destBuffer, destOffset, count);
 }
 #else
-int init_opencl() {}
+int init_opencl() { return 0; }
 void aes_opencl_key_expand(const unsigned char* userkey, unsigned char* key) {}
 
 int aes_opencl_transform(const unsigned char* key, unsigned char* counter,
