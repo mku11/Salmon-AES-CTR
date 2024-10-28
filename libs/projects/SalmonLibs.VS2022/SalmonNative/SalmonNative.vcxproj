@@ -110,12 +110,12 @@
     <ClCompile>
       <WarningLevel>Level3</WarningLevel>
       <SDLCheck>true</SDLCheck>
-      <PreprocessorDefinitions>_DEBUG;SALMONNATIVE_EXPORTS;_WINDOWS;_USRDLL;%(PreprocessorDefinitions);AES256=1;USE_OPENCL=1;CL_TARGET_OPENCL_VERSION=200</PreprocessorDefinitions>
+      <PreprocessorDefinitions>_DEBUG;_WINDOWS;_USRDLL;%(PreprocessorDefinitions);USE_OPENCL=1;CL_TARGET_OPENCL_VERSION=120;_CRT_SECURE_NO_WARNINGS</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
       <PrecompiledHeader>NotUsing</PrecompiledHeader>
       <PrecompiledHeaderFile>pch.h</PrecompiledHeaderFile>
       <IntrinsicFunctions>true</IntrinsicFunctions>
-      <AdditionalIncludeDirectories>D:\tools\OpenCL-SDK-v2024.05.08-Win-x64\include;$(ProjectDir)\include;$(ProjectDir)\..\..\..\src\c\salmon\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>D:\tools\OpenCL-SDK-v2024.05.08-Win-x64\include;$(ProjectDir)\..\..\..\src\c\salmon\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <DisableSpecificWarnings>4996</DisableSpecificWarnings>
       <CompileAs>Default</CompileAs>
       <CallingConvention>Cdecl</CallingConvention>
@@ -133,7 +133,6 @@
       <Message>Creating nuget package</Message>
     </PostBuildEvent>
     <PreBuildEvent>
-      
     </PreBuildEvent>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
@@ -142,11 +141,11 @@
       <FunctionLevelLinking>true</FunctionLevelLinking>
       <IntrinsicFunctions>true</IntrinsicFunctions>
       <SDLCheck>true</SDLCheck>
-      <PreprocessorDefinitions>NDEBUG;SALMONNATIVE_EXPORTS;_WINDOWS;_USRDLL;%(PreprocessorDefinitions);USE_TINY_AES;AES256=1</PreprocessorDefinitions>
+      <PreprocessorDefinitions>NDEBUG;_WINDOWS;_USRDLL;%(PreprocessorDefinitions);USE_OPENCL=1;CL_TARGET_OPENCL_VERSION=120;_CRT_SECURE_NO_WARNINGS</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
       <PrecompiledHeader>NotUsing</PrecompiledHeader>
       <PrecompiledHeaderFile>pch.h</PrecompiledHeaderFile>
-      <AdditionalIncludeDirectories>$(ProjectDir)\..\..\..\src\c\tiny-AES-c;D:\tools\OpenCL-SDK-v2024.05.08-Win-x64\include;$(ProjectDir)\..\..\..\src\c\opencl-aes;$(ProjectDir)\..\..\..\src\c\salmon\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>D:\tools\OpenCL-SDK-v2024.05.08-Win-x64\include;$(ProjectDir)\..\..\..\src\c\salmon\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
@@ -154,6 +153,7 @@
       <OptimizeReferences>true</OptimizeReferences>
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <EnableUAC>false</EnableUAC>
+      <AdditionalDependencies>D:\tools\OpenCL-SDK-v2024.05.08-Win-x64\lib\OpenCL.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
     <PostBuildEvent>
       <Command>NuGet.exe pack SalmonNative.nuspec -outputDir ..\..\..\..\output\nuget\releases</Command>
