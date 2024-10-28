@@ -36,7 +36,7 @@ else
   CFLAGS+=-maes
 endif
 
-VERSION=2.0.0
+VERSION=2.2.0
 PACKAGES_DIR=packages
 PACKAGE_NAME=salmon-$(PLATFORM)-$(ARCH).$(VERSION)
 PACKAGE_FILE=$(PACKAGE_NAME).tar.gz
