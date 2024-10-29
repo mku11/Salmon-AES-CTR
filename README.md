@@ -21,6 +21,7 @@ Virtual file system API
 Nonce sequencer in app sandbox (Android Only)  
 Nonce sequencer with SHA-256 chksum (Windows Only)  
 Nonce sequencer via windows service (Windows Only)  
+Experimental Spring Web Service for use with remote drives (Java and C# clients only)
 
 ### So why another encryption library?  
 **Native implementation:**  
@@ -64,6 +65,32 @@ You can also create your own secure nonce sequencers by implemented the interfac
 Salmon supports random access unlike GCM.  
 Salmon supports authentication unlike XTS.  
 Salmon supports hardware acceleration unlike Salsa20 and Chacha20.  
+
+**Benchmarks**  
+How fast is Salmon?
+
+jmh benchmark on old hw shows salmon is 2x faster than OpenJDK 11 javax.crypto and 3x faster than Bouncy castle:
+Data size: 32MB
+Benchmark                                              Mode  Cnt   Score   Error  Units
+SalmonBenchmark.EncryptAndDecryptSalmonNativeAesIntr  thrpt       22.008          ops/s
+SalmonBenchmark.EncryptAndDecryptSysBouncyCastle      thrpt        6.457          ops/s
+SalmonBenchmark.EncryptAndDecryptSysDefault           thrpt       12.371          ops/s
+
+C# benchmark on old hw shows salmon is 2x faster than .NET 7 System.Security.Cryptography:
+Data size: 32MB
+EncryptAndDecryptPerfSysDefault
+Time ms:
+ enc: 682
+ dec: 548
+ Total: 1230
+
+EncryptAndDecryptPerfSalmonNativeAesIntrinsics
+Time ms:
+ enc time: 253
+ dec time: 253
+ Total: 506
+ 
+Do you need more speed? Use SalmonEncryptor/SalmonDecryptor with multiple threads. 
 
 **Languages:**  
 Java 11+  

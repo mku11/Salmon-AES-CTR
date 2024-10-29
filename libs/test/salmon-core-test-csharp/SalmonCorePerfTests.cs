@@ -31,7 +31,7 @@ namespace Mku.Salmon.Test;
 [TestClass]
 public class SalmonCorePerfTests
 {
-    public static int TEST_PERF_SIZE = 4 * 1024 * 1024;
+    public static int TEST_PERF_SIZE = 32 * 1024 * 1024;
 
     static SalmonCorePerfTests() {
         //SalmonCoreTestHelper.TEST_ENC_BUFFER_SIZE = 8 * 1024 * 1024;
