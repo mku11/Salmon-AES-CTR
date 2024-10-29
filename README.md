@@ -15,7 +15,7 @@ AES-256 encryption in CTR Mode
 HMAC SHA-256 authentication  
 SHA-256 PBKDF2 key derivation    
 AES-NI for Intel x86 and ARM64  
-AES GPU support with OpenCL
+AES GPU support with OpenCL  
 Data and seekable stream encryption API  
 Virtual file system API  
 Nonce sequencer in app sandbox (Android Only)  
