@@ -15,6 +15,7 @@ AES-256 encryption in CTR Mode
 HMAC SHA-256 authentication  
 SHA-256 PBKDF2 key derivation    
 AES-NI for Intel x86 and ARM64  
+AES GPU support with OpenCL
 Data and seekable stream encryption API  
 Virtual file system API  
 Nonce sequencer in app sandbox (Android Only)  
@@ -132,9 +133,4 @@ Salmon is released under MIT Licence, see [LICENSE](https://github.com/mku11/Sal
 Make sure you read the LICENSE file and display proper attribution if you decide to use this software.
 Dependency libraries from Github, Maven, and NuGet are covered by their own license  
 see [NOTICE](https://github.com/mku11/Salmon-AES-CTR/blob/main/NOTICE)  
-
-**In Progress**  
-Next release: v2.2.0  
-- AES GPU acceleration  
-- Salmon AES intrinsics optimization  
-- Remote encrypted drives support (REST API Web Service)
+  
