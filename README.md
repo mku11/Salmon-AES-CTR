@@ -125,6 +125,9 @@ Intel x86_64
 ARM64  
 
 **Salmon API Samples**  
+  
+##### Salmon Core API: #####
+
 ```
 // Simple encryption and decryption of byte array
 byte[] key = SalmonGenerator.getSecureRandomBytes(32); // Generate a secure random key, keep this somewhere safe.
@@ -138,6 +141,18 @@ encryptor.close();
 SalmonDecryptor decryptor = new SalmonDecryptor(2); // use 2 threads to decrypt
 byte[] decBytes = decryptor.decrypt(encBytes, key, nonce, false);
 decryptor.close();
+```
+
+##### Salmon FS API: #####
+```
+// Create a sequencer. Make sure this path is secure and excluded from your backups.
+String sequencerPath = "c:\\users\\<username>\\AppData\\Local\\<somefolder>\\salmon_sequencer.xml";
+SalmonFileSequencer sequencer = new SalmonFileSequencer(new JavaFile(sequencerPath), new SalmonSequenceSerializer());
+
+// create() or open() a virtual drive provided with a location and a text password
+// Supported drives: JavaDrive, DotNetDrive, PyDrive, JsDrive, JsHttpDrive (remote), JsNodeDrive (node.js)
+SalmonDrive drive = JavaDrive.create(new JavaFile("c:\\path\\to\\your\\virtual\\drive"), password, sequencer);
+// you can now import files, create and list directories, for more info see the samples documentation
 ```
 
 For more Java Samples including the Salmon FS API see: [Samples Documentation](https://github.com/mku11/Salmon-AES-CTR/tree/main/docs/Samples.md)  
