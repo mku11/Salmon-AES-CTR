@@ -71,7 +71,9 @@ How fast is Salmon?
   
 jmh benchmark shows that salmon is almost 2x faster than OpenJDK 11 javax.crypto and 3x faster than Bouncy castle:  
 ```
+CPU: Intel i7 @2.00GHz
 Data size: 32MB  
+
 Benchmark                                              Mode  Cnt   Score   Error  Units  
 SalmonBenchmark.EncryptAndDecryptSalmonNativeAesIntr  thrpt       22.008          ops/s  
 SalmonBenchmark.EncryptAndDecryptSysBouncyCastle      thrpt        6.457          ops/s  
@@ -81,7 +83,9 @@ SalmonBenchmark.EncryptAndDecryptSysDefault           thrpt       12.371        
 C# benchmark shows that salmon is 2x faster than .NET 7 System.Security.Cryptography:  
 
 ```
+CPU: Intel i7 @2.00GHz
 Data size: 32MB  
+
 EncryptAndDecryptPerfSysDefault (System.Security.Cryptography)  
 Time ms:  
  enc: 682  
