@@ -149,9 +149,9 @@ or the [**Live Web Demo**](https://mku11.github.io/Salmon-Vault/demo).
 **Salmon API Reference Documentation**  
 The API ref documentation is not complete but nontheless helpful:  
 [Java](https://mku11.github.io/Salmon-AES-CTR/docs/2.1.0/java/html/)
- | [C#](https://mku11.github.io/Salmon-AES-CTR/docs/2.1.0/java/csharp/html/namespaces.html)
- | [C](https://mku11.github.io/Salmon-AES-CTR/docs/2.1.0/java/c/html/files.html)
- | [JavaScript](https://mku11.github.io/Salmon-AES-CTR/docs/2.1.0/javascript/html/)
+ | [C#](https://mku11.github.io/Salmon-AES-CTR/docs/2.1.0/csharp/html/namespaces.html)
+ | [C](https://mku11.github.io/Salmon-AES-CTR/docs/2.1.0/c/html/files.html)
+ | [JavaScript](https://mku11.github.io/Salmon-AES-CTR/docs/2.1.0/javascript/html/Base64.html)
  | [Python](https://mku11.github.io/Salmon-AES-CTR/docs/2.1.0/python/html/namespaces.html)
 
 **Package Management**  
