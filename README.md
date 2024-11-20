@@ -70,15 +70,19 @@ Salmon supports hardware acceleration unlike Salsa20 and Chacha20.
 How fast is Salmon?  
   
 jmh benchmark on old hw shows salmon is almost 2x faster than OpenJDK 11 javax.crypto and 3x faster than Bouncy castle:  
+```
 Data size: 32MB  
 Benchmark                                              Mode  Cnt   Score   Error  Units  
 SalmonBenchmark.EncryptAndDecryptSalmonNativeAesIntr  thrpt       22.008          ops/s  
 SalmonBenchmark.EncryptAndDecryptSysBouncyCastle      thrpt        6.457          ops/s  
 SalmonBenchmark.EncryptAndDecryptSysDefault           thrpt       12.371          ops/s  
+```
   
 C# benchmark on old hw shows salmon is 2x faster than .NET 7 System.Security.Cryptography:  
+
+```
 Data size: 32MB  
-EncryptAndDecryptPerfSysDefault  
+EncryptAndDecryptPerfSysDefault (System.Security.Cryptography)  
 Time ms:  
  enc: 682  
  dec: 548  
@@ -89,6 +93,7 @@ Time ms:
  enc time: 253  
  dec time: 253  
  Total: 506  
+```
  
 Do you need more speed? Use SalmonEncryptor/SalmonDecryptor with multiple threads. 
 
