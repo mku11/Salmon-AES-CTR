@@ -104,10 +104,10 @@ Do you need more speed? Use SalmonEncryptor/SalmonDecryptor with multiple thread
 **Languages:**  
 Java 11+  
 C# .NET 7+  
-C/C++ (data only, no streams, no fs)  
 Python 3.11+  
 Typescript ESM/ES2020  
 Javascript ESM/ES2020  
+C/C++ (byte array enc/dec API only)  
   
 **Platforms:**  
 JavaFX 17+  
