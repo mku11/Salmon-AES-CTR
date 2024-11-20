@@ -125,10 +125,34 @@ Intel x86_64
 ARM64  
 
 **Salmon API Samples**  
-You can view some [Samples Documentation](https://github.com/mku11/Salmon-AES-CTR/tree/main/docs/Samples.md) for Java.  
-More [Samples](https://github.com/mku11/Salmon-AES-CTR/tree/main/samples) for C#, C, C++, JavaScript, and Python are included in the project so you can clone and run on your computer.  
-For a complete showcase of the Salmon API visit the [Salmon Vault App](https://github.com/mku11/Salmon-Vault) repository which contains a demo app offered on several different platforms.  
-Or view a [**Live Web Demo**](https://mku11.github.io/Salmon-Vault/demo) on your browser.  
+```
+// Simple encryption and decryption of byte array
+byte[] key = SalmonGenerator.getSecureRandomBytes(32); // Generate a secure random key, keep this somewhere safe.
+byte[] nonce = SalmonGenerator.getSecureRandomBytes(8); // Generate a nonce, this is not a secret though you need to use only once!
+byte[] bytes = ..; // data you want to encrypt
+
+SalmonEncryptor encryptor = new SalmonEncryptor(2); // use 2 threads to encrypt
+byte[] encBytes = encryptor.encrypt(bytes, key, nonce, false);
+encryptor.close();
+
+SalmonDecryptor decryptor = new SalmonDecryptor(2); // use 2 threads to decrypt
+byte[] decBytes = decryptor.decrypt(encBytes, key, nonce, false);
+decryptor.close();
+```
+
+For more Java Samples including the Salmon FS API see: [Samples Documentation](https://github.com/mku11/Salmon-AES-CTR/tree/main/docs/Samples.md)  
+For complete sample code for Java, C#, C, C++, Python, and JS: [Samples](https://github.com/mku11/Salmon-AES-CTR/tree/main/samples)  
+
+For a showcase of the Salmon API visit [Salmon Vault App](https://github.com/mku11/Salmon-Vault)
+or the [**Live Web Demo**](https://mku11.github.io/Salmon-Vault/demo).
+
+**Salmon API Reference Documentation**  
+The API ref documentation is not complete but nontheless helpful:  
+[Java](https://mku11.github.io/Salmon-AES-CTR/docs/2.1.0/java/html/)
+ | [C#](https://mku11.github.io/Salmon-AES-CTR/docs/2.1.0/java/csharp/namespaces.html)
+ | [C](https://mku11.github.io/Salmon-AES-CTR/docs/2.1.0/java/c/files.html)
+ | [JavaScript](https://mku11.github.io/Salmon-AES-CTR/docs/2.1.0/javascript/html/)
+ | [Python](https://mku11.github.io/Salmon-AES-CTR/docs/2.1.0/python/html/namespaces.html)
 
 **Package Management**  
 To learn how to integrate Salmon into your project with Maven, Gradle, or VS Studio see [Package Management](https://github.com/mku11/Salmon-AES-CTR/blob/main/docs/Package_Management.md)  

@@ -3,53 +3,11 @@ API usage is consistent across languages with slight variations on naming conven
   
 For detailed samples see: [**Samples**](https://github.com/mku11/Salmon-AES-CTR/tree/main/samples)  
 For an extensive use of the API see: [**Salmon Vault**](https://github.com/mku11/Salmon-Vault)  
+Salmon API reference docs: [Salmon API Docs](https://mku11.github.io/Salmon-AES-CTR/docs/)
   
 For short code samples see below.
 
-### SalmonFS API:
-```
-// Create a sequencer. Make sure this path is secure and excluded from your backups.
-String sequencerPath = "c:\\users\\<username>\\AppData\\Local\\<somefolder>\\salmon_sequencer.xml";
-SalmonFileSequencer sequencer = new SalmonFileSequencer(new JavaFile(sequencerPath), new SalmonSequenceSerializer());
-
-// create() or open() a virtual drive provided with a location and a text password
-// Supported drives: JavaDrive, DotNetDrive, PyDrive, JsDrive, JsHttpDrive (remote), JsNodeDrive (node.js)
-SalmonDrive drive = JavaDrive.create(new JavaFile("c:\\path\\to\\your\\virtual\\drive"), password, sequencer);
-
-// Create an importer with 2 threads for parallel processing
-SalmonFileCommander commander = new SalmonFileCommander(256 * 1024, 256 * 1024, 2);
-
-// you can create a batch of multiple files for encryption
-JavaFile[] files = new JavaFile[]{
-	new JavaFile("data/file1.txt"), 
-	new JavaFile("data/file2.jpg"), 
-	new JavaFile("data/file3.mp4")};
-
-// now import the files under the root directory
-commander.importFiles(files, drive.getRoot(), false, true, null, null, null);
-commander.close();
-
-// use the virtual drive API to list the files
-SalmonFile root = drive.getRoot();
-SalmonFile[] salmonFiles = root.listFiles();
-
-// or retrieve a file by filename
-SalmonFile file = root.getChild("file1.txt");
-
-// get a stream that you can read/decrypt the data from
-SalmonStream stream = file.getInputStream();
-// stream.read(...);
-// stream.seek(...);
-stream.close();
-
-// or use a SalmonFileInputStream with parallel processing and caching
-SalmonFileInputStream inputStream = new SalmonFileInputStream(file, 2, 4 * 1024 * 1024, 2, 256 * 1024);
-// inputStream.read(...);
-inputStream.close();
-drive.close();
-```
-
-### SalmonCore API: Data encryption/decryption
+### SalmonCore API: Byte Array and Text encryption/decryption
 ```
 // To encrypt byte data or text without using a drive you need to generate your own key and nonce.
 // Get a fresh secure random key and keep this somewhere safe.
@@ -77,6 +35,61 @@ String encText = SalmonTextEncryptor.encryptString(text, key, nonce, true);
 
 // Decrypt the encrypted string, no need to specify the nonce again since it's embedded in the data
 String decText = SalmonTextDecryptor.decryptString(encText, key, null, true);
+```
+
+### SalmonFS API: file encryption via a virtual file system API
+```
+// Create a sequencer. Make sure this path is secure and excluded from your backups.
+String sequencerPath = "c:\\users\\<username>\\AppData\\Local\\<somefolder>\\salmon_sequencer.xml";
+SalmonFileSequencer sequencer = new SalmonFileSequencer(new JavaFile(sequencerPath), new SalmonSequenceSerializer());
+
+// create() or open() a virtual drive provided with a location and a text password
+// Supported drives: JavaDrive, DotNetDrive, PyDrive, JsDrive, JsHttpDrive (remote), JsNodeDrive (node.js)
+SalmonDrive drive = JavaDrive.create(new JavaFile("c:\\path\\to\\your\\virtual\\drive"), password, sequencer);
+
+// Create an importer with 2 threads for parallel processing
+SalmonFileCommander commander = new SalmonFileCommander(256 * 1024, 256 * 1024, 2);
+
+// you can create a batch of multiple files for encryption
+JavaFile[] files = new JavaFile[]{
+	new JavaFile("data/file1.txt"), 
+	new JavaFile("data/file2.jpg"), 
+	new JavaFile("data/file3.mp4")};
+
+// now import the files under the root directory
+commander.importFiles(files, drive.getRoot(), false, true, null, null, null);
+commander.close();
+
+// use the Salmon FS API to list files:
+SalmonFile root = drive.getRoot();
+SalmonFile[] salmonFiles = root.listFiles();
+
+// create directory
+SalmonFile dir = root.createDirectory("New Folder");
+SalmonFile parent = dir.getParent();
+
+// retrieve a file by filename
+SalmonFile file = root.getChild("file1.txt");
+
+// get file attributes
+String dirName = file.getName();
+String path = file.getPath();
+long size = file.getSize();
+long date = file.getLastDateTimeModified();
+
+// read the data from a file
+SalmonStream stream = file.getInputStream();
+// stream.read(...);
+// stream.seek(...);
+stream.close();
+
+// or use a SalmonFileInputStream with parallel processing and caching
+SalmonFileInputStream inputStream = new SalmonFileInputStream(file, 2, 4 * 1024 * 1024, 2, 256 * 1024);
+inputStream.read(...);
+inputStream.close();
+
+// close the drive when done
+drive.close();
 ```
 
 
