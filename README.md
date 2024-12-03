@@ -134,8 +134,8 @@ ARM64
 
 ```
 // Simple encryption and decryption of byte array
-byte[] key = SalmonGenerator.getSecureRandomBytes(32); // Generate a secure random key, keep this somewhere safe.
-byte[] nonce = SalmonGenerator.getSecureRandomBytes(8); // Generate a nonce, this is not a secret though you need to use only once!
+byte[] key = SalmonGenerator.getSecureRandomBytes(32); // Generate a secure key, keep this somewhere safe!
+byte[] nonce = SalmonGenerator.getSecureRandomBytes(8); // Generate a nonce, you must NOT reuse this again for encryption!
 byte[] bytes = ..; // data you want to encrypt
 
 SalmonEncryptor encryptor = new SalmonEncryptor(2); // use 2 threads to encrypt
