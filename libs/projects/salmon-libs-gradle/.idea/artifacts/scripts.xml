@@ -3,6 +3,7 @@
     <output-path>$PROJECT_DIR$/../../../output/java-ws/</output-path>
     <root id="root">
       <element id="file-copy" path="$PROJECT_DIR$/salmon-ws/scripts/start-salmon-ws.bat" />
+      <element id="file-copy" path="$PROJECT_DIR$/salmon-ws/scripts/start-salmon-ws.sh" />
     </root>
   </artifact>
 </component>

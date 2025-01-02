@@ -1,0 +1,1 @@
+java -cp salmon-ws-2.2.0.war org.springframework.boot.loader.WarLauncher

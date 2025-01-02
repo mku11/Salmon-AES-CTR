@@ -1,0 +1,8 @@
+<component name="ArtifactManager">
+  <artifact name="config">
+    <output-path>$PROJECT_DIR$/../../../output/java-ws/config</output-path>
+    <root id="root">
+      <element id="file-copy" path="$PROJECT_DIR$/salmon-ws/config/application.properties" />
+    </root>
+  </artifact>
+</component>

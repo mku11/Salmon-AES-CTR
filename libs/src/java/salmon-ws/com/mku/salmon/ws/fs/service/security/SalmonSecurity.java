@@ -23,7 +23,9 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 */
 
+import com.mku.salmon.ws.fs.service.controller.FileSystem;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
@@ -35,6 +37,13 @@ import java.util.HashMap;
 
 @EnableWebSecurity
 public class SalmonSecurity {
+    @Value("${app.name}")
+    private String user;
+    @Value("${app.password}")
+    private String password;
+
+    @Value("${app.path}")
+    private String path;
 
     private SalmonAuthEntryPoint authenticationEntryPoint;
 
@@ -59,7 +68,9 @@ public class SalmonSecurity {
     }
     @Autowired
     public void configureGlobal(AuthenticationManagerBuilder auth) throws Exception {
+        FileSystem.getInstance().setPath(path);
         HashMap<String, String> users = SalmonAuthUsers.getUsers();
+        users.put(user, password);
         for(String user : users.keySet()) {
             auth.inMemoryAuthentication()
                     .passwordEncoder(new BCryptPasswordEncoder())

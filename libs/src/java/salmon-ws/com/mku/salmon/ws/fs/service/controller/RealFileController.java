@@ -24,7 +24,6 @@ SOFTWARE.
 */
 
 import com.mku.file.IRealFile;
-import com.mku.salmon.ws.fs.service.FileSystem;
 import com.mku.streams.InputStreamWrapper;
 import com.mku.streams.RandomAccessStream;
 import org.springframework.core.io.InputStreamResource;
@@ -58,7 +57,7 @@ public class RealFileController {
      */
     @GetMapping("/info")
     public RealFileNode info(String path) throws IOException {
-        IRealFile file = FileSystem.getFile(path);
+        IRealFile file = FileSystem.getInstance().getFile(path);
         if(file == null)
             throw new IOException("File does not exist");
         return new RealFileNode(file);
@@ -75,7 +74,7 @@ public class RealFileController {
     @GetMapping("/list")
     public List<RealFileNode> list(String path) throws IOException {
         ArrayList<RealFileNode> list = new ArrayList<>();
-        IRealFile file = FileSystem.getFile(path);
+        IRealFile file = FileSystem.getInstance().getFile(path);
         if(file == null)
             throw new IOException("Directory does not exist");
         if (file.isDirectory()) {
@@ -98,7 +97,7 @@ public class RealFileController {
      */
     @PostMapping("/mkdir")
     public RealFileNode mkdir(String path) throws IOException {
-        IRealFile file = FileSystem.getFile(path);
+        IRealFile file = FileSystem.getInstance().getFile(path);
         IRealFile parent = file.getParent();
         if(parent == null || !parent.exists())
             throw new IOException("Parent does not exist");
@@ -119,7 +118,7 @@ public class RealFileController {
      */
     @PostMapping("/create")
     public RealFileNode create(String path) throws IOException {
-        IRealFile file = FileSystem.getFile(path);
+        IRealFile file = FileSystem.getInstance().getFile(path);
         IRealFile parent = file.getParent();
         if(parent == null || !parent.exists() || !parent.isDirectory())
             throw new IOException("Parent does not exist");
@@ -143,7 +142,7 @@ public class RealFileController {
     @PostMapping("/upload")
     public ResponseEntity<RealFileNode> upload(@RequestParam("file") MultipartFile file, String path, Long position) throws IOException {
 		System.out.println("upload path="+path+",position="+position+",size=" + file.getSize());
-        IRealFile rFile = FileSystem.write(path, file, position);
+        IRealFile rFile = FileSystem.getInstance().write(path, file, position);
         return new ResponseEntity<>(new RealFileNode(rFile), position > 0 ? HttpStatus.PARTIAL_CONTENT : HttpStatus.OK);
     }
 
@@ -160,7 +159,7 @@ public class RealFileController {
     @GetMapping(path = "/get")
     public ResponseEntity<Resource> get(String path, Long position) throws IOException {
 		System.out.println("get: path="+path+",position="+position);
-        IRealFile rFile = FileSystem.getFile(path);
+        IRealFile rFile = FileSystem.getInstance().getFile(path);
         if(rFile == null || !rFile.exists() || !rFile.isFile())
             throw new IOException("File does not exist");
         RandomAccessStream stream = rFile.getInputStream();
@@ -185,10 +184,10 @@ public class RealFileController {
      */
     @PostMapping("/copy")
     public RealFileNode copy(String path, String destDir, String filename) throws IOException {
-        IRealFile source = FileSystem.getFile(path);
+        IRealFile source = FileSystem.getInstance().getFile(path);
         if(source == null || !source.exists())
             throw new IOException("Path does not exist");
-        IRealFile dest = FileSystem.getFile(destDir);
+        IRealFile dest = FileSystem.getInstance().getFile(destDir);
         if(dest == null || !dest.exists() || !dest.isDirectory())
             throw new IOException("Destination directory does not exist");
         IRealFile nFile;
@@ -213,10 +212,10 @@ public class RealFileController {
      */
     @PutMapping("/move")
     public RealFileNode move(String path, String destDir, String filename) throws IOException {
-        IRealFile source = FileSystem.getFile(path);
+        IRealFile source = FileSystem.getInstance().getFile(path);
         if(source == null || !source.exists())
             throw new IOException("Path does not exist");
-        IRealFile dest = FileSystem.getFile(destDir);
+        IRealFile dest = FileSystem.getInstance().getFile(destDir);
         if(dest == null || !dest.exists() || !dest.isDirectory())
             throw new IOException("Destination directory does not exist");
         IRealFile nFile;
@@ -239,7 +238,7 @@ public class RealFileController {
      */
     @PutMapping("/rename")
     public RealFileNode rename(String path, String filename) throws IOException {
-        IRealFile file = FileSystem.getFile(path);
+        IRealFile file = FileSystem.getInstance().getFile(path);
         if(file == null || !file.exists())
             throw new IOException("Path does not exist");
         file.renameTo(filename);
@@ -256,7 +255,7 @@ public class RealFileController {
      */
     @DeleteMapping("/delete")
     public RealFileNode delete(String path) throws IOException {
-        IRealFile file = FileSystem.getFile(path);
+        IRealFile file = FileSystem.getInstance().getFile(path);
         if(file == null || !file.exists())
             throw new IOException("Path does not exist");
         file.delete();
@@ -277,7 +276,7 @@ public class RealFileController {
     public RealFileNode setLength(String path, long length) throws IOException {
         RandomAccessStream stream = null;
         try {
-            IRealFile file = FileSystem.getFile(path);
+            IRealFile file = FileSystem.getInstance().getFile(path);
             if(file == null || !file.exists())
                 throw new IOException("Path does not exist");
             stream = file.getOutputStream();

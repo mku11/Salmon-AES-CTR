@@ -24,7 +24,6 @@ SOFTWARE.
 */
 
 import com.mku.file.IRealFile;
-import com.mku.salmon.ws.fs.service.FileSystem;
 
 import java.io.IOException;
 
@@ -42,7 +41,7 @@ public class RealFileNode {
     }
 
     public String getPath() throws IOException {
-        return FileSystem.getRelativePath(file);
+        return FileSystem.getInstance().getRelativePath(file);
     }
     public boolean isPresent() {
         return file.exists();

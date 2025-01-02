@@ -1,4 +1,4 @@
-package com.mku.salmon.ws.fs.service;
+package com.mku.salmon.ws.fs.service.controller;
 /*
 MIT License
 
@@ -37,18 +37,27 @@ import java.io.InputStream;
 public class FileSystem {
     private static final int BUFF_LENGTH = 32768;
 
-    static void setPath(String path) {
-        FileSystem.path = path;
+    private String path;
+
+    private static FileSystem instance;
+
+    public static FileSystem getInstance() {
+        if(instance == null)
+            instance = new FileSystem();
+        return instance;
     }
 
-    private static String path;
 
-    public static IRealFile getRoot() {
+    public void setPath(String path) {
+        this.path = path;
+    }
+
+    public IRealFile getRoot() {
         IRealFile realRoot = new JavaFile(path);
         return realRoot;
     }
 
-    public static IRealFile getFile(String path) {
+    public IRealFile getFile(String path) {
         String[] parts = path.split("/");
         IRealFile file = getRoot();
         for (String part : parts) {
@@ -61,12 +70,12 @@ public class FileSystem {
         return file;
     }
 
-    public static String getRelativePath(IRealFile file) {
+    public String getRelativePath(IRealFile file) {
         return new JavaFile(file.getPath()).getAbsolutePath().replace(
                 new JavaFile(path).getAbsolutePath(), "").replace("\\", "/");
     }
 
-    public static IRealFile write(String path, MultipartFile file, long position) throws IOException {
+    public IRealFile write(String path, MultipartFile file, long position) throws IOException {
         IRealFile rFile = getFile(path);
         if(!rFile.exists()) {
             IRealFile dir = rFile.getParent();

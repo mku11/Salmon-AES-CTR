@@ -25,6 +25,8 @@ SOFTWARE.
 
 import com.mku.file.JavaWSFile;
 import com.mku.salmon.ws.fs.service.SalmonWSApplication;
+import com.mku.salmon.ws.fs.service.controller.FileSystem;
+import com.mku.salmon.ws.fs.service.security.SalmonAuthUsers;
 import org.junit.jupiter.api.Test;
 
 import java.util.HashMap;
@@ -55,13 +57,14 @@ public class SalmonWSTestHelper {
     public static void startServer(String vaultDir, HashMap<String, String> users) throws Exception {
         if (serverStarted)
             throw new Exception("Another instance is running, use stopServer to stop");
-        SalmonWSApplication.removeAllUsers();
+        FileSystem.getInstance().setPath(vaultDir);
+        SalmonAuthUsers.removeAllUsers();
         for (String user : users.keySet()) {
-            SalmonWSApplication.addUser(user, users.get(user));
+            SalmonAuthUsers.addUser(user, users.get(user));
         }
         serverStarted = true;
         try {
-            SalmonWSApplication.main(new String[]{vaultDir, "-np"});
+            SalmonWSApplication.start(new String[0]);
         } catch (Exception e) {
             e.printStackTrace();
         }
