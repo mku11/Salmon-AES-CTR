@@ -13,7 +13,7 @@ jobs:
   build:
     defaults:
       run:
-        working-directory: libs/projects/SalmonLibs.VS2022
+        working-directory: ./libs/projects/SalmonLibs.VS2022
     runs-on: ubuntu-latest
 
     steps:
@@ -23,10 +23,14 @@ jobs:
       with:
         dotnet-version: 7.0.x
     - name: Restore workload dependencies
+      working-directory: ./libs/projects/SalmonLibs.VS2022/Salmon.Core
       run: dotnet workload restore
     - name: Restore dependencies
+      working-directory: ./libs/projects/SalmonLibs.VS2022/Salmon.Core
       run: dotnet restore
     - name: Build
+      working-directory: ./libs/projects/SalmonLibs.VS2022/Salmon.Core
       run: dotnet build --no-restore
     - name: Test
+      working-directory: ./libs/projects/SalmonLibs.VS2022
       run: dotnet test --no-build --verbosity normal
