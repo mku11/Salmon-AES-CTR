@@ -20,6 +20,7 @@ Salmon will use the Java default cipher for AES256.
 
 To build the java and native libraries from the command line run:  
 ```
+gradlew.bat :salmon-native:build --rerun-tasks
 gradlew.bat build -x test --rerun-tasks
 ```
 
