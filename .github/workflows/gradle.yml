@@ -50,6 +50,9 @@ jobs:
       uses: gradle/actions/setup-gradle@af1da67850ed9a4cedd57bfd976089dd991e2582 # v4.0.0
 
     # build and test without native and windows deps
+    - name: Build Salmon native with Gradle Wrapper
+      run: ./gradlew :salmon-native:build -i
+      
     - name: Build with Gradle Wrapper
       run: ./gradlew build -i -x :salmon-win:build
 
