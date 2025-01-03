@@ -22,15 +22,27 @@ jobs:
       uses: actions/setup-dotnet@v4
       with:
         dotnet-version: 7.0.x
-    - name: Restore workload dependencies
+        
+    - name: Salmon.Core Restore workload dependencies
       working-directory: ./libs/projects/SalmonLibs.VS2022/Salmon.Core
       run: dotnet workload restore
-    - name: Restore dependencies
+    - name: Salmon.Core Restore dependencies
       working-directory: ./libs/projects/SalmonLibs.VS2022/Salmon.Core
       run: dotnet restore
-    - name: Build
+    - name: Salmon.Core Build
       working-directory: ./libs/projects/SalmonLibs.VS2022/Salmon.Core
       run: dotnet build --no-restore
-    - name: Test
-      working-directory: ./libs/projects/SalmonLibs.VS2022
+
+    - name: Salmon.FS Restore workload dependencies
+      working-directory: ./libs/projects/SalmonLibs.VS2022/Salmon.FS
+      run: dotnet workload restore
+    - name: Salmon.FS Restore dependencies
+      working-directory: ./libs/projects/SalmonLibs.VS2022/Salmon.FS
+      run: dotnet restore
+    - name: Salmon.FS Build
+      working-directory: ./libs/projects/SalmonLibs.VS2022/Salmon.FS
+      run: dotnet build --no-restore
+      
+    - name: Salmon.Test Test
+      working-directory: ./libs/projects/SalmonLibs.VS2022/Salmon.Test
       run: dotnet test --no-build --verbosity normal
