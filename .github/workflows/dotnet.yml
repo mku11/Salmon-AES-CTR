@@ -42,6 +42,16 @@ jobs:
     - name: Salmon.FS Build
       working-directory: ./libs/projects/SalmonLibs.VS2022/Salmon.FS
       run: dotnet build --no-restore
+
+    - name: Salmon.FS.Android Restore workload dependencies
+      working-directory: ./libs/projects/SalmonLibs.VS2022/Salmon.FS.Android
+      run: dotnet workload restore
+    - name: Salmon.FS.Android Restore dependencies
+      working-directory: ./libs/projects/SalmonLibs.VS2022/Salmon.FS.Android
+      run: dotnet restore
+    - name: Salmon.FS.Android Build
+      working-directory: ./libs/projects/SalmonLibs.VS2022/Salmon.FS
+      run: dotnet build --no-restore
       
     - name: Salmon.Test Test
       working-directory: ./libs/projects/SalmonLibs.VS2022/Salmon.Test
