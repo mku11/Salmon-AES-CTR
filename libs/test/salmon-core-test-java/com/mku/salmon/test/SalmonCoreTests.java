@@ -92,7 +92,7 @@ public class SalmonCoreTests {
         try {
             SalmonTextEncryptor.encryptString(plainText, null, SalmonCoreTestHelper.TEST_NONCE_BYTES, true);
         } catch (SalmonSecurityException ex) {
-            ex.printStackTrace();
+            // ex.printStackTrace();
             caught = true;
         }
 
@@ -107,7 +107,7 @@ public class SalmonCoreTests {
         try {
             SalmonTextEncryptor.encryptString(plainText, SalmonCoreTestHelper.TEST_KEY_BYTES, null, true);
         } catch (SalmonSecurityException ex) {
-            ex.printStackTrace();
+            // ex.printStackTrace();
             caught = true;
         } catch (Exception e) {
             e.printStackTrace();
@@ -125,7 +125,7 @@ public class SalmonCoreTests {
             String encText = SalmonTextEncryptor.encryptString(plainText, SalmonCoreTestHelper.TEST_KEY_BYTES, SalmonCoreTestHelper.TEST_NONCE_BYTES, false);
             SalmonTextDecryptor.decryptString(encText, SalmonCoreTestHelper.TEST_KEY_BYTES, null, false);
         } catch (Exception ex) {
-            ex.printStackTrace();
+            // ex.printStackTrace();
             caught = true;
         }
 
@@ -141,7 +141,7 @@ public class SalmonCoreTests {
             String encText = SalmonTextEncryptor.encryptString(plainText, SalmonCoreTestHelper.TEST_KEY_BYTES, SalmonCoreTestHelper.TEST_NONCE_BYTES, true);
             SalmonTextDecryptor.decryptString(encText, null, SalmonCoreTestHelper.TEST_NONCE_BYTES, true);
         } catch (Exception ex) {
-            ex.printStackTrace();
+            // ex.printStackTrace();
             caught = true;
         }
 
@@ -490,7 +490,7 @@ public class SalmonCoreTests {
         try {
             SalmonCoreTestHelper.testCounterValue(SalmonCoreTestHelper.TEST_TEXT, SalmonCoreTestHelper.TEST_KEY_BYTES, SalmonCoreTestHelper.TEST_NONCE_BYTES, SalmonCoreTestHelper.MAX_ENC_COUNTER);
         } catch (Throwable throwable) {
-            throwable.printStackTrace();
+            // throwable.printStackTrace();
             if (throwable instanceof SalmonRangeExceededException || throwable instanceof IllegalArgumentException)
                 caught = true;
         }
