@@ -15,7 +15,7 @@ project.ext.set('os', 'win')
 
 // set to true to enable opencl
 // windows
-project.ext.set('enable_opencl', true)
+project.ext.set('enable_opencl', false)
 project.ext.set('OPENCL_INCLUDE', 'D:\\tools\\OpenCL-SDK-v2024.05.08-Win-x64\\include')
 project.ext.set('OPENCL_LIB', 'D:\\tools\\OpenCL-SDK-v2024.05.08-Win-x64\\lib')
 // linux
