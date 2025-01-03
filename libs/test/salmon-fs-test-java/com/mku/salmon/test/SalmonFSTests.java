@@ -57,7 +57,9 @@ import static org.junit.jupiter.api.Assertions.*;
 
 public class SalmonFSTests {
     @BeforeAll
-    static void beforeAll() {
+    static void beforeAll() throws Exception {
+		SalmonFSTestHelper.setOutputDir(System.getProperty("testDir"));
+		
         // SalmonStream.setAesProviderType(ProviderType.AesGPU);
         // local drive
         SalmonFSTestHelper.setDriveClassType(JavaDrive.class);

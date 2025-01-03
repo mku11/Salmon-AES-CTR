@@ -25,6 +25,7 @@ dependencies {
 
 test {
     useJUnitPlatform()
+	systemProperty 'testDir', System.getProperty('testDir')
 }
 
 tasks.withType(Test) {

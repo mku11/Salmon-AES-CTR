@@ -57,25 +57,30 @@ import java.security.DigestInputStream;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.util.HashMap;
+import java.util.Random;
 
 import static org.junit.jupiter.api.Assertions.*;
 
 public class SalmonFSTestHelper {
     static Class<?> driveClassType = null; // drive class type
-    static String TEST_ROOT_DIR = "d:\\tmp\\";
-    static String TEST_OUTPUT_DIR = SalmonFSTestHelper.TEST_ROOT_DIR + "output\\";
-    static String TEST_VAULT_DIR = SalmonFSTestHelper.TEST_OUTPUT_DIR + "enc";
-    static String TEST_VAULT2_DIR = SalmonFSTestHelper.TEST_OUTPUT_DIR + "enc2";
-    static String TEST_EXPORT_AUTH_DIR = SalmonFSTestHelper.TEST_OUTPUT_DIR + "export\\";
-    static String TEST_DATA_DIR_FOLDER = SalmonFSTestHelper.TEST_ROOT_DIR + "testdata\\";
-    static String TEST_IMPORT_TINY_FILE = SalmonFSTestHelper.TEST_DATA_DIR_FOLDER + "tiny_test.txt";
-    static String TEST_IMPORT_SMALL_FILE = SalmonFSTestHelper.TEST_DATA_DIR_FOLDER + "small_test.zip";
-    static String TEST_IMPORT_MEDIUM_FILE = SalmonFSTestHelper.TEST_DATA_DIR_FOLDER + "medium_test.zip";
-    static String TEST_IMPORT_LARGE_FILE = SalmonFSTestHelper.TEST_DATA_DIR_FOLDER + "large_test.mp4";
-    static String TEST_IMPORT_HUGE_FILE = SalmonFSTestHelper.TEST_DATA_DIR_FOLDER + "huge.zip";
-    static String TEST_IMPORT_FILE = SalmonFSTestHelper.TEST_IMPORT_SMALL_FILE;
+    static String TEST_ROOT_DIR = "d:\\tmp";
+    static String TEST_DATA_DIR_FOLDER;
+	static String TEST_OUTPUT_DIR;
+    static String TEST_VAULT_DIR;
+    static String TEST_VAULT2_DIR;
+    static String TEST_EXPORT_AUTH_DIR;
+    
+	// files
+    static String TEST_IMPORT_TINY_FILE;
+    static String TEST_IMPORT_SMALL_FILE;
+    static String TEST_IMPORT_MEDIUM_FILE;
+    static String TEST_IMPORT_LARGE_FILE;
+    static String TEST_IMPORT_HUGE_FILE;
+	
+    static String TEST_IMPORT_FILE;
 
-    static String TEST_SEQUENCER_DIR = SalmonFSTestHelper.TEST_OUTPUT_DIR;
+	static String TINY_FILE_CONTENTS = "This is a new file created.";
+    static String TEST_SEQUENCER_DIR;
     static String TEST_SEQUENCER_FILENAME = "fileseq.xml";
 
     static String TEST_EXPORT_FILENAME = "export.slma";
@@ -99,12 +104,78 @@ public class SalmonFSTestHelper {
     public static String TEST_SEQUENCER_FILE1 = "seq1.xml";
     public static String TEST_SEQUENCER_FILE2 = "seq2.xml";
 
+	private static final Random random = new Random(System.currentTimeMillis());
+
     public static HashMap<String, String> users;
     private static JavaWSFile.Credentials credentials1 = new JavaWSFile.Credentials("user", "password");
 
     static SalmonFileImporter fileImporter;
     static SalmonFileExporter fileExporter;
-
+	
+	public static void setOutputDir(String path) throws Exception {
+		if(path != null)
+			SalmonFSTestHelper.TEST_ROOT_DIR = path;
+		System.out.println("setting test path: " + path);
+		TEST_DATA_DIR_FOLDER = SalmonFSTestHelper.TEST_ROOT_DIR + File.separator + "input" + File.separator;
+		TEST_OUTPUT_DIR = SalmonFSTestHelper.TEST_ROOT_DIR + File.separator + "output" + File.separator;
+		TEST_VAULT_DIR = SalmonFSTestHelper.TEST_OUTPUT_DIR + File.separator + "enc";
+		TEST_VAULT2_DIR = SalmonFSTestHelper.TEST_OUTPUT_DIR + File.separator + "enc2";
+		TEST_EXPORT_AUTH_DIR = SalmonFSTestHelper.TEST_OUTPUT_DIR + File.separator + "export" + File.separator;
+		TEST_SEQUENCER_DIR = SalmonFSTestHelper.TEST_OUTPUT_DIR + File.separator;
+		
+		createDir(TEST_ROOT_DIR);
+		createDir(TEST_DATA_DIR_FOLDER);
+		createDir(TEST_OUTPUT_DIR);
+		createTestFiles();
+	}
+	
+	public static void createDir(String path) {
+		IRealFile dir = new JavaFile(path);
+		if(!dir.exists())
+			dir.mkdir();
+	}
+	
+	public static void createTestFiles() throws Exception {
+		TEST_IMPORT_TINY_FILE = SalmonFSTestHelper.TEST_DATA_DIR_FOLDER + "tiny_test.txt";
+		TEST_IMPORT_SMALL_FILE = SalmonFSTestHelper.TEST_DATA_DIR_FOLDER + "small_test.dat";
+		TEST_IMPORT_MEDIUM_FILE = SalmonFSTestHelper.TEST_DATA_DIR_FOLDER + "medium_test.dat";
+		TEST_IMPORT_LARGE_FILE = SalmonFSTestHelper.TEST_DATA_DIR_FOLDER + "large_test.dat";
+		TEST_IMPORT_HUGE_FILE = SalmonFSTestHelper.TEST_DATA_DIR_FOLDER + "huge_test.dat";
+		TEST_IMPORT_FILE = SalmonFSTestHelper.TEST_IMPORT_SMALL_FILE;
+		
+		createFile(TEST_IMPORT_TINY_FILE, TINY_FILE_CONTENTS);
+		createFile(TEST_IMPORT_SMALL_FILE,1024*1024);
+		createFile(TEST_IMPORT_MEDIUM_FILE,12*1024*1024);
+		// createFile(TEST_IMPORT_LARGE_FILE,48*1024*1024);
+		// createFile(TEST_IMPORT_HUGE_FILE,512*1024*1024);
+	}
+	
+	public static void createFile(String path, String contents) throws Exception {
+		IRealFile file = new JavaFile(path);
+		RandomAccessStream stream = file.getOutputStream();
+		byte[] data = contents.getBytes();
+		stream.write(data, 0, data.length);
+		stream.flush();
+		stream.close();
+	}
+	
+	public static void createFile(String path, long size) throws Exception {
+        IRealFile file = new JavaFile(path);
+		if(file.exists())
+			return;
+		byte[] data = new byte[4*1024*1024];
+		RandomAccessStream stream = file.getOutputStream();
+		int len = 0;
+		while(size > 0) {
+			random.nextBytes(data);
+			len = (int) Math.min(size, data.length);
+			stream.write(data, 0, len);
+			size -= len;
+		}
+		stream.flush();
+		stream.close();
+	}
+	
     public static INonceSequenceSerializer getSequenceSerializer() {
         return new SalmonSequenceSerializer();
     }
@@ -599,7 +670,7 @@ public class SalmonFSTestHelper {
     }
 
     public static void shouldTestFileSequencer() throws IOException {
-        IRealFile file = new JavaFile(TEST_SEQUENCER_DIR + "\\" + TEST_SEQUENCER_FILENAME);
+        IRealFile file = new JavaFile(TEST_SEQUENCER_DIR + File.separator + TEST_SEQUENCER_FILENAME);
         if (file.exists())
             file.delete();
         SalmonFileSequencer sequencer = createSalmonFileSequencer(file,
