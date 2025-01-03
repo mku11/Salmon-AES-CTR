@@ -59,7 +59,7 @@ jobs:
     - name: Salmon.Core Test
       run: ./gradlew :salmon-core:test --tests "com.mku.salmon.test.SalmonCoreTests" -i
     - name: Salmon.FS Test
-      run: ./gradlew :salmon-fs:test -i
+      run: ./gradlew :salmon-fs:test -i -DtestDir="/tmp/salmon/test"
     - name: Salmon.Native Test
       run: ./gradlew :salmon-native:test -i
 
