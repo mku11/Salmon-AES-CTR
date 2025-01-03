@@ -130,7 +130,7 @@ public class SalmonFSTestHelper {
 	}
 	
 	public static void createDir(String path) {
-		IRealFile dir = new JavaFile(path);
+		File dir = new File(path);
 		if(!dir.exists())
 			dir.mkdirs();
 	}
