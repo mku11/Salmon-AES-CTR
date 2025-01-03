@@ -58,15 +58,15 @@ import static org.junit.jupiter.api.Assertions.*;
 public class SalmonFSTests {
     @BeforeAll
     static void beforeAll() {
-        SalmonStream.setAesProviderType(ProviderType.AesGPU);
+        // SalmonStream.setAesProviderType(ProviderType.AesGPU);
         // local drive
-        // SalmonFSTestHelper.setDriveClassType(JavaDrive.class);
+        SalmonFSTestHelper.setDriveClassType(JavaDrive.class);
 
         // remote drive
         // make sure you turn on the web service either manually
         // or start the test case from gradle:
         // gradlew.bat :salmon-ws:test --tests "com.mku.salmon.ws.fs.service.test.SalmonWSTests.testStartServer" --rerun-tasks
-        SalmonFSTestHelper.setDriveClassType(JavaWSDrive.class);
+        // SalmonFSTestHelper.setDriveClassType(JavaWSDrive.class);
 
 		//SalmonCoreTestHelper.TEST_ENC_BUFFER_SIZE = 1 * 1024 * 1024;
 		//SalmonCoreTestHelper.TEST_DEC_BUFFER_SIZE = 1 * 1024 * 1024;
