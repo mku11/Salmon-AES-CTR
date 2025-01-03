@@ -19,6 +19,9 @@ jobs:
     runs-on: ubuntu-latest
     permissions:
       contents: read
+    defaults:
+      run:
+        working-directory: libs/projects/salmon-libs-gradle
 
     steps:
     - uses: actions/checkout@v4
@@ -27,7 +30,7 @@ jobs:
       with:
         java-version: '17'
         distribution: 'temurin'
-        working-directory: libs/projects/salmon-libs-gradle
+        
 
     # Configure Gradle for optimal use in GitHub Actions, including caching of downloaded dependencies.
     # See: https://github.com/gradle/actions/blob/main/setup-gradle/README.md
