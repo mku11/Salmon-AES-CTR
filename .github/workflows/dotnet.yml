@@ -50,7 +50,7 @@ jobs:
       working-directory: ./libs/projects/SalmonLibs.VS2022/Salmon.FS.Android
       run: dotnet restore
     - name: Salmon.FS.Android Build
-      working-directory: ./libs/projects/SalmonLibs.VS2022/Salmon.FS.Android
+      working-directory: ./libs/projects/SalmonLibs.VS2022/Salmon.FS
       run: dotnet build --no-restore
       
     - name: Salmon.Test Test
