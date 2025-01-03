@@ -544,7 +544,7 @@ public class SalmonFSTestHelper {
 
     public static void testExamples() throws Exception {
         String text = "This is a plaintext that will be used for testing";
-        String testFile = "D:/tmp/file.txt";
+        String testFile = TEST_OUTPUT_DIR + File.separator + "file.txt";
         IRealFile tFile = new JavaFile(testFile);
         if (tFile.exists())
             tFile.delete();
