@@ -66,10 +66,11 @@ jobs:
     - uses: actions/checkout@v4
     - name: Set up JDK 11
       uses: actions/setup-java@v4
+      working-directory: libs/projects/salmon-libs-gradle
       with:
         java-version: '11'
         distribution: 'temurin'
-        working-directory: libs/projects/salmon-libs-gradle
+        
 
     # Generates and submits a dependency graph, enabling Dependabot Alerts for all project dependencies.
     # See: https://github.com/gradle/actions/blob/main/dependency-submission/README.md
