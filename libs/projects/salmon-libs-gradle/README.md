@@ -48,7 +48,7 @@ To run a specific test case:
 gradlew.bat :salmon-fs:test --tests "com.mku.salmon.test.SalmonFSTests.shouldAuthorizePositive" --rerun-tasks -i   
 ```
 
-To change the temporary test directory use:
+To use a different specific temporary directory for testing use:
 ```
 gradlew.bat :salmon-fs:test -DtestDir="D:\tmp\salmon\test"
 ```
