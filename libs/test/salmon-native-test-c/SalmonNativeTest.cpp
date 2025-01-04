@@ -122,7 +122,9 @@ namespace SalmonNativeTest
 			time_transform_expected((const unsigned char*)bytes, (const unsigned char*)key, (const char*)nonce, length);
 			time_transform((const unsigned char*)bytes, (const unsigned char*)key, (const char*)nonce, length, AES_IMPL_AES, "AES_IMPL_AES");
 			time_transform((const unsigned char*)bytes, (const unsigned char*)key, (const char*)nonce, length, AES_IMPL_AES_INTR, "AES_IMPL_AES_INTR");
+#ifdef USE_GPU			
 			time_transform((const unsigned char*)bytes, (const unsigned char*)key, (const char*)nonce, length, AES_IMPL_AES_GPU, "AES_IMPL_AES_GPU");
+#endif
 
 			free(bytes);
 		}
