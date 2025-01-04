@@ -26,6 +26,9 @@ dependencies {
 test {
     useJUnitPlatform()
 	systemProperty 'testDir', System.getProperty('testDir')
+	afterTest { desc, result -> 
+        logger.quiet "Test ${desc.className} ${desc.name} : ${result.resultType}"
+    }
 }
 
 tasks.withType(Test) {
