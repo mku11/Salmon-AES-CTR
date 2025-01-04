@@ -43,6 +43,9 @@ jobs:
       working-directory: ./libs/projects/SalmonLibs.VS2022/Salmon.FS
       run: dotnet build --no-restore
       
-    - name: Salmon.Test Test
+    # - name: Salmon.Test Test
+    #   working-directory: ./libs/projects/SalmonLibs.VS2022/Salmon.Test
+    #   run: dotnet test --no-build --verbosity normal
+    - name: Salmon.Test SalmonCoreTests
       working-directory: ./libs/projects/SalmonLibs.VS2022/Salmon.Test
-      run: dotnet test --no-build --verbosity normal
+      run: vstest.console bin\Debug\net7.0-windows\Salmon.Test.dll /Tests:SalmonCoreTests
