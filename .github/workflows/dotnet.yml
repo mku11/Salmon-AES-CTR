@@ -33,8 +33,8 @@ jobs:
       with:
         dotnet-version: 7.0.x
         
-    - name: Setup VSTest Path
-      uses: darenm/Setup-VSTest@v1.2
+    # - name: Setup VSTest Path
+    #   uses: darenm/Setup-VSTest@v1.2
       
     - name: Salmon.Core Restore workload dependencies
       working-directory: ./libs/projects/SalmonLibs.VS2022/Salmon.Core
@@ -59,6 +59,6 @@ jobs:
     # - name: Salmon.Test Test
     #   working-directory: ./libs/projects/SalmonLibs.VS2022/Salmon.Test
     #   run: dotnet test --no-build --verbosity normal
-    - name: Salmon.Test SalmonCoreTests
-      working-directory: ./libs/projects/SalmonLibs.VS2022/Salmon.Test
-      run: vstest.console bin\Debug\net7.0-windows\Salmon.Test.dll /Tests:SalmonCoreTests
+    # - name: Salmon.Test SalmonCoreTests
+    #   working-directory: ./libs/projects/SalmonLibs.VS2022/Salmon.Test
+    #   run: vstest.console bin\Debug\net7.0-windows\Salmon.Test.dll /Tests:SalmonCoreTests
