@@ -28,6 +28,9 @@ jobs:
         restore-keys: |
           ${{ runner.os }}-nuget-
           
+    - name: Get git submodules
+      run: git submodule update --recursive --init
+  
     - name: Setup .NET
       uses: actions/setup-dotnet@v4
       with:
@@ -67,9 +70,9 @@ jobs:
     #   working-directory: ./libs/projects/SalmonLibs.VS2022
     #   run: msbuild Salmon.Test
     
-    # - name: Salmon.Native.Test Build
-    #   working-directory: ./libs/projects/SalmonLibs.VS2022
-    #   run: msbuild Salmon.Native.Test
+    - name: Salmon.Native.Test Build
+      working-directory: ./libs/projects/SalmonLibs.VS2022
+      run: msbuild Salmon.Native.Test /p:IncludePath="..\..\..\src\c\salmon\include;..\..\..\src\c\tiny-AES-c"
           
     # - name: Salmon.Test SalmonCoreTests
     #   working-directory: ./libs/projects/SalmonLibs.VS2022/Salmon.Test
