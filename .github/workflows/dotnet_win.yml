@@ -72,7 +72,7 @@ jobs:
     
     - name: Salmon.Native.Test Build
       working-directory: ./libs/projects/SalmonLibs.VS2022
-      run: msbuild Salmon.Native.Test /p:IncludePath="..\..\..\src\c\salmon\include;..\..\..\src\c\tiny-AES-c"
+      run: msbuild Salmon.Native.Test /p:IncludePath="..\..\..\src\c\salmon\include"
           
     # - name: Salmon.Test SalmonCoreTests
     #   working-directory: ./libs/projects/SalmonLibs.VS2022/Salmon.Test
