@@ -563,7 +563,7 @@ public class SalmonFSTestHelper
     public static void TestExamples()
     {
         string text = "This is a plaintext that will be used for testing";
-        string testFile = "D:/tmp/file.txt";
+        string testFile = TEST_OUTPUT_DIR + Path.DirectorySeparatorChar + "file.txt";
         IRealFile tFile = new DotNetFile(testFile);
         if (tFile.Exists)
             tFile.Delete();
