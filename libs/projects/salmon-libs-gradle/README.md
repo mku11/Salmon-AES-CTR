@@ -24,6 +24,12 @@ gradlew.bat :salmon-native:build --rerun-tasks
 gradlew.bat build -x test --rerun-tasks
 ```
 
+To enable GPU support for the native libary edit salmon-native/build.gradle and set enable_opencl to true.
+For linux you need to update variables OPENCL_INCLUDE and OPENCL_LIB to the appropriate paths
+```
+project.ext.set('enable_opencl', true)
+```
+
 To build the java web service from the command line run:  
 ```
 gradlew.bat bootWar -x test --rerun-tasks
@@ -40,6 +46,11 @@ test files for core, fs, and native subprojects are included in respective test 
 To run a specific test case:
 ```
 gradlew.bat :salmon-fs:test --tests "com.mku.salmon.test.SalmonFSTests.shouldAuthorizePositive" --rerun-tasks -i   
+```
+
+To change the temporary test directory use:
+```
+gradlew.bat :salmon-fs:test -DtestDir="D:\tmp\salmon\test"
 ```
 
 see salmon-core/src/jmh folder for benchmarks. To run from the command line:  
