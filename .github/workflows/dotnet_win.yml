@@ -25,6 +25,9 @@ jobs:
     
     - name: Setup MSBuild.exe
       uses: microsoft/setup-msbuild@v2
+
+    - name: Setup VSTest Path
+      uses: darenm/Setup-VSTest@v1.2
       
     - name: Salmon Restore dependencies
       working-directory: ./libs/projects/SalmonLibs.VS2022
