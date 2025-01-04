@@ -39,6 +39,14 @@ jobs:
           gradle-${{ runner.os }}
           gradle-
           
+    - name: Cache local Maven repository
+      uses: actions/cache@v4
+      with:
+        path: ~/.m2/repository
+        key: ${{ runner.os }}-maven-${{ hashFiles('**/pom.xml') }}
+        restore-keys: |
+          ${{ runner.os }}-maven-
+          
     - name: Get git submodules
       run: git submodule update --recursive --init
       
@@ -49,32 +57,32 @@ jobs:
         distribution: 'temurin'
         cache: gradle
         
-    - name: Setup .NET
-      uses: actions/setup-dotnet@v4
-      with:
-        dotnet-version: 7.0.x
+    # - name: Setup .NET
+    #   uses: actions/setup-dotnet@v4
+    #   with:
+    #     dotnet-version: 7.0.x
     
-    - name: Setup MSBuild.exe
-      uses: microsoft/setup-msbuild@v2
+    # - name: Setup MSBuild.exe
+    #   uses: microsoft/setup-msbuild@v2
 
-    - name: Setup VSTest Path
-      uses: darenm/Setup-VSTest@v1.2
+    # - name: Setup VSTest Path
+    #   uses: darenm/Setup-VSTest@v1.2
       
-    - name: Salmon Restore dependencies
-      working-directory: ./libs/projects/SalmonLibs.VS2022
-      run: msbuild -t:restore
+    # - name: Salmon Restore dependencies
+    #   working-directory: ./libs/projects/SalmonLibs.VS2022
+    #   run: msbuild -t:restore
 
     - name: Grant execute permission for gradlew
-      working-directory: libs/projects/salmon-libs-gradle-android
+      working-directory: ./libs/projects/salmon-libs-gradle-android
       run: chmod +x gradlew
       
     - name: Build Android Native with Gradle
-      working-directory: libs/projects/salmon-libs-gradle-android
+      working-directory: ./libs/projects/salmon-libs-gradle-android
       run: gradlew.bat build
       
-    - name: Salmon Build
-      working-directory: ./libs/projects/SalmonLibs.VS2022
-      run: msbuild
+    # - name: Salmon Build
+    #   working-directory: ./libs/projects/SalmonLibs.VS2022
+    #   run: msbuild
     
     # - name: Salmon.Core Build
     #   working-directory: ./libs/projects/SalmonLibs.VS2022
