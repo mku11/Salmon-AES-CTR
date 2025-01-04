@@ -12,6 +12,10 @@ You can build from the windows command line in windows:
 msbuild /p:Configuration=Release
 
 In linux you can build only the C# projects
+To build the native libaries only:
+cd SalmonNative
+msbuild  /p:IncludePath="..\..\..\src\c\salmon\include"
+
 If you need to build the native libraries in linux use salmon-libs-gradle or salmon-libs-gcc
 sudo apt-get install -y dotnet-runtime-7.0
 dotnet workload install wasm-tools-net7
@@ -26,6 +30,8 @@ Test:
 To test the native libraries you will need Tiny Aes
 To download Tiny Aes source code from the project root folder type:
 git submodule update --recursive --init
+Then build:
+msbuild Salmon.Native.Test /p:IncludePath="..\..\..\src\c\salmon\include;..\..\..\src\c\tiny-AES-c"
 
 To test C# library from the command line in windows:
 vstest.console Salmon.Test\bin\Debug\net7.0-windows\Salmon.Test.dll /Tests:ShouldEncryptAndDecryptTextCompatible /Logger:Console;verbosity=detailed
