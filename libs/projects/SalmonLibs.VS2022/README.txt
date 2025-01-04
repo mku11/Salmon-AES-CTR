@@ -9,16 +9,12 @@ msbuild -t:restore
 
 Build:
 You can build from the windows command line in windows:
-msbuild /p:Configuration=Release
+msbuild
 
 In linux you can build only the C# projects
-To build the native libaries only:
-cd SalmonNative
-msbuild  /p:IncludePath="..\..\..\src\c\salmon\include"
-
 If you need to build the native libraries in linux use salmon-libs-gradle or salmon-libs-gcc
-sudo apt-get install -y dotnet-runtime-7.0
-dotnet workload install wasm-tools-net7
+sudo apt-get install -y dotnet-runtime-8.0
+dotnet workload install wasm-tools-net8
 dotnet workload restore
 dotnet msbuild -t:restore
 dotnet msbuild Salmon.Core
@@ -30,8 +26,17 @@ Test:
 To test the native libraries you will need Tiny Aes
 To download Tiny Aes source code from the project root folder type:
 git submodule update --recursive --init
-Then build:
-msbuild Salmon.Native.Test /p:IncludePath="..\..\..\src\c\salmon\include;..\..\..\src\c\tiny-AES-c"
+
+To enable GPU support for the native libary edit file Salmon.Native.vcxproj and add the following:
+```
+<PreprocessorDefinitions>...;USE_OPENCL=1</PreprocessorDefinitions>
+<AdditionalDependencies>...;D:\tools\OpenCL-SDK-v2024.05.08-Win-x64\lib\OpenCL.lib</AdditionalDependencies>
+```
+
+To test GPU support edit file Salmon.Native.Test.vcxproj and add the following:
+```
+<PreprocessorDefinitions>...;USE_GPU=1</PreprocessorDefinitions>
+```
 
 To test C# library from the command line in windows:
 vstest.console Salmon.Test\bin\Debug\net7.0-windows\Salmon.Test.dll /Tests:ShouldEncryptAndDecryptTextCompatible /Logger:Console;verbosity=detailed
