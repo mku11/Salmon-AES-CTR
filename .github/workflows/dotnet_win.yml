@@ -60,8 +60,8 @@ jobs:
     #   run: devenv SalmonLibs.VS2022.sln /Build "Debug|x64"
     
     - name: SalmonNative Build
-      working-directory: ./libs/projects/SalmonLibs.VS2022/SalmonNative
-      run: msbuild  /p:IncludePath="..\..\..\src\c\salmon\include"
+      working-directory: ./libs/projects/SalmonLibs.VS2022
+      run: msbuild SalmonNative /p:IncludePath="..\..\..\src\c\salmon\include"
     
     # - name: Salmon.Test Build
     #   working-directory: ./libs/projects/SalmonLibs.VS2022
