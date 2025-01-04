@@ -57,28 +57,28 @@ jobs:
         distribution: 'temurin'
         cache: gradle
         
-    # - name: Setup .NET
-    #   uses: actions/setup-dotnet@v4
-    #   with:
-    #     dotnet-version: 7.0.x
+    - name: Setup .NET
+      uses: actions/setup-dotnet@v4
+      with:
+        dotnet-version: 8.0.x
     
-    # - name: Setup MSBuild.exe
-    #   uses: microsoft/setup-msbuild@v2
+    - name: Setup MSBuild.exe
+      uses: microsoft/setup-msbuild@v2
 
-    # - name: Setup VSTest Path
-    #   uses: darenm/Setup-VSTest@v1.2
+    - name: Setup VSTest Path
+      uses: darenm/Setup-VSTest@v1.2
       
-    # - name: Salmon Restore dependencies
-    #   working-directory: ./libs/projects/SalmonLibs.VS2022
-    #   run: msbuild -t:restore
+    - name: Salmon Restore dependencies
+      working-directory: ./libs/projects/SalmonLibs.VS2022
+      run: msbuild -t:restore
       
     - name: Build Android Native with Gradle
       working-directory: ./libs/projects/salmon-libs-gradle-android
       run: .\gradlew.bat build
       
-    # - name: Salmon Build
-    #   working-directory: ./libs/projects/SalmonLibs.VS2022
-    #   run: msbuild
+    - name: Salmon Build
+      working-directory: ./libs/projects/SalmonLibs.VS2022
+      run: msbuild
     
     # - name: Salmon.Core Build
     #   working-directory: ./libs/projects/SalmonLibs.VS2022
@@ -92,29 +92,26 @@ jobs:
     # - name: Salmon.Win Build
     #   working-directory: ./libs/projects/SalmonLibs.VS2022
     #   run: msbuild Salmon.Win
-    
     # - name: SalmonNative Build
     #   working-directory: ./libs/projects/SalmonLibs.VS2022
     #   run: msbuild SalmonNative /p:IncludePath="..\..\..\src\c\salmon\include"
-    
     # - name: Salmon.Test Build
     #   working-directory: ./libs/projects/SalmonLibs.VS2022
     #   run: msbuild Salmon.Test
-    
     # - name: Salmon.Native.Test Build
     #   working-directory: ./libs/projects/SalmonLibs.VS2022
     #   run: msbuild Salmon.Native.Test /p:IncludePath="..\..\..\src\c\salmon\include"
           
-    # - name: Salmon.Test SalmonCoreTests
-    #   working-directory: ./libs/projects/SalmonLibs.VS2022/Salmon.Test
-    #   run: vstest.console bin\Debug\net7.0-windows\Salmon.Test.dll /Tests:SalmonCoreTests
+    - name: Salmon.Test SalmonCoreTests
+      working-directory: ./libs/projects/SalmonLibs.VS2022/Salmon.Test
+      run: vstest.console bin\Debug\net7.0-windows\Salmon.Test.dll /Tests:SalmonCoreTests
     # - name: Salmon.Test SalmonFSTests
     #   working-directory: ./libs/projects/SalmonLibs.VS2022/Salmon.Test
     #   run: vstest.console bin\Debug\net7.0-windows\Salmon.Test.dll /Tests:SalmonFSTests
 
-    # - name: Salmon.Test SalmonNativeTests C#
-    #   working-directory: ./libs/projects/SalmonLibs.VS2022/Salmon.Test
-    #   run: vstest.console bin\Debug\net7.0-windows\Salmon.Test.dll /Tests:SalmonNativeTests
-    # - name: Salmon.Native.Test TestExamples C++
-    #   working-directory: ./libs/projects/SalmonLibs.VS2022
-    #   run: vstest.console x64\Debug\Salmon.Native.Test.dll /Tests:TestExamples
+    - name: Salmon.Test SalmonNativeTests C#
+      working-directory: ./libs/projects/SalmonLibs.VS2022/Salmon.Test
+      run: vstest.console bin\Debug\net7.0-windows\Salmon.Test.dll /Tests:SalmonNativeTests
+    - name: Salmon.Native.Test TestExamples C++
+      working-directory: ./libs/projects/SalmonLibs.VS2022
+      run: vstest.console x64\Debug\Salmon.Native.Test.dll /Tests:TestExamples
