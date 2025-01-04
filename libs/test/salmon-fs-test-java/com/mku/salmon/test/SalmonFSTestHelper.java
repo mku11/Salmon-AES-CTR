@@ -392,7 +392,7 @@ public class SalmonFSTestHelper {
         // write file
         IRealFile realDir = new JavaFile(outputDir);
         SalmonFile dir = new SalmonFile(realDir, null);
-        String filename = "test_" + System.currentTimeMillis() + ".txt";
+        String filename = "test_" + System.currentTimeMillis() + "." + flipPosition + ".txt";
         SalmonFile newFile = dir.createFile(filename, key, filenameNonce, fileNonce);
         if (applyIntegrity)
             newFile.setApplyIntegrity(true, hashKey, chunkSize);
