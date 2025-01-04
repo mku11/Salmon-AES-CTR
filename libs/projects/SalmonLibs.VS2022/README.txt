@@ -43,9 +43,12 @@ vstest.console Salmon.Test\bin\Debug\net8.0-windows\Salmon.Test.dll /Tests:Shoul
 To test the native C library from the command line:
 vstest.console x64\Debug\Salmon.Native.Test.dll /Tests:TestExamples /Logger:Console;verbosity=detailed
 
-To use a different specific temporary directory for testing use:
+To use a different specific temporary directory for testing set the SALMON_TEST_DIR env variable before running your tests:
 ```
-vstest.console Salmon.Test\bin\Debug\net8.0-windows\Salmon.Test.dll /Tests:SalmonFSTests.ShouldAuthorizePositive /Logger:Console;verbosity=detailed -- TestRunParameters.Parameter(name=\"testDir\", value=\"D:\tmp2\")
+for windows:
+set SALMON_TEST_DIR=C:\\tmp\\salmon\\test
+for linux:
+export SALMON_TEST_DIR="/tmp/salmon/test"
 ```
 
 In linux you can run tests using the dotnet tool:

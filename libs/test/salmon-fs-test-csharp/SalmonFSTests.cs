@@ -44,7 +44,7 @@ public class SalmonFSTests
 	[ClassInitialize]
     public static void ClassInitialize(TestContext testContext)
     {
-		SalmonFSTestHelper.SetOutputDir(testContext.Properties["testDir"].ToString());
+		SalmonFSTestHelper.SetOutputDir(Environment.GetEnvironmentVariable("SALMON_TEST_DIR"));
 		
 		SalmonStream.AesProviderType = ProviderType.AesIntrinsics;
         SalmonFSTestHelper.DriveClassType = typeof(DotNetDrive);
