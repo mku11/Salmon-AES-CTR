@@ -202,8 +202,10 @@ namespace SalmonNativeTest
 			encrypt_and_decrypt((const unsigned char*)bytes, (const unsigned char*)key, (const char*)nonce, length, AES_IMPL_AES);
 			printf("aes intr:\r\n");
 			encrypt_and_decrypt((const unsigned char*)bytes, (const unsigned char*)key, (const char*)nonce, length, AES_IMPL_AES_INTR);
+#ifdef USE_GPU
 			printf("aes gpu:\r\n");
 			encrypt_and_decrypt((const unsigned char*)bytes, (const unsigned char*)key, (const char*)nonce, length, AES_IMPL_AES_GPU);
+#endif
 		}
 	};
 }
