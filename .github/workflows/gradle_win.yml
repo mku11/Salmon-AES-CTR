@@ -48,5 +48,12 @@ jobs:
 
     # build
     - name: Build Salmon native with Gradle Wrapper
-      run: .\gradlew.bat build -x test -i   
+      run: .\gradlew.bat build -x test -i  
+
+    - name: Salmon.Core Test
+      run: .\gradlew.bat :salmon-core:test --tests "com.mku.salmon.test.SalmonCoreTests" -i
+    - name: Salmon.FS Test
+      run: .\gradlew.bat :salmon-fs:test -i -DtestDir="/tmp/salmon/test"
+    - name: Salmon.Native Test
+      run: .\gradlew.bat :salmon-native:test -i
   
