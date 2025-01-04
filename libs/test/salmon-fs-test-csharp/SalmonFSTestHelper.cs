@@ -374,7 +374,7 @@ public class SalmonFSTestHelper
         // write file
         IRealFile realDir = new DotNetFile(outputDir);
         SalmonFile dir = new SalmonFile(realDir, null);
-        string filename = "test_" + Mku.Time.Time.CurrentTimeMillis() + ".txt";
+        string filename = "test_" + Mku.Time.Time.CurrentTimeMillis() + "." + flipPosition + ".txt";
         SalmonFile newFile = dir.CreateFile(filename, key, filenameNonce, fileNonce);
         if (applyIntegrity)
             newFile.SetApplyIntegrity(true, hashKey, chunkSize);

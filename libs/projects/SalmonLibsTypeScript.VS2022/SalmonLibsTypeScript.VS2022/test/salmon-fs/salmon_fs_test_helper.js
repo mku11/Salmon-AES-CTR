@@ -362,7 +362,7 @@ export class SalmonFSTestHelper {
         // write file
         let realDir = await getFile(outputDir);
         let dir = new SalmonFile(realDir, null);
-        let filename = "test_" + Date.now() + ".txt";
+        let filename = "test_" + Date.now() + "." + flipPosition + ".txt";
         let newFile = await dir.createFile(filename, key, filenameNonce, fileNonce);
         if (applyIntegrity)
             await newFile.setApplyIntegrity(true, hashKey, chunkSize);
