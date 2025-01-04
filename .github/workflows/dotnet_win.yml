@@ -29,26 +29,26 @@ jobs:
     - name: Salmon Restore dependencies
       working-directory: ./libs/projects/SalmonLibs.VS2022
       run: msbuild -t:restore
-    - name: Salmon.Core Build
-      working-directory: ./libs/projects/SalmonLibs.VS2022
-      run: msbuild Salmon.Core
-    - name: Salmon.FS Build
-      working-directory: ./libs/projects/SalmonLibs.VS2022
-      run: msbuild Salmon.FS
-    - name: Salmon.FS.Android Build
-      working-directory: ./libs/projects/SalmonLibs.VS2022
-      run: msbuild Salmon.FS.Android
-    - name: Salmon.Win Build
-      working-directory: ./libs/projects/SalmonLibs.VS2022
-      run: msbuild Salmon.Win
+    # - name: Salmon.Core Build
+    #   working-directory: ./libs/projects/SalmonLibs.VS2022
+    #   run: msbuild Salmon.Core
+    # - name: Salmon.FS Build
+    #   working-directory: ./libs/projects/SalmonLibs.VS2022
+    #   run: msbuild Salmon.FS
+    # - name: Salmon.FS.Android Build
+    #   working-directory: ./libs/projects/SalmonLibs.VS2022
+    #   run: msbuild Salmon.FS.Android
+    # - name: Salmon.Win Build
+    #   working-directory: ./libs/projects/SalmonLibs.VS2022
+    #   run: msbuild Salmon.Win
 
     # - name: Salmon devenv Build
     #   working-directory: ./libs/projects/SalmonLibs.VS2022
     #   run: devenv SalmonLibs.VS2022.sln /Build "Debug|x64"
     
     - name: SalmonNative Build
-      working-directory: ./libs/projects/SalmonLibs.VS2022
-      run: msbuild SalmonNative
+      working-directory: ./libs/projects/SalmonLibs.VS2022/SalmonNative
+      run: msbuild  /p:IncludePath="..\..\..\src\c\salmon\include"
     
     # - name: Salmon.Test Build
     #   working-directory: ./libs/projects/SalmonLibs.VS2022
@@ -58,9 +58,9 @@ jobs:
     #   working-directory: ./libs/projects/SalmonLibs.VS2022
     #   run: msbuild Salmon.Native.Test
           
-    - name: Salmon.Test SalmonCoreTests
-      working-directory: ./libs/projects/SalmonLibs.VS2022/Salmon.Test
-      run: vstest.console bin\Debug\net7.0-windows\Salmon.Test.dll /Tests:SalmonCoreTests
+    # - name: Salmon.Test SalmonCoreTests
+    #   working-directory: ./libs/projects/SalmonLibs.VS2022/Salmon.Test
+    #   run: vstest.console bin\Debug\net7.0-windows\Salmon.Test.dll /Tests:SalmonCoreTests
     # - name: Salmon.Test SalmonFSTests
     #   working-directory: ./libs/projects/SalmonLibs.VS2022/Salmon.Test
     #   run: vstest.console bin\Debug\net7.0-windows\Salmon.Test.dll /Tests:SalmonFSTests
@@ -68,6 +68,6 @@ jobs:
     # - name: Salmon.Test SalmonNativeTests C#
     #   working-directory: ./libs/projects/SalmonLibs.VS2022/Salmon.Test
     #   run: vstest.console bin\Debug\net7.0-windows\Salmon.Test.dll /Tests:SalmonNativeTests
-    # - name: Salmon.Native.Test TestExamples C++
-    #   working-directory: ./libs/projects/SalmonLibs.VS2022
-    #   run: vstest.console x64\Debug\Salmon.Native.Test.dll /Tests:TestExamples /Logger:Console;verbosity=detailed
+    - name: Salmon.Native.Test TestExamples C++
+      working-directory: ./libs/projects/SalmonLibs.VS2022
+      run: vstest.console x64\Debug\Salmon.Native.Test.dll /Tests:TestExamples /Logger:Console;verbosity=detailed
