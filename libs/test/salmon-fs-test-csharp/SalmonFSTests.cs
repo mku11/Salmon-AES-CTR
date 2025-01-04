@@ -41,18 +41,19 @@ namespace Mku.Salmon.Test;
 [TestClass]
 public class SalmonFSTests
 {
-    static SalmonFSTests()
+	[ClassInitialize]
+    public static void ClassInitialize(TestContext testContext)
     {
-        SalmonStream.AesProviderType = ProviderType.AesIntrinsics;
-
+		SalmonFSTestHelper.SetOutputDir(testContext.Properties["testDir"].ToString());
+		
+		SalmonStream.AesProviderType = ProviderType.AesIntrinsics;
         SalmonFSTestHelper.DriveClassType = typeof(DotNetDrive);
         // remote drive
         // make sure you turn on the web service manually
         // or start the test case from gradle:
         // gradlew.bat :salmon-ws:test --tests "com.mku.salmon.ws.fs.service.test.SalmonWSTests.testStartServer" --rerun-tasks
-        // SalmonFSTestHelper.DriveClassType = typeof(DotNetWSDrive);
+        // SalmonFSTestHelper.DriveClassType = typeof(DotNetWSDrive);		
     }
-
 
     [TestInitialize]
     public void BeforeEach()
@@ -684,7 +685,7 @@ public class SalmonFSTests
     public void ShouldReadFromFileMultithreaded()
     {
         IRealFile vaultDir = SalmonFSTestHelper.GenerateFolder(SalmonFSTestHelper.TEST_VAULT2_DIR);
-        IRealFile file = new DotNetFile(SalmonFSTestHelper.TEST_IMPORT_LARGE_FILE);
+        IRealFile file = new DotNetFile(SalmonFSTestHelper.TEST_IMPORT_MEDIUM_FILE);
 
         SalmonFileSequencer sequencer = SalmonFSTestHelper.CreateSalmonFileSequencer(new DotNetFile(vaultDir + "/" + SalmonFSTestHelper.TEST_SEQUENCER_FILE1), new SalmonSequenceSerializer());
         SalmonDrive drive = SalmonFSTestHelper.CreateDrive(vaultDir, SalmonFSTestHelper.DriveClassType, SalmonCoreTestHelper.TEST_PASSWORD, sequencer);

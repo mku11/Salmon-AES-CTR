@@ -39,12 +39,17 @@ To test GPU support edit file Salmon.Native.Test.vcxproj and add the following:
 ```
 
 To test C# library from the command line in windows:
-vstest.console Salmon.Test\bin\Debug\net7.0-windows\Salmon.Test.dll /Tests:ShouldEncryptAndDecryptTextCompatible /Logger:Console;verbosity=detailed
+vstest.console Salmon.Test\bin\Debug\net8.0-windows\Salmon.Test.dll /Tests:ShouldEncryptAndDecryptTextCompatible /Logger:Console;verbosity=detailed
 To test the native C library from the command line:
 vstest.console x64\Debug\Salmon.Native.Test.dll /Tests:TestExamples /Logger:Console;verbosity=detailed
 
+To use a different specific temporary directory for testing use:
+```
+vstest.console Salmon.Test\bin\Debug\net8.0-windows\Salmon.Test.dll /Tests:SalmonFSTests.ShouldAuthorizePositive /Logger:Console;verbosity=detailed -- TestRunParameters.Parameter(name=\"testDir\", value=\"D:\tmp2\")
+```
+
 In linux you can run tests using the dotnet tool:
-dotnet vstest Salmon.Test/bin/Debug/net7.0-windows/Salmon.Test.dll /Tests:ShouldEncryptAndDecryptTextCompatible /Logger:Console;verbosity=detailed
+dotnet vstest Salmon.Test/bin/Debug/net8.0-windows/Salmon.Test.dll /Tests:ShouldEncryptAndDecryptTextCompatible /Logger:Console;verbosity=detailed
 
 To debug the native code check the option under Project Properties/Debug/Debug Launch UI profiles/Enable native code debugging
 Note that debugging the native code will probably disable the Edit and Continue for .NET code.

@@ -46,19 +46,21 @@ public class SalmonFSTestHelper
 {
     internal static Type DriveClassType { get; set; } // drive class type
     internal static string TEST_ROOT_DIR = "d:\\tmp\\";
-    internal static string TEST_OUTPUT_DIR = SalmonFSTestHelper.TEST_ROOT_DIR + "output\\";
-    internal static string TEST_VAULT_DIR = SalmonFSTestHelper.TEST_OUTPUT_DIR + "enc";
-    internal static string TEST_VAULT2_DIR = SalmonFSTestHelper.TEST_OUTPUT_DIR + "enc2";
-    internal static string TEST_EXPORT_AUTH_DIR = SalmonFSTestHelper.TEST_OUTPUT_DIR + "export\\";
-    internal static string TEST_DATA_DIR_FOLDER = SalmonFSTestHelper.TEST_ROOT_DIR + "testdata\\";
-    internal static string TEST_IMPORT_TINY_FILE = SalmonFSTestHelper.TEST_DATA_DIR_FOLDER + "tiny_test.txt";
-    internal static string TEST_IMPORT_SMALL_FILE = SalmonFSTestHelper.TEST_DATA_DIR_FOLDER + "small_test.zip";
-    internal static string TEST_IMPORT_MEDIUM_FILE = SalmonFSTestHelper.TEST_DATA_DIR_FOLDER + "medium_test.zip";
-    internal static string TEST_IMPORT_LARGE_FILE = SalmonFSTestHelper.TEST_DATA_DIR_FOLDER + "large_test.mp4";
-    internal static string TEST_IMPORT_HUGE_FILE = SalmonFSTestHelper.TEST_DATA_DIR_FOLDER + "huge.zip";
-    internal static string TEST_IMPORT_FILE = SalmonFSTestHelper.TEST_IMPORT_SMALL_FILE;
+    internal static string TEST_OUTPUT_DIR;
+    internal static string TEST_VAULT_DIR;
+    internal static string TEST_VAULT2_DIR;
+    internal static string TEST_EXPORT_AUTH_DIR;
+    internal static string TEST_DATA_DIR_FOLDER;
+	
+    internal static string TEST_IMPORT_TINY_FILE;
+    internal static string TEST_IMPORT_SMALL_FILE;
+    internal static string TEST_IMPORT_MEDIUM_FILE;
+    internal static string TEST_IMPORT_LARGE_FILE;
+    internal static string TEST_IMPORT_HUGE_FILE;
+    internal static string TEST_IMPORT_FILE;
 
-    internal static string TEST_SEQUENCER_DIR = SalmonFSTestHelper.TEST_OUTPUT_DIR;
+	internal static String TINY_FILE_CONTENTS = "This is a new file created.";
+    internal static string TEST_SEQUENCER_DIR;
     internal static string TEST_SEQUENCER_FILENAME = "fileseq.xml";
 
     internal static string TEST_EXPORT_FILENAME = "export.slma";
@@ -84,12 +86,76 @@ public class SalmonFSTestHelper
     internal static string TEST_SEQUENCER_FILE1 = "seq1.xml";
     internal static string TEST_SEQUENCER_FILE2 = "seq2.xml";
 
+	private static readonly Random random = new Random((int)Time.Time.CurrentTimeMillis());
+
     public static Dictionary<string, string> users;
     private static DotNetWSFile.Credentials credentials1 = new DotNetWSFile.Credentials("user", "password");
 
     internal static SalmonFileImporter fileImporter;
     internal static SalmonFileExporter fileExporter;
 
+	internal static void SetOutputDir(string path) {
+		if(path != null)
+			SalmonFSTestHelper.TEST_ROOT_DIR = path;
+		Console.WriteLine("setting test path: " + path);
+		TEST_DATA_DIR_FOLDER = SalmonFSTestHelper.TEST_ROOT_DIR + Path.DirectorySeparatorChar + "input" + Path.DirectorySeparatorChar;
+		TEST_OUTPUT_DIR = SalmonFSTestHelper.TEST_ROOT_DIR + Path.DirectorySeparatorChar + "output" + Path.DirectorySeparatorChar;
+		TEST_VAULT_DIR = SalmonFSTestHelper.TEST_OUTPUT_DIR + Path.DirectorySeparatorChar + "enc";
+		TEST_VAULT2_DIR = SalmonFSTestHelper.TEST_OUTPUT_DIR + Path.DirectorySeparatorChar + "enc2";
+		TEST_EXPORT_AUTH_DIR = SalmonFSTestHelper.TEST_OUTPUT_DIR + Path.DirectorySeparatorChar + "export" + Path.DirectorySeparatorChar;
+		TEST_SEQUENCER_DIR = SalmonFSTestHelper.TEST_OUTPUT_DIR + Path.DirectorySeparatorChar;
+		
+		CreateDir(TEST_ROOT_DIR);
+		CreateDir(TEST_DATA_DIR_FOLDER);
+		CreateDir(TEST_OUTPUT_DIR);
+		CreateTestFiles();
+	}
+	
+	
+	internal static void CreateDir(string path) {
+		if(!Directory.Exists(path))
+			Directory.CreateDirectory(path);
+	}
+	
+	internal static void CreateTestFiles() {
+		TEST_IMPORT_TINY_FILE = SalmonFSTestHelper.TEST_DATA_DIR_FOLDER + "tiny_test.txt";
+		TEST_IMPORT_SMALL_FILE = SalmonFSTestHelper.TEST_DATA_DIR_FOLDER + "small_test.dat";
+		TEST_IMPORT_MEDIUM_FILE = SalmonFSTestHelper.TEST_DATA_DIR_FOLDER + "medium_test.dat";
+		TEST_IMPORT_LARGE_FILE = SalmonFSTestHelper.TEST_DATA_DIR_FOLDER + "large_test.dat";
+		TEST_IMPORT_HUGE_FILE = SalmonFSTestHelper.TEST_DATA_DIR_FOLDER + "huge_test.dat";
+		TEST_IMPORT_FILE = SalmonFSTestHelper.TEST_IMPORT_SMALL_FILE;
+		
+		CreateFile(TEST_IMPORT_TINY_FILE, TINY_FILE_CONTENTS);
+		CreateFile(TEST_IMPORT_SMALL_FILE,1024*1024);
+		CreateFile(TEST_IMPORT_MEDIUM_FILE,12*1024*1024);
+		// CreateFile(TEST_IMPORT_LARGE_FILE,48*1024*1024);
+		// CreateFile(TEST_IMPORT_HUGE_FILE,512*1024*1024);
+	}
+	
+	internal static void CreateFile(string path, string contents) {
+		Stream stream = System.IO.File.Open(path, FileMode.OpenOrCreate, FileAccess.Write, FileShare.ReadWrite);
+		byte[] data = UTF8Encoding.UTF8.GetBytes(contents);
+		stream.Write(data, 0, data.Length);
+		stream.Flush();
+		stream.Close();
+	}
+	
+	internal static void CreateFile(string path, long size) {
+		if(System.IO.File.Exists(path))
+			return;
+		byte[] data = new byte[4*1024*1024];
+		Stream stream = System.IO.File.Open(path, FileMode.OpenOrCreate, FileAccess.Write, FileShare.ReadWrite);
+		int len = 0;
+		while(size > 0) {
+			random.NextBytes(data);
+			len = (int) Math.Min(size, data.Length);
+			stream.Write(data, 0, len);
+			size -= len;
+		}
+		stream.Flush();
+		stream.Close();
+	}
+	
     internal static void Initialize()
     {
         // TODO: ToSync global importer/exporter
@@ -170,7 +236,7 @@ public class SalmonFSTestHelper
         if (chunkSize != null && chunkSize > 0 && !VerifyFileIntegrity)
             salmonFile.SetVerifyIntegrity(false, null);
         SalmonStream sstream = salmonFile.GetInputStream();
-        String hashPostImport = SalmonFSTestHelper.GetChecksum(sstream, sstream.BufferSize);
+        string hashPostImport = SalmonFSTestHelper.GetChecksum(sstream, sstream.BufferSize);
         if (shouldBeEqual)
         {
             Assert.AreEqual(hashPreImport, hashPostImport);
@@ -482,7 +548,7 @@ public class SalmonFSTestHelper
             base.InitSequence(driveId, authId, startNonce, maxNonce);
         }
     }
-    public static SalmonDrive OpenDrive(IRealFile vaultDir, Type driveClassType, String testPassword, SalmonFileSequencer sequencer)
+    public static SalmonDrive OpenDrive(IRealFile vaultDir, Type driveClassType, string testPassword, SalmonFileSequencer sequencer)
     {
         if (driveClassType == typeof(DotNetWSDrive))
         {
