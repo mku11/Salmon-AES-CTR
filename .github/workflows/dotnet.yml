@@ -33,6 +33,9 @@ jobs:
       with:
         dotnet-version: 7.0.x
         
+    - name: Setup VSTest Path
+      uses: darenm/Setup-VSTest@v1.2
+      
     - name: Salmon.Core Restore workload dependencies
       working-directory: ./libs/projects/SalmonLibs.VS2022/Salmon.Core
       run: dotnet workload restore
