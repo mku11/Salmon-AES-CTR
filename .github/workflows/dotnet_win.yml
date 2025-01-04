@@ -1,0 +1,35 @@
+# This workflow will build a .NET project
+# For more information see: https://docs.github.com/en/actions/automating-builds-and-tests/building-and-testing-net
+
+name: .NET
+
+on:
+  push:
+    branches: [ "main" ]
+  pull_request:
+    branches: [ "main" ]
+
+jobs:
+  build:
+    defaults:
+      run:
+        working-directory: ./libs/projects/SalmonLibs.VS2022
+    runs-on: windows-latest
+
+    steps:
+    - uses: actions/checkout@v4
+    - name: Setup .NET
+      uses: actions/setup-dotnet@v4
+      with:
+        dotnet-version: 7.0.x
+      
+    - name: Salmon Restore dependencies
+      working-directory: ./libs/projects/SalmonLibs.VS2022
+      run: msbuild -t:restore
+    - name: Salmon Build
+      working-directory: ./libs/projects/SalmonLibs.VS2022
+      run: msbuild
+      
+    - name: Salmon.Test SalmonCoreTests
+      working-directory: ./libs/projects/SalmonLibs.VS2022/Salmon.Test
+      run: vstest.console bin\Debug\net7.0-windows\Salmon.Test.dll /Tests:SalmonCoreTests
