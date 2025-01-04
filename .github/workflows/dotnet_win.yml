@@ -1,7 +1,7 @@
 # This workflow will build a .NET project
 # For more information see: https://docs.github.com/en/actions/automating-builds-and-tests/building-and-testing-net
 
-name: .NET
+name: Salmon .NET Windows
 
 on:
   push:
@@ -72,42 +72,20 @@ jobs:
       working-directory: ./libs/projects/SalmonLibs.VS2022
       run: msbuild -t:restore
       
-    - name: Build Android Native with Gradle
+    - name: Build Android Native Libs with Gradle
       working-directory: ./libs/projects/salmon-libs-gradle-android
       run: .\gradlew.bat build
       
-    - name: Salmon Build
+    - name: Salmon .NET Build
       working-directory: ./libs/projects/SalmonLibs.VS2022
       run: msbuild
-    
-    # - name: Salmon.Core Build
-    #   working-directory: ./libs/projects/SalmonLibs.VS2022
-    #   run: msbuild Salmon.Core
-    # - name: Salmon.FS Build
-    #   working-directory: ./libs/projects/SalmonLibs.VS2022
-    #   run: msbuild Salmon.FS
-    # - name: Salmon.FS.Android Build
-    #   working-directory: ./libs/projects/SalmonLibs.VS2022
-    #   run: msbuild Salmon.FS.Android
-    # - name: Salmon.Win Build
-    #   working-directory: ./libs/projects/SalmonLibs.VS2022
-    #   run: msbuild Salmon.Win
-    # - name: SalmonNative Build
-    #   working-directory: ./libs/projects/SalmonLibs.VS2022
-    #   run: msbuild SalmonNative /p:IncludePath="..\..\..\src\c\salmon\include"
-    # - name: Salmon.Test Build
-    #   working-directory: ./libs/projects/SalmonLibs.VS2022
-    #   run: msbuild Salmon.Test
-    # - name: Salmon.Native.Test Build
-    #   working-directory: ./libs/projects/SalmonLibs.VS2022
-    #   run: msbuild Salmon.Native.Test /p:IncludePath="..\..\..\src\c\salmon\include"
           
     - name: Salmon.Test SalmonCoreTests
       working-directory: ./libs/projects/SalmonLibs.VS2022/Salmon.Test
       run: vstest.console bin\Debug\net8.0-windows\Salmon.Test.dll /Tests:SalmonCoreTests
-    # - name: Salmon.Test SalmonFSTests
-    #   working-directory: ./libs/projects/SalmonLibs.VS2022/Salmon.Test
-    #   run: vstest.console bin\Debug\net7.0-windows\Salmon.Test.dll /Tests:SalmonFSTests
+    - name: Salmon.Test SalmonFSTests
+      working-directory: ./libs/projects/SalmonLibs.VS2022/Salmon.Test
+      run: vstest.console bin\Debug\net7.0-windows\Salmon.Test.dll /Tests:SalmonFSTests
 
     - name: Salmon.Test SalmonNativeTests C#
       working-directory: ./libs/projects/SalmonLibs.VS2022/Salmon.Test
