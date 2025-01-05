@@ -63,7 +63,7 @@ import static org.junit.jupiter.api.Assertions.*;
 
 public class SalmonFSTestHelper {
     static Class<?> driveClassType = null; // drive class type
-    static String TEST_ROOT_DIR = "d:\\tmp";
+    static String TEST_ROOT_DIR = "c:\\tmp\\salmon\\test";
     static String TEST_DATA_DIR_FOLDER;
 	static String TEST_OUTPUT_DIR;
     static String TEST_VAULT_DIR;

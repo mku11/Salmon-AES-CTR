@@ -45,7 +45,7 @@ namespace Mku.Salmon.Test;
 public class SalmonFSTestHelper
 {
     internal static Type DriveClassType { get; set; } // drive class type
-    internal static string TEST_ROOT_DIR = "d:\\tmp\\";
+    internal static string TEST_ROOT_DIR = "c:\\tmp\\salmon\\test";
     internal static string TEST_OUTPUT_DIR;
     internal static string TEST_VAULT_DIR;
     internal static string TEST_VAULT2_DIR;
