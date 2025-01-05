@@ -87,6 +87,8 @@ public class SalmonCorePerfTests
     [TestMethod]
     public void EncryptAndDecryptPerfSalmonNativeAesGPU()
     {
+		if(!SalmonCoreTestHelper.IsGPUEnabled())
+			return;
         SalmonStream.AesProviderType = ProviderType.AesGPU;
         // warm up
         SalmonCoreTestHelper.EncryptAndDecryptByteArrayNative(TEST_PERF_SIZE, false);
@@ -132,6 +134,8 @@ public class SalmonCorePerfTests
     [TestMethod]
     public void EncryptAndDecryptStreamPerfSalmonNativeAesGPU()
     {
+		if(!SalmonCoreTestHelper.IsGPUEnabled())
+			return;
         SalmonStream.AesProviderType = ProviderType.AesGPU;
         //warm up
         SalmonCoreTestHelper.EncryptAndDecryptByteArray(TEST_PERF_SIZE, false);

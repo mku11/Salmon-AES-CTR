@@ -21,6 +21,7 @@ dependencies {
 test {
     useJUnitPlatform()
     systemProperty "java.library.path", "../salmon-native/build/libs/salmon/shared"
+	systemProperty "ENABLE_GPU", System.getProperty('ENABLE_GPU')
 }
 
 tasks.withType(Test) {

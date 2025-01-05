@@ -27,13 +27,21 @@ SOFTWARE.
 import com.mku.salmon.streams.ProviderType;
 import com.mku.salmon.streams.SalmonStream;
 import org.junit.jupiter.api.*;
+import org.junit.jupiter.api.condition.*;
 
 @TestMethodOrder(MethodOrderer.OrderAnnotation.class)
 public class SalmonCorePerfTests {
-    public static int TEST_PERF_SIZE = 32 * 1024 * 1024;
-
+    public static int TEST_PERF_SIZE = 8 * 1024 * 1024;
+	public static boolean enableGPU = false;
+	
     @BeforeAll
     static void beforeAll() {
+		String enableGPUStr = System.getProperty("ENABLE_GPU");
+		if(enableGPUStr!=null) {
+			enableGPU = new Boolean(enableGPUStr);
+			System.out.println("ENABLE_GPU: " + enableGPU);
+		}
+		 
 		//SalmonCoreTestHelper.TEST_ENC_BUFFER_SIZE = 1 * 1024 * 1024;
 		//SalmonCoreTestHelper.TEST_DEC_BUFFER_SIZE = 1 * 1024 * 1024;
 		SalmonCoreTestHelper.TEST_ENC_THREADS = 1;
@@ -86,6 +94,7 @@ public class SalmonCorePerfTests {
 
     @Test
     @Order(4)
+	@EnabledIfSystemProperty(named = "ENABLE_GPU", matches = "true")
     public void EncryptAndDecryptPerfSalmonNativeAesGPU() throws Exception {
         SalmonStream.setAesProviderType(ProviderType.AesGPU);
         // warm up
@@ -132,6 +141,7 @@ public class SalmonCorePerfTests {
 
     @Test
     @Order(8)
+	@EnabledIfSystemProperty(named = "ENABLE_GPU", matches = "true")
     public void EncryptAndDecryptStreamPerfSalmonNativeAesGPU() throws Exception {
         SalmonStream.setAesProviderType(ProviderType.AesGPU);
         //warm up

@@ -48,6 +48,11 @@ To run a specific test case:
 gradlew.bat :salmon-fs:test --tests "com.mku.salmon.test.SalmonFSTests.shouldAuthorizePositive" --rerun-tasks -i   
 ```
 
+To include GPU tests in performance tests:
+```
+gradlew.bat :salmon-core:test --rerun-tasks -i -DENABLE_GPU=true
+```
+
 To use a different specific temporary directory for testing use:
 ```
 gradlew.bat :salmon-fs:test -DtestDir="D:\tmp\salmon\test"

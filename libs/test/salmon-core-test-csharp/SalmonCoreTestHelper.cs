@@ -101,6 +101,13 @@ public class SalmonCoreTestHelper
         SalmonCoreTestHelper.encryptor.Close();
         SalmonCoreTestHelper.decryptor.Close();
     }
+	
+	internal static bool IsGPUEnabled() {
+		String enabledStr = Environment.GetEnvironmentVariable("ENABLE_GPU");
+		if(enabledStr != null)
+			return Boolean.Parse(enabledStr);
+		return false;
+	}
 
     public static string SeekAndGetSubstringByRead(SalmonStream reader, int seek, int readCount, SeekOrigin seekOrigin)
     {

@@ -51,6 +51,14 @@ for linux:
 export SALMON_TEST_DIR="/tmp/salmon/test"
 ```
 
+To include GPU tests in performance testing set env variable:
+```
+for windows:
+set ENABLE_GPU=true
+for linux:
+export ENABLE_GPU=true
+```
+
 In linux you can run tests using the dotnet tool:
 dotnet vstest Salmon.Test/bin/Debug/net8.0-windows/Salmon.Test.dll /Tests:ShouldEncryptAndDecryptTextCompatible /Logger:Console;verbosity=detailed
 
