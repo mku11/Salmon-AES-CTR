@@ -276,7 +276,7 @@ static int transform_opencl(const unsigned char* key, unsigned char* counter,
 	}
 
 	fflush(stdout);
-	return 0;
+	return count;
 }
 
 int aes_opencl_transform(const unsigned char* key, unsigned char* counter,
