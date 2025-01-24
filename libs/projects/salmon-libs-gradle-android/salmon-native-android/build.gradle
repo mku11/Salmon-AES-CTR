@@ -56,7 +56,8 @@ android {
     externalNativeBuild {
         cmake {
             path "../../../src/android/make/CMakeLists.txt"
-            version "3.22.1"
+			// uncomment to use specific version
+            // version "3.22.1"
         }
     }
     sourceSets {
