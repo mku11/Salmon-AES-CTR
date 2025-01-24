@@ -21,6 +21,7 @@
     <ImplicitUsings>false</ImplicitUsings>
     <LangVersion>10</LangVersion>
     <Version>2.2.0</Version>
+    <Configurations>Debug;Release;DebugGPU;ReleaseGPU</Configurations>
   </PropertyGroup>
 
 	<ItemGroup>

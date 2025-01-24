@@ -9,7 +9,7 @@ msbuild -t:restore
 
 Build:
 You can build from the windows command line in windows:
-msbuild
+msbuild /property:Configuration=Release
 
 In linux you can build only the C# projects
 If you need to build the native libraries in linux use salmon-libs-gradle or salmon-libs-gcc
@@ -27,15 +27,24 @@ To test the native libraries you will need Tiny Aes
 To download Tiny Aes source code from the project root folder type:
 git submodule update --recursive --init
 
-To enable GPU support for the native libary edit file Salmon.Native.vcxproj and add the following:
+To enable GPU support for the native libary edit file Salmon.Native.vcxproj and modify the paths to OpenCL directories:
 ```
-<PreprocessorDefinitions>...;USE_OPENCL=1</PreprocessorDefinitions>
-<AdditionalDependencies>...;D:\tools\OpenCL-SDK-v2024.05.08-Win-x64\lib\OpenCL.lib</AdditionalDependencies>
+<AdditionalIncludeDirectories>D:\tools\OpenCL-SDK-v2024.05.08-Win-x64\include;$(ProjectDir)\..\..\..\src\c\salmon\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+<AdditionalDependencies>D:\tools\OpenCL-SDK-v2024.05.08-Win-x64\lib\OpenCL.lib;%(AdditionalDependencies)</AdditionalDependencies>
+```
+Then build release with GPU support:
+```
+msbuild /property:Configuration=ReleaseGPU /p:Platform=x64
 ```
 
-To test GPU support edit file Salmon.Native.Test.vcxproj and add the following:
+Then build debug with GPU support:
 ```
-<PreprocessorDefinitions>...;USE_GPU=1</PreprocessorDefinitions>
+msbuild /property:Configuration=DebugGPU /p:Platform=x64
+```
+
+To test GPU support:
+```
+vstest.console x64\DebugGPU\Salmon.Native.Test.dll /Tests:TestExamples /Logger:Console;verbosity=detailed
 ```
 
 To test C# library from the command line in windows:
@@ -68,4 +77,5 @@ Note that debugging the native code will probably disable the Edit and Continue 
 Packaging:  
 The nuget packages for SalmonCore and SalmonFS will be created automatically during the build.  
 To create the nuget package for SalmonNative see Salmon.Native/README.md file.  
+GPU support is included by default in the nuget package if you don't want it edit the SalmonNative.nuspec file.
 Make sure you're under release configuration before building.

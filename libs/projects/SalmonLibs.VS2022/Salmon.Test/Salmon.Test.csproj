@@ -4,6 +4,8 @@
     <TargetFramework>net8.0-windows</TargetFramework>
 
     <IsPackable>false</IsPackable>
+
+    <Configurations>Debug;Release;DebugGPU;ReleaseGPU</Configurations>
   </PropertyGroup>
 
   <ItemGroup>
@@ -25,24 +27,6 @@
     
   </ItemGroup>
   
-    <ItemGroup>
-    <Content Include="..\x64\Debug\SalmonNative.dll" Link="SalmonNative.dll">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </Content>
-    <Content Include="..\x64\Debug\SalmonNative.pdb" Link="SalmonNative.pdb">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </Content>
-  </ItemGroup>
-
-  <ItemGroup>
-    <Content Include="..\x64\Debug\SalmonNative.exp" Link="SalmonNative.exp">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </Content>
-    <Content Include="..\x64\Debug\SalmonNative.lib" Link="SalmonNative.lib">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </Content>
-  </ItemGroup>
-
   <ItemGroup>
     <PackageReference Include="Microsoft.NET.Test.Sdk" Version="17.9.0" />
     <PackageReference Include="MSTest.TestAdapter" Version="3.2.2" />
@@ -55,5 +39,10 @@
     <ProjectReference Include="..\Salmon.FS\Salmon.FS.csproj" />
     <ProjectReference Include="..\SalmonNative\SalmonNative.vcxproj" />
   </ItemGroup>
+
+  <Target Name="PreBuild" BeforeTargets="PreBuildEvent">
+    <Exec Command="copy ..\x64\$(Configuration)\SalmonNative.* .\bin\$(Configuration)\$(TargetFramework)\" />
+	
+  </Target>
 
 </Project>

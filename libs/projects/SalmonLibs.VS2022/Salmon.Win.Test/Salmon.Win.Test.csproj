@@ -4,6 +4,8 @@
     <TargetFramework>net8.0-windows</TargetFramework>
 
     <IsPackable>false</IsPackable>
+
+    <Configurations>Debug;Release;DebugGPU;ReleaseGPU</Configurations>
   </PropertyGroup>
 
   <ItemGroup>
