@@ -26,20 +26,23 @@ public class Sample
 		
     public static void Main(string[] args)
     {
-        // uncomment to load the AES intrinsics for better performance
-        // make sure you add option -Djava.library.path=C:\path\to\salmonlib\
-        // SalmonStream.setAesProviderType(ProviderType.AesIntrinsics);
+        // Aes: for software acceleration
+		// AesIntrinsics: for CPU acceleration
+		// AesGPU: for GPU acceleration, make sure you have compiled the libraries with OpenCL GPU support
+        SalmonStream.AesProviderType = ProviderType.AesIntrinsics;
 
-        // use the password to create a drive and import a file
+		DotNetFile dir = new DotNetFile("output");
+        
+		// create a drive with a password and import a file
 		string vaultPath = "vault_" + BitConverter.ToHex(SalmonGenerator.GetSecureRandomBytes(6));
-        DotNetFile vaultDir = new DotNetFile(vaultPath);
+        IRealFile vaultDir = dir.CreateDirectory(vaultPath);
 		vaultDir.Mkdir();
 		DotNetFile[] filesToImport = new DotNetFile[] { new DotNetFile("data/file.txt") };
         CreateDriveAndImportFile(vaultDir, filesToImport);
 
         // or encrypt text into a standalone file without a drive:
 		string filePath = "data_" + BitConverter.ToHex(SalmonGenerator.GetSecureRandomBytes(6));
-		DotNetFile file = new DotNetFile(filePath);
+		IRealFile file = dir.CreateFile(filePath);
         EncryptAndDecryptTextToFile(file);
 		
 		// misc stream samples

@@ -33,9 +33,12 @@ public class Main {
     }
 
     public static void main(String[] args) throws Exception {
-        // uncomment to load the native AES library for better performance
+        // Aes: for software acceleration
+		// AesIntrinsics: for CPU acceleration
+		// AesGPU: for GPU acceleration, make sure you have compiled the libraries with OpenCL GPU
         // make sure you add jvm option: -Djava.library.path=C:\path\to\salmonlib\
-        SalmonStream.setAesProviderType(ProviderType.AesIntrinsics);
+		
+		SalmonStream.setAesProviderType(ProviderType.AesIntrinsics);
 
         JavaFile dir = new JavaFile("output");
 
