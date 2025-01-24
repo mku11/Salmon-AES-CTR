@@ -15,9 +15,9 @@
   </metadata>
 
   <files>
-    <!-- Change the path to GPU variant or debug if you're in developement -->
-    <file src="..\x64\ReleaseGPU\SalmonNative.dll"                  target="runtimes\win-x64\native"/>
-    <file src="..\x64\ReleaseGPU\SalmonNative.lib"                  target="runtimes\win-x64\native"/>
+    <!-- Change the path to ReleaseGPU variant or Debug if you're in development -->
+    <file src="..\x64\Release\SalmonNative.dll"                  target="runtimes\win-x64\native"/>
+    <file src="..\x64\Release\SalmonNative.lib"                  target="runtimes\win-x64\native"/>
     <file src="..\..\..\src\c\salmon\include\salmon.h"              target="runtimes\win-x64\native\salmon\include"/>
 	<file src="..\..\..\src\c\salmon\include\salmon-aes.h"          target="runtimes\win-x64\native\salmon\include"/>
     <file src="..\..\..\src\c\salmon\include\salmon-aes-intr.h"     target="runtimes\win-x64\native\salmon\include"/>
