@@ -23,6 +23,8 @@ Web Service for use with remote virtual drives (experimental Java/C# clients)
  
 [**Live Web Demo**](https://mku11.github.io/Salmon-Vault/demo.html)    
 ![alt text](https://github.com/mku11/Salmon-Vault/blob/main/screenshots/Screenshot.png)  
+The access to the demo vault is remote and read-only so you won't be able to import new files.  
+Local drives are only available using Chrome. Access to live web demo: [**Live Web Demo**](https://mku11.github.io/Salmon-Vault/demo.html)  
 Demo Vault contents are licensed under [Content License](https://mku11.github.io/Salmon-Vault/vault/content_license.txt)  
 Copyright by Blender Foundation | www.bigbuckbunny.org  
 
