@@ -19,12 +19,12 @@ File system API for encrypted virtual drives
 Protected nonce sequencers (limited)  
 Web Service for use with remote virtual drives (experimental Java/C# clients)
  
-[**Live Web Demo**](https://mku11.github.io/Salmon-Vault/demo.html)    
+ 
+## Live Web Demo
 ![alt text](https://github.com/mku11/Salmon-Vault/blob/main/screenshots/Screenshot.png)  
 Access to the demo vault is remote and read-only so you won't be able to import new files.  
 Local drives are only available using Chrome. Access to live web demo: [**Live Web Demo**](https://mku11.github.io/Salmon-Vault/demo.html)  
-Demo Vault contents are licensed under [Content License](https://mku11.github.io/Salmon-Vault/vault/content_license.txt)  
-Copyright by Blender Foundation | www.bigbuckbunny.org  
+Demo Vault files are licensed under [Content License](https://mku11.github.io/Salmon-Vault/vault/content_license.txt) Copyright by Blender Foundation | www.bigbuckbunny.org  
 
 ## API Support  
 **Languages:**  
