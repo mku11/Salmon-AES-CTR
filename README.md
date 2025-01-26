@@ -2,15 +2,13 @@
 
 ## Salmon
 
-Salmon is an AES-256 encryption library with built-in integrity, parallel operations, and seekable stream support.  
-It provides a high level API for encrypting data, streams, and a virtual drive API for encrypting files.  
-Powered by a fast native library for Intel x86_64 and ARM64.  
+Salmon is an AES-256 encryption library with CPU and GPU acceleration, built-in data integrity, parallel operations, and seekable stream support. It provides a high level API for encrypting data arrays and streams, and a file system API for virtual drives.  
   
 [![License: MIT](https://img.shields.io/github/license/mku11/Salmon-AES-CTR.svg)](LICENSE)
 [![Version](https://img.shields.io/badge/version-2.2.0-blue)](https://github.com/mku11/Salmon-AES-CTR/releases)
 [![GitHub Releases](https://img.shields.io/github/downloads/mku11/Salmon-AES-CTR/latest/total?logo=github)](https://github.com/mku11/Salmon-AES-CTR/releases)
 
-**Library Features**  
+## Library Features  
 AES-256 encryption in CTR Mode  
 HMAC SHA-256 authentication  
 SHA-256 PBKDF2 key derivation  
@@ -23,12 +21,13 @@ Web Service for use with remote virtual drives (experimental Java/C# clients)
  
 [**Live Web Demo**](https://mku11.github.io/Salmon-Vault/demo.html)    
 ![alt text](https://github.com/mku11/Salmon-Vault/blob/main/screenshots/Screenshot.png)  
-The access to the demo vault is remote and read-only so you won't be able to import new files.  
+Access to the demo vault is remote and read-only so you won't be able to import new files.  
 Local drives are only available using Chrome. Access to live web demo: [**Live Web Demo**](https://mku11.github.io/Salmon-Vault/demo.html)  
 Demo Vault contents are licensed under [Content License](https://mku11.github.io/Salmon-Vault/vault/content_license.txt)  
 Copyright by Blender Foundation | www.bigbuckbunny.org  
 
-**API Libraries:**  
+## API Support  
+**Languages:**  
 Java 11+  
 C# .NET 8+  
 Python 3.11+  
@@ -36,7 +35,7 @@ Typescript ESM/ES2020
 Javascript ESM/ES2020  
 C/C++ (data encryption API only)  
   
-**Platforms:**  
+**Platforms Tested:**  
 JavaFX 17+  
 Android 23+  
 .NET Android 23+  
@@ -45,18 +44,19 @@ Chrome, Firefox, Safari (Remote read-only drives)
 Chrome (Local read-write drives)  
 Node.js (Remote read-only and Local read-write drives)  
   
-**Operating Systems:**  
+**Operating Systems Tested:**  
 Windows 10+ x86_64  
-MacOS 10.11+ x86_64 
-Linux/Debian/Ubuntu x86_64, aarch64
-Android 23+ ARM
+MacOS 10.11+ x86_64  
+Linux/Debian/Ubuntu x86_64, aarch64  
+Android 23+ ARM  
 
-**CPU architectures (Tested):**  
-Intel x86_64  
-ARM aarch64
+## Acceleration
+**CPU architectures:**  
+Intel AES-NI SIMD x86_64  
+ARM SIMD aarch64
 
 **GPU Platforms:**  
-OpenCL
+OpenCL 1.2+
 
 **Benchmarks**  
 How fast is Salmon?  
@@ -92,22 +92,22 @@ Time ms:
  dec time: 253  
  Total: 506  
 ```
- 
-Do you need more speed? Use SalmonEncryptor/SalmonDecryptor with multiple threads. 
+
+In case you need more speed Salmon has baked-in multithreaded read/write operations, see API samples below. 
 
 ### Why another encryption library?  
 - Blazing fast CPU and GPU acceleration.  
-- Parallel baked-in encryption and decryption of data and files.  
-- Read/Write/Seek through encrypted streams and files via a low ceremony API.  
+- Parallel baked-in encryption and decryption of data arrays, streams, and files.  
+- Low ceremony API for read/write/seek operations.  
 - Data integrity with interleaved HMAC signatures with a per-chunk authentication scheme.
 - Use of sequential nonces with strict ranges so no birthday problem.
-- Nonce sequences reside outside of virtual drives to allow for fully operational clones and backups.  
+- Nonce sequences reside outside of encrypted drives so you can have multiple fully operational clones and backups.  
 - Import new files in virtual drives using multiple authorized devices.  
 - Sequence ranges are stored in app protected space (Android only).  
 - Any tampering is detected using an encrypted SHA256 checksum (Win10/11 only).  
 - Additional protection from non-admin users (Salmon Windows Service Win10/11 only).  
-- API for several popular programming languages, platforms, operating systems.  
-- Implementation is based on abstract components you can extend easily.  
+- API for several popular programming languages, platforms, and operating systems.  
+- Implementation is based on abstract components which can easily extended.  
 
 **Comparison:**  
 - Salmon uses AES-CTR which supports random access unlike GCM.  
