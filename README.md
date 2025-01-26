@@ -21,8 +21,8 @@ File system API for encrypted virtual drives
 Protected nonce sequencers (limited)  
 Web Service for use with remote virtual drives (experimental Java/C# clients)
  
-![alt text](https://github.com/mku11/Salmon-Vault/blob/main/screenshots/Screenshot.png)  
 [**Live Web Demo**](https://mku11.github.io/Salmon-Vault/demo.html)    
+![alt text](https://github.com/mku11/Salmon-Vault/blob/main/screenshots/Screenshot.png)  
 Demo Vault contents are licensed under [Content License](https://mku11.github.io/Salmon-Vault/vault/content_license.txt)  
 Copyright by Blender Foundation | www.bigbuckbunny.org  
 
