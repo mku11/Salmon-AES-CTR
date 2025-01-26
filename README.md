@@ -13,58 +13,48 @@ Powered by a fast native library for Intel x86_64 and ARM64.
 **Library Features**  
 AES-256 encryption in CTR Mode  
 HMAC SHA-256 authentication  
-SHA-256 PBKDF2 key derivation    
-AES-NI for Intel x86 and ARM64  
-AES GPU support with OpenCL  
+SHA-256 PBKDF2 key derivation  
+CPU AES-NI acceleration for Intel x86 and ARM64  
+GPU AES acceleration with OpenCL  
 Data and seekable stream encryption API  
-Virtual file system API  
-Nonce sequencer in app sandbox (Android Only)  
-Nonce sequencer with SHA-256 chksum (Windows Only)  
-Nonce sequencer via windows service (Windows Only)  
-Experimental Spring Web Service for use with remote drives (Java and C# clients only)
+File system API for encrypted virtual drives  
+Protected nonce sequencers (limited)  
+Web Service for use with remote virtual drives (experimental Java/C# clients)
+ 
+![alt text](https://github.com/mku11/Salmon-Vault/blob/main/screenshots/Screenshot.png)  
+[**Live Web Demo**](https://mku11.github.io/Salmon-Vault/demo.html)    
+Demo Vault contents are licensed under [Content License](https://mku11.github.io/Salmon-Vault/vault/content_license.txt)  
+Copyright by Blender Foundation | www.bigbuckbunny.org  
 
-### So why another encryption library?  
-**Native implementation:**  
-Fast native AES-NI intrinsics subroutines using SIMD for x86_64 and ARM64.  
+**API Libraries:**  
+Java 11+  
+C# .NET 8+  
+Python 3.11+  
+Typescript ESM/ES2020  
+Javascript ESM/ES2020  
+C/C++ (data encryption API only)  
+  
+**Platforms:**  
+JavaFX 17+  
+Android 23+  
+.NET Android 23+  
+WPF, Xamarin, and MAUI  
+Chrome, Firefox, Safari (Remote read-only drives)  
+Chrome (Local read-write drives)  
+Node.js (Remote read-only and Local read-write drives)  
+  
+**Operating Systems:**  
+Windows 10+ x86_64  
+MacOS 10.11+ x86_64 
+Linux/Debian/Ubuntu x86_64, aarch64
+Android 23+ ARM
 
-**Parallel processing:**  
-Fast multithreaded encryption and decryption of data and files.  
+**CPU architectures (Tested):**  
+Intel x86_64  
+ARM aarch64
 
-**Facade API:**  
-Read/Write/Seek through encrypted streams and files via a low ceremony API.  
-Random access is supported for both the stream and file system APIs.
-
-**Data integrity:**  
-Samon is using CTR with interleaved HMAC signatures so you don't have to verify the whole content.  
-Seekable streams will simply fail when reading a data chunk that is tampered.  
-
-**No birthday problem:**  
-Salmon is using by default sequential nonces with strict ranges so no random nonces.  
-
-**Backups:**  
-Nonce sequence ranges reside outside of the virtual drive so you can safely keep fully operational clones and backups of your drive.  
-
-**Portability:**  
-You can import new files in virtual drives using multiple authorized devices.  
-Move and decrypt files using any supported device.  
-
-**Protected nonce sequences:**  
-Sequence ranges are stored in app protected space (Android only).  
-Any tampering is detected using an encrypted SHA256 checksum (Win10/11 only).  
-Additional protection from non-admin users (Salmon Windows Service Win10/11 only).  
-
-**Platform Support:**  
-Salmon is implemented in several programming languages and supports most major platforms and operating systems.  
-
-**Extensible API:**  
-The implementation is based on abstract components which you can implement and inject easily in your custom solution.  
-This make things easier if you want to support other file systems, or network files and cloud storage.  
-You can also create your own secure nonce sequencers by implemented the interfaces provided.
-
-**Comparison:**  
-Salmon supports random access unlike GCM.  
-Salmon supports authentication unlike XTS.  
-Salmon supports hardware acceleration unlike Salsa20 and Chacha20.  
+**GPU Platforms:**  
+OpenCL
 
 **Benchmarks**  
 How fast is Salmon?  
@@ -101,32 +91,24 @@ Time ms:
  
 Do you need more speed? Use SalmonEncryptor/SalmonDecryptor with multiple threads. 
 
-**Languages:**  
-Java 11+  
-C# .NET 7+  
-Python 3.11+  
-Typescript ESM/ES2020  
-Javascript ESM/ES2020  
-C/C++ (byte array enc/dec API only)  
-  
-**Platforms:**  
-JavaFX 17+  
-Android 23+  
-.NET Android 23+  
-WPF, Xamarin, and MAUI  
-Chrome, Firefox, Safari (Remote read-only drives)  
-Chrome (Local read-write drives)  
-Node.js (Remote read-only and Local read-write drives)  
-  
-**Operating Systems (Tested):**  
-Windows 10 x86_64  
-MacOS x86_64 10.11  
-Linux Debian 11 x86_64  
-Linux Debian 12 aarch64  
+### Why another encryption library?  
+- Blazing fast CPU and GPU acceleration.  
+- Parallel baked-in encryption and decryption of data and files.  
+- Read/Write/Seek through encrypted streams and files via a low ceremony API.  
+- Data integrity with interleaved HMAC signatures with a per-chunk authentication scheme.
+- Use of sequential nonces with strict ranges so no birthday problem.
+- Nonce sequences reside outside of virtual drives to allow for fully operational clones and backups.  
+- Import new files in virtual drives using multiple authorized devices.  
+- Sequence ranges are stored in app protected space (Android only).  
+- Any tampering is detected using an encrypted SHA256 checksum (Win10/11 only).  
+- Additional protection from non-admin users (Salmon Windows Service Win10/11 only).  
+- API for several popular programming languages, platforms, operating systems.  
+- Implementation is based on abstract components you can extend easily.  
 
-**CPU architectures (Tested):**  
-Intel x86_64  
-ARM64  
+**Comparison:**  
+- Salmon uses AES-CTR which supports random access unlike GCM.  
+- Salmon uses HMAC-SHA256 which supports authentication unlike XTS.  
+- Salmon uses AES which supports hardware acceleration unlike Salsa20 and Chacha20.  
 
 **Salmon API Samples**  
   
