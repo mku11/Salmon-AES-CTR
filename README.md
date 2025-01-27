@@ -9,15 +9,15 @@ Salmon is an AES-256 encryption library with CPU and GPU acceleration, built-in 
 [![GitHub Releases](https://img.shields.io/github/downloads/mku11/Salmon-AES-CTR/latest/total?logo=github)](https://github.com/mku11/Salmon-AES-CTR/releases)
 
 ## Library Features  
-AES-256 encryption in CTR Mode  
-HMAC SHA-256 authentication  
-SHA-256 PBKDF2 key derivation  
-CPU AES-NI acceleration for Intel x86 and ARM64  
-GPU AES acceleration with OpenCL  
-Data and seekable stream encryption API  
-File system API for encrypted virtual drives  
-Protected nonce sequencers (limited)  
-Web Service for use with remote virtual drives (experimental Java/C# clients)
+- AES-256 encryption in CTR Mode  
+- HMAC SHA-256 authentication  
+- SHA-256 PBKDF2 key derivation  
+- CPU AES-NI acceleration for Intel x86 and ARM64  
+- GPU AES acceleration with OpenCL  
+- Data and seekable stream encryption API  
+- File system API for encrypted virtual drives  
+- Protected nonce sequencers (limited)  
+- Web Service for use with remote virtual drives (experimental Java/C# clients)
  
  
 ## Live Web Demo
@@ -107,16 +107,14 @@ In case you need more speed Salmon has baked-in multithreaded read/write operati
 - Any tampering is detected using an encrypted SHA256 checksum (Win10/11 only).  
 - Additional protection from non-admin users (Salmon Windows Service Win10/11 only).  
 - API for several popular programming languages, platforms, and operating systems.  
-- Implementation is based on abstract components which can easily extended.  
+- Implementation is based on abstract components which can easily be extended.  
 
-**Comparison:**  
+### Comparison: ###
 - Salmon uses AES-CTR which supports random access unlike GCM.  
 - Salmon uses HMAC-SHA256 which supports authentication unlike XTS.  
 - Salmon uses AES which supports hardware acceleration unlike Salsa20 and Chacha20.  
-
-**Salmon API Samples**  
   
-##### Salmon Core API: #####
+#### Salmon Core API: ####
 
 ```
 // Simple encryption and decryption of byte array
@@ -133,7 +131,7 @@ byte[] decBytes = decryptor.decrypt(encBytes, key, nonce, false);
 decryptor.close();
 ```
 
-##### Salmon FS API: #####
+#### Salmon FS API: ####
 ```
 // Create a sequencer. Make sure this path is secure and excluded from your backups.
 String sequencerPath = "c:\\users\\<username>\\AppData\\Local\\<somefolder>\\salmon_sequencer.xml";
@@ -151,7 +149,7 @@ For complete sample code for Java, C#, C, C++, Python, and JS: [Samples](https:/
 For a showcase of the Salmon API visit [Salmon Vault App](https://github.com/mku11/Salmon-Vault)
 or the [**Live Web Demo**](https://mku11.github.io/Salmon-Vault/demo).
 
-**Salmon API Reference Documentation**  
+#### Salmon API Reference Documentation ####
 The API ref documentation is not complete but nontheless helpful:  
 [Java](https://mku11.github.io/Salmon-AES-CTR/docs/2.1.0/java/html/)
  | [C#](https://mku11.github.io/Salmon-AES-CTR/docs/2.1.0/csharp/html/namespaces.html)
@@ -159,24 +157,21 @@ The API ref documentation is not complete but nontheless helpful:
  | [JavaScript](https://mku11.github.io/Salmon-AES-CTR/docs/2.1.0/javascript/html/Base64.html)
  | [Python](https://mku11.github.io/Salmon-AES-CTR/docs/2.1.0/python/html/namespaces.html)
 
-**Package Management**  
-To learn how to integrate Salmon into your project with Maven, Gradle, or VS Studio see [Package Management](https://github.com/mku11/Salmon-AES-CTR/blob/main/docs/Package_Management.md)  
+### Sequence Files ###
+User sequencer files keep information about the sequence ranges so they need to be kept in a protected space. Someone who has **write access to a sequencer file** and **repeated read access to your encrypted files** can leak encrypted information about your files. Also make sure that you never backup and restore the nonce sequencer files! You should always create them under a directory that is exluded from your backups, this will prevent nonce reuse!  
 
-**Specifications**  
-Want to know more about Salmon specs and subprojects?  
-Click on [Salmon specifications and formats](https://github.com/mku11/Salmon-AES-CTR/tree/main/docs)   
-For how to compile and build each subproject see README.md in its respective folder.
+More specifically for:  
+- **Android**: You must create sequencer files in protected app space and not on external storage! Android apps work on sandbox environments so the sequence files are protected from other apps. Though for rooted devices there is no such guarantee since any app can run as a superuser.  
+- **Windows**: You should create a sequencer file under %LOCALAPPDATA% folder. Salmon for Windows will detect if a file is tampered with though it is recommended for additional security that you use the Salmon Windows Service. The Salmon Service is a better solution because it protects the sequencer files under a system administrator (LocalSystem) account.  
+- **Linux/Mac**: You can create a sequencer file under your $HOME folder. Keep in mind that Salmon has no anti-tampering support for these operating systems. Therefore, if you want to prevent other apps having access to the sequencer file you can do is implement a protected service like the equivalent of Salmon Windows Service or create your own tampering detection. You can do the latter by extending SalmonFileSequencer class, see WinFileSequencer implementation as an example.  
 
-**Security Limitations**  
-- User sequencer files are not secure from other apps by default.  
-For Android: you must create sequencer files in protected app space and not on external storage! Android apps work on sandbox environments though for rooted devices there is no such protection.  
-For Windows: you can create sequencer files preferably within %LOCALAPPDATA% folder. Windows will notify you if it detects tampering though it is recommended for additional security you use the Salmon Windows Service. The Salmon windows service is a better solution because it protects the sequencer files under a system administrator (LocalSystem) account.  
-For Linux and Mac: make sure you keep the sequencer files in a safe place since salmon has no anti-tampering support for these OSes. What you can do is implement a secure nonce service or your own tampering detection! You can do that by extending SalmonFileSequencer class, for an example see WinFileSequencer.  
-- Importing files to a salmon virtual drive using different devices requires authorization by an already authorized device for each  virtual drive. The device that created the drive is by default authorized. The authorization mechanism works by assigning new nonce ranges for each authorized device which prevents nonce reuse.
-- Make sure that you never backup and restore the nonce sequencer files! You should always create them under a directory that is exluded from your backups, this will prevent nonce reuse!  
-- Data integrity is not supported for filenames only for file contents.   
+### Device Authorization ###
+Importing files to a salmon virtual drive using different devices requires authorization by an already authorized device for each  virtual drive. The device that created the drive is by default authorized. The authorization mechanism works by assigning new nonce ranges for each authorized device which prevents nonce reuse.
 
-**Functional Limitations**  
+### Data integrity ###
+Salmon can inform if an encrypted file is tampered with. The verification works with HMAC-SHA256 only for file content ranges that are currently accessed so it allows fast random access without reading the whole file.
+
+### Functional Limitations ###
 - Salmon streams are seekable only if the backed resource supports random access (disk, memory, network).  
 - Salmon API is not Thread Safe! If you want to use parallel processing you need to use SalmonEncryptor/SalmonDecryptor and SalmonFileImporter/SalmonFileExporter.  
 - Maximum guaranteed file size: 2^64 bytes or limited by the backed resource (disk, memory, network).  
@@ -185,11 +180,18 @@ For Linux and Mac: make sure you keep the sequencer files in a safe place since 
 - Python parallel processing (multiple cpus) in Windows is slow due to python being single-threaded.  
 - Javascript service worker handler does not support parallel processing.  
 - Javascript implementation is ESM so in order to work in Node.js you need to use --experimental-vm-modules  
+- Data integrity works with file contents but not filenames.  
 
-**Contributions**  
+### Specifications ###
+Want to know more about Salmon specs and subprojects? See [Salmon specifications and formats](https://github.com/mku11/Salmon-AES-CTR/tree/main/docs). For how to compile and build each subproject see README.md under libs/projects folders.
+
+### Package Management ###
+To learn how to integrate Salmon into your project with Maven, Gradle, or VS Studio see [Package Management](https://github.com/mku11/Salmon-AES-CTR/blob/main/docs/Package_Management.md)  
+
+### Contributions ###
 Unfortunately I cannot accept any code contributions. Though, bug reports and security POCs are more than welcome!  
   
-**License**  
+### License ###
 Salmon is released under MIT Licence, see [LICENSE](https://github.com/mku11/Salmon-AES-CTR/blob/main/LICENSE) file.
 Make sure you read the LICENSE file and display proper attribution if you decide to use this software.
 Dependency libraries from Github, Maven, and NuGet are covered by their own license  
