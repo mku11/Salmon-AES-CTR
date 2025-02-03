@@ -49,14 +49,14 @@ public class JavaWSFile implements IRealFile {
     private static final String DEST_DIR = "destDir";
     private static final String FILENAME = "filename";
     public static String Separator = "/";
-    public static CloseableHttpClient client = HttpClients.createDefault();
+    
     private String filePath;
+	private String servicePath;
+	public static CloseableHttpClient client = HttpClients.createDefault();
 
     public String getServicePath() {
         return servicePath;
     }
-
-    private String servicePath;
 
     public Credentials getCredentials() {
         return credentials;
@@ -69,48 +69,6 @@ public class JavaWSFile implements IRealFile {
 
     public void setCredentials(Credentials credentials) {
         this.credentials = credentials;
-    }
-
-    public static class Credentials {
-        private final String serviceUser;
-
-        public String getServiceUser() {
-            return serviceUser;
-        }
-
-        public String getServicePassword() {
-            return servicePassword;
-        }
-
-        private final String servicePassword;
-
-        public Credentials(String serviceUser, String servicePassword) {
-            this.serviceUser = serviceUser;
-            this.servicePassword = servicePassword;
-        }
-    }
-
-    private class Response {
-        String path;
-        String name;
-        long length;
-        long lastModified;
-        boolean isDirectory;
-        boolean isFile;
-        boolean exists;
-        Header[] headers;
-
-        private Response(String jsonString, Header[] headers) {
-            JSONObject obj = new JSONObject(jsonString);
-            this.name = obj.getString("name");
-            this.path = obj.getString("path");
-            this.length = obj.getLong("length");
-            this.lastModified = obj.getLong("lastModified");
-            this.isDirectory = obj.getBoolean("directory");
-            this.isFile = obj.getBoolean("file");
-            this.exists = obj.getBoolean("present");
-            this.headers = headers;
-        }
     }
 
     /**
@@ -144,11 +102,6 @@ public class JavaWSFile implements IRealFile {
                 httpResponse.close();
         }
         return response;
-    }
-
-    private void setServiceAuth(HttpRequest httpRequest) {
-        String encoding = new Base64().encode((credentials.getServiceUser() + ":" + credentials.getServicePassword()).getBytes());
-        httpRequest.setHeader(HttpHeaders.AUTHORIZATION, "Basic " + encoding);
     }
 
     /**
@@ -205,8 +158,8 @@ public class JavaWSFile implements IRealFile {
             httpResponse = client.execute(httpPost);
             checkStatus(httpResponse, HttpStatus.SC_OK);
             httpResponse.close();
-            JavaWSFile JavaFile = new JavaWSFile(nFilePath, servicePath, credentials);
-            return JavaFile;
+            JavaWSFile nFile = new JavaWSFile(nFilePath, servicePath, credentials);
+            return nFile;
         } catch (URISyntaxException e) {
             throw new RuntimeException(e);
         } finally {
@@ -487,9 +440,9 @@ public class JavaWSFile implements IRealFile {
 
         List<JavaWSFile> realFiles = new ArrayList<>();
         List<JavaWSFile> realDirs = new ArrayList<>();
-        for (int i = 0; i < files.length; i++) {
-            JavaWSFile file = new JavaWSFile(files[i].path, servicePath, credentials);
-            if (file.isDirectory())
+        for (Response resFile : files) {
+            JavaWSFile file = new JavaWSFile(resFile.path, servicePath, credentials);
+            if (resFile.isDirectory)
                 realDirs.add(file);
             else
                 realFiles.add(file);
@@ -718,6 +671,11 @@ public class JavaWSFile implements IRealFile {
         return filePath;
     }
 
+    private void setServiceAuth(HttpRequest httpRequest) {
+        String encoding = new Base64().encode((credentials.getServiceUser() + ":" + credentials.getServicePassword()).getBytes());
+        httpRequest.setHeader(HttpHeaders.AUTHORIZATION, "Basic " + encoding);
+    }
+	
     private void checkStatus(HttpResponse httpResponse, int status) throws IOException {
         if (httpResponse.getStatusLine().getStatusCode() != status)
             throw new IOException(httpResponse.getStatusLine().getStatusCode()
@@ -728,5 +686,47 @@ public class JavaWSFile implements IRealFile {
     private void setDefaultHeaders(HttpRequest request) {
         request.addHeader("Cache", "no-store");
         request.addHeader("Keep-Alive", "true");
+    }
+
+    private static class Response {
+        String path;
+        String name;
+        long length;
+        long lastModified;
+        boolean isDirectory;
+        boolean isFile;
+        boolean exists;
+        Header[] headers;
+
+        Response(String jsonString, Header[] headers) {
+            JSONObject obj = new JSONObject(jsonString);
+            this.name = obj.getString("name");
+            this.path = obj.getString("path");
+            this.length = obj.getLong("length");
+            this.lastModified = obj.getLong("lastModified");
+            this.isDirectory = obj.getBoolean("directory");
+            this.isFile = obj.getBoolean("file");
+            this.exists = obj.getBoolean("present");
+            this.headers = headers;
+        }
+    }
+
+    public static class Credentials {
+        private final String serviceUser;
+
+        public String getServiceUser() {
+            return serviceUser;
+        }
+
+        public String getServicePassword() {
+            return servicePassword;
+        }
+
+        private final String servicePassword;
+
+        public Credentials(String serviceUser, String servicePassword) {
+            this.serviceUser = serviceUser;
+            this.servicePassword = servicePassword;
+        }
     }
 }
