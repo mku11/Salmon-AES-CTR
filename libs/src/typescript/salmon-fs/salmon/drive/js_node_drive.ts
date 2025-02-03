@@ -26,7 +26,6 @@ import { SalmonDrive } from "../salmon_drive.js";
 import { IRealFile } from "../../file/ireal_file.js";
 import { INonceSequencer } from "../../sequence/inonce_sequencer.js";
 import { SalmonFile } from "../salmon_file.js";
-import { IVirtualFile } from "../../file/ivirtual_file.js";
 
 /**
  * SalmonDrive implementation for standard node js file system. This provides a virtual drive implementation

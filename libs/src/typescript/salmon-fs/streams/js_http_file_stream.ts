@@ -33,7 +33,7 @@ import { IRealFile } from "../file/ireal_file.js";
 export class JsHttpFileStream extends RandomAccessStream {
     static MAX_LEN_PER_REQUEST = 8 * 1024 * 1024;
     /**
-     * The java file associated with this stream.
+     * The web service file associated with this stream.
      */
     readonly file: IRealFile;
 
