@@ -60,8 +60,10 @@ xcuserdata
 /libs/projects/salmon-libs-python/main.py
 node_modules
 /libs/projects/SalmonLibsTypeScript.VS2022/SalmonLibsTypeScript.VS2022/lib
-/libs/projects/SalmonLibsTypeScript.VS2022/SalmonLibsTypeScript.VS2022/eslintreport.txt
-/libs/projects/SalmonLibsTypeScript.VS2022/SalmonLibsTypeScript.VS2022/lintreport.txt
+eslintreport.txt
+lintreport.txt
+eslint.txt
+lint.txt
 /libs/projects/SalmonLibsTypeScript.VS2022/SalmonLibsTypeScript.VS2022/test/data
 /libs/projects/SalmonLibsTypeScript.VS2022/SalmonLibsTypeScript.VS2022/jsdoc
 
@@ -69,4 +71,4 @@ node_modules
 /samples/PythonSamples/lib
 vault_*
 data_*
-/libs/projects/salmon-libs-gradle/salmon-ws/src/main/resources/*.p12
+*.p12
