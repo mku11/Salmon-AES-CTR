@@ -29,7 +29,7 @@ import { IOException } from '../../salmon-core/streams/io_exception.js';
 import { MemoryStream } from '../../salmon-core/streams/memory_stream.js';
 
 /**
- * Salmon RealFile implementation for Java.
+ * Salmon RealFile implementation for Javascript.
  */
 export class JsHttpFile implements IRealFile {
     public static readonly separator: string = "/";
@@ -48,7 +48,8 @@ export class JsHttpFile implements IRealFile {
 
     async getResponse(): Promise<Response> {
         if (this.response == null)
-            this.response = (await fetch(this.filePath, {method: 'HEAD'}));
+            this.response = (await fetch(this.filePath, 
+			{method: 'HEAD', keepalive: true}));
         return this.response;
     }
 
@@ -88,7 +89,7 @@ export class JsHttpFile implements IRealFile {
     }
 
     /**
-     * Get the absolute path on the physical disk. For java this is the same as the filepath.
+     * Get the absolute path on the physical disk. For javascript this is the same as the filepath.
      * @return The absolute path.
      */
     public getAbsolutePath(): string {
@@ -129,7 +130,7 @@ export class JsHttpFile implements IRealFile {
      * @return The stream to write to.
      * @throws FileNotFoundException
      */
-    public getOutputStream(): Promise<RandomAccessStream> {
+    public async getOutputStream(): Promise<RandomAccessStream> {
         throw new Error("Unsupported Operation, readonly filesystem");
     }
 
@@ -146,7 +147,7 @@ export class JsHttpFile implements IRealFile {
     }
 
     /**
-     * Get the path of this file. For java this is the same as the absolute filepath.
+     * Get the path of this file. For Javascript this is the same as the absolute filepath.
      * @return
      */
     public getPath(): string {
@@ -210,7 +211,8 @@ export class JsHttpFile implements IRealFile {
             length = parseInt(lenStr);
         }
         else {
-            res = (await fetch(this.filePath, {method: 'GET'}));
+            res = (await fetch(this.filePath, 
+			{method: 'GET', keepalive: true}));
             if (res.body == null)
                 throw new IOException("Could not get length from content. No response body.");
             let totalLength: number = 0;
