@@ -117,15 +117,17 @@ export class FileUtils {
      */
     public static async getInstance(type: string, param: any) {
         switch (type) {
+            case 'JsFile':
+                const { JsFile } = await import("../file/js_file.js");
+                return new JsFile(param);
             case 'JsNodeFile':
                 const { JsNodeFile } = await import("../file/js_node_file.js");
                 return new JsNodeFile(param);
             case 'JsHttpFile':
                 const { JsHttpFile } = await import("../file/js_http_file.js");
                 return new JsHttpFile(param);
-            case 'JsFile':
-                const { JsFile } = await import("../file/js_file.js");
-                return new JsFile(param);
+            case 'JsWSFile':
+                throw new Error("Web Service files not supported");
         }
         throw new Error("Unknown class type");
     }
