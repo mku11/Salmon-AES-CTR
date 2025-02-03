@@ -529,8 +529,8 @@ public class SalmonFSTests {
         // recursive copy
         IRealFile folder3 = dir.createDirectory("folder4");
         dir.getChild("folder1").copyRecursively(folder3);
-        int count1 = SalmonFSTestHelper.GetChildrenCountRecursively(dir.getChild("folder1"));
-        int count2 = SalmonFSTestHelper.GetChildrenCountRecursively(dir.getChild("folder4").getChild("folder1"));
+        int count1 = SalmonFSTestHelper.getChildrenCountRecursively(dir.getChild("folder1"));
+        int count2 = SalmonFSTestHelper.getChildrenCountRecursively(dir.getChild("folder4").getChild("folder1"));
         assertEquals(count1, count2);
 
         IRealFile dfile = dir.getChild("folder4").getChild("folder1").getChild("folder2").getChild(file.getBaseName());

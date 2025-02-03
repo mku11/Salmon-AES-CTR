@@ -41,8 +41,8 @@ public class SalmonWSTestHelper {
     public static String TEST_SEQUENCER_DIR = "D:\\tmp\\output_ws";
     public static String TEST_SEQUENCER_FILENAME = "fileseq.xml";
 //    public static String TEST_WS_DIR = "D:\\tmp\\test_vault";
-    public static String TEST_WS_DIR = "D:\\tmp\\output_ws";
-    public static String VAULT_PATH = "/test_vault"; // relative path to an existing vault on the server
+    public static String TEST_WS_DIR = "D:\\tmp\\salmon\\test\\ws";
+    public static String VAULT_PATH = "test_vault"; // relative path to an existing vault on the server
     public static HashMap<String, String> users;
     public static JavaWSFile.Credentials credentials1 = new JavaWSFile.Credentials("user", "password");
     public static JavaWSFile.Credentials wrongCredentials1 = new JavaWSFile.Credentials("wrongUser", "wrongPass");

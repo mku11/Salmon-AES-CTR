@@ -63,7 +63,7 @@ import static org.junit.jupiter.api.Assertions.*;
 
 public class SalmonFSTestHelper {
     static Class<?> driveClassType = null; // drive class type
-    static String TEST_ROOT_DIR = "c:\\tmp\\salmon\\test";
+    static String TEST_ROOT_DIR = "d:\\tmp\\salmon\\test";
     static String TEST_DATA_DIR_FOLDER;
 	static String TEST_OUTPUT_DIR;
     static String TEST_VAULT_DIR;
@@ -85,10 +85,11 @@ public class SalmonFSTestHelper {
 
     static String TEST_EXPORT_FILENAME = "export.slma";
 
+	// web service
     public static String VAULT_HOST = "http://localhost:8080";
     public static String VAULT_URL = VAULT_HOST + ""; // same
-    public static String VAULT_PASSWORD = "test";
-
+    private static JavaWSFile.Credentials credentials = new JavaWSFile.Credentials("user", "password");
+	
     static int ENC_IMPORT_BUFFER_SIZE = 512 * 1024;
     static int ENC_IMPORT_THREADS = 1;
     static int ENC_EXPORT_BUFFER_SIZE = 512 * 1024;
@@ -105,9 +106,6 @@ public class SalmonFSTestHelper {
     public static String TEST_SEQUENCER_FILE2 = "seq2.xml";
 
 	private static final Random random = new Random(System.currentTimeMillis());
-
-    public static HashMap<String, String> users;
-    private static JavaWSFile.Credentials credentials1 = new JavaWSFile.Credentials("user", "password");
 
     static SalmonFileImporter fileImporter;
     static SalmonFileExporter fileExporter;
@@ -203,7 +201,7 @@ public class SalmonFSTestHelper {
         long time = System.currentTimeMillis();
         if (driveClassType == JavaWSDrive.class) {
             IRealFile dir = new JavaWSFile("/remote_" + time, SalmonFSTestHelper.VAULT_URL,
-                    SalmonFSTestHelper.credentials1);
+                    SalmonFSTestHelper.credentials);
             if (!dir.mkdir())
                 throw new RuntimeException("Could not generate folder");
             return dir;
@@ -308,10 +306,20 @@ public class SalmonFSTestHelper {
         }
     }
 
+
+    static SalmonDrive openDrive(IRealFile vaultDir, Class<?> driveClassType, String pass, SalmonFileSequencer sequencer) throws IOException {
+        if (driveClassType == JavaWSDrive.class) {
+            // use the remote service instead
+            return JavaWSDrive.open(vaultDir, pass, sequencer,
+                    credentials.getServiceUser(), credentials.getServicePassword());
+        } else
+            return SalmonDrive.openDrive(vaultDir, driveClassType, pass, sequencer);
+    }
+	
     static SalmonDrive createDrive(IRealFile vaultDir, Class<?> driveClassType, String pass, SalmonFileSequencer sequencer) throws IOException {
         if (driveClassType == JavaWSDrive.class)
-            return JavaWSDrive.create(vaultDir, pass, sequencer, credentials1.getServiceUser(),
-                    credentials1.getServicePassword());
+            return JavaWSDrive.create(vaultDir, pass, sequencer, credentials.getServiceUser(),
+                    credentials.getServicePassword());
         else
             return SalmonDrive.createDrive(vaultDir, driveClassType, pass, sequencer);
     }
@@ -526,6 +534,7 @@ public class SalmonFSTestHelper {
             IVirtualFile salmonFile = fileImporter.importFile(fileToImport, salmonRootDir, null, false, false, null);
             importSuccess = salmonFile != null;
         } catch (Exception ex) {
+			// TODO: check specific exception SalmonRangeExceededException
             importSuccess = false;
             ex.printStackTrace();
         }
@@ -533,21 +542,10 @@ public class SalmonFSTestHelper {
         assertEquals(shouldImport, importSuccess);
     }
 
-    static SalmonDrive openDrive(IRealFile vaultDir, Class<?> driveClassType, String testPassword, SalmonFileSequencer sequencer) throws IOException {
-        if (driveClassType == JavaWSDrive.class) {
-            // use the remote service instead
-            return JavaWSDrive.open(vaultDir, testPassword, sequencer,
-                    credentials1.getServiceUser(), credentials1.getServicePassword());
-        } else
-            return SalmonDrive.openDrive(vaultDir, driveClassType, testPassword, sequencer);
-    }
-
     public static void testExamples() throws Exception {
         String text = "This is a plaintext that will be used for testing";
-        String testFile = TEST_OUTPUT_DIR + File.separator + "file.txt";
-        IRealFile tFile = new JavaFile(testFile);
-        if (tFile.exists())
-            tFile.delete();
+		IRealFile dir = generateFolder("test");
+		IRealFile testFile = dir.createFile("file.dat");
         byte[] bytes = text.getBytes();
         byte[] key = SalmonGenerator.getSecureRandomBytes(32); // 256-bit key
         byte[] nonce = SalmonGenerator.getSecureRandomBytes(8); // 64-bit nonce
@@ -598,7 +596,7 @@ public class SalmonFSTestHelper {
 
         // Example 4: encrypt to a file, the SalmonFile has a virtual file system API
         // with copy, move, rename, delete operations
-        SalmonFile encFile = new SalmonFile(new JavaFile(testFile), null);
+        SalmonFile encFile = new SalmonFile(testFile, null);
         nonce = SalmonGenerator.getSecureRandomBytes(8); // always get a fresh nonce!
         encFile.setEncryptionKey(key);
         encFile.setRequestedNonce(nonce);
@@ -608,7 +606,7 @@ public class SalmonFSTestHelper {
         stream.flush();
         stream.close();
         // decrypt an encrypted file
-        SalmonFile encFile2 = new SalmonFile(new JavaFile(testFile), null);
+        SalmonFile encFile2 = new SalmonFile(testFile, null);
         encFile2.setEncryptionKey(key);
         RandomAccessStream stream2 = encFile2.getInputStream();
         byte[] decBuff = new byte[1024];
@@ -698,11 +696,11 @@ public class SalmonFSTestHelper {
         assertTrue(caught);
     }
 
-    public static int GetChildrenCountRecursively(IRealFile realFile) {
+    public static int getChildrenCountRecursively(IRealFile realFile) {
         int count = 1;
         if (realFile.isDirectory()) {
             for (IRealFile child : realFile.listFiles()) {
-                count += GetChildrenCountRecursively(child);
+                count += getChildrenCountRecursively(child);
             }
         }
         return count;
