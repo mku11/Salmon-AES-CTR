@@ -17,7 +17,8 @@ for windows you can add this in the advance environment system variables.
 NODE_OPTIONS=--experimental-vm-modules
 for linux/macos add this line in .bashrc or .profile:
 export NODE_OPTIONS=--experimental-vm-modules
-if you use Visual Studio Code install the "Jest" extension and add this to the extension settings:
+If you use Visual Studio Code open the SalmonLibsTypeScript.VS2022.code-workspace file
+Then install the "Jest" extension and add this to the extension settings:
 "jest.nodeEnv": {
 	"NODE_OPTIONS": "--experimental-vm-modules"
 }
@@ -35,7 +36,6 @@ To run the test cases click on the test icon in VS Code and run the test
 If the library test providers won't work you try running the Provider:
 "Jest Test Provider (SalmonLibsTypeScript.VS2022)
 
-
 To turn off auto running test cases:
 "jest.autoRun": "off",
 
@@ -43,6 +43,8 @@ To build/transpile from typescript to javascript from the command line:
 npm run build
 
 To run the tests from the command line:
+Edit jest.setup.js with the correct output folder and the TestMode
+Then run on the command line:
 npm run test
 
 To run a specific suite:
@@ -57,9 +59,22 @@ Rebuild Project
 Open Test Explorer and run test cases as per usual
 
 To run test cases in Chrome:
-Open index.html in Chrome and choose the test suite then click execute.
-If you test salmon-fs you need to choose the root of your test folder, by default it's "d:\temp"
+If you want to test the HTTP support setup a local http server.
+Create a virtual directory in your http server that points to the project folder.
+Start chrome without CORS policy:
+"C:\Program Files\Google\Chrome\Application\chrome.exe" --disable-web-security --user-data-dir="C://SalmonTest"
+Edit browser.setup.js with the correct TestMode.
+Open index.html in Chrome.
+Choose the test suite then click execute.
+If you test salmon-fs you need to choose the root of your test folder
 then click execute.
+
+To run the tests with the web service from Chrome:
+Make sure the application.properties has SSL and http2 enabled.
+
+If you're testing with node and use a self-signed cert for the web service then add this env var
+make sure you don't use this in production environment
+NODE_TLS_REJECT_UNAUTHORIZED=0
 
 To run static code analysis:
 npm run lint
