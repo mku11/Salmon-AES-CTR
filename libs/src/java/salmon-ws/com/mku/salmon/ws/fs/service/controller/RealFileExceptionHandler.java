@@ -31,12 +31,14 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
 import java.io.ByteArrayInputStream;
 
 @ControllerAdvice
 public class RealFileExceptionHandler {
     @ExceptionHandler
-    public ResponseEntity<Resource> handleException(Exception e) {
+    public ResponseEntity<Resource> handleException(Exception e, HttpServletRequest request, HttpServletResponse response) {
         String msg = e.getMessage();
         InputStreamResource resource = new InputStreamResource(new ByteArrayInputStream(msg.getBytes()));
         return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
