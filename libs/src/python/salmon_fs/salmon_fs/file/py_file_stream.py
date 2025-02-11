@@ -39,11 +39,6 @@ class PyFileStream(RandomAccessStream):
     This class is used internally for random file access of physical (real) files.
     """
 
-    __lock = RLock()
-    """
-    Global lock for resizing files. 
-    """
-
     def __init__(self, file: IRealFile, mode: str):
         """
         Construct a file stream from an AndroidFile.
@@ -123,7 +118,6 @@ class PyFileStream(RandomAccessStream):
         self.seek(value, RandomAccessStream.SeekOrigin.Begin)
 
     def set_length(self, value: int):
-        # with (PyFileStream.__lock):
         self.__raf.truncate(value)
 
     def read(self, buffer: bytearray, offset: int, count: int) -> int:
