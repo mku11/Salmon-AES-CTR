@@ -57,11 +57,14 @@ class SalmonCoreTests(TestCase):
     # linux
     # NativeProxy.set_library_path("../../projects/salmon-libs-gradle/salmon-native/build/libs/salmon/shared/libsalmon.so")
 
-    def setUp(self):
+    @classmethod
+    def setUpClass(cls):
+        print(ProviderType.Aes)
         SalmonStream.set_aes_provider_type(ProviderType.Aes)
         SalmonCoreTestHelper.initialize()
-
-    def tearDown(self) -> None:
+    
+    @classmethod
+    def tearDownClass(cls):
         SalmonCoreTestHelper.close()
 
     def test_shouldEncryptAndDecryptText(self):
