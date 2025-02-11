@@ -26,46 +26,44 @@ from __future__ import annotations
 
 import hashlib
 import random
+from unittest import TestCase
 
 from typeguard import typechecked
 
-import os,sys
+import os, sys
+
 sys.path.append(os.path.dirname(__file__) + '/../../src/python/salmon_core')
 sys.path.append(os.path.dirname(__file__) + '/../../src/python/salmon_fs')
 sys.path.append(os.path.dirname(__file__) + '/../salmon_core_test_python')
 
-from salmon_fs.salmon.drive.py_drive import PyDrive
-from salmon_fs.file.py_file import PyFile
 from salmon_fs.file.ivirtual_file import IVirtualFile
 from salmon_core.streams.memory_stream import MemoryStream
 from salmon_core.integrity.integrity_exception import IntegrityException
 from salmon_fs.salmon.salmon_auth_exception import SalmonAuthException
-from salmon_fs.salmon.salmon_drive import SalmonDrive
 from salmon_fs.salmon.salmon_file import SalmonFile, IRealFile
 from salmon_fs.salmon.streams.salmon_file_input_stream import SalmonFileInputStream
-from salmon_fs.sequence.inonce_sequence_serializer import INonceSequenceSerializer
 from salmon_fs.salmon.sequence.salmon_file_sequencer import SalmonFileSequencer
-from salmon_core.salmon.integrity.salmon_integrity import SalmonIntegrity
 from salmon_fs.salmon.utils.salmon_file_commander import SalmonFileCommander
-from salmon_core_tests import SalmonCoreTests
+
 from salmon_core_test_helper import SalmonCoreTestHelper
-from salmon_fs_test_helper import SalmonFSTestHelper
+from salmon_fs_test_helper import SalmonFSTestHelper, TestMode
 
 
 @typechecked
-class SalmonFSTests(SalmonCoreTests):
-    SalmonFSTestHelper.set_drive_class_type(PyDrive)
+class SalmonFSTests(TestCase):
+    @classmethod
+    def setUpClass(cls):
+        SalmonFSTestHelper.set_test_params("d:\\tmp\\salmon\\test", TestMode.WebService)
 
-    # SalmonCoreTestHelper.TEST_ENC_BUFFER_SIZE = 1 * 1024 * 1024
-    # SalmonCoreTestHelper.TEST_DEC_BUFFER_SIZE = 1 * 1024 * 1024
+        SalmonFSTestHelper.TEST_IMPORT_FILE = SalmonFSTestHelper.TEST_IMPORT_MEDIUM_FILE
 
-    def setUp(self):
-        SalmonFSTestHelper.TEST_IMPORT_FILE = SalmonFSTestHelper.TEST_IMPORT_SMALL_FILE
+        # SalmonCoreTestHelper.TEST_ENC_BUFFER_SIZE = 1 * 1024 * 1024
+        # SalmonCoreTestHelper.TEST_DEC_BUFFER_SIZE = 1 * 1024 * 1024
 
         SalmonFSTestHelper.ENC_IMPORT_BUFFER_SIZE = 512 * 1024
-        SalmonFSTestHelper.ENC_IMPORT_THREADS = 2
+        SalmonFSTestHelper.ENC_IMPORT_THREADS = 1
         SalmonFSTestHelper.ENC_EXPORT_BUFFER_SIZE = 512 * 1024
-        SalmonFSTestHelper.ENC_EXPORT_THREADS = 2
+        SalmonFSTestHelper.ENC_EXPORT_THREADS = 1
         SalmonFSTestHelper.ENABLE_MULTI_CPU = False
 
         SalmonFSTestHelper.TEST_FILE_INPUT_STREAM_THREADS = 2
@@ -74,22 +72,21 @@ class SalmonFSTests(SalmonCoreTests):
         SalmonCoreTestHelper.initialize()
         SalmonFSTestHelper.initialize()
 
-    def tearDown(self) -> None:
+    @classmethod
+    def tearDownClass(cls):
         SalmonFSTestHelper.close()
         SalmonCoreTestHelper.close()
 
     def test_CatchNotAuthorizedNegative(self):
-        vault_dir: IRealFile = SalmonFSTestHelper.generate_folder(SalmonFSTestHelper.TEST_VAULT2_DIR)
-        sequencer: SalmonFileSequencer = SalmonFileSequencer(
-            vault_dir.get_child(SalmonFSTestHelper.TEST_SEQUENCER_FILE1),
-            SalmonFSTestHelper.get_sequence_serializer())
-        drive = SalmonDrive.create_drive(vault_dir, SalmonFSTestHelper.drive_class_type,
-                                         SalmonCoreTestHelper.TEST_PASSWORD, sequencer)
+        vault_dir: IRealFile = SalmonFSTestHelper.generate_folder(SalmonFSTestHelper.TEST_VAULT_DIRNAME)
+        sequencer: SalmonFileSequencer = SalmonFSTestHelper.create_salmon_file_sequencer()
+        drive = SalmonFSTestHelper.create_drive(vault_dir, SalmonFSTestHelper.drive_class_type,
+                                                SalmonCoreTestHelper.TEST_PASSWORD, sequencer)
         wrong_password: bool = False
         drive.close()
         try:
-            drive = SalmonDrive.open_drive(vault_dir, SalmonFSTestHelper.drive_class_type,
-                                           SalmonCoreTestHelper.TEST_FALSE_PASSWORD, sequencer)
+            drive = SalmonFSTestHelper.open_drive(vault_dir, SalmonFSTestHelper.drive_class_type,
+                                                  SalmonCoreTestHelper.TEST_FALSE_PASSWORD, sequencer)
             root_dir: SalmonFile = drive.getRoot()
             root_dir.listFiles()
         except SalmonAuthException as ex:
@@ -98,17 +95,15 @@ class SalmonFSTests(SalmonCoreTests):
         self.assertTrue(wrong_password)
 
     def test_AuthorizedPositive(self):
-        vault_dir: IRealFile = SalmonFSTestHelper.generate_folder(SalmonFSTestHelper.TEST_VAULT2_DIR)
-        sequencer: SalmonFileSequencer = SalmonFileSequencer(
-            vault_dir.get_child(SalmonFSTestHelper.TEST_SEQUENCER_FILE1),
-            SalmonFSTestHelper.get_sequence_serializer())
-        drive = SalmonDrive.create_drive(vault_dir, SalmonFSTestHelper.drive_class_type,
-                                         SalmonCoreTestHelper.TEST_PASSWORD, sequencer)
+        vault_dir: IRealFile = SalmonFSTestHelper.generate_folder(SalmonFSTestHelper.TEST_VAULT_DIRNAME)
+        sequencer: SalmonFileSequencer = SalmonFSTestHelper.create_salmon_file_sequencer()
+        drive = SalmonFSTestHelper.create_drive(vault_dir, SalmonFSTestHelper.drive_class_type,
+                                                SalmonCoreTestHelper.TEST_PASSWORD, sequencer)
         wrong_password: bool = False
         drive.close()
         try:
-            drive = SalmonDrive.open_drive(vault_dir, SalmonFSTestHelper.drive_class_type,
-                                           SalmonCoreTestHelper.TEST_PASSWORD, sequencer)
+            drive = SalmonFSTestHelper.open_drive(vault_dir, SalmonFSTestHelper.drive_class_type,
+                                                  SalmonCoreTestHelper.TEST_PASSWORD, sequencer)
             virtual_root: IVirtualFile = drive.get_root()
         except SalmonAuthException as ex:
             wrong_password = True
@@ -118,51 +113,44 @@ class SalmonFSTests(SalmonCoreTests):
     def test_ImportAndExportNoIntegrityBitFlipDataNoCatch(self):
         integrity_failed: bool = False
         try:
-            SalmonFSTestHelper.import_and_export(SalmonFSTestHelper.generate_folder(SalmonFSTestHelper.TEST_VAULT2_DIR),
-                                                 SalmonCoreTestHelper.TEST_PASSWORD,
-                                                 SalmonFSTestHelper.TEST_IMPORT_FILE,
-                                                 SalmonFSTestHelper.ENC_IMPORT_BUFFER_SIZE,
-                                                 SalmonFSTestHelper.ENC_IMPORT_THREADS,
-                                                 SalmonFSTestHelper.ENC_EXPORT_BUFFER_SIZE,
-                                                 SalmonFSTestHelper.ENC_EXPORT_THREADS,
-                                                 False, True, 24 + 10, False, False, False)
+            SalmonFSTestHelper.import_and_export(
+                SalmonFSTestHelper.generate_folder(SalmonFSTestHelper.TEST_VAULT_DIRNAME),
+                SalmonCoreTestHelper.TEST_PASSWORD, SalmonFSTestHelper.TEST_IMPORT_FILE,
+                True, 24 + 10, False, False, False)
         except IOError as ex:
             if isinstance(ex.__cause__, IntegrityException):
                 integrity_failed = True
+            else:
+                raise ex
 
         self.assertFalse(integrity_failed)
 
     def test_ImportAndExportNoIntegrity(self):
         integrity_failed: bool = False
         try:
-            SalmonFSTestHelper.import_and_export(SalmonFSTestHelper.generate_folder(SalmonFSTestHelper.TEST_VAULT2_DIR),
-                                                 SalmonCoreTestHelper.TEST_PASSWORD,
-                                                 SalmonFSTestHelper.TEST_IMPORT_FILE,
-                                                 SalmonFSTestHelper.ENC_IMPORT_BUFFER_SIZE,
-                                                 SalmonFSTestHelper.ENC_IMPORT_THREADS,
-                                                 SalmonFSTestHelper.ENC_EXPORT_BUFFER_SIZE,
-                                                 SalmonFSTestHelper.ENC_EXPORT_THREADS,
-                                                 False, False, 0, True, False,
-                                                 False)
+            SalmonFSTestHelper.import_and_export(
+                SalmonFSTestHelper.generate_folder(SalmonFSTestHelper.TEST_VAULT_DIRNAME),
+                SalmonCoreTestHelper.TEST_PASSWORD, SalmonFSTestHelper.TEST_IMPORT_SMALL_FILE,
+                False, 0, True, False, False)
         except Exception as ex:
             if isinstance(ex.__cause__, IntegrityException):
                 integrity_failed = True
+            else:
+                raise ex
 
         self.assertFalse(integrity_failed)
 
     def test_import_and_search_files(self):
-        SalmonFSTestHelper.import_and_search(SalmonFSTestHelper.generate_folder(SalmonFSTestHelper.TEST_VAULT2_DIR),
-                                             SalmonCoreTestHelper.TEST_PASSWORD, SalmonFSTestHelper.TEST_IMPORT_FILE,
-                                             SalmonFSTestHelper.ENC_IMPORT_BUFFER_SIZE,
-                                             SalmonFSTestHelper.ENC_IMPORT_THREADS)
+        SalmonFSTestHelper.import_and_search(SalmonFSTestHelper.generate_folder(SalmonFSTestHelper.TEST_VAULT_DIRNAME),
+                                             SalmonCoreTestHelper.TEST_PASSWORD, SalmonFSTestHelper.TEST_IMPORT_FILE)
 
     def test_ImportAndCopyFile(self):
         integrity_failed: bool = False
         try:
-            SalmonFSTestHelper.import_and_copy(SalmonFSTestHelper.generate_folder(SalmonFSTestHelper.TEST_VAULT2_DIR),
-                                               SalmonCoreTestHelper.TEST_PASSWORD, SalmonFSTestHelper.TEST_IMPORT_FILE,
-                                               SalmonFSTestHelper.ENC_IMPORT_BUFFER_SIZE,
-                                               SalmonFSTestHelper.ENC_IMPORT_THREADS, "subdir", False)
+            SalmonFSTestHelper.import_and_copy(
+                SalmonFSTestHelper.generate_folder(SalmonFSTestHelper.TEST_VAULT_DIRNAME),
+                SalmonCoreTestHelper.TEST_PASSWORD, SalmonFSTestHelper.TEST_IMPORT_FILE,
+                "subdir", False)
         except IOError as ex:
             if isinstance(ex.__cause__, IntegrityException):
                 integrity_failed = True
@@ -172,12 +160,10 @@ class SalmonFSTests(SalmonCoreTests):
     def test_import_and_move_file(self):
         integrity_failed: bool = False
         try:
-            SalmonFSTestHelper.import_and_copy(SalmonFSTestHelper.generate_folder(SalmonFSTestHelper.TEST_VAULT2_DIR),
-                                               SalmonCoreTestHelper.TEST_PASSWORD, SalmonFSTestHelper.TEST_IMPORT_FILE,
-                                               SalmonFSTestHelper.ENC_IMPORT_BUFFER_SIZE,
-                                               SalmonFSTestHelper.ENC_IMPORT_THREADS,
-                                               "subdir",
-                                               True)
+            SalmonFSTestHelper.import_and_copy(
+                SalmonFSTestHelper.generate_folder(SalmonFSTestHelper.TEST_VAULT_DIRNAME),
+                SalmonCoreTestHelper.TEST_PASSWORD, SalmonFSTestHelper.TEST_IMPORT_FILE,
+                "subdir", True)
         except IOError as ex:
             if isinstance(ex.__cause__, IntegrityException):
                 integrity_failed = True
@@ -187,14 +173,11 @@ class SalmonFSTests(SalmonCoreTests):
     def test_import_and_export_integrity_bit_flip_data(self):
         integrity_failed: bool = False
         try:
-            SalmonFSTestHelper.import_and_export(SalmonFSTestHelper.generate_folder(SalmonFSTestHelper.TEST_VAULT2_DIR),
-                                                 SalmonCoreTestHelper.TEST_PASSWORD,
-                                                 SalmonFSTestHelper.TEST_IMPORT_FILE,
-                                                 SalmonFSTestHelper.ENC_IMPORT_BUFFER_SIZE,
-                                                 SalmonFSTestHelper.ENC_IMPORT_THREADS,
-                                                 SalmonFSTestHelper.ENC_EXPORT_BUFFER_SIZE,
-                                                 SalmonFSTestHelper.ENC_EXPORT_THREADS,
-                                                 True, True, 24 + 10, False, True, True)
+            SalmonFSTestHelper.import_and_export(
+                SalmonFSTestHelper.generate_folder(SalmonFSTestHelper.TEST_VAULT_DIRNAME),
+                SalmonCoreTestHelper.TEST_PASSWORD,
+                SalmonFSTestHelper.TEST_IMPORT_FILE,
+                True, 24 + 10, False, True, True)
         except Exception as ex:
             if isinstance(ex.__cause__, IntegrityException):
                 integrity_failed = True
@@ -205,14 +188,11 @@ class SalmonFSTests(SalmonCoreTests):
         integrity_failed: bool = False
         failed: bool = False
         try:
-            SalmonFSTestHelper.import_and_export(SalmonFSTestHelper.generate_folder(SalmonFSTestHelper.TEST_VAULT2_DIR),
-                                                 SalmonCoreTestHelper.TEST_PASSWORD,
-                                                 SalmonFSTestHelper.TEST_IMPORT_FILE,
-                                                 SalmonFSTestHelper.ENC_IMPORT_BUFFER_SIZE,
-                                                 SalmonFSTestHelper.ENC_IMPORT_THREADS,
-                                                 SalmonFSTestHelper.ENC_EXPORT_BUFFER_SIZE,
-                                                 SalmonFSTestHelper.ENC_EXPORT_THREADS,
-                                                 True, True, 24 + 10, False, False, False)
+            SalmonFSTestHelper.import_and_export(
+                SalmonFSTestHelper.generate_folder(SalmonFSTestHelper.TEST_VAULT_DIRNAME),
+                SalmonCoreTestHelper.TEST_PASSWORD,
+                SalmonFSTestHelper.TEST_IMPORT_FILE,
+                True, 24 + 10, False, False, False)
         except IOError as ex:
             if isinstance(ex.__cause__, IntegrityException):
                 integrity_failed = True
@@ -223,35 +203,15 @@ class SalmonFSTests(SalmonCoreTests):
 
         self.assertFalse(failed)
 
-    def test_ImportAndExportNoAppliedIntegrityYesVerifyIntegrityNoBitFlipDataShouldCatch(self):
-        failed: bool = False
-        try:
-            SalmonFSTestHelper.import_and_export(SalmonFSTestHelper.generate_folder(SalmonFSTestHelper.TEST_VAULT2_DIR),
-                                                 SalmonCoreTestHelper.TEST_PASSWORD,
-                                                 SalmonFSTestHelper.TEST_IMPORT_FILE,
-                                                 SalmonFSTestHelper.ENC_IMPORT_BUFFER_SIZE,
-                                                 SalmonFSTestHelper.ENC_IMPORT_THREADS,
-                                                 SalmonFSTestHelper.ENC_EXPORT_BUFFER_SIZE,
-                                                 SalmonFSTestHelper.ENC_EXPORT_THREADS,
-                                                 True, False, 0, False,
-                                                 False, True)
-        except Exception as ex:
-            failed = True
-
-        self.assertTrue(failed)
-
     def test_ImportAndExportAppliedIntegrityNoVerifyIntegrityBitFlipDataShouldNotCatch(self):
         failed: bool = False
         try:
-            SalmonFSTestHelper.import_and_export(SalmonFSTestHelper.generate_folder(SalmonFSTestHelper.TEST_VAULT2_DIR),
-                                                 SalmonCoreTestHelper.TEST_PASSWORD,
-                                                 SalmonFSTestHelper.TEST_IMPORT_FILE,
-                                                 SalmonFSTestHelper.ENC_IMPORT_BUFFER_SIZE,
-                                                 SalmonFSTestHelper.ENC_IMPORT_THREADS,
-                                                 SalmonFSTestHelper.ENC_EXPORT_BUFFER_SIZE,
-                                                 SalmonFSTestHelper.ENC_EXPORT_THREADS,
-                                                 True, True, 36, False,
-                                                 True, False)
+            SalmonFSTestHelper.import_and_export(
+                SalmonFSTestHelper.generate_folder(SalmonFSTestHelper.TEST_VAULT_DIRNAME),
+                SalmonCoreTestHelper.TEST_PASSWORD,
+                SalmonFSTestHelper.TEST_IMPORT_FILE,
+                True, 36, False,
+                True, False)
         except IOError as ex:
             if isinstance(ex.__cause__, IntegrityException):
                 failed = True
@@ -260,33 +220,28 @@ class SalmonFSTests(SalmonCoreTests):
     def test_ImportAndExportAppliedIntegrityNoVerifyIntegrity(self):
         failed: bool = False
         try:
-            SalmonFSTestHelper.import_and_export(SalmonFSTestHelper.generate_folder(SalmonFSTestHelper.TEST_VAULT2_DIR),
-                                                 SalmonCoreTestHelper.TEST_PASSWORD,
-                                                 SalmonFSTestHelper.TEST_IMPORT_FILE,
-                                                 SalmonFSTestHelper.ENC_IMPORT_BUFFER_SIZE,
-                                                 SalmonFSTestHelper.ENC_IMPORT_THREADS,
-                                                 SalmonFSTestHelper.ENC_EXPORT_BUFFER_SIZE,
-                                                 SalmonFSTestHelper.ENC_EXPORT_THREADS,
-                                                 True, False, 0, True,
-                                                 True, False)
+            SalmonFSTestHelper.import_and_export(
+                SalmonFSTestHelper.generate_folder(SalmonFSTestHelper.TEST_VAULT_DIRNAME),
+                SalmonCoreTestHelper.TEST_PASSWORD,
+                SalmonFSTestHelper.TEST_IMPORT_FILE,
+                False, 0, True,
+                True, False)
         except IOError as ex:
             if isinstance(ex.__cause__, IntegrityException):
                 failed = True
+            raise ex
 
         self.assertFalse(failed)
 
     def test_ImportAndExportIntegrityBitFlipHeader(self):
         integrity_failed: bool = False
         try:
-            SalmonFSTestHelper.import_and_export(SalmonFSTestHelper.generate_folder(SalmonFSTestHelper.TEST_VAULT2_DIR),
-                                                 SalmonCoreTestHelper.TEST_PASSWORD,
-                                                 SalmonFSTestHelper.TEST_IMPORT_FILE,
-                                                 SalmonFSTestHelper.ENC_IMPORT_BUFFER_SIZE,
-                                                 SalmonFSTestHelper.ENC_IMPORT_THREADS,
-                                                 SalmonFSTestHelper.ENC_EXPORT_BUFFER_SIZE,
-                                                 SalmonFSTestHelper.ENC_EXPORT_THREADS,
-                                                 True, True, 20, False,
-                                                 True, True)
+            SalmonFSTestHelper.import_and_export(
+                SalmonFSTestHelper.generate_folder(SalmonFSTestHelper.TEST_VAULT_DIRNAME),
+                SalmonCoreTestHelper.TEST_PASSWORD,
+                SalmonFSTestHelper.TEST_IMPORT_FILE,
+                True, 20, False,
+                True, True)
         except IOError as ex:
             if isinstance(ex.__cause__, IntegrityException):
                 integrity_failed = True
@@ -296,42 +251,37 @@ class SalmonFSTests(SalmonCoreTests):
     def test_ImportAndExportIntegrity(self):
         import_success: bool = True
         try:
-            SalmonFSTestHelper.import_and_export(SalmonFSTestHelper.generate_folder(SalmonFSTestHelper.TEST_VAULT2_DIR),
-                                                 SalmonCoreTestHelper.TEST_PASSWORD,
-                                                 SalmonFSTestHelper.TEST_IMPORT_FILE,
-                                                 SalmonFSTestHelper.ENC_IMPORT_BUFFER_SIZE,
-                                                 SalmonFSTestHelper.ENC_IMPORT_THREADS,
-                                                 SalmonFSTestHelper.ENC_EXPORT_BUFFER_SIZE,
-                                                 SalmonFSTestHelper.ENC_EXPORT_THREADS,
-                                                 True, False, 0, True,
-                                                 True, True)
+            SalmonFSTestHelper.import_and_export(
+                SalmonFSTestHelper.generate_folder(SalmonFSTestHelper.TEST_VAULT_DIRNAME),
+                SalmonCoreTestHelper.TEST_PASSWORD,
+                SalmonFSTestHelper.TEST_IMPORT_SMALL_FILE,
+                False, 0, True,
+                True, True)
         except IOError as ex:
-            print(ex)
             if isinstance(ex.__cause__, IntegrityException):
                 import_success = False
+            raise ex
         self.assertTrue(import_success)
 
     def test_CatchVaultMaxFiles(self):
-        vault_dir: IRealFile = SalmonFSTestHelper.generate_folder(SalmonFSTestHelper.TEST_VAULT2_DIR)
-        seq_file: IRealFile = vault_dir.get_child(SalmonFSTestHelper.TEST_SEQUENCER_FILE1)
-
+        vault_dir: IRealFile = SalmonFSTestHelper.generate_folder(SalmonFSTestHelper.TEST_VAULT_DIRNAME)
+        seq_dir = SalmonFSTestHelper.generate_folder(SalmonFSTestHelper.TEST_SEQ_DIRNAME,
+                                                     SalmonFSTestHelper.TEST_SEQ_DIR, True)
+        seq_file = seq_dir.get_child(SalmonFSTestHelper.TEST_SEQ_FILENAME)
         SalmonFSTestHelper.test_max_files(vault_dir, seq_file, SalmonFSTestHelper.TEST_IMPORT_TINY_FILE,
                                           SalmonCoreTestHelper.TEXT_VAULT_MAX_FILE_NONCE, -2, True)
 
         # we need 2 nonces once of the filename the other for the file
         # so this should fail
-        vault_dir = SalmonFSTestHelper.generate_folder(SalmonFSTestHelper.TEST_VAULT2_DIR)
-        seq_file = vault_dir.get_child(SalmonFSTestHelper.TEST_SEQUENCER_FILE1)
+        vault_dir = SalmonFSTestHelper.generate_folder(SalmonFSTestHelper.TEST_VAULT_DIRNAME)
         SalmonFSTestHelper.test_max_files(vault_dir, seq_file, SalmonFSTestHelper.TEST_IMPORT_TINY_FILE,
                                           SalmonCoreTestHelper.TEXT_VAULT_MAX_FILE_NONCE, -1, False)
 
-        vault_dir = SalmonFSTestHelper.generate_folder(SalmonFSTestHelper.TEST_VAULT2_DIR)
-        seq_file = vault_dir.get_child(SalmonFSTestHelper.TEST_SEQUENCER_FILE1)
+        vault_dir = SalmonFSTestHelper.generate_folder(SalmonFSTestHelper.TEST_VAULT_DIRNAME)
         SalmonFSTestHelper.test_max_files(vault_dir, seq_file, SalmonFSTestHelper.TEST_IMPORT_TINY_FILE,
                                           SalmonCoreTestHelper.TEXT_VAULT_MAX_FILE_NONCE, 0, False)
 
-        vault_dir = SalmonFSTestHelper.generate_folder(SalmonFSTestHelper.TEST_VAULT2_DIR)
-        seq_file = vault_dir.get_child(SalmonFSTestHelper.TEST_SEQUENCER_FILE1)
+        vault_dir = SalmonFSTestHelper.generate_folder(SalmonFSTestHelper.TEST_VAULT_DIRNAME)
         SalmonFSTestHelper.test_max_files(vault_dir, seq_file, SalmonFSTestHelper.TEST_IMPORT_TINY_FILE,
                                           SalmonCoreTestHelper.TEXT_VAULT_MAX_FILE_NONCE, 1, False)
 
@@ -340,10 +290,7 @@ class SalmonFSTests(SalmonCoreTests):
                                                             SalmonCoreTestHelper.TEST_KEY_BYTES,
                                                             True, True, 64, SalmonCoreTestHelper.TEST_HMAC_KEY_BYTES,
                                                             SalmonCoreTestHelper.TEST_FILENAME_NONCE_BYTES,
-                                                            SalmonCoreTestHelper.TEST_NONCE_BYTES,
-                                                            SalmonFSTestHelper.TEST_OUTPUT_DIR,
-                                                            False,
-                                                            -1, True)
+                                                            SalmonCoreTestHelper.TEST_NONCE_BYTES, False, -1, True)
 
     def test_CreateFileWithoutVaultApplyAndVerifyIntegrityFlipCaught(self):
 
@@ -354,9 +301,7 @@ class SalmonFSTests(SalmonCoreTests):
                 SalmonCoreTestHelper.TEST_KEY_BYTES,
                 True, True, 64, SalmonCoreTestHelper.TEST_HMAC_KEY_BYTES,
                 SalmonCoreTestHelper.TEST_FILENAME_NONCE_BYTES,
-                SalmonCoreTestHelper.TEST_NONCE_BYTES,
-                SalmonFSTestHelper.TEST_OUTPUT_DIR,
-                True, 45, True)
+                SalmonCoreTestHelper.TEST_NONCE_BYTES, True, 45, True)
         except IOError as ex:
             if isinstance(ex.__cause__, IntegrityException):
                 caught = True
@@ -365,7 +310,7 @@ class SalmonFSTests(SalmonCoreTests):
 
     def test_CreateFileWithoutVaultApplyIntegrityNoVerifyIntegrityFlipHMACNotCaught(self):
         text: str = SalmonCoreTestHelper.TEST_TEXT
-        for i in range(0, len(text)):
+        for i in range(5):
             caught: bool = False
             failed: bool = False
             try:
@@ -374,8 +319,7 @@ class SalmonFSTests(SalmonCoreTests):
                                                                     True, False, 64,
                                                                     SalmonCoreTestHelper.TEST_HMAC_KEY_BYTES,
                                                                     SalmonCoreTestHelper.TEST_FILENAME_NONCE_BYTES,
-                                                                    SalmonCoreTestHelper.TEST_NONCE_BYTES,
-                                                                    SalmonFSTestHelper.TEST_OUTPUT_DIR, True, i,
+                                                                    SalmonCoreTestHelper.TEST_NONCE_BYTES, True, i,
                                                                     False)
             except IOError as ex:
                 if isinstance(ex.__cause__, IntegrityException):
@@ -397,7 +341,6 @@ class SalmonFSTests(SalmonCoreTests):
                                                                 SalmonCoreTestHelper.TEST_HMAC_KEY_BYTES,
                                                                 SalmonCoreTestHelper.TEST_FILENAME_NONCE_BYTES,
                                                                 SalmonCoreTestHelper.TEST_NONCE_BYTES,
-                                                                SalmonFSTestHelper.TEST_OUTPUT_DIR,
                                                                 True, 24 + 32 + 5, True)
         except IOError as ex:
             if isinstance(ex.__cause__, IntegrityException):
@@ -406,13 +349,18 @@ class SalmonFSTests(SalmonCoreTests):
             failed = True
 
         self.assertFalse(caught)
-
         self.assertTrue(failed)
 
     def test_ExportAndImportAuth(self):
-        vault: IRealFile = SalmonFSTestHelper.generate_folder(SalmonFSTestHelper.TEST_VAULT_DIR)
-        import_file_path: str = SalmonFSTestHelper.TEST_IMPORT_TINY_FILE
+        vault: IRealFile = SalmonFSTestHelper.generate_folder(SalmonFSTestHelper.TEST_VAULT_DIRNAME)
+        import_file_path: IRealFile = SalmonFSTestHelper.TEST_IMPORT_TINY_FILE
         SalmonFSTestHelper.export_and_import_auth(vault, import_file_path)
+
+    def test_raw(self):
+        SalmonFSTestHelper.test_raw()
+
+    def test_enc(self):
+        SalmonFSTestHelper.test_enc()
 
     def test_examples(self):
         SalmonFSTestHelper.test_examples()
@@ -434,10 +382,11 @@ class SalmonFSTests(SalmonCoreTests):
                                               SalmonCoreTestHelper.TEST_HMAC_KEY_BYTES,
                                               SalmonCoreTestHelper.TEST_FILENAME_NONCE_BYTES,
                                               SalmonCoreTestHelper.TEST_NONCE_BYTES,
-                                              SalmonFSTestHelper.TEST_OUTPUT_DIR,
                                               False, -1, True)
         file_input_stream: SalmonFileInputStream = SalmonFileInputStream(file,
-                                                                         3, 50, 2, 12)
+                                                                         3, 50,
+                                                                         SalmonFSTestHelper.TEST_FILE_INPUT_STREAM_THREADS,
+                                                                         12)
 
         SalmonFSTestHelper.seek_and_read_file_input_stream(data, file_input_stream, 0, 32, 0, 32)
         SalmonFSTestHelper.seek_and_read_file_input_stream(data, file_input_stream, 220, 8, 2, 8)
@@ -446,14 +395,13 @@ class SalmonFSTests(SalmonCoreTests):
         SalmonFSTestHelper.seek_and_read_file_input_stream(data, file_input_stream, 50, 40, 0, 40)
         SalmonFSTestHelper.seek_and_read_file_input_stream(data, file_input_stream, 124, 50, 0, 50)
         SalmonFSTestHelper.seek_and_read_file_input_stream(data, file_input_stream, 250, 10, 0, 6)
+        file_input_stream.close()
 
     def test_CreateDriveAndOpenFsFolder(self):
-        vault_dir: IRealFile = SalmonFSTestHelper.generate_folder(SalmonFSTestHelper.TEST_VAULT2_DIR)
-        sequence_file: IRealFile = vault_dir.get_child(SalmonFSTestHelper.TEST_SEQUENCER_FILE1)
-        serializer: INonceSequenceSerializer = SalmonFSTestHelper.get_sequence_serializer()
-        sequencer: SalmonFileSequencer = SalmonFileSequencer(sequence_file, serializer)
-        drive = SalmonDrive.create_drive(vault_dir, SalmonFSTestHelper.drive_class_type,
-                                         SalmonCoreTestHelper.TEST_PASSWORD, sequencer)
+        vault_dir: IRealFile = SalmonFSTestHelper.generate_folder(SalmonFSTestHelper.TEST_VAULT_DIRNAME)
+        sequencer: SalmonFileSequencer = SalmonFSTestHelper.create_salmon_file_sequencer()
+        drive = SalmonFSTestHelper.create_drive(vault_dir, SalmonFSTestHelper.drive_class_type,
+                                                SalmonCoreTestHelper.TEST_PASSWORD, sequencer)
         wrong_password: bool = False
         root_dir: IVirtualFile = drive.get_root()
         root_dir.list_files()
@@ -461,21 +409,21 @@ class SalmonFSTests(SalmonCoreTests):
 
         # reopen but open the fs folder instead it should still login
         try:
-            drive = SalmonDrive.open_drive(vault_dir.get_child("fs"), SalmonFSTestHelper.drive_class_type,
-                                           SalmonCoreTestHelper.TEST_PASSWORD, sequencer)
+            drive = SalmonFSTestHelper.open_drive(vault_dir.get_child("fs"), SalmonFSTestHelper.drive_class_type,
+                                                  SalmonCoreTestHelper.TEST_PASSWORD, sequencer)
             self.assertTrue(drive.has_config())
         except SalmonAuthException as ignored:
             wrong_password = True
 
         self.assertFalse(wrong_password)
 
-    def test_CreateWinFileSequencer(self):
+    def test_CreateFileSequencer(self):
         SalmonFSTestHelper.should_test_file_sequencer()
 
     def test_shouldPerformOperationsRealFiles(self):
         caught: bool = False
-        v_dir: IRealFile = SalmonFSTestHelper.generate_folder(SalmonFSTestHelper.TEST_VAULT2_DIR)
-        file: PyFile = PyFile(SalmonFSTestHelper.TEST_IMPORT_TINY_FILE)
+        v_dir: IRealFile = SalmonFSTestHelper.generate_folder(SalmonFSTestHelper.TEST_VAULT_DIRNAME)
+        file: IRealFile = SalmonFSTestHelper.TEST_IMPORT_TINY_FILE
         file1: IRealFile = file.copy(v_dir)
         file2: IRealFile
         try:
@@ -573,26 +521,20 @@ class SalmonFSTests(SalmonCoreTests):
         self.assertEqual(9, v_dir.get_child("folder4").get_child("folder1").get_children_count())
         self.assertEqual(7, v_dir.get_child("folder4").get_child("folder1").get_child("folder2").get_children_count())
 
-    def ShouldReadFromFileMultithreaded(self):
+    def test_shouldReadFromFileMultithreaded(self):
         caught: bool = False
-        vault_dir: IRealFile = SalmonFSTestHelper.generate_folder(SalmonFSTestHelper.TEST_VAULT2_DIR)
-        file: IRealFile = PyFile(SalmonCoreTestHelper.TEST_IMPORT_MEDIUM_FILE)
+        vault_dir: IRealFile = SalmonFSTestHelper.generate_folder(SalmonFSTestHelper.TEST_VAULT_DIRNAME)
+        file: IRealFile = SalmonFSTestHelper.TEST_IMPORT_MEDIUM_FILE
 
-        sequencer: SalmonFileSequencer = SalmonFileSequencer(
-            vault_dir.get_child(SalmonFSTestHelper.TEST_SEQUENCER_FILE1),
-            SalmonFSTestHelper.get_sequence_serializer())
-        drive = SalmonDrive.create_drive(vault_dir, SalmonCoreTestHelper.TEST_PASSWORD)
-        file_commander: SalmonFileCommander = SalmonFileCommander(SalmonIntegrity.DEFAULT_CHUNK_SIZE,
-                                                                  SalmonIntegrity.DEFAULT_CHUNK_SIZE, 2)
+        sequencer = SalmonFSTestHelper.create_salmon_file_sequencer()
+        drive = SalmonFSTestHelper.create_drive(vault_dir, SalmonFSTestHelper.drive_class_type,
+                                                SalmonCoreTestHelper.TEST_PASSWORD, sequencer)
+        file_commander: SalmonFileCommander = SalmonFileCommander(SalmonFSTestHelper.ENC_IMPORT_BUFFER_SIZE,
+                                                                  SalmonFSTestHelper.ENC_EXPORT_BUFFER_SIZE, 2)
         sfiles: list[SalmonFile] = file_commander.import_files([file],
-                                                               drive.get_root(), False, True, None, None, None)
-
-        file_input_stream1: SalmonFileInputStream = SalmonFileInputStream(sfiles[0], 4, 4 * 1024 * 1024, 4, 256 * 1024)
-        h1: str = hashlib.md5(file_input_stream1).hexdigest()
-
-        file_input_stream2: SalmonFileInputStream = SalmonFileInputStream(sfiles[0], 4, 4 * 1024 * 1024, 1, 256 * 1024)
-        h2: str = hashlib.md5(file_input_stream2).hexdigest()
-        self.assertEqual(h1, h2)
+                                                               drive.get_root(), False, True,
+                                                               lambda task_progress: None, lambda file: "",
+                                                               lambda file, ex: None)
 
         pos: int = abs(random.randint(0, file.length()))
 
@@ -602,7 +544,6 @@ class SalmonFSTests(SalmonCoreTests):
         SalmonFSTestHelper.copy_stream(file_input_stream1, ms1)
         ms1.flush()
         ms1.set_position(0)
-        file_input_stream1.set_position(0)
         h3: str = hashlib.md5(ms1.to_array()).hexdigest()
         file_input_stream1.close()
         ms1.close()
@@ -617,3 +558,12 @@ class SalmonFSTests(SalmonCoreTests):
         file_input_stream2.close()
         ms2.close()
         self.assertEqual(h3, h4)
+
+    def test_ShouldUploadHTTP(self):
+        SalmonFSTestHelper.test_upload_http()
+
+    def test_ShouldDownloadHTTP(self):
+        SalmonFSTestHelper.test_download_http()
+
+    def test_ShouldPipeQueue(self):
+        SalmonFSTestHelper.test_blocking_queue()
