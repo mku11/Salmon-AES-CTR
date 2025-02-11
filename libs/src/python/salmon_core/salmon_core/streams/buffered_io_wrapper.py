@@ -36,6 +36,10 @@ class BufferedIOWrapper(BufferedIOBase):
     Use this class to wrap any AbsStream to a less powerful but familiar and compatible Python InputStream.
     """
 
+    # Default cache buffer should be high enough for most buffer needs
+    # the cache buffers should be aligned to the SalmonFile chunk size for efficiency
+    __DEFAULT_BUFFER_SIZE = 512 * 1024
+
     def __init__(self, stream: RandomAccessStream):
         """
         Instantiates an BufferedIOWrapper with a base stream.
@@ -60,10 +64,14 @@ class BufferedIOWrapper(BufferedIOBase):
         return bytes_read
 
     def read(self, size: int | None = ...) -> bytearray:
-        raise NotImplementedError("use readinto instead")
+        if size is None:
+            size = BufferedIOWrapper.__DEFAULT_BUFFER_SIZE
+        return self.read1(size)
 
     def read1(self, size: int = ...) -> bytearray:
-        raise NotImplementedError("use readinto instead")
+        buff: bytearray = bytearray(size)
+        bytes_read = self.readinto(buff)
+        return buff[0:bytes_read]
 
     def detach(self) -> RawIOBase:
         raise NotImplementedError()
@@ -72,7 +80,7 @@ class BufferedIOWrapper(BufferedIOBase):
         raise NotImplementedError()
 
     def readinto1(self, __buffer: bytearray) -> int:
-        raise NotImplementedError()
+        return self.readinto(__buffer)
 
     def close(self):
         """

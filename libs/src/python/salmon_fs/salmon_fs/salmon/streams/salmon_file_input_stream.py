@@ -47,9 +47,7 @@ class SalmonFileInputStream(BufferedIOBase):
     for performance.
     """
 
-    # TAG: str = type(SalmonFileInputStream.__class__).__name__
-
-    # Default cache buffer should be high enough for some mpeg videos to work
+    # Default cache buffer should be high enough for most buffer needs
     # the cache buffers should be aligned to the SalmonFile chunk size for efficiency
     __DEFAULT_BUFFER_SIZE = 512 * 1024
 
@@ -205,10 +203,14 @@ class SalmonFileInputStream(BufferedIOBase):
         return min_count
 
     def read(self, size: int | None = ...) -> bytearray:
-        raise NotImplementedError("use readinto instead")
+        if size is None:
+            size = SalmonFileInputStream.__DEFAULT_BUFFER_SIZE
+        return self.read1(size)
 
     def read1(self, size: int = ...) -> bytearray:
-        raise NotImplementedError("use readinto instead")
+        buff: bytearray = bytearray(size)
+        bytes_read = self.readinto(buff, 0, size)
+        return buff[0:bytes_read]
 
     def detach(self) -> RawIOBase:
         raise NotImplementedError()
@@ -217,7 +219,7 @@ class SalmonFileInputStream(BufferedIOBase):
         raise NotImplementedError()
 
     def readinto1(self, __buffer: bytearray) -> int:
-        raise NotImplementedError()
+        return self.readinto(__buffer)
 
     def tell(self) -> int:
         return self.__position - self.__positionStart
