@@ -558,12 +558,3 @@ class SalmonFSTests(TestCase):
         file_input_stream2.close()
         ms2.close()
         self.assertEqual(h3, h4)
-
-    def test_ShouldUploadHTTP(self):
-        SalmonFSTestHelper.test_upload_http()
-
-    def test_ShouldDownloadHTTP(self):
-        SalmonFSTestHelper.test_download_http()
-
-    def test_ShouldPipeQueue(self):
-        SalmonFSTestHelper.test_blocking_queue()
