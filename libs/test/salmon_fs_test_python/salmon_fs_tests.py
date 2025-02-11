@@ -36,9 +36,9 @@ sys.path.append(os.path.dirname(__file__) + '/../../src/python/salmon_core')
 sys.path.append(os.path.dirname(__file__) + '/../../src/python/salmon_fs')
 sys.path.append(os.path.dirname(__file__) + '/../salmon_core_test_python')
 
-from salmon_fs.file.ivirtual_file import IVirtualFile
 from salmon_core.streams.memory_stream import MemoryStream
 from salmon_core.integrity.integrity_exception import IntegrityException
+from salmon_fs.file.ivirtual_file import IVirtualFile
 from salmon_fs.salmon.salmon_auth_exception import SalmonAuthException
 from salmon_fs.salmon.salmon_file import SalmonFile, IRealFile
 from salmon_fs.salmon.streams.salmon_file_input_stream import SalmonFileInputStream
