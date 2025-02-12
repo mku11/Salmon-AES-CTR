@@ -108,7 +108,7 @@ export class JsWSFileStream extends RandomAccessStream {
             let startPosition: number = await this.getPosition();
             const boundary = "*******";
             let header = "--"+boundary+"\r\n"; 
-            header += "Content-Disposition: form-data; name=\"file\"; filename=\""+ this.file.getBaseName()+ "\"\r\n";
+            header += "Content-Disposition: form-data; name=\"file\"; filename=\""+ this.file.getBaseName() + "\"\r\n";
             header += "\r\n";
 			let headerData = new TextEncoder().encode(header);
             

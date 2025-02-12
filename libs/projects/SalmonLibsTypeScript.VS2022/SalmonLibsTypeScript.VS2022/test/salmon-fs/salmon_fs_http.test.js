@@ -24,10 +24,9 @@ SOFTWARE.
 
 import { MemoryStream } from '../../lib/salmon-core/streams/memory_stream.js';
 import { JsHttpDrive } from '../../lib/salmon-fs/salmon/drive/js_http_drive.js';
-import { JsHttpFile } from '../../lib/salmon-fs/file/js_http_file.js';
 import { SalmonDrive } from '../../lib/salmon-fs/salmon/salmon_drive.js';
 import { SalmonCoreTestHelper } from '../salmon-core/salmon_core_test_helper.js';
-import { getTestMode, getTestRunnerMode, SalmonFSTestHelper, TestMode, TestRunnerMode } from './salmon_fs_test_helper.js';
+import { getTestMode, getTestRunnerMode, SalmonFSTestHelper, TestMode } from './salmon_fs_test_helper.js';
 
 describe('salmon-fs-http', () => {
     let oldTestMode = null;
@@ -47,7 +46,9 @@ describe('salmon-fs-http', () => {
     afterAll(async () => {
         SalmonFSTestHelper.close();
         SalmonCoreTestHelper.close();
-		await SalmonFSTestHelper.setTestParams(await SalmonFSTestHelper.TEST_ROOT_DIR.getPath(), oldTestMode, getTestRunnerMode());
+		
+		if (oldTestMode)
+			await SalmonFSTestHelper.setTestParams(await SalmonFSTestHelper.TEST_ROOT_DIR.getPath(), oldTestMode, getTestRunnerMode());
     });
 
     beforeEach(() => {
@@ -58,7 +59,7 @@ describe('salmon-fs-http', () => {
         let vaultDir = SalmonFSTestHelper.HTTP_VAULT_DIR;
         let wrongPassword = false;
         try {
-            let drive = await SalmonDrive.openDrive(vaultDir, SalmonFSTestHelper.driveClassType, SalmonCoreTestHelper.TEST_FALSE_PASSWORD);
+            let drive = await SalmonFSTestHelper.openDrive(vaultDir, SalmonFSTestHelper.driveClassType, SalmonCoreTestHelper.TEST_FALSE_PASSWORD);
         } catch (ex) {
             console.error(ex);
             wrongPassword = true;
@@ -114,9 +115,10 @@ describe('salmon-fs-http', () => {
             let filename = await files[i].getBaseName();
             filenames.push(filename);
         }
-        expect(files.length).toBe(3);
+        expect(files.length).toBe(4);
         expect(filenames.includes(SalmonFSTestHelper.TEST_IMPORT_TINY_FILENAME)).toBeTruthy();
         expect(filenames.includes(SalmonFSTestHelper.TEST_IMPORT_SMALL_FILENAME)).toBeTruthy();
         expect(filenames.includes(SalmonFSTestHelper.TEST_IMPORT_MEDIUM_FILENAME)).toBeTruthy();
+        expect(filenames.includes(SalmonFSTestHelper.TEST_IMPORT_LARGE_FILENAME)).toBeTruthy();
     });
 });

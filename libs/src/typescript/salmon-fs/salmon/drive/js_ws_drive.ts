@@ -111,6 +111,5 @@ export class JsWSDrive extends SalmonDrive {
         if(credentials)
             (realRoot as JsWSFile).setCredentials(credentials);
         await super.initialize(realRoot, createIfNotExists);
-
     }
 }

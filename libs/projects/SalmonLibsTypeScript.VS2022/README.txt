@@ -69,9 +69,6 @@ Choose the test suite then click execute.
 If you test salmon-fs you need to choose the root of your test folder
 then click execute.
 
-To run the tests with the web service from Chrome:
-Make sure the application.properties has SSL and http2 enabled.
-
 If you're testing with node and use a self-signed cert for the web service then add this env var
 make sure you don't use this in production environment
 NODE_TLS_REJECT_UNAUTHORIZED=0

@@ -49,8 +49,8 @@ export class JsHttpDrive extends SalmonDrive {
      * @param {ISalmonSequencer} sequencer Optional nonce sequencer that will be used for importing files.
      * @returns {Promise<SalmonDrive>} The drive.
      */
-    public static async open(dir: IRealFile, password: string, sequencer: INonceSequencer | null = null): Promise<SalmonDrive> {
-        return await SalmonDrive.openDrive(dir, JsHttpDrive, password, sequencer);
+    public static async open(dir: IRealFile, password: string): Promise<SalmonDrive> {
+        return await SalmonDrive.openDrive(dir, JsHttpDrive, password);
     }
     
     /**

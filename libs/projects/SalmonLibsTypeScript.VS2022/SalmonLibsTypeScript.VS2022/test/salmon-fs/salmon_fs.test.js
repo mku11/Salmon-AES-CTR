@@ -31,7 +31,6 @@ import { copyRecursively, moveRecursively, autoRenameFile } from '../../lib/salm
 import { SalmonFileReadableStream } from '../../lib/salmon-fs/salmon/streams/salmon_file_readable_stream.js';
 import { SalmonFileCommander } from '../../lib/salmon-fs/salmon/utils/salmon_file_commander.js';
 import { SalmonAuthException } from '../../lib/salmon-fs/salmon/salmon_auth_exception.js'
-import { SalmonIntegrity } from '../../lib/salmon-core/salmon/integrity/salmon_integrity.js';
 import { getTestMode, TestMode } from "./salmon_fs_test_helper.js";
 
 function checkParams() {
@@ -49,6 +48,7 @@ function checkParams() {
 describe('salmon-fs', () => {
 	beforeAll(() => {
         checkParams();
+        SalmonFSTestHelper.TEST_IMPORT_FILE = SalmonFSTestHelper.TEST_IMPORT_MEDIUM_FILE;
         // SalmonCoreTestHelper.TEST_ENC_BUFFER_SIZE = 1 * 1024 * 1024;
 		// SalmonCoreTestHelper.TEST_DEC_BUFFER_SIZE = 1 * 1024 * 1024;
 		SalmonCoreTestHelper.TEST_ENC_THREADS = 1;
@@ -91,29 +91,6 @@ describe('salmon-fs', () => {
         expect(wrongPassword).toBeTruthy();
     });
 
-    it('atest', async () => {
-        let wbuff = new Uint8Array(2);
-        wbuff[0]=1;
-        wbuff[1]=2;
-        let ctrl;
-        let rs = new ReadableStream({
-            start(controller) {
-                ctrl = controller;
-            }
-          });
-        ctrl.enqueue(wbuff);
-        let reader = rs.getReader();
-        let rbuff = await reader.read();
-        console.log(rbuff);
-
-        // let file = new JsNodeFile(SalmonFSTestHelper.TEST_IMPORT_TINY_FILE);
-        // let stream = await file.getInputStream();
-        // let streamWrapper = ReadableStreamWrapper.create(stream);
-        // let reader = streamWrapper.getReader();
-        // let buff = await reader.read();
-        // console.log(buff);
-    });
-
     it('shouldAuthorizePositive', async () => {
         let vaultDir = await SalmonFSTestHelper.generateFolder(SalmonFSTestHelper.TEST_VAULT_DIRNAME);
         let sequencer = await SalmonFSTestHelper.createSalmonFileSequencer();
@@ -135,7 +112,7 @@ describe('salmon-fs', () => {
         try {
             await SalmonFSTestHelper.importAndExport(await SalmonFSTestHelper.generateFolder(SalmonFSTestHelper.TEST_VAULT_DIRNAME), 
                 SalmonCoreTestHelper.TEST_PASSWORD, SalmonFSTestHelper.TEST_IMPORT_FILE,
-                true, 24 + 10, true, false, false);
+                true, 24 + 10, false, false, false);
         } catch (ex) {
             console.error(ex);
             if (ex.getCause != undefined && ex.getCause() instanceof IntegrityException)
@@ -148,8 +125,7 @@ describe('salmon-fs', () => {
         let integrityFailed = false;
         try {
             await SalmonFSTestHelper.importAndExport(await SalmonFSTestHelper.generateFolder(SalmonFSTestHelper.TEST_VAULT_DIRNAME), SalmonCoreTestHelper.TEST_PASSWORD, SalmonFSTestHelper.TEST_IMPORT_FILE,
-                false, 0, true, false,
-                false);
+                false, 0, true, false, false);
         } catch (ex) {
             console.error(ex);
             integrityFailed = true;
@@ -283,7 +259,7 @@ describe('salmon-fs', () => {
 
     it('shouldCatchVaultMaxFiles', async () => {
         let vaultDir = await SalmonFSTestHelper.generateFolder(SalmonFSTestHelper.TEST_VAULT_DIRNAME);
-        let seqDir = await SalmonFSTestHelper.generateFolder(SalmonFSTestHelper.TEST_SEQ_DIRNAME, SalmonFSTestHelper.TEST_SEQ_DIR, true, true);
+        let seqDir = await SalmonFSTestHelper.generateFolder(SalmonFSTestHelper.TEST_SEQ_DIRNAME, SalmonFSTestHelper.TEST_SEQ_DIR, true);
         let seqFile = await seqDir.getChild(SalmonFSTestHelper.TEST_SEQ_FILENAME);
         await SalmonFSTestHelper.testMaxFiles(vaultDir, seqFile, SalmonFSTestHelper.TEST_IMPORT_TINY_FILE,
             SalmonCoreTestHelper.TEXT_VAULT_MAX_FILE_NONCE, -2, true);
@@ -308,7 +284,7 @@ describe('salmon-fs', () => {
         try {
             await SalmonFSTestHelper.shouldCreateFileWithoutVault(new TextEncoder().encode(SalmonCoreTestHelper.TEST_TEXT), SalmonCoreTestHelper.TEST_KEY_BYTES,
                 true, true, 64, SalmonCoreTestHelper.TEST_HMAC_KEY_BYTES,
-                SalmonCoreTestHelper.TEST_FILENAME_NONCE_BYTES, SalmonCoreTestHelper.TEST_NONCE_BYTES, SalmonFSTestHelper.TEST_OUTPUT_DIR, false, -1, true);
+                SalmonCoreTestHelper.TEST_FILENAME_NONCE_BYTES, SalmonCoreTestHelper.TEST_NONCE_BYTES, false, -1, true);
         } catch (ex) {
             console.error(ex);
             success = false;
@@ -321,8 +297,7 @@ describe('salmon-fs', () => {
         try {
             await SalmonFSTestHelper.shouldCreateFileWithoutVault(new TextEncoder().encode(SalmonCoreTestHelper.TEST_TEXT), SalmonCoreTestHelper.TEST_KEY_BYTES,
                 true, true, 64, SalmonCoreTestHelper.TEST_HMAC_KEY_BYTES,
-                SalmonCoreTestHelper.TEST_FILENAME_NONCE_BYTES, SalmonCoreTestHelper.TEST_NONCE_BYTES, SalmonFSTestHelper.TEST_OUTPUT_DIR,
-                true, 45, true);
+                SalmonCoreTestHelper.TEST_FILENAME_NONCE_BYTES, SalmonCoreTestHelper.TEST_NONCE_BYTES, true, 45, true);
         } catch (ex) {
             console.error(ex);
             if (ex.getCause != undefined && ex.getCause() instanceof IntegrityException)
@@ -340,8 +315,7 @@ describe('salmon-fs', () => {
             try {
                 await SalmonFSTestHelper.shouldCreateFileWithoutVault(new TextEncoder().encode(text), SalmonCoreTestHelper.TEST_KEY_BYTES,
                     true, false, 64,
-                    SalmonCoreTestHelper.TEST_HMAC_KEY_BYTES, SalmonCoreTestHelper.TEST_FILENAME_NONCE_BYTES, SalmonCoreTestHelper.TEST_NONCE_BYTES,
-                    SalmonFSTestHelper.TEST_OUTPUT_DIR, true, i, false);
+                    SalmonCoreTestHelper.TEST_HMAC_KEY_BYTES, SalmonCoreTestHelper.TEST_FILENAME_NONCE_BYTES, SalmonCoreTestHelper.TEST_NONCE_BYTES, true, i, false);
             } catch (ex) {
                 console.error(ex);
                 if (ex.getCause != undefined && ex.getCause() instanceof IntegrityException)
@@ -361,7 +335,6 @@ describe('salmon-fs', () => {
                 true, false, 64,
                 SalmonCoreTestHelper.TEST_HMAC_KEY_BYTES,
                 SalmonCoreTestHelper.TEST_FILENAME_NONCE_BYTES, SalmonCoreTestHelper.TEST_NONCE_BYTES,
-                SalmonFSTestHelper.TEST_OUTPUT_DIR,
                 true, 24 + 32 + 5, true);
         } catch (ex) {
             console.error(ex);
@@ -405,7 +378,7 @@ describe('salmon-fs', () => {
         }
         let file = await SalmonFSTestHelper.shouldCreateFileWithoutVault(data, SalmonCoreTestHelper.TEST_KEY_BYTES,
             true, true, 64, SalmonCoreTestHelper.TEST_HMAC_KEY_BYTES,
-            SalmonCoreTestHelper.TEST_FILENAME_NONCE_BYTES, SalmonCoreTestHelper.TEST_NONCE_BYTES, SalmonFSTestHelper.TEST_OUTPUT_DIR,
+            SalmonCoreTestHelper.TEST_FILENAME_NONCE_BYTES, SalmonCoreTestHelper.TEST_NONCE_BYTES,
             false, -1, true);
         let fileInputStream = SalmonFileReadableStream.create(file,
             3, 50, SalmonFSTestHelper.TEST_FILE_INPUT_STREAM_THREADS, 12);
@@ -441,7 +414,7 @@ describe('salmon-fs', () => {
         expect(wrongPassword).toBeFalsy();
     });
 
-    it('shouldCreateWinFileSequencer', async () => {
+    it('shouldCreateFileSequencer', async () => {
         await SalmonFSTestHelper.shouldTestFileSequencer();
     });
 
@@ -568,7 +541,7 @@ describe('salmon-fs', () => {
 
         let sequencer = await SalmonFSTestHelper.createSalmonFileSequencer();
         let drive = await SalmonFSTestHelper.createDrive(vaultDir, SalmonFSTestHelper.driveClassType, SalmonCoreTestHelper.TEST_PASSWORD, sequencer);
-        let fileCommander = new SalmonFileCommander(SalmonIntegrity.DEFAULT_CHUNK_SIZE, SalmonIntegrity.DEFAULT_CHUNK_SIZE, 2);
+        let fileCommander = new SalmonFileCommander(SalmonFSTestHelper.ENC_IMPORT_BUFFER_SIZE, SalmonFSTestHelper.ENC_EXPORT_BUFFER_SIZE, 2);
         let sfiles = await fileCommander.importFiles([file],
             await drive.getRoot(), false, true, null, null, null);
 

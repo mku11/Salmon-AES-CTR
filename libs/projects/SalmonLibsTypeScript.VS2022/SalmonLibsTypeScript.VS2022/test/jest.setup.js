@@ -10,7 +10,7 @@ import { SalmonFSTestHelper, TestMode, TestRunnerMode } from "./salmon-fs/salmon
 // WebService: to run on a web service drive (browser or node.js)
 // TestRunnerMode:
 // NodeJS: to run in node.js command line (or Visual Code)
-var testMode = TestMode.Node;
+var testMode = TestMode.WebService;
 var testRunnerMode = TestRunnerMode.NodeJS;
 
 // test dir

@@ -72,7 +72,7 @@ export function getTestRunnerMode() {
 export class SalmonFSTestHelper {
     // dirs
     static driveClassType = null; // drive class type
-    static TEST_ROOT_DIR = "d:\\tmp\\salmon\\test"; // default root for saving all test files
+    static TEST_ROOT_DIR; // root dir for testing
     static TEST_INPUT_DIRNAME = "input";
     static TEST_OUTPUT_DIRNAME = "output";
     static TEST_VAULT_DIRNAME = "vault";
@@ -159,7 +159,7 @@ export class SalmonFSTestHelper {
                 await SalmonFSTestHelper.TEST_ROOT_DIR.mkdir();
         }
 
-        console.log("setting test path: " + SalmonFSTestHelper.TEST_ROOT_DIR.getPath());
+        console.log("setting test path: " + SalmonFSTestHelper.TEST_ROOT_DIR.getAbsolutePath());
         SalmonFSTestHelper.TEST_INPUT_DIR = await SalmonFSTestHelper.createDir(SalmonFSTestHelper.TEST_ROOT_DIR, SalmonFSTestHelper.TEST_INPUT_DIRNAME);
         if(testMode == TestMode.WebService)
             SalmonFSTestHelper.TEST_OUTPUT_DIR = new JsWSFile("/", SalmonFSTestHelper.WS_SERVER_URL, SalmonFSTestHelper.credentials);
@@ -203,7 +203,6 @@ export class SalmonFSTestHelper {
 
         httpVaultDir.mkdir();
         let sequencer = await SalmonFSTestHelper.createSalmonFileSequencer();
-        httpVaultDir = await SalmonFSTestHelper.HTTP_TEST_DIR.createDirectory(SalmonFSTestHelper.HTTP_VAULT_DIRNAME);
         let drive = await SalmonFSTestHelper.createDrive(httpVaultDir, SalmonFSTestHelper.driveClassType, SalmonCoreTestHelper.TEST_PASSWORD, sequencer);
         let rootDir = await drive.getRoot();
         let importFiles = [SalmonFSTestHelper.TEST_IMPORT_TINY_FILE,
@@ -263,6 +262,7 @@ export class SalmonFSTestHelper {
         let dir = await parent.getChild(dirName);
         if(!await dir.exists())
             await dir.mkdir();
+        console.log("generated folder: " + dir.getAbsolutePath())
         return dir;
     }
 
@@ -415,7 +415,7 @@ export class SalmonFSTestHelper {
     }
 
     static async shouldCreateFileWithoutVault(testBytes, key, applyIntegrity, verifyIntegrity, chunkSize, hashKey,
-        filenameNonce, fileNonce, outputDir, flipBit, flipPosition, checkData) {
+        filenameNonce, fileNonce, flipBit, flipPosition, checkData) {
         // write file
         let realDir = await SalmonFSTestHelper.generateFolder("encfiles", SalmonFSTestHelper.TEST_OUTPUT_DIR, false);
         let dir = new SalmonFile(realDir, null);
@@ -428,7 +428,7 @@ export class SalmonFSTestHelper {
         await stream.write(testBytes, 0, testBytes.length);
         await stream.flush();
         await stream.close();
-        let realFilePath = newFile.getRealFile();
+        let realFile = newFile.getRealFile();
 
         // tamper
         if (flipBit) {
@@ -441,7 +441,6 @@ export class SalmonFSTestHelper {
         }
 
         // open file for read
-        let realFile = realFilePath;
         let readFile = new SalmonFile(realFile, null);
         readFile.setEncryptionKey(key);
         readFile.setRequestedNonce(fileNonce);
@@ -655,8 +654,10 @@ export class SalmonFSTestHelper {
         let nonce = SalmonGenerator.getSecureRandomBytes(8); // 64-bit nonce
 
         // Example 1: encrypt byte array
-        let encryptor = new SalmonEncryptor(1); // use more threads for parallel processing
-        let decryptor = new SalmonDecryptor(1);
+        let encryptor = new SalmonEncryptor(SalmonCoreTestHelper.TEST_ENC_THREADS,
+                                               SalmonCoreTestHelper.TEST_ENC_BUFFER_SIZE); // use more threads for parallel processing
+        let decryptor = new SalmonDecryptor(SalmonCoreTestHelper.TEST_DEC_THREADS,
+                                               SalmonCoreTestHelper.TEST_DEC_BUFFER_SIZE);
         let encBytes = await encryptor.encrypt(bytes, key, nonce, false);
         // decrypt byte array
         let decBytes = await decryptor.decrypt(encBytes, key, nonce, false);
@@ -856,7 +857,8 @@ export class SalmonFSTestHelper {
         let localChkSum = await this.getChecksum(localFile);
 
         let vaultDir = vaultPath;
-        let drive = await SalmonFSTestHelper.openDrive(vaultDir, SalmonFSTestHelper.driveClassType, SalmonCoreTestHelper.TEST_PASSWORD);
+		let sequencer = await SalmonFSTestHelper.createSalmonFileSequencer();
+        let drive = await SalmonFSTestHelper.openDrive(vaultDir, SalmonFSTestHelper.driveClassType, SalmonCoreTestHelper.TEST_PASSWORD, sequencer);
         let root = await drive.getRoot();
         let file = await root.getChild(filename);
         expect(await file.exists()).toBeTruthy();
