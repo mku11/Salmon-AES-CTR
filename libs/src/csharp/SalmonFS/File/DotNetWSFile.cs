@@ -108,7 +108,7 @@ public class DotNetWSFile : IRealFile
     ///  <returns>The newly created directory.</returns>
     public IRealFile CreateDirectory(string dirName)
     {
-        string nDirPath = filePath + Separator + dirName;
+        string nDirPath = this.GetChildPath(dirName);
         HttpResponseMessage httpResponse = null;
         try
         {
@@ -184,8 +184,7 @@ public class DotNetWSFile : IRealFile
     ///  <exception cref="IOException">Thrown if error during IO</exception>
     public IRealFile CreateFile(string filename)
     {
-        string nFilePath = filePath + Separator + filename;
-
+        String nFilePath = this.GetChildPath(filename);
         HttpResponseMessage httpResponse = null;
         try
         {
@@ -395,7 +394,7 @@ public class DotNetWSFile : IRealFile
                         SetServiceAuth(requestMessage);
                         httpResponse = client.Send(requestMessage);
                         CheckStatus(httpResponse, HttpStatusCode.OK);
-                        int res = getFileListCount(httpResponse.Content);
+                        int res = GetFileListCount(httpResponse.Content);
                         return res;
                     }
                     finally
@@ -414,13 +413,13 @@ public class DotNetWSFile : IRealFile
     }
 
 
-    private int getFileListCount(HttpContent content)
+    private int GetFileListCount(HttpContent content)
     {
         Response[] responses = (Response[])content.ReadFromJsonAsync(typeof(Response[])).Result;
         return responses.Length;
     }
 
-    private Response[] parseFileList(HttpContent content)
+    private Response[] ParseFileList(HttpContent content)
     {
         Response[] responses = (Response[])content.ReadFromJsonAsync(typeof(Response[])).Result;
         return responses;
@@ -447,7 +446,7 @@ public class DotNetWSFile : IRealFile
             SetServiceAuth(requestMessage);
             httpResponse = client.Send(requestMessage);
             CheckStatus(httpResponse, HttpStatusCode.OK);
-            files = parseFileList(httpResponse.Content);
+            files = ParseFileList(httpResponse.Content);
         }
         finally
         {
@@ -594,8 +593,8 @@ public class DotNetWSFile : IRealFile
     {
         if (IsFile)
             return null;
-        DotNetWSFile child = new DotNetWSFile(filePath + Separator + filename,
-            ServicePath, ServiceCredentials);
+        string nFilepath = this.GetChildPath(filename);
+        DotNetWSFile child = new DotNetWSFile(nFilepath, ServicePath, ServiceCredentials);
         return child;
     }
 
@@ -673,6 +672,15 @@ public class DotNetWSFile : IRealFile
         }
     }
 
+    private string GetChildPath(String filename)
+    {
+        string nFilepath = this.filePath;
+        if (!nFilepath.EndsWith(DotNetHttpFile.Separator))
+            nFilepath += DotNetHttpFile.Separator;
+        nFilepath += filename;
+        return nFilepath;
+    }
+
     /// <summary>
     /// Returns a string representation of this object
     /// </summary>
@@ -722,6 +730,6 @@ public class DotNetWSFile : IRealFile
     private void SetDefaultHeaders(HttpRequestMessage requestMessage)
     {
         requestMessage.Headers.Add("Cache", "no-store");
-        requestMessage.Headers.Add("Keep-Alive", "true");
+        requestMessage.Headers.Add("Connection", "keep-alive");
     }
 }

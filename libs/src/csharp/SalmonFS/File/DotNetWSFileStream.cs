@@ -101,9 +101,6 @@ public class DotNetWSFileStream : Stream
             }
             else if (this.position != value)
             {
-                // cannot reuse stream
-                if (this.inputStream != null)
-                    Console.WriteLine("cannot reuse: " + (value - position));
                 this.Reset();
             }
             this.position = value;
@@ -344,30 +341,8 @@ public class DotNetWSFileStream : Stream
     {
         if (httpResponse.StatusCode != status)
         {
-            string msg = "";
-            Stream stream = null;
-            MemoryStream ms = null;
-            try
-            {
-                ms = new MemoryStream();
-                stream = httpResponse.Content.ReadAsStream();
-                stream.CopyTo(ms);
-                msg = UTF8Encoding.UTF8.GetString(ms.ToArray());
-            }
-            catch (Exception e)
-            {
-                Console.Error.WriteLine(e);
-            }
-            finally
-            {
-                if (ms != null)
-                    ms.Dispose();
-                if (stream != null)
-                    stream.Dispose();
-            }
             throw new IOException(httpResponse.StatusCode
-                    + " " + httpResponse.ReasonPhrase + "\n"
-                    + msg);
+                    + " " + httpResponse.ReasonPhrase);
         }
     }
     private void SetServiceAuth(HttpRequestMessage httpRequestMessage)
@@ -379,6 +354,6 @@ public class DotNetWSFileStream : Stream
     private void SetDefaultHeaders(HttpRequestMessage requestMessage)
     {
         requestMessage.Headers.Add("Cache", "no-store");
-        requestMessage.Headers.Add("Keep-Alive", "true");
+        requestMessage.Headers.Add("Connection", "keep-alive");
     }
 }
