@@ -38,124 +38,209 @@ using Mku.Salmon.Utils;
 using Mku.Salmon.Sequence;
 using Mku.Salmon.Drive;
 using System.Collections.Generic;
-using System.Net;
+using Mku.Salmon.Test;
+using Mku.Salmon;
+using static System.Runtime.InteropServices.JavaScript.JSType;
+using System.Collections;
+using Microsoft.Testing.Platform.Extensions.Messages;
+using Org.BouncyCastle.Crypto;
+using Org.BouncyCastle.Utilities.Zlib;
 
 namespace Mku.Salmon.Test;
 
+
+public enum TestMode
+{
+    Local,
+    Http,
+    WebService
+}
 public class SalmonFSTestHelper
 {
+    internal static TestMode currTestMode;
+    // dirs
     internal static Type DriveClassType { get; set; } // drive class type
-    internal static string TEST_ROOT_DIR = "c:\\tmp\\salmon\\test";
-    internal static string TEST_OUTPUT_DIR;
-    internal static string TEST_VAULT_DIR;
-    internal static string TEST_VAULT2_DIR;
-    internal static string TEST_EXPORT_AUTH_DIR;
-    internal static string TEST_DATA_DIR_FOLDER;
-	
-    internal static string TEST_IMPORT_TINY_FILE;
-    internal static string TEST_IMPORT_SMALL_FILE;
-    internal static string TEST_IMPORT_MEDIUM_FILE;
-    internal static string TEST_IMPORT_LARGE_FILE;
-    internal static string TEST_IMPORT_HUGE_FILE;
-    internal static string TEST_IMPORT_FILE;
+    internal static IRealFile TEST_ROOT_DIR; // root dir for testing
+    internal static string TEST_INPUT_DIRNAME = "input";
+    internal static string TEST_OUTPUT_DIRNAME = "output";
+    internal static string TEST_VAULT_DIRNAME = "vault";
+    internal static string TEST_OPER_DIRNAME = "files";
+    internal static string TEST_EXPORT_AUTH_DIRNAME = "auth";
+    internal static string TEST_IMPORT_TINY_FILENAME = "tiny_test.txt";
+    internal static string TEST_IMPORT_SMALL_FILENAME = "small_test.dat";
+    internal static string TEST_IMPORT_MEDIUM_FILENAME = "medium_test.dat";
+    internal static string TEST_IMPORT_LARGE_FILENAME = "large_test.dat";
+    internal static string TEST_IMPORT_HUGE_FILENAME = "huge_test.dat";
+    internal static string TINY_FILE_CONTENTS = "This is a new file created.";
+    internal static string TEST_SEQ_DIRNAME = "seq";
+    internal static string TEST_SEQ_FILENAME = "fileseq.json";
+    internal static string TEST_EXPORT_AUTH_FILENAME = "export.slma";
 
-	internal static String TINY_FILE_CONTENTS = "This is a new file created.";
-    internal static string TEST_SEQUENCER_DIR;
-    internal static string TEST_SEQUENCER_FILENAME = "fileseq.xml";
+    // Web service
+    internal static string WS_SERVER_URL = "http://localhost:8080";
+    // static WS_SERVER_URL = "https://localhost:8443"; // for testing from the Web browser
+    internal static string WS_TEST_DIRNAME = "ws";
+    internal static DotNetWSFile.Credentials credentials = new DotNetWSFile.Credentials("user", "password");
 
-    internal static string TEST_EXPORT_FILENAME = "export.slma";
+    // HTTP server (Read-only)
+    internal static string HTTP_SERVER_URL = "http://localhost";
+    internal static string HTTP_SERVER_VIRTUAL_URL = SalmonFSTestHelper.HTTP_SERVER_URL + "/saltest";
+    internal static string HTTP_TEST_DIRNAME = "httpserv";
+    internal static string HTTP_VAULT_DIRNAME = "vault";
+    internal static string HTTP_VAULT_DIR_URL = SalmonFSTestHelper.HTTP_SERVER_VIRTUAL_URL
+            + "/" + SalmonFSTestHelper.HTTP_TEST_DIRNAME + "/" + SalmonFSTestHelper.HTTP_VAULT_DIRNAME;
+    internal static string HTTP_VAULT_FILES_DIR_URL = SalmonFSTestHelper.HTTP_VAULT_DIR_URL + "/fs";
 
-
-    public static string VAULT_HOST = "http://localhost:8080";
-    public static string VAULT_URL = VAULT_HOST + ""; // same
-    public static string VAULT_PASSWORD = "test";
-
-
+    // performance
     internal static int ENC_IMPORT_BUFFER_SIZE = 512 * 1024;
     internal static int ENC_IMPORT_THREADS = 1;
     internal static int ENC_EXPORT_BUFFER_SIZE = 512 * 1024;
     internal static int ENC_EXPORT_THREADS = 1;
-
-    private static readonly int REAL_FILE_BUFFER_SIZE = 512 * 1024;
-
     internal static int TEST_FILE_INPUT_STREAM_THREADS = 1;
     internal static bool TEST_USE_FILE_INPUT_STREAM = false;
 
-    static bool ENABLE_FILE_PROGRESS = false;
+    // progress
+    internal static bool ENABLE_FILE_PROGRESS = false;
 
-    internal static string TEST_SEQUENCER_FILE1 = "seq1.xml";
-    internal static string TEST_SEQUENCER_FILE2 = "seq2.xml";
-
-	private static readonly Random random = new Random((int)Time.Time.CurrentTimeMillis());
-
-    public static Dictionary<string, string> users;
-    private static DotNetWSFile.Credentials credentials1 = new DotNetWSFile.Credentials("user", "password");
-
+    // test dirs and files
+    internal static IRealFile TEST_INPUT_DIR;
+    internal static IRealFile TEST_OUTPUT_DIR;
+    internal static IRealFile TEST_IMPORT_TINY_FILE;
+    internal static IRealFile TEST_IMPORT_SMALL_FILE;
+    internal static IRealFile TEST_IMPORT_MEDIUM_FILE;
+    internal static IRealFile TEST_IMPORT_LARGE_FILE;
+    internal static IRealFile TEST_IMPORT_HUGE_FILE;
+    internal static IRealFile TEST_IMPORT_FILE;
+    internal static IRealFile WS_TEST_DIR;
+    internal static IRealFile HTTP_TEST_DIR;
+    internal static IRealFile HTTP_VAULT_DIR;
+    internal static IRealFile TEST_SEQ_DIR;
+    internal static IRealFile TEST_EXPORT_AUTH_DIR;
     internal static SalmonFileImporter fileImporter;
     internal static SalmonFileExporter fileExporter;
+    internal static SalmonSequenceSerializer sequenceSerializer = new SalmonSequenceSerializer();
+    internal static readonly Random random = new Random((int)Time.Time.CurrentTimeMillis());
 
-	internal static void SetOutputDir(string path) {
-		if(path != null)
-			SalmonFSTestHelper.TEST_ROOT_DIR = path;
-		Console.WriteLine("setting test path: " + path);
-		TEST_DATA_DIR_FOLDER = SalmonFSTestHelper.TEST_ROOT_DIR + Path.DirectorySeparatorChar + "input" + Path.DirectorySeparatorChar;
-		TEST_OUTPUT_DIR = SalmonFSTestHelper.TEST_ROOT_DIR + Path.DirectorySeparatorChar + "output" + Path.DirectorySeparatorChar;
-		TEST_VAULT_DIR = SalmonFSTestHelper.TEST_OUTPUT_DIR + Path.DirectorySeparatorChar + "enc";
-		TEST_VAULT2_DIR = SalmonFSTestHelper.TEST_OUTPUT_DIR + Path.DirectorySeparatorChar + "enc2";
-		TEST_EXPORT_AUTH_DIR = SalmonFSTestHelper.TEST_OUTPUT_DIR + Path.DirectorySeparatorChar + "export" + Path.DirectorySeparatorChar;
-		TEST_SEQUENCER_DIR = SalmonFSTestHelper.TEST_OUTPUT_DIR + Path.DirectorySeparatorChar;
-		
-		CreateDir(TEST_ROOT_DIR);
-		CreateDir(TEST_DATA_DIR_FOLDER);
-		CreateDir(TEST_OUTPUT_DIR);
-		CreateTestFiles();
-	}
-	
-	
-	internal static void CreateDir(string path) {
-		if(!Directory.Exists(path))
-			Directory.CreateDirectory(path);
-	}
-	
-	internal static void CreateTestFiles() {
-		TEST_IMPORT_TINY_FILE = SalmonFSTestHelper.TEST_DATA_DIR_FOLDER + "tiny_test.txt";
-		TEST_IMPORT_SMALL_FILE = SalmonFSTestHelper.TEST_DATA_DIR_FOLDER + "small_test.dat";
-		TEST_IMPORT_MEDIUM_FILE = SalmonFSTestHelper.TEST_DATA_DIR_FOLDER + "medium_test.dat";
-		TEST_IMPORT_LARGE_FILE = SalmonFSTestHelper.TEST_DATA_DIR_FOLDER + "large_test.dat";
-		TEST_IMPORT_HUGE_FILE = SalmonFSTestHelper.TEST_DATA_DIR_FOLDER + "huge_test.dat";
-		TEST_IMPORT_FILE = SalmonFSTestHelper.TEST_IMPORT_SMALL_FILE;
-		
-		CreateFile(TEST_IMPORT_TINY_FILE, TINY_FILE_CONTENTS);
-		CreateFile(TEST_IMPORT_SMALL_FILE,1024*1024);
-		CreateFile(TEST_IMPORT_MEDIUM_FILE,12*1024*1024);
-		// CreateFile(TEST_IMPORT_LARGE_FILE,48*1024*1024);
-		// CreateFile(TEST_IMPORT_HUGE_FILE,512*1024*1024);
-	}
-	
-	internal static void CreateFile(string path, string contents) {
-		Stream stream = System.IO.File.Open(path, FileMode.OpenOrCreate, FileAccess.Write, FileShare.ReadWrite);
-		byte[] data = UTF8Encoding.UTF8.GetBytes(contents);
-		stream.Write(data, 0, data.Length);
-		stream.Flush();
-		stream.Close();
-	}
-	
-	internal static void CreateFile(string path, long size) {
-		if(System.IO.File.Exists(path))
-			return;
-		byte[] data = new byte[4*1024*1024];
-		Stream stream = System.IO.File.Open(path, FileMode.OpenOrCreate, FileAccess.Write, FileShare.ReadWrite);
-		int len = 0;
-		while(size > 0) {
-			random.NextBytes(data);
-			len = (int) Math.Min(size, data.Length);
-			stream.Write(data, 0, len);
-			size -= len;
-		}
-		stream.Flush();
-		stream.Close();
-	}
-	
+    public static void SetTestParams(string testDir, TestMode testMode)
+    {
+        currTestMode = testMode;
+
+        if (testMode == TestMode.Local)
+        {
+            SalmonFSTestHelper.DriveClassType = typeof(DotNetDrive);
+        }
+        else if (testMode == TestMode.Http)
+        {
+            SalmonFSTestHelper.DriveClassType = typeof(DotNetHttpDrive);
+        }
+        else if (testMode == TestMode.WebService)
+        {
+            SalmonFSTestHelper.DriveClassType = typeof(DotNetWSDrive);
+        }
+
+        SalmonFSTestHelper.TEST_ROOT_DIR = new DotNetFile(testDir);
+        if (!SalmonFSTestHelper.TEST_ROOT_DIR.Exists)
+            SalmonFSTestHelper.TEST_ROOT_DIR.Mkdir();
+
+        Console.WriteLine("setting test path: " + SalmonFSTestHelper.TEST_ROOT_DIR.AbsolutePath);
+
+        SalmonFSTestHelper.TEST_INPUT_DIR = SalmonFSTestHelper.CreateDir(SalmonFSTestHelper.TEST_ROOT_DIR, SalmonFSTestHelper.TEST_INPUT_DIRNAME);
+        if (testMode == TestMode.WebService)
+            SalmonFSTestHelper.TEST_OUTPUT_DIR = new DotNetWSFile("/", SalmonFSTestHelper.WS_SERVER_URL, SalmonFSTestHelper.credentials);
+        else
+            SalmonFSTestHelper.TEST_OUTPUT_DIR = SalmonFSTestHelper.CreateDir(SalmonFSTestHelper.TEST_ROOT_DIR, SalmonFSTestHelper.TEST_OUTPUT_DIRNAME);
+        SalmonFSTestHelper.WS_TEST_DIR = SalmonFSTestHelper.CreateDir(SalmonFSTestHelper.TEST_ROOT_DIR, SalmonFSTestHelper.WS_TEST_DIRNAME);
+        SalmonFSTestHelper.HTTP_TEST_DIR = SalmonFSTestHelper.CreateDir(SalmonFSTestHelper.TEST_ROOT_DIR, SalmonFSTestHelper.HTTP_TEST_DIRNAME);
+        SalmonFSTestHelper.TEST_SEQ_DIR = SalmonFSTestHelper.CreateDir(SalmonFSTestHelper.TEST_ROOT_DIR, SalmonFSTestHelper.TEST_SEQ_DIRNAME);
+        SalmonFSTestHelper.TEST_EXPORT_AUTH_DIR = SalmonFSTestHelper.CreateDir(SalmonFSTestHelper.TEST_ROOT_DIR, SalmonFSTestHelper.TEST_EXPORT_AUTH_DIRNAME);
+        SalmonFSTestHelper.HTTP_VAULT_DIR = new DotNetHttpFile(SalmonFSTestHelper.HTTP_VAULT_DIR_URL);
+        SalmonFSTestHelper.CreateTestFiles();
+        SalmonFSTestHelper.CreateHttpVault();
+    }
+
+    public static IRealFile CreateDir(IRealFile parent, string dirName)
+    {
+        IRealFile dir = parent.GetChild(dirName);
+        if (!dir.Exists)
+            dir.Mkdir();
+        return dir;
+    }
+
+    static void CreateTestFiles()
+    {
+        SalmonFSTestHelper.TEST_IMPORT_TINY_FILE = SalmonFSTestHelper.TEST_INPUT_DIR.GetChild(SalmonFSTestHelper.TEST_IMPORT_TINY_FILENAME);
+        SalmonFSTestHelper.TEST_IMPORT_SMALL_FILE = SalmonFSTestHelper.TEST_INPUT_DIR.GetChild(SalmonFSTestHelper.TEST_IMPORT_SMALL_FILENAME);
+        SalmonFSTestHelper.TEST_IMPORT_MEDIUM_FILE = SalmonFSTestHelper.TEST_INPUT_DIR.GetChild(SalmonFSTestHelper.TEST_IMPORT_MEDIUM_FILENAME);
+        SalmonFSTestHelper.TEST_IMPORT_LARGE_FILE = SalmonFSTestHelper.TEST_INPUT_DIR.GetChild(SalmonFSTestHelper.TEST_IMPORT_LARGE_FILENAME);
+        SalmonFSTestHelper.TEST_IMPORT_HUGE_FILE = SalmonFSTestHelper.TEST_INPUT_DIR.GetChild(SalmonFSTestHelper.TEST_IMPORT_HUGE_FILENAME);
+        SalmonFSTestHelper.TEST_IMPORT_FILE = SalmonFSTestHelper.TEST_IMPORT_TINY_FILE;
+
+        SalmonFSTestHelper.createFile(SalmonFSTestHelper.TEST_IMPORT_TINY_FILE, SalmonFSTestHelper.TINY_FILE_CONTENTS);
+        SalmonFSTestHelper.createFileRandomData(SalmonFSTestHelper.TEST_IMPORT_SMALL_FILE, 1024 * 1024);
+        SalmonFSTestHelper.createFileRandomData(SalmonFSTestHelper.TEST_IMPORT_MEDIUM_FILE, 12 * 1024 * 1024);
+        SalmonFSTestHelper.createFileRandomData(SalmonFSTestHelper.TEST_IMPORT_LARGE_FILE, 48 * 1024 * 1024);
+        // this.createFileRandomData(TEST_IMPORT_HUGE_FILE,512*1024*1024);
+    }
+
+    static void CreateHttpVault()
+    {
+        IRealFile httpVaultDir = SalmonFSTestHelper.HTTP_TEST_DIR.GetChild(SalmonFSTestHelper.HTTP_VAULT_DIRNAME);
+        if (httpVaultDir != null && httpVaultDir.Exists)
+            return;
+
+        httpVaultDir.Mkdir();
+        SalmonFileSequencer sequencer = SalmonFSTestHelper.CreateSalmonFileSequencer();
+        SalmonDrive drive = SalmonFSTestHelper.CreateDrive(httpVaultDir, SalmonFSTestHelper.DriveClassType, SalmonCoreTestHelper.TEST_PASSWORD, sequencer);
+        IVirtualFile rootDir = drive.Root;
+        IRealFile[] importFiles = new IRealFile[]{SalmonFSTestHelper.TEST_IMPORT_TINY_FILE,
+                SalmonFSTestHelper.TEST_IMPORT_SMALL_FILE,
+                SalmonFSTestHelper.TEST_IMPORT_MEDIUM_FILE
+        };
+        SalmonFileImporter importer = new SalmonFileImporter(SalmonFSTestHelper.ENC_IMPORT_BUFFER_SIZE, SalmonFSTestHelper.ENC_IMPORT_THREADS);
+        foreach (IRealFile importFile in importFiles)
+        {
+            importer.ImportFile(importFile, rootDir, null, false, true, null);
+        }
+        importer.Close();
+    }
+
+    public static void createFile(string path, string contents)
+    {
+        IRealFile file = new DotNetFile(path);
+        Stream stream = file.GetOutputStream();
+        byte[] data = UTF8Encoding.UTF8.GetBytes(contents);
+        stream.Write(data, 0, data.Length);
+        stream.Flush();
+        stream.Close();
+    }
+
+    public static void createFile(IRealFile file, string contents)
+    {
+        Stream stream = file.GetOutputStream();
+        byte[] data = UTF8Encoding.UTF8.GetBytes(contents);
+        stream.Write(data, 0, data.Length);
+        stream.Flush();
+        stream.Close();
+    }
+
+    public static void createFileRandomData(IRealFile file, long size)
+    {
+        if (file.Exists)
+            return;
+        byte[] data = new byte[65536];
+        Stream stream = file.GetOutputStream();
+        int len = 0;
+        while (size > 0)
+        {
+            random.NextBytes(data);
+            len = (int)Math.Min(size, data.Length);
+            stream.Write(data, 0, len);
+            size -= len;
+        }
+        stream.Flush();
+        stream.Close();
+    }
+
     internal static void Initialize()
     {
         // TODO: ToSync global importer/exporter
@@ -169,61 +254,62 @@ public class SalmonFSTestHelper
         SalmonFSTestHelper.fileExporter.Close();
     }
 
-    public static IRealFile GenerateFolder(string dirPath, Type driveClassType = null)
+    public static SalmonFileSequencer CreateSalmonFileSequencer()
     {
-        driveClassType ??= SalmonFSTestHelper.DriveClassType;
-        long time = Time.Time.CurrentTimeMillis();
-        if (driveClassType == typeof(DotNetWSDrive))
-        {
-            IRealFile dir = new DotNetWSFile("/remote_" + time, SalmonFSTestHelper.VAULT_URL,
-                    SalmonFSTestHelper.credentials1);
-            if (!dir.Mkdir())
-                throw new Exception("Could not generate folder");
-            return dir;
-        }
-        else
-        {
-            DirectoryInfo dir = Directory.CreateDirectory(dirPath + "_" + time);
-            if (dir == null)
-                return null;
-            return new DotNetFile(dir.FullName);
-        }
+        // always create the sequencer files locally
+        IRealFile seqDir = GenerateFolder(SalmonFSTestHelper.TEST_SEQ_DIRNAME, SalmonFSTestHelper.TEST_SEQ_DIR, true);
+        IRealFile seqFile = seqDir.GetChild(SalmonFSTestHelper.TEST_SEQ_FILENAME);
+        return new SalmonFileSequencer(seqFile, SalmonFSTestHelper.sequenceSerializer);
+    }
+
+    public static IRealFile GenerateFolder(string name)
+    {
+        return GenerateFolder(name, TEST_OUTPUT_DIR);
+    }
+
+    public static IRealFile GenerateFolder(string name, IRealFile parent, bool rand = true)
+    {
+        string dirName = name + (rand ? "_" + Time.Time.CurrentTimeMillis() : "");
+        IRealFile dir = parent.GetChild(dirName);
+        if (!dir.Exists)
+            dir.Mkdir();
+        Console.WriteLine("generated folder: " + dir.AbsolutePath);
+        return dir;
     }
 
     public static string GetChecksum(IRealFile realFile)
     {
         Stream stream = realFile.GetInputStream();
-        return GetChecksum(stream, REAL_FILE_BUFFER_SIZE);
+        return GetChecksumStream(stream);
     }
 
-
-    public static string GetChecksum(Stream inputStream, int bufferSize)
+    public static string GetChecksumStream(Stream stream)
     {
         try
         {
             MD5 md5 = MD5.Create();
-            byte[] hash = md5.ComputeHash(new BufferedStream(inputStream, bufferSize));
+            byte[] hash = md5.ComputeHash(new BufferedStream(stream, 256 * 1024));
             string hashstring = System.Convert.ToBase64String(hash);
             return hashstring;
         }
         finally
         {
-            if (inputStream != null)
-                inputStream.Close();
+            if (stream != null)
+                stream.Close();
         }
     }
 
-    public static void ImportAndExport(IRealFile vaultDir, string pass, string importFile,
+    public static void ImportAndExport(IRealFile vaultDir, string pass, IRealFile importFile,
                                        int importBufferSize, int importThreads, int exportBufferSize, int exportThreads, bool integrity,
                                        bool bitflip, long flipPosition, bool shouldBeEqual,
                                        bool ApplyFileIntegrity, bool VerifyFileIntegrity)
     {
-        SalmonFileSequencer sequencer = CreateSalmonFileSequencer(new DotNetFile(vaultDir + "/" + SalmonFSTestHelper.TEST_SEQUENCER_FILE1), new SalmonSequenceSerializer());
+        SalmonFileSequencer sequencer = CreateSalmonFileSequencer();
         SalmonDrive drive = SalmonFSTestHelper.CreateDrive(vaultDir, DriveClassType, pass, sequencer);
         SalmonFile rootDir = drive.Root;
         rootDir.ListFiles();
 
-        DotNetFile fileToImport = new DotNetFile(importFile);
+        IRealFile fileToImport = importFile;
         string hashPreImport = SalmonFSTestHelper.GetChecksum(fileToImport);
 
         // import
@@ -236,7 +322,7 @@ public class SalmonFSTestHelper
         if (chunkSize != null && chunkSize > 0 && !VerifyFileIntegrity)
             salmonFile.SetVerifyIntegrity(false, null);
         SalmonStream sstream = salmonFile.GetInputStream();
-        string hashPostImport = SalmonFSTestHelper.GetChecksum(sstream, sstream.BufferSize);
+        string hashPostImport = SalmonFSTestHelper.GetChecksumStream(sstream);
         if (shouldBeEqual)
         {
             Assert.AreEqual(hashPreImport, hashPostImport);
@@ -280,19 +366,19 @@ public class SalmonFSTestHelper
     public static SalmonDrive CreateDrive(IRealFile vaultDir, Type driveClassType, string pass, SalmonFileSequencer sequencer)
     {
         if (driveClassType == typeof(DotNetWSDrive))
-            return DotNetWSDrive.Create(vaultDir, pass, sequencer, credentials1.ServiceUser,
-                    credentials1.ServicePassword);
+            return DotNetWSDrive.Create(vaultDir, pass, sequencer, credentials.ServiceUser,
+                    credentials.ServicePassword);
         else
             return SalmonDrive.CreateDrive(vaultDir, driveClassType, pass, sequencer);
     }
 
-    public static void ImportAndSearch(IRealFile vaultDir, string pass, string importFile,
+    public static void ImportAndSearch(IRealFile vaultDir, string pass, IRealFile importFile,
                                            int importBufferSize, int importThreads)
     {
-        SalmonFileSequencer sequencer = CreateSalmonFileSequencer(new DotNetFile(vaultDir + "/" + SalmonFSTestHelper.TEST_SEQUENCER_FILE1), new SalmonSequenceSerializer());
+        SalmonFileSequencer sequencer = CreateSalmonFileSequencer();
         SalmonDrive drive = SalmonFSTestHelper.CreateDrive(vaultDir, DriveClassType, pass, sequencer);
         SalmonFile rootDir = drive.Root;
-        DotNetFile fileToImport = new DotNetFile(importFile);
+        IRealFile fileToImport = importFile;
         string rbasename = fileToImport.BaseName;
 
         // import
@@ -317,13 +403,13 @@ public class SalmonFSTestHelper
 
     }
 
-    public static void ImportAndCopy(IRealFile vaultDir, string pass, string importFile,
+    public static void ImportAndCopy(IRealFile vaultDir, string pass, IRealFile importFile,
                                      int importBufferSize, int importThreads, string newDir, bool move)
     {
-        SalmonFileSequencer sequencer = CreateSalmonFileSequencer(new DotNetFile(vaultDir + "/" + SalmonFSTestHelper.TEST_SEQUENCER_FILE1), new SalmonSequenceSerializer());
+        SalmonFileSequencer sequencer = CreateSalmonFileSequencer();
         SalmonDrive drive = SalmonFSTestHelper.CreateDrive(vaultDir, DriveClassType, pass, sequencer);
         SalmonFile rootDir = drive.Root;
-        DotNetFile fileToImport = new DotNetFile(importFile);
+        IRealFile fileToImport = importFile;
         string rbasename = fileToImport.BaseName;
 
         // import
@@ -369,10 +455,10 @@ public class SalmonFSTestHelper
 
 
     public static SalmonFile ShouldCreateFileWithoutVault(byte[] testBytes, byte[] key, bool applyIntegrity, bool verifyIntegrity, int chunkSize, byte[] hashKey,
-                                                    byte[] filenameNonce, byte[] fileNonce, string outputDir, bool flipBit, int flipPosition, bool checkData)
+                                                    byte[] filenameNonce, byte[] fileNonce, bool flipBit, int flipPosition, bool checkData)
     {
         // write file
-        IRealFile realDir = new DotNetFile(outputDir);
+        IRealFile realDir = SalmonFSTestHelper.GenerateFolder("encfiles", SalmonFSTestHelper.TEST_OUTPUT_DIR, false);
         SalmonFile dir = new SalmonFile(realDir, null);
         string filename = "test_" + Mku.Time.Time.CurrentTimeMillis() + "." + flipPosition + ".txt";
         SalmonFile newFile = dir.CreateFile(filename, key, filenameNonce, fileNonce);
@@ -383,7 +469,7 @@ public class SalmonFSTestHelper
         stream.Write(testBytes, 0, testBytes.Length);
         stream.Flush();
         stream.Close();
-        string realFilePath = newFile.RealFile.Path;
+        IRealFile realFile = newFile.RealFile;
 
         // tamper
         if (flipBit)
@@ -397,7 +483,6 @@ public class SalmonFSTestHelper
         }
 
         // open file for read
-        IRealFile realFile = new DotNetFile(realFilePath);
         SalmonFile readFile = new SalmonFile(realFile, null);
         readFile.EncryptionKey = key;
         readFile.RequestedNonce = fileNonce;
@@ -412,20 +497,17 @@ public class SalmonFSTestHelper
         return readFile;
     }
 
-    public static void ExportAndImportAuth(IRealFile vault, string importFilePath)
+    public static void ExportAndImportAuth(IRealFile vault, IRealFile importFilePath)
     {
-        IRealFile seqFile1 = vault.GetChild(SalmonFSTestHelper.TEST_SEQUENCER_FILE1);
-        IRealFile seqFile2 = vault.GetChild(SalmonFSTestHelper.TEST_SEQUENCER_FILE2);
-
         // emulate 2 different devices with different sequencers
-        SalmonFileSequencer sequencer1 = CreateSalmonFileSequencer(seqFile1, new SalmonSequenceSerializer());
-        SalmonFileSequencer sequencer2 = CreateSalmonFileSequencer(seqFile2, new SalmonSequenceSerializer());
+        SalmonFileSequencer sequencer1 = CreateSalmonFileSequencer();
+        SalmonFileSequencer sequencer2 = CreateSalmonFileSequencer();
 
         // set to the first sequencer and create the vault
         SalmonDrive drive = SalmonFSTestHelper.CreateDrive(vault, DriveClassType, SalmonCoreTestHelper.TEST_PASSWORD, sequencer1);
         // import a test file
         SalmonFile rootDir = drive.Root;
-        IRealFile fileToImport = new DotNetFile(importFilePath);
+        IRealFile fileToImport = importFilePath;
         SalmonFileImporter fileImporter = new SalmonFileImporter(0, 0);
         SalmonFile salmonFileA1 = fileImporter.ImportFile(fileToImport, rootDir, null, false, false, null);
         long nonceA1 = BitConverter.ToLong(salmonFileA1.RequestedNonce, 0, SalmonGenerator.NONCE_LENGTH);
@@ -439,7 +521,7 @@ public class SalmonFSTestHelper
         {
             // import a test file should fail because not authorized
             rootDir = drive.Root;
-            fileToImport = new DotNetFile(importFilePath);
+            fileToImport = importFilePath;
             fileImporter = new SalmonFileImporter(0, 0);
             fileImporter.ImportFile(fileToImport, rootDir, null, false, false, null);
             success = true;
@@ -454,14 +536,15 @@ public class SalmonFSTestHelper
 
         //reopen with first device sequencer and export the auth file with the auth id from the second device
         drive = SalmonFSTestHelper.OpenDrive(vault, SalmonFSTestHelper.DriveClassType, SalmonCoreTestHelper.TEST_PASSWORD, sequencer1);
-        IRealFile exportFile = vault.GetChild(SalmonFSTestHelper.TEST_EXPORT_FILENAME);
+        IRealFile exportAuthDir = GenerateFolder(SalmonFSTestHelper.TEST_EXPORT_AUTH_DIRNAME, SalmonFSTestHelper.TEST_EXPORT_AUTH_DIR);
+        IRealFile exportFile = exportAuthDir.CreateFile(SalmonFSTestHelper.TEST_EXPORT_AUTH_FILENAME);
         SalmonAuthConfig.ExportAuthFile(drive, authId, exportFile);
-        IRealFile exportAuthFile = vault.GetChild(SalmonFSTestHelper.TEST_EXPORT_FILENAME);
+        IRealFile exportAuthFile = exportAuthDir.GetChild(SalmonFSTestHelper.TEST_EXPORT_AUTH_FILENAME);
         SalmonFile salmonCfgFile = new SalmonFile(exportAuthFile, drive);
         long nonceCfg = BitConverter.ToLong(salmonCfgFile.FileNonce, 0, SalmonGenerator.NONCE_LENGTH);
         // import another test file
         rootDir = drive.Root;
-        fileToImport = new DotNetFile(importFilePath);
+        fileToImport = importFilePath;
         fileImporter = new SalmonFileImporter(0, 0);
         SalmonFile salmonFileA2 = fileImporter.ImportFile(fileToImport, rootDir, null, false, false, null);
         long nonceA2 = BitConverter.ToLong(salmonFileA2.FileNonce, 0, SalmonGenerator.NONCE_LENGTH);
@@ -472,7 +555,7 @@ public class SalmonFSTestHelper
         SalmonAuthConfig.ImportAuthFile(drive, exportAuthFile);
         // now import a 3rd file
         rootDir = drive.Root;
-        fileToImport = new DotNetFile(importFilePath);
+        fileToImport = importFilePath;
         SalmonFile salmonFileB1 = fileImporter.ImportFile(fileToImport, rootDir, null, false, false, null);
         long nonceB1 = BitConverter.ToLong(salmonFileB1.FileNonce, 0, SalmonGenerator.NONCE_LENGTH);
         SalmonFile salmonFileB2 = fileImporter.ImportFile(fileToImport, rootDir, null, false, false, null);
@@ -490,12 +573,10 @@ public class SalmonFSTestHelper
     }
 
 
-    public static void TestMaxFiles(IRealFile vaultDir, IRealFile seqFile, string importFile,
+    public static void TestMaxFiles(IRealFile vaultDir, IRealFile seqFile, IRealFile importFile,
                                     byte[] testMaxNonce, long offset, bool shouldImport)
     {
         bool importSuccess;
-        IRealFile seqDir = SalmonFSTestHelper.GenerateFolder(SalmonFSTestHelper.TEST_SEQUENCER_DIR + "/seq", typeof(DotNetDrive));
-        seqFile = seqDir.GetChild(SalmonFSTestHelper.TEST_SEQUENCER_FILE1);
         try
         {
             TestSalmonFileSequencer sequencer = new TestSalmonFileSequencer(seqFile, new SalmonSequenceSerializer(),
@@ -514,7 +595,7 @@ public class SalmonFSTestHelper
             }
             SalmonFile rootDir = drive.Root;
             rootDir.ListFiles();
-            DotNetFile fileToImport = new DotNetFile(importFile);
+            IRealFile fileToImport = importFile;
             SalmonFileImporter fileImporter = new SalmonFileImporter(0, 0);
             SalmonFile salmonFile = fileImporter.ImportFile(fileToImport, rootDir, null, false, false, null);
             importSuccess = salmonFile != null;
@@ -554,7 +635,7 @@ public class SalmonFSTestHelper
         {
             // use the remote service instead
             return DotNetWSDrive.Open(vaultDir, testPassword, sequencer,
-                    credentials1.ServiceUser, credentials1.ServicePassword);
+                    credentials.ServiceUser, credentials.ServicePassword);
         }
         else
             return DotNetDrive.OpenDrive(vaultDir, driveClassType, testPassword, sequencer);
@@ -563,10 +644,8 @@ public class SalmonFSTestHelper
     public static void TestExamples()
     {
         string text = "This is a plaintext that will be used for testing";
-        string testFile = TEST_OUTPUT_DIR + Path.DirectorySeparatorChar + "file.txt";
-        IRealFile tFile = new DotNetFile(testFile);
-        if (tFile.Exists)
-            tFile.Delete();
+        IRealFile dir = GenerateFolder("test");
+        IRealFile testFile = dir.CreateFile("file.dat");
         byte[] bytes = UTF8Encoding.UTF8.GetBytes(text);
         byte[] key = SalmonGenerator.GetSecureRandomBytes(32); // 256-bit key
         byte[] nonce = SalmonGenerator.GetSecureRandomBytes(8); // 64-bit nonce
@@ -617,7 +696,7 @@ public class SalmonFSTestHelper
 
         // Example 4: encrypt to a file, the SalmonFile has a virtual file system API
         // with copy, move, rename, delete operations
-        SalmonFile encFile = new SalmonFile(new DotNetFile(testFile), null);
+        SalmonFile encFile = new SalmonFile(testFile, null);
         nonce = SalmonGenerator.GetSecureRandomBytes(8); // always get a fresh nonce!
         encFile.EncryptionKey = key;
         encFile.RequestedNonce = nonce;
@@ -627,7 +706,7 @@ public class SalmonFSTestHelper
         stream.Flush();
         stream.Close();
         // decrypt an encrypted file
-        SalmonFile encFile2 = new SalmonFile(new DotNetFile(testFile), null);
+        SalmonFile encFile2 = new SalmonFile(testFile, null);
         encFile2.EncryptionKey = key;
         Stream stream2 = encFile2.GetInputStream();
         byte[] decBuff = new byte[1024];
@@ -666,9 +745,9 @@ public class SalmonFSTestHelper
         CollectionAssert.AreEqual(data, decData);
     }
 
-    public static byte[] GetRealFileContents(string filePath)
+    public static byte[] GetRealFileContents(IRealFile filePath)
     {
-        IRealFile file = new DotNetFile(filePath);
+        IRealFile file = filePath;
         Stream ins = file.GetInputStream();
         MemoryStream outs = new MemoryStream();
         ins.CopyTo(outs);
@@ -692,11 +771,7 @@ public class SalmonFSTestHelper
 
     public static void ShouldTestFileSequencer()
     {
-        IRealFile file = new DotNetFile(TEST_SEQUENCER_DIR + "\\" + TEST_SEQUENCER_FILENAME);
-        if (file.Exists)
-            file.Delete();
-        SalmonFileSequencer sequencer = CreateSalmonFileSequencer(file,
-            new SalmonSequenceSerializer());
+        SalmonFileSequencer sequencer = CreateSalmonFileSequencer();
 
         sequencer.CreateSequence("AAAA", "AAAA");
         sequencer.InitSequence("AAAA", "AAAA",
@@ -736,17 +811,112 @@ public class SalmonFSTestHelper
         return count;
     }
 
-    public static SalmonFileSequencer CreateSalmonFileSequencer(IRealFile javaFile, INonceSequenceSerializer sequenceSerializer)
+
+    public static void CopyStream(SalmonFileInputStream src, MemoryStream dest)
     {
-        if (DriveClassType == typeof(DotNetWSDrive))
+        int bufferSize = 256 * 1024;
+        int bytesRead;
+        byte[] buffer = new byte[bufferSize];
+        while ((bytesRead = src.Read(buffer, 0, bufferSize)) > 0)
         {
-            // use a local sequencer for testing since the current path is remote
-            IRealFile seqDir = GenerateFolder(TEST_SEQUENCER_DIR + "/seq", typeof(DotNetDrive));
-            IRealFile seqFile = seqDir.GetChild(TEST_SEQUENCER_FILENAME);
-            return new SalmonFileSequencer(seqFile, new SalmonSequenceSerializer());
+            dest.Write(buffer, 0, bytesRead);
         }
-        else
-            return new SalmonFileSequencer(javaFile, sequenceSerializer);
+        dest.Flush();
     }
 
+
+    internal static void ShouldReadFile(IRealFile vaultPath, string filename)
+    {
+        IRealFile localFile = SalmonFSTestHelper.TEST_INPUT_DIR.GetChild(filename);
+        string localChkSum = GetChecksum(localFile);
+
+        IRealFile vaultDir = vaultPath;
+        SalmonFileSequencer sequencer = SalmonFSTestHelper.CreateSalmonFileSequencer();
+        SalmonDrive drive = SalmonFSTestHelper.OpenDrive(vaultDir, SalmonFSTestHelper.DriveClassType, SalmonCoreTestHelper.TEST_PASSWORD, sequencer);
+        IVirtualFile root = drive.Root;
+        IVirtualFile file = root.GetChild(filename);
+        Assert.IsTrue(file.Exists);
+
+        Stream stream = file.GetInputStream();
+        MemoryStream ms = new MemoryStream();
+        stream.CopyTo(ms);
+        ms.Flush();
+        ms.Position = 0;
+        string digest = SalmonFSTestHelper.GetChecksumStream(ms);
+        ms.Close();
+        stream.Close();
+        Assert.AreEqual(digest, localChkSum);
+    }
+
+    internal static void SeekAndReadHttpFile(byte[] data, IVirtualFile file, bool isEncrypted,
+                                    int buffersCount, int bufferSize, int backOffset)
+    {
+        SalmonFSTestHelper.SeekAndReadFileStream(data, file, isEncrypted,
+                    0, 32, 0, 32,
+                    buffersCount, bufferSize, backOffset);
+        SalmonFSTestHelper.SeekAndReadFileStream(data, file, isEncrypted,
+                    220, 8, 2, 8,
+                    buffersCount, bufferSize, backOffset);
+        SalmonFSTestHelper.SeekAndReadFileStream(data, file, isEncrypted,
+                    100, 2, 0, 2,
+                    buffersCount, bufferSize, backOffset);
+        SalmonFSTestHelper.SeekAndReadFileStream(data, file, isEncrypted,
+                    6, 16, 0, 16,
+                    buffersCount, bufferSize, backOffset);
+        SalmonFSTestHelper.SeekAndReadFileStream(data, file, isEncrypted,
+                    50, 40, 0, 40,
+                    buffersCount, bufferSize, backOffset);
+        SalmonFSTestHelper.SeekAndReadFileStream(data, file, isEncrypted,
+                    124, 50, 0, 50,
+                    buffersCount, bufferSize, backOffset);
+        SalmonFSTestHelper.SeekAndReadFileStream(data, file, isEncrypted,
+                    250, 10, 0, 10,
+                    buffersCount, bufferSize, backOffset);
+    }
+
+    // shouldReadLength should be equal to length
+    // when checking Http files since the return buffer
+    // might give us more data than requested
+    static void SeekAndReadFileStream(byte[] data, IVirtualFile file, bool isEncrypted,
+                                      int start, int length, int readOffset, int shouldReadLength,
+                                      int buffersCount, int bufferSize, int backOffset)
+    {
+        byte[]
+    buffer = new byte[length + readOffset];
+
+        SalmonFileInputStream stream = null;
+        if (SalmonFSTestHelper.TEST_USE_FILE_INPUT_STREAM && isEncrypted)
+        {
+            // multi threaded
+            stream = new SalmonFileInputStream((SalmonFile)file, buffersCount, bufferSize, SalmonFSTestHelper.TEST_FILE_INPUT_STREAM_THREADS, backOffset);
+        }
+        else
+        {
+            //TODO: support IRealFile streams
+            //            RandomAccessStream fileStream;
+            //            if (isEncrypted) {
+            //                fileStream =  file.getInputStream();
+            //            } else {
+            //                fileStream = new JavaHttpFileStream(file);
+            //            }
+            //            stream = new InputStreamWrapper(fileStream);
+        }
+
+        stream.Position = start;
+        byte[] buff = new byte[length];
+        stream.Read(buff, 0, length);
+        for (int i = 0; i < length; i++)
+        {
+            buffer[readOffset + i] = buff[i];
+        }
+        byte[] tdata = new byte[buffer.Length];
+        for (int i = 0; i < shouldReadLength; i++)
+        {
+            tdata[readOffset + i] = data[start + i];
+        }
+        Console.WriteLine(tdata);
+        Console.WriteLine(buffer);
+        stream.Close();
+        Assert.AreEqual(tdata, buffer);
+    }
 }
