@@ -35,7 +35,6 @@ import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 
 import java.io.IOException;
-import java.io.InputStream;
 import java.security.NoSuchAlgorithmException;
 import java.util.ArrayList;
 import java.util.List;
@@ -47,6 +46,8 @@ public class SalmonFSHttpTests {
     @BeforeAll
     static void beforeAll() throws Exception {
         SalmonFSHttpTests.oldTestMode = SalmonFSTestHelper.currTestMode;
+		
+		// use TestMode: Http only
         SalmonFSTestHelper.setTestParams(System.getProperty("testDir"), TestMode.Http);
 
         // SalmonCoreTestHelper.TEST_ENC_BUFFER_SIZE = 1 * 1024 * 1024;
@@ -60,7 +61,7 @@ public class SalmonFSHttpTests {
         SalmonFSTestHelper.ENC_EXPORT_THREADS = 2;
 
         SalmonFSTestHelper.TEST_FILE_INPUT_STREAM_THREADS = 2;
-        SalmonFSTestHelper.TEST_USE_FILE_INPUT_STREAM = false;
+        SalmonFSTestHelper.TEST_USE_FILE_INPUT_STREAM = true;
 
         SalmonCoreTestHelper.initialize();
         SalmonFSTestHelper.initialize();

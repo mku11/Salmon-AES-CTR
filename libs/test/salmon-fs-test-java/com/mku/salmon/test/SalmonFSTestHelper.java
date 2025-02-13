@@ -49,6 +49,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
+import java.util.Arrays;
 import java.util.Random;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -824,17 +825,17 @@ public class SalmonFSTestHelper {
 
         stream.skip(start);
         byte[] buff = new byte[length];
-        stream.read(buff, 0, length);
-        for (int i = 0; i < length; i++) {
+        int bytesRead = stream.read(buff, 0, length);
+        for (int i = 0; i < bytesRead; i++) {
             buffer[readOffset + i] = buff[i];
         }
         byte[] tdata = new byte[buffer.length];
         for (int i = 0; i < shouldReadLength; i++) {
             tdata[readOffset + i] = data[start + i];
         }
-        System.out.println(tdata);
-        System.out.println(buffer);
+        System.out.println(Arrays.toString(tdata));
+        System.out.println(Arrays.toString(buffer));
         stream.close();
-        assertEquals(tdata, buffer);
+        assertArrayEquals(tdata, buffer);
     }
 }

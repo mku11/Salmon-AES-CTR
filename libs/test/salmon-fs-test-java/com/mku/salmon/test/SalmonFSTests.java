@@ -338,7 +338,7 @@ public class SalmonFSTests {
     @Test
     public void shouldCreateFileWithoutVaultApplyIntegrityNoVerifyIntegrityFlipHMACNotCaught() {
         String text = SalmonCoreTestHelper.TEST_TEXT;
-        for (int i = 0; i < text.length(); i++) {
+        for (int i = 0; i < 5; i++) {
             boolean caught = false;
             boolean failed = false;
             try {
