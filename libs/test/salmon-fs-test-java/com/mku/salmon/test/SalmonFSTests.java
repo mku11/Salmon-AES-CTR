@@ -26,24 +26,19 @@ SOFTWARE.
 
 import com.mku.convert.BitConverter;
 import com.mku.file.IRealFile;
-import com.mku.salmon.drive.JavaDrive;
-import com.mku.file.JavaFile;
-import com.mku.salmon.drive.JavaWSDrive;
-import com.mku.salmon.streams.ProviderType;
-import com.mku.salmon.streams.SalmonStream;
-import com.mku.streams.InputStreamWrapper;
-import com.mku.streams.MemoryStream;
-import com.mku.salmon.SalmonAuthException;
-import com.mku.salmon.integrity.SalmonIntegrity;
 import com.mku.integrity.IntegrityException;
-import com.mku.salmon.*;
+import com.mku.salmon.SalmonAuthException;
+import com.mku.salmon.SalmonDrive;
+import com.mku.salmon.SalmonFile;
+import com.mku.salmon.drive.JavaDrive;
+import com.mku.salmon.integrity.SalmonIntegrity;
+import com.mku.salmon.sequence.SalmonFileSequencer;
 import com.mku.salmon.streams.SalmonFileInputStream;
 import com.mku.salmon.utils.SalmonFileCommander;
-import com.mku.sequence.INonceSequenceSerializer;
-import com.mku.salmon.sequence.SalmonFileSequencer;
-import org.junit.jupiter.api.AfterEach;
+import com.mku.streams.InputStreamWrapper;
+import com.mku.streams.MemoryStream;
+import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
 import java.io.IOException;
@@ -58,25 +53,15 @@ import static org.junit.jupiter.api.Assertions.*;
 public class SalmonFSTests {
     @BeforeAll
     static void beforeAll() throws Exception {
-		SalmonFSTestHelper.setOutputDir(System.getProperty("testDir"));
-		
-        // SalmonStream.setAesProviderType(ProviderType.AesGPU);
-        // local drive
-        SalmonFSTestHelper.setDriveClassType(JavaDrive.class);
+        // use TestMode: Local, WebService. Http is tested only in SalmonFSHttpTests.
+        SalmonFSTestHelper.setTestParams(System.getProperty("testDir"), TestMode.WebService);
 
-        // remote drive
-        // make sure you turn on the web service either manually
-        // or start the test case from gradle:
-        // gradlew.bat :salmon-ws:test --tests "com.mku.salmon.ws.fs.service.test.SalmonWSTests.testStartServer" --rerun-tasks
-        // SalmonFSTestHelper.setDriveClassType(JavaWSDrive.class);
+        SalmonFSTestHelper.TEST_IMPORT_FILE = SalmonFSTestHelper.TEST_IMPORT_MEDIUM_FILE;
 
-		//SalmonCoreTestHelper.TEST_ENC_BUFFER_SIZE = 1 * 1024 * 1024;
-		//SalmonCoreTestHelper.TEST_DEC_BUFFER_SIZE = 1 * 1024 * 1024;
-    }
-	
-    @BeforeEach
-    void beforeEach() {
-        SalmonFSTestHelper.TEST_IMPORT_FILE = SalmonFSTestHelper.TEST_IMPORT_SMALL_FILE;
+        // SalmonCoreTestHelper.TEST_ENC_BUFFER_SIZE = 1 * 1024 * 1024;
+        // SalmonCoreTestHelper.TEST_DEC_BUFFER_SIZE = 1 * 1024 * 1024;
+        SalmonCoreTestHelper.TEST_ENC_THREADS = 2;
+        SalmonCoreTestHelper.TEST_DEC_THREADS = 2;
 
         SalmonFSTestHelper.ENC_IMPORT_BUFFER_SIZE = 512 * 1024;
         SalmonFSTestHelper.ENC_IMPORT_THREADS = 2;
@@ -88,20 +73,25 @@ public class SalmonFSTests {
 
         SalmonCoreTestHelper.initialize();
         SalmonFSTestHelper.initialize();
+
+        // for remote drive make sure you turn on the web service either manually
+        // or start the test case from gradle:
+        // gradlew.bat :salmon-ws:test --tests "com.mku.salmon.ws.fs.service.test.SalmonWSTests.testStartServer" --rerun-tasks
+
+        // use the native library
+        // SalmonStream.setAesProviderType(ProviderType.AesIntrinsics);
     }
 
-    @AfterEach
-    void afterEach() {
+    @AfterAll
+    static void afterAll() {
         SalmonFSTestHelper.close();
         SalmonCoreTestHelper.close();
     }
 
     @Test
     public void shouldCatchNotAuthorizeNegative() throws Exception {
-        IRealFile vaultDir = SalmonFSTestHelper.generateFolder(SalmonFSTestHelper.TEST_VAULT2_DIR);
-        SalmonFileSequencer sequencer = SalmonFSTestHelper.createSalmonFileSequencer(
-                new JavaFile(vaultDir + "/" + SalmonFSTestHelper.TEST_SEQUENCER_FILE1),
-                SalmonFSTestHelper.getSequenceSerializer());
+        IRealFile vaultDir = SalmonFSTestHelper.generateFolder(SalmonFSTestHelper.TEST_VAULT_DIRNAME);
+        SalmonFileSequencer sequencer = SalmonFSTestHelper.createSalmonFileSequencer();
         SalmonDrive drive = SalmonFSTestHelper.createDrive(vaultDir, JavaDrive.class,
                 SalmonCoreTestHelper.TEST_PASSWORD, sequencer);
         boolean wrongPassword = false;
@@ -118,10 +108,8 @@ public class SalmonFSTests {
 
     @Test
     public void shouldAuthorizePositive() throws Exception {
-        IRealFile vaultDir = SalmonFSTestHelper.generateFolder(SalmonFSTestHelper.TEST_VAULT2_DIR);
-        SalmonFileSequencer sequencer = SalmonFSTestHelper.createSalmonFileSequencer(
-                new JavaFile(vaultDir + "/" + SalmonFSTestHelper.TEST_SEQUENCER_FILE1),
-                SalmonFSTestHelper.getSequenceSerializer());
+        IRealFile vaultDir = SalmonFSTestHelper.generateFolder(SalmonFSTestHelper.TEST_VAULT_DIRNAME);
+        SalmonFileSequencer sequencer = SalmonFSTestHelper.createSalmonFileSequencer();
         SalmonDrive drive = SalmonFSTestHelper.createDrive(vaultDir, JavaDrive.class,
                 SalmonCoreTestHelper.TEST_PASSWORD, sequencer);
         boolean wrongPassword = false;
@@ -138,10 +126,10 @@ public class SalmonFSTests {
     }
 
     @Test
-    public void shouldImportAndExportNoIntegrityBitFlipDataNoCatch() throws Exception {
+    public void shouldImportAndExportNoIntegrityBitFlipDataNoCatch() {
         boolean integrityFailed = false;
         try {
-            SalmonFSTestHelper.importAndExport(SalmonFSTestHelper.generateFolder(SalmonFSTestHelper.TEST_VAULT2_DIR), SalmonCoreTestHelper.TEST_PASSWORD, SalmonFSTestHelper.TEST_IMPORT_FILE,
+            SalmonFSTestHelper.importAndExport(SalmonFSTestHelper.generateFolder(SalmonFSTestHelper.TEST_VAULT_DIRNAME), SalmonCoreTestHelper.TEST_PASSWORD, SalmonFSTestHelper.TEST_IMPORT_FILE,
                     true, 24 + 10, false, false, false);
         } catch (Exception ex) {
             integrityFailed = true;
@@ -153,7 +141,7 @@ public class SalmonFSTests {
     public void shouldImportAndExportNoIntegrity() throws Exception {
         boolean integrityFailed = false;
         try {
-            SalmonFSTestHelper.importAndExport(SalmonFSTestHelper.generateFolder(SalmonFSTestHelper.TEST_VAULT2_DIR),
+            SalmonFSTestHelper.importAndExport(SalmonFSTestHelper.generateFolder(SalmonFSTestHelper.TEST_VAULT_DIRNAME),
                     SalmonCoreTestHelper.TEST_PASSWORD, SalmonFSTestHelper.TEST_IMPORT_FILE,
                     false, 0, true, false,
                     false);
@@ -169,7 +157,7 @@ public class SalmonFSTests {
 
     @Test
     public void shouldImportAndSearchFiles() throws Exception {
-        SalmonFSTestHelper.importAndSearch(SalmonFSTestHelper.generateFolder(SalmonFSTestHelper.TEST_VAULT2_DIR),
+        SalmonFSTestHelper.importAndSearch(SalmonFSTestHelper.generateFolder(SalmonFSTestHelper.TEST_VAULT_DIRNAME),
                 SalmonCoreTestHelper.TEST_PASSWORD, SalmonFSTestHelper.TEST_IMPORT_FILE);
     }
 
@@ -177,7 +165,7 @@ public class SalmonFSTests {
     public void shouldImportAndCopyFile() throws Exception {
         boolean failed = false;
         try {
-            SalmonFSTestHelper.importAndCopy(SalmonFSTestHelper.generateFolder(SalmonFSTestHelper.TEST_VAULT2_DIR), SalmonCoreTestHelper.TEST_PASSWORD, SalmonFSTestHelper.TEST_IMPORT_FILE,
+            SalmonFSTestHelper.importAndCopy(SalmonFSTestHelper.generateFolder(SalmonFSTestHelper.TEST_VAULT_DIRNAME), SalmonCoreTestHelper.TEST_PASSWORD, SalmonFSTestHelper.TEST_IMPORT_FILE,
                     SalmonFSTestHelper.ENC_IMPORT_BUFFER_SIZE, SalmonFSTestHelper.ENC_IMPORT_THREADS, "subdir", false);
         } catch (Exception ex) {
             ex.printStackTrace();
@@ -191,7 +179,7 @@ public class SalmonFSTests {
     public void shouldImportAndMoveFile() throws Exception {
         boolean failed = false;
         try {
-            SalmonFSTestHelper.importAndCopy(SalmonFSTestHelper.generateFolder(SalmonFSTestHelper.TEST_VAULT2_DIR), SalmonCoreTestHelper.TEST_PASSWORD, SalmonFSTestHelper.TEST_IMPORT_FILE,
+            SalmonFSTestHelper.importAndCopy(SalmonFSTestHelper.generateFolder(SalmonFSTestHelper.TEST_VAULT_DIRNAME), SalmonCoreTestHelper.TEST_PASSWORD, SalmonFSTestHelper.TEST_IMPORT_FILE,
                     SalmonFSTestHelper.ENC_IMPORT_BUFFER_SIZE, SalmonFSTestHelper.ENC_IMPORT_THREADS, "subdir", true);
         } catch (Exception ex) {
             ex.printStackTrace();
@@ -205,7 +193,7 @@ public class SalmonFSTests {
     public void shouldImportAndExportIntegrityBitFlipData() throws Exception {
         boolean integrityFailed = false;
         try {
-            SalmonFSTestHelper.importAndExport(SalmonFSTestHelper.generateFolder(SalmonFSTestHelper.TEST_VAULT2_DIR),
+            SalmonFSTestHelper.importAndExport(SalmonFSTestHelper.generateFolder(SalmonFSTestHelper.TEST_VAULT_DIRNAME),
                     SalmonCoreTestHelper.TEST_PASSWORD, SalmonFSTestHelper.TEST_IMPORT_FILE,
                     true, 24 + 10, false, true, true);
         } catch (IOException ex) {
@@ -221,7 +209,7 @@ public class SalmonFSTests {
         boolean integrityFailed = false;
         boolean failed = false;
         try {
-            SalmonFSTestHelper.importAndExport(SalmonFSTestHelper.generateFolder(SalmonFSTestHelper.TEST_VAULT2_DIR),
+            SalmonFSTestHelper.importAndExport(SalmonFSTestHelper.generateFolder(SalmonFSTestHelper.TEST_VAULT_DIRNAME),
                     SalmonCoreTestHelper.TEST_PASSWORD, SalmonFSTestHelper.TEST_IMPORT_FILE,
                     true, 24 + 10, false, false, false);
         } catch (IOException ex) {
@@ -240,7 +228,7 @@ public class SalmonFSTests {
     public void shouldImportAndExportAppliedIntegrityNoVerifyIntegrityBitFlipDataShouldNotCatch() throws Exception {
         boolean failed = false;
         try {
-            SalmonFSTestHelper.importAndExport(SalmonFSTestHelper.generateFolder(SalmonFSTestHelper.TEST_VAULT2_DIR),
+            SalmonFSTestHelper.importAndExport(SalmonFSTestHelper.generateFolder(SalmonFSTestHelper.TEST_VAULT_DIRNAME),
                     SalmonCoreTestHelper.TEST_PASSWORD, SalmonFSTestHelper.TEST_IMPORT_FILE,
                     true, 36, false,
                     true, false);
@@ -256,7 +244,7 @@ public class SalmonFSTests {
     public void shouldImportAndExportAppliedIntegrityNoVerifyIntegrity() throws Exception {
         boolean failed = false;
         try {
-            SalmonFSTestHelper.importAndExport(SalmonFSTestHelper.generateFolder(SalmonFSTestHelper.TEST_VAULT2_DIR),
+            SalmonFSTestHelper.importAndExport(SalmonFSTestHelper.generateFolder(SalmonFSTestHelper.TEST_VAULT_DIRNAME),
                     SalmonCoreTestHelper.TEST_PASSWORD, SalmonFSTestHelper.TEST_IMPORT_FILE,
                     false, 0, true,
                     true, false);
@@ -272,7 +260,7 @@ public class SalmonFSTests {
     public void shouldImportAndExportIntegrityBitFlipHeader() throws Exception {
         boolean integrityFailed = false;
         try {
-            SalmonFSTestHelper.importAndExport(SalmonFSTestHelper.generateFolder(SalmonFSTestHelper.TEST_VAULT2_DIR),
+            SalmonFSTestHelper.importAndExport(SalmonFSTestHelper.generateFolder(SalmonFSTestHelper.TEST_VAULT_DIRNAME),
                     SalmonCoreTestHelper.TEST_PASSWORD, SalmonFSTestHelper.TEST_IMPORT_FILE,
                     true, 20, false,
                     true, true);
@@ -288,7 +276,7 @@ public class SalmonFSTests {
     public void shouldImportAndExportIntegrity() throws Exception {
         boolean importSuccess = true;
         try {
-            SalmonFSTestHelper.importAndExport(SalmonFSTestHelper.generateFolder(SalmonFSTestHelper.TEST_VAULT2_DIR),
+            SalmonFSTestHelper.importAndExport(SalmonFSTestHelper.generateFolder(SalmonFSTestHelper.TEST_VAULT_DIRNAME),
                     SalmonCoreTestHelper.TEST_PASSWORD, SalmonFSTestHelper.TEST_IMPORT_FILE,
                     false, 0, true,
                     true, true);
@@ -301,26 +289,24 @@ public class SalmonFSTests {
 
     @Test
     public void shouldCatchVaultMaxFiles() {
-        IRealFile vaultDir = SalmonFSTestHelper.generateFolder(SalmonFSTestHelper.TEST_VAULT2_DIR);
-        IRealFile seqFile = vaultDir.getChild(SalmonFSTestHelper.TEST_SEQUENCER_FILE1);
+        IRealFile vaultDir = SalmonFSTestHelper.generateFolder(SalmonFSTestHelper.TEST_VAULT_DIRNAME);
+        IRealFile seqDir = SalmonFSTestHelper.generateFolder(SalmonFSTestHelper.TEST_SEQ_DIRNAME, SalmonFSTestHelper.TEST_SEQ_DIR, true);
+        IRealFile seqFile = seqDir.getChild(SalmonFSTestHelper.TEST_SEQ_FILENAME);
 
         SalmonFSTestHelper.testMaxFiles(vaultDir, seqFile, SalmonFSTestHelper.TEST_IMPORT_TINY_FILE,
                 SalmonCoreTestHelper.TEXT_VAULT_MAX_FILE_NONCE, -2, true);
 
         // we need 2 nonces once of the filename the other for the file
         // so this should fail
-        vaultDir = SalmonFSTestHelper.generateFolder(SalmonFSTestHelper.TEST_VAULT2_DIR);
-        seqFile = vaultDir.getChild(SalmonFSTestHelper.TEST_SEQUENCER_FILE1);
+        vaultDir = SalmonFSTestHelper.generateFolder(SalmonFSTestHelper.TEST_VAULT_DIRNAME);
         SalmonFSTestHelper.testMaxFiles(vaultDir, seqFile, SalmonFSTestHelper.TEST_IMPORT_TINY_FILE,
                 SalmonCoreTestHelper.TEXT_VAULT_MAX_FILE_NONCE, -1, false);
 
-        vaultDir = SalmonFSTestHelper.generateFolder(SalmonFSTestHelper.TEST_VAULT2_DIR);
-        seqFile = vaultDir.getChild(SalmonFSTestHelper.TEST_SEQUENCER_FILE1);
+        vaultDir = SalmonFSTestHelper.generateFolder(SalmonFSTestHelper.TEST_VAULT_DIRNAME);
         SalmonFSTestHelper.testMaxFiles(vaultDir, seqFile, SalmonFSTestHelper.TEST_IMPORT_TINY_FILE,
                 SalmonCoreTestHelper.TEXT_VAULT_MAX_FILE_NONCE, 0, false);
 
-        vaultDir = SalmonFSTestHelper.generateFolder(SalmonFSTestHelper.TEST_VAULT2_DIR);
-        seqFile = vaultDir.getChild(SalmonFSTestHelper.TEST_SEQUENCER_FILE1);
+        vaultDir = SalmonFSTestHelper.generateFolder(SalmonFSTestHelper.TEST_VAULT_DIRNAME);
         SalmonFSTestHelper.testMaxFiles(vaultDir, seqFile, SalmonFSTestHelper.TEST_IMPORT_TINY_FILE,
                 SalmonCoreTestHelper.TEXT_VAULT_MAX_FILE_NONCE, 1, false);
     }
@@ -329,7 +315,7 @@ public class SalmonFSTests {
     public void shouldCreateFileWithoutVault() throws Exception {
         SalmonFSTestHelper.shouldCreateFileWithoutVault(SalmonCoreTestHelper.TEST_TEXT.getBytes(Charset.defaultCharset()), SalmonCoreTestHelper.TEST_KEY_BYTES,
                 true, true, 64, SalmonCoreTestHelper.TEST_HMAC_KEY_BYTES,
-                SalmonCoreTestHelper.TEST_FILENAME_NONCE_BYTES, SalmonCoreTestHelper.TEST_NONCE_BYTES, SalmonFSTestHelper.TEST_OUTPUT_DIR, false, -1, true);
+                SalmonCoreTestHelper.TEST_FILENAME_NONCE_BYTES, SalmonCoreTestHelper.TEST_NONCE_BYTES, false, -1, true);
     }
 
     @Test
@@ -339,7 +325,7 @@ public class SalmonFSTests {
         try {
             SalmonFSTestHelper.shouldCreateFileWithoutVault(SalmonCoreTestHelper.TEST_TEXT.getBytes(Charset.defaultCharset()), SalmonCoreTestHelper.TEST_KEY_BYTES,
                     true, true, 64, SalmonCoreTestHelper.TEST_HMAC_KEY_BYTES,
-                    SalmonCoreTestHelper.TEST_FILENAME_NONCE_BYTES, SalmonCoreTestHelper.TEST_NONCE_BYTES, SalmonFSTestHelper.TEST_OUTPUT_DIR,
+                    SalmonCoreTestHelper.TEST_FILENAME_NONCE_BYTES, SalmonCoreTestHelper.TEST_NONCE_BYTES,
                     true, 45, true);
         } catch (IOException ex) {
             if (ex.getCause() instanceof IntegrityException)
@@ -359,7 +345,7 @@ public class SalmonFSTests {
                 SalmonFSTestHelper.shouldCreateFileWithoutVault(text.getBytes(Charset.defaultCharset()), SalmonCoreTestHelper.TEST_KEY_BYTES,
                         true, false, 64,
                         SalmonCoreTestHelper.TEST_HMAC_KEY_BYTES, SalmonCoreTestHelper.TEST_FILENAME_NONCE_BYTES, SalmonCoreTestHelper.TEST_NONCE_BYTES,
-                        SalmonFSTestHelper.TEST_OUTPUT_DIR, true, i, false);
+                        true, i, false);
             } catch (IOException ex) {
                 if (ex.getCause() instanceof IntegrityException)
                     caught = true;
@@ -382,7 +368,6 @@ public class SalmonFSTests {
                     true, false, 64,
                     SalmonCoreTestHelper.TEST_HMAC_KEY_BYTES,
                     SalmonCoreTestHelper.TEST_FILENAME_NONCE_BYTES, SalmonCoreTestHelper.TEST_NONCE_BYTES,
-                    SalmonFSTestHelper.TEST_OUTPUT_DIR,
                     true, 24 + 32 + 5, true);
         } catch (IOException ex) {
             if (ex.getCause() instanceof IntegrityException)
@@ -398,8 +383,8 @@ public class SalmonFSTests {
 
     @Test
     public void shouldExportAndImportAuth() throws Exception {
-        IRealFile vault = SalmonFSTestHelper.generateFolder(SalmonFSTestHelper.TEST_VAULT_DIR);
-        String importFilePath = SalmonFSTestHelper.TEST_IMPORT_TINY_FILE;
+        IRealFile vault = SalmonFSTestHelper.generateFolder(SalmonFSTestHelper.TEST_VAULT_DIRNAME);
+        IRealFile importFilePath = SalmonFSTestHelper.TEST_IMPORT_TINY_FILE;
         SalmonFSTestHelper.exportAndImportAuth(vault, importFilePath);
     }
 
@@ -422,7 +407,7 @@ public class SalmonFSTests {
         }
         SalmonFile file = SalmonFSTestHelper.shouldCreateFileWithoutVault(data, SalmonCoreTestHelper.TEST_KEY_BYTES,
                 true, true, 64, SalmonCoreTestHelper.TEST_HMAC_KEY_BYTES,
-                SalmonCoreTestHelper.TEST_FILENAME_NONCE_BYTES, SalmonCoreTestHelper.TEST_NONCE_BYTES, SalmonFSTestHelper.TEST_OUTPUT_DIR,
+                SalmonCoreTestHelper.TEST_FILENAME_NONCE_BYTES, SalmonCoreTestHelper.TEST_NONCE_BYTES,
                 false, -1, true);
         SalmonFileInputStream fileInputStream = new SalmonFileInputStream(file,
                 3, 50, 2, 12);
@@ -438,10 +423,8 @@ public class SalmonFSTests {
 
     @Test
     public void shouldCreateDriveAndOpenFsFolder() throws Exception {
-        IRealFile vaultDir = SalmonFSTestHelper.generateFolder(SalmonFSTestHelper.TEST_VAULT2_DIR);
-        JavaFile sequenceFile = new JavaFile(vaultDir + "/" + SalmonFSTestHelper.TEST_SEQUENCER_FILE1);
-        INonceSequenceSerializer serializer = SalmonFSTestHelper.getSequenceSerializer();
-        SalmonFileSequencer sequencer = SalmonFSTestHelper.createSalmonFileSequencer(sequenceFile, serializer);
+        IRealFile vaultDir = SalmonFSTestHelper.generateFolder(SalmonFSTestHelper.TEST_VAULT_DIRNAME);
+        SalmonFileSequencer sequencer = SalmonFSTestHelper.createSalmonFileSequencer();
         SalmonDrive drive = SalmonFSTestHelper.createDrive(vaultDir, SalmonFSTestHelper.driveClassType, SalmonCoreTestHelper.TEST_PASSWORD, sequencer);
         boolean wrongPassword = false;
         SalmonFile rootDir = drive.getRoot();
@@ -460,15 +443,15 @@ public class SalmonFSTests {
     }
 
     @Test
-    public void shouldCreateWinFileSequencer() throws IOException {
+    public void shouldCreateFileSequencer() throws IOException {
         SalmonFSTestHelper.shouldTestFileSequencer();
     }
 
     @Test
     public void ShouldPerformOperationsRealFiles() throws IOException {
         boolean caught = false;
-        IRealFile dir = SalmonFSTestHelper.generateFolder(SalmonFSTestHelper.TEST_VAULT2_DIR);
-        JavaFile file = new JavaFile(SalmonFSTestHelper.TEST_IMPORT_TINY_FILE);
+        IRealFile dir = SalmonFSTestHelper.generateFolder(SalmonFSTestHelper.TEST_VAULT_DIRNAME);
+        IRealFile file = SalmonFSTestHelper.TEST_IMPORT_TINY_FILE;
         IRealFile file1 = file.copy(dir);
         IRealFile file2;
         try {
@@ -572,43 +555,23 @@ public class SalmonFSTests {
 
     @Test
     public void ShouldReadFromFileMultithreaded() throws Exception {
-        IRealFile vaultDir = SalmonFSTestHelper.generateFolder(SalmonFSTestHelper.TEST_VAULT2_DIR);
-        IRealFile file = new JavaFile(SalmonFSTestHelper.TEST_IMPORT_MEDIUM_FILE);
+        IRealFile vaultDir = SalmonFSTestHelper.generateFolder(SalmonFSTestHelper.TEST_VAULT_DIRNAME);
+        IRealFile file = SalmonFSTestHelper.TEST_IMPORT_MEDIUM_FILE;
 
-        SalmonFileSequencer sequencer = SalmonFSTestHelper.createSalmonFileSequencer(new JavaFile(vaultDir + "/" + SalmonFSTestHelper.TEST_SEQUENCER_FILE1), SalmonFSTestHelper.getSequenceSerializer());
+        SalmonFileSequencer sequencer = SalmonFSTestHelper.createSalmonFileSequencer();
         SalmonDrive drive = SalmonFSTestHelper.createDrive(vaultDir, SalmonFSTestHelper.driveClassType, SalmonCoreTestHelper.TEST_PASSWORD, sequencer);
         SalmonFileCommander fileCommander = new SalmonFileCommander(SalmonIntegrity.DEFAULT_CHUNK_SIZE, SalmonIntegrity.DEFAULT_CHUNK_SIZE, 2);
         SalmonFile[] sfiles = fileCommander.importFiles(new IRealFile[]{file},
                 drive.getRoot(), false, true, null, null, null);
 
-        SalmonFileInputStream fileInputStream1 = new SalmonFileInputStream(sfiles[0], 4, 4 * 1024 * 1024, 4, 256 * 1024);
-        MessageDigest md51 = MessageDigest.getInstance("SHA-256");
-        DigestInputStream dis = new DigestInputStream(fileInputStream1, md51);
-        byte[] buff1 = new byte[256 * 1024];
-        while (dis.read(buff1, 0, buff1.length) > -1) ;
-        byte[] hash1 = dis.getMessageDigest().digest();
-        dis.close();
-        String h1 = BitConverter.toHex(hash1);
-
-        SalmonFileInputStream fileInputStream2 = new SalmonFileInputStream(sfiles[0], 4, 4 * 1024 * 1024, 1, 256 * 1024);
-        MessageDigest md52 = MessageDigest.getInstance("SHA-256");
-        DigestInputStream dis2 = new DigestInputStream(fileInputStream2, md51);
-        byte[] buff2 = new byte[256 * 1024];
-        while (dis2.read(buff2, 0, buff2.length) > -1) ;
-        byte[] hash2 = dis2.getMessageDigest().digest();
-        dis2.close();
-        String h2 = BitConverter.toHex(hash2);
-        assertEquals(h1, h2);
-
         long pos = Math.abs(new Random().nextLong() % file.length());
 
-        fileInputStream1 = new SalmonFileInputStream(sfiles[0], 4, 4 * 1024 * 1024, 4, 256 * 1024);
+        SalmonFileInputStream fileInputStream1 = new SalmonFileInputStream(sfiles[0], 4, 4 * 1024 * 1024, 4, 256 * 1024);
         fileInputStream1.skip(pos);
         MemoryStream ms1 = new MemoryStream();
         SalmonFSTestHelper.copyStream(fileInputStream1, ms1);
         ms1.flush();
         ms1.setPosition(0);
-        fileInputStream1.reset();
         MessageDigest m1 = MessageDigest.getInstance("SHA-256");
         InputStreamWrapper msa1 = new InputStreamWrapper(ms1);
         DigestInputStream dism1 = new DigestInputStream(msa1, m1);
@@ -625,7 +588,7 @@ public class SalmonFSTests {
         msa1.close();
         dism1.close();
 
-        fileInputStream2 = new SalmonFileInputStream(sfiles[0], 4, 4 * 1024 * 1024, 1, 256 * 1024);
+        SalmonFileInputStream fileInputStream2 = new SalmonFileInputStream(sfiles[0], 4, 4 * 1024 * 1024, 1, 256 * 1024);
         fileInputStream2.skip(pos);
         MemoryStream ms2 = new MemoryStream();
         SalmonFSTestHelper.copyStream(fileInputStream2, ms2);

@@ -72,7 +72,7 @@ public class SalmonWSTests {
         if(!vaultDir.exists())
             vaultDir.mkdir();
         IRealFile seqfile = new JavaFile(SalmonWSTestHelper.TEST_SEQUENCER_DIR + "\\" + SalmonWSTestHelper.TEST_SEQUENCER_FILENAME);
-        SalmonFileSequencer sequencer = new SalmonFileSequencer(seqfile, SalmonFSTestHelper.getSequenceSerializer());
+        SalmonFileSequencer sequencer = SalmonFSTestHelper.createSalmonFileSequencer();
         SalmonDrive drive = JavaWSDrive.create(vaultDir, SalmonWSTestHelper.VAULT_PASSWORD,
                 sequencer, SalmonWSTestHelper.credentials1.getServiceUser(),
                 SalmonWSTestHelper.credentials1.getServicePassword());
@@ -98,7 +98,7 @@ public class SalmonWSTests {
         JavaWSFile vaultDir = new JavaWSFile("/", SalmonWSTestHelper.VAULT_URL,
                 SalmonWSTestHelper.credentials1);
         IRealFile seqfile = new JavaFile(SalmonWSTestHelper.TEST_SEQUENCER_DIR + "\\" + SalmonWSTestHelper.TEST_SEQUENCER_FILENAME);
-        SalmonFileSequencer sequencer = new SalmonFileSequencer(seqfile, SalmonFSTestHelper.getSequenceSerializer());
+        SalmonFileSequencer sequencer = SalmonFSTestHelper.createSalmonFileSequencer();
         boolean unlocked = false;
         try {
             SalmonDrive drive = JavaWSDrive.open(vaultDir, SalmonWSTestHelper.VAULT_PASSWORD,
@@ -119,7 +119,7 @@ public class SalmonWSTests {
         JavaWSFile vaultDir = new JavaWSFile("/", SalmonWSTestHelper.VAULT_URL,
                 SalmonWSTestHelper.credentials1);
         IRealFile seqfile = new JavaFile(SalmonWSTestHelper.TEST_SEQUENCER_DIR + "\\" + SalmonWSTestHelper.TEST_SEQUENCER_FILENAME);
-        SalmonFileSequencer sequencer = new SalmonFileSequencer(seqfile, SalmonFSTestHelper.getSequenceSerializer());
+        SalmonFileSequencer sequencer = SalmonFSTestHelper.createSalmonFileSequencer();
         boolean unlocked = false;
         try {
             SalmonDrive drive = JavaWSDrive.open(vaultDir, SalmonWSTestHelper.VAULT_WRONG_PASSWORD,
