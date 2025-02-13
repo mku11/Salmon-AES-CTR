@@ -390,6 +390,6 @@ public class JavaWSFileStream extends RandomAccessStream {
 
     private void setDefaultHeaders(HttpRequest request) {
         request.addHeader("Cache", "no-store");
-        request.addHeader("Keep-Alive", "true");
+        request.addHeader("Connection", "keep-alive");
     }
 }
