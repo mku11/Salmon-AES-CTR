@@ -36,8 +36,6 @@ namespace Mku.Salmon.Drive;
 public class DotNetWSDrive : SalmonDrive
 {
     private static Dictionary<IRealFile, DotNetWSFile.Credentials> serviceCredentials = new Dictionary<IRealFile, DotNetWSFile.Credentials>();
-    private string serviceUser;
-    private string servicePassword;
 
     /// <summary>
     /// Private constructor, use open() or create() instead.
