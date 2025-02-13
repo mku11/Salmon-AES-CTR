@@ -25,7 +25,7 @@ dependencies {
 
 test {
     useJUnitPlatform()
-	systemProperty 'testDir', System.getProperty('testDir')
+	systemProperty 'testDir', System.getProperty('testDir', "d:\\tmp\\salmon\\test")
 	afterTest { desc, result -> 
         logger.quiet "Test ${desc.className} ${desc.name} : ${result.resultType}"
     }
