@@ -370,15 +370,6 @@ public class JavaWSFileStream extends RandomAccessStream {
         if (this.outputStream != null)
             this.outputStream.close();
         this.outputStream = null;
-        if (inputStream != null)
-            inputStream.close();
-        inputStream = null;
-        if (outputStream != null)
-            outputStream.close();
-        outputStream = null;
-        if (client != null)
-            client.close();
-        client = null;
         if (client != null)
             client.close();
         client = null;
