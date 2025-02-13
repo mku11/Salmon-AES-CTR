@@ -22,6 +22,7 @@
     
     <Compile Include="..\..\..\test\salmon-fs-test-csharp\SalmonFSTestHelper.cs" Link="salmon-fs-test-csharp\SalmonFSTestHelper.cs" />
     <Compile Include="..\..\..\test\salmon-fs-test-csharp\SalmonFSTests.cs" Link="salmon-fs-test-csharp\SalmonFSTests.cs" />
+	<Compile Include="..\..\..\test\salmon-fs-test-csharp\SalmonFSHttpTests.cs" Link="salmon-fs-test-csharp\SalmonFSHttpTests.cs" />
 
     <Compile Include="..\..\..\test\salmon-native-test-csharp\SalmonNativeTests.cs" Link="salmon-native-test-csharp\SalmonNativeTests.cs" />
     

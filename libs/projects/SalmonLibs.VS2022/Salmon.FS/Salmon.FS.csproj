@@ -28,12 +28,15 @@
 		<Compile Include="..\..\..\src\csharp\SalmonFS\File\DotNetFile.cs" Link="File\DotNetFile.cs" />
 		<Compile Include="..\..\..\src\csharp\SalmonFS\File\DotNetWSFile.cs" Link="File\DotNetWSFile.cs" />
 		<Compile Include="..\..\..\src\csharp\SalmonFS\File\DotNetWSFileStream.cs" Link="File\DotNetWSFileStream.cs" />
+		<Compile Include="..\..\..\src\csharp\SalmonFS\File\DotNetHttpFile.cs" Link="File\DotNetHttpFile.cs" />
+		<Compile Include="..\..\..\src\csharp\SalmonFS\File\DotNetHttpFileStream.cs" Link="File\DotNetHttpFileStream.cs" />
 		<Compile Include="..\..\..\src\csharp\SalmonFS\File\IRealFile.cs" Link="File\IRealFile.cs" />
 		<Compile Include="..\..\..\src\csharp\SalmonFS\File\IVirtualFile.cs" Link="File\IVirtualFile.cs" />
 		<Compile Include="..\..\..\src\csharp\SalmonFS\Drive\VirtualDrive.cs" Link="Drive\VirtualDrive.cs" />
 
 		<Compile Include="..\..\..\src\csharp\SalmonFS\Salmon\Drive\DotNetDrive.cs" Link="Salmon\Drive\DotNetDrive.cs" />
 		<Compile Include="..\..\..\src\csharp\SalmonFS\Salmon\Drive\DotNetWSDrive.cs" Link="Salmon\Drive\DotNetWSDrive.cs" />
+		<Compile Include="..\..\..\src\csharp\SalmonFS\Salmon\Drive\DotNetHttpDrive.cs" Link="Salmon\Drive\DotNetHttpDrive.cs" />
 
 		<Compile Include="..\..\..\src\csharp\SalmonFS\Salmon\SalmonAuthConfig.cs" Link="Salmon\SalmonAuthConfig.cs" />
 		<Compile Include="..\..\..\src\csharp\SalmonFS\Salmon\SalmonAuthException.cs" Link="Salmon\SalmonAuthException.cs" />
