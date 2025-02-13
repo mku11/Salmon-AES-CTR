@@ -111,7 +111,7 @@ public class JavaWSFile implements IRealFile {
      * @return The newly created directory.
      */
     public IRealFile createDirectory(String dirName) {
-        String nDirPath = filePath + Separator + dirName;
+        String nDirPath = this.getChildPath(dirName);
         CloseableHttpResponse httpResponse = null;
         try {
             URIBuilder uriBuilder = new URIBuilder(this.servicePath + "/api/mkdir");
@@ -146,7 +146,7 @@ public class JavaWSFile implements IRealFile {
      * @throws IOException Thrown if there is an IO error.
      */
     public IRealFile createFile(String filename) throws IOException {
-        String nFilePath = filePath + Separator + filename;
+        String nFilePath = this.getChildPath(filename);
         URIBuilder uriBuilder;
         CloseableHttpResponse httpResponse = null;
         try {
@@ -597,7 +597,8 @@ public class JavaWSFile implements IRealFile {
     public IRealFile getChild(String filename) {
         if (isFile())
             return null;
-        JavaWSFile child = new JavaWSFile(filePath + Separator + filename, servicePath, credentials);
+        String nFilepath = this.getChildPath(filename);
+        JavaWSFile child = new JavaWSFile(nFilepath, servicePath, credentials);
         return child;
     }
 
@@ -661,6 +662,14 @@ public class JavaWSFile implements IRealFile {
             }
         }
         return false;
+    }
+
+    private String getChildPath(String filename) {
+        String nFilepath = this.filePath;
+        if(!nFilepath.endsWith(JavaWSFile.Separator))
+            nFilepath += JavaWSFile.Separator;
+        nFilepath += filename;
+        return nFilepath;
     }
 
     /**
