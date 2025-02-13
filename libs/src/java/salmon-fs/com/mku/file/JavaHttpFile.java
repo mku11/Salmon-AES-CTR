@@ -328,9 +328,9 @@ public class JavaHttpFile implements IRealFile {
                 stream.copyTo(ms);
                 String contents = new String(ms.toArray());
 
-                Matcher matcher = Pattern.compile("HREF=\"(.+?)\"").matcher(contents);
-                while (matcher.matches()) {
-                    String filename = matcher.group(1);
+                Matcher matcher = Pattern.compile("(.+?)HREF=\"(.+?)\"(.+?)", Pattern.CASE_INSENSITIVE).matcher(contents);
+                while (matcher.find()) {
+                    String filename = matcher.group(2);
                     if (filename.contains(":") || filename.contains(".."))
                         continue;
                     if (filename.contains("%")) {
@@ -437,7 +437,8 @@ public class JavaHttpFile implements IRealFile {
     public IRealFile getChild(String filename) {
         if (isFile())
             return null;
-        JavaHttpFile child = new JavaHttpFile(filePath + Separator + filename);
+		String nFilepath = this.getChildPath(filename);
+        JavaHttpFile child = new JavaHttpFile(nFilepath);
         return child;
     }
 
@@ -460,6 +461,14 @@ public class JavaHttpFile implements IRealFile {
         throw new UnsupportedOperationException("Unsupported Operation, readonly filesystem");
     }
 
+    private String getChildPath(String filename) {
+        String nFilepath = this.filePath;
+        if(!nFilepath.endsWith(JavaHttpFile.Separator))
+            nFilepath += JavaHttpFile.Separator;
+        nFilepath += filename;
+        return nFilepath;
+    }
+	
     /**
      * Returns a string representation of this object
      */
@@ -477,6 +486,6 @@ public class JavaHttpFile implements IRealFile {
 
     private void setDefaultHeaders(HttpRequest request) {
         request.addHeader("Cache", "no-store");
-        request.addHeader("Keep-Alive", "true");
+        request.addHeader("Connection", "keep-alive");
     }
 }

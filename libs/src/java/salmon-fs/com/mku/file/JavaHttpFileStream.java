@@ -93,6 +93,8 @@ public class JavaHttpFileStream extends RandomAccessStream {
                 uriBuilder = new URIBuilder(file.getPath());
                 HttpGet httpGet = new HttpGet(uriBuilder.build());
                 setDefaultHeaders(httpGet);
+				if(this.position > 0)
+					httpGet.addHeader("Range", "bytes=" + this.position + "-");
                 httpResponse = client.execute(httpGet);
                 checkStatus(httpResponse, startPosition > 0 ? HttpStatus.SC_PARTIAL_CONTENT : HttpStatus.SC_OK);
                 this.inputStream = new BufferedInputStream(httpResponse.getEntity().getContent());
@@ -279,6 +281,6 @@ public class JavaHttpFileStream extends RandomAccessStream {
 
     private void setDefaultHeaders(HttpRequest request) {
         request.addHeader("Cache", "no-store");
-        request.addHeader("Keep-Alive", "true");
+        request.addHeader("Connection", "keep-alive");
     }
 }
