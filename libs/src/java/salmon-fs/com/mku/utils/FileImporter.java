@@ -163,28 +163,12 @@ public abstract class FileImporter {
                 runningThreads = (int) (fileSize / partSize);
             }
 
-            // we use a countdown latch which is better suited with executor than Thread.join or CompletableFuture.
-            final CountDownLatch done = new CountDownLatch(runningThreads);
-            final long finalPartSize = partSize;
-            final int finalRunningThreads = runningThreads;
-            for (int i = 0; i < runningThreads; i++) {
-                final int index = i;
-                executor.submit(() -> {
-                    long start = finalPartSize * index;
-                    long length;
-                    if (index == finalRunningThreads - 1)
-                        length = fileSize - start;
-                    else
-                        length = finalPartSize;
-                    try {
-                        importFilePart(fileToImport, importedFile, start, length, totalBytesRead, onProgress);
-                    } catch (Exception e) {
-                        e.printStackTrace();
-                    }
-                    done.countDown();
-                });
+            if(runningThreads == 1) {
+                importFilePart(fileToImport, importedFile, 0, fileSize, totalBytesRead, onProgress);
+            } else {
+                this.submitImportJobs(runningThreads, partSize, fileToImport, importedFile, totalBytesRead, integrity, onProgress);
             }
-            done.await();
+
             if (stopped)
                 importedFile.getRealFile().delete();
             else if (deleteSource)
@@ -203,6 +187,33 @@ public abstract class FileImporter {
         }
         stopped = true;
         return importedFile;
+    }
+
+    private void submitImportJobs(int runningThreads, long partSize, IRealFile fileToImport, IVirtualFile importedFile, long[] totalBytesRead, boolean integrity, BiConsumer<Long, Long> onProgress) throws InterruptedException {
+        long fileSize = fileToImport.length();
+
+        // we use a countdown latch which is better suited with executor than Thread.join or CompletableFuture.
+        final CountDownLatch done = new CountDownLatch(runningThreads);
+        final long finalPartSize = partSize;
+        final int finalRunningThreads = runningThreads;
+        for (int i = 0; i < runningThreads; i++) {
+            final int index = i;
+            executor.submit(() -> {
+                long start = finalPartSize * index;
+                long length;
+                if (index == finalRunningThreads - 1)
+                    length = fileSize - start;
+                else
+                    length = finalPartSize;
+                try {
+                    importFilePart(fileToImport, importedFile, start, length, totalBytesRead, onProgress);
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
+                done.countDown();
+            });
+        }
+        done.await();
     }
 
     /**

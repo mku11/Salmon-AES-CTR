@@ -154,28 +154,12 @@ public abstract class FileExporter {
                 runningThreads = (int) (fileSize / partSize);
             }
 
-            // we use a countdown latch which is better suited with executor than Thread.join.
-            final CountDownLatch done = new CountDownLatch(runningThreads);
-            final long finalPartSize = partSize;
-            final int finalRunningThreads = runningThreads;
-            for (int i = 0; i < runningThreads; i++) {
-                final int index = i;
-                executor.submit(() -> {
-                    long start = finalPartSize * index;
-                    long length;
-                    if (index == finalRunningThreads - 1)
-                        length = fileSize - start;
-                    else
-                        length = finalPartSize;
-                    try {
-                        exportFilePart(fileToExport, exportFile, start, length, totalBytesWritten, onProgress);
-                    } catch (Exception e) {
-                        e.printStackTrace();
-                    }
-                    done.countDown();
-                });
+            if (runningThreads == 1) {
+                exportFilePart(fileToExport, exportFile, 0, fileSize, totalBytesWritten, onProgress);
+            } else {
+                this.submitExportJobs(runningThreads, partSize, fileToExport, exportFile, totalBytesWritten, integrity, onProgress);
             }
-            done.await();
+
             if (stopped)
                 exportFile.delete();
             else if (deleteSource)
@@ -195,6 +179,33 @@ public abstract class FileExporter {
         }
         stopped = true;
         return exportFile;
+    }
+
+    private void submitExportJobs(int runningThreads, long partSize, IVirtualFile fileToExport, IRealFile exportFile, long[] totalBytesWritten, boolean integrity, BiConsumer<Long, Long> onProgress) throws IOException, InterruptedException {
+        long fileSize = fileToExport.getSize();
+
+        // we use a countdown latch which is better suited with executor than Thread.join.
+        final CountDownLatch done = new CountDownLatch(runningThreads);
+        final long finalPartSize = partSize;
+        final int finalRunningThreads = runningThreads;
+        for (int i = 0; i < runningThreads; i++) {
+            final int index = i;
+            executor.submit(() -> {
+                long start = finalPartSize * index;
+                long length;
+                if (index == finalRunningThreads - 1)
+                    length = fileSize - start;
+                else
+                    length = finalPartSize;
+                try {
+                    exportFilePart(fileToExport, exportFile, start, length, totalBytesWritten, onProgress);
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
+                done.countDown();
+            });
+        }
+        done.await();
     }
 
     /**
