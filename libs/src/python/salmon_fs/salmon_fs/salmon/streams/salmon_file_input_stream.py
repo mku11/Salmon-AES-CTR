@@ -209,7 +209,7 @@ class SalmonFileInputStream(BufferedIOBase):
 
     def read1(self, size: int = ...) -> bytearray:
         buff: bytearray = bytearray(size)
-        bytes_read = self.readinto(buff, 0, size)
+        bytes_read = self.readinto(buff)
         return buff[0:bytes_read]
 
     def detach(self) -> RawIOBase:
