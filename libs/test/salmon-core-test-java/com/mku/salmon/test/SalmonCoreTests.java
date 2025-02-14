@@ -57,8 +57,8 @@ public class SalmonCoreTests {
 
     @BeforeEach
     public void init() {
-        // SalmonStream.setAesProviderType(ProviderType.Aes);
         SalmonCoreTestHelper.initialize();
+		SalmonStream.setAesProviderType(ProviderType.Default);
     }
 
     @AfterEach
