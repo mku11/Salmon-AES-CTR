@@ -65,12 +65,8 @@ public class SalmonFSTests
         SalmonCoreTestHelper.Initialize();
         SalmonFSTestHelper.Initialize();
 
-        // for remote drive make sure you turn on the web service either manually
-        // or start the test case from gradle:
-        // gradlew.bat :salmon-ws:test --tests "com.mku.salmon.ws.fs.service.test.SalmonWSTests.testStartServer" --rerun-tasks
-
         // use the native library
-        // SalmonStream.AesProviderType = ProviderType.AesIntrinsics;
+        SalmonStream.AesProviderType = ProviderType.AesIntrinsics;
     }
 
     [ClassCleanup]
