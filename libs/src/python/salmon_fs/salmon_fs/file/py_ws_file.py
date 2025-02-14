@@ -30,7 +30,6 @@ import urllib.parse
 from urllib.parse import urlparse
 from http.client import HTTPResponse, HTTPConnection, HTTPSConnection
 from typing import Any, Callable
-from wrapt import synchronized
 
 from typeguard import typechecked
 
@@ -72,7 +71,6 @@ class PyWSFile(IRealFile):
         self.__credentials: Credentials = credentials
         self.__response: HTTPResponse | None = None
 
-    @synchronized
     def __get_response(self) -> HTTPResponse:
         if not self.__response:
             headers = {}
@@ -94,7 +92,6 @@ class PyWSFile(IRealFile):
                     http_response.close()
         return self.__response
 
-    @synchronized
     def create_directory(self, dir_name: str) -> IRealFile:
         """
         Create a directory under this directory.
@@ -121,7 +118,6 @@ class PyWSFile(IRealFile):
         ndir: PyWSFile = PyWSFile(n_dir_path, self.__service_path, self.__credentials)
         return ndir
 
-    @synchronized
     def create_file(self, filename: str) -> IRealFile:
         """
         Create a file under this directory.
@@ -149,7 +145,6 @@ class PyWSFile(IRealFile):
         n_file: PyWSFile = PyWSFile(n_filepath, self.__service_path, self.__credentials)
         return n_file
 
-    @synchronized
     def delete(self) -> bool:
         """
         Delete this file or directory.
@@ -193,7 +188,6 @@ class PyWSFile(IRealFile):
                 http_response.close()
         return not os.path.exists(self.__file_path)
 
-    @synchronized
     def exists(self) -> bool:
         """
         True if file or directory exists.
@@ -225,7 +219,6 @@ class PyWSFile(IRealFile):
             basename = urllib.parse.unquote(basename)
         return basename
 
-    @synchronized
     def get_input_stream(self) -> RandomAccessStream:
         """
         Get a stream for reading the file.
@@ -233,7 +226,6 @@ class PyWSFile(IRealFile):
         :raises FileNotFoundException:     """
         return PyWSFileStream(self, "r")
 
-    @synchronized
     def get_output_stream(self) -> RandomAccessStream:
         """
         Get a stream for writing to this file.
@@ -352,7 +344,6 @@ class PyWSFile(IRealFile):
                     response.close()
         return []
 
-    @synchronized
     def move(self, new_dir: IRealFile, new_name: str | None = None,
              progress_listener: Callable[[int, int], Any] | None = None) -> IRealFile:
         """
@@ -395,7 +386,6 @@ class PyWSFile(IRealFile):
                 if http_response:
                     http_response.close()
 
-    @synchronized
     def copy(self, new_dir: IRealFile, new_name: str | None = None,
              progress_listener: Callable[[int, int], Any] | None = None) -> IRealFile:
         """
@@ -449,7 +439,6 @@ class PyWSFile(IRealFile):
         child: PyWSFile = PyWSFile(n_filepath, self.__service_path, self.__credentials)
         return child
 
-    @synchronized
     def rename_to(self, new_filename: str) -> bool:
         """
         Rename the current file or directory.
@@ -476,7 +465,6 @@ class PyWSFile(IRealFile):
             if http_response:
                 http_response.close()
 
-    @synchronized
     def mkdir(self) -> bool:
         """
         Create this directory under the current filepath.
@@ -540,7 +528,6 @@ class PyWSFile(IRealFile):
         elif scheme == "https":
             conn = http.client.HTTPSConnection(urlparse(self.__service_path).netloc)
         return conn
-
 
 class Credentials:
     def __init__(self, service_user: str, service_password: str):

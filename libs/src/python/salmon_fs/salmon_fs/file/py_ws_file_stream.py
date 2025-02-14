@@ -31,7 +31,6 @@ import urllib
 from urllib import parse
 from urllib.parse import urlparse
 from io import RawIOBase
-from wrapt import synchronized
 
 from salmon_core.convert.base_64 import Base64
 from salmon_fs.file.ireal_file import IRealFile
@@ -72,7 +71,6 @@ class PyWSFileStream(RandomAccessStream):
         self.upload_thread: Thread | None = None
         self.closed: bool = False
 
-    @synchronized
     def get_input_response(self) -> HTTPResponse:
         if self.closed:
             raise IOError("Stream is closed")
@@ -88,7 +86,6 @@ class PyWSFileStream(RandomAccessStream):
             self.__check_status(self.__response, 206 if self.position > 0 else 200)
         return self.__response
 
-    @synchronized
     def get_output_queue(self) -> Queue:
         if self.closed:
             raise IOError("Stream is closed")
@@ -177,11 +174,9 @@ class PyWSFileStream(RandomAccessStream):
         """
         return self.__file.length()
 
-    @synchronized
     def get_position(self) -> int:
         return self.position
 
-    @synchronized
     def set_position(self, value: int):
         """
         Set the current position of the stream.
@@ -192,7 +187,6 @@ class PyWSFileStream(RandomAccessStream):
             self.reset()
         self.position = value
 
-    @synchronized
     def set_length(self, value: int):
         headers = {}
         self.__set_default_headers(headers)
@@ -213,7 +207,6 @@ class PyWSFileStream(RandomAccessStream):
             if http_response:
                 http_response.close()
 
-    @synchronized
     def read(self, buffer: bytearray, offset: int, count: int) -> int:
         """
         Read data from the file stream into the buffer provided.
@@ -235,7 +228,6 @@ class PyWSFileStream(RandomAccessStream):
         self.position += bytes_read
         return bytes_read
 
-    @synchronized
     def write(self, buffer: bytearray, offset: int, count: int):
         """
         Write the data from the buffer provided into the stream.
@@ -249,7 +241,6 @@ class PyWSFileStream(RandomAccessStream):
         queue.put(buff)
         self.position += len(buff)
 
-    @synchronized
     def seek(self, offset: int, origin: RandomAccessStream.SeekOrigin) -> int:
         """
         Seek to the offset provided.
@@ -269,7 +260,6 @@ class PyWSFileStream(RandomAccessStream):
         self.set_position(pos)
         return self.position
 
-    @synchronized
     def flush(self):
         """
         Flush the buffers to the associated file.
@@ -277,7 +267,6 @@ class PyWSFileStream(RandomAccessStream):
         # TODO: flush network upload before queueing more?
         pass
 
-    @synchronized
     def close(self):
         """
         Close this stream and associated resources.
@@ -292,7 +281,6 @@ class PyWSFileStream(RandomAccessStream):
         self.reset()
         self.closed = True
 
-    @synchronized
     def reset(self):
         if self.__response:
             self.__response.close()
