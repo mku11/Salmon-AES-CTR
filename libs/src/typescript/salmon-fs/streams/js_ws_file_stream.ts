@@ -356,7 +356,6 @@ export class JsWSFileStream extends RandomAccessStream {
         this.buffer = null;
         this.bufferPosition = 0;
     }
-
     
     private setServiceAuth(headers: Headers) {
         if(!this.file.getCredentials())
@@ -368,8 +367,7 @@ export class JsWSFileStream extends RandomAccessStream {
     async #checkStatus(httpResponse: Response, status: number) {
         if (httpResponse.status != status)
             throw new IOException(httpResponse.status
-                    + " " + httpResponse.statusText + "\n"
-                    + await httpResponse.text());
+                    + " " + httpResponse.statusText);
     }
 
     private setDefaultHeaders(headers: Headers) {
