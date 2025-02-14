@@ -100,7 +100,7 @@ public class SalmonFSTestHelper
     internal static bool TEST_USE_FILE_INPUT_STREAM = false;
 
     // progress
-    internal static bool ENABLE_FILE_PROGRESS = false;
+    internal static bool ENABLE_FILE_PROGRESS = true;
 
     // test dirs and files
     internal static IRealFile TEST_INPUT_DIR;
@@ -313,22 +313,26 @@ public class SalmonFSTestHelper
         string hashPreImport = SalmonFSTestHelper.GetChecksum(fileToImport);
 
         // import
-        SalmonFileImporter fileImporter = new SalmonFileImporter(importBufferSize, importThreads);
-        SalmonFile salmonFile = fileImporter.ImportFile(fileToImport, rootDir, null, false, ApplyFileIntegrity, null);
-        Assert.IsNotNull(salmonFile);
-        Assert.IsTrue(salmonFile.Exists);
-
+		Action<long, long> printImportProgress = (position, length) => {
+            if (SalmonFSTestHelper.ENABLE_FILE_PROGRESS)
+                Console.WriteLine("importing file: " + position + "/" + length);
+        };
+        SalmonFile salmonFile = SalmonFSTestHelper.fileImporter.ImportFile(fileToImport, rootDir, null, false, ApplyFileIntegrity, printImportProgress);
+		
+		// get fresh copy of the file
+        // TODO: for remote files the output stream should clear all cached file properties
+        //instead of having to get a new file
+        salmonFile = rootDir.GetChild(salmonFile.BaseName);
+		
         int? chunkSize = salmonFile.FileChunkSize;
         if (chunkSize != null && chunkSize > 0 && !VerifyFileIntegrity)
             salmonFile.SetVerifyIntegrity(false, null);
-        SalmonStream sstream = salmonFile.GetInputStream();
-        string hashPostImport = SalmonFSTestHelper.GetChecksumStream(sstream);
+		
+        Assert.IsTrue(salmonFile.Exists);
+        string hashPostImport = SalmonFSTestHelper.GetChecksumStream(salmonFile.GetInputStream());
         if (shouldBeEqual)
-        {
             Assert.AreEqual(hashPreImport, hashPostImport);
-        }
 
-        // get fresh copy of file
         SalmonFile[] salmonFiles = rootDir.ListFiles();
         long realFileSize = fileToImport.Length;
         foreach (SalmonFile file in salmonFiles)
@@ -347,20 +351,20 @@ public class SalmonFSTestHelper
         }
 
         // export
-        SalmonFileExporter fileExporter = new SalmonFileExporter(exportBufferSize, exportThreads);
+		Action<long, long> printExportProgress = (position, length) => {
+            if (SalmonFSTestHelper.ENABLE_FILE_PROGRESS)
+                Console.WriteLine("exporting file: " + position + "/" + length);
+        };
         if (bitflip)
             FlipBit(salmonFile, flipPosition);
         int? chunkSize2 = salmonFile.FileChunkSize;
         if (chunkSize2 != null && chunkSize2 > 0 && VerifyFileIntegrity)
             salmonFile.SetVerifyIntegrity(true, null);
-        IRealFile exportFile = fileExporter.ExportFile(salmonFile, drive.ExportDir, null, false, VerifyFileIntegrity, null);
+        IRealFile exportFile = SalmonFSTestHelper.fileExporter.ExportFile(salmonFile, drive.ExportDir, null, false, VerifyFileIntegrity, printExportProgress);
 
         string hashPostExport = SalmonFSTestHelper.GetChecksum(exportFile);
         if (shouldBeEqual)
-        {
-
             Assert.AreEqual(hashPreImport, hashPostExport);
-        }
     }
 
     public static SalmonDrive CreateDrive(IRealFile vaultDir, Type driveClassType, string pass, SalmonFileSequencer sequencer)
