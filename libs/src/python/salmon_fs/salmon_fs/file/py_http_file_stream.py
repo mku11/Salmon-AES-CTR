@@ -26,6 +26,7 @@ from typeguard import typechecked
 import http.client
 from http.client import HTTPResponse, HTTPConnection, HTTPSConnection
 from urllib.parse import urlparse
+from urllib.parse import urljoin
 from wrapt import synchronized
 
 from salmon_fs.file.ireal_file import IRealFile
@@ -38,6 +39,8 @@ class PyHttpFileStream(RandomAccessStream):
     An advanced Salmon File Stream implementation for python http files.
     This class is used internally for random file access of physical (real) files.
     """
+
+    MAX_REDIRECTS: int = 5
 
     def __init__(self, file: IRealFile, mode: str):
         """
@@ -70,9 +73,18 @@ class PyHttpFileStream(RandomAccessStream):
             self.__set_default_headers(headers)
             if self.position > 0:
                 headers['Range'] = "bytes=" + str(self.position) + "-"
-            self.conn: HTTPConnection | HTTPSConnection = self.__create_connection()
-            self.conn.request("GET", self.__file.get_path(), headers=headers)
-            self.__response = self.conn.getresponse()
+            url = self.__file.get_path()
+            while count := PyHttpFileStream.MAX_REDIRECTS:
+                self.conn = self.__create_connection(urlparse(url).netloc)
+                self.conn.request("GET", url, headers=headers)
+                self.__response = self.conn.getresponse()
+                if self.__response.getheader('location'):
+                    url = urljoin(url, self.__response.getheader('location'))
+                    count -= 1
+                    self.__response.close()
+                    self.conn.close()
+                else:
+                    break
             self.__check_status(self.__response, 206 if self.position > 0 else 200)
         return self.__response
 
@@ -131,7 +143,7 @@ class PyHttpFileStream(RandomAccessStream):
         """
         bytes_read: int = 0
         while bytes_read < count:
-            buff: bytes = self.get_input_response().read1(count - bytes_read)
+            buff: bytes = self.get_input_response().read(count - bytes_read)
             if not buff or len(buff) == 0:
                 break
             buffer[offset + bytes_read:offset + bytes_read + len(buff)] = buff[:]
@@ -203,11 +215,11 @@ class PyHttpFileStream(RandomAccessStream):
         headers["Connection"] = "keep-alive"
         headers["Content-type"] = "application/x-www-form-urlencoded"
 
-    def __create_connection(self):
+    def __create_connection(self, host):
         conn = None
         scheme = urlparse(self.__file.get_path()).scheme
         if scheme == "http":
-            conn = http.client.HTTPConnection(urlparse(self.__file.get_path()).netloc)
+            conn = http.client.HTTPConnection(host)
         elif scheme == "https":
-            conn = http.client.HTTPSConnection(urlparse(self.__file.get_path()).netloc)
+            conn = http.client.HTTPSConnection(host)
         return conn
