@@ -56,7 +56,6 @@ class SalmonCoreTests(TestCase):
 
     @classmethod
     def setUpClass(cls):
-        print(ProviderType.Aes)
         SalmonCoreTestHelper.initialize()
         SalmonStream.set_aes_provider_type(ProviderType.Default)
     
