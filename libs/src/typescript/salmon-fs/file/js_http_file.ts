@@ -33,7 +33,8 @@ import { MemoryStream } from '../../salmon-core/streams/memory_stream.js';
  */
 export class JsHttpFile implements IRealFile {
     public static readonly separator: string = "/";
-    public static readonly SMALL_FILE_MAX_LENGTH: number = 1 * 1024 * 1024;
+    public static readonly SMALL_FILE_MAX_LENGTH: number = 128*1024;
+	public static readonly BUFFER_LENGTH: number = 32*1024;
 
     filePath: string;
     response: Response | null = null;
@@ -47,9 +48,13 @@ export class JsHttpFile implements IRealFile {
     }
 
     async getResponse(): Promise<Response> {
-        if (this.response == null)
+        if (this.response == null) {
+			let headers = new Headers();
+			this.setDefaultHeaders(headers);
             this.response = (await fetch(this.filePath, 
-			{method: 'HEAD', keepalive: true}));
+			{method: 'HEAD', keepalive: true, headers: headers}));
+			await this.#checkStatus(this.response, 200);
+		}
         return this.response;
     }
 
@@ -211,23 +216,17 @@ export class JsHttpFile implements IRealFile {
             length = parseInt(lenStr);
         }
         else {
-            res = (await fetch(this.filePath, 
-			{method: 'GET', keepalive: true}));
-            if (res.body == null)
-                throw new IOException("Could not get length from content. No response body.");
-            let totalLength: number = 0;
-            let reader: ReadableStreamDefaultReader = await res.body.getReader();
-            while (true) {
-                let readResult: ReadableStreamReadResult<any> = await reader.read();
-                if (readResult.value === undefined || readResult.value.length == 0)
-                    break;
-                totalLength += readResult.value.length;
+			let stream: RandomAccessStream = await this.getInputStream();
+			let totalLength: number = 0;
+			let buffer: Uint8Array = new Uint8Array(JsHttpFile.BUFFER_LENGTH);
+			let bytesRead = 0;
+            while((bytesRead = await stream.read(buffer, 0, buffer.length)) > 0) {
+                totalLength += bytesRead;
                 if (totalLength > JsHttpFile.SMALL_FILE_MAX_LENGTH) {
                     throw new IOException("Could not get length from file. If this is a large file make sure the server responds with a Content-Length");
                 }
             }
             length = totalLength;
-            reader.releaseLock();
         }
         return length;
     }
@@ -244,24 +243,28 @@ export class JsHttpFile implements IRealFile {
      * @return The list of files.
      */
     public async listFiles(): Promise<IRealFile[]> {
-        let files: IRealFile[] = [];
-        let stream: RandomAccessStream = await this.getInputStream();
-        let ms: MemoryStream = new MemoryStream();
-        await stream.copyTo(ms);
-        await ms.close();
-        let contents: string = new TextDecoder().decode(ms.toArray());
-        let matches = contents.matchAll(/HREF\=\"(.+?)\"/ig);
-        for (const match of matches) {
-            let filename: string = match[1];
-            if (filename.includes(":") || filename.includes(".."))
-                continue;
-            if (filename.includes("%")){
-                filename = decodeURIComponent(filename);
-            }
-            let file: IRealFile = new JsHttpFile(this.filePath + JsHttpFile.separator + filename);
-            files.push(file);
-        }
-        return files;
+		if(await this.isDirectory()) {
+			let files: IRealFile[] = [];
+			let stream: RandomAccessStream = await this.getInputStream();
+			let ms: MemoryStream = new MemoryStream();
+			await stream.copyTo(ms);
+			await ms.close();
+			await stream.close();
+			let contents: string = new TextDecoder().decode(ms.toArray());
+			let matches = contents.matchAll(/HREF\=\"(.+?)\"/ig);
+			for (const match of matches) {
+				let filename: string = match[1];
+				if (filename.includes(":") || filename.includes(".."))
+					continue;
+				if (filename.includes("%")){
+					filename = decodeURIComponent(filename);
+				}
+				let file: IRealFile = new JsHttpFile(this.filePath + JsHttpFile.separator + filename);
+				files.push(file);
+			}
+			return files;
+		}
+		return [];
     }
 
     /**
@@ -321,5 +324,16 @@ export class JsHttpFile implements IRealFile {
      */
     public toString(): string {
         return this.filePath;
+    }
+	
+	async #checkStatus(httpResponse: Response, status: number) {
+        if (httpResponse.status != status)
+            throw new IOException(httpResponse.status
+                    + " " + httpResponse.statusText);
+    }
+
+    private setDefaultHeaders(headers: Headers) {
+        headers.append("Cache", "no-store");
+		headers.append("Connection", "keep-alive");
     }
 }
