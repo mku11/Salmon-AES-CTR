@@ -352,7 +352,7 @@ export class ReadableStreamFileReader {
                     err = new Error(err.error);
             }
             console.error(err);
-            throw new IOException("Error during export", err);
+            throw new IOException("Error during read", err);
         });
         return bytesRead;
     }

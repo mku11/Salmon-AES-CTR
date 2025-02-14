@@ -62,6 +62,8 @@ async function getInstance(type: string, param: any): Promise<any> {
         case 'JsFile':
             const { JsFile } = await import("../../file/js_file.js");
             return new JsFile(param);
+        case 'JsWSFile':
+            throw new Error("Multithreading for Web Service files is not supported");
     }
     throw new Error("Unknown class type");
 }

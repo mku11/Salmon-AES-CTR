@@ -127,7 +127,7 @@ export class FileUtils {
                 const { JsHttpFile } = await import("../file/js_http_file.js");
                 return new JsHttpFile(param);
             case 'JsWSFile':
-                throw new Error("Web Service files not supported");
+                throw new Error("Multithreading for Web Service files is not supported");
         }
         throw new Error("Unknown class type");
     }
