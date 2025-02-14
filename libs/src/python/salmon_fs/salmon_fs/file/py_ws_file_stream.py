@@ -218,7 +218,7 @@ class PyWSFileStream(RandomAccessStream):
         """
         bytes_read: int = 0
         while bytes_read < count:
-            buff: bytes = self.get_input_response().read1(count - bytes_read)
+            buff: bytes = self.get_input_response().read(count - bytes_read)
             if not buff or len(buff) == 0:
                 break
             buffer[offset + bytes_read:offset + bytes_read + len(buff)] = buff[:]
