@@ -33,6 +33,7 @@ from wrapt import synchronized
 import urllib
 from urllib.parse import urljoin
 
+from salmon_core.streams.memory_stream import MemoryStream
 from salmon_fs.file.ireal_file import IRealFile
 from salmon_fs.file.py_http_file_stream import PyHttpFileStream
 from salmon_core.streams.random_access_stream import RandomAccessStream
@@ -218,13 +219,13 @@ class PyHttpFile(IRealFile):
         :return: The list of files.
         """
         if self.is_directory():
+            ms: MemoryStream = MemoryStream()
+            stream: RandomAccessStream | None = None
             try:
                 files: list[IRealFile] = []
-                stream: RandomAccessStream = this.get_input_stream();
-                ms: MemoryStream = MemoryStream();
-                stream.copyTo(ms)
-                ms.close()
-                contents: str = ms.to_array().decode();
+                stream = self.get_input_stream()
+                stream.copy_to(ms)
+                contents: str = ms.to_array().decode()
                 matches = re.findall("HREF=\"(.+?)\"", contents, flags=re.I)
                 for match in matches:
                     filename: str = match
@@ -236,10 +237,10 @@ class PyHttpFile(IRealFile):
                     files.append(p_file)
                 return files
             finally:
-                if conn:
-                    conn.close()
-                if http_response:
-                    http_response.close()
+                if ms:
+                    ms.close()
+                if stream:
+                    stream.close()
         return []
 
     def move(self, new_dir: IRealFile, new_name: str | None = None,
