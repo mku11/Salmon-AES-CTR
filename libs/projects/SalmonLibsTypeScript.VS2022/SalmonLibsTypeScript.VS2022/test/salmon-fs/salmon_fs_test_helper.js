@@ -55,6 +55,7 @@ export const TestMode = {
     Http: { name: 'Http', ordinal: 2 },
     WebService: { name: 'WebService', ordinal: 3 },
 }
+
 export const TestRunnerMode = {
     Browser: { name: 'Browser', ordinal: 0 },
     NodeJS: { name: 'NodeJS', ordinal: 1 }
@@ -262,23 +263,27 @@ export class SalmonFSTestHelper {
         let dir = await parent.getChild(dirName);
         if(!await dir.exists())
             await dir.mkdir();
-        console.log("generated folder: " + dir.getAbsolutePath())
+        console.log("generated folder: " + dir.getAbsolutePath());
         return dir;
     }
 
-    static async getChecksum(realFile) {
-        let is = null;
+    static async getChecksum(file) {
+		let stream = await file.getInputStream()
+        return SalmonFSTestHelper.getChecksumStream(stream)
+	}
+	
+	static async getChecksumStream(stream) {
         let ms = new MemoryStream();
         try {
-            is = await realFile.getInputStream();
-            await is.copyTo(ms);
+            await stream.copyTo(ms);
             let digest = BitConverter.toHex(new Uint8Array(await crypto.subtle.digest("SHA-256", ms.toArray())));
             return digest;
         } finally {
             if (ms != null)
                 await ms.close();
-            if (is != null)
-                await is.close();
+            if (stream != null) {
+                await stream.close();
+            }
         }
     }
 
@@ -300,12 +305,24 @@ export class SalmonFSTestHelper {
                 console.log("importing file: " + position + "/" + length);
         }
         let salmonFile = await SalmonFSTestHelper.fileImporter.importFile(fileToImport, rootDir, null, false, applyFileIntegrity, printImportProgress);
+		
+		// get fresh copy of the file
+        // TODO: for remote files the output stream should clear all cached file properties
+        //instead of having to get a new file
+        salmonFile = await rootDir.getChild(await salmonFile.getBaseName());
+		
+		let chunkSize = await salmonFile.getFileChunkSize();
+        if (chunkSize && chunkSize > 0 && !verifyFileIntegrity)
+            await salmonFile.setVerifyIntegrity(false, null);
+		
         expect(await salmonFile.exists()).toBeTruthy();
-        // get fresh copy of the file
-        salmonFile = (await rootDir.listFiles())[0];
-
+        let hashPostImport = await SalmonFSTestHelper.getChecksumStream(await salmonFile.getInputStream());
+        if (shouldBeEqual)
+            expect(hashPreImport).toBe(hashPostImport);
+		
         expect(salmonFile != null).toBeTruthy();
         expect(await salmonFile.exists()).toBeTruthy();
+		
         let salmonFiles = await (await drive.getRoot()).listFiles();
         let realFileSize = await fileToImport.length();
         for (let file of salmonFiles) {
@@ -325,6 +342,9 @@ export class SalmonFSTestHelper {
         }
         if (bitflip)
             await SalmonFSTestHelper.flipBit(salmonFile, flipPosition);
+		let chunkSize2 = await salmonFile.getFileChunkSize();
+        if (chunkSize2 != null && chunkSize2 > 0 && verifyFileIntegrity)
+            await salmonFile.setVerifyIntegrity(true, null);
         let exportFile = await SalmonFSTestHelper.fileExporter.exportFile(salmonFile, await drive.getExportDir(), null, false, verifyFileIntegrity, printExportProgress);
         let hashPostExport = await SalmonFSTestHelper.getChecksum(exportFile);
         if (shouldBeEqual) {
@@ -447,7 +467,7 @@ export class SalmonFSTestHelper {
         if (verifyIntegrity)
             await readFile.setVerifyIntegrity(true, hashKey);
         else
-        await readFile.setVerifyIntegrity(false, null);
+			await readFile.setVerifyIntegrity(false, null);
         let inStream = await readFile.getInputStream();
         let textBytes = new Uint8Array(testBytes.length);
         await inStream.read(textBytes, 0, textBytes.length);
@@ -865,14 +885,12 @@ export class SalmonFSTestHelper {
         
         let stream = await file.getInputStream();
         let ms = new MemoryStream();
-        let start = Date.now();
         await stream.copyTo(ms);
-        let end = Date.now();
         await ms.flush();
         await ms.setPosition(0);
         await ms.close();
         await stream.close();
-        let digest = BitConverter.toHex(new Uint8Array(await crypto.subtle.digest("SHA-256", ms.toArray())));
+        let digest = await SalmonFSTestHelper.getChecksumStream(ms);
         expect(digest).toBe(localChkSum);
     }
 
@@ -918,7 +936,7 @@ export class SalmonFSTestHelper {
             if (isEncrypted) {
                 fileStream = await file.getInputStream();
             } else {
-                fileStream = new JsHttpFileStream(file);
+                fileStream = new JsHttpFileStream(file, "r");
             }
             stream = ReadableStreamWrapper.create(fileStream);
         }

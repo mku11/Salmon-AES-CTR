@@ -34,10 +34,13 @@ describe('salmon-fs-http', () => {
 		oldTestMode = getTestMode();
 		await SalmonFSTestHelper.setTestParams(await SalmonFSTestHelper.TEST_ROOT_DIR.getPath(), TestMode.Http, getTestRunnerMode());
 		
-		//SalmonCoreTestHelper.TEST_ENC_BUFFER_SIZE = 1 * 1024 * 1024;
-		//SalmonCoreTestHelper.TEST_DEC_BUFFER_SIZE = 1 * 1024 * 1024;
+		// SalmonCoreTestHelper.TEST_ENC_BUFFER_SIZE = 1 * 1024 * 1024;
+        // SalmonCoreTestHelper.TEST_DEC_BUFFER_SIZE = 1 * 1024 * 1024;
+        
+		SalmonFSTestHelper.TEST_IMPORT_FILE = SalmonFSTestHelper.TEST_IMPORT_LARGE_FILE;
+		
         SalmonFSTestHelper.TEST_FILE_INPUT_STREAM_THREADS = 2;
-        SalmonFSTestHelper.TEST_USE_FILE_INPUT_STREAM = false;
+        SalmonFSTestHelper.TEST_USE_FILE_INPUT_STREAM = true;
 
         SalmonCoreTestHelper.initialize();
         SalmonFSTestHelper.initialize();
@@ -49,10 +52,6 @@ describe('salmon-fs-http', () => {
 		
 		if (oldTestMode)
 			await SalmonFSTestHelper.setTestParams(await SalmonFSTestHelper.TEST_ROOT_DIR.getPath(), oldTestMode, getTestRunnerMode());
-    });
-
-    beforeEach(() => {
-
     });
 
     it('shouldCatchNotAuthorizeNegative', async () => {
@@ -86,6 +85,10 @@ describe('salmon-fs-http', () => {
     });
 
     it('shouldReadFromRealFileSmall', async () => {
+        await SalmonFSTestHelper.shouldReadFile(SalmonFSTestHelper.HTTP_VAULT_DIR, SalmonFSTestHelper.TEST_IMPORT_SMALL_FILENAME);
+    });
+
+    it('shouldReadFromRealFileLarge', async () => {
         await SalmonFSTestHelper.shouldReadFile(SalmonFSTestHelper.HTTP_VAULT_DIR, SalmonFSTestHelper.TEST_IMPORT_SMALL_FILENAME);
     });
 

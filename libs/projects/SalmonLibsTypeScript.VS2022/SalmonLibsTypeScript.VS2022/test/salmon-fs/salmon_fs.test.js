@@ -48,14 +48,12 @@ function checkParams() {
 describe('salmon-fs', () => {
 	beforeAll(() => {
         checkParams();
-        SalmonFSTestHelper.TEST_IMPORT_FILE = SalmonFSTestHelper.TEST_IMPORT_MEDIUM_FILE;
+        SalmonFSTestHelper.TEST_IMPORT_FILE = SalmonFSTestHelper.TEST_IMPORT_SMALL_FILE;
         // SalmonCoreTestHelper.TEST_ENC_BUFFER_SIZE = 1 * 1024 * 1024;
 		// SalmonCoreTestHelper.TEST_DEC_BUFFER_SIZE = 1 * 1024 * 1024;
-		SalmonCoreTestHelper.TEST_ENC_THREADS = 1;
-		SalmonCoreTestHelper.TEST_DEC_THREADS = 1;
-	});
-	
-    beforeEach(() => {
+		SalmonCoreTestHelper.TEST_ENC_THREADS = 2;
+		SalmonCoreTestHelper.TEST_DEC_THREADS = 2;
+
         // SalmonFSTestHelper.ENC_IMPORT_BUFFER_SIZE = 512 * 1024;
         // SalmonFSTestHelper.ENC_EXPORT_BUFFER_SIZE = 512 * 1024;
         SalmonFSTestHelper.ENC_IMPORT_THREADS = 1;
@@ -67,7 +65,7 @@ describe('salmon-fs', () => {
         SalmonFSTestHelper.initialize();
     });
 
-    afterEach(() => {
+    afterAll(() => {
         SalmonFSTestHelper.close();
         SalmonCoreTestHelper.close();
     });
@@ -261,6 +259,7 @@ describe('salmon-fs', () => {
         let vaultDir = await SalmonFSTestHelper.generateFolder(SalmonFSTestHelper.TEST_VAULT_DIRNAME);
         let seqDir = await SalmonFSTestHelper.generateFolder(SalmonFSTestHelper.TEST_SEQ_DIRNAME, SalmonFSTestHelper.TEST_SEQ_DIR, true);
         let seqFile = await seqDir.getChild(SalmonFSTestHelper.TEST_SEQ_FILENAME);
+		
         await SalmonFSTestHelper.testMaxFiles(vaultDir, seqFile, SalmonFSTestHelper.TEST_IMPORT_TINY_FILE,
             SalmonCoreTestHelper.TEXT_VAULT_MAX_FILE_NONCE, -2, true);
 
