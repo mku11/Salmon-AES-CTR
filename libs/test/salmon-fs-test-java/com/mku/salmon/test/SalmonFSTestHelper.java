@@ -311,6 +311,12 @@ public class SalmonFSTestHelper {
                 System.out.println("importing file: " + position + "/" + length);
         };
         SalmonFile salmonFile = fileImporter.importFile(fileToImport, rootDir, null, false, applyFileIntegrity, printImportProgress);
+		
+		// get fresh copy of the file
+        // TODO: for remote files the output stream should clear all cached file properties
+        //instead of having to get a new file
+        salmonFile = (SalmonFile) rootDir.getChild(salmonFile.getBaseName());
+		
         Integer chunkSize = salmonFile.getFileChunkSize();
         if (chunkSize != null && chunkSize > 0 && !verifyFileIntegrity)
             salmonFile.setVerifyIntegrity(false, null);
@@ -348,6 +354,7 @@ public class SalmonFSTestHelper {
         if (chunkSize2 != null && chunkSize2 > 0 && verifyFileIntegrity)
             salmonFile.setVerifyIntegrity(true, null);
         IRealFile exportFile = fileExporter.exportFile(salmonFile, drive.getExportDir(), null, false, verifyFileIntegrity, printExportProgress);
+		
         String hashPostExport = SalmonFSTestHelper.getChecksum(exportFile);
         if (shouldBeEqual)
             assertEquals(hashPreImport, hashPostExport);
