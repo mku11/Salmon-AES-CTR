@@ -23,9 +23,7 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 '''
 from mmap import mmap
-from threading import RLock
 from typing import BinaryIO
-
 from typeguard import typechecked
 
 from salmon_fs.file.ireal_file import IRealFile
