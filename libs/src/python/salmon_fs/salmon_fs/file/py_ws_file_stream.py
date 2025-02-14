@@ -313,8 +313,7 @@ class PyWSFileStream(RandomAccessStream):
     def __check_status(self, http_response: HTTPResponse, status: int):
         if http_response.status != status:
             raise IOError(str(http_response.status)
-                          + " " + http_response.reason + "\n"
-                          + http_response.read().decode())
+                          + " " + http_response.reason)
 
     def __set_default_headers(self, headers: dict[str, str]):
         headers["Cache"] = "no-store"

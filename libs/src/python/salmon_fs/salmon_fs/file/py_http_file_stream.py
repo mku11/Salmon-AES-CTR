@@ -81,14 +81,14 @@ class PyHttpFileStream(RandomAccessStream):
         True if stream can read from file.
         :return: True if readable
         """
-        return not self.__canWrite
+        return True
 
     def can_write(self) -> bool:
         """
         True if stream can write to file.
         :return: True if writable
         """
-        return self.__canWrite
+        return False
 
     def can_seek(self) -> bool:
         """

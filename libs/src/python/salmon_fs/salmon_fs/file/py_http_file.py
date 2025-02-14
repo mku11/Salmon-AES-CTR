@@ -218,29 +218,14 @@ class PyHttpFile(IRealFile):
         :return: The list of files.
         """
         if self.is_directory():
-            headers = {}
-            self.__set_default_headers(headers)
-            conn: HTTPConnection | HTTPSConnection | None = None
-            http_response: HTTPResponse | None = None
             try:
-
-                url = self.__file_path
-                while count := PyHttpFile.MAX_REDIRECTS:
-                    conn = self.__create_connection(urlparse(url).netloc)
-                    conn.request("GET", url, headers=headers)
-                    http_response = conn.getresponse()
-                    if http_response.getheader('location'):
-                        url = urljoin(url, http_response.getheader('location'))
-                        count -= 1
-                        http_response.close()
-                        conn.close()
-                    else:
-                        break
-
-                self.__check_status(http_response, 200)
-                contents = http_response.read().decode()
-                matches = re.findall("HREF=\"(.+?)\"", contents, flags=re.I)
                 files: list[IRealFile] = []
+                stream: RandomAccessStream = this.get_input_stream();
+                ms: MemoryStream = MemoryStream();
+                stream.copyTo(ms)
+                ms.close()
+                contents: str = ms.to_array().decode();
+                matches = re.findall("HREF=\"(.+?)\"", contents, flags=re.I)
                 for match in matches:
                     filename: str = match
                     if ":" in filename or ".." in filename:
