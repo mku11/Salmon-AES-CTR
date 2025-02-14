@@ -79,7 +79,6 @@ export class JsWSFile implements IRealFile {
 				{method: 'GET', keepalive: true, headers: headers}));
 			await this.#checkStatus(httpResponse, 200);
 			this.response = await httpResponse.json();
-			return this.response;
 		}
         return this.response;
     }
@@ -445,6 +444,7 @@ export class JsWSFile implements IRealFile {
         nFilepath += filename;
         return nFilepath;
     }
+	
     /**
      * Returns a string representation of this object
      */
