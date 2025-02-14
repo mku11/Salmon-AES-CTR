@@ -40,6 +40,8 @@ export class JsHttpFileStream extends RandomAccessStream {
     position: number = 0;
     end_position: number = 0;
 
+	// fetch will response will download the whole contents internally
+	// so we use our own "chunked" implementation with our own buffer
     buffer: Uint8Array | null = null;
     bufferPosition: number = 0;
 
@@ -66,13 +68,12 @@ export class JsHttpFileStream extends RandomAccessStream {
         if (this.closed)
             throw new IOException("Stream is closed");
         if (this.stream == null) {
-            let headers: any = {};
-            let end = await this.length() - 1;
-            if (end >= this.position + JsHttpFileStream.MAX_LEN_PER_REQUEST) {
-                end = this.position + JsHttpFileStream.MAX_LEN_PER_REQUEST - 1;
-                headers.range = "bytes=" + this.position + "-" + end;
-            } else if (this.position > 0) {
-                headers.range = "bytes=" + this.position + "-";
+            let headers = new Headers();
+			this.setDefaultHeaders(headers);
+            let end = this.position + JsHttpFileStream.MAX_LEN_PER_REQUEST - 1;
+            if(this.position > 0) {
+                // always specify the end since fetch will read the whole content without streaming
+                headers.append("Range", "bytes=" + this.position + "-" + end);
             }
             this.stream = (await (fetch(this.file.getPath(), { cache: "no-store", keepalive: true, headers: headers }))).body;
             this.end_position = end;
@@ -222,6 +223,7 @@ export class JsHttpFileStream extends RandomAccessStream {
             pos = await this.file.length() - offset;
 
         await this.setPosition(pos);
+		// TODO: move this conditionaly to setPosition
         await this.getStream();
         return this.position;
     }
@@ -253,5 +255,16 @@ export class JsHttpFileStream extends RandomAccessStream {
         this.stream = null;
         this.buffer = null;
         this.bufferPosition = 0;
+    }
+	
+    async #checkStatus(httpResponse: Response, status: number) {
+        if (httpResponse.status != status)
+            throw new IOException(httpResponse.status
+                    + " " + httpResponse.statusText);
+    }
+
+    private setDefaultHeaders(headers: Headers) {
+        headers.append("Cache", "no-store");
+		headers.append("Connection", "keep-alive");
     }
 }
