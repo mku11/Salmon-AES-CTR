@@ -25,7 +25,6 @@ SOFTWARE.
 from __future__ import annotations
 
 from unittest import TestCase
-
 from typeguard import typechecked
 import os
 import sys
@@ -36,6 +35,8 @@ sys.path.append(os.path.dirname(__file__) + '/../salmon_core_test_python')
 
 from salmon_core.streams.random_access_stream import RandomAccessStream
 from salmon_core.streams.memory_stream import MemoryStream
+from salmon_core.salmon.streams.provider_type import ProviderType
+from salmon_core.salmon.streams.salmon_stream import SalmonStream
 from salmon_fs.file.ireal_file import IRealFile
 from salmon_fs.file.ivirtual_file import IVirtualFile
 from salmon_fs.salmon.drive.py_http_drive import PyHttpDrive
@@ -54,22 +55,25 @@ class SalmonFSHttpTests(TestCase):
         SalmonFSHttpTests.old_test_mode = SalmonFSTestHelper.curr_test_mode
         SalmonFSTestHelper.set_test_params("d:\\tmp\\salmon\\test", TestMode.Http)
 
-        SalmonFSTestHelper.TEST_IMPORT_FILE = SalmonFSTestHelper.TEST_IMPORT_LARGE_FILE
-
         # SalmonCoreTestHelper.TEST_ENC_BUFFER_SIZE = 1 * 1024 * 1024
         # SalmonCoreTestHelper.TEST_DEC_BUFFER_SIZE = 1 * 1024 * 1024
+    
+        SalmonFSTestHelper.TEST_IMPORT_FILE = SalmonFSTestHelper.TEST_IMPORT_LARGE_FILE
 
         SalmonFSTestHelper.ENC_IMPORT_BUFFER_SIZE = 512 * 1024
-        SalmonFSTestHelper.ENC_IMPORT_THREADS = 1
+        SalmonFSTestHelper.ENC_IMPORT_THREADS = 2
         SalmonFSTestHelper.ENC_EXPORT_BUFFER_SIZE = 512 * 1024
-        SalmonFSTestHelper.ENC_EXPORT_THREADS = 1
-        SalmonFSTestHelper.ENABLE_MULTI_CPU = False
+        SalmonFSTestHelper.ENC_EXPORT_THREADS = 2
+        SalmonFSTestHelper.ENABLE_MULTI_CPU = True
 
         SalmonFSTestHelper.TEST_FILE_INPUT_STREAM_THREADS = 2
-        SalmonFSTestHelper.TEST_USE_FILE_INPUT_STREAM = False
+        SalmonFSTestHelper.TEST_USE_FILE_INPUT_STREAM = True
 
         SalmonCoreTestHelper.initialize()
         SalmonFSTestHelper.initialize()
+
+        # use the native library
+        SalmonStream.set_aes_provider_type(ProviderType.AesGPU)
 
     @classmethod
     def tearDownClass(cls):

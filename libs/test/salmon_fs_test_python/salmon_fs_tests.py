@@ -38,6 +38,8 @@ sys.path.append(os.path.dirname(__file__) + '/../salmon_core_test_python')
 
 from salmon_core.streams.memory_stream import MemoryStream
 from salmon_core.integrity.integrity_exception import IntegrityException
+from salmon_core.salmon.streams.provider_type import ProviderType
+from salmon_core.salmon.streams.salmon_stream import SalmonStream
 from salmon_fs.file.ivirtual_file import IVirtualFile
 from salmon_fs.salmon.salmon_auth_exception import SalmonAuthException
 from salmon_fs.salmon.salmon_file import SalmonFile, IRealFile
@@ -55,22 +57,25 @@ class SalmonFSTests(TestCase):
     def setUpClass(cls):
         SalmonFSTestHelper.set_test_params("d:\\tmp\\salmon\\test", TestMode.WebService)
 
-        SalmonFSTestHelper.TEST_IMPORT_FILE = SalmonFSTestHelper.TEST_IMPORT_MEDIUM_FILE
+        SalmonFSTestHelper.TEST_IMPORT_FILE = SalmonFSTestHelper.TEST_IMPORT_SMALL_FILE
 
         # SalmonCoreTestHelper.TEST_ENC_BUFFER_SIZE = 1 * 1024 * 1024
         # SalmonCoreTestHelper.TEST_DEC_BUFFER_SIZE = 1 * 1024 * 1024
 
         SalmonFSTestHelper.ENC_IMPORT_BUFFER_SIZE = 512 * 1024
-        SalmonFSTestHelper.ENC_IMPORT_THREADS = 1
+        SalmonFSTestHelper.ENC_IMPORT_THREADS = 2
         SalmonFSTestHelper.ENC_EXPORT_BUFFER_SIZE = 512 * 1024
-        SalmonFSTestHelper.ENC_EXPORT_THREADS = 1
-        SalmonFSTestHelper.ENABLE_MULTI_CPU = False
+        SalmonFSTestHelper.ENC_EXPORT_THREADS = 2
+        SalmonFSTestHelper.ENABLE_MULTI_CPU = True
 
         SalmonFSTestHelper.TEST_FILE_INPUT_STREAM_THREADS = 2
         SalmonFSTestHelper.TEST_USE_FILE_INPUT_STREAM = False
 
         SalmonCoreTestHelper.initialize()
         SalmonFSTestHelper.initialize()
+
+        # use the native library
+        SalmonStream.set_aes_provider_type(ProviderType.Aes)
 
     @classmethod
     def tearDownClass(cls):
@@ -130,7 +135,7 @@ class SalmonFSTests(TestCase):
         try:
             SalmonFSTestHelper.import_and_export(
                 SalmonFSTestHelper.generate_folder(SalmonFSTestHelper.TEST_VAULT_DIRNAME),
-                SalmonCoreTestHelper.TEST_PASSWORD, SalmonFSTestHelper.TEST_IMPORT_SMALL_FILE,
+                SalmonCoreTestHelper.TEST_PASSWORD, SalmonFSTestHelper.TEST_IMPORT_FILE,
                 False, 0, True, False, False)
         except Exception as ex:
             if isinstance(ex.__cause__, IntegrityException):
@@ -179,7 +184,7 @@ class SalmonFSTests(TestCase):
                 SalmonFSTestHelper.TEST_IMPORT_FILE,
                 True, 24 + 10, False, True, True)
         except Exception as ex:
-            if isinstance(ex.__cause__, IntegrityException):
+            if isinstance(ex.__cause__, IntegrityException) or "Data corrupt or tampered" in str(ex.__cause__):
                 integrity_failed = True
 
         self.assertTrue(integrity_failed)
@@ -243,7 +248,7 @@ class SalmonFSTests(TestCase):
                 True, 20, False,
                 True, True)
         except IOError as ex:
-            if isinstance(ex.__cause__, IntegrityException):
+            if isinstance(ex.__cause__, IntegrityException) or "Data corrupt or tampered" in str(ex.__cause__):
                 integrity_failed = True
 
         self.assertTrue(integrity_failed)

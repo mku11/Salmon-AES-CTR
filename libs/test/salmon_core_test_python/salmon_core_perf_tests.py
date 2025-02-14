@@ -40,19 +40,18 @@ from salmon_core_test_helper import SalmonCoreTestHelper
 @typechecked
 class SalmonCorePerfTests(TestCase):
     TEST_PERF_SIZE = 32 * 1024 * 1024
-    NativeProxy.set_library_path("../../projects/salmon-libs-gradle/salmon-native/build/libs/salmon/shared/salmon.dll")
-    # linux
-    # NativeProxy.set_library_path("../../projects/salmon-libs-gradle/salmon-native/build/libs/salmon/shared/libsalmon.so")
 
     # SalmonCoreTestHelper.TEST_ENC_BUFFER_SIZE = 1 * 1024 * 1024
     # SalmonCoreTestHelper.TEST_DEC_BUFFER_SIZE = 1 * 1024 * 1024
     SalmonCoreTestHelper.TEST_ENC_THREADS = 1
     SalmonCoreTestHelper.TEST_DEC_THREADS = 1
 
-    def setUp(self) -> None:
+    @classmethod
+    def setUpClass(cls) -> None:
         SalmonCoreTestHelper.initialize()
 
-    def tearDown(self) -> None:
+    @classmethod
+    def tearDownClass(cls) -> None:
         SalmonCoreTestHelper.close()
 
     def test_encrypt_and_decrypt_perf_sys_default(self):

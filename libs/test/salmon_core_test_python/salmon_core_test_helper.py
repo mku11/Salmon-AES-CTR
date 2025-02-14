@@ -27,6 +27,7 @@ from __future__ import annotations
 import hashlib
 import math
 import os
+import platform
 import random
 import time
 
@@ -40,6 +41,7 @@ from salmon_core.convert.bit_converter import BitConverter
 from salmon_core.streams.memory_stream import MemoryStream
 from salmon_core.streams.random_access_stream import RandomAccessStream
 from salmon_core.integrity.hmac_sha256_provider import HmacSHA256Provider
+from salmon_core.salmon.bridge.native_proxy import NativeProxy
 from salmon_core.integrity.ihash_provider import IHashProvider
 from salmon_core.salmon.integrity.salmon_integrity import SalmonIntegrity
 from salmon_core.salmon.streams.encryption_mode import EncryptionMode
@@ -93,6 +95,15 @@ class SalmonCoreTestHelper:
         SalmonCoreTestHelper.hashProvider = HmacSHA256Provider()
         SalmonCoreTestHelper.encryptor = SalmonEncryptor(SalmonCoreTestHelper.TEST_ENC_THREADS)
         SalmonCoreTestHelper.decryptor = SalmonDecryptor(SalmonCoreTestHelper.TEST_DEC_THREADS)
+
+        # set native library path
+        platform_os: str = platform.system().upper()
+        if "WIN" in platform_os:
+            NativeProxy.set_library_path("../../projects/salmon-libs-gradle/salmon-native/build/libs/salmon/shared/salmon.dll")
+        elif "MAC" in platform_os:
+            NativeProxy.set_library_path("../../projects/salmon-libs-xcode-macos/salmon/DerivedData/salmon/Build/Products/Release/libsalmon.dylib")
+        elif "LINUX" in platform_os:
+            NativeProxy.set_library_path("../../projects/salmon-libs-gradle/salmon-native/build/libs/salmon/shared/libsalmon.so")
 
     @staticmethod
     def get_encryptor() -> SalmonEncryptor:
