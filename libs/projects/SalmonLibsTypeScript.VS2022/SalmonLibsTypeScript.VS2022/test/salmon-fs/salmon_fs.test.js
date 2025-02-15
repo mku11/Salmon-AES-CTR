@@ -353,18 +353,6 @@ describe('salmon-fs', () => {
         await SalmonFSTestHelper.exportAndImportAuth(vault, importFilePath);
     });
 
-	it('testRaw', async () => {
-        await SalmonFSTestHelper.testRaw();
-    });
-
-    it('testEnc', async () => {
-        await SalmonFSTestHelper.testEnc();
-    });
-	
-    it('testExamples', async () => {
-        await SalmonFSTestHelper.testExamples();
-    });
-
     it('shouldEncryptAndDecryptStream', async () => {
         let data = await SalmonFSTestHelper.getRealFileContents(SalmonFSTestHelper.TEST_IMPORT_FILE);
         await SalmonFSTestHelper.encryptAndDecryptStream(data, SalmonCoreTestHelper.TEST_KEY_BYTES, SalmonCoreTestHelper.TEST_NONCE_BYTES);
@@ -559,5 +547,13 @@ describe('salmon-fs', () => {
         let h2 = BitConverter.toHex(new Uint8Array(await crypto.subtle.digest("SHA-256", ms52.toArray())));
         expect(h1).toBe(h2);
         fileCommander.close();
+    });
+
+    it('testRawFile', async () => {
+        await SalmonFSTestHelper.testRawFile();
+    });
+
+    it('testEncDecFile', async () => {
+        await SalmonFSTestHelper.testEncDecFile();
     });
 });

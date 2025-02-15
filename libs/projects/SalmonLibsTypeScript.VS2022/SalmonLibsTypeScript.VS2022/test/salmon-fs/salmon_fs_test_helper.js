@@ -571,193 +571,91 @@ export class SalmonFSTestHelper {
 
         expect(importSuccess).toBe(shouldImport);
     }
-
-	static async testRaw() {
-        let text = "This is a plaintext that will be used for testing";
-		for(let i=0; i<18; i++)
-			text += text;
-		const BUFF_SIZE = 256 * 1024;
+        
+    static async testRawFile() {
+        let text = SalmonFSTestHelper.TINY_FILE_CONTENTS;
+        for (let i = 0; i < 18; i++)
+            text += text;
+        const BUFF_SIZE = 256 * 1024;
         let dir = await this.generateFolder("test");
-		let filename = "file.txt";
-		let testFile = await dir.createFile(filename);
+        let filename = "file.txt";
+        let testFile = await dir.createFile(filename);
         let bytes = new TextEncoder().encode(text);
 
-        // write file
-		let readFile = await dir.getChild(filename);
+        // write to file
         let wstream = await testFile.getOutputStream();
-		let idx = 0;
-		while(idx < text.length) {
-			let len = Math.min(BUFF_SIZE, text.length - idx);
-			await wstream.write(bytes.slice(idx, idx + len), 0, len);
-			idx += len;
-		}
+        let idx = 0;
+        while (idx < text.length) {
+            let len = Math.min(BUFF_SIZE, text.length - idx);
+            await wstream.write(bytes, idx, len);
+            idx += len;
+        }
         await wstream.flush();
         await wstream.close();
-        
-		// read a file
-		let writeFile = await dir.getChild(filename);
+
+        // read a file
+        let writeFile = await dir.getChild(filename);
         let rstream = await writeFile.getInputStream();
-		let readBuff = new Uint8Array(BUFF_SIZE);
-		let bytesRead = 0;
-		let lstream = new MemoryStream();
-		while((bytesRead = await rstream.read(readBuff, 0, readBuff.length)) > 0) {
-			await lstream.write(readBuff, 0, bytesRead);
-		}
-		let lbytes = lstream.toArray();
-		let string = new TextDecoder().decode(lbytes);
+        let readBuff = new Uint8Array(BUFF_SIZE);
+        let bytesRead = 0;
+        let lstream = new MemoryStream();
+        while ((bytesRead = await rstream.read(readBuff, 0, readBuff.length)) > 0) {
+            await lstream.write(readBuff, 0, bytesRead);
+        }
+        let lbytes = lstream.toArray();
+        let string = new TextDecoder().decode(lbytes);
         // console.log(string);
         await rstream.close();
 
         expect(string).toBe(text);
     }
-	
-    static async testEnc() {
-        let text = "This is a plaintext that will be used for testing";
-		for(let i=0; i<18; i++)
-			text += text;
-		const BUFF_SIZE = 256 * 1024;
-        let dir = await this.generateFolder("test");
-		let filename = "file.dat";
-		let testFile = await dir.createFile(filename);
-        let bytes = new TextEncoder().encode(text);
-        let key = SalmonGenerator.getSecureRandomBytes(32); // 256-bit key
-        let nonce = SalmonGenerator.getSecureRandomBytes(8); // 64-bit nonce
 
-        // Example 4: encrypt to a file, the SalmonFile has a virtual file system API
-        // with copy, move, rename, delete operations
-		let wfile = await dir.getChild(filename);
+    static async testEncDecFile() {
+        let text = SalmonFSTestHelper.TINY_FILE_CONTENTS;
+        for (let i = 0; i < 18; i++)
+            text += text;
+        const BUFF_SIZE = 256 * 1024;
+        let dir = await this.generateFolder("test");
+        let filename = "file.dat";
+        let testFile = await dir.createFile(filename);
+        let bytes = new TextEncoder().encode(text);
+        let key = SalmonGenerator.getSecureRandomBytes(32);
+        let nonce = SalmonGenerator.getSecureRandomBytes(8);
+
+        let wfile = await dir.getChild(filename);
         let encFile = new SalmonFile(wfile);
-        nonce = SalmonGenerator.getSecureRandomBytes(8); // always get a fresh nonce!
+        nonce = SalmonGenerator.getSecureRandomBytes(8);
         encFile.setEncryptionKey(key);
         encFile.setRequestedNonce(nonce);
         let stream = await encFile.getOutputStream();
-        // encrypt data and write with a single call
-		let idx = 0;
-		while(idx < text.length) {
-			let len = Math.min(BUFF_SIZE, text.length - idx);
-			await stream.write(bytes.slice(idx, idx + len), 0, len);
-			idx += len;
-		}
+        let idx = 0;
+        while (idx < text.length) {
+            let len = Math.min(BUFF_SIZE, text.length - idx);
+            await stream.write(bytes, idx, len);
+            idx += len;
+        }
         await stream.flush();
         await stream.close();
-		
+
         // decrypt an encrypted file
-		let rfile = await dir.getChild(filename);
+        let rfile = await dir.getChild(filename);
         let encFile2 = new SalmonFile(rfile);
         encFile2.setEncryptionKey(key);
         let stream2 = await encFile2.getInputStream();
         let decBuff = new Uint8Array(BUFF_SIZE);
-		let lstream = new MemoryStream();
-		let bytesRead = 0;
-		// decrypt and read data with a single call, you can also Seek() to any position before Read()
-		while((bytesRead = await stream2.read(decBuff, 0, decBuff.length)) > 0) {
-			await lstream.write(decBuff, 0, bytesRead);
-		}
-		let lbytes = lstream.toArray();
+        let lstream = new MemoryStream();
+        let bytesRead = 0;
+
+        while ((bytesRead = await stream2.read(decBuff, 0, decBuff.length)) > 0) {
+            await lstream.write(decBuff, 0, bytesRead);
+        }
+        let lbytes = lstream.toArray();
         let decString2 = new TextDecoder().decode(lbytes);
-        // console.log(decString2);
         await stream2.close();
 
         expect(decString2).toBe(text);
     }
-	
-    static async testExamples() {
-        let text = "This is a plaintext that will be used for testing";
-		for(let i=0; i<7; i++)
-			text += text;
-        let dir = await this.generateFolder("test");
-		let filename = "file.dat";
-		const BUFF_SIZE = 256 * 1024;
-		let testFile = await dir.createFile(filename);
-        let bytes = new TextEncoder().encode(text);
-        let key = SalmonGenerator.getSecureRandomBytes(32); // 256-bit key
-        let nonce = SalmonGenerator.getSecureRandomBytes(8); // 64-bit nonce
-
-        // Example 1: encrypt byte array
-        let encryptor = new SalmonEncryptor(SalmonCoreTestHelper.TEST_ENC_THREADS,
-                                               SalmonCoreTestHelper.TEST_ENC_BUFFER_SIZE); // use more threads for parallel processing
-        let decryptor = new SalmonDecryptor(SalmonCoreTestHelper.TEST_DEC_THREADS,
-                                               SalmonCoreTestHelper.TEST_DEC_BUFFER_SIZE);
-        let encBytes = await encryptor.encrypt(bytes, key, nonce, false);
-        // decrypt byte array
-        let decBytes = await decryptor.decrypt(encBytes, key, nonce, false);
-        SalmonCoreTestHelper.assertArrayEquals(bytes, decBytes);
-        encryptor.close();
-        decryptor.close();
-
-        // Example 2: encrypt string and save the nonce in the header
-        nonce = SalmonGenerator.getSecureRandomBytes(8); // always get a fresh nonce!
-        let encText = await SalmonTextEncryptor.encryptString(text, key, nonce, true);
-        // decrypt string
-        let decText = await SalmonTextDecryptor.decryptString(encText, key, null, true);
-
-        expect(decText).toBe(text);
-
-        // Example 3: encrypt data to an output stream
-        let encOutStream = new MemoryStream(); // or any other writeable Stream like to a file
-        nonce = SalmonGenerator.getSecureRandomBytes(8); // always get a fresh nonce!
-        // pass the output stream to the SalmonStream
-        let encryptStream = new SalmonStream(key, nonce, EncryptionMode.Encrypt, encOutStream,
-            null, false, null, null);
-        // encrypt and write with a single call, you can also Seek() and Write()
-        await encryptStream.write(bytes, 0, bytes.length);
-        // encrypted data are now written to the encOutStream.
-        await encOutStream.setPosition(0);
-        let encData = encOutStream.toArray();
-        await encryptStream.flush();
-        await encryptStream.close();
-        await encOutStream.close();
-        //decrypt a stream with encoded data
-        let encInputStream = new MemoryStream(encData); // or any other readable Stream like from a file
-        let decryptStream = new SalmonStream(key, nonce, EncryptionMode.Decrypt, encInputStream,
-            null, false, null, null);
-        let decBuffer = new Uint8Array(text.length);
-        // decrypt and read data with a single call, you can also Seek() before Read()
-        let bytesRead = await decryptStream.read(decBuffer, 0, decBuffer.length);
-        // encrypted data are now in the decBuffer
-        let decString = new TextDecoder().decode(decBuffer.slice(0, bytesRead));
-        // console.log(decString);
-        await decryptStream.close();
-        await encInputStream.close();
-
-        expect(decString).toBe(text);
-
-        // Example 4: encrypt to a file, the SalmonFile has a virtual file system API
-        // with copy, move, rename, delete operations
-		testFile = await dir.getChild(filename);
-        let encFile = new SalmonFile(testFile);
-        nonce = SalmonGenerator.getSecureRandomBytes(8); // always get a fresh nonce!
-        encFile.setEncryptionKey(key);
-        encFile.setRequestedNonce(nonce);
-        let stream = await encFile.getOutputStream();
-        // encrypt data and write with a single call
-		let idx = 0;
-		while(idx < text.length) {
-			let len = Math.min(BUFF_SIZE, text.length - idx);
-			await stream.write(bytes.slice(idx, idx+len), 0, len);
-			idx += len;
-		}
-        await stream.flush();
-        await stream.close();
-        // decrypt an encrypted file
-		testFile = await dir.getChild(filename);
-        let encFile2 = new SalmonFile(testFile);
-        encFile2.setEncryptionKey(key);
-        let stream2 = await encFile2.getInputStream();
-        let decBuff = new Uint8Array(BUFF_SIZE);
-		let lstream = new MemoryStream();
-		// decrypt and read data with a single call, you can also Seek() to any position before Read()
-		while((bytesRead = await stream2.read(decBuff, 0, decBuff.length)) > 0) {
-			await lstream.write(decBuff, 0, bytesRead);
-		}
-		let lbytes = lstream.toArray();
-        let decString2 = new TextDecoder().decode(lbytes);
-        // console.log(decString2);
-        await stream2.close();
-
-        expect(decString2).toBe(text);
-    }
-
+    
     static async encryptAndDecryptStream(data, key, nonce) {
         let encOutStream = new MemoryStream();
         let encryptor = new SalmonStream(key, nonce, EncryptionMode.Encrypt, encOutStream);
