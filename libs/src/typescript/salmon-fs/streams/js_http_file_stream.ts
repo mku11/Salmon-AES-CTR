@@ -223,8 +223,6 @@ export class JsHttpFileStream extends RandomAccessStream {
             pos = await this.file.length() - offset;
 
         await this.setPosition(pos);
-		// TODO: move this conditionaly to setPosition
-        await this.getStream();
         return this.position;
     }
 

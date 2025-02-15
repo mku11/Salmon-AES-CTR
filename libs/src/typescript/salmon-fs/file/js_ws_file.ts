@@ -324,7 +324,6 @@ export class JsWSFile implements IRealFile {
      */
     public async move(newDir: IRealFile, newName: string | null = null, progressListener: ((position: number, length: number) => void) | null = null): Promise<IRealFile> {
         newName = newName != null ? newName : this.getBaseName();
-        //TODO: ToSync
         if (newDir == null || !newDir.exists())
             throw new IOException("Target directory does not exist");
         let newFile: IRealFile | null = await newDir.getChild(newName);
