@@ -322,7 +322,6 @@ export class JsWSFileStream extends RandomAccessStream {
      * Flush the buffers to the associated file.
      */
     public override async flush(): Promise<void> {
-        //TODO: flush network upload?        
     }
 
     /**
