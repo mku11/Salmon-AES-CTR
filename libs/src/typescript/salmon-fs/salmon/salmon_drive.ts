@@ -565,7 +565,7 @@ export abstract class SalmonDrive extends VirtualDrive {
         let realRoot: IRealFile | null = this.getRealRoot();
         if (realRoot == null)
             throw new Error("Cannot create config, no root found, make sure you init the drive first");
-        let configFile: IRealFile | null = await realRoot.getChild(SalmonDrive.getConfigFilename());
+        let configFile: IRealFile | null = await this.getConfigFile(realRoot);
 
         if (driveKey == null && configFile != null && await configFile.exists())
             throw new SalmonAuthException("Not authenticated");
@@ -573,7 +573,7 @@ export abstract class SalmonDrive extends VirtualDrive {
         // delete the old config file and create a new one
         if (configFile != null && await configFile.exists())
             await configFile.delete();
-        configFile = await realRoot.createFile(SalmonDrive.getConfigFilename());
+        configFile = await this.createConfigFile(realRoot);
 
         let magicBytes: Uint8Array = SalmonGenerator.getMagicBytes();
 
@@ -667,5 +667,27 @@ export abstract class SalmonDrive extends VirtualDrive {
      */
     public setSequencer(sequencer: INonceSequencer) {
         this.#sequencer = sequencer;
+    }
+
+    /**
+     * Create the config file for this drive. Be default the config file is placed in the real root of the vault.
+     * You can override this with your own location, make sure you also override getConfigFile().
+     * @param realRoot The real root directory of the vault
+     * @returns The config file that was created
+     */
+    public async createConfigFile(realRoot: IRealFile) {
+        let configFile: IRealFile = await realRoot.createFile(SalmonDrive.getConfigFilename());
+        return configFile;
+    }
+
+    /**
+     * Get the config file for this drive. Be default the config file is placed in the real root of the vault.
+     * You can override this with your own location.
+     * @param realRoot The real root directory of the vault
+     * @returns The config file that will be used for this drive.
+     */
+    public async getConfigFile(realRoot: IRealFile) {
+        let configFile: IRealFile | null = await realRoot.getChild(SalmonDrive.getConfigFilename());
+        return configFile;
     }
 }
