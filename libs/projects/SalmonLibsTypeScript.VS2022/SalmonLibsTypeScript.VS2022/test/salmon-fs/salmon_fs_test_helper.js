@@ -574,9 +574,7 @@ export class SalmonFSTestHelper {
         
     static async testRawFile() {
         let text = SalmonFSTestHelper.TINY_FILE_CONTENTS;
-        for (let i = 0; i < 18; i++)
-            text += text;
-        const BUFF_SIZE = 256 * 1024;
+        const BUFF_SIZE = 16;
         let dir = await this.generateFolder("test");
         let filename = "file.txt";
         let testFile = await dir.createFile(filename);
@@ -612,9 +610,7 @@ export class SalmonFSTestHelper {
 
     static async testEncDecFile() {
         let text = SalmonFSTestHelper.TINY_FILE_CONTENTS;
-        for (let i = 0; i < 18; i++)
-            text += text;
-        const BUFF_SIZE = 256 * 1024;
+        const BUFF_SIZE = 16;
         let dir = await this.generateFolder("test");
         let filename = "file.dat";
         let testFile = await dir.createFile(filename);

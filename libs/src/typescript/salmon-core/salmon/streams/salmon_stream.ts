@@ -642,7 +642,7 @@ export class SalmonStream extends RandomAccessStream {
         while (pos < count) {
             let nBufferSize: number = Math.min(bufferSize, count - pos);
 
-            let srcBuffer: Uint8Array = this.#readBufferData(buffer, pos, nBufferSize);
+            let srcBuffer: Uint8Array = this.#readBufferData(buffer, pos + offset, nBufferSize);
             if (srcBuffer.length == 0)
                 break;
             let destBuffer: Uint8Array = new Uint8Array(srcBuffer.length);
