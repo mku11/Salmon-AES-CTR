@@ -224,6 +224,11 @@ public class DotNetFile : IRealFile
     public IRealFile Move(IRealFile newDir, string newName = null, Action<long,long> progressListener = null)
     {
         newName = newName ?? BaseName;
+		if (newDir == null || !newDir.Exists)
+            throw new IOException("Target directory does not exist");
+        IRealFile newFile = newDir.GetChild(newName);
+        if (newFile != null && newFile.Exists)
+            throw new IOException("Another file/directory already exists");
         string nFilePath = newDir.AbsolutePath + System.IO.Path.DirectorySeparatorChar + newName;
         if (IsDirectory)
             System.IO.Directory.Move(filePath, nFilePath);
