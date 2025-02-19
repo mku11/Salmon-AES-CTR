@@ -216,8 +216,7 @@ export class MemoryStream extends RandomAccessStream {
      */
     public toArray(): Uint8Array {
         const nBytes: Uint8Array = new Uint8Array(this.#length);
-        for (let i = 0; i < this.#length; i++)
-            nBytes[i] = this.#bytes[i];
+		nBytes.set(this.#bytes.slice(0, this.#length));
         return nBytes;
     }
 }
