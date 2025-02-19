@@ -44,9 +44,9 @@ public class SalmonNonce
     {
         long nonce = BitConverter.ToLong(startNonce, 0, SalmonGenerator.NONCE_LENGTH);
         long maxNonce = BitConverter.ToLong(endNonce, 0, SalmonGenerator.NONCE_LENGTH);
-        nonce++;
-        if (nonce <= 0 || nonce > maxNonce)
+        if (nonce + 1 <= 0 || nonce >= maxNonce)
             throw new SalmonRangeExceededException("Cannot increase nonce, maximum nonce exceeded");
+		nonce++;
         return BitConverter.ToBytes(nonce, 8);
     }
 
