@@ -65,7 +65,7 @@ gradlew.bat :salmon-core:jmh --rerun-tasks
 ```
 
 To start the web service:
-start-salmon-ws.bat D:\path\to\rootfolder
+start-salmon-ws.bat
 Then type the user and password for basic auth
 
 To connect to the web service using http (basic auth):
