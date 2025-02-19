@@ -180,10 +180,6 @@ export class SalmonFile implements IVirtualFile {
             throw new IOException("Could not parse chunks size from file header");
 
         let chunkSize: number = BitConverter.toLong(fileChunkSizeBytes, 0, 4);
-        // if user not requesting integrity we default to true if there are integrity chunks
-        if (chunkSize > 0 && this.#reqChunkSize == null) {
-            await this.setVerifyIntegrity(true, null);
-        }
         if (this.#integrity && chunkSize == 0)
             throw new SalmonSecurityException("Cannot check integrity if file doesn't support it");
 
