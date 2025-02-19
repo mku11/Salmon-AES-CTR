@@ -38,10 +38,6 @@ import java.util.HashMap;
  * Use static methods open() or create() to create an instance.
  */
 public class JavaWSDrive extends SalmonDrive {
-    private static HashMap<IRealFile, JavaWSFile.Credentials> serviceCredentials = new HashMap<>();
-
-    private String serviceUser;
-    private String servicePassword;
 
     /**
      * Private constructor, use open() or create() instead.
@@ -62,9 +58,7 @@ public class JavaWSDrive extends SalmonDrive {
      * @return The drive.
      * @throws IOException Thrown if error occurs during opening the drive.
      */
-    public static SalmonDrive open(IRealFile dir, String password, INonceSequencer sequencer,
-                                   String serviceUser, String servicePassword) throws IOException {
-        serviceCredentials.put(dir, new JavaWSFile.Credentials(serviceUser, servicePassword));
+    public static SalmonDrive open(IRealFile dir, String password, INonceSequencer sequencer) throws IOException {
         return SalmonDrive.openDrive(dir, JavaWSDrive.class, password, sequencer);
     }
 
@@ -73,14 +67,10 @@ public class JavaWSDrive extends SalmonDrive {
      * @param dir The directory that will host the drive.
      * @param password The password.
      * @param sequencer The nonce sequencer that will be used for encryption.
-     * @param serviceUser The web service username
-     * @param servicePassword The web service password
      * @return The drive.
      * @throws IOException If error occurs during creating the drive.
      */
-    public static SalmonDrive create(IRealFile dir, String password, INonceSequencer sequencer,
-                                     String serviceUser, String servicePassword) throws IOException {
-        serviceCredentials.put(dir, new JavaWSFile.Credentials(serviceUser, servicePassword));
+    public static SalmonDrive create(IRealFile dir, String password, INonceSequencer sequencer) throws IOException {
         return SalmonDrive.createDrive(dir, JavaWSDrive.class, password, sequencer);
     }
 
@@ -118,12 +108,6 @@ public class JavaWSDrive extends SalmonDrive {
      */
     @Override
     public void onUnlockError() {
-
-    }
-
-    public void initialize(IRealFile realRoot, boolean createIfNotExists) {
-        ((JavaWSFile) realRoot).setCredentials(serviceCredentials.get(realRoot));
-        super.initialize(realRoot, createIfNotExists);
 
     }
 }
