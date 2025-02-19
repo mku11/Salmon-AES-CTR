@@ -77,6 +77,8 @@ public class SalmonDefaultTransformer : SalmonAES256CTRTransformer
     public int EncryptData(byte[] srcBuffer, int srcOffset,
                            byte[] destBuffer, int destOffset, int count)
     {
+		if (this.aesTransformer == null)
+            throw new SalmonSecurityException("No key defined, run init first");
         try
         {
             return Transform(srcBuffer, srcOffset, destBuffer, destOffset, count);
@@ -87,6 +89,33 @@ public class SalmonDefaultTransformer : SalmonAES256CTRTransformer
         }
     }
 
+
+    /// <summary>
+    ///  Decrypt the data.
+	/// </summary>
+	///  <param name="srcBuffer">The source byte array.</param>
+    ///  <param name="srcOffset">The source byte offset.</param>
+    ///  <param name="destBuffer">The destination byte array.</param>
+    ///  <param name="destOffset">The destination byte offset.</param>
+    ///  <param name="count">The number of bytes to transform.</param>
+    ///  <returns>The number of bytes transformed.</returns>
+    ///  <exception cref="SalmonSecurityException">Thrown when error with security</exception>
+    override
+    public int DecryptData(byte[] srcBuffer, int srcOffset,
+                            byte[] destBuffer, int destOffset, int count)
+    {
+		if (this.aesTransformer == null)
+            throw new SalmonSecurityException("No key defined, run init first");
+        try
+        {
+            return Transform(srcBuffer, srcOffset, destBuffer, destOffset, count);
+        }
+        catch (Exception ex)
+        {
+            throw new SalmonSecurityException("Could not decrypt data: ", ex);
+        }
+    }
+	
     private int Transform(byte[] srcBuffer, int srcOffset, byte[] destBuffer, int destOffset, int count)
     {
         byte[] encCounter = new byte[Counter.Length];
@@ -104,29 +133,5 @@ public class SalmonDefaultTransformer : SalmonAES256CTRTransformer
         }
 
         return totalBytes;
-    }
-
-    /// <summary>
-    ///  Decrypt the data.
-	/// </summary>
-	///  <param name="srcBuffer">The source byte array.</param>
-    ///  <param name="srcOffset">The source byte offset.</param>
-    ///  <param name="destBuffer">The destination byte array.</param>
-    ///  <param name="destOffset">The destination byte offset.</param>
-    ///  <param name="count">The number of bytes to transform.</param>
-    ///  <returns>The number of bytes transformed.</returns>
-    ///  <exception cref="SalmonSecurityException">Thrown when error with security</exception>
-    override
-    public int DecryptData(byte[] srcBuffer, int srcOffset,
-                            byte[] destBuffer, int destOffset, int count)
-    {
-        try
-        {
-            return Transform(srcBuffer, srcOffset, destBuffer, destOffset, count);
-        }
-        catch (Exception ex)
-        {
-            throw new SalmonSecurityException("Could not decrypt data: ", ex);
-        }
     }
 }

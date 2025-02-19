@@ -87,6 +87,11 @@ public class SalmonNativeTransformer : SalmonAES256CTRTransformer
     public int EncryptData(byte[] srcBuffer, int srcOffset,
                            byte[] destBuffer, int destOffset, int count)
     {
+		if (Key == null)
+            throw new SalmonSecurityException("No key found, run init first");
+        if (Counter == null)
+            throw new SalmonSecurityException("No counter found, run init first");
+			
         // we block for AES GPU since it's not entirely thread safe
         if (ImplType == 3)
         {
@@ -118,6 +123,11 @@ public class SalmonNativeTransformer : SalmonAES256CTRTransformer
     public int DecryptData(byte[] srcBuffer, int srcOffset,
                             byte[] destBuffer, int destOffset, int count)
     {
+		if (Key == null)
+            throw new SalmonSecurityException("No key found, run init first");
+        if (Counter == null)
+            throw new SalmonSecurityException("No counter found, run init first");
+		
         // we block for AES GPU since it's not entirely thread safe
         if (ImplType == 3)
         {

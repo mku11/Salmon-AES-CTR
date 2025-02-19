@@ -103,6 +103,8 @@ public abstract class SalmonAES256CTRTransformer : ISalmonCTRTransformer
     /// </summary>
     public void ResetCounter()
     {
+		if (this.Nonce == null)
+            throw new SalmonSecurityException("No counter, run init first");
         Counter = new byte[BLOCK_SIZE];
         Array.Copy(Nonce, 0, Counter, 0, Nonce.Length);
         Block = 0;
@@ -127,6 +129,8 @@ public abstract class SalmonAES256CTRTransformer : ISalmonCTRTransformer
 	///  <param name="value">value to increase counter by</param>
     protected void IncreaseCounter(long value)
     {
+		if (this.Counter == null || this.Nonce == null)
+            throw new SalmonSecurityException("No counter, run init first");
         if (value < 0)
             throw new ArgumentOutOfRangeException("Value should be positive");
         int index = BLOCK_SIZE - 1;
