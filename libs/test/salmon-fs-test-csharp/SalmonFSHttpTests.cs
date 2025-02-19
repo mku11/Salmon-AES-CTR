@@ -58,7 +58,7 @@ public class SalmonFSHttpTests
         SalmonFSTestHelper.ENC_EXPORT_THREADS = 1;
 
         SalmonFSTestHelper.TEST_FILE_INPUT_STREAM_THREADS = 2;
-        SalmonFSTestHelper.TEST_USE_FILE_INPUT_STREAM = false;
+        SalmonFSTestHelper.TEST_USE_FILE_INPUT_STREAM = true;
 
         SalmonCoreTestHelper.Initialize();
         SalmonFSTestHelper.Initialize();
@@ -129,7 +129,7 @@ public class SalmonFSHttpTests
     }
 
     [TestMethod]
-    void ShouldSeekAndReadEncryptedFileStreamFromDrive()
+    public void ShouldSeekAndReadEncryptedFileStreamFromDrive()
     {
         IRealFile vaultDir = SalmonFSTestHelper.HTTP_VAULT_DIR;
         SalmonDrive drive = SalmonDrive.OpenDrive(vaultDir, SalmonFSTestHelper.DriveClassType, SalmonCoreTestHelper.TEST_PASSWORD, null);

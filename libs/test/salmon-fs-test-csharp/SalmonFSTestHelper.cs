@@ -370,8 +370,7 @@ public class SalmonFSTestHelper
     public static SalmonDrive CreateDrive(IRealFile vaultDir, Type driveClassType, string pass, SalmonFileSequencer sequencer)
     {
         if (driveClassType == typeof(DotNetWSDrive))
-            return DotNetWSDrive.Create(vaultDir, pass, sequencer, credentials.ServiceUser,
-                    credentials.ServicePassword);
+            return DotNetWSDrive.Create(vaultDir, pass, sequencer);
         else
             return SalmonDrive.CreateDrive(vaultDir, driveClassType, pass, sequencer);
     }
@@ -638,8 +637,7 @@ public class SalmonFSTestHelper
         if (driveClassType == typeof(DotNetWSDrive))
         {
             // use the remote service instead
-            return DotNetWSDrive.Open(vaultDir, testPassword, sequencer,
-                    credentials.ServiceUser, credentials.ServicePassword);
+            return DotNetWSDrive.Open(vaultDir, testPassword, sequencer);
         }
         else
             return DotNetDrive.OpenDrive(vaultDir, driveClassType, testPassword, sequencer);
@@ -921,6 +919,6 @@ public class SalmonFSTestHelper
         Console.WriteLine(tdata);
         Console.WriteLine(buffer);
         stream.Close();
-        Assert.AreEqual(tdata, buffer);
+        CollectionAssert.AreEqual(tdata, buffer);
     }
 }
