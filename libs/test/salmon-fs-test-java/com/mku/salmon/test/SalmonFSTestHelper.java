@@ -45,6 +45,7 @@ import com.mku.streams.MemoryStream;
 import com.mku.streams.RandomAccessStream;
 import com.mku.utils.FileSearcher;
 
+import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
 import java.security.MessageDigest;
@@ -232,7 +233,6 @@ public class SalmonFSTestHelper {
     }
 
     static void initialize() {
-        // TODO: ToSync global importer/exporter
         SalmonFSTestHelper.fileImporter = new SalmonFileImporter(SalmonFSTestHelper.ENC_IMPORT_BUFFER_SIZE, SalmonFSTestHelper.ENC_IMPORT_THREADS);
         SalmonFSTestHelper.fileExporter = new SalmonFileExporter(SalmonFSTestHelper.ENC_EXPORT_BUFFER_SIZE, SalmonFSTestHelper.ENC_EXPORT_THREADS);
     }
@@ -311,12 +311,12 @@ public class SalmonFSTestHelper {
                 System.out.println("importing file: " + position + "/" + length);
         };
         SalmonFile salmonFile = fileImporter.importFile(fileToImport, rootDir, null, false, applyFileIntegrity, printImportProgress);
-		
-		// get fresh copy of the file
+
+        // get fresh copy of the file
         // TODO: for remote files the output stream should clear all cached file properties
         //instead of having to get a new file
         salmonFile = (SalmonFile) rootDir.getChild(salmonFile.getBaseName());
-		
+
         Integer chunkSize = salmonFile.getFileChunkSize();
         if (chunkSize != null && chunkSize > 0 && !verifyFileIntegrity)
             salmonFile.setVerifyIntegrity(false, null);
@@ -354,7 +354,7 @@ public class SalmonFSTestHelper {
         if (chunkSize2 != null && chunkSize2 > 0 && verifyFileIntegrity)
             salmonFile.setVerifyIntegrity(true, null);
         IRealFile exportFile = fileExporter.exportFile(salmonFile, drive.getExportDir(), null, false, verifyFileIntegrity, printExportProgress);
-		
+
         String hashPostExport = SalmonFSTestHelper.getChecksum(exportFile);
         if (shouldBeEqual)
             assertEquals(hashPreImport, hashPostExport);
@@ -363,16 +363,14 @@ public class SalmonFSTestHelper {
     static SalmonDrive openDrive(IRealFile vaultDir, Class<?> driveClassType, String pass, SalmonFileSequencer sequencer) throws IOException {
         if (driveClassType == JavaWSDrive.class) {
             // use the remote service instead
-            return JavaWSDrive.open(vaultDir, pass, sequencer,
-                    credentials.getServiceUser(), credentials.getServicePassword());
+            return JavaWSDrive.open(vaultDir, pass, sequencer);
         } else
             return SalmonDrive.openDrive(vaultDir, driveClassType, pass, sequencer);
     }
 
     static SalmonDrive createDrive(IRealFile vaultDir, Class<?> driveClassType, String pass, SalmonFileSequencer sequencer) throws IOException {
         if (driveClassType == JavaWSDrive.class)
-            return JavaWSDrive.create(vaultDir, pass, sequencer, credentials.getServiceUser(),
-                    credentials.getServicePassword());
+            return JavaWSDrive.create(vaultDir, pass, sequencer);
         else
             return SalmonDrive.createDrive(vaultDir, driveClassType, pass, sequencer);
     }
@@ -556,7 +554,7 @@ public class SalmonFSTestHelper {
 
     public static void testMaxFiles(IRealFile vaultDir, IRealFile seqFile, IRealFile importFile,
                                     byte[] testMaxNonce, long offset, boolean shouldImport) {
-        boolean importSuccess;
+        boolean importSuccess = false;
         try {
             SalmonFileSequencer sequencer = new SalmonFileSequencer(seqFile, SalmonFSTestHelper.sequenceSerializer) {
                 @Override
@@ -581,89 +579,93 @@ public class SalmonFSTestHelper {
             IVirtualFile salmonFile = fileImporter.importFile(fileToImport, salmonRootDir, null, false, false, null);
             importSuccess = salmonFile != null;
         } catch (Exception ex) {
-            // TODO: check specific exception SalmonRangeExceededException
-            importSuccess = false;
+            if(ex instanceof SalmonRangeExceededException)
+                importSuccess = false;
             ex.printStackTrace();
         }
 
         assertEquals(shouldImport, importSuccess);
     }
 
-    public static void testExamples() throws Exception {
-        String text = "This is a plaintext that will be used for testing";
+
+    public static void testRawFile() throws IOException {
+        String text = SalmonFSTestHelper.TINY_FILE_CONTENTS;
+        int BUFF_SIZE = 16;
         IRealFile dir = generateFolder("test");
-        IRealFile testFile = dir.createFile("file.dat");
+        String filename = "file.txt";
+        IRealFile testFile = dir.createFile(filename);
         byte[] bytes = text.getBytes();
-        byte[] key = SalmonGenerator.getSecureRandomBytes(32); // 256-bit key
-        byte[] nonce = SalmonGenerator.getSecureRandomBytes(8); // 64-bit nonce
 
-        // Example 1: encrypt byte array
-        byte[] encBytes = new SalmonEncryptor().encrypt(bytes, key, nonce, false);
-        // decrypt byte array
-        byte[] decBytes = new SalmonDecryptor().decrypt(encBytes, key, nonce, false);
+        // write to file
+        RandomAccessStream wstream = testFile.getOutputStream();
+        int idx = 0;
+        while (idx < text.length()) {
+            int len = Math.min(BUFF_SIZE, text.length() - idx);
+            wstream.write(bytes, idx, len);
+            idx += len;
+        }
+        wstream.flush();
+        wstream.close();
 
-        assertArrayEquals(bytes, decBytes);
+        // read a file
+        IRealFile writeFile = dir.getChild(filename);
+        RandomAccessStream rstream = writeFile.getInputStream();
+        byte[] readBuff = new byte[BUFF_SIZE];
+        int bytesRead = 0;
+        MemoryStream lstream = new MemoryStream();
+        while ((bytesRead = rstream.read(readBuff, 0, readBuff.length)) > 0) {
+            lstream.write(readBuff, 0, bytesRead);
+        }
+        byte[] lbytes = lstream.toArray();
+        String string = new String(lbytes);
+        // console.log(string);
+        rstream.close();
 
-        // Example 2: encrypt string and save the nonce in the header
-        nonce = SalmonGenerator.getSecureRandomBytes(8); // always get a fresh nonce!
-        String encText = SalmonTextEncryptor.encryptString(text, key, nonce, true);
-        // decrypt string
-        String decText = SalmonTextDecryptor.decryptString(encText, key, null, true);
+        assertEquals(string, text);
+    }
 
-        assertEquals(text, decText);
+    public static void testEncDecFile() throws IOException {
+        String text = SalmonFSTestHelper.TINY_FILE_CONTENTS;
+        int BUFF_SIZE = 16;
+        IRealFile dir = generateFolder("test");
+        String filename = "file.dat";
+        IRealFile testFile = dir.createFile(filename);
+        byte[] bytes = text.getBytes();
+        byte[] key = SalmonGenerator.getSecureRandomBytes(32);
+        byte[] nonce = SalmonGenerator.getSecureRandomBytes(8);
 
-        // Example 3: encrypt data to an output stream
-        MemoryStream encOutStream = new MemoryStream(); // or any other writable Stream like to a file
-        nonce = SalmonGenerator.getSecureRandomBytes(8); // always get a fresh nonce!
-        // pass the output stream to the SalmonStream
-        SalmonStream encryptor = new SalmonStream(key, nonce, EncryptionMode.Encrypt, encOutStream,
-                null, false, null, null);
-        // encrypt and write with a single call, you can also Seek() and Write()
-        encryptor.write(bytes, 0, bytes.length);
-        // encrypted data are now written to the encOutStream.
-        encOutStream.setPosition(0);
-        byte[] encData = encOutStream.toArray();
-        encryptor.flush();
-        encryptor.close();
-        encOutStream.close();
-        //decrypt a stream with encoded data
-        RandomAccessStream encInputStream = new MemoryStream(encData); // or any other readable Stream like from a file
-        SalmonStream decryptor = new SalmonStream(key, nonce, EncryptionMode.Decrypt, encInputStream,
-                null, false, null, null);
-        byte[] decBuffer = new byte[1024];
-        // decrypt and read data with a single call, you can also Seek() before Read()
-        int bytesRead = decryptor.read(decBuffer, 0, decBuffer.length);
-        // encrypted data are now in the decBuffer
-        String decString = new String(decBuffer, 0, bytesRead);
-        System.out.println(decString);
-        decryptor.close();
-        encInputStream.close();
-
-        assertEquals(text, decString);
-
-        // Example 4: encrypt to a file, the SalmonFile has a virtual file system API
-        // with copy, move, rename, delete operations
-        SalmonFile encFile = new SalmonFile(testFile, null);
-        nonce = SalmonGenerator.getSecureRandomBytes(8); // always get a fresh nonce!
+        IRealFile wfile = dir.getChild(filename);
+        SalmonFile encFile = new SalmonFile(wfile);
+        nonce = SalmonGenerator.getSecureRandomBytes(8);
         encFile.setEncryptionKey(key);
         encFile.setRequestedNonce(nonce);
         RandomAccessStream stream = encFile.getOutputStream();
-        // encrypt data and write with a single call
-        stream.write(bytes, 0, bytes.length);
+        int idx = 0;
+        while (idx < text.length()) {
+            int len = Math.min(BUFF_SIZE, text.length() - idx);
+            stream.write(bytes, idx, len);
+            idx += len;
+        }
         stream.flush();
         stream.close();
+
         // decrypt an encrypted file
-        SalmonFile encFile2 = new SalmonFile(testFile, null);
+        IRealFile rfile = dir.getChild(filename);
+        SalmonFile encFile2 = new SalmonFile(rfile);
         encFile2.setEncryptionKey(key);
         RandomAccessStream stream2 = encFile2.getInputStream();
-        byte[] decBuff = new byte[1024];
-        // decrypt and read data with a single call, you can also Seek() to any position before Read()
-        int encBytesRead = stream2.read(decBuff, 0, decBuff.length);
-        String decString2 = new String(decBuff, 0, encBytesRead);
-        System.out.println(decString2);
+        byte[] decBuff = new byte[BUFF_SIZE];
+        MemoryStream lstream = new MemoryStream();
+        int bytesRead = 0;
+
+        while ((bytesRead = stream2.read(decBuff, 0, decBuff.length)) > 0) {
+            lstream.write(decBuff, 0, bytesRead);
+        }
+        byte[] lbytes = lstream.toArray();
+        String decString2 = new String(lbytes);
         stream2.close();
 
-        assertEquals(text, decString2);
+        assertEquals(decString2, text);
     }
 
     public static void encryptAndDecryptStream(byte[] data, byte[] key, byte[] nonce) throws Exception {

@@ -38,7 +38,7 @@ public class SalmonCorePerfTests {
     static void beforeAll() {
 		String enableGPUStr = System.getProperty("ENABLE_GPU");
 		if(enableGPUStr!=null) {
-			enableGPU = new Boolean(enableGPUStr);
+			enableGPU = enableGPUStr.equals("1") || enableGPUStr.equals("true");
 			System.out.println("ENABLE_GPU: " + enableGPU);
 		}
 		 

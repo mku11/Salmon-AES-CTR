@@ -389,11 +389,6 @@ public class SalmonFSTests {
     }
 
     @Test
-    public void testExamples() throws Exception {
-        SalmonFSTestHelper.testExamples();
-    }
-
-    @Test
     public void shouldEncryptAndDecryptStream() throws Exception {
         byte[] data = SalmonFSTestHelper.getRealFileContents(SalmonFSTestHelper.TEST_IMPORT_FILE);
         SalmonFSTestHelper.encryptAndDecryptStream(data, SalmonCoreTestHelper.TEST_KEY_BYTES, SalmonCoreTestHelper.TEST_NONCE_BYTES);
@@ -608,4 +603,15 @@ public class SalmonFSTests {
         dism2.close();
         assertEquals(h3, h4);
     }
+
+    @Test
+    public void testRawFile() throws IOException {
+        SalmonFSTestHelper.testRawFile();
+    }
+
+    @Test
+    public void testEncDecFile() throws IOException {
+        SalmonFSTestHelper.testEncDecFile();
+    }
+
 }

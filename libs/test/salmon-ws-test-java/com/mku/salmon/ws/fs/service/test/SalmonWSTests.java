@@ -63,23 +63,21 @@ public class SalmonWSTests {
     @Test
     public void testAuthServer() throws Exception {
         IRealFile wsDir = new JavaFile(SalmonWSTestHelper.TEST_WS_DIR);
-        if(!wsDir.exists()){
+        if (!wsDir.exists()) {
             wsDir.mkdir();
         }
         String vaultPath = SalmonWSTestHelper.VAULT_PATH + "_" + System.currentTimeMillis();
         JavaWSFile vaultDir = new JavaWSFile(vaultPath, SalmonWSTestHelper.VAULT_URL,
                 SalmonWSTestHelper.credentials1);
-        if(!vaultDir.exists())
+        if (!vaultDir.exists())
             vaultDir.mkdir();
         IRealFile seqfile = new JavaFile(SalmonWSTestHelper.TEST_SEQUENCER_DIR + "\\" + SalmonWSTestHelper.TEST_SEQUENCER_FILENAME);
         SalmonFileSequencer sequencer = SalmonFSTestHelper.createSalmonFileSequencer();
         SalmonDrive drive = JavaWSDrive.create(vaultDir, SalmonWSTestHelper.VAULT_PASSWORD,
-                sequencer, SalmonWSTestHelper.credentials1.getServiceUser(),
-                SalmonWSTestHelper.credentials1.getServicePassword());
+                sequencer);
         drive.close();
         drive = JavaWSDrive.open(vaultDir, SalmonWSTestHelper.VAULT_PASSWORD,
-                sequencer, SalmonWSTestHelper.credentials1.getServiceUser(),
-                SalmonWSTestHelper.credentials1.getServicePassword());
+                sequencer);
         IVirtualFile rootDir = drive.getRoot();
         IVirtualFile[] files = rootDir.listFiles();
         for (IVirtualFile file : files) {
@@ -102,8 +100,7 @@ public class SalmonWSTests {
         boolean unlocked = false;
         try {
             SalmonDrive drive = JavaWSDrive.open(vaultDir, SalmonWSTestHelper.VAULT_PASSWORD,
-                    sequencer, SalmonWSTestHelper.wrongCredentials1.getServiceUser(),
-                    SalmonWSTestHelper.wrongCredentials1.getServicePassword());
+                    sequencer);
             IVirtualFile rootDir = drive.getRoot();
             IVirtualFile[] files = rootDir.listFiles();
             unlocked = true;
@@ -123,7 +120,7 @@ public class SalmonWSTests {
         boolean unlocked = false;
         try {
             SalmonDrive drive = JavaWSDrive.open(vaultDir, SalmonWSTestHelper.VAULT_WRONG_PASSWORD,
-                    sequencer, SalmonWSTestHelper.credentials1.getServiceUser(), SalmonWSTestHelper.credentials1.getServicePassword());
+                    sequencer);
             IVirtualFile rootDir = drive.getRoot();
             IVirtualFile[] files = rootDir.listFiles();
             unlocked = true;
