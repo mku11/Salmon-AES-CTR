@@ -35,8 +35,6 @@ namespace Mku.Salmon.Drive;
 /// </summary>
 public class DotNetWSDrive : SalmonDrive
 {
-    private static Dictionary<IRealFile, DotNetWSFile.Credentials> serviceCredentials = new Dictionary<IRealFile, DotNetWSFile.Credentials>();
-
     /// <summary>
     /// Private constructor, use open() or create() instead.
     /// </summary>
@@ -52,10 +50,8 @@ public class DotNetWSDrive : SalmonDrive
     /// <param name="password">The password</param>
     /// <param name="sequencer">The nonce sequencer that will be used for encryption.</param>
     /// <returns>The drive</returns>
-    public static SalmonDrive Open(IRealFile dir, string password, INonceSequencer sequencer,
-        string serviceUser, string servicePassword)
+    public static SalmonDrive Open(IRealFile dir, string password, INonceSequencer sequencer)
     {
-        serviceCredentials[dir] = new DotNetWSFile.Credentials(serviceUser, servicePassword);
         return SalmonDrive.OpenDrive(dir, typeof(DotNetWSDrive), password, sequencer);
     }
 
@@ -66,10 +62,8 @@ public class DotNetWSDrive : SalmonDrive
     /// <param name="password">The password</param>
     /// <param name="sequencer">The nonce sequencer that will be used for encryption.</param>
     /// <returns>The drive</returns>
-    public static SalmonDrive Create(IRealFile dir, string password, INonceSequencer sequencer,
-        string serviceUser, string servicePassword)
+    public static SalmonDrive Create(IRealFile dir, string password, INonceSequencer sequencer)
     {
-        serviceCredentials[dir] = new DotNetWSFile.Credentials(serviceUser, servicePassword);
         return SalmonDrive.CreateDrive(dir, typeof(DotNetWSDrive), password, sequencer);
     }
 
@@ -100,19 +94,5 @@ public class DotNetWSDrive : SalmonDrive
     public void OnUnlockError()
     {
 
-    }
-
-    /// <summary>
-    ///  Return the virtual root directory of the drive.
-    /// </summary>
-    ///  <returns>The root directory</returns>
-    ///  <exception cref="SalmonAuthException">Thrown when there is a failure during authorization</exception>
-    override
-    public SalmonFile Root => (SalmonFile) base.Root;
-
-    protected override void Initialize(IRealFile realRoot, bool createIfNotExists)
-    {
-        ((DotNetWSFile)realRoot).ServiceCredentials = serviceCredentials[realRoot];
-        base.Initialize(realRoot, createIfNotExists);
     }
 }
