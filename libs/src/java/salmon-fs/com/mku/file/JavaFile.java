@@ -256,7 +256,6 @@ public class JavaFile implements IRealFile {
      */
     public IRealFile move(IRealFile newDir, String newName, BiConsumer<Long, Long> progressListener) {
         newName = newName != null ? newName : getBaseName();
-        //TODO: ToSync
         if (newDir == null || !newDir.exists())
             throw new RuntimeException("Target directory does not exist");
         IRealFile newFile = newDir.getChild(newName);

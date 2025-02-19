@@ -482,7 +482,6 @@ public class JavaWSFile implements IRealFile {
      */
     public IRealFile move(IRealFile newDir, String newName, BiConsumer<Long, Long> progressListener) throws IOException {
         newName = newName != null ? newName : getBaseName();
-        //TODO: ToSync
         if (newDir == null || !newDir.exists())
             throw new IOException("Target directory does not exist");
         IRealFile newFile = newDir.getChild(newName);

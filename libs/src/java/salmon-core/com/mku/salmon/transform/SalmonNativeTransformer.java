@@ -92,9 +92,9 @@ public class SalmonNativeTransformer extends SalmonAES256CTRTransformer {
     @Override
     public int encryptData(byte[] srcBuffer, int srcOffset,
                            byte[] destBuffer, int destOffset, int count) {
-        if (getKey() == null) //TODO: ToSync
+        if (getKey() == null)
             throw new SalmonSecurityException("No key found, run init first");
-        if (getCounter() == null) //TODO: ToSync
+        if (getCounter() == null)
             throw new SalmonSecurityException("No counter found, run init first");
 		
 		// we block for AES GPU since it's not entirely thread safe
@@ -127,9 +127,9 @@ public class SalmonNativeTransformer extends SalmonAES256CTRTransformer {
     @Override
     public int decryptData(byte[] srcBuffer, int srcOffset,
                             byte[] destBuffer, int destOffset, int count) {
-        if (getKey() == null) //TODO: ToSync
+        if (getKey() == null)
             throw new SalmonSecurityException("No key found, run init first");
-        if (getCounter() == null) //TODO: ToSync
+        if (getCounter() == null)
             throw new SalmonSecurityException("No counter found, run init first");
 		
 		// we block for AES GPU since it's not entirely thread safe

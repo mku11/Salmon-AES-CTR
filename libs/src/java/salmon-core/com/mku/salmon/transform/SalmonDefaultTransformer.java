@@ -75,7 +75,7 @@ public class SalmonDefaultTransformer extends SalmonAES256CTRTransformer {
      */
     public int encryptData(byte[] srcBuffer, int srcOffset,
                            byte[] destBuffer, int destOffset, int count) {
-        if (this.encSecretKey == null) //TODO: ToSync
+        if (this.encSecretKey == null)
             throw new SalmonSecurityException("No key defined, run init first");
         try {
             byte[] counter = getCounter();
@@ -100,7 +100,7 @@ public class SalmonDefaultTransformer extends SalmonAES256CTRTransformer {
      */
     public int decryptData(byte[] srcBuffer, int srcOffset,
                             byte[] destBuffer, int destOffset, int count) {
-        if (this.encSecretKey == null) //TODO: ToSync
+        if (this.encSecretKey == null)
             throw new SalmonSecurityException("No key defined, run init first");
         try {
             byte[] counter = getCounter();

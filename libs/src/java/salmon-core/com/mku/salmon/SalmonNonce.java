@@ -42,7 +42,6 @@ public class SalmonNonce {
     public static byte[] increaseNonce(byte[] startNonce, byte[] endNonce) {
         long nonce = BitConverter.toLong(startNonce, 0, SalmonGenerator.NONCE_LENGTH);
         long maxNonce = BitConverter.toLong(endNonce, 0, SalmonGenerator.NONCE_LENGTH);
-        // TODO: ToSync
         if (nonce + 1 <= 0 || nonce >= maxNonce)
             throw new SalmonRangeExceededException("Cannot increase nonce, maximum nonce exceeded");
         nonce++;
