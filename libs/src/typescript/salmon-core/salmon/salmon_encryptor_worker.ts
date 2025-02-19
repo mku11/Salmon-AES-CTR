@@ -27,16 +27,27 @@ import { encryptData } from "./salmon_encryptor_helper.js";
 async function receive(event: any) {
     let params = typeof process === 'object' ? event : event.data;
     let destBuffer = new Uint8Array(params.out_size);
-    let { startPos, endPos } = await encryptData(params.data, params.start, params.length, destBuffer, params.key, params.nonce, params.headerData, params.integrity, params.hashKey, params.chunkSize, params.bufferSize);
-    let msg = { startPos: startPos, endPos: endPos, outData: destBuffer };
-    if (typeof process === 'object') {
-        const { parentPort } = await import("worker_threads");
-        if (parentPort != null) {
-            parentPort.postMessage(msg);
+	try {
+		let { startPos, endPos } = await encryptData(params.data, params.start, params.length, destBuffer, params.key, params.nonce, params.headerData, params.integrity, params.hashKey, params.chunkSize, params.bufferSize);
+		let msg = { startPos: startPos, endPos: endPos, outData: destBuffer };
+		if (typeof process === 'object') {
+			const { parentPort } = await import("worker_threads");
+			if (parentPort != null) {
+				parentPort.postMessage(msg);
+			}
+		}
+		else
+			postMessage(msg);
+	} catch (ex) {
+		if (typeof process === 'object') {
+            const { parentPort } = await import("worker_threads");
+            if (parentPort != null) {
+                parentPort.postMessage(ex);
+            }
         }
-    }
-    else
-        postMessage(msg);
+        else
+            postMessage(ex);
+	}
 }
 
 if (typeof process === 'object') {

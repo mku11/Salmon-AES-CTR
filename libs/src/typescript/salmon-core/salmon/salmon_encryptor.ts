@@ -199,7 +199,10 @@ export class SalmonEncryptor {
                 if (typeof process !== 'object') {
                     this.#workers[i] = new Worker(this.#workerPath, { type: 'module' });
                     this.#workers[i].addEventListener('message', (event: { data: unknown }) => {
-                        resolve(event.data);
+                        if(event.data instanceof Error)
+							reject(event.data);
+						else
+							resolve(event.data);
                     });
                     this.#workers[i].addEventListener('error', (event: any) => {
                         reject(event);
@@ -208,7 +211,10 @@ export class SalmonEncryptor {
                     const { Worker } = await import("worker_threads");
                     this.#workers[i] = new Worker(this.#workerPath);
                     this.#workers[i].on('message', (event: any) => {
-                        resolve(event);
+						if(event.data instanceof Error)
+							reject(event);
+						else
+							resolve(event);
                     });
                     this.#workers[i].on('error', (event: any) => {
                         reject(event);
@@ -234,9 +240,13 @@ export class SalmonEncryptor {
                     outData[j] = results[i].outData[j];
                 }
             }
-        }).catch((err) => {
-            console.error(err);
-            throw err;
+        }).catch((event) => {
+			console.error(event);
+			if(event instanceof Error) {
+				throw event;
+			} else {
+				throw new Error("Could not run Worker, make sure you set the correct workerPath");
+			}
         });
     }
 
