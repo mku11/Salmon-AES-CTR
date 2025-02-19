@@ -529,7 +529,7 @@ public class SalmonStream : Stream
         {
             int nBufferSize = Math.Min(bufferSize, count - pos);
 
-            byte[] srcBuffer = ReadBufferData(buffer, pos, nBufferSize);
+            byte[] srcBuffer = ReadBufferData(buffer, pos + offset, nBufferSize);
             if (srcBuffer.Length == 0)
                 break;
             byte[] destBuffer = new byte[srcBuffer.Length];
