@@ -384,8 +384,7 @@ public class JavaWSFileStream extends RandomAccessStream {
     private void checkStatus(HttpResponse httpResponse, int status) throws IOException {
         if (httpResponse.getStatusLine().getStatusCode() != status)
             throw new IOException(httpResponse.getStatusLine().getStatusCode()
-                    + " " + httpResponse.getStatusLine().getReasonPhrase() + "\n"
-                    + new String(httpResponse.getEntity().getContent().readAllBytes()));
+                    + " " + httpResponse.getStatusLine().getReasonPhrase());
     }
 
     private void setDefaultHeaders(HttpRequest request) {
