@@ -1,8 +1,8 @@
-version=2.1.0
+version=2.2.0
 rm -rf packages
 mkdir packages
-rm -rf lib
-mkdir lib
+rm -rf assets/js/lib
+mkdir assets/js/lib
 
 SALMON_CORE=salmon-core
 SALMON_FS=salmon-fs
@@ -14,7 +14,7 @@ SALMON_FS_LIB_FILENAME=$SALMON_FS_LIB.zip
 # use local repo
 # SALMON_LIBS_URL=http://localhost/repository/javascript
 # use salmon release
-SALMON_LIBS_URL=https://github.com/mku11/Salmon-AES-CTR/releases/download/v2.1.0
+SALMON_LIBS_URL=https://github.com/mku11/Salmon-AES-CTR/releases/download/v2.2.0
 
 SALMON_CORE_LIB_URL=$SALMON_LIBS_URL/$SALMON_CORE_LIB_FILENAME
 SALMON_FS_LIB_URL=$SALMON_LIBS_URL/$SALMON_FS_LIB_FILENAME
@@ -27,5 +27,5 @@ unzip -qq -o $SALMON_CORE_LIB_FILENAME
 unzip -qq -o $SALMON_FS_LIB_FILENAME 
 
 cd ..
-mv packages/$SALMON_CORE lib/
-mv packages/$SALMON_FS lib/
+mv packages/$SALMON_CORE assets/js/lib/
+mv packages/$SALMON_FS assets/js/lib/

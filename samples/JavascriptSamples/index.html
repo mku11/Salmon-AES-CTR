@@ -1,0 +1,303 @@
+<!DOCTYPE HTML>
+<html>
+	<title>Salmon JS Samples</title>
+	<link rel="stylesheet" href="./assets/css/main.css">
+	<body>
+		<h3>Salmon JS Samples</h3>
+		<select id="example-selection">
+			<option value="text-example">Encrypt text</option>
+			<option value="data-example">Encrypt data</option>
+			<option value="data-stream-example">Encrypt data stream</option>
+			<option value="local-file-example">Encrypt to local file</option>
+			<option value="local-drive-example">Local drive</option>
+			<option value="ws-drive-example">Web service drive</option>
+			<option value="http-drive-example">Http drive</option>
+		</select>
+		
+		<div class="text-example example-section">
+			<hr class="separator">
+			<h3>Encypt and decrypt text</h3>
+			
+			<div class="spacer"></div>
+			<form onsubmit="return false">
+				<span>Password: </span>
+				<input id="text-password" type="password" value="test123" class="text-password" autocomplete="on">
+				<button onclick="javascript:togglePassword(this)">&#128065;</button>
+			</form>
+			
+			<div class="spacer"></div>
+			<div>
+				<span id="file-to-save">Plain Text</span>
+			</div>
+			<div>
+				<textarea id="text-plain-text" name="text-edit" rows="3" cols="80">This is plaintext that will be encrypted</textarea>
+			</div>
+			<div>
+				<button onclick="javascript:encryptText()">Encrypt</button>
+			</div>
+			
+			
+			<div class="spacer"></div>
+			<div>
+				<span id="file-to-save">Encrypted Text</span>
+			</div>
+			<div>
+				<textarea id="text-encrypted-text" readonly name="text-edit" rows="3" cols="80"></textarea>
+			</div>
+			<div>
+				<button onclick="javascript:decryptText()">Decrypt</button>
+			</div>
+		</div>
+		
+		<div class="data-example example-section hidden-section">
+			<hr class="separator">
+			<h3>Encrypt and decrypt data using multiple threads</h3>
+			
+			<div class="spacer"></div>
+			<form onsubmit="return false">
+				Password:
+				<input id="data-password" type="password" value="test123" class="text-password" autocomplete="on">
+				<button onclick="javascript:togglePassword(this)">&#128065;</button>
+			</form>
+
+			<div class="spacer"></div>
+			<div>
+				Data Size:
+				<select id="data-size">
+					<option value="1048576">1MB</option>
+					<option value="2097152">2MB</option>
+					<option value="4194304">4MB</option>
+					<option value="8388608">8MB</option>
+					<option value="16777216">16MB</option>
+					<option value="16777216">32MB</option>
+					<option value="67108864">64MB</option>
+					<option value="134217728">128MB</option>
+				</select>
+			</div>
+
+			<div class="spacer"></div>
+			<div>
+				Threads:
+				<select id="data-threads">
+					<option value="1">1</option>
+					<option value="2">2</option>
+					<option value="4">4</option>
+				</select>
+			</div>
+
+			<div class="spacer"></div>
+			<div>
+				Integrity:
+				<select id="data-integrity">
+					<option value="false">Disable</option>
+					<option value="true">Enable</option>
+				</select>
+			</div>
+			
+			<div class="spacer"></div>
+			<div>
+				<button onclick="javascript:encryptData()">Encrypt</button>
+			</div>
+			
+			<div class="spacer"></div>
+			<div>
+				<button onclick="javascript:decryptData()">Decrypt</button>
+			</div>
+		</div>
+		
+		<div class="data-stream-example example-section hidden-section">
+			<hr class="separator">
+			<h3>Encrypt and decrypt data using streams</h3>
+			
+			<div class="spacer"></div>
+			<form onsubmit="return false">
+				<span>Password: </span>
+				<input id="data-stream-password" type="password" value="test123" class="text-password" autocomplete="on">
+				<button onclick="javascript:togglePassword(this)">&#128065;</button>
+			</form>
+
+			<div class="spacer"></div>
+			<div>
+				Data Size:
+				<select id="data-stream-size">
+					<option value="1048576">1MB</option>
+					<option value="2097152">2MB</option>
+					<option value="4194304">4MB</option>
+					<option value="8388608">8MB</option>
+					<option value="16777216">16MB</option>
+					<option value="16777216">32MB</option>
+					<option value="67108864">64MB</option>
+					<option value="134217728">128MB</option>
+				</select>
+			</div>
+			
+			<div class="spacer"></div>
+			<div>
+				<button onclick="javascript:encryptDataStream()">Encrypt</button>
+			</div>
+			
+			<div class="spacer"></div>
+			<div>
+				<button onclick="javascript:decryptDataStream()">Decrypt</button>
+			</div>
+		</div>
+		
+		<div class="local-file-example example-section hidden-section">
+			<hr class="separator">
+			<h3>Local file encryption and decryption</h3>
+			
+			<div class="spacer"></div>
+			<form onsubmit="return false">
+				<span>Password: </span>
+				<input id="local-file-password" type="password" value="test123" class="text-password" autocomplete="on">
+				<button onclick="javascript:togglePassword(this)">&#128065;</button>
+			</form>
+
+			<div class="spacer"></div>
+			<div>
+				Integrity:
+				<select id="local-file-integrity">
+					<option value="false">Disable</option>
+					<option value="true">Enable</option>
+				</select>
+			</div>
+			
+			<div class="spacer"></div>
+			<div>
+				<span>Encrypt text to file:</span>
+			</div>
+			<div>
+				<textarea id="local-file-encrypt-text" name="text-edit" rows="3" cols="80">This is plaintext that will be encrypted</textarea>
+			</div>
+			<div>
+				<button onclick="javascript:selectFileToEncryptTo()">Save</button>
+			</div>
+			
+			<div class="spacer"></div>
+			<div>
+				<span>Decrypt text from file:</span>
+			</div>
+			<div>
+				<textarea id="local-file-decrypt-text" readonly name="text-edit" rows="3" cols="80"></textarea>
+			</div>
+			<div>
+				<button onclick="javascript:selectFileToDecryptFrom()">Load</button>
+			</div>
+		</div>
+		
+		<div class="local-drive-example example-section hidden-section">
+			<hr class="separator">
+			<h3>Local Drive</h3>
+
+			<div class="spacer"></div>
+			<form onsubmit="return false">
+				<span>Password: </span>
+				<input id="local-drive-password" type="password" value="test123" class="text-password" autocomplete="on">
+				<button onclick="javascript:togglePassword(this)">&#128065;</button>
+			</form>
+
+			<div class="spacer"></div>
+			<div>
+				<button onclick="javascript:createLocalDrive()">Create Drive</button>
+				<button onclick="javascript:openLocalDrive()">Open Drive</button>
+				<button onclick="javascript:importLocalFiles()">Import Files</button>
+				<button onclick="javascript:listLocalFiles()">List files</button>
+				<button onclick="javascript:exportLocalFiles()">Export Files</button>
+				<button onclick="javascript:closeLocalDrive()">Close Drive</button>
+			</div>
+		</div>
+		
+		<div class="ws-drive-example example-section hidden-section">
+			<hr class="separator">
+			<h3>Web Service Drive</h3>
+				
+				<div class="spacer"></div>
+				<div>
+					<span>Web Service Location: </span>
+					<input id="ws-service-path" id="ws-url" placeholder="https://example.com:8443" value="http://localhost:8080"></input>
+				</div>
+				
+				<div class="spacer"></div>
+				<div>
+					<span>Web Service User: </span>
+					<input id="ws-user" type="username" value="user"></input>
+				</div>
+
+				<div class="spacer"></div>
+				<form onsubmit="return false">
+					<span>Web Service Password: </span>
+					<input id="ws-password" type="password" value="password" class="text-password" autocomplete="on"></input>
+					<button onclick="javascript:togglePassword(this)">&#128065;</button>
+				</form>
+
+				<div class="spacer"></div>
+				<div>
+					<span>Drive Path: </span>
+					<input id="ws-drive-path" value="/test_drive"></input>
+				</div>
+			
+				<div class="spacer"></div>
+				<form onsubmit="return false">
+					<span>Drive Password: </span>
+					<input id="ws-drive-password" type="password" value="test123" class="text-password" autocomplete="on">
+					<button onclick="javascript:togglePassword(this)">&#128065;</button>
+				</form>
+			
+			<div class="spacer"></div>
+			<div>
+				<button onclick="javascript:createWebServiceDrive()">Create Drive</button>
+				<button onclick="javascript:openWebServiceDrive()">Open Drive</button>
+				<button onclick="javascript:importWebServiceFiles()">Import Files</button>
+				<button onclick="javascript:listWebServiceFiles()">List files</button>
+				<button onclick="javascript:exportWebServiceFiles()">Export Files</button>
+				<button onclick="javascript:closeWebServiceDrive()">Close Drive</button>
+			</div>
+		</div>
+
+		
+		<div class="http-drive-example example-section hidden-section">
+			<hr class="separator">
+			<h3>Http Drive</h3>
+			<div style="padding: 2pt">
+				<span>HTTP Drive Location: </span>
+				<input id="http-drive-url" placeholder="https://example.com/drive" value="http://localhost/saltest/httpserv/vault"></input>
+			</div>
+
+			<div class="spacer"></div>
+			<form onsubmit="return false">
+				<span>Drive Password: </span>
+				<input id="http-drive-password" type="password" value="test123" class="text-password" autocomplete="on">
+				<button onclick="javascript:togglePassword(this)">&#128065;</button>
+			</form>
+
+			<div class="spacer"></div>
+			<div>
+				<button onclick="javascript:openHttpDrive()">Open Drive</button>
+				<button onclick="javascript:listHttpDriveFiles()">List files</button>
+				<button onclick="javascript:exportHttpDriveFiles()">Export Files</button>
+				<button onclick="javascript:closeHttpDrive()">Close Drive</button>
+			</div>
+		</div>
+		
+		<div class="console-section">
+			<div>
+				<span>Output: </span>
+			</div>
+			<div>
+				<textarea id="output-text" name="text-edit" rows="15" cols="80"></textarea>
+			</div>
+		<div>
+			<span>* To use remote drives with other domains you will need to modify the CORS header</span>
+		</div>
+		
+		<script type="module" src="assets/js/browser/browser_common.js"></script>
+		<script type="module" src="assets/js/browser/browser_text.js"></script>
+		<script type="module" src="assets/js/browser/browser_data_stream.js"></script>
+		<script type="module" src="assets/js/browser/browser_data.js"></script>
+		<script type="module" src="assets/js/browser/browser_file.js"></script>
+		<script type="module" src="assets/js/browser/browser_local_drive.js"></script>
+		<script type="module" src="assets/js/browser/browser_http_drive.js"></script>
+		<script type="module" src="assets/js/browser/browser_web_service_drive.js"></script>
+		</div>
+	</body>
+</html>

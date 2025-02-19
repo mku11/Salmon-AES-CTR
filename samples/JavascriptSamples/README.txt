@@ -8,21 +8,17 @@ lib/salmon-fs
 
 - To run the samples in Chrome:
 Deploy this folder to an HTTP server
-Navigate to ./js_browser_local.html
-Run the samples using the user interface
-
-- To run the remote samples in Chrome:
-Deploy this folder to an HTTP server
-Make sure folder indexing on the HTTP server is enabled.
-Navigate to ./js_browser_remote.html
+For the HTTP vault make sure you have created a vault under the HTTP public directory
+For the Web Service make sure you're running the Java Web Service start-salmon-ws.bat
+Navigate to index.html
 Run the samples using the user interface
 
 - To run the samples in Node Js:
 Set the enviromental variable so node can support ESM:
 set NODE_OPTIONS=--experimental-vm-modules
 To execute the Node.js sample from the command line:
-cd assets/
-Then run:
-node --experimental-modules --experimental-default-type=module node_sample.js
+cd assets/js/node
+To run a sample:
+node --experimental-modules --experimental-default-type=module node_text.js
 or via package.json:
 npm run execute

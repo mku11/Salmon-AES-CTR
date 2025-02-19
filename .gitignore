@@ -67,7 +67,7 @@ lint.txt
 /libs/projects/SalmonLibsTypeScript.VS2022/SalmonLibsTypeScript.VS2022/test/data
 /libs/projects/SalmonLibsTypeScript.VS2022/SalmonLibsTypeScript.VS2022/jsdoc
 
-/samples/JavascriptSamples/lib
+/samples/JavascriptSamples/assets/js/lib
 /samples/PythonSamples/lib
 vault_*
 data_*

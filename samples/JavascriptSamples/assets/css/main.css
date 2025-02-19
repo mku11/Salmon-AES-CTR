@@ -1,0 +1,21 @@
+hr.separator {
+  border-top: 1px solid #ccc;
+}
+
+.hidden-section {
+	display: none;
+}
+
+.example-section {
+	padding: 8pt;
+}
+
+.console-section {
+	padding: 8pt;
+}
+
+.spacer {
+	padding: 4pt;
+	visibility: hidden;
+}
+
