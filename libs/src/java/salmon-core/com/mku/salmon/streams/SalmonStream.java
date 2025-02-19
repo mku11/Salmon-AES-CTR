@@ -654,7 +654,7 @@ public class SalmonStream extends RandomAccessStream {
         while (pos < count) {
             int nBufferSize = Math.min(bufferSize, count - pos);
 
-            byte[] srcBuffer = readBufferData(buffer, pos, nBufferSize);
+            byte[] srcBuffer = readBufferData(buffer, pos + offset, nBufferSize);
             if (srcBuffer.length == 0)
                 break;
             byte[] destBuffer = new byte[srcBuffer.length];
