@@ -25,15 +25,11 @@ SOFTWARE.
 import { BitConverter } from '../../lib/salmon-core/convert/bit_converter.js';
 import { MemoryStream } from '../../lib/salmon-core/streams/memory_stream.js';
 import { SalmonGenerator } from '../../lib/salmon-core/salmon/salmon_generator.js';
-import { SalmonEncryptor } from '../../lib/salmon-core/salmon/salmon_encryptor.js';
-import { SalmonDecryptor } from '../../lib/salmon-core/salmon/salmon_decryptor.js';
 import { SalmonStream } from '../../lib/salmon-core/salmon/streams/salmon_stream.js';
 import { EncryptionMode } from '../../lib/salmon-core/salmon/streams/encryption_mode.js';
 import { SalmonRangeExceededException } from '../../lib/salmon-core/salmon/salmon_range_exceeded_exception.js';
 import { ReadableStreamWrapper } from '../../lib/salmon-core/streams/readable_stream_wrapper.js';
 import { SalmonCoreTestHelper } from '../salmon-core/salmon_core_test_helper.js';
-import { SalmonTextEncryptor } from '../../lib/salmon-core/salmon/text/salmon_text_encryptor.js';
-import { SalmonTextDecryptor } from '../../lib/salmon-core/salmon/text/salmon_text_decryptor.js';
 import { SalmonFile } from '../../lib/salmon-fs/salmon/salmon_file.js';
 import { SalmonDrive } from '../../lib/salmon-fs/salmon/salmon_drive.js';
 import { SalmonSequenceSerializer } from '../../lib/salmon-fs/salmon/sequence/salmon_sequence_serializer.js';
