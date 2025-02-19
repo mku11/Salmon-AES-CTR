@@ -481,13 +481,11 @@ public class DotNetWSFile : IRealFile
     public IRealFile Move(IRealFile newDir, string newName = null, Action<long, long> progressListener = null)
     {
         newName = newName ?? BaseName;
-        //TODO: ToSync
         if (newDir == null || !newDir.Exists)
             throw new IOException("Target directory does not exist");
         IRealFile newFile = newDir.GetChild(newName);
         if (newFile != null && newFile.Exists)
             throw new IOException("Another file/directory already exists");
-
         if (IsDirectory)
         {
             throw new IOException("Could not move directory use IRealFile moveRecursively() instead");
