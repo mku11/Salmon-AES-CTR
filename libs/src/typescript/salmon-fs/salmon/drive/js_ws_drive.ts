@@ -35,7 +35,6 @@ import { SalmonFile } from "../salmon_file.js";
  * Use static methods open() or create() to create an instance.
  */
 export class JsWSDrive extends SalmonDrive {
-    private static serviceCredentials: Map<IRealFile, Credentials> = new Map();
 
     /**
      * Private constructor, use open() instead.
@@ -51,24 +50,19 @@ export class JsWSDrive extends SalmonDrive {
      * @param {ISalmonSequencer} sequencer Optional nonce sequencer that will be used for importing files.
      * @returns {Promise<SalmonDrive>} The drive.
      */
-    public static async open(dir: IRealFile, password: string, sequencer: INonceSequencer | null = null, 
-        serviceUser: string, servicePassword: string): Promise<SalmonDrive> {
-        JsWSDrive.serviceCredentials.set(dir, new Credentials(serviceUser, servicePassword));
+    public static async open(dir: IRealFile, password: string, sequencer: INonceSequencer | null = null): Promise<SalmonDrive> {
         return await SalmonDrive.openDrive(dir, JsWSDrive, password, sequencer);
     }
     
     /**
      * Helper method that creates and initializes a JsWSDrive
-     * @param {IRealFile} dir The directory that will host the drive.
+     * @param {IRealFile} dir The directory that will host the drive. This should be a JsWSFile with the correct service path and credentials.
      * @param {string} password The password.
      * @param {ISalmonSequencer} sequencer The nonce sequencer that will be used for encryption.
-     * @param {string} serviceUser The web service username
-     * @param {string} servicePassword The web service password
      * @return {Promise<SalmonDrive>} The drive.
      * @throws IOException If error occurs during creating the drive.
      */
-    static async create(dir: IRealFile, password: string, sequencer: INonceSequencer, serviceUser: string, servicePassword: string) {
-        JsWSDrive.serviceCredentials.set(dir, new Credentials(serviceUser, servicePassword));
+    static async create(dir: IRealFile, password: string, sequencer: INonceSequencer) {
         return await SalmonDrive.createDrive(dir, JsWSDrive, password, sequencer);
     }
 
@@ -104,12 +98,5 @@ export class JsWSDrive extends SalmonDrive {
      */
     public override getFile(file: IRealFile): SalmonFile {
         return new SalmonFile(file, this);
-    }
-
-    public override async initialize(realRoot: IRealFile, createIfNotExists: boolean): Promise<void> {
-        let credentials: Credentials | undefined = JsWSDrive.serviceCredentials.get(realRoot);
-        if(credentials)
-            (realRoot as JsWSFile).setCredentials(credentials);
-        await super.initialize(realRoot, createIfNotExists);
     }
 }
