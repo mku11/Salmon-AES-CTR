@@ -118,7 +118,6 @@ export class JsWSFileStream extends RandomAccessStream {
             // the new js stream API with HTTP2 doesn't seem very reliable 
 			// especially when we use a ReadableStream with push controller
 			// so we manually chunk it to blobs	
-			let CHUNK_SIZE = 4 * 1024 * 1024;
             let body: MemoryStream = new MemoryStream();
 			await body.write(headerData, 0, headerData.length);
 			let sstream = this;
@@ -143,7 +142,7 @@ export class JsWSFileStream extends RandomAccessStream {
             this.writeStream = new WritableStream({
                 async write(data) {
 					await body.write(data, 0, data.length);
-					if(await body.length() - headerData.length >= CHUNK_SIZE) {
+					if(await body.length() - headerData.length >= JsWSFileStream.MAX_LEN_PER_REQUEST) {
 						await send();
 					}
                 },
