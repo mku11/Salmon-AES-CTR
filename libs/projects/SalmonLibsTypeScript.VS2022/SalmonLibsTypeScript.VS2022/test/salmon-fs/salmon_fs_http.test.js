@@ -40,6 +40,16 @@ describe('salmon-fs-http', () => {
         
         SalmonFSTestHelper.TEST_HTTP_FILE = SalmonFSTestHelper.TEST_IMPORT_LARGE_FILE;
 		
+        // SalmonCoreTestHelper.TEST_ENC_BUFFER_SIZE = 1 * 1024 * 1024;
+		// SalmonCoreTestHelper.TEST_DEC_BUFFER_SIZE = 1 * 1024 * 1024;
+		SalmonCoreTestHelper.TEST_ENC_THREADS = 2;
+		SalmonCoreTestHelper.TEST_DEC_THREADS = 2;
+
+        // SalmonFSTestHelper.ENC_IMPORT_BUFFER_SIZE = 512 * 1024;
+        // SalmonFSTestHelper.ENC_EXPORT_BUFFER_SIZE = 512 * 1024;
+        SalmonFSTestHelper.ENC_IMPORT_THREADS = 2;
+        SalmonFSTestHelper.ENC_EXPORT_THREADS = 2;
+        
         SalmonFSTestHelper.TEST_FILE_INPUT_STREAM_THREADS = 2;
         SalmonFSTestHelper.TEST_USE_FILE_INPUT_STREAM = true;
 

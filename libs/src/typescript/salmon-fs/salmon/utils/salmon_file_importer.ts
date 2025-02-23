@@ -59,7 +59,7 @@ export class SalmonFileImporter extends FileImporter {
         // we force the whole content to use 1 thread if:
         if(
             // we are in the browser andthe target is a local file (chromes crswap clash between writers)
-            (targetFile.constructor.name === 'JsFile' && typeof process !== 'object') 
+            (targetFile.getRealFile().constructor.name === 'JsFile' && typeof process !== 'object') 
             // or Web Service files (require passing the credentials)
             || targetFile.getRealFile().constructor.name == 'JsWSFile' 
             || sourceFile.constructor.name === 'JsWSFile)') {
