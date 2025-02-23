@@ -215,19 +215,6 @@ export class JsHttpFile implements IRealFile {
         if (lenStr != null) {
             length = parseInt(lenStr);
         }
-        else {
-			let stream: RandomAccessStream = await this.getInputStream();
-			let totalLength: number = 0;
-			let buffer: Uint8Array = new Uint8Array(JsHttpFile.BUFFER_LENGTH);
-			let bytesRead = 0;
-            while((bytesRead = await stream.read(buffer, 0, buffer.length)) > 0) {
-                totalLength += bytesRead;
-                if (totalLength > JsHttpFile.SMALL_FILE_MAX_LENGTH) {
-                    throw new IOException("Could not get length from file. If this is a large file make sure the server responds with a Content-Length");
-                }
-            }
-            length = totalLength;
-        }
         return length;
     }
 
