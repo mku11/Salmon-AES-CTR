@@ -2,7 +2,6 @@ import { TestMode, TestRunnerMode, SalmonFSTestHelper } from "./salmon-fs/salmon
 
 // TestMode:
 // Local: to test Local browser files (browser only)
-// Http: to test Http files (browser or node.js)
 // WebService: to run on a web service drive (browser or node.js)
 // TestRunnerMode:
 // Browser: to run in the browser

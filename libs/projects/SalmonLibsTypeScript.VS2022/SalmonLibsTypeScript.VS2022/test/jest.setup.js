@@ -6,11 +6,10 @@ import { SalmonFSTestHelper, TestMode, TestRunnerMode } from "./salmon-fs/salmon
 
 // TestMode:
 // Node: to test node files (node.js only)
-// Http: to test Http files (browser or node.js)
 // WebService: to run on a web service drive (browser or node.js)
 // TestRunnerMode:
 // NodeJS: to run in node.js command line (or Visual Code)
-var testMode = TestMode.Local;
+var testMode = TestMode.Node;
 var testRunnerMode = TestRunnerMode.NodeJS;
 
 // test dir
