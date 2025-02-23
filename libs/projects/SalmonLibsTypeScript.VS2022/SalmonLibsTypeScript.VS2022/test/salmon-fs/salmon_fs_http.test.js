@@ -24,6 +24,7 @@ SOFTWARE.
 
 import { MemoryStream } from '../../lib/salmon-core/streams/memory_stream.js';
 import { JsHttpDrive } from '../../lib/salmon-fs/salmon/drive/js_http_drive.js';
+import { JsHttpFile } from '../../lib/salmon-fs/file/js_http_file.js';
 import { SalmonDrive } from '../../lib/salmon-fs/salmon/salmon_drive.js';
 import { SalmonCoreTestHelper } from '../salmon-core/salmon_core_test_helper.js';
 import { getTestMode, getTestRunnerMode, SalmonFSTestHelper, TestMode } from './salmon_fs_test_helper.js';
@@ -37,7 +38,7 @@ describe('salmon-fs-http', () => {
 		// SalmonCoreTestHelper.TEST_ENC_BUFFER_SIZE = 1 * 1024 * 1024;
         // SalmonCoreTestHelper.TEST_DEC_BUFFER_SIZE = 1 * 1024 * 1024;
         
-		SalmonFSTestHelper.TEST_IMPORT_FILE = SalmonFSTestHelper.TEST_IMPORT_LARGE_FILE;
+        SalmonFSTestHelper.TEST_HTTP_FILE = SalmonFSTestHelper.TEST_IMPORT_LARGE_FILE;
 		
         SalmonFSTestHelper.TEST_FILE_INPUT_STREAM_THREADS = 2;
         SalmonFSTestHelper.TEST_USE_FILE_INPUT_STREAM = true;
@@ -80,16 +81,20 @@ describe('salmon-fs-http', () => {
         expect(wrongPassword).toBeFalsy();
     });
 
-    it('shouldReadFromRealFileTiny', async () => {
+    it('shouldReadFromFileTiny', async () => {
         await SalmonFSTestHelper.shouldReadFile(SalmonFSTestHelper.HTTP_VAULT_DIR, SalmonFSTestHelper.TEST_IMPORT_TINY_FILENAME);
     });
 
-    it('shouldReadFromRealFileSmall', async () => {
+    it('shouldReadFromFileSmall', async () => {
         await SalmonFSTestHelper.shouldReadFile(SalmonFSTestHelper.HTTP_VAULT_DIR, SalmonFSTestHelper.TEST_IMPORT_SMALL_FILENAME);
     });
 
-    it('shouldReadFromRealFileLarge', async () => {
-        await SalmonFSTestHelper.shouldReadFile(SalmonFSTestHelper.HTTP_VAULT_DIR, SalmonFSTestHelper.TEST_IMPORT_SMALL_FILENAME);
+    it('shouldReadFromFileMedium', async () => {
+        await SalmonFSTestHelper.shouldReadFile(SalmonFSTestHelper.HTTP_VAULT_DIR, SalmonFSTestHelper.TEST_IMPORT_MEDIUM_FILENAME);
+    });
+
+    it('shouldReadFromFileLarge', async () => {
+        await SalmonFSTestHelper.shouldReadFile(SalmonFSTestHelper.HTTP_VAULT_DIR, SalmonFSTestHelper.TEST_IMPORT_LARGE_FILENAME);
     });
 
     it('shouldSeekAndReadEncryptedFileStreamFromDrive', async () => {
@@ -123,5 +128,34 @@ describe('salmon-fs-http', () => {
         expect(filenames.includes(SalmonFSTestHelper.TEST_IMPORT_SMALL_FILENAME)).toBeTruthy();
         expect(filenames.includes(SalmonFSTestHelper.TEST_IMPORT_MEDIUM_FILENAME)).toBeTruthy();
         expect(filenames.includes(SalmonFSTestHelper.TEST_IMPORT_LARGE_FILENAME)).toBeTruthy();
+    });
+
+    it('shouldExportFileFromDrive', async () => {
+        let vaultDir = SalmonFSTestHelper.HTTP_VAULT_DIR;
+        let threads = 2;
+        let drive = await SalmonFSTestHelper.openDrive(vaultDir, SalmonFSTestHelper.driveClassType, SalmonCoreTestHelper.TEST_PASSWORD);
+        let file = await (await drive.getRoot()).getChild(await SalmonFSTestHelper.TEST_HTTP_FILE.getBaseName());
+        let exportDir = await SalmonFSTestHelper.generateFolder("export_http", SalmonFSTestHelper.TEST_OUTPUT_DIR, false);
+        let localFile = await exportDir.getChild(await SalmonFSTestHelper.TEST_HTTP_FILE.getBaseName());
+        if(await localFile.exists())
+            await localFile.delete();
+        await SalmonFSTestHelper.exportFiles([file], exportDir, threads);
+        drive.close();
+    });
+
+    it('shouldReadRawFile', async () => {
+        let localFile = await SalmonFSTestHelper.HTTP_TEST_DIR.getChild(await SalmonFSTestHelper.TEST_HTTP_FILE.getBaseName());
+        let localChkSum = await SalmonFSTestHelper.getChecksum(localFile);
+        let httpRoot = new JsHttpFile(SalmonFSTestHelper.HTTP_SERVER_VIRTUAL_URL + "/" + SalmonFSTestHelper.HTTP_TEST_DIRNAME);
+        let httpFile = await httpRoot.getChild(await SalmonFSTestHelper.TEST_HTTP_FILE.getBaseName());
+        let stream = await httpFile.getInputStream();
+        let ms = new MemoryStream();
+        await stream.copyTo(ms);
+        await ms.flush();
+        await ms.setPosition(0);
+        await ms.close();
+        await stream.close();
+        let digest = await SalmonFSTestHelper.getChecksumStream(ms);
+        expect(digest).toBe(localChkSum);
     });
 });
