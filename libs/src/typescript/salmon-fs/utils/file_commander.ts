@@ -47,6 +47,14 @@ export class FileCommander {
         this.fileSearcher = fileSearcher;
     }
 
+	public getFileImporter(): FileImporter {
+		return this.fileImporter;
+	}
+	
+	public getFileExporter(): FileExporter {
+		return this.fileExporter;
+	}
+	
     /**
      * Import files to the drive.
      *
