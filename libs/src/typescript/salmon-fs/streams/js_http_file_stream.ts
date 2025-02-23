@@ -70,12 +70,17 @@ export class JsHttpFileStream extends RandomAccessStream {
         if (this.stream == null) {
             let headers = new Headers();
 			this.setDefaultHeaders(headers);
-            let end = this.position + JsHttpFileStream.MAX_LEN_PER_REQUEST - 1;
-            if(this.position > 0) {
-                // always specify the end since fetch will read the whole content without streaming
-                headers.append("Range", "bytes=" + this.position + "-" + end);
+			let end = await this.length() - 1;
+            let requestLength = JsHttpFileStream.MAX_LEN_PER_REQUEST;
+            if (end == -1 || end >= this.position + requestLength) {
+                end = this.position + requestLength - 1;
             }
-            this.stream = (await (fetch(this.file.getPath(), { cache: "no-store", keepalive: true, headers: headers }))).body;
+            // specify the end since fetch will read the whole content without streaming
+			headers.append("Range", "bytes=" + this.position + "-" + end);
+            let httpResponse = await fetch(this.file.getPath(), { cache: "no-store", keepalive: true, headers: headers });
+
+            await this.#checkStatus(httpResponse, new Set([200, 206]));
+            this.stream = httpResponse.body;
             this.end_position = end;
         }
         if (this.stream == null)
@@ -169,7 +174,7 @@ export class JsHttpFileStream extends RandomAccessStream {
             }
             this.position += bytesRead;
         }
-        if(bytesRead < count && this.position == this.end_position - 1 && this.position < await this.file.length()) {
+        if(bytesRead < count && this.position == this.end_position + 1 && this.position < await this.file.length()) {
             await this.reset();
         }
         let reader: ReadableStreamDefaultReader = await this.getReader();
@@ -255,10 +260,11 @@ export class JsHttpFileStream extends RandomAccessStream {
         this.bufferPosition = 0;
     }
 	
-    async #checkStatus(httpResponse: Response, status: number) {
-        if (httpResponse.status != status)
+    async #checkStatus(httpResponse: Response, status: Set<number>) {
+        if (!status.has(httpResponse.status)) {
             throw new IOException(httpResponse.status
                     + " " + httpResponse.statusText);
+            }
     }
 
     private setDefaultHeaders(headers: Headers) {
