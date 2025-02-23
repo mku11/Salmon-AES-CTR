@@ -3,6 +3,7 @@ import { DriveSample } from '../samples/drive_sample.js';
 import { FileDialogs } from './file_dialogs.js';
 
 let wsDrive;
+
 export async function createWebServiceDrive() {
 	let wsServicePath = document.getElementById("ws-service-path").value;
 	let wsUser = document.getElementById("ws-user").value;
@@ -47,6 +48,9 @@ export async function openWebServiceDrive() {
 }
 
 export function importWebServiceFiles() {
+	if(!wsDrive)
+		return;
+	
 	FileDialogs.openFiles(async (files)=>{
 		if(files == null)
 			return;
@@ -60,6 +64,9 @@ export function importWebServiceFiles() {
 }
 
 export function exportWebServiceFiles() {
+	if(!wsDrive)
+		return;
+	
 	FileDialogs.openFolder(async (dir)=>{
 		if(dir == null)
 			return;
@@ -73,6 +80,9 @@ export function exportWebServiceFiles() {
 }
 
 export async function listWebServiceFiles() {
+	if(!wsDrive)
+		return;
+		
 	try {
 		await DriveSample.listFiles(wsDrive);
 	} catch (ex) {
@@ -82,6 +92,8 @@ export async function listWebServiceFiles() {
 }
 
 export function closeWebServiceDrive() {
+	if(!wsDrive)
+		return;
 	try {
 		DriveSample.closeDrive(wsDrive);
 	} catch (ex) {

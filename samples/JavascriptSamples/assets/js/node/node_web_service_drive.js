@@ -1,100 +1,30 @@
-import { JsWSFile, Credentials } from '../lib/salmon-fs/file/js_ws_file.js';
+import './node_common.js';
 import { DriveSample } from '../samples/drive_sample.js';
-import { FileDialogs } from './file_dialogs.js';
+import { JsWSFile, Credentials } from '../lib/salmon-fs/file/js_ws_file.js';
+import { JsNodeFile } from '../lib/salmon-fs/file/js_node_file.js';
 
-let wsDrive;
-export async function createWebServiceDrive() {
-	let wsServicePath = document.getElementById("ws-service-path").value;
-	let wsUser = document.getElementById("ws-user").value;
-	let wsPassword = document.getElementById("ws-password").value;
-	let drivePath = document.getElementById("ws-drive-path").value;
-	let password = document.getElementById("ws-drive-password").value;
+let wsServicePath = "http://localhost:8080";
+let wsUser = "user";
+let wsPassword = "password";
+let drivePath = "/example_drive_" + Date.now();
+let password = "test123";
 
-	if(drivePath === "")
-		return;
-	try {
-		printReset();
-		let dir = new JsWSFile(drivePath, wsServicePath, new Credentials(wsUser, wsPassword));
-		if(!await dir.exists())
-			await dir.mkdir();
-		wsDrive = await DriveSample.createDrive(dir, password);
-	} catch (ex) {
-		console.error(ex);
-		print(ex.stack + "\n");
-	}
-}
+let filesToImport = [new JsNodeFile("../../../data/file.txt")];
 
-export async function openWebServiceDrive() {
-	if(wsDrive)
-		DriveSample.closeDrive(wsDrive);
+let dir = new JsNodeFile("../../../output");
+if(!await dir.exists())
+	await dir.mkdir();
+let exportDir = await dir.getChild("export");
+if(!await exportDir.exists())
+	await exportDir.mkdir();
 
-	let wsServicePath = document.getElementById("ws-service-path").value;
-	let wsUser = document.getElementById("ws-user").value;
-	let wsPassword = document.getElementById("ws-password").value;
-	let drivePath = document.getElementById("ws-drive-path").value;
-	let password = document.getElementById("ws-drive-password").value;
-	
-	if(drivePath === "")
-		return;
-	try {
-		let dir = new JsWSFile(drivePath, wsServicePath, new Credentials(wsUser, wsPassword));
-		wsDrive = await DriveSample.openDrive(dir, password, 
-												wsServicePath, wsUser, wsPassword);
-	} catch (ex) {
-		console.error(ex);
-		print(ex.stack + "\n");
-	}
-}
+let driveDir = new JsWSFile(drivePath, wsServicePath, new Credentials(wsUser, wsPassword));
+if(!await driveDir.exists())
+	await driveDir.mkdir();
 
-export function importWebServiceFiles() {
-	FileDialogs.openFiles(async (files)=>{
-		if(files == null)
-			return;
-		try {
-			DriveSample.importFiles(wsDrive, files);
-		} catch (ex) {
-			console.error(ex);
-			print(ex.stack + "\n");
-		}
-	});
-}
-
-export function exportWebServiceFiles() {
-	FileDialogs.openFolder(async (dir)=>{
-		if(dir == null)
-			return;
-		try {
-			DriveSample.exportFiles(wsDrive, dir);
-		} catch (ex) {
-			console.error(ex);
-			print(ex.stack + "\n");
-		}
-	});
-}
-
-export async function listWebServiceFiles() {
-	try {
-		await DriveSample.listFiles(wsDrive);
-	} catch (ex) {
-		console.error(ex);
-		print(ex.stack + "\n");
-	}
-}
-
-export function closeWebServiceDrive() {
-	try {
-		DriveSample.closeDrive(wsDrive);
-	} catch (ex) {
-		console.error(ex);
-		print(ex.stack + "\n");
-	}
-	wsDrive = null;
-}
-
-window.createWebServiceDrive = createWebServiceDrive;
-window.openWebServiceDrive = openWebServiceDrive;
-window.importWebServiceFiles = importWebServiceFiles;
-window.listWebServiceFiles = listWebServiceFiles;
-window.exportWebServiceFiles = exportWebServiceFiles;
-window.closeWebServiceDrive = closeWebServiceDrive;
-
+let wsDrive = await DriveSample.createDrive(driveDir, password, wsServicePath, wsUser, wsPassword);
+wsDrive = await DriveSample.openDrive(driveDir, password, wsServicePath, wsUser, wsPassword);
+await DriveSample.importFiles(wsDrive, filesToImport);
+await DriveSample.listFiles(wsDrive);
+await DriveSample.exportFiles(wsDrive, dir);
+DriveSample.closeDrive(wsDrive);

@@ -1,55 +1,21 @@
+import './node_common.js';
 import { DriveSample } from '../samples/drive_sample.js';
-import { FileDialogs } from './file_dialogs.js';
 import { JsHttpFile } from '../lib/salmon-fs/file/js_http_file.js';
+import { JsNodeFile } from '../lib/salmon-fs/file/js_node_file.js';
 
-let httpDrive;
-export async function openHttpDrive() {
-	if(httpDrive)
-		DriveSample.closeDrive(httpDrive);
-	try {
-		let httpDriveURL = document.getElementById("http-drive-url").value;
-		let password = document.getElementById("http-drive-password").value;
-		let dir = new JsHttpFile(httpDriveURL);
-		httpDrive = await DriveSample.openDrive(dir, password);
-	} catch (ex) {
-		console.error(ex);
-		print(ex.stack + "\n");
-	}
-}
+let httpDriveURL = "http://localhost/saltest/httpserv/vault";
+let password = "test123";
+let threads = 2;
 
-export function exportHttpDriveFiles() {
-	FileDialogs.openFolder(async (dir)=>{
-		if(dir == null)
-			return;
-		try {
-			DriveSample.exportFiles(httpDrive, dir);
-		} catch (ex) {
-			console.error(ex);
-			print(ex.stack + "\n");
-		}
-	});
-}
+let dir = new JsNodeFile("../../../output");
+if(!await dir.exists())
+	await dir.mkdir();
+let exportDir = await dir.getChild("export");
+if(!await exportDir.exists())
+	await exportDir.mkdir();
 
-export async function listHttpDriveFiles() {
-	try {
-		await DriveSample.listFiles(httpDrive);
-	} catch (ex) {
-		console.error(ex);
-		print(ex.stack + "\n");
-	}
-}
-
-export function closeHttpDrive() {
-	try {
-		DriveSample.closeDrive(httpDrive);
-	} catch (ex) {
-		console.error(ex);
-		print(ex.stack + "\n");
-	}
-	httpDrive = null;
-}
-
-window.openHttpDrive = openHttpDrive;
-window.listHttpDriveFiles = listHttpDriveFiles;
-window.exportHttpDriveFiles = exportHttpDriveFiles;
-window.closeHttpDrive = closeHttpDrive;
+let httpDir = new JsHttpFile(httpDriveURL);
+let httpDrive = await DriveSample.openDrive(httpDir, password);
+await DriveSample.listFiles(httpDrive);
+await DriveSample.exportFiles(httpDrive, exportDir, threads);
+DriveSample.closeDrive(httpDrive);

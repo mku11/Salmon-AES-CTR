@@ -1,7 +1,9 @@
 import { DriveSample } from '../samples/drive_sample.js';
 import { FileDialogs } from './file_dialogs.js';
 
+let threads = 2;
 let localDrive;
+
 export function createLocalDrive() {
 	FileDialogs.openFolder(async (dir) => {
 		if(dir == null)
@@ -35,11 +37,13 @@ export function openLocalDrive() {
 }
 
 export function importLocalFiles() {
+	if(!localDrive)
+		return;
 	FileDialogs.openFiles(async (files)=>{
 		if(files == null)
 			return;
 		try {
-			DriveSample.importFiles(localDrive, files);
+			DriveSample.importFiles(localDrive, files, threads);
 		} catch (ex) {
 			console.error(ex);
 			print(ex.stack + "\n");
@@ -48,11 +52,13 @@ export function importLocalFiles() {
 }
 
 export function exportLocalFiles() {
+	if(!localDrive)
+		return;
 	FileDialogs.openFolder(async (dir)=>{
 		if(dir == null)
 			return;
 		try {
-			DriveSample.exportFiles(localDrive, dir);
+			DriveSample.exportFiles(localDrive, dir, threads);
 		} catch (ex) {
 			console.error(ex);
 			print(ex.stack + "\n");
@@ -61,6 +67,8 @@ export function exportLocalFiles() {
 }
 
 export async function listLocalFiles() {
+	if(!localDrive)
+		return;
 	try {
 		await DriveSample.listFiles(localDrive);
 	} catch (ex) {
@@ -70,6 +78,8 @@ export async function listLocalFiles() {
 }
 
 export function closeLocalDrive() {
+	if(!localDrive)
+		return;
 	try {
 		DriveSample.closeDrive(localDrive);
 	} catch (ex) {

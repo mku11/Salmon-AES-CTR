@@ -2,11 +2,14 @@ import { DriveSample } from '../samples/drive_sample.js';
 import { FileDialogs } from './file_dialogs.js';
 import { JsHttpFile } from '../lib/salmon-fs/file/js_http_file.js';
 
+let threads = 2;
 let httpDrive;
+
 export async function openHttpDrive() {
 	if(httpDrive)
 		DriveSample.closeDrive(httpDrive);
 	try {
+		printReset();
 		let httpDriveURL = document.getElementById("http-drive-url").value;
 		let password = document.getElementById("http-drive-password").value;
 		let dir = new JsHttpFile(httpDriveURL);
@@ -17,12 +20,14 @@ export async function openHttpDrive() {
 	}
 }
 
-export function exportHttpDriveFiles() {
+export async function exportHttpDriveFiles() {
+	if(!httpDrive)
+		return;
 	FileDialogs.openFolder(async (dir)=>{
 		if(dir == null)
 			return;
 		try {
-			DriveSample.exportFiles(httpDrive, dir);
+			DriveSample.exportFiles(httpDrive, dir, threads);
 		} catch (ex) {
 			console.error(ex);
 			print(ex.stack + "\n");
@@ -31,6 +36,8 @@ export function exportHttpDriveFiles() {
 }
 
 export async function listHttpDriveFiles() {
+	if(!httpDrive)
+		return;
 	try {
 		await DriveSample.listFiles(httpDrive);
 	} catch (ex) {
@@ -40,6 +47,8 @@ export async function listHttpDriveFiles() {
 }
 
 export function closeHttpDrive() {
+	if(!httpDrive)
+		return;
 	try {
 		DriveSample.closeDrive(httpDrive);
 	} catch (ex) {

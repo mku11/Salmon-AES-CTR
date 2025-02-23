@@ -1,31 +1,15 @@
-import { BitConverter } from '../lib/salmon-core/convert/bit_converter.js';
-import { MemoryStream } from '../lib/salmon-core/streams/memory_stream.js';
-import { SalmonGenerator } from '../lib/salmon-core/salmon/salmon_generator.js';
-import { SalmonEncryptor } from '../lib/salmon-core/salmon/salmon_encryptor.js';
-import { SalmonDecryptor } from '../lib/salmon-core/salmon/salmon_decryptor.js';
-import { SalmonTextEncryptor } from '../lib/salmon-core/salmon/text/salmon_text_encryptor.js';
-import { SalmonTextDecryptor } from '../lib/salmon-core/salmon/text/salmon_text_decryptor.js';
-import { SalmonStream } from '../lib/salmon-core/salmon/streams/salmon_stream.js';
-import { EncryptionMode } from '../lib/salmon-core/salmon/streams/encryption_mode.js';
-import { SalmonFile } from '../lib/salmon-fs/salmon/salmon_file.js';
-import { autoRename as IRealFileAutoRename } from '../lib/salmon-fs/file/ireal_file.js';
-import { SalmonDrive } from '../lib/salmon-fs/salmon/salmon_drive.js';
-import { JsHttpFile } from '../lib/salmon-fs/file/js_http_file.js';
+import { autoRenameFile as autoRenameFile } from '../lib/salmon-fs/file/ireal_file.js';
 import { JsHttpDrive } from '../lib/salmon-fs/salmon/drive/js_http_drive.js';
-import { JsFile } from '../lib/salmon-fs/file/js_file.js';
 import { JsDrive } from '../lib/salmon-fs/salmon/drive/js_drive.js';
-import { JsWSFile, Credentials } from '../lib/salmon-fs/file/js_ws_file.js';
 import { JsWSDrive } from '../lib/salmon-fs/salmon/drive/js_ws_drive.js';
 import { JsLocalStorageFile } from '../lib/salmon-fs/file/js_ls_file.js';
 import { SalmonFileSequencer } from '../lib/salmon-fs/salmon/sequence/salmon_file_sequencer.js';
 import { SalmonSequenceSerializer } from '../lib/salmon-fs/salmon/sequence/salmon_sequence_serializer.js';
 import { SalmonFileCommander } from '../lib/salmon-fs/salmon/utils/salmon_file_commander.js';
 import { SalmonFileReadableStream } from '../lib/salmon-fs/salmon/streams/salmon_file_readable_stream.js';
-import { SalmonPassword } from '../lib/salmon-core/salmon/password/salmon_password.js';
-import { RandomAccessStream, SeekOrigin } from '../lib/salmon-core/streams/random_access_stream.js';
 
 export class DriveSample {
-    static async createDrive(vaultDir, password, wsServicePath = null, wsUser = null, wsPassword = null) {
+    static async createDrive(vaultDir, password) {
         // create a drive
         let drive;
 		if(vaultDir.constructor.name === 'JsFile') { // local
@@ -34,13 +18,13 @@ export class DriveSample {
 			const { JsNodeDrive } = await import('../lib/salmon-fs/salmon/drive/js_node_drive.js');
 			drive = await JsNodeDrive.create(vaultDir, password, sequencer);
 		} else if(vaultDir.constructor.name === 'JsWSFile') { // web service
-			drive = await JsWSDrive.create(vaultDir, password, sequencer, wsServicePath, new Credentials(wsUser, wsPassword));
+			drive = await JsWSDrive.create(vaultDir, password, sequencer);
 		}
 		print("drive created: " + drive.getRealRoot().getAbsolutePath());
 		return drive;
 	}
 
-	static async openDrive(vaultDir, password, wsServicePath = null, wsUser = null, wsPassword = null) {
+	static async openDrive(vaultDir, password) {
         // open a drive
         let drive;
 		if(vaultDir.constructor.name === 'JsFile') { // local
@@ -57,16 +41,21 @@ export class DriveSample {
 		return drive;
 	}
 
-	static async importFiles(drive, filesToImport) {
-        let commander = new SalmonFileCommander(256 * 1024, 256 * 1024, 2);
+	static async importFiles(drive, filesToImport, threads) {
+		let bufferSize = 256 * 1024;
+        let commander = new SalmonFileCommander(bufferSize, bufferSize, threads);
+
+		// set the correct worker paths for multithreading
+		commander.getFileImporter().setWorkerPath( '../lib/salmon-fs/salmon/utils/salmon_file_importer_worker.js');
+		commander.getFileExporter().setWorkerPath( '../lib/salmon-fs/salmon/utils/salmon_file_exporter_worker.js');
 		
         // import multiple files
         let filesImported = await commander.importFiles(filesToImport, await drive.getRoot(), false, true,
                 async (taskProgress) => {
                     print( "file importing: " + taskProgress.getFile().getBaseName() + ": "
                             + taskProgress.getProcessedBytes() + "/" + taskProgress.getTotalBytes() + " bytes" );
-                }, IRealFileAutoRename, (file, ex) => {
-                    // file failed to import
+                }, autoRenameFile, async (file, ex) => {
+                    console.error("import failed: " + await file.getBaseName() + "\n" + ex);
                 });
 	
 		print("Files imported");
@@ -75,12 +64,17 @@ export class DriveSample {
         commander.close();
     }
 
-	static async exportFiles(drive, dir) {
-		let commander = new SalmonFileCommander(256 * 1024, 256 * 1024, 2);
+	static async exportFiles(drive, dir, threads = 1) {
+		let bufferSize = 256 * 1024;
+		let commander = new SalmonFileCommander(bufferSize, bufferSize, threads);
+
+		// set the correct worker paths for multithreading
+		commander.getFileImporter().setWorkerPath( '../lib/salmon-fs/salmon/utils/salmon_file_importer_worker.js');
+		commander.getFileExporter().setWorkerPath( '../lib/salmon-fs/salmon/utils/salmon_file_exporter_worker.js');
 		
         // export all files
 		let files = await drive.getRoot().then((root)=>root.listFiles());
-        let filesExported = await commander.exportFiles(files, await dir, false, true,
+        let filesExported = await commander.exportFiles(files, dir, false, true,
                 async (taskProgress) => {
                     try {
                         print( "file exporting: " + await taskProgress.getFile().getBaseName() + ": "
@@ -88,8 +82,10 @@ export class DriveSample {
                     } catch (e) {
                         console.error(e);
                     }
-                }, IRealFileAutoRename, (sfile, ex) => {
+                }, autoRenameFile, async (sfile, ex) => {
                     // file failed to import
+					console.error(ex);
+					print("export failed: " + await sfile.getBaseName() + "\n" + ex.stack);
                 });
 			
 		print("Files exported");
@@ -103,12 +99,17 @@ export class DriveSample {
 		let root = await drive.getRoot();
         let files = await root.listFiles();
 		print("directory listing:")
+		if(files.length == 0) {
+			print("no files found");
+			return;
+		}
+			
 		for(let file of files) {
 			print("file: " + await file.getBaseName() + ", size: " + await file.getSize());
 		}
-
+		
 		// to read you can use file.getInputStream() to get a low level RandomAccessStream
-		// or use a ReadableStream wrapper with parallel threads and caching, see below:
+		// or use a JS native ReadableStream wrapper with caching, see below:
 		let file = files[0]; // pick the first file
 		print("reading file: " + await file.getBaseName());
 		let buffers = 4;
