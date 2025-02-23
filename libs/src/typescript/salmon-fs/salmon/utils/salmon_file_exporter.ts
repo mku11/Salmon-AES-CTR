@@ -40,8 +40,17 @@ export class SalmonFileExporter extends FileExporter {
         super.initialize(bufferSize, threads);
     }
 
-    async getMinimumPartSize(file: IVirtualFile): Promise<number> {
-        return await (file as SalmonFile).getMinimumPartSize();
+    async getMinimumPartSize(sourceFile: IVirtualFile, targetFile: IRealFile): Promise<number> {
+        // we force the whole content to use 1 thread if:
+        if(
+            // we are in the browser andthe target is a local file (chromes crswap clash between writers)
+            (targetFile.constructor.name === 'JsFile' && typeof process !== 'object') 
+            // or Web Service files (require passing the credentials)
+            || sourceFile.getRealFile().constructor.name == 'JsWSFile' 
+            || targetFile.constructor.name === 'JsWSFile)') {
+            return await (sourceFile as SalmonFile).getSize();
+        }
+        return await (sourceFile as SalmonFile).getMinimumPartSize();
     }
 
     async onPrepare(sourceFile: IVirtualFile, integrity: boolean): Promise<void> {
@@ -72,7 +81,8 @@ export class SalmonFileExporter extends FileExporter {
             length = fileSize - start;
         else
             length = partSize;
-        return {
+
+		return {
             message: 'start',
             index: index,
             fileToExportHandle: fileToExportHandle,

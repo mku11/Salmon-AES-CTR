@@ -82,9 +82,9 @@ export abstract class FileExporter {
     abstract getWorkerMessage(index: number, sourceFile: IVirtualFile, targetFile: IRealFile,
         runningThreads: number, partSize: number, fileSize: number, bufferSize: number, integrity: boolean): Promise<any>;
 
-    abstract getMinimumPartSize(file: IVirtualFile): Promise<number>;
+    abstract getMinimumPartSize(sourceFile: IVirtualFile, targetFile: IRealFile): Promise<number>;
 
-    abstract onPrepare(targetFile: IVirtualFile, integrity: boolean): Promise<void>;
+    abstract onPrepare(sourceFile: IVirtualFile, integrity: boolean): Promise<void>;
 
     public initialize(bufferSize: number, threads: number) {
         if (bufferSize == 0)
@@ -93,11 +93,6 @@ export abstract class FileExporter {
             threads = FileExporter.#DEFAULT_THREADS;
         this.#bufferSize = bufferSize;
         this.#threads = threads;
-        if (typeof process !== 'object') {
-            // multiple writers in the browser use crswap files that overwrite 
-            // each other so falling back to 1 thread
-            this.#threads = 1;
-        }
     }
 
     public isRunning(): boolean {
@@ -157,7 +152,7 @@ export abstract class FileExporter {
             await targetStream.close();
 
             // if we want to check integrity we align to the chunk size otherwise to the AES Block
-            let minPartSize: number = await this.getMinimumPartSize(fileToExport);
+            let minPartSize: number = await this.getMinimumPartSize(fileToExport, exportFile);
             if (partSize > minPartSize && this.#threads > 1) {
                 partSize = Math.ceil(fileSize / this.#threads);
                 if (partSize > minPartSize)
@@ -206,6 +201,8 @@ export abstract class FileExporter {
                 if (typeof process !== 'object') {
                     if (this.#workers[i] == null)
                         this.#workers[i] = new Worker(this.#workerPath, { type: 'module' });
+					this.#workers[i].removeEventListener('message', null);
+                    this.#workers[i].removeEventListener('error', null);
                     this.#workers[i].addEventListener('message', (event: any) => {
                         if (event.data.message == 'progress' && onProgress != null) {
                             bytesWritten[event.data.index] = event.data.position;
@@ -228,6 +225,7 @@ export abstract class FileExporter {
                     const { Worker } = await import("worker_threads");
                     if (this.#workers[i] == null)
                         this.#workers[i] = new Worker(this.#workerPath);
+					this.#workers[i].removeAllListeners();
                     this.#workers[i].on('message', (event: any) => {
                         if (event.message == 'progress' && onProgress != null) {
                             bytesWritten[event.index] = event.position;
@@ -247,10 +245,13 @@ export abstract class FileExporter {
                         reject(event);
                     });
                 }
-                let msg = await this.getWorkerMessage(i,
-                    fileToExport, exportedFile,
-                    runningThreads, partSize, fileSize, this.#bufferSize, integrity);
-                this.#workers[i].postMessage(msg);
+				try {
+					let msg = await this.getWorkerMessage(i, fileToExport, exportedFile,
+						runningThreads, partSize, fileSize, this.#bufferSize, integrity);
+					this.#workers[i].postMessage(msg);
+				} catch (ex) {
+					reject(ex);
+				}
             }));
         }
         await Promise.all(this.#promises).then((results: any) => {

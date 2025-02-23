@@ -55,8 +55,17 @@ export class SalmonFileImporter extends FileImporter {
         await (targetFile as SalmonFile).setApplyIntegrity(integrity, null, null);
     }
 
-    async getMinimumPartSize(file: IVirtualFile): Promise<number> {
-        return await (file as SalmonFile).getMinimumPartSize();
+    async getMinimumPartSize(sourceFile: IRealFile, targetFile: IVirtualFile): Promise<number> {
+        // we force the whole content to use 1 thread if:
+        if(
+            // we are in the browser andthe target is a local file (chromes crswap clash between writers)
+            (targetFile.constructor.name === 'JsFile' && typeof process !== 'object') 
+            // or Web Service files (require passing the credentials)
+            || targetFile.getRealFile().constructor.name == 'JsWSFile' 
+            || sourceFile.constructor.name === 'JsWSFile)') {
+            return await sourceFile.length();
+        }
+        return await (targetFile as SalmonFile).getMinimumPartSize();
     }
 
     getError(err: any) {

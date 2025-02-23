@@ -82,7 +82,7 @@ export abstract class FileImporter {
     abstract getWorkerMessage(index: number, sourceFile: IRealFile, targetFile: IVirtualFile,
         runningThreads: number, partSize: number, fileSize: number, bufferSize: number, integrity: boolean): Promise<any>;
 
-    abstract getMinimumPartSize(file: IVirtualFile): Promise<number>;
+    abstract getMinimumPartSize(sourceFile: IRealFile, targetFile: IVirtualFile): Promise<number>;
 
     abstract onPrepare(targetFile: IVirtualFile, integrity: boolean): Promise<void>;
 
@@ -101,11 +101,6 @@ export abstract class FileImporter {
         this.#threads = threads;
         if (this.#threads == 0)
             this.#threads = FileImporter.#DEFAULT_THREADS;
-        if (typeof process !== 'object') {
-            // multiple writers in the browser use crswap files that overwrite 
-            // each other so falling back to 1 thread
-            this.#threads = 1;
-        }
     }
 
     /**
@@ -177,7 +172,7 @@ export abstract class FileImporter {
             await targetStream.close();
 
             // if we want to check integrity we align to the chunk size otherwise to the AES Block
-            let minPartSize: number = await this.getMinimumPartSize(importedFile);
+            let minPartSize: number = await this.getMinimumPartSize(fileToImport, importedFile);
             if (partSize > minPartSize && this.#threads > 1) {
                 partSize = Math.ceil(fileSize / this.#threads);
 				if(partSize > minPartSize)
@@ -226,6 +221,8 @@ export abstract class FileImporter {
                         if(this.#workers[i] == null) {
                             this.#workers[i] = new Worker(this.#workerPath, { type: 'module' });
                         }
+                        this.#workers[i].removeEventListener('error', null);
+						this.#workers[i].removeEventListener('message', null);
                         this.#workers[i].addEventListener('message', (event: any) => {
                             if(event.data.message == 'progress' && onProgress != null) {
                                 bytesRead[event.data.index] = event.data.position;
@@ -247,6 +244,7 @@ export abstract class FileImporter {
                         const { Worker } = await import("worker_threads");
                         if(this.#workers[i] == null)
                             this.#workers[i] = new Worker(this.#workerPath);
+						this.#workers[i].removeAllListeners();
                         this.#workers[i].on('message', (event: any) => {
                             if(event.message == 'progress' && onProgress != null) {
                                 bytesRead[event.index] = event.position;
@@ -265,10 +263,13 @@ export abstract class FileImporter {
                             reject(event);
                         });
                     }
-                    let msg = await this.getWorkerMessage(i,
-                            fileToImport, importedFile,
-                            runningThreads, partSize, fileSize, this.#bufferSize, integrity);
-                    this.#workers[i].postMessage(msg);
+					try {
+						let msg = await this.getWorkerMessage(i, fileToImport, importedFile,
+							runningThreads, partSize, fileSize, this.#bufferSize, integrity);
+						this.#workers[i].postMessage(msg);
+					} catch (ex) {
+						reject(ex);
+					}
                 }));
             }
             await Promise.all(this.#promises).then((results: any) => {
