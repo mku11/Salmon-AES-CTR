@@ -1,0 +1,78 @@
+{
+    // Use IntelliSense to learn about possible attributes.
+    // Hover to view descriptions of existing attributes.
+    // For more information, visit: https://go.microsoft.com/fwlink/?linkid=830387
+    "version": "0.2.0",
+    "configurations": [
+        {
+            "name": "Text",
+            "program": "${workspaceFolder}/node_text.js",
+            "request": "launch",
+            "skipFiles": [
+                "<node_internals>/**"
+            ],
+            "type": "node",
+            "runtimeArgs": ["--experimental-modules","--experimental-default-type=module"]
+        },
+        {
+            "name": "Data",
+            "program": "${workspaceFolder}/node_data.js",
+            "request": "launch",
+            "skipFiles": [
+                "<node_internals>/**"
+            ],
+            "type": "node",
+            "runtimeArgs": ["--experimental-modules","--experimental-default-type=module"]
+        },
+        {
+            "name": "Data Stream",
+            "program": "${workspaceFolder}/node_data_stream.js",
+            "request": "launch",
+            "skipFiles": [
+                "<node_internals>/**"
+            ],
+            "type": "node",
+            "runtimeArgs": ["--experimental-modules","--experimental-default-type=module"]
+        },
+        {
+            "name": "File",
+            "program": "${workspaceFolder}/node_file.js",
+            "request": "launch",
+            "skipFiles": [
+                "<node_internals>/**"
+            ],
+            "type": "node",
+            "runtimeArgs": ["--experimental-modules","--experimental-default-type=module"]
+        },
+        {
+            "name": "Local Drive",
+            "program": "${workspaceFolder}/node_local_drive.js",
+            "request": "launch",
+            "skipFiles": [
+                "<node_internals>/**"
+            ],
+            "type": "node",
+            "runtimeArgs": ["--experimental-modules","--experimental-default-type=module"]
+        },
+        {
+            "name": "Web Service Drive",
+            "program": "${workspaceFolder}/node_web_service_drive.js",
+            "request": "launch",
+            "skipFiles": [
+                "<node_internals>/**"
+            ],
+            "type": "node",
+            "runtimeArgs": ["--experimental-modules","--experimental-default-type=module"]
+        },
+        {
+            "name": "Http Drive",
+            "program": "${workspaceFolder}/node_http_drive.js",
+            "request": "launch",
+            "skipFiles": [
+                "<node_internals>/**"
+            ],
+            "type": "node",
+            "runtimeArgs": ["--experimental-modules","--experimental-default-type=module"]
+        },
+    ]
+}
