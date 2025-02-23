@@ -36,7 +36,7 @@ export class FileImporterWorker {
      * @returns 
      */
     async getSourceFile(params: any): Promise<IRealFile> {
-        return FileUtils.getInstance(params.importFileClassType, params.fileToImportHandle);
+        return await FileUtils.getInstance(params.importFileClassType, params.fileToImportHandle);
     }
 
     /**

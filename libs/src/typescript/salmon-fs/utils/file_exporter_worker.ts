@@ -45,7 +45,7 @@ export class FileExporterWorker {
      * @returns 
      */
     async getTargetFile(params: any): Promise<IRealFile> {
-        return FileUtils.getInstance(params.exportedFileClassType, params.exportedFileHandle);
+        return await FileUtils.getInstance(params.exportedFileClassType, params.exportedFileHandle);
     }
 
     async receive(worker: FileExporterWorker, event: any) {
