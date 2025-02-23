@@ -258,7 +258,7 @@ export class JsWSFileStream extends RandomAccessStream {
             }
             this.position += bytesRead;
         }
-        if(bytesRead < count && this.position == this.end_position - 1 && this.position < await this.file.length()) {
+        if(bytesRead < count && this.position == this.end_position + 1 && this.position < await this.file.length()) {
             await this.reset();
         }
         let reader: ReadableStreamDefaultReader = await this.getReader();
