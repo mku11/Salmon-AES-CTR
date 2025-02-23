@@ -36,6 +36,8 @@ import { SalmonSequenceSerializer } from '../../lib/salmon-fs/salmon/sequence/sa
 import { SalmonFileSequencer } from '../../lib/salmon-fs/salmon/sequence/salmon_file_sequencer.js';
 import { SalmonFileImporter } from '../../lib/salmon-fs/salmon/utils/salmon_file_importer.js';
 import { SalmonFileExporter } from '../../lib/salmon-fs/salmon/utils/salmon_file_exporter.js';
+import { SalmonFileCommander } from '../../lib/salmon-fs/salmon/utils/salmon_file_commander.js';
+import { autoRenameFile as autoRenameFile } from '../../lib/salmon-fs/file/ireal_file.js';
 import { FileSearcher } from '../../lib/salmon-fs/utils/file_searcher.js';
 import { SalmonFileReadableStream } from '../../lib/salmon-fs/salmon/streams/salmon_file_readable_stream.js';
 import { SalmonAuthConfig } from '../../lib/salmon-fs/salmon/salmon_auth_config.js';
@@ -80,7 +82,7 @@ export class SalmonFSTestHelper {
     static TEST_IMPORT_MEDIUM_FILENAME = "medium_test.dat";
     static TEST_IMPORT_LARGE_FILENAME = "large_test.dat";
     static TEST_IMPORT_HUGE_FILENAME = "huge_test.dat";
-    static TINY_FILE_CONTENTS = "This is a new file created.";
+    static TINY_FILE_CONTENTS = "This is a new file created that will be used for testing encryptio and decryption.";
     static TEST_SEQ_DIRNAME = "seq";
     static TEST_SEQ_FILENAME = "fileseq.json";
     static TEST_EXPORT_AUTH_FILENAME = "export.slma";
@@ -123,6 +125,12 @@ export class SalmonFSTestHelper {
     static WS_TEST_DIR;
     static HTTP_TEST_DIR;
     static HTTP_VAULT_DIR;
+    static TEST_HTTP_TINY_FILE;
+    static TEST_HTTP_SMALL_FILE;
+    static TEST_HTTP_MEDIUM_FILE;
+    static TEST_HTTP_LARGE_FILE;
+    static TEST_HTTP_HUGE_FILE;
+    static TEST_HTTP_FILE;
     static TEST_SEQ_DIR;
     static TEST_EXPORT_AUTH_DIR;
     static fileImporter;
@@ -168,6 +176,7 @@ export class SalmonFSTestHelper {
         SalmonFSTestHelper.TEST_EXPORT_AUTH_DIR = await SalmonFSTestHelper.createDir(SalmonFSTestHelper.TEST_ROOT_DIR, SalmonFSTestHelper.TEST_EXPORT_AUTH_DIRNAME);
         SalmonFSTestHelper.HTTP_VAULT_DIR = new JsHttpFile(SalmonFSTestHelper.HTTP_VAULT_DIR_URL);
 		await SalmonFSTestHelper.createTestFiles();
+        await SalmonFSTestHelper.createHttpFiles();
         await SalmonFSTestHelper.createHttpVault();
 	}
 	
@@ -193,6 +202,21 @@ export class SalmonFSTestHelper {
 		// this.createFileRandomData(TEST_IMPORT_HUGE_FILE,512*1024*1024);
 	}
 
+    static async createHttpFiles() {
+        SalmonFSTestHelper.TEST_HTTP_TINY_FILE = await SalmonFSTestHelper.HTTP_TEST_DIR.getChild(SalmonFSTestHelper.TEST_IMPORT_TINY_FILENAME);
+        SalmonFSTestHelper.TEST_HTTP_SMALL_FILE = await SalmonFSTestHelper.HTTP_TEST_DIR.getChild(SalmonFSTestHelper.TEST_IMPORT_SMALL_FILENAME);
+        SalmonFSTestHelper.TEST_HTTP_MEDIUM_FILE = await SalmonFSTestHelper.HTTP_TEST_DIR.getChild(SalmonFSTestHelper.TEST_IMPORT_MEDIUM_FILENAME);
+        SalmonFSTestHelper.TEST_HTTP_LARGE_FILE = await SalmonFSTestHelper.HTTP_TEST_DIR.getChild(SalmonFSTestHelper.TEST_IMPORT_LARGE_FILENAME);
+        SalmonFSTestHelper.TEST_HTTP_HUGE_FILE = await SalmonFSTestHelper.HTTP_TEST_DIR.getChild(SalmonFSTestHelper.TEST_IMPORT_HUGE_FILENAME);
+        SalmonFSTestHelper.TEST_HTTP_FILE = SalmonFSTestHelper.TEST_HTTP_TINY_FILE;
+
+		await SalmonFSTestHelper.createFile(SalmonFSTestHelper.TEST_HTTP_TINY_FILE, SalmonFSTestHelper.TINY_FILE_CONTENTS);
+		await SalmonFSTestHelper.createFileRandomData(SalmonFSTestHelper.TEST_HTTP_SMALL_FILE,1024*1024);
+		await SalmonFSTestHelper.createFileRandomData(SalmonFSTestHelper.TEST_HTTP_MEDIUM_FILE,12*1024*1024);
+		await SalmonFSTestHelper.createFileRandomData(SalmonFSTestHelper.TEST_HTTP_LARGE_FILE,48*1024*1024);
+		// this.createFileRandomData(TEST_HTTP_HUGE_FILE,512*1024*1024);
+	}
+
     static async createHttpVault() {
         let httpVaultDir = await SalmonFSTestHelper.HTTP_TEST_DIR.getChild(SalmonFSTestHelper.HTTP_VAULT_DIRNAME);
         if(httpVaultDir && await httpVaultDir.exists())
@@ -204,7 +228,8 @@ export class SalmonFSTestHelper {
         let rootDir = await drive.getRoot();
         let importFiles = [SalmonFSTestHelper.TEST_IMPORT_TINY_FILE,
             SalmonFSTestHelper.TEST_IMPORT_SMALL_FILE,
-            SalmonFSTestHelper.TEST_IMPORT_MEDIUM_FILE
+            SalmonFSTestHelper.TEST_IMPORT_MEDIUM_FILE,
+            SalmonFSTestHelper.TEST_IMPORT_LARGE_FILE,
         ];
         let importer = new SalmonFileImporter(SalmonFSTestHelper.ENC_IMPORT_BUFFER_SIZE, SalmonFSTestHelper.ENC_IMPORT_THREADS);
         for(let importFile of importFiles) {
@@ -771,6 +796,7 @@ export class SalmonFSTestHelper {
         let drive = await SalmonFSTestHelper.openDrive(vaultDir, SalmonFSTestHelper.driveClassType, SalmonCoreTestHelper.TEST_PASSWORD, sequencer);
         let root = await drive.getRoot();
         let file = await root.getChild(filename);
+        console.log("file size: " + await file.getSize());
         expect(await file.exists()).toBeTruthy();
         
         let stream = await file.getInputStream();
@@ -780,6 +806,8 @@ export class SalmonFSTestHelper {
         await ms.setPosition(0);
         await ms.close();
         await stream.close();
+        // console.log("Text: ")
+        // console.log(new TextDecoder().decode(ms.toArray()));
         let digest = await SalmonFSTestHelper.getChecksumStream(ms);
         expect(digest).toBe(localChkSum);
     }
@@ -847,4 +875,46 @@ export class SalmonFSTestHelper {
         await stream.cancel();
         SalmonCoreTestHelper.assertArrayEquals(tdata, buffer);
     }
+
+    static async exportFiles(files, dir, threads = 1) {
+		let bufferSize = 256 * 1024;
+		let commander = new SalmonFileCommander(bufferSize, bufferSize, threads);
+
+		// set the correct worker paths for multithreading
+		// commander.getFileImporter().setWorkerPath( '../lib/salmon-fs/salmon/utils/salmon_file_importer_worker.js');
+		// commander.getFileExporter().setWorkerPath( '../lib/salmon-fs/salmon/utils/salmon_file_exporter_worker.js');
+		
+        let hashPreExport = [];
+        for(let file of files)
+            hashPreExport.push(await SalmonFSTestHelper.getChecksum(file));
+
+        // export files
+        let filesExported = await commander.exportFiles(files, dir, false, true,
+            async (taskProgress) => {
+                if(!SalmonFSTestHelper.ENABLE_FILE_PROGRESS)
+                    return;
+                try {
+                    console.log( "file exporting: " + await taskProgress.getFile().getBaseName() + ": "
+                    + taskProgress.getProcessedBytes() + "/" + taskProgress.getTotalBytes() + " bytes"  );
+                } catch (e) {
+                    console.error(e);
+                }
+            }, autoRenameFile, async (sfile, ex) => {
+                // file failed to import
+                console.error(ex);
+                console.log("export failed: " + await sfile.getBaseName() + "\n" + ex.stack);
+        });
+			
+        console.log("Files exported");
+
+        for(let i = 0; i < files.length; i++) {
+            let stream = await filesExported[i].getInputStream();
+            let hashPostImport = await SalmonFSTestHelper.getChecksumStream(stream);
+            await stream.close();
+            expect(hashPostImport).toBe(hashPreExport[i]);
+        }
+
+		// close the file commander
+        commander.close();
+	}
 }
