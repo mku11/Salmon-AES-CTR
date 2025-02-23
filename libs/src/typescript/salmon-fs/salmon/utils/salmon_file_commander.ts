@@ -48,6 +48,7 @@ export class SalmonFileCommander extends FileCommander {
     onError(ex: Error | unknown | null): boolean {
         if (ex instanceof SequenceException)
             throw ex;
-        return true;
+		else
+			return false;
     }
 }
