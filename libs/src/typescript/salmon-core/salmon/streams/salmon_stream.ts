@@ -728,7 +728,13 @@ export class SalmonStream extends RandomAccessStream {
      */
     async #readStreamData(count: number): Promise<Uint8Array> {
         let data: Uint8Array = new Uint8Array(Math.min(count, await this.#baseStream.length() - await this.#baseStream.getPosition()));
-        await this.#baseStream.read(data, 0, data.length);
+        let totalBytesRead = 0;
+        while(totalBytesRead < data.length) {
+            let bytesRead = await this.#baseStream.read(data, totalBytesRead, data.length - totalBytesRead);
+            if(bytesRead <= 0)
+                break;
+            totalBytesRead += bytesRead;
+        }
         return data;
     }
 
