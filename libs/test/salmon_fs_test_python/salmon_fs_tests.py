@@ -55,12 +55,14 @@ from salmon_fs_test_helper import SalmonFSTestHelper, TestMode
 class SalmonFSTests(TestCase):
     @classmethod
     def setUpClass(cls):
-        SalmonFSTestHelper.set_test_params("d:\\tmp\\salmon\\test", TestMode.WebService)
+        SalmonFSTestHelper.set_test_params("d:\\tmp\\salmon\\test", TestMode.Local)
 
-        SalmonFSTestHelper.TEST_IMPORT_FILE = SalmonFSTestHelper.TEST_IMPORT_SMALL_FILE
+        SalmonFSTestHelper.TEST_IMPORT_FILE = SalmonFSTestHelper.TEST_IMPORT_MEDIUM_FILE
 
         # SalmonCoreTestHelper.TEST_ENC_BUFFER_SIZE = 1 * 1024 * 1024
         # SalmonCoreTestHelper.TEST_DEC_BUFFER_SIZE = 1 * 1024 * 1024
+        SalmonCoreTestHelper.TEST_ENC_THREADS = 2
+        SalmonCoreTestHelper.TEST_DEC_THREADS = 2
 
         SalmonFSTestHelper.ENC_IMPORT_BUFFER_SIZE = 512 * 1024
         SalmonFSTestHelper.ENC_IMPORT_THREADS = 2
@@ -75,7 +77,7 @@ class SalmonFSTests(TestCase):
         SalmonFSTestHelper.initialize()
 
         # use the native library
-        SalmonStream.set_aes_provider_type(ProviderType.Aes)
+        SalmonStream.set_aes_provider_type(ProviderType.AesGPU)
 
     @classmethod
     def tearDownClass(cls):
@@ -259,7 +261,7 @@ class SalmonFSTests(TestCase):
             SalmonFSTestHelper.import_and_export(
                 SalmonFSTestHelper.generate_folder(SalmonFSTestHelper.TEST_VAULT_DIRNAME),
                 SalmonCoreTestHelper.TEST_PASSWORD,
-                SalmonFSTestHelper.TEST_IMPORT_SMALL_FILE,
+                SalmonFSTestHelper.TEST_IMPORT_FILE,
                 False, 0, True,
                 True, True)
         except IOError as ex:

@@ -26,11 +26,13 @@ from __future__ import annotations
 
 import hashlib
 import time
+import sys
 from enum import Enum
 from unittest import TestCase
 import random
 
 from file.py_http_file_stream import PyHttpFileStream
+from salmon_fs.salmon.utils.salmon_file_commander import SalmonFileCommander
 from salmon_fs.file.py_http_file import PyHttpFile
 from salmon_fs.file.py_ws_file import Credentials, PyWSFile
 from salmon_fs.salmon.drive.py_ws_drive import PyWSDrive
@@ -86,7 +88,7 @@ class SalmonFSTestHelper:
     TEST_IMPORT_MEDIUM_FILENAME = "medium_test.dat"
     TEST_IMPORT_LARGE_FILENAME = "large_test.dat"
     TEST_IMPORT_HUGE_FILENAME = "huge_test.dat"
-    TINY_FILE_CONTENTS = "This is a new file created."
+    TINY_FILE_CONTENTS = "This is a new file created that will be used for testing encryption and decryption."
     TEST_SEQ_DIRNAME = "seq"
     TEST_SEQ_FILENAME = "fileseq.json"
     TEST_EXPORT_AUTH_FILENAME = "export.slma"
@@ -115,7 +117,7 @@ class SalmonFSTestHelper:
     TEST_USE_FILE_INPUT_STREAM = False
 
     # progress
-    ENABLE_FILE_PROGRESS = False
+    ENABLE_FILE_PROGRESS = True
 
     # test dirs and files
     TEST_INPUT_DIR = None
@@ -129,6 +131,12 @@ class SalmonFSTestHelper:
     WS_TEST_DIR = None
     HTTP_TEST_DIR = None
     HTTP_VAULT_DIR = None
+    TEST_HTTP_TINY_FILE = None
+    TEST_HTTP_SMALL_FILE = None
+    TEST_HTTP_MEDIUM_FILE = None
+    TEST_HTTP_LARGE_FILE = None
+    TEST_HTTP_HUGE_FILE = None
+    TEST_HTTP_FILE = None
     TEST_SEQ_DIR = None
     TEST_EXPORT_AUTH_DIR = None
     file_importer = None
@@ -184,6 +192,7 @@ class SalmonFSTestHelper:
                                                                                 SalmonFSTestHelper.TEST_EXPORT_AUTH_DIRNAME)
         SalmonFSTestHelper.HTTP_VAULT_DIR = PyHttpFile(SalmonFSTestHelper.HTTP_VAULT_DIR_URL)
         SalmonFSTestHelper.create_test_files()
+        SalmonFSTestHelper.create_http_files()
         SalmonFSTestHelper.create_http_vault()
 
     @staticmethod
@@ -212,8 +221,28 @@ class SalmonFSTestHelper:
         SalmonFSTestHelper.create_file_random_data(SalmonFSTestHelper.TEST_IMPORT_SMALL_FILE, 1024 * 1024)
         SalmonFSTestHelper.create_file_random_data(SalmonFSTestHelper.TEST_IMPORT_MEDIUM_FILE, 12 * 1024 * 1024)
         SalmonFSTestHelper.create_file_random_data(SalmonFSTestHelper.TEST_IMPORT_LARGE_FILE, 48 * 1024 * 1024)
+        # SalmonFSTestHelper.create_file_random_data(SalmonFSTestHelper.TEST_IMPORT_HUGE_FILE, 512 * 1024 * 1024)
 
-    # this.createFileRandomData(TEST_IMPORT_HUGE_FILE, 512 * 1024 * 1024)
+    @staticmethod
+    def create_http_files():
+        SalmonFSTestHelper.TEST_HTTP_TINY_FILE = SalmonFSTestHelper.HTTP_TEST_DIR.get_child(
+            SalmonFSTestHelper.TEST_IMPORT_TINY_FILENAME)
+        SalmonFSTestHelper.TEST_HTTP_SMALL_FILE = SalmonFSTestHelper.HTTP_TEST_DIR.get_child(
+            SalmonFSTestHelper.TEST_IMPORT_SMALL_FILENAME)
+        SalmonFSTestHelper.TEST_HTTP_MEDIUM_FILE = SalmonFSTestHelper.HTTP_TEST_DIR.get_child(
+            SalmonFSTestHelper.TEST_IMPORT_MEDIUM_FILENAME)
+        SalmonFSTestHelper.TEST_HTTP_LARGE_FILE = SalmonFSTestHelper.HTTP_TEST_DIR.get_child(
+            SalmonFSTestHelper.TEST_IMPORT_LARGE_FILENAME)
+        SalmonFSTestHelper.TEST_HTTP_HUGE_FILE = SalmonFSTestHelper.HTTP_TEST_DIR.get_child(
+            SalmonFSTestHelper.TEST_IMPORT_HUGE_FILENAME)
+        SalmonFSTestHelper.TEST_HTTP_FILE = SalmonFSTestHelper.TEST_HTTP_TINY_FILE
+
+        SalmonFSTestHelper.create_file(SalmonFSTestHelper.TEST_HTTP_TINY_FILE,
+                                       SalmonFSTestHelper.TINY_FILE_CONTENTS)
+        SalmonFSTestHelper.create_file_random_data(SalmonFSTestHelper.TEST_HTTP_SMALL_FILE, 1024 * 1024)
+        SalmonFSTestHelper.create_file_random_data(SalmonFSTestHelper.TEST_HTTP_MEDIUM_FILE, 12 * 1024 * 1024)
+        SalmonFSTestHelper.create_file_random_data(SalmonFSTestHelper.TEST_HTTP_LARGE_FILE, 48 * 1024 * 1024)
+        # SalmonFSTestHelper.create_file_random_data(SalmonFSTestHelper.TEST_HTTP_HUGE_FILE, 512 * 1024 * 1024)
 
     @staticmethod
     def create_http_vault():
@@ -321,9 +350,10 @@ class SalmonFSTestHelper:
         hash_pre_import: str = SalmonFSTestHelper.get_checksum(file_to_import)
 
         # import
-        print_import_progress = lambda vb, tb: print(
-            "importing file: " + file_to_import.get_base_name() + ": " + str(vb) + "/" + str(
+        def print_import_progress(vb, tb):
+            print("importing file: " + file_to_import.get_base_name() + ": " + str(vb) + "/" + str(
                 tb)) if SalmonFSTestHelper.ENABLE_FILE_PROGRESS else None
+
         salmon_file: SalmonFile = SalmonFSTestHelper.file_importer.import_file(file_to_import, root_dir, None, False,
                                                                                apply_file_integrity,
                                                                                print_import_progress)
@@ -355,8 +385,8 @@ class SalmonFSTestHelper:
                     SalmonFSTestHelper.testCase.assertEqual(real_file_size, file_size)
 
         # export
-        print_export_progress = lambda vb, tb: print(
-            "exporting file: " + salmon_file.get_base_name() + ": " + str(vb) + "/" + str(
+        def print_export_progress(vb, tb):
+            print("exporting file: " + salmon_file.get_base_name() + ": " + str(vb) + "/" + str(
                 tb)) if SalmonFSTestHelper.ENABLE_FILE_PROGRESS else None
 
         if bitflip:
@@ -379,9 +409,7 @@ class SalmonFSTestHelper:
                    sequencer: SalmonFileSequencer | None = None):
         if drive_class_type == PyWSDrive:
             # use the remote service instead
-            return PyWSDrive.open(vault_dir, password, sequencer,
-                                  SalmonFSTestHelper.credentials.get_service_user(),
-                                  SalmonFSTestHelper.credentials.get_service_password())
+            return PyWSDrive.open(vault_dir, password, sequencer)
         else:
             return SalmonDrive.open_drive(vault_dir, drive_class_type, password, sequencer)
 
@@ -389,9 +417,7 @@ class SalmonFSTestHelper:
     def create_drive(vault_dir: IRealFile, drive_class_type: type, password: str,
                      sequencer: SalmonFileSequencer | None = None):
         if drive_class_type == PyWSDrive:
-            return PyWSDrive.create(vault_dir, password, sequencer,
-                                    SalmonFSTestHelper.credentials.get_service_user(),
-                                    SalmonFSTestHelper.credentials.get_service_password())
+            return PyWSDrive.create(vault_dir, password, sequencer)
         else:
             return SalmonDrive.create_drive(vault_dir, drive_class_type, password, sequencer)
 
@@ -616,8 +642,10 @@ class SalmonFSTestHelper:
                                                                                    None, False, False, None)
             import_success = salmon_file is not None
         except Exception as ex:
-            import_success = False
-            print(ex)
+            if type(ex) is SalmonRangeExceededException:
+                import_success = False
+            else:
+                raise
 
         SalmonFSTestHelper.testCase.assertEqual(should_import, import_success)
 
@@ -630,16 +658,15 @@ class SalmonFSTestHelper:
         v_dir = SalmonFSTestHelper.generate_folder("test")
         filename = "file.txt"
         test_file = v_dir.create_file(filename)
-        v_bytes = text.encode()
+        v_bytes = bytearray(text.encode())
 
         # write file
         write_file = v_dir.get_child(filename)
-        wstream = write_file.get_output_stream()
+        wstream: RandomAccessStream = write_file.get_output_stream()
         idx = 0
         while idx < len(text):
             length = min(BUFF_SIZE, len(text) - idx)
-            # FIXME: write does not work with offset
-            wstream.write(bytearray(v_bytes[idx:idx + length]), 0, length)
+            wstream.write(v_bytes, idx, length)
             idx += length
         wstream.flush()
         wstream.close()
@@ -903,6 +930,8 @@ class SalmonFSTestHelper:
                                               SalmonCoreTestHelper.TEST_PASSWORD, sequencer)
         root = drive.get_root()
         file = root.get_child(filename)
+        print("file size: " + str(file.get_size()))
+        print("file last modified: " + str(file.get_last_date_time_modified()))
         SalmonFSTestHelper.testCase.assertTrue(file.exists())
 
         stream: RandomAccessStream = file.get_input_stream()
@@ -913,6 +942,8 @@ class SalmonFSTestHelper:
         digest = SalmonFSTestHelper.get_checksum_stream(ms)
         ms.close()
         stream.close()
+        # print("Text: ")
+        # print(ms.to_array().decode())
         SalmonFSTestHelper.testCase.assertEqual(digest, local_chksum)
 
     @staticmethod
@@ -972,3 +1003,43 @@ class SalmonFSTestHelper:
         print(buffer)
         stream.close()
         SalmonCoreTestHelper.testCase.assertEqual(tdata, buffer)
+
+    @staticmethod
+    def export_files(files: list[SalmonFile], v_dir: IRealFile, threads: int = 1):
+        buffer_size = 256 * 1024
+        commander = SalmonFileCommander(buffer_size, buffer_size, threads)
+
+        hash_pre_export = []
+        for file in files:
+            hash_pre_export.append(SalmonFSTestHelper.get_checksum(file))
+
+        def print_export_progress(task_progress: SalmonFileCommander.SalmonFileTaskProgress) -> any:
+            if not SalmonFSTestHelper.ENABLE_FILE_PROGRESS:
+                return
+            try:
+                print("file exporting: " + task_progress.get_file().get_base_name() + ": "
+                      + str(task_progress.get_processed_bytes()) + "/" + str(task_progress.get_total_bytes())
+                      + " bytes")
+            except Exception as e:
+                print(e)
+
+        def on_failed(sfile: SalmonFile, ex: Exception):
+            # file failed to import
+            print(ex)
+            print("export failed: " + sfile.get_base_name() + "\n" + str(ex))
+
+        # export files
+        files_exported = commander.export_files(files, v_dir, False, True, print_export_progress,
+                                                IRealFile.auto_rename_file,
+                                                on_failed)
+
+        print("Files exported")
+
+        for i in range(len(files)):
+            stream = files_exported[i].get_input_stream()
+            hash_post_import = SalmonFSTestHelper.get_checksum_stream(stream)
+            stream.close()
+            SalmonFSTestHelper.testCase.assertEqual(hash_post_import, hash_pre_export[i])
+
+        # close the file commander
+        commander.close()

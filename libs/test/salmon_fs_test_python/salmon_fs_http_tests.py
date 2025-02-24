@@ -25,6 +25,7 @@ SOFTWARE.
 from __future__ import annotations
 
 from unittest import TestCase
+
 from typeguard import typechecked
 import os
 import sys
@@ -38,6 +39,7 @@ from salmon_core.streams.memory_stream import MemoryStream
 from salmon_core.salmon.streams.provider_type import ProviderType
 from salmon_core.salmon.streams.salmon_stream import SalmonStream
 from salmon_fs.file.ireal_file import IRealFile
+from salmon_fs.file.py_http_file import PyHttpFile
 from salmon_fs.file.ivirtual_file import IVirtualFile
 from salmon_fs.salmon.drive.py_http_drive import PyHttpDrive
 from salmon_fs.salmon.salmon_drive import SalmonDrive
@@ -55,10 +57,12 @@ class SalmonFSHttpTests(TestCase):
         SalmonFSHttpTests.old_test_mode = SalmonFSTestHelper.curr_test_mode
         SalmonFSTestHelper.set_test_params("d:\\tmp\\salmon\\test", TestMode.Http)
 
+        SalmonFSTestHelper.TEST_HTTP_FILE = SalmonFSTestHelper.TEST_IMPORT_LARGE_FILE
+
         # SalmonCoreTestHelper.TEST_ENC_BUFFER_SIZE = 1 * 1024 * 1024
         # SalmonCoreTestHelper.TEST_DEC_BUFFER_SIZE = 1 * 1024 * 1024
-    
-        SalmonFSTestHelper.TEST_IMPORT_FILE = SalmonFSTestHelper.TEST_IMPORT_LARGE_FILE
+        SalmonCoreTestHelper.TEST_ENC_THREADS = 2
+        SalmonCoreTestHelper.TEST_DEC_THREADS = 2
 
         SalmonFSTestHelper.ENC_IMPORT_BUFFER_SIZE = 512 * 1024
         SalmonFSTestHelper.ENC_IMPORT_THREADS = 2
@@ -73,7 +77,7 @@ class SalmonFSHttpTests(TestCase):
         SalmonFSTestHelper.initialize()
 
         # use the native library
-        SalmonStream.set_aes_provider_type(ProviderType.AesGPU)
+        SalmonStream.set_aes_provider_type(ProviderType.Default)
 
     @classmethod
     def tearDownClass(cls):
@@ -106,15 +110,19 @@ class SalmonFSHttpTests(TestCase):
             raise ex
         self.assertFalse(wrong_password)
 
-    def test_shouldReadFromRealFileTiny(self):
+    def test_shouldReadFromFileTiny(self):
         SalmonFSTestHelper.should_read_file(SalmonFSTestHelper.HTTP_VAULT_DIR,
                                             SalmonFSTestHelper.TEST_IMPORT_TINY_FILENAME)
 
-    def test_shouldReadFromRealFileSmall(self):
+    def test_shouldReadFromFileSmall(self):
         SalmonFSTestHelper.should_read_file(SalmonFSTestHelper.HTTP_VAULT_DIR,
                                             SalmonFSTestHelper.TEST_IMPORT_SMALL_FILENAME)
 
-    def test_shouldReadFromRealFileLarge(self):
+    def test_shouldReadFromFileMedium(self):
+        SalmonFSTestHelper.should_read_file(SalmonFSTestHelper.HTTP_VAULT_DIR,
+                                            SalmonFSTestHelper.TEST_IMPORT_MEDIUM_FILENAME)
+
+    def test_shouldReadFromFileLarge(self):
         SalmonFSTestHelper.should_read_file(SalmonFSTestHelper.HTTP_VAULT_DIR,
                                             SalmonFSTestHelper.TEST_IMPORT_LARGE_FILENAME)
 
@@ -147,3 +155,32 @@ class SalmonFSHttpTests(TestCase):
         self.assertTrue(SalmonFSTestHelper.TEST_IMPORT_TINY_FILENAME in filenames)
         self.assertTrue(SalmonFSTestHelper.TEST_IMPORT_SMALL_FILENAME in filenames)
         self.assertTrue(SalmonFSTestHelper.TEST_IMPORT_MEDIUM_FILENAME in filenames)
+
+    def test_shouldExportFileFromDrive(self):
+        vault_dir = SalmonFSTestHelper.HTTP_VAULT_DIR
+        threads = 2
+        drive = SalmonFSTestHelper.open_drive(vault_dir, SalmonFSTestHelper.drive_class_type,
+                                                    SalmonCoreTestHelper.TEST_PASSWORD)
+        file = drive.get_root().get_child(SalmonFSTestHelper.TEST_HTTP_FILE.get_base_name())
+        export_dir = SalmonFSTestHelper.generate_folder("export_http", SalmonFSTestHelper.TEST_OUTPUT_DIR, False)
+        local_file = export_dir.get_child(SalmonFSTestHelper.TEST_HTTP_FILE.get_base_name())
+        if local_file.exists():
+            local_file.delete()
+        SalmonFSTestHelper.export_files([file], export_dir, threads)
+        drive.close()
+
+    def test_shouldReadRawFile(self):
+        local_file = SalmonFSTestHelper.HTTP_TEST_DIR.get_child(
+            SalmonFSTestHelper.TEST_HTTP_FILE.get_base_name())
+        local_chk_sum = SalmonFSTestHelper.get_checksum(local_file)
+        http_root = PyHttpFile(SalmonFSTestHelper.HTTP_SERVER_VIRTUAL_URL + "/" + SalmonFSTestHelper.HTTP_TEST_DIRNAME)
+        http_file = http_root.get_child(SalmonFSTestHelper.TEST_HTTP_FILE.get_base_name())
+        stream = http_file.get_input_stream()
+        ms = MemoryStream()
+        stream.copy_to(ms)
+        ms.flush()
+        ms.set_position(0)
+        ms.close()
+        stream.close()
+        digest = SalmonFSTestHelper.get_checksum_stream(ms)
+        SalmonFSTestHelper.testCase.assertEqual(digest, local_chk_sum)
