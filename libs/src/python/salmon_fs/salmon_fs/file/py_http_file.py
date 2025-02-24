@@ -32,6 +32,7 @@ from typeguard import typechecked
 from wrapt import synchronized
 import urllib
 from urllib.parse import urljoin
+from datetime import datetime
 
 from salmon_core.streams.memory_stream import MemoryStream
 from salmon_fs.file.ireal_file import IRealFile
@@ -62,7 +63,6 @@ class PyHttpFile(IRealFile):
             headers = {}
             self.__set_default_headers(headers)
             conn: HTTPConnection | HTTPSConnection | None = None
-            http_response: HTTPResponse | None = None
             try:
                 url = self.__file_path
                 while count := PyHttpFile.MAX_REDIRECTS:
@@ -197,14 +197,16 @@ class PyHttpFile(IRealFile):
         Get the last modified date on disk.
         :return: The last modified date in milliseconds
         """
-        return self.__get_response().lastModified
+        response: HTTPResponse = self.__get_response()
+        return int(datetime.strptime(response.headers['last-modified'], '%a, %d %b %Y %H:%M:%S GMT').timestamp())
 
     def length(self) -> int:
         """
         Get the size of the file on disk.
         :return: The size
         """
-        return self.__get_response().length
+        response: HTTPResponse = self.__get_response()
+        return response.length
 
     def get_children_count(self) -> int:
         """
