@@ -71,7 +71,7 @@ class PyFileStream(RandomAccessStream):
             else:
                 mode = "w+"
 
-        self.__raf: BinaryIO = open(self.__file.get_path(), mode + "b")
+        self.__raf = open(self.__file.get_path(), mode + "b")
         if mode == "a+":
             self.__mm = mmap(self.__raf.fileno(), 0)
             self.__mm.seek(0)
