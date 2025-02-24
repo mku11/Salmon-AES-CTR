@@ -59,13 +59,13 @@ xcuserdata
 *.exe
 /libs/projects/salmon-libs-python/main.py
 node_modules
-/libs/projects/SalmonLibsTypeScript.VS2022/SalmonLibsTypeScript.VS2022/lib
+/libs/projects/SalmonLibs.vscode/lib
+/libs/projects/SalmonLibs.vscode/test/data
+/libs/projects/SalmonLibs.vscode/jsdoc
 eslintreport.txt
 lintreport.txt
 eslint.txt
 lint.txt
-/libs/projects/SalmonLibsTypeScript.VS2022/SalmonLibsTypeScript.VS2022/test/data
-/libs/projects/SalmonLibsTypeScript.VS2022/SalmonLibsTypeScript.VS2022/jsdoc
 
 /samples/JavascriptSamples/assets/js/lib
 /samples/PythonSamples/lib
