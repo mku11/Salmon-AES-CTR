@@ -28,7 +28,6 @@ import platform
 from typeguard import typechecked
 
 from salmon_fs.file.py_file import PyFile
-from salmon_fs.file.py_ws_file import PyWSFile, Credentials
 from salmon_fs.file.ireal_file import IRealFile
 from salmon_fs.file.ivirtual_file import IVirtualFile
 from salmon_fs.salmon.salmon_drive import SalmonDrive
@@ -42,7 +41,6 @@ class PyWSDrive(SalmonDrive):
     SalmonDrive implementation for web service Python file API. This provides a virtual drive implementation
     that you can use to store and access encrypted files.
     """
-    service_credentials: dict[IRealFile, Credentials] = dict()
 
     def __init__(self):
         """
@@ -51,33 +49,25 @@ class PyWSDrive(SalmonDrive):
         super().__init__()
 
     @staticmethod
-    def open(v_dir: IRealFile, password: str, sequencer: INonceSequencer,
-             service_user: str, service_password: str) -> SalmonDrive:
+    def open(v_dir: IRealFile, password: str, sequencer: INonceSequencer) -> SalmonDrive:
         """
         Helper method that opens and initializes a JavaDrive
         :param v_dir: The directory that hosts the drive.
         :param password: The password.
         :param sequencer: The nonce sequencer that will be used for encryption.
-        :param service_user: The web service username
-        :param service_password: The web service password
         :return: The drive.
         """
-        PyWSDrive.service_credentials[v_dir] = Credentials(service_user, service_password)
         return SalmonDrive.open_drive(v_dir, PyWSDrive, password, sequencer)
 
     @staticmethod
-    def create(v_dir: IRealFile, password: str, sequencer: INonceSequencer,
-               service_user: str, service_password: str) -> SalmonDrive:
+    def create(v_dir: IRealFile, password: str, sequencer: INonceSequencer) -> SalmonDrive:
         """
         Helper method that creates and initializes a JavaDrive
         :param v_dir: The directory that will host the drive.
         :param password: The password.
         :param sequencer: The nonce sequencer that will be used for encryption.
-        :param service_user: The web service username
-        :param service_password: The web service password
         :return: The drive.
         """
-        PyWSDrive.service_credentials[v_dir] = Credentials(service_user, service_password)
         return SalmonDrive.create_drive(v_dir, PyWSDrive, password, sequencer)
 
     def get_private_dir(self) -> IRealFile:
@@ -124,15 +114,3 @@ class PyWSDrive(SalmonDrive):
         :return: The drive root directory
         """
         return super().get_root()
-
-    def initialize(self, real_root: IRealFile | PyWSFile, create_if_not_exists: bool):
-        """
-        Initialize a web service drive at the directory path provided
-
-        :param real_root: The directory for the drive
-        :param create_if_not_exists: Create the drive if it does not exist
-        """
-        credentials: Credentials = PyWSDrive.service_credentials[real_root]
-        if credentials:
-            real_root.set_credentials(credentials)
-        super().initialize(real_root, create_if_not_exists)
