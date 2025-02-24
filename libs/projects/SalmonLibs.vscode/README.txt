@@ -8,6 +8,7 @@ To build the javascript libraries you will need:
 To run the unit tests you will need:
 1. nodejs
 2. jest
+3. jest extension
 
 Jest doesn't translate hard links in windows very well so 
 make sure you don't link any external unit test cases files
@@ -34,10 +35,10 @@ make sure you restart VS code.
 
 To run the test cases click on the test icon in VS Code and run the test 
 If the library test providers won't work you try running the Provider:
-"Jest Test Provider (SalmonLibsTypeScript.VS2022)
+"Jest Test Provider (SalmonLibs.cscode)
 
 To turn off auto running test cases:
-"jest.autoRun": "off",
+"jest.runMode": "on-demand",
 
 To build/transpile from typescript to javascript from the command line:
 npm run build

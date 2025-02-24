@@ -4,10 +4,10 @@
 			"path": "."
 		},
 		{
-			"path": "../../../src/typescript/salmon-core"
+			"path": "../../src/typescript/salmon-core"
 		},
 		{
-			"path": "../../../src/typescript/salmon-fs"
+			"path": "../../src/typescript/salmon-fs"
 		}
 	],
 	"settings": {
