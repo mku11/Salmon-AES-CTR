@@ -160,11 +160,6 @@ class SalmonFileImporter:
     The global default threads to use.
     """
 
-    __enableMultiThread: bool = True
-    """
-    True if multithreading is enabled.
-    """
-
     def __init__(self, buffer_size: int, threads: int, multi_cpu: bool = False):
         """
         Constructs a file importer that can be used to import files to the drive
@@ -257,8 +252,6 @@ class SalmonFileImporter:
         filename = filename if filename is not None else file_to_import.get_base_name()
         imported_file: SalmonFile
         try:
-            if not SalmonFileImporter.__enableMultiThread and self.__threads != 1:
-                raise NotImplementedError("Multithreading is not supported")
             self.__stopped[0] = False
             self.__failed = False
             self.__lastException = None

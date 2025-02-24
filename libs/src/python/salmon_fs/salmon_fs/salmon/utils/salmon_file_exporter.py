@@ -155,11 +155,6 @@ class SalmonFileExporter:
     The global default threads to use.
     """
 
-    __enableMultiThread: bool = True
-    """
-    True if multithreading is enabled.
-    """
-
     def __init__(self, buffer_size: int, threads: int, multi_cpu: bool = False):
         """
         Constructs a file exporter that can be used to export files from the drive
@@ -251,9 +246,6 @@ class SalmonFileExporter:
         exported_file: IRealFile | None = None
         filename = filename if filename is not None else file_to_export.get_base_name()
         try:
-            if not self.__enableMultiThread and self.__threads != 1:
-                raise NotImplementedError("Multithreading is not supported")
-
             self.__stopped[0] = False
             total_bytes_written = [0]
             self.__failed = False
