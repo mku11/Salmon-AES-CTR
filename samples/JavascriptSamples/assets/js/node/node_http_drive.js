@@ -7,7 +7,7 @@ let httpDriveURL = "http://localhost/saltest/httpserv/vault";
 let password = "test123";
 let threads = 2;
 
-let dir = new JsNodeFile("../../../output");
+let dir = new JsNodeFile("output");
 if(!await dir.exists())
 	await dir.mkdir();
 let exportDir = await dir.getChild("export");
