@@ -21,6 +21,6 @@ set NODE_OPTIONS=--experimental-vm-modules
 To execute the Node.js sample from the command line:
 cd assets/js/node
 To run a sample:
-node --experimental-modules --experimental-default-type=module node_text.js
+node --experimental-modules --experimental-default-type=module assets/js/node/node_text.js
 or via package.json:
 npm run execute

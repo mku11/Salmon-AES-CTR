@@ -9,9 +9,9 @@ let wsPassword = "password";
 let drivePath = "/example_drive_" + Date.now();
 let password = "test123";
 
-let filesToImport = [new JsNodeFile("../../../data/file.txt")];
+let filesToImport = [new JsNodeFile("./data/file.txt")];
 
-let dir = new JsNodeFile("../../../output");
+let dir = new JsNodeFile("./output");
 if(!await dir.exists())
 	await dir.mkdir();
 let exportDir = await dir.getChild("export");

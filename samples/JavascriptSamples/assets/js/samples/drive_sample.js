@@ -46,8 +46,8 @@ export class DriveSample {
         let commander = new SalmonFileCommander(bufferSize, bufferSize, threads);
 
 		// set the correct worker paths for multithreading
-		commander.getFileImporter().setWorkerPath( '../lib/salmon-fs/salmon/utils/salmon_file_importer_worker.js');
-		commander.getFileExporter().setWorkerPath( '../lib/salmon-fs/salmon/utils/salmon_file_exporter_worker.js');
+		commander.getFileImporter().setWorkerPath( './assets/js/lib/salmon-fs/salmon/utils/salmon_file_importer_worker.js');
+		commander.getFileExporter().setWorkerPath( './assets/js/lib/salmon-fs/salmon/utils/salmon_file_exporter_worker.js');
 		
         // import multiple files
         let filesImported = await commander.importFiles(filesToImport, await drive.getRoot(), false, true,
@@ -69,8 +69,8 @@ export class DriveSample {
 		let commander = new SalmonFileCommander(bufferSize, bufferSize, threads);
 
 		// set the correct worker paths for multithreading
-		commander.getFileImporter().setWorkerPath( '../lib/salmon-fs/salmon/utils/salmon_file_importer_worker.js');
-		commander.getFileExporter().setWorkerPath( '../lib/salmon-fs/salmon/utils/salmon_file_exporter_worker.js');
+		commander.getFileImporter().setWorkerPath( './assets/js/lib/salmon-fs/salmon/utils/salmon_file_importer_worker.js');
+		commander.getFileExporter().setWorkerPath( './assets/js/lib/salmon-fs/salmon/utils/salmon_file_exporter_worker.js');
 		
         // export all files
 		let files = await drive.getRoot().then((root)=>root.listFiles());

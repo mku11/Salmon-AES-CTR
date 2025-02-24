@@ -6,7 +6,7 @@
     "configurations": [
         {
             "name": "Text",
-            "program": "${workspaceFolder}/node_text.js",
+            "program": "${workspaceFolder}/assets/js/node/node_text.js",
             "request": "launch",
             "skipFiles": [
                 "<node_internals>/**"
@@ -16,7 +16,7 @@
         },
         {
             "name": "Data",
-            "program": "${workspaceFolder}/node_data.js",
+            "program": "${workspaceFolder}/assets/js/node/node_data.js",
             "request": "launch",
             "skipFiles": [
                 "<node_internals>/**"
@@ -26,7 +26,7 @@
         },
         {
             "name": "Data Stream",
-            "program": "${workspaceFolder}/node_data_stream.js",
+            "program": "${workspaceFolder}/assets/js/node/node_data_stream.js",
             "request": "launch",
             "skipFiles": [
                 "<node_internals>/**"
@@ -36,7 +36,7 @@
         },
         {
             "name": "File",
-            "program": "${workspaceFolder}/node_file.js",
+            "program": "${workspaceFolder}/assets/js/node/node_file.js",
             "request": "launch",
             "skipFiles": [
                 "<node_internals>/**"
@@ -46,7 +46,7 @@
         },
         {
             "name": "Local Drive",
-            "program": "${workspaceFolder}/node_local_drive.js",
+            "program": "${workspaceFolder}/assets/js/node/node_local_drive.js",
             "request": "launch",
             "skipFiles": [
                 "<node_internals>/**"
@@ -56,7 +56,7 @@
         },
         {
             "name": "Web Service Drive",
-            "program": "${workspaceFolder}/node_web_service_drive.js",
+            "program": "${workspaceFolder}/assets/js/node/node_web_service_drive.js",
             "request": "launch",
             "skipFiles": [
                 "<node_internals>/**"
@@ -66,7 +66,7 @@
         },
         {
             "name": "Http Drive",
-            "program": "${workspaceFolder}/node_http_drive.js",
+            "program": "${workspaceFolder}/assets/js/node/node_http_drive.js",
             "request": "launch",
             "skipFiles": [
                 "<node_internals>/**"

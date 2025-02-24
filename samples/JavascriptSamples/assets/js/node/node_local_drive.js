@@ -6,7 +6,7 @@ let password = "test123";
 let threads = 2;
 
 // directories and files
-let dir = new JsNodeFile("../../../output");
+let dir = new JsNodeFile("./output");
 if(!await dir.exists())
 	await dir.mkdir();
 
@@ -20,7 +20,7 @@ let localDrive = await DriveSample.createDrive(driveDir, password);
 localDrive = await DriveSample.openDrive(driveDir, password);
 
 // import
-let filesToImport = [new JsNodeFile("../../../data/file.txt")];
+let filesToImport = [new JsNodeFile("./data/file.txt")];
 await DriveSample.importFiles(localDrive, filesToImport, threads);
 
 // list

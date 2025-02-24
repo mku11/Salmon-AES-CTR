@@ -20,7 +20,7 @@ if(integrity) {
 	integrityKey = null;
 }
 
-let dir = new JsNodeFile("../../../output");
+let dir = new JsNodeFile("./output");
 if(!await dir.exists())
 	await dir.mkdir();
 let file = await dir.getChild("data.dat");
