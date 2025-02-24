@@ -27,6 +27,7 @@ from abc import ABC
 from salmon_core.salmon.salmon_generator import SalmonGenerator
 from salmon_core.salmon.salmon_range_exceeded_exception import SalmonRangeExceededException
 from salmon_core.salmon.transform.isalmon_ctr_transformer import ISalmonCTRTransformer
+from salmon_core.salmon.salmon_security_exception import SalmonSecurityException
 
 from typeguard import typechecked
 
@@ -73,6 +74,9 @@ class SalmonAES256CTRTransformer(ISalmonCTRTransformer, ABC):
         """
         Resets the Counter and the block count.
         """
+        
+        if self.__nonce is None:
+            raise SalmonSecurityException("No counter, run init first")
         self.__counter: bytearray = bytearray(SalmonGenerator.BLOCK_SIZE)
         self.__counter[0:len(self.__nonce)] = self.__nonce[0:]
         self.__block = 0
@@ -94,6 +98,9 @@ class SalmonAES256CTRTransformer(ISalmonCTRTransformer, ABC):
         
         :param value: value to increase counter by
         """
+        
+        if self.__counter is None or self.__nonce is None:
+            raise SalmonSecurityException("No counter, run init first")
         if value < 0:
             raise ValueError("Value should be positive")
         index: int = SalmonGenerator.BLOCK_SIZE - 1

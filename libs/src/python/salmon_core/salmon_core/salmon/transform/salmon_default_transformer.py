@@ -63,6 +63,8 @@ class SalmonDefaultTransformer(SalmonAES256CTRTransformer):
         :return: The number of bytes transformed.
         :raises IntegrityException: Thrown when security error
         """
+        if self.get_key() is None:
+            raise SalmonSecurityException("No key defined, run init first")
         try:
             counter: bytearray = self.get_counter()
             ctr = Counter.new(len(counter) * 8, initial_value=BitConverter.to_long(counter, 0, len(counter)))
@@ -85,6 +87,9 @@ class SalmonDefaultTransformer(SalmonAES256CTRTransformer):
         :return: The number of bytes transformed.
         :raises IntegrityException: Thrown when security error
         """
+        
+        if self.get_key() is None:
+            raise SalmonSecurityException("No key defined, run init first")
         try:
             counter: bytearray = self.get_counter()
             ctr = Counter.new(len(counter) * 8, initial_value=BitConverter.to_long(counter, 0, len(counter)))
