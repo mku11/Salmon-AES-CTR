@@ -82,7 +82,7 @@ export class SalmonFSTestHelper {
     static TEST_IMPORT_MEDIUM_FILENAME = "medium_test.dat";
     static TEST_IMPORT_LARGE_FILENAME = "large_test.dat";
     static TEST_IMPORT_HUGE_FILENAME = "huge_test.dat";
-    static TINY_FILE_CONTENTS = "This is a new file created that will be used for testing encryptio and decryption.";
+    static TINY_FILE_CONTENTS = "This is a new file created that will be used for testing encryption and decryption.";
     static TEST_SEQ_DIRNAME = "seq";
     static TEST_SEQ_FILENAME = "fileseq.json";
     static TEST_EXPORT_AUTH_FILENAME = "export.slma";
