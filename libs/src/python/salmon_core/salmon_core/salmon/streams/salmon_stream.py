@@ -651,7 +651,12 @@ class SalmonStream(RandomAccessStream):
         :raises IOError: Thrown if there is an IO error.
         """
         data: bytearray = bytearray(min(count, self.__baseStream.length() - self.__baseStream.get_position()))
-        self.__baseStream.read(data, 0, len(data))
+        total_bytes_read = 0
+        while total_bytes_read < len(data):
+            bytes_read = self.__baseStream.read(data, total_bytes_read, len(data) - total_bytes_read)
+            if bytes_read <= 0:
+                break
+            total_bytes_read += bytes_read
         return data
 
     def __write_to_buffer(self, src_buffer: bytearray, src_offset: int, dest_buffer: bytearray, dest_offset: int,
