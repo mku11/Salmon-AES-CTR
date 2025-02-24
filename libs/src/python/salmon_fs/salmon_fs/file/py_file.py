@@ -203,11 +203,19 @@ class PyFile(IRealFile):
         :return: The moved file. Use this file for subsequent operations instead of the original.
         """
         new_name = new_name if new_name is not None else self.get_base_name()
-        n_file_path: str = new_dir.get_path() + os.sep + new_name
-        os.rename(self.__file_path, n_file_path)
-        if not os.path.exists(n_file_path):
-            raise RuntimeError("directory already exists")
-        return PyFile(n_file_path)
+        if new_dir is None or not new_dir.exists():
+            raise IOError("Target directory does not exists")
+        new_file: IRealFile = new_dir.get_child(new_name)
+        if new_file is not None and new_file.exists():
+            raise IOError("Another file/directory already exists")
+        if self.is_directory():
+            raise IOError("Could not move directory use IRealFile moveRecursively() instead")
+        else:
+            n_file_path: str = new_dir.get_path() + os.sep + new_name
+            os.rename(self.__file_path, n_file_path)
+            if not os.path.exists(n_file_path):
+                raise RuntimeError("directory already exists")
+            return PyFile(n_file_path)
 
     def copy(self, new_dir: IRealFile, new_name: str | None = None,
              progress_listener: Callable[[int, int], Any] | None = None) -> IRealFile:
@@ -226,7 +234,7 @@ class PyFile(IRealFile):
         if new_file is not None and new_file.exists():
             raise IOError("Another file/directory already exists")
         if self.is_directory():
-            return new_dir.create_directory(new_name)
+            raise IOError("Could not copy directory use IRealFile copyRecursively() instead")
         else:
             new_file = new_dir.create_file(new_name)
             res: bool = IRealFile.copy_file_contents(self, new_file, False, progress_listener)
