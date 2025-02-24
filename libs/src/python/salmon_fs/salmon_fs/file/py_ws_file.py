@@ -71,7 +71,7 @@ class PyWSFile(IRealFile):
         self.__credentials: Credentials = credentials
         self.__response: HTTPResponse | None = None
 
-    def __get_response(self) -> HTTPResponse:
+    def __get_response(self) -> dict[str,any]:
         if not self.__response:
             headers = {}
             self.__set_default_headers(headers)
