@@ -35,13 +35,13 @@ export class DriveSample {
 		} else if(vaultDir.constructor.name === 'JsWSFile') { // web service
 			drive = await JsWSDrive.open(vaultDir, password, sequencer);
 		} else if(vaultDir.constructor.name === 'JsHttpFile') { // http (Read-only)
-			drive = await JsHttpDrive.open(vaultDir, password, sequencer);
+			drive = await JsHttpDrive.open(vaultDir, password);
 		}
 		print("drive opened: " + drive.getRealRoot().getAbsolutePath());
 		return drive;
 	}
 
-	static async importFiles(drive, filesToImport, threads) {
+	static async importFiles(drive, filesToImport, threads = 1) {
 		let bufferSize = 256 * 1024;
         let commander = new SalmonFileCommander(bufferSize, bufferSize, threads);
 
