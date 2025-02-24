@@ -90,7 +90,7 @@ class SalmonFSTestHelper:
     TEST_IMPORT_HUGE_FILENAME = "huge_test.dat"
     TINY_FILE_CONTENTS = "This is a new file created that will be used for testing encryption and decryption."
     TEST_SEQ_DIRNAME = "seq"
-    TEST_SEQ_FILENAME = "fileseq.json"
+    TEST_SEQ_FILENAME = "fileseq.xml"
     TEST_EXPORT_AUTH_FILENAME = "export.slma"
 
     # Web service
