@@ -110,7 +110,7 @@ class SalmonAES256CTRTransformer(ISalmonCTRTransformer, ABC):
                 raise SalmonRangeExceededException("Current CTR max blocks exceeded")
             val: int = (value + carriage) % 256
             carriage = int((((self.__counter[index] & 0xFF) + val) // 256))
-            self.__counter[index] += val
+            self.__counter[index] = (self.__counter[index] + val) % 256
             index -= 1
             value //= 256
 
