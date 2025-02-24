@@ -102,7 +102,7 @@ class SalmonIntegrity:
             raise SalmonSecurityException("You need a hash to use with integrity")
         if integrity and (chunk_size is None or chunk_size == 0):
             self._chunkSize = SalmonIntegrity.DEFAULT_CHUNK_SIZE
-        elif integrity or (chunk_size is not None and chunk_size > 0):
+        elif chunk_size and (integrity or chunk_size > 0):
             self._chunkSize = chunk_size
         if hash_size < 0:
             raise SalmonSecurityException("Hash size should be a positive number")
