@@ -39,8 +39,7 @@ export async function openWebServiceDrive() {
 		return;
 	try {
 		let dir = new JsWSFile(drivePath, wsServicePath, new Credentials(wsUser, wsPassword));
-		wsDrive = await DriveSample.openDrive(dir, password, 
-												wsServicePath, wsUser, wsPassword);
+		wsDrive = await DriveSample.openDrive(dir, password);
 	} catch (ex) {
 		console.error(ex);
 		print(ex.stack + "\n");

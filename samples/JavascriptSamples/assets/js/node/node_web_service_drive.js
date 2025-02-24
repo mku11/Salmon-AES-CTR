@@ -22,9 +22,9 @@ let driveDir = new JsWSFile(drivePath, wsServicePath, new Credentials(wsUser, ws
 if(!await driveDir.exists())
 	await driveDir.mkdir();
 
-let wsDrive = await DriveSample.createDrive(driveDir, password, wsServicePath, wsUser, wsPassword);
-wsDrive = await DriveSample.openDrive(driveDir, password, wsServicePath, wsUser, wsPassword);
+let wsDrive = await DriveSample.createDrive(driveDir, password);
+wsDrive = await DriveSample.openDrive(driveDir, password);
 await DriveSample.importFiles(wsDrive, filesToImport);
 await DriveSample.listFiles(wsDrive);
-await DriveSample.exportFiles(wsDrive, dir);
+await DriveSample.exportFiles(wsDrive, exportDir);
 DriveSample.closeDrive(wsDrive);
