@@ -318,12 +318,13 @@ class PyWSFile(IRealFile):
             self.set_service_auth(headers)
             params = urllib.parse.urlencode({PyWSFile.__PATH: self.get_path()})
             conn: HTTPConnection | HTTPSConnection | None = None
+            httpResponse: HTTPResponse | None = None
             try:
                 conn = self.__create_connection()
                 conn.request("GET", "/api/list" + "?" + params, headers=headers)
-                response = conn.getresponse()
-                self.__check_status(response, 200)
-                contents = response.read()
+                httpResponse = conn.getresponse()
+                self.__check_status(httpResponse, 200)
+                contents = httpResponse.read()
                 files: list[Any] = json.loads(contents)
                 real_files: list[PyWSFile] = []
                 real_dirs: list[PyWSFile] = []
@@ -340,8 +341,8 @@ class PyWSFile(IRealFile):
             finally:
                 if conn:
                     conn.close()
-                if response:
-                    response.close()
+                if httpResponse:
+                    httpResponse.close()
         return []
 
     def move(self, new_dir: IRealFile, new_name: str | None = None,
@@ -528,6 +529,7 @@ class PyWSFile(IRealFile):
         elif scheme == "https":
             conn = http.client.HTTPSConnection(urlparse(self.__service_path).netloc)
         return conn
+
 
 class Credentials:
     def __init__(self, service_user: str, service_password: str):
