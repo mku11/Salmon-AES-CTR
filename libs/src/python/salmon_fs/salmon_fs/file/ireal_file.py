@@ -285,7 +285,7 @@ class IRealFile(ABC):
                 progress_listener(self, 0, 1)
             if dest.get_absolute_path().startswith(self.get_absolute_path()):
                 if progress_listener:
-                    progress_listener(src, 1, 1)
+                    progress_listener(self, 1, 1)
                 return
             if new_file is not None and new_file.exists() and auto_rename is not None and auto_rename_folders:
                 new_file = dest.create_directory(auto_rename(self))
