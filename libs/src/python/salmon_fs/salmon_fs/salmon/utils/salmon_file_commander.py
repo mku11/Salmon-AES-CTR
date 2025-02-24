@@ -61,6 +61,12 @@ class SalmonFileCommander:
         self.__fileExporter = SalmonFileExporter(export_buffer_size, threads, multi_cpu)
         self.__fileSearcher = FileSearcher()
 
+    def get_file_importer(self):
+        return self.__fileImporter
+
+    def get_file_exporter(self):
+        return self.__fileExporter
+
     def import_files(self, files_to_import: list[IRealFile], import_dir: SalmonFile,
                      delete_source: bool, integrity: bool,
                      on_progress_changed: Callable[[SalmonFileCommander.RealFileTaskProgress], Any] = None,
