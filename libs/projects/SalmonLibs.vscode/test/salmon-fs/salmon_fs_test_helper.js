@@ -797,6 +797,7 @@ export class SalmonFSTestHelper {
         let root = await drive.getRoot();
         let file = await root.getChild(filename);
         console.log("file size: " + await file.getSize());
+		console.log("file last modified: " + await file.getLastDateTimeModified());
         expect(await file.exists()).toBeTruthy();
         
         let stream = await file.getInputStream();
