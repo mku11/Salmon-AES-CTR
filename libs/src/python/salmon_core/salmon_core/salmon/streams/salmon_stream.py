@@ -572,7 +572,7 @@ class SalmonStream(RandomAccessStream):
         while pos < count:
             n_buffer_size: int = min(buffer_size, count - pos)
 
-            src_buffer: bytearray = self.__read_buffer_data(buffer, pos, n_buffer_size)
+            src_buffer: bytearray = self.__read_buffer_data(buffer, pos + offset, n_buffer_size)
             if len(src_buffer) == 0:
                 break
             dest_buffer: bytearray = bytearray(len(src_buffer))
