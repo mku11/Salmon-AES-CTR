@@ -70,8 +70,8 @@ class SalmonFileInputStream(BufferedIOBase):
         :param back_offset:   The back offset.
         """
         self.__buffersCount: int
-        self.__buffers: list[SalmonFileInputStream.CacheBuffer] | list[None] | None = None
-        self.__streams: list[SalmonStream] | list[None] | None = None
+        self.__buffers: list[SalmonFileInputStream.CacheBuffer | None] | None = None
+        self.__streams: list[SalmonStream | None] | None = None
         self.__salmonFile: SalmonFile | None = None
         self.__cacheBufferSize: int = 0
         self.__threads: int = 0
@@ -124,7 +124,7 @@ class SalmonFileInputStream(BufferedIOBase):
         Method creates the parallel streams for reading from the file
         """
         self.__executor = ThreadPoolExecutor(self.__threads)
-        self.__streams = [None] * self.__threads
+        self.__streams: list[RandomAccessStream | None] = [None] * self.__threads
         try:
             for i in range(0, self.__threads):
                 self.__streams[i] = self.__salmonFile.get_input_stream()
