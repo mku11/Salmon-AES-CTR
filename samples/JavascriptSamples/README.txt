@@ -3,8 +3,8 @@ Salmon Libraries
 To get the salmon libraries run in the command line:
 getDeps.sh
 You should have this file structure:
-lib/salmon-core
-lib/salmon-fs
+assets/js/lib/salmon-core
+assets/js/lib/salmon-fs
 
 - To run the samples in Chrome:
 Deploy this folder to an HTTP server
