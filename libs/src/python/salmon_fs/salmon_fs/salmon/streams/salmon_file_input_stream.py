@@ -143,7 +143,7 @@ class SalmonFileInputStream(BufferedIOBase):
         for i in range(0, self.__buffersCount):
             self.__buffers[i] = SalmonFileInputStream.CacheBuffer(self.__cacheBufferSize)
 
-    def seek(self, v_bytes: int, whence: int = ...) -> int:
+    def seek(self, v_bytes: int, whence: int = 0) -> int:
         """
         Seek to a position in the stream
         
@@ -167,7 +167,7 @@ class SalmonFileInputStream(BufferedIOBase):
         """
 
         if self.__position >= self.__positionEnd + 1:
-            return -1
+            return 0
 
         min_count: int
         bytes_read: int
@@ -202,12 +202,10 @@ class SalmonFileInputStream(BufferedIOBase):
         self.__position += min_count
         return min_count
 
-    def read(self, size: int | None = ...) -> bytearray:
-        if size is None:
-            size = SalmonFileInputStream.__DEFAULT_BUFFER_SIZE
+    def read(self, size: int = __DEFAULT_BUFFER_SIZE) -> bytearray:
         return self.read1(size)
 
-    def read1(self, size: int = ...) -> bytearray:
+    def read1(self, size: int = __DEFAULT_BUFFER_SIZE) -> bytearray:
         buff: bytearray = bytearray(size)
         bytes_read = self.readinto(buff)
         return buff[0:bytes_read]
