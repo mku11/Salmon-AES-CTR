@@ -25,7 +25,6 @@ SOFTWARE.
 using Mku.File;
 using Mku.Sequence;
 using System;
-using System.Collections.Generic;
 
 namespace Mku.Salmon.Drive;
 
