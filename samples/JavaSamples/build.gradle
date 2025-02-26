@@ -50,7 +50,7 @@ task extractNativeBundle(type: Sync) {
 classes.dependsOn extractNativeBundle
 
 ext {
-    javaMainClass = "com.mku.salmon.samples.Main"
+    javaMainClass = "com.mku.salmon.samples.main.Main"
 }
 
 task run(type: JavaExec) {
