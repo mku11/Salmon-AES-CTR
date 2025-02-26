@@ -373,6 +373,7 @@ public class JavaWSFileStream extends RandomAccessStream {
         if (client != null)
             client.close();
         client = null;
+        file.reset();
     }
 
     private void setServiceAuth(HttpRequest httpRequest) {

@@ -241,6 +241,12 @@ public interface IRealFile {
      * @return True if directory was created
      */
     boolean mkdir();
+	
+	/**
+     * Reset cached properties
+     *
+     */
+    void reset();
 
     /**
      * Copy contents of a file to another file.

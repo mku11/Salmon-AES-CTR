@@ -23,12 +23,14 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 */
 
-import com.mku.convert.Base64;
 import com.mku.func.BiConsumer;
 import com.mku.streams.MemoryStream;
 import com.mku.streams.RandomAccessStream;
-import org.apache.http.*;
-import org.apache.http.client.methods.*;
+import org.apache.http.HttpRequest;
+import org.apache.http.HttpResponse;
+import org.apache.http.HttpStatus;
+import org.apache.http.client.methods.CloseableHttpResponse;
+import org.apache.http.client.methods.HttpGet;
 import org.apache.http.client.utils.URIBuilder;
 import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.HttpClients;
@@ -50,9 +52,7 @@ import java.util.regex.Pattern;
  */
 public class JavaHttpFile implements IRealFile {
     public static final String Separator = "/";
-    public static final int SMALL_FILE_MAX_LENGTH = 128 * 1024;
-    private static final int BUFFER_LENGTH = 32 * 1024;
-    private static final String DATE_FORMAT = "yyyy-MM-dd HH:mm:ss";
+    private static final String DATE_FORMAT = "EEE, dd MMM yyyy HH:mm:ss zzz";
 
     private String filePath;
     public static CloseableHttpClient client = HttpClients.createDefault();
@@ -275,30 +275,6 @@ public class JavaHttpFile implements IRealFile {
         String lenStr = res.getFirstHeader("content-length").getValue();
         if (lenStr != null) {
             length = Integer.parseInt(lenStr);
-        } else {
-            RandomAccessStream stream = null;
-            try {
-                stream = this.getInputStream();
-                long totalLength = 0;
-                byte[] buffer = new byte[BUFFER_LENGTH];
-                int bytesRead;
-                while ((bytesRead = stream.read(buffer, 0, buffer.length)) > 0) {
-                    totalLength += bytesRead;
-                    if (totalLength > JavaHttpFile.SMALL_FILE_MAX_LENGTH) {
-                        throw new RuntimeException("Could not get length from file. If this is a large file make sure the server responds with a Content-Length");
-                    }
-                }
-                length = totalLength;
-            } catch (IOException e) {
-                throw new RuntimeException(e);
-            } finally {
-                try {
-                    if (stream != null)
-                        stream.close();
-                } catch (IOException e) {
-                    throw new RuntimeException(e);
-                }
-            }
         }
         return length;
     }
@@ -460,6 +436,14 @@ public class JavaHttpFile implements IRealFile {
     public boolean mkdir() {
         throw new UnsupportedOperationException("Unsupported Operation, readonly filesystem");
     }
+	
+	/**
+     * Reset cached properties
+     *
+     */
+    public void reset() {
+		
+	}
 
     private String getChildPath(String filename) {
         String nFilepath = this.filePath;

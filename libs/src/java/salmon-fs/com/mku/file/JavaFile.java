@@ -355,6 +355,14 @@ public class JavaFile implements IRealFile {
         File file = new File(filePath);
         return file.mkdir();
     }
+	
+	/**
+     * Reset cached properties
+     *
+     */
+    public void reset() {
+		
+	}
 
     /**
      * Returns a string representation of this object
