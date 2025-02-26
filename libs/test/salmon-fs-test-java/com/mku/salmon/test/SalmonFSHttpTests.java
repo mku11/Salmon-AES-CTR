@@ -26,14 +26,19 @@ SOFTWARE.
 
 import com.mku.file.IRealFile;
 import com.mku.file.IVirtualFile;
+import com.mku.file.JavaHttpFile;
 import com.mku.salmon.SalmonDrive;
+import com.mku.salmon.SalmonFile;
 import com.mku.salmon.drive.JavaHttpDrive;
+import com.mku.salmon.streams.ProviderType;
+import com.mku.salmon.streams.SalmonStream;
 import com.mku.streams.MemoryStream;
 import com.mku.streams.RandomAccessStream;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 
+import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.security.NoSuchAlgorithmException;
 import java.util.ArrayList;
@@ -43,17 +48,20 @@ import static org.junit.jupiter.api.Assertions.*;
 
 public class SalmonFSHttpTests {
     static TestMode oldTestMode = null;
+
     @BeforeAll
     static void beforeAll() throws Exception {
         SalmonFSHttpTests.oldTestMode = SalmonFSTestHelper.currTestMode;
-		
-		// use TestMode: Http only
+
+        // use TestMode: Http only
         SalmonFSTestHelper.setTestParams(System.getProperty("testDir"), TestMode.Http);
+
+        SalmonFSTestHelper.TEST_HTTP_FILE = SalmonFSTestHelper.TEST_IMPORT_LARGE_FILE;
 
         // SalmonCoreTestHelper.TEST_ENC_BUFFER_SIZE = 1 * 1024 * 1024;
         // SalmonCoreTestHelper.TEST_DEC_BUFFER_SIZE = 1 * 1024 * 1024;
-
-        SalmonFSTestHelper.TEST_IMPORT_FILE = SalmonFSTestHelper.TEST_IMPORT_SMALL_FILE;
+        SalmonCoreTestHelper.TEST_ENC_THREADS = 2;
+        SalmonCoreTestHelper.TEST_DEC_THREADS = 2;
 
         SalmonFSTestHelper.ENC_IMPORT_BUFFER_SIZE = 512 * 1024;
         SalmonFSTestHelper.ENC_IMPORT_THREADS = 2;
@@ -71,7 +79,7 @@ public class SalmonFSHttpTests {
         // gradlew.bat :salmon-ws:test --tests "com.mku.salmon.ws.fs.service.test.SalmonWSTests.testStartServer" --rerun-tasks
 
         // use the native library
-        // SalmonStream.setAesProviderType(ProviderType.AesIntrinsics);
+        SalmonStream.setAesProviderType(ProviderType.Default);
     }
 
     @AfterAll
@@ -111,13 +119,23 @@ public class SalmonFSHttpTests {
     }
 
     @Test
-    void shouldReadFromRealFileTiny() throws NoSuchAlgorithmException, IOException {
+    void shouldReadFromFileTiny() throws NoSuchAlgorithmException, IOException {
         SalmonFSTestHelper.shouldReadFile(SalmonFSTestHelper.HTTP_VAULT_DIR, SalmonFSTestHelper.TEST_IMPORT_TINY_FILENAME);
     }
 
     @Test
-    void shouldReadFromRealFileSmall() throws NoSuchAlgorithmException, IOException {
+    void shouldReadFromFileSmall() throws NoSuchAlgorithmException, IOException {
         SalmonFSTestHelper.shouldReadFile(SalmonFSTestHelper.HTTP_VAULT_DIR, SalmonFSTestHelper.TEST_IMPORT_SMALL_FILENAME);
+    }
+
+    @Test
+    void shouldReadFromFileMedium() throws NoSuchAlgorithmException, IOException {
+        SalmonFSTestHelper.shouldReadFile(SalmonFSTestHelper.HTTP_VAULT_DIR, SalmonFSTestHelper.TEST_IMPORT_MEDIUM_FILENAME);
+    }
+
+    @Test
+    void shouldReadFromFileLarge() throws NoSuchAlgorithmException, IOException {
+        SalmonFSTestHelper.shouldReadFile(SalmonFSTestHelper.HTTP_VAULT_DIR, SalmonFSTestHelper.TEST_IMPORT_LARGE_FILENAME);
     }
 
     @Test
@@ -153,5 +171,37 @@ public class SalmonFSHttpTests {
         assertTrue(filenames.contains(SalmonFSTestHelper.TEST_IMPORT_SMALL_FILENAME));
         assertTrue(filenames.contains(SalmonFSTestHelper.TEST_IMPORT_MEDIUM_FILENAME));
         assertTrue(filenames.contains(SalmonFSTestHelper.TEST_IMPORT_LARGE_FILENAME));
+    }
+
+
+    @Test
+    public void ShouldExportFileFromDrive() throws Exception {
+        IRealFile vaultDir = SalmonFSTestHelper.HTTP_VAULT_DIR;
+        int threads = 1;
+        SalmonDrive drive = SalmonFSTestHelper.openDrive(vaultDir, SalmonFSTestHelper.driveClassType, SalmonCoreTestHelper.TEST_PASSWORD);
+        SalmonFile file = drive.getRoot().getChild(SalmonFSTestHelper.TEST_HTTP_FILE.getBaseName());
+        IRealFile exportDir = SalmonFSTestHelper.generateFolder("export_http", SalmonFSTestHelper.TEST_OUTPUT_DIR, false);
+        IRealFile localFile = exportDir.getChild(SalmonFSTestHelper.TEST_HTTP_FILE.getBaseName());
+        if (localFile.exists())
+            localFile.delete();
+        SalmonFSTestHelper.exportFiles(new SalmonFile[]{file}, exportDir, threads);
+        drive.close();
+    }
+
+    @Test
+    public void ShouldReadRawFile() throws IOException, NoSuchAlgorithmException {
+        IRealFile localFile = SalmonFSTestHelper.HTTP_TEST_DIR.getChild(SalmonFSTestHelper.TEST_HTTP_FILE.getBaseName());
+        String localChkSum = SalmonFSTestHelper.getChecksum(localFile);
+        IRealFile httpRoot = new JavaHttpFile(SalmonFSTestHelper.HTTP_SERVER_VIRTUAL_URL + "/" + SalmonFSTestHelper.HTTP_TEST_DIRNAME);
+        IRealFile httpFile = httpRoot.getChild(SalmonFSTestHelper.TEST_HTTP_FILE.getBaseName());
+        RandomAccessStream stream = httpFile.getInputStream();
+        MemoryStream ms = new MemoryStream();
+        stream.copyTo(ms);
+        ms.flush();
+        ms.setPosition(0);
+        String digest = SalmonFSTestHelper.getChecksumStream(new ByteArrayInputStream(ms.toArray()));
+        ms.close();
+        stream.close();
+        assertEquals(digest, localChkSum);
     }
 }

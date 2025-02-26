@@ -56,7 +56,7 @@ public class SalmonFSTests {
         // use TestMode: Local, WebService. Http is tested only in SalmonFSHttpTests.
         SalmonFSTestHelper.setTestParams(System.getProperty("testDir"), TestMode.WebService);
 
-        SalmonFSTestHelper.TEST_IMPORT_FILE = SalmonFSTestHelper.TEST_IMPORT_MEDIUM_FILE;
+        SalmonFSTestHelper.TEST_IMPORT_FILE = SalmonFSTestHelper.TEST_IMPORT_LARGE_FILE;
 
         // SalmonCoreTestHelper.TEST_ENC_BUFFER_SIZE = 1 * 1024 * 1024;
         // SalmonCoreTestHelper.TEST_DEC_BUFFER_SIZE = 1 * 1024 * 1024;
@@ -129,7 +129,8 @@ public class SalmonFSTests {
     public void shouldImportAndExportNoIntegrityBitFlipDataNoCatch() {
         boolean integrityFailed = false;
         try {
-            SalmonFSTestHelper.importAndExport(SalmonFSTestHelper.generateFolder(SalmonFSTestHelper.TEST_VAULT_DIRNAME), SalmonCoreTestHelper.TEST_PASSWORD, SalmonFSTestHelper.TEST_IMPORT_FILE,
+            SalmonFSTestHelper.importAndExport(SalmonFSTestHelper.generateFolder(SalmonFSTestHelper.TEST_VAULT_DIRNAME),
+                    SalmonCoreTestHelper.TEST_PASSWORD, SalmonFSTestHelper.TEST_IMPORT_FILE,
                     true, 24 + 10, false, false, false);
         } catch (Exception ex) {
             integrityFailed = true;
@@ -165,7 +166,8 @@ public class SalmonFSTests {
     public void shouldImportAndCopyFile() throws Exception {
         boolean failed = false;
         try {
-            SalmonFSTestHelper.importAndCopy(SalmonFSTestHelper.generateFolder(SalmonFSTestHelper.TEST_VAULT_DIRNAME), SalmonCoreTestHelper.TEST_PASSWORD, SalmonFSTestHelper.TEST_IMPORT_FILE,
+            SalmonFSTestHelper.importAndCopy(SalmonFSTestHelper.generateFolder(SalmonFSTestHelper.TEST_VAULT_DIRNAME),
+                    SalmonCoreTestHelper.TEST_PASSWORD, SalmonFSTestHelper.TEST_IMPORT_FILE,
                     SalmonFSTestHelper.ENC_IMPORT_BUFFER_SIZE, SalmonFSTestHelper.ENC_IMPORT_THREADS, "subdir", false);
         } catch (Exception ex) {
             ex.printStackTrace();
