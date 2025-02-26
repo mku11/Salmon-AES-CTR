@@ -535,7 +535,7 @@ public class SalmonFile implements IVirtualFile {
     private String getPath(String realPath) throws IOException {
         String relativePath = getRelativePath(realPath);
         StringBuilder path = new StringBuilder();
-        String[] parts = relativePath.split(Pattern.quote(File.separator));
+        String[] parts = relativePath.split("\\\\|/\"");
         for (String part : parts) {
             if (!part.equals("")) {
                 path.append(separator);
