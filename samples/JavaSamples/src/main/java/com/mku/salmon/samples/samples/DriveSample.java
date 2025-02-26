@@ -58,7 +58,7 @@ public class DriveSample {
         importFiles(drive, filesToImport, 1);
     }
 
-    public static void importFiles(SalmonDrive drive, IRealFile[] filesToImport, int thread) throws Exception {
+    public static void importFiles(SalmonDrive drive, IRealFile[] filesToImport, int threads) throws Exception {
         SalmonFileCommander commander = new SalmonFileCommander(256 * 1024, 256 * 1024, threads);
 
 
