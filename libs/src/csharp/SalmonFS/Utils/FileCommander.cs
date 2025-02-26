@@ -35,9 +35,9 @@ namespace Mku.Utils;
 /// </summary>
 public class FileCommander
 {
-    private FileImporter fileImporter;
-    private FileExporter fileExporter;
-    private FileSearcher fileSearcher;
+    public FileImporter FileImporter { get; private set; }
+    public FileExporter FileExporter { get; private set; }
+    public FileSearcher FileSearcher { get; private set; }
     private bool stopJobs;
 
     /// <summary>
@@ -45,9 +45,9 @@ public class FileCommander
     /// </summary>
     public FileCommander(FileImporter fileImporter, FileExporter fileExporter, FileSearcher fileSearcher)
     {
-        this.fileImporter = fileImporter;
-        this.fileExporter = fileExporter;
-        this.fileSearcher = fileSearcher;
+        this.FileImporter = fileImporter;
+        this.FileExporter = fileExporter;
+        this.FileSearcher = fileSearcher;
     }
 
     /// <summary>
@@ -143,7 +143,7 @@ public class FileCommander
                 if (sfile != null && (sfile.Exists || sfile.IsDirectory) && AutoRename != null)
                     filename = AutoRename(fileToImport);
                 int finalCount = count;
-                sfile = fileImporter.ImportFile(fileToImport, importDir, filename,
+                sfile = FileImporter.ImportFile(fileToImport, importDir, filename,
                 deleteSource, integrity,
                 (bytes, totalBytes) =>
                 {
@@ -272,7 +272,7 @@ public class FileCommander
                 if (rfile != null && rfile.Exists && AutoRename != null)
                     filename = AutoRename(rfile);
                 int finalCount = count;
-                rfile = fileExporter.ExportFile(fileToExport, exportDir, filename, deleteSource, integrity,
+                rfile = FileExporter.ExportFile(fileToExport, exportDir, filename, deleteSource, integrity,
                     (bytes, totalBytes) =>
                 {
                     if (OnProgressChanged != null)
@@ -457,9 +457,9 @@ public class FileCommander
     public void Cancel()
     {
         stopJobs = true;
-        fileImporter.Stop();
-        fileExporter.Stop();
-        fileSearcher.Stop();
+        FileImporter.Stop();
+        FileExporter.Stop();
+        FileSearcher.Stop();
     }
 
     /// <summary>
@@ -468,7 +468,7 @@ public class FileCommander
 	///  <returns>True if file search is running</returns>
     public bool IsFileSearcherRunning()
     {
-        return fileSearcher.IsRunning();
+        return FileSearcher.IsRunning();
     }
 
     /// <summary>
@@ -477,7 +477,7 @@ public class FileCommander
 	///  <returns>True if running</returns>
     public bool IsRunning()
     {
-        return fileSearcher.IsRunning() || fileImporter.IsRunning() || fileExporter.IsRunning();
+        return FileSearcher.IsRunning() || FileImporter.IsRunning() || FileExporter.IsRunning();
     }
 
     /// <summary>
@@ -486,7 +486,7 @@ public class FileCommander
 	///  <returns>True if file searcher is running</returns>
     public bool IsFileSearcherStopped()
     {
-        return fileSearcher.IsStopped();
+        return FileSearcher.IsStopped();
     }
 
     /// <summary>
@@ -494,7 +494,7 @@ public class FileCommander
     /// </summary>
     public void StopFileSearch()
     {
-        fileSearcher.Stop();
+        FileSearcher.Stop();
     }
 
     /// <summary>
@@ -510,7 +510,7 @@ public class FileCommander
                                FileSearcher.OnResultFoundListener OnResultFound,
                                Action<FileSearcher.SearchEvent> OnSearchEvent)
     {
-        return fileSearcher.Search(dir, terms, any, OnResultFound, OnSearchEvent);
+        return FileSearcher.Search(dir, terms, any, OnResultFound, OnSearchEvent);
     }
 
     /// <summary>
@@ -527,8 +527,8 @@ public class FileCommander
     /// </summary>
     public void Close()
     {
-        fileImporter.Close();
-        fileExporter.Close();
+        FileImporter.Close();
+        FileExporter.Close();
     }
 
     /// <summary>
