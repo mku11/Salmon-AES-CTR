@@ -209,6 +209,21 @@ public abstract class SalmonDrive extends VirtualDrive {
         virtualRoot = getVirtualFile(virtualRootRealFile, this);
     }
 
+/**
+     * Set the drive location to an external directory.
+     * This requires you previously use SetDriveClass() to provide a class for the drive
+     *
+     * @param dir            The directory path that will be used for storing the contents of the drive
+     * @param driveClassType The class type of the drive to open (ie: JavaDrive.class)
+     * @param password       The password
+     * @return The drive
+     * @throws IOException Thrown if there is an IO error.
+     */
+    public static SalmonDrive openDrive(IRealFile dir, Class<?> driveClassType,
+                                        String password) throws IOException {
+		return openDrive(dir, driveClassType, password, null);
+	}
+										
     /**
      * Set the drive location to an external directory.
      * This requires you previously use SetDriveClass() to provide a class for the drive
@@ -451,7 +466,7 @@ public abstract class SalmonDrive extends VirtualDrive {
         return virtualRoot;
     }
 
-    protected IRealFile getRealRoot() {
+    public IRealFile getRealRoot() {
         return realRoot;
     }
 

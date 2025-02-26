@@ -27,7 +27,6 @@ import com.mku.file.IRealFile;
 import com.mku.file.JavaFile;
 import com.mku.file.JavaWSFile;
 import com.mku.salmon.SalmonDrive;
-import com.mku.sequence.INonceSequencer;
 
 import java.io.IOException;
 import java.util.HashMap;
@@ -52,12 +51,11 @@ public class JavaHttpDrive extends SalmonDrive {
      * @param dir             The URL that hosts the drive. This can be either a raw URL
      *                        or a REST API URL, see Salmon Web Service for usage.
      * @param password        The password.
-     * @param sequencer       The nonce sequencer that will be used for encryption.
      * @return The drive.
      * @throws IOException Thrown if error occurs during opening the drive.
      */
-    public static SalmonDrive open(IRealFile dir, String password, INonceSequencer sequencer) throws IOException {
-        return SalmonDrive.openDrive(dir, JavaHttpDrive.class, password, sequencer);
+    public static SalmonDrive open(IRealFile dir, String password) throws IOException {
+        return SalmonDrive.openDrive(dir, JavaHttpDrive.class, password);
     }
 
     /**
