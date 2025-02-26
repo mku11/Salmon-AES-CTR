@@ -316,7 +316,7 @@ public class DotNetWSFileStream : Stream
         this.closed = true;
     }
 
-    public void Reset()
+    private void Reset()
     {
         if (this.inputStream != null)
             this.inputStream.Close();
@@ -334,7 +334,7 @@ public class DotNetWSFileStream : Stream
         if (client != null)
             client.Dispose();
         client = null;
-
+        file.Reset();
     }
 
     private void CheckStatus(HttpResponseMessage httpResponse, HttpStatusCode status)

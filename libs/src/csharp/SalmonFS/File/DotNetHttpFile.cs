@@ -26,12 +26,12 @@ using System;
 using System.Collections.Generic;
 using System.Collections.Specialized;
 using System.IO;
-using System.Linq;
 using System.Net;
 using System.Net.Http;
 using System.Net.Http.Headers;
 using System.Text;
 using System.Text.RegularExpressions;
+using System.Threading;
 using System.Web;
 
 
@@ -48,9 +48,7 @@ public class DotNetHttpFile : IRealFile
 
     private static HttpClient client = new HttpClient();
     private string filePath;
-    private long? length;
-    private DateTimeOffset? lastDateModified;
-    private MediaTypeHeaderValue contentType;
+    private Response response;
 
     /// <summary>
     ///  Instantiate a remote file represented by the filepath provided.
@@ -72,30 +70,37 @@ public class DotNetHttpFile : IRealFile
         throw new NotSupportedException("Unsupported Operation, readonly filesystem");
     }
 
-    private HttpResponseMessage GetResponse()
+    private Response GetResponse()
     {
-        HttpResponseMessage httpResponse = null;
-        try
+        if (this.response == null)
         {
-            UriBuilder builder = new UriBuilder(this.filePath);
-            NameValueCollection query = HttpUtility.ParseQueryString(builder.Query);
-            builder.Query = query.ToString();
-            string url = builder.ToString();
+            HttpResponseMessage httpResponse = null;
+            try
+            {
+                UriBuilder builder = new UriBuilder(this.filePath);
+                NameValueCollection query = HttpUtility.ParseQueryString(builder.Query);
+                builder.Query = query.ToString();
+                string url = builder.ToString();
 
-            HttpRequestMessage requestMessage = new HttpRequestMessage(HttpMethod.Get, url);
-            SetDefaultHeaders(requestMessage);
-            httpResponse = client.Send(requestMessage);
-            CheckStatus(httpResponse, HttpStatusCode.OK);
-            length = httpResponse.Content.Headers.ContentLength;
-            lastDateModified = httpResponse.Content.Headers.LastModified;
-            contentType = httpResponse.Content.Headers.ContentType;
+                HttpRequestMessage requestMessage = new HttpRequestMessage(HttpMethod.Get, url);
+                SetDefaultHeaders(requestMessage);
+                httpResponse = client.Send(requestMessage);
+                CheckStatus(httpResponse, HttpStatusCode.OK);
+                this.response = new Response()
+                {
+                    Length = httpResponse.Content.Headers.ContentLength??0,
+                    LastModified = httpResponse.Content.Headers.LastModified?.ToUnixTimeMilliseconds()??0,
+                    ContentType = httpResponse.Content.Headers.ContentType.ToString(),
+                    StatusCode = httpResponse.StatusCode
+                };
+            }
+            finally
+            {
+                if (httpResponse != null)
+                    httpResponse.Dispose();
+            }
         }
-        finally
-        {
-            if (httpResponse != null)
-                httpResponse.Dispose();
-        }
-        return httpResponse;
+        return this.response;
     }
 
     /// <summary>
@@ -211,20 +216,12 @@ public class DotNetHttpFile : IRealFile
     {
         get
         {
-            HttpResponseMessage res = null;
-            try
-            {
-                res = this.GetResponse();
-            }
-            catch (Exception e)
-            {
-                throw e;
-            }
+            Response res = this.GetResponse();
             if (res == null)
                 throw new Exception("Could not get response");
-            if (contentType == null)
+            if (res.ContentType == null)
                 throw new Exception("Could not get content type");
-            return contentType.ToString().StartsWith("text/html");
+            return res.ContentType.ToString().StartsWith("text/html");
         }
     }
 
@@ -238,88 +235,19 @@ public class DotNetHttpFile : IRealFile
     ///  Get the last modified date on disk.
     /// </summary>
     ///  <returns>The last modified date</returns>
-    public long LastModified
-    {
-        get
-        {
-            if (lastDateModified == null)
-                return 0;
-            return this.lastDateModified.Value.ToUnixTimeMilliseconds();
-        }
-    }
+    public long LastModified => this.GetResponse().LastModified;
 
     /// <summary>
     ///  Get the size of the file on disk.
     /// </summary>
     ///  <returns>The length</returns>
-    public long Length
-    {
-        get
-        {
-            HttpResponseMessage res = null;
-            try
-            {
-                res = this.GetResponse();
-            }
-            catch (Exception e)
-            {
-                throw;
-            }
-            if (res == null)
-                throw new Exception("Could not get response");
-
-            if (length == null)
-            {
-                Stream stream = null;
-                try
-                {
-                    stream = this.GetInputStream();
-                    long totalLength = 0;
-                    byte[] buffer = new byte[BUFFER_LENGTH];
-                    int bytesRead;
-                    while ((bytesRead = stream.Read(buffer, 0, buffer.Length)) > 0)
-                    {
-                        totalLength += bytesRead;
-                        if (totalLength > DotNetHttpFile.SMALL_FILE_MAX_LENGTH)
-                        {
-                            throw new Exception("Could not get length from file. If this is a large file make sure the server responds with a Content-Length");
-                        }
-                    }
-                    length = totalLength;
-                    return totalLength;
-                }
-                catch (IOException e)
-                {
-                    throw;
-                }
-                finally
-                {
-                    try
-                    {
-                        if (stream != null)
-                            stream.Close();
-                    }
-                    catch (IOException e)
-                    {
-                        throw;
-                    }
-                }
-            }
-            return length??0;
-        }
-    }
+    public long Length => this.GetResponse().Length;
 
     /// <summary>
     ///  Get the count of files and subdirectories
     /// </summary>
     ///  <returns>The children count</returns>
-    public int ChildrenCount
-    {
-        get
-        {
-            return this.ListFiles().Length;
-        }
-    }
+    public int ChildrenCount => this.ListFiles().Length;
 
     /// <summary>
     ///  List all files under this directory.
@@ -426,6 +354,14 @@ public class DotNetHttpFile : IRealFile
         throw new NotSupportedException("Unsupported Operation, readonly filesystem");
     }
 
+    /// <summary>
+    ///  Reset cached properties 
+    /// </summary>
+    public void Reset()
+    {
+        this.response = null;
+    }
+
     private string GetChildPath(String filename)
     {
         string nFilepath = this.filePath;
@@ -458,5 +394,13 @@ public class DotNetHttpFile : IRealFile
     {
         requestMessage.Headers.Add("Cache", "no-store");
         requestMessage.Headers.Add("Connection", "keep-alive");
+    }
+
+    class Response
+    {
+        public HttpStatusCode StatusCode { get; internal set; }
+        internal long Length { get; set; }
+        internal string ContentType { get; set; }
+        internal long LastModified { get; set; }
     }
 }

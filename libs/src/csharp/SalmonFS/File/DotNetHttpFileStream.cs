@@ -161,7 +161,7 @@ public class DotNetHttpFileStream : Stream
                     requestMessage.Headers.Add("Range", "bytes=" + this.position + "-");
                 httpResponse = client.Send(requestMessage);
                 CheckStatus(httpResponse, startPosition > 0 ? HttpStatusCode.PartialContent : HttpStatusCode.OK);
-                Stream stream = new BufferedStream(httpResponse.Content.ReadAsStream());
+                Stream stream = httpResponse.Content.ReadAsStream();
                 this.inputStream = stream;
                 return stream;
             }

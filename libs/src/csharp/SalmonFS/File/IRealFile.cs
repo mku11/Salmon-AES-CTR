@@ -182,6 +182,11 @@ public interface IRealFile
     bool Mkdir();
 
     /// <summary>
+    ///  Reset cached properties 
+	/// </summary>
+    void Reset();
+
+    /// <summary>
     /// Copy contents of a file to another file.
     /// </summary>
     /// <param name="src">The source file</param>

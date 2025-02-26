@@ -305,6 +305,14 @@ public class DotNetFile : IRealFile
     }
 
     /// <summary>
+    ///  Reset cached properties 
+    /// </summary>
+    public void Reset()
+    {
+        
+    }
+
+    /// <summary>
     /// Returns a string representation of this object
     /// </summary>
     /// <returns>The string representation</returns>

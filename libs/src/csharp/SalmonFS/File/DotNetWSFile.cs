@@ -23,7 +23,6 @@ SOFTWARE.
 */
 
 using Mku.Convert;
-using Mku.Streams;
 using System;
 using System.Collections.Generic;
 using System.Collections.Specialized;
@@ -35,7 +34,6 @@ using System.Net.Http.Json;
 using System.Text;
 using System.Text.Json.Serialization;
 using System.Web;
-using static Mku.File.DotNetWSFile;
 
 
 namespace Mku.File;
@@ -52,6 +50,8 @@ public class DotNetWSFile : IRealFile
     public static readonly string Separator = "/";
     private static HttpClient client = new HttpClient();
     private string filePath;
+    private Response response;
+
     public string ServicePath { get; private set; }
     public Credentials ServiceCredentials { get; set; }
 
@@ -150,30 +150,32 @@ public class DotNetWSFile : IRealFile
 
     private Response GetResponse()
     {
-        HttpResponseMessage httpResponse = null;
-        Response response = null;
-        try
+        if (this.response == null)
         {
-            UriBuilder builder = new UriBuilder(ServicePath + "/api/info");
-            NameValueCollection query = HttpUtility.ParseQueryString(builder.Query);
-            query[PATH] = filePath;
-            builder.Query = query.ToString();
-            string url = builder.ToString();
+            HttpResponseMessage httpResponse = null;
+            try
+            {
+                UriBuilder builder = new UriBuilder(ServicePath + "/api/info");
+                NameValueCollection query = HttpUtility.ParseQueryString(builder.Query);
+                query[PATH] = filePath;
+                builder.Query = query.ToString();
+                string url = builder.ToString();
 
-            HttpRequestMessage requestMessage = new HttpRequestMessage(HttpMethod.Get, url);
-            SetDefaultHeaders(requestMessage);
-            SetServiceAuth(requestMessage);
-            httpResponse = client.Send(requestMessage);
-            CheckStatus(httpResponse, HttpStatusCode.OK);
-            response = (Response)httpResponse.Content.ReadFromJsonAsync(typeof(Response)).Result;
-            response.Headers = httpResponse.Headers;
+                HttpRequestMessage requestMessage = new HttpRequestMessage(HttpMethod.Get, url);
+                SetDefaultHeaders(requestMessage);
+                SetServiceAuth(requestMessage);
+                httpResponse = client.Send(requestMessage);
+                CheckStatus(httpResponse, HttpStatusCode.OK);
+                this.response = (Response)httpResponse.Content.ReadFromJsonAsync(typeof(Response)).Result;
+                this.response.Headers = httpResponse.Headers;
+            }
+            finally
+            {
+                if (httpResponse != null)
+                    httpResponse.Dispose();
+            }
         }
-        finally
-        {
-            if (httpResponse != null)
-                httpResponse.Dispose();
-        }
-        return response;
+        return this.response;
     }
 
     /// <summary>
@@ -264,6 +266,7 @@ public class DotNetWSFile : IRealFile
             SetServiceAuth(requestMessage);
             dirHttpResponse = client.Send(requestMessage);
             CheckStatus(dirHttpResponse, HttpStatusCode.OK);
+            return true;
         }
         catch (Exception ex)
         {
@@ -274,7 +277,6 @@ public class DotNetWSFile : IRealFile
             if (dirHttpResponse != null)
                 dirHttpResponse.Dispose();
         }
-        return !Exists;
     }
 
     /// <summary>
@@ -302,6 +304,7 @@ public class DotNetWSFile : IRealFile
     ///  <exception cref="FileNotFoundException">Thrown if file is not found</exception>
     public Stream GetInputStream()
     {
+        Reset();
         return new DotNetWSFileStream(this, FileAccess.Read);
     }
 
@@ -312,6 +315,7 @@ public class DotNetWSFile : IRealFile
     ///  <exception cref="FileNotFoundException">Thrown if file is not found</exception>
     public Stream GetOutputStream()
     {
+        Reset();
         return new DotNetWSFileStream(this, FileAccess.Write);
     }
 
@@ -511,6 +515,7 @@ public class DotNetWSFile : IRealFile
                 Response response = (Response)httpResponse.Content.ReadFromJsonAsync(typeof(Response)).Result;
                 response.Headers = httpResponse.Headers;
                 newFile = new DotNetWSFile(response.Path, ServicePath, ServiceCredentials);
+                Reset();
                 return newFile;
             }
             catch (Exception ex)
@@ -536,7 +541,6 @@ public class DotNetWSFile : IRealFile
     public IRealFile Copy(IRealFile newDir, string newName = null, Action<long, long> progressListener = null)
     {
         newName = newName ?? BaseName;
-        //TODO: ToSync
         if (newDir == null || !newDir.Exists)
             throw new IOException("Target directory does not exist");
         IRealFile newFile = newDir.GetChild(newName);
@@ -568,6 +572,7 @@ public class DotNetWSFile : IRealFile
                 Response response = (Response)httpResponse.Content.ReadFromJsonAsync(typeof(Response)).Result;
                 response.Headers = httpResponse.Headers;
                 newFile = new DotNetWSFile(response.Path, ServicePath, ServiceCredentials);
+                Reset();
                 return newFile;
             }
             catch (Exception ex)
@@ -606,6 +611,7 @@ public class DotNetWSFile : IRealFile
         HttpResponseMessage httpResponse = null;
         try
         {
+            Reset();
             UriBuilder builder = new UriBuilder(ServicePath + "/api/rename");
             NameValueCollection query = HttpUtility.ParseQueryString(builder.Query);
             query[PATH] = filePath;
@@ -643,6 +649,7 @@ public class DotNetWSFile : IRealFile
         HttpResponseMessage httpResponse = null;
         try
         {
+            Reset();
             UriBuilder builder = new UriBuilder(ServicePath + "/api/mkdir");
             NameValueCollection query = HttpUtility.ParseQueryString(builder.Query);
             query[PATH] = filePath;
@@ -668,6 +675,14 @@ public class DotNetWSFile : IRealFile
             if (httpResponse != null)
                 httpResponse.Dispose();
         }
+    }
+
+    /// <summary>
+    ///  Reset cached properties 
+	/// </summary>
+    public void Reset()
+    {
+        this.response = null;
     }
 
     private string GetChildPath(String filename)
