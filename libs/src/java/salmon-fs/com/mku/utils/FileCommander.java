@@ -23,17 +23,17 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 */
 
+import com.mku.file.IRealFile;
+import com.mku.file.IVirtualFile;
+import com.mku.func.BiConsumer;
+import com.mku.func.Consumer;
+import com.mku.func.Function;
+import com.mku.sequence.SequenceException;
+
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.concurrent.CancellationException;
-
-import com.mku.file.IVirtualFile;
-import com.mku.func.BiConsumer;
-import com.mku.func.Consumer;
-import com.mku.file.IRealFile;
-import com.mku.func.Function;
-import com.mku.sequence.SequenceException;
 
 /**
  * Facade class for file operations.
@@ -57,6 +57,17 @@ public class FileCommander {
         this.fileSearcher = fileSearcher;
     }
 
+    public FileImporter getFileImporter() {
+        return fileImporter;
+    }
+
+    public FileExporter getFileExporter() {
+        return fileExporter;
+    }
+
+    public FileSearcher getFileSearcher() {
+        return fileSearcher;
+    }
 
     /**
      * Import files to the drive.
