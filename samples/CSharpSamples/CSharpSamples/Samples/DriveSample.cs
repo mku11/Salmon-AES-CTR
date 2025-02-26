@@ -40,16 +40,16 @@ class DriveSample
         }
         else if (vaultDir is DotNetHttpFile)
         { // http (Read-only)
-            drive = DotNetHttpDrive.Open(vaultDir, password, sequencer);
+            drive = DotNetHttpDrive.Open(vaultDir, password);
         }
         if (drive != null)
             Console.WriteLine("drive opened: " + drive.RealRoot.AbsolutePath);
         return drive;
     }
 
-    public static void ImportFiles(SalmonDrive drive, IRealFile[] filesToImport, int thread = 1)
+    public static void ImportFiles(SalmonDrive drive, IRealFile[] filesToImport, int threads = 1)
     {
-        SalmonFileCommander commander = new SalmonFileCommander(256 * 1024, 256 * 1024, 2);
+        SalmonFileCommander commander = new SalmonFileCommander(256 * 1024, 256 * 1024, threads);
 
 
         // import multiple files
@@ -70,7 +70,7 @@ class DriveSample
 
     public static void ExportFiles(SalmonDrive drive, IRealFile dir, int threads = 1)
     {
-        SalmonFileCommander commander = new SalmonFileCommander(256 * 1024, 256 * 1024, 2);
+        SalmonFileCommander commander = new SalmonFileCommander(256 * 1024, 256 * 1024, threads);
 
         // export all files
         SalmonFile[] files = drive.Root.ListFiles();
