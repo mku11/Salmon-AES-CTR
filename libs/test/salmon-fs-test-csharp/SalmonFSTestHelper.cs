@@ -336,11 +336,6 @@ public class SalmonFSTestHelper
         };
         SalmonFile salmonFile = SalmonFSTestHelper.fileImporter.ImportFile(fileToImport, rootDir, null, false, ApplyFileIntegrity, printImportProgress);
 
-        // get fresh copy of the file
-        // TODO: for remote files the output stream should clear all cached file properties
-        //instead of having to get a new file
-        // salmonFile = rootDir.GetChild(salmonFile.BaseName);
-
         int? chunkSize = salmonFile.FileChunkSize;
         if (chunkSize != null && chunkSize > 0 && !VerifyFileIntegrity)
             salmonFile.SetVerifyIntegrity(false, null);
