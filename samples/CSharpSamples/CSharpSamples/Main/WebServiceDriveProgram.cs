@@ -1,5 +1,6 @@
 using Mku.File;
 using Mku.Salmon.Samples.Samples;
+using Mku.Salmon.Streams;
 using static Mku.File.DotNetWSFile;
 
 namespace Mku.Salmon.Samples.Main;

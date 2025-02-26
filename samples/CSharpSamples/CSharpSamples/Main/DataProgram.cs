@@ -1,4 +1,5 @@
 using Mku.Salmon.Samples.Samples;
+using Mku.Salmon.Streams;
 
 namespace Mku.Salmon.Samples.Main;
 
@@ -10,6 +11,8 @@ class DataProgram
         int size = 8 * 1024 * 1024;
         int threads = 1;
         bool integrity = true;
+		
+		SalmonStream.AesProviderType = ProviderType.Default;
 
         // generate a key
         Console.Write("generating keys and random data...");

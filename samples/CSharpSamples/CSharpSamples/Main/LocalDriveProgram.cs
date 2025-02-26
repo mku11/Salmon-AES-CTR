@@ -1,5 +1,6 @@
 using Mku.File;
 using Mku.Salmon.Samples.Samples;
+using Mku.Salmon.Streams;
 
 namespace Mku.Salmon.Samples.Main;
 
@@ -9,6 +10,8 @@ class LocalDriveProgram
     {
         string password = "test123";
         int threads = 2;
+		
+		SalmonStream.AesProviderType = ProviderType.Default;
 
         // directories and files
         IRealFile dir = new DotNetFile("./output");

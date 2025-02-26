@@ -1,4 +1,5 @@
 using Mku.Salmon.Samples.Samples;
+using Mku.Salmon.Streams;
 
 namespace Mku.Salmon.Samples.Main;
 
@@ -8,6 +9,9 @@ class TextProgram
     {
         string password = "test123";
         string text = "This is a plain text that will be encrypted";
+		
+		SalmonStream.AesProviderType = ProviderType.Default;
+		
         // generate an encryption key from the text password
         byte[] key = SamplesCommon.GetKeyFromPassword(password);
         Console.WriteLine("Plain Text: " + "\n" + text + "\n");

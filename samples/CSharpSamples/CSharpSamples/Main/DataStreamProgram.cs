@@ -1,5 +1,6 @@
 using BitConverter = Mku.Convert.BitConverter;
 using Mku.Salmon.Samples.Samples;
+using Mku.Salmon.Streams;
 
 namespace Mku.Salmon.Samples.Main;
 
@@ -9,6 +10,8 @@ class DataStreamProgram
     {
         string password = "test123";
         int size = 1 * 1024 * 1024;
+
+		SalmonStream.AesProviderType = ProviderType.Default;
 
         // generate a key
         Console.WriteLine("generating keys and random data...");

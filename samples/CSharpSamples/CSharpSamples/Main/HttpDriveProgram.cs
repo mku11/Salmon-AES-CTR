@@ -1,6 +1,6 @@
 using Mku.File;
-using Mku.Salmon;
 using Mku.Salmon.Samples.Samples;
+using Mku.Salmon.Streams;
 
 namespace Mku.Salmon.Samples.Main;
 
@@ -11,6 +11,8 @@ class HttpDriveProgram
         string httpDriveURL = "http://localhost/saltest/httpserv/vault";
         string password = "test123";
         int threads = 1;
+		
+		SalmonStream.AesProviderType = ProviderType.Default;
 
         IRealFile dir = new DotNetFile("./output");
         if (!dir.Exists)
