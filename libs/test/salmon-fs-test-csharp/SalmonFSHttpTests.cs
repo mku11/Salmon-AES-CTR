@@ -118,23 +118,23 @@ public class SalmonFSHttpTests
     }
 
     [TestMethod]
-    public void ShouldReadFromRealFileTiny()
+    public void ShouldReadFromFileTiny()
     {
         SalmonFSTestHelper.ShouldReadFile(SalmonFSTestHelper.HTTP_VAULT_DIR, SalmonFSTestHelper.TEST_IMPORT_TINY_FILENAME);
     }
 
     [TestMethod]
-    public void ShouldReadFromRealFileSmall()
+    public void ShouldReadFromFileSmall()
     {
         SalmonFSTestHelper.ShouldReadFile(SalmonFSTestHelper.HTTP_VAULT_DIR, SalmonFSTestHelper.TEST_IMPORT_SMALL_FILENAME);
     }
 
-    public void ShouldReadFromRealFileMedium()
+    public void ShouldReadFromFileMedium()
     {
         SalmonFSTestHelper.ShouldReadFile(SalmonFSTestHelper.HTTP_VAULT_DIR, SalmonFSTestHelper.TEST_IMPORT_MEDIUM_FILENAME);
     }
 
-    public void ShouldReadFromRealFileLarge()
+    public void ShouldReadFromFileLarge()
     {
         SalmonFSTestHelper.ShouldReadFile(SalmonFSTestHelper.HTTP_VAULT_DIR, SalmonFSTestHelper.TEST_IMPORT_LARGE_FILENAME);
     }
@@ -161,7 +161,7 @@ public class SalmonFSHttpTests
     public void ShouldListFilesFromDrive()
     {
         IRealFile vaultDir = SalmonFSTestHelper.HTTP_VAULT_DIR;
-        SalmonDrive drive = DotNetHttpDrive.Open(vaultDir, SalmonCoreTestHelper.TEST_PASSWORD, null);
+        SalmonDrive drive = DotNetHttpDrive.Open(vaultDir, SalmonCoreTestHelper.TEST_PASSWORD);
         IVirtualFile root = drive.Root;
         IVirtualFile[] files = root.ListFiles();
         List<string> filenames = new List<string>();

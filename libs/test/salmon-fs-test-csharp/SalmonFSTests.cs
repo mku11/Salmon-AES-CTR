@@ -473,12 +473,6 @@ public class SalmonFSTests
     }
 
     [TestMethod]
-    public void TestExamples()
-    {
-        SalmonFSTestHelper.TestExamples();
-    }
-
-    [TestMethod]
     public void ShouldEncryptAndDecryptStream()
     {
         byte[] data = SalmonFSTestHelper.GetRealFileContents(SalmonFSTestHelper.TEST_IMPORT_FILE);
@@ -673,19 +667,29 @@ public class SalmonFSTests
         long pos = Math.Abs(new Random().NextInt64() % file.Length);
 
         SalmonFileInputStream fileInputStream1 = new SalmonFileInputStream(sfiles[0], 4, 4 * 1024 * 1024, 1, 256 * 1024);
-        //fileInputStream1.Seek(pos, SeekOrigin.Current);
+        fileInputStream1.Seek(pos, SeekOrigin.Current);
         MD5 md51 = MD5.Create();
         byte[] hash1 = md51.ComputeHash(fileInputStream1);
         string h1 = Mku.Convert.BitConverter.ToHex(hash1);
         fileInputStream1.Close();
 
         SalmonFileInputStream fileInputStream2 = new SalmonFileInputStream(sfiles[0], 4, 4 * 1024 * 1024, 1, 256 * 1024);
-        //fileInputStream2.Seek(pos, SeekOrigin.Current);
+        fileInputStream2.Seek(pos, SeekOrigin.Current);
         MD5 md52 = MD5.Create();
         byte[] hash2 = md52.ComputeHash(fileInputStream2);
         string h2 = Mku.Convert.BitConverter.ToHex(hash2);
         fileInputStream2.Close();
 
         Assert.AreEqual(h1, h2);
+    }
+	
+    [TestMethod]
+    public void TestRawFile() {
+        SalmonFSTestHelper.TestRawFile();
+    }
+
+    [TestMethod]
+    public void TestEncDecFile() {
+        SalmonFSTestHelper.TestEncDecFile();
     }
 }

@@ -380,6 +380,18 @@ public class SalmonFSTestHelper
             Assert.AreEqual(hashPreImport, hashPostExport);
     }
 
+	
+    public static SalmonDrive OpenDrive(IRealFile vaultDir, Type driveClassType, string testPassword, SalmonFileSequencer sequencer = null)
+    {
+        if (driveClassType == typeof(DotNetWSDrive))
+        {
+            // use the remote service instead
+            return DotNetWSDrive.Open(vaultDir, testPassword, sequencer);
+        }
+        else
+            return DotNetDrive.OpenDrive(vaultDir, driveClassType, testPassword, sequencer);
+    }
+
     public static SalmonDrive CreateDrive(IRealFile vaultDir, Type driveClassType, string pass, SalmonFileSequencer sequencer)
     {
         if (driveClassType == typeof(DotNetWSDrive))
@@ -645,95 +657,86 @@ public class SalmonFSTestHelper
             base.InitSequence(driveId, authId, startNonce, maxNonce);
         }
     }
-    public static SalmonDrive OpenDrive(IRealFile vaultDir, Type driveClassType, string testPassword, SalmonFileSequencer sequencer = null)
-    {
-        if (driveClassType == typeof(DotNetWSDrive))
-        {
-            // use the remote service instead
-            return DotNetWSDrive.Open(vaultDir, testPassword, sequencer);
+
+    public static void TestRawFile() {
+        string text = SalmonFSTestHelper.TINY_FILE_CONTENTS;
+        int BUFF_SIZE = 16;
+        IRealFile dir = GenerateFolder("test");
+        string filename = "file.txt";
+        IRealFile testFile = dir.CreateFile(filename);
+        byte[] bytes = UTF8Encoding.UTF8.GetBytes(text);
+
+        // write to file
+        Stream wstream = testFile.GetOutputStream();
+        int idx = 0;
+        while (idx < text.Length) {
+            int len = Math.Min(BUFF_SIZE, text.Length - idx);
+            wstream.Write(bytes, idx, len);
+            idx += len;
         }
-        else
-            return DotNetDrive.OpenDrive(vaultDir, driveClassType, testPassword, sequencer);
+        wstream.Flush();
+        wstream.Close();
+
+        // read a file
+        IRealFile writeFile = dir.GetChild(filename);
+        Stream rstream = writeFile.GetInputStream();
+        byte[] readBuff = new byte[BUFF_SIZE];
+        int bytesRead = 0;
+        MemoryStream lstream = new MemoryStream();
+        while ((bytesRead = rstream.Read(readBuff, 0, readBuff.Length)) > 0) {
+            lstream.Write(readBuff, 0, bytesRead);
+        }
+        byte[] lbytes = lstream.ToArray();
+        string str = UTF8Encoding.UTF8.GetString(lbytes);
+        // console.log(str);
+        rstream.Close();
+
+        Assert.AreEqual(str, text);
     }
 
-    public static void TestExamples()
-    {
-        string text = "This is a plaintext that will be used for testing";
+    public static void TestEncDecFile() {
+        String text = SalmonFSTestHelper.TINY_FILE_CONTENTS;
+        int BUFF_SIZE = 16;
         IRealFile dir = GenerateFolder("test");
-        IRealFile testFile = dir.CreateFile("file.dat");
-        byte[] bytes = UTF8Encoding.UTF8.GetBytes(text);
-        byte[] key = SalmonGenerator.GetSecureRandomBytes(32); // 256-bit key
-        byte[] nonce = SalmonGenerator.GetSecureRandomBytes(8); // 64-bit nonce
+        String filename = "file.dat";
+        IRealFile testFile = dir.CreateFile(filename);
+        byte[] bytes =  UTF8Encoding.UTF8.GetBytes(text);
+        byte[] key = SalmonGenerator.GetSecureRandomBytes(32);
+        byte[] nonce = SalmonGenerator.GetSecureRandomBytes(8);
 
-        // Example 1: encrypt byte array
-        byte[] encBytes = new SalmonEncryptor().Encrypt(bytes, key, nonce, false);
-        // decrypt byte array
-        byte[] decBytes = new SalmonDecryptor().Decrypt(encBytes, key, nonce, false);
-
-        CollectionAssert.AreEqual(bytes, decBytes);
-
-        // Example 2: encrypt string and save the nonce in the header
-        nonce = SalmonGenerator.GetSecureRandomBytes(8); // always get a fresh nonce!
-        string encText = SalmonTextEncryptor.EncryptString(text, key, nonce, true);
-        // decrypt string
-        string decText = SalmonTextDecryptor.DecryptString(encText, key, null, true);
-
-        Assert.AreEqual(text, decText);
-
-        // Example 3: encrypt data to an output stream
-        MemoryStream encOutStream = new MemoryStream(); // or any other writeable Stream like to a file
-        nonce = SalmonGenerator.GetSecureRandomBytes(8); // always get a fresh nonce!
-                                                         // pass the output stream to the SalmonStream
-        SalmonStream encryptor = new SalmonStream(key, nonce, EncryptionMode.Encrypt, encOutStream,
-                null, false, null, null);
-        // encrypt and write with a single call, you can also Seek() and Write()
-        encryptor.Write(bytes, 0, bytes.Length);
-        // encrypted data are now written to the encOutStream.
-        encOutStream.Position = 0;
-        byte[] encData = encOutStream.ToArray();
-        encryptor.Flush();
-        encryptor.Close();
-        encOutStream.Close();
-        //decrypt a stream with encoded data
-        Stream encInputStream = new MemoryStream(encData); // or any other readable Stream like from a file
-        SalmonStream decryptor = new SalmonStream(key, nonce, EncryptionMode.Decrypt, encInputStream,
-                null, false, null, null);
-        byte[] decBuffer = new byte[1024];
-        // decrypt and read data with a single call, you can also Seek() before Read()
-        int bytesRead = decryptor.Read(decBuffer, 0, decBuffer.Length);
-        // encrypted data are now in the decBuffer
-        string decString = UTF8Encoding.UTF8.GetString(decBuffer, 0, bytesRead);
-        Console.WriteLine(decString);
-        decryptor.Close();
-        encInputStream.Close();
-
-        Assert.AreEqual(text, decString);
-
-        // Example 4: encrypt to a file, the SalmonFile has a virtual file system API
-        // with copy, move, rename, delete operations
-        SalmonFile encFile = new SalmonFile(testFile, null);
-        nonce = SalmonGenerator.GetSecureRandomBytes(8); // always get a fresh nonce!
+        IRealFile wfile = dir.GetChild(filename);
+        SalmonFile encFile = new SalmonFile(wfile);
+        nonce = SalmonGenerator.GetSecureRandomBytes(8);
         encFile.EncryptionKey = key;
         encFile.RequestedNonce = nonce;
         Stream stream = encFile.GetOutputStream();
-        // encrypt data and write with a single call
-        stream.Write(bytes, 0, bytes.Length);
+        int idx = 0;
+        while (idx < text.Length) {
+            int len = Math.Min(BUFF_SIZE, text.Length - idx);
+            stream.Write(bytes, idx, len);
+            idx += len;
+        }
         stream.Flush();
         stream.Close();
+
         // decrypt an encrypted file
-        SalmonFile encFile2 = new SalmonFile(testFile, null);
+        IRealFile rfile = dir.GetChild(filename);
+        SalmonFile encFile2 = new SalmonFile(rfile);
         encFile2.EncryptionKey = key;
         Stream stream2 = encFile2.GetInputStream();
-        byte[] decBuff = new byte[1024];
-        // decrypt and read data with a single call, you can also Seek() to any position before Read()
-        int encBytesRead = stream2.Read(decBuff, 0, decBuff.Length);
-        string decString2 = UTF8Encoding.UTF8.GetString(decBuff, 0, encBytesRead);
-        Console.WriteLine(decString2);
+        byte[] decBuff = new byte[BUFF_SIZE];
+        MemoryStream lstream = new MemoryStream();
+        int bytesRead = 0;
+
+        while ((bytesRead = stream2.Read(decBuff, 0, decBuff.Length)) > 0) {
+            lstream.Write(decBuff, 0, bytesRead);
+        }
+        byte[] lbytes = lstream.ToArray();
+        string decString2 = UTF8Encoding.UTF8.GetString(lbytes);
         stream2.Close();
 
-        Assert.AreEqual(text, decString2);
+        Assert.AreEqual(decString2, text);
     }
-
     public static void EncryptAndDecryptStream(byte[] data, byte[] key, byte[] nonce)
     {
         MemoryStream encOutStream = new MemoryStream();
