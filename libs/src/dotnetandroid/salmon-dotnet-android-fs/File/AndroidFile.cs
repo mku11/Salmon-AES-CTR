@@ -418,6 +418,14 @@ public class AndroidFile : IRealFile
         }
         return false;
     }
+	
+	/// <summary>
+    ///  Clear cache properties
+	/// </summary>
+    public void Reset()
+    {
+		
+    }
 
     /// <summary>
     ///  Get a file descriptor corresponding to this file.
