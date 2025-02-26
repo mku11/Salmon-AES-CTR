@@ -1,0 +1,38 @@
+package com.mku.salmon.samples.main;
+
+import com.mku.convert.BitConverter;
+import com.mku.salmon.SalmonGenerator;
+import com.mku.salmon.samples.samples.DataStreamSample;
+import com.mku.salmon.samples.samples.SamplesCommon;
+import com.mku.salmon.streams.ProviderType;
+import com.mku.salmon.streams.SalmonStream;
+
+import java.io.IOException;
+
+public class DataStreamProgram {
+    public static void main(String[] args) throws IOException {
+        String password = "test123";
+        int size = 1 * 1024 * 1024;
+
+        SalmonStream.setAesProviderType(ProviderType.Default);
+
+        // generate a key
+        System.out.println("generating keys and random data...");
+        byte[] key = SamplesCommon.getKeyFromPassword(password);
+
+        // Always request a new random secure nonce!
+        // if you want to you can embed the nonce in the header data
+        // see SalmonEncryptor implementation
+        byte[] nonce = SalmonGenerator.getSecureRandomBytes(8); // 64 bit nonce
+        System.out.println("Created nonce: " + BitConverter.toHex(nonce));
+
+        // generate random data
+        byte[] data = SamplesCommon.generateRandomData(size);
+
+        System.out.println("starting encryption...");
+        byte[] encData = DataStreamSample.encryptDataStream(data, key, nonce);
+        System.out.println("starting decryption...");
+        byte[] decData = DataStreamSample.decryptDataStream(encData, key, nonce);
+        System.out.println("done");
+    }
+}
