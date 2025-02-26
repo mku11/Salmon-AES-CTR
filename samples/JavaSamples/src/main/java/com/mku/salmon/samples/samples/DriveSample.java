@@ -59,7 +59,7 @@ public class DriveSample {
     }
 
     public static void importFiles(SalmonDrive drive, IRealFile[] filesToImport, int thread) throws Exception {
-        SalmonFileCommander commander = new SalmonFileCommander(256 * 1024, 256 * 1024, 2);
+        SalmonFileCommander commander = new SalmonFileCommander(256 * 1024, 256 * 1024, threads);
 
 
         // import multiple files
@@ -83,7 +83,7 @@ public class DriveSample {
     }
 
     public static void exportFiles(SalmonDrive drive, IRealFile dir, int threads) throws Exception {
-        SalmonFileCommander commander = new SalmonFileCommander(256 * 1024, 256 * 1024, 2);
+        SalmonFileCommander commander = new SalmonFileCommander(256 * 1024, 256 * 1024, threads);
 
         // export all files
         SalmonFile[] files = drive.getRoot().listFiles();
