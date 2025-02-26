@@ -569,7 +569,7 @@ public class SalmonFile : IVirtualFile
     {
         string relativePath = GetRelativePath(realPath);
         StringBuilder path = new StringBuilder();
-        string[] parts = relativePath.Split(System.IO.Path.DirectorySeparatorChar);
+        string[] parts = relativePath.Split(new char[] { '\\','/' });
         foreach (string part in parts)
         {
             if (!part.Equals(""))
