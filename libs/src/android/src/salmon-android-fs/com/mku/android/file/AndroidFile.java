@@ -447,6 +447,13 @@ public class AndroidFile implements IRealFile {
         }
         return false;
     }
+	
+	/**
+     * Clear cache properties
+     */
+    public boolean reset() {
+		
+    }
 
     /**
      * Get a file descriptor corresponding to this file.
