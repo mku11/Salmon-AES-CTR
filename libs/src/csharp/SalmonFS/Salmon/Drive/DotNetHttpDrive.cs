@@ -49,11 +49,10 @@ public class DotNetHttpDrive : SalmonDrive
     /// </summary>
     /// <param name="dir">The directory that will host the drive.</param>
     /// <param name="password">The password</param>
-    /// <param name="sequencer">The nonce sequencer that will be used for encryption.</param>
     /// <returns>The drive</returns>
-    public static SalmonDrive Open(IRealFile dir, string password, INonceSequencer sequencer)
+    public static SalmonDrive Open(IRealFile dir, string password)
     {
-        return SalmonDrive.OpenDrive(dir, typeof(DotNetHttpDrive), password, sequencer);
+        return SalmonDrive.OpenDrive(dir, typeof(DotNetHttpDrive), password);
     }
 
 

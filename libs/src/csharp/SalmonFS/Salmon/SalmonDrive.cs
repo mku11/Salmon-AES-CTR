@@ -132,7 +132,7 @@ public abstract class SalmonDrive : VirtualDrive
     /// <summary>
     ///  Clear sensitive information when app is close.
     /// </summary>
-    private void RegisterOnProcessClose()
+    protected void RegisterOnProcessClose()
     {
         //TODO
     }
@@ -181,7 +181,7 @@ public abstract class SalmonDrive : VirtualDrive
     ///  <param name="password">password</param>
     ///  <param name="sequencer">The sequencer</param>
     public static SalmonDrive OpenDrive(IRealFile dir, Type driveClassType,
-                                        string password, INonceSequencer sequencer)
+                                        string password, INonceSequencer sequencer = null)
     {
         SalmonDrive drive = CreateDriveInstance(dir, false,
             driveClassType, sequencer);
