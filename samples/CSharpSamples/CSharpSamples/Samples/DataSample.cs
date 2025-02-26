@@ -12,7 +12,7 @@ class DataSample {
 		
 		SalmonEncryptor encryptor = new SalmonEncryptor(threads);
         byte[] encData = encryptor.Encrypt(data, key, nonce, true,
-											 integrityKey!=null?true:false, integrityKey);
+											 integrityKey!=null, integrityKey);
         encryptor.Close();
 
 		Console.WriteLine("Bytes encrypted: " + BitConverter.ToHex(encData.Take(24).ToArray()) + "...");
@@ -24,7 +24,7 @@ class DataSample {
 		
 		SalmonDecryptor decryptor = new SalmonDecryptor(threads);
 		byte[] decBytes = decryptor.Decrypt(data, key, null, true, 
-											   integrityKey != null?true:false, integrityKey);
+											   integrityKey != null, integrityKey);
         decryptor.Close();
 
 		Console.WriteLine("Bytes decrypted: " + BitConverter.ToHex(decBytes.Take(24).ToArray()) + "...");
