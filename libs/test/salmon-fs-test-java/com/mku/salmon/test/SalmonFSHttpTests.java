@@ -158,7 +158,7 @@ public class SalmonFSHttpTests {
     @Test
     void shouldListFilesFromDrive() throws IOException {
         IRealFile vaultDir = SalmonFSTestHelper.HTTP_VAULT_DIR;
-        SalmonDrive drive = JavaHttpDrive.open(vaultDir, SalmonCoreTestHelper.TEST_PASSWORD, null);
+        SalmonDrive drive = JavaHttpDrive.open(vaultDir, SalmonCoreTestHelper.TEST_PASSWORD);
         IVirtualFile root = drive.getRoot();
         IVirtualFile[] files = root.listFiles();
         List<String> filenames = new ArrayList<>();
