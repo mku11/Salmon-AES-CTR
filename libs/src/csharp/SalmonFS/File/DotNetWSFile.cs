@@ -266,6 +266,7 @@ public class DotNetWSFile : IRealFile
             SetServiceAuth(requestMessage);
             dirHttpResponse = client.Send(requestMessage);
             CheckStatus(dirHttpResponse, HttpStatusCode.OK);
+			this.Reset();
             return true;
         }
         catch (Exception ex)
