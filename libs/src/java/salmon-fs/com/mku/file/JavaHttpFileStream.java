@@ -72,7 +72,6 @@ public class JavaHttpFileStream extends RandomAccessStream {
      *
      * @param file The JavaFile that will be used to get the read/write stream
      * @param mode The mode "r" for read "rw" for write
-     * @throws FileNotFoundException Thrown if file not found
      */
     public JavaHttpFileStream(JavaHttpFile file, String mode) {
         this.file = file;

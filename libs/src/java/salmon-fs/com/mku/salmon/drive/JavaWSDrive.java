@@ -53,8 +53,6 @@ public class JavaWSDrive extends SalmonDrive {
      *                        or a REST API URL, see Salmon Web Service for usage.
      * @param password        The password.
      * @param sequencer       The nonce sequencer that will be used for encryption.
-     * @param serviceUser     The username for the REST API service
-     * @param servicePassword The password for the REST API service
      * @return The drive.
      * @throws IOException Thrown if error occurs during opening the drive.
      */
