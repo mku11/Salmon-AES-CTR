@@ -45,11 +45,6 @@ public abstract class FileExporter {
     private static final int DEFAULT_THREADS = 1;
 
     /**
-     * True if multithreading is enabled.
-     */
-    private static final boolean enableMultiThread = true;
-
-    /**
      * Current buffer size.
      */
     private int bufferSize;
@@ -126,9 +121,6 @@ public abstract class FileExporter {
         final IRealFile exportFile;
         filename = filename != null ? filename : fileToExport.getBaseName();
         try {
-            if (!enableMultiThread && threads != 1)
-                throw new UnsupportedOperationException("Multithreading is not supported");
-
             stopped = false;
             final long[] totalBytesWritten = new long[]{0};
             failed = false;

@@ -45,11 +45,6 @@ public abstract class FileImporter {
     private static final int DEFAULT_THREADS = 1;
 
     /**
-     * True if multithreading is enabled.
-     */
-    private static final boolean enableMultiThread = true;
-
-    /**
      * Current buffer size.
      */
     private int bufferSize;
@@ -139,8 +134,6 @@ public abstract class FileImporter {
         final long[] totalBytesRead = new long[]{0};
         final IVirtualFile importedFile;
         try {
-            if (!enableMultiThread && threads != 1)
-                throw new UnsupportedOperationException("Multithreading is not supported");
             stopped = false;
             failed = false;
             lastException = null;
