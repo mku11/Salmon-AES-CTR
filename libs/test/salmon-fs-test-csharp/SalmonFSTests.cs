@@ -40,14 +40,14 @@ namespace Mku.Salmon.Test;
 [TestClass]
 public class SalmonFSTests
 {
-	[ClassInitialize]
+    [ClassInitialize]
     public static void ClassInitialize(TestContext testContext)
     {
         // use TestMode: Local, WebService. Http is tested only in SalmonFSHttpTests.
-        SalmonFSTestHelper.SetTestParams(Environment.GetEnvironmentVariable("SALMON_TEST_DIR") 
+        SalmonFSTestHelper.SetTestParams(Environment.GetEnvironmentVariable("SALMON_TEST_DIR")
             ?? "d:\\tmp\\salmon\\test", TestMode.WebService);
 
-        SalmonFSTestHelper.TEST_IMPORT_FILE = SalmonFSTestHelper.TEST_IMPORT_MEDIUM_FILE;
+        SalmonFSTestHelper.TEST_IMPORT_FILE = SalmonFSTestHelper.TEST_IMPORT_LARGE_FILE;
 
         // SalmonCoreTestHelper.TEST_ENC_BUFFER_SIZE = 1 * 1024 * 1024;
         // SalmonCoreTestHelper.TEST_DEC_BUFFER_SIZE = 1 * 1024 * 1024;
@@ -127,9 +127,10 @@ public class SalmonFSTests
         bool integrityFailed = false;
         try
         {
-            SalmonFSTestHelper.ImportAndExport(SalmonFSTestHelper.GenerateFolder(SalmonFSTestHelper.TEST_VAULT_DIRNAME), SalmonCoreTestHelper.TEST_PASSWORD, SalmonFSTestHelper.TEST_IMPORT_FILE,
-                    SalmonFSTestHelper.ENC_IMPORT_BUFFER_SIZE, SalmonFSTestHelper.ENC_IMPORT_THREADS, SalmonFSTestHelper.ENC_EXPORT_BUFFER_SIZE, SalmonFSTestHelper.ENC_EXPORT_THREADS,
-                    false, true, 24 + 10, false, false, false);
+            SalmonFSTestHelper.ImportAndExport(SalmonFSTestHelper.GenerateFolder(SalmonFSTestHelper.TEST_VAULT_DIRNAME),
+                SalmonCoreTestHelper.TEST_PASSWORD, SalmonFSTestHelper.TEST_IMPORT_FILE,
+                true, 24 + 10, false,
+                false, false);
         }
         catch (Exception ex)
         {
@@ -139,16 +140,15 @@ public class SalmonFSTests
     }
 
     [TestMethod]
-
     public void ShouldImportAndExportNoIntegrity()
     {
         bool failed = false;
         try
         {
-            SalmonFSTestHelper.ImportAndExport(SalmonFSTestHelper.GenerateFolder(SalmonFSTestHelper.TEST_VAULT_DIRNAME), SalmonCoreTestHelper.TEST_PASSWORD, SalmonFSTestHelper.TEST_IMPORT_FILE,
-                    SalmonFSTestHelper.ENC_IMPORT_BUFFER_SIZE, SalmonFSTestHelper.ENC_IMPORT_THREADS, SalmonFSTestHelper.ENC_EXPORT_BUFFER_SIZE, SalmonFSTestHelper.ENC_EXPORT_THREADS,
-                    false, false, 0, true, false,
-                    false);
+            SalmonFSTestHelper.ImportAndExport(SalmonFSTestHelper.GenerateFolder(SalmonFSTestHelper.TEST_VAULT_DIRNAME),
+                SalmonCoreTestHelper.TEST_PASSWORD, SalmonFSTestHelper.TEST_IMPORT_FILE,
+                false, 0, true,
+                false, false);
         }
         catch (IOException ex)
         {
@@ -160,22 +160,22 @@ public class SalmonFSTests
     }
 
     [TestMethod]
-
     public void ShouldImportAndSearchFiles()
     {
-        SalmonFSTestHelper.ImportAndSearch(SalmonFSTestHelper.GenerateFolder(SalmonFSTestHelper.TEST_VAULT_DIRNAME), SalmonCoreTestHelper.TEST_PASSWORD, SalmonFSTestHelper.TEST_IMPORT_FILE,
-                SalmonFSTestHelper.ENC_IMPORT_BUFFER_SIZE, SalmonFSTestHelper.ENC_IMPORT_THREADS);
+        SalmonFSTestHelper.ImportAndSearch(SalmonFSTestHelper.GenerateFolder(SalmonFSTestHelper.TEST_VAULT_DIRNAME),
+            SalmonCoreTestHelper.TEST_PASSWORD, SalmonFSTestHelper.TEST_IMPORT_FILE,
+            SalmonFSTestHelper.ENC_IMPORT_BUFFER_SIZE, SalmonFSTestHelper.ENC_IMPORT_THREADS);
     }
 
     [TestMethod]
-
     public void ShouldImportAndCopyFile()
     {
         bool failed = false;
         try
         {
-            SalmonFSTestHelper.ImportAndCopy(SalmonFSTestHelper.GenerateFolder(SalmonFSTestHelper.TEST_VAULT_DIRNAME), SalmonCoreTestHelper.TEST_PASSWORD, SalmonFSTestHelper.TEST_IMPORT_FILE,
-                    SalmonFSTestHelper.ENC_IMPORT_BUFFER_SIZE, SalmonFSTestHelper.ENC_IMPORT_THREADS, "subdir", false);
+            SalmonFSTestHelper.ImportAndCopy(SalmonFSTestHelper.GenerateFolder(SalmonFSTestHelper.TEST_VAULT_DIRNAME),
+                SalmonCoreTestHelper.TEST_PASSWORD, SalmonFSTestHelper.TEST_IMPORT_FILE,
+                SalmonFSTestHelper.ENC_IMPORT_BUFFER_SIZE, SalmonFSTestHelper.ENC_IMPORT_THREADS, "subdir", false);
         }
         catch (Exception ex)
         {
@@ -187,14 +187,14 @@ public class SalmonFSTests
     }
 
     [TestMethod]
-
     public void ShouldImportAndMoveFile()
     {
         bool failed = false;
         try
         {
-            SalmonFSTestHelper.ImportAndCopy(SalmonFSTestHelper.GenerateFolder(SalmonFSTestHelper.TEST_VAULT_DIRNAME), SalmonCoreTestHelper.TEST_PASSWORD, SalmonFSTestHelper.TEST_IMPORT_FILE,
-                    SalmonFSTestHelper.ENC_IMPORT_BUFFER_SIZE, SalmonFSTestHelper.ENC_IMPORT_THREADS, "subdir", true);
+            SalmonFSTestHelper.ImportAndCopy(SalmonFSTestHelper.GenerateFolder(SalmonFSTestHelper.TEST_VAULT_DIRNAME),
+                SalmonCoreTestHelper.TEST_PASSWORD, SalmonFSTestHelper.TEST_IMPORT_FILE,
+                SalmonFSTestHelper.ENC_IMPORT_BUFFER_SIZE, SalmonFSTestHelper.ENC_IMPORT_THREADS, "subdir", true);
         }
         catch (Exception ex)
         {
@@ -206,15 +206,14 @@ public class SalmonFSTests
     }
 
     [TestMethod]
-
     public void ShouldImportAndExportIntegrityBitFlipData()
     {
         bool integrityFailed = false;
         try
         {
-            SalmonFSTestHelper.ImportAndExport(SalmonFSTestHelper.GenerateFolder(SalmonFSTestHelper.TEST_VAULT_DIRNAME), SalmonCoreTestHelper.TEST_PASSWORD, SalmonFSTestHelper.TEST_IMPORT_FILE,
-                    SalmonFSTestHelper.ENC_IMPORT_BUFFER_SIZE, SalmonFSTestHelper.ENC_IMPORT_THREADS, SalmonFSTestHelper.ENC_EXPORT_BUFFER_SIZE, SalmonFSTestHelper.ENC_EXPORT_THREADS,
-                    true, true, 24 + 10, false, true, true);
+            SalmonFSTestHelper.ImportAndExport(SalmonFSTestHelper.GenerateFolder(SalmonFSTestHelper.TEST_VAULT_DIRNAME),
+                SalmonCoreTestHelper.TEST_PASSWORD, SalmonFSTestHelper.TEST_IMPORT_FILE,
+                true, 24 + 10, false, true, true);
         }
         catch (IOException ex)
         {
@@ -227,16 +226,15 @@ public class SalmonFSTests
 
 
     [TestMethod]
-
     public void ShouldImportAndExportNoAppliedIntegrityBitFlipDataShouldNotCatch()
     {
         bool integrityFailed = false;
         bool failed = false;
         try
         {
-            SalmonFSTestHelper.ImportAndExport(SalmonFSTestHelper.GenerateFolder(SalmonFSTestHelper.TEST_VAULT_DIRNAME), SalmonCoreTestHelper.TEST_PASSWORD, SalmonFSTestHelper.TEST_IMPORT_FILE,
-                    SalmonFSTestHelper.ENC_IMPORT_BUFFER_SIZE, SalmonFSTestHelper.ENC_IMPORT_THREADS, SalmonFSTestHelper.ENC_EXPORT_BUFFER_SIZE, SalmonFSTestHelper.ENC_EXPORT_THREADS,
-                    true, true, 24 + 10, false, false, false);
+            SalmonFSTestHelper.ImportAndExport(SalmonFSTestHelper.GenerateFolder(SalmonFSTestHelper.TEST_VAULT_DIRNAME),
+                SalmonCoreTestHelper.TEST_PASSWORD, SalmonFSTestHelper.TEST_IMPORT_FILE,
+                true, 24 + 10, false, false, false);
         }
         catch (IOException ex)
         {
@@ -254,16 +252,15 @@ public class SalmonFSTests
     }
 
     [TestMethod]
-
     public void ShouldImportAndExportNoAppliedIntegrityYesVerifyIntegrityNoBitFlipDataShouldCatch()
     {
         bool failed = false;
         try
         {
-            SalmonFSTestHelper.ImportAndExport(SalmonFSTestHelper.GenerateFolder(SalmonFSTestHelper.TEST_VAULT_DIRNAME), SalmonCoreTestHelper.TEST_PASSWORD, SalmonFSTestHelper.TEST_IMPORT_FILE,
-                    SalmonFSTestHelper.ENC_IMPORT_BUFFER_SIZE, SalmonFSTestHelper.ENC_IMPORT_THREADS, SalmonFSTestHelper.ENC_EXPORT_BUFFER_SIZE, SalmonFSTestHelper.ENC_EXPORT_THREADS,
-                    true, false, 0, false,
-                    false, true);
+            SalmonFSTestHelper.ImportAndExport(SalmonFSTestHelper.GenerateFolder(SalmonFSTestHelper.TEST_VAULT_DIRNAME),
+                SalmonCoreTestHelper.TEST_PASSWORD, SalmonFSTestHelper.TEST_IMPORT_FILE,
+                false, 0, false,
+                false, true);
         }
         catch (Exception)
         {
@@ -274,16 +271,15 @@ public class SalmonFSTests
     }
 
     [TestMethod]
-
     public void ShouldImportAndExportAppliedIntegrityNoVerifyIntegrityBitFlipDataShouldNotCatch()
     {
         bool failed = false;
         try
         {
-            SalmonFSTestHelper.ImportAndExport(SalmonFSTestHelper.GenerateFolder(SalmonFSTestHelper.TEST_VAULT_DIRNAME), SalmonCoreTestHelper.TEST_PASSWORD, SalmonFSTestHelper.TEST_IMPORT_FILE,
-                    SalmonFSTestHelper.ENC_IMPORT_BUFFER_SIZE, SalmonFSTestHelper.ENC_IMPORT_THREADS, SalmonFSTestHelper.ENC_EXPORT_BUFFER_SIZE, SalmonFSTestHelper.ENC_EXPORT_THREADS,
-                    true, true, 36, false,
-                    true, false);
+            SalmonFSTestHelper.ImportAndExport(SalmonFSTestHelper.GenerateFolder(SalmonFSTestHelper.TEST_VAULT_DIRNAME),
+                SalmonCoreTestHelper.TEST_PASSWORD, SalmonFSTestHelper.TEST_IMPORT_FILE,
+                true, 36, false,
+                true, false);
         }
         catch (IOException ex)
         {
@@ -295,16 +291,13 @@ public class SalmonFSTests
     }
 
     [TestMethod]
-
     public void ShouldImportAndExportAppliedIntegrityNoVerifyIntegrity()
     {
         bool failed = false;
         try
         {
             SalmonFSTestHelper.ImportAndExport(SalmonFSTestHelper.GenerateFolder(SalmonFSTestHelper.TEST_VAULT_DIRNAME), SalmonCoreTestHelper.TEST_PASSWORD, SalmonFSTestHelper.TEST_IMPORT_FILE,
-                    SalmonFSTestHelper.ENC_IMPORT_BUFFER_SIZE, SalmonFSTestHelper.ENC_IMPORT_THREADS,
-                    SalmonFSTestHelper.ENC_EXPORT_BUFFER_SIZE, SalmonFSTestHelper.ENC_EXPORT_THREADS,
-                    true, false, 0, true,
+                    false, 0, true,
                     true, false);
         }
         catch (IOException ex)
@@ -317,15 +310,14 @@ public class SalmonFSTests
     }
 
     [TestMethod]
-
     public void ShouldImportAndExportIntegrityBitFlipHeader()
     {
         bool integrityFailed = false;
         try
         {
-            SalmonFSTestHelper.ImportAndExport(SalmonFSTestHelper.GenerateFolder(SalmonFSTestHelper.TEST_VAULT_DIRNAME), SalmonCoreTestHelper.TEST_PASSWORD, SalmonFSTestHelper.TEST_IMPORT_FILE,
-                    SalmonFSTestHelper.ENC_IMPORT_BUFFER_SIZE, SalmonFSTestHelper.ENC_IMPORT_THREADS, SalmonFSTestHelper.ENC_EXPORT_BUFFER_SIZE, SalmonFSTestHelper.ENC_EXPORT_THREADS,
-                    true, true, 20, false,
+            SalmonFSTestHelper.ImportAndExport(SalmonFSTestHelper.GenerateFolder(SalmonFSTestHelper.TEST_VAULT_DIRNAME), 
+                SalmonCoreTestHelper.TEST_PASSWORD, SalmonFSTestHelper.TEST_IMPORT_FILE,
+                    true, 20, false,
                     true, true);
         }
         catch (IOException ex)
@@ -338,16 +330,14 @@ public class SalmonFSTests
     }
 
     [TestMethod]
-
     public void ShouldImportAndExportIntegrity()
     {
         bool importSuccess = true;
         try
         {
-            SalmonFSTestHelper.ImportAndExport(SalmonFSTestHelper.GenerateFolder(SalmonFSTestHelper.TEST_VAULT_DIRNAME), SalmonCoreTestHelper.TEST_PASSWORD, SalmonFSTestHelper.TEST_IMPORT_FILE,
-                    SalmonFSTestHelper.ENC_IMPORT_BUFFER_SIZE, SalmonFSTestHelper.ENC_IMPORT_THREADS,
-                    SalmonFSTestHelper.ENC_EXPORT_BUFFER_SIZE, SalmonFSTestHelper.ENC_EXPORT_THREADS,
-                    true, false, 0, true,
+            SalmonFSTestHelper.ImportAndExport(SalmonFSTestHelper.GenerateFolder(SalmonFSTestHelper.TEST_VAULT_DIRNAME),
+                SalmonCoreTestHelper.TEST_PASSWORD, SalmonFSTestHelper.TEST_IMPORT_FILE,
+                    false, 0, true,
                     true, true);
         }
         catch (IOException ex)
@@ -357,7 +347,6 @@ public class SalmonFSTests
         }
         Assert.IsTrue(importSuccess);
     }
-
 
     [TestMethod]
     public void ShouldCatchVaultMaxFiles()
@@ -390,7 +379,7 @@ public class SalmonFSTests
     {
         SalmonFSTestHelper.ShouldCreateFileWithoutVault(UTF8Encoding.UTF8.GetBytes(SalmonCoreTestHelper.TEST_TEXT), SalmonCoreTestHelper.TEST_KEY_BYTES,
                 true, true, 64, SalmonCoreTestHelper.TEST_HMAC_KEY_BYTES,
-                SalmonCoreTestHelper.TEST_FILENAME_NONCE_BYTES, SalmonCoreTestHelper.TEST_NONCE_BYTES, 
+                SalmonCoreTestHelper.TEST_FILENAME_NONCE_BYTES, SalmonCoreTestHelper.TEST_NONCE_BYTES,
                 false, -1, true);
     }
 
@@ -415,7 +404,6 @@ public class SalmonFSTests
 
         Assert.IsTrue(caught);
     }
-
 
     [TestMethod]
     public void ShouldCreateFileWithoutVaultApplyIntegrityNoVerifyIntegrityFlipHMACNotCaught()
@@ -447,7 +435,6 @@ public class SalmonFSTests
         }
     }
 
-
     [TestMethod]
     public void ShouldCreateFileWithoutVaultApplyIntegrityNoVerifyIntegrityFlipDataNotCaughtNotEqual()
     {
@@ -477,9 +464,7 @@ public class SalmonFSTests
         Assert.IsTrue(failed);
     }
 
-
     [TestMethod]
-
     public void ShouldExportAndImportAuth()
     {
         IRealFile vault = SalmonFSTestHelper.GenerateFolder(SalmonFSTestHelper.TEST_VAULT_DIRNAME);
@@ -492,7 +477,6 @@ public class SalmonFSTests
     {
         SalmonFSTestHelper.TestExamples();
     }
-
 
     [TestMethod]
     public void ShouldEncryptAndDecryptStream()
@@ -678,7 +662,7 @@ public class SalmonFSTests
     public void ShouldReadFromFileMultithreaded()
     {
         IRealFile vaultDir = SalmonFSTestHelper.GenerateFolder(SalmonFSTestHelper.TEST_VAULT_DIRNAME);
-        IRealFile file = SalmonFSTestHelper.TEST_IMPORT_MEDIUM_FILE;
+        IRealFile file = SalmonFSTestHelper.TEST_IMPORT_TINY_FILE;
 
         SalmonFileSequencer sequencer = SalmonFSTestHelper.CreateSalmonFileSequencer();
         SalmonDrive drive = SalmonFSTestHelper.CreateDrive(vaultDir, SalmonFSTestHelper.DriveClassType, SalmonCoreTestHelper.TEST_PASSWORD, sequencer);
@@ -688,17 +672,20 @@ public class SalmonFSTests
 
         long pos = Math.Abs(new Random().NextInt64() % file.Length);
 
-        SalmonFileInputStream fileInputStream1 = new SalmonFileInputStream(sfiles[0], 4, 4 * 1024 * 1024, 4, 256 * 1024);
-        fileInputStream1.Seek(pos, SeekOrigin.Current);
+        SalmonFileInputStream fileInputStream1 = new SalmonFileInputStream(sfiles[0], 4, 4 * 1024 * 1024, 1, 256 * 1024);
+        //fileInputStream1.Seek(pos, SeekOrigin.Current);
         MD5 md51 = MD5.Create();
         byte[] hash1 = md51.ComputeHash(fileInputStream1);
         string h1 = Mku.Convert.BitConverter.ToHex(hash1);
+        fileInputStream1.Close();
 
         SalmonFileInputStream fileInputStream2 = new SalmonFileInputStream(sfiles[0], 4, 4 * 1024 * 1024, 1, 256 * 1024);
-        fileInputStream2.Seek(pos, SeekOrigin.Current);
+        //fileInputStream2.Seek(pos, SeekOrigin.Current);
         MD5 md52 = MD5.Create();
         byte[] hash2 = md52.ComputeHash(fileInputStream2);
         string h2 = Mku.Convert.BitConverter.ToHex(hash2);
+        fileInputStream2.Close();
+
         Assert.AreEqual(h1, h2);
     }
 }
