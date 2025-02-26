@@ -45,11 +45,6 @@ public abstract class FileExporter
     private static readonly int DEFAULT_THREADS = 1;
 
     /// <summary>
-    ///  True if multithreading is enabled.
-    /// </summary>
-    private static readonly bool enableMultiThread = true;
-
-    /// <summary>
     ///  Current buffer size.
     /// </summary>
     private int bufferSize;
@@ -140,9 +135,6 @@ public abstract class FileExporter
         filename = filename ?? fileToExport.BaseName;
         try
         {
-            if (!enableMultiThread && threads != 1)
-                throw new NotSupportedException("Multithreading is not supported");
-
             stopped = false;
             long[] totalBytesWritten = new long[] { 0 };
             failed = false;
@@ -169,31 +161,15 @@ public abstract class FileExporter
                 runningThreads = (int)(fileSize / partSize);
             }
 
-            Task[] tasks = new Task[runningThreads];
-            long finalPartSize = partSize;
-            int finalRunningThreads = runningThreads;
-            for (int i = 0; i < runningThreads; i++)
+            if (runningThreads == 1)
             {
-                int index = i;
-                tasks[i] = Task.Run(() =>
-                {
-                    long start = finalPartSize * index;
-                    long length;
-                    if (index == finalRunningThreads - 1)
-                        length = fileSize - start;
-                    else
-                        length = finalPartSize;
-                    try
-                    {
-                        ExportFilePart(fileToExport, exportFile, start, length, totalBytesWritten, OnProgress);
-                    }
-                    catch (Exception e)
-                    {
-                        Console.Error.WriteLine(e);
-                    }
-                });
+                ExportFilePart(fileToExport, exportFile, 0, fileSize, totalBytesWritten, OnProgress);
             }
-            Task.WaitAll(tasks);
+            else
+            {
+                this.SubmitExportJobs(runningThreads, partSize, fileToExport, exportFile, totalBytesWritten, integrity, OnProgress);
+            }
+
             if (stopped)
                 exportFile.Delete();
             else if (deleteSource)
@@ -218,10 +194,41 @@ public abstract class FileExporter
         return exportFile;
     }
 
+    private void SubmitExportJobs(int runningThreads, long partSize, IVirtualFile fileToExport, IRealFile exportFile, long[] totalBytesWritten, bool integrity, Action<long, long> OnProgress)
+    {
+        long fileSize = fileToExport.Size;
+
+        Task[] tasks = new Task[runningThreads];
+        long finalPartSize = partSize;
+        int finalRunningThreads = runningThreads;
+        for (int i = 0; i < runningThreads; i++)
+        {
+            int index = i;
+            tasks[i] = Task.Run(() =>
+            {
+                long start = finalPartSize * index;
+                long length;
+                if (index == finalRunningThreads - 1)
+                    length = fileSize - start;
+                else
+                    length = finalPartSize;
+                try
+                {
+                    ExportFilePart(fileToExport, exportFile, start, length, totalBytesWritten, OnProgress);
+                }
+                catch (Exception e)
+                {
+                    Console.Error.WriteLine(e);
+                }
+            });
+        }
+        Task.WaitAll(tasks);
+    }
+
     /// <summary>
     ///  Export a file part from the drive.
-	/// </summary>
-	///  <param name="fileToExport">     The file the part belongs to</param>
+    /// </summary>
+    ///  <param name="fileToExport">     The file the part belongs to</param>
     ///  <param name="exportFile">       The file to copy the exported part to</param>
     ///  <param name="start">            The start position on the file</param>
     ///  <param name="count">            The length of the bytes to be decrypted</param>

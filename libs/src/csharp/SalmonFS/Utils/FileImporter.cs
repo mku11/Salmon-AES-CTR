@@ -23,6 +23,7 @@ SOFTWARE.
 */
 
 using Mku.File;
+using Mku.Salmon;
 using System;
 using System.IO;
 using System.Threading.Tasks;
@@ -43,16 +44,6 @@ public abstract class FileImporter
     ///  The global default threads to use.
     /// </summary>
     private static readonly int DEFAULT_THREADS = 1;
-
-    /// <summary>
-    ///  Minimum file size to use parallelism. Anything less will use single thread.
-    /// </summary>
-    private static readonly int MIN_FILE_SIZE = 2 * 1024 * 1024;
-
-    /// <summary>
-    ///  True if multithreading is enabled.
-    /// </summary>
-    private static readonly bool enableMultiThread = true;
 
     /// <summary>
     ///  Current buffer size.
@@ -148,24 +139,22 @@ public abstract class FileImporter
 
         filename = filename ?? fileToImport.BaseName;
         long[] totalBytesRead = new long[] { 0 };
-        IVirtualFile salmonFile;
+        IVirtualFile importedFile;
         try
         {
-            if (!enableMultiThread && threads != 1)
-                throw new NotSupportedException("Multithreading is not supported");
             stopped = false;
             failed = false;
             lastException = null;
 
-            salmonFile = dir.CreateFile(filename);
-            this.OnPrepare(salmonFile, integrity);
+            importedFile = dir.CreateFile(filename);
+            this.OnPrepare(importedFile, integrity);
 
             long fileSize = fileToImport.Length;
             int runningThreads = 1;
             long partSize = fileSize;
 
             // if we want to check integrity we align to the chunk size otherwise to the AES Block
-            long minPartSize = GetMinimumPartSize(salmonFile);
+            long minPartSize = GetMinimumPartSize(importedFile);
             if (partSize > minPartSize && threads > 1)
             {
                 partSize = (int)Math.Ceiling(fileSize / (float)threads);
@@ -176,33 +165,17 @@ public abstract class FileImporter
                 runningThreads = (int)(fileSize / partSize);
             }
 
-            Task[] tasks = new Task[runningThreads];
-            long finalPartSize = partSize;
-            int finalRunningThreads = runningThreads;
-            for (int i = 0; i < runningThreads; i++)
+            if (runningThreads == 1)
             {
-                int index = i;
-                tasks[i] = Task.Run(() =>
-                {
-                    long start = finalPartSize * index;
-                    long length;
-                    if (index == finalRunningThreads - 1)
-                        length = fileSize - start;
-                    else
-                        length = finalPartSize;
-                    try
-                    {
-                        ImportFilePart(fileToImport, salmonFile, start, length, totalBytesRead, OnProgress);
-                    }
-                    catch (Exception e)
-                    {
-                        Console.Error.WriteLine(e);
-                    }
-                });
+                ImportFilePart(fileToImport, importedFile, 0, fileSize, totalBytesRead, OnProgress);
             }
-            Task.WaitAll(tasks);
+            else
+            {
+                this.SubmitImportJobs(runningThreads, partSize, fileToImport, importedFile, totalBytesRead, integrity, OnProgress);
+            }
+
             if (stopped)
-                salmonFile.RealFile.Delete();
+                importedFile.RealFile.Delete();
             else if (deleteSource)
                 fileToImport.Delete();
             if (lastException != null)
@@ -221,13 +194,44 @@ public abstract class FileImporter
             return null;
         }
         stopped = true;
-        return salmonFile;
+        return importedFile;
+    }
+
+    private void SubmitImportJobs(int runningThreads, long partSize, IRealFile fileToImport, IVirtualFile importedFile, long[] totalBytesRead, bool integrity, Action<long, long> OnProgress)
+    {
+        long fileSize = fileToImport.Length;
+
+        Task[] tasks = new Task[runningThreads];
+        long finalPartSize = partSize;
+        int finalRunningThreads = runningThreads;
+        for (int i = 0; i < runningThreads; i++)
+        {
+            int index = i;
+            tasks[i] = Task.Run(() =>
+            {
+                long start = finalPartSize * index;
+                long length;
+                if (index == finalRunningThreads - 1)
+                    length = fileSize - start;
+                else
+                    length = finalPartSize;
+                try
+                {
+                    ImportFilePart(fileToImport, importedFile, start, length, totalBytesRead, OnProgress);
+                }
+                catch (Exception e)
+                {
+                    Console.Error.WriteLine(e);
+                }
+            });
+        }
+        Task.WaitAll(tasks);
     }
 
     /// <summary>
     ///  Import a file part into a file in the drive.
-	/// </summary>
-	///  <param name="fileToImport">  The external file that will be imported</param>
+    /// </summary>
+    ///  <param name="fileToImport">  The external file that will be imported</param>
     ///  <param name="salmonFile">    The file that will be imported to</param>
     ///  <param name="start">         The start position of the byte data that will be imported</param>
     ///  <param name="count">         The length of the file content that will be imported</param>
