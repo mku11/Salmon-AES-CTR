@@ -492,7 +492,7 @@ public class SalmonFileInputStream : Stream
     ///  Class will be used to cache decrypted data that can later be read via the ReadAt() method
     ///  without requesting frequent decryption reads.
 	/// </summary>
-	    //TODO: replace the CacheBuffer with a MemoryStream to simplify the code
+	//TODO: replace the CacheBuffer with a MemoryStream to simplify the code
     public class CacheBuffer
     {
         /// <summary>
