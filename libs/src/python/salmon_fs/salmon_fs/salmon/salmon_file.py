@@ -23,9 +23,8 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 '''
 from __future__ import annotations
-import os
 from typing import Callable, Any
-
+import sys
 from typeguard import typechecked
 from wrapt import synchronized
 
@@ -138,7 +137,7 @@ class SalmonFile(IVirtualFile):
             if bytes_read != SalmonGenerator.NONCE_LENGTH:
                 return None
         except Exception as ex:
-            print(ex)
+            print(ex, file=sys.stderr)
             raise IOError("Could not get file header") from ex
         finally:
             if stream is not None:
@@ -482,8 +481,7 @@ class SalmonFile(IVirtualFile):
         """
         relative_path: str = self.__get_relative_path(real_path)
         path: str = ""
-        # TODO: test if char is escaped
-        parts: list[str] = relative_path.split(os.sep)
+        parts: list[str] = relative_path.split("\\|/")
         for part in parts:
             if part != "":
                 path += SalmonFile.separator
@@ -532,7 +530,7 @@ class SalmonFile(IVirtualFile):
                     self.get_real_file().get_path():
                 return None
         except Exception as exception:
-            print(exception)
+            print(exception, file=sys.stderr)
             return None
 
         real_dir: IRealFile = self.__realFile.get_parent()
