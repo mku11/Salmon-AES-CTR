@@ -55,7 +55,7 @@ from salmon_fs_test_helper import SalmonFSTestHelper, TestMode
 class SalmonFSTests(TestCase):
     @classmethod
     def setUpClass(cls):
-        SalmonFSTestHelper.set_test_params("d:\\tmp\\salmon\\test", TestMode.Local)
+        SalmonFSTestHelper.set_test_params("d:\\tmp\\salmon\\test", TestMode.WebService)
 
         SalmonFSTestHelper.TEST_IMPORT_FILE = SalmonFSTestHelper.TEST_IMPORT_MEDIUM_FILE
 
@@ -68,7 +68,7 @@ class SalmonFSTests(TestCase):
         SalmonFSTestHelper.ENC_IMPORT_THREADS = 2
         SalmonFSTestHelper.ENC_EXPORT_BUFFER_SIZE = 512 * 1024
         SalmonFSTestHelper.ENC_EXPORT_THREADS = 2
-        SalmonFSTestHelper.ENABLE_MULTI_CPU = True
+        SalmonFSTestHelper.ENABLE_MULTI_CPU = False
 
         SalmonFSTestHelper.TEST_FILE_INPUT_STREAM_THREADS = 2
         SalmonFSTestHelper.TEST_USE_FILE_INPUT_STREAM = False
@@ -77,7 +77,7 @@ class SalmonFSTests(TestCase):
         SalmonFSTestHelper.initialize()
 
         # use the native library
-        SalmonStream.set_aes_provider_type(ProviderType.AesGPU)
+        SalmonStream.set_aes_provider_type(ProviderType.Default)
 
     @classmethod
     def tearDownClass(cls):
@@ -332,7 +332,7 @@ class SalmonFSTests(TestCase):
                 if isinstance(ex.__cause__, IntegrityException):
                     caught = True
             except Exception as ex:
-                print(ex)
+                print(ex, file=sys.stderr)
                 failed = True
             self.assertFalse(caught)
             self.assertFalse(failed)
@@ -436,7 +436,7 @@ class SalmonFSTests(TestCase):
         try:
             file2 = file.copy(v_dir)
         except Exception as ex:
-            print(ex)
+            print(ex, file=sys.stderr)
             caught = True
 
         self.assertEqual(True, caught)
@@ -474,7 +474,7 @@ class SalmonFSTests(TestCase):
         try:
             file3.move(v_dir.get_child("folder1"))
         except Exception as ex:
-            print(ex)
+            print(ex, file=sys.stderr)
             caught = True
 
         self.assertTrue(caught)
@@ -537,7 +537,8 @@ class SalmonFSTests(TestCase):
         drive = SalmonFSTestHelper.create_drive(vault_dir, SalmonFSTestHelper.drive_class_type,
                                                 SalmonCoreTestHelper.TEST_PASSWORD, sequencer)
         file_commander: SalmonFileCommander = SalmonFileCommander(SalmonFSTestHelper.ENC_IMPORT_BUFFER_SIZE,
-                                                                  SalmonFSTestHelper.ENC_EXPORT_BUFFER_SIZE, 2)
+                                                                  SalmonFSTestHelper.ENC_EXPORT_BUFFER_SIZE, 2,
+                                                                  multi_cpu=SalmonFSTestHelper.ENABLE_MULTI_CPU)
         sfiles: list[SalmonFile] = file_commander.import_files([file],
                                                                drive.get_root(), False, True,
                                                                lambda task_progress: None, lambda file: "",
