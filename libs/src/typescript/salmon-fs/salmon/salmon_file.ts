@@ -538,7 +538,7 @@ export class SalmonFile implements IVirtualFile {
             realPath = this.#realFile.getAbsolutePath();
         let relativePath: string = await this.#getRelativePath(realPath);
         let path: string = "";
-        let parts: string[] = relativePath.split(SalmonFile.separator);
+        let parts: string[] = relativePath.split("\\|/");
         for (let part of parts) {
             if (part != "") {
                 path += SalmonFile.separator;
