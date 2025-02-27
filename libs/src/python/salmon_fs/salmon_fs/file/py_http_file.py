@@ -29,10 +29,10 @@ from http.client import HTTPResponse, HTTPConnection, HTTPSConnection
 from typing import Any, Callable
 import re
 from typeguard import typechecked
-from wrapt import synchronized
 import urllib
 from urllib.parse import urljoin
 from datetime import datetime
+from threading import RLock
 
 from salmon_core.streams.memory_stream import MemoryStream
 from salmon_fs.file.ireal_file import IRealFile
@@ -48,6 +48,7 @@ class PyHttpFile(IRealFile):
 
     MAX_REDIRECTS: int = 5
     separator: str = "/"
+    __lock_object: RLock = RLock()
 
     def __init__(self, path: str):
         """
@@ -57,32 +58,32 @@ class PyHttpFile(IRealFile):
         self.__file_path: str = path
         self.__response: HTTPResponse | None = None
 
-    @synchronized
     def __get_response(self) -> HTTPResponse:
-        if not self.__response:
-            headers = {}
-            self.__set_default_headers(headers)
-            conn: HTTPConnection | HTTPSConnection | None = None
-            try:
-                url = self.__file_path
-                while count := PyHttpFile.MAX_REDIRECTS:
-                    conn = self.__create_connection(urlparse(url).netloc)
-                    conn.request("GET", url, headers=headers)
-                    self.__response = conn.getresponse()
-                    if self.__response.getheader('location'):
-                        url = urljoin(url, self.__response.getheader('location'))
-                        count -= 1
-                        self.__response.close()
+        with PyHttpFile.__lock_object:
+            if not self.__response:
+                headers = {}
+                self.__set_default_headers(headers)
+                conn: HTTPConnection | HTTPSConnection | None = None
+                try:
+                    url = self.__file_path
+                    while count := PyHttpFile.MAX_REDIRECTS:
+                        conn = self.__create_connection(urlparse(url).netloc)
+                        conn.request("GET", url, headers=headers)
+                        self.__response = conn.getresponse()
+                        if self.__response.getheader('location'):
+                            url = urljoin(url, self.__response.getheader('location'))
+                            count -= 1
+                            self.__response.close()
+                            conn.close()
+                        else:
+                            break
+                    self.__check_status(self.__response, 200)
+                finally:
+                    if conn:
                         conn.close()
-                    else:
-                        break
-                self.__check_status(self.__response, 200)
-            finally:
-                if conn:
-                    conn.close()
-                if self.__response:
-                    self.__response.close()
-        return self.__response
+                    if self.__response:
+                        self.__response.close()
+            return self.__response
 
     def create_directory(self, dir_name: str) -> IRealFile:
         """
@@ -295,6 +296,13 @@ class PyHttpFile(IRealFile):
         """
         raise Exception("Unsupported Operation, readonly filesystem")
 
+    def reset(self):
+        """
+        Clear cached properties
+        """
+        with PyHttpFile.__lock_object:
+            self.__response = None
+        
     def get_child_path(self, filename: str) -> str:
         n_filepath = self.__file_path
         if not n_filepath.endswith(PyHttpFile.separator):

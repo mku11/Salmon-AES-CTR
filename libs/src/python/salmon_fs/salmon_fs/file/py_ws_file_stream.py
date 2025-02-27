@@ -31,6 +31,7 @@ import urllib
 from urllib import parse
 from urllib.parse import urlparse
 from io import RawIOBase
+from wrapt import synchronized
 
 from salmon_core.convert.base_64 import Base64
 from salmon_fs.file.ireal_file import IRealFile
@@ -93,7 +94,8 @@ class PyWSFileStream(RandomAccessStream):
             self.start_position: int = self.get_position()
             boundary = "*******"
             header = "--" + boundary + "\r\n"
-            header += "Content-Disposition: form-data; name=\"file\"; filename=\"" + self.__file.get_base_name() + "\"\r\n"
+            header += "Content-Disposition: form-data; name=\"file\"; filename=\"" \
+                      + self.__file.get_base_name() + "\"\r\n"
             header += "\r\n"
             header_data = bytearray(header.encode())
 
@@ -281,6 +283,7 @@ class PyWSFileStream(RandomAccessStream):
         self.reset()
         self.closed = True
 
+    @synchronized
     def reset(self):
         if self.__response:
             self.__response.close()
@@ -289,14 +292,15 @@ class PyWSFileStream(RandomAccessStream):
         self.conn = None
         self.__response = None
         self.start_position = 0
+        self.__file.reset()
 
     def set_service_auth(self, headers: dict[str, str]):
         if not self.__file.get_credentials():
             return
-        headers['Authorization'] = 'Basic ' + Base64().encode(bytearray(
-            (
-                    self.__file.get_credentials().get_service_user() + ":" + self.__file.get_credentials().get_service_password())
-            .encode('utf-8')))
+        headers['Authorization'] = 'Basic ' + Base64().encode(
+            bytearray((self.__file.get_credentials().get_service_user() + ":"
+                       + self.__file.get_credentials().get_service_password())
+                      .encode('utf-8')))
 
     def __check_status(self, http_response: HTTPResponse, status: int):
         if http_response.status != status:

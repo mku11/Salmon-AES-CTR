@@ -23,7 +23,6 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 '''
 from __future__ import annotations
-import os
 import json
 import http.client
 import urllib.parse
@@ -32,6 +31,7 @@ from http.client import HTTPResponse, HTTPConnection, HTTPSConnection
 from typing import Any, Callable
 
 from typeguard import typechecked
+from threading import RLock
 
 from salmon_core.convert.base_64 import Base64
 from salmon_fs.file.ireal_file import IRealFile
@@ -49,6 +49,7 @@ class PyWSFile(IRealFile):
     __DEST_DIR: str = "destDir"
     __FILENAME: str = "filename"
     separator: str = "/"
+    __lock_object: RLock = RLock()
 
     def get_service_path(self):
         return self.__service_path
@@ -71,26 +72,27 @@ class PyWSFile(IRealFile):
         self.__credentials: Credentials = credentials
         self.__response: HTTPResponse | None = None
 
-    def __get_response(self) -> dict[str,any]:
-        if not self.__response:
-            headers = {}
-            self.__set_default_headers(headers)
-            self.set_service_auth(headers)
-            params = urllib.parse.urlencode({PyWSFile.__PATH: self.__file_path})
-            conn: HTTPConnection | HTTPSConnection | None = None
-            http_response: HTTPResponse | None = None
-            try:
-                conn = self.__create_connection()
-                conn.request("GET", "/api/info" + "?" + params, headers=headers)
-                http_response = conn.getresponse()
-                self.__check_status(http_response, 200)
-                self.__response = json.loads(http_response.read())
-            finally:
-                if conn:
-                    conn.close()
-                if http_response:
-                    http_response.close()
-        return self.__response
+    def __get_response(self) -> dict[str, any]:
+        with PyWSFile.__lock_object:
+            if not self.__response:
+                headers = {}
+                self.__set_default_headers(headers)
+                self.set_service_auth(headers)
+                params = urllib.parse.urlencode({PyWSFile.__PATH: self.__file_path})
+                conn: HTTPConnection | HTTPSConnection | None = None
+                http_response: HTTPResponse | None = None
+                try:
+                    conn = self.__create_connection()
+                    conn.request("GET", "/api/info" + "?" + params, headers=headers)
+                    http_response = conn.getresponse()
+                    self.__check_status(http_response, 200)
+                    self.__response = json.loads(http_response.read())
+                finally:
+                    if conn:
+                        conn.close()
+                    if http_response:
+                        http_response.close()
+            return self.__response
 
     def create_directory(self, dir_name: str) -> IRealFile:
         """
@@ -150,6 +152,7 @@ class PyWSFile(IRealFile):
         Delete this file or directory.
         :return: True if deletion is successful.
         """
+        self.reset()
         if self.is_directory():
             p_files: list[IRealFile] = self.list_files()
             for p_file in p_files:
@@ -181,12 +184,13 @@ class PyWSFile(IRealFile):
             conn.request("DELETE", "/api/delete", headers=headers, body=params)
             http_response = conn.getresponse()
             self.__check_status(http_response, 200)
+            self.reset()
+            return True
         finally:
             if conn:
                 conn.close()
             if http_response:
                 http_response.close()
-        return not os.path.exists(self.__file_path)
 
     def exists(self) -> bool:
         """
@@ -224,6 +228,7 @@ class PyWSFile(IRealFile):
         Get a stream for reading the file.
         :return: The stream to read from.
         :raises FileNotFoundException:     """
+        self.reset()
         return PyWSFileStream(self, "r")
 
     def get_output_stream(self) -> RandomAccessStream:
@@ -231,7 +236,7 @@ class PyWSFile(IRealFile):
         Get a stream for writing to this file.
         :return: The stream to write to.
         :raises FileNotFoundException:         """
-        self.__response = None
+        self.reset()
         return PyWSFileStream(self, "rw")
 
     def get_parent(self) -> IRealFile:
@@ -318,13 +323,13 @@ class PyWSFile(IRealFile):
             self.set_service_auth(headers)
             params = urllib.parse.urlencode({PyWSFile.__PATH: self.get_path()})
             conn: HTTPConnection | HTTPSConnection | None = None
-            httpResponse: HTTPResponse | None = None
+            http_response: HTTPResponse | None = None
             try:
                 conn = self.__create_connection()
                 conn.request("GET", "/api/list" + "?" + params, headers=headers)
-                httpResponse = conn.getresponse()
-                self.__check_status(httpResponse, 200)
-                contents = httpResponse.read()
+                http_response = conn.getresponse()
+                self.__check_status(http_response, 200)
+                contents = http_response.read()
                 files: list[Any] = json.loads(contents)
                 real_files: list[PyWSFile] = []
                 real_dirs: list[PyWSFile] = []
@@ -341,8 +346,8 @@ class PyWSFile(IRealFile):
             finally:
                 if conn:
                     conn.close()
-                if httpResponse:
-                    httpResponse.close()
+                if http_response:
+                    http_response.close()
         return []
 
     def move(self, new_dir: IRealFile, new_name: str | None = None,
@@ -379,7 +384,7 @@ class PyWSFile(IRealFile):
                 http_response = conn.getresponse()
                 self.__check_status(http_response, 200)
                 new_file = PyWSFile(json.loads(http_response.read())['path'], self.__service_path, self.__credentials)
-                self.__response = None
+                self.reset()
                 return new_file
             finally:
                 if conn:
@@ -419,7 +424,7 @@ class PyWSFile(IRealFile):
                 conn.request("POST", "/api/copy", headers=headers, body=params)
                 http_response = conn.getresponse()
                 self.__check_status(http_response, 200)
-                self.__response = None
+                self.reset()
                 new_file = PyWSFile(json.loads(http_response.read())['path'], self.__service_path, self.__credentials)
                 return new_file
             finally:
@@ -446,7 +451,7 @@ class PyWSFile(IRealFile):
         :param new_filename: The new name for the file or directory.
         :return: True if successfully renamed.
         """
-        self.__response = None
+        self.reset()
         headers = {}
         self.__set_default_headers(headers)
         self.set_service_auth(headers)
@@ -471,7 +476,7 @@ class PyWSFile(IRealFile):
         Create this directory under the current filepath.
         :return: True if created.
         """
-        self.__response = None
+        self.reset()
         headers = {}
         self.__set_default_headers(headers)
         self.set_service_auth(headers)
@@ -489,6 +494,13 @@ class PyWSFile(IRealFile):
                 conn.close()
             if http_response:
                 http_response.close()
+
+    def reset(self):
+        """
+        Clear cached properties
+        """
+        with PyWSFile.__lock_object:
+            self.__response = None
 
     def get_child_path(self, filename: str) -> str:
         n_filepath = self.__file_path
