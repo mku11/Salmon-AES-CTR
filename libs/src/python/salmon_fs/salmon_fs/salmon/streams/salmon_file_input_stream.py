@@ -28,7 +28,7 @@ import math
 import threading
 from concurrent.futures import ThreadPoolExecutor
 from io import BufferedIOBase, RawIOBase
-
+import sys
 from typeguard import typechecked
 from wrapt import synchronized
 
@@ -180,7 +180,7 @@ class SalmonFileInputStream(BufferedIOBase):
             cache_buffer = self.__get_avail_cache_buffer()
             # the stream is closed
             if cache_buffer is None:
-                return -1
+                return 0
             # for some applications like media players they make a second immediate request
             # in a position a few bytes before the first request. To make
             # sure we don't make 2 overlapping requests we start the buffer
@@ -191,7 +191,7 @@ class SalmonFileInputStream(BufferedIOBase):
 
             bytes_read = self.__fill_buffer(cache_buffer, start_position, self.__cacheBufferSize)
             if bytes_read <= 0:
-                return -1
+                return 0
             cache_buffer.startPos = start_position
             cache_buffer.count = bytes_read
 
@@ -284,10 +284,8 @@ class SalmonFileInputStream(BufferedIOBase):
                                                                     self.__streams[index])
                     if chunk_bytes_read >= 0:
                         bytes_read[0] += chunk_bytes_read
-                except IOError as ex1:
+                except Exception as ex1:
                     ex = ex1
-                except Exception as ex2:
-                    print(ex2)
 
                 done.wait()
 
