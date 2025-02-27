@@ -55,6 +55,7 @@ public class JavaHttpFile implements IRealFile {
     private static final String DATE_FORMAT = "EEE, dd MMM yyyy HH:mm:ss zzz";
 
     private String filePath;
+	private CloseableHttpResponse response;
     public static CloseableHttpClient client = HttpClients.createDefault();
 
     /**
@@ -66,19 +67,18 @@ public class JavaHttpFile implements IRealFile {
         this.filePath = path;
     }
 
-    private HttpResponse getResponse() throws Exception {
+    private CloseableHttpResponse getResponse() throws Exception {
         URIBuilder uriBuilder = new URIBuilder(this.filePath);
         HttpGet httpGet = new HttpGet(uriBuilder.build());
         setDefaultHeaders(httpGet);
-        CloseableHttpResponse httpResponse = null;
         try {
-            httpResponse = client.execute(httpGet);
-            checkStatus(httpResponse, HttpStatus.SC_OK);
+            this.response = client.execute(httpGet);
+            checkStatus(this.response, HttpStatus.SC_OK);
         } finally {
-            if (httpResponse != null)
-                httpResponse.close();
+            if (this.response != null)
+                this.response.close();
         }
-        return httpResponse;
+        return this.response;
     }
 
     /**
@@ -442,7 +442,7 @@ public class JavaHttpFile implements IRealFile {
      *
      */
     public void reset() {
-		
+		this.response = null;
 	}
 
     private String getChildPath(String filename) {
