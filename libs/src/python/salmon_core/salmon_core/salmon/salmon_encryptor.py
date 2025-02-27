@@ -27,7 +27,7 @@ import math
 from concurrent.futures import ProcessPoolExecutor, ThreadPoolExecutor
 from multiprocessing import shared_memory
 from multiprocessing.shared_memory import SharedMemory
-
+import sys
 from typeguard import typechecked
 
 from salmon_core.convert.bit_converter import BitConverter
@@ -135,7 +135,7 @@ def encrypt_data(input_stream: MemoryStream, start: int, count: int, out_data: b
             total_chunk_bytes_read += bytes_read
         stream.flush()
     except (IOError, SalmonSecurityException, IntegrityException) as ex:
-        print(ex)
+        print(ex, file=sys.stderr)
         raise SalmonSecurityException("Could not encrypt data") from ex
     finally:
         output_stream.close()
@@ -330,7 +330,7 @@ class SalmonEncryptor:
                 # catch any errors within the children processes
                 f.result()
             except Exception as ex1:
-                print(ex1)
+                print(ex1, file=sys.stderr)
                 ex = ex1
                 # cancel all tasks
                 shm_cancel.buf[0] = 1

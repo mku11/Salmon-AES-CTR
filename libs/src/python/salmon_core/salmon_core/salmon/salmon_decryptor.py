@@ -27,6 +27,7 @@ import math
 from concurrent.futures import ProcessPoolExecutor, ThreadPoolExecutor
 from multiprocessing import shared_memory
 from multiprocessing.shared_memory import SharedMemory
+import sys
 
 from salmon_core.streams.memory_stream import MemoryStream
 from salmon_core.streams.random_access_stream import RandomAccessStream
@@ -132,7 +133,7 @@ def decrypt_data(input_stream: RandomAccessStream, start: int, count: int, out_d
             total_chunk_bytes_read += bytes_read
         output_stream.flush()
     except (IOError, SalmonSecurityException, IntegrityException) as ex:
-        print(ex)
+        print(ex, file=sys.stderr)
         raise SalmonSecurityException("Could not decrypt data") from ex
     finally:
         if input_stream is not None:
@@ -321,7 +322,7 @@ class SalmonDecryptor:
                 # catch any errors within the children processes
                 f.result()
             except Exception as ex1:
-                print(ex1)
+                print(ex1, file=sys.stderr)
                 ex = ex1
                 # cancel all tasks
                 shm_cancel.buf[0] = 1

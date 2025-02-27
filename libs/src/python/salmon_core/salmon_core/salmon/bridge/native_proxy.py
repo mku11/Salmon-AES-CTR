@@ -27,6 +27,7 @@ import ctypes
 from salmon_core.bridge.inative_proxy import INativeProxy
 
 from typeguard import typechecked
+import sys
 
 
 @typechecked
@@ -81,7 +82,7 @@ class NativeProxy(INativeProxy):
             NativeProxy.__transform.restype = ctypes.c_int
 
         except Exception as ex:
-            print(ex)
+            print(ex, file=sys.stderr)
 
         NativeProxy.__loaded = True
 

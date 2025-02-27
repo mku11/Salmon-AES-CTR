@@ -26,6 +26,7 @@ from io import BufferedIOBase
 
 from typeguard import typechecked
 from wrapt import synchronized
+import sys
 
 from salmon_core.convert.bit_converter import BitConverter
 from salmon_fs.file.ireal_file import IRealFile
@@ -168,7 +169,7 @@ class SalmonFileSequencer(INonceSequencer):
             while (bytes_read := stream.readinto(buffer)) > 0:
                 output_stream.write(buffer, 0, bytes_read)
         except IOError as ex:
-            print(ex)
+            print(ex, file=sys.stderr)
             raise SequenceException("Could not get XML Contents") from ex
         finally:
             if stream is not None:
@@ -233,7 +234,7 @@ class SalmonFileSequencer(INonceSequencer):
             contents: str = self.__serializer.serialize(sequences)
             self._save_contents(contents)
         except Exception as ex:
-            print(ex)
+            print(ex, file=sys.stderr)
             raise SequenceException("Could not serialize sequences") from ex
 
     @synchronized
@@ -254,7 +255,7 @@ class SalmonFileSequencer(INonceSequencer):
                 output_stream.write(buffer, 0, bytes_read)
 
         except Exception as ex:
-            print(ex)
+            print(ex, file=sys.stderr)
             raise SequenceException("Could not save sequence file") from ex
         finally:
             if output_stream is not None:

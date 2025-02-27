@@ -25,6 +25,7 @@ SOFTWARE.
 from __future__ import annotations
 
 from typeguard import typechecked
+import sys
 
 from salmon_fs.salmon.salmon_file import SalmonFile
 from salmon_fs.utils.file_utils import FileUtils
@@ -135,7 +136,7 @@ class SalmonFileComparators:
         try:
             return salmon_file.get_base_name()
         except Exception as ex:
-            print(ex)
+            print(ex, file=sys.stderr)
 
         return ""
 
@@ -151,7 +152,7 @@ class SalmonFileComparators:
                 return salmon_file.get_base_name()
             return FileUtils.get_extension_from_file_name(salmon_file.get_base_name()).lower()
         except Exception as ex:
-            print(ex)
+            print(ex, file=sys.stderr)
 
         return ""
 
@@ -170,7 +171,7 @@ class SalmonFileComparators:
             # so instead we sort on the real file size
             return salmon_file.get_real_file().length()
         except Exception as ex:
-            print(ex)
+            print(ex, file=sys.stderr)
 
         return 0
 
@@ -184,7 +185,7 @@ class SalmonFileComparators:
         try:
             return salmon_file.get_last_date_time_modified()
         except Exception as ex:
-            print(ex)
+            print(ex, file=sys.stderr)
 
         return 0
 

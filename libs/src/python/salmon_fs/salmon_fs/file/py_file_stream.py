@@ -25,6 +25,7 @@ SOFTWARE.
 from mmap import mmap
 from typing import BinaryIO
 from typeguard import typechecked
+import sys
 
 from salmon_fs.file.ireal_file import IRealFile
 from salmon_core.streams.random_access_stream import RandomAccessStream
@@ -178,7 +179,7 @@ class PyFileStream(RandomAccessStream):
         try:
             self.__mm.flush() if self.__mm else self.__raf.flush()
         except Exception as ex:
-            print(ex)
+            print(ex, file=sys.stderr)
 
     def close(self):
         """

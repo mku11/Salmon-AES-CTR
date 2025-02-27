@@ -88,7 +88,7 @@ class SalmonCoreTests(TestCase):
         try:
             SalmonTextEncryptor.encrypt_string(plain_text, None, SalmonCoreTestHelper.TEST_NONCE_BYTES, True)
         except (TypeCheckError, SalmonSecurityException) as ex:
-            print(ex)
+            print(ex, file=sys.stderr)
             caught = True
 
         self.assertTrue(caught)
@@ -100,10 +100,10 @@ class SalmonCoreTests(TestCase):
         try:
             SalmonTextEncryptor.encrypt_string(plain_text, SalmonCoreTestHelper.TEST_KEY_BYTES, None, True)
         except (TypeCheckError, SalmonSecurityException) as ex:
-            print(ex)
+            print(ex, file=sys.stderr)
             caught = True
         except Exception as e:
-            print(e)
+            print(e, file=sys.stderr)
 
         self.assertTrue(caught)
 
@@ -116,7 +116,7 @@ class SalmonCoreTests(TestCase):
                                                           SalmonCoreTestHelper.TEST_NONCE_BYTES, False)
             SalmonTextDecryptor.decrypt_string(enc_text, SalmonCoreTestHelper.TEST_KEY_BYTES, None, False)
         except Exception as ex:
-            print(ex)
+            print(ex, file=sys.stderr)
             caught = True
 
         self.assertTrue(caught)
@@ -130,7 +130,7 @@ class SalmonCoreTests(TestCase):
                                                           SalmonCoreTestHelper.TEST_NONCE_BYTES, True)
             SalmonTextDecryptor.decrypt_string(enc_text, None, SalmonCoreTestHelper.TEST_NONCE_BYTES, True)
         except Exception as ex:
-            print(ex)
+            print(ex, file=sys.stderr)
             caught = True
 
         self.assertTrue(caught)

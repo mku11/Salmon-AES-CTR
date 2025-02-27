@@ -27,6 +27,7 @@ from __future__ import annotations
 from abc import ABC
 from enum import Enum
 from typing import Callable, Any
+import sys
 
 from typeguard import typechecked
 
@@ -117,7 +118,7 @@ class FileSearcher:
                 if len(term) > 0 and term.lower() in filename.lower():
                     count += 1
             except Exception as exception:
-                print(exception)
+                print(exception, file=sys.stderr)
         if any or count == len(terms):
             return count
         return 0
@@ -152,4 +153,4 @@ class FileSearcher:
                         if on_result_found is not None:
                             on_result_found.on_result_found(file)
                 except Exception as ex:
-                    print(ex)
+                    print(ex, file=sys.stderr)

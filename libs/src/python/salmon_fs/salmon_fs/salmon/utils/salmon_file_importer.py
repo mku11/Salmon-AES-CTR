@@ -27,6 +27,7 @@ from __future__ import annotations
 import concurrent
 import math
 import time
+import sys
 from concurrent.futures import ProcessPoolExecutor, Future, ThreadPoolExecutor
 from multiprocessing import shared_memory
 from multiprocessing.shared_memory import SharedMemory
@@ -133,7 +134,7 @@ def import_file_part(file_to_import: IRealFile, salmon_file: SalmonFile, start: 
             if on_progress:
                 on_progress(total_part_bytes_read, count)
     except Exception as ex:
-        print(ex)
+        print(ex, file=sys.stderr)
         raise ex
     finally:
         if target_stream is not None:
@@ -295,7 +296,7 @@ class SalmonFileImporter:
             if self.__lastException is not None:
                 raise self.__lastException
         except Exception as ex:
-            print(ex)
+            print(ex, file=sys.stderr)
             self.__failed = True
             self.__stopped[0] = True
             raise ex
@@ -355,7 +356,7 @@ class SalmonFileImporter:
                 # catch any errors within the children processes
                 f.result()
             except Exception as ex1:
-                print(ex1)
+                print(ex1, file=sys.stderr)
                 self.__lastException = ex1
                 self.__failed = True
                 # cancel all tasks

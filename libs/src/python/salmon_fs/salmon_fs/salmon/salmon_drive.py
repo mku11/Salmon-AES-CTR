@@ -25,6 +25,7 @@ SOFTWARE.
 from __future__ import annotations
 
 from abc import ABC
+import sys
 
 from typeguard import typechecked
 from typing import Type
@@ -348,7 +349,7 @@ class SalmonDrive(VirtualDrive, ABC):
         try:
             salmon_config = self.__get_drive_config()
         except Exception as ex:
-            print(ex)
+            print(ex, file=sys.stderr)
             return False
 
         return salmon_config is not None
@@ -382,7 +383,7 @@ class SalmonDrive(VirtualDrive, ABC):
                 virtual_root_real_file = self.get_real_root().create_directory(
                     SalmonDrive.get_virtual_drive_directory_name())
             except Exception as ex:
-                print(ex)
+                print(ex, file=sys.stderr)
 
         self.__virtualRoot = self.get_file(virtual_root_real_file)
 

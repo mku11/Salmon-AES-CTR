@@ -26,7 +26,7 @@ from __future__ import annotations
 
 import xml.etree.ElementTree as Et
 from xml.dom import minidom
-
+import sys
 from typeguard import typechecked
 
 from salmon_core.salmon.encode.salmon_encoder import SalmonEncoder
@@ -67,7 +67,7 @@ class SalmonSequenceSerializer(INonceSequenceSerializer):
                 if value.get_max_nonce() is not None:
                     drive.attrib["maxNonce"] = SalmonEncoder.get_base64().encode(value.get_max_nonce())
         except Exception as ex:
-            print(ex)
+            print(ex, file=sys.stderr)
             raise SequenceException("Could not serialize sequences") from ex
         return minidom.parseString(Et.tostring(tree.getroot(), encoding="utf-8"))\
             .toprettyxml(indent="    ", encoding="utf-8").decode("utf-8")
@@ -105,6 +105,6 @@ class SalmonSequenceSerializer(INonceSequenceSerializer):
                     configs[drive_id] = sequence
 
         except IOError as ex:
-            print(ex)
+            print(ex, file=sys.stderr)
             raise SequenceException("Could not deserialize sequences") from ex
         return configs

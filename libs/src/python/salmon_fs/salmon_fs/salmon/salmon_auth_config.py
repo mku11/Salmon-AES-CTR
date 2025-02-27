@@ -25,6 +25,7 @@ SOFTWARE.
 from __future__ import annotations
 
 from typeguard import typechecked
+import sys
 
 from salmon_fs.file.ireal_file import IRealFile
 from salmon_core.streams.memory_stream import MemoryStream
@@ -146,7 +147,7 @@ class SalmonAuthConfig:
             buffer[0: len(content)] = content[0:len(content)]
             stream.write(buffer, 0, len(content))
         except Exception as ex:
-            print(ex)
+            print(ex, file=sys.stderr)
             raise SalmonAuthException("Could not write auth config") from ex
         finally:
             ms.close()
