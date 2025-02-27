@@ -20,22 +20,23 @@ password = "test123"
 
 SalmonStream.set_aes_provider_type(ProviderType.Default)
 
-files_to_import = [PyFile("./data/file.txt")]
+if __name__ == '__main__':
+    files_to_import = [PyFile("./data/aa.mp4")]
 
-v_dir = PyFile("./output")
-if not v_dir.exists():
-    v_dir.mkdir()
-export_dir = v_dir.get_child("export")
-if not export_dir.exists():
-    export_dir.mkdir()
+    v_dir = PyFile("./output")
+    if not v_dir.exists():
+        v_dir.mkdir()
+    export_dir = v_dir.get_child("export")
+    if not export_dir.exists():
+        export_dir.mkdir()
 
-drive_dir = PyWSFile(drive_path, ws_service_path, Credentials(ws_user, ws_password))
-if not drive_dir.exists():
-    drive_dir.mkdir()
+    drive_dir = PyWSFile(drive_path, ws_service_path, Credentials(ws_user, ws_password))
+    if not drive_dir.exists():
+        drive_dir.mkdir()
 
-DriveSample.create_drive(drive_dir, password)
-ws_drive = DriveSample.open_drive(drive_dir, password)
-DriveSample.import_files(ws_drive, files_to_import)
-DriveSample.list_files(ws_drive)
-DriveSample.export_files(ws_drive, export_dir)
-DriveSample.close_drive(ws_drive)
+    DriveSample.create_drive(drive_dir, password)
+    ws_drive = DriveSample.open_drive(drive_dir, password)
+    DriveSample.import_files(ws_drive, files_to_import)
+    DriveSample.list_files(ws_drive)
+    DriveSample.export_files(ws_drive, export_dir)
+    DriveSample.close_drive(ws_drive)

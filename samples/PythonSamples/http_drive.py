@@ -16,15 +16,16 @@ threads = 2
 
 SalmonStream.set_aes_provider_type(ProviderType.Default)
 
-v_dir = PyFile("./output")
-if not v_dir.exists():
-    v_dir.mkdir()
-export_dir = v_dir.get_child("export")
-if not export_dir.exists():
-    export_dir.mkdir()
+if __name__ == '__main__':
+    v_dir = PyFile("./output")
+    if not v_dir.exists():
+        v_dir.mkdir()
+    export_dir = v_dir.get_child("export")
+    if not export_dir.exists():
+        export_dir.mkdir()
 
-http_dir = PyHttpFile(http_drive_url)
-http_drive = DriveSample.open_drive(http_dir, password)
-DriveSample.list_files(http_drive)
-DriveSample.export_files(http_drive, export_dir, threads)
-DriveSample.close_drive(http_drive)
+    http_dir = PyHttpFile(http_drive_url)
+    http_drive = DriveSample.open_drive(http_dir, password)
+    DriveSample.list_files(http_drive)
+    DriveSample.export_files(http_drive, export_dir, threads)
+    DriveSample.close_drive(http_drive)
