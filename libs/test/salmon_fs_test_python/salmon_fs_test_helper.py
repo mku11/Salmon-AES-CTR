@@ -898,7 +898,7 @@ class SalmonFSTestHelper:
             nonce = sequencer.next_nonce("AAAA")
             SalmonFSTestHelper.testCase.assertEqual(5, BitConverter.to_long(nonce, 0, 8))
         except SalmonRangeExceededException as ex:
-            print(ex)
+            print(ex, file=sys.stderr)
             caught = True
         SalmonFSTestHelper.testCase.assertTrue(caught)
 
@@ -1007,7 +1007,7 @@ class SalmonFSTestHelper:
     @staticmethod
     def export_files(files: list[SalmonFile], v_dir: IRealFile, threads: int = 1):
         buffer_size = 256 * 1024
-        commander = SalmonFileCommander(buffer_size, buffer_size, threads)
+        commander = SalmonFileCommander(buffer_size, buffer_size, threads, multi_cpu=SalmonFSTestHelper.ENABLE_MULTI_CPU)
 
         hash_pre_export = []
         for file in files:
@@ -1021,11 +1021,11 @@ class SalmonFSTestHelper:
                       + str(task_progress.get_processed_bytes()) + "/" + str(task_progress.get_total_bytes())
                       + " bytes")
             except Exception as e:
-                print(e)
+                print(e, file=sys.stderr)
 
         def on_failed(sfile: SalmonFile, ex: Exception):
             # file failed to import
-            print(ex)
+            print(ex, file=sys.stderr)
             print("export failed: " + sfile.get_base_name() + "\n" + str(ex))
 
         # export files
