@@ -68,7 +68,7 @@ class DriveSample:
     @staticmethod
     def export_files(drive, v_dir, threads=1):
         buffer_size = 256 * 1024
-        commander = SalmonFileCommander(buffer_size, buffer_size, threads)
+        commander = SalmonFileCommander(buffer_size, buffer_size, threads, True)
 
         def on_progress(task_progress: SalmonFileCommander.SalmonFileTaskProgress):
             try:
@@ -79,7 +79,7 @@ class DriveSample:
                 print(e, file=sys.stderr)
 
         def on_fail(file, ex):
-            print("export failed: " + file.get_base_name() + "\n" + ex, file=sys.stderr)
+            print("export failed: " + file.get_base_name() + "\n" + str(ex), file=sys.stderr)
 
         # export all files
         files: list[SalmonFile] = drive.get_root().list_files()

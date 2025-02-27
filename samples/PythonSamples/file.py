@@ -4,6 +4,8 @@
 # python -O file.py
 
 from salmon_core.salmon.salmon_generator import SalmonGenerator
+from salmon_core.salmon.streams.salmon_stream import SalmonStream
+from salmon_core.salmon.streams.salmon_stream import ProviderType
 from salmon_fs.file.ireal_file import IRealFile
 from salmon_fs.file.py_file import PyFile
 
@@ -13,6 +15,8 @@ from samples.samples_common import get_key_from_password
 password = "test123"
 text = "This is a plain text that will be encrypted"
 integrity = True
+
+SalmonStream.set_aes_provider_type(ProviderType.Default)
 
 # generate an encryption key from the text password
 key = get_key_from_password(password)

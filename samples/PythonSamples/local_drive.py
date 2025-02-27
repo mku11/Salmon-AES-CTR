@@ -5,12 +5,16 @@
 
 import time
 
+from salmon_core.salmon.streams.salmon_stream import SalmonStream
+from salmon_core.salmon.streams.salmon_stream import ProviderType
 from salmon_fs.file.py_file import PyFile
 
 from samples.drive_sample import DriveSample
 
 password = "test123"
 threads = 2
+
+SalmonStream.set_aes_provider_type(ProviderType.Default)
 
 # directories and files
 v_dir = PyFile("./output")

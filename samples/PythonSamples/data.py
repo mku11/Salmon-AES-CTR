@@ -4,6 +4,8 @@
 # python -O data.py
 
 from salmon_core.salmon.salmon_generator import SalmonGenerator
+from salmon_core.salmon.streams.salmon_stream import SalmonStream
+from salmon_core.salmon.streams.salmon_stream import ProviderType
 
 from samples.data_sample import DataSample
 from samples.samples_common import get_key_from_password, generate_random_data
@@ -12,6 +14,8 @@ password = "test123"
 size = 8 * 1024 * 1024
 threads = 1
 integrity = True
+
+SalmonStream.set_aes_provider_type(ProviderType.Default)
 
 # generate a key
 print("generating keys and random data...")

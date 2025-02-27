@@ -5,6 +5,8 @@
 
 import time
 
+from salmon_core.salmon.streams.salmon_stream import SalmonStream
+from salmon_core.salmon.streams.salmon_stream import ProviderType
 from salmon_fs.file.py_file import PyFile
 from salmon_fs.file.py_ws_file import PyWSFile, Credentials
 
@@ -15,6 +17,8 @@ ws_user = "user"
 ws_password = "password"
 drive_path = "/example_drive_" + str(round(time.time() * 1000))
 password = "test123"
+
+SalmonStream.set_aes_provider_type(ProviderType.Default)
 
 files_to_import = [PyFile("./data/file.txt")]
 
