@@ -305,6 +305,13 @@ export class JsHttpFile implements IRealFile {
     public async mkdir(): Promise<boolean> {
         throw new Error("Unsupported Operation, readonly filesystem");
     }
+	
+	/**
+     * Reset cached properties
+     */
+    public reset() {
+		this.response = null;
+	}
 
     /**
      * Returns a string representation of this object

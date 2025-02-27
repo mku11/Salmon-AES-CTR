@@ -291,6 +291,13 @@ export class JsNodeFile implements IRealFile {
         await mkdir(this.#filePath, { recursive: true });
         return await this.exists();
     }
+	
+	/**
+     * Reset cached properties
+     */
+    public reset() {
+		
+	}
 
     /**
      * Returns a string representation of this object

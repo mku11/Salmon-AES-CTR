@@ -353,6 +353,7 @@ export class JsWSFileStream extends RandomAccessStream {
         
         this.buffer = null;
         this.bufferPosition = 0;
+		this.file.reset();
     }
     
     private setServiceAuth(headers: Headers) {

@@ -237,6 +237,13 @@ export class JsLocalStorageFile implements IRealFile {
         // no-op
         return true;
     }
+	
+	/**
+     * Reset cached properties
+     */
+    public reset() {
+		
+	}
 
     /**
      * Returns a string representation of this object

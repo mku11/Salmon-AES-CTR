@@ -192,6 +192,11 @@ export interface IRealFile {
      * @return {Promise<boolean>}
      */
     mkdir(): Promise<boolean>;
+	
+	/**
+     * Reset cached properties
+     */
+    reset(): any;
 
 }
 

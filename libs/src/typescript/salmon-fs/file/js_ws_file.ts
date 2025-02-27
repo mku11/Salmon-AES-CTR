@@ -129,7 +129,7 @@ export class JsWSFile implements IRealFile {
      * @return True if deletion is successful.
      */
     public async delete(): Promise<boolean> {
-		this.response = null;
+		this.reset();
         if(await this.isDirectory()) {
             let files: IRealFile[]  = await this.listFiles();
             for (let file of files) {
@@ -154,6 +154,7 @@ export class JsWSFile implements IRealFile {
         httpResponse = (await fetch(this.#servicePath + "/api/delete", 
             { method: 'DELETE', keepalive: true, body: params, headers: headers }));
         await this.#checkStatus(httpResponse, 200);
+		this.reset();
         return true;
     }
 
@@ -198,7 +199,7 @@ export class JsWSFile implements IRealFile {
      * @throws FileNotFoundException
      */
     public async getInputStream(): Promise<RandomAccessStream> {
-		this.response = null;
+		this.reset();
         let fileStream: JsWSFileStream = new JsWSFileStream(this, "r");
         return fileStream;
     }
@@ -209,7 +210,7 @@ export class JsWSFile implements IRealFile {
      * @throws FileNotFoundException
      */
     public async getOutputStream(): Promise<RandomAccessStream> {
-		this.response = null;
+		this.reset();
         let fileStream: JsWSFileStream = new JsWSFileStream(this, "rw");
         return fileStream;
     }
@@ -345,7 +346,7 @@ export class JsWSFile implements IRealFile {
                 { method: 'PUT', keepalive: true, body: params, headers: headers }));
             await this.#checkStatus(httpResponse, 200);
             newFile = new JsWSFile((await httpResponse.json()).path, this.#servicePath, this.#credentials);
-			this.response = null;
+			this.reset();
             return newFile;
         }
     }
@@ -380,7 +381,7 @@ export class JsWSFile implements IRealFile {
                 { method: 'POST', keepalive: true, body: params, headers: headers }));
             await this.#checkStatus(httpResponse, 200);
             newFile = new JsWSFile((await httpResponse.json()).path, this.#servicePath, this.#credentials);
-			this.response = null;
+			this.reset();
             return newFile;
         }
     }
@@ -404,7 +405,7 @@ export class JsWSFile implements IRealFile {
      * @return True if successfully renamed.
      */
     public async renameTo(newFilename: string): Promise<boolean> {
-		this.response = null;
+		this.reset();
         let headers: Headers = new Headers();
         this.setDefaultHeaders(headers);
         this.setServiceAuth(headers);
@@ -423,7 +424,7 @@ export class JsWSFile implements IRealFile {
      * @return True if created.
      */
     public async mkdir(): Promise<boolean> {
-		this.response = null;
+		this.reset();
         let headers: Headers = new Headers();
         this.setDefaultHeaders(headers);
         this.setServiceAuth(headers);
@@ -435,6 +436,13 @@ export class JsWSFile implements IRealFile {
         await this.#checkStatus(httpResponse, 200);
         return true;
     }
+	
+	/**
+     * Reset cached properties
+     */
+    public reset() {
+		this.response = null;
+	}
 
     private getChildPath(filename: string) {
         let nFilepath = this.#filePath;

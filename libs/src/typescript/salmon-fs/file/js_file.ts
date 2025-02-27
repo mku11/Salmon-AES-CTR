@@ -363,6 +363,13 @@ export class JsFile implements IRealFile {
         this.#fileHandle = dir.getPath();
         return await dir.exists();
     }
+	
+	/**
+     * Reset cached properties
+     */
+    public reset() {
+		
+	}
 
     /**
      * Returns a string representation of this object
