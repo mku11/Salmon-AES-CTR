@@ -269,6 +269,12 @@ class PyFile(IRealFile):
         os.makedirs(self.__file_path)
         return self.exists()
 
+    def reset(self):
+        """
+        Clear cached properties
+        """
+        pass
+        
     def __str__(self) -> str:
         """
         Returns a string representation of this object

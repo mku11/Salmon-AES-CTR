@@ -224,6 +224,12 @@ class IRealFile(ABC):
         :return: True if directory created
         """
         pass
+        
+    def reset(self):
+        """
+        Clear cached properties
+        """
+        pass
 
     @staticmethod
     def copy_file_contents(src: IRealFile, dest: IRealFile, delete: bool = False,
