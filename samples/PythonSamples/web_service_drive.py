@@ -21,7 +21,7 @@ password = "test123"
 SalmonStream.set_aes_provider_type(ProviderType.Default)
 
 if __name__ == '__main__':
-    files_to_import = [PyFile("./data/aa.mp4")]
+    files_to_import = [PyFile("./data/file.txt")]
 
     v_dir = PyFile("./output")
     if not v_dir.exists():
