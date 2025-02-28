@@ -451,7 +451,7 @@ public class AndroidFile implements IRealFile {
 	/**
      * Clear cache properties
      */
-    public boolean reset() {
+    public void reset() {
 		
     }
 
