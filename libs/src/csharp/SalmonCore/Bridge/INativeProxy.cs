@@ -25,29 +25,28 @@ SOFTWARE.
 namespace Mku.Bridge;
 
 /// <summary>
-/// Proxy interface for use with native libraries for different platforms and operating systems.
+///  Interface to native libraries that provide AES-256 encryption in CTR mode.
 /// </summary>
 public interface INativeProxy
 {
     /// <summary>
-    ///  Proxy Init the native code with AES implementation, and hash length options.
+    ///  Initializes the native library with the specified AES implementation.
     /// </summary>
-    ///  <param name="aesImpl">       The AES implementation code.</param>
+    ///  <param name="aesImpl">The AES implementation, see {@link Mku.Salmon.Streams.ProviderType} for possible values</param>
     public void SalmonInit(int aesImpl);
 
     /// <summary>
-    ///  Proxy Key schedule algorithm for expanding the 32 byte key to 240 bytes required
-    ///  for AES 256.
+    ///  Expands the specified AES encryption key.
 	/// </summary>
-	///  <param name="key">The AES256 key (32 bytes).</param>
-    ///  <param name="expandedKey">The expanded key (240 bytes).</param>
+	///  <param name="key">The AES-256 encryption key (32 bytes)</param>
+    ///  <param name="expandedKey">The expanded key (240 bytes)</param>
     public void SalmonExpandKey(byte[] key, byte[] expandedKey);
 
     /// <summary>
-    ///  Proxy Transform the input byte array using AES 256 encryption or decryption mode.
+    ///  Transforms data using CTR mode which is symmetric so you should use it for both encryption and decryption.
 	/// </summary>
-	///  <param name="key">The key</param>
-    ///  <param name="counter">The counter</param>
+	///  <param name="key">The AES-256 encryption key (32 bytes)</param>
+    ///  <param name="counter">The counter (16 bytes)</param>
     ///  <param name="srcBuffer">The source buffer</param>
     ///  <param name="srcOffset">The source offset</param>
     ///  <param name="destBuffer">The destination buffer</param>

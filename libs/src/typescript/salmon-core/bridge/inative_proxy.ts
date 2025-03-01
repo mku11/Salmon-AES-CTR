@@ -23,27 +23,26 @@ SOFTWARE.
 */
 
 /**
- * Proxy interface for use with native libraries.
+ * Interface to native libraries that provide AES-256 encryption in CTR mode.
  */
 export interface INativeProxy {
     /**
-     * Proxy Init the native code with AES implementation, and hash length options.
+     * Initializes the native library with the specified AES implementation.
      * @param {number} aesImpl
      */
     init(aesImpl: number): void;
 
     /**
-     * Proxy Key schedule algorithm for expanding the 32 byte key to 240 bytes required
-     * for AES 256.
-     * @param {Uint8Array} key
+     * Expands the specified AES encryption key.
+     * @param {Uint8Array} The AES-256 encryption key (32 bytes)
      * @param {Uint8Array} expandedKey
      */
     expandKey(key: Uint8Array, expandedKey: Uint8Array): void;
 
     /**
-     * Proxy Transform the input byte array using AES-256 CTR mode
-     * @param {Uint8Array} key
-     * @param {number} counter
+     * Transforms data using CTR mode which is symmetric so you should use it for both encryption and decryption.
+     * @param {Uint8Array} The AES-256 encryption key (32 bytes)
+     * @param {number} The counter (16 bytes)
      * @param {Uint8Array} srcBuffer
      * @param {number} srcOffset
      * @param {Uint8Array} destBuffer

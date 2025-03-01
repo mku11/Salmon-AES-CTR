@@ -30,23 +30,22 @@ from typeguard import typechecked
 @typechecked
 class INativeProxy(ABC):
     """
-    Proxy interface for use with native libraries for different platforms and operating systems.
+    Interface to native libraries that provide AES-256 encryption in CTR mode.
     """
 
     @abstractmethod
     def salmon_init(self, aes_impl: int):
         """
-        Proxy Init the native code with AES implementation, and hash length options.
+        Initializes the native library with the specified AES implementation.
         :param aes_impl:         """
         pass
 
     @abstractmethod
     def salmon_expand_key(self, key: bytearray, expanded_key: bytearray):
         """
-        Proxy Key schedule algorithm for expanding the 32 byte key to 240 bytes required
-        for AES 256.
-        :param key: The key
-        :param expanded_key: The expanded key
+        Expands the specified AES encryption key.
+        :param key: The AES-256 encryption key (32 bytes)
+        :param expanded_key: The expanded key (240 bytes)
         """
         pass
 
@@ -55,9 +54,9 @@ class INativeProxy(ABC):
                          src_buffer: bytearray, src_offset: int,
                          dest_buffer: bytearray, dest_offset: int, count: int) -> int:
         """
-        Proxy Transform the input byte array using AES 256 encryption or decryption mode.
-        :param key: The encryption key
-        :param counter: The counter
+        Transforms data using CTR mode which is symmetric so you should use it for both encryption and decryption.
+        :param key: The AES-256 encryption key (32 bytes)
+        :param counter: The counter (16 bytes)
         :param src_buffer: The source buffer
         :param src_offset: The source buffer offset
         :param dest_buffer: The destination buffer

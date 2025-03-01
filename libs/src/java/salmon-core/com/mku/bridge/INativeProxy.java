@@ -24,34 +24,33 @@ SOFTWARE.
 */
 
 /**
- * Proxy interface for use with native libraries for different platforms and operating systems.
+ * Interface to native libraries that provide AES-256 encryption in CTR mode.
  */
 public interface INativeProxy
 {
     /**
-     * Proxy Init the native code with AES implementation, and hash length options.
-     * @param aesImpl Aes Implementation
+     * Initializes the native library with the specified AES implementation.
+     * @param aesImpl The AES implementation, see {@link com.mku.salmon.streams.ProviderType} for possible values
      */
     void salmonInit(int aesImpl);
 
     /**
-     * Proxy Key schedule algorithm for expanding the 32 byte key to 240 bytes required
-     * for AES 256.
-     * @param key The key
-     * @param expandedKey The expanded key
+     * Expands the specified AES encryption key.
+     * @param key The AES-256 encryption key (32 bytes)
+     * @param expandedKey The expanded key (240 bytes)
      */
     void salmonExpandKey(byte[] key, byte[] expandedKey);
 
     /**
-     * Proxy Transform the input byte array using AES-256 CTR mode
-     * @param key The key
-     * @param counter The counter
+     * Transforms data using CTR mode which is symmetric so you should use it for both encryption and decryption.
+     * @param key The AES-256 encryption key (32 bytes)
+     * @param counter The counter (16 bytes)
      * @param srcBuffer The source byte array.
      * @param srcOffset The source byte offset.
      * @param destBuffer The destination byte array.
      * @param destOffset The destination byte offset.
      * @param count The count of bytes to transform.
-     * @return The number of bytes that were transformed.
+     * @return The number of bytes transformed.
      */
     int salmonTransform(byte[] key, byte[] counter,
                                byte[] srcBuffer, int srcOffset,
