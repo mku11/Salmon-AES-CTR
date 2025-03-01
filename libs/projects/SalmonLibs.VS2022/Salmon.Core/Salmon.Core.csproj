@@ -20,7 +20,8 @@
     <DocumentationFile></DocumentationFile>
     <ImplicitUsings>false</ImplicitUsings>
     <LangVersion>10</LangVersion>
-    <Version>2.2.0</Version>
+	<SalmonVersion>2.3.0</SalmonVersion>
+    <Version>$(SalmonVersion)</Version>
     <Configurations>Debug;Release;DebugGPU;ReleaseGPU</Configurations>
   </PropertyGroup>
 

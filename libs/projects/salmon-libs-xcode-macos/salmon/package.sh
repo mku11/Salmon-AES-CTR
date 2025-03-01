@@ -1,4 +1,5 @@
 #!/bin/bash
+SALMON_VERSION=2.3.0
 SRC_ROOT=../../../src/c
 SALMON_ROOT=$SRC_ROOT/salmon
 SALMON_JNI_ROOT=$SRC_ROOT/salmon-jni
@@ -10,11 +11,10 @@ SALMON_JNI_INCLUDE=$SALMON_JNI_ROOT/include
 
 LIB_DIR=./DerivedData/salmon/Build/Products/Release
 
-VERSION=2.2.0
 OS=macos
 PACKAGES_DIR=packages
 ARCH=x86_64
-PACKAGE_NAME=salmon-$OS-$ARCH.$VERSION
+PACKAGE_NAME=salmon-$OS-$ARCH.$SALMON_VERSION
 PACKAGE_FILE=$PACKAGE_NAME.dmg
 
 mkdir -p $PACKAGES_DIR/$PACKAGE_NAME

@@ -20,7 +20,8 @@
     <PackAsTool>False</PackAsTool>
     <PackageOutputPath>..\..\..\..\output\nuget\releases</PackageOutputPath>
     <GenerateDocumentationFile>True</GenerateDocumentationFile>
-    <Version>2.2.0</Version>
+    <SalmonVersion>2.3.0</SalmonVersion>
+    <Version>$(SalmonVersion)</Version>
     <Configurations>Debug;Release;DebugGPU;ReleaseGPU</Configurations>
   </PropertyGroup>
 

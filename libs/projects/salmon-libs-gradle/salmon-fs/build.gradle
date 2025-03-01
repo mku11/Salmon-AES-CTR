@@ -5,7 +5,7 @@ plugins {
 
 group 'com.mku.salmon'
 description = 'Salmon AES256 CTR filesystem encryption library'
-version '2.2.0'
+version '2.3.0'
 
 repositories {
     mavenCentral()

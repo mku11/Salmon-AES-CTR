@@ -1,4 +1,5 @@
 # salmon makefile
+SALMON_VERSION=2.3.0
 SRC_ROOT=../../src/c
 SALMON_ROOT=$(SRC_ROOT)/salmon
 SALMON_JNI_ROOT=$(SRC_ROOT)/salmon-jni
@@ -36,9 +37,8 @@ else
   CFLAGS+=-maes
 endif
 
-VERSION=2.2.0
 PACKAGES_DIR=packages
-PACKAGE_NAME=salmon-$(PLATFORM)-$(ARCH).$(VERSION)
+PACKAGE_NAME=salmon-$(PLATFORM)-$(ARCH).$(SALMON_VERSION)
 PACKAGE_FILE=$(PACKAGE_NAME).tar.gz
 OUTPUT_DIR=$(OUTPUT_ROOT)/$(PLATFORM)
 ifeq ($(PLATFORM),win)
