@@ -88,19 +88,20 @@ export class SalmonFSTestHelper {
     static TEST_EXPORT_AUTH_FILENAME = "export.slma";
 
     // Web service
-    static WS_SERVER_URL = "http://localhost:8080";
-	// static WS_SERVER_URL = "https://localhost:8443"; // for testing from the Web browser
+	static WS_SERVER_DEFAULT_URL = "http://localhost:8080";
+    // const WS_SERVER_DEFAULT_URL = "https://localhost:8443"; // for testing from the Web browser
+	static WS_SERVER_URL = SalmonFSTestHelper.WS_SERVER_DEFAULT_URL;
     static WS_TEST_DIRNAME = "ws";
     static credentials = new Credentials("user", "password");
     
     // HTTP server (Read-only)
-    static HTTP_SERVER_URL = "http://localhost";
-    static HTTP_SERVER_VIRTUAL_URL = SalmonFSTestHelper.HTTP_SERVER_URL + "/saltest";
+	static HTTP_SERVER_DEFAULT_URL = "http://localhost";
+    static HTTP_SERVER_URL = SalmonFSTestHelper.HTTP_SERVER_DEFAULT_URL;
     static HTTP_TEST_DIRNAME = "httpserv";
     static HTTP_VAULT_DIRNAME = "vault";
-    static HTTP_VAULT_DIR_URL = SalmonFSTestHelper.HTTP_SERVER_VIRTUAL_URL 
-        + "/" + SalmonFSTestHelper.HTTP_TEST_DIRNAME + "/" + SalmonFSTestHelper.HTTP_VAULT_DIRNAME; 
-    static HTTP_VAULT_FILES_DIR_URL = SalmonFSTestHelper.HTTP_VAULT_DIR_URL + "/fs"; 
+	static HTTP_SERVER_VIRTUAL_URL;
+    static HTTP_VAULT_DIR_URL;
+    static HTTP_VAULT_FILES_DIR_URL;
 
     // performance
     static ENC_IMPORT_BUFFER_SIZE = 512 * 1024;
@@ -164,6 +165,11 @@ export class SalmonFSTestHelper {
                 await SalmonFSTestHelper.TEST_ROOT_DIR.mkdir();
         }
 
+		SalmonFSTestHelper.HTTP_SERVER_VIRTUAL_URL = SalmonFSTestHelper.HTTP_SERVER_URL + "/saltest";
+		SalmonFSTestHelper.HTTP_VAULT_DIR_URL = SalmonFSTestHelper.HTTP_SERVER_VIRTUAL_URL 
+			+ "/" + SalmonFSTestHelper.HTTP_TEST_DIRNAME + "/" + SalmonFSTestHelper.HTTP_VAULT_DIRNAME;
+		SalmonFSTestHelper.HTTP_VAULT_FILES_DIR_URL = SalmonFSTestHelper.HTTP_VAULT_DIR_URL + "/fs"; 
+		
         console.log("setting test path: " + SalmonFSTestHelper.TEST_ROOT_DIR.getAbsolutePath());
         SalmonFSTestHelper.TEST_INPUT_DIR = await SalmonFSTestHelper.createDir(SalmonFSTestHelper.TEST_ROOT_DIR, SalmonFSTestHelper.TEST_INPUT_DIRNAME);
         if(testMode == TestMode.WebService)

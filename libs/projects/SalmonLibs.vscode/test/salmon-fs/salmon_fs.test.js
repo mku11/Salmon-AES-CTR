@@ -48,7 +48,7 @@ function checkParams() {
 describe('salmon-fs', () => {
 	beforeAll(() => {
         checkParams();
-        SalmonFSTestHelper.TEST_IMPORT_FILE = SalmonFSTestHelper.TEST_IMPORT_LARGE_FILE;
+        SalmonFSTestHelper.TEST_IMPORT_FILE = SalmonFSTestHelper.TEST_IMPORT_MEDIUM_FILE;
         // SalmonCoreTestHelper.TEST_ENC_BUFFER_SIZE = 1 * 1024 * 1024;
 		// SalmonCoreTestHelper.TEST_DEC_BUFFER_SIZE = 1 * 1024 * 1024;
 		SalmonCoreTestHelper.TEST_ENC_THREADS = 2;
@@ -519,10 +519,6 @@ describe('salmon-fs', () => {
     });
 
     it('shouldReadFromFileMultithreaded', async () => {
-        if(getTestMode() == TestMode.WebService) {
-            console.log("Skipping test, multithreading for web service files is not supported");
-            return;
-        }
 
         let vaultDir = await SalmonFSTestHelper.generateFolder(SalmonFSTestHelper.TEST_VAULT_DIRNAME);
         let file = SalmonFSTestHelper.TEST_IMPORT_MEDIUM_FILE;

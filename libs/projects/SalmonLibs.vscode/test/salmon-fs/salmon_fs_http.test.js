@@ -29,7 +29,7 @@ import { SalmonDrive } from '../../lib/salmon-fs/salmon/salmon_drive.js';
 import { SalmonCoreTestHelper } from '../salmon-core/salmon_core_test_helper.js';
 import { getTestMode, getTestRunnerMode, SalmonFSTestHelper, TestMode } from './salmon_fs_test_helper.js';
 
-describe('salmon-fs-http', () => {
+describe('salmon-httpfs', () => {
     let oldTestMode = null;
     beforeAll(async () => {
 		oldTestMode = getTestMode();
@@ -38,7 +38,7 @@ describe('salmon-fs-http', () => {
 		// SalmonCoreTestHelper.TEST_ENC_BUFFER_SIZE = 1 * 1024 * 1024;
         // SalmonCoreTestHelper.TEST_DEC_BUFFER_SIZE = 1 * 1024 * 1024;
         
-        SalmonFSTestHelper.TEST_HTTP_FILE = SalmonFSTestHelper.TEST_IMPORT_LARGE_FILE;
+        SalmonFSTestHelper.TEST_HTTP_FILE = SalmonFSTestHelper.TEST_IMPORT_MEDIUM_FILE;
 		
         // SalmonCoreTestHelper.TEST_ENC_BUFFER_SIZE = 1 * 1024 * 1024;
 		// SalmonCoreTestHelper.TEST_DEC_BUFFER_SIZE = 1 * 1024 * 1024;
@@ -125,6 +125,7 @@ describe('salmon-fs-http', () => {
 
     it('shouldListFilesFromDrive', async () => {
         let vaultDir = SalmonFSTestHelper.HTTP_VAULT_DIR;
+		console.log("vaultDir: " + vaultDir.getPath());
         let drive = await JsHttpDrive.open(vaultDir, SalmonCoreTestHelper.TEST_PASSWORD);
         let root = await drive.getRoot();
         let files = await root.listFiles();
