@@ -72,7 +72,6 @@ def export_file(index: int, final_part_size: int, final_running_threads: int, fi
         if shm_total_bytes_read is not None:
             total_bytes_written.release()
             shm_total_bytes_read.close()
-            shm_total_bytes_read.unlink()
 
 
 @typechecked
@@ -141,7 +140,6 @@ def export_file_part(file_to_export: SalmonFile, exported_file: IRealFile, start
 
         if shm_cancel is not None:
             shm_cancel.close()
-            shm_cancel.unlink()
 
 
 @typechecked

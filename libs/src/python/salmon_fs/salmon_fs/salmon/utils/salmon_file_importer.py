@@ -77,8 +77,6 @@ def import_file(index: int, final_part_size: int, final_running_threads: int, fi
         if shm_total_bytes_read is not None:
             total_bytes_read.release()
             shm_total_bytes_read.close()
-            shm_total_bytes_read.unlink()
-
 
 @typechecked
 def import_file_part(file_to_import: IRealFile, salmon_file: SalmonFile, start: int, count: int,
@@ -146,8 +144,6 @@ def import_file_part(file_to_import: IRealFile, salmon_file: SalmonFile, start: 
 
         if shm_cancel is not None:
             shm_cancel.close()
-            shm_cancel.unlink()
-
 
 @typechecked
 class SalmonFileImporter:
