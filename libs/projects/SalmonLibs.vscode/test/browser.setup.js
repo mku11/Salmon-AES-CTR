@@ -5,7 +5,7 @@ import { TestMode, TestRunnerMode, SalmonFSTestHelper } from "./salmon-fs/salmon
 // WebService: to run on a web service drive (browser or node.js)
 // TestRunnerMode:
 // Browser: to run in the browser
-var testMode = TestMode.WebService;
+var testMode = TestMode.Local;
 var testRunnerMode = TestRunnerMode.Browser;
 	
 // browser test runner somewhat compatible with jest assertions
