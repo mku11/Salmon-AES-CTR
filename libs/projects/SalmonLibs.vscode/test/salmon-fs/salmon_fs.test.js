@@ -528,7 +528,8 @@ describe('salmon-fs', () => {
         let fileCommander = new SalmonFileCommander(SalmonFSTestHelper.ENC_IMPORT_BUFFER_SIZE, SalmonFSTestHelper.ENC_EXPORT_BUFFER_SIZE, 2);
         let sfiles = await fileCommander.importFiles([file],
             await drive.getRoot(), false, true, null, null, null);
-
+		fileCommander.close();
+		
         let fileInputStream1 = SalmonFileReadableStream.create(sfiles[0], 4, 4 * 1024 * 1024, 4, 256 * 1024);
         let ms = new MemoryStream();
         await SalmonFSTestHelper.copyReadableStream(fileInputStream1, ms);

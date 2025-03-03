@@ -548,7 +548,8 @@ class SalmonFSTests(TestCase):
                                                                drive.get_root(), False, True,
                                                                lambda task_progress: None, lambda file: "",
                                                                lambda file, ex: None)
-
+        file_commander.close()
+        
         pos: int = abs(random.randint(0, file.length()))
 
         file_input_stream1 = SalmonFileInputStream(sfiles[0], 4, 4 * 1024 * 1024, 4, 256 * 1024)

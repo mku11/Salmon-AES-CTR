@@ -663,7 +663,8 @@ public class SalmonFSTests
         SalmonFileCommander fileCommander = new SalmonFileCommander(SalmonIntegrity.DEFAULT_CHUNK_SIZE, SalmonIntegrity.DEFAULT_CHUNK_SIZE, 2);
         SalmonFile[] sfiles = fileCommander.ImportFiles(new IRealFile[] { file },
                 drive.Root, false, true, null, null, null);
-
+		fileCommander.Close();
+		
         long pos = Math.Abs(new Random().NextInt64() % file.Length);
 
         SalmonFileInputStream fileInputStream1 = new SalmonFileInputStream(sfiles[0], 4, 4 * 1024 * 1024, 1, 256 * 1024);

@@ -560,7 +560,8 @@ public class SalmonFSTests {
         SalmonFileCommander fileCommander = new SalmonFileCommander(SalmonIntegrity.DEFAULT_CHUNK_SIZE, SalmonIntegrity.DEFAULT_CHUNK_SIZE, 2);
         SalmonFile[] sfiles = fileCommander.importFiles(new IRealFile[]{file},
                 drive.getRoot(), false, true, null, null, null);
-
+		fileCommander.close();
+		
         long pos = Math.abs(new Random().nextLong() % file.length());
 
         SalmonFileInputStream fileInputStream1 = new SalmonFileInputStream(sfiles[0], 4, 4 * 1024 * 1024, 4, 256 * 1024);
