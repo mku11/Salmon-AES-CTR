@@ -26,7 +26,7 @@ from __future__ import annotations
 
 import hashlib
 import time
-import sys
+import sys, os
 from enum import Enum
 from unittest import TestCase
 import random
@@ -96,12 +96,14 @@ class SalmonFSTestHelper:
     # Web service
     WS_SERVER_URL = "http://localhost:8080"
     # WS_SERVER_URL = "https://localhost:8443" // for testing from the Web browser
+    WS_SERVER_URL = os.getenv("WS_SERVER_URL", WS_SERVER_URL)
     WS_TEST_DIRNAME = "ws"
 
     credentials = Credentials("user", "password")
 
     # HTTP server(Read - only)
     HTTP_SERVER_URL = "http://localhost"
+    HTTP_SERVER_URL = os.getenv("HTTP_SERVER_URL", HTTP_SERVER_URL)
     HTTP_SERVER_VIRTUAL_URL = HTTP_SERVER_URL + "/saltest"
     HTTP_TEST_DIRNAME = "httpserv"
     HTTP_VAULT_DIRNAME = "vault"
@@ -312,7 +314,7 @@ class SalmonFSTestHelper:
     def generate_folder(name: str, parent: IRealFile | None = None, rand=True):
         if not parent:
             parent: IRealFile = SalmonFSTestHelper.TEST_OUTPUT_DIR
-        dir_name: str = name + ("_" + str(round(time.time() * 1000)) if rand else "")
+        dir_name: str = name + ("_" + str(time.time() * 1000 + random.random()) if rand else "")
         v_dir: IRealFile = parent.get_child(dir_name)
         if not v_dir.exists():
             v_dir.mkdir()
@@ -561,6 +563,7 @@ class SalmonFSTestHelper:
             SalmonFSTestHelper.file_importer.import_file(file_to_import, root_dir, None, False, False, None)
             success = True
         except Exception as ignored:
+            print("failed: " + str(ignored), file=sys.stderr)
             pass
         SalmonFSTestHelper.testCase.assertFalse(success)
         drive.close()

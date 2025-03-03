@@ -55,7 +55,13 @@ class SalmonFSHttpTests(TestCase):
     @classmethod
     def setUpClass(cls):
         SalmonFSHttpTests.old_test_mode = SalmonFSTestHelper.curr_test_mode
-        SalmonFSTestHelper.set_test_params("d:\\tmp\\salmon\\test", TestMode.Http)
+        
+        test_dir: str = os.getenv("TEST_DIR", "d:\\tmp\\salmon\\test")
+        test_mode: TestMode = TestMode.Http
+        print("test_dir", test_dir)
+        print("test_mode", test_mode)
+        
+        SalmonFSTestHelper.set_test_params(test_dir, test_mode)
 
         SalmonFSTestHelper.TEST_HTTP_FILE = SalmonFSTestHelper.TEST_IMPORT_LARGE_FILE
 

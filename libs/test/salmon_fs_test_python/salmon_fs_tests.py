@@ -50,12 +50,17 @@ from salmon_fs.salmon.utils.salmon_file_commander import SalmonFileCommander
 from salmon_core_test_helper import SalmonCoreTestHelper
 from salmon_fs_test_helper import SalmonFSTestHelper, TestMode
 
-
 @typechecked
 class SalmonFSTests(TestCase):
     @classmethod
     def setUpClass(cls):
-        SalmonFSTestHelper.set_test_params("d:\\tmp\\salmon\\test", TestMode.WebService)
+        
+        test_dir: str = os.getenv("TEST_DIR", "d:\\tmp\\salmon\\test")
+        test_mode: TestMode = TestMode[os.getenv("TEST_MODE")] if os.getenv("TEST_MODE") else TestMode.Local
+        print("test_dir", test_dir)
+        print("test_mode", test_mode)
+
+        SalmonFSTestHelper.set_test_params(test_dir, test_mode)
 
         SalmonFSTestHelper.TEST_IMPORT_FILE = SalmonFSTestHelper.TEST_IMPORT_MEDIUM_FILE
 
@@ -68,7 +73,7 @@ class SalmonFSTests(TestCase):
         SalmonFSTestHelper.ENC_IMPORT_THREADS = 2
         SalmonFSTestHelper.ENC_EXPORT_BUFFER_SIZE = 512 * 1024
         SalmonFSTestHelper.ENC_EXPORT_THREADS = 2
-        SalmonFSTestHelper.ENABLE_MULTI_CPU = False
+        SalmonFSTestHelper.ENABLE_MULTI_CPU = True
 
         SalmonFSTestHelper.TEST_FILE_INPUT_STREAM_THREADS = 2
         SalmonFSTestHelper.TEST_USE_FILE_INPUT_STREAM = False
