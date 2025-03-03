@@ -25,25 +25,25 @@ SOFTWARE.
 namespace Mku.Convert;
 
 /// <summary>
-///  C# default implementation of Base64 encoder/decoder.
+///  Base64 encoder/decoder.
 /// </summary>
 public class Base64 : IBase64
 {
     /// <summary>
-    ///  Decode text from Base64 string.
+    ///  Decode a Base64 encoded string into a byte array.
 	/// </summary>
-	///  <param name="text">string to be decoded</param>
-    ///  <returns>Byte array of decoded data.</returns>
+	///  <param name="text">String to be decoded</param>
+    ///  <returns>Byte array of decoded data</returns>
     public byte[] Decode(string text)
     {
         return System.Convert.FromBase64String(text);
     }
 
     /// <summary>
-    ///  Encode byte array to a text string.
+    ///  Encode a byte array into a Base64 encoded string.
 	/// </summary>
 	///  <param name="data">Byte array to be encoded.</param>
-    ///  <returns>string of encoded data.</returns>
+    ///  <returns>String of encoded data.</returns>
     public string Encode(byte[] data)
     {
         return System.Convert.ToBase64String(data);

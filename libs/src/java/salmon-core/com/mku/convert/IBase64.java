@@ -24,22 +24,22 @@ SOFTWARE.
 */
 
 /**
- * Interface for Base64 conversion implementations.
+ * Interface for a Base64 encoder/decoder.
  */
 public interface IBase64 {
     /**
-     * Decode a Base64 string to byte array
+     * Decode a Base64 encoded string into a byte array.
      *
-     * @param text String to be converted.
-     * @return Byte array of converted data.
+     * @param text String to be decoded
+     * @return Byte array of decoded data.
      */
     byte[] decode(String text);
 
     /**
-     * Encode a byte array to Base64 string.
+     * Encode a byte array into a Base64 encoded string.
      *
-     * @param data The byte array to be converted.
-     * @return Text string of converted data.
+     * @param data Byte array to be encoded
+     * @return String of encoded data.
      */
     String encode(byte[] data);
 }

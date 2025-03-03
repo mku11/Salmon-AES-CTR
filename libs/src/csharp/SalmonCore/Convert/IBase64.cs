@@ -25,21 +25,21 @@ SOFTWARE.
 namespace Mku.Convert;
 
 /// <summary>
-///  Interface for Base64 conversion implementations.
+///  Interface for a Base64 encoder/decoder.
 /// </summary>
 public interface IBase64
 {
     /// <summary>
-    ///  Decode a Base64 string to byte array.
+    ///  Decode a Base64 encoded string into a byte array.
 	/// </summary>
-	///  <param name="text">string to be converted.</param>
-    ///  <returns>Byte array of converted data.</returns>
+	///  <param name="text">String to be decoded</param>
+    ///  <returns>Byte array of decoded data</returns>
     byte[] Decode(string text);
 
     /// <summary>
-    ///  Encode a byte array to Base64 string.
+    ///  Encode a byte array into a Base64 encoded string.
 	/// </summary>
-	///  <param name="data">The byte array to be converted.</param>
-    ///  <returns>Text string of converted data.</returns>
+	///  <param name="data">Byte array to be encoded.</param>
+    ///  <returns>String of encoded data.</returns>
     string Encode(byte[] data);
 }

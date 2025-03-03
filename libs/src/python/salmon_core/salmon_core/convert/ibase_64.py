@@ -30,23 +30,23 @@ from typeguard import typechecked
 @typechecked
 class IBase64(ABC):
     """
-    Interface for Base64 conversion implementations.
+    Interface for a Base64 encoder/decoder.
     """
 
     @abstractmethod
     def decode(self, text: str) -> bytearray:
         """
-       Decode a Base64 string to byte array
-       :param text: String to be converted.
-       :return: Byte array of converted data.
+        Decode a Base64 encoded string into a byte array.
+        :param text: String to be decoded
+        :return: Byte array of decoded data.
         """
         pass
 
     @abstractmethod
     def encode(self, data: bytearray) -> str:
         """
-        Encode a byte array to Base64 string.
-        @param data The byte array to be converted.
-        @return Text string of converted data.
+        Encode a byte array into a Base64 encoded string.
+        :param data: Byte array to be encoded
+        :return: String of encoded data.
         """
         pass

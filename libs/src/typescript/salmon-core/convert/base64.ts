@@ -29,7 +29,7 @@ import { IBase64 } from './ibase64.js';
  */
 export class Base64 implements IBase64 {
     /**
-     * Decode text from Base64 string.
+     * Decode a Base64 encoded string into a byte array.
      * @param {string} text String to be decoded
      * @returns {Uint8Array} Byte array of decoded data.
      */
@@ -38,8 +38,8 @@ export class Base64 implements IBase64 {
     }
 
     /**
-     * Encode byte array to a text string.
-     * @param {Uint8Array} data Byte array to be encoded.
+     * Encode a byte array into a Base64 encoded string.
+     * @param {Uint8Array} data Byte array to be encoded
      * @return {string} String of encoded data.
      */
     public encode(data: Uint8Array): string {

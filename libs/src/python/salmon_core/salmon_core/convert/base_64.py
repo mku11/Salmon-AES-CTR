@@ -31,21 +31,21 @@ from salmon_core.convert.ibase_64 import IBase64
 @typechecked
 class Base64(IBase64):
     """
-    Python default implementation of Base64 encoder/decoder.
+    Base64 encoder/decoder.
     """
 
     def decode(self, text: str) -> bytearray:
         """
-       Decode text from Base64 string
-       :param text: String to be decoded
-       :return: Byte array of decoded data.
+        Decode a Base64 encoded string into a byte array.
+        :param text: String to be decoded
+        :return: Byte array of decoded data.
         """
         return bytearray(base64.b64decode(text))
 
     def encode(self, data: bytearray) -> str:
         """
-       Encode byte array to a text string.
-       :param data: Byte array to be encoded.
-       :return: String of encoded data.
+        Encode a byte array into a Base64 encoded string.
+        :param data: Byte array to be encoded
+        :return: String of encoded data.
         """
         return base64.b64encode(data).decode('utf-8')

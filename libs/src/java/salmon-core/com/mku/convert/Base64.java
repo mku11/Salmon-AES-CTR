@@ -28,7 +28,7 @@ SOFTWARE.
  */
 public class Base64 implements IBase64 {
     /**
-     * Decode text from Base64 string.
+     * Decode a Base64 encoded string into a byte array.
      *
      * @param text String to be decoded
      * @return Byte array of decoded data.
@@ -38,9 +38,9 @@ public class Base64 implements IBase64 {
     }
 
     /**
-     * Encode byte array to a text string.
+     * Encode a byte array into a Base64 encoded string.
      *
-     * @param data Byte array to be encoded.
+     * @param data Byte array to be encoded
      * @return String of encoded data.
      */
     public String encode(byte[] data) {

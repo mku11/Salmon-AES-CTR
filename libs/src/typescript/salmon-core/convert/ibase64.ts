@@ -23,20 +23,20 @@ SOFTWARE.
 */
 
 /**
- * Interface for Base64 conversion implementations.
+ * Interface for a Base64 encoder/decoder.
  */
 export interface IBase64 {
     /**
-     * Decode a Base64 string to byte array
-     * @param {string} text String to be converted.
-     * @return Byte array of converted data.
+     * Decode a Base64 encoded string into a byte array.
+     * @param {string} text String to be decoded
+     * @returns {Uint8Array} Byte array of decoded data.
      */
     decode(text: string): Uint8Array;
 
     /**
-     * Encode a byte array to Base64 string.
-     * @param {Uint8Array} data The byte array to be converted.
-     * @return {string} Text string of converted data.
+     * Encode a byte array into a Base64 encoded string.
+     * @param {Uint8Array} data Byte array to be encoded
+     * @return {string} String of encoded data.
      */
     encode(data: Uint8Array): string;
 }
