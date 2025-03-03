@@ -1,4 +1,4 @@
-CURRDIR=$(dirname "$0")
+CURRDIR=$(pwd)
 source $CURRDIR/settings.cfg
 
 echo Synchronizing project settings
@@ -48,6 +48,9 @@ SUBST="SALMON_VERSION=$SALMON_VERSION"
 DIR=../../libs/projects/salmon-libs-gcc
 sed -i -e "s/$PATTERN/$SUBST/g" $DIR/makefile
 
+# SAMPLES
+
+
 # README
 PATTERN="^version:[^/]*"
 SUBST="version: $SALMON_VERSION"
@@ -81,6 +84,11 @@ FILE=../../services/winservice/project/SalmonWinService/README.txt
 sed -i -e "s/$PATTERN/$SUBST/g" $FILE
 
 # SCRIPTS
+PATTERN="^set SALMON_VERSION=[^/]*"
+SUBST="set SALMON_VERSION=$SALMON_VERSION"
+
+DIR=../../libs/projects/SalmonLibs.vscode
+sed -i -e "s/$PATTERN/$SUBST/g" $DIR/package.bat
 
 PATTERN="^SALMON_VERSION=[^/]*"
 SUBST="SALMON_VERSION=$SALMON_VERSION"
