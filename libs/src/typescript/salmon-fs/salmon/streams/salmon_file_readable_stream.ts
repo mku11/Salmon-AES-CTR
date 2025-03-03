@@ -142,8 +142,8 @@ export class ReadableStreamFileReader {
         this.buffersCount = buffersCount;
         this.cacheBufferSize = bufferSize;
         if(this.salmonFile.getRealFile().constructor.name === 'JsWSFile'){
-            // Multithreading for Web Service files is not supported yet
-            threads = 1;
+			console.log("Multithreading for web service files is not supported, setting single thread");
+			threads = 1;
         }
         this.threads = threads;
         this.backOffset = backOffset;
