@@ -11,8 +11,7 @@ import { SalmonFSTestHelper, TestMode, TestRunnerMode } from "./salmon-fs/salmon
 // NodeJS: to run in node.js command line (or Visual Code)
 var testMode = TestMode.Node;
 var testRunnerMode = TestRunnerMode.NodeJS;
-var testHttpServerURL;
-var testWSServerURL;
+
 // test dir
 // Make sure the dir root on the Web Service and the HTTP virtual folders
 // point to the correct location
@@ -29,7 +28,6 @@ for(let arg of process.argv) {
 	if(opt[0] == "HTTP_SERVER_URL" && opt[1])
         SalmonFSTestHelper.HTTP_SERVER_URL = opt[1];
 }
-
 
 await SalmonFSTestHelper.setTestParams(testDir, testMode, testRunnerMode);
 console.log("testDir: ", testDir);
