@@ -54,7 +54,14 @@ public class SalmonFSTests {
     @BeforeAll
     static void beforeAll() throws Exception {
         // use TestMode: Local, WebService. Http is tested only in SalmonFSHttpTests.
-        SalmonFSTestHelper.setTestParams(System.getProperty("testDir"), TestMode.WebService);
+		String testDir = System.getProperty("TEST_DIR") != null && !System.getProperty("TEST_DIR").equals("") ?
+			System.getProperty("TEST_DIR") : "d:\\tmp\\salmon\\test";
+		TestMode testMode = System.getProperty("TEST_MODE") != null && !System.getProperty("TEST_MODE").equals("") ?
+			TestMode.valueOf(System.getProperty("TEST_MODE")) : TestMode.Local;
+		
+		System.out.println("testDir: " + testDir);
+		System.out.println("testMode: " + testMode);
+        SalmonFSTestHelper.setTestParams(testDir, testMode);
 
         SalmonFSTestHelper.TEST_IMPORT_FILE = SalmonFSTestHelper.TEST_IMPORT_LARGE_FILE;
 

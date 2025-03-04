@@ -82,13 +82,17 @@ public class SalmonFSTestHelper {
     static String TEST_EXPORT_AUTH_FILENAME = "export.slma";
 
     // Web service
-    static String WS_SERVER_URL = "http://localhost:8080";
-    // static WS_SERVER_URL = "https://localhost:8443"; // for testing from the Web browser
+    static String WS_SERVER_DEFAULT_URL = "http://localhost:8080";
+    // static WS_SERVER_DEFAULT_URL = "https://localhost:8443"; // for testing from the Web browser
+	static String WS_SERVER_URL = System.getProperty("WS_SERVER_URL") != null && !System.getProperty("WS_SERVER_URL").equals("") ?
+		System.getProperty("WS_SERVER_URL") : WS_SERVER_DEFAULT_URL;
     static String WS_TEST_DIRNAME = "ws";
     static JavaWSFile.Credentials credentials = new JavaWSFile.Credentials("user", "password");
 
     // HTTP server (Read-only)
-    static String HTTP_SERVER_URL = "http://localhost";
+    static String HTTP_SERVER_DEFAULT_URL = "http://localhost";
+	static String HTTP_SERVER_URL = System.getProperty("HTTP_SERVER_URL") != null && !System.getProperty("HTTP_SERVER_URL").equals("") ?
+		System.getProperty("HTTP_SERVER_URL") : HTTP_SERVER_DEFAULT_URL;		
     static String HTTP_SERVER_VIRTUAL_URL = SalmonFSTestHelper.HTTP_SERVER_URL + "/saltest";
     static String HTTP_TEST_DIRNAME = "httpserv";
     static String HTTP_VAULT_DIRNAME = "vault";
