@@ -371,12 +371,6 @@ class SalmonFSTests(TestCase):
         import_file_path: IRealFile = SalmonFSTestHelper.TEST_IMPORT_TINY_FILE
         SalmonFSTestHelper.export_and_import_auth(vault, import_file_path)
 
-    def test_raw(self):
-        SalmonFSTestHelper.test_raw()
-
-    def test_enc(self):
-        SalmonFSTestHelper.test_enc()
-
     def test_examples(self):
         SalmonFSTestHelper.test_examples()
 
@@ -575,3 +569,9 @@ class SalmonFSTests(TestCase):
         file_input_stream2.close()
         ms2.close()
         self.assertEqual(h3, h4)
+
+    def test_raw(self):
+        SalmonFSTestHelper.test_raw()
+
+    def test_enc(self):
+        SalmonFSTestHelper.test_enc()
