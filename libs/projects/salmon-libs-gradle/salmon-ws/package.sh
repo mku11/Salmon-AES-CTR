@@ -2,7 +2,7 @@
 SALMON_VERSION=2.3.0
 
 JAVA_WS=salmon-ws
-WS_APP_PROPERTIES=./salmon-ws/config/application.properties
+WS_APP_PROPERTIES=./config/application.properties
 WS_SCRIPT_SH=./scripts/start-salmon-ws.sh
 WS_SCRIPT_BAT=./scripts/start-salmon-ws.bat
 WS_WAR=./build/libs/$JAVA_WS-$SALMON_VERSION.war
