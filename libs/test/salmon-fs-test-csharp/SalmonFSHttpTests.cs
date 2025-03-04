@@ -43,9 +43,13 @@ public class SalmonFSHttpTests
         SalmonFSHttpTests.oldTestMode = SalmonFSTestHelper.currTestMode;
 
         // use TestMode: Http only
-        SalmonFSTestHelper.SetTestParams(Environment.GetEnvironmentVariable("SALMON_TEST_DIR")
-            ?? "d:\\tmp\\salmon\\test", TestMode.Local);
-
+        SalmonFSTestHelper.SetTestParams(Environment.GetEnvironmentVariable("TEST_DIR")
+            ?? "d:\\tmp\\salmon\\test", TestMode.Http);
+		Console.WriteLine("test_dir: " + test_dir);
+        Console.WriteLine("test_mode: " + test_mode);
+        Console.WriteLine("http server url: " + SalmonFSTestHelper.HTTP_SERVER_URL);
+        Console.WriteLine("HTTP_VAULT_DIR_URL: " + SalmonFSTestHelper.HTTP_VAULT_DIR_URL);
+		
         SalmonFSTestHelper.TEST_HTTP_FILE = SalmonFSTestHelper.TEST_IMPORT_LARGE_FILE;
 
         // SalmonCoreTestHelper.TEST_ENC_BUFFER_SIZE = 1 * 1024 * 1024;

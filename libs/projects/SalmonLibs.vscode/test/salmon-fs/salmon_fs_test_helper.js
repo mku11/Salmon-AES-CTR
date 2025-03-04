@@ -165,7 +165,7 @@ export class SalmonFSTestHelper {
                 await SalmonFSTestHelper.TEST_ROOT_DIR.mkdir();
         }
 
-		SalmonFSTestHelper.HTTP_SERVER_VIRTUAL_URL = SalmonFSTestHelper.HTTP_SERVER_URL + "/saltest";
+		SalmonFSTestHelper.HTTP_SERVER_VIRTUAL_URL = SalmonFSTestHelper.HTTP_SERVER_URL + "/test";
 		SalmonFSTestHelper.HTTP_VAULT_DIR_URL = SalmonFSTestHelper.HTTP_SERVER_VIRTUAL_URL 
 			+ "/" + SalmonFSTestHelper.HTTP_TEST_DIRNAME + "/" + SalmonFSTestHelper.HTTP_VAULT_DIRNAME;
 		SalmonFSTestHelper.HTTP_VAULT_FILES_DIR_URL = SalmonFSTestHelper.HTTP_VAULT_DIR_URL + "/fs"; 

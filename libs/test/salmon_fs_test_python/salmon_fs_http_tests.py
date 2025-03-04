@@ -58,11 +58,12 @@ class SalmonFSHttpTests(TestCase):
         
         test_dir: str = os.getenv("TEST_DIR", "d:\\tmp\\salmon\\test")
         test_mode: TestMode = TestMode.Http
+        SalmonFSTestHelper.set_test_params(test_dir, test_mode)
         print("test_dir", test_dir)
         print("test_mode", test_mode)
+        print("http server url: ", SalmonFSTestHelper.HTTP_SERVER_URL)
+        print("HTTP_VAULT_DIR_URL: ", SalmonFSTestHelper.HTTP_VAULT_DIR_URL)
         
-        SalmonFSTestHelper.set_test_params(test_dir, test_mode)
-
         SalmonFSTestHelper.TEST_HTTP_FILE = SalmonFSTestHelper.TEST_IMPORT_LARGE_FILE
 
         # SalmonCoreTestHelper.TEST_ENC_BUFFER_SIZE = 1 * 1024 * 1024

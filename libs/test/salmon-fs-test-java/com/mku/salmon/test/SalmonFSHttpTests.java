@@ -52,9 +52,15 @@ public class SalmonFSHttpTests {
     @BeforeAll
     static void beforeAll() throws Exception {
         SalmonFSHttpTests.oldTestMode = SalmonFSTestHelper.currTestMode;
-
+		String testDir = System.getProperty("TEST_DIR");
         // use TestMode: Http only
-        SalmonFSTestHelper.setTestParams(System.getProperty("testDir"), TestMode.Http);
+		TestMode testMode = TestMode.Http;
+        SalmonFSTestHelper.setTestParams(testDir, testMode);
+		
+		System.out.println("testDir: " + testDir);
+        System.out.println("testMode: " + testMode);
+        System.out.println("http server url: " + SalmonFSTestHelper.HTTP_SERVER_URL);
+        System.out.println("HTTP_VAULT_DIR_URL: " + SalmonFSTestHelper.HTTP_VAULT_DIR_URL);
 
         SalmonFSTestHelper.TEST_HTTP_FILE = SalmonFSTestHelper.TEST_IMPORT_LARGE_FILE;
 

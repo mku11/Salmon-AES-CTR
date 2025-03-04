@@ -104,7 +104,7 @@ class SalmonFSTestHelper:
     # HTTP server(Read - only)
     HTTP_SERVER_URL = "http://localhost"
     HTTP_SERVER_URL = os.getenv("HTTP_SERVER_URL", HTTP_SERVER_URL)
-    HTTP_SERVER_VIRTUAL_URL = HTTP_SERVER_URL + "/saltest"
+    HTTP_SERVER_VIRTUAL_URL = HTTP_SERVER_URL + "/test"
     HTTP_TEST_DIRNAME = "httpserv"
     HTTP_VAULT_DIRNAME = "vault"
     HTTP_VAULT_DIR_URL = HTTP_SERVER_VIRTUAL_URL + "/" + HTTP_TEST_DIRNAME + "/" + HTTP_VAULT_DIRNAME

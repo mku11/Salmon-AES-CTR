@@ -57,10 +57,11 @@ class SalmonFSTests(TestCase):
         
         test_dir: str = os.getenv("TEST_DIR", "d:\\tmp\\salmon\\test")
         test_mode: TestMode = TestMode[os.getenv("TEST_MODE")] if os.getenv("TEST_MODE") else TestMode.Local
-        print("test_dir", test_dir)
-        print("test_mode", test_mode)
 
         SalmonFSTestHelper.set_test_params(test_dir, test_mode)
+        print("test_dir" + test_dir)
+        print("test_mode" + test_mode)
+        print("ws server url: " + SalmonFSTestHelper.WS_SERVER_URL)
 
         SalmonFSTestHelper.TEST_IMPORT_FILE = SalmonFSTestHelper.TEST_IMPORT_MEDIUM_FILE
 

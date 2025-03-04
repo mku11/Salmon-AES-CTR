@@ -93,7 +93,7 @@ public class SalmonFSTestHelper {
     static String HTTP_SERVER_DEFAULT_URL = "http://localhost";
 	static String HTTP_SERVER_URL = System.getProperty("HTTP_SERVER_URL") != null && !System.getProperty("HTTP_SERVER_URL").equals("") ?
 		System.getProperty("HTTP_SERVER_URL") : HTTP_SERVER_DEFAULT_URL;		
-    static String HTTP_SERVER_VIRTUAL_URL = SalmonFSTestHelper.HTTP_SERVER_URL + "/saltest";
+    static String HTTP_SERVER_VIRTUAL_URL = SalmonFSTestHelper.HTTP_SERVER_URL + "/test";
     static String HTTP_TEST_DIRNAME = "httpserv";
     static String HTTP_VAULT_DIRNAME = "vault";
     static String HTTP_VAULT_DIR_URL = SalmonFSTestHelper.HTTP_SERVER_VIRTUAL_URL

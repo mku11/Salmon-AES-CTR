@@ -47,6 +47,10 @@ public class SalmonFSTests
         SalmonFSTestHelper.SetTestParams(Environment.GetEnvironmentVariable("SALMON_TEST_DIR")
             ?? "d:\\tmp\\salmon\\test", TestMode.WebService);
 
+		Console.WriteLine("test_dir: " + test_dir);
+        Console.WriteLine("test_mode: " + test_mode);
+        Console.WriteLine("ws server url: " + SalmonFSTestHelper.WS_SERVER_URL);
+		
         SalmonFSTestHelper.TEST_IMPORT_FILE = SalmonFSTestHelper.TEST_IMPORT_LARGE_FILE;
 
         // SalmonCoreTestHelper.TEST_ENC_BUFFER_SIZE = 1 * 1024 * 1024;
