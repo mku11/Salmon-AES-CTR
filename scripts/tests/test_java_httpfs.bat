@@ -1,7 +1,7 @@
 set CURRDIR=%CD%
 
-:: set HTTP_SERVER_URL=http://localhost
-:: set TEST_DIR="d:/tmp/salmon/test"
+set HTTP_SERVER_URL=http://localhost:8000
+set TEST_DIR="d:/tmp/salmon/test"
 :: set ENABLE_GPU=false
 set TEST_MODE=Http
 
