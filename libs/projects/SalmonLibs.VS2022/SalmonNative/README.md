@@ -12,8 +12,8 @@ Build
 To build the app you will need:  
 1. Microsoft Visual Studio 2022  
 2. Microsoft Visual Studio C++ installed (visual studio installer)  
-3. Tiny AES key expansion subroutine. To pull Tiny AES code from the project root folder type:  
-	git submodule update --init --recursive    
+3. Tiny AES key expansion subroutine. To pull Tiny AES code change to the main branch and from the project root folder type:  
+	git submodule update --init --recursive --remote  
 5. Enable intrinsic functions /Oi  
   
 Package:  
