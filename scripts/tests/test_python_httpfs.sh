@@ -1,9 +1,8 @@
 CURRDIR=$(pwd)
 
 # set env var HTTP_SERVER_URL to the HTTP server
-# export HTTP_SERVER_URL=http://localhost
-# export TEST_DIR=/tmp/salmon/test
-
+export HTTP_SERVER_URL=http://localhost:8000
+export TEST_DIR=/tmp/salmon/test
 export TEST_MODE=Http
 
 cd ../../libs/test/salmon_fs_test_python

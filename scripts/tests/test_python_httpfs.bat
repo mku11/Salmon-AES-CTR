@@ -1,8 +1,8 @@
 set CURRDIR=%CD%
 
 :: set env var HTTP_SERVER_URL to the HTTP server
-:: set HTTP_SERVER_URL=http://localhost
-:: set TEST_DIR=c:\tmp\salmon\test
+set HTTP_SERVER_URL=http://localhost:8000
+set TEST_DIR=d:\tmp\salmon\test
 
 set TEST_MODE=Http
 

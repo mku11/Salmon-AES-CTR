@@ -95,7 +95,7 @@ export class SalmonFSTestHelper {
     static credentials = new Credentials("user", "password");
     
     // HTTP server (Read-only)
-	static HTTP_SERVER_DEFAULT_URL = "http://localhost";
+	static HTTP_SERVER_DEFAULT_URL = "http://localhost:8000";
     static HTTP_SERVER_URL = SalmonFSTestHelper.HTTP_SERVER_DEFAULT_URL;
     static HTTP_TEST_DIRNAME = "httpserv";
     static HTTP_VAULT_DIRNAME = "vault";

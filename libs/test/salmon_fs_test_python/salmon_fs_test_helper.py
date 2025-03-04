@@ -102,7 +102,7 @@ class SalmonFSTestHelper:
     credentials = Credentials("user", "password")
 
     # HTTP server(Read - only)
-    HTTP_SERVER_URL = "http://localhost"
+    HTTP_SERVER_URL = "http://localhost:8000"
     HTTP_SERVER_URL = os.getenv("HTTP_SERVER_URL", HTTP_SERVER_URL)
     HTTP_SERVER_VIRTUAL_URL = HTTP_SERVER_URL + "/test"
     HTTP_TEST_DIRNAME = "httpserv"

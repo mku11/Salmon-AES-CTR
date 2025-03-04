@@ -77,7 +77,7 @@ public class SalmonFSTestHelper
     internal static DotNetWSFile.Credentials credentials = new DotNetWSFile.Credentials("user", "password");
 
     // HTTP server (Read-only)
-    internal static string HTTP_SERVER_URL = "http://localhost";
+    internal static string HTTP_SERVER_URL = "http://localhost:8000";
     internal static string HTTP_SERVER_VIRTUAL_URL = SalmonFSTestHelper.HTTP_SERVER_URL + "/test";
     internal static string HTTP_TEST_DIRNAME = "httpserv";
     internal static string HTTP_VAULT_DIRNAME = "vault";

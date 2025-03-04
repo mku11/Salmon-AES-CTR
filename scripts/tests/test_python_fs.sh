@@ -1,7 +1,6 @@
 CURRDIR=$(pwd)
 
-# export TEST_DIR=/tmp/salmon/test
-
+export TEST_DIR=/tmp/salmon/test
 export TEST_MODE=Local
 
 cd ../../libs/test/salmon_fs_test_python
