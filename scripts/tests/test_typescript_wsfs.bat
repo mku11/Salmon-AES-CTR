@@ -1,8 +1,8 @@
 @ECHO OFF
 set CURRDIR=%CD%
 
-:: set WS_SERVER_URL=http://localhost:8080
-:: set TEST_DIR="d:\tmp\salmon\test"
+set WS_SERVER_URL=http://localhost:8080
+set TEST_DIR="d:\tmp\salmon\test"
 set TEST_MODE=WebService
 
 cd ..\..\libs\projects\SalmonLibs.vscode & ^

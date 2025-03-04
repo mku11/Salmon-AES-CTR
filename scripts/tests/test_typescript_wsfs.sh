@@ -1,13 +1,11 @@
 CURRDIR=$(pwd)
 
-# you can set these vars here or inside your shell
-# Set the web service url
-# export WS_SERVER_URL=http://localhost:8080
+export WS_SERVER_URL=http://localhost:8080
 
 # if you use WSL set this to a windows path instead
 # export TS_TEST_DIR="/mnt/d/tmp/salmon/test"
 # for Linux and macOS
-# export TS_TEST_DIR="/tmp/salmon/test"
+export TS_TEST_DIR="/tmp/salmon/test"
 export TEST_MODE=WebService
 
 cd ../../libs/projects/SalmonLibs.vscode
