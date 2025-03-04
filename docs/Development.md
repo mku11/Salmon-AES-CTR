@@ -3,3 +3,8 @@ If you're working on Windows make sure you ignore the unix file permission by se
 ```
 filemode = false
 ```
+
+If you have unix shell scripts update the index with the correct permissions before committing:
+```
+git update-index --chmod=+x
+```
