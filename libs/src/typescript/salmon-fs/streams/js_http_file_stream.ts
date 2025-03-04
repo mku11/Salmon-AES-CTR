@@ -75,8 +75,11 @@ export class JsHttpFileStream extends RandomAccessStream {
             if (end == -1 || end >= this.position + requestLength) {
                 end = this.position + requestLength - 1;
             }
-            // specify the end since fetch will read the whole content without streaming
-			headers.append("Range", "bytes=" + this.position + "-" + end);
+            // fetch will read the whole content without streaming
+            // so we want to specify the end if it's a range request
+            // or it's a full request but we don't know the end
+            if(this.position > 0 || end == JsHttpFileStream.MAX_LEN_PER_REQUEST - 1)
+			    headers.append("Range", "bytes=" + this.position + "-" + end);
             let httpResponse = await fetch(this.file.getPath(), { cache: "no-store", keepalive: true, headers: headers });
 
             await this.#checkStatus(httpResponse, new Set([200, 206]));
