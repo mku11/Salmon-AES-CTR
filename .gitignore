@@ -72,3 +72,4 @@ lint.txt
 vault_*
 data_*
 *.p12
+/libs/src/c/tiny-AES-c
