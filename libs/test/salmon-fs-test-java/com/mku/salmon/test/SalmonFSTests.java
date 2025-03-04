@@ -61,7 +61,7 @@ public class SalmonFSTests {
         SalmonFSTestHelper.setTestParams(testDir, testMode);
 		System.out.println("testDir: " + testDir);
         System.out.println("testMode: " + testMode);
-        System.out.println("ws server url: " + SalmonFSTestHelper.HTTP_SERVER_URL);
+        System.out.println("ws server url: " + SalmonFSTestHelper.WS_SERVER_URL);
 		
         SalmonFSTestHelper.TEST_IMPORT_FILE = SalmonFSTestHelper.TEST_IMPORT_LARGE_FILE;
 
