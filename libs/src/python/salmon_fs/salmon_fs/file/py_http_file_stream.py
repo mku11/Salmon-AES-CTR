@@ -76,7 +76,7 @@ class PyHttpFileStream(RandomAccessStream):
             url = self.__file.get_path()
             while count := PyHttpFileStream.MAX_REDIRECTS:
                 self.conn = self.__create_connection(urlparse(url).netloc)
-                self.conn.request("GET", url, headers=headers)
+                self.conn.request("GET", urlparse(url).path, headers=headers)
                 self.__response = self.conn.getresponse()
                 if self.__response.getheader('location'):
                     url = urljoin(url, self.__response.getheader('location'))

@@ -68,7 +68,7 @@ class PyHttpFile(IRealFile):
                     url = self.__file_path
                     while count := PyHttpFile.MAX_REDIRECTS:
                         conn = self.__create_connection(urlparse(url).netloc)
-                        conn.request("GET", url, headers=headers)
+                        conn.request("GET", urlparse(url).path, headers=headers)
                         self.__response = conn.getresponse()
                         if self.__response.getheader('location'):
                             url = urljoin(url, self.__response.getheader('location'))
