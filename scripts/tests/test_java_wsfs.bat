@@ -1,6 +1,6 @@
 set CURRDIR=%CD%
 
-:: set WS_SERVER_URL=http://localhost
+:: set WS_SERVER_URL=http://localhost:8080
 :: set TEST_DIR="d:/tmp/salmon/test"
 :: set ENABLE_GPU=false
 set TEST_MODE=WebService
