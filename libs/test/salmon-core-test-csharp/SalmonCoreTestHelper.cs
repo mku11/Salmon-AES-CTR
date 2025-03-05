@@ -98,8 +98,10 @@ public class SalmonCoreTestHelper
 
     internal static void Close()
     {
-        SalmonCoreTestHelper.encryptor.Close();
-        SalmonCoreTestHelper.decryptor.Close();
+		if(SalmonCoreTestHelper.encryptor != null)
+			SalmonCoreTestHelper.encryptor.Close();
+		if(SalmonCoreTestHelper.decryptor != null)
+			SalmonCoreTestHelper.decryptor.Close();
     }
 	
 	internal static bool IsGPUEnabled() {
