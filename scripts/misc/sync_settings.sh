@@ -149,3 +149,14 @@ sed -i -e "s/$PATTERN/$SUBST/g" $DIR/salmon/package.sh
 DIR=../../libs/projects/salmon-libs-gradle
 sed -i -e "s/$PATTERN/$SUBST/g" $DIR/salmon-ws/package.sh
 sed -i -e "s/$PATTERN/$SUBST/g" $DIR/salmon-ws/package.bat
+
+PATTERN="^set SALMON_VERSION=[^/]*"
+SUBST="set SALMON_VERSION=$SALMON_VERSION"
+DIR=./
+sed -i -e "s/$PATTERN/$SUBST/g" $DIR/start_ws_server.bat
+
+PATTERN="^SALMON_VERSION=[^/]*"
+SUBST="SALMON_VERSION=$SALMON_VERSION"
+DIR=./
+sed -i -e "s/$PATTERN/$SUBST/g" $DIR/start_ws_server.sh
+
