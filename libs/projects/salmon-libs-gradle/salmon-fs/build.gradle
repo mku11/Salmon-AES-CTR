@@ -28,7 +28,7 @@ test {
 	systemProperty 'TEST_DIR', System.getProperty('TEST_DIR', "d:\\tmp\\salmon\\test")
 	systemProperty 'TEST_MODE', System.getProperty('TEST_MODE', "Local")
 	systemProperty 'ENABLE_GPU', System.getProperty('ENABLE_GPU', "false")
-	systemProperty 'HTTP_SERVER_URL', System.getProperty('HTTP_SERVER_URL', "http://localhost")
+	systemProperty 'HTTP_SERVER_URL', System.getProperty('HTTP_SERVER_URL', "http://localhost:8000")
 	systemProperty 'WS_SERVER_URL', System.getProperty('WS_SERVER_URL', "http://localhost:8080")
 	afterTest { desc, result -> 
         logger.quiet "Test ${desc.className} ${desc.name} : ${result.resultType}"
