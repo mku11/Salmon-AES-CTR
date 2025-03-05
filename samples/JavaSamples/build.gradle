@@ -3,7 +3,7 @@ plugins {
 }
 
 group 'com.mku.salmon'
-version '2.2.0'
+version '2.3.0'
 
 repositories {
     maven {
@@ -29,8 +29,8 @@ dependencies {
     testRuntimeOnly 'org.junit.jupiter:junit-jupiter-engine:5.8.1'
 
     // salmon libs:
-    implementation 'com.mku.salmon:salmon-core:2.2.0'
-    implementation 'com.mku.salmon:salmon-fs:2.2.0'
+    implementation("com.mku.salmon:salmon-core:${version}")
+    implementation("com.mku.salmon:salmon-fs:${version}")
     // optional fast AES intrinsics and Tiny AES:
     implementation 'com.mku.salmon:salmon-native:2.2.0:win-x86_64'
     nativeBundle 'com.mku.salmon:salmon-native:2.2.0:win-x86_64'

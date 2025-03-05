@@ -24,6 +24,7 @@
     <ProjectGuid>{1edf7ea9-85a6-4bd3-a650-dcc2e77a0796}</ProjectGuid>
     <RootNamespace>CppSamples</RootNamespace>
     <WindowsTargetPlatformVersion>10.0</WindowsTargetPlatformVersion>
+	<SalmonVersion>2.3.0</SalmonVersion>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="Configuration">
@@ -104,12 +105,12 @@
       <SDLCheck>true</SDLCheck>
       <PreprocessorDefinitions>_DEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
-      <AdditionalIncludeDirectories>..\packages\Salmon.Native.2.2.0\runtimes\win-x64\native\salmon\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>..\packages\Salmon.Native.$(SalmonVersion)\runtimes\win-x64\native\salmon\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
-      <AdditionalDependencies>..\packages\Salmon.Native.2.2.0\runtimes\win-x64\native\SalmonNative.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>..\packages\Salmon.Native.$(SalmonVersion)\runtimes\win-x64\native\SalmonNative.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <AdditionalLibraryDirectories>%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
     </Link>
   </ItemDefinitionGroup>
@@ -121,7 +122,7 @@
       <SDLCheck>true</SDLCheck>
       <PreprocessorDefinitions>NDEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
-      <AdditionalIncludeDirectories>..\packages\Salmon.Native.2.2.0\runtimes\win-x64\native\salmon\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>..\packages\Salmon.Native.$(SalmonVersion)\runtimes\win-x64\native\salmon\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
@@ -134,7 +135,7 @@
     <ClCompile Include="CppSamples.cpp" />
   </ItemGroup>
   <ItemGroup>
-    <CopyFileToFolders Include="..\packages\Salmon.Native.2.2.0\runtimes\win-x64\native\SalmonNative.dll">
+    <CopyFileToFolders Include="..\packages\Salmon.Native.$(SalmonVersion)\runtimes\win-x64\native\SalmonNative.dll">
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">false</ExcludedFromBuild>
       <DeploymentContent Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</DeploymentContent>
       <FileType>Document</FileType>
@@ -142,7 +143,7 @@
     <None Include="packages.config" />
   </ItemGroup>
   <ItemGroup>
-    <Library Include="..\packages\Salmon.Native.2.2.0\runtimes\win-x64\native\SalmonNative.lib" />
+    <Library Include="..\packages\Salmon.Native.$(SalmonVersion)\runtimes\win-x64\native\SalmonNative.lib" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

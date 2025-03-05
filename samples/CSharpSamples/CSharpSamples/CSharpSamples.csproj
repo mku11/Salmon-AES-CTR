@@ -5,6 +5,7 @@
     <TargetFramework>net8.0</TargetFramework>
     <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>enable</Nullable>
+	<SalmonVersion>2.3.0</SalmonVersion>
   </PropertyGroup>
 
   <ItemGroup>
@@ -18,8 +19,8 @@
   </ItemGroup>
 
   <ItemGroup>
-    <PackageReference Include="Salmon.Core" Version="2.2.0" />
-    <PackageReference Include="Salmon.FS" Version="2.2.0" />
-    <PackageReference Include="Salmon.Native" Version="2.2.0" />
+    <PackageReference Include="Salmon.Core" Version="$(SalmonVersion)" />
+    <PackageReference Include="Salmon.FS" Version="$(SalmonVersion)" />
+    <PackageReference Include="Salmon.Native" Version="$(SalmonVersion)" />
   </ItemGroup>
 </Project>
