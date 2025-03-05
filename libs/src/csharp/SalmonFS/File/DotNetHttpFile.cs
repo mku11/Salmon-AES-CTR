@@ -267,7 +267,7 @@ public class DotNetHttpFile : IRealFile
                 stream.CopyTo(ms);
                 string contents = UTF8Encoding.UTF8.GetString(ms.ToArray());
 
-                Match matcher = Regex.Match(contents, "HREF=\"(.+?)\"");
+                Match matcher = Regex.Match(contents, "HREF=\"(.+?)\"", RegexOptions.IgnoreCase);
                 while (matcher.Success)
                 {
                     string filename = matcher.Groups[1].Value;
