@@ -32,13 +32,11 @@ using System;
 using System.Text;
 using BitConverter = Mku.Convert.BitConverter;
 using Mku.Salmon.Streams;
-using Mku.Salmon.Text;
 using System.Diagnostics;
 using Mku.Salmon.Utils;
 using Mku.Salmon.Sequence;
 using Mku.Salmon.Drive;
 using System.Collections.Generic;
-using Mku.Streams;
 
 namespace Mku.Salmon.Test;
 
@@ -267,8 +265,10 @@ public class SalmonFSTestHelper
 
     internal static void Close()
     {
-        SalmonFSTestHelper.fileImporter.Close();
-        SalmonFSTestHelper.fileExporter.Close();
+		if(SalmonFSTestHelper.fileImporter != null)
+			SalmonFSTestHelper.fileImporter.Close();
+		if(SalmonFSTestHelper.fileExporter != null)
+			SalmonFSTestHelper.fileExporter.Close();
     }
 
     public static SalmonFileSequencer CreateSalmonFileSequencer()
