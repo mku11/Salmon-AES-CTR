@@ -37,10 +37,9 @@ else
   CFLAGS+=-maes
 endif
 
-PACKAGES_DIR=packages
-PACKAGE_NAME=salmon-$(PLATFORM)-$(ARCH).$(SALMON_VERSION)
+PACKAGE_NAME=salmon-gcc-$(PLATFORM)-$(ARCH).$(SALMON_VERSION)
 PACKAGE_FILE=$(PACKAGE_NAME).tar.gz
-OUTPUT_DIR=$(OUTPUT_ROOT)/$(PLATFORM)
+OUTPUT_DIR=$(OUTPUT_ROOT)/native
 ifeq ($(PLATFORM),win)
   LIB_NAME=salmon.dll
 else ifeq ($(PLATFORM),linux)
@@ -102,16 +101,14 @@ $(LIB_NAME): $(OBJECT)
 	$(CC) -shared -o $(LIB_DIR)/$@ $(subst $(SRC_ROOT),$(OBJ_DIR),$^) $(CFLAGS) $(LIBS)
 
 package: $(LIB_NAME)
-	@mkdir -p $(PACKAGES_DIR)/$(PACKAGE_NAME)
-	rm -rf $(PACKAGES_DIR)/$(PACKAGE_NAME)/*
-	@mkdir -p $(PACKAGES_DIR)/$(PACKAGE_NAME)/include
-	cp -r $(SALMON_INCLUDE)/* $(PACKAGES_DIR)/$(PACKAGE_NAME)/include
-	@mkdir -p $(PACKAGES_DIR)/$(PACKAGE_NAME)/lib
-	cp $(LIB_DIR)/$(LIB_NAME) $(PACKAGES_DIR)/$(PACKAGE_NAME)/lib
-	cp README.txt $(PACKAGES_DIR)/$(PACKAGE_NAME)
-	cd $(PACKAGES_DIR) && tar -czvf $(PACKAGE_FILE) $(PACKAGE_NAME)/
-	@mkdir -p $(OUTPUT_DIR)
-	cp -f $(PACKAGES_DIR)/$(PACKAGE_FILE) $(OUTPUT_DIR)
+	@mkdir -p $(OUTPUT_DIR)/$(PACKAGE_NAME)
+	rm -rf $(OUTPUT_DIR)/$(PACKAGE_NAME)/*
+	@mkdir -p $(OUTPUT_DIR)/$(PACKAGE_NAME)/include
+	cp -r $(SALMON_INCLUDE)/* $(OUTPUT_DIR)/$(PACKAGE_NAME)/include
+	@mkdir -p $(OUTPUT_DIR)/$(PACKAGE_NAME)/lib
+	cp $(LIB_DIR)/$(LIB_NAME) $(OUTPUT_DIR)/$(PACKAGE_NAME)/lib
+	cp README.txt $(OUTPUT_DIR)/$(PACKAGE_NAME)
+	cd $(OUTPUT_DIR) && tar -czvf $(PACKAGE_FILE) $(PACKAGE_NAME)/
 	
 .PHONY: all
 
