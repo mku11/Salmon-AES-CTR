@@ -44,11 +44,17 @@ public class SalmonFSTests
     public static void ClassInitialize(TestContext testContext)
     {
         // use TestMode: Local, WebService. Http is tested only in SalmonFSHttpTests.
-        SalmonFSTestHelper.SetTestParams(Environment.GetEnvironmentVariable("SALMON_TEST_DIR")
-            ?? "d:\\tmp\\salmon\\test", TestMode.WebService);
-
-		Console.WriteLine("test_dir: " + test_dir);
-        Console.WriteLine("test_mode: " + test_mode);
+		string testDir = Environment.GetEnvironmentVariable("TEST_DIR") != null
+			&& !Environment.GetEnvironmentVariable("TEST_DIR").Equals("") ? Environment.GetEnvironmentVariable("TEST_DIR") : "d:\\tmp\\salmon\\test";
+		TestMode testMode = Environment.GetEnvironmentVariable("TEST_MODE") != null 
+			&& !Environment.GetEnvironmentVariable("TEST_DIR").Equals("") ? 
+			(TestMode) Enum.Parse(typeof(TestMode), Environment.GetEnvironmentVariable("TEST_MODE")) : TestMode.Local;
+			
+        Console.WriteLine("testDirEnv: " + Environment.GetEnvironmentVariable("TEST_DIR"));
+        Console.WriteLine("testModeEnv: " + Environment.GetEnvironmentVariable("TEST_MODE"));
+		SalmonFSTestHelper.SetTestParams(testDir, testMode);
+		Console.WriteLine("testDir: " + testDir);
+        Console.WriteLine("testMode: " + testMode);
         Console.WriteLine("ws server url: " + SalmonFSTestHelper.WS_SERVER_URL);
 		
         SalmonFSTestHelper.TEST_IMPORT_FILE = SalmonFSTestHelper.TEST_IMPORT_LARGE_FILE;
