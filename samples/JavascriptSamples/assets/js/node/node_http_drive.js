@@ -3,7 +3,7 @@ import { DriveSample } from '../samples/drive_sample.js';
 import { JsHttpFile } from '../lib/salmon-fs/file/js_http_file.js';
 import { JsNodeFile } from '../lib/salmon-fs/file/js_node_file.js';
 
-let httpDriveURL = "http://localhost/saltest/httpserv/vault";
+let httpDriveURL = "http://localhost:8000/test/httpserv/vault";
 let password = "test123";
 let threads = 2;
 

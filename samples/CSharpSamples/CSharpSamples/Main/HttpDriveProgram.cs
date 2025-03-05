@@ -8,7 +8,7 @@ class HttpDriveProgram
 {
     public static void RunMain(string[] args)
     {
-        string httpDriveURL = "http://localhost/saltest/httpserv/vault";
+        string httpDriveURL = "http://localhost:8000/test/httpserv/vault";
         string password = "test123";
         int threads = 1;
 		
