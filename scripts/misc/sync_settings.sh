@@ -50,6 +50,50 @@ sed -i -e "s/$PATTERN/$SUBST/g" $DIR/makefile
 
 # SAMPLES
 
+PATTERN="<SalmonVersion>[^/]*<\/SalmonVersion>"
+SUBST="<SalmonVersion>$SALMON_VERSION<\/SalmonVersion>"
+DIR=../../samples/CSharpSamples/CSharpSamples
+sed -i -e "s/$PATTERN/$SUBST/g" $DIR/CSharpSamples.csproj
+
+PATTERN="<SalmonVersion>[^/]*<\/SalmonVersion>"
+SUBST="<SalmonVersion>$SALMON_VERSION<\/SalmonVersion>"
+DIR=../../samples/CppSamples/CppSamples
+sed -i -e "s/$PATTERN/$SUBST/g" $DIR/CppSamples.vcxproj
+
+PATTERN="<package id=\"Salmon.Native\" version=\"[^/]*\" targetFramework=\"native\" \/>"
+SUBST="<package id=\"Salmon.Native\" version=\"$SALMON_VERSION\" targetFramework=\"native\" \/>"
+DIR=../../samples/CppSamples/CppSamples
+sed -i -e "s/$PATTERN/$SUBST/g" $DIR/packages.config
+
+PATTERN="^SALMON_VERSION=[^/]*"
+SUBST="SALMON_VERSION=$SALMON_VERSION"
+DIR=../samples
+sed -i -e "s/$PATTERN/$SUBST/g" $DIR/sample_gcc_win_x86_64.sh
+
+PATTERN="^SALMON_VERSION=[^/]*"
+SUBST="SALMON_VERSION=$SALMON_VERSION"
+DIR=../../samples/JavascriptSamples
+sed -i -e "s/$PATTERN/$SUBST/g" $DIR/getdeps.sh
+
+PATTERN="^set SALMON_VERSION=[^/]*"
+SUBST="set SALMON_VERSION=$SALMON_VERSION"
+DIR=../../samples/JavascriptSamples
+sed -i -e "s/$PATTERN/$SUBST/g" $DIR/getdeps.bat
+
+PATTERN="^set SALMON_VERSION=[^/]*"
+SUBST="set SALMON_VERSION=$SALMON_VERSION"
+DIR=../samples
+sed -i -e "s/$PATTERN/$SUBST/g" $DIR/sample_python.bat
+
+PATTERN="^SALMON_VERSION=[^/]*"
+SUBST="SALMON_VERSION=$SALMON_VERSION"
+DIR=../samples
+sed -i -e "s/$PATTERN/$SUBST/g" $DIR/sample_python.sh
+
+PATTERN="^version '[^/]*'"
+SUBST="version '$SALMON_VERSION'"
+DIR=../../samples/JavaSamples
+sed -i -e "s/$PATTERN/$SUBST/g" $DIR/build.gradle
 
 # README
 PATTERN="^version:[^/]*"
