@@ -1,6 +1,6 @@
 CURRDIR=$(pwd)
 
-# export TEST_DIR="d:/tmp/salmon/test"
+export TEST_DIR="/tmp/salmon/test"
 # export ENABLE_GPU=false
 export TEST_MODE=Local
 

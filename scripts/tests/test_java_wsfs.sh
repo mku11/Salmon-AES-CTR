@@ -1,7 +1,7 @@
 set CURRDIR=$(pwd)
 
-# export WS_SERVER_URL=http://localhost:8080
-# export TEST_DIR="/tmp/salmon/test"
+export WS_SERVER_URL=http://localhost:8080
+export TEST_DIR="/tmp/salmon/test"
 # export ENABLE_GPU=false
 export TEST_MODE=WebService
 

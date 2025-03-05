@@ -1,6 +1,6 @@
 set CURRDIR=%CD%
 
-:: set TEST_DIR="d:/tmp/salmon/test"
+set TEST_DIR="d:/tmp/salmon/test"
 :: set ENABLE_GPU=false
 set TEST_MODE=Local
 
