@@ -33,11 +33,18 @@ public class SalmonCorePerfTests
 {
     public static int TEST_PERF_SIZE = 8 * 1024 * 1024;
 
-    static SalmonCorePerfTests() {
-        //SalmonCoreTestHelper.TEST_ENC_BUFFER_SIZE = 8 * 1024 * 1024;
+	[ClassInitialize]
+    public static void ClassInitialize(TestContext testContext)
+    {
+		int threads = Environment.GetEnvironmentVariable("ENC_THREADS") != null && !Environment.GetEnvironmentVariable("ENC_THREADS").Equals("") ?
+			int.Parse(Environment.GetEnvironmentVariable("ENC_THREADS")) : 1;
+		
+		Console.WriteLine("threads: " + threads);
+
+		//SalmonCoreTestHelper.TEST_ENC_BUFFER_SIZE = 8 * 1024 * 1024;
         //SalmonCoreTestHelper.TEST_DEC_BUFFER_SIZE = 8 * 1024 * 1024;
-        SalmonCoreTestHelper.TEST_ENC_THREADS = 1;
-        SalmonCoreTestHelper.TEST_DEC_THREADS = 1;
+        SalmonCoreTestHelper.TEST_ENC_THREADS = threads;
+        SalmonCoreTestHelper.TEST_DEC_THREADS = threads;
     }
 
     [TestInitialize]

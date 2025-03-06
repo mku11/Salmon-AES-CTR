@@ -49,34 +49,40 @@ public class SalmonFSTests
 		TestMode testMode = Environment.GetEnvironmentVariable("TEST_MODE") != null 
 			&& !Environment.GetEnvironmentVariable("TEST_DIR").Equals("") ? 
 			(TestMode) Enum.Parse(typeof(TestMode), Environment.GetEnvironmentVariable("TEST_MODE")) : TestMode.Local;
+		int threads = Environment.GetEnvironmentVariable("ENC_THREADS") != null && !Environment.GetEnvironmentVariable("ENC_THREADS").Equals("") ?
+			int.Parse(Environment.GetEnvironmentVariable("ENC_THREADS")) : 1;
 			
-        Console.WriteLine("testDirEnv: " + Environment.GetEnvironmentVariable("TEST_DIR"));
-        Console.WriteLine("testModeEnv: " + Environment.GetEnvironmentVariable("TEST_MODE"));
 		SalmonFSTestHelper.SetTestParams(testDir, testMode);
 		Console.WriteLine("testDir: " + testDir);
         Console.WriteLine("testMode: " + testMode);
+		Console.WriteLine("threads: " + threads);
         Console.WriteLine("ws server url: " + SalmonFSTestHelper.WS_SERVER_URL);
 		
         SalmonFSTestHelper.TEST_IMPORT_FILE = SalmonFSTestHelper.TEST_IMPORT_LARGE_FILE;
 
         // SalmonCoreTestHelper.TEST_ENC_BUFFER_SIZE = 1 * 1024 * 1024;
         // SalmonCoreTestHelper.TEST_DEC_BUFFER_SIZE = 1 * 1024 * 1024;
-        SalmonCoreTestHelper.TEST_ENC_THREADS = 2;
-        SalmonCoreTestHelper.TEST_DEC_THREADS = 2;
+        SalmonCoreTestHelper.TEST_ENC_THREADS = threads;
+        SalmonCoreTestHelper.TEST_DEC_THREADS = threads;
 
         SalmonFSTestHelper.ENC_IMPORT_BUFFER_SIZE = 512 * 1024;
-        SalmonFSTestHelper.ENC_IMPORT_THREADS = 2;
+        SalmonFSTestHelper.ENC_IMPORT_THREADS = threads;
         SalmonFSTestHelper.ENC_EXPORT_BUFFER_SIZE = 512 * 1024;
-        SalmonFSTestHelper.ENC_EXPORT_THREADS = 2;
+        SalmonFSTestHelper.ENC_EXPORT_THREADS = threads;
 
-        SalmonFSTestHelper.TEST_FILE_INPUT_STREAM_THREADS = 2;
+        SalmonFSTestHelper.TEST_FILE_INPUT_STREAM_THREADS = threads;
         SalmonFSTestHelper.TEST_USE_FILE_INPUT_STREAM = false;
 
         SalmonCoreTestHelper.Initialize();
         SalmonFSTestHelper.Initialize();
 
-        // use the native library
-        SalmonStream.AesProviderType = ProviderType.AesIntrinsics;
+        ProviderType providerType = ProviderType.Default;
+		string aesProviderType = Environment.GetEnvironmentVariable("AES_PROVIDER_TYPE");
+		if(aesProviderType != null && !aesProviderType.Equals(""))
+			providerType = (ProviderType) Enum.Parse(typeof(ProviderType), aesProviderType);
+		Console.WriteLine("ProviderType: " + providerType);
+		
+        SalmonStream.AesProviderType = providerType;
     }
 
     [ClassCleanup]

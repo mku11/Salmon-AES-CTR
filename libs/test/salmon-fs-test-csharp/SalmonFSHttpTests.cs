@@ -43,11 +43,15 @@ public class SalmonFSHttpTests
         SalmonFSHttpTests.oldTestMode = SalmonFSTestHelper.currTestMode;
 		string testDir = Environment.GetEnvironmentVariable("TEST_DIR") 
 			?? "d:\\tmp\\salmon\\test";
+		// use TestMode: Http only
 		TestMode testMode = TestMode.Http;
-        // use TestMode: Http only
+		int threads = Environment.GetEnvironmentVariable("ENC_THREADS") != null && !Environment.GetEnvironmentVariable("ENC_THREADS").Equals("") ?
+			int.Parse(Environment.GetEnvironmentVariable("ENC_THREADS")) : 1;
+			
         SalmonFSTestHelper.SetTestParams(testDir, testMode);
 		Console.WriteLine("testDir: " + testDir);
         Console.WriteLine("testMode: " + testMode);
+		Console.WriteLine("threads: " + threads);
         Console.WriteLine("http server url: " + SalmonFSTestHelper.HTTP_SERVER_URL);
         Console.WriteLine("HTTP_VAULT_DIR_URL: " + SalmonFSTestHelper.HTTP_VAULT_DIR_URL);
 		
@@ -55,15 +59,15 @@ public class SalmonFSHttpTests
 
         // SalmonCoreTestHelper.TEST_ENC_BUFFER_SIZE = 1 * 1024 * 1024;
         // SalmonCoreTestHelper.TEST_DEC_BUFFER_SIZE = 1 * 1024 * 1024;
-        SalmonCoreTestHelper.TEST_ENC_THREADS = 2;
-        SalmonCoreTestHelper.TEST_DEC_THREADS = 2;
+        SalmonCoreTestHelper.TEST_ENC_THREADS = threads;
+        SalmonCoreTestHelper.TEST_DEC_THREADS = threads;
 
         SalmonFSTestHelper.ENC_IMPORT_BUFFER_SIZE = 512 * 1024;
-        SalmonFSTestHelper.ENC_IMPORT_THREADS = 2;
+        SalmonFSTestHelper.ENC_IMPORT_THREADS = threads;
         SalmonFSTestHelper.ENC_EXPORT_BUFFER_SIZE = 512 * 1024;
-        SalmonFSTestHelper.ENC_EXPORT_THREADS = 2;
+        SalmonFSTestHelper.ENC_EXPORT_THREADS = threads;
 
-        SalmonFSTestHelper.TEST_FILE_INPUT_STREAM_THREADS = 2;
+        SalmonFSTestHelper.TEST_FILE_INPUT_STREAM_THREADS = threads;
         SalmonFSTestHelper.TEST_USE_FILE_INPUT_STREAM = true;
 
         SalmonCoreTestHelper.Initialize();
@@ -73,8 +77,12 @@ public class SalmonFSHttpTests
         // or start the test case from gradle:
         // gradlew.bat :salmon-ws:test --tests "com.mku.salmon.ws.fs.service.test.SalmonWSTests.testStartServer" --rerun-tasks
 
-        // use the native library
-        SalmonStream.AesProviderType = ProviderType.Default;
+        ProviderType providerType = ProviderType.Default;
+		string aesProviderType = Environment.GetEnvironmentVariable("AES_PROVIDER_TYPE");
+		if(aesProviderType != null && !aesProviderType.Equals(""))
+			providerType = (ProviderType) Enum.Parse(typeof(ProviderType), aesProviderType);
+		Console.WriteLine("ProviderType: " + providerType);
+        SalmonStream.AesProviderType = providerType;
     }
 
     [ClassCleanup]

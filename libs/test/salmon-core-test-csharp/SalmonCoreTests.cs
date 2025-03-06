@@ -36,23 +36,31 @@ namespace Mku.Salmon.Test;
 [TestClass]
 public class SalmonCoreTests
 {
-    static SalmonCoreTests()
+	[ClassInitialize]
+    public static void ClassInitialize(TestContext testContext)
     {
-        //SalmonCoreTestHelper.TEST_ENC_BUFFER_SIZE = 1 * 1024 * 1024;
+		int threads = Environment.GetEnvironmentVariable("ENC_THREADS") != null && !Environment.GetEnvironmentVariable("ENC_THREADS").Equals("") ?
+			int.Parse(Environment.GetEnvironmentVariable("ENC_THREADS")) : 1;
+		
+		Console.WriteLine("threads: " + threads);
+		//SalmonCoreTestHelper.TEST_ENC_BUFFER_SIZE = 1 * 1024 * 1024;
         //SalmonCoreTestHelper.TEST_DEC_BUFFER_SIZE = 1 * 1024 * 1024;
-        SalmonCoreTestHelper.TEST_ENC_THREADS = 1;
-        SalmonCoreTestHelper.TEST_DEC_THREADS = 1;
+        SalmonCoreTestHelper.TEST_ENC_THREADS = threads;
+        SalmonCoreTestHelper.TEST_DEC_THREADS = threads;
+		
+		SalmonCoreTestHelper.Initialize();
+		
+		ProviderType providerType = ProviderType.Default;
+		string aesProviderType = Environment.GetEnvironmentVariable("AES_PROVIDER_TYPE");
+		if(aesProviderType != null && !aesProviderType.Equals(""))
+			providerType = (ProviderType) Enum.Parse(typeof(ProviderType), aesProviderType);
+		Console.WriteLine("ProviderType: " + providerType);
+
+		SalmonStream.AesProviderType = providerType;
     }
 
-    [TestInitialize]
-    public void Init()
-    {
-        SalmonStream.AesProviderType = ProviderType.Aes;
-        SalmonCoreTestHelper.Initialize();
-    }
-
-    [TestCleanup]
-    public void AfterEach()
+    [ClassCleanup]
+    public static void ClassCleanup()
     {
         SalmonCoreTestHelper.Close();
     }

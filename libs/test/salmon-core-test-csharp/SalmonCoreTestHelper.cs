@@ -81,9 +81,19 @@ public class SalmonCoreTestHelper
 
     internal static void Initialize()
     {
+		Console.WriteLine("closing core helper");
         SalmonCoreTestHelper.hashProvider = new HmacSHA256Provider();
         SalmonCoreTestHelper.encryptor = new SalmonEncryptor(SalmonCoreTestHelper.TEST_ENC_THREADS, TEST_ENC_BUFFER_SIZE);
         SalmonCoreTestHelper.decryptor = new SalmonDecryptor(SalmonCoreTestHelper.TEST_DEC_THREADS, TEST_DEC_BUFFER_SIZE);
+    }
+	
+	internal static void Close()
+    {
+		Console.WriteLine("closing core helper");
+		if(SalmonCoreTestHelper.encryptor != null)
+			SalmonCoreTestHelper.encryptor.Close();
+		if(SalmonCoreTestHelper.decryptor != null)
+			SalmonCoreTestHelper.decryptor.Close();
     }
 
     internal static SalmonEncryptor GetEncryptor()
@@ -94,14 +104,6 @@ public class SalmonCoreTestHelper
     internal static SalmonDecryptor GetDecryptor()
     {
         return SalmonCoreTestHelper.decryptor;
-    }
-
-    internal static void Close()
-    {
-		if(SalmonCoreTestHelper.encryptor != null)
-			SalmonCoreTestHelper.encryptor.Close();
-		if(SalmonCoreTestHelper.decryptor != null)
-			SalmonCoreTestHelper.decryptor.Close();
     }
 	
 	internal static bool IsGPUEnabled() {
@@ -439,7 +441,6 @@ public class SalmonCoreTestHelper
 
     public static void TestCounterValue(string text, byte[] key, byte[] nonce, long counter)
     {
-        SalmonStream.AesProviderType = ProviderType.Default;
         byte[] testTextBytes = UTF8Encoding.UTF8.GetBytes(text);
         MemoryStream ms = new MemoryStream(testTextBytes);
         SalmonStream stream = new SalmonStream(key, nonce, EncryptionMode.Encrypt, ms,
