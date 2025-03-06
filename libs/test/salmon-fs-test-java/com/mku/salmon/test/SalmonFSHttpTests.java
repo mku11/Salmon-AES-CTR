@@ -55,10 +55,14 @@ public class SalmonFSHttpTests {
 		String testDir = System.getProperty("TEST_DIR");
         // use TestMode: Http only
 		TestMode testMode = TestMode.Http;
+		int threads = System.getProperty("ENC_THREADS") != null && !System.getProperty("ENC_THREADS").equals("") ?
+			Integer.parseInt(System.getProperty("ENC_THREADS")) : 1;
+			
         SalmonFSTestHelper.setTestParams(testDir, testMode);
 		
 		System.out.println("testDir: " + testDir);
         System.out.println("testMode: " + testMode);
+		System.out.println("threads: " + threads);
         System.out.println("http server url: " + SalmonFSTestHelper.HTTP_SERVER_URL);
         System.out.println("HTTP_VAULT_DIR_URL: " + SalmonFSTestHelper.HTTP_VAULT_DIR_URL);
 
@@ -66,15 +70,15 @@ public class SalmonFSHttpTests {
 
         // SalmonCoreTestHelper.TEST_ENC_BUFFER_SIZE = 1 * 1024 * 1024;
         // SalmonCoreTestHelper.TEST_DEC_BUFFER_SIZE = 1 * 1024 * 1024;
-        SalmonCoreTestHelper.TEST_ENC_THREADS = 2;
-        SalmonCoreTestHelper.TEST_DEC_THREADS = 2;
+        SalmonCoreTestHelper.TEST_ENC_THREADS = threads;
+        SalmonCoreTestHelper.TEST_DEC_THREADS = threads;
 
         SalmonFSTestHelper.ENC_IMPORT_BUFFER_SIZE = 512 * 1024;
-        SalmonFSTestHelper.ENC_IMPORT_THREADS = 2;
+        SalmonFSTestHelper.ENC_IMPORT_THREADS = threads;
         SalmonFSTestHelper.ENC_EXPORT_BUFFER_SIZE = 512 * 1024;
-        SalmonFSTestHelper.ENC_EXPORT_THREADS = 2;
+        SalmonFSTestHelper.ENC_EXPORT_THREADS = threads;
 
-        SalmonFSTestHelper.TEST_FILE_INPUT_STREAM_THREADS = 2;
+        SalmonFSTestHelper.TEST_FILE_INPUT_STREAM_THREADS = threads;
         SalmonFSTestHelper.TEST_USE_FILE_INPUT_STREAM = true;
 
         SalmonCoreTestHelper.initialize();
@@ -82,10 +86,17 @@ public class SalmonFSHttpTests {
 
         // for remote drive make sure you turn on the web service either manually
         // or start the test case from gradle:
-        // gradlew.bat :salmon-ws:test --tests "com.mku.salmon.ws.fs.service.test.SalmonWSTests.testStartServer" --rerun-tasks
+        // gradlew.bat :salmon-ws:test --tests "com.mku.salmon.ws.fs.service.test.SalmonWSTests.testStartServer" --rerun-tasks -i
 
         // use the native library
-        SalmonStream.setAesProviderType(ProviderType.Default);
+		ProviderType providerType = ProviderType.Default;
+		String aesProviderType = System.getProperty("AES_PROVIDER_TYPE");
+		System.out.println("ProviderTypeEnv: " + aesProviderType);
+		if(aesProviderType != null && !aesProviderType.equals(""))
+			providerType = ProviderType.valueOf(aesProviderType);
+		System.out.println("ProviderType: " + providerType);
+		
+        SalmonStream.setAesProviderType(providerType);
     }
 
     @AfterAll
