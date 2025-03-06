@@ -141,7 +141,7 @@ public class RealFileController {
      */
     @PostMapping("/upload")
     public ResponseEntity<RealFileNode> upload(@RequestParam("file") MultipartFile file, String path, Long position) throws IOException {
-		System.out.println("upload path="+path+",position="+position+",size=" + file.getSize());
+		System.out.println("upload: path="+path+",position="+position+",size=" + file.getSize());
         IRealFile rFile = FileSystem.getInstance().write(path, file, position);
         return new ResponseEntity<>(new RealFileNode(rFile), position > 0 ? HttpStatus.PARTIAL_CONTENT : HttpStatus.OK);
     }
