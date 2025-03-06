@@ -52,7 +52,19 @@ public class SalmonNativeTests
     [TestInitialize]
     public void Init()
     {
-        SalmonStream.AesProviderType = ProviderType.Aes;
+		ProviderType providerType = ProviderType.Aes;
+		String aesProviderType = Environment.GetEnvironmentVariable("AES_PROVIDER_TYPE");
+		if(aesProviderType != null && !aesProviderType.Equals(""))
+			providerType = (ProviderType) Enum.Parse(typeof(ProviderType),aesProviderType);
+		int threads = Environment.GetEnvironmentVariable("ENC_THREADS") != null && !Environment.GetEnvironmentVariable("ENC_THREADS").Equals("") ?
+			int.Parse(Environment.GetEnvironmentVariable("ENC_THREADS")) : 1;
+
+		Console.WriteLine("ProviderType: " + providerType);
+		Console.WriteLine("threads: " + threads);
+
+		SalmonStream.AesProviderType = providerType;
+		ENC_THREADS = threads;
+		DEC_THREADS = threads;
     }
 
     [TestMethod]
