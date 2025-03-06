@@ -289,6 +289,7 @@ class SalmonFSTestHelper:
 
     @staticmethod
     def initialize():
+        print("init fs helper")
         SalmonFSTestHelper.file_importer = SalmonFileImporter(SalmonFSTestHelper.ENC_IMPORT_BUFFER_SIZE,
                                                               SalmonFSTestHelper.ENC_IMPORT_THREADS,
                                                               SalmonFSTestHelper.ENABLE_MULTI_CPU)
@@ -298,8 +299,11 @@ class SalmonFSTestHelper:
 
     @staticmethod
     def close():
-        SalmonFSTestHelper.file_importer.close()
-        SalmonFSTestHelper.file_exporter.close()
+        print("closing fs helper")
+        if SalmonFSTestHelper.file_importer:
+            SalmonFSTestHelper.file_importer.close()
+        if SalmonFSTestHelper.file_exporter:
+            SalmonFSTestHelper.file_exporter.close()
 
     @staticmethod
     def create_salmon_file_sequencer() -> SalmonFileSequencer:

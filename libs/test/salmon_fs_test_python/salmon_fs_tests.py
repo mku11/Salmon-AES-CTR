@@ -57,25 +57,25 @@ class SalmonFSTests(TestCase):
         
         test_dir: str = os.getenv("TEST_DIR", "d:\\tmp\\salmon\\test")
         test_mode: TestMode = TestMode[os.getenv("TEST_MODE")] if os.getenv("TEST_MODE") else TestMode.Local
+        threads: int = int(os.getenv("ENC_THREADS")) if os.getenv("ENC_THREADS") else 1
 
-        print("test_dir: " + test_dir)
-        print("test_mode: " + str(test_mode))
         SalmonFSTestHelper.set_test_params(test_dir, test_mode)
         print("test_dir: " + test_dir)
         print("test_mode: " + str(test_mode))
+        print("threads: " + str(threads))
         print("ws server url: " + SalmonFSTestHelper.WS_SERVER_URL)
 
         SalmonFSTestHelper.TEST_IMPORT_FILE = SalmonFSTestHelper.TEST_IMPORT_MEDIUM_FILE
 
         # SalmonCoreTestHelper.TEST_ENC_BUFFER_SIZE = 1 * 1024 * 1024
         # SalmonCoreTestHelper.TEST_DEC_BUFFER_SIZE = 1 * 1024 * 1024
-        SalmonCoreTestHelper.TEST_ENC_THREADS = 2
-        SalmonCoreTestHelper.TEST_DEC_THREADS = 2
+        SalmonCoreTestHelper.TEST_ENC_THREADS = threads
+        SalmonCoreTestHelper.TEST_DEC_THREADS = threads
 
         SalmonFSTestHelper.ENC_IMPORT_BUFFER_SIZE = 512 * 1024
-        SalmonFSTestHelper.ENC_IMPORT_THREADS = 2
+        SalmonFSTestHelper.ENC_IMPORT_THREADS = threads
         SalmonFSTestHelper.ENC_EXPORT_BUFFER_SIZE = 512 * 1024
-        SalmonFSTestHelper.ENC_EXPORT_THREADS = 2
+        SalmonFSTestHelper.ENC_EXPORT_THREADS = threads
         SalmonFSTestHelper.ENABLE_MULTI_CPU = True
 
         SalmonFSTestHelper.TEST_FILE_INPUT_STREAM_THREADS = 2
@@ -84,7 +84,10 @@ class SalmonFSTests(TestCase):
         SalmonCoreTestHelper.initialize()
         SalmonFSTestHelper.initialize()
 
-        # use the native library
+        provider_type: ProviderType = ProviderType[os.getenv("AES_PROVIDER_TYPE")] if os.getenv(
+            "AES_PROVIDER_TYPE") else ProviderType.Default
+        print("ProviderType: " + str(provider_type))
+
         SalmonStream.set_aes_provider_type(ProviderType.Default)
 
     @classmethod

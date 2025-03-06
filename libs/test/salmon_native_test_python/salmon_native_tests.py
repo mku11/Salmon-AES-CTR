@@ -24,11 +24,14 @@ SOFTWARE.
 '''
 
 from __future__ import annotations
+
+import platform
 from unittest import TestCase
 
 from typeguard import typechecked
 
-import os,sys
+import os, sys
+
 sys.path.append(os.path.dirname(__file__) + '/../../src/python/salmon_core')
 sys.path.append(os.path.dirname(__file__) + '/../salmon_core_test_python')
 
@@ -51,10 +54,29 @@ class SalmonNativeTests(TestCase):
     SalmonPassword.set_pbkdf_type(PbkdfType.Default)
 
     def setUp(self):
-        NativeProxy.set_library_path("../../projects/salmon-libs-gradle/salmon-native/build/libs/salmon/shared/salmon.dll")
-        # linux
-        # NativeProxy.set_library_path("../../projects/salmon-libs-gradle/salmon-native/build/libs/salmon/shared/libsalmon.so")
-        SalmonStream.set_aes_provider_type(ProviderType.AesGPU)
+        # set native library path
+        platform_os: str = platform.system().upper()
+        if "WIN" in platform_os:
+            NativeProxy.set_library_path(
+                "../../projects/salmon-libs-gradle/salmon-native/build/libs/salmon/shared/salmon.dll")
+        elif "MAC" in platform_os:
+            NativeProxy.set_library_path(
+                "../../projects/salmon-libs-xcode-macos/salmon/DerivedData/salmon/Build/Products/Release/libsalmon.dylib")
+        elif "LINUX" in platform_os:
+            NativeProxy.set_library_path(
+                "../../projects/salmon-libs-gradle/salmon-native/build/libs/salmon/shared/libsalmon.so")
+
+        provider_type: ProviderType = ProviderType[os.getenv("AES_PROVIDER_TYPE")] if os.getenv(
+            "AES_PROVIDER_TYPE") else ProviderType.Default
+        print("ProviderType: " + str(provider_type))
+        threads: int = int(os.getenv("ENC_THREADS")) if os.getenv("ENC_THREADS") else 1
+
+        print("ProviderType: " + str(provider_type))
+        print("threads: " + str(threads))
+
+        SalmonStream.set_aes_provider_type(provider_type)
+        SalmonNativeTests.ENC_THREADS = threads
+        SalmonNativeTests.DEC_THREADS = threads
 
     def test_encrypt_and_decrypt_native_text_compatible(self):
         plain_text = SalmonCoreTestHelper.TEST_TEXT  # [0:16]

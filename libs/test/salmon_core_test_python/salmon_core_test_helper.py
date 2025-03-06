@@ -92,6 +92,7 @@ class SalmonCoreTestHelper:
 
     @staticmethod
     def initialize():
+        print("init core helper")
         SalmonCoreTestHelper.hashProvider = HmacSHA256Provider()
         SalmonCoreTestHelper.encryptor = SalmonEncryptor(SalmonCoreTestHelper.TEST_ENC_THREADS)
         SalmonCoreTestHelper.decryptor = SalmonDecryptor(SalmonCoreTestHelper.TEST_DEC_THREADS)
@@ -106,17 +107,20 @@ class SalmonCoreTestHelper:
             NativeProxy.set_library_path("../../projects/salmon-libs-gradle/salmon-native/build/libs/salmon/shared/libsalmon.so")
 
     @staticmethod
+    def close():
+        print("closing core helper")
+        if SalmonCoreTestHelper.encryptor:
+            SalmonCoreTestHelper.encryptor.close()
+        if SalmonCoreTestHelper.decryptor:
+            SalmonCoreTestHelper.decryptor.close()
+
+    @staticmethod
     def get_encryptor() -> SalmonEncryptor:
         return SalmonCoreTestHelper.encryptor
 
     @staticmethod
     def get_decryptor() -> SalmonDecryptor:
         return SalmonCoreTestHelper.decryptor
-
-    @staticmethod
-    def close():
-        SalmonCoreTestHelper.encryptor.close()
-        SalmonCoreTestHelper.decryptor.close()
 
     @staticmethod
     def assert_equal(a, b):
@@ -429,7 +433,6 @@ class SalmonCoreTestHelper:
 
     @staticmethod
     def test_counter_value(text, key, nonce, counter: int):
-        SalmonStream.set_aes_provider_type(ProviderType.Default)
         test_text_bytes = bytearray(text.encode('utf-8'))
         ms = MemoryStream(test_text_bytes)
         stream: SalmonStream = SalmonStream(key, nonce, EncryptionMode.Encrypt, ms,

@@ -58,9 +58,12 @@ class SalmonFSHttpTests(TestCase):
         
         test_dir: str = os.getenv("TEST_DIR", "d:\\tmp\\salmon\\test")
         test_mode: TestMode = TestMode.Http
+        threads: int = int(os.getenv("ENC_THREADS")) if os.getenv("ENC_THREADS") else 1
+
         SalmonFSTestHelper.set_test_params(test_dir, test_mode)
         print("test_dir", test_dir)
         print("test_mode", test_mode)
+        print("threads", threads)
         print("http server url: ", SalmonFSTestHelper.HTTP_SERVER_URL)
         print("HTTP_VAULT_DIR_URL: ", SalmonFSTestHelper.HTTP_VAULT_DIR_URL)
         
@@ -68,23 +71,26 @@ class SalmonFSHttpTests(TestCase):
 
         # SalmonCoreTestHelper.TEST_ENC_BUFFER_SIZE = 1 * 1024 * 1024
         # SalmonCoreTestHelper.TEST_DEC_BUFFER_SIZE = 1 * 1024 * 1024
-        SalmonCoreTestHelper.TEST_ENC_THREADS = 2
-        SalmonCoreTestHelper.TEST_DEC_THREADS = 2
+        SalmonCoreTestHelper.TEST_ENC_THREADS = threads
+        SalmonCoreTestHelper.TEST_DEC_THREADS = threads
 
         SalmonFSTestHelper.ENC_IMPORT_BUFFER_SIZE = 512 * 1024
-        SalmonFSTestHelper.ENC_IMPORT_THREADS = 2
+        SalmonFSTestHelper.ENC_IMPORT_THREADS = threads
         SalmonFSTestHelper.ENC_EXPORT_BUFFER_SIZE = 512 * 1024
-        SalmonFSTestHelper.ENC_EXPORT_THREADS = 2
+        SalmonFSTestHelper.ENC_EXPORT_THREADS = threads
         SalmonFSTestHelper.ENABLE_MULTI_CPU = True
 
-        SalmonFSTestHelper.TEST_FILE_INPUT_STREAM_THREADS = 2
+        SalmonFSTestHelper.TEST_FILE_INPUT_STREAM_THREADS = threads
         SalmonFSTestHelper.TEST_USE_FILE_INPUT_STREAM = True
 
         SalmonCoreTestHelper.initialize()
         SalmonFSTestHelper.initialize()
 
-        # use the native library
-        SalmonStream.set_aes_provider_type(ProviderType.Default)
+        provider_type: ProviderType = ProviderType[os.getenv("AES_PROVIDER_TYPE")] if os.getenv(
+            "AES_PROVIDER_TYPE") else ProviderType.Default
+        print("ProviderType: " + str(provider_type))
+
+        SalmonStream.set_aes_provider_type(provider_type)
 
     @classmethod
     def tearDownClass(cls):

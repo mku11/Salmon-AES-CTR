@@ -26,7 +26,8 @@ import time
 import traceback
 from unittest import TestCase
 
-import os,sys
+import os, sys
+
 sys.path.append(os.path.dirname(__file__) + '/../../src/python/salmon_core')
 
 from salmon_core.convert.bit_converter import BitConverter
@@ -49,16 +50,24 @@ from typeguard import typechecked, TypeCheckError
 
 @typechecked
 class SalmonCoreTests(TestCase):
-    SalmonCoreTestHelper.TEST_ENC_BUFFER_SIZE = 1 * 1024 * 1024
-    SalmonCoreTestHelper.TEST_DEC_BUFFER_SIZE = 1 * 1024 * 1024
-    SalmonCoreTestHelper.TEST_ENC_THREADS = 2
-    SalmonCoreTestHelper.TEST_DEC_THREADS = 2
 
     @classmethod
     def setUpClass(cls):
+        threads: int = int(os.getenv("ENC_THREADS")) if os.getenv("ENC_THREADS") else 1
+        print("threads: " + str(threads))
+
+        # SalmonCoreTestHelper.TEST_ENC_BUFFER_SIZE = 1 * 1024 * 1024
+        # SalmonCoreTestHelper.TEST_DEC_BUFFER_SIZE = 1 * 1024 * 1024
+        SalmonCoreTestHelper.TEST_ENC_THREADS = threads
+        SalmonCoreTestHelper.TEST_DEC_THREADS = threads
+
         SalmonCoreTestHelper.initialize()
-        SalmonStream.set_aes_provider_type(ProviderType.Default)
-    
+
+        provider_type: ProviderType = ProviderType[os.getenv("AES_PROVIDER_TYPE")] if os.getenv(
+            "AES_PROVIDER_TYPE") else ProviderType.Default
+        print("ProviderType: " + str(provider_type))
+        SalmonStream.set_aes_provider_type(provider_type)
+
     @classmethod
     def tearDownClass(cls):
         SalmonCoreTestHelper.close()
