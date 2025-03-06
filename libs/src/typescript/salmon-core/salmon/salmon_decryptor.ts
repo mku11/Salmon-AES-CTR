@@ -192,6 +192,8 @@ export class SalmonDecryptor {
                 if (typeof process !== 'object') {
                     if (this.#workers[i] == null)
                         this.#workers[i] = new Worker(this.#workerPath, { type: 'module' });
+                    this.#workers[i].removeEventListener('error', null);
+				    this.#workers[i].removeEventListener('message', null);
                     this.#workers[i].addEventListener('message', (event: { data: unknown }) => {
                         if(event.data instanceof Error)
 							reject(event.data);
@@ -205,6 +207,7 @@ export class SalmonDecryptor {
                     const { Worker } = await import("worker_threads");
                     if (this.#workers[i] == null)
                         this.#workers[i] = new Worker(this.#workerPath);
+                    this.#workers[i].removeAllListeners();
                     this.#workers[i].on('message', (event: any) => {
                         if(event instanceof Error)
 							reject(event);

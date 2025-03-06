@@ -197,7 +197,10 @@ export class SalmonEncryptor {
         for (let i = 0; i < runningThreads; i++) {
             this.#promises.push(new Promise(async (resolve, reject) => {
                 if (typeof process !== 'object') {
-                    this.#workers[i] = new Worker(this.#workerPath, { type: 'module' });
+                    if(this.#workers[i] == null)
+                        this.#workers[i] = new Worker(this.#workerPath, { type: 'module' });
+                    this.#workers[i].removeEventListener('error', null);
+				    this.#workers[i].removeEventListener('message', null);
                     this.#workers[i].addEventListener('message', (event: { data: unknown }) => {
                         if(event.data instanceof Error)
 							reject(event.data);
@@ -209,7 +212,9 @@ export class SalmonEncryptor {
                     });
                 } else {
                     const { Worker } = await import("worker_threads");
-                    this.#workers[i] = new Worker(this.#workerPath);
+                    if(this.#workers[i] == null)
+                        this.#workers[i] = new Worker(this.#workerPath);
+                    this.#workers[i].removeAllListeners();
                     this.#workers[i].on('message', (event: any) => {
 						if(event.data instanceof Error)
 							reject(event);
@@ -253,7 +258,7 @@ export class SalmonEncryptor {
     public close(): void {
         for(let i=0; i<this.#workers.length; i++) {
             this.#workers[i].terminate();
-            this.#workers[i] = null;       
+            this.#workers[i] = null; 
         }
         this.#promises = [];
     }
