@@ -22,6 +22,8 @@ test {
     useJUnitPlatform()
     systemProperty "java.library.path", "../salmon-native/build/libs/salmon/shared"
 	systemProperty "ENABLE_GPU", System.getProperty('ENABLE_GPU')
+	systemProperty "AES_PROVIDER_TYPE", System.getProperty('AES_PROVIDER_TYPE')
+	systemProperty "ENC_THREADS", System.getProperty('ENC_THREADS', "1")
 }
 
 tasks.withType(Test) {

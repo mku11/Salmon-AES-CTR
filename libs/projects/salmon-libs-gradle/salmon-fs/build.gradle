@@ -28,6 +28,8 @@ test {
 	systemProperty 'TEST_DIR', System.getProperty('TEST_DIR', "d:\\tmp\\salmon\\test")
 	systemProperty 'TEST_MODE', System.getProperty('TEST_MODE', "Local")
 	systemProperty 'ENABLE_GPU', System.getProperty('ENABLE_GPU', "false")
+	systemProperty "AES_PROVIDER_TYPE", System.getProperty('AES_PROVIDER_TYPE')
+	systemProperty "ENC_THREADS", System.getProperty('ENC_THREADS')
 	systemProperty 'HTTP_SERVER_URL', System.getProperty('HTTP_SERVER_URL', "http://localhost:8000")
 	systemProperty 'WS_SERVER_URL', System.getProperty('WS_SERVER_URL', "http://localhost:8080")
 	afterTest { desc, result -> 
