@@ -48,7 +48,19 @@ public class SalmonNativeTests {
 
     @BeforeEach
     public void init() {
-        SalmonStream.setAesProviderType(ProviderType.Aes);
+		ProviderType providerType = ProviderType.Aes;
+		String aesProviderType = System.getProperty("AES_PROVIDER_TYPE");
+		if(aesProviderType != null && !aesProviderType.equals(""))
+			providerType = ProviderType.valueOf(aesProviderType);
+		int threads = System.getProperty("ENC_THREADS") != null && !System.getProperty("ENC_THREADS").equals("") ?
+			Integer.parseInt(System.getProperty("ENC_THREADS")) : 1;
+			
+		System.out.println("ProviderType: " + providerType);
+		System.out.println("threads: " + threads);
+		
+        SalmonStream.setAesProviderType(providerType);
+		ENC_THREADS = threads;
+		DEC_THREADS = threads;
     }
 
     @Test
