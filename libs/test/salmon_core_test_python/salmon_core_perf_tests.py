@@ -33,7 +33,6 @@ from salmon_core.salmon.streams.salmon_stream import SalmonStream
 
 from typeguard import typechecked
 
-from salmon_core.salmon.bridge.native_proxy import NativeProxy
 from salmon_core_test_helper import SalmonCoreTestHelper
 
 
