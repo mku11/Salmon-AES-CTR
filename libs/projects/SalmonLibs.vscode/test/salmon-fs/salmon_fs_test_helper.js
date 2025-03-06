@@ -61,11 +61,15 @@ export const TestRunnerMode = {
 
 let currTestMode = null;
 let currTestRunnerMode = null;
+let currTestThreads = 1;
 export function getTestMode() {
 	return currTestMode;
 }
 export function getTestRunnerMode() {
 	return currTestRunnerMode;
+}
+export function getTestThreads() {
+	return currTestThreads;
 }
 
 export class SalmonFSTestHelper {
@@ -139,9 +143,14 @@ export class SalmonFSTestHelper {
     static sequenceSerializer = new SalmonSequenceSerializer();
     
     // testDir can be a path or a fileHandle
-	static async setTestParams(testDir,testMode,testRunnerMode) {
+	static async setTestParams(testDir,testMode,testRunnerMode,threads=1) {
         currTestMode = testMode;
         currTestRunnerMode = testRunnerMode;
+        currTestThreads = threads;
+
+		SalmonFSTestHelper.ENC_IMPORT_THREADS = threads;
+		SalmonFSTestHelper.ENC_EXPORT_THREADS = threads;
+		SalmonFSTestHelper.TEST_FILE_INPUT_STREAM_THREADS = threads;
 
         if (testMode == TestMode.Local) {
             const { JsDrive } = await import('../../lib/salmon-fs/salmon/drive/js_drive.js');
@@ -269,13 +278,17 @@ export class SalmonFSTestHelper {
 	}
 
     static initialize() {
+		console.log("init fs helper");
         SalmonFSTestHelper.fileImporter = new SalmonFileImporter(SalmonFSTestHelper.ENC_IMPORT_BUFFER_SIZE, SalmonFSTestHelper.ENC_IMPORT_THREADS);
         SalmonFSTestHelper.fileExporter = new SalmonFileExporter(SalmonFSTestHelper.ENC_EXPORT_BUFFER_SIZE, SalmonFSTestHelper.ENC_EXPORT_THREADS);
     }
 
     static close() {
-        SalmonFSTestHelper.fileImporter.close();
-        SalmonFSTestHelper.fileExporter.close();
+		console.log("closing fs helper");
+		if(SalmonFSTestHelper.fileImporter)
+			SalmonFSTestHelper.fileImporter.close();
+		if(SalmonFSTestHelper.fileExporter)
+			SalmonFSTestHelper.fileExporter.close();
     }
 
     static async createSalmonFileSequencer() {

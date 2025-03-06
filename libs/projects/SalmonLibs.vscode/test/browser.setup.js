@@ -1,3 +1,4 @@
+import { SalmonCoreTestHelper } from "./salmon-core/salmon_core_test_helper.js";
 import { TestMode, TestRunnerMode, SalmonFSTestHelper } from "./salmon-fs/salmon_fs_test_helper.js";
 
 // TestMode:
@@ -7,6 +8,9 @@ import { TestMode, TestRunnerMode, SalmonFSTestHelper } from "./salmon-fs/salmon
 // Browser: to run in the browser
 var testMode = TestMode.Local;
 var testRunnerMode = TestRunnerMode.Browser;
+var testThreads = 1;
+var testDirHandle;
+var testSuite;
 	
 // browser test runner somewhat compatible with jest assertions
 var beforeTest = null;
@@ -19,9 +23,6 @@ var testCases = [];
 var stopOnError = false;
 var totalTestCases = 0;
 var passedTestCases = 0;
-
-// user defined test dir
-var testDirHandle;
 
 // set to run specific case
 // var testFilter = "shouldAuthorizePositive";
@@ -38,7 +39,17 @@ if(enableLogReport) {
 }
 
 window.execute = async function () {
-    let testSuite = document.getElementById("testSuite").value;
+    testSuite = document.getElementById("testSuite").value;
+	testThreads = Number.parseInt(document.getElementById("test-threads").value);
+	testMode = TestMode[document.getElementById("test-mode").value];
+    SalmonCoreTestHelper.setTestParams(testThreads);
+    if(testSuite !== "salmon-core") {
+        if(!testDirHandle) {
+            console.log("Select a Test Folder first");
+            return;
+        }
+        await SalmonFSTestHelper.setTestParams(testDirHandle, testMode, testRunnerMode, testThreads);
+    }
     await executeTestSuite(testSuite);
 }
 
@@ -48,7 +59,6 @@ function setLogArea(element) {
 
 async function selectTestFolder() {
     testDirHandle = await showDirectoryPicker({ id: 1, mode: "readwrite", multiple: false });
-    await SalmonFSTestHelper.setTestParams(testDirHandle, testMode, testRunnerMode);
 }
 
 async function it(testCaseName, callback) {

@@ -34,7 +34,6 @@ import { SeekOrigin } from '../../lib/salmon-core/streams/random_access_stream.j
 import { SalmonAES256CTRTransformer } from '../../lib/salmon-core/salmon/transform/salmon_aes256_ctr_transformer.js';
 import { SalmonStream } from '../../lib/salmon-core/salmon/streams/salmon_stream.js';
 import { EncryptionMode } from '../../lib/salmon-core/salmon/streams/encryption_mode.js';
-import { ProviderType } from '../../lib/salmon-core/salmon/streams/provider_type.js';
 
 export class SalmonCoreTestHelper {
     static TEST_ENC_BUFFER_SIZE = 512 * 1024;
@@ -69,10 +68,24 @@ export class SalmonCoreTestHelper {
     static encryptor;
     static decryptor;
 
+	static setTestParams(threads=1) {
+		SalmonCoreTestHelper.TEST_ENC_THREADS = threads;
+		SalmonCoreTestHelper.TEST_DEC_THREADS = threads;
+	}
+	
     static initialize() {
+		console.log("init core helper");
         SalmonCoreTestHelper.hashProvider = new HmacSHA256Provider();
         SalmonCoreTestHelper.encryptor = new SalmonEncryptor(SalmonCoreTestHelper.TEST_ENC_THREADS);
         SalmonCoreTestHelper.decryptor = new SalmonDecryptor(SalmonCoreTestHelper.TEST_DEC_THREADS);
+    }
+	
+    static close() {
+		console.log("closing core helper");
+		if(SalmonCoreTestHelper.encryptor)
+			SalmonCoreTestHelper.encryptor.close();
+		if(SalmonCoreTestHelper.decryptor)
+			SalmonCoreTestHelper.decryptor.close();
     }
 
     static getEncryptor() {
@@ -81,11 +94,6 @@ export class SalmonCoreTestHelper {
 
     static getDecryptor() {
         return SalmonCoreTestHelper.decryptor;
-    }
-
-    static close() {
-        SalmonCoreTestHelper.encryptor.close();
-        SalmonCoreTestHelper.decryptor.close();
     }
 
     static async seekAndGetSubstringByRead(reader, seek, readCount, seekOrigin) {
@@ -388,7 +396,6 @@ export class SalmonCoreTestHelper {
     }
 
     static async testCounterValue(text, key, nonce, counter) {
-        SalmonStream.setAesProviderType(ProviderType.Default);
         let testTextBytes = new TextEncoder().encode(text);
         let ms = new MemoryStream(testTextBytes);
         let stream = new SalmonStream(key, nonce, EncryptionMode.Encrypt, ms,

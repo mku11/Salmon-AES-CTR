@@ -24,6 +24,8 @@ SOFTWARE.
 
 import { MemoryStream } from '../../lib/salmon-core/streams/memory_stream.js';
 import { BitConverter } from '../../lib/salmon-core/convert/bit_converter.js';
+import { SalmonStream } from '../../lib/salmon-core/salmon/streams/salmon_stream.js';
+import { ProviderType } from '../../lib/salmon-core/salmon/streams/provider_type.js';
 import { SalmonCoreTestHelper } from '../salmon-core/salmon_core_test_helper.js';
 import { getTestRunnerMode, SalmonFSTestHelper } from './salmon_fs_test_helper.js';
 import { IntegrityException } from '../../lib/salmon-core/integrity/integrity_exception.js';
@@ -51,17 +53,15 @@ describe('salmon-fs', () => {
         SalmonFSTestHelper.TEST_IMPORT_FILE = SalmonFSTestHelper.TEST_IMPORT_MEDIUM_FILE;
         // SalmonCoreTestHelper.TEST_ENC_BUFFER_SIZE = 1 * 1024 * 1024;
 		// SalmonCoreTestHelper.TEST_DEC_BUFFER_SIZE = 1 * 1024 * 1024;
-		SalmonCoreTestHelper.TEST_ENC_THREADS = 2;
-		SalmonCoreTestHelper.TEST_DEC_THREADS = 2;
 
         // SalmonFSTestHelper.ENC_IMPORT_BUFFER_SIZE = 512 * 1024;
         // SalmonFSTestHelper.ENC_EXPORT_BUFFER_SIZE = 512 * 1024;
-        SalmonFSTestHelper.ENC_IMPORT_THREADS = 2;
-        SalmonFSTestHelper.ENC_EXPORT_THREADS = 2;
 
-        SalmonFSTestHelper.TEST_FILE_INPUT_STREAM_THREADS = 2;
         SalmonFSTestHelper.TEST_USE_FILE_INPUT_STREAM = false;
 
+        // only default provider is supported
+        SalmonStream.setAesProviderType(ProviderType.Default);
+        
         SalmonCoreTestHelper.initialize();
         SalmonFSTestHelper.initialize();
     });

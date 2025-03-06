@@ -37,18 +37,15 @@ import { SalmonRangeExceededException } from '../../lib/salmon-core/salmon/salmo
 
 describe('salmon-core', () => {
     beforeAll(() => {
-        SalmonCoreTestHelper.TEST_ENC_BUFFER_SIZE = 1 * 1024 * 1024;
-        SalmonCoreTestHelper.TEST_DEC_BUFFER_SIZE = 1 * 1024 * 1024;
-        SalmonCoreTestHelper.TEST_ENC_THREADS = 2;
-        SalmonCoreTestHelper.TEST_DEC_THREADS = 2;
-    });
-
-    beforeEach(() => {
-        SalmonStream.setAesProviderType(ProviderType.Default);
+        // see jest.setup.js and browser.setup.js for setting params
+		
+		// only default provider is supported
+		SalmonStream.setAesProviderType(ProviderType.Default);
         SalmonCoreTestHelper.initialize();
     });
 
-    afterEach(() => {
+    afterAll(() => {
+		console.log("closing");
         SalmonCoreTestHelper.close();
     });
 

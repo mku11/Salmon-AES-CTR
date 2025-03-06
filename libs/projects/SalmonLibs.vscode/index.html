@@ -6,10 +6,21 @@
 <label for="testSuite">Test Suite</label>
 <select name="Test Suite" id="testSuite">
   <option value="salmon-core">salmon-core</option>
-  <option value="salmon-fs-http">salmon-fs-http</option>
+  <option value="salmon-httpfs">salmon-httpfs</option>
   <option value="salmon-fs">salmon-fs</option>
 </select>
 <button onclick="javascript:selectTestFolder()" id="selectTextFolder">Test Folder</button>
+Threads: 
+<select id="test-threads">
+	<option value="1">1</option>
+	<option value="2">2</option>
+	<option value="4">4</option>
+</select>
+Mode: 
+<select id="test-mode">
+	<option value="Local">Local</option>
+	<option value="WebService">WebService</option>
+</select>
 <button onclick="javascript:execute()" id="execute">Execute</button>
 </div>
 <textarea id="text-edit" name="text-edit" rows="32" cols="100" style="margin: 4px;"></textarea>

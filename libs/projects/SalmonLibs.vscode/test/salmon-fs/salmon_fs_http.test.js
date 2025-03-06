@@ -25,15 +25,17 @@ SOFTWARE.
 import { MemoryStream } from '../../lib/salmon-core/streams/memory_stream.js';
 import { JsHttpDrive } from '../../lib/salmon-fs/salmon/drive/js_http_drive.js';
 import { JsHttpFile } from '../../lib/salmon-fs/file/js_http_file.js';
+import { SalmonStream } from '../../lib/salmon-core/salmon/streams/salmon_stream.js';
+import { ProviderType } from '../../lib/salmon-core/salmon/streams/provider_type.js';
 import { SalmonDrive } from '../../lib/salmon-fs/salmon/salmon_drive.js';
 import { SalmonCoreTestHelper } from '../salmon-core/salmon_core_test_helper.js';
-import { getTestMode, getTestRunnerMode, SalmonFSTestHelper, TestMode } from './salmon_fs_test_helper.js';
+import { getTestMode, getTestRunnerMode, getTestThreads, SalmonFSTestHelper, TestMode } from './salmon_fs_test_helper.js';
 
 describe('salmon-httpfs', () => {
     let oldTestMode = null;
     beforeAll(async () => {
 		oldTestMode = getTestMode();
-		await SalmonFSTestHelper.setTestParams(await SalmonFSTestHelper.TEST_ROOT_DIR.getPath(), TestMode.Http, getTestRunnerMode());
+		await SalmonFSTestHelper.setTestParams(await SalmonFSTestHelper.TEST_ROOT_DIR.getPath(), TestMode.Http, getTestRunnerMode(), getTestThreads());
 		
 		// SalmonCoreTestHelper.TEST_ENC_BUFFER_SIZE = 1 * 1024 * 1024;
         // SalmonCoreTestHelper.TEST_DEC_BUFFER_SIZE = 1 * 1024 * 1024;
@@ -42,16 +44,14 @@ describe('salmon-httpfs', () => {
 		
         // SalmonCoreTestHelper.TEST_ENC_BUFFER_SIZE = 1 * 1024 * 1024;
 		// SalmonCoreTestHelper.TEST_DEC_BUFFER_SIZE = 1 * 1024 * 1024;
-		SalmonCoreTestHelper.TEST_ENC_THREADS = 2;
-		SalmonCoreTestHelper.TEST_DEC_THREADS = 2;
 
         // SalmonFSTestHelper.ENC_IMPORT_BUFFER_SIZE = 512 * 1024;
         // SalmonFSTestHelper.ENC_EXPORT_BUFFER_SIZE = 512 * 1024;
-        SalmonFSTestHelper.ENC_IMPORT_THREADS = 2;
-        SalmonFSTestHelper.ENC_EXPORT_THREADS = 2;
-        
-        SalmonFSTestHelper.TEST_FILE_INPUT_STREAM_THREADS = 2;
+
         SalmonFSTestHelper.TEST_USE_FILE_INPUT_STREAM = true;
+
+        // only default provider is supported
+        SalmonStream.setAesProviderType(ProviderType.Default);
 
         SalmonCoreTestHelper.initialize();
         SalmonFSTestHelper.initialize();
