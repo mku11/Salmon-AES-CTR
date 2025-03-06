@@ -301,7 +301,7 @@ class SalmonStream(RandomAccessStream):
         if nonce is None:
             raise SalmonSecurityException("Nonce is missing")
 
-        self.__transformer = SalmonTransformerFactory.create(self.__provider_type)
+        self.__transformer = SalmonTransformerFactory.create(SalmonStream.__provider_type)
         self.__transformer.init(key, nonce)
         self.__transformer.reset_counter()
 
