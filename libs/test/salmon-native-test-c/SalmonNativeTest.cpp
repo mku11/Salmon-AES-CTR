@@ -111,7 +111,7 @@ namespace SalmonNativeTest
 			CryptGenRandom(hCryptProv, 8, nonce); // 8 bytes for the random nonce
 
 
-			const int length = 32 * 1024 * 1024;
+			const int length = 16 * 1024 * 1024;
 			BYTE* bytes = (BYTE*)malloc(length * sizeof(BYTE));
 			CryptGenRandom(hCryptProv, length, bytes); // 8 bytes for the random nonce
 
