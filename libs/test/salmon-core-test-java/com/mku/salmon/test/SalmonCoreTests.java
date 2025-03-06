@@ -35,9 +35,8 @@ import com.mku.salmon.streams.ProviderType;
 import com.mku.salmon.streams.SalmonStream;
 import com.mku.salmon.text.SalmonTextDecryptor;
 import com.mku.salmon.text.SalmonTextEncryptor;
-import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeAll;
-import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.Test;
 
 import java.io.IOException;
@@ -49,20 +48,28 @@ public class SalmonCoreTests {
 
     @BeforeAll
     static void beforeAll() {
-        //SalmonCoreTestHelper.TEST_ENC_BUFFER_SIZE = 1 * 1024 * 1024;
+		int threads = System.getProperty("ENC_THREADS") != null && !System.getProperty("ENC_THREADS").equals("") ?
+			Integer.parseInt(System.getProperty("ENC_THREADS")) : 1;
+		
+		System.out.println("threads: " + threads);
+		//SalmonCoreTestHelper.TEST_ENC_BUFFER_SIZE = 1 * 1024 * 1024;
         //SalmonCoreTestHelper.TEST_DEC_BUFFER_SIZE = 1 * 1024 * 1024;
-        SalmonCoreTestHelper.TEST_ENC_THREADS = 1;
-        SalmonCoreTestHelper.TEST_DEC_THREADS = 1;
+        SalmonCoreTestHelper.TEST_ENC_THREADS = threads;
+        SalmonCoreTestHelper.TEST_DEC_THREADS = threads;
+		
+		SalmonCoreTestHelper.initialize();
+		
+		ProviderType providerType = ProviderType.Default;
+		String aesProviderType = System.getProperty("AES_PROVIDER_TYPE");
+		if(aesProviderType != null && !aesProviderType.equals(""))
+			providerType = ProviderType.valueOf(aesProviderType);
+		System.out.println("ProviderType: " + providerType);
+
+		SalmonStream.setAesProviderType(providerType);
     }
 
-    @BeforeEach
-    public void init() {
-        SalmonCoreTestHelper.initialize();
-		SalmonStream.setAesProviderType(ProviderType.Default);
-    }
-
-    @AfterEach
-    void afterEach() {
+    @AfterAll
+    static void afterAll() {
         SalmonCoreTestHelper.close();
     }
 

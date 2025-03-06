@@ -93,10 +93,19 @@ public class SalmonCoreTestHelper {
     private static SalmonDecryptor decryptor;
 
     static void initialize() {
+		System.out.println("init core helper");
         SalmonCoreTestHelper.hashProvider = new HmacSHA256Provider();
         SalmonCoreTestHelper.encryptor = new SalmonEncryptor(SalmonCoreTestHelper.TEST_ENC_THREADS);
         SalmonCoreTestHelper.decryptor = new SalmonDecryptor(SalmonCoreTestHelper.TEST_DEC_THREADS);
     }
+	
+	static void close() {
+		if(SalmonCoreTestHelper.encryptor != null)
+			SalmonCoreTestHelper.encryptor.close();
+		if(SalmonCoreTestHelper.decryptor != null)
+			SalmonCoreTestHelper.decryptor.close();
+    }
+
 
     static SalmonEncryptor getEncryptor() {
         return SalmonCoreTestHelper.encryptor;
@@ -105,12 +114,6 @@ public class SalmonCoreTestHelper {
     static SalmonDecryptor getDecryptor() {
         return SalmonCoreTestHelper.decryptor;
     }
-
-    static void close() {
-        SalmonCoreTestHelper.encryptor.close();
-        SalmonCoreTestHelper.decryptor.close();
-    }
-
 
     public static String seekAndGetSubstringByRead(SalmonStream reader, int seek, int readCount, RandomAccessStream.SeekOrigin seekOrigin) throws Exception {
         reader.seek(seek, seekOrigin);
@@ -412,7 +415,6 @@ public class SalmonCoreTestHelper {
     }
 
     public static void testCounterValue(String text, byte[] key, byte[] nonce, long counter) throws Throwable {
-        SalmonStream.setAesProviderType(ProviderType.Default);
         byte[] testTextBytes = text.getBytes(Charset.defaultCharset());
         MemoryStream ms = new MemoryStream(testTextBytes);
         SalmonStream stream = new SalmonStream(key, nonce, EncryptionMode.Encrypt, ms,

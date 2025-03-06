@@ -41,11 +41,16 @@ public class SalmonCorePerfTests {
 			enableGPU = enableGPUStr.equals("1") || enableGPUStr.equals("true");
 			System.out.println("ENABLE_GPU: " + enableGPU);
 		}
+		
+		int threads = System.getProperty("ENC_THREADS") != null && !System.getProperty("ENC_THREADS").equals("") ?
+			Integer.parseInt(System.getProperty("ENC_THREADS")) : 1;
+		
+		System.out.println("threads: " + threads);
 		 
 		//SalmonCoreTestHelper.TEST_ENC_BUFFER_SIZE = 1 * 1024 * 1024;
 		//SalmonCoreTestHelper.TEST_DEC_BUFFER_SIZE = 1 * 1024 * 1024;
-		SalmonCoreTestHelper.TEST_ENC_THREADS = 1;
-		SalmonCoreTestHelper.TEST_DEC_THREADS = 1;
+		SalmonCoreTestHelper.TEST_ENC_THREADS = threads;
+		SalmonCoreTestHelper.TEST_DEC_THREADS = threads;
     }
 
     @BeforeEach
