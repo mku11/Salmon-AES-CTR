@@ -1,5 +1,25 @@
 #!/usr/bin/env python3
-'''
+from __future__ import annotations
+
+import concurrent
+import math
+import time
+import sys
+from concurrent.futures import ProcessPoolExecutor, Future, ThreadPoolExecutor
+from multiprocessing import shared_memory
+from multiprocessing.shared_memory import SharedMemory
+from typing import Any, Callable
+
+from typeguard import typechecked
+
+from salmon_core.convert.bit_converter import BitConverter
+from salmon_fs.file.ireal_file import IRealFile
+from salmon_core.streams.random_access_stream import RandomAccessStream
+from salmon_core.salmon.streams.salmon_stream import SalmonStream
+from salmon_fs.salmon.salmon_file import SalmonFile
+from salmon_fs.utils.file_utils import FileUtils
+
+__license__ = """
 MIT License
 
 Copyright (c) 2021 Max Kas
@@ -21,26 +41,7 @@ AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
 LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
-'''
-from __future__ import annotations
-
-import concurrent
-import math
-import time
-import sys
-from concurrent.futures import ProcessPoolExecutor, Future, ThreadPoolExecutor
-from multiprocessing import shared_memory
-from multiprocessing.shared_memory import SharedMemory
-from typing import Any, Callable
-
-from typeguard import typechecked
-
-from salmon_core.convert.bit_converter import BitConverter
-from salmon_fs.file.ireal_file import IRealFile
-from salmon_core.streams.random_access_stream import RandomAccessStream
-from salmon_core.salmon.streams.salmon_stream import SalmonStream
-from salmon_fs.salmon.salmon_file import SalmonFile
-from salmon_fs.utils.file_utils import FileUtils
+"""
 
 
 @typechecked
@@ -77,6 +78,7 @@ def import_file(index: int, final_part_size: int, final_running_threads: int, fi
         if shm_total_bytes_read is not None:
             total_bytes_read.release()
             shm_total_bytes_read.close()
+
 
 @typechecked
 def import_file_part(file_to_import: IRealFile, salmon_file: SalmonFile, start: int, count: int,
@@ -144,6 +146,7 @@ def import_file_part(file_to_import: IRealFile, salmon_file: SalmonFile, start: 
 
         if shm_cancel is not None:
             shm_cancel.close()
+
 
 @typechecked
 class SalmonFileImporter:

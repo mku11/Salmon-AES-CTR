@@ -1,5 +1,7 @@
 #!/usr/bin/env python3
-'''
+from __future__ import annotations
+
+__license__ = """
 MIT License
 
 Copyright (c) 2025 Max Kas
@@ -21,8 +23,8 @@ AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
 LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
-'''
-from __future__ import annotations
+"""
+
 import http.client
 from urllib.parse import urlparse
 from http.client import HTTPResponse, HTTPConnection, HTTPSConnection
@@ -302,7 +304,7 @@ class PyHttpFile(IRealFile):
         """
         with PyHttpFile.__lock_object:
             self.__response = None
-        
+
     def get_child_path(self, filename: str) -> str:
         n_filepath = self.__file_path
         if not n_filepath.endswith(PyHttpFile.separator):

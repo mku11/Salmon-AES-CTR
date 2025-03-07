@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-'''
+__license__ = """
 MIT License
 
 Copyright (c) 2021 Max Kas
@@ -21,7 +21,8 @@ AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
 LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
-'''
+"""
+
 import secrets
 
 from typeguard import typechecked
@@ -86,6 +87,7 @@ class SalmonGenerator:
     """
     Gets the fixed magic bytes array
     """
+
     @staticmethod
     def get_magic_bytes() -> bytearray:
         return bytearray(SalmonGenerator.MAGIC_BYTES.encode('utf-8'))
@@ -93,6 +95,7 @@ class SalmonGenerator:
     """
     Returns the current Salmon format version.
     """
+
     @staticmethod
     def get_version() -> int:
         return SalmonGenerator.VERSION
@@ -102,6 +105,7 @@ class SalmonGenerator:
     :param size: The size of the byte array.
     :return: The random secure byte array.
     """
+
     @staticmethod
     def get_secure_random_bytes(size: int) -> bytearray:
         v_bytes: bytearray = bytearray(secrets.token_bytes(size))

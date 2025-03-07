@@ -1,0 +1,2 @@
+"""!@brief Salmon Core package
+"""

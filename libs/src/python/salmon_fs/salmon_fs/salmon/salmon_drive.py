@@ -1,5 +1,7 @@
 #!/usr/bin/env python3
-'''
+from __future__ import annotations
+
+__license__ = """
 MIT License
 
 Copyright (c) 2021 Max Kas
@@ -21,14 +23,13 @@ AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
 LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
-'''
-from __future__ import annotations
+"""
 
 from abc import ABC
 import sys
-
 from typeguard import typechecked
 from typing import Type
+
 from salmon_core.convert.bit_converter import BitConverter
 from salmon_fs.file.ireal_file import IRealFile
 from salmon_fs.drive.virtual_drive import VirtualDrive
@@ -618,7 +619,7 @@ class SalmonDrive(VirtualDrive, ABC):
         :return: The nonce sequencer
         """
         return self.__sequencer
-        
+
     def set_sequencer(self, sequencer: INonceSequencer | None):
         """
         Set the sequencer

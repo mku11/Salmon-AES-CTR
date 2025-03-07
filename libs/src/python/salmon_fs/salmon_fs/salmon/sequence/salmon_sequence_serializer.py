@@ -1,5 +1,7 @@
 #!/usr/bin/env python3
-'''
+from __future__ import annotations
+
+__license__ = """
 MIT License
 
 Copyright (c) 2021 Max Kas
@@ -21,8 +23,7 @@ AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
 LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
-'''
-from __future__ import annotations
+"""
 
 import xml.etree.ElementTree as Et
 from xml.dom import minidom
@@ -69,7 +70,7 @@ class SalmonSequenceSerializer(INonceSequenceSerializer):
         except Exception as ex:
             print(ex, file=sys.stderr)
             raise SequenceException("Could not serialize sequences") from ex
-        return minidom.parseString(Et.tostring(tree.getroot(), encoding="utf-8"))\
+        return minidom.parseString(Et.tostring(tree.getroot(), encoding="utf-8")) \
             .toprettyxml(indent="    ", encoding="utf-8").decode("utf-8")
 
     def deserialize(self, contents: str) -> dict[str, NonceSequence]:

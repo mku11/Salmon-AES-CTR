@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-'''
+__license__ = """
 MIT License
 
 Copyright (c) 2021 Max Kas
@@ -21,7 +21,7 @@ AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
 LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
-'''
+"""
 
 from Crypto.Cipher import AES
 from Crypto.Util import Counter
@@ -87,7 +87,7 @@ class SalmonDefaultTransformer(SalmonAES256CTRTransformer):
         :return: The number of bytes transformed.
         :raises IntegrityException: Thrown when security error
         """
-        
+
         if self.get_key() is None:
             raise SalmonSecurityException("No key defined, run init first")
         try:

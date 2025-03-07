@@ -1,5 +1,7 @@
 #!/usr/bin/env python3
-'''
+from __future__ import annotations
+
+__license__ = """
 MIT License
 
 Copyright (c) 2021 Max Kas
@@ -21,8 +23,7 @@ AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
 LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
-'''
-from __future__ import annotations
+"""
 
 import hashlib
 import time
@@ -30,20 +31,13 @@ import sys, os
 from enum import Enum
 from unittest import TestCase
 import random
-
-from file.py_http_file_stream import PyHttpFileStream
-from salmon_fs.salmon.utils.salmon_file_commander import SalmonFileCommander
-from salmon_fs.file.py_http_file import PyHttpFile
-from salmon_fs.file.py_ws_file import Credentials, PyWSFile
-from salmon_fs.salmon.drive.py_ws_drive import PyWSDrive
-from salmon_fs.salmon.drive.py_http_drive import PyHttpDrive
-from streams.buffered_io_wrapper import BufferedIOWrapper
 from typeguard import typechecked
 
+sys.path.append(os.path.dirname(__file__) + '/../../src/python/salmon_core')
+sys.path.append(os.path.dirname(__file__) + '/../../src/python/salmon_fs')
+sys.path.append(os.path.dirname(__file__) + '/../salmon_core_test_python')
+from salmon_core.streams.buffered_io_wrapper import BufferedIOWrapper
 from salmon_core.convert.bit_converter import BitConverter
-from salmon_fs.salmon.drive.py_drive import PyDrive
-from salmon_fs.file.py_file import PyFile
-from salmon_fs.file.ireal_file import IRealFile
 from salmon_core.streams.memory_stream import MemoryStream
 from salmon_core.streams.random_access_stream import RandomAccessStream
 from salmon_core.salmon.streams.encryption_mode import EncryptionMode
@@ -54,17 +48,27 @@ from salmon_core.salmon.salmon_generator import SalmonGenerator
 from salmon_core.salmon.salmon_range_exceeded_exception import SalmonRangeExceededException
 from salmon_core.salmon.text.salmon_text_decryptor import SalmonTextDecryptor
 from salmon_core.salmon.text.salmon_text_encryptor import SalmonTextEncryptor
+from salmon_fs.salmon.utils.salmon_file_commander import SalmonFileCommander
+from salmon_fs.salmon.drive.py_ws_drive import PyWSDrive
+from salmon_fs.salmon.drive.py_http_drive import PyHttpDrive
+from salmon_fs.salmon.drive.py_drive import PyDrive
+from salmon_fs.file.py_http_file_stream import PyHttpFileStream
+from salmon_fs.file.py_http_file import PyHttpFile
+from salmon_fs.file.py_ws_file import Credentials, PyWSFile
+from salmon_fs.file.py_file import PyFile
+from salmon_fs.file.ireal_file import IRealFile
 from salmon_fs.salmon.salmon_drive import SalmonDrive
 from salmon_fs.salmon.salmon_file import SalmonFile
 from salmon_fs.salmon.streams.salmon_file_input_stream import SalmonFileInputStream
 from salmon_fs.sequence.inonce_sequence_serializer import INonceSequenceSerializer
 from salmon_fs.salmon.sequence.salmon_file_sequencer import SalmonFileSequencer
 from salmon_fs.salmon.sequence.salmon_sequence_serializer import SalmonSequenceSerializer
-from salmon_core_test_helper import SalmonCoreTestHelper
 from salmon_fs.salmon.utils.salmon_file_exporter import SalmonFileExporter
 from salmon_fs.salmon.utils.salmon_file_importer import SalmonFileImporter
 from salmon_fs.utils.file_searcher import FileSearcher
 from salmon_fs.salmon.salmon_auth_config import SalmonAuthConfig
+
+from salmon_core_test_helper import SalmonCoreTestHelper
 
 
 class TestMode(Enum):
@@ -1014,7 +1018,8 @@ class SalmonFSTestHelper:
     @staticmethod
     def export_files(files: list[SalmonFile], v_dir: IRealFile, threads: int = 1):
         buffer_size = 256 * 1024
-        commander = SalmonFileCommander(buffer_size, buffer_size, threads, multi_cpu=SalmonFSTestHelper.ENABLE_MULTI_CPU)
+        commander = SalmonFileCommander(buffer_size, buffer_size, threads,
+                                        multi_cpu=SalmonFSTestHelper.ENABLE_MULTI_CPU)
 
         hash_pre_export = []
         for file in files:

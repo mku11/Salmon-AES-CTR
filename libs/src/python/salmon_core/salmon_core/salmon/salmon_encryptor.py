@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""
+__license__ = """
 MIT License
 
 Copyright (c) 2021 Max Kas
@@ -22,6 +22,7 @@ LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 """
+
 import concurrent
 import math
 from concurrent.futures import ProcessPoolExecutor, ThreadPoolExecutor

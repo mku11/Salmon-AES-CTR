@@ -1,5 +1,17 @@
 #!/usr/bin/env python3
-'''
+from __future__ import annotations
+from concurrent.futures import CancelledError
+from typing import Callable, Any
+from typeguard import typechecked
+
+from salmon_fs.file.ireal_file import IRealFile
+from salmon_fs.salmon.salmon_file import SalmonFile
+from salmon_fs.sequence.sequence_exception import SequenceException
+from salmon_fs.salmon.utils.salmon_file_exporter import SalmonFileExporter
+from salmon_fs.salmon.utils.salmon_file_importer import SalmonFileImporter
+from salmon_fs.utils.file_searcher import FileSearcher
+
+__license__ = """
 MIT License
 
 Copyright (c) 2021 Max Kas
@@ -21,21 +33,7 @@ AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
 LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
-'''
-
-from __future__ import annotations
-
-from concurrent.futures import CancelledError
-from typing import Callable, Any
-
-from typeguard import typechecked
-
-from salmon_fs.file.ireal_file import IRealFile
-from salmon_fs.salmon.salmon_file import SalmonFile
-from salmon_fs.sequence.sequence_exception import SequenceException
-from salmon_fs.salmon.utils.salmon_file_exporter import SalmonFileExporter
-from salmon_fs.salmon.utils.salmon_file_importer import SalmonFileImporter
-from salmon_fs.utils.file_searcher import FileSearcher
+"""
 
 
 @typechecked

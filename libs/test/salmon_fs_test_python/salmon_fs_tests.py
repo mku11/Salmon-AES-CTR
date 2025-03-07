@@ -1,5 +1,7 @@
 #!/usr/bin/env python3
-'''
+from __future__ import annotations
+
+__license__ = """
 MIT License
 
 Copyright (c) 2021 Max Kas
@@ -21,21 +23,17 @@ AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
 LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
-'''
-from __future__ import annotations
+"""
 
 import hashlib
 import random
 from unittest import TestCase
-
 from typeguard import typechecked
-
 import os, sys
 
 sys.path.append(os.path.dirname(__file__) + '/../../src/python/salmon_core')
 sys.path.append(os.path.dirname(__file__) + '/../../src/python/salmon_fs')
 sys.path.append(os.path.dirname(__file__) + '/../salmon_core_test_python')
-
 from salmon_core.streams.memory_stream import MemoryStream
 from salmon_core.integrity.integrity_exception import IntegrityException
 from salmon_core.salmon.streams.provider_type import ProviderType
@@ -50,11 +48,12 @@ from salmon_fs.salmon.utils.salmon_file_commander import SalmonFileCommander
 from salmon_core_test_helper import SalmonCoreTestHelper
 from salmon_fs_test_helper import SalmonFSTestHelper, TestMode
 
+
 @typechecked
 class SalmonFSTests(TestCase):
     @classmethod
     def setUpClass(cls):
-        
+
         test_dir: str = os.getenv("TEST_DIR", "d:\\tmp\\salmon\\test")
         test_mode: TestMode = TestMode[os.getenv("TEST_MODE")] if os.getenv("TEST_MODE") else TestMode.Local
         threads: int = int(os.getenv("ENC_THREADS")) if os.getenv("ENC_THREADS") else 1
@@ -549,7 +548,7 @@ class SalmonFSTests(TestCase):
                                                                lambda task_progress: None, lambda file: "",
                                                                lambda file, ex: None)
         file_commander.close()
-        
+
         pos: int = abs(random.randint(0, file.length()))
 
         file_input_stream1 = SalmonFileInputStream(sfiles[0], 4, 4 * 1024 * 1024, 4, 256 * 1024)

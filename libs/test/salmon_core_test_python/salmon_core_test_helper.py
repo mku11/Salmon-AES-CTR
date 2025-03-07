@@ -1,5 +1,7 @@
 #!/usr/bin/env python3
-'''
+from __future__ import annotations
+
+__license__ = """
 MIT License
 
 Copyright (c) 2021 Max Kas
@@ -21,14 +23,14 @@ AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
 LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
-'''
-from __future__ import annotations
+"""
 
 import hashlib
 import math
 import os
 import platform
 import random
+import sys
 import time
 
 from unittest import TestCase
@@ -37,6 +39,7 @@ from Crypto.Cipher import AES
 from Crypto.Util import Counter
 from typeguard import typechecked
 
+sys.path.append(os.path.dirname(__file__) + '/../../src/python/salmon_core')
 from salmon_core.convert.bit_converter import BitConverter
 from salmon_core.streams.memory_stream import MemoryStream
 from salmon_core.streams.random_access_stream import RandomAccessStream
@@ -100,11 +103,14 @@ class SalmonCoreTestHelper:
         # set native library path
         platform_os: str = platform.system().upper()
         if "WIN" in platform_os:
-            NativeProxy.set_library_path("../../projects/salmon-libs-gradle/salmon-native/build/libs/salmon/shared/salmon.dll")
+            NativeProxy.set_library_path(
+                "../../projects/salmon-libs-gradle/salmon-native/build/libs/salmon/shared/salmon.dll")
         elif "MAC" in platform_os:
-            NativeProxy.set_library_path("../../projects/salmon-libs-xcode-macos/salmon/DerivedData/salmon/Build/Products/Release/libsalmon.dylib")
+            NativeProxy.set_library_path(
+                "../../projects/salmon-libs-xcode-macos/salmon/DerivedData/salmon/Build/Products/Release/libsalmon.dylib")
         elif "LINUX" in platform_os:
-            NativeProxy.set_library_path("../../projects/salmon-libs-gradle/salmon-native/build/libs/salmon/shared/libsalmon.so")
+            NativeProxy.set_library_path(
+                "../../projects/salmon-libs-gradle/salmon-native/build/libs/salmon/shared/libsalmon.so")
 
     @staticmethod
     def close():

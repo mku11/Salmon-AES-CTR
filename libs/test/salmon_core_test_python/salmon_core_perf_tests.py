@@ -1,5 +1,7 @@
 #!/usr/bin/env python3
-'''
+from __future__ import annotations
+
+__license__ = """
 MIT License
 
 Copyright (c) 2021 Max Kas
@@ -21,17 +23,16 @@ AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
 LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
-'''
+"""
 
-from __future__ import annotations
+import os
+import sys
 from unittest import TestCase
-import os,sys
-sys.path.append(os.path.dirname(__file__) + '/../../src/python/salmon_core')
+from typeguard import typechecked
 
+sys.path.append(os.path.dirname(__file__) + '/../../src/python/salmon_core')
 from salmon_core.salmon.streams.provider_type import ProviderType
 from salmon_core.salmon.streams.salmon_stream import SalmonStream
-
-from typeguard import typechecked
 
 from salmon_core_test_helper import SalmonCoreTestHelper
 
@@ -92,7 +93,6 @@ class SalmonCorePerfTests(TestCase):
         print("SalmonStream Salmon Default: ")
         SalmonCoreTestHelper.encrypt_and_decrypt_byte_array(SalmonCorePerfTests.TEST_PERF_SIZE, True)
         print()
-
 
     def test_encrypt_and_decrypt_stream_perf_salmon_aes(self):
         SalmonStream.set_aes_provider_type(ProviderType.Aes)

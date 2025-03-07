@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-'''
+__license__ = """
 MIT License
 
 Copyright (c) 2021 Max Kas
@@ -21,7 +21,8 @@ AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
 LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
-'''
+"""
+
 from abc import ABC
 
 from salmon_core.salmon.salmon_generator import SalmonGenerator
@@ -74,7 +75,7 @@ class SalmonAES256CTRTransformer(ISalmonCTRTransformer, ABC):
         """
         Resets the Counter and the block count.
         """
-        
+
         if self.__nonce is None:
             raise SalmonSecurityException("No counter, run init first")
         self.__counter: bytearray = bytearray(SalmonGenerator.BLOCK_SIZE)
@@ -98,7 +99,7 @@ class SalmonAES256CTRTransformer(ISalmonCTRTransformer, ABC):
         
         :param value: value to increase counter by
         """
-        
+
         if self.__counter is None or self.__nonce is None:
             raise SalmonSecurityException("No counter, run init first")
         if value < 0:

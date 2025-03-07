@@ -1,5 +1,7 @@
 #!/usr/bin/env python3
-'''
+from __future__ import annotations
+
+__license__ = """
 MIT License
 
 Copyright (c) 2021 Max Kas
@@ -21,11 +23,10 @@ AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
 LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
-'''
-from __future__ import annotations
+"""
+
 import os
 from typing import Any, Callable
-
 from typeguard import typechecked
 
 from salmon_fs.file.ireal_file import IRealFile
@@ -274,7 +275,7 @@ class PyFile(IRealFile):
         Clear cached properties
         """
         pass
-        
+
     def __str__(self) -> str:
         """
         Returns a string representation of this object

@@ -1,5 +1,7 @@
 #!/usr/bin/env python3
-'''
+from __future__ import annotations
+
+__license__ = """
 MIT License
 
 Copyright (c) 2025 Max Kas
@@ -21,11 +23,9 @@ AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
 LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
-'''
-from __future__ import annotations
+"""
 
 from unittest import TestCase
-
 from typeguard import typechecked
 import os
 import sys
@@ -33,7 +33,6 @@ import sys
 sys.path.append(os.path.dirname(__file__) + '/../../src/python/salmon_core')
 sys.path.append(os.path.dirname(__file__) + '/../../src/python/salmon_fs')
 sys.path.append(os.path.dirname(__file__) + '/../salmon_core_test_python')
-
 from salmon_core.streams.random_access_stream import RandomAccessStream
 from salmon_core.streams.memory_stream import MemoryStream
 from salmon_core.salmon.streams.provider_type import ProviderType
@@ -55,7 +54,7 @@ class SalmonFSHttpTests(TestCase):
     @classmethod
     def setUpClass(cls):
         SalmonFSHttpTests.old_test_mode = SalmonFSTestHelper.curr_test_mode
-        
+
         test_dir: str = os.getenv("TEST_DIR", "d:\\tmp\\salmon\\test")
         test_mode: TestMode = TestMode.Http
         threads: int = int(os.getenv("ENC_THREADS")) if os.getenv("ENC_THREADS") else 1
@@ -66,7 +65,7 @@ class SalmonFSHttpTests(TestCase):
         print("threads", threads)
         print("http server url: ", SalmonFSTestHelper.HTTP_SERVER_URL)
         print("HTTP_VAULT_DIR_URL: ", SalmonFSTestHelper.HTTP_VAULT_DIR_URL)
-        
+
         SalmonFSTestHelper.TEST_HTTP_FILE = SalmonFSTestHelper.TEST_IMPORT_LARGE_FILE
 
         # SalmonCoreTestHelper.TEST_ENC_BUFFER_SIZE = 1 * 1024 * 1024
@@ -173,7 +172,7 @@ class SalmonFSHttpTests(TestCase):
         vault_dir = SalmonFSTestHelper.HTTP_VAULT_DIR
         threads = 2
         drive = SalmonFSTestHelper.open_drive(vault_dir, SalmonFSTestHelper.drive_class_type,
-                                                    SalmonCoreTestHelper.TEST_PASSWORD)
+                                              SalmonCoreTestHelper.TEST_PASSWORD)
         file = drive.get_root().get_child(SalmonFSTestHelper.TEST_HTTP_FILE.get_base_name())
         export_dir = SalmonFSTestHelper.generate_folder("export_http", SalmonFSTestHelper.TEST_OUTPUT_DIR, False)
         local_file = export_dir.get_child(SalmonFSTestHelper.TEST_HTTP_FILE.get_base_name())

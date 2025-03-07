@@ -1,5 +1,6 @@
 #!/usr/bin/env python3
-'''
+
+__license__ = """
 MIT License
 
 Copyright (c) 2021 Max Kas
@@ -21,15 +22,15 @@ AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
 LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
-'''
+"""
+
+from typeguard import typechecked, TypeCheckError
 import time
 import traceback
 from unittest import TestCase
-
 import os, sys
 
 sys.path.append(os.path.dirname(__file__) + '/../../src/python/salmon_core')
-
 from salmon_core.convert.bit_converter import BitConverter
 from salmon_core.streams.memory_stream import MemoryStream
 from salmon_core.integrity.integrity_exception import IntegrityException
@@ -41,11 +42,7 @@ from salmon_core.salmon.salmon_range_exceeded_exception import SalmonRangeExceed
 from salmon_core.salmon.salmon_security_exception import SalmonSecurityException
 from salmon_core.salmon.text.salmon_text_decryptor import SalmonTextDecryptor
 from salmon_core.salmon.text.salmon_text_encryptor import SalmonTextEncryptor
-
-from salmon_core.salmon.bridge.native_proxy import NativeProxy
 from salmon_core_test_helper import SalmonCoreTestHelper
-
-from typeguard import typechecked, TypeCheckError
 
 
 @typechecked

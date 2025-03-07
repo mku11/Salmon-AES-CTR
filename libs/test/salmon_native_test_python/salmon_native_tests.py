@@ -1,5 +1,8 @@
 #!/usr/bin/env python3
-'''
+
+from __future__ import annotations
+
+__license__ = """
 MIT License
 
 Copyright (c) 2021 Max Kas
@@ -21,20 +24,15 @@ AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
 LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
-'''
+"""
 
-from __future__ import annotations
-
+import os
 import platform
+import sys
 from unittest import TestCase
-
 from typeguard import typechecked
 
-import os, sys
-
 sys.path.append(os.path.dirname(__file__) + '/../../src/python/salmon_core')
-sys.path.append(os.path.dirname(__file__) + '/../salmon_core_test_python')
-
 from salmon_core.salmon.streams.provider_type import ProviderType
 from salmon_core.salmon.streams.salmon_stream import SalmonStream
 from salmon_core.salmon.password.pbkdf_type import PbkdfType
@@ -48,6 +46,10 @@ from salmon_core_test_helper import SalmonCoreTestHelper
 
 @typechecked
 class SalmonNativeTests(TestCase):
+    win_path = "../../projects/salmon-libs-gradle/salmon-native/build/libs/salmon/shared/salmon.dll"
+    mac_path = "../../projects/salmon-libs-xcode-macos/salmon/DerivedData/salmon/Build/Products/Release/libsalmon.dylib"
+    linux_path = "../../projects/salmon-libs-gradle/salmon-native/build/libs/salmon/shared/libsalmon.so"
+
     ENC_THREADS = 1
     DEC_THREADS = 1
 
@@ -57,14 +59,11 @@ class SalmonNativeTests(TestCase):
         # set native library path
         platform_os: str = platform.system().upper()
         if "WIN" in platform_os:
-            NativeProxy.set_library_path(
-                "../../projects/salmon-libs-gradle/salmon-native/build/libs/salmon/shared/salmon.dll")
+            NativeProxy.set_library_path(SalmonNativeTests.win_path)
         elif "MAC" in platform_os:
-            NativeProxy.set_library_path(
-                "../../projects/salmon-libs-xcode-macos/salmon/DerivedData/salmon/Build/Products/Release/libsalmon.dylib")
+            NativeProxy.set_library_path(SalmonNativeTests.mac_path)
         elif "LINUX" in platform_os:
-            NativeProxy.set_library_path(
-                "../../projects/salmon-libs-gradle/salmon-native/build/libs/salmon/shared/libsalmon.so")
+            NativeProxy.set_library_path(SalmonNativeTests.mac_path)
 
         provider_type: ProviderType = ProviderType[os.getenv("AES_PROVIDER_TYPE")] if os.getenv(
             "AES_PROVIDER_TYPE") else ProviderType.Default

@@ -1,5 +1,7 @@
 #!/usr/bin/env python3
-'''
+from __future__ import annotations
+
+__license__ = """
 MIT License
 
 Copyright (c) 2021 Max Kas
@@ -21,16 +23,15 @@ AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
 LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
-'''
-from __future__ import annotations
+"""
+
+from typeguard import typechecked
 
 from salmon_core.salmon.password.isalmon_pbkdf_provider import ISalmonPbkdfProvider
 from salmon_core.salmon.password.pbkdf_algo import PbkdfAlgo
 from salmon_core.salmon.password.pbkdf_type import PbkdfType
 from salmon_core.salmon.password.salmon_default_pbkdf_provider import SalmonDefaultPbkdfProvider
 from salmon_core.salmon.password.salmon_pbkdf_factory import SalmonPbkdfFactory
-
-from typeguard import typechecked
 
 
 @typechecked
