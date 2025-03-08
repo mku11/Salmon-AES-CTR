@@ -1,5 +1,5 @@
 Salmon.FS  
-version: 2.3.0
+version: 3.0.0
 project: https://github.com/mku11/Salmon-AES-CTR  
 license: MIT License https://github.com/mku11/Salmon-AES-CTR/blob/main/LICENSE  
   

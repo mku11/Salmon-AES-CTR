@@ -1,5 +1,5 @@
 set CURRDIR=%CD%
-set SALMON_VERSION=2.3.0
+set SALMON_VERSION=3.0.0
 
 pip install ..\..\output\python\salmon_core_py.%SALMON_VERSION%.tar.gz
 pip install ..\..\output\python\salmon_fs_py.%SALMON_VERSION%.tar.gz

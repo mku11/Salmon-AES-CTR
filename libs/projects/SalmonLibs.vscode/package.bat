@@ -1,5 +1,5 @@
 :: @ECHO OFF
-set SALMON_VERSION=2.3.0
+set SALMON_VERSION=3.0.0
 set CURRDIR=%CD%
 
 set TS_SRC_ROOT=..\..\src\typescript
