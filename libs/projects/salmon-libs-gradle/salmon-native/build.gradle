@@ -9,7 +9,7 @@ plugins {
 
 group 'com.mku.salmon'
 description = 'Salmon AES256 CTR native encryption library'
-version '2.3.0'
+version '3.0.0'
 project.ext.set('arch', 'x86_64')
 project.ext.set('os', 'win')
 
