@@ -36,12 +36,14 @@ sed -i -e "s/$PATTERN/$SUBST/g" $DIR/salmon-core/build.gradle
 sed -i -e "s/$PATTERN/$SUBST/g" $DIR/salmon-fs/build.gradle
 sed -i -e "s/$PATTERN/$SUBST/g" $DIR/salmon-native/build.gradle
 sed -i -e "s/$PATTERN/$SUBST/g" $DIR/salmon-win/build.gradle
-sed -i -e "s/$PATTERN/$SUBST/g" $DIR/salmon-ws/build.gradle
 
 DIR=../../libs/projects/salmon-libs-gradle-android
 sed -i -e "s/$PATTERN/$SUBST/g" $DIR/build.gradle
 sed -i -e "s/$PATTERN/$SUBST/g" $DIR/salmon-fs-android/build.gradle
 sed -i -e "s/$PATTERN/$SUBST/g" $DIR/salmon-native-android/build.gradle
+
+DIR=../../services/webservice/project
+sed -i -e "s/$PATTERN/$SUBST/g" $DIR/salmon-ws/build.gradle
 
 PATTERN="^SALMON_VERSION=[^/]*"
 SUBST="SALMON_VERSION=$SALMON_VERSION"
@@ -121,7 +123,7 @@ sed -i -e "s/$PATTERN/$SUBST/g" $DIR/README.txt
 DIR=../../libs/projects/salmon-libs-xcode-macos
 sed -i -e "s/$PATTERN/$SUBST/g" $DIR/salmon/README.txt
 
-DIR=../../libs/projects/salmon-libs-gradle
+DIR=../../services/webservice/project
 sed -i -e "s/$PATTERN/$SUBST/g" $DIR/salmon-ws/README.txt
 
 FILE=../../services/winservice/project/SalmonWinService/README.txt
@@ -146,8 +148,14 @@ sed -i -e "s/$PATTERN/$SUBST/g" $DIR/package.sh
 DIR=../../libs/projects/salmon-libs-xcode-macos
 sed -i -e "s/$PATTERN/$SUBST/g" $DIR/salmon/package.sh
 
-DIR=../../libs/projects/salmon-libs-gradle
+PATTERN="^SALMON_VERSION=[^/]*"
+SUBST="SALMON_VERSION=$SALMON_VERSION"
+DIR=../../services/webservice/project
 sed -i -e "s/$PATTERN/$SUBST/g" $DIR/salmon-ws/package.sh
+
+PATTERN="^set SALMON_VERSION=[^/]*"
+SUBST="set SALMON_VERSION=$SALMON_VERSION"
+DIR=../../services/webservice/project
 sed -i -e "s/$PATTERN/$SUBST/g" $DIR/salmon-ws/package.bat
 
 PATTERN="^set SALMON_VERSION=[^/]*"
