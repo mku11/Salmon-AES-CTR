@@ -1,6 +1,7 @@
 .gradle
 local.properties
 
+/shelf/
 /android/app/.idea
 /android/app/app/.cxx
 
