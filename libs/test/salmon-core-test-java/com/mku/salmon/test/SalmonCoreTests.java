@@ -26,15 +26,15 @@ SOFTWARE.
 
 import com.mku.convert.BitConverter;
 import com.mku.streams.MemoryStream;
-import com.mku.salmon.SalmonGenerator;
-import com.mku.salmon.SalmonRangeExceededException;
-import com.mku.salmon.SalmonSecurityException;
-import com.mku.integrity.IntegrityException;
-import com.mku.salmon.streams.EncryptionMode;
+import com.mku.salmon.Generator;
+import com.mku.salmon.RangeExceededException;
+import com.mku.salmon.SecurityException;
+import com.mku.salmon.integrity.IntegrityException;
+import com.mku.salmon.streams.EncryptionType;
 import com.mku.salmon.streams.ProviderType;
-import com.mku.salmon.streams.SalmonStream;
-import com.mku.salmon.text.SalmonTextDecryptor;
-import com.mku.salmon.text.SalmonTextEncryptor;
+import com.mku.salmon.streams.AesStream;
+import com.mku.salmon.text.TextDecryptor;
+import com.mku.salmon.text.TextEncryptor;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.Test;
@@ -65,7 +65,7 @@ public class SalmonCoreTests {
 			providerType = ProviderType.valueOf(aesProviderType);
 		System.out.println("ProviderType: " + providerType);
 
-		SalmonStream.setAesProviderType(providerType);
+		AesStream.setAesProviderType(providerType);
     }
 
     @AfterAll
@@ -77,8 +77,8 @@ public class SalmonCoreTests {
     public void shouldEncryptAndDecryptText() throws Exception {
         String plainText = SalmonCoreTestHelper.TEST_TEXT;
 
-        String encText = SalmonTextEncryptor.encryptString(plainText, SalmonCoreTestHelper.TEST_KEY_BYTES, SalmonCoreTestHelper.TEST_NONCE_BYTES, false);
-        String decText = SalmonTextDecryptor.decryptString(encText, SalmonCoreTestHelper.TEST_KEY_BYTES, SalmonCoreTestHelper.TEST_NONCE_BYTES, false);
+        String encText = TextEncryptor.encryptString(plainText, SalmonCoreTestHelper.TEST_KEY_BYTES, SalmonCoreTestHelper.TEST_NONCE_BYTES, false);
+        String decText = TextDecryptor.decryptString(encText, SalmonCoreTestHelper.TEST_KEY_BYTES, SalmonCoreTestHelper.TEST_NONCE_BYTES, false);
         assertEquals(plainText, decText);
     }
 
@@ -86,8 +86,8 @@ public class SalmonCoreTests {
     public void shouldEncryptAndDecryptTextWithHeader() throws Exception {
         String plainText = SalmonCoreTestHelper.TEST_TINY_TEXT;
 
-        String encText = SalmonTextEncryptor.encryptString(plainText, SalmonCoreTestHelper.TEST_KEY_BYTES, SalmonCoreTestHelper.TEST_NONCE_BYTES, true);
-        String decText = SalmonTextDecryptor.decryptString(encText, SalmonCoreTestHelper.TEST_KEY_BYTES, null, true);
+        String encText = TextEncryptor.encryptString(plainText, SalmonCoreTestHelper.TEST_KEY_BYTES, SalmonCoreTestHelper.TEST_NONCE_BYTES, true);
+        String decText = TextDecryptor.decryptString(encText, SalmonCoreTestHelper.TEST_KEY_BYTES, null, true);
         assertEquals(plainText, decText);
     }
 
@@ -97,8 +97,8 @@ public class SalmonCoreTests {
         boolean caught = false;
 
         try {
-            SalmonTextEncryptor.encryptString(plainText, null, SalmonCoreTestHelper.TEST_NONCE_BYTES, true);
-        } catch (SalmonSecurityException ex) {
+            TextEncryptor.encryptString(plainText, null, SalmonCoreTestHelper.TEST_NONCE_BYTES, true);
+        } catch (SecurityException ex) {
             // ex.printStackTrace();
             caught = true;
         }
@@ -112,8 +112,8 @@ public class SalmonCoreTests {
         boolean caught = false;
 
         try {
-            SalmonTextEncryptor.encryptString(plainText, SalmonCoreTestHelper.TEST_KEY_BYTES, null, true);
-        } catch (SalmonSecurityException ex) {
+            TextEncryptor.encryptString(plainText, SalmonCoreTestHelper.TEST_KEY_BYTES, null, true);
+        } catch (SecurityException ex) {
             // ex.printStackTrace();
             caught = true;
         } catch (Exception e) {
@@ -129,8 +129,8 @@ public class SalmonCoreTests {
         boolean caught = false;
 
         try {
-            String encText = SalmonTextEncryptor.encryptString(plainText, SalmonCoreTestHelper.TEST_KEY_BYTES, SalmonCoreTestHelper.TEST_NONCE_BYTES, false);
-            SalmonTextDecryptor.decryptString(encText, SalmonCoreTestHelper.TEST_KEY_BYTES, null, false);
+            String encText = TextEncryptor.encryptString(plainText, SalmonCoreTestHelper.TEST_KEY_BYTES, SalmonCoreTestHelper.TEST_NONCE_BYTES, false);
+            TextDecryptor.decryptString(encText, SalmonCoreTestHelper.TEST_KEY_BYTES, null, false);
         } catch (Exception ex) {
             // ex.printStackTrace();
             caught = true;
@@ -145,8 +145,8 @@ public class SalmonCoreTests {
         boolean caught = false;
 
         try {
-            String encText = SalmonTextEncryptor.encryptString(plainText, SalmonCoreTestHelper.TEST_KEY_BYTES, SalmonCoreTestHelper.TEST_NONCE_BYTES, true);
-            SalmonTextDecryptor.decryptString(encText, null, SalmonCoreTestHelper.TEST_NONCE_BYTES, true);
+            String encText = TextEncryptor.encryptString(plainText, SalmonCoreTestHelper.TEST_KEY_BYTES, SalmonCoreTestHelper.TEST_NONCE_BYTES, true);
+            TextDecryptor.decryptString(encText, null, SalmonCoreTestHelper.TEST_NONCE_BYTES, true);
         } catch (Exception ex) {
             // ex.printStackTrace();
             caught = true;
@@ -205,10 +205,10 @@ public class SalmonCoreTests {
             System.arraycopy(buffer, i, buff1, 0, nChunkSize);
 
             byte[] buff2 = new byte[chunkSize];
-            System.arraycopy(bufferWithIntegrity, index + SalmonGenerator.HASH_RESULT_LENGTH, buff2, 0, nChunkSize);
+            System.arraycopy(bufferWithIntegrity, index + Generator.HASH_RESULT_LENGTH, buff2, 0, nChunkSize);
 
             assertArrayEquals(buff1, buff2);
-            index += nChunkSize + SalmonGenerator.HASH_RESULT_LENGTH;
+            index += nChunkSize + Generator.HASH_RESULT_LENGTH;
         }
         assertEquals(bufferWithIntegrity.length, index);
     }
@@ -390,8 +390,8 @@ public class SalmonCoreTests {
         byte[] inputBytes = plainText.getBytes(Charset.defaultCharset());
         MemoryStream ins = new MemoryStream(inputBytes);
         MemoryStream outs = new MemoryStream();
-        SalmonStream encWriter = new SalmonStream(SalmonCoreTestHelper.TEST_KEY_BYTES,
-                SalmonCoreTestHelper.TEST_NONCE_BYTES, EncryptionMode.Encrypt, outs,
+        AesStream encWriter = new AesStream(SalmonCoreTestHelper.TEST_KEY_BYTES,
+                SalmonCoreTestHelper.TEST_NONCE_BYTES, EncryptionType.Encrypt, outs,
                 null, false, null, null);
         try {
             encWriter.copyTo(outs);
@@ -419,7 +419,7 @@ public class SalmonCoreTests {
         byte[] encBytes = SalmonCoreTestHelper.encrypt(inputBytes, SalmonCoreTestHelper.TEST_KEY_BYTES, SalmonCoreTestHelper.TEST_NONCE_BYTES, SalmonCoreTestHelper.TEST_ENC_BUFFER_SIZE, false, 0, null, null);
 
         MemoryStream ins = new MemoryStream(encBytes);
-        SalmonStream encWriter = new SalmonStream(SalmonCoreTestHelper.TEST_KEY_BYTES, SalmonCoreTestHelper.TEST_NONCE_BYTES, EncryptionMode.Decrypt, ins,
+        AesStream encWriter = new AesStream(SalmonCoreTestHelper.TEST_KEY_BYTES, SalmonCoreTestHelper.TEST_NONCE_BYTES, EncryptionType.Decrypt, ins,
                 null, false, null, null);
         try {
             ins.copyTo(encWriter);
@@ -468,7 +468,7 @@ public class SalmonCoreTests {
             SalmonCoreTestHelper.seekAndWrite(SalmonCoreTestHelper.TEST_TEXT, SalmonCoreTestHelper.TEST_KEY_BYTES, SalmonCoreTestHelper.TEST_NONCE_BYTES, 5,
                     SalmonCoreTestHelper.TEST_TEXT_WRITE.length(), SalmonCoreTestHelper.TEST_TEXT_WRITE, false, 0, null, false);
         } catch (IOException ex) {
-            if (ex.getCause() instanceof SalmonSecurityException)
+            if (ex.getCause() instanceof SecurityException)
                 caught = true;
         }
 
@@ -498,7 +498,7 @@ public class SalmonCoreTests {
             SalmonCoreTestHelper.testCounterValue(SalmonCoreTestHelper.TEST_TEXT, SalmonCoreTestHelper.TEST_KEY_BYTES, SalmonCoreTestHelper.TEST_NONCE_BYTES, SalmonCoreTestHelper.MAX_ENC_COUNTER);
         } catch (Throwable throwable) {
             // throwable.printStackTrace();
-            if (throwable instanceof SalmonRangeExceededException || throwable instanceof IllegalArgumentException)
+            if (throwable instanceof RangeExceededException || throwable instanceof IllegalArgumentException)
                 caught = true;
         }
 
@@ -512,7 +512,7 @@ public class SalmonCoreTests {
             SalmonCoreTestHelper.testCounterValue(SalmonCoreTestHelper.TEST_TEXT, SalmonCoreTestHelper.TEST_KEY_BYTES, SalmonCoreTestHelper.TEST_NONCE_BYTES, SalmonCoreTestHelper.MAX_ENC_COUNTER - 1L);
         } catch (Throwable throwable) {
             throwable.printStackTrace();
-            if (throwable instanceof SalmonRangeExceededException)
+            if (throwable instanceof RangeExceededException)
                 caught = true;
         }
 

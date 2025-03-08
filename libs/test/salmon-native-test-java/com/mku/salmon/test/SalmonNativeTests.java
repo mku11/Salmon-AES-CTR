@@ -26,9 +26,9 @@ SOFTWARE.
 
 import com.mku.salmon.*;
 import com.mku.salmon.streams.ProviderType;
-import com.mku.salmon.streams.SalmonStream;
+import com.mku.salmon.streams.AesStream;
 import com.mku.salmon.password.PbkdfType;
-import com.mku.salmon.password.SalmonPassword;
+import com.mku.salmon.password.Password;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
@@ -43,7 +43,7 @@ public class SalmonNativeTests {
     static int DEC_THREADS = 1;
 
     static {
-        SalmonPassword.setPbkdfType(PbkdfType.Default);
+        Password.setPbkdfType(PbkdfType.Default);
     }
 
     @BeforeEach
@@ -58,7 +58,7 @@ public class SalmonNativeTests {
 		System.out.println("ProviderType: " + providerType);
 		System.out.println("threads: " + threads);
 		
-        SalmonStream.setAesProviderType(providerType);
+        AesStream.setAesProviderType(providerType);
 		ENC_THREADS = threads;
 		DEC_THREADS = threads;
     }
@@ -76,10 +76,10 @@ public class SalmonNativeTests {
         assertArrayEquals(bytes, decBytesDef);
 
         byte[] encBytes = SalmonCoreTestHelper.nativeCTRTransform(bytes, SalmonCoreTestHelper.TEST_KEY_BYTES, SalmonCoreTestHelper.TEST_NONCE_BYTES, true,
-                SalmonStream.getAesProviderType());
+                AesStream.getAesProviderType());
         assertArrayEquals(encBytesDef, encBytes);
         byte[] decBytes = SalmonCoreTestHelper.nativeCTRTransform(encBytes, SalmonCoreTestHelper.TEST_KEY_BYTES, SalmonCoreTestHelper.TEST_NONCE_BYTES, false,
-                SalmonStream.getAesProviderType());
+                AesStream.getAesProviderType());
         assertArrayEquals(bytes, decBytes);
     }
 
@@ -97,11 +97,11 @@ public class SalmonNativeTests {
                 false);
         assertArrayEquals(bytes, decBytesDef);
 
-        byte[] encBytes = new SalmonEncryptor(ENC_THREADS).encrypt(bytes, SalmonCoreTestHelper.TEST_KEY_BYTES, SalmonCoreTestHelper.TEST_NONCE_BYTES, false,
+        byte[] encBytes = new Encryptor(ENC_THREADS).encrypt(bytes, SalmonCoreTestHelper.TEST_KEY_BYTES, SalmonCoreTestHelper.TEST_NONCE_BYTES, false,
                 false, null, null);
         assertArrayEquals(encBytesDef, encBytes);
 
-        byte[] decBytes = new SalmonDecryptor(DEC_THREADS).decrypt(encBytes, SalmonCoreTestHelper.TEST_KEY_BYTES, SalmonCoreTestHelper.TEST_NONCE_BYTES, false,
+        byte[] decBytes = new Decryptor(DEC_THREADS).decrypt(encBytes, SalmonCoreTestHelper.TEST_KEY_BYTES, SalmonCoreTestHelper.TEST_NONCE_BYTES, false,
                 false, null, null);
         assertArrayEquals(bytes, decBytes);
     }
@@ -121,10 +121,10 @@ public class SalmonNativeTests {
                 false);
         assertArrayEquals(bytes, decBytesDef);
 
-        byte[] encBytes = new SalmonEncryptor(ENC_THREADS).encrypt(bytes, SalmonCoreTestHelper.TEST_KEY_BYTES, SalmonCoreTestHelper.TEST_NONCE_BYTES, false,
+        byte[] encBytes = new Encryptor(ENC_THREADS).encrypt(bytes, SalmonCoreTestHelper.TEST_KEY_BYTES, SalmonCoreTestHelper.TEST_NONCE_BYTES, false,
                 false, null, null);
         assertArrayEquals(encBytesDef, encBytes);
-        SalmonDecryptor decryptor = new SalmonDecryptor(DEC_THREADS, 32 + 2);
+        Decryptor decryptor = new Decryptor(DEC_THREADS, 32 + 2);
         byte[] decBytes = decryptor.decrypt(encBytes, SalmonCoreTestHelper.TEST_KEY_BYTES, SalmonCoreTestHelper.TEST_NONCE_BYTES, false,
                 false, null, null);
         assertArrayEquals(bytes, decBytes);
@@ -142,11 +142,11 @@ public class SalmonNativeTests {
 
         int chunkSize = 256 * 1024;
         assertArrayEquals(bytes, decBytesDef);
-        byte[] encBytes = new SalmonEncryptor(ENC_THREADS).encrypt(bytes, SalmonCoreTestHelper.TEST_KEY_BYTES, SalmonCoreTestHelper.TEST_NONCE_BYTES, false,
+        byte[] encBytes = new Encryptor(ENC_THREADS).encrypt(bytes, SalmonCoreTestHelper.TEST_KEY_BYTES, SalmonCoreTestHelper.TEST_NONCE_BYTES, false,
                 true, SalmonCoreTestHelper.TEST_HMAC_KEY_BYTES, chunkSize);
 
         assertArrayEqualsWithIntegrity(encBytesDef, encBytes, chunkSize);
-        byte[] decBytes = new SalmonDecryptor(DEC_THREADS).decrypt(encBytes, SalmonCoreTestHelper.TEST_KEY_BYTES, SalmonCoreTestHelper.TEST_NONCE_BYTES, false,
+        byte[] decBytes = new Decryptor(DEC_THREADS).decrypt(encBytes, SalmonCoreTestHelper.TEST_KEY_BYTES, SalmonCoreTestHelper.TEST_NONCE_BYTES, false,
                 true, SalmonCoreTestHelper.TEST_HMAC_KEY_BYTES, chunkSize);
 
         assertArrayEquals(bytes, decBytes);
@@ -160,10 +160,10 @@ public class SalmonNativeTests {
             System.arraycopy(buffer, i, buff1, 0, nChunkSize);
 
             byte[] buff2 = new byte[chunkSize];
-            System.arraycopy(bufferWithIntegrity, index + SalmonGenerator.HASH_RESULT_LENGTH, buff2, 0, nChunkSize);
+            System.arraycopy(bufferWithIntegrity, index + Generator.HASH_RESULT_LENGTH, buff2, 0, nChunkSize);
 
             assertArrayEquals(buff1, buff2);
-            index += nChunkSize + SalmonGenerator.HASH_RESULT_LENGTH;
+            index += nChunkSize + Generator.HASH_RESULT_LENGTH;
         }
         assertEquals(bufferWithIntegrity.length, index);
     }

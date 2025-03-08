@@ -23,6 +23,8 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 */
 
+import com.mku.salmon.streams.ProviderType;
+
 /**
  * Interface to native libraries that provide AES-256 encryption in CTR mode.
  */
@@ -30,7 +32,7 @@ public interface INativeProxy
 {
     /**
      * Initializes the native library with the specified AES implementation.
-     * @param aesImpl The AES implementation, see {@link com.mku.salmon.streams.ProviderType} for possible values
+     * @param aesImpl The AES implementation, see {@link ProviderType} for possible values
      */
     void salmonInit(int aesImpl);
 

@@ -23,7 +23,7 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 */
 
-import com.mku.sequence.SequenceException;
+import com.mku.salmon.sequence.SequenceException;
 
 /// <summary>
 ///  Thrown when tampering has been detected in the nonce sequencer.

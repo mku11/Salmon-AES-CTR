@@ -23,11 +23,11 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 */
 
-import com.mku.file.IRealFile;
-import com.mku.salmon.win.registry.SalmonRegistry;
-import com.mku.sequence.INonceSequenceSerializer;
-import com.mku.salmon.sequence.SalmonFileSequencer;
-import com.mku.sequence.SequenceException;
+import com.mku.fs.file.IRealFile;
+import com.mku.salmon.win.registry.Registry;
+import com.mku.salmon.sequence.INonceSequenceSerializer;
+import com.mku.salmonfs.sequence.FileSequencer;
+import com.mku.salmon.sequence.SequenceException;
 import com.sun.jna.platform.win32.Crypt32Util;
 
 import java.io.IOException;
@@ -37,14 +37,14 @@ import java.security.MessageDigest;
 /**
  * File Sequencer for Windows with tamper protection.
  */
-public class WinFileSequencer extends SalmonFileSequencer
+public class WinFileSequencer extends FileSequencer
 {
     private String checkSumKey;
-    private SalmonRegistry registry;
+    private Registry registry;
 
-    private SalmonRegistry getRegistry() {
+    private Registry getRegistry() {
         if(registry == null)
-            registry = new SalmonRegistry();
+            registry = new Registry();
         return registry;
     }
     /**

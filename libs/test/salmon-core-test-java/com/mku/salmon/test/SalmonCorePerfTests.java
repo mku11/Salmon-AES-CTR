@@ -25,7 +25,7 @@ SOFTWARE.
 */
 
 import com.mku.salmon.streams.ProviderType;
-import com.mku.salmon.streams.SalmonStream;
+import com.mku.salmon.streams.AesStream;
 import org.junit.jupiter.api.*;
 import org.junit.jupiter.api.condition.*;
 
@@ -77,7 +77,7 @@ public class SalmonCorePerfTests {
     @Test
     @Order(2)
     public void EncryptAndDecryptPerfSalmonNativeAes() throws Exception {
-        SalmonStream.setAesProviderType(ProviderType.Aes);
+        AesStream.setAesProviderType(ProviderType.Aes);
         // warm up
         SalmonCoreTestHelper.encryptAndDecryptByteArrayNative(TEST_PERF_SIZE, false);
         System.out.println("Salmon Native Aes: ");
@@ -89,7 +89,7 @@ public class SalmonCorePerfTests {
     @Test
     @Order(3)
     public void EncryptAndDecryptPerfSalmonNativeAesIntrinsics() throws Exception {
-        SalmonStream.setAesProviderType(ProviderType.AesIntrinsics);
+        AesStream.setAesProviderType(ProviderType.AesIntrinsics);
         // warm up
         SalmonCoreTestHelper.encryptAndDecryptByteArrayNative(TEST_PERF_SIZE, false);
         System.out.println("Salmon Native Intr: ");
@@ -101,7 +101,7 @@ public class SalmonCorePerfTests {
     @Order(4)
 	@EnabledIfSystemProperty(named = "ENABLE_GPU", matches = "true")
     public void EncryptAndDecryptPerfSalmonNativeAesGPU() throws Exception {
-        SalmonStream.setAesProviderType(ProviderType.AesGPU);
+        AesStream.setAesProviderType(ProviderType.AesGPU);
         // warm up
         SalmonCoreTestHelper.encryptAndDecryptByteArrayNative(TEST_PERF_SIZE, false);
         System.out.println("Salmon Native GPU: ");
@@ -113,7 +113,7 @@ public class SalmonCorePerfTests {
     @Test
     @Order(5)
     public void EncryptAndDecryptStreamPerfSalmonDefault() throws Exception {
-        SalmonStream.setAesProviderType(ProviderType.Default);
+        AesStream.setAesProviderType(ProviderType.Default);
         // warm up
         SalmonCoreTestHelper.encryptAndDecryptByteArray(TEST_PERF_SIZE, false);
         System.out.println("SalmonStream Salmon Default: ");
@@ -125,7 +125,7 @@ public class SalmonCorePerfTests {
     @Test
     @Order(6)
     public void EncryptAndDecryptStreamPerfSalmonNativeAes() throws Exception {
-        SalmonStream.setAesProviderType(ProviderType.Aes);
+        AesStream.setAesProviderType(ProviderType.Aes);
         // warm up
         SalmonCoreTestHelper.encryptAndDecryptByteArray(TEST_PERF_SIZE, false);
         System.out.println("SalmonStream Salmon Native Aes: ");
@@ -136,7 +136,7 @@ public class SalmonCorePerfTests {
     @Test
     @Order(7)
     public void EncryptAndDecryptStreamPerfSalmonNativeAesIntrinsics() throws Exception {
-        SalmonStream.setAesProviderType(ProviderType.AesIntrinsics);
+        AesStream.setAesProviderType(ProviderType.AesIntrinsics);
         //warm up
         SalmonCoreTestHelper.encryptAndDecryptByteArray(TEST_PERF_SIZE, false);
         System.out.println("SalmonStream Salmon Native Aes Intrinsics: ");
@@ -148,7 +148,7 @@ public class SalmonCorePerfTests {
     @Order(8)
 	@EnabledIfSystemProperty(named = "ENABLE_GPU", matches = "true")
     public void EncryptAndDecryptStreamPerfSalmonNativeAesGPU() throws Exception {
-        SalmonStream.setAesProviderType(ProviderType.AesGPU);
+        AesStream.setAesProviderType(ProviderType.AesGPU);
         //warm up
         SalmonCoreTestHelper.encryptAndDecryptByteArray(TEST_PERF_SIZE, false);
         System.out.println("SalmonStream Salmon GPU: ");

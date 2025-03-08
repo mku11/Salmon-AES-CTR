@@ -23,9 +23,9 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 */
 
-import com.mku.sequence.INonceSequencer;
-import com.mku.sequence.SequenceException;
-import com.mku.sequence.NonceSequence;
+import com.mku.salmon.sequence.INonceSequencer;
+import com.mku.salmon.sequence.SequenceException;
+import com.mku.salmon.sequence.NonceSequence;
 import com.sun.jna.platform.win32.AccCtrl;
 import com.sun.jna.platform.win32.Advapi32;
 import com.sun.jna.platform.win32.Kernel32;
@@ -139,7 +139,7 @@ public class WinClientSequencer implements INonceSequencer, Closeable {
         } catch (Exception e) {
             throw new SequenceException("Could not get sequence", e);
         }
-        if(res.status == Response.ResponseStatus.Error)
+        if (res.status == Response.ResponseStatus.Error)
             throw new SequenceException("Could not get sequence: " + res.error);
         if (res.status == Response.ResponseStatus.NotFound)
             return null;
@@ -207,7 +207,7 @@ public class WinClientSequencer implements INonceSequencer, Closeable {
     }
 
     public String generateRequest(String driveId, String authId, RequestType type,
-                                         byte[] nextNonce, byte[] maxNonce)
+                                  byte[] nextNonce, byte[] maxNonce)
             throws IOException {
         ByteArrayOutputStream stream = new ByteArrayOutputStream();
         XMLStreamWriter out = null;

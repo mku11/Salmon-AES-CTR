@@ -25,18 +25,18 @@ SOFTWARE.
 */
 
 import com.mku.convert.BitConverter;
-import com.mku.file.IRealFile;
-import com.mku.integrity.IntegrityException;
-import com.mku.salmon.SalmonAuthException;
-import com.mku.salmon.SalmonDrive;
-import com.mku.salmon.SalmonFile;
-import com.mku.salmon.drive.JavaDrive;
-import com.mku.salmon.integrity.SalmonIntegrity;
-import com.mku.salmon.sequence.SalmonFileSequencer;
-import com.mku.salmon.streams.SalmonFileInputStream;
+import com.mku.fs.file.IRealFile;
+import com.mku.salmon.integrity.IntegrityException;
+import com.mku.salmonfs.auth.AuthException;
+import com.mku.salmonfs.drive.AesDrive;
+import com.mku.salmonfs.file.AesFile;
+import com.mku.salmonfs.drive.Drive;
+import com.mku.salmon.integrity.Integrity;
+import com.mku.salmonfs.sequence.FileSequencer;
+import com.mku.salmonfs.streams.AesFileInputStream;
 import com.mku.salmon.streams.ProviderType;
-import com.mku.salmon.streams.SalmonStream;
-import com.mku.salmon.utils.SalmonFileCommander;
+import com.mku.salmon.streams.AesStream;
+import com.mku.salmonfs.utils.AesFileCommander;
 import com.mku.streams.InputStreamWrapper;
 import com.mku.streams.MemoryStream;
 import org.junit.jupiter.api.AfterAll;
@@ -99,7 +99,7 @@ public class SalmonFSTests {
 			providerType = ProviderType.valueOf(aesProviderType);
 		System.out.println("ProviderType: " + providerType);
 		
-        SalmonStream.setAesProviderType(ProviderType.AesIntrinsics);
+        AesStream.setAesProviderType(ProviderType.AesIntrinsics);
     }
 
     @AfterAll
@@ -111,16 +111,16 @@ public class SalmonFSTests {
     @Test
     public void shouldCatchNotAuthorizeNegative() throws Exception {
         IRealFile vaultDir = SalmonFSTestHelper.generateFolder(SalmonFSTestHelper.TEST_VAULT_DIRNAME);
-        SalmonFileSequencer sequencer = SalmonFSTestHelper.createSalmonFileSequencer();
-        SalmonDrive drive = SalmonFSTestHelper.createDrive(vaultDir, JavaDrive.class,
+        FileSequencer sequencer = SalmonFSTestHelper.createSalmonFileSequencer();
+        AesDrive drive = SalmonFSTestHelper.createDrive(vaultDir, Drive.class,
                 SalmonCoreTestHelper.TEST_PASSWORD, sequencer);
         boolean wrongPassword = false;
         drive.close();
         try {
             drive = SalmonFSTestHelper.openDrive(vaultDir, SalmonFSTestHelper.driveClassType, SalmonCoreTestHelper.TEST_FALSE_PASSWORD, sequencer);
-            SalmonFile rootDir = drive.getRoot();
+            AesFile rootDir = drive.getRoot();
             rootDir.listFiles();
-        } catch (SalmonAuthException ex) {
+        } catch (AuthException ex) {
             wrongPassword = true;
         }
         assertTrue(wrongPassword);
@@ -129,16 +129,16 @@ public class SalmonFSTests {
     @Test
     public void shouldAuthorizePositive() throws Exception {
         IRealFile vaultDir = SalmonFSTestHelper.generateFolder(SalmonFSTestHelper.TEST_VAULT_DIRNAME);
-        SalmonFileSequencer sequencer = SalmonFSTestHelper.createSalmonFileSequencer();
-        SalmonDrive drive = SalmonFSTestHelper.createDrive(vaultDir, JavaDrive.class,
+        FileSequencer sequencer = SalmonFSTestHelper.createSalmonFileSequencer();
+        AesDrive drive = SalmonFSTestHelper.createDrive(vaultDir, Drive.class,
                 SalmonCoreTestHelper.TEST_PASSWORD, sequencer);
         boolean wrongPassword = false;
         drive.close();
         try {
             drive = SalmonFSTestHelper.openDrive(vaultDir, SalmonFSTestHelper.driveClassType,
                     SalmonCoreTestHelper.TEST_PASSWORD, sequencer);
-            SalmonFile virtualRoot = drive.getRoot();
-        } catch (SalmonAuthException ex) {
+            AesFile virtualRoot = drive.getRoot();
+        } catch (AuthException ex) {
             wrongPassword = true;
         }
 
@@ -422,11 +422,11 @@ public class SalmonFSTests {
         for (int i = 0; i < data.length; i++) {
             data[i] = (byte) i;
         }
-        SalmonFile file = SalmonFSTestHelper.shouldCreateFileWithoutVault(data, SalmonCoreTestHelper.TEST_KEY_BYTES,
+        AesFile file = SalmonFSTestHelper.shouldCreateFileWithoutVault(data, SalmonCoreTestHelper.TEST_KEY_BYTES,
                 true, true, 64, SalmonCoreTestHelper.TEST_HMAC_KEY_BYTES,
                 SalmonCoreTestHelper.TEST_FILENAME_NONCE_BYTES, SalmonCoreTestHelper.TEST_NONCE_BYTES,
                 false, -1, true);
-        SalmonFileInputStream fileInputStream = new SalmonFileInputStream(file,
+        AesFileInputStream fileInputStream = new AesFileInputStream(file,
                 3, 50, 2, 12);
 
         SalmonFSTestHelper.seekAndReadFileInputStream(data, fileInputStream, 0, 32, 0, 32);
@@ -441,10 +441,10 @@ public class SalmonFSTests {
     @Test
     public void shouldCreateDriveAndOpenFsFolder() throws Exception {
         IRealFile vaultDir = SalmonFSTestHelper.generateFolder(SalmonFSTestHelper.TEST_VAULT_DIRNAME);
-        SalmonFileSequencer sequencer = SalmonFSTestHelper.createSalmonFileSequencer();
-        SalmonDrive drive = SalmonFSTestHelper.createDrive(vaultDir, SalmonFSTestHelper.driveClassType, SalmonCoreTestHelper.TEST_PASSWORD, sequencer);
+        FileSequencer sequencer = SalmonFSTestHelper.createSalmonFileSequencer();
+        AesDrive drive = SalmonFSTestHelper.createDrive(vaultDir, SalmonFSTestHelper.driveClassType, SalmonCoreTestHelper.TEST_PASSWORD, sequencer);
         boolean wrongPassword = false;
-        SalmonFile rootDir = drive.getRoot();
+        AesFile rootDir = drive.getRoot();
         rootDir.listFiles();
         drive.close();
 
@@ -452,7 +452,7 @@ public class SalmonFSTests {
         try {
             drive = SalmonFSTestHelper.openDrive(vaultDir.getChild("fs"), SalmonFSTestHelper.driveClassType, SalmonCoreTestHelper.TEST_PASSWORD, sequencer);
             assertTrue(drive.hasConfig());
-        } catch (SalmonAuthException ignored) {
+        } catch (AuthException ignored) {
             wrongPassword = true;
         }
 
@@ -575,16 +575,16 @@ public class SalmonFSTests {
         IRealFile vaultDir = SalmonFSTestHelper.generateFolder(SalmonFSTestHelper.TEST_VAULT_DIRNAME);
         IRealFile file = SalmonFSTestHelper.TEST_IMPORT_MEDIUM_FILE;
 
-        SalmonFileSequencer sequencer = SalmonFSTestHelper.createSalmonFileSequencer();
-        SalmonDrive drive = SalmonFSTestHelper.createDrive(vaultDir, SalmonFSTestHelper.driveClassType, SalmonCoreTestHelper.TEST_PASSWORD, sequencer);
-        SalmonFileCommander fileCommander = new SalmonFileCommander(SalmonIntegrity.DEFAULT_CHUNK_SIZE, SalmonIntegrity.DEFAULT_CHUNK_SIZE, 2);
-        SalmonFile[] sfiles = fileCommander.importFiles(new IRealFile[]{file},
+        FileSequencer sequencer = SalmonFSTestHelper.createSalmonFileSequencer();
+        AesDrive drive = SalmonFSTestHelper.createDrive(vaultDir, SalmonFSTestHelper.driveClassType, SalmonCoreTestHelper.TEST_PASSWORD, sequencer);
+        AesFileCommander fileCommander = new AesFileCommander(Integrity.DEFAULT_CHUNK_SIZE, Integrity.DEFAULT_CHUNK_SIZE, 2);
+        AesFile[] sfiles = fileCommander.importFiles(new IRealFile[]{file},
                 drive.getRoot(), false, true, null, null, null);
 		fileCommander.close();
 		
         long pos = Math.abs(new Random().nextLong() % file.length());
 
-        SalmonFileInputStream fileInputStream1 = new SalmonFileInputStream(sfiles[0], 4, 4 * 1024 * 1024, 4, 256 * 1024);
+        AesFileInputStream fileInputStream1 = new AesFileInputStream(sfiles[0], 4, 4 * 1024 * 1024, 4, 256 * 1024);
         fileInputStream1.skip(pos);
         MemoryStream ms1 = new MemoryStream();
         SalmonFSTestHelper.copyStream(fileInputStream1, ms1);
@@ -606,7 +606,7 @@ public class SalmonFSTests {
         msa1.close();
         dism1.close();
 
-        SalmonFileInputStream fileInputStream2 = new SalmonFileInputStream(sfiles[0], 4, 4 * 1024 * 1024, 1, 256 * 1024);
+        AesFileInputStream fileInputStream2 = new AesFileInputStream(sfiles[0], 4, 4 * 1024 * 1024, 1, 256 * 1024);
         fileInputStream2.skip(pos);
         MemoryStream ms2 = new MemoryStream();
         SalmonFSTestHelper.copyStream(fileInputStream2, ms2);

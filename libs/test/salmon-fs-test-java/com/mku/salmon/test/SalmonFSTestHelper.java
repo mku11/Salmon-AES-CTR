@@ -25,24 +25,28 @@ SOFTWARE.
 */
 
 import com.mku.convert.BitConverter;
-import com.mku.file.*;
+import com.mku.fs.drive.utils.FileSearcher;
+import com.mku.fs.file.*;
 import com.mku.func.BiConsumer;
-import com.mku.salmon.*;
-import com.mku.salmon.drive.JavaDrive;
-import com.mku.salmon.drive.JavaHttpDrive;
-import com.mku.salmon.drive.JavaWSDrive;
-import com.mku.salmon.sequence.SalmonFileSequencer;
-import com.mku.salmon.sequence.SalmonSequenceSerializer;
-import com.mku.salmon.streams.EncryptionMode;
-import com.mku.salmon.streams.SalmonFileInputStream;
-import com.mku.salmon.streams.SalmonStream;
-import com.mku.salmon.utils.SalmonFileCommander;
-import com.mku.salmon.utils.SalmonFileExporter;
-import com.mku.salmon.utils.SalmonFileImporter;
+import com.mku.salmon.Generator;
+import com.mku.salmon.RangeExceededException;
+import com.mku.salmon.sequence.SequenceSerializer;
+import com.mku.salmon.streams.AesStream;
+import com.mku.salmon.streams.EncryptionType;
+import com.mku.salmonfs.auth.AuthConfig;
+import com.mku.salmonfs.drive.AesDrive;
+import com.mku.salmonfs.drive.Drive;
+import com.mku.salmonfs.drive.HttpDrive;
+import com.mku.salmonfs.drive.WSDrive;
+import com.mku.salmonfs.file.AesFile;
+import com.mku.salmonfs.sequence.FileSequencer;
+import com.mku.salmonfs.streams.AesFileInputStream;
+import com.mku.salmonfs.utils.AesFileCommander;
+import com.mku.salmonfs.utils.AesFileExporter;
+import com.mku.salmonfs.utils.AesFileImporter;
 import com.mku.streams.InputStreamWrapper;
 import com.mku.streams.MemoryStream;
 import com.mku.streams.RandomAccessStream;
-import com.mku.utils.FileSearcher;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -87,7 +91,7 @@ public class SalmonFSTestHelper {
 	static String WS_SERVER_URL = System.getProperty("WS_SERVER_URL") != null && !System.getProperty("WS_SERVER_URL").equals("") ?
 		System.getProperty("WS_SERVER_URL") : WS_SERVER_DEFAULT_URL;
     static String WS_TEST_DIRNAME = "ws";
-    static JavaWSFile.Credentials credentials = new JavaWSFile.Credentials("user", "password");
+    static WSFile.Credentials credentials = new WSFile.Credentials("user", "password");
 
     // HTTP server (Read-only)
     static String HTTP_SERVER_DEFAULT_URL = "http://localhost:8000";
@@ -131,23 +135,23 @@ public class SalmonFSTestHelper {
     static IRealFile TEST_HTTP_FILE;
     static IRealFile TEST_SEQ_DIR;
     static IRealFile TEST_EXPORT_AUTH_DIR;
-    static SalmonFileImporter fileImporter;
-    static SalmonFileExporter fileExporter;
-    static SalmonSequenceSerializer sequenceSerializer = new SalmonSequenceSerializer();
+    static AesFileImporter fileImporter;
+    static AesFileExporter fileExporter;
+    static SequenceSerializer sequenceSerializer = new SequenceSerializer();
     static final Random random = new Random(System.currentTimeMillis());
 
     public static void setTestParams(String testDir, TestMode testMode) throws Exception {
         currTestMode = testMode;
 
         if (testMode == TestMode.Local) {
-            SalmonFSTestHelper.driveClassType = JavaDrive.class;
+            SalmonFSTestHelper.driveClassType = Drive.class;
         } else if (testMode == TestMode.Http) {
-            SalmonFSTestHelper.driveClassType = JavaHttpDrive.class;
+            SalmonFSTestHelper.driveClassType = HttpDrive.class;
         } else if (testMode == TestMode.WebService) {
-            SalmonFSTestHelper.driveClassType = JavaWSDrive.class;
+            SalmonFSTestHelper.driveClassType = WSDrive.class;
         }
 
-        SalmonFSTestHelper.TEST_ROOT_DIR = new JavaFile(testDir);
+        SalmonFSTestHelper.TEST_ROOT_DIR = new File(testDir);
         if (!SalmonFSTestHelper.TEST_ROOT_DIR.exists())
             SalmonFSTestHelper.TEST_ROOT_DIR.mkdir();
 
@@ -155,14 +159,14 @@ public class SalmonFSTestHelper {
 
         SalmonFSTestHelper.TEST_INPUT_DIR = SalmonFSTestHelper.createDir(SalmonFSTestHelper.TEST_ROOT_DIR, SalmonFSTestHelper.TEST_INPUT_DIRNAME);
         if (testMode == TestMode.WebService)
-            SalmonFSTestHelper.TEST_OUTPUT_DIR = new JavaWSFile("/", SalmonFSTestHelper.WS_SERVER_URL, SalmonFSTestHelper.credentials);
+            SalmonFSTestHelper.TEST_OUTPUT_DIR = new WSFile("/", SalmonFSTestHelper.WS_SERVER_URL, SalmonFSTestHelper.credentials);
         else
             SalmonFSTestHelper.TEST_OUTPUT_DIR = SalmonFSTestHelper.createDir(SalmonFSTestHelper.TEST_ROOT_DIR, SalmonFSTestHelper.TEST_OUTPUT_DIRNAME);
         SalmonFSTestHelper.WS_TEST_DIR = SalmonFSTestHelper.createDir(SalmonFSTestHelper.TEST_ROOT_DIR, SalmonFSTestHelper.WS_TEST_DIRNAME);
         SalmonFSTestHelper.HTTP_TEST_DIR = SalmonFSTestHelper.createDir(SalmonFSTestHelper.TEST_ROOT_DIR, SalmonFSTestHelper.HTTP_TEST_DIRNAME);
         SalmonFSTestHelper.TEST_SEQ_DIR = SalmonFSTestHelper.createDir(SalmonFSTestHelper.TEST_ROOT_DIR, SalmonFSTestHelper.TEST_SEQ_DIRNAME);
         SalmonFSTestHelper.TEST_EXPORT_AUTH_DIR = SalmonFSTestHelper.createDir(SalmonFSTestHelper.TEST_ROOT_DIR, SalmonFSTestHelper.TEST_EXPORT_AUTH_DIRNAME);
-        SalmonFSTestHelper.HTTP_VAULT_DIR = new JavaHttpFile(SalmonFSTestHelper.HTTP_VAULT_DIR_URL);
+        SalmonFSTestHelper.HTTP_VAULT_DIR = new HttpFile(SalmonFSTestHelper.HTTP_VAULT_DIR_URL);
         SalmonFSTestHelper.createTestFiles();
         SalmonFSTestHelper.createHttpFiles();
         SalmonFSTestHelper.createHttpVault();
@@ -212,15 +216,15 @@ public class SalmonFSTestHelper {
             return;
 
         httpVaultDir.mkdir();
-        SalmonFileSequencer sequencer = SalmonFSTestHelper.createSalmonFileSequencer();
-        SalmonDrive drive = SalmonFSTestHelper.createDrive(httpVaultDir, SalmonFSTestHelper.driveClassType, SalmonCoreTestHelper.TEST_PASSWORD, sequencer);
+        FileSequencer sequencer = SalmonFSTestHelper.createSalmonFileSequencer();
+        AesDrive drive = SalmonFSTestHelper.createDrive(httpVaultDir, SalmonFSTestHelper.driveClassType, SalmonCoreTestHelper.TEST_PASSWORD, sequencer);
         IVirtualFile rootDir = drive.getRoot();
         IRealFile[] importFiles = new IRealFile[]{SalmonFSTestHelper.TEST_IMPORT_TINY_FILE,
                 SalmonFSTestHelper.TEST_IMPORT_SMALL_FILE,
                 SalmonFSTestHelper.TEST_IMPORT_MEDIUM_FILE,
                 SalmonFSTestHelper.TEST_IMPORT_LARGE_FILE
         };
-        SalmonFileImporter importer = new SalmonFileImporter(SalmonFSTestHelper.ENC_IMPORT_BUFFER_SIZE, SalmonFSTestHelper.ENC_IMPORT_THREADS);
+        AesFileImporter importer = new AesFileImporter(SalmonFSTestHelper.ENC_IMPORT_BUFFER_SIZE, SalmonFSTestHelper.ENC_IMPORT_THREADS);
         for (IRealFile importFile : importFiles) {
             importer.importFile(importFile, rootDir, null, false, true, null);
         }
@@ -228,7 +232,7 @@ public class SalmonFSTestHelper {
     }
 
     public static void createFile(String path, String contents) throws Exception {
-        IRealFile file = new JavaFile(path);
+        IRealFile file = new File(path);
         RandomAccessStream stream = file.getOutputStream();
         byte[] data = contents.getBytes();
         stream.write(data, 0, data.length);
@@ -262,8 +266,8 @@ public class SalmonFSTestHelper {
 
     static void initialize() {
 		System.out.println("init fs helper");
-        SalmonFSTestHelper.fileImporter = new SalmonFileImporter(SalmonFSTestHelper.ENC_IMPORT_BUFFER_SIZE, SalmonFSTestHelper.ENC_IMPORT_THREADS);
-        SalmonFSTestHelper.fileExporter = new SalmonFileExporter(SalmonFSTestHelper.ENC_EXPORT_BUFFER_SIZE, SalmonFSTestHelper.ENC_EXPORT_THREADS);
+        SalmonFSTestHelper.fileImporter = new AesFileImporter(SalmonFSTestHelper.ENC_IMPORT_BUFFER_SIZE, SalmonFSTestHelper.ENC_IMPORT_THREADS);
+        SalmonFSTestHelper.fileExporter = new AesFileExporter(SalmonFSTestHelper.ENC_EXPORT_BUFFER_SIZE, SalmonFSTestHelper.ENC_EXPORT_THREADS);
     }
 
     static void close() {
@@ -274,11 +278,11 @@ public class SalmonFSTestHelper {
 			SalmonFSTestHelper.fileExporter.close();
     }
 
-    public static SalmonFileSequencer createSalmonFileSequencer() throws IOException {
+    public static FileSequencer createSalmonFileSequencer() throws IOException {
         // always create the sequencer files locally
         IRealFile seqDir = generateFolder(SalmonFSTestHelper.TEST_SEQ_DIRNAME, SalmonFSTestHelper.TEST_SEQ_DIR, true);
         IRealFile seqFile = seqDir.getChild(SalmonFSTestHelper.TEST_SEQ_FILENAME);
-        return new SalmonFileSequencer(seqFile, SalmonFSTestHelper.sequenceSerializer);
+        return new FileSequencer(seqFile, SalmonFSTestHelper.sequenceSerializer);
     }
 
     public static IRealFile generateFolder(String name) {
@@ -329,8 +333,8 @@ public class SalmonFSTestHelper {
     public static void importAndExport(IRealFile vaultDir, String pass, IRealFile importFile,
                                        boolean bitflip, long flipPosition, boolean shouldBeEqual,
                                        boolean applyFileIntegrity, boolean verifyFileIntegrity) throws Exception {
-        SalmonFileSequencer sequencer = createSalmonFileSequencer();
-        SalmonDrive drive = createDrive(vaultDir, SalmonFSTestHelper.driveClassType, pass, sequencer);
+        FileSequencer sequencer = createSalmonFileSequencer();
+        AesDrive drive = createDrive(vaultDir, SalmonFSTestHelper.driveClassType, pass, sequencer);
         IVirtualFile rootDir = drive.getRoot();
         rootDir.listFiles();
 
@@ -342,21 +346,21 @@ public class SalmonFSTestHelper {
             if (SalmonFSTestHelper.ENABLE_FILE_PROGRESS)
                 System.out.println("importing file: " + position + "/" + length);
         };
-        SalmonFile salmonFile = fileImporter.importFile(fileToImport, rootDir, null, false, applyFileIntegrity, printImportProgress);
+        AesFile aesFile = fileImporter.importFile(fileToImport, rootDir, null, false, applyFileIntegrity, printImportProgress);
 
-        Integer chunkSize = salmonFile.getFileChunkSize();
+        Integer chunkSize = aesFile.getFileChunkSize();
         if (chunkSize != null && chunkSize > 0 && !verifyFileIntegrity)
-            salmonFile.setVerifyIntegrity(false, null);
+            aesFile.setVerifyIntegrity(false, null);
 
-        assertTrue(salmonFile.exists());
-        String hashPostImport = SalmonFSTestHelper.getChecksumStream(new InputStreamWrapper(salmonFile.getInputStream()));
+        assertTrue(aesFile.exists());
+        String hashPostImport = SalmonFSTestHelper.getChecksumStream(new InputStreamWrapper(aesFile.getInputStream()));
         if (shouldBeEqual)
             assertEquals(hashPreImport, hashPostImport);
 
         // get fresh copy of the file
-        salmonFile = (SalmonFile) rootDir.listFiles()[0];
-        assertTrue(salmonFile != null);
-        assertTrue(salmonFile.exists());
+        aesFile = (AesFile) rootDir.listFiles()[0];
+        assertTrue(aesFile != null);
+        assertTrue(aesFile.exists());
 
         IVirtualFile[] salmonFiles = rootDir.listFiles();
         long realFileSize = fileToImport.length();
@@ -376,39 +380,39 @@ public class SalmonFSTestHelper {
                 System.out.println("exporting file: " + position + "/" + length);
         };
         if (bitflip)
-            flipBit(salmonFile, flipPosition);
-        Integer chunkSize2 = salmonFile.getFileChunkSize();
+            flipBit(aesFile, flipPosition);
+        Integer chunkSize2 = aesFile.getFileChunkSize();
         if (chunkSize2 != null && chunkSize2 > 0 && verifyFileIntegrity)
-            salmonFile.setVerifyIntegrity(true, null);
-        IRealFile exportFile = fileExporter.exportFile(salmonFile, drive.getExportDir(), null, false, verifyFileIntegrity, printExportProgress);
+            aesFile.setVerifyIntegrity(true, null);
+        IRealFile exportFile = fileExporter.exportFile(aesFile, drive.getExportDir(), null, false, verifyFileIntegrity, printExportProgress);
 
         String hashPostExport = SalmonFSTestHelper.getChecksum(exportFile);
         if (shouldBeEqual)
             assertEquals(hashPreImport, hashPostExport);
     }
 
-    static SalmonDrive openDrive(IRealFile vaultDir, Class<?> driveClassType, String pass) throws IOException {
-        return SalmonDrive.openDrive(vaultDir, driveClassType, pass, null);
+    static AesDrive openDrive(IRealFile vaultDir, Class<?> driveClassType, String pass) throws IOException {
+        return AesDrive.openDrive(vaultDir, driveClassType, pass, null);
     }
 
-    static SalmonDrive openDrive(IRealFile vaultDir, Class<?> driveClassType, String pass, SalmonFileSequencer sequencer) throws IOException {
-        if (driveClassType == JavaWSDrive.class) {
+    static AesDrive openDrive(IRealFile vaultDir, Class<?> driveClassType, String pass, FileSequencer sequencer) throws IOException {
+        if (driveClassType == WSDrive.class) {
             // use the remote service instead
-            return JavaWSDrive.open(vaultDir, pass, sequencer);
+            return WSDrive.open(vaultDir, pass, sequencer);
         } else
-            return SalmonDrive.openDrive(vaultDir, driveClassType, pass, sequencer);
+            return AesDrive.openDrive(vaultDir, driveClassType, pass, sequencer);
     }
 
-    static SalmonDrive createDrive(IRealFile vaultDir, Class<?> driveClassType, String pass, SalmonFileSequencer sequencer) throws IOException {
-        if (driveClassType == JavaWSDrive.class)
-            return JavaWSDrive.create(vaultDir, pass, sequencer);
+    static AesDrive createDrive(IRealFile vaultDir, Class<?> driveClassType, String pass, FileSequencer sequencer) throws IOException {
+        if (driveClassType == WSDrive.class)
+            return WSDrive.create(vaultDir, pass, sequencer);
         else
-            return SalmonDrive.createDrive(vaultDir, driveClassType, pass, sequencer);
+            return AesDrive.createDrive(vaultDir, driveClassType, pass, sequencer);
     }
 
     public static void importAndSearch(IRealFile vaultDir, String pass, IRealFile importFile) throws Exception {
-        SalmonFileSequencer sequencer = createSalmonFileSequencer();
-        SalmonDrive drive = createDrive(vaultDir, SalmonFSTestHelper.driveClassType, pass, sequencer);
+        FileSequencer sequencer = createSalmonFileSequencer();
+        AesDrive drive = createDrive(vaultDir, SalmonFSTestHelper.driveClassType, pass, sequencer);
         IVirtualFile rootDir = drive.getRoot();
         IRealFile fileToImport = importFile;
         String rbasename = fileToImport.getBaseName();
@@ -429,8 +433,8 @@ public class SalmonFSTestHelper {
 
     public static void importAndCopy(IRealFile vaultDir, String pass, IRealFile importFile,
                                      int importBufferSize, int importThreads, String newDir, boolean move) throws Exception {
-        SalmonFileSequencer sequencer = createSalmonFileSequencer();
-        SalmonDrive drive = createDrive(vaultDir, SalmonFSTestHelper.driveClassType, pass, sequencer);
+        FileSequencer sequencer = createSalmonFileSequencer();
+        AesDrive drive = createDrive(vaultDir, SalmonFSTestHelper.driveClassType, pass, sequencer);
         IVirtualFile rootDir = drive.getRoot();
         rootDir.listFiles();
         IRealFile fileToImport = importFile;
@@ -477,13 +481,13 @@ public class SalmonFSTestHelper {
         stream.close();
     }
 
-    public static SalmonFile shouldCreateFileWithoutVault(byte[] testBytes, byte[] key, boolean applyIntegrity, boolean verifyIntegrity, int chunkSize, byte[] hashKey,
-                                                          byte[] filenameNonce, byte[] fileNonce, boolean flipBit, int flipPosition, boolean checkData) throws Exception {
+    public static AesFile shouldCreateFileWithoutVault(byte[] testBytes, byte[] key, boolean applyIntegrity, boolean verifyIntegrity, int chunkSize, byte[] hashKey,
+                                                       byte[] filenameNonce, byte[] fileNonce, boolean flipBit, int flipPosition, boolean checkData) throws Exception {
         // write file
         IRealFile realDir = SalmonFSTestHelper.generateFolder("encfiles", SalmonFSTestHelper.TEST_OUTPUT_DIR, false);
-        SalmonFile dir = new SalmonFile(realDir, null);
+        AesFile dir = new AesFile(realDir, null);
         String filename = "test_" + System.currentTimeMillis() + "." + flipPosition + ".txt";
-        SalmonFile newFile = dir.createFile(filename, key, filenameNonce, fileNonce);
+        AesFile newFile = dir.createFile(filename, key, filenameNonce, fileNonce);
         if (applyIntegrity)
             newFile.setApplyIntegrity(true, hashKey, chunkSize);
         RandomAccessStream stream = newFile.getOutputStream();
@@ -504,12 +508,12 @@ public class SalmonFSTestHelper {
         }
 
         // open file for read
-        SalmonFile readFile = new SalmonFile(realFile, null);
+        AesFile readFile = new AesFile(realFile, null);
         readFile.setEncryptionKey(key);
         readFile.setRequestedNonce(fileNonce);
         if (verifyIntegrity)
             readFile.setVerifyIntegrity(true, hashKey);
-        SalmonStream inStream = readFile.getInputStream();
+        AesStream inStream = readFile.getInputStream();
         byte[] textBytes = new byte[testBytes.length];
         inStream.read(textBytes, 0, textBytes.length);
         inStream.close();
@@ -520,17 +524,17 @@ public class SalmonFSTestHelper {
 
     public static void exportAndImportAuth(IRealFile vault, IRealFile importFilePath) throws Exception {
         // emulate 2 different devices with different sequencers
-        SalmonFileSequencer sequencer1 = createSalmonFileSequencer();
-        SalmonFileSequencer sequencer2 = createSalmonFileSequencer();
+        FileSequencer sequencer1 = createSalmonFileSequencer();
+        FileSequencer sequencer2 = createSalmonFileSequencer();
 
         // set to the first sequencer and create the vault
-        SalmonDrive drive = createDrive(vault, SalmonFSTestHelper.driveClassType, SalmonCoreTestHelper.TEST_PASSWORD, sequencer1);
+        AesDrive drive = createDrive(vault, SalmonFSTestHelper.driveClassType, SalmonCoreTestHelper.TEST_PASSWORD, sequencer1);
         // import a test file
         IVirtualFile rootDir = drive.getRoot();
         IRealFile fileToImport = importFilePath;
-        SalmonFile salmonFileA1 = (SalmonFile) fileImporter.importFile(fileToImport, rootDir, null, false,
+        AesFile aesFileA1 = (AesFile) fileImporter.importFile(fileToImport, rootDir, null, false,
                 false, null);
-        long nonceA1 = BitConverter.toLong(salmonFileA1.getRequestedNonce(), 0, SalmonGenerator.NONCE_LENGTH);
+        long nonceA1 = BitConverter.toLong(aesFileA1.getRequestedNonce(), 0, Generator.NONCE_LENGTH);
         drive.close();
 
         // open with another device (different sequencer) and export auth id
@@ -554,27 +558,27 @@ public class SalmonFSTestHelper {
         drive = openDrive(vault, SalmonFSTestHelper.driveClassType, SalmonCoreTestHelper.TEST_PASSWORD, sequencer1);
         IRealFile exportAuthDir = generateFolder(SalmonFSTestHelper.TEST_EXPORT_AUTH_DIRNAME, SalmonFSTestHelper.TEST_EXPORT_AUTH_DIR);
         IRealFile exportFile = exportAuthDir.createFile(SalmonFSTestHelper.TEST_EXPORT_AUTH_FILENAME);
-        SalmonAuthConfig.exportAuthFile(drive, authId, exportFile);
+        AuthConfig.exportAuthFile(drive, authId, exportFile);
         IRealFile exportAuthFile = exportAuthDir.getChild(SalmonFSTestHelper.TEST_EXPORT_AUTH_FILENAME);
-        SalmonFile salmonCfgFile = new SalmonFile(exportAuthFile, drive);
-        long nonceCfg = BitConverter.toLong(salmonCfgFile.getFileNonce(), 0, SalmonGenerator.NONCE_LENGTH);
+        AesFile salmonCfgFile = new AesFile(exportAuthFile, drive);
+        long nonceCfg = BitConverter.toLong(salmonCfgFile.getFileNonce(), 0, Generator.NONCE_LENGTH);
         // import another test file
         rootDir = drive.getRoot();
         fileToImport = importFilePath;
-        SalmonFile salmonFileA2 = fileImporter.importFile(fileToImport, rootDir, null, false, false, null);
-        long nonceA2 = BitConverter.toLong(salmonFileA2.getFileNonce(), 0, SalmonGenerator.NONCE_LENGTH);
+        AesFile aesFileA2 = fileImporter.importFile(fileToImport, rootDir, null, false, false, null);
+        long nonceA2 = BitConverter.toLong(aesFileA2.getFileNonce(), 0, Generator.NONCE_LENGTH);
         drive.close();
 
         //reopen with second device(sequencer) and import auth file
         drive = openDrive(vault, SalmonFSTestHelper.driveClassType, SalmonCoreTestHelper.TEST_PASSWORD, sequencer2);
-        SalmonAuthConfig.importAuthFile(drive, exportAuthFile);
+        AuthConfig.importAuthFile(drive, exportAuthFile);
         // now import a 3rd file
         rootDir = drive.getRoot();
         fileToImport = importFilePath;
-        SalmonFile salmonFileB1 = fileImporter.importFile(fileToImport, rootDir, null, false, false, null);
-        long nonceB1 = BitConverter.toLong(salmonFileB1.getFileNonce(), 0, SalmonGenerator.NONCE_LENGTH);
-        SalmonFile salmonFileB2 = fileImporter.importFile(fileToImport, rootDir, null, false, false, null);
-        long nonceB2 = BitConverter.toLong(salmonFileB2.getFileNonce(), 0, SalmonGenerator.NONCE_LENGTH);
+        AesFile aesFileB1 = fileImporter.importFile(fileToImport, rootDir, null, false, false, null);
+        long nonceB1 = BitConverter.toLong(aesFileB1.getFileNonce(), 0, Generator.NONCE_LENGTH);
+        AesFile aesFileB2 = fileImporter.importFile(fileToImport, rootDir, null, false, false, null);
+        long nonceB2 = BitConverter.toLong(aesFileB2.getFileNonce(), 0, Generator.NONCE_LENGTH);
         drive.close();
 
         assertEquals(nonceA1, nonceCfg - 1);
@@ -587,17 +591,17 @@ public class SalmonFSTestHelper {
                                     byte[] testMaxNonce, long offset, boolean shouldImport) {
         boolean importSuccess = false;
         try {
-            SalmonFileSequencer sequencer = new SalmonFileSequencer(seqFile, SalmonFSTestHelper.sequenceSerializer) {
+            FileSequencer sequencer = new FileSequencer(seqFile, SalmonFSTestHelper.sequenceSerializer) {
                 @Override
                 public void initializeSequence(String driveId, String authId, byte[] startNonce, byte[] maxNonce)
                         throws IOException {
-                    long nMaxNonce = BitConverter.toLong(testMaxNonce, 0, SalmonGenerator.NONCE_LENGTH);
-                    startNonce = BitConverter.toBytes(nMaxNonce + offset, SalmonGenerator.NONCE_LENGTH);
-                    maxNonce = BitConverter.toBytes(nMaxNonce, SalmonGenerator.NONCE_LENGTH);
+                    long nMaxNonce = BitConverter.toLong(testMaxNonce, 0, Generator.NONCE_LENGTH);
+                    startNonce = BitConverter.toBytes(nMaxNonce + offset, Generator.NONCE_LENGTH);
+                    maxNonce = BitConverter.toBytes(nMaxNonce, Generator.NONCE_LENGTH);
                     super.initializeSequence(driveId, authId, startNonce, maxNonce);
                 }
             };
-            SalmonDrive drive;
+            AesDrive drive;
             try {
                 drive = openDrive(vaultDir, SalmonFSTestHelper.driveClassType, SalmonCoreTestHelper.TEST_PASSWORD, sequencer);
             } catch (Exception ex) {
@@ -610,7 +614,7 @@ public class SalmonFSTestHelper {
             IVirtualFile salmonFile = fileImporter.importFile(fileToImport, salmonRootDir, null, false, false, null);
             importSuccess = salmonFile != null;
         } catch (Exception ex) {
-            if (ex instanceof SalmonRangeExceededException)
+            if (ex instanceof RangeExceededException)
                 importSuccess = false;
             ex.printStackTrace();
         }
@@ -661,12 +665,12 @@ public class SalmonFSTestHelper {
         String filename = "file.dat";
         IRealFile testFile = dir.createFile(filename);
         byte[] bytes = text.getBytes();
-        byte[] key = SalmonGenerator.getSecureRandomBytes(32);
-        byte[] nonce = SalmonGenerator.getSecureRandomBytes(8);
+        byte[] key = Generator.getSecureRandomBytes(32);
+        byte[] nonce = Generator.getSecureRandomBytes(8);
 
         IRealFile wfile = dir.getChild(filename);
-        SalmonFile encFile = new SalmonFile(wfile);
-        nonce = SalmonGenerator.getSecureRandomBytes(8);
+        AesFile encFile = new AesFile(wfile);
+        nonce = Generator.getSecureRandomBytes(8);
         encFile.setEncryptionKey(key);
         encFile.setRequestedNonce(nonce);
         RandomAccessStream stream = encFile.getOutputStream();
@@ -681,7 +685,7 @@ public class SalmonFSTestHelper {
 
         // decrypt an encrypted file
         IRealFile rfile = dir.getChild(filename);
-        SalmonFile encFile2 = new SalmonFile(rfile);
+        AesFile encFile2 = new AesFile(rfile);
         encFile2.setEncryptionKey(key);
         RandomAccessStream stream2 = encFile2.getInputStream();
         byte[] decBuff = new byte[BUFF_SIZE];
@@ -700,7 +704,7 @@ public class SalmonFSTestHelper {
 
     public static void encryptAndDecryptStream(byte[] data, byte[] key, byte[] nonce) throws Exception {
         MemoryStream encOutStream = new MemoryStream();
-        SalmonStream encryptor = new SalmonStream(key, nonce, EncryptionMode.Encrypt, encOutStream);
+        AesStream encryptor = new AesStream(key, nonce, EncryptionType.Encrypt, encOutStream);
         RandomAccessStream inputStream = new MemoryStream(data);
         inputStream.copyTo(encryptor);
         encOutStream.setPosition(0);
@@ -711,7 +715,7 @@ public class SalmonFSTestHelper {
         inputStream.close();
 
         RandomAccessStream encInputStream = new MemoryStream(encData);
-        SalmonStream decryptor = new SalmonStream(key, nonce, EncryptionMode.Decrypt, encInputStream);
+        AesStream decryptor = new AesStream(key, nonce, EncryptionType.Decrypt, encInputStream);
         MemoryStream outStream = new MemoryStream();
         decryptor.copyTo(outStream);
         outStream.setPosition(0);
@@ -734,7 +738,7 @@ public class SalmonFSTestHelper {
         return outs.toArray();
     }
 
-    public static void seekAndReadFileInputStream(byte[] data, SalmonFileInputStream fileInputStream,
+    public static void seekAndReadFileInputStream(byte[] data, AesFileInputStream fileInputStream,
                                                   int start, int length, int readOffset, int shouldReadLength) throws IOException {
         byte[] buffer = new byte[length + readOffset];
         fileInputStream.reset();
@@ -747,7 +751,7 @@ public class SalmonFSTestHelper {
     }
 
     public static void shouldTestFileSequencer() throws IOException {
-        SalmonFileSequencer sequencer = SalmonFSTestHelper.createSalmonFileSequencer();
+        FileSequencer sequencer = SalmonFSTestHelper.createSalmonFileSequencer();
 
         sequencer.createSequence("AAAA", "AAAA");
         sequencer.initializeSequence("AAAA", "AAAA",
@@ -764,7 +768,7 @@ public class SalmonFSTestHelper {
         try {
             nonce = sequencer.nextNonce("AAAA");
             assertEquals(5, BitConverter.toLong(nonce, 0, 8));
-        } catch (SalmonRangeExceededException ex) {
+        } catch (RangeExceededException ex) {
             System.err.println(ex);
             caught = true;
         }
@@ -781,7 +785,7 @@ public class SalmonFSTestHelper {
         return count;
     }
 
-    public static void copyStream(SalmonFileInputStream src, MemoryStream dest) throws IOException {
+    public static void copyStream(AesFileInputStream src, MemoryStream dest) throws IOException {
         int bufferSize = 256 * 1024;
         int bytesRead;
         byte[] buffer = new byte[bufferSize];
@@ -797,8 +801,8 @@ public class SalmonFSTestHelper {
         String localChkSum = getChecksum(localFile);
 
         IRealFile vaultDir = vaultPath;
-        SalmonFileSequencer sequencer = SalmonFSTestHelper.createSalmonFileSequencer();
-        SalmonDrive drive = SalmonFSTestHelper.openDrive(vaultDir, SalmonFSTestHelper.driveClassType, SalmonCoreTestHelper.TEST_PASSWORD, sequencer);
+        FileSequencer sequencer = SalmonFSTestHelper.createSalmonFileSequencer();
+        AesDrive drive = SalmonFSTestHelper.openDrive(vaultDir, SalmonFSTestHelper.driveClassType, SalmonCoreTestHelper.TEST_PASSWORD, sequencer);
         IVirtualFile root = drive.getRoot();
         IVirtualFile file = root.getChild(filename);
         System.out.println("file size: " + file.getSize());
@@ -849,10 +853,10 @@ public class SalmonFSTestHelper {
                                       int buffersCount, int bufferSize, int backOffset) throws IOException {
         byte[] buffer = new byte[length + readOffset];
 
-        SalmonFileInputStream stream = null;
+        AesFileInputStream stream = null;
         if (SalmonFSTestHelper.TEST_USE_FILE_INPUT_STREAM && isEncrypted) {
             // multi threaded
-            stream = new SalmonFileInputStream((SalmonFile) file, buffersCount, bufferSize, SalmonFSTestHelper.TEST_FILE_INPUT_STREAM_THREADS, backOffset);
+            stream = new AesFileInputStream((AesFile) file, buffersCount, bufferSize, SalmonFSTestHelper.TEST_FILE_INPUT_STREAM_THREADS, backOffset);
         } else {
             //TODO: support IRealFile streams
 //            RandomAccessStream fileStream;
@@ -880,16 +884,16 @@ public class SalmonFSTestHelper {
         assertArrayEquals(tdata, buffer);
     }
 
-    public static void exportFiles(SalmonFile[] files, IRealFile dir) throws Exception {
+    public static void exportFiles(AesFile[] files, IRealFile dir) throws Exception {
         exportFiles(files, dir, 1);
     }
 
-    public static void exportFiles(SalmonFile[] files, IRealFile dir, int threads) throws Exception {
+    public static void exportFiles(AesFile[] files, IRealFile dir, int threads) throws Exception {
         int bufferSize = 256 * 1024;
-        SalmonFileCommander commander = new SalmonFileCommander(bufferSize, bufferSize, threads);
+        AesFileCommander commander = new AesFileCommander(bufferSize, bufferSize, threads);
 
         List<String> hashPreExport = new ArrayList<>();
-        for (SalmonFile file : files)
+        for (AesFile file : files)
             hashPreExport.add(SalmonFSTestHelper.getChecksumStream(new InputStreamWrapper(file.getInputStream())));
 
         // export files

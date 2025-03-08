@@ -24,7 +24,6 @@ SOFTWARE.
 */
 
 import com.mku.func.BiConsumer;
-import com.mku.salmon.SalmonDefaultOptions;
 
 import java.io.IOException;
 

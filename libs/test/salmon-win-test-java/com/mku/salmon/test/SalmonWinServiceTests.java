@@ -24,14 +24,14 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 */
 
-import com.mku.file.IRealFile;
-import com.mku.file.JavaFile;
+import com.mku.fs.file.IRealFile;
+import com.mku.fs.file.File;
 import com.mku.convert.BitConverter;
-import com.mku.salmon.SalmonRangeExceededException;
-import com.mku.salmon.win.registry.SalmonRegistry;
+import com.mku.salmon.RangeExceededException;
+import com.mku.salmon.win.registry.Registry;
 import com.mku.salmon.win.sequencer.WinClientSequencer;
 import com.mku.salmon.win.sequencer.WinFileSequencer;
-import com.mku.salmon.sequence.SalmonSequenceSerializer;
+import com.mku.salmon.sequence.SequenceSerializer;
 import com.sun.jna.platform.win32.Crypt32Util;
 import org.junit.jupiter.api.Test;
 
@@ -48,7 +48,7 @@ public class SalmonWinServiceTests {
     private static String TEST_REG_CHCKSUM_KEY = "TestChkSum";
 
     public static String TEST_SERVICE_PIPE_NAME = "SalmonService";
-    public static SalmonRegistry registry = new SalmonRegistry();
+    public static Registry registry = new Registry();
 
     @Test
     public void testServerSid() throws Exception {
@@ -70,7 +70,7 @@ public class SalmonWinServiceTests {
     public void shouldWriteToRegistry() {
         String key = "Seq Hash";
         String value = new Random().nextInt() + "";
-        SalmonRegistry registry = new SalmonRegistry();
+        Registry registry = new Registry();
         registry.write(key, value);
         String val = (String) registry.read(key);
         assertEquals(value, val);
@@ -81,11 +81,11 @@ public class SalmonWinServiceTests {
         if(registry.exists(TEST_REG_CHCKSUM_KEY))
             registry.delete(TEST_REG_CHCKSUM_KEY);
 
-        IRealFile file = new JavaFile(TEST_SEQUENCER_DIR + "\\" + TEST_SEQUENCER_FILENAME);
+        IRealFile file = new File(TEST_SEQUENCER_DIR + "\\" + TEST_SEQUENCER_FILENAME);
         if (file.exists())
             file.delete();
         WinFileSequencer sequencer = new WinFileSequencer(file,
-                new SalmonSequenceSerializer(),
+                new SequenceSerializer(),
                 TEST_REG_CHCKSUM_KEY);
 
         sequencer.createSequence("AAAA", "AAAA");
@@ -103,7 +103,7 @@ public class SalmonWinServiceTests {
         try {
             nonce = sequencer.nextNonce("AAAA");
             assertNotEquals(5, BitConverter.toLong(nonce, 0, 8));
-        } catch (SalmonRangeExceededException ex) {
+        } catch (RangeExceededException ex) {
             ex.printStackTrace();
             caught = true;
         }

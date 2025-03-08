@@ -24,14 +24,14 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 */
 
-import com.mku.file.IRealFile;
-import com.mku.file.IVirtualFile;
-import com.mku.file.JavaHttpFile;
-import com.mku.salmon.SalmonDrive;
-import com.mku.salmon.SalmonFile;
-import com.mku.salmon.drive.JavaHttpDrive;
+import com.mku.fs.file.IRealFile;
+import com.mku.fs.file.IVirtualFile;
+import com.mku.fs.file.HttpFile;
+import com.mku.salmonfs.drive.AesDrive;
+import com.mku.salmonfs.file.AesFile;
+import com.mku.salmonfs.drive.HttpDrive;
 import com.mku.salmon.streams.ProviderType;
-import com.mku.salmon.streams.SalmonStream;
+import com.mku.salmon.streams.AesStream;
 import com.mku.streams.MemoryStream;
 import com.mku.streams.RandomAccessStream;
 import org.junit.jupiter.api.AfterAll;
@@ -96,7 +96,7 @@ public class SalmonFSHttpTests {
 			providerType = ProviderType.valueOf(aesProviderType);
 		System.out.println("ProviderType: " + providerType);
 		
-        SalmonStream.setAesProviderType(providerType);
+        AesStream.setAesProviderType(providerType);
     }
 
     @AfterAll
@@ -112,7 +112,7 @@ public class SalmonFSHttpTests {
         IRealFile vaultDir = SalmonFSTestHelper.HTTP_VAULT_DIR;
         boolean wrongPassword = false;
         try {
-            SalmonDrive drive = SalmonFSTestHelper.openDrive(vaultDir, SalmonFSTestHelper.driveClassType, SalmonCoreTestHelper.TEST_FALSE_PASSWORD, null);
+            AesDrive drive = SalmonFSTestHelper.openDrive(vaultDir, SalmonFSTestHelper.driveClassType, SalmonCoreTestHelper.TEST_FALSE_PASSWORD, null);
         } catch (Exception ex) {
             System.err.println(ex);
             wrongPassword = true;
@@ -125,7 +125,7 @@ public class SalmonFSHttpTests {
         boolean wrongPassword = false;
         IRealFile vaultDir = SalmonFSTestHelper.HTTP_VAULT_DIR;
         try {
-            SalmonDrive drive = SalmonFSTestHelper.openDrive(vaultDir, SalmonFSTestHelper.driveClassType, SalmonCoreTestHelper.TEST_PASSWORD, null);
+            AesDrive drive = SalmonFSTestHelper.openDrive(vaultDir, SalmonFSTestHelper.driveClassType, SalmonCoreTestHelper.TEST_PASSWORD, null);
             IVirtualFile root = drive.getRoot();
         } catch (Exception ex) {
             System.err.println(ex);
@@ -158,7 +158,7 @@ public class SalmonFSHttpTests {
     @Test
     void shouldSeekAndReadEncryptedFileStreamFromDrive() throws IOException {
         IRealFile vaultDir = SalmonFSTestHelper.HTTP_VAULT_DIR;
-        SalmonDrive drive = SalmonDrive.openDrive(vaultDir, SalmonFSTestHelper.driveClassType, SalmonCoreTestHelper.TEST_PASSWORD, null);
+        AesDrive drive = AesDrive.openDrive(vaultDir, SalmonFSTestHelper.driveClassType, SalmonCoreTestHelper.TEST_PASSWORD, null);
         IVirtualFile root = drive.getRoot();
         IVirtualFile encFile = root.getChild(SalmonFSTestHelper.TEST_IMPORT_SMALL_FILENAME);
         assertEquals(encFile.getBaseName(), SalmonFSTestHelper.TEST_IMPORT_SMALL_FILENAME);
@@ -175,7 +175,7 @@ public class SalmonFSHttpTests {
     @Test
     void shouldListFilesFromDrive() throws IOException {
         IRealFile vaultDir = SalmonFSTestHelper.HTTP_VAULT_DIR;
-        SalmonDrive drive = JavaHttpDrive.open(vaultDir, SalmonCoreTestHelper.TEST_PASSWORD);
+        AesDrive drive = HttpDrive.open(vaultDir, SalmonCoreTestHelper.TEST_PASSWORD);
         IVirtualFile root = drive.getRoot();
         IVirtualFile[] files = root.listFiles();
         List<String> filenames = new ArrayList<>();
@@ -195,13 +195,13 @@ public class SalmonFSHttpTests {
     public void ShouldExportFileFromDrive() throws Exception {
         IRealFile vaultDir = SalmonFSTestHelper.HTTP_VAULT_DIR;
         int threads = 1;
-        SalmonDrive drive = SalmonFSTestHelper.openDrive(vaultDir, SalmonFSTestHelper.driveClassType, SalmonCoreTestHelper.TEST_PASSWORD);
-        SalmonFile file = drive.getRoot().getChild(SalmonFSTestHelper.TEST_HTTP_FILE.getBaseName());
+        AesDrive drive = SalmonFSTestHelper.openDrive(vaultDir, SalmonFSTestHelper.driveClassType, SalmonCoreTestHelper.TEST_PASSWORD);
+        AesFile file = drive.getRoot().getChild(SalmonFSTestHelper.TEST_HTTP_FILE.getBaseName());
         IRealFile exportDir = SalmonFSTestHelper.generateFolder("export_http", SalmonFSTestHelper.TEST_OUTPUT_DIR, false);
         IRealFile localFile = exportDir.getChild(SalmonFSTestHelper.TEST_HTTP_FILE.getBaseName());
         if (localFile.exists())
             localFile.delete();
-        SalmonFSTestHelper.exportFiles(new SalmonFile[]{file}, exportDir, threads);
+        SalmonFSTestHelper.exportFiles(new AesFile[]{file}, exportDir, threads);
         drive.close();
     }
 
@@ -209,7 +209,7 @@ public class SalmonFSHttpTests {
     public void ShouldReadRawFile() throws IOException, NoSuchAlgorithmException {
         IRealFile localFile = SalmonFSTestHelper.HTTP_TEST_DIR.getChild(SalmonFSTestHelper.TEST_HTTP_FILE.getBaseName());
         String localChkSum = SalmonFSTestHelper.getChecksum(localFile);
-        IRealFile httpRoot = new JavaHttpFile(SalmonFSTestHelper.HTTP_SERVER_VIRTUAL_URL + "/" + SalmonFSTestHelper.HTTP_TEST_DIRNAME);
+        IRealFile httpRoot = new HttpFile(SalmonFSTestHelper.HTTP_SERVER_VIRTUAL_URL + "/" + SalmonFSTestHelper.HTTP_TEST_DIRNAME);
         IRealFile httpFile = httpRoot.getChild(SalmonFSTestHelper.TEST_HTTP_FILE.getBaseName());
         RandomAccessStream stream = httpFile.getInputStream();
         MemoryStream ms = new MemoryStream();
