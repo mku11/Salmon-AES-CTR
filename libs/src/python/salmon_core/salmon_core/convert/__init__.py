@@ -1,4 +1,4 @@
-"""!@brief Defines convertion and encoding classes.
+"""!@brief Defines conversion and encoding classes.
 """
 
 import os
