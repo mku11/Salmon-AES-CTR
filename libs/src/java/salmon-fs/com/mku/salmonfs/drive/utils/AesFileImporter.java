@@ -1,4 +1,4 @@
-package com.mku.salmonfs.utils;
+package com.mku.salmonfs.drive.utils;
 /*
 MIT License
 
@@ -31,23 +31,61 @@ import com.mku.fs.drive.utils.FileImporter;
 
 import java.io.IOException;
 
+/**
+ * Imports IRealFile(s) into an encrypted VirtualDrive.
+ */
 public class AesFileImporter extends FileImporter {
+
+    /**
+     * Instantiates a file importer for encrypted files.
+     *
+     * @param bufferSize The buffer size to be used for export.
+     * @param threads    The parallel threads to use
+     */
     public AesFileImporter(int bufferSize, int threads) {
         super.initialize(bufferSize, threads);
     }
 
-    protected void onPrepare(IVirtualFile importedFile, boolean integrity) throws IOException {
-        ((AesFile) importedFile).setAllowOverwrite(true);
+    /**
+     * Runs before import
+     *
+     * @param targetFile The target file imported
+     * @param integrity  If integrity verification is enabled
+     * @throws IOException If there is a problem with the file preparation.
+     */
+    protected void onPrepare(IVirtualFile targetFile, boolean integrity) throws IOException {
+        ((AesFile) targetFile).setAllowOverwrite(true);
         // we use default chunk file size
-        ((AesFile) importedFile).setApplyIntegrity(integrity, null, null);
+        ((AesFile) targetFile).setApplyIntegrity(integrity, null, null);
     }
 
+
+    /**
+     * Get the minimum part of file that can be imported in parallel.
+     *
+     * @param file The file
+     * @return The number of bytes
+     * @throws IOException If there was a problem calculating the size.
+     */
     protected long getMinimumPartSize(IVirtualFile file) throws IOException {
         return ((AesFile) file).getMinimumPartSize();
     }
 
+
+    /**
+     * Imports a real file into the drive.
+     *
+     * @param fileToImport The source file that will be imported in to the drive.
+     * @param dir          The target directory in the drive that the file will be imported
+     * @param filename     The filename to use
+     * @param deleteSource If true delete the source file.
+     * @param integrity    Apply data integrity
+     * @param onProgress   Progress to notify
+     * @return The imported file
+     * @throws Exception Thrown if error occurs during import
+     */
     public AesFile importFile(IRealFile fileToImport, IVirtualFile dir, String filename,
-                              boolean deleteSource, boolean integrity, BiConsumer<Long,Long> onProgress) throws Exception {
+                              boolean deleteSource, boolean integrity, BiConsumer<Long, Long> onProgress) throws Exception {
         return (AesFile) super.importFile(fileToImport, dir, filename, deleteSource, integrity, onProgress);
     }
 }

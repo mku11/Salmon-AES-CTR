@@ -1,4 +1,4 @@
 /**
- * Proxy classes for calling native libraries.
+ * Proxy classes for calling native encryption libraries.
  */
 package com.mku.salmon.bridge;

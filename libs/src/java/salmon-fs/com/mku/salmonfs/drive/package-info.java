@@ -1,4 +1,4 @@
 /**
- * Proxy classes for calling native libraries.
+ * Virtual drive definitions
  */
 package com.mku.salmonfs.drive;

@@ -26,8 +26,8 @@ SOFTWARE.
 import com.mku.fs.file.IRealFile;
 import com.mku.fs.file.IVirtualFile;
 
-/*
- * Virtual Drive
+/**
+ * Abstract virtual drive.
  */
 public abstract class VirtualDrive {
 

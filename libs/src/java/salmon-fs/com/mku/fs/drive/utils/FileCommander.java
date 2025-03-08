@@ -512,7 +512,7 @@ public class FileCommander {
     }
 
     /**
-     * File task progress class.
+     * Task progress for File(s).
      */
     private static class FileTaskProgress {
         private final long processedBytes;
@@ -544,6 +544,9 @@ public class FileCommander {
         }
     }
 
+    /**
+     * Task progress for IVirtualFile(s).
+     */
     public class VirtualFileTaskProgress extends FileTaskProgress {
         private final IVirtualFile file;
 
@@ -558,6 +561,9 @@ public class FileCommander {
         }
     }
 
+    /**
+     * Task progress for IRealFile(s).
+     */
     public class RealFileTaskProgress extends FileTaskProgress {
         public IRealFile getFile() {
             return file;

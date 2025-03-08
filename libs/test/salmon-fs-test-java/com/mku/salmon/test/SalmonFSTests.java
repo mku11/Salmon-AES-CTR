@@ -36,7 +36,7 @@ import com.mku.salmonfs.sequence.FileSequencer;
 import com.mku.salmonfs.streams.AesFileInputStream;
 import com.mku.salmon.streams.ProviderType;
 import com.mku.salmon.streams.AesStream;
-import com.mku.salmonfs.utils.AesFileCommander;
+import com.mku.salmonfs.drive.utils.AesFileCommander;
 import com.mku.streams.InputStreamWrapper;
 import com.mku.streams.MemoryStream;
 import org.junit.jupiter.api.AfterAll;

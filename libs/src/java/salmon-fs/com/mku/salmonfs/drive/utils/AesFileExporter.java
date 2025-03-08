@@ -1,4 +1,4 @@
-package com.mku.salmonfs.utils;
+package com.mku.salmonfs.drive.utils;
 /*
 MIT License
 
@@ -23,21 +23,39 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 */
 
+import com.mku.fs.drive.utils.FileExporter;
 import com.mku.fs.file.IVirtualFile;
 import com.mku.salmonfs.file.AesFile;
-import com.mku.fs.drive.utils.FileExporter;
 
 import java.io.IOException;
 
+/**
+ * Exports AesFile(s) from an encrypted AesDrive.
+ */
 public class AesFileExporter extends FileExporter {
     public AesFileExporter(int bufferSize, int threads) {
         super.initialize(bufferSize, threads);
     }
+
+    /**
+     * Runs before export
+     *
+     * @param sourceFile The file that will be imported
+     * @param integrity  If integrity verification is enabled
+     * @throws IOException If there is a problem with the file preparation.
+     */
     protected void onPrepare(IVirtualFile sourceFile, boolean integrity) throws IOException {
         // we use the drive hash key for integrity verification
         ((AesFile) sourceFile).setVerifyIntegrity(integrity, null);
     }
 
+    /**
+     * Get the minimum part of file that can be exported in parallel.
+     *
+     * @param file The file
+     * @return The number of bytes
+     * @throws IOException If there was a problem calculating the size.
+     */
     protected long getMinimumPartSize(IVirtualFile file) throws IOException {
         return ((AesFile) file).getMinimumPartSize();
     }

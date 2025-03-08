@@ -33,6 +33,7 @@ import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
+
 public abstract class FileImporter {
     /**
      * The global default buffer size to use when reading/writing on streams.
@@ -74,8 +75,22 @@ public abstract class FileImporter {
      */
     private final ExecutorService executor = Executors.newCachedThreadPool();
 
-    protected abstract void onPrepare(IVirtualFile importedFile, boolean integrity) throws IOException;
+    /**
+     * Runs before import
+     *
+     * @param targetFile The target file imported
+     * @param integrity  If integrity verification is enabled
+     * @throws IOException If there is a problem with the file preparation.
+     */
+    protected abstract void onPrepare(IVirtualFile targetFile, boolean integrity) throws IOException;
 
+    /**
+     * Get the minimum part of file that can be imported in parallel.
+     *
+     * @param file The file
+     * @return The number of bytes
+     * @throws IOException If there was a problem calculating the size.
+     */
     protected abstract long getMinimumPartSize(IVirtualFile file) throws IOException;
 
     /**
@@ -84,7 +99,7 @@ public abstract class FileImporter {
      * @param bufferSize Buffer size to be used when encrypting files.
      *                   If using integrity this value has to be a multiple of the Chunk size.
      *                   If not using integrity it should be a multiple of the AES block size for better performance
-     * @param threads The threads to use for import
+     * @param threads    The threads to use for import
      */
     public void initialize(int bufferSize, int threads) {
         this.bufferSize = bufferSize;
@@ -116,15 +131,15 @@ public abstract class FileImporter {
      *
      * @param fileToImport The source file that will be imported in to the drive.
      * @param dir          The target directory in the drive that the file will be imported
-     * @param filename The filename to use
+     * @param filename     The filename to use
      * @param deleteSource If true delete the source file.
-	 * @param integrity    Apply data integrity
-	 * @param onProgress   Progress to notify
+     * @param integrity    Apply data integrity
+     * @param onProgress   Progress to notify
      * @return The imported file
      * @throws Exception Thrown if error occurs during import
      */
     public IVirtualFile importFile(IRealFile fileToImport, IVirtualFile dir, String filename,
-                                   boolean deleteSource, boolean integrity, BiConsumer<Long,Long> onProgress) throws Exception {
+                                   boolean deleteSource, boolean integrity, BiConsumer<Long, Long> onProgress) throws Exception {
         if (isRunning())
             throw new Exception("Another import is running");
         if (fileToImport.isDirectory())
@@ -149,14 +164,14 @@ public abstract class FileImporter {
             long minPartSize = getMinimumPartSize(importedFile);
             if (partSize > minPartSize && threads > 1) {
                 partSize = (int) Math.ceil(fileSize / (float) threads);
-				if(partSize > minPartSize)
-					partSize -= partSize % minPartSize;
-				else
-					partSize = minPartSize;
+                if (partSize > minPartSize)
+                    partSize -= partSize % minPartSize;
+                else
+                    partSize = minPartSize;
                 runningThreads = (int) (fileSize / partSize);
             }
 
-            if(runningThreads == 1) {
+            if (runningThreads == 1) {
                 importFilePart(fileToImport, importedFile, 0, fileSize, totalBytesRead, onProgress);
             } else {
                 this.submitImportJobs(runningThreads, partSize, fileToImport, importedFile, totalBytesRead, integrity, onProgress);
@@ -217,10 +232,10 @@ public abstract class FileImporter {
      * @param start          The start position of the byte data that will be imported
      * @param count          The length of the file content that will be imported
      * @param totalBytesRead The total bytes read from the external file
-	 * @param onProgress 	 Progress observer
+     * @param onProgress     Progress observer
      */
     private void importFilePart(IRealFile fileToImport, IVirtualFile salmonFile,
-                                long start, long count, long[] totalBytesRead, BiConsumer<Long,Long> onProgress) throws IOException {
+                                long start, long count, long[] totalBytesRead, BiConsumer<Long, Long> onProgress) throws IOException {
         long totalPartBytesRead = 0;
 
         RandomAccessStream targetStream = null;
@@ -268,6 +283,9 @@ public abstract class FileImporter {
         close();
     }
 
+    /**
+     * Stops the current import
+     */
     public void close() {
         executor.shutdownNow();
     }

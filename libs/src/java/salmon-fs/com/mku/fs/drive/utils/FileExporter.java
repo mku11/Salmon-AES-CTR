@@ -33,6 +33,9 @@ import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
+/**
+ * Exports IVirtualFile(s) from a VirtualDrive.
+ */
 public abstract class FileExporter {
     /**
      * The global default buffer size to use when reading/writing on streams.
@@ -74,10 +77,30 @@ public abstract class FileExporter {
      */
     private final ExecutorService executor = Executors.newCachedThreadPool();
 
-    protected abstract void onPrepare(IVirtualFile importedFile, boolean integrity) throws IOException;
+    /**
+     * Runs before export
+     *
+     * @param sourceFile The file that will be imported
+     * @param integrity  If integrity verification is enabled
+     * @throws IOException If there is a problem with the file preparation.
+     */
+    protected abstract void onPrepare(IVirtualFile sourceFile, boolean integrity) throws IOException;
 
+    /**
+     * Get the minimum part of file that can be exported in parallel.
+     *
+     * @param file The file
+     * @return The number of bytes
+     * @throws IOException If there was a problem calculating the size.
+     */
     protected abstract long getMinimumPartSize(IVirtualFile file) throws IOException;
 
+    /**
+     * Initialize the exporter.
+     *
+     * @param bufferSize The buffer size to use while exporting
+     * @param threads    The number of parallel threads to run
+     */
     public void initialize(int bufferSize, int threads) {
         if (bufferSize == 0)
             bufferSize = DEFAULT_BUFFER_SIZE;
@@ -87,12 +110,17 @@ public abstract class FileExporter {
         this.threads = threads;
     }
 
+    /**
+     * Check if export is running
+     *
+     * @return True if running
+     */
     public boolean isRunning() {
         return !stopped;
     }
 
     /**
-     *
+     * Stop current export
      */
     public void stop() {
         stopped = true;
@@ -106,12 +134,12 @@ public abstract class FileExporter {
      * @param filename     The filename to use
      * @param deleteSource Delete the source file when the export finishes successfully
      * @param integrity    True to verify integrity
-     * @param onProgress Progress listener
+     * @param onProgress   Progress listener
      * @return The exported file
      * @throws Exception Thrown if error occurs during export
      */
     public IRealFile exportFile(IVirtualFile fileToExport, IRealFile exportDir, String filename,
-                                boolean deleteSource, boolean integrity, BiConsumer<Long,Long> onProgress) throws Exception {
+                                boolean deleteSource, boolean integrity, BiConsumer<Long, Long> onProgress) throws Exception {
 
         if (isRunning())
             throw new Exception("Another export is running");
@@ -139,10 +167,10 @@ public abstract class FileExporter {
             long minPartSize = getMinimumPartSize(fileToExport);
             if (partSize > minPartSize && threads > 1) {
                 partSize = (int) Math.ceil(fileSize / (float) threads);
-				if(partSize > minPartSize)
-					partSize -= partSize % minPartSize;
-				else
-					partSize = minPartSize;
+                if (partSize > minPartSize)
+                    partSize -= partSize % minPartSize;
+                else
+                    partSize = minPartSize;
                 runningThreads = (int) (fileSize / partSize);
             }
 
@@ -210,7 +238,7 @@ public abstract class FileExporter {
      * @param totalBytesWritten The total bytes that were written to the external file
      */
     private void exportFilePart(IVirtualFile fileToExport, IRealFile exportFile, long start, long count,
-                                long[] totalBytesWritten, BiConsumer<Long,Long> onProgress) throws IOException {
+                                long[] totalBytesWritten, BiConsumer<Long, Long> onProgress) throws IOException {
         long startTime = System.currentTimeMillis();
         long totalPartBytesWritten = 0;
 
@@ -235,7 +263,7 @@ public abstract class FileExporter {
                 totalPartBytesWritten += bytesRead;
 
                 totalBytesWritten[0] += bytesRead;
-                if(onProgress != null)
+                if (onProgress != null)
                     onProgress.accept(totalBytesWritten[0], fileToExport.getSize());
             }
         } catch (Exception ex) {
@@ -259,6 +287,9 @@ public abstract class FileExporter {
         close();
     }
 
+    /**
+     * Close exporter and release resources.
+     */
     public void close() {
         executor.shutdownNow();
     }
