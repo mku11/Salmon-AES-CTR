@@ -38,17 +38,17 @@ public enum ProviderType {
     Default,
 
     /**
-     * Salmon builtin AES intrinsics. This needs the SalmonNative library to be loaded. See: https://github.com/mku11/Salmon-AES-CTR#readme
+     * Salmon builtin AES intrinsics. This needs the SalmonNative library to be loaded. See: <a href="https://github.com/mku11/Salmon-AES-CTR#readme">...</a>
      */
     AesIntrinsics,
 
     /**
-     * Salmon Aes implementation. This needs the SalmonNative library to be loaded. See: https://github.com/mku11/Salmon-AES-CTR#readme
+     * Salmon Aes implementation. This needs the SalmonNative library to be loaded. See: <a href="https://github.com/mku11/Salmon-AES-CTR#readme">...</a>
      */
     Aes,
 
     /**
-     * Salmon builtin AES GPU. This needs OpenCL, a compatible Graphics card, and the SalmonNative library to be loaded. See: https://github.com/mku11/Salmon-AES-CTR#readme
+     * Salmon builtin AES GPU. This needs OpenCL, a compatible Graphics card, and the SalmonNative library to be loaded. See: <a href="https://github.com/mku11/Salmon-AES-CTR#readme">...</a>
      */
     AesGPU
 }

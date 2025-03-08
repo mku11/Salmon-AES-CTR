@@ -23,8 +23,6 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 */
 
-import com.mku.bridge.INativeProxy;
-
 /**
  * Proxy class for use with windows native library.
  */
@@ -39,15 +37,15 @@ public class NativeProxy implements INativeProxy {
     /**
      * Init the native code with AES implementation, and hash length options.
      *
-     * @param aesImpl
+     * @param aesImpl The AES implementation see ProviderType
      */
     private native static void init(int aesImpl);
 
     /**
      * Native Key schedule algorithm for expanding the 32 byte key to 240 bytes required
      *
-     * @param key The key
-     * @param expandedKey
+     * @param key The key (32 bytes)
+     * @param expandedKey The expanded key (240 bytes)
      */
     private native static void expandkey(byte[] key, byte[] expandedKey);
 

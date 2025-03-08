@@ -23,7 +23,7 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 */
 
-import com.mku.bridge.INativeProxy;
+import com.mku.salmon.bridge.INativeProxy;
 import com.mku.salmon.SecurityException;
 import com.mku.salmon.bridge.NativeProxy;
 

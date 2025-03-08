@@ -27,7 +27,7 @@ import com.mku.convert.BitConverter;
 import com.mku.streams.MemoryStream;
 import com.mku.salmon.integrity.Integrity;
 import com.mku.salmon.integrity.IntegrityException;
-import com.mku.salmon.streams.EncryptionType;
+import com.mku.salmon.streams.EncryptionMode;
 import com.mku.salmon.streams.AesStream;
 import com.mku.salmon.transform.AesCTRTransformer;
 
@@ -154,7 +154,7 @@ public class Encryptor {
             headerData = outputStream.toArray();
         }
 
-        int realSize = (int) AesStream.getActualSize(data, key, nonce, EncryptionType.Encrypt,
+        int realSize = (int) AesStream.getActualSize(data, key, nonce, EncryptionMode.Encrypt,
                 headerData, integrity, chunkSize, hashKey);
         byte[] outData = new byte[realSize];
         outputStream.setPosition(0);
@@ -291,7 +291,7 @@ public class Encryptor {
         AesStream stream = null;
         try {
             inputStream.setPosition(start);
-            stream = new AesStream(key, nonce, EncryptionType.Encrypt, outputStream, headerData,
+            stream = new AesStream(key, nonce, EncryptionMode.Encrypt, outputStream, headerData,
                     integrity, chunkSize, hashKey);
             stream.setAllowRangeWrite(true);
             stream.setPosition(start);

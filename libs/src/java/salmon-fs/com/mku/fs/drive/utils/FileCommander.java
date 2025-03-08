@@ -481,7 +481,7 @@ public class FileCommander {
      * Get number of files recursively for the files provided.
      *
      * @param files Total number of files and files under subdirectories.
-     * @return
+     * @return The number of all files and subdirectories
      */
     private int getFiles(IVirtualFile[] files) {
         int total = 0;

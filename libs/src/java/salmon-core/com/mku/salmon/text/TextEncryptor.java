@@ -29,9 +29,10 @@ import com.mku.salmon.SecurityException;
 import com.mku.salmon.encode.Base64Utils;
 
 import java.io.IOException;
+import java.nio.charset.StandardCharsets;
 
 /**
- * Utility class that encrypts and decrypts text strings.
+ * Utility class that encrypts text strings.
  */
 public class TextEncryptor {
     private static final Encryptor encryptor = new Encryptor();
@@ -75,7 +76,7 @@ public class TextEncryptor {
     public static String encryptString(String text, byte[] key, byte[] nonce, boolean header,
                                        boolean integrity, byte[] hashKey, Integer chunkSize)
             throws IOException {
-        byte[] bytes = text.getBytes("UTF-8");
+        byte[] bytes = text.getBytes(StandardCharsets.UTF_8);
         byte[] encBytes = encryptor.encrypt(bytes, key, nonce, header, integrity, hashKey, chunkSize);
         String encString = Base64Utils.getBase64().encode(encBytes).replace("\n", "");
         return encString;

@@ -32,7 +32,7 @@ import com.mku.salmon.Generator;
 import com.mku.salmon.RangeExceededException;
 import com.mku.salmon.sequence.SequenceSerializer;
 import com.mku.salmon.streams.AesStream;
-import com.mku.salmon.streams.EncryptionType;
+import com.mku.salmon.streams.EncryptionMode;
 import com.mku.salmonfs.auth.AuthConfig;
 import com.mku.salmonfs.drive.AesDrive;
 import com.mku.salmonfs.drive.Drive;
@@ -704,7 +704,7 @@ public class SalmonFSTestHelper {
 
     public static void encryptAndDecryptStream(byte[] data, byte[] key, byte[] nonce) throws Exception {
         MemoryStream encOutStream = new MemoryStream();
-        AesStream encryptor = new AesStream(key, nonce, EncryptionType.Encrypt, encOutStream);
+        AesStream encryptor = new AesStream(key, nonce, EncryptionMode.Encrypt, encOutStream);
         RandomAccessStream inputStream = new MemoryStream(data);
         inputStream.copyTo(encryptor);
         encOutStream.setPosition(0);
@@ -715,7 +715,7 @@ public class SalmonFSTestHelper {
         inputStream.close();
 
         RandomAccessStream encInputStream = new MemoryStream(encData);
-        AesStream decryptor = new AesStream(key, nonce, EncryptionType.Decrypt, encInputStream);
+        AesStream decryptor = new AesStream(key, nonce, EncryptionMode.Decrypt, encInputStream);
         MemoryStream outStream = new MemoryStream();
         decryptor.copyTo(outStream);
         outStream.setPosition(0);

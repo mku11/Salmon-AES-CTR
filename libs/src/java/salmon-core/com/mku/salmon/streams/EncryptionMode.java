@@ -24,12 +24,12 @@ SOFTWARE.
 */
 
 /**
- * Encryption Type
+ * Encryption Mode
  *
  * @see #Encrypt
  * @see #Decrypt
  */
-public enum EncryptionType {
+public enum EncryptionMode {
     /**
      * Encryption Type used with a base stream as a target.
      */

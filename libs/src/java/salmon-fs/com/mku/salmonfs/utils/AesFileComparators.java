@@ -222,7 +222,7 @@ public class AesFileComparators {
 
     /**
      * Get the SalmonFile file type extension if available.
-     * @param aesFile
+     * @param aesFile The Aes file to get the file type from
      * @return The file type
      */
     private static String tryGetType(AesFile aesFile) {

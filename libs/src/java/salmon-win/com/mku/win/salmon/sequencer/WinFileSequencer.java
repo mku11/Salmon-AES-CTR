@@ -1,4 +1,4 @@
-package com.mku.salmon.win.sequencer;
+package com.mku.win.salmon.sequencer;
 /*
 MIT License
 
@@ -24,7 +24,7 @@ SOFTWARE.
 */
 
 import com.mku.fs.file.IRealFile;
-import com.mku.salmon.win.registry.Registry;
+import com.mku.win.salmon.registry.Registry;
 import com.mku.salmon.sequence.INonceSequenceSerializer;
 import com.mku.salmonfs.sequence.FileSequencer;
 import com.mku.salmon.sequence.SequenceException;
@@ -122,9 +122,9 @@ public class WinFileSequencer extends FileSequencer
     }
 
     /**
-     * Get the checksum of the contents.
-     * @param contents
-     * @return
+     * Get the checksum of the text contents.
+     * @param contents The text
+     * @return The SHA-256 checksum string
      * @throws SequenceException Thrown if there is an error with the nonce sequence
      */
     private String getChecksum(String contents) {

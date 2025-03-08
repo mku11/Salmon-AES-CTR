@@ -37,7 +37,7 @@ import com.mku.streams.RandomAccessStream;
 import com.mku.convert.BitConverter;
 import com.mku.salmon.integrity.Integrity;
 import com.mku.salmon.integrity.IntegrityException;
-import com.mku.salmon.streams.EncryptionType;
+import com.mku.salmon.streams.EncryptionMode;
 import com.mku.salmon.streams.AesStream;
 import com.mku.salmon.text.TextDecryptor;
 import com.mku.salmon.text.TextEncryptor;
@@ -194,7 +194,7 @@ public class AesFile implements IVirtualFile {
         realStream.read(headerData, 0, headerData.length);
 
         AesStream stream = new AesStream(getEncryptionKey(),
-                nonceBytes, EncryptionType.Decrypt, realStream, headerData,
+                nonceBytes, EncryptionMode.Decrypt, realStream, headerData,
                 integrity, getFileChunkSize(), getHashKey());
         return stream;
     }
@@ -217,7 +217,8 @@ public class AesFile implements IVirtualFile {
      * @param nonce Nonce to be used for encryption. Note that each file should have
      *              a unique nonce see {@link AesDrive#getNextNonce()}.
      * @return The output stream.
-     * @throws Exception
+     * @throws SecurityException If overwriting existing files. See SetAllowOverwrite().
+     * @throws IOException If there is a problem creating the stream.
      */
     public synchronized RandomAccessStream getOutputStream(byte[] nonce) throws IOException {
 
@@ -240,7 +241,7 @@ public class AesFile implements IVirtualFile {
         realStream.seek(getHeaderLength(), RandomAccessStream.SeekOrigin.Begin);
 
         AesStream stream = new AesStream(getEncryptionKey(), nonceBytes,
-                EncryptionType.Encrypt, realStream, headerData,
+                EncryptionMode.Encrypt, realStream, headerData,
                 integrity, getRequestedChunkSize() > 0 ? getRequestedChunkSize() : null, getHashKey());
         stream.setAllowRangeWrite(overwrite);
         return stream;

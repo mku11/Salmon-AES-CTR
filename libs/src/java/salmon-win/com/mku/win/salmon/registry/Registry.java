@@ -1,4 +1,4 @@
-package com.mku.salmon.win.registry;
+package com.mku.win.salmon.registry;
 /*
 MIT License
 

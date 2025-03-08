@@ -27,7 +27,7 @@ import com.mku.salmon.integrity.IntegrityException;
 import com.mku.streams.RandomAccessStream;
 import com.mku.streams.MemoryStream;
 import com.mku.salmon.integrity.Integrity;
-import com.mku.salmon.streams.EncryptionType;
+import com.mku.salmon.streams.EncryptionMode;
 import com.mku.salmon.streams.AesStream;
 import com.mku.salmon.transform.AesCTRTransformer;
 
@@ -151,7 +151,7 @@ public class Decryptor {
         if (nonce == null)
             throw new SecurityException("Nonce is missing");
 
-        int realSize = (int) AesStream.getActualSize(data, key, nonce, EncryptionType.Decrypt,
+        int realSize = (int) AesStream.getActualSize(data, key, nonce, EncryptionMode.Decrypt,
                 headerData, integrity, chunkSize, hashKey);
         byte[] outData = new byte[realSize];
 
@@ -289,7 +289,7 @@ public class Decryptor {
         try {
             outputStream = new MemoryStream(outData);
             outputStream.setPosition(start);
-            stream = new AesStream(key, nonce, EncryptionType.Decrypt, inputStream,
+            stream = new AesStream(key, nonce, EncryptionMode.Decrypt, inputStream,
                     headerData, integrity, chunkSize, hashKey);
             stream.setPosition(start);
             long totalChunkBytesRead = 0;

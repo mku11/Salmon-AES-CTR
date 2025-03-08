@@ -117,7 +117,7 @@ public class NonceSequence {
 
     /**
      * Set the authorization ID of the device.
-     * @param authId
+     * @param authId The device authorization id
      */
     void setAuthID(String authId) {
         this.authId = authId;

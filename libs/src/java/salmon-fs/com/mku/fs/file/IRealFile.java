@@ -451,7 +451,7 @@ public interface IRealFile {
     /**
      * Get an auto generated copy of the name for a file.
      */
-    public static Function<IRealFile, String> autoRename = (IRealFile file) -> {
+    Function<IRealFile, String> autoRename = (IRealFile file) -> {
         return autoRename(file.getBaseName());
     };
 

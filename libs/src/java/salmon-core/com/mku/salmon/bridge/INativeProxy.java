@@ -1,4 +1,4 @@
-package com.mku.bridge;
+package com.mku.salmon.bridge;
 /*
 MIT License
 

@@ -37,8 +37,7 @@ import com.mku.salmon.transform.TransformerFactory;
 import java.io.IOException;
 
 /**
- * Stream decorator provides AES256 encryption and decryption of stream.
- * Block data integrity is also supported.
+ * Stream wrapper provides AES256 encryption, decryption, and integrity verification of a base stream.
  */
 public class AesStream extends RandomAccessStream {
 
@@ -50,7 +49,7 @@ public class AesStream extends RandomAccessStream {
     /**
      * Mode to be used for this stream. This can only be set once.
      */
-    private final EncryptionType encryptionType;
+    private final EncryptionMode encryptionMode;
 
     /**
      * Allow seek and write.
@@ -96,17 +95,17 @@ public class AesStream extends RandomAccessStream {
      * @param data       The data to be transformed.
      * @param key        The AES key.
      * @param nonce      The nonce for the CTR.
-     * @param mode       The {@link EncryptionType} Encrypt or Decrypt.
+     * @param mode       The {@link EncryptionMode} Encrypt or Decrypt.
      * @param headerData The header data to be embedded if you use Encryption.
      * @param integrity  True if you want to enable integrity.
      * @param chunkSize  The chunk size for integrity chunks.
      * @param hashKey    The hash key to be used for integrity checks.
      * @return The size of the output data.
-     * @throws SecurityException Thrown if there is a security exception
-     * @throws IntegrityException      Thrown if the data are corrupt or tampered with.
-     * @throws IOException             Thrown if there is an IO error.
+     * @throws SecurityException  Thrown if there is a security exception
+     * @throws IntegrityException Thrown if the data are corrupt or tampered with.
+     * @throws IOException        Thrown if there is an IO error.
      */
-    public static long getActualSize(byte[] data, byte[] key, byte[] nonce, EncryptionType mode,
+    public static long getActualSize(byte[] data, byte[] key, byte[] nonce, EncryptionMode mode,
                                      byte[] headerData, boolean integrity, Integer chunkSize, byte[] hashKey)
             throws IOException {
         MemoryStream inputStream = new MemoryStream(data);
@@ -122,18 +121,18 @@ public class AesStream extends RandomAccessStream {
      *
      * @param key            The AES encryption key.
      * @param nonce          The nonce key.
-     * @param encryptionType The mode to use for encryption or decryption. This can only be set once.
+     * @param encryptionMode The mode to use for encryption or decryption. This can only be set once.
      * @param baseStream     If EncryptionMode is Encrypt this will be the target stream
      *                       that data will be written to. If DecryptionMode is Decrypt this will be the
      *                       source stream to read the data from.
-     * @throws SecurityException If the stream cannot be decrypted or missing key or nonce.
-     * @throws IntegrityException      If the integrity of the stream is compromised.
-     * @throws IOException             If the base stream is corrupt.
+     * @throws SecurityException  If the stream cannot be decrypted or missing key or nonce.
+     * @throws IntegrityException If the integrity of the stream is compromised.
+     * @throws IOException        If the base stream is corrupt.
      */
-    public AesStream(byte[] key, byte[] nonce, EncryptionType encryptionType,
+    public AesStream(byte[] key, byte[] nonce, EncryptionMode encryptionMode,
                      RandomAccessStream baseStream)
             throws IOException {
-        this(key, nonce, encryptionType, baseStream, null, false, null, null);
+        this(key, nonce, encryptionMode, baseStream, null, false, null, null);
     }
 
     /**
@@ -141,19 +140,19 @@ public class AesStream extends RandomAccessStream {
      *
      * @param key            The key
      * @param nonce          The nonce to use
-     * @param encryptionType The encryption Mode see {@link EncryptionType}
+     * @param encryptionMode The encryption Mode see {@link EncryptionMode}
      * @param baseStream     If EncryptionMode is Encrypt this will be the target stream
      *                       that data will be written to. If DecryptionMode is Decrypt this will be the
      *                       source stream to read the data from.
      * @param headerData     The header data to embed if you use EncryptionMode = Encrypt.
-     * @throws SecurityException If the stream cannot be decrypted or missing key or nonce.
-     * @throws IntegrityException      If the integrity of the stream is compromised.
-     * @throws IOException             If the base stream is corrupt.
+     * @throws SecurityException  If the stream cannot be decrypted or missing key or nonce.
+     * @throws IntegrityException If the integrity of the stream is compromised.
+     * @throws IOException        If the base stream is corrupt.
      */
-    public AesStream(byte[] key, byte[] nonce, EncryptionType encryptionType,
+    public AesStream(byte[] key, byte[] nonce, EncryptionMode encryptionMode,
                      RandomAccessStream baseStream, byte[] headerData)
             throws IOException {
-        this(key, nonce, encryptionType, baseStream, headerData, false, null, null);
+        this(key, nonce, encryptionMode, baseStream, headerData, false, null, null);
     }
 
     /**
@@ -169,23 +168,23 @@ public class AesStream extends RandomAccessStream {
      *
      * @param key            The AES key that is used to encrypt decrypt
      * @param nonce          The nonce used for the initial counter
-     * @param encryptionType Encryption mode Encrypt or Decrypt this cannot change later
+     * @param encryptionMode Encryption mode Encrypt or Decrypt this cannot change later
      * @param baseStream     The base Stream that will be used to read the data
      * @param headerData     The data to store in the header when encrypting.
      * @param integrity      enable integrity
      * @param chunkSize      the chunk size to be used with integrity
      * @param hashKey        Hash key to be used with integrity
-     * @throws IOException             Thrown if there is an IO error.
-     * @throws SecurityException Thrown if there is a security exception
-     * @throws IntegrityException      Thrown if the data are corrupt or tampered with.
+     * @throws IOException        Thrown if there is an IO error.
+     * @throws SecurityException  Thrown if there is a security exception
+     * @throws IntegrityException Thrown if the data are corrupt or tampered with.
      * @see <a href="https://en.wikipedia.org/wiki/Block_cipher_mode_of_operation#Counter_(CTR)">Salmon README.md</a>
      */
-    public AesStream(byte[] key, byte[] nonce, EncryptionType encryptionType,
+    public AesStream(byte[] key, byte[] nonce, EncryptionMode encryptionMode,
                      RandomAccessStream baseStream, byte[] headerData,
                      boolean integrity, Integer chunkSize, byte[] hashKey)
             throws IOException {
 
-        this.encryptionType = encryptionType;
+        this.encryptionMode = encryptionMode;
         this.baseStream = baseStream;
         this.headerData = headerData;
 
@@ -199,11 +198,11 @@ public class AesStream extends RandomAccessStream {
      * stream because in the case of a decryption stream that has already embedded integrity
      * we still need to calculate/skip the chunks.
      *
-     * @param integrity
-     * @param hashKey
-     * @param chunkSize
-     * @throws SecurityException Thrown if there is a security exception
-     * @throws IntegrityException      Thrown if the data are corrupt or tampered with.
+     * @param integrity True to use integrity checking
+     * @param hashKey   The hash key to verify the data
+     * @param chunkSize The chunk size
+     * @throws SecurityException  Thrown if there is a security exception
+     * @throws IntegrityException Thrown if the data are corrupt or tampered with.
      */
     private void initIntegrity(boolean integrity, byte[] hashKey, Integer chunkSize) {
         this.integrity = new Integrity(integrity, hashKey, chunkSize,
@@ -324,7 +323,7 @@ public class AesStream extends RandomAccessStream {
      * @return True if mode is decryption.
      */
     public boolean canRead() {
-        return baseStream.canRead() && encryptionType == EncryptionType.Decrypt;
+        return baseStream.canRead() && encryptionMode == EncryptionMode.Decrypt;
     }
 
     /**
@@ -342,7 +341,7 @@ public class AesStream extends RandomAccessStream {
      * @return True if mode is decryption.
      */
     public boolean canWrite() {
-        return baseStream.canWrite() && encryptionType == EncryptionType.Encrypt;
+        return baseStream.canWrite() && encryptionMode == EncryptionMode.Encrypt;
     }
 
     /**
@@ -494,8 +493,8 @@ public class AesStream extends RandomAccessStream {
     /**
      * Set the virtual position of the stream.
      *
-     * @param value
-     * @throws IOException                  Thrown if there is an IO error.
+     * @param value The new position
+     * @throws IOException            Thrown if there is an IO error.
      * @throws RangeExceededException Thrown if the nonce exceeds its range
      */
     private void setVirtualPosition(long value) throws IOException {
@@ -675,7 +674,7 @@ public class AesStream extends RandomAccessStream {
      * wrt to the encryption block size. Use this method to align a position to the
      * start of the block or chunk.
      *
-     * @return
+     * @return The aligned offset
      */
     private int getAlignedOffset() throws IOException {
         int alignOffset;
@@ -692,7 +691,7 @@ public class AesStream extends RandomAccessStream {
      * wrt to the encryption block size. Use this method to ensure that buffer sizes request
      * via the API are aligned for read/writes and integrity processing.
      *
-     * @return
+     * @return The buffer size
      */
     private int getNormalizedBufferSize(boolean includeHashes) {
         int bufferSize = this.bufferSize;
@@ -792,7 +791,7 @@ public class AesStream extends RandomAccessStream {
      *
      * @param buffer    The buffer.
      * @param chunkSize The chunk size.
-     * @return
+     * @return The data without the hash signatures
      */
     private byte[] stripSignatures(byte[] buffer, int chunkSize) {
         int bytes = buffer.length / (chunkSize + Generator.HASH_RESULT_LENGTH) * chunkSize;
@@ -818,12 +817,12 @@ public class AesStream extends RandomAccessStream {
     }
 
     /**
-     * Get the encryption mode see {@link EncryptionType}.
+     * Get the encryption mode see {@link EncryptionMode}.
      *
      * @return The encryption mode
      */
-    public EncryptionType getEncryptionMode() {
-        return encryptionType;
+    public EncryptionMode getEncryptionMode() {
+        return encryptionMode;
     }
 
     /**

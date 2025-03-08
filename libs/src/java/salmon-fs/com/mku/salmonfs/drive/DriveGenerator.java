@@ -62,7 +62,6 @@ public class DriveGenerator {
     /**
      * Global default iterations that will be used for the master key derivation.
      */
-    @SuppressWarnings("FieldCanBeLocal")
     private static int iterations = 65536;
 
     /**

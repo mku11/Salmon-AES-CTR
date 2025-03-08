@@ -1,4 +1,4 @@
-package com.mku.salmon.win.sequencer;
+package com.mku.win.salmon.sequencer;
 /*
 MIT License
 

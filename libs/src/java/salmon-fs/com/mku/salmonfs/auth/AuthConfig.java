@@ -180,10 +180,9 @@ public class AuthConfig {
      * Verify the authorization id with the current drive auth id.
      *
      * @param authId The authorization id to verify.
-     * @return
-     * @throws Exception
+     * @return True if authorization if successful.
      */
-    private static boolean verifyAuthID(AesDrive drive, byte[] authId) throws Exception {
+    private static boolean verifyAuthID(AesDrive drive, byte[] authId) {
         return Arrays.equals(authId, drive.getAuthIdBytes());
     }
 
@@ -191,10 +190,10 @@ public class AuthConfig {
     /**
      * Import sequence into the current drive.
      *
-     * @param authConfig
-     * @throws Exception
+     * @param authConfig The authorization configuration
+     * @throws IOException If there is a problem with initializing the nonce sequence with the new configuration
      */
-    private static void importSequence(AesDrive drive, AuthConfig authConfig) throws Exception {
+    private static void importSequence(AesDrive drive, AuthConfig authConfig) throws IOException {
         String drvStr = BitConverter.toHex(authConfig.getDriveId());
         String authStr = BitConverter.toHex(authConfig.getAuthId());
         drive.getSequencer().initializeSequence(drvStr, authStr, authConfig.getStartNonce(), authConfig.getMaxNonce());

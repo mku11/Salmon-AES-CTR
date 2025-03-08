@@ -1,4 +1,4 @@
 /**
- * File based nonce sequencers.
+ * File-based nonce sequencers.
  */
 package com.mku.salmonfs.sequence;

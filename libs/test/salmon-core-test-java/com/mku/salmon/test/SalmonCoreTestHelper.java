@@ -34,7 +34,7 @@ import com.mku.salmon.Generator;
 import com.mku.salmon.integrity.HMACSHA256Provider;
 import com.mku.salmon.integrity.IHashProvider;
 import com.mku.salmon.integrity.Integrity;
-import com.mku.salmon.streams.EncryptionType;
+import com.mku.salmon.streams.EncryptionMode;
 import com.mku.salmon.streams.ProviderType;
 import com.mku.salmon.streams.AesStream;
 import com.mku.salmon.transform.ICTRTransformer;
@@ -176,7 +176,7 @@ public class SalmonCoreTestHelper {
             headerData = header.getBytes(Charset.defaultCharset());
             outs.write(headerData, 0, headerData.length);
         }
-        AesStream writer = new AesStream(key, iv, EncryptionType.Encrypt, outs,
+        AesStream writer = new AesStream(key, iv, EncryptionMode.Encrypt, outs,
                 headerData, integrity, chunkSize, hashKey);
 
         if (bufferSize == 0) // use the internal buffer size of the memorystream to copy
@@ -206,7 +206,7 @@ public class SalmonCoreTestHelper {
             headerData = new byte[(int) headerLength];
             ins.read(headerData, 0, headerData.length);
         }
-        AesStream reader = new AesStream(key, iv, EncryptionType.Decrypt, ins,
+        AesStream reader = new AesStream(key, iv, EncryptionMode.Decrypt, ins,
                 headerData, integrity, chunkSize, hashKey);
 
         if (bufferSize == 0) // use the internal buffersize of the memorystream to copy
@@ -240,7 +240,7 @@ public class SalmonCoreTestHelper {
         byte[] inputBytes = plainText.getBytes(Charset.defaultCharset());
         MemoryStream ins = new MemoryStream(inputBytes);
         MemoryStream outs = new MemoryStream();
-        AesStream encWriter = new AesStream(key, iv, EncryptionType.Encrypt, outs,
+        AesStream encWriter = new AesStream(key, iv, EncryptionMode.Encrypt, outs,
                 null, integrity, chunkSize, hashKey);
         ins.copyTo(encWriter);
         ins.close();
@@ -250,7 +250,7 @@ public class SalmonCoreTestHelper {
 
         // Use SalmonStrem to read from cipher text and seek and read to different positions in the stream
         MemoryStream encIns = new MemoryStream(encBytes);
-        AesStream decReader = new AesStream(key, iv, EncryptionType.Decrypt, encIns,
+        AesStream decReader = new AesStream(key, iv, EncryptionMode.Decrypt, encIns,
                 null, integrity, chunkSize, hashKey);
         String correctText;
         String decText;
@@ -318,7 +318,7 @@ public class SalmonCoreTestHelper {
         byte[] inputBytes = plainText.getBytes(Charset.defaultCharset());
         MemoryStream ins = new MemoryStream(inputBytes);
         MemoryStream outs = new MemoryStream();
-        AesStream encWriter = new AesStream(key, iv, EncryptionType.Encrypt, outs,
+        AesStream encWriter = new AesStream(key, iv, EncryptionMode.Encrypt, outs,
                 null, integrity, chunkSize, hashKey);
         ins.copyTo(encWriter);
         ins.close();
@@ -328,7 +328,7 @@ public class SalmonCoreTestHelper {
 
         // Use SalmonStream to read from cipher text and seek and read to different positions in the stream
         MemoryStream encIns = new MemoryStream(encBytes);
-        AesStream decReader = new AesStream(key, iv, EncryptionType.Decrypt, encIns,
+        AesStream decReader = new AesStream(key, iv, EncryptionMode.Decrypt, encIns,
                 null, integrity, chunkSize, hashKey);
         for (int i = 0; i < 100; i++) {
             decReader.setPosition(decReader.getPosition() + 7);
@@ -372,7 +372,7 @@ public class SalmonCoreTestHelper {
         byte[] inputBytes = plainText.getBytes(Charset.defaultCharset());
         MemoryStream ins = new MemoryStream(inputBytes);
         MemoryStream outs = new MemoryStream();
-        AesStream encWriter = new AesStream(key, iv, EncryptionType.Encrypt, outs,
+        AesStream encWriter = new AesStream(key, iv, EncryptionMode.Encrypt, outs,
                 null, integrity, chunkSize, hashKey);
         ins.copyTo(encWriter);
         ins.close();
@@ -383,7 +383,7 @@ public class SalmonCoreTestHelper {
         // partial write
         byte[] writeBytes = textToWrite.getBytes(Charset.defaultCharset());
         MemoryStream pOuts = new MemoryStream(encBytes);
-        AesStream partialWriter = new AesStream(key, iv, EncryptionType.Encrypt, pOuts,
+        AesStream partialWriter = new AesStream(key, iv, EncryptionMode.Encrypt, pOuts,
                 null, integrity, chunkSize, hashKey);
         long alignedPosition = seek;
         int alignOffset = 0;
@@ -399,7 +399,7 @@ public class SalmonCoreTestHelper {
 
         // Use SalmonStrem to read from cipher text and test if writing was successful
         MemoryStream encIns = new MemoryStream(encBytes);
-        AesStream decReader = new AesStream(key, iv, EncryptionType.Decrypt, encIns,
+        AesStream decReader = new AesStream(key, iv, EncryptionMode.Decrypt, encIns,
                 null, integrity, chunkSize, hashKey);
         String decText = SalmonCoreTestHelper.seekAndGetSubstringByRead(decReader, 0, text.length(), RandomAccessStream.SeekOrigin.Begin);
 
@@ -417,7 +417,7 @@ public class SalmonCoreTestHelper {
     public static void testCounterValue(String text, byte[] key, byte[] nonce, long counter) throws Throwable {
         byte[] testTextBytes = text.getBytes(Charset.defaultCharset());
         MemoryStream ms = new MemoryStream(testTextBytes);
-        AesStream stream = new AesStream(key, nonce, EncryptionType.Encrypt, ms,
+        AesStream stream = new AesStream(key, nonce, EncryptionMode.Encrypt, ms,
                 null, false, null, null);
         stream.setAllowRangeWrite(true);
 
@@ -624,7 +624,7 @@ public class SalmonCoreTestHelper {
         // encrypt to a memory byte stream
         ms2.setPosition(0);
         MemoryStream ms3 = new MemoryStream();
-        AesStream aesStream = new AesStream(key, nonce, EncryptionType.Encrypt, ms3,
+        AesStream aesStream = new AesStream(key, nonce, EncryptionMode.Encrypt, ms3,
                 null, integrity, chunkSize, hashKey);
         // we always align the writes to the chunk size if we enable integrity
         if (integrity)
@@ -638,7 +638,7 @@ public class SalmonCoreTestHelper {
 		ms3 = new MemoryStream(encData);
         ms3.setPosition(0);
         MemoryStream ms4 = new MemoryStream();
-        AesStream aesStream2 = new AesStream(key, nonce, EncryptionType.Decrypt, ms3,
+        AesStream aesStream2 = new AesStream(key, nonce, EncryptionMode.Decrypt, ms3,
                 null, integrity, chunkSize, hashKey);
         aesStream2.copyTo(ms4, bufferSize, null);
         aesStream2.close();

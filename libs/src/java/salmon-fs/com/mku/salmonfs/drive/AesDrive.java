@@ -36,7 +36,7 @@ import com.mku.salmon.password.Password;
 import com.mku.salmon.sequence.INonceSequencer;
 import com.mku.salmon.sequence.NonceSequence;
 import com.mku.salmon.sequence.SequenceException;
-import com.mku.salmon.streams.EncryptionType;
+import com.mku.salmon.streams.EncryptionMode;
 import com.mku.salmon.streams.AesStream;
 import com.mku.salmonfs.auth.AuthException;
 import com.mku.salmonfs.file.AesFile;
@@ -275,7 +275,7 @@ public abstract class AesDrive extends VirtualDrive {
      *
      * @param dir               The target directory where the drive is located.
      * @param createIfNotExists Create the drive if it does not exist
-     * @return
+     * @return An encrypted drive instance
      * @throws SecurityException Thrown if there is a security exception
      */
     private static AesDrive createDriveInstance(IRealFile dir, boolean createIfNotExists,
@@ -299,13 +299,13 @@ public abstract class AesDrive extends VirtualDrive {
     /**
      * Get the device authorization byte array for the current drive.
      *
-     * @return
-     * @throws Exception
+     * @return A byte array containing device authorization id.
+     * @throws RuntimeException If drive is not initialized.
      */
     public byte[] getAuthIdBytes() {
         byte[] driveId = this.getDriveId();
         if (driveId == null)
-            throw new Error("Could not get drive id, make sure you init the drive first");
+            throw new RuntimeException("Could not get drive id, make sure you init the drive first");
         String drvStr = BitConverter.toHex(driveId);
         NonceSequence sequence = sequencer.getSequence(drvStr);
         if (sequence == null) {
@@ -331,7 +331,6 @@ public abstract class AesDrive extends VirtualDrive {
      *
      * @param driveId The driveId
      * @param authId  The authId
-     * @throws Exception
      */
     void createSequence(byte[] driveId, byte[] authId) {
         String drvStr = BitConverter.toHex(driveId);
@@ -345,7 +344,7 @@ public abstract class AesDrive extends VirtualDrive {
      *
      * @param driveId Drive ID.
      * @param authId  Authorization ID.
-     * @throws Exception
+     * @throws IOException If there was a problem initializing the sequence.
      */
     void initSequence(byte[] driveId, byte[] authId) throws IOException {
         byte[] startingNonce = DriveGenerator.getStartingNonce();
@@ -432,7 +431,7 @@ public abstract class AesDrive extends VirtualDrive {
 
         // encrypt the combined key (drive key + hash key) using the masterKey and the masterKeyIv
         MemoryStream ms = new MemoryStream();
-        AesStream stream = new AesStream(masterKey, masterKeyIv, EncryptionType.Encrypt, ms,
+        AesStream stream = new AesStream(masterKey, masterKeyIv, EncryptionMode.Encrypt, ms,
                 null, false, null, null);
         stream.write(driveKey, 0, driveKey.length);
         stream.write(hashKey, 0, hashKey.length);
@@ -499,7 +498,7 @@ public abstract class AesDrive extends VirtualDrive {
 
             // decrypt the combined key (drive key + hash key) using the master key
             MemoryStream ms = new MemoryStream(encData);
-            stream = new AesStream(masterKey, masterKeyIv, EncryptionType.Decrypt, ms,
+            stream = new AesStream(masterKey, masterKeyIv, EncryptionMode.Decrypt, ms,
                     null, false, null, null);
 
             byte[] driveKey = new byte[Generator.KEY_LENGTH];
@@ -532,10 +531,10 @@ public abstract class AesDrive extends VirtualDrive {
     /**
      * Sets the key properties.
      *
-     * @param masterKey  The master key.
-     * @param driveKey   The drive key used for enc/dec of files and filenames.
-     * @param hashKey    The hash key used for data integrity.
-     * @param iterations
+     * @param masterKey  The master key
+     * @param driveKey   The drive key used for enc/dec of files and filenames
+     * @param hashKey    The hash key used for data integrity
+     * @param iterations The number of iterations
      */
     private void setKey(byte[] masterKey, byte[] driveKey, byte[] hashKey, int iterations) {
         key.setMasterKey(masterKey);
@@ -547,9 +546,9 @@ public abstract class AesDrive extends VirtualDrive {
     /**
      * Verify that the hash signature is correct
      *
-     * @param salmonConfig
-     * @param data
-     * @param hashKey
+     * @param salmonConfig The drive configuration
+     * @param data The data to verify
+     * @param hashKey The hash key to use for integrity verification
      */
     private void verifyHash(DriveConfig salmonConfig, byte[] data, byte[] hashKey) {
         byte[] hashSignature = salmonConfig.getHashSignature();

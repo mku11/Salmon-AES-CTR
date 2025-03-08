@@ -30,7 +30,7 @@ import com.mku.salmon.Generator;
 import com.mku.salmon.RangeExceededException;
 import com.mku.salmon.SecurityException;
 import com.mku.salmon.integrity.IntegrityException;
-import com.mku.salmon.streams.EncryptionType;
+import com.mku.salmon.streams.EncryptionMode;
 import com.mku.salmon.streams.ProviderType;
 import com.mku.salmon.streams.AesStream;
 import com.mku.salmon.text.TextDecryptor;
@@ -391,7 +391,7 @@ public class SalmonCoreTests {
         MemoryStream ins = new MemoryStream(inputBytes);
         MemoryStream outs = new MemoryStream();
         AesStream encWriter = new AesStream(SalmonCoreTestHelper.TEST_KEY_BYTES,
-                SalmonCoreTestHelper.TEST_NONCE_BYTES, EncryptionType.Encrypt, outs,
+                SalmonCoreTestHelper.TEST_NONCE_BYTES, EncryptionMode.Encrypt, outs,
                 null, false, null, null);
         try {
             encWriter.copyTo(outs);
@@ -419,7 +419,7 @@ public class SalmonCoreTests {
         byte[] encBytes = SalmonCoreTestHelper.encrypt(inputBytes, SalmonCoreTestHelper.TEST_KEY_BYTES, SalmonCoreTestHelper.TEST_NONCE_BYTES, SalmonCoreTestHelper.TEST_ENC_BUFFER_SIZE, false, 0, null, null);
 
         MemoryStream ins = new MemoryStream(encBytes);
-        AesStream encWriter = new AesStream(SalmonCoreTestHelper.TEST_KEY_BYTES, SalmonCoreTestHelper.TEST_NONCE_BYTES, EncryptionType.Decrypt, ins,
+        AesStream encWriter = new AesStream(SalmonCoreTestHelper.TEST_KEY_BYTES, SalmonCoreTestHelper.TEST_NONCE_BYTES, EncryptionMode.Decrypt, ins,
                 null, false, null, null);
         try {
             ins.copyTo(encWriter);

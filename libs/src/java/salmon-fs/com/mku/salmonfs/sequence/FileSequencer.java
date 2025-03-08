@@ -298,9 +298,9 @@ public class FileSequencer implements INonceSequencer {
     /**
      * Get the sequence for the drive provided.
      *
-     * @param configs All sequence configurations.
-     * @param driveId The drive ID.
-     * @return
+     * @param configs All sequence configurations
+     * @param driveId The drive ID
+     * @return The Nonce sequence
      * @throws SequenceException Thrown if there is an error with the nonce sequence
      */
     private static NonceSequence getSequence(HashMap<String, NonceSequence> configs, String driveId) {

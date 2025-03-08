@@ -77,7 +77,7 @@ public class WSFile implements IRealFile {
      * Instantiate a real file represented by the filepath provided (Remote read-write drive)
      *
      * @param path        The filepath. This should be a relative path of the vault folder
-     * @param servicePath The REST API server path (ie https://localhost:8080/)
+     * @param servicePath The REST API server path (ie <a href="https://localhost:8080/">...</a>)
      * @param credentials The REST API credentials
      */
     public WSFile(String path, String servicePath, Credentials credentials) {
