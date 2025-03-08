@@ -1,6 +1,6 @@
 set CURRDIR=%CD%
 
-cd ..\..\libs\projects\salmon-libs-gradle & ^
+cd ..\..\services\webservice\project & ^
 gradlew.bat --refresh-dependencies & ^
 gradlew.bat :salmon-ws:bootWar -x test --rerun-tasks & ^
 cd salmon-ws & ^
