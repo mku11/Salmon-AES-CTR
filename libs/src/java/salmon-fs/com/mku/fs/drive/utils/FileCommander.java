@@ -91,7 +91,7 @@ public class FileCommander {
      * @param importDir     The target directory.
      * @param deleteSource  True if you want to delete the source files when import complete.
      * @param integrity     True to apply integrity to imported files.
-     * @return The imported files if completes successfully.
+     * @return The imported files.
      * @throws Exception Thrown if error occurs during import
      */
     public IVirtualFile[] importFiles(IRealFile[] filesToImport, IVirtualFile importDir,
@@ -107,7 +107,7 @@ public class FileCommander {
      * @param deleteSource  True if you want to delete the source files when import complete.
      * @param integrity     True to apply integrity to imported files.
      * @param autoRename    Function to rename file if another file with the same filename exists
-     * @return The imported files if completes successfully.
+     * @return The imported files.
      * @throws Exception Thrown if error occurs during import
      */
     public IVirtualFile[] importFiles(IRealFile[] filesToImport, IVirtualFile importDir,
@@ -126,7 +126,7 @@ public class FileCommander {
      * @param integrity     True to apply integrity to imported files.
      * @param autoRename    Function to rename file if another file with the same filename exists
      * @param onFailed      Observer to notify when a file fails importing
-     * @return The imported files if completes successfully.
+     * @return The imported files.
      * @throws Exception Thrown if error occurs during import
      */
     public IVirtualFile[] importFiles(IRealFile[] filesToImport, IVirtualFile importDir,
@@ -146,7 +146,7 @@ public class FileCommander {
      * @param autoRename        Function to rename file if another file with the same filename exists
      * @param onFailed          Observer to notify when a file fails importing
      * @param onProgressChanged Observer to notify when progress changes.
-     * @return The imported files if completes successfully.
+     * @return The imported files.
      * @throws Exception Thrown if error occurs during import
      */
     public IVirtualFile[] importFiles(IRealFile[] filesToImport, IVirtualFile importDir,
@@ -243,7 +243,7 @@ public class FileCommander {
     }
 
     /**
-     * Export a file from a drive.
+     * Export IVirtualFile(s) from the drive.
      *
      * @param filesToExport The files to export.
      * @param exportDir     The export target directory
@@ -260,7 +260,7 @@ public class FileCommander {
 
 
     /**
-     * Export a file from a drive.
+     * Export IVirtualFile(s) from the drive.
      *
      * @param filesToExport The files to export.
      * @param exportDir     The export target directory
@@ -279,7 +279,7 @@ public class FileCommander {
 
 
     /**
-     * Export a file from a drive.
+     * Export IVirtualFile(s) from the drive.
      *
      * @param filesToExport The files to export.
      * @param exportDir     The export target directory
@@ -299,7 +299,7 @@ public class FileCommander {
     }
 
     /**
-     * Export a file from a drive.
+     * Export IVirtualFile(s) from the drive.
      *
      * @param filesToExport     The files to export.
      * @param exportDir         The export target directory

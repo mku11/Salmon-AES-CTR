@@ -59,7 +59,7 @@ public class AesFileCommander extends FileCommander {
      * @param importDir     The target directory.
      * @param deleteSource  True if you want to delete the source files when import complete.
      * @param integrity     True to apply integrity to imported files.
-     * @return The imported files if completes successfully.
+     * @return The imported files.
      * @throws Exception Thrown if error occurs during import
      */
     public IVirtualFile[] importFiles(IRealFile[] filesToImport, IVirtualFile importDir,
@@ -75,7 +75,7 @@ public class AesFileCommander extends FileCommander {
      * @param deleteSource  True if you want to delete the source files when import complete.
      * @param integrity     True to apply integrity to imported files.
      * @param autoRename    Function to rename file if another file with the same filename exists
-     * @return The imported files if completes successfully.
+     * @return The imported files.
      * @throws Exception Thrown if error occurs during import
      */
     public IVirtualFile[] importFiles(IRealFile[] filesToImport, IVirtualFile importDir,
@@ -94,7 +94,7 @@ public class AesFileCommander extends FileCommander {
      * @param integrity     True to apply integrity to imported files.
      * @param autoRename    Function to rename file if another file with the same filename exists
      * @param onFailed      Observer to notify when a file fails importing
-     * @return The imported files if completes successfully.
+     * @return The imported files.
      * @throws Exception Thrown if error occurs during import
      */
     public IVirtualFile[] importFiles(IRealFile[] filesToImport, IVirtualFile importDir,
@@ -114,7 +114,7 @@ public class AesFileCommander extends FileCommander {
      * @param onProgressChanged Observer to notify when progress changes.
      * @param autoRename        Function to rename file if another file with the same filename exists
      * @param onFailed          Observer to notify when a file fails importing
-     * @return The imported files if completes successfully.
+     * @return The imported files.
      * @throws Exception Thrown if error occurs during import
      */
     @Override
@@ -129,5 +129,85 @@ public class AesFileCommander extends FileCommander {
         for (IVirtualFile file : files)
             sfiles.add((AesFile) file);
         return sfiles.toArray(new AesFile[0]);
+    }
+
+
+    /**
+     * Export AesFile(s) from the drive.
+     *
+     * @param filesToExport The files to export.
+     * @param exportDir     The export target directory
+     * @param deleteSource  True if you want to delete the source files
+     * @param integrity     True to use integrity verification before exporting files
+     * @return The exported files
+     * @throws Exception Thrown if error occurs during export
+     */
+    public IRealFile[] exportFiles(IVirtualFile[] filesToExport, IRealFile exportDir,
+                                   boolean deleteSource, boolean integrity)
+            throws Exception {
+        return exportFiles(filesToExport, exportDir, deleteSource, integrity, null, null, null);
+    }
+
+
+    /**
+     * Export AesFile(s) from the drive.
+     *
+     * @param filesToExport The files to export.
+     * @param exportDir     The export target directory
+     * @param deleteSource  True if you want to delete the source files
+     * @param integrity     True to use integrity verification before exporting files
+     * @param autoRename    Function to rename file if another file with the same filename exists
+     * @return The exported files
+     * @throws Exception Thrown if error occurs during export
+     */
+    public IRealFile[] exportFiles(IVirtualFile[] filesToExport, IRealFile exportDir,
+                                   boolean deleteSource, boolean integrity,
+                                   Function<IRealFile, String> autoRename)
+            throws Exception {
+        return exportFiles(filesToExport, exportDir, deleteSource, integrity, autoRename, null, null);
+    }
+
+
+    /**
+     * Export AesFile(s) from the drive.
+     *
+     * @param filesToExport The files to export.
+     * @param exportDir     The export target directory
+     * @param deleteSource  True if you want to delete the source files
+     * @param integrity     True to use integrity verification before exporting files
+     * @param autoRename    Function to rename file if another file with the same filename exists
+     * @param onFailed      Observer to notify when a file fails exporting
+     * @return The exported files
+     * @throws Exception Thrown if error occurs during export
+     */
+    public IRealFile[] exportFiles(IVirtualFile[] filesToExport, IRealFile exportDir,
+                                   boolean deleteSource, boolean integrity,
+                                   Function<IRealFile, String> autoRename,
+                                   BiConsumer<IVirtualFile, Exception> onFailed)
+            throws Exception {
+        return exportFiles(filesToExport, exportDir, deleteSource, integrity, autoRename, onFailed, null);
+    }
+
+    /**
+     * Export AesFile(s) from the drive.
+     *
+     * @param filesToExport     The files to export.
+     * @param exportDir         The export target directory
+     * @param deleteSource      True if you want to delete the source files
+     * @param integrity         True to use integrity verification before exporting files
+     * @param autoRename        Function to rename file if another file with the same filename exists
+     * @param onFailed          Observer to notify when a file fails exporting
+     * @param onProgressChanged Observer to notify when progress changes.
+     * @return The exported files
+     * @throws Exception Thrown if error occurs during export
+     */
+    public IRealFile[] exportFiles(IVirtualFile[] filesToExport, IRealFile exportDir,
+                                   boolean deleteSource, boolean integrity,
+                                   Function<IRealFile, String> autoRename,
+                                   BiConsumer<IVirtualFile, Exception> onFailed,
+                                   Consumer<VirtualFileTaskProgress> onProgressChanged)
+            throws Exception {
+        return super.exportFiles(filesToExport, exportDir, deleteSource, integrity,
+                autoRename, onFailed, onProgressChanged);
     }
 }
