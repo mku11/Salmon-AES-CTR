@@ -98,7 +98,7 @@ public abstract class AesDrive extends VirtualDrive {
         }
         if (virtualRootRealFile == null)
             throw new Error("Could not create directory for the virtual file system");
-        virtualRoot = getVirtualFile(virtualRootRealFile, this);
+        virtualRoot = getVirtualFile(virtualRootRealFile);
         registerOnProcessClose();
         key = new DriveKey();
     }
@@ -106,11 +106,10 @@ public abstract class AesDrive extends VirtualDrive {
     /**
      * Get the virtual encrypted AesFile backed by a IRealFile.
      * @param file The real file.
-     * @param drive The drive the file belongs to
      * @return
      */
-	protected AesFile getVirtualFile(IRealFile file, AesDrive drive) {
-		return new AesFile(file, drive);
+	protected AesFile getVirtualFile(IRealFile file) {
+		return new AesFile(file, this);
 	}
 
     /**
@@ -255,7 +254,7 @@ public abstract class AesDrive extends VirtualDrive {
                 ex.printStackTrace();
             }
         }
-        virtualRoot = getVirtualFile(virtualRootRealFile, this);
+        virtualRoot = getVirtualFile(virtualRootRealFile);
     }
 
 /**
