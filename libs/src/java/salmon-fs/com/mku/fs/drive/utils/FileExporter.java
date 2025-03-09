@@ -23,10 +23,10 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 */
 
+import com.mku.fs.file.IFile;
 import com.mku.fs.file.IVirtualFile;
 import com.mku.func.BiConsumer;
 import com.mku.streams.RandomAccessStream;
-import com.mku.fs.file.IRealFile;
 
 import java.io.IOException;
 import java.util.concurrent.CountDownLatch;
@@ -138,15 +138,15 @@ public abstract class FileExporter {
      * @return The exported file
      * @throws Exception Thrown if error occurs during export
      */
-    public IRealFile exportFile(IVirtualFile fileToExport, IRealFile exportDir, String filename,
-                                boolean deleteSource, boolean integrity, BiConsumer<Long, Long> onProgress) throws Exception {
+    public IFile exportFile(IVirtualFile fileToExport, IFile exportDir, String filename,
+                            boolean deleteSource, boolean integrity, BiConsumer<Long, Long> onProgress) throws Exception {
 
         if (isRunning())
             throw new Exception("Another export is running");
         if (fileToExport.isDirectory())
             throw new Exception("Cannot export directory, use VirtualFileCommander instead");
 
-        final IRealFile exportFile;
+        final IFile exportFile;
         filename = filename != null ? filename : fileToExport.getName();
         try {
             stopped = false;
@@ -201,7 +201,7 @@ public abstract class FileExporter {
         return exportFile;
     }
 
-    private void submitExportJobs(int runningThreads, long partSize, IVirtualFile fileToExport, IRealFile exportFile, long[] totalBytesWritten, boolean integrity, BiConsumer<Long, Long> onProgress) throws IOException, InterruptedException {
+    private void submitExportJobs(int runningThreads, long partSize, IVirtualFile fileToExport, IFile exportFile, long[] totalBytesWritten, boolean integrity, BiConsumer<Long, Long> onProgress) throws IOException, InterruptedException {
         long fileSize = fileToExport.getSize();
 
         // we use a countdown latch which is better suited with executor than Thread.join.
@@ -237,7 +237,7 @@ public abstract class FileExporter {
      * @param count             The length of the bytes to be decrypted
      * @param totalBytesWritten The total bytes that were written to the external file
      */
-    private void exportFilePart(IVirtualFile fileToExport, IRealFile exportFile, long start, long count,
+    private void exportFilePart(IVirtualFile fileToExport, IFile exportFile, long start, long count,
                                 long[] totalBytesWritten, BiConsumer<Long, Long> onProgress) throws IOException {
         long startTime = System.currentTimeMillis();
         long totalPartBytesWritten = 0;

@@ -39,7 +39,7 @@ import java.util.Calendar;
  * import, store, and export the encrypted files.
  * Extend this to provide an interface to any file system, platform, or API ie: on disk, memory, network, or cloud.
  */
-public interface IRealFile {
+public interface IFile {
     /**
      * Check if this file exists.
      *
@@ -134,7 +134,7 @@ public interface IRealFile {
      *
      * @return The files
      */
-    IRealFile[] listFiles();
+    IFile[] listFiles();
 
     /**
      * Get the file name
@@ -149,14 +149,14 @@ public interface IRealFile {
      * @param dirName Directory name.
      * @return The newly created directory.
      */
-    IRealFile createDirectory(String dirName);
+    IFile createDirectory(String dirName);
 
     /**
      * Get the parent directory of this file/directory.
      *
      * @return The parent directory.
      */
-    IRealFile getParent();
+    IFile getParent();
 
     /**
      * Create an empty file with the provided name.
@@ -165,7 +165,7 @@ public interface IRealFile {
      * @return The newly create file.
      * @throws IOException Thrown if there is an IO error.
      */
-    IRealFile createFile(String filename) throws IOException;
+    IFile createFile(String filename) throws IOException;
 
     /**
      * Move this file to another directory.
@@ -174,7 +174,7 @@ public interface IRealFile {
      * @return The file after the move. Use this instance for any subsequent file operations.
      * @throws IOException Thrown if there is an IO error.
      */
-    IRealFile move(IRealFile newDir) throws IOException;
+    IFile move(IFile newDir) throws IOException;
 
     /**
      * Move this file to another directory.
@@ -184,7 +184,7 @@ public interface IRealFile {
      * @return The file after the move. Use this instance for any subsequent file operations.
      * @throws IOException Thrown if there is an IO error.
      */
-    IRealFile move(IRealFile newDir, String newName) throws IOException;
+    IFile move(IFile newDir, String newName) throws IOException;
 
     /**
      * Move this file to another directory.
@@ -195,7 +195,7 @@ public interface IRealFile {
      * @return The file after the move. Use this instance for any subsequent file operations.
      * @throws IOException Thrown if there is an IO error.
      */
-    IRealFile move(IRealFile newDir, String newName, BiConsumer<Long, Long> progressListener) throws IOException;
+    IFile move(IFile newDir, String newName, BiConsumer<Long, Long> progressListener) throws IOException;
 
     /**
      * Copy this file to another directory.
@@ -204,7 +204,7 @@ public interface IRealFile {
      * @return The file after the copy. Use this instance for any subsequent file operations.
      * @throws IOException Thrown if there is an IO error.
      */
-    IRealFile copy(IRealFile newDir) throws IOException;
+    IFile copy(IFile newDir) throws IOException;
 
     /**
      * Copy this file to another directory.
@@ -214,7 +214,7 @@ public interface IRealFile {
      * @return The file after the copy. Use this instance for any subsequent file operations.
      * @throws IOException Thrown if there is an IO error.
      */
-    IRealFile copy(IRealFile newDir, String newName) throws IOException;
+    IFile copy(IFile newDir, String newName) throws IOException;
 
     /**
      * Copy this file to another directory.
@@ -225,7 +225,7 @@ public interface IRealFile {
      * @return The file after the copy. Use this instance for any subsequent file operations.
      * @throws IOException Thrown if there is an IO error.
      */
-    IRealFile copy(IRealFile newDir, String newName, BiConsumer<Long, Long> progressListener) throws IOException;
+    IFile copy(IFile newDir, String newName, BiConsumer<Long, Long> progressListener) throws IOException;
 
     /**
      * Get the file/directory matching the name provided under this directory.
@@ -233,7 +233,7 @@ public interface IRealFile {
      * @param filename The name of the file or directory to match.
      * @return The file that was matched.
      */
-    IRealFile getChild(String filename);
+    IFile getChild(String filename);
 
     /**
      * Create a directory with the current filepath.
@@ -257,7 +257,7 @@ public interface IRealFile {
      * @return True if contents were copied
      * @throws IOException Thrown if there is an IO error.
      */
-    static boolean copyFileContents(IRealFile src, IRealFile dest, boolean delete,
+    static boolean copyFileContents(IFile src, IFile dest, boolean delete,
                                     BiConsumer<Long, Long> progressListener)
             throws IOException {
         RandomAccessStream source = src.getInputStream();
@@ -282,7 +282,7 @@ public interface IRealFile {
      * @param dest Destination directory
      * @throws IOException Thrown if there is an IO error.
      */
-    default void copyRecursively(IRealFile dest) throws IOException {
+    default void copyRecursively(IFile dest) throws IOException {
         copyRecursively(dest, null, null, true, null);
     }
 
@@ -296,13 +296,13 @@ public interface IRealFile {
      * @param onFailed          Callback if copy failed
      * @throws IOException Thrown if there is an IO error.
      */
-    default void copyRecursively(IRealFile destDir,
-                                 TriConsumer<IRealFile, Long, Long> progressListener,
-                                 Function<IRealFile, String> autoRename,
+    default void copyRecursively(IFile destDir,
+                                 TriConsumer<IFile, Long, Long> progressListener,
+                                 Function<IFile, String> autoRename,
                                  boolean autoRenameFolders,
-                                 BiConsumer<IRealFile, Exception> onFailed) throws IOException {
+                                 BiConsumer<IFile, Exception> onFailed) throws IOException {
         String newFilename = getName();
-        IRealFile newFile;
+        IFile newFile;
         newFile = destDir.getChild(newFilename);
         if (isFile()) {
             if (newFile != null && newFile.exists()) {
@@ -335,7 +335,7 @@ public interface IRealFile {
             if (progressListener != null)
                 progressListener.accept(this, 1L, 1L);
 
-            for (IRealFile child : this.listFiles()) {
+            for (IFile child : this.listFiles()) {
                 child.copyRecursively(newFile, progressListener, autoRename, autoRenameFolders, onFailed);
             }
         }
@@ -347,7 +347,7 @@ public interface IRealFile {
      * @param dest The target directory
      * @throws IOException Thrown if there is an IO error.
      */
-    default void moveRecursively(IRealFile dest) throws IOException {
+    default void moveRecursively(IFile dest) throws IOException {
         moveRecursively(dest, null, null, true, null);
     }
 
@@ -361,11 +361,11 @@ public interface IRealFile {
      * @param onFailed          Callback when move failed
      * @throws IOException Thrown if there is an IO error.
      */
-    default void moveRecursively(IRealFile destDir,
-                                 TriConsumer<IRealFile, Long, Long> progressListener,
-                                 Function<IRealFile, String> autoRename,
+    default void moveRecursively(IFile destDir,
+                                 TriConsumer<IFile, Long, Long> progressListener,
+                                 Function<IFile, String> autoRename,
                                  boolean autoRenameFolders,
-                                 BiConsumer<IRealFile, Exception> onFailed) throws IOException {
+                                 BiConsumer<IFile, Exception> onFailed) throws IOException {
         // target directory is the same
         if (getParent().getPath().equals(destDir.getPath())) {
             if (progressListener != null) {
@@ -376,7 +376,7 @@ public interface IRealFile {
         }
 
         String newFilename = getName();
-        IRealFile newFile;
+        IFile newFile;
         newFile = destDir.getChild(newFilename);
         if (isFile()) {
             if (newFile != null && newFile.exists()) {
@@ -412,7 +412,7 @@ public interface IRealFile {
             if (progressListener != null)
                 progressListener.accept(this, 1L, 1L);
 
-            for (IRealFile child : this.listFiles()) {
+            for (IFile child : this.listFiles()) {
                 child.moveRecursively(newFile, progressListener, autoRename, autoRenameFolders, onFailed);
             }
             if (!this.delete()) {
@@ -428,8 +428,8 @@ public interface IRealFile {
      * @param progressListener The progress listener
      * @param onFailed         Callback when delete failed
      */
-    default void deleteRecursively(TriConsumer<IRealFile, Long, Long> progressListener,
-                                   BiConsumer<IRealFile, Exception> onFailed) {
+    default void deleteRecursively(TriConsumer<IFile, Long, Long> progressListener,
+                                   BiConsumer<IFile, Exception> onFailed) {
         if (isFile()) {
             progressListener.accept(this, 0L, 1L);
             if (!this.delete()) {
@@ -438,7 +438,7 @@ public interface IRealFile {
             }
             progressListener.accept(this, 1L, 1L);
         } else if (this.isDirectory()) {
-            for (IRealFile child : this.listFiles()) {
+            for (IFile child : this.listFiles()) {
                 child.deleteRecursively(progressListener, onFailed);
             }
             if (!this.delete()) {
@@ -451,7 +451,7 @@ public interface IRealFile {
     /**
      * Get an auto generated copy of the name for a file.
      */
-    Function<IRealFile, String> autoRename = (IRealFile file) -> {
+    Function<IFile, String> autoRename = (IFile file) -> {
         return autoRename(file.getName());
     };
 

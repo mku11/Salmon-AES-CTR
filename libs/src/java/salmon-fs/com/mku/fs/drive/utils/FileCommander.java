@@ -23,7 +23,7 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 */
 
-import com.mku.fs.file.IRealFile;
+import com.mku.fs.file.IFile;
 import com.mku.fs.file.IVirtualFile;
 import com.mku.func.BiConsumer;
 import com.mku.func.Consumer;
@@ -85,7 +85,7 @@ public class FileCommander {
     }
 
     /**
-     * Import IRealFile(s) into the drive.
+     * Import IFile(s) into the drive.
      *
      * @param filesToImport The files to import.
      * @param importDir     The target directory.
@@ -94,13 +94,13 @@ public class FileCommander {
      * @return The imported files.
      * @throws Exception Thrown if error occurs during import
      */
-    public IVirtualFile[] importFiles(IRealFile[] filesToImport, IVirtualFile importDir,
+    public IVirtualFile[] importFiles(IFile[] filesToImport, IVirtualFile importDir,
                                       boolean deleteSource, boolean integrity) throws Exception {
         return importFiles(filesToImport, importDir, deleteSource, integrity, null, null, null);
     }
 
     /**
-     * Import IRealFile(s) into the drive.
+     * Import IFile(s) into the drive.
      *
      * @param filesToImport The files to import.
      * @param importDir     The target directory.
@@ -110,15 +110,15 @@ public class FileCommander {
      * @return The imported files.
      * @throws Exception Thrown if error occurs during import
      */
-    public IVirtualFile[] importFiles(IRealFile[] filesToImport, IVirtualFile importDir,
+    public IVirtualFile[] importFiles(IFile[] filesToImport, IVirtualFile importDir,
                                       boolean deleteSource, boolean integrity,
-                                      Function<IRealFile, String> autoRename) throws Exception {
+                                      Function<IFile, String> autoRename) throws Exception {
         return importFiles(filesToImport, importDir, deleteSource, integrity, autoRename, null, null);
     }
 
 
     /**
-     * Import IRealFile(s) into the drive.
+     * Import IFile(s) into the drive.
      *
      * @param filesToImport The files to import.
      * @param importDir     The target directory.
@@ -129,15 +129,15 @@ public class FileCommander {
      * @return The imported files.
      * @throws Exception Thrown if error occurs during import
      */
-    public IVirtualFile[] importFiles(IRealFile[] filesToImport, IVirtualFile importDir,
+    public IVirtualFile[] importFiles(IFile[] filesToImport, IVirtualFile importDir,
                                       boolean deleteSource, boolean integrity,
-                                      Function<IRealFile, String> autoRename,
-                                      BiConsumer<IRealFile, Exception> onFailed) throws Exception {
+                                      Function<IFile, String> autoRename,
+                                      BiConsumer<IFile, Exception> onFailed) throws Exception {
         return importFiles(filesToImport, importDir, deleteSource, integrity, autoRename, onFailed, null);
     }
 
     /**
-     * Import IRealFile(s) into the drive.
+     * Import IFile(s) into the drive.
      *
      * @param filesToImport     The files to import.
      * @param importDir         The target directory.
@@ -149,10 +149,10 @@ public class FileCommander {
      * @return The imported files.
      * @throws Exception Thrown if error occurs during import
      */
-    public IVirtualFile[] importFiles(IRealFile[] filesToImport, IVirtualFile importDir,
+    public IVirtualFile[] importFiles(IFile[] filesToImport, IVirtualFile importDir,
                                       boolean deleteSource, boolean integrity,
-                                      Function<IRealFile, String> autoRename,
-                                      BiConsumer<IRealFile, Exception> onFailed,
+                                      Function<IFile, String> autoRename,
+                                      BiConsumer<IFile, Exception> onFailed,
                                       Consumer<RealFileTaskProgress> onProgressChanged) throws Exception {
         stopJobs = false;
         ArrayList<IVirtualFile> importedFiles = new ArrayList<>();
@@ -190,10 +190,10 @@ public class FileCommander {
         return files;
     }
 
-    private void importRecursively(IRealFile fileToImport, IVirtualFile importDir,
+    private void importRecursively(IFile fileToImport, IVirtualFile importDir,
                                    boolean deleteSource, boolean integrity,
                                    Consumer<RealFileTaskProgress> onProgressChanged,
-                                   Function<IRealFile, String> autoRename, BiConsumer<IRealFile, Exception> onFailed,
+                                   Function<IFile, String> autoRename, BiConsumer<IFile, Exception> onFailed,
                                    ArrayList<IVirtualFile> importedFiles, int[] count, int total,
                                    HashMap<String, IVirtualFile> existingFiles) throws IOException {
         IVirtualFile sfile = existingFiles.containsKey(fileToImport.getName())
@@ -209,7 +209,7 @@ public class FileCommander {
                 onProgressChanged.accept(new RealFileTaskProgress(fileToImport, 1, 1, count[0], total));
             count[0]++;
             HashMap<String, IVirtualFile> nExistingFiles = getExistingFiles(sfile);
-            for (IRealFile child : fileToImport.listFiles()) {
+            for (IFile child : fileToImport.listFiles()) {
                 if (stopJobs)
                     break;
                 importRecursively(child, sfile, deleteSource, integrity, onProgressChanged,
@@ -252,8 +252,8 @@ public class FileCommander {
      * @return The exported files
      * @throws Exception Thrown if error occurs during export
      */
-    public IRealFile[] exportFiles(IVirtualFile[] filesToExport, IRealFile exportDir,
-                                   boolean deleteSource, boolean integrity)
+    public IFile[] exportFiles(IVirtualFile[] filesToExport, IFile exportDir,
+                               boolean deleteSource, boolean integrity)
             throws Exception {
         return exportFiles(filesToExport, exportDir, deleteSource, integrity, null, null, null);
     }
@@ -270,9 +270,9 @@ public class FileCommander {
      * @return The exported files
      * @throws Exception Thrown if error occurs during export
      */
-    public IRealFile[] exportFiles(IVirtualFile[] filesToExport, IRealFile exportDir,
-                                   boolean deleteSource, boolean integrity,
-                                   Function<IRealFile, String> autoRename)
+    public IFile[] exportFiles(IVirtualFile[] filesToExport, IFile exportDir,
+                               boolean deleteSource, boolean integrity,
+                               Function<IFile, String> autoRename)
             throws Exception {
         return exportFiles(filesToExport, exportDir, deleteSource, integrity, autoRename, null, null);
     }
@@ -290,10 +290,10 @@ public class FileCommander {
      * @return The exported files
      * @throws Exception Thrown if error occurs during export
      */
-    public IRealFile[] exportFiles(IVirtualFile[] filesToExport, IRealFile exportDir,
-                                   boolean deleteSource, boolean integrity,
-                                   Function<IRealFile, String> autoRename,
-                                   BiConsumer<IVirtualFile, Exception> onFailed)
+    public IFile[] exportFiles(IVirtualFile[] filesToExport, IFile exportDir,
+                               boolean deleteSource, boolean integrity,
+                               Function<IFile, String> autoRename,
+                               BiConsumer<IVirtualFile, Exception> onFailed)
             throws Exception {
         return exportFiles(filesToExport, exportDir, deleteSource, integrity, autoRename, onFailed, null);
     }
@@ -311,14 +311,14 @@ public class FileCommander {
      * @return The exported files
      * @throws Exception Thrown if error occurs during export
      */
-    public IRealFile[] exportFiles(IVirtualFile[] filesToExport, IRealFile exportDir,
-                                   boolean deleteSource, boolean integrity,
-                                   Function<IRealFile, String> autoRename,
-                                   BiConsumer<IVirtualFile, Exception> onFailed,
-                                   Consumer<VirtualFileTaskProgress> onProgressChanged)
+    public IFile[] exportFiles(IVirtualFile[] filesToExport, IFile exportDir,
+                               boolean deleteSource, boolean integrity,
+                               Function<IFile, String> autoRename,
+                               BiConsumer<IVirtualFile, Exception> onFailed,
+                               Consumer<VirtualFileTaskProgress> onProgressChanged)
             throws Exception {
         stopJobs = false;
-        ArrayList<IRealFile> exportedFiles = new ArrayList<>();
+        ArrayList<IFile> exportedFiles = new ArrayList<>();
 
         int total = 0;
         for (int i = 0; i < filesToExport.length; i++) {
@@ -327,7 +327,7 @@ public class FileCommander {
             total += getCountRecursively(filesToExport[i]);
         }
 
-        HashMap<String, IRealFile> existingFiles = getExistingFiles(exportDir);
+        HashMap<String, IFile> existingFiles = getExistingFiles(exportDir);
 
         int[] count = new int[1];
         for (int i = 0; i < filesToExport.length; i++) {
@@ -339,12 +339,12 @@ public class FileCommander {
                     exportedFiles, count, total,
                     existingFiles);
         }
-        return exportedFiles.toArray(new IRealFile[0]);
+        return exportedFiles.toArray(new IFile[0]);
     }
 
-    private HashMap<String, IRealFile> getExistingFiles(IRealFile exportDir) {
-        HashMap<String, IRealFile> files = new HashMap<>();
-        for (IRealFile file : exportDir.listFiles()) {
+    private HashMap<String, IFile> getExistingFiles(IFile exportDir) {
+        HashMap<String, IFile> files = new HashMap<>();
+        for (IFile file : exportDir.listFiles()) {
             if (stopJobs)
                 break;
             files.put(file.getName(), file);
@@ -352,15 +352,15 @@ public class FileCommander {
         return files;
     }
 
-    private void exportRecursively(IVirtualFile fileToExport, IRealFile exportDir,
+    private void exportRecursively(IVirtualFile fileToExport, IFile exportDir,
                                    boolean deleteSource, boolean integrity,
                                    Consumer<VirtualFileTaskProgress> onProgressChanged,
-                                   Function<IRealFile, String> autoRename,
+                                   Function<IFile, String> autoRename,
                                    BiConsumer<IVirtualFile, Exception> onFailed,
-                                   ArrayList<IRealFile> exportedFiles, int[] count, int total,
-                                   HashMap<String, IRealFile> existingFiles)
+                                   ArrayList<IFile> exportedFiles, int[] count, int total,
+                                   HashMap<String, IFile> existingFiles)
             throws Exception {
-        IRealFile rfile = existingFiles.containsKey(fileToExport.getName())
+        IFile rfile = existingFiles.containsKey(fileToExport.getName())
                 ? existingFiles.get(fileToExport.getName()) : null;
 
         if (fileToExport.isDirectory()) {
@@ -371,7 +371,7 @@ public class FileCommander {
             if (onProgressChanged != null)
                 onProgressChanged.accept(new VirtualFileTaskProgress(fileToExport, 1, 1, count[0], total));
             count[0]++;
-            HashMap<String, IRealFile> nExistingFiles = getExistingFiles(rfile);
+            HashMap<String, IFile> nExistingFiles = getExistingFiles(rfile);
             for (IVirtualFile child : fileToExport.listFiles()) {
                 if (stopJobs)
                     break;
@@ -418,10 +418,10 @@ public class FileCommander {
         return count;
     }
 
-    private int getCountRecursively(IRealFile file) {
+    private int getCountRecursively(IFile file) {
         int count = 1;
         if (file.isDirectory()) {
-            for (IRealFile child : file.listFiles()) {
+            for (IFile child : file.listFiles()) {
                 if (stopJobs)
                     break;
                 count += getCountRecursively(child);
@@ -751,7 +751,7 @@ public class FileCommander {
     }
 
     /**
-     * Task progress for IRealFile(s).
+     * Task progress for IFile(s).
      */
     public class RealFileTaskProgress extends FileTaskProgress {
         /**
@@ -759,13 +759,13 @@ public class FileCommander {
          *
          * @return
          */
-        public IRealFile getFile() {
+        public IFile getFile() {
             return file;
         }
 
-        private final IRealFile file;
+        private final IFile file;
 
-        private RealFileTaskProgress(IRealFile file, long processedBytes, long totalBytes,
+        private RealFileTaskProgress(IFile file, long processedBytes, long totalBytes,
                                      int processedFiles, int totalFiles) {
             super(processedBytes, totalBytes, processedFiles, totalFiles);
             this.file = file;

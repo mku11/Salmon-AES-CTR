@@ -23,7 +23,7 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 */
 
-import com.mku.fs.file.IRealFile;
+import com.mku.fs.file.IFile;
 import com.mku.fs.file.File;
 import com.mku.salmonfs.file.AesFile;
 import com.mku.salmon.sequence.INonceSequencer;
@@ -52,7 +52,7 @@ public class Drive extends AesDrive {
      * @return The drive.
      * @throws IOException Thrown if error occurs during opening the drive.
      */
-    public static AesDrive open(IRealFile dir, String password, INonceSequencer sequencer) throws IOException {
+    public static AesDrive open(IFile dir, String password, INonceSequencer sequencer) throws IOException {
         return AesDrive.openDrive(dir, Drive.class, password, sequencer);
     }
 
@@ -64,7 +64,7 @@ public class Drive extends AesDrive {
      * @return The drive.
      * @throws IOException If error occurs during creating the drive.
      */
-    public static AesDrive create(IRealFile dir, String password, INonceSequencer sequencer) throws IOException {
+    public static AesDrive create(IFile dir, String password, INonceSequencer sequencer) throws IOException {
         return AesDrive.createDrive(dir, Drive.class, password, sequencer);
     }
 
@@ -73,7 +73,7 @@ public class Drive extends AesDrive {
      * @return The private directory
      * @throws Exception Thrown if error occurs
      */
-    public IRealFile getPrivateDir() throws Exception {
+    public IFile getPrivateDir() throws Exception {
         String fileFolder = null;
         String os = System.getProperty("os.name").toUpperCase();
         if (os.toUpperCase().contains("WIN")) {

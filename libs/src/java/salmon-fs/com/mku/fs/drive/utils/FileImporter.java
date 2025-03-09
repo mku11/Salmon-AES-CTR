@@ -23,10 +23,10 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 */
 
+import com.mku.fs.file.IFile;
 import com.mku.fs.file.IVirtualFile;
 import com.mku.func.BiConsumer;
 import com.mku.streams.RandomAccessStream;
-import com.mku.fs.file.IRealFile;
 
 import java.io.IOException;
 import java.util.concurrent.CountDownLatch;
@@ -34,7 +34,7 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
 /**
- * Import IRealFile(s) into a VirtualDrive.
+ * Import IFile(s) into a VirtualDrive.
  */
 public abstract class FileImporter {
     /**
@@ -140,7 +140,7 @@ public abstract class FileImporter {
      * @return The imported file
      * @throws Exception Thrown if error occurs during import
      */
-    public IVirtualFile importFile(IRealFile fileToImport, IVirtualFile dir, String filename,
+    public IVirtualFile importFile(IFile fileToImport, IVirtualFile dir, String filename,
                                    boolean deleteSource, boolean integrity, BiConsumer<Long, Long> onProgress) throws Exception {
         if (isRunning())
             throw new Exception("Another import is running");
@@ -199,7 +199,7 @@ public abstract class FileImporter {
         return importedFile;
     }
 
-    private void submitImportJobs(int runningThreads, long partSize, IRealFile fileToImport, IVirtualFile importedFile, long[] totalBytesRead, boolean integrity, BiConsumer<Long, Long> onProgress) throws InterruptedException {
+    private void submitImportJobs(int runningThreads, long partSize, IFile fileToImport, IVirtualFile importedFile, long[] totalBytesRead, boolean integrity, BiConsumer<Long, Long> onProgress) throws InterruptedException {
         long fileSize = fileToImport.length();
 
         // we use a countdown latch which is better suited with executor than Thread.join or CompletableFuture.
@@ -236,7 +236,7 @@ public abstract class FileImporter {
      * @param totalBytesRead The total bytes read from the external file
      * @param onProgress     Progress observer
      */
-    private void importFilePart(IRealFile fileToImport, IVirtualFile aesFile,
+    private void importFilePart(IFile fileToImport, IVirtualFile aesFile,
                                 long start, long count, long[] totalBytesRead, BiConsumer<Long, Long> onProgress) throws IOException {
         long totalPartBytesRead = 0;
 

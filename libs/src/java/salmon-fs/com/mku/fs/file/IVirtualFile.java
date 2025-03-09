@@ -109,7 +109,7 @@ public interface IVirtualFile {
      *
      * @return The real file
      */
-    IRealFile getRealFile();
+    IFile getRealFile();
 
     /**
      * Returns the file name

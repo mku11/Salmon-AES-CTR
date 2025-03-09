@@ -23,7 +23,7 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 */
 
-import com.mku.fs.file.IRealFile;
+import com.mku.fs.file.IFile;
 import com.mku.win.salmon.registry.Registry;
 import com.mku.salmon.sequence.INonceSequenceSerializer;
 import com.mku.salmonfs.sequence.FileSequencer;
@@ -71,7 +71,7 @@ public class WinFileSequencer extends FileSequencer
      * @throws SequenceException Thrown if there is an error with the nonce sequence
      * @throws IOException Thrown if there is an IO error.
      */
-    public WinFileSequencer(IRealFile sequenceFile, INonceSequenceSerializer serializer, String regCheckSumKey) throws IOException {
+    public WinFileSequencer(IFile sequenceFile, INonceSequenceSerializer serializer, String regCheckSumKey) throws IOException {
         super(sequenceFile, serializer);
 		if(regCheckSumKey == null)
 			throw new SequenceException("Registry checksum key cannot be null");

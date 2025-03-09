@@ -24,7 +24,7 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 */
 
-import com.mku.fs.file.IRealFile;
+import com.mku.fs.file.IFile;
 import com.mku.fs.file.IVirtualFile;
 import com.mku.fs.file.HttpFile;
 import com.mku.salmonfs.drive.AesDrive;
@@ -109,7 +109,7 @@ public class SalmonFSHttpTests {
 
     @Test
     void shouldCatchNotAuthorizeNegative() {
-        IRealFile vaultDir = SalmonFSTestHelper.HTTP_VAULT_DIR;
+        IFile vaultDir = SalmonFSTestHelper.HTTP_VAULT_DIR;
         boolean wrongPassword = false;
         try {
             AesDrive drive = SalmonFSTestHelper.openDrive(vaultDir, SalmonFSTestHelper.driveClassType, SalmonCoreTestHelper.TEST_FALSE_PASSWORD, null);
@@ -123,7 +123,7 @@ public class SalmonFSHttpTests {
     @Test
     void shouldAuthorizePositive() throws IOException {
         boolean wrongPassword = false;
-        IRealFile vaultDir = SalmonFSTestHelper.HTTP_VAULT_DIR;
+        IFile vaultDir = SalmonFSTestHelper.HTTP_VAULT_DIR;
         try {
             AesDrive drive = SalmonFSTestHelper.openDrive(vaultDir, SalmonFSTestHelper.driveClassType, SalmonCoreTestHelper.TEST_PASSWORD, null);
             IVirtualFile root = drive.getRoot();
@@ -157,7 +157,7 @@ public class SalmonFSHttpTests {
 
     @Test
     void shouldSeekAndReadEncryptedFileStreamFromDrive() throws IOException {
-        IRealFile vaultDir = SalmonFSTestHelper.HTTP_VAULT_DIR;
+        IFile vaultDir = SalmonFSTestHelper.HTTP_VAULT_DIR;
         AesDrive drive = AesDrive.openDrive(vaultDir, SalmonFSTestHelper.driveClassType, SalmonCoreTestHelper.TEST_PASSWORD, null);
         IVirtualFile root = drive.getRoot();
         IVirtualFile encFile = root.getChild(SalmonFSTestHelper.TEST_IMPORT_SMALL_FILENAME);
@@ -174,7 +174,7 @@ public class SalmonFSHttpTests {
 
     @Test
     void shouldListFilesFromDrive() throws IOException {
-        IRealFile vaultDir = SalmonFSTestHelper.HTTP_VAULT_DIR;
+        IFile vaultDir = SalmonFSTestHelper.HTTP_VAULT_DIR;
         AesDrive drive = HttpDrive.open(vaultDir, SalmonCoreTestHelper.TEST_PASSWORD);
         IVirtualFile root = drive.getRoot();
         IVirtualFile[] files = root.listFiles();
@@ -193,12 +193,12 @@ public class SalmonFSHttpTests {
 
     @Test
     public void ShouldExportFileFromDrive() throws Exception {
-        IRealFile vaultDir = SalmonFSTestHelper.HTTP_VAULT_DIR;
+        IFile vaultDir = SalmonFSTestHelper.HTTP_VAULT_DIR;
         int threads = 1;
         AesDrive drive = SalmonFSTestHelper.openDrive(vaultDir, SalmonFSTestHelper.driveClassType, SalmonCoreTestHelper.TEST_PASSWORD);
         AesFile file = drive.getRoot().getChild(SalmonFSTestHelper.TEST_HTTP_FILE.getName());
-        IRealFile exportDir = SalmonFSTestHelper.generateFolder("export_http", SalmonFSTestHelper.TEST_OUTPUT_DIR, false);
-        IRealFile localFile = exportDir.getChild(SalmonFSTestHelper.TEST_HTTP_FILE.getName());
+        IFile exportDir = SalmonFSTestHelper.generateFolder("export_http", SalmonFSTestHelper.TEST_OUTPUT_DIR, false);
+        IFile localFile = exportDir.getChild(SalmonFSTestHelper.TEST_HTTP_FILE.getName());
         if (localFile.exists())
             localFile.delete();
         SalmonFSTestHelper.exportFiles(new AesFile[]{file}, exportDir, threads);
@@ -207,10 +207,10 @@ public class SalmonFSHttpTests {
 
     @Test
     public void ShouldReadRawFile() throws IOException, NoSuchAlgorithmException {
-        IRealFile localFile = SalmonFSTestHelper.HTTP_TEST_DIR.getChild(SalmonFSTestHelper.TEST_HTTP_FILE.getName());
+        IFile localFile = SalmonFSTestHelper.HTTP_TEST_DIR.getChild(SalmonFSTestHelper.TEST_HTTP_FILE.getName());
         String localChkSum = SalmonFSTestHelper.getChecksum(localFile);
-        IRealFile httpRoot = new HttpFile(SalmonFSTestHelper.HTTP_SERVER_VIRTUAL_URL + "/" + SalmonFSTestHelper.HTTP_TEST_DIRNAME);
-        IRealFile httpFile = httpRoot.getChild(SalmonFSTestHelper.TEST_HTTP_FILE.getName());
+        IFile httpRoot = new HttpFile(SalmonFSTestHelper.HTTP_SERVER_VIRTUAL_URL + "/" + SalmonFSTestHelper.HTTP_TEST_DIRNAME);
+        IFile httpFile = httpRoot.getChild(SalmonFSTestHelper.TEST_HTTP_FILE.getName());
         RandomAccessStream stream = httpFile.getInputStream();
         MemoryStream ms = new MemoryStream();
         stream.copyTo(ms);

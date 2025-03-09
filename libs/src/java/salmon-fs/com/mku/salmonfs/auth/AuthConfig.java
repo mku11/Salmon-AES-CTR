@@ -24,7 +24,7 @@ SOFTWARE.
 */
 
 import com.mku.convert.BitConverter;
-import com.mku.fs.file.IRealFile;
+import com.mku.fs.file.IFile;
 import com.mku.salmon.Generator;
 import com.mku.salmon.Nonce;
 import com.mku.salmon.SecurityException;
@@ -109,7 +109,7 @@ public class AuthConfig {
      * @param configNonce Nonce for the file itself
      * @throws Exception Thrown if error occurs during writing the file
      */
-    public static void writeAuthFile(IRealFile authConfigFile,
+    public static void writeAuthFile(IFile authConfigFile,
                                      AesDrive drive,
                                      byte[] targetAuthId,
                                      byte[] targetStartingNonce,
@@ -162,7 +162,7 @@ public class AuthConfig {
      * @return The decrypted authorization file.
      * @throws Exception Thrown if error occurs during reading
      */
-    public static AuthConfig getAuthConfig(AesDrive drive, IRealFile authFile) throws Exception {
+    public static AuthConfig getAuthConfig(AesDrive drive, IFile authFile) throws Exception {
         AesFile aesFile = new AesFile(authFile, drive);
         AesStream stream = aesFile.getInputStream();
         MemoryStream ms = new MemoryStream();
@@ -206,7 +206,7 @@ public class AuthConfig {
      * @param authConfigFile The filepath to the authorization file.
      * @throws Exception Thrown if error occurs during import
      */
-    public static void importAuthFile(AesDrive drive, IRealFile authConfigFile) throws Exception {
+    public static void importAuthFile(AesDrive drive, IFile authConfigFile) throws Exception {
         if (drive.getDriveId() == null)
             throw new Exception("Could not get drive id, make sure you init the drive first");
 
@@ -235,7 +235,7 @@ public class AuthConfig {
      * @param file     The config file.
      * @throws Exception Thrown if error occurs during export
      */
-    public static void exportAuthFile(AesDrive drive, String targetAuthId, IRealFile file) throws Exception {
+    public static void exportAuthFile(AesDrive drive, String targetAuthId, IFile file) throws Exception {
         if (drive.getDriveId() == null)
             throw new Exception("Could not get drive id, make sure you init the drive first");
 

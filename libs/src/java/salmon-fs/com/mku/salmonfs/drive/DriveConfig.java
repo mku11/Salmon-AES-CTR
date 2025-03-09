@@ -23,7 +23,7 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 */
 
-import com.mku.fs.file.IRealFile;
+import com.mku.fs.file.IFile;
 import com.mku.convert.BitConverter;
 import com.mku.salmon.Generator;
 import com.mku.streams.RandomAccessStream;
@@ -77,7 +77,7 @@ public class DriveConfig {
      * @param hashSignature                The hash signature of the drive id
      * @throws IOException Thrown if there is an IO error.
      */
-    public static void writeDriveConfig(IRealFile configFile, byte[] magicBytes, byte version, byte[] salt,
+    public static void writeDriveConfig(IFile configFile, byte[] magicBytes, byte version, byte[] salt,
                                         int iterations, byte[] keyIv,
                                         byte[] encryptedData, byte[] hashSignature) throws IOException {
         // construct the contents of the config file

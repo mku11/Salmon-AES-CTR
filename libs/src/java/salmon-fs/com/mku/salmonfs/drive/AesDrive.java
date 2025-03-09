@@ -24,7 +24,7 @@ SOFTWARE.
 */
 
 import com.mku.convert.BitConverter;
-import com.mku.fs.file.IRealFile;
+import com.mku.fs.file.IFile;
 import com.mku.fs.drive.VirtualDrive;
 import com.mku.salmon.Generator;
 import com.mku.salmon.SecurityException;
@@ -49,7 +49,7 @@ import java.lang.reflect.Constructor;
 /**
  * Abstract class provides an encrypted VirtualDrive that can be extended for use with
  * any filesystem ie disk, net, cloud, etc.
- * Each drive implementation needs a corresponding implementation of {@link IRealFile}.
+ * Each drive implementation needs a corresponding implementation of {@link IFile}.
  */
 public abstract class AesDrive extends VirtualDrive {
     private static final int DEFAULT_FILE_CHUNK_SIZE = 256 * 1024;
@@ -63,7 +63,7 @@ public abstract class AesDrive extends VirtualDrive {
     private int defaultFileChunkSize = DEFAULT_FILE_CHUNK_SIZE;
     private DriveKey key = null;
     private byte[] driveId;
-    private IRealFile realRoot = null;
+    private IFile realRoot = null;
     private AesFile virtualRoot = null;
 
     private final IHashProvider hashProvider = new HMACSHA256Provider();
@@ -75,14 +75,14 @@ public abstract class AesDrive extends VirtualDrive {
      * @param realRoot          The root of the real directory
      * @param createIfNotExists Create the drive if it does not exist
      */
-    public void initialize(IRealFile realRoot, boolean createIfNotExists) {
+    public void initialize(IFile realRoot, boolean createIfNotExists) {
         close();
         if (realRoot == null)
             return;
         this.realRoot = realRoot;
         if (!createIfNotExists && !hasConfig() && realRoot.getParent() != null && realRoot.getParent().exists()) {
             // try the parent if this is the filesystem folder 
-            IRealFile originalRealRoot = this.realRoot;
+            IFile originalRealRoot = this.realRoot;
             this.realRoot = this.realRoot.getParent();
             if (!hasConfig()) {
                 // revert to original
@@ -92,7 +92,7 @@ public abstract class AesDrive extends VirtualDrive {
         if (this.realRoot == null)
             throw new Error("Could not initialize root folder");
 
-        IRealFile virtualRootRealFile = this.realRoot.getChild(virtualDriveDirectoryName);
+        IFile virtualRootRealFile = this.realRoot.getChild(virtualDriveDirectoryName);
         if (createIfNotExists && (virtualRootRealFile == null || !virtualRootRealFile.exists())) {
             virtualRootRealFile = realRoot.createDirectory(virtualDriveDirectoryName);
         }
@@ -104,11 +104,11 @@ public abstract class AesDrive extends VirtualDrive {
     }
 
     /**
-     * Get the virtual encrypted AesFile backed by a IRealFile.
+     * Get the virtual encrypted AesFile backed by an IFile.
      * @param file The real file.
      * @return
      */
-	protected AesFile getVirtualFile(IRealFile file) {
+	protected AesFile getVirtualFile(IFile file) {
 		return new AesFile(file, this);
 	}
 
@@ -246,7 +246,7 @@ public abstract class AesDrive extends VirtualDrive {
      * Initialize the drive virtual filesystem.
      */
     protected void initFS() {
-        IRealFile virtualRootRealFile = realRoot.getChild(virtualDriveDirectoryName);
+        IFile virtualRootRealFile = realRoot.getChild(virtualDriveDirectoryName);
         if (virtualRootRealFile == null || !virtualRootRealFile.exists()) {
             try {
                 virtualRootRealFile = realRoot.createDirectory(virtualDriveDirectoryName);
@@ -267,7 +267,7 @@ public abstract class AesDrive extends VirtualDrive {
      * @return The drive
      * @throws IOException Thrown if there is an IO error.
      */
-    public static AesDrive openDrive(IRealFile dir, Class<?> driveClassType,
+    public static AesDrive openDrive(IFile dir, Class<?> driveClassType,
                                      String password) throws IOException {
 		return openDrive(dir, driveClassType, password, null);
 	}
@@ -283,7 +283,7 @@ public abstract class AesDrive extends VirtualDrive {
      * @return The drive
      * @throws IOException Thrown if there is an IO error.
      */
-    public static AesDrive openDrive(IRealFile dir, Class<?> driveClassType,
+    public static AesDrive openDrive(IFile dir, Class<?> driveClassType,
                                      String password, INonceSequencer sequencer)
             throws IOException {
         AesDrive drive = createDriveInstance(dir, false, driveClassType, sequencer);
@@ -306,7 +306,7 @@ public abstract class AesDrive extends VirtualDrive {
      * @throws SequenceException  Thrown if there is an error with the nonce sequence
      * @throws IOException        Thrown if there is an IO error.
      */
-    public static AesDrive createDrive(IRealFile dir, Class<?> driveClassType,
+    public static AesDrive createDrive(IFile dir, Class<?> driveClassType,
                                        String password, INonceSequencer sequencer) throws IOException {
         AesDrive drive = createDriveInstance(dir, true, driveClassType, sequencer);
         if (drive.hasConfig())
@@ -323,7 +323,7 @@ public abstract class AesDrive extends VirtualDrive {
      * @return An encrypted drive instance
      * @throws SecurityException Thrown if there is a security exception
      */
-    private static AesDrive createDriveInstance(IRealFile dir, boolean createIfNotExists,
+    private static AesDrive createDriveInstance(IFile dir, boolean createIfNotExists,
                                                 Class<?> driveClassType, INonceSequencer sequencer) {
         Class<?> clazz;
         AesDrive drive;
@@ -435,7 +435,7 @@ public abstract class AesDrive extends VirtualDrive {
         byte[] driveKey = getKey().getDriveKey();
         byte[] hashKey = getKey().getHashKey();
 
-        IRealFile configFile = realRoot.getChild(configFilename);
+        IFile configFile = realRoot.getChild(configFilename);
 
         if (driveKey == null && configFile != null && configFile.exists())
             throw new AuthException("Not authorized");
@@ -513,7 +513,7 @@ public abstract class AesDrive extends VirtualDrive {
         return virtualRoot;
     }
 
-    public IRealFile getRealRoot() {
+    public IFile getRealRoot() {
         return realRoot;
     }
 
@@ -624,7 +624,7 @@ public abstract class AesDrive extends VirtualDrive {
      * @return The contents of the file
      * @throws IOException Thrown if there is an IO error.
      */
-    public byte[] getBytesFromRealFile(IRealFile file, int bufferSize) throws IOException {
+    public byte[] getBytesFromRealFile(IFile file, int bufferSize) throws IOException {
         RandomAccessStream stream = file.getInputStream();
         MemoryStream ms = new MemoryStream();
         stream.copyTo(ms, bufferSize, null);
@@ -639,10 +639,10 @@ public abstract class AesDrive extends VirtualDrive {
     /**
      * Return the drive configuration file.
      */
-    private IRealFile getDriveConfigFile() {
+    private IFile getDriveConfigFile() {
         if (realRoot == null || !realRoot.exists())
             return null;
-        IRealFile file = realRoot.getChild(configFilename);
+        IFile file = realRoot.getChild(configFilename);
         return file;
     }
 
@@ -651,8 +651,8 @@ public abstract class AesDrive extends VirtualDrive {
      *
      * @return The file on the real filesystem.
      */
-    public IRealFile getExportDir() {
-        IRealFile exportDir = realRoot.getChild(exportDirectoryName);
+    public IFile getExportDir() {
+        IFile exportDir = realRoot.getChild(exportDirectoryName);
         if (exportDir == null || !exportDir.exists())
             exportDir = realRoot.createDirectory(exportDirectoryName);
         return exportDir;
@@ -665,7 +665,7 @@ public abstract class AesDrive extends VirtualDrive {
      * @throws IOException Thrown if there is an IO error.
      */
     protected DriveConfig getDriveConfig() throws IOException {
-        IRealFile configFile = getDriveConfigFile();
+        IFile configFile = getDriveConfigFile();
         if (configFile == null || !configFile.exists())
             return null;
         byte[] bytes = getBytesFromRealFile(configFile, 0);

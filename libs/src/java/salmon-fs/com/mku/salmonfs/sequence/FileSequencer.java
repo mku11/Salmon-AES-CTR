@@ -24,7 +24,7 @@ SOFTWARE.
 */
 
 import com.mku.convert.BitConverter;
-import com.mku.fs.file.IRealFile;
+import com.mku.fs.file.IFile;
 import com.mku.salmon.Generator;
 import com.mku.salmon.Nonce;
 import com.mku.salmon.RangeExceededException;
@@ -46,7 +46,7 @@ import java.util.HashMap;
  * Generates nonces based on a sequencer backed by a file.
  */
 public class FileSequencer implements INonceSequencer {
-    private final IRealFile sequenceFile;
+    private final IFile sequenceFile;
     private final INonceSequenceSerializer serializer;
 
     /**
@@ -57,7 +57,7 @@ public class FileSequencer implements INonceSequencer {
      * @throws IOException Thrown if there is an IO error.
      * @throws SequenceException Thrown if there is an error with the nonce sequence
      */
-    public FileSequencer(IRealFile sequenceFile, INonceSequenceSerializer serializer)
+    public FileSequencer(IFile sequenceFile, INonceSequenceSerializer serializer)
             throws IOException {
         this.sequenceFile = sequenceFile;
         this.serializer = serializer;
@@ -71,7 +71,7 @@ public class FileSequencer implements INonceSequencer {
      * Get the file used by this sequencer.
      * @return The file.
      */
-    public IRealFile getSequenceFile() {
+    public IFile getSequenceFile() {
         return sequenceFile;
     }
 

@@ -24,7 +24,7 @@ SOFTWARE.
 */
 
 import com.mku.fs.drive.utils.FileCommander;
-import com.mku.fs.file.IRealFile;
+import com.mku.fs.file.IFile;
 import com.mku.fs.file.IVirtualFile;
 import com.mku.func.BiConsumer;
 import com.mku.func.Consumer;
@@ -53,7 +53,7 @@ public class AesFileCommander extends FileCommander {
 
 
     /**
-     * Import IRealFile(s) into the drive.
+     * Import IFile(s) into the drive.
      *
      * @param filesToImport The files to import.
      * @param importDir     The target directory.
@@ -62,13 +62,13 @@ public class AesFileCommander extends FileCommander {
      * @return The imported files.
      * @throws Exception Thrown if error occurs during import
      */
-    public IVirtualFile[] importFiles(IRealFile[] filesToImport, IVirtualFile importDir,
+    public IVirtualFile[] importFiles(IFile[] filesToImport, IVirtualFile importDir,
                                       boolean deleteSource, boolean integrity) throws Exception {
         return importFiles(filesToImport, importDir, deleteSource, integrity, null, null, null);
     }
 
     /**
-     * Import IRealFile(s) into the drive.
+     * Import IFile(s) into the drive.
      *
      * @param filesToImport The files to import.
      * @param importDir     The target directory.
@@ -78,15 +78,15 @@ public class AesFileCommander extends FileCommander {
      * @return The imported files.
      * @throws Exception Thrown if error occurs during import
      */
-    public IVirtualFile[] importFiles(IRealFile[] filesToImport, IVirtualFile importDir,
+    public IVirtualFile[] importFiles(IFile[] filesToImport, IVirtualFile importDir,
                                       boolean deleteSource, boolean integrity,
-                                      Function<IRealFile, String> autoRename) throws Exception {
+                                      Function<IFile, String> autoRename) throws Exception {
         return importFiles(filesToImport, importDir, deleteSource, integrity, autoRename, null, null);
     }
 
 
     /**
-     * Import IRealFile(s) into the drive.
+     * Import IFile(s) into the drive.
      *
      * @param filesToImport The files to import.
      * @param importDir     The target directory.
@@ -97,15 +97,15 @@ public class AesFileCommander extends FileCommander {
      * @return The imported files.
      * @throws Exception Thrown if error occurs during import
      */
-    public IVirtualFile[] importFiles(IRealFile[] filesToImport, IVirtualFile importDir,
+    public IVirtualFile[] importFiles(IFile[] filesToImport, IVirtualFile importDir,
                                       boolean deleteSource, boolean integrity,
-                                      Function<IRealFile, String> autoRename,
-                                      BiConsumer<IRealFile, Exception> onFailed) throws Exception {
+                                      Function<IFile, String> autoRename,
+                                      BiConsumer<IFile, Exception> onFailed) throws Exception {
         return importFiles(filesToImport, importDir, deleteSource, integrity, autoRename, onFailed, null);
     }
 
     /**
-     * Import IRealFile(s) into the drive.
+     * Import IFile(s) into the drive.
      *
      * @param filesToImport     The files to import.
      * @param importDir         The target directory.
@@ -118,10 +118,10 @@ public class AesFileCommander extends FileCommander {
      * @throws Exception Thrown if error occurs during import
      */
     @Override
-    public AesFile[] importFiles(IRealFile[] filesToImport, IVirtualFile importDir,
+    public AesFile[] importFiles(IFile[] filesToImport, IVirtualFile importDir,
                                  boolean deleteSource, boolean integrity,
-                                 Function<IRealFile, String> autoRename,
-                                 BiConsumer<IRealFile, Exception> onFailed,
+                                 Function<IFile, String> autoRename,
+                                 BiConsumer<IFile, Exception> onFailed,
                                  Consumer<RealFileTaskProgress> onProgressChanged) throws Exception {
         IVirtualFile[] files = super.importFiles(filesToImport, importDir, deleteSource, integrity,
                 autoRename, onFailed, onProgressChanged);
@@ -142,8 +142,8 @@ public class AesFileCommander extends FileCommander {
      * @return The exported files
      * @throws Exception Thrown if error occurs during export
      */
-    public IRealFile[] exportFiles(IVirtualFile[] filesToExport, IRealFile exportDir,
-                                   boolean deleteSource, boolean integrity)
+    public IFile[] exportFiles(IVirtualFile[] filesToExport, IFile exportDir,
+                               boolean deleteSource, boolean integrity)
             throws Exception {
         return exportFiles(filesToExport, exportDir, deleteSource, integrity, null, null, null);
     }
@@ -160,9 +160,9 @@ public class AesFileCommander extends FileCommander {
      * @return The exported files
      * @throws Exception Thrown if error occurs during export
      */
-    public IRealFile[] exportFiles(IVirtualFile[] filesToExport, IRealFile exportDir,
-                                   boolean deleteSource, boolean integrity,
-                                   Function<IRealFile, String> autoRename)
+    public IFile[] exportFiles(IVirtualFile[] filesToExport, IFile exportDir,
+                               boolean deleteSource, boolean integrity,
+                               Function<IFile, String> autoRename)
             throws Exception {
         return exportFiles(filesToExport, exportDir, deleteSource, integrity, autoRename, null, null);
     }
@@ -180,10 +180,10 @@ public class AesFileCommander extends FileCommander {
      * @return The exported files
      * @throws Exception Thrown if error occurs during export
      */
-    public IRealFile[] exportFiles(IVirtualFile[] filesToExport, IRealFile exportDir,
-                                   boolean deleteSource, boolean integrity,
-                                   Function<IRealFile, String> autoRename,
-                                   BiConsumer<IVirtualFile, Exception> onFailed)
+    public IFile[] exportFiles(IVirtualFile[] filesToExport, IFile exportDir,
+                               boolean deleteSource, boolean integrity,
+                               Function<IFile, String> autoRename,
+                               BiConsumer<IVirtualFile, Exception> onFailed)
             throws Exception {
         return exportFiles(filesToExport, exportDir, deleteSource, integrity, autoRename, onFailed, null);
     }
@@ -201,11 +201,11 @@ public class AesFileCommander extends FileCommander {
      * @return The exported files
      * @throws Exception Thrown if error occurs during export
      */
-    public IRealFile[] exportFiles(IVirtualFile[] filesToExport, IRealFile exportDir,
-                                   boolean deleteSource, boolean integrity,
-                                   Function<IRealFile, String> autoRename,
-                                   BiConsumer<IVirtualFile, Exception> onFailed,
-                                   Consumer<VirtualFileTaskProgress> onProgressChanged)
+    public IFile[] exportFiles(IVirtualFile[] filesToExport, IFile exportDir,
+                               boolean deleteSource, boolean integrity,
+                               Function<IFile, String> autoRename,
+                               BiConsumer<IVirtualFile, Exception> onFailed,
+                               Consumer<VirtualFileTaskProgress> onProgressChanged)
             throws Exception {
         return super.exportFiles(filesToExport, exportDir, deleteSource, integrity,
                 autoRename, onFailed, onProgressChanged);

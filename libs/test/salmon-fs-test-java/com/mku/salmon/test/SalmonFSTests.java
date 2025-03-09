@@ -25,7 +25,7 @@ SOFTWARE.
 */
 
 import com.mku.convert.BitConverter;
-import com.mku.fs.file.IRealFile;
+import com.mku.fs.file.IFile;
 import com.mku.salmon.integrity.IntegrityException;
 import com.mku.salmonfs.auth.AuthException;
 import com.mku.salmonfs.drive.AesDrive;
@@ -110,7 +110,7 @@ public class SalmonFSTests {
 
     @Test
     public void shouldCatchNotAuthorizeNegative() throws Exception {
-        IRealFile vaultDir = SalmonFSTestHelper.generateFolder(SalmonFSTestHelper.TEST_VAULT_DIRNAME);
+        IFile vaultDir = SalmonFSTestHelper.generateFolder(SalmonFSTestHelper.TEST_VAULT_DIRNAME);
         FileSequencer sequencer = SalmonFSTestHelper.createSalmonFileSequencer();
         AesDrive drive = SalmonFSTestHelper.createDrive(vaultDir, Drive.class,
                 SalmonCoreTestHelper.TEST_PASSWORD, sequencer);
@@ -128,7 +128,7 @@ public class SalmonFSTests {
 
     @Test
     public void shouldAuthorizePositive() throws Exception {
-        IRealFile vaultDir = SalmonFSTestHelper.generateFolder(SalmonFSTestHelper.TEST_VAULT_DIRNAME);
+        IFile vaultDir = SalmonFSTestHelper.generateFolder(SalmonFSTestHelper.TEST_VAULT_DIRNAME);
         FileSequencer sequencer = SalmonFSTestHelper.createSalmonFileSequencer();
         AesDrive drive = SalmonFSTestHelper.createDrive(vaultDir, Drive.class,
                 SalmonCoreTestHelper.TEST_PASSWORD, sequencer);
@@ -311,9 +311,9 @@ public class SalmonFSTests {
 
     @Test
     public void shouldCatchVaultMaxFiles() {
-        IRealFile vaultDir = SalmonFSTestHelper.generateFolder(SalmonFSTestHelper.TEST_VAULT_DIRNAME);
-        IRealFile seqDir = SalmonFSTestHelper.generateFolder(SalmonFSTestHelper.TEST_SEQ_DIRNAME, SalmonFSTestHelper.TEST_SEQ_DIR, true);
-        IRealFile seqFile = seqDir.getChild(SalmonFSTestHelper.TEST_SEQ_FILENAME);
+        IFile vaultDir = SalmonFSTestHelper.generateFolder(SalmonFSTestHelper.TEST_VAULT_DIRNAME);
+        IFile seqDir = SalmonFSTestHelper.generateFolder(SalmonFSTestHelper.TEST_SEQ_DIRNAME, SalmonFSTestHelper.TEST_SEQ_DIR, true);
+        IFile seqFile = seqDir.getChild(SalmonFSTestHelper.TEST_SEQ_FILENAME);
 
         SalmonFSTestHelper.testMaxFiles(vaultDir, seqFile, SalmonFSTestHelper.TEST_IMPORT_TINY_FILE,
                 SalmonCoreTestHelper.TEXT_VAULT_MAX_FILE_NONCE, -2, true);
@@ -405,8 +405,8 @@ public class SalmonFSTests {
 
     @Test
     public void shouldExportAndImportAuth() throws Exception {
-        IRealFile vault = SalmonFSTestHelper.generateFolder(SalmonFSTestHelper.TEST_VAULT_DIRNAME);
-        IRealFile importFilePath = SalmonFSTestHelper.TEST_IMPORT_TINY_FILE;
+        IFile vault = SalmonFSTestHelper.generateFolder(SalmonFSTestHelper.TEST_VAULT_DIRNAME);
+        IFile importFilePath = SalmonFSTestHelper.TEST_IMPORT_TINY_FILE;
         SalmonFSTestHelper.exportAndImportAuth(vault, importFilePath);
     }
 
@@ -440,7 +440,7 @@ public class SalmonFSTests {
 
     @Test
     public void shouldCreateDriveAndOpenFsFolder() throws Exception {
-        IRealFile vaultDir = SalmonFSTestHelper.generateFolder(SalmonFSTestHelper.TEST_VAULT_DIRNAME);
+        IFile vaultDir = SalmonFSTestHelper.generateFolder(SalmonFSTestHelper.TEST_VAULT_DIRNAME);
         FileSequencer sequencer = SalmonFSTestHelper.createSalmonFileSequencer();
         AesDrive drive = SalmonFSTestHelper.createDrive(vaultDir, SalmonFSTestHelper.driveClassType, SalmonCoreTestHelper.TEST_PASSWORD, sequencer);
         boolean wrongPassword = false;
@@ -467,10 +467,10 @@ public class SalmonFSTests {
     @Test
     public void ShouldPerformOperationsRealFiles() throws IOException {
         boolean caught = false;
-        IRealFile dir = SalmonFSTestHelper.generateFolder(SalmonFSTestHelper.TEST_VAULT_DIRNAME);
-        IRealFile file = SalmonFSTestHelper.TEST_IMPORT_TINY_FILE;
-        IRealFile file1 = file.copy(dir);
-        IRealFile file2;
+        IFile dir = SalmonFSTestHelper.generateFolder(SalmonFSTestHelper.TEST_VAULT_DIRNAME);
+        IFile file = SalmonFSTestHelper.TEST_IMPORT_TINY_FILE;
+        IFile file1 = file.copy(dir);
+        IFile file2;
         try {
             file2 = file.copy(dir);
         } catch (Exception ex) {
@@ -478,7 +478,7 @@ public class SalmonFSTests {
             caught = true;
         }
         assertEquals(true, caught);
-        file2 = file.copy(dir, IRealFile.autoRename.apply(file));
+        file2 = file.copy(dir, IFile.autoRename.apply(file));
 
         assertEquals(2, dir.getChildrenCount());
         assertTrue(dir.getChild(file.getName()).exists());
@@ -486,12 +486,12 @@ public class SalmonFSTests {
         assertTrue(dir.getChild(file2.getName()).exists());
         assertTrue(dir.getChild(file2.getName()).isFile());
 
-        IRealFile dir1 = dir.createDirectory("folder1");
+        IFile dir1 = dir.createDirectory("folder1");
         assertTrue(dir.getChild("folder1").exists());
         assertTrue(dir.getChild("folder1").isDirectory());
         assertEquals(3, dir.getChildrenCount());
 
-        IRealFile folder1 = dir.createDirectory("folder2");
+        IFile folder1 = dir.createDirectory("folder2");
         assertTrue(folder1.exists());
         boolean renamed = folder1.renameTo("folder3");
         assertTrue(renamed);
@@ -507,7 +507,7 @@ public class SalmonFSTests {
         file1.move(dir.getChild("folder1"));
         file2.move(dir.getChild("folder1"));
 
-        IRealFile file3 = file.copy(dir);
+        IFile file3 = file.copy(dir);
         caught = false;
         try {
             file3.move(dir.getChild("folder1"));
@@ -516,28 +516,28 @@ public class SalmonFSTests {
             caught = true;
         }
         assertTrue(caught);
-        IRealFile file4 = file3.move(dir.getChild("folder1"), IRealFile.autoRename.apply(file3));
+        IFile file4 = file3.move(dir.getChild("folder1"), IFile.autoRename.apply(file3));
         assertTrue(file4.exists());
         assertEquals(3, dir.getChild("folder1").getChildrenCount());
 
-        IRealFile folder2 = dir.getChild("folder1").createDirectory("folder2");
-        for (IRealFile rfile : dir.getChild("folder1").listFiles())
+        IFile folder2 = dir.getChild("folder1").createDirectory("folder2");
+        for (IFile rfile : dir.getChild("folder1").listFiles())
             rfile.copyRecursively(folder2);
         assertEquals(4, dir.getChild("folder1").getChildrenCount());
         assertEquals(3, dir.getChild("folder1").getChild("folder2").getChildrenCount());
 
         // recursive copy
-        IRealFile folder3 = dir.createDirectory("folder4");
+        IFile folder3 = dir.createDirectory("folder4");
         dir.getChild("folder1").copyRecursively(folder3);
         int count1 = SalmonFSTestHelper.getChildrenCountRecursively(dir.getChild("folder1"));
         int count2 = SalmonFSTestHelper.getChildrenCountRecursively(dir.getChild("folder4").getChild("folder1"));
         assertEquals(count1, count2);
 
-        IRealFile dfile = dir.getChild("folder4").getChild("folder1").getChild("folder2").getChild(file.getName());
+        IFile dfile = dir.getChild("folder4").getChild("folder1").getChild("folder2").getChild(file.getName());
         assertTrue(dfile.exists());
         assertTrue(dfile.delete());
         assertEquals(2, dir.getChild("folder4").getChild("folder1").getChild("folder2").getChildrenCount());
-        dir.getChild("folder1").copyRecursively(folder3, null, IRealFile.autoRename, false, null);
+        dir.getChild("folder1").copyRecursively(folder3, null, IFile.autoRename, false, null);
         assertEquals(2, dir.getChildrenCount());
         assertEquals(1, dir.getChild("folder4").getChildrenCount());
         assertEquals(7, dir.getChild("folder4").getChild("folder1").getChildrenCount());
@@ -545,7 +545,7 @@ public class SalmonFSTests {
 
         dir.getChild("folder4").getChild("folder1").getChild("folder2").getChild(file.getName()).delete();
         dir.getChild("folder4").getChild("folder1").getChild(file.getName()).delete();
-        ArrayList<IRealFile> failed = new ArrayList<IRealFile>();
+        ArrayList<IFile> failed = new ArrayList<IFile>();
         dir.getChild("folder1").copyRecursively(folder3, null, null, false, (failedFile, ex) ->
         {
             failed.add(failedFile);
@@ -558,8 +558,8 @@ public class SalmonFSTests {
 
         dir.getChild("folder4").getChild("folder1").getChild("folder2").getChild(file.getName()).delete();
         dir.getChild("folder4").getChild("folder1").getChild(file.getName()).delete();
-        ArrayList<IRealFile> failedmv = new ArrayList<IRealFile>();
-        dir.getChild("folder1").moveRecursively(dir.getChild("folder4"), null, IRealFile.autoRename, false, (failedFile, ex) ->
+        ArrayList<IFile> failedmv = new ArrayList<IFile>();
+        dir.getChild("folder1").moveRecursively(dir.getChild("folder4"), null, IFile.autoRename, false, (failedFile, ex) ->
         {
             failedmv.add(failedFile);
         });
@@ -572,13 +572,13 @@ public class SalmonFSTests {
 
     @Test
     public void ShouldReadFromFileMultithreaded() throws Exception {
-        IRealFile vaultDir = SalmonFSTestHelper.generateFolder(SalmonFSTestHelper.TEST_VAULT_DIRNAME);
-        IRealFile file = SalmonFSTestHelper.TEST_IMPORT_MEDIUM_FILE;
+        IFile vaultDir = SalmonFSTestHelper.generateFolder(SalmonFSTestHelper.TEST_VAULT_DIRNAME);
+        IFile file = SalmonFSTestHelper.TEST_IMPORT_MEDIUM_FILE;
 
         FileSequencer sequencer = SalmonFSTestHelper.createSalmonFileSequencer();
         AesDrive drive = SalmonFSTestHelper.createDrive(vaultDir, SalmonFSTestHelper.driveClassType, SalmonCoreTestHelper.TEST_PASSWORD, sequencer);
         AesFileCommander fileCommander = new AesFileCommander(Integrity.DEFAULT_CHUNK_SIZE, Integrity.DEFAULT_CHUNK_SIZE, 2);
-        AesFile[] sfiles = fileCommander.importFiles(new IRealFile[]{file},
+        AesFile[] sfiles = fileCommander.importFiles(new IFile[]{file},
                 drive.getRoot(), false, true, null, null, null);
         fileCommander.close();
 

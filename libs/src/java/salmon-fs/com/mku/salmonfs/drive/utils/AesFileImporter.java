@@ -23,7 +23,7 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 */
 
-import com.mku.fs.file.IRealFile;
+import com.mku.fs.file.IFile;
 import com.mku.fs.file.IVirtualFile;
 import com.mku.func.BiConsumer;
 import com.mku.salmonfs.file.AesFile;
@@ -32,7 +32,7 @@ import com.mku.fs.drive.utils.FileImporter;
 import java.io.IOException;
 
 /**
- * Imports IRealFile(s) into an encrypted VirtualDrive.
+ * Imports IFile(s) into an encrypted VirtualDrive.
  */
 public class AesFileImporter extends FileImporter {
 
@@ -84,7 +84,7 @@ public class AesFileImporter extends FileImporter {
      * @return The imported file
      * @throws Exception Thrown if error occurs during import
      */
-    public AesFile importFile(IRealFile fileToImport, IVirtualFile dir, String filename,
+    public AesFile importFile(IFile fileToImport, IVirtualFile dir, String filename,
                               boolean deleteSource, boolean integrity, BiConsumer<Long, Long> onProgress) throws Exception {
         return (AesFile) super.importFile(fileToImport, dir, filename, deleteSource, integrity, onProgress);
     }

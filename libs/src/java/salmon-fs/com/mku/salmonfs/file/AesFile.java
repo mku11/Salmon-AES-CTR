@@ -23,7 +23,7 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 */
 
-import com.mku.fs.file.IRealFile;
+import com.mku.fs.file.IFile;
 import com.mku.fs.file.IVirtualFile;
 import com.mku.func.BiConsumer;
 import com.mku.func.Function;
@@ -48,9 +48,9 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
- * A virtual file backed by an encrypted {@link IRealFile} on the real filesystem.
- * Supports operations for retrieving {@link AesStream} for reading/decrypting
- * and writing/encrypting contents.
+ * An {@link IVirtualFile} implementation of an encryption wrapper backed by a real {@link IFile}.
+ * You can use this file to browse a VirtualDrive.
+ * Encrypt/Decrypt operations are accessible via getInputStream/getOutputStream.
  */
 public class AesFile implements IVirtualFile {
     /**
@@ -59,7 +59,7 @@ public class AesFile implements IVirtualFile {
     public static final String Separator = "/";
 
     private final AesDrive drive;
-    private final IRealFile realFile;
+    private final IFile realFile;
 
     //cached values
     private String _name;
@@ -78,7 +78,7 @@ public class AesFile implements IVirtualFile {
      *
      * @param realFile The real file
      */
-    public AesFile(IRealFile realFile) {
+    public AesFile(IFile realFile) {
         this(realFile, null);
     }
 
@@ -89,7 +89,7 @@ public class AesFile implements IVirtualFile {
      * @param drive    The file virtual system that will be used with file operations
      * @param realFile The real file
      */
-    public AesFile(IRealFile realFile, AesDrive drive) {
+    public AesFile(IFile realFile, AesDrive drive) {
         this.drive = drive;
         this.realFile = realFile;
         if (integrity)
@@ -277,7 +277,7 @@ public class AesFile implements IVirtualFile {
      *
      * @param realFile The real file containing the data
      */
-    private byte[] getRealFileHeaderData(IRealFile realFile) throws IOException {
+    private byte[] getRealFileHeaderData(IFile realFile) throws IOException {
         RandomAccessStream realStream = realFile.getInputStream();
         byte[] headerData = new byte[getHeaderLength()];
         realStream.read(headerData, 0, headerData.length);
@@ -456,9 +456,9 @@ public class AesFile implements IVirtualFile {
      * Lists files and directories under this directory
      */
     public AesFile[] listFiles() {
-        IRealFile[] files = realFile.listFiles();
+        IFile[] files = realFile.listFiles();
         List<AesFile> aesFiles = new ArrayList<>();
-        for (IRealFile iRealFile : files) {
+        for (IFile iRealFile : files) {
             AesFile file = new AesFile(iRealFile, drive);
             aesFiles.add(file);
         }
@@ -506,7 +506,7 @@ public class AesFile implements IVirtualFile {
      */
     public AesFile createDirectory(String dirName, byte[] key, byte[] dirNameNonce) throws IOException {
         String encryptedDirName = getEncryptedFilename(dirName, key, dirNameNonce);
-        IRealFile realDir = realFile.createDirectory(encryptedDirName);
+        IFile realDir = realFile.createDirectory(encryptedDirName);
         return new AesFile(realDir, drive);
     }
 
@@ -515,7 +515,7 @@ public class AesFile implements IVirtualFile {
      *
      * @return The real file
      */
-    public IRealFile getRealFile() {
+    public IFile getRealFile() {
         return realFile;
     }
 
@@ -615,7 +615,7 @@ public class AesFile implements IVirtualFile {
             exception.printStackTrace();
             return null;
         }
-        IRealFile realDir = realFile.getParent();
+        IFile realDir = realFile.getParent();
         AesFile dir = new AesFile(realDir, drive);
         return dir;
     }
@@ -699,7 +699,7 @@ public class AesFile implements IVirtualFile {
     public AesFile createFile(String filename, byte[] key, byte[] fileNameNonce, byte[] fileNonce)
             throws IOException {
         String encryptedFilename = getEncryptedFilename(filename, key, fileNameNonce);
-        IRealFile file = realFile.createFile(encryptedFilename);
+        IFile file = realFile.createFile(encryptedFilename);
         AesFile aesFile = new AesFile(file, drive);
         aesFile.setEncryptionKey(key);
         aesFile.integrity = integrity;
@@ -842,7 +842,7 @@ public class AesFile implements IVirtualFile {
      * @throws IOException Thrown if there is an IO error.
      */
     public AesFile move(IVirtualFile dir, BiConsumer<Long, Long> OnProgressListener) throws IOException {
-        IRealFile newRealFile = realFile.move(dir.getRealFile(), null, OnProgressListener);
+        IFile newRealFile = realFile.move(dir.getRealFile(), null, OnProgressListener);
         return new AesFile(newRealFile, drive);
     }
 
@@ -856,7 +856,7 @@ public class AesFile implements IVirtualFile {
      */
     public AesFile copy(IVirtualFile dir, BiConsumer<Long, Long> OnProgressListener)
             throws IOException {
-        IRealFile newRealFile = realFile.copy(dir.getRealFile(), null, OnProgressListener);
+        IFile newRealFile = realFile.copy(dir.getRealFile(), null, OnProgressListener);
         return new AesFile(newRealFile, drive);
     }
 
@@ -902,14 +902,14 @@ public class AesFile implements IVirtualFile {
                                 boolean autoRenameFolders,
                                 BiConsumer<IVirtualFile, Exception> onFailed,
                                 TriConsumer<IVirtualFile, Long, Long> progressListener) throws IOException {
-        BiConsumer<IRealFile, Exception> onFailedRealFile = null;
+        BiConsumer<IFile, Exception> onFailedRealFile = null;
         if (onFailed != null) {
             onFailedRealFile = (file, ex) ->
             {
                 onFailed.accept(new AesFile(file, getDrive()), ex);
             };
         }
-        Function<IRealFile, String> renameRealFile = null;
+        Function<IFile, String> renameRealFile = null;
         // use auto rename only when we are using a drive
         if (autoRename != null && getDrive() != null)
             renameRealFile = (file) -> {
@@ -972,7 +972,7 @@ public class AesFile implements IVirtualFile {
                                 BiConsumer<IVirtualFile, Exception> onFailed,
                                 TriConsumer<IVirtualFile, Long, Long> progressListener)
             throws IOException {
-        BiConsumer<IRealFile, Exception> onFailedRealFile = null;
+        BiConsumer<IFile, Exception> onFailedRealFile = null;
         if (onFailed != null) {
             onFailedRealFile = (file, ex) ->
             {
@@ -980,7 +980,7 @@ public class AesFile implements IVirtualFile {
                     onFailed.accept(new AesFile(file, getDrive()), ex);
             };
         }
-        Function<IRealFile, String> renameRealFile = null;
+        Function<IFile, String> renameRealFile = null;
         // use auto rename only when we are using a drive
         if (autoRename != null && getDrive() != null)
             renameRealFile = (file) -> {
@@ -1022,7 +1022,7 @@ public class AesFile implements IVirtualFile {
      */
     public void deleteRecursively(BiConsumer<IVirtualFile, Exception> onFailed,
                                   TriConsumer<IVirtualFile, Long, Long> progressListener) {
-        BiConsumer<IRealFile, Exception> onFailedRealFile = null;
+        BiConsumer<IFile, Exception> onFailedRealFile = null;
         if (onFailed != null) {
             onFailedRealFile = (file, ex) ->
             {
@@ -1077,7 +1077,7 @@ public class AesFile implements IVirtualFile {
      * @throws Exception If a problem occurs
      */
     public static String autoRename(AesFile file) throws Exception {
-        String filename = IRealFile.autoRename(file.getName());
+        String filename = IFile.autoRename(file.getName());
         byte[] nonce = file.getDrive().getNextNonce();
         byte[] key = file.getDrive().getKey().getDriveKey();
         String encryptedPath = TextEncryptor.encryptString(filename, key, nonce, true);

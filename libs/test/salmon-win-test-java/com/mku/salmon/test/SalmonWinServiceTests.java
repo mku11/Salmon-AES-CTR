@@ -24,7 +24,7 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 */
 
-import com.mku.fs.file.IRealFile;
+import com.mku.fs.file.IFile;
 import com.mku.fs.file.File;
 import com.mku.convert.BitConverter;
 import com.mku.salmon.RangeExceededException;
@@ -81,7 +81,7 @@ public class SalmonWinServiceTests {
         if(registry.exists(TEST_REG_CHCKSUM_KEY))
             registry.delete(TEST_REG_CHCKSUM_KEY);
 
-        IRealFile file = new File(TEST_SEQUENCER_DIR + "\\" + TEST_SEQUENCER_FILENAME);
+        IFile file = new File(TEST_SEQUENCER_DIR + "\\" + TEST_SEQUENCER_FILENAME);
         if (file.exists())
             file.delete();
         WinFileSequencer sequencer = new WinFileSequencer(file,

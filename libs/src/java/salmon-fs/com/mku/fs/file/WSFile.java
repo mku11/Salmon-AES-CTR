@@ -43,9 +43,9 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
- * IRealFile implementation for a remote web service file.
+ * IFile implementation for a remote web service file.
  */
-public class WSFile implements IRealFile {
+public class WSFile implements IFile {
     private static final String PATH = "path";
     private static final String DEST_DIR = "destDir";
     private static final String FILENAME = "filename";
@@ -113,7 +113,7 @@ public class WSFile implements IRealFile {
      * @param dirName The name of the new directory.
      * @return The newly created directory.
      */
-    public IRealFile createDirectory(String dirName) {
+    public IFile createDirectory(String dirName) {
         String nDirPath = this.getChildPath(dirName);
         CloseableHttpResponse httpResponse = null;
         try {
@@ -148,7 +148,7 @@ public class WSFile implements IRealFile {
      * @return The newly created file.
      * @throws IOException Thrown if there is an IO error.
      */
-    public IRealFile createFile(String filename) throws IOException {
+    public IFile createFile(String filename) throws IOException {
         String nFilePath = this.getChildPath(filename);
         URIBuilder uriBuilder;
         CloseableHttpResponse httpResponse = null;
@@ -180,8 +180,8 @@ public class WSFile implements IRealFile {
     public boolean delete() {
         this.reset();
         if (isDirectory()) {
-            IRealFile[] files = listFiles();
-            for (IRealFile file : files) {
+            IFile[] files = listFiles();
+            for (IFile file : files) {
                 CloseableHttpResponse httpResponse = null;
                 try {
                     URIBuilder uriBuilder = new URIBuilder(this.servicePath + "/api/delete");
@@ -291,7 +291,7 @@ public class WSFile implements IRealFile {
      *
      * @return The parent directory.
      */
-    public IRealFile getParent() {
+    public IFile getParent() {
         if (filePath.length() == 0 || filePath.equals("/"))
             return null;
         String path = filePath;
@@ -417,7 +417,7 @@ public class WSFile implements IRealFile {
      *
      * @return The list of files.
      */
-    public IRealFile[] listFiles() {
+    public IFile[] listFiles() {
         Response[] files = null;
         CloseableHttpResponse httpResponse = null;
         try {
@@ -464,7 +464,7 @@ public class WSFile implements IRealFile {
      * @param newDir The target directory.
      * @return The moved file. Use this file for subsequent operations instead of the original.
      */
-    public IRealFile move(IRealFile newDir) throws IOException {
+    public IFile move(IFile newDir) throws IOException {
         return move(newDir, null, null);
     }
 
@@ -475,7 +475,7 @@ public class WSFile implements IRealFile {
      * @param newName The new filename
      * @return The moved file. Use this file for subsequent operations instead of the original.
      */
-    public IRealFile move(IRealFile newDir, String newName) throws IOException {
+    public IFile move(IFile newDir, String newName) throws IOException {
         return move(newDir, newName, null);
     }
 
@@ -487,16 +487,16 @@ public class WSFile implements IRealFile {
      * @param progressListener Observer to notify when progress changes.
      * @return The moved file. Use this file for subsequent operations instead of the original.
      */
-    public IRealFile move(IRealFile newDir, String newName, BiConsumer<Long, Long> progressListener) throws IOException {
+    public IFile move(IFile newDir, String newName, BiConsumer<Long, Long> progressListener) throws IOException {
         newName = newName != null ? newName : getName();
         if (newDir == null || !newDir.exists())
             throw new IOException("Target directory does not exist");
-        IRealFile newFile = newDir.getChild(newName);
+        IFile newFile = newDir.getChild(newName);
         if (newFile != null && newFile.exists())
             throw new IOException("Another file/directory already exists");
 
         if (isDirectory()) {
-            throw new IOException("Could not move directory use IRealFile moveRecursively() instead");
+            throw new IOException("Could not move directory use IFile moveRecursively() instead");
         } else {
             URIBuilder uriBuilder;
             CloseableHttpResponse httpResponse = null;
@@ -533,7 +533,7 @@ public class WSFile implements IRealFile {
      * @throws IOException Thrown if there is an IO error.
      */
     @Override
-    public IRealFile copy(IRealFile newDir) throws IOException {
+    public IFile copy(IFile newDir) throws IOException {
         return copy(newDir, null, null);
     }
 
@@ -546,7 +546,7 @@ public class WSFile implements IRealFile {
      * @throws IOException Thrown if there is an IO error.
      */
     @Override
-    public IRealFile copy(IRealFile newDir, String newName) throws IOException {
+    public IFile copy(IFile newDir, String newName) throws IOException {
         return copy(newDir, newName, null);
     }
 
@@ -560,15 +560,15 @@ public class WSFile implements IRealFile {
      * @throws IOException Thrown if there is an IO error.
      */
     @Override
-    public IRealFile copy(IRealFile newDir, String newName, BiConsumer<Long, Long> progressListener) throws IOException {
+    public IFile copy(IFile newDir, String newName, BiConsumer<Long, Long> progressListener) throws IOException {
         newName = newName != null ? newName : getName();
         if (newDir == null || !newDir.exists())
             throw new IOException("Target directory does not exists");
-        IRealFile newFile = newDir.getChild(newName);
+        IFile newFile = newDir.getChild(newName);
         if (newFile != null && newFile.exists())
             throw new IOException("Another file/directory already exists");
         if (isDirectory()) {
-            throw new IOException("Could not copy directory use IRealFile copyRecursively() instead");
+            throw new IOException("Could not copy directory use IFile copyRecursively() instead");
         } else {
             URIBuilder uriBuilder;
             CloseableHttpResponse httpResponse = null;
@@ -602,7 +602,7 @@ public class WSFile implements IRealFile {
      * @param filename The name of the file or directory.
      * @return The child
      */
-    public IRealFile getChild(String filename) {
+    public IFile getChild(String filename) {
         if (isFile())
             return null;
         String nFilepath = this.getChildPath(filename);

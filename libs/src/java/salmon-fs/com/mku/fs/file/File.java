@@ -33,9 +33,9 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
- * IRealFile implementation for a local file.
+ * IFile implementation for a local file.
  */
-public class File implements IRealFile {
+public class File implements IFile {
     private String filePath;
 
     /**
@@ -53,7 +53,7 @@ public class File implements IRealFile {
      * @param dirName The name of the new directory.
      * @return The newly created directory.
      */
-    public IRealFile createDirectory(String dirName) {
+    public IFile createDirectory(String dirName) {
         String nDirPath = filePath + java.io.File.separator + dirName;
         java.io.File file = new java.io.File(nDirPath);
         file.mkdirs();
@@ -68,7 +68,7 @@ public class File implements IRealFile {
      * @return The newly created file.
      * @throws IOException Thrown if there is an IO error.
      */
-    public IRealFile createFile(String filename) throws IOException {
+    public IFile createFile(String filename) throws IOException {
         String nFilePath = filePath + java.io.File.separator + filename;
         new java.io.File(nFilePath).createNewFile();
         File File = new File(nFilePath);
@@ -82,8 +82,8 @@ public class File implements IRealFile {
      */
     public boolean delete() {
         if (isDirectory()) {
-            IRealFile[] files = listFiles();
-            for (IRealFile file : files) {
+            IFile[] files = listFiles();
+            for (IFile file : files) {
                 file.delete();
             }
         }
@@ -142,7 +142,7 @@ public class File implements IRealFile {
      *
      * @return The parent directory.
      */
-    public IRealFile getParent() {
+    public IFile getParent() {
         String dirPath = new java.io.File(filePath).getParent();
         File parent = new File(dirPath);
         return parent;
@@ -207,7 +207,7 @@ public class File implements IRealFile {
      *
      * @return The list of files.
      */
-    public IRealFile[] listFiles() {
+    public IFile[] listFiles() {
         java.io.File[] files = new java.io.File(filePath).listFiles();
         if (files == null)
             return new File[0];
@@ -231,7 +231,7 @@ public class File implements IRealFile {
      * @param newDir The target directory.
      * @return The moved file. Use this file for subsequent operations instead of the original.
      */
-    public IRealFile move(IRealFile newDir) {
+    public IFile move(IFile newDir) {
         return move(newDir, null, null);
     }
 
@@ -242,7 +242,7 @@ public class File implements IRealFile {
      * @param newName The new filename
      * @return The moved file. Use this file for subsequent operations instead of the original.
      */
-    public IRealFile move(IRealFile newDir, String newName) {
+    public IFile move(IFile newDir, String newName) {
         return move(newDir, newName, null);
     }
 
@@ -254,11 +254,11 @@ public class File implements IRealFile {
      * @param progressListener Observer to notify when progress changes.
      * @return The moved file. Use this file for subsequent operations instead of the original.
      */
-    public IRealFile move(IRealFile newDir, String newName, BiConsumer<Long, Long> progressListener) {
+    public IFile move(IFile newDir, String newName, BiConsumer<Long, Long> progressListener) {
         newName = newName != null ? newName : getName();
         if (newDir == null || !newDir.exists())
             throw new RuntimeException("Target directory does not exist");
-        IRealFile newFile = newDir.getChild(newName);
+        IFile newFile = newDir.getChild(newName);
         if (newFile != null && newFile.exists())
             throw new RuntimeException("Another file/directory already exists");
         java.io.File nFile = new java.io.File(newFile.getDisplayPath());
@@ -276,7 +276,7 @@ public class File implements IRealFile {
      * @throws IOException Thrown if there is an IO error.
      */
     @Override
-    public IRealFile copy(IRealFile newDir) throws IOException {
+    public IFile copy(IFile newDir) throws IOException {
         return copy(newDir, null, null);
     }
 
@@ -289,7 +289,7 @@ public class File implements IRealFile {
      * @throws IOException Thrown if there is an IO error.
      */
     @Override
-    public IRealFile copy(IRealFile newDir, String newName) throws IOException {
+    public IFile copy(IFile newDir, String newName) throws IOException {
         return copy(newDir, newName, null);
     }
 
@@ -303,18 +303,18 @@ public class File implements IRealFile {
      * @throws IOException Thrown if there is an IO error.
      */
     @Override
-    public IRealFile copy(IRealFile newDir, String newName, BiConsumer<Long, Long> progressListener) throws IOException {
+    public IFile copy(IFile newDir, String newName, BiConsumer<Long, Long> progressListener) throws IOException {
         newName = newName != null ? newName : getName();
         if (newDir == null || !newDir.exists())
             throw new IOException("Target directory does not exists");
-        IRealFile newFile = newDir.getChild(newName);
+        IFile newFile = newDir.getChild(newName);
         if (newFile != null && newFile.exists())
             throw new IOException("Another file/directory already exists");
         if (isDirectory()) {
-            throw new IOException("Could not copy directory use IRealFile copyRecursively() instead");
+            throw new IOException("Could not copy directory use IFile copyRecursively() instead");
         } else {
             newFile = newDir.createFile(newName);
-            boolean res = IRealFile.copyFileContents(this, newFile, false, progressListener);
+            boolean res = IFile.copyFileContents(this, newFile, false, progressListener);
             return res ? newFile : null;
         }
     }
@@ -325,7 +325,7 @@ public class File implements IRealFile {
      * @param filename The name of the file or directory.
      * @return The child
      */
-    public IRealFile getChild(String filename) {
+    public IFile getChild(String filename) {
         if (isFile())
             return null;
         File child = new File(filePath + java.io.File.separator + filename);

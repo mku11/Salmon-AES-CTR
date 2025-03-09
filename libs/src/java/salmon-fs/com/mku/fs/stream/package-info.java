@@ -1,4 +1,4 @@
 /**
- * Stream implementations for IRealFile.
+ * Stream implementations for IFile.
  */
 package com.mku.fs.stream;

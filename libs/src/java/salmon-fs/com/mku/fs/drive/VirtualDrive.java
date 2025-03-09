@@ -23,7 +23,7 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 */
 
-import com.mku.fs.file.IRealFile;
+import com.mku.fs.file.IFile;
 import com.mku.fs.file.IVirtualFile;
 
 /**
@@ -41,7 +41,7 @@ public abstract class VirtualDrive {
      */
     public abstract void onUnlockError();
 
-    public abstract IRealFile getPrivateDir() throws Exception;
+    public abstract IFile getPrivateDir() throws Exception;
 
     public abstract IVirtualFile getRoot();
 

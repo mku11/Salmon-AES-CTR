@@ -23,7 +23,7 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 */
 
-import com.mku.fs.file.IRealFile;
+import com.mku.fs.file.IFile;
 import com.mku.fs.file.File;
 
 import java.io.IOException;
@@ -51,7 +51,7 @@ public class HttpDrive extends AesDrive {
      * @return The drive.
      * @throws IOException Thrown if error occurs during opening the drive.
      */
-    public static AesDrive open(IRealFile dir, String password) throws IOException {
+    public static AesDrive open(IFile dir, String password) throws IOException {
         return AesDrive.openDrive(dir, HttpDrive.class, password);
     }
 
@@ -61,7 +61,7 @@ public class HttpDrive extends AesDrive {
      * @return The private directory
      * @throws Exception Thrown if error occurs
      */
-    public IRealFile getPrivateDir() throws Exception {
+    public IFile getPrivateDir() throws Exception {
         String fileFolder = null;
         String os = System.getProperty("os.name").toUpperCase();
         if (os.toUpperCase().contains("WIN")) {

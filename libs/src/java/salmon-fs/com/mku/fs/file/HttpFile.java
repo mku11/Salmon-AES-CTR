@@ -49,9 +49,9 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 /**
- * IRealFile implementation for a remote HTTP file.
+ * IFile implementation for a remote HTTP file.
  */
-public class HttpFile implements IRealFile {
+public class HttpFile implements IFile {
     /**
      * Directory separator
      */
@@ -91,7 +91,7 @@ public class HttpFile implements IRealFile {
      * @param dirName The name of the new directory.
      * @return The newly created directory.
      */
-    public IRealFile createDirectory(String dirName) {
+    public IFile createDirectory(String dirName) {
         throw new UnsupportedOperationException("Unsupported Operation, readonly filesystem");
     }
 
@@ -102,7 +102,7 @@ public class HttpFile implements IRealFile {
      * @return The newly created file.
      * @throws IOException Thrown if there is an IO error.
      */
-    public IRealFile createFile(String filename) throws IOException {
+    public IFile createFile(String filename) throws IOException {
         throw new UnsupportedOperationException("Unsupported Operation, readonly filesystem");
     }
 
@@ -184,7 +184,7 @@ public class HttpFile implements IRealFile {
      *
      * @return The parent directory.
      */
-    public IRealFile getParent() {
+    public IFile getParent() {
         if (filePath.length() == 0 || filePath.equals("/"))
             return null;
         String path = filePath;
@@ -297,8 +297,8 @@ public class HttpFile implements IRealFile {
      *
      * @return The list of files.
      */
-    public IRealFile[] listFiles() {
-        List<IRealFile> files = new ArrayList<>();
+    public IFile[] listFiles() {
+        List<IFile> files = new ArrayList<>();
         if (this.isDirectory()) {
             RandomAccessStream stream = null;
             MemoryStream ms = null;
@@ -316,7 +316,7 @@ public class HttpFile implements IRealFile {
                     if (filename.contains("%")) {
                         filename = URLDecoder.decode(filename, StandardCharsets.UTF_8);
                     }
-                    IRealFile file = new HttpFile(this.filePath + HttpFile.Separator + filename);
+                    IFile file = new HttpFile(this.filePath + HttpFile.Separator + filename);
                     files.add(file);
                 }
             } catch (IOException e) {
@@ -333,7 +333,7 @@ public class HttpFile implements IRealFile {
                 }
             }
         }
-        return files.toArray(new IRealFile[0]);
+        return files.toArray(new IFile[0]);
     }
 
     /**
@@ -342,7 +342,7 @@ public class HttpFile implements IRealFile {
      * @param newDir The target directory.
      * @return The moved file. Use this file for subsequent operations instead of the original.
      */
-    public IRealFile move(IRealFile newDir) throws IOException {
+    public IFile move(IFile newDir) throws IOException {
         return move(newDir, null, null);
     }
 
@@ -353,7 +353,7 @@ public class HttpFile implements IRealFile {
      * @param newName The new filename
      * @return The moved file. Use this file for subsequent operations instead of the original.
      */
-    public IRealFile move(IRealFile newDir, String newName) throws IOException {
+    public IFile move(IFile newDir, String newName) throws IOException {
         return move(newDir, newName, null);
     }
 
@@ -365,7 +365,7 @@ public class HttpFile implements IRealFile {
      * @param progressListener Observer to notify when progress changes.
      * @return The moved file. Use this file for subsequent operations instead of the original.
      */
-    public IRealFile move(IRealFile newDir, String newName, BiConsumer<Long, Long> progressListener) throws IOException {
+    public IFile move(IFile newDir, String newName, BiConsumer<Long, Long> progressListener) throws IOException {
         throw new UnsupportedOperationException("Unsupported Operation, readonly filesystem");
     }
 
@@ -377,7 +377,7 @@ public class HttpFile implements IRealFile {
      * @throws IOException Thrown if there is an IO error.
      */
     @Override
-    public IRealFile copy(IRealFile newDir) throws IOException {
+    public IFile copy(IFile newDir) throws IOException {
         return copy(newDir, null, null);
     }
 
@@ -390,7 +390,7 @@ public class HttpFile implements IRealFile {
      * @throws IOException Thrown if there is an IO error.
      */
     @Override
-    public IRealFile copy(IRealFile newDir, String newName) throws IOException {
+    public IFile copy(IFile newDir, String newName) throws IOException {
         return copy(newDir, newName, null);
     }
 
@@ -404,7 +404,7 @@ public class HttpFile implements IRealFile {
      * @throws IOException Thrown if there is an IO error.
      */
     @Override
-    public IRealFile copy(IRealFile newDir, String newName, BiConsumer<Long, Long> progressListener) throws IOException {
+    public IFile copy(IFile newDir, String newName, BiConsumer<Long, Long> progressListener) throws IOException {
         throw new UnsupportedOperationException("Unsupported Operation, readonly filesystem");
     }
 
@@ -414,7 +414,7 @@ public class HttpFile implements IRealFile {
      * @param filename The name of the file or directory.
      * @return The child
      */
-    public IRealFile getChild(String filename) {
+    public IFile getChild(String filename) {
         if (isFile())
             return null;
 		String nFilepath = this.getChildPath(filename);
