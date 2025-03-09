@@ -113,7 +113,7 @@ public class File implements IRealFile {
      *
      * @return The name of this file or directory.
      */
-    public String getBaseName() {
+    public String getName() {
         return new java.io.File(filePath).getName();
     }
 
@@ -255,7 +255,7 @@ public class File implements IRealFile {
      * @return The moved file. Use this file for subsequent operations instead of the original.
      */
     public IRealFile move(IRealFile newDir, String newName, BiConsumer<Long, Long> progressListener) {
-        newName = newName != null ? newName : getBaseName();
+        newName = newName != null ? newName : getName();
         if (newDir == null || !newDir.exists())
             throw new RuntimeException("Target directory does not exist");
         IRealFile newFile = newDir.getChild(newName);
@@ -304,7 +304,7 @@ public class File implements IRealFile {
      */
     @Override
     public IRealFile copy(IRealFile newDir, String newName, BiConsumer<Long, Long> progressListener) throws IOException {
-        newName = newName != null ? newName : getBaseName();
+        newName = newName != null ? newName : getName();
         if (newDir == null || !newDir.exists())
             throw new IOException("Target directory does not exists");
         IRealFile newFile = newDir.getChild(newName);

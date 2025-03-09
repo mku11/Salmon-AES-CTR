@@ -147,7 +147,7 @@ public abstract class FileExporter {
             throw new Exception("Cannot export directory, use VirtualFileCommander instead");
 
         final IRealFile exportFile;
-        filename = filename != null ? filename : fileToExport.getBaseName();
+        filename = filename != null ? filename : fileToExport.getName();
         try {
             stopped = false;
             final long[] totalBytesWritten = new long[]{0};

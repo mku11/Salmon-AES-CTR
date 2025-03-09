@@ -143,7 +143,7 @@ public class HttpFile implements IRealFile {
      *
      * @return The name of this file or directory.
      */
-    public String getBaseName() {
+    public String getName() {
         if (this.filePath == null)
             throw new RuntimeException("Filepath is not assigned");
         String nFilePath = this.filePath;
@@ -152,7 +152,7 @@ public class HttpFile implements IRealFile {
         String[] parts = nFilePath.split(HttpFile.Separator);
         String basename = parts[parts.length - 1];
         if (basename == null)
-            throw new RuntimeException("Could not get basename");
+            throw new RuntimeException("Could not get the file name");
         if (basename.contains("%")) {
             basename = URLDecoder.decode(basename, StandardCharsets.UTF_8);
         }

@@ -62,7 +62,7 @@ public class AesFile implements IVirtualFile {
     private final IRealFile realFile;
 
     //cached values
-    private String _baseName;
+    private String _name;
     private Header _header;
 
     private boolean overwrite;
@@ -478,7 +478,7 @@ public class AesFile implements IVirtualFile {
     public AesFile getChild(String filename) throws IOException {
         AesFile[] files = listFiles();
         for (AesFile file : files) {
-            if (file.getBaseName().equals(filename))
+            if (file.getName().equals(filename))
                 return file;
         }
         return null;
@@ -589,17 +589,17 @@ public class AesFile implements IVirtualFile {
     }
 
     /**
-     * Returns the basename for the file
+     * Returns the virtual name of the file
      */
-    public String getBaseName() throws IOException {
-        if (_baseName != null)
-            return _baseName;
+    public String getName() throws IOException {
+        if (_name != null)
+            return _name;
         if (drive != null && getRealPath().equals(drive.getRoot().getRealPath()))
             return "";
 
-        String realBaseName = realFile.getBaseName();
-        _baseName = getDecryptedFilename(realBaseName);
-        return _baseName;
+        String realName = realFile.getName();
+        _name = getDecryptedFilename(realName);
+        return _name;
     }
 
     /**
@@ -732,7 +732,7 @@ public class AesFile implements IVirtualFile {
     public void rename(String newFilename, byte[] nonce) throws IOException {
         String newEncryptedFilename = getEncryptedFilename(newFilename, null, nonce);
         realFile.renameTo(newEncryptedFilename);
-        _baseName = null;
+        _name = null;
     }
 
     /**
@@ -916,7 +916,7 @@ public class AesFile implements IVirtualFile {
                 try {
                     return autoRename.apply(new AesFile(file, getDrive()));
                 } catch (Exception e) {
-                    return file.getBaseName();
+                    return file.getName();
                 }
             };
         this.realFile.copyRecursively(dest.getRealFile(), (file, position, length) ->
@@ -987,7 +987,7 @@ public class AesFile implements IVirtualFile {
                 try {
                     return autoRename.apply(new AesFile(file, getDrive()));
                 } catch (Exception e) {
-                    return file.getBaseName();
+                    return file.getName();
                 }
             };
         this.realFile.moveRecursively(dest.getRealFile(), (file, position, length) ->
@@ -1062,7 +1062,7 @@ public class AesFile implements IVirtualFile {
             return autoRename((AesFile) file);
         } catch (Exception ex) {
             try {
-                return file.getBaseName();
+                return file.getName();
             } catch (Exception ex1) {
                 return "";
             }
@@ -1077,7 +1077,7 @@ public class AesFile implements IVirtualFile {
      * @throws Exception If a problem occurs
      */
     public static String autoRename(AesFile file) throws Exception {
-        String filename = IRealFile.autoRename(file.getBaseName());
+        String filename = IRealFile.autoRename(file.getName());
         byte[] nonce = file.getDrive().getNextNonce();
         byte[] key = file.getDrive().getKey().getDriveKey();
         String encryptedPath = TextEncryptor.encryptString(filename, key, nonce, true);

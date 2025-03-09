@@ -141,7 +141,7 @@ public class AesStreamHandler extends URLStreamHandler {
 
             public String getContentType() {
                 try {
-                    return URLConnection.guessContentTypeFromName(getFile().getBaseName());
+                    return URLConnection.guessContentTypeFromName(getFile().getName());
                 } catch (Exception e) {
                     e.printStackTrace();
                 }

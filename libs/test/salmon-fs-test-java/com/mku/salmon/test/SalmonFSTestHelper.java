@@ -365,7 +365,7 @@ public class SalmonFSTestHelper {
         IVirtualFile[] salmonFiles = rootDir.listFiles();
         long realFileSize = fileToImport.length();
         for (IVirtualFile file : salmonFiles) {
-            if (file.getBaseName().equals(fileToImport.getBaseName())) {
+            if (file.getName().equals(fileToImport.getName())) {
                 if (shouldBeEqual) {
                     assertTrue(file.exists());
                     long fileSize = file.getSize();
@@ -415,7 +415,7 @@ public class SalmonFSTestHelper {
         AesDrive drive = createDrive(vaultDir, SalmonFSTestHelper.driveClassType, pass, sequencer);
         IVirtualFile rootDir = drive.getRoot();
         IRealFile fileToImport = importFile;
-        String rbasename = fileToImport.getBaseName();
+        String rbasename = fileToImport.getName();
 
         // import
         IVirtualFile salmonFile = fileImporter.importFile(fileToImport, rootDir, null, false, false, null);
@@ -423,11 +423,11 @@ public class SalmonFSTestHelper {
         assertTrue(salmonFile.exists());
 
         // search
-        String basename = salmonFile.getBaseName();
+        String basename = salmonFile.getName();
         FileSearcher searcher = new FileSearcher();
         IVirtualFile[] files = searcher.search(rootDir, basename, true, null, null);
         assertTrue(files.length > 0);
-        assertEquals(files[0].getBaseName(), basename);
+        assertEquals(files[0].getName(), basename);
 
     }
 
@@ -438,14 +438,14 @@ public class SalmonFSTestHelper {
         IVirtualFile rootDir = drive.getRoot();
         rootDir.listFiles();
         IRealFile fileToImport = importFile;
-        String rbasename = fileToImport.getBaseName();
+        String rbasename = fileToImport.getName();
 
         // import
         IVirtualFile salmonFile = fileImporter.importFile(fileToImport, rootDir, null, false,
                 false, null);
 
         // trigger the cache to add the filename
-        String basename = salmonFile.getBaseName();
+        String basename = salmonFile.getName();
 
         assertNotNull(salmonFile);
 
@@ -460,17 +460,17 @@ public class SalmonFSTestHelper {
             newFile = salmonFile.copy(newDir1, null);
         assertNotNull(newFile);
 
-        IVirtualFile nNewFile = newDir1.getChild(newFile.getBaseName());
+        IVirtualFile nNewFile = newDir1.getChild(newFile.getName());
         String checkSumAfter = getChecksum(nNewFile.getRealFile());
         assertEquals(checkSumBefore, checkSumAfter);
 
         if (!move) {
-            IVirtualFile file = rootDir.getChild(fileToImport.getBaseName());
+            IVirtualFile file = rootDir.getChild(fileToImport.getName());
             String checkSumOrigAfter = getChecksum(file.getRealFile());
             assertEquals(checkSumBefore, checkSumOrigAfter);
         }
 
-        assertEquals(salmonFile.getBaseName(), newFile.getBaseName());
+        assertEquals(salmonFile.getName(), newFile.getName());
     }
 
     private static void flipBit(IVirtualFile salmonFile, long position) throws Exception {
@@ -903,7 +903,7 @@ public class SalmonFSTestHelper {
                     // file failed to import
                     System.err.println(ex);
                     try {
-                        System.out.println("export failed: " + sfile.getBaseName() + "\n" + ex);
+                        System.out.println("export failed: " + sfile.getName() + "\n" + ex);
                     } catch (IOException e) {
                         throw new RuntimeException(e);
                     }
@@ -911,7 +911,7 @@ public class SalmonFSTestHelper {
                     if (!SalmonFSTestHelper.ENABLE_FILE_PROGRESS)
                         return;
                     try {
-                        System.out.println("file exporting: " + taskProgress.getFile().getBaseName() + ": "
+                        System.out.println("file exporting: " + taskProgress.getFile().getName() + ": "
                                 + taskProgress.getProcessedBytes() + "/" + taskProgress.getTotalBytes() + " bytes");
                     } catch (Exception e) {
                         System.err.println(e);

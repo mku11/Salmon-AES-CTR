@@ -62,7 +62,7 @@ public class FileSequencer implements INonceSequencer {
         this.sequenceFile = sequenceFile;
         this.serializer = serializer;
         if (!sequenceFile.exists()) {
-            sequenceFile.getParent().createFile(sequenceFile.getBaseName());
+            sequenceFile.getParent().createFile(sequenceFile.getName());
             saveSequenceFile(new HashMap<>());
         }
     }

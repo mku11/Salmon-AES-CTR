@@ -48,7 +48,7 @@ public class AesFileComparators {
         else if (!c1.isDirectory() && c2.isDirectory())
             return 1;
         else
-            return tryGetBasename(c1).compareTo(tryGetBasename(c2));
+            return trygetName(c1).compareTo(trygetName(c2));
     };
 
     private static final Comparator<AesFile> filenameDescComparator = (AesFile c1, AesFile c2) ->
@@ -58,7 +58,7 @@ public class AesFileComparators {
         else if (!c1.isDirectory() && c2.isDirectory())
             return -1;
         else
-            return tryGetBasename(c2).compareTo(tryGetBasename(c1));
+            return trygetName(c2).compareTo(trygetName(c1));
     };
 
     private static final Comparator<AesFile> sizeAscComparator = (AesFile c1, AesFile c2) ->
@@ -217,14 +217,14 @@ public class AesFileComparators {
     }
 
     /**
-     * Get the AesFile basename if available.
+     * Get the virtual file name
      *
      * @param aesFile The file
      * @return The base name
      */
-    private static String tryGetBasename(AesFile aesFile) {
+    private static String trygetName(AesFile aesFile) {
         try {
-            return aesFile.getBaseName();
+            return aesFile.getName();
         } catch (Exception ex) {
             ex.printStackTrace();
         }
@@ -240,8 +240,8 @@ public class AesFileComparators {
     private static String tryGetType(AesFile aesFile) {
         try {
             if (aesFile.isDirectory())
-                return aesFile.getBaseName();
-            return FileUtils.getExtensionFromFileName(aesFile.getBaseName()).toLowerCase();
+                return aesFile.getName();
+            return FileUtils.getExtensionFromFileName(aesFile.getName()).toLowerCase();
         } catch (Exception ex) {
             ex.printStackTrace();
         }

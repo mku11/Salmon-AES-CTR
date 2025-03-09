@@ -147,7 +147,7 @@ public abstract class FileImporter {
         if (fileToImport.isDirectory())
             throw new Exception("Cannot import directory, use AesFileCommander instead");
 
-        filename = filename != null ? filename : fileToImport.getBaseName();
+        filename = filename != null ? filename : fileToImport.getName();
         final long[] totalBytesRead = new long[]{0};
         final IVirtualFile importedFile;
         try {

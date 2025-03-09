@@ -161,7 +161,7 @@ public class SalmonFSHttpTests {
         AesDrive drive = AesDrive.openDrive(vaultDir, SalmonFSTestHelper.driveClassType, SalmonCoreTestHelper.TEST_PASSWORD, null);
         IVirtualFile root = drive.getRoot();
         IVirtualFile encFile = root.getChild(SalmonFSTestHelper.TEST_IMPORT_SMALL_FILENAME);
-        assertEquals(encFile.getBaseName(), SalmonFSTestHelper.TEST_IMPORT_SMALL_FILENAME);
+        assertEquals(encFile.getName(), SalmonFSTestHelper.TEST_IMPORT_SMALL_FILENAME);
 
         RandomAccessStream encStream = encFile.getInputStream();
         MemoryStream ms = new MemoryStream();
@@ -180,7 +180,7 @@ public class SalmonFSHttpTests {
         IVirtualFile[] files = root.listFiles();
         List<String> filenames = new ArrayList<>();
         for (int i = 0; i < files.length; i++) {
-            String filename = files[i].getBaseName();
+            String filename = files[i].getName();
             filenames.add(filename);
         }
         assertEquals(files.length, 4);
@@ -196,9 +196,9 @@ public class SalmonFSHttpTests {
         IRealFile vaultDir = SalmonFSTestHelper.HTTP_VAULT_DIR;
         int threads = 1;
         AesDrive drive = SalmonFSTestHelper.openDrive(vaultDir, SalmonFSTestHelper.driveClassType, SalmonCoreTestHelper.TEST_PASSWORD);
-        AesFile file = drive.getRoot().getChild(SalmonFSTestHelper.TEST_HTTP_FILE.getBaseName());
+        AesFile file = drive.getRoot().getChild(SalmonFSTestHelper.TEST_HTTP_FILE.getName());
         IRealFile exportDir = SalmonFSTestHelper.generateFolder("export_http", SalmonFSTestHelper.TEST_OUTPUT_DIR, false);
-        IRealFile localFile = exportDir.getChild(SalmonFSTestHelper.TEST_HTTP_FILE.getBaseName());
+        IRealFile localFile = exportDir.getChild(SalmonFSTestHelper.TEST_HTTP_FILE.getName());
         if (localFile.exists())
             localFile.delete();
         SalmonFSTestHelper.exportFiles(new AesFile[]{file}, exportDir, threads);
@@ -207,10 +207,10 @@ public class SalmonFSHttpTests {
 
     @Test
     public void ShouldReadRawFile() throws IOException, NoSuchAlgorithmException {
-        IRealFile localFile = SalmonFSTestHelper.HTTP_TEST_DIR.getChild(SalmonFSTestHelper.TEST_HTTP_FILE.getBaseName());
+        IRealFile localFile = SalmonFSTestHelper.HTTP_TEST_DIR.getChild(SalmonFSTestHelper.TEST_HTTP_FILE.getName());
         String localChkSum = SalmonFSTestHelper.getChecksum(localFile);
         IRealFile httpRoot = new HttpFile(SalmonFSTestHelper.HTTP_SERVER_VIRTUAL_URL + "/" + SalmonFSTestHelper.HTTP_TEST_DIRNAME);
-        IRealFile httpFile = httpRoot.getChild(SalmonFSTestHelper.TEST_HTTP_FILE.getBaseName());
+        IRealFile httpFile = httpRoot.getChild(SalmonFSTestHelper.TEST_HTTP_FILE.getName());
         RandomAccessStream stream = httpFile.getInputStream();
         MemoryStream ms = new MemoryStream();
         stream.copyTo(ms);

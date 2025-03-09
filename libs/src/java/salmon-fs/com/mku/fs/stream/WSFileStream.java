@@ -158,7 +158,7 @@ public class WSFileStream extends RandomAccessStream {
                 try {
                     InputStream pipedInputStream = outputStream.getInputStream();
                     HttpEntity entity = MultipartEntityBuilder.create()
-                            .addPart("file", new InputStreamBody(pipedInputStream, file.getBaseName()))
+                            .addPart("file", new InputStreamBody(pipedInputStream, file.getName()))
                             .build();
                     finalHttpPost.setEntity(entity);
                     outHttpResponse = client.execute(finalHttpPost);

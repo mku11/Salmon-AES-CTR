@@ -137,11 +137,11 @@ public interface IRealFile {
     IRealFile[] listFiles();
 
     /**
-     * Get the basename of the file.
+     * Get the file name
      *
-     * @return The base name
+     * @return The file name
      */
-    String getBaseName();
+    String getName();
 
     /**
      * Create the directory with the name provided under this directory.
@@ -301,7 +301,7 @@ public interface IRealFile {
                                  Function<IRealFile, String> autoRename,
                                  boolean autoRenameFolders,
                                  BiConsumer<IRealFile, Exception> onFailed) throws IOException {
-        String newFilename = getBaseName();
+        String newFilename = getName();
         IRealFile newFile;
         newFile = destDir.getChild(newFilename);
         if (isFile()) {
@@ -375,7 +375,7 @@ public interface IRealFile {
             return;
         }
 
-        String newFilename = getBaseName();
+        String newFilename = getName();
         IRealFile newFile;
         newFile = destDir.getChild(newFilename);
         if (isFile()) {
@@ -452,7 +452,7 @@ public interface IRealFile {
      * Get an auto generated copy of the name for a file.
      */
     Function<IRealFile, String> autoRename = (IRealFile file) -> {
-        return autoRename(file.getBaseName());
+        return autoRename(file.getName());
     };
 
     /**

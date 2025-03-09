@@ -112,11 +112,11 @@ public interface IVirtualFile {
     IRealFile getRealFile();
 
     /**
-     * Returns the basename for the file
+     * Returns the file name
      *
-     * @return The basename
+     * @return The file name
      */
-    String getBaseName() throws IOException;
+    String getName() throws IOException;
 
     /**
      * Returns the virtual parent directory.

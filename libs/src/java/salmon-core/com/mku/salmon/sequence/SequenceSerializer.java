@@ -67,7 +67,7 @@ public class SequenceSerializer implements INonceSequenceSerializer {
             out.writeCharacters(System.getProperty("line.separator"));
             out.writeStartElement("drives");
             out.writeCharacters(System.getProperty("line.separator"));
-            for (Map.Entry<String, NonceSequence> entry : driveAuthEntries.entrySet()) {
+            for (Map.Entry<String, NonceSequence> entry : sequences.entrySet()) {
                 out.writeStartElement("drive");
                 out.writeAttribute("driveID", entry.getValue().getId());
                 out.writeAttribute("authID", entry.getValue().getAuthId());

@@ -144,7 +144,7 @@ public class FileSearcher {
                 if (searchResults.containsKey(file.getRealPath()))
                     continue;
                 try {
-                    int hits = getSearchResults(file.getBaseName(), termsArray, any);
+                    int hits = getSearchResults(file.getName(), termsArray, any);
                     if(hits > 0) {
                         searchResults.put(file.getRealPath(), file);
                         if (OnResultFound != null)

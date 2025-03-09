@@ -183,7 +183,7 @@ public class FileCommander {
             if (stopJobs)
                 break;
             try {
-                files.put(file.getBaseName(), file);
+                files.put(file.getName(), file);
             } catch (Exception ignored) {
             }
         }
@@ -196,13 +196,13 @@ public class FileCommander {
                                    Function<IRealFile, String> autoRename, BiConsumer<IRealFile, Exception> onFailed,
                                    ArrayList<IVirtualFile> importedFiles, int[] count, int total,
                                    HashMap<String, IVirtualFile> existingFiles) throws IOException {
-        IVirtualFile sfile = existingFiles.containsKey(fileToImport.getBaseName())
-                ? existingFiles.get(fileToImport.getBaseName()) : null;
+        IVirtualFile sfile = existingFiles.containsKey(fileToImport.getName())
+                ? existingFiles.get(fileToImport.getName()) : null;
         if (fileToImport.isDirectory()) {
             if (onProgressChanged != null)
                 onProgressChanged.accept(new RealFileTaskProgress(fileToImport, 0, 1, count[0], total));
             if (sfile == null || !sfile.exists())
-                sfile = importDir.createDirectory(fileToImport.getBaseName());
+                sfile = importDir.createDirectory(fileToImport.getName());
             else if (sfile != null && sfile.exists() && sfile.isFile() && autoRename != null)
                 sfile = importDir.createDirectory(autoRename.apply(fileToImport));
             if (onProgressChanged != null)
@@ -220,7 +220,7 @@ public class FileCommander {
                 fileToImport.delete();
         } else {
             try {
-                String filename = fileToImport.getBaseName();
+                String filename = fileToImport.getName();
                 if (sfile != null && (sfile.exists() || sfile.isDirectory()) && autoRename != null)
                     filename = autoRename.apply(fileToImport);
                 sfile = fileImporter.importFile(fileToImport, importDir, filename, deleteSource, integrity,
@@ -230,7 +230,7 @@ public class FileCommander {
                                         bytes, totalBytes, count[0], total));
                             }
                         });
-                existingFiles.put(sfile.getBaseName(), sfile);
+                existingFiles.put(sfile.getName(), sfile);
                 importedFiles.add(sfile);
                 count[0]++;
             } catch (SequenceException ex) {
@@ -347,7 +347,7 @@ public class FileCommander {
         for (IRealFile file : exportDir.listFiles()) {
             if (stopJobs)
                 break;
-            files.put(file.getBaseName(), file);
+            files.put(file.getName(), file);
         }
         return files;
     }
@@ -360,12 +360,12 @@ public class FileCommander {
                                    ArrayList<IRealFile> exportedFiles, int[] count, int total,
                                    HashMap<String, IRealFile> existingFiles)
             throws Exception {
-        IRealFile rfile = existingFiles.containsKey(fileToExport.getBaseName())
-                ? existingFiles.get(fileToExport.getBaseName()) : null;
+        IRealFile rfile = existingFiles.containsKey(fileToExport.getName())
+                ? existingFiles.get(fileToExport.getName()) : null;
 
         if (fileToExport.isDirectory()) {
             if (rfile == null || !rfile.exists())
-                rfile = exportDir.createDirectory(fileToExport.getBaseName());
+                rfile = exportDir.createDirectory(fileToExport.getName());
             else if (rfile != null && rfile.isFile() && autoRename != null)
                 rfile = exportDir.createDirectory(autoRename.apply(rfile));
             if (onProgressChanged != null)
@@ -384,7 +384,7 @@ public class FileCommander {
             }
         } else {
             try {
-                String filename = fileToExport.getBaseName();
+                String filename = fileToExport.getName();
                 if (rfile != null && rfile.exists() && autoRename != null)
                     filename = autoRename.apply(rfile);
                 rfile = fileExporter.exportFile(fileToExport, exportDir, filename, deleteSource, integrity,
@@ -394,7 +394,7 @@ public class FileCommander {
                                         bytes, totalBytes, count[0], total));
                             }
                         });
-                existingFiles.put(rfile.getBaseName(), rfile);
+                existingFiles.put(rfile.getName(), rfile);
                 exportedFiles.add(rfile);
                 count[0]++;
             } catch (SequenceException ex) {
