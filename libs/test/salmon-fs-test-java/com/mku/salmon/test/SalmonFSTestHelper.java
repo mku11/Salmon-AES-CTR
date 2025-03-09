@@ -155,7 +155,7 @@ public class SalmonFSTestHelper {
         if (!SalmonFSTestHelper.TEST_ROOT_DIR.exists())
             SalmonFSTestHelper.TEST_ROOT_DIR.mkdir();
 
-        System.out.println("setting test path: " + SalmonFSTestHelper.TEST_ROOT_DIR.getAbsolutePath());
+        System.out.println("setting test path: " + SalmonFSTestHelper.TEST_ROOT_DIR.getDisplayPath());
 
         SalmonFSTestHelper.TEST_INPUT_DIR = SalmonFSTestHelper.createDir(SalmonFSTestHelper.TEST_ROOT_DIR, SalmonFSTestHelper.TEST_INPUT_DIRNAME);
         if (testMode == TestMode.WebService)
@@ -298,7 +298,7 @@ public class SalmonFSTestHelper {
         IRealFile dir = parent.getChild(dirName);
         if (!dir.exists())
             dir.mkdir();
-        System.out.println("generated folder: " + dir.getAbsolutePath());
+        System.out.println("generated folder: " + dir.getDisplayPath());
         return dir;
     }
 

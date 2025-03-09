@@ -100,11 +100,11 @@ public class File implements IRealFile {
     }
 
     /**
-     * Get the absolute path on the physical disk. For java this is the same as the filepath.
+     * Get the display path on the physical disk.
      *
-     * @return The absolute path.
+     * @return The display path.
      */
-    public String getAbsolutePath() {
+    public String getDisplayPath() {
         return new java.io.File(filePath).getAbsolutePath();
     }
 
@@ -149,7 +149,7 @@ public class File implements IRealFile {
     }
 
     /**
-     * Get the path of this file. For java this is the same as the absolute filepath.
+     * Get the path of this file.
      *
      * @return The path
      */
@@ -261,7 +261,7 @@ public class File implements IRealFile {
         IRealFile newFile = newDir.getChild(newName);
         if (newFile != null && newFile.exists())
             throw new RuntimeException("Another file/directory already exists");
-        java.io.File nFile = new java.io.File(newFile.getAbsolutePath());
+        java.io.File nFile = new java.io.File(newFile.getDisplayPath());
         boolean res = new java.io.File(filePath).renameTo(nFile);
         if (!res)
             throw new RuntimeException("Could not move file/directory");

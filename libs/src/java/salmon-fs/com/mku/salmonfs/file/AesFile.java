@@ -543,7 +543,7 @@ public class AesFile implements IVirtualFile {
      * @return The virtual path.
      */
     public String getPath() throws IOException {
-        String realPath = realFile.getAbsolutePath();
+        String realPath = realFile.getDisplayPath();
         return getPath(realPath);
     }
 
@@ -581,7 +581,7 @@ public class AesFile implements IVirtualFile {
      */
     private String getRelativePath(String realPath) {
         AesFile virtualRoot = drive.getRoot();
-        String virtualRootPath = virtualRoot.getRealFile().getAbsolutePath();
+        String virtualRootPath = virtualRoot.getRealFile().getDisplayPath();
         if (realPath.startsWith(virtualRootPath)) {
             return realPath.replace(virtualRootPath, "");
         }

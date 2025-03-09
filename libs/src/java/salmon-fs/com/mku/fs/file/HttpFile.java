@@ -130,11 +130,11 @@ public class HttpFile implements IRealFile {
     }
 
     /**
-     * Get the absolute path on the physical disk. For java this is the same as the filepath.
+     * Get the display path on the physical disk.
      *
-     * @return The absolute path.
+     * @return The display path.
      */
-    public String getAbsolutePath() {
+    public String getDisplayPath() {
         return filePath;
     }
 
@@ -198,7 +198,7 @@ public class HttpFile implements IRealFile {
     }
 
     /**
-     * Get the path of this file. For java this is the same as the absolute filepath.
+     * Get the path of this file.
      *
      * @return The path
      */

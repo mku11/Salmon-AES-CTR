@@ -101,15 +101,15 @@ public interface IRealFile {
     long lastModified();
 
     /**
-     * Get the absolute path of the file on disk.
+     * Get the display path of the file on disk.
      *
-     * @return The absolute path
+     * @return The display path
      */
-    String getAbsolutePath();
+    String getDisplayPath();
 
     /**
-     * Get the original filepath of this file. This might symlinks or merged folders. To get the absolute path
-     * use {@link #getAbsolutePath()}.
+     * Get the original filepath of this file. This might symlinks or merged folders. To get the display path
+     * use {@link #getDisplayPath()}.
      *
      * @return The file path
      */
@@ -323,7 +323,7 @@ public interface IRealFile {
         } else if (this.isDirectory()) {
             if (progressListener != null)
                 progressListener.accept(this, 0L, 1L);
-            if (destDir.getAbsolutePath().startsWith(this.getAbsolutePath())) {
+            if (destDir.getDisplayPath().startsWith(this.getDisplayPath())) {
                 if (progressListener != null)
                     progressListener.accept(this, 1L, 1L);
                 return;
@@ -399,7 +399,7 @@ public interface IRealFile {
         } else if (this.isDirectory()) {
             if (progressListener != null)
                 progressListener.accept(this, 0L, 1L);
-            if (destDir.getAbsolutePath().startsWith(this.getAbsolutePath())) {
+            if (destDir.getDisplayPath().startsWith(this.getDisplayPath())) {
                 if (progressListener != null)
                     progressListener.accept(this, 1L, 1L);
                 return;
