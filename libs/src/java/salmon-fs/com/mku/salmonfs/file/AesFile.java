@@ -833,6 +833,19 @@ public class AesFile implements IVirtualFile {
         return tag;
     }
 
+
+    /**
+     * Move file to another directory.
+     *
+     * @param dir Target directory.
+     * @return The file
+     * @throws IOException Thrown if there is an IO error.
+     */
+    public AesFile move(IVirtualFile dir) throws IOException {
+        IFile newRealFile = realFile.move(dir.getRealFile(), null, null);
+        return new AesFile(newRealFile, drive);
+    }
+
     /**
      * Move file to another directory.
      *
@@ -843,6 +856,19 @@ public class AesFile implements IVirtualFile {
      */
     public AesFile move(IVirtualFile dir, BiConsumer<Long, Long> OnProgressListener) throws IOException {
         IFile newRealFile = realFile.move(dir.getRealFile(), null, OnProgressListener);
+        return new AesFile(newRealFile, drive);
+    }
+
+
+    /**
+     * Copy file to another directory.
+     *
+     * @param dir Target directory.
+     * @return The file
+     * @throws IOException Thrown if there is an IO error.
+     */
+    public AesFile copy(IVirtualFile dir) throws IOException {
+        IFile newRealFile = realFile.copy(dir.getRealFile(), null, null);
         return new AesFile(newRealFile, drive);
     }
 
@@ -919,12 +945,12 @@ public class AesFile implements IVirtualFile {
                     return file.getName();
                 }
             };
-        this.realFile.copyRecursively(dest.getRealFile(), (file, position, length) ->
+        this.realFile.copyRecursively(dest.getRealFile(), renameRealFile, autoRenameFolders, onFailedRealFile,
+                (file, position, length) ->
                 {
                     if (progressListener != null)
                         progressListener.accept(new AesFile(file, drive), position, length);
-                },
-                renameRealFile, autoRenameFolders, onFailedRealFile);
+                });
     }
 
     /**
@@ -990,12 +1016,12 @@ public class AesFile implements IVirtualFile {
                     return file.getName();
                 }
             };
-        this.realFile.moveRecursively(dest.getRealFile(), (file, position, length) ->
+        this.realFile.moveRecursively(dest.getRealFile(), renameRealFile, autoRenameFolders, onFailedRealFile,
+                (file, position, length) ->
                 {
                     if (progressListener != null)
                         progressListener.accept(new AesFile(file, drive), position, length);
-                },
-                renameRealFile, autoRenameFolders, onFailedRealFile);
+                });
     }
 
     /**
@@ -1030,11 +1056,11 @@ public class AesFile implements IVirtualFile {
                     onFailed.accept(new AesFile(file, drive), ex);
             };
         }
-        this.getRealFile().deleteRecursively((file, position, length) ->
+        this.getRealFile().deleteRecursively(onFailedRealFile, (file, position, length) ->
         {
             if (progressListener != null)
                 progressListener.accept(new AesFile(file, drive), position, length);
-        }, onFailedRealFile);
+        });
     }
 
 

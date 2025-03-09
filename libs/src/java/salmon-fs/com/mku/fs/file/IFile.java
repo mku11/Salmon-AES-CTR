@@ -250,6 +250,20 @@ public interface IFile {
     /**
      * Copy contents of a file to another file.
      *
+     * @param src    The source directory
+     * @param dest   The target directory
+     * @param delete True to delete the source files when complete
+     * @return True if contents were copied
+     * @throws IOException Thrown if there is an IO error.
+     */
+    static boolean copyFileContents(IFile src, IFile dest, boolean delete)
+            throws IOException {
+        return copyFileContents(src, dest, delete, null);
+    }
+
+    /**
+     * Copy contents of a file to another file.
+     *
      * @param src              The source directory
      * @param dest             The target directory
      * @param delete           True to delete the source files when complete
@@ -283,24 +297,55 @@ public interface IFile {
      * @throws IOException Thrown if there is an IO error.
      */
     default void copyRecursively(IFile dest) throws IOException {
-        copyRecursively(dest, null, null, true, null);
+        copyRecursively(dest, null, true, null);
+    }
+
+
+    /**
+     * Copy a directory recursively
+     *
+     * @param destDir           The destination directory
+     * @param autoRename        The autorename function
+     * @param autoRenameFolders Apply autorename to folders also (default is true)
+     * @throws IOException Thrown if there is an IO error.
+     */
+    default void copyRecursively(IFile destDir,
+                                 Function<IFile, String> autoRename,
+                                 boolean autoRenameFolders) throws IOException {
+        copyRecursively(destDir, autoRename, autoRenameFolders, null, null);
     }
 
     /**
      * Copy a directory recursively
      *
      * @param destDir           The destination directory
-     * @param progressListener  The progress listener
      * @param autoRename        The autorename function
      * @param autoRenameFolders Apply autorename to folders also (default is true)
      * @param onFailed          Callback if copy failed
      * @throws IOException Thrown if there is an IO error.
      */
     default void copyRecursively(IFile destDir,
-                                 TriConsumer<IFile, Long, Long> progressListener,
                                  Function<IFile, String> autoRename,
                                  boolean autoRenameFolders,
                                  BiConsumer<IFile, Exception> onFailed) throws IOException {
+        copyRecursively(destDir, autoRename, autoRenameFolders, onFailed, null);
+    }
+
+    /**
+     * Copy a directory recursively
+     *
+     * @param destDir           The destination directory
+     * @param autoRename        The autorename function
+     * @param autoRenameFolders Apply autorename to folders also (default is true)
+     * @param onFailed          Callback if copy failed
+     * @param progressListener  The progress listener
+     * @throws IOException Thrown if there is an IO error.
+     */
+    default void copyRecursively(IFile destDir,
+                                 Function<IFile, String> autoRename,
+                                 boolean autoRenameFolders,
+                                 BiConsumer<IFile, Exception> onFailed,
+                                 TriConsumer<IFile, Long, Long> progressListener) throws IOException {
         String newFilename = getName();
         IFile newFile;
         newFile = destDir.getChild(newFilename);
@@ -336,7 +381,7 @@ public interface IFile {
                 progressListener.accept(this, 1L, 1L);
 
             for (IFile child : this.listFiles()) {
-                child.copyRecursively(newFile, progressListener, autoRename, autoRenameFolders, onFailed);
+                child.copyRecursively(newFile, autoRename, autoRenameFolders, onFailed, progressListener);
             }
         }
     }
@@ -344,28 +389,44 @@ public interface IFile {
     /**
      * Move a directory recursively
      *
-     * @param dest The target directory
+     * @param destDir The target directory
      * @throws IOException Thrown if there is an IO error.
      */
-    default void moveRecursively(IFile dest) throws IOException {
-        moveRecursively(dest, null, null, true, null);
+    default void moveRecursively(IFile destDir) throws IOException {
+        moveRecursively(destDir, null, true, null, null);
     }
 
     /**
      * Move a directory recursively
      *
      * @param destDir           The target directory
-     * @param progressListener  The progress listener
      * @param autoRename        The autorename function
      * @param autoRenameFolders Apply autorename to folders also (default is true)
      * @param onFailed          Callback when move failed
      * @throws IOException Thrown if there is an IO error.
      */
     default void moveRecursively(IFile destDir,
-                                 TriConsumer<IFile, Long, Long> progressListener,
                                  Function<IFile, String> autoRename,
                                  boolean autoRenameFolders,
                                  BiConsumer<IFile, Exception> onFailed) throws IOException {
+        moveRecursively(destDir, autoRename, autoRenameFolders, onFailed, null);
+    }
+
+    /**
+     * Move a directory recursively
+     *
+     * @param destDir           The target directory
+     * @param autoRename        The autorename function
+     * @param autoRenameFolders Apply autorename to folders also (default is true)
+     * @param onFailed          Callback when move failed
+     * @param progressListener  The progress listener
+     * @throws IOException Thrown if there is an IO error.
+     */
+    default void moveRecursively(IFile destDir,
+                                 Function<IFile, String> autoRename,
+                                 boolean autoRenameFolders,
+                                 BiConsumer<IFile, Exception> onFailed,
+                                 TriConsumer<IFile, Long, Long> progressListener) throws IOException {
         // target directory is the same
         if (getParent().getPath().equals(destDir.getPath())) {
             if (progressListener != null) {
@@ -413,7 +474,7 @@ public interface IFile {
                 progressListener.accept(this, 1L, 1L);
 
             for (IFile child : this.listFiles()) {
-                child.moveRecursively(newFile, progressListener, autoRename, autoRenameFolders, onFailed);
+                child.moveRecursively(newFile, autoRename, autoRenameFolders, onFailed, progressListener);
             }
             if (!this.delete()) {
                 onFailed.accept(this, new Exception("Could not delete source directory"));
@@ -422,14 +483,31 @@ public interface IFile {
         }
     }
 
+
+    /**
+     * Delete a directory recursively
+     */
+    default void deleteRecursively() {
+        deleteRecursively(null, null);
+    }
+
     /**
      * Delete a directory recursively
      *
-     * @param progressListener The progress listener
-     * @param onFailed         Callback when delete failed
+     * @param onFailed Callback when delete failed
      */
-    default void deleteRecursively(TriConsumer<IFile, Long, Long> progressListener,
-                                   BiConsumer<IFile, Exception> onFailed) {
+    default void deleteRecursively(BiConsumer<IFile, Exception> onFailed) {
+        deleteRecursively(onFailed, null);
+    }
+
+    /**
+     * Delete a directory recursively
+     *
+     * @param onFailed         Callback when delete failed
+     * @param progressListener The progress listener
+     */
+    default void deleteRecursively(BiConsumer<IFile, Exception> onFailed,
+                                   TriConsumer<IFile, Long, Long> progressListener) {
         if (isFile()) {
             progressListener.accept(this, 0L, 1L);
             if (!this.delete()) {
@@ -439,7 +517,7 @@ public interface IFile {
             progressListener.accept(this, 1L, 1L);
         } else if (this.isDirectory()) {
             for (IFile child : this.listFiles()) {
-                child.deleteRecursively(progressListener, onFailed);
+                child.deleteRecursively(onFailed, progressListener);
             }
             if (!this.delete()) {
                 onFailed.accept(this, new Exception("Could not delete directory"));

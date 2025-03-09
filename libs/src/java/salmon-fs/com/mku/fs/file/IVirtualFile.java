@@ -180,6 +180,15 @@ public interface IVirtualFile {
     /**
      * Move file to another directory.
      *
+     * @param dir Target directory.
+     * @return The file
+     * @throws IOException Thrown if there is an IO error.
+     */
+    IVirtualFile move(IVirtualFile dir) throws IOException;
+
+    /**
+     * Move file to another directory.
+     *
      * @param dir                Target directory.
      * @param OnProgressListener Observer to notify when move progress changes.
      * @return The file
@@ -190,13 +199,21 @@ public interface IVirtualFile {
     /**
      * Copy file to another directory.
      *
+     * @param dir Target directory.
+     * @return The file
+     * @throws IOException Thrown if there is an IO error.
+     */
+    IVirtualFile copy(IVirtualFile dir) throws IOException;
+
+    /**
+     * Copy file to another directory.
+     *
      * @param dir                Target directory.
      * @param OnProgressListener Observer to notify when copy progress changes.
      * @return The file
      * @throws IOException Thrown if there is an IO error.
      */
     IVirtualFile copy(IVirtualFile dir, BiConsumer<Long, Long> OnProgressListener) throws IOException;
-
 
     /**
      * Copy a directory recursively

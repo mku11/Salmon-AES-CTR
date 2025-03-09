@@ -537,7 +537,7 @@ public class SalmonFSTests {
         assertTrue(dfile.exists());
         assertTrue(dfile.delete());
         assertEquals(2, dir.getChild("folder4").getChild("folder1").getChild("folder2").getChildrenCount());
-        dir.getChild("folder1").copyRecursively(folder3, null, IFile.autoRename, false, null);
+        dir.getChild("folder1").copyRecursively(folder3, IFile.autoRename, false);
         assertEquals(2, dir.getChildrenCount());
         assertEquals(1, dir.getChild("folder4").getChildrenCount());
         assertEquals(7, dir.getChild("folder4").getChild("folder1").getChildrenCount());
@@ -546,7 +546,7 @@ public class SalmonFSTests {
         dir.getChild("folder4").getChild("folder1").getChild("folder2").getChild(file.getName()).delete();
         dir.getChild("folder4").getChild("folder1").getChild(file.getName()).delete();
         ArrayList<IFile> failed = new ArrayList<IFile>();
-        dir.getChild("folder1").copyRecursively(folder3, null, null, false, (failedFile, ex) ->
+        dir.getChild("folder1").copyRecursively(folder3, null, false, (failedFile, ex) ->
         {
             failed.add(failedFile);
         });
@@ -559,7 +559,7 @@ public class SalmonFSTests {
         dir.getChild("folder4").getChild("folder1").getChild("folder2").getChild(file.getName()).delete();
         dir.getChild("folder4").getChild("folder1").getChild(file.getName()).delete();
         ArrayList<IFile> failedmv = new ArrayList<IFile>();
-        dir.getChild("folder1").moveRecursively(dir.getChild("folder4"), null, IFile.autoRename, false, (failedFile, ex) ->
+        dir.getChild("folder1").moveRecursively(dir.getChild("folder4"), IFile.autoRename, false, (failedFile, ex) ->
         {
             failedmv.add(failedFile);
         });
