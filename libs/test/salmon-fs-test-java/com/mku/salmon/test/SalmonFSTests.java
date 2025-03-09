@@ -56,20 +56,20 @@ public class SalmonFSTests {
     @BeforeAll
     static void beforeAll() throws Exception {
         // use TestMode: Local, WebService. Http is tested only in SalmonFSHttpTests.
-		String testDir = System.getProperty("TEST_DIR") != null && !System.getProperty("TEST_DIR").equals("") ?
-			System.getProperty("TEST_DIR") : "d:\\tmp\\salmon\\test";
-		TestMode testMode = System.getProperty("TEST_MODE") != null && !System.getProperty("TEST_MODE").equals("") ?
-			TestMode.valueOf(System.getProperty("TEST_MODE")) : TestMode.Local;
-		int threads = System.getProperty("ENC_THREADS") != null && !System.getProperty("ENC_THREADS").equals("") ?
-			Integer.parseInt(System.getProperty("ENC_THREADS")) : 1;
-			
-			
+        String testDir = System.getProperty("TEST_DIR") != null && !System.getProperty("TEST_DIR").equals("") ?
+                System.getProperty("TEST_DIR") : "d:\\tmp\\salmon\\test";
+        TestMode testMode = System.getProperty("TEST_MODE") != null && !System.getProperty("TEST_MODE").equals("") ?
+                TestMode.valueOf(System.getProperty("TEST_MODE")) : TestMode.Local;
+        int threads = System.getProperty("ENC_THREADS") != null && !System.getProperty("ENC_THREADS").equals("") ?
+                Integer.parseInt(System.getProperty("ENC_THREADS")) : 1;
+
+
         SalmonFSTestHelper.setTestParams(testDir, testMode);
-		System.out.println("testDir: " + testDir);
+        System.out.println("testDir: " + testDir);
         System.out.println("testMode: " + testMode);
-		System.out.println("threads: " + threads);
+        System.out.println("threads: " + threads);
         System.out.println("ws server url: " + SalmonFSTestHelper.WS_SERVER_URL);
-		
+
         SalmonFSTestHelper.TEST_IMPORT_FILE = SalmonFSTestHelper.TEST_IMPORT_LARGE_FILE;
 
         // SalmonCoreTestHelper.TEST_ENC_BUFFER_SIZE = 1 * 1024 * 1024;
@@ -93,12 +93,12 @@ public class SalmonFSTests {
         // gradlew.bat :salmon-ws:test --tests "com.mku.salmon.ws.fs.service.test.SalmonWSTests.testStartServer" --rerun-tasks -i
 
         // use the native library
-		ProviderType providerType = ProviderType.Default;
-		String aesProviderType = System.getProperty("AES_PROVIDER_TYPE");
-		if(aesProviderType != null && !aesProviderType.equals(""))
-			providerType = ProviderType.valueOf(aesProviderType);
-		System.out.println("ProviderType: " + providerType);
-		
+        ProviderType providerType = ProviderType.Default;
+        String aesProviderType = System.getProperty("AES_PROVIDER_TYPE");
+        if (aesProviderType != null && !aesProviderType.equals(""))
+            providerType = ProviderType.valueOf(aesProviderType);
+        System.out.println("ProviderType: " + providerType);
+
         AesStream.setAesProviderType(ProviderType.AesIntrinsics);
     }
 
@@ -580,8 +580,8 @@ public class SalmonFSTests {
         AesFileCommander fileCommander = new AesFileCommander(Integrity.DEFAULT_CHUNK_SIZE, Integrity.DEFAULT_CHUNK_SIZE, 2);
         AesFile[] sfiles = fileCommander.importFiles(new IRealFile[]{file},
                 drive.getRoot(), false, true, null, null, null);
-		fileCommander.close();
-		
+        fileCommander.close();
+
         long pos = Math.abs(new Random().nextLong() % file.length());
 
         AesFileInputStream fileInputStream1 = new AesFileInputStream(sfiles[0], 4, 4 * 1024 * 1024, 4, 256 * 1024);

@@ -102,21 +102,58 @@ public class FileCommander {
     /**
      * Import IRealFile(s) into the drive.
      *
-     * @param filesToImport     The files to import.
-     * @param importDir         The target directory.
-     * @param deleteSource      True if you want to delete the source files when import complete.
-     * @param integrity         True to apply integrity to imported files.
-     * @param onProgressChanged Observer to notify when progress changes.
-     * @param autoRename        Function to rename file if another file with the same filename exists
-     * @param onFailed          Observer to notify when a file fails importing
+     * @param filesToImport The files to import.
+     * @param importDir     The target directory.
+     * @param deleteSource  True if you want to delete the source files when import complete.
+     * @param integrity     True to apply integrity to imported files.
+     * @param autoRename    Function to rename file if another file with the same filename exists
      * @return The imported files if completes successfully.
      * @throws Exception Thrown if error occurs during import
      */
     public IVirtualFile[] importFiles(IRealFile[] filesToImport, IVirtualFile importDir,
                                       boolean deleteSource, boolean integrity,
-                                      Consumer<RealFileTaskProgress> onProgressChanged,
+                                      Function<IRealFile, String> autoRename) throws Exception {
+        return importFiles(filesToImport, importDir, deleteSource, integrity, autoRename, null, null);
+    }
+
+
+    /**
+     * Import IRealFile(s) into the drive.
+     *
+     * @param filesToImport The files to import.
+     * @param importDir     The target directory.
+     * @param deleteSource  True if you want to delete the source files when import complete.
+     * @param integrity     True to apply integrity to imported files.
+     * @param autoRename    Function to rename file if another file with the same filename exists
+     * @param onFailed      Observer to notify when a file fails importing
+     * @return The imported files if completes successfully.
+     * @throws Exception Thrown if error occurs during import
+     */
+    public IVirtualFile[] importFiles(IRealFile[] filesToImport, IVirtualFile importDir,
+                                      boolean deleteSource, boolean integrity,
                                       Function<IRealFile, String> autoRename,
                                       BiConsumer<IRealFile, Exception> onFailed) throws Exception {
+        return importFiles(filesToImport, importDir, deleteSource, integrity, autoRename, onFailed, null);
+    }
+
+    /**
+     * Import IRealFile(s) into the drive.
+     *
+     * @param filesToImport     The files to import.
+     * @param importDir         The target directory.
+     * @param deleteSource      True if you want to delete the source files when import complete.
+     * @param integrity         True to apply integrity to imported files.
+     * @param autoRename        Function to rename file if another file with the same filename exists
+     * @param onFailed          Observer to notify when a file fails importing
+     * @param onProgressChanged Observer to notify when progress changes.
+     * @return The imported files if completes successfully.
+     * @throws Exception Thrown if error occurs during import
+     */
+    public IVirtualFile[] importFiles(IRealFile[] filesToImport, IVirtualFile importDir,
+                                      boolean deleteSource, boolean integrity,
+                                      Function<IRealFile, String> autoRename,
+                                      BiConsumer<IRealFile, Exception> onFailed,
+                                      Consumer<RealFileTaskProgress> onProgressChanged) throws Exception {
         stopJobs = false;
         ArrayList<IVirtualFile> importedFiles = new ArrayList<>();
 
@@ -221,6 +258,46 @@ public class FileCommander {
         return exportFiles(filesToExport, exportDir, deleteSource, integrity, null, null, null);
     }
 
+
+    /**
+     * Export a file from a drive.
+     *
+     * @param filesToExport The files to export.
+     * @param exportDir     The export target directory
+     * @param deleteSource  True if you want to delete the source files
+     * @param integrity     True to use integrity verification before exporting files
+     * @param autoRename    Function to rename file if another file with the same filename exists
+     * @return The exported files
+     * @throws Exception Thrown if error occurs during export
+     */
+    public IRealFile[] exportFiles(IVirtualFile[] filesToExport, IRealFile exportDir,
+                                   boolean deleteSource, boolean integrity,
+                                   Function<IRealFile, String> autoRename)
+            throws Exception {
+        return exportFiles(filesToExport, exportDir, deleteSource, integrity, autoRename, null, null);
+    }
+
+
+    /**
+     * Export a file from a drive.
+     *
+     * @param filesToExport The files to export.
+     * @param exportDir     The export target directory
+     * @param deleteSource  True if you want to delete the source files
+     * @param integrity     True to use integrity verification before exporting files
+     * @param autoRename    Function to rename file if another file with the same filename exists
+     * @param onFailed      Observer to notify when a file fails exporting
+     * @return The exported files
+     * @throws Exception Thrown if error occurs during export
+     */
+    public IRealFile[] exportFiles(IVirtualFile[] filesToExport, IRealFile exportDir,
+                                   boolean deleteSource, boolean integrity,
+                                   Function<IRealFile, String> autoRename,
+                                   BiConsumer<IVirtualFile, Exception> onFailed)
+            throws Exception {
+        return exportFiles(filesToExport, exportDir, deleteSource, integrity, autoRename, onFailed, null);
+    }
+
     /**
      * Export a file from a drive.
      *
@@ -228,17 +305,17 @@ public class FileCommander {
      * @param exportDir         The export target directory
      * @param deleteSource      True if you want to delete the source files
      * @param integrity         True to use integrity verification before exporting files
-     * @param onProgressChanged Observer to notify when progress changes.
      * @param autoRename        Function to rename file if another file with the same filename exists
      * @param onFailed          Observer to notify when a file fails exporting
+     * @param onProgressChanged Observer to notify when progress changes.
      * @return The exported files
      * @throws Exception Thrown if error occurs during export
      */
     public IRealFile[] exportFiles(IVirtualFile[] filesToExport, IRealFile exportDir,
                                    boolean deleteSource, boolean integrity,
-                                   Consumer<VirtualFileTaskProgress> onProgressChanged,
                                    Function<IRealFile, String> autoRename,
-                                   BiConsumer<IVirtualFile, Exception> onFailed)
+                                   BiConsumer<IVirtualFile, Exception> onFailed,
+                                   Consumer<VirtualFileTaskProgress> onProgressChanged)
             throws Exception {
         stopJobs = false;
         ArrayList<IRealFile> exportedFiles = new ArrayList<>();
@@ -365,12 +442,24 @@ public class FileCommander {
     /**
      * Delete files from a drive.
      *
-     * @param filesToDelete     The files to delete.
-     * @param onProgressChanged The observer to notify when each file is deleted.
-     * @param onFailed          The observer to notify when a file has failed.
+     * @param filesToDelete The files to delete.
+     * @param onFailed      The observer to notify when a file has failed.
      */
-    public void deleteFiles(IVirtualFile[] filesToDelete, Consumer<VirtualFileTaskProgress> onProgressChanged,
+    public void deleteFiles(IVirtualFile[] filesToDelete,
                             BiConsumer<IVirtualFile, Exception> onFailed) {
+        deleteFiles(filesToDelete, onFailed, null);
+    }
+
+    /**
+     * Delete files from a drive.
+     *
+     * @param filesToDelete     The files to delete.
+     * @param onFailed          The observer to notify when a file has failed.
+     * @param onProgressChanged The observer to notify when each file is deleted.
+     */
+    public void deleteFiles(IVirtualFile[] filesToDelete,
+                            BiConsumer<IVirtualFile, Exception> onFailed,
+                            Consumer<VirtualFileTaskProgress> onProgressChanged) {
         stopJobs = false;
         int[] count = new int[1];
         int total = 0;

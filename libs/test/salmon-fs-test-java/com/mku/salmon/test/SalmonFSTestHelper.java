@@ -88,15 +88,15 @@ public class SalmonFSTestHelper {
     // Web service
     static String WS_SERVER_DEFAULT_URL = "http://localhost:8080";
     // static WS_SERVER_DEFAULT_URL = "https://localhost:8443"; // for testing from the Web browser
-	static String WS_SERVER_URL = System.getProperty("WS_SERVER_URL") != null && !System.getProperty("WS_SERVER_URL").equals("") ?
-		System.getProperty("WS_SERVER_URL") : WS_SERVER_DEFAULT_URL;
+    static String WS_SERVER_URL = System.getProperty("WS_SERVER_URL") != null && !System.getProperty("WS_SERVER_URL").equals("") ?
+            System.getProperty("WS_SERVER_URL") : WS_SERVER_DEFAULT_URL;
     static String WS_TEST_DIRNAME = "ws";
     static WSFile.Credentials credentials = new WSFile.Credentials("user", "password");
 
     // HTTP server (Read-only)
     static String HTTP_SERVER_DEFAULT_URL = "http://localhost:8000";
-	static String HTTP_SERVER_URL = System.getProperty("HTTP_SERVER_URL") != null && !System.getProperty("HTTP_SERVER_URL").equals("") ?
-		System.getProperty("HTTP_SERVER_URL") : HTTP_SERVER_DEFAULT_URL;		
+    static String HTTP_SERVER_URL = System.getProperty("HTTP_SERVER_URL") != null && !System.getProperty("HTTP_SERVER_URL").equals("") ?
+            System.getProperty("HTTP_SERVER_URL") : HTTP_SERVER_DEFAULT_URL;
     static String HTTP_SERVER_VIRTUAL_URL = SalmonFSTestHelper.HTTP_SERVER_URL + "/test";
     static String HTTP_TEST_DIRNAME = "httpserv";
     static String HTTP_VAULT_DIRNAME = "vault";
@@ -265,17 +265,17 @@ public class SalmonFSTestHelper {
     }
 
     static void initialize() {
-		System.out.println("init fs helper");
+        System.out.println("init fs helper");
         SalmonFSTestHelper.fileImporter = new AesFileImporter(SalmonFSTestHelper.ENC_IMPORT_BUFFER_SIZE, SalmonFSTestHelper.ENC_IMPORT_THREADS);
         SalmonFSTestHelper.fileExporter = new AesFileExporter(SalmonFSTestHelper.ENC_EXPORT_BUFFER_SIZE, SalmonFSTestHelper.ENC_EXPORT_THREADS);
     }
 
     static void close() {
-		System.out.println("close fs helper");
-		if(SalmonFSTestHelper.fileImporter != null)
-			SalmonFSTestHelper.fileImporter.close();
-		if(SalmonFSTestHelper.fileExporter != null)
-			SalmonFSTestHelper.fileExporter.close();
+        System.out.println("close fs helper");
+        if (SalmonFSTestHelper.fileImporter != null)
+            SalmonFSTestHelper.fileImporter.close();
+        if (SalmonFSTestHelper.fileExporter != null)
+            SalmonFSTestHelper.fileExporter.close();
     }
 
     public static FileSequencer createSalmonFileSequencer() throws IOException {
@@ -898,16 +898,7 @@ public class SalmonFSTestHelper {
 
         // export files
         IRealFile[] filesExported = commander.exportFiles(files, dir, false, true,
-                (taskProgress) -> {
-                    if (!SalmonFSTestHelper.ENABLE_FILE_PROGRESS)
-                        return;
-                    try {
-                        System.out.println("file exporting: " + taskProgress.getFile().getBaseName() + ": "
-                                + taskProgress.getProcessedBytes() + "/" + taskProgress.getTotalBytes() + " bytes");
-                    } catch (Exception e) {
-                        System.err.println(e);
-                    }
-                }, IRealFile.autoRename, (sfile, ex) ->
+                IRealFile.autoRename, (sfile, ex) ->
                 {
                     // file failed to import
                     System.err.println(ex);
@@ -915,6 +906,15 @@ public class SalmonFSTestHelper {
                         System.out.println("export failed: " + sfile.getBaseName() + "\n" + ex);
                     } catch (IOException e) {
                         throw new RuntimeException(e);
+                    }
+                }, (taskProgress) -> {
+                    if (!SalmonFSTestHelper.ENABLE_FILE_PROGRESS)
+                        return;
+                    try {
+                        System.out.println("file exporting: " + taskProgress.getFile().getBaseName() + ": "
+                                + taskProgress.getProcessedBytes() + "/" + taskProgress.getTotalBytes() + " bytes");
+                    } catch (Exception e) {
+                        System.err.println(e);
                     }
                 });
 
