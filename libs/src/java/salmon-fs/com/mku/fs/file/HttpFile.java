@@ -52,6 +52,9 @@ import java.util.regex.Pattern;
  * IRealFile implementation for a remote HTTP file.
  */
 public class HttpFile implements IRealFile {
+    /**
+     * Directory separator
+     */
     public static final String Separator = "/";
     private static final String DATE_FORMAT = "EEE, dd MMM yyyy HH:mm:ss zzz";
 
