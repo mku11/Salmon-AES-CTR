@@ -39,7 +39,7 @@ import java.io.*;
  * This class is used internally for random file access of remote physical (real) files.
  */
 public class HttpFileStream extends RandomAccessStream {
-    public CloseableHttpClient client;
+    private CloseableHttpClient client;
 
     /**
      * The network input stream associated.
