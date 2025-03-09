@@ -197,43 +197,104 @@ public interface IVirtualFile {
      */
     IVirtualFile copy(IVirtualFile dir, BiConsumer<Long, Long> OnProgressListener) throws IOException;
 
-    /**
-     * Move a directory recursively
-     *
-     * @param dest             The destination directory
-     * @param progressListener The progress listener
-     * @param autoRename       The autorename function
-     * @param onFailed         Callback when move fails
-     */
-    void moveRecursively(IVirtualFile dest,
-                         TriConsumer<IVirtualFile, Long, Long> progressListener,
-                         Function<IVirtualFile, String> autoRename,
-                         boolean autoRenameFolders,
-                         BiConsumer<IVirtualFile, Exception> onFailed)
-            throws IOException;
-
 
     /**
      * Copy a directory recursively
      *
-     * @param dest             The destination directory
-     * @param progressListener The progress listener
-     * @param autoRename       The autorename function
-     * @param onFailed         The callback when file copying has failed
+     * @param dest              The destination directory
+     * @param autoRename        The autorename function
+     * @param autoRenameFolders True to also auto rename folders
      */
-    void copyRecursively(IVirtualFile dest,
-                         TriConsumer<IVirtualFile, Long, Long> progressListener,
-                         Function<IVirtualFile, String> autoRename,
-                         boolean autoRenameFolders,
-                         BiConsumer<IVirtualFile, Exception> onFailed)
-            throws IOException;
+    public void copyRecursively(IVirtualFile dest,
+                                Function<IVirtualFile, String> autoRename,
+                                boolean autoRenameFolders) throws IOException;
+
+    /**
+     * Copy a directory recursively
+     *
+     * @param dest              The destination directory
+     * @param autoRename        The autorename function
+     * @param autoRenameFolders True to also auto rename folders
+     * @param onFailed          The callback when file copying has failed
+     */
+    public void copyRecursively(IVirtualFile dest,
+                                Function<IVirtualFile, String> autoRename,
+                                boolean autoRenameFolders,
+                                BiConsumer<IVirtualFile, Exception> onFailed) throws IOException;
+
+    /**
+     * Copy a directory recursively
+     *
+     * @param dest              The destination directory
+     * @param autoRename        The autorename function
+     * @param autoRenameFolders True to also auto rename folders
+     * @param onFailed          The callback when file copying has failed
+     * @param progressListener  The progress listener
+     */
+    public void copyRecursively(IVirtualFile dest,
+                                Function<IVirtualFile, String> autoRename,
+                                boolean autoRenameFolders,
+                                BiConsumer<IVirtualFile, Exception> onFailed,
+                                TriConsumer<IVirtualFile, Long, Long> progressListener) throws IOException;
+
+    /**
+     * Move a directory recursively
+     *
+     * @param dest              The destination directory
+     * @param autoRename        The autorename function
+     * @param autoRenameFolders True to also auto rename folder
+     */
+    public void moveRecursively(IVirtualFile dest,
+                                Function<IVirtualFile, String> autoRename,
+                                boolean autoRenameFolders) throws IOException;
+
+    /**
+     * Move a directory recursively
+     *
+     * @param dest              The destination directory
+     * @param autoRename        The autorename function
+     * @param autoRenameFolders True to also auto rename folder
+     * @param onFailed          Callback when move fails
+     */
+    public void moveRecursively(IVirtualFile dest,
+                                Function<IVirtualFile, String> autoRename,
+                                boolean autoRenameFolders,
+                                BiConsumer<IVirtualFile, Exception> onFailed) throws IOException;
+
+    /**
+     * Move a directory recursively
+     *
+     * @param dest              The destination directory
+     * @param autoRename        The autorename function
+     * @param autoRenameFolders True to also auto rename folders.
+     * @param onFailed          Callback when move fails
+     * @param progressListener  The progress listener
+     */
+    public void moveRecursively(IVirtualFile dest,
+                                Function<IVirtualFile, String> autoRename,
+                                boolean autoRenameFolders,
+                                BiConsumer<IVirtualFile, Exception> onFailed,
+                                TriConsumer<IVirtualFile, Long, Long> progressListener) throws IOException;
+
+    /**
+     * Delete all subdirectories and files.
+     */
+    void deleteRecursively();
 
     /**
      * Delete all subdirectories and files.
      *
-     * @param progressListener Called when progress is changed.
-     * @param onFailed         Called when file fails during deletion.
+     * @param onFailed Called when file fails during deletion.
      */
-    void deleteRecursively(TriConsumer<IVirtualFile, Long, Long> progressListener,
-                           BiConsumer<IVirtualFile, Exception> onFailed);
+    void deleteRecursively(BiConsumer<IVirtualFile, Exception> onFailed);
+
+    /**
+     * Delete all subdirectories and files.
+     *
+     * @param onFailed         Called when file fails during deletion.
+     * @param progressListener Called when progress is changed.
+     */
+    void deleteRecursively(BiConsumer<IVirtualFile, Exception> onFailed,
+                           TriConsumer<IVirtualFile, Long, Long> progressListener);
+
 }

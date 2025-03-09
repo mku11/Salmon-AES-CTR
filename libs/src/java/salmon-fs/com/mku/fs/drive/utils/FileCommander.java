@@ -59,6 +59,7 @@ public class FileCommander {
 
     /**
      * Get the file importer.
+     *
      * @return The file importer.
      */
     public FileImporter getFileImporter() {
@@ -67,6 +68,7 @@ public class FileCommander {
 
     /**
      * Get the file exporter.
+     *
      * @return The file exporter.
      */
     public FileExporter getFileExporter() {
@@ -75,6 +77,7 @@ public class FileCommander {
 
     /**
      * Get the file searcher.
+     *
      * @return The file searcher.
      */
     public FileSearcher getFileSearcher() {
@@ -84,10 +87,10 @@ public class FileCommander {
     /**
      * Import IRealFile(s) into the drive.
      *
-     * @param filesToImport     The files to import.
-     * @param importDir         The target directory.
-     * @param deleteSource      True if you want to delete the source files when import complete.
-     * @param integrity         True to apply integrity to imported files.
+     * @param filesToImport The files to import.
+     * @param importDir     The target directory.
+     * @param deleteSource  True if you want to delete the source files when import complete.
+     * @param integrity     True to apply integrity to imported files.
      * @return The imported files if completes successfully.
      * @throws Exception Thrown if error occurs during import
      */
@@ -205,10 +208,10 @@ public class FileCommander {
     /**
      * Export a file from a drive.
      *
-     * @param filesToExport     The files to export.
-     * @param exportDir         The export target directory
-     * @param deleteSource      True if you want to delete the source files
-     * @param integrity         True to use integrity verification before exporting files
+     * @param filesToExport The files to export.
+     * @param exportDir     The export target directory
+     * @param deleteSource  True if you want to delete the source files
+     * @param integrity     True to use integrity verification before exporting files
      * @return The exported files
      * @throws Exception Thrown if error occurs during export
      */
@@ -353,7 +356,7 @@ public class FileCommander {
     /**
      * Delete files from a drive.
      *
-     * @param filesToDelete     The files to delete.
+     * @param filesToDelete The files to delete.
      */
     public void deleteFiles(IVirtualFile[] filesToDelete) {
         deleteFiles(filesToDelete, null, null);
@@ -380,7 +383,7 @@ public class FileCommander {
             if (stopJobs)
                 break;
             int finalTotal = total;
-            virtualFile.deleteRecursively((file, position, length) ->
+            virtualFile.deleteRecursively(onFailed, (file, position, length) ->
             {
                 if (stopJobs)
                     throw new CancellationException();
@@ -393,7 +396,7 @@ public class FileCommander {
                 }
                 if (position == (long) length)
                     count[0]++;
-            }, onFailed);
+            });
         }
     }
 
@@ -428,34 +431,36 @@ public class FileCommander {
             if (dir.getRealFile().getPath().startsWith(VirtualFile.getRealFile().getPath()))
                 continue;
             if (move) {
-                VirtualFile.moveRecursively(dir, (file, position, length) ->
-                {
-                    if (stopJobs)
-                        throw new CancellationException();
-                    if (onProgressChanged != null) {
-                        try {
-                            onProgressChanged.accept(new VirtualFileTaskProgress(
-                                    file, position, length, count[0], finalTotal));
-                        } catch (Exception ex) {
-                        }
-                    }
-                    if (position == (long) length)
-                        count[0]++;
-                }, autoRename, autoRenameFolders, onFailed);
+                VirtualFile.moveRecursively(dir, autoRename, autoRenameFolders, onFailed,
+                        (file, position, length) ->
+                        {
+                            if (stopJobs)
+                                throw new CancellationException();
+                            if (onProgressChanged != null) {
+                                try {
+                                    onProgressChanged.accept(new VirtualFileTaskProgress(
+                                            file, position, length, count[0], finalTotal));
+                                } catch (Exception ex) {
+                                }
+                            }
+                            if (position == (long) length)
+                                count[0]++;
+                        });
             } else {
-                VirtualFile.copyRecursively(dir, (file, position, length) ->
-                {
-                    if (stopJobs)
-                        throw new CancellationException();
-                    if (onProgressChanged != null) {
-                        try {
-                            onProgressChanged.accept(new VirtualFileTaskProgress(file, position, length, count[0], finalTotal));
-                        } catch (Exception ignored) {
-                        }
-                    }
-                    if (position == (long) length)
-                        count[0]++;
-                }, autoRename, autoRenameFolders, onFailed);
+                VirtualFile.copyRecursively(dir, autoRename, autoRenameFolders, onFailed,
+                        (file, position, length) ->
+                        {
+                            if (stopJobs)
+                                throw new CancellationException();
+                            if (onProgressChanged != null) {
+                                try {
+                                    onProgressChanged.accept(new VirtualFileTaskProgress(file, position, length, count[0], finalTotal));
+                                } catch (Exception ignored) {
+                                }
+                            }
+                            if (position == (long) length)
+                                count[0]++;
+                        });
             }
         }
     }
@@ -508,9 +513,9 @@ public class FileCommander {
     /**
      * Search for files in a drive.
      *
-     * @param dir           The directory to start the search.
-     * @param terms         The terms to search for.
-     * @param any           True if you want to match any term otherwise match all terms.
+     * @param dir   The directory to start the search.
+     * @param terms The terms to search for.
+     * @param any   True if you want to match any term otherwise match all terms.
      * @return An array with all the results found.
      */
     public IVirtualFile[] search(IVirtualFile dir, String terms, boolean any) {
@@ -571,7 +576,8 @@ public class FileCommander {
 
     /**
      * Rename an encrypted file
-     * @param ifile The file to rename
+     *
+     * @param ifile       The file to rename
      * @param newFilename The new file name
      * @throws IOException Thrown if there is an IO error.
      */
@@ -590,6 +596,7 @@ public class FileCommander {
 
         /**
          * Get the file size.
+         *
          * @return The file size in bytes.
          */
         public long getTotalBytes() {
@@ -598,6 +605,7 @@ public class FileCommander {
 
         /**
          * Get the bytes processed.
+         *
          * @return The byte processed.
          */
         public long getProcessedBytes() {
@@ -606,6 +614,7 @@ public class FileCommander {
 
         /**
          * Get the number of files processed.
+         *
          * @return The number of files processed.
          */
         public int getProcessedFiles() {
@@ -614,6 +623,7 @@ public class FileCommander {
 
         /**
          * Get the total number of files submitted.
+         *
          * @return The total number of files submitted.
          */
         public int getTotalFiles() {
@@ -637,6 +647,7 @@ public class FileCommander {
 
         /**
          * Get the associated file.
+         *
          * @return The file.
          */
         public IVirtualFile getFile() {
@@ -656,6 +667,7 @@ public class FileCommander {
     public class RealFileTaskProgress extends FileTaskProgress {
         /**
          * Get the associated file.
+         *
          * @return
          */
         public IRealFile getFile() {

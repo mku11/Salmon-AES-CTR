@@ -53,7 +53,10 @@ import java.util.List;
  * and writing/encrypting contents.
  */
 public class AesFile implements IVirtualFile {
-    public static final String separator = "/";
+    /**
+     * Directory separator.
+     */
+    public static final String Separator = "/";
 
     private final AesDrive drive;
     private final IRealFile realFile;
@@ -71,8 +74,7 @@ public class AesFile implements IVirtualFile {
     private Object tag;
 
     /**
-     * Provides a file handle that can be used to create encrypted files.
-     * Requires a virtual drive that supports the underlying filesystem, see JavaFile implementation.
+     * File wrapper to be used to create, read, and write encrypted files.
      *
      * @param realFile The real file
      */
@@ -81,7 +83,7 @@ public class AesFile implements IVirtualFile {
     }
 
     /**
-     * Provides a file handle that can be used to create encrypted files.
+     * File wrapper to create, read, and write encrypted files.
      * Requires a virtual drive that supports the underlying filesystem, see JavaFile implementation.
      *
      * @param drive    The file virtual system that will be used with file operations
@@ -556,7 +558,7 @@ public class AesFile implements IVirtualFile {
         String[] parts = relativePath.split("\\\\|/\"");
         for (String part : parts) {
             if (!part.equals("")) {
-                path.append(separator);
+                path.append(Separator);
                 path.append(getDecryptedFilename(part));
             }
         }
@@ -861,16 +863,45 @@ public class AesFile implements IVirtualFile {
     /**
      * Copy a directory recursively
      *
-     * @param dest             The destination directory
-     * @param progressListener The progress listener
-     * @param autoRename       The autorename function
-     * @param onFailed         The callback when file copying has failed
+     * @param dest              The destination directory
+     * @param autoRename        The autorename function
+     * @param autoRenameFolders True to also auto rename folders
      */
     public void copyRecursively(IVirtualFile dest,
-                                TriConsumer<IVirtualFile, Long, Long> progressListener,
+                                Function<IVirtualFile, String> autoRename,
+                                boolean autoRenameFolders) throws IOException {
+        copyRecursively(dest, autoRename, autoRenameFolders, null, null);
+    }
+
+    /**
+     * Copy a directory recursively
+     *
+     * @param dest              The destination directory
+     * @param autoRename        The autorename function
+     * @param autoRenameFolders True to also auto rename folders
+     * @param onFailed          The callback when file copying has failed
+     */
+    public void copyRecursively(IVirtualFile dest,
                                 Function<IVirtualFile, String> autoRename,
                                 boolean autoRenameFolders,
                                 BiConsumer<IVirtualFile, Exception> onFailed) throws IOException {
+        copyRecursively(dest, autoRename, autoRenameFolders, onFailed, null);
+    }
+
+    /**
+     * Copy a directory recursively
+     *
+     * @param dest              The destination directory
+     * @param autoRename        The autorename function
+     * @param autoRenameFolders True to also auto rename folders
+     * @param onFailed          The callback when file copying has failed
+     * @param progressListener  The progress listener
+     */
+    public void copyRecursively(IVirtualFile dest,
+                                Function<IVirtualFile, String> autoRename,
+                                boolean autoRenameFolders,
+                                BiConsumer<IVirtualFile, Exception> onFailed,
+                                TriConsumer<IVirtualFile, Long, Long> progressListener) throws IOException {
         BiConsumer<IRealFile, Exception> onFailedRealFile = null;
         if (onFailed != null) {
             onFailedRealFile = (file, ex) ->
@@ -899,16 +930,47 @@ public class AesFile implements IVirtualFile {
     /**
      * Move a directory recursively
      *
-     * @param dest             The destination directory
-     * @param progressListener The progress listener
-     * @param autoRename       The autorename function
-     * @param onFailed         Callback when move fails
+     * @param dest              The destination directory
+     * @param autoRename        The autorename function
+     * @param autoRenameFolders True to also auto rename folder
      */
     public void moveRecursively(IVirtualFile dest,
-                                TriConsumer<IVirtualFile, Long, Long> progressListener,
+                                Function<IVirtualFile, String> autoRename,
+                                boolean autoRenameFolders)
+            throws IOException {
+        moveRecursively(dest, autoRename, autoRenameFolders, null, null);
+    }
+
+    /**
+     * Move a directory recursively
+     *
+     * @param dest              The destination directory
+     * @param autoRename        The autorename function
+     * @param autoRenameFolders True to also auto rename folder
+     * @param onFailed          Callback when move fails
+     */
+    public void moveRecursively(IVirtualFile dest,
                                 Function<IVirtualFile, String> autoRename,
                                 boolean autoRenameFolders,
                                 BiConsumer<IVirtualFile, Exception> onFailed)
+            throws IOException {
+        moveRecursively(dest, autoRename, autoRenameFolders, onFailed, null);
+    }
+
+    /**
+     * Move a directory recursively
+     *
+     * @param dest              The destination directory
+     * @param autoRename        The autorename function
+     * @param autoRenameFolders True to also auto rename folders.
+     * @param onFailed          Callback when move fails
+     * @param progressListener  The progress listener
+     */
+    public void moveRecursively(IVirtualFile dest,
+                                Function<IVirtualFile, String> autoRename,
+                                boolean autoRenameFolders,
+                                BiConsumer<IVirtualFile, Exception> onFailed,
+                                TriConsumer<IVirtualFile, Long, Long> progressListener)
             throws IOException {
         BiConsumer<IRealFile, Exception> onFailedRealFile = null;
         if (onFailed != null) {
@@ -938,12 +1000,28 @@ public class AesFile implements IVirtualFile {
 
     /**
      * Delete all subdirectories and files.
-     *
-     * @param progressListener Called when progress is changed.
-     * @param onFailed         Called when file fails during deletion.
      */
-    public void deleteRecursively(TriConsumer<IVirtualFile, Long, Long> progressListener,
-                                  BiConsumer<IVirtualFile, Exception> onFailed) {
+    public void deleteRecursively() {
+        deleteRecursively(null, null);
+    }
+
+    /**
+     * Delete all subdirectories and files.
+     *
+     * @param onFailed Called when file fails during deletion.
+     */
+    public void deleteRecursively(BiConsumer<IVirtualFile, Exception> onFailed) {
+        deleteRecursively(onFailed, null);
+    }
+
+    /**
+     * Delete all subdirectories and files.
+     *
+     * @param onFailed         Called when file fails during deletion.
+     * @param progressListener Called when progress is changed.
+     */
+    public void deleteRecursively(BiConsumer<IVirtualFile, Exception> onFailed,
+                                  TriConsumer<IVirtualFile, Long, Long> progressListener) {
         BiConsumer<IRealFile, Exception> onFailedRealFile = null;
         if (onFailed != null) {
             onFailedRealFile = (file, ex) ->
@@ -976,6 +1054,9 @@ public class AesFile implements IVirtualFile {
         return this.getBlockSize();
     }
 
+    /**
+     * Provides an alternative file name. Use this to rename files.
+     */
     public static Function<IVirtualFile, String> autoRename = (IVirtualFile file) -> {
         try {
             return autoRename((AesFile) file);
@@ -988,14 +1069,8 @@ public class AesFile implements IVirtualFile {
         }
     };
 
-    /// <summary>
-    /// Get an auto generated copy of the name for the file.
-    /// </summary>
-    /// <param name="file"></param>
-    /// <returns></returns>
-
     /**
-     * Provide an alternative file name for an AesFile. Use this to rename files.
+     * Provides an alternative file name for an AesFile. Use this to rename files.
      *
      * @param file The file
      * @return The new file name
