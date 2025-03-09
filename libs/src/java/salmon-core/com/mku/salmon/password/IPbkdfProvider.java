@@ -30,21 +30,21 @@ import com.mku.salmon.SecurityException;
  */
 public interface IPbkdfProvider {
     /**
-     * Java Cipher key for SHA256. See javax.crypto.SecretKeyFactory.
+     * Cipher key for SHA256. See javax.crypto.SecretKeyFactory.
      */
     String PBKDF_SHA256 = "PBKDF2WithHmacSHA256";
     /**
-     * Java Cipher key for SHA1. See javax.crypto.SecretKeyFactory.
+     * Cipher key for SHA1. See javax.crypto.SecretKeyFactory.
      * WARNING! SHA1 is considered insecure! Use PBKDF_SHA256 instead.
      */
     @Deprecated
     String PBKDF_SHA1 = "PBKDF2WithHmacSHA1";
 
     /**
-     * Get the PBKDF java cipher algorigthm string.
+     * Get the PBKDF cipher algorithm string.
      *
      * @param pbkdfAlgo The PBKDF algorithm to use
-     * @return The java cipher algorithm string. See javax.crypto.SecretKeyFactory.
+     * @return The cipher algorithm string. See javax.crypto.SecretKeyFactory.
      */
     @SuppressWarnings("deprecation")
     static String getPbkdfAlgoString(PbkdfAlgo pbkdfAlgo) {

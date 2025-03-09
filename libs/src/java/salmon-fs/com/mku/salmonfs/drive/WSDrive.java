@@ -44,7 +44,7 @@ public class WSDrive extends AesDrive {
     }
 
     /**
-     * Helper method that opens and initializes a JavaHttpDrive
+     * Helper method that opens and initializes a HttpDrive
      *
      * @param dir             The URL that hosts the drive. This can be either a raw URL
      *                        or a REST API URL, see Salmon Web Service for usage.
@@ -58,7 +58,7 @@ public class WSDrive extends AesDrive {
     }
 
     /**
-     * Helper method that creates and initializes a JavaWSDrive
+     * Helper method that creates and initializes a WSDrive
      * @param dir The directory that will host the drive.
      * @param password The password.
      * @param sequencer The nonce sequencer that will be used for encryption.

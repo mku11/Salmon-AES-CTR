@@ -33,7 +33,7 @@ SOFTWARE.
  */
 public enum ProviderType {
     /**
-     * Default Java AES cipher implementation.
+     * Default AES cipher implementation.
      */
     Default,
 

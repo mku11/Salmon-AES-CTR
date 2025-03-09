@@ -145,7 +145,7 @@ public abstract class FileImporter {
         if (isRunning())
             throw new Exception("Another import is running");
         if (fileToImport.isDirectory())
-            throw new Exception("Cannot import directory, use SalmonFileCommander instead");
+            throw new Exception("Cannot import directory, use AesFileCommander instead");
 
         filename = filename != null ? filename : fileToImport.getBaseName();
         final long[] totalBytesRead = new long[]{0};
@@ -230,13 +230,13 @@ public abstract class FileImporter {
      * Import a file part into a file in the drive.
      *
      * @param fileToImport   The external file that will be imported
-     * @param salmonFile     The file that will be imported to
+     * @param aesFile        The file that will be imported to
      * @param start          The start position of the byte data that will be imported
      * @param count          The length of the file content that will be imported
      * @param totalBytesRead The total bytes read from the external file
      * @param onProgress     Progress observer
      */
-    private void importFilePart(IRealFile fileToImport, IVirtualFile salmonFile,
+    private void importFilePart(IRealFile fileToImport, IVirtualFile aesFile,
                                 long start, long count, long[] totalBytesRead, BiConsumer<Long, Long> onProgress) throws IOException {
         long totalPartBytesRead = 0;
 
@@ -244,7 +244,7 @@ public abstract class FileImporter {
         RandomAccessStream sourceStream = null;
 
         try {
-            targetStream = salmonFile.getOutputStream();
+            targetStream = aesFile.getOutputStream();
             targetStream.setPosition(start);
 
             sourceStream = fileToImport.getInputStream();

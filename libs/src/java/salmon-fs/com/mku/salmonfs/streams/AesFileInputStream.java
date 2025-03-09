@@ -39,15 +39,15 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.atomic.AtomicReference;
 
 /**
- * Implementation of a Java InputStream for seeking and reading a SalmonFile.
- * This class provides a seekable source with parallel substreams and cached buffers
+ * InputStream wrapper for seeking and reading an encrypted AesFile.
+ * This class provides a seekable source with parallel streams and cached buffers
  * for performance.
  */
 public class AesFileInputStream extends InputStream {
     private static final String TAG = AesFileInputStream.class.getName();
 
     // Default cache buffer should be high enough for some mpeg videos to work
-    // the cache buffers should be aligned to the SalmonFile chunk size for efficiency
+    // the cache buffers should be aligned to the AesFile chunk size for efficiency
     private static final int DEFAULT_BUFFER_SIZE = 512 * 1024;
 
     // default threads is one but you can increase it

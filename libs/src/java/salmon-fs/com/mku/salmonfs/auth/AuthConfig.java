@@ -124,7 +124,7 @@ public class AuthConfig {
     }
 
     /**
-     * Write authorization configuration to a SalmonStream.
+     * Write authorization configuration to an AesStream.
      * @param stream The stream to write to.
      * @param driveId The drive id.
      * @param authId The auth id of the new device.

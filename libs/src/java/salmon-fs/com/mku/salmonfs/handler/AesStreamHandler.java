@@ -79,7 +79,7 @@ public class AesStreamHandler extends URLStreamHandler {
     }
 
     /**
-     * Open a local SalmonStreamConnection
+     * Open a local connection to an encrypted stream.
      *
      * @param u the URL that this connects to.
      * @return URLConnection to inject the decoded stream

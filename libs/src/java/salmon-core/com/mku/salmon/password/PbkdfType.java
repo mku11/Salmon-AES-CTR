@@ -5,7 +5,7 @@ package com.mku.salmon.password;
  */
 public enum PbkdfType {
     /**
-     * Default Java pbkdf implementation.
+     * Default pbkdf implementation.
      */
     Default
 }

@@ -154,7 +154,7 @@ public class SalmonCoreTestHelper {
         if (flipBits)
             encBytes[encBytes.length / 2] = 0;
 
-        // Use SalmonStream to read from cipher byte array and MemoryStream to Write to byte array
+        // Use AesStream to read from cipher byte array and MemoryStream to Write to byte array
         byte[] outputByte2 = decrypt(encBytes, key, iv, decBufferSize,
                 testIntegrity, chunkSize, hashKey, header != null ? headerLength :
                         null);
@@ -236,7 +236,7 @@ public class SalmonCoreTestHelper {
         }
         String plainText = tBuilder.toString();
 
-        // Use SalmonStream read from text byte array and MemoryStream to Write to byte array
+        // Use AesStream read from text byte array and MemoryStream to Write to byte array
         byte[] inputBytes = plainText.getBytes(Charset.defaultCharset());
         MemoryStream ins = new MemoryStream(inputBytes);
         MemoryStream outs = new MemoryStream();
@@ -314,7 +314,7 @@ public class SalmonCoreTestHelper {
         }
         String plainText = tBuilder.toString();
 
-        // Use SalmonStream read from text byte array and MemoryStream to Write to byte array
+        // Use AesStream read from text byte array and MemoryStream to Write to byte array
         byte[] inputBytes = plainText.getBytes(Charset.defaultCharset());
         MemoryStream ins = new MemoryStream(inputBytes);
         MemoryStream outs = new MemoryStream();
@@ -326,7 +326,7 @@ public class SalmonCoreTestHelper {
         encWriter.close();
         byte[] encBytes = outs.toArray();
 
-        // Use SalmonStream to read from cipher text and seek and read to different positions in the stream
+        // Use AesStream to read from cipher text and seek and read to different positions in the stream
         MemoryStream encIns = new MemoryStream(encBytes);
         AesStream decReader = new AesStream(key, iv, EncryptionMode.Decrypt, encIns,
                 null, integrity, chunkSize, hashKey);
@@ -368,7 +368,7 @@ public class SalmonCoreTestHelper {
         }
         String plainText = tBuilder.toString();
 
-        // Use SalmonStream read from text byte array and MemoryStream to Write to byte array
+        // Use AesStream read from text byte array and MemoryStream to Write to byte array
         byte[] inputBytes = plainText.getBytes(Charset.defaultCharset());
         MemoryStream ins = new MemoryStream(inputBytes);
         MemoryStream outs = new MemoryStream();

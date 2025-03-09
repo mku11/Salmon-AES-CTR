@@ -43,7 +43,7 @@ public class HttpDrive extends AesDrive {
     }
 
     /**
-     * Helper method that opens and initializes a JavaHttpDrive
+     * Helper method that opens and initializes a HttpDrive
      *
      * @param dir             The URL that hosts the drive. This can be either a raw URL
      *                        or a REST API URL, see Salmon Web Service for usage.

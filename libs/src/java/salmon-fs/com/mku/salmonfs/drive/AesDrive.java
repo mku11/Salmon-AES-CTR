@@ -262,7 +262,7 @@ public abstract class AesDrive extends VirtualDrive {
      * This requires you previously use SetDriveClass() to provide a class for the drive
      *
      * @param dir            The directory path that will be used for storing the contents of the drive
-     * @param driveClassType The class type of the drive to open (ie: JavaDrive.class)
+     * @param driveClassType The class type of the drive to open (ie: Drive.class)
      * @param password       The password
      * @return The drive
      * @throws IOException Thrown if there is an IO error.
@@ -277,7 +277,7 @@ public abstract class AesDrive extends VirtualDrive {
      * This requires you previously use SetDriveClass() to provide a class for the drive
      *
      * @param dir            The directory path that will be used for storing the contents of the drive
-     * @param driveClassType The class type of the drive to open (ie: JavaDrive.class)
+     * @param driveClassType The class type of the drive to open (ie: Drive.class)
      * @param password       The password
      * @param sequencer      The sequencer to use for this drive
      * @return The drive
@@ -298,7 +298,7 @@ public abstract class AesDrive extends VirtualDrive {
      * Create a new drive in the provided location.
      *
      * @param dir            Directory to store the drive configuration and virtual filesystem.
-     * @param driveClassType The class type of the drive to create (ie: JavaDrive.class)
+     * @param driveClassType The class type of the drive to create (ie: Drive.class)
      * @param password       The password
      * @param sequencer      The sequencer to use for this drive
      * @return The newly created drive.

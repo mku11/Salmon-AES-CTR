@@ -161,7 +161,7 @@ public class AesFile implements IVirtualFile {
     }
 
     /**
-     * Retrieves a SalmonStream that will be used for decrypting the file contents.
+     * Retrieves a AesStream that will be used for decrypting the file contents.
      *
      * @return The input stream
      * @throws IOException Thrown if there is an IO error.

@@ -29,7 +29,7 @@ import com.mku.fs.drive.utils.FileUtils;
 import java.util.Comparator;
 
 /**
- * Useful comparators for SalmonFile.
+ * Useful comparators for AesFile.
  */
 public class AesFileComparators {
     private static final Comparator<AesFile> defaultComparator = (AesFile c1, AesFile c2) ->
@@ -127,6 +127,7 @@ public class AesFileComparators {
     /**
      * Get default comparator. This is the fastest sorting comparator as it simply lists folders first.
      * The rest of the files will be listed without sorting.
+     *
      * @return The default comparator
      */
     public static Comparator<AesFile> getDefaultComparator() {
@@ -135,6 +136,7 @@ public class AesFileComparators {
 
     /**
      * Get Filename Ascending Comparator.
+     *
      * @return The filename scending comparator.
      */
     public static Comparator<AesFile> getFilenameAscComparator() {
@@ -143,6 +145,7 @@ public class AesFileComparators {
 
     /**
      * Get Filename Descending Comparator.
+     *
      * @return filename descending comparator
      */
     public static Comparator<AesFile> getFilenameDescComparator() {
@@ -151,6 +154,7 @@ public class AesFileComparators {
 
     /**
      * Get Size Ascending Comparator.
+     *
      * @return The size ascending comparator
      */
     public static Comparator<AesFile> getSizeAscComparator() {
@@ -159,6 +163,7 @@ public class AesFileComparators {
 
     /**
      * Get Size Descending Comparator.
+     *
      * @return The size descending comparator
      */
     public static Comparator<AesFile> getSizeDescComparator() {
@@ -167,6 +172,7 @@ public class AesFileComparators {
 
     /**
      * Get File Type Ascending Comparator.
+     *
      * @return The file type ascending comparator
      */
     public static Comparator<AesFile> getTypeAscComparator() {
@@ -175,6 +181,7 @@ public class AesFileComparators {
 
     /**
      * Get File Type Descending Comparator.
+     *
      * @return The file type descending comparator
      */
     public static Comparator<AesFile> getTypeDescComparator() {
@@ -183,6 +190,7 @@ public class AesFileComparators {
 
     /**
      * Get Date Ascending Comparator.
+     *
      * @return The date ascending comparator
      */
     public static Comparator<AesFile> getDateAscComparator() {
@@ -191,6 +199,7 @@ public class AesFileComparators {
 
     /**
      * Get Date Descending Comparator.
+     *
      * @return The date descending comparator
      */
     public static Comparator<AesFile> getDateDescComparator() {
@@ -200,6 +209,7 @@ public class AesFileComparators {
     /**
      * Get Relevant Comparator. This will sort by the search result relevancy in the Tag member. Most relevant results
      * will be listed first.
+     *
      * @return The relevancy comparator
      */
     public static Comparator<AesFile> getRelevanceComparator() {
@@ -207,7 +217,8 @@ public class AesFileComparators {
     }
 
     /**
-     * Get the SalmonFile basename if available.
+     * Get the AesFile basename if available.
+     *
      * @param aesFile The file
      * @return The base name
      */
@@ -221,7 +232,8 @@ public class AesFileComparators {
     }
 
     /**
-     * Get the SalmonFile file type extension if available.
+     * Get the AesFile file type extension if available.
+     *
      * @param aesFile The Aes file to get the file type from
      * @return The file type
      */
@@ -237,7 +249,8 @@ public class AesFileComparators {
     }
 
     /**
-     * Get the SalmonFile size if available.
+     * Get the AesFile size if available.
+     *
      * @param aesFile The file
      * @return The size
      */
@@ -256,7 +269,8 @@ public class AesFileComparators {
     }
 
     /**
-     * Get the SalmonFile date if available.
+     * Get the AesFile date if available.
+     *
      * @param aesFile The file
      * @return The date in milliseconds
      */

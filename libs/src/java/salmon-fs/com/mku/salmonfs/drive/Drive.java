@@ -45,7 +45,7 @@ public class Drive extends AesDrive {
     }
 
     /**
-     * Helper method that opens and initializes a JavaDrive
+     * Helper method that opens and initializes a Drive
      * @param dir The directory that hosts the drive.
 	 * @param password The password.
      * @param sequencer The nonce sequencer that will be used for encryption.
@@ -57,7 +57,7 @@ public class Drive extends AesDrive {
     }
 
     /**
-     * Helper method that creates and initializes a JavaDrive
+     * Helper method that creates and initializes a Drive
      * @param dir The directory that will host the drive.
 	 * @param password The password.
      * @param sequencer The nonce sequencer that will be used for encryption.

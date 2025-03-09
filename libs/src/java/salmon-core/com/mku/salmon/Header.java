@@ -29,7 +29,7 @@ import com.mku.streams.RandomAccessStream;
 import java.io.IOException;
 
 /**
- * Header embedded in the SalmonStream. Header contains nonce and other information for
+ * Header embedded within the AesStream. Header contains nonce and other information for
  * decrypting the stream.
  */
 public class Header {

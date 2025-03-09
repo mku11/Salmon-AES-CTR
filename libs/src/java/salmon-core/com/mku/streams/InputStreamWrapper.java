@@ -27,8 +27,8 @@ import java.io.IOException;
 import java.io.InputStream;
 
 /***
- * Wrapper stream of RandomAccessStream to a native InputStream implementation.
- * Use this class to wrap any RandomAccessStream to a  Java InputStream.
+ * InputStream wrapper for RandomAccessStream.
+ * Use this class to wrap any RandomAccessStream to a Java InputStream to use with 3rd party libraries.
  */
 public class InputStreamWrapper extends InputStream {
     private final RandomAccessStream stream;
@@ -65,7 +65,7 @@ public class InputStreamWrapper extends InputStream {
      *               at which the data is written.
      * @param count  the maximum number of bytes to read.
      * @return The number of bytes read.
-     * @throws IOException with an optional inner Exception if the base stream is a SalmonStream
+     * @throws IOException with an optional inner Exception if the base stream is a AesStream
      */
     @Override
     public int read(byte[] buffer, int offset, int count) throws IOException {
