@@ -47,7 +47,7 @@ public class FileSearcher {
     }
 
     /**
-     * Functional interface to notify when result is found.
+     * Functional interface that is called when result is found.
      */
     public interface OnResultFoundListener {
         /**
@@ -58,7 +58,7 @@ public class FileSearcher {
     }
 
     /**
-     * True if a search is running.
+     * Check if a search is running.
      * @return True if running
      */
     public boolean isRunning() {
@@ -66,7 +66,7 @@ public class FileSearcher {
     }
 
     /**
-     * True if last search was stopped by user.
+     * Check if last search was stopped by user.
      * @return True if user stopped
      */
     public boolean isStopped() {

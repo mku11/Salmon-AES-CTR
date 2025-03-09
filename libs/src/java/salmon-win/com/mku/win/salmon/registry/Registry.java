@@ -87,7 +87,7 @@ public class Registry
     }
 
     /**
-     * True if value exists
+     * Check if value exists
      * @param key The key
      * @return True if value exists
      */

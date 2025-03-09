@@ -34,21 +34,21 @@ public abstract class RandomAccessStream {
     private static final int DEFAULT_BUFFER_SIZE = 256 * 1024;
 
     /**
-     * True if the stream is readable.
+     * Check if the stream is readable.
      *
      * @return True if readable
      */
     public abstract boolean canRead();
 
     /**
-     * True if the stream is writable.
+     * Check if the stream is writable.
      *
      * @return True if writable
      */
     public abstract boolean canWrite();
 
     /**
-     * True if the stream is seekable.
+     * Check if the stream is seekable.
      *
      * @return True if seekable
      */

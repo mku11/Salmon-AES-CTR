@@ -33,7 +33,9 @@ import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
-
+/**
+ * Import IRealFile(s) into a VirtualDrive.
+ */
 public abstract class FileImporter {
     /**
      * The global default buffer size to use when reading/writing on streams.
@@ -56,7 +58,7 @@ public abstract class FileImporter {
     private int threads;
 
     /**
-     * True if last job was stopped by the user.
+     * Check if last job was stopped by the user.
      */
     private boolean stopped = true;
 
@@ -94,7 +96,7 @@ public abstract class FileImporter {
     protected abstract long getMinimumPartSize(IVirtualFile file) throws IOException;
 
     /**
-     * Constructs a file importer that can be used to import files to the drive
+     * Constructs a file importer that can be used to import files into the drive
      *
      * @param bufferSize Buffer size to be used when encrypting files.
      *                   If using integrity this value has to be a multiple of the Chunk size.
@@ -118,7 +120,7 @@ public abstract class FileImporter {
     }
 
     /**
-     * True if importer is currently running a job.
+     * Check if importer is currently running a job.
      *
      * @return True if running
      */
@@ -129,7 +131,7 @@ public abstract class FileImporter {
     /**
      * Imports a real file into the drive.
      *
-     * @param fileToImport The source file that will be imported in to the drive.
+     * @param fileToImport The source file that will be imported in into the drive.
      * @param dir          The target directory in the drive that the file will be imported
      * @param filename     The filename to use
      * @param deleteSource If true delete the source file.

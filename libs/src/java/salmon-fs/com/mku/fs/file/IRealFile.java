@@ -41,7 +41,7 @@ import java.util.Calendar;
  */
 public interface IRealFile {
     /**
-     * True if this file exists.
+     * Check if this file exists.
      *
      * @return True if file exists
      */
@@ -116,14 +116,14 @@ public interface IRealFile {
     String getPath();
 
     /**
-     * True if this is a file.
+     * Check if this is a file.
      *
      * @return True if this is a file
      */
     boolean isFile();
 
     /**
-     * True if this is a directory.
+     * Check if this is a directory.
      *
      * @return True if this is a directory.
      */

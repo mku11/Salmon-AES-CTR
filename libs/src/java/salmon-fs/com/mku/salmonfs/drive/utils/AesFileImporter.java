@@ -75,7 +75,7 @@ public class AesFileImporter extends FileImporter {
     /**
      * Imports a real file into the drive.
      *
-     * @param fileToImport The source file that will be imported in to the drive.
+     * @param fileToImport The source file that will be imported in into the drive.
      * @param dir          The target directory in the drive that the file will be imported
      * @param filename     The filename to use
      * @param deleteSource If true delete the source file.

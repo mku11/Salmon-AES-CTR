@@ -57,20 +57,47 @@ public class FileCommander {
         this.fileSearcher = fileSearcher;
     }
 
+    /**
+     * Get the file importer.
+     * @return The file importer.
+     */
     public FileImporter getFileImporter() {
         return fileImporter;
     }
 
+    /**
+     * Get the file exporter.
+     * @return The file exporter.
+     */
     public FileExporter getFileExporter() {
         return fileExporter;
     }
 
+    /**
+     * Get the file searcher.
+     * @return The file searcher.
+     */
     public FileSearcher getFileSearcher() {
         return fileSearcher;
     }
 
     /**
-     * Import files to the drive.
+     * Import IRealFile(s) into the drive.
+     *
+     * @param filesToImport     The files to import.
+     * @param importDir         The target directory.
+     * @param deleteSource      True if you want to delete the source files when import complete.
+     * @param integrity         True to apply integrity to imported files.
+     * @return The imported files if completes successfully.
+     * @throws Exception Thrown if error occurs during import
+     */
+    public IVirtualFile[] importFiles(IRealFile[] filesToImport, IVirtualFile importDir,
+                                      boolean deleteSource, boolean integrity) throws Exception {
+        return importFiles(filesToImport, importDir, deleteSource, integrity, null, null, null);
+    }
+
+    /**
+     * Import IRealFile(s) into the drive.
      *
      * @param filesToImport     The files to import.
      * @param importDir         The target directory.
@@ -173,6 +200,22 @@ public class FileCommander {
                     onFailed.accept(fileToImport, ex);
             }
         }
+    }
+
+    /**
+     * Export a file from a drive.
+     *
+     * @param filesToExport     The files to export.
+     * @param exportDir         The export target directory
+     * @param deleteSource      True if you want to delete the source files
+     * @param integrity         True to use integrity verification before exporting files
+     * @return The exported files
+     * @throws Exception Thrown if error occurs during export
+     */
+    public IRealFile[] exportFiles(IVirtualFile[] filesToExport, IRealFile exportDir,
+                                   boolean deleteSource, boolean integrity)
+            throws Exception {
+        return exportFiles(filesToExport, exportDir, deleteSource, integrity, null, null, null);
     }
 
     /**
@@ -308,7 +351,16 @@ public class FileCommander {
     }
 
     /**
-     * Delete files.
+     * Delete files from a drive.
+     *
+     * @param filesToDelete     The files to delete.
+     */
+    public void deleteFiles(IVirtualFile[] filesToDelete) {
+        deleteFiles(filesToDelete, null, null);
+    }
+
+    /**
+     * Delete files from a drive.
      *
      * @param filesToDelete     The files to delete.
      * @param onProgressChanged The observer to notify when each file is deleted.
@@ -419,7 +471,7 @@ public class FileCommander {
     }
 
     /**
-     * True if the file search is currently running.
+     * Check if file search is currently running.
      *
      * @return True if search is running
      */
@@ -428,7 +480,7 @@ public class FileCommander {
     }
 
     /**
-     * True if jobs are currently running.
+     * Check if jobs are currently running.
      *
      * @return True if a job is running
      */
@@ -437,7 +489,7 @@ public class FileCommander {
     }
 
     /**
-     * True if file search stopped.
+     * Check if file search stopped.
      *
      * @return True if file search is stopped
      */
@@ -446,14 +498,27 @@ public class FileCommander {
     }
 
     /**
-     * Stop file search.
+     * Stop the current file search.
      */
     public void stopFileSearch() {
         fileSearcher.stop();
     }
 
+
     /**
-     * Search
+     * Search for files in a drive.
+     *
+     * @param dir           The directory to start the search.
+     * @param terms         The terms to search for.
+     * @param any           True if you want to match any term otherwise match all terms.
+     * @return An array with all the results found.
+     */
+    public IVirtualFile[] search(IVirtualFile dir, String terms, boolean any) {
+        return search(dir, terms, any);
+    }
+
+    /**
+     * Search for files in a drive.
      *
      * @param dir           The directory to start the search.
      * @param terms         The terms to search for.
@@ -469,7 +534,7 @@ public class FileCommander {
     }
 
     /**
-     * True if all jobs are stopped.
+     * Check if all jobs are stopped.
      *
      * @return True if jobs are stopped
      */
@@ -496,6 +561,9 @@ public class FileCommander {
         return total;
     }
 
+    /**
+     * Close the commander and release resources.
+     */
     public void close() {
         fileImporter.close();
         fileExporter.close();
@@ -520,18 +588,34 @@ public class FileCommander {
         private final int processedFiles;
         private final int totalFiles;
 
+        /**
+         * Get the file size.
+         * @return The file size in bytes.
+         */
         public long getTotalBytes() {
             return totalBytes;
         }
 
+        /**
+         * Get the bytes processed.
+         * @return The byte processed.
+         */
         public long getProcessedBytes() {
             return processedBytes;
         }
 
+        /**
+         * Get the number of files processed.
+         * @return The number of files processed.
+         */
         public int getProcessedFiles() {
             return processedFiles;
         }
 
+        /**
+         * Get the total number of files submitted.
+         * @return The total number of files submitted.
+         */
         public int getTotalFiles() {
             return totalFiles;
         }
@@ -550,6 +634,11 @@ public class FileCommander {
     public class VirtualFileTaskProgress extends FileTaskProgress {
         private final IVirtualFile file;
 
+
+        /**
+         * Get the associated file.
+         * @return The file.
+         */
         public IVirtualFile getFile() {
             return file;
         }
@@ -565,6 +654,10 @@ public class FileCommander {
      * Task progress for IRealFile(s).
      */
     public class RealFileTaskProgress extends FileTaskProgress {
+        /**
+         * Get the associated file.
+         * @return
+         */
         public IRealFile getFile() {
             return file;
         }

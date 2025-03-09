@@ -808,7 +808,7 @@ public class AesStream extends RandomAccessStream {
     }
 
     /**
-     * True if the stream has integrity enabled.
+     * Check if the stream has integrity enabled.
      *
      * @return True if integrity is enabled
      */

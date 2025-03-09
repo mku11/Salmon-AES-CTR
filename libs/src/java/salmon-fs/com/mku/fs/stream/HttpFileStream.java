@@ -114,7 +114,7 @@ public class HttpFileStream extends RandomAccessStream {
     }
 
     /**
-     * True if stream can read from file.
+     * Check if stream can read from file.
      *
      * @return True if readable
      */
@@ -124,7 +124,7 @@ public class HttpFileStream extends RandomAccessStream {
     }
 
     /**
-     * True if stream can write to file.
+     * Check if stream can write to file.
      *
      * @return True if writable
      */
@@ -134,7 +134,7 @@ public class HttpFileStream extends RandomAccessStream {
     }
 
     /**
-     * True if stream can seek.
+     * Check if stream can seek.
      *
      * @return True if seekable
      */

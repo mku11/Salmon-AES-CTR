@@ -102,47 +102,93 @@ public abstract class AesDrive extends VirtualDrive {
         registerOnProcessClose();
         key = new DriveKey();
     }
-	
+
+    /**
+     * Get the virtual encrypted AesFile backed by a IRealFile.
+     * @param file The real file.
+     * @param drive The drive the file belongs to
+     * @return
+     */
 	protected AesFile getVirtualFile(IRealFile file, AesDrive drive) {
 		return new AesFile(file, drive);
 	}
 
+    /**
+     * Get the file name for the drive configuration.
+     * @return The file name.
+     */
     public static String getConfigFilename() {
         return configFilename;
     }
 
+    /**
+     * Set the file name for the drive configuration.
+     * @param configFilename The file name
+     */
     public static void setConfigFilename(String configFilename) {
         AesDrive.configFilename = configFilename;
     }
 
+    /**
+     * Get the file name for the authorization configuration .
+     * @return The file name.
+     */
     public static String getAuthConfigFilename() {
         return authConfigFilename;
     }
 
+    /**
+     * Set the file name for the authorization configuration .
+     * @param authConfigFilename  The file name.
+     */
     public static void setAuthConfigFilename(String authConfigFilename) {
         AesDrive.authConfigFilename = authConfigFilename;
     }
 
+    /**
+     * Get the directory name for the virtual drive.
+     * @return The directory name
+     */
     public static String getVirtualDriveDirectoryName() {
         return virtualDriveDirectoryName;
     }
 
+    /**
+     * Set the directory name for the virtual drive.
+     * @param virtualDriveDirectoryName The directory name
+     */
     public static void setVirtualDriveDirectoryName(String virtualDriveDirectoryName) {
         AesDrive.virtualDriveDirectoryName = virtualDriveDirectoryName;
     }
 
+    /**
+     * Get the directory name for exporting files.
+     * @return
+     */
     public static String getExportDirectoryName() {
         return exportDirectoryName;
     }
 
+    /**
+     * Set the directory name for exporting files.
+     * @param exportDirectoryName The directory name.
+     */
     public static void setExportDirectoryName(String exportDirectoryName) {
         AesDrive.exportDirectoryName = exportDirectoryName;
     }
 
+    /**
+     * Get the directory name for sharing files.
+     * @return The directory name.
+     */
     public static String getShareDirectoryName() {
         return shareDirectoryName;
     }
 
+    /**
+     * Set the directory name for exporting files.
+     * @param shareDirectoryName The directory name.
+     */
     public static void setShareDirectoryName(String shareDirectoryName) {
         AesDrive.shareDirectoryName = shareDirectoryName;
     }

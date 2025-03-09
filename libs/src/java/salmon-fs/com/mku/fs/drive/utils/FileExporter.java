@@ -58,7 +58,7 @@ public abstract class FileExporter {
     private int threads;
 
     /**
-     * True if last job was stopped by the user.
+     * Check if last job was stopped by the user.
      */
     private boolean stopped = true;
 

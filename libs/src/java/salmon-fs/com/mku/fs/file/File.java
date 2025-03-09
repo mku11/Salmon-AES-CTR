@@ -91,7 +91,7 @@ public class File implements IRealFile {
     }
 
     /**
-     * True if file or directory exists.
+     * Check if file or directory exists.
      *
      * @return True if exists.
      */
@@ -158,7 +158,7 @@ public class File implements IRealFile {
     }
 
     /**
-     * True if this is a directory.
+     * Check if this is a directory.
      *
      * @return True if it's a directory.
      */
@@ -167,7 +167,7 @@ public class File implements IRealFile {
     }
 
     /**
-     * True if this is a file.
+     * Check if this is a file.
      *
      * @return True if it's a file
      */
