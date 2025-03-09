@@ -318,7 +318,7 @@ public class AesStream extends RandomAccessStream {
     }
 
     /**
-     * If the stream is readable (only if EncryptionMode == Decrypted)
+     * If the stream is readable (only if EncryptionMode is EncryptionMode.Decrypt)
      *
      * @return True if mode is decryption.
      */
@@ -336,7 +336,7 @@ public class AesStream extends RandomAccessStream {
     }
 
     /**
-     * If the stream is writable (only if EncryptionMode is Encrypt)
+     * If the stream is writable (only if EncryptionMode is EncryptionMode.Encrypt)
      *
      * @return True if mode is decryption.
      */

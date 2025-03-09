@@ -31,17 +31,19 @@ import java.util.HashMap;
 public interface INonceSequenceSerializer {
 
     /**
-     * Parse nonce sequences from text contents.
+     * Deserialize sequences from a string.
+     *
      * @param contents The contents containing the nonce sequences.
-     * @return The nonce sequences.
+     * @return The deserialized sequences
      * @throws SequenceException Thrown if there is an error with the nonce sequence
      */
     HashMap<String, NonceSequence> deserialize(String contents);
 
     /**
-     * Generates the contents from sequences.
+     * Serialize the sequences to a string.
+     *
      * @param sequences The sequences to convert to text.
-     * @return The string contents.
+     * @return The serialized contents
      * @throws SequenceException Thrown if there is an error with the nonce sequence
      */
     String serialize(HashMap<String, NonceSequence> sequences);

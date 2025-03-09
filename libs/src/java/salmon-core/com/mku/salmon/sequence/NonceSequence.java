@@ -69,7 +69,7 @@ public class NonceSequence {
     }
 
     /**
-     * Sequencer status.
+     * Sequence status.
      * @see #New
      * @see #Active Active sequence.
      * @see #Revoked Revoked sequence.

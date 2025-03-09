@@ -51,11 +51,11 @@ public class SequenceSerializer implements INonceSequenceSerializer {
     /**
      * Serialize the sequences to an XML string.
      *
-     * @param driveAuthEntries The sequences to convert to text.
+     * @param sequences The sequences to convert to text.
      * @return The serialized contents
      * @throws SequenceException Thrown if there is an error with the nonce sequence
      */
-    public String serialize(HashMap<String, NonceSequence> driveAuthEntries) {
+    public String serialize(HashMap<String, NonceSequence> sequences) {
         ByteArrayOutputStream stream = new ByteArrayOutputStream();
         XMLStreamWriter out = null;
         try {
@@ -83,7 +83,7 @@ public class SequenceSerializer implements INonceSequenceSerializer {
             out.writeCharacters(System.getProperty("line.separator"));
             out.writeEndDocument();
         } catch (XMLStreamException ex) {
-			ex.printStackTrace();
+            ex.printStackTrace();
             throw new SequenceException("Could not serialize sequences", ex);
         } finally {
             if (out != null) {
