@@ -25,27 +25,26 @@ SOFTWARE.
 
 import com.mku.salmon.sequence.SequenceException;
 
-/// <summary>
-///  Thrown when tampering has been detected in the nonce sequencer.
-/// </summary>
-public class WinSequenceTamperedException extends SequenceException
-{
+/**
+ * Thrown when tampering has been detected in the nonce sequencer.
+ */
+public class WinSequenceTamperedException extends SequenceException {
     /**
      * Construct an exception with a specific message.
+     *
      * @param msg The message
      */
-    public WinSequenceTamperedException(String msg)
-    {
+    public WinSequenceTamperedException(String msg) {
         super(msg);
     }
 
     /**
      * Construct an exception with a specific message and inner exception
+     *
      * @param msg The provided message
-     * @param ex The inner exception
+     * @param ex  The inner exception
      */
-    public WinSequenceTamperedException(String msg, Exception ex)
-    {
+    public WinSequenceTamperedException(String msg, Exception ex) {
         super(msg, ex);
     }
 }

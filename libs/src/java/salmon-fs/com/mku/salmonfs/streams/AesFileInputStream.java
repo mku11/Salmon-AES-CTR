@@ -84,7 +84,7 @@ public class AesFileInputStream extends InputStream {
     /**
      * Instantiate a seekable stream from an encrypted file source
      *
-     * @param aesFile   The source file.
+     * @param aesFile      The source file.
      * @param buffersCount Number of buffers to use.
      * @param bufferSize   The length of each buffer.
      * @param threads      The number of threads/streams to source the file in parallel.
@@ -152,7 +152,7 @@ public class AesFileInputStream extends InputStream {
      * @return The byte skipped
      */
     public long skip(long bytes) {
-		bytes += positionStart;
+        bytes += positionStart;
         long currPos = this.position;
         if (this.position + bytes > this.size)
             this.position = this.size;
@@ -161,6 +161,9 @@ public class AesFileInputStream extends InputStream {
         return this.position - currPos;
     }
 
+    /**
+     * Reset the stream.
+     */
     @Override
     public void reset() {
         position = 0;
@@ -246,9 +249,9 @@ public class AesFileInputStream extends InputStream {
     /**
      * Fills a cache buffer with the decrypted data from a part of an encrypted file served as a salmon stream
      *
-     * @param cacheBuffer  The cache buffer that will store the decrypted contents
-     * @param bufferSize   The length of the data requested
-     * @param aesStream The stream that will be used to read from
+     * @param cacheBuffer The cache buffer that will store the decrypted contents
+     * @param bufferSize  The length of the data requested
+     * @param aesStream   The stream that will be used to read from
      */
     private int fillBufferPart(CacheBuffer cacheBuffer, long start, int offset, int bufferSize,
                                AesStream aesStream) throws IOException {
@@ -340,7 +343,7 @@ public class AesFileInputStream extends InputStream {
     private synchronized CacheBuffer getCacheBuffer(long position, int count) {
         for (int i = 0; i < buffers.length; i++) {
             CacheBuffer buffer = buffers[i];
-            if (buffer!=null && position >= buffer.startPos && position + count <= buffer.startPos + buffer.count) {
+            if (buffer != null && position >= buffer.startPos && position + count <= buffer.startPos + buffer.count) {
                 // promote buffer to the front
                 lruBuffersIndex.remove((Integer) i);
                 lruBuffersIndex.addFirst(i);
@@ -360,13 +363,41 @@ public class AesFileInputStream extends InputStream {
     }
 
     private long positionStart;
+
+    /**
+     * Get the start position for the stream.
+     *
+     * @return The start position.
+     */
     public long getPositionStart() {
         return positionStart;
     }
+
+    /**
+     * Set the start position for the stream.
+     *
+     * @param pos The start position.
+     */
     public void setPositionStart(long pos) {
         positionStart = pos;
     }
+
     private long positionEnd;
+
+    /**
+     * Get the end position for the stream.
+     *
+     * @return The end position.
+     */
+    public long getPositionEnd() {
+        return positionEnd;
+    }
+
+    /**
+     * Set the end position for the stream.
+     *
+     * @param pos The end position.
+     */
     public void setPositionEnd(long pos) {
         positionEnd = pos;
     }
@@ -407,28 +438,28 @@ public class AesFileInputStream extends InputStream {
     }
 
     /**
-     * Class will be used to cache decrypted data that can later be read via the ReadAt() method
-     * without requesting frequent decryption reads.
+     * Class is used to cache decrypted data that can later be read
+     * without requesting frequent decryption reads from the base stream.
      */
     //TODO: replace the CacheBuffer with a MemoryStream to simplify the code
-    public static class CacheBuffer {
-        public byte[] buffer;
-        public long startPos = 0;
-        public long count = 0;
+    private static class CacheBuffer {
+        byte[] buffer;
+        long startPos = 0;
+        long count = 0;
 
         /**
          * Instantiate a cache buffer.
          *
          * @param bufferSize The buffer size
          */
-        public CacheBuffer(int bufferSize) {
+        CacheBuffer(int bufferSize) {
             buffer = new byte[bufferSize];
         }
 
         /**
          * Clear the buffer.
          */
-        public void clear() {
+        void clear() {
             if (buffer != null)
                 Arrays.fill(buffer, 0, buffer.length, (byte) 0);
         }

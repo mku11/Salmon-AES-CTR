@@ -50,14 +50,26 @@ import java.io.*;
 import java.nio.charset.StandardCharsets;
 import java.util.Base64;
 
+/**
+ * Nonce sequencer for use with the salmon windows service.
+ */
 public class WinClientSequencer implements INonceSequencer, Closeable {
     private String pipeName;
     private RandomAccessFile namedPipe;
 
+    /**
+     * Request type.
+     */
     public enum RequestType {
         CreateSequence, InitSequence, SetMaxNonce, NextNonce, RevokeSequence, GetSequence
     }
 
+    /**
+     * Instanticate a sequencer.
+     *
+     * @param pipeName The name of the pipe to use see Salmon WinService.
+     * @throws Exception If there is a problem with accessing the pipe.
+     */
     public WinClientSequencer(String pipeName) throws Exception {
         this.pipeName = pipeName;
         createPipeClient();
@@ -72,6 +84,12 @@ public class WinClientSequencer implements INonceSequencer, Closeable {
         namedPipe = new RandomAccessFile("\\\\.\\pipe\\" + pipeName, "rw");
     }
 
+    /**
+     * Check if this is a service running as local admin.
+     *
+     * @param pipeName The pipe name.
+     * @return True if running as local admin.
+     */
     public static boolean isServiceAdmin(String pipeName) {
         WinNT.HANDLE hNamedPipe = Kernel32.INSTANCE.CreateFile(
                 "\\\\.\\pipe\\" + pipeName,
@@ -115,6 +133,12 @@ public class WinClientSequencer implements INonceSequencer, Closeable {
         return Advapi32.INSTANCE.EqualSid(pSid, ppSid);
     }
 
+    /**
+     * Create a sequence.
+     *
+     * @param driveId The drive ID.
+     * @param authId  The authorization ID of the drive.
+     */
     public void createSequence(String driveId, String authId) {
         Response res;
         try {
@@ -129,6 +153,12 @@ public class WinClientSequencer implements INonceSequencer, Closeable {
             throw new SequenceException("Could not create sequence: " + res.error);
     }
 
+    /**
+     * Get a sequence by drive ID.
+     *
+     * @param driveId The drive ID.
+     * @return The sequence.
+     */
     public NonceSequence getSequence(String driveId) {
         Response res;
         try {
@@ -147,6 +177,14 @@ public class WinClientSequencer implements INonceSequencer, Closeable {
                 res.nextNonce, res.maxNonce, res.seqStatus);
     }
 
+    /**
+     * Initialize the sequence.
+     *
+     * @param driveId    The drive ID.
+     * @param authId     The auth ID of the device for the drive.
+     * @param startNonce The starting nonce.
+     * @param maxNonce   The maximum nonce.
+     */
     public void initializeSequence(String driveId, String authId, byte[] startNonce, byte[] maxNonce) {
         Response res;
         try {
@@ -162,6 +200,12 @@ public class WinClientSequencer implements INonceSequencer, Closeable {
             throw new SequenceException("Could not init sequence: " + res.error);
     }
 
+    /**
+     * Get the next nonce
+     *
+     * @param driveId The drive ID.
+     * @return The byte array with the next nonce.
+     */
     public byte[] nextNonce(String driveId) {
         Response res;
         try {
@@ -177,6 +221,11 @@ public class WinClientSequencer implements INonceSequencer, Closeable {
         return res.nextNonce;
     }
 
+    /**
+     * Revoke a sequence by drive ID.
+     *
+     * @param driveId The drive Id
+     */
     public void revokeSequence(String driveId) {
         Response res;
         try {
@@ -191,6 +240,14 @@ public class WinClientSequencer implements INonceSequencer, Closeable {
             throw new SequenceException("Could not revoke Sequence: " + res.error);
     }
 
+    /**
+     * Set the max nonce this sequence can produce.
+     *
+     * @param driveId  The drive ID.
+     * @param authId   The auth ID of the device for the drive.
+     * @param maxNonce The maximum nonce.
+     * @throws IOException If there was a problem with the sequencer.
+     */
     public void setMaxNonce(String driveId, String authId, byte[] maxNonce) throws IOException {
         String request = generateRequest(driveId, authId, RequestType.SetMaxNonce,
                 null, maxNonce);
@@ -206,8 +263,8 @@ public class WinClientSequencer implements INonceSequencer, Closeable {
             throw new SequenceException("Could not revoke Sequence: " + res.error);
     }
 
-    public String generateRequest(String driveId, String authId, RequestType type,
-                                  byte[] nextNonce, byte[] maxNonce)
+    private String generateRequest(String driveId, String authId, RequestType type,
+                                   byte[] nextNonce, byte[] maxNonce)
             throws IOException {
         ByteArrayOutputStream stream = new ByteArrayOutputStream();
         XMLStreamWriter out = null;
@@ -244,6 +301,9 @@ public class WinClientSequencer implements INonceSequencer, Closeable {
         return new String(stream.toByteArray());
     }
 
+    /**
+     * Close the sequencer.
+     */
     public void close() {
         if (namedPipe != null) {
             try {
@@ -314,7 +374,7 @@ public class WinClientSequencer implements INonceSequencer, Closeable {
         return new String(buffer, 0, bytesRead);
     }
 
-    public static String getSIDString(WinNT.PSID sid) {
+    private static String getSIDString(WinNT.PSID sid) {
         PointerByReference stringSid = new PointerByReference();
         Advapi32.INSTANCE.ConvertSidToStringSid(sid, stringSid);
         return stringSid.getValue().getWideString(0);

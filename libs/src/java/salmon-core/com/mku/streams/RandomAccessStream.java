@@ -86,6 +86,8 @@ public abstract class RandomAccessStream {
     public abstract void setLength(long value) throws IOException;
 
     /**
+     * Read the contents from the stream into the buffer.
+     *
      * @param buffer The buffer to read into
      * @param offset The offset to start reading into
      * @param count  The number of bytes that were read. If the stream reached the end return -1.
