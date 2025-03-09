@@ -33,22 +33,22 @@ SOFTWARE.
  */
 public enum ProviderType {
     /**
-     * Default AES cipher implementation.
+     * Default platform AES implementation.
      */
     Default,
 
     /**
-     * Salmon builtin AES intrinsics. This needs the SalmonNative library to be loaded. See: <a href="https://github.com/mku11/Salmon-AES-CTR#readme">...</a>
+     * Salmon native AES-NI intrinsics. This needs the SalmonNative library to be loaded. See: <a href="https://github.com/mku11/Salmon-AES-CTR#readme">...</a>
      */
     AesIntrinsics,
 
     /**
-     * Salmon Aes implementation. This needs the SalmonNative library to be loaded. See: <a href="https://github.com/mku11/Salmon-AES-CTR#readme">...</a>
+     * Salmon native AES implementation. This needs the SalmonNative library to be loaded. See: <a href="https://github.com/mku11/Salmon-AES-CTR#readme">...</a>
      */
     Aes,
 
     /**
-     * Salmon builtin AES GPU. This needs OpenCL, a compatible Graphics card, and the SalmonNative library to be loaded. See: <a href="https://github.com/mku11/Salmon-AES-CTR#readme">...</a>
+     * Salmon native AES-GPU implementation. This needs OpenCL, a compatible Graphics card, and the SalmonNative library to be loaded. See: <a href="https://github.com/mku11/Salmon-AES-CTR#readme">...</a>
      */
     AesGPU
 }

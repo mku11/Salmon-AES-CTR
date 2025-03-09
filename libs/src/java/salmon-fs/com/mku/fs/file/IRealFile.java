@@ -35,7 +35,7 @@ import java.text.SimpleDateFormat;
 import java.util.Calendar;
 
 /**
- * Interface that represents a real file. This class is used internally by the virtual disk to
+ * A real file. This class is used internally by the virtual disk to
  * import, store, and export the encrypted files.
  * Extend this to provide an interface to any file system, platform, or API ie: on disk, memory, network, or cloud.
  */
@@ -241,10 +241,9 @@ public interface IRealFile {
      * @return True if directory was created
      */
     boolean mkdir();
-	
-	/**
+
+    /**
      * Reset cached properties
-     *
      */
     void reset();
 
@@ -290,11 +289,11 @@ public interface IRealFile {
     /**
      * Copy a directory recursively
      *
-     * @param destDir The destination directory
-     * @param progressListener The progress listener
-     * @param autoRename The autorename function
+     * @param destDir           The destination directory
+     * @param progressListener  The progress listener
+     * @param autoRename        The autorename function
      * @param autoRenameFolders Apply autorename to folders also (default is true)
-     * @param onFailed Callback if copy failed
+     * @param onFailed          Callback if copy failed
      * @throws IOException Thrown if there is an IO error.
      */
     default void copyRecursively(IRealFile destDir,
@@ -355,11 +354,11 @@ public interface IRealFile {
     /**
      * Move a directory recursively
      *
-     * @param destDir              The target directory
-     * @param progressListener The progress listener
-     * @param autoRename The autorename function
+     * @param destDir           The target directory
+     * @param progressListener  The progress listener
+     * @param autoRename        The autorename function
      * @param autoRenameFolders Apply autorename to folders also (default is true)
-     * @param onFailed Callback when move failed
+     * @param onFailed          Callback when move failed
      * @throws IOException Thrown if there is an IO error.
      */
     default void moveRecursively(IRealFile destDir,
@@ -425,8 +424,9 @@ public interface IRealFile {
 
     /**
      * Delete a directory recursively
+     *
      * @param progressListener The progress listener
-     * @param onFailed Callback when delete failed
+     * @param onFailed         Callback when delete failed
      */
     default void deleteRecursively(TriConsumer<IRealFile, Long, Long> progressListener,
                                    BiConsumer<IRealFile, Exception> onFailed) {
@@ -456,9 +456,9 @@ public interface IRealFile {
     };
 
     /**
-     * Get an auto generated copy of a filename
+     * Provide an alternative file name. Use this to rename files.
      *
-     * @param filename The file name
+     * @param filename The current file name
      * @return The new file name
      */
     static String autoRename(String filename) {

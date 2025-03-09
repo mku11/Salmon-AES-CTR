@@ -49,7 +49,7 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 /**
- * Java Http file implementation.
+ * IRealFile implementation for a remote HTTP file.
  */
 public class HttpFile implements IRealFile {
     public static final String Separator = "/";

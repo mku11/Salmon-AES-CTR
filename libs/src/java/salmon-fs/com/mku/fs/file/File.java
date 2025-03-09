@@ -33,7 +33,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
- * Salmon RealFile implementation for Java.
+ * IRealFile implementation for a local file.
  */
 public class File implements IRealFile {
     private String filePath;

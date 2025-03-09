@@ -31,8 +31,8 @@ import com.mku.salmon.sequence.INonceSequencer;
 import java.io.IOException;
 
 /**
- * Drive implementation for local file systems. This provides a virtual drive implementation
- * that you can use to store and access encrypted files.
+ * VirtualDrive implementation for local file systems.
+ * Use to store and access encrypted files.
  * To create an instance use static methods open() or create().
  */
 public class Drive extends AesDrive {
@@ -89,7 +89,7 @@ public class Drive extends AesDrive {
     }
 
     /**
-     * When authentication succeed.
+     * Called when drive unlock succeeds.
      */
     @Override
     public void onUnlockSuccess() {
@@ -97,7 +97,7 @@ public class Drive extends AesDrive {
     }
 
     /**
-     * When authentication succeeds.
+     * Called when drive unlock fails.
      */
     @Override
     public void onUnlockError() {

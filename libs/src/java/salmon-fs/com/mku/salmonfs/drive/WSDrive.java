@@ -30,9 +30,9 @@ import com.mku.salmon.sequence.INonceSequencer;
 import java.io.IOException;
 
 /**
- * An encrypted VirtualDrive implementation for use with the Salmon Web Service. This provides a virtual drive implementation
- * that you can use to remotely store and access encrypted files.
- * Use static methods open() or create() to create an instance.
+ * VirtualDrive implementation for remote web service file systems.
+ * Use to store and access encrypted files.
+ * To create an instance use static methods open() or create().
  */
 public class WSDrive extends AesDrive {
 
@@ -44,12 +44,12 @@ public class WSDrive extends AesDrive {
     }
 
     /**
-     * Helper method that opens and initializes a HttpDrive
+     * Helper method that opens and initializes an HttpDrive
      *
-     * @param dir             The URL that hosts the drive. This can be either a raw URL
-     *                        or a REST API URL, see Salmon Web Service for usage.
-     * @param password        The password.
-     * @param sequencer       The nonce sequencer that will be used for encryption.
+     * @param dir       The URL that hosts the drive. This can be either a raw URL
+     *                  or a REST API URL, see Salmon Web Service for usage.
+     * @param password  The password.
+     * @param sequencer The nonce sequencer that will be used for encryption.
      * @return The drive.
      * @throws IOException Thrown if error occurs during opening the drive.
      */
@@ -59,8 +59,9 @@ public class WSDrive extends AesDrive {
 
     /**
      * Helper method that creates and initializes a WSDrive
-     * @param dir The directory that will host the drive.
-     * @param password The password.
+     *
+     * @param dir       The directory that will host the drive.
+     * @param password  The password.
      * @param sequencer The nonce sequencer that will be used for encryption.
      * @return The drive.
      * @throws IOException If error occurs during creating the drive.
@@ -91,7 +92,7 @@ public class WSDrive extends AesDrive {
     }
 
     /**
-     * When authentication succeed.
+     * Called when drive unlock succeeds.
      */
     @Override
     public void onUnlockSuccess() {
@@ -99,7 +100,7 @@ public class WSDrive extends AesDrive {
     }
 
     /**
-     * When authentication succeeds.
+     * Called when drive unlock fails.
      */
     @Override
     public void onUnlockError() {

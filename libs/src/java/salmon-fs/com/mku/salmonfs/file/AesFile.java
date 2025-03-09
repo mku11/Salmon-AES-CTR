@@ -70,7 +70,7 @@ public class AesFile implements IVirtualFile {
     private byte[] requestedNonce;
     private Object tag;
 
-	/**
+    /**
      * Provides a file handle that can be used to create encrypted files.
      * Requires a virtual drive that supports the underlying filesystem, see JavaFile implementation.
      *
@@ -79,7 +79,7 @@ public class AesFile implements IVirtualFile {
     public AesFile(IRealFile realFile) {
         this(realFile, null);
     }
-	
+
     /**
      * Provides a file handle that can be used to create encrypted files.
      * Requires a virtual drive that supports the underlying filesystem, see JavaFile implementation.
@@ -98,6 +98,7 @@ public class AesFile implements IVirtualFile {
 
     /**
      * Return the current chunk size requested that will be used for integrity
+     *
      * @return The requested chunk size
      */
     public synchronized Integer getRequestedChunkSize() {
@@ -161,11 +162,11 @@ public class AesFile implements IVirtualFile {
     }
 
     /**
-     * Retrieves a AesStream that will be used for decrypting the file contents.
+     * Retrieves a AesStream that will be used for reading/decrypting the file contents.
      *
      * @return The input stream
-     * @throws IOException Thrown if there is an IO error.
-     * @throws SecurityException Thrown if there is a security exception
+     * @throws IOException        Thrown if there is an IO error.
+     * @throws SecurityException  Thrown if there is a security exception
      * @throws IntegrityException Thrown if the data are corrupt or tampered with.
      */
     public AesStream getInputStream() throws IOException {
@@ -203,9 +204,9 @@ public class AesFile implements IVirtualFile {
      * Get a {@link AesStream} for encrypting/writing contents using the nonce in the header.
      *
      * @return The output stream
-     * @throws SecurityException Thrown if there is a security exception
+     * @throws SecurityException  Thrown if there is a security exception
      * @throws IntegrityException Thrown if the data are corrupt or tampered with.
-     * @throws SequenceException Thrown if there is an error with the nonce sequence
+     * @throws SequenceException  Thrown if there is an error with the nonce sequence
      */
     public synchronized RandomAccessStream getOutputStream() throws IOException {
         return getOutputStream(null);
@@ -218,7 +219,7 @@ public class AesFile implements IVirtualFile {
      *              a unique nonce see {@link AesDrive#getNextNonce()}.
      * @return The output stream.
      * @throws SecurityException If overwriting existing files. See SetAllowOverwrite().
-     * @throws IOException If there is a problem creating the stream.
+     * @throws IOException       If there is a problem creating the stream.
      */
     public synchronized RandomAccessStream getOutputStream(byte[] nonce) throws IOException {
 
@@ -249,6 +250,7 @@ public class AesFile implements IVirtualFile {
 
     /**
      * Returns the current encryption key
+     *
      * @return The encryption key
      */
     public byte[] getEncryptionKey() {
@@ -305,8 +307,9 @@ public class AesFile implements IVirtualFile {
 
     /**
      * Enable integrity with this file.
-     * @param integrity True to enable integrity
-     * @param hashKey The hash key to use
+     *
+     * @param integrity        True to enable integrity
+     * @param hashKey          The hash key to use
      * @param requestChunkSize 0 use default file chunk.
      *                         A positive number to specify integrity chunks.
      * @throws IOException Thrown if there is an IO error.
@@ -350,6 +353,7 @@ public class AesFile implements IVirtualFile {
 
     /**
      * Returns the length of the header in bytes
+     *
      * @return The header length
      */
     private int getHeaderLength() {
@@ -359,6 +363,7 @@ public class AesFile implements IVirtualFile {
 
     /**
      * Returns the initial vector that is used for encryption / decryption
+     *
      * @return The file nonce
      * @throws IOException Thrown if there is an IO error.
      */
@@ -429,6 +434,7 @@ public class AesFile implements IVirtualFile {
 
     /**
      * Return the AES block size for encryption / decryption
+     *
      * @return The block size
      */
     public int getBlockSize() {
@@ -462,10 +468,10 @@ public class AesFile implements IVirtualFile {
      *
      * @param filename The filename to search for
      * @return The child file
-     * @throws SecurityException Thrown if there is a security exception
+     * @throws SecurityException  Thrown if there is a security exception
      * @throws IntegrityException Thrown if the data are corrupt or tampered with.
-     * @throws IOException Thrown if there is an IO error.
-     * @throws AuthException Thrown if there is an Authorization error
+     * @throws IOException        Thrown if there is an IO error.
+     * @throws AuthException      Thrown if there is an Authorization error
      */
     public AesFile getChild(String filename) throws IOException {
         AesFile[] files = listFiles();
@@ -496,7 +502,7 @@ public class AesFile implements IVirtualFile {
      * @return The directory that was created
      * @throws IOException Thrown when error during IO
      */
-    public AesFile createDirectory(String dirName, byte[] key, byte[] dirNameNonce) throws IOException{
+    public AesFile createDirectory(String dirName, byte[] key, byte[] dirNameNonce) throws IOException {
         String encryptedDirName = getEncryptedFilename(dirName, key, dirNameNonce);
         IRealFile realDir = realFile.createDirectory(encryptedDirName);
         return new AesFile(realDir, drive);
@@ -504,27 +510,35 @@ public class AesFile implements IVirtualFile {
 
     /**
      * Return the real file
+     *
+     * @return The real file
      */
     public IRealFile getRealFile() {
         return realFile;
     }
 
     /**
-     * Returns true if this is a file
+     * Check if this is a file.
+     *
+     * @return True if it is a file.
      */
     public boolean isFile() {
         return realFile.isFile();
     }
 
     /**
-     * Returns True if this is a directory
+     * Check if this is a directory.
+     *
+     * @return True if it is a directory.
      */
     public boolean isDirectory() {
         return realFile.isDirectory();
     }
 
     /**
-     * Return the path of the real file stored
+     * Return the virtual path for this file.
+     *
+     * @return The virtual path.
      */
     public String getPath() throws IOException {
         String realPath = realFile.getAbsolutePath();
@@ -532,7 +546,7 @@ public class AesFile implements IVirtualFile {
     }
 
     /**
-     * Returns the virtual path for the drive and the file provided
+     * Returns the virtual path for the drive and the file provided.
      *
      * @param realPath The path of the real file
      */
@@ -550,7 +564,9 @@ public class AesFile implements IVirtualFile {
     }
 
     /**
-     * Return the path of the real file
+     * Return the path of the real file.
+     *
+     * @return The real path.
      */
     public String getRealPath() {
         return realFile.getPath();
@@ -585,7 +601,9 @@ public class AesFile implements IVirtualFile {
     }
 
     /**
-     * Returns the virtual parent directory
+     * Returns the virtual parent directory.
+     *
+     * @return The parent directory.
      */
     public AesFile getParent() {
         try {
@@ -615,7 +633,9 @@ public class AesFile implements IVirtualFile {
     }
 
     /**
-     * Returns the last date modified in milliseconds
+     * Returns the last date modified in milliseconds.
+     *
+     * @return The last date modified in milliseconds.
      */
     public long getLastDateTimeModified() {
         return realFile.lastModified();
@@ -623,6 +643,8 @@ public class AesFile implements IVirtualFile {
 
     /**
      * Return the virtual size of the file excluding the header and hash signatures.
+     *
+     * @return The size in bytes.
      */
     public long getSize() throws IOException {
         long rSize = realFile.length();
@@ -650,20 +672,20 @@ public class AesFile implements IVirtualFile {
     /**
      * Create a file under this directory
      *
-     * @param realFilename The real file name of the file (encrypted)
+     * @param filename The file name of the file.
      */
     //TODO: files with real same name can exists we can add checking all files in the dir
     // and throw an Exception though this could be an expensive operation
-    public AesFile createFile(String realFilename) throws IOException {
+    public AesFile createFile(String filename) throws IOException {
         if (drive == null)
             throw new SecurityException("Need to pass the key, filename nonce, and file nonce if not using a drive");
-        return createFile(realFilename, null, null, null);
+        return createFile(filename, null, null, null);
     }
 
     /**
      * Create a file under this directory
      *
-     * @param realFilename  The real file name of the file (encrypted)
+     * @param filename      The file name.
      * @param key           The key that will be used for encryption
      * @param fileNameNonce The nonce for the encrypting the filename
      * @param fileNonce     The nonce for the encrypting the file contents
@@ -672,9 +694,9 @@ public class AesFile implements IVirtualFile {
      */
     //TODO: files with real same name can exists we can add checking all files in the dir
     // and throw an Exception though this could be an expensive operation
-    public AesFile createFile(String realFilename, byte[] key, byte[] fileNameNonce, byte[] fileNonce)
+    public AesFile createFile(String filename, byte[] key, byte[] fileNameNonce, byte[] fileNonce)
             throws IOException {
-        String encryptedFilename = getEncryptedFilename(realFilename, key, fileNameNonce);
+        String encryptedFilename = getEncryptedFilename(filename, key, fileNameNonce);
         IRealFile file = realFile.createFile(encryptedFilename);
         AesFile aesFile = new AesFile(file, drive);
         aesFile.setEncryptionKey(key);
@@ -713,6 +735,8 @@ public class AesFile implements IVirtualFile {
 
     /**
      * Returns true if this file exists
+     *
+     * @return True if exists.
      */
     public boolean exists() {
         if (realFile == null)
@@ -815,13 +839,13 @@ public class AesFile implements IVirtualFile {
      * @return The file
      * @throws IOException Thrown if there is an IO error.
      */
-    public AesFile move(IVirtualFile dir, BiConsumer<Long, Long> OnProgressListener) throws IOException{
+    public AesFile move(IVirtualFile dir, BiConsumer<Long, Long> OnProgressListener) throws IOException {
         IRealFile newRealFile = realFile.move(dir.getRealFile(), null, OnProgressListener);
         return new AesFile(newRealFile, drive);
     }
 
     /**
-     * Copy a file to another directory.
+     * Copy file to another directory.
      *
      * @param dir                Target directory.
      * @param OnProgressListener Observer to notify when copy progress changes.
@@ -837,10 +861,10 @@ public class AesFile implements IVirtualFile {
     /**
      * Copy a directory recursively
      *
-     * @param dest The destination directory
+     * @param dest             The destination directory
      * @param progressListener The progress listener
-     * @param autoRename The autorename function
-     * @param onFailed The callback when file copying has failed
+     * @param autoRename       The autorename function
+     * @param onFailed         The callback when file copying has failed
      */
     public void copyRecursively(IVirtualFile dest,
                                 TriConsumer<IVirtualFile, Long, Long> progressListener,
@@ -875,10 +899,10 @@ public class AesFile implements IVirtualFile {
     /**
      * Move a directory recursively
      *
-     * @param dest The destination directory
+     * @param dest             The destination directory
      * @param progressListener The progress listener
-     * @param autoRename The autorename function
-     * @param onFailed Callback when move fails
+     * @param autoRename       The autorename function
+     * @param onFailed         Callback when move fails
      */
     public void moveRecursively(IVirtualFile dest,
                                 TriConsumer<IVirtualFile, Long, Long> progressListener,
@@ -912,11 +936,16 @@ public class AesFile implements IVirtualFile {
                 renameRealFile, autoRenameFolders, onFailedRealFile);
     }
 
+    /**
+     * Delete all subdirectories and files.
+     *
+     * @param progressListener Called when progress is changed.
+     * @param onFailed         Called when file fails during deletion.
+     */
     public void deleteRecursively(TriConsumer<IVirtualFile, Long, Long> progressListener,
-                           BiConsumer<IVirtualFile, Exception> onFailed) {
+                                  BiConsumer<IVirtualFile, Exception> onFailed) {
         BiConsumer<IRealFile, Exception> onFailedRealFile = null;
-        if (onFailed != null)
-        {
+        if (onFailed != null) {
             onFailedRealFile = (file, ex) ->
             {
                 if (onFailed != null)
@@ -934,6 +963,7 @@ public class AesFile implements IVirtualFile {
     /**
      * Returns the minimum part size that can be encrypted / decrypted in parallel
      * aligning to the integrity chunk size if available.
+     *
      * @return The minimum part size
      * @throws IOException Thrown if there is an IO error.
      */
@@ -963,6 +993,14 @@ public class AesFile implements IVirtualFile {
     /// </summary>
     /// <param name="file"></param>
     /// <returns></returns>
+
+    /**
+     * Provide an alternative file name for an AesFile. Use this to rename files.
+     *
+     * @param file The file
+     * @return The new file name
+     * @throws Exception If a problem occurs
+     */
     public static String autoRename(AesFile file) throws Exception {
         String filename = IRealFile.autoRename(file.getBaseName());
         byte[] nonce = file.getDrive().getNextNonce();

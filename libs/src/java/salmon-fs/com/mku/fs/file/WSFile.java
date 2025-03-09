@@ -43,18 +43,18 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
- * Salmon RealFile implementation for Java.
+ * IRealFile implementation for a remote web service file.
  */
 public class WSFile implements IRealFile {
     private static final String PATH = "path";
     private static final String DEST_DIR = "destDir";
     private static final String FILENAME = "filename";
     public static String Separator = "/";
-    
+
     private String filePath;
     private Response response;
-	private String servicePath;
-	public static CloseableHttpClient client = HttpClients.createDefault();
+    private String servicePath;
+    public static CloseableHttpClient client = HttpClients.createDefault();
 
     public String getServicePath() {
         return servicePath;
@@ -87,7 +87,7 @@ public class WSFile implements IRealFile {
     }
 
     private Response getResponse() throws Exception {
-        if(this.response == null) {
+        if (this.response == null) {
             URIBuilder uriBuilder = new URIBuilder(this.servicePath + "/api/info");
             uriBuilder.addParameter(PATH, this.filePath);
             HttpGet httpGet = new HttpGet(uriBuilder.build());
@@ -178,7 +178,7 @@ public class WSFile implements IRealFile {
      * @return True if deletion is successful.
      */
     public boolean delete() {
-		this.reset();
+        this.reset();
         if (isDirectory()) {
             IRealFile[] files = listFiles();
             for (IRealFile file : files) {
@@ -271,7 +271,7 @@ public class WSFile implements IRealFile {
      * @throws FileNotFoundException Thrown if file not found
      */
     public RandomAccessStream getInputStream() throws FileNotFoundException {
-		this.reset();
+        this.reset();
         return new WSFileStream(this, "r");
     }
 
@@ -282,7 +282,7 @@ public class WSFile implements IRealFile {
      * @throws FileNotFoundException Thrown if file not found
      */
     public RandomAccessStream getOutputStream() throws FileNotFoundException {
-		this.reset();
+        this.reset();
         return new WSFileStream(this, "rw");
     }
 
@@ -514,7 +514,7 @@ public class WSFile implements IRealFile {
                 Response response = new Response(new String(httpResponse.getEntity().getContent().readAllBytes()),
                         httpResponse.getAllHeaders());
                 newFile = new WSFile(response.path, servicePath, credentials);
-				this.reset();
+                this.reset();
                 return newFile;
             } catch (Exception e) {
                 throw new RuntimeException(e);
@@ -585,7 +585,7 @@ public class WSFile implements IRealFile {
                 Response response = new Response(new String(httpResponse.getEntity().getContent().readAllBytes()),
                         httpResponse.getAllHeaders());
                 newFile = new WSFile(response.path, this.servicePath, credentials);
-				this.reset();
+                this.reset();
                 return newFile;
             } catch (URISyntaxException e) {
                 throw new RuntimeException(e);
@@ -619,7 +619,7 @@ public class WSFile implements IRealFile {
     public boolean renameTo(String newFilename) {
         CloseableHttpResponse httpResponse = null;
         try {
-			this.reset();
+            this.reset();
             URIBuilder uriBuilder = new URIBuilder(this.servicePath + "/api/rename");
             uriBuilder.addParameter(PATH, this.filePath);
             uriBuilder.addParameter(FILENAME, newFilename);
@@ -651,7 +651,7 @@ public class WSFile implements IRealFile {
     public boolean mkdir() {
         CloseableHttpResponse httpResponse = null;
         try {
-			this.reset();
+            this.reset();
             URIBuilder uriBuilder = new URIBuilder(this.servicePath + "/api/mkdir");
             uriBuilder.addParameter(PATH, this.filePath);
             HttpPost httpPost = new HttpPost(uriBuilder.build());
@@ -674,17 +674,16 @@ public class WSFile implements IRealFile {
         return false;
     }
 
-	/**
+    /**
      * Reset cached properties
-     *
      */
     public void reset() {
-		this.response = null;
-	}
-	
+        this.response = null;
+    }
+
     private String getChildPath(String filename) {
         String nFilepath = this.filePath;
-        if(!nFilepath.endsWith(WSFile.Separator))
+        if (!nFilepath.endsWith(WSFile.Separator))
             nFilepath += WSFile.Separator;
         nFilepath += filename;
         return nFilepath;
@@ -702,7 +701,7 @@ public class WSFile implements IRealFile {
         String encoding = new Base64().encode((credentials.getServiceUser() + ":" + credentials.getServicePassword()).getBytes());
         httpRequest.setHeader(HttpHeaders.AUTHORIZATION, "Basic " + encoding);
     }
-	
+
     private void checkStatus(HttpResponse httpResponse, int status) throws IOException {
         if (httpResponse.getStatusLine().getStatusCode() != status)
             throw new IOException(httpResponse.getStatusLine().getStatusCode()
@@ -738,19 +737,38 @@ public class WSFile implements IRealFile {
         }
     }
 
+    /**
+     * Web service credentials.
+     */
     public static class Credentials {
         private final String serviceUser;
 
+        /**
+         * Get the user name.
+         *
+         * @return The user name.
+         */
         public String getServiceUser() {
             return serviceUser;
         }
 
+        /**
+         * Get the user password.
+         *
+         * @return The user password.
+         */
         public String getServicePassword() {
             return servicePassword;
         }
 
         private final String servicePassword;
 
+        /**
+         * Instantiate a Credentials object.
+         *
+         * @param serviceUser     The user name.
+         * @param servicePassword The user password.
+         */
         public Credentials(String serviceUser, String servicePassword) {
             this.serviceUser = serviceUser;
             this.servicePassword = servicePassword;

@@ -29,9 +29,9 @@ import com.mku.fs.file.File;
 import java.io.IOException;
 
 /**
- * A VirtualDrive implementation for use with remote HTTP drives. This provides a virtual drive implementation
- * that you can use to remotely store and access encrypted files.
- * Use static methods open() or create() to create an instance.
+ * VirtualDrive implementation for remote HTTP file systems.
+ * Use to store and access encrypted files.
+ * To create an instance use static methods open() or create().
  */
 public class HttpDrive extends AesDrive {
 
@@ -43,11 +43,11 @@ public class HttpDrive extends AesDrive {
     }
 
     /**
-     * Helper method that opens and initializes a HttpDrive
+     * Helper method that opens and initializes an HttpDrive
      *
-     * @param dir             The URL that hosts the drive. This can be either a raw URL
-     *                        or a REST API URL, see Salmon Web Service for usage.
-     * @param password        The password.
+     * @param dir      The URL that hosts the drive. This can be either a raw URL
+     *                 or a REST API URL, see Salmon Web Service for usage.
+     * @param password The password.
      * @return The drive.
      * @throws IOException Thrown if error occurs during opening the drive.
      */
@@ -77,7 +77,7 @@ public class HttpDrive extends AesDrive {
     }
 
     /**
-     * When authentication succeed.
+     * Called when drive unlock succeeds.
      */
     @Override
     public void onUnlockSuccess() {
@@ -85,7 +85,7 @@ public class HttpDrive extends AesDrive {
     }
 
     /**
-     * When authentication succeeds.
+     * Called when drive unlock fails.
      */
     @Override
     public void onUnlockError() {

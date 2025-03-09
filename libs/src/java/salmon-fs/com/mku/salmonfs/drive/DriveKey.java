@@ -48,15 +48,16 @@ public class DriveKey {
             Arrays.fill(hashKey, 0, hashKey.length, (byte) 0);
         hashKey = null;
 
-        if(masterKey != null)
+        if (masterKey != null)
             Arrays.fill(masterKey, 0, masterKey.length, (byte) 0);
         masterKey = null;
-        
+
         iterations = 0;
     }
 
     /**
      * Function returns the encryption key that will be used to encrypt/decrypt the files
+     *
      * @return The encryption key
      */
     public byte[] getDriveKey() {
@@ -65,6 +66,7 @@ public class DriveKey {
 
     /**
      * Function returns the hash key that will be used to sign the file chunks
+     *
      * @return The hash key
      */
     public byte[] getHashKey() {
@@ -73,6 +75,7 @@ public class DriveKey {
 
     /**
      * Set the drive key.
+     *
      * @param driveKey The drive key
      */
     public void setDriveKey(byte[] driveKey) {
@@ -81,6 +84,7 @@ public class DriveKey {
 
     /**
      * Set the hash key.
+     *
      * @param hashKey The hash key
      */
     public void setHashKey(byte[] hashKey) {
@@ -89,6 +93,7 @@ public class DriveKey {
 
     /**
      * Get the master key.
+     *
      * @return The master key
      */
     public byte[] getMasterKey() {
@@ -97,6 +102,7 @@ public class DriveKey {
 
     /**
      * Set the master key.
+     *
      * @param masterKey The master key
      */
     public void setMasterKey(byte[] masterKey) {
@@ -105,6 +111,7 @@ public class DriveKey {
 
     /**
      * Get the number of iterations for the master key derivation.
+     *
      * @return The iterations
      */
     public int getIterations() {
@@ -113,6 +120,7 @@ public class DriveKey {
 
     /**
      * Set the number of iterations for the master key derivation.
+     *
      * @param iterations The iterations
      */
     public void setIterations(int iterations) {
