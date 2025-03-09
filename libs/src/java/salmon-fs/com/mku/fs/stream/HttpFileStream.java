@@ -35,8 +35,7 @@ import org.apache.http.impl.client.HttpClients;
 import java.io.*;
 
 /**
- * An advanced Salmon File Stream implementation for java files.
- * This class is used internally for random file access of remote physical (real) files.
+ * File stream implementation for remote HTTP files.
  */
 public class HttpFileStream extends RandomAccessStream {
     private CloseableHttpClient client;
@@ -93,8 +92,8 @@ public class HttpFileStream extends RandomAccessStream {
                 uriBuilder = new URIBuilder(file.getPath());
                 HttpGet httpGet = new HttpGet(uriBuilder.build());
                 setDefaultHeaders(httpGet);
-				if(this.position > 0)
-					httpGet.addHeader("Range", "bytes=" + this.position + "-");
+                if (this.position > 0)
+                    httpGet.addHeader("Range", "bytes=" + this.position + "-");
                 httpResponse = client.execute(httpGet);
                 checkStatus(httpResponse, startPosition > 0 ? HttpStatus.SC_PARTIAL_CONTENT : HttpStatus.SC_OK);
                 this.inputStream = new BufferedInputStream(httpResponse.getEntity().getContent());

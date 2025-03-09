@@ -67,6 +67,10 @@ public class FileSequencer implements INonceSequencer {
         }
     }
 
+    /**
+     * Get the file used by this sequencer.
+     * @return The file.
+     */
     public IRealFile getSequenceFile() {
         return sequenceFile;
     }

@@ -41,8 +41,7 @@ import org.apache.http.impl.client.HttpClients;
 import java.io.*;
 
 /**
- * An advanced Salmon File Stream implementation for java files.
- * This class is used internally for random file access of remote physical (real) files.
+ * File stream implementation for web service files.
  */
 public class WSFileStream extends RandomAccessStream {
     private static final String PATH = "path";

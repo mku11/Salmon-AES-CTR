@@ -33,8 +33,7 @@ import java.nio.ByteBuffer;
 import java.nio.channels.FileChannel;
 
 /**
- * An advanced Salmon File Stream implementation for java files.
- * This class is used internally for random file access of physical (real) files.
+ * File stream implementation for local files.
  */
 public class FileStream extends RandomAccessStream {
 

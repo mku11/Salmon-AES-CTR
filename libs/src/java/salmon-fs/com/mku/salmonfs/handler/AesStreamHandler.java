@@ -49,7 +49,7 @@ public class AesStreamHandler extends URLStreamHandler {
 
     private final HashMap<String, IVirtualFile> requests = new HashMap<>();
 
-    public AesStreamHandler() {
+    private AesStreamHandler() {
         URL.setURLStreamHandlerFactory(protocol -> {
             if (protocol.equals("http"))
                 return this;
@@ -57,6 +57,11 @@ public class AesStreamHandler extends URLStreamHandler {
         });
     }
 
+    /**
+     * Get the instance.
+     *
+     * @return
+     */
     public static AesStreamHandler getInstance() {
         if (instance == null) {
             instance = new AesStreamHandler();
@@ -64,12 +69,21 @@ public class AesStreamHandler extends URLStreamHandler {
         return instance;
     }
 
+    /**
+     * Register a path to be handled by this handler.
+     * @param path The URL path
+     * @param file The file associated with this path.
+     */
     public void register(String path, IVirtualFile file) {
         requests.put(path, file);
     }
 
+    /**
+     * Unregister a path.
+     * @param path The URL path
+     */
     public void unregister(String path) {
-        if(path!= null)
+        if (path != null)
             requests.remove(path);
         else {
             for (Map.Entry<String, IVirtualFile> entry : requests.entrySet()) {
@@ -92,7 +106,7 @@ public class AesStreamHandler extends URLStreamHandler {
 
             private IVirtualFile getFile() throws IOException {
                 String path = u.toString();
-                if(!requests.containsKey(path))
+                if (!requests.containsKey(path))
                     throw new IOException("Could not find path in registered requests");
                 return requests.get(path);
             }
@@ -100,7 +114,7 @@ public class AesStreamHandler extends URLStreamHandler {
             @Override
             public void disconnect() {
                 try {
-                    if(stream !=null)
+                    if (stream != null)
                         stream.close();
                     stream = null;
                 } catch (IOException e) {
@@ -112,6 +126,7 @@ public class AesStreamHandler extends URLStreamHandler {
             public boolean usingProxy() {
                 return false;
             }
+
             @Override
             public void connect() {
                 // nop
