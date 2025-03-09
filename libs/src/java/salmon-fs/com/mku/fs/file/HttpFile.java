@@ -60,7 +60,7 @@ public class HttpFile implements IRealFile {
 
     private String filePath;
 	private CloseableHttpResponse response;
-    public static CloseableHttpClient client = HttpClients.createDefault();
+    private static CloseableHttpClient client = HttpClients.createDefault();
 
     /**
      * Instantiate a real file represented by the filepath provided (Remote read-write drive)
