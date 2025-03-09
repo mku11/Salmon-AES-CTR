@@ -282,11 +282,6 @@ public abstract class FileExporter {
         }
     }
 
-    @Override
-    protected void finalize() {
-        close();
-    }
-
     /**
      * Close exporter and release resources.
      */

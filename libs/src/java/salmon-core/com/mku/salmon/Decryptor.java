@@ -325,9 +325,4 @@ public class Decryptor {
         if (executor != null)
             executor.shutdownNow();
     }
-
-    @Override
-    protected void finalize() {
-        close();
-    }
 }

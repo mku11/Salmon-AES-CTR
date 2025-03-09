@@ -327,8 +327,4 @@ public class Encryptor {
         if (executor != null)
             executor.shutdownNow();
     }
-    @Override
-    protected void finalize() {
-        close();
-    }
 }

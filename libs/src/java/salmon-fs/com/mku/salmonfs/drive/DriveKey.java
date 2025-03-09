@@ -56,18 +56,6 @@ public class DriveKey {
     }
 
     /**
-     * Finalize.
-     * @throws Throwable Thrown if error occurs during finalization
-     */
-    //TODO: replace with Phantom References
-    @SuppressWarnings("deprecation")
-    @Override
-    protected void finalize() throws Throwable {
-        clear();
-        super.finalize();
-    }
-
-    /**
      * Function returns the encryption key that will be used to encrypt/decrypt the files
      * @return The encryption key
      */

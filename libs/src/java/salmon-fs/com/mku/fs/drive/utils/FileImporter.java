@@ -280,11 +280,6 @@ public abstract class FileImporter {
         }
     }
 
-    @Override
-    protected void finalize() {
-        close();
-    }
-
     /**
      * Stops the current import
      */
