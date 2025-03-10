@@ -31,11 +31,6 @@ import com.mku.salmon.SecurityException;
 public class Password {
 
     /**
-     * WARNING! SHA1 is not secure anymore enable only if you know what you're doing!
-     */
-    private static final boolean ENABLE_SHA1 = false;
-
-    /**
      * Global PBKDF algorithm option that will be used for the master key derivation.
      */
     private static PbkdfAlgo pbkdfAlgo = PbkdfAlgo.SHA256;
@@ -107,8 +102,6 @@ public class Password {
      * @throws SecurityException Thrown if there is a security exception
      */
     public static byte[] getKeyFromPassword(String password, byte[] salt, int iterations, int outputBytes) {
-        if (pbkdfAlgo == PbkdfAlgo.SHA1 && !ENABLE_SHA1)
-            throw new RuntimeException("Cannot use SHA1, SHA1 is not secure anymore use SHA256!");
         return provider.getKey(password, salt, iterations, outputBytes, pbkdfAlgo);
     }
 

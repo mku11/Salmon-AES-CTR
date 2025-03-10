@@ -5,11 +5,6 @@ package com.mku.salmon.password;
  */
 public enum PbkdfAlgo {
     /**
-     * SHA1 hashing. DO NOT USE.
-     */
-    @Deprecated
-    SHA1,
-    /**
      * SHA256 hashing.
      */
     SHA256
