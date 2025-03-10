@@ -33,12 +33,6 @@ public interface IPbkdfProvider {
      * Cipher key for SHA256. See javax.crypto.SecretKeyFactory.
      */
     String PBKDF_SHA256 = "PBKDF2WithHmacSHA256";
-    /**
-     * Cipher key for SHA1. See javax.crypto.SecretKeyFactory.
-     * WARNING! SHA1 is considered insecure! Use PBKDF_SHA256 instead.
-     */
-    @Deprecated
-    String PBKDF_SHA1 = "PBKDF2WithHmacSHA1";
 
     /**
      * Get the PBKDF cipher algorithm string.
@@ -49,8 +43,6 @@ public interface IPbkdfProvider {
     @SuppressWarnings("deprecation")
     static String getPbkdfAlgoString(PbkdfAlgo pbkdfAlgo) {
         switch (pbkdfAlgo) {
-            case SHA1:
-                return IPbkdfProvider.PBKDF_SHA1;
             case SHA256:
                 return IPbkdfProvider.PBKDF_SHA256;
         }
