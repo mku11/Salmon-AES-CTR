@@ -46,8 +46,7 @@ public class AndroidDrive extends Drive {
     private static Context context;
 
     /**
-     * Initialize the Android Drive. This needs to run before you attempt to
-     * create or open any virtual drives.
+     * Initialize the Android Drive before creating or opening any virtual drives.
      *
      * @param context The context
      */
