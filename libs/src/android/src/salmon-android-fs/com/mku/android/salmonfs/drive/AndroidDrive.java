@@ -1,4 +1,4 @@
-package com.mku.android.salmon.drive;
+package com.mku.android.salmonfs.drive;
 /*
 MIT License
 
@@ -28,20 +28,18 @@ import android.net.Uri;
 
 import androidx.documentfile.provider.DocumentFile;
 
-import com.mku.android.file.AndroidFile;
-import com.mku.android.file.AndroidSharedFileObserver;
-import com.mku.file.JavaFile;
-import com.mku.salmon.SalmonDrive;
-import com.mku.salmon.SalmonFile;
-import com.mku.file.IRealFile;
-import com.mku.salmon.utils.SalmonFileExporter;
-
-import java.io.File;
+import com.mku.android.fs.file.AndroidFile;
+import com.mku.android.fs.file.AndroidSharedFileObserver;
+import com.mku.fs.file.File;
+import com.mku.fs.file.IFile;
+import com.mku.salmonfs.drive.Drive;
+import com.mku.salmonfs.drive.utils.AesFileExporter;
+import com.mku.salmonfs.file.AesFile;
 
 /**
  * Implementation of a virtual drive for android.
  */
-public class AndroidDrive extends SalmonDrive {
+public class AndroidDrive extends Drive {
     private static final String TAG = AndroidDrive.class.getName();
     private static final int ENC_BUFFER_SIZE = 5 * 1024 * 1024;
     private static final int ENC_THREADS = 4;
@@ -50,6 +48,7 @@ public class AndroidDrive extends SalmonDrive {
     /**
      * Initialize the Android Drive. This needs to run before you attempt to
      * create or open any virtual drives.
+     *
      * @param context The context
      */
     public static void initialize(Context context) {
@@ -58,9 +57,10 @@ public class AndroidDrive extends SalmonDrive {
 
     /**
      * Get the Android context.
+     *
      * @return The Android context
      */
-    public static Context getContext(){
+    public static Context getContext() {
         return context;
     }
 
@@ -73,41 +73,44 @@ public class AndroidDrive extends SalmonDrive {
 
     /**
      * Copy file to shared folder
-     * @param salmonFile The file
+     *
+     * @param aesFile The file
      * @return The shared file
      * @throws Exception Thrown when error occured
      */
-    public File copyToSharedFolder(SalmonFile salmonFile) throws Exception {
-        File privateDir = new File(getPrivateDir().getAbsolutePath());
-        java.io.File cacheFile = new java.io.File(privateDir, salmonFile.getBaseName());
+    public java.io.File copyToSharedFolder(AesFile aesFile) throws Exception {
+        java.io.File privateDir = new java.io.File(getPrivateDir().getDisplayPath());
+        java.io.File cacheFile = new java.io.File(privateDir, aesFile.getName());
         AndroidSharedFileObserver.removeFileObserver(cacheFile);
         cacheFile.delete();
 
         AndroidFile sharedDir = new AndroidFile(DocumentFile.fromFile(privateDir), context);
-        SalmonFileExporter fileExporter = new SalmonFileExporter(ENC_BUFFER_SIZE, ENC_THREADS);
-        fileExporter.exportFile(salmonFile, sharedDir, null,  false, true, null);
+        AesFileExporter fileExporter = new AesFileExporter(ENC_BUFFER_SIZE, ENC_THREADS);
+        fileExporter.exportFile(aesFile, sharedDir, null, false, true, null);
         return cacheFile;
     }
 
     /**
      * Get the private directory that will be used for sharing encrypted context with
      * other apps on the android device.
+     *
      * @return The private directory
      */
-    public IRealFile getPrivateDir() {
+    public IFile getPrivateDir() {
         java.io.File sharedDir = new java.io.File(context.getCacheDir(), getShareDirectoryName());
         if (!sharedDir.exists())
             sharedDir.mkdir();
-        return new JavaFile(sharedDir.getAbsolutePath());
+        return new File(sharedDir.getAbsolutePath());
     }
 
     /**
      * Get the real file hosted on the android device.
-     * @param uri The real file uri
+     *
+     * @param uri         The real file uri
      * @param isDirectory True if filepath corresponds to a directory.
      * @return The real file
      */
-    public IRealFile getRealFile(String uri, boolean isDirectory) {
+    public IFile getRealFile(String uri, boolean isDirectory) {
         DocumentFile docFile;
         if (isDirectory)
             docFile = DocumentFile.fromTreeUri(context, Uri.parse(uri));
@@ -138,6 +141,7 @@ public class AndroidDrive extends SalmonDrive {
     /**
      * Clear the cache and the private folder that is used to share files with
      * other apps.
+     *
      * @param file
      */
     private void clearCache(java.io.File file) {

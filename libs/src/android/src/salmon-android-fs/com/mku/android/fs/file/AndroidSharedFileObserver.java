@@ -1,4 +1,4 @@
-package com.mku.android.file;
+package com.mku.android.fs.file;
 /*
 MIT License
 
@@ -30,7 +30,7 @@ import androidx.annotation.Nullable;
 import androidx.annotation.RequiresApi;
 
 import com.mku.func.Consumer;
-import com.mku.salmon.SalmonFile;
+import com.mku.salmonfs.file.AesFile;
 
 import java.io.File;
 import java.util.HashMap;
@@ -48,7 +48,7 @@ public class AndroidSharedFileObserver extends FileObserver {
     /**
      * The associated salmon file.
      */
-    private SalmonFile salmonFile;
+    private AesFile aesFile;
 
     /**
      * The callback to fire when the shared file changes.
@@ -58,29 +58,29 @@ public class AndroidSharedFileObserver extends FileObserver {
     /**
      * Instantiate a file observer associated with an encrypted file.
      * @param file The shared file.
-     * @param salmonFile The SalmonFile that is associated. This file will be updated with
+     * @param aesFile The AesFile that is associated. This file will be updated with
      *                   the contents of the shared file after the file contents are changed.
      * @param onFileContentsChanged Callback is called the shared file contents change.
      */
     @RequiresApi(api = Build.VERSION_CODES.Q)
-    private AndroidSharedFileObserver(File file, SalmonFile salmonFile,
+    private AndroidSharedFileObserver(File file, AesFile aesFile,
                                       Consumer<AndroidSharedFileObserver> onFileContentsChanged) {
         super(file, FileObserver.CLOSE_WRITE);
-        this.salmonFile = salmonFile;
+        this.aesFile = aesFile;
         this.onFileContentsChanged = onFileContentsChanged;
     }
 
     /**
      * Instantiate a file observer associated with an encrypted file.
      * @param filePath The filepath for the shared filed.
-     * @param salmonFile The SalmonFile that is associated. This file will be updated with
+     * @param aesFile The AesFile that is associated. This file will be updated with
      *                   the contents of the shared file after the file contents are changed.
      * @param onFileContentsChanged Callback is called the shared file contents change.
      */
-    private AndroidSharedFileObserver(String filePath, SalmonFile salmonFile,
+    private AndroidSharedFileObserver(String filePath, AesFile aesFile,
                                       Consumer<AndroidSharedFileObserver> onFileContentsChanged) {
         super(filePath, FileObserver.CLOSE_WRITE);
-        this.salmonFile = salmonFile;
+        this.aesFile = aesFile;
         this.onFileContentsChanged = onFileContentsChanged;
     }
 
@@ -88,19 +88,19 @@ public class AndroidSharedFileObserver extends FileObserver {
      * Create a file observer that will detect if the file contents of a shared salmon file have changed
      *
      * @param cacheFile             The temporary private decrypted cached file
-     * @param salmonFile            The encrypted file that is associated with the shared file
+     * @param aesFile            The encrypted file that is associated with the shared file
      * @param onFileContentsChanged Action notifier when file contents change
      * @return The shared file observer
      */
-    public static AndroidSharedFileObserver createFileObserver(File cacheFile, SalmonFile salmonFile,
+    public static AndroidSharedFileObserver createFileObserver(File cacheFile, AesFile aesFile,
                                                                Consumer<AndroidSharedFileObserver> onFileContentsChanged) {
         AndroidSharedFileObserver fileObserver;
         if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.Q) {
             fileObserver = new AndroidSharedFileObserver(cacheFile,
-                    salmonFile, onFileContentsChanged);
+                    aesFile, onFileContentsChanged);
         } else {
             fileObserver = new AndroidSharedFileObserver(cacheFile.getPath(),
-                    salmonFile, onFileContentsChanged);
+                    aesFile, onFileContentsChanged);
         }
         fileObservers.put(cacheFile.getPath(), fileObserver);
         return fileObserver;
@@ -142,16 +142,16 @@ public class AndroidSharedFileObserver extends FileObserver {
      * Returns the encrypted salmon file that is associated with the shared file
      * @return The file
      */
-    public SalmonFile getSalmonFile() {
-        return salmonFile;
+    public AesFile getAesFile() {
+        return aesFile;
     }
 
     /**
      * Set the salmon file associated with the shared file to observer.
-     * @param salmonFile The file
+     * @param aesFile The file
      */
-    public void setSalmonFile(SalmonFile salmonFile) {
-        this.salmonFile = salmonFile;
+    public void setAesFile(AesFile aesFile) {
+        this.aesFile = aesFile;
     }
 }
 

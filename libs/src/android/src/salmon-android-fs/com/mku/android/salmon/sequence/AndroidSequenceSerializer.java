@@ -1,4 +1,4 @@
-package com.mku.android.sequence;
+package com.mku.android.salmon.sequence;
 /*
 MIT License
 
@@ -35,9 +35,10 @@ import java.io.StringWriter;
 
 import android.util.Base64;
 
-import com.mku.sequence.SequenceException;
-import com.mku.sequence.INonceSequenceSerializer;
-import com.mku.sequence.NonceSequence;
+
+import com.mku.salmon.sequence.INonceSequenceSerializer;
+import com.mku.salmon.sequence.NonceSequence;
+import com.mku.salmon.sequence.SequenceException;
 
 import java.util.HashMap;
 import java.util.Map;

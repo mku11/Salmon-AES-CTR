@@ -1,4 +1,4 @@
-package com.mku.android.file;
+package com.mku.android.fs.file;
 /*
 MIT License
 
@@ -32,8 +32,8 @@ import android.provider.DocumentsContract;
 import androidx.documentfile.provider.DocumentFile;
 
 import com.mku.android.streams.AndroidFileStream;
-import com.mku.android.salmon.drive.AndroidDrive;
-import com.mku.file.IRealFile;
+import com.mku.android.salmonfs.drive.AndroidDrive;
+import com.mku.fs.file.IFile;
 import com.mku.func.BiConsumer;
 import com.mku.streams.RandomAccessStream;
 
@@ -43,10 +43,10 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
- * Implementation of the IRealFile for Android using Storage Access Framework that supports read/write to external SD cards.
- * This class is used by the AndroidDrive implementation so you can use SalmonFile wrapper transparently
+ * Implementation of the IFile for Android using Storage Access Framework that supports read/write to external SD cards.
+ * This class is used by the AndroidDrive implementation so you can use AesFile wrapper transparently
  */
-public class AndroidFile implements IRealFile {
+public class AndroidFile implements IFile {
     //TODO: remove the context
     private final Context context;
     private DocumentFile documentFile;
@@ -67,9 +67,10 @@ public class AndroidFile implements IRealFile {
     public AndroidFile(DocumentFile documentFile, Context context) {
         this.documentFile = documentFile;
         this.context = context;
+
     }
 
-    public IRealFile createDirectory(String dirName) {
+    public IFile createDirectory(String dirName) {
         DocumentFile dir = documentFile.createDirectory(dirName);
         if (dir == null)
             return null;
@@ -79,7 +80,7 @@ public class AndroidFile implements IRealFile {
 
     }
 
-    public IRealFile createFile(String filename) {
+    public IFile createFile(String filename) {
         DocumentFile doc = documentFile.createFile("*/*", filename);
         // for some reason android storage access framework even though it supports auto rename
         // somehow it includes the extension. to protect that we temporarily use another extension
@@ -119,7 +120,7 @@ public class AndroidFile implements IRealFile {
      *
      * @return The absolute path
      */
-    public String getAbsolutePath() {
+    public String getDisplayPath() {
         try {
             String path = Uri.decode(documentFile.getUri().toString());
             int index = path.lastIndexOf(":");
@@ -134,7 +135,7 @@ public class AndroidFile implements IRealFile {
      *
      * @return The base name
      */
-    public String getBaseName() {
+    public String getName() {
         if (_basename != null)
             return _basename;
 
@@ -170,7 +171,7 @@ public class AndroidFile implements IRealFile {
      *
      * @return The parent directory
      */
-    public IRealFile getParent() {
+    public IFile getParent() {
         DocumentFile parentDocumentFile = documentFile.getParentFile();
 		if(parentDocumentFile == null)
 			return null;
@@ -250,12 +251,12 @@ public class AndroidFile implements IRealFile {
      *
      * @return The files and subdirectories
      */
-    public IRealFile[] listFiles() {
+    public IFile[] listFiles() {
         DocumentFile[] files = documentFile.listFiles();
         if (files == null)
             return new AndroidFile[0];
-        List<IRealFile> realFiles = new ArrayList<>();
-        List<IRealFile> realDirs = new ArrayList<>();
+        List<IFile> realFiles = new ArrayList<>();
+        List<IFile> realDirs = new ArrayList<>();
         for (int i = 0; i < files.length; i++) {
             AndroidFile file = new AndroidFile(files[i], context);
             if (files[i].isDirectory())
@@ -274,7 +275,7 @@ public class AndroidFile implements IRealFile {
      * @return The moved file
      * @throws IOException Thrown if error during IO
      */
-    public IRealFile move(IRealFile newDir) throws IOException {
+    public IFile move(IFile newDir) throws IOException {
         return move(newDir, null, null);
     }
 
@@ -286,7 +287,7 @@ public class AndroidFile implements IRealFile {
      * @return The moved file
      * @throws IOException Thrown if error during IO
      */
-    public IRealFile move(IRealFile newDir, String newName) throws IOException {
+    public IFile move(IFile newDir, String newName) throws IOException {
         return move(newDir, newName, null);
     }
 
@@ -298,7 +299,7 @@ public class AndroidFile implements IRealFile {
      * @return The moved file
      * @throws IOException Thrown if error during IO
      */
-    public IRealFile move(IRealFile newDir, String newName, BiConsumer<Long, Long> progressListener)
+    public IFile move(IFile newDir, String newName, BiConsumer<Long, Long> progressListener)
             throws IOException {
         // target directory is the same
         if(getParent().getPath().equals(newDir.getPath()))
@@ -319,7 +320,7 @@ public class AndroidFile implements IRealFile {
                     documentFile.getUri(), documentFile.getParentFile().getUri(), androidDir.documentFile.getUri());
             if (progressListener != null)
                 progressListener.accept(1L, 1L);
-            IRealFile file = androidDir.getChild(getBaseName());
+            IFile file = androidDir.getChild(getName());
             if (file != null && newName != null)
                 file.renameTo(newName);
             if(getParent()!=null)
@@ -341,7 +342,7 @@ public class AndroidFile implements IRealFile {
      * @return The new file
      * @throws IOException Thrown if error during IO
      */
-    public IRealFile copy(IRealFile newDir) throws IOException {
+    public IFile copy(IFile newDir) throws IOException {
         return copy(newDir, null, null);
     }
 
@@ -353,7 +354,7 @@ public class AndroidFile implements IRealFile {
      * @return The new file
      * @throws IOException Thrown if error during IO
      */
-    public IRealFile copy(IRealFile newDir, String newName) throws IOException {
+    public IFile copy(IFile newDir, String newName) throws IOException {
         return copy(newDir, newName, null);
     }
 
@@ -366,7 +367,7 @@ public class AndroidFile implements IRealFile {
      * @return The new file
      * @throws IOException Thrown if error during IO
      */
-    public IRealFile copy(IRealFile newDir, String newName, BiConsumer<Long,Long> progressListener)
+    public IFile copy(IFile newDir, String newName, BiConsumer<Long,Long> progressListener)
             throws IOException {
         return copy(newDir, newName, false, progressListener);
     }
@@ -380,25 +381,25 @@ public class AndroidFile implements IRealFile {
      * @return
      * @throws IOException
      */
-    private IRealFile copy(IRealFile newDir, String newName,
+    private IFile copy(IFile newDir, String newName,
                            boolean delete, BiConsumer<Long,Long> progressListener)
             throws IOException {
         if (newDir == null || !newDir.exists())
             throw new IOException("Target directory does not exists");
 
-        newName = newName !=null?newName: getBaseName();
-        IRealFile dir = newDir.getChild(newName);
+        newName = newName !=null?newName: getName();
+        IFile dir = newDir.getChild(newName);
         if (dir != null)
             throw new IOException("Target file/directory already exists");
         if (isDirectory())
         {
-            IRealFile file = newDir.createDirectory(newName);
+            IFile file = newDir.createDirectory(newName);
             return file;
         }
         else
         {
-            IRealFile newFile = newDir.createFile(newName);
-            IRealFile.copyFileContents(this, newFile, delete, progressListener);
+            IFile newFile = newDir.createFile(newName);
+            IFile.copyFileContents(this, newFile, delete, progressListener);
             return newFile;
         }
     }
@@ -409,7 +410,7 @@ public class AndroidFile implements IRealFile {
      * @param filename The name of the file or directory to match.
      * @return The child file
      */
-    public IRealFile getChild(String filename) {
+    public IFile getChild(String filename) {
         DocumentFile[] documentFiles = documentFile.listFiles();
         for (DocumentFile documentFile : documentFiles) {
             if (documentFile.getName().equals(filename))
@@ -440,9 +441,9 @@ public class AndroidFile implements IRealFile {
      * @return True if directory created
      */
     public boolean mkdir() {
-        IRealFile parent = getParent();
+        IFile parent = getParent();
         if (parent != null) {
-            IRealFile dir = parent.createDirectory(getBaseName());
+            IFile dir = parent.createDirectory(getName());
             return dir.exists() && dir.isDirectory();
         }
         return false;
