@@ -24,18 +24,19 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 */
 
-import com.mku.salmon.*;
-import com.mku.salmon.streams.ProviderType;
-import com.mku.salmon.streams.AesStream;
-import com.mku.salmon.password.PbkdfType;
+import com.mku.salmon.Decryptor;
+import com.mku.salmon.Encryptor;
 import com.mku.salmon.password.Password;
+import com.mku.salmon.password.PbkdfType;
+import com.mku.salmon.streams.AesStream;
+import com.mku.salmon.streams.EncryptionFormat;
+import com.mku.salmon.streams.ProviderType;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
 import java.nio.charset.Charset;
 
 import static org.junit.jupiter.api.Assertions.assertArrayEquals;
-import static org.junit.jupiter.api.Assertions.assertEquals;
 
 public class SalmonNativeTests {
 
@@ -48,19 +49,19 @@ public class SalmonNativeTests {
 
     @BeforeEach
     public void init() {
-		ProviderType providerType = ProviderType.Aes;
-		String aesProviderType = System.getProperty("AES_PROVIDER_TYPE");
-		if(aesProviderType != null && !aesProviderType.equals(""))
-			providerType = ProviderType.valueOf(aesProviderType);
-		int threads = System.getProperty("ENC_THREADS") != null && !System.getProperty("ENC_THREADS").equals("") ?
-			Integer.parseInt(System.getProperty("ENC_THREADS")) : 1;
-			
-		System.out.println("ProviderType: " + providerType);
-		System.out.println("threads: " + threads);
-		
+        ProviderType providerType = ProviderType.Aes;
+        String aesProviderType = System.getProperty("AES_PROVIDER_TYPE");
+        if (aesProviderType != null && !aesProviderType.equals(""))
+            providerType = ProviderType.valueOf(aesProviderType);
+        int threads = System.getProperty("ENC_THREADS") != null && !System.getProperty("ENC_THREADS").equals("") ?
+                Integer.parseInt(System.getProperty("ENC_THREADS")) : 1;
+
+        System.out.println("ProviderType: " + providerType);
+        System.out.println("threads: " + threads);
+
         AesStream.setAesProviderType(providerType);
-		ENC_THREADS = threads;
-		DEC_THREADS = threads;
+        ENC_THREADS = threads;
+        DEC_THREADS = threads;
     }
 
     @Test
@@ -93,16 +94,17 @@ public class SalmonNativeTests {
         byte[] bytes = plainText.getBytes(Charset.defaultCharset());
         byte[] encBytesDef = SalmonCoreTestHelper.defaultAESCTRTransform(bytes, SalmonCoreTestHelper.TEST_KEY_BYTES, SalmonCoreTestHelper.TEST_NONCE_BYTES,
                 true);
-        byte[] decBytesDef = SalmonCoreTestHelper.defaultAESCTRTransform(encBytesDef, SalmonCoreTestHelper.TEST_KEY_BYTES, SalmonCoreTestHelper.TEST_NONCE_BYTES,
+        byte[] decBytesDef = SalmonCoreTestHelper.defaultAESCTRTransform(encBytesDef, SalmonCoreTestHelper.TEST_KEY_BYTES,
+                SalmonCoreTestHelper.TEST_NONCE_BYTES,
                 false);
         assertArrayEquals(bytes, decBytesDef);
 
-        byte[] encBytes = new Encryptor(ENC_THREADS).encrypt(bytes, SalmonCoreTestHelper.TEST_KEY_BYTES, SalmonCoreTestHelper.TEST_NONCE_BYTES, false,
-                false, null, null);
+        byte[] encBytes = new Encryptor(ENC_THREADS).encrypt(bytes, SalmonCoreTestHelper.TEST_KEY_BYTES,
+                SalmonCoreTestHelper.TEST_NONCE_BYTES, EncryptionFormat.Generic);
         assertArrayEquals(encBytesDef, encBytes);
 
-        byte[] decBytes = new Decryptor(DEC_THREADS).decrypt(encBytes, SalmonCoreTestHelper.TEST_KEY_BYTES, SalmonCoreTestHelper.TEST_NONCE_BYTES, false,
-                false, null, null);
+        byte[] decBytes = new Decryptor(DEC_THREADS).decrypt(encBytes, SalmonCoreTestHelper.TEST_KEY_BYTES,
+                SalmonCoreTestHelper.TEST_NONCE_BYTES, EncryptionFormat.Generic);
         assertArrayEquals(bytes, decBytes);
     }
 
@@ -121,50 +123,10 @@ public class SalmonNativeTests {
                 false);
         assertArrayEquals(bytes, decBytesDef);
 
-        byte[] encBytes = new Encryptor(ENC_THREADS).encrypt(bytes, SalmonCoreTestHelper.TEST_KEY_BYTES, SalmonCoreTestHelper.TEST_NONCE_BYTES, false,
-                false, null, null);
+        byte[] encBytes = new Encryptor(ENC_THREADS).encrypt(bytes, SalmonCoreTestHelper.TEST_KEY_BYTES, SalmonCoreTestHelper.TEST_NONCE_BYTES, EncryptionFormat.Generic);
         assertArrayEquals(encBytesDef, encBytes);
         Decryptor decryptor = new Decryptor(DEC_THREADS, 32 + 2);
-        byte[] decBytes = decryptor.decrypt(encBytes, SalmonCoreTestHelper.TEST_KEY_BYTES, SalmonCoreTestHelper.TEST_NONCE_BYTES, false,
-                false, null, null);
+        byte[] decBytes = decryptor.decrypt(encBytes, SalmonCoreTestHelper.TEST_KEY_BYTES, SalmonCoreTestHelper.TEST_NONCE_BYTES, EncryptionFormat.Generic);
         assertArrayEquals(bytes, decBytes);
-    }
-
-    @Test
-    public void shouldEncryptAndDecryptNativeStreamCompatibleWithIntegrity() throws Exception {
-        String plainText = SalmonCoreTestHelper.TEST_TEXT;
-        for (int i = 0; i < 13; i++)
-            plainText += plainText;
-
-        byte[] bytes = plainText.getBytes(Charset.defaultCharset());
-        byte[] encBytesDef = SalmonCoreTestHelper.defaultAESCTRTransform(bytes, SalmonCoreTestHelper.TEST_KEY_BYTES, SalmonCoreTestHelper.TEST_NONCE_BYTES, true);
-        byte[] decBytesDef = SalmonCoreTestHelper.defaultAESCTRTransform(encBytesDef, SalmonCoreTestHelper.TEST_KEY_BYTES, SalmonCoreTestHelper.TEST_NONCE_BYTES, false);
-
-        int chunkSize = 256 * 1024;
-        assertArrayEquals(bytes, decBytesDef);
-        byte[] encBytes = new Encryptor(ENC_THREADS).encrypt(bytes, SalmonCoreTestHelper.TEST_KEY_BYTES, SalmonCoreTestHelper.TEST_NONCE_BYTES, false,
-                true, SalmonCoreTestHelper.TEST_HMAC_KEY_BYTES, chunkSize);
-
-        assertArrayEqualsWithIntegrity(encBytesDef, encBytes, chunkSize);
-        byte[] decBytes = new Decryptor(DEC_THREADS).decrypt(encBytes, SalmonCoreTestHelper.TEST_KEY_BYTES, SalmonCoreTestHelper.TEST_NONCE_BYTES, false,
-                true, SalmonCoreTestHelper.TEST_HMAC_KEY_BYTES, chunkSize);
-
-        assertArrayEquals(bytes, decBytes);
-    }
-
-    private void assertArrayEqualsWithIntegrity(byte[] buffer, byte[] bufferWithIntegrity, int chunkSize) {
-        int index = 0;
-        for (int i = 0; i < buffer.length; i += chunkSize) {
-            int nChunkSize = Math.min(chunkSize, buffer.length - i);
-            byte[] buff1 = new byte[chunkSize];
-            System.arraycopy(buffer, i, buff1, 0, nChunkSize);
-
-            byte[] buff2 = new byte[chunkSize];
-            System.arraycopy(bufferWithIntegrity, index + Generator.HASH_RESULT_LENGTH, buff2, 0, nChunkSize);
-
-            assertArrayEquals(buff1, buff2);
-            index += nChunkSize + Generator.HASH_RESULT_LENGTH;
-        }
-        assertEquals(bufferWithIntegrity.length, index);
     }
 }

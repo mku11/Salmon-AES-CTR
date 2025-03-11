@@ -56,7 +56,7 @@ public class AesFileImporter extends FileImporter {
     protected void onPrepare(IVirtualFile targetFile, boolean integrity) throws IOException {
         ((AesFile) targetFile).setAllowOverwrite(true);
         // we use default chunk file size
-        ((AesFile) targetFile).setApplyIntegrity(integrity, null, null);
+        ((AesFile) targetFile).setApplyIntegrity(integrity, null, 0);
     }
 
 

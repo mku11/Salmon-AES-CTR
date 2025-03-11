@@ -23,16 +23,17 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 */
 
+import com.mku.salmon.Generator;
+import com.mku.salmon.Header;
+import com.mku.salmon.RangeExceededException;
 import com.mku.salmon.SecurityException;
-import com.mku.salmon.integrity.IntegrityException;
-import com.mku.streams.MemoryStream;
-import com.mku.streams.RandomAccessStream;
-import com.mku.salmon.*;
 import com.mku.salmon.integrity.HMACSHA256Provider;
 import com.mku.salmon.integrity.Integrity;
-import com.mku.salmon.transform.ICTRTransformer;
+import com.mku.salmon.integrity.IntegrityException;
 import com.mku.salmon.transform.AesCTRTransformer;
+import com.mku.salmon.transform.ICTRTransformer;
 import com.mku.salmon.transform.TransformerFactory;
+import com.mku.streams.RandomAccessStream;
 
 import java.io.IOException;
 
@@ -44,7 +45,7 @@ public class AesStream extends RandomAccessStream {
     /**
      * Header data embedded in the stream if available.
      */
-    private final byte[] headerData;
+    private final Header header;
 
     /**
      * Mode to be used for this stream. This can only be set once.
@@ -87,72 +88,62 @@ public class AesStream extends RandomAccessStream {
      */
     private int bufferSize = Integrity.DEFAULT_CHUNK_SIZE;
 
+
     /**
      * Get the output size of the data to be transformed(encrypted or decrypted) including
      * header and hash without executing any operations. This can be used to prevent over-allocating memory
      * where creating your output buffers.
      *
-     * @param data       The data to be transformed.
-     * @param key        The AES key.
-     * @param nonce      The nonce for the CTR.
-     * @param mode       The {@link EncryptionMode} Encrypt or Decrypt.
-     * @param headerData The header data to be embedded if you use Encryption.
-     * @param integrity  True if you want to enable integrity.
-     * @param chunkSize  The chunk size for integrity chunks.
-     * @param hashKey    The hash key to be used for integrity checks.
+     * @param mode      The {@link EncryptionMode} Encrypt or Decrypt.
+     * @param format    The format to use, see {@link EncryptionFormat}
+     * @param integrity True to enable integrity verification
      * @return The size of the output data.
      * @throws SecurityException  Thrown if there is a security exception
      * @throws IntegrityException Thrown if the data are corrupt or tampered with.
      * @throws IOException        Thrown if there is an IO error.
      */
-    public static long getActualSize(byte[] data, byte[] key, byte[] nonce, EncryptionMode mode,
-                                     byte[] headerData, boolean integrity, Integer chunkSize, byte[] hashKey)
-            throws IOException {
-        MemoryStream inputStream = new MemoryStream(data);
-        AesStream s = new AesStream(key, nonce, mode, inputStream,
-                headerData, integrity, chunkSize, hashKey);
-        long size = s.actualLength();
-        s.close();
+    public static long getOutputSize(EncryptionMode mode, long length,
+                                     EncryptionFormat format, boolean integrity) {
+        return getOutputSize(mode, length, format, integrity, Integrity.DEFAULT_CHUNK_SIZE);
+    }
+
+    /**
+     * Get the output size of the data to be transformed(encrypted or decrypted) including
+     * header and hash without executing any operations. This can be used to prevent over-allocating memory
+     * where creating your output buffers.
+     *
+     * @param mode      The {@link EncryptionMode} Encrypt or Decrypt.
+     * @param format    The format to use, see {@link EncryptionFormat}
+     * @param integrity True to enable integrity verification
+     * @param chunkSize the chunk size to be used with integrity
+     * @return The size of the output data.
+     * @throws SecurityException  Thrown if there is a security exception
+     * @throws IntegrityException Thrown if the data are corrupt or tampered with.
+     * @throws IOException        Thrown if there is an IO error.
+     */
+    public static long getOutputSize(EncryptionMode mode, long length,
+                                     EncryptionFormat format, boolean integrity, int chunkSize) {
+        if (format == EncryptionFormat.Generic && integrity)
+            throw new SecurityException("Cannot use integrity with generic format");
+        if (chunkSize == 0)
+            chunkSize = Integrity.DEFAULT_CHUNK_SIZE;
+        long size = length;
+        if (format == EncryptionFormat.Salmon) {
+            if (mode == EncryptionMode.Encrypt) {
+                size += Header.HEADER_LENGTH;
+                if (integrity) {
+                    size += Integrity.getTotalHashDataLength(mode, length, chunkSize,
+                            0, Generator.HASH_RESULT_LENGTH);
+                }
+            } else {
+                size -= Header.HEADER_LENGTH;
+                if (integrity) {
+                    size -= Integrity.getTotalHashDataLength(mode, length - Header.HEADER_LENGTH, chunkSize,
+                            Generator.HASH_RESULT_LENGTH, Generator.HASH_RESULT_LENGTH);
+                }
+            }
+        }
         return size;
-    }
-
-    /**
-     * Instantiate a new Salmon stream with a plain base stream.
-     *
-     * @param key            The AES encryption key.
-     * @param nonce          The nonce key.
-     * @param encryptionMode The mode to use for encryption or decryption. This can only be set once.
-     * @param baseStream     If EncryptionMode is Encrypt this will be the target stream
-     *                       that data will be written to. If DecryptionMode is Decrypt this will be the
-     *                       source stream to read the data from.
-     * @throws SecurityException  If the stream cannot be decrypted or missing key or nonce.
-     * @throws IntegrityException If the integrity of the stream is compromised.
-     * @throws IOException        If the base stream is corrupt.
-     */
-    public AesStream(byte[] key, byte[] nonce, EncryptionMode encryptionMode,
-                     RandomAccessStream baseStream)
-            throws IOException {
-        this(key, nonce, encryptionMode, baseStream, null, false, null, null);
-    }
-
-    /**
-     * Instantiate a new Salmon stream with a base stream and embedded header data.
-     *
-     * @param key            The key
-     * @param nonce          The nonce to use
-     * @param encryptionMode The encryption Mode see {@link EncryptionMode}
-     * @param baseStream     If EncryptionMode is Encrypt this will be the target stream
-     *                       that data will be written to. If DecryptionMode is Decrypt this will be the
-     *                       source stream to read the data from.
-     * @param headerData     The header data to embed if you use EncryptionMode = Encrypt.
-     * @throws SecurityException  If the stream cannot be decrypted or missing key or nonce.
-     * @throws IntegrityException If the integrity of the stream is compromised.
-     * @throws IOException        If the base stream is corrupt.
-     */
-    public AesStream(byte[] key, byte[] nonce, EncryptionMode encryptionMode,
-                     RandomAccessStream baseStream, byte[] headerData)
-            throws IOException {
-        this(key, nonce, encryptionMode, baseStream, headerData, false, null, null);
     }
 
     /**
@@ -170,9 +161,90 @@ public class AesStream extends RandomAccessStream {
      * @param nonce          The nonce used for the initial counter
      * @param encryptionMode Encryption mode Encrypt or Decrypt this cannot change later
      * @param baseStream     The base Stream that will be used to read the data
-     * @param headerData     The data to store in the header when encrypting.
-     * @param integrity      enable integrity
-     * @param chunkSize      the chunk size to be used with integrity
+     * @throws IOException        Thrown if there is an IO error.
+     * @throws SecurityException  Thrown if there is a security exception
+     * @throws IntegrityException Thrown if the data are corrupt or tampered with.
+     * @see <a href="https://en.wikipedia.org/wiki/Block_cipher_mode_of_operation#Counter_(CTR)">Salmon README.md</a>
+     */
+    public AesStream(byte[] key, byte[] nonce, EncryptionMode encryptionMode,
+                     RandomAccessStream baseStream)
+            throws IOException {
+        this(key, nonce, encryptionMode, baseStream, EncryptionFormat.Salmon, false, null, 0);
+    }
+
+    /**
+     * Instantiate a new Salmon stream with a base stream and optional header data and hash integrity.
+     * <p>
+     * If you read from the stream it will decrypt the data from the baseStream.
+     * If you write to the stream it will encrypt the data from the baseStream.
+     * The transformation is based on AES CTR Mode.
+     * </p>
+     * Notes:
+     * The initial value of the counter is a result of the concatenation of an 12 byte nonce and an additional 4 bytes counter.
+     * The counter is then: incremented every block, encrypted by the key, and xored with the plain text.
+     *
+     * @param key            The AES key that is used to encrypt decrypt
+     * @param nonce          The nonce used for the initial counter
+     * @param encryptionMode Encryption mode Encrypt or Decrypt this cannot change later
+     * @param baseStream     The base Stream that will be used to read the data
+     * @param format         The format to use, see {@link EncryptionFormat}
+     * @throws IOException        Thrown if there is an IO error.
+     * @throws SecurityException  Thrown if there is a security exception
+     * @throws IntegrityException Thrown if the data are corrupt or tampered with.
+     * @see <a href="https://en.wikipedia.org/wiki/Block_cipher_mode_of_operation#Counter_(CTR)">Salmon README.md</a>
+     */
+    public AesStream(byte[] key, byte[] nonce, EncryptionMode encryptionMode,
+                     RandomAccessStream baseStream, EncryptionFormat format)
+            throws IOException {
+        this(key, nonce, encryptionMode, baseStream, format, false, null, 0);
+    }
+
+
+    /**
+     * Instantiate a new Salmon stream with a base stream and optional header data and hash integrity.
+     * <p>
+     * If you read from the stream it will decrypt the data from the baseStream.
+     * If you write to the stream it will encrypt the data from the baseStream.
+     * The transformation is based on AES CTR Mode.
+     * </p>
+     * Notes:
+     * The initial value of the counter is a result of the concatenation of an 12 byte nonce and an additional 4 bytes counter.
+     * The counter is then: incremented every block, encrypted by the key, and xored with the plain text.
+     *
+     * @param key            The AES key that is used to encrypt decrypt
+     * @param nonce          The nonce used for the initial counter
+     * @param encryptionMode Encryption mode Encrypt or Decrypt this cannot change later
+     * @param baseStream     The base Stream that will be used to read the data
+     * @param format         The format to use, see {@link EncryptionFormat}
+     * @param integrity      True to enable integrity verification
+     * @throws IOException        Thrown if there is an IO error.
+     * @throws SecurityException  Thrown if there is a security exception
+     * @throws IntegrityException Thrown if the data are corrupt or tampered with.
+     * @see <a href="https://en.wikipedia.org/wiki/Block_cipher_mode_of_operation#Counter_(CTR)">Salmon README.md</a>
+     */
+    public AesStream(byte[] key, byte[] nonce, EncryptionMode encryptionMode,
+                     RandomAccessStream baseStream, EncryptionFormat format, boolean integrity)
+            throws IOException {
+        this(key, nonce, encryptionMode, baseStream, format, integrity, null, 0);
+    }
+
+    /**
+     * Instantiate a new Salmon stream with a base stream and optional header data and hash integrity.
+     * <p>
+     * If you read from the stream it will decrypt the data from the baseStream.
+     * If you write to the stream it will encrypt the data from the baseStream.
+     * The transformation is based on AES CTR Mode.
+     * </p>
+     * Notes:
+     * The initial value of the counter is a result of the concatenation of an 12 byte nonce and an additional 4 bytes counter.
+     * The counter is then: incremented every block, encrypted by the key, and xored with the plain text.
+     *
+     * @param key            The AES key that is used to encrypt decrypt
+     * @param nonce          The nonce used for the initial counter
+     * @param encryptionMode Encryption mode Encrypt or Decrypt this cannot change later
+     * @param baseStream     The base Stream that will be used to read the data
+     * @param format         The format to use, see {@link EncryptionFormat}
+     * @param integrity      True to enable integrity verification
      * @param hashKey        Hash key to be used with integrity
      * @throws IOException        Thrown if there is an IO error.
      * @throws SecurityException  Thrown if there is a security exception
@@ -180,17 +252,67 @@ public class AesStream extends RandomAccessStream {
      * @see <a href="https://en.wikipedia.org/wiki/Block_cipher_mode_of_operation#Counter_(CTR)">Salmon README.md</a>
      */
     public AesStream(byte[] key, byte[] nonce, EncryptionMode encryptionMode,
-                     RandomAccessStream baseStream, byte[] headerData,
-                     boolean integrity, Integer chunkSize, byte[] hashKey)
+                     RandomAccessStream baseStream, EncryptionFormat format, boolean integrity, byte[] hashKey)
             throws IOException {
+        this(key, nonce, encryptionMode, baseStream, format, integrity, hashKey, 0);
+    }
+
+    /**
+     * Instantiate a new Salmon stream with a base stream and optional header data and hash integrity.
+     * <p>
+     * If you read from the stream it will decrypt the data from the baseStream.
+     * If you write to the stream it will encrypt the data from the baseStream.
+     * The transformation is based on AES CTR Mode.
+     * </p>
+     * Notes:
+     * The initial value of the counter is a result of the concatenation of an 12 byte nonce and an additional 4 bytes counter.
+     * The counter is then: incremented every block, encrypted by the key, and xored with the plain text.
+     *
+     * @param key            The AES key that is used to encrypt decrypt
+     * @param nonce          The nonce used for the initial counter
+     * @param encryptionMode Encryption mode Encrypt or Decrypt this cannot change later
+     * @param baseStream     The base Stream that will be used to read the data
+     * @param format         The format to use, see {@link EncryptionFormat}
+     * @param integrity      True to enable integrity verification
+     * @param hashKey        Hash key to be used with integrity
+     * @param chunkSize      the chunk size to be used with integrity
+     * @throws IOException        Thrown if there is an IO error.
+     * @throws SecurityException  Thrown if there is a security exception
+     * @throws IntegrityException Thrown if the data are corrupt or tampered with.
+     * @see <a href="https://en.wikipedia.org/wiki/Block_cipher_mode_of_operation#Counter_(CTR)">Salmon README.md</a>
+     */
+    public AesStream(byte[] key, byte[] nonce, EncryptionMode encryptionMode,
+                     RandomAccessStream baseStream, EncryptionFormat format, boolean integrity, byte[] hashKey, int chunkSize)
+            throws IOException {
+        if (format == EncryptionFormat.Generic && integrity)
+            throw new SecurityException("Cannot use integrity with generic format");
+        if (format == EncryptionFormat.Generic && hashKey != null)
+            throw new SecurityException("Cannot use hashkey with generic format");
 
         this.encryptionMode = encryptionMode;
         this.baseStream = baseStream;
-        this.headerData = headerData;
-
+        this.header = getOrCreateHeader(format, nonce, integrity, chunkSize);
+        if (this.header != null) {
+            chunkSize = header.getChunkSize();
+            nonce = header.getNonce();
+        }
+        if (nonce == null)
+            throw new SecurityException("Nonce is missing");
         initIntegrity(integrity, hashKey, chunkSize);
         initTransformer(key, nonce);
         initStream();
+    }
+
+    private Header getOrCreateHeader(EncryptionFormat format, byte[] nonce, boolean integrity, int chunkSize) throws IOException {
+        if (format == EncryptionFormat.Salmon) {
+            if (encryptionMode == EncryptionMode.Encrypt) {
+                if (integrity && chunkSize == 0)
+                    chunkSize = Integrity.DEFAULT_CHUNK_SIZE;
+                return Header.writeHeader(baseStream, nonce, chunkSize);
+            }
+            return Header.readHeaderData(baseStream);
+        }
+        return null;
     }
 
     /**
@@ -204,7 +326,7 @@ public class AesStream extends RandomAccessStream {
      * @throws SecurityException  Thrown if there is a security exception
      * @throws IntegrityException Thrown if the data are corrupt or tampered with.
      */
-    private void initIntegrity(boolean integrity, byte[] hashKey, Integer chunkSize) {
+    private void initIntegrity(boolean integrity, byte[] hashKey, int chunkSize) {
         this.integrity = new Integrity(integrity, hashKey, chunkSize,
                 new HMACSHA256Provider(), Generator.HASH_RESULT_LENGTH);
     }
@@ -233,7 +355,7 @@ public class AesStream extends RandomAccessStream {
      * @throws IOException Thrown if there is an IO error.
      */
     private void initStream() throws IOException {
-        baseStream.setPosition(getHeaderLength());
+        setPosition(0);
     }
 
     /**
@@ -264,23 +386,7 @@ public class AesStream extends RandomAccessStream {
         long totalHashBytes;
         int hashOffset = integrity.getChunkSize() > 0 ? Generator.HASH_RESULT_LENGTH : 0;
         totalHashBytes = integrity.getHashDataLength(baseStream.length() - 1, hashOffset);
-
         return baseStream.length() - getHeaderLength() - totalHashBytes;
-    }
-
-    /**
-     * Provides the total length of the base stream including header and integrity data if available.
-     *
-     * @return The actual length of the base stream.
-     */
-    public long actualLength() {
-        long totalHashBytes = 0;
-        totalHashBytes += integrity.getHashDataLength(baseStream.length() - 1, 0);
-        if (canRead())
-            return length();
-        else if (canWrite())
-            return baseStream.length() + getHeaderLength() + totalHashBytes;
-        return 0;
     }
 
     /**
@@ -359,10 +465,10 @@ public class AesStream extends RandomAccessStream {
      * @return The header data length.
      */
     private long getHeaderLength() {
-        if (headerData == null)
+        if (header == null)
             return 0;
         else
-            return headerData.length;
+            return header.getHeaderData().length;
     }
 
     /**
@@ -608,7 +714,7 @@ public class AesStream extends RandomAccessStream {
                 }
                 byte[] destBuffer = new byte[srcBuffer.length];
                 if (integrity.useIntegrity()) {
-                    integrity.verifyHashes(integrityHashes, srcBuffer, pos == 0 && bytes == 0 ? headerData : null);
+                    integrity.verifyHashes(integrityHashes, srcBuffer, pos == 0 && bytes == 0 ? header.getHeaderData() : null);
                 }
                 transformer.decryptData(srcBuffer, 0, destBuffer, 0, srcBuffer.length);
                 int len = Math.min(count - bytes, destBuffer.length);
@@ -660,7 +766,10 @@ public class AesStream extends RandomAccessStream {
             byte[] destBuffer = new byte[srcBuffer.length];
             try {
                 transformer.encryptData(srcBuffer, 0, destBuffer, 0, srcBuffer.length);
-                byte[][] integrityHashes = integrity.generateHashes(destBuffer, getPosition() == 0 ? headerData : null);
+                byte[][] integrityHashes = null;
+                if (integrity.useIntegrity())
+                    integrityHashes = integrity.generateHashes(destBuffer,
+                            getPosition() == 0 ? header.getHeaderData() : null);
                 pos += writeToStream(destBuffer, getChunkSize(), integrityHashes);
                 transformer.syncCounter(getPosition());
             } catch (SecurityException | RangeExceededException | IntegrityException ex) {

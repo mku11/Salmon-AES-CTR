@@ -247,7 +247,7 @@ public class AesFileInputStream extends InputStream {
     }
 
     /**
-     * Fills a cache buffer with the decrypted data from a part of an encrypted file served as a salmon stream
+     * Fills a cache buffer with the decrypted data from a part of an encrypted file
      *
      * @param cacheBuffer The cache buffer that will store the decrypted contents
      * @param bufferSize  The length of the data requested

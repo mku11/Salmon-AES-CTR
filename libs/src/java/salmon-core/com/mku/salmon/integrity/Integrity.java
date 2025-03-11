@@ -25,6 +25,7 @@ SOFTWARE.
 
 import com.mku.salmon.Generator;
 import com.mku.salmon.SecurityException;
+import com.mku.salmon.streams.EncryptionMode;
 import com.mku.salmon.transform.AesCTRTransformer;
 
 import java.util.LinkedList;
@@ -78,18 +79,17 @@ public class Integrity {
      * @throws IntegrityException Thrown if the data are corrupt or tampered with.
      * @throws SecurityException  When security has failed
      */
-    public Integrity(boolean integrity, byte[] key, Integer chunkSize,
-                     IHashProvider provider, int hashSize) {
-        if (chunkSize != null && (chunkSize < 0 || (chunkSize > 0 && chunkSize < AesCTRTransformer.BLOCK_SIZE)
-                || (chunkSize > 0 && chunkSize % AesCTRTransformer.BLOCK_SIZE != 0) || chunkSize > MAX_CHUNK_SIZE)) {
+    public Integrity(boolean integrity, byte[] key, int chunkSize, IHashProvider provider, int hashSize) {
+        if (chunkSize < 0 || (chunkSize > 0 && chunkSize < AesCTRTransformer.BLOCK_SIZE)
+                || (chunkSize > 0 && chunkSize % AesCTRTransformer.BLOCK_SIZE != 0) || chunkSize > MAX_CHUNK_SIZE) {
             throw new IntegrityException("Invalid chunk size, specify zero for default value or a positive number multiple of: "
                     + AesCTRTransformer.BLOCK_SIZE + " and less than: " + Integrity.MAX_CHUNK_SIZE + " bytes");
         }
         if (integrity && key == null)
             throw new SecurityException("You need a hash to use with integrity");
-        if (integrity && (chunkSize == null || chunkSize == 0))
+        if (integrity && chunkSize == 0)
             this.chunkSize = DEFAULT_CHUNK_SIZE;
-        else if (chunkSize != null && (integrity || chunkSize > 0))
+        else if (integrity || chunkSize > 0)
             this.chunkSize = chunkSize;
         if (hashSize < 0)
             throw new SecurityException("Hash size should be a positive number");
@@ -139,14 +139,21 @@ public class Integrity {
      * @param hashLength The hash length.
      * @return The total hash data length
      */
-    public static long getTotalHashDataLength(long length, int chunkSize,
+    public static long getTotalHashDataLength(EncryptionMode mode, long length, int chunkSize,
                                               int hashOffset, int hashLength) {
-        // if the stream is using multiple chunks for integrity
-        int chunks = (int) (length / (chunkSize + hashOffset));
-        int rem = (int) (length % (chunkSize + hashOffset));
-        if (rem > hashOffset)
-            chunks++;
-        return (long) chunks * hashLength;
+        if (mode == EncryptionMode.Decrypt) {
+            int chunks = (int) (length / (chunkSize + hashOffset));
+            int rem = (int) (length % (chunkSize + hashOffset));
+            if (rem > hashOffset)
+                chunks++;
+            return (long) chunks * hashLength;
+        } else {
+            int chunks = (int) (length / chunkSize);
+            int rem = (int) (length % chunkSize);
+            if (rem > hashOffset)
+                chunks++;
+            return (long) chunks * hashLength;
+        }
     }
 
     /**
@@ -159,7 +166,7 @@ public class Integrity {
     public long getHashDataLength(long count, int hashOffset) {
         if (chunkSize <= 0)
             return 0;
-        return Integrity.getTotalHashDataLength(count, chunkSize, hashOffset, hashSize);
+        return Integrity.getTotalHashDataLength(EncryptionMode.Decrypt, count, chunkSize, hashOffset, hashSize);
     }
 
     /**

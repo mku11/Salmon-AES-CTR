@@ -36,6 +36,7 @@ import com.mku.salmon.password.Password;
 import com.mku.salmon.sequence.INonceSequencer;
 import com.mku.salmon.sequence.NonceSequence;
 import com.mku.salmon.sequence.SequenceException;
+import com.mku.salmon.streams.EncryptionFormat;
 import com.mku.salmon.streams.EncryptionMode;
 import com.mku.salmon.streams.AesStream;
 import com.mku.salmonfs.auth.AuthException;
@@ -105,15 +106,17 @@ public abstract class AesDrive extends VirtualDrive {
 
     /**
      * Get the virtual encrypted AesFile backed by an IFile.
+     *
      * @param file The real file.
      * @return
      */
-	protected AesFile getVirtualFile(IFile file) {
-		return new AesFile(file, this);
-	}
+    protected AesFile getVirtualFile(IFile file) {
+        return new AesFile(file, this);
+    }
 
     /**
      * Get the file name for the drive configuration.
+     *
      * @return The file name.
      */
     public static String getConfigFilename() {
@@ -122,6 +125,7 @@ public abstract class AesDrive extends VirtualDrive {
 
     /**
      * Set the file name for the drive configuration.
+     *
      * @param configFilename The file name
      */
     public static void setConfigFilename(String configFilename) {
@@ -130,6 +134,7 @@ public abstract class AesDrive extends VirtualDrive {
 
     /**
      * Get the file name for the authorization configuration .
+     *
      * @return The file name.
      */
     public static String getAuthConfigFilename() {
@@ -138,7 +143,8 @@ public abstract class AesDrive extends VirtualDrive {
 
     /**
      * Set the file name for the authorization configuration .
-     * @param authConfigFilename  The file name.
+     *
+     * @param authConfigFilename The file name.
      */
     public static void setAuthConfigFilename(String authConfigFilename) {
         AesDrive.authConfigFilename = authConfigFilename;
@@ -146,6 +152,7 @@ public abstract class AesDrive extends VirtualDrive {
 
     /**
      * Get the directory name for the virtual drive.
+     *
      * @return The directory name
      */
     public static String getVirtualDriveDirectoryName() {
@@ -154,6 +161,7 @@ public abstract class AesDrive extends VirtualDrive {
 
     /**
      * Set the directory name for the virtual drive.
+     *
      * @param virtualDriveDirectoryName The directory name
      */
     public static void setVirtualDriveDirectoryName(String virtualDriveDirectoryName) {
@@ -162,6 +170,7 @@ public abstract class AesDrive extends VirtualDrive {
 
     /**
      * Get the directory name for exporting files.
+     *
      * @return
      */
     public static String getExportDirectoryName() {
@@ -170,6 +179,7 @@ public abstract class AesDrive extends VirtualDrive {
 
     /**
      * Set the directory name for exporting files.
+     *
      * @param exportDirectoryName The directory name.
      */
     public static void setExportDirectoryName(String exportDirectoryName) {
@@ -178,6 +188,7 @@ public abstract class AesDrive extends VirtualDrive {
 
     /**
      * Get the directory name for sharing files.
+     *
      * @return The directory name.
      */
     public static String getShareDirectoryName() {
@@ -186,6 +197,7 @@ public abstract class AesDrive extends VirtualDrive {
 
     /**
      * Set the directory name for exporting files.
+     *
      * @param shareDirectoryName The directory name.
      */
     public static void setShareDirectoryName(String shareDirectoryName) {
@@ -230,11 +242,11 @@ public abstract class AesDrive extends VirtualDrive {
      * Change the user password.
      *
      * @param pass The new password.
-     * @throws IOException             Thrown if there is an IO error.
-     * @throws AuthException     Thrown if there is an Authorization error
-     * @throws SecurityException Thrown if there is a security exception
-     * @throws IntegrityException      Thrown if the data are corrupt or tampered with.
-     * @throws SequenceException       Thrown if there is an error with the nonce sequence
+     * @throws IOException        Thrown if there is an IO error.
+     * @throws AuthException      Thrown if there is an Authorization error
+     * @throws SecurityException  Thrown if there is a security exception
+     * @throws IntegrityException Thrown if the data are corrupt or tampered with.
+     * @throws SequenceException  Thrown if there is an error with the nonce sequence
      */
     public void setPassword(String pass) throws IOException {
         synchronized (this) {
@@ -257,7 +269,7 @@ public abstract class AesDrive extends VirtualDrive {
         virtualRoot = getVirtualFile(virtualRootRealFile);
     }
 
-/**
+    /**
      * Set the drive location to an external directory.
      * This requires you previously use SetDriveClass() to provide a class for the drive
      *
@@ -269,9 +281,9 @@ public abstract class AesDrive extends VirtualDrive {
      */
     public static AesDrive openDrive(IFile dir, Class<?> driveClassType,
                                      String password) throws IOException {
-		return openDrive(dir, driveClassType, password, null);
-	}
-										
+        return openDrive(dir, driveClassType, password, null);
+    }
+
     /**
      * Set the drive location to an external directory.
      * This requires you previously use SetDriveClass() to provide a class for the drive
@@ -416,8 +428,8 @@ public abstract class AesDrive extends VirtualDrive {
      * Get the authorization ID for the current device.
      *
      * @return The authorization id.
-     * @throws SequenceException   Thrown if there is an error with the nonce sequence
-     * @throws AuthException Thrown if there is an Authorization error
+     * @throws SequenceException Thrown if there is an error with the nonce sequence
+     * @throws AuthException     Thrown if there is an Authorization error
      */
     public String getAuthId() {
         return BitConverter.toHex(this.getAuthIdBytes());
@@ -476,8 +488,7 @@ public abstract class AesDrive extends VirtualDrive {
 
         // encrypt the combined key (drive key + hash key) using the masterKey and the masterKeyIv
         MemoryStream ms = new MemoryStream();
-        AesStream stream = new AesStream(masterKey, masterKeyIv, EncryptionMode.Encrypt, ms,
-                null, false, null, null);
+        AesStream stream = new AesStream(masterKey, masterKeyIv, EncryptionMode.Encrypt, ms, EncryptionFormat.Generic);
         stream.write(driveKey, 0, driveKey.length);
         stream.write(hashKey, 0, hashKey.length);
         stream.write(driveId, 0, driveId.length);
@@ -543,8 +554,7 @@ public abstract class AesDrive extends VirtualDrive {
 
             // decrypt the combined key (drive key + hash key) using the master key
             MemoryStream ms = new MemoryStream(encData);
-            stream = new AesStream(masterKey, masterKeyIv, EncryptionMode.Decrypt, ms,
-                    null, false, null, null);
+            stream = new AesStream(masterKey, masterKeyIv, EncryptionMode.Decrypt, ms, EncryptionFormat.Generic);
 
             byte[] driveKey = new byte[Generator.KEY_LENGTH];
             stream.read(driveKey, 0, driveKey.length);
@@ -592,8 +602,8 @@ public abstract class AesDrive extends VirtualDrive {
      * Verify that the hash signature is correct
      *
      * @param salmonConfig The drive configuration
-     * @param data The data to verify
-     * @param hashKey The hash key to use for integrity verification
+     * @param data         The data to verify
+     * @param hashKey      The hash key to use for integrity verification
      */
     private void verifyHash(DriveConfig salmonConfig, byte[] data, byte[] hashKey) {
         byte[] hashSignature = salmonConfig.getHashSignature();
@@ -675,6 +685,7 @@ public abstract class AesDrive extends VirtualDrive {
 
     /**
      * Return true if the drive is already created and has a configuration file.
+     *
      * @return True if already created
      */
     public boolean hasConfig() {
@@ -719,8 +730,8 @@ public abstract class AesDrive extends VirtualDrive {
             throw new Error("Could not find a sequencer");
         return this.sequencer;
     }
-	
-	/**
+
+    /**
      * Set the nonce sequencer used for the current drive.
      *
      * @param sequencer The nonce sequencer

@@ -31,6 +31,7 @@ import com.mku.func.TriConsumer;
 import com.mku.salmon.Generator;
 import com.mku.salmon.Header;
 import com.mku.salmon.SecurityException;
+import com.mku.salmon.streams.EncryptionFormat;
 import com.mku.salmonfs.auth.AuthException;
 import com.mku.salmonfs.drive.AesDrive;
 import com.mku.streams.RandomAccessStream;
@@ -59,6 +60,7 @@ public class AesFile implements IVirtualFile {
     public static final String Separator = "/";
 
     private final AesDrive drive;
+    private final EncryptionFormat format;
     private final IFile realFile;
 
     //cached values
@@ -67,7 +69,7 @@ public class AesFile implements IVirtualFile {
 
     private boolean overwrite;
     private boolean integrity;
-    private Integer reqChunkSize;
+    private int reqChunkSize;
     private byte[] encryptionKey;
     private byte[] hashKey;
     private byte[] requestedNonce;
@@ -79,21 +81,34 @@ public class AesFile implements IVirtualFile {
      * @param realFile The real file
      */
     public AesFile(IFile realFile) {
-        this(realFile, null);
+        this(realFile, null, EncryptionFormat.Salmon);
+    }
+
+    /**
+     * File wrapper to be used to create, read, and write encrypted files.
+     *
+     * @param realFile The real file
+     * @param format   The format to use, see {@link EncryptionFormat}
+     */
+    public AesFile(IFile realFile, EncryptionFormat format) {
+        this(realFile, null, format);
     }
 
     /**
      * File wrapper to create, read, and write encrypted files.
      * Requires a virtual drive that supports the underlying filesystem, see JavaFile implementation.
      *
-     * @param drive    The file virtual system that will be used with file operations
      * @param realFile The real file
+     * @param drive    The file virtual system that will be used with file operations
      */
     public AesFile(IFile realFile, AesDrive drive) {
-        this.drive = drive;
+        this(realFile, drive, EncryptionFormat.Salmon);
+    }
+
+    private AesFile(IFile realFile, AesDrive drive, EncryptionFormat format) {
         this.realFile = realFile;
-        if (integrity)
-            reqChunkSize = drive.getDefaultFileChunkSize();
+        this.drive = drive;
+        this.format = format;
         if (drive != null && drive.getKey() != null)
             hashKey = drive.getKey().getHashKey();
     }
@@ -103,7 +118,7 @@ public class AesFile implements IVirtualFile {
      *
      * @return The requested chunk size
      */
-    public synchronized Integer getRequestedChunkSize() {
+    public synchronized int getRequestedChunkSize() {
         return reqChunkSize;
     }
 
@@ -113,10 +128,10 @@ public class AesFile implements IVirtualFile {
      * @return The chunk size.
      * @throws IOException Throws exceptions if the format is corrupt.
      */
-    public Integer getFileChunkSize() throws IOException {
+    public int getFileChunkSize() throws IOException {
         Header header = getHeader();
         if (header == null)
-            return null;
+            return 0;
         return header.getChunkSize();
     }
 
@@ -135,22 +150,7 @@ public class AesFile implements IVirtualFile {
         RandomAccessStream stream = null;
         try {
             stream = realFile.getInputStream();
-            int bytesRead = stream.read(header.getMagicBytes(), 0, header.getMagicBytes().length);
-            if (bytesRead != header.getMagicBytes().length)
-                return null;
-            byte[] buff = new byte[8];
-            bytesRead = stream.read(buff, 0, Generator.VERSION_LENGTH);
-            if (bytesRead != Generator.VERSION_LENGTH)
-                return null;
-            header.setVersion(buff[0]);
-            bytesRead = stream.read(buff, 0, getChunkSizeLength());
-            if (bytesRead != getChunkSizeLength())
-                return null;
-            header.setChunkSize((int) BitConverter.toLong(buff, 0, bytesRead));
-            header.setNonce(new byte[Generator.NONCE_LENGTH]);
-            bytesRead = stream.read(header.getNonce(), 0, Generator.NONCE_LENGTH);
-            if (bytesRead != Generator.NONCE_LENGTH)
-                return null;
+            header = Header.readHeaderData(stream);
         } catch (Exception ex) {
             ex.printStackTrace();
             throw new IOException("Could not get file header", ex);
@@ -197,8 +197,8 @@ public class AesFile implements IVirtualFile {
         realStream.read(headerData, 0, headerData.length);
 
         AesStream stream = new AesStream(getEncryptionKey(),
-                nonceBytes, EncryptionMode.Decrypt, realStream, headerData,
-                integrity, getFileChunkSize(), getHashKey());
+                nonceBytes, EncryptionMode.Decrypt, realStream, EncryptionFormat.Salmon,
+                integrity, getHashKey());
         return stream;
     }
 
@@ -226,16 +226,32 @@ public class AesFile implements IVirtualFile {
     public synchronized RandomAccessStream getOutputStream(byte[] nonce) throws IOException {
 
         // check if we have an existing iv in the header
-        byte[] nonceBytes = getFileNonce();
+        Header header = getHeader();
+        byte[] nonceBytes = null;
+        if (header != null)
+            nonceBytes = header.getNonce();
+
         if (nonceBytes != null && !overwrite)
             throw new SecurityException("You should not overwrite existing files for security instead delete the existing file and create a new file. If this is a new file and you want to use parallel streams call SetAllowOverwrite(true)");
 
-        if (nonceBytes == null)
-            createHeader(nonce);
-        nonceBytes = getFileNonce();
+        if (nonceBytes == null) {
+            // set it to zero (disabled integrity) or get the default chunk
+            // size defined by the drive
+            if (integrity && reqChunkSize == 0 && drive != null)
+                reqChunkSize = drive.getDefaultFileChunkSize();
+            else if (!integrity)
+                reqChunkSize = 0;
 
-        // we also get the header data to include in the hash
-        byte[] headerData = getRealFileHeaderData(realFile);
+            if (nonce != null)
+                requestedNonce = nonce;
+            else if (requestedNonce == null && drive != null)
+                requestedNonce = drive.getNextNonce();
+
+            if (requestedNonce == null)
+                throw new SecurityException("File requires a nonce");
+
+            nonceBytes = requestedNonce;
+        }
 
         // create a stream with the file chunk size specified which will be used to host the integrity hash
         // we also specify if stream ranges can be overwritten which is generally dangerous if the file is existing
@@ -244,8 +260,8 @@ public class AesFile implements IVirtualFile {
         realStream.seek(getHeaderLength(), RandomAccessStream.SeekOrigin.Begin);
 
         AesStream stream = new AesStream(getEncryptionKey(), nonceBytes,
-                EncryptionMode.Encrypt, realStream, headerData,
-                integrity, getRequestedChunkSize() > 0 ? getRequestedChunkSize() : null, getHashKey());
+                EncryptionMode.Encrypt, realStream, EncryptionFormat.Salmon,
+                integrity, getHashKey(), getRequestedChunkSize());
         stream.setAllowRangeWrite(overwrite);
         return stream;
     }
@@ -295,7 +311,17 @@ public class AesFile implements IVirtualFile {
     /**
      * Enabled verification of file integrity during read() and write()
      *
-     * @param integrity True if enable integrity verification
+     * @param integrity False to disable integrity verification
+     * @throws IOException Thrown if there is an IO error.
+     */
+    public void setVerifyIntegrity(boolean integrity) throws IOException {
+        setVerifyIntegrity(integrity, null);
+    }
+
+    /**
+     * Enabled verification of file integrity during read() and write()
+     *
+     * @param integrity True to enable integrity verification
      * @param hashKey   The hash key to be used for verification
      * @throws IOException Thrown if there is an IO error.
      */
@@ -307,6 +333,28 @@ public class AesFile implements IVirtualFile {
         this.reqChunkSize = getFileChunkSize();
     }
 
+
+    /**
+     * Enable integrity with this file.
+     *
+     * @param integrity False to disable integrity
+     * @throws IOException Thrown if there is an IO error.
+     */
+    public void setApplyIntegrity(boolean integrity) throws IOException {
+        setApplyIntegrity(integrity, hashKey, 0);
+    }
+
+    /**
+     * Enable integrity with this file.
+     *
+     * @param integrity True to enable integrity
+     * @param hashKey   The hash key to use
+     * @throws IOException Thrown if there is an IO error.
+     */
+    public void setApplyIntegrity(boolean integrity, byte[] hashKey) throws IOException {
+        setApplyIntegrity(integrity, hashKey, 0);
+    }
+
     /**
      * Enable integrity with this file.
      *
@@ -316,21 +364,23 @@ public class AesFile implements IVirtualFile {
      *                         A positive number to specify integrity chunks.
      * @throws IOException Thrown if there is an IO error.
      */
-    public void setApplyIntegrity(boolean integrity, byte[] hashKey, Integer requestChunkSize) throws IOException {
-        Integer fileChunkSize = getFileChunkSize();
+    public void setApplyIntegrity(boolean integrity, byte[] hashKey, int requestChunkSize) throws IOException {
+        int fileChunkSize = getFileChunkSize();
 
-        if (fileChunkSize != null)
+        if (fileChunkSize > 0)
             throw new IntegrityException("Cannot redefine chunk size, delete file and recreate");
-        if (requestChunkSize != null && requestChunkSize < 0)
+        if (requestChunkSize < 0)
             throw new IntegrityException("Chunk size needs to be zero for default chunk size or a positive value");
-        if (integrity && fileChunkSize != null && fileChunkSize == 0)
-            throw new IntegrityException("Cannot enable integrity if the file is not created with integrity, export file and reimport with integrity");
 
         if (integrity && hashKey == null && drive != null)
             hashKey = drive.getKey().getHashKey();
+
+        if(integrity && hashKey == null)
+            throw new java.lang.SecurityException("Integrity needs a hashKey");
+
         this.integrity = integrity;
         this.reqChunkSize = requestChunkSize;
-        if (integrity && this.reqChunkSize == null && drive != null)
+        if (integrity && this.reqChunkSize == 0 && drive != null)
             this.reqChunkSize = drive.getDefaultFileChunkSize();
         this.hashKey = hashKey;
     }
@@ -395,43 +445,6 @@ public class AesFile implements IVirtualFile {
      */
     public byte[] getRequestedNonce() {
         return requestedNonce;
-    }
-
-    /**
-     * Create the header for the file
-     */
-    private void createHeader(byte[] nonce) throws IOException {
-        // set it to zero (disabled integrity) or get the default chunk
-        // size defined by the drive
-        if (integrity && reqChunkSize == null && drive != null)
-            reqChunkSize = drive.getDefaultFileChunkSize();
-        else if (!integrity)
-            reqChunkSize = 0;
-        if (reqChunkSize == null)
-            throw new IntegrityException("File requires a chunk size");
-
-        if (nonce != null)
-            requestedNonce = nonce;
-        else if (requestedNonce == null && drive != null)
-            requestedNonce = drive.getNextNonce();
-
-        if (requestedNonce == null)
-            throw new SecurityException("File requires a nonce");
-
-        RandomAccessStream realStream = realFile.getOutputStream();
-        byte[] magicBytes = Generator.getMagicBytes();
-        realStream.write(magicBytes, 0, magicBytes.length);
-
-        byte version = Generator.getVersion();
-        realStream.write(new byte[]{version}, 0, Generator.VERSION_LENGTH);
-
-        byte[] chunkSizeBytes = BitConverter.toBytes(reqChunkSize, 4);
-        realStream.write(chunkSizeBytes, 0, chunkSizeBytes.length);
-
-        realStream.write(requestedNonce, 0, requestedNonce.length);
-
-        realStream.flush();
-        realStream.close();
     }
 
     /**
@@ -580,6 +593,9 @@ public class AesFile implements IVirtualFile {
      * @param realPath The path of the real file
      */
     private String getRelativePath(String realPath) {
+        if (drive == null) {
+            return this.getRealFile().getName();
+        }
         AesFile virtualRoot = drive.getRoot();
         String virtualRootPath = virtualRoot.getRealFile().getDisplayPath();
         if (realPath.startsWith(virtualRootPath)) {
@@ -660,14 +676,14 @@ public class AesFile implements IVirtualFile {
      */
     private long getHashTotalBytesLength() throws IOException {
         // file does not support integrity
-        if (getFileChunkSize() == null || getFileChunkSize() <= 0)
+        if (getFileChunkSize() <= 0)
             return 0;
 
         // integrity has been requested but hash is missing
         if (integrity && getHashKey() == null)
             throw new IntegrityException("File requires hashKey, use SetVerifyIntegrity() to provide one");
 
-        return Integrity.getTotalHashDataLength(realFile.length(), getFileChunkSize(),
+        return Integrity.getTotalHashDataLength(EncryptionMode.Decrypt, realFile.length(), getFileChunkSize(),
                 Generator.HASH_RESULT_LENGTH, Generator.HASH_KEY_LENGTH);
     }
 
@@ -778,7 +794,7 @@ public class AesFile implements IVirtualFile {
             key = this.encryptionKey;
         if (key == null && drive != null)
             key = drive.getKey().getDriveKey();
-        String decfilename = TextDecryptor.decryptString(rfilename, key, nonce, true);
+        String decfilename = TextDecryptor.decryptString(rfilename, key, nonce);
         return decfilename;
     }
 
@@ -801,7 +817,7 @@ public class AesFile implements IVirtualFile {
             throw new SecurityException("Key is already set by the drive");
         if (drive != null)
             key = drive.getKey().getDriveKey();
-        String encryptedPath = TextEncryptor.encryptString(filename, key, nonce, true);
+        String encryptedPath = TextEncryptor.encryptString(filename, key, nonce);
         encryptedPath = encryptedPath.replaceAll("/", "-");
         return encryptedPath;
     }
@@ -1072,10 +1088,10 @@ public class AesFile implements IVirtualFile {
      * @throws IOException Thrown if there is an IO error.
      */
     public long getMinimumPartSize() throws IOException {
-        Integer currChunkSize = this.getFileChunkSize();
-        if (currChunkSize != null && currChunkSize != 0)
+        int currChunkSize = this.getFileChunkSize();
+        if (currChunkSize != 0)
             return currChunkSize;
-        if (this.getRequestedChunkSize() != null && this.getRequestedChunkSize() != 0)
+        if (this.getRequestedChunkSize() > 0)
             return this.getRequestedChunkSize();
         return this.getBlockSize();
     }
@@ -1106,7 +1122,7 @@ public class AesFile implements IVirtualFile {
         String filename = IFile.autoRename(file.getName());
         byte[] nonce = file.getDrive().getNextNonce();
         byte[] key = file.getDrive().getKey().getDriveKey();
-        String encryptedPath = TextEncryptor.encryptString(filename, key, nonce, true);
+        String encryptedPath = TextEncryptor.encryptString(filename, key, nonce);
         encryptedPath = encryptedPath.replace("/", "-");
         return encryptedPath;
     }

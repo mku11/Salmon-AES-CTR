@@ -348,8 +348,8 @@ public class SalmonFSTestHelper {
         };
         AesFile aesFile = fileImporter.importFile(fileToImport, rootDir, null, false, applyFileIntegrity, printImportProgress);
 
-        Integer chunkSize = aesFile.getFileChunkSize();
-        if (chunkSize != null && chunkSize > 0 && !verifyFileIntegrity)
+        int chunkSize = aesFile.getFileChunkSize();
+        if (chunkSize > 0 && !verifyFileIntegrity)
             aesFile.setVerifyIntegrity(false, null);
 
         assertTrue(aesFile.exists());
@@ -381,8 +381,8 @@ public class SalmonFSTestHelper {
         };
         if (bitflip)
             flipBit(aesFile, flipPosition);
-        Integer chunkSize2 = aesFile.getFileChunkSize();
-        if (chunkSize2 != null && chunkSize2 > 0 && verifyFileIntegrity)
+        int chunkSize2 = aesFile.getFileChunkSize();
+        if (chunkSize2 > 0 && verifyFileIntegrity)
             aesFile.setVerifyIntegrity(true, null);
         IFile exportFile = fileExporter.exportFile(aesFile, drive.getExportDir(), null, false, verifyFileIntegrity, printExportProgress);
 
@@ -485,9 +485,10 @@ public class SalmonFSTestHelper {
                                                        byte[] filenameNonce, byte[] fileNonce, boolean flipBit, int flipPosition, boolean checkData) throws Exception {
         // write file
         IFile realDir = SalmonFSTestHelper.generateFolder("encfiles", SalmonFSTestHelper.TEST_OUTPUT_DIR, false);
-        AesFile dir = new AesFile(realDir, null);
+        AesFile dir = new AesFile(realDir);
         String filename = "test_" + System.currentTimeMillis() + "." + flipPosition + ".txt";
         AesFile newFile = dir.createFile(filename, key, filenameNonce, fileNonce);
+        System.out.println("new file: " + newFile.getPath());
         if (applyIntegrity)
             newFile.setApplyIntegrity(true, hashKey, chunkSize);
         RandomAccessStream stream = newFile.getOutputStream();
@@ -508,7 +509,7 @@ public class SalmonFSTestHelper {
         }
 
         // open file for read
-        AesFile readFile = new AesFile(realFile, null);
+        AesFile readFile = new AesFile(realFile);
         readFile.setEncryptionKey(key);
         readFile.setRequestedNonce(fileNonce);
         if (verifyIntegrity)

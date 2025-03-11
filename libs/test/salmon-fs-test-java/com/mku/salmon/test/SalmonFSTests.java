@@ -139,6 +139,7 @@ public class SalmonFSTests {
                     SalmonCoreTestHelper.TEST_PASSWORD, sequencer);
             AesFile virtualRoot = drive.getRoot();
         } catch (AuthException ex) {
+            ex.printStackTrace();
             wrongPassword = true;
         }
 

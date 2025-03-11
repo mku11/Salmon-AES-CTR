@@ -22,21 +22,17 @@ Library provides support for Android including Storage Access Framework API.
 #### SalmonNativeAndroid  
 Library provides a fast native C library for Android with AES-NI intrinsics in C/C++ for x86, x64, armv7, ARM64 architectures.  
     
+#### Salmon Web Service  
+The Salmon Web Service provides a network filesystem to use with SalmonFS see WSDrive and WSFile.
   
-#### SalmonService  
+#### Salmon WinService  
 The Salmon Service provides a protected nonce sequencer running with elevated privileges. 
-  
-  
-#### SalmonVault  
-A file vault app using Salmon. Currently there are versions in JavaFX, C# WPF, and Android, and Xamarin Android.  
-It features an explorer-like interface to browse and view, copy, move, delete, rename, import, and export encrypted files.  
-There are builtin in-memory apps for viewing files with Image, Video, and Audio content.  
-The android versions feature sharing files with external apps for editing and automatically re-import into the vault.  
-  
+
   
 ### Specifications
 
-#### SalmonAES
+#### Salmon format
+AES-256 in CTR mode with HMAC SHA-256 chunks:  
 
 ```
      UNENCRYPTED_DATA                                      ENCRYPTED_DATA
@@ -63,7 +59,7 @@ The android versions feature sharing files with external apps for editing and au
 * When HMAC integrity is enabled each CHUNK is independent of others thus allowing random access (seek) and parallelism at the CHUNK level.  
    
    
-#### SalmonStream
+#### AesStream
 ```
 				 ENCRYPTED DATA STREAM
 
@@ -81,24 +77,24 @@ ____________________________|______________|______________|...|...
 |______________|______________________________________________|...
 
 ```
-* SalmonStream optionally supports a standard Salmon header with unencrypted data (see SalmonFile format below) or you can include any data you want.
+* AesStream optionally supports a standard Salmon header with unencrypted data (see AesFile format below) or you can include any data you want.
 * Enabling HMAC integrity in the stream will interleave HMAC SHA256 hash signatures before the chunks as shown above.
 * The first HMAC section includes the HMAC for the first chunk and the header data.
 * HMAC is applied after the encrypted data in each chunk.
 * Same HMAC key is used for all integrity chunks.
 * The CHUNK_SIZE must be a multiple of the AES Block (16 bytes).
 * Last chunk might have a length lesser than the CHUNK_SIZE, no padding applied.
-* SalmonStream is NOT thread safe, if you need parallel processing see SalmonImporter and SalmonExporter.
+* AesStream is NOT thread safe, if you need parallel processing see AesFileImporter and AesFileExporter.
 * Always align your write buffers to the AES Block size.
 * If you use integrity align your read/write buffers to the CHUNK_SIZE for better performance.
 * If you don't use integrity align your read/write buffers to the AES Block size for better performance.
   
   
   
-#### SalmonFile
+#### AesFile
 
-You can use a SalmonFile to encrypt contents of a file.
-SalmonFile follows the same format as the stream but with the addition of a standard Salmon header, see below.
+You can use a AesFile to encrypt contents of a file.
+AesFile follows the same format as the stream but with the addition of a standard Salmon header, see below.
 ```
 
 NONCE is a incremental number from a sequence hosted in a sequence file in the user filesystem or served via the Salmon Windows Service.
@@ -118,23 +114,23 @@ CTR (16 bytes) = NONCE(8 bytes) || ZERO(8 bytes)
 |_________|__________|____________|___________|__________|___________|__________|___________|
 
 ```
-* SalmonFile comes with a complete API for creating, deleting, copying, and moving files.
+* AesFile comes with a complete API for creating, deleting, copying, and moving files.
 * Filenames may be the same for 2 or more files so when you export make sure you don't overwrite 
 other files in the export directory
-* If you use parallel processing you need to align to the CHUNK_SIZE. See SalmonImporter
+* If you use parallel processing you need to align to the CHUNK_SIZE. See AesFileImporter
   
   
   
-#### SalmonDrive
+#### Drive
 
-SalmonDrive is a virtual drive that hosts encrypted files.
+Drive is a virtual drive that hosts encrypted files.
 More specifically:
-1) Takes advantage of the SalmonFile API.
+1) Takes advantage of the AesFile API.
 2) Uses parallel processing to import and export files to the drive.
 3) Handles configuration for the encryption keys and nonce generation.
 4) Is portable so any device with Salmon can read/decrypt files. 
 
-#### SalmonDriveConfig
+#### DriveConfig
 
 ```
                                                   DRIVE CONFIG FILE
@@ -159,7 +155,7 @@ More specifically:
 * DRIVE_ID is generated during the creation of a new drive.
 * APP_DEVICE_ID is generated during the first time the application runs one a device and is unique per application per device.
   
-#### SalmonAuthConfig
+#### AuthConfig
 
 ```
                                                   AUTH CONFIG FILE
@@ -183,7 +179,7 @@ More specifically:
   
   
   
-#### SalmonSequenceConfig
+#### Sequencer File
 
 ```
                                            SEQUENCES CONFIG FILE 

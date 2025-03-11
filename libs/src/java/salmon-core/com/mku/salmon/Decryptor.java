@@ -24,6 +24,7 @@ SOFTWARE.
 */
 
 import com.mku.salmon.integrity.IntegrityException;
+import com.mku.salmon.streams.EncryptionFormat;
 import com.mku.streams.RandomAccessStream;
 import com.mku.streams.MemoryStream;
 import com.mku.salmon.integrity.Integrity;
@@ -92,75 +93,99 @@ public class Decryptor {
         this.bufferSize = bufferSize;
     }
 
+
     /**
-     * Decrypts a byte array using parallel threads.
+     * Decrypts a byte array using the embedded nonce.
      *
-     * @param data          The input data to be decrypted.
-     * @param key           The AES key to use for decryption.
-     * @param nonce         The nonce to use for decryption.
-     * @param hasHeaderData The header data.
+     * @param data The input data to be decrypted.
+     * @param key  The AES key to use for decryption.
      * @return The output buffer containing the decrypted data.
-     * @throws IOException              Thrown if there is an error with the stream.
+     * @throws IOException        Thrown if there is an error with the stream.
      * @throws SecurityException  Thrown if there is a security exception
      * @throws IntegrityException Thrown if the data are corrupt or tampered with.
      */
-    public byte[] decrypt(byte[] data, byte[] key, byte[] nonce, boolean hasHeaderData)
+    public byte[] decrypt(byte[] data, byte[] key)
             throws IOException {
-        return decrypt(data, key, nonce, hasHeaderData, false, null, null);
+        return decrypt(data, key, null, EncryptionFormat.Salmon, false, null, 0);
     }
 
     /**
-     * Decrypt a byte array using AES256 based on the provided key and nonce.
+     * Decrypts a byte array.
      *
-     * @param data          The input data to be decrypted.
-     * @param key           The AES key to use for decryption.
-     * @param nonce         The nonce to use for decryption.
-     * @param hasHeaderData The header data.
-     * @param integrity     Verify hash integrity in the data.
-     * @param hashKey       The hash key to be used for integrity.
-     * @param chunkSize     The chunk size.
+     * @param data   The input data to be decrypted.
+     * @param key    The AES key to use for decryption.
+     * @param nonce  The nonce to use for decryption.
+     * @param format The format to use, see {@link EncryptionFormat}
+     * @return The output buffer containing the decrypted data.
+     * @throws IOException        Thrown if there is an error with the stream.
+     * @throws SecurityException  Thrown if there is a security exception
+     * @throws IntegrityException Thrown if the data are corrupt or tampered with.
+     */
+    public byte[] decrypt(byte[] data, byte[] key, byte[] nonce, EncryptionFormat format)
+            throws IOException {
+        return decrypt(data, key, nonce, format, false, null, 0);
+    }
+
+
+    /**
+     * Decrypt a byte array using the specified nonce and integrity hashkey.
+     *
+     * @param data      The input data to be decrypted.
+     * @param key       The AES key to use for decryption.
+     * @param nonce     The nonce to use for decryption.
+     * @param format    The format to use, see {@link EncryptionFormat}
+     * @param integrity Verify hash integrity in the data.
+     * @param hashKey   The hash key to be used for integrity.
      * @return The byte array with the decrypted data.
-     * @throws IOException              Thrown if there is a problem with decoding the array.
+     * @throws IOException        Thrown if there is a problem with decoding the array.
      * @throws SecurityException  Thrown if the key and nonce are not provided.
-     * @throws IOException Thrown if there is an IO error.
+     * @throws IOException        Thrown if there is an IO error.
      * @throws IntegrityException Thrown if the data are corrupt or tampered with.
      */
     public byte[] decrypt(byte[] data, byte[] key, byte[] nonce,
-                          boolean hasHeaderData,
-                          boolean integrity, byte[] hashKey, Integer chunkSize)
+                          EncryptionFormat format,
+                          boolean integrity, byte[] hashKey) throws IOException {
+        return decrypt(data, key, nonce, format, false, null, 0);
+    }
+
+    /**
+     * Decrypt a byte array using the specified nonce, the integrity hash key and the chunk size.
+     *
+     * @param data      The input data to be decrypted.
+     * @param key       The AES key to use for decryption.
+     * @param nonce     The nonce to use for decryption.
+     * @param format    The format to use, see {@link EncryptionFormat}
+     * @param integrity Verify hash integrity in the data.
+     * @param hashKey   The hash key to be used for integrity.
+     * @param chunkSize The chunk size.
+     * @return The byte array with the decrypted data.
+     * @throws IOException        Thrown if there is a problem with decoding the array.
+     * @throws SecurityException  Thrown if the key and nonce are not provided.
+     * @throws IOException        Thrown if there is an IO error.
+     * @throws IntegrityException Thrown if the data are corrupt or tampered with.
+     */
+    public byte[] decrypt(byte[] data, byte[] key, byte[] nonce,
+                          EncryptionFormat format,
+                          boolean integrity, byte[] hashKey, int chunkSize)
             throws IOException {
         if (key == null)
             throw new SecurityException("Key is missing");
-        if (!hasHeaderData && nonce == null)
+        if (format == EncryptionFormat.Generic && nonce == null)
             throw new SecurityException("Need to specify a nonce if the file doesn't have a header");
 
         if (integrity)
-            chunkSize = chunkSize == null ? Integrity.DEFAULT_CHUNK_SIZE : chunkSize;
+            chunkSize = chunkSize == 0 ? Integrity.DEFAULT_CHUNK_SIZE : chunkSize;
 
         MemoryStream inputStream = new MemoryStream(data);
-        Header header;
-        byte[] headerData = null;
-        if (hasHeaderData) {
-            header = Header.parseHeaderData(inputStream);
-            if (header.getChunkSize() > 0)
-                integrity = true;
-            chunkSize = header.getChunkSize();
-            nonce = header.getNonce();
-            headerData = header.getHeaderData();
-        }
-        if (nonce == null)
-            throw new SecurityException("Nonce is missing");
-
-        int realSize = (int) AesStream.getActualSize(data, key, nonce, EncryptionMode.Decrypt,
-                headerData, integrity, chunkSize, hashKey);
+        int realSize = (int) AesStream.getOutputSize(EncryptionMode.Decrypt, data.length, format, integrity, chunkSize);
         byte[] outData = new byte[realSize];
 
         if (threads == 1) {
-            decryptData(inputStream, 0, inputStream.length(), outData,
-                    key, nonce, headerData, integrity, hashKey, chunkSize);
+            decryptData(inputStream, 0, realSize, outData, key, nonce, format,
+                    integrity, hashKey, chunkSize);
         } else {
             decryptDataParallel(data, outData,
-                    key, hashKey, nonce, headerData,
+                    key, hashKey, nonce, format,
                     chunkSize, integrity);
         }
 
@@ -170,25 +195,25 @@ public class Decryptor {
     /**
      * Decrypt stream using parallel threads.
      *
-     * @param data       The input data to be decrypted
-     * @param outData    The output buffer with the decrypted data.
-     * @param key        The AES key.
-     * @param hashKey    The hash key.
-     * @param nonce      The nonce to be used for decryption.
-     * @param headerData The header data.
-     * @param chunkSize  The chunk size.
-     * @param integrity  True to verify integrity.
+     * @param data      The input data to be decrypted
+     * @param outData   The output buffer with the decrypted data.
+     * @param key       The AES key.
+     * @param hashKey   The hash key.
+     * @param nonce     The nonce to be used for decryption.
+     * @param format    The format to use, see {@link EncryptionFormat}
+     * @param chunkSize The chunk size.
+     * @param integrity True to verify integrity.
      */
     private void decryptDataParallel(byte[] data, byte[] outData,
-                                     byte[] key, byte[] hashKey, byte[] nonce, byte[] headerData,
-                                     Integer chunkSize, boolean integrity) {
+                                     byte[] key, byte[] hashKey, byte[] nonce, EncryptionFormat format,
+                                     int chunkSize, boolean integrity) {
         int runningThreads = 1;
         long partSize = data.length;
 
         // if we want to check integrity we align to the chunk size otherwise to the AES Block
         long minPartSize = AesCTRTransformer.BLOCK_SIZE;
-        if (integrity && chunkSize != null)
-            minPartSize = (long) chunkSize;
+        if (integrity && chunkSize > 0)
+            minPartSize = chunkSize;
         else if (integrity)
             minPartSize = Integrity.DEFAULT_CHUNK_SIZE;
 
@@ -201,9 +226,8 @@ public class Decryptor {
             runningThreads = (int) (data.length / partSize);
         }
 
-        submitDecryptJobs(runningThreads, partSize,
-                data, outData,
-                key, hashKey, nonce, headerData,
+        submitDecryptJobs(runningThreads, partSize, data, outData,
+                key, hashKey, nonce, format,
                 integrity, chunkSize);
     }
 
@@ -218,14 +242,13 @@ public class Decryptor {
      * @param key            The AES key.
      * @param hashKey        The hash key for integrity validation.
      * @param nonce          The nonce for the data.
-     * @param headerData     The header data common to all parts.
+     * @param format         The format to use, see {@link EncryptionFormat}
      * @param integrity      True to verify the data integrity.
      * @param chunkSize      The chunk size.
      */
-    private void submitDecryptJobs(int runningThreads, long partSize,
-                                   byte[] data, byte[] outData,
-                                   byte[] key, byte[] hashKey, byte[] nonce, byte[] headerData,
-                                   boolean integrity, Integer chunkSize) {
+    private void submitDecryptJobs(int runningThreads, long partSize, byte[] data, byte[] outData,
+                                   byte[] key, byte[] hashKey, byte[] nonce, EncryptionFormat format,
+                                   boolean integrity, int chunkSize) {
         final CountDownLatch done = new CountDownLatch(runningThreads);
         AtomicReference<Exception> ex = new AtomicReference<>();
         for (int i = 0; i < runningThreads; i++) {
@@ -240,7 +263,8 @@ public class Decryptor {
                     else
                         length = partSize;
                     MemoryStream ins = new MemoryStream(data);
-                    decryptData(ins, start, length, outData, key, nonce, headerData,
+                    decryptData(ins, start, length, outData,
+                            key, nonce, format,
                             integrity, hashKey, chunkSize);
                 } catch (Exception ex1) {
                     ex.set(ex1);
@@ -272,31 +296,31 @@ public class Decryptor {
      * @param outData     The buffer with the decrypted data.
      * @param key         The AES key to be used.
      * @param nonce       The nonce to be used.
-     * @param headerData  The header data to be used.
+     * @param format      The format to use, see {@link EncryptionFormat}
      * @param integrity   True to verify integrity.
      * @param hashKey     The hash key to be used for integrity verification.
      * @param chunkSize   The chunk size.
-     * @throws IOException              Thrown if there is an error with the stream.
+     * @throws IOException        Thrown if there is an error with the stream.
      * @throws SecurityException  Thrown if there is a security exception with the stream.
      * @throws IntegrityException Thrown if the stream is corrupt or tampered with.
      */
     private void decryptData(RandomAccessStream inputStream, long start, long count, byte[] outData,
-                             byte[] key, byte[] nonce,
-                             byte[] headerData, boolean integrity, byte[] hashKey, Integer chunkSize)
+                             byte[] key, byte[] nonce, EncryptionFormat format,
+                             boolean integrity, byte[] hashKey, int chunkSize)
             throws IOException {
         AesStream stream = null;
         MemoryStream outputStream = null;
         try {
             outputStream = new MemoryStream(outData);
             outputStream.setPosition(start);
-            stream = new AesStream(key, nonce, EncryptionMode.Decrypt, inputStream,
-                    headerData, integrity, chunkSize, hashKey);
+            stream = new AesStream(key, nonce, EncryptionMode.Decrypt, inputStream, format,
+                    integrity, hashKey, chunkSize);
             stream.setPosition(start);
             long totalChunkBytesRead = 0;
             // align to the chunksize if available
             int buffSize = Math.max(bufferSize, stream.getChunkSize());
-			// set the same buffer size for the internal stream
-			stream.setBufferSize(buffSize);
+            // set the same buffer size for the internal stream
+            stream.setBufferSize(buffSize);
             byte[] buff = new byte[buffSize];
             int bytesRead;
             while ((bytesRead = stream.read(buff, 0, Math.min(buff.length, (int) (count - totalChunkBytesRead)))) > 0

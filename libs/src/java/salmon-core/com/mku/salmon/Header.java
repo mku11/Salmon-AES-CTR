@@ -24,6 +24,7 @@ SOFTWARE.
 */
 
 import com.mku.convert.BitConverter;
+import com.mku.streams.MemoryStream;
 import com.mku.streams.RandomAccessStream;
 
 import java.io.IOException;
@@ -33,6 +34,11 @@ import java.io.IOException;
  * decrypting the stream.
  */
 public class Header {
+
+    /**
+     * Header length
+     */
+    public static final long HEADER_LENGTH = 16;
 
     /**
      * Magic bytes.
@@ -106,22 +112,56 @@ public class Header {
      * @return The header data.
      * @throws IOException Thrown if there is an IO error.
      */
-    public static Header parseHeaderData(RandomAccessStream stream) throws IOException {
-        Header header = new Header();
-        header.magicBytes = new byte[Generator.MAGIC_LENGTH];
-        stream.read(header.magicBytes, 0, header.magicBytes.length);
-        byte[] versionBytes = new byte[Generator.VERSION_LENGTH];
-        stream.read(versionBytes, 0, Generator.VERSION_LENGTH);
-        header.version = versionBytes[0];
-        byte[] chunkSizeHeader = new byte[Generator.CHUNK_SIZE_LENGTH];
-        stream.read(chunkSizeHeader, 0, chunkSizeHeader.length);
-        header.chunkSize = (int) BitConverter.toLong(chunkSizeHeader, 0, Generator.CHUNK_SIZE_LENGTH);
-        header.nonce = new byte[Generator.NONCE_LENGTH];
-        stream.read(header.nonce, 0, header.nonce.length);
+    public static Header readHeaderData(RandomAccessStream stream) throws IOException {
+        if(stream.length() == 0)
+            return null;
+        long pos = stream.getPosition();
+
         stream.setPosition(0);
+        Header header = new Header();
         header.headerData = new byte[Generator.MAGIC_LENGTH + Generator.VERSION_LENGTH
                 + Generator.CHUNK_SIZE_LENGTH + Generator.NONCE_LENGTH];
         stream.read(header.headerData, 0, header.headerData.length);
+
+        MemoryStream ms = new MemoryStream(header.headerData);
+        header.magicBytes = new byte[Generator.MAGIC_LENGTH];
+        ms.read(header.magicBytes, 0, header.magicBytes.length);
+        byte[] versionBytes = new byte[Generator.VERSION_LENGTH];
+        ms.read(versionBytes, 0, Generator.VERSION_LENGTH);
+        header.version = versionBytes[0];
+        byte[] chunkSizeHeader = new byte[Generator.CHUNK_SIZE_LENGTH];
+        ms.read(chunkSizeHeader, 0, chunkSizeHeader.length);
+        header.chunkSize = (int) BitConverter.toLong(chunkSizeHeader, 0, Generator.CHUNK_SIZE_LENGTH);
+        header.nonce = new byte[Generator.NONCE_LENGTH];
+        ms.read(header.nonce, 0, header.nonce.length);
+
+        stream.setPosition(pos);
+        return header;
+    }
+
+    public static Header writeHeader(RandomAccessStream stream, byte[] nonce, int chunkSize) throws IOException {
+        byte[] magicBytes = Generator.getMagicBytes();
+        byte version = Generator.getVersion();
+        byte[] versionBytes = new byte[]{version};
+        byte[] chunkSizeBytes = BitConverter.toBytes(chunkSize, Generator.CHUNK_SIZE_LENGTH);
+
+        byte[] headerData =  new byte[Generator.MAGIC_LENGTH + Generator.VERSION_LENGTH
+                + Generator.CHUNK_SIZE_LENGTH + Generator.NONCE_LENGTH];
+        MemoryStream ms = new MemoryStream(headerData);
+        ms.write(magicBytes, 0, magicBytes.length);
+        ms.write(versionBytes, 0, versionBytes.length);
+        ms.write(chunkSizeBytes, 0, chunkSizeBytes.length);
+        ms.write(nonce, 0, nonce.length);
+        ms.setPosition(0);
+        Header header = readHeaderData(ms);
+
+        long pos = stream.getPosition();
+        stream.setPosition(0);
+        ms.setPosition(0);
+        ms.copyTo(stream);
+        ms.close();
+        stream.flush();
+        stream.setPosition(pos);
 
         return header;
     }

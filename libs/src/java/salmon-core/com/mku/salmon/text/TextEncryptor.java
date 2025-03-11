@@ -27,6 +27,7 @@ import com.mku.salmon.integrity.IntegrityException;
 import com.mku.salmon.Encryptor;
 import com.mku.salmon.SecurityException;
 import com.mku.salmon.encode.Base64Utils;
+import com.mku.salmon.streams.EncryptionFormat;
 
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
@@ -40,44 +41,59 @@ public class TextEncryptor {
     /**
      * Encrypts a text String using AES256 with the key and nonce provided.
      *
-     * @param text  Text to be encrypted.
-     * @param key   The encryption key to be used.
-     * @param nonce The nonce to be used.
-     * @param header Set to true to store a header with information like nonce and/or chunk size,
-     *               otherwise you will have to store that information externally.
-     * @throws IOException Thrown if there is an IO error.
-     * @throws SecurityException Thrown if there is a security exception
-     * @throws IntegrityException Thrown if the data are corrupt or tampered with.
+     * @param text   Text to be encrypted.
+     * @param key    The encryption key to be used.
+     * @param nonce  The nonce to be used.
      * @return The encrypted string
-     * @throws IOException Thrown if there is an IO error.
+     * @throws IOException        Thrown if there is an IO error.
+     * @throws SecurityException  Thrown if there is a security exception
+     * @throws IntegrityException Thrown if the data are corrupt or tampered with.
+     * @throws IOException        Thrown if there is an IO error.
      */
-    public static String encryptString(String text, byte[] key, byte[] nonce, boolean header)
+    public static String encryptString(String text, byte[] key, byte[] nonce)
             throws IOException {
-        return encryptString(text, key, nonce, header, false, null, null);
+        return encryptString(text, key, nonce, EncryptionFormat.Salmon, false, null, 0);
     }
 
     /**
      * Encrypts a text String using AES256 with the key and nonce provided.
      *
-     * @param text  Text to be encrypted.
-     * @param key   The encryption key to be used.
-     * @param nonce The nonce to be used.
-     * @param header Set to true to store a header with information like nonce and/or chunk size,
-     *               otherwise you will have to store that information externally.
-     * @param integrity True if you want to calculate and store hash signatures for each chunkSize
-     * @param hashKey Hash key to be used for all chunks.
-     * @param chunkSize The chunk size.
-     * @throws IOException Thrown if there is an IO error.
-     * @throws SecurityException Thrown if there is a security exception
+     * @param text   Text to be encrypted.
+     * @param key    The encryption key to be used.
+     * @param nonce  The nonce to be used.
+     * @param format The format to use, see {@link EncryptionFormat}
+     * @return The encrypted string
+     * @throws IOException        Thrown if there is an IO error.
+     * @throws SecurityException  Thrown if there is a security exception
      * @throws IntegrityException Thrown if the data are corrupt or tampered with.
-     * @return The encrypted string.
-     * @throws IOException Thrown if there is an IO error.
+     * @throws IOException        Thrown if there is an IO error.
      */
-    public static String encryptString(String text, byte[] key, byte[] nonce, boolean header,
-                                       boolean integrity, byte[] hashKey, Integer chunkSize)
+    public static String encryptString(String text, byte[] key, byte[] nonce, EncryptionFormat format)
+            throws IOException {
+        return encryptString(text, key, nonce, format, false, null, 0);
+    }
+
+    /**
+     * Encrypts a text String using AES256 with the key and nonce provided.
+     *
+     * @param text      Text to be encrypted.
+     * @param key       The encryption key to be used.
+     * @param nonce     The nonce to be used.
+     * @param format    The format to use, see {@link EncryptionFormat}
+     * @param integrity True if you want to calculate and store hash signatures for each chunkSize
+     * @param hashKey   Hash key to be used for all chunks.
+     * @param chunkSize The chunk size.
+     * @return The encrypted string.
+     * @throws IOException        Thrown if there is an IO error.
+     * @throws SecurityException  Thrown if there is a security exception
+     * @throws IntegrityException Thrown if the data are corrupt or tampered with.
+     * @throws IOException        Thrown if there is an IO error.
+     */
+    public static String encryptString(String text, byte[] key, byte[] nonce, EncryptionFormat format,
+                                       boolean integrity, byte[] hashKey, int chunkSize)
             throws IOException {
         byte[] bytes = text.getBytes(StandardCharsets.UTF_8);
-        byte[] encBytes = encryptor.encrypt(bytes, key, nonce, header, integrity, hashKey, chunkSize);
+        byte[] encBytes = encryptor.encrypt(bytes, key, nonce, format, integrity, hashKey, chunkSize);
         String encString = Base64Utils.getBase64().encode(encBytes).replace("\n", "");
         return encString;
     }
