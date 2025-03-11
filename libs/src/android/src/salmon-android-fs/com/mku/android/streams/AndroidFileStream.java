@@ -25,7 +25,7 @@ SOFTWARE.
 
 import android.os.ParcelFileDescriptor;
 
-import com.mku.android.file.AndroidFile;
+import com.mku.android.fs.file.AndroidFile;
 import com.mku.streams.RandomAccessStream;
 
 import java.io.FileInputStream;

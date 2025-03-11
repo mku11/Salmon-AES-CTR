@@ -142,7 +142,7 @@ public class AndroidDrive extends Drive {
      * Clear the cache and the private folder that is used to share files with
      * other apps.
      *
-     * @param file
+     * @param file The cache file or directory
      */
     private void clearCache(java.io.File file) {
         if (file.exists() && file.isDirectory()) {

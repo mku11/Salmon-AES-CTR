@@ -372,15 +372,6 @@ public class AndroidFile implements IFile {
         return copy(newDir, newName, false, progressListener);
     }
 
-    /**
-     * Copy this file to another directory
-     *
-     * @param newDir
-     * @param progressListener
-     * @param delete
-     * @return
-     * @throws IOException
-     */
     private IFile copy(IFile newDir, String newName,
                            boolean delete, BiConsumer<Long,Long> progressListener)
             throws IOException {

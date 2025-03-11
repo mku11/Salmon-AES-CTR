@@ -28,12 +28,12 @@ import android.media.MediaDataSource;
 import android.util.Log;
 import android.widget.Toast;
 
-import com.mku.android.salmon.drive.AndroidDrive;
+import com.mku.android.salmonfs.drive.AndroidDrive;
+import com.mku.salmon.integrity.IntegrityException;
+import com.mku.salmon.streams.AesStream;
+import com.mku.salmonfs.file.AesFile;
+import com.mku.salmonfs.streams.AesFileInputStream;
 import com.mku.streams.InputStreamWrapper;
-import com.mku.salmon.SalmonFile;
-import com.mku.integrity.IntegrityException;
-import com.mku.salmon.streams.SalmonFileInputStream;
-import com.mku.salmon.streams.SalmonStream;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -46,33 +46,33 @@ public class SalmonMediaDataSource extends MediaDataSource {
 
     private final Activity activity;
     private final InputStream stream;
-    private final SalmonFile salmonFile;
+    private final AesFile aesFile;
     private final boolean enableMultiThreaded = true;
 
     private boolean integrityFailed;
-	private long size;
-	
+    private long size;
+
     /**
      * Construct a seekable source for the media player from an encrypted file source
      *
      * @param activity   Activity this data source will be used with. This is usually the activity the MediaPlayer is attached to
-     * @param salmonFile SalmonFile that will be used as a source
-     * @param buffers The buffers
+     * @param aesFile    AesFile that will be used as a source
+     * @param buffers    The buffers
      * @param bufferSize Buffer size
      * @param threads    Threads for parallel processing
      * @param backOffset The backwards offset to use when reading buffers
      * @throws Exception Thrown if error occured
      */
-    public SalmonMediaDataSource(Activity activity, SalmonFile salmonFile,
+    public SalmonMediaDataSource(Activity activity, AesFile aesFile,
                                  int buffers, int bufferSize, int threads, int backOffset) throws Exception {
         this.activity = activity;
-        this.salmonFile = salmonFile;
-        this.size = salmonFile.getSize();
-        		
+        this.aesFile = aesFile;
+        this.size = aesFile.getSize();
+
         if (enableMultiThreaded)
-            this.stream = new SalmonFileInputStream(salmonFile, buffers, bufferSize, threads, backOffset);
+            this.stream = new AesFileInputStream(aesFile, buffers, bufferSize, threads, backOffset);
         else {
-            SalmonStream fStream = salmonFile.getInputStream();
+            AesStream fStream = aesFile.getInputStream();
             this.stream = new InputStreamWrapper(fStream);
         }
     }
@@ -115,6 +115,7 @@ public class SalmonMediaDataSource extends MediaDataSource {
 
     /**
      * Get the content size.
+     *
      * @return The size
      */
     public long getSize() {
