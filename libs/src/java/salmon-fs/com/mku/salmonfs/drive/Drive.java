@@ -38,9 +38,9 @@ import java.io.IOException;
 public class Drive extends AesDrive {
 
     /**
-     * Private constructor, use open() or create() instead.
+     * Protected constructor, use open() or create() instead.
      */
-    private Drive() {
+    protected Drive() {
 
     }
 

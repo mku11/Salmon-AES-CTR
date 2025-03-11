@@ -36,9 +36,9 @@ import java.io.IOException;
 public class HttpDrive extends AesDrive {
 
     /**
-     * Private constructor, use open() or create() instead.
+     * Protected constructor, use open() or create() instead.
      */
-    private HttpDrive() {
+    protected HttpDrive() {
 
     }
 

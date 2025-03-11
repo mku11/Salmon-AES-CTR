@@ -37,9 +37,9 @@ import java.io.IOException;
 public class WSDrive extends AesDrive {
 
     /**
-     * Private constructor, use open() or create() instead.
+     * Protected constructor, use open() or create() instead.
      */
-    private WSDrive() {
+    protected WSDrive() {
 
     }
 
