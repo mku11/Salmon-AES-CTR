@@ -100,7 +100,6 @@ public class AesStream extends RandomAccessStream {
      * @return The size of the output data.
      * @throws SecurityException  Thrown if there is a security exception
      * @throws IntegrityException Thrown if the data are corrupt or tampered with.
-     * @throws IOException        Thrown if there is an IO error.
      */
     public static long getOutputSize(EncryptionMode mode, long length,
                                      EncryptionFormat format, boolean integrity) {
@@ -119,7 +118,6 @@ public class AesStream extends RandomAccessStream {
      * @return The size of the output data.
      * @throws SecurityException  Thrown if there is a security exception
      * @throws IntegrityException Thrown if the data are corrupt or tampered with.
-     * @throws IOException        Thrown if there is an IO error.
      */
     public static long getOutputSize(EncryptionMode mode, long length,
                                      EncryptionFormat format, boolean integrity, int chunkSize) {
