@@ -349,8 +349,10 @@ public class SalmonFSTestHelper {
         AesFile aesFile = fileImporter.importFile(fileToImport, rootDir, null, false, applyFileIntegrity, printImportProgress);
 
         int chunkSize = aesFile.getFileChunkSize();
-        if (chunkSize > 0 && !verifyFileIntegrity)
-            aesFile.setVerifyIntegrity(false, null);
+        if (chunkSize == 0 || !verifyFileIntegrity)
+            aesFile.setVerifyIntegrity(false);
+		else
+            aesFile.setVerifyIntegrity(true);
 
         assertTrue(aesFile.exists());
         String hashPostImport = SalmonFSTestHelper.getChecksumStream(new InputStreamWrapper(aesFile.getInputStream()));
@@ -383,7 +385,9 @@ public class SalmonFSTestHelper {
             flipBit(aesFile, flipPosition);
         int chunkSize2 = aesFile.getFileChunkSize();
         if (chunkSize2 > 0 && verifyFileIntegrity)
-            aesFile.setVerifyIntegrity(true, null);
+            aesFile.setVerifyIntegrity(true);
+		else
+            aesFile.setVerifyIntegrity(false);
         IFile exportFile = fileExporter.exportFile(aesFile, drive.getExportDir(), null, false, verifyFileIntegrity, printExportProgress);
 
         String hashPostExport = SalmonFSTestHelper.getChecksum(exportFile);
