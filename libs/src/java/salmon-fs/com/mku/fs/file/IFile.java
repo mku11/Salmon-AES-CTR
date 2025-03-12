@@ -405,7 +405,7 @@ public interface IFile {
      * @throws IOException Thrown if there is an IO error.
      */
     default void moveRecursively(IFile destDir) throws IOException {
-        moveRecursively(destDir, null, true, null, null);
+        moveRecursively(destDir, null, false, null, null);
     }
 
     /**
