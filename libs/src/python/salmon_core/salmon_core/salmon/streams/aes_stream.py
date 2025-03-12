@@ -27,13 +27,14 @@ SOFTWARE.
 
 from typeguard import typechecked
 
-from salmon_core.streams.memory_stream import MemoryStream
 from salmon_core.streams.random_access_stream import RandomAccessStream
 from salmon.integrity.hmac_sha256_provider import HmacSHA256Provider
 from salmon_core.salmon.integrity.integrity import Integrity
 from salmon.integrity.integrity_exception import IntegrityException
 from salmon_core.salmon.streams.encryption_mode import EncryptionMode
+from salmon_core.salmon.streams.encryption_format import EncryptionFormat
 from salmon_core.salmon.streams.provider_type import ProviderType
+from salmon_core.salmon.header import Header
 from salmon_core.salmon.generator import Generator
 from salmon_core.salmon.range_exceeded_exception import RangeExceededException
 from salmon_core.salmon.security_exception import SecurityException
@@ -54,38 +55,46 @@ class AesStream(RandomAccessStream):
     """
 
     @staticmethod
-    def get_actual_size(data: bytearray, key: bytearray, nonce: bytearray, mode: EncryptionMode,
-                        header_data: bytearray | None, integrity: bool, chunk_size: int | None,
-                        hash_key: bytearray | None) -> int:
-
+    def get_output_size(mode: EncryptionMode, length: int,
+                        format: EncryptionFormat, integrity: bool,
+                        chunk_size: int = Integrity.DEFAULT_CHUNK_SIZE) -> int:
         """
         Get the output size of the data to be transformed(encrypted or decrypted) including
         header and hash without executing any operations. This can be used to prevent over-allocating memory
         where creating your output buffers.
-        
-        :param data: The data to be transformed.
-        :param key: The AES key.
-        :param nonce: The nonce for the CTR.
+
         :param mode: The {@link EncryptionMode} Encrypt or Decrypt.
-        :param header_data: The header data to be embedded if you use Encryption.
+        :param length: The data length
+        :param format: The {@link EncryptionFormat} Generic or Salmon.
         :param integrity: True if you want to enable integrity.
         :param chunk_size: The chunk size for integrity chunks.
-        :param hash_key: The hash key to be used for integrity checks.
         :return: The size of the output data.
         
         :raises IntegrityException: Thrown when security error
         :raises IntegrityException: Thrown when data are corrupt or tampered with.
         :raises IOError: Thrown if there is an IO error.
         """
-        input_stream: MemoryStream = MemoryStream(data)
-        s: AesStream = AesStream(key, nonce, mode, input_stream, header_data, integrity, chunk_size, hash_key)
-        size: int = s.actual_length()
-        s.close()
+        if format == EncryptionFormat.Generic and integrity:
+            raise SecurityException("Cannot use integrity with generic format")
+        if chunk_size <= 0:
+            chunk_size = Integrity.DEFAULT_CHUNK_SIZE
+        size: int = length
+        if format == EncryptionFormat.Salmon:
+            if mode == EncryptionMode.Encrypt:
+                size += Header.HEADER_LENGTH
+                if integrity:
+                    size += Integrity.get_total_hash_data_length(mode, length, chunk_size,
+                                                             0, Generator.HASH_RESULT_LENGTH)
+            else:
+                size -= Header.HEADER_LENGTH
+                if integrity:
+                    size -= Integrity.get_total_hash_data_length(mode, length - Header.HEADER_LENGTH, chunk_size,
+                                                             Generator.HASH_RESULT_LENGTH, Generator.HASH_RESULT_LENGTH)
         return size
 
-    def __init__(self, key: bytearray, nonce: bytearray, encryption_mode: EncryptionMode,
-                 base_stream: RandomAccessStream, header_data: bytearray | None = None,
-                 integrity: bool = False, chunk_size: int | None = None, hash_key: bytearray | None = None):
+    def __init__(self, key: bytearray, nonce: bytearray | None, encryption_mode: EncryptionMode,
+                 base_stream: RandomAccessStream, format: EncryptionFormat = EncryptionFormat.Salmon,
+                 integrity: bool = False, hash_key: bytearray | None = None, chunk_size: int = 0):
         """
         Instantiate a new Salmon stream with a base stream and optional header data and hash integrity.
         <p>
@@ -103,7 +112,7 @@ class AesStream(RandomAccessStream):
         :param nonce:          The nonce used for the initial counter
         :param encryption_mode: Encryption mode Encrypt or Decrypt this cannot change later
         :param base_stream:     The base Stream that will be used to read the data
-        :param header_data:     The data to store in the header when encrypting.
+        :param format: The {@link EncryptionFormat} Generic or Salmon.
         :param integrity:      enable integrity
         :param chunk_size:      the chunk size to be used with integrity
         :param hash_key:        Hash key to be used with integrity
@@ -111,27 +120,28 @@ class AesStream(RandomAccessStream):
         :raises IntegrityException: Thrown when security error
         :raises IntegrityException: Thrown when data are corrupt or tampered with.
         """
-        self.__headerData: bytearray
+
+        self.__header: Header | None = None
         """
         Header data embedded in the stream if available.
         """
 
-        self.__encryptionMode: EncryptionMode
+        self.__encryption_mode: EncryptionMode
         """
         Mode to be used for this stream. This can only be set once.
         """
 
-        self.__allowRangeWrite: bool = False
+        self.__allow_range_write: bool = False
         """
         Allow seek and write.
         """
 
-        self.__failSilently: bool = False
+        self.__fail_silently: bool = False
         """
         Fail silently if integrity cannot be verified.
         """
 
-        self.__baseStream: RandomAccessStream
+        self.__base_stream: RandomAccessStream
         """
         The base stream. When EncryptionMode is Encrypt this will be the target stream.
         When EncryptionMode is Decrypt this will be the source stream.
@@ -142,7 +152,7 @@ class AesStream(RandomAccessStream):
         The transformer to use for encryption.
         """
 
-        self.__salmonIntegrity: Integrity | None = None
+        self.integrity: Integrity | None = None
         """
         The integrity to use for hash signature creation and validation.
         """
@@ -152,13 +162,34 @@ class AesStream(RandomAccessStream):
         Default buffer size for all internal streams including Encryptors and Decryptors
         """
 
-        self.__encryptionMode = encryption_mode
-        self.__baseStream = base_stream
-        self.__headerData = header_data
+        if format == EncryptionFormat.Generic and integrity:
+            raise SecurityException("Cannot use integrity with generic format")
+        if format == EncryptionFormat.Generic and hash_key:
+            raise SecurityException("Cannot use hashkey with generic format")
 
+        self.__encryption_mode = encryption_mode
+        self.__base_stream = base_stream
+        self.__header: Header | None = self.get_or_create_header(format, nonce, integrity, chunk_size)
+        if self.__header:
+            chunk_size = self.__header.get_chunk_size()
+            nonce = self.__header.get_nonce()
+        if nonce is None:
+            raise SecurityException("Nonce is missing")
         self.__init_integrity(integrity, hash_key, chunk_size)
         self.__init_transformer(key, nonce)
         self.__init_stream()
+
+    def get_or_create_header(self, format: EncryptionFormat, nonce: bytearray | None, integrity: bool,
+                             chunk_size: int) -> Header | None:
+        if format == EncryptionFormat.Salmon:
+            if self.__encryption_mode == EncryptionMode.Encrypt:
+                if not nonce:
+                    raise SecurityException("Nonce is missing")
+                if integrity and chunk_size <= 0:
+                    chunk_size = Integrity.DEFAULT_CHUNK_SIZE
+                return Header.write_header(self.__base_stream, nonce, chunk_size)
+            return Header.read_header_data(self.__base_stream)
+        return None
 
     @staticmethod
     def set_aes_provider_type(provider_type: ProviderType):
@@ -178,30 +209,16 @@ class AesStream(RandomAccessStream):
         """
         return AesStream.__provider_type
 
-    def length(self) -> int:
+    def get_length(self) -> int:
         """
         Provides the length of the actual transformed data (minus the header and integrity data).
         
         :return: The length of the stream.
         """
         total_hash_bytes: int
-        hash_offset: int = Generator.HASH_RESULT_LENGTH if self.__salmonIntegrity.get_chunk_size() > 0 else 0
-        total_hash_bytes = self.__salmonIntegrity.get_hash_data_length(self.__baseStream.length() - 1, hash_offset)
-        return self.__baseStream.length() - self.get_header_length() - total_hash_bytes
-
-    def actual_length(self) -> int:
-        """
-        Provides the total length of the base stream including header and integrity data if available.
-        
-        :return: The actual length of the base stream.
-        """
-        total_hash_bytes: int = 0
-        total_hash_bytes += self.__salmonIntegrity.get_hash_data_length(self.__baseStream.length() - 1, 0)
-        if self.can_read():
-            return self.length()
-        elif self.can_write():
-            return self.__baseStream.length() + self.get_header_length() + total_hash_bytes
-        return 0
+        hash_offset: int = Generator.HASH_RESULT_LENGTH if self.integrity.get_chunk_size() > 0 else 0
+        total_hash_bytes = self.integrity.get_hash_data_length(self.__base_stream.get_length() - 1, hash_offset)
+        return self.__base_stream.get_length() - self.get_header_length() - total_hash_bytes
 
     def get_position(self) -> int:
         """
@@ -218,10 +235,10 @@ class AesStream(RandomAccessStream):
         
         :param value:         :raises IOError: Thrown if there is an IO error.
         """
-        if self.can_write() and not self.__allowRangeWrite and value != 0:
+        if self.can_write() and not self.__allow_range_write and value != 0:
             raise IOError() from \
                 SecurityException("Range Write is not allowed for security (non-reusable IVs). " +
-                                        "If you want to take the risk you need to use set_allow_range_write(true)")
+                                  "If you want to take the risk you need to use set_allow_range_write(true)")
         try:
             self.__set_virtual_position(value)
         except RangeExceededException as e:
@@ -233,7 +250,7 @@ class AesStream(RandomAccessStream):
         
         :return: True if mode is decryption.
         """
-        return self.__baseStream.can_read() and self.__encryptionMode == EncryptionMode.Decrypt
+        return self.__base_stream.can_read() and self.__encryption_mode == EncryptionMode.Decrypt
 
     def can_seek(self) -> bool:
         """
@@ -241,7 +258,7 @@ class AesStream(RandomAccessStream):
         
         :return: True if stream is seekable.
         """
-        return self.__baseStream.can_seek()
+        return self.__base_stream.can_seek()
 
     def can_write(self) -> bool:
         """
@@ -249,7 +266,7 @@ class AesStream(RandomAccessStream):
         
         :return: True if mode is decryption.
         """
-        return self.__baseStream.can_write() and self.__encryptionMode == EncryptionMode.Encrypt
+        return self.__base_stream.can_write() and self.__encryption_mode == EncryptionMode.Encrypt
 
     def has_integrity(self) -> bool:
         """
@@ -257,7 +274,7 @@ class AesStream(RandomAccessStream):
         """
         return self.get_chunk_size() > 0
 
-    def __init_integrity(self, integrity: bool, hash_key: bytearray | None, chunk_size: int | None):
+    def __init_integrity(self, integrity: bool, hash_key: bytearray | None, chunk_size: int):
         """
         Initialize the integrity validator. This object is always associated with the
         stream because in the case of a decryption stream that has already embedded integrity
@@ -268,8 +285,8 @@ class AesStream(RandomAccessStream):
         :param chunk_size: The chunk size
         :raises IntegrityException: Thrown when data are corrupt or tampered with.
         """
-        self.__salmonIntegrity = Integrity(integrity, hash_key, chunk_size,
-                                           HmacSHA256Provider(), Generator.HASH_RESULT_LENGTH)
+        self.integrity = Integrity(integrity, hash_key, chunk_size,
+                                   HmacSHA256Provider(), Generator.HASH_RESULT_LENGTH)
 
     def __init_stream(self):
         """
@@ -277,7 +294,7 @@ class AesStream(RandomAccessStream):
         
         :raises IOError: Thrown if there is an IO error.
         """
-        self.__baseStream.set_position(self.get_header_length())
+        self.set_position(0)
 
     def get_header_length(self) -> int:
         """
@@ -285,10 +302,10 @@ class AesStream(RandomAccessStream):
         
         :return: The header data length.
         """
-        if self.__headerData is None:
+        if self.__header is None:
             return 0
         else:
-            return len(self.__headerData)
+            return len(self.__header.get_header_data())
 
     def __init_transformer(self, key: bytearray, nonce: bytearray):
         """
@@ -320,7 +337,7 @@ class AesStream(RandomAccessStream):
         elif origin == RandomAccessStream.SeekOrigin.Current:
             self.set_position(self.get_position() + offset)
         elif origin == RandomAccessStream.SeekOrigin.End:
-            self.set_position(self.length() - offset)
+            self.set_position(self.get_length() - offset)
         return self.get_position()
 
     def set_length(self, value: int):
@@ -336,8 +353,8 @@ class AesStream(RandomAccessStream):
         """
         Flushes any buffered data to the base stream.
         """
-        if self.__baseStream is not None:
-            self.__baseStream.flush()
+        if self.__base_stream is not None:
+            self.__base_stream.flush()
 
     def close(self):
         """
@@ -371,7 +388,7 @@ class AesStream(RandomAccessStream):
         """
         Returns a copy of the hash key.
         """
-        return self.__salmonIntegrity.get_key().copy()
+        return self.integrity.get_key().copy()
 
     def get_nonce(self) -> bytearray:
         """
@@ -383,7 +400,7 @@ class AesStream(RandomAccessStream):
         """
         Returns the Chunk size used to apply hash signature
         """
-        return self.__salmonIntegrity.get_chunk_size()
+        return self.integrity.get_chunk_size()
 
     def set_allow_range_write(self, value: bool):
         """
@@ -395,7 +412,7 @@ class AesStream(RandomAccessStream):
         
         :param value: True to allow byte range encryption write operations
         """
-        self.__allowRangeWrite = value
+        self.__allow_range_write = value
 
     def set_fail_silently(self, value: bool):
         """
@@ -405,7 +422,7 @@ class AesStream(RandomAccessStream):
         
         :param value: True to fail silently.
         """
-        self.__failSilently = value
+        self.__fail_silently = value
 
     def __set_virtual_position(self, value: int):
         """
@@ -415,9 +432,9 @@ class AesStream(RandomAccessStream):
         :raises SalmonRangeExceededException: Thrown when maximum nonce range is exceeded.
         """
         # we skip the header bytes and any hash values we have if the file has integrity set
-        total_hash_bytes: int = self.__salmonIntegrity.get_hash_data_length(value, 0)
+        total_hash_bytes: int = self.integrity.get_hash_data_length(value, 0)
         value = value + total_hash_bytes + self.get_header_length()
-        self.__baseStream.set_position(value)
+        self.__base_stream.set_position(value)
 
         self.__transformer.reset_counter()
         self.__transformer.sync_counter(self.get_position())
@@ -427,18 +444,18 @@ class AesStream(RandomAccessStream):
         Returns the Virtual Position of the stream excluding the header and hash signatures.
         """
         total_hash_bytes: int
-        hash_offset: int = Generator.HASH_RESULT_LENGTH if self.__salmonIntegrity.get_chunk_size() > 0 else 0
-        total_hash_bytes = self.__salmonIntegrity.get_hash_data_length(self.__baseStream.get_position(), hash_offset)
-        return self.__baseStream.get_position() - self.get_header_length() - total_hash_bytes
+        hash_offset: int = Generator.HASH_RESULT_LENGTH if self.integrity.get_chunk_size() > 0 else 0
+        total_hash_bytes = self.integrity.get_hash_data_length(self.__base_stream.get_position(), hash_offset)
+        return self.__base_stream.get_position() - self.get_header_length() - total_hash_bytes
 
     def __close_streams(self):
         """
         Close base stream
         """
-        if self.__baseStream is not None:
+        if self.__base_stream is not None:
             if self.can_write():
-                self.__baseStream.flush()
-            self.__baseStream.close()
+                self.__base_stream.flush()
+            self.__base_stream.close()
 
     def read(self, buffer: bytearray, offset: int, count: int) -> int:
         """
@@ -449,7 +466,7 @@ class AesStream(RandomAccessStream):
         :param count:  The requested count of the data bytes that should be decrypted
         :return: The number of data bytes that were decrypted.
         """
-        if self.get_position() == self.length():
+        if self.get_position() == self.get_length():
             return -1
         aligned_offset: int = self.__get_aligned_offset()
         v_bytes: int = 0
@@ -459,7 +476,7 @@ class AesStream(RandomAccessStream):
         if aligned_offset != 0:
             # read partially once
             self.set_position(self.get_position() - aligned_offset)
-            n_count: int = self.__salmonIntegrity.get_chunk_size() if self.__salmonIntegrity.get_chunk_size() > 0 \
+            n_count: int = self.integrity.get_chunk_size() if self.integrity.get_chunk_size() > 0 \
                 else Generator.BLOCK_SIZE
             buff: bytearray = bytearray(n_count)
             v_bytes = self.read(buff, 0, n_count)
@@ -493,18 +510,18 @@ class AesStream(RandomAccessStream):
         :return: The number of data bytes that were decrypted.
         :raises IOError: Thrown if stream is not aligned.
         """
-        if self.get_position() == self.length():
+        if self.get_position() == self.get_length():
             return 0
-        if self.__salmonIntegrity.get_chunk_size() > 0 \
-                and self.get_position() % self.__salmonIntegrity.get_chunk_size() != 0:
-            raise IOError("All reads should be aligned to the chunks size: " + self.__salmonIntegrity.get_chunk_size())
-        elif self.__salmonIntegrity.get_chunk_size() == 0 and self.get_position() % Generator.BLOCK_SIZE != 0:
+        if self.integrity.get_chunk_size() > 0 \
+                and self.get_position() % self.integrity.get_chunk_size() != 0:
+            raise IOError("All reads should be aligned to the chunks size: " + self.integrity.get_chunk_size())
+        elif self.integrity.get_chunk_size() == 0 and self.get_position() % Generator.BLOCK_SIZE != 0:
             raise IOError("All reads should be aligned to the block size: " + Generator.BLOCK_SIZE)
 
         pos: int = self.get_position()
 
         # if there are not enough data in the stream
-        count = min(count, self.length() - self.get_position())
+        count = min(count, self.get_length() - self.get_position())
 
         # if there are not enough space in the buffer
         count = min(count, len(buffer) - offset)
@@ -522,21 +539,21 @@ class AesStream(RandomAccessStream):
             try:
                 integrity_hashes: list | None = None
                 # if there are integrity hashes strip them and get the data chunks only
-                if self.__salmonIntegrity.get_chunk_size() > 0:
+                if self.integrity.get_chunk_size() > 0:
                     # get the integrity signatures
-                    integrity_hashes = self.__salmonIntegrity.get_hashes(src_buffer)
-                    src_buffer = self.__strip_signatures(src_buffer, self.__salmonIntegrity.get_chunk_size())
+                    integrity_hashes = self.integrity.get_hashes(src_buffer)
+                    src_buffer = self.__strip_signatures(src_buffer, self.integrity.get_chunk_size())
                 dest_buffer: bytearray = bytearray(len(src_buffer))
-                if self.__salmonIntegrity.use_integrity():
-                    self.__salmonIntegrity.verify_hashes(integrity_hashes, src_buffer,
-                                                         self.__headerData if pos == 0 and v_bytes == 0 else None)
+                if self.integrity.use_integrity():
+                    self.integrity.verify_hashes(integrity_hashes, src_buffer,
+                                                 self.__header.get_header_data() if pos == 0 and v_bytes == 0 else None)
                 self.__transformer.decrypt_data(src_buffer, 0, dest_buffer, 0, len(src_buffer))
                 length: int = min(count - v_bytes, len(dest_buffer))
                 self.__write_to_buffer(dest_buffer, 0, buffer, v_bytes + offset, length)
                 v_bytes += length
                 self.__transformer.sync_counter(self.get_position())
             except (SecurityException, RangeExceededException, IntegrityException) as ex:
-                if isinstance(ex, IntegrityException) and self.__failSilently:
+                if isinstance(ex, IntegrityException) and self.__fail_silently:
                     return -1
                 raise IOError("Could not read from stream: ") from ex
         return v_bytes
@@ -552,12 +569,12 @@ class AesStream(RandomAccessStream):
         :param count:  The length of the bytes that will be encrypted.
         
         """
-        if self.__salmonIntegrity.get_chunk_size() > 0 \
-                and self.get_position() % self.__salmonIntegrity.get_chunk_size() != 0:
+        if self.integrity.get_chunk_size() > 0 \
+                and self.get_position() % self.integrity.get_chunk_size() != 0:
             raise IOError() from \
                 IntegrityException("All write operations should be aligned to the chunks size: "
-                                   + str(self.__salmonIntegrity.get_chunk_size()))
-        elif self.__salmonIntegrity.get_chunk_size() == 0 \
+                                   + str(self.integrity.get_chunk_size()))
+        elif self.integrity.get_chunk_size() == 0 \
                 and self.get_position() % Generator.BLOCK_SIZE != 0:
             raise IOError() from \
                 IntegrityException("All write operations should be aligned to the block size: "
@@ -580,9 +597,10 @@ class AesStream(RandomAccessStream):
 
             try:
                 self.__transformer.encrypt_data(src_buffer, 0, dest_buffer, 0, len(src_buffer))
-                integrity_hashes: list | None = \
-                    self.__salmonIntegrity.generate_hashes(
-                        dest_buffer, self.__headerData if self.get_position() == 0 else None)
+                integrity_hashes: list | None = None
+                if self.integrity.use_integrity():
+                    integrity_hashes = self.integrity.generate_hashes(dest_buffer,
+                                                                      self.__header.get_header_data() if self.get_position() == 0 else None)
                 pos += self.__write_to_stream(dest_buffer, self.get_chunk_size(), integrity_hashes)
                 self.__transformer.sync_counter(self.get_position())
             except (SecurityException, RangeExceededException, IntegrityException) as ex:
@@ -597,8 +615,8 @@ class AesStream(RandomAccessStream):
         :return: The aligned offset
         """
         align_offset: int
-        if self.__salmonIntegrity.get_chunk_size() > 0:
-            align_offset = self.get_position() % self.__salmonIntegrity.get_chunk_size()
+        if self.integrity.get_chunk_size() > 0:
+            align_offset = self.get_position() % self.integrity.get_chunk_size()
         else:
             align_offset = self.get_position() % Generator.BLOCK_SIZE
         return align_offset
@@ -651,10 +669,10 @@ class AesStream(RandomAccessStream):
         :return: The number of bytes read.
         :raises IOError: Thrown if there is an IO error.
         """
-        data: bytearray = bytearray(min(count, self.__baseStream.length() - self.__baseStream.get_position()))
+        data: bytearray = bytearray(min(count, self.__base_stream.get_length() - self.__base_stream.get_position()))
         total_bytes_read = 0
         while total_bytes_read < len(data):
-            bytes_read = self.__baseStream.read(data, total_bytes_read, len(data) - total_bytes_read)
+            bytes_read = self.__base_stream.read(data, total_bytes_read, len(data) - total_bytes_read)
             if bytes_read <= 0:
                 break
             total_bytes_read += bytes_read
@@ -689,9 +707,9 @@ class AesStream(RandomAccessStream):
             chunk_size = len(buffer)
         while pos < len(buffer):
             if hashes is not None:
-                self.__baseStream.write(hashes[chunk], 0, len(hashes[chunk]))
+                self.__base_stream.write(hashes[chunk], 0, len(hashes[chunk]))
             length: int = min(chunk_size, len(buffer) - pos)
-            self.__baseStream.write(buffer, pos, length)
+            self.__base_stream.write(buffer, pos, length)
             pos += length
             chunk += 1
         return pos
@@ -723,7 +741,7 @@ class AesStream(RandomAccessStream):
         
         :return: True if integrity enabled
         """
-        return self.__salmonIntegrity.use_integrity()
+        return self.integrity.use_integrity()
 
     def get_encryption_mode(self) -> EncryptionMode:
         """
@@ -731,7 +749,7 @@ class AesStream(RandomAccessStream):
         
         :return: The encryption mode
         """
-        return self.__encryptionMode
+        return self.__encryption_mode
 
     def is_allow_range_write(self) -> bool:
         """
@@ -740,7 +758,7 @@ class AesStream(RandomAccessStream):
         
         :return: True if the stream allowed to seek and write.
         """
-        return self.__allowRangeWrite
+        return self.__allow_range_write
 
     def get_buffer_size(self) -> int:
         """

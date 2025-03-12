@@ -35,9 +35,9 @@ from salmon_core.streams.random_access_stream import RandomAccessStream
 from salmon_core.salmon.integrity.integrity import Integrity
 from salmon.integrity.integrity_exception import IntegrityException
 from salmon_core.salmon.streams.encryption_mode import EncryptionMode
+from salmon_core.salmon.streams.encryption_format import EncryptionFormat
 from salmon_core.salmon.streams.aes_stream import AesStream
 from salmon_core.salmon.generator import Generator
-from salmon_core.salmon.header import Header
 from salmon_core.salmon.security_exception import SecurityException
 
 from typeguard import typechecked
@@ -47,8 +47,8 @@ from typeguard import typechecked
 def decrypt_shm(index: int, part_size: int, running_threads: int,
                 data: bytearray, shm_out_name: str, shm_length: int, shm_cancel_name: str, key: bytearray,
                 nonce: bytearray,
-                header_data: bytearray | None,
-                integrity: bool, hash_key: bytearray | None, chunk_size: int | None, buffer_size: int):
+                format: EncryptionFormat,
+                integrity: bool, hash_key: bytearray | None, chunk_size: int, buffer_size: int):
     """
     Do not use directly use decrypt() instead.
     :param index: The worker index
@@ -60,7 +60,7 @@ def decrypt_shm(index: int, part_size: int, running_threads: int,
     :param shm_cancel_name: The shared memory for cancelation
     :param key: The encryption key
     :param nonce: The nonce
-    :param header_data: The header data
+    :param format: The {@link EncryptionFormat} Generic or Salmon.
     :param integrity: True to verify integrity
     :param hash_key: The hash key
     :param chunk_size: The chunk size
@@ -76,16 +76,16 @@ def decrypt_shm(index: int, part_size: int, running_threads: int,
     shm_out_data = shm_out.buf
     ins: MemoryStream = MemoryStream(data)
     out_data: bytearray = bytearray(shm_length)
-    (byte_start, byte_end) = decrypt_data(ins, start, length, out_data, key, nonce, header_data,
+    (byte_start, byte_end) = decrypt_data(ins, start, length, out_data, key, nonce, format,
                                           integrity, hash_key, chunk_size, buffer_size, shm_cancel_name)
     shm_out_data[byte_start:byte_end] = out_data[byte_start:byte_end]
 
 
 @typechecked
 def decrypt_data(input_stream: RandomAccessStream, start: int, count: int, out_data: bytearray,
-                 key: bytearray, nonce: bytearray,
-                 header_data: bytearray | None, integrity: bool, hash_key: bytearray | None,
-                 chunk_size: int | None, buffer_size: int, shm_cancel_name: str | None = None) -> (int, int):
+                 key: bytearray, nonce: bytearray | None,
+                 format: EncryptionFormat, integrity: bool, hash_key: bytearray | None,
+                 chunk_size: int, buffer_size: int, shm_cancel_name: str | None = None) -> (int, int):
     """
     Decrypt the data stream. Do not use directly use decrypt() instead.
     :param input_stream: The Stream to be decrypted.
@@ -94,7 +94,7 @@ def decrypt_data(input_stream: RandomAccessStream, start: int, count: int, out_d
     :param out_data: The buffer with the decrypted data.
     :param key: The AES key to be used.
     :param nonce: The nonce to be used.
-    :param header_data: The header data to be used.
+    :param format: The {@link EncryptionFormat} Generic or Salmon.
     :param integrity: True to verify integrity.
     :param hash_key: The hash key to be used for integrity verification.
     :param chunk_size: The chunk size.
@@ -116,7 +116,7 @@ def decrypt_data(input_stream: RandomAccessStream, start: int, count: int, out_d
         output_stream = MemoryStream(out_data)
         output_stream.set_position(start)
         stream = AesStream(key, nonce, EncryptionMode.Decrypt, input_stream,
-                           header_data, integrity, chunk_size, hash_key)
+                           format, integrity, hash_key, chunk_size)
         stream.set_position(start)
         start_pos = output_stream.get_position()
         total_chunk_bytes_read: int = 0
@@ -153,7 +153,7 @@ class Decryptor:
     Utility class that decrypts byte arrays.
     """
 
-    def __init__(self, threads: int | None = None, buffer_size: int | None = None, multi_cpu: bool = False):
+    def __init__(self, threads: int = 1, buffer_size: int = Integrity.DEFAULT_CHUNK_SIZE, multi_cpu: bool = False):
         """
         Instantiate an encryptor with parallel tasks and buffer size.
         
@@ -179,27 +179,27 @@ class Decryptor:
         The buffer size to use.
         """
 
-        if threads is None or threads <= 0:
+        if threads <= 0:
             self.__threads = 1
         else:
             self.__threads = threads
             self.__executor = ThreadPoolExecutor(self.__threads) if not multi_cpu else ProcessPoolExecutor(
                 self.__threads)
 
-        if buffer_size is None:
+        if buffer_size <= 0:
             self.__buffer_size = Integrity.DEFAULT_CHUNK_SIZE
         else:
             self.__buffer_size = buffer_size
 
-    def decrypt(self, data: bytearray, key: bytearray, nonce: bytearray | None,
-                has_header_data: bool,
-                integrity: bool = False, hash_key: bytearray | None = None, chunk_size: int | None = None) -> bytearray:
+    def decrypt(self, data: bytearray, key: bytearray, nonce: bytearray | None = None,
+                format: EncryptionFormat = EncryptionFormat.Salmon,
+                integrity: bool = False, hash_key: bytearray | None = None, chunk_size: int = 0) -> bytearray:
         """
         Decrypt a byte array using AES256 based on the provided key and nonce.
         :param data: The input data to be decrypted.
         :param key: The AES key to use for decryption.
         :param nonce: The nonce to use for decryption.
-        :param has_header_data: The header data.
+        :param format: The {@link EncryptionFormat} Generic or Salmon.
         :param integrity: Verify hash integrity in the data.
         :param hash_key: The hash key to be used for integrity.
         :param chunk_size: The chunk size.
@@ -211,44 +211,29 @@ class Decryptor:
         """
         if key is None:
             raise SecurityException("Key is missing")
-        if not has_header_data and nonce is None:
+        if format == EncryptionFormat.Generic and nonce is None:
             raise SecurityException("Need to specify a nonce if the file doesn't have a header")
 
         if integrity:
-            chunk_size = Integrity.DEFAULT_CHUNK_SIZE if chunk_size is None else chunk_size
+            chunk_size = Integrity.DEFAULT_CHUNK_SIZE if chunk_size <= 0 else chunk_size
 
-        input_stream: MemoryStream = MemoryStream(data)
-        header: Header
-        header_data: bytearray | None = None
-        if has_header_data:
-            header = Header.parse_header_data(input_stream)
-            if header.get_chunk_size() > 0:
-                integrity = True
-            chunk_size = header.get_chunk_size()
-            nonce = header.get_nonce()
-            header_data = header.get_header_data()
-
-        if nonce is None:
-            raise SecurityException("Nonce is missing")
-
-        real_size: int = AesStream.get_actual_size(data, key, nonce,
-                                                   EncryptionMode.Decrypt,
-                                                   header_data, integrity, chunk_size, hash_key)
+        real_size: int = AesStream.get_output_size(EncryptionMode.Decrypt, len(data), format, integrity, chunk_size)
         out_data: bytearray = bytearray(real_size)
 
         if self.__threads == 1:
-            decrypt_data(input_stream, 0, input_stream.length(), out_data,
-                         key, nonce, header_data, integrity, hash_key, chunk_size, self.__buffer_size)
+            input_stream: MemoryStream = MemoryStream(data)
+            decrypt_data(input_stream, 0, input_stream.get_length(), out_data,
+                         key, nonce, format, integrity, hash_key, chunk_size, self.__buffer_size)
         else:
             self.__decrypt_data_parallel(data, out_data,
-                                         key, hash_key, nonce, header_data,
+                                         key, hash_key, nonce, format,
                                          chunk_size, integrity)
         return out_data
 
     def __decrypt_data_parallel(self, data: bytearray, out_data: bytearray,
                                 key: bytearray, hash_key: bytearray | None, nonce: bytearray,
-                                header_data: bytearray | None,
-                                chunk_size: int | None, integrity: bool):
+                                format: EncryptionFormat,
+                                chunk_size: int, integrity: bool):
         """
         Decrypt stream using parallel threads.
         :param data: The input data to be decrypted
@@ -256,7 +241,7 @@ class Decryptor:
         :param key: The AES key.
         :param hash_key: The hash key.
         :param nonce: The nonce to be used for decryption.
-        :param header_data: The header data.
+        :param format: The {@link EncryptionFormat} Generic or Salmon.
         :param chunk_size: The chunk size.
         :param integrity: True to verify integrity.
         """
@@ -266,7 +251,7 @@ class Decryptor:
 
         # if we want to check integrity we align to the chunk size otherwise to the AES Block
         min_part_size: int = Generator.BLOCK_SIZE
-        if integrity and chunk_size is not None:
+        if integrity and chunk_size > 0:
             min_part_size = chunk_size
         elif integrity:
             min_part_size = Integrity.DEFAULT_CHUNK_SIZE
@@ -281,14 +266,14 @@ class Decryptor:
 
         self.__submit_decrypt_jobs(running_threads, part_size,
                                    data, out_data,
-                                   key, hash_key, nonce, header_data,
+                                   key, hash_key, nonce, format,
                                    integrity, chunk_size)
 
     def __submit_decrypt_jobs(self, running_threads: int, part_size: int,
                               data: bytearray, out_data: bytearray,
                               key: bytearray, hash_key: bytearray | None, nonce: bytearray,
-                              header_data: bytearray | None,
-                              integrity: bool, chunk_size: int | None):
+                              format: EncryptionFormat,
+                              integrity: bool, chunk_size: int):
 
         """
         Submit decryption parallel jobs.
@@ -300,7 +285,7 @@ class Decryptor:
         :param key: The AES key.
         :param hash_key: The hash key for integrity validation.
         :param nonce: The nonce for the data.
-        :param header_data: The header data common to all parts.
+        :param format: The {@link EncryptionFormat} Generic or Salmon.
         :param integrity: True to verify the data integrity.
         :param chunk_size: The chunk size.
         """
@@ -315,7 +300,7 @@ class Decryptor:
         for i in range(0, running_threads):
             fs.append(self.__executor.submit(decrypt_shm, i, part_size, running_threads,
                                              data, shm_out_name, len(shm_out.buf), shm_cancel_name, key, nonce,
-                                             header_data,
+                                             format,
                                              integrity, hash_key, chunk_size, self.__buffer_size))
 
         for f in concurrent.futures.as_completed(fs):

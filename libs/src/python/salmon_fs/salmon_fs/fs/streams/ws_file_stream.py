@@ -35,7 +35,7 @@ from io import RawIOBase
 from wrapt import synchronized
 
 from salmon_core.convert.base_64 import Base64
-from fs.file.ifile import IFile
+from salmon_fs.fs.file.ifile import IFile
 from salmon_core.streams.random_access_stream import RandomAccessStream
 
 
@@ -96,7 +96,7 @@ class WSFileStream(RandomAccessStream):
             boundary = "*******"
             header = "--" + boundary + "\r\n"
             header += "Content-Disposition: form-data; name=\"file\"; filename=\"" \
-                      + self.__file.get_base_name() + "\"\r\n"
+                      + self.__file.get_name() + "\"\r\n"
             header += "\r\n"
             header_data = bytearray(header.encode())
 
@@ -170,12 +170,12 @@ class WSFileStream(RandomAccessStream):
         """
         return True
 
-    def length(self) -> int:
+    def get_length(self) -> int:
         """
         Get the length of the stream. This is the same as the backed file.
         :return: The length
         """
-        return self.__file.length()
+        return self.__file.get_length()
 
     def get_position(self) -> int:
         return self.position
@@ -258,7 +258,7 @@ class WSFileStream(RandomAccessStream):
         elif origin == RandomAccessStream.SeekOrigin.Current:
             pos += offset
         elif origin == RandomAccessStream.SeekOrigin.End:
-            pos = self.__file.length() - offset
+            pos = self.__file.get_length() - offset
 
         self.set_position(pos)
         return self.position

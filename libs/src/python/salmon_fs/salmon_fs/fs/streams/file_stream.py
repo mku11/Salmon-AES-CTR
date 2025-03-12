@@ -28,7 +28,7 @@ from typing import BinaryIO
 from typeguard import typechecked
 import sys
 
-from fs.file.ifile import IFile
+from salmon_fs.fs.file.ifile import IFile
 from salmon_core.streams.random_access_stream import RandomAccessStream
 
 
@@ -68,7 +68,7 @@ class FileStream(RandomAccessStream):
         self.__file = file
         if mode == "rw":
             self.__canWrite = True
-            if self.__file.exists() and self.__file.length() > 0:
+            if self.__file.exists() and self.__file.get_length() > 0:
                 mode = "a+"
             else:
                 mode = "w+"
@@ -99,12 +99,12 @@ class FileStream(RandomAccessStream):
         """
         return True
 
-    def length(self) -> int:
+    def get_length(self) -> int:
         """
         Get the length of the stream. This is the same as the backed file.
         :return: The length
         """
-        return self.__file.length()
+        return self.__file.get_length()
 
     def get_position(self) -> int:
         return self.__mm.tell() if self.__mm else self.__raf.tell()
@@ -145,7 +145,7 @@ class FileStream(RandomAccessStream):
         :raises IOError: Thrown if there is an IO error.
         """
         if self.__mm:
-            if self.get_position() + count > self.__file.length():
+            if self.get_position() + count > self.__file.get_length():
                 self.__resize(self.get_position() + count)
             self.__mm.write(buffer[offset:offset + count])
         else:
@@ -165,9 +165,9 @@ class FileStream(RandomAccessStream):
         elif origin == RandomAccessStream.SeekOrigin.Current:
             pos += offset
         elif origin == RandomAccessStream.SeekOrigin.End:
-            pos = self.__file.length() - offset
+            pos = self.__file.get_length() - offset
 
-        if self.__mm and pos > self.__file.length():
+        if self.__mm and pos > self.__file.get_length():
             self.__resize(pos)
 
         self.__mm.seek(pos) if self.__mm else self.__raf.seek(pos)

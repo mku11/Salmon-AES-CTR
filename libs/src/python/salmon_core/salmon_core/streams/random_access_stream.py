@@ -65,7 +65,7 @@ class RandomAccessStream(ABC):
         pass
 
     @abstractmethod
-    def length(self) -> int:
+    def get_length(self) -> int:
         """
         Get the length of the stream.
         :return: The length
@@ -171,7 +171,7 @@ class RandomAccessStream(ABC):
         while (bytes_read := self.read(buffer, 0, buffer_size)) > 0:
             stream.write(buffer, 0, bytes_read)
             if progress_listener is not None:
-                progress_listener(self.get_position(), self.length())
+                progress_listener(self.get_position(), self.get_length())
         stream.flush()
         self.set_position(pos)
 

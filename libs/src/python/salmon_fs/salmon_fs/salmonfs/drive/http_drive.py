@@ -28,17 +28,17 @@ import os
 import platform
 from typeguard import typechecked
 
-from fs.file.file import File
-from fs.file.ifile import IFile
-from fs.file import IVirtualFile
-from salmon_fs.salmon.salmon_drive import SalmonDrive
-from salmon_fs.salmon.salmon_file import SalmonFile
+from salmon_fs.fs.file.file import File
+from salmon_fs.fs.file.ifile import IFile
+from salmon_fs.fs.file.ivirtual_file import IVirtualFile
+from salmon_fs.salmonfs.drive.aes_drive import AesDrive
+from salmon_fs.salmonfs.file.aes_file import AesFile
 
 
 @typechecked
-class HttpDrive(SalmonDrive):
+class HttpDrive(AesDrive):
     """
-    SalmonDrive implementation for Python HTTP files. This provides a virtual drive implementation
+    AesDrive implementation for Python HTTP files. This provides a virtual drive implementation
     that you can use to access encrypted files.
     """
 
@@ -49,14 +49,14 @@ class HttpDrive(SalmonDrive):
         super().__init__()
 
     @staticmethod
-    def open(v_dir: IFile, password: str) -> SalmonDrive:
+    def open(v_dir: IFile, password: str) -> AesDrive:
         """
         Helper method that opens and initializes a JavaDrive
         :param v_dir: The directory that hosts the drive.
         :param password: The password.
         :return: The drive.
         """
-        return SalmonDrive.open_drive(v_dir, HttpDrive, password)
+        return AesDrive.open_drive(v_dir, HttpDrive, password)
 
     def get_private_dir(self) -> IFile:
         """
@@ -88,15 +88,15 @@ class HttpDrive(SalmonDrive):
         """
         print("drive failed to unlock")
 
-    def get_file(self, file: IFile) -> IVirtualFile | None:
+    def get_virtual_file(self, file: IFile) -> IVirtualFile | None:
         """
         Get the virtual file backed by a real file
         :param file: The file
         :return: The
         """
-        return SalmonFile(file, self)
+        return AesFile(file, self)
 
-    def get_root(self) -> SalmonFile | None:
+    def get_root(self) -> AesFile | None:
         """
         Get the drive root
         :return: The drive root directory

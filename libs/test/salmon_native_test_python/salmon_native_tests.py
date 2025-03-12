@@ -37,9 +37,9 @@ from salmon_core.salmon.streams.provider_type import ProviderType
 from salmon_core.salmon.streams.aes_stream import AesStream
 from salmon_core.salmon.password.pbkdf_type import PbkdfType
 from salmon_core.salmon.password.password import Password
+from salmon_core.salmon.streams.encryption_format import EncryptionFormat
 from salmon_core.salmon.decryptor import Decryptor
 from salmon_core.salmon.encryptor import Encryptor
-from salmon_core.salmon.generator import Generator
 from salmon_core.salmon.bridge.native_proxy import NativeProxy
 from salmon_core_test_helper import SalmonCoreTestHelper
 
@@ -66,7 +66,7 @@ class SalmonNativeTests(TestCase):
             NativeProxy.set_library_path(SalmonNativeTests.mac_path)
 
         provider_type: ProviderType = ProviderType[os.getenv("AES_PROVIDER_TYPE")] if os.getenv(
-            "AES_PROVIDER_TYPE") else ProviderType.Default
+            "AES_PROVIDER_TYPE") else ProviderType.Aes
         print("ProviderType: " + str(provider_type))
         threads: int = int(os.getenv("ENC_THREADS")) if os.getenv("ENC_THREADS") else 1
 
@@ -120,12 +120,12 @@ class SalmonNativeTests(TestCase):
 
         enc_bytes = Encryptor(SalmonNativeTests.ENC_THREADS, multi_cpu=SalmonCoreTestHelper.ENABLE_MULTI_CPU) \
             .encrypt(v_bytes, SalmonCoreTestHelper.TEST_KEY_BYTES, SalmonCoreTestHelper.TEST_NONCE_BYTES,
-                     False, False, None, None)
+                     EncryptionFormat.Generic)
         self.assertEqual(enc_bytes_def, enc_bytes)
 
         dec_bytes = Decryptor(SalmonNativeTests.DEC_THREADS, multi_cpu=SalmonCoreTestHelper.ENABLE_MULTI_CPU) \
             .decrypt(enc_bytes, SalmonCoreTestHelper.TEST_KEY_BYTES, SalmonCoreTestHelper.TEST_NONCE_BYTES,
-                     False, False, None, None)
+                     EncryptionFormat.Generic)
         self.assertEqual(v_bytes, dec_bytes)
 
     def test_encrypt_and_decrypt_native_stream_read_buffers_not_aligned_text_compatible(self):
@@ -145,53 +145,10 @@ class SalmonNativeTests(TestCase):
 
         enc_bytes = Encryptor(SalmonNativeTests.ENC_THREADS, multi_cpu=SalmonCoreTestHelper.ENABLE_MULTI_CPU) \
             .encrypt(v_bytes, SalmonCoreTestHelper.TEST_KEY_BYTES, SalmonCoreTestHelper.TEST_NONCE_BYTES,
-                     False, False, None, None)
+                     EncryptionFormat.Generic)
         self.assertEqual(enc_bytes_def, enc_bytes)
 
         dec_bytes = Decryptor(SalmonNativeTests.DEC_THREADS, multi_cpu=SalmonCoreTestHelper.ENABLE_MULTI_CPU) \
             .decrypt(enc_bytes, SalmonCoreTestHelper.TEST_KEY_BYTES, SalmonCoreTestHelper.TEST_NONCE_BYTES,
-                     False, False, None, None)
+                     EncryptionFormat.Generic)
         self.assertEqual(v_bytes, dec_bytes)
-
-    def test_encrypt_and_decrypt_native_stream_compatible_with_integrity(self):
-        plain_text = SalmonCoreTestHelper.TEST_TEXT
-        for i in range(0, 13):
-            plain_text += plain_text
-        plain_text = plain_text[0:16]
-
-        v_bytes = bytearray(plain_text.encode('utf-8'))
-        enc_bytes_def = SalmonCoreTestHelper.default_aesctr_transform(v_bytes, SalmonCoreTestHelper.TEST_KEY_BYTES,
-                                                                      SalmonCoreTestHelper.TEST_NONCE_BYTES,
-                                                                      True)
-        dec_bytes_def = SalmonCoreTestHelper.default_aesctr_transform(enc_bytes_def,
-                                                                      SalmonCoreTestHelper.TEST_KEY_BYTES,
-                                                                      SalmonCoreTestHelper.TEST_NONCE_BYTES, False)
-
-        chunk_size = 256 * 1024
-        self.assertEqual(v_bytes, dec_bytes_def)
-        enc_bytes = Encryptor(SalmonNativeTests.ENC_THREADS, multi_cpu=SalmonCoreTestHelper.ENABLE_MULTI_CPU) \
-            .encrypt(v_bytes, SalmonCoreTestHelper.TEST_KEY_BYTES, SalmonCoreTestHelper.TEST_NONCE_BYTES,
-                     False, True,
-                     SalmonCoreTestHelper.TEST_HMAC_KEY_BYTES, chunk_size)
-
-        self.assert_equal_with_integrity(enc_bytes_def, enc_bytes, chunk_size)
-        dec_bytes = Decryptor(SalmonNativeTests.DEC_THREADS, multi_cpu=SalmonCoreTestHelper.ENABLE_MULTI_CPU) \
-            .decrypt(enc_bytes, SalmonCoreTestHelper.TEST_KEY_BYTES, SalmonCoreTestHelper.TEST_NONCE_BYTES,
-                     False, True, SalmonCoreTestHelper.TEST_HMAC_KEY_BYTES, chunk_size)
-
-        self.assertEqual(v_bytes, dec_bytes)
-
-    def assert_equal_with_integrity(self, v_buffer: bytearray, buffer_with_integrity: bytearray, chunk_size):
-        index = 0
-        for i in range(0, len(v_buffer), chunk_size):
-            n_chunk_size = min(chunk_size, len(v_buffer) - i)
-            buff1 = bytearray(chunk_size)
-            buff1[0:n_chunk_size] = v_buffer[i:i + n_chunk_size]
-
-            buff2 = bytearray(chunk_size)
-            end = index + Generator.HASH_RESULT_LENGTH + n_chunk_size
-            buff2[0:n_chunk_size] = buffer_with_integrity[index + Generator.HASH_RESULT_LENGTH:end]
-
-            self.assertEqual(buff1, buff2)
-            index += n_chunk_size + Generator.HASH_RESULT_LENGTH
-            self.assertEqual(len(buffer_with_integrity), index)

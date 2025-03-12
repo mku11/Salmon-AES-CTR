@@ -31,23 +31,24 @@ from typeguard import typechecked
 from typing import Type
 
 from salmon_core.convert.bit_converter import BitConverter
-from fs.file.ifile import IFile
-from fs.drive import VirtualDrive
-from fs.file import IVirtualFile
+from salmon_fs.fs.file.ifile import IFile
+from salmon_fs.fs.drive.virtual_drive import VirtualDrive
+from salmon_fs.fs.file.ivirtual_file import IVirtualFile
 from salmon_core.streams.memory_stream import MemoryStream
 from salmon_core.streams.random_access_stream import RandomAccessStream
 from salmon.integrity.hmac_sha256_provider import HmacSHA256Provider
 from salmon.integrity.ihash_provider import IHashProvider
 from salmon_core.salmon.integrity.integrity import Integrity
 from salmon_core.salmon.streams.encryption_mode import EncryptionMode
+from salmon_core.salmon.streams.encryption_format import EncryptionFormat
 from salmon_core.salmon.streams.aes_stream import AesStream
 from salmon_core.salmon.password.password import Password
 from salmon_core.salmon.generator import Generator
 from salmon_core.salmon.security_exception import SecurityException
-from salmon_fs.salmon.salmon_auth_exception import SalmonAuthException
-from salmon_fs.salmon.salmon_drive_config import SalmonDriveConfig
-from salmon_fs.salmon.salmon_drive_generator import SalmonDriveGenerator
-from salmon_fs.salmon.salmon_key import SalmonKey
+from salmon_fs.salmonfs.auth.auth_exception import AuthException
+from salmon_fs.salmonfs.drive.drive_config import DriveConfig
+from salmon_fs.salmonfs.drive.drive_generator import DriveGenerator
+from salmon_fs.salmonfs.drive.drive_key import DriveKey
 from salmon.sequence.inonce_sequencer import INonceSequencer
 from salmon.sequence.nonce_sequence import NonceSequence
 
@@ -74,7 +75,7 @@ class AesDrive(VirtualDrive, ABC):
         """
         super().__init__()
         self.__defaultFileChunkSize: int = AesDrive.__DEFAULT_FILE_CHUNK_SIZE
-        self.__key: SalmonKey | None = None
+        self.__key: DriveKey | None = None
         self.__driveID: bytearray | None = None
         self.__realRoot: IFile | None = None
         self.__virtualRoot: IVirtualFile | None = None
@@ -111,9 +112,9 @@ class AesDrive(VirtualDrive, ABC):
         if virtual_root_real_file is None:
             raise Exception("Could not create directory for the virtual file system")
 
-        self.__virtualRoot = self.get_file(virtual_root_real_file)
+        self.__virtualRoot = self.get_virtual_file(virtual_root_real_file)
         self.__register_on_process_close()
-        self.__key = SalmonKey()
+        self.__key = DriveKey()
 
     @staticmethod
     def get_config_filename() -> str:
@@ -176,7 +177,7 @@ class AesDrive(VirtualDrive, ABC):
         :param file_chunk_size:         """
         self.__defaultFileChunkSize = file_chunk_size
 
-    def get_key(self) -> SalmonKey | None:
+    def get_key(self) -> DriveKey | None:
         """
         Return the encryption key that is used for encryption / decryption
         :return: The key
@@ -187,12 +188,12 @@ class AesDrive(VirtualDrive, ABC):
         """
         Return the virtual root directory of the drive.
         :return: The drive root directory
-        :raises SalmonAuthException: Thrown when there is a failure in the nonce sequencer.
+        :raises AuthException: Thrown when there is a failure in the nonce sequencer.
         """
         if self.__realRoot is None or not self.__realRoot.exists():
             return None
         if not self.is_unlocked():
-            raise SalmonAuthException("Not authorized")
+            raise AuthException("Not authorized")
         return self.__virtualRoot
 
     def get_real_root(self) -> IFile:
@@ -200,7 +201,7 @@ class AesDrive(VirtualDrive, ABC):
 
     def __unlock(self, password: str):
         """
-        Verify if the user password is correct otherwise it throws a SalmonAuthException
+        Verify if the user password is correct otherwise it throws a AuthException
         
         :param password: The password.
         """
@@ -209,13 +210,13 @@ class AesDrive(VirtualDrive, ABC):
             if password is None:
                 raise SecurityException("Password is missing")
 
-            salmon_config: SalmonDriveConfig = self.__get_drive_config()
+            salmon_config: DriveConfig = self.__get_drive_config()
             iterations: int = salmon_config.get_iterations()
             salt: bytearray = salmon_config.get_salt()
 
             # derive the master key from the text password
             master_key: bytearray = Password.get_master_key(password, salt, iterations,
-                                                            SalmonDriveGenerator.MASTER_KEY_LENGTH)
+                                                            DriveGenerator.MASTER_KEY_LENGTH)
 
             # get the master Key Iv
             master_key_iv: bytearray = salmon_config.get_iv()
@@ -225,8 +226,7 @@ class AesDrive(VirtualDrive, ABC):
 
             # decrypt the combined key (drive key + hash key) using the master key
             ms: MemoryStream = MemoryStream(enc_data)
-            stream = AesStream(master_key, master_key_iv, EncryptionMode.Decrypt, ms,
-                               None, False, None, None)
+            stream = AesStream(master_key, master_key_iv, EncryptionMode.Decrypt, ms, EncryptionFormat.Generic)
 
             drive_key: bytearray = bytearray(Generator.KEY_LENGTH)
             stream.read(drive_key, 0, len(drive_key))
@@ -234,7 +234,7 @@ class AesDrive(VirtualDrive, ABC):
             hash_key: bytearray = bytearray(Generator.HASH_KEY_LENGTH)
             stream.read(hash_key, 0, len(hash_key))
 
-            drive_id: bytearray = bytearray(SalmonDriveGenerator.DRIVE_ID_LENGTH)
+            drive_id: bytearray = bytearray(DriveGenerator.DRIVE_ID_LENGTH)
             stream.read(drive_id, 0, len(drive_id))
 
             # to make sure we have the right key we get the hash portion
@@ -265,7 +265,7 @@ class AesDrive(VirtualDrive, ABC):
         self.__key.set_hash_key(hash_key)
         self.__key.set_iterations(iterations)
 
-    def __verify_hash(self, salmon_config: SalmonDriveConfig, data: bytearray, hash_key: bytearray):
+    def __verify_hash(self, salmon_config: DriveConfig, data: bytearray, hash_key: bytearray):
         """
         Verify that the hash signature is correct
         
@@ -274,7 +274,7 @@ class AesDrive(VirtualDrive, ABC):
         v_hash: bytearray = Integrity.calculate_hash(self.__hashProvider, data, 0, len(data), hash_key, None)
         for i in range(0, len(hash_key)):
             if hash_signature[i] != v_hash[i]:
-                raise SalmonAuthException("Wrong password")
+                raise AuthException("Wrong password")
 
     def get_next_nonce(self) -> bytearray:
         """
@@ -282,14 +282,14 @@ class AesDrive(VirtualDrive, ABC):
         :return: The next nonce
         :raises Exception:         """
         if not self.is_unlocked():
-            raise SalmonAuthException("Not authorized")
+            raise AuthException("Not authorized")
         return self.__sequencer.next_nonce(BitConverter.to_hex(self.get_drive_id()))
 
     def is_unlocked(self) -> bool:
         """
         Returns True if password authorization has succeeded.
         """
-        key: SalmonKey = self.get_key()
+        key: DriveKey = self.get_key()
         if key is None:
             return False
         enc_key: bytearray | None = key.get_drive_key()
@@ -331,7 +331,7 @@ class AesDrive(VirtualDrive, ABC):
             export_dir = self.__realRoot.create_directory(AesDrive.__exportDirectoryName)
         return export_dir
 
-    def __get_drive_config(self) -> SalmonDriveConfig | None:
+    def __get_drive_config(self) -> DriveConfig | None:
         """
         Return the configuration properties of this drive.
         """
@@ -339,14 +339,14 @@ class AesDrive(VirtualDrive, ABC):
         if config_file is None or not config_file.exists():
             return None
         v_bytes: bytearray = self.get_bytes_from_real_file(config_file, 0)
-        drive_config: SalmonDriveConfig = SalmonDriveConfig(v_bytes)
+        drive_config: DriveConfig = DriveConfig(v_bytes)
         return drive_config
 
     def has_config(self) -> bool:
         """
         Return True if the drive is already created and has a configuration file.
         """
-        salmon_config: SalmonDriveConfig | None = None
+        salmon_config: DriveConfig | None = None
         try:
             salmon_config = self.__get_drive_config()
         except Exception as ex:
@@ -386,7 +386,7 @@ class AesDrive(VirtualDrive, ABC):
             except Exception as ex:
                 print(ex, file=sys.stderr)
 
-        self.__virtualRoot = self.get_file(virtual_root_real_file)
+        self.__virtualRoot = self.get_virtual_file(virtual_root_real_file)
 
     def get_hash_provider(self):
         return self.__hashProvider
@@ -460,7 +460,7 @@ class AesDrive(VirtualDrive, ABC):
         drv_str: str = BitConverter.to_hex(self.get_drive_id())
         sequence: NonceSequence | None = self.__sequencer.get_sequence(drv_str)
         if sequence is None:
-            auth_id: bytearray = SalmonDriveGenerator.generate_auth_id()
+            auth_id: bytearray = DriveGenerator.generate_auth_id()
             self.create_sequence(self.get_drive_id(), auth_id)
 
         sequence = self.__sequencer.get_sequence(drv_str)
@@ -495,8 +495,8 @@ class AesDrive(VirtualDrive, ABC):
         :param drive_id: Drive ID.
         :param auth_id:  authorization ID.
         :raises Exception:         """
-        starting_nonce: bytearray = SalmonDriveGenerator.get_starting_nonce()
-        max_nonce: bytearray = SalmonDriveGenerator.get_max_nonce()
+        starting_nonce: bytearray = DriveGenerator.get_starting_nonce()
+        max_nonce: bytearray = DriveGenerator.get_max_nonce()
         drv_str: str = BitConverter.to_hex(drive_id)
         auth_str: str = BitConverter.to_hex(auth_id)
         self.__sequencer.init_sequence(drv_str, auth_str, starting_nonce, max_nonce)
@@ -518,7 +518,7 @@ class AesDrive(VirtualDrive, ABC):
         
         :return: The authorization id
         :raises SequenceException: Thrown when there is a failure in the nonce sequencer.
-        :raises SalmonAuthException: Thrown when there is a failure in the nonce sequencer.
+        :raises AuthException: Thrown when there is a failure in the nonce sequencer.
         """
         return BitConverter.to_hex(self.get_auth_id_bytes())
 
@@ -535,7 +535,7 @@ class AesDrive(VirtualDrive, ABC):
 
         config_file: IFile = self.get_real_root().get_child(AesDrive.get_config_filename())
         if drive_key is None and config_file is not None and config_file.exists():
-            raise SalmonAuthException("Not authorized")
+            raise AuthException("Not authorized")
 
         # delete the old config file and create a new one
         if config_file is not None and config_file.exists():
@@ -554,29 +554,28 @@ class AesDrive(VirtualDrive, ABC):
             new_drive = True
             drive_key: bytearray = bytearray(Generator.KEY_LENGTH)
             hash_key: bytearray = bytearray(Generator.HASH_KEY_LENGTH)
-            comb_key: bytearray = SalmonDriveGenerator.generate_combined_key()
+            comb_key: bytearray = DriveGenerator.generate_combined_key()
             drive_key[0: Generator.KEY_LENGTH] = comb_key[0:Generator.KEY_LENGTH]
             length: int = Generator.KEY_LENGTH + Generator.HASH_KEY_LENGTH
             hash_key[0:Generator.HASH_KEY_LENGTH] = comb_key[Generator.KEY_LENGTH:length]
-            self.__driveID = SalmonDriveGenerator.generate_drive_id()
+            self.__driveID = DriveGenerator.generate_drive_id()
 
         # Get the salt that we will use to encrypt the combined key (drive key + hash key)
-        salt: bytearray = SalmonDriveGenerator.generate_salt()
+        salt: bytearray = DriveGenerator.generate_salt()
 
-        iterations: int = SalmonDriveGenerator.get_iterations()
+        iterations: int = DriveGenerator.get_iterations()
 
         # generate a 128 bit IV that will be used with the master key
         # to encrypt the combined 64-bit key (drive key + hash key)
-        master_key_iv: bytearray = SalmonDriveGenerator.generate_master_key_iv()
+        master_key_iv: bytearray = DriveGenerator.generate_master_key_iv()
 
         # create a key that will encrypt both the (drive key and the hash key)
         master_key: bytearray = Password.get_master_key(password, salt, iterations,
-                                                        SalmonDriveGenerator.MASTER_KEY_LENGTH)
+                                                        DriveGenerator.MASTER_KEY_LENGTH)
 
         # encrypt the combined key (drive key + hash key) using the master_key and the masterKeyIv
         ms: MemoryStream = MemoryStream()
-        stream: AesStream = AesStream(master_key, master_key_iv, EncryptionMode.Encrypt, ms,
-                                      None, False, None, None)
+        stream: AesStream = AesStream(master_key, master_key_iv, EncryptionMode.Encrypt, ms, EncryptionFormat.Generic)
         stream.write(drive_key, 0, len(drive_key))
         stream.write(hash_key, 0, len(hash_key))
         stream.write(self.get_drive_id(), 0, len(self.get_drive_id()))
@@ -589,13 +588,13 @@ class AesDrive(VirtualDrive, ABC):
                                                              len(enc_data),
                                                              hash_key, None)
 
-        SalmonDriveConfig.write_drive_config(config_file, magic_bytes, version, salt, iterations, master_key_iv,
-                                             enc_data, hash_signature)
+        DriveConfig.write_drive_config(config_file, magic_bytes, version, salt, iterations, master_key_iv,
+                                       enc_data, hash_signature)
         self.set_key(master_key, drive_key, hash_key, iterations)
 
         if new_drive:
             # create a full sequence for nonces
-            auth_id: bytearray = SalmonDriveGenerator.generate_auth_id()
+            auth_id: bytearray = DriveGenerator.generate_auth_id()
             self.create_sequence(self.get_drive_id(), auth_id)
             self.init_sequence(self.get_drive_id(), auth_id)
 
@@ -606,7 +605,7 @@ class AesDrive(VirtualDrive, ABC):
         Change the user password.
         :param password: The new password.
         :raises IOError: Thrown if there is an IO error.
-        :raises SalmonAuthException: Thrown when there is a failure in the nonce sequencer.
+        :raises AuthException: Thrown when there is a failure in the nonce sequencer.
         :raises IntegrityException: Thrown when security error
         :raises IntegrityException: Thrown when data are corrupt or tampered with.
         :raises SequenceException: Thrown when there is a failure in the nonce sequencer.

@@ -36,19 +36,19 @@ from salmon_core.streams.random_access_stream import RandomAccessStream
 from salmon.integrity.integrity_exception import IntegrityException
 from salmon_core.salmon.streams.aes_stream import AesStream
 from salmon_core.salmon.security_exception import SecurityException
-from salmon_fs.salmon.salmon_file import SalmonFile
+from salmon_fs.salmonfs.file.aes_file import AesFile
 
 
 @typechecked
 class AesFileInputStream(BufferedIOBase):
     """
-    Implementation of a Python InputStream for seeking and reading a SalmonFile.
+    Implementation of a Python InputStream for seeking and reading a AesFile.
     This class provides a seekable source with parallel substreams and cached buffers
     for performance.
     """
 
     # Default cache buffer should be high enough for most buffer needs
-    # the cache buffers should be aligned to the SalmonFile chunk size for efficiency
+    # the cache buffers should be aligned to the AesFile chunk size for efficiency
     __DEFAULT_BUFFER_SIZE = 512 * 1024
 
     # default threads is one but you can increase it
@@ -58,7 +58,7 @@ class AesFileInputStream(BufferedIOBase):
 
     __MAX_BUFFERS = 6
 
-    def __init__(self, salmon_file: SalmonFile, buffers_count: int, buffer_size: int, threads: int, back_offset: int):
+    def __init__(self, salmon_file: AesFile, buffers_count: int, buffer_size: int, threads: int, back_offset: int):
 
         """
         Instantiate a seekable stream from an encrypted file source
@@ -72,7 +72,7 @@ class AesFileInputStream(BufferedIOBase):
         self.__buffersCount: int
         self.__buffers: list[AesFileInputStream.CacheBuffer | None] | None = None
         self.__streams: list[AesStream | None] | None = None
-        self.__salmonFile: SalmonFile | None = None
+        self.__AesFile: AesFile | None = None
         self.__cacheBufferSize: int = 0
         self.__threads: int = 0
         self.__executor: ThreadPoolExecutor | None = None
@@ -93,8 +93,8 @@ class AesFileInputStream(BufferedIOBase):
         the buffers ending up with too much overlapping data.
         """
 
-        self.__salmonFile = salmon_file
-        self.__size = salmon_file.get_size()
+        self.__AesFile = salmon_file
+        self.__size = salmon_file.get_length()
         self.__positionStart: int
         self.__positionEnd: int
 
@@ -127,7 +127,7 @@ class AesFileInputStream(BufferedIOBase):
         self.__streams: list[RandomAccessStream | None] = [None] * self.__threads
         try:
             for i in range(0, self.__threads):
-                self.__streams[i] = self.__salmonFile.get_input_stream()
+                self.__streams[i] = self.__AesFile.get_input_stream()
 
         except (SecurityException, IntegrityException) as ex:
             raise IOError("Could not create streams") from ex
@@ -244,7 +244,7 @@ class AesFileInputStream(BufferedIOBase):
                            buffer_size: int,
                            salmon_stream: AesStream) -> int:
         """
-        Fills a cache buffer with the decrypted data from a part of an encrypted file served as a salmonfs stream
+        Fills a cache buffer with the decrypted data from a part of an encrypted file
         
         :param cache_buffer:  The cache buffer that will store the decrypted contents
         :param buffer_size:   The length of the data requested

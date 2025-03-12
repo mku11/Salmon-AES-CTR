@@ -37,11 +37,11 @@ from salmon_core.streams.random_access_stream import RandomAccessStream
 from salmon_core.streams.memory_stream import MemoryStream
 from salmon_core.salmon.streams.provider_type import ProviderType
 from salmon_core.salmon.streams.aes_stream import AesStream
-from fs.file.ifile import IFile
-from fs.file.http_file import HttpFile
-from fs.file import IVirtualFile
-from salmon_fs.salmon.drive.py_http_drive import PyHttpDrive
-from salmon_fs.salmon.salmon_drive import SalmonDrive
+from salmon_fs.fs.file.ifile import IFile
+from salmon_fs.fs.file.http_file import HttpFile
+from salmon_fs.fs.file.ivirtual_file import IVirtualFile
+from salmon_fs.salmonfs.drive.http_drive import HttpDrive
+from salmon_fs.salmonfs.drive.aes_drive import AesDrive
 
 from salmon_core_test_helper import SalmonCoreTestHelper
 from salmon_fs_test_helper import SalmonFSTestHelper, TestMode
@@ -103,7 +103,7 @@ class SalmonFSHttpTests(TestCase):
         vault_dir: IFile = SalmonFSTestHelper.HTTP_VAULT_DIR
         wrong_password: bool = False
         try:
-            drive: PyHttpDrive = SalmonDrive.open_drive(vault_dir, SalmonFSTestHelper.drive_class_type,
+            drive: HttpDrive = AesDrive.open_drive(vault_dir, SalmonFSTestHelper.drive_class_type,
                                                         SalmonCoreTestHelper.TEST_FALSE_PASSWORD)
         except Exception as ex:
             print(ex, file=sys.stderr)
@@ -114,7 +114,7 @@ class SalmonFSHttpTests(TestCase):
         vault_dir: IFile = SalmonFSTestHelper.HTTP_VAULT_DIR
         wrong_password: bool = False
         try:
-            drive: PyHttpDrive = SalmonDrive.open_drive(vault_dir, SalmonFSTestHelper.drive_class_type,
+            drive: HttpDrive = AesDrive.open_drive(vault_dir, SalmonFSTestHelper.drive_class_type,
                                                         SalmonCoreTestHelper.TEST_PASSWORD)
         except Exception as ex:
             print(ex, file=sys.stderr)
@@ -140,11 +140,11 @@ class SalmonFSHttpTests(TestCase):
 
     def test_shouldSeekAndReadEncryptedFileStreamFromDrive(self):
         vault_dir: IFile = SalmonFSTestHelper.HTTP_VAULT_DIR
-        drive: PyHttpDrive = SalmonDrive.open_drive(vault_dir, SalmonFSTestHelper.drive_class_type,
+        drive: HttpDrive = AesDrive.open_drive(vault_dir, SalmonFSTestHelper.drive_class_type,
                                                     SalmonCoreTestHelper.TEST_PASSWORD)
         root: IVirtualFile = drive.get_root()
         enc_file: IVirtualFile = root.get_child(SalmonFSTestHelper.TEST_IMPORT_SMALL_FILENAME)
-        self.assertEqual(enc_file.get_base_name(), SalmonFSTestHelper.TEST_IMPORT_SMALL_FILENAME)
+        self.assertEqual(enc_file.get_name(), SalmonFSTestHelper.TEST_IMPORT_SMALL_FILENAME)
 
         enc_stream: RandomAccessStream = enc_file.get_input_stream()
         ms: MemoryStream = MemoryStream()
@@ -156,12 +156,12 @@ class SalmonFSHttpTests(TestCase):
 
     def test_shouldListFilesFromDrive(self):
         vault_dir: IFile = SalmonFSTestHelper.HTTP_VAULT_DIR
-        drive: PyHttpDrive = PyHttpDrive.open(vault_dir, SalmonCoreTestHelper.TEST_PASSWORD)
+        drive: HttpDrive = HttpDrive.open(vault_dir, SalmonCoreTestHelper.TEST_PASSWORD)
         root: IVirtualFile = drive.get_root()
         files: list[IVirtualFile] = root.list_files()
         filenames: list[str] = []
         for i in range(len(files)):
-            filename = files[i].get_base_name()
+            filename = files[i].get_name()
             filenames.append(filename)
         self.assertEqual(len(files), 4)
         self.assertTrue(SalmonFSTestHelper.TEST_IMPORT_TINY_FILENAME in filenames)
@@ -173,9 +173,9 @@ class SalmonFSHttpTests(TestCase):
         threads = 2
         drive = SalmonFSTestHelper.open_drive(vault_dir, SalmonFSTestHelper.drive_class_type,
                                               SalmonCoreTestHelper.TEST_PASSWORD)
-        file = drive.get_root().get_child(SalmonFSTestHelper.TEST_HTTP_FILE.get_base_name())
+        file = drive.get_root().get_child(SalmonFSTestHelper.TEST_HTTP_FILE.get_name())
         export_dir = SalmonFSTestHelper.generate_folder("export_http", SalmonFSTestHelper.TEST_OUTPUT_DIR, False)
-        local_file = export_dir.get_child(SalmonFSTestHelper.TEST_HTTP_FILE.get_base_name())
+        local_file = export_dir.get_child(SalmonFSTestHelper.TEST_HTTP_FILE.get_name())
         if local_file.exists():
             local_file.delete()
         SalmonFSTestHelper.export_files([file], export_dir, threads)
@@ -183,10 +183,10 @@ class SalmonFSHttpTests(TestCase):
 
     def test_shouldReadRawFile(self):
         local_file = SalmonFSTestHelper.HTTP_TEST_DIR.get_child(
-            SalmonFSTestHelper.TEST_HTTP_FILE.get_base_name())
+            SalmonFSTestHelper.TEST_HTTP_FILE.get_name())
         local_chk_sum = SalmonFSTestHelper.get_checksum(local_file)
         http_root = HttpFile(SalmonFSTestHelper.HTTP_SERVER_VIRTUAL_URL + "/" + SalmonFSTestHelper.HTTP_TEST_DIRNAME)
-        http_file = http_root.get_child(SalmonFSTestHelper.TEST_HTTP_FILE.get_base_name())
+        http_file = http_root.get_child(SalmonFSTestHelper.TEST_HTTP_FILE.get_name())
         stream = http_file.get_input_stream()
         ms = MemoryStream()
         stream.copy_to(ms)

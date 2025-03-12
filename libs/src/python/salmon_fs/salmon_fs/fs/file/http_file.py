@@ -37,8 +37,8 @@ from datetime import datetime
 from threading import RLock
 
 from salmon_core.streams.memory_stream import MemoryStream
-from fs.file.ifile import IFile
-from fs.streams.http_file_stream import HttpFileStream
+from salmon_fs.fs.file.ifile import IFile
+from salmon_fs.fs.streams.http_file_stream import HttpFileStream
 from salmon_core.streams.random_access_stream import RandomAccessStream
 
 
@@ -118,14 +118,14 @@ class HttpFile(IFile):
         """
         return self.__get_response().status == 200 or self.__get_response().status == 206
 
-    def get_absolute_path(self) -> str:
+    def get_display_path(self) -> str:
         """
         Get the absolute path on the physical disk.
         :return: The absolute path.
         """
         return self.__file_path
 
-    def get_base_name(self) -> str:
+    def get_name(self) -> str:
         """
         Get the name of this file or directory.
         :return: The name of this file or directory.
@@ -195,7 +195,7 @@ class HttpFile(IFile):
         """
         return not self.is_directory()
 
-    def last_modified(self) -> int:
+    def get_last_date_modified(self) -> int:
         """
         Get the last modified date on disk.
         :return: The last modified date in milliseconds
@@ -203,7 +203,7 @@ class HttpFile(IFile):
         response: HTTPResponse = self.__get_response()
         return int(datetime.strptime(response.headers['last-modified'], '%a, %d %b %Y %H:%M:%S GMT').timestamp())
 
-    def length(self) -> int:
+    def get_length(self) -> int:
         """
         Get the size of the file on disk.
         :return: The size

@@ -1,6 +1,4 @@
 #!/usr/bin/env python3
-from __future__ import annotations
-
 __license__ = """
 MIT License
 
@@ -25,38 +23,26 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 """
 
-from abc import ABC, abstractmethod
+from enum import Enum
+
 from typeguard import typechecked
-from salmon_fs.fs.file.ifile import IFile
 
 
 @typechecked
-class VirtualDrive(ABC):
+class EncryptionFormat(Enum):
     """
-    Virtual Drive
+    Encryption Format
+    
+    @see #Generic
+    @see #Salmon
     """
 
-    @abstractmethod
-    def _on_unlock_success(self):
-        """
-        Method is called when the drive is unlocked
-        """
-        pass
+    Generic = 0
+    """
+    Generic format without header information, compatible with other AES-256 CTR libraries.
+    """
 
-    def _on_unlock_error(self):
-        """
-        Method is called when unlocking the drive has failed
-        """
-        pass
-
-    @abstractmethod
-    def get_private_dir(self) -> IFile:
-        pass
-
-    @abstractmethod
-    def get_virtual_file(self, file: IFile) -> any:
-        pass
-
-    @abstractmethod
-    def get_root(self) -> any:
-        pass
+    Salmon = 1
+    """
+    Salmon format with header (embedded nonce and integrity support).
+    """

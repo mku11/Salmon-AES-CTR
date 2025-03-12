@@ -31,13 +31,13 @@ from typing import Callable, Any
 import sys
 from typeguard import typechecked
 
-from salmon_fs.salmon.salmon_file import SalmonFile
+from salmon_fs.salmonfs.file.aes_file import AesFile
 
 
 @typechecked
 class FileSearcher:
     """
-    Class searches for files in a SalmonDrive by filename.
+    Class searches for files in a AesDrive by filename.
     """
 
     def __init__(self):
@@ -59,7 +59,7 @@ class FileSearcher:
         Functional interface to notify when result is found.
         """
 
-        def on_result_found(self, search_result: SalmonFile):
+        def on_result_found(self, search_result: AesFile):
             """
             Fired when search result found.
             :param search_result: The search result.
@@ -80,9 +80,9 @@ class FileSearcher:
         """
         return self.__quit
 
-    def search(self, v_dir: SalmonFile, terms: str, any_term: bool,
+    def search(self, v_dir: AesFile, terms: str, any_term: bool,
                on_result_found: FileSearcher.OnResultFoundListener | None = None,
-               on_search_event: Callable[[FileSearcher.SearchEvent], Any] | None = None) -> list[SalmonFile]:
+               on_search_event: Callable[[FileSearcher.SearchEvent], Any] | None = None) -> list[AesFile]:
         """
         Search files in directory and its subdirectories recursively for matching terms.
         :param v_dir: The directory to start the search.
@@ -94,7 +94,7 @@ class FileSearcher:
         """
         self.__running = True
         self.__quit = False
-        search_results: dict[str, SalmonFile] = {}
+        search_results: dict[str, AesFile] = {}
         if on_search_event is not None:
             on_search_event(FileSearcher.SearchEvent.SearchingFiles)
         self.__search_dir(v_dir, terms, any_term, on_result_found, search_results)
@@ -123,9 +123,9 @@ class FileSearcher:
             return count
         return 0
 
-    def __search_dir(self, v_dir: SalmonFile, terms: str, anyterm: bool,
+    def __search_dir(self, v_dir: AesFile, terms: str, anyterm: bool,
                      on_result_found: FileSearcher.OnResultFoundListener | None,
-                     search_results: dict[str, SalmonFile]):
+                     search_results: dict[str, AesFile]):
         """
         Search a directory for all filenames matching the terms supplied.
         :param v_dir: The directory to start the search.
@@ -136,7 +136,7 @@ class FileSearcher:
         """
         if self.__quit:
             return
-        files: list[SalmonFile] = v_dir.list_files()
+        files: list[AesFile] = v_dir.list_files()
         terms_array: list[str] = terms.split(" ")
         for file in files:
             if self.__quit:
@@ -147,7 +147,7 @@ class FileSearcher:
                 if file.get_real_path() in search_results:
                     continue
                 try:
-                    hits: int = self.__get_search_results(file.get_base_name(), terms_array, anyterm)
+                    hits: int = self.__get_search_results(file.get_name(), terms_array, anyterm)
                     if hits > 0:
                         search_results[file.get_real_path()] = file
                         if on_result_found is not None:

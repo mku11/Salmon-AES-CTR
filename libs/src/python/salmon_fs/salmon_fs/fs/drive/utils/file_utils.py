@@ -27,8 +27,6 @@ SOFTWARE.
 
 from typeguard import typechecked
 
-from salmon_fs.salmon.salmon_file import SalmonFile
-
 
 @typechecked
 class FileUtils:
@@ -114,12 +112,3 @@ class FileUtils:
             return file_name[0: index]
         else:
             return ""
-
-    @staticmethod
-    def get_minimum_part_size(file: SalmonFile) -> int:
-        curr_chunk_size = file.get_file_chunk_size()
-        if curr_chunk_size is not None and curr_chunk_size != 0:
-            return curr_chunk_size
-        if file.get_requested_chunk_size() is not None and file.get_requested_chunk_size() != 0:
-            return file.get_requested_chunk_size()
-        return file.get_block_size()

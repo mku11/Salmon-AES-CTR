@@ -35,9 +35,9 @@ from salmon_core.convert.bit_converter import BitConverter
 from salmon_core.streams.memory_stream import MemoryStream
 from salmon.integrity.integrity_exception import IntegrityException
 from salmon_core.salmon.streams.encryption_mode import EncryptionMode
+from salmon_core.salmon.streams.encryption_format import EncryptionFormat
 from salmon_core.salmon.streams.provider_type import ProviderType
 from salmon_core.salmon.streams.aes_stream import AesStream
-from salmon_core.salmon.generator import Generator
 from salmon_core.salmon.range_exceeded_exception import RangeExceededException
 from salmon_core.salmon.security_exception import SecurityException
 from salmon_core.salmon.text.text_decryptor import TextDecryptor
@@ -73,18 +73,17 @@ class SalmonCoreTests(TestCase):
         plain_text = SalmonCoreTestHelper.TEST_TINY_TEXT
         enc_text = TextEncryptor.encrypt_string(plain_text, SalmonCoreTestHelper.TEST_KEY_BYTES,
                                                 SalmonCoreTestHelper.TEST_NONCE_BYTES,
-                                                False)
+                                                EncryptionFormat.Generic)
         dec_text = TextDecryptor.decrypt_string(enc_text, SalmonCoreTestHelper.TEST_KEY_BYTES,
                                                 SalmonCoreTestHelper.TEST_NONCE_BYTES,
-                                                False)
+                                                EncryptionFormat.Generic)
         self.assertEqual(plain_text, dec_text)
 
     def test_shouldEncryptAndDecryptTextWithHeader(self):
         plain_text = SalmonCoreTestHelper.TEST_TINY_TEXT
         enc_text = TextEncryptor.encrypt_string(plain_text, SalmonCoreTestHelper.TEST_KEY_BYTES,
-                                                SalmonCoreTestHelper.TEST_NONCE_BYTES,
-                                                True)
-        dec_text = TextDecryptor.decrypt_string(enc_text, SalmonCoreTestHelper.TEST_KEY_BYTES, None, True)
+                                                SalmonCoreTestHelper.TEST_NONCE_BYTES)
+        dec_text = TextDecryptor.decrypt_string(enc_text, SalmonCoreTestHelper.TEST_KEY_BYTES)
         self.assertEqual(plain_text, dec_text)
 
     def test_shouldEncryptCatchNoKey(self):
@@ -92,7 +91,7 @@ class SalmonCoreTests(TestCase):
         caught = False
 
         try:
-            TextEncryptor.encrypt_string(plain_text, None, SalmonCoreTestHelper.TEST_NONCE_BYTES, True)
+            TextEncryptor.encrypt_string(plain_text, None, SalmonCoreTestHelper.TEST_NONCE_BYTES)
         except (TypeCheckError, SecurityException) as ex:
             print(ex, file=sys.stderr)
             caught = True
@@ -104,7 +103,7 @@ class SalmonCoreTests(TestCase):
         caught = False
 
         try:
-            TextEncryptor.encrypt_string(plain_text, SalmonCoreTestHelper.TEST_KEY_BYTES, None, True)
+            TextEncryptor.encrypt_string(plain_text, SalmonCoreTestHelper.TEST_KEY_BYTES, None)
         except (TypeCheckError, SecurityException) as ex:
             print(ex, file=sys.stderr)
             caught = True
@@ -119,8 +118,8 @@ class SalmonCoreTests(TestCase):
 
         try:
             enc_text = TextEncryptor.encrypt_string(plain_text, SalmonCoreTestHelper.TEST_KEY_BYTES,
-                                                    SalmonCoreTestHelper.TEST_NONCE_BYTES, False)
-            TextDecryptor.decrypt_string(enc_text, SalmonCoreTestHelper.TEST_KEY_BYTES, None, False)
+                                                    SalmonCoreTestHelper.TEST_NONCE_BYTES, EncryptionFormat.Generic)
+            TextDecryptor.decrypt_string(enc_text, SalmonCoreTestHelper.TEST_KEY_BYTES, None, EncryptionFormat.Generic)
         except Exception as ex:
             print(ex, file=sys.stderr)
             caught = True
@@ -133,8 +132,8 @@ class SalmonCoreTests(TestCase):
 
         try:
             enc_text = TextEncryptor.encrypt_string(plain_text, SalmonCoreTestHelper.TEST_KEY_BYTES,
-                                                    SalmonCoreTestHelper.TEST_NONCE_BYTES, True)
-            TextDecryptor.decrypt_string(enc_text, None, SalmonCoreTestHelper.TEST_NONCE_BYTES, True)
+                                                    SalmonCoreTestHelper.TEST_NONCE_BYTES)
+            TextDecryptor.decrypt_string(enc_text, None, SalmonCoreTestHelper.TEST_NONCE_BYTES)
         except Exception as ex:
             print(ex, file=sys.stderr)
             caught = True
@@ -156,62 +155,22 @@ class SalmonCoreTests(TestCase):
 
         self.assertEqual(v_bytes, dec_bytes_def)
         enc_bytes = SalmonCoreTestHelper.get_encryptor() \
-            .encrypt(v_bytes, SalmonCoreTestHelper.TEST_KEY_BYTES, SalmonCoreTestHelper.TEST_NONCE_BYTES, False)
+            .encrypt(v_bytes, SalmonCoreTestHelper.TEST_KEY_BYTES, SalmonCoreTestHelper.TEST_NONCE_BYTES,
+                     EncryptionFormat.Generic)
 
         self.assertEqual(enc_bytes_def, enc_bytes)
         dec_bytes = SalmonCoreTestHelper.get_decryptor() \
-            .decrypt(enc_bytes, SalmonCoreTestHelper.TEST_KEY_BYTES, SalmonCoreTestHelper.TEST_NONCE_BYTES, False)
-
-        self.assertEqual(v_bytes, dec_bytes)
-
-    def test_shouldEncryptAndDecryptTextCompatibleWithIntegrity(self):
-        plain_text = SalmonCoreTestHelper.TEST_TEXT
-        for i in range(0, 13):
-            plain_text += plain_text
-
-        v_bytes = bytearray(plain_text.encode('utf-8'))
-        enc_bytes_def = SalmonCoreTestHelper.default_aesctr_transform(v_bytes, SalmonCoreTestHelper.TEST_KEY_BYTES,
-                                                                      SalmonCoreTestHelper.TEST_NONCE_BYTES,
-                                                                      True)
-        dec_bytes_def = SalmonCoreTestHelper.default_aesctr_transform(enc_bytes_def,
-                                                                      SalmonCoreTestHelper.TEST_KEY_BYTES,
-                                                                      SalmonCoreTestHelper.TEST_NONCE_BYTES, False)
-
-        threads = 1
-        chunk_size = 256 * 1024
-        self.assertEqual(v_bytes, dec_bytes_def)
-        enc_bytes = SalmonCoreTestHelper.get_encryptor() \
-            .encrypt(v_bytes, SalmonCoreTestHelper.TEST_KEY_BYTES, SalmonCoreTestHelper.TEST_NONCE_BYTES,
-                     False, True, SalmonCoreTestHelper.TEST_HMAC_KEY_BYTES, chunk_size)
-
-        self.assertEqualWithIntegrity(enc_bytes_def, enc_bytes, chunk_size)
-        dec_bytes = SalmonCoreTestHelper.get_decryptor() \
             .decrypt(enc_bytes, SalmonCoreTestHelper.TEST_KEY_BYTES, SalmonCoreTestHelper.TEST_NONCE_BYTES,
-                     False, True, SalmonCoreTestHelper.TEST_HMAC_KEY_BYTES, chunk_size)
+                     EncryptionFormat.Generic)
 
         self.assertEqual(v_bytes, dec_bytes)
-
-    def assertEqualWithIntegrity(self, buffer: bytearray, buffer_with_integrity: bytearray, chunk_size: int):
-        index = 0
-        for i in range(0, len(buffer), chunk_size):
-            n_chunk_size = min(chunk_size, len(buffer) - i)
-            buff1 = bytearray(chunk_size)
-            buff1[0:n_chunk_size] = buffer[i:i + n_chunk_size]
-
-            buff2 = bytearray(chunk_size)
-            end = index + Generator.HASH_RESULT_LENGTH + n_chunk_size
-            buff2[0:n_chunk_size] = buffer_with_integrity[index + Generator.HASH_RESULT_LENGTH:end]
-
-            self.assertEqual(buff1, buff2)
-            index += n_chunk_size + Generator.HASH_RESULT_LENGTH
-        self.assertEqual(len(buffer_with_integrity), index)
 
     def test_encrypt_decrypt_using_stream_no_buffers_specified(self):
         SalmonCoreTestHelper.encrypt_write_decrypt_read(SalmonCoreTestHelper.TEST_TEXT,
                                                         SalmonCoreTestHelper.TEST_KEY_BYTES,
                                                         SalmonCoreTestHelper.TEST_NONCE_BYTES,
                                                         0, 0,
-                                                        False, None, None, False, None, None)
+                                                        False, 0, None, False, None)
 
     def test_encrypt_decrypt_using_stream_large_buffers_align_specified(self):
         SalmonCoreTestHelper.encrypt_write_decrypt_read(SalmonCoreTestHelper.TEST_TEXT,
@@ -219,7 +178,7 @@ class SalmonCoreTests(TestCase):
                                                         SalmonCoreTestHelper.TEST_NONCE_BYTES,
                                                         SalmonCoreTestHelper.TEST_ENC_BUFFER_SIZE,
                                                         SalmonCoreTestHelper.TEST_DEC_BUFFER_SIZE,
-                                                        False, None, None, False, None, None)
+                                                        False, 0, None, False, None)
 
     def test_encrypt_decrypt_using_stream_large_buffers_no_align_specified(self):
         SalmonCoreTestHelper.encrypt_write_decrypt_read(SalmonCoreTestHelper.TEST_TEXT,
@@ -227,21 +186,21 @@ class SalmonCoreTests(TestCase):
                                                         SalmonCoreTestHelper.TEST_NONCE_BYTES,
                                                         SalmonCoreTestHelper.TEST_ENC_BUFFER_SIZE + 3,
                                                         SalmonCoreTestHelper.TEST_DEC_BUFFER_SIZE + 3,
-                                                        False, None, None, False, None, None)
+                                                        False, 0, None, False, None)
 
     def test_encrypt_decrypt_using_stream_aligned_buffer(self):
         SalmonCoreTestHelper.encrypt_write_decrypt_read(SalmonCoreTestHelper.TEST_TEXT,
                                                         SalmonCoreTestHelper.TEST_KEY_BYTES,
                                                         SalmonCoreTestHelper.TEST_NONCE_BYTES,
                                                         16 * 2, 16 * 2,
-                                                        False, None, None, False, None, None)
+                                                        False, 0, None, False, None)
 
     def test_encrypt_decrypt_using_stream_dec_no_aligned_buffer(self):
         SalmonCoreTestHelper.encrypt_write_decrypt_read(SalmonCoreTestHelper.TEST_TEXT,
                                                         SalmonCoreTestHelper.TEST_KEY_BYTES,
                                                         SalmonCoreTestHelper.TEST_NONCE_BYTES,
                                                         16 * 2, 16 * 2 + 3,
-                                                        False, None, None, False, None, None)
+                                                        False, 0, None, False, None)
 
     def test_encrypt_decrypt_using_stream_test_integrity_positive(self):
         SalmonCoreTestHelper.encrypt_write_decrypt_read(SalmonCoreTestHelper.TEST_TEXT,
@@ -249,8 +208,8 @@ class SalmonCoreTests(TestCase):
                                                         SalmonCoreTestHelper.TEST_NONCE_BYTES,
                                                         SalmonCoreTestHelper.TEST_ENC_BUFFER_SIZE,
                                                         SalmonCoreTestHelper.TEST_ENC_BUFFER_SIZE,
-                                                        True, None, SalmonCoreTestHelper.TEST_HMAC_KEY_BYTES,
-                                                        False, None, None)
+                                                        True, 0, SalmonCoreTestHelper.TEST_HMAC_KEY_BYTES,
+                                                        False, None)
 
     def test_encrypt_decrypt_using_stream_test_integrity_no_buffer_specified_positive(self):
         SalmonCoreTestHelper.encrypt_write_decrypt_read(SalmonCoreTestHelper.TEST_TEXT,
@@ -258,16 +217,15 @@ class SalmonCoreTests(TestCase):
                                                         SalmonCoreTestHelper.TEST_NONCE_BYTES,
                                                         SalmonCoreTestHelper.TEST_ENC_BUFFER_SIZE,
                                                         SalmonCoreTestHelper.TEST_ENC_BUFFER_SIZE,
-                                                        True, None, SalmonCoreTestHelper.TEST_HMAC_KEY_BYTES,
-                                                        False, None, None)
+                                                        True, 0, SalmonCoreTestHelper.TEST_HMAC_KEY_BYTES,
+                                                        False, None)
 
     def test_shouldEncryptDecryptUsingStreamTestIntegrityWithHeaderNoBufferSpecifiedPositive(self):
         SalmonCoreTestHelper.encrypt_write_decrypt_read(SalmonCoreTestHelper.TEST_TEXT,
                                                         SalmonCoreTestHelper.TEST_KEY_BYTES,
                                                         SalmonCoreTestHelper.TEST_NONCE_BYTES,
                                                         0, 0,
-                                                        True, None, SalmonCoreTestHelper.TEST_HMAC_KEY_BYTES, False,
-                                                        SalmonCoreTestHelper.TEST_HEADER,
+                                                        True, 0, SalmonCoreTestHelper.TEST_HMAC_KEY_BYTES, False,
                                                         64)
 
     def test_encrypt_decrypt_using_stream_test_integrity_with_chunks_specified_with_header_no_buffer_specified_positive(
@@ -276,8 +234,7 @@ class SalmonCoreTests(TestCase):
                                                         SalmonCoreTestHelper.TEST_KEY_BYTES,
                                                         SalmonCoreTestHelper.TEST_NONCE_BYTES,
                                                         0, 0,
-                                                        True, None, SalmonCoreTestHelper.TEST_HMAC_KEY_BYTES, False,
-                                                        SalmonCoreTestHelper.TEST_HEADER,
+                                                        True, 0, SalmonCoreTestHelper.TEST_HMAC_KEY_BYTES, False,
                                                         128)
 
     def test_encrypt_decrypt_using_stream_test_integrity_multiple_chunks_specified_positive(self):
@@ -286,7 +243,7 @@ class SalmonCoreTests(TestCase):
                                                         SalmonCoreTestHelper.TEST_NONCE_BYTES,
                                                         SalmonCoreTestHelper.TEST_ENC_BUFFER_SIZE,
                                                         SalmonCoreTestHelper.TEST_ENC_BUFFER_SIZE,
-                                                        True, 0, SalmonCoreTestHelper.TEST_HMAC_KEY_BYTES, False, None,
+                                                        True, 0, SalmonCoreTestHelper.TEST_HMAC_KEY_BYTES, False,
                                                         32)
 
     def test_encrypt_decrypt_using_stream_test_integrity_multiple_chunks_specified_buffer_smaller_aligned_positive(
@@ -295,7 +252,7 @@ class SalmonCoreTests(TestCase):
                                                         SalmonCoreTestHelper.TEST_KEY_BYTES,
                                                         SalmonCoreTestHelper.TEST_NONCE_BYTES,
                                                         128, 128, True, 64, SalmonCoreTestHelper.TEST_HMAC_KEY_BYTES,
-                                                        False, None, None)
+                                                        False, None)
 
     def test_shouldEncryptDecryptUsingStreamTestIntegrityMultipleChunksSpecifiedEncBufferNotAlignedNegative(self):
         caught = False
@@ -304,7 +261,7 @@ class SalmonCoreTests(TestCase):
                                                             SalmonCoreTestHelper.TEST_KEY_BYTES,
                                                             SalmonCoreTestHelper.TEST_NONCE_BYTES, 16 * 2 + 3, 16 * 2,
                                                             True, 32, SalmonCoreTestHelper.TEST_HMAC_KEY_BYTES, False,
-                                                            None, None)
+                                                            None)
         except IOError as ex:
             if isinstance(ex.__cause__, IntegrityException):
                 caught = True
@@ -318,8 +275,8 @@ class SalmonCoreTests(TestCase):
             SalmonCoreTestHelper.encrypt_write_decrypt_read(SalmonCoreTestHelper.TEST_TEXT,
                                                             SalmonCoreTestHelper.TEST_KEY_BYTES,
                                                             SalmonCoreTestHelper.TEST_NONCE_BYTES, 16 * 2 + 3, 16 * 2,
-                                                            True, None, SalmonCoreTestHelper.TEST_HMAC_KEY_BYTES, False,
-                                                            None, None)
+                                                            True, 0, SalmonCoreTestHelper.TEST_HMAC_KEY_BYTES, False,
+                                                            None)
         except IOError as ex:
             if isinstance(ex.__cause__, IntegrityException):
                 caught = True
@@ -331,8 +288,7 @@ class SalmonCoreTests(TestCase):
                                                         SalmonCoreTestHelper.TEST_KEY_BYTES,
                                                         SalmonCoreTestHelper.TEST_NONCE_BYTES,
                                                         16 * 2, 16 * 2 + 3,
-                                                        True, 32, SalmonCoreTestHelper.TEST_HMAC_KEY_BYTES, False, None,
-                                                        None)
+                                                        True, 32, SalmonCoreTestHelper.TEST_HMAC_KEY_BYTES, False, None)
 
     def test_encrypt_decrypt_stream_test_integrity_multiple_chunks_no_buffer_specified_dec_buffer_not_aligned_negative(
             self):
@@ -341,8 +297,8 @@ class SalmonCoreTests(TestCase):
             SalmonCoreTestHelper.encrypt_write_decrypt_read(SalmonCoreTestHelper.TEST_TEXT,
                                                             SalmonCoreTestHelper.TEST_KEY_BYTES,
                                                             SalmonCoreTestHelper.TEST_NONCE_BYTES, 16 * 2, 16 * 2 + 3,
-                                                            True, None, SalmonCoreTestHelper.TEST_HMAC_KEY_BYTES, False,
-                                                            None, None)
+                                                            True, 0, SalmonCoreTestHelper.TEST_HMAC_KEY_BYTES, False,
+                                                            None)
         except IOError as ex:
             if isinstance(ex.__cause__, IntegrityException):
                 caught = True
@@ -357,8 +313,8 @@ class SalmonCoreTests(TestCase):
                                                             SalmonCoreTestHelper.TEST_NONCE_BYTES,
                                                             SalmonCoreTestHelper.TEST_ENC_BUFFER_SIZE,
                                                             SalmonCoreTestHelper.TEST_ENC_BUFFER_SIZE,
-                                                            True, None, SalmonCoreTestHelper.TEST_HMAC_KEY_BYTES, True,
-                                                            None, None)
+                                                            True, 0, SalmonCoreTestHelper.TEST_HMAC_KEY_BYTES, True,
+                                                            None)
         except IOError as ex:
             if isinstance(ex.__cause__, IntegrityException):
                 caught = True
@@ -374,7 +330,7 @@ class SalmonCoreTests(TestCase):
                                                             SalmonCoreTestHelper.TEST_ENC_BUFFER_SIZE,
                                                             SalmonCoreTestHelper.TEST_ENC_BUFFER_SIZE,
                                                             True, 32, SalmonCoreTestHelper.TEST_HMAC_KEY_BYTES, True,
-                                                            None, None)
+                                                            None)
         except IOError as ex:
             if isinstance(ex.__cause__, IntegrityException):
                 caught = True
@@ -394,8 +350,7 @@ class SalmonCoreTests(TestCase):
         ins = MemoryStream(input_bytes)
         outs = MemoryStream()
         enc_writer = AesStream(SalmonCoreTestHelper.TEST_KEY_BYTES, SalmonCoreTestHelper.TEST_NONCE_BYTES,
-                               EncryptionMode.Encrypt, outs,
-                               None, False, None, None)
+                               EncryptionMode.Encrypt, outs, EncryptionFormat.Salmon)
         try:
             enc_writer.copy_to(outs)
         except Exception as ex:
@@ -417,12 +372,11 @@ class SalmonCoreTests(TestCase):
         input_bytes = bytearray(plain_text.encode('utf-8'))
         enc_bytes = SalmonCoreTestHelper.encrypt(input_bytes, SalmonCoreTestHelper.TEST_KEY_BYTES,
                                                  SalmonCoreTestHelper.TEST_NONCE_BYTES,
-                                                 SalmonCoreTestHelper.TEST_ENC_BUFFER_SIZE, False, 0, None, None)
+                                                 SalmonCoreTestHelper.TEST_ENC_BUFFER_SIZE, False, 0, None)
 
         ins = MemoryStream(enc_bytes)
         enc_writer = AesStream(SalmonCoreTestHelper.TEST_KEY_BYTES, SalmonCoreTestHelper.TEST_NONCE_BYTES,
-                               EncryptionMode.Decrypt, ins,
-                               None, False, None, None)
+                               EncryptionMode.Decrypt, ins, EncryptionFormat.Salmon)
         try:
             ins.copy_to(enc_writer)
         except Exception as ex:
@@ -537,14 +491,16 @@ class SalmonCoreTests(TestCase):
 
         self.assertEqual(lnum1, lnum2)
 
-    def test_encrypt_and_decrypt_array(self):
+    def test_encrypt_and_decrypt_array_generic(self):
         data = SalmonCoreTestHelper.get_rand_array(1 * 1024 * 1024 + 4)
         t1 = time.time() * 1000
         enc_data = SalmonCoreTestHelper.get_encryptor() \
-            .encrypt(data, SalmonCoreTestHelper.TEST_KEY_BYTES, SalmonCoreTestHelper.TEST_NONCE_BYTES, False)
+            .encrypt(data, SalmonCoreTestHelper.TEST_KEY_BYTES, SalmonCoreTestHelper.TEST_NONCE_BYTES,
+                     EncryptionFormat.Generic)
         t2 = time.time() * 1000
         dec_data = SalmonCoreTestHelper.get_decryptor() \
-            .decrypt(enc_data, SalmonCoreTestHelper.TEST_KEY_BYTES, SalmonCoreTestHelper.TEST_NONCE_BYTES, False)
+            .decrypt(enc_data, SalmonCoreTestHelper.TEST_KEY_BYTES, SalmonCoreTestHelper.TEST_NONCE_BYTES,
+                     EncryptionFormat.Generic)
         t3 = time.time() * 1000
 
         self.assertEqual(data, dec_data)
@@ -557,13 +513,12 @@ class SalmonCoreTests(TestCase):
         enc_data = SalmonCoreTestHelper.get_encryptor().encrypt(data,
                                                                 SalmonCoreTestHelper.TEST_KEY_BYTES,
                                                                 SalmonCoreTestHelper.TEST_NONCE_BYTES,
-                                                                False, True,
-                                                                SalmonCoreTestHelper.TEST_HMAC_KEY_BYTES,
-                                                                None)
+                                                                EncryptionFormat.Salmon, True,
+                                                                SalmonCoreTestHelper.TEST_HMAC_KEY_BYTES)
         t2 = time.time() * 1000
         dec_data = SalmonCoreTestHelper.get_decryptor() \
             .decrypt(enc_data, SalmonCoreTestHelper.TEST_KEY_BYTES, SalmonCoreTestHelper.TEST_NONCE_BYTES,
-                     False, True, SalmonCoreTestHelper.TEST_HMAC_KEY_BYTES, None)
+                     EncryptionFormat.Salmon, True, SalmonCoreTestHelper.TEST_HMAC_KEY_BYTES)
         t3 = time.time() * 1000
 
         self.assertEqual(data, dec_data)
@@ -576,37 +531,16 @@ class SalmonCoreTests(TestCase):
         enc_data = SalmonCoreTestHelper.get_encryptor().encrypt(data,
                                                                 SalmonCoreTestHelper.TEST_KEY_BYTES,
                                                                 SalmonCoreTestHelper.TEST_NONCE_BYTES,
-                                                                False, True,
+                                                                EncryptionFormat.Salmon, True,
                                                                 SalmonCoreTestHelper.TEST_HMAC_KEY_BYTES,
                                                                 32)
         t2 = time.time() * 1000
         dec_data = SalmonCoreTestHelper.get_decryptor().decrypt(enc_data,
                                                                 SalmonCoreTestHelper.TEST_KEY_BYTES,
                                                                 SalmonCoreTestHelper.TEST_NONCE_BYTES,
-                                                                False, True,
+                                                                EncryptionFormat.Salmon, True,
                                                                 SalmonCoreTestHelper.TEST_HMAC_KEY_BYTES,
                                                                 32)
-        t3 = time.time() * 1000
-
-        self.assertEqual(data, dec_data)
-        print("enc time: " + str(t2 - t1))
-        print("dec time: " + str(t3 - t2))
-
-    def test_encrypt_and_decrypt_array_integrity_custom_chunk_size_store_header(self):
-        data = SalmonCoreTestHelper.get_rand_array_same(129 * 1024)
-        t1 = time.time() * 1000
-        enc_data = SalmonCoreTestHelper.get_encryptor().encrypt(data,
-                                                                SalmonCoreTestHelper.TEST_KEY_BYTES,
-                                                                SalmonCoreTestHelper.TEST_NONCE_BYTES,
-                                                                True, True,
-                                                                SalmonCoreTestHelper.TEST_HMAC_KEY_BYTES,
-                                                                32)
-        t2 = time.time() * 1000
-        dec_data = SalmonCoreTestHelper.get_decryptor().decrypt(enc_data,
-                                                                SalmonCoreTestHelper.TEST_KEY_BYTES,
-                                                                None, True, True,
-                                                                SalmonCoreTestHelper.TEST_HMAC_KEY_BYTES,
-                                                                None)
         t3 = time.time() * 1000
 
         self.assertEqual(data, dec_data)
@@ -624,12 +558,12 @@ class SalmonCoreTests(TestCase):
         SalmonCoreTestHelper.copy_from_mem_stream_to_salmon_stream(1 * 1024 * 1024,
                                                                    SalmonCoreTestHelper.TEST_KEY_BYTES,
                                                                    SalmonCoreTestHelper.TEST_NONCE_BYTES,
-                                                                   True, None, SalmonCoreTestHelper.TEST_HMAC_KEY_BYTES,
+                                                                   True, 0, SalmonCoreTestHelper.TEST_HMAC_KEY_BYTES,
                                                                    0)
         SalmonCoreTestHelper.copy_from_mem_stream_to_salmon_stream(1 * 1024 * 1024,
                                                                    SalmonCoreTestHelper.TEST_KEY_BYTES,
                                                                    SalmonCoreTestHelper.TEST_NONCE_BYTES,
-                                                                   True, None, SalmonCoreTestHelper.TEST_HMAC_KEY_BYTES,
+                                                                   True, 0, SalmonCoreTestHelper.TEST_HMAC_KEY_BYTES,
                                                                    32768)
 
         SalmonCoreTestHelper.copy_from_mem_stream_to_salmon_stream(1 * 1024 * 1024,

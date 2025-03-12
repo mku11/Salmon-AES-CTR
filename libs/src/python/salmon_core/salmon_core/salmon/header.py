@@ -29,28 +29,30 @@ from typeguard import typechecked
 
 from salmon_core.convert.bit_converter import BitConverter
 from salmon_core.streams.random_access_stream import RandomAccessStream
+from salmon_core.streams.memory_stream import MemoryStream
 from salmon_core.salmon.generator import Generator
 
 
 @typechecked
 class Header:
     """
-    Header embedded in the SalmonStream. Header contains nonce and other information for
+    Header embedded in the AesStream. Header contains nonce and other information for
     decrypting the stream.
     """
+    HEADER_LENGTH: int = 16
 
-    def __init__(self):
-        self.__magicBytes: bytearray = bytearray(Generator.MAGIC_LENGTH)
+    def __init__(self, header_data: bytearray):
+        self.__magic_bytes: bytearray = bytearray(Generator.MAGIC_LENGTH)
         """
         Magic bytes.
         """
 
         self.__version: int = 0
         """
-        Format version from {@link SalmonGenerator#VERSION}.
+        Format version from {@link DriveGenerator#VERSION}.
         """
 
-        self.__chunkSize: int = 0
+        self.__chunk_size: int = 0
         """
         Chunk size used for data integrity.
         """
@@ -61,7 +63,7 @@ class Header:
         
         """
 
-        self.__headerData: bytearray = bytearray()
+        self.__header_data: bytearray = header_data
         """
         Binary data.
         """
@@ -78,14 +80,14 @@ class Header:
         Get the chunk size.
         :return: Chunk size
         """
-        return self.__chunkSize
+        return self.__chunk_size
 
     def get_header_data(self) -> bytearray:
         """
         Get the raw header data.
         :return: Header data
         """
-        return self.__headerData
+        return self.__header_data
 
     def get_version(self) -> int:
         """
@@ -99,40 +101,75 @@ class Header:
         Get the magic bytes
         :return: Magic bytes
         """
-        return self.__magicBytes
+        return self.__magic_bytes
 
     @staticmethod
-    def parse_header_data(stream: RandomAccessStream) -> Header:
+    def read_header_data(stream: RandomAccessStream) -> Header | None:
         """
         Parse the header data from the stream
         :param stream: The stream.
         :return: The header
         :raises IOError: Thrown if there is an IO error.
         """
-        header: Header = Header()
-        header.__magicBytes = bytearray(Generator.MAGIC_LENGTH)
-        stream.read(header.__magicBytes, 0, len(header.__magicBytes))
+        if stream.get_length() == 0:
+            return None
+        pos: int = stream.get_position()
+
+        stream.set_position(0)
+
+        header_data: bytearray = bytearray(Generator.MAGIC_LENGTH + Generator.VERSION_LENGTH
+                                           + Generator.CHUNK_SIZE_LENGTH + Generator.NONCE_LENGTH)
+        stream.read(header_data, 0, len(header_data))
+
+        header: Header = Header(header_data)
+        ms: MemoryStream = MemoryStream(header_data)
+        header.__magic_bytes = bytearray(Generator.MAGIC_LENGTH)
+        ms.read(header.__magic_bytes, 0, len(header.__magic_bytes))
         version_bytes: bytearray = bytearray(Generator.VERSION_LENGTH)
-        stream.read(version_bytes, 0, Generator.VERSION_LENGTH)
+        ms.read(version_bytes, 0, Generator.VERSION_LENGTH)
         header.__version = version_bytes[0]
         chunk_size_header: bytearray = bytearray(Generator.CHUNK_SIZE_LENGTH)
-        stream.read(chunk_size_header, 0, len(chunk_size_header))
-        header.__chunkSize = BitConverter.to_long(chunk_size_header, 0, Generator.CHUNK_SIZE_LENGTH)
+        ms.read(chunk_size_header, 0, len(chunk_size_header))
+        header.__chunk_size = BitConverter.to_long(chunk_size_header, 0, Generator.CHUNK_SIZE_LENGTH)
         header.__nonce = bytearray(Generator.NONCE_LENGTH)
-        stream.read(header.__nonce, 0, len(header.__nonce))
+        ms.read(header.__nonce, 0, len(header.__nonce))
+
         stream.set_position(0)
-        header.__headerData = bytearray(Generator.MAGIC_LENGTH + Generator.VERSION_LENGTH
-                                        + Generator.CHUNK_SIZE_LENGTH + Generator.NONCE_LENGTH)
-        stream.read(header.__headerData, 0, len(header.__headerData))
         return header
 
-    """
-    Set the header chunk size
-    :param chunkSize: The chunk size
-    """
+    @staticmethod
+    def write_header(stream: RandomAccessStream, nonce: bytearray, chunk_size: int):
+        magic_bytes: bytearray = Generator.get_magic_bytes()
+        version: int = Generator.get_version()
+        version_bytes: bytearray = bytearray([version])
+        chunk_size_bytes: bytearray = BitConverter.to_bytes(chunk_size, Generator.CHUNK_SIZE_LENGTH)
+
+        header_data: bytearray = bytearray(Generator.MAGIC_LENGTH + Generator.VERSION_LENGTH
+                                           + Generator.CHUNK_SIZE_LENGTH + Generator.NONCE_LENGTH)
+        ms: MemoryStream = MemoryStream(header_data)
+        ms.write(magic_bytes, 0, len(magic_bytes))
+        ms.write(version_bytes, 0, len(version_bytes))
+        ms.write(chunk_size_bytes, 0, len(chunk_size_bytes))
+        ms.write(nonce, 0, len(nonce))
+        ms.set_position(0)
+        header: Header = Header.read_header_data(ms)
+
+        pos: int = stream.get_position()
+        stream.set_position(0)
+        ms.set_position(0)
+        ms.copy_to(stream)
+        ms.close()
+        stream.flush()
+        stream.set_position(pos)
+
+        return header
 
     def set_chunk_size(self, chunk_size: int):
-        self.__chunkSize = chunk_size
+        """
+        Set the header chunk size
+        :param chunk_size: The chunk size
+        """
+        self.__chunk_size = chunk_size
 
     def set_version(self, version: int):
         """

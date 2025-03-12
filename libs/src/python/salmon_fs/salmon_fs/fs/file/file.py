@@ -29,8 +29,8 @@ import os
 from typing import Any, Callable
 from typeguard import typechecked
 
-from fs.file.ifile import IFile
-from fs.streams.file_stream import FileStream
+from salmon_fs.fs.file.ifile import IFile
+from salmon_fs.fs.streams.file_stream import FileStream
 from salmon_core.streams.random_access_stream import RandomAccessStream
 
 
@@ -92,14 +92,14 @@ class File(IFile):
         """
         return os.path.exists(self.__file_path)
 
-    def get_absolute_path(self) -> str:
+    def get_display_path(self) -> str:
         """
         Get the absolute path on the physical disk.
         :return: The absolute path.
         """
         return os.path.abspath(self.__file_path)
 
-    def get_base_name(self) -> str:
+    def get_name(self) -> str:
         """
         Get the name of this file or directory.
         :return: The name of this file or directory.
@@ -126,7 +126,7 @@ class File(IFile):
         Get the parent directory of this file or directory.
         :return: The parent directory.
         """
-        dir_path: str = os.path.dirname(self.get_absolute_path())
+        dir_path: str = os.path.dirname(self.get_display_path())
         parent: File = File(dir_path)
         return parent
 
@@ -151,14 +151,14 @@ class File(IFile):
         """
         return not self.is_directory()
 
-    def last_modified(self) -> int:
+    def get_last_date_modified(self) -> int:
         """
         Get the last modified date on disk.
         :return: The last modified date in milliseconds
         """
         return int(os.path.getmtime(self.__file_path))
 
-    def length(self) -> int:
+    def get_length(self) -> int:
         """
         Get the size of the file on disk.
         :return: The size
@@ -203,7 +203,7 @@ class File(IFile):
         :param progress_listener: Observer to notify when progress changes.
         :return: The moved file. Use this file for subsequent operations instead of the original.
         """
-        new_name = new_name if new_name is not None else self.get_base_name()
+        new_name = new_name if new_name is not None else self.get_name()
         if new_dir is None or not new_dir.exists():
             raise IOError("Target directory does not exists")
         new_file: IFile = new_dir.get_child(new_name)
@@ -228,7 +228,7 @@ class File(IFile):
         :return: The copied file. Use this file for subsequent operations instead of the original.
         :raises IOError: Thrown if there is an IO error.
         """
-        new_name = new_name if new_name is not None else self.get_base_name()
+        new_name = new_name if new_name is not None else self.get_name()
         if new_dir is None or not new_dir.exists():
             raise IOError("Target directory does not exists")
         new_file: IFile = new_dir.get_child(new_name)

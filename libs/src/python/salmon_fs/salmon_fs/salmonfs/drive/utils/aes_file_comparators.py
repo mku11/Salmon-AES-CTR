@@ -1,12 +1,6 @@
 # not /usr/bin/env python3
 from __future__ import annotations
 
-from typeguard import typechecked
-import sys
-
-from salmon_fs.salmon.salmon_file import SalmonFile
-from fs.drive.utils.file_utils import FileUtils
-
 __license__ = """
 MIT License
 
@@ -31,15 +25,21 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 """
 
+from typeguard import typechecked
+import sys
+
+from salmon_fs.salmonfs.file.aes_file import AesFile
+from salmon_fs.fs.drive.utils.file_utils import FileUtils
+
 
 @typechecked
-class SalmonFileComparators:
+class AesFileComparators:
     """
-    Useful comparators for SalmonFile.
+    Useful comparators for AesFile.
     """
 
     @staticmethod
-    def default_comparator(c1: SalmonFile, c2: SalmonFile):
+    def default_comparator(c1: AesFile, c2: AesFile):
         if c1.is_directory() and not c2.is_directory():
             return -1
         elif not c1.is_directory() and c2.is_directory():
@@ -48,119 +48,119 @@ class SalmonFileComparators:
             return 0
 
     @staticmethod
-    def filename_asc_comparator(c1: SalmonFile, c2: SalmonFile):
+    def filename_asc_comparator(c1: AesFile, c2: AesFile):
         if c1.is_directory() and not c2.is_directory():
             return -1
         elif not c1.is_directory() and c2.is_directory():
             return 1
         else:
-            return SalmonFileComparators.__compare(SalmonFileComparators.__try_get_basename(c1),
-                                                   SalmonFileComparators.__try_get_basename(c2))
+            return AesFileComparators.__compare(AesFileComparators.__try_get_basename(c1),
+                                                AesFileComparators.__try_get_basename(c2))
 
     @staticmethod
-    def filename_desc_comparator(c1: SalmonFile, c2: SalmonFile):
+    def filename_desc_comparator(c1: AesFile, c2: AesFile):
         if c1.is_directory() and not c2.is_directory():
             return 1
         elif not c1.is_directory() and c2.is_directory():
             return -1
         else:
-            return SalmonFileComparators.__compare(SalmonFileComparators.__try_get_basename(c2),
-                                                   SalmonFileComparators.__try_get_basename(c1))
+            return AesFileComparators.__compare(AesFileComparators.__try_get_basename(c2),
+                                                AesFileComparators.__try_get_basename(c1))
 
     @staticmethod
-    def size_asc_comparator(c1: SalmonFile, c2: SalmonFile):
+    def size_asc_comparator(c1: AesFile, c2: AesFile):
         if c1.is_directory() and not c2.is_directory():
             return -1
         elif not c1.is_directory() and c2.is_directory():
             return 1
         else:
-            return SalmonFileComparators.__try_get_size(c1) - SalmonFileComparators.__try_get_size(c2)
+            return AesFileComparators.__try_get_size(c1) - AesFileComparators.__try_get_size(c2)
 
     @staticmethod
-    def size_desc_comparator(c1: SalmonFile, c2: SalmonFile):
+    def size_desc_comparator(c1: AesFile, c2: AesFile):
         if c1.is_directory() and not c2.is_directory():
             return 1
         elif not c1.is_directory() and c2.is_directory():
             return -1
         else:
-            return SalmonFileComparators.__try_get_size(c2) - SalmonFileComparators.__try_get_size(c1)
+            return AesFileComparators.__try_get_size(c2) - AesFileComparators.__try_get_size(c1)
 
     @staticmethod
-    def type_asc_comparator(c1: SalmonFile, c2: SalmonFile):
+    def type_asc_comparator(c1: AesFile, c2: AesFile):
         if c1.is_directory() and not c2.is_directory():
             return -1
         elif not c1.is_directory() and c2.is_directory():
             return 1
         else:
-            return SalmonFileComparators.__compare(SalmonFileComparators.__try_get_type(c1),
-                                                   SalmonFileComparators.__try_get_type(c2))
+            return AesFileComparators.__compare(AesFileComparators.__try_get_type(c1),
+                                                AesFileComparators.__try_get_type(c2))
 
     @staticmethod
-    def type_desc_comparator(c1: SalmonFile, c2: SalmonFile):
+    def type_desc_comparator(c1: AesFile, c2: AesFile):
         if c1.is_directory() and not c2.is_directory():
             return 1
         elif not c1.is_directory() and c2.is_directory():
             return -1
         else:
-            return SalmonFileComparators.__compare(SalmonFileComparators.__try_get_type(c2),
-                                                   SalmonFileComparators.__try_get_type(c1))
+            return AesFileComparators.__compare(AesFileComparators.__try_get_type(c2),
+                                                AesFileComparators.__try_get_type(c1))
 
     @staticmethod
-    def date_asc_comparator(c1: SalmonFile, c2: SalmonFile):
+    def date_asc_comparator(c1: AesFile, c2: AesFile):
         if c1.is_directory() and not c2.is_directory():
             return -1
         elif not c1.is_directory() and c2.is_directory():
             return 1
         else:
-            return SalmonFileComparators.__try_get_date(c1) - SalmonFileComparators.__try_get_date(c2)
+            return AesFileComparators.__try_get_date(c1) - AesFileComparators.__try_get_date(c2)
 
     @staticmethod
-    def date_desc_comparator(c1: SalmonFile, c2: SalmonFile):
+    def date_desc_comparator(c1: AesFile, c2: AesFile):
         if c1.is_directory() and not c2.is_directory():
             return 1
         elif not c1.is_directory() and c2.is_directory():
             return -1
         else:
-            return SalmonFileComparators.__try_get_date(c2) - SalmonFileComparators.__try_get_date(c1)
+            return AesFileComparators.__try_get_date(c2) - AesFileComparators.__try_get_date(c1)
 
     @staticmethod
-    def relevance_comparator(c1: SalmonFile, c2: SalmonFile):
+    def relevance_comparator(c1: AesFile, c2: AesFile):
         return int(str(c2.get_tag())) - int(str(c1.get_tag()))
 
     @staticmethod
-    def __try_get_basename(salmon_file: SalmonFile) -> str:
+    def __try_get_basename(salmon_file: AesFile) -> str:
         """
-        Get the SalmonFile basename if available.
+        Get the AesFile basename if available.
         :param salmon_file:
         :return: The base name
         """
         try:
-            return salmon_file.get_base_name()
+            return salmon_file.get_name()
         except Exception as ex:
             print(ex, file=sys.stderr)
 
         return ""
 
     @staticmethod
-    def __try_get_type(salmon_file: SalmonFile) -> str:
+    def __try_get_type(salmon_file: AesFile) -> str:
         """
-        Get the SalmonFile file type extension if available.
+        Get the AesFile file type extension if available.
         :param salmon_file:
         :return: The file type
         """
         try:
             if salmon_file.is_directory():
-                return salmon_file.get_base_name()
-            return FileUtils.get_extension_from_file_name(salmon_file.get_base_name()).lower()
+                return salmon_file.get_name()
+            return FileUtils.get_extension_from_file_name(salmon_file.get_name()).lower()
         except Exception as ex:
             print(ex, file=sys.stderr)
 
         return ""
 
     @staticmethod
-    def __try_get_size(salmon_file: SalmonFile) -> int:
+    def __try_get_size(salmon_file: AesFile) -> int:
         """
-        Get the SalmonFile size if available.
+        Get the AesFile size if available.
         :param salmon_file:
         :return: The size
         """
@@ -170,21 +170,21 @@ class SalmonFileComparators:
             # the original file length requires reading the chunks size
             # from the file so it can get a bit expensive
             # so instead we sort on the real file size
-            return salmon_file.get_real_file().length()
+            return salmon_file.get_real_file().get_length()
         except Exception as ex:
             print(ex, file=sys.stderr)
 
         return 0
 
     @staticmethod
-    def __try_get_date(salmon_file: SalmonFile) -> int:
+    def __try_get_date(salmon_file: AesFile) -> int:
         """
-        Get the SalmonFile date if available.
+        Get the AesFile date if available.
         :param salmon_file:
         :return: The date
         """
         try:
-            return salmon_file.get_last_date_time_modified()
+            return salmon_file.get_last_date_modified()
         except Exception as ex:
             print(ex, file=sys.stderr)
 

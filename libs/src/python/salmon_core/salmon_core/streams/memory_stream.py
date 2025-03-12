@@ -91,7 +91,7 @@ class MemoryStream(RandomAccessStream):
         """
         return True
 
-    def length(self) -> int:
+    def get_length(self) -> int:
         """
         
         :return: The length of the stream.

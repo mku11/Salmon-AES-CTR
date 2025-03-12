@@ -36,8 +36,8 @@ from typeguard import typechecked
 from threading import RLock
 
 from salmon_core.convert.base_64 import Base64
-from fs.file.ifile import IFile
-from fs.streams.ws_file_stream import WSFileStream
+from salmon_fs.fs.file.ifile import IFile
+from salmon_fs.fs.streams.ws_file_stream import WSFileStream
 from salmon_core.streams.random_access_stream import RandomAccessStream
 
 
@@ -201,14 +201,14 @@ class WSFile(IFile):
         """
         return self.__get_response()['present']
 
-    def get_absolute_path(self) -> str:
+    def get_display_path(self) -> str:
         """
         Get the absolute path on the physical disk.
         :return: The absolute path.
         """
         return self.__file_path
 
-    def get_base_name(self) -> str:
+    def get_name(self) -> str:
         """
         Get the name of this file or directory.
         :return: The name of this file or directory.
@@ -274,14 +274,14 @@ class WSFile(IFile):
         """
         return not self.is_directory()
 
-    def last_modified(self) -> int:
+    def get_last_date_modified(self) -> int:
         """
         Get the last modified date on disk.
         :return: The last modified date in milliseconds
         """
         return self.__get_response()['lastModified']
 
-    def length(self) -> int:
+    def get_length(self) -> int:
         """
         Get the size of the file on disk.
         :return: The size
@@ -361,7 +361,7 @@ class WSFile(IFile):
         :param progress_listener: Observer to notify when progress changes.
         :return: The moved file. Use this file for subsequent operations instead of the original.
         """
-        new_name = new_name if new_name is not None else self.get_base_name()
+        new_name = new_name if new_name is not None else self.get_name()
         if new_dir is None or not new_dir.exists():
             raise IOError("Target directory does not exist")
 
@@ -404,7 +404,7 @@ class WSFile(IFile):
         :return: The copied file. Use this file for subsequent operations instead of the original.
         :raises IOError: Thrown if there is an IO error.
         """
-        new_name = new_name if new_name is not None else self.get_base_name()
+        new_name = new_name if new_name is not None else self.get_name()
         if new_dir is None or not new_dir.exists():
             raise IOError("Target directory does not exists")
         new_file: IFile | None = new_dir.get_child(new_name)

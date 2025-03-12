@@ -37,7 +37,7 @@ class BufferedIOWrapper(BufferedIOBase):
     """
 
     # Default cache buffer should be high enough for most buffer needs
-    # the cache buffers should be aligned to the SalmonFile chunk size for efficiency
+    # the cache buffers should be aligned to the AesFile chunk size for efficiency
     __DEFAULT_BUFFER_SIZE = 512 * 1024
 
     def __init__(self, stream: RandomAccessStream):
@@ -54,7 +54,7 @@ class BufferedIOWrapper(BufferedIOBase):
         to specify the count and offset pass a memoryview instead
         :param buffer:     the buffer into which the data is read.
         :return: The number of bytes read.
-        :raises IOError: with an optional inner Exception if the base stream is a SalmonStream
+        :raises IOError: with an optional inner Exception if the base stream is a AesStream
         """
         bytes_read: int
         try:
@@ -100,9 +100,9 @@ class BufferedIOWrapper(BufferedIOBase):
         if whence == 1:
             pos += self.__stream.get_position()
         elif whence == 2:
-            pos = self.__stream.length() - pos
-        if pos > self.__stream.length():
-            self.__stream.set_position(self.__stream.length())
+            pos = self.__stream.get_length() - pos
+        if pos > self.__stream.get_length():
+            self.__stream.set_position(self.__stream.get_length())
         else:
             self.__stream.set_position(self.__stream.get_position() + pos)
         return self.__stream.get_position()

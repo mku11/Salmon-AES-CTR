@@ -83,7 +83,7 @@ class IFile(ABC):
         :raises FileNotFoundException:         """
         pass
 
-    def length(self) -> int:
+    def get_length(self) -> int:
         """
         Get the length for the file.
         
@@ -99,7 +99,7 @@ class IFile(ABC):
         """
         pass
 
-    def last_modified(self) -> int:
+    def get_last_date_modified(self) -> int:
         """
         Get the last modified date of the file.
         
@@ -107,7 +107,7 @@ class IFile(ABC):
         """
         pass
 
-    def get_absolute_path(self) -> str:
+    def get_display_path(self) -> str:
         """
         Get the absolute path of the file on disk.
         
@@ -148,7 +148,7 @@ class IFile(ABC):
         """
         pass
 
-    def get_base_name(self) -> str:
+    def get_name(self) -> str:
         """
         Get the basename of the file.
         
@@ -259,10 +259,10 @@ class IFile(ABC):
         return True
 
     def copy_recursively(self, dest: IFile,
-                         progress_listener: Callable[[IFile, int, int], Any] | None = None,
                          auto_rename: Callable[[IFile], str] | None = None,
                          auto_rename_folders: bool = True,
-                         on_failed: Callable[[IFile, Exception], Any] | None = None):
+                         on_failed: Callable[[IFile, Exception], Any] | None = None,
+                         progress_listener: Callable[[IFile, int, int], Any] | None = None):
         """
         Copy a directory recursively
         
@@ -273,7 +273,7 @@ class IFile(ABC):
         :param on_failed: Callback when copy failed
         :raises IOError: Thrown if there is an IO error.
         """
-        new_filename: str = self.get_base_name()
+        new_filename: str = self.get_name()
         new_file: IFile
         new_file = dest.get_child(new_filename)
         if self.is_file():
@@ -289,7 +289,7 @@ class IFile(ABC):
         elif self.is_directory():
             if progress_listener is not None:
                 progress_listener(self, 0, 1)
-            if dest.get_absolute_path().startswith(self.get_absolute_path()):
+            if dest.get_display_path().startswith(self.get_display_path()):
                 if progress_listener:
                     progress_listener(self, 1, 1)
                 return
@@ -304,10 +304,10 @@ class IFile(ABC):
                 child.copy_recursively(new_file, progress_listener, auto_rename, auto_rename_folders, on_failed)
 
     def move_recursively(self, dest: IFile,
-                         progress_listener: Callable[[IFile, int, int], Any] | None = None,
                          auto_rename: Callable[[IFile], str] | None = None,
-                         auto_rename_folders: bool = True,
-                         on_failed: Callable[[IFile, Exception], Any] | None = None):
+                         auto_rename_folders: bool = False,
+                         on_failed: Callable[[IFile, Exception], Any] | None = None,
+                         progress_listener: Callable[[IFile, int, int], Any] | None = None):
         """
         Move a directory recursively
         
@@ -324,7 +324,7 @@ class IFile(ABC):
                 progress_listener(self, 1, 1)
             return
 
-        new_filename: str = self.get_base_name()
+        new_filename: str = self.get_name()
         new_file: IFile
         new_file = dest.get_child(new_filename)
         if self.is_file():
@@ -357,8 +357,8 @@ class IFile(ABC):
             if not self.delete():
                 on_failed(self, Exception("Could not delete source directory"))
 
-    def delete_recursively(self, progress_listener: Callable[[IFile, int, int], Any],
-                           on_failed: Callable[[IFile, Exception], Any]):
+    def delete_recursively(self, on_failed: Callable[[IFile, Exception], Any] | None = None,
+                           progress_listener: Callable[[IFile, int, int], Any] | None = None):
         """
         Delete a directory recursively
         :param progress_listener: Progress listener
@@ -384,7 +384,7 @@ class IFile(ABC):
         """
         Get an auto generated copy of the name for a file.
         """
-        return IFile.auto_rename(file.get_base_name())
+        return IFile.auto_rename(file.get_name())
 
     @staticmethod
     def auto_rename(filename: str) -> str:

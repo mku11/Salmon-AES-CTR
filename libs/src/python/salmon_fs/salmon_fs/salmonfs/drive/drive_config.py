@@ -26,11 +26,11 @@ SOFTWARE.
 from typeguard import typechecked
 
 from salmon_core.convert.bit_converter import BitConverter
-from fs.file.ifile import IFile
+from salmon_fs.fs.file.ifile import IFile
 from salmon_core.streams.memory_stream import MemoryStream
 from salmon_core.streams.random_access_stream import RandomAccessStream
 from salmon_core.salmon.generator import Generator
-from salmon_fs.salmon.salmon_drive_generator import SalmonDriveGenerator
+from salmon_fs.salmonfs.drive.drive_generator import DriveGenerator
 
 
 @typechecked
@@ -48,20 +48,20 @@ class DriveConfig:
         """
         self.__magicBytes: bytearray = bytearray(Generator.MAGIC_LENGTH)
         self.__version: bytearray = bytearray(Generator.VERSION_LENGTH)
-        self.__salt: bytearray = bytearray(SalmonDriveGenerator.SALT_LENGTH)
-        self.__iterations: bytearray = bytearray(SalmonDriveGenerator.ITERATIONS_LENGTH)
-        self.__iv: bytearray = bytearray(SalmonDriveGenerator.IV_LENGTH)
+        self.__salt: bytearray = bytearray(DriveGenerator.SALT_LENGTH)
+        self.__iterations: bytearray = bytearray(DriveGenerator.ITERATIONS_LENGTH)
+        self.__iv: bytearray = bytearray(DriveGenerator.IV_LENGTH)
         self.__encryptedData: bytearray = bytearray(
-            SalmonDriveGenerator.COMBINED_KEY_LENGTH + SalmonDriveGenerator.DRIVE_ID_LENGTH)
+            DriveGenerator.COMBINED_KEY_LENGTH + DriveGenerator.DRIVE_ID_LENGTH)
         self.__hashSignature: bytearray = bytearray(Generator.HASH_RESULT_LENGTH)
 
         ms: MemoryStream = MemoryStream(contents)
         ms.read(self.__magicBytes, 0, Generator.MAGIC_LENGTH)
         ms.read(self.__version, 0, Generator.VERSION_LENGTH)
-        ms.read(self.__salt, 0, SalmonDriveGenerator.SALT_LENGTH)
-        ms.read(self.__iterations, 0, SalmonDriveGenerator.ITERATIONS_LENGTH)
-        ms.read(self.__iv, 0, SalmonDriveGenerator.IV_LENGTH)
-        ms.read(self.__encryptedData, 0, SalmonDriveGenerator.COMBINED_KEY_LENGTH + SalmonDriveGenerator.AUTH_ID_SIZE)
+        ms.read(self.__salt, 0, DriveGenerator.SALT_LENGTH)
+        ms.read(self.__iterations, 0, DriveGenerator.ITERATIONS_LENGTH)
+        ms.read(self.__iv, 0, DriveGenerator.IV_LENGTH)
+        ms.read(self.__encryptedData, 0, DriveGenerator.COMBINED_KEY_LENGTH + DriveGenerator.AUTH_ID_SIZE)
         ms.read(self.__hashSignature, 0, Generator.HASH_RESULT_LENGTH)
         ms.close()
 
@@ -135,7 +135,7 @@ class DriveConfig:
         """
         if self.__iterations is None:
             return 0
-        return BitConverter.to_long(self.__iterations, 0, SalmonDriveGenerator.ITERATIONS_LENGTH)
+        return BitConverter.to_long(self.__iterations, 0, DriveGenerator.ITERATIONS_LENGTH)
 
     def get_encrypted_data(self) -> bytearray:
         """

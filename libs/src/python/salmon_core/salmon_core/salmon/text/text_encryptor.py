@@ -25,6 +25,7 @@ SOFTWARE.
 
 from salmon_core.salmon.encode.base64_utils import Base64Utils
 from salmon_core.salmon.encryptor import Encryptor
+from salmon_core.salmon.streams.encryption_format import EncryptionFormat
 from typeguard import typechecked
 
 
@@ -37,16 +38,16 @@ class TextEncryptor:
     __encryptor: Encryptor = Encryptor()
 
     @staticmethod
-    def encrypt_string(text: str, key: bytearray, nonce: bytearray, header: bool, integrity: bool = False,
-                       hash_key: bytearray | None = None, chunk_size: int | None = None) -> str:
+    def encrypt_string(text: str, key: bytearray, nonce: bytearray,
+                       format: EncryptionFormat = EncryptionFormat.Salmon, integrity: bool = False,
+                       hash_key: bytearray | None = None, chunk_size: int = 0) -> str:
         """
         Encrypts a text String using AES256 with the key and nonce provided.
         
         :param text:  Text to be encrypted.
         :param key:   The encryption key to be used.
         :param nonce: The nonce to be used.
-        :param header: Set to true to store a header with information like nonce and/or chunk size,
-                      otherwise you will have to store that information externally.
+        :param format: The {@link EncryptionFormat} Generic or Salmon.
         :param integrity: True if you want to calculate and store hash signatures for each chunkSize
         :param hash_key: Hash key to be used for all chunks.
         :param chunk_size: The chunk size.
@@ -56,7 +57,7 @@ class TextEncryptor:
         :raises IOError: Thrown if there is an IO error.
         """
         v_bytes: bytearray = bytearray(text.encode('utf-8'))
-        enc_bytes: bytearray = TextEncryptor.__encryptor.encrypt(v_bytes, key, nonce, header, integrity, hash_key,
+        enc_bytes: bytearray = TextEncryptor.__encryptor.encrypt(v_bytes, key, nonce, format, integrity, hash_key,
                                                                  chunk_size)
         enc_string: str = Base64Utils.get_base64().encode(enc_bytes).replace("\n", "")
         return enc_string

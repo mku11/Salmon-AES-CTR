@@ -23,11 +23,13 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 """
 
+import math
 from builtins import int
 
 from salmon.integrity.ihash_provider import IHashProvider
 from salmon.integrity.integrity_exception import IntegrityException
 from salmon_core.salmon.generator import Generator
+from salmon_core.salmon.streams.encryption_mode import EncryptionMode
 from salmon_core.salmon.security_exception import SecurityException
 
 from typeguard import typechecked
@@ -63,7 +65,7 @@ class Integrity:
     :raises SalmonSecurityException: When security has failed
      """
 
-    def __init__(self, integrity: bool, key: bytearray | None, chunk_size: int | None,
+    def __init__(self, integrity: bool, key: bytearray | None, chunk_size: int,
                  provider: IHashProvider, hash_size: int):
 
         self._chunkSize: int = -1
@@ -91,19 +93,18 @@ class Integrity:
        True to use integrity, false to skip the chunks
         """
 
-        if (chunk_size is not None and (chunk_size < 0
-                                        or (0 < chunk_size < Generator.BLOCK_SIZE)
-                                        or (chunk_size > 0 and chunk_size % Generator.BLOCK_SIZE != 0)
-                                        or chunk_size > Integrity.MAX_CHUNK_SIZE)):
+        if (chunk_size < 0 or (0 < chunk_size < Generator.BLOCK_SIZE)
+                or (chunk_size > 0 and chunk_size % Generator.BLOCK_SIZE != 0)
+                or chunk_size > Integrity.MAX_CHUNK_SIZE):
             raise IntegrityException(
                 "Invalid chunk size, specify zero for default value or a positive number multiple of: "
                 + str(Generator.BLOCK_SIZE) + " and less than: " + str(
                     Integrity.MAX_CHUNK_SIZE) + " bytes")
         if integrity and key is None:
             raise SecurityException("You need a hash to use with integrity")
-        if integrity and (chunk_size is None or chunk_size == 0):
+        if integrity and chunk_size == 0:
             self._chunkSize = Integrity.DEFAULT_CHUNK_SIZE
-        elif chunk_size and (integrity or chunk_size > 0):
+        elif integrity or chunk_size > 0:
             self._chunkSize = chunk_size
         if hash_size < 0:
             raise SecurityException("Hash size should be a positive number")
@@ -142,10 +143,12 @@ class Integrity:
         return hash_value
 
     @staticmethod
-    def get_total_hash_data_length(length: int, chunk_size: int,
+    def get_total_hash_data_length(mode: EncryptionMode, length: int, chunk_size: int,
                                    hash_offset: int, hash_length: int) -> int:
         """
         Get the total number of bytes for all hash signatures for data of a specific length.
+
+        :param mode: The {@link EncryptionMode} Encrypt or Decrypt.
         :param length: 		The length of the data.
         :param chunk_size:      The byte size of the stream chunk that will be used to calculate the hash.
                               The length should be fixed value except for the last chunk which might be lesser since
@@ -154,12 +157,18 @@ class Integrity:
         :param hash_length:     The hash length.
         :return: The total hash length
         """
-        # if the stream is using multiple chunks for integrity
-        chunks: int = int(length // (chunk_size + hash_offset))
-        rem: int = int(length % (chunk_size + hash_offset))
-        if rem > hash_offset:
-            chunks += 1
-        return chunks * hash_length
+        if mode == EncryptionMode.Decrypt:
+            chunks: int = int(math.floor(length / (chunk_size + hash_offset)))
+            rem: int = int(length % (chunk_size + hash_offset))
+            if rem > hash_offset:
+                chunks += 1
+            return chunks * hash_length
+        else:
+            chunks = int(math.floor(length / chunk_size))
+            rem: int = int(length % chunk_size)
+            if rem > hash_offset:
+                chunks += 1
+            return chunks * hash_length
 
     def get_hash_data_length(self, count: int, hash_offset: int) -> int:
         """
@@ -171,7 +180,8 @@ class Integrity:
         """
         if self._chunkSize <= 0:
             return 0
-        return Integrity.get_total_hash_data_length(count, self._chunkSize, hash_offset, self._hashSize)
+        return Integrity.get_total_hash_data_length(EncryptionMode.Decrypt, count, self._chunkSize, hash_offset,
+                                                    self._hashSize)
 
     def get_chunk_size(self) -> int:
         """

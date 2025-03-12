@@ -31,11 +31,12 @@ from multiprocessing.shared_memory import SharedMemory
 import sys
 from typeguard import typechecked
 
-from salmon_core.convert.bit_converter import BitConverter
 from salmon_core.streams.memory_stream import MemoryStream
 from salmon_core.salmon.integrity.integrity import Integrity
 from salmon.integrity.integrity_exception import IntegrityException
 from salmon_core.salmon.streams.encryption_mode import EncryptionMode
+from salmon_core.salmon.streams.encryption_format import EncryptionFormat
+from salmon_core.salmon.header import Header
 from salmon_core.salmon.streams.aes_stream import AesStream
 from salmon_core.salmon.generator import Generator
 from salmon_core.salmon.security_exception import SecurityException
@@ -45,7 +46,7 @@ from salmon_core.salmon.security_exception import SecurityException
 def encrypt_shm(index: int, part_size: int, running_threads: int,
                 data: bytearray, shm_out_name: str, shm_length: int, shm_cancel_name: str, key: bytearray,
                 nonce: bytearray,
-                header_data: bytearray | None,
+                format: EncryptionFormat,
                 integrity: bool, hash_key: bytearray | None, chunk_size: int, buffer_size: int):
     """
     Do not use directly use encrypt() instead.
@@ -58,7 +59,7 @@ def encrypt_shm(index: int, part_size: int, running_threads: int,
     :param shm_cancel_name: The shared memory for cancelation
     :param key: The encryption key
     :param nonce: The nonce
-    :param header_data: The header date
+    :param format: The {@link EncryptionFormat} Generic or Salmon.
     :param integrity: True to apply integrity when encrypting
     :param hash_key: The hash key for integrity
     :param chunk_size: The chunk size for integrity
@@ -76,14 +77,14 @@ def encrypt_shm(index: int, part_size: int, running_threads: int,
 
     ins: MemoryStream = MemoryStream(data)
     out_data: bytearray = bytearray(shm_length)
-    (byte_start, byte_end) = encrypt_data(ins, start, length, out_data, key, nonce, header_data,
+    (byte_start, byte_end) = encrypt_data(ins, start, length, out_data, key, nonce, format,
                                           integrity, hash_key, chunk_size, buffer_size, shm_cancel_name)
     shm_out_data[byte_start:byte_end] = out_data[byte_start:byte_end]
 
 
 @typechecked
 def encrypt_data(input_stream: MemoryStream, start: int, count: int, out_data: bytearray,
-                 key: bytearray, nonce: bytearray, header_data: bytearray | None,
+                 key: bytearray, nonce: bytearray, format: EncryptionFormat,
                  integrity: bool, hash_key: bytearray | None, chunk_size: int, buffer_size: int,
                  shm_cancel_name: str | None = None) -> (
         int, int):
@@ -96,7 +97,7 @@ def encrypt_data(input_stream: MemoryStream, start: int, count: int, out_data: b
     :param out_data:     The buffer with the encrypted data.
     :param key:         The AES key to be used.
     :param nonce:       The nonce to be used.
-    :param header_data:  The header data to be used.
+    :param format: The {@link EncryptionFormat} Generic or Salmon.
     :param integrity:   True to apply integrity.
     :param hash_key:     The key to be used for integrity application.
     :param chunk_size:   The chunk size.
@@ -116,8 +117,8 @@ def encrypt_data(input_stream: MemoryStream, start: int, count: int, out_data: b
     start_pos: int
     try:
         input_stream.set_position(start)
-        stream = AesStream(key, nonce, EncryptionMode.Encrypt, output_stream, header_data,
-                           integrity, chunk_size, hash_key)
+        stream = AesStream(key, nonce, EncryptionMode.Encrypt, output_stream, format,
+                           integrity, hash_key, chunk_size)
         stream.set_allow_range_write(True)
         stream.set_position(start)
         start_pos = output_stream.get_position()
@@ -154,7 +155,7 @@ class Encryptor:
     Encrypts byte arrays.
     """
 
-    def __init__(self, threads: int | None = None, buffer_size: int | None = None, multi_cpu: bool = False):
+    def __init__(self, threads: int = 1, buffer_size: int = Integrity.DEFAULT_CHUNK_SIZE, multi_cpu: bool = False):
         """
         Instantiate an encryptor with parallel tasks and buffer size.
         
@@ -180,29 +181,29 @@ class Encryptor:
         The buffer size to use.
         """
 
-        if threads is None or threads <= 0:
+        if threads <= 0:
             self.__threads = 1
         else:
             self.__threads = threads
             self.__executor = ThreadPoolExecutor(self.__threads) if not multi_cpu else ProcessPoolExecutor(
                 self.__threads)
 
-        if buffer_size is None:
+        if buffer_size <= 0:
             self.__buffer_size = Integrity.DEFAULT_CHUNK_SIZE
         else:
             self.__buffer_size = buffer_size
 
     def encrypt(self, data: bytearray, key: bytearray, nonce: bytearray,
-                store_header_data: bool,
-                integrity: bool = False, hash_key: bytearray | None = None, chunk_size: int | None = None) -> bytearray:
+                format: EncryptionFormat = EncryptionFormat.Salmon,
+                integrity: bool = False, hash_key: bytearray | None = None,
+                chunk_size: int = 0) -> bytearray:
         """
         Encrypts a byte array using the provided key and nonce.
         
         :param data:            The byte array to be encrypted.
         :param key:             The AES key to be used.
         :param nonce:           The nonce to be used.
-        :param store_header_data: True if you want to store a header data with the nonce. False if you store
-                               the nonce external. Note that you will need to provide the nonce when decrypting.
+        :param format: The {@link EncryptionFormat} Generic or Salmon.
         :param integrity:       True if you want to calculate and store hash signatures for each chunkSize.
         :param hash_key:         Hash key to be used for all chunks.
         :param chunk_size:       The chunk size.
@@ -218,45 +219,26 @@ class Encryptor:
             raise SecurityException("Nonce is missing")
 
         if integrity:
-            chunk_size = Integrity.DEFAULT_CHUNK_SIZE if chunk_size is None else chunk_size
+            chunk_size = Integrity.DEFAULT_CHUNK_SIZE if chunk_size <= 0 else chunk_size
         else:
             chunk_size = 0
 
-        output_stream: MemoryStream = MemoryStream()
-        header_data: bytearray | None = None
-        if store_header_data:
-            magic_bytes: bytearray = Generator.get_magic_bytes()
-            output_stream.write(magic_bytes, 0, len(magic_bytes))
-            version: int = Generator.get_version()
-            version_bytes: bytearray = bytearray([version])
-            output_stream.write(version_bytes, 0, len(version_bytes))
-            chunk_size_bytes: bytearray = BitConverter.to_bytes(chunk_size, Generator.CHUNK_SIZE_LENGTH)
-            output_stream.write(chunk_size_bytes, 0, len(chunk_size_bytes))
-            output_stream.write(nonce, 0, len(nonce))
-            output_stream.flush()
-            header_data = output_stream.to_array()
-
-        real_size: int = AesStream.get_actual_size(data, key, nonce,
-                                                   EncryptionMode.Encrypt,
-                                                   header_data, integrity, chunk_size, hash_key)
+        real_size: int = AesStream.get_output_size(EncryptionMode.Encrypt, len(data), format, integrity, chunk_size)
         out_data: bytearray = bytearray(real_size)
-        output_stream.set_position(0)
-        output_stream.read(out_data, 0, output_stream.length())
-        output_stream.close()
 
         if self.__threads == 1:
             input_stream: MemoryStream = MemoryStream(data)
             encrypt_data(input_stream, 0, len(data), out_data,
-                         key, nonce, header_data, integrity, hash_key, chunk_size, self.__buffer_size)
+                         key, nonce, format, integrity, hash_key, chunk_size, self.__buffer_size)
         else:
             self.__encrypt_data_parallel(data, out_data,
-                                         key, hash_key, nonce, header_data,
+                                         key, hash_key, nonce, format,
                                          chunk_size, integrity)
         return out_data
 
     def __encrypt_data_parallel(self, data: bytearray, out_data: bytearray,
                                 key: bytearray, hash_key: bytearray | None, nonce: bytearray,
-                                header_data: bytearray | None,
+                                format: EncryptionFormat,
                                 chunk_size: int, integrity: bool):
         """
         Encrypt stream using parallel threads.
@@ -266,7 +248,7 @@ class Encryptor:
         :param key:        The AES key.
         :param hash_key:    The hash key.
         :param nonce:      The nonce to be used for encryption.
-        :param header_data: The header data.
+        :param format: The {@link EncryptionFormat} Generic or Salmon.
         :param chunk_size:  The chunk size.
         :param integrity:  True to apply integrity.
         """
@@ -276,7 +258,7 @@ class Encryptor:
 
         # if we want to check integrity we align to the chunk size otherwise to the AES Block
         min_part_size: int = Generator.BLOCK_SIZE
-        if integrity and chunk_size is not None:
+        if integrity and chunk_size > 0:
             min_part_size = chunk_size
         elif integrity:
             min_part_size = Integrity.DEFAULT_CHUNK_SIZE
@@ -291,12 +273,12 @@ class Encryptor:
 
         self.__submit_encrypt_jobs(running_threads, part_size,
                                    data, out_data,
-                                   key, hash_key, nonce, header_data,
+                                   key, hash_key, nonce, format,
                                    integrity, chunk_size)
 
     def __submit_encrypt_jobs(self, running_threads: int, part_size: int, data: bytearray, out_data: bytearray,
                               key: bytearray, hash_key: bytearray | None, nonce: bytearray,
-                              header_data: bytearray | None, integrity: bool, chunk_size: int):
+                              format: EncryptionFormat, integrity: bool, chunk_size: int):
         """
         Submit encryption parallel jobs.
         
@@ -308,7 +290,7 @@ class Encryptor:
         :param key:            The AES key.
         :param hash_key:        The hash key for integrity.
         :param nonce:          The nonce for the data.
-        :param header_data:     The header data common to all parts.
+        :param format: The {@link EncryptionFormat} Generic or Salmon.
         :param integrity:      True to apply the data integrity.
         :param chunk_size:      The chunk size.
         """
@@ -324,7 +306,7 @@ class Encryptor:
         for i in range(0, running_threads):
             fs.append(self.__executor.submit(encrypt_shm, i, part_size, running_threads,
                                              data, shm_out_name, len(shm_out.buf), shm_cancel_name, key, nonce,
-                                             header_data,
+                                             format,
                                              integrity, hash_key, chunk_size, self.__buffer_size))
         for f in concurrent.futures.as_completed(fs):
             try:
@@ -336,7 +318,7 @@ class Encryptor:
                 # cancel all tasks
                 shm_cancel.buf[0] = 1
 
-        start = len(header_data) if header_data is not None else 0
+        start = Header.HEADER_LENGTH if format == EncryptionFormat.Salmon else 0
         out_data[start:] = shm_out.buf[start:]
 
         shm_cancel.close()

@@ -48,6 +48,7 @@ from salmon_core.salmon.bridge.native_proxy import NativeProxy
 from salmon.integrity.ihash_provider import IHashProvider
 from salmon_core.salmon.integrity.integrity import Integrity
 from salmon_core.salmon.streams.encryption_mode import EncryptionMode
+from salmon_core.salmon.streams.encryption_format import EncryptionFormat
 from salmon_core.salmon.streams.provider_type import ProviderType
 from salmon_core.salmon.streams.aes_stream import AesStream
 from salmon_core.salmon.decryptor import Decryptor
@@ -59,13 +60,13 @@ from salmon_core.salmon.transform.salmon_transformer_factory import TransformerF
 @typechecked
 class SalmonCoreTestHelper:
     TEST_ENC_BUFFER_SIZE = 512 * 1024
-    TEST_ENC_THREADS = 2
+    TEST_ENC_THREADS = 1
     TEST_DEC_BUFFER_SIZE = 512 * 1024
     ENABLE_MULTI_CPU = False
-    TEST_DEC_THREADS = 2
+    TEST_DEC_THREADS = 1
 
     TEST_PASSWORD = "test123"
-    TEST_FALSE_PASSWORD = "Falsepass"
+    TEST_FALSE_PASSWORD = "falsepass"
 
     MAX_ENC_COUNTER = int(math.pow(256, 7))
     #  a nonce ready to overflow if a file is imported
@@ -155,8 +156,8 @@ class SalmonCoreTestHelper:
 
     @staticmethod
     def encrypt_write_decrypt_read(text, key, iv,
-                                   enc_buffer_size, dec_buffer_size, test_integrity, chunk_size: int | None,
-                                   hash_key, flip_bits, header: str | None, max_text_length: int | None):
+                                   enc_buffer_size, dec_buffer_size, test_integrity, chunk_size: int,
+                                   hash_key, flip_bits, max_text_length: int | None = None):
         test_text = text
 
         t_builder = ""
@@ -167,19 +168,15 @@ class SalmonCoreTestHelper:
         if max_text_length is not None and max_text_length < len(plain_text):
             plain_text = plain_text[0:max_text_length]
 
-        header_length = 0
-        if header is not None:
-            header_length = len(header.encode('utf-8'))
         input_bytes = bytearray(plain_text.encode('utf-8'))
         enc_bytes = SalmonCoreTestHelper.encrypt(input_bytes, key, iv, enc_buffer_size,
-                                                 test_integrity, chunk_size, hash_key, header)
+                                                 test_integrity, chunk_size, hash_key)
         if flip_bits:
             enc_bytes[len(enc_bytes) // 2] = 0
 
         #  Use to read from cipher byte array and to Write to byte array
         output_byte2 = SalmonCoreTestHelper.decrypt(enc_bytes, key, iv, dec_buffer_size,
-                                                    test_integrity, chunk_size, hash_key,
-                                                    header_length if header is not None else None)
+                                                    test_integrity, chunk_size, hash_key)
         dec_text = output_byte2.decode('utf-8')
 
         print(plain_text)
@@ -189,17 +186,11 @@ class SalmonCoreTestHelper:
 
     @staticmethod
     def encrypt(input_bytes, key, iv, buffer_size,
-                integrity, chunk_size: int | None, hash_key,
-                header) -> bytearray:
+                integrity, chunk_size: int, hash_key) -> bytearray:
         ins = MemoryStream(input_bytes)
         outs = MemoryStream()
-        header_data = None
-        if header is not None:
-            header_data = bytearray(header.encode('utf-8'))
-            outs.write(header_data, 0, len(header_data))
-
         writer = AesStream(key, iv, EncryptionMode.Encrypt, outs,
-                           header_data, integrity, chunk_size, hash_key)
+                           EncryptionFormat.Salmon, integrity, hash_key, chunk_size)
 
         if buffer_size == 0:  # use the internal buffer size of the to copy
             ins.copy_to(writer)
@@ -217,17 +208,11 @@ class SalmonCoreTestHelper:
 
     @staticmethod
     def decrypt(input_bytes, key, iv, buffer_size,
-                integrity, chunk_size: int | None, hash_key,
-                header_length: int | None):
+                integrity, chunk_size: int, hash_key):
         ins = MemoryStream(input_bytes)
         outs = MemoryStream()
-        header_data = None
-        if header_length is not None:
-            header_data = bytearray(header_length)
-            ins.read(header_data, 0, len(header_data))
-
         reader = AesStream(key, iv, EncryptionMode.Decrypt, ins,
-                           header_data, integrity, chunk_size, hash_key)
+                           EncryptionFormat.Salmon, integrity, hash_key, chunk_size)
 
         if buffer_size == 0:  # use the internal buffersize of the to copy
             reader.copy_to(outs)
@@ -259,7 +244,7 @@ class SalmonCoreTestHelper:
         ins = MemoryStream(input_bytes)
         outs = MemoryStream()
         enc_writer = AesStream(key, iv, EncryptionMode.Encrypt, outs,
-                               None, integrity, chunk_size, hash_key)
+                               EncryptionFormat.Salmon, integrity, hash_key, chunk_size)
         ins.copy_to(enc_writer)
         ins.close()
         enc_writer.flush()
@@ -269,7 +254,7 @@ class SalmonCoreTestHelper:
         #  Use SalmonStrem to read from cipher text and seek and read to different positions in the stream
         enc_ins = MemoryStream(enc_bytes)
         dec_reader = AesStream(key, iv, EncryptionMode.Decrypt, enc_ins,
-                               None, integrity, chunk_size, hash_key)
+                               EncryptionFormat.Salmon, integrity, hash_key, chunk_size)
 
         correct_text = plain_text[0:6]
         dec_text = SalmonCoreTestHelper.seek_and_get_substring_by_read(dec_reader, 0, 6,
@@ -343,7 +328,7 @@ class SalmonCoreTestHelper:
         ins = MemoryStream(input_bytes)
         outs = MemoryStream()
         enc_writer = AesStream(key, iv, EncryptionMode.Encrypt, outs,
-                               None, integrity, chunk_size, hash_key)
+                               EncryptionFormat.Salmon, integrity, hash_key, chunk_size)
         ins.copy_to(enc_writer)
         ins.close()
         enc_writer.flush()
@@ -353,7 +338,7 @@ class SalmonCoreTestHelper:
         #  Use to read from cipher text and seek and read to different positions in the stream
         enc_ins = MemoryStream(enc_bytes)
         dec_reader = AesStream(key, iv, EncryptionMode.Decrypt, enc_ins,
-                               None, integrity, chunk_size, hash_key)
+                               EncryptionFormat.Salmon, integrity, hash_key, chunk_size)
         for i in range(0, 100):
             dec_reader.set_position(dec_reader.get_position() + 7)
             SalmonCoreTestHelper.test_counter(dec_reader)
@@ -396,7 +381,7 @@ class SalmonCoreTestHelper:
         ins = MemoryStream(input_bytes)
         outs = MemoryStream()
         enc_writer = AesStream(key, iv, EncryptionMode.Encrypt, outs,
-                               None, integrity, chunk_size, hash_key)
+                               EncryptionFormat.Salmon, integrity, hash_key, chunk_size)
         ins.copy_to(enc_writer)
         ins.close()
         enc_writer.flush()
@@ -407,7 +392,7 @@ class SalmonCoreTestHelper:
         write_bytes = bytearray(text_to_write.encode('utf-8'))
         p_outs = MemoryStream(enc_bytes)
         partial_writer = AesStream(key, iv, EncryptionMode.Encrypt, p_outs,
-                                   None, integrity, chunk_size, hash_key)
+                                   EncryptionFormat.Salmon, integrity, hash_key, chunk_size)
         aligned_position = seek
         align_offset = 0
         count = write_count
@@ -423,7 +408,7 @@ class SalmonCoreTestHelper:
         #  Use SalmonStrem to read from cipher text and test if writing was successful
         enc_ins = MemoryStream(enc_bytes)
         dec_reader = AesStream(key, iv, EncryptionMode.Decrypt, enc_ins,
-                               None, integrity, chunk_size, hash_key)
+                               EncryptionFormat.Salmon, integrity, hash_key, chunk_size)
         dec_text = SalmonCoreTestHelper.seek_and_get_substring_by_read(dec_reader, 0, len(text),
                                                                        RandomAccessStream.SeekOrigin.Begin)
 
@@ -439,16 +424,14 @@ class SalmonCoreTestHelper:
 
     @staticmethod
     def test_counter_value(text, key, nonce, counter: int):
-        test_text_bytes = bytearray(text.encode('utf-8'))
-        ms = MemoryStream(test_text_bytes)
-        stream: AesStream = AesStream(key, nonce, EncryptionMode.Encrypt, ms,
-                                      None, False, None, None)
+        ms: MemoryStream = MemoryStream()
+        stream: AesStream = AesStream(key, nonce, EncryptionMode.Encrypt, ms, EncryptionFormat.Salmon)
         stream.set_allow_range_write(True)
 
         #  creating enormous files to test is overkill and since the law was made for man
         #  we use reflection to test this.
         try:
-            stream._SalmonStream__transformer._increase_counter(counter)
+            stream._AesStream__transformer._increase_counter(counter)
         finally:
             stream.close()
 
@@ -509,10 +492,10 @@ class SalmonCoreTestHelper:
     def encrypt_and_decrypt_byte_array2(data, enable_log):
         t1 = time.time() * 1000
         enc_data = SalmonCoreTestHelper.get_encryptor() \
-            .encrypt(data, SalmonCoreTestHelper.TEST_KEY_BYTES, SalmonCoreTestHelper.TEST_NONCE_BYTES, False)
+            .encrypt(data, SalmonCoreTestHelper.TEST_KEY_BYTES, SalmonCoreTestHelper.TEST_NONCE_BYTES, EncryptionFormat.Generic)
         t2 = time.time() * 1000
         dec_data = SalmonCoreTestHelper.get_decryptor() \
-            .decrypt(enc_data, SalmonCoreTestHelper.TEST_KEY_BYTES, SalmonCoreTestHelper.TEST_NONCE_BYTES, False)
+            .decrypt(enc_data, SalmonCoreTestHelper.TEST_KEY_BYTES, SalmonCoreTestHelper.TEST_NONCE_BYTES, EncryptionFormat.Generic)
         t3 = time.time() * 1000
 
         SalmonCoreTestHelper.assert_array_equal(data, dec_data)
@@ -608,7 +591,7 @@ class SalmonCoreTestHelper:
 
     @staticmethod
     def copy_from_mem_stream_to_salmon_stream(size, key, nonce,
-                                              integrity, chunk_size: int | None, hash_key,
+                                              integrity, chunk_size: int, hash_key,
                                               buffer_size):
 
         test_data = SalmonCoreTestHelper.get_rand_array(size)
@@ -624,7 +607,7 @@ class SalmonCoreTestHelper:
         ms2.set_position(0)
         ms3 = MemoryStream()
         salmon_stream: AesStream = AesStream(key, nonce, EncryptionMode.Encrypt, ms3,
-                                             None, integrity, chunk_size, hash_key)
+                                             EncryptionFormat.Salmon, integrity, hash_key, chunk_size)
         #  we always align the writes to the chunk size if we enable integrity
         if integrity:
             buffer_size = salmon_stream.get_chunk_size()
@@ -638,7 +621,7 @@ class SalmonCoreTestHelper:
         ms3.set_position(0)
         ms4 = MemoryStream()
         salmon_stream2 = AesStream(key, nonce, EncryptionMode.Decrypt, ms3,
-                                   None, integrity, chunk_size, hash_key)
+                                   EncryptionFormat.Salmon, integrity, hash_key, chunk_size)
         salmon_stream2.copy_to(ms4, buffer_size, None)
         salmon_stream2.close()
         ms3.close()
@@ -648,7 +631,5 @@ class SalmonCoreTestHelper:
 
     @staticmethod
     def calculate_hmac(v_bytes, offset, length, hash_key, include_data):
-        salmon_integrity = Integrity(True, hash_key, None, HmacSHA256Provider(),
-                                     Generator.HASH_RESULT_LENGTH)
         return Integrity.calculate_hash(SalmonCoreTestHelper.hashProvider, v_bytes, offset, length, hash_key,
                                         include_data)

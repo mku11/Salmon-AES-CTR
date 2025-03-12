@@ -30,7 +30,7 @@ from urllib.parse import urlparse
 from urllib.parse import urljoin
 from wrapt import synchronized
 
-from fs.file.ifile import IFile
+from salmon_fs.fs.file.ifile import IFile
 from salmon_core.streams.random_access_stream import RandomAccessStream
 
 
@@ -110,12 +110,12 @@ class HttpFileStream(RandomAccessStream):
         """
         return True
 
-    def length(self) -> int:
+    def get_length(self) -> int:
         """
         Get the length of the stream. This is the same as the backed file.
         :return: The length
         """
-        return self.__file.length()
+        return self.__file.get_length()
 
     def get_position(self) -> int:
         return self.position
@@ -178,7 +178,7 @@ class HttpFileStream(RandomAccessStream):
         elif origin == RandomAccessStream.SeekOrigin.Current:
             pos += offset
         elif origin == RandomAccessStream.SeekOrigin.End:
-            pos = self.__file.length() - offset
+            pos = self.__file.get_length() - offset
 
         self.set_position(pos)
         return self.position

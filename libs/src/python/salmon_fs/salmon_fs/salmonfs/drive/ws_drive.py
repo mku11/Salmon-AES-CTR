@@ -28,18 +28,18 @@ import os
 import platform
 from typeguard import typechecked
 
-from fs.file.file import File
-from fs.file.ifile import IFile
-from fs.file import IVirtualFile
-from salmon_fs.salmon.salmon_drive import SalmonDrive
-from salmon_fs.salmon.salmon_file import SalmonFile
+from salmon_fs.fs.file.file import File
+from salmon_fs.fs.file.ifile import IFile
+from salmon_fs.fs.file.ivirtual_file import IVirtualFile
+from salmon_fs.salmonfs.drive.aes_drive import AesDrive
+from salmon_fs.salmonfs.file.aes_file import AesFile
 from salmon.sequence.inonce_sequencer import INonceSequencer
 
 
 @typechecked
-class WSDrive(SalmonDrive):
+class WSDrive(AesDrive):
     """
-    SalmonDrive implementation for web service Python file API. This provides a virtual drive implementation
+    AesDrive implementation for web service Python file API. This provides a virtual drive implementation
     that you can use to store and access encrypted files.
     """
 
@@ -50,7 +50,7 @@ class WSDrive(SalmonDrive):
         super().__init__()
 
     @staticmethod
-    def open(v_dir: IFile, password: str, sequencer: INonceSequencer) -> SalmonDrive:
+    def open(v_dir: IFile, password: str, sequencer: INonceSequencer) -> AesDrive:
         """
         Helper method that opens and initializes a JavaDrive
         :param v_dir: The directory that hosts the drive.
@@ -58,10 +58,10 @@ class WSDrive(SalmonDrive):
         :param sequencer: The nonce sequencer that will be used for encryption.
         :return: The drive.
         """
-        return SalmonDrive.open_drive(v_dir, WSDrive, password, sequencer)
+        return AesDrive.open_drive(v_dir, WSDrive, password, sequencer)
 
     @staticmethod
-    def create(v_dir: IFile, password: str, sequencer: INonceSequencer) -> SalmonDrive:
+    def create(v_dir: IFile, password: str, sequencer: INonceSequencer) -> AesDrive:
         """
         Helper method that creates and initializes a JavaDrive
         :param v_dir: The directory that will host the drive.
@@ -69,7 +69,7 @@ class WSDrive(SalmonDrive):
         :param sequencer: The nonce sequencer that will be used for encryption.
         :return: The drive.
         """
-        return SalmonDrive.create_drive(v_dir, WSDrive, password, sequencer)
+        return AesDrive.create_drive(v_dir, WSDrive, password, sequencer)
 
     def get_private_dir(self) -> IFile:
         """
@@ -101,15 +101,15 @@ class WSDrive(SalmonDrive):
         """
         print("drive failed to unlock")
 
-    def get_file(self, file: IFile) -> IVirtualFile | None:
+    def get_virtual_file(self, file: IFile) -> IVirtualFile | None:
         """
         Get the virtual file backed by a real file
         :param file: The file
         :return: The
         """
-        return SalmonFile(file, self)
+        return AesFile(file, self)
 
-    def get_root(self) -> SalmonFile | None:
+    def get_root(self) -> AesFile | None:
         """
         Get the drive root
         :return: The drive root directory

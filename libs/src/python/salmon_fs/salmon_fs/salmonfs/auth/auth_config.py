@@ -28,17 +28,17 @@ SOFTWARE.
 from typeguard import typechecked
 import sys
 
-from fs.file.ifile import IFile
+from salmon_fs.fs.file.ifile import IFile
 from salmon_core.streams.memory_stream import MemoryStream
 from salmon_core.streams.random_access_stream import RandomAccessStream
 from salmon_core.salmon.integrity.integrity import Integrity
 from salmon_core.salmon.streams.aes_stream import AesStream
 from salmon_core.salmon.generator import Generator
-from salmon_fs.salmon.salmon_auth_exception import SalmonAuthException
+from salmon_fs.salmonfs.auth.auth_exception import AuthException
 from salmon_core.salmon.security_exception import SecurityException
-from salmon_fs.salmon.salmon_drive_generator import SalmonDriveGenerator
-from salmon_fs.salmon.salmon_file import SalmonFile
-from salmon_fs.salmon.salmon_drive import SalmonDrive
+from salmon_fs.salmonfs.drive.drive_generator import DriveGenerator
+from salmon_fs.salmonfs.file.aes_file import AesFile
+from salmon_fs.salmonfs.drive.aes_drive import AesDrive
 from salmon_core.convert.bit_converter import BitConverter
 from salmon.sequence.nonce_sequence import NonceSequence
 from salmon_core.salmon.nonce import Nonce
@@ -86,21 +86,21 @@ class AuthConfig:
         :param contents: The byte array that contains the contents of the auth config file.
         """
 
-        self.__driveID: bytearray = bytearray(SalmonDriveGenerator.DRIVE_ID_LENGTH)
-        self.__authID: bytearray = bytearray(SalmonDriveGenerator.AUTH_ID_SIZE)
+        self.__driveID: bytearray = bytearray(DriveGenerator.DRIVE_ID_LENGTH)
+        self.__authID: bytearray = bytearray(DriveGenerator.AUTH_ID_SIZE)
         self.__startNonce: bytearray = bytearray(Generator.NONCE_LENGTH)
         self.__maxNonce: bytearray = bytearray(Generator.NONCE_LENGTH)
 
         ms: MemoryStream = MemoryStream(contents)
-        ms.read(self.__driveID, 0, SalmonDriveGenerator.DRIVE_ID_LENGTH)
-        ms.read(self.__authID, 0, SalmonDriveGenerator.AUTH_ID_SIZE)
+        ms.read(self.__driveID, 0, DriveGenerator.DRIVE_ID_LENGTH)
+        ms.read(self.__authID, 0, DriveGenerator.AUTH_ID_SIZE)
         ms.read(self.__startNonce, 0, Generator.NONCE_LENGTH)
         ms.read(self.__maxNonce, 0, Generator.NONCE_LENGTH)
         ms.close()
 
     @staticmethod
     def write_auth_file(auth_config_file: IFile,
-                        drive: SalmonDrive,
+                        drive: AesDrive,
                         target_auth_id: bytearray,
                         target_starting_nonce: bytearray,
                         target_max_nonce: bytearray,
@@ -119,7 +119,7 @@ class AuthConfig:
         drive_id: bytearray = drive.get_drive_id()
         if drive_id is None:
             raise Exception("Could not write auth file, no drive id found")
-        salmon_file: SalmonFile = SalmonFile(auth_config_file, drive)
+        salmon_file: AesFile = AesFile(auth_config_file, drive)
         stream: AesStream = salmon_file.get_output_stream(config_nonce)
         AuthConfig.write_to_stream(stream, drive_id, target_auth_id, target_starting_nonce,
                                    target_max_nonce)
@@ -128,7 +128,7 @@ class AuthConfig:
     def write_to_stream(stream: AesStream, drive_id: bytearray, auth_id: bytearray,
                         next_nonce: bytearray, max_nonce: bytearray):
         """
-        Write authorization configuration to a SalmonStream.
+        Write authorization configuration to a AesStream.
         :param stream: The stream to write to.
         :param drive_id: The drive id.
         :param auth_id: The auth id of the new device.
@@ -149,14 +149,14 @@ class AuthConfig:
             stream.write(buffer, 0, len(content))
         except Exception as ex:
             print(ex, file=sys.stderr)
-            raise SalmonAuthException("Could not write auth config") from ex
+            raise AuthException("Could not write auth config") from ex
         finally:
             ms.close()
             stream.flush()
             stream.close()
 
     @staticmethod
-    def get_auth_config(drive: SalmonDrive, auth_file: IFile) -> AuthConfig:
+    def get_auth_config(drive: AesDrive, auth_file: IFile) -> AuthConfig:
         """
         Get the app drive pair configuration properties for this drive
         :param drive: The drive
@@ -164,7 +164,7 @@ class AuthConfig:
         :return: The decrypted authorization file.
         :raises Exception: Thrown when error during reading file
         """
-        salmon_file: SalmonFile = SalmonFile(auth_file, drive)
+        salmon_file: AesFile = AesFile(auth_file, drive)
         stream: AesStream = salmon_file.get_input_stream()
         ms: MemoryStream = MemoryStream()
         stream.copy_to(ms)
@@ -176,7 +176,7 @@ class AuthConfig:
         return drive_config
 
     @staticmethod
-    def __verify_auth_id(drive: SalmonDrive, auth_id: bytearray) -> bool:
+    def __verify_auth_id(drive: AesDrive, auth_id: bytearray) -> bool:
         """
         Verify the authorization id with the current drive auth id.
         
@@ -187,7 +187,7 @@ class AuthConfig:
         return AuthConfig.__arrays_equal(auth_id, drive.get_auth_id_bytes())
 
     @staticmethod
-    def import_sequence(drive: SalmonDrive, auth_config: AuthConfig):
+    def import_sequence(drive: AesDrive, auth_config: AuthConfig):
         """
         Import sequence into the current drive.
         :param drive: The drive
@@ -199,7 +199,7 @@ class AuthConfig:
                                             auth_config.get_max_nonce())
 
     @staticmethod
-    def import_auth_file(drive: SalmonDrive, auth_config_file: IFile):
+    def import_auth_file(drive: AesDrive, auth_config_file: IFile):
         """
         Import the device authorization file.
         :param drive: The drive
@@ -225,7 +225,7 @@ class AuthConfig:
         AuthConfig.import_sequence(drive, auth_config)
 
     @staticmethod
-    def export_auth_file(drive: SalmonDrive, target_auth_id: str, file: IFile):
+    def export_auth_file(drive: AesDrive, target_auth_id: str, file: IFile):
         """
         :param drive: The drive
         :param target_auth_id: The authorization id of the target device.
@@ -239,7 +239,7 @@ class AuthConfig:
         if sequence is None:
             raise Exception("Device is not authorized to export")
 
-        if file.exists() and file.length() > 0:
+        if file.exists() and file.get_length() > 0:
             out_stream: RandomAccessStream | None = None
             try:
                 out_stream = file.getOutputStream()

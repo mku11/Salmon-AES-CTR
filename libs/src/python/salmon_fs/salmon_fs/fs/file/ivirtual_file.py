@@ -29,8 +29,8 @@ from abc import ABC
 from typing import Any, Callable
 from typeguard import typechecked
 
-from fs.file.ifile import IFile
-from fs.drive import VirtualDrive
+from salmon_fs.fs.file.ifile import IFile
+from salmon_fs.fs.drive.virtual_drive import VirtualDrive
 from salmon_core.streams.random_access_stream import RandomAccessStream
 
 
@@ -71,7 +71,7 @@ class IVirtualFile(ABC):
     def get_real_file(self) -> IFile:
         pass
 
-    def get_base_name(self) -> str:
+    def get_name(self) -> str:
         pass
 
     def get_parent(self) -> IVirtualFile | None:
@@ -83,10 +83,10 @@ class IVirtualFile(ABC):
     def mkdir(self):
         pass
 
-    def get_last_date_time_modified(self) -> int:
+    def get_last_date_modified(self) -> int:
         pass
 
-    def get_size(self) -> int:
+    def get_length(self) -> int:
         pass
 
     def exists(self) -> bool:
@@ -108,19 +108,19 @@ class IVirtualFile(ABC):
         pass
 
     def copy_recursively(self, dest: IVirtualFile,
-                         progress_listener: Callable[[IVirtualFile, int, int], Any],
-                         auto_rename: Callable[[IVirtualFile], str],
-                         auto_rename_folders: bool,
-                         on_failed: Callable[[IVirtualFile, Exception], Any]):
+                         auto_rename: Callable[[IVirtualFile], str] | None = None,
+                         auto_rename_folders: bool = False,
+                         on_failed: Callable[[IVirtualFile, Exception], Any] | None = None,
+                         progress_listener: Callable[[IVirtualFile, int, int], Any] | None = None):
         pass
 
     def move_recursively(self, dest: IVirtualFile,
-                         progress_listener: Callable[[IVirtualFile, int, int], Any],
-                         auto_rename: Callable[[IVirtualFile], str],
-                         auto_rename_folders: bool,
-                         on_failed: Callable[[IVirtualFile, Exception], Any]):
+                         auto_rename: Callable[[IVirtualFile], str] | None = None,
+                         auto_rename_folders: bool = False,
+                         on_failed: Callable[[IVirtualFile, Exception], Any] | None = None,
+                         progress_listener: Callable[[IVirtualFile, int, int], Any] | None = None):
         pass
 
-    def delete_recursively(self, progress_listener: Callable[[IVirtualFile, int, int], Any],
-                           on_failed: Callable[[IVirtualFile, Exception], Any]):
+    def delete_recursively(self, on_failed: Callable[[IVirtualFile, Exception], Any] | None = None,
+                           progress_listener: Callable[[IVirtualFile, int, int], Any] | None = None):
         pass

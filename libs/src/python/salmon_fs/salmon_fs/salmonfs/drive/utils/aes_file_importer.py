@@ -1,24 +1,6 @@
 #!/usr/bin/env python3
 from __future__ import annotations
 
-import concurrent
-import math
-import time
-import sys
-from concurrent.futures import ProcessPoolExecutor, Future, ThreadPoolExecutor
-from multiprocessing import shared_memory
-from multiprocessing.shared_memory import SharedMemory
-from typing import Any, Callable
-
-from typeguard import typechecked
-
-from salmon_core.convert.bit_converter import BitConverter
-from fs.file.ifile import IFile
-from salmon_core.streams.random_access_stream import RandomAccessStream
-from salmon_core.salmon.streams.aes_stream import AesStream
-from salmon_fs.salmon.salmon_file import SalmonFile
-from fs.drive.utils.file_utils import FileUtils
-
 __license__ = """
 MIT License
 
@@ -43,6 +25,22 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 """
 
+import concurrent
+import math
+import time
+import sys
+from concurrent.futures import ProcessPoolExecutor, Future, ThreadPoolExecutor
+from multiprocessing import shared_memory
+from multiprocessing.shared_memory import SharedMemory
+from typing import Any, Callable
+from typeguard import typechecked
+
+from salmon_core.convert.bit_converter import BitConverter
+from salmon_fs.fs.file.ifile import IFile
+from salmon_core.streams.random_access_stream import RandomAccessStream
+from salmon_core.salmon.streams.aes_stream import AesStream
+from salmon_fs.salmonfs.file.aes_file import AesFile
+
 
 @typechecked
 def import_file(index: int, final_part_size: int, final_running_threads: int, file_size: int,
@@ -51,8 +49,8 @@ def import_file(index: int, final_part_size: int, final_running_threads: int, fi
                 shm_total_bytes_read_name: str,
                 shm_cancel_name: str,
                 buffer_size: int, key: bytearray,
-                integrity: bool, hash_key: bytearray | None, chunk_size: int | None):
-    imported_file: SalmonFile = SalmonFile(salmon_real_file)
+                integrity: bool, hash_key: bytearray | None, chunk_size: int):
+    imported_file: AesFile = AesFile(salmon_real_file)
     imported_file.set_allow_overwrite(True)
     imported_file.set_encryption_key(key)
     imported_file.set_apply_integrity(integrity, hash_key, chunk_size)
@@ -81,7 +79,7 @@ def import_file(index: int, final_part_size: int, final_running_threads: int, fi
 
 
 @typechecked
-def import_file_part(file_to_import: IFile, salmon_file: SalmonFile, start: int, count: int,
+def import_file_part(file_to_import: IFile, salmon_file: AesFile, start: int, count: int,
                      total_bytes_read: memoryview | None, buffer_size: int,
                      shm_cancel_name: str | None = None,
                      stopped: list[bool] | None = None,
@@ -149,10 +147,10 @@ def import_file_part(file_to_import: IFile, salmon_file: SalmonFile, start: int,
 
 
 @typechecked
-class SalmonFileImporter:
+class AesFileImporter:
     __DEFAULT_BUFFER_SIZE = 512 * 1024
     """
-    The global default buffer size to use when reading/writing on the SalmonStream.
+    The global default buffer size to use when reading/writing on the AesStream.
     """
 
     __DEFAULT_THREADS = 1
@@ -208,10 +206,10 @@ class SalmonFileImporter:
 
         self.__buffer_size = buffer_size
         if self.__buffer_size == 0:
-            self.__buffer_size = SalmonFileImporter.__DEFAULT_BUFFER_SIZE
+            self.__buffer_size = AesFileImporter.__DEFAULT_BUFFER_SIZE
         self.__threads = threads
         if self.__threads == 0:
-            self.__threads = SalmonFileImporter.__DEFAULT_THREADS
+            self.__threads = AesFileImporter.__DEFAULT_THREADS
 
         self.__executor = ThreadPoolExecutor(self.__threads) if not multi_cpu else ProcessPoolExecutor(self.__threads)
 
@@ -231,9 +229,9 @@ class SalmonFileImporter:
         """
         return not self.__stopped[0]
 
-    def import_file(self, file_to_import: IFile, v_dir: SalmonFile, filename: str | None, delete_source: bool,
+    def import_file(self, file_to_import: IFile, v_dir: AesFile, filename: str | None, delete_source: bool,
                     integrity: bool,
-                    on_progress: Callable[[int, int], Any] | None) -> SalmonFile | None:
+                    on_progress: Callable[[int, int], Any] | None) -> AesFile | None:
         """
         Imports a real file into the drive.
         
@@ -247,10 +245,10 @@ class SalmonFileImporter:
         if self.is_running():
             raise Exception("Another import is running")
         if file_to_import.is_directory():
-            raise Exception("Cannot import directory, use SalmonFileCommander instead")
+            raise Exception("Cannot import directory, use AesFileCommander instead")
 
-        filename = filename if filename is not None else file_to_import.get_base_name()
-        imported_file: SalmonFile
+        filename = filename if filename is not None else file_to_import.get_name()
+        imported_file: AesFile
         try:
             self.__stopped[0] = False
             self.__failed = False
@@ -259,9 +257,9 @@ class SalmonFileImporter:
             imported_file = v_dir.create_file(filename)
             imported_file.set_allow_overwrite(True)
             # we use default chunk file size
-            imported_file.set_apply_integrity(integrity, None, None)
+            imported_file.set_apply_integrity(integrity)
 
-            file_size: int = file_to_import.length()
+            file_size: int = file_to_import.get_length()
             running_threads: int = 1
             part_size: int = file_size
 
@@ -272,7 +270,7 @@ class SalmonFileImporter:
             target_stream.close()
 
             # if we want to check integrity we align to the chunk size otherwise to the AES Block
-            min_part_size: int = FileUtils.get_minimum_part_size(imported_file)
+            min_part_size: int = imported_file.get_minimum_part_size()
             if part_size > min_part_size and self.__threads > 1:
                 part_size = math.ceil(file_size / float(self.__threads))
                 if part_size > min_part_size:
@@ -308,13 +306,13 @@ class SalmonFileImporter:
         return imported_file
 
     def __submit_import_jobs(self, running_threads: int, part_size: int, file_to_import: IFile,
-                             imported_file: SalmonFile,
+                             imported_file: AesFile,
                              integrity: bool,
                              on_progress: Callable[[int, int], Any] | None):
 
         shm_total_bytes_read = shared_memory.SharedMemory(create=True, size=8 * running_threads)
         shm_total_bytes_read_name = shm_total_bytes_read.name
-        file_size: int = file_to_import.length()
+        file_size: int = file_to_import.get_length()
         shm_cancel_name = self.__shm_cancel.name
         self.__shm_cancel.buf[0] = 0
 

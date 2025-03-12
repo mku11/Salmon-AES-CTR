@@ -38,12 +38,12 @@ from salmon_core.streams.memory_stream import MemoryStream
 from salmon.integrity.integrity_exception import IntegrityException
 from salmon_core.salmon.streams.provider_type import ProviderType
 from salmon_core.salmon.streams.aes_stream import AesStream
-from fs.file import IVirtualFile
-from salmon_fs.salmon.salmon_auth_exception import SalmonAuthException
-from salmon_fs.salmon.salmon_file import SalmonFile, IRealFile
-from salmon_fs.salmon.streams.salmon_file_input_stream import SalmonFileInputStream
-from salmon_fs.salmon.sequence.salmon_file_sequencer import SalmonFileSequencer
-from salmon_fs.salmon.utils.salmon_file_commander import SalmonFileCommander
+from salmon_fs.fs.file.ivirtual_file import IVirtualFile
+from salmon_fs.salmonfs.auth.auth_exception import AuthException
+from salmon_fs.salmonfs.file.aes_file import AesFile, IFile
+from salmon_fs.salmonfs.streams.aes_file_input_stream import AesFileInputStream
+from salmon_fs.salmonfs.sequence.file_sequencer import FileSequencer
+from salmon_fs.salmonfs.drive.utils.aes_file_commander import AesFileCommander
 
 from salmon_core_test_helper import SalmonCoreTestHelper
 from salmon_fs_test_helper import SalmonFSTestHelper, TestMode
@@ -95,8 +95,8 @@ class SalmonFSTests(TestCase):
         SalmonCoreTestHelper.close()
 
     def test_CatchNotAuthorizedNegative(self):
-        vault_dir: IRealFile = SalmonFSTestHelper.generate_folder(SalmonFSTestHelper.TEST_VAULT_DIRNAME)
-        sequencer: SalmonFileSequencer = SalmonFSTestHelper.create_salmon_file_sequencer()
+        vault_dir: IFile = SalmonFSTestHelper.generate_folder(SalmonFSTestHelper.TEST_VAULT_DIRNAME)
+        sequencer: FileSequencer = SalmonFSTestHelper.create_salmon_file_sequencer()
         drive = SalmonFSTestHelper.create_drive(vault_dir, SalmonFSTestHelper.drive_class_type,
                                                 SalmonCoreTestHelper.TEST_PASSWORD, sequencer)
         wrong_password: bool = False
@@ -104,16 +104,16 @@ class SalmonFSTests(TestCase):
         try:
             drive = SalmonFSTestHelper.open_drive(vault_dir, SalmonFSTestHelper.drive_class_type,
                                                   SalmonCoreTestHelper.TEST_FALSE_PASSWORD, sequencer)
-            root_dir: SalmonFile = drive.getRoot()
+            root_dir: AesFile = drive.getRoot()
             root_dir.listFiles()
-        except SalmonAuthException as ex:
+        except AuthException as ex:
             wrong_password = True
 
         self.assertTrue(wrong_password)
 
     def test_AuthorizedPositive(self):
-        vault_dir: IRealFile = SalmonFSTestHelper.generate_folder(SalmonFSTestHelper.TEST_VAULT_DIRNAME)
-        sequencer: SalmonFileSequencer = SalmonFSTestHelper.create_salmon_file_sequencer()
+        vault_dir: IFile = SalmonFSTestHelper.generate_folder(SalmonFSTestHelper.TEST_VAULT_DIRNAME)
+        sequencer: FileSequencer = SalmonFSTestHelper.create_salmon_file_sequencer()
         drive = SalmonFSTestHelper.create_drive(vault_dir, SalmonFSTestHelper.drive_class_type,
                                                 SalmonCoreTestHelper.TEST_PASSWORD, sequencer)
         wrong_password: bool = False
@@ -122,7 +122,7 @@ class SalmonFSTests(TestCase):
             drive = SalmonFSTestHelper.open_drive(vault_dir, SalmonFSTestHelper.drive_class_type,
                                                   SalmonCoreTestHelper.TEST_PASSWORD, sequencer)
             virtual_root: IVirtualFile = drive.get_root()
-        except SalmonAuthException as ex:
+        except AuthException as ex:
             wrong_password = True
 
         self.assertFalse(wrong_password)
@@ -281,7 +281,7 @@ class SalmonFSTests(TestCase):
         self.assertTrue(import_success)
 
     def test_CatchVaultMaxFiles(self):
-        vault_dir: IRealFile = SalmonFSTestHelper.generate_folder(SalmonFSTestHelper.TEST_VAULT_DIRNAME)
+        vault_dir: IFile = SalmonFSTestHelper.generate_folder(SalmonFSTestHelper.TEST_VAULT_DIRNAME)
         seq_dir = SalmonFSTestHelper.generate_folder(SalmonFSTestHelper.TEST_SEQ_DIRNAME,
                                                      SalmonFSTestHelper.TEST_SEQ_DIR, True)
         seq_file = seq_dir.get_child(SalmonFSTestHelper.TEST_SEQ_FILENAME)
@@ -369,8 +369,8 @@ class SalmonFSTests(TestCase):
         self.assertTrue(failed)
 
     def test_ExportAndImportAuth(self):
-        vault: IRealFile = SalmonFSTestHelper.generate_folder(SalmonFSTestHelper.TEST_VAULT_DIRNAME)
-        import_file_path: IRealFile = SalmonFSTestHelper.TEST_IMPORT_TINY_FILE
+        vault: IFile = SalmonFSTestHelper.generate_folder(SalmonFSTestHelper.TEST_VAULT_DIRNAME)
+        import_file_path: IFile = SalmonFSTestHelper.TEST_IMPORT_TINY_FILE
         SalmonFSTestHelper.export_and_import_auth(vault, import_file_path)
 
     def test_examples(self):
@@ -386,7 +386,7 @@ class SalmonFSTests(TestCase):
         for i in range(0, len(data)):
             data[i] = i
 
-        file: SalmonFile = SalmonFSTestHelper \
+        file: AesFile = SalmonFSTestHelper \
             .should_create_file_without_vault(data,
                                               SalmonCoreTestHelper.TEST_KEY_BYTES,
                                               True, True, 64,
@@ -394,10 +394,10 @@ class SalmonFSTests(TestCase):
                                               SalmonCoreTestHelper.TEST_FILENAME_NONCE_BYTES,
                                               SalmonCoreTestHelper.TEST_NONCE_BYTES,
                                               False, -1, True)
-        file_input_stream: SalmonFileInputStream = SalmonFileInputStream(file,
-                                                                         3, 50,
-                                                                         SalmonFSTestHelper.TEST_FILE_INPUT_STREAM_THREADS,
-                                                                         12)
+        file_input_stream: AesFileInputStream = AesFileInputStream(file,
+                                                                   3, 50,
+                                                                   SalmonFSTestHelper.TEST_FILE_INPUT_STREAM_THREADS,
+                                                                   12)
 
         SalmonFSTestHelper.seek_and_read_file_input_stream(data, file_input_stream, 0, 32, 0, 32)
         SalmonFSTestHelper.seek_and_read_file_input_stream(data, file_input_stream, 220, 8, 2, 8)
@@ -409,8 +409,8 @@ class SalmonFSTests(TestCase):
         file_input_stream.close()
 
     def test_CreateDriveAndOpenFsFolder(self):
-        vault_dir: IRealFile = SalmonFSTestHelper.generate_folder(SalmonFSTestHelper.TEST_VAULT_DIRNAME)
-        sequencer: SalmonFileSequencer = SalmonFSTestHelper.create_salmon_file_sequencer()
+        vault_dir: IFile = SalmonFSTestHelper.generate_folder(SalmonFSTestHelper.TEST_VAULT_DIRNAME)
+        sequencer: FileSequencer = SalmonFSTestHelper.create_salmon_file_sequencer()
         drive = SalmonFSTestHelper.create_drive(vault_dir, SalmonFSTestHelper.drive_class_type,
                                                 SalmonCoreTestHelper.TEST_PASSWORD, sequencer)
         wrong_password: bool = False
@@ -423,7 +423,7 @@ class SalmonFSTests(TestCase):
             drive = SalmonFSTestHelper.open_drive(vault_dir.get_child("fs"), SalmonFSTestHelper.drive_class_type,
                                                   SalmonCoreTestHelper.TEST_PASSWORD, sequencer)
             self.assertTrue(drive.has_config())
-        except SalmonAuthException as ignored:
+        except AuthException as ignored:
             wrong_password = True
 
         self.assertFalse(wrong_password)
@@ -433,10 +433,10 @@ class SalmonFSTests(TestCase):
 
     def test_shouldPerformOperationsRealFiles(self):
         caught: bool = False
-        v_dir: IRealFile = SalmonFSTestHelper.generate_folder(SalmonFSTestHelper.TEST_VAULT_DIRNAME)
-        file: IRealFile = SalmonFSTestHelper.TEST_IMPORT_TINY_FILE
-        file1: IRealFile = file.copy(v_dir)
-        file2: IRealFile
+        v_dir: IFile = SalmonFSTestHelper.generate_folder(SalmonFSTestHelper.TEST_VAULT_DIRNAME)
+        file: IFile = SalmonFSTestHelper.TEST_IMPORT_TINY_FILE
+        file1: IFile = file.copy(v_dir)
+        file2: IFile
         try:
             file2 = file.copy(v_dir)
         except Exception as ex:
@@ -444,20 +444,20 @@ class SalmonFSTests(TestCase):
             caught = True
 
         self.assertEqual(True, caught)
-        file2 = file.copy(v_dir, IRealFile.auto_rename_file(file))
+        file2 = file.copy(v_dir, IFile.auto_rename_file(file))
 
         self.assertEqual(2, v_dir.get_children_count())
-        self.assertTrue(v_dir.get_child(file.get_base_name()).exists())
-        self.assertTrue(v_dir.get_child(file.get_base_name()).is_file())
-        self.assertTrue(v_dir.get_child(file2.get_base_name()).exists())
-        self.assertTrue(v_dir.get_child(file2.get_base_name()).is_file())
+        self.assertTrue(v_dir.get_child(file.get_name()).exists())
+        self.assertTrue(v_dir.get_child(file.get_name()).is_file())
+        self.assertTrue(v_dir.get_child(file2.get_name()).exists())
+        self.assertTrue(v_dir.get_child(file2.get_name()).is_file())
 
-        dir1: IRealFile = v_dir.create_directory("folder1")
+        dir1: IFile = v_dir.create_directory("folder1")
         self.assertTrue(v_dir.get_child("folder1").exists())
         self.assertTrue(v_dir.get_child("folder1").is_directory())
         self.assertEqual(3, v_dir.get_children_count())
 
-        folder1: IRealFile = v_dir.create_directory("folder2")
+        folder1: IFile = v_dir.create_directory("folder2")
         self.assertTrue(folder1.exists())
         renamed: bool = folder1.rename_to("folder3")
         self.assertTrue(renamed)
@@ -473,7 +473,7 @@ class SalmonFSTests(TestCase):
         file1.move(v_dir.get_child("folder1"))
         file2.move(v_dir.get_child("folder1"))
 
-        file3: IRealFile = file.copy(v_dir)
+        file3: IFile = file.copy(v_dir)
         caught = False
         try:
             file3.move(v_dir.get_child("folder1"))
@@ -482,38 +482,38 @@ class SalmonFSTests(TestCase):
             caught = True
 
         self.assertTrue(caught)
-        file4: IRealFile = file3.move(v_dir.get_child("folder1"), IRealFile.auto_rename_file(file3))
+        file4: IFile = file3.move(v_dir.get_child("folder1"), IFile.auto_rename_file(file3))
         self.assertTrue(file4.exists())
         self.assertEqual(3, v_dir.get_child("folder1").get_children_count())
 
-        folder2: IRealFile = v_dir.get_child("folder1").create_directory("folder2")
+        folder2: IFile = v_dir.get_child("folder1").create_directory("folder2")
         for rfile in v_dir.get_child("folder1").list_files():
             rfile.copy_recursively(folder2)
         self.assertEqual(4, v_dir.get_child("folder1").get_children_count())
         self.assertEqual(3, v_dir.get_child("folder1").get_child("folder2").get_children_count())
 
         # recursive copy
-        folder3: IRealFile = v_dir.create_directory("folder4")
+        folder3: IFile = v_dir.create_directory("folder4")
         v_dir.get_child("folder1").copy_recursively(folder3)
         count1: int = SalmonFSTestHelper.get_children_count_recursively(v_dir.get_child("folder1"))
         count2: int = SalmonFSTestHelper.get_children_count_recursively(v_dir.get_child("folder4").get_child("folder1"))
         self.assertEqual(count1, count2)
 
-        dfile: IRealFile = v_dir.get_child("folder4").get_child("folder1").get_child("folder2").get_child(
-            file.get_base_name())
+        dfile: IFile = v_dir.get_child("folder4").get_child("folder1").get_child("folder2").get_child(
+            file.get_name())
         self.assertTrue(dfile.exists())
         self.assertTrue(dfile.delete())
         self.assertEqual(2, v_dir.get_child("folder4").get_child("folder1").get_child("folder2").get_children_count())
-        v_dir.get_child("folder1").copy_recursively(folder3, None, IRealFile.auto_rename_file, False, None)
+        v_dir.get_child("folder1").copy_recursively(folder3, IFile.auto_rename_file)
         self.assertEqual(2, v_dir.get_children_count())
         self.assertEqual(1, v_dir.get_child("folder4").get_children_count())
         self.assertEqual(7, v_dir.get_child("folder4").get_child("folder1").get_children_count())
         self.assertEqual(5, v_dir.get_child("folder4").get_child("folder1").get_child("folder2").get_children_count())
 
-        v_dir.get_child("folder4").get_child("folder1").get_child("folder2").get_child(file.get_base_name()).delete()
-        v_dir.get_child("folder4").get_child("folder1").get_child(file.get_base_name()).delete()
-        failed: list[IRealFile] = []
-        v_dir.get_child("folder1").copy_recursively(folder3, None, None, False,
+        v_dir.get_child("folder4").get_child("folder1").get_child("folder2").get_child(file.get_name()).delete()
+        v_dir.get_child("folder4").get_child("folder1").get_child(file.get_name()).delete()
+        failed: list[IFile] = []
+        v_dir.get_child("folder1").copy_recursively(folder3, None, False,
                                                     lambda failed_file, e: failed.append(failed_file))
         self.assertEqual(4, len(failed))
         self.assertEqual(2, v_dir.get_children_count())
@@ -521,10 +521,10 @@ class SalmonFSTests(TestCase):
         self.assertEqual(7, v_dir.get_child("folder4").get_child("folder1").get_children_count())
         self.assertEqual(5, v_dir.get_child("folder4").get_child("folder1").get_child("folder2").get_children_count())
 
-        v_dir.get_child("folder4").get_child("folder1").get_child("folder2").get_child(file.get_base_name()).delete()
-        v_dir.get_child("folder4").get_child("folder1").get_child(file.get_base_name()).delete()
-        failedmv: list[IRealFile] = []
-        v_dir.get_child("folder1").move_recursively(v_dir.get_child("folder4"), None, IRealFile.auto_rename_file, False,
+        v_dir.get_child("folder4").get_child("folder1").get_child("folder2").get_child(file.get_name()).delete()
+        v_dir.get_child("folder4").get_child("folder1").get_child(file.get_name()).delete()
+        failedmv: list[IFile] = []
+        v_dir.get_child("folder1").move_recursively(v_dir.get_child("folder4"), IFile.auto_rename_file, False,
                                                     lambda failed_file, e1: failedmv.append(failed_file))
         self.assertEqual(4, len(failed))
         self.assertEqual(1, v_dir.get_children_count())
@@ -534,24 +534,24 @@ class SalmonFSTests(TestCase):
 
     def test_shouldReadFromFileMultithreaded(self):
         caught: bool = False
-        vault_dir: IRealFile = SalmonFSTestHelper.generate_folder(SalmonFSTestHelper.TEST_VAULT_DIRNAME)
-        file: IRealFile = SalmonFSTestHelper.TEST_IMPORT_MEDIUM_FILE
+        vault_dir: IFile = SalmonFSTestHelper.generate_folder(SalmonFSTestHelper.TEST_VAULT_DIRNAME)
+        file: IFile = SalmonFSTestHelper.TEST_IMPORT_MEDIUM_FILE
 
         sequencer = SalmonFSTestHelper.create_salmon_file_sequencer()
         drive = SalmonFSTestHelper.create_drive(vault_dir, SalmonFSTestHelper.drive_class_type,
                                                 SalmonCoreTestHelper.TEST_PASSWORD, sequencer)
-        file_commander: SalmonFileCommander = SalmonFileCommander(SalmonFSTestHelper.ENC_IMPORT_BUFFER_SIZE,
-                                                                  SalmonFSTestHelper.ENC_EXPORT_BUFFER_SIZE, 2,
-                                                                  multi_cpu=SalmonFSTestHelper.ENABLE_MULTI_CPU)
-        sfiles: list[SalmonFile] = file_commander.import_files([file],
-                                                               drive.get_root(), False, True,
-                                                               lambda task_progress: None, lambda file: "",
-                                                               lambda file, ex: None)
+        file_commander: AesFileCommander = AesFileCommander(SalmonFSTestHelper.ENC_IMPORT_BUFFER_SIZE,
+                                                            SalmonFSTestHelper.ENC_EXPORT_BUFFER_SIZE, 2,
+                                                            multi_cpu=SalmonFSTestHelper.ENABLE_MULTI_CPU)
+        sfiles: list[AesFile] = file_commander.import_files([file],
+                                                            drive.get_root(), False, True,
+                                                            lambda file: "", lambda file, ex: None,
+                                                            lambda task_progress: None)
         file_commander.close()
 
-        pos: int = abs(random.randint(0, file.length()))
+        pos: int = abs(random.randint(0, file.get_length()))
 
-        file_input_stream1 = SalmonFileInputStream(sfiles[0], 4, 4 * 1024 * 1024, 4, 256 * 1024)
+        file_input_stream1 = AesFileInputStream(sfiles[0], 4, 4 * 1024 * 1024, 4, 256 * 1024)
         file_input_stream1.seek(pos, 1)
         ms1: MemoryStream = MemoryStream()
         SalmonFSTestHelper.copy_stream(file_input_stream1, ms1)
@@ -561,7 +561,7 @@ class SalmonFSTests(TestCase):
         file_input_stream1.close()
         ms1.close()
 
-        file_input_stream2 = SalmonFileInputStream(sfiles[0], 4, 4 * 1024 * 1024, 1, 256 * 1024)
+        file_input_stream2 = AesFileInputStream(sfiles[0], 4, 4 * 1024 * 1024, 1, 256 * 1024)
         file_input_stream2.seek(pos, 1)
         ms2: MemoryStream = MemoryStream()
         SalmonFSTestHelper.copy_stream(file_input_stream2, ms2)

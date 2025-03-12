@@ -1,22 +1,6 @@
 #!/usr/bin/env python3
 from __future__ import annotations
 
-import concurrent
-import math
-import time
-import sys
-from concurrent.futures import ThreadPoolExecutor, Future, ProcessPoolExecutor
-from multiprocessing import shared_memory
-from multiprocessing.shared_memory import SharedMemory
-from typing import Any, Callable
-from typeguard import typechecked
-
-from salmon_core.convert.bit_converter import BitConverter
-from fs.file.ifile import IFile
-from salmon_core.streams.random_access_stream import RandomAccessStream
-from salmon_fs.salmon.salmon_file import SalmonFile
-from fs.drive.utils.file_utils import FileUtils
-
 __license__ = """
 MIT License
 
@@ -41,6 +25,21 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 """
 
+import concurrent
+import math
+import time
+import sys
+from concurrent.futures import ThreadPoolExecutor, Future, ProcessPoolExecutor
+from multiprocessing import shared_memory
+from multiprocessing.shared_memory import SharedMemory
+from typing import Any, Callable
+from typeguard import typechecked
+
+from salmon_core.convert.bit_converter import BitConverter
+from salmon_fs.fs.file.ifile import IFile
+from salmon_core.streams.random_access_stream import RandomAccessStream
+from salmon_fs.salmonfs.file.aes_file import AesFile
+
 
 @typechecked
 def export_file(index: int, final_part_size: int, final_running_threads: int, file_size: int,
@@ -50,7 +49,7 @@ def export_file(index: int, final_part_size: int, final_running_threads: int, fi
                 shm_cancel_name: str,
                 buffer_size: int, key: bytearray,
                 integrity: bool, hash_key: bytearray | None, chunk_size: int):
-    file_to_export: SalmonFile = SalmonFile(real_file_to_export)
+    file_to_export: AesFile = AesFile(real_file_to_export)
     file_to_export.set_encryption_key(key)
     file_to_export.set_verify_integrity(integrity, hash_key)
 
@@ -75,7 +74,7 @@ def export_file(index: int, final_part_size: int, final_running_threads: int, fi
 
 
 @typechecked
-def export_file_part(file_to_export: SalmonFile, exported_file: IFile, start: int, count: int,
+def export_file_part(file_to_export: AesFile, exported_file: IFile, start: int, count: int,
                      total_bytes_written: memoryview | None, buffer_size: int,
                      shm_cancel_name: str | None = None,
                      stopped: list[bool] | None = None,
@@ -143,10 +142,10 @@ def export_file_part(file_to_export: SalmonFile, exported_file: IFile, start: in
 
 
 @typechecked
-class SalmonFileExporter:
+class AesFileExporter:
     __DEFAULT_BUFFER_SIZE = 512 * 1024
     """
-    The global default buffer size to use when reading/writing on the SalmonStream.
+    The global default buffer size to use when reading/writing on the AesStream.
     """
 
     __DEFAULT_THREADS = 1
@@ -202,10 +201,10 @@ class SalmonFileExporter:
 
         self.__buffer_size = buffer_size
         if self.__buffer_size == 0:
-            self.__buffer_size = SalmonFileExporter.__DEFAULT_BUFFER_SIZE
+            self.__buffer_size = AesFileExporter.__DEFAULT_BUFFER_SIZE
         self.__threads = threads
         if self.__threads == 0:
-            self.__threads = SalmonFileExporter.__DEFAULT_THREADS
+            self.__threads = AesFileExporter.__DEFAULT_THREADS
 
         self.__executor = ThreadPoolExecutor(self.__threads) if not multi_cpu else ProcessPoolExecutor(self.__threads)
 
@@ -222,7 +221,7 @@ class SalmonFileExporter:
         """
         return not self.__stopped[0]
 
-    def export_file(self, file_to_export: SalmonFile, export_dir: IFile, filename: str | None,
+    def export_file(self, file_to_export: AesFile, export_dir: IFile, filename: str | None,
                     delete_source: bool,
                     integrity: bool,
                     on_progress: Callable[[int, int], Any] | None) -> IFile | None:
@@ -240,10 +239,10 @@ class SalmonFileExporter:
         if self.is_running():
             Exception("Another export is running")
         if file_to_export.is_directory():
-            raise Exception("Cannot export directory, use SalmonFileCommander instead")
+            raise Exception("Cannot export directory, use AesFileCommander instead")
 
         exported_file: IFile | None = None
-        filename = filename if filename is not None else file_to_export.get_base_name()
+        filename = filename if filename is not None else file_to_export.get_name()
         try:
             self.__stopped[0] = False
             total_bytes_written = [0]
@@ -254,9 +253,9 @@ class SalmonFileExporter:
                 export_dir.mkdir()
             exported_file = export_dir.create_file(filename)
             # we use the drive hash key for integrity verification
-            file_to_export.set_verify_integrity(integrity, None)
+            file_to_export.set_verify_integrity(integrity)
 
-            file_size: int = file_to_export.get_size()
+            file_size: int = file_to_export.get_length()
             running_threads: int = 1
             part_size: int = file_size
 
@@ -266,7 +265,7 @@ class SalmonFileExporter:
             target_stream.close()
 
             # if we want to check integrity we align to the chunk size otherwise to the AES Block
-            min_part_size: int = FileUtils.get_minimum_part_size(file_to_export)
+            min_part_size: int = file_to_export.get_minimum_part_size()
             if part_size > min_part_size and self.__threads > 1:
                 part_size = int(math.ceil(file_size / float(self.__threads)))
                 if part_size > min_part_size:
@@ -301,13 +300,13 @@ class SalmonFileExporter:
         self.__stopped[0] = True
         return exported_file
 
-    def __submit_export_jobs(self, running_threads: int, part_size: int, file_to_export: SalmonFile,
+    def __submit_export_jobs(self, running_threads: int, part_size: int, file_to_export: AesFile,
                              exported_file: IFile,
                              integrity: bool, on_progress: Callable[[int, int], Any] | None):
 
         shm_total_bytes_read = shared_memory.SharedMemory(create=True, size=8 * running_threads)
         shm_total_bytes_read_name = shm_total_bytes_read.name
-        file_size: int = file_to_export.get_size()
+        file_size: int = file_to_export.get_length()
         shm_cancel_name = self.__shm_cancel.name
         self.__shm_cancel.buf[0] = 0
 

@@ -29,7 +29,7 @@ from wrapt import synchronized
 import sys
 
 from salmon_core.convert.bit_converter import BitConverter
-from fs.file.ifile import IFile
+from salmon_fs.fs.file.ifile import IFile
 from salmon_core.streams.buffered_io_wrapper import BufferedIOWrapper
 from salmon_core.streams.memory_stream import MemoryStream
 from salmon_core.streams.random_access_stream import RandomAccessStream
@@ -62,7 +62,7 @@ class FileSequencer(INonceSequencer):
         self.__sequenceFile = sequence_file
         self.__serializer = serializer
         if not sequence_file.exists():
-            sequence_file.get_parent().create_file(sequence_file.get_base_name())
+            sequence_file.get_parent().create_file(sequence_file.get_name())
             self._save_sequence_file(None)
 
     def get_sequence_file(self) -> IFile:

@@ -1,15 +1,5 @@
 #!/usr/bin/env python3
 from __future__ import annotations
-from concurrent.futures import CancelledError
-from typing import Callable, Any
-from typeguard import typechecked
-
-from fs.file.ifile import IFile
-from salmon_fs.salmon.salmon_file import SalmonFile
-from salmon.sequence.sequence_exception import SequenceException
-from salmon_fs.salmon.utils.salmon_file_exporter import SalmonFileExporter
-from salmon_fs.salmon.utils.salmon_file_importer import SalmonFileImporter
-from fs.drive.utils.file_searcher import FileSearcher
 
 __license__ = """
 MIT License
@@ -35,9 +25,20 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 """
 
+from concurrent.futures import CancelledError
+from typing import Callable, Any
+from typeguard import typechecked
+
+from salmon_fs.fs.file.ifile import IFile
+from salmon_fs.salmonfs.file.aes_file import AesFile
+from salmon.sequence.sequence_exception import SequenceException
+from salmon_fs.salmonfs.drive.utils.aes_file_exporter import AesFileExporter
+from salmon_fs.salmonfs.drive.utils.aes_file_importer import AesFileImporter
+from salmon_fs.fs.drive.utils.file_searcher import FileSearcher
+
 
 @typechecked
-class SalmonFileCommander:
+class AesFileCommander:
     """
     Facade class for file operations.
     """
@@ -50,13 +51,13 @@ class SalmonFileCommander:
         :param export_buffer_size: The buffer size to use for exporting files.
         :multi_cpu:  Utilize multiple cpus. Windows does not have a fast fork() so it has a very slow startup
         """
-        self.__fileImporter: SalmonFileImporter
-        self.__fileExporter: SalmonFileExporter
+        self.__fileImporter: AesFileImporter
+        self.__fileExporter: AesFileExporter
         self.__fileSearcher: FileSearcher
         self.__stopJobs: bool = False
 
-        self.__fileImporter = SalmonFileImporter(import_buffer_size, threads, multi_cpu)
-        self.__fileExporter = SalmonFileExporter(export_buffer_size, threads, multi_cpu)
+        self.__fileImporter = AesFileImporter(import_buffer_size, threads, multi_cpu)
+        self.__fileExporter = AesFileExporter(export_buffer_size, threads, multi_cpu)
         self.__fileSearcher = FileSearcher()
 
     def get_file_importer(self):
@@ -65,11 +66,11 @@ class SalmonFileCommander:
     def get_file_exporter(self):
         return self.__fileExporter
 
-    def import_files(self, files_to_import: list[IFile], import_dir: SalmonFile,
+    def import_files(self, files_to_import: list[IFile], import_dir: AesFile,
                      delete_source: bool, integrity: bool,
-                     on_progress_changed: Callable[[SalmonFileCommander.RealFileTaskProgress], Any] = None,
-                     auto_rename: Callable[[IFile], str] = None,
-                     on_failed: Callable[[IFile, Exception], Any] = None) -> list[SalmonFile]:
+                     auto_rename: Callable[[IFile], str] | None = None,
+                     on_failed: Callable[[IFile, Exception], Any] | None = None,
+                     on_progress_changed: Callable[[AesFileCommander.RealFileTaskProgress], Any] | None = None) -> list[AesFile]:
         """
         Import files to the drive.
         
@@ -83,7 +84,7 @@ class SalmonFileCommander:
         :return: The imported files if completes successfully.
         :raises Exception:         """
         self.__stopJobs = False
-        imported_files: list[SalmonFile] = []
+        imported_files: list[AesFile] = []
 
         total: list[int] = [0]
         for i in range(0, len(files_to_import)):
@@ -91,7 +92,7 @@ class SalmonFileCommander:
                 break
             total[0] += self.__get_real_files_count_recursively(files_to_import[i])
         count: list[int] = [1]
-        existing_files: dict[str, SalmonFile] = self.__get_existing_salmon_files(import_dir)
+        existing_files: dict[str, AesFile] = self.__get_existing_salmon_files(import_dir)
         for i in range(0, len(files_to_import)):
             if self.__stopJobs:
                 break
@@ -103,37 +104,37 @@ class SalmonFileCommander:
 
         return imported_files
 
-    def __get_existing_salmon_files(self, import_dir: SalmonFile) -> dict[str, SalmonFile]:
-        files: dict[str, SalmonFile] = {}
+    def __get_existing_salmon_files(self, import_dir: AesFile) -> dict[str, AesFile]:
+        files: dict[str, AesFile] = {}
         for file in import_dir.list_files():
             if self.__stopJobs:
                 break
             try:
-                files[file.get_base_name()] = file
+                files[file.get_name()] = file
             except Exception as ignored:
                 pass
 
         return files
 
-    def __import_recursively(self, file_to_import: IFile, import_dir: SalmonFile,
+    def __import_recursively(self, file_to_import: IFile, import_dir: AesFile,
                              delete_source: bool, integrity: bool,
-                             on_progress_changed: Callable[[SalmonFileCommander.RealFileTaskProgress], Any],
+                             on_progress_changed: Callable[[AesFileCommander.RealFileTaskProgress], Any],
                              auto_rename: Callable[[IFile], str], on_failed: Callable[[IFile, Exception], Any],
-                             imported_files: list[SalmonFile], count: list[int], total: list[int],
-                             existing_files: dict[str, SalmonFile]):
-        sfile: SalmonFile | None = existing_files.get(
-            file_to_import.get_base_name()) if file_to_import.get_base_name() in existing_files else None
+                             imported_files: list[AesFile], count: list[int], total: list[int],
+                             existing_files: dict[str, AesFile]):
+        sfile: AesFile | None = existing_files.get(
+            file_to_import.get_name()) if file_to_import.get_name() in existing_files else None
         if file_to_import.is_directory():
             if on_progress_changed is not None:
-                on_progress_changed(SalmonFileCommander.RealFileTaskProgress(file_to_import, 0, 1, count[0], total[0]))
+                on_progress_changed(AesFileCommander.RealFileTaskProgress(file_to_import, 0, 1, count[0], total[0]))
             if sfile is None or not sfile.exists():
-                sfile = import_dir.create_directory(file_to_import.get_base_name())
+                sfile = import_dir.create_directory(file_to_import.get_name())
             elif sfile is not None and sfile.exists() and sfile.is_file() and auto_rename is not None:
                 sfile = import_dir.create_directory(auto_rename(file_to_import))
             if on_progress_changed is not None:
-                on_progress_changed(SalmonFileCommander.RealFileTaskProgress(file_to_import, 1, 1, count[0], total[0]))
+                on_progress_changed(AesFileCommander.RealFileTaskProgress(file_to_import, 1, 1, count[0], total[0]))
             count[0] += 1
-            n_existing_files: dict[str, SalmonFile] = self.__get_existing_salmon_files(sfile)
+            n_existing_files: dict[str, AesFile] = self.__get_existing_salmon_files(sfile)
             for child in file_to_import.list_files():
                 if self.__stopJobs:
                     break
@@ -144,7 +145,7 @@ class SalmonFileCommander:
                 file_to_import.delete()
         else:
             try:
-                filename: str = file_to_import.get_base_name()
+                filename: str = file_to_import.get_name()
                 if sfile is not None and (sfile.exists() or sfile.is_directory()) and auto_rename is not None:
                     filename = auto_rename(file_to_import)
                 sfile = self.__fileImporter.import_file(file_to_import, import_dir, filename, delete_source, integrity,
@@ -154,7 +155,7 @@ class SalmonFileCommander:
                                                                                          total_bytes2,
                                                                                          count, total[0],
                                                                                          on_progress_changed))
-                existing_files[sfile.get_base_name()] = sfile
+                existing_files[sfile.get_name()] = sfile
                 imported_files.append(sfile)
                 count[0] += 1
             except SequenceException as ex:
@@ -163,10 +164,11 @@ class SalmonFileCommander:
                 if on_failed is not None:
                     on_failed(file_to_import, ex)
 
-    def export_files(self, files_to_export: list[SalmonFile], export_dir: IFile,
+    def export_files(self, files_to_export: list[AesFile], export_dir: IFile,
                      delete_source: bool, integrity: bool,
-                     on_progress_changed: Callable[[SalmonFileCommander.SalmonFileTaskProgress], Any],
-                     auto_rename: Callable[[IFile], str], on_failed: Callable[[SalmonFile, Exception], Any]) \
+                     auto_rename: Callable[[IFile], str] | None = None,
+                     on_failed: Callable[[AesFile, Exception], Any] | None = None,
+                     on_progress_changed: Callable[[AesFileCommander.AesFileTaskProgress], Any] | None = None) \
             -> list[IFile]:
         """
         Export a file from a drive.
@@ -206,27 +208,27 @@ class SalmonFileCommander:
     def __get_existing_real_files(self, export_dir: IFile) -> dict[str, IFile]:
         files: dict[str, IFile] = {}
         for file in export_dir.list_files():
-            files[file.get_base_name()] = file
+            files[file.get_name()] = file
 
         return files
 
-    def __export_recursively(self, file_to_export: SalmonFile, export_dir: IFile,
+    def __export_recursively(self, file_to_export: AesFile, export_dir: IFile,
                              delete_source: bool, integrity: bool,
-                             on_progress_changed: Callable[[SalmonFileCommander.SalmonFileTaskProgress], Any],
+                             on_progress_changed: Callable[[AesFileCommander.AesFileTaskProgress], Any],
                              auto_rename: Callable[[IFile], str],
-                             on_failed: Callable[[SalmonFile, Exception], Any],
+                             on_failed: Callable[[AesFile, Exception], Any],
                              exported_files: list[IFile], count: list[int], total: int,
                              existing_files: dict[str, IFile]):
         rfile: IFile | None = existing_files.get(
-            file_to_export.get_base_name()) if file_to_export.get_base_name() in existing_files else None
+            file_to_export.get_name()) if file_to_export.get_name() in existing_files else None
 
         if file_to_export.is_directory():
             if rfile is None or not rfile.exists():
-                rfile = export_dir.create_directory(file_to_export.get_base_name())
+                rfile = export_dir.create_directory(file_to_export.get_name())
             elif rfile is not None and rfile.is_file() and auto_rename is not None:
                 rfile = export_dir.create_directory(auto_rename(rfile))
             if on_progress_changed is not None:
-                on_progress_changed(SalmonFileCommander.SalmonFileTaskProgress(file_to_export, 1, 1, count[0], total))
+                on_progress_changed(AesFileCommander.AesFileTaskProgress(file_to_export, 1, 1, count[0], total))
             count[0] += 1
             n_existing_files: dict[str, IFile] = self.__get_existing_real_files(rfile)
             for child in file_to_export.list_files():
@@ -239,14 +241,14 @@ class SalmonFileCommander:
                 file_to_export.delete()
         else:
             try:
-                filename: str = file_to_export.get_base_name()
+                filename: str = file_to_export.get_name()
                 if rfile is not None and rfile.exists() and auto_rename is not None:
                     filename = auto_rename(rfile)
                 rfile = self.__fileExporter.export_file(file_to_export, export_dir, filename, delete_source, integrity,
                                                         lambda v_bytes, total_bytes: self.__notify_salmon_file_progress(
                                                             file_to_export, v_bytes, total_bytes, count, total,
                                                             on_progress_changed))
-                existing_files[rfile.get_base_name()] = rfile
+                existing_files[rfile.get_name()] = rfile
                 exported_files.append(rfile)
                 count[0] += 1
             except SequenceException as ex:
@@ -255,7 +257,7 @@ class SalmonFileCommander:
                 if on_failed is not None:
                     on_failed(file_to_export, ex)
 
-    def __get_salmon_files_count_recursively(self, file: SalmonFile) -> int:
+    def __get_salmon_files_count_recursively(self, file: AesFile) -> int:
         count: int = 1
         if file.is_directory():
             for child in file.list_files():
@@ -274,9 +276,9 @@ class SalmonFileCommander:
 
         return count
 
-    def delete_files(self, files_to_delete: list[SalmonFile],
-                     on_progress_changed: Callable[[SalmonFileCommander.SalmonFileTaskProgress], Any],
-                     on_failed: Callable[[SalmonFile, Exception], Any]):
+    def delete_files(self, files_to_delete: list[AesFile],
+                     on_failed: Callable[[AesFile, Exception], Any] | None = None,
+                     on_progress_changed: Callable[[AesFileCommander.AesFileTaskProgress], Any] | None = None):
         """
         Delete files.
         
@@ -291,31 +293,32 @@ class SalmonFileCommander:
             if self.__stopJobs:
                 break
             total += self.__get_salmon_files_count_recursively(files_to_delete[i])
-        for salmonFile in files_to_delete:
+        for aes_file in files_to_delete:
             if self.__stopJobs:
                 break
             final_total: int = total
-            salmonFile.delete_recursively(
-                lambda file, position, length: self.notify_delete_progress(file, position, length, count, final_total,
-                                                                           on_progress_changed), on_failed)
+            aes_file.delete_recursively(
+                lambda file, position, length: self.__notify_delete_progress(file, position, length, count, final_total,
+                                                                             on_progress_changed), on_failed)
 
-    def notify_delete_progress(self, file: SalmonFile, position: int, length: int, count: list[int], final_total: int,
-                               on_progress_changed: Callable[[SalmonFileCommander.SalmonFileTaskProgress], Any]):
+    def __notify_delete_progress(self, file: AesFile, position: int, length: int, count: list[int], final_total: int,
+                                 on_progress_changed: Callable[[AesFileCommander.AesFileTaskProgress], Any]):
         if self.__stopJobs:
             raise CancelledError()
         if on_progress_changed is not None:
             try:
                 on_progress_changed(
-                    SalmonFileCommander.SalmonFileTaskProgress(file, position, length, count[0], final_total))
+                    AesFileCommander.AesFileTaskProgress(file, position, length, count[0], final_total))
 
             except Exception as ex:
                 if position == length:
                     count[0] += 1
 
-    def copy_files(self, files_to_copy: list[SalmonFile], v_dir: SalmonFile, move: bool,
-                   on_progress_changed: Callable[[SalmonFileCommander.SalmonFileTaskProgress], Any],
-                   auto_rename: Callable[[SalmonFile, str], Any], auto_rename_folders: bool,
-                   on_failed: Callable[[SalmonFile, Exception], Any]):
+    def copy_files(self, files_to_copy: list[AesFile], v_dir: AesFile, move: bool,
+                   auto_rename: Callable[[AesFile, str], Any] | None = None,
+                   auto_rename_folders: bool = False,
+                   on_failed: Callable[[AesFile, Exception], Any] | None = None,
+                   on_progress_changed: Callable[[AesFileCommander.AesFileTaskProgress], Any] | None = None):
         """
         Copy files to another directory.
         
@@ -335,31 +338,31 @@ class SalmonFileCommander:
                 break
             total += self.__get_salmon_files_count_recursively(files_to_copy[i])
         final_total: int = total
-        for salmonFile in files_to_copy:
+        for aes_file in files_to_copy:
             if self.__stopJobs:
                 break
-            if v_dir.get_real_file().get_path().startswith(salmonFile.get_real_file().get_path()):
+            if v_dir.get_real_file().get_path().startswith(aes_file.get_real_file().get_path()):
                 continue
 
             if self.__stopJobs:
                 break
 
             if move:
-                salmonFile.move_recursively(v_dir,
-                                            lambda file, position, length:
-                                            self.__notify_move_progress(file, position,
-                                                                        length, count,
-                                                                        final_total,
-                                                                        on_progress_changed),
-                                            auto_rename, auto_rename_folders, on_failed)
+                aes_file.move_recursively(v_dir,
+                                          lambda file, position, length:
+                                          self.__notify_move_progress(file, position,
+                                                                      length, count,
+                                                                      final_total,
+                                                                      on_progress_changed),
+                                          auto_rename, auto_rename_folders, on_failed)
             else:
-                salmonFile.copy_recursively(v_dir,
-                                            lambda file, position, length:
-                                            self.__notify_copy_progress(file, position,
-                                                                        length, count,
-                                                                        final_total,
-                                                                        on_progress_changed),
-                                            auto_rename, auto_rename_folders, on_failed)
+                AesFile.copy_recursively(v_dir,
+                                         lambda file, position, length:
+                                         self.__notify_copy_progress(file, position,
+                                                                     length, count,
+                                                                     final_total,
+                                                                     on_progress_changed),
+                                         auto_rename, auto_rename_folders, on_failed)
 
     def cancel(self):
         """
@@ -400,9 +403,9 @@ class SalmonFileCommander:
         """
         self.__fileSearcher.stop()
 
-    def search(self, v_dir: SalmonFile, terms: str, any_term: bool,
+    def search(self, v_dir: AesFile, terms: str, any_term: bool,
                on_result_found: FileSearcher.OnResultFoundListener,
-               on_search_event: Callable[[FileSearcher.SearchEvent], Any]) -> [SalmonFile]:
+               on_search_event: Callable[[FileSearcher.SearchEvent], Any]) -> [AesFile]:
         """
         Search
         
@@ -424,7 +427,7 @@ class SalmonFileCommander:
         """
         return self.__stopJobs
 
-    def __get_files(self, files: list[SalmonFile]) -> int:
+    def __get_files(self, files: list[AesFile]) -> int:
         """
         Get number of files recursively for the files provided.
         
@@ -445,7 +448,7 @@ class SalmonFileCommander:
         self.__fileImporter.close()
         self.__fileExporter.close()
 
-    def rename_file(self, ifile: SalmonFile, new_filename: str):
+    def rename_file(self, ifile: AesFile, new_filename: str):
         """
         Rename an encrypted file
         
@@ -475,14 +478,14 @@ class SalmonFileCommander:
             self.__processedFiles = processed_files
             self.__totalFiles = total_files
 
-    class SalmonFileTaskProgress(FileTaskProgress):
-        def get_file(self) -> SalmonFile:
+    class AesFileTaskProgress(FileTaskProgress):
+        def get_file(self) -> AesFile:
             return self.__file
 
-        def __init__(self, file: SalmonFile, processed_bytes: int, total_bytes: int,
+        def __init__(self, file: AesFile, processed_bytes: int, total_bytes: int,
                      processed_files: int, total_files: int):
             super().__init__(processed_bytes, total_bytes, processed_files, total_files)
-            self.__file: SalmonFile | None = None
+            self.__file: AesFile | None = None
             self.__file = file
 
     class RealFileTaskProgress(FileTaskProgress):
@@ -497,41 +500,41 @@ class SalmonFileCommander:
 
     def __notify_real_file_progress(self, file_to_import: IFile, v_bytes: int, total_bytes: int, count: list[int],
                                     total: int,
-                                    on_progress_changed: Callable[[SalmonFileCommander.RealFileTaskProgress], Any]):
+                                    on_progress_changed: Callable[[AesFileCommander.RealFileTaskProgress], Any]):
         if on_progress_changed is not None:
             on_progress_changed(
-                SalmonFileCommander.RealFileTaskProgress(file_to_import, v_bytes, total_bytes, count[0], total))
+                AesFileCommander.RealFileTaskProgress(file_to_import, v_bytes, total_bytes, count[0], total))
 
-    def __notify_salmon_file_progress(self, file_to_export: SalmonFile, v_bytes: int, total_bytes: int,
+    def __notify_salmon_file_progress(self, file_to_export: AesFile, v_bytes: int, total_bytes: int,
                                       count: list[int],
                                       total: int,
-                                      on_progress_changed: Callable[[SalmonFileCommander.SalmonFileTaskProgress], Any]):
+                                      on_progress_changed: Callable[[AesFileCommander.AesFileTaskProgress], Any]):
         if on_progress_changed is not None:
             on_progress_changed(
-                SalmonFileCommander.SalmonFileTaskProgress(file_to_export, v_bytes, total_bytes, count[0], total))
+                AesFileCommander.AesFileTaskProgress(file_to_export, v_bytes, total_bytes, count[0], total))
 
-    def __notify_copy_progress(self, file: SalmonFile, position: int, length: int, count: list[int], final_total: int,
-                               on_progress_changed: Callable[[SalmonFileCommander.SalmonFileTaskProgress], Any]):
+    def __notify_copy_progress(self, file: AesFile, position: int, length: int, count: list[int], final_total: int,
+                               on_progress_changed: Callable[[AesFileCommander.AesFileTaskProgress], Any]):
 
         if self.__stopJobs:
             raise CancelledError()
         if on_progress_changed is not None:
             try:
                 on_progress_changed(
-                    SalmonFileCommander.SalmonFileTaskProgress(file, position, length, count[0], final_total))
+                    AesFileCommander.AesFileTaskProgress(file, position, length, count[0], final_total))
             except Exception as ignored:
                 pass
         if position == length:
             count[0] += 1
 
-    def __notify_move_progress(self, file: SalmonFile, position: int, length: int, count: list[int], final_total: int,
-                               on_progress_changed: Callable[[SalmonFileCommander.SalmonFileTaskProgress], Any]):
+    def __notify_move_progress(self, file: AesFile, position: int, length: int, count: list[int], final_total: int,
+                               on_progress_changed: Callable[[AesFileCommander.AesFileTaskProgress], Any]):
         if self.__stopJobs:
             raise CancelledError()
         if on_progress_changed is not None:
             try:
                 on_progress_changed(
-                    SalmonFileCommander.SalmonFileTaskProgress(file, position, length, count[0], final_total))
+                    AesFileCommander.AesFileTaskProgress(file, position, length, count[0], final_total))
             except Exception as ex:
                 pass
         if position == length:
