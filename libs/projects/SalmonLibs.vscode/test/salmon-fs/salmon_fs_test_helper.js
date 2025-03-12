@@ -352,8 +352,10 @@ export class SalmonFSTestHelper {
         aesFile = await rootDir.getChild(await aesFile.getName());
 		
 		let chunkSize = await aesFile.getFileChunkSize();
-        if (chunkSize && chunkSize > 0 && !verifyFileIntegrity)
-            await aesFile.setVerifyIntegrity(false, null);
+        if (chunkSize == 0 || !verifyFileIntegrity)
+            await aesFile.setVerifyIntegrity(false);
+		else
+			await aesFile.setVerifyIntegrity(true);
 		
         expect(await aesFile.exists()).toBeTruthy();
         let hashPostImport = await SalmonFSTestHelper.getChecksumStream(await aesFile.getInputStream());
@@ -383,8 +385,10 @@ export class SalmonFSTestHelper {
         if (bitflip)
             await SalmonFSTestHelper.flipBit(aesFile, flipPosition);
 		let chunkSize2 = await aesFile.getFileChunkSize();
-        if (chunkSize2 != null && chunkSize2 > 0 && verifyFileIntegrity)
-            await aesFile.setVerifyIntegrity(true, null);
+        if (chunkSize2 > 0 && verifyFileIntegrity)
+            await aesFile.setVerifyIntegrity(true);
+		else
+			await aesFile.setVerifyIntegrity(false);
         let exportFile = await SalmonFSTestHelper.fileExporter.exportFile(aesFile, await drive.getExportDir(), null, false, verifyFileIntegrity, printExportProgress);
         let hashPostExport = await SalmonFSTestHelper.getChecksum(exportFile);
         if (shouldBeEqual) {
