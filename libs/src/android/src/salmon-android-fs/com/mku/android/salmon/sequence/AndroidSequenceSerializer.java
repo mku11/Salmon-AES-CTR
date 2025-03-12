@@ -48,7 +48,7 @@ import javax.xml.xpath.XPathConstants;
 import javax.xml.xpath.XPathFactory;
 
 /**
- * Sequence parser for Android.
+ * Serializer for Android file-based nonce sequencer.
  */
 public class AndroidSequenceSerializer implements INonceSequenceSerializer {
     /**

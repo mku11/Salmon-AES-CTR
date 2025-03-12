@@ -1,4 +1,4 @@
-package com.mku.android.salmon.media;
+package com.mku.android.salmonfs.media;
 /*
 MIT License
 
@@ -39,7 +39,7 @@ import java.io.IOException;
 import java.io.InputStream;
 
 /**
- * This class provides a parallel processing seekable source for encrypted media content
+ * Seekable source for encrypted media content.
  */
 public class SalmonMediaDataSource extends MediaDataSource {
     private static final String TAG = SalmonMediaDataSource.class.getName();
@@ -67,7 +67,7 @@ public class SalmonMediaDataSource extends MediaDataSource {
                                  int buffers, int bufferSize, int threads, int backOffset) throws Exception {
         this.activity = activity;
         this.aesFile = aesFile;
-        this.size = aesFile.getSize();
+        this.size = aesFile.getLength();
 
         if (enableMultiThreaded)
             this.stream = new AesFileInputStream(aesFile, buffers, bufferSize, threads, backOffset);

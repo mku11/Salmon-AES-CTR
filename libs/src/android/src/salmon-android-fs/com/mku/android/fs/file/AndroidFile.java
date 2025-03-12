@@ -31,7 +31,7 @@ import android.provider.DocumentsContract;
 
 import androidx.documentfile.provider.DocumentFile;
 
-import com.mku.android.streams.AndroidFileStream;
+import com.mku.android.fs.streams.AndroidFileStream;
 import com.mku.android.salmonfs.drive.AndroidDrive;
 import com.mku.fs.file.IFile;
 import com.mku.func.BiConsumer;
@@ -214,7 +214,7 @@ public class AndroidFile implements IFile {
      *
      * @return Last modified date in milliseconds
      */
-    public long lastModified() {
+    public long getLastDateModified() {
         if (_lastModified != null)
             return _lastModified;
         _lastModified = documentFile.lastModified();
@@ -226,7 +226,7 @@ public class AndroidFile implements IFile {
      *
      * @return The size
      */
-    public long length() {
+    public long getLength() {
         if (_length != null)
             return _length;
         _length = documentFile.length();

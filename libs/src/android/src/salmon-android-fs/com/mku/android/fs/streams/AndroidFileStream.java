@@ -1,4 +1,4 @@
-package com.mku.android.streams;
+package com.mku.android.fs.streams;
 /*
 MIT License
 
@@ -73,8 +73,8 @@ public class AndroidFileStream extends RandomAccessStream {
      * Get the length of the stream.
      * @return The length
      */
-    public long length() {
-        return file.length();
+    public long getLength() {
+        return file.getLength();
     }
 
     /**
@@ -174,7 +174,7 @@ public class AndroidFileStream extends RandomAccessStream {
         else if (origin == SeekOrigin.Current)
             pos += offset;
         else if (origin == SeekOrigin.End)
-            pos = file.length() - offset;
+            pos = file.getLength() - offset;
 
         fileChannel.position(pos);
         return fileChannel.position();
