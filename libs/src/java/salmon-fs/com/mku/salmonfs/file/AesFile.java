@@ -274,7 +274,7 @@ public class AesFile implements IVirtualFile {
             throw new IOException("No nonce provided and no nonce found in file");
 
         AesStream stream = new AesStream(getEncryptionKey(), nonceBytes,
-                EncryptionMode.Encrypt, realStream, EncryptionFormat.Salmon,
+                EncryptionMode.Encrypt, realStream, format,
                 integrity, getHashKey(), getRequestedChunkSize());
         stream.setAllowRangeWrite(overwrite);
         return stream;
