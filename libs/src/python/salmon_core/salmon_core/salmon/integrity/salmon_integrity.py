@@ -25,8 +25,8 @@ SOFTWARE.
 
 from builtins import int
 
-from salmon_core.integrity.ihash_provider import IHashProvider
-from salmon_core.integrity.integrity_exception import IntegrityException
+from salmon.integrity.ihash_provider import IHashProvider
+from salmon.integrity.integrity_exception import IntegrityException
 from salmon_core.salmon.salmon_generator import SalmonGenerator
 from salmon_core.salmon.salmon_security_exception import SalmonSecurityException
 

@@ -35,10 +35,10 @@ sys.path.append(os.path.dirname(__file__) + '/../../src/python/salmon_core')
 sys.path.append(os.path.dirname(__file__) + '/../../src/python/salmon_fs')
 sys.path.append(os.path.dirname(__file__) + '/../salmon_core_test_python')
 from salmon_core.streams.memory_stream import MemoryStream
-from salmon_core.integrity.integrity_exception import IntegrityException
+from salmon.integrity.integrity_exception import IntegrityException
 from salmon_core.salmon.streams.provider_type import ProviderType
 from salmon_core.salmon.streams.salmon_stream import SalmonStream
-from salmon_fs.file.ivirtual_file import IVirtualFile
+from fs.file import IVirtualFile
 from salmon_fs.salmon.salmon_auth_exception import SalmonAuthException
 from salmon_fs.salmon.salmon_file import SalmonFile, IRealFile
 from salmon_fs.salmon.streams.salmon_file_input_stream import SalmonFileInputStream
@@ -418,7 +418,7 @@ class SalmonFSTests(TestCase):
         root_dir.list_files()
         drive.close()
 
-        # reopen but open the fs folder instead it should still login
+        # reopen but open the file folder instead it should still login
         try:
             drive = SalmonFSTestHelper.open_drive(vault_dir.get_child("fs"), SalmonFSTestHelper.drive_class_type,
                                                   SalmonCoreTestHelper.TEST_PASSWORD, sequencer)

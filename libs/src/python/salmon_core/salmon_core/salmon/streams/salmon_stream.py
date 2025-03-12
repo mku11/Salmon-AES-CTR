@@ -29,9 +29,9 @@ from typeguard import typechecked
 
 from salmon_core.streams.memory_stream import MemoryStream
 from salmon_core.streams.random_access_stream import RandomAccessStream
-from salmon_core.integrity.hmac_sha256_provider import HmacSHA256Provider
+from salmon.integrity.hmac_sha256_provider import HmacSHA256Provider
 from salmon_core.salmon.integrity.salmon_integrity import SalmonIntegrity
-from salmon_core.integrity.integrity_exception import IntegrityException
+from salmon.integrity.integrity_exception import IntegrityException
 from salmon_core.salmon.streams.encryption_mode import EncryptionMode
 from salmon_core.salmon.streams.provider_type import ProviderType
 from salmon_core.salmon.salmon_generator import SalmonGenerator

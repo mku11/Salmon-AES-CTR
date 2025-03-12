@@ -33,7 +33,7 @@ import sys
 from salmon_core.streams.memory_stream import MemoryStream
 from salmon_core.streams.random_access_stream import RandomAccessStream
 from salmon_core.salmon.integrity.salmon_integrity import SalmonIntegrity
-from salmon_core.integrity.integrity_exception import IntegrityException
+from salmon.integrity.integrity_exception import IntegrityException
 from salmon_core.salmon.streams.encryption_mode import EncryptionMode
 from salmon_core.salmon.streams.salmon_stream import SalmonStream
 from salmon_core.salmon.salmon_generator import SalmonGenerator

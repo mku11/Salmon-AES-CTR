@@ -24,7 +24,7 @@ SOFTWARE.
 """
 import ctypes
 
-from salmon_core.bridge.inative_proxy import INativeProxy
+from salmon.bridge.inative_proxy import INativeProxy
 
 from typeguard import typechecked
 import sys
@@ -43,7 +43,7 @@ class NativeProxy(INativeProxy):
 
     __library_path: str = "salmon.dll"
     """
-    The dll path for the salmon library.
+    The dll path for the salmonfs library.
     """
 
     @staticmethod

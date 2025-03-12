@@ -52,20 +52,20 @@ from salmon_fs.salmon.utils.salmon_file_commander import SalmonFileCommander
 from salmon_fs.salmon.drive.py_ws_drive import PyWSDrive
 from salmon_fs.salmon.drive.py_http_drive import PyHttpDrive
 from salmon_fs.salmon.drive.py_drive import PyDrive
-from salmon_fs.file.py_http_file_stream import PyHttpFileStream
-from salmon_fs.file.py_http_file import PyHttpFile
-from salmon_fs.file.py_ws_file import Credentials, PyWSFile
-from salmon_fs.file.py_file import PyFile
-from salmon_fs.file.ireal_file import IRealFile
+from fs.streams.py_http_file_stream import PyHttpFileStream
+from fs.file.py_http_file import PyHttpFile
+from fs.file.py_ws_file import Credentials, PyWSFile
+from fs.file.py_file import PyFile
+from fs.file.ireal_file import IRealFile
 from salmon_fs.salmon.salmon_drive import SalmonDrive
 from salmon_fs.salmon.salmon_file import SalmonFile
 from salmon_fs.salmon.streams.salmon_file_input_stream import SalmonFileInputStream
-from salmon_fs.sequence.inonce_sequence_serializer import INonceSequenceSerializer
+from salmon.sequence.inonce_sequence_serializer import INonceSequenceSerializer
 from salmon_fs.salmon.sequence.salmon_file_sequencer import SalmonFileSequencer
-from salmon_fs.salmon.sequence.salmon_sequence_serializer import SalmonSequenceSerializer
+from salmon.sequence.salmon_sequence_serializer import SalmonSequenceSerializer
 from salmon_fs.salmon.utils.salmon_file_exporter import SalmonFileExporter
 from salmon_fs.salmon.utils.salmon_file_importer import SalmonFileImporter
-from salmon_fs.utils.file_searcher import FileSearcher
+from fs.drive.utils.file_searcher import FileSearcher
 from salmon_fs.salmon.salmon_auth_config import SalmonAuthConfig
 
 from salmon_core_test_helper import SalmonCoreTestHelper
@@ -112,7 +112,7 @@ class SalmonFSTestHelper:
     HTTP_TEST_DIRNAME = "httpserv"
     HTTP_VAULT_DIRNAME = "vault"
     HTTP_VAULT_DIR_URL = HTTP_SERVER_VIRTUAL_URL + "/" + HTTP_TEST_DIRNAME + "/" + HTTP_VAULT_DIRNAME
-    HTTP_VAULT_FILES_DIR_URL = HTTP_VAULT_DIR_URL + "/fs"
+    HTTP_VAULT_FILES_DIR_URL = HTTP_VAULT_DIR_URL + "/file"
 
     # performance
     ENC_IMPORT_BUFFER_SIZE = 512 * 1024
@@ -293,7 +293,7 @@ class SalmonFSTestHelper:
 
     @staticmethod
     def initialize():
-        print("init fs helper")
+        print("init file helper")
         SalmonFSTestHelper.file_importer = SalmonFileImporter(SalmonFSTestHelper.ENC_IMPORT_BUFFER_SIZE,
                                                               SalmonFSTestHelper.ENC_IMPORT_THREADS,
                                                               SalmonFSTestHelper.ENABLE_MULTI_CPU)
@@ -303,7 +303,7 @@ class SalmonFSTestHelper:
 
     @staticmethod
     def close():
-        print("closing fs helper")
+        print("closing file helper")
         if SalmonFSTestHelper.file_importer:
             SalmonFSTestHelper.file_importer.close()
         if SalmonFSTestHelper.file_exporter:

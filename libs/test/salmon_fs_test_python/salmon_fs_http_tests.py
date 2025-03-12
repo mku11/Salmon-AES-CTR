@@ -37,9 +37,9 @@ from salmon_core.streams.random_access_stream import RandomAccessStream
 from salmon_core.streams.memory_stream import MemoryStream
 from salmon_core.salmon.streams.provider_type import ProviderType
 from salmon_core.salmon.streams.salmon_stream import SalmonStream
-from salmon_fs.file.ireal_file import IRealFile
-from salmon_fs.file.py_http_file import PyHttpFile
-from salmon_fs.file.ivirtual_file import IVirtualFile
+from fs.file.ireal_file import IRealFile
+from fs.file.py_http_file import PyHttpFile
+from fs.file import IVirtualFile
 from salmon_fs.salmon.drive.py_http_drive import PyHttpDrive
 from salmon_fs.salmon.salmon_drive import SalmonDrive
 

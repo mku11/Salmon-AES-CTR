@@ -23,7 +23,7 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 """
 
-from salmon_core.bridge.inative_proxy import INativeProxy
+from salmon.bridge.inative_proxy import INativeProxy
 from salmon_core.salmon.bridge.native_proxy import NativeProxy
 from salmon_core.salmon.transform.salmon_aes256_ctr_transformer import SalmonAES256CTRTransformer
 from salmon_core.salmon.salmon_security_exception import SalmonSecurityException
