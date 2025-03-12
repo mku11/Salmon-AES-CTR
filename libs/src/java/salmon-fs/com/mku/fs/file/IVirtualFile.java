@@ -140,7 +140,7 @@ public interface IVirtualFile {
      *
      * @return The last date modified in milliseconds.
      */
-    long getLastDateTimeModified();
+    long getLastDateModified();
 
     /**
      * Return the virtual size of the file.

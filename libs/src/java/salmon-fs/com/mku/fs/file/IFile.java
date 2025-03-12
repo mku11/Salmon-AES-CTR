@@ -98,7 +98,7 @@ public interface IFile {
      *
      * @return The last date modified in milliseconds
      */
-    long getLastModified();
+    long getLastDateModified();
 
     /**
      * Get the display path of the file on disk.

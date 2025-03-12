@@ -276,7 +276,7 @@ public class AesFileComparators {
      */
     private static long tryGetDate(AesFile aesFile) {
         try {
-            return aesFile.getLastDateTimeModified();
+            return aesFile.getLastDateModified();
         } catch (Exception ex) {
             ex.printStackTrace();
         }

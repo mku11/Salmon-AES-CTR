@@ -811,7 +811,7 @@ public class SalmonFSTestHelper {
         IVirtualFile root = drive.getRoot();
         IVirtualFile file = root.getChild(filename);
         System.out.println("file size: " + file.getLength());
-        System.out.println("file last modified: " + file.getLastDateTimeModified());
+        System.out.println("file last modified: " + file.getLastDateModified());
         assertTrue(file.exists());
 
         RandomAccessStream stream = file.getInputStream();

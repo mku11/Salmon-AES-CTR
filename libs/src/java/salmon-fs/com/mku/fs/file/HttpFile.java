@@ -240,7 +240,7 @@ public class HttpFile implements IFile {
      *
      * @return The last modified date in milliseconds
      */
-    public long getLastModified() {
+    public long getLastDateModified() {
         String lastDateModified = null;
         try {
             lastDateModified = getResponse().getFirstHeader("last-modified").getValue();

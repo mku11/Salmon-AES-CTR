@@ -669,8 +669,8 @@ public class AesFile implements IVirtualFile {
      *
      * @return The last date modified in milliseconds.
      */
-    public long getLastDateTimeModified() {
-        return realFile.getLastModified();
+    public long getLastDateModified() {
+        return realFile.getLastDateModified();
     }
 
     /**
