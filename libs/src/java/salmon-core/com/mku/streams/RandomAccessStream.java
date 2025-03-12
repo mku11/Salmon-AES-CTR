@@ -59,7 +59,7 @@ public abstract class RandomAccessStream {
      *
      * @return The length
      */
-    public abstract long length();
+    public abstract long getLength();
 
     /**
      * Get the current position of the stream.
@@ -172,7 +172,7 @@ public abstract class RandomAccessStream {
         while ((bytesRead = read(buffer, 0, bufferSize)) > 0) {
             stream.write(buffer, 0, bytesRead);
             if (progressListener != null)
-                progressListener.accept(getPosition(), length());
+                progressListener.accept(getPosition(), getLength());
         }
         stream.flush();
         setPosition(pos);

@@ -559,9 +559,9 @@ public class SalmonCoreTests {
 
     @Test
     public void ShouldEncryptAndDecryptArrayIntegrity() throws Exception {
-        // byte[] data = SalmonCoreTestHelper.getRandArray(1 * 1024 * 1024 + 3);
-        byte[] data = SalmonCoreTestHelper.TEST_TEXT.getBytes();
+        byte[] data = SalmonCoreTestHelper.getRandArray(1 * 1024 * 1024 + 3);
         long t1 = System.currentTimeMillis();
+		// FIXME: chunksize is not set to default
         byte[] encData = SalmonCoreTestHelper.getEncryptor().encrypt(data,
                 SalmonCoreTestHelper.TEST_KEY_BYTES, SalmonCoreTestHelper.TEST_NONCE_BYTES,
                 EncryptionFormat.Salmon, true, SalmonCoreTestHelper.TEST_HMAC_KEY_BYTES);

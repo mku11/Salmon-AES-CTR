@@ -62,10 +62,7 @@ public class Decryptor {
      * Instantiate an encryptor.
      */
     public Decryptor() {
-        this.threads = 1;
-        // we use the chunks size as default this keeps buffers aligned in case
-        // integrity is enabled.
-        this.bufferSize = Integrity.DEFAULT_CHUNK_SIZE;
+        this(1, Integrity.DEFAULT_CHUNK_SIZE);
     }
 
     /**
@@ -74,9 +71,7 @@ public class Decryptor {
      * @param threads The number of threads to use.
      */
     public Decryptor(int threads) {
-        this.threads = threads;
-        executor = Executors.newFixedThreadPool(threads);
-        this.bufferSize = Integrity.DEFAULT_CHUNK_SIZE;
+        this(threads, Integrity.DEFAULT_CHUNK_SIZE);
     }
 
     /**
@@ -88,8 +83,11 @@ public class Decryptor {
      *                   otherwise a multiple of the AES block size (16 bytes).
      */
     public Decryptor(int threads, int bufferSize) {
+        if(threads <= 0)
+			threads = 1;
         this.threads = threads;
-        executor = Executors.newFixedThreadPool(threads);
+		if(threads > 1)
+			executor = Executors.newFixedThreadPool(threads);
         this.bufferSize = bufferSize;
     }
 

@@ -538,7 +538,7 @@ public class SalmonFSTests {
         assertTrue(dfile.exists());
         assertTrue(dfile.delete());
         assertEquals(2, dir.getChild("folder4").getChild("folder1").getChild("folder2").getChildrenCount());
-        dir.getChild("folder1").copyRecursively(folder3, IFile.autoRename, false);
+        dir.getChild("folder1").copyRecursively(folder3, IFile.autoRename);
         assertEquals(2, dir.getChildrenCount());
         assertEquals(1, dir.getChild("folder4").getChildrenCount());
         assertEquals(7, dir.getChild("folder4").getChild("folder1").getChildrenCount());
@@ -583,7 +583,7 @@ public class SalmonFSTests {
                 drive.getRoot(), false, true, null, null, null);
         fileCommander.close();
 
-        long pos = Math.abs(new Random().nextLong() % file.length());
+        long pos = Math.abs(new Random().nextLong() % file.getLength());
 
         AesFileInputStream fileInputStream1 = new AesFileInputStream(sfiles[0], 4, 4 * 1024 * 1024, 4, 256 * 1024);
         fileInputStream1.skip(pos);

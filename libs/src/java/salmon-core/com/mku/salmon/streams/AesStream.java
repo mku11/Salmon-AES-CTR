@@ -95,6 +95,7 @@ public class AesStream extends RandomAccessStream {
      * where creating your output buffers.
      *
      * @param mode      The {@link EncryptionMode} Encrypt or Decrypt.
+     * @param length    The length of the data to transform.
      * @param format    The format to use, see {@link EncryptionFormat}
      * @param integrity True to enable integrity verification
      * @return The size of the output data.
@@ -112,6 +113,7 @@ public class AesStream extends RandomAccessStream {
      * where creating your output buffers.
      *
      * @param mode      The {@link EncryptionMode} Encrypt or Decrypt.
+     * @param length    The length of the data to transform.
      * @param format    The format to use, see {@link EncryptionFormat}
      * @param integrity True to enable integrity verification
      * @param chunkSize the chunk size to be used with integrity
@@ -123,7 +125,7 @@ public class AesStream extends RandomAccessStream {
                                      EncryptionFormat format, boolean integrity, int chunkSize) {
         if (format == EncryptionFormat.Generic && integrity)
             throw new SecurityException("Cannot use integrity with generic format");
-        if (chunkSize == 0)
+        if (chunkSize <= 0)
             chunkSize = Integrity.DEFAULT_CHUNK_SIZE;
         long size = length;
         if (format == EncryptionFormat.Salmon) {
@@ -291,8 +293,8 @@ public class AesStream extends RandomAccessStream {
         this.baseStream = baseStream;
         this.header = getOrCreateHeader(format, nonce, integrity, chunkSize);
         if (this.header != null) {
-            chunkSize = header.getChunkSize();
-            nonce = header.getNonce();
+            chunkSize = this.header.getChunkSize();
+            nonce = this.header.getNonce();
         }
         if (nonce == null)
             throw new SecurityException("Nonce is missing");
@@ -304,7 +306,10 @@ public class AesStream extends RandomAccessStream {
     private Header getOrCreateHeader(EncryptionFormat format, byte[] nonce, boolean integrity, int chunkSize) throws IOException {
         if (format == EncryptionFormat.Salmon) {
             if (encryptionMode == EncryptionMode.Encrypt) {
-                if (integrity && chunkSize == 0)
+				if (nonce == null)
+					throw new SecurityException("Nonce is missing");
+				
+                if (integrity && chunkSize <= 0)
                     chunkSize = Integrity.DEFAULT_CHUNK_SIZE;
                 return Header.writeHeader(baseStream, nonce, chunkSize);
             }
@@ -380,11 +385,11 @@ public class AesStream extends RandomAccessStream {
      * @return The length of the stream.
      */
     @Override
-    public long length() {
+    public long getLength() {
         long totalHashBytes;
         int hashOffset = integrity.getChunkSize() > 0 ? Generator.HASH_RESULT_LENGTH : 0;
-        totalHashBytes = integrity.getHashDataLength(baseStream.length() - 1, hashOffset);
-        return baseStream.length() - getHeaderLength() - totalHashBytes;
+        totalHashBytes = integrity.getHashDataLength(baseStream.getLength() - 1, hashOffset);
+        return baseStream.getLength() - getHeaderLength() - totalHashBytes;
     }
 
     /**
@@ -484,7 +489,7 @@ public class AesStream extends RandomAccessStream {
         else if (origin == SeekOrigin.Current)
             setPosition(getPosition() + offset);
         else if (origin == SeekOrigin.End)
-            setPosition(length() - offset);
+            setPosition(getLength() - offset);
         return getPosition();
     }
 
@@ -632,7 +637,7 @@ public class AesStream extends RandomAccessStream {
      */
     @Override
     public int read(byte[] buffer, int offset, int count) throws IOException {
-        if (getPosition() == length())
+        if (getPosition() == getLength())
             return -1;
         int alignedOffset = getAlignedOffset();
         int bytes = 0;
@@ -677,7 +682,7 @@ public class AesStream extends RandomAccessStream {
      * @throws IOException Thrown if stream is not aligned.
      */
     private int readFromStream(byte[] buffer, int offset, int count) throws IOException {
-        if (getPosition() == length())
+        if (getPosition() == getLength())
             return 0;
         if (integrity.getChunkSize() > 0 && getPosition() % integrity.getChunkSize() != 0)
             throw new IOException("All reads should be aligned to the chunks size: " + integrity.getChunkSize());
@@ -687,7 +692,7 @@ public class AesStream extends RandomAccessStream {
         long pos = getPosition();
 
         // if there are not enough data in the stream
-        count = (int) Math.min(count, length() - getPosition());
+        count = (int) Math.min(count, getLength() - getPosition());
 
         // if there are not enough space in the buffer
         count = Math.min(count, buffer.length - offset);
@@ -845,7 +850,7 @@ public class AesStream extends RandomAccessStream {
      * @throws IOException Thrown if there is an IO error.
      */
     private byte[] readStreamData(int count) throws IOException {
-        byte[] data = new byte[(int) Math.min(count, baseStream.length() - baseStream.getPosition())];
+        byte[] data = new byte[(int) Math.min(count, baseStream.getLength() - baseStream.getPosition())];
         int bytesRead;
         int totalBytesRead = 0;
         while ((bytesRead = baseStream.read(data, totalBytesRead, data.length - totalBytesRead)) > 0) {

@@ -158,7 +158,7 @@ public abstract class FileImporter {
             importedFile = dir.createFile(filename);
             this.onPrepare(importedFile, integrity);
 
-            final long fileSize = fileToImport.length();
+            final long fileSize = fileToImport.getLength();
             int runningThreads = 1;
             long partSize = fileSize;
 
@@ -200,7 +200,7 @@ public abstract class FileImporter {
     }
 
     private void submitImportJobs(int runningThreads, long partSize, IFile fileToImport, IVirtualFile importedFile, long[] totalBytesRead, boolean integrity, BiConsumer<Long, Long> onProgress) throws InterruptedException {
-        long fileSize = fileToImport.length();
+        long fileSize = fileToImport.getLength();
 
         // we use a countdown latch which is better suited with executor than Thread.join or CompletableFuture.
         final CountDownLatch done = new CountDownLatch(runningThreads);
@@ -262,7 +262,7 @@ public abstract class FileImporter {
 
                 totalBytesRead[0] += bytesRead;
                 if (onProgress != null)
-                    onProgress.accept(totalBytesRead[0], fileToImport.length());
+                    onProgress.accept(totalBytesRead[0], fileToImport.getLength());
             }
         } catch (Exception ex) {
             ex.printStackTrace();

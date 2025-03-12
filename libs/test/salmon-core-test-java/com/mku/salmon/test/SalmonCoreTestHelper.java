@@ -60,9 +60,9 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 
 public class SalmonCoreTestHelper {
     public static int TEST_ENC_BUFFER_SIZE = 512 * 1024;
-    public static int TEST_ENC_THREADS = 2;
+    public static int TEST_ENC_THREADS = 1;
     public static int TEST_DEC_BUFFER_SIZE = 512 * 1024;
-    public static int TEST_DEC_THREADS = 2;
+    public static int TEST_DEC_THREADS = 1;
 
     public static final String TEST_PASSWORD = "test123";
     public static final String TEST_FALSE_PASSWORD = "falsepass";
@@ -100,6 +100,7 @@ public class SalmonCoreTestHelper {
     }
 
     static void close() {
+		System.out.println("closing core helper");
         if (SalmonCoreTestHelper.encryptor != null)
             SalmonCoreTestHelper.encryptor.close();
         if (SalmonCoreTestHelper.decryptor != null)
@@ -636,8 +637,6 @@ public class SalmonCoreTestHelper {
 
     public static byte[] calculateHMAC(byte[] bytes, int offset, int length,
                                        byte[] hashKey, byte[] includeData) {
-        Integrity integrity = new Integrity(true, hashKey, 0, new HMACSHA256Provider(),
-                Generator.HASH_RESULT_LENGTH);
         return Integrity.calculateHash(hashProvider, bytes, offset, length, hashKey, includeData);
     }
 }

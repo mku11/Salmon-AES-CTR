@@ -46,7 +46,7 @@ public class AesFileExporter extends FileExporter {
      */
     protected void onPrepare(IVirtualFile sourceFile, boolean integrity) throws IOException {
         // we use the drive hash key for integrity verification
-        ((AesFile) sourceFile).setVerifyIntegrity(integrity, null);
+        ((AesFile) sourceFile).setVerifyIntegrity(integrity);
     }
 
     /**

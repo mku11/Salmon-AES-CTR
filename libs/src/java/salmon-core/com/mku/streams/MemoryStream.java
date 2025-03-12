@@ -104,7 +104,7 @@ public class MemoryStream extends RandomAccessStream {
      * @return The length of the stream.
      */
     @Override
-    public long length() {
+    public long getLength() {
         return _length;
     }
 

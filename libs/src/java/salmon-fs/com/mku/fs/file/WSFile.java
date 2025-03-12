@@ -340,7 +340,7 @@ public class WSFile implements IFile {
      *
      * @return The last modified date in milliseconds
      */
-    public long lastModified() {
+    public long getLastModified() {
         try {
             return getResponse().lastModified;
         } catch (Exception e) {
@@ -353,7 +353,7 @@ public class WSFile implements IFile {
      *
      * @return The length
      */
-    public long length() {
+    public long getLength() {
         try {
             return getResponse().length;
         } catch (Exception e) {

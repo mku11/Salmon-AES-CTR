@@ -95,7 +95,7 @@ public class AesFileInputStream extends InputStream {
                               int buffersCount, int bufferSize, int threads, int backOffset)
             throws IOException {
         this.aesFile = aesFile;
-        this.size = aesFile.getSize();
+        this.size = aesFile.getLength();
         if (buffersCount == 0)
             buffersCount = DEFAULT_BUFFERS;
         if (buffersCount > MAX_BUFFERS)
@@ -358,7 +358,7 @@ public class AesFileInputStream extends InputStream {
      *
      * @return The size
      */
-    public long getSize() {
+    public long getLength() {
         return positionEnd - positionStart + 1;
     }
 

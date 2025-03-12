@@ -363,12 +363,12 @@ public class SalmonFSTestHelper {
         assertTrue(aesFile.exists());
 
         IVirtualFile[] salmonFiles = rootDir.listFiles();
-        long realFileSize = fileToImport.length();
+        long realFileSize = fileToImport.getLength();
         for (IVirtualFile file : salmonFiles) {
             if (file.getName().equals(fileToImport.getName())) {
                 if (shouldBeEqual) {
                     assertTrue(file.exists());
-                    long fileSize = file.getSize();
+                    long fileSize = file.getLength();
                     assertEquals(realFileSize, fileSize);
                 }
             }
@@ -491,6 +491,8 @@ public class SalmonFSTestHelper {
         System.out.println("new file: " + newFile.getPath());
         if (applyIntegrity)
             newFile.setApplyIntegrity(true, hashKey, chunkSize);
+		else
+            newFile.setApplyIntegrity(false);
         RandomAccessStream stream = newFile.getOutputStream();
 
         stream.write(testBytes, 0, testBytes.length);
@@ -514,6 +516,8 @@ public class SalmonFSTestHelper {
         readFile.setRequestedNonce(fileNonce);
         if (verifyIntegrity)
             readFile.setVerifyIntegrity(true, hashKey);
+		else
+			readFile.setVerifyIntegrity(false);
         AesStream inStream = readFile.getInputStream();
         byte[] textBytes = new byte[testBytes.length];
         inStream.read(textBytes, 0, textBytes.length);
@@ -806,7 +810,7 @@ public class SalmonFSTestHelper {
         AesDrive drive = SalmonFSTestHelper.openDrive(vaultDir, SalmonFSTestHelper.driveClassType, SalmonCoreTestHelper.TEST_PASSWORD, sequencer);
         IVirtualFile root = drive.getRoot();
         IVirtualFile file = root.getChild(filename);
-        System.out.println("file size: " + file.getSize());
+        System.out.println("file size: " + file.getLength());
         System.out.println("file last modified: " + file.getLastDateTimeModified());
         assertTrue(file.exists());
 

@@ -103,8 +103,8 @@ public class FileStream extends RandomAccessStream {
      * @return The file stream length
      */
     @Override
-    public long length() {
-        return file.length();
+    public long getLength() {
+        return file.getLength();
     }
 
     /**
@@ -187,7 +187,7 @@ public class FileStream extends RandomAccessStream {
         else if (origin == SeekOrigin.Current)
             pos += offset;
         else if (origin == SeekOrigin.End)
-            pos = file.length() - offset;
+            pos = file.getLength() - offset;
 
         fileChannel.position(pos);
         return fileChannel.position();

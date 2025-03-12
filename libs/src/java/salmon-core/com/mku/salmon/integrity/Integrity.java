@@ -142,13 +142,13 @@ public class Integrity {
     public static long getTotalHashDataLength(EncryptionMode mode, long length, int chunkSize,
                                               int hashOffset, int hashLength) {
         if (mode == EncryptionMode.Decrypt) {
-            int chunks = (int) (length / (chunkSize + hashOffset));
+            int chunks = (int) Math.floor(length / (chunkSize + hashOffset));
             int rem = (int) (length % (chunkSize + hashOffset));
             if (rem > hashOffset)
                 chunks++;
             return (long) chunks * hashLength;
         } else {
-            int chunks = (int) (length / chunkSize);
+            int chunks = (int) Math.floor(length / chunkSize);
             int rem = (int) (length % chunkSize);
             if (rem > hashOffset)
                 chunks++;

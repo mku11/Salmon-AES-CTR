@@ -61,10 +61,7 @@ public class Encryptor {
      * Instantiate an encryptor.
      */
     public Encryptor() {
-        this.threads = 1;
-        // we use the chunks size as default this keeps buffers aligned in case
-        // integrity is enabled.
-        this.bufferSize = Integrity.DEFAULT_CHUNK_SIZE;
+        this(1, Integrity.DEFAULT_CHUNK_SIZE);
     }
 
     /**
@@ -73,9 +70,7 @@ public class Encryptor {
      * @param threads The number of threads to use.
      */
     public Encryptor(int threads) {
-        this.threads = threads;
-        executor = Executors.newFixedThreadPool(threads);
-        this.bufferSize = Integrity.DEFAULT_CHUNK_SIZE;
+		this(threads, Integrity.DEFAULT_CHUNK_SIZE);
     }
 
     /**
@@ -87,11 +82,13 @@ public class Encryptor {
      *                   otherwise a multiple of the AES block size (16 bytes).
      */
     public Encryptor(int threads, int bufferSize) {
+		if(threads <= 0)
+			threads = 1;
         this.threads = threads;
-        executor = Executors.newFixedThreadPool(threads);
+		if(threads > 1)
+			executor = Executors.newFixedThreadPool(threads);
         this.bufferSize = bufferSize;
     }
-
 
     /**
      * Encrypt a byte array and embedded the nonce.

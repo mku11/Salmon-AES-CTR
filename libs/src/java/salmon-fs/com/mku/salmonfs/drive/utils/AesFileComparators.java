@@ -261,7 +261,7 @@ public class AesFileComparators {
             // the original file length requires reading the chunks size
             // from the file so it can get a bit expensive
             // so instead we sort on the real file size
-            return aesFile.getRealFile().length();
+            return aesFile.getRealFile().getLength();
         } catch (Exception ex) {
             ex.printStackTrace();
         }

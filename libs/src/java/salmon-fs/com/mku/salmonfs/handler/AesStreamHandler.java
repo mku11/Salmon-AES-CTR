@@ -150,7 +150,7 @@ public class AesStreamHandler extends URLStreamHandler {
 
             public int getContentLength() {
                 try {
-                    return (int) getFile().getSize();
+                    return (int) getFile().getLength();
                 } catch (IOException e) {
                     throw new RuntimeException(e);
                 }
@@ -158,7 +158,7 @@ public class AesStreamHandler extends URLStreamHandler {
 
             public long getContentLengthLong() {
                 try {
-                    return getFile().getSize();
+                    return getFile().getLength();
                 } catch (IOException e) {
                     throw new RuntimeException(e);
                 }

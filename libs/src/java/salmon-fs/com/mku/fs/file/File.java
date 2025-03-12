@@ -180,7 +180,7 @@ public class File implements IFile {
      *
      * @return The last modified date in milliseconds
      */
-    public long lastModified() {
+    public long getLastModified() {
         return new java.io.File(filePath).lastModified();
     }
 
@@ -189,7 +189,7 @@ public class File implements IFile {
      *
      * @return The length
      */
-    public long length() {
+    public long getLength() {
         return new java.io.File(filePath).length();
     }
 

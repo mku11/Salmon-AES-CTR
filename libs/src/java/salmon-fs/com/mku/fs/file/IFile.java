@@ -84,7 +84,7 @@ public interface IFile {
      *
      * @return The length.
      */
-    long length();
+    long getLength();
 
     /**
      * Get the count of files and subdirectories
@@ -98,7 +98,7 @@ public interface IFile {
      *
      * @return The last date modified in milliseconds
      */
-    long lastModified();
+    long getLastModified();
 
     /**
      * Get the display path of the file on disk.
@@ -297,9 +297,21 @@ public interface IFile {
      * @throws IOException Thrown if there is an IO error.
      */
     default void copyRecursively(IFile dest) throws IOException {
-        copyRecursively(dest, null, true, null);
+        copyRecursively(dest, null, false, null);
     }
 
+
+    /**
+     * Copy a directory recursively
+     *
+     * @param destDir    The destination directory
+     * @param autoRename The autorename function
+     * @throws IOException Thrown if there is an IO error.
+     */
+    default void copyRecursively(IFile destDir,
+                                 Function<IFile, String> autoRename) throws IOException {
+        copyRecursively(destDir, autoRename, false, null, null);
+    }
 
     /**
      * Copy a directory recursively
@@ -320,7 +332,7 @@ public interface IFile {
      *
      * @param destDir           The destination directory
      * @param autoRename        The autorename function
-     * @param autoRenameFolders Apply autorename to folders also (default is true)
+     * @param autoRenameFolders Apply autorename to folders also
      * @param onFailed          Callback if copy failed
      * @throws IOException Thrown if there is an IO error.
      */
@@ -336,7 +348,7 @@ public interface IFile {
      *
      * @param destDir           The destination directory
      * @param autoRename        The autorename function
-     * @param autoRenameFolders Apply autorename to folders also (default is true)
+     * @param autoRenameFolders Apply autorename to folders also
      * @param onFailed          Callback if copy failed
      * @param progressListener  The progress listener
      * @throws IOException Thrown if there is an IO error.

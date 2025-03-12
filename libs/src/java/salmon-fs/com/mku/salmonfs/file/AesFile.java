@@ -113,6 +113,14 @@ public class AesFile implements IVirtualFile {
             hashKey = drive.getKey().getHashKey();
     }
 
+
+    /**
+     * Return if integrity is set
+     */
+    public boolean isIntegrityEnabled() {
+        return this.integrity;
+    }
+
     /**
      * Return the current chunk size requested that will be used for integrity
      *
@@ -146,7 +154,7 @@ public class AesFile implements IVirtualFile {
             return null;
         if (_header != null)
             return _header;
-        Header header = new Header();
+        Header header = new Header(new byte[0]);
         RandomAccessStream stream = null;
         try {
             stream = realFile.getInputStream();
@@ -197,7 +205,7 @@ public class AesFile implements IVirtualFile {
         realStream.read(headerData, 0, headerData.length);
 
         AesStream stream = new AesStream(getEncryptionKey(),
-                nonceBytes, EncryptionMode.Decrypt, realStream, EncryptionFormat.Salmon,
+                nonceBytes, EncryptionMode.Decrypt, realStream, format,
                 integrity, getHashKey());
         return stream;
     }
@@ -258,6 +266,12 @@ public class AesFile implements IVirtualFile {
         // but practical if the file is brand new and multithreaded writes for performance need to be used.
         RandomAccessStream realStream = realFile.getOutputStream();
         realStream.seek(getHeaderLength(), RandomAccessStream.SeekOrigin.Begin);
+
+        byte[] key = this.getEncryptionKey();
+        if (key == null)
+            throw new IOException("Set an encryption key to the file first");
+        if (nonceBytes == null)
+            throw new IOException("No nonce provided and no nonce found in file");
 
         AesStream stream = new AesStream(getEncryptionKey(), nonceBytes,
                 EncryptionMode.Encrypt, realStream, EncryptionFormat.Salmon,
@@ -375,8 +389,8 @@ public class AesFile implements IVirtualFile {
         if (integrity && hashKey == null && drive != null)
             hashKey = drive.getKey().getHashKey();
 
-        if(integrity && hashKey == null)
-            throw new java.lang.SecurityException("Integrity needs a hashKey");
+        if (integrity && hashKey == null)
+            throw new SecurityException("Integrity needs a hashKey");
 
         this.integrity = integrity;
         this.reqChunkSize = requestChunkSize;
@@ -656,7 +670,7 @@ public class AesFile implements IVirtualFile {
      * @return The last date modified in milliseconds.
      */
     public long getLastDateTimeModified() {
-        return realFile.lastModified();
+        return realFile.getLastModified();
     }
 
     /**
@@ -664,8 +678,8 @@ public class AesFile implements IVirtualFile {
      *
      * @return The size in bytes.
      */
-    public long getSize() throws IOException {
-        long rSize = realFile.length();
+    public long getLength() throws IOException {
+        long rSize = realFile.getLength();
         if (rSize == 0)
             return rSize;
         return rSize - getHeaderLength() - getHashTotalBytesLength();
@@ -682,8 +696,9 @@ public class AesFile implements IVirtualFile {
         // integrity has been requested but hash is missing
         if (integrity && getHashKey() == null)
             throw new IntegrityException("File requires hashKey, use SetVerifyIntegrity() to provide one");
-
-        return Integrity.getTotalHashDataLength(EncryptionMode.Decrypt, realFile.length(), getFileChunkSize(),
+        long realLength = this.realFile.getLength();
+        int headerLength = this.getHeaderLength();
+        return Integrity.getTotalHashDataLength(EncryptionMode.Decrypt, realLength - headerLength, getFileChunkSize(),
                 Generator.HASH_RESULT_LENGTH, Generator.HASH_KEY_LENGTH);
     }
 

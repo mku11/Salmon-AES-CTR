@@ -147,7 +147,7 @@ public interface IVirtualFile {
      *
      * @return The size in bytes.
      */
-    long getSize() throws IOException;
+    long getLength() throws IOException;
 
     /**
      * Returns true if this file exists

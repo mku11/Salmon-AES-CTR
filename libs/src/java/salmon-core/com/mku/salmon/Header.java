@@ -106,6 +106,10 @@ public class Header {
         return magicBytes;
     }
 
+	public Header(byte[] headerData) {
+		this.headerData = headerData;
+	}
+	
     /**
      * Parse the header data from the stream
      * @param stream The stream.
@@ -113,16 +117,17 @@ public class Header {
      * @throws IOException Thrown if there is an IO error.
      */
     public static Header readHeaderData(RandomAccessStream stream) throws IOException {
-        if(stream.length() == 0)
+        if(stream.getLength() == 0)
             return null;
         long pos = stream.getPosition();
 
         stream.setPosition(0);
-        Header header = new Header();
-        header.headerData = new byte[Generator.MAGIC_LENGTH + Generator.VERSION_LENGTH
+        
+        byte[] headerData = new byte[Generator.MAGIC_LENGTH + Generator.VERSION_LENGTH
                 + Generator.CHUNK_SIZE_LENGTH + Generator.NONCE_LENGTH];
-        stream.read(header.headerData, 0, header.headerData.length);
+        stream.read(headerData, 0, headerData.length);
 
+		Header header = new Header(headerData);
         MemoryStream ms = new MemoryStream(header.headerData);
         header.magicBytes = new byte[Generator.MAGIC_LENGTH];
         ms.read(header.magicBytes, 0, header.magicBytes.length);

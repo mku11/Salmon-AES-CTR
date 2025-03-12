@@ -159,7 +159,7 @@ public abstract class FileExporter {
             exportFile = exportDir.createFile(filename);
             onPrepare(fileToExport, integrity);
 
-            final long fileSize = fileToExport.getSize();
+            final long fileSize = fileToExport.getLength();
             int runningThreads = 1;
             long partSize = fileSize;
 
@@ -202,7 +202,7 @@ public abstract class FileExporter {
     }
 
     private void submitExportJobs(int runningThreads, long partSize, IVirtualFile fileToExport, IFile exportFile, long[] totalBytesWritten, boolean integrity, BiConsumer<Long, Long> onProgress) throws IOException, InterruptedException {
-        long fileSize = fileToExport.getSize();
+        long fileSize = fileToExport.getLength();
 
         // we use a countdown latch which is better suited with executor than Thread.join.
         final CountDownLatch done = new CountDownLatch(runningThreads);
@@ -264,7 +264,7 @@ public abstract class FileExporter {
 
                 totalBytesWritten[0] += bytesRead;
                 if (onProgress != null)
-                    onProgress.accept(totalBytesWritten[0], fileToExport.getSize());
+                    onProgress.accept(totalBytesWritten[0], fileToExport.getLength());
             }
         } catch (Exception ex) {
             ex.printStackTrace();

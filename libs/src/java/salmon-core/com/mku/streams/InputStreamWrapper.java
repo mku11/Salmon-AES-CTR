@@ -107,8 +107,8 @@ public class InputStreamWrapper extends InputStream {
      */
     @Override
     public long skip(long pos) throws IOException {
-        if (pos > stream.length())
-            stream.setPosition(stream.length());
+        if (pos > stream.getLength())
+            stream.setPosition(stream.getLength());
         else
             stream.setPosition(stream.getPosition() + pos);
         return stream.getPosition();

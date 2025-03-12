@@ -245,7 +245,7 @@ public class AuthConfig {
         if (sequence == null)
             throw new Exception("Device is not authorized to export");
 
-        if(file.exists() && file.length() > 0) {
+        if(file.exists() && file.getLength() > 0) {
             RandomAccessStream outStream = null;
             try {
                 outStream = file.getOutputStream();

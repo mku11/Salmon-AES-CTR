@@ -489,21 +489,88 @@ public class FileCommander {
         }
     }
 
+
+	/**
+     * Copy files to another directory.
+     *
+     * @param filesToCopy       The array of files to copy.
+     * @param dir               The target directory.
+     * @param move              True if moving files instead of copying.
+     * @throws Exception Thrown if error occurs during copying
+     */
+    public void copyFiles(IVirtualFile[] filesToCopy, IVirtualFile dir, boolean move)
+            throws Exception {
+		copyFiles(filesToCopy, dir, move, null, false, null, null);
+	}
+
+	/**
+     * Copy files to another directory.
+     *
+     * @param filesToCopy       The array of files to copy.
+     * @param dir               The target directory.
+     * @param move              True if moving files instead of copying.
+     * @param autoRename        The auto rename function to use when files with same filename are found
+     * @throws Exception Thrown if error occurs during copying
+     */
+    public void copyFiles(IVirtualFile[] filesToCopy, IVirtualFile dir, boolean move, 
+                          Function<IVirtualFile, String> autoRename)
+            throws Exception {
+		copyFiles(filesToCopy, dir, move, autoRename, false, null, null);
+	}
+
+	/**
+     * Copy files to another directory.
+     *
+     * @param filesToCopy       The array of files to copy.
+     * @param dir               The target directory.
+     * @param move              True if moving files instead of copying.
+     * @param autoRename        The auto rename function to use when files with same filename are found
+     * @param autoRenameFolders True to autorename folders
+     * @throws Exception Thrown if error occurs during copying
+     */
+    public void copyFiles(IVirtualFile[] filesToCopy, IVirtualFile dir, boolean move, 
+                          Function<IVirtualFile, String> autoRename,
+                          boolean autoRenameFolders)
+            throws Exception {
+		copyFiles(filesToCopy, dir, move, autoRename, autoRenameFolders, null, null);
+	}
+	
+	/**
+     * Copy files to another directory.
+     *
+     * @param filesToCopy       The array of files to copy.
+     * @param dir               The target directory.
+     * @param move              True if moving files instead of copying.
+     * @param autoRename        The auto rename function to use when files with same filename are found
+     * @param autoRenameFolders True to autorename folders
+     * @param onFailed          The observer to notify when failures occur
+     * @throws Exception Thrown if error occurs during copying
+     */
+    public void copyFiles(IVirtualFile[] filesToCopy, IVirtualFile dir, boolean move, 
+                          Function<IVirtualFile, String> autoRename,
+                          boolean autoRenameFolders, 
+						  BiConsumer<IVirtualFile, Exception> onFailed)
+            throws Exception {
+		copyFiles(filesToCopy, dir, move, autoRename, autoRenameFolders, onFailed, null);
+	}
+			
     /**
      * Copy files to another directory.
      *
      * @param filesToCopy       The array of files to copy.
      * @param dir               The target directory.
      * @param move              True if moving files instead of copying.
-     * @param onProgressChanged The progress change observer to notify.
      * @param autoRename        The auto rename function to use when files with same filename are found
      * @param autoRenameFolders True to autorename folders
      * @param onFailed          The observer to notify when failures occur
+     * @param onProgressChanged The progress change observer to notify.
      * @throws Exception Thrown if error occurs during copying
      */
-    public void copyFiles(IVirtualFile[] filesToCopy, IVirtualFile dir, boolean move, Consumer<VirtualFileTaskProgress> onProgressChanged,
+    public void copyFiles(IVirtualFile[] filesToCopy, IVirtualFile dir, boolean move, 
                           Function<IVirtualFile, String> autoRename,
-                          boolean autoRenameFolders, BiConsumer<IVirtualFile, Exception> onFailed)
+                          boolean autoRenameFolders, 
+						  BiConsumer<IVirtualFile, Exception> onFailed,
+						  Consumer<VirtualFileTaskProgress> onProgressChanged)
             throws Exception {
         stopJobs = false;
         int[] count = new int[1];
