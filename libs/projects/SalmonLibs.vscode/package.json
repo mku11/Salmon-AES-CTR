@@ -19,6 +19,7 @@
     "@typescript-eslint/eslint-plugin": "^8.26.0",
     "@typescript-eslint/parser": "^8.26.0",
     "eslint": "^9.21.0",
+    "@eslint/compat": "^1.2.7",
     "eslint-plugin-import": "^2.31.0",
     "jsdoc": "^4.0.4",
     "npx": "^10.2.2",
