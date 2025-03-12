@@ -172,7 +172,7 @@ public class Decryptor {
             throw new SecurityException("Need to specify a nonce if the file doesn't have a header");
 
         if (integrity)
-            chunkSize = chunkSize == 0 ? Integrity.DEFAULT_CHUNK_SIZE : chunkSize;
+            chunkSize = chunkSize <= 0 ? Integrity.DEFAULT_CHUNK_SIZE : chunkSize;
 
         MemoryStream inputStream = new MemoryStream(data);
         int realSize = (int) AesStream.getOutputSize(EncryptionMode.Decrypt, data.length, format, integrity, chunkSize);
