@@ -98,7 +98,7 @@ export class Decryptor {
             throw new SecurityException("Need to specify a nonce if the file doesn't have a header");
 
         if (integrity)
-            chunkSize = chunkSize == null ? Integrity.DEFAULT_CHUNK_SIZE : chunkSize;
+            chunkSize = chunkSize <= 0 ? Integrity.DEFAULT_CHUNK_SIZE : chunkSize;
 
         let realSize: number = await AesStream.getOutputSize(EncryptionMode.Decrypt, data.length, format, integrity, chunkSize);
         let outData: Uint8Array = new Uint8Array(realSize);

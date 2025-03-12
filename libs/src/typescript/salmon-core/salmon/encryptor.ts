@@ -101,7 +101,7 @@ export class Encryptor {
             throw new SecurityException("Nonce is missing");
 
         if (integrity)
-            chunkSize = chunkSize == null ? Integrity.DEFAULT_CHUNK_SIZE : chunkSize;
+            chunkSize = chunkSize <= 0 ? Integrity.DEFAULT_CHUNK_SIZE : chunkSize;
         else
             chunkSize = 0;
 
