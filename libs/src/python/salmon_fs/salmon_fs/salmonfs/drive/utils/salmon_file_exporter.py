@@ -12,7 +12,7 @@ from typing import Any, Callable
 from typeguard import typechecked
 
 from salmon_core.convert.bit_converter import BitConverter
-from fs.file.ireal_file import IRealFile
+from fs.file.ifile import IFile
 from salmon_core.streams.random_access_stream import RandomAccessStream
 from salmon_fs.salmon.salmon_file import SalmonFile
 from fs.drive.utils.file_utils import FileUtils
@@ -44,8 +44,8 @@ SOFTWARE.
 
 @typechecked
 def export_file(index: int, final_part_size: int, final_running_threads: int, file_size: int,
-                real_file_to_export: IRealFile,
-                real_file: IRealFile,
+                real_file_to_export: IFile,
+                real_file: IFile,
                 shm_total_bytes_read_name: str,
                 shm_cancel_name: str,
                 buffer_size: int, key: bytearray,
@@ -75,7 +75,7 @@ def export_file(index: int, final_part_size: int, final_running_threads: int, fi
 
 
 @typechecked
-def export_file_part(file_to_export: SalmonFile, exported_file: IRealFile, start: int, count: int,
+def export_file_part(file_to_export: SalmonFile, exported_file: IFile, start: int, count: int,
                      total_bytes_written: memoryview | None, buffer_size: int,
                      shm_cancel_name: str | None = None,
                      stopped: list[bool] | None = None,
@@ -222,10 +222,10 @@ class SalmonFileExporter:
         """
         return not self.__stopped[0]
 
-    def export_file(self, file_to_export: SalmonFile, export_dir: IRealFile, filename: str | None,
+    def export_file(self, file_to_export: SalmonFile, export_dir: IFile, filename: str | None,
                     delete_source: bool,
                     integrity: bool,
-                    on_progress: Callable[[int, int], Any] | None) -> IRealFile | None:
+                    on_progress: Callable[[int, int], Any] | None) -> IFile | None:
         """
         Export a file from the drive to the external directory path
         
@@ -242,7 +242,7 @@ class SalmonFileExporter:
         if file_to_export.is_directory():
             raise Exception("Cannot export directory, use SalmonFileCommander instead")
 
-        exported_file: IRealFile | None = None
+        exported_file: IFile | None = None
         filename = filename if filename is not None else file_to_export.get_base_name()
         try:
             self.__stopped[0] = False
@@ -302,7 +302,7 @@ class SalmonFileExporter:
         return exported_file
 
     def __submit_export_jobs(self, running_threads: int, part_size: int, file_to_export: SalmonFile,
-                             exported_file: IRealFile,
+                             exported_file: IFile,
                              integrity: bool, on_progress: Callable[[int, int], Any] | None):
 
         shm_total_bytes_read = shared_memory.SharedMemory(create=True, size=8 * running_threads)

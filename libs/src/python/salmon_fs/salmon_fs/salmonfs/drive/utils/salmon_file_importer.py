@@ -13,9 +13,9 @@ from typing import Any, Callable
 from typeguard import typechecked
 
 from salmon_core.convert.bit_converter import BitConverter
-from fs.file.ireal_file import IRealFile
+from fs.file.ifile import IFile
 from salmon_core.streams.random_access_stream import RandomAccessStream
-from salmon_core.salmon.streams.salmon_stream import SalmonStream
+from salmon_core.salmon.streams.aes_stream import AesStream
 from salmon_fs.salmon.salmon_file import SalmonFile
 from fs.drive.utils.file_utils import FileUtils
 
@@ -46,8 +46,8 @@ SOFTWARE.
 
 @typechecked
 def import_file(index: int, final_part_size: int, final_running_threads: int, file_size: int,
-                file_to_import: IRealFile,
-                salmon_real_file: IRealFile,
+                file_to_import: IFile,
+                salmon_real_file: IFile,
                 shm_total_bytes_read_name: str,
                 shm_cancel_name: str,
                 buffer_size: int, key: bytearray,
@@ -81,7 +81,7 @@ def import_file(index: int, final_part_size: int, final_running_threads: int, fi
 
 
 @typechecked
-def import_file_part(file_to_import: IRealFile, salmon_file: SalmonFile, start: int, count: int,
+def import_file_part(file_to_import: IFile, salmon_file: SalmonFile, start: int, count: int,
                      total_bytes_read: memoryview | None, buffer_size: int,
                      shm_cancel_name: str | None = None,
                      stopped: list[bool] | None = None,
@@ -108,7 +108,7 @@ def import_file_part(file_to_import: IRealFile, salmon_file: SalmonFile, start: 
     start_time: int = int(time.time() * 1000)
     total_part_bytes_read: int = 0
 
-    target_stream: SalmonStream | None = None
+    target_stream: AesStream | None = None
     source_stream: RandomAccessStream | None = None
 
     try:
@@ -231,7 +231,7 @@ class SalmonFileImporter:
         """
         return not self.__stopped[0]
 
-    def import_file(self, file_to_import: IRealFile, v_dir: SalmonFile, filename: str | None, delete_source: bool,
+    def import_file(self, file_to_import: IFile, v_dir: SalmonFile, filename: str | None, delete_source: bool,
                     integrity: bool,
                     on_progress: Callable[[int, int], Any] | None) -> SalmonFile | None:
         """
@@ -267,7 +267,7 @@ class SalmonFileImporter:
 
             # for python we make sure to allocate enough space for the file 
             # this will also create the header
-            target_stream: SalmonStream = imported_file.get_output_stream()
+            target_stream: AesStream = imported_file.get_output_stream()
             target_stream.set_length(file_size)
             target_stream.close()
 
@@ -307,7 +307,7 @@ class SalmonFileImporter:
         self.__stopped[0] = True
         return imported_file
 
-    def __submit_import_jobs(self, running_threads: int, part_size: int, file_to_import: IRealFile,
+    def __submit_import_jobs(self, running_threads: int, part_size: int, file_to_import: IFile,
                              imported_file: SalmonFile,
                              integrity: bool,
                              on_progress: Callable[[int, int], Any] | None):

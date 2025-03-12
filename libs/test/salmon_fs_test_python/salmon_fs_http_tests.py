@@ -36,9 +36,9 @@ sys.path.append(os.path.dirname(__file__) + '/../salmon_core_test_python')
 from salmon_core.streams.random_access_stream import RandomAccessStream
 from salmon_core.streams.memory_stream import MemoryStream
 from salmon_core.salmon.streams.provider_type import ProviderType
-from salmon_core.salmon.streams.salmon_stream import SalmonStream
-from fs.file.ireal_file import IRealFile
-from fs.file.py_http_file import PyHttpFile
+from salmon_core.salmon.streams.aes_stream import AesStream
+from fs.file.ifile import IFile
+from fs.file.http_file import HttpFile
 from fs.file import IVirtualFile
 from salmon_fs.salmon.drive.py_http_drive import PyHttpDrive
 from salmon_fs.salmon.salmon_drive import SalmonDrive
@@ -89,7 +89,7 @@ class SalmonFSHttpTests(TestCase):
             "AES_PROVIDER_TYPE") else ProviderType.Default
         print("ProviderType: " + str(provider_type))
 
-        SalmonStream.set_aes_provider_type(provider_type)
+        AesStream.set_aes_provider_type(provider_type)
 
     @classmethod
     def tearDownClass(cls):
@@ -100,7 +100,7 @@ class SalmonFSHttpTests(TestCase):
                                                SalmonFSHttpTests.old_test_mode)
 
     def test_shouldCatchNotAuthorizeNegative(self):
-        vault_dir: IRealFile = SalmonFSTestHelper.HTTP_VAULT_DIR
+        vault_dir: IFile = SalmonFSTestHelper.HTTP_VAULT_DIR
         wrong_password: bool = False
         try:
             drive: PyHttpDrive = SalmonDrive.open_drive(vault_dir, SalmonFSTestHelper.drive_class_type,
@@ -111,7 +111,7 @@ class SalmonFSHttpTests(TestCase):
         self.assertTrue(wrong_password)
 
     def test_shouldAuthorizePositive(self):
-        vault_dir: IRealFile = SalmonFSTestHelper.HTTP_VAULT_DIR
+        vault_dir: IFile = SalmonFSTestHelper.HTTP_VAULT_DIR
         wrong_password: bool = False
         try:
             drive: PyHttpDrive = SalmonDrive.open_drive(vault_dir, SalmonFSTestHelper.drive_class_type,
@@ -139,7 +139,7 @@ class SalmonFSHttpTests(TestCase):
                                             SalmonFSTestHelper.TEST_IMPORT_LARGE_FILENAME)
 
     def test_shouldSeekAndReadEncryptedFileStreamFromDrive(self):
-        vault_dir: IRealFile = SalmonFSTestHelper.HTTP_VAULT_DIR
+        vault_dir: IFile = SalmonFSTestHelper.HTTP_VAULT_DIR
         drive: PyHttpDrive = SalmonDrive.open_drive(vault_dir, SalmonFSTestHelper.drive_class_type,
                                                     SalmonCoreTestHelper.TEST_PASSWORD)
         root: IVirtualFile = drive.get_root()
@@ -155,7 +155,7 @@ class SalmonFSHttpTests(TestCase):
         SalmonFSTestHelper.seek_and_read_http_file(data, enc_file, True, 3, 50, 12)
 
     def test_shouldListFilesFromDrive(self):
-        vault_dir: IRealFile = SalmonFSTestHelper.HTTP_VAULT_DIR
+        vault_dir: IFile = SalmonFSTestHelper.HTTP_VAULT_DIR
         drive: PyHttpDrive = PyHttpDrive.open(vault_dir, SalmonCoreTestHelper.TEST_PASSWORD)
         root: IVirtualFile = drive.get_root()
         files: list[IVirtualFile] = root.list_files()
@@ -185,7 +185,7 @@ class SalmonFSHttpTests(TestCase):
         local_file = SalmonFSTestHelper.HTTP_TEST_DIR.get_child(
             SalmonFSTestHelper.TEST_HTTP_FILE.get_base_name())
         local_chk_sum = SalmonFSTestHelper.get_checksum(local_file)
-        http_root = PyHttpFile(SalmonFSTestHelper.HTTP_SERVER_VIRTUAL_URL + "/" + SalmonFSTestHelper.HTTP_TEST_DIRNAME)
+        http_root = HttpFile(SalmonFSTestHelper.HTTP_SERVER_VIRTUAL_URL + "/" + SalmonFSTestHelper.HTTP_TEST_DIRNAME)
         http_file = http_root.get_child(SalmonFSTestHelper.TEST_HTTP_FILE.get_base_name())
         stream = http_file.get_input_stream()
         ms = MemoryStream()

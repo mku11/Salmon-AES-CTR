@@ -29,7 +29,7 @@ from abc import ABC
 from typing import Any, Callable
 from typeguard import typechecked
 
-from fs.file.ireal_file import IRealFile
+from fs.file.ifile import IFile
 from fs.drive import VirtualDrive
 from salmon_core.streams.random_access_stream import RandomAccessStream
 
@@ -41,7 +41,7 @@ class IVirtualFile(ABC):
     specific ie for encryption they can be implemented by extending this class.
     """
 
-    def __init__(self, real_file: IRealFile, drive: VirtualDrive | None = None):
+    def __init__(self, real_file: IFile, drive: VirtualDrive | None = None):
         pass
 
     def get_input_stream(self) -> RandomAccessStream:
@@ -68,7 +68,7 @@ class IVirtualFile(ABC):
     def get_real_path(self) -> str:
         pass
 
-    def get_real_file(self) -> IRealFile:
+    def get_real_file(self) -> IFile:
         pass
 
     def get_base_name(self) -> str:

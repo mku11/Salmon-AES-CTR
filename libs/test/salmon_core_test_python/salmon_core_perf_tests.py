@@ -32,7 +32,7 @@ from typeguard import typechecked
 
 sys.path.append(os.path.dirname(__file__) + '/../../src/python/salmon_core')
 from salmon_core.salmon.streams.provider_type import ProviderType
-from salmon_core.salmon.streams.salmon_stream import SalmonStream
+from salmon_core.salmon.streams.aes_stream import AesStream
 
 from salmon_core_test_helper import SalmonCoreTestHelper
 
@@ -62,7 +62,7 @@ class SalmonCorePerfTests(TestCase):
         print()
 
     def test_encrypt_and_decrypt_perf_salmon_aes(self):
-        SalmonStream.set_aes_provider_type(ProviderType.Aes)
+        AesStream.set_aes_provider_type(ProviderType.Aes)
         # warm up
         SalmonCoreTestHelper.encrypt_and_decrypt_byte_array_native(SalmonCorePerfTests.TEST_PERF_SIZE, False)
         print("Salmon Native Aes: ")
@@ -70,7 +70,7 @@ class SalmonCorePerfTests(TestCase):
         print()
 
     def test_encrypt_and_decrypt_perf_salmon_intrinsics(self):
-        SalmonStream.set_aes_provider_type(ProviderType.AesIntrinsics)
+        AesStream.set_aes_provider_type(ProviderType.AesIntrinsics)
         # warm up
         SalmonCoreTestHelper.encrypt_and_decrypt_byte_array_native(SalmonCorePerfTests.TEST_PERF_SIZE, False)
         print("Salmon Native Aes Intrinsics: ")
@@ -78,7 +78,7 @@ class SalmonCorePerfTests(TestCase):
         print()
 
     def test_encrypt_and_decrypt_perf_salmon_gpu(self):
-        SalmonStream.set_aes_provider_type(ProviderType.AesGPU)
+        AesStream.set_aes_provider_type(ProviderType.AesGPU)
         # warm up
         SalmonCoreTestHelper.encrypt_and_decrypt_byte_array_native(SalmonCorePerfTests.TEST_PERF_SIZE, False)
         print("Salmon Native GPU: ")
@@ -87,7 +87,7 @@ class SalmonCorePerfTests(TestCase):
 
     # streams
     def test_encrypt_and_decrypt_stream_performance_salmon_def(self):
-        SalmonStream.set_aes_provider_type(ProviderType.Default)
+        AesStream.set_aes_provider_type(ProviderType.Default)
         # warm up
         SalmonCoreTestHelper.encrypt_and_decrypt_byte_array(SalmonCorePerfTests.TEST_PERF_SIZE, False)
         print("SalmonStream Salmon Default: ")
@@ -95,7 +95,7 @@ class SalmonCorePerfTests(TestCase):
         print()
 
     def test_encrypt_and_decrypt_stream_perf_salmon_aes(self):
-        SalmonStream.set_aes_provider_type(ProviderType.Aes)
+        AesStream.set_aes_provider_type(ProviderType.Aes)
         # warm up
         SalmonCoreTestHelper.encrypt_and_decrypt_byte_array(SalmonCorePerfTests.TEST_PERF_SIZE, False)
         print("SalmonStream Salmon Native Aes: ")
@@ -103,7 +103,7 @@ class SalmonCorePerfTests(TestCase):
         print()
 
     def test_encrypt_and_decrypt_stream_perf_salmon_intrinsics(self):
-        SalmonStream.set_aes_provider_type(ProviderType.AesIntrinsics)
+        AesStream.set_aes_provider_type(ProviderType.AesIntrinsics)
         # warm up
         SalmonCoreTestHelper.encrypt_and_decrypt_byte_array(SalmonCorePerfTests.TEST_PERF_SIZE, False)
         print("SalmonStream Salmon Native Intrinsics: ")
@@ -111,7 +111,7 @@ class SalmonCorePerfTests(TestCase):
         print()
 
     def test_encrypt_and_decrypt_stream_perf_salmon_aes_gpu(self):
-        SalmonStream.set_aes_provider_type(ProviderType.AesGPU)
+        AesStream.set_aes_provider_type(ProviderType.AesGPU)
         # warm up
         SalmonCoreTestHelper.encrypt_and_decrypt_byte_array(SalmonCorePerfTests.TEST_PERF_SIZE, False)
         print("SalmonStream Salmon Native GPU: ")

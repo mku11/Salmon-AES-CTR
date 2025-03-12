@@ -24,22 +24,22 @@ SOFTWARE.
 """
 
 from salmon_core.salmon.streams.provider_type import ProviderType
-from salmon_core.salmon.salmon_security_exception import SalmonSecurityException
-from salmon_core.salmon.transform.isalmon_ctr_transformer import ISalmonCTRTransformer
-from salmon_core.salmon.transform.salmon_default_transformer import SalmonDefaultTransformer
+from salmon_core.salmon.security_exception import SecurityException
+from salmon_core.salmon.transform.ictr_transformer import ICTRTransformer
+from salmon_core.salmon.transform.aes_default_transformer import AesDefaultTransformer
 from typeguard import typechecked
 
-from salmon_core.salmon.transform.salmon_native_transformer import SalmonNativeTransformer
+from salmon_core.salmon.transform.aes_native_transformer import AesNativeTransformer
 
 
 @typechecked
-class SalmonTransformerFactory:
+class TransformerFactory:
     """
     Creates an AES transformer object.
     """
 
     @staticmethod
-    def create(v_type: ProviderType) -> ISalmonCTRTransformer:
+    def create(v_type: ProviderType) -> ICTRTransformer:
         """
         Create an encryption transformer implementation.
         :param v_type: The supported provider type.
@@ -48,7 +48,7 @@ class SalmonTransformerFactory:
         """
         match v_type:
             case ProviderType.Default:
-                return SalmonDefaultTransformer()
+                return AesDefaultTransformer()
             case ProviderType.AesIntrinsics | ProviderType.Aes | ProviderType.AesGPU:
-                return SalmonNativeTransformer(v_type.value)
-        raise SalmonSecurityException("Unknown Transformer type")
+                return AesNativeTransformer(v_type.value)
+        raise SecurityException("Unknown Transformer type")

@@ -1,6 +1,4 @@
 #!/usr/bin/env python3
-from __future__ import annotations
-
 __license__ = """
 MIT License
 
@@ -25,38 +23,35 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 """
 
-from abc import ABC, abstractmethod
+from salmon_core.convert.base_64 import Base64
+from salmon_core.convert.ibase_64 import IBase64
+
 from typeguard import typechecked
-from fs.file.ifile import IFile
 
 
 @typechecked
-class VirtualDrive(ABC):
+class Base64Utils:
     """
-    Virtual Drive
+    Provides generic encoder (ie Base64).
     """
 
-    @abstractmethod
-    def _on_unlock_success(self):
-        """
-        Method is called when the drive is unlocked
-        """
-        pass
+    __base64: IBase64 = Base64()
+    """
+    Current global Base64 implementation for encrypting/decrypting text strings. To change use set_base64().
+    """
 
-    def _on_unlock_error(self):
+    @staticmethod
+    def set_base64(base64: IBase64):
         """
-        Method is called when unlocking the drive has failed
+        Change the current global Base64 implementation.
+        :param base64: The new Base64 implementation.
         """
-        pass
+        Base64Utils.base64 = base64
 
-    @abstractmethod
-    def get_private_dir(self) -> IFile:
-        pass
-
-    @abstractmethod
-    def get_file(self, file: IFile) -> any:
-        pass
-
-    @abstractmethod
-    def get_root(self) -> any:
-        pass
+    @staticmethod
+    def get_base64() -> IBase64:
+        """
+        Get the global default Base64 implementation.
+        :return: The Base64 implementation.
+        """
+        return Base64Utils.__base64

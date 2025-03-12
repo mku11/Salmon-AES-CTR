@@ -36,12 +36,12 @@ from salmon_core.streams.memory_stream import MemoryStream
 from salmon.integrity.integrity_exception import IntegrityException
 from salmon_core.salmon.streams.encryption_mode import EncryptionMode
 from salmon_core.salmon.streams.provider_type import ProviderType
-from salmon_core.salmon.streams.salmon_stream import SalmonStream
-from salmon_core.salmon.salmon_generator import SalmonGenerator
-from salmon_core.salmon.salmon_range_exceeded_exception import SalmonRangeExceededException
-from salmon_core.salmon.salmon_security_exception import SalmonSecurityException
-from salmon_core.salmon.text.salmon_text_decryptor import SalmonTextDecryptor
-from salmon_core.salmon.text.salmon_text_encryptor import SalmonTextEncryptor
+from salmon_core.salmon.streams.aes_stream import AesStream
+from salmon_core.salmon.generator import Generator
+from salmon_core.salmon.range_exceeded_exception import RangeExceededException
+from salmon_core.salmon.security_exception import SecurityException
+from salmon_core.salmon.text.text_decryptor import TextDecryptor
+from salmon_core.salmon.text.text_encryptor import TextEncryptor
 from salmon_core_test_helper import SalmonCoreTestHelper
 
 
@@ -63,7 +63,7 @@ class SalmonCoreTests(TestCase):
         provider_type: ProviderType = ProviderType[os.getenv("AES_PROVIDER_TYPE")] if os.getenv(
             "AES_PROVIDER_TYPE") else ProviderType.Default
         print("ProviderType: " + str(provider_type))
-        SalmonStream.set_aes_provider_type(provider_type)
+        AesStream.set_aes_provider_type(provider_type)
 
     @classmethod
     def tearDownClass(cls):
@@ -71,20 +71,20 @@ class SalmonCoreTests(TestCase):
 
     def test_shouldEncryptAndDecryptText(self):
         plain_text = SalmonCoreTestHelper.TEST_TINY_TEXT
-        enc_text = SalmonTextEncryptor.encrypt_string(plain_text, SalmonCoreTestHelper.TEST_KEY_BYTES,
-                                                      SalmonCoreTestHelper.TEST_NONCE_BYTES,
-                                                      False)
-        dec_text = SalmonTextDecryptor.decrypt_string(enc_text, SalmonCoreTestHelper.TEST_KEY_BYTES,
-                                                      SalmonCoreTestHelper.TEST_NONCE_BYTES,
-                                                      False)
+        enc_text = TextEncryptor.encrypt_string(plain_text, SalmonCoreTestHelper.TEST_KEY_BYTES,
+                                                SalmonCoreTestHelper.TEST_NONCE_BYTES,
+                                                False)
+        dec_text = TextDecryptor.decrypt_string(enc_text, SalmonCoreTestHelper.TEST_KEY_BYTES,
+                                                SalmonCoreTestHelper.TEST_NONCE_BYTES,
+                                                False)
         self.assertEqual(plain_text, dec_text)
 
     def test_shouldEncryptAndDecryptTextWithHeader(self):
         plain_text = SalmonCoreTestHelper.TEST_TINY_TEXT
-        enc_text = SalmonTextEncryptor.encrypt_string(plain_text, SalmonCoreTestHelper.TEST_KEY_BYTES,
-                                                      SalmonCoreTestHelper.TEST_NONCE_BYTES,
-                                                      True)
-        dec_text = SalmonTextDecryptor.decrypt_string(enc_text, SalmonCoreTestHelper.TEST_KEY_BYTES, None, True)
+        enc_text = TextEncryptor.encrypt_string(plain_text, SalmonCoreTestHelper.TEST_KEY_BYTES,
+                                                SalmonCoreTestHelper.TEST_NONCE_BYTES,
+                                                True)
+        dec_text = TextDecryptor.decrypt_string(enc_text, SalmonCoreTestHelper.TEST_KEY_BYTES, None, True)
         self.assertEqual(plain_text, dec_text)
 
     def test_shouldEncryptCatchNoKey(self):
@@ -92,8 +92,8 @@ class SalmonCoreTests(TestCase):
         caught = False
 
         try:
-            SalmonTextEncryptor.encrypt_string(plain_text, None, SalmonCoreTestHelper.TEST_NONCE_BYTES, True)
-        except (TypeCheckError, SalmonSecurityException) as ex:
+            TextEncryptor.encrypt_string(plain_text, None, SalmonCoreTestHelper.TEST_NONCE_BYTES, True)
+        except (TypeCheckError, SecurityException) as ex:
             print(ex, file=sys.stderr)
             caught = True
 
@@ -104,8 +104,8 @@ class SalmonCoreTests(TestCase):
         caught = False
 
         try:
-            SalmonTextEncryptor.encrypt_string(plain_text, SalmonCoreTestHelper.TEST_KEY_BYTES, None, True)
-        except (TypeCheckError, SalmonSecurityException) as ex:
+            TextEncryptor.encrypt_string(plain_text, SalmonCoreTestHelper.TEST_KEY_BYTES, None, True)
+        except (TypeCheckError, SecurityException) as ex:
             print(ex, file=sys.stderr)
             caught = True
         except Exception as e:
@@ -118,9 +118,9 @@ class SalmonCoreTests(TestCase):
         caught = False
 
         try:
-            enc_text = SalmonTextEncryptor.encrypt_string(plain_text, SalmonCoreTestHelper.TEST_KEY_BYTES,
-                                                          SalmonCoreTestHelper.TEST_NONCE_BYTES, False)
-            SalmonTextDecryptor.decrypt_string(enc_text, SalmonCoreTestHelper.TEST_KEY_BYTES, None, False)
+            enc_text = TextEncryptor.encrypt_string(plain_text, SalmonCoreTestHelper.TEST_KEY_BYTES,
+                                                    SalmonCoreTestHelper.TEST_NONCE_BYTES, False)
+            TextDecryptor.decrypt_string(enc_text, SalmonCoreTestHelper.TEST_KEY_BYTES, None, False)
         except Exception as ex:
             print(ex, file=sys.stderr)
             caught = True
@@ -132,9 +132,9 @@ class SalmonCoreTests(TestCase):
         caught = False
 
         try:
-            enc_text = SalmonTextEncryptor.encrypt_string(plain_text, SalmonCoreTestHelper.TEST_KEY_BYTES,
-                                                          SalmonCoreTestHelper.TEST_NONCE_BYTES, True)
-            SalmonTextDecryptor.decrypt_string(enc_text, None, SalmonCoreTestHelper.TEST_NONCE_BYTES, True)
+            enc_text = TextEncryptor.encrypt_string(plain_text, SalmonCoreTestHelper.TEST_KEY_BYTES,
+                                                    SalmonCoreTestHelper.TEST_NONCE_BYTES, True)
+            TextDecryptor.decrypt_string(enc_text, None, SalmonCoreTestHelper.TEST_NONCE_BYTES, True)
         except Exception as ex:
             print(ex, file=sys.stderr)
             caught = True
@@ -199,11 +199,11 @@ class SalmonCoreTests(TestCase):
             buff1[0:n_chunk_size] = buffer[i:i + n_chunk_size]
 
             buff2 = bytearray(chunk_size)
-            end = index + SalmonGenerator.HASH_RESULT_LENGTH + n_chunk_size
-            buff2[0:n_chunk_size] = buffer_with_integrity[index + SalmonGenerator.HASH_RESULT_LENGTH:end]
+            end = index + Generator.HASH_RESULT_LENGTH + n_chunk_size
+            buff2[0:n_chunk_size] = buffer_with_integrity[index + Generator.HASH_RESULT_LENGTH:end]
 
             self.assertEqual(buff1, buff2)
-            index += n_chunk_size + SalmonGenerator.HASH_RESULT_LENGTH
+            index += n_chunk_size + Generator.HASH_RESULT_LENGTH
         self.assertEqual(len(buffer_with_integrity), index)
 
     def test_encrypt_decrypt_using_stream_no_buffers_specified(self):
@@ -393,9 +393,9 @@ class SalmonCoreTests(TestCase):
         input_bytes = bytearray(plain_text.encode('utf-8'))
         ins = MemoryStream(input_bytes)
         outs = MemoryStream()
-        enc_writer = SalmonStream(SalmonCoreTestHelper.TEST_KEY_BYTES, SalmonCoreTestHelper.TEST_NONCE_BYTES,
-                                  EncryptionMode.Encrypt, outs,
-                                  None, False, None, None)
+        enc_writer = AesStream(SalmonCoreTestHelper.TEST_KEY_BYTES, SalmonCoreTestHelper.TEST_NONCE_BYTES,
+                               EncryptionMode.Encrypt, outs,
+                               None, False, None, None)
         try:
             enc_writer.copy_to(outs)
         except Exception as ex:
@@ -420,9 +420,9 @@ class SalmonCoreTests(TestCase):
                                                  SalmonCoreTestHelper.TEST_ENC_BUFFER_SIZE, False, 0, None, None)
 
         ins = MemoryStream(enc_bytes)
-        enc_writer = SalmonStream(SalmonCoreTestHelper.TEST_KEY_BYTES, SalmonCoreTestHelper.TEST_NONCE_BYTES,
-                                  EncryptionMode.Decrypt, ins,
-                                  None, False, None, None)
+        enc_writer = AesStream(SalmonCoreTestHelper.TEST_KEY_BYTES, SalmonCoreTestHelper.TEST_NONCE_BYTES,
+                               EncryptionMode.Decrypt, ins,
+                               None, False, None, None)
         try:
             ins.copy_to(enc_writer)
         except Exception as ex:
@@ -469,7 +469,7 @@ class SalmonCoreTests(TestCase):
                                                 SalmonCoreTestHelper.TEST_TEXT_WRITE, False, 0, None,
                                                 False)
         except IOError as ex:
-            if isinstance(ex.__cause__, SalmonSecurityException):
+            if isinstance(ex.__cause__, SecurityException):
                 caught = True
 
         self.assertTrue(caught)
@@ -496,7 +496,7 @@ class SalmonCoreTests(TestCase):
                                                     SalmonCoreTestHelper.MAX_ENC_COUNTER)
         except Exception as throwable:
             print(throwable)
-            if isinstance(throwable, SalmonRangeExceededException) or isinstance(throwable, ValueError):
+            if isinstance(throwable, RangeExceededException) or isinstance(throwable, ValueError):
                 caught = True
             else:
                 traceback.print_exc()
@@ -511,7 +511,7 @@ class SalmonCoreTests(TestCase):
                                                   SalmonCoreTestHelper.MAX_ENC_COUNTER - 1)
         except Exception as throwable:
             print(throwable)
-            if isinstance(throwable, SalmonRangeExceededException):
+            if isinstance(throwable, RangeExceededException):
                 caught = True
 
         self.assertFalse(caught)

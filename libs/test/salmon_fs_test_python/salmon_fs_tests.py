@@ -37,7 +37,7 @@ sys.path.append(os.path.dirname(__file__) + '/../salmon_core_test_python')
 from salmon_core.streams.memory_stream import MemoryStream
 from salmon.integrity.integrity_exception import IntegrityException
 from salmon_core.salmon.streams.provider_type import ProviderType
-from salmon_core.salmon.streams.salmon_stream import SalmonStream
+from salmon_core.salmon.streams.aes_stream import AesStream
 from fs.file import IVirtualFile
 from salmon_fs.salmon.salmon_auth_exception import SalmonAuthException
 from salmon_fs.salmon.salmon_file import SalmonFile, IRealFile
@@ -87,7 +87,7 @@ class SalmonFSTests(TestCase):
             "AES_PROVIDER_TYPE") else ProviderType.Default
         print("ProviderType: " + str(provider_type))
 
-        SalmonStream.set_aes_provider_type(ProviderType.Default)
+        AesStream.set_aes_provider_type(ProviderType.Default)
 
     @classmethod
     def tearDownClass(cls):

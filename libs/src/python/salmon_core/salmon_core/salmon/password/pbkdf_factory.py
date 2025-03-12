@@ -1,6 +1,4 @@
 #!/usr/bin/env python3
-from __future__ import annotations
-
 __license__ = """
 MIT License
 
@@ -25,38 +23,27 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 """
 
-from abc import ABC, abstractmethod
+from salmon_core.salmon.password.ipbkdf_provider import ISalmonPbkdfProvider
+from salmon_core.salmon.password.pbkdf_type import PbkdfType
+from salmon_core.salmon.password.default_pbkdf_provider import SalmonDefaultPbkdfProvider
+
 from typeguard import typechecked
-from fs.file.ifile import IFile
 
 
 @typechecked
-class VirtualDrive(ABC):
+class SalmonPbkdfFactory:
     """
-    Virtual Drive
+    Creates AES transformer implementations.
     """
 
-    @abstractmethod
-    def _on_unlock_success(self):
+    @staticmethod
+    def create(pbkdf_type: PbkdfType) -> ISalmonPbkdfProvider:
         """
-        Method is called when the drive is unlocked
+        Create an instance of a pbkdf provider.
+        :param pbkdf_type: The pbkdf type.
+        :return: The provider.
         """
-        pass
-
-    def _on_unlock_error(self):
-        """
-        Method is called when unlocking the drive has failed
-        """
-        pass
-
-    @abstractmethod
-    def get_private_dir(self) -> IFile:
-        pass
-
-    @abstractmethod
-    def get_file(self, file: IFile) -> any:
-        pass
-
-    @abstractmethod
-    def get_root(self) -> any:
-        pass
+        match pbkdf_type:
+            case PbkdfType.Default:
+                return SalmonDefaultPbkdfProvider()
+        raise RuntimeError("Unknown Pbkdf provider type")

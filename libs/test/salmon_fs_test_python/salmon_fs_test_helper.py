@@ -41,28 +41,28 @@ from salmon_core.convert.bit_converter import BitConverter
 from salmon_core.streams.memory_stream import MemoryStream
 from salmon_core.streams.random_access_stream import RandomAccessStream
 from salmon_core.salmon.streams.encryption_mode import EncryptionMode
-from salmon_core.salmon.streams.salmon_stream import SalmonStream
-from salmon_core.salmon.salmon_decryptor import SalmonDecryptor
-from salmon_core.salmon.salmon_encryptor import SalmonEncryptor
-from salmon_core.salmon.salmon_generator import SalmonGenerator
-from salmon_core.salmon.salmon_range_exceeded_exception import SalmonRangeExceededException
-from salmon_core.salmon.text.salmon_text_decryptor import SalmonTextDecryptor
-from salmon_core.salmon.text.salmon_text_encryptor import SalmonTextEncryptor
+from salmon_core.salmon.streams.aes_stream import AesStream
+from salmon_core.salmon.decryptor import Decryptor
+from salmon_core.salmon.encryptor import Encryptor
+from salmon_core.salmon.generator import Generator
+from salmon_core.salmon.range_exceeded_exception import RangeExceededException
+from salmon_core.salmon.text.text_decryptor import TextDecryptor
+from salmon_core.salmon.text.text_encryptor import TextEncryptor
 from salmon_fs.salmon.utils.salmon_file_commander import SalmonFileCommander
 from salmon_fs.salmon.drive.py_ws_drive import PyWSDrive
 from salmon_fs.salmon.drive.py_http_drive import PyHttpDrive
 from salmon_fs.salmon.drive.py_drive import PyDrive
-from fs.streams.py_http_file_stream import PyHttpFileStream
-from fs.file.py_http_file import PyHttpFile
-from fs.file.py_ws_file import Credentials, PyWSFile
-from fs.file.py_file import PyFile
-from fs.file.ireal_file import IRealFile
+from fs.streams.http_file_stream import HttpFileStream
+from fs.file.http_file import HttpFile
+from fs.file.ws_file import Credentials, WSFile
+from fs.file.file import File
+from fs.file.ifile import IFile
 from salmon_fs.salmon.salmon_drive import SalmonDrive
 from salmon_fs.salmon.salmon_file import SalmonFile
 from salmon_fs.salmon.streams.salmon_file_input_stream import SalmonFileInputStream
 from salmon.sequence.inonce_sequence_serializer import INonceSequenceSerializer
 from salmon_fs.salmon.sequence.salmon_file_sequencer import SalmonFileSequencer
-from salmon.sequence.salmon_sequence_serializer import SalmonSequenceSerializer
+from salmon.sequence.sequence_serializer import SequenceSerializer
 from salmon_fs.salmon.utils.salmon_file_exporter import SalmonFileExporter
 from salmon_fs.salmon.utils.salmon_file_importer import SalmonFileImporter
 from fs.drive.utils.file_searcher import FileSearcher
@@ -147,7 +147,7 @@ class SalmonFSTestHelper:
     TEST_EXPORT_AUTH_DIR = None
     file_importer = None
     file_exporter = None
-    sequence_serializer = SalmonSequenceSerializer()
+    sequence_serializer = SequenceSerializer()
 
     ENABLE_MULTI_CPU = False
     testCase: TestCase = TestCase()
@@ -162,7 +162,7 @@ class SalmonFSTestHelper:
 
     @staticmethod
     def get_sequence_serializer() -> INonceSequenceSerializer:
-        return SalmonSequenceSerializer()
+        return SequenceSerializer()
 
     @staticmethod
     def set_test_params(test_dir: str, test_mode: TestMode):
@@ -175,7 +175,7 @@ class SalmonFSTestHelper:
         elif test_mode == TestMode.WebService:
             SalmonFSTestHelper.drive_class_type = PyWSDrive
 
-        SalmonFSTestHelper.TEST_ROOT_DIR = PyFile(test_dir)
+        SalmonFSTestHelper.TEST_ROOT_DIR = File(test_dir)
         if not SalmonFSTestHelper.TEST_ROOT_DIR.exists():
             SalmonFSTestHelper.TEST_ROOT_DIR.mkdir()
 
@@ -183,8 +183,8 @@ class SalmonFSTestHelper:
         SalmonFSTestHelper.TEST_INPUT_DIR = SalmonFSTestHelper.create_dir(SalmonFSTestHelper.TEST_ROOT_DIR,
                                                                           SalmonFSTestHelper.TEST_INPUT_DIRNAME)
         if test_mode == TestMode.WebService:
-            SalmonFSTestHelper.TEST_OUTPUT_DIR = PyWSFile("/", SalmonFSTestHelper.WS_SERVER_URL,
-                                                          SalmonFSTestHelper.credentials)
+            SalmonFSTestHelper.TEST_OUTPUT_DIR = WSFile("/", SalmonFSTestHelper.WS_SERVER_URL,
+                                                        SalmonFSTestHelper.credentials)
         else:
             SalmonFSTestHelper.TEST_OUTPUT_DIR = SalmonFSTestHelper.create_dir(SalmonFSTestHelper.TEST_ROOT_DIR,
                                                                                SalmonFSTestHelper.TEST_OUTPUT_DIRNAME)
@@ -196,13 +196,13 @@ class SalmonFSTestHelper:
                                                                         SalmonFSTestHelper.TEST_SEQ_DIRNAME)
         SalmonFSTestHelper.TEST_EXPORT_AUTH_DIR = SalmonFSTestHelper.create_dir(SalmonFSTestHelper.TEST_ROOT_DIR,
                                                                                 SalmonFSTestHelper.TEST_EXPORT_AUTH_DIRNAME)
-        SalmonFSTestHelper.HTTP_VAULT_DIR = PyHttpFile(SalmonFSTestHelper.HTTP_VAULT_DIR_URL)
+        SalmonFSTestHelper.HTTP_VAULT_DIR = HttpFile(SalmonFSTestHelper.HTTP_VAULT_DIR_URL)
         SalmonFSTestHelper.create_test_files()
         SalmonFSTestHelper.create_http_files()
         SalmonFSTestHelper.create_http_vault()
 
     @staticmethod
-    def create_dir(parent: IRealFile, dir_name: str):
+    def create_dir(parent: IFile, dir_name: str):
         v_dir = parent.get_child(dir_name)
         if not v_dir.exists():
             v_dir.mkdir()
@@ -270,7 +270,7 @@ class SalmonFSTestHelper:
         importer.close()
 
     @staticmethod
-    def create_file(file: IRealFile, contents: str):
+    def create_file(file: IFile, contents: str):
         stream = file.get_output_stream()
         data: bytearray = bytearray(contents.encode())
         stream.write(data, 0, len(data))
@@ -278,7 +278,7 @@ class SalmonFSTestHelper:
         stream.close()
 
     @staticmethod
-    def create_file_random_data(file: IRealFile, size: int):
+    def create_file_random_data(file: IFile, size: int):
         if file.exists():
             return
         stream = file.get_output_stream()
@@ -319,18 +319,18 @@ class SalmonFSTestHelper:
         return SalmonFileSequencer(seq_file, SalmonFSTestHelper.sequence_serializer)
 
     @staticmethod
-    def generate_folder(name: str, parent: IRealFile | None = None, rand=True):
+    def generate_folder(name: str, parent: IFile | None = None, rand=True):
         if not parent:
-            parent: IRealFile = SalmonFSTestHelper.TEST_OUTPUT_DIR
+            parent: IFile = SalmonFSTestHelper.TEST_OUTPUT_DIR
         dir_name: str = name + ("_" + str(time.time() * 1000 + random.random()) if rand else "")
-        v_dir: IRealFile = parent.get_child(dir_name)
+        v_dir: IFile = parent.get_child(dir_name)
         if not v_dir.exists():
             v_dir.mkdir()
         print("generated folder: " + v_dir.get_path())
         return v_dir
 
     @staticmethod
-    def get_checksum(file: IRealFile | SalmonFile) -> str:
+    def get_checksum(file: IFile | SalmonFile) -> str:
         stream: RandomAccessStream | None = file.get_input_stream()
         return SalmonFSTestHelper.get_checksum_stream(stream)
 
@@ -348,7 +348,7 @@ class SalmonFSTestHelper:
                 stream.close()
 
     @staticmethod
-    def import_and_export(vault_dir: IRealFile, password: str, import_file: IRealFile,
+    def import_and_export(vault_dir: IFile, password: str, import_file: IFile,
                           bitflip: bool, flip_position: int, should_be_equal: bool,
                           apply_file_integrity: bool, verify_file_integrity: bool):
         sequencer: SalmonFileSequencer = SalmonFSTestHelper.create_salmon_file_sequencer()
@@ -356,7 +356,7 @@ class SalmonFSTestHelper:
         root_dir = drive.get_root()
         root_dir.list_files()
 
-        file_to_import: IRealFile = import_file
+        file_to_import: IFile = import_file
         hash_pre_import: str = SalmonFSTestHelper.get_checksum(file_to_import)
 
         # import
@@ -405,17 +405,17 @@ class SalmonFSTestHelper:
         if chunk_size2 and chunk_size2 > 0 and verify_file_integrity:
             salmon_file.set_verify_integrity(True, None)
 
-        export_file: IRealFile = SalmonFSTestHelper.file_exporter.export_file(salmon_file, drive.get_export_dir(),
-                                                                              None,
-                                                                              False, verify_file_integrity,
-                                                                              print_export_progress)
+        export_file: IFile = SalmonFSTestHelper.file_exporter.export_file(salmon_file, drive.get_export_dir(),
+                                                                          None,
+                                                                          False, verify_file_integrity,
+                                                                          print_export_progress)
 
         hash_post_export: str = SalmonFSTestHelper.get_checksum(export_file)
         if should_be_equal:
             SalmonFSTestHelper.testCase.assertEqual(hash_pre_import, hash_post_export)
 
     @staticmethod
-    def open_drive(vault_dir: IRealFile, drive_class_type: type, password: str,
+    def open_drive(vault_dir: IFile, drive_class_type: type, password: str,
                    sequencer: SalmonFileSequencer | None = None):
         if drive_class_type == PyWSDrive:
             # use the remote service instead
@@ -424,7 +424,7 @@ class SalmonFSTestHelper:
             return SalmonDrive.open_drive(vault_dir, drive_class_type, password, sequencer)
 
     @staticmethod
-    def create_drive(vault_dir: IRealFile, drive_class_type: type, password: str,
+    def create_drive(vault_dir: IFile, drive_class_type: type, password: str,
                      sequencer: SalmonFileSequencer | None = None):
         if drive_class_type == PyWSDrive:
             return PyWSDrive.create(vault_dir, password, sequencer)
@@ -432,11 +432,11 @@ class SalmonFSTestHelper:
             return SalmonDrive.create_drive(vault_dir, drive_class_type, password, sequencer)
 
     @staticmethod
-    def import_and_search(vault_dir: IRealFile, password: str, import_file: IRealFile):
+    def import_and_search(vault_dir: IFile, password: str, import_file: IFile):
         sequencer = SalmonFSTestHelper.create_salmon_file_sequencer()
         drive = SalmonFSTestHelper.create_drive(vault_dir, SalmonFSTestHelper.drive_class_type, password, sequencer)
         root_dir: SalmonFile = drive.get_root()
-        file_to_import: IRealFile = import_file
+        file_to_import: IFile = import_file
         rbasename: str = file_to_import.get_base_name()
 
         # import
@@ -457,12 +457,12 @@ class SalmonFSTestHelper:
         SalmonFSTestHelper.testCase.assertEqual(files[0].get_base_name(), basename)
 
     @staticmethod
-    def import_and_copy(vault_dir: IRealFile, password: str, import_file: IRealFile,
+    def import_and_copy(vault_dir: IFile, password: str, import_file: IFile,
                         new_dir: str, move: bool):
         sequencer: SalmonFileSequencer = SalmonFSTestHelper.create_salmon_file_sequencer()
         drive = SalmonFSTestHelper.create_drive(vault_dir, SalmonFSTestHelper.drive_class_type, password, sequencer)
         root_dir: SalmonFile = drive.get_root()
-        file_to_import: IRealFile = import_file
+        file_to_import: IFile = import_file
         rbasename: str = file_to_import.get_base_name()
 
         # import
@@ -505,7 +505,7 @@ class SalmonFSTestHelper:
                                          file_nonce: bytearray,
                                          flip_bit: bool, flip_position: int, check_data: bool):
         # write file
-        real_dir: IRealFile = SalmonFSTestHelper.generate_folder("encfiles", SalmonFSTestHelper.TEST_OUTPUT_DIR, False)
+        real_dir: IFile = SalmonFSTestHelper.generate_folder("encfiles", SalmonFSTestHelper.TEST_OUTPUT_DIR, False)
         v_dir: SalmonFile = SalmonFile(real_dir, None)
         filename: str = "test_" + str(int(time.time() * 1000)) + "." + str(flip_position) + ".txt"
         new_file: SalmonFile = v_dir.create_file(filename, key, filename_nonce, file_nonce)
@@ -516,11 +516,11 @@ class SalmonFSTestHelper:
         stream.write(test_bytes, 0, len(test_bytes))
         stream.flush()
         stream.close()
-        real_file: IRealFile = new_file.get_real_file()
+        real_file: IFile = new_file.get_real_file()
 
         # tamper
         if flip_bit:
-            real_tmp_file: IRealFile = new_file.get_real_file()
+            real_tmp_file: IFile = new_file.get_real_file()
             real_stream: RandomAccessStream = real_tmp_file.get_output_stream()
             real_stream.set_position(flip_position)
             real_stream.write(bytearray([0]), 0, 1)
@@ -533,7 +533,7 @@ class SalmonFSTestHelper:
         read_file.set_requested_nonce(file_nonce)
         if verify_integrity:
             read_file.set_verify_integrity(True, hash_key)
-        in_stream: SalmonStream = read_file.get_input_stream()
+        in_stream: AesStream = read_file.get_input_stream()
         text_bytes: bytearray = bytearray(len(test_bytes))
         in_stream.read(text_bytes, 0, len(text_bytes))
         in_stream.close()
@@ -542,7 +542,7 @@ class SalmonFSTestHelper:
         return read_file
 
     @staticmethod
-    def export_and_import_auth(vault: IRealFile, import_file_path: IRealFile):
+    def export_and_import_auth(vault: IFile, import_file_path: IFile):
         # emulate 2 different devices with different sequencers
         sequencer1: SalmonFileSequencer = SalmonFSTestHelper.create_salmon_file_sequencer()
         sequencer2: SalmonFileSequencer = SalmonFSTestHelper.create_salmon_file_sequencer()
@@ -552,11 +552,11 @@ class SalmonFSTestHelper:
                                                 SalmonCoreTestHelper.TEST_PASSWORD, sequencer1)
         # import a test file
         root_dir: SalmonFile = drive.get_root()
-        file_to_import: IRealFile = import_file_path
+        file_to_import: IFile = import_file_path
         salmon_file_a1: SalmonFile = SalmonFSTestHelper.file_importer.import_file(file_to_import, root_dir, None, False,
                                                                                   False,
                                                                                   None)
-        nonce_a1: int = BitConverter.to_long(salmon_file_a1.get_requested_nonce(), 0, SalmonGenerator.NONCE_LENGTH)
+        nonce_a1: int = BitConverter.to_long(salmon_file_a1.get_requested_nonce(), 0, Generator.NONCE_LENGTH)
         drive.close()
 
         # open with another device (different sequencer) and export auth id
@@ -579,20 +579,20 @@ class SalmonFSTestHelper:
         # reopen with first device sequencer and export the auth file with the auth id from the second device
         drive = SalmonDrive.open_drive(vault, SalmonFSTestHelper.drive_class_type,
                                        SalmonCoreTestHelper.TEST_PASSWORD, sequencer1)
-        export_auth_dir: IRealFile = SalmonFSTestHelper.generate_folder(SalmonFSTestHelper.TEST_EXPORT_AUTH_DIRNAME,
-                                                                        SalmonFSTestHelper.TEST_EXPORT_AUTH_DIR)
+        export_auth_dir: IFile = SalmonFSTestHelper.generate_folder(SalmonFSTestHelper.TEST_EXPORT_AUTH_DIRNAME,
+                                                                    SalmonFSTestHelper.TEST_EXPORT_AUTH_DIR)
         export_file = export_auth_dir.create_file(SalmonFSTestHelper.TEST_EXPORT_AUTH_FILENAME)
         SalmonAuthConfig.export_auth_file(drive, auth_id, export_file)
-        export_auth_file: IRealFile = export_auth_dir.get_child(SalmonFSTestHelper.TEST_EXPORT_AUTH_FILENAME)
+        export_auth_file: IFile = export_auth_dir.get_child(SalmonFSTestHelper.TEST_EXPORT_AUTH_FILENAME)
         salmon_cfg_file: SalmonFile = SalmonFile(export_auth_file, drive)
-        nonce_cfg: int = BitConverter.to_long(salmon_cfg_file.get_file_nonce(), 0, SalmonGenerator.NONCE_LENGTH)
+        nonce_cfg: int = BitConverter.to_long(salmon_cfg_file.get_file_nonce(), 0, Generator.NONCE_LENGTH)
         #  import another test file
         salmon_root_dir = drive.get_root()
         file_to_import = import_file_path
         salmon_file_a2: SalmonFile = SalmonFSTestHelper.file_importer.import_file(file_to_import, salmon_root_dir, None,
                                                                                   False, False,
                                                                                   None)
-        nonce_a2: int = BitConverter.to_long(salmon_file_a2.get_file_nonce(), 0, SalmonGenerator.NONCE_LENGTH)
+        nonce_a2: int = BitConverter.to_long(salmon_file_a2.get_file_nonce(), 0, Generator.NONCE_LENGTH)
         drive.close()
 
         # reopen with second device(sequencer) and import auth file
@@ -605,11 +605,11 @@ class SalmonFSTestHelper:
         salmon_file_b1: SalmonFile = SalmonFSTestHelper.file_importer.import_file(file_to_import, root_dir, None, False,
                                                                                   False,
                                                                                   None)
-        nonce_b1: int = BitConverter.to_long(salmon_file_b1.get_file_nonce(), 0, SalmonGenerator.NONCE_LENGTH)
+        nonce_b1: int = BitConverter.to_long(salmon_file_b1.get_file_nonce(), 0, Generator.NONCE_LENGTH)
         salmon_file_b2: SalmonFile = SalmonFSTestHelper.file_importer.import_file(file_to_import, root_dir, None, False,
                                                                                   False,
                                                                                   None)
-        nonce_b2: int = BitConverter.to_long(salmon_file_b2.get_file_nonce(), 0, SalmonGenerator.NONCE_LENGTH)
+        nonce_b2: int = BitConverter.to_long(salmon_file_b2.get_file_nonce(), 0, Generator.NONCE_LENGTH)
         drive.close()
 
         SalmonFSTestHelper.testCase.assertEqual(nonce_a1, nonce_cfg - 1)
@@ -618,27 +618,27 @@ class SalmonFSTestHelper:
         SalmonFSTestHelper.testCase.assertEqual(nonce_b1, nonce_b2 - 2)
 
     class TestSalmonFileSequencer(SalmonFileSequencer):
-        def __init__(self, sequence_file: IRealFile, serializer: INonceSequenceSerializer, test_max_nonce: bytearray,
+        def __init__(self, sequence_file: IFile, serializer: INonceSequenceSerializer, test_max_nonce: bytearray,
                      offset: int):
             super().__init__(sequence_file, serializer)
             self.testMaxNonce = test_max_nonce
             self.offset = offset
 
         def init_sequence(self, drive_id: str, auth_id: str, start_nonce: bytearray, max_nonce: bytearray):
-            n_max_nonce: int = BitConverter.to_long(self.testMaxNonce, 0, SalmonGenerator.NONCE_LENGTH)
-            start_nonce = BitConverter.to_bytes(n_max_nonce + self.offset, SalmonGenerator.NONCE_LENGTH)
-            max_nonce = BitConverter.to_bytes(n_max_nonce, SalmonGenerator.NONCE_LENGTH)
+            n_max_nonce: int = BitConverter.to_long(self.testMaxNonce, 0, Generator.NONCE_LENGTH)
+            start_nonce = BitConverter.to_bytes(n_max_nonce + self.offset, Generator.NONCE_LENGTH)
+            max_nonce = BitConverter.to_bytes(n_max_nonce, Generator.NONCE_LENGTH)
             super().init_sequence(drive_id, auth_id, start_nonce, max_nonce)
             pass
 
     @staticmethod
-    def test_max_files(vault_dir: IRealFile, seq_file: IRealFile, import_file: IRealFile, test_max_nonce: bytearray,
+    def test_max_files(vault_dir: IFile, seq_file: IFile, import_file: IFile, test_max_nonce: bytearray,
                        offset: int,
                        should_import: bool):
         import_success: bool
         try:
             sequencer: SalmonFileSequencer = SalmonFSTestHelper.TestSalmonFileSequencer(seq_file,
-                                                                                        SalmonSequenceSerializer(),
+                                                                                        SequenceSerializer(),
                                                                                         test_max_nonce, offset)
             try:
                 drive = SalmonDrive.open_drive(vault_dir, SalmonFSTestHelper.drive_class_type,
@@ -648,12 +648,12 @@ class SalmonFSTestHelper:
                                                         SalmonCoreTestHelper.TEST_PASSWORD, sequencer)
             root_dir: SalmonFile = drive.get_root()
             root_dir.list_files()
-            file_to_import: IRealFile = import_file
+            file_to_import: IFile = import_file
             salmon_file: SalmonFile = SalmonFSTestHelper.file_importer.import_file(file_to_import, root_dir,
                                                                                    None, False, False, None)
             import_success = salmon_file is not None
         except Exception as ex:
-            if type(ex) is SalmonRangeExceededException:
+            if type(ex) is RangeExceededException:
                 import_success = False
             else:
                 raise
@@ -683,7 +683,7 @@ class SalmonFSTestHelper:
         wstream.close()
 
         # read a file
-        read_file: IRealFile = v_dir.get_child(filename)
+        read_file: IFile = v_dir.get_child(filename)
         rstream: RandomAccessStream = read_file.get_input_stream()
         read_buff = bytearray(BUFF_SIZE)
         bytes_read = 0
@@ -708,14 +708,14 @@ class SalmonFSTestHelper:
         filename = "file.dat"
         test_file = v_dir.create_file(filename)
         v_bytes = text.encode()
-        key = SalmonGenerator.get_secure_random_bytes(32)  # 256-bit key
-        nonce = SalmonGenerator.get_secure_random_bytes(8)  # 64-bit nonce
+        key = Generator.get_secure_random_bytes(32)  # 256-bit key
+        nonce = Generator.get_secure_random_bytes(8)  # 64-bit nonce
 
         # Example 4: encrypt to a file, the SalmonFile has a virtual file system API
         # with copy, move, rename, delete operations
         wfile = v_dir.get_child(filename)
         enc_file = SalmonFile(wfile)
-        nonce = SalmonGenerator.get_secure_random_bytes(8)  # always get a fresh nonce!
+        nonce = Generator.get_secure_random_bytes(8)  # always get a fresh nonce!
         enc_file.set_encryption_key(key)
         enc_file.set_requested_nonce(nonce)
         stream = enc_file.get_output_stream()
@@ -757,35 +757,35 @@ class SalmonFSTestHelper:
         BUFF_SIZE = 256 * 1024
         test_file = v_dir.create_file(filename)
         v_bytes: bytearray = bytearray(text.encode('utf-8'))
-        key: bytearray = SalmonGenerator.get_secure_random_bytes(32)  # 256-bit key
-        nonce: bytearray = SalmonGenerator.get_secure_random_bytes(8)  # 64-bit nonce
+        key: bytearray = Generator.get_secure_random_bytes(32)  # 256-bit key
+        nonce: bytearray = Generator.get_secure_random_bytes(8)  # 64-bit nonce
 
         # Example 1: encrypt byte array
-        enc_bytes: bytearray = SalmonEncryptor(SalmonCoreTestHelper.TEST_ENC_THREADS,
-                                               SalmonCoreTestHelper.TEST_ENC_BUFFER_SIZE,
-                                               multi_cpu=SalmonCoreTestHelper.ENABLE_MULTI_CPU).encrypt(v_bytes, key,
+        enc_bytes: bytearray = Encryptor(SalmonCoreTestHelper.TEST_ENC_THREADS,
+                                         SalmonCoreTestHelper.TEST_ENC_BUFFER_SIZE,
+                                         multi_cpu=SalmonCoreTestHelper.ENABLE_MULTI_CPU).encrypt(v_bytes, key,
                                                                                                         nonce, False)
         # decrypt byte array
-        dec_bytes: bytearray = SalmonDecryptor(SalmonCoreTestHelper.TEST_DEC_THREADS,
-                                               SalmonCoreTestHelper.TEST_DEC_BUFFER_SIZE,
-                                               multi_cpu=SalmonCoreTestHelper.ENABLE_MULTI_CPU).decrypt(enc_bytes, key,
+        dec_bytes: bytearray = Decryptor(SalmonCoreTestHelper.TEST_DEC_THREADS,
+                                         SalmonCoreTestHelper.TEST_DEC_BUFFER_SIZE,
+                                         multi_cpu=SalmonCoreTestHelper.ENABLE_MULTI_CPU).decrypt(enc_bytes, key,
                                                                                                         nonce, False)
         SalmonFSTestHelper.assert_array_equal(v_bytes, dec_bytes)
 
         # Example 2: encrypt string and save the nonce in the header
-        nonce = SalmonGenerator.get_secure_random_bytes(8)  # always get a fresh nonce!
-        enc_text: str = SalmonTextEncryptor.encrypt_string(text, key, nonce, True)
+        nonce = Generator.get_secure_random_bytes(8)  # always get a fresh nonce!
+        enc_text: str = TextEncryptor.encrypt_string(text, key, nonce, True)
         # decrypt string
-        dec_text: str = SalmonTextDecryptor.decrypt_string(enc_text, key, None, True)
+        dec_text: str = TextDecryptor.decrypt_string(enc_text, key, None, True)
 
         SalmonFSTestHelper.testCase.assertEqual(text, dec_text)
 
         # Example 3: encrypt data to an output stream
         enc_out_stream: MemoryStream = MemoryStream()  # or any other writeable Stream like to a file
-        nonce = SalmonGenerator.get_secure_random_bytes(8)  # always get a fresh nonce!
+        nonce = Generator.get_secure_random_bytes(8)  # always get a fresh nonce!
         # pass the output stream to the SalmonStream
-        encryptor: SalmonStream = SalmonStream(key, nonce, EncryptionMode.Encrypt, enc_out_stream,
-                                               None, False, None, None)
+        encryptor: AesStream = AesStream(key, nonce, EncryptionMode.Encrypt, enc_out_stream,
+                                         None, False, None, None)
         # encrypt and write with a single call, you can also Seek() and Write()
         encryptor.write(v_bytes, 0, len(v_bytes))
         # encrypted data are now written to the encOutStream.
@@ -796,8 +796,8 @@ class SalmonFSTestHelper:
         enc_out_stream.close()
         # decrypt a stream with encoded data
         enc_input_stream: RandomAccessStream = MemoryStream(enc_data)  # or any other readable Stream like from a file
-        decryptor: SalmonStream = SalmonStream(key, nonce, EncryptionMode.Decrypt, enc_input_stream,
-                                               None, False, None, None)
+        decryptor: AesStream = AesStream(key, nonce, EncryptionMode.Decrypt, enc_input_stream,
+                                         None, False, None, None)
         dec_buffer: bytearray = bytearray(len(text))
         # decrypt and read data with a single call, you can also Seek() before Read()
         bytes_read: int = decryptor.read(dec_buffer, 0, len(dec_buffer))
@@ -812,7 +812,7 @@ class SalmonFSTestHelper:
         # Example 4: encrypt to a file, the SalmonFile has a virtual file system API
         # with copy, move, rename, delete operations
         enc_file: SalmonFile = SalmonFile(test_file, None)
-        nonce = SalmonGenerator.get_secure_random_bytes(8)  # always get a fresh nonce!
+        nonce = Generator.get_secure_random_bytes(8)  # always get a fresh nonce!
         enc_file.set_encryption_key(key)
         enc_file.set_requested_nonce(nonce)
         stream = enc_file.get_output_stream()
@@ -843,7 +843,7 @@ class SalmonFSTestHelper:
     @staticmethod
     def encrypt_and_decrypt_stream(data: bytearray, key: bytearray, nonce: bytearray):
         enc_out_stream: MemoryStream = MemoryStream()
-        encryptor: SalmonStream = SalmonStream(key, nonce, EncryptionMode.Encrypt, enc_out_stream)
+        encryptor: AesStream = AesStream(key, nonce, EncryptionMode.Encrypt, enc_out_stream)
         input_stream: RandomAccessStream = MemoryStream(data)
         input_stream.copy_to(encryptor)
         enc_out_stream.set_position(0)
@@ -854,7 +854,7 @@ class SalmonFSTestHelper:
         input_stream.close()
 
         enc_input_stream: RandomAccessStream = MemoryStream(enc_data)
-        decryptor: SalmonStream = SalmonStream(key, nonce, EncryptionMode.Decrypt, enc_input_stream)
+        decryptor: AesStream = AesStream(key, nonce, EncryptionMode.Decrypt, enc_input_stream)
         out_stream: MemoryStream = MemoryStream()
         decryptor.copy_to(out_stream)
         out_stream.set_position(0)
@@ -866,8 +866,8 @@ class SalmonFSTestHelper:
         SalmonFSTestHelper.assert_array_equal(data, dec_data)
 
     @staticmethod
-    def get_real_file_contents(file_path: IRealFile) -> bytearray:
-        file: IRealFile = file_path
+    def get_real_file_contents(file_path: IFile) -> bytearray:
+        file: IFile = file_path
         ins: RandomAccessStream = file.get_input_stream()
         outs: MemoryStream = MemoryStream()
         ins.copy_to(outs)
@@ -908,13 +908,13 @@ class SalmonFSTestHelper:
         try:
             nonce = sequencer.next_nonce("AAAA")
             SalmonFSTestHelper.testCase.assertEqual(5, BitConverter.to_long(nonce, 0, 8))
-        except SalmonRangeExceededException as ex:
+        except RangeExceededException as ex:
             print(ex, file=sys.stderr)
             caught = True
         SalmonFSTestHelper.testCase.assertTrue(caught)
 
     @staticmethod
-    def get_children_count_recursively(real_file: IRealFile) -> int:
+    def get_children_count_recursively(real_file: IFile) -> int:
         count: int = 1
         if real_file.is_directory():
             for child in real_file.list_files():
@@ -931,7 +931,7 @@ class SalmonFSTestHelper:
         dest.flush()
 
     @staticmethod
-    def should_read_file(vault_path: IRealFile, filename: str):
+    def should_read_file(vault_path: IFile, filename: str):
         local_file = SalmonFSTestHelper.TEST_INPUT_DIR.get_child(filename)
         local_chksum = SalmonFSTestHelper.get_checksum(local_file)
 
@@ -998,7 +998,7 @@ class SalmonFSTestHelper:
             if is_encrypted:
                 file_stream = file.get_input_stream()
             else:
-                file_stream = PyHttpFileStream(file, "r")
+                file_stream = HttpFileStream(file, "r")
             stream = BufferedIOWrapper(file_stream)
 
         stream.seek(start, 1)
@@ -1016,7 +1016,7 @@ class SalmonFSTestHelper:
         SalmonCoreTestHelper.testCase.assertEqual(tdata, buffer)
 
     @staticmethod
-    def export_files(files: list[SalmonFile], v_dir: IRealFile, threads: int = 1):
+    def export_files(files: list[SalmonFile], v_dir: IFile, threads: int = 1):
         buffer_size = 256 * 1024
         commander = SalmonFileCommander(buffer_size, buffer_size, threads,
                                         multi_cpu=SalmonFSTestHelper.ENABLE_MULTI_CPU)
@@ -1042,7 +1042,7 @@ class SalmonFSTestHelper:
 
         # export files
         files_exported = commander.export_files(files, v_dir, False, True, print_export_progress,
-                                                IRealFile.auto_rename_file,
+                                                IFile.auto_rename_file,
                                                 on_failed)
 
         print("Files exported")

@@ -1,6 +1,4 @@
 #!/usr/bin/env python3
-from __future__ import annotations
-
 __license__ = """
 MIT License
 
@@ -25,38 +23,17 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 """
 
-from abc import ABC, abstractmethod
 from typeguard import typechecked
-from fs.file.ifile import IFile
 
 
 @typechecked
-class VirtualDrive(ABC):
+class AuthException(Exception):
     """
-    Virtual Drive
+    Thrown when there is a failure in the nonce sequencer.
     """
 
-    @abstractmethod
-    def _on_unlock_success(self):
+    def __init__(self, msg: str):
         """
-        Method is called when the drive is unlocked
-        """
-        pass
-
-    def _on_unlock_error(self):
-        """
-        Method is called when unlocking the drive has failed
-        """
-        pass
-
-    @abstractmethod
-    def get_private_dir(self) -> IFile:
-        pass
-
-    @abstractmethod
-    def get_file(self, file: IFile) -> any:
-        pass
-
-    @abstractmethod
-    def get_root(self) -> any:
-        pass
+        Construct an exception with a specific message.
+        :param msg:         """
+        super().__init__(msg)
