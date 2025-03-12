@@ -33,7 +33,7 @@ export class MemoryStream extends RandomAccessStream {
     /**
      * Increment to resize to when capacity is exhausted.
      */
-    static readonly #INITIAL_CAPACITY: number = 128 * 1024;
+    public static readonly INITIAL_CAPACITY: number = 128 * 1024;
 
     /**
      * Buffer to store the data. This can be provided via the constructor.
@@ -67,8 +67,8 @@ export class MemoryStream extends RandomAccessStream {
             this.#bytes = bytes;
             this.#capacity = bytes.length;
         } else {
-            this.#bytes = new Uint8Array(MemoryStream.#INITIAL_CAPACITY);
-            this.#capacity = MemoryStream.#INITIAL_CAPACITY;
+            this.#bytes = new Uint8Array(MemoryStream.INITIAL_CAPACITY);
+            this.#capacity = MemoryStream.INITIAL_CAPACITY;
         }
     }
 
@@ -97,7 +97,7 @@ export class MemoryStream extends RandomAccessStream {
      *
      * @return {Promise<number>} The length of the stream.
      */
-    public override async length(): Promise<number> {
+    public override async getLength(): Promise<number> {
         return this.#length;
     }
 

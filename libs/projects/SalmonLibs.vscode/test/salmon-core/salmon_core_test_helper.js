@@ -24,22 +24,23 @@ SOFTWARE.
 
 import { BitConverter } from '../../lib/salmon-core/convert/bit_converter.js';
 import { MemoryStream } from '../../lib/salmon-core/streams/memory_stream.js';
-import { SalmonGenerator } from '../../lib/salmon-core/salmon/salmon_generator.js';
-import { SalmonEncryptor } from '../../lib/salmon-core/salmon/salmon_encryptor.js';
-import { SalmonDecryptor } from '../../lib/salmon-core/salmon/salmon_decryptor.js';
-import { SalmonTransformerFactory } from '../../lib/salmon-core/salmon/transform/salmon_transformer_factory.js';
-import { HmacSHA256Provider } from '../../lib/salmon-core/integrity/hmac_sha256_provider.js';
-import { SalmonIntegrity } from '../../lib/salmon-core/salmon/integrity/salmon_integrity.js';
+import { Generator } from '../../lib/salmon-core/salmon/generator.js';
+import { Encryptor } from '../../lib/salmon-core/salmon/encryptor.js';
+import { Decryptor } from '../../lib/salmon-core/salmon/decryptor.js';
+import { TransformerFactory } from '../../lib/salmon-core/salmon/transform/transformer_factory.js';
+import { HmacSHA256Provider } from '../../lib/salmon-core/salmon/integrity/hmac_sha256_provider.js';
+import { Integrity } from '../../lib/salmon-core/salmon/integrity/integrity.js';
 import { SeekOrigin } from '../../lib/salmon-core/streams/random_access_stream.js';
-import { SalmonAES256CTRTransformer } from '../../lib/salmon-core/salmon/transform/salmon_aes256_ctr_transformer.js';
-import { SalmonStream } from '../../lib/salmon-core/salmon/streams/salmon_stream.js';
+import { AESCTRTransformer } from '../../lib/salmon-core/salmon/transform/aes_ctr_transformer.js';
+import { AesStream } from '../../lib/salmon-core/salmon/streams/aes_stream.js';
 import { EncryptionMode } from '../../lib/salmon-core/salmon/streams/encryption_mode.js';
+import { EncryptionFormat } from '../../lib/salmon-core/salmon/streams/encryption_format.js';
 
 export class SalmonCoreTestHelper {
     static TEST_ENC_BUFFER_SIZE = 512 * 1024;
-    static TEST_ENC_THREADS = 2;
+    static TEST_ENC_THREADS = 1;
     static TEST_DEC_BUFFER_SIZE = 512 * 1024;
-    static TEST_DEC_THREADS = 2;
+    static TEST_DEC_THREADS = 1;
 
     static TEST_PASSWORD = "test123";
     static TEST_FALSE_PASSWORD = "falsepass";
@@ -76,8 +77,8 @@ export class SalmonCoreTestHelper {
     static initialize() {
 		console.log("init core helper");
         SalmonCoreTestHelper.hashProvider = new HmacSHA256Provider();
-        SalmonCoreTestHelper.encryptor = new SalmonEncryptor(SalmonCoreTestHelper.TEST_ENC_THREADS);
-        SalmonCoreTestHelper.decryptor = new SalmonDecryptor(SalmonCoreTestHelper.TEST_DEC_THREADS);
+        SalmonCoreTestHelper.encryptor = new Encryptor(SalmonCoreTestHelper.TEST_ENC_THREADS);
+        SalmonCoreTestHelper.decryptor = new Decryptor(SalmonCoreTestHelper.TEST_DEC_THREADS);
     }
 	
     static close() {
@@ -115,7 +116,7 @@ export class SalmonCoreTestHelper {
 
     static async encryptWriteDecryptRead(text, key, iv,
         encBufferSize, decBufferSize, testIntegrity, chunkSize,
-        hashKey, flipBits, header, maxTextLength) {
+        hashKey, flipBits, maxTextLength) {
         let testText = text;
 
         let tBuilder = "";
@@ -126,19 +127,15 @@ export class SalmonCoreTestHelper {
         if (maxTextLength != null && maxTextLength < plainText.length)
             plainText = plainText.substring(0, maxTextLength);
 
-        let headerLength = 0;
-        if (header != null)
-            headerLength = new TextEncoder().encode(header).length;
         let inputBytes = new TextEncoder().encode(plainText);
         let encBytes = await SalmonCoreTestHelper.encrypt(inputBytes, key, iv, encBufferSize,
-            testIntegrity, chunkSize, hashKey, header);
+            testIntegrity, chunkSize, hashKey);
         if (flipBits)
             encBytes[Math.floor(encBytes.length / 2)] = 0;
 
-        // Use SalmonStream to read from cipher byte array and MemoryStream to Write to byte array
+        // Use AesStream to read from cipher byte array and MemoryStream to Write to byte array
         let outputByte2 = await SalmonCoreTestHelper.decrypt(encBytes, key, iv, decBufferSize,
-            testIntegrity, chunkSize, hashKey, header != null ? headerLength :
-            null);
+            testIntegrity, chunkSize, hashKey);
         let decText = new TextDecoder().decode(outputByte2);
 
         console.log(plainText);
@@ -148,17 +145,11 @@ export class SalmonCoreTestHelper {
     }
 
     static async encrypt(inputBytes, key, iv, bufferSize,
-        integrity, chunkSize, hashKey,
-        header) {
+        integrity, chunkSize, hashKey) {
         let ins = new MemoryStream(inputBytes);
         let outs = new MemoryStream();
-        let headerData = null;
-        if (header != null) {
-            headerData = new TextEncoder().encode(header);
-            await outs.write(headerData, 0, headerData.length);
-        }
-        let writer = new SalmonStream(key, iv, EncryptionMode.Encrypt, outs,
-            headerData, integrity, chunkSize, hashKey);
+        let writer = new AesStream(key, iv, EncryptionMode.Encrypt, outs,
+            EncryptionFormat.Salmon, integrity, hashKey, chunkSize);
 
         if (bufferSize == 0) // use the internal buffer size of the memorystream to copy
         {
@@ -178,17 +169,11 @@ export class SalmonCoreTestHelper {
     }
 
     static async decrypt(inputBytes, key, iv, bufferSize,
-        integrity, chunkSize, hashKey,
-        headerLength) {
+        integrity, chunkSize, hashKey) {
         let ins = new MemoryStream(inputBytes);
         let outs = new MemoryStream();
-        let headerData = null;
-        if (headerLength != null) {
-            headerData = new Uint8Array(headerLength);
-            await ins.read(headerData, 0, headerData.length);
-        }
-        let reader = new SalmonStream(key, iv, EncryptionMode.Decrypt, ins,
-            headerData, integrity, chunkSize, hashKey);
+        let reader = new AesStream(key, iv, EncryptionMode.Decrypt, ins,
+            EncryptionFormat.Salmon, integrity, hashKey, chunkSize);
 
         if (bufferSize == 0) // use the internal buffersize of the memorystream to copy
         {
@@ -217,12 +202,12 @@ export class SalmonCoreTestHelper {
         }
         let plainText = tBuilder;
 
-        // Use SalmonStream read from text byte array and MemoryStream to Write to byte array
+        // Use AesStream read from text byte array and MemoryStream to Write to byte array
         let inputBytes = new TextEncoder().encode(plainText);
         let ins = new MemoryStream(inputBytes);
         let outs = new MemoryStream();
-        let encWriter = new SalmonStream(key, iv, EncryptionMode.Encrypt, outs,
-            null, integrity, chunkSize, hashKey);
+        let encWriter = new AesStream(key, iv, EncryptionMode.Encrypt, outs,
+            EncryptionFormat.Salmon, integrity, hashKey, chunkSize);
         await ins.copyTo(encWriter);
         await ins.close();
         await encWriter.flush();
@@ -231,8 +216,8 @@ export class SalmonCoreTestHelper {
 
         // Use SalmonStrem to read from cipher text and seek and read to different positions in the stream
         let encIns = new MemoryStream(encBytes);
-        let decReader = new SalmonStream(key, iv, EncryptionMode.Decrypt, encIns,
-            null, integrity, chunkSize, hashKey);
+        let decReader = new AesStream(key, iv, EncryptionMode.Decrypt, encIns,
+            EncryptionFormat.Salmon, integrity, hashKey, chunkSize);
         let correctText;
         let decText;
 
@@ -295,22 +280,22 @@ export class SalmonCoreTestHelper {
         }
         const plainText = tBuilder;
 
-        // Use SalmonStream read from text byte array and MemoryStream to Write to byte array
+        // Use AesStream read from text byte array and MemoryStream to Write to byte array
         let inputBytes = new TextEncoder().encode(plainText);
         let ins = new MemoryStream(inputBytes);
         let outs = new MemoryStream();
-        let encWriter = new SalmonStream(key, iv, EncryptionMode.Encrypt, outs,
-            null, integrity, chunkSize, hashKey);
+        let encWriter = new AesStream(key, iv, EncryptionMode.Encrypt, outs,
+            EncryptionFormat.Salmon, integrity, hashKey, chunkSize);
         await ins.copyTo(encWriter);
         await ins.close();
         await encWriter.flush();
         await encWriter.close();
         let encBytes = outs.toArray();
 
-        // Use SalmonStream to read from cipher text and seek and read to different positions in the stream
+        // Use AesStream to read from cipher text and seek and read to different positions in the stream
         let encIns = new MemoryStream(encBytes);
-        let decReader = new SalmonStream(key, iv, EncryptionMode.Decrypt, encIns,
-            null, integrity, chunkSize, hashKey);
+        let decReader = new AesStream(key, iv, EncryptionMode.Decrypt, encIns,
+            EncryptionFormat.Salmon, integrity, hashKey, chunkSize);
         for (let i = 0; i < 100; i++) {
             await decReader.setPosition(await decReader.getPosition() + 7);
             await SalmonCoreTestHelper.testCounter(decReader);
@@ -321,18 +306,18 @@ export class SalmonCoreTestHelper {
     }
 
     static async testCounter(decReader) {
-        let expectedBlock = Math.floor(await decReader.getPosition() / SalmonAES256CTRTransformer.BLOCK_SIZE);
+        let expectedBlock = Math.floor(await decReader.getPosition() / AESCTRTransformer.BLOCK_SIZE);
 
         expect(await decReader.getBlock()).toBe(expectedBlock);
 
-        let counterBlock = BitConverter.toLong(await decReader.getCounter(), SalmonGenerator.NONCE_LENGTH,
-            SalmonGenerator.BLOCK_SIZE - SalmonGenerator.NONCE_LENGTH);
+        let counterBlock = BitConverter.toLong(await decReader.getCounter(), Generator.NONCE_LENGTH,
+            Generator.BLOCK_SIZE - Generator.NONCE_LENGTH);
         let expectedCounterValue = await decReader.getBlock();
 
         expect(counterBlock).toBe(expectedCounterValue);
 
-        let nonce = BitConverter.toLong(await decReader.getCounter(), 0, SalmonGenerator.NONCE_LENGTH);
-        let expectedNonce = BitConverter.toLong(await decReader.getNonce(), 0, SalmonGenerator.NONCE_LENGTH);
+        let nonce = BitConverter.toLong(await decReader.getCounter(), 0, Generator.NONCE_LENGTH);
+        let expectedNonce = BitConverter.toLong(await decReader.getNonce(), 0, Generator.NONCE_LENGTH);
 
         expect(nonce).toBe(expectedNonce);
     }
@@ -349,12 +334,12 @@ export class SalmonCoreTestHelper {
         }
         let plainText = tBuilder;
 
-        // Use SalmonStream read from text byte array and MemoryStream to Write to byte array
+        // Use AesStream read from text byte array and MemoryStream to Write to byte array
         let inputBytes = new TextEncoder().encode(plainText);
         let ins = new MemoryStream(inputBytes);
         let outs = new MemoryStream();
-        let encWriter = new SalmonStream(key, iv, EncryptionMode.Encrypt, outs,
-            null, integrity, chunkSize, hashKey);
+        let encWriter = new AesStream(key, iv, EncryptionMode.Encrypt, outs,
+            EncryptionFormat.Salmon, integrity, hashKey, chunkSize);
         await ins.copyTo(encWriter);
         await ins.close();
         await encWriter.flush();
@@ -364,8 +349,8 @@ export class SalmonCoreTestHelper {
         // partial write
         let writeBytes = new TextEncoder().encode(textToWrite);
         let pOuts = new MemoryStream(encBytes);
-        let partialWriter = new SalmonStream(key, iv, EncryptionMode.Encrypt, pOuts,
-            null, integrity, chunkSize, hashKey);
+        let partialWriter = new AesStream(key, iv, EncryptionMode.Encrypt, pOuts,
+            EncryptionFormat.Salmon, integrity, hashKey, chunkSize);
         let alignedPosition = seek;
         let alignOffset = 0;
         let count = writeCount;
@@ -380,8 +365,8 @@ export class SalmonCoreTestHelper {
 
         // Use SalmonStrem to read from cipher text and test if writing was successful
         let encIns = new MemoryStream(encBytes);
-        let decReader = new SalmonStream(key, iv, EncryptionMode.Decrypt, encIns,
-            null, integrity, chunkSize, hashKey);
+        let decReader = new AesStream(key, iv, EncryptionMode.Decrypt, encIns,
+            EncryptionFormat.Salmon, integrity, hashKey, chunkSize);
         let decText = await SalmonCoreTestHelper.seekAndGetSubstringByRead(decReader, 0, text.length, SeekOrigin.Begin);
 
         expect(decText.substring(0, seek)).toBe(text.substring(0, seek));
@@ -396,10 +381,9 @@ export class SalmonCoreTestHelper {
     }
 
     static async testCounterValue(text, key, nonce, counter) {
-        let testTextBytes = new TextEncoder().encode(text);
-        let ms = new MemoryStream(testTextBytes);
-        let stream = new SalmonStream(key, nonce, EncryptionMode.Encrypt, ms,
-            null, false, null, null);
+        let ms = new MemoryStream();
+        let stream = new AesStream(key, nonce, EncryptionMode.Encrypt, ms,
+            EncryptionFormat.Salmon);
         stream.setAllowRangeWrite(true);
 
         // WORKAROUND: first we need to run an operation that will init the transformer
@@ -464,7 +448,7 @@ export class SalmonCoreTestHelper {
                 tmp[i] = testNonceBytes[i];
             testNonceBytes = tmp;
         }
-        let transformer = SalmonTransformerFactory.create(providerType);
+        let transformer = TransformerFactory.create(providerType);
         await transformer.init(testKeyBytes, testNonceBytes);
         let output = new Uint8Array(input.length);
         transformer.resetCounter();
@@ -500,9 +484,9 @@ export class SalmonCoreTestHelper {
 
     static encryptAndDecryptByteArray2(data, enableLog) {
         let t1 = Date.now();
-        let encData = SalmonCoreTestHelper.getEncryptor().encrypt(data, SalmonCoreTestHelper.TEST_KEY_BYTES, SalmonCoreTestHelper.TEST_NONCE_BYTES, false);
+        let encData = SalmonCoreTestHelper.getEncryptor().encrypt(data, SalmonCoreTestHelper.TEST_KEY_BYTES, SalmonCoreTestHelper.TEST_NONCE_BYTES, EncryptionFormat.Generic);
         let t2 = Date.now();
-        let decData = SalmonCoreTestHelper.getDecryptor().decrypt(encData, SalmonCoreTestHelper.TEST_KEY_BYTES, SalmonCoreTestHelper.TEST_NONCE_BYTES, false);
+        let decData = SalmonCoreTestHelper.getDecryptor().decrypt(encData, SalmonCoreTestHelper.TEST_KEY_BYTES, SalmonCoreTestHelper.TEST_NONCE_BYTES, EncryptionFormat.Generic);
         let t3 = Date.now();
 
         expect(decData).toBe(data);
@@ -521,10 +505,10 @@ export class SalmonCoreTestHelper {
     static encryptAndDecryptByteArrayNative2(data, enableLog) {
         let t1 = Date.now();
         let encData = SalmonCoreTestHelper.nativeCTRTransform(data, SalmonCoreTestHelper.TEST_KEY_BYTES, SalmonCoreTestHelper.TEST_NONCE_BYTES, true,
-            SalmonStream.getAesProviderType());
+            AesStream.getAesProviderType());
         let t2 = Date.now();
         let decData = SalmonCoreTestHelper.nativeCTRTransform(encData, SalmonCoreTestHelper.TEST_KEY_BYTES, SalmonCoreTestHelper.TEST_NONCE_BYTES, false,
-            SalmonStream.getAesProviderType());
+            AesStream.getAesProviderType());
         let t3 = Date.now();
 
         expect(decData).toBe(data);
@@ -595,7 +579,7 @@ export class SalmonCoreTestHelper {
 
     }
 
-    static async copyFromMemStreamToSalmonStream(size, key, nonce,
+    static async copyFromMemStreamToAesStream(size, key, nonce,
         integrity, chunkSize, hashKey,
         bufferSize) {
 
@@ -611,13 +595,13 @@ export class SalmonCoreTestHelper {
         // encrypt to a memory byte stream
         await ms2.setPosition(0);
         let ms3 = new MemoryStream();
-        let salmonStream = new SalmonStream(key, nonce, EncryptionMode.Encrypt, ms3,
-            null, integrity, chunkSize, hashKey);
+        let aesStream = new AesStream(key, nonce, EncryptionMode.Encrypt, ms3,
+            EncryptionFormat.Salmon, integrity, hashKey, chunkSize);
         // we always align the writes to the chunk size if we enable integrity
         if (integrity)
-            bufferSize = salmonStream.getChunkSize();
-        await ms2.copyTo(salmonStream, bufferSize, null);
-        await salmonStream.close();
+            bufferSize = aesStream.getChunkSize();
+        await ms2.copyTo(aesStream, bufferSize, null);
+        await aesStream.close();
         await ms2.close();
         let encData = ms3.toArray();
         await ms3.close();
@@ -626,21 +610,18 @@ export class SalmonCoreTestHelper {
         ms3 = new MemoryStream(encData);
         await ms3.setPosition(0);
         let ms4 = new MemoryStream();
-        let salmonStream2 = new SalmonStream(key, nonce, EncryptionMode.Decrypt, ms3,
-            null, integrity, chunkSize, hashKey);
-        await salmonStream2.copyTo(ms4, bufferSize, null);
-        await salmonStream2.close();
+        let aesStream2 = new AesStream(key, nonce, EncryptionMode.Decrypt, ms3,
+            EncryptionFormat.Salmon, integrity, hashKey, chunkSize);
+        await aesStream2.copyTo(ms4, bufferSize, null);
+        await aesStream2.close();
         await ms3.close();
         await ms4.setPosition(0);
         let digest2 = await crypto.subtle.digest("SHA-256", ms4.toArray());
         await ms4.close();
     }
 
-    static calculateHMAC(bytes, offset, length,
-        hashKey, includeData) {
-        let salmonIntegrity = new SalmonIntegrity(true, hashKey, null, new HmacSHA256Provider(),
-            SalmonGenerator.HASH_RESULT_LENGTH);
-        return SalmonIntegrity.calculateHash(SalmonCoreTestHelper.hashProvider, bytes, offset, length, hashKey, includeData);
+    static calculateHMAC(bytes, offset, length, hashKey, includeData) {
+        return Integrity.calculateHash(SalmonCoreTestHelper.hashProvider, bytes, offset, length, hashKey, includeData);
     }
 
 

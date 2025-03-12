@@ -52,7 +52,7 @@ export abstract class RandomAccessStream {
      * Get the length of the stream.
      * @return {Promise<number>} The length of the stream.
      */
-    public abstract length(): Promise<number>;
+    public abstract getLength(): Promise<number>;
 
     /**
      * Get the current position of the stream.
@@ -136,7 +136,7 @@ export abstract class RandomAccessStream {
         while ((bytesRead = await this.read(buffer, 0, bufferSize)) > 0) {
             await stream.write(buffer, 0, bytesRead);
             if (progressListener != null)
-                progressListener(await this.getPosition(), await this.length());
+                progressListener(await this.getPosition(), await this.getLength());
         }
         await stream.flush();
         await this.setPosition(pos);

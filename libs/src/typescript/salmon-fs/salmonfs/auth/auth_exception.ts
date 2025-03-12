@@ -23,11 +23,28 @@ SOFTWARE.
 */
 
 /**
- * Pbkdf algorithm implementation type.
+ * Thrown when there is a failure during authorization.
  */
-export enum PbkdfAlgo {
+export class AuthException extends Error {
+
+    cause: Error | unknown | null = null;
+
     /**
-     * SHA256 hashing.
+     * Construct an exception with a specific message and inner exception
+     * @param msg The provided message
+     * @param ex The inner exception
      */
-    SHA256
+    public constructor(msg: string | null = null, ex: Error | unknown | null = null) {
+        super(msg ?? "");
+        if (ex != null) {
+            this.cause = ex;
+        }
+    }
+
+    public getCause(): Error | unknown | null {
+        return this.cause;
+    }
 }
+
+let oldToString = AuthException.prototype.toString;
+

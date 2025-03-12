@@ -22,12 +22,33 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 */
 
+import { FileSearcher } from "../../../fs/drive/utils/file_searcher.js";
+import { FileCommander } from "../../../fs/drive/utils/file_commander.js";
+import { AesFileExporter } from "./aes_file_exporter.js";
+import { AesFileImporter } from "./aes_file_importer.js";
+import { SequenceException } from "../../../../salmon-core/salmon/sequence/sequence_exception.js";
+
 /**
- * Pbkdf algorithm implementation type.
+ * Facade class for file operations.
  */
-export enum PbkdfAlgo {
+export class AesFileCommander extends FileCommander {
+
     /**
-     * SHA256 hashing.
+     * Instantiate a new file commander object.
+     *
+     * @param importBufferSize The buffer size to use for importing files.
+     * @param exportBufferSize The buffer size to use for exporting files.
      */
-    SHA256
+    public constructor(importBufferSize: number, exportBufferSize: number, threads: number) {
+        super(new AesFileImporter(importBufferSize, threads), 
+            new AesFileExporter(exportBufferSize, threads),
+            new FileSearcher());
+    }
+
+    onError(ex: Error | unknown | null): boolean {
+        if (ex instanceof SequenceException)
+            throw ex;
+		else
+			return false;
+    }
 }

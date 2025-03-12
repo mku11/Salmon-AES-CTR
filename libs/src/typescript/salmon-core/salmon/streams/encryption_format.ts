@@ -23,11 +23,19 @@ SOFTWARE.
 */
 
 /**
- * Pbkdf algorithm implementation type.
+ * Encryption Format
+ *
+ * @see #Generic
+ * @see #Salmon
  */
-export enum PbkdfAlgo {
+export enum EncryptionFormat {
     /**
-     * SHA256 hashing.
+     * Generic format without header information, compatible with other AES-256 CTR libraries.
      */
-    SHA256
+    Generic,
+    /**
+     * Salmon format with header (embedded nonce and integrity support).
+     */
+    Salmon
 }
+

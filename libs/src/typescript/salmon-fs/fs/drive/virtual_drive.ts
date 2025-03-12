@@ -22,12 +22,38 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 */
 
-/**
- * Pbkdf algorithm implementation type.
+import { IRealFile } from "../file/ifile";
+import { IVirtualFile } from "../file/ivirtual_file";
+
+/*
+ * Virtual Drive 
  */
-export enum PbkdfAlgo {
+export abstract class VirtualDrive {
     /**
-     * SHA256 hashing.
+     * Method is called when the user is authenticated
      */
-    SHA256
+    public abstract onUnlockSuccess(): void;
+
+    /**
+     * Method is called when unlocking the drive has failed
+     */
+    public abstract onUnlockError(): void;
+	
+    /**
+     * Get a private dir for sharing files with other apps.
+     */
+	public abstract getPrivateDir(): IRealFile;
+
+    /**
+     * Get a virtual file backed by a real file.
+     * @param file The real file
+     */
+    public abstract getVirtualFile(file: IRealFile): IVirtualFile;
+	
+	/**
+     * Return the virtual root directory of the drive.
+     * @return
+     * @throws SalmonAuthException Thrown when error during authorization
+     */
+	public abstract getRoot(): Promise<IVirtualFile | null>;
 }

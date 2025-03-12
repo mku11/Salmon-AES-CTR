@@ -24,15 +24,15 @@ SOFTWARE.
 
 import { MemoryStream } from '../../lib/salmon-core/streams/memory_stream.js';
 import { BitConverter } from '../../lib/salmon-core/convert/bit_converter.js';
-import { SalmonStream } from '../../lib/salmon-core/salmon/streams/salmon_stream.js';
+import { AesStream } from '../../lib/salmon-core/salmon/streams/aes_stream.js';
 import { ProviderType } from '../../lib/salmon-core/salmon/streams/provider_type.js';
 import { SalmonCoreTestHelper } from '../salmon-core/salmon_core_test_helper.js';
 import { getTestRunnerMode, SalmonFSTestHelper } from './salmon_fs_test_helper.js';
-import { IntegrityException } from '../../lib/salmon-core/integrity/integrity_exception.js';
-import { copyRecursively, moveRecursively, autoRenameFile } from '../../lib/salmon-fs/file/ireal_file.js'
-import { SalmonFileReadableStream } from '../../lib/salmon-fs/salmon/streams/salmon_file_readable_stream.js';
-import { SalmonFileCommander } from '../../lib/salmon-fs/salmon/utils/salmon_file_commander.js';
-import { SalmonAuthException } from '../../lib/salmon-fs/salmon/salmon_auth_exception.js'
+import { IntegrityException } from '../../lib/salmon-core/salmon/integrity/integrity_exception.js';
+import { copyRecursively, moveRecursively, autoRenameFile } from '../../lib/salmon-fs/fs/file/ifile.js'
+import { AesFileReadableStream } from '../../lib/salmon-fs/salmonfs/streams/aes_file_readable_stream.js';
+import { AesFileCommander } from '../../lib/salmon-fs/salmonfs/drive/utils/aes_file_commander.js';
+import { AuthException } from '../../lib/salmon-fs/salmonfs/auth/auth_exception.js'
 import { getTestMode, TestMode } from "./salmon_fs_test_helper.js";
 
 function checkParams() {
@@ -60,7 +60,7 @@ describe('salmon-fs', () => {
         SalmonFSTestHelper.TEST_USE_FILE_INPUT_STREAM = false;
 
         // only default provider is supported
-        SalmonStream.setAesProviderType(ProviderType.Default);
+        AesStream.setAesProviderType(ProviderType.Default);
         
         SalmonCoreTestHelper.initialize();
         SalmonFSTestHelper.initialize();
@@ -84,7 +84,7 @@ describe('salmon-fs', () => {
             await rootDir.listFiles();
         } catch (ex) {
             console.error(ex);
-            if (ex instanceof SalmonAuthException)
+            if (ex instanceof AuthException)
                 wrongPassword = true;
         }
         expect(wrongPassword).toBeTruthy();
@@ -368,7 +368,7 @@ describe('salmon-fs', () => {
             true, true, 64, SalmonCoreTestHelper.TEST_HMAC_KEY_BYTES,
             SalmonCoreTestHelper.TEST_FILENAME_NONCE_BYTES, SalmonCoreTestHelper.TEST_NONCE_BYTES,
             false, -1, true);
-        let fileInputStream = SalmonFileReadableStream.create(file,
+        let fileInputStream = AesFileReadableStream.create(file,
             3, 50, SalmonFSTestHelper.TEST_FILE_INPUT_STREAM_THREADS, 12);
 
         await SalmonFSTestHelper.seekAndReadFileInputStream(data, fileInputStream, 0, 32, 0, 32);
@@ -422,10 +422,10 @@ describe('salmon-fs', () => {
         file2 = await file.copy(dir, await autoRenameFile(file));
 
         expect(2).toBe(await dir.getChildrenCount());
-        expect(await dir.getChild(file.getBaseName()).then(_ => _.exists())).toBeTruthy();
-        expect(await dir.getChild(file.getBaseName()).then(_ => _.isFile())).toBeTruthy();
-        expect(await dir.getChild(file2.getBaseName()).then(_ => _.exists())).toBeTruthy();
-        expect(await dir.getChild(file2.getBaseName()).then(_ => _.isFile())).toBeTruthy();
+        expect(await dir.getChild(file.getName()).then(_ => _.exists())).toBeTruthy();
+        expect(await dir.getChild(file.getName()).then(_ => _.isFile())).toBeTruthy();
+        expect(await dir.getChild(file2.getName()).then(_ => _.exists())).toBeTruthy();
+        expect(await dir.getChild(file2.getName()).then(_ => _.isFile())).toBeTruthy();
 
         let dir1 = await dir.createDirectory("folder1");
         expect(await dir.getChild("folder1").then(_ => _.exists())).toBeTruthy();
@@ -475,12 +475,12 @@ describe('salmon-fs', () => {
         expect(count1).toBe(count2);
 
         let dfile = await dir.getChild("folder4").then(_ => _.getChild("folder1"))
-            .then(_ => _.getChild("folder2")).then(_ => _.getChild(file.getBaseName()));
+            .then(_ => _.getChild("folder2")).then(_ => _.getChild(file.getName()));
         expect(await dfile.exists()).toBeTruthy();
         expect(await dfile.delete()).toBeTruthy();
         expect(2).toBe(await dir.getChild("folder4").then(_ => _.getChild("folder1"))
             .then(_ => _.getChild("folder2")).then(_ => _.getChildrenCount()));
-        await copyRecursively(await dir.getChild("folder1"), folder3, null, autoRenameFile, false, null);
+        await copyRecursively(await dir.getChild("folder1"), folder3, autoRenameFile);
         expect(2).toBe(await dir.getChildrenCount());
         expect(1).toBe(await dir.getChild("folder4").then(_ => _.getChildrenCount()));
         expect(7).toBe(await dir.getChild("folder4").then(_ => _.getChild("folder1")).then(_ => _.getChildrenCount()));
@@ -488,11 +488,11 @@ describe('salmon-fs', () => {
             .then(_ => _.getChild("folder2")).then(_ => _.getChildrenCount()));
 
         await dir.getChild("folder4").then(_ => _.getChild("folder1")).then(_ => _.getChild("folder2"))
-            .then(_ => _.getChild(file.getBaseName())).then(_ => _.delete());
-        await dir.getChild("folder4").then(_ => _.getChild("folder1")).then(_ => _.getChild(file.getBaseName()))
+            .then(_ => _.getChild(file.getName())).then(_ => _.delete());
+        await dir.getChild("folder4").then(_ => _.getChild("folder1")).then(_ => _.getChild(file.getName()))
             .then(_ => _.delete());
         let failed = [];
-        await copyRecursively(await dir.getChild("folder1"), folder3, null, null, false, (failedFile, ex) => {
+        await copyRecursively(await dir.getChild("folder1"), folder3, null, false, (failedFile, ex) => {
             failed.push(failedFile);
         });
         expect(4).toBe(await failed.length);
@@ -503,11 +503,11 @@ describe('salmon-fs', () => {
             .then(_ => _.getChildrenCount()));
 
         await dir.getChild("folder4").then(_ => _.getChild("folder1")).then(_ => _.getChild("folder2"))
-            .then(_ => _.getChild(file.getBaseName())).then(_ => _.delete());
-        await dir.getChild("folder4").then(_ => _.getChild("folder1")).then(_ => _.getChild(file.getBaseName()))
+            .then(_ => _.getChild(file.getName())).then(_ => _.delete());
+        await dir.getChild("folder4").then(_ => _.getChild("folder1")).then(_ => _.getChild(file.getName()))
             .then(_ => _.delete());
         let failedmv = [];
-        await moveRecursively(await dir.getChild("folder1"), await dir.getChild("folder4"), null, autoRenameFile, false, (failedFile, ex) => {
+        await moveRecursively(await dir.getChild("folder1"), await dir.getChild("folder4"), autoRenameFile, false, (failedFile, ex) => {
             failedmv.push(failedFile);
         });
         expect(4).toBe(await failed.length);
@@ -525,19 +525,19 @@ describe('salmon-fs', () => {
 
         let sequencer = await SalmonFSTestHelper.createSalmonFileSequencer();
         let drive = await SalmonFSTestHelper.createDrive(vaultDir, SalmonFSTestHelper.driveClassType, SalmonCoreTestHelper.TEST_PASSWORD, sequencer);
-        let fileCommander = new SalmonFileCommander(SalmonFSTestHelper.ENC_IMPORT_BUFFER_SIZE, SalmonFSTestHelper.ENC_EXPORT_BUFFER_SIZE, 2);
+        let fileCommander = new AesFileCommander(SalmonFSTestHelper.ENC_IMPORT_BUFFER_SIZE, SalmonFSTestHelper.ENC_EXPORT_BUFFER_SIZE, 2);
         let sfiles = await fileCommander.importFiles([file],
             await drive.getRoot(), false, true, null, null, null);
 		fileCommander.close();
 		
-        let fileInputStream1 = SalmonFileReadableStream.create(sfiles[0], 4, 4 * 1024 * 1024, 4, 256 * 1024);
+        let fileInputStream1 = AesFileReadableStream.create(sfiles[0], 4, 4 * 1024 * 1024, 4, 256 * 1024);
         let ms = new MemoryStream();
         await SalmonFSTestHelper.copyReadableStream(fileInputStream1, ms);
         await ms.flush();
         await ms.close();
         let h1 = BitConverter.toHex(new Uint8Array(await crypto.subtle.digest("SHA-256", ms.toArray())));
 
-        let fileInputStream2 = SalmonFileReadableStream.create(sfiles[0], 4, 4 * 1024 * 1024, 1, 256 * 1024);
+        let fileInputStream2 = AesFileReadableStream.create(sfiles[0], 4, 4 * 1024 * 1024, 1, 256 * 1024);
         let ms52 = new MemoryStream();
         await SalmonFSTestHelper.copyReadableStream(fileInputStream2, ms52);
         await ms52.flush();

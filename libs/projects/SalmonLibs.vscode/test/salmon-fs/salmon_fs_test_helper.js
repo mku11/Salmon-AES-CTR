@@ -24,28 +24,28 @@ SOFTWARE.
 
 import { BitConverter } from '../../lib/salmon-core/convert/bit_converter.js';
 import { MemoryStream } from '../../lib/salmon-core/streams/memory_stream.js';
-import { SalmonGenerator } from '../../lib/salmon-core/salmon/salmon_generator.js';
-import { SalmonStream } from '../../lib/salmon-core/salmon/streams/salmon_stream.js';
+import { Generator } from '../../lib/salmon-core/salmon/generator.js';
+import { AesStream } from '../../lib/salmon-core/salmon/streams/aes_stream.js';
 import { EncryptionMode } from '../../lib/salmon-core/salmon/streams/encryption_mode.js';
-import { SalmonRangeExceededException } from '../../lib/salmon-core/salmon/salmon_range_exceeded_exception.js';
+import { RangeExceededException } from '../../lib/salmon-core/salmon/range_exceeded_exception.js';
 import { ReadableStreamWrapper } from '../../lib/salmon-core/streams/readable_stream_wrapper.js';
 import { SalmonCoreTestHelper } from '../salmon-core/salmon_core_test_helper.js';
-import { SalmonFile } from '../../lib/salmon-fs/salmon/salmon_file.js';
-import { SalmonDrive } from '../../lib/salmon-fs/salmon/salmon_drive.js';
-import { SalmonSequenceSerializer } from '../../lib/salmon-fs/salmon/sequence/salmon_sequence_serializer.js';
-import { SalmonFileSequencer } from '../../lib/salmon-fs/salmon/sequence/salmon_file_sequencer.js';
-import { SalmonFileImporter } from '../../lib/salmon-fs/salmon/utils/salmon_file_importer.js';
-import { SalmonFileExporter } from '../../lib/salmon-fs/salmon/utils/salmon_file_exporter.js';
-import { SalmonFileCommander } from '../../lib/salmon-fs/salmon/utils/salmon_file_commander.js';
-import { autoRenameFile as autoRenameFile } from '../../lib/salmon-fs/file/ireal_file.js';
-import { FileSearcher } from '../../lib/salmon-fs/utils/file_searcher.js';
-import { SalmonFileReadableStream } from '../../lib/salmon-fs/salmon/streams/salmon_file_readable_stream.js';
-import { SalmonAuthConfig } from '../../lib/salmon-fs/salmon/salmon_auth_config.js';
-import { JsHttpDrive } from '../../lib/salmon-fs/salmon/drive/js_http_drive.js';
-import { Credentials, JsWSFile } from '../../lib/salmon-fs/file/js_ws_file.js';
-import { JsWSDrive } from '../../lib/salmon-fs/salmon/drive/js_ws_drive.js';
-import { JsHttpFile } from '../../lib/salmon-fs/file/js_http_file.js';
-import { JsHttpFileStream } from '../../lib/salmon-fs/streams/js_http_file_stream.js';
+import { AesFile } from '../../lib/salmon-fs/salmonfs/file/aes_file.js';
+import { AesDrive } from '../../lib/salmon-fs/salmonfs/drive/aes_drive.js';
+import { SequenceSerializer } from '../../lib/salmon-core/salmon/sequence/sequence_serializer.js';
+import { FileSequencer } from '../../lib/salmon-fs/salmonfs/sequence/file_sequencer.js';
+import { AesFileImporter } from '../../lib/salmon-fs/salmonfs/drive/utils/aes_file_importer.js';
+import { AesFileExporter } from '../../lib/salmon-fs/salmonfs/drive/utils/aes_file_exporter.js';
+import { AesFileCommander } from '../../lib/salmon-fs/salmonfs/drive/utils/aes_file_commander.js';
+import { autoRenameFile as autoRenameFile } from '../../lib/salmon-fs/fs/file/ifile.js';
+import { FileSearcher } from '../../lib/salmon-fs/fs/drive/utils/file_searcher.js';
+import { AesFileReadableStream } from '../../lib/salmon-fs/salmonfs/streams/aes_file_readable_stream.js';
+import { AuthConfig } from '../../lib/salmon-fs/salmonfs/auth/auth_config.js';
+import { HttpDrive } from '../../lib/salmon-fs/salmonfs/drive/http_drive.js';
+import { Credentials, WSFile } from '../../lib/salmon-fs/fs/file/ws_file.js';
+import { WSDrive } from '../../lib/salmon-fs/salmonfs/drive/ws_drive.js';
+import { HttpFile } from '../../lib/salmon-fs/fs/file/http_file.js';
+import { HttpFileStream } from '../../lib/salmon-fs/fs/streams/http_file_stream.js';
 
 export const TestMode = {
     Local: { name: 'Local', ordinal: 0 },
@@ -140,7 +140,7 @@ export class SalmonFSTestHelper {
     static TEST_EXPORT_AUTH_DIR;
     static fileImporter;
     static fileExporter;
-    static sequenceSerializer = new SalmonSequenceSerializer();
+    static sequenceSerializer = new SequenceSerializer();
     
     // testDir can be a path or a fileHandle
 	static async setTestParams(testDir,testMode,testRunnerMode,threads=1) {
@@ -153,23 +153,23 @@ export class SalmonFSTestHelper {
 		SalmonFSTestHelper.TEST_FILE_INPUT_STREAM_THREADS = threads;
 
         if (testMode == TestMode.Local) {
-            const { JsDrive } = await import('../../lib/salmon-fs/salmon/drive/js_drive.js');
-            SalmonFSTestHelper.driveClassType = JsDrive;
+            const { Drive } = await import('../../lib/salmon-fs/salmonfs/drive/drive.js');
+            SalmonFSTestHelper.driveClassType = Drive;
         } else if (testMode == TestMode.Node) {
-            const { JsNodeDrive } = await import('../../lib/salmon-fs/salmon/drive/js_node_drive.js');
-            SalmonFSTestHelper.driveClassType = JsNodeDrive;
+            const { NodeDrive } = await import('../../lib/salmon-fs/salmonfs/drive/node_drive.js');
+            SalmonFSTestHelper.driveClassType = NodeDrive;
         } else if (testMode == TestMode.Http) {
-            SalmonFSTestHelper.driveClassType = JsHttpDrive;
+            SalmonFSTestHelper.driveClassType = HttpDrive;
         } else if (testMode == TestMode.WebService) {
-            SalmonFSTestHelper.driveClassType = JsWSDrive;
+            SalmonFSTestHelper.driveClassType = WSDrive;
         }
 
         if(currTestRunnerMode == TestRunnerMode.Browser) {
-            const { JsFile } = await import('../../lib/salmon-fs/file/js_file.js');
-            SalmonFSTestHelper.TEST_ROOT_DIR = new JsFile(testDir);
+            const { File } = await import('../../lib/salmon-fs/fs/file/file.js');
+            SalmonFSTestHelper.TEST_ROOT_DIR = new File(testDir);
         } else if(currTestRunnerMode == TestRunnerMode.NodeJS) {
-            const { JsNodeFile } = await import('../../lib/salmon-fs/file/js_node_file.js');
-            SalmonFSTestHelper.TEST_ROOT_DIR = new JsNodeFile(testDir);
+            const { NodeFile } = await import('../../lib/salmon-fs/fs/file/node_file.js');
+            SalmonFSTestHelper.TEST_ROOT_DIR = new NodeFile(testDir);
             if(!await SalmonFSTestHelper.TEST_ROOT_DIR.exists())
                 await SalmonFSTestHelper.TEST_ROOT_DIR.mkdir();
         }
@@ -179,17 +179,17 @@ export class SalmonFSTestHelper {
 			+ "/" + SalmonFSTestHelper.HTTP_TEST_DIRNAME + "/" + SalmonFSTestHelper.HTTP_VAULT_DIRNAME;
 		SalmonFSTestHelper.HTTP_VAULT_FILES_DIR_URL = SalmonFSTestHelper.HTTP_VAULT_DIR_URL + "/fs"; 
 		
-        console.log("setting test path: " + SalmonFSTestHelper.TEST_ROOT_DIR.getAbsolutePath());
+        console.log("setting test path: " + SalmonFSTestHelper.TEST_ROOT_DIR.getDisplayPath());
         SalmonFSTestHelper.TEST_INPUT_DIR = await SalmonFSTestHelper.createDir(SalmonFSTestHelper.TEST_ROOT_DIR, SalmonFSTestHelper.TEST_INPUT_DIRNAME);
         if(testMode == TestMode.WebService)
-            SalmonFSTestHelper.TEST_OUTPUT_DIR = new JsWSFile("/", SalmonFSTestHelper.WS_SERVER_URL, SalmonFSTestHelper.credentials);
+            SalmonFSTestHelper.TEST_OUTPUT_DIR = new WSFile("/", SalmonFSTestHelper.WS_SERVER_URL, SalmonFSTestHelper.credentials);
         else
             SalmonFSTestHelper.TEST_OUTPUT_DIR = await SalmonFSTestHelper.createDir(SalmonFSTestHelper.TEST_ROOT_DIR, SalmonFSTestHelper.TEST_OUTPUT_DIRNAME);
         SalmonFSTestHelper.WS_TEST_DIR = await SalmonFSTestHelper.createDir(SalmonFSTestHelper.TEST_ROOT_DIR, SalmonFSTestHelper.WS_TEST_DIRNAME);
         SalmonFSTestHelper.HTTP_TEST_DIR = await SalmonFSTestHelper.createDir(SalmonFSTestHelper.TEST_ROOT_DIR, SalmonFSTestHelper.HTTP_TEST_DIRNAME);
         SalmonFSTestHelper.TEST_SEQ_DIR = await SalmonFSTestHelper.createDir(SalmonFSTestHelper.TEST_ROOT_DIR, SalmonFSTestHelper.TEST_SEQ_DIRNAME);
         SalmonFSTestHelper.TEST_EXPORT_AUTH_DIR = await SalmonFSTestHelper.createDir(SalmonFSTestHelper.TEST_ROOT_DIR, SalmonFSTestHelper.TEST_EXPORT_AUTH_DIRNAME);
-        SalmonFSTestHelper.HTTP_VAULT_DIR = new JsHttpFile(SalmonFSTestHelper.HTTP_VAULT_DIR_URL);
+        SalmonFSTestHelper.HTTP_VAULT_DIR = new HttpFile(SalmonFSTestHelper.HTTP_VAULT_DIR_URL);
 		await SalmonFSTestHelper.createTestFiles();
         await SalmonFSTestHelper.createHttpFiles();
         await SalmonFSTestHelper.createHttpVault();
@@ -246,7 +246,7 @@ export class SalmonFSTestHelper {
             SalmonFSTestHelper.TEST_IMPORT_MEDIUM_FILE,
             SalmonFSTestHelper.TEST_IMPORT_LARGE_FILE,
         ];
-        let importer = new SalmonFileImporter(SalmonFSTestHelper.ENC_IMPORT_BUFFER_SIZE, SalmonFSTestHelper.ENC_IMPORT_THREADS);
+        let importer = new AesFileImporter(SalmonFSTestHelper.ENC_IMPORT_BUFFER_SIZE, SalmonFSTestHelper.ENC_IMPORT_THREADS);
         for(let importFile of importFiles) {
             await importer.importFile(importFile, rootDir, null, false, true);
         }
@@ -279,8 +279,8 @@ export class SalmonFSTestHelper {
 
     static initialize() {
 		console.log("init fs helper");
-        SalmonFSTestHelper.fileImporter = new SalmonFileImporter(SalmonFSTestHelper.ENC_IMPORT_BUFFER_SIZE, SalmonFSTestHelper.ENC_IMPORT_THREADS);
-        SalmonFSTestHelper.fileExporter = new SalmonFileExporter(SalmonFSTestHelper.ENC_EXPORT_BUFFER_SIZE, SalmonFSTestHelper.ENC_EXPORT_THREADS);
+        SalmonFSTestHelper.fileImporter = new AesFileImporter(SalmonFSTestHelper.ENC_IMPORT_BUFFER_SIZE, SalmonFSTestHelper.ENC_IMPORT_THREADS);
+        SalmonFSTestHelper.fileExporter = new AesFileExporter(SalmonFSTestHelper.ENC_EXPORT_BUFFER_SIZE, SalmonFSTestHelper.ENC_EXPORT_THREADS);
     }
 
     static close() {
@@ -295,7 +295,7 @@ export class SalmonFSTestHelper {
         // always create the sequencer files locally
         let seqDir = await this.generateFolder(SalmonFSTestHelper.TEST_SEQ_DIRNAME, SalmonFSTestHelper.TEST_SEQ_DIR, true);
         let seqFile = await seqDir.getChild(SalmonFSTestHelper.TEST_SEQ_FILENAME);
-        return new SalmonFileSequencer(seqFile, SalmonFSTestHelper.sequenceSerializer);
+        return new FileSequencer(seqFile, SalmonFSTestHelper.sequenceSerializer);
     }
 
     static async generateFolder(name, parent=SalmonFSTestHelper.TEST_OUTPUT_DIR, rand = true) {
@@ -303,7 +303,7 @@ export class SalmonFSTestHelper {
         let dir = await parent.getChild(dirName);
         if(!await dir.exists())
             await dir.mkdir();
-        console.log("generated folder: " + dir.getAbsolutePath());
+        console.log("generated folder: " + dir.getDisplayPath());
         return dir;
     }
 
@@ -344,29 +344,29 @@ export class SalmonFSTestHelper {
             if (SalmonFSTestHelper.ENABLE_FILE_PROGRESS)
                 console.log("importing file: " + position + "/" + length);
         }
-        let salmonFile = await SalmonFSTestHelper.fileImporter.importFile(fileToImport, rootDir, null, false, applyFileIntegrity, printImportProgress);
+        let aesFile = await SalmonFSTestHelper.fileImporter.importFile(fileToImport, rootDir, null, false, applyFileIntegrity, printImportProgress);
 		
 		// get fresh copy of the file
         // TODO: for remote files the output stream should clear all cached file properties
         //instead of having to get a new file
-        salmonFile = await rootDir.getChild(await salmonFile.getBaseName());
+        aesFile = await rootDir.getChild(await aesFile.getName());
 		
-		let chunkSize = await salmonFile.getFileChunkSize();
+		let chunkSize = await aesFile.getFileChunkSize();
         if (chunkSize && chunkSize > 0 && !verifyFileIntegrity)
-            await salmonFile.setVerifyIntegrity(false, null);
+            await aesFile.setVerifyIntegrity(false, null);
 		
-        expect(await salmonFile.exists()).toBeTruthy();
-        let hashPostImport = await SalmonFSTestHelper.getChecksumStream(await salmonFile.getInputStream());
+        expect(await aesFile.exists()).toBeTruthy();
+        let hashPostImport = await SalmonFSTestHelper.getChecksumStream(await aesFile.getInputStream());
         if (shouldBeEqual)
             expect(hashPreImport).toBe(hashPostImport);
 		
-        expect(salmonFile != null).toBeTruthy();
-        expect(await salmonFile.exists()).toBeTruthy();
+        expect(aesFile != null).toBeTruthy();
+        expect(await aesFile.exists()).toBeTruthy();
 		
-        let salmonFiles = await (await drive.getRoot()).listFiles();
-        let realFileSize = await fileToImport.length();
-        for (let file of salmonFiles) {
-            if ((await file.getBaseName()) == fileToImport.getBaseName()) {
+        let aesFiles = await (await drive.getRoot()).listFiles();
+        let realFileSize = await fileToImport.getLength();
+        for (let file of aesFiles) {
+            if ((await file.getName()) == fileToImport.getName()) {
                 if (shouldBeEqual) {
                     expect(await file.exists()).toBeTruthy();
                     let fileSize = await file.getSize();
@@ -381,11 +381,11 @@ export class SalmonFSTestHelper {
                 console.log("exporting file: " + position + "/" + length);
         }
         if (bitflip)
-            await SalmonFSTestHelper.flipBit(salmonFile, flipPosition);
-		let chunkSize2 = await salmonFile.getFileChunkSize();
+            await SalmonFSTestHelper.flipBit(aesFile, flipPosition);
+		let chunkSize2 = await aesFile.getFileChunkSize();
         if (chunkSize2 != null && chunkSize2 > 0 && verifyFileIntegrity)
-            await salmonFile.setVerifyIntegrity(true, null);
-        let exportFile = await SalmonFSTestHelper.fileExporter.exportFile(salmonFile, await drive.getExportDir(), null, false, verifyFileIntegrity, printExportProgress);
+            await aesFile.setVerifyIntegrity(true, null);
+        let exportFile = await SalmonFSTestHelper.fileExporter.exportFile(aesFile, await drive.getExportDir(), null, false, verifyFileIntegrity, printExportProgress);
         let hashPostExport = await SalmonFSTestHelper.getChecksum(exportFile);
         if (shouldBeEqual) {
             expect(hashPostExport).toBe(hashPreImport);
@@ -394,20 +394,20 @@ export class SalmonFSTestHelper {
 
     
     static async openDrive(vaultDir, driveClassType, pass, sequencer){
-        if (driveClassType == JsWSDrive) {
+        if (driveClassType == WSDrive) {
             // use the remote service instead
-            return await JsWSDrive.open(vaultDir, pass, sequencer,
+            return await WSDrive.open(vaultDir, pass, sequencer,
                     SalmonFSTestHelper.credentials.getServiceUser(), SalmonFSTestHelper.credentials.getServicePassword());
         } else
-            return await SalmonDrive.openDrive(vaultDir, driveClassType, pass, sequencer);
+            return await AesDrive.openDrive(vaultDir, driveClassType, pass, sequencer);
     }
 	
     static async createDrive(vaultDir, driveClassType, pass, sequencer) {
-        if (driveClassType == JsWSDrive)
-            return await JsWSDrive.create(vaultDir, pass, sequencer, 
+        if (driveClassType == WSDrive)
+            return await WSDrive.create(vaultDir, pass, sequencer, 
                 SalmonFSTestHelper.credentials.getServiceUser(), SalmonFSTestHelper.credentials.getServicePassword());
         else
-            return await SalmonDrive.createDrive(vaultDir, driveClassType, pass, sequencer);
+            return await AesDrive.createDrive(vaultDir, driveClassType, pass, sequencer);
     }
 
     static async importAndSearch(vaultDir, pass, importFile) {
@@ -416,19 +416,19 @@ export class SalmonFSTestHelper {
         let rootDir = await drive.getRoot();
         await rootDir.listFiles();
         let fileToImport = importFile;
-        let rbasename = fileToImport.getBaseName();
+        let rbasename = fileToImport.getName();
 
         // import
-        let salmonFile = await SalmonFSTestHelper.fileImporter.importFile(fileToImport, rootDir, null, false, false, null);
-        expect(salmonFile != null).toBeTruthy();
-        expect(await salmonFile.exists()).toBeTruthy();
+        let aesFile = await SalmonFSTestHelper.fileImporter.importFile(fileToImport, rootDir, null, false, false, null);
+        expect(aesFile != null).toBeTruthy();
+        expect(await aesFile.exists()).toBeTruthy();
 
         // search
-        let basename = await salmonFile.getBaseName();
+        let basename = await aesFile.getName();
         let searcher = new FileSearcher();
         let files = await searcher.search(rootDir, basename, true, null, null);
         expect(files.length > 0).toBeTruthy();
-        expect(basename).toBe(await files[0].getBaseName());
+        expect(basename).toBe(await files[0].getName());
 
     }
 
@@ -438,36 +438,36 @@ export class SalmonFSTestHelper {
         let rootDir = await drive.getRoot();
         rootDir.listFiles();
         let fileToImport = importFile;
-        let rbasename = fileToImport.getBaseName();
+        let rbasename = fileToImport.getName();
 
         // import
-        let salmonFile = await SalmonFSTestHelper.fileImporter.importFile(fileToImport, rootDir, null, false, false, null);
+        let aesFile = await SalmonFSTestHelper.fileImporter.importFile(fileToImport, rootDir, null, false, false, null);
 
         // trigger the cache to add the filename
-        let basename = await salmonFile.getBaseName();
+        let basename = await aesFile.getName();
 
-        expect(salmonFile != null).toBeTruthy();
+        expect(aesFile != null).toBeTruthy();
 
-        expect(await salmonFile.exists()).toBeTruthy();
+        expect(await aesFile.exists()).toBeTruthy();
 
-        let checkSumBefore = await SalmonFSTestHelper.getChecksum(salmonFile.getRealFile());
+        let checkSumBefore = await SalmonFSTestHelper.getChecksum(aesFile.getRealFile());
         let newDir1 = await rootDir.createDirectory(newDir);
         let newFile;
         if (move)
-            newFile = await salmonFile.move(newDir1, null);
+            newFile = await aesFile.move(newDir1, null);
         else
-            newFile = await salmonFile.copy(newDir1, null);
+            newFile = await aesFile.copy(newDir1, null);
 
         expect(newFile != null).toBeTruthy();
         let checkSumAfter = await SalmonFSTestHelper.getChecksum(await newFile.getRealFile());
 
         expect(checkSumAfter).toBe(checkSumBefore);
 
-        expect(await newFile.getBaseName()).toBe(await salmonFile.getBaseName());
+        expect(await newFile.getName()).toBe(await aesFile.getName());
     }
 
-    static async flipBit(salmonFile, position) {
-        let stream = await salmonFile.getRealFile().getOutputStream();
+    static async flipBit(aesFile, position) {
+        let stream = await aesFile.getRealFile().getOutputStream();
         await stream.setPosition(position);
         await stream.write(new Uint8Array([1]), 0, 1);
         await stream.flush();
@@ -478,11 +478,14 @@ export class SalmonFSTestHelper {
         filenameNonce, fileNonce, flipBit, flipPosition, checkData) {
         // write file
         let realDir = await SalmonFSTestHelper.generateFolder("encfiles", SalmonFSTestHelper.TEST_OUTPUT_DIR, false);
-        let dir = new SalmonFile(realDir, null);
+        let dir = new AesFile(realDir);
         let filename = "test_" + Date.now() + "." + flipPosition + ".txt";
         let newFile = await dir.createFile(filename, key, filenameNonce, fileNonce);
+        console.log("new file: " + newFile.getPath());
         if (applyIntegrity)
             await newFile.setApplyIntegrity(true, hashKey, chunkSize);
+        else
+            await newFile.setApplyIntegrity(false);
         let stream = await newFile.getOutputStream();
 
         await stream.write(testBytes, 0, testBytes.length);
@@ -501,13 +504,13 @@ export class SalmonFSTestHelper {
         }
 
         // open file for read
-        let readFile = new SalmonFile(realFile, null);
+        let readFile = new AesFile(realFile);
         readFile.setEncryptionKey(key);
         readFile.setRequestedNonce(fileNonce);
         if (verifyIntegrity)
             await readFile.setVerifyIntegrity(true, hashKey);
         else
-			await readFile.setVerifyIntegrity(false, null);
+			await readFile.setVerifyIntegrity(false);
         let inStream = await readFile.getInputStream();
         let textBytes = new Uint8Array(testBytes.length);
         await inStream.read(textBytes, 0, textBytes.length);
@@ -527,8 +530,8 @@ export class SalmonFSTestHelper {
         // import a test file
         let rootDir = await drive.getRoot();
         let fileToImport = importFilePath;
-        let salmonFileA1 = await SalmonFSTestHelper.fileImporter.importFile(fileToImport, rootDir, null, false, false, null);
-        let nonceA1 = BitConverter.toLong(salmonFileA1.getRequestedNonce(), 0, SalmonGenerator.NONCE_LENGTH);
+        let aesFile1 = await SalmonFSTestHelper.fileImporter.importFile(fileToImport, rootDir, null, false, false, null);
+        let nonceA1 = BitConverter.toLong(aesFile1.getRequestedNonce(), 0, Generator.NONCE_LENGTH);
         drive.close();
 
         // open with another device (different sequencer) and export auth id
@@ -550,27 +553,27 @@ export class SalmonFSTestHelper {
         drive = await SalmonFSTestHelper.openDrive(vault, SalmonFSTestHelper.driveClassType, SalmonCoreTestHelper.TEST_PASSWORD, sequencer1);
         let exportAuthDir = await this.generateFolder(SalmonFSTestHelper.TEST_EXPORT_AUTH_DIRNAME, SalmonFSTestHelper.TEST_EXPORT_AUTH_DIR);
         let exportFile = await exportAuthDir.createFile(SalmonFSTestHelper.TEST_EXPORT_AUTH_FILENAME);
-        await SalmonAuthConfig.exportAuthFile(drive, authId, exportFile);
+        await AuthConfig.exportAuthFile(drive, authId, exportFile);
         let exportAuthFile = await exportAuthDir.getChild(SalmonFSTestHelper.TEST_EXPORT_AUTH_FILENAME);
-        let salmonCfgFile = new SalmonFile(exportAuthFile, drive);
-        let nonceCfg = BitConverter.toLong(await salmonCfgFile.getFileNonce(), 0, SalmonGenerator.NONCE_LENGTH);
+        let salmonCfgFile = new AesFile(exportAuthFile, drive);
+        let nonceCfg = BitConverter.toLong(await salmonCfgFile.getFileNonce(), 0, Generator.NONCE_LENGTH);
         // import another test file
         rootDir = await drive.getRoot();
         fileToImport = importFilePath;
-        let salmonFileA2 = await SalmonFSTestHelper.fileImporter.importFile(fileToImport, rootDir, null, false, false, null);
-        let nonceA2 = BitConverter.toLong(await salmonFileA2.getFileNonce(), 0, SalmonGenerator.NONCE_LENGTH);
+        let aesFileA2 = await SalmonFSTestHelper.fileImporter.importFile(fileToImport, rootDir, null, false, false, null);
+        let nonceA2 = BitConverter.toLong(await aesFileA2.getFileNonce(), 0, Generator.NONCE_LENGTH);
         drive.close();
 
         //reopen with second device(sequencer) and import auth file
         drive = await SalmonFSTestHelper.openDrive(vault, SalmonFSTestHelper.driveClassType, SalmonCoreTestHelper.TEST_PASSWORD, sequencer2);
-        await SalmonAuthConfig.importAuthFile(drive, exportAuthFile);
+        await AuthConfig.importAuthFile(drive, exportAuthFile);
         // now import a 3rd file
         rootDir = await drive.getRoot();
         fileToImport = importFilePath;
-        let salmonFileB1 = await SalmonFSTestHelper.fileImporter.importFile(fileToImport, rootDir, null, false, false, null);
-        let nonceB1 = BitConverter.toLong(await salmonFileB1.getFileNonce(), 0, SalmonGenerator.NONCE_LENGTH);
-        let salmonFileB2 = await SalmonFSTestHelper.fileImporter.importFile(fileToImport, rootDir, null, false, false, null);
-        let nonceB2 = BitConverter.toLong(await salmonFileB2.getFileNonce(), 0, SalmonGenerator.NONCE_LENGTH);
+        let aesFileB1 = await SalmonFSTestHelper.fileImporter.importFile(fileToImport, rootDir, null, false, false, null);
+        let nonceB1 = BitConverter.toLong(await aesFileB1.getFileNonce(), 0, Generator.NONCE_LENGTH);
+        let aesFileB2 = await SalmonFSTestHelper.fileImporter.importFile(fileToImport, rootDir, null, false, false, null);
+        let nonceB2 = BitConverter.toLong(await aesFileB2.getFileNonce(), 0, Generator.NONCE_LENGTH);
         drive.close();
 
         expect(nonceCfg - 1).toBe(nonceA1);
@@ -582,15 +585,15 @@ export class SalmonFSTestHelper {
     static async testMaxFiles(vaultDir, seqFile, importFile, testMaxNonce, offset, shouldImport) {
         let importSuccess;
         try {
-            class TestSalmonFileSequencer extends SalmonFileSequencer {
+            class TestFileSequencer extends FileSequencer {
                 async initializeSequence(driveId, authId, startNonce, maxNonce) {
-                    let nMaxNonce = BitConverter.toLong(testMaxNonce, 0, SalmonGenerator.NONCE_LENGTH);
-                    startNonce = BitConverter.toBytes(nMaxNonce + offset, SalmonGenerator.NONCE_LENGTH);
-                    maxNonce = BitConverter.toBytes(nMaxNonce, SalmonGenerator.NONCE_LENGTH);
+                    let nMaxNonce = BitConverter.toLong(testMaxNonce, 0, Generator.NONCE_LENGTH);
+                    startNonce = BitConverter.toBytes(nMaxNonce + offset, Generator.NONCE_LENGTH);
+                    maxNonce = BitConverter.toBytes(nMaxNonce, Generator.NONCE_LENGTH);
                     await super.initializeSequence(driveId, authId, startNonce, maxNonce);
                 }
             }
-            let sequencer = new TestSalmonFileSequencer(seqFile, SalmonFSTestHelper.sequenceSerializer);
+            let sequencer = new TestFileSequencer(seqFile, SalmonFSTestHelper.sequenceSerializer);
             let drive;
             try {
                 drive = await SalmonFSTestHelper.openDrive(vaultDir, SalmonFSTestHelper.driveClassType, SalmonCoreTestHelper.TEST_PASSWORD, sequencer);
@@ -600,12 +603,12 @@ export class SalmonFSTestHelper {
             let rootDir = await drive.getRoot();
             await rootDir.listFiles();
             let fileToImport = importFile;
-            let salmonFile = await SalmonFSTestHelper.fileImporter.importFile(fileToImport, rootDir, null, false, false, null);
-            importSuccess = salmonFile != null;
+            let aesFile = await SalmonFSTestHelper.fileImporter.importFile(fileToImport, rootDir, null, false, false, null);
+            importSuccess = aesFile != null;
         } catch (ex) {
             console.error(ex);
             // TODO: check specific exception
-            if(ex instanceof SalmonRangeExceededException)
+            if(ex instanceof RangeExceededException)
                 importSuccess = false;
         }
 
@@ -655,12 +658,12 @@ export class SalmonFSTestHelper {
         let filename = "file.dat";
         let testFile = await dir.createFile(filename);
         let bytes = new TextEncoder().encode(text);
-        let key = SalmonGenerator.getSecureRandomBytes(32);
-        let nonce = SalmonGenerator.getSecureRandomBytes(8);
+        let key = Generator.getSecureRandomBytes(32);
+        let nonce = Generator.getSecureRandomBytes(8);
 
         let wfile = await dir.getChild(filename);
-        let encFile = new SalmonFile(wfile);
-        nonce = SalmonGenerator.getSecureRandomBytes(8);
+        let encFile = new AesFile(wfile);
+        nonce = Generator.getSecureRandomBytes(8);
         encFile.setEncryptionKey(key);
         encFile.setRequestedNonce(nonce);
         let stream = await encFile.getOutputStream();
@@ -675,7 +678,7 @@ export class SalmonFSTestHelper {
 
         // decrypt an encrypted file
         let rfile = await dir.getChild(filename);
-        let encFile2 = new SalmonFile(rfile);
+        let encFile2 = new AesFile(rfile);
         encFile2.setEncryptionKey(key);
         let stream2 = await encFile2.getInputStream();
         let decBuff = new Uint8Array(BUFF_SIZE);
@@ -694,7 +697,7 @@ export class SalmonFSTestHelper {
     
     static async encryptAndDecryptStream(data, key, nonce) {
         let encOutStream = new MemoryStream();
-        let encryptor = new SalmonStream(key, nonce, EncryptionMode.Encrypt, encOutStream);
+        let encryptor = new AesStream(key, nonce, EncryptionMode.Encrypt, encOutStream);
         let inputStream = new MemoryStream(data);
         await inputStream.copyTo(encryptor);
         await encOutStream.setPosition(0);
@@ -705,7 +708,7 @@ export class SalmonFSTestHelper {
         await inputStream.close();
 
         let encInputStream = new MemoryStream(encData);
-        let decryptor = new SalmonStream(key, nonce, EncryptionMode.Decrypt, encInputStream);
+        let decryptor = new AesStream(key, nonce, EncryptionMode.Decrypt, encInputStream);
         let outStream = new MemoryStream();
         await decryptor.copyTo(outStream);
         await outStream.setPosition(0);
@@ -816,7 +819,7 @@ export class SalmonFSTestHelper {
         let root = await drive.getRoot();
         let file = await root.getChild(filename);
         console.log("file size: " + await file.getSize());
-		console.log("file last modified: " + await file.getLastDateTimeModified());
+		console.log("file last modified: " + await file.getLastDateModified());
         expect(await file.exists()).toBeTruthy();
         
         let stream = await file.getInputStream();
@@ -868,13 +871,13 @@ export class SalmonFSTestHelper {
         let stream = null;
         if (SalmonFSTestHelper.TEST_USE_FILE_INPUT_STREAM && isEncrypted) {
             // multi threaded
-            stream = SalmonFileReadableStream.create(file, buffersCount, bufferSize, SalmonFSTestHelper.TEST_FILE_INPUT_STREAM_THREADS, backOffset);
+            stream = AesFileReadableStream.create(file, buffersCount, bufferSize, SalmonFSTestHelper.TEST_FILE_INPUT_STREAM_THREADS, backOffset);
         } else {
             let fileStream;
             if (isEncrypted) {
                 fileStream = await file.getInputStream();
             } else {
-                fileStream = new JsHttpFileStream(file, "r");
+                fileStream = new HttpFileStream(file, "r");
             }
             stream = ReadableStreamWrapper.create(fileStream);
         }
@@ -898,7 +901,7 @@ export class SalmonFSTestHelper {
 
     static async exportFiles(files, dir, threads = 1) {
 		let bufferSize = 256 * 1024;
-		let commander = new SalmonFileCommander(bufferSize, bufferSize, threads);
+		let commander = new AesFileCommander(bufferSize, bufferSize, threads);
 
 		// set the correct worker paths for multithreading
 		// commander.getFileImporter().setWorkerPath( '../lib/salmon-fs/salmon/utils/salmon_file_importer_worker.js');
@@ -910,19 +913,19 @@ export class SalmonFSTestHelper {
 
         // export files
         let filesExported = await commander.exportFiles(files, dir, false, true,
-            async (taskProgress) => {
-                if(!SalmonFSTestHelper.ENABLE_FILE_PROGRESS)
-                    return;
-                try {
-                    console.log( "file exporting: " + await taskProgress.getFile().getBaseName() + ": "
-                    + taskProgress.getProcessedBytes() + "/" + taskProgress.getTotalBytes() + " bytes"  );
-                } catch (e) {
-                    console.error(e);
-                }
-            }, autoRenameFile, async (sfile, ex) => {
+            autoRenameFile, async (sfile, ex) => {
                 // file failed to import
                 console.error(ex);
-                console.log("export failed: " + await sfile.getBaseName() + "\n" + ex.stack);
+                console.log("export failed: " + await sfile.getName() + "\n" + ex.stack);
+        }, async (taskProgress) => {
+            if(!SalmonFSTestHelper.ENABLE_FILE_PROGRESS)
+                return;
+            try {
+                console.log( "file exporting: " + await taskProgress.getFile().getName() + ": "
+                + taskProgress.getProcessedBytes() + "/" + taskProgress.getTotalBytes() + " bytes"  );
+            } catch (e) {
+                console.error(e);
+            }
         });
 			
         console.log("Files exported");

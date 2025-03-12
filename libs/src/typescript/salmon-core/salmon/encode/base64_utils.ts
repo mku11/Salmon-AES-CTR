@@ -22,12 +22,28 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 */
 
+import { Base64 } from "../../convert/base64.js";
+import { IBase64 } from "../../convert/ibase64.js";
+
 /**
- * Pbkdf algorithm implementation type.
+ * Provides generic Base64 encoder utility.
  */
-export enum PbkdfAlgo {
+export class Base64Utils {
+    static #base64: IBase64 = new Base64();
+
     /**
-     * SHA256 hashing.
+     * Change the current global Base64 implementation.
+     * @param {IBase64} base64 The new Base64 implementation.
      */
-    SHA256
+    public static setBase64(base64: IBase64): void {
+        Base64Utils.#base64 = base64;
+    }
+
+    /**
+     * Get the global default Base64 implementation.
+     * @return {IBase64} The Base64 implementation.
+     */
+    public static getBase64(): IBase64 {
+        return Base64Utils.#base64;
+    }
 }

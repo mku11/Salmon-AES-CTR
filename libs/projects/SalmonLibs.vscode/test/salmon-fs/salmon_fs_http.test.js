@@ -23,11 +23,11 @@ SOFTWARE.
 */
 
 import { MemoryStream } from '../../lib/salmon-core/streams/memory_stream.js';
-import { JsHttpDrive } from '../../lib/salmon-fs/salmon/drive/js_http_drive.js';
-import { JsHttpFile } from '../../lib/salmon-fs/file/js_http_file.js';
-import { SalmonStream } from '../../lib/salmon-core/salmon/streams/salmon_stream.js';
+import { HttpDrive } from '../../lib/salmon-fs/salmonfs/drive/http_drive.js';
+import { HttpFile } from '../../lib/salmon-fs/fs/file/http_file.js';
+import { AesStream } from '../../lib/salmon-core/salmon/streams/aes_stream.js';
 import { ProviderType } from '../../lib/salmon-core/salmon/streams/provider_type.js';
-import { SalmonDrive } from '../../lib/salmon-fs/salmon/salmon_drive.js';
+import { AesDrive } from '../../lib/salmon-fs/salmonfs/drive/aes_drive.js';
 import { SalmonCoreTestHelper } from '../salmon-core/salmon_core_test_helper.js';
 import { getTestMode, getTestRunnerMode, getTestThreads, SalmonFSTestHelper, TestMode } from './salmon_fs_test_helper.js';
 
@@ -51,7 +51,7 @@ describe('salmon-httpfs', () => {
         SalmonFSTestHelper.TEST_USE_FILE_INPUT_STREAM = true;
 
         // only default provider is supported
-        SalmonStream.setAesProviderType(ProviderType.Default);
+        AesStream.setAesProviderType(ProviderType.Default);
 
         SalmonCoreTestHelper.initialize();
         SalmonFSTestHelper.initialize();
@@ -81,7 +81,7 @@ describe('salmon-httpfs', () => {
         let wrongPassword = false;
         let vaultDir = SalmonFSTestHelper.HTTP_VAULT_DIR;
         try {
-            let drive = await SalmonDrive.openDrive(vaultDir, SalmonFSTestHelper.driveClassType, SalmonCoreTestHelper.TEST_PASSWORD);
+            let drive = await AesDrive.openDrive(vaultDir, SalmonFSTestHelper.driveClassType, SalmonCoreTestHelper.TEST_PASSWORD);
             let root = drive.getRoot();
         } catch (ex) {
             console.error(ex);
@@ -109,10 +109,10 @@ describe('salmon-httpfs', () => {
 
     it('shouldSeekAndReadEncryptedFileStreamFromDrive', async () => {
         let vaultDir = SalmonFSTestHelper.HTTP_VAULT_DIR;
-        let drive = await SalmonDrive.openDrive(vaultDir, SalmonFSTestHelper.driveClassType, SalmonCoreTestHelper.TEST_PASSWORD);
+        let drive = await AesDrive.openDrive(vaultDir, SalmonFSTestHelper.driveClassType, SalmonCoreTestHelper.TEST_PASSWORD);
         let root = await drive.getRoot();
         let encFile = await root.getChild(SalmonFSTestHelper.TEST_IMPORT_SMALL_FILENAME);
-        expect(await encFile.getBaseName()).toBe(SalmonFSTestHelper.TEST_IMPORT_SMALL_FILENAME);
+        expect(await encFile.getName()).toBe(SalmonFSTestHelper.TEST_IMPORT_SMALL_FILENAME);
 
         let encStream = await encFile.getInputStream();
         let ms = new MemoryStream();
@@ -126,12 +126,12 @@ describe('salmon-httpfs', () => {
     it('shouldListFilesFromDrive', async () => {
         let vaultDir = SalmonFSTestHelper.HTTP_VAULT_DIR;
 		console.log("vaultDir: " + vaultDir.getPath());
-        let drive = await JsHttpDrive.open(vaultDir, SalmonCoreTestHelper.TEST_PASSWORD);
+        let drive = await HttpDrive.open(vaultDir, SalmonCoreTestHelper.TEST_PASSWORD);
         let root = await drive.getRoot();
         let files = await root.listFiles();
         let filenames = [];
         for (let i = 0; i < files.length; i++) {
-            let filename = await files[i].getBaseName();
+            let filename = await files[i].getName();
             filenames.push(filename);
         }
         expect(files.length).toBe(4);
@@ -143,11 +143,11 @@ describe('salmon-httpfs', () => {
 
     it('shouldExportFileFromDrive', async () => {
         let vaultDir = SalmonFSTestHelper.HTTP_VAULT_DIR;
-        let threads = 2;
+        let threads = 1;
         let drive = await SalmonFSTestHelper.openDrive(vaultDir, SalmonFSTestHelper.driveClassType, SalmonCoreTestHelper.TEST_PASSWORD);
-        let file = await (await drive.getRoot()).getChild(await SalmonFSTestHelper.TEST_HTTP_FILE.getBaseName());
+        let file = await (await drive.getRoot()).getChild(await SalmonFSTestHelper.TEST_HTTP_FILE.getName());
         let exportDir = await SalmonFSTestHelper.generateFolder("export_http", SalmonFSTestHelper.TEST_OUTPUT_DIR, false);
-        let localFile = await exportDir.getChild(await SalmonFSTestHelper.TEST_HTTP_FILE.getBaseName());
+        let localFile = await exportDir.getChild(await SalmonFSTestHelper.TEST_HTTP_FILE.getName());
         if(await localFile.exists())
             await localFile.delete();
         await SalmonFSTestHelper.exportFiles([file], exportDir, threads);
@@ -155,10 +155,10 @@ describe('salmon-httpfs', () => {
     });
 
     it('shouldReadRawFile', async () => {
-        let localFile = await SalmonFSTestHelper.HTTP_TEST_DIR.getChild(await SalmonFSTestHelper.TEST_HTTP_FILE.getBaseName());
+        let localFile = await SalmonFSTestHelper.HTTP_TEST_DIR.getChild(await SalmonFSTestHelper.TEST_HTTP_FILE.getName());
         let localChkSum = await SalmonFSTestHelper.getChecksum(localFile);
-        let httpRoot = new JsHttpFile(SalmonFSTestHelper.HTTP_SERVER_VIRTUAL_URL + "/" + SalmonFSTestHelper.HTTP_TEST_DIRNAME);
-        let httpFile = await httpRoot.getChild(await SalmonFSTestHelper.TEST_HTTP_FILE.getBaseName());
+        let httpRoot = new HttpFile(SalmonFSTestHelper.HTTP_SERVER_VIRTUAL_URL + "/" + SalmonFSTestHelper.HTTP_TEST_DIRNAME);
+        let httpFile = await httpRoot.getChild(await SalmonFSTestHelper.TEST_HTTP_FILE.getName());
         let stream = await httpFile.getInputStream();
         let ms = new MemoryStream();
         await stream.copyTo(ms);
