@@ -216,7 +216,6 @@ class AesFile(IVirtualFile):
         # we also specify if stream ranges can be overwritten which is generally dangerous if the file is existing
         # but practical if the file is brand new and multithreaded writes for performance need to be used.
         real_stream: RandomAccessStream = self.__real_file.get_output_stream()
-        real_stream.seek(self.__get_header_length(), RandomAccessStream.SeekOrigin.Begin)
 
         key: bytearray | None = self.get_encryption_key()
         if not key:
