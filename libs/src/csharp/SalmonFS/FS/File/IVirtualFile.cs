@@ -82,7 +82,7 @@ public abstract class IVirtualFile
     /// <summary>
     /// The real encrypted file on the physical disk.
     /// </summary>
-    public abstract IRealFile RealFile { get; protected set; }
+    public abstract IFile RealFile { get; protected set; }
 
     /// <summary>
     ///  The base name for the file

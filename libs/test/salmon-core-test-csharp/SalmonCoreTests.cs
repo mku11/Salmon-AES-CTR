@@ -56,7 +56,7 @@ public class SalmonCoreTests
 			providerType = (ProviderType) Enum.Parse(typeof(ProviderType), aesProviderType);
 		Console.WriteLine("ProviderType: " + providerType);
 
-		SalmonStream.AesProviderType = providerType;
+		AesStream.AesProviderType = providerType;
     }
 
     [ClassCleanup]
@@ -71,8 +71,8 @@ public class SalmonCoreTests
         string plainText = SalmonCoreTestHelper.TEST_TINY_TEXT;
 
 
-        string encText = SalmonTextEncryptor.EncryptString(plainText, SalmonCoreTestHelper.TEST_KEY_BYTES, SalmonCoreTestHelper.TEST_NONCE_BYTES, false);
-        string decText = SalmonTextDecryptor.DecryptString(encText, SalmonCoreTestHelper.TEST_KEY_BYTES, SalmonCoreTestHelper.TEST_NONCE_BYTES, false);
+        string encText = TextEncryptor.EncryptString(plainText, SalmonCoreTestHelper.TEST_KEY_BYTES, SalmonCoreTestHelper.TEST_NONCE_BYTES, false);
+        string decText = TextDecryptor.DecryptString(encText, SalmonCoreTestHelper.TEST_KEY_BYTES, SalmonCoreTestHelper.TEST_NONCE_BYTES, false);
         Assert.AreEqual(plainText, decText);
     }
 
@@ -81,8 +81,8 @@ public class SalmonCoreTests
     {
         string plainText = SalmonCoreTestHelper.TEST_TINY_TEXT;
 
-        string encText = SalmonTextEncryptor.EncryptString(plainText, SalmonCoreTestHelper.TEST_KEY_BYTES, SalmonCoreTestHelper.TEST_NONCE_BYTES, true);
-        string decText = SalmonTextDecryptor.DecryptString(encText, SalmonCoreTestHelper.TEST_KEY_BYTES, null, true);
+        string encText = TextEncryptor.EncryptString(plainText, SalmonCoreTestHelper.TEST_KEY_BYTES, SalmonCoreTestHelper.TEST_NONCE_BYTES, true);
+        string decText = TextDecryptor.DecryptString(encText, SalmonCoreTestHelper.TEST_KEY_BYTES, null, true);
         Assert.AreEqual(plainText, decText);
     }
 
@@ -94,9 +94,9 @@ public class SalmonCoreTests
 
         try
         {
-            SalmonTextEncryptor.EncryptString(plainText, null, SalmonCoreTestHelper.TEST_NONCE_BYTES, true);
+            TextEncryptor.EncryptString(plainText, null, SalmonCoreTestHelper.TEST_NONCE_BYTES, true);
         }
-        catch (SalmonSecurityException ex)
+        catch (SecurityException ex)
         {
             Console.Error.WriteLine(ex);
             caught = true;
@@ -113,9 +113,9 @@ public class SalmonCoreTests
 
         try
         {
-            SalmonTextEncryptor.EncryptString(plainText, SalmonCoreTestHelper.TEST_KEY_BYTES, null, true);
+            TextEncryptor.EncryptString(plainText, SalmonCoreTestHelper.TEST_KEY_BYTES, null, true);
         }
-        catch (SalmonSecurityException ex)
+        catch (SecurityException ex)
         {
             Console.Error.WriteLine(ex);
             caught = true;
@@ -136,8 +136,8 @@ public class SalmonCoreTests
 
         try
         {
-            string encText = SalmonTextEncryptor.EncryptString(plainText, SalmonCoreTestHelper.TEST_KEY_BYTES, SalmonCoreTestHelper.TEST_NONCE_BYTES, false);
-            SalmonTextDecryptor.DecryptString(encText, SalmonCoreTestHelper.TEST_KEY_BYTES, null, false);
+            string encText = TextEncryptor.EncryptString(plainText, SalmonCoreTestHelper.TEST_KEY_BYTES, SalmonCoreTestHelper.TEST_NONCE_BYTES, false);
+            TextDecryptor.DecryptString(encText, SalmonCoreTestHelper.TEST_KEY_BYTES, null, false);
         }
         catch (Exception ex)
         {
@@ -157,8 +157,8 @@ public class SalmonCoreTests
 
         try
         {
-            string encText = SalmonTextEncryptor.EncryptString(plainText, SalmonCoreTestHelper.TEST_KEY_BYTES, SalmonCoreTestHelper.TEST_NONCE_BYTES, true);
-            SalmonTextDecryptor.DecryptString(encText, null, SalmonCoreTestHelper.TEST_NONCE_BYTES, true);
+            string encText = TextEncryptor.EncryptString(plainText, SalmonCoreTestHelper.TEST_KEY_BYTES, SalmonCoreTestHelper.TEST_NONCE_BYTES, true);
+            TextDecryptor.DecryptString(encText, null, SalmonCoreTestHelper.TEST_NONCE_BYTES, true);
         }
         catch (Exception ex)
         {
@@ -181,10 +181,10 @@ public class SalmonCoreTests
         byte[] decBytesDef = SalmonCoreTestHelper.DefaultAESCTRTransform(encBytesDef, SalmonCoreTestHelper.TEST_KEY_BYTES, SalmonCoreTestHelper.TEST_NONCE_BYTES, false);
 
         CollectionAssert.AreEqual(bytes, decBytesDef);
-        byte[] encBytes = new SalmonEncryptor().Encrypt(bytes, SalmonCoreTestHelper.TEST_KEY_BYTES, SalmonCoreTestHelper.TEST_NONCE_BYTES, false);
+        byte[] encBytes = new Encryptor().Encrypt(bytes, SalmonCoreTestHelper.TEST_KEY_BYTES, SalmonCoreTestHelper.TEST_NONCE_BYTES, false);
 
         CollectionAssert.AreEqual(encBytesDef, encBytes);
-        byte[] decBytes = new SalmonDecryptor().Decrypt(encBytes, SalmonCoreTestHelper.TEST_KEY_BYTES, SalmonCoreTestHelper.TEST_NONCE_BYTES, false);
+        byte[] decBytes = new Decryptor().Decrypt(encBytes, SalmonCoreTestHelper.TEST_KEY_BYTES, SalmonCoreTestHelper.TEST_NONCE_BYTES, false);
 
         CollectionAssert.AreEqual(bytes, decBytes);
     }
@@ -205,11 +205,11 @@ public class SalmonCoreTests
         int chunkSize = 256 * 1024;
         CollectionAssert.AreEqual(bytes, decBytesDef);
         byte[]
-    encBytes = new SalmonEncryptor(threads).Encrypt(bytes, SalmonCoreTestHelper.TEST_KEY_BYTES, SalmonCoreTestHelper.TEST_NONCE_BYTES, false,
+    encBytes = new Encryptor(threads).Encrypt(bytes, SalmonCoreTestHelper.TEST_KEY_BYTES, SalmonCoreTestHelper.TEST_NONCE_BYTES, false,
                 true, SalmonCoreTestHelper.TEST_HMAC_KEY_BYTES, chunkSize);
 
         AssertAreEqualWithIntegrity(encBytesDef, encBytes, chunkSize);
-        byte[] decBytes = new SalmonDecryptor(threads).Decrypt(encBytes, SalmonCoreTestHelper.TEST_KEY_BYTES, SalmonCoreTestHelper.TEST_NONCE_BYTES, false,
+        byte[] decBytes = new Decryptor(threads).Decrypt(encBytes, SalmonCoreTestHelper.TEST_KEY_BYTES, SalmonCoreTestHelper.TEST_NONCE_BYTES, false,
                 true, SalmonCoreTestHelper.TEST_HMAC_KEY_BYTES, chunkSize);
 
         CollectionAssert.AreEqual(bytes, decBytes);
@@ -225,10 +225,10 @@ public class SalmonCoreTests
             Array.Copy(buffer, i, buff1, 0, nChunkSize);
 
             byte[] buff2 = new byte[chunkSize];
-            Array.Copy(bufferWithIntegrity, index + SalmonGenerator.HASH_RESULT_LENGTH, buff2, 0, nChunkSize);
+            Array.Copy(bufferWithIntegrity, index + Generator.HASH_RESULT_LENGTH, buff2, 0, nChunkSize);
 
             CollectionAssert.AreEqual(buff1, buff2);
-            index += nChunkSize + SalmonGenerator.HASH_RESULT_LENGTH;
+            index += nChunkSize + Generator.HASH_RESULT_LENGTH;
         }
         Assert.AreEqual(bufferWithIntegrity.Length, index);
     }
@@ -449,7 +449,7 @@ public class SalmonCoreTests
         byte[] inputBytes = UTF8Encoding.UTF8.GetBytes(plainText);
         MemoryStream ins = new MemoryStream(inputBytes);
         MemoryStream outs = new MemoryStream();
-        SalmonStream encWriter = new SalmonStream(SalmonCoreTestHelper.TEST_KEY_BYTES, SalmonCoreTestHelper.TEST_NONCE_BYTES, EncryptionMode.Encrypt, outs,
+        AesStream encWriter = new AesStream(SalmonCoreTestHelper.TEST_KEY_BYTES, SalmonCoreTestHelper.TEST_NONCE_BYTES, EncryptionMode.Encrypt, outs,
                 null, false, null, null);
         try
         {
@@ -482,7 +482,7 @@ public class SalmonCoreTests
         byte[] encBytes = SalmonCoreTestHelper.Encrypt(inputBytes, SalmonCoreTestHelper.TEST_KEY_BYTES, SalmonCoreTestHelper.TEST_NONCE_BYTES, SalmonCoreTestHelper.TEST_ENC_BUFFER_SIZE, false, 0, null, null);
 
         MemoryStream ins = new MemoryStream(encBytes);
-        SalmonStream encWriter = new SalmonStream(SalmonCoreTestHelper.TEST_KEY_BYTES, SalmonCoreTestHelper.TEST_NONCE_BYTES, EncryptionMode.Decrypt, ins,
+        AesStream encWriter = new AesStream(SalmonCoreTestHelper.TEST_KEY_BYTES, SalmonCoreTestHelper.TEST_NONCE_BYTES, EncryptionMode.Decrypt, ins,
                 null, false, null, null);
         try
         {
@@ -545,7 +545,7 @@ public class SalmonCoreTests
         }
         catch (IOException ex)
         {
-            if (ex.InnerException.GetType() == typeof(SalmonSecurityException))
+            if (ex.InnerException.GetType() == typeof(SecurityException))
                 caught = true;
         }
 
@@ -584,7 +584,7 @@ public class SalmonCoreTests
         catch (Exception ex)
         {
             Console.Error.WriteLine(ex);
-            if (ex.InnerException.GetType() == typeof(SalmonRangeExceededException) || ex.InnerException.GetType() == typeof(ArgumentOutOfRangeException))
+            if (ex.InnerException.GetType() == typeof(RangeExceededException) || ex.InnerException.GetType() == typeof(ArgumentOutOfRangeException))
                 caught = true;
         }
 
@@ -603,7 +603,7 @@ public class SalmonCoreTests
         catch (Exception ex)
         {
             Console.Error.WriteLine(ex);
-            if (ex.GetType() == typeof(SalmonRangeExceededException))
+            if (ex.GetType() == typeof(RangeExceededException))
                 caught = true;
         }
 
@@ -643,10 +643,10 @@ public class SalmonCoreTests
         byte[]
     data = SalmonCoreTestHelper.GetRandArray(1 * 1024 * 1024 + 4);
         long t1 = Time.Time.CurrentTimeMillis();
-        byte[] encData = new SalmonEncryptor(2).Encrypt(data, SalmonCoreTestHelper.TEST_KEY_BYTES, SalmonCoreTestHelper.TEST_NONCE_BYTES,
+        byte[] encData = new Encryptor(2).Encrypt(data, SalmonCoreTestHelper.TEST_KEY_BYTES, SalmonCoreTestHelper.TEST_NONCE_BYTES,
                 false);
         long t2 = Time.Time.CurrentTimeMillis();
-        byte[] decData = new SalmonDecryptor(2).Decrypt(encData, SalmonCoreTestHelper.TEST_KEY_BYTES, SalmonCoreTestHelper.TEST_NONCE_BYTES,
+        byte[] decData = new Decryptor(2).Decrypt(encData, SalmonCoreTestHelper.TEST_KEY_BYTES, SalmonCoreTestHelper.TEST_NONCE_BYTES,
                 false);
         long t3 = Time.Time.CurrentTimeMillis();
 
@@ -660,10 +660,10 @@ public class SalmonCoreTests
     {
         byte[] data = SalmonCoreTestHelper.GetRandArray(1 * 1024 * 1024 + 3);
         long t1 = Time.Time.CurrentTimeMillis();
-        byte[] encData = new SalmonEncryptor(2).Encrypt(data, SalmonCoreTestHelper.TEST_KEY_BYTES, SalmonCoreTestHelper.TEST_NONCE_BYTES,
+        byte[] encData = new Encryptor(2).Encrypt(data, SalmonCoreTestHelper.TEST_KEY_BYTES, SalmonCoreTestHelper.TEST_NONCE_BYTES,
                 false, true, SalmonCoreTestHelper.TEST_HMAC_KEY_BYTES, null);
         long t2 = Time.Time.CurrentTimeMillis();
-        byte[] decData = new SalmonDecryptor(2).Decrypt(encData, SalmonCoreTestHelper.TEST_KEY_BYTES, SalmonCoreTestHelper.TEST_NONCE_BYTES,
+        byte[] decData = new Decryptor(2).Decrypt(encData, SalmonCoreTestHelper.TEST_KEY_BYTES, SalmonCoreTestHelper.TEST_NONCE_BYTES,
                 false, true, SalmonCoreTestHelper.TEST_HMAC_KEY_BYTES, null);
         long t3 = Time.Time.CurrentTimeMillis();
 
@@ -677,10 +677,10 @@ public class SalmonCoreTests
     {
         byte[] data = SalmonCoreTestHelper.GetRandArray(1 * 1024 * 1024);
         long t1 = Time.Time.CurrentTimeMillis();
-        byte[] encData = new SalmonEncryptor(2).Encrypt(data, SalmonCoreTestHelper.TEST_KEY_BYTES, SalmonCoreTestHelper.TEST_NONCE_BYTES,
+        byte[] encData = new Encryptor(2).Encrypt(data, SalmonCoreTestHelper.TEST_KEY_BYTES, SalmonCoreTestHelper.TEST_NONCE_BYTES,
                 false, true, SalmonCoreTestHelper.TEST_HMAC_KEY_BYTES, 32);
         long t2 = Time.Time.CurrentTimeMillis();
-        byte[] decData = new SalmonDecryptor(2).Decrypt(encData, SalmonCoreTestHelper.TEST_KEY_BYTES, SalmonCoreTestHelper.TEST_NONCE_BYTES,
+        byte[] decData = new Decryptor(2).Decrypt(encData, SalmonCoreTestHelper.TEST_KEY_BYTES, SalmonCoreTestHelper.TEST_NONCE_BYTES,
                 false, true, SalmonCoreTestHelper.TEST_HMAC_KEY_BYTES, 32);
         long t3 = Time.Time.CurrentTimeMillis();
 
@@ -694,10 +694,10 @@ public class SalmonCoreTests
     {
         byte[] data = SalmonCoreTestHelper.GetRandArraySame(129 * 1024);
         long t1 = Time.Time.CurrentTimeMillis();
-        byte[] encData = new SalmonEncryptor().Encrypt(data, SalmonCoreTestHelper.TEST_KEY_BYTES, SalmonCoreTestHelper.TEST_NONCE_BYTES,
+        byte[] encData = new Encryptor().Encrypt(data, SalmonCoreTestHelper.TEST_KEY_BYTES, SalmonCoreTestHelper.TEST_NONCE_BYTES,
                 true, true, SalmonCoreTestHelper.TEST_HMAC_KEY_BYTES, 32);
         long t2 = Time.Time.CurrentTimeMillis();
-        byte[] decData = new SalmonDecryptor().Decrypt(encData, SalmonCoreTestHelper.TEST_KEY_BYTES,
+        byte[] decData = new Decryptor().Decrypt(encData, SalmonCoreTestHelper.TEST_KEY_BYTES,
                 null, true, true, SalmonCoreTestHelper.TEST_HMAC_KEY_BYTES, null);
         long t3 = Time.Time.CurrentTimeMillis();
 

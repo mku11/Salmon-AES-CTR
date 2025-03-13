@@ -31,7 +31,7 @@ namespace Mku.Salmon.Password;
 /// <summary>
 ///  Provides pbkdf via C# default algorithm.
 /// </summary>
-public class SalmonDefaultPbkdfProvider : ISalmonPbkdfProvider
+public class DefaultPbkdfProvider : IPbkdfProvider
 {
     /// <summary>
     ///  Get a key derived from a text password
@@ -42,7 +42,7 @@ public class SalmonDefaultPbkdfProvider : ISalmonPbkdfProvider
     ///  <param name="outputBytes">The length of the output key.</param>
     ///  <param name="pbkdfAlgo">The hash algorithm to use.</param>
     ///  <returns>The key.</returns>
-    ///  <exception cref="SalmonSecurityException">Thrown when error with security</exception>
+    ///  <exception cref="SecurityException">Thrown when error with security</exception>
     public byte[] GetKey(string password, byte[] salt, int iterations, int outputBytes, PbkdfAlgo pbkdfAlgo)
     {
 #if !NETSTANDARD

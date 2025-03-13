@@ -32,7 +32,7 @@ namespace Mku.Salmon.Transform;
 /// <summary>
 ///  Abstract class for AES256 transformer implementations.
 /// </summary>
-public abstract class SalmonAES256CTRTransformer : ISalmonCTRTransformer
+public abstract class AESCTRTransformer : ICTRTransformer
 {
 
     /// <summary>
@@ -54,14 +54,14 @@ public abstract class SalmonAES256CTRTransformer : ISalmonCTRTransformer
     ///  <param name="chunkSize">The chunk size for integrity chunks.</param>
     ///  <param name="hashKey">The hash key to be used for integrity checks.</param>
     ///  <returns>The size of the output data.</returns>
-    ///  <exception cref="SalmonSecurityException">Thrown when error with security</exception>
+    ///  <exception cref="SecurityException">Thrown when error with security</exception>
     ///  <exception cref="IntegrityException">Thrown when data are corrupt or tampered with</exception>
     ///  <exception cref="IOException">Thrown if error during IO</exception>
     public static long GetActualSize(byte[] data, byte[] key, byte[] nonce, EncryptionMode mode,
                                      byte[] headerData, bool integrity, int? chunkSize, byte[] hashKey)
     {
         MemoryStream inputStream = new MemoryStream(data);
-        SalmonStream s = new SalmonStream(key, nonce, mode, inputStream,
+        AesStream s = new AesStream(key, nonce, mode, inputStream,
                 headerData, integrity, chunkSize, hashKey);
         long size = s.ActualLength;
         s.Close();
@@ -104,7 +104,7 @@ public abstract class SalmonAES256CTRTransformer : ISalmonCTRTransformer
     public void ResetCounter()
     {
 		if (this.Nonce == null)
-            throw new SalmonSecurityException("No counter, run init first");
+            throw new SecurityException("No counter, run init first");
         Counter = new byte[BLOCK_SIZE];
         Array.Copy(Nonce, 0, Counter, 0, Nonce.Length);
         Block = 0;
@@ -130,15 +130,15 @@ public abstract class SalmonAES256CTRTransformer : ISalmonCTRTransformer
     protected void IncreaseCounter(long value)
     {
 		if (this.Counter == null || this.Nonce == null)
-            throw new SalmonSecurityException("No counter, run init first");
+            throw new SecurityException("No counter, run init first");
         if (value < 0)
             throw new ArgumentOutOfRangeException("Value should be positive");
         int index = BLOCK_SIZE - 1;
         int carriage = 0;
         while (index >= 0 && value + carriage > 0)
         {
-            if (index <= BLOCK_SIZE - SalmonGenerator.NONCE_LENGTH)
-                throw new SalmonRangeExceededException("Current CTR max blocks exceeded");
+            if (index <= BLOCK_SIZE - Generator.NONCE_LENGTH)
+                throw new RangeExceededException("Current CTR max blocks exceeded");
             long val = (value + carriage) % 256;
             carriage = (int)(((Counter[index] & 0xFF) + val) / 256);
             Counter[index--] += (byte)val;
@@ -152,7 +152,7 @@ public abstract class SalmonAES256CTRTransformer : ISalmonCTRTransformer
 	/// </summary>
 	///  <param name="key">The key</param>
     ///  <param name="nonce">The nonce</param>
-    ///  <exception cref="SalmonSecurityException">Thrown when error with security</exception>
+    ///  <exception cref="SecurityException">Thrown when error with security</exception>
     public virtual void Init(byte[] key, byte[] nonce)
     {
         this.Key = key;

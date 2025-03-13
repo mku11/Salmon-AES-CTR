@@ -45,7 +45,7 @@ public abstract class VirtualDrive
     /// <summary>
     /// Get the private directory for this drive
     /// </summary>
-    public abstract IRealFile PrivateDir { get; }
+    public abstract IFile PrivateDir { get; }
 
     /// <summary>
     /// Get the root directory

@@ -38,12 +38,12 @@ namespace Mku.SalmonFS.Sequence;
 /// <summary>
 /// Generates nonces based on a sequencer backed by a file.
 /// </summary>
-public class SalmonFileSequencer : INonceSequencer
+public class FileSequencer : INonceSequencer
 {
     /// <summary>
     /// File that stores nonce sequences.
     /// </summary>
-    public IRealFile SequenceFile { get; private set; }
+    public IFile SequenceFile { get; private set; }
     private readonly INonceSequenceSerializer serializer;
 
     /// <summary>
@@ -53,7 +53,7 @@ public class SalmonFileSequencer : INonceSequencer
     ///  <param name="serializer">The serializer to be used.</param>
     ///  <exception cref="IOException">Thrown if error during IO</exception>
     ///  <exception cref="SequenceException">Thrown when there is a failure in the nonce sequencer.</exception>
-    public SalmonFileSequencer(IRealFile sequenceFile, INonceSequenceSerializer serializer)
+    public FileSequencer(IFile sequenceFile, INonceSequenceSerializer serializer)
     {
         this.SequenceFile = sequenceFile;
         this.serializer = serializer;
@@ -120,8 +120,8 @@ public class SalmonFileSequencer : INonceSequencer
         NonceSequence sequence = GetSequence(configs, driveId);
         if (sequence == null || sequence.SequenceStatus == NonceSequence.Status.Revoked)
             throw new SequenceException("Sequence does not exist");
-        if (BitConverter.ToLong(sequence.MaxNonce, 0, SalmonGenerator.NONCE_LENGTH)
-                < BitConverter.ToLong(maxNonce, 0, SalmonGenerator.NONCE_LENGTH))
+        if (BitConverter.ToLong(sequence.MaxNonce, 0, Generator.NONCE_LENGTH)
+                < BitConverter.ToLong(maxNonce, 0, Generator.NONCE_LENGTH))
             throw new SequenceException("Max nonce cannot be increased");
         sequence.MaxNonce = maxNonce;
         SaveSequenceFile(configs);
@@ -133,7 +133,7 @@ public class SalmonFileSequencer : INonceSequencer
 	///  <param name="driveId">The drive ID.</param>
     ///  <returns>The next nonce</returns>
     ///  <exception cref="SequenceException">Thrown when there is a failure in the nonce sequencer.</exception>
-    ///  <exception cref="SalmonRangeExceededException">Thrown when maximum nonce range is exceeded.</exception>
+    ///  <exception cref="RangeExceededException">Thrown when maximum nonce range is exceeded.</exception>
     public virtual byte[] NextNonce(string driveId)
     {
         string xmlContents = GetContents();
@@ -144,7 +144,7 @@ public class SalmonFileSequencer : INonceSequencer
 
         //We get the next nonce
         byte[] nextNonce = sequence.NextNonce;
-        sequence.NextNonce = SalmonNonce.IncreaseNonce(sequence.NextNonce, sequence.MaxNonce);
+        sequence.NextNonce = Nonce.IncreaseNonce(sequence.NextNonce, sequence.MaxNonce);
         SaveSequenceFile(configs);
         return nextNonce;
     }

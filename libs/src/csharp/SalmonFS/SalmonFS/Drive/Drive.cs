@@ -30,15 +30,15 @@ using System;
 namespace Mku.SalmonFS.Drive;
 
 /// <summary>
-///  SalmonDrive implementation for standard C# file API. This provides a virtual drive implementation
+///  AesDrive implementation for standard C# file API. This provides a virtual drive implementation
 ///  that you can use to store and access encrypted files.
 /// </summary>
-public class DotNetDrive : SalmonDrive
+public class Drive : AesDrive
 {
     /// <summary>
     /// Private constructor, use open() or create() instead.
     /// </summary>
-    private DotNetDrive()
+    private Drive()
     {
 
     }
@@ -50,9 +50,9 @@ public class DotNetDrive : SalmonDrive
     /// <param name="password">The password</param>
     /// <param name="sequencer">The nonce sequencer that will be used for encryption.</param>
     /// <returns>The drive</returns>
-    public static SalmonDrive Open(IRealFile dir, string password, INonceSequencer sequencer)
+    public static AesDrive Open(IFile dir, string password, INonceSequencer sequencer)
     {
-        return SalmonDrive.OpenDrive(dir, typeof(DotNetDrive), password, sequencer);
+        return AesDrive.OpenDrive(dir, typeof(Drive), password, sequencer);
     }
 
     /// <summary>
@@ -62,9 +62,9 @@ public class DotNetDrive : SalmonDrive
     /// <param name="password">The password</param>
     /// <param name="sequencer">The nonce sequencer that will be used for encryption.</param>
     /// <returns>The drive</returns>
-    public static SalmonDrive Create(IRealFile dir, string password, INonceSequencer sequencer)
+    public static AesDrive Create(IFile dir, string password, INonceSequencer sequencer)
     {
-        return SalmonDrive.CreateDrive(dir, typeof(DotNetDrive), password, sequencer);
+        return AesDrive.CreateDrive(dir, typeof(Drive), password, sequencer);
     }
 
     /// <summary>
@@ -73,7 +73,7 @@ public class DotNetDrive : SalmonDrive
     ///  <returns>The private directory</returns>
     ///  <exception cref="Exception">Thrown if error during operation</exception>
     override
-    public IRealFile PrivateDir
+    public IFile PrivateDir
     {
         get { throw new NotSupportedException(); }
     }
@@ -102,5 +102,5 @@ public class DotNetDrive : SalmonDrive
     ///  <returns>The root directory</returns>
     ///  <exception cref="SalmonAuthException">Thrown when there is a failure during authorization</exception>
     override
-    public SalmonFile Root => (SalmonFile) base.Root;
+    public AesFile Root => (AesFile) base.Root;
 }

@@ -33,14 +33,14 @@ using System.Threading.Tasks;
 namespace Mku.SalmonFS.Streams;
 
 /// <summary>
-///  Implementation of a C# InputStream for seeking and reading a SalmonFile.
+///  Implementation of a C# InputStream for seeking and reading a AesFile.
 ///  This class provides a seekable source with parallel substreams and cached buffers
 ///  for performance.
 /// </summary>
-public class SalmonFileInputStream : Stream
+public class AesFileInputStream : Stream
 {
     // Default cache buffer should be high enough for some mpeg videos to work
-    // the cache buffers should be aligned to the SalmonFile chunk size for efficiency
+    // the cache buffers should be aligned to the AesFile chunk size for efficiency
     private static readonly int DEFAULT_BUFFER_SIZE = 512 * 1024;
 
     // default threads is one but you can increase it
@@ -52,8 +52,8 @@ public class SalmonFileInputStream : Stream
 
     private readonly int buffersCount;
     private CacheBuffer[] buffers = null;
-    private SalmonStream[] streams;
-    private readonly SalmonFile salmonFile;
+    private AesStream[] streams;
+    private readonly AesFile salmonFile;
     private readonly int cacheBufferSize;
     private readonly int threads;
     private long position;
@@ -81,7 +81,7 @@ public class SalmonFileInputStream : Stream
     ///  <param name="bufferSize">  The length of each buffer.</param>
     ///  <param name="threads">     The number of threads/streams to source the file in parallel.</param>
     ///  <param name="backOffset">  The back offset to use</param>
-    public SalmonFileInputStream(SalmonFile salmonFile,
+    public AesFileInputStream(AesFile salmonFile,
                                  int buffersCount, int bufferSize, int threads, int backOffset)
     {
 
@@ -114,7 +114,7 @@ public class SalmonFileInputStream : Stream
     /// </summary>
     private void CreateStreams()
     {
-        streams = new SalmonStream[threads];
+        streams = new AesStream[threads];
         try
         {
             for (int i = 0; i < threads; i++)
@@ -218,7 +218,7 @@ public class SalmonFileInputStream : Stream
     ///  <param name="bufferSize">  The length of the data requested</param>
     ///  <param name="salmonStream">The stream that will be used to read from</param>
     private int FillBufferPart(CacheBuffer cacheBuffer, long start, int offset, int bufferSize,
-                               SalmonStream salmonStream)
+                               AesStream salmonStream)
     {
         salmonStream.Seek(start, SeekOrigin.Begin);
         int totalBytesRead = salmonStream.Read(cacheBuffer.buffer, offset, bufferSize);

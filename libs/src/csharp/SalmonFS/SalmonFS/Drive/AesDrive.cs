@@ -42,9 +42,9 @@ namespace Mku.SalmonFS.Drive;
 /// <summary>
 ///  Class provides an abstract virtual drive that can be extended for use with
 ///  any filesystem ie disk, net, cloud, etc.
-///  Drive implementations needs to be realized together with <see cref="IRealFile"/> }.
+///  Drive implementations needs to be realized together with <see cref="IFile"/> }.
 /// </summary>
-public abstract class SalmonDrive : VirtualDrive
+public abstract class AesDrive : VirtualDrive
 {
     private static readonly int DEFAULT_FILE_CHUNK_SIZE = 256 * 1024;
 
@@ -77,7 +77,7 @@ public abstract class SalmonDrive : VirtualDrive
     /// <summary>
     /// The current key
     /// </summary>
-    public SalmonDriveKey Key { get; private set; } = null;
+    public DriveKey Key { get; private set; } = null;
 
     /// <summary>
     /// The current drive ID
@@ -87,8 +87,8 @@ public abstract class SalmonDrive : VirtualDrive
     /// <summary>
     /// The real root location of the vault
     /// </summary>
-    public IRealFile RealRoot { get; private set; } = null;
-    private SalmonFile virtualRoot = null;
+    public IFile RealRoot { get; private set; } = null;
+    private AesFile virtualRoot = null;
     private readonly IHashProvider hashProvider = new HmacSHA256Provider();
     
     /// <summary>
@@ -101,7 +101,7 @@ public abstract class SalmonDrive : VirtualDrive
 	/// </summary>
 	///  <param name="realRoot">The root of the real directory</param>
     ///  <param name="createIfNotExists">Create the drive if it does not exist</param>
-    protected virtual void Initialize(IRealFile realRoot, bool createIfNotExists = false)
+    protected virtual void Initialize(IFile realRoot, bool createIfNotExists = false)
     {
         Close();
         if (realRoot == null)
@@ -110,7 +110,7 @@ public abstract class SalmonDrive : VirtualDrive
         if (!createIfNotExists && !HasConfig() && RealRoot.Parent != null && RealRoot.Parent.Exists)
         {
             // try the parent if this is the filesystem folder 
-            IRealFile originalRealRoot = RealRoot;
+            IFile originalRealRoot = RealRoot;
             RealRoot = RealRoot.Parent;
             if (!HasConfig())
             {
@@ -119,14 +119,14 @@ public abstract class SalmonDrive : VirtualDrive
             }
         }
 
-        IRealFile virtualRootRealFile = RealRoot.GetChild(VirtualDriveDirectoryName);
+        IFile virtualRootRealFile = RealRoot.GetChild(VirtualDriveDirectoryName);
         if (createIfNotExists && (virtualRootRealFile == null || !virtualRootRealFile.Exists))
         {
             virtualRootRealFile = RealRoot.CreateDirectory(VirtualDriveDirectoryName);
         }
-        virtualRoot = new SalmonFile(virtualRootRealFile, this);
+        virtualRoot = new AesFile(virtualRootRealFile, this);
         RegisterOnProcessClose();
-        Key = new SalmonDriveKey();
+        Key = new DriveKey();
     }
 
     /// <summary>
@@ -142,8 +142,8 @@ public abstract class SalmonDrive : VirtualDrive
 	/// </summary>
 	///  <param name="pass">The new password.</param>
     ///  <exception cref="IOException">Thrown if error during IO</exception>
-    ///  <exception cref="SalmonAuthException">Thrown when there is a failure during authorization</exception>
-    ///  <exception cref="SalmonSecurityException">Thrown when error with security</exception>
+    ///  <exception cref="AuthException">Thrown when there is a failure during authorization</exception>
+    ///  <exception cref="SecurityException">Thrown when error with security</exception>
     ///  <exception cref="IntegrityException">Thrown when data are corrupt or tampered with.</exception>
     ///  <exception cref="SequenceException">Thrown when there is a failure in the nonce sequencer.</exception>
     [MethodImpl(MethodImplOptions.Synchronized)]
@@ -157,7 +157,7 @@ public abstract class SalmonDrive : VirtualDrive
     /// </summary>
     protected void InitFS()
     {
-        IRealFile virtualRootRealFile = RealRoot.GetChild(VirtualDriveDirectoryName);
+        IFile virtualRootRealFile = RealRoot.GetChild(VirtualDriveDirectoryName);
         if (virtualRootRealFile == null || !virtualRootRealFile.Exists)
         {
             try
@@ -169,7 +169,7 @@ public abstract class SalmonDrive : VirtualDrive
                 Console.Error.WriteLine(ex);
             }
         }
-        virtualRoot = new SalmonFile(virtualRootRealFile, this);
+        virtualRoot = new AesFile(virtualRootRealFile, this);
     }
 
     /// <summary>
@@ -177,13 +177,13 @@ public abstract class SalmonDrive : VirtualDrive
     ///  This requires you previously use SetDriveClass() to provide a class for the drive
     /// </summary>
     ///  <param name="dir">The directory that will be used for storing the contents of the drive</param>
-    ///  <param name="driveClassType">The class type of the drive (ie: typeof(DotNetDrive))</param>
+    ///  <param name="driveClassType">The class type of the drive (ie: typeof(Drive))</param>
     ///  <param name="password">password</param>
     ///  <param name="sequencer">The sequencer</param>
-    public static SalmonDrive OpenDrive(IRealFile dir, Type driveClassType,
+    public static AesDrive OpenDrive(IFile dir, Type driveClassType,
                                         string password, INonceSequencer sequencer = null)
     {
-        SalmonDrive drive = CreateDriveInstance(dir, false,
+        AesDrive drive = CreateDriveInstance(dir, false,
             driveClassType, sequencer);
         if (drive == null || !drive.HasConfig())
         {
@@ -197,19 +197,19 @@ public abstract class SalmonDrive : VirtualDrive
     ///  Create a new drive in the provided location.
 	/// </summary>
 	///  <param name="dir"> Directory to store the drive configuration and virtual filesystem.</param>
-    ///  <param name="driveClassType">The drive class type of this drive (ie typeof(DotNetDrive)) </param>
+    ///  <param name="driveClassType">The drive class type of this drive (ie typeof(Drive)) </param>
     ///  <param name="password">Master password to encrypt the drive configuration.</param>
     ///  <param name="sequencer">The sequencer</param>
     ///  <returns>The newly created drive.</returns>
     ///  <exception cref="IntegrityException">Thrown when data are corrupt or tampered with.</exception>
     ///  <exception cref="SequenceException">Thrown when there is a failure in the nonce sequencer.</exception>
-    public static SalmonDrive CreateDrive(IRealFile dir, Type driveClassType,
+    public static AesDrive CreateDrive(IFile dir, Type driveClassType,
         string password, INonceSequencer sequencer)
     {
-        SalmonDrive drive = CreateDriveInstance(dir, true,
+        AesDrive drive = CreateDriveInstance(dir, true,
             driveClassType, sequencer);
         if (drive.HasConfig())
-            throw new SalmonSecurityException("Drive already exists");
+            throw new SecurityException("Drive already exists");
         drive.SetPassword(password);
         return drive;
     }
@@ -222,22 +222,22 @@ public abstract class SalmonDrive : VirtualDrive
     ///  <param name="driveClassType">Create the drive if it does not exist</param>
     ///  <param name="sequencer">Create the drive if it does not exist</param>
     ///  <returns>The drive</returns>
-    ///  <exception cref="SalmonSecurityException">Thrown when error with security</exception>
-    private static SalmonDrive CreateDriveInstance(IRealFile dir, bool createIfNotExists,
+    ///  <exception cref="SecurityException">Thrown when error with security</exception>
+    private static AesDrive CreateDriveInstance(IFile dir, bool createIfNotExists,
         Type driveClassType, INonceSequencer sequencer)
     {
 
-        SalmonDrive drive;
+        AesDrive drive;
         try
         {
-            drive = Activator.CreateInstance(driveClassType, true) as SalmonDrive;
+            drive = Activator.CreateInstance(driveClassType, true) as AesDrive;
             drive.Initialize(dir, createIfNotExists);
             drive.Sequencer = sequencer;
         }
         catch (Exception e)
         {
             Console.Error.WriteLine(e);
-            throw new SalmonSecurityException("Could not create drive instance", e);
+            throw new SecurityException("Could not create drive instance", e);
         }
         return drive;
     }
@@ -254,7 +254,7 @@ public abstract class SalmonDrive : VirtualDrive
         NonceSequence sequence = Sequencer.GetSequence(drvStr);
         if (sequence == null)
         {
-            byte[] authId = SalmonDriveGenerator.GenerateAuthId();
+            byte[] authId = DriveGenerator.GenerateAuthId();
             CreateSequence(DriveId, authId);
         }
         sequence = Sequencer.GetSequence(drvStr);
@@ -268,7 +268,7 @@ public abstract class SalmonDrive : VirtualDrive
 	///  <returns>The default authorization configuration file name</returns>
     public string GetDefaultAuthConfigFilename()
     {
-        return SalmonDrive.AuthConfigFilename;
+        return AesDrive.AuthConfigFilename;
     }
 
 
@@ -278,8 +278,8 @@ public abstract class SalmonDrive : VirtualDrive
 	///  <param name="salmonDrive">The drive</param>
     ///  <returns>The next nonce</returns>
     ///  <exception cref="SequenceException">Thrown when there is a failure in the nonce sequencer.</exception>
-    ///  <exception cref="SalmonRangeExceededException">Thrown when maximum nonce range is exceeded.</exception>
-    public byte[] GetNextNonce(SalmonDrive salmonDrive)
+    ///  <exception cref="RangeExceededException">Thrown when maximum nonce range is exceeded.</exception>
+    public byte[] GetNextNonce(AesDrive salmonDrive)
     {
         return Sequencer.NextNonce(BitConverter.ToHex(salmonDrive.DriveId));
     }
@@ -307,8 +307,8 @@ public abstract class SalmonDrive : VirtualDrive
     ///  <exception cref="Exception">Thrown if error during operation</exception>
     internal void InitSequence(byte[] driveId, byte[] authId)
     {
-        byte[] startingNonce = SalmonDriveGenerator.GetStartingNonce();
-        byte[] maxNonce = SalmonDriveGenerator.GetMaxNonce();
+        byte[] startingNonce = DriveGenerator.GetStartingNonce();
+        byte[] maxNonce = DriveGenerator.GetMaxNonce();
         string drvStr = BitConverter.ToHex(driveId);
         string authStr = BitConverter.ToHex(authId);
         Sequencer.InitSequence(drvStr, authStr, startingNonce, maxNonce);
@@ -334,7 +334,7 @@ public abstract class SalmonDrive : VirtualDrive
 	/// </summary>
 	///  <returns>The authorization id</returns>
     ///  <exception cref="SequenceException">Thrown when there is a failure in the nonce sequencer.</exception>
-    ///  <exception cref="SalmonAuthException">Thrown when there is a failure during authorization</exception>
+    ///  <exception cref="AuthException">Thrown when there is a failure during authorization</exception>
     public string GetAuthId()
     {
         return BitConverter.ToHex(GetAuthIdBytes());
@@ -348,22 +348,22 @@ public abstract class SalmonDrive : VirtualDrive
     ///                  encrypt the combined key (encryption key + hash key)
     private void CreateConfig(string password)
     {
-        byte[] driveKey = Key.DriveKey;
+        byte[] driveKey = Key.DriveEncKey;
         byte[] hashKey = Key.HashKey;
 
-        IRealFile configFile = RealRoot.GetChild(ConfigFilename);
+        IFile configFile = RealRoot.GetChild(ConfigFilename);
 
         if (driveKey == null && configFile != null && configFile.Exists)
-            throw new SalmonAuthException("Not authorized");
+            throw new AuthException("Not authorized");
 
         // delete the old config file and create a new one
         if (configFile != null && configFile.Exists)
             configFile.Delete();
         configFile = RealRoot.CreateFile(ConfigFilename);
 
-        byte[] magicBytes = SalmonGenerator.GetMagicBytes();
+        byte[] magicBytes = Generator.GetMagicBytes();
 
-        byte version = SalmonGenerator.VERSION;
+        byte version = Generator.VERSION;
 
         // if this is a new config file derive a 512-bit key that will be split to:
         // a) drive encryption key (for encrypting filenames and files)
@@ -372,28 +372,28 @@ public abstract class SalmonDrive : VirtualDrive
         if (driveKey == null)
         {
             newDrive = true;
-            driveKey = new byte[SalmonGenerator.KEY_LENGTH];
-            hashKey = new byte[SalmonGenerator.HASH_KEY_LENGTH];
-            byte[] combKey = SalmonDriveGenerator.GenerateCombinedKey();
-            Array.Copy(combKey, 0, driveKey, 0, SalmonGenerator.KEY_LENGTH);
-            Array.Copy(combKey, SalmonGenerator.KEY_LENGTH, hashKey, 0, SalmonGenerator.HASH_KEY_LENGTH);
-            DriveId = SalmonDriveGenerator.GenerateDriveId();
+            driveKey = new byte[Generator.KEY_LENGTH];
+            hashKey = new byte[Generator.HASH_KEY_LENGTH];
+            byte[] combKey = DriveGenerator.GenerateCombinedKey();
+            Array.Copy(combKey, 0, driveKey, 0, Generator.KEY_LENGTH);
+            Array.Copy(combKey, Generator.KEY_LENGTH, hashKey, 0, Generator.HASH_KEY_LENGTH);
+            DriveId = DriveGenerator.GenerateDriveId();
         }
 
         // Get the salt that we will use to encrypt the combined key (drive key + hash key)
-        byte[] salt = SalmonDriveGenerator.GenerateSalt();
+        byte[] salt = DriveGenerator.GenerateSalt();
 
-        int iterations = SalmonDriveGenerator.GetIterations();
+        int iterations = DriveGenerator.GetIterations();
 
         // generate a 128 bit IV that will be used with the master key to encrypt the combined 64-bit key (drive key + hash key)
-        byte[] masterKeyIv = SalmonDriveGenerator.GenerateMasterKeyIV();
+        byte[] masterKeyIv = DriveGenerator.GenerateMasterKeyIV();
 
         // create a key that will encrypt both the (drive key and the hash key)
-        byte[] masterKey = SalmonPassword.GetMasterKey(password, salt, iterations, SalmonDriveGenerator.MASTER_KEY_LENGTH);
+        byte[] masterKey = Password.GetMasterKey(password, salt, iterations, DriveGenerator.MASTER_KEY_LENGTH);
 
         // encrypt the combined key (drive key + hash key) using the masterKey and the masterKeyIv
         MemoryStream ms = new MemoryStream();
-        SalmonStream stream = new SalmonStream(masterKey, masterKeyIv, EncryptionMode.Encrypt, ms,
+        AesStream stream = new AesStream(masterKey, masterKeyIv, EncryptionMode.Encrypt, ms,
                 null, false, null, null);
         stream.Write(driveKey, 0, driveKey.Length);
         stream.Write(hashKey, 0, hashKey.Length);
@@ -403,16 +403,16 @@ public abstract class SalmonDrive : VirtualDrive
         byte[] encData = ms.ToArray();
 
         // generate the hash signature
-        byte[] hashSignature = SalmonIntegrity.CalculateHash(hashProvider, encData, 0, encData.Length, hashKey, null);
+        byte[] hashSignature = Integrity.CalculateHash(hashProvider, encData, 0, encData.Length, hashKey, null);
 
-        SalmonDriveConfig.WriteDriveConfig(configFile, magicBytes, version, salt, iterations, masterKeyIv,
+        DriveConfig.WriteDriveConfig(configFile, magicBytes, version, salt, iterations, masterKeyIv,
                 encData, hashSignature);
         SetKey(masterKey, driveKey, hashKey, iterations);
 
         if (newDrive)
         {
             // create a full sequence for nonces
-            byte[] authId = SalmonDriveGenerator.GenerateAuthId();
+            byte[] authId = DriveGenerator.GenerateAuthId();
             CreateSequence(DriveId, authId);
             InitSequence(DriveId, authId);
         }
@@ -423,9 +423,9 @@ public abstract class SalmonDrive : VirtualDrive
     ///  Return the virtual root directory of the drive.
 	/// </summary>
 	///  <returns>The root directory</returns>
-    ///  <exception cref="SalmonAuthException">Thrown when there is a failure during authorization</exception>
+    ///  <exception cref="AuthException">Thrown when there is a failure during authorization</exception>
     override
-    public SalmonFile Root
+    public AesFile Root
     {
         get
         {
@@ -436,24 +436,24 @@ public abstract class SalmonDrive : VirtualDrive
     }
 
     /// <summary>
-    ///  Verify if the user password is correct otherwise it will throw a SalmonAuthException
+    ///  Verify if the user password is correct otherwise it will throw a AuthException
 	/// </summary>
 	///  <param name="password">The password.</param>
     private void Unlock(string password)
     {
-        SalmonStream stream = null;
+        AesStream stream = null;
         try
         {
             if (password == null)
             {
-                throw new SalmonSecurityException("Password is missing");
+                throw new SecurityException("Password is missing");
             }
-            SalmonDriveConfig salmonConfig = GetDriveConfig();
+            DriveConfig salmonConfig = GetDriveConfig();
             int iterations = salmonConfig.GetIterations();
             byte[] salt = salmonConfig.Salt;
 
             // derive the master key from the text password
-            byte[] masterKey = SalmonPassword.GetMasterKey(password, salt, iterations, SalmonDriveGenerator.MASTER_KEY_LENGTH);
+            byte[] masterKey = Password.GetMasterKey(password, salt, iterations, DriveGenerator.MASTER_KEY_LENGTH);
 
             // get the master Key Iv
             byte[] masterKeyIv = salmonConfig.Iv;
@@ -463,16 +463,16 @@ public abstract class SalmonDrive : VirtualDrive
 
             // decrypt the combined key (drive key + hash key) using the master key
             MemoryStream ms = new MemoryStream(encData);
-            stream = new SalmonStream(masterKey, masterKeyIv, EncryptionMode.Decrypt, ms,
+            stream = new AesStream(masterKey, masterKeyIv, EncryptionMode.Decrypt, ms,
                     null, false, null, null);
 
-            byte[] driveKey = new byte[SalmonGenerator.KEY_LENGTH];
+            byte[] driveKey = new byte[Generator.KEY_LENGTH];
             stream.Read(driveKey, 0, driveKey.Length);
 
-            byte[] hashKey = new byte[SalmonGenerator.HASH_KEY_LENGTH];
+            byte[] hashKey = new byte[Generator.HASH_KEY_LENGTH];
             stream.Read(hashKey, 0, hashKey.Length);
 
-            byte[] driveId = new byte[SalmonDriveGenerator.DRIVE_ID_LENGTH];
+            byte[] driveId = new byte[DriveGenerator.DRIVE_ID_LENGTH];
             stream.Read(driveId, 0, driveId.Length);
 
             // to make sure we have the right key we get the hash portion
@@ -507,7 +507,7 @@ public abstract class SalmonDrive : VirtualDrive
     private void SetKey(byte[] masterKey, byte[] driveKey, byte[] hashKey, int iterations)
     {
         Key.MasterKey = masterKey;
-        Key.DriveKey = driveKey;
+        Key.DriveEncKey = driveKey;
         Key.HashKey = hashKey;
         Key.Iterations = iterations;
     }
@@ -518,13 +518,13 @@ public abstract class SalmonDrive : VirtualDrive
 	///  <param name="salmonConfig">The drive configuration file</param>
     ///  <param name="data">The data</param>
     ///  <param name="hashKey">The hash key</param>
-    private void VerifyHash(SalmonDriveConfig salmonConfig, byte[] data, byte[] hashKey)
+    private void VerifyHash(DriveConfig salmonConfig, byte[] data, byte[] hashKey)
     {
         byte[] hashSignature = salmonConfig.HashSignature;
-        byte[] hash = SalmonIntegrity.CalculateHash(hashProvider, data, 0, data.Length, hashKey, null);
+        byte[] hash = Integrity.CalculateHash(hashProvider, data, 0, data.Length, hashKey, null);
         for (int i = 0; i < hashKey.Length; i++)
             if (hashSignature[i] != hash[i])
-                throw new SalmonAuthException("Wrong password");
+                throw new AuthException("Wrong password");
     }
 
     /// <summary>
@@ -542,7 +542,7 @@ public abstract class SalmonDrive : VirtualDrive
 	/// </summary>
 	///  <param name="file">The file</param>
     ///  <param name="bufferSize">The buffer to be used when reading</param>
-    public byte[] GetBytesFromRealFile(IRealFile file, int bufferSize)
+    public byte[] GetBytesFromRealFile(IFile file, int bufferSize)
     {
         Stream stream = file.GetInputStream();
         MemoryStream ms = new MemoryStream();
@@ -558,11 +558,11 @@ public abstract class SalmonDrive : VirtualDrive
     /// <summary>
     ///  Return the drive configuration file.
     /// </summary>
-    private IRealFile GetDriveConfigFile()
+    private IFile GetDriveConfigFile()
     {
         if (RealRoot == null || !RealRoot.Exists)
             return null;
-        IRealFile file = RealRoot.GetChild(ConfigFilename);
+        IFile file = RealRoot.GetChild(ConfigFilename);
         return file;
     }
 
@@ -570,11 +570,11 @@ public abstract class SalmonDrive : VirtualDrive
     ///  Return the default external export dir that all file can be exported to.
 	/// </summary>
 	///  <returns>The file on the real filesystem.</returns>
-    public IRealFile ExportDir
+    public IFile ExportDir
     {
         get
         {
-            IRealFile exportDir = RealRoot.GetChild(ExportDirectoryName);
+            IFile exportDir = RealRoot.GetChild(ExportDirectoryName);
             if (exportDir == null || !exportDir.Exists)
                 exportDir = RealRoot.CreateDirectory(ExportDirectoryName);
             return exportDir;
@@ -584,13 +584,13 @@ public abstract class SalmonDrive : VirtualDrive
     /// <summary>
     ///  Return the configuration properties of this drive.
     /// </summary>
-    protected SalmonDriveConfig GetDriveConfig()
+    protected DriveConfig GetDriveConfig()
     {
-        IRealFile configFile = GetDriveConfigFile();
+        IFile configFile = GetDriveConfigFile();
         if (configFile == null || !configFile.Exists)
             return null;
         byte[] bytes = GetBytesFromRealFile(configFile, 0);
-        SalmonDriveConfig driveConfig = new SalmonDriveConfig(bytes);
+        DriveConfig driveConfig = new DriveConfig(bytes);
         return driveConfig;
     }
 
@@ -599,7 +599,7 @@ public abstract class SalmonDrive : VirtualDrive
     /// </summary>
     public bool HasConfig()
     {
-        SalmonDriveConfig salmonConfig;
+        DriveConfig salmonConfig;
         try
         {
             salmonConfig = GetDriveConfig();

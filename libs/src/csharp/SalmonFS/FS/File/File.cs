@@ -32,7 +32,7 @@ namespace Mku.FS.File;
 /// <summary>
 ///  Salmon RealFile implementation for C#.
 /// </summary>
-public class DotNetFile : IRealFile
+public class File : IFile
 {
     private string filePath;
 
@@ -40,7 +40,7 @@ public class DotNetFile : IRealFile
     ///  Instantiate a real file represented by the filepath provided.
 	/// </summary>
 	///  <param name="path">The filepath.</param>
-    public DotNetFile(string path)
+    public File(string path)
     {
         this.filePath = path;
     }
@@ -50,11 +50,11 @@ public class DotNetFile : IRealFile
 	/// </summary>
 	///  <param name="dirName">The name of the new directory.</param>
     ///  <returns>The newly created directory.</returns>
-    public IRealFile CreateDirectory(string dirName)
+    public IFile CreateDirectory(string dirName)
     {
         string nDirPath = filePath + System.IO.Path.DirectorySeparatorChar + dirName;
         Directory.CreateDirectory(nDirPath);
-        DotNetFile dotNetDir = new DotNetFile(nDirPath);
+        File dotNetDir = new File(nDirPath);
         return dotNetDir;
     }
 
@@ -64,11 +64,11 @@ public class DotNetFile : IRealFile
 	///  <param name="filename">The name of the new file.</param>
     ///  <returns>The newly created file.</returns>
     ///  <exception cref="IOException">Thrown if error during IO</exception>
-    public IRealFile CreateFile(string filename)
+    public IFile CreateFile(string filename)
     {
         string nFilePath = filePath + System.IO.Path.DirectorySeparatorChar + filename;
         System.IO.File.Create(nFilePath).Close();
-        DotNetFile dotNetFile = new DotNetFile(nFilePath);
+        File dotNetFile = new File(nFilePath);
         return dotNetFile;
     }
 
@@ -80,8 +80,8 @@ public class DotNetFile : IRealFile
     {
         if (IsDirectory)
         {
-            IRealFile[] files = ListFiles();
-            foreach (IRealFile file in files)
+            IFile[] files = ListFiles();
+            foreach (IFile file in files)
             {
                 if (file.IsDirectory)
                     Directory.Delete(file.AbsolutePath);
@@ -137,12 +137,12 @@ public class DotNetFile : IRealFile
     ///  Get the parent directory of this file or directory.
 	/// </summary>
 	///  <returns>The parent directory.</returns>
-    public IRealFile Parent
+    public IFile Parent
     {
         get
         {
             string dirPath = Directory.GetParent(filePath).FullName;
-            DotNetFile parent = new DotNetFile(dirPath);
+            File parent = new File(dirPath);
             return parent;
         }
     }
@@ -196,20 +196,20 @@ public class DotNetFile : IRealFile
     ///  List all files under this directory.
 	/// </summary>
 	///  <returns>The list of files.</returns>
-    public IRealFile[] ListFiles()
+    public IFile[] ListFiles()
     {
-        IList<DotNetFile> children = new List<DotNetFile>();
+        IList<File> children = new List<File>();
 
         string[] dirs = Directory.GetDirectories(filePath);
         foreach (string dir in dirs)
         {
-            children.Add(new DotNetFile(dir));
+            children.Add(new File(dir));
         }
 
         string[] files = Directory.GetFiles(filePath);
         foreach (string file in files)
         {
-            children.Add(new DotNetFile(file));
+            children.Add(new File(file));
         }
         return children.ToArray();
     }
@@ -221,12 +221,12 @@ public class DotNetFile : IRealFile
     ///  <param name="newName">The new name.</param>
     ///  <param name="progressListener">Observer to notify when progress changes.</param>
     ///  <returns>The moved file. Use this file for subsequent operations instead of the original.</returns>
-    public IRealFile Move(IRealFile newDir, string newName = null, Action<long,long> progressListener = null)
+    public IFile Move(IFile newDir, string newName = null, Action<long,long> progressListener = null)
     {
         newName = newName ?? BaseName;
 		if (newDir == null || !newDir.Exists)
             throw new IOException("Target directory does not exist");
-        IRealFile newFile = newDir.GetChild(newName);
+        IFile newFile = newDir.GetChild(newName);
         if (newFile != null && newFile.Exists)
             throw new IOException("Another file/directory already exists");
         string nFilePath = newDir.AbsolutePath + System.IO.Path.DirectorySeparatorChar + newName;
@@ -234,7 +234,7 @@ public class DotNetFile : IRealFile
             System.IO.Directory.Move(filePath, nFilePath);
         else if (IsFile)
             System.IO.File.Move(filePath, nFilePath);
-        return new DotNetFile(nFilePath);
+        return new File(nFilePath);
     }
 
     /// <summary>
@@ -245,12 +245,12 @@ public class DotNetFile : IRealFile
     ///  <param name="progressListener">Observer to notify when progress changes.</param>
     ///  <returns>The copied file. Use this file for subsequent operations instead of the original.</returns>
     ///  <exception cref="IOException">Thrown if error during IO</exception>
-    public IRealFile Copy(IRealFile newDir, string newName = null, Action<long,long> progressListener = null)
+    public IFile Copy(IFile newDir, string newName = null, Action<long,long> progressListener = null)
     {
         newName = newName ?? BaseName;
         if (newDir == null || !newDir.Exists)
             throw new IOException("Target directory does not exists");
-        IRealFile newFile = newDir.GetChild(newName);
+        IFile newFile = newDir.GetChild(newName);
         if (newFile != null && newFile.Exists)
             throw new IOException("Another file/directory already exists");
         if (IsDirectory)
@@ -260,7 +260,7 @@ public class DotNetFile : IRealFile
         else
         {
             newFile = newDir.CreateFile(newName);
-            bool res = IRealFile.CopyFileContents(this, newFile, false, progressListener);
+            bool res = IFile.CopyFileContents(this, newFile, false, progressListener);
             return res ? newFile : null;
         }
     }
@@ -270,11 +270,11 @@ public class DotNetFile : IRealFile
 	/// </summary>
 	///  <param name="filename">The name of the file or directory.</param>
     ///  <returns>The child file</returns>
-    public IRealFile GetChild(string filename)
+    public IFile GetChild(string filename)
     {
         if (IsFile)
             return null;
-        DotNetFile child = new DotNetFile(filePath + System.IO.Path.DirectorySeparatorChar + filename);
+        File child = new File(filePath + System.IO.Path.DirectorySeparatorChar + filename);
         return child;
     }
 

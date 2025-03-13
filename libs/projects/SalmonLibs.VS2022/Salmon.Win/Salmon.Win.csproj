@@ -28,7 +28,7 @@
     <Compile Include="..\..\..\src\csharp\SalmonWin\Win\Salmon\Sequencer\WinClientSequencer.cs" Link="Win\Salmon\Sequencer\WinClientSequencer.cs" />
     <Compile Include="..\..\..\src\csharp\SalmonWin\Win\Salmon\Sequencer\WinFileSequencer.cs" Link="Win\Salmon\Sequencer\WinFileSequencer.cs" />
     <Compile Include="..\..\..\src\csharp\SalmonWin\Win\Salmon\Sequencer\WinSequenceTamperedException.cs" Link="Win\Salmon\Sequencer\WinSequenceTamperedException.cs" />
-    <Compile Include="..\..\..\src\csharp\SalmonWin\Win\Salmon\Registry\Registry.cs" Link="Win\Salmon\Registry\Registry.cs" />
+    <Compile Include="..\..\..\src\csharp\SalmonWin\Win\Registry\Registry.cs" Link="Win\Registry\Registry.cs" />
   </ItemGroup>
   <ItemGroup>
     <PackageReference Include="System.Security.Cryptography.ProtectedData" Version="8.0.0" />

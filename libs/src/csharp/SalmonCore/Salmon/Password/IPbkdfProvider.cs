@@ -29,7 +29,7 @@ namespace Mku.Salmon.Password;
 /// <summary>
 ///  Provides key derivation based on text passwords.
 /// </summary>
-public interface ISalmonPbkdfProvider
+public interface IPbkdfProvider
 {
     /// <summary>
     ///  C# Cipher key for SHA256;
@@ -53,11 +53,11 @@ public interface ISalmonPbkdfProvider
         switch (pbkdfAlgo)
         {
             case PbkdfAlgo.SHA1:
-                return ISalmonPbkdfProvider.PBKDF_SHA1;
+                return IPbkdfProvider.PBKDF_SHA1;
             case PbkdfAlgo.SHA256:
-                return ISalmonPbkdfProvider.PBKDF_SHA256;
+                return IPbkdfProvider.PBKDF_SHA256;
         }
-        throw new SalmonSecurityException("Unknown pbkdf algorithm");
+        throw new SecurityException("Unknown pbkdf algorithm");
     }
 
     /// <summary>
@@ -69,6 +69,6 @@ public interface ISalmonPbkdfProvider
     ///  <param name="outputBytes">The length of the output key.</param>
     ///  <param name="pbkdfAlgo">The hash algorithm to use.</param>
     ///  <returns>The key.</returns>
-    ///  <exception cref="SalmonSecurityException">Thrown when error with security</exception>
+    ///  <exception cref="SecurityException">Thrown when error with security</exception>
     byte[] GetKey(string password, byte[] salt, int iterations, int outputBytes, PbkdfAlgo pbkdfAlgo);
 }

@@ -26,8 +26,8 @@ using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Mku.FS.File;
 using Mku.Salmon;
 using Mku.Salmon.Sequence;
-using Salmon.Win.Registry;
-using Salmon.Win.Sequencer;
+using Mku.Win.Registry;
+using Mku.Win.Salmon.Sequencer;
 using System;
 using System.Diagnostics;
 using System.Security.Cryptography;
@@ -45,7 +45,7 @@ public class SalmonWinServiceTests
 	
 	public static string TEST_SERVICE_PIPE_NAME = "SalmonService";
 	
-	public static SalmonRegistry registry = new SalmonRegistry();
+	public static Registry registry = new Registry();
     
     [TestMethod]
     public void TestServerSid()
@@ -71,7 +71,7 @@ public class SalmonWinServiceTests
     {
         string key = "Seq Hash";
         string value = new Random().Next() + "";
-        SalmonRegistry registry = new SalmonRegistry();
+        Registry registry = new Registry();
         registry.Write(key, value);
         string val = (string)registry.Read(key);
         Assert.AreEqual(value, val);
@@ -83,11 +83,11 @@ public class SalmonWinServiceTests
         if(registry.Exists(TEST_REG_CHCKSUM_KEY))
             registry.Delete(TEST_REG_CHCKSUM_KEY);
 
-        IRealFile file = new DotNetFile(TEST_SEQUENCER_DIR + "\\" + TEST_SEQUENCER_FILENAME);
+        IFile file = new File(TEST_SEQUENCER_DIR + "\\" + TEST_SEQUENCER_FILENAME);
         if (file.Exists)
             file.Delete();
         WinFileSequencer sequencer = new WinFileSequencer(file, 
-            new SalmonSequenceSerializer(), 
+            new SequenceSerializer(), 
             TEST_REG_CHCKSUM_KEY);
 
         sequencer.CreateSequence("AAAA", "AAAA");
@@ -107,7 +107,7 @@ public class SalmonWinServiceTests
             nonce = sequencer.NextNonce("AAAA");
             Assert.AreNotEqual(5, Mku.Convert.BitConverter.ToLong(nonce, 0, 8));
         }
-        catch (SalmonRangeExceededException ex)
+        catch (RangeExceededException ex)
         {
             Debug.WriteLine(ex);
             caught = true;

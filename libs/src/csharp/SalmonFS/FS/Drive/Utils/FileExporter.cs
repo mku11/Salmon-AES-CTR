@@ -123,7 +123,7 @@ public abstract class FileExporter
     ///  <param name="deleteSource">Delete the source file when the export finishes successfully</param>
     ///  <param name="integrity">True to verify integrity</param>
     ///  <param name="OnProgress">Progress listener</param>
-    public IRealFile ExportFile(IVirtualFile fileToExport, IRealFile exportDir, string filename,
+    public IFile ExportFile(IVirtualFile fileToExport, IFile exportDir, string filename,
         bool deleteSource, bool integrity, Action<long, long> OnProgress)
     {
         if (IsRunning())
@@ -131,7 +131,7 @@ public abstract class FileExporter
         if (fileToExport.IsDirectory)
             throw new Exception("Cannot export directory, use FileCommander instead");
 
-        IRealFile exportFile;
+        IFile exportFile;
         filename = filename ?? fileToExport.BaseName;
         try
         {
@@ -194,7 +194,7 @@ public abstract class FileExporter
         return exportFile;
     }
 
-    private void SubmitExportJobs(int runningThreads, long partSize, IVirtualFile fileToExport, IRealFile exportFile, long[] totalBytesWritten, bool integrity, Action<long, long> OnProgress)
+    private void SubmitExportJobs(int runningThreads, long partSize, IVirtualFile fileToExport, IFile exportFile, long[] totalBytesWritten, bool integrity, Action<long, long> OnProgress)
     {
         long fileSize = fileToExport.Size;
 
@@ -234,7 +234,7 @@ public abstract class FileExporter
     ///  <param name="count">            The length of the bytes to be decrypted</param>
     ///  <param name="totalBytesWritten">The total bytes that were written to the external file</param>
     ///  <param name="OnProgress">The progress listener</param>
-    private void ExportFilePart(IVirtualFile fileToExport, IRealFile exportFile, long start, long count,
+    private void ExportFilePart(IVirtualFile fileToExport, IFile exportFile, long start, long count,
         long[] totalBytesWritten, Action<long, long> OnProgress)
     {
         long totalPartBytesWritten = 0;

@@ -33,7 +33,7 @@ namespace Mku.SalmonFS.Utils;
 /// <summary>
 ///  Facade class for file operations.
 /// </summary>
-public class SalmonFileCommander : FileCommander
+public class AesFileCommander : FileCommander
 {
     /**
      * Instantiate a new file commander object.
@@ -41,9 +41,9 @@ public class SalmonFileCommander : FileCommander
      * @param importBufferSize The buffer size to use for importing files.
      * @param exportBufferSize The buffer size to use for exporting files.
      */
-    public SalmonFileCommander(int importBufferSize, int exportBufferSize, int threads)
-        : base(new SalmonFileImporter(importBufferSize, threads),
-                new SalmonFileExporter(exportBufferSize, threads),
+    public AesFileCommander(int importBufferSize, int exportBufferSize, int threads)
+        : base(new AesFileImporter(importBufferSize, threads),
+                new AesFileExporter(exportBufferSize, threads),
                 new FileSearcher())
     {
 
@@ -62,13 +62,13 @@ public class SalmonFileCommander : FileCommander
     ///  <returns>The imported files.</returns>
     ///  <exception cref="Exception">Thrown if error during operation</exception>
     override
-    public SalmonFile[] ImportFiles(IRealFile[] filesToImport, IVirtualFile importDir,
+    public AesFile[] ImportFiles(IFile[] filesToImport, IVirtualFile importDir,
         bool deleteSource, bool integrity, Action<RealFileTaskProgress> OnProgressChanged,
-                                      Func<IRealFile, string> AutoRename,
-                                      Action<IRealFile, Exception> OnFailed)
+                                      Func<IFile, string> AutoRename,
+                                      Action<IFile, Exception> OnFailed)
     {
         IVirtualFile[] files = base.ImportFiles(filesToImport, importDir, deleteSource, integrity, OnProgressChanged,
                 AutoRename, OnFailed);
-        return files.Cast<SalmonFile>().ToArray();
+        return files.Cast<AesFile>().ToArray();
     }
 }

@@ -30,7 +30,7 @@ namespace Mku.Salmon.Transform;
 /// Generic Native AES transformer. Extend this with your specific 
 /// native transformer.
 /// </summary>
-public class SalmonNativeTransformer : SalmonAES256CTRTransformer
+public class NativeTransformer : AESCTRTransformer
 {
     /// <summary>
     /// The native proxy to use for loading libraries for different platforms and operating systems.
@@ -46,10 +46,10 @@ public class SalmonNativeTransformer : SalmonAES256CTRTransformer
     public int ImplType { get; set; }
 
     /// <summary>
-    /// Construct a SalmonNativeTransformer for using the native aes c library
+    /// Construct a NativeTransformer for using the native aes c library
     /// </summary>
     /// <param name="implType">The AES native implementation see ProviderType enum</param>
-    public SalmonNativeTransformer(int implType)
+    public NativeTransformer(int implType)
     {
         ImplType = implType;
     }
@@ -59,12 +59,12 @@ public class SalmonNativeTransformer : SalmonAES256CTRTransformer
 	/// </summary>
 	///  <param name="key">The AES key to use.</param>
     ///  <param name="nonce">The nonce to use.</param>
-    ///  <exception cref="SalmonSecurityException">Thrown when error with security</exception>
+    ///  <exception cref="SecurityException">Thrown when error with security</exception>
     override
     public void Init(byte[] key, byte[] nonce)
     {
         NativeProxy.SalmonInit(ImplType);
-        byte[] expandedKey = new byte[SalmonAES256CTRTransformer.EXPANDED_KEY_SIZE];
+        byte[] expandedKey = new byte[AESCTRTransformer.EXPANDED_KEY_SIZE];
         NativeProxy.SalmonExpandKey(key, expandedKey);
         ExpandedKey = expandedKey;
         base.Init(key, nonce);
@@ -84,9 +84,9 @@ public class SalmonNativeTransformer : SalmonAES256CTRTransformer
                            byte[] destBuffer, int destOffset, int count)
     {
 		if (Key == null)
-            throw new SalmonSecurityException("No key found, run init first");
+            throw new SecurityException("No key found, run init first");
         if (Counter == null)
-            throw new SalmonSecurityException("No counter found, run init first");
+            throw new SecurityException("No counter found, run init first");
 			
         // we block for AES GPU since it's not entirely thread safe
         if (ImplType == 3)
@@ -120,9 +120,9 @@ public class SalmonNativeTransformer : SalmonAES256CTRTransformer
                             byte[] destBuffer, int destOffset, int count)
     {
 		if (Key == null)
-            throw new SalmonSecurityException("No key found, run init first");
+            throw new SecurityException("No key found, run init first");
         if (Counter == null)
-            throw new SalmonSecurityException("No counter found, run init first");
+            throw new SecurityException("No counter found, run init first");
 		
         // we block for AES GPU since it's not entirely thread safe
         if (ImplType == 3)

@@ -33,9 +33,9 @@ namespace Mku.FS.File;
 ///  Interface that represents a real file. This class is used internally by the virtual disk to
 ///  import, store, and export the encrypted files.
 ///  Extend this to provide an interface to any file system, platform, or API ie: on disk, memory, network, or cloud.
-///  <para>See: <see cref="DotNetFile"/></para>
+///  <para>See: <see cref="File"/></para>
 /// </summary>
-public interface IRealFile
+public interface IFile
 {
     /// <summary>
     ///  True if this file exists.
@@ -118,7 +118,7 @@ public interface IRealFile
     ///  Get all files and directories under this directory.
 	/// </summary>
 	///  <returns>The files and subdirectories</returns>
-    IRealFile[] ListFiles();
+    IFile[] ListFiles();
 
     /// <summary>
     ///  Get the basename of the file.
@@ -131,13 +131,13 @@ public interface IRealFile
 	/// </summary>
 	///  <param name="dirName">Directory name.</param>
     ///  <returns>The newly created directory.</returns>
-    IRealFile CreateDirectory(string dirName);
+    IFile CreateDirectory(string dirName);
 
     /// <summary>
     ///  Get the parent directory of this file/directory.
 	/// </summary>
 	///  <returns>The parent directory.</returns>
-    IRealFile Parent { get; }
+    IFile Parent { get; }
 
 
     /// <summary>
@@ -146,7 +146,7 @@ public interface IRealFile
 	///  <param name="filename">The name for the new file.</param>
     ///  <returns>The newly create file.</returns>
     ///  <exception cref="IOException">Thrown if error during IO</exception>
-    IRealFile CreateFile(string filename);
+    IFile CreateFile(string filename);
 
     /// <summary>
     ///  Move this file or directory recursively to another directory.
@@ -156,7 +156,7 @@ public interface IRealFile
     ///  <param name="progressListener">Observer to notify of the move progress.</param>
     ///  <returns>The file after the move. Use this instance for any subsequent file operations.</returns>
     ///  <exception cref="IOException">Thrown if error during IO</exception>
-    IRealFile Move(IRealFile newDir, string newName = null, Action<long, long> progressListener = null);
+    IFile Move(IFile newDir, string newName = null, Action<long, long> progressListener = null);
 
     /// <summary>
     ///  Copy this file or directory recursively to another directory.
@@ -166,14 +166,14 @@ public interface IRealFile
     ///  <param name="progressListener">Observer to notify of the copy progress.</param>
     ///  <returns>The file after the copy. Use this instance for any subsequent file operations.</returns>
     ///  <exception cref="IOException">Thrown if error during IO</exception>
-    IRealFile Copy(IRealFile newDir, string newName = null, Action<long,long> progressListener = null);
+    IFile Copy(IFile newDir, string newName = null, Action<long,long> progressListener = null);
 
     /// <summary>
     ///  Get the file/directory matching the name provided under this directory.
 	/// </summary>
 	///  <param name="filename">The name of the file or directory to match.</param>
     ///  <returns>The file that was matched.</returns>
-    IRealFile GetChild(string filename);
+    IFile GetChild(string filename);
 
     /// <summary>
     ///  Create a directory with the current filepath.
@@ -194,7 +194,7 @@ public interface IRealFile
     /// <param name="delete">True to delete the source file on success</param>
     /// <param name="progressListener">The progress listener</param>
     /// <returns>True if success</returns>
-    public static bool CopyFileContents(IRealFile src, IRealFile dest, bool delete, Action<long,long> progressListener)
+    public static bool CopyFileContents(IFile src, IFile dest, bool delete, Action<long,long> progressListener)
     {
         Stream source = src.GetInputStream();
         Stream target = dest.GetOutputStream();
@@ -225,14 +225,14 @@ public interface IRealFile
     /// <param name="AutoRename">The autorename function to use when renaming files if they exist</param>
     /// <param name="autoRenameFolders">Apply autorename to folders also (default is true)</param>
     /// <param name="OnFailed">Callback when copy fails</param>
-    public sealed void CopyRecursively(IRealFile dest,
-        Action<IRealFile, long, long> progressListener = null,
-        Func<IRealFile, string> AutoRename = null,
+    public sealed void CopyRecursively(IFile dest,
+        Action<IFile, long, long> progressListener = null,
+        Func<IFile, string> AutoRename = null,
         bool autoRenameFolders = true,
-        Action<IRealFile, Exception> OnFailed = null)
+        Action<IFile, Exception> OnFailed = null)
     {
         string newFilename = BaseName;
-        IRealFile newFile;
+        IFile newFile;
         newFile = dest.GetChild(newFilename);
         if (IsFile)
         {
@@ -274,7 +274,7 @@ public interface IRealFile
             if (progressListener != null)
                 progressListener(this, 1, 1);
 
-            foreach (IRealFile child in this.ListFiles())
+            foreach (IFile child in this.ListFiles())
             {
                 child.CopyRecursively(newFile, progressListener, AutoRename, autoRenameFolders, OnFailed);
             }
@@ -289,9 +289,9 @@ public interface IRealFile
     /// <param name="AutoRename">The autorename function to use when renaming files if they exist</param>
     /// <param name="autoRenameFolders">Apply autorename to folders also (default is true)</param>
     /// <param name="OnFailed">Callback when move fails</param>
-    public sealed void MoveRecursively(IRealFile dest,
-        Action<IRealFile, long, long> progressListener = null, Func<IRealFile, string> AutoRename = null,
-        bool autoRenameFolders = true, Action<IRealFile, Exception> OnFailed = null)
+    public sealed void MoveRecursively(IFile dest,
+        Action<IFile, long, long> progressListener = null, Func<IFile, string> AutoRename = null,
+        bool autoRenameFolders = true, Action<IFile, Exception> OnFailed = null)
     {
         // target directory is the same
         if (Parent.Path.Equals(dest.Path))
@@ -305,7 +305,7 @@ public interface IRealFile
         }
 
         string newFilename = BaseName;
-        IRealFile newFile;
+        IFile newFile;
         newFile = dest.GetChild(newFilename);
         if (IsFile)
         {
@@ -345,7 +345,7 @@ public interface IRealFile
             if (progressListener != null)
                 progressListener(this, 1, 1);
 
-            foreach (IRealFile child in this.ListFiles())
+            foreach (IFile child in this.ListFiles())
             {
                 child.MoveRecursively(newFile, progressListener, AutoRename, autoRenameFolders, OnFailed);
             }
@@ -362,8 +362,8 @@ public interface IRealFile
     /// </summary>
     /// <param name="progressListener">The progress listener</param>
     /// <param name="OnFailed">Callback when delete fails</param>
-    public sealed void DeleteRecursively(Action<IRealFile, long, long> progressListener = null,
-        Action<IRealFile, Exception> OnFailed = null)
+    public sealed void DeleteRecursively(Action<IFile, long, long> progressListener = null,
+        Action<IFile, Exception> OnFailed = null)
     {
         if (IsFile)
         {
@@ -377,7 +377,7 @@ public interface IRealFile
         }
         else if (this.IsDirectory)
         {
-            foreach (IRealFile child in this.ListFiles())
+            foreach (IFile child in this.ListFiles())
             {
                 child.DeleteRecursively(progressListener, OnFailed);
             }
@@ -394,7 +394,7 @@ public interface IRealFile
     /// </summary>
     /// <param name="file">The file</param>
     /// <returns>The new file name</returns>
-    public static string AutoRename(IRealFile file)
+    public static string AutoRename(IFile file)
     {
         return AutoRename(file.BaseName);
     }

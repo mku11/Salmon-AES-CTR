@@ -46,7 +46,7 @@ public class AndroidSharedFileObserver : FileObserver
     ///  The associated salmon file.
 	/// </summary>
 	///
-    private SalmonFile salmonFile;
+    private AesFile salmonFile;
 
     public delegate void OnFileContentsChanged(AndroidSharedFileObserver observer);
 
@@ -60,10 +60,10 @@ public class AndroidSharedFileObserver : FileObserver
     ///  Instantiate a file observer associated with an encrypted file.
 	/// </summary>
 	///  <param name="file">The shared file.</param>
-    ///  <param name="salmonFile">The SalmonFile that is associated. This file will be updated with</param>
+    ///  <param name="salmonFile">The AesFile that is associated. This file will be updated with</param>
     ///                    the contents of the shared file after the file contents are changed.
     ///  <param name="onFileContentsChanged">Callback is called the shared file contents change.</param>
-    private AndroidSharedFileObserver(Java.IO.File file, SalmonFile salmonFile,
+    private AndroidSharedFileObserver(Java.IO.File file, AesFile salmonFile,
                                       OnFileContentsChanged onFileContentsChanged) :
         base(file, FileObserverEvents.CloseWrite)
     {
@@ -75,10 +75,10 @@ public class AndroidSharedFileObserver : FileObserver
     ///  Instantiate a file observer associated with an encrypted file.
 	/// </summary>
 	///  <param name="filePath">The filepath for the shared filed.</param>
-    ///  <param name="salmonFile">The SalmonFile that is associated. This file will be updated with</param>
+    ///  <param name="salmonFile">The AesFile that is associated. This file will be updated with</param>
     ///                    the contents of the shared file after the file contents are changed.
     ///  <param name="onFileContentsChanged">Callback is called the shared file contents change.</param>
-    private AndroidSharedFileObserver(string filePath, SalmonFile salmonFile,
+    private AndroidSharedFileObserver(string filePath, AesFile salmonFile,
                                       OnFileContentsChanged onFileContentsChanged) :
         base(filePath, FileObserverEvents.CloseWrite)
     {
@@ -92,7 +92,7 @@ public class AndroidSharedFileObserver : FileObserver
 	///  <param name="cacheFile">            The temporary private decrypted cached file</param>
     ///  <param name="salmonFile">           The encrypted file that is associated with the shared file</param>
     ///  <param name="onFileContentsChanged">Action notifier when file contents change</param>
-    public static AndroidSharedFileObserver CreateFileObserver(Java.IO.File cacheFile, SalmonFile salmonFile,
+    public static AndroidSharedFileObserver CreateFileObserver(Java.IO.File cacheFile, AesFile salmonFile,
                                                                OnFileContentsChanged onFileContentsChanged)
     {
         AndroidSharedFileObserver fileObserver;
@@ -151,7 +151,7 @@ public class AndroidSharedFileObserver : FileObserver
     ///  Returns the encrypted salmon file that is associated with the shared file
 	/// </summary>
 	///
-    public SalmonFile GetSalmonFile()
+    public AesFile GetSalmonFile()
     {
         return salmonFile;
     }
@@ -160,7 +160,7 @@ public class AndroidSharedFileObserver : FileObserver
     ///  Set the salmon file associated with the shared file to observer.
 	/// </summary>
 	///  <param name="salmonFile">The file</param>
-    public void SetSalmonFile(SalmonFile salmonFile)
+    public void SetSalmonFile(AesFile salmonFile)
     {
         this.salmonFile = salmonFile;
     }

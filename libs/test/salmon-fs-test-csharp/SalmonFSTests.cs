@@ -85,7 +85,7 @@ public class SalmonFSTests
 			providerType = (ProviderType) Enum.Parse(typeof(ProviderType), aesProviderType);
 		Console.WriteLine("ProviderType: " + providerType);
 		
-        SalmonStream.AesProviderType = providerType;
+        AesStream.AesProviderType = providerType;
     }
 
     [ClassCleanup]
@@ -98,18 +98,18 @@ public class SalmonFSTests
     [TestMethod]
     public void ShouldCatchNotAuthorizeNegative()
     {
-        IRealFile vaultDir = SalmonFSTestHelper.GenerateFolder(SalmonFSTestHelper.TEST_VAULT_DIRNAME);
-        SalmonFileSequencer sequencer = SalmonFSTestHelper.CreateSalmonFileSequencer();
-        SalmonDrive drive = SalmonFSTestHelper.CreateDrive(vaultDir, SalmonFSTestHelper.DriveClassType, SalmonCoreTestHelper.TEST_PASSWORD, sequencer);
+        IFile vaultDir = SalmonFSTestHelper.GenerateFolder(SalmonFSTestHelper.TEST_VAULT_DIRNAME);
+        FileSequencer sequencer = SalmonFSTestHelper.CreateSalmonFileSequencer();
+        AesDrive drive = SalmonFSTestHelper.CreateDrive(vaultDir, SalmonFSTestHelper.DriveClassType, SalmonCoreTestHelper.TEST_PASSWORD, sequencer);
         bool wrongPassword = false;
         drive.Close();
         try
         {
             drive = SalmonFSTestHelper.OpenDrive(vaultDir, SalmonFSTestHelper.DriveClassType, SalmonCoreTestHelper.TEST_FALSE_PASSWORD, sequencer);
-            SalmonFile rootDir = drive.Root;
+            AesFile rootDir = drive.Root;
             rootDir.ListFiles();
         }
-        catch (SalmonAuthException)
+        catch (AuthException)
         {
             wrongPassword = true;
         }
@@ -121,18 +121,18 @@ public class SalmonFSTests
     [TestMethod]
     public void ShouldAuthorizePositive()
     {
-        IRealFile vaultDir = SalmonFSTestHelper.GenerateFolder(SalmonFSTestHelper.TEST_VAULT_DIRNAME);
-        SalmonFileSequencer sequencer = SalmonFSTestHelper.CreateSalmonFileSequencer();
-        SalmonDrive drive = SalmonFSTestHelper.CreateDrive(vaultDir, typeof(DotNetDrive),
+        IFile vaultDir = SalmonFSTestHelper.GenerateFolder(SalmonFSTestHelper.TEST_VAULT_DIRNAME);
+        FileSequencer sequencer = SalmonFSTestHelper.CreateSalmonFileSequencer();
+        AesDrive drive = SalmonFSTestHelper.CreateDrive(vaultDir, typeof(Drive),
                 SalmonCoreTestHelper.TEST_PASSWORD, sequencer);
         bool wrongPassword = false;
         drive.Close();
         try
         {
             drive = SalmonFSTestHelper.OpenDrive(vaultDir, SalmonFSTestHelper.DriveClassType, SalmonCoreTestHelper.TEST_PASSWORD, sequencer);
-            SalmonFile virtualRoot = drive.Root;
+            AesFile virtualRoot = drive.Root;
         }
-        catch (SalmonAuthException)
+        catch (AuthException)
         {
             wrongPassword = true;
         }
@@ -370,9 +370,9 @@ public class SalmonFSTests
     [TestMethod]
     public void ShouldCatchVaultMaxFiles()
     {
-        IRealFile vaultDir = SalmonFSTestHelper.GenerateFolder(SalmonFSTestHelper.TEST_VAULT_DIRNAME);
-        IRealFile seqDir = SalmonFSTestHelper.GenerateFolder(SalmonFSTestHelper.TEST_SEQ_DIRNAME, SalmonFSTestHelper.TEST_SEQ_DIR, true);
-        IRealFile seqFile = seqDir.GetChild(SalmonFSTestHelper.TEST_SEQ_FILENAME);
+        IFile vaultDir = SalmonFSTestHelper.GenerateFolder(SalmonFSTestHelper.TEST_VAULT_DIRNAME);
+        IFile seqDir = SalmonFSTestHelper.GenerateFolder(SalmonFSTestHelper.TEST_SEQ_DIRNAME, SalmonFSTestHelper.TEST_SEQ_DIR, true);
+        IFile seqFile = seqDir.GetChild(SalmonFSTestHelper.TEST_SEQ_FILENAME);
 
 
         SalmonFSTestHelper.TestMaxFiles(vaultDir, seqFile, SalmonFSTestHelper.TEST_IMPORT_TINY_FILE,
@@ -486,8 +486,8 @@ public class SalmonFSTests
     [TestMethod]
     public void ShouldExportAndImportAuth()
     {
-        IRealFile vault = SalmonFSTestHelper.GenerateFolder(SalmonFSTestHelper.TEST_VAULT_DIRNAME);
-        IRealFile importFilePath = SalmonFSTestHelper.TEST_IMPORT_TINY_FILE;
+        IFile vault = SalmonFSTestHelper.GenerateFolder(SalmonFSTestHelper.TEST_VAULT_DIRNAME);
+        IFile importFilePath = SalmonFSTestHelper.TEST_IMPORT_TINY_FILE;
         SalmonFSTestHelper.ExportAndImportAuth(vault, importFilePath);
     }
 
@@ -506,11 +506,11 @@ public class SalmonFSTests
         {
             data[i] = (byte)i;
         }
-        SalmonFile file = SalmonFSTestHelper.ShouldCreateFileWithoutVault(data, SalmonCoreTestHelper.TEST_KEY_BYTES,
+        AesFile file = SalmonFSTestHelper.ShouldCreateFileWithoutVault(data, SalmonCoreTestHelper.TEST_KEY_BYTES,
                 true, true, 64, SalmonCoreTestHelper.TEST_HMAC_KEY_BYTES,
                 SalmonCoreTestHelper.TEST_FILENAME_NONCE_BYTES, SalmonCoreTestHelper.TEST_NONCE_BYTES,
                 false, -1, true);
-        SalmonFileInputStream fileInputStream = new SalmonFileInputStream(file,
+        AesFileInputStream fileInputStream = new AesFileInputStream(file,
                 3, 50, 2, 12);
 
         SalmonFSTestHelper.SeekAndReadFileInputStream(data, fileInputStream, 0, 32, 0, 32);
@@ -525,11 +525,11 @@ public class SalmonFSTests
     [TestMethod]
     public void ShouldCreateDriveAndOpenFsFolder()
     {
-        IRealFile vaultDir = SalmonFSTestHelper.GenerateFolder(SalmonFSTestHelper.TEST_VAULT_DIRNAME);
-        SalmonFileSequencer sequencer = SalmonFSTestHelper.CreateSalmonFileSequencer();
-        SalmonDrive drive = SalmonFSTestHelper.CreateDrive(vaultDir, SalmonFSTestHelper.DriveClassType, SalmonCoreTestHelper.TEST_PASSWORD, sequencer);
+        IFile vaultDir = SalmonFSTestHelper.GenerateFolder(SalmonFSTestHelper.TEST_VAULT_DIRNAME);
+        FileSequencer sequencer = SalmonFSTestHelper.CreateSalmonFileSequencer();
+        AesDrive drive = SalmonFSTestHelper.CreateDrive(vaultDir, SalmonFSTestHelper.DriveClassType, SalmonCoreTestHelper.TEST_PASSWORD, sequencer);
         bool wrongPassword = false;
-        SalmonFile rootDir = drive.Root;
+        AesFile rootDir = drive.Root;
         rootDir.ListFiles();
         drive.Close();
 
@@ -559,10 +559,10 @@ public class SalmonFSTests
     public void ShouldPerformOperationsRealFiles()
     {
         bool caught = false;
-        IRealFile dir = SalmonFSTestHelper.GenerateFolder(SalmonFSTestHelper.TEST_VAULT_DIRNAME);
-        IRealFile file = SalmonFSTestHelper.TEST_IMPORT_TINY_FILE;
-        IRealFile file1 = file.Copy(dir);
-        IRealFile file2;
+        IFile dir = SalmonFSTestHelper.GenerateFolder(SalmonFSTestHelper.TEST_VAULT_DIRNAME);
+        IFile file = SalmonFSTestHelper.TEST_IMPORT_TINY_FILE;
+        IFile file1 = file.Copy(dir);
+        IFile file2;
         try
         {
             file2 = file.Copy(dir);
@@ -573,7 +573,7 @@ public class SalmonFSTests
             caught = true;
         }
         Assert.AreEqual(true, caught);
-        file2 = file.Copy(dir, IRealFile.AutoRename(file));
+        file2 = file.Copy(dir, IFile.AutoRename(file));
 
         Assert.AreEqual(2, dir.ChildrenCount);
         Assert.IsTrue(dir.GetChild(file.BaseName).Exists);
@@ -581,14 +581,14 @@ public class SalmonFSTests
         Assert.IsTrue(dir.GetChild(file2.BaseName).Exists);
         Assert.IsTrue(dir.GetChild(file2.BaseName).IsFile);
 
-        IRealFile dir1 = dir.CreateDirectory("folder1");
+        IFile dir1 = dir.CreateDirectory("folder1");
         Assert.IsTrue(dir.GetChild("folder1").Exists);
         Assert.IsTrue(dir.GetChild("folder1").IsDirectory);
         Assert.AreEqual(3, dir.ChildrenCount);
 
 
 
-        IRealFile folder1 = dir.CreateDirectory("folder2");
+        IFile folder1 = dir.CreateDirectory("folder2");
         Assert.IsTrue(folder1.Exists);
         bool renamed = folder1.RenameTo("folder3");
         Assert.IsTrue(renamed);
@@ -604,7 +604,7 @@ public class SalmonFSTests
         file1.Move(dir.GetChild("folder1"));
         file2.Move(dir.GetChild("folder1"));
 
-        IRealFile file3 = file.Copy(dir);
+        IFile file3 = file.Copy(dir);
         caught = false;
         try
         {
@@ -616,28 +616,28 @@ public class SalmonFSTests
             caught = true;
         }
         Assert.IsTrue(caught);
-        IRealFile file4 = file3.Move(dir.GetChild("folder1"), IRealFile.AutoRename(file3));
+        IFile file4 = file3.Move(dir.GetChild("folder1"), IFile.AutoRename(file3));
         Assert.IsTrue(file4.Exists);
         Assert.AreEqual(3, dir.GetChild("folder1").ChildrenCount);
 
-        IRealFile folder2 = dir.GetChild("folder1").CreateDirectory("folder2");
-        foreach (IRealFile rfile in dir.GetChild("folder1").ListFiles())
+        IFile folder2 = dir.GetChild("folder1").CreateDirectory("folder2");
+        foreach (IFile rfile in dir.GetChild("folder1").ListFiles())
             rfile.CopyRecursively(folder2);
         Assert.AreEqual(4, dir.GetChild("folder1").ChildrenCount);
         Assert.AreEqual(3, dir.GetChild("folder1").GetChild("folder2").ChildrenCount);
 
         // recursive copy
-        IRealFile folder3 = dir.CreateDirectory("folder4");
+        IFile folder3 = dir.CreateDirectory("folder4");
         dir.GetChild("folder1").CopyRecursively(folder3);
         int count1 = SalmonFSTestHelper.GetChildrenCountRecursively(dir.GetChild("folder1"));
         int count2 = SalmonFSTestHelper.GetChildrenCountRecursively(dir.GetChild("folder4").GetChild("folder1"));
         Assert.AreEqual(count1, count2);
 
-        IRealFile dfile = dir.GetChild("folder4").GetChild("folder1").GetChild("folder2").GetChild(file.BaseName);
+        IFile dfile = dir.GetChild("folder4").GetChild("folder1").GetChild("folder2").GetChild(file.BaseName);
         Assert.IsTrue(dfile.Exists);
         Assert.IsTrue(dfile.Delete());
         Assert.AreEqual(2, dir.GetChild("folder4").GetChild("folder1").GetChild("folder2").ChildrenCount);
-        dir.GetChild("folder1").CopyRecursively(folder3, null, IRealFile.AutoRename, false, null);
+        dir.GetChild("folder1").CopyRecursively(folder3, null, IFile.AutoRename, false, null);
         Assert.AreEqual(2, dir.ChildrenCount);
         Assert.AreEqual(1, dir.GetChild("folder4").ChildrenCount);
         Assert.AreEqual(7, dir.GetChild("folder4").GetChild("folder1").ChildrenCount);
@@ -645,7 +645,7 @@ public class SalmonFSTests
 
         dir.GetChild("folder4").GetChild("folder1").GetChild("folder2").GetChild(file.BaseName).Delete();
         dir.GetChild("folder4").GetChild("folder1").GetChild(file.BaseName).Delete();
-        List<IRealFile> failed = new List<IRealFile>();
+        List<IFile> failed = new List<IFile>();
         dir.GetChild("folder1").CopyRecursively(folder3, null, null, false, (file, ex) =>
         {
             failed.Add(file);
@@ -659,8 +659,8 @@ public class SalmonFSTests
 
         dir.GetChild("folder4").GetChild("folder1").GetChild("folder2").GetChild(file.BaseName).Delete();
         dir.GetChild("folder4").GetChild("folder1").GetChild(file.BaseName).Delete();
-        List<IRealFile> failedmv = new List<IRealFile>();
-        dir.GetChild("folder1").MoveRecursively(dir.GetChild("folder4"), null, IRealFile.AutoRename, false, (file, ex) =>
+        List<IFile> failedmv = new List<IFile>();
+        dir.GetChild("folder1").MoveRecursively(dir.GetChild("folder4"), null, IFile.AutoRename, false, (file, ex) =>
         {
             failedmv.Add(file);
         });
@@ -674,26 +674,26 @@ public class SalmonFSTests
     [TestMethod]
     public void ShouldReadFromFileMultithreaded()
     {
-        IRealFile vaultDir = SalmonFSTestHelper.GenerateFolder(SalmonFSTestHelper.TEST_VAULT_DIRNAME);
-        IRealFile file = SalmonFSTestHelper.TEST_IMPORT_TINY_FILE;
+        IFile vaultDir = SalmonFSTestHelper.GenerateFolder(SalmonFSTestHelper.TEST_VAULT_DIRNAME);
+        IFile file = SalmonFSTestHelper.TEST_IMPORT_TINY_FILE;
 
-        SalmonFileSequencer sequencer = SalmonFSTestHelper.CreateSalmonFileSequencer();
-        SalmonDrive drive = SalmonFSTestHelper.CreateDrive(vaultDir, SalmonFSTestHelper.DriveClassType, SalmonCoreTestHelper.TEST_PASSWORD, sequencer);
-        SalmonFileCommander fileCommander = new SalmonFileCommander(SalmonIntegrity.DEFAULT_CHUNK_SIZE, SalmonIntegrity.DEFAULT_CHUNK_SIZE, 2);
-        SalmonFile[] sfiles = fileCommander.ImportFiles(new IRealFile[] { file },
+        FileSequencer sequencer = SalmonFSTestHelper.CreateSalmonFileSequencer();
+        AesDrive drive = SalmonFSTestHelper.CreateDrive(vaultDir, SalmonFSTestHelper.DriveClassType, SalmonCoreTestHelper.TEST_PASSWORD, sequencer);
+        AesFileCommander fileCommander = new AesFileCommander(Integrity.Integrity.DEFAULT_CHUNK_SIZE, Integrity.Integrity.DEFAULT_CHUNK_SIZE, 2);
+        AesFile[] sfiles = fileCommander.ImportFiles(new IFile[] { file },
                 drive.Root, false, true, null, null, null);
 		fileCommander.Close();
 		
         long pos = Math.Abs(new Random().NextInt64() % file.Length);
 
-        SalmonFileInputStream fileInputStream1 = new SalmonFileInputStream(sfiles[0], 4, 4 * 1024 * 1024, 1, 256 * 1024);
+        AesFileInputStream fileInputStream1 = new AesFileInputStream(sfiles[0], 4, 4 * 1024 * 1024, 1, 256 * 1024);
         fileInputStream1.Seek(pos, SeekOrigin.Current);
         MD5 md51 = MD5.Create();
         byte[] hash1 = md51.ComputeHash(fileInputStream1);
         string h1 = Mku.Convert.BitConverter.ToHex(hash1);
         fileInputStream1.Close();
 
-        SalmonFileInputStream fileInputStream2 = new SalmonFileInputStream(sfiles[0], 4, 4 * 1024 * 1024, 1, 256 * 1024);
+        AesFileInputStream fileInputStream2 = new AesFileInputStream(sfiles[0], 4, 4 * 1024 * 1024, 1, 256 * 1024);
         fileInputStream2.Seek(pos, SeekOrigin.Current);
         MD5 md52 = MD5.Create();
         byte[] hash2 = md52.ComputeHash(fileInputStream2);

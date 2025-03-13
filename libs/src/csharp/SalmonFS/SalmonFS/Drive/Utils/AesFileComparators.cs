@@ -30,9 +30,9 @@ using System.Collections.Generic;
 namespace Mku.SalmonFS.Utils;
 
 /// <summary>
-///  Useful Comparers for SalmonFile.
+///  Useful Comparers for AesFile.
 /// </summary>
-public class SalmonFileComparators
+public class AesFileComparators
 {
 
     /// <summary>
@@ -40,8 +40,8 @@ public class SalmonFileComparators
     ///  The rest of the files will be listed without sorting.
     /// </summary>
     ///  <returns>The default comparer</returns>
-    public static Comparer<SalmonFile> DefaultComparator { get; } = 
-        Comparer<SalmonFile>.Create((SalmonFile c1, SalmonFile c2) =>
+    public static Comparer<AesFile> DefaultComparator { get; } = 
+        Comparer<AesFile>.Create((AesFile c1, AesFile c2) =>
     {
         if (c1.IsDirectory && !c2.IsDirectory)
             return -1;
@@ -54,8 +54,8 @@ public class SalmonFileComparators
     ///  Get Filename Ascending Comparer.
 	/// </summary>
 	///  <returns>The filename ascending comparer</returns>
-    public static Comparer<SalmonFile> FilenameAscComparator { get; } = 
-        Comparer<SalmonFile>.Create((SalmonFile c1, SalmonFile c2) =>
+    public static Comparer<AesFile> FilenameAscComparator { get; } = 
+        Comparer<AesFile>.Create((AesFile c1, AesFile c2) =>
     {
         if (c1.IsDirectory && !c2.IsDirectory)
             return -1;
@@ -69,8 +69,8 @@ public class SalmonFileComparators
     ///  Get Filename Descending Comparer.
 	/// </summary>
 	///  <returns>The filename descending comparer</returns>
-    public static Comparer<SalmonFile> FilenameDescComparator { get; } = 
-        Comparer<SalmonFile>.Create((SalmonFile c1, SalmonFile c2) =>
+    public static Comparer<AesFile> FilenameDescComparator { get; } = 
+        Comparer<AesFile>.Create((AesFile c1, AesFile c2) =>
     {
         if (c1.IsDirectory && !c2.IsDirectory)
             return 1;
@@ -84,8 +84,8 @@ public class SalmonFileComparators
     ///  Get Size Ascending Comparer.
 	/// </summary>
 	///  <returns>The size ascending comparer</returns>
-    public static Comparer<SalmonFile> SizeAscComparator { get; } = 
-        Comparer<SalmonFile>.Create((SalmonFile c1, SalmonFile c2) =>
+    public static Comparer<AesFile> SizeAscComparator { get; } = 
+        Comparer<AesFile>.Create((AesFile c1, AesFile c2) =>
     {
         if (c1.IsDirectory && !c2.IsDirectory)
             return -1;
@@ -99,8 +99,8 @@ public class SalmonFileComparators
     ///  Get Size Descending Comparer.
 	/// </summary>
 	///  <returns>The size descending comparer</returns>
-    public static Comparer<SalmonFile> SizeDescComparator { get; } = 
-        Comparer<SalmonFile>.Create((SalmonFile c1, SalmonFile c2) =>
+    public static Comparer<AesFile> SizeDescComparator { get; } = 
+        Comparer<AesFile>.Create((AesFile c1, AesFile c2) =>
     {
         if (c1.IsDirectory && !c2.IsDirectory)
             return 1;
@@ -114,8 +114,8 @@ public class SalmonFileComparators
     ///  Get File Type Ascending Comparer.
 	/// </summary>
 	///  <returns>The file type ascending comparer</returns>
-    public static Comparer<SalmonFile> TypeAscComparator { get; } = 
-        Comparer<SalmonFile>.Create((SalmonFile c1, SalmonFile c2) =>
+    public static Comparer<AesFile> TypeAscComparator { get; } = 
+        Comparer<AesFile>.Create((AesFile c1, AesFile c2) =>
     {
         if (c1.IsDirectory && !c2.IsDirectory)
             return -1;
@@ -129,8 +129,8 @@ public class SalmonFileComparators
     ///  Get Filetype Descending Comparer.
 	/// </summary>
 	///  <returns>The file type descending comparer</returns>
-    public static Comparer<SalmonFile> TypeDescComparator { get; } =
-        Comparer<SalmonFile>.Create((SalmonFile c1, SalmonFile c2) =>
+    public static Comparer<AesFile> TypeDescComparator { get; } =
+        Comparer<AesFile>.Create((AesFile c1, AesFile c2) =>
     {
         if (c1.IsDirectory && !c2.IsDirectory)
             return 1;
@@ -144,8 +144,8 @@ public class SalmonFileComparators
     ///  Get Date Ascending Comparer.
 	/// </summary>
 	///  <returns>The date ascending comparer</returns>
-    public static Comparer<SalmonFile> DateAscComparator { get; } = 
-        Comparer<SalmonFile>.Create((SalmonFile c1, SalmonFile c2) =>
+    public static Comparer<AesFile> DateAscComparator { get; } = 
+        Comparer<AesFile>.Create((AesFile c1, AesFile c2) =>
     {
         if (c1.IsDirectory && !c2.IsDirectory)
             return -1;
@@ -159,8 +159,8 @@ public class SalmonFileComparators
     ///  Get Date Descending Comparer.
 	/// </summary>
 	///  <returns>The date descending comparer</returns>
-    public static Comparer<SalmonFile> DateDescComparator { get; } = 
-        Comparer<SalmonFile>.Create((SalmonFile c1, SalmonFile c2) =>
+    public static Comparer<AesFile> DateDescComparator { get; } = 
+        Comparer<AesFile>.Create((AesFile c1, AesFile c2) =>
     {
         if (c1.IsDirectory && !c2.IsDirectory)
             return 1;
@@ -175,17 +175,17 @@ public class SalmonFileComparators
     ///  will be listed first.
 	/// </summary>
 	///  <returns>The relevance comparer</returns>
-    public static Comparer<SalmonFile> RelevanceComparator { get; } = 
-        Comparer<SalmonFile>.Create((SalmonFile c1, SalmonFile c2) =>
+    public static Comparer<AesFile> RelevanceComparator { get; } = 
+        Comparer<AesFile>.Create((AesFile c1, AesFile c2) =>
             (int)c2.Tag - (int)c1.Tag);
 
 
     /// <summary>
-    ///  Get the SalmonFile base name if available.
+    ///  Get the AesFile base name if available.
     /// </summary>
     ///  <param name="salmonFile">The file</param>
     ///  <returns>The base name</returns>
-    private static string TryGetBasename(SalmonFile salmonFile)
+    private static string TryGetBasename(AesFile salmonFile)
     {
         try
         {
@@ -199,11 +199,11 @@ public class SalmonFileComparators
     }
 
     /// <summary>
-    ///  Get the SalmonFile file type extension if available.
+    ///  Get the AesFile file type extension if available.
 	/// </summary>
 	///  <param name="salmonFile">The file</param>
     ///  <returns>The file type</returns>
-    private static string TryGetType(SalmonFile salmonFile)
+    private static string TryGetType(AesFile salmonFile)
     {
         try
         {
@@ -219,11 +219,11 @@ public class SalmonFileComparators
     }
 
     /// <summary>
-    ///  Get the SalmonFile size if available.
+    ///  Get the AesFile size if available.
 	/// </summary>
 	///  <param name="salmonFile">The file</param>
     ///  <returns>The file size</returns>
-    private static long TryGetSize(SalmonFile salmonFile)
+    private static long TryGetSize(AesFile salmonFile)
     {
         try
         {
@@ -242,11 +242,11 @@ public class SalmonFileComparators
     }
 
     /// <summary>
-    ///  Get the SalmonFile date if available.
+    ///  Get the AesFile date if available.
 	/// </summary>
 	///  <param name="salmonFile">The file</param>
     ///  <returns>The file date in milliseconds</returns>
-    private static long TryGetDate(SalmonFile salmonFile)
+    private static long TryGetDate(AesFile salmonFile)
     {
         try
         {

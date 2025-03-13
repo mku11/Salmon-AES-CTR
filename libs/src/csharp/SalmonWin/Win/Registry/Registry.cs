@@ -21,15 +21,15 @@ LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 */
-namespace Salmon.Win.Registry;
 
 using Microsoft.Win32;
-using System;
+
+namespace Mku.Win.Registry;
 
 /// <summary>
 /// Read and Write to Windows registry
 /// </summary>
-public class SalmonRegistry
+public class Registry
 {
     private static string CATEGORY = "Software";
     private static string APP_NAME = "Salmon";
@@ -42,9 +42,9 @@ public class SalmonRegistry
     /// <summary>
     /// Maps to the windows registry that can be used to store a key/value pair.
     /// </summary>
-    public SalmonRegistry()
+    public Registry()
     {
-        rkey = Registry.CurrentUser.OpenSubKey(CATEGORY, true);
+        rkey = Microsoft.Win32.Registry.CurrentUser.OpenSubKey(CATEGORY, true);
         rkey.CreateSubKey(APP_NAME);
         rkey = rkey.OpenSubKey(APP_NAME, true);
 

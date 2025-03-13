@@ -29,7 +29,7 @@ namespace Mku.SalmonFS.Drive;
 /// <summary>
 ///  Encryption keys and properties.
 /// </summary>
-public class SalmonDriveKey
+public class DriveKey
 {
     /// <summary>
     /// The master key
@@ -39,7 +39,7 @@ public class SalmonDriveKey
     /// <summary>
     /// The drive key
     /// </summary>
-    public byte[] DriveKey { get; internal set; }
+    public byte[] DriveEncKey { get; internal set; }
 
     /// <summary>
     /// The hash key
@@ -57,9 +57,9 @@ public class SalmonDriveKey
     public void Clear()
     {
 
-        if (DriveKey != null)
-            Array.Fill<byte>(DriveKey, 0, DriveKey.Length, (byte)0);
-        DriveKey = null;
+        if (DriveEncKey != null)
+            Array.Fill<byte>(DriveEncKey, 0, DriveEncKey.Length, (byte)0);
+        DriveEncKey = null;
 
         if (HashKey != null)
             Array.Fill<byte>(HashKey, 0, HashKey.Length, (byte)0);
@@ -76,7 +76,7 @@ public class SalmonDriveKey
     ///  Finalize.
 	/// </summary>
 	///  <exception cref="Exception">Thrown if error during operation</exception>
-    ~SalmonDriveKey()
+    ~DriveKey()
     {
         Clear();
     }

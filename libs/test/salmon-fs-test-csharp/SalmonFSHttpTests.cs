@@ -83,7 +83,7 @@ public class SalmonFSHttpTests
 		if(aesProviderType != null && !aesProviderType.Equals(""))
 			providerType = (ProviderType) Enum.Parse(typeof(ProviderType), aesProviderType);
 		Console.WriteLine("ProviderType: " + providerType);
-        SalmonStream.AesProviderType = providerType;
+        AesStream.AesProviderType = providerType;
     }
 
     [ClassCleanup]
@@ -98,11 +98,11 @@ public class SalmonFSHttpTests
     [TestMethod]
     public void ShouldCatchNotAuthorizeNegative()
     {
-        IRealFile vaultDir = SalmonFSTestHelper.HTTP_VAULT_DIR;
+        IFile vaultDir = SalmonFSTestHelper.HTTP_VAULT_DIR;
         bool wrongPassword = false;
         try
         {
-            SalmonDrive drive = SalmonFSTestHelper.OpenDrive(vaultDir, SalmonFSTestHelper.DriveClassType, SalmonCoreTestHelper.TEST_FALSE_PASSWORD, null);
+            AesDrive drive = SalmonFSTestHelper.OpenDrive(vaultDir, SalmonFSTestHelper.DriveClassType, SalmonCoreTestHelper.TEST_FALSE_PASSWORD, null);
         }
         catch (Exception ex)
         {
@@ -116,10 +116,10 @@ public class SalmonFSHttpTests
     public void ShouldAuthorizePositive()
     {
         bool wrongPassword = false;
-        IRealFile vaultDir = SalmonFSTestHelper.HTTP_VAULT_DIR;
+        IFile vaultDir = SalmonFSTestHelper.HTTP_VAULT_DIR;
         try
         {
-            SalmonDrive drive = SalmonFSTestHelper.OpenDrive(vaultDir, SalmonFSTestHelper.DriveClassType, SalmonCoreTestHelper.TEST_PASSWORD, null);
+            AesDrive drive = SalmonFSTestHelper.OpenDrive(vaultDir, SalmonFSTestHelper.DriveClassType, SalmonCoreTestHelper.TEST_PASSWORD, null);
             IVirtualFile root = drive.Root;
         }
         catch (Exception ex)
@@ -156,8 +156,8 @@ public class SalmonFSHttpTests
     [TestMethod]
     public void ShouldSeekAndReadEncryptedFileStreamFromDrive()
     {
-        IRealFile vaultDir = SalmonFSTestHelper.HTTP_VAULT_DIR;
-        SalmonDrive drive = SalmonDrive.OpenDrive(vaultDir, SalmonFSTestHelper.DriveClassType, SalmonCoreTestHelper.TEST_PASSWORD, null);
+        IFile vaultDir = SalmonFSTestHelper.HTTP_VAULT_DIR;
+        AesDrive drive = AesDrive.OpenDrive(vaultDir, SalmonFSTestHelper.DriveClassType, SalmonCoreTestHelper.TEST_PASSWORD, null);
         IVirtualFile root = drive.Root;
         IVirtualFile encFile = root.GetChild(SalmonFSTestHelper.TEST_IMPORT_SMALL_FILENAME);
         Assert.AreEqual(encFile.BaseName, SalmonFSTestHelper.TEST_IMPORT_SMALL_FILENAME);
@@ -174,8 +174,8 @@ public class SalmonFSHttpTests
     [TestMethod]
     public void ShouldListFilesFromDrive()
     {
-        IRealFile vaultDir = SalmonFSTestHelper.HTTP_VAULT_DIR;
-        SalmonDrive drive = DotNetHttpDrive.Open(vaultDir, SalmonCoreTestHelper.TEST_PASSWORD);
+        IFile vaultDir = SalmonFSTestHelper.HTTP_VAULT_DIR;
+        AesDrive drive = HttpDrive.Open(vaultDir, SalmonCoreTestHelper.TEST_PASSWORD);
         IVirtualFile root = drive.Root;
         IVirtualFile[] files = root.ListFiles();
         List<string> filenames = new List<string>();
@@ -194,12 +194,12 @@ public class SalmonFSHttpTests
     [TestMethod]
     public void ShouldExportFileFromDrive()
     {
-        IRealFile vaultDir = SalmonFSTestHelper.HTTP_VAULT_DIR;
+        IFile vaultDir = SalmonFSTestHelper.HTTP_VAULT_DIR;
         int threads = 1;
-        SalmonDrive drive = SalmonFSTestHelper.OpenDrive(vaultDir, SalmonFSTestHelper.DriveClassType, SalmonCoreTestHelper.TEST_PASSWORD);
-        SalmonFile file = drive.Root.GetChild(SalmonFSTestHelper.TEST_HTTP_FILE.BaseName);
-        IRealFile exportDir = SalmonFSTestHelper.GenerateFolder("export_http", SalmonFSTestHelper.TEST_OUTPUT_DIR, false);
-        IRealFile localFile = exportDir.GetChild(SalmonFSTestHelper.TEST_HTTP_FILE.BaseName);
+        AesDrive drive = SalmonFSTestHelper.OpenDrive(vaultDir, SalmonFSTestHelper.DriveClassType, SalmonCoreTestHelper.TEST_PASSWORD);
+        AesFile file = drive.Root.GetChild(SalmonFSTestHelper.TEST_HTTP_FILE.BaseName);
+        IFile exportDir = SalmonFSTestHelper.GenerateFolder("export_http", SalmonFSTestHelper.TEST_OUTPUT_DIR, false);
+        IFile localFile = exportDir.GetChild(SalmonFSTestHelper.TEST_HTTP_FILE.BaseName);
         if (localFile.Exists)
             localFile.Delete();
         SalmonFSTestHelper.ExportFiles([file], exportDir, threads);
@@ -209,10 +209,10 @@ public class SalmonFSHttpTests
     [TestMethod]
     public void ShouldReadRawFile()
     {
-        IRealFile localFile = SalmonFSTestHelper.HTTP_TEST_DIR.GetChild(SalmonFSTestHelper.TEST_HTTP_FILE.BaseName);
+        IFile localFile = SalmonFSTestHelper.HTTP_TEST_DIR.GetChild(SalmonFSTestHelper.TEST_HTTP_FILE.BaseName);
         string localChkSum = SalmonFSTestHelper.GetChecksum(localFile);
-        IRealFile httpRoot = new DotNetHttpFile(SalmonFSTestHelper.HTTP_SERVER_VIRTUAL_URL + "/" + SalmonFSTestHelper.HTTP_TEST_DIRNAME);
-        IRealFile httpFile = httpRoot.GetChild(SalmonFSTestHelper.TEST_HTTP_FILE.BaseName);
+        IFile httpRoot = new HttpFile(SalmonFSTestHelper.HTTP_SERVER_VIRTUAL_URL + "/" + SalmonFSTestHelper.HTTP_TEST_DIRNAME);
+        IFile httpFile = httpRoot.GetChild(SalmonFSTestHelper.TEST_HTTP_FILE.BaseName);
         Stream stream = httpFile.GetInputStream();
         MemoryStream ms = new MemoryStream();
         stream.CopyTo(ms);

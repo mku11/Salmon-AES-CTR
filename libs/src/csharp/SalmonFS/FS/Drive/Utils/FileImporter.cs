@@ -128,7 +128,7 @@ public abstract class FileImporter
     ///  <param name="OnProgress">    Progress observer</param>
     ///  <returns>The IVirtualFile that was imported</returns>
     virtual
-    public IVirtualFile ImportFile(IRealFile fileToImport, IVirtualFile dir, string filename,
+    public IVirtualFile ImportFile(IFile fileToImport, IVirtualFile dir, string filename,
         bool deleteSource, bool integrity, Action<long, long> OnProgress)
     {
         if (IsRunning())
@@ -196,7 +196,7 @@ public abstract class FileImporter
         return importedFile;
     }
 
-    private void SubmitImportJobs(int runningThreads, long partSize, IRealFile fileToImport, IVirtualFile importedFile, long[] totalBytesRead, bool integrity, Action<long, long> OnProgress)
+    private void SubmitImportJobs(int runningThreads, long partSize, IFile fileToImport, IVirtualFile importedFile, long[] totalBytesRead, bool integrity, Action<long, long> OnProgress)
     {
         long fileSize = fileToImport.Length;
 
@@ -236,7 +236,7 @@ public abstract class FileImporter
     ///  <param name="count">         The length of the file content that will be imported</param>
     ///  <param name="totalBytesRead">The total bytes read from the external file</param>
     ///  <param name="OnProgress">    Progress observer</param>
-    private void ImportFilePart(IRealFile fileToImport, IVirtualFile salmonFile,
+    private void ImportFilePart(IFile fileToImport, IVirtualFile salmonFile,
                                 long start, long count, long[] totalBytesRead, Action<long, long> OnProgress)
     {
         long totalPartBytesRead = 0;

@@ -22,8 +22,6 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 */
 
-namespace Salmon.Win.Sequencer;
-
 using Mku.Salmon.Sequence;
 using System;
 using System.IO;
@@ -32,6 +30,8 @@ using System.Security.Principal;
 using System.Text;
 using System.Threading;
 using System.Xml;
+
+namespace Mku.Win.Salmon.Sequencer;
 
 /// <summary>
 /// Sequencer client that connects to the windows service.
@@ -316,9 +316,9 @@ public class WinClientSequencer : INonceSequencer
                 writer.WriteAttributeString("authID", authId);
             writer.WriteAttributeString("type", type.ToString());
             if (nextNonce != null)
-                writer.WriteAttributeString("nextNonce", Convert.ToBase64String(nextNonce));
+                writer.WriteAttributeString("nextNonce", System.Convert.ToBase64String(nextNonce));
             if (maxNonce != null)
-                writer.WriteAttributeString("maxNonce", Convert.ToBase64String(maxNonce));
+                writer.WriteAttributeString("maxNonce", System.Convert.ToBase64String(maxNonce));
             writer.WriteEndElement();
             writer.WriteEndDocument();
         }
@@ -404,9 +404,9 @@ public class WinClientSequencer : INonceSequencer
                 if (drive.Attributes.GetNamedItem("seqStatus") != null)
                     request.seqStatus = (NonceSequence.Status)Enum.Parse(typeof(NonceSequence.Status), drive.Attributes.GetNamedItem("seqStatus").Value);
                 if (drive.Attributes.GetNamedItem("nextNonce") != null)
-                    request.nextNonce = Convert.FromBase64String(drive.Attributes.GetNamedItem("nextNonce").Value);
+                    request.nextNonce = System.Convert.FromBase64String(drive.Attributes.GetNamedItem("nextNonce").Value);
                 if (drive.Attributes.GetNamedItem("maxNonce") != null)
-                    request.maxNonce = Convert.FromBase64String(drive.Attributes.GetNamedItem("maxNonce").Value);
+                    request.maxNonce = System.Convert.FromBase64String(drive.Attributes.GetNamedItem("maxNonce").Value);
                 if (drive.Attributes.GetNamedItem("error") != null)
                     request.error = drive.Attributes.GetNamedItem("error").Value;
             }

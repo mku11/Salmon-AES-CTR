@@ -41,9 +41,9 @@ public class SalmonNativeTests
     {
         try
         {
-            SalmonPassword.PbkdfImplType = PbkdfType.Default;
+            Password.Password.PbkdfImplType = PbkdfType.Default;
         }
-        catch (SalmonSecurityException e)
+        catch (SecurityException e)
         {
             throw new Exception("Could not run native test", e);
         }
@@ -62,7 +62,7 @@ public class SalmonNativeTests
 		Console.WriteLine("ProviderType: " + providerType);
 		Console.WriteLine("threads: " + threads);
 
-		SalmonStream.AesProviderType = providerType;
+		AesStream.AesProviderType = providerType;
 		ENC_THREADS = threads;
 		DEC_THREADS = threads;
     }
@@ -82,10 +82,10 @@ public class SalmonNativeTests
         CollectionAssert.AreEqual(bytes, decBytesDef);
 
         byte[] encBytes = SalmonCoreTestHelper.NativeCTRTransform(bytes, SalmonCoreTestHelper.TEST_KEY_BYTES, SalmonCoreTestHelper.TEST_NONCE_BYTES, true,
-                SalmonStream.AesProviderType);
+                AesStream.AesProviderType);
         CollectionAssert.AreEqual(encBytesDef, encBytes);
         byte[] decBytes = SalmonCoreTestHelper.NativeCTRTransform(encBytes, SalmonCoreTestHelper.TEST_KEY_BYTES, SalmonCoreTestHelper.TEST_NONCE_BYTES, false,
-                SalmonStream.AesProviderType);
+                AesStream.AesProviderType);
         CollectionAssert.AreEqual(bytes, decBytes);
     }
 
@@ -105,11 +105,11 @@ public class SalmonNativeTests
                 false);
         CollectionAssert.AreEqual(bytes, decBytesDef);
 
-        byte[] encBytes = new SalmonEncryptor(ENC_THREADS).Encrypt(bytes, SalmonCoreTestHelper.TEST_KEY_BYTES, SalmonCoreTestHelper.TEST_NONCE_BYTES, false,
+        byte[] encBytes = new Encryptor(ENC_THREADS).Encrypt(bytes, SalmonCoreTestHelper.TEST_KEY_BYTES, SalmonCoreTestHelper.TEST_NONCE_BYTES, false,
                                 false, null, null);
         CollectionAssert.AreEqual(encBytesDef, encBytes);
 
-        byte[] decBytes = new SalmonDecryptor(DEC_THREADS).Decrypt(encBytes, SalmonCoreTestHelper.TEST_KEY_BYTES, SalmonCoreTestHelper.TEST_NONCE_BYTES, false,
+        byte[] decBytes = new Decryptor(DEC_THREADS).Decrypt(encBytes, SalmonCoreTestHelper.TEST_KEY_BYTES, SalmonCoreTestHelper.TEST_NONCE_BYTES, false,
                 false, null, null);
         CollectionAssert.AreEqual(bytes, decBytes);
     }
@@ -131,10 +131,10 @@ public class SalmonNativeTests
                 false);
         CollectionAssert.AreEqual(bytes, decBytesDef);
 
-        byte[] encBytes = new SalmonEncryptor(ENC_THREADS).Encrypt(bytes, SalmonCoreTestHelper.TEST_KEY_BYTES, SalmonCoreTestHelper.TEST_NONCE_BYTES, false,
+        byte[] encBytes = new Encryptor(ENC_THREADS).Encrypt(bytes, SalmonCoreTestHelper.TEST_KEY_BYTES, SalmonCoreTestHelper.TEST_NONCE_BYTES, false,
                 false, null, null);
         CollectionAssert.AreEqual(encBytesDef, encBytes);
-        SalmonDecryptor decryptor = new SalmonDecryptor(DEC_THREADS, 32 + 2);
+        Decryptor decryptor = new Decryptor(DEC_THREADS, 32 + 2);
         byte[] decBytes = decryptor.Decrypt(encBytes, SalmonCoreTestHelper.TEST_KEY_BYTES, SalmonCoreTestHelper.TEST_NONCE_BYTES, false,
                 false, null, null);
         CollectionAssert.AreEqual(bytes, decBytes);
@@ -153,11 +153,11 @@ public class SalmonNativeTests
 
         int chunkSize = 256 * 1024;
         CollectionAssert.AreEqual(bytes, decBytesDef);
-        byte[] encBytes = new SalmonEncryptor(ENC_THREADS).Encrypt(bytes, SalmonCoreTestHelper.TEST_KEY_BYTES, SalmonCoreTestHelper.TEST_NONCE_BYTES, false,
+        byte[] encBytes = new Encryptor(ENC_THREADS).Encrypt(bytes, SalmonCoreTestHelper.TEST_KEY_BYTES, SalmonCoreTestHelper.TEST_NONCE_BYTES, false,
                 true, SalmonCoreTestHelper.TEST_HMAC_KEY_BYTES, chunkSize);
 
         AssertArrayEqualsWithIntegrity(encBytesDef, encBytes, chunkSize);
-        byte[] decBytes = new SalmonDecryptor(DEC_THREADS).Decrypt(encBytes, SalmonCoreTestHelper.TEST_KEY_BYTES, SalmonCoreTestHelper.TEST_NONCE_BYTES, false,
+        byte[] decBytes = new Decryptor(DEC_THREADS).Decrypt(encBytes, SalmonCoreTestHelper.TEST_KEY_BYTES, SalmonCoreTestHelper.TEST_NONCE_BYTES, false,
                 true, SalmonCoreTestHelper.TEST_HMAC_KEY_BYTES, chunkSize);
 
         CollectionAssert.AreEqual(bytes, decBytes);
@@ -174,10 +174,10 @@ public class SalmonNativeTests
             Array.Copy(buffer, i, buff1, 0, nChunkSize);
 
             byte[] buff2 = new byte[chunkSize];
-            Array.Copy(bufferWithIntegrity, index + SalmonGenerator.HASH_RESULT_LENGTH, buff2, 0, nChunkSize);
+            Array.Copy(bufferWithIntegrity, index + Generator.HASH_RESULT_LENGTH, buff2, 0, nChunkSize);
 
             CollectionAssert.AreEqual(buff1, buff2);
-            index += nChunkSize + SalmonGenerator.HASH_RESULT_LENGTH;
+            index += nChunkSize + Generator.HASH_RESULT_LENGTH;
         }
         Assert.AreEqual(bufferWithIntegrity.Length, index);
     }

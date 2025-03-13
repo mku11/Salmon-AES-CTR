@@ -30,7 +30,7 @@ namespace Mku.Salmon.Transform;
 /// <summary>
 ///  Salmon AES transformer based on c# System.Security.Cryptography
 /// </summary>
-public class SalmonDefaultTransformer : SalmonAES256CTRTransformer
+public class DefaultTransformer : AESCTRTransformer
 {
 
     /// <summary>
@@ -43,7 +43,7 @@ public class SalmonDefaultTransformer : SalmonAES256CTRTransformer
 	/// </summary>
 	///  <param name="key">The AES256 key to use.</param>
     ///  <param name="nonce">The nonce to use.</param>
-    ///  <exception cref="SalmonSecurityException">Thrown when error with security</exception>
+    ///  <exception cref="SecurityException">Thrown when error with security</exception>
     override
     public void Init(byte[] key, byte[] nonce)
     {
@@ -53,13 +53,13 @@ public class SalmonDefaultTransformer : SalmonAES256CTRTransformer
             Aes aes = Aes.Create();
             aes.Mode = CipherMode.ECB;
             aes.Padding = PaddingMode.None;
-            var zeroIv = new byte[SalmonAES256CTRTransformer.BLOCK_SIZE];
+            var zeroIv = new byte[AESCTRTransformer.BLOCK_SIZE];
             // we just initialize with a zero IV since we'll implement a custom CTR
             aesTransformer = aes.CreateEncryptor(key, zeroIv);
         }
         catch (Exception e)
         {
-            throw new SalmonSecurityException("Could not init AES transformer", e);
+            throw new SecurityException("Could not init AES transformer", e);
         }
     }
 
@@ -72,20 +72,20 @@ public class SalmonDefaultTransformer : SalmonAES256CTRTransformer
     ///  <param name="destOffset">The destination byte offset.</param>
     ///  <param name="count">The number of bytes to transform.</param>
     ///  <returns>The number of bytes transformed.</returns>
-    ///  <exception cref="SalmonSecurityException">Thrown when error with security</exception>
+    ///  <exception cref="SecurityException">Thrown when error with security</exception>
     override
     public int EncryptData(byte[] srcBuffer, int srcOffset,
                            byte[] destBuffer, int destOffset, int count)
     {
 		if (this.aesTransformer == null)
-            throw new SalmonSecurityException("No key defined, run init first");
+            throw new SecurityException("No key defined, run init first");
         try
         {
             return Transform(srcBuffer, srcOffset, destBuffer, destOffset, count);
         }
         catch (Exception ex)
         {
-            throw new SalmonSecurityException("Could not encrypt data: ", ex);
+            throw new SecurityException("Could not encrypt data: ", ex);
         }
     }
 
@@ -99,20 +99,20 @@ public class SalmonDefaultTransformer : SalmonAES256CTRTransformer
     ///  <param name="destOffset">The destination byte offset.</param>
     ///  <param name="count">The number of bytes to transform.</param>
     ///  <returns>The number of bytes transformed.</returns>
-    ///  <exception cref="SalmonSecurityException">Thrown when error with security</exception>
+    ///  <exception cref="SecurityException">Thrown when error with security</exception>
     override
     public int DecryptData(byte[] srcBuffer, int srcOffset,
                             byte[] destBuffer, int destOffset, int count)
     {
 		if (this.aesTransformer == null)
-            throw new SalmonSecurityException("No key defined, run init first");
+            throw new SecurityException("No key defined, run init first");
         try
         {
             return Transform(srcBuffer, srcOffset, destBuffer, destOffset, count);
         }
         catch (Exception ex)
         {
-            throw new SalmonSecurityException("Could not decrypt data: ", ex);
+            throw new SecurityException("Could not decrypt data: ", ex);
         }
     }
 	
@@ -120,11 +120,11 @@ public class SalmonDefaultTransformer : SalmonAES256CTRTransformer
     {
         byte[] encCounter = new byte[Counter.Length];
         int totalBytes = 0;
-        for (int i = 0; i < count; i += SalmonAES256CTRTransformer.BLOCK_SIZE)
+        for (int i = 0; i < count; i += AESCTRTransformer.BLOCK_SIZE)
         {
             aesTransformer.TransformBlock(Counter, 0, Counter.Length, encCounter, 0);
             // xor the plain text with the encrypted counter
-            for (int k = 0; k < SalmonAES256CTRTransformer.BLOCK_SIZE && i + k < count; k++)
+            for (int k = 0; k < AESCTRTransformer.BLOCK_SIZE && i + k < count; k++)
             {
                 destBuffer[destOffset + i + k] = (byte)(srcBuffer[srcOffset + i + k] ^ encCounter[k]);
                 totalBytes++;

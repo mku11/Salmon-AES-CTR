@@ -29,15 +29,15 @@ using System;
 namespace Mku.SalmonFS.Drive;
 
 /// <summary>
-///  SalmonDrive implementation for Salmon REST API. This provides a virtual drive implementation
+///  AesDrive implementation for Salmon REST API. This provides a virtual drive implementation
 ///  that you can use to remotely store and access encrypted files. This 
 /// </summary>
-public class DotNetWSDrive : SalmonDrive
+public class WSDrive : AesDrive
 {
     /// <summary>
     /// Private constructor, use open() or create() instead.
     /// </summary>
-    private DotNetWSDrive()
+    private WSDrive()
     {
 
     }
@@ -49,9 +49,9 @@ public class DotNetWSDrive : SalmonDrive
     /// <param name="password">The password</param>
     /// <param name="sequencer">The nonce sequencer that will be used for encryption.</param>
     /// <returns>The drive</returns>
-    public static SalmonDrive Open(IRealFile dir, string password, INonceSequencer sequencer)
+    public static AesDrive Open(IFile dir, string password, INonceSequencer sequencer)
     {
-        return SalmonDrive.OpenDrive(dir, typeof(DotNetWSDrive), password, sequencer);
+        return AesDrive.OpenDrive(dir, typeof(WSDrive), password, sequencer);
     }
 
     /// <summary>
@@ -61,9 +61,9 @@ public class DotNetWSDrive : SalmonDrive
     /// <param name="password">The password</param>
     /// <param name="sequencer">The nonce sequencer that will be used for encryption.</param>
     /// <returns>The drive</returns>
-    public static SalmonDrive Create(IRealFile dir, string password, INonceSequencer sequencer)
+    public static AesDrive Create(IFile dir, string password, INonceSequencer sequencer)
     {
-        return SalmonDrive.CreateDrive(dir, typeof(DotNetWSDrive), password, sequencer);
+        return AesDrive.CreateDrive(dir, typeof(WSDrive), password, sequencer);
     }
 
     /// <summary>
@@ -72,7 +72,7 @@ public class DotNetWSDrive : SalmonDrive
     ///  <returns>The private directory</returns>
     ///  <exception cref="Exception">Thrown if error during operation</exception>
     override
-    public IRealFile PrivateDir
+    public IFile PrivateDir
     {
         get { throw new NotSupportedException(); }
     }

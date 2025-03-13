@@ -33,7 +33,7 @@ namespace Mku.Salmon.Integrity;
 ///  Provide operations for calculating, storing, and verifying data integrity.
 ///  This class operates in chunks of data in buffers calculating the hash for each one.
 /// </summary>
-public class SalmonIntegrity
+public class Integrity
 {
     /// <summary>
     ///  Maximum chunk size for data integrity.
@@ -76,24 +76,24 @@ public class SalmonIntegrity
     ///  <param name="provider"> Hash implementation provider.</param>
     ///  <param name="hashSize">The hash size.</param>
     ///  <exception cref="IntegrityException">Thrown when data are corrupt or tampered with.</exception>
-    ///  <exception cref="SalmonSecurityException">Thrown when error with security</exception>
-    public SalmonIntegrity(bool integrity, byte[] key, int? chunkSize,
+    ///  <exception cref="SecurityException">Thrown when error with security</exception>
+    public Integrity(bool integrity, byte[] key, int? chunkSize,
                            IHashProvider provider, int hashSize)
     {
-        if (chunkSize != null && (chunkSize < 0 || (chunkSize > 0 && chunkSize < SalmonAES256CTRTransformer.BLOCK_SIZE)
-                || (chunkSize > 0 && chunkSize % SalmonAES256CTRTransformer.BLOCK_SIZE != 0) || chunkSize > MAX_CHUNK_SIZE))
+        if (chunkSize != null && (chunkSize < 0 || (chunkSize > 0 && chunkSize < AESCTRTransformer.BLOCK_SIZE)
+                || (chunkSize > 0 && chunkSize % AESCTRTransformer.BLOCK_SIZE != 0) || chunkSize > MAX_CHUNK_SIZE))
         {
             throw new IntegrityException("Invalid chunk size, specify zero for default value or a positive number multiple of: "
-                    + SalmonAES256CTRTransformer.BLOCK_SIZE + " and less than: " + SalmonIntegrity.MAX_CHUNK_SIZE + " bytes");
+                    + AESCTRTransformer.BLOCK_SIZE + " and less than: " + Integrity.MAX_CHUNK_SIZE + " bytes");
         }
         if (integrity && key == null)
-            throw new SalmonSecurityException("You need a hash to use with integrity");
+            throw new SecurityException("You need a hash to use with integrity");
         if (integrity && (chunkSize == null || chunkSize == 0))
             this.ChunkSize = DEFAULT_CHUNK_SIZE;
         else if (chunkSize != null && (integrity || chunkSize > 0))
             this.ChunkSize = (int)chunkSize;
         if (hashSize < 0)
-            throw new SalmonSecurityException("Hash size should be a positive number");
+            throw new SecurityException("Hash size should be a positive number");
         this.Key = key;
         this.provider = provider;
         this.integrity = integrity;
@@ -160,7 +160,7 @@ public class SalmonIntegrity
     {
         if (ChunkSize <= 0)
             return 0;
-        return SalmonIntegrity.GetTotalHashDataLength(count, ChunkSize, hashOffset, hashSize);
+        return Integrity.GetTotalHashDataLength(count, ChunkSize, hashOffset, hashSize);
     }
 
     /// <summary>
@@ -199,10 +199,10 @@ public class SalmonIntegrity
         if (!integrity)
             return null;
         IList<byte[]> hashes = new List<byte[]>();
-        for (int i = 0; i < buffer.Length; i += SalmonGenerator.HASH_KEY_LENGTH + ChunkSize)
+        for (int i = 0; i < buffer.Length; i += Generator.HASH_KEY_LENGTH + ChunkSize)
         {
-            byte[] hash = new byte[SalmonGenerator.HASH_KEY_LENGTH];
-            Array.Copy(buffer, i, hash, 0, SalmonGenerator.HASH_KEY_LENGTH);
+            byte[] hash = new byte[Generator.HASH_KEY_LENGTH];
+            Array.Copy(buffer, i, hash, 0, Generator.HASH_KEY_LENGTH);
             hashes.Add(hash);
         }
         return hashes.ToArray();

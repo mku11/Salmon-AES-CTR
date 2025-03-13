@@ -30,7 +30,7 @@ namespace Mku.SalmonFS.Drive;
 /// <summary>
 ///  Utility class generates internal secure properties for the drive.
 /// </summary>
-public class SalmonDriveGenerator
+public class DriveGenerator
 {
     /// <summary>
     ///  Initial vector length that will be used for encryption and master encryption of the combined key
@@ -39,7 +39,7 @@ public class SalmonDriveGenerator
     /// <summary>
     ///  combined key is drive key + hash key.
     /// </summary>
-    public static readonly int COMBINED_KEY_LENGTH = SalmonGenerator.KEY_LENGTH + SalmonGenerator.HASH_KEY_LENGTH;
+    public static readonly int COMBINED_KEY_LENGTH = Generator.KEY_LENGTH + Generator.HASH_KEY_LENGTH;
     /// <summary>
     ///  Salt length.
     /// </summary>
@@ -72,7 +72,7 @@ public class SalmonDriveGenerator
 	///  <returns>The Drive ID.</returns>
     public static byte[] GenerateDriveId()
     {
-        return SalmonGenerator.GetSecureRandomBytes(DRIVE_ID_LENGTH);
+        return Generator.GetSecureRandomBytes(DRIVE_ID_LENGTH);
     }
 
     /// <summary>
@@ -81,7 +81,7 @@ public class SalmonDriveGenerator
 	///  <returns>The authorization Id (16 bytes).</returns>
     public static byte[] GenerateAuthId()
     {
-        return SalmonGenerator.GetSecureRandomBytes(AUTH_ID_SIZE);
+        return Generator.GetSecureRandomBytes(AUTH_ID_SIZE);
     }
 
     /// <summary>
@@ -90,7 +90,7 @@ public class SalmonDriveGenerator
 	///  <returns>The length of the combined key.</returns>
     public static byte[] GenerateCombinedKey()
     {
-        return SalmonGenerator.GetSecureRandomBytes(COMBINED_KEY_LENGTH);
+        return Generator.GetSecureRandomBytes(COMBINED_KEY_LENGTH);
     }
 
     /// <summary>
@@ -98,7 +98,7 @@ public class SalmonDriveGenerator
     /// </summary>
     public static byte[] GenerateMasterKeyIV()
     {
-        return SalmonGenerator.GetSecureRandomBytes(IV_LENGTH);
+        return Generator.GetSecureRandomBytes(IV_LENGTH);
     }
 
     /// <summary>
@@ -107,7 +107,7 @@ public class SalmonDriveGenerator
 	///  <returns>The salt byte array.</returns>
     public static byte[] GenerateSalt()
     {
-        return SalmonGenerator.GetSecureRandomBytes(SALT_LENGTH);
+        return Generator.GetSecureRandomBytes(SALT_LENGTH);
     }
 
     /// <summary>
@@ -116,7 +116,7 @@ public class SalmonDriveGenerator
 	///  <returns>A secure random byte array (8 bytes).</returns>
     public static byte[] GetStartingNonce()
     {
-        byte[] bytes = new byte[SalmonGenerator.NONCE_LENGTH];
+        byte[] bytes = new byte[Generator.NONCE_LENGTH];
         return bytes;
     }
 
@@ -145,7 +145,7 @@ public class SalmonDriveGenerator
 	///  <param name="iterations">The iterations</param>
     public static void SetIterations(int iterations)
     {
-        SalmonDriveGenerator.iterations = iterations;
+        DriveGenerator.iterations = iterations;
     }
 
 }

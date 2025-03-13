@@ -33,7 +33,7 @@ namespace Mku.Salmon.Streams;
 ///  Stream decorator provides AES256 encryption and decryption of stream.
 ///  Block data integrity is also supported.
 /// </summary>
-public class SalmonStream : Stream
+public class AesStream : Stream
 {
     /// <summary>
     ///  Header data embedded in the stream if available.
@@ -75,17 +75,17 @@ public class SalmonStream : Stream
     /// <summary>
     ///  The transformer to use for encryption.
     /// </summary>
-    private ISalmonCTRTransformer transformer;
+    private ICTRTransformer transformer;
 
     /// <summary>
     ///  The integrity to use for hash signature creation and validation.
     /// </summary>
-    private SalmonIntegrity salmonIntegrity;
+    private Integrity.Integrity salmonIntegrity;
 
     /// <summary>
     /// Default buffer size for all internal streams including Encryptors and Decryptors
     /// </summary>
-    public int BufferSize { get; set; } = SalmonIntegrity.DEFAULT_CHUNK_SIZE;
+    public int BufferSize { get; set; } = Integrity.Integrity.DEFAULT_CHUNK_SIZE;
 
     /// <summary>
     ///  Instantiate a new Salmon stream with a base stream and optional header data and hash integrity.
@@ -107,7 +107,7 @@ public class SalmonStream : Stream
     ///  <param name="integrity">     enable integrity</param>
     ///  <param name="chunkSize">     the chunk size to be used with integrity</param>
     ///  <param name="hashKey">       Hash key to be used with integrity</param>
-    public SalmonStream(byte[] key, byte[] nonce, EncryptionMode encryptionMode,
+    public AesStream(byte[] key, byte[] nonce, EncryptionMode encryptionMode,
                         Stream baseStream, byte[] headerData = null,
                         bool integrity = false, int? chunkSize = null, byte[] hashKey = null)
     {
@@ -130,7 +130,7 @@ public class SalmonStream : Stream
         get
         {
             long totalHashBytes;
-            int hashOffset = salmonIntegrity.ChunkSize > 0 ? SalmonGenerator.HASH_RESULT_LENGTH : 0;
+            int hashOffset = salmonIntegrity.ChunkSize > 0 ? Generator.HASH_RESULT_LENGTH : 0;
             totalHashBytes = salmonIntegrity.GetHashDataLength(baseStream.Length - 1, hashOffset);
 
             return baseStream.Length - GetHeaderLength() - totalHashBytes;
@@ -171,14 +171,14 @@ public class SalmonStream : Stream
             if (CanWrite && !AllowRangeWrite && value != 0)
             {
                 throw new IOException("Could not get stream position",
-                        new SalmonSecurityException("Range Write is not allowed for security (non-reusable IVs). " +
+                        new SecurityException("Range Write is not allowed for security (non-reusable IVs). " +
                                 "If you still want to take the risk you need to use SetAllowRangeWrite(true)"));
             }
             try
             {
                 SetVirtualPosition(value);
             }
-            catch (SalmonRangeExceededException e)
+            catch (RangeExceededException e)
             {
                 throw new IOException("Could not set position", e);
             }
@@ -221,8 +221,8 @@ public class SalmonStream : Stream
     ///  <param name="chunkSize">The chunk size</param>
     private void InitIntegrity(bool integrity, byte[] hashKey, int? chunkSize)
     {
-        salmonIntegrity = new SalmonIntegrity(integrity, hashKey, chunkSize,
-                new HmacSHA256Provider(), SalmonGenerator.HASH_RESULT_LENGTH);
+        salmonIntegrity = new Integrity.Integrity(integrity, hashKey, chunkSize,
+                new HmacSHA256Provider(), Generator.HASH_RESULT_LENGTH);
     }
 
     /// <summary>
@@ -254,11 +254,11 @@ public class SalmonStream : Stream
     private void InitTransformer(byte[] key, byte[] nonce)
     {
         if (key == null)
-            throw new SalmonSecurityException("Key is missing");
+            throw new SecurityException("Key is missing");
         if (nonce == null)
-            throw new SalmonSecurityException("Nonce is missing");
+            throw new SecurityException("Nonce is missing");
 
-        transformer = SalmonTransformerFactory.Create(AesProviderType);
+        transformer = TransformerFactory.Create(AesProviderType);
         transformer.Init(key, nonce);
         transformer.ResetCounter();
     }
@@ -348,7 +348,7 @@ public class SalmonStream : Stream
     ///  Set the virtual position of the stream.
 	/// </summary>
 	///  <param name="value">The new position</param>
-    ///  <exception cref="SalmonRangeExceededException">Thrown when maximum nonce range is exceeded.</exception>
+    ///  <exception cref="RangeExceededException">Thrown when maximum nonce range is exceeded.</exception>
     private void SetVirtualPosition(long value)
     {
         // we skip the header bytes and any hash values we have if the file has integrity set
@@ -366,7 +366,7 @@ public class SalmonStream : Stream
     private long GetVirtualPosition()
     {
         long totalHashBytes;
-        int hashOffset = salmonIntegrity.ChunkSize > 0 ? SalmonGenerator.HASH_RESULT_LENGTH : 0;
+        int hashOffset = salmonIntegrity.ChunkSize > 0 ? Generator.HASH_RESULT_LENGTH : 0;
         totalHashBytes = salmonIntegrity.GetHashDataLength(baseStream.Position, hashOffset);
         return baseStream.Position - GetHeaderLength() - totalHashBytes;
     }
@@ -405,7 +405,7 @@ public class SalmonStream : Stream
         {
             // read partially once
             Position = Position - alignedOffset;
-            int nCount = salmonIntegrity.ChunkSize > 0 ? salmonIntegrity.ChunkSize : SalmonGenerator.BLOCK_SIZE;
+            int nCount = salmonIntegrity.ChunkSize > 0 ? salmonIntegrity.ChunkSize : Generator.BLOCK_SIZE;
             byte[] buff = new byte[nCount];
             bytes = Read(buff, 0, nCount);
             bytes = Math.Min(bytes - alignedOffset, count);
@@ -444,8 +444,8 @@ public class SalmonStream : Stream
             return 0;
         if (salmonIntegrity.ChunkSize > 0 && Position % salmonIntegrity.ChunkSize != 0)
             throw new IOException("All reads should be aligned to the chunks size: " + salmonIntegrity.ChunkSize);
-        else if (salmonIntegrity.ChunkSize == 0 && Position % SalmonAES256CTRTransformer.BLOCK_SIZE != 0)
-            throw new IOException("All reads should be aligned to the block size: " + SalmonAES256CTRTransformer.BLOCK_SIZE);
+        else if (salmonIntegrity.ChunkSize == 0 && Position % AESCTRTransformer.BLOCK_SIZE != 0)
+            throw new IOException("All reads should be aligned to the block size: " + AESCTRTransformer.BLOCK_SIZE);
 
         long pos = Position;
 
@@ -512,10 +512,10 @@ public class SalmonStream : Stream
             throw new IOException("Could not write to stream",
                     new IntegrityException("All write operations should be aligned to the chunks size: "
                             + salmonIntegrity.ChunkSize));
-        else if (salmonIntegrity.ChunkSize == 0 && Position % SalmonAES256CTRTransformer.BLOCK_SIZE != 0)
+        else if (salmonIntegrity.ChunkSize == 0 && Position % AESCTRTransformer.BLOCK_SIZE != 0)
             throw new IOException("Could not write to stream",
                     new IntegrityException("All write operations should be aligned to the block size: "
-                            + SalmonAES256CTRTransformer.BLOCK_SIZE));
+                            + AESCTRTransformer.BLOCK_SIZE));
 
         // if there are not enough data in the buffer
         count = Math.Min(count, buffer.Length - offset);
@@ -561,7 +561,7 @@ public class SalmonStream : Stream
         }
         else
         {
-            alignOffset = (int)(Position % SalmonAES256CTRTransformer.BLOCK_SIZE);
+            alignOffset = (int)(Position % AESCTRTransformer.BLOCK_SIZE);
         }
         return alignOffset;
     }
@@ -589,13 +589,13 @@ public class SalmonStream : Stream
                 bufferSize = partSize;
 
             if (includeHashes)
-                bufferSize += bufferSize / ChunkSize * SalmonGenerator.HASH_RESULT_LENGTH;
+                bufferSize += bufferSize / ChunkSize * Generator.HASH_RESULT_LENGTH;
         }
         else
         {
             // buffer size should also be a multiple of the AES block size
-            bufferSize = bufferSize / SalmonAES256CTRTransformer.BLOCK_SIZE
-                   * SalmonAES256CTRTransformer.BLOCK_SIZE;
+            bufferSize = bufferSize / AESCTRTransformer.BLOCK_SIZE
+                   * AESCTRTransformer.BLOCK_SIZE;
         }
 
         return bufferSize;
@@ -680,15 +680,15 @@ public class SalmonStream : Stream
     ///  <returns>The buffer without the hash signatures</returns>
     private byte[] StripSignatures(byte[] buffer, int chunkSize)
     {
-        int bytes = buffer.Length / (chunkSize + SalmonGenerator.HASH_RESULT_LENGTH) * chunkSize;
-        if (buffer.Length % (chunkSize + SalmonGenerator.HASH_RESULT_LENGTH) != 0)
-            bytes += buffer.Length % (chunkSize + SalmonGenerator.HASH_RESULT_LENGTH) - SalmonGenerator.HASH_RESULT_LENGTH;
+        int bytes = buffer.Length / (chunkSize + Generator.HASH_RESULT_LENGTH) * chunkSize;
+        if (buffer.Length % (chunkSize + Generator.HASH_RESULT_LENGTH) != 0)
+            bytes += buffer.Length % (chunkSize + Generator.HASH_RESULT_LENGTH) - Generator.HASH_RESULT_LENGTH;
         byte[] buff = new byte[bytes];
         int index = 0;
-        for (int i = 0; i < buffer.Length; i += chunkSize + SalmonGenerator.HASH_RESULT_LENGTH)
+        for (int i = 0; i < buffer.Length; i += chunkSize + Generator.HASH_RESULT_LENGTH)
         {
             int nChunkSize = Math.Min(chunkSize, buff.Length - index);
-            Array.Copy(buffer, i + SalmonGenerator.HASH_RESULT_LENGTH, buff, index, nChunkSize);
+            Array.Copy(buffer, i + Generator.HASH_RESULT_LENGTH, buff, index, nChunkSize);
             index += nChunkSize;
         }
         return buff;

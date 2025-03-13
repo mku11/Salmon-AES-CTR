@@ -37,7 +37,7 @@ namespace Mku.FS.Streams;
  * An advanced Salmon File Stream implementation for java files.
  * This class is used internally for random file access of remote physical (real) files.
  */
-public class DotNetHttpFileStream : Stream
+public class HttpFileStream : Stream
 {
 
     private HttpClient client;
@@ -50,7 +50,7 @@ public class DotNetHttpFileStream : Stream
      * The network output stream associated.
      */
     private bool closed;
-    private DotNetHttpFile file;
+    private HttpFile file;
     /**
      * Maximum amount of bytes allowed to skip forwards when seeking otherwise will open a new connection
      */
@@ -59,7 +59,7 @@ public class DotNetHttpFileStream : Stream
     private long position;
     private HttpResponseMessage httpResponse;
 
-    public DotNetHttpFileStream(DotNetHttpFile file, FileAccess access)
+    public HttpFileStream(HttpFile file, FileAccess access)
     {
         this.file = file;
         if (access == FileAccess.Write)

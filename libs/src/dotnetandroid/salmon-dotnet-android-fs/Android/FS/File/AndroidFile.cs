@@ -38,11 +38,11 @@ using Mku.Android.FS.Streams;
 namespace Mku.Android.FS.File;
 
 /// <summary>
-///  Implementation of the IRealFile for Android using Storage Access Framework that supports read/write to external SD cards.
-///  This class is used by the AndroidDrive implementation so you can use SalmonFile wrapper transparently
+///  Implementation of the IFile for Android using Storage Access Framework that supports read/write to external SD cards.
+///  This class is used by the AndroidDrive implementation so you can use AesFile wrapper transparently
 /// </summary>
 ///
-public class AndroidFile : IRealFile
+public class AndroidFile : IFile
 {
     private Context context;
     private DocumentFile documentFile;
@@ -65,7 +65,7 @@ public class AndroidFile : IRealFile
         this.context = context;
     }
 
-    public IRealFile CreateDirectory(string dirName)
+    public IFile CreateDirectory(string dirName)
     {
         DocumentFile dir = documentFile.CreateDirectory(dirName);
         if (dir == null)
@@ -76,7 +76,7 @@ public class AndroidFile : IRealFile
 
     }
 
-    public IRealFile CreateFile(string filename)
+    public IFile CreateFile(string filename)
     {
         DocumentFile doc = documentFile.CreateFile("*/*", filename);
         // for some reason android storage access framework even though it supports auto rename
@@ -175,7 +175,7 @@ public class AndroidFile : IRealFile
     ///  Get the parent directory.
 	/// </summary>
 	///  <returns>The parent directory</returns>
-    public IRealFile Parent
+    public IFile Parent
     {
         get
         {
@@ -267,13 +267,13 @@ public class AndroidFile : IRealFile
     ///  List files and directories.
 	/// </summary>
 	///  <returns>The files and subdirectories</returns>
-    public IRealFile[] ListFiles()
+    public IFile[] ListFiles()
     {
         DocumentFile[] files = documentFile.ListFiles();
         if (files == null)
             return new AndroidFile[0];
-        List<IRealFile> realFiles = new List<IRealFile>();
-        List<IRealFile> realDirs = new List<IRealFile>();
+        List<IFile> realFiles = new List<IFile>();
+        List<IFile> realDirs = new List<IFile>();
         for (int i = 0; i < files.Length; i++)
         {
             AndroidFile file = new AndroidFile(files[i], context);
@@ -293,7 +293,7 @@ public class AndroidFile : IRealFile
     ///  <param name="progressListener">Observer to notify of the move progress.</param>
     ///  <returns>The moved file</returns>
     ///  <exception cref="IOException">Thrown if error during IO</exception>
-    public IRealFile Move(IRealFile newDir, string newName = null,
+    public IFile Move(IFile newDir, string newName = null,
         Action<long,long> progressListener = null)
     {
         // target directory is the same
@@ -314,7 +314,7 @@ public class AndroidFile : IRealFile
                     documentFile.Uri, documentFile.ParentFile.Uri, androidDir.documentFile.Uri);
             if (progressListener != null)
                 progressListener(1, 1);
-            IRealFile file = androidDir.GetChild(BaseName);
+            IFile file = androidDir.GetChild(BaseName);
             if (file != null && newName != null)
                 file.RenameTo(newName);
             if(Parent!=null)
@@ -336,7 +336,7 @@ public class AndroidFile : IRealFile
     ///  <param name="progressListener">Observer to notify of the copy progress.</param>
     ///  <returns>The new file</returns>
     ///  <exception cref="IOException">Thrown if error during IO</exception>
-    public IRealFile Copy(IRealFile newDir, string newName = null,
+    public IFile Copy(IFile newDir, string newName = null,
         Action<long,long> progressListener = null)
     {
         return Copy(newDir, newName, false, progressListener);
@@ -350,25 +350,25 @@ public class AndroidFile : IRealFile
     ///  <param name="progressListener">The progess listener</param>
     ///  <returns>The new file</returns>
     ///  <exception cref="IOException">Thrown if error during IO</exception>
-    private IRealFile Copy(IRealFile newDir, string newName = null,
+    private IFile Copy(IFile newDir, string newName = null,
         bool delete = false, Action<long,long> progressListener = null)
     {
         if (newDir == null || !newDir.Exists)
             throw new IOException("Target directory does not exists");
 
         newName = newName ?? BaseName;
-        IRealFile dir = newDir.GetChild(newName);
+        IFile dir = newDir.GetChild(newName);
         if (dir != null)
             throw new IOException("Target file/directory already exists");
         if (IsDirectory)
         {
-            IRealFile file = newDir.CreateDirectory(newName);
+            IFile file = newDir.CreateDirectory(newName);
             return file;
         }
         else
         {
-            IRealFile newFile = newDir.CreateFile(newName);
-            IRealFile.CopyFileContents(this, newFile, delete, progressListener);
+            IFile newFile = newDir.CreateFile(newName);
+            IFile.CopyFileContents(this, newFile, delete, progressListener);
             return newFile;
         }
     }
@@ -378,7 +378,7 @@ public class AndroidFile : IRealFile
 	/// </summary>
 	///  <param name="filename">The name of the file or directory to match.</param>
     ///  <returns>The child file</returns>
-    public IRealFile GetChild(string filename)
+    public IFile GetChild(string filename)
     {
         DocumentFile[] documentFiles = documentFile.ListFiles();
         foreach (DocumentFile documentFile in documentFiles)
@@ -411,10 +411,10 @@ public class AndroidFile : IRealFile
 	///  <returns>True if directory created</returns>
     public bool Mkdir()
     {
-        IRealFile parent = Parent;
+        IFile parent = Parent;
         if (parent != null)
         {
-            IRealFile dir = parent.CreateDirectory(BaseName);
+            IFile dir = parent.CreateDirectory(BaseName);
             return dir.Exists && dir.IsDirectory;
         }
         return false;

@@ -1,7 +1,3 @@
-using Mku.Salmon.Sequence;
-using System;
-
-namespace Mku.Salmon.Integrity;
 /*
 MIT License
 
@@ -25,6 +21,11 @@ LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 */
+
+using Mku.Salmon.Sequence;
+using System;
+
+namespace Mku.Win.Salmon.Sequencer;
 
 /// <summary>
 ///  Thrown when tampering has been detected in the nonce sequencer.

@@ -22,32 +22,29 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 */
 
-namespace Salmon.Win.Sequencer;
-
 using Mku.FS.File;
-using Mku.Salmon.Integrity;
 using Mku.Salmon.Sequence;
 using Mku.SalmonFS.Sequence;
-using Salmon.Win.Registry;
-using System;
 using System.Security.Cryptography;
+
+namespace Mku.Win.Salmon.Sequencer;
 
 /// <summary>
 /// File Sequencer for Windows with tamper protection.
 /// </summary>
-public class WinFileSequencer : SalmonFileSequencer
+public class WinFileSequencer : FileSequencer
 {
 #pragma warning disable CA1416 // Validate platform compatibility
     /// <summary>
     /// The registry key to save the checksum.
     /// </summary>
     public string CheckSumKey { get; set; }
-    private SalmonRegistry registry = new SalmonRegistry();
+    private Registry.Registry registry = new Registry.Registry();
 
     /// <summary>
     /// Instantiate a windows file sequencer.
     /// </summary>
-    public WinFileSequencer(IRealFile sequenceFile, INonceSequenceSerializer serializer, string regCheckSumKey) 
+    public WinFileSequencer(IFile sequenceFile, INonceSequenceSerializer serializer, string regCheckSumKey) 
         : base(sequenceFile, serializer)
     {
 		if(regCheckSumKey == null)
@@ -99,7 +96,7 @@ public class WinFileSequencer : SalmonFileSequencer
         SHA256 sha256 = SHA256.Create();
         byte[] inputBytes = System.Text.Encoding.UTF8.GetBytes(contents);
         byte[] hashBytes = sha256.ComputeHash(inputBytes);
-        return Convert.ToHexString(hashBytes).ToUpper();
+        return System.Convert.ToHexString(hashBytes).ToUpper();
     }
 
     /// <summary>

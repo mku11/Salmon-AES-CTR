@@ -29,13 +29,13 @@ namespace Mku.Salmon;
 /// <summary>
 ///  Salmon generic security exception.
 /// </summary>
-public class SalmonSecurityException : Exception
+public class SecurityException : Exception
 {
     /// <summary>
     ///  Construct an exception with a specific message.
 	/// </summary>
 	///  <param name="msg">The provided message.</param>
-    public SalmonSecurityException(string msg) : base(msg)
+    public SecurityException(string msg) : base(msg)
     {
 
     }
@@ -45,7 +45,7 @@ public class SalmonSecurityException : Exception
 	/// </summary>
 	///  <param name="msg">The provided message.</param>
     ///  <param name="ex">The inner exception.</param>
-    public SalmonSecurityException(string msg, Exception ex) : base(msg, ex)
+    public SecurityException(string msg, Exception ex) : base(msg, ex)
     {
 
     }

@@ -29,13 +29,13 @@ namespace Mku.SalmonFS.Auth;
 /// <summary>
 ///  Thrown when there is a failure in the nonce sequencer.
 /// </summary>
-public class SalmonAuthException : Exception
+public class AuthException : Exception
 {
     /// <summary>
     ///  Construct an exception with a specific message.
 	/// </summary>
 	///  <param name="msg">The message</param>
-    public SalmonAuthException(string msg) : base(msg)
+    public AuthException(string msg) : base(msg)
     {
 
     }
@@ -45,7 +45,7 @@ public class SalmonAuthException : Exception
 	/// </summary>
 	///  <param name="msg">The provided message</param>
     ///  <param name="ex">The inner exception</param>
-    public SalmonAuthException(string msg, Exception ex) : base(msg, ex)
+    public AuthException(string msg, Exception ex) : base(msg, ex)
     {
 
     }

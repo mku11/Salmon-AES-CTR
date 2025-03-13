@@ -42,7 +42,7 @@ namespace Mku.FS.Streams;
  * An advanced Salmon File Stream implementation for java files.
  * This class is used internally for random file access of remote physical (real) files.
  */
-public class DotNetWSFileStream : Stream
+public class WSFileStream : Stream
 {
     private static readonly string PATH = "path";
     private static readonly string POSITION = "position";
@@ -59,7 +59,7 @@ public class DotNetWSFileStream : Stream
      */
     private Stream outputStream;
     private bool closed;
-    private DotNetWSFile file;
+    private WSFile file;
     /**
      * Maximum amount of bytes allowed to skip forwards when seeking otherwise will open a new connection
      */
@@ -70,7 +70,7 @@ public class DotNetWSFileStream : Stream
     private HttpResponseMessage httpResponse;
     private HttpResponseMessage outHttpResponse;
 
-    public DotNetWSFileStream(DotNetWSFile file, FileAccess access)
+    public WSFileStream(WSFile file, FileAccess access)
     {
         this.file = file;
         if (access == FileAccess.Write)

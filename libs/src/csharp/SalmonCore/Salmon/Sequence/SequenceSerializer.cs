@@ -34,7 +34,7 @@ namespace Mku.Salmon.Sequence;
 /// <summary>
 ///  Serializes sequences for all the drives the device is authorized.
 /// </summary>
-public class SalmonSequenceSerializer : INonceSequenceSerializer
+public class SequenceSerializer : INonceSequenceSerializer
 {
 
     /// <summary>

@@ -28,16 +28,16 @@ using System;
 namespace Mku.SalmonFS.Drive;
 
 /// <summary>
-///  SalmonDrive implementation for Salmon REST API. This provides a virtual drive implementation
+///  AesDrive implementation for Salmon REST API. This provides a virtual drive implementation
 ///  that you can use to remotely store and access encrypted files. This 
 /// </summary>
-public class DotNetHttpDrive : SalmonDrive
+public class HttpDrive : AesDrive
 {
 
     /// <summary>
     /// Private constructor, use open() or create() instead.
     /// </summary>
-    private DotNetHttpDrive()
+    private HttpDrive()
     {
 
     }
@@ -48,9 +48,9 @@ public class DotNetHttpDrive : SalmonDrive
     /// <param name="dir">The directory that will host the drive.</param>
     /// <param name="password">The password</param>
     /// <returns>The drive</returns>
-    public static SalmonDrive Open(IRealFile dir, string password)
+    public static AesDrive Open(IFile dir, string password)
     {
-        return SalmonDrive.OpenDrive(dir, typeof(DotNetHttpDrive), password);
+        return AesDrive.OpenDrive(dir, typeof(HttpDrive), password);
     }
 
 
@@ -60,7 +60,7 @@ public class DotNetHttpDrive : SalmonDrive
     ///  <returns>The private directory</returns>
     ///  <exception cref="Exception">Thrown if error during operation</exception>
     override
-    public IRealFile PrivateDir
+    public IFile PrivateDir
     {
         get { throw new NotSupportedException(); }
     }

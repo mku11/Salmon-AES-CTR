@@ -29,13 +29,13 @@ namespace Mku.Salmon;
 /// <summary>
 ///  Thrown when maximum nonce range is exceeded.
 /// </summary>
-public class SalmonRangeExceededException : Exception
+public class RangeExceededException : Exception
 {
     /// <summary>
     ///  Construct an exception with a specific message.
 	/// </summary>
 	///  <param name="msg">The message.</param>
-    public SalmonRangeExceededException(string msg) : base(msg)
+    public RangeExceededException(string msg) : base(msg)
     {
 
     }

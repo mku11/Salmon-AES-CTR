@@ -72,7 +72,7 @@ public class SalmonCorePerfTests
     [TestMethod]
     public void EncryptAndDecryptPerfSalmonNativeAes()
     {
-        SalmonStream.AesProviderType = ProviderType.Aes;
+        AesStream.AesProviderType = ProviderType.Aes;
         // warm up
         SalmonCoreTestHelper.EncryptAndDecryptByteArrayNative(TEST_PERF_SIZE, false);
         Console.WriteLine("Salmon Native Aes: ");
@@ -83,7 +83,7 @@ public class SalmonCorePerfTests
     [TestMethod]
     public void EncryptAndDecryptPerfSalmonNativeAesIntrinsics()
     {
-        SalmonStream.AesProviderType = ProviderType.AesIntrinsics;
+        AesStream.AesProviderType = ProviderType.AesIntrinsics;
         // warm up
         SalmonCoreTestHelper.EncryptAndDecryptByteArrayNative(TEST_PERF_SIZE, false);
         Console.WriteLine("Salmon Native Intr: ");
@@ -96,7 +96,7 @@ public class SalmonCorePerfTests
     {
 		if(!SalmonCoreTestHelper.IsGPUEnabled())
 			return;
-        SalmonStream.AesProviderType = ProviderType.AesGPU;
+        AesStream.AesProviderType = ProviderType.AesGPU;
         // warm up
         SalmonCoreTestHelper.EncryptAndDecryptByteArrayNative(TEST_PERF_SIZE, false);
         Console.WriteLine("Salmon Native GPU: ");
@@ -107,10 +107,10 @@ public class SalmonCorePerfTests
     [TestMethod]
     public void EncryptAndDecryptStreamPerfSalmonDefault()
     {
-        SalmonStream.AesProviderType = ProviderType.Default;
+        AesStream.AesProviderType = ProviderType.Default;
         //warm up
         SalmonCoreTestHelper.EncryptAndDecryptByteArray(TEST_PERF_SIZE, false);
-        Console.WriteLine("SalmonStream Salmon Default: ");
+        Console.WriteLine("AesStream Salmon Default: ");
         SalmonCoreTestHelper.EncryptAndDecryptByteArray(TEST_PERF_SIZE, true);
         Console.WriteLine();
     }
@@ -118,10 +118,10 @@ public class SalmonCorePerfTests
     [TestMethod]
     public void EncryptAndDecryptStreamPerfSalmonNativeAes()
     {
-        SalmonStream.AesProviderType = ProviderType.Aes;
+        AesStream.AesProviderType = ProviderType.Aes;
         //warm up
         SalmonCoreTestHelper.EncryptAndDecryptByteArray(TEST_PERF_SIZE, false);
-        Console.WriteLine("SalmonStream Salmon Native Aes: ");
+        Console.WriteLine("AesStream Salmon Native Aes: ");
         SalmonCoreTestHelper.EncryptAndDecryptByteArray(TEST_PERF_SIZE, true);
         Console.WriteLine();
     }
@@ -129,10 +129,10 @@ public class SalmonCorePerfTests
     [TestMethod]
     public void EncryptAndDecryptStreamPerfSalmonNativeAesIntrinsics()
     {
-        SalmonStream.AesProviderType = ProviderType.AesIntrinsics;
+        AesStream.AesProviderType = ProviderType.AesIntrinsics;
         //warm up
         SalmonCoreTestHelper.EncryptAndDecryptByteArray(TEST_PERF_SIZE, false);
-        Console.WriteLine("SalmonStream Salmon Native Aes Intrinsics: ");
+        Console.WriteLine("AesStream Salmon Native Aes Intrinsics: ");
         SalmonCoreTestHelper.EncryptAndDecryptByteArray(TEST_PERF_SIZE, true);
         Console.WriteLine();
     }
@@ -143,10 +143,10 @@ public class SalmonCorePerfTests
     {
 		if(!SalmonCoreTestHelper.IsGPUEnabled())
 			return;
-        SalmonStream.AesProviderType = ProviderType.AesGPU;
+        AesStream.AesProviderType = ProviderType.AesGPU;
         //warm up
         SalmonCoreTestHelper.EncryptAndDecryptByteArray(TEST_PERF_SIZE, false);
-        Console.WriteLine("SalmonStream Salmon GPU: ");
+        Console.WriteLine("AesStream Salmon GPU: ");
         SalmonCoreTestHelper.EncryptAndDecryptByteArray(TEST_PERF_SIZE, true);
         Console.WriteLine();
     }

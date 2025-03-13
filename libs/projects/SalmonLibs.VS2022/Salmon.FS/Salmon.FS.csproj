@@ -48,7 +48,7 @@
 		<Compile Include="..\..\..\src\csharp\SalmonFS\SalmonFS\Drive\DriveGenerator.cs" Link="SalmonFS\Drive\DriveGenerator.cs" />
 		<Compile Include="..\..\..\src\csharp\SalmonFS\SalmonFS\Drive\DriveKey.cs" Link="SalmonFS\Drive\DriveKey.cs" />
 
-		<Compile Include="..\..\..\src\csharp\SalmonFS\SalmonFS\File\AesFile.cs" Link="SalmonFS\File\SalmonFile.cs" />
+		<Compile Include="..\..\..\src\csharp\SalmonFS\SalmonFS\File\AesFile.cs" Link="SalmonFS\File\AesFile.cs" />
 		
 		<Compile Include="..\..\..\src\csharp\SalmonFS\SalmonFS\Streams\AesFileInputStream.cs" Link="SalmonFS\Streams\AesFileInputStream.cs" />
 

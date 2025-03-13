@@ -34,7 +34,7 @@ namespace Mku.Salmon;
 /// <summary>
 ///  Utility class that decrypts byte arrays.
 /// </summary>
-public class SalmonDecryptor
+public class Decryptor
 {
     /// <summary>
     ///  The number of parallel threads to use.
@@ -49,22 +49,22 @@ public class SalmonDecryptor
     /// <summary>
     ///  Instantiate an encryptor.
     /// </summary>
-    public SalmonDecryptor()
+    public Decryptor()
     {
         this.threads = 1;
         // we use the chunks size as default this keeps buffers aligned in case
         // integrity is enabled.
-        this.bufferSize = SalmonIntegrity.DEFAULT_CHUNK_SIZE;
+        this.bufferSize = Integrity.Integrity.DEFAULT_CHUNK_SIZE;
     }
 
     /// <summary>
     ///  Instantiate an encryptor with parallel tasks and buffer size.
 	/// </summary>
 	///  <param name="threads">   The number of threads to use.</param>
-    public SalmonDecryptor(int threads)
+    public Decryptor(int threads)
     {
         this.threads = threads;
-        this.bufferSize = SalmonIntegrity.DEFAULT_CHUNK_SIZE;
+        this.bufferSize = Integrity.Integrity.DEFAULT_CHUNK_SIZE;
     }
 
     /// <summary>
@@ -74,7 +74,7 @@ public class SalmonDecryptor
     ///  <param name="bufferSize">The buffer size to use. It is recommended for performance  to use
     ///                    a multiple of the chunk size if you enabled integrity
     ///                    otherwise a multiple of the AES block size (16 bytes).</param>
-    public SalmonDecryptor(int threads, int bufferSize)
+    public Decryptor(int threads, int bufferSize)
     {
         this.threads = threads;
         this.bufferSize = bufferSize;
@@ -92,7 +92,7 @@ public class SalmonDecryptor
     ///  <param name="chunkSize">The chunk size.</param>
     ///  <returns>The byte array with the decrypted data.</returns>
     ///  <exception cref="IOException">Thrown if there is a problem with decoding the array.</exception>
-    ///  <exception cref="SalmonSecurityException">Thrown if the key and nonce are not provided.</exception>
+    ///  <exception cref="SecurityException">Thrown if the key and nonce are not provided.</exception>
     ///  <exception cref="IOException">Thrown if error during IO</exception>
     ///  <exception cref="IntegrityException">Thrown when data are corrupt or tampered with.</exception>
     public byte[] Decrypt(byte[] data, byte[] key, byte[] nonce,
@@ -100,19 +100,19 @@ public class SalmonDecryptor
                                  bool integrity = false, byte[] hashKey = null, int? chunkSize = null)
     {
         if (key == null)
-            throw new SalmonSecurityException("Key is missing");
+            throw new SecurityException("Key is missing");
         if (!hasHeaderData && nonce == null)
-            throw new SalmonSecurityException("Need to specify a nonce if the file doesn't have a header");
+            throw new SecurityException("Need to specify a nonce if the file doesn't have a header");
 
         if (integrity)
-            chunkSize = chunkSize == null ? SalmonIntegrity.DEFAULT_CHUNK_SIZE : chunkSize;
+            chunkSize = chunkSize == null ? Integrity.Integrity.DEFAULT_CHUNK_SIZE : chunkSize;
 
         MemoryStream inputStream = new MemoryStream(data);
-        SalmonHeader header;
+        Header header;
         byte[] headerData = null;
         if (hasHeaderData)
         {
-            header = SalmonHeader.ParseHeaderData(inputStream);
+            header = Header.ParseHeaderData(inputStream);
             if (header.ChunkSize > 0)
                 integrity = true;
             chunkSize = header.ChunkSize;
@@ -120,9 +120,9 @@ public class SalmonDecryptor
             headerData = header.HeaderData;
         }
         if (nonce == null)
-            throw new SalmonSecurityException("Nonce is missing");
+            throw new SecurityException("Nonce is missing");
 
-        int realSize = (int)SalmonAES256CTRTransformer.GetActualSize(data, key, nonce, EncryptionMode.Decrypt,
+        int realSize = (int)AESCTRTransformer.GetActualSize(data, key, nonce, EncryptionMode.Decrypt,
                 headerData, integrity, chunkSize, hashKey);
         byte[] outData = new byte[realSize];
 
@@ -160,11 +160,11 @@ public class SalmonDecryptor
         long partSize = data.Length;
 
         // if we want to check integrity we align to the chunk size otherwise to the AES Block
-        long minPartSize = SalmonAES256CTRTransformer.BLOCK_SIZE;
+        long minPartSize = AESCTRTransformer.BLOCK_SIZE;
         if (integrity && chunkSize != null)
             minPartSize = (long)chunkSize;
         else if (integrity)
-            minPartSize = SalmonIntegrity.DEFAULT_CHUNK_SIZE;
+            minPartSize = Integrity.Integrity.DEFAULT_CHUNK_SIZE;
 
         if (partSize > minPartSize)
         {
@@ -250,19 +250,19 @@ public class SalmonDecryptor
     ///  <param name="hashKey">The hash key to be used for integrity verification.</param>
     ///  <param name="chunkSize">The chunk size.</param>
     ///  <exception cref="IOException"> Thrown if there is an error with the stream.</exception>
-    ///  <exception cref="SalmonSecurityException">Thrown if there is a security exception with the stream.</exception>
+    ///  <exception cref="SecurityException">Thrown if there is a security exception with the stream.</exception>
     ///  <exception cref="IntegrityException">Thrown if the stream is corrupt or tampered with.</exception>
     private void DecryptData(Stream inputStream, long start, long count, byte[] outData,
                                     byte[] key, byte[] nonce,
                                     byte[] headerData, bool integrity, byte[] hashKey, int? chunkSize)
     {
-        SalmonStream stream = null;
+        AesStream stream = null;
         MemoryStream outputStream = null;
         try
         {
             outputStream = new MemoryStream(outData);
             outputStream.Position = start;
-            stream = new SalmonStream(key, nonce, EncryptionMode.Decrypt, inputStream,
+            stream = new AesStream(key, nonce, EncryptionMode.Decrypt, inputStream,
                     headerData, integrity, chunkSize, hashKey);
             stream.Position = start;
             long totalChunkBytesRead = 0;
@@ -283,7 +283,7 @@ public class SalmonDecryptor
         catch (Exception ex)
         {
             Console.Error.WriteLine(ex);
-            throw new SalmonSecurityException("Could not decrypt data", ex);
+            throw new SecurityException("Could not decrypt data", ex);
         }
         finally
         {

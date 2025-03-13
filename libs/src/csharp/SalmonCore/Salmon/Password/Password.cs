@@ -27,7 +27,7 @@ namespace Mku.Salmon.Password;
 /// <summary>
 ///  Generates security keys based on text passwords.
 /// </summary>
-public class SalmonPassword
+public class Password
 {
     /// <summary>
     ///  WARNING! SHA1 is not secure anymore enable only if you know what you're doing!
@@ -42,20 +42,20 @@ public class SalmonPassword
     /// <summary>
     ///  Global PBKDF implementation to be used for text key derivation.
 	/// </summary>
-    ///  <exception cref="SalmonSecurityException">Thrown when error with security</exception>
+    ///  <exception cref="SecurityException">Thrown when error with security</exception>
     public static PbkdfType PbkdfImplType
     {
         set
         {
-            provider = SalmonPbkdfFactory.Create(value);
+            provider = PbkdfFactory.Create(value);
         }
     }
 
     /// <summary>
     ///  Global PBKDF provider to be used for text key derivation.
 	/// </summary>
-    ///  <exception cref="SalmonSecurityException">Thrown when error with security</exception>
-    public static ISalmonPbkdfProvider PbkdfImplProvider
+    ///  <exception cref="SecurityException">Thrown when error with security</exception>
+    public static IPbkdfProvider PbkdfImplProvider
     {
         set
         {
@@ -66,7 +66,7 @@ public class SalmonPassword
     /// <summary>
     ///  Pbkdf provider.
     /// </summary>
-    private static ISalmonPbkdfProvider provider = new SalmonDefaultPbkdfProvider();
+    private static IPbkdfProvider provider = new DefaultPbkdfProvider();
 
     /// <summary>
     ///  Derives the key from a text password
@@ -76,7 +76,7 @@ public class SalmonPassword
     ///  <param name="iterations">The number of iterations the key derivation algorithm will use</param>
     ///  <param name="length">The length of key to return</param>
     ///  <returns>The derived master key.</returns>
-    ///  <exception cref="SalmonSecurityException">Thrown when error with security</exception>
+    ///  <exception cref="SecurityException">Thrown when error with security</exception>
     public static byte[] GetMasterKey(string pass, byte[] salt, int iterations, int length)
     {
         byte[] masterKey = GetKeyFromPassword(pass, salt, iterations, length);
@@ -91,11 +91,11 @@ public class SalmonPassword
     ///  <param name="iterations"> The iterations to be used with Pbkdf2</param>
     ///  <param name="outputBytes">The number of bytes for the key</param>
     ///  <returns>The derived key.</returns>
-    ///  <exception cref="SalmonSecurityException">Thrown when error with security</exception>
+    ///  <exception cref="SecurityException">Thrown when error with security</exception>
     public static byte[] GetKeyFromPassword(string password, byte[] salt, int iterations, int outputBytes)
     {
         if (PbkdfAlgorithm == PbkdfAlgo.SHA1 && !ENABLE_SHA1)
-            throw new SalmonSecurityException("Cannot use SHA1, SHA1 is not secure anymore use SHA256!");
+            throw new SecurityException("Cannot use SHA1, SHA1 is not secure anymore use SHA256!");
         return provider.GetKey(password, salt, iterations, outputBytes, PbkdfAlgorithm);
     }
 }

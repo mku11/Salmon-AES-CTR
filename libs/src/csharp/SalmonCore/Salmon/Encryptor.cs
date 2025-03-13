@@ -35,7 +35,7 @@ namespace Mku.Salmon;
 /// <summary>
 ///  Encrypts byte arrays.
 /// </summary>
-public class SalmonEncryptor
+public class Encryptor
 {
 
     /// <summary>
@@ -51,22 +51,22 @@ public class SalmonEncryptor
     /// <summary>
     ///  Instantiate an encryptor.
     /// </summary>
-    public SalmonEncryptor()
+    public Encryptor()
     {
         this.threads = 1;
         // we use the chunks size as default this keeps buffers aligned in case
         // integrity is enabled.
-        this.bufferSize = SalmonIntegrity.DEFAULT_CHUNK_SIZE;
+        this.bufferSize = Integrity.Integrity.DEFAULT_CHUNK_SIZE;
     }
 
     /// <summary>
     ///  Instantiate an encryptor with parallel tasks and buffer size.
 	/// </summary>
 	///  <param name="threads">   The number of threads to use.</param>
-    public SalmonEncryptor(int threads)
+    public Encryptor(int threads)
     {
         this.threads = threads;
-        this.bufferSize = SalmonIntegrity.DEFAULT_CHUNK_SIZE;
+        this.bufferSize = Integrity.Integrity.DEFAULT_CHUNK_SIZE;
     }
 
     /// <summary>
@@ -76,7 +76,7 @@ public class SalmonEncryptor
     ///  <param name="bufferSize">The buffer size to use. It is recommended for performance  to use
     ///                    a multiple of the chunk size if you enabled integrity
     ///                    otherwise a multiple of the AES block size (16 bytes).</param>
-    public SalmonEncryptor(int threads, int bufferSize)
+    public Encryptor(int threads, int bufferSize)
     {
         this.threads = threads;
         this.bufferSize = bufferSize;
@@ -94,7 +94,7 @@ public class SalmonEncryptor
     ///  <param name="hashKey">        Hash key to be used for all chunks.</param>
     ///  <param name="chunkSize">      The chunk size.</param>
     ///  <returns>The byte array with the encrypted data.</returns>
-    ///  <exception cref="SalmonSecurityException">Thrown when error with security</exception>
+    ///  <exception cref="SecurityException">Thrown when error with security</exception>
     ///  <exception cref="IOException">Thrown if error during IO</exception>
     ///  <exception cref="IntegrityException">Thrown when data are corrupt or tampered with.</exception>
     public byte[] Encrypt(byte[] data, byte[] key, byte[] nonce,
@@ -102,12 +102,12 @@ public class SalmonEncryptor
                           bool integrity = false, byte[] hashKey = null, int? chunkSize = null)
     {
         if (key == null)
-            throw new SalmonSecurityException("Key is missing");
+            throw new SecurityException("Key is missing");
         if (nonce == null)
-            throw new SalmonSecurityException("Nonce is missing");
+            throw new SecurityException("Nonce is missing");
 
         if (integrity)
-            chunkSize = chunkSize == null ? SalmonIntegrity.DEFAULT_CHUNK_SIZE : chunkSize;
+            chunkSize = chunkSize == null ? Integrity.Integrity.DEFAULT_CHUNK_SIZE : chunkSize;
         else
             chunkSize = 0;
 
@@ -115,19 +115,19 @@ public class SalmonEncryptor
         byte[] headerData = null;
         if (storeHeaderData)
         {
-            byte[] magicBytes = SalmonGenerator.GetMagicBytes();
+            byte[] magicBytes = Generator.GetMagicBytes();
             outputStream.Write(magicBytes, 0, magicBytes.Length);
-            byte version = SalmonGenerator.VERSION;
+            byte version = Generator.VERSION;
             byte[] versionBytes = new byte[] { version };
             outputStream.Write(versionBytes, 0, versionBytes.Length);
-            byte[] chunkSizeBytes = BitConverter.ToBytes((long)chunkSize, SalmonGenerator.CHUNK_SIZE_LENGTH);
+            byte[] chunkSizeBytes = BitConverter.ToBytes((long)chunkSize, Generator.CHUNK_SIZE_LENGTH);
             outputStream.Write(chunkSizeBytes, 0, chunkSizeBytes.Length);
             outputStream.Write(nonce, 0, nonce.Length);
             outputStream.Flush();
             headerData = outputStream.ToArray();
         }
 
-        int realSize = (int)SalmonAES256CTRTransformer.GetActualSize(data, key, nonce, EncryptionMode.Encrypt,
+        int realSize = (int)AESCTRTransformer.GetActualSize(data, key, nonce, EncryptionMode.Encrypt,
                 headerData, integrity, chunkSize, hashKey);
         byte[] outData = new byte[realSize];
         outputStream.Position = 0;
@@ -169,11 +169,11 @@ public class SalmonEncryptor
         long partSize = data.Length;
 
         // if we want to check integrity we align to the chunk size otherwise to the AES Block
-        long minPartSize = SalmonAES256CTRTransformer.BLOCK_SIZE;
+        long minPartSize = AESCTRTransformer.BLOCK_SIZE;
         if (integrity && chunkSize != null)
             minPartSize = (long)chunkSize;
         else if (integrity)
-            minPartSize = SalmonIntegrity.DEFAULT_CHUNK_SIZE;
+            minPartSize = Integrity.Integrity.DEFAULT_CHUNK_SIZE;
 
         if (partSize > minPartSize)
         {
@@ -256,18 +256,18 @@ public class SalmonEncryptor
     ///  <param name="hashKey">    The key to be used for integrity application.</param>
     ///  <param name="chunkSize">  The chunk size.</param>
     ///  <exception cref="IOException">             Thrown if there is an error with the stream.</exception>
-    ///  <exception cref="SalmonSecurityException"> Thrown if there is a security exception with the stream.</exception>
+    ///  <exception cref="SecurityException"> Thrown if there is a security exception with the stream.</exception>
     ///  <exception cref="IntegrityException">Thrown if integrity cannot be applied.</exception>
     private void EncryptData(MemoryStream inputStream, long start, long count, byte[] outData,
                              byte[] key, byte[] nonce, byte[] headerData,
                              bool integrity, byte[] hashKey, int? chunkSize)
     {
         MemoryStream outputStream = new MemoryStream(outData);
-        SalmonStream stream = null;
+        AesStream stream = null;
         try
         {
             inputStream.Position = start;
-            stream = new SalmonStream(key, nonce, EncryptionMode.Encrypt, outputStream, headerData,
+            stream = new AesStream(key, nonce, EncryptionMode.Encrypt, outputStream, headerData,
                     integrity, chunkSize, hashKey);
             stream.AllowRangeWrite = true;
             stream.Position = start;

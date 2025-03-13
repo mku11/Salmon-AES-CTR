@@ -39,13 +39,13 @@ namespace Mku.Android.SalmonFS.Media;
 /// <summary>
 /// This class provides a parallel processing seekable source for encrypted media content
 /// </summary>
-public class SalmonMediaDataSource : MediaDataSource
+public class AesMediaDataSource : MediaDataSource
 {
-    private static readonly string TAG = nameof(SalmonMediaDataSource);
+    private static readonly string TAG = nameof(AesMediaDataSource);
 
     private readonly Activity activity;
     private readonly System.IO.Stream stream;
-    private readonly SalmonFile salmonFile;
+    private readonly AesFile salmonFile;
     private readonly bool enableMultiThreaded = true;
 
     private bool integrityFailed;
@@ -60,7 +60,7 @@ public class SalmonMediaDataSource : MediaDataSource
     /// <param name="bufferSize">Buffer size</param>
     /// <param name="threads">Threads for parallel processing</param>
     /// <param name="backOffset">Backwards offset</param>
-    public SalmonMediaDataSource(Activity activity, SalmonFile salmonFile,
+    public AesMediaDataSource(Activity activity, AesFile salmonFile,
                                  int buffers, int bufferSize, int threads, int backOffset)
     {
         this.activity = activity;
@@ -68,7 +68,7 @@ public class SalmonMediaDataSource : MediaDataSource
         this.size = salmonFile.Size;
 
         if (enableMultiThreaded)
-            this.stream = new SalmonFileInputStream(salmonFile, buffers, bufferSize, threads, backOffset);
+            this.stream = new AesFileInputStream(salmonFile, buffers, bufferSize, threads, backOffset);
         else
         {
             stream = salmonFile.GetInputStream();

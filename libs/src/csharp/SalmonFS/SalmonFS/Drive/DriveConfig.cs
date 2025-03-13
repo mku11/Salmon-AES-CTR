@@ -35,31 +35,31 @@ namespace Mku.SalmonFS.Drive;
 ///  Represents a configuration file for a drive. The properties are encrypted in the file
 ///  with a master key which is password derived.
 /// </summary>
-public class SalmonDriveConfig
+public class DriveConfig
 {
     //TODO: support versioned formats for the file header
-    internal byte[] MagicBytes { get; } = new byte[SalmonGenerator.MAGIC_LENGTH];
-    internal byte[] Version { get; } = new byte[SalmonGenerator.VERSION_LENGTH];
-    internal byte[] Salt { get; } = new byte[SalmonDriveGenerator.SALT_LENGTH];
-    internal byte[] Iterations { get; } = new byte[SalmonDriveGenerator.ITERATIONS_LENGTH];
-    internal byte[] Iv { get; } = new byte[SalmonDriveGenerator.IV_LENGTH];
-    internal byte[] EncryptedData { get; } = new byte[SalmonDriveGenerator.COMBINED_KEY_LENGTH + SalmonDriveGenerator.DRIVE_ID_LENGTH];
-    internal byte[] HashSignature { get; } = new byte[SalmonGenerator.HASH_RESULT_LENGTH];
+    internal byte[] MagicBytes { get; } = new byte[Generator.MAGIC_LENGTH];
+    internal byte[] Version { get; } = new byte[Generator.VERSION_LENGTH];
+    internal byte[] Salt { get; } = new byte[DriveGenerator.SALT_LENGTH];
+    internal byte[] Iterations { get; } = new byte[DriveGenerator.ITERATIONS_LENGTH];
+    internal byte[] Iv { get; } = new byte[DriveGenerator.IV_LENGTH];
+    internal byte[] EncryptedData { get; } = new byte[DriveGenerator.COMBINED_KEY_LENGTH + DriveGenerator.DRIVE_ID_LENGTH];
+    internal byte[] HashSignature { get; } = new byte[Generator.HASH_RESULT_LENGTH];
 
     /// <summary>
     ///  Provide a class that hosts the properties of the drive config file
 	/// </summary>
 	///  <param name="contents">The byte array that contains the contents of the config file</param>
-    public SalmonDriveConfig(byte[] contents)
+    public DriveConfig(byte[] contents)
     {
         MemoryStream ms = new MemoryStream(contents);
-        ms.Read(MagicBytes, 0, SalmonGenerator.MAGIC_LENGTH);
-        ms.Read(Version, 0, SalmonGenerator.VERSION_LENGTH);
-        ms.Read(Salt, 0, SalmonDriveGenerator.SALT_LENGTH);
-        ms.Read(Iterations, 0, SalmonDriveGenerator.ITERATIONS_LENGTH);
-        ms.Read(Iv, 0, SalmonDriveGenerator.IV_LENGTH);
-        ms.Read(EncryptedData, 0, SalmonDriveGenerator.COMBINED_KEY_LENGTH + SalmonDriveGenerator.AUTH_ID_SIZE);
-        ms.Read(HashSignature, 0, SalmonGenerator.HASH_RESULT_LENGTH);
+        ms.Read(MagicBytes, 0, Generator.MAGIC_LENGTH);
+        ms.Read(Version, 0, Generator.VERSION_LENGTH);
+        ms.Read(Salt, 0, DriveGenerator.SALT_LENGTH);
+        ms.Read(Iterations, 0, DriveGenerator.ITERATIONS_LENGTH);
+        ms.Read(Iv, 0, DriveGenerator.IV_LENGTH);
+        ms.Read(EncryptedData, 0, DriveGenerator.COMBINED_KEY_LENGTH + DriveGenerator.AUTH_ID_SIZE);
+        ms.Read(HashSignature, 0, Generator.HASH_RESULT_LENGTH);
         ms.Close();
     }
 
@@ -74,7 +74,7 @@ public class SalmonDriveConfig
     ///  <param name="keyIv">                       The initial vector that was used with the master password to encrypt the combined key</param>
     ///  <param name="encryptedData">The encrypted combined key and drive id</param>
     ///  <param name="hashSignature">               The hash signature of the drive id</param>
-    public static void WriteDriveConfig(IRealFile configFile, byte[] magicBytes, byte version, byte[] salt,
+    public static void WriteDriveConfig(IFile configFile, byte[] magicBytes, byte version, byte[] salt,
                                         int iterations, byte[] keyIv,
                                         byte[] encryptedData, byte[] hashSignature)
     {
@@ -120,6 +120,6 @@ public class SalmonDriveConfig
     {
         if (Iterations == null)
             return 0;
-        return (int)BitConverter.ToLong(Iterations, 0, SalmonDriveGenerator.ITERATIONS_LENGTH);
+        return (int)BitConverter.ToLong(Iterations, 0, DriveGenerator.ITERATIONS_LENGTH);
     }
 }

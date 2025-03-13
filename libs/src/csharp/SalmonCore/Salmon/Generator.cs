@@ -29,7 +29,7 @@ namespace Mku.Salmon;
 /// <summary>
 ///  Utility class generates internal secure properties.
 /// </summary>
-public class SalmonGenerator
+public class Generator
 {
     /// <summary>
     ///  Version.

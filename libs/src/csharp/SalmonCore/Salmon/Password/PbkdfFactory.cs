@@ -27,21 +27,21 @@ namespace Mku.Salmon.Password;
 /// <summary>
 ///  Creates AES transformer implementations.
 /// </summary>
-public class SalmonPbkdfFactory
+public class PbkdfFactory
 {
     /// <summary>
     ///  Create an instance of a pbkdf provider.
 	/// </summary>
 	///  <param name="type">The pbkdf type.</param>
     ///  <returns>The provider.</returns>
-    ///  <exception cref="SalmonSecurityException">Thrown when error with security</exception>
-    public static ISalmonPbkdfProvider Create(PbkdfType type)
+    ///  <exception cref="SecurityException">Thrown when error with security</exception>
+    public static IPbkdfProvider Create(PbkdfType type)
     {
         switch (type)
         {
             case PbkdfType.Default:
-                return new SalmonDefaultPbkdfProvider();
+                return new DefaultPbkdfProvider();
         }
-        throw new SalmonSecurityException("Unknown Pbkdf provider type");
+        throw new SecurityException("Unknown Pbkdf provider type");
     }
 }

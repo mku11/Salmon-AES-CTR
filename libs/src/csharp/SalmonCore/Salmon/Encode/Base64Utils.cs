@@ -29,11 +29,11 @@ namespace Mku.Salmon.Encode;
 /// <summary>
 ///  Provides generic encoder (ie Base64).
 /// </summary>
-public class SalmonEncoder
+public class Base64Utils
 {
-    static SalmonEncoder()
+    static Base64Utils()
     {
-        SalmonEncoder.Base64 = new Base64();
+        Base64Utils.Base64 = new Base64();
     }
 
     /// <summary>

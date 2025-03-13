@@ -37,7 +37,7 @@ namespace Mku.Android.SalmonFS.Drive;
 ///  Implementation of a virtual drive for android.
 /// </summary>
 ///
-public class AndroidDrive : SalmonDrive
+public class AndroidDrive : AesDrive
 {
     public static readonly string TAG = nameof(AndroidDrive);
     private static readonly int ENC_BUFFER_SIZE = 5 * 1024 * 1024;
@@ -68,7 +68,7 @@ public class AndroidDrive : SalmonDrive
 
     }
 
-    public Java.IO.File CopyToSharedFolder(SalmonFile salmonFile)
+    public Java.IO.File CopyToSharedFolder(AesFile salmonFile)
     {
         Java.IO.File privateDir = new Java.IO.File(this.PrivateDir.AbsolutePath);
         Java.IO.File cacheFile = new Java.IO.File(privateDir, salmonFile.BaseName);
@@ -76,7 +76,7 @@ public class AndroidDrive : SalmonDrive
         cacheFile.Delete();
 
         AndroidFile sharedDir = new AndroidFile(DocumentFile.FromFile(privateDir), context);
-        SalmonFileExporter fileExporter = new SalmonFileExporter(ENC_BUFFER_SIZE, ENC_THREADS);
+        AesFileExporter fileExporter = new AesFileExporter(ENC_BUFFER_SIZE, ENC_THREADS);
         fileExporter.ExportFile(salmonFile, sharedDir, null,  false, true, null);
         return cacheFile;
     }
@@ -87,14 +87,14 @@ public class AndroidDrive : SalmonDrive
 	/// </summary>
 	///  <returns>The private directory</returns>
     override
-    public IRealFile PrivateDir
+    public IFile PrivateDir
     {
         get
         {
             Java.IO.File sharedDir = new Java.IO.File(context.CacheDir, ShareDirectoryName);
             if (!sharedDir.Exists())
                 sharedDir.Mkdir();
-            return new DotNetFile(sharedDir.AbsolutePath);
+            return new File(sharedDir.AbsolutePath);
         }
     }
 
@@ -104,7 +104,7 @@ public class AndroidDrive : SalmonDrive
 	///  <param name="filepath">The file path</param>
     ///  <param name="isDirectory">True if filepath corresponds to a directory.</param>
     ///  <returns>The file </returns>
-    public IRealFile GetRealFile(string filepath, bool isDirectory)
+    public IFile GetRealFile(string filepath, bool isDirectory)
     {
         DocumentFile docFile;
         if (isDirectory)

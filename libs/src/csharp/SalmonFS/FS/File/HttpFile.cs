@@ -39,7 +39,7 @@ namespace Mku.FS.File;
 /// <summary>
 ///  RealFile implementation for remote files via Salmon Web Service.
 /// </summary>
-public class DotNetHttpFile : IRealFile
+public class HttpFile : IFile
 {
     public static readonly string Separator = "/";
     public static readonly int SMALL_FILE_MAX_LENGTH = 128 * 1024;
@@ -54,7 +54,7 @@ public class DotNetHttpFile : IRealFile
     ///  The REST API server path (ie https://localhost:8080/)
     /// </summary>
     ///  <param name="path">The filepath.</param>
-    public DotNetHttpFile(string path)
+    public HttpFile(string path)
     {
         this.filePath = path;
     }
@@ -64,7 +64,7 @@ public class DotNetHttpFile : IRealFile
 	/// </summary>
 	///  <param name="dirName">The name of the new directory.</param>
     ///  <returns>The newly created directory.</returns>
-    public IRealFile CreateDirectory(string dirName)
+    public IFile CreateDirectory(string dirName)
     {
         throw new NotSupportedException("Unsupported Operation, readonly filesystem");
     }
@@ -108,7 +108,7 @@ public class DotNetHttpFile : IRealFile
 	///  <param name="filename">The name of the new file.</param>
     ///  <returns>The newly created file.</returns>
     ///  <exception cref="IOException">Thrown if error during IO</exception>
-    public IRealFile CreateFile(string filename)
+    public IFile CreateFile(string filename)
     {
         throw new NotSupportedException("Unsupported Operation, readonly filesystem");
     }
@@ -147,7 +147,7 @@ public class DotNetHttpFile : IRealFile
             string nFilePath = this.filePath;
             if (nFilePath.EndsWith("/"))
                 nFilePath = nFilePath.Substring(0, nFilePath.Length - 1);
-            string[] parts = nFilePath.Split(DotNetHttpFile.Separator);
+            string[] parts = nFilePath.Split(HttpFile.Separator);
             string basename = parts[parts.Length - 1];
             if (basename == null)
                 throw new Exception("Could not get basename");
@@ -166,7 +166,7 @@ public class DotNetHttpFile : IRealFile
     ///  <exception cref="FileNotFoundException">Thrown if file is not found</exception>
     public Stream GetInputStream()
     {
-        return new DotNetHttpFileStream(this, FileAccess.Read);
+        return new HttpFileStream(this, FileAccess.Read);
     }
 
     /// <summary>
@@ -184,7 +184,7 @@ public class DotNetHttpFile : IRealFile
     ///  Get the parent directory of this file or directory.
     /// </summary>
     ///  <returns>The parent directory.</returns>
-    public IRealFile Parent
+    public IFile Parent
     {
         get
         {
@@ -196,7 +196,7 @@ public class DotNetHttpFile : IRealFile
             int index = path.LastIndexOf("/");
             if (index == -1)
                 return null;
-            DotNetHttpFile parent = new DotNetHttpFile(path.Substring(0, index));
+            HttpFile parent = new HttpFile(path.Substring(0, index));
             return parent;
         }
     }
@@ -252,9 +252,9 @@ public class DotNetHttpFile : IRealFile
     ///  List all files under this directory.
     /// </summary>
     ///  <returns>The list of files.</returns>
-    public IRealFile[] ListFiles()
+    public IFile[] ListFiles()
     {
-        List<IRealFile> files = new List<IRealFile>();
+        List<IFile> files = new List<IFile>();
         if (this.IsDirectory)
         {
             Stream stream = null;
@@ -276,7 +276,7 @@ public class DotNetHttpFile : IRealFile
                         {
                             filename = HttpUtility.UrlDecode(filename);
                         }
-                        IRealFile file = new DotNetHttpFile(this.filePath + DotNetHttpFile.Separator + filename);
+                        IFile file = new HttpFile(this.filePath + HttpFile.Separator + filename);
                         files.Add(file);
                     }
                     matcher = matcher.NextMatch();
@@ -302,7 +302,7 @@ public class DotNetHttpFile : IRealFile
     ///  <param name="newName">The new name.</param>
     ///  <param name="progressListener">Observer to notify when progress changes.</param>
     ///  <returns>The moved file. Use this file for subsequent operations instead of the original.</returns>
-    public IRealFile Move(IRealFile newDir, string newName = null, Action<long, long> progressListener = null)
+    public IFile Move(IFile newDir, string newName = null, Action<long, long> progressListener = null)
     {
         throw new NotSupportedException("Unsupported Operation, readonly filesystem");
     }
@@ -315,7 +315,7 @@ public class DotNetHttpFile : IRealFile
     ///  <param name="progressListener">Observer to notify when progress changes.</param>
     ///  <returns>The copied file. Use this file for subsequent operations instead of the original.</returns>
     ///  <exception cref="IOException">Thrown if error during IO</exception>
-    public IRealFile Copy(IRealFile newDir, string newName = null, Action<long, long> progressListener = null)
+    public IFile Copy(IFile newDir, string newName = null, Action<long, long> progressListener = null)
     {
         throw new NotSupportedException("Unsupported Operation, readonly filesystem");
     }
@@ -325,12 +325,12 @@ public class DotNetHttpFile : IRealFile
     /// </summary>
     ///  <param name="filename">The name of the file or directory.</param>
     ///  <returns>The child file</returns>
-    public IRealFile GetChild(string filename)
+    public IFile GetChild(string filename)
     {
         if (IsFile)
             return null;
         string nFilepath = this.GetChildPath(filename);
-        DotNetHttpFile child = new DotNetHttpFile(nFilepath);
+        HttpFile child = new HttpFile(nFilepath);
         return child;
     }
 
@@ -364,8 +364,8 @@ public class DotNetHttpFile : IRealFile
     private string GetChildPath(String filename)
     {
         string nFilepath = this.filePath;
-        if (!nFilepath.EndsWith(DotNetHttpFile.Separator))
-            nFilepath += DotNetHttpFile.Separator;
+        if (!nFilepath.EndsWith(HttpFile.Separator))
+            nFilepath += HttpFile.Separator;
         nFilepath += filename;
         return nFilepath;
     }

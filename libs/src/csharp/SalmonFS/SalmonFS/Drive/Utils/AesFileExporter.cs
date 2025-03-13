@@ -31,14 +31,14 @@ namespace Mku.SalmonFS.Utils;
 /// <summary>
 /// Exports files from the drive to the real filesystem
 /// </summary>
-public class SalmonFileExporter : FileExporter
+public class AesFileExporter : FileExporter
 {
     /// <summary>
-    /// Create an instance of an exporter for a SalmonDrive
+    /// Create an instance of an exporter for a AesDrive
     /// </summary>
     /// <param name="bufferSize">The buffer size</param>
     /// <param name="threads">The threads</param>
-    public SalmonFileExporter(int bufferSize, int threads)
+    public AesFileExporter(int bufferSize, int threads)
     {
         base.Initialize(bufferSize, threads);
     }
@@ -53,7 +53,7 @@ public class SalmonFileExporter : FileExporter
     protected void OnPrepare(IVirtualFile sourceFile, bool integrity)
     {
         // we use the drive hash key for integrity verification
-        ((SalmonFile)sourceFile).SetVerifyIntegrity(integrity, null);
+        ((AesFile)sourceFile).SetVerifyIntegrity(integrity, null);
     }
 
     /// <summary>
@@ -64,6 +64,6 @@ public class SalmonFileExporter : FileExporter
     override
     protected long GetMinimumPartSize(IVirtualFile file)
     {
-        return ((SalmonFile)file).GetMinimumPartSize();
+        return ((AesFile)file).GetMinimumPartSize();
     }
 }

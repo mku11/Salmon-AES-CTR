@@ -28,7 +28,7 @@ namespace Mku.Salmon.Transform;
 ///  Contract for the encryption/decryption transformers.
 ///  Note that Counter mode needs to be supported.
 /// </summary>
-public interface ISalmonCTRTransformer
+public interface ICTRTransformer
 {
 
     /// <summary>
@@ -36,7 +36,7 @@ public interface ISalmonCTRTransformer
 	/// </summary>
 	///  <param name="key">The AES key to use.</param>
     ///  <param name="nonce">The nonce to use.</param>
-    ///  <exception cref="SalmonSecurityException">Thrown when error with security</exception>
+    ///  <exception cref="SecurityException">Thrown when error with security</exception>
     void Init(byte[] key, byte[] nonce);
 
     /// <summary>
@@ -48,8 +48,8 @@ public interface ISalmonCTRTransformer
     ///  <param name="destOffset">The destination byte offset.</param>
     ///  <param name="count">The number of bytes to transform.</param>
     ///  <returns>The number of bytes transformed.</returns>
-    ///  <exception cref="SalmonSecurityException">Thrown when error with security</exception>
-    ///  <exception cref="SalmonRangeExceededException">Thrown when maximum nonce range is exceeded.</exception>
+    ///  <exception cref="SecurityException">Thrown when error with security</exception>
+    ///  <exception cref="RangeExceededException">Thrown when maximum nonce range is exceeded.</exception>
     int EncryptData(byte[] srcBuffer, int srcOffset,
                     byte[] destBuffer, int destOffset, int count);
 
@@ -62,8 +62,8 @@ public interface ISalmonCTRTransformer
     ///  <param name="destOffset">The destination byte offset.</param>
     ///  <param name="count">The number of bytes to transform.</param>
     ///  <returns>The number of bytes transformed.</returns>
-    ///  <exception cref="SalmonSecurityException">Thrown when error with security</exception>
-    ///  <exception cref="SalmonRangeExceededException">Thrown when maximum nonce range is exceeded.</exception>
+    ///  <exception cref="SecurityException">Thrown when error with security</exception>
+    ///  <exception cref="RangeExceededException">Thrown when maximum nonce range is exceeded.</exception>
     int DecryptData(byte[] srcBuffer, int srcOffset,
                     byte[] destBuffer, int destOffset, int count);
 
@@ -102,7 +102,7 @@ public interface ISalmonCTRTransformer
     ///  the Counter.
 	/// </summary>
 	///  <param name="position">The position to sync to</param>
-    ///  <exception cref="SalmonRangeExceededException">Thrown when maximum nonce range is exceeded.</exception>
+    ///  <exception cref="RangeExceededException">Thrown when maximum nonce range is exceeded.</exception>
     void SyncCounter(long position);
 }
 

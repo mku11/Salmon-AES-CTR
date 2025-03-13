@@ -67,7 +67,7 @@ public interface INonceSequencer
 	///  <param name="driveId">The drive ID.</param>
     ///  <returns>The next nonce.</returns>
     ///  <exception cref="SequenceException">Thrown when there is a failure in the nonce sequencer.</exception>
-    ///  <exception cref="SalmonRangeExceededException">Thrown when maximum nonce range is exceeded.</exception>
+    ///  <exception cref="RangeExceededException">Thrown when maximum nonce range is exceeded.</exception>
     byte[] NextNonce(string driveId);
 
     /// <summary>

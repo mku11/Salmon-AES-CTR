@@ -30,7 +30,7 @@ using System.Linq;
 namespace Mku.FS.Drive.Utils;
 
 /// <summary>
-///  Class searches for files in a SalmonDrive by filename.
+///  Class searches for files in a AesDrive by filename.
 /// </summary>
 public class FileSearcher
 {

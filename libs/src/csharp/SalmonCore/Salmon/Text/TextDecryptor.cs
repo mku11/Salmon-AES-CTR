@@ -31,10 +31,10 @@ namespace Mku.Salmon.Text;
 /// <summary>
 ///  Utility class that encrypts and decrypts text strings.
 /// </summary>
-public class SalmonTextDecryptor
+public class TextDecryptor
 {
 
-    private static readonly SalmonDecryptor decryptor = new SalmonDecryptor();
+    private static readonly Decryptor decryptor = new Decryptor();
 
     /// <summary>
     ///  Decrypts a text string using AES256 with the key and nonce provided.
@@ -49,12 +49,12 @@ public class SalmonTextDecryptor
     ///  <param name="chunkSize">      The chunk size.</param>
     ///  <returns>The decrypted text.</returns>
     ///  <exception cref="IOException">Thrown if error during IO</exception>
-    ///  <exception cref="SalmonSecurityException">Thrown when error with security</exception>
+    ///  <exception cref="SecurityException">Thrown when error with security</exception>
     ///  <exception cref="IntegrityException">Thrown when data are corrupt or tampered with.</exception>
     public static string DecryptString(string text, byte[] key, byte[] nonce, bool header,
         bool integrity = false, byte[] hashKey = null, int? chunkSize = null)
     {
-        byte[] bytes = SalmonEncoder.Base64.Decode(text);
+        byte[] bytes = Base64Utils.Base64.Decode(text);
         byte[] decBytes = decryptor.Decrypt(bytes, key, nonce, header, integrity, hashKey, chunkSize);
         string decString = System.Text.Encoding.Default.GetString(decBytes);
         return decString;

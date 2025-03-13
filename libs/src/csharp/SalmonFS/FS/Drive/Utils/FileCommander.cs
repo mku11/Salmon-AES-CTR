@@ -62,11 +62,11 @@ public class FileCommander
     ///  <param name="OnFailed">Observer to notify when a file fails importing.</param>
     ///  <returns>The imported files.</returns>
     ///  <exception cref="Exception">Thrown if error during operation</exception>
-    public virtual IVirtualFile[] ImportFiles(IRealFile[] filesToImport, IVirtualFile importDir,
+    public virtual IVirtualFile[] ImportFiles(IFile[] filesToImport, IVirtualFile importDir,
         bool deleteSource, bool integrity,
         Action<RealFileTaskProgress> OnProgressChanged,
-        Func<IRealFile, string> AutoRename,
-        Action<IRealFile, Exception> OnFailed)
+        Func<IFile, string> AutoRename,
+        Action<IFile, Exception> OnFailed)
     {
         stopJobs = false;
         List<IVirtualFile> importedFiles = new List<IVirtualFile>();
@@ -105,10 +105,10 @@ public class FileCommander
         return files;
     }
 
-    private void ImportRecursively(IRealFile fileToImport, IVirtualFile importDir,
+    private void ImportRecursively(IFile fileToImport, IVirtualFile importDir,
         bool deleteSource, bool integrity,
         Action<RealFileTaskProgress> OnProgressChanged,
-        Func<IRealFile, string> AutoRename, Action<IRealFile, Exception> OnFailed,
+        Func<IFile, string> AutoRename, Action<IFile, Exception> OnFailed,
         List<IVirtualFile> importedFiles, ref int count, int total,
         Dictionary<string, IVirtualFile> existingFiles)
     {
@@ -125,7 +125,7 @@ public class FileCommander
                 OnProgressChanged(new RealFileTaskProgress(fileToImport, 1, 1, count, total));
             count++;
             Dictionary<string, IVirtualFile> nExistingFiles = GetExistingFiles(sfile);
-            foreach (IRealFile child in fileToImport.ListFiles())
+            foreach (IFile child in fileToImport.ListFiles())
             {
                 if (stopJobs)
                     break;
@@ -181,14 +181,14 @@ public class FileCommander
     ///  <param name="OnFailed">Observer to notify when a file fails exporting.</param>
     ///  <returns>True if complete successfully.</returns>
     ///  <exception cref="Exception">Thrown if error during operation</exception>
-    public IRealFile[] ExportFiles(IVirtualFile[] filesToExport, IRealFile exportDir,
+    public IFile[] ExportFiles(IVirtualFile[] filesToExport, IFile exportDir,
         bool deleteSource, bool integrity,
         Action<IVirtualFileTaskProgress> OnProgressChanged,
-        Func<IRealFile, string> AutoRename,
+        Func<IFile, string> AutoRename,
         Action<IVirtualFile, Exception> OnFailed)
     {
         stopJobs = false;
-        List<IRealFile> exportedFiles = new List<IRealFile>();
+        List<IFile> exportedFiles = new List<IFile>();
 
         int total = 0;
         for (int i = 0; i < filesToExport.Length; i++)
@@ -197,7 +197,7 @@ public class FileCommander
                 break;
             total += GetCountRecursively(filesToExport[i]);
         }
-        Dictionary<string, IRealFile> existingFiles = GetExistingFiles(exportDir);
+        Dictionary<string, IFile> existingFiles = GetExistingFiles(exportDir);
 
         int count = 0;
         for (int i = 0; i < filesToExport.Length; i++)
@@ -215,10 +215,10 @@ public class FileCommander
         return exportedFiles.ToArray();
     }
 
-    private Dictionary<string, IRealFile> GetExistingFiles(IRealFile exportDir)
+    private Dictionary<string, IFile> GetExistingFiles(IFile exportDir)
     {
-        Dictionary<string, IRealFile> files = new Dictionary<string, IRealFile>();
-        foreach (IRealFile file in exportDir.ListFiles())
+        Dictionary<string, IFile> files = new Dictionary<string, IFile>();
+        foreach (IFile file in exportDir.ListFiles())
         {
             if (stopJobs)
                 break;
@@ -227,15 +227,15 @@ public class FileCommander
         return files;
     }
 
-    private void ExportRecursively(IVirtualFile fileToExport, IRealFile exportDir,
+    private void ExportRecursively(IVirtualFile fileToExport, IFile exportDir,
         bool deleteSource, bool integrity,
         Action<IVirtualFileTaskProgress> OnProgressChanged,
-        Func<IRealFile, string> AutoRename,
+        Func<IFile, string> AutoRename,
         Action<IVirtualFile, Exception> OnFailed,
-        List<IRealFile> exportedFiles, ref int count, int total,
-        Dictionary<string, IRealFile> existingFiles)
+        List<IFile> exportedFiles, ref int count, int total,
+        Dictionary<string, IFile> existingFiles)
     {
-        IRealFile rfile = existingFiles.ContainsKey(fileToExport.BaseName) ? existingFiles[fileToExport.BaseName] : null;
+        IFile rfile = existingFiles.ContainsKey(fileToExport.BaseName) ? existingFiles[fileToExport.BaseName] : null;
 
         if (fileToExport.IsDirectory)
         {
@@ -246,7 +246,7 @@ public class FileCommander
             if (OnProgressChanged != null)
                 OnProgressChanged(new IVirtualFileTaskProgress(fileToExport, 1, 1, count, total));
             count++;
-            Dictionary<string, IRealFile> nExistingFiles = GetExistingFiles(rfile);
+            Dictionary<string, IFile> nExistingFiles = GetExistingFiles(rfile);
             foreach (IVirtualFile child in fileToExport.ListFiles())
             {
                 if (stopJobs)
@@ -313,12 +313,12 @@ public class FileCommander
         return count;
     }
 
-    private int GetCountRecursively(IRealFile file)
+    private int GetCountRecursively(IFile file)
     {
         int count = 1;
         if (file.IsDirectory)
         {
-            foreach (IRealFile child in file.ListFiles())
+            foreach (IFile child in file.ListFiles())
             {
                 if (stopJobs)
                     break;
@@ -601,9 +601,9 @@ public class FileCommander
         /// <summary>
         /// The file associated
         /// </summary>
-        public IRealFile File { get; }
+        public IFile File { get; }
 
-        internal RealFileTaskProgress(IRealFile file, long processedBytes, long totalBytes,
+        internal RealFileTaskProgress(IFile file, long processedBytes, long totalBytes,
                                      int processedFiles, int totalFiles) :
             base(processedBytes, totalBytes, processedFiles, totalFiles)
         {

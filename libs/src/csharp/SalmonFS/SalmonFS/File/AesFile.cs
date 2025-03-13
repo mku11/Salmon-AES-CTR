@@ -39,28 +39,28 @@ using BitConverter = Mku.Convert.BitConverter;
 namespace Mku.SalmonFS.File;
 
 /// <summary>
-///  A virtual file backed by an encrypted <see cref="IRealFile"/> on the real filesystem.
-///  Supports operations for retrieving <see cref="SalmonStream"/> for reading/decrypting
+///  A virtual file backed by an encrypted <see cref="IFile"/> on the real filesystem.
+///  Supports operations for retrieving <see cref="AesStream"/> for reading/decrypting
 ///  and writing/encrypting contents.
 /// </summary>
-public class SalmonFile : IVirtualFile
+public class AesFile : IVirtualFile
 {
     private static readonly string separator = "/";
 
     /// <summary>
     /// The drive this file belongs too.
     /// </summary>
-    public SalmonDrive Drive { get; private set; }
+    public AesDrive Drive { get; private set; }
 
     /// <summary>
     /// The real encrypted file on the physical disk.
     /// </summary>
     override
-    public IRealFile RealFile { get; protected set; }
+    public IFile RealFile { get; protected set; }
 
     // cached values
     private string _baseName;
-    private SalmonHeader _header;
+    private Header _header;
 
     /// <summary>
     ///  The path of the real file stored
@@ -144,11 +144,11 @@ public class SalmonFile : IVirtualFile
 
     /// <summary>
     ///  Provides a file handle that can be used to create encrypted files.
-    ///  Requires a virtual drive that supports the underlying filesystem, see DotNetFile implementation.
+    ///  Requires a virtual drive that supports the underlying filesystem, see File implementation.
 	/// </summary>
 	///  <param name="drive">   The file virtual system that will be used with file operations</param>
     ///  <param name="realFile">The real file</param>
-    public SalmonFile(IRealFile realFile, SalmonDrive drive = null)
+    public AesFile(IFile realFile, AesDrive drive = null)
     {
         this.Drive = drive;
         this.RealFile = realFile;
@@ -181,7 +181,7 @@ public class SalmonFile : IVirtualFile
     {
         get
         {
-            SalmonHeader header = Header;
+            Header header = Header;
             if (header == null)
                 return null;
             return Header.ChunkSize;
@@ -189,10 +189,10 @@ public class SalmonFile : IVirtualFile
     }
 
     /// <summary>
-    ///  The custom <see cref="SalmonHeader"></see> from this file.
-	/// </summary>
-	///  <exception cref="IOException">Thrown if error during IO</exception>
-    public SalmonHeader Header
+    ///  The custom <see cref="Salmon.Header"></see> from this file.
+    /// </summary>
+    ///  <exception cref="IOException">Thrown if error during IO</exception>
+    public Header Header
     {
         get
         {
@@ -200,7 +200,7 @@ public class SalmonFile : IVirtualFile
                 return null;
             if (_header != null)
                 return _header;
-            SalmonHeader header = new SalmonHeader();
+            Header header = new Header();
             Stream stream = null;
             try
             {
@@ -209,17 +209,17 @@ public class SalmonFile : IVirtualFile
                 if (bytesRead != header.MagicBytes.Length)
                     return null;
                 byte[] buff = new byte[8];
-                bytesRead = stream.Read(buff, 0, SalmonGenerator.VERSION_LENGTH);
-                if (bytesRead != SalmonGenerator.VERSION_LENGTH)
+                bytesRead = stream.Read(buff, 0, Generator.VERSION_LENGTH);
+                if (bytesRead != Generator.VERSION_LENGTH)
                     return null;
                 header.Version = buff[0];
                 bytesRead = stream.Read(buff, 0, GetChunkSizeLength());
                 if (bytesRead != GetChunkSizeLength())
                     return null;
                 header.ChunkSize = (int)BitConverter.ToLong(buff, 0, bytesRead);
-                header.Nonce = new byte[SalmonGenerator.NONCE_LENGTH];
-                bytesRead = stream.Read(header.Nonce, 0, SalmonGenerator.NONCE_LENGTH);
-                if (bytesRead != SalmonGenerator.NONCE_LENGTH)
+                header.Nonce = new byte[Generator.NONCE_LENGTH];
+                bytesRead = stream.Read(header.Nonce, 0, Generator.NONCE_LENGTH);
+                if (bytesRead != Generator.NONCE_LENGTH)
                     return null;
             }
             catch (Exception ex)
@@ -240,20 +240,20 @@ public class SalmonFile : IVirtualFile
     }
 
     /// <summary>
-    ///  Opens a SalmonStream that will be used for reading/decrypting the file contents.
+    ///  Opens a AesStream that will be used for reading/decrypting the file contents.
 	/// </summary>
 	///  <returns>The input stream</returns>
     ///  <exception cref="IOException">Thrown if error during IO</exception>
-    ///  <exception cref="SalmonSecurityException">Thrown when error with security</exception>
+    ///  <exception cref="SecurityException">Thrown when error with security</exception>
     ///  <exception cref="IntegrityException">Thrown when data are corrupt or tampered with.</exception>
     override
-    public SalmonStream GetInputStream()
+    public AesStream GetInputStream()
     {
         if (!Exists)
             throw new IOException("File does not exist");
 
         Stream realStream = RealFile.GetInputStream();
-        realStream.Seek(SalmonGenerator.MAGIC_LENGTH + SalmonGenerator.VERSION_LENGTH,
+        realStream.Seek(Generator.MAGIC_LENGTH + Generator.VERSION_LENGTH,
                 SeekOrigin.Begin);
 
         byte[] fileChunkSizeBytes = new byte[GetChunkSizeLength()];
@@ -262,9 +262,9 @@ public class SalmonFile : IVirtualFile
             throw new IOException("Could not parse chunks size from file header");
         int chunkSize = (int)BitConverter.ToLong(fileChunkSizeBytes, 0, 4);
         if (IsIntegrityEnabled && chunkSize == 0)
-            throw new SalmonSecurityException("Cannot check integrity if file doesn't support it");
+            throw new SecurityException("Cannot check integrity if file doesn't support it");
 
-        byte[] nonceBytes = new byte[SalmonGenerator.NONCE_LENGTH];
+        byte[] nonceBytes = new byte[Generator.NONCE_LENGTH];
         int ivBytesRead = realStream.Read(nonceBytes, 0, nonceBytes.Length);
         if (ivBytesRead == 0)
             throw new IOException("Could not parse nonce from file header");
@@ -273,41 +273,41 @@ public class SalmonFile : IVirtualFile
         byte[] headerData = new byte[GetHeaderLength()];
         realStream.Read(headerData, 0, headerData.Length);
 
-        SalmonStream stream = new SalmonStream(EncryptionKey,
+        AesStream stream = new AesStream(EncryptionKey,
                 nonceBytes, EncryptionMode.Decrypt, realStream, headerData,
                 IsIntegrityEnabled, FileChunkSize, HashKey);
         return stream;
     }
 
     /// <summary>
-    ///  Opens a SalmonStream for encrypting/writing contents.
+    ///  Opens a AesStream for encrypting/writing contents.
 	/// </summary>
 	///  <returns>The output stream</returns>
-    ///  <exception cref="SalmonSecurityException">Thrown when error with security</exception>
+    ///  <exception cref="SecurityException">Thrown when error with security</exception>
     ///  <exception cref="IntegrityException">Thrown when data are corrupt or tampered with.</exception>
     ///  <exception cref="SequenceException">Thrown when there is a failure in the nonce sequencer.</exception>
     [MethodImpl(MethodImplOptions.Synchronized)]
     override
-    public SalmonStream GetOutputStream()
+    public AesStream GetOutputStream()
     {
         return GetOutputStream(null);
     }
 
     /// <summary>
-    ///  Get a <see cref="SalmonStream"/> for encrypting/writing contents to this file.
+    ///  Get a <see cref="AesStream"/> for encrypting/writing contents to this file.
     ///  <param name="nonce">Nonce to be used for encryption. Note that each file should have</param>
-    ///               a unique nonce see <see cref="SalmonDrive.GetNextNonce()"/>.
+    ///               a unique nonce see <see cref="AesDrive.GetNextNonce()"/>.
     /// </summary>
     ///  <returns>The output stream.</returns>
     ///  <exception cref="Exception">Thrown if error during operation</exception>
     [MethodImpl(MethodImplOptions.Synchronized)]
-    internal SalmonStream GetOutputStream(byte[] nonce)
+    internal AesStream GetOutputStream(byte[] nonce)
     {
 
         // check if we have an existing iv in the header
         byte[] nonceBytes = FileNonce;
         if (nonceBytes != null && !AllowOverwrite)
-            throw new SalmonSecurityException("You should not overwrite existing files for security instead delete the existing file and create a new file. If this is a new file and you want to use parallel streams call SetAllowOverwrite(true)");
+            throw new SecurityException("You should not overwrite existing files for security instead delete the existing file and create a new file. If this is a new file and you want to use parallel streams call SetAllowOverwrite(true)");
 
         if (nonceBytes == null)
             CreateHeader(nonce);
@@ -321,7 +321,7 @@ public class SalmonFile : IVirtualFile
         // but practical if the file is brand new and multithreaded writes for performance need to be used.
         Stream realStream = RealFile.GetOutputStream();
 
-        SalmonStream stream = new SalmonStream(EncryptionKey, nonceBytes,
+        AesStream stream = new AesStream(EncryptionKey, nonceBytes,
                 EncryptionMode.Encrypt, realStream, headerData,
                 IsIntegrityEnabled, RequestedChunkSize > 0 ? RequestedChunkSize : null, HashKey);
         stream.AllowRangeWrite = AllowOverwrite;
@@ -338,7 +338,7 @@ public class SalmonFile : IVirtualFile
             if (this.encryptionKey != null)
                 return encryptionKey;
             if (Drive != null && Drive.Key != null)
-                return Drive.Key.DriveKey;
+                return Drive.Key.DriveEncKey;
             return null;
         }
         set
@@ -351,7 +351,7 @@ public class SalmonFile : IVirtualFile
     ///  Return the current header data that are stored in the file
 	/// </summary>
 	///  <param name="realFile">The real file containing the data</param>
-    private byte[] GetRealFileHeaderData(IRealFile realFile)
+    private byte[] GetRealFileHeaderData(IFile realFile)
     {
         Stream realStream = realFile.GetInputStream();
         byte[] headerData = new byte[GetHeaderLength()];
@@ -407,7 +407,7 @@ public class SalmonFile : IVirtualFile
     /// </summary>
     private int GetChunkSizeLength()
     {
-        return SalmonGenerator.CHUNK_SIZE_LENGTH;
+        return Generator.CHUNK_SIZE_LENGTH;
     }
 
     /// <summary>
@@ -415,8 +415,8 @@ public class SalmonFile : IVirtualFile
     /// </summary>
     private int GetHeaderLength()
     {
-        return SalmonGenerator.MAGIC_LENGTH + SalmonGenerator.VERSION_LENGTH +
-                GetChunkSizeLength() + SalmonGenerator.NONCE_LENGTH;
+        return Generator.MAGIC_LENGTH + Generator.VERSION_LENGTH +
+                GetChunkSizeLength() + Generator.NONCE_LENGTH;
     }
 
     /// <summary>
@@ -426,7 +426,7 @@ public class SalmonFile : IVirtualFile
     {
         get
         {
-            SalmonHeader header = Header;
+            Header header = Header;
             if (header == null)
                 return null;
             return Header.Nonce;
@@ -446,7 +446,7 @@ public class SalmonFile : IVirtualFile
         set
         {
             if (Drive != null)
-                throw new SalmonSecurityException("Nonce is already set by the drive");
+                throw new SecurityException("Nonce is already set by the drive");
             this.requestedNonce = value;
 
         }
@@ -472,14 +472,14 @@ public class SalmonFile : IVirtualFile
             requestedNonce = Drive.GetNextNonce();
 
         if (requestedNonce == null)
-            throw new SalmonSecurityException("File requires a nonce");
+            throw new SecurityException("File requires a nonce");
 
         Stream realStream = RealFile.GetOutputStream();
-        byte[] magicBytes = SalmonGenerator.GetMagicBytes();
+        byte[] magicBytes = Generator.GetMagicBytes();
         realStream.Write(magicBytes, 0, magicBytes.Length);
 
-        byte version = SalmonGenerator.VERSION;
-        realStream.Write(new byte[] { version }, 0, SalmonGenerator.VERSION_LENGTH);
+        byte version = Generator.VERSION;
+        realStream.Write(new byte[] { version }, 0, Generator.VERSION_LENGTH);
 
         byte[] chunkSizeBytes = BitConverter.ToBytes((int)reqChunkSize, 4);
         realStream.Write(chunkSizeBytes, 0, chunkSizeBytes.Length);
@@ -493,7 +493,7 @@ public class SalmonFile : IVirtualFile
     /// <summary>
     ///  Return the AES block size for encryption / decryption
     /// </summary>
-    public int BlockSize => SalmonGenerator.BLOCK_SIZE;
+    public int BlockSize => Generator.BLOCK_SIZE;
 
     /// <summary>
     ///  Get the count of files and subdirectories
@@ -506,13 +506,13 @@ public class SalmonFile : IVirtualFile
     /// </summary>
     /// <returns>An array of files and subdirectories</returns>
     override
-    public SalmonFile[] ListFiles()
+    public AesFile[] ListFiles()
     {
-        IRealFile[] files = RealFile.ListFiles();
-        List<SalmonFile> salmonFiles = new List<SalmonFile>();
-        foreach (IRealFile iRealFile in files)
+        IFile[] files = RealFile.ListFiles();
+        List<AesFile> salmonFiles = new List<AesFile>();
+        foreach (IFile iRealFile in files)
         {
-            SalmonFile file = new SalmonFile(iRealFile, Drive);
+            AesFile file = new AesFile(iRealFile, Drive);
             salmonFiles.Add(file);
         }
         return salmonFiles.ToArray();
@@ -524,10 +524,10 @@ public class SalmonFile : IVirtualFile
     /// <param name="filename">The filename to match</param>
     /// <returns>The file/subdirectory</returns>
     override
-    public SalmonFile GetChild(string filename)
+    public AesFile GetChild(string filename)
     {
-        SalmonFile[] files = ListFiles();
-        foreach (SalmonFile file in files)
+        AesFile[] files = ListFiles();
+        foreach (AesFile file in files)
         {
             if (file.BaseName.Equals(filename))
                 return file;
@@ -540,10 +540,10 @@ public class SalmonFile : IVirtualFile
 	/// </summary>
 	///  <param name="dirName">The name of the directory to be created</param>
     override
-    public SalmonFile CreateDirectory(string dirName)
+    public AesFile CreateDirectory(string dirName)
     {
         if (Drive == null)
-            throw new SalmonSecurityException("Need to pass the key and dirNameNonce nonce if not using a drive");
+            throw new SecurityException("Need to pass the key and dirNameNonce nonce if not using a drive");
         return CreateDirectory(dirName, null, null);
     }
 
@@ -553,12 +553,12 @@ public class SalmonFile : IVirtualFile
 	///  <param name="dirName">     The name of the directory to be created</param>
     ///  <param name="key">         The key that will be used to encrypt the directory name</param>
     ///  <param name="dirNameNonce">The nonce to be used for encrypting the directory name</param>
-    public SalmonFile CreateDirectory(string dirName, byte[] key, byte[] dirNameNonce)
+    public AesFile CreateDirectory(string dirName, byte[] key, byte[] dirNameNonce)
 
     {
         string encryptedDirName = GetEncryptedFilename(dirName, key, dirNameNonce);
-        IRealFile realDir = RealFile.CreateDirectory(encryptedDirName);
-        return new SalmonFile(realDir, Drive);
+        IFile realDir = RealFile.CreateDirectory(encryptedDirName);
+        return new AesFile(realDir, Drive);
     }
 
     /// <summary>
@@ -587,7 +587,7 @@ public class SalmonFile : IVirtualFile
 	///  <param name="realPath">The path of the real file</param>
     private string GetRelativePath(string realPath)
     {
-        SalmonFile virtualRoot = Drive.Root;
+        AesFile virtualRoot = Drive.Root;
         string virtualRootPath = virtualRoot.RealFile.AbsolutePath;
         if (realPath.StartsWith(virtualRootPath))
         {
@@ -619,7 +619,7 @@ public class SalmonFile : IVirtualFile
     ///  Returns the virtual parent directory
     /// </summary>
     override
-    public SalmonFile Parent
+    public AesFile Parent
     {
         get
         {
@@ -633,8 +633,8 @@ public class SalmonFile : IVirtualFile
                 Console.Error.WriteLine(exception);
                 return null;
             }
-            IRealFile realDir = RealFile.Parent;
-            SalmonFile dir = new SalmonFile(realDir, Drive);
+            IFile realDir = RealFile.Parent;
+            AesFile dir = new AesFile(realDir, Drive);
             return dir;
         }
     }
@@ -670,8 +670,8 @@ public class SalmonFile : IVirtualFile
         if (IsIntegrityEnabled && HashKey == null)
             throw new IntegrityException("File requires hashKey, use SetVerifyIntegrity() to provide one");
 
-        return SalmonIntegrity.GetTotalHashDataLength(RealFile.Length, (int)FileChunkSize,
-                SalmonGenerator.HASH_RESULT_LENGTH, SalmonGenerator.HASH_KEY_LENGTH);
+        return Integrity.GetTotalHashDataLength(RealFile.Length, (int)FileChunkSize,
+                Generator.HASH_RESULT_LENGTH, Generator.HASH_KEY_LENGTH);
     }
 
     /// <summary>
@@ -681,10 +681,10 @@ public class SalmonFile : IVirtualFile
     //TODO: files with real same name can exists we can add checking all files in the dir
     // and throw an Exception though this could be an expensive operation
     override
-    public SalmonFile CreateFile(string realFilename)
+    public AesFile CreateFile(string realFilename)
     {
         if (Drive == null)
-            throw new SalmonSecurityException("Need to pass the key, filename nonce, and file nonce if not using a drive");
+            throw new SecurityException("Need to pass the key, filename nonce, and file nonce if not using a drive");
         return CreateFile(realFilename, null, null, null);
     }
 
@@ -697,17 +697,17 @@ public class SalmonFile : IVirtualFile
     ///  <param name="fileNonce">    The nonce for the encrypting the file contents</param>
     //TODO: files with real same name can exists we can add checking all files in the dir
     // and throw an Exception though this could be an expensive operation
-    public SalmonFile CreateFile(string realFilename, byte[] key, byte[] fileNameNonce, byte[] fileNonce)
+    public AesFile CreateFile(string realFilename, byte[] key, byte[] fileNameNonce, byte[] fileNonce)
     {
         string encryptedFilename = GetEncryptedFilename(realFilename, key, fileNameNonce);
-        IRealFile file = RealFile.CreateFile(encryptedFilename);
-        SalmonFile salmonFile = new SalmonFile(file, Drive);
+        IFile file = RealFile.CreateFile(encryptedFilename);
+        AesFile salmonFile = new AesFile(file, Drive);
         salmonFile.EncryptionKey = key;
         salmonFile.IsIntegrityEnabled = IsIntegrityEnabled;
         if (Drive != null && (fileNonce != null || fileNameNonce != null))
-            throw new SalmonSecurityException("Nonce is already set by the drive");
+            throw new SecurityException("Nonce is already set by the drive");
         if (Drive != null && key != null)
-            throw new SalmonSecurityException("Key is already set by the drive");
+            throw new SecurityException("Key is already set by the drive");
         salmonFile.requestedNonce = fileNonce;
         return salmonFile;
     }
@@ -720,7 +720,7 @@ public class SalmonFile : IVirtualFile
     public void Rename(string newFilename)
     {
         if (Drive == null && (encryptionKey == null || requestedNonce == null))
-            throw new SalmonSecurityException("Need to pass a nonce if not using a drive");
+            throw new SecurityException("Need to pass a nonce if not using a drive");
         Rename(newFilename, null);
     }
 
@@ -757,7 +757,7 @@ public class SalmonFile : IVirtualFile
     private string GetDecryptedFilename(string filename)
     {
         if (Drive == null && (encryptionKey == null || requestedNonce == null))
-            throw new SalmonSecurityException("Need to use a drive or pass key and nonce");
+            throw new SecurityException("Need to use a drive or pass key and nonce");
         return GetDecryptedFilename(filename, null, null);
     }
 
@@ -771,15 +771,15 @@ public class SalmonFile : IVirtualFile
     {
         string rfilename = filename.Replace("-", "/");
         if (Drive != null && nonce != null)
-            throw new SalmonSecurityException("Filename nonce is already set by the drive");
+            throw new SecurityException("Filename nonce is already set by the drive");
         if (Drive != null && key != null)
-            throw new SalmonSecurityException("Key is already set by the drive");
+            throw new SecurityException("Key is already set by the drive");
 
         if (key == null)
             key = this.encryptionKey;
         if (key == null && Drive != null)
-            key = Drive.Key.DriveKey;
-        string decfilename = SalmonTextDecryptor.DecryptString(rfilename, key, nonce, true);
+            key = Drive.Key.DriveEncKey;
+        string decfilename = TextDecryptor.DecryptString(rfilename, key, nonce, true);
         return decfilename;
     }
 
@@ -792,14 +792,14 @@ public class SalmonFile : IVirtualFile
     protected string GetEncryptedFilename(string filename, byte[] key, byte[] nonce)
     {
         if (Drive != null && nonce != null)
-            throw new SalmonSecurityException("Filename nonce is already set by the drive");
+            throw new SecurityException("Filename nonce is already set by the drive");
         if (Drive != null)
             nonce = Drive.GetNextNonce();
         if (Drive != null && key != null)
-            throw new SalmonSecurityException("Key is already set by the drive");
+            throw new SecurityException("Key is already set by the drive");
         if (Drive != null)
-            key = Drive.Key.DriveKey;
-        string encryptedPath = SalmonTextEncryptor.EncryptString(filename, key, nonce, true);
+            key = Drive.Key.DriveEncKey;
+        string encryptedPath = TextEncryptor.EncryptString(filename, key, nonce, true);
         encryptedPath = encryptedPath.Replace("/", "-");
         return encryptedPath;
     }
@@ -812,10 +812,10 @@ public class SalmonFile : IVirtualFile
     ///  <returns>The moved file</returns>
     ///  <exception cref="IOException">Thrown if error during IO</exception>
     override
-    public SalmonFile Move(IVirtualFile dir, Action<long,long> OnProgressListener)
+    public AesFile Move(IVirtualFile dir, Action<long,long> OnProgressListener)
     {
-        IRealFile newRealFile = RealFile.Move(dir.RealFile, null, OnProgressListener);
-        return new SalmonFile(newRealFile, Drive);
+        IFile newRealFile = RealFile.Move(dir.RealFile, null, OnProgressListener);
+        return new AesFile(newRealFile, Drive);
     }
 
     /// <summary>
@@ -826,10 +826,10 @@ public class SalmonFile : IVirtualFile
     ///  <returns>The new file</returns>
     ///  <exception cref="IOException">Thrown if error during IO</exception>
     override
-    public SalmonFile Copy(IVirtualFile dir, Action<long,long> OnProgressListener)
+    public AesFile Copy(IVirtualFile dir, Action<long,long> OnProgressListener)
     {
-        IRealFile newRealFile = RealFile.Copy(dir.RealFile, null, OnProgressListener);
-        return new SalmonFile(newRealFile, Drive);
+        IFile newRealFile = RealFile.Copy(dir.RealFile, null, OnProgressListener);
+        return new AesFile(newRealFile, Drive);
     }
 
     /// <summary>
@@ -846,22 +846,22 @@ public class SalmonFile : IVirtualFile
         bool autoRenameFolders,
         Action<IVirtualFile, Exception> OnFailed)
     {
-        Action<IRealFile, Exception> OnFailedRealFile = null;
+        Action<IFile, Exception> OnFailedRealFile = null;
         if (OnFailed != null)
         {
             OnFailedRealFile = (file, ex) =>
             {
-                OnFailed(new SalmonFile(file, Drive), ex);
+                OnFailed(new AesFile(file, Drive), ex);
             };
         }
-        Func<IRealFile, string> RenameRealFile = null;
+        Func<IFile, string> RenameRealFile = null;
         // use auto rename only when we are using a drive
         if (AutoRename != null && Drive != null)
-            RenameRealFile = (file) => AutoRename(new SalmonFile(file, Drive));
+            RenameRealFile = (file) => AutoRename(new AesFile(file, Drive));
         this.RealFile.CopyRecursively(dest.RealFile, (file, position, length) =>
         {
             if (progressListener != null)
-                progressListener(new SalmonFile(file, Drive), position, length);
+                progressListener(new AesFile(file, Drive), position, length);
         },
             RenameRealFile, autoRenameFolders, OnFailedRealFile);
     }
@@ -881,24 +881,24 @@ public class SalmonFile : IVirtualFile
         bool autoRenameFolders,
         Action<IVirtualFile, Exception> OnFailed)
     {
-        Action<IRealFile, Exception> OnFailedRealFile = null;
+        Action<IFile, Exception> OnFailedRealFile = null;
         if (OnFailed != null)
         {
             OnFailedRealFile = (file, ex) =>
             {
                 if (OnFailed != null)
-                    OnFailed(new SalmonFile(file, Drive), ex);
+                    OnFailed(new AesFile(file, Drive), ex);
             };
         }
-        Func<IRealFile, string> RenameRealFile = null;
+        Func<IFile, string> RenameRealFile = null;
         // use auto rename only when we are using a drive
         if (AutoRename != null && Drive != null)
-            RenameRealFile = (file) => AutoRename(new SalmonFile(file, Drive));
+            RenameRealFile = (file) => AutoRename(new AesFile(file, Drive));
 
         this.RealFile.MoveRecursively(dest.RealFile, (file, position, length) =>
         {
             if (progressListener != null)
-                progressListener(new SalmonFile(file, Drive), position, length);
+                progressListener(new AesFile(file, Drive), position, length);
         },RenameRealFile, autoRenameFolders, OnFailedRealFile);
     }
 
@@ -910,19 +910,19 @@ public class SalmonFile : IVirtualFile
     override
     public void DeleteRecursively(Action<IVirtualFile, long, long> progressListener, Action<IVirtualFile, Exception> OnFailed)
     {
-        Action<IRealFile, Exception> OnFailedRealFile = null;
+        Action<IFile, Exception> OnFailedRealFile = null;
         if (OnFailed != null)
         {
             OnFailedRealFile = (file, ex) =>
             {
                 if (OnFailed != null)
-                    OnFailed(new SalmonFile(file, Drive), ex);
+                    OnFailed(new AesFile(file, Drive), ex);
             };
         }
         this.RealFile.DeleteRecursively((file, position, length) =>
         {
             if (progressListener != null)
-                progressListener(new SalmonFile(file, Drive), position, length);
+                progressListener(new AesFile(file, Drive), position, length);
         }, OnFailedRealFile);
     }
 
@@ -949,10 +949,10 @@ public class SalmonFile : IVirtualFile
     /// <returns>The new file name</returns>
     public static string AutoRename(IVirtualFile file)
     {
-        string filename = IRealFile.AutoRename(file.BaseName);
-        byte[] nonce = ((SalmonFile) file).Drive.GetNextNonce();
-        byte[] key = ((SalmonFile)file).Drive.Key.DriveKey;
-        string encryptedPath = SalmonTextEncryptor.EncryptString(filename, key, nonce, true);
+        string filename = IFile.AutoRename(file.BaseName);
+        byte[] nonce = ((AesFile) file).Drive.GetNextNonce();
+        byte[] key = ((AesFile)file).Drive.Key.DriveEncKey;
+        string encryptedPath = TextEncryptor.EncryptString(filename, key, nonce, true);
         encryptedPath = encryptedPath.Replace("/", "-");
         return encryptedPath;
     }
@@ -965,7 +965,7 @@ public class SalmonFile : IVirtualFile
         /// <summary>
         /// The file associated
         /// </summary>
-        public IRealFile File { get; }
+        public IFile File { get; }
 
         /// <summary>
         /// Processed files
@@ -977,7 +977,7 @@ public class SalmonFile : IVirtualFile
         /// </summary>
         public readonly long TotalBytes;
 
-        internal FileTaskProgress(IRealFile file, long processedBytes, long totalBytes)
+        internal FileTaskProgress(IFile file, long processedBytes, long totalBytes)
         {
             this.File = file;
             this.ProcessedBytes = processedBytes;

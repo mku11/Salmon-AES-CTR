@@ -42,7 +42,7 @@ namespace Mku.FS.File;
 /// <summary>
 ///  RealFile implementation for remote files via Salmon Web Service.
 /// </summary>
-public class DotNetWSFile : IRealFile
+public class WSFile : IFile
 {
     private static readonly string PATH = "path";
     private static readonly string DEST_DIR = "destDir";
@@ -95,7 +95,7 @@ public class DotNetWSFile : IRealFile
     ///  The REST API server path (ie https://localhost:8080/)
 	/// </summary>
 	///  <param name="path">The filepath.</param>
-    public DotNetWSFile(string path, string servicePath, Credentials credentials)
+    public WSFile(string path, string servicePath, Credentials credentials)
     {
         this.filePath = path;
         this.ServicePath = servicePath;
@@ -107,7 +107,7 @@ public class DotNetWSFile : IRealFile
 	/// </summary>
 	///  <param name="dirName">The name of the new directory.</param>
     ///  <returns>The newly created directory.</returns>
-    public IRealFile CreateDirectory(string dirName)
+    public IFile CreateDirectory(string dirName)
     {
         string nDirPath = this.GetChildPath(dirName);
         HttpResponseMessage httpResponse = null;
@@ -124,7 +124,7 @@ public class DotNetWSFile : IRealFile
             SetServiceAuth(requestMessage);
             httpResponse = client.Send(requestMessage);
             CheckStatus(httpResponse, HttpStatusCode.OK);
-            DotNetWSFile dir = new DotNetWSFile(nDirPath, ServicePath, ServiceCredentials);
+            WSFile dir = new WSFile(nDirPath, ServicePath, ServiceCredentials);
             return dir;
         }
         catch (IOException e)
@@ -185,7 +185,7 @@ public class DotNetWSFile : IRealFile
 	///  <param name="filename">The name of the new file.</param>
     ///  <returns>The newly created file.</returns>
     ///  <exception cref="IOException">Thrown if error during IO</exception>
-    public IRealFile CreateFile(string filename)
+    public IFile CreateFile(string filename)
     {
         String nFilePath = this.GetChildPath(filename);
         HttpResponseMessage httpResponse = null;
@@ -202,7 +202,7 @@ public class DotNetWSFile : IRealFile
             SetServiceAuth(requestMessage);
             httpResponse = client.Send(requestMessage);
             CheckStatus(httpResponse, HttpStatusCode.OK);
-            DotNetWSFile file = new DotNetWSFile(nFilePath, ServicePath, ServiceCredentials);
+            WSFile file = new WSFile(nFilePath, ServicePath, ServiceCredentials);
             return file;
         }
         catch (Exception e)
@@ -224,8 +224,8 @@ public class DotNetWSFile : IRealFile
     {
         if (IsDirectory)
         {
-            IRealFile[] files = ListFiles();
-            foreach (IRealFile file in files)
+            IFile[] files = ListFiles();
+            foreach (IFile file in files)
             {
                 HttpResponseMessage httpResponse = null;
                 try
@@ -307,7 +307,7 @@ public class DotNetWSFile : IRealFile
     public Stream GetInputStream()
     {
         Reset();
-        return new DotNetWSFileStream(this, FileAccess.Read);
+        return new WSFileStream(this, FileAccess.Read);
     }
 
     /// <summary>
@@ -318,7 +318,7 @@ public class DotNetWSFile : IRealFile
     public Stream GetOutputStream()
     {
         Reset();
-        return new DotNetWSFileStream(this, FileAccess.Write);
+        return new WSFileStream(this, FileAccess.Write);
     }
 
 
@@ -326,7 +326,7 @@ public class DotNetWSFile : IRealFile
     ///  Get the parent directory of this file or directory.
     /// </summary>
     ///  <returns>The parent directory.</returns>
-    public IRealFile Parent
+    public IFile Parent
     {
         get
         {
@@ -338,7 +338,7 @@ public class DotNetWSFile : IRealFile
             int index = path.LastIndexOf("/");
             if (index == -1)
                 return null;
-            DotNetWSFile parent = new DotNetWSFile(path.Substring(0, index), ServicePath, ServiceCredentials);
+            WSFile parent = new WSFile(path.Substring(0, index), ServicePath, ServiceCredentials);
             return parent;
         }
     }
@@ -435,7 +435,7 @@ public class DotNetWSFile : IRealFile
     ///  List all files under this directory.
     /// </summary>
     ///  <returns>The list of files.</returns>
-    public IRealFile[] ListFiles()
+    public IFile[] ListFiles()
     {
         HttpResponseMessage httpResponse = null;
         Response[] files = null;
@@ -461,13 +461,13 @@ public class DotNetWSFile : IRealFile
         }
 
         if (files == null)
-            return new DotNetWSFile[0];
+            return new WSFile[0];
 
-        List<DotNetWSFile> realFiles = new List<DotNetWSFile>();
-        List<DotNetWSFile> realDirs = new List<DotNetWSFile>();
+        List<WSFile> realFiles = new List<WSFile>();
+        List<WSFile> realDirs = new List<WSFile>();
         for (int i = 0; i < files.Length; i++)
         {
-            DotNetWSFile file = new DotNetWSFile(files[i].Path, ServicePath, ServiceCredentials);
+            WSFile file = new WSFile(files[i].Path, ServicePath, ServiceCredentials);
             if (file.IsDirectory)
                 realDirs.Add(file);
             else
@@ -484,17 +484,17 @@ public class DotNetWSFile : IRealFile
     ///  <param name="newName">The new name.</param>
     ///  <param name="progressListener">Observer to notify when progress changes.</param>
     ///  <returns>The moved file. Use this file for subsequent operations instead of the original.</returns>
-    public IRealFile Move(IRealFile newDir, string newName = null, Action<long, long> progressListener = null)
+    public IFile Move(IFile newDir, string newName = null, Action<long, long> progressListener = null)
     {
         newName = newName ?? BaseName;
         if (newDir == null || !newDir.Exists)
             throw new IOException("Target directory does not exist");
-        IRealFile newFile = newDir.GetChild(newName);
+        IFile newFile = newDir.GetChild(newName);
         if (newFile != null && newFile.Exists)
             throw new IOException("Another file/directory already exists");
         if (IsDirectory)
         {
-            throw new IOException("Could not move directory use IRealFile moveRecursively() instead");
+            throw new IOException("Could not move directory use IFile moveRecursively() instead");
         }
         else
         {
@@ -516,7 +516,7 @@ public class DotNetWSFile : IRealFile
                 CheckStatus(httpResponse, HttpStatusCode.OK);
                 Response response = (Response)httpResponse.Content.ReadFromJsonAsync(typeof(Response)).Result;
                 response.Headers = httpResponse.Headers;
-                newFile = new DotNetWSFile(response.Path, ServicePath, ServiceCredentials);
+                newFile = new WSFile(response.Path, ServicePath, ServiceCredentials);
                 Reset();
                 return newFile;
             }
@@ -540,18 +540,18 @@ public class DotNetWSFile : IRealFile
     ///  <param name="progressListener">Observer to notify when progress changes.</param>
     ///  <returns>The copied file. Use this file for subsequent operations instead of the original.</returns>
     ///  <exception cref="IOException">Thrown if error during IO</exception>
-    public IRealFile Copy(IRealFile newDir, string newName = null, Action<long, long> progressListener = null)
+    public IFile Copy(IFile newDir, string newName = null, Action<long, long> progressListener = null)
     {
         newName = newName ?? BaseName;
         if (newDir == null || !newDir.Exists)
             throw new IOException("Target directory does not exist");
-        IRealFile newFile = newDir.GetChild(newName);
+        IFile newFile = newDir.GetChild(newName);
         if (newFile != null && newFile.Exists)
             throw new IOException("Another file/directory already exists");
 
         if (IsDirectory)
         {
-            throw new IOException("Could not copy directory use IRealFile copyRecursively() instead");
+            throw new IOException("Could not copy directory use IFile copyRecursively() instead");
         }
         else
         {
@@ -573,7 +573,7 @@ public class DotNetWSFile : IRealFile
                 CheckStatus(httpResponse, HttpStatusCode.OK);
                 Response response = (Response)httpResponse.Content.ReadFromJsonAsync(typeof(Response)).Result;
                 response.Headers = httpResponse.Headers;
-                newFile = new DotNetWSFile(response.Path, ServicePath, ServiceCredentials);
+                newFile = new WSFile(response.Path, ServicePath, ServiceCredentials);
                 Reset();
                 return newFile;
             }
@@ -594,12 +594,12 @@ public class DotNetWSFile : IRealFile
     /// </summary>
     ///  <param name="filename">The name of the file or directory.</param>
     ///  <returns>The child file</returns>
-    public IRealFile GetChild(string filename)
+    public IFile GetChild(string filename)
     {
         if (IsFile)
             return null;
         string nFilepath = this.GetChildPath(filename);
-        DotNetWSFile child = new DotNetWSFile(nFilepath, ServicePath, ServiceCredentials);
+        WSFile child = new WSFile(nFilepath, ServicePath, ServiceCredentials);
         return child;
     }
 
@@ -690,8 +690,8 @@ public class DotNetWSFile : IRealFile
     private string GetChildPath(String filename)
     {
         string nFilepath = this.filePath;
-        if (!nFilepath.EndsWith(DotNetHttpFile.Separator))
-            nFilepath += DotNetHttpFile.Separator;
+        if (!nFilepath.EndsWith(HttpFile.Separator))
+            nFilepath += HttpFile.Separator;
         nFilepath += filename;
         return nFilepath;
     }

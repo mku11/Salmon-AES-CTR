@@ -22,7 +22,6 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 */
 
-using Mku.Convert;
 using BitConverter = Mku.Convert.BitConverter;
 
 namespace Mku.Salmon;
@@ -30,7 +29,7 @@ namespace Mku.Salmon;
 /// <summary>
 ///  Utility provides nonce operations.
 /// </summary>
-public class SalmonNonce
+public class Nonce
 {
     /// <summary>
     ///  Increase the sequential NONCE by a value of 1.
@@ -39,13 +38,13 @@ public class SalmonNonce
 	///  <param name="startNonce">The starting nonce</param>
     ///  <param name="endNonce">The ending nonce</param>
     ///  <returns>The nonce after increasing</returns>
-    ///  <exception cref="SalmonRangeExceededException">Thrown when maximum nonce range is exceeded.</exception>
+    ///  <exception cref="RangeExceededException">Thrown when maximum nonce range is exceeded.</exception>
     public static byte[] IncreaseNonce(byte[] startNonce, byte[] endNonce)
     {
-        long nonce = BitConverter.ToLong(startNonce, 0, SalmonGenerator.NONCE_LENGTH);
-        long maxNonce = BitConverter.ToLong(endNonce, 0, SalmonGenerator.NONCE_LENGTH);
+        long nonce = BitConverter.ToLong(startNonce, 0, Generator.NONCE_LENGTH);
+        long maxNonce = BitConverter.ToLong(endNonce, 0, Generator.NONCE_LENGTH);
         if (nonce + 1 <= 0 || nonce >= maxNonce)
-            throw new SalmonRangeExceededException("Cannot increase nonce, maximum nonce exceeded");
+            throw new RangeExceededException("Cannot increase nonce, maximum nonce exceeded");
 		nonce++;
         return BitConverter.ToBytes(nonce, 8);
     }
@@ -59,14 +58,14 @@ public class SalmonNonce
 	///  <param name="startNonce">The starting nonce.</param>
     ///  <param name="endNonce">The ending nonce in the sequence.</param>
     ///  <returns>The byte array with the middle nonce.</returns>
-    ///  <exception cref="SalmonSecurityException">Thrown when error with security</exception>
+    ///  <exception cref="SecurityException">Thrown when error with security</exception>
     public static byte[] SplitNonceRange(byte[] startNonce, byte[] endNonce)
     {
-        long start = BitConverter.ToLong(startNonce, 0, SalmonGenerator.NONCE_LENGTH);
-        long end = BitConverter.ToLong(endNonce, 0, SalmonGenerator.NONCE_LENGTH);
+        long start = BitConverter.ToLong(startNonce, 0, Generator.NONCE_LENGTH);
+        long end = BitConverter.ToLong(endNonce, 0, Generator.NONCE_LENGTH);
         // we reserve some nonces
         if (end - start < 256)
-            throw new SalmonSecurityException("Not enough nonces left");
-        return BitConverter.ToBytes(start + (end - start) / 2, SalmonGenerator.NONCE_LENGTH);
+            throw new SecurityException("Not enough nonces left");
+        return BitConverter.ToBytes(start + (end - start) / 2, Generator.NONCE_LENGTH);
     }
 }
