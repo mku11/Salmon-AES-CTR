@@ -265,7 +265,6 @@ public class AesFile implements IVirtualFile {
         // we also specify if stream ranges can be overwritten which is generally dangerous if the file is existing
         // but practical if the file is brand new and multithreaded writes for performance need to be used.
         RandomAccessStream realStream = realFile.getOutputStream();
-        realStream.seek(getHeaderLength(), RandomAccessStream.SeekOrigin.Begin);
 
         byte[] key = this.getEncryptionKey();
         if (key == null)
