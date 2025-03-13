@@ -41,8 +41,8 @@ import java.io.InputStream;
 /**
  * Seekable source for encrypted media content.
  */
-public class SalmonMediaDataSource extends MediaDataSource {
-    private static final String TAG = SalmonMediaDataSource.class.getName();
+public class AesMediaDataSource extends MediaDataSource {
+    private static final String TAG = AesMediaDataSource.class.getName();
 
     private final Activity activity;
     private final InputStream stream;
@@ -63,7 +63,7 @@ public class SalmonMediaDataSource extends MediaDataSource {
      * @param backOffset The backwards offset to use when reading buffers
      * @throws Exception Thrown if error occured
      */
-    public SalmonMediaDataSource(Activity activity, AesFile aesFile,
+    public AesMediaDataSource(Activity activity, AesFile aesFile,
                                  int buffers, int bufferSize, int threads, int backOffset) throws Exception {
         this.activity = activity;
         this.aesFile = aesFile;
