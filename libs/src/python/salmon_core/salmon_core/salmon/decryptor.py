@@ -263,6 +263,8 @@ class Decryptor:
             else:
                 part_size = min_part_size
             running_threads = int(len(data) // part_size)
+            if running_threads > self.__threads:
+                running_threads = self.__threads
 
         self.__submit_decrypt_jobs(running_threads, part_size,
                                    data, out_data,

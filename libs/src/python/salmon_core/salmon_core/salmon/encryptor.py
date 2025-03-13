@@ -79,6 +79,8 @@ def encrypt_shm(index: int, part_size: int, running_threads: int,
     out_data: bytearray = bytearray(shm_length)
     (byte_start, byte_end) = encrypt_data(ins, start, length, out_data, key, nonce, format,
                                           integrity, hash_key, chunk_size, buffer_size, shm_cancel_name)
+    if index == 0:
+        byte_start = 0
     shm_out_data[byte_start:byte_end] = out_data[byte_start:byte_end]
 
 
@@ -270,6 +272,8 @@ class Encryptor:
             else:
                 part_size = min_part_size
             running_threads = len(data) // part_size
+            if running_threads > self.__threads:
+                running_threads = self.__threads
 
         self.__submit_encrypt_jobs(running_threads, part_size,
                                    data, out_data,
@@ -318,8 +322,7 @@ class Encryptor:
                 # cancel all tasks
                 shm_cancel.buf[0] = 1
 
-        start = Header.HEADER_LENGTH if format == EncryptionFormat.Salmon else 0
-        out_data[start:] = shm_out.buf[start:]
+        out_data[:] = shm_out.buf[:]
 
         shm_cancel.close()
         shm_cancel.unlink()
