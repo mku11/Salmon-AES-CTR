@@ -183,6 +183,8 @@ public class SalmonEncryptor
 			else
 				partSize = minPartSize;
             runningThreads = (int)(data.Length / partSize);
+			if (runningThreads > this.threads)
+				runningThreads = this.threads;
         }
 
         SubmitEncryptJobs(runningThreads, partSize,

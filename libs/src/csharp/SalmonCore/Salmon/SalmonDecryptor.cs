@@ -174,6 +174,8 @@ public class SalmonDecryptor
 			else
 				partSize = minPartSize;
             runningThreads = (int)(data.Length / partSize);
+			if (runningThreads > this.threads)
+				runningThreads = this.threads;
         }
 
         SubmitDecryptJobs(runningThreads, partSize,
