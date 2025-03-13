@@ -53,7 +53,7 @@ class WSFileStream(RandomAccessStream):
         """
         Construct a file stream from an AndroidFile.
         This will create a wrapper stream that will route read() and write() to the file
-        
+
         :param file: The file that will be used to get the read/write stream
         :param mode: The mode "r" for read "rw" for write
         """
@@ -275,23 +275,30 @@ class WSFileStream(RandomAccessStream):
         Close this stream and associated resources.
         :raises IOError: Thrown if there is an IO error.
         """
-        if self.can_write() and self.queue:
-            self.queue.put(None)
+        self.reset()
+        self.closed = True
+
+    def reset(self):
+        if self.can_write():
+            if self.queue:
+                self.queue.put(None)
             if self.upload_thread:
                 self.upload_thread.join()
             if self.__response:
                 self.__check_status(self.__response, 206 if self.start_position > 0 else 200)
-        self.reset()
-        self.closed = True
+                self.__response.close()
+            if self.conn:
+                self.conn.close()
+        else:
+            if self.__response:
+                self.__response.close()
+            if self.conn:
+                self.conn.close()
 
-    @synchronized
-    def reset(self):
-        if self.__response:
-            self.__response.close()
-        if self.conn:
-            self.conn.close()
         self.conn = None
         self.__response = None
+        self.queue = None
+        self.upload_thread = None
         self.start_position = 0
         self.__file.reset()
 
