@@ -579,8 +579,7 @@ public class SalmonFSTests {
         FileSequencer sequencer = SalmonFSTestHelper.createSalmonFileSequencer();
         AesDrive drive = SalmonFSTestHelper.createDrive(vaultDir, SalmonFSTestHelper.driveClassType, SalmonCoreTestHelper.TEST_PASSWORD, sequencer);
         AesFileCommander fileCommander = new AesFileCommander(Integrity.DEFAULT_CHUNK_SIZE, Integrity.DEFAULT_CHUNK_SIZE, 2);
-        AesFile[] sfiles = fileCommander.importFiles(new IFile[]{file},
-                drive.getRoot(), false, true, null, null, null);
+        AesFile[] sfiles = fileCommander.importFiles(new IFile[]{file}, drive.getRoot(), false, true);
         fileCommander.close();
 
         long pos = Math.abs(new Random().nextLong() % file.getLength());
