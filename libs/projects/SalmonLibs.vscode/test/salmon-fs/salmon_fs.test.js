@@ -526,8 +526,7 @@ describe('salmon-fs', () => {
         let sequencer = await SalmonFSTestHelper.createSalmonFileSequencer();
         let drive = await SalmonFSTestHelper.createDrive(vaultDir, SalmonFSTestHelper.driveClassType, SalmonCoreTestHelper.TEST_PASSWORD, sequencer);
         let fileCommander = new AesFileCommander(SalmonFSTestHelper.ENC_IMPORT_BUFFER_SIZE, SalmonFSTestHelper.ENC_EXPORT_BUFFER_SIZE, 2);
-        let sfiles = await fileCommander.importFiles([file],
-            await drive.getRoot(), false, true, null, null, null);
+        let sfiles = await fileCommander.importFiles([file], await drive.getRoot(), false, true);
 		fileCommander.close();
 		
         let fileInputStream1 = AesFileReadableStream.create(sfiles[0], 4, 4 * 1024 * 1024, 4, 256 * 1024);
