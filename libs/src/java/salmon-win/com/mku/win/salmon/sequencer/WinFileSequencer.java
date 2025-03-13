@@ -24,7 +24,7 @@ SOFTWARE.
 */
 
 import com.mku.fs.file.IFile;
-import com.mku.win.salmon.registry.Registry;
+import com.mku.win.registry.Registry;
 import com.mku.salmon.sequence.INonceSequenceSerializer;
 import com.mku.salmonfs.sequence.FileSequencer;
 import com.mku.salmon.sequence.SequenceException;
