@@ -220,6 +220,8 @@ public class Encryptor {
             else
                 partSize = minPartSize;
             runningThreads = (int) (data.length / partSize);
+			if (runningThreads > this.threads)
+				runningThreads = this.threads;
         }
 
         submitEncryptJobs(runningThreads, partSize,

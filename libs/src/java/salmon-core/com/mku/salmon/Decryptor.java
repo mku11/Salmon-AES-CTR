@@ -222,6 +222,8 @@ public class Decryptor {
             else
                 partSize = minPartSize;
             runningThreads = (int) (data.length / partSize);
+			if (runningThreads > this.threads)
+				runningThreads = this.threads;
         }
 
         submitDecryptJobs(runningThreads, partSize, data, outData,
