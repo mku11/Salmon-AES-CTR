@@ -22,13 +22,14 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 */
 
-using Mku.File;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using System;
 using System.IO;
 using System.Collections.Generic;
-using Mku.Salmon.Drive;
 using Mku.Salmon.Streams;
+using Mku.FS.File;
+using Mku.SalmonFS.Drive;
+using Mku.SalmonFS.File;
 
 namespace Mku.Salmon.Test;
 

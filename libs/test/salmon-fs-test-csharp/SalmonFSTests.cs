@@ -22,7 +22,6 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 */
 
-using Mku.File;
 using Mku.Salmon.Integrity;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using System;
@@ -30,10 +29,14 @@ using System.IO;
 using System.Text;
 using System.Collections.Generic;
 using System.Security.Cryptography;
-using Mku.Salmon.Utils;
-using Mku.Salmon.Sequence;
 using Mku.Salmon.Streams;
-using Mku.Salmon.Drive;
+using Mku.FS.File;
+using Mku.SalmonFS.Sequence;
+using Mku.SalmonFS.Drive;
+using Mku.SalmonFS.Auth;
+using Mku.SalmonFS.File;
+using Mku.SalmonFS.Streams;
+using Mku.SalmonFS.Utils;
 
 namespace Mku.Salmon.Test;
 

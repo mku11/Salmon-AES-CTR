@@ -1,70 +1,73 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
-  <PropertyGroup>
-    <TargetFramework>net8.0-android</TargetFramework>
-    <LangVersion>10</LangVersion>
-    <ImplicitUsings>false</ImplicitUsings>
-    <Title>Salmon AES256 CTR android filesystem encryption library</Title>
-    <GeneratePackageOnBuild>True</GeneratePackageOnBuild>
-    <PackageIcon>logo.png</PackageIcon>
-    <PackageReadmeFile>README.md</PackageReadmeFile>
-    <PackageLicenseFile>LICENSE</PackageLicenseFile>
-    <PackageRequireLicenseAcceptance>True</PackageRequireLicenseAcceptance>
-    <IncludeSymbols>True</IncludeSymbols>
-    <Authors>Max Kas</Authors>
-    <Company>$(Authors)</Company>
-    <Description>Salmon is an AES-256 CTR encrypted virtual filesystem library with HMAC SHA 256 integrity featuring seekable streams and parallel processing.</Description>
-    <PackageProjectUrl>https://github.com/mku11/Salmon-AES-CTR</PackageProjectUrl>
-    <RepositoryUrl>https://github.com/mku11/Salmon-AES-CTR</RepositoryUrl>
-    <PackageTags>AES,AES-256,CTR,SHA256,HMAC,Encryption,Virtual,Filesystem,File</PackageTags>
-    <PackAsTool>False</PackAsTool>
-    <PackageOutputPath>..\..\..\..\output\nuget\releases</PackageOutputPath>
-    <GenerateDocumentationFile>True</GenerateDocumentationFile>
-    <SalmonVersion>3.0.0</SalmonVersion>
-    <Version>$(SalmonVersion)</Version>
-    <Configurations>Debug;Release;DebugGPU;ReleaseGPU</Configurations>
-  </PropertyGroup>
+	<PropertyGroup>
+		<TargetFramework>net8.0-android</TargetFramework>
+		<LangVersion>10</LangVersion>
+		<ImplicitUsings>false</ImplicitUsings>
+		<Title>Salmon AES256 CTR android filesystem encryption library</Title>
+		<GeneratePackageOnBuild>True</GeneratePackageOnBuild>
+		<PackageIcon>logo.png</PackageIcon>
+		<PackageReadmeFile>README.md</PackageReadmeFile>
+		<PackageLicenseFile>LICENSE</PackageLicenseFile>
+		<PackageRequireLicenseAcceptance>True</PackageRequireLicenseAcceptance>
+		<IncludeSymbols>True</IncludeSymbols>
+		<Authors>Max Kas</Authors>
+		<Company>$(Authors)</Company>
+		<Description>Salmon is an AES-256 CTR encrypted virtual filesystem library with HMAC SHA 256 integrity featuring seekable streams and parallel processing.</Description>
+		<PackageProjectUrl>https://github.com/mku11/Salmon-AES-CTR</PackageProjectUrl>
+		<RepositoryUrl>https://github.com/mku11/Salmon-AES-CTR</RepositoryUrl>
+		<PackageTags>AES,AES-256,CTR,SHA256,HMAC,Encryption,Virtual,Filesystem,File</PackageTags>
+		<PackAsTool>False</PackAsTool>
+		<PackageOutputPath>..\..\..\..\output\nuget\releases</PackageOutputPath>
+		<GenerateDocumentationFile>True</GenerateDocumentationFile>
+		<SalmonVersion>3.0.0</SalmonVersion>
+		<Version>$(SalmonVersion)</Version>
+		<Configurations>Debug;Release;DebugGPU;ReleaseGPU</Configurations>
+	</PropertyGroup>
 
-  <ItemGroup>
-    <None Include="..\..\..\..\common\common-res\icons\logo.png">
-      <Pack>True</Pack>
-      <PackagePath>\</PackagePath>
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </None>
-    <None Include="..\..\..\..\LICENSE">
-      <Pack>True</Pack>
-      <PackagePath>\</PackagePath>
-    </None>
-    <None Include="..\..\..\..\NOTICE">
-      <Pack>True</Pack>
-      <PackagePath>\</PackagePath>
-    </None>
-    <Content Include="README.md">
-      <Pack>True</Pack>
-      <PackagePath>\</PackagePath>
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </Content>
-  </ItemGroup>
+	<ItemGroup>
+		<None Include="..\..\..\..\common\common-res\icons\logo.png">
+			<Pack>True</Pack>
+			<PackagePath>\</PackagePath>
+			<CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+		</None>
+		<None Include="..\..\..\..\LICENSE">
+			<Pack>True</Pack>
+			<PackagePath>\</PackagePath>
+		</None>
+		<None Include="..\..\..\..\NOTICE">
+			<Pack>True</Pack>
+			<PackagePath>\</PackagePath>
+		</None>
+		<Content Include="README.md">
+			<Pack>True</Pack>
+			<PackagePath>\</PackagePath>
+			<CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+		</Content>
+	</ItemGroup>
 
-  <ItemGroup>
-    <Compile Include="..\..\..\src\dotnetandroid\salmon-dotnet-android-fs\Salmon\Drive\AndroidDrive.cs" Link="Salmon\Drive\AndroidDrive.cs" />
-    <Compile Include="..\..\..\src\dotnetandroid\salmon-dotnet-android-fs\File\AndroidFile.cs" Link="File\AndroidFile.cs" />
-    <Compile Include="..\..\..\src\dotnetandroid\salmon-dotnet-android-fs\File\AndroidFileStream.cs" Link="File\AndroidFileStream.cs" />
-    <Compile Include="..\..\..\src\dotnetandroid\salmon-dotnet-android-fs\File\AndroidSharedFileObserver.cs" Link="File\AndroidSharedFileObserver.cs" />
-    <Compile Include="..\..\..\src\dotnetandroid\salmon-dotnet-android-fs\Salmon\Media\SalmonMediaDataSource.cs" Link="Salmon\Media\SalmonMediaDataSource.cs" />
-  </ItemGroup>
+	<ItemGroup>
+		<Compile Include="..\..\..\src\dotnetandroid\salmon-dotnet-android-fs\Android\SalmonFS\Drive\AndroidDrive.cs" Link="Android\SalmonFS\Drive\AndroidDrive.cs" />
+		<Compile Include="..\..\..\src\dotnetandroid\salmon-dotnet-android-fs\Android\SalmonFS\Media\SalmonMediaDataSource.cs" Link="Android\SalmonFS\Media\SalmonMediaDataSource.cs" />
+		
+		<Compile Include="..\..\..\src\dotnetandroid\salmon-dotnet-android-fs\Android\FS\File\AndroidFile.cs" Link="Android\FS\File\AndroidFile.cs" />
+		<Compile Include="..\..\..\src\dotnetandroid\salmon-dotnet-android-fs\Android\FS\File\AndroidSharedFileObserver.cs" Link="Android\FS\File\AndroidSharedFileObserver.cs" />
+		
+		<Compile Include="..\..\..\src\dotnetandroid\salmon-dotnet-android-fs\Android\FS\Streams\AndroidFileStream.cs" Link="Android\FS\Streams\AndroidFileStream.cs" />
 
-
-  <ItemGroup>
-    <PackageReference Include="System.Collections" Version="4.3.0" />
-    <PackageReference Include="Xamarin.AndroidX.Core" Version="1.12.0.4" />
-    <PackageReference Include="Xamarin.AndroidX.DocumentFile" Version="1.0.1.23" />
-  </ItemGroup>
+	</ItemGroup>
 
 
-  <ItemGroup>
-    <ProjectReference Include="..\Salmon.Core\Salmon.Core.csproj" />
-    <ProjectReference Include="..\Salmon.FS\Salmon.FS.csproj" />
-  </ItemGroup>
+	<ItemGroup>
+		<PackageReference Include="System.Collections" Version="4.3.0" />
+		<PackageReference Include="Xamarin.AndroidX.Core" Version="1.12.0.4" />
+		<PackageReference Include="Xamarin.AndroidX.DocumentFile" Version="1.0.1.23" />
+	</ItemGroup>
+
+
+	<ItemGroup>
+		<ProjectReference Include="..\Salmon.Core\Salmon.Core.csproj" />
+		<ProjectReference Include="..\Salmon.FS\Salmon.FS.csproj" />
+	</ItemGroup>
 
 </Project>

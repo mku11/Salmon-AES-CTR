@@ -22,9 +22,6 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 */
 
-using Mku.File;
-using Mku.Sequence;
-using Mku.Utils;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using System.IO;
 using System.Security.Cryptography;
@@ -33,10 +30,16 @@ using System.Text;
 using BitConverter = Mku.Convert.BitConverter;
 using Mku.Salmon.Streams;
 using System.Diagnostics;
-using Mku.Salmon.Utils;
 using Mku.Salmon.Sequence;
-using Mku.Salmon.Drive;
 using System.Collections.Generic;
+using Mku.FS.File;
+using Mku.SalmonFS.Drive;
+using Mku.SalmonFS.Utils;
+using Mku.SalmonFS.Sequence;
+using Mku.SalmonFS.File;
+using Mku.FS.Drive.Utils;
+using Mku.SalmonFS.Auth;
+using Mku.SalmonFS.Streams;
 
 namespace Mku.Salmon.Test;
 

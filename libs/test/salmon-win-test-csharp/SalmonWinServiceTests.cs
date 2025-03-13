@@ -23,7 +23,7 @@ SOFTWARE.
 */
 
 using Microsoft.VisualStudio.TestTools.UnitTesting;
-using Mku.File;
+using Mku.FS.File;
 using Mku.Salmon;
 using Mku.Salmon.Sequence;
 using Salmon.Win.Registry;

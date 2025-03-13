@@ -22,7 +22,6 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 */
 
-using Mku.Bridge;
 using System.Runtime.InteropServices;
 
 namespace Mku.Salmon.Bridge;

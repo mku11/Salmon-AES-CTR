@@ -25,10 +25,10 @@
     <Configurations>Debug;Release;DebugGPU;ReleaseGPU</Configurations>
   </PropertyGroup>
   <ItemGroup>
-    <Compile Include="..\..\..\src\csharp\SalmonWin\Sequencer\WinClientSequencer.cs" Link="Sequencer\WinClientSequencer.cs" />
-    <Compile Include="..\..\..\src\csharp\SalmonWin\Sequencer\WinFileSequencer.cs" Link="Sequencer\WinFileSequencer.cs" />
-    <Compile Include="..\..\..\src\csharp\SalmonWin\Sequencer\WinSequenceTamperedException.cs" Link="Sequencer\WinSequenceTamperedException.cs" />
-    <Compile Include="..\..\..\src\csharp\SalmonWin\Registry\SalmonRegistry.cs" Link="Registry\SalmonRegistry.cs" />
+    <Compile Include="..\..\..\src\csharp\SalmonWin\Win\Salmon\Sequencer\WinClientSequencer.cs" Link="Win\Salmon\Sequencer\WinClientSequencer.cs" />
+    <Compile Include="..\..\..\src\csharp\SalmonWin\Win\Salmon\Sequencer\WinFileSequencer.cs" Link="Win\Salmon\Sequencer\WinFileSequencer.cs" />
+    <Compile Include="..\..\..\src\csharp\SalmonWin\Win\Salmon\Sequencer\WinSequenceTamperedException.cs" Link="Win\Salmon\Sequencer\WinSequenceTamperedException.cs" />
+    <Compile Include="..\..\..\src\csharp\SalmonWin\Win\Salmon\Registry\Registry.cs" Link="Win\Salmon\Registry\Registry.cs" />
   </ItemGroup>
   <ItemGroup>
     <PackageReference Include="System.Security.Cryptography.ProtectedData" Version="8.0.0" />
