@@ -167,7 +167,7 @@ class FileStream(RandomAccessStream):
         elif origin == RandomAccessStream.SeekOrigin.End:
             pos = self.__file.get_length() - offset
 
-        if self.__mm and pos > self.__file.get_length():
+        if self.can_write() and pos > self.__file.get_length():
             self.__resize(pos)
 
         self.__mm.seek(pos) if self.__mm else self.__raf.seek(pos)
@@ -178,7 +178,10 @@ class FileStream(RandomAccessStream):
         Flush the buffers to the associated file.
         """
         try:
-            self.__mm.flush() if self.__mm else self.__raf.flush()
+            if self.__mm:
+                self.__mm.flush()
+            else:
+                self.__raf.flush()
         except Exception as ex:
             print(ex, file=sys.stderr)
 
