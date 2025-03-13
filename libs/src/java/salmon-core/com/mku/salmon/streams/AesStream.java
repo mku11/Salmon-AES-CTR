@@ -295,7 +295,9 @@ public class AesStream extends RandomAccessStream {
         if (this.header != null) {
             chunkSize = this.header.getChunkSize();
             nonce = this.header.getNonce();
-        }
+        } else {
+			chunkSize = 0;
+		}
         if (nonce == null)
             throw new SecurityException("Nonce is missing");
         initIntegrity(integrity, hashKey, chunkSize);

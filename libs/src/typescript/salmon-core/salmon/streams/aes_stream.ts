@@ -191,7 +191,10 @@ export class AesStream extends RandomAccessStream {
         if (this.#header != null) {
             this.#chunkSize = this.#header.getChunkSize();
             this.#nonce = this.#header.getNonce();
-        }
+        } else {
+			this.#chunkSize = 0;
+		}
+			
         if (this.#nonce == null)
             throw new SecurityException("Nonce is missing");
 

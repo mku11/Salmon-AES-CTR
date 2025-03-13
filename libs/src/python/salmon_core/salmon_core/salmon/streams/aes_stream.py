@@ -173,6 +173,9 @@ class AesStream(RandomAccessStream):
         if self.__header:
             chunk_size = self.__header.get_chunk_size()
             nonce = self.__header.get_nonce()
+        else:
+            chunk_size = 0
+
         if nonce is None:
             raise SecurityException("Nonce is missing")
         self.__init_integrity(integrity, hash_key, chunk_size)
