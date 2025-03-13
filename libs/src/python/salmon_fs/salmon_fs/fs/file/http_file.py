@@ -165,7 +165,7 @@ class HttpFile(IFile):
         if path.endswith(HttpFile.separator):
             path = path[0:-1]
 
-        parent_file_path: str = path[0:path.rindex(HttpFile.separator)]
+        parent_file_path: str = path[0:path.rindex(HttpFile.separator)] if HttpFile.separator in path else ""
         return HttpFile(parent_file_path)
 
     def get_path(self) -> str:

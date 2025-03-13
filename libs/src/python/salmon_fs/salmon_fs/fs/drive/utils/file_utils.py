@@ -91,7 +91,7 @@ class FileUtils:
         """
         if file_name is None:
             return ""
-        index: int = file_name.rindex(".")
+        index: int = file_name.rindex(".") if "." in file_name else -1
         if index >= 0:
             return file_name[index + 1]
         else:
@@ -107,7 +107,7 @@ class FileUtils:
         """
         if file_name is None:
             return ""
-        index: int = file_name.rindex(".")
+        index: int = file_name.rindex(".") if "." in file_name else -1
         if index >= 0:
             return file_name[0: index]
         else:

@@ -236,7 +236,7 @@ class IFile(ABC):
                            progress_listener: Callable[[int, int], Any] | None = None) -> bool:
         """
         Copy contents of a file to another file.
-        
+
         :param src:              The source directory
         :param dest:             The target directory
         :param delete:           True to delete the source files when complete
@@ -260,12 +260,12 @@ class IFile(ABC):
 
     def copy_recursively(self, dest: IFile,
                          auto_rename: Callable[[IFile], str] | None = None,
-                         auto_rename_folders: bool = True,
+                         auto_rename_folders: bool = False,
                          on_failed: Callable[[IFile, Exception], Any] | None = None,
                          progress_listener: Callable[[IFile, int, int], Any] | None = None):
         """
         Copy a directory recursively
-        
+
         :param dest: The destination directory
         :param progress_listener: The progress listener
         :param auto_rename: The autorename function
@@ -301,7 +301,7 @@ class IFile(ABC):
                 progress_listener(self, 1, 1)
 
             for child in self.list_files():
-                child.copy_recursively(new_file, progress_listener, auto_rename, auto_rename_folders, on_failed)
+                child.copy_recursively(new_file, auto_rename, auto_rename_folders, on_failed, progress_listener)
 
     def move_recursively(self, dest: IFile,
                          auto_rename: Callable[[IFile], str] | None = None,
@@ -310,7 +310,7 @@ class IFile(ABC):
                          progress_listener: Callable[[IFile, int, int], Any] | None = None):
         """
         Move a directory recursively
-        
+
         :param dest:              The target directory
         :param progress_listener: The progress listener
         :param auto_rename: The autorename function
@@ -352,7 +352,7 @@ class IFile(ABC):
                 progress_listener(self, 1, 1)
 
             for child in self.list_files():
-                child.move_recursively(new_file, progress_listener, auto_rename, auto_rename_folders, on_failed)
+                child.move_recursively(new_file, auto_rename, auto_rename_folders, on_failed, progress_listener)
 
             if not self.delete():
                 on_failed(self, Exception("Could not delete source directory"))
@@ -373,7 +373,7 @@ class IFile(ABC):
             progress_listener(self, 1, 1)
         elif self.is_directory():
             for child in self.list_files():
-                child.delete_recursively(progress_listener, on_failed)
+                child.delete_recursively(on_failed, progress_listener)
 
             if not self.delete():
                 on_failed(self, Exception("Could not delete directory"))
@@ -390,7 +390,7 @@ class IFile(ABC):
     def auto_rename(filename: str) -> str:
         """
         Get an auto generated copy of a filename
-        
+
         :param filename:
         :return: The new file name
         """
@@ -413,7 +413,7 @@ class IFile(ABC):
     def __get_extension(file_name: str) -> str:
         if file_name is None:
             return ""
-        index: int = file_name.rindex(".")
+        index: int = file_name.rindex(".") if "." in file_name else -1
         if index >= 0:
             return file_name[index + 1:]
         else:

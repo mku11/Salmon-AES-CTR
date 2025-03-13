@@ -250,7 +250,7 @@ class WSFile(IFile):
         if path.endswith(WSFile.separator):
             path = path[0:-1]
 
-        parent_file_path: str = path[0:path.rindex(WSFile.separator)]
+        parent_file_path: str = path[0:path.rindex(WSFile.separator)] if WSFile.separator in path else ""
         return WSFile(parent_file_path, self.__service_path, self.__credentials)
 
     def get_path(self) -> str:

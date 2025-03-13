@@ -231,7 +231,6 @@ export class AesFile implements IVirtualFile {
         // we also specify if stream ranges can be overwritten which is generally dangerous if the file is existing
         // but practical if the file is brand new and multithreaded writes for performance need to be used.
         let realStream: RandomAccessStream = await this.#realFile.getOutputStream();
-        await realStream.seek(this.#getHeaderLength(), SeekOrigin.Begin);
 
         let key: Uint8Array | null = this.getEncryptionKey();
         if (key == null)
