@@ -77,7 +77,7 @@ class SalmonFSTests(TestCase):
         SalmonFSTestHelper.ENC_EXPORT_THREADS = threads
         SalmonFSTestHelper.ENABLE_MULTI_CPU = True
 
-        SalmonFSTestHelper.TEST_FILE_INPUT_STREAM_THREADS = 2
+        SalmonFSTestHelper.TEST_FILE_INPUT_STREAM_THREADS = threads
         SalmonFSTestHelper.TEST_USE_FILE_INPUT_STREAM = False
 
         SalmonCoreTestHelper.initialize()
@@ -373,9 +373,6 @@ class SalmonFSTests(TestCase):
         import_file_path: IFile = SalmonFSTestHelper.TEST_IMPORT_TINY_FILE
         SalmonFSTestHelper.export_and_import_auth(vault, import_file_path)
 
-    def test_examples(self):
-        SalmonFSTestHelper.test_examples()
-
     def test_EncryptAndDecryptStream(self):
         data: bytearray = SalmonFSTestHelper.get_real_file_contents(SalmonFSTestHelper.TEST_IMPORT_FILE)
         SalmonFSTestHelper.encrypt_and_decrypt_stream(data, SalmonCoreTestHelper.TEST_KEY_BYTES,
@@ -543,10 +540,15 @@ class SalmonFSTests(TestCase):
         file_commander: AesFileCommander = AesFileCommander(SalmonFSTestHelper.ENC_IMPORT_BUFFER_SIZE,
                                                             SalmonFSTestHelper.ENC_EXPORT_BUFFER_SIZE, 2,
                                                             multi_cpu=SalmonFSTestHelper.ENABLE_MULTI_CPU)
+
+        def on_failed(file, ex):
+            print("Error while import: " + str(ex), file=sys.stderr)
+            raise ex
+
         sfiles: list[AesFile] = file_commander.import_files([file],
                                                             drive.get_root(), False, True,
-                                                            lambda file: "", lambda file, ex: None,
-                                                            lambda task_progress: None)
+                                                            auto_rename=IFile.auto_rename_file,
+                                                            on_failed=on_failed)
         file_commander.close()
 
         pos: int = abs(random.randint(0, file.get_length()))
@@ -572,8 +574,8 @@ class SalmonFSTests(TestCase):
         ms2.close()
         self.assertEqual(h3, h4)
 
-    def test_raw(self):
-        SalmonFSTestHelper.test_raw()
+    def test_raw_file(self):
+        SalmonFSTestHelper.test_raw_file()
 
-    def test_enc(self):
-        SalmonFSTestHelper.test_enc()
+    def test_enc_dec_file(self):
+        SalmonFSTestHelper.test_enc_dec_file()

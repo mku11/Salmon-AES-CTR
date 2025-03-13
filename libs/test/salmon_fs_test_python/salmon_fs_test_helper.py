@@ -149,7 +149,7 @@ class SalmonFSTestHelper:
     file_exporter = None
     sequence_serializer = SequenceSerializer()
 
-    ENABLE_MULTI_CPU = False
+    ENABLE_MULTI_CPU = True
     testCase: TestCase = TestCase()
 
     @staticmethod
@@ -542,12 +542,17 @@ class SalmonFSTestHelper:
             read_file.set_verify_integrity(True, hash_key)
         else:
             read_file.set_verify_integrity(False)
+
         in_stream: AesStream = read_file.get_input_stream()
-        text_bytes: bytearray = bytearray(len(test_bytes))
-        in_stream.read(text_bytes, 0, len(text_bytes))
-        in_stream.close()
-        if check_data:
-            SalmonFSTestHelper.assert_array_equal(test_bytes, text_bytes)
+        try:
+            text_bytes: bytearray = bytearray(len(test_bytes))
+            in_stream.read(text_bytes, 0, len(text_bytes))
+            in_stream.close()
+            if check_data:
+                SalmonFSTestHelper.assert_array_equal(test_bytes, text_bytes)
+        finally:
+            in_stream.close()
+
         return read_file
 
     @staticmethod
@@ -670,7 +675,7 @@ class SalmonFSTestHelper:
         SalmonFSTestHelper.testCase.assertEqual(should_import, import_success)
 
     @staticmethod
-    def test_raw():
+    def test_raw_file():
         text = "This is a plaintext that will be used for testing"
         # for i in range(18):
         #     text += text
@@ -707,7 +712,7 @@ class SalmonFSTestHelper:
         SalmonFSTestHelper.testCase.assertEqual(string, text)
 
     @staticmethod
-    def test_enc():
+    def test_enc_dec_file():
         text = "This is a plaintext that will be used for testing"
         # for i in range(18):
         #     text += text
@@ -957,9 +962,9 @@ class SalmonFSTestHelper:
             print("export failed: " + sfile.get_name() + "\n" + str(ex))
 
         # export files
-        files_exported = commander.export_files(files, v_dir, False, True, print_export_progress,
+        files_exported = commander.export_files(files, v_dir, False, True,
                                                 IFile.auto_rename_file,
-                                                on_failed)
+                                                on_failed, print_export_progress)
 
         print("Files exported")
 
