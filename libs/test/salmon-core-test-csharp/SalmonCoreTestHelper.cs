@@ -77,7 +77,6 @@ public class SalmonCoreTestHelper
 
     internal static void Initialize()
     {
-		Console.WriteLine("closing core helper");
         SalmonCoreTestHelper.hashProvider = new HmacSHA256Provider();
         SalmonCoreTestHelper.encryptor = new Encryptor(SalmonCoreTestHelper.TEST_ENC_THREADS, TEST_ENC_BUFFER_SIZE);
         SalmonCoreTestHelper.decryptor = new Decryptor(SalmonCoreTestHelper.TEST_DEC_THREADS, TEST_DEC_BUFFER_SIZE);
@@ -85,7 +84,6 @@ public class SalmonCoreTestHelper
 	
 	internal static void Close()
     {
-		Console.WriteLine("closing core helper");
 		if(SalmonCoreTestHelper.encryptor != null)
 			SalmonCoreTestHelper.encryptor.Close();
 		if(SalmonCoreTestHelper.decryptor != null)

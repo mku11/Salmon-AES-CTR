@@ -278,13 +278,11 @@ export class SalmonFSTestHelper {
 	}
 
     static initialize() {
-		console.log("init fs helper");
         SalmonFSTestHelper.fileImporter = new AesFileImporter(SalmonFSTestHelper.ENC_IMPORT_BUFFER_SIZE, SalmonFSTestHelper.ENC_IMPORT_THREADS);
         SalmonFSTestHelper.fileExporter = new AesFileExporter(SalmonFSTestHelper.ENC_EXPORT_BUFFER_SIZE, SalmonFSTestHelper.ENC_EXPORT_THREADS);
     }
 
     static close() {
-		console.log("closing fs helper");
 		if(SalmonFSTestHelper.fileImporter)
 			SalmonFSTestHelper.fileImporter.close();
 		if(SalmonFSTestHelper.fileExporter)

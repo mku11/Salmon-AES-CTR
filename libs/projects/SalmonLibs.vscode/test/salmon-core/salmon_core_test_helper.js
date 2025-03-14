@@ -75,14 +75,12 @@ export class SalmonCoreTestHelper {
 	}
 	
     static initialize() {
-		console.log("init core helper");
         SalmonCoreTestHelper.hashProvider = new HmacSHA256Provider();
         SalmonCoreTestHelper.encryptor = new Encryptor(SalmonCoreTestHelper.TEST_ENC_THREADS);
         SalmonCoreTestHelper.decryptor = new Decryptor(SalmonCoreTestHelper.TEST_DEC_THREADS);
     }
 	
     static close() {
-		console.log("closing core helper");
 		if(SalmonCoreTestHelper.encryptor)
 			SalmonCoreTestHelper.encryptor.close();
 		if(SalmonCoreTestHelper.decryptor)

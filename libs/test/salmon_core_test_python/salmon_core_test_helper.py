@@ -96,7 +96,6 @@ class SalmonCoreTestHelper:
 
     @staticmethod
     def initialize():
-        print("init core helper")
         SalmonCoreTestHelper.hashProvider = HmacSHA256Provider()
         SalmonCoreTestHelper.encryptor = Encryptor(SalmonCoreTestHelper.TEST_ENC_THREADS)
         SalmonCoreTestHelper.decryptor = Decryptor(SalmonCoreTestHelper.TEST_DEC_THREADS)
@@ -115,7 +114,6 @@ class SalmonCoreTestHelper:
 
     @staticmethod
     def close():
-        print("closing core helper")
         if SalmonCoreTestHelper.encryptor:
             SalmonCoreTestHelper.encryptor.close()
         if SalmonCoreTestHelper.decryptor:

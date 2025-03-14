@@ -293,7 +293,6 @@ class SalmonFSTestHelper:
 
     @staticmethod
     def initialize():
-        print("init file helper")
         SalmonFSTestHelper.file_importer = AesFileImporter(SalmonFSTestHelper.ENC_IMPORT_BUFFER_SIZE,
                                                            SalmonFSTestHelper.ENC_IMPORT_THREADS,
                                                            SalmonFSTestHelper.ENABLE_MULTI_CPU)
@@ -303,7 +302,6 @@ class SalmonFSTestHelper:
 
     @staticmethod
     def close():
-        print("closing file helper")
         if SalmonFSTestHelper.file_importer:
             SalmonFSTestHelper.file_importer.close()
         if SalmonFSTestHelper.file_exporter:

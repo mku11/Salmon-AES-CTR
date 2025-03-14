@@ -265,13 +265,11 @@ public class SalmonFSTestHelper {
     }
 
     static void initialize() {
-        System.out.println("init fs helper");
         SalmonFSTestHelper.fileImporter = new AesFileImporter(SalmonFSTestHelper.ENC_IMPORT_BUFFER_SIZE, SalmonFSTestHelper.ENC_IMPORT_THREADS);
         SalmonFSTestHelper.fileExporter = new AesFileExporter(SalmonFSTestHelper.ENC_EXPORT_BUFFER_SIZE, SalmonFSTestHelper.ENC_EXPORT_THREADS);
     }
 
     static void close() {
-        System.out.println("close fs helper");
         if (SalmonFSTestHelper.fileImporter != null)
             SalmonFSTestHelper.fileImporter.close();
         if (SalmonFSTestHelper.fileExporter != null)

@@ -262,14 +262,12 @@ public class SalmonFSTestHelper
 
     internal static void Initialize()
     {
-		Console.WriteLine("init fs helper");
         SalmonFSTestHelper.fileImporter = new AesFileImporter(SalmonFSTestHelper.ENC_IMPORT_BUFFER_SIZE, SalmonFSTestHelper.ENC_IMPORT_THREADS);
         SalmonFSTestHelper.fileExporter = new AesFileExporter(SalmonFSTestHelper.ENC_EXPORT_BUFFER_SIZE, SalmonFSTestHelper.ENC_EXPORT_THREADS);
     }
 
     internal static void Close()
     {
-		Console.WriteLine("closing fs helper");
 		if(SalmonFSTestHelper.fileImporter != null)
 			SalmonFSTestHelper.fileImporter.Close();
 		if(SalmonFSTestHelper.fileExporter != null)

@@ -93,14 +93,12 @@ public class SalmonCoreTestHelper {
     private static Decryptor decryptor;
 
     static void initialize() {
-        System.out.println("init core helper");
         SalmonCoreTestHelper.hashProvider = new HMACSHA256Provider();
         SalmonCoreTestHelper.encryptor = new Encryptor(SalmonCoreTestHelper.TEST_ENC_THREADS);
         SalmonCoreTestHelper.decryptor = new Decryptor(SalmonCoreTestHelper.TEST_DEC_THREADS);
     }
 
     static void close() {
-		System.out.println("closing core helper");
         if (SalmonCoreTestHelper.encryptor != null)
             SalmonCoreTestHelper.encryptor.close();
         if (SalmonCoreTestHelper.decryptor != null)
