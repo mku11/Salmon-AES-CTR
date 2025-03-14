@@ -155,8 +155,8 @@ export class Encryptor {
             else
                 partSize = minPartSize;
             runningThreads = Math.floor(data.length / partSize);
-			if (runningThreads > this.threads)
-				runningThreads = this.threads;
+			if (runningThreads > this.#threads)
+				runningThreads = this.#threads;
         }
 
         await this.#submitEncryptJobs(runningThreads, partSize, 
