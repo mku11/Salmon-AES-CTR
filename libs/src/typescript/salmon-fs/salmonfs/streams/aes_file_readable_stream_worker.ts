@@ -23,7 +23,7 @@ SOFTWARE.
 */
 
 import { AesStream } from "../../../salmon-core/salmon/streams/aes_stream.js";
-import { IRealFile } from "../../fs/file/ifile.js";
+import { IFile } from "../../fs/file/ifile.js";
 import { AesFile } from "../file/aes_file.js";
 import { fillBufferPart, CacheBuffer } from "./aes_file_readable_stream_helper.js";
 
@@ -73,7 +73,7 @@ async function startRead(event: any): Promise<void> {
         let params = typeof process === 'object' ? event : event.data;
         let chunkBytesRead: number = 0;
         if (stream == null) {
-            let realFile: IRealFile = await getInstance(params.readFileClassType, params.fileToReadHandle);
+            let realFile: IFile = await getInstance(params.readFileClassType, params.fileToReadHandle);
             let fileToExport: AesFile = new AesFile(realFile, null);
             fileToExport.setEncryptionKey(params.key);
             await fileToExport.setVerifyIntegrity(params.integrity, params.hash_key);

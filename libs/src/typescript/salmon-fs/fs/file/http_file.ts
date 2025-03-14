@@ -23,7 +23,7 @@ SOFTWARE.
 */
 
 import { RandomAccessStream } from '../../../salmon-core/streams/random_access_stream.js';
-import { IRealFile } from './ifile.js';
+import { IFile } from './ifile.js';
 import { HttpFileStream } from '../streams/http_file_stream.js';
 import { IOException } from '../../../salmon-core/streams/io_exception.js';
 import { MemoryStream } from '../../../salmon-core/streams/memory_stream.js';
@@ -31,7 +31,7 @@ import { MemoryStream } from '../../../salmon-core/streams/memory_stream.js';
 /**
  * Salmon RealFile implementation for Javascript.
  */
-export class HttpFile implements IRealFile {
+export class HttpFile implements IFile {
     public static readonly separator: string = "/";
     public static readonly SMALL_FILE_MAX_LENGTH: number = 128*1024;
 	public static readonly BUFFER_LENGTH: number = 32*1024;
@@ -63,7 +63,7 @@ export class HttpFile implements IRealFile {
      * @param dirName The name of the new directory.
      * @return The newly created directory.
      */
-    public async createDirectory(dirName: string): Promise<IRealFile> {
+    public async createDirectory(dirName: string): Promise<IFile> {
         throw new Error("Unsupported Operation, readonly filesystem");
     }
 
@@ -73,7 +73,7 @@ export class HttpFile implements IRealFile {
      * @return The newly created file.
      * @throws IOException Thrown if there is an IO error.
      */
-    public createFile(filename: string): Promise<IRealFile> {
+    public createFile(filename: string): Promise<IFile> {
         throw new Error("Unsupported Operation, readonly filesystem");
     }
 
@@ -143,7 +143,7 @@ export class HttpFile implements IRealFile {
      * Get the parent directory of this file or directory.
      * @return The parent directory.
      */
-    public async getParent(): Promise<IRealFile> {
+    public async getParent(): Promise<IFile> {
 		let path: string = this.filePath;
 		if(path.endsWith(HttpFile.separator))
 			path = path.slice(0,-1);
@@ -229,9 +229,9 @@ export class HttpFile implements IRealFile {
      * List all files under this directory.
      * @return The list of files.
      */
-    public async listFiles(): Promise<IRealFile[]> {
+    public async listFiles(): Promise<IFile[]> {
 		if(await this.isDirectory()) {
-			let files: IRealFile[] = [];
+			let files: IFile[] = [];
 			let stream: RandomAccessStream = await this.getInputStream();
 			let ms: MemoryStream = new MemoryStream();
 			await stream.copyTo(ms);
@@ -246,7 +246,7 @@ export class HttpFile implements IRealFile {
 				if (filename.includes("%")){
 					filename = decodeURIComponent(filename);
 				}
-				let file: IRealFile = new HttpFile(this.filePath + HttpFile.separator + filename);
+				let file: IFile = new HttpFile(this.filePath + HttpFile.separator + filename);
 				files.push(file);
 			}
 			return files;
@@ -261,7 +261,7 @@ export class HttpFile implements IRealFile {
      * @param progressListener Observer to notify when progress changes.
      * @return The moved file. Use this file for subsequent operations instead of the original.
      */
-    public async move(newDir: IRealFile, newName: string | null = null, progressListener: ((position: number, length: number) => void) | null = null): Promise<IRealFile> {
+    public async move(newDir: IFile, newName: string | null = null, progressListener: ((position: number, length: number) => void) | null = null): Promise<IFile> {
         throw new Error("Unsupported Operation, readonly filesystem");
     }
 
@@ -273,7 +273,7 @@ export class HttpFile implements IRealFile {
      * @return The copied file. Use this file for subsequent operations instead of the original.
      * @throws IOException Thrown if there is an IO error.
      */
-    public async copy(newDir: IRealFile, newName: string | null = null, progressListener: ((position: number, length: number) => void) | null = null): Promise<IRealFile> {
+    public async copy(newDir: IFile, newName: string | null = null, progressListener: ((position: number, length: number) => void) | null = null): Promise<IFile> {
         throw new Error("Unsupported Operation, readonly filesystem");
     }
 
@@ -282,7 +282,7 @@ export class HttpFile implements IRealFile {
      * @param filename The name of the file or directory.
      * @return
      */
-    public async getChild(filename: string): Promise<IRealFile | null> {
+    public async getChild(filename: string): Promise<IFile | null> {
         if (await this.isFile())
             return null;
         let child: HttpFile = new HttpFile(this.filePath + HttpFile.separator + filename);

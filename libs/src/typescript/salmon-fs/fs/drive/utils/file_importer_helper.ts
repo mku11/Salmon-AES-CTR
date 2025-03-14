@@ -23,7 +23,7 @@ SOFTWARE.
 */
 
 import { RandomAccessStream } from "../../../../salmon-core/streams/random_access_stream.js";
-import { IRealFile } from "../../file/ifile.js";
+import { IFile } from "../../file/ifile.js";
 import { IVirtualFile } from "../../file/ivirtual_file.js";
 
 /**
@@ -36,7 +36,7 @@ import { IVirtualFile } from "../../file/ivirtual_file.js";
  * @param totalBytesRead The total bytes read from the external file
  * @param onProgress 	 Progress observer
  */
-export async function importFilePart(fileToImport: IRealFile, salmonFile: IVirtualFile,
+export async function importFilePart(fileToImport: IFile, salmonFile: IVirtualFile,
     start: number, count: number, totalBytesRead: number[], onProgress: ((position: number, length: number) => void) | null,
     bufferSize: number, stopped: boolean[]): Promise<void> {
     let totalPartBytesRead: number = 0;

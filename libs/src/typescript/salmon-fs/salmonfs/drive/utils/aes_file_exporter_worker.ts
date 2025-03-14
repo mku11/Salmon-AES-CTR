@@ -22,7 +22,7 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 */
 
-import { IRealFile } from "../../../fs/file/ifile.js";
+import { IFile } from "../../../fs/file/ifile.js";
 import { IVirtualFile } from "../../../fs/file/ivirtual_file.js";
 import { FileExporterWorker } from "../../../fs/drive/utils/file_exporter_worker.js";
 import { FileUtils } from "../../../fs/drive/utils/file_utils.js";
@@ -35,7 +35,7 @@ export class AesFileExporterWorker extends FileExporterWorker {
      * @returns 
      */
     async getSourceFile(params: any): Promise<IVirtualFile | null> {
-        let realFile: IRealFile = await FileUtils.getInstance(params.exportFileClassType, params.fileToExportHandle);
+        let realFile: IFile = await FileUtils.getInstance(params.exportFileClassType, params.fileToExportHandle);
         let fileToExport: AesFile = new AesFile(realFile, null);
         fileToExport.setEncryptionKey(params.key);
         await fileToExport.setVerifyIntegrity(params.integrity, params.hash_key);

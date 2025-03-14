@@ -23,7 +23,7 @@ SOFTWARE.
 */
 
 import { AesDrive } from "./aes_drive.js";
-import { IRealFile } from "../../fs/file/ifile.js";
+import { IFile } from "../../fs/file/ifile.js";
 import { AesFile } from "../file/aes_file.js";
 
 /**
@@ -43,21 +43,21 @@ export class HttpDrive extends AesDrive {
 
     /**
      * Helper method that opens and initializes a Drive
-     * @param {IRealFile} dir The real directory that contains the drive.
+     * @param {IFile} dir The real directory that contains the drive.
      * @param {string} password Text password to use with this drive.
      * @param {ISalmonSequencer} sequencer Optional nonce sequencer that will be used for importing files.
      * @returns {Promise<AesDrive>} The drive.
      */
-    public static async open(dir: IRealFile, password: string): Promise<AesDrive> {
+    public static async open(dir: IFile, password: string): Promise<AesDrive> {
         return await AesDrive.openDrive(dir, HttpDrive, password);
     }
     
     /**
      * Get a private dir for sharing files with external applications.
-     * @return {IRealFile} The private dir
+     * @return {IFile} The private dir
      * @throws Exception
      */
-    public getPrivateDir(): IRealFile {
+    public getPrivateDir(): IFile {
         throw new Error("Unsupported Operation");
     }
 
@@ -81,7 +81,7 @@ export class HttpDrive extends AesDrive {
      * @param file The real file.
      * @returns The encrypted file.
      */
-    public override getVirtualFile(file: IRealFile): AesFile {
+    public override getVirtualFile(file: IFile): AesFile {
         return new AesFile(file, this);
     }
 }

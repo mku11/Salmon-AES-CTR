@@ -22,7 +22,7 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 */
 
-import { IRealFile } from "../../../fs/file/ifile.js";
+import { IFile } from "../../../fs/file/ifile.js";
 import { IVirtualFile } from "../../../fs/file/ivirtual_file.js";
 import { FileImporterWorker } from "../../../fs/drive/utils/file_importer_worker.js";
 import { FileUtils } from "../../../fs/drive/utils/file_utils.js";
@@ -31,7 +31,7 @@ import { AesFile } from "../../file/aes_file.js";
 export class AesFileImporterWorker extends FileImporterWorker {
 
     async getTargetFile(params: any): Promise<IVirtualFile | null> {
-        let realFile: IRealFile = await FileUtils.getInstance(params.importedFileClassType, params.importedFileHandle);
+        let realFile: IFile = await FileUtils.getInstance(params.importedFileClassType, params.importedFileHandle);
         let targetFile: AesFile = new AesFile(realFile, null);
         targetFile.setAllowOverwrite(true);
         targetFile.setEncryptionKey(params.key);

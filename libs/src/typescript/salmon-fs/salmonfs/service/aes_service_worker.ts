@@ -23,7 +23,7 @@ SOFTWARE.
 */
 import { ReadableStreamWrapper } from "../../../salmon-core/streams/readable_stream_wrapper.js";
 import { AesStream } from "../../../salmon-core/salmon/streams/aes_stream.js";
-import { IRealFile } from "../../fs/file/ifile.js";
+import { IFile } from "../../fs/file/ifile.js";
 import { File } from "../../fs/file/file.js";
 import { HttpFile } from "../../fs/file/http_file.js";
 import { AesFile } from "../file/aes_file.js";
@@ -48,7 +48,7 @@ export class AesServiceWorker {
 		return position;
 	}
 
-	async getFile(type: string, param: any): Promise<IRealFile> {
+	async getFile(type: string, param: any): Promise<IFile> {
 		switch (type) {
 			case 'HttpFile':
 				return new HttpFile(param);
@@ -61,7 +61,7 @@ export class AesServiceWorker {
 	async getResponse(request: Request) {
 		let position: number = this.getPosition(request.headers);
 		let params: any = this.requests[request.url];
-		let file: IRealFile = await this.getFile(params.fileClass, params.fileHandle);
+		let file: IFile = await this.getFile(params.fileClass, params.fileHandle);
 		let salmonFile: AesFile = new AesFile(file);
 		salmonFile.setEncryptionKey(params.key);
 		await salmonFile.setVerifyIntegrity(params.integrity, params.hash_key);

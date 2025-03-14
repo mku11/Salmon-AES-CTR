@@ -22,7 +22,7 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 */
 
-import { IRealFile } from "../../../fs/file/ifile.js";
+import { IFile } from "../../../fs/file/ifile.js";
 import { IVirtualFile } from "../../../fs/file/ivirtual_file.js";
 import { IntegrityException } from "../../../../salmon-core/salmon/integrity/integrity_exception.js";
 import { AuthException } from "../../auth/auth_exception.js";
@@ -55,7 +55,7 @@ export class AesFileImporter extends FileImporter {
         await (targetFile as AesFile).setApplyIntegrity(integrity);
     }
 
-    async getMinimumPartSize(sourceFile: IRealFile, targetFile: IVirtualFile): Promise<number> {
+    async getMinimumPartSize(sourceFile: IFile, targetFile: IVirtualFile): Promise<number> {
         // we force the whole content to use 1 thread if:
         if(
             // we are in the browser andthe target is a local file (chromes crswap clash between writers)
@@ -80,7 +80,7 @@ export class AesFileImporter extends FileImporter {
         }
         return err;
     }
-    async getWorkerMessage(index: number, sourceFile: IRealFile, targetFile: IVirtualFile,
+    async getWorkerMessage(index: number, sourceFile: IFile, targetFile: IVirtualFile,
         runningThreads: number, partSize: number, fileSize: number, bufferSize: number, integrity: boolean) {
         let importedFile = targetFile as AesFile;
         let fileToImportHandle: any = await sourceFile.getPath();

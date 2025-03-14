@@ -23,7 +23,7 @@ SOFTWARE.
 */
 
 import { RandomAccessStream, SeekOrigin } from "../../../salmon-core/streams/random_access_stream.js";
-import { IRealFile } from "../file/ifile.js";
+import { IFile } from "../file/ifile.js";
 
 // File operations on the local file system may be slow due to
 // web browser specificallly Chrome malware scans
@@ -38,7 +38,7 @@ export class FileStream extends RandomAccessStream {
     /**
      * The java file associated with this stream.
      */
-    readonly #file: IRealFile;
+    readonly #file: IFile;
     #fileBlob: File | null = null;
     #writablefileStream: FileSystemWritableFileStream | null = null;
     #_position: number = 0;
@@ -51,7 +51,7 @@ export class FileStream extends RandomAccessStream {
      * @param file The File that will be used to get the read/write stream
      * @param mode The mode "r" for read "rw" for write
      */
-    public constructor(file: IRealFile, mode: string) {
+    public constructor(file: IFile, mode: string) {
         super();
         this.#file = file;
         if (mode == "rw") {
@@ -72,7 +72,7 @@ export class FileStream extends RandomAccessStream {
             if (exists) {
                 this.#writablefileStream = await fileHandle.createWritable({ keepExistingData: true });
             } else {
-                let parent: IRealFile | null = await this.#file.getParent();
+                let parent: IFile | null = await this.#file.getParent();
                 if(parent == null)
                     throw new Error("Could not get parent");
                 await parent.createFile(this.#file.getName());

@@ -24,14 +24,14 @@ SOFTWARE.
 
 import { RandomAccessStream } from '../../../salmon-core/streams/random_access_stream.js';
 import { Base64 } from '../../../salmon-core/convert/base64.js';
-import { IRealFile } from './ifile.js';
+import { IFile } from './ifile.js';
 import { WSFileStream } from '../streams/ws_file_stream.js';
 import { IOException } from '../../../salmon-core/streams/io_exception.js';
 
 /**
  * Salmon RealFile implementation for Web Service files.
  */
-export class WSFile implements IRealFile {
+export class WSFile implements IFile {
     static readonly #PATH: string = "path";
     static readonly #DEST_DIR: string = "destDir";
     static readonly #FILENAME: string = "filename";
@@ -88,7 +88,7 @@ export class WSFile implements IRealFile {
      * @param dirName The name of the new directory.
      * @return The newly created directory.
      */
-    public async createDirectory(dirName: string): Promise<IRealFile> {
+    public async createDirectory(dirName: string): Promise<IFile> {
         let nDirPath: string = this.getChildPath(dirName);
         let headers: Headers = new Headers();
         this.setDefaultHeaders(headers);
@@ -109,7 +109,7 @@ export class WSFile implements IRealFile {
      * @return The newly created file.
      * @throws IOException Thrown if there is an IO error.
      */
-    public async createFile(filename: string): Promise<IRealFile> {
+    public async createFile(filename: string): Promise<IFile> {
         let nFilePath: string = this.getChildPath(filename);
         let headers: Headers = new Headers();
         this.setDefaultHeaders(headers);
@@ -131,7 +131,7 @@ export class WSFile implements IRealFile {
     public async delete(): Promise<boolean> {
 		this.reset();
         if(await this.isDirectory()) {
-            let files: IRealFile[]  = await this.listFiles();
+            let files: IFile[]  = await this.listFiles();
             for (let file of files) {
                 let headers: Headers = new Headers();
                 this.setDefaultHeaders(headers);
@@ -219,7 +219,7 @@ export class WSFile implements IRealFile {
      * Get the parent directory of this file or directory.
      * @return The parent directory.
      */
-    public async getParent(): Promise<IRealFile> {
+    public async getParent(): Promise<IFile> {
 		let path: string = this.#filePath;
 		if(path.endsWith(WSFile.separator))
 			path = path.slice(0,-1);
@@ -291,7 +291,7 @@ export class WSFile implements IRealFile {
      * List all files under this directory.
      * @return The list of files.
      */
-    public async listFiles(): Promise<IRealFile[]> {
+    public async listFiles(): Promise<IFile[]> {
         if(await this.isDirectory()) {
             let headers: Headers = new Headers();
             this.setDefaultHeaders(headers);
@@ -323,16 +323,16 @@ export class WSFile implements IRealFile {
      * @param progressListener Observer to notify when progress changes.
      * @return The moved file. Use this file for subsequent operations instead of the original.
      */
-    public async move(newDir: IRealFile, newName: string | null = null, progressListener: ((position: number, length: number) => void) | null = null): Promise<IRealFile> {
+    public async move(newDir: IFile, newName: string | null = null, progressListener: ((position: number, length: number) => void) | null = null): Promise<IFile> {
         newName = newName != null ? newName : this.getName();
         if (newDir == null || !newDir.exists())
             throw new IOException("Target directory does not exist");
-        let newFile: IRealFile | null = await newDir.getChild(newName);
+        let newFile: IFile | null = await newDir.getChild(newName);
         if (newFile != null && await newFile.exists())
             throw new IOException("Another file/directory already exists");
 
         if (await this.isDirectory()) {
-            throw new IOException("Could not move directory use IRealFile moveRecursively() instead");
+            throw new IOException("Could not move directory use IFile moveRecursively() instead");
         } else {
             let headers: Headers = new Headers();
             this.setDefaultHeaders(headers);
@@ -359,15 +359,15 @@ export class WSFile implements IRealFile {
      * @return The copied file. Use this file for subsequent operations instead of the original.
      * @throws IOException Thrown if there is an IO error.
      */
-    public async copy(newDir: IRealFile, newName: string | null = null, progressListener: ((position: number, length: number) => void) | null = null): Promise<IRealFile> {
+    public async copy(newDir: IFile, newName: string | null = null, progressListener: ((position: number, length: number) => void) | null = null): Promise<IFile> {
         newName = newName != null ? newName : this.getName();
         if (newDir == null || !newDir.exists())
             throw new IOException("Target directory does not exists");
-        let newFile: IRealFile | null = await newDir.getChild(newName);
+        let newFile: IFile | null = await newDir.getChild(newName);
         if (newFile != null && await newFile.exists())
             throw new IOException("Another file/directory already exists");
         if (await this.isDirectory()) {
-            throw new IOException("Could not copy directory use IRealFile copyRecursively() instead");
+            throw new IOException("Could not copy directory use IFile copyRecursively() instead");
         } else {
             let headers: Headers = new Headers();
             this.setDefaultHeaders(headers);
@@ -391,7 +391,7 @@ export class WSFile implements IRealFile {
      * @param filename The name of the file or directory.
      * @return
      */
-    public async getChild(filename: string): Promise<IRealFile | null> {
+    public async getChild(filename: string): Promise<IFile | null> {
         if (await this.isFile())
             return null;
         let nFilepath: string = this.getChildPath(filename);

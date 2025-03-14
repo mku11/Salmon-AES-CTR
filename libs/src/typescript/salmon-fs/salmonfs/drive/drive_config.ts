@@ -26,7 +26,7 @@ import { BitConverter } from "../../../salmon-core/convert/bit_converter.js";
 import { MemoryStream } from "../../../salmon-core/streams/memory_stream.js";
 import { RandomAccessStream } from "../../../salmon-core/streams/random_access_stream.js";
 import { Generator } from "../../../salmon-core/salmon/generator.js";
-import { IRealFile } from "../../fs/file/ifile.js";
+import { IFile } from "../../fs/file/ifile.js";
 import { DriveGenerator } from "./drive_generator.js";
 
 /**
@@ -75,7 +75,7 @@ export class DriveConfig {
      * @param encryptedData The encrypted combined key and drive id
      * @param hashSignature                The hash signature of the drive id
      */
-    public static async writeDriveConfig(configFile: IRealFile, magicBytes: Uint8Array, version: number, salt: Uint8Array,
+    public static async writeDriveConfig(configFile: IFile, magicBytes: Uint8Array, version: number, salt: Uint8Array,
         iterations: number, keyIv: Uint8Array,
         encryptedData: Uint8Array, hashSignature: Uint8Array): Promise<void>{
         // construct the contents of the config file

@@ -22,7 +22,7 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 */
 
-import { IRealFile } from "../../file/ifile.js";
+import { IFile } from "../../file/ifile.js";
 import { IVirtualFile } from "../../file/ivirtual_file.js";
 import { exportFilePart } from "./file_exporter_helper.js";
 import { RandomAccessStream } from "../../../../salmon-core/streams/random_access_stream.js";
@@ -67,10 +67,10 @@ export abstract class FileExporter {
 
     #workers: any[] = [];
 
-    abstract getWorkerMessage(index: number, sourceFile: IVirtualFile, targetFile: IRealFile,
+    abstract getWorkerMessage(index: number, sourceFile: IVirtualFile, targetFile: IFile,
         runningThreads: number, partSize: number, fileSize: number, bufferSize: number, integrity: boolean): Promise<any>;
 
-    abstract getMinimumPartSize(sourceFile: IVirtualFile, targetFile: IRealFile): Promise<number>;
+    abstract getMinimumPartSize(sourceFile: IVirtualFile, targetFile: IFile): Promise<number>;
 
     abstract onPrepare(sourceFile: IVirtualFile, integrity: boolean): Promise<void>;
 
@@ -106,14 +106,14 @@ export abstract class FileExporter {
      * @param deleteSource Delete the source file when the export finishes successfully
      * @param integrity    True to verify integrity
      */
-    public async exportFile(fileToExport: IVirtualFile, exportDir: IRealFile, filename: string,
-        deleteSource: boolean, integrity: boolean, onProgress: ((position: number, length: number) => void | null)): Promise<IRealFile | null> {
+    public async exportFile(fileToExport: IVirtualFile, exportDir: IFile, filename: string,
+        deleteSource: boolean, integrity: boolean, onProgress: ((position: number, length: number) => void | null)): Promise<IFile | null> {
         if (this.isRunning())
             throw new Error("Another export is running");
         if (await fileToExport.isDirectory())
             throw new Error("Cannot export directory, use SalmonFileCommander instead");
 
-        let exportFile: IRealFile;
+        let exportFile: IFile;
         filename = filename != null ? filename : await fileToExport.getName();
         try {
             if (!FileExporter.#enableMultiThread && this.#threads != 1)
@@ -178,7 +178,7 @@ export abstract class FileExporter {
         return exportFile;
     }
 
-    async #submitExportJobs(runningThreads: number, partSize: number, fileToExport: IVirtualFile, exportedFile: IRealFile,
+    async #submitExportJobs(runningThreads: number, partSize: number, fileToExport: IVirtualFile, exportedFile: IFile,
         totalBytesWritten: number[], integrity: boolean, 
         onProgress: ((position: number, length: number) => void) | null): Promise<void> {
         let fileSize: number = await fileToExport.getSize();

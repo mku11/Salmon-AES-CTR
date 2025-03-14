@@ -24,7 +24,7 @@ SOFTWARE.
 
 import { BitConverter } from "../../../salmon-core/convert/bit_converter.js";
 import { Generator } from "../../../salmon-core/salmon/generator.js";
-import { IRealFile } from "../../fs/file/ifile.js";
+import { IFile } from "../../fs/file/ifile.js";
 import { INonceSequenceSerializer } from "../../../salmon-core/salmon/sequence/inonce_sequence_serializer.js";
 import { INonceSequencer } from "../../../salmon-core/salmon/sequence/inonce_sequencer.js";
 import { Status, NonceSequence } from "../../../salmon-core/salmon/sequence/nonce_sequence.js";
@@ -37,7 +37,7 @@ import { RandomAccessStream } from "../../../salmon-core/streams/random_access_s
  * Generates nonces based on a sequencer backed by a file.
  */
 export class FileSequencer implements INonceSequencer {
-    #sequenceFile: IRealFile;
+    #sequenceFile: IFile;
     readonly #serializer: INonceSequenceSerializer;
 
     /**
@@ -48,14 +48,14 @@ export class FileSequencer implements INonceSequencer {
      * @throws IOException Thrown if there is an IO error.
      * @throws SequenceException Thrown if error with the nonce sequence
      */
-    public constructor(sequenceFile: IRealFile, serializer: INonceSequenceSerializer) {
+    public constructor(sequenceFile: IFile, serializer: INonceSequenceSerializer) {
         this.#sequenceFile = sequenceFile;
         this.#serializer = serializer;
     }
 
     public async initialize(): Promise<void> {
         if (!await this.#sequenceFile.exists()) {
-            let parent: IRealFile | null = await this.#sequenceFile.getParent();
+            let parent: IFile | null = await this.#sequenceFile.getParent();
             if(parent == null)
                 throw new Error("Could not get parent");
             await parent.createFile(this.#sequenceFile.getName());
@@ -63,7 +63,7 @@ export class FileSequencer implements INonceSequencer {
         }
     }
 
-    public getSequenceFile(): IRealFile {
+    public getSequenceFile(): IFile {
         return this.#sequenceFile;
     }
 
@@ -290,8 +290,8 @@ export class FileSequencer implements INonceSequencer {
                 }
             }
         }
-        let parent: IRealFile = await this.#sequenceFile.getParent() as IRealFile;
-        this.#sequenceFile = await parent.getChild(this.#sequenceFile.getName()) as IRealFile;
+        let parent: IFile = await this.#sequenceFile.getParent() as IFile;
+        this.#sequenceFile = await parent.getChild(this.#sequenceFile.getName()) as IFile;
     }
 
     /**

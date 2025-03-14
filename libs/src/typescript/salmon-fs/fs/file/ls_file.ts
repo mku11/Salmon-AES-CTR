@@ -23,13 +23,13 @@ SOFTWARE.
 */
 
 import { RandomAccessStream } from '../../../salmon-core/streams/random_access_stream.js';
-import { IRealFile } from './ifile.js';
+import { IFile } from './ifile.js';
 import { LocalStorageFileStream } from '../streams/ls_file_stream.js';
 
 /**
  * Salmon localStorage implementation. This can be used to store small files.
  */
-export class LocalStorageFile implements IRealFile {
+export class LocalStorageFile implements IFile {
     public static readonly separator: string = "/";
     public static readonly SMALL_FILE_MAX_LENGTH: number = 1 * 1024 * 1024;
 
@@ -48,7 +48,7 @@ export class LocalStorageFile implements IRealFile {
      * @param dirName The name of the new directory.
      * @return The newly created directory.
      */
-    public async createDirectory(dirName: string): Promise<IRealFile> {
+    public async createDirectory(dirName: string): Promise<IFile> {
         throw new Error("Not supported");
     }
 
@@ -58,8 +58,8 @@ export class LocalStorageFile implements IRealFile {
      * @return The newly created file.
      * @throws IOException Thrown if there is an IO error.
      */
-    public async createFile(filename: string): Promise<IRealFile> {
-		let child: IRealFile = new LocalStorageFile(this.#filePath + LocalStorageFile.separator + filename);
+    public async createFile(filename: string): Promise<IFile> {
+		let child: IFile = new LocalStorageFile(this.#filePath + LocalStorageFile.separator + filename);
 		return child;
     }
 
@@ -122,10 +122,10 @@ export class LocalStorageFile implements IRealFile {
      * Get the parent directory of this file or directory.
      * @return The parent directory.
      */
-    public async getParent(): Promise<IRealFile> {
+    public async getParent(): Promise<IFile> {
 		let index: number = this.#filePath.lastIndexOf(LocalStorageFile.separator);
 		let dirPath: string = this.#filePath.substring(0, index);
-		let dir: IRealFile = new LocalStorageFile(dirPath);
+		let dir: IFile = new LocalStorageFile(dirPath);
         return dir;
     }
 
@@ -183,7 +183,7 @@ export class LocalStorageFile implements IRealFile {
      * List all files under this directory.
      * @return The list of files.
      */
-    public async listFiles(): Promise<IRealFile[]> {
+    public async listFiles(): Promise<IFile[]> {
         throw new Error("Not supported");
     }
 
@@ -194,7 +194,7 @@ export class LocalStorageFile implements IRealFile {
      * @param progressListener Observer to notify when progress changes.
      * @return The moved file. Use this file for subsequent operations instead of the original.
      */
-    public async move(newDir: IRealFile, newName: string | null = null, progressListener: ((position: number, length: number) => void) | null = null): Promise<IRealFile> {
+    public async move(newDir: IFile, newName: string | null = null, progressListener: ((position: number, length: number) => void) | null = null): Promise<IFile> {
         throw new Error("Not supported");
     }
 
@@ -206,7 +206,7 @@ export class LocalStorageFile implements IRealFile {
      * @return The copied file. Use this file for subsequent operations instead of the original.
      * @throws IOException Thrown if there is an IO error.
      */
-    public async copy(newDir: IRealFile, newName: string | null = null, progressListener: ((position: number, length: number) => void) | null = null): Promise<IRealFile | null> {
+    public async copy(newDir: IFile, newName: string | null = null, progressListener: ((position: number, length: number) => void) | null = null): Promise<IFile | null> {
         throw new Error("Not supported");
     }
 
@@ -215,8 +215,8 @@ export class LocalStorageFile implements IRealFile {
      * @param filename The name of the file or directory.
      * @return
      */
-    public async getChild(filename: string): Promise<IRealFile | null> {
-        let child: IRealFile = new LocalStorageFile(this.#filePath + LocalStorageFile.separator + filename);
+    public async getChild(filename: string): Promise<IFile | null> {
+        let child: IFile = new LocalStorageFile(this.#filePath + LocalStorageFile.separator + filename);
 		return child;
     }
 

@@ -22,7 +22,7 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 */
 
-import { IRealFile } from "../../file/ifile.js";
+import { IFile } from "../../file/ifile.js";
 import { IVirtualFile } from "../../file/ivirtual_file.js";
 import { importFilePart } from "./file_importer_helper.js";
 import { IOException } from "../../../../salmon-core/streams/io_exception.js";
@@ -67,10 +67,10 @@ export abstract class FileImporter {
 
     #workers: any[] = [];
 
-    abstract getWorkerMessage(index: number, sourceFile: IRealFile, targetFile: IVirtualFile,
+    abstract getWorkerMessage(index: number, sourceFile: IFile, targetFile: IVirtualFile,
         runningThreads: number, partSize: number, fileSize: number, bufferSize: number, integrity: boolean): Promise<any>;
 
-    abstract getMinimumPartSize(sourceFile: IRealFile, targetFile: IVirtualFile): Promise<number>;
+    abstract getMinimumPartSize(sourceFile: IFile, targetFile: IVirtualFile): Promise<number>;
 
     abstract onPrepare(targetFile: IVirtualFile, integrity: boolean): Promise<void>;
 
@@ -121,14 +121,14 @@ export abstract class FileImporter {
     /**
      * Imports a real file into the drive.
      *
-     * @param {IRealFile} fileToImport The source file that will be imported in to the drive.
-     * @param {IRealFile} dir          The target directory in the drive that the file will be imported
+     * @param {IFile} fileToImport The source file that will be imported in to the drive.
+     * @param {IFile} dir          The target directory in the drive that the file will be imported
      * @param {boolean} deleteSource If true delete the source file.
 	 * @param {boolean} integrity    Apply data integrity
 	 * @param {onProgress | null} onProgress   Progress to notify
      * @returns {Promise<IVirtualFile | null>} A promise which resolves to a virtual file or null
      */
-    public async importFile(fileToImport: IRealFile, dir: IVirtualFile , filename: string,
+    public async importFile(fileToImport: IFile, dir: IVirtualFile , filename: string,
                                  deleteSource: boolean, integrity: boolean, 
                                  onProgress: ((position: number, length: number)=>void) | null): Promise<IVirtualFile | null>{
         if (this.isRunning())
@@ -198,7 +198,7 @@ export abstract class FileImporter {
         return importedFile;
     }
 
-    async #submitImportJobs(runningThreads: number, partSize: number, fileToImport: IRealFile, importedFile: IVirtualFile, 
+    async #submitImportJobs(runningThreads: number, partSize: number, fileToImport: IFile, importedFile: IVirtualFile, 
         totalBytesRead: number[], integrity: boolean, onProgress: ((position: number, length: number)=>void) | null): Promise<void> {
             let fileSize: number = await fileToImport.getLength();
             let bytesRead: number[] = new Array(runningThreads);

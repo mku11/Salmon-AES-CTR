@@ -23,7 +23,7 @@ SOFTWARE.
 */
 
 import { AesDrive } from "../drive/aes_drive.js";
-import { IRealFile } from "../../fs/file/ifile.js";
+import { IFile } from "../../fs/file/ifile.js";
 import { INonceSequencer } from "../../../salmon-core/salmon/sequence/inonce_sequencer.js";
 import { AesFile } from "../file/aes_file.js";
 
@@ -44,32 +44,32 @@ export class Drive extends AesDrive {
 
     /**
      * Helper method that opens and initializes a Drive
-     * @param {IRealFile} dir The real directory that contains the drive.
+     * @param {IFile} dir The real directory that contains the drive.
      * @param {string} password Text password to use with this drive.
      * @param {ISalmonSequencer} sequencer Optional nonce sequencer that will be used for importing files.
      * @returns {Promise<AesDrive>} The drive.
      */
-    public static async open(dir: IRealFile, password: string, sequencer: INonceSequencer | null = null): Promise<AesDrive> {
+    public static async open(dir: IFile, password: string, sequencer: INonceSequencer | null = null): Promise<AesDrive> {
         return await AesDrive.openDrive(dir, Drive, password, sequencer);
     }
 
     /**
      * Helper method that creates and initializes a Drive
-     * @param {IRealFile} dir The real directory that will contain the drive.
+     * @param {IFile} dir The real directory that will contain the drive.
      * @param {string} password Text password to use with this drive.
      * @param {ISalmonSequencer} sequencer The nonce sequencer that will be used for encryption.
      * @returns {Promise<AesDrive>} The drive.
      */
-    public static async create(dir: IRealFile,  password: string, sequencer: INonceSequencer): Promise<AesDrive> {
+    public static async create(dir: IFile,  password: string, sequencer: INonceSequencer): Promise<AesDrive> {
         return await AesDrive.createDrive(dir, Drive, password, sequencer);
     }
 
     /**
      * Get a private dir for sharing files with external applications.
-     * @return {IRealFile} The private directory.
+     * @return {IFile} The private directory.
      * @throws Exception
      */
-    public getPrivateDir(): IRealFile {
+    public getPrivateDir(): IFile {
         throw new Error("Unsupported Operation");
     }
 
@@ -92,7 +92,7 @@ export class Drive extends AesDrive {
      * @param file The real file.
      * @returns The encrypted file.
      */
-    public override getVirtualFile(file: IRealFile): AesFile {
+    public override getVirtualFile(file: IFile): AesFile {
         return new AesFile(file, this);
     }
 }

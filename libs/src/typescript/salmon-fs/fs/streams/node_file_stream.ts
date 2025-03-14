@@ -24,7 +24,7 @@ SOFTWARE.
 
 import { IOException } from "../../../salmon-core/streams/io_exception.js";
 import { RandomAccessStream, SeekOrigin } from "../../../salmon-core/streams/random_access_stream.js";
-import { IRealFile } from "../file/ifile.js";
+import { IFile } from "../file/ifile.js";
 import { truncate } from 'node:fs/promises';
 import { openSync } from "node:fs";
 import fs from "fs";
@@ -38,7 +38,7 @@ export class NodeFileStream extends RandomAccessStream {
     /**
      * The java file associated with this stream.
      */
-    readonly #file: IRealFile;
+    readonly #file: IFile;
 
     #_position: number = 0;
 
@@ -57,7 +57,7 @@ export class NodeFileStream extends RandomAccessStream {
      * @param file The NodeFile that will be used to get the read/write stream
      * @param mode The mode "r" for read "rw" for write
      */
-    public constructor(file: IRealFile, mode: string) {
+    public constructor(file: IFile, mode: string) {
         super();
         this.#file = file;
         if (mode == "rw") {

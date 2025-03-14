@@ -27,7 +27,7 @@ import { MemoryStream } from "../../../salmon-core/streams/memory_stream.js";
 import { AesStream } from "../../../salmon-core/salmon/streams/aes_stream.js";
 import { Integrity } from "../../../salmon-core/salmon/integrity/integrity.js";
 import { DriveGenerator } from "../drive/drive_generator.js";
-import { IRealFile } from "../../fs/file/ifile.js";
+import { IFile } from "../../fs/file/ifile.js";
 import { AuthException } from "./auth_exception.js";
 import { AesDrive } from "../drive/aes_drive.js";
 import { AesFile } from "../file/aes_file.js";
@@ -108,7 +108,7 @@ export class AuthConfig {
      * @param targetMaxNonce Maximum nonce for the target device.
      * @throws Exception
      */
-    static async #writeAuthFile(authConfigFile: IRealFile,
+    static async #writeAuthFile(authConfigFile: IFile,
         drive: AesDrive,
         targetAuthId: Uint8Array,
         targetStartingNonce: Uint8Array, targetMaxNonce: Uint8Array,
@@ -161,7 +161,7 @@ export class AuthConfig {
      * @return The decrypted authorization file.
      * @throws Exception
      */
-    static async #getAuthConfig(drive: AesDrive, authFile: IRealFile): Promise<AuthConfig> {
+    static async #getAuthConfig(drive: AesDrive, authFile: IFile): Promise<AuthConfig> {
         let salmonFile: AesFile = new AesFile(authFile, drive);
         let stream: AesStream = await salmonFile.getInputStream();
         let ms: MemoryStream = new MemoryStream();
@@ -207,7 +207,7 @@ export class AuthConfig {
      * @param authConfigFile The filepath to the authorization file.
      * @throws Exception
      */
-    public static async importAuthFile(drive: AesDrive, authConfigFile: IRealFile): Promise<void> {
+    public static async importAuthFile(drive: AesDrive, authConfigFile: IFile): Promise<void> {
         let driveId: Uint8Array | null = drive.getDriveId();
         if (driveId == null)
             throw new Error("Could not get drive id, make sure you init the drive first");
@@ -236,7 +236,7 @@ export class AuthConfig {
      * @param filename     The filename of the auth config file.
      * @throws Exception
      */
-    public static async exportAuthFile(drive: AesDrive, targetAuthId: string, file: IRealFile): Promise<void> {
+    public static async exportAuthFile(drive: AesDrive, targetAuthId: string, file: IFile): Promise<void> {
         let driveId: Uint8Array | null = drive.getDriveId();
         if (driveId == null)
             throw new Error("Could not get drive id, make sure you init the drive first");

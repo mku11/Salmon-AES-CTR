@@ -23,7 +23,7 @@ SOFTWARE.
 */
 
 import { RandomAccessStream } from "../../../salmon-core/streams/random_access_stream"
-import { IRealFile } from "./ifile";
+import { IFile } from "./ifile";
 
 export interface IVirtualFile {
     /*
@@ -38,7 +38,7 @@ export interface IVirtualFile {
     isDirectory(): Promise<boolean>;
     getPath(): Promise<string>;
     getRealPath(): string;
-    getRealFile(): IRealFile;
+    getRealFile(): IFile;
     getName(): Promise<string>;
     getParent(): Promise<IVirtualFile | null>;
     delete(): void;

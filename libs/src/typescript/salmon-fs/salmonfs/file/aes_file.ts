@@ -29,10 +29,10 @@ import { Generator } from "../../../salmon-core/salmon/generator.js";
 import { Header } from "../../../salmon-core/salmon/header.js";
 import { AesStream } from "../../../salmon-core/salmon/streams/aes_stream.js";
 import {
-    IRealFile, autoRename as IRealFileAutoRename,
-    copyRecursively as IRealFileCopyRecursively,
-    moveRecursively as IRealFileMoveRecursively,
-    deleteRecursively as IRealFileDeleteRecursively
+    IFile, autoRename as IFileAutoRename,
+    copyRecursively as IFileCopyRecursively,
+    moveRecursively as IFileMoveRecursively,
+    deleteRecursively as IFileDeleteRecursively
 } from "../../fs/file/ifile.js";
 import { AesDrive } from "../drive/aes_drive.js";
 import { EncryptionMode } from "../../../salmon-core/salmon/streams/encryption_mode.js";
@@ -47,7 +47,7 @@ import { IVirtualFile } from "../../fs/file/ivirtual_file.js";
 import { Encryptor } from "../../../salmon-core/salmon/encryptor.js";
 
 /**
- * A virtual file backed by an encrypted {@link IRealFile} on the real filesystem.
+ * A virtual file backed by an encrypted {@link IFile} on the real filesystem.
  * Supports operations for retrieving {@link AesStream} for reading/decrypting
  * and writing/encrypting contents.
  */
@@ -56,7 +56,7 @@ export class AesFile implements IVirtualFile {
 
     readonly #drive: AesDrive | null = null;
     readonly #format: EncryptionFormat;
-    readonly #realFile: IRealFile;
+    readonly #realFile: IFile;
 
     //cached values
     #_baseName: string | null = null;
@@ -78,7 +78,7 @@ export class AesFile implements IVirtualFile {
      * @param drive    The file virtual system that will be used with file operations
      * @param realFile The real file
      */
-    public constructor(realFile: IRealFile, drive: AesDrive | null = null, format: EncryptionFormat = EncryptionFormat.Salmon) {
+    public constructor(realFile: IFile, drive: AesDrive | null = null, format: EncryptionFormat = EncryptionFormat.Salmon) {
         this.#realFile = realFile;
         this.#drive = drive;
         this.#format = format;
@@ -273,7 +273,7 @@ export class AesFile implements IVirtualFile {
      *
      * @param realFile The real file containing the data
      */
-    async #getRealFileHeaderData(realFile: IRealFile): Promise<Uint8Array> {
+    async #getRealFileHeaderData(realFile: IFile): Promise<Uint8Array> {
         let realStream: RandomAccessStream = await realFile.getInputStream();
         let headerData: Uint8Array = new Uint8Array(this.#getHeaderLength());
         await realStream.read(headerData, 0, headerData.length);
@@ -417,7 +417,7 @@ export class AesFile implements IVirtualFile {
      * Lists files and directories under this directory
      */
     public async listFiles(): Promise<AesFile[]> {
-        let files: IRealFile[] = await this.#realFile.listFiles();
+        let files: IFile[] = await this.#realFile.listFiles();
         let salmonFiles: AesFile[] = [];
         for (let iRealFile of await files) {
             let file: AesFile = new AesFile(iRealFile, this.#drive);
@@ -456,14 +456,14 @@ export class AesFile implements IVirtualFile {
         if (this.#drive == null)
             throw new SecurityException("Need to pass the key and dirNameNonce nonce if not using a drive");
         let encryptedDirName: string = await this.getEncryptedFilename(dirName, key, dirNameNonce);
-        let realDir: IRealFile = await this.#realFile.createDirectory(encryptedDirName);
+        let realDir: IFile = await this.#realFile.createDirectory(encryptedDirName);
         return new AesFile(realDir, this.#drive);
     }
 
     /**
      * Return the real file
      */
-    public getRealFile(): IRealFile {
+    public getRealFile(): IFile {
         return this.#realFile;
     }
 
@@ -574,7 +574,7 @@ export class AesFile implements IVirtualFile {
             console.error(exception);
             return null;
         }
-        let realDir: IRealFile | null = await this.#realFile.getParent();
+        let realDir: IFile | null = await this.#realFile.getParent();
         if (realDir == null)
             throw new Error("Could not get parent");
         let dir: AesFile = new AesFile(realDir, this.#drive);
@@ -648,7 +648,7 @@ export class AesFile implements IVirtualFile {
             throw new SecurityException("Need to pass the key, filename nonce, and file nonce if not using a drive");
 
         let encryptedFilename: string = await this.getEncryptedFilename(realFilename, key, fileNameNonce);
-        let file: IRealFile = await this.#realFile.createFile(encryptedFilename);
+        let file: IFile = await this.#realFile.createFile(encryptedFilename);
         let salmonFile: AesFile = new AesFile(file, this.#drive);
         salmonFile.setEncryptionKey(key);
         salmonFile.#integrity = this.#integrity;
@@ -793,7 +793,7 @@ export class AesFile implements IVirtualFile {
      * @throws IOException Thrown if there is an IO error.
      */
     public async move(dir: AesFile, OnProgressListener: ((position: number, length: number) => void) | null = null): Promise<AesFile> {
-        let newRealFile: IRealFile = await this.#realFile.move(dir.getRealFile(), null, OnProgressListener);
+        let newRealFile: IFile = await this.#realFile.move(dir.getRealFile(), null, OnProgressListener);
         return new AesFile(newRealFile, this.#drive);
     }
 
@@ -806,7 +806,7 @@ export class AesFile implements IVirtualFile {
      * @throws IOException Thrown if there is an IO error.
      */
     public async copy(dir: AesFile, OnProgressListener: ((position: number, length: number) => void) | null = null): Promise<AesFile> {
-        let newRealFile: IRealFile | null = await this.#realFile.copy(dir.getRealFile(), null, OnProgressListener);
+        let newRealFile: IFile | null = await this.#realFile.copy(dir.getRealFile(), null, OnProgressListener);
         if (newRealFile == null)
             throw new IOException("Could not copy file");
         return new AesFile(newRealFile, this.#drive);
@@ -825,19 +825,19 @@ export class AesFile implements IVirtualFile {
         autoRenameFolders: boolean = false,
         onFailed: ((salmonFile: AesFile, ex: Error) => void) | null = null,
         progressListener: ((salmonFile: AesFile, position: number, length: number) => void) | null = null): Promise<void> {
-        let onFailedRealFile: ((realFile: IRealFile, ex: Error) => void) | null = null;
+        let onFailedRealFile: ((realFile: IFile, ex: Error) => void) | null = null;
         if (onFailed != null) {
             onFailedRealFile = (file, ex) => {
                 onFailed(new AesFile(file, this.getDrive()), ex);
             };
         }
-        let renameRealFile: ((realFile: IRealFile) => Promise<string>) | null = null;
+        let renameRealFile: ((realFile: IFile) => Promise<string>) | null = null;
         // use auto rename only when we are using a drive
         if (autoRename != null && this.getDrive() != null)
-            renameRealFile = async (file: IRealFile): Promise<string> => {
+            renameRealFile = async (file: IFile): Promise<string> => {
                 return await autoRename(new AesFile(file, this.getDrive()));
             };
-        await IRealFileCopyRecursively(this.#realFile, dest.getRealFile(),
+        await IFileCopyRecursively(this.#realFile, dest.getRealFile(),
             renameRealFile, autoRenameFolders, onFailedRealFile, (file, position, length) => {
                 if (progressListener != null)
                     progressListener(new AesFile(file, this.#drive), position, length);
@@ -857,20 +857,20 @@ export class AesFile implements IVirtualFile {
         autoRenameFolders: boolean,
         onFailed: ((salmonFile: AesFile, ex: Error) => void) | null,
         progressListener: ((salmonFile: AesFile, position: number, length: number) => void) | null): Promise<void> {
-        let onFailedRealFile: ((realFile: IRealFile, ex: Error) => void) | null = null;
+        let onFailedRealFile: ((realFile: IFile, ex: Error) => void) | null = null;
         if (onFailed != null) {
             onFailedRealFile = (file, ex) => {
                 if (onFailed != null)
                     onFailed(new AesFile(file, this.getDrive()), ex);
             };
         }
-        let renameRealFile: ((realFile: IRealFile) => Promise<string>) | null = null;
+        let renameRealFile: ((realFile: IFile) => Promise<string>) | null = null;
         // use auto rename only when we are using a drive
         if (autoRename != null && this.getDrive() != null)
-            renameRealFile = async (file: IRealFile): Promise<string> => {
+            renameRealFile = async (file: IFile): Promise<string> => {
 				return await autoRename(new AesFile(file, this.getDrive()));
             };
-        await IRealFileMoveRecursively(this.#realFile, dest.getRealFile(),
+        await IFileMoveRecursively(this.#realFile, dest.getRealFile(),
             renameRealFile, autoRenameFolders, onFailedRealFile, (file, position, length) => {
                 if (progressListener != null)
                     progressListener(new AesFile(file, this.#drive), position, length);
@@ -880,14 +880,14 @@ export class AesFile implements IVirtualFile {
     public async deleteRecursively(
         onFailed: ((salmonFile: AesFile, ex: Error) => void) | null = null,
         progressListener: ((salmonFile: AesFile, position: number, length: number) => void) | null = null): Promise<void> {
-        let onFailedRealFile: ((realFile: IRealFile, ex: Error) => void) | null = null;
+        let onFailedRealFile: ((realFile: IFile, ex: Error) => void) | null = null;
         if (onFailed != null) {
             onFailedRealFile = (file, ex) => {
                 if (onFailed != null)
                     onFailed(new AesFile(file, this.#drive), ex);
             };
         }
-        await IRealFileDeleteRecursively(this.getRealFile(), onFailedRealFile, (file, position, length) => {
+        await IFileDeleteRecursively(this.getRealFile(), onFailedRealFile, (file, position, length) => {
             if (progressListener != null)
                 progressListener(new AesFile(file, this.#drive), position, length);
         });
@@ -927,7 +927,7 @@ export async function autoRename(file: AesFile): Promise<string> {
 /// <param name="file"></param>
 /// <returns></returns>
 export async function autoRenameFile(file: AesFile): Promise<string> {
-    let filename: string = IRealFileAutoRename(await file.getName());
+    let filename: string = IFileAutoRename(await file.getName());
     let drive: AesDrive | null = file.getDrive();
     if (drive == null)
         throw new IOException("Autorename is not supported without a drive");

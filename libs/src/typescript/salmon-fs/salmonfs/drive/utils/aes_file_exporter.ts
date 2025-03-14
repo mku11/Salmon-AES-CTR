@@ -23,7 +23,7 @@ SOFTWARE.
 */
 
 import { IntegrityException } from "../../../../salmon-core/salmon/integrity/integrity_exception.js";
-import { IRealFile } from "../../../fs/file/ifile.js";
+import { IFile } from "../../../fs/file/ifile.js";
 import { IVirtualFile } from "../../../fs/file/ivirtual_file.js";
 import { FileExporter } from "../../../fs/drive/utils/file_exporter.js";
 import { AuthException } from "../../auth/auth_exception.js";
@@ -40,7 +40,7 @@ export class AesFileExporter extends FileExporter {
         super.initialize(bufferSize, threads);
     }
 
-    async getMinimumPartSize(sourceFile: IVirtualFile, targetFile: IRealFile): Promise<number> {
+    async getMinimumPartSize(sourceFile: IVirtualFile, targetFile: IFile): Promise<number> {
         // we force the whole content to use 1 thread if:
         if(
             // we are in the browser andthe target is a local file (chromes crswap clash between writers)
@@ -70,7 +70,7 @@ export class AesFileExporter extends FileExporter {
         return err;
     }
 
-    async getWorkerMessage(index: number, sourceFile: IVirtualFile, targetFile: IRealFile,
+    async getWorkerMessage(index: number, sourceFile: IVirtualFile, targetFile: IFile,
         runningThreads: number, partSize: number, fileSize: number, bufferSize: number, integrity: boolean) {
         let fileToExport = sourceFile as AesFile;
         let fileToExportHandle: any = await fileToExport.getRealFile().getPath();

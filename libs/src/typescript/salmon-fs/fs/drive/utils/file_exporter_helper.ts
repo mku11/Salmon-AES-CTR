@@ -22,7 +22,7 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 */
 
-import { IRealFile } from "../../file/ifile.js";
+import { IFile } from "../../file/ifile.js";
 import { IVirtualFile } from "../../file/ivirtual_file.js";
 import { RandomAccessStream } from "../../../../salmon-core/streams/random_access_stream.js";
 
@@ -35,7 +35,7 @@ import { RandomAccessStream } from "../../../../salmon-core/streams/random_acces
  * @param count             The length of the bytes to be decrypted
  * @param totalBytesWritten The total bytes that were written to the external file
  */
-export async function exportFilePart(fileToExport: IVirtualFile, exportFile: IRealFile, start: number, count: number,
+export async function exportFilePart(fileToExport: IVirtualFile, exportFile: IFile, start: number, count: number,
     totalBytesWritten: number[], onProgress: ((position: number, length: number) => void) | null, 
     bufferSize: number, stopped: boolean[]): Promise<void> {
     let totalPartBytesWritten: number = 0;

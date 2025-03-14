@@ -22,7 +22,7 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 */
 
-import { IRealFile } from "../../file/ifile.js";
+import { IFile } from "../../file/ifile.js";
 import { IVirtualFile } from "../../file/ivirtual_file.js";
 import { importFilePart } from "./file_importer_helper.js";
 import { FileUtils } from "./file_utils.js";
@@ -35,7 +35,7 @@ export class FileImporterWorker {
      * @param params The parameters object
      * @returns 
      */
-    async getSourceFile(params: any): Promise<IRealFile> {
+    async getSourceFile(params: any): Promise<IFile> {
         return await FileUtils.getInstance(params.importFileClassType, params.fileToImportHandle);
     }
 

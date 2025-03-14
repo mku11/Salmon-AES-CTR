@@ -22,7 +22,7 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 */
 
-import { IRealFile } from "../../file/ifile.js";
+import { IFile } from "../../file/ifile.js";
 import { FileImporter } from "./file_importer.js";
 import { FileExporter } from "./file_exporter.js";
 import { SearchEvent, FileSearcher } from "./file_searcher.js";
@@ -68,10 +68,10 @@ export class FileCommander {
      * @return The imported files if completes successfully.
      * @throws Exception
      */
-    public async importFiles(filesToImport: IRealFile[], importDir: IVirtualFile,
+    public async importFiles(filesToImport: IFile[], importDir: IVirtualFile,
         deleteSource: boolean, integrity: boolean,
-        autoRename: ((file: IRealFile) => Promise<string>) | null,
-        onFailed: ((file: IRealFile, error: Error | unknown) => void | null),
+        autoRename: ((file: IFile) => Promise<string>) | null,
+        onFailed: ((file: IFile, error: Error | unknown) => void | null),
         onProgressChanged: ((progress: RealFileTaskProgress) => void | null)): Promise<IVirtualFile[]> {
         this.stopJobs = false;
         let importedFiles: IVirtualFile[] = [];
@@ -112,11 +112,11 @@ export class FileCommander {
         return files;
     }
 
-    private async importRecursively(fileToImport: IRealFile, importDir: IVirtualFile,
+    private async importRecursively(fileToImport: IFile, importDir: IVirtualFile,
         deleteSource: boolean, integrity: boolean,
         onProgressChanged: ((progress: RealFileTaskProgress) => void) | null,
-        autoRename: ((realFile: IRealFile) => Promise<string>) | null,
-        onFailed: ((realFile: IRealFile, error: Error | unknown) => void) | null,
+        autoRename: ((realFile: IFile) => Promise<string>) | null,
+        onFailed: ((realFile: IFile, error: Error | unknown) => void) | null,
         importedFiles: IVirtualFile[], count: number[], total: number,
         existingFiles: { [key: string]: IVirtualFile }): Promise<void> {
 
@@ -139,7 +139,7 @@ export class FileCommander {
             for (let i = 0; i < lFiles.length; i++) {
                 if (this.stopJobs)
                     break;
-                let child: IRealFile = lFiles[i];
+                let child: IFile = lFiles[i];
                 await this.importRecursively(child, sfile, deleteSource, integrity, onProgressChanged,
                     autoRename, onFailed, importedFiles, count, total,
                     nExistingFiles);
@@ -185,13 +185,13 @@ export class FileCommander {
      * @return The exported files
      * @throws Exception
      */
-    public async exportFiles(filesToExport: IVirtualFile[], exportDir: IRealFile,
+    public async exportFiles(filesToExport: IVirtualFile[], exportDir: IFile,
         deleteSource: boolean, integrity: boolean,
-        autoRename: ((realFile: IRealFile) => Promise<string>) | null,
+        autoRename: ((realFile: IFile) => Promise<string>) | null,
         onFailed: ((file: IVirtualFile, error: Error | unknown) => void) | null,
-        onProgressChanged: ((progress: IVirtualFileTaskProgress) => void) | null): Promise<IRealFile[]> {
+        onProgressChanged: ((progress: IVirtualFileTaskProgress) => void) | null): Promise<IFile[]> {
         this.stopJobs = false;
-        let exportedFiles: IRealFile[] = [];
+        let exportedFiles: IFile[] = [];
 
         let total: number = 0;
         for (let i = 0; i < filesToExport.length; i++) {
@@ -200,7 +200,7 @@ export class FileCommander {
             total += await this.getIVirtualFilesCountRecursively(filesToExport[i]);
         }
 
-        let existingFiles: { [key: string]: IRealFile } = await this.getExistingRealFiles(exportDir);
+        let existingFiles: { [key: string]: IFile } = await this.getExistingRealFiles(exportDir);
 
         let count: number[] = [0];
         for (let i = 0; i < filesToExport.length; i++) {
@@ -215,26 +215,26 @@ export class FileCommander {
         return exportedFiles;
     }
 
-    private async getExistingRealFiles(exportDir: IRealFile): Promise<{ [key: string]: IRealFile }> {
-        let files: { [key: string]: IRealFile } = {};
-        let lFiles: IRealFile[] = await exportDir.listFiles();
+    private async getExistingRealFiles(exportDir: IFile): Promise<{ [key: string]: IFile }> {
+        let files: { [key: string]: IFile } = {};
+        let lFiles: IFile[] = await exportDir.listFiles();
         for (let i = 0; i < lFiles.length; i++) {
             if (this.stopJobs)
                 break;
-            let file: IRealFile = lFiles[i]
+            let file: IFile = lFiles[i]
             files[file.getName()] = file;
         }
         return files;
     }
 
-    private async exportRecursively(fileToExport: IVirtualFile, exportDir: IRealFile,
+    private async exportRecursively(fileToExport: IVirtualFile, exportDir: IFile,
         deleteSource: boolean, integrity: boolean,
         onProgressChanged: ((progress: IVirtualFileTaskProgress) => void) | null,
-        autoRename: ((file: IRealFile) => Promise<string>) | null,
+        autoRename: ((file: IFile) => Promise<string>) | null,
         onFailed: ((file: IVirtualFile, error: Error | unknown) => void) | null,
-        exportedFiles: IRealFile[], count: number[], total: number,
-        existingFiles: { [key: string]: IRealFile }): Promise<void> {
-        let rfile: IRealFile | null = await fileToExport.getName() in existingFiles
+        exportedFiles: IFile[], count: number[], total: number,
+        existingFiles: { [key: string]: IFile }): Promise<void> {
+        let rfile: IFile | null = await fileToExport.getName() in existingFiles
             ? existingFiles[await fileToExport.getName()] : null;
 
         if (await fileToExport.isDirectory()) {
@@ -245,7 +245,7 @@ export class FileCommander {
             if (onProgressChanged != null)
                 onProgressChanged(new IVirtualFileTaskProgress(fileToExport as IVirtualFile, 1, 1, count[0], total));
             count[0]++;
-            let nExistingFiles: { [key: string]: IRealFile } = await this.getExistingRealFiles(rfile);
+            let nExistingFiles: { [key: string]: IFile } = await this.getExistingRealFiles(rfile);
             let lFiles: IVirtualFile[] = await fileToExport.listFiles();
             for (let i = 0; i < lFiles.length; i++) {
                 if (this.stopJobs)
@@ -298,14 +298,14 @@ export class FileCommander {
         return count;
     }
 
-    private async getRealFilesCountRecursively(file: IRealFile): Promise<number> {
+    private async getRealFilesCountRecursively(file: IFile): Promise<number> {
         let count: number = 1;
         if (await file.isDirectory()) {
-            let lFiles: IRealFile[] = await file.listFiles();
+            let lFiles: IFile[] = await file.listFiles();
             for (let i = 0; i < lFiles.length; i++) {
                 if (this.stopJobs)
                     break;
-                let child: IRealFile = lFiles[i];
+                let child: IFile = lFiles[i];
                 count += await this.getRealFilesCountRecursively(child);
             }
         }
@@ -579,13 +579,13 @@ export class IVirtualFileTaskProgress extends FileTaskProgress {
 }
 
 export class RealFileTaskProgress extends FileTaskProgress {
-    public getFile(): IRealFile {
+    public getFile(): IFile {
         return this.file;
     }
 
-    private readonly file: IRealFile;
+    private readonly file: IFile;
 
-    public constructor(file: IRealFile, processedBytes: number, totalBytes: number,
+    public constructor(file: IFile, processedBytes: number, totalBytes: number,
         processedFiles: number, totalFiles: number) {
         super(processedBytes, totalBytes, processedFiles, totalFiles);
         this.file = file;

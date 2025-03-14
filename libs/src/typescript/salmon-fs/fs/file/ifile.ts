@@ -29,7 +29,7 @@ import { RandomAccessStream } from "../../../salmon-core/streams/random_access_s
  * import, store, and export the encrypted files.
  * Extend this to provide an interface to any file system, platform, or API ie: on disk, memory, network, or cloud.
  */
-export interface IRealFile {
+export interface IFile {
     /**
      * True if this file exists.
      *
@@ -122,9 +122,9 @@ export interface IRealFile {
     /**
      * Get all files and directories under this directory.
      *
-     * @return {Promise<IRealFile[]>}
+     * @return {Promise<IFile[]>}
      */
-    listFiles(): Promise<IRealFile[]>;
+    listFiles(): Promise<IFile[]>;
 
     /**
      * Get the basename of the file.
@@ -137,54 +137,54 @@ export interface IRealFile {
      * Create the directory with the name provided under this directory.
      *
      * @param {string} dirName Directory name.
-     * @return {Promise<IRealFile>} The newly created directory.
+     * @return {Promise<IFile>} The newly created directory.
      */
-    createDirectory(dirName: string): Promise<IRealFile>;
+    createDirectory(dirName: string): Promise<IFile>;
 
     /**
      * Get the parent directory of this file/directory.
      *
-     * @return {Promise<IRealFile | null>} The parent directory.
+     * @return {Promise<IFile | null>} The parent directory.
      */
-    getParent(): Promise<IRealFile | null>;
+    getParent(): Promise<IFile | null>;
 
     /**
      * Create an empty file with the provided name.
      *
      * @param {string} filename The name for the new file.
-     * @return {Promise<IRealFile>} The newly create file.
+     * @return {Promise<IFile>} The newly create file.
      * @throws IOException Thrown if there is an IO error.
      */
-    createFile(filename: string): Promise<IRealFile>;
+    createFile(filename: string): Promise<IFile>;
 
     /**
      * Move this file to another directory.
      *
-     * @param {IRealFile} newDir           The target directory.
+     * @param {IFile} newDir           The target directory.
      * @param {string | null} newName          The new filename.
      * @param {((position: number, length: number) => void) | null} progressListener Observer to notify of the move progress.
-     * @return {Promise<IRealFile>} The file after the move. Use this instance for any subsequent file operations.
+     * @return {Promise<IFile>} The file after the move. Use this instance for any subsequent file operations.
      */
-    move(newDir: IRealFile, newName: string | null, progressListener: ((position: number, length: number) => void) | null): Promise<IRealFile>;
+    move(newDir: IFile, newName: string | null, progressListener: ((position: number, length: number) => void) | null): Promise<IFile>;
 
     /**
      * Copy this file to another directory.
      *
-     * @param {IRealFile} newDir           The target directory.
+     * @param {IFile} newDir           The target directory.
      * @param {string | null} newName          The new filename.
      * @param {((position: number, length: number) => void) | null} progressListener Observer to notify of the copy progress.
-     * @return {Promise<IRealFile | null>} The file after the copy. Use this instance for any subsequent file operations.
+     * @return {Promise<IFile | null>} The file after the copy. Use this instance for any subsequent file operations.
      * @throws IOException Thrown if there is an IO error.
      */
-    copy(newDir: IRealFile, newName: string | null, progressListener: ((position: number, length: number) => void) | null): Promise<IRealFile | null>;
+    copy(newDir: IFile, newName: string | null, progressListener: ((position: number, length: number) => void) | null): Promise<IFile | null>;
 
     /**
      * Get the file/directory matching the name provided under this directory.
      *
      * @param {string} filename The name of the file or directory to match.
-     * @return {Promise<IRealFile | null>} The file that was matched.
+     * @return {Promise<IFile | null>} The file that was matched.
      */
-    getChild(filename: string): Promise<IRealFile | null>;
+    getChild(filename: string): Promise<IFile | null>;
 
     /**
      * Create a directory with the current filepath.
@@ -210,7 +210,7 @@ export interface IRealFile {
  * @return
  * @throws IOException Thrown if there is an IO error.
  */
-export async function copyFileContents(src: IRealFile, dest: IRealFile, deleteAfter: boolean,
+export async function copyFileContents(src: IFile, dest: IFile, deleteAfter: boolean,
     progressListener: ((position: number, length: number) => void) | null): Promise<boolean> {
     let source: RandomAccessStream = await src.getInputStream();
     let target: RandomAccessStream = await dest.getOutputStream();
@@ -231,21 +231,21 @@ export async function copyFileContents(src: IRealFile, dest: IRealFile, deleteAf
 /**
  * Copy a directory recursively
  *
- * @param {IRealFile} src Source directory
- * @param {IRealFile} destDir Destination directory to copy into.
- * @param {((realfile: IRealFile) => Promise<string>) | null} autoRename Autorename callback (default is none).
+ * @param {IFile} src Source directory
+ * @param {IFile} destDir Destination directory to copy into.
+ * @param {((realfile: IFile) => Promise<string>) | null} autoRename Autorename callback (default is none).
  * @param {boolean} autoRenameFolders Apply autorename to folders also (default is false)
- * @param {((realfile: IRealFile, ex: Error) => void) | null} onFailed OnFailed callback
- * @param {((realfile: IRealFile, position: number, length: number) => void) | null} progressListener Progress listener
+ * @param {((realfile: IFile, ex: Error) => void) | null} onFailed OnFailed callback
+ * @param {((realfile: IFile, position: number, length: number) => void) | null} progressListener Progress listener
  * @throws IOException Thrown if there is an IO error.
  */
-export async function copyRecursively(src: IRealFile, destDir: IRealFile,
-    autoRename: ((realfile: IRealFile) => Promise<string>) | null = null,
+export async function copyRecursively(src: IFile, destDir: IFile,
+    autoRename: ((realfile: IFile) => Promise<string>) | null = null,
     autoRenameFolders: boolean = false,
-    onFailed: ((realfile: IRealFile, ex: Error) => void) | null = null,
-    progressListener: ((realfile: IRealFile, position: number, length: number) => void) | null = null): Promise<void> {
+    onFailed: ((realfile: IFile, ex: Error) => void) | null = null,
+    progressListener: ((realfile: IFile, position: number, length: number) => void) | null = null): Promise<void> {
     let newFilename: string = src.getName();
-    let newFile: IRealFile | null;
+    let newFile: IFile | null;
     newFile = await destDir.getChild(newFilename);
     if (await src.isFile()) {
         if (newFile != null && await newFile.exists()) {
@@ -287,20 +287,20 @@ export async function copyRecursively(src: IRealFile, destDir: IRealFile,
 /**
  * Move a directory recursively
  *
- * @param {IRealFile} src Source directory
- * @param {IRealFile} destDir Destination directory to move into.
- * @param {((realfile: IRealFile) => Promise<string>) | null} autoRename Autorename callback (default is none).
+ * @param {IFile} src Source directory
+ * @param {IFile} destDir Destination directory to move into.
+ * @param {((realfile: IFile) => Promise<string>) | null} autoRename Autorename callback (default is none).
  * @param {boolean} autoRenameFolders Apply autorename to folders also (default is false)
- * @param {((realfile: IRealFile, ex: Error) => void) | null} onFailed OnFailed callback
- * @param {((realfile: IRealFile, position: number, length: number) => void) | null} progressListener Progress listener
+ * @param {((realfile: IFile, ex: Error) => void) | null} onFailed OnFailed callback
+ * @param {((realfile: IFile, position: number, length: number) => void) | null} progressListener Progress listener
  */
-export async function moveRecursively(file: IRealFile, destDir: IRealFile,
-    autoRename: ((realFile: IRealFile) => Promise<string>) | null = null,
+export async function moveRecursively(file: IFile, destDir: IFile,
+    autoRename: ((realFile: IFile) => Promise<string>) | null = null,
     autoRenameFolders: boolean = false,
-    onFailed: ((realFile: IRealFile, ex: Error) => void) | null = null,
-    progressListener: ((realFile: IRealFile, position: number, length: number) => void) | null = null,): Promise<void> {
+    onFailed: ((realFile: IFile, ex: Error) => void) | null = null,
+    progressListener: ((realFile: IFile, position: number, length: number) => void) | null = null,): Promise<void> {
     // target directory is the same
-    let parent: IRealFile | null = await file.getParent();
+    let parent: IFile | null = await file.getParent();
     if (parent != null && parent.getDisplayPath() == destDir.getDisplayPath()) {
         if (progressListener != null) {
             progressListener(file, 0, 1);
@@ -310,7 +310,7 @@ export async function moveRecursively(file: IRealFile, destDir: IRealFile,
     }
 
     let newFilename: string = file.getName();
-    let newFile: IRealFile | null;
+    let newFile: IFile | null;
     newFile = await destDir.getChild(newFilename);
     if (await file.isFile()) {
         if (newFile != null && await newFile.exists()) {
@@ -365,9 +365,9 @@ export async function moveRecursively(file: IRealFile, destDir: IRealFile,
  * @param onFailed Callback when delete fails
  * @param progressListener The progress listener
  */
-export async function deleteRecursively(file: IRealFile, 
-    onFailed: ((realFile: IRealFile, ex: Error) => void) | null,
-    progressListener: (realfile: IRealFile, position: number, length: number) => void): Promise<void> {
+export async function deleteRecursively(file: IFile, 
+    onFailed: ((realFile: IFile, ex: Error) => void) | null,
+    progressListener: (realfile: IFile, position: number, length: number) => void): Promise<void> {
     if (await file.isFile()) {
         progressListener(file, 0, 1);
         if (!file.delete()) {
@@ -391,7 +391,7 @@ export async function deleteRecursively(file: IRealFile,
 /**
  * Get an auto generated copy of the name for a file.
  */
-export async function autoRenameFile(file: IRealFile) {
+export async function autoRenameFile(file: IFile) {
     return autoRename(file.getName());
 };
 

@@ -22,7 +22,7 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 */
 
-import { IRealFile } from "../file/ifile";
+import { IFile } from "../file/ifile";
 import { IVirtualFile } from "../file/ivirtual_file";
 
 /*
@@ -42,13 +42,13 @@ export abstract class VirtualDrive {
     /**
      * Get a private dir for sharing files with other apps.
      */
-	public abstract getPrivateDir(): IRealFile;
+	public abstract getPrivateDir(): IFile;
 
     /**
      * Get a virtual file backed by a real file.
      * @param file The real file
      */
-    public abstract getVirtualFile(file: IRealFile): IVirtualFile;
+    public abstract getVirtualFile(file: IFile): IVirtualFile;
 	
 	/**
      * Return the virtual root directory of the drive.

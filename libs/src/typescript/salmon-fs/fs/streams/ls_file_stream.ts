@@ -24,7 +24,7 @@ SOFTWARE.
 
 import { MemoryStream } from "../../../salmon-core/streams/memory_stream.js";
 import { RandomAccessStream, SeekOrigin } from "../../../salmon-core/streams/random_access_stream.js";
-import { IRealFile } from "../file/ifile.js";
+import { IFile } from "../file/ifile.js";
 import { Base64 } from "../../../salmon-core/convert/base64.js";
 
 /**
@@ -36,7 +36,7 @@ export class LocalStorageFileStream extends RandomAccessStream {
     /**
      * The java file associated with this stream.
      */
-    readonly #file: IRealFile;
+    readonly #file: IFile;
     #stream: MemoryStream;
     #canWrite: boolean = false;
     #base64: Base64;
@@ -48,7 +48,7 @@ export class LocalStorageFileStream extends RandomAccessStream {
      * @param file The LocalStorageFile that will be used to get the read/write stream
      * @param mode The mode "r" for read "rw" for write
      */
-    public constructor(file: IRealFile, mode: string) {
+    public constructor(file: IFile, mode: string) {
         super();
         this.#file = file;
         this.#base64 = new Base64();

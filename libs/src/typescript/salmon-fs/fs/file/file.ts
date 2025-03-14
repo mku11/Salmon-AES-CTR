@@ -23,7 +23,7 @@ SOFTWARE.
 */
 
 import { RandomAccessStream } from '../../../salmon-core/streams/random_access_stream.js';
-import { IRealFile, copyFileContents, moveRecursively } from './ifile.js';
+import { IFile, copyFileContents, moveRecursively } from './ifile.js';
 import { FileStream } from '../streams/file_stream.js';
 import { IOException } from '../../../salmon-core/streams/io_exception.js';
 
@@ -31,7 +31,7 @@ import { IOException } from '../../../salmon-core/streams/io_exception.js';
  * Salmon real local filesystem implementation for Javascript. This can be used only with the 
  * browser.
  */
-export class File implements IRealFile {
+export class File implements IFile {
     public static readonly separator: string = "/";
     public static readonly SMALL_FILE_MAX_LENGTH: number = 1 * 1024 * 1024;
 
@@ -54,7 +54,7 @@ export class File implements IRealFile {
      * @param dirName The name of the new directory.
      * @return The newly created directory.
      */
-    public async createDirectory(dirName: string): Promise<IRealFile> {
+    public async createDirectory(dirName: string): Promise<IFile> {
         try {
             let nDirHandle: FileSystemDirectoryHandle = await (this.#fileHandle as FileSystemDirectoryHandle)
                 .getDirectoryHandle(dirName, { create: false });
@@ -74,7 +74,7 @@ export class File implements IRealFile {
      * @return The newly created file.
      * @throws IOException Thrown if there is an IO error.
      */
-    public async createFile(filename: string): Promise<IRealFile> {
+    public async createFile(filename: string): Promise<IFile> {
         let nFileHandle: FileSystemFileHandle = await (this.#fileHandle as FileSystemDirectoryHandle)
             .getFileHandle(filename, { create: true });
         let jsFile: File = new File(nFileHandle, this);
@@ -159,10 +159,10 @@ export class File implements IRealFile {
      */
     public async getOutputStream(): Promise<RandomAccessStream> {
         if (!await this.exists()) {
-            let parent: IRealFile | null = await this.getParent();
+            let parent: IFile | null = await this.getParent();
             if (parent == null)
                 throw new Error("Could not get parent");
-            let nFile: IRealFile = await parent.createFile(this.getName());
+            let nFile: IFile = await parent.createFile(this.getName());
             this.#fileHandle = nFile.getPath();
         }
         let fileStream: FileStream = new FileStream(this, "rw");
@@ -173,8 +173,8 @@ export class File implements IRealFile {
      * Get the parent directory of this file or directory.
      * @return The parent directory.
      */
-    public async getParent(): Promise<IRealFile | null> {
-        return this.#parent as IRealFile;
+    public async getParent(): Promise<IFile | null> {
+        return this.#parent as IFile;
     }
 
     /**
@@ -234,11 +234,11 @@ export class File implements IRealFile {
      * List all files under this directory.
      * @return The list of files.
      */
-    public async listFiles(): Promise<IRealFile[]> {
-        let files: IRealFile[] = [];
-		let nFiles: IRealFile[] = [];
+    public async listFiles(): Promise<IFile[]> {
+        let files: IFile[] = [];
+		let nFiles: IFile[] = [];
         for await (const [key, value] of this.#fileHandle.entries()) {
-            let file: IRealFile = new File(value, this);
+            let file: IFile = new File(value, this);
 			if(await file.isFile())
 				nFiles.push(file);
 			else
@@ -256,11 +256,11 @@ export class File implements IRealFile {
      * @return The moved file. Use this file for subsequent operations instead of the original.
      * @throws IOException Thrown if there is an IO error.
      */
-    public async move(newDir: IRealFile, newName: string | null = null, progressListener: ((position: number, length: number) => void) | null = null): Promise<IRealFile> {
+    public async move(newDir: IFile, newName: string | null = null, progressListener: ((position: number, length: number) => void) | null = null): Promise<IFile> {
         newName = newName != null ? newName : this.getName();
         if (newDir == null || !await newDir.exists())
             throw new IOException("Target directory does not exist");
-        let newFile: IRealFile | null = await newDir.getChild(newName);
+        let newFile: IFile | null = await newDir.getChild(newName);
         if (newFile != null && await newFile.exists())
             throw new IOException("Another file/directory already exists");
 
@@ -269,13 +269,13 @@ export class File implements IRealFile {
             return await newDir.getChild(newName) as File;
         } else {
             let oldFilename: string = this.getName();
-            let parent: IRealFile | null = await this.getParent();
+            let parent: IFile | null = await this.getParent();
             await this.copy(newDir, newName, progressListener);
-            let newFile: IRealFile | null = await newDir.getChild(newName);
+            let newFile: IFile | null = await newDir.getChild(newName);
             if (newFile == null)
                 throw new IOException("Could not move file");
             if (parent != null) {
-                let oldFile: IRealFile | null = await parent.getChild(oldFilename);
+                let oldFile: IFile | null = await parent.getChild(oldFilename);
                 if (oldFile != null)
                     await oldFile.delete();
             }
@@ -291,17 +291,17 @@ export class File implements IRealFile {
      * @return The copied file. Use this file for subsequent operations instead of the original.
      * @throws IOException Thrown if there is an IO error.
      */
-    public async copy(newDir: IRealFile, newName: string | null = null, progressListener: ((position: number, length: number) => void) | null = null): Promise<IRealFile | null> {
+    public async copy(newDir: IFile, newName: string | null = null, progressListener: ((position: number, length: number) => void) | null = null): Promise<IFile | null> {
         newName = newName != null ? newName : this.getName();
         if (newDir == null || !await newDir.exists())
             throw new IOException("Target directory does not exists");
-        let newFile: IRealFile | null = await newDir.getChild(newName);
+        let newFile: IFile | null = await newDir.getChild(newName);
         if (newFile != null && await newFile.exists())
             throw new IOException("Another file/directory already exists");
         if (await this.isDirectory()) {
-            let parent: IRealFile | null = await this.getParent();
+            let parent: IFile | null = await this.getParent();
             if(await this.getChildrenCount() > 0 || parent == null)
-                throw new IOException("Could not copy directory use IRealFile copyRecursively() instead");
+                throw new IOException("Could not copy directory use IFile copyRecursively() instead");
             return parent.createDirectory(newName);
         } else {
             newFile = await newDir.createFile(newName);
@@ -315,7 +315,7 @@ export class File implements IRealFile {
      * @param filename The name of the file or directory.
      * @return
      */
-    public async getChild(filename: string): Promise<IRealFile | null> {
+    public async getChild(filename: string): Promise<IFile | null> {
         if (await this.isFile())
             throw new Error("Parent is a file");
         let nFileHandle: FileSystemHandle | null = null;
@@ -346,7 +346,7 @@ export class File implements IRealFile {
         } else if(await this.isDirectory() && (await this.listFiles()).length > 0) {
             throw new Error("Cannot rename non-empty directory. Create a new directory manually and moveRecursively() instead");
         }else {
-            let nFile: IRealFile = await this.move(this.#parent, newFilename);
+            let nFile: IFile = await this.move(this.#parent, newFilename);
             this.#fileHandle = nFile.getPath();
         }
         return this.#fileHandle.name == newFilename;
@@ -359,7 +359,7 @@ export class File implements IRealFile {
     public async mkdir(): Promise<boolean> {
         if (this.#parent == null)
             return false;
-        let dir: IRealFile = await this.#parent.createDirectory(this.getName());
+        let dir: IFile = await this.#parent.createDirectory(this.getName());
         this.#fileHandle = dir.getPath();
         return await dir.exists();
     }
