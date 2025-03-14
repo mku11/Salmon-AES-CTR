@@ -115,6 +115,7 @@ public interface IVirtualFile {
      * Returns the file name
      *
      * @return The file name
+	 * @throws IOException if there was a problem with the stream
      */
     String getName() throws IOException;
 
@@ -146,6 +147,7 @@ public interface IVirtualFile {
      * Return the virtual size of the file.
      *
      * @return The size in bytes.
+	 * @throws IOException if there was a problem with the stream
      */
     long getLength() throws IOException;
 
@@ -160,6 +162,8 @@ public interface IVirtualFile {
      * Creates a directory under this directory
      *
      * @param dirName The name of the directory to be created
+	 * @return The new directory.
+	 * @throws IOException if there was a problem with the stream
      */
     IVirtualFile createDirectory(String dirName) throws IOException;
 
@@ -167,6 +171,8 @@ public interface IVirtualFile {
      * Create a file under this directory
      *
      * @param filename The file name.
+	 * @return The new file.
+	 * @throws IOException if there was a problem with the stream
      */
     IVirtualFile createFile(String filename) throws IOException;
 
@@ -174,6 +180,7 @@ public interface IVirtualFile {
      * Rename the virtual file name
      *
      * @param newFilename The new filename this file will be renamed to
+	 * @throws IOException if there was a problem with the stream
      */
     void rename(String newFilename) throws IOException;
 
@@ -221,6 +228,7 @@ public interface IVirtualFile {
      * @param dest              The destination directory
      * @param autoRename        The autorename function
      * @param autoRenameFolders True to also auto rename folders
+     * @throws IOException Thrown if there is an IO error.
      */
     public void copyRecursively(IVirtualFile dest,
                                 Function<IVirtualFile, String> autoRename,
@@ -233,6 +241,7 @@ public interface IVirtualFile {
      * @param autoRename        The autorename function
      * @param autoRenameFolders True to also auto rename folders
      * @param onFailed          The callback when file copying has failed
+     * @throws IOException Thrown if there is an IO error.
      */
     public void copyRecursively(IVirtualFile dest,
                                 Function<IVirtualFile, String> autoRename,
@@ -247,6 +256,7 @@ public interface IVirtualFile {
      * @param autoRenameFolders True to also auto rename folders
      * @param onFailed          The callback when file copying has failed
      * @param progressListener  The progress listener
+     * @throws IOException Thrown if there is an IO error.
      */
     public void copyRecursively(IVirtualFile dest,
                                 Function<IVirtualFile, String> autoRename,
@@ -260,6 +270,7 @@ public interface IVirtualFile {
      * @param dest              The destination directory
      * @param autoRename        The autorename function
      * @param autoRenameFolders True to also auto rename folder
+     * @throws IOException Thrown if there is an IO error.
      */
     public void moveRecursively(IVirtualFile dest,
                                 Function<IVirtualFile, String> autoRename,
@@ -272,6 +283,7 @@ public interface IVirtualFile {
      * @param autoRename        The autorename function
      * @param autoRenameFolders True to also auto rename folder
      * @param onFailed          Callback when move fails
+     * @throws IOException Thrown if there is an IO error.
      */
     public void moveRecursively(IVirtualFile dest,
                                 Function<IVirtualFile, String> autoRename,
@@ -286,6 +298,7 @@ public interface IVirtualFile {
      * @param autoRenameFolders True to also auto rename folders.
      * @param onFailed          Callback when move fails
      * @param progressListener  The progress listener
+     * @throws IOException Thrown if there is an IO error.
      */
     public void moveRecursively(IVirtualFile dest,
                                 Function<IVirtualFile, String> autoRename,

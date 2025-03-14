@@ -116,6 +116,7 @@ public class AesFile implements IVirtualFile {
 
     /**
      * Return if integrity is set
+	 * @return True if integrity is enabled.
      */
     public boolean isIntegrityEnabled() {
         return this.integrity;

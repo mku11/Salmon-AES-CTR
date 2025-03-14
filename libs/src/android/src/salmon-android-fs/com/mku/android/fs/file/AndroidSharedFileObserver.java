@@ -127,10 +127,8 @@ public class AndroidSharedFileObserver extends FileObserver {
 
     /**
      * When a file event happens.
-     * @param e The type of event which happened
-     * @param path The path, relative to the main monitored file or directory,
-     *     of the file or directory which triggered the event.  This value can
-     *     be {@code null} for certain events, such as {@link #MOVE_SELF}.
+     * @param e The type of event that happened
+     * @param path The path to the monitored file
      */
     @Override
     public void onEvent(int e, @Nullable String path) {

@@ -201,17 +201,17 @@ public class Integrity {
      * Generate a hash signatures for each data chunk.
      *
      * @param buffer            The buffer containing the data chunks.
-     * @param includeHeaderData Include the header data in the first chunk.
+     * @param includeData Additional data to be included in the hash generation.
      * @return The hash signatures.
      * @throws IntegrityException Thrown if the data are corrupt or tampered with.
      */
-    public byte[][] generateHashes(byte[] buffer, byte[] includeHeaderData) {
+    public byte[][] generateHashes(byte[] buffer, byte[] includeData) {
         if (!integrity)
             return null;
         List<byte[]> hashes = new LinkedList<>();
         for (int i = 0; i < buffer.length; i += chunkSize) {
             int len = Math.min(chunkSize, buffer.length - i);
-            hashes.add(calculateHash(provider, buffer, i, len, getKey(), i == 0 ? includeHeaderData : null));
+            hashes.add(calculateHash(provider, buffer, i, len, getKey(), i == 0 ? includeData : null));
         }
         return hashes.toArray(new byte[][]{});
     }

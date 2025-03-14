@@ -90,9 +90,9 @@ public class AesStream extends RandomAccessStream {
 
 
     /**
-     * Get the output size of the data to be transformed(encrypted or decrypted) including
-     * header and hash without executing any operations. This can be used to prevent over-allocating memory
-     * where creating your output buffers.
+     * Get the output size of the data to be transformed (encrypted or decrypted) including
+     * header and hash without executing any operations. 
+	 * This can be used to prevent over-allocating memory where creating your output arrays.
      *
      * @param mode      The {@link EncryptionMode} Encrypt or Decrypt.
      * @param length    The length of the data to transform.
@@ -108,9 +108,9 @@ public class AesStream extends RandomAccessStream {
     }
 
     /**
-     * Get the output size of the data to be transformed(encrypted or decrypted) including
-     * header and hash without executing any operations. This can be used to prevent over-allocating memory
-     * where creating your output buffers.
+     * Get the output size of the data to be transformed (encrypted or decrypted) including
+     * header and hash without executing any operations for the specified chunk size. 
+	 * This can be used to prevent over-allocating memory where creating your output arrays.
      *
      * @param mode      The {@link EncryptionMode} Encrypt or Decrypt.
      * @param length    The length of the data to transform.
@@ -147,15 +147,12 @@ public class AesStream extends RandomAccessStream {
     }
 
     /**
-     * Instantiate a new Salmon stream with a base stream and optional header data and hash integrity.
+     * Instantiate a new encrypted stream with a key, a nonce, and a base stream.
      * <p>
      * If you read from the stream it will decrypt the data from the baseStream.
-     * If you write to the stream it will encrypt the data from the baseStream.
+     * If you write to the stream it will encrypt the data to the baseStream.
      * The transformation is based on AES CTR Mode.
      * </p>
-     * Notes:
-     * The initial value of the counter is a result of the concatenation of an 12 byte nonce and an additional 4 bytes counter.
-     * The counter is then: incremented every block, encrypted by the key, and xored with the plain text.
      *
      * @param key            The AES key that is used to encrypt decrypt
      * @param nonce          The nonce used for the initial counter
@@ -173,15 +170,13 @@ public class AesStream extends RandomAccessStream {
     }
 
     /**
-     * Instantiate a new Salmon stream with a base stream and optional header data and hash integrity.
+     * Instantiate a new encrypted stream with a key, a nonce, a base stream, and optionally store 
+	 * the nonce information in the header, see EncryptionFormat.
      * <p>
      * If you read from the stream it will decrypt the data from the baseStream.
-     * If you write to the stream it will encrypt the data from the baseStream.
+     * If you write to the stream it will encrypt the data to the baseStream.
      * The transformation is based on AES CTR Mode.
      * </p>
-     * Notes:
-     * The initial value of the counter is a result of the concatenation of an 12 byte nonce and an additional 4 bytes counter.
-     * The counter is then: incremented every block, encrypted by the key, and xored with the plain text.
      *
      * @param key            The AES key that is used to encrypt decrypt
      * @param nonce          The nonce used for the initial counter
@@ -199,45 +194,15 @@ public class AesStream extends RandomAccessStream {
         this(key, nonce, encryptionMode, baseStream, format, false, null, 0);
     }
 
-
     /**
-     * Instantiate a new Salmon stream with a base stream and optional header data and hash integrity.
+     * Instantiate a new encrypted stream with a key, a nonce, a base stream, and optionally enable 
+	 * integrity with a hash key and store the nonce and the integrity information in the header, 
+	 * see EncryptionFormat.
      * <p>
      * If you read from the stream it will decrypt the data from the baseStream.
-     * If you write to the stream it will encrypt the data from the baseStream.
+     * If you write to the stream it will encrypt the data to the baseStream.
      * The transformation is based on AES CTR Mode.
      * </p>
-     * Notes:
-     * The initial value of the counter is a result of the concatenation of an 12 byte nonce and an additional 4 bytes counter.
-     * The counter is then: incremented every block, encrypted by the key, and xored with the plain text.
-     *
-     * @param key            The AES key that is used to encrypt decrypt
-     * @param nonce          The nonce used for the initial counter
-     * @param encryptionMode Encryption mode Encrypt or Decrypt this cannot change later
-     * @param baseStream     The base Stream that will be used to read the data
-     * @param format         The format to use, see {@link EncryptionFormat}
-     * @param integrity      True to enable integrity verification
-     * @throws IOException        Thrown if there is an IO error.
-     * @throws SecurityException  Thrown if there is a security exception
-     * @throws IntegrityException Thrown if the data are corrupt or tampered with.
-     * @see <a href="https://en.wikipedia.org/wiki/Block_cipher_mode_of_operation#Counter_(CTR)">Salmon README.md</a>
-     */
-    public AesStream(byte[] key, byte[] nonce, EncryptionMode encryptionMode,
-                     RandomAccessStream baseStream, EncryptionFormat format, boolean integrity)
-            throws IOException {
-        this(key, nonce, encryptionMode, baseStream, format, integrity, null, 0);
-    }
-
-    /**
-     * Instantiate a new Salmon stream with a base stream and optional header data and hash integrity.
-     * <p>
-     * If you read from the stream it will decrypt the data from the baseStream.
-     * If you write to the stream it will encrypt the data from the baseStream.
-     * The transformation is based on AES CTR Mode.
-     * </p>
-     * Notes:
-     * The initial value of the counter is a result of the concatenation of an 12 byte nonce and an additional 4 bytes counter.
-     * The counter is then: incremented every block, encrypted by the key, and xored with the plain text.
      *
      * @param key            The AES key that is used to encrypt decrypt
      * @param nonce          The nonce used for the initial counter
@@ -258,12 +223,15 @@ public class AesStream extends RandomAccessStream {
     }
 
     /**
-     * Instantiate a new Salmon stream with a base stream and optional header data and hash integrity.
+     * Instantiate a new encrypted stream with a key, a nonce, a base stream, and optionally enable 
+	 * integrity with a hash key and specified chunk size as well as store the nonce and the integrity 
+	 * information in the header, see EncryptionFormat.
      * <p>
      * If you read from the stream it will decrypt the data from the baseStream.
-     * If you write to the stream it will encrypt the data from the baseStream.
+     * If you write to the stream it will encrypt the data to the baseStream.
      * The transformation is based on AES CTR Mode.
      * </p>
+	 *
      * Notes:
      * The initial value of the counter is a result of the concatenation of an 12 byte nonce and an additional 4 bytes counter.
      * The counter is then: incremented every block, encrypted by the key, and xored with the plain text.

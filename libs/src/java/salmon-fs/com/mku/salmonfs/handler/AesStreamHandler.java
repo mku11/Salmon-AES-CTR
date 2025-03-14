@@ -37,8 +37,8 @@ import java.util.HashMap;
 import java.util.Map;
 
 /**
- * Provides a local stream handler to read a {@link AesFile}
- * as a source to apps that cannot use {@link AesFileInputStream} directly.
+ * Provides a local stream URL handler to read an {@link AesFile} as a source. 
+ * This works with 3rd party libraries and apps that can read file only via URLs.
  */
 public class AesStreamHandler extends URLStreamHandler {
     private static final int BUFFERS = 4;
@@ -60,7 +60,7 @@ public class AesStreamHandler extends URLStreamHandler {
     /**
      * Get the instance.
      *
-     * @return
+     * @return A URL stream handler for encrypted streams.
      */
     public static AesStreamHandler getInstance() {
         if (instance == null) {

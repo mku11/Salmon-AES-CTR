@@ -824,7 +824,7 @@ public class FileCommander {
         /**
          * Get the associated file.
          *
-         * @return
+         * @return The file being processed.
          */
         public IFile getFile() {
             return file;

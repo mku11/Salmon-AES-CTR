@@ -26,17 +26,18 @@ SOFTWARE.
 
 import com.mku.convert.BitConverter;
 import com.mku.fs.file.IFile;
+import com.mku.fs.file.IVirtualFile;
+import com.mku.salmon.integrity.Integrity;
 import com.mku.salmon.integrity.IntegrityException;
+import com.mku.salmon.streams.AesStream;
+import com.mku.salmon.streams.ProviderType;
 import com.mku.salmonfs.auth.AuthException;
 import com.mku.salmonfs.drive.AesDrive;
-import com.mku.salmonfs.file.AesFile;
 import com.mku.salmonfs.drive.Drive;
-import com.mku.salmon.integrity.Integrity;
+import com.mku.salmonfs.drive.utils.AesFileCommander;
+import com.mku.salmonfs.file.AesFile;
 import com.mku.salmonfs.sequence.FileSequencer;
 import com.mku.salmonfs.streams.AesFileInputStream;
-import com.mku.salmon.streams.ProviderType;
-import com.mku.salmon.streams.AesStream;
-import com.mku.salmonfs.drive.utils.AesFileCommander;
 import com.mku.streams.InputStreamWrapper;
 import com.mku.streams.MemoryStream;
 import org.junit.jupiter.api.AfterAll;
@@ -579,12 +580,12 @@ public class SalmonFSTests {
         FileSequencer sequencer = SalmonFSTestHelper.createSalmonFileSequencer();
         AesDrive drive = SalmonFSTestHelper.createDrive(vaultDir, SalmonFSTestHelper.driveClassType, SalmonCoreTestHelper.TEST_PASSWORD, sequencer);
         AesFileCommander fileCommander = new AesFileCommander(Integrity.DEFAULT_CHUNK_SIZE, Integrity.DEFAULT_CHUNK_SIZE, 2);
-        AesFile[] sfiles = fileCommander.importFiles(new IFile[]{file}, drive.getRoot(), false, true);
+        IVirtualFile[] sfiles = fileCommander.importFiles(new IFile[]{file}, drive.getRoot(), false, true);
         fileCommander.close();
 
         long pos = Math.abs(new Random().nextLong() % file.getLength());
 
-        AesFileInputStream fileInputStream1 = new AesFileInputStream(sfiles[0], 4, 4 * 1024 * 1024, 4, 256 * 1024);
+        AesFileInputStream fileInputStream1 = new AesFileInputStream((AesFile) sfiles[0], 4, 4 * 1024 * 1024, 4, 256 * 1024);
         fileInputStream1.skip(pos);
         MemoryStream ms1 = new MemoryStream();
         SalmonFSTestHelper.copyStream(fileInputStream1, ms1);
@@ -606,7 +607,7 @@ public class SalmonFSTests {
         msa1.close();
         dism1.close();
 
-        AesFileInputStream fileInputStream2 = new AesFileInputStream(sfiles[0], 4, 4 * 1024 * 1024, 1, 256 * 1024);
+        AesFileInputStream fileInputStream2 = new AesFileInputStream((AesFile) sfiles[0], 4, 4 * 1024 * 1024, 1, 256 * 1024);
         fileInputStream2.skip(pos);
         MemoryStream ms2 = new MemoryStream();
         SalmonFSTestHelper.copyStream(fileInputStream2, ms2);
