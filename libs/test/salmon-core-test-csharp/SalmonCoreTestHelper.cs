@@ -428,7 +428,7 @@ public class SalmonCoreTestHelper
         // we resort to reflection to test this.
         FieldInfo fieldInfo =
            stream.GetType().GetField("transformer", BindingFlags.Instance | BindingFlags.NonPublic);
-        DefaultTransformer transformer = (DefaultTransformer)fieldInfo.GetValue(stream);
+        ICTRTransformer transformer = (ICTRTransformer)fieldInfo.GetValue(stream);
         MethodInfo methodInfo = transformer.GetType().GetMethod("IncreaseCounter", BindingFlags.Instance | BindingFlags.NonPublic);
         methodInfo.Invoke(transformer, new object[] { counter });
 
