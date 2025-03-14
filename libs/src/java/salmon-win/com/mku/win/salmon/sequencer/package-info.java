@@ -1,4 +1,4 @@
 /**
- * Windows file-based nonce sequencers
+ * Windows file-based nonce sequencers.
  */
 package com.mku.win.salmon.sequencer;

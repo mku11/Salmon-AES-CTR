@@ -1,4 +1,4 @@
 /**
- * Encryption and decryption streams
+ * Encryption and decryption streams.
  */
 package com.mku.salmon.streams;

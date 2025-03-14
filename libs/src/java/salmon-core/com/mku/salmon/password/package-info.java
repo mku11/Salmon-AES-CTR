@@ -1,4 +1,4 @@
 /**
- * Password based key derivation utilities
+ * Password based key derivation utilities.
  */
 package com.mku.salmon.password;

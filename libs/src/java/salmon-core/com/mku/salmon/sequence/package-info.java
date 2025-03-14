@@ -1,4 +1,4 @@
 /**
- * Nonce sequencers and serializers
+ * Nonce sequencers and serializers.
  */
 package com.mku.salmon.sequence;
