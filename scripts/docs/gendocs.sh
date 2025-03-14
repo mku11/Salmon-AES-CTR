@@ -1,13 +1,24 @@
 # use Linux or WSL or cygwin to run
 
 # java
-find ../../libs/src -type f -name "*.java" | xargs javadoc --no-module-directories -d ../../output/docs/java/html --ignore-source-errors
+find ../../libs/src/java -type f -name "*.java" | xargs javadoc --no-module-directories -d ../../output/docs/java/html --ignore-source-errors
 
-# typescript
+find ../../libs/src/android -type f -name "*.java" | xargs javadoc --no-module-directories -d ../../output/docs/android/html --ignore-source-errors
+
+# javascript
 npx jsdoc ../../libs/projects/SalmonLibs.vscode/lib -r -d ../../output/docs/javascript/html
 
-# csharp
-doxygen DoxyfileCSharp
+# typescript
+CURR_DIR=$(pwd)
+cd ../../libs/projects/SalmonLibs.vscode
+npm run tsdoc
+cd $CURR_DIR
+
+# .NET
+doxygen Doxyfile.Net
+
+# .NET android
+doxygen Doxyfile.NetAndroid
 
 # Python
 doxygen DoxyfilePython
