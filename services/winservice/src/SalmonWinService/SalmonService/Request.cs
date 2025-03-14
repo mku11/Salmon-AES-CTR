@@ -21,12 +21,10 @@ LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 */
-using System;
-using System.IO;
 using System.Text;
 using System.Xml;
 
-namespace Salmon.Service.Sequence;
+namespace Mku.SalmonWinService.SalmonService;
 
 enum RequestType
 {
@@ -56,9 +54,9 @@ internal class Request
             if (drive.Attributes.GetNamedItem("authID") != null)
                 request.authID = drive.Attributes.GetNamedItem("authID").Value;
             if (drive.Attributes.GetNamedItem("nextNonce") != null)
-                request.nextNonce = Convert.FromBase64String(drive.Attributes.GetNamedItem("nextNonce").Value);
+                request.nextNonce = System.Convert.FromBase64String(drive.Attributes.GetNamedItem("nextNonce").Value);
             if (drive.Attributes.GetNamedItem("maxNonce") != null)
-                request.maxNonce = Convert.FromBase64String(drive.Attributes.GetNamedItem("maxNonce").Value);
+                request.maxNonce = System.Convert.FromBase64String(drive.Attributes.GetNamedItem("maxNonce").Value);
         }
         catch (Exception ex)
         {

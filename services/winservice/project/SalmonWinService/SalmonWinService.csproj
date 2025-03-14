@@ -27,31 +27,31 @@
 
   <ItemGroup>
 
-    <Compile Include="..\..\src\Config\SalmonConfig.cs">
-      <Link>Config\SalmonConfig.cs</Link>
+    <Compile Include="..\..\src\SalmonWinService\Config\Config.cs">
+      <Link>SalmonWinService\Config\Config.cs</Link>
     </Compile>
 
-    <Compile Include="..\..\src\Program.cs">
-      <Link>Program.cs</Link>
+    <Compile Include="..\..\src\SalmonWinService\Program.cs">
+      <Link>SalmonWinService\Program.cs</Link>
     </Compile>
 
-    <Compile Include="..\..\src\SalmonService.cs">
-      <Link>SalmonService.cs</Link>
+    <Compile Include="..\..\src\SalmonWinService\Service\WinService.cs">
+      <Link>SalmonWinService\Service\WinService.cs</Link>
     </Compile>
 
-    <Compile Include="..\..\src\WindowsBackgroundService.cs">
-      <Link>WindowsBackgroundService.cs</Link>
+    <Compile Include="..\..\src\SalmonWinService\Service\WindowsBackgroundService.cs">
+      <Link>SalmonWinService\Service\WindowsBackgroundService.cs</Link>
     </Compile>
     
     
-    <Compile Include="..\..\src\SequenceServer\Request.cs">
-      <Link>SequenceServer\Request.cs</Link>
+    <Compile Include="..\..\src\SalmonWinService\SalmonService\Request.cs">
+      <Link>SalmonWinService\SalmonService\Request.cs</Link>
     </Compile>
-    <Compile Include="..\..\src\SequenceServer\Response.cs">
-      <Link>SequenceServer\Response.cs</Link>
+    <Compile Include="..\..\src\SalmonWinService\SalmonService\Response.cs">
+      <Link>SalmonWinService\SalmonService\Response.cs</Link>
     </Compile>
-    <Compile Include="..\..\src\SequenceServer\SequenceServer.cs">
-      <Link>SequenceServer\SequenceServer.cs</Link>
+    <Compile Include="..\..\src\SalmonWinService\SalmonService\Sequence\SequenceServer.cs">
+      <Link>SalmonWinService\SalmonService\Sequence\SequenceServer.cs</Link>
     </Compile>    
   </ItemGroup>
 

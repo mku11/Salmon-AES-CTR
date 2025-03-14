@@ -22,11 +22,12 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 */
 using Microsoft.VisualStudio.TestTools.UnitTesting;
-using Mku.File;
+using Mku.FS.File;
 using Mku.Salmon.Sequence;
-using Mku.Sequence;
-using Salmon.Service.Sequence;
-using Salmon.Win.Sequencer;
+using Mku.SalmonWinService;
+using Mku.SalmonWinService.SalmonService.Sequence;
+using Mku.SalmonWinService.Service;
+using Mku.Win.Salmon.Sequencer;
 using System;
 using System.Diagnostics;
 using System.IO;
@@ -34,6 +35,7 @@ using System.IO.Pipes;
 using System.Security.Principal;
 using System.Threading;
 using System.Threading.Tasks;
+using File = Mku.FS.File.File;
 
 namespace Test;
 
@@ -43,7 +45,7 @@ namespace Test;
 [TestClass]
 public class WinServiceTests
 {
-    private static readonly string TEST_SERVICE_PIPE_NAME = "SalmonService";
+    private static readonly string TEST_SERVICE_PIPE_NAME = "WinService";
     private static readonly string TEST_USER_PIPE_NAME = "UserService";
     private static readonly string TEST_USER_SEQ_DIR_PATH = "D:\\tmp\\output";
     private static readonly string TEST_USER_SEQ_FILE_NAME = "seqfile.xml";
@@ -52,10 +54,10 @@ public class WinServiceTests
 
     public void Setup()
     {
-        IRealFile dir = new DotNetFile(TEST_USER_SEQ_DIR_PATH);
+        IFile dir = new File(TEST_USER_SEQ_DIR_PATH);
         if (!dir.Exists)
             dir.Mkdir();
-        IRealFile file = dir.GetChild(TEST_USER_SEQ_FILE_NAME);
+        IFile file = dir.GetChild(TEST_USER_SEQ_FILE_NAME);
         if (file.Exists)
             file.Delete();
         dir.CreateFile(TEST_USER_SEQ_FILE_NAME);
@@ -68,8 +70,8 @@ public class WinServiceTests
         SequenceServer sequenceServer = null;
 
         sequenceServer = new SequenceServer(TEST_USER_PIPE_NAME,
-            new WinFileSequencer(new DotNetFile(TEST_USER_SEQ_FILE_PATH),
-            new SalmonSequenceSerializer(), TEST_REG_KEY),
+            new WinFileSequencer(new File(TEST_USER_SEQ_FILE_PATH),
+            new SequenceSerializer(), TEST_REG_KEY),
             (entry, warning) => Console.WriteLine(entry, warning),
             (ex) => { });
         sequenceServer.Start();
@@ -113,8 +115,8 @@ public class WinServiceTests
     {
         SequenceServer sequenceServer = null;
         sequenceServer = new SequenceServer(TEST_USER_PIPE_NAME,
-            new WinFileSequencer(new DotNetFile(TEST_USER_SEQ_FILE_PATH),
-            new SalmonSequenceSerializer(), TEST_REG_KEY),
+            new WinFileSequencer(new File(TEST_USER_SEQ_FILE_PATH),
+            new SequenceSerializer(), TEST_REG_KEY),
             (entry, warning) => Console.WriteLine(entry, warning), (ex) => { });
         sequenceServer.Start();
 
@@ -132,8 +134,8 @@ public class WinServiceTests
         SequenceServer sequenceServer = null;
         bool failed = false;
         sequenceServer = new SequenceServer(TEST_SERVICE_PIPE_NAME,
-            new WinFileSequencer(new DotNetFile(TEST_USER_SEQ_FILE_PATH),
-            new SalmonSequenceSerializer(), TEST_REG_KEY),
+            new WinFileSequencer(new File(TEST_USER_SEQ_FILE_PATH),
+            new SequenceSerializer(), TEST_REG_KEY),
             (entry, warning) => Console.WriteLine(entry, warning),
             (ex) =>
             {
@@ -176,15 +178,15 @@ public class WinServiceTests
     [TestMethod]
     public void TestService()
     {
-        DotNetFile file = new DotNetFile(TEST_USER_SEQ_FILE_PATH);
+        File file = new File(TEST_USER_SEQ_FILE_PATH);
         if (file.Exists)
             file.Delete();
-        SalmonWinService.SalmonService.PIPE_NAME = TEST_SERVICE_PIPE_NAME;
-        SalmonWinService.SalmonService.SEQUENCER_FILENAME = TEST_USER_SEQ_FILE_PATH;
+        WinService.PIPE_NAME = TEST_SERVICE_PIPE_NAME;
+        WinService.SEQUENCER_FILENAME = TEST_USER_SEQ_FILE_PATH;
         
         Task.Run(() =>
         {
-            SalmonWinService.Program.Main(null);
+            Program.Main(null);
         });
         // wait for service
         Thread.Sleep(5000);
@@ -213,7 +215,7 @@ public class WinServiceTests
         }
         Assert.IsTrue(caught);
 
-        SalmonWinService.Program.Stop();
+        Program.Stop();
     }
 
 }

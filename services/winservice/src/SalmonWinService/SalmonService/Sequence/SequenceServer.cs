@@ -21,12 +21,12 @@ LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 */
-using Mku.Sequence;
+using Mku.Salmon.Sequence;
 using System.IO.Pipes;
 using System.Security.AccessControl;
 using System.Security.Principal;
 
-namespace Salmon.Service.Sequence;
+namespace Mku.SalmonWinService.SalmonService.Sequence;
 
 public class SequenceServer
 {

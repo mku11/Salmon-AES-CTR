@@ -22,9 +22,9 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 */
 
-namespace Salmon.Config;
+namespace Mku.SalmonWinService.Config;
 
-public class SalmonConfig
+public class Config
 {
     public static readonly string APP_NAME = "Salmon Service";
     public static readonly string ABOUT_TEXT = "Released under MIT License";

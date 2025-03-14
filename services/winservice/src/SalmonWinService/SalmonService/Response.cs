@@ -21,11 +21,11 @@ LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 */
+using Mku.Salmon.Sequence;
 using System.Text;
 using System.Xml;
-using Mku.Sequence;
 
-namespace Salmon.Service.Sequence;
+namespace Mku.SalmonWinService.SalmonService;
 
 internal class Response
 {
@@ -52,9 +52,9 @@ internal class Response
             if (seqStatus != null)
                 writer.WriteAttributeString("seqStatus", seqStatus.ToString());
             if (nextNonce != null)
-                writer.WriteAttributeString("nextNonce", Convert.ToBase64String(nextNonce));
+                writer.WriteAttributeString("nextNonce", System.Convert.ToBase64String(nextNonce));
             if (maxNonce != null)
-                writer.WriteAttributeString("maxNonce", Convert.ToBase64String(maxNonce));
+                writer.WriteAttributeString("maxNonce", System.Convert.ToBase64String(maxNonce));
             if (error != null)
                 writer.WriteAttributeString("error", error);
             writer.WriteEndElement();

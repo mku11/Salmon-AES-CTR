@@ -23,8 +23,9 @@ SOFTWARE.
 */
 using Microsoft.Extensions.Logging.Configuration;
 using Microsoft.Extensions.Logging.EventLog;
+using Mku.SalmonWinService.Service;
 
-namespace SalmonWinService;
+namespace Mku.SalmonWinService;
 
 public class Program
 {
@@ -40,7 +41,7 @@ public class Program
             {
                 LoggerProviderOptions.RegisterProviderOptions<
                     EventLogSettings, EventLogLoggerProvider>(services);
-                services.AddSingleton<SalmonService>();
+                services.AddSingleton<WinService>();
                 services.AddHostedService<WindowsBackgroundService>();
             }).ConfigureLogging(logging =>
             {

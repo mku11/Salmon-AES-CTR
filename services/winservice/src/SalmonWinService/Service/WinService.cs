@@ -22,32 +22,32 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 */
 
-using Mku.File;
+using File = Mku.FS.File;
 using Mku.Salmon.Sequence;
-using Salmon.Config;
-using Salmon.Service.Sequence;
-using Salmon.Win.Sequencer;
+using Mku.Win.Salmon.Sequencer;
+using Mku.FS.File;
+using Mku.SalmonWinService.SalmonService.Sequence;
 
-namespace SalmonWinService;
+namespace Mku.SalmonWinService.Service;
 
-public class SalmonService
+public class WinService
 {
     private SequenceServer sequenceServer;
-    public static string PIPE_NAME { get; set; } = "SalmonService";
+    public static string PIPE_NAME { get; set; } = "WinService";
     public static string SEQUENCER_FILENAME { get; set; } = "config.xml";
     public delegate void WriteEntryDelegate(string message, bool error);
     public WriteEntryDelegate WriteEntry;
 
-    public SalmonService()
+    public WinService()
     {
         CreateSequenceServer();
     }
 
     private void CreateSequenceServer()
     {
-        IRealFile file = InitFile();
-        sequenceServer = new SequenceServer(PIPE_NAME, 
-		new WinFileSequencer(file, new SalmonSequenceSerializer(), SalmonConfig.REGISTRY_CHKSUM_KEY),
+        IFile file = InitFile();
+        sequenceServer = new SequenceServer(PIPE_NAME,
+        new WinFileSequencer(file, new SequenceSerializer(), Config.Config.REGISTRY_CHKSUM_KEY),
             (entry, error) => WriteLog(entry, error), (ex) => { });
         sequenceServer.Start();
     }
@@ -59,7 +59,7 @@ public class SalmonService
             WriteEntry(entry, error);
     }
 
-    private IRealFile InitFile()
+    private IFile InitFile()
     {
         string path = Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData);
         var dirPath = Path.Combine(path, "Salmon");
@@ -68,6 +68,6 @@ public class SalmonService
             Directory.CreateDirectory(dirPath);
         }
         var filePath = Path.Combine(dirPath, SEQUENCER_FILENAME);
-        return new DotNetFile(filePath);
+        return new File.File(filePath);
     }
 }

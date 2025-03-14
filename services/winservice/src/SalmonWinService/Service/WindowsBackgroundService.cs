@@ -21,15 +21,16 @@ LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 */
-namespace SalmonWinService;
+
+namespace Mku.SalmonWinService.Service;
 
 public sealed class WindowsBackgroundService : BackgroundService
 {
-    private readonly SalmonService _salmonService;
+    private readonly WinService _salmonService;
     private readonly ILogger<WindowsBackgroundService> _logger;
 
     public WindowsBackgroundService(
-        SalmonService salmonService,
+        WinService salmonService,
         ILogger<WindowsBackgroundService> logger)
     {
         _salmonService = salmonService;
