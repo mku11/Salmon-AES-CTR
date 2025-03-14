@@ -120,7 +120,7 @@ class AesFile(IVirtualFile):
             return None
         if self.__header is not None:
             return self.__header
-        header: Header = Header(bytearray())
+        header: Header | None = Header(bytearray())
         stream: RandomAccessStream | None = None
         try:
             stream = self.__real_file.get_input_stream()

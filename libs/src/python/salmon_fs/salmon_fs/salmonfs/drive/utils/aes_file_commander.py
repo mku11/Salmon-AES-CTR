@@ -70,7 +70,8 @@ class AesFileCommander:
                      delete_source: bool, integrity: bool,
                      auto_rename: Callable[[IFile], str] | None = None,
                      on_failed: Callable[[IFile, Exception], Any] | None = None,
-                     on_progress_changed: Callable[[AesFileCommander.RealFileTaskProgress], Any] | None = None) -> list[AesFile]:
+                     on_progress_changed: Callable[[AesFileCommander.RealFileTaskProgress], Any] | None = None) -> list[
+        AesFile]:
         """
         Import files to the drive.
         
@@ -118,8 +119,9 @@ class AesFileCommander:
 
     def __import_recursively(self, file_to_import: IFile, import_dir: AesFile,
                              delete_source: bool, integrity: bool,
-                             on_progress_changed: Callable[[AesFileCommander.RealFileTaskProgress], Any],
-                             auto_rename: Callable[[IFile], str], on_failed: Callable[[IFile, Exception], Any],
+                             on_progress_changed: Callable[[AesFileCommander.RealFileTaskProgress], Any] | None,
+                             auto_rename: Callable[[IFile], str] | None,
+                             on_failed: Callable[[IFile, Exception], Any] | None,
                              imported_files: list[AesFile], count: list[int], total: list[int],
                              existing_files: dict[str, AesFile]):
         sfile: AesFile | None = existing_files.get(
@@ -214,9 +216,9 @@ class AesFileCommander:
 
     def __export_recursively(self, file_to_export: AesFile, export_dir: IFile,
                              delete_source: bool, integrity: bool,
-                             on_progress_changed: Callable[[AesFileCommander.AesFileTaskProgress], Any],
-                             auto_rename: Callable[[IFile], str],
-                             on_failed: Callable[[AesFile, Exception], Any],
+                             on_progress_changed: Callable[[AesFileCommander.AesFileTaskProgress], Any] | None,
+                             auto_rename: Callable[[IFile], str] | None,
+                             on_failed: Callable[[AesFile, Exception], Any] | None,
                              exported_files: list[IFile], count: list[int], total: int,
                              existing_files: dict[str, IFile]):
         rfile: IFile | None = existing_files.get(
@@ -302,7 +304,7 @@ class AesFileCommander:
                                                                              on_progress_changed), on_failed)
 
     def __notify_delete_progress(self, file: AesFile, position: int, length: int, count: list[int], final_total: int,
-                                 on_progress_changed: Callable[[AesFileCommander.AesFileTaskProgress], Any]):
+                                 on_progress_changed: Callable[[AesFileCommander.AesFileTaskProgress], Any] | None):
         if self.__stopJobs:
             raise CancelledError()
         if on_progress_changed is not None:
@@ -500,7 +502,7 @@ class AesFileCommander:
 
     def __notify_real_file_progress(self, file_to_import: IFile, v_bytes: int, total_bytes: int, count: list[int],
                                     total: int,
-                                    on_progress_changed: Callable[[AesFileCommander.RealFileTaskProgress], Any]):
+                                    on_progress_changed: Callable[[AesFileCommander.RealFileTaskProgress], Any] | None):
         if on_progress_changed is not None:
             on_progress_changed(
                 AesFileCommander.RealFileTaskProgress(file_to_import, v_bytes, total_bytes, count[0], total))
@@ -508,7 +510,8 @@ class AesFileCommander:
     def __notify_salmon_file_progress(self, file_to_export: AesFile, v_bytes: int, total_bytes: int,
                                       count: list[int],
                                       total: int,
-                                      on_progress_changed: Callable[[AesFileCommander.AesFileTaskProgress], Any]):
+                                      on_progress_changed: Callable[
+                                                               [AesFileCommander.AesFileTaskProgress], Any] | None):
         if on_progress_changed is not None:
             on_progress_changed(
                 AesFileCommander.AesFileTaskProgress(file_to_export, v_bytes, total_bytes, count[0], total))
