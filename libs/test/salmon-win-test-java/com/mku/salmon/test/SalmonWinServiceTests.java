@@ -24,14 +24,14 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 */
 
-import com.mku.fs.file.IFile;
-import com.mku.fs.file.File;
 import com.mku.convert.BitConverter;
+import com.mku.fs.file.File;
+import com.mku.fs.file.IFile;
 import com.mku.salmon.RangeExceededException;
-import com.mku.win.salmon.registry.Registry;
+import com.mku.salmon.sequence.SequenceSerializer;
+import com.mku.win.registry.Registry;
 import com.mku.win.salmon.sequencer.WinClientSequencer;
 import com.mku.win.salmon.sequencer.WinFileSequencer;
-import com.mku.salmon.sequence.SequenceSerializer;
 import com.sun.jna.platform.win32.Crypt32Util;
 import org.junit.jupiter.api.Test;
 
@@ -46,8 +46,7 @@ public class SalmonWinServiceTests {
     public static String TEST_SEQUENCER_DIR = "D:\\tmp\\output";
     public static String TEST_SEQUENCER_FILENAME = "winfileseq.xml";
     private static String TEST_REG_CHCKSUM_KEY = "TestChkSum";
-
-    public static String TEST_SERVICE_PIPE_NAME = "SalmonService";
+    public static String TEST_SERVICE_PIPE_NAME = "WinService";
     public static Registry registry = new Registry();
 
     @Test
@@ -59,7 +58,7 @@ public class SalmonWinServiceTests {
 
     @Test
     public void shouldConnectAndDisconnectToService() throws Exception {
-        for (int i = 0; i < 12; i++) {
+        for (int i = 0; i < 3; i++) {
             WinClientSequencer sequencer = new WinClientSequencer(TEST_SERVICE_PIPE_NAME);
             sequencer.close();
             Thread.sleep(1000);

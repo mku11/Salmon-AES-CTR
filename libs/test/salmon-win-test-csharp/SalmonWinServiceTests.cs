@@ -43,14 +43,14 @@ public class SalmonWinServiceTests
     public static string TEST_SEQUENCER_FILENAME = "winfileseq.xml";
     private static string TEST_REG_CHCKSUM_KEY = "TestChkSum";
 	
-	public static string TEST_SERVICE_PIPE_NAME = "SalmonService";
+	public static string WIN_SERVICE_PIPE_NAME = "WinService";
 	
 	public static Registry registry = new Registry();
     
     [TestMethod]
     public void TestServerSid()
     {
-        bool res = WinClientSequencer.IsServiceAdmin(TEST_SERVICE_PIPE_NAME);
+        bool res = WinClientSequencer.IsServiceAdmin(WIN_SERVICE_PIPE_NAME);
         Assert.IsTrue(res);
         Thread.Sleep(2000);
     }
@@ -60,7 +60,7 @@ public class SalmonWinServiceTests
     {
         for (int i = 0; i < 12; i++)
         {
-            WinClientSequencer sequencer = new WinClientSequencer(TEST_SERVICE_PIPE_NAME);
+            WinClientSequencer sequencer = new WinClientSequencer(WIN_SERVICE_PIPE_NAME);
             sequencer.Close();
             Thread.Sleep(1000);
         }
