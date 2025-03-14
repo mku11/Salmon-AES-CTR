@@ -53,7 +53,7 @@ public class AesMediaDataSource extends MediaDataSource {
     private long size;
 
     /**
-     * Construct a seekable source for the media player from an encrypted file source
+     * Construct a seekable source for the android media player from an encrypted file.
      *
      * @param activity   Activity this data source will be used with. This is usually the activity the MediaPlayer is attached to
      * @param aesFile    AesFile that will be used as a source
