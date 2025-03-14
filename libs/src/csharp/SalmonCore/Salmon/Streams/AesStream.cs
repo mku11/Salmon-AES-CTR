@@ -135,7 +135,9 @@ public class AesStream : Stream
     }
 
     /// <summary>
-    ///  Instantiate a new Salmon stream with a base stream and optional header data and hash integrity.
+    /// Instantiate a new encrypted stream with a key, a nonce, a base stream, and optionally enable 
+	/// integrity with a hash key and specified chunk size as well as store the nonce and the integrity 
+	/// information in the header, see EncryptionFormat.
     ///  <para>
     ///  If you read from the stream it will decrypt the data from the baseStream.
     ///  If you write to the stream it will encrypt the data from the baseStream.
@@ -239,7 +241,7 @@ public class AesStream : Stream
     }
 
     /// <summary>
-    ///  If the stream is readable (only if EncryptionMode == Decrypted)
+    ///  If the stream is readable (EncryptionMode.Decrypted)
 	/// </summary>
 	///  <returns>True if mode is decryption.</returns>
     override
@@ -253,7 +255,7 @@ public class AesStream : Stream
     public bool CanSeek => baseStream.CanSeek;
 
     /// <summary>
-    ///  If the stream is writeable (only if EncryptionMode is Encrypt)
+    ///  If the stream is writeable (EncryptionMode.Encrypt)
 	/// </summary>
 	///  <returns>True if mode is decryption.</returns>
     override
