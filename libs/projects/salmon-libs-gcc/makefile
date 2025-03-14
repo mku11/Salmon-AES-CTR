@@ -7,7 +7,7 @@ USE_AES_GPU?=0
 OPENCL_ROOT?=
 OUTPUT_ROOT=../../../output
 CL_TARGET_OPENCL_VERSION?=120
-OPENCL_KERNEL=salmon-aes-kernel.c
+OPENCL_KERNEL=$(SALMON_ROOT)/kernels/salmon-aes-kernel.c
        
 SALMON_INCLUDE=$(SALMON_ROOT)/include
 SALMON_JNI_INCLUDE=$(SALMON_JNI_ROOT)/include

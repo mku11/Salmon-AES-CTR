@@ -342,7 +342,7 @@
     <ClCompile Include="..\..\..\src\c\salmon\src\salmon.c" />
     <ClCompile Include="dllmain.cpp" />
     <ClCompile Include="pch.cpp" />
-    <ClCompile Include="salmon-aes-kernel.cpp" />
+    <ClCompile Include="..\..\..\src\c\salmon\src\kernels\salmon-aes-kernel.cpp" />
   </ItemGroup>
   <ItemGroup>
     <None Include="gen_kernel_header.bat" />
@@ -354,7 +354,7 @@
     </None>
     <None Include="..\..\..\..\LICENSE" />
     <None Include="..\..\..\..\NOTICE" />
-    <None Include="..\..\..\src\c\salmon\src\salmon-aes-kernel.cl">
+    <None Include="..\..\..\src\c\salmon\src\kernels\salmon-aes-kernel.cl">
       <DeploymentContent>true</DeploymentContent>
     </None>
     <None Include="SalmonNative.nuspec" />

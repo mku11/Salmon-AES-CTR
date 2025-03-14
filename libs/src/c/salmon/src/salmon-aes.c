@@ -129,18 +129,18 @@ static inline void sub_word(unsigned char word[4]) {
 }
 
 // https://en.wikipedia.org/wiki/AES_key_schedule#The_key_schedule
-void aes_key_expand(unsigned char* roundKey, const unsigned char* key)
+void aes_key_expand(const unsigned char* key, unsigned char* expandedKey)
 {
 	unsigned char WPREV[4];
 	for (int i = 0; i < 4 * (ROUNDS + 1); i++) {
 		if (i < WORD_LEN) {
 			for (int j = 0; j < 4; j++) {
-				roundKey[i * 4 + j] = key[i * 4 + j];
+				expandedKey[i * 4 + j] = key[i * 4 + j];
 			}
 		}
 		else {
 			for (int j = 0; j < 4; j++) {
-				WPREV[j] = roundKey[(i - 1) * 4 + j];
+				WPREV[j] = expandedKey[(i - 1) * 4 + j];
 			}
 			if (i % WORD_LEN == 0) {
 				rot_word(WPREV);
@@ -151,24 +151,24 @@ void aes_key_expand(unsigned char* roundKey, const unsigned char* key)
 				sub_word(WPREV);
 			}
 			for (int j = 0; j < 4; j++) {
-				roundKey[i * 4 + j] = roundKey[(i - WORD_LEN) * 4 + j] ^ WPREV[j];
+				expandedKey[i * 4 + j] = expandedKey[(i - WORD_LEN) * 4 + j] ^ WPREV[j];
 			}
 		}
 	}
 }
 
 // https://en.wikipedia.org/wiki/Advanced_Encryption_Standard#High-level_description_of_the_algorithm
-void aes_transform(unsigned char* state, const unsigned char* roundKey)
+void aes_transform(const unsigned char* expandedKey, unsigned char* data)
 {
 	for (int r = 0; r <= ROUNDS; r++)
 	{
 		if (0 < r && r <= ROUNDS) {
-			sub_bytes(state);
-			shift_rows(state);
+			sub_bytes(data);
+			shift_rows(data);
 			if (r != ROUNDS)
-				mix_columns(state);
+				mix_columns(data);
 		}
-		add_round_key(r, state, roundKey);
+		add_round_key(r, data, expandedKey);
 	}
 }
 
@@ -192,8 +192,8 @@ static inline long increment_counter(long value, unsigned char* counter) {
 }
 
 // https://en.wikipedia.org/wiki/Block_cipher_mode_of_operation#Counter_(CTR)
-int aes_transform_ctr(const unsigned char* key, unsigned char* counter,
-	unsigned char* srcBuffer, int srcOffset,
+int aes_transform_ctr(const unsigned char* expandedKey, unsigned char* counter,
+	const unsigned char* srcBuffer, int srcOffset,
 	unsigned char* destBuffer, int destOffset, int count) {
 	unsigned char encCounter[AES_BLOCK_SIZE];
 
@@ -203,7 +203,7 @@ int aes_transform_ctr(const unsigned char* key, unsigned char* counter,
 			encCounter[j] = counter[j];
 		}
 
-		aes_transform(encCounter, key);
+		aes_transform(expandedKey, encCounter);
 		for (int k = 0; k < AES_BLOCK_SIZE && i + k < count; k++) {
 			destBuffer[destOffset + i + k] = srcBuffer[srcOffset + i + k] ^ encCounter[k];
 			totalBytes++;

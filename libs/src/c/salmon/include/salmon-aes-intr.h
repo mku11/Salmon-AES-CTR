@@ -21,11 +21,15 @@ LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 */
+
+/**
+ * @file salmon-aes-intr.h
+ * @brief Encrypt and decrypt data with AES-256 in CTR mode using AES-NI intrinsics.
+ */
 #ifndef _SALMON_AES_INTR_H
 #define _SALMON_AES_INTR_H
 
 #include <stdint.h>
-
 
 #define NONCE_SIZE 8
 #define AES_BLOCK_SIZE 16
@@ -40,24 +44,12 @@ void KEY_256_ASSIST_2(__m128i* temp1, __m128i* temp3);
 #endif
 
 /**
- * Expand the AES256 key.
- *      For x86/64 it will use the arch intrinsics.
- *      For ARM64 arch this will use the Tiny AES key schedule algorithm.
- * @param userkey AES256 32 byte key.
- * @param key The expanded key (240 bytes).
- */
-void aes_intr_key_expand(const unsigned char* userkey, unsigned char* key);
-
-/**
- * Transform the data using AES256 CTR mode.
+ * Transform the data using AES-256 CTR mode.
  * @param in The input byte array.
  * @param out The output byte array.
  * @param length The number of bytes to transform.
- * @param key The AES expanded key to use. Use salmon_expandKey()
- *      to derive the expanded Key
- * @param rounds The rounds to use. From AES256 this should be 14.
  */
-int aes_intr_transform_ctr(const unsigned char* key, unsigned char* counter,
-	unsigned char* srcBuffer, int srcOffset,
+int aes_intr_transform_ctr(const unsigned char* expandedKey, unsigned char* counter,
+	const unsigned char* srcBuffer, int srcOffset,
 	unsigned char* destBuffer, int destOffset, int count);
 #endif

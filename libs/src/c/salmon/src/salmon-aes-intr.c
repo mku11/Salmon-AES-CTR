@@ -57,75 +57,6 @@ static inline long increment_counter(long value, unsigned char* counter) {
 // Instructions from:
 // https://www.intel.com/content/dam/doc/white-paper/advanced-encryption-standard-new-instructions-set-paper.pdf
 
-inline void KEY_256_ASSIST_1(__m128i* temp1, __m128i* temp2)
-{
-	__m128i temp4;
-	*temp2 = _mm_shuffle_epi32(*temp2, 0xff);
-	temp4 = _mm_slli_si128(*temp1, 0x4);
-	*temp1 = _mm_xor_si128(*temp1, temp4);
-	temp4 = _mm_slli_si128(temp4, 0x4);
-	*temp1 = _mm_xor_si128(*temp1, temp4);
-	temp4 = _mm_slli_si128(temp4, 0x4);
-	*temp1 = _mm_xor_si128(*temp1, temp4);
-	*temp1 = _mm_xor_si128(*temp1, *temp2);
-}
-inline void KEY_256_ASSIST_2(__m128i* temp1, __m128i* temp3)
-{
-	__m128i temp2, temp4;
-	temp4 = _mm_aeskeygenassist_si128(*temp1, 0x0);
-	temp2 = _mm_shuffle_epi32(temp4, 0xaa);
-	temp4 = _mm_slli_si128(*temp3, 0x4);
-	*temp3 = _mm_xor_si128(*temp3, temp4);
-	temp4 = _mm_slli_si128(temp4, 0x4);
-	*temp3 = _mm_xor_si128(*temp3, temp4);
-	temp4 = _mm_slli_si128(temp4, 0x4);
-	*temp3 = _mm_xor_si128(*temp3, temp4);
-	*temp3 = _mm_xor_si128(*temp3, temp2);
-}
-
-void aes_intr_key_expand(const unsigned char* userkey, unsigned char* key) {
-	__m128i temp1, temp2, temp3;
-	__m128i* Key_Schedule = (__m128i*)key;
-	temp1 = _mm_loadu_si128((__m128i*)userkey);
-	temp3 = _mm_loadu_si128((__m128i*)(userkey + 16));
-	Key_Schedule[0] = temp1;
-	Key_Schedule[1] = temp3;
-	temp2 = _mm_aeskeygenassist_si128(temp3, 0x01);
-	KEY_256_ASSIST_1(&temp1, &temp2);
-	Key_Schedule[2] = temp1;
-	KEY_256_ASSIST_2(&temp1, &temp3);
-	Key_Schedule[3] = temp3;
-	temp2 = _mm_aeskeygenassist_si128(temp3, 0x02);
-	KEY_256_ASSIST_1(&temp1, &temp2);
-	Key_Schedule[4] = temp1;
-	KEY_256_ASSIST_2(&temp1, &temp3);
-	Key_Schedule[5] = temp3;
-	temp2 = _mm_aeskeygenassist_si128(temp3, 0x04);
-	KEY_256_ASSIST_1(&temp1, &temp2);
-	Key_Schedule[6] = temp1;
-	KEY_256_ASSIST_2(&temp1, &temp3);
-	Key_Schedule[7] = temp3;
-	temp2 = _mm_aeskeygenassist_si128(temp3, 0x08);
-	KEY_256_ASSIST_1(&temp1, &temp2);
-	Key_Schedule[8] = temp1;
-	KEY_256_ASSIST_2(&temp1, &temp3);
-	Key_Schedule[9] = temp3;
-	temp2 = _mm_aeskeygenassist_si128(temp3, 0x10);
-	KEY_256_ASSIST_1(&temp1, &temp2);
-	Key_Schedule[10] = temp1;
-	KEY_256_ASSIST_2(&temp1, &temp3);
-	Key_Schedule[11] = temp3;
-	temp2 = _mm_aeskeygenassist_si128(temp3, 0x20);
-	KEY_256_ASSIST_1(&temp1, &temp2);
-	Key_Schedule[12] = temp1;
-	KEY_256_ASSIST_2(&temp1, &temp3);
-	Key_Schedule[13] = temp3;
-	temp2 = _mm_aeskeygenassist_si128(temp3, 0x40);
-	KEY_256_ASSIST_1(&temp1, &temp2);
-	Key_Schedule[14] = temp1;
-}
-
-
 inline static void load_round_keys(__m128i* kvr, __m128i* kv) {
 	#pragma unroll
 	for (int i = 0; i <= ROUNDS; i++) {
@@ -170,22 +101,21 @@ inline static void xor_source_counters(__m128i* dest, __m128i* src1, __m128i* sr
 	}
 }
 
-inline static void load_source(__m128i* src, unsigned char* srcBuffer, int offset) {
+inline static void load_source(__m128i* src, const unsigned char* srcBuffer, int offset) {
 	#pragma unroll
 	for(int i=0; i<CHUNKS; i++) {
 		src[i] = _mm_loadu_si128(&((__m128i*) srcBuffer)[offset + i]);
 	}
 }
-int aes_intr_transform_ctr(
-	const unsigned char* key, unsigned char* counter,
-	unsigned char* srcBuffer, int srcOffset,
+int aes_intr_transform_ctr(const unsigned char* expandedKey, unsigned char* counter,
+	const unsigned char* srcBuffer, int srcOffset,
 	unsigned char* destBuffer, int destOffset, int count) {
 
 	__m128i kvr[ROUNDS+1], ecv[CHUNKS], src[CHUNKS];
 	__m128i* kv;
 	char part[AES_BLOCK_SIZE];
 	int len;
-	kv = (__m128i*) key;
+	kv = (__m128i*) expandedKey;
 	int j;
 	int blength = count / AES_BLOCK_SIZE;
 	int totalBytes = 0;
@@ -227,37 +157,30 @@ int aes_intr_transform_ctr(
 	return totalBytes;
 }
 #elif defined(__aarch64__) && defined(__ARM_FEATURE_CRYPTO)
-// We use the key expansion in salmon aes implementation
-void aes_intr_key_expand(const unsigned char* key, unsigned char* roundKey) {
-	aes_key_expand(roundKey, key);
-}
 
 // Instructions from:
 // https://community.arm.com/arm-community-blogs/b/tools-software-ides-blog/posts/porting-putty-to-windows-on-arm
 void
-aes_intr_transform(const unsigned char* text, unsigned char* cipher, int length, unsigned char* keys, int rounds) {
-	uint8x16_t vtext = vld1q_u8(text);
-	for (int i = 0; i < rounds - 1; i++) {
-		vtext = vaeseq_u8(vtext, (uint8x16_t)vld1q_u8(keys + i * AES_BLOCK_SIZE));
+aes_intr_transform(const unsigned char* expandedKey, const unsigned char* src, unsigned char* dest) {
+	uint8x16_t vtext = vld1q_u8(src);
+	for (int i = 0; i < ROUNDS - 1; i++) {
+		vtext = vaeseq_u8(vtext, (uint8x16_t)vld1q_u8(expandedKey + i * AES_BLOCK_SIZE));
 		vtext = vaesmcq_u8(vtext);
 	}
-	vtext = vaeseq_u8(vtext, (uint8x16_t)vld1q_u8(keys + (rounds - 1) * AES_BLOCK_SIZE));
-	vtext = veorq_u8(vtext, (uint8x16_t)vld1q_u8(keys + rounds * AES_BLOCK_SIZE));
-	vst1q_u8(cipher, vtext);
+	vtext = vaeseq_u8(vtext, (uint8x16_t)vld1q_u8(expandedKey + (ROUNDS - 1) * AES_BLOCK_SIZE));
+	vtext = veorq_u8(vtext, (uint8x16_t)vld1q_u8(expandedKey + ROUNDS * AES_BLOCK_SIZE));
+	vst1q_u8(dest, vtext);
 }
+
 // https://en.wikipedia.org/wiki/Block_cipher_mode_of_operation#Counter_(CTR)
-int aes_intr_transform_ctr(const unsigned char* key, unsigned char* counter,
-	unsigned char* srcBuffer, int srcOffset,
+int aes_intr_transform_ctr(const unsigned char* expandedKey, unsigned char* counter,
+	const unsigned char* srcBuffer, int srcOffset,
 	unsigned char* destBuffer, int destOffset, int count) {
 	unsigned char encCounter[AES_BLOCK_SIZE];
 
 	int totalBytes = 0;
 	for (int i = 0; i < count; i += AES_BLOCK_SIZE) {
-		for (int j = 0; j < AES_BLOCK_SIZE; j++) {
-			encCounter[j] = counter[j];
-		}
-
-		aes_transform((unsigned char(*)[4]) encCounter, key);
+		aes_intr_transform(expandedKey, counter, encCounter);
 		for (int k = 0; k < AES_BLOCK_SIZE && i + k < count; k++) {
 			destBuffer[destOffset + i + k] = srcBuffer[srcOffset + i + k] ^ encCounter[k];
 			totalBytes++;
@@ -269,9 +192,7 @@ int aes_intr_transform_ctr(const unsigned char* key, unsigned char* counter,
 	return totalBytes;
 }
 #else
-void aes_intr_transform(const unsigned char* text, unsigned char* cipher, int length, unsigned char* keys, int rounds) {}
-void aes_intr_key_expand(const unsigned char* key, unsigned char* roundKey) {}
-int aes_intr_transform_ctr(const unsigned char* key, unsigned char* counter,
-	unsigned char* srcBuffer, int srcOffset,
+int aes_intr_transform_ctr(const unsigned char* expandedKey, unsigned char* counter,
+	const unsigned char* srcBuffer, int srcOffset,
 	unsigned char* destBuffer, int destOffset, int count) {}
 #endif

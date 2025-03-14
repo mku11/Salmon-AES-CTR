@@ -22,9 +22,7 @@
 	<file src="..\..\..\src\c\salmon\include\salmon-aes.h"          target="runtimes\win-x64\native\salmon\include"/>
     <file src="..\..\..\src\c\salmon\include\salmon-aes-intr.h"     target="runtimes\win-x64\native\salmon\include"/>
 	<file src="..\..\..\src\c\salmon\include\salmon-aes-opencl.h"   target="runtimes\win-x64\native\salmon\include"/>
-    <file src="..\..\..\src\c\salmon-jni\include\salmon-jni.h"      target="runtimes\win-x64\native\salmon-jni\include" />
-	<file src="..\..\..\src\c\salmon\src\salmon-aes.c"              target="runtimes\win-x64\native\salmon\kernels"/>
-	<file src="..\..\..\src\c\salmon\src\salmon-aes-kernel.cl"      target="runtimes\win-x64\native\salmon\kernels"/>
+    <file src="..\..\..\src\c\salmon-jni\include\salmon-jni.h"      target="runtimes\win-x64\native\salmon-jni\include"/>
     <file src="..\..\..\..\common\common-res\icons\logo.png"        target="" />
 	<file src="..\..\..\..\README.md"                               target="README.md" />
     <file src="..\..\..\..\LICENSE"                                 target="LICENSE" />

@@ -24,11 +24,9 @@ gradlew.bat :salmon-native:build --rerun-tasks
 gradlew.bat build -x test --rerun-tasks
 ```
 
-To enable GPU support for the native libary edit salmon-native/build.gradle and set enable_opencl to true.
-For linux you need to update variables OPENCL_INCLUDE and OPENCL_LIB to the appropriate paths
-```
-project.ext.set('enable_opencl', true)
-```
+To enable GPU support for the native libary you need to set the following environment variable:
+ENABLE_GPU=true
+You also need to specify the paths using variables OPENCL_INCLUDE and OPENCL_LIB to the appropriate paths. These variables can be found in build.gradle where you can also edit them directly.
 
 To build the java web service from the command line run:  
 ```

@@ -33,33 +33,28 @@ SOFTWARE.
 
 static int aesImpl = AES_IMPL_AES_INTR;
 
-extern EXPORT_DLL void salmon_init(int _aesImpl) {
-	aesImpl = _aesImpl;
+extern EXPORT_DLL void salmon_init(int aesImplType) {
+	aesImpl = aesImplType;
 	if (aesImpl == AES_IMPL_AES_GPU)
 		init_opencl();
 }
 
 extern EXPORT_DLL void salmon_expandKey(const unsigned char* key, unsigned char* expandedKey) {
-	if (aesImpl == AES_IMPL_AES)
-		aes_key_expand(expandedKey, key);
-	else if (aesImpl == AES_IMPL_AES_INTR)
-		aes_intr_key_expand(key, expandedKey);
-	else if (aesImpl == AES_IMPL_AES_GPU)
-		aes_opencl_key_expand(key, expandedKey);
+	aes_key_expand(key, expandedKey);
 }
 
 extern EXPORT_DLL int salmon_transform(
-	const unsigned char* key, unsigned char* counter,
-	unsigned char* srcBuffer, int srcOffset,
+	const unsigned char* expandedKey, unsigned char* counter,
+	const unsigned char* srcBuffer, int srcOffset,
 	unsigned char* destBuffer, int destOffset, int count) {
 	if (aesImpl == AES_IMPL_AES) {
-		return aes_transform_ctr(key, counter, srcBuffer, srcOffset, destBuffer, destOffset, count);
+		return aes_transform_ctr(expandedKey, counter, srcBuffer, srcOffset, destBuffer, destOffset, count);
 	}
 	else if (aesImpl == AES_IMPL_AES_INTR) {
-		return aes_intr_transform_ctr(key, counter, srcBuffer, srcOffset, destBuffer, destOffset, count);
+		return aes_intr_transform_ctr(expandedKey, counter, srcBuffer, srcOffset, destBuffer, destOffset, count);
 	}
 	else if (aesImpl == AES_IMPL_AES_GPU) {
-		return aes_opencl_transform_ctr(key, counter, srcBuffer, srcOffset, destBuffer, destOffset, count);
+		return aes_opencl_transform_ctr(expandedKey, counter, srcBuffer, srcOffset, destBuffer, destOffset, count);
 	}
 	return 0;
 }

@@ -63,10 +63,6 @@ cl_command_queue queue;
 cl_program program;
 cl_kernel kernel;
 
-void aes_opencl_key_expand(const unsigned char* userkey, unsigned char* key) {
-	aes_key_expand(key, userkey);
-}
-
 void print_build_error(cl_device_id device_id, cl_program program) {
 	size_t log_size;
 	clGetProgramBuildInfo(program, device_id, CL_PROGRAM_BUILD_LOG, 0, NULL, &log_size);
@@ -182,8 +178,8 @@ void destroy_opencl() {
 	free(source_str);
 }
 
-static int transform_opencl(const unsigned char* key, unsigned char* counter,
-	unsigned char* srcBuffer, int srcOffset,
+int aes_opencl_transform_ctr(const unsigned char* expandedKey, unsigned char* counter,
+	const unsigned char* srcBuffer, int srcOffset,
 	unsigned char* destBuffer, int destOffset, int count)
 {
 	cl_mem d_key;
@@ -197,13 +193,13 @@ static int transform_opencl(const unsigned char* key, unsigned char* counter,
 	local[0] = kernel_max_local_size;
 	global[0] = ((int) ceil(chunks / (double) local[0])) * local[0];
 
-	d_key = clCreateBuffer(context, CL_MEM_READ_ONLY, 240 * sizeof(*key), NULL, NULL);
+	d_key = clCreateBuffer(context, CL_MEM_READ_ONLY, 240 * sizeof(*expandedKey), NULL, NULL);
 	d_ctr = clCreateBuffer(context, CL_MEM_READ_ONLY, 16 * sizeof(*counter), NULL, NULL);
 	d_src = clCreateBuffer(context, CL_MEM_READ_ONLY, count * sizeof(*srcBuffer), NULL, NULL);
 	d_dest = clCreateBuffer(context, CL_MEM_WRITE_ONLY, count * sizeof(*destBuffer), NULL, NULL);
 
 	// Write our data set into the input array in device memory
-	err = clEnqueueWriteBuffer(queue, d_key, CL_TRUE, 0, 240 * sizeof(*key), key, 0, NULL, NULL);
+	err = clEnqueueWriteBuffer(queue, d_key, CL_TRUE, 0, 240 * sizeof(*expandedKey), expandedKey, 0, NULL, NULL);
 	err = clEnqueueWriteBuffer(queue, d_ctr, CL_TRUE, 0, 16 * sizeof(*counter), counter, 0, NULL, NULL);
 	err = clEnqueueWriteBuffer(queue, d_src, CL_TRUE, 0, count * sizeof(*srcBuffer), srcBuffer, 0, NULL, NULL);
 	if (err != CL_SUCCESS) {
@@ -279,30 +275,11 @@ static int transform_opencl(const unsigned char* key, unsigned char* counter,
 	return count;
 }
 
-int aes_opencl_transform(const unsigned char* key, unsigned char* counter,
-	unsigned char* srcBuffer, int srcOffset,
-	unsigned char* destBuffer, int destOffset, int count) {
-
-	return transform_opencl(key, counter, srcBuffer, srcOffset, destBuffer, destOffset, count);
-}
-
-int aes_opencl_transform_ctr(const unsigned char* key, unsigned char* counter,
-	unsigned char* srcBuffer, int srcOffset,
-	unsigned char* destBuffer, int destOffset, int count) {
-	return aes_opencl_transform(key, counter, srcBuffer, srcOffset, destBuffer, destOffset, count);
-}
-#else
+#else // not USE_OPENCL
 int init_opencl() { return 0; }
-void aes_opencl_key_expand(const unsigned char* userkey, unsigned char* key) {}
 
-int aes_opencl_transform(const unsigned char* key, unsigned char* counter,
-	unsigned char* srcBuffer, int srcOffset,
-	unsigned char* destBuffer, int destOffset, int count) {
-	return 0;
-}
-
-int aes_opencl_transform_ctr(const unsigned char* key, unsigned char* counter,
-    unsigned char* srcBuffer, int srcOffset,
+int aes_opencl_transform_ctr(const unsigned char* expandedKey, unsigned char* counter,
+    const unsigned char* srcBuffer, int srcOffset,
 	unsigned char* destBuffer, int destOffset, int count) {
 	return 0;
 }

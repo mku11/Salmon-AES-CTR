@@ -22,12 +22,16 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 */
 
+/**
+ * @file salmon-aes.h
+ * @brief Encrypt and decrypt data with AES-256 in CTR mode using pure C.
+ */
 #ifndef _SALMON_AES_H_
 #define _SALMON_AES_H_
 
-void aes_key_expand(unsigned char* roundKey, const unsigned char* key);
-void aes_transform(unsigned char state[4][4], const unsigned char* roundKey);
-int aes_transform_ctr(const unsigned char* key, unsigned char* counter,
-    unsigned char* srcBuffer, int srcOffset,
+void aes_key_expand(const unsigned char* key, unsigned char* expandedKey);
+void aes_transform(const unsigned char* expandedKey, unsigned char* data);
+int aes_transform_ctr(const unsigned char* expandedKey, unsigned char* counter,
+    const unsigned char* srcBuffer, int srcOffset,
     unsigned char* destBuffer, int destOffset, int count);
 #endif // _SALMON_AES_H_

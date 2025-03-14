@@ -21,20 +21,20 @@ LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 */
+
+/**
+ * @file salmon-aes-opencl.h
+ * @brief Encrypt and decrypt data with AES-256 in CTR mode using OpenCL.
+ */
 #ifndef _SALMON_AES_OPENCL_H
 #define _SALMON_AES_OPENCL_H
 
 #include "salmon-aes.h"
 
 int init_opencl();
-void aes_opencl_key_expand(const unsigned char* userkey, unsigned char* key);
 
-int aes_opencl_transform(const unsigned char* key, unsigned char* counter,
-	unsigned char* srcBuffer, int srcOffset,
+int aes_opencl_transform_ctr(const unsigned char* expandedKey, unsigned char* counter,
+	const unsigned char* srcBuffer, int srcOffset,
 	unsigned char* destBuffer, int destOffset, int count);
-
-int aes_opencl_transform_ctr(const unsigned char* key, unsigned char* counter,
-    unsigned char* srcBuffer, int srcOffset,
-    unsigned char* destBuffer, int destOffset, int count);
 #endif
 

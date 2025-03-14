@@ -93,8 +93,8 @@ model {
                 }
                 cpp {
                     source {
-                        srcDirs "./"
-                        include "salmon-aes-kernel.cpp"
+                        srcDirs "../../../src/c/"
+                        include "**/salmon/src/kernels/*.cpp"
                     }
                 }
             }
