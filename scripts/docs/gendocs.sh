@@ -11,14 +11,14 @@ npx jsdoc ../../libs/projects/SalmonLibs.vscode/lib -r -d ../../output/docs/java
 # typescript
 CURR_DIR=$(pwd)
 cd ../../libs/projects/SalmonLibs.vscode
-npm run tsdoc
+npm run tsdocs
 cd $CURR_DIR
 
 # .NET
 doxygen Doxyfile.Net
 
 # .NET android
-doxygen Doxyfile.NetAndroid
+doxygen DoxyfileAndroid.Net
 
 # Python
 doxygen DoxyfilePython
