@@ -6,7 +6,7 @@ set ENC_THREADS=1
 
 cd ..\..\..\..\libs\projects\SalmonLibs.vscode
 
-call npm run test -- salmon-fs -t="salmon-fs.shouldAuthorizePositive" TEST_DIR=%TEST_DIR% TEST_MODE=%TEST_MODE% ENC_THREADS=%ENC_THREADS%
+call npm run test -- salmon-fs -t="salmon-fs" TEST_DIR=%TEST_DIR% TEST_MODE=%TEST_MODE% ENC_THREADS=%ENC_THREADS%
 if %ERRORLEVEL% GEQ 1 cd %CURRDIR% && EXIT /B 1
 
 cd %CURRDIR%
