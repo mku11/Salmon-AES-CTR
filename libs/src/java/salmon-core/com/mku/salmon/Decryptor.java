@@ -143,7 +143,7 @@ public class Decryptor {
     public byte[] decrypt(byte[] data, byte[] key, byte[] nonce,
                           EncryptionFormat format,
                           boolean integrity, byte[] hashKey) throws IOException {
-        return decrypt(data, key, nonce, format, false, null, 0);
+        return decrypt(data, key, nonce, format, integrity, hashKey, 0);
     }
 
     /**
