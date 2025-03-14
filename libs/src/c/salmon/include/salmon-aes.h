@@ -29,8 +29,32 @@ SOFTWARE.
 #ifndef _SALMON_AES_H_
 #define _SALMON_AES_H_
 
+
+/**
+ * Expand an AES-256 32-byte key to a 240-byte set of round keys.
+ * @param key 	 	The AES-256 (32-byte) key to expand.
+ * @param expandedKey The expanded key (240-bytes).
+ */
 void aes_key_expand(const unsigned char* key, unsigned char* expandedKey);
+
+/**
+ * Transform a 16-byte block using AES-256.
+ * @param expandedKey The expandedKey 240 bytes, see aes_key_expand()
+ * @param data 	 	The data to transform.
+ */
 void aes_transform(const unsigned char* expandedKey, unsigned char* data);
+
+/**
+ * Transform the data using AES-256 CTR mode.
+ * @param expandedKey The expanded AES-256 key (240 bytes), see aes_key_expand()
+ * @param counter 	 The counter.
+ * @param srcBuffer  The source array to transform.
+ * @param srcOffset  The source offset.
+ * @param destBuffer The source array to transform.
+ * @param destOffset The destination offset
+ * @param count 	 The number of bytes to transform
+ * @return The number of bytes transformed.
+ */
 int aes_transform_ctr(const unsigned char* expandedKey, unsigned char* counter,
     const unsigned char* srcBuffer, int srcOffset,
     unsigned char* destBuffer, int destOffset, int count);

@@ -31,11 +31,6 @@ SOFTWARE.
 
 #include <stdint.h>
 
-#define NONCE_SIZE 8
-#define AES_BLOCK_SIZE 16
-#define EXPANDED_KEY_SIZE 240
-#define ROUNDS 14
-
 #if defined(_MSC_VER) || defined(__i386__) || defined(__x86_64__)
 #include <wmmintrin.h>
 #include <immintrin.h>
@@ -45,9 +40,14 @@ void KEY_256_ASSIST_2(__m128i* temp1, __m128i* temp3);
 
 /**
  * Transform the data using AES-256 CTR mode.
- * @param in The input byte array.
- * @param out The output byte array.
- * @param length The number of bytes to transform.
+ * @param expandedKey The expanded AES-256 key (240 bytes), see aes_key_expand()
+ * @param counter 	 The counter.
+ * @param srcBuffer  The source array to transform.
+ * @param srcOffset  The source offset.
+ * @param destBuffer The source array to transform.
+ * @param destOffset The destination offset
+ * @param count 	 The number of bytes to transform
+ * @return The number of bytes transformed.
  */
 int aes_intr_transform_ctr(const unsigned char* expandedKey, unsigned char* counter,
 	const unsigned char* srcBuffer, int srcOffset,

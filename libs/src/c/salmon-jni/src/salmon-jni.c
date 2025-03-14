@@ -31,8 +31,8 @@ SOFTWARE.
 #include "salmon.h"
 
 JNIEXPORT void JNICALL Java_com_mku_salmon_bridge_NativeProxy_init(JNIEnv* env, jclass thiz,
-    jint aesImpl) {
-    salmon_init(aesImpl);
+    jint aesImplType) {
+    salmon_init(aesImplType);
 }
 
 JNIEXPORT void JNICALL Java_com_mku_salmon_bridge_NativeProxy_expandkey(JNIEnv* env, jclass thiz,

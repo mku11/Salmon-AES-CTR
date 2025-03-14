@@ -33,6 +33,10 @@ SOFTWARE.
 #endif
 #include "salmon-aes-intr.h"
 
+#define NONCE_SIZE 8
+#define AES_BLOCK_SIZE 16
+#define EXPANDED_KEY_SIZE 240
+#define ROUNDS 14
 #define CHUNKS 8
 
 static inline long increment_counter(long value, unsigned char* counter) {

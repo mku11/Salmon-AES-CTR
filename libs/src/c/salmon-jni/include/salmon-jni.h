@@ -32,12 +32,33 @@ SOFTWARE.
 #include <jni.h>
 #include <stdint.h>
 
+/**
+ * Initialize the transformer.
+ * @param aesImplType The AES implementation:
+ *  see: AES_IMPL_AES_INTR, AES_IMPL_TINY_AES, AES_IMPL_AES_GPU
+ */
 JNIEXPORT void JNICALL Java_com_mku_salmon_bridge_NativeProxy_init(JNIEnv* env, jclass thiz,
-    jint aesImpl);
+    jint aesImplType);
 
+/**
+ * Expand an AES-256 32-byte key to a 240-byte set of round keys.
+ * @param jKey 	 	The AES-256 (32-byte) key to expand.
+ * @param jExpandedKey The expanded key (240-bytes).
+ */
 JNIEXPORT void JNICALL Java_com_mku_salmon_bridge_NativeProxy_expandkey(JNIEnv* env, jclass thiz,
     jbyteArray jKey, jbyteArray jExpandedKey);
 
+/**
+ * Transform the data using AES-256 CTR mode.
+ * @param expandedKey The expanded AES-256 key (240 bytes), see aes_key_expand
+ * @param jCounter The counter to use.
+ * @param jSrcBuffer The source byte array.
+ * @param jSrcOffset The source byte offset.
+ * @param jDestBuffer The destination byte array.
+ * @param jDestOffset The destination byte offset.
+ * @param jCount The number of bytes to transform.
+ * @return The number of bytes transformed.
+ */
 JNIEXPORT jint JNICALL Java_com_mku_salmon_bridge_NativeProxy_transform(JNIEnv* env, jclass thiz,
     jbyteArray jKey, jbyteArray jCounter,
     jbyteArray jSrcBuffer, jint srcOffset,

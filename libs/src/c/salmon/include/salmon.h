@@ -64,25 +64,23 @@ SOFTWARE.
 #define EXPORT_DLL
 #endif
 
-static inline long incrementCounter(long value, unsigned char * counter);
-
 /**
  * Initialize the transformer.
  * @param aesImplType The AES implementation:
- *  see: AES_IMPL_AES_INTR, AES_IMPL_TINY_AES
+ *  see: AES_IMPL_AES_INTR, AES_IMPL_TINY_AES, AES_IMPL_AES_GPU
  */
 extern EXPORT_DLL void salmon_init(int aesImplType);
 
 /**
- * Expand the AES-256 key.
- * @param key AES-256 32 byte key.
- * @param expandedKey The expanded key 240 bytes.
+ * Expand an AES-256 32-byte key to a 240-byte set of round keys.
+ * @param key 	 	The AES-256 (32-byte) key to expand.
+ * @param expandedKey The expanded key (240-bytes).
  */
 extern EXPORT_DLL void salmon_expandKey(const unsigned char* key, unsigned char* expandedKey);
 
 /**
  * Transform the data using AES-256 CTR mode.
- * @param expandedKey The AES-256 240 byte expanded key to be used.
+ * @param expandedKey The expanded AES-256 key (240 bytes), see aes_key_expand
  * @param counter The counter to use.
  * @param srcBuffer The source byte array.
  * @param srcOffset The source byte offset.
