@@ -219,7 +219,7 @@ public class AndroidFile : IFile
     ///  Get the last modified time in milliseconds.
 	/// </summary>
 	///  <returns>The last modified date in milliseconds</returns>
-    public long LastModified
+    public long LastDateModified
     {
         get
         {

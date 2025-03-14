@@ -100,7 +100,7 @@ public class FileCommander
         {
             if (stopJobs)
                 break;
-            files[file.BaseName] = file;
+            files[file.Name] = file;
         }
         return files;
     }
@@ -153,7 +153,7 @@ public class FileCommander
                                 bytes, totalBytes, finalCount, total));
                     }
                 });
-                existingFiles[sfile.BaseName] = sfile;
+                existingFiles[sfile.Name] = sfile;
                 importedFiles.Add(sfile);
                 count++;
             }
@@ -235,12 +235,12 @@ public class FileCommander
         List<IFile> exportedFiles, ref int count, int total,
         Dictionary<string, IFile> existingFiles)
     {
-        IFile rfile = existingFiles.ContainsKey(fileToExport.BaseName) ? existingFiles[fileToExport.BaseName] : null;
+        IFile rfile = existingFiles.ContainsKey(fileToExport.Name) ? existingFiles[fileToExport.Name] : null;
 
         if (fileToExport.IsDirectory)
         {
             if (rfile == null || !rfile.Exists)
-                rfile = exportDir.CreateDirectory(fileToExport.BaseName);
+                rfile = exportDir.CreateDirectory(fileToExport.Name);
             else if (rfile != null && rfile.IsFile && AutoRename != null)
                 rfile = exportDir.CreateDirectory(AutoRename(rfile));
             if (OnProgressChanged != null)
@@ -268,7 +268,7 @@ public class FileCommander
         {
             try
             {
-                string filename = fileToExport.BaseName;
+                string filename = fileToExport.Name;
                 if (rfile != null && rfile.Exists && AutoRename != null)
                     filename = AutoRename(rfile);
                 int finalCount = count;

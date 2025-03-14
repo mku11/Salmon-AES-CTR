@@ -160,7 +160,7 @@ public class SalmonFSHttpTests
         AesDrive drive = AesDrive.OpenDrive(vaultDir, SalmonFSTestHelper.DriveClassType, SalmonCoreTestHelper.TEST_PASSWORD, null);
         IVirtualFile root = drive.Root;
         IVirtualFile encFile = root.GetChild(SalmonFSTestHelper.TEST_IMPORT_SMALL_FILENAME);
-        Assert.AreEqual(encFile.BaseName, SalmonFSTestHelper.TEST_IMPORT_SMALL_FILENAME);
+        Assert.AreEqual(encFile.Name, SalmonFSTestHelper.TEST_IMPORT_SMALL_FILENAME);
 
         Stream encStream = encFile.GetInputStream();
         MemoryStream ms = new MemoryStream();
@@ -181,7 +181,7 @@ public class SalmonFSHttpTests
         List<string> filenames = new List<string>();
         for (int i = 0; i < files.Length; i++)
         {
-            string filename = files[i].BaseName;
+            string filename = files[i].Name;
             filenames.Add(filename);
         }
         Assert.AreEqual(files.Length, 4);

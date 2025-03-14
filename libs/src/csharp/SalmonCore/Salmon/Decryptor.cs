@@ -86,7 +86,7 @@ public class Decryptor
 	///  <param name="data">The input data to be decrypted.</param>
     ///  <param name="key">The AES key to use for decryption.</param>
     ///  <param name="nonce">The nonce to use for decryption.</param>
-    ///  <param name="hasHeaderData">The header data.</param>
+    ///  <param name="format">The EncryptionFormat.</param>
     ///  <param name="integrity">Verify hash integrity in the data.</param>
     ///  <param name="hashKey">The hash key to be used for integrity.</param>
     ///  <param name="chunkSize">The chunk size.</param>
@@ -96,45 +96,30 @@ public class Decryptor
     ///  <exception cref="IOException">Thrown if error during IO</exception>
     ///  <exception cref="IntegrityException">Thrown when data are corrupt or tampered with.</exception>
     public byte[] Decrypt(byte[] data, byte[] key, byte[] nonce,
-                                 bool hasHeaderData = false,
-                                 bool integrity = false, byte[] hashKey = null, int? chunkSize = null)
+                                 EncryptionFormat format = EncryptionFormat.Salmon,
+                                 bool integrity = false, byte[] hashKey = null, int chunkSize = 0)
     {
         if (key == null)
             throw new SecurityException("Key is missing");
-        if (!hasHeaderData && nonce == null)
+        if (format == EncryptionFormat.Generic && nonce == null)
             throw new SecurityException("Need to specify a nonce if the file doesn't have a header");
 
         if (integrity)
-            chunkSize = chunkSize == null ? Integrity.Integrity.DEFAULT_CHUNK_SIZE : chunkSize;
+            chunkSize = chunkSize <= 0 ? Integrity.Integrity.DEFAULT_CHUNK_SIZE : chunkSize;
 
         MemoryStream inputStream = new MemoryStream(data);
-        Header header;
-        byte[] headerData = null;
-        if (hasHeaderData)
-        {
-            header = Header.ParseHeaderData(inputStream);
-            if (header.ChunkSize > 0)
-                integrity = true;
-            chunkSize = header.ChunkSize;
-            nonce = header.Nonce;
-            headerData = header.HeaderData;
-        }
-        if (nonce == null)
-            throw new SecurityException("Nonce is missing");
-
-        int realSize = (int)AESCTRTransformer.GetActualSize(data, key, nonce, EncryptionMode.Decrypt,
-                headerData, integrity, chunkSize, hashKey);
+        int realSize = (int)AesStream.GetOutputSize(EncryptionMode.Decrypt, data.Length, format, integrity, chunkSize);
         byte[] outData = new byte[realSize];
 
         if (threads == 1)
         {
-            DecryptData(inputStream, 0, inputStream.Length, outData,
-                    key, nonce, headerData, integrity, hashKey, chunkSize);
+            DecryptData(inputStream, 0, realSize, outData,
+                    key, nonce, format, integrity, hashKey, chunkSize);
         }
         else
         {
             DecryptDataParallel(data, outData,
-                    key, hashKey, nonce, headerData,
+                    key, hashKey, nonce, format,
                     chunkSize, integrity);
         }
 
@@ -149,19 +134,20 @@ public class Decryptor
     ///  <param name="key">The AES key.</param>
     ///  <param name="hashKey">The hash key.</param>
     ///  <param name="nonce">The nonce to be used for decryption.</param>
-    ///  <param name="headerData">The header data.</param>
+    ///  <param name="format">The EncryptionFormat.</param>
     ///  <param name="chunkSize">The chunk size.</param>
     ///  <param name="integrity">True to verify integrity.</param>
     private void DecryptDataParallel(byte[] data, byte[] outData,
-                                            byte[] key, byte[] hashKey, byte[] nonce, byte[] headerData,
-                                            int? chunkSize, bool integrity)
+                                            byte[] key, byte[] hashKey, byte[] nonce, 
+                                            EncryptionFormat format,
+                                            int chunkSize, bool integrity)
     {
         int runningThreads = 1;
         long partSize = data.Length;
 
         // if we want to check integrity we align to the chunk size otherwise to the AES Block
         long minPartSize = AESCTRTransformer.BLOCK_SIZE;
-        if (integrity && chunkSize != null)
+        if (integrity && chunkSize > 0)
             minPartSize = (long)chunkSize;
         else if (integrity)
             minPartSize = Integrity.Integrity.DEFAULT_CHUNK_SIZE;
@@ -180,7 +166,7 @@ public class Decryptor
 
         SubmitDecryptJobs(runningThreads, partSize,
                 data, outData,
-                key, hashKey, nonce, headerData,
+                key, hashKey, nonce, format,
                 integrity, chunkSize);
     }
 
@@ -195,13 +181,14 @@ public class Decryptor
     ///  <param name="key">The AES key.</param>
     ///  <param name="hashKey">The hash key for integrity validation.</param>
     ///  <param name="nonce">The nonce for the data.</param>
-    ///  <param name="headerData">The header data common to all parts.</param>
+    ///  <param name="format">The EncryptionFormat.</param>
     ///  <param name="integrity">True to verify the data integrity.</param>
     ///  <param name="chunkSize">The chunk size.</param>
     private void SubmitDecryptJobs(int runningThreads, long partSize,
                                           byte[] data, byte[] outData,
-                                          byte[] key, byte[] hashKey, byte[] nonce, byte[] headerData,
-                                          bool integrity, int? chunkSize)
+                                          byte[] key, byte[] hashKey, byte[] nonce, 
+                                          EncryptionFormat format,
+                                          bool integrity, int chunkSize)
     {
         Task[] tasks = new Task[runningThreads];
         Exception ex = null;
@@ -219,7 +206,7 @@ public class Decryptor
                     else
                         length = partSize;
                     MemoryStream ins = new MemoryStream(data);
-                    DecryptData(ins, start, length, outData, key, nonce, headerData,
+                    DecryptData(ins, start, length, outData, key, nonce, format,
                             integrity, hashKey, chunkSize);
                 }
                 catch (Exception ex1)
@@ -245,7 +232,7 @@ public class Decryptor
     ///  <param name="outData">The buffer with the decrypted data.</param>
     ///  <param name="key">The AES key to be used.</param>
     ///  <param name="nonce">The nonce to be used.</param>
-    ///  <param name="headerData">The header data to be used.</param>
+    ///  <param name="format">The EncryptionFormat.</param>
     ///  <param name="integrity">True to verify integrity.</param>
     ///  <param name="hashKey">The hash key to be used for integrity verification.</param>
     ///  <param name="chunkSize">The chunk size.</param>
@@ -254,7 +241,7 @@ public class Decryptor
     ///  <exception cref="IntegrityException">Thrown if the stream is corrupt or tampered with.</exception>
     private void DecryptData(Stream inputStream, long start, long count, byte[] outData,
                                     byte[] key, byte[] nonce,
-                                    byte[] headerData, bool integrity, byte[] hashKey, int? chunkSize)
+                                    EncryptionFormat format, bool integrity, byte[] hashKey, int chunkSize)
     {
         AesStream stream = null;
         MemoryStream outputStream = null;
@@ -263,7 +250,7 @@ public class Decryptor
             outputStream = new MemoryStream(outData);
             outputStream.Position = start;
             stream = new AesStream(key, nonce, EncryptionMode.Decrypt, inputStream,
-                    headerData, integrity, chunkSize, hashKey);
+                    format, integrity, hashKey, chunkSize);
             stream.Position = start;
             long totalChunkBytesRead = 0;
             // align to the chunksize if available

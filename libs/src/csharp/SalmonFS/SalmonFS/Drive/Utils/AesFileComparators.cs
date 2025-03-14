@@ -189,7 +189,7 @@ public class AesFileComparators
     {
         try
         {
-            return salmonFile.BaseName;
+            return salmonFile.Name;
         }
         catch (Exception ex)
         {
@@ -208,8 +208,8 @@ public class AesFileComparators
         try
         {
             if (salmonFile.IsDirectory)
-                return salmonFile.BaseName;
-            return FileUtils.GetExtensionFromFileName(salmonFile.BaseName).ToLower();
+                return salmonFile.Name;
+            return FileUtils.GetExtensionFromFileName(salmonFile.Name).ToLower();
         }
         catch (Exception ex)
         {
@@ -250,7 +250,7 @@ public class AesFileComparators
     {
         try
         {
-            return salmonFile.LastDateTimeModified;
+            return salmonFile.LastDateModified;
         }
         catch (Exception ex)
         {

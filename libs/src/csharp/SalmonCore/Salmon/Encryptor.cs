@@ -28,7 +28,6 @@ using Mku.Salmon.Transform;
 using System;
 using System.IO;
 using System.Threading.Tasks;
-using BitConverter = Mku.Convert.BitConverter;
 
 namespace Mku.Salmon;
 
@@ -88,8 +87,7 @@ public class Encryptor
 	///  <param name="data">           The byte array to be encrypted.</param>
     ///  <param name="key">            The AES key to be used.</param>
     ///  <param name="nonce">          The nonce to be used.</param>
-    ///  <param name="storeHeaderData">True if you want to store a header data with the nonce. False if you store
-    ///                         the nonce external. Note that you will need to provide the nonce when decrypting.</param>
+    ///  <param name="format">         The format to use, see EncryptionFormat</param>
     ///  <param name="integrity">      True if you want to calculate and store hash signatures for each chunkSize.</param>
     ///  <param name="hashKey">        Hash key to be used for all chunks.</param>
     ///  <param name="chunkSize">      The chunk size.</param>
@@ -98,8 +96,8 @@ public class Encryptor
     ///  <exception cref="IOException">Thrown if error during IO</exception>
     ///  <exception cref="IntegrityException">Thrown when data are corrupt or tampered with.</exception>
     public byte[] Encrypt(byte[] data, byte[] key, byte[] nonce,
-                          bool storeHeaderData = false,
-                          bool integrity = false, byte[] hashKey = null, int? chunkSize = null)
+                          EncryptionFormat format,
+                          bool integrity = false, byte[] hashKey = null, int chunkSize = 0)
     {
         if (key == null)
             throw new SecurityException("Key is missing");
@@ -107,43 +105,23 @@ public class Encryptor
             throw new SecurityException("Nonce is missing");
 
         if (integrity)
-            chunkSize = chunkSize == null ? Integrity.Integrity.DEFAULT_CHUNK_SIZE : chunkSize;
+            chunkSize = chunkSize <= 0 ? Integrity.Integrity.DEFAULT_CHUNK_SIZE : chunkSize;
         else
             chunkSize = 0;
 
-        MemoryStream outputStream = new MemoryStream();
-        byte[] headerData = null;
-        if (storeHeaderData)
-        {
-            byte[] magicBytes = Generator.GetMagicBytes();
-            outputStream.Write(magicBytes, 0, magicBytes.Length);
-            byte version = Generator.VERSION;
-            byte[] versionBytes = new byte[] { version };
-            outputStream.Write(versionBytes, 0, versionBytes.Length);
-            byte[] chunkSizeBytes = BitConverter.ToBytes((long)chunkSize, Generator.CHUNK_SIZE_LENGTH);
-            outputStream.Write(chunkSizeBytes, 0, chunkSizeBytes.Length);
-            outputStream.Write(nonce, 0, nonce.Length);
-            outputStream.Flush();
-            headerData = outputStream.ToArray();
-        }
-
-        int realSize = (int)AESCTRTransformer.GetActualSize(data, key, nonce, EncryptionMode.Encrypt,
-                headerData, integrity, chunkSize, hashKey);
+        int realSize = (int)AesStream.GetOutputSize(EncryptionMode.Encrypt, data.Length, format, integrity, chunkSize);
         byte[] outData = new byte[realSize];
-        outputStream.Position = 0;
-        outputStream.Read(outData, 0, (int)outputStream.Length);
-        outputStream.Close();
 
         if (threads == 1)
         {
             MemoryStream inputStream = new MemoryStream(data);
             EncryptData(inputStream, 0, data.Length, outData,
-                    key, nonce, headerData, integrity, hashKey, chunkSize);
+                    key, nonce, format, integrity, hashKey, chunkSize);
         }
         else
         {
             EncryptDataParallel(data, outData,
-                    key, hashKey, nonce, headerData,
+                    key, hashKey, nonce, format,
                     chunkSize, integrity);
         }
         return outData;
@@ -157,12 +135,13 @@ public class Encryptor
     ///  <param name="key">       The AES key.</param>
     ///  <param name="hashKey">   The hash key.</param>
     ///  <param name="nonce">     The nonce to be used for encryption.</param>
-    ///  <param name="headerData">The header data.</param>
+    ///  <param name="format">         The format to use, see EncryptionFormat</param>
     ///  <param name="chunkSize"> The chunk size.</param>
     ///  <param name="integrity"> True to apply integrity.</param>
     private void EncryptDataParallel(byte[] data, byte[] outData,
-                                     byte[] key, byte[] hashKey, byte[] nonce, byte[] headerData,
-                                     int? chunkSize, bool integrity)
+                                     byte[] key, byte[] hashKey, byte[] nonce,
+                                     EncryptionFormat format,
+                                     int chunkSize, bool integrity)
     {
 
         int runningThreads = 1;
@@ -170,7 +149,7 @@ public class Encryptor
 
         // if we want to check integrity we align to the chunk size otherwise to the AES Block
         long minPartSize = AESCTRTransformer.BLOCK_SIZE;
-        if (integrity && chunkSize != null)
+        if (integrity && chunkSize > 0)
             minPartSize = (long)chunkSize;
         else if (integrity)
             minPartSize = Integrity.Integrity.DEFAULT_CHUNK_SIZE;
@@ -178,18 +157,18 @@ public class Encryptor
         if (partSize > minPartSize)
         {
             partSize = (int)Math.Ceiling(data.Length / (float)threads);
-            if(partSize > minPartSize)
-				partSize -= partSize % minPartSize;
-			else
-				partSize = minPartSize;
+            if (partSize > minPartSize)
+                partSize -= partSize % minPartSize;
+            else
+                partSize = minPartSize;
             runningThreads = (int)(data.Length / partSize);
-			if (runningThreads > this.threads)
-				runningThreads = this.threads;
+            if (runningThreads > this.threads)
+                runningThreads = this.threads;
         }
 
         SubmitEncryptJobs(runningThreads, partSize,
                 data, outData,
-                key, hashKey, nonce, headerData,
+                key, hashKey, nonce, format,
                 integrity, chunkSize);
     }
 
@@ -204,12 +183,13 @@ public class Encryptor
     ///  <param name="key">           The AES key.</param>
     ///  <param name="hashKey">       The hash key for integrity.</param>
     ///  <param name="nonce">         The nonce for the data.</param>
-    ///  <param name="headerData">    The header data common to all parts.</param>
+    ///  <param name="format">         The format to use, see EncryptionFormat</param>
     ///  <param name="integrity">     True to apply the data integrity.</param>
     ///  <param name="chunkSize">     The chunk size.</param>
     private void SubmitEncryptJobs(int runningThreads, long partSize, byte[] data, byte[] outData,
                                    byte[] key, byte[] hashKey, byte[] nonce,
-                                   byte[] headerData, bool integrity, int? chunkSize)
+                                   EncryptionFormat format,
+                                   bool integrity, int chunkSize)
     {
         Task[] tasks = new Task[runningThreads];
         Exception ex = null;
@@ -227,7 +207,7 @@ public class Encryptor
                     else
                         length = partSize;
                     MemoryStream ins = new MemoryStream(data);
-                    EncryptData(ins, start, length, outData, key, nonce, headerData, integrity, hashKey, chunkSize);
+                    EncryptData(ins, start, length, outData, key, nonce, format, integrity, hashKey, chunkSize);
                 }
                 catch (Exception ex1)
                 {
@@ -251,7 +231,7 @@ public class Encryptor
     ///  <param name="outData">    The buffer with the encrypted data.</param>
     ///  <param name="key">        The AES key to be used.</param>
     ///  <param name="nonce">      The nonce to be used.</param>
-    ///  <param name="headerData"> The header data to be used.</param>
+    ///  <param name="format">         The format to use, see EncryptionFormat</param>
     ///  <param name="integrity">  True to apply integrity.</param>
     ///  <param name="hashKey">    The key to be used for integrity application.</param>
     ///  <param name="chunkSize">  The chunk size.</param>
@@ -259,16 +239,17 @@ public class Encryptor
     ///  <exception cref="SecurityException"> Thrown if there is a security exception with the stream.</exception>
     ///  <exception cref="IntegrityException">Thrown if integrity cannot be applied.</exception>
     private void EncryptData(MemoryStream inputStream, long start, long count, byte[] outData,
-                             byte[] key, byte[] nonce, byte[] headerData,
-                             bool integrity, byte[] hashKey, int? chunkSize)
+                             byte[] key, byte[] nonce,
+                             EncryptionFormat format,
+                             bool integrity, byte[] hashKey, int chunkSize)
     {
         MemoryStream outputStream = new MemoryStream(outData);
         AesStream stream = null;
         try
         {
             inputStream.Position = start;
-            stream = new AesStream(key, nonce, EncryptionMode.Encrypt, outputStream, headerData,
-                    integrity, chunkSize, hashKey);
+            stream = new AesStream(key, nonce, EncryptionMode.Encrypt, outputStream, format,
+                    integrity, hashKey, chunkSize);
             stream.AllowRangeWrite = true;
             stream.Position = start;
             long totalChunkBytesRead = 0;

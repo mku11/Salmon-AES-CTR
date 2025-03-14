@@ -51,9 +51,9 @@ public class SalmonFSTests
 			&& !Environment.GetEnvironmentVariable("TEST_DIR").Equals("") ? Environment.GetEnvironmentVariable("TEST_DIR") : "d:\\tmp\\salmon\\test";
 		TestMode testMode = Environment.GetEnvironmentVariable("TEST_MODE") != null 
 			&& !Environment.GetEnvironmentVariable("TEST_DIR").Equals("") ? 
-			(TestMode) Enum.Parse(typeof(TestMode), Environment.GetEnvironmentVariable("TEST_MODE")) : TestMode.Local;
+			(TestMode) Enum.Parse(typeof(TestMode), Environment.GetEnvironmentVariable("TEST_MODE")) : TestMode.WebService;
 		int threads = Environment.GetEnvironmentVariable("ENC_THREADS") != null && !Environment.GetEnvironmentVariable("ENC_THREADS").Equals("") ?
-			int.Parse(Environment.GetEnvironmentVariable("ENC_THREADS")) : 1;
+			int.Parse(Environment.GetEnvironmentVariable("ENC_THREADS")) : 2;
 			
 		SalmonFSTestHelper.SetTestParams(testDir, testMode);
 		Console.WriteLine("testDir: " + testDir);
@@ -132,8 +132,9 @@ public class SalmonFSTests
             drive = SalmonFSTestHelper.OpenDrive(vaultDir, SalmonFSTestHelper.DriveClassType, SalmonCoreTestHelper.TEST_PASSWORD, sequencer);
             AesFile virtualRoot = drive.Root;
         }
-        catch (AuthException)
+        catch (AuthException ex)
         {
+            Console.Error.WriteLine(ex);
             wrongPassword = true;
         }
 

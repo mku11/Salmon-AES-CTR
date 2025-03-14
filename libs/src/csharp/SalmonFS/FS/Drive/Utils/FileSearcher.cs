@@ -170,7 +170,7 @@ public class FileSearcher
                     continue;
                 try
                 {
-                    int hits = GetSearchResults(file.BaseName, termsArray, any);
+                    int hits = GetSearchResults(file.Name, termsArray, any);
                     if (hits > 0)
                     {
                         searchResults[file.RealPath] = file;

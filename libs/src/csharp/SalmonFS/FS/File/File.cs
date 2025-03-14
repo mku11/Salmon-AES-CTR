@@ -169,7 +169,7 @@ public class File : IFile
     ///  Get the last modified date on disk.
 	/// </summary>
 	///  <returns>The last modified date</returns>
-    public long LastModified => new DateTimeOffset(new FileInfo(filePath).LastWriteTime).ToUnixTimeMilliseconds();
+    public long LastDateModified => new DateTimeOffset(new FileInfo(filePath).LastWriteTime).ToUnixTimeMilliseconds();
 
     /// <summary>
     ///  Get the size of the file on disk.

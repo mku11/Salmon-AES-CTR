@@ -65,7 +65,7 @@ public class AesMediaDataSource : MediaDataSource
     {
         this.activity = activity;
         this.salmonFile = salmonFile;
-        this.size = salmonFile.Size;
+        this.size = salmonFile.Length;
 
         if (enableMultiThreaded)
             this.stream = new AesFileInputStream(salmonFile, buffers, bufferSize, threads, backOffset);

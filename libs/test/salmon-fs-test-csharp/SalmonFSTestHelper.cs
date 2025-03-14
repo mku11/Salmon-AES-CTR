@@ -341,9 +341,9 @@ public class SalmonFSTestHelper
         };
         AesFile salmonFile = SalmonFSTestHelper.fileImporter.ImportFile(fileToImport, rootDir, null, false, ApplyFileIntegrity, printImportProgress);
 
-        int? chunkSize = salmonFile.FileChunkSize;
-        if (chunkSize != null && chunkSize > 0 && !VerifyFileIntegrity)
-            salmonFile.SetVerifyIntegrity(false, null);
+        int chunkSize = salmonFile.FileChunkSize;
+        if (chunkSize > 0 && !VerifyFileIntegrity)
+            salmonFile.SetVerifyIntegrity(false);
 
         Assert.IsTrue(salmonFile.Exists);
         string hashPostImport = SalmonFSTestHelper.GetChecksumStream(salmonFile.GetInputStream());
@@ -354,13 +354,13 @@ public class SalmonFSTestHelper
         long realFileSize = fileToImport.Length;
         foreach (AesFile file in salmonFiles)
         {
-            if (file.BaseName.Equals(fileToImport.BaseName))
+            if (file.Name.Equals(fileToImport.BaseName))
             {
                 if (shouldBeEqual)
                 {
 
                     Assert.IsTrue(file.Exists);
-                    long fileSize = file.Size;
+                    long fileSize = file.Length;
 
                     Assert.AreEqual(realFileSize, fileSize);
                 }
@@ -375,9 +375,9 @@ public class SalmonFSTestHelper
         };
         if (bitflip)
             FlipBit(salmonFile, flipPosition);
-        int? chunkSize2 = salmonFile.FileChunkSize;
-        if (chunkSize2 != null && chunkSize2 > 0 && VerifyFileIntegrity)
-            salmonFile.SetVerifyIntegrity(true, null);
+        int chunkSize2 = salmonFile.FileChunkSize;
+        if (chunkSize2 > 0 && VerifyFileIntegrity)
+            salmonFile.SetVerifyIntegrity(true);
         IFile exportFile = SalmonFSTestHelper.fileExporter.ExportFile(salmonFile, drive.ExportDir, null, false, VerifyFileIntegrity, printExportProgress);
 
         string hashPostExport = SalmonFSTestHelper.GetChecksum(exportFile);
@@ -419,7 +419,7 @@ public class SalmonFSTestHelper
         AesFile salmonFile = fileImporter.ImportFile(fileToImport, rootDir, null, false, false, null);
 
         // trigger the cache to add the filename
-        string basename = salmonFile.BaseName;
+        string basename = salmonFile.Name;
 
 
         Assert.IsNotNull(salmonFile);
@@ -432,7 +432,7 @@ public class SalmonFSTestHelper
 
         Assert.IsTrue(files.Length > 0);
 
-        Assert.AreEqual(files[0].BaseName, basename);
+        Assert.AreEqual(files[0].Name, basename);
 
     }
 
@@ -450,7 +450,7 @@ public class SalmonFSTestHelper
         AesFile salmonFile = fileImporter.ImportFile(fileToImport, rootDir, null, false, false, null);
 
         // trigger the cache to add the filename
-        string basename = salmonFile.BaseName;
+        string basename = salmonFile.Name;
 
         Assert.IsNotNull(salmonFile);
 
@@ -474,7 +474,7 @@ public class SalmonFSTestHelper
             Assert.AreEqual(checkSumBefore, checkSumOrigAfter);
         }
 
-        Assert.AreEqual(salmonFile.BaseName, newFile.BaseName);
+        Assert.AreEqual(salmonFile.Name, newFile.Name);
     }
 
     private static void FlipBit(AesFile salmonFile, long position)
@@ -492,11 +492,14 @@ public class SalmonFSTestHelper
     {
         // write file
         IFile realDir = SalmonFSTestHelper.GenerateFolder("encfiles", SalmonFSTestHelper.TEST_OUTPUT_DIR, false);
-        AesFile dir = new AesFile(realDir, null);
+        AesFile dir = new AesFile(realDir);
         string filename = "test_" + Mku.Time.Time.CurrentTimeMillis() + "." + flipPosition + ".txt";
         AesFile newFile = dir.CreateFile(filename, key, filenameNonce, fileNonce);
+        Console.WriteLine("new file: " + newFile.Path);
         if (applyIntegrity)
             newFile.SetApplyIntegrity(true, hashKey, chunkSize);
+        else
+            newFile.SetApplyIntegrity(false);
         Stream stream = newFile.GetOutputStream();
 
         stream.Write(testBytes, 0, testBytes.Length);
@@ -516,11 +519,14 @@ public class SalmonFSTestHelper
         }
 
         // open file for read
-        AesFile readFile = new AesFile(realFile, null);
+        AesFile readFile = new AesFile(realFile);
         readFile.EncryptionKey = key;
         readFile.RequestedNonce = fileNonce;
         if (verifyIntegrity)
             readFile.SetVerifyIntegrity(true, hashKey);
+        else
+            readFile.SetVerifyIntegrity(false);
+
         AesStream inStream = readFile.GetInputStream();
         byte[] textBytes = new byte[testBytes.Length];
         int bytesRead = inStream.Read(textBytes, 0, textBytes.Length);
@@ -858,8 +864,8 @@ public class SalmonFSTestHelper
         AesDrive drive = SalmonFSTestHelper.OpenDrive(vaultDir, SalmonFSTestHelper.DriveClassType, SalmonCoreTestHelper.TEST_PASSWORD, sequencer);
         IVirtualFile root = drive.Root;
         IVirtualFile file = root.GetChild(filename);
-        Console.WriteLine("file size: " + file.Size);
-        Console.WriteLine("file last modified: " + file.LastDateTimeModified);
+        Console.WriteLine("file size: " + file.Length);
+        Console.WriteLine("file last modified: " + file.LastDateModified);
         Assert.IsTrue(file.Exists);
 
         Stream stream = file.GetInputStream();
@@ -962,7 +968,7 @@ public class SalmonFSTestHelper
                     return;
                 try
                 {
-                    Console.WriteLine("file exporting: " + taskProgress.File.BaseName + ": "
+                    Console.WriteLine("file exporting: " + taskProgress.File.Name + ": "
                     + taskProgress.ProcessedBytes + "/" + taskProgress.TotalBytes + " bytes");
                 }
                 catch (Exception e)
@@ -973,7 +979,7 @@ public class SalmonFSTestHelper
             {
                 // file failed to import
                 Console.Error.WriteLine(ex);
-                Console.WriteLine("export failed: " + sfile.BaseName + "\n" + ex);
+                Console.WriteLine("export failed: " + sfile.Name + "\n" + ex);
             });
 
         Console.WriteLine("Files exported");

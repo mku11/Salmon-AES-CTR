@@ -38,7 +38,7 @@ public class AesStream : Stream
     /// <summary>
     ///  Header data embedded in the stream if available.
     /// </summary>
-    private readonly byte[] headerData;
+    private readonly Header header;
 
     /// <summary>
     ///  Mode to be used for this stream. This can only be set once.
@@ -87,6 +87,53 @@ public class AesStream : Stream
     /// </summary>
     public int BufferSize { get; set; } = Integrity.Integrity.DEFAULT_CHUNK_SIZE;
 
+
+    /// <summary>
+    ///  Get the output size of the data to be transformed(encrypted or decrypted) including
+    ///  header and hash without executing any operations. This can be used to prevent over-allocating memory
+    ///  where creating your output buffers.
+    /// </summary>
+    ///  <param name="mode">The <see cref="EncryptionMode"/> Encrypt or Decrypt.</param>
+    ///  <param name="format">The format to use, see EncryptionFormat</param>
+    ///  <param name="integrity">True if you want to enable integrity.</param>
+    ///  <param name="chunkSize">The chunk size for integrity chunks.</param>
+    ///  <returns>The size of the output data.</returns>
+    ///  <exception cref="SecurityException">Thrown when error with security</exception>
+    ///  <exception cref="Integrity.IntegrityException">Thrown when data are corrupt or tampered with</exception>
+    ///  <exception cref="IOException">Thrown if error during IO</exception>
+    public static long GetOutputSize(EncryptionMode mode, long length, 
+        EncryptionFormat format = EncryptionFormat.Salmon,
+        bool integrity = false, int chunkSize = 0)
+    {
+        if (format == EncryptionFormat.Generic && integrity)
+            throw new SecurityException("Cannot use integrity with generic format");
+        if (chunkSize == 0)
+            chunkSize = Integrity.Integrity.DEFAULT_CHUNK_SIZE;
+        long size = length;
+        if (format == EncryptionFormat.Salmon)
+        {
+            if (mode == EncryptionMode.Encrypt)
+            {
+                size += Header.HEADER_LENGTH;
+                if (integrity)
+                {
+                    size += Integrity.Integrity.GetTotalHashDataLength(mode, length, chunkSize,
+                            0, Generator.HASH_RESULT_LENGTH);
+                }
+            }
+            else
+            {
+                size -= Header.HEADER_LENGTH;
+                if (integrity)
+                {
+                    size -= Integrity.Integrity.GetTotalHashDataLength(mode, length - Header.HEADER_LENGTH, chunkSize,
+                            Generator.HASH_RESULT_LENGTH, Generator.HASH_RESULT_LENGTH);
+                }
+            }
+        }
+        return size;
+    }
+
     /// <summary>
     ///  Instantiate a new Salmon stream with a base stream and optional header data and hash integrity.
     ///  <para>
@@ -103,21 +150,45 @@ public class AesStream : Stream
     ///  <param name="nonce">         The nonce used for the initial counter</param>
     ///  <param name="encryptionMode">Encryption mode Encrypt or Decrypt this cannot change later</param>
     ///  <param name="baseStream">    The base Stream that will be used to read the data</param>
-    ///  <param name="headerData">    The data to store in the header when encrypting.</param>
+    ///  <param name="format">The format to use, see EncryptionFormat</param>
     ///  <param name="integrity">     enable integrity</param>
     ///  <param name="chunkSize">     the chunk size to be used with integrity</param>
     ///  <param name="hashKey">       Hash key to be used with integrity</param>
     public AesStream(byte[] key, byte[] nonce, EncryptionMode encryptionMode,
-                        Stream baseStream, byte[] headerData = null,
-                        bool integrity = false, int? chunkSize = null, byte[] hashKey = null)
+                        Stream baseStream, EncryptionFormat format = EncryptionFormat.Salmon,
+                        bool integrity = false, byte[] hashKey = null, int chunkSize = 0)
     {
         this.AesEncryptionMode = encryptionMode;
         this.baseStream = baseStream;
-        this.headerData = headerData;
+        this.header = GetOrCreateHeader(format, nonce, integrity, chunkSize);
+        if (this.header != null)
+        {
+            chunkSize = header.ChunkSize;
+            nonce = header.Nonce;
+        }
+        else
+        {
+            chunkSize = 0;
+        }
+        if (nonce == null)
+            throw new SecurityException("Nonce is missing");
 
         InitIntegrity(integrity, hashKey, chunkSize);
         InitTransformer(key, nonce);
         InitStream();
+    }
+
+    private Header GetOrCreateHeader(EncryptionFormat format, byte[] nonce, bool integrity, int chunkSize)
+    {
+        if (format == EncryptionFormat.Salmon) {
+            if (this.AesEncryptionMode== EncryptionMode.Encrypt) {
+                if (integrity && chunkSize == 0)
+                    chunkSize = Integrity.Integrity.DEFAULT_CHUNK_SIZE;
+                return Header.WriteHeader(baseStream, nonce, chunkSize);
+            }
+            return Header.ReadHeaderData(baseStream);
+        }
+        return null;
     }
 
     /// <summary>
@@ -134,24 +205,6 @@ public class AesStream : Stream
             totalHashBytes = salmonIntegrity.GetHashDataLength(baseStream.Length - 1, hashOffset);
 
             return baseStream.Length - GetHeaderLength() - totalHashBytes;
-        }
-    }
-
-    /// <summary>
-    ///  Provides the total length of the base stream including header and integrity data if available.
-	/// </summary>
-	///  <returns>The actual length of the base stream.</returns>
-    public long ActualLength
-    {
-        get
-        {
-            long totalHashBytes = 0;
-            totalHashBytes += salmonIntegrity.GetHashDataLength(baseStream.Length - 1, 0);
-            if (CanRead)
-                return Length;
-            else if (CanWrite)
-                return baseStream.Length + GetHeaderLength() + totalHashBytes;
-            return 0;
         }
     }
 
@@ -219,7 +272,7 @@ public class AesStream : Stream
 	///  <param name="integrity">True to enable integrity</param>
     ///  <param name="hashKey">The hash key</param>
     ///  <param name="chunkSize">The chunk size</param>
-    private void InitIntegrity(bool integrity, byte[] hashKey, int? chunkSize)
+    private void InitIntegrity(bool integrity, byte[] hashKey, int chunkSize)
     {
         salmonIntegrity = new Integrity.Integrity(integrity, hashKey, chunkSize,
                 new HmacSHA256Provider(), Generator.HASH_RESULT_LENGTH);
@@ -230,7 +283,7 @@ public class AesStream : Stream
 	/// </summary>
     private void InitStream()
     {
-        baseStream.Position = GetHeaderLength();
+        Position = 0;
     }
 
     /// <summary>
@@ -239,10 +292,10 @@ public class AesStream : Stream
 	///  <returns>The header data length.</returns>
     private long GetHeaderLength()
     {
-        if (headerData == null)
+        if (header == null)
             return 0;
         else
-            return headerData.Length;
+            return header.HeaderData.Length;
     }
 
     /// <summary>
@@ -479,7 +532,7 @@ public class AesStream : Stream
                 byte[] destBuffer = new byte[srcBuffer.Length];
                 if (salmonIntegrity.UseIntegrity)
                 {
-                    salmonIntegrity.VerifyHashes(integrityHashes, srcBuffer, pos == 0 && bytes == 0 ? headerData : null);
+                    salmonIntegrity.VerifyHashes(integrityHashes, srcBuffer, pos == 0 && bytes == 0 ? header.HeaderData : null);
                 }
                 transformer.DecryptData(srcBuffer, 0, destBuffer, 0, srcBuffer.Length);
                 int len = Math.Min(count - bytes, destBuffer.Length);
@@ -489,7 +542,7 @@ public class AesStream : Stream
             }
             catch (Exception ex)
             {
-                if (ex.GetType() == typeof(IntegrityException) && FailSilently)
+                if (ex.GetType() == typeof(Integrity.IntegrityException) && FailSilently)
                     return -1;
                 throw new IOException("Could not read from stream: ", ex);
             }
@@ -510,11 +563,11 @@ public class AesStream : Stream
     {
         if (salmonIntegrity.ChunkSize > 0 && Position % salmonIntegrity.ChunkSize != 0)
             throw new IOException("Could not write to stream",
-                    new IntegrityException("All write operations should be aligned to the chunks size: "
+                    new Integrity.IntegrityException("All write operations should be aligned to the chunks size: "
                             + salmonIntegrity.ChunkSize));
         else if (salmonIntegrity.ChunkSize == 0 && Position % AESCTRTransformer.BLOCK_SIZE != 0)
             throw new IOException("Could not write to stream",
-                    new IntegrityException("All write operations should be aligned to the block size: "
+                    new Integrity.IntegrityException("All write operations should be aligned to the block size: "
                             + AESCTRTransformer.BLOCK_SIZE));
 
         // if there are not enough data in the buffer
@@ -535,7 +588,9 @@ public class AesStream : Stream
             try
             {
                 transformer.EncryptData(srcBuffer, 0, destBuffer, 0, srcBuffer.Length);
-                byte[][] integrityHashes = salmonIntegrity.GenerateHashes(destBuffer, Position == 0 ? headerData : null);
+                byte[][] integrityHashes = null;
+                if(salmonIntegrity.UseIntegrity)
+                    integrityHashes = salmonIntegrity.GenerateHashes(destBuffer, Position == 0 ? header.HeaderData : null);
                 pos += WriteToStream(destBuffer, ChunkSize, integrityHashes);
                 transformer.SyncCounter(Position);
             }

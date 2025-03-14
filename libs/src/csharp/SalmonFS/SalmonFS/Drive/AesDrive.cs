@@ -124,9 +124,14 @@ public abstract class AesDrive : VirtualDrive
         {
             virtualRootRealFile = RealRoot.CreateDirectory(VirtualDriveDirectoryName);
         }
-        virtualRoot = new AesFile(virtualRootRealFile, this);
+        virtualRoot = GetVirtualFile(virtualRootRealFile);
         RegisterOnProcessClose();
         Key = new DriveKey();
+    }
+
+    private AesFile GetVirtualFile(IFile file)
+    {
+        return new AesFile(file, this);
     }
 
     /// <summary>
@@ -169,7 +174,7 @@ public abstract class AesDrive : VirtualDrive
                 Console.Error.WriteLine(ex);
             }
         }
-        virtualRoot = new AesFile(virtualRootRealFile, this);
+        virtualRoot = GetVirtualFile(virtualRootRealFile);
     }
 
     /// <summary>
@@ -393,8 +398,7 @@ public abstract class AesDrive : VirtualDrive
 
         // encrypt the combined key (drive key + hash key) using the masterKey and the masterKeyIv
         MemoryStream ms = new MemoryStream();
-        AesStream stream = new AesStream(masterKey, masterKeyIv, EncryptionMode.Encrypt, ms,
-                null, false, null, null);
+        AesStream stream = new AesStream(masterKey, masterKeyIv, EncryptionMode.Encrypt, ms, EncryptionFormat.Generic);
         stream.Write(driveKey, 0, driveKey.Length);
         stream.Write(hashKey, 0, hashKey.Length);
         stream.Write(DriveId, 0, DriveId.Length);
@@ -463,8 +467,7 @@ public abstract class AesDrive : VirtualDrive
 
             // decrypt the combined key (drive key + hash key) using the master key
             MemoryStream ms = new MemoryStream(encData);
-            stream = new AesStream(masterKey, masterKeyIv, EncryptionMode.Decrypt, ms,
-                    null, false, null, null);
+            stream = new AesStream(masterKey, masterKeyIv, EncryptionMode.Decrypt, ms, EncryptionFormat.Generic);
 
             byte[] driveKey = new byte[Generator.KEY_LENGTH];
             stream.Read(driveKey, 0, driveKey.Length);

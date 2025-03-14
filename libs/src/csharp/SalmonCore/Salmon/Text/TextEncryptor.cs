@@ -24,6 +24,7 @@ SOFTWARE.
 
 using Mku.Salmon.Encode;
 using Mku.Salmon.Integrity;
+using Mku.Salmon.Streams;
 using System.IO;
 
 namespace Mku.Salmon.Text;
@@ -41,19 +42,19 @@ public class TextEncryptor
     ///  <param name="text"> Text to be encrypted.</param>
     ///  <param name="key">  The encryption key to be used.</param>
     ///  <param name="nonce">The nonce to be used.</param>
-    ///  <param name="header">Set to true to store a header with information like nonce and/or chunk size
-    ///                otherwise you will have to store that information externally.</param>
+    ///  <param name="format">The format to use, see EncryptionFormat</param>
     ///  <param name="integrity">      True if you want to calculate and store hash signatures for each chunkSize.</param>
     ///  <param name="hashKey">        Hash key to be used for all chunks.</param>
     ///  <param name="chunkSize">      The chunk size.</param>
     ///  <exception cref="SecurityException">Thrown when error with security</exception>
     ///  <exception cref="IntegrityException">Thrown when data are corrupt or tampered with.</exception>
     ///  <exception cref="IOException">Thrown if error during IO</exception>
-    public static string EncryptString(string text, byte[] key, byte[] nonce, bool header, 
-        bool integrity = false, byte[] hashKey = null, int? chunkSize = null)
+    public static string EncryptString(string text, byte[] key, byte[] nonce, 
+        EncryptionFormat format = EncryptionFormat.Salmon, 
+        bool integrity = false, byte[] hashKey = null, int chunkSize = 0)
     {
         byte[] bytes = System.Text.Encoding.Default.GetBytes(text);
-        byte[] encBytes = encryptor.Encrypt(bytes, key, nonce, header, integrity, hashKey, chunkSize);
+        byte[] encBytes = encryptor.Encrypt(bytes, key, nonce, format, integrity, hashKey, chunkSize);
         string encString = Base64Utils.Base64.Encode(encBytes).Replace("\n", "");
         return encString;
     }

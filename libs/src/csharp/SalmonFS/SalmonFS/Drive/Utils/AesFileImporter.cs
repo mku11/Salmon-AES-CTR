@@ -54,7 +54,7 @@ public class AesFileImporter : FileImporter
     {
         ((AesFile)importedFile).AllowOverwrite = true;
         // we use default chunk file size
-        ((AesFile)importedFile).SetApplyIntegrity(integrity, null, null);
+        ((AesFile)importedFile).SetApplyIntegrity(integrity, null, 0);
     }
 
     /// <summary>

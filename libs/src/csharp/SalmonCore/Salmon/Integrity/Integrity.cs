@@ -1,3 +1,4 @@
+
 /*
 MIT License
 
@@ -22,6 +23,7 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 */
 
+using Mku.Salmon.Streams;
 using Mku.Salmon.Transform;
 using System;
 using System.Collections.Generic;
@@ -77,20 +79,20 @@ public class Integrity
     ///  <param name="hashSize">The hash size.</param>
     ///  <exception cref="IntegrityException">Thrown when data are corrupt or tampered with.</exception>
     ///  <exception cref="SecurityException">Thrown when error with security</exception>
-    public Integrity(bool integrity, byte[] key, int? chunkSize,
+    public Integrity(bool integrity, byte[] key, int chunkSize,
                            IHashProvider provider, int hashSize)
     {
-        if (chunkSize != null && (chunkSize < 0 || (chunkSize > 0 && chunkSize < AESCTRTransformer.BLOCK_SIZE)
-                || (chunkSize > 0 && chunkSize % AESCTRTransformer.BLOCK_SIZE != 0) || chunkSize > MAX_CHUNK_SIZE))
+        if (chunkSize < 0 || (chunkSize > 0 && chunkSize < AESCTRTransformer.BLOCK_SIZE)
+                || (chunkSize > 0 && chunkSize % AESCTRTransformer.BLOCK_SIZE != 0) || chunkSize > MAX_CHUNK_SIZE)
         {
             throw new IntegrityException("Invalid chunk size, specify zero for default value or a positive number multiple of: "
                     + AESCTRTransformer.BLOCK_SIZE + " and less than: " + Integrity.MAX_CHUNK_SIZE + " bytes");
         }
         if (integrity && key == null)
             throw new SecurityException("You need a hash to use with integrity");
-        if (integrity && (chunkSize == null || chunkSize == 0))
+        if (integrity && chunkSize == 0)
             this.ChunkSize = DEFAULT_CHUNK_SIZE;
-        else if (chunkSize != null && (integrity || chunkSize > 0))
+        else if (integrity || chunkSize > 0)
             this.ChunkSize = (int)chunkSize;
         if (hashSize < 0)
             throw new SecurityException("Hash size should be a positive number");
@@ -139,15 +141,25 @@ public class Integrity
     ///  <param name="hashOffset">    The hash key length that will be used as an offset</param>
     ///  <param name="hashLength">    The hash length.</param>
     ///  <returns>The total hash length</returns>
-    public static long GetTotalHashDataLength(long length, int chunkSize,
+    public static long GetTotalHashDataLength(EncryptionMode mode, long length, int chunkSize,
                                               int hashOffset, int hashLength)
     {
-        // if the stream is using multiple chunks for integrity
-        int chunks = (int)(length / (chunkSize + hashOffset));
-        int rem = (int)(length % (chunkSize + hashOffset));
-        if (rem > hashOffset)
-            chunks++;
-        return (long)chunks * hashLength;
+        if (mode == EncryptionMode.Decrypt)
+        {
+            int chunks = (int)Math.Floor(length / (double)(chunkSize + hashOffset));
+            int rem = (int)(length % (chunkSize + hashOffset));
+            if (rem > hashOffset)
+                chunks++;
+            return (long)chunks * hashLength;
+        }
+        else
+        {
+            int chunks = (int)Math.Floor(length / (double)chunkSize);
+            int rem = (int)(length % chunkSize);
+            if (rem > hashOffset)
+                chunks++;
+            return (long)chunks * hashLength;
+        }
     }
 
     /// <summary>
@@ -160,7 +172,7 @@ public class Integrity
     {
         if (ChunkSize <= 0)
             return 0;
-        return Integrity.GetTotalHashDataLength(count, ChunkSize, hashOffset, hashSize);
+        return Integrity.GetTotalHashDataLength(EncryptionMode.Decrypt, count, ChunkSize, hashOffset, hashSize);
     }
 
     /// <summary>

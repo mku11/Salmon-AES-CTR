@@ -365,7 +365,7 @@ public class WSFile : IFile
     ///  Get the last modified date on disk.
     /// </summary>
     ///  <returns>The last modified date</returns>
-    public long LastModified => GetResponse().LastModified;
+    public long LastDateModified => GetResponse().LastModified;
 
     /// <summary>
     ///  Get the size of the file on disk.

@@ -41,34 +41,6 @@ public abstract class AESCTRTransformer : ICTRTransformer
     public static readonly int EXPANDED_KEY_SIZE = 240;
 
     /// <summary>
-    ///  Get the output size of the data to be transformed(encrypted or decrypted) including
-    ///  header and hash without executing any operations. This can be used to prevent over-allocating memory
-    ///  where creating your output buffers.
-	/// </summary>
-	///  <param name="data">The data to be transformed.</param>
-    ///  <param name="key">The AES key.</param>
-    ///  <param name="nonce">The nonce for the CTR.</param>
-    ///  <param name="mode">The <see cref="EncryptionMode"/> Encrypt or Decrypt.</param>
-    ///  <param name="headerData">The header data to be embedded if you use Encryption.</param>
-    ///  <param name="integrity">True if you want to enable integrity.</param>
-    ///  <param name="chunkSize">The chunk size for integrity chunks.</param>
-    ///  <param name="hashKey">The hash key to be used for integrity checks.</param>
-    ///  <returns>The size of the output data.</returns>
-    ///  <exception cref="SecurityException">Thrown when error with security</exception>
-    ///  <exception cref="IntegrityException">Thrown when data are corrupt or tampered with</exception>
-    ///  <exception cref="IOException">Thrown if error during IO</exception>
-    public static long GetActualSize(byte[] data, byte[] key, byte[] nonce, EncryptionMode mode,
-                                     byte[] headerData, bool integrity, int? chunkSize, byte[] hashKey)
-    {
-        MemoryStream inputStream = new MemoryStream(data);
-        AesStream s = new AesStream(key, nonce, mode, inputStream,
-                headerData, integrity, chunkSize, hashKey);
-        long size = s.ActualLength;
-        s.Close();
-        return size;
-    }
-
-    /// <summary>
     ///  Salmon stream encryption block size, same as AES.
     /// </summary>
     public static readonly int BLOCK_SIZE = 16;

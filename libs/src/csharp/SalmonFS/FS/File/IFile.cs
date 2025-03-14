@@ -87,7 +87,7 @@ public interface IFile
     ///  Get the last modified date of the file.
 	/// </summary>
 	///  <returns>The last modified date in milliseconds</returns>
-    long LastModified { get; }
+    long LastDateModified { get; }
 
     /// <summary>
     ///  Get the absolute path of the file on disk.

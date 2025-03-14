@@ -66,7 +66,6 @@ public class SalmonCoreTestHelper
     public static string TEST_HMAC_KEY = "12345678901234561234567890123456"; //32bytes
     public static byte[] TEST_HMAC_KEY_BYTES = Encoding.UTF8.GetBytes(TEST_HMAC_KEY);
 
-    public static string TEST_HEADER = "SOMEHEADERDATASOMEHEADER";
     public static string TEST_TINY_TEXT = "test.txt";
     public static string TEST_TEXT = "This is another test that could be very long if used correctly.";
     public static string TEST_TEXT_WRITE = "THIS*TEXT*IS*NOW*OVERWRITTEN*WITH*THIS";
@@ -131,8 +130,8 @@ public class SalmonCoreTestHelper
 
 
     public static void EncryptWriteDecryptRead(string text, byte[] key, byte[] iv,
-                                               int encBufferSize, int decBufferSize, bool testIntegrity, int? chunkSize,
-                                               byte[] hashKey, bool flipBits, string header, int? maxTextLength)
+                                               int encBufferSize, int decBufferSize, bool testIntegrity, int chunkSize,
+                                               byte[] hashKey, bool flipBits, int? maxTextLength)
     {
         string testText = text;
 
@@ -145,19 +144,15 @@ public class SalmonCoreTestHelper
         if (maxTextLength != null && maxTextLength < plainText.Length)
             plainText = plainText.Substring(0, (int)maxTextLength);
 
-        int headerLength = 0;
-        if (header != null)
-            headerLength = UTF8Encoding.UTF8.GetBytes(header).Length;
         byte[] inputBytes = UTF8Encoding.UTF8.GetBytes(plainText);
         byte[] encBytes = Encrypt(inputBytes, key, iv, encBufferSize,
-                testIntegrity, chunkSize, hashKey, header);
+                testIntegrity, chunkSize, hashKey);
         if (flipBits)
             encBytes[encBytes.Length / 2] = 0;
 
         // Use AesStream to read from cipher byte array and MemoryStream to Write to byte array
         byte[] outputByte2 = Decrypt(encBytes, key, iv, decBufferSize,
-                testIntegrity, chunkSize, hashKey, header != null ? headerLength :
-                        null);
+                testIntegrity, chunkSize, hashKey);
         string decText = UTF8Encoding.UTF8.GetString(outputByte2);
 
         Console.WriteLine(plainText);
@@ -168,19 +163,12 @@ public class SalmonCoreTestHelper
 
 
     public static byte[] Encrypt(byte[] inputBytes, byte[] key, byte[] iv, int bufferSize,
-                                 bool integrity, int? chunkSize, byte[] hashKey,
-                                 string header)
+                                 bool integrity, int chunkSize, byte[] hashKey)
     {
         MemoryStream ins = new MemoryStream(inputBytes);
         MemoryStream outs = new MemoryStream();
-        byte[] headerData = null;
-        if (header != null)
-        {
-            headerData = UTF8Encoding.UTF8.GetBytes(header);
-            outs.Write(headerData, 0, headerData.Length);
-        }
         AesStream writer = new AesStream(key, iv, EncryptionMode.Encrypt, outs,
-                headerData, integrity, chunkSize, hashKey);
+                EncryptionFormat.Salmon, integrity, hashKey, chunkSize);
 
         if (bufferSize == 0) // use the internal buffer size of the memorystream to copy
         {
@@ -203,19 +191,12 @@ public class SalmonCoreTestHelper
     }
 
     public static byte[] Decrypt(byte[] inputBytes, byte[] key, byte[] iv, int bufferSize,
-                                 bool integrity, int? chunkSize, byte[] hashKey,
-                                 int? headerLength)
+                                 bool integrity, int chunkSize, byte[] hashKey)
     {
         MemoryStream ins = new MemoryStream(inputBytes);
         MemoryStream outs = new MemoryStream();
-        byte[] headerData = null;
-        if (headerLength != null)
-        {
-            headerData = new byte[(int)headerLength];
-            ins.Read(headerData, 0, headerData.Length);
-        }
         AesStream reader = new AesStream(key, iv, EncryptionMode.Decrypt, ins,
-                headerData, integrity, chunkSize, hashKey);
+                EncryptionFormat.Salmon, integrity, hashKey, chunkSize);
 
         if (bufferSize == 0) // use the internal buffersize of the memorystream to copy
         {
@@ -255,7 +236,7 @@ public class SalmonCoreTestHelper
         MemoryStream ins = new MemoryStream(inputBytes);
         MemoryStream outs = new MemoryStream();
         AesStream encWriter = new AesStream(key, iv, EncryptionMode.Encrypt, outs,
-                null, integrity, chunkSize, hashKey);
+                EncryptionFormat.Salmon, integrity, hashKey, chunkSize);
         ins.CopyTo(encWriter);
         ins.Close();
         encWriter.Flush();
@@ -265,7 +246,7 @@ public class SalmonCoreTestHelper
         // Use SalmonStrem to read from cipher text and seek and read to different positions in the stream
         MemoryStream encIns = new MemoryStream(encBytes);
         AesStream decReader = new AesStream(key, iv, EncryptionMode.Decrypt, encIns,
-                null, integrity, chunkSize, hashKey);
+                EncryptionFormat.Salmon, integrity, hashKey, chunkSize);
         string correctText;
         string decText;
 
@@ -335,7 +316,7 @@ public class SalmonCoreTestHelper
         MemoryStream ins = new MemoryStream(inputBytes);
         MemoryStream outs = new MemoryStream();
         AesStream encWriter = new AesStream(key, iv, EncryptionMode.Encrypt, outs,
-                null, integrity, chunkSize, hashKey);
+                EncryptionFormat.Salmon, integrity, hashKey, chunkSize);
         ins.CopyTo(encWriter);
         ins.Close();
         encWriter.Flush();
@@ -345,7 +326,7 @@ public class SalmonCoreTestHelper
         // Use AesStream to read from cipher text and seek and read to different positions in the stream
         MemoryStream encIns = new MemoryStream(encBytes);
         AesStream decReader = new AesStream(key, iv, EncryptionMode.Decrypt, encIns,
-                null, integrity, chunkSize, hashKey);
+                EncryptionFormat.Salmon, integrity, hashKey, chunkSize);
         for (int i = 0; i < 100; i++)
         {
             decReader.Position = decReader.Position + 7;
@@ -393,7 +374,7 @@ public class SalmonCoreTestHelper
         MemoryStream ins = new MemoryStream(inputBytes);
         MemoryStream outs = new MemoryStream();
         AesStream encWriter = new AesStream(key, iv, EncryptionMode.Encrypt, outs,
-                null, integrity, chunkSize, hashKey);
+                EncryptionFormat.Salmon, integrity, hashKey, chunkSize);
         ins.CopyTo(encWriter);
         ins.Close();
         encWriter.Flush();
@@ -404,7 +385,7 @@ public class SalmonCoreTestHelper
         byte[] writeBytes = UTF8Encoding.UTF8.GetBytes(textToWrite);
         MemoryStream pOuts = new MemoryStream(encBytes);
         AesStream partialWriter = new AesStream(key, iv, EncryptionMode.Encrypt, pOuts,
-                null, integrity, chunkSize, hashKey);
+                EncryptionFormat.Salmon, integrity, hashKey, chunkSize);
         long alignedPosition = seek;
         int count = writeCount;
 
@@ -420,7 +401,7 @@ public class SalmonCoreTestHelper
         // Use SalmonStrem to read from cipher text and test if writing was successful
         MemoryStream encIns = new MemoryStream(encBytes);
         AesStream decReader = new AesStream(key, iv, EncryptionMode.Decrypt, encIns,
-                null, integrity, chunkSize, hashKey);
+                EncryptionFormat.Salmon, integrity, hashKey, chunkSize);
         string decText = SalmonCoreTestHelper.SeekAndGetSubstringByRead(decReader, 0, text.Length, SeekOrigin.Begin);
 
 
@@ -441,7 +422,7 @@ public class SalmonCoreTestHelper
         byte[] testTextBytes = UTF8Encoding.UTF8.GetBytes(text);
         MemoryStream ms = new MemoryStream(testTextBytes);
         AesStream stream = new AesStream(key, nonce, EncryptionMode.Encrypt, ms,
-                null, false, null, null);
+                EncryptionFormat.Salmon);
         stream.AllowRangeWrite = true;
 
         // we resort to reflection to test this.
@@ -515,9 +496,9 @@ public class SalmonCoreTestHelper
     public static void EncryptAndDecryptByteArray(byte[] data, bool enableLog)
     {
         long t1 = Time.Time.CurrentTimeMillis();
-        byte[] encData = encryptor.Encrypt(data, SalmonCoreTestHelper.TEST_KEY_BYTES, SalmonCoreTestHelper.TEST_NONCE_BYTES, false);
+        byte[] encData = encryptor.Encrypt(data, SalmonCoreTestHelper.TEST_KEY_BYTES, SalmonCoreTestHelper.TEST_NONCE_BYTES, EncryptionFormat.Generic);
         long t2 = Time.Time.CurrentTimeMillis();
-        byte[] decData = decryptor.Decrypt(encData, SalmonCoreTestHelper.TEST_KEY_BYTES, SalmonCoreTestHelper.TEST_NONCE_BYTES, false);
+        byte[] decData = decryptor.Decrypt(encData, SalmonCoreTestHelper.TEST_KEY_BYTES, SalmonCoreTestHelper.TEST_NONCE_BYTES, EncryptionFormat.Generic);
         long t3 = Time.Time.CurrentTimeMillis();
 
         CollectionAssert.AreEqual(data, decData);
@@ -626,7 +607,7 @@ public class SalmonCoreTestHelper
     }
 
     public static void CopyFromMemStreamToSalmonStream(int size, byte[] key, byte[] nonce,
-                                                       bool integrity, int? chunkSize, byte[] hashKey,
+                                                       bool integrity, int chunkSize, byte[] hashKey,
                                                        int bufferSize)
     {
 
@@ -646,7 +627,7 @@ public class SalmonCoreTestHelper
         ms2.Position = 0;
         MemoryStream ms3 = new MemoryStream();
         AesStream salmonStream = new AesStream(key, nonce, EncryptionMode.Encrypt, ms3,
-                null, integrity, chunkSize, hashKey);
+                EncryptionFormat.Salmon, integrity, hashKey, chunkSize);
         // we always align the writes to the chunk size if we enable integrity
         if (integrity)
             bufferSize = salmonStream.ChunkSize;
@@ -660,7 +641,7 @@ public class SalmonCoreTestHelper
         ms3.Position = 0;
         MemoryStream ms4 = new MemoryStream();
         AesStream salmonStream2 = new AesStream(key, nonce, EncryptionMode.Decrypt, ms3,
-                null, integrity, chunkSize, hashKey);
+                EncryptionFormat.Salmon, integrity, hashKey, chunkSize);
         salmonStream2.CopyTo(ms4, bufferSize);
         salmonStream2.Close();
         ms3.Close();
@@ -673,8 +654,6 @@ public class SalmonCoreTestHelper
     public static byte[] CalculateHMAC(byte[] bytes, int offset, int length,
                                        byte[] hashKey, byte[] includeData)
     {
-        Integrity.Integrity salmonIntegrity = new Integrity.Integrity(true, hashKey, null, new HmacSHA256Provider(),
-                Generator.HASH_RESULT_LENGTH);
         return Integrity.Integrity.CalculateHash(hashProvider, bytes, offset, length, hashKey, includeData);
     }
 }

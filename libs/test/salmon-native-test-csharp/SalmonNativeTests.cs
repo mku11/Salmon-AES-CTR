@@ -105,12 +105,10 @@ public class SalmonNativeTests
                 false);
         CollectionAssert.AreEqual(bytes, decBytesDef);
 
-        byte[] encBytes = new Encryptor(ENC_THREADS).Encrypt(bytes, SalmonCoreTestHelper.TEST_KEY_BYTES, SalmonCoreTestHelper.TEST_NONCE_BYTES, false,
-                                false, null, null);
+        byte[] encBytes = new Encryptor(ENC_THREADS).Encrypt(bytes, SalmonCoreTestHelper.TEST_KEY_BYTES, SalmonCoreTestHelper.TEST_NONCE_BYTES, EncryptionFormat.Generic);
         CollectionAssert.AreEqual(encBytesDef, encBytes);
 
-        byte[] decBytes = new Decryptor(DEC_THREADS).Decrypt(encBytes, SalmonCoreTestHelper.TEST_KEY_BYTES, SalmonCoreTestHelper.TEST_NONCE_BYTES, false,
-                false, null, null);
+        byte[] decBytes = new Decryptor(DEC_THREADS).Decrypt(encBytes, SalmonCoreTestHelper.TEST_KEY_BYTES, SalmonCoreTestHelper.TEST_NONCE_BYTES, EncryptionFormat.Generic);
         CollectionAssert.AreEqual(bytes, decBytes);
     }
 
@@ -131,54 +129,10 @@ public class SalmonNativeTests
                 false);
         CollectionAssert.AreEqual(bytes, decBytesDef);
 
-        byte[] encBytes = new Encryptor(ENC_THREADS).Encrypt(bytes, SalmonCoreTestHelper.TEST_KEY_BYTES, SalmonCoreTestHelper.TEST_NONCE_BYTES, false,
-                false, null, null);
+        byte[] encBytes = new Encryptor(ENC_THREADS).Encrypt(bytes, SalmonCoreTestHelper.TEST_KEY_BYTES, SalmonCoreTestHelper.TEST_NONCE_BYTES, EncryptionFormat.Generic);
         CollectionAssert.AreEqual(encBytesDef, encBytes);
         Decryptor decryptor = new Decryptor(DEC_THREADS, 32 + 2);
-        byte[] decBytes = decryptor.Decrypt(encBytes, SalmonCoreTestHelper.TEST_KEY_BYTES, SalmonCoreTestHelper.TEST_NONCE_BYTES, false,
-                false, null, null);
+        byte[] decBytes = decryptor.Decrypt(encBytes, SalmonCoreTestHelper.TEST_KEY_BYTES, SalmonCoreTestHelper.TEST_NONCE_BYTES, EncryptionFormat.Generic);
         CollectionAssert.AreEqual(bytes, decBytes);
-    }
-
-    [TestMethod]
-    public void ShouldEncryptAndDecryptNativeStreamCompatibleWithIntegrity()
-    {
-        string plainText = SalmonCoreTestHelper.TEST_TEXT;
-        for (int i = 0; i < 13; i++)
-            plainText += plainText;
-
-        byte[] bytes = UTF8Encoding.UTF8.GetBytes(plainText);
-        byte[] encBytesDef = SalmonCoreTestHelper.DefaultAESCTRTransform(bytes, SalmonCoreTestHelper.TEST_KEY_BYTES, SalmonCoreTestHelper.TEST_NONCE_BYTES, true);
-        byte[] decBytesDef = SalmonCoreTestHelper.DefaultAESCTRTransform(encBytesDef, SalmonCoreTestHelper.TEST_KEY_BYTES, SalmonCoreTestHelper.TEST_NONCE_BYTES, false);
-
-        int chunkSize = 256 * 1024;
-        CollectionAssert.AreEqual(bytes, decBytesDef);
-        byte[] encBytes = new Encryptor(ENC_THREADS).Encrypt(bytes, SalmonCoreTestHelper.TEST_KEY_BYTES, SalmonCoreTestHelper.TEST_NONCE_BYTES, false,
-                true, SalmonCoreTestHelper.TEST_HMAC_KEY_BYTES, chunkSize);
-
-        AssertArrayEqualsWithIntegrity(encBytesDef, encBytes, chunkSize);
-        byte[] decBytes = new Decryptor(DEC_THREADS).Decrypt(encBytes, SalmonCoreTestHelper.TEST_KEY_BYTES, SalmonCoreTestHelper.TEST_NONCE_BYTES, false,
-                true, SalmonCoreTestHelper.TEST_HMAC_KEY_BYTES, chunkSize);
-
-        CollectionAssert.AreEqual(bytes, decBytes);
-    }
-
-
-    private void AssertArrayEqualsWithIntegrity(byte[] buffer, byte[] bufferWithIntegrity, int chunkSize)
-    {
-        int index = 0;
-        for (int i = 0; i < buffer.Length; i += chunkSize)
-        {
-            int nChunkSize = Math.Min(chunkSize, buffer.Length - i);
-            byte[] buff1 = new byte[chunkSize];
-            Array.Copy(buffer, i, buff1, 0, nChunkSize);
-
-            byte[] buff2 = new byte[chunkSize];
-            Array.Copy(bufferWithIntegrity, index + Generator.HASH_RESULT_LENGTH, buff2, 0, nChunkSize);
-
-            CollectionAssert.AreEqual(buff1, buff2);
-            index += nChunkSize + Generator.HASH_RESULT_LENGTH;
-        }
-        Assert.AreEqual(bufferWithIntegrity.Length, index);
     }
 }

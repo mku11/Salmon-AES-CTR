@@ -234,7 +234,7 @@ public class HttpFile : IFile
     ///  Get the last modified date on disk.
     /// </summary>
     ///  <returns>The last modified date</returns>
-    public long LastModified => this.GetResponse().LastModified;
+    public long LastDateModified => this.GetResponse().LastModified;
 
     /// <summary>
     ///  Get the size of the file on disk.

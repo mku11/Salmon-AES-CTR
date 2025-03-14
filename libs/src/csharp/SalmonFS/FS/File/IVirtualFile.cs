@@ -87,7 +87,7 @@ public abstract class IVirtualFile
     /// <summary>
     ///  The base name for the file
     /// </summary>
-    public abstract string BaseName { get; }
+    public abstract string Name { get; }
 
     /// <summary>
     ///  Returns the virtual parent directory
@@ -107,12 +107,12 @@ public abstract class IVirtualFile
     /// <summary>
     ///  The last date modified in milliseconds
     /// </summary>
-    public abstract long LastDateTimeModified { get; }
+    public abstract long LastDateModified { get; }
 
     /// <summary>
     ///  The virtual size of the file excluding the header and hash signatures.
     /// </summary>
-    public abstract long Size { get; }
+    public abstract long Length { get; }
 
     /// <summary>
     ///  True if this file/directory exists

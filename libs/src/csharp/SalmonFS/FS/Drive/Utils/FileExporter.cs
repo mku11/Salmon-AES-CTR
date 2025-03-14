@@ -132,7 +132,7 @@ public abstract class FileExporter
             throw new Exception("Cannot export directory, use FileCommander instead");
 
         IFile exportFile;
-        filename = filename ?? fileToExport.BaseName;
+        filename = filename ?? fileToExport.Name;
         try
         {
             stopped = false;
@@ -145,7 +145,7 @@ public abstract class FileExporter
             exportFile = exportDir.CreateFile(filename);
             OnPrepare(fileToExport, integrity);
 
-            long fileSize = fileToExport.Size;
+            long fileSize = fileToExport.Length;
             int runningThreads = 1;
             long partSize = fileSize;
 
@@ -196,7 +196,7 @@ public abstract class FileExporter
 
     private void SubmitExportJobs(int runningThreads, long partSize, IVirtualFile fileToExport, IFile exportFile, long[] totalBytesWritten, bool integrity, Action<long, long> OnProgress)
     {
-        long fileSize = fileToExport.Size;
+        long fileSize = fileToExport.Length;
 
         Task[] tasks = new Task[runningThreads];
         long finalPartSize = partSize;
@@ -263,7 +263,7 @@ public abstract class FileExporter
 
                 totalBytesWritten[0] += bytesRead;
                 if (OnProgress != null)
-                    OnProgress(totalBytesWritten[0], fileToExport.Size);
+                    OnProgress(totalBytesWritten[0], fileToExport.Length);
             }
         }
         catch (Exception ex)

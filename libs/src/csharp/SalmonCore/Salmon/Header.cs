@@ -33,6 +33,8 @@ namespace Mku.Salmon;
 /// </summary>
 public class Header
 {
+    public static readonly long HEADER_LENGTH = 16;
+
     /// <summary>
     ///  Magic bytes.
     /// </summary>
@@ -58,29 +60,70 @@ public class Header
     /// </summary>
     public byte[] HeaderData { get; set; }
 
+    public Header(byte[] headerData)
+    {
+        this.HeaderData = headerData;
+    }
+
     /// <summary>
     ///  Parse the header data from the stream
 	/// </summary>
 	///  <param name="stream">The stream.</param>
     ///  <returns>The header</returns>
     ///  <exception cref="IOException">Thrown if error during IO</exception>
-    public static Header ParseHeaderData(Stream stream)
+    public static Header ReadHeaderData(Stream stream)
     {
-        Header header = new Header();
+        if (stream.Length == 0)
+            return null;
+        long pos = stream.Position;
+
+        stream.Position = 0;
+
+        byte[] headerData = new byte[Generator.MAGIC_LENGTH + Generator.VERSION_LENGTH
+                + Generator.CHUNK_SIZE_LENGTH + Generator.NONCE_LENGTH];
+        stream.Read(headerData, 0, headerData.Length);
+
+        Header header = new Header(headerData);
+        MemoryStream ms = new MemoryStream(header.HeaderData);
         header.MagicBytes = new byte[Generator.MAGIC_LENGTH];
-        stream.Read(header.MagicBytes, 0, header.MagicBytes.Length);
+        ms.Read(header.MagicBytes, 0, header.MagicBytes.Length);
         byte[] versionBytes = new byte[Generator.VERSION_LENGTH];
-        stream.Read(versionBytes, 0, Generator.VERSION_LENGTH);
+        ms.Read(versionBytes, 0, Generator.VERSION_LENGTH);
         header.Version = versionBytes[0];
         byte[] chunkSizeHeader = new byte[Generator.CHUNK_SIZE_LENGTH];
-        stream.Read(chunkSizeHeader, 0, chunkSizeHeader.Length);
+        ms.Read(chunkSizeHeader, 0, chunkSizeHeader.Length);
         header.ChunkSize = (int)BitConverter.ToLong(chunkSizeHeader, 0, Generator.CHUNK_SIZE_LENGTH);
         header.Nonce = new byte[Generator.NONCE_LENGTH];
-        stream.Read(header.Nonce, 0, header.Nonce.Length);
-        stream.Position = 0;
-        header.HeaderData = new byte[Generator.MAGIC_LENGTH + Generator.VERSION_LENGTH
+        ms.Read(header.Nonce, 0, header.Nonce.Length);
+
+        stream.Position = pos;
+        return header;
+    }
+
+    public static Header WriteHeader(Stream stream, byte[] nonce, int chunkSize)
+    {
+        byte[] magicBytes = Generator.GetMagicBytes();
+        byte version = Generator.VERSION;
+        byte[] versionBytes = new byte[] { version };
+        byte[] chunkSizeBytes = BitConverter.ToBytes(chunkSize, Generator.CHUNK_SIZE_LENGTH);
+
+        byte[] headerData = new byte[Generator.MAGIC_LENGTH + Generator.VERSION_LENGTH
                 + Generator.CHUNK_SIZE_LENGTH + Generator.NONCE_LENGTH];
-        stream.Read(header.HeaderData, 0, header.HeaderData.Length);
+        MemoryStream ms = new MemoryStream(headerData);
+        ms.Write(magicBytes, 0, magicBytes.Length);
+        ms.Write(versionBytes, 0, versionBytes.Length);
+        ms.Write(chunkSizeBytes, 0, chunkSizeBytes.Length);
+        ms.Write(nonce, 0, nonce.Length);
+        ms.Position = 0;
+        Header header = ReadHeaderData(ms);
+
+        long pos = stream.Position;
+        stream.Position = 0;
+        ms.Position = 0;
+        ms.CopyTo(stream);
+        ms.Close();
+        stream.Flush();
+        stream.Position = pos;
 
         return header;
     }

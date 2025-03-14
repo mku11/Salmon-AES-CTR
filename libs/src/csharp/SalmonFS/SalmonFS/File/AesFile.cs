@@ -52,6 +52,8 @@ public class AesFile : IVirtualFile
     /// </summary>
     public AesDrive Drive { get; private set; }
 
+    private readonly EncryptionFormat format;
+
     /// <summary>
     /// The real encrypted file on the physical disk.
     /// </summary>
@@ -86,13 +88,13 @@ public class AesFile : IVirtualFile
     ///  The last date modified in milliseconds
     /// </summary>
     override
-    public long LastDateTimeModified => RealFile.LastModified;
+    public long LastDateModified => RealFile.LastDateModified;
 
     /// <summary>
     ///  The virtual size of the file excluding the header and hash signatures.
     /// </summary>
     override
-    public long Size
+    public long Length
     {
         get
         {
@@ -128,7 +130,7 @@ public class AesFile : IVirtualFile
     /// </summary>
     public bool IsIntegrityEnabled { get; private set; }
 
-    private int? reqChunkSize;
+    private int reqChunkSize;
     private byte[] encryptionKey;
     private byte[] requestedNonce;
 
@@ -148,10 +150,11 @@ public class AesFile : IVirtualFile
 	/// </summary>
 	///  <param name="drive">   The file virtual system that will be used with file operations</param>
     ///  <param name="realFile">The real file</param>
-    public AesFile(IFile realFile, AesDrive drive = null)
+    public AesFile(IFile realFile, AesDrive drive = null, EncryptionFormat format = EncryptionFormat.Salmon)
     {
-        this.Drive = drive;
         this.RealFile = realFile;
+        this.Drive = drive;
+        this.format = format;
         if (IsIntegrityEnabled)
             reqChunkSize = drive.DefaultFileChunkSize;
         if (drive != null && drive.Key != null)
@@ -161,7 +164,7 @@ public class AesFile : IVirtualFile
     /// <summary>
     ///  Return the current chunk size requested that will be used for integrity
     /// </summary>
-    public int? RequestedChunkSize
+    public int RequestedChunkSize
     {
         get
         {
@@ -177,13 +180,13 @@ public class AesFile : IVirtualFile
 	/// </summary>
 	///  <returns>The chunk size.</returns>
     ///  <exception cref="IOException">Thrown if the format is corrupt.</exception>
-    public int? FileChunkSize
+    public int FileChunkSize
     {
         get
         {
             Header header = Header;
             if (header == null)
-                return null;
+                return 0;
             return Header.ChunkSize;
         }
     }
@@ -200,27 +203,12 @@ public class AesFile : IVirtualFile
                 return null;
             if (_header != null)
                 return _header;
-            Header header = new Header();
+            Header header = new Header(new byte[0]);
             Stream stream = null;
             try
             {
                 stream = RealFile.GetInputStream();
-                int bytesRead = stream.Read(header.MagicBytes, 0, header.MagicBytes.Length);
-                if (bytesRead != header.MagicBytes.Length)
-                    return null;
-                byte[] buff = new byte[8];
-                bytesRead = stream.Read(buff, 0, Generator.VERSION_LENGTH);
-                if (bytesRead != Generator.VERSION_LENGTH)
-                    return null;
-                header.Version = buff[0];
-                bytesRead = stream.Read(buff, 0, GetChunkSizeLength());
-                if (bytesRead != GetChunkSizeLength())
-                    return null;
-                header.ChunkSize = (int)BitConverter.ToLong(buff, 0, bytesRead);
-                header.Nonce = new byte[Generator.NONCE_LENGTH];
-                bytesRead = stream.Read(header.Nonce, 0, Generator.NONCE_LENGTH);
-                if (bytesRead != Generator.NONCE_LENGTH)
-                    return null;
+                header = Header.ReadHeaderData(stream);
             }
             catch (Exception ex)
             {
@@ -274,8 +262,8 @@ public class AesFile : IVirtualFile
         realStream.Read(headerData, 0, headerData.Length);
 
         AesStream stream = new AesStream(EncryptionKey,
-                nonceBytes, EncryptionMode.Decrypt, realStream, headerData,
-                IsIntegrityEnabled, FileChunkSize, HashKey);
+                nonceBytes, EncryptionMode.Decrypt, realStream, format,
+                IsIntegrityEnabled, HashKey, FileChunkSize);
         return stream;
     }
 
@@ -305,25 +293,48 @@ public class AesFile : IVirtualFile
     {
 
         // check if we have an existing iv in the header
-        byte[] nonceBytes = FileNonce;
+        Header header = Header;
+        byte[] nonceBytes = null;
+        if (header != null)
+            nonceBytes = header.Nonce;
+
         if (nonceBytes != null && !AllowOverwrite)
             throw new SecurityException("You should not overwrite existing files for security instead delete the existing file and create a new file. If this is a new file and you want to use parallel streams call SetAllowOverwrite(true)");
 
         if (nonceBytes == null)
-            CreateHeader(nonce);
-        nonceBytes = FileNonce;
+        {
+            // set it to zero (disabled integrity) or get the default chunk
+            // size defined by the drive
+            if (IsIntegrityEnabled && reqChunkSize == 0 && Drive != null)
+                reqChunkSize = Drive.DefaultFileChunkSize;
+            else if (!IsIntegrityEnabled)
+                reqChunkSize = 0;
 
-        // we also get the header data to include in the hash
-        byte[] headerData = GetRealFileHeaderData(RealFile);
+            if (nonce != null)
+                requestedNonce = nonce;
+            else if (requestedNonce == null && Drive != null)
+                requestedNonce = Drive.GetNextNonce();
+
+            if (requestedNonce == null)
+                throw new SecurityException("File requires a nonce");
+
+            nonceBytes = requestedNonce;
+        }
 
         // create a stream with the file chunk size specified which will be used to host the integrity hash
         // we also specify if stream ranges can be overwritten which is generally dangerous if the file is existing
         // but practical if the file is brand new and multithreaded writes for performance need to be used.
         Stream realStream = RealFile.GetOutputStream();
 
+        byte[] key = this.EncryptionKey;
+        if (key == null)
+            throw new IOException("Set an encryption key to the file first");
+        if (nonceBytes == null)
+            throw new IOException("No nonce provided and no nonce found in file");
+
         AesStream stream = new AesStream(EncryptionKey, nonceBytes,
-                EncryptionMode.Encrypt, realStream, headerData,
-                IsIntegrityEnabled, RequestedChunkSize > 0 ? RequestedChunkSize : null, HashKey);
+                EncryptionMode.Encrypt, realStream, format,
+                IsIntegrityEnabled, HashKey, RequestedChunkSize);
         stream.AllowRangeWrite = AllowOverwrite;
         return stream;
     }
@@ -366,7 +377,7 @@ public class AesFile : IVirtualFile
 	/// </summary>
 	///  <param name="integrity">True if enable integrity verification</param>
     ///  <param name="hashKey">  The hash key to be used for verification</param>
-    public void SetVerifyIntegrity(bool integrity, byte[] hashKey)
+    public void SetVerifyIntegrity(bool integrity, byte[] hashKey = null)
     {
         if (integrity && hashKey == null && Drive != null)
             hashKey = Drive.Key.HashKey;
@@ -382,22 +393,26 @@ public class AesFile : IVirtualFile
     ///  <param name="integrity">The integrity</param>
     ///  <param name="requestChunkSize">0 use default file chunk.</param>
     ///                          A positive number to specify integrity chunks.
-    public void SetApplyIntegrity(bool integrity, byte[] hashKey, int? requestChunkSize)
+    public void SetApplyIntegrity(bool integrity, byte[] hashKey = null, int requestChunkSize = 0)
     {
-        int? fileChunkSize = FileChunkSize;
+        int fileChunkSize = FileChunkSize;
 
-        if (fileChunkSize != null)
+        if (fileChunkSize > 0)
             throw new IntegrityException("Cannot redefine chunk size, delete file and recreate");
-        if (requestChunkSize != null && requestChunkSize < 0)
+        if (requestChunkSize < 0)
             throw new IntegrityException("Chunk size needs to be zero for default chunk size or a positive value");
-        if (integrity && fileChunkSize != null && fileChunkSize == 0)
+        if (integrity && fileChunkSize < 0)
             throw new IntegrityException("Cannot enable integrity if the file is not created with integrity, export file and reimport with integrity");
 
         if (integrity && hashKey == null && Drive != null)
             hashKey = Drive.Key.HashKey;
+
+        if (integrity && hashKey == null)
+            throw new SecurityException("Integrity needs a hashKey");
+
         this.IsIntegrityEnabled = integrity;
         this.reqChunkSize = requestChunkSize;
-        if (integrity && this.reqChunkSize == null && Drive != null)
+        if (integrity && this.reqChunkSize == 0 && Drive != null)
             this.reqChunkSize = Drive.DefaultFileChunkSize;
         this.HashKey = hashKey;
     }
@@ -453,44 +468,6 @@ public class AesFile : IVirtualFile
     }
 
     /// <summary>
-    ///  Create the header for the file
-    /// </summary>
-    private void CreateHeader(byte[] nonce)
-    {
-        // set it to zero (disabled integrity) or get the default chunk
-        // size defined by the drive
-        if (IsIntegrityEnabled && reqChunkSize == null && Drive != null)
-            reqChunkSize = Drive.DefaultFileChunkSize;
-        else if (!IsIntegrityEnabled)
-            reqChunkSize = 0;
-        if (reqChunkSize == null)
-            throw new IntegrityException("File requires a chunk size");
-
-        if (nonce != null)
-            requestedNonce = nonce;
-        else if (requestedNonce == null && Drive != null)
-            requestedNonce = Drive.GetNextNonce();
-
-        if (requestedNonce == null)
-            throw new SecurityException("File requires a nonce");
-
-        Stream realStream = RealFile.GetOutputStream();
-        byte[] magicBytes = Generator.GetMagicBytes();
-        realStream.Write(magicBytes, 0, magicBytes.Length);
-
-        byte version = Generator.VERSION;
-        realStream.Write(new byte[] { version }, 0, Generator.VERSION_LENGTH);
-
-        byte[] chunkSizeBytes = BitConverter.ToBytes((int)reqChunkSize, 4);
-        realStream.Write(chunkSizeBytes, 0, chunkSizeBytes.Length);
-
-        realStream.Write(requestedNonce, 0, requestedNonce.Length);
-
-        realStream.Flush();
-        realStream.Close();
-    }
-
-    /// <summary>
     ///  Return the AES block size for encryption / decryption
     /// </summary>
     public int BlockSize => Generator.BLOCK_SIZE;
@@ -529,7 +506,7 @@ public class AesFile : IVirtualFile
         AesFile[] files = ListFiles();
         foreach (AesFile file in files)
         {
-            if (file.BaseName.Equals(filename))
+            if (file.Name.Equals(filename))
                 return file;
         }
         return null;
@@ -587,6 +564,10 @@ public class AesFile : IVirtualFile
 	///  <param name="realPath">The path of the real file</param>
     private string GetRelativePath(string realPath)
     {
+        if (Drive == null)
+        {
+            return this.RealFile.BaseName;
+        }
         AesFile virtualRoot = Drive.Root;
         string virtualRootPath = virtualRoot.RealFile.AbsolutePath;
         if (realPath.StartsWith(virtualRootPath))
@@ -600,7 +581,7 @@ public class AesFile : IVirtualFile
     ///  The base name for the file
     /// </summary>
     override
-    public string BaseName
+    public string Name
     {
         get
         {
@@ -663,14 +644,15 @@ public class AesFile : IVirtualFile
     private long GetHashTotalBytesLength()
     {
         // file does not support integrity
-        if (FileChunkSize == null || FileChunkSize <= 0)
+        if (FileChunkSize <= 0)
             return 0;
 
         // integrity has been requested but hash is missing
         if (IsIntegrityEnabled && HashKey == null)
             throw new IntegrityException("File requires hashKey, use SetVerifyIntegrity() to provide one");
-
-        return Integrity.GetTotalHashDataLength(RealFile.Length, (int)FileChunkSize,
+        long realLength = this.RealFile.Length;
+        int headerLength = this.GetHeaderLength();
+        return Integrity.GetTotalHashDataLength(EncryptionMode.Decrypt, realLength - headerLength, FileChunkSize,
                 Generator.HASH_RESULT_LENGTH, Generator.HASH_KEY_LENGTH);
     }
 
@@ -779,7 +761,7 @@ public class AesFile : IVirtualFile
             key = this.encryptionKey;
         if (key == null && Drive != null)
             key = Drive.Key.DriveEncKey;
-        string decfilename = TextDecryptor.DecryptString(rfilename, key, nonce, true);
+        string decfilename = TextDecryptor.DecryptString(rfilename, key, nonce);
         return decfilename;
     }
 
@@ -799,7 +781,7 @@ public class AesFile : IVirtualFile
             throw new SecurityException("Key is already set by the drive");
         if (Drive != null)
             key = Drive.Key.DriveEncKey;
-        string encryptedPath = TextEncryptor.EncryptString(filename, key, nonce, true);
+        string encryptedPath = TextEncryptor.EncryptString(filename, key, nonce);
         encryptedPath = encryptedPath.Replace("/", "-");
         return encryptedPath;
     }
@@ -933,10 +915,10 @@ public class AesFile : IVirtualFile
     /// </summary>
     public int GetMinimumPartSize()
     {
-        int? currChunkSize = this.FileChunkSize;
-        if (currChunkSize != null && currChunkSize != 0)
+        int currChunkSize = this.FileChunkSize;
+        if (currChunkSize != 0)
             return (int)currChunkSize;
-        if (this.RequestedChunkSize != null && this.RequestedChunkSize != 0)
+        if (this.RequestedChunkSize > 0)
             return (int)this.RequestedChunkSize;
         return this.BlockSize;
     }
@@ -949,10 +931,10 @@ public class AesFile : IVirtualFile
     /// <returns>The new file name</returns>
     public static string AutoRename(IVirtualFile file)
     {
-        string filename = IFile.AutoRename(file.BaseName);
+        string filename = IFile.AutoRename(file.Name);
         byte[] nonce = ((AesFile) file).Drive.GetNextNonce();
         byte[] key = ((AesFile)file).Drive.Key.DriveEncKey;
-        string encryptedPath = TextEncryptor.EncryptString(filename, key, nonce, true);
+        string encryptedPath = TextEncryptor.EncryptString(filename, key, nonce);
         encryptedPath = encryptedPath.Replace("/", "-");
         return encryptedPath;
     }

@@ -86,7 +86,7 @@ public class AesFileInputStream : Stream
     {
 
         this.salmonFile = salmonFile;
-        this.size = salmonFile.Size;
+        this.size = salmonFile.Length;
         if (buffersCount == 0)
             buffersCount = DEFAULT_BUFFERS;
         if (buffersCount > MAX_BUFFERS)
@@ -210,7 +210,7 @@ public class AesFileInputStream : Stream
     }
 
     /// <summary>
-    ///  Fills a cache buffer with the decrypted data from a part of an encrypted file served as a salmon stream
+    ///  Fills a cache buffer with the decrypted data from a part of an encrypted file.
     /// </summary>
     ///  <param name="cacheBuffer"> The cache buffer that will store the decrypted contents</param>
     ///  <param name="start"> The start position to start reading from</param>

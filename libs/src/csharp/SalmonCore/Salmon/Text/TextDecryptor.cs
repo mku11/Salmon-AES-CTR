@@ -24,6 +24,7 @@ SOFTWARE.
 
 using Mku.Salmon.Encode;
 using Mku.Salmon.Integrity;
+using Mku.Salmon.Streams;
 using System.IO;
 
 namespace Mku.Salmon.Text;
@@ -42,8 +43,7 @@ public class TextDecryptor
     ///  <param name="text"> Text to be decrypted.</param>
     ///  <param name="key">  The encryption key to be used.</param>
     ///  <param name="nonce">The nonce to be used, set only if header=false.</param>
-    ///  <param name="header">Set to true if you encrypted the string with encrypt(header=true), set only if nonce=null
-    ///                otherwise you will have to provide the original nonce.</param>
+    ///  <param name="format">The format to use, see EncryptionFormat</param>
     ///  <param name="integrity">      True if you want to calculate and store hash signatures for each chunkSize.</param>
     ///  <param name="hashKey">        Hash key to be used for all chunks.</param>
     ///  <param name="chunkSize">      The chunk size.</param>
@@ -51,11 +51,12 @@ public class TextDecryptor
     ///  <exception cref="IOException">Thrown if error during IO</exception>
     ///  <exception cref="SecurityException">Thrown when error with security</exception>
     ///  <exception cref="IntegrityException">Thrown when data are corrupt or tampered with.</exception>
-    public static string DecryptString(string text, byte[] key, byte[] nonce, bool header,
-        bool integrity = false, byte[] hashKey = null, int? chunkSize = null)
+    public static string DecryptString(string text, byte[] key, byte[] nonce,
+        EncryptionFormat format = EncryptionFormat.Salmon,
+        bool integrity = false, byte[] hashKey = null, int chunkSize = 0)
     {
         byte[] bytes = Base64Utils.Base64.Decode(text);
-        byte[] decBytes = decryptor.Decrypt(bytes, key, nonce, header, integrity, hashKey, chunkSize);
+        byte[] decBytes = decryptor.Decrypt(bytes, key, nonce, format, integrity, hashKey, chunkSize);
         string decString = System.Text.Encoding.Default.GetString(decBytes);
         return decString;
     }

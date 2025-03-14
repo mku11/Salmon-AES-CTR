@@ -71,7 +71,7 @@ public class AndroidDrive : AesDrive
     public Java.IO.File CopyToSharedFolder(AesFile salmonFile)
     {
         Java.IO.File privateDir = new Java.IO.File(this.PrivateDir.AbsolutePath);
-        Java.IO.File cacheFile = new Java.IO.File(privateDir, salmonFile.BaseName);
+        Java.IO.File cacheFile = new Java.IO.File(privateDir, salmonFile.Name);
         AndroidSharedFileObserver.RemoveFileObserver(cacheFile);
         cacheFile.Delete();
 

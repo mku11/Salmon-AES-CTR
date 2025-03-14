@@ -53,7 +53,7 @@ public class AesFileExporter : FileExporter
     protected void OnPrepare(IVirtualFile sourceFile, bool integrity)
     {
         // we use the drive hash key for integrity verification
-        ((AesFile)sourceFile).SetVerifyIntegrity(integrity, null);
+        ((AesFile)sourceFile).SetVerifyIntegrity(integrity);
     }
 
     /// <summary>
