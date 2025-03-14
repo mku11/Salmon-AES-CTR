@@ -356,7 +356,7 @@ public abstract class AesDrive : VirtualDrive
         byte[] driveKey = Key.DriveEncKey;
         byte[] hashKey = Key.HashKey;
 
-        IFile configFile = RealRoot.GetChild(ConfigFilename);
+        IFile configFile = GetConfigFile(RealRoot);
 
         if (driveKey == null && configFile != null && configFile.Exists)
             throw new AuthException("Not authorized");
@@ -364,7 +364,7 @@ public abstract class AesDrive : VirtualDrive
         // delete the old config file and create a new one
         if (configFile != null && configFile.Exists)
             configFile.Delete();
-        configFile = RealRoot.CreateFile(ConfigFilename);
+        configFile = CreateConfigFile(RealRoot);
 
         byte[] magicBytes = Generator.GetMagicBytes();
 
@@ -627,5 +627,30 @@ public abstract class AesDrive : VirtualDrive
         if (Key != null)
             Key.Clear();
         Key = null;
+    }
+	
+	
+	/**
+     * Create the config file for this drive. By default the config file is placed in the real root of the vault.
+     * You can override this with your own location, make sure you also override getConfigFile().
+     * @param realRoot The real root directory of the vault
+     * @returns The config file that was created
+     */
+	virtual
+    public IFile CreateConfigFile(IFile realRoot) {
+        IFile configFile = realRoot.CreateFile(AesDrive.ConfigFilename);
+        return configFile;
+    }
+
+    /**
+     * Get the config file for this drive. By default the config file is placed in the real root of the vault.
+     * You can override this with your own location.
+     * @param realRoot The real root directory of the vault
+     * @returns The config file that will be used for this drive.
+     */
+	virtual
+    public IFile GetConfigFile(IFile realRoot) {
+        IFile configFile = realRoot.GetChild(AesDrive.ConfigFilename);
+        return configFile;
     }
 }

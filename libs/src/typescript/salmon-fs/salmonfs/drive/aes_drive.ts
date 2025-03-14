@@ -25,7 +25,7 @@ SOFTWARE.
 import { HmacSHA256Provider } from "../../../salmon-core/salmon/integrity/hmac_sha256_provider.js";
 import { IHashProvider } from "../../../salmon-core/salmon/integrity/ihash_provider.js";
 import { Generator } from "../../../salmon-core/salmon/generator.js";
-import { IRealFile } from "../../fs/file/ifile.js";
+import { IFile } from "../../fs/file/ifile.js";
 import { DriveKey } from "./drive_key.js";
 import { DriveGenerator } from "./drive_generator.js";
 import { Integrity } from "../../../salmon-core/salmon/integrity/integrity.js";
@@ -47,7 +47,7 @@ import { IVirtualFile } from "../../fs/file/ivirtual_file.js";
 /**
  * Class provides an abstract virtual drive that can be extended for use with
  * any filesystem ie disk, net, cloud, etc.
- * Each drive implementation needs a corresponding implementation of {@link IRealFile}.
+ * Each drive implementation needs a corresponding implementation of {@link IFile}.
  */
 export abstract class AesDrive extends VirtualDrive {
     static readonly #DEFAULT_FILE_CHUNK_SIZE: number = 256 * 1024;
@@ -61,21 +61,21 @@ export abstract class AesDrive extends VirtualDrive {
     #defaultFileChunkSize: number = AesDrive.#DEFAULT_FILE_CHUNK_SIZE;
     #key: DriveKey | null = null;
     #driveId: Uint8Array | null = null;
-    #realRoot: IRealFile | null = null;
+    #realRoot: IFile | null = null;
     #virtualRoot: IVirtualFile | null = null;
 
     readonly #hashProvider: IHashProvider = new HmacSHA256Provider();
     #sequencer: INonceSequencer | null = null;
 
-    public async initialize(realRoot: IRealFile, createIfNotExists: boolean): Promise<void> {
+    public async initialize(realRoot: IFile, createIfNotExists: boolean): Promise<void> {
         this.close();
         if (realRoot == null)
             return;
         this.#realRoot = realRoot;
-        let parent: IRealFile | null = await this.#realRoot.getParent();
+        let parent: IFile | null = await this.#realRoot.getParent();
         if (parent != null && !createIfNotExists && ! await this.hasConfig() && await this.#realRoot.getParent() != null && await parent.exists()) {
             // try the parent if this is the filesystem folder 
-            let originalRealRoot: IRealFile = this.#realRoot;
+            let originalRealRoot: IFile = this.#realRoot;
             this.#realRoot = parent;
             if (! await this.hasConfig()) {
                 // revert to original
@@ -85,7 +85,7 @@ export abstract class AesDrive extends VirtualDrive {
         if (this.#realRoot == null)
             throw new Error("Could not initialize root folder");
 
-        let virtualRootRealFile: IRealFile | null = await this.#realRoot.getChild(AesDrive.#virtualDriveDirectoryName);
+        let virtualRootRealFile: IFile | null = await this.#realRoot.getChild(AesDrive.#virtualDriveDirectoryName);
         if (createIfNotExists && (virtualRootRealFile == null || !await virtualRootRealFile.exists())) {
             virtualRootRealFile = await this.#realRoot.createDirectory(AesDrive.#virtualDriveDirectoryName);
         }
@@ -181,7 +181,7 @@ export abstract class AesDrive extends VirtualDrive {
         return this.#virtualRoot;
     }
 
-    public getRealRoot(): IRealFile | null {
+    public getRealRoot(): IFile | null {
         return this.#realRoot;
     }
 
@@ -294,7 +294,7 @@ export abstract class AesDrive extends VirtualDrive {
      * @param file The file
      * @param bufferSize The buffer to be used when reading
      */
-    public async getBytesFromRealFile(file: IRealFile, bufferSize: number): Promise<Uint8Array> {
+    public async getBytesFromRealFile(file: IFile, bufferSize: number): Promise<Uint8Array> {
         let stream: RandomAccessStream = await file.getInputStream();
         let ms: MemoryStream = new MemoryStream();
         await stream.copyTo(ms, bufferSize, null);
@@ -309,10 +309,10 @@ export abstract class AesDrive extends VirtualDrive {
     /**
      * Return the drive configuration file.
      */
-    async #getDriveConfigFile(): Promise<IRealFile | null> {
+    async #getDriveConfigFile(): Promise<IFile | null> {
         if (this.#realRoot == null || !await this.#realRoot.exists())
             return null;
-        let file: IRealFile | null = await this.#realRoot.getChild(AesDrive.#configFilename);
+        let file: IFile | null = await this.#realRoot.getChild(AesDrive.#configFilename);
         return file;
     }
 
@@ -320,10 +320,10 @@ export abstract class AesDrive extends VirtualDrive {
      * Return the default external export dir that all file can be exported to.
      * @return The file on the real filesystem.
      */
-    public async getExportDir(): Promise<IRealFile> {
+    public async getExportDir(): Promise<IFile> {
         if (this.#realRoot == null)
             throw new SecurityException("Cannot export, make sure you init the drive first");
-        let exportDir: IRealFile | null = await this.#realRoot.getChild(AesDrive.#exportDirectoryName);
+        let exportDir: IFile | null = await this.#realRoot.getChild(AesDrive.#exportDirectoryName);
         if (exportDir == null || !await exportDir.exists())
             exportDir = await this.#realRoot.createDirectory(AesDrive.#exportDirectoryName);
         return exportDir;
@@ -333,7 +333,7 @@ export abstract class AesDrive extends VirtualDrive {
      * Return the configuration properties of this drive.
      */
     protected async getDriveConfig(): Promise<DriveConfig | null> {
-        let configFile: IRealFile | null = await this.#getDriveConfigFile();
+        let configFile: IFile | null = await this.#getDriveConfigFile();
         if (configFile == null || !await configFile.exists())
             return null;
         let bytes: Uint8Array = await this.getBytesFromRealFile(configFile, 0);
@@ -382,7 +382,7 @@ export abstract class AesDrive extends VirtualDrive {
     public async initFS(): Promise<void> {
         if (this.#realRoot == null)
             throw new SecurityException("Could not initialize virtual file system, make sure you run init first");
-        let virtualRootRealFile: IRealFile | null = await this.#realRoot.getChild(AesDrive.#virtualDriveDirectoryName);
+        let virtualRootRealFile: IFile | null = await this.#realRoot.getChild(AesDrive.#virtualDriveDirectoryName);
         if (virtualRootRealFile == null || !await virtualRootRealFile.exists()) {
             try {
                 virtualRootRealFile = await this.#realRoot.createDirectory(AesDrive.#virtualDriveDirectoryName);
@@ -407,7 +407,7 @@ export abstract class AesDrive extends VirtualDrive {
      * @param password Text password to encrypt the drive configuration.
      * @param sequencer The sequencer to use.
      */
-    public static async openDrive(dir: IRealFile, driveClassType: any, password: string, sequencer: INonceSequencer | null = null): Promise<AesDrive> {
+    public static async openDrive(dir: IFile, driveClassType: any, password: string, sequencer: INonceSequencer | null = null): Promise<AesDrive> {
         let drive: AesDrive = await AesDrive.#createDriveInstance(dir, false, driveClassType, sequencer);
         if (!await drive.hasConfig()) {
             throw new Error("Drive does not exist");
@@ -427,7 +427,7 @@ export abstract class AesDrive extends VirtualDrive {
      * @throws IntegrityException Thrown if the data are corrupt or tampered with.
      * @throws SequenceException Thrown if error with the nonce sequence
      */
-    public static async createDrive(dir: IRealFile, driveClassType: any, password: string, sequencer: INonceSequencer): Promise<AesDrive> {
+    public static async createDrive(dir: IFile, driveClassType: any, password: string, sequencer: INonceSequencer): Promise<AesDrive> {
         let drive: AesDrive = await AesDrive.#createDriveInstance(dir, true, driveClassType, sequencer);
         if (await drive.hasConfig())
             throw new SecurityException("Drive already exists");
@@ -443,7 +443,7 @@ export abstract class AesDrive extends VirtualDrive {
      * @return
      * @throws SalmonSecurityException Thrown when error with security
      */
-    static async #createDriveInstance(dir: IRealFile, createIfNotExists: boolean, 
+    static async #createDriveInstance(dir: IFile, createIfNotExists: boolean, 
         driveClassType: any, sequencer: INonceSequencer | null = null): Promise<AesDrive> {
         try {
             let drive: AesDrive = new driveClassType;
@@ -562,10 +562,10 @@ export abstract class AesDrive extends VirtualDrive {
             throw new Error("Cannot create config, no key found, make sure you init the drive first");
         let driveKey: Uint8Array | null = key.getDriveKey();
         let hashKey: Uint8Array | null = key.getHashKey();
-        let realRoot: IRealFile | null = this.getRealRoot();
+        let realRoot: IFile | null = this.getRealRoot();
         if (realRoot == null)
             throw new Error("Cannot create config, no root found, make sure you init the drive first");
-        let configFile: IRealFile | null = await this.getConfigFile(realRoot);
+        let configFile: IFile | null = await this.getConfigFile(realRoot);
 
         if (driveKey == null && configFile != null && await configFile.exists())
             throw new AuthException("Not authenticated");
@@ -574,6 +574,8 @@ export abstract class AesDrive extends VirtualDrive {
         if (configFile != null && await configFile.exists())
             await configFile.delete();
         configFile = await this.createConfigFile(realRoot);
+        if(configFile == null)
+            throw new AuthException("Could not crete config file");
 
         let magicBytes: Uint8Array = Generator.getMagicBytes();
 
@@ -674,8 +676,8 @@ export abstract class AesDrive extends VirtualDrive {
      * @param realRoot The real root directory of the vault
      * @returns The config file that was created
      */
-    public async createConfigFile(realRoot: IRealFile) {
-        let configFile: IRealFile = await realRoot.createFile(AesDrive.getConfigFilename());
+    public async createConfigFile(realRoot: IFile): Promise<IFile>  {
+        let configFile: IFile = await realRoot.createFile(AesDrive.getConfigFilename());
         return configFile;
     }
 
@@ -685,8 +687,8 @@ export abstract class AesDrive extends VirtualDrive {
      * @param realRoot The real root directory of the vault
      * @returns The config file that will be used for this drive.
      */
-    public async getConfigFile(realRoot: IRealFile) {
-        let configFile: IRealFile | null = await realRoot.getChild(AesDrive.getConfigFilename());
+    public async getConfigFile(realRoot: IFile): Promise<IFile | null> {
+        let configFile: IFile | null = await realRoot.getChild(AesDrive.getConfigFilename());
         return configFile;
     }
 }

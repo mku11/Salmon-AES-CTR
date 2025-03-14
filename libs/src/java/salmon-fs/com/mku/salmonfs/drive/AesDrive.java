@@ -447,7 +447,7 @@ public abstract class AesDrive extends VirtualDrive {
         byte[] driveKey = getKey().getDriveKey();
         byte[] hashKey = getKey().getHashKey();
 
-        IFile configFile = realRoot.getChild(configFilename);
+        IFile configFile = getConfigFile(realRoot);
 
         if (driveKey == null && configFile != null && configFile.exists())
             throw new AuthException("Not authorized");
@@ -455,7 +455,7 @@ public abstract class AesDrive extends VirtualDrive {
         // delete the old config file and create a new one
         if (configFile != null && configFile.exists())
             configFile.delete();
-        configFile = realRoot.createFile(configFilename);
+        configFile = createConfigFile(realRoot);
 
         byte[] magicBytes = Generator.getMagicBytes();
 
@@ -524,6 +524,11 @@ public abstract class AesDrive extends VirtualDrive {
         return virtualRoot;
     }
 
+    /**
+     * Return the real root directory of the drive.
+     *
+     * @return The real root directory of the drive
+     */
     public IFile getRealRoot() {
         return realRoot;
     }
@@ -738,5 +743,27 @@ public abstract class AesDrive extends VirtualDrive {
      */
     public void setSequencer(INonceSequencer sequencer) {
         this.sequencer = sequencer;
+    }
+	
+	/**
+     * Create the config file for this drive. By default the config file is placed in the real root of the vault.
+     * You can override this with your own location, make sure you also override getConfigFile().
+     * @param realRoot The real root directory of the vault
+     * @returns The config file that was created
+     */
+    public IFile createConfigFile(IFile realRoot) throws IOException {
+        IFile configFile = realRoot.createFile(AesDrive.getConfigFilename());
+        return configFile;
+    }
+
+    /**
+     * Get the config file for this drive. By default the config file is placed in the real root of the vault.
+     * You can override this with your own location.
+     * @param realRoot The real root directory of the vault
+     * @returns The config file that will be used for this drive.
+     */
+    public IFile getConfigFile(IFile realRoot) throws IOException {
+        IFile configFile = realRoot.getChild(AesDrive.getConfigFilename());
+        return configFile;
     }
 }

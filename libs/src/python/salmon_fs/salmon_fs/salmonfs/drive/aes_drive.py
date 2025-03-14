@@ -533,14 +533,14 @@ class AesDrive(VirtualDrive, ABC):
         drive_key: bytearray | None = self.get_key().get_drive_key()
         hash_key: bytearray | None = self.get_key().get_hash_key()
 
-        config_file: IFile = self.get_real_root().get_child(AesDrive.get_config_filename())
+        config_file: IFile = self.get_config_file(self.get_real_root())
         if drive_key is None and config_file is not None and config_file.exists():
             raise AuthException("Not authorized")
 
         # delete the old config file and create a new one
         if config_file is not None and config_file.exists():
             config_file.delete()
-        config_file = self.get_real_root().create_file(AesDrive.get_config_filename())
+        config_file = self.create_config_file(self.get_real_root())
 
         magic_bytes: bytearray = Generator.get_magic_bytes()
 
@@ -625,3 +625,23 @@ class AesDrive(VirtualDrive, ABC):
         :param sequencer: The nonce sequencer
         """
         self.__sequencer = sequencer
+
+    def create_config_file(self, real_root: IFile) -> IFile:
+        """
+        Create the drive config file
+        :param real_root: The real root directory.
+        :return: The config file
+        """
+        config_file: IFile = real_root.create_file(AesDrive.get_config_filename());
+        return config_file;
+    
+    def get_config_file(self, real_root: IFile) -> IFile:
+        """
+        Get the drive config file
+        :param real_root: The real root directory.
+        :return: The config file
+        """
+        config_file: IFile = real_root.get_child(AesDrive.get_config_filename());
+        return config_file;
+        
+    
