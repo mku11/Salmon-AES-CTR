@@ -53,14 +53,13 @@ public interface IVirtualFile {
      * Retrieves a stream that will be used for writing the file contents.
      *
      * @return The output stream
-     * @throws SecurityException  Thrown if there is a security exception
-     * @throws IntegrityException Thrown if the data are corrupt or tampered with.
-     * @throws SequenceException  Thrown if there is an error with the nonce sequence
+	 * @throws IOException  Thrown if there is a problem with the stream.
      */
     RandomAccessStream getOutputStream() throws IOException;
 
     /**
      * Lists files and directories under this directory
+	 * @return An array of files and subdirectories.
      */
     IVirtualFile[] listFiles();
 
@@ -94,6 +93,7 @@ public interface IVirtualFile {
      * Return the virtual path for this file.
      *
      * @return The virtual path.
+	 * @throws IOException        Thrown if there is an IO error.
      */
     String getPath() throws IOException;
 

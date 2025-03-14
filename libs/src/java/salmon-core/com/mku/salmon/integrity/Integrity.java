@@ -132,6 +132,7 @@ public class Integrity {
     /**
      * Get the total number of bytes for all hash signatures for data of a specific length.
      *
+	 * @param mode		 The encryption mode
      * @param length     The length of the data.
      * @param chunkSize  The byte size of the stream chunk that will be used to calculate the hash.
      *                   The length should be fixed value except for the last chunk which might be lesser since we don't use padding

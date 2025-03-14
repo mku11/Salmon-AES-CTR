@@ -108,7 +108,7 @@ public abstract class AesDrive extends VirtualDrive {
      * Get the virtual encrypted AesFile backed by an IFile.
      *
      * @param file The real file.
-     * @return
+     * @return The virtual file
      */
     protected AesFile getVirtualFile(IFile file) {
         return new AesFile(file, this);
@@ -171,7 +171,7 @@ public abstract class AesDrive extends VirtualDrive {
     /**
      * Get the directory name for exporting files.
      *
-     * @return
+     * @return The directory name
      */
     public static String getExportDirectoryName() {
         return exportDirectoryName;
