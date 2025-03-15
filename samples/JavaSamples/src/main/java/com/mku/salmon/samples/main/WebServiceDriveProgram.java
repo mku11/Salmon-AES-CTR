@@ -1,12 +1,12 @@
 package com.mku.salmon.samples.main;
 
-import com.mku.file.IRealFile;
-import com.mku.file.JavaFile;
-import com.mku.file.JavaWSFile;
-import com.mku.salmon.SalmonDrive;
+import com.mku.fs.file.File;
+import com.mku.fs.file.IFile;
+import com.mku.fs.file.WSFile;
 import com.mku.salmon.samples.samples.DriveSample;
 import com.mku.salmon.streams.ProviderType;
-import com.mku.salmon.streams.SalmonStream;
+import com.mku.salmon.streams.AesStream;
+import com.mku.salmonfs.drive.AesDrive;
 
 public class WebServiceDriveProgram {
     public static void main(String[] args) throws Exception {
@@ -16,22 +16,22 @@ public class WebServiceDriveProgram {
         String drivePath = "/example_drive_" + System.currentTimeMillis();
         String password = "test123";
 
-        SalmonStream.setAesProviderType(ProviderType.Default);
+        AesStream.setAesProviderType(ProviderType.Default);
 
-        IRealFile[] filesToImport = new JavaFile[]{new JavaFile("./data/file.txt")};
+        IFile[] filesToImport = new File[]{new File("./data/file.txt")};
 
-        IRealFile dir = new JavaFile("./output");
+        IFile dir = new File("./output");
         if (!dir.exists())
             dir.mkdir();
-        IRealFile exportDir = dir.getChild("export");
+        IFile exportDir = dir.getChild("export");
         if (!exportDir.exists())
             exportDir.mkdir();
 
-        IRealFile driveDir = new JavaWSFile(drivePath, wsServicePath, new JavaWSFile.Credentials(wsUser, wsPassword));
+        IFile driveDir = new WSFile(drivePath, wsServicePath, new WSFile.Credentials(wsUser, wsPassword));
         if (!driveDir.exists())
             driveDir.mkdir();
 
-        SalmonDrive wsDrive = DriveSample.createDrive(driveDir, password);
+        AesDrive wsDrive = DriveSample.createDrive(driveDir, password);
         wsDrive = DriveSample.openDrive(driveDir, password);
         DriveSample.importFiles(wsDrive, filesToImport);
         DriveSample.listFiles(wsDrive);

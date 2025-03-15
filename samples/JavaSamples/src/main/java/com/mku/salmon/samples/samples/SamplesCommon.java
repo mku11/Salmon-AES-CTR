@@ -1,7 +1,7 @@
 package com.mku.salmon.samples.samples;
 
-import com.mku.salmon.SalmonGenerator;
-import com.mku.salmon.password.SalmonPassword;
+import com.mku.salmon.Generator;
+import com.mku.salmon.password.Password;
 import com.mku.streams.MemoryStream;
 
 import java.util.Random;
@@ -12,12 +12,12 @@ public class SamplesCommon {
     // create an encryption key from a text password
     public static byte[] getKeyFromPassword(String password) {
         // generate a salt
-        byte[] salt = SalmonGenerator.getSecureRandomBytes(24);
+        byte[] salt = Generator.getSecureRandomBytes(24);
         // make sure the iterations are a large enough number
         int iterations = 60000;
 
         // generate a 256bit key from the text password
-        byte[] key = SalmonPassword.getKeyFromPassword(password, salt, iterations, 32);
+        byte[] key = Password.getKeyFromPassword(password, salt, iterations, 32);
 
         return key;
     }

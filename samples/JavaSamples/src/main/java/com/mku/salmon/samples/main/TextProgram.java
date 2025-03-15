@@ -3,7 +3,7 @@ package com.mku.salmon.samples.main;
 import com.mku.salmon.samples.samples.SamplesCommon;
 import com.mku.salmon.samples.samples.TextSample;
 import com.mku.salmon.streams.ProviderType;
-import com.mku.salmon.streams.SalmonStream;
+import com.mku.salmon.streams.AesStream;
 
 import java.io.IOException;
 
@@ -12,7 +12,7 @@ public class TextProgram {
         String password = "test123";
         String text = "This is a plain text that will be encrypted";
 
-        SalmonStream.setAesProviderType(ProviderType.Default);
+        AesStream.setAesProviderType(ProviderType.Default);
 
         // generate an encryption key from the text password
         byte[] key = SamplesCommon.getKeyFromPassword(password);

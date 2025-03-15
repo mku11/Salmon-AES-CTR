@@ -1,11 +1,11 @@
 package com.mku.salmon.samples.main;
 
-import com.mku.file.IRealFile;
-import com.mku.file.JavaFile;
-import com.mku.salmon.SalmonDrive;
+import com.mku.fs.file.File;
+import com.mku.fs.file.IFile;
 import com.mku.salmon.samples.samples.DriveSample;
 import com.mku.salmon.streams.ProviderType;
-import com.mku.salmon.streams.SalmonStream;
+import com.mku.salmon.streams.AesStream;
+import com.mku.salmonfs.drive.AesDrive;
 
 public class LocalDriveProgram
 {
@@ -13,31 +13,31 @@ public class LocalDriveProgram
         String password = "test123";
         int threads = 2;
 
-        SalmonStream.setAesProviderType(ProviderType.Default);
+        AesStream.setAesProviderType(ProviderType.Default);
 
         // directories and files
-        IRealFile dir = new JavaFile("./output");
+        IFile dir = new File("./output");
         if (!dir.exists())
             dir.mkdir();
 
         // create
-        IRealFile driveDir = dir.getChild("drive_" + System.currentTimeMillis());
+        IFile driveDir = dir.getChild("drive_" + System.currentTimeMillis());
         if (!driveDir.exists())
             driveDir.mkdir();
-        SalmonDrive localDrive = DriveSample.createDrive(driveDir, password);
+        AesDrive localDrive = DriveSample.createDrive(driveDir, password);
 
         // open
         localDrive = DriveSample.openDrive(driveDir, password);
 
         // import
-        IRealFile[] filesToImport = new JavaFile[] {new JavaFile("./data/file.txt")};
+        IFile[] filesToImport = new File[] {new File("./data/file.txt")};
         DriveSample.importFiles(localDrive, filesToImport, threads);
 
         // list
         DriveSample.listFiles(localDrive);
 
         // export the files
-        IRealFile exportDir = driveDir.getChild("export");
+        IFile exportDir = driveDir.getChild("export");
         if (!exportDir.exists())
             exportDir.mkdir();
         DriveSample.exportFiles(localDrive, exportDir, threads);

@@ -1,10 +1,10 @@
 package com.mku.salmon.samples.samples;
 
-import com.mku.file.IRealFile;
-import com.mku.salmon.SalmonFile;
-import com.mku.salmon.SalmonGenerator;
-import com.mku.salmon.integrity.SalmonIntegrity;
-import com.mku.salmon.streams.SalmonStream;
+import com.mku.fs.file.IFile;
+import com.mku.salmon.Generator;
+import com.mku.salmon.integrity.Integrity;
+import com.mku.salmon.streams.AesStream;
+import com.mku.salmonfs.file.AesFile;
 import com.mku.streams.RandomAccessStream;
 
 import java.io.IOException;
@@ -12,23 +12,23 @@ import java.io.IOException;
 public class FileSample {
     static int BUFFER_SIZE = 256 * 1024; // recommended buffer size aligned to internal buffers
 
-    public static void encryptTextToFile(String text, byte[] key, byte[] integrityKey, IRealFile file) throws IOException {
-        // encrypt to a file, the SalmonFile has a virtual file system API
-        System.out.println("Encrypting text to file: " + file.getBaseName());
+    public static void encryptTextToFile(String text, byte[] key, byte[] integrityKey, IFile file) throws IOException {
+        // encrypt to a file, the AesFile has a virtual file system API
+        System.out.println("Encrypting text to file: " + file.getName());
 
         byte[] data = text.getBytes();
 
         // Always request a new random secure nonce
-        byte[] nonce = SalmonGenerator.getSecureRandomBytes(8); // 64 bit nonce
+        byte[] nonce = Generator.getSecureRandomBytes(8); // 64 bit nonce
 
-        SalmonFile encFile = new SalmonFile(file);
+        AesFile encFile = new AesFile(file);
         encFile.setEncryptionKey(key);
         encFile.setRequestedNonce(nonce);
 
         if (integrityKey != null)
-            encFile.setApplyIntegrity(true, integrityKey, SalmonIntegrity.DEFAULT_CHUNK_SIZE);
+            encFile.setApplyIntegrity(true, integrityKey, Integrity.DEFAULT_CHUNK_SIZE);
         else
-            encFile.setApplyIntegrity(false, null, null);
+            encFile.setApplyIntegrity(false);
 
         RandomAccessStream encStream = encFile.getOutputStream();
 
@@ -45,12 +45,12 @@ public class FileSample {
         encStream.close();
     }
 
-    public static String decryptTextFromFile(byte[] key, byte[] integrityKey, IRealFile file) throws IOException {
-        System.out.println("Decrypting text from file: " + file.getBaseName());
+    public static String decryptTextFromFile(byte[] key, byte[] integrityKey, IFile file) throws IOException {
+        System.out.println("Decrypting text from file: " + file.getName());
 
-        // Wrap the file with a SalmonFile
+        // Wrap the file with a AesFile
         // the nonce is already embedded in the header
-        SalmonFile encFile = new SalmonFile(file);
+        AesFile encFile = new AesFile(file);
 
         // set the key
         encFile.setEncryptionKey(key);
@@ -61,10 +61,10 @@ public class FileSample {
             encFile.setVerifyIntegrity(false, null);
 
         // open a read stream
-        SalmonStream decStream = encFile.getInputStream();
+        AesStream decStream = encFile.getInputStream();
 
         // decrypt the data
-        byte[] decData = new byte[(int) decStream.length()];
+        byte[] decData = new byte[(int) decStream.getLength()];
         int totalBytesRead = 0;
         int bytesRead = 0;
         while ((bytesRead = decStream.read(decData, totalBytesRead, FileSample.BUFFER_SIZE)) > 0) {
