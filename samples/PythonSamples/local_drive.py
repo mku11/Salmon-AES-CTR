@@ -5,20 +5,20 @@
 
 import time
 
-from salmon_core.salmon.streams.salmon_stream import SalmonStream
-from salmon_core.salmon.streams.salmon_stream import ProviderType
-from salmon_fs.file.py_file import PyFile
+from salmon_core.salmon.streams.aes_stream import AesStream
+from salmon_core.salmon.streams.provider_type import ProviderType
+from salmon_fs.fs.file.file import File
 
 from samples.drive_sample import DriveSample
 
 password = "test123"
 threads = 2
 
-SalmonStream.set_aes_provider_type(ProviderType.Default)
+AesStream.set_aes_provider_type(ProviderType.Default)
 
 if __name__ == '__main__':
     # directories and files
-    v_dir = PyFile("./output")
+    v_dir = File("./output")
     if not v_dir.exists():
         v_dir.mkdir()
 
@@ -32,7 +32,7 @@ if __name__ == '__main__':
     local_drive = DriveSample.open_drive(drive_dir, password)
 
     # import
-    files_to_import = [PyFile("./data/file.txt")]
+    files_to_import = [File("./data/file.txt")]
     DriveSample.import_files(local_drive, files_to_import, threads)
 
     # list

@@ -3,9 +3,9 @@
 # Make sure you run with -O option to disable type checks during runtime
 # python -O data.py
 
-from salmon_core.salmon.salmon_generator import SalmonGenerator
-from salmon_core.salmon.streams.salmon_stream import SalmonStream
-from salmon_core.salmon.streams.salmon_stream import ProviderType
+from salmon_core.salmon.generator import Generator
+from salmon_core.salmon.streams.aes_stream import AesStream
+from salmon_core.salmon.streams.aes_stream import ProviderType
 
 from samples.data_sample import DataSample
 from samples.samples_common import get_key_from_password, generate_random_data
@@ -15,7 +15,7 @@ size = 8 * 1024 * 1024
 threads = 1
 integrity = True
 
-SalmonStream.set_aes_provider_type(ProviderType.Default)
+AesStream.set_aes_provider_type(ProviderType.Default)
 
 # generate a key
 print("generating keys and random data...")
@@ -24,7 +24,7 @@ key = get_key_from_password(password)
 # enable integrity (optional)
 if integrity:
     # generate an HMAC key
-    integrity_key = SalmonGenerator.get_secure_random_bytes(32)
+    integrity_key = Generator.get_secure_random_bytes(32)
 else:
     integrity_key = None
 
@@ -32,7 +32,7 @@ else:
 data = generate_random_data(size)
 
 print("starting encryption...")
-encData = DataSample.encrypt_data(data, key, integrity_key, threads)
+enc_data = DataSample.encrypt_data(data, key, integrity_key, threads)
 print("starting decryption...")
-decData = DataSample.decrypt_data(encData, key, integrity_key, threads)
+dec_data = DataSample.decrypt_data(enc_data, key, integrity_key, threads)
 print("done")

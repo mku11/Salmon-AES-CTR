@@ -1,31 +1,31 @@
 #!/usr/bin/env python3
-from salmon_core.salmon.integrity.salmon_integrity import SalmonIntegrity
-from salmon_core.salmon.salmon_generator import SalmonGenerator
-from salmon_fs.file.ireal_file import IRealFile
-from salmon_fs.salmon.salmon_file import SalmonFile
+from salmon_core.salmon.integrity.integrity import Integrity
+from salmon_core.salmon.generator import Generator
+from salmon_fs.fs.file.ifile import IFile
+from salmon_fs.salmonfs.file.aes_file import AesFile
 
 
 class FileSample:
     BUFFER_SIZE = 256 * 1024  # recommended buffer size aligned to internal buffers
 
     @staticmethod
-    def encrypt_text_to_file(text: str, key: bytearray, integrity_key: bytearray, file: IRealFile):
-        # encrypt to a file, the SalmonFile has a virtual file system API
-        print("Encrypting text to file: " + file.get_base_name())
+    def encrypt_text_to_file(text: str, key: bytearray, integrity_key: bytearray, file: IFile):
+        # encrypt to a file, the AesFile has a virtual file system API
+        print("Encrypting text to file: " + file.get_name())
 
         data = bytearray(text.encode())
 
         # Always request a new random secure nonce
-        nonce = SalmonGenerator.get_secure_random_bytes(8)  # 64 bit nonce
+        nonce = Generator.get_secure_random_bytes(8)  # 64 bit nonce
 
-        enc_file = SalmonFile(file)
+        enc_file = AesFile(file)
         enc_file.set_encryption_key(key)
         enc_file.set_requested_nonce(nonce)
 
         if integrity_key:
-            enc_file.set_apply_integrity(True, integrity_key, SalmonIntegrity.DEFAULT_CHUNK_SIZE)
+            enc_file.set_apply_integrity(True, integrity_key, Integrity.DEFAULT_CHUNK_SIZE)
         else:
-            enc_file.set_apply_integrity(False, None, None)
+            enc_file.set_apply_integrity(False)
 
         enc_stream = enc_file.get_output_stream()
 
@@ -42,12 +42,12 @@ class FileSample:
         enc_stream.close()
 
     @staticmethod
-    def decrypt_text_from_file(key: bytearray, integrity_key: bytearray | None, file: IRealFile) -> str:
-        print("Decrypting text from file: " + file.get_base_name())
+    def decrypt_text_from_file(key: bytearray, integrity_key: bytearray | None, file: IFile) -> str:
+        print("Decrypting text from file: " + file.get_name())
 
-        # Wrap the file with a SalmonFile
+        # Wrap the file with a AesFile
         # the nonce is already embedded in the header
-        enc_file = SalmonFile(file)
+        enc_file = AesFile(file)
 
         # set the key
         enc_file.set_encryption_key(key)
@@ -61,7 +61,7 @@ class FileSample:
         dec_stream = enc_file.get_input_stream()
 
         # decrypt the data
-        dec_data = bytearray(dec_stream.length())
+        dec_data = bytearray(dec_stream.get_length())
         total_bytes_read = 0
         while bytes_read := dec_stream.read(dec_data, total_bytes_read, FileSample.BUFFER_SIZE) > 0:
             total_bytes_read += bytes_read
