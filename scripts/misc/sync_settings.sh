@@ -129,6 +129,19 @@ sed -i -e "s/$PATTERN/$SUBST/g" $DIR/salmon-ws/README.txt
 FILE=../../services/winservice/project/SalmonWinService/README.txt
 sed -i -e "s/$PATTERN/$SUBST/g" $FILE
 
+PATTERN="^version = [^/]*"
+SUBST="version = \"$SALMON_VERSION\""
+FILE=../../libs/src/python/salmon_core/pyproject.toml
+sed -i -e "s/$PATTERN/$SUBST/g" $FILE
+
+FILE=../../libs/src/python/salmon_fs/pyproject.toml
+sed -i -e "s/$PATTERN/$SUBST/g" $FILE
+
+PATTERN="  'salmon_core == [^/]*',"
+SUBST="  'salmon_core == $SALMON_VERSION',"
+FILE=../../libs/src/python/salmon_fs/pyproject.toml
+sed -i -e "s/$PATTERN/$SUBST/g" $FILE
+
 # SCRIPTS
 PATTERN="^set SALMON_VERSION=[^/]*"
 SUBST="set SALMON_VERSION=$SALMON_VERSION"
