@@ -41,6 +41,7 @@ from salmon_core.salmon.range_exceeded_exception import RangeExceededException
 from salmon_core.salmon.security_exception import SecurityException
 from salmon_core.salmon.text.text_decryptor import TextDecryptor
 from salmon_core.salmon.text.text_encryptor import TextEncryptor
+from salmon_core.salmon.generator import Generator
 from salmon_core_test_helper import SalmonCoreTestHelper
 from salmon.integrity.integrity_exception import IntegrityException
 
@@ -543,6 +544,70 @@ class SalmonCoreTests(TestCase):
                                                                 EncryptionFormat.Salmon, True,
                                                                 SalmonCoreTestHelper.TEST_HMAC_KEY_BYTES,
                                                                 32)
+        t3 = time.time() * 1000
+
+        self.assertEqual(data, dec_data)
+        print("enc time: " + str(t2 - t1))
+        print("dec time: " + str(t3 - t2))
+
+    def test_ShouldEncryptAndDecryptArrayIntegrityNoApply(self):
+        data = bytearray(SalmonCoreTestHelper.TEST_TEXT.encode())
+        key = Generator.get_secure_random_bytes(32)
+        nonce = Generator.get_secure_random_bytes(8)
+        hash_key = Generator.get_secure_random_bytes(32)
+
+        enc_data = SalmonCoreTestHelper.get_encryptor().encrypt(data, key, nonce, EncryptionFormat.Salmon, True,
+                                                                hash_key)
+
+        # specify integrity
+        dec_data2 = SalmonCoreTestHelper.get_decryptor().decrypt(enc_data, key, None, EncryptionFormat.Salmon, True,
+                                                                 hash_key)
+        self.assertEqual(data, dec_data2)
+
+        # skip integrity
+        dec_data3: bytearray = SalmonCoreTestHelper.get_decryptor().decrypt(enc_data, key, None,
+                                                                            EncryptionFormat.Salmon,
+                                                                            False)
+        self.assertEqual(data, dec_data3)
+
+        # tamper
+        enc_data[14] = 0
+
+        # specify integrity
+        caught: bool = False
+        try:
+            dec_data4: bytearray = SalmonCoreTestHelper.get_decryptor().decrypt(enc_data, key, None,
+                                                                                EncryptionFormat.Salmon, True, hash_key)
+            self.assertEqual(data, dec_data4)
+        except Exception as ex:
+            caught = True
+        self.assertTrue(caught)
+
+        # skip integrity, not failing but results don't match
+        caught2: bool = False
+        try:
+            dec_data5: bytearray = SalmonCoreTestHelper.get_decryptor().decrypt(enc_data, key, None,
+                                                                                EncryptionFormat.Salmon, False)
+        except Exception as ex:
+            caught2 = True
+
+        self.assertFalse(caught2)
+
+    def test_ShouldEncryptAndDecryptArrayIntegrityCustomChunkSizeDecNoChunkSize(self):
+        data: bytearray = SalmonCoreTestHelper.get_rand_array(1 * 1024 * 1024)
+        t1 = time.time() * 1000
+        enc_data: bytearray = SalmonCoreTestHelper.get_encryptor().encrypt(data,
+                                                                          SalmonCoreTestHelper.TEST_KEY_BYTES,
+                                                                          SalmonCoreTestHelper.TEST_NONCE_BYTES,
+                                                                          EncryptionFormat.Salmon, True,
+                                                                          SalmonCoreTestHelper.TEST_HMAC_KEY_BYTES, 32)
+        t2 = time.time() * 1000
+        dec_data = SalmonCoreTestHelper.get_decryptor().decrypt(enc_data,
+                                                               SalmonCoreTestHelper.TEST_KEY_BYTES,
+                                                               SalmonCoreTestHelper.TEST_NONCE_BYTES,
+                                                               EncryptionFormat.Salmon, True,
+                                                               SalmonCoreTestHelper.TEST_HMAC_KEY_BYTES)
+
         t3 = time.time() * 1000
 
         self.assertEqual(data, dec_data)

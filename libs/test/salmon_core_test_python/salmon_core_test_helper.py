@@ -206,7 +206,7 @@ class SalmonCoreTestHelper:
 
     @staticmethod
     def decrypt(input_bytes, key, iv, buffer_size,
-                integrity, chunk_size: int, hash_key):
+                integrity: bool, chunk_size: int, hash_key):
         ins = MemoryStream(input_bytes)
         outs = MemoryStream()
         reader = AesStream(key, iv, EncryptionMode.Decrypt, ins,

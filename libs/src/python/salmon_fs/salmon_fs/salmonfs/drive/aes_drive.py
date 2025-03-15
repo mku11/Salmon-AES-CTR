@@ -632,8 +632,8 @@ class AesDrive(VirtualDrive, ABC):
         :param real_root: The real root directory.
         :return: The config file
         """
-        config_file: IFile = real_root.create_file(AesDrive.get_config_filename());
-        return config_file;
+        config_file: IFile = real_root.create_file(AesDrive.get_config_filename())
+        return config_file
     
     def get_config_file(self, real_root: IFile) -> IFile:
         """
@@ -641,7 +641,7 @@ class AesDrive(VirtualDrive, ABC):
         :param real_root: The real root directory.
         :return: The config file
         """
-        config_file: IFile = real_root.get_child(AesDrive.get_config_filename());
-        return config_file;
+        config_file: IFile = real_root.get_child(AesDrive.get_config_filename())
+        return config_file
         
     

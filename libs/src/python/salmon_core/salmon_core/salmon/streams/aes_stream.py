@@ -56,7 +56,7 @@ class AesStream(RandomAccessStream):
 
     @staticmethod
     def get_output_size(mode: EncryptionMode, length: int,
-                        format: EncryptionFormat, integrity: bool,
+                        format: EncryptionFormat,
                         chunk_size: int = Integrity.DEFAULT_CHUNK_SIZE) -> int:
         """
         Get the output size of the data to be transformed(encrypted or decrypted) including
@@ -66,7 +66,6 @@ class AesStream(RandomAccessStream):
         :param mode: The {@link EncryptionMode} Encrypt or Decrypt.
         :param length: The data length
         :param format: The {@link EncryptionFormat} Generic or Salmon.
-        :param integrity: True if you want to enable integrity.
         :param chunk_size: The chunk size for integrity chunks.
         :return: The size of the output data.
         
@@ -74,22 +73,19 @@ class AesStream(RandomAccessStream):
         :raises IntegrityException: Thrown when data are corrupt or tampered with.
         :raises IOError: Thrown if there is an IO error.
         """
-        if format == EncryptionFormat.Generic and integrity:
-            raise SecurityException("Cannot use integrity with generic format")
-        if chunk_size <= 0:
-            chunk_size = Integrity.DEFAULT_CHUNK_SIZE
         size: int = length
         if format == EncryptionFormat.Salmon:
             if mode == EncryptionMode.Encrypt:
                 size += Header.HEADER_LENGTH
-                if integrity:
+                if chunk_size > 0:
                     size += Integrity.get_total_hash_data_length(mode, length, chunk_size,
-                                                             0, Generator.HASH_RESULT_LENGTH)
+                                                                 0, Generator.HASH_RESULT_LENGTH)
             else:
                 size -= Header.HEADER_LENGTH
-                if integrity:
+                if chunk_size > 0:
                     size -= Integrity.get_total_hash_data_length(mode, length - Header.HEADER_LENGTH, chunk_size,
-                                                             Generator.HASH_RESULT_LENGTH, Generator.HASH_RESULT_LENGTH)
+                                                                 Generator.HASH_RESULT_LENGTH,
+                                                                 Generator.HASH_RESULT_LENGTH)
         return size
 
     def __init__(self, key: bytearray, nonce: bytearray | None, encryption_mode: EncryptionMode,
@@ -162,10 +158,10 @@ class AesStream(RandomAccessStream):
         Default buffer size for all internal streams including Encryptors and Decryptors
         """
 
-        if format == EncryptionFormat.Generic and integrity:
-            raise SecurityException("Cannot use integrity with generic format")
-        if format == EncryptionFormat.Generic and hash_key:
-            raise SecurityException("Cannot use hashkey with generic format")
+        if format == EncryptionFormat.Generic:
+            integrity = False
+            hashKey = None
+            chunkSize = 0
 
         self.__encryption_mode = encryption_mode
         self.__base_stream = base_stream

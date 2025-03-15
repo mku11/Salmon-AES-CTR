@@ -185,8 +185,8 @@ class Encryptor:
 
         if threads <= 0:
             self.__threads = 1
-        else:
-            self.__threads = threads
+        self.__threads = threads
+        if threads > 1:
             self.__executor = ThreadPoolExecutor(self.__threads) if not multi_cpu else ProcessPoolExecutor(
                 self.__threads)
 
@@ -225,7 +225,7 @@ class Encryptor:
         else:
             chunk_size = 0
 
-        real_size: int = AesStream.get_output_size(EncryptionMode.Encrypt, len(data), format, integrity, chunk_size)
+        real_size: int = AesStream.get_output_size(EncryptionMode.Encrypt, len(data), format, chunk_size)
         out_data: bytearray = bytearray(real_size)
 
         if self.__threads == 1:

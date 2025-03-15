@@ -274,11 +274,15 @@ class AesFile(IVirtualFile):
         :param integrity: True if enable integrity verification
         :param hash_key:   The hash key to be used for verification
         """
+        header: Header = self.get_header()
+        if not header and integrity:
+            raise IntegrityException("File does not support integrity")
+
         if integrity and hash_key is None and self.__drive is not None:
             hash_key = self.__drive.get_key().get_hash_key()
         self.__integrity = integrity
         self.__hash_key = hash_key
-        self.__req_chunk_size = self.get_file_chunk_size()
+        self.__req_chunk_size = header.get_chunk_size()
 
     def set_apply_integrity(self, integrity: bool, hash_key: bytearray | None = None,
                             request_chunk_size: int = 0):
@@ -291,10 +295,10 @@ class AesFile(IVirtualFile):
         if not hash_key:
             hash_key = self.__hash_key
 
-        file_chunk_size: int = self.get_file_chunk_size()
+        header: Header | None = self.get_header()
+        if header and header.get_chunk_size() > 0 and not self.__overwrite:
+            raise IntegrityException("Cannot redefine chunk size")
 
-        if file_chunk_size > 0 and not self.__overwrite:
-            raise IntegrityException("Cannot redefine chunk size, delete file and recreate")
         if request_chunk_size < 0:
             raise IntegrityException("Chunk size needs to be zero for default chunk size or a positive value")
 
@@ -550,7 +554,7 @@ class AesFile(IVirtualFile):
 
         # integrity has been requested but hash is missing
         if self.__integrity and self.get_hash_key() is None:
-            raise IntegrityException("File requires hash_key, use SetVerifyIntegrity() to provide one")
+            raise IntegrityException("File requires hash_key, use set_verify_integrity() to provide one")
 
         real_length: int = self.__real_file.get_length()
         header_length: int = self.__get_header_length()

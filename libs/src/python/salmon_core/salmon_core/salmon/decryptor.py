@@ -37,6 +37,7 @@ from salmon.integrity.integrity_exception import IntegrityException
 from salmon_core.salmon.streams.encryption_mode import EncryptionMode
 from salmon_core.salmon.streams.encryption_format import EncryptionFormat
 from salmon_core.salmon.streams.aes_stream import AesStream
+from salmon_core.salmon.header import Header
 from salmon_core.salmon.generator import Generator
 from salmon_core.salmon.security_exception import SecurityException
 
@@ -180,9 +181,9 @@ class Decryptor:
         """
 
         if threads <= 0:
-            self.__threads = 1
-        else:
-            self.__threads = threads
+            threads = 1
+        self.__threads = threads
+        if threads > 1:
             self.__executor = ThreadPoolExecutor(self.__threads) if not multi_cpu else ProcessPoolExecutor(
                 self.__threads)
 
@@ -193,7 +194,7 @@ class Decryptor:
 
     def decrypt(self, data: bytearray, key: bytearray, nonce: bytearray | None = None,
                 format: EncryptionFormat = EncryptionFormat.Salmon,
-                integrity: bool = False, hash_key: bytearray | None = None, chunk_size: int = 0) -> bytearray:
+                integrity: bool = True, hash_key: bytearray | None = None, chunk_size: int = 0) -> bytearray:
         """
         Decrypt a byte array using AES256 based on the provided key and nonce.
         :param data: The input data to be decrypted.
@@ -214,10 +215,17 @@ class Decryptor:
         if format == EncryptionFormat.Generic and nonce is None:
             raise SecurityException("Need to specify a nonce if the file doesn't have a header")
 
-        if integrity:
+        input_stream: MemoryStream = MemoryStream(data)
+        if format == EncryptionFormat.Salmon:
+            header: Header = Header.read_header_data(input_stream)
+            if header:
+                chunk_size = header.get_chunk_size()
+        elif integrity:
             chunk_size = Integrity.DEFAULT_CHUNK_SIZE if chunk_size <= 0 else chunk_size
+        else:
+            chunk_size = 0
 
-        real_size: int = AesStream.get_output_size(EncryptionMode.Decrypt, len(data), format, integrity, chunk_size)
+        real_size: int = AesStream.get_output_size(EncryptionMode.Decrypt, len(data), format, chunk_size)
         out_data: bytearray = bytearray(real_size)
 
         if self.__threads == 1:
