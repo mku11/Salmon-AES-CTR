@@ -1,5 +1,4 @@
-using Mku.Salmon.Password;
-
+using MemoryStream = Mku.Streams.MemoryStream;
 namespace Mku.Salmon.Samples.Samples;
 
 class SamplesCommon

@@ -22,12 +22,13 @@ class DataSample
         return encData;
     }
 
-    public static byte[] DecryptData(byte[] data, byte[] key, int threads)
+    public static byte[] DecryptData(byte[] data, byte[] key, byte[] integrityKey,int threads)
     {
         Console.WriteLine("Decrypting bytes: " + BitConverter.ToHex(data.Take(24).ToArray()) + "...");
 
         Decryptor decryptor = new Decryptor(threads);
-        byte[] decBytes = decryptor.Decrypt(data, key);
+        byte[] decBytes = decryptor.Decrypt(data, key, null, EncryptionFormat.Salmon,
+                                             integrityKey != null, integrityKey);
         decryptor.Close();
 
         Console.WriteLine("Bytes decrypted: " + BitConverter.ToHex(decBytes.Take(24).ToArray()) + "...");

@@ -1,5 +1,6 @@
 using Mku.Salmon.Streams;
 using BitConverter = Mku.Convert.BitConverter;
+using MemoryStream = Mku.Streams.MemoryStream;
 
 namespace Mku.Salmon.Samples.Samples;
 
@@ -12,9 +13,7 @@ class DataStreamSample
         Console.WriteLine("Encrypting bytes: " + BitConverter.ToHex(data.Take(24).ToArray()) + "...");
 
         // we use a memory stream to host the encrypted data
-        long realSize = AesStream.GetOutputSize(EncryptionMode.Encrypt, data.Length);
-        byte[] encData = new byte[realSize];
-        MemoryStream memoryStream = new MemoryStream(encData);
+        MemoryStream memoryStream = new MemoryStream();
 
         // and wrap it with a AesStream that will do the encryption
         AesStream encStream = new AesStream(key, nonce, EncryptionMode.Encrypt, memoryStream);
@@ -33,6 +32,7 @@ class DataStreamSample
 
         // the encrypted data are now written to the memoryStream/encData.
         encStream.Close();
+        byte[] encData = memoryStream.ToArray();
         memoryStream.Close();
 
         Console.WriteLine("Bytes encrypted: " + BitConverter.ToHex(encData.Take(24).ToArray()) + "...");
@@ -50,8 +50,7 @@ class DataStreamSample
         AesStream decStream = new AesStream(key, nonce, EncryptionMode.Decrypt, memoryStream);
 
         // decrypt the data
-        long realSize = AesStream.GetOutputSize(EncryptionMode.Decrypt, data.Length);
-        byte[] decData = new byte[realSize];
+        byte[] decData = new byte[(int)decStream.Length];
         int totalBytesRead = 0;
         int bytesRead = 0;
         while ((bytesRead = decStream.Read(decData, totalBytesRead, DataStreamSample.BUFFER_SIZE)) > 0)

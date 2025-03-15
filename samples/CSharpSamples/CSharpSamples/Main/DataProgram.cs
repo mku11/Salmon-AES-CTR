@@ -32,7 +32,7 @@ class DataProgram
         Console.WriteLine("starting encryption...");
         byte[] encData = DataSample.EncryptData(data, key, integrityKey, threads);
         Console.WriteLine("starting decryption...");
-        byte[] decData = DataSample.DecryptData(encData, key, threads);
+        byte[] decData = DataSample.DecryptData(encData, key, integrityKey, threads);
         Console.WriteLine("done");
     }
 }
