@@ -1,4 +1,4 @@
-import { WSFile, Credentials } from '../lib/salmon-fs/file/js_ws_file.js';
+import { WSFile, Credentials } from '../lib/salmon-fs/fs/file/ws_file.js';
 import { DriveSample } from '../samples/drive_sample.js';
 import { FileDialogs } from './file_dialogs.js';
 

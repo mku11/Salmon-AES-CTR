@@ -1,6 +1,6 @@
 import { DriveSample } from '../samples/drive_sample.js';
 import { FileDialogs } from './file_dialogs.js';
-import { HttpFile } from '../lib/salmon-fs/file/http_file.js';
+import { HttpFile } from '../lib/salmon-fs/fs/file/http_file.js';
 
 let threads = 2;
 let httpDrive;

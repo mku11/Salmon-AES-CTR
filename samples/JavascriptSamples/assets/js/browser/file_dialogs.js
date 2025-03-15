@@ -1,4 +1,4 @@
-import { JsFile } from '../lib/salmon-fs/file/js_file.js';
+import { File } from '../lib/salmon-fs/fs/file/file.js';
 
 export class FileDialogs {
     static async openFile(filename, onFilePicked) {
@@ -20,7 +20,7 @@ export class FileDialogs {
             return;
         if(fileHandle instanceof Array)
             fileHandle = fileHandle[0];
-        const file = new JsFile(fileHandle);
+        const file = new File(fileHandle);
         onFilePicked(file);
     }
     
@@ -34,7 +34,7 @@ export class FileDialogs {
             return;
         let files = [];
         for (let fileHandle of fileHandles) {
-            files.push(new JsFile(fileHandle));
+            files.push(new File(fileHandle));
         }
         onFilesPicked(files);
     }
@@ -47,7 +47,7 @@ export class FileDialogs {
         });
         if(!dirHandle)
             return;
-        let dir = new JsFile(dirHandle);
+        let dir = new File(dirHandle);
         onFolderPicked(dir);
     }
 	
@@ -62,7 +62,7 @@ export class FileDialogs {
             return;
         if(fileHandle instanceof Array)
             fileHandle = fileHandle[0];
-        const file = new JsFile(fileHandle);
+        const file = new File(fileHandle);
         onFilePicked(file);
     }
 }
