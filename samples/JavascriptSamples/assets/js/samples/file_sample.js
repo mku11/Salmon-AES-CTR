@@ -1,26 +1,25 @@
-import { BitConverter } from '../lib/salmon-core/convert/bit_converter.js';
-import { SalmonGenerator } from '../lib/salmon-core/salmon/salmon_generator.js';
-import { SalmonIntegrity } from '../lib/salmon-core/salmon/integrity/salmon_integrity.js';
-import { SalmonFile } from '../lib/salmon-fs/salmon/salmon_file.js';
+import { Generator } from '../lib/salmon-core/salmon/generator.js';
+import { Integrity } from '../lib/salmon-core/salmon/integrity/integrity.js';
+import { AesFile } from '../lib/salmon-fs/salmonfs/file/aes_file.js';
 
 export class FileSample {
 	static BUFFER_SIZE = 256 * 1024; // recommended buffer size aligned to internal buffers
 	
     static async encryptTextToFile(text, key, integrityKey, file) {
-        // encrypt to a file, the SalmonFile has a virtual file system API
-        print( "Encrypting text to file: " + file.getBaseName());
+        // encrypt to a file, the AesFile has a virtual file system API
+        print( "Encrypting text to file: " + file.getName());
 
         let data = new TextEncoder().encode(text);
 		
         // Always request a new random secure nonce
-        let nonce = SalmonGenerator.getSecureRandomBytes(8); // 64 bit nonce
+        let nonce = Generator.getSecureRandomBytes(8); // 64 bit nonce
 
-        let encFile = new SalmonFile(file);
+        let encFile = new AesFile(file);
         encFile.setEncryptionKey(key);
         encFile.setRequestedNonce(nonce);
 
 		if(integrityKey)
-			encFile.setApplyIntegrity(true, integrityKey, SalmonIntegrity.DEFAULT_CHUNK_SIZE);
+			encFile.setApplyIntegrity(true, integrityKey, Integrity.DEFAULT_CHUNK_SIZE);
 		else
 			encFile.setApplyIntegrity(false);
 		
@@ -40,11 +39,11 @@ export class FileSample {
     }
 	
 	static async decryptTextFromFile(key, integrityKey, file) {
-		print( "Decrypting text from file: " + file.getBaseName());
+		print( "Decrypting text from file: " + file.getName());
 		
-        // Wrap the file with a SalmonFile
+        // Wrap the file with a AesFile
 		// the nonce is already embedded in the header
-        let encFile = new SalmonFile(file);
+        let encFile = new AesFile(file);
 
 		// set the key
         encFile.setEncryptionKey(key);
@@ -58,7 +57,7 @@ export class FileSample {
         let decStream = await encFile.getInputStream();
 
         // decrypt the data
-		let decData = new Uint8Array(await decStream.length());
+		let decData = new Uint8Array(await decStream.getLength());
 		let totalBytesRead = 0;
 		let bytesRead = 0;
         while((bytesRead = await decStream.read(decData, totalBytesRead, FileSample.BUFFER_SIZE)) > 0) {

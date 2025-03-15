@@ -1,6 +1,6 @@
 import './node_common.js';
-import { SalmonGenerator } from '../lib/salmon-core/salmon/salmon_generator.js';
-import { JsNodeFile } from '../lib/salmon-fs/file/js_node_file.js';
+import { Generator } from '../lib/salmon-core/salmon/generator.js';
+import { NodeFile } from '../lib/salmon-fs/fs/file/node_file.js';
 import { FileSample } from '../samples/file_sample.js';
 import { getKeyFromPassword } from '../samples/samples_common.js';
 
@@ -15,12 +15,12 @@ let key = await getKeyFromPassword(password);
 let integrityKey;
 if(integrity) {
 	// generate an HMAC key
-	integrityKey = SalmonGenerator.getSecureRandomBytes(32);
+	integrityKey = Generator.getSecureRandomBytes(32);
 } else {
 	integrityKey = null;
 }
 
-let dir = new JsNodeFile("./output");
+let dir = new NodeFile("./output");
 if(!await dir.exists())
 	await dir.mkdir();
 let file = await dir.getChild("data.dat");

@@ -1,6 +1,6 @@
 import { DriveSample } from '../samples/drive_sample.js';
 import { FileDialogs } from './file_dialogs.js';
-import { JsHttpFile } from '../lib/salmon-fs/file/js_http_file.js';
+import { HttpFile } from '../lib/salmon-fs/file/http_file.js';
 
 let threads = 2;
 let httpDrive;
@@ -12,7 +12,7 @@ export async function openHttpDrive() {
 		printReset();
 		let httpDriveURL = document.getElementById("http-drive-url").value;
 		let password = document.getElementById("http-drive-password").value;
-		let dir = new JsHttpFile(httpDriveURL);
+		let dir = new HttpFile(httpDriveURL);
 		httpDrive = await DriveSample.openDrive(dir, password);
 	} catch (ex) {
 		console.error(ex);

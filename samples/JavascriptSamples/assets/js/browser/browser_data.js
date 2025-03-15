@@ -1,4 +1,4 @@
-import { SalmonGenerator } from '../lib/salmon-core/salmon/salmon_generator.js';
+import { Generator } from '../lib/salmon-core/salmon/generator.js';
 import { DataSample } from '../samples/data_sample.js';
 import { getKeyFromPassword, generateRandomData } from '../samples/samples_common.js';
 
@@ -24,7 +24,7 @@ class BrowserData {
 			// enable integrity (optional)
 			if(integrity) {
 				// generate an HMAC key
-				BrowserData.integrityKey = SalmonGenerator.getSecureRandomBytes(32);
+				BrowserData.integrityKey = Generator.getSecureRandomBytes(32);
 			} else {
 				BrowserData.integrityKey = null;
 			}

@@ -1,4 +1,4 @@
-import { JsWSFile, Credentials } from '../lib/salmon-fs/file/js_ws_file.js';
+import { WSFile, Credentials } from '../lib/salmon-fs/file/js_ws_file.js';
 import { DriveSample } from '../samples/drive_sample.js';
 import { FileDialogs } from './file_dialogs.js';
 
@@ -15,7 +15,7 @@ export async function createWebServiceDrive() {
 		return;
 	try {
 		printReset();
-		let dir = new JsWSFile(drivePath, wsServicePath, new Credentials(wsUser, wsPassword));
+		let dir = new WSFile(drivePath, wsServicePath, new Credentials(wsUser, wsPassword));
 		if(!await dir.exists())
 			await dir.mkdir();
 		wsDrive = await DriveSample.createDrive(dir, password);
@@ -38,7 +38,7 @@ export async function openWebServiceDrive() {
 	if(drivePath === "")
 		return;
 	try {
-		let dir = new JsWSFile(drivePath, wsServicePath, new Credentials(wsUser, wsPassword));
+		let dir = new WSFile(drivePath, wsServicePath, new Credentials(wsUser, wsPassword));
 		wsDrive = await DriveSample.openDrive(dir, password);
 	} catch (ex) {
 		console.error(ex);

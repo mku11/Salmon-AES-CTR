@@ -1,5 +1,5 @@
 import './node_common.js';
-import { SalmonGenerator } from '../lib/salmon-core/salmon/salmon_generator.js';
+import { Generator } from '../lib/salmon-core/salmon/generator.js';
 import { DataSample } from '../samples/data_sample.js';
 import { getKeyFromPassword, generateRandomData } from '../samples/samples_common.js';
 
@@ -16,7 +16,7 @@ let key = await getKeyFromPassword(password);
 let integrityKey;
 if(integrity) {
 	// generate an HMAC key
-	integrityKey = SalmonGenerator.getSecureRandomBytes(32);
+	integrityKey = Generator.getSecureRandomBytes(32);
 } else {
 	integrityKey = null;
 }

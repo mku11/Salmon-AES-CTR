@@ -1,6 +1,6 @@
 import './node_common.js';
 import { BitConverter } from '../lib/salmon-core/convert/bit_converter.js';
-import { SalmonGenerator } from '../lib/salmon-core/salmon/salmon_generator.js';
+import { Generator } from '../lib/salmon-core/salmon/generator.js';
 import { DataStreamSample } from '../samples/data_stream_sample.js';
 import { getKeyFromPassword, generateRandomData } from '../samples/samples_common.js';
 
@@ -13,8 +13,8 @@ let key = await getKeyFromPassword(password);
 
 // Always request a new random secure nonce!
 // if you want to you can embed the nonce in the header data
-// see SalmonEncryptor implementation
-let nonce = SalmonGenerator.getSecureRandomBytes(8); // 64 bit nonce
+// see Encryptor implementation
+let nonce = Generator.getSecureRandomBytes(8); // 64 bit nonce
 print("Created nonce: " + BitConverter.toHex(nonce));
 
 // generate random data

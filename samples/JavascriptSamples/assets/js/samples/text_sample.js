@@ -1,20 +1,20 @@
-import { SalmonGenerator } from '../lib/salmon-core/salmon/salmon_generator.js';
-import { SalmonTextEncryptor } from '../lib/salmon-core/salmon/text/salmon_text_encryptor.js';
-import { SalmonTextDecryptor } from '../lib/salmon-core/salmon/text/salmon_text_decryptor.js';
+import { Generator } from '../lib/salmon-core/salmon/generator.js';
+import { TextEncryptor } from '../lib/salmon-core/salmon/text/text_encryptor.js';
+import { TextDecryptor } from '../lib/salmon-core/salmon/text/text_decryptor.js';
 
 export class TextSample {
     static async encryptText(text, key) {
         // Always request a new random secure nonce.
-        let nonce = SalmonGenerator.getSecureRandomBytes(8);
+        let nonce = Generator.getSecureRandomBytes(8);
 
         // encrypt string and embed the nonce in the header
-        let encText = await SalmonTextEncryptor.encryptString(text, key, nonce, true);
+        let encText = await TextEncryptor.encryptString(text, key, nonce);
         return encText;        
     }
 
     static async decryptText(encText, key) {
         // decrypt string, the nonce is already embedded
-        let decText = await SalmonTextDecryptor.decryptString(encText, key, null, true);
+        let decText = await TextDecryptor.decryptString(encText, key);
         return decText;
     }
 }

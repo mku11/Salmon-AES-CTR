@@ -1,12 +1,12 @@
 import './node_common.js';
-import { JsNodeFile } from '../lib/salmon-fs/file/js_node_file.js';
+import { NodeFile } from '../lib/salmon-fs/fs/file/node_file.js';
 import { DriveSample } from '../samples/drive_sample.js';
 
 let password = "test123";
 let threads = 2;
 
 // directories and files
-let dir = new JsNodeFile("./output");
+let dir = new NodeFile("./output");
 if(!await dir.exists())
 	await dir.mkdir();
 
@@ -20,7 +20,7 @@ let localDrive = await DriveSample.createDrive(driveDir, password);
 localDrive = await DriveSample.openDrive(driveDir, password);
 
 // import
-let filesToImport = [new JsNodeFile("./data/file.txt")];
+let filesToImport = [new NodeFile("./data/file.txt")];
 await DriveSample.importFiles(localDrive, filesToImport, threads);
 
 // list
