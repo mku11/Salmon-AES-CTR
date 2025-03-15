@@ -105,9 +105,7 @@ export class Encryptor {
         else
             chunkSize = 0;
 
-        let outputStream: MemoryStream = new MemoryStream();
-
-        let realSize: number = await AesStream.getOutputSize(EncryptionMode.Encrypt, data.length, format, integrity, chunkSize);
+        let realSize: number = await AesStream.getOutputSize(EncryptionMode.Encrypt, data.length, format, chunkSize);
         let outData: Uint8Array = new Uint8Array(realSize);
 
         if (this.#threads == 1) {

@@ -109,7 +109,6 @@ export class AesStream extends RandomAccessStream {
      * @param {Uint8Array} nonce The nonce for the CTR.
      * @param {EncryptionMode} mode The EncryptionMode Encrypt or Decrypt.
      * @param {Uint8Array|null} headerData The header data to be embedded if you use Encryption.
-     * @param {boolean} integrity True if you want to enable integrity.
      * @param {Uint8Array | null} hashKey The hash key to be used for integrity checks.
      * @param {number | null} chunkSize The chunk size for integrity chunks.
      * @return {Promise<number>} The size of the output data.
@@ -118,23 +117,18 @@ export class AesStream extends RandomAccessStream {
      * @throws IOException Thrown if there is an IO error.
      */
     public static async getOutputSize(mode: EncryptionMode, length: number,
-        format: EncryptionFormat, integrity: boolean = false, 
-        chunkSize: number = Integrity.DEFAULT_CHUNK_SIZE): Promise<number> {
-            if (format == EncryptionFormat.Generic && integrity)
-                throw new SecurityException("Cannot use integrity with generic format");
-            if (chunkSize <= 0)
-                chunkSize = Integrity.DEFAULT_CHUNK_SIZE;
+        format: EncryptionFormat, chunkSize: number = Integrity.DEFAULT_CHUNK_SIZE): Promise<number> {
             let size: number = length;
             if (format == EncryptionFormat.Salmon) {
                 if (mode == EncryptionMode.Encrypt) {
                     size += Header.HEADER_LENGTH;
-                    if (integrity) {
+                    if (chunkSize > 0) {
                         size += Integrity.getTotalHashDataLength(mode, length, chunkSize,
                                 0, Generator.HASH_RESULT_LENGTH);
                     }
                 } else {
                     size -= Header.HEADER_LENGTH;
-                    if (integrity) {
+                    if (chunkSize > 0) {
                         size -= Integrity.getTotalHashDataLength(mode, length - Header.HEADER_LENGTH, chunkSize,
                                 Generator.HASH_RESULT_LENGTH, Generator.HASH_RESULT_LENGTH);
                     }
@@ -169,6 +163,11 @@ export class AesStream extends RandomAccessStream {
         baseStream: RandomAccessStream, format: EncryptionFormat = EncryptionFormat.Salmon,
         integrity: boolean = false, hashKey: Uint8Array | null = null, chunkSize: number = 0) {
         super();
+        if (format == EncryptionFormat.Generic) {
+            integrity = false;
+            hashKey = null;
+            chunkSize = 0;
+        }
         this.#encryptionMode = encryptionMode;
         this.#baseStream = baseStream;
         this.#key = key;

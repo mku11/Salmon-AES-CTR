@@ -26,6 +26,7 @@ import { MemoryStream } from "../streams/memory_stream.js";
 import { Integrity } from "./integrity/integrity.js";
 import { EncryptionMode } from "./streams/encryption_mode.js";
 import { EncryptionFormat } from "./streams/encryption_format.js";
+import { Header } from "./header.js";
 import { AesStream } from "./streams/aes_stream.js";
 import { SecurityException } from "./security_exception.js";
 import { AESCTRTransformer } from "./transform/aes_ctr_transformer.js";
@@ -60,18 +61,15 @@ export class Decryptor {
      *                   otherwise a multiple of the AES block size (16 bytes).
      */
     public constructor(threads: number = 0, bufferSize: number = 0) {
-        if (threads <= 0) {
-            this.#threads = 1;
-        } else {
-            this.#threads = threads;
-        }
+        if (threads <= 0)
+            threads = 1;
+        this.#threads = threads;
         if (bufferSize <= 0) {
             // we use the chunks size as default this keeps buffers aligned in case
             // integrity is enabled.
-            this.#bufferSize = Integrity.DEFAULT_CHUNK_SIZE;
-        } else {
-            this.#bufferSize = bufferSize;
+            bufferSize = Integrity.DEFAULT_CHUNK_SIZE;
         }
+        this.#bufferSize = bufferSize;
     }
 
     /**
@@ -89,18 +87,27 @@ export class Decryptor {
      * @throws IOException Thrown if there is an IO error.
      * @throws IntegrityException Thrown if the data are corrupt or tampered with.
      */
-    public async decrypt(data: Uint8Array, key: Uint8Array, nonce: Uint8Array | null,
-        format: EncryptionFormat,
-        integrity: boolean = false, hashKey: Uint8Array | null = null, chunkSize: number = 0): Promise<Uint8Array> {
+    public async decrypt(data: Uint8Array, key: Uint8Array, nonce: Uint8Array | null = null,
+        format: EncryptionFormat = EncryptionFormat.Salmon,
+        integrity: boolean = true, hashKey: Uint8Array | null = null, chunkSize: number = 0): Promise<Uint8Array> {
         if (key == null)
             throw new SecurityException("Key is missing");
         if (format == EncryptionFormat.Generic && nonce == null)
             throw new SecurityException("Need to specify a nonce if the file doesn't have a header");
 
-        if (integrity)
+        let inputStream: MemoryStream = new MemoryStream(data);
+        if (format == EncryptionFormat.Salmon) {
+            let header: Header | null = await Header.readHeaderData(inputStream);
+            if (header != null)
+                chunkSize = header.getChunkSize();
+        } else if (integrity) {
             chunkSize = chunkSize <= 0 ? Integrity.DEFAULT_CHUNK_SIZE : chunkSize;
+        } else {
+            chunkSize = 0;
+        }
 
-        let realSize: number = await AesStream.getOutputSize(EncryptionMode.Decrypt, data.length, format, integrity, chunkSize);
+        let realSize: number = await AesStream.getOutputSize(EncryptionMode.Decrypt, data.length, format, chunkSize);
+
         let outData: Uint8Array = new Uint8Array(realSize);
 
         if (this.#threads == 1) {

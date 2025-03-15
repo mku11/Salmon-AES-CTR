@@ -295,6 +295,10 @@ export class AesFile implements IVirtualFile {
      * @param hashKey   The hash key to be used for verification
      */
     public async setVerifyIntegrity(integrity: boolean, hashKey: Uint8Array | null = null): Promise<void> {
+        let header: Header | null = await this.getHeader();
+        if(header == null && integrity)
+            throw new IntegrityException("File does not support integrity");
+
         if (integrity && hashKey == null && this.#drive != null) {
             let key: DriveKey | null = this.#drive.getKey();
             if (key != null)
@@ -307,6 +311,8 @@ export class AesFile implements IVirtualFile {
         }
         this.#integrity = integrity;
         this.#hashKey = hashKey;
+        if(header)
+            this.#reqChunkSize = header.getChunkSize();
     }
 
     /**
@@ -318,9 +324,10 @@ export class AesFile implements IVirtualFile {
      *                         A positive number to specify integrity chunks.
      */
     public async setApplyIntegrity(integrity: boolean, hashKey: Uint8Array | null = null, requestChunkSize: number = 0): Promise<void> {
-        let fileChunkSize: number = await this.getFileChunkSize();
-        if (fileChunkSize > 0 && !this.#overwrite)
-            throw new IntegrityException("Cannot redefine chunk size, delete file and recreate");
+        let header: Header | null = await this.getHeader();
+        if (header != null && header.getChunkSize() > 0 && !this.#overwrite)
+            throw new IntegrityException("Cannot redefine chunk size");
+
         if (requestChunkSize < 0)
             throw new IntegrityException("Chunk size needs to be zero for default chunk size or a positive value");
 

@@ -26,6 +26,7 @@ import { BitConverter } from '../../lib/salmon-core/convert/bit_converter.js';
 import { MemoryStream } from '../../lib/salmon-core/streams/memory_stream.js';
 import { EncryptionMode } from '../../lib/salmon-core/salmon/streams/encryption_mode.js';
 import { IntegrityException } from '../../lib/salmon-core/salmon/integrity/integrity_exception.js';
+import { Generator } from '../../lib/salmon-core/salmon/generator.js';
 import { TextEncryptor } from '../../lib/salmon-core/salmon/text/text_encryptor.js';
 import { TextDecryptor } from '../../lib/salmon-core/salmon/text/text_decryptor.js';
 import { AesStream } from '../../lib/salmon-core/salmon/streams/aes_stream.js';
@@ -532,6 +533,62 @@ describe('salmon-core', () => {
         console.log("dec time: " + (t3 - t2));
     });
 
+    it('ShouldEncryptAndDecryptArrayIntegrityNoApply', async () => {
+        let data = new TextEncoder().encode(SalmonCoreTestHelper.TEST_TEXT);
+        let key = Generator.getSecureRandomBytes(32);
+        let nonce = Generator.getSecureRandomBytes(8);
+        let hashKey = Generator.getSecureRandomBytes(32);
+
+        let encData = await SalmonCoreTestHelper.getEncryptor().encrypt(data, key, nonce, EncryptionFormat.Salmon, true, hashKey);
+
+        // specify integrity
+        let decData2 = await SalmonCoreTestHelper.getDecryptor().decrypt(encData, key, null, EncryptionFormat.Salmon, true, hashKey);
+        SalmonCoreTestHelper.assertArrayEquals(data, decData2);
+
+        // skip integrity
+        let decData3 = await SalmonCoreTestHelper.getDecryptor().decrypt(encData, key, null, EncryptionFormat.Salmon, false);
+        SalmonCoreTestHelper.assertArrayEquals(data, decData3);
+
+        // tamper
+        encData[14] = 0;
+
+        // specify integrity
+        let caught = false;
+        try {
+            decData4 = await SalmonCoreTestHelper.getDecryptor().decrypt(encData, key, null, EncryptionFormat.Salmon, true, hashKey);
+            SalmonCoreTestHelper.assertArrayEquals(data, decData4);
+        } catch (ex) {
+            caught = true;
+        }
+        expect(caught).toBeTruthy();
+
+        // skip integrity, not failing but results don't match
+        let caught2 = false;
+        try {
+            let decData5 = await SalmonCoreTestHelper.getDecryptor().decrypt(encData, key, null, EncryptionFormat.Salmon, false);
+        } catch (ex) {
+            caught2 = true;
+        }
+        expect(caught2).toBeFalsy();
+    });
+
+    
+    it('ShouldEncryptAndDecryptArrayIntegrityCustomChunkSizeDecNoChunkSize', async () => {
+        let data = SalmonCoreTestHelper.getRandArray(1 * 1024 * 1024);
+        const t1 = Date.now();
+        let encData = await SalmonCoreTestHelper.getEncryptor().encrypt(data,
+                SalmonCoreTestHelper.TEST_KEY_BYTES, SalmonCoreTestHelper.TEST_NONCE_BYTES,
+                EncryptionFormat.Salmon, true, SalmonCoreTestHelper.TEST_HMAC_KEY_BYTES, 32);
+        const t2 = Date.now();
+        let decData = await SalmonCoreTestHelper.getDecryptor().decrypt(encData,
+                SalmonCoreTestHelper.TEST_KEY_BYTES, SalmonCoreTestHelper.TEST_NONCE_BYTES,
+                EncryptionFormat.Salmon, true, SalmonCoreTestHelper.TEST_HMAC_KEY_BYTES);
+        const t3 = Date.now();
+
+        SalmonCoreTestHelper.assertArrayEquals(data, decData);
+        console.log("enc time: " + (t2 - t1));
+        console.log("dec time: " + (t3 - t2));
+    });
 
     it('shouldCopyMemory', async () => {
         await SalmonCoreTestHelper.copyMemory(4 * 1024 * 1024);
