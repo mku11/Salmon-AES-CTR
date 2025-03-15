@@ -1,6 +1,8 @@
-using Mku.File;
+using Mku.FS.File;
 using Mku.Salmon.Samples.Samples;
 using Mku.Salmon.Streams;
+using Mku.SalmonFS.Drive;
+using File = Mku.FS.File.File;
 
 namespace Mku.Salmon.Samples.Main;
 
@@ -12,17 +14,17 @@ class HttpDriveProgram
         string password = "test123";
         int threads = 1;
 		
-		SalmonStream.AesProviderType = ProviderType.Default;
+		AesStream.AesProviderType = ProviderType.Default;
 
-        IRealFile dir = new DotNetFile("./output");
+        IFile dir = new File("./output");
         if (!dir.Exists)
             dir.Mkdir();
-        IRealFile exportDir = dir.GetChild("export");
+        IFile exportDir = dir.GetChild("export");
         if (!exportDir.Exists)
             exportDir.Mkdir();
 
-        DotNetHttpFile httpDir = new DotNetHttpFile(httpDriveURL);
-        SalmonDrive httpDrive = DriveSample.OpenDrive(httpDir, password);
+        HttpFile httpDir = new HttpFile(httpDriveURL);
+        AesDrive httpDrive = DriveSample.OpenDrive(httpDir, password);
         DriveSample.ListFiles(httpDrive);
         DriveSample.ExportFiles(httpDrive, exportDir, threads);
         DriveSample.CloseDrive(httpDrive);

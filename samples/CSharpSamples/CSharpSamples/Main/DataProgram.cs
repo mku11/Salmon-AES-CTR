@@ -11,8 +11,8 @@ class DataProgram
         int size = 8 * 1024 * 1024;
         int threads = 1;
         bool integrity = true;
-		
-		SalmonStream.AesProviderType = ProviderType.Default;
+
+        AesStream.AesProviderType = ProviderType.Default;
 
         // generate a key
         Console.Write("generating keys and random data...");
@@ -23,7 +23,7 @@ class DataProgram
         if (integrity)
         {
             // generate an HMAC key
-            integrityKey = SalmonGenerator.GetSecureRandomBytes(32);
+            integrityKey = Generator.GetSecureRandomBytes(32);
         }
 
         // generate random data
@@ -32,7 +32,7 @@ class DataProgram
         Console.WriteLine("starting encryption...");
         byte[] encData = DataSample.EncryptData(data, key, integrityKey, threads);
         Console.WriteLine("starting decryption...");
-        byte[] decData = DataSample.DecryptData(encData, key, integrityKey, threads);
+        byte[] decData = DataSample.DecryptData(encData, key, threads);
         Console.WriteLine("done");
     }
 }

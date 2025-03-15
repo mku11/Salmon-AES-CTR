@@ -11,7 +11,7 @@ class DataStreamProgram
         string password = "test123";
         int size = 1 * 1024 * 1024;
 
-		SalmonStream.AesProviderType = ProviderType.Default;
+        AesStream.AesProviderType = ProviderType.Default;
 
         // generate a key
         Console.WriteLine("generating keys and random data...");
@@ -19,8 +19,8 @@ class DataStreamProgram
 
         // Always request a new random secure nonce!
         // if you want to you can embed the nonce in the header data
-        // see SalmonEncryptor implementation
-        byte[] nonce = SalmonGenerator.GetSecureRandomBytes(8); // 64 bit nonce
+        // see Encryptor implementation
+        byte[] nonce = Generator.GetSecureRandomBytes(8); // 64 bit nonce
         Console.WriteLine("Created nonce: " + BitConverter.ToHex(nonce));
 
         // generate random data

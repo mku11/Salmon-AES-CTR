@@ -1,7 +1,10 @@
-using Mku.File;
+using Mku.FS.File;
 using Mku.Salmon.Samples.Samples;
 using Mku.Salmon.Streams;
-using static Mku.File.DotNetWSFile;
+using Mku.SalmonFS.Drive;
+using static Mku.FS.File.WSFile;
+using File = Mku.FS.File.File;
+using IFile = Mku.FS.File.IFile;
 
 namespace Mku.Salmon.Samples.Main;
 
@@ -14,23 +17,23 @@ class WebServiceDriveProgram
         string wsPassword = "password";
         string drivePath = "/example_drive_" + Time.Time.CurrentTimeMillis();
         string password = "test123";
-		
-		SalmonStream.AesProviderType = ProviderType.Default;
 
-        IRealFile[] filesToImport = [new DotNetFile("./data/file.txt")];
+        AesStream.AesProviderType = ProviderType.Default;
 
-        IRealFile dir = new DotNetFile("./output");
+        IFile[] filesToImport = [new File("./data/file.txt")];
+
+        IFile dir = new File("./output");
         if (!dir.Exists)
             dir.Mkdir();
-        IRealFile exportDir = dir.GetChild("export");
+        IFile exportDir = dir.GetChild("export");
         if (!exportDir.Exists)
             exportDir.Mkdir();
 
-        IRealFile driveDir = new DotNetWSFile(drivePath, wsServicePath, new Credentials(wsUser, wsPassword));
+        IFile driveDir = new WSFile(drivePath, wsServicePath, new Credentials(wsUser, wsPassword));
         if (!driveDir.Exists)
             driveDir.Mkdir();
 
-        SalmonDrive wsDrive = DriveSample.CreateDrive(driveDir, password);
+        AesDrive wsDrive = DriveSample.CreateDrive(driveDir, password);
         wsDrive = DriveSample.OpenDrive(driveDir, password);
         DriveSample.ImportFiles(wsDrive, filesToImport);
         DriveSample.ListFiles(wsDrive);

@@ -1,6 +1,6 @@
-using Mku.File;
-using Mku.Salmon.Integrity;
+using Mku.FS.File;
 using Mku.Salmon.Streams;
+using Mku.SalmonFS.File;
 using System.Text;
 
 namespace Mku.Salmon.Samples.Samples;
@@ -9,26 +9,26 @@ class FileSample
 {
     static int BUFFER_SIZE = 256 * 1024; // recommended buffer size aligned to internal buffers
 
-    public static void EncryptTextToFile(string text, byte[] key, byte[] integrityKey, IRealFile file)
+    public static void EncryptTextToFile(string text, byte[] key, byte[] integrityKey, IFile file)
     {
-        // encrypt to a file, the SalmonFile has a virtual file system API
-        Console.WriteLine("Encrypting text to file: " + file.BaseName);
+        // encrypt to a file, the AesFile has a virtual file system API
+        Console.WriteLine("Encrypting text to file: " + file.Name);
 
         byte[] data = UTF8Encoding.UTF8.GetBytes(text);
 
         // Always request a new random secure nonce
-        byte[] nonce = SalmonGenerator.GetSecureRandomBytes(8); // 64 bit nonce
+        byte[] nonce = Generator.GetSecureRandomBytes(8); // 64 bit nonce
 
-        SalmonFile encFile = new SalmonFile(file);
+        AesFile encFile = new AesFile(file);
         encFile.EncryptionKey = key;
         encFile.RequestedNonce = nonce;
 
         if (integrityKey != null)
-            encFile.SetApplyIntegrity(true, integrityKey, SalmonIntegrity.DEFAULT_CHUNK_SIZE);
+            encFile.SetApplyIntegrity(true, integrityKey, Integrity.Integrity.DEFAULT_CHUNK_SIZE);
         else
-            encFile.SetApplyIntegrity(false, null, null);
+            encFile.SetApplyIntegrity(false);
 
-        SalmonStream encStream = encFile.GetOutputStream();
+        AesStream encStream = encFile.GetOutputStream();
 
         // now write the data you want to decrypt
         // it is recommended to use a large enough buffer while writing the data
@@ -44,13 +44,13 @@ class FileSample
         encStream.Close();
     }
 
-    public static string DecryptTextFromFile(byte[] key, byte[] integrityKey, IRealFile file)
+    public static string DecryptTextFromFile(byte[] key, byte[] integrityKey, IFile file)
     {
-        Console.WriteLine("Decrypting text from file: " + file.BaseName);
+        Console.WriteLine("Decrypting text from file: " + file.Name);
 
-        // Wrap the file with a SalmonFile
+        // Wrap the file with a AesFile
         // the nonce is already embedded in the header
-        SalmonFile encFile = new SalmonFile(file);
+        AesFile encFile = new AesFile(file);
 
         // set the key
         encFile.EncryptionKey = key;
@@ -61,7 +61,7 @@ class FileSample
             encFile.SetVerifyIntegrity(false, null);
 
         // open a read stream
-        SalmonStream decStream = encFile.GetInputStream();
+        AesStream decStream = encFile.GetInputStream();
 
         // decrypt the data
         byte[] decData = new byte[decStream.Length];

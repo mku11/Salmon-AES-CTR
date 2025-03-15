@@ -12,11 +12,12 @@ class DataStreamSample
         Console.WriteLine("Encrypting bytes: " + BitConverter.ToHex(data.Take(24).ToArray()) + "...");
 
         // we use a memory stream to host the encrypted data
-        byte[] encData = new byte[data.Length];
+        long realSize = AesStream.GetOutputSize(EncryptionMode.Encrypt, data.Length);
+        byte[] encData = new byte[realSize];
         MemoryStream memoryStream = new MemoryStream(encData);
 
-        // and wrap it with a SalmonStream that will do the encryption
-        SalmonStream encStream = new SalmonStream(key, nonce, EncryptionMode.Encrypt, memoryStream);
+        // and wrap it with a AesStream that will do the encryption
+        AesStream encStream = new AesStream(key, nonce, EncryptionMode.Encrypt, memoryStream);
 
         // now write the data you want to decrypt
         // it is recommended to use a large enough buffer while writing the data
@@ -46,10 +47,11 @@ class DataStreamSample
         MemoryStream memoryStream = new MemoryStream(data);
 
         // and wrap it with a salmon stream to do the decryption
-        SalmonStream decStream = new SalmonStream(key, nonce, EncryptionMode.Decrypt, memoryStream);
+        AesStream decStream = new AesStream(key, nonce, EncryptionMode.Decrypt, memoryStream);
 
         // decrypt the data
-        byte[] decData = new byte[decStream.Length];
+        long realSize = AesStream.GetOutputSize(EncryptionMode.Decrypt, data.Length);
+        byte[] decData = new byte[realSize];
         int totalBytesRead = 0;
         int bytesRead = 0;
         while ((bytesRead = decStream.Read(decData, totalBytesRead, DataStreamSample.BUFFER_SIZE)) > 0)

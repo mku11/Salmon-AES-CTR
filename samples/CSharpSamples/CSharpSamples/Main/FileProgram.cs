@@ -1,6 +1,7 @@
-using Mku.File;
+using Mku.FS.File;
 using Mku.Salmon.Samples.Samples;
 using Mku.Salmon.Streams;
+using File = Mku.FS.File.File;
 
 namespace Mku.Salmon.Samples.Main;
 
@@ -11,8 +12,8 @@ class FileProgram
         string password = "test123";
         string text = "This is a plain text that will be encrypted";
         bool integrity = true;
-		
-		SalmonStream.AesProviderType = ProviderType.Default;
+
+        AesStream.AesProviderType = ProviderType.Default;
 
         // generate an encryption key from the text password
         byte[] key = SamplesCommon.GetKeyFromPassword(password);
@@ -22,13 +23,13 @@ class FileProgram
         if (integrity)
         {
             // generate an HMAC key
-            integrityKey = SalmonGenerator.GetSecureRandomBytes(32);
+            integrityKey = Generator.GetSecureRandomBytes(32);
         }
 
-        IRealFile dir = new DotNetFile("./output");
+        IFile dir = new File("./output");
         if (!dir.Exists)
             dir.Mkdir();
-        IRealFile file = dir.GetChild("data.dat");
+        IFile file = dir.GetChild("data.dat");
         if (file.Exists)
             file.Delete();
 
