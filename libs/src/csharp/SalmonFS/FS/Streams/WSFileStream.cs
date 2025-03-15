@@ -253,7 +253,7 @@ public class WSFileStream : Stream
                 requestMessage = new HttpRequestMessage(HttpMethod.Post, url);
                 MultipartFormDataContent content = new MultipartFormDataContent();
                 Stream pipedInputStream = outputStream.InputStream;
-                content.Add(new StreamContent(pipedInputStream), "file", file.BaseName);
+                content.Add(new StreamContent(pipedInputStream), "file", file.Name);
                 requestMessage.Content = content;
                 SetDefaultHeaders(requestMessage);
                 SetServiceAuth(requestMessage);

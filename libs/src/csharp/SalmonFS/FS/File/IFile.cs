@@ -124,7 +124,7 @@ public interface IFile
     ///  Get the basename of the file.
 	/// </summary>
 	///  <returns>The base name</returns>
-    string BaseName { get; }
+    string Name { get; }
 
     /// <summary>
     ///  Create the directory with the name provided under this directory.
@@ -231,7 +231,7 @@ public interface IFile
         bool autoRenameFolders = true,
         Action<IFile, Exception> OnFailed = null)
     {
-        string newFilename = BaseName;
+        string newFilename = Name;
         IFile newFile;
         newFile = dest.GetChild(newFilename);
         if (IsFile)
@@ -304,7 +304,7 @@ public interface IFile
             return;
         }
 
-        string newFilename = BaseName;
+        string newFilename = Name;
         IFile newFile;
         newFile = dest.GetChild(newFilename);
         if (IsFile)
@@ -396,7 +396,7 @@ public interface IFile
     /// <returns>The new file name</returns>
     public static string AutoRename(IFile file)
     {
-        return AutoRename(file.BaseName);
+        return AutoRename(file.Name);
     }
 
     /// <summary>

@@ -134,7 +134,7 @@ public class AndroidFile : IFile
     ///  Get the base name of this file.
 	/// </summary>
 	///  <returns>The base name</returns>
-    public string BaseName
+    public string Name
     {
         get
         {
@@ -314,7 +314,7 @@ public class AndroidFile : IFile
                     documentFile.Uri, documentFile.ParentFile.Uri, androidDir.documentFile.Uri);
             if (progressListener != null)
                 progressListener(1, 1);
-            IFile file = androidDir.GetChild(BaseName);
+            IFile file = androidDir.GetChild(Name);
             if (file != null && newName != null)
                 file.RenameTo(newName);
             if(Parent!=null)
@@ -356,7 +356,7 @@ public class AndroidFile : IFile
         if (newDir == null || !newDir.Exists)
             throw new IOException("Target directory does not exists");
 
-        newName = newName ?? BaseName;
+        newName = newName ?? Name;
         IFile dir = newDir.GetChild(newName);
         if (dir != null)
             throw new IOException("Target file/directory already exists");
@@ -414,7 +414,7 @@ public class AndroidFile : IFile
         IFile parent = Parent;
         if (parent != null)
         {
-            IFile dir = parent.CreateDirectory(BaseName);
+            IFile dir = parent.CreateDirectory(Name);
             return dir.Exists && dir.IsDirectory;
         }
         return false;

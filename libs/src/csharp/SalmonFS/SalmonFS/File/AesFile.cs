@@ -566,7 +566,7 @@ public class AesFile : IVirtualFile
     {
         if (Drive == null)
         {
-            return this.RealFile.BaseName;
+            return this.RealFile.Name;
         }
         AesFile virtualRoot = Drive.Root;
         string virtualRootPath = virtualRoot.RealFile.AbsolutePath;
@@ -590,7 +590,7 @@ public class AesFile : IVirtualFile
             if (Drive != null && RealPath.Equals(Drive.Root.RealPath))
                 return "";
 
-            string realBaseName = RealFile.BaseName;
+            string realBaseName = RealFile.Name;
             _baseName = GetDecryptedFilename(realBaseName);
             return _baseName;
         }

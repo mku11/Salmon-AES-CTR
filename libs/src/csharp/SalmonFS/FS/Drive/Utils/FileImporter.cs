@@ -136,7 +136,7 @@ public abstract class FileImporter
         if (fileToImport.IsDirectory)
             throw new Exception("Cannot import directory, use FileCommander instead");
 
-        filename = filename ?? fileToImport.BaseName;
+        filename = filename ?? fileToImport.Name;
         long[] totalBytesRead = new long[] { 0 };
         IVirtualFile importedFile;
         try

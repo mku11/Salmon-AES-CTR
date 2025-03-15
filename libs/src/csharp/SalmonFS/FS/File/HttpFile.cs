@@ -138,7 +138,7 @@ public class HttpFile : IFile
     ///  Get the name of this file or directory.
 	/// </summary>
 	///  <returns>The name of this file or directory.</returns>
-    public string BaseName
+    public string Name
     {
         get
         {

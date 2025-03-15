@@ -352,7 +352,7 @@ public class SalmonFSTestHelper
         long realFileSize = fileToImport.Length;
         foreach (AesFile file in salmonFiles)
         {
-            if (file.Name.Equals(fileToImport.BaseName))
+            if (file.Name.Equals(fileToImport.Name))
             {
                 if (shouldBeEqual)
                 {
@@ -410,7 +410,7 @@ public class SalmonFSTestHelper
         AesDrive drive = SalmonFSTestHelper.CreateDrive(vaultDir, DriveClassType, pass, sequencer);
         AesFile rootDir = drive.Root;
         IFile fileToImport = importFile;
-        string rbasename = fileToImport.BaseName;
+        string rbasename = fileToImport.Name;
 
         // import
         AesFileImporter fileImporter = new AesFileImporter(importBufferSize, importThreads);
@@ -441,7 +441,7 @@ public class SalmonFSTestHelper
         AesDrive drive = SalmonFSTestHelper.CreateDrive(vaultDir, DriveClassType, pass, sequencer);
         AesFile rootDir = drive.Root;
         IFile fileToImport = importFile;
-        string rbasename = fileToImport.BaseName;
+        string rbasename = fileToImport.Name;
 
         // import
         AesFileImporter fileImporter = new AesFileImporter(importBufferSize, importThreads);
@@ -467,7 +467,7 @@ public class SalmonFSTestHelper
 
         if (!move)
         {
-            IVirtualFile file = rootDir.GetChild(fileToImport.BaseName);
+            IVirtualFile file = rootDir.GetChild(fileToImport.Name);
             string checkSumOrigAfter = GetChecksum(file.RealFile);
             Assert.AreEqual(checkSumBefore, checkSumOrigAfter);
         }

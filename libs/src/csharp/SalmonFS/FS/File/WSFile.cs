@@ -297,7 +297,7 @@ public class WSFile : IFile
     ///  Get the name of this file or directory.
 	/// </summary>
 	///  <returns>The name of this file or directory.</returns>
-    public string BaseName => GetResponse().Name;
+    public string Name => GetResponse().Name;
 
     /// <summary>
     ///  Get a stream for reading the file.
@@ -486,7 +486,7 @@ public class WSFile : IFile
     ///  <returns>The moved file. Use this file for subsequent operations instead of the original.</returns>
     public IFile Move(IFile newDir, string newName = null, Action<long, long> progressListener = null)
     {
-        newName = newName ?? BaseName;
+        newName = newName ?? Name;
         if (newDir == null || !newDir.Exists)
             throw new IOException("Target directory does not exist");
         IFile newFile = newDir.GetChild(newName);
@@ -542,7 +542,7 @@ public class WSFile : IFile
     ///  <exception cref="IOException">Thrown if error during IO</exception>
     public IFile Copy(IFile newDir, string newName = null, Action<long, long> progressListener = null)
     {
-        newName = newName ?? BaseName;
+        newName = newName ?? Name;
         if (newDir == null || !newDir.Exists)
             throw new IOException("Target directory does not exist");
         IFile newFile = newDir.GetChild(newName);

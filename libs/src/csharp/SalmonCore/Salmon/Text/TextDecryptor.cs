@@ -51,7 +51,7 @@ public class TextDecryptor
     ///  <exception cref="IOException">Thrown if error during IO</exception>
     ///  <exception cref="SecurityException">Thrown when error with security</exception>
     ///  <exception cref="IntegrityException">Thrown when data are corrupt or tampered with.</exception>
-    public static string DecryptString(string text, byte[] key, byte[] nonce,
+    public static string DecryptString(string text, byte[] key, byte[] nonce = null,
         EncryptionFormat format = EncryptionFormat.Salmon,
         bool integrity = false, byte[] hashKey = null, int chunkSize = 0)
     {

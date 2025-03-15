@@ -577,10 +577,10 @@ public class SalmonFSTests
         file2 = file.Copy(dir, IFile.AutoRename(file));
 
         Assert.AreEqual(2, dir.ChildrenCount);
-        Assert.IsTrue(dir.GetChild(file.BaseName).Exists);
-        Assert.IsTrue(dir.GetChild(file.BaseName).IsFile);
-        Assert.IsTrue(dir.GetChild(file2.BaseName).Exists);
-        Assert.IsTrue(dir.GetChild(file2.BaseName).IsFile);
+        Assert.IsTrue(dir.GetChild(file.Name).Exists);
+        Assert.IsTrue(dir.GetChild(file.Name).IsFile);
+        Assert.IsTrue(dir.GetChild(file2.Name).Exists);
+        Assert.IsTrue(dir.GetChild(file2.Name).IsFile);
 
         IFile dir1 = dir.CreateDirectory("folder1");
         Assert.IsTrue(dir.GetChild("folder1").Exists);
@@ -634,7 +634,7 @@ public class SalmonFSTests
         int count2 = SalmonFSTestHelper.GetChildrenCountRecursively(dir.GetChild("folder4").GetChild("folder1"));
         Assert.AreEqual(count1, count2);
 
-        IFile dfile = dir.GetChild("folder4").GetChild("folder1").GetChild("folder2").GetChild(file.BaseName);
+        IFile dfile = dir.GetChild("folder4").GetChild("folder1").GetChild("folder2").GetChild(file.Name);
         Assert.IsTrue(dfile.Exists);
         Assert.IsTrue(dfile.Delete());
         Assert.AreEqual(2, dir.GetChild("folder4").GetChild("folder1").GetChild("folder2").ChildrenCount);
@@ -644,8 +644,8 @@ public class SalmonFSTests
         Assert.AreEqual(7, dir.GetChild("folder4").GetChild("folder1").ChildrenCount);
         Assert.AreEqual(5, dir.GetChild("folder4").GetChild("folder1").GetChild("folder2").ChildrenCount);
 
-        dir.GetChild("folder4").GetChild("folder1").GetChild("folder2").GetChild(file.BaseName).Delete();
-        dir.GetChild("folder4").GetChild("folder1").GetChild(file.BaseName).Delete();
+        dir.GetChild("folder4").GetChild("folder1").GetChild("folder2").GetChild(file.Name).Delete();
+        dir.GetChild("folder4").GetChild("folder1").GetChild(file.Name).Delete();
         List<IFile> failed = new List<IFile>();
         dir.GetChild("folder1").CopyRecursively(folder3, null, null, false, (file, ex) =>
         {
@@ -658,8 +658,8 @@ public class SalmonFSTests
         Assert.AreEqual(5, dir.GetChild("folder4").GetChild("folder1").GetChild("folder2").ChildrenCount);
 
 
-        dir.GetChild("folder4").GetChild("folder1").GetChild("folder2").GetChild(file.BaseName).Delete();
-        dir.GetChild("folder4").GetChild("folder1").GetChild(file.BaseName).Delete();
+        dir.GetChild("folder4").GetChild("folder1").GetChild("folder2").GetChild(file.Name).Delete();
+        dir.GetChild("folder4").GetChild("folder1").GetChild(file.Name).Delete();
         List<IFile> failedmv = new List<IFile>();
         dir.GetChild("folder1").MoveRecursively(dir.GetChild("folder4"), null, IFile.AutoRename, false, (file, ex) =>
         {

@@ -95,7 +95,7 @@ public class Decryptor
     ///  <exception cref="SecurityException">Thrown if the key and nonce are not provided.</exception>
     ///  <exception cref="IOException">Thrown if error during IO</exception>
     ///  <exception cref="IntegrityException">Thrown when data are corrupt or tampered with.</exception>
-    public byte[] Decrypt(byte[] data, byte[] key, byte[] nonce,
+    public byte[] Decrypt(byte[] data, byte[] key, byte[] nonce = null,
                                  EncryptionFormat format = EncryptionFormat.Salmon,
                                  bool integrity = false, byte[] hashKey = null, int chunkSize = 0)
     {

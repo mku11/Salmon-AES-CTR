@@ -112,13 +112,13 @@ public class FileCommander
         List<IVirtualFile> importedFiles, ref int count, int total,
         Dictionary<string, IVirtualFile> existingFiles)
     {
-        IVirtualFile sfile = existingFiles.ContainsKey(fileToImport.BaseName) ? existingFiles[fileToImport.BaseName] : null;
+        IVirtualFile sfile = existingFiles.ContainsKey(fileToImport.Name) ? existingFiles[fileToImport.Name] : null;
         if (fileToImport.IsDirectory)
         {
             if (OnProgressChanged != null)
                 OnProgressChanged(new RealFileTaskProgress(fileToImport, 0, 1, count, total));
             if (sfile == null || !sfile.Exists)
-                sfile = importDir.CreateDirectory(fileToImport.BaseName);
+                sfile = importDir.CreateDirectory(fileToImport.Name);
             else if (sfile != null && sfile.Exists && sfile.IsFile && AutoRename != null)
                 sfile = importDir.CreateDirectory(AutoRename(fileToImport));
             if (OnProgressChanged != null)
@@ -139,7 +139,7 @@ public class FileCommander
         {
             try
             {
-                string filename = fileToImport.BaseName;
+                string filename = fileToImport.Name;
                 if (sfile != null && (sfile.Exists || sfile.IsDirectory) && AutoRename != null)
                     filename = AutoRename(fileToImport);
                 int finalCount = count;
@@ -222,7 +222,7 @@ public class FileCommander
         {
             if (stopJobs)
                 break;
-            files[file.BaseName] = file;
+            files[file.Name] = file;
         }
         return files;
     }
@@ -281,7 +281,7 @@ public class FileCommander
                                 bytes, totalBytes, finalCount, total));
                     }
                 });
-                existingFiles[rfile.BaseName] = rfile;
+                existingFiles[rfile.Name] = rfile;
                 exportedFiles.Add(rfile);
                 count++;
             }
