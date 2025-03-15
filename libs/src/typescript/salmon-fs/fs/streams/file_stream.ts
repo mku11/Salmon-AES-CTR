@@ -134,8 +134,7 @@ export class FileStream extends RandomAccessStream {
 			try {
 				if(await this.#file.getLength() < value)
 					await stream.truncate(value);
-				else
-					await stream.seek(this.#_position);
+				await stream.seek(this.#_position);
 			} catch(ex) {
 				console.error(ex);
 				throw ex;
