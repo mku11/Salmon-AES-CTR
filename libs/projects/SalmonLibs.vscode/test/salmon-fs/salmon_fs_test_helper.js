@@ -483,7 +483,7 @@ export class SalmonFSTestHelper {
         let dir = new AesFile(realDir);
         let filename = "test_" + Date.now() + "." + flipPosition + ".txt";
         let newFile = await dir.createFile(filename, key, filenameNonce, fileNonce);
-        console.log("new file: " + newFile.getPath());
+        console.log("new file: " + await newFile.getPath());
         if (applyIntegrity)
             await newFile.setApplyIntegrity(true, hashKey, chunkSize);
         else
