@@ -172,7 +172,7 @@ public class Encryptor {
         else
             chunkSize = 0;
 
-        int realSize = (int) AesStream.getOutputSize(EncryptionMode.Encrypt, data.length, format, integrity, chunkSize);
+        int realSize = (int) AesStream.getOutputSize(EncryptionMode.Encrypt, data.length, format, chunkSize);
         byte[] outData = new byte[realSize];
 
         if (threads == 1) {

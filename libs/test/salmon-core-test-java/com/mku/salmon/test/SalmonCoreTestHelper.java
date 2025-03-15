@@ -187,7 +187,7 @@ public class SalmonCoreTestHelper {
     }
 
     public static byte[] decrypt(byte[] inputBytes, byte[] key, byte[] iv, int bufferSize,
-                                 Boolean integrity, int chunkSize, byte[] hashKey) throws Exception {
+                                 boolean integrity, int chunkSize, byte[] hashKey) throws Exception {
         MemoryStream ins = new MemoryStream(inputBytes);
         MemoryStream outs = new MemoryStream();
         AesStream reader = new AesStream(key, iv, EncryptionMode.Decrypt, ins,

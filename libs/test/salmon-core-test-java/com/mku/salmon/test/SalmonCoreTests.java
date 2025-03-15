@@ -25,8 +25,8 @@ SOFTWARE.
 */
 
 import com.mku.convert.BitConverter;
-import com.mku.salmon.RangeExceededException;
 import com.mku.salmon.SecurityException;
+import com.mku.salmon.*;
 import com.mku.salmon.integrity.IntegrityException;
 import com.mku.salmon.streams.AesStream;
 import com.mku.salmon.streams.EncryptionFormat;
@@ -586,6 +586,64 @@ public class SalmonCoreTests {
         byte[] decData = SalmonCoreTestHelper.getDecryptor().decrypt(encData,
                 SalmonCoreTestHelper.TEST_KEY_BYTES, SalmonCoreTestHelper.TEST_NONCE_BYTES,
                 EncryptionFormat.Salmon, true, SalmonCoreTestHelper.TEST_HMAC_KEY_BYTES, 32);
+        long t3 = System.currentTimeMillis();
+
+        assertArrayEquals(data, decData);
+        System.out.println("enc time: " + (t2 - t1));
+        System.out.println("dec time: " + (t3 - t2));
+    }
+
+    @Test
+    public void ShouldEncryptAndDecryptArrayIntegrityNoApply() throws Exception {
+        byte[] data = SalmonCoreTestHelper.TEST_TEXT.getBytes();
+        byte[] key = Generator.getSecureRandomBytes(32);
+        byte[] nonce = Generator.getSecureRandomBytes(8);
+        byte[] hashKey = Generator.getSecureRandomBytes(32);
+
+        byte[] encData = SalmonCoreTestHelper.getEncryptor().encrypt(data, key, nonce, EncryptionFormat.Salmon, true, hashKey);
+
+        // specify integrity
+        byte[] decData2 = SalmonCoreTestHelper.getDecryptor().decrypt(encData, key, null, EncryptionFormat.Salmon, true, hashKey);
+        assertArrayEquals(data, decData2);
+
+        // skip integrity
+        byte[] decData3 = SalmonCoreTestHelper.getDecryptor().decrypt(encData, key, null, EncryptionFormat.Salmon, false);
+        assertArrayEquals(data, decData3);
+
+        // tamper
+        encData[14] = 0;
+
+        // specify integrity
+        boolean caught = false;
+        try {
+            byte[] decData4 = SalmonCoreTestHelper.getDecryptor().decrypt(encData, key, null, EncryptionFormat.Salmon, true, hashKey);
+            assertArrayEquals(data, decData4);
+        } catch (Exception ex) {
+            caught = true;
+        }
+        assertTrue(caught);
+
+        // skip integrity, not failing but results don't match
+        boolean caught2 = false;
+        try {
+            byte[] decData5 = SalmonCoreTestHelper.getDecryptor().decrypt(encData, key, null, EncryptionFormat.Salmon, false);
+        } catch (Exception ex) {
+            caught2 = true;
+        }
+        assertFalse(caught2);
+    }
+
+    @Test
+    public void ShouldEncryptAndDecryptArrayIntegrityCustomChunkSizeDecNoChunkSize() throws Exception {
+        byte[] data = SalmonCoreTestHelper.getRandArray(1 * 1024 * 1024);
+        long t1 = System.currentTimeMillis();
+        byte[] encData = SalmonCoreTestHelper.getEncryptor().encrypt(data,
+                SalmonCoreTestHelper.TEST_KEY_BYTES, SalmonCoreTestHelper.TEST_NONCE_BYTES,
+                EncryptionFormat.Salmon, true, SalmonCoreTestHelper.TEST_HMAC_KEY_BYTES, 32);
+        long t2 = System.currentTimeMillis();
+        byte[] decData = SalmonCoreTestHelper.getDecryptor().decrypt(encData,
+                SalmonCoreTestHelper.TEST_KEY_BYTES, SalmonCoreTestHelper.TEST_NONCE_BYTES,
+                EncryptionFormat.Salmon, true, SalmonCoreTestHelper.TEST_HMAC_KEY_BYTES);
         long t3 = System.currentTimeMillis();
 
         assertArrayEquals(data, decData);

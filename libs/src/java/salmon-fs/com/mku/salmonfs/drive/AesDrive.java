@@ -749,7 +749,8 @@ public abstract class AesDrive extends VirtualDrive {
      * Create the config file for this drive. By default the config file is placed in the real root of the vault.
      * You can override this with your own location, make sure you also override getConfigFile().
      * @param realRoot The real root directory of the vault
-     * @returns The config file that was created
+     * @return The config file that was created
+     * @throws IOException If there was a problem creating the file.
      */
     public IFile createConfigFile(IFile realRoot) throws IOException {
         IFile configFile = realRoot.createFile(AesDrive.getConfigFilename());
@@ -760,9 +761,9 @@ public abstract class AesDrive extends VirtualDrive {
      * Get the config file for this drive. By default the config file is placed in the real root of the vault.
      * You can override this with your own location.
      * @param realRoot The real root directory of the vault
-     * @returns The config file that will be used for this drive.
+     * @return The config file that will be used for this drive.
      */
-    public IFile getConfigFile(IFile realRoot) throws IOException {
+    public IFile getConfigFile(IFile realRoot) {
         IFile configFile = realRoot.getChild(AesDrive.getConfigFilename());
         return configFile;
     }

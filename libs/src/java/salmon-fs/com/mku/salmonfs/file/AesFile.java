@@ -116,7 +116,8 @@ public class AesFile implements IVirtualFile {
 
     /**
      * Return if integrity is set
-	 * @return True if integrity is enabled.
+     *
+     * @return True if integrity is enabled.
      */
     public boolean isIntegrityEnabled() {
         return this.integrity;
@@ -340,13 +341,15 @@ public class AesFile implements IVirtualFile {
      * @throws IOException Thrown if there is an IO error.
      */
     public void setVerifyIntegrity(boolean integrity, byte[] hashKey) throws IOException {
+        Header header = getHeader();
+        if(header == null && integrity)
+            throw new IntegrityException("File does not support integrity");
         if (integrity && hashKey == null && drive != null)
             hashKey = drive.getKey().getHashKey();
         this.integrity = integrity;
         this.hashKey = hashKey;
-        this.reqChunkSize = getFileChunkSize();
+        this.reqChunkSize = header.getChunkSize();
     }
-
 
     /**
      * Enable integrity with this file.
@@ -379,10 +382,9 @@ public class AesFile implements IVirtualFile {
      * @throws IOException Thrown if there is an IO error.
      */
     public void setApplyIntegrity(boolean integrity, byte[] hashKey, int requestChunkSize) throws IOException {
-        int fileChunkSize = getFileChunkSize();
-
-        if (fileChunkSize > 0)
-            throw new IntegrityException("Cannot redefine chunk size, delete file and recreate");
+        Header header = getHeader();
+        if (header != null && header.getChunkSize() > 0 && !overwrite)
+            throw new IntegrityException("Cannot redefine chunk size");
         if (requestChunkSize < 0)
             throw new IntegrityException("Chunk size needs to be zero for default chunk size or a positive value");
 

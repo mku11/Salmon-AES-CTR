@@ -91,53 +91,47 @@ public class AesStream extends RandomAccessStream {
 
     /**
      * Get the output size of the data to be transformed (encrypted or decrypted) including
-     * header and hash without executing any operations. 
-	 * This can be used to prevent over-allocating memory where creating your output arrays.
+     * header and hashes.
+     * This can be used for efficient memory pre-allocation.
      *
-     * @param mode      The {@link EncryptionMode} Encrypt or Decrypt.
-     * @param length    The length of the data to transform.
-     * @param format    The format to use, see {@link EncryptionFormat}
-     * @param integrity True to enable integrity verification
+     * @param mode   The {@link EncryptionMode} Encrypt or Decrypt.
+     * @param length The length of the data to transform.
+     * @param format The format to use, see {@link EncryptionFormat}
      * @return The size of the output data.
      * @throws SecurityException  Thrown if there is a security exception
      * @throws IntegrityException Thrown if the data are corrupt or tampered with.
      */
     public static long getOutputSize(EncryptionMode mode, long length,
-                                     EncryptionFormat format, boolean integrity) {
-        return getOutputSize(mode, length, format, integrity, Integrity.DEFAULT_CHUNK_SIZE);
+                                     EncryptionFormat format) {
+        return getOutputSize(mode, length, format, Integrity.DEFAULT_CHUNK_SIZE);
     }
 
     /**
      * Get the output size of the data to be transformed (encrypted or decrypted) including
-     * header and hash without executing any operations for the specified chunk size. 
-	 * This can be used to prevent over-allocating memory where creating your output arrays.
+     * header and hashes for the specified chunk size.
+     * This can be used for efficient memory pre-allocation.
      *
      * @param mode      The {@link EncryptionMode} Encrypt or Decrypt.
      * @param length    The length of the data to transform.
      * @param format    The format to use, see {@link EncryptionFormat}
-     * @param integrity True to enable integrity verification
      * @param chunkSize the chunk size to be used with integrity
      * @return The size of the output data.
      * @throws SecurityException  Thrown if there is a security exception
      * @throws IntegrityException Thrown if the data are corrupt or tampered with.
      */
     public static long getOutputSize(EncryptionMode mode, long length,
-                                     EncryptionFormat format, boolean integrity, int chunkSize) {
-        if (format == EncryptionFormat.Generic && integrity)
-            throw new SecurityException("Cannot use integrity with generic format");
-        if (chunkSize <= 0)
-            chunkSize = Integrity.DEFAULT_CHUNK_SIZE;
+                                     EncryptionFormat format, int chunkSize) {
         long size = length;
         if (format == EncryptionFormat.Salmon) {
             if (mode == EncryptionMode.Encrypt) {
                 size += Header.HEADER_LENGTH;
-                if (integrity) {
+                if (chunkSize > 0) {
                     size += Integrity.getTotalHashDataLength(mode, length, chunkSize,
                             0, Generator.HASH_RESULT_LENGTH);
                 }
             } else {
                 size -= Header.HEADER_LENGTH;
-                if (integrity) {
+                if (chunkSize > 0) {
                     size -= Integrity.getTotalHashDataLength(mode, length - Header.HEADER_LENGTH, chunkSize,
                             Generator.HASH_RESULT_LENGTH, Generator.HASH_RESULT_LENGTH);
                 }
@@ -170,8 +164,8 @@ public class AesStream extends RandomAccessStream {
     }
 
     /**
-     * Instantiate a new encrypted stream with a key, a nonce, a base stream, and optionally store 
-	 * the nonce information in the header, see EncryptionFormat.
+     * Instantiate a new encrypted stream with a key, a nonce, a base stream, and optionally store
+     * the nonce information in the header, see EncryptionFormat.
      * <p>
      * If you read from the stream it will decrypt the data from the baseStream.
      * If you write to the stream it will encrypt the data to the baseStream.
@@ -195,9 +189,9 @@ public class AesStream extends RandomAccessStream {
     }
 
     /**
-     * Instantiate a new encrypted stream with a key, a nonce, a base stream, and optionally enable 
-	 * integrity with a hash key and store the nonce and the integrity information in the header, 
-	 * see EncryptionFormat.
+     * Instantiate a new encrypted stream with a key, a nonce, a base stream, and optionally enable
+     * integrity with a hash key and store the nonce and the integrity information in the header,
+     * see EncryptionFormat.
      * <p>
      * If you read from the stream it will decrypt the data from the baseStream.
      * If you write to the stream it will encrypt the data to the baseStream.
@@ -223,15 +217,15 @@ public class AesStream extends RandomAccessStream {
     }
 
     /**
-     * Instantiate a new encrypted stream with a key, a nonce, a base stream, and optionally enable 
-	 * integrity with a hash key and specified chunk size as well as store the nonce and the integrity 
-	 * information in the header, see EncryptionFormat.
+     * Instantiate a new encrypted stream with a key, a nonce, a base stream, and optionally enable
+     * integrity with a hash key and specified chunk size as well as store the nonce and the integrity
+     * information in the header, see EncryptionFormat.
      * <p>
      * If you read from the stream it will decrypt the data from the baseStream.
      * If you write to the stream it will encrypt the data to the baseStream.
      * The transformation is based on AES CTR Mode.
      * </p>
-	 *
+     * <p>
      * Notes:
      * The initial value of the counter is a result of the concatenation of an 12 byte nonce and an additional 4 bytes counter.
      * The counter is then: incremented every block, encrypted by the key, and xored with the plain text.
@@ -252,11 +246,11 @@ public class AesStream extends RandomAccessStream {
     public AesStream(byte[] key, byte[] nonce, EncryptionMode encryptionMode,
                      RandomAccessStream baseStream, EncryptionFormat format, boolean integrity, byte[] hashKey, int chunkSize)
             throws IOException {
-        if (format == EncryptionFormat.Generic && integrity)
-            throw new SecurityException("Cannot use integrity with generic format");
-        if (format == EncryptionFormat.Generic && hashKey != null)
-            throw new SecurityException("Cannot use hashkey with generic format");
-
+        if (format == EncryptionFormat.Generic) {
+            integrity = false;
+            hashKey = null;
+            chunkSize = 0;
+        }
         this.encryptionMode = encryptionMode;
         this.baseStream = baseStream;
         this.header = getOrCreateHeader(format, nonce, integrity, chunkSize);
@@ -264,8 +258,8 @@ public class AesStream extends RandomAccessStream {
             chunkSize = this.header.getChunkSize();
             nonce = this.header.getNonce();
         } else {
-			chunkSize = 0;
-		}
+            chunkSize = 0;
+        }
         if (nonce == null)
             throw new SecurityException("Nonce is missing");
         initIntegrity(integrity, hashKey, chunkSize);
@@ -276,9 +270,9 @@ public class AesStream extends RandomAccessStream {
     private Header getOrCreateHeader(EncryptionFormat format, byte[] nonce, boolean integrity, int chunkSize) throws IOException {
         if (format == EncryptionFormat.Salmon) {
             if (encryptionMode == EncryptionMode.Encrypt) {
-				if (nonce == null)
-					throw new SecurityException("Nonce is missing");
-				
+                if (nonce == null)
+                    throw new SecurityException("Nonce is missing");
+
                 if (integrity && chunkSize <= 0)
                     chunkSize = Integrity.DEFAULT_CHUNK_SIZE;
                 return Header.writeHeader(baseStream, nonce, chunkSize);

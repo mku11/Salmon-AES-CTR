@@ -83,11 +83,11 @@ public class Decryptor {
      *                   otherwise a multiple of the AES block size (16 bytes).
      */
     public Decryptor(int threads, int bufferSize) {
-        if(threads <= 0)
-			threads = 1;
+        if (threads <= 0)
+            threads = 1;
         this.threads = threads;
-		if(threads > 1)
-			executor = Executors.newFixedThreadPool(threads);
+        if (threads > 1)
+            executor = Executors.newFixedThreadPool(threads);
         this.bufferSize = bufferSize;
     }
 
@@ -121,12 +121,32 @@ public class Decryptor {
      */
     public byte[] decrypt(byte[] data, byte[] key, byte[] nonce, EncryptionFormat format)
             throws IOException {
-        return decrypt(data, key, nonce, format, false, null, 0);
+        return decrypt(data, key, nonce, format, true, null, 0);
     }
 
 
     /**
-     * Decrypt a byte array using the specified nonce and integrity hashkey.
+     * Decrypt a byte array using the specified nonce and integrity.
+     *
+     * @param data      The input data to be decrypted.
+     * @param key       The AES key to use for decryption.
+     * @param nonce     The nonce to use for decryption.
+     * @param format    The format to use, see {@link EncryptionFormat}
+     * @param integrity Verify hash integrity in the data.
+     * @return The byte array with the decrypted data.
+     * @throws IOException        Thrown if there is a problem with decoding the array.
+     * @throws SecurityException  Thrown if the key and nonce are not provided.
+     * @throws IOException        Thrown if there is an IO error.
+     * @throws IntegrityException Thrown if the data are corrupt or tampered with.
+     */
+    public byte[] decrypt(byte[] data, byte[] key, byte[] nonce,
+                          EncryptionFormat format,
+                          boolean integrity) throws IOException {
+        return decrypt(data, key, nonce, format, integrity, null, 0);
+    }
+
+    /**
+     * Decrypt a byte array using the specified nonce and integrity hash key.
      *
      * @param data      The input data to be decrypted.
      * @param key       The AES key to use for decryption.
@@ -171,11 +191,18 @@ public class Decryptor {
         if (format == EncryptionFormat.Generic && nonce == null)
             throw new SecurityException("Need to specify a nonce if the file doesn't have a header");
 
-        if (integrity)
-            chunkSize = chunkSize <= 0 ? Integrity.DEFAULT_CHUNK_SIZE : chunkSize;
-
         MemoryStream inputStream = new MemoryStream(data);
-        int realSize = (int) AesStream.getOutputSize(EncryptionMode.Decrypt, data.length, format, integrity, chunkSize);
+        if (format == EncryptionFormat.Salmon) {
+            Header header = Header.readHeaderData(inputStream);
+            if (header != null)
+                chunkSize = header.getChunkSize();
+        } else if (integrity) {
+            chunkSize = chunkSize <= 0 ? Integrity.DEFAULT_CHUNK_SIZE : chunkSize;
+        } else {
+            chunkSize = 0;
+        }
+
+        int realSize = (int) AesStream.getOutputSize(EncryptionMode.Decrypt, data.length, format, chunkSize);
         byte[] outData = new byte[realSize];
 
         if (threads == 1) {
@@ -222,8 +249,8 @@ public class Decryptor {
             else
                 partSize = minPartSize;
             runningThreads = (int) (data.length / partSize);
-			if (runningThreads > this.threads)
-				runningThreads = this.threads;
+            if (runningThreads > this.threads)
+                runningThreads = this.threads;
         }
 
         submitDecryptJobs(runningThreads, partSize, data, outData,
