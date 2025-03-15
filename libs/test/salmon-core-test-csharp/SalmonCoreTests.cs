@@ -30,6 +30,7 @@ using System;
 using System.IO;
 using System.Text;
 using BitConverter = Mku.Convert.BitConverter;
+using MemoryStream = Mku.Streams.MemoryStream;
 
 namespace Mku.Salmon.Test;
 
@@ -558,7 +559,7 @@ public class SalmonCoreTests
         bool caught = false;
         try
         {
-            SalmonCoreTestHelper.TestCounterValue(SalmonCoreTestHelper.TEST_TEXT, SalmonCoreTestHelper.TEST_KEY_BYTES, 
+            SalmonCoreTestHelper.TestCounterValue(SalmonCoreTestHelper.TEST_TEXT, SalmonCoreTestHelper.TEST_KEY_BYTES,
                 SalmonCoreTestHelper.TEST_NONCE_BYTES, SalmonCoreTestHelper.MAX_ENC_COUNTER - 1L);
         }
         catch (Exception ex)
@@ -575,7 +576,7 @@ public class SalmonCoreTests
     public void ShouldCalcHMac256()
     {
         byte[] bytes = UTF8Encoding.UTF8.GetBytes(SalmonCoreTestHelper.TEST_TEXT);
-        byte[] hash = SalmonCoreTestHelper.CalculateHMAC(bytes, 0, bytes.Length, 
+        byte[] hash = SalmonCoreTestHelper.CalculateHMAC(bytes, 0, bytes.Length,
             SalmonCoreTestHelper.TEST_HMAC_KEY_BYTES, null);
         foreach (byte b in hash) Console.Write(b.ToString("x2") + " ");
         Console.WriteLine();
@@ -605,7 +606,7 @@ public class SalmonCoreTests
         byte[]
     data = SalmonCoreTestHelper.GetRandArray(1 * 1024 * 1024 + 4);
         long t1 = Time.Time.CurrentTimeMillis();
-        byte[] encData = new Encryptor(2).Encrypt(data, SalmonCoreTestHelper.TEST_KEY_BYTES, SalmonCoreTestHelper.TEST_NONCE_BYTES,
+        byte[] encData = SalmonCoreTestHelper.GetEncryptor().Encrypt(data, SalmonCoreTestHelper.TEST_KEY_BYTES, SalmonCoreTestHelper.TEST_NONCE_BYTES,
                 EncryptionFormat.Generic);
         long t2 = Time.Time.CurrentTimeMillis();
         byte[] decData = new Decryptor(2).Decrypt(encData, SalmonCoreTestHelper.TEST_KEY_BYTES, SalmonCoreTestHelper.TEST_NONCE_BYTES,
@@ -622,10 +623,10 @@ public class SalmonCoreTests
     {
         byte[] data = SalmonCoreTestHelper.GetRandArray(1 * 1024 * 1024 + 3);
         long t1 = Time.Time.CurrentTimeMillis();
-        byte[] encData = new Encryptor(2).Encrypt(data, SalmonCoreTestHelper.TEST_KEY_BYTES, SalmonCoreTestHelper.TEST_NONCE_BYTES,
+        byte[] encData = SalmonCoreTestHelper.GetEncryptor().Encrypt(data, SalmonCoreTestHelper.TEST_KEY_BYTES, SalmonCoreTestHelper.TEST_NONCE_BYTES,
                 EncryptionFormat.Salmon, true, SalmonCoreTestHelper.TEST_HMAC_KEY_BYTES);
         long t2 = Time.Time.CurrentTimeMillis();
-        byte[] decData = new Decryptor(2).Decrypt(encData, SalmonCoreTestHelper.TEST_KEY_BYTES, SalmonCoreTestHelper.TEST_NONCE_BYTES,
+        byte[] decData = SalmonCoreTestHelper.GetDecryptor().Decrypt(encData, SalmonCoreTestHelper.TEST_KEY_BYTES, SalmonCoreTestHelper.TEST_NONCE_BYTES,
                 EncryptionFormat.Salmon, true, SalmonCoreTestHelper.TEST_HMAC_KEY_BYTES);
         long t3 = Time.Time.CurrentTimeMillis();
 
@@ -635,15 +636,81 @@ public class SalmonCoreTests
     }
 
     [TestMethod]
-    public void ShouldEncryptAndDecryptArrayMultipleThreadsIntegrityCustomChunkSize()
+    public void ShouldEncryptAndDecryptArrayIntegrityCustomChunkSize()
     {
         byte[] data = SalmonCoreTestHelper.GetRandArray(1 * 1024 * 1024);
         long t1 = Time.Time.CurrentTimeMillis();
-        byte[] encData = new Encryptor(2).Encrypt(data, SalmonCoreTestHelper.TEST_KEY_BYTES, SalmonCoreTestHelper.TEST_NONCE_BYTES,
+        byte[] encData = SalmonCoreTestHelper.GetEncryptor().Encrypt(data, SalmonCoreTestHelper.TEST_KEY_BYTES, SalmonCoreTestHelper.TEST_NONCE_BYTES,
                 EncryptionFormat.Salmon, true, SalmonCoreTestHelper.TEST_HMAC_KEY_BYTES, 32);
         long t2 = Time.Time.CurrentTimeMillis();
         byte[] decData = new Decryptor(2).Decrypt(encData, SalmonCoreTestHelper.TEST_KEY_BYTES, SalmonCoreTestHelper.TEST_NONCE_BYTES,
                 EncryptionFormat.Salmon, true, SalmonCoreTestHelper.TEST_HMAC_KEY_BYTES, 32);
+        long t3 = Time.Time.CurrentTimeMillis();
+
+        CollectionAssert.AreEqual(data, decData);
+        Console.WriteLine("enc time: " + (t2 - t1));
+        Console.WriteLine("dec time: " + (t3 - t2));
+    }
+
+    [TestMethod]
+    public void ShouldEncryptAndDecryptArrayIntegrityNoApply()
+    {
+        byte[] data = UTF8Encoding.UTF8.GetBytes(SalmonCoreTestHelper.TEST_TEXT);
+        byte[] key = Generator.GetSecureRandomBytes(32);
+        byte[] nonce = Generator.GetSecureRandomBytes(8);
+        byte[] hashKey = Generator.GetSecureRandomBytes(32);
+
+        byte[] encData = SalmonCoreTestHelper.GetEncryptor().Encrypt(data, key, nonce, EncryptionFormat.Salmon, true, hashKey);
+
+        // specify integrity
+        byte[] decData2 = SalmonCoreTestHelper.GetDecryptor().Decrypt(encData, key, null, EncryptionFormat.Salmon, true, hashKey);
+        CollectionAssert.AreEqual(data, decData2);
+
+        // skip integrity
+        byte[] decData3 = SalmonCoreTestHelper.GetDecryptor().Decrypt(encData, key, null, EncryptionFormat.Salmon, false);
+        CollectionAssert.AreEqual(data, decData3);
+
+        // tamper
+        encData[14] = 0;
+
+        // specify integrity
+        bool caught = false;
+        try
+        {
+            byte[] decData4 = SalmonCoreTestHelper.GetDecryptor().Decrypt(encData, key, null, EncryptionFormat.Salmon, true, hashKey);
+            CollectionAssert.AreEqual(data, decData4);
+        }
+        catch (Exception ex)
+        {
+            caught = true;
+        }
+        Assert.IsTrue(caught);
+
+        // skip integrity, not failing but results don't match
+        bool caught2 = false;
+        try
+        {
+            byte[] decData5 = SalmonCoreTestHelper.GetDecryptor().Decrypt(encData, key, null, EncryptionFormat.Salmon, false);
+        }
+        catch (Exception ex)
+        {
+            caught2 = true;
+        }
+        Assert.IsFalse(caught2);
+    }
+
+    [TestMethod]
+    public void ShouldEncryptAndDecryptArrayIntegrityCustomChunkSizeDecNoChunkSize()
+    {
+        byte[] data = SalmonCoreTestHelper.GetRandArray(1 * 1024 * 1024);
+        long t1 = Time.Time.CurrentTimeMillis();
+        byte[] encData = SalmonCoreTestHelper.GetEncryptor().Encrypt(data,
+                SalmonCoreTestHelper.TEST_KEY_BYTES, SalmonCoreTestHelper.TEST_NONCE_BYTES,
+                EncryptionFormat.Salmon, true, SalmonCoreTestHelper.TEST_HMAC_KEY_BYTES, 32);
+        long t2 = Time.Time.CurrentTimeMillis();
+        byte[] decData = SalmonCoreTestHelper.GetDecryptor().Decrypt(encData,
+                SalmonCoreTestHelper.TEST_KEY_BYTES, SalmonCoreTestHelper.TEST_NONCE_BYTES,
+                EncryptionFormat.Salmon, true, SalmonCoreTestHelper.TEST_HMAC_KEY_BYTES);
         long t3 = Time.Time.CurrentTimeMillis();
 
         CollectionAssert.AreEqual(data, decData);

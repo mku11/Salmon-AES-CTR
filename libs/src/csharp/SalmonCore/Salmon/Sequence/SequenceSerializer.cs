@@ -28,6 +28,7 @@ using System.IO;
 using System.Text;
 using System.Xml;
 using static Mku.Salmon.Sequence.NonceSequence;
+using MemoryStream = Mku.Streams.MemoryStream;
 
 namespace Mku.Salmon.Sequence;
 

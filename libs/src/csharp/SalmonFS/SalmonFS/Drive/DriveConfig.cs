@@ -26,7 +26,7 @@ using Mku.FS.File;
 using Mku.Salmon;
 using System;
 using System.IO;
-
+using MemoryStream = Mku.Streams.MemoryStream;
 using BitConverter = Mku.Convert.BitConverter;
 
 namespace Mku.SalmonFS.Drive;
@@ -100,8 +100,8 @@ public class DriveConfig
 
     /// <summary>
     ///  Clear properties.
-	/// </summary>
-	    public void Clear()
+    /// </summary>
+    public void Clear()
     {
         Array.Fill<byte>(MagicBytes, 0, MagicBytes.Length, (byte)0);
         Array.Fill<byte>(Version, 0, Version.Length, (byte)0);

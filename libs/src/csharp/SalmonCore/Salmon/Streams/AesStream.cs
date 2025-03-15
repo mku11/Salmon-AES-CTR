@@ -90,32 +90,27 @@ public class AesStream : Stream
 
     /// <summary>
     ///  Get the output size of the data to be transformed(encrypted or decrypted) including
-    ///  header and hash without executing any operations. This can be used to prevent over-allocating memory
+    ///  header and hashes without executing any operations. This can be used to prevent over-allocating memory
     ///  where creating your output buffers.
     /// </summary>
     ///  <param name="mode">The <see cref="EncryptionMode"/> Encrypt or Decrypt.</param>
     ///  <param name="format">The format to use, see EncryptionFormat</param>
-    ///  <param name="integrity">True if you want to enable integrity.</param>
     ///  <param name="chunkSize">The chunk size for integrity chunks.</param>
     ///  <returns>The size of the output data.</returns>
     ///  <exception cref="SecurityException">Thrown when error with security</exception>
     ///  <exception cref="Integrity.IntegrityException">Thrown when data are corrupt or tampered with</exception>
     ///  <exception cref="IOException">Thrown if error during IO</exception>
     public static long GetOutputSize(EncryptionMode mode, long length, 
-        EncryptionFormat format = EncryptionFormat.Salmon,
-        bool integrity = false, int chunkSize = 0)
+        EncryptionFormat format = EncryptionFormat.Salmon, int chunkSize = 0)
     {
-        if (format == EncryptionFormat.Generic && integrity)
-            throw new SecurityException("Cannot use integrity with generic format");
-        if (chunkSize == 0)
-            chunkSize = Integrity.Integrity.DEFAULT_CHUNK_SIZE;
+
         long size = length;
         if (format == EncryptionFormat.Salmon)
         {
             if (mode == EncryptionMode.Encrypt)
             {
                 size += Header.HEADER_LENGTH;
-                if (integrity)
+                if (chunkSize > 0)
                 {
                     size += Integrity.Integrity.GetTotalHashDataLength(mode, length, chunkSize,
                             0, Generator.HASH_RESULT_LENGTH);
@@ -124,7 +119,7 @@ public class AesStream : Stream
             else
             {
                 size -= Header.HEADER_LENGTH;
-                if (integrity)
+                if (chunkSize > 0)
                 {
                     size -= Integrity.Integrity.GetTotalHashDataLength(mode, length - Header.HEADER_LENGTH, chunkSize,
                             Generator.HASH_RESULT_LENGTH, Generator.HASH_RESULT_LENGTH);
@@ -160,6 +155,12 @@ public class AesStream : Stream
                         Stream baseStream, EncryptionFormat format = EncryptionFormat.Salmon,
                         bool integrity = false, byte[] hashKey = null, int chunkSize = 0)
     {
+        if (format == EncryptionFormat.Generic)
+        {
+            integrity = false;
+            hashKey = null;
+            chunkSize = 0;
+        }
         this.AesEncryptionMode = encryptionMode;
         this.baseStream = baseStream;
         this.header = GetOrCreateHeader(format, nonce, integrity, chunkSize);
@@ -184,6 +185,8 @@ public class AesStream : Stream
     {
         if (format == EncryptionFormat.Salmon) {
             if (this.AesEncryptionMode== EncryptionMode.Encrypt) {
+                if (nonce == null)
+                    throw new SecurityException("Nonce is missing");
                 if (integrity && chunkSize == 0)
                     chunkSize = Integrity.Integrity.DEFAULT_CHUNK_SIZE;
                 return Header.WriteHeader(baseStream, nonce, chunkSize);

@@ -51,9 +51,9 @@ public class SalmonFSTests
 			&& !Environment.GetEnvironmentVariable("TEST_DIR").Equals("") ? Environment.GetEnvironmentVariable("TEST_DIR") : "d:\\tmp\\salmon\\test";
 		TestMode testMode = Environment.GetEnvironmentVariable("TEST_MODE") != null 
 			&& !Environment.GetEnvironmentVariable("TEST_DIR").Equals("") ? 
-			(TestMode) Enum.Parse(typeof(TestMode), Environment.GetEnvironmentVariable("TEST_MODE")) : TestMode.WebService;
+			(TestMode) Enum.Parse(typeof(TestMode), Environment.GetEnvironmentVariable("TEST_MODE")) : TestMode.Local;
 		int threads = Environment.GetEnvironmentVariable("ENC_THREADS") != null && !Environment.GetEnvironmentVariable("ENC_THREADS").Equals("") ?
-			int.Parse(Environment.GetEnvironmentVariable("ENC_THREADS")) : 2;
+			int.Parse(Environment.GetEnvironmentVariable("ENC_THREADS")) : 1;
 			
 		SalmonFSTestHelper.SetTestParams(testDir, testMode);
 		Console.WriteLine("testDir: " + testDir);

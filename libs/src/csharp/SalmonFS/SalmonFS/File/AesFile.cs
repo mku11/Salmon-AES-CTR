@@ -379,11 +379,15 @@ public class AesFile : IVirtualFile
     ///  <param name="hashKey">  The hash key to be used for verification</param>
     public void SetVerifyIntegrity(bool integrity, byte[] hashKey = null)
     {
+        Header header = Header;
+        if (header == null && integrity)
+            throw new IntegrityException("File does not support integrity");
+
         if (integrity && hashKey == null && Drive != null)
             hashKey = Drive.Key.HashKey;
         this.IsIntegrityEnabled = integrity;
         this.HashKey = hashKey;
-        this.reqChunkSize = FileChunkSize;
+        this.reqChunkSize = header.ChunkSize;
     }
 
     /// <summary>
@@ -395,14 +399,11 @@ public class AesFile : IVirtualFile
     ///                          A positive number to specify integrity chunks.
     public void SetApplyIntegrity(bool integrity, byte[] hashKey = null, int requestChunkSize = 0)
     {
-        int fileChunkSize = FileChunkSize;
-
-        if (fileChunkSize > 0)
-            throw new IntegrityException("Cannot redefine chunk size, delete file and recreate");
+        Header header = Header;
+        if (header != null && header.ChunkSize > 0 && !AllowOverwrite)
+            throw new IntegrityException("Cannot redefine chunk size");
         if (requestChunkSize < 0)
             throw new IntegrityException("Chunk size needs to be zero for default chunk size or a positive value");
-        if (integrity && fileChunkSize < 0)
-            throw new IntegrityException("Cannot enable integrity if the file is not created with integrity, export file and reimport with integrity");
 
         if (integrity && hashKey == null && Drive != null)
             hashKey = Drive.Key.HashKey;

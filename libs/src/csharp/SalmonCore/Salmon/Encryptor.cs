@@ -28,6 +28,7 @@ using Mku.Salmon.Transform;
 using System;
 using System.IO;
 using System.Threading.Tasks;
+using MemoryStream = Mku.Streams.MemoryStream;
 
 namespace Mku.Salmon;
 
@@ -109,7 +110,7 @@ public class Encryptor
         else
             chunkSize = 0;
 
-        int realSize = (int)AesStream.GetOutputSize(EncryptionMode.Encrypt, data.Length, format, integrity, chunkSize);
+        int realSize = (int)AesStream.GetOutputSize(EncryptionMode.Encrypt, data.Length, format, chunkSize);
         byte[] outData = new byte[realSize];
 
         if (threads == 1)

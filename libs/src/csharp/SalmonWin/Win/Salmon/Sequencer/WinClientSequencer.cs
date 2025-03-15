@@ -30,6 +30,7 @@ using System.Security.Principal;
 using System.Text;
 using System.Threading;
 using System.Xml;
+using MemoryStream = Mku.Streams.MemoryStream;
 
 namespace Mku.Win.Salmon.Sequencer;
 

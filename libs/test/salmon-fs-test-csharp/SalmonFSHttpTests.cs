@@ -30,6 +30,7 @@ using Mku.Salmon.Streams;
 using Mku.FS.File;
 using Mku.SalmonFS.Drive;
 using Mku.SalmonFS.File;
+using MemoryStream = Mku.Streams.MemoryStream;
 
 namespace Mku.Salmon.Test;
 

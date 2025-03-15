@@ -37,15 +37,16 @@ using Org.BouncyCastle.Crypto.Parameters;
 using Org.BouncyCastle.Security;
 using Org.BouncyCastle.Crypto;
 using Mku.Streams;
+using MemoryStream = Mku.Streams.MemoryStream;
 
 namespace Mku.Salmon.Test;
 
 public class SalmonCoreTestHelper
 {
     public static int TEST_ENC_BUFFER_SIZE = 512 * 1024;
-    public static int TEST_ENC_THREADS = 2;
+    public static int TEST_ENC_THREADS = 1;
     public static int TEST_DEC_BUFFER_SIZE = 512 * 1024;
-    public static int TEST_DEC_THREADS = 2;
+    public static int TEST_DEC_THREADS = 1;
 
     public static readonly string TEST_PASSWORD = "test123";
     public static readonly string TEST_FALSE_PASSWORD = "falsepass";

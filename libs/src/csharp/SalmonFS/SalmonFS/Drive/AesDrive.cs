@@ -36,6 +36,7 @@ using Mku.FS.File;
 using Mku.SalmonFS.File;
 using Mku.Salmon;
 using Mku.SalmonFS.Auth;
+using MemoryStream = Mku.Streams.MemoryStream;
 
 namespace Mku.SalmonFS.Drive;
 

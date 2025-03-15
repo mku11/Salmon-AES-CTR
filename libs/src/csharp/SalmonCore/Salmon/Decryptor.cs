@@ -28,6 +28,7 @@ using Mku.Salmon.Transform;
 using System;
 using System.IO;
 using System.Threading.Tasks;
+using MemoryStream = Mku.Streams.MemoryStream;
 
 namespace Mku.Salmon;
 
@@ -97,18 +98,31 @@ public class Decryptor
     ///  <exception cref="IntegrityException">Thrown when data are corrupt or tampered with.</exception>
     public byte[] Decrypt(byte[] data, byte[] key, byte[] nonce = null,
                                  EncryptionFormat format = EncryptionFormat.Salmon,
-                                 bool integrity = false, byte[] hashKey = null, int chunkSize = 0)
+                                 bool integrity = true, byte[] hashKey = null, int chunkSize = 0)
     {
         if (key == null)
             throw new SecurityException("Key is missing");
         if (format == EncryptionFormat.Generic && nonce == null)
             throw new SecurityException("Need to specify a nonce if the file doesn't have a header");
 
-        if (integrity)
-            chunkSize = chunkSize <= 0 ? Integrity.Integrity.DEFAULT_CHUNK_SIZE : chunkSize;
 
         MemoryStream inputStream = new MemoryStream(data);
-        int realSize = (int)AesStream.GetOutputSize(EncryptionMode.Decrypt, data.Length, format, integrity, chunkSize);
+        if (format == EncryptionFormat.Salmon)
+        {
+            Header header = Header.ReadHeaderData(inputStream);
+            if (header != null)
+                chunkSize = header.ChunkSize;
+        }
+        else if (integrity)
+        {
+            chunkSize = chunkSize <= 0 ? Integrity.Integrity.DEFAULT_CHUNK_SIZE : chunkSize;
+        }
+        else
+        {
+            chunkSize = 0;
+        }
+
+        int realSize = (int)AesStream.GetOutputSize(EncryptionMode.Decrypt, data.Length, format, chunkSize);
         byte[] outData = new byte[realSize];
 
         if (threads == 1)

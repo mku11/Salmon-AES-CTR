@@ -33,6 +33,7 @@ using System;
 using System.IO;
 using System.Linq;
 using BitConverter = Mku.Convert.BitConverter;
+using MemoryStream = Mku.Streams.MemoryStream;
 
 namespace Mku.SalmonFS.Auth;
 

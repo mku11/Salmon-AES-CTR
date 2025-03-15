@@ -33,6 +33,7 @@
 		<Compile Include="..\..\..\src\csharp\SalmonCore\Convert\IBase64.cs" Link="Convert\IBase64.cs" />
 
 		<Compile Include="..\..\..\src\csharp\SalmonCore\Streams\RandomAccessStreamExtensions.cs" Link="Streams\RandomAccessStreamExtensions.cs" />
+		<Compile Include="..\..\..\src\csharp\SalmonCore\Streams\MemoryStream.cs" Link="Streams\MemoryStream.cs" />
 		<Compile Include="..\..\..\src\csharp\SalmonCore\Streams\BlockingInputOutputAdapterStream.cs" Link="Streams\BlockingInputOutputAdapterStream.cs" />
 
 		<Compile Include="..\..\..\src\csharp\SalmonCore\Salmon\Encode\Base64Utils.cs" Link="Salmon\Encode\Base64Utils.cs" />

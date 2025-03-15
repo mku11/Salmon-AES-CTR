@@ -31,6 +31,7 @@ using System.IO;
 using System.Runtime.CompilerServices;
 using System.Text;
 using BitConverter = Mku.Convert.BitConverter;
+using MemoryStream = Mku.Streams.MemoryStream;
 
 namespace Mku.SalmonFS.Sequence;
 

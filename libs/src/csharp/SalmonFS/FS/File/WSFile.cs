@@ -35,6 +35,7 @@ using System.Net.Http.Json;
 using System.Text;
 using System.Text.Json.Serialization;
 using System.Web;
+using MemoryStream = Mku.Streams.MemoryStream;
 
 
 namespace Mku.FS.File;
