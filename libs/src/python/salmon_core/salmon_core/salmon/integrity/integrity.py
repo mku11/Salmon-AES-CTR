@@ -27,7 +27,7 @@ import math
 from builtins import int
 
 from salmon.integrity.ihash_provider import IHashProvider
-from salmon.integrity.integrity_exception import IntegrityException
+from salmon_core.salmon.integrity.integrity_exception import IntegrityException
 from salmon_core.salmon.generator import Generator
 from salmon_core.salmon.streams.encryption_mode import EncryptionMode
 from salmon_core.salmon.security_exception import SecurityException

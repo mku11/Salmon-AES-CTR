@@ -33,7 +33,7 @@ from typeguard import typechecked
 from wrapt import synchronized
 
 from salmon_core.streams.random_access_stream import RandomAccessStream
-from salmon.integrity.integrity_exception import IntegrityException
+from salmon_core.salmon.integrity.integrity_exception import IntegrityException
 from salmon_core.salmon.streams.aes_stream import AesStream
 from salmon_core.salmon.security_exception import SecurityException
 from salmon_fs.salmonfs.file.aes_file import AesFile

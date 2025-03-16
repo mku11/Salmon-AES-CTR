@@ -27,7 +27,7 @@ import hashlib
 import hmac
 
 from salmon.integrity.ihash_provider import IHashProvider
-from salmon.integrity.integrity_exception import IntegrityException
+from salmon_core.salmon.integrity.integrity_exception import IntegrityException
 
 from typeguard import typechecked
 

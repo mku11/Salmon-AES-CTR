@@ -35,7 +35,7 @@ sys.path.append(os.path.dirname(__file__) + '/../../src/python/salmon_core')
 sys.path.append(os.path.dirname(__file__) + '/../../src/python/salmon_fs')
 sys.path.append(os.path.dirname(__file__) + '/../salmon_core_test_python')
 from salmon_core.streams.memory_stream import MemoryStream
-from salmon.integrity.integrity_exception import IntegrityException
+from salmon_core.salmon.integrity.integrity_exception import IntegrityException
 from salmon_core.salmon.streams.provider_type import ProviderType
 from salmon_core.salmon.streams.aes_stream import AesStream
 from salmon_fs.fs.file.ivirtual_file import IVirtualFile
@@ -55,7 +55,7 @@ class SalmonFSTests(TestCase):
     def setUpClass(cls):
 
         test_dir: str = os.getenv("TEST_DIR", "d:\\tmp\\salmon\\test")
-        test_mode: TestMode = TestMode[os.getenv("TEST_MODE")] if os.getenv("TEST_MODE") else TestMode.Local
+        test_mode: TestMode = TestMode[os.getenv("TEST_MODE")] if os.getenv("TEST_MODE") else TestMode.WebService
         threads: int = int(os.getenv("ENC_THREADS")) if os.getenv("ENC_THREADS") else 1
 
         SalmonFSTestHelper.set_test_params(test_dir, test_mode)
@@ -196,8 +196,11 @@ class SalmonFSTests(TestCase):
                 SalmonFSTestHelper.TEST_IMPORT_FILE,
                 True, 24 + 10, False, True, True)
         except Exception as ex:
+            print(str(ex.__cause__), file=sys.stderr)
             if isinstance(ex.__cause__, IntegrityException) or "Data corrupt or tampered" in str(ex.__cause__):
                 integrity_failed = True
+            else:
+                raise ex
 
         self.assertTrue(integrity_failed)
 
