@@ -66,6 +66,8 @@ public class FileSystem {
             if (part.equals(".."))
                 throw new RuntimeException("Backwards traversing (..) is not supported");
             file = file.getChild(part);
+			if(file == null)
+				return null;
         }
         return file;
     }

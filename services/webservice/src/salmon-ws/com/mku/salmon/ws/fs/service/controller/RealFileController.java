@@ -60,7 +60,7 @@ public class RealFileController {
         System.out.println("INFO, path: " + path);
         IFile file = FileSystem.getInstance().getFile(path);
         if (file == null)
-            throw new IOException("File does not exist");
+            throw new IOException("Partial path does not exist: " + path);
         return new RealFileNode(file);
     }
 
