@@ -74,10 +74,10 @@ export abstract class FileExporter {
 
     abstract onPrepare(sourceFile: IVirtualFile, integrity: boolean): Promise<void>;
 
-    public initialize(bufferSize: number, threads: number) {
-        if (bufferSize == 0)
+    public initialize(bufferSize: number = 0, threads: number = 1) {
+        if (bufferSize <= 0)
             bufferSize = FileExporter.#DEFAULT_BUFFER_SIZE;
-        if (threads == 0)
+        if (threads <= 0)
             threads = FileExporter.#DEFAULT_THREADS;
         this.#bufferSize = bufferSize;
         this.#threads = threads;

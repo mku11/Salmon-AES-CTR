@@ -82,12 +82,12 @@ export abstract class FileImporter {
      *                   If not using integrity it should be a multiple of the AES block size for better performance
      * @param threads The threads
      */
-    public initialize(bufferSize: number, threads: number) {
+    public initialize(bufferSize: number = 0, threads: number = 1) {
         this.#bufferSize = bufferSize;
-        if (this.#bufferSize == 0)
+        if (this.#bufferSize <= 0)
             this.#bufferSize = FileImporter.#DEFAULT_BUFFER_SIZE;
         this.#threads = threads;
-        if (this.#threads == 0)
+        if (this.#threads <= 0)
             this.#threads = FileImporter.#DEFAULT_THREADS;
     }
 

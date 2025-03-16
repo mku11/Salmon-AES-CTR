@@ -39,7 +39,7 @@ export class AesFileCommander extends FileCommander {
      * @param importBufferSize The buffer size to use for importing files.
      * @param exportBufferSize The buffer size to use for exporting files.
      */
-    public constructor(importBufferSize: number, exportBufferSize: number, threads: number) {
+    public constructor(importBufferSize: number = 0, exportBufferSize: number = 0, threads: number = 1) {
         super(new AesFileImporter(importBufferSize, threads), 
             new AesFileExporter(exportBufferSize, threads),
             new FileSearcher());
