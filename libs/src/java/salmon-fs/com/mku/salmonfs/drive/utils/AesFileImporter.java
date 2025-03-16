@@ -36,10 +36,28 @@ import java.io.IOException;
  */
 public class AesFileImporter extends FileImporter {
 
+
+	/**
+     * Instantiates a file importer for encrypted files.
+     *
+     */
+    public AesFileImporter() {
+        super.initialize(0, 1);
+    }
+	
+	/**
+     * Instantiates a file importer for encrypted files.
+     *
+     * @param bufferSize The buffer size to be used.
+     */
+    public AesFileImporter(int bufferSize) {
+        super.initialize(bufferSize, 1);
+    }
+	
     /**
      * Instantiates a file importer for encrypted files.
      *
-     * @param bufferSize The buffer size to be used for export.
+     * @param bufferSize The buffer size to be used.
      * @param threads    The parallel threads to use
      */
     public AesFileImporter(int bufferSize, int threads) {

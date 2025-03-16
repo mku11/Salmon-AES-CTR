@@ -102,9 +102,9 @@ public abstract class FileExporter {
      * @param threads    The number of parallel threads to run
      */
     public void initialize(int bufferSize, int threads) {
-        if (bufferSize == 0)
+        if (bufferSize <= 0)
             bufferSize = DEFAULT_BUFFER_SIZE;
-        if (threads == 0)
+        if (threads <= 0)
             threads = DEFAULT_THREADS;
         this.bufferSize = bufferSize;
         this.threads = threads;

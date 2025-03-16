@@ -33,6 +33,30 @@ import java.io.IOException;
  * Exports AesFile(s) from an encrypted AesDrive.
  */
 public class AesFileExporter extends FileExporter {
+	
+	/**
+     * Instantiates a file exporter for encrypted files.
+     *
+     */
+	public AesFileExporter() {
+        super.initialize(0, 1);
+    }
+
+    /**
+     * Instantiates a file exporter for encrypted files.
+     *
+     * @param bufferSize The buffer size to be used.
+     */
+    public AesFileExporter(int bufferSize) {
+        super.initialize(bufferSize, 1);
+    }
+
+    /**
+     * Instantiates a file exporter for encrypted files.
+     *
+     * @param bufferSize The buffer size to be used.
+     * @param threads    The parallel threads to use
+     */
     public AesFileExporter(int bufferSize, int threads) {
         super.initialize(bufferSize, threads);
     }

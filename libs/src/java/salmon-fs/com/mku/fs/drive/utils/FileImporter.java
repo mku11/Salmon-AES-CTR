@@ -105,10 +105,10 @@ public abstract class FileImporter {
      */
     public void initialize(int bufferSize, int threads) {
         this.bufferSize = bufferSize;
-        if (this.bufferSize == 0)
+        if (this.bufferSize <= 0)
             this.bufferSize = DEFAULT_BUFFER_SIZE;
         this.threads = threads;
-        if (this.threads == 0)
+        if (this.threads <= 0)
             this.threads = DEFAULT_THREADS;
     }
 
