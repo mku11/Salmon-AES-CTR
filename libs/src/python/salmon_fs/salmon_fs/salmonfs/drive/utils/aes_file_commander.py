@@ -43,7 +43,7 @@ class AesFileCommander:
     Facade class for file operations.
     """
 
-    def __init__(self, import_buffer_size: int, export_buffer_size: int, threads: int, multi_cpu: False = False):
+    def __init__(self, import_buffer_size: int = 0, export_buffer_size: int = 0, threads: int = 1, multi_cpu: False = False):
         """
         Instantiate a new file commander object.
         

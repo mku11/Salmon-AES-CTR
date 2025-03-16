@@ -153,7 +153,7 @@ class AesFileExporter:
     The global default threads to use.
     """
 
-    def __init__(self, buffer_size: int, threads: int, multi_cpu: bool = False):
+    def __init__(self, buffer_size: int = 0, threads: int = 1, multi_cpu: bool = False):
         """
         Constructs a file exporter that can be used to export files from the drive
         
@@ -200,10 +200,10 @@ class AesFileExporter:
         """
 
         self.__buffer_size = buffer_size
-        if self.__buffer_size == 0:
+        if self.__buffer_size <= 0:
             self.__buffer_size = AesFileExporter.__DEFAULT_BUFFER_SIZE
         self.__threads = threads
-        if self.__threads == 0:
+        if self.__threads <= 0:
             self.__threads = AesFileExporter.__DEFAULT_THREADS
 
         self.__executor = ThreadPoolExecutor(self.__threads) if not multi_cpu else ProcessPoolExecutor(self.__threads)
@@ -221,10 +221,10 @@ class AesFileExporter:
         """
         return not self.__stopped[0]
 
-    def export_file(self, file_to_export: AesFile, export_dir: IFile, filename: str | None,
-                    delete_source: bool,
-                    integrity: bool,
-                    on_progress: Callable[[int, int], Any] | None) -> IFile | None:
+    def export_file(self, file_to_export: AesFile, export_dir: IFile, filename: str | None = None,
+                    delete_source: bool = False,
+                    integrity: bool = False,
+                    on_progress: Callable[[int, int], Any] | None = None) -> IFile | None:
         """
         Export a file from the drive to the external directory path
         
