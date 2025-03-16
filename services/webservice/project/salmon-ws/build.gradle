@@ -32,6 +32,9 @@ dependencies {
 
     implementation("com.mku.salmon:salmon-core:${version}")
     implementation("com.mku.salmon:salmon-fs:${version}")
+
+    testImplementation("com.mku.salmon:salmon-core:${version}")
+    testImplementation("com.mku.salmon:salmon-fs:${version}")
     
     implementation 'org.springframework.boot:spring-boot-starter-web:2.5.5'
     implementation 'org.springframework.boot:spring-boot-starter-security:2.5.5'
