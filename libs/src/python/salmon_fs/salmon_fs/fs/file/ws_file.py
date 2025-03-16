@@ -338,7 +338,7 @@ class WSFile(IFile):
 
                 for file in files:
                     p_file: WSFile = WSFile(file['path'], self.get_service_path(), self.get_credentials())
-                    if p_file.is_directory():
+                    if file['directory']:
                         real_dirs.append(p_file)
                     else:
                         real_files.append(p_file)
