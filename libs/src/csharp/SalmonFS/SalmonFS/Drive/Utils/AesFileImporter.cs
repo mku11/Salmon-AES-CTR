@@ -39,7 +39,7 @@ public class AesFileImporter : FileImporter
     /// </summary>
     /// <param name="bufferSize">The buffer size</param>
     /// <param name="threads">The threads to use</param>
-    public AesFileImporter(int bufferSize, int threads)
+    public AesFileImporter(int bufferSize = 0, int threads = 1)
     {
         base.Initialize(bufferSize, threads);
     }

@@ -41,7 +41,7 @@ public class AesFileCommander : FileCommander
      * @param importBufferSize The buffer size to use for importing files.
      * @param exportBufferSize The buffer size to use for exporting files.
      */
-    public AesFileCommander(int importBufferSize, int exportBufferSize, int threads)
+    public AesFileCommander(int importBufferSize = 0, int exportBufferSize = 0, int threads = 1)
         : base(new AesFileImporter(importBufferSize, threads),
                 new AesFileExporter(exportBufferSize, threads),
                 new FileSearcher())

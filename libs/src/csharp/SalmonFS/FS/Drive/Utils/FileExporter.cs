@@ -88,11 +88,11 @@ public abstract class FileExporter
     /// </summary>
     /// <param name="bufferSize">The buffer size</param>
     /// <param name="threads">The threads</param>
-    public void Initialize(int bufferSize, int threads)
+    public void Initialize(int bufferSize = 0, int threads = 1)
     {
-        if (bufferSize == 0)
+        if (bufferSize <= 0)
             bufferSize = DEFAULT_BUFFER_SIZE;
-        if (threads == 0)
+        if (threads <= 0)
             threads = DEFAULT_THREADS;
         this.bufferSize = bufferSize;
         this.threads = threads;

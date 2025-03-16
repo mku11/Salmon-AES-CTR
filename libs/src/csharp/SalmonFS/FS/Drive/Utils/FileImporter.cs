@@ -90,13 +90,13 @@ public abstract class FileImporter
     ///                    If using integrity this value has to be a multiple of the Chunk size.
     ///                    If not using integrity it should be a multiple of the AES block size for better performance
     ///  <param name="threads">The threads to use</param>
-    public void Initialize(int bufferSize, int threads)
+    public void Initialize(int bufferSize = 0, int threads = 1)
     {
         this.bufferSize = bufferSize;
-        if (this.bufferSize == 0)
+        if (this.bufferSize <= 0)
             this.bufferSize = DEFAULT_BUFFER_SIZE;
         this.threads = threads;
-        if (this.threads == 0)
+        if (this.threads <= 0)
             this.threads = DEFAULT_THREADS;
     }
 

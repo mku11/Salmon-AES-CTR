@@ -38,7 +38,7 @@ public class AesFileExporter : FileExporter
     /// </summary>
     /// <param name="bufferSize">The buffer size</param>
     /// <param name="threads">The threads</param>
-    public AesFileExporter(int bufferSize, int threads)
+    public AesFileExporter(int bufferSize = 0, int threads = 1)
     {
         base.Initialize(bufferSize, threads);
     }
