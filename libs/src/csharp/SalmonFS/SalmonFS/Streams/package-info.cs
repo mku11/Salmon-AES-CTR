@@ -1,4 +1,4 @@
 /**@brief
- * @namespace Mku.Salmon.Streams
- * Encrypted streams
+ * @namespace Mku.SalmonFS.Streams
+ * Wrappers for encrypted file streams.
  */

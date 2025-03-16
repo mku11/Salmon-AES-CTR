@@ -27,7 +27,7 @@ using Mku.SalmonFS.File;
 using System;
 using System.Collections.Generic;
 
-namespace Mku.SalmonFS.Utils;
+namespace Mku.SalmonFS.Drive.Utils;
 
 /// <summary>
 ///  Useful Comparers for AesFile.

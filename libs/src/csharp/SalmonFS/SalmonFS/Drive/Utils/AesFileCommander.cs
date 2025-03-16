@@ -28,7 +28,7 @@ using Mku.SalmonFS.File;
 using Mku.FS.File;
 using Mku.FS.Drive.Utils;
 
-namespace Mku.SalmonFS.Utils;
+namespace Mku.SalmonFS.Drive.Utils;
 
 /// <summary>
 ///  Facade class for file operations.

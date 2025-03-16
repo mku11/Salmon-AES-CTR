@@ -1,4 +1,4 @@
 /**@brief
- * @namespace Salmon.Win.Sequencer
+ * @namespace Mku.Win.Salmon.Sequencer
  * Nonce sequencers for Windows.
  */

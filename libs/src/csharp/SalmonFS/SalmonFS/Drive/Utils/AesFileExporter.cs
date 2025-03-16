@@ -26,7 +26,7 @@ using Mku.FS.Drive.Utils;
 using Mku.FS.File;
 using Mku.SalmonFS.File;
 
-namespace Mku.SalmonFS.Utils;
+namespace Mku.SalmonFS.Drive.Utils;
 
 /// <summary>
 /// Exports files from the drive to the real filesystem

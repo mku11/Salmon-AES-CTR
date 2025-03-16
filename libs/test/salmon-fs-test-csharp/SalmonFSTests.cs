@@ -36,7 +36,7 @@ using Mku.SalmonFS.Drive;
 using Mku.SalmonFS.Auth;
 using Mku.SalmonFS.File;
 using Mku.SalmonFS.Streams;
-using Mku.SalmonFS.Utils;
+using Mku.SalmonFS.Drive.Utils;
 
 namespace Mku.Salmon.Test;
 

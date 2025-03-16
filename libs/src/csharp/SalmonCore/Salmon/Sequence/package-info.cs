@@ -1,4 +1,4 @@
 /**@brief
- * @namespace Mku.Sequence
+ * @namespace Mku.Salmon.Sequence
  * Nonce sequencers and serializer interfaces
  */

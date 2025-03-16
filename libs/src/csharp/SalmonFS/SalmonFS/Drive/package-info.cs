@@ -1,4 +1,4 @@
 /**@brief
- * @namespace Mku.Salmon.Drive
- * Virtual file implementations
+ * @namespace Mku.SalmonFS.Drive
+ * Virtual drive definitions.
  */

@@ -1,4 +1,4 @@
 /**@brief
- * @namespace Salmon.Win
- * Salmon for Windows
+ * @namespace Mku.Win.Salmon
+ * Salmon encryption for Windows
  */

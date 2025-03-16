@@ -1,4 +1,4 @@
 /**@brief
  * @namespace Mku.Salmon
- * Encryption classes
+ * Salmon encryption.
  */

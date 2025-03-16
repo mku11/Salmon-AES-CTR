@@ -469,7 +469,7 @@ public class WSFile : IFile
         for (int i = 0; i < files.Length; i++)
         {
             WSFile file = new WSFile(files[i].Path, ServicePath, ServiceCredentials);
-            if (files[i].directory)
+            if (files[i].IsDirectory)
                 realDirs.Add(file);
             else
                 realFiles.Add(file);

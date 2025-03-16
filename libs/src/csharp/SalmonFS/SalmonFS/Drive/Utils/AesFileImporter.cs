@@ -27,7 +27,7 @@ using Mku.FS.File;
 using Mku.SalmonFS.File;
 using System;
 
-namespace Mku.SalmonFS.Utils;
+namespace Mku.SalmonFS.Drive.Utils;
 
 /// <summary>
 /// Import files from the real file system to the drive

@@ -1,4 +1,4 @@
 /**@brief
- * @namespace Mku.Drive
+ * @namespace Mku.FS.Drive
  * Virtual drive interfaces and abstractions.
  */

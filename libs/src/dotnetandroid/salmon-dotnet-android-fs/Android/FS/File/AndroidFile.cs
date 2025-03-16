@@ -55,7 +55,7 @@ public class AndroidFile : IFile
     private bool? _isDirectory;
 
     /// <summary>
-    ///  Construct an AndroidFile wrapper from an Android DocumentFile.
+    ///  Construct an AndroidFile from an Android DocumentFile.
 	/// </summary>
 	///  <param name="documentFile">The Android DocumentFile that will be associated to</param>
     ///  <param name="context">     Android Context</param>

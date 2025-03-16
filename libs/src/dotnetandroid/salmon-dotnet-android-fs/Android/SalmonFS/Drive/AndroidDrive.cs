@@ -28,7 +28,7 @@ using Mku.Android.FS.File;
 using Mku.FS.File;
 using Mku.SalmonFS.Drive;
 using Mku.SalmonFS.File;
-using Mku.SalmonFS.Utils;
+using Mku.SalmonFS.Drive.Utils;
 using Uri = Android.Net.Uri;
 
 namespace Mku.Android.SalmonFS.Drive;

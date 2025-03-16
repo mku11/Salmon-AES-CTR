@@ -1,4 +1,4 @@
 /**@brief
- * @namespace Mku.File
- * Real and virtual file interfaces and implementations
+ * @namespace Mku.FS.File
+ * File implementation for .NET
  */

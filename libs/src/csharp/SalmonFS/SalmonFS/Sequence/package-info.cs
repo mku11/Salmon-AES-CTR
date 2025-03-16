@@ -1,4 +1,4 @@
 /**@brief
- * @namespace Mku.Salmon.Sequence
- * Nonce sequencers and serializers
+ * @namespace Mku.SalmonFS.Sequence
+ * File-based nonce sequencers.
  */

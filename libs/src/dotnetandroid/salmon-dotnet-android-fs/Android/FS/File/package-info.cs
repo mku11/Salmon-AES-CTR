@@ -1,4 +1,4 @@
 /**@brief
- * @namespace Mku.Android.File
- * Android virtual file and stream implementations.
+ * @namespace Mku.Android.FS.File
+ * Android file implementations.
  */

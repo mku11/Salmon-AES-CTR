@@ -1,4 +1,4 @@
 /**@brief
- * @namespace Mku.Android.Salmon.Media
+ * @namespace Mku.Android.SalmonFS.Media
  * Android data source implementation for encrypted media.
  */

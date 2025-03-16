@@ -1,4 +1,4 @@
 /**@brief
- * @namespace Mku.Android.Salmon
+ * @namespace Mku.Android.SalmonFS
  * Salmon encryption for Android
  */
