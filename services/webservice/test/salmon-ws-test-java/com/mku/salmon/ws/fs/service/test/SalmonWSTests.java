@@ -23,16 +23,13 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 */
 
-import com.mku.file.IRealFile;
-import com.mku.file.IVirtualFile;
-import com.mku.file.JavaFile;
-import com.mku.file.JavaWSFile;
-import com.mku.salmon.SalmonAuthException;
-import com.mku.salmon.SalmonDrive;
-import com.mku.salmon.drive.JavaWSDrive;
-import com.mku.salmon.sequence.SalmonFileSequencer;
-import com.mku.salmon.test.SalmonFSTestHelper;
-import com.mku.salmon.test.SalmonFSTests;
+import com.mku.fs.file.File;
+import com.mku.fs.file.IFile;
+import com.mku.fs.file.IVirtualFile;
+import com.mku.fs.file.WSFile;
+import com.mku.salmonfs.drive.AesDrive;
+import com.mku.salmonfs.drive.WSDrive;
+import com.mku.salmonfs.sequence.FileSequencer;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
@@ -40,7 +37,7 @@ import org.junit.jupiter.api.Test;
 import static org.junit.jupiter.api.Assertions.*;
 
 /**
- * Basic tests for the Web Service, functional test cases see {@link SalmonFSTests}
+ * Basic tests for the Web Service, functional test cases see SalmonFSTests}
  */
 public class SalmonWSTests {
     @BeforeAll
@@ -62,27 +59,26 @@ public class SalmonWSTests {
 
     @Test
     public void testAuthServer() throws Exception {
-        IRealFile wsDir = new JavaFile(SalmonWSTestHelper.TEST_WS_DIR);
+        IFile wsDir = new File(SalmonWSTestHelper.TEST_WS_DIR);
         if (!wsDir.exists()) {
             wsDir.mkdir();
         }
         String vaultPath = SalmonWSTestHelper.VAULT_PATH + "_" + System.currentTimeMillis();
-        JavaWSFile vaultDir = new JavaWSFile(vaultPath, SalmonWSTestHelper.VAULT_URL,
+        WSFile vaultDir = new WSFile(vaultPath, SalmonWSTestHelper.VAULT_URL,
                 SalmonWSTestHelper.credentials1);
         if (!vaultDir.exists())
             vaultDir.mkdir();
-        IRealFile seqfile = new JavaFile(SalmonWSTestHelper.TEST_SEQUENCER_DIR + "\\" + SalmonWSTestHelper.TEST_SEQUENCER_FILENAME);
-        SalmonFileSequencer sequencer = SalmonFSTestHelper.createSalmonFileSequencer();
-        SalmonDrive drive = JavaWSDrive.create(vaultDir, SalmonWSTestHelper.VAULT_PASSWORD,
+        FileSequencer sequencer = SalmonWSTestHelper.createSalmonFileSequencer();
+        AesDrive drive = WSDrive.create(vaultDir, SalmonWSTestHelper.VAULT_PASSWORD,
                 sequencer);
         drive.close();
-        drive = JavaWSDrive.open(vaultDir, SalmonWSTestHelper.VAULT_PASSWORD,
+        drive = WSDrive.open(vaultDir, SalmonWSTestHelper.VAULT_PASSWORD,
                 sequencer);
         IVirtualFile rootDir = drive.getRoot();
         IVirtualFile[] files = rootDir.listFiles();
         for (IVirtualFile file : files) {
             try {
-                System.out.println(file.getBaseName());
+                System.out.println(file.getName());
             } catch (Exception ex) {
                 ex.printStackTrace();
             }
@@ -93,13 +89,12 @@ public class SalmonWSTests {
 
     @Test
     public void testNoAuthServer() throws Exception {
-        JavaWSFile vaultDir = new JavaWSFile("/", SalmonWSTestHelper.VAULT_URL,
+        WSFile vaultDir = new WSFile("/", SalmonWSTestHelper.VAULT_URL,
                 SalmonWSTestHelper.credentials1);
-        IRealFile seqfile = new JavaFile(SalmonWSTestHelper.TEST_SEQUENCER_DIR + "\\" + SalmonWSTestHelper.TEST_SEQUENCER_FILENAME);
-        SalmonFileSequencer sequencer = SalmonFSTestHelper.createSalmonFileSequencer();
+        FileSequencer sequencer = SalmonWSTestHelper.createSalmonFileSequencer();
         boolean unlocked = false;
         try {
-            SalmonDrive drive = JavaWSDrive.open(vaultDir, SalmonWSTestHelper.VAULT_PASSWORD,
+            AesDrive drive = WSDrive.open(vaultDir, SalmonWSTestHelper.VAULT_PASSWORD,
                     sequencer);
             IVirtualFile rootDir = drive.getRoot();
             IVirtualFile[] files = rootDir.listFiles();
@@ -113,13 +108,12 @@ public class SalmonWSTests {
 
     @Test
     public void testNoPassAuthServer() throws Exception {
-        JavaWSFile vaultDir = new JavaWSFile("/", SalmonWSTestHelper.VAULT_URL,
+        WSFile vaultDir = new WSFile("/", SalmonWSTestHelper.VAULT_URL,
                 SalmonWSTestHelper.credentials1);
-        IRealFile seqfile = new JavaFile(SalmonWSTestHelper.TEST_SEQUENCER_DIR + "\\" + SalmonWSTestHelper.TEST_SEQUENCER_FILENAME);
-        SalmonFileSequencer sequencer = SalmonFSTestHelper.createSalmonFileSequencer();
+        FileSequencer sequencer = SalmonWSTestHelper.createSalmonFileSequencer();
         boolean unlocked = false;
         try {
-            SalmonDrive drive = JavaWSDrive.open(vaultDir, SalmonWSTestHelper.VAULT_WRONG_PASSWORD,
+            AesDrive drive = WSDrive.open(vaultDir, SalmonWSTestHelper.VAULT_WRONG_PASSWORD,
                     sequencer);
             IVirtualFile rootDir = drive.getRoot();
             IVirtualFile[] files = rootDir.listFiles();

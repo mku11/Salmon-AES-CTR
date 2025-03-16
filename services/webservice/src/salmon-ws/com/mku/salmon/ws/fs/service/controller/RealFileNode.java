@@ -23,7 +23,7 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 */
 
-import com.mku.file.IRealFile;
+import com.mku.fs.file.IFile;
 
 import java.io.IOException;
 
@@ -34,18 +34,20 @@ public class RealFileNode {
     /**
      * We wrap over the real file instead of choosing redundancy for better performance.
      */
-    private transient IRealFile file;
+    private transient IFile file;
 
-    public RealFileNode(IRealFile file) {
+    public RealFileNode(IFile file) {
         this.file = file;
     }
 
     public String getPath() throws IOException {
         return FileSystem.getInstance().getRelativePath(file);
     }
+
     public boolean isPresent() {
         return file.exists();
     }
+
     public boolean isDirectory() throws IOException {
         return file.isDirectory();
     }
@@ -55,14 +57,14 @@ public class RealFileNode {
     }
 
     public long getLength() {
-        return file.length();
+        return file.getLength();
     }
 
     public long getLastModified() {
-        return file.lastModified();
+        return file.getLastDateModified();
     }
 
     public String getName() {
-        return file.getBaseName();
+        return file.getName();
     }
 }

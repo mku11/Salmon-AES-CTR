@@ -23,8 +23,8 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 */
 
-import com.mku.file.IRealFile;
-import com.mku.file.JavaFile;
+import com.mku.fs.file.File;
+import com.mku.fs.file.IFile;
 import com.mku.streams.RandomAccessStream;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -52,14 +52,14 @@ public class FileSystem {
         this.path = path;
     }
 
-    public IRealFile getRoot() {
-        IRealFile realRoot = new JavaFile(path);
+    public IFile getRoot() {
+        IFile realRoot = new File(path);
         return realRoot;
     }
 
-    public IRealFile getFile(String path) {
+    public IFile getFile(String path) {
         String[] parts = path.split("/");
-        IRealFile file = getRoot();
+        IFile file = getRoot();
         for (String part : parts) {
             if (part.length() == 0)
                 continue;
@@ -70,15 +70,15 @@ public class FileSystem {
         return file;
     }
 
-    public String getRelativePath(IRealFile file) {
-        return new JavaFile(file.getPath()).getAbsolutePath().replace(
-                new JavaFile(path).getAbsolutePath(), "").replace("\\", "/");
+    public String getRelativePath(IFile file) {
+        return new File(file.getPath()).getPath().replace(
+                new File(path).getPath(), "").replace("\\", "/");
     }
 
-    public IRealFile write(String path, MultipartFile file, long position) throws IOException {
-        IRealFile rFile = getFile(path);
+    public IFile write(String path, MultipartFile file, long position) throws IOException {
+        IFile rFile = getFile(path);
         if(!rFile.exists()) {
-            IRealFile dir = rFile.getParent();
+            IFile dir = rFile.getParent();
             rFile = dir.createFile(file.getOriginalFilename());
         }
         InputStream inputStream = null;
