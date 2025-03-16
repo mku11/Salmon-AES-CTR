@@ -1,4 +1,4 @@
 /**
- * Salmon file system package.
+ * Salmon encrypted file system.
  */
 package com.mku.salmonfs;

@@ -1,4 +1,4 @@
 /**
- * Encryption classes.
+ * Salmon encryption.
  */
 package com.mku.salmon;

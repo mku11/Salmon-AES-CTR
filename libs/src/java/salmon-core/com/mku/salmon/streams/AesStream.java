@@ -38,7 +38,7 @@ import com.mku.streams.RandomAccessStream;
 import java.io.IOException;
 
 /**
- * Stream wrapper provides AES256 encryption, decryption, and integrity verification of a base stream.
+ * Stream wrapper provides AES-256 encryption, decryption, and integrity verification of a data stream.
  */
 public class AesStream extends RandomAccessStream {
 

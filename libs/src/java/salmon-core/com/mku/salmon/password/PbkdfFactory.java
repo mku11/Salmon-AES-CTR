@@ -24,7 +24,7 @@ SOFTWARE.
 */
 
 /**
- * Creates AES transformer implementations.
+ * Creates PBKDF implementations.
  */
 public class PbkdfFactory {
     /**

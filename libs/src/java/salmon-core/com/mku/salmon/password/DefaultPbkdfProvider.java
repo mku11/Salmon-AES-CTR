@@ -32,13 +32,13 @@ import java.security.NoSuchAlgorithmException;
 import java.security.spec.InvalidKeySpecException;
 
 /**
- * Provides pbkdf algorithm.
+ * Provides pbkdf functions.
  */
 public class DefaultPbkdfProvider implements IPbkdfProvider {
     /**
      * Get a key derived from a text password
      * @param password The text password.
-     * @param salt The salt needs to be at least 24 bytes.
+     * @param salt The salt (at least 24 bytes).
      * @param iterations Iterations to use. Make sure you use a high number according to your hardware specs.
      * @param outputBytes The length of the output key.
      * @param pbkdfAlgo The PBKDF algorithm to use

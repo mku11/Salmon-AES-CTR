@@ -44,7 +44,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 /**
- * Serializes sequences for all the drives the device is authorized.
+ * Serializes sequences.
  */
 public class SequenceSerializer implements INonceSequenceSerializer {
 

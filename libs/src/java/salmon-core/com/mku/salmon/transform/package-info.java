@@ -1,4 +1,4 @@
 /**
- * Encryption transformers that use AES encryption algorithm.
+ * Transformers that utilize encryption algorithm.
  */
 package com.mku.salmon.transform;

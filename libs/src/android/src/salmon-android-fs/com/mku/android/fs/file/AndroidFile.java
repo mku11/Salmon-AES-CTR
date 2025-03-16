@@ -70,6 +70,12 @@ public class AndroidFile implements IFile {
 
     }
 
+	/**
+     * Create a directory under this directory.
+     *
+     * @param dirName The directory name.
+	 * @return The new directory.
+     */
     public IFile createDirectory(String dirName) {
         DocumentFile dir = documentFile.createDirectory(dirName);
         if (dir == null)
@@ -77,9 +83,14 @@ public class AndroidFile implements IFile {
         clearCache();
         AndroidFile newDir = new AndroidFile(dir, AndroidDrive.getContext());
         return newDir;
-
     }
 
+	/**
+     * Create an empty file under this directory.
+     *
+     * @param filename The file name.
+	 * @return The new file.
+     */
     public IFile createFile(String filename) {
         DocumentFile doc = documentFile.createFile("*/*", filename);
         // for some reason android storage access framework even though it supports auto rename
@@ -107,7 +118,7 @@ public class AndroidFile implements IFile {
     }
 
     /**
-     * True if file exists.
+     * Check if file exists.
      *
      * @return True if exists
      */
@@ -116,9 +127,9 @@ public class AndroidFile implements IFile {
     }
 
     /**
-     * Get the absolute path on the physical drive.
+     * Get the display path on the physical drive.
      *
-     * @return The absolute path
+     * @return The display path
      */
     public String getDisplayPath() {
         try {
@@ -180,7 +191,7 @@ public class AndroidFile implements IFile {
     }
 
     /**
-     * Get the path.
+     * Get the path on the physical disk.
      *
      * @return The file path
      */
@@ -189,7 +200,7 @@ public class AndroidFile implements IFile {
     }
 
     /**
-     * True if it is a directory.
+     * Check if this is a directory.
      *
      * @return True if directory
      */
@@ -201,7 +212,7 @@ public class AndroidFile implements IFile {
     }
 
     /**
-     * True if it is a file.
+     * Check if this is a file.
      *
      * @return True if is file
      */
@@ -212,7 +223,7 @@ public class AndroidFile implements IFile {
     /**
      * Get the last modified date in milliseconds.
      *
-     * @return Last modified date in milliseconds
+     * @return Last modified date in milliseconds.
      */
     public long getLastDateModified() {
         if (_lastModified != null)
@@ -347,7 +358,7 @@ public class AndroidFile implements IFile {
     }
 
     /**
-     * Copy this file to another directory.
+     * Copy this file to another directory with a new filename.
      *
      * @param newDir           The target directory.
      * @param newName          The new filename
@@ -359,7 +370,7 @@ public class AndroidFile implements IFile {
     }
 
     /**
-     * Copy this file to another directory.
+     * Copy this file to another directory with a new filename with a progress.
      *
      * @param newDir           The target directory.
      * @param newName          The new filename
@@ -396,7 +407,7 @@ public class AndroidFile implements IFile {
     }
 
     /**
-     * Get a child file in this directory.
+     * Get a child file or directory under this directory.
      *
      * @param filename The name of the file or directory to match.
      * @return The child file
@@ -411,7 +422,7 @@ public class AndroidFile implements IFile {
     }
 
     /**
-     * Rename file.
+     * Rename this file.
      *
      * @param newFilename The new filename
      * @return True if file renamed
@@ -441,10 +452,14 @@ public class AndroidFile implements IFile {
     }
 	
 	/**
-     * Clear cache properties
+     * Clear cache properties.
      */
     public void reset() {
-		
+		_basename = null;
+        _childrenCount = null;
+        _isDirectory = null;
+        _lastModified = null;
+        _length = null;
     }
 
     /**
@@ -464,17 +479,5 @@ public class AndroidFile implements IFile {
     @Override
     public String toString() {
         return documentFile.getUri().toString();
-    }
-
-    /**
-     * Clear the cache
-     */
-    public void clearCache()
-    {
-        _basename = null;
-        _childrenCount = null;
-        _isDirectory = null;
-        _lastModified = null;
-        _length = null;
     }
 }
