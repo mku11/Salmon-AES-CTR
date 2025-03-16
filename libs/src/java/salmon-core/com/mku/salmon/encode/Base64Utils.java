@@ -27,7 +27,7 @@ import com.mku.convert.Base64;
 import com.mku.convert.IBase64;
 
 /**
- * Provides generic Base64 utility.
+ * Provides generic Base64 utilities.
  */
 public class Base64Utils {
 
@@ -36,12 +36,12 @@ public class Base64Utils {
     }
 
     /**
-     * Current global Base64 implementation for encrypting/decrypting text strings. To change use setBase64().
+     * Global Base64 implementation for encrypting/decrypting text strings. To change use setBase64().
      */
     private static IBase64 base64;
 
     /**
-     * Change the current global Base64 implementation.
+     * Change the global Base64 implementation.
      * @param base64 The new Base64 implementation.
      */
     public static void setBase64(IBase64 base64) {
@@ -49,7 +49,7 @@ public class Base64Utils {
     }
 
     /**
-     * Get the global default Base64 implementation.
+     * Get the global Base64 implementation.
      * @return The Base64 implementation.
      */
     public static IBase64 getBase64() {

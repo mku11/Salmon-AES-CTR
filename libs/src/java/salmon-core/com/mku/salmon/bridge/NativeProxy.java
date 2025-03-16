@@ -50,8 +50,7 @@ public class NativeProxy implements INativeProxy {
     private native static void expandkey(byte[] key, byte[] expandedKey);
 
     /**
-     * Native transform of the input byte array using AES-256 CTR mode
-     *
+     * Transforms data using CTR mode. CTR mode is symmetric so you should use it for both encryption and decryption.
      * @param key The key
      * @param counter The counter
      * @param srcBuffer The source byte array.

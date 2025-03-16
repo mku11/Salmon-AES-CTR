@@ -44,7 +44,7 @@ public interface INativeProxy
     void salmonExpandKey(byte[] key, byte[] expandedKey);
 
     /**
-     * Transforms data using CTR mode which is symmetric so you should use it for both encryption and decryption.
+     * Transforms data using CTR mode. CTR mode is symmetric so you should use it for both encryption and decryption.
      * @param key The AES-256 encryption key (32 bytes)
      * @param counter The counter (16 bytes)
      * @param srcBuffer The source byte array.

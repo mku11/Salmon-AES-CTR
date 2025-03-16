@@ -70,14 +70,14 @@ public class Integrity {
     /**
      * Instantiate an object to be used for applying and verifying hash signatures for each of the data chunks.
      *
-     * @param integrity True to enable integrity checks.
+     * @param integrity True to enable integrity check.
      * @param key       The key to use for hashing.
-     * @param chunkSize The chunk size. Use 0 to enable integrity on the whole file (1 chunk).
+     * @param chunkSize The chunk size. Use 0 to use default.
      *                  Use a positive number to specify integrity chunks.
      * @param provider  Hash implementation provider.
      * @param hashSize  The hash size.
      * @throws IntegrityException Thrown if the data are corrupt or tampered with.
-     * @throws SecurityException  When security has failed
+     * @throws SecurityException  Thrown when security has failed
      */
     public Integrity(boolean integrity, byte[] key, int chunkSize, IHashProvider provider, int hashSize) {
         if (chunkSize < 0 || (chunkSize > 0 && chunkSize < AesCTRTransformer.BLOCK_SIZE)
