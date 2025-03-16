@@ -231,7 +231,7 @@ class AesFileImporter:
 
     def import_file(self, file_to_import: IFile, v_dir: AesFile, filename: str | None = None, delete_source: bool = False,
                     integrity: bool = False,
-                    on_progress: Callable[[int, int], Any] | None) -> AesFile | None = None:
+                    on_progress: Callable[[int, int], Any] | None = None) -> AesFile | None:
         """
         Imports a real file into the drive.
         
