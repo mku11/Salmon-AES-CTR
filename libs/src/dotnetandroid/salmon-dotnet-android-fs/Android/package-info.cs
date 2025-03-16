@@ -1,4 +1,4 @@
 /**@brief
  * @namespace Mku.Android
- * Salmon for Android
+ * Salmon for Android .NET
  */

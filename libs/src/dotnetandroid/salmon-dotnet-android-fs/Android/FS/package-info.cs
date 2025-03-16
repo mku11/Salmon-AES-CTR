@@ -1,4 +1,4 @@
 /**@brief
  * @namespace Mku.Android.FS
- * Filesystem for Android
+ * File system for Android .NET
  */

@@ -1,4 +1,4 @@
 /**@brief
  * @namespace Mku.Android.FS.File
- * Android file implementations.
+ * Android .NET file implementations.
  */

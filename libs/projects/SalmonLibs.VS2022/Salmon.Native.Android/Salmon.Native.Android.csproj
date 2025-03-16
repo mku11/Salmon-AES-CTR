@@ -27,7 +27,7 @@
 
 
   <ItemGroup>
-    <Compile Include="..\..\..\src\dotnetandroid\salmon-dotnet-android-native\Android\Transform\AndroidNativeProxy.cs" Link="Android\Transform\AndroidNativeProxy.cs" />
+    <Compile Include="..\..\..\src\dotnetandroid\salmon-dotnet-android-native\Android\Salmon\Transform\AndroidNativeProxy.cs" Link="Android\Salmon\Transform\AndroidNativeProxy.cs" />
   </ItemGroup>
 
   <ItemGroup>
