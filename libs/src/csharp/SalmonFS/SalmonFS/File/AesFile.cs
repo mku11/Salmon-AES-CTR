@@ -26,6 +26,7 @@ SOFTWARE.
 using Mku.FS.File;
 using Mku.Salmon;
 using Mku.Salmon.Integrity;
+using Mku.Salmon.Sequence;
 using Mku.Salmon.Streams;
 using Mku.Salmon.Text;
 using Mku.SalmonFS.Drive;
@@ -147,8 +148,9 @@ public class AesFile : IVirtualFile
     /// <summary>
     ///  Provides a file handle that can be used to create encrypted files.
     ///  Requires a virtual drive that supports the underlying filesystem, see File implementation.
-	/// </summary>
-	///  <param name="drive">   The file virtual system that will be used with file operations</param>
+    /// </summary>
+    ///  <param name="drive">   The file virtual system that will be used with file operations</param>
+    /// <param name="format">The encryption format</param>
     ///  <param name="realFile">The real file</param>
     public AesFile(IFile realFile, AesDrive drive = null, EncryptionFormat format = EncryptionFormat.Salmon)
     {

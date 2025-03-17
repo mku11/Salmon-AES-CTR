@@ -41,9 +41,10 @@ namespace Mku.FS.File;
 /// </summary>
 public class HttpFile : IFile
 {
+    /// <summary>
+    /// The directory separator.
+    /// </summary>
     public static readonly string Separator = "/";
-    public static readonly int SMALL_FILE_MAX_LENGTH = 128 * 1024;
-    private static readonly int BUFFER_LENGTH = 32 * 1024;
 
     private static HttpClient client = new HttpClient();
     private string filePath;

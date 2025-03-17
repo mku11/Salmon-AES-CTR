@@ -33,6 +33,10 @@ namespace Mku.Salmon;
 /// </summary>
 public class Header
 {
+    /// <summary>
+    /// 
+    /// Header length
+    /// </summary>
     public static readonly long HEADER_LENGTH = 16;
 
     /// <summary>
@@ -60,6 +64,10 @@ public class Header
     /// </summary>
     public byte[] HeaderData { get; set; }
 
+    /// <summary>
+    /// Construct a header from data.
+    /// </summary>
+    /// <param name="headerData">The data</param>
     public Header(byte[] headerData)
     {
         this.HeaderData = headerData;

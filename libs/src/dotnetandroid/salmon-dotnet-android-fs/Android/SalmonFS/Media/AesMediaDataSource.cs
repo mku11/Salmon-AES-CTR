@@ -115,7 +115,7 @@ public class AesMediaDataSource : MediaDataSource
                     });
                 }
             }
-            throw ex;
+            throw;
         }
     }
 

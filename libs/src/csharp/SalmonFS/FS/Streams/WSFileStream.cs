@@ -38,10 +38,10 @@ using Mku.FS.File;
 namespace Mku.FS.Streams;
 
 
-/**
- * An advanced Salmon File Stream implementation for java files.
- * This class is used internally for random file access of remote physical (real) files.
- */
+/// <summary>
+/// An advanced Salmon File Stream implementation for java files.
+/// This class is used internally for random file access of remote physical (real) files.
+/// </summary>
 public class WSFileStream : Stream
 {
     private static readonly string PATH = "path";
@@ -79,14 +79,29 @@ public class WSFileStream : Stream
         }
     }
 
+    /// <summary>
+    /// Check if stream can read.
+    /// </summary>
     public override bool CanRead => !canWrite;
 
+    /// <summary>
+    /// Check if stream can seek.
+    /// </summary>
     public override bool CanSeek => true;
 
+    /// <summary>
+    /// Check if stream can write.
+    /// </summary>
     public override bool CanWrite => canWrite;
 
+    /// <summary>
+    /// The length of the stream.
+    /// </summary>
     public override long Length => file.Length;
 
+    /// <summary>
+    /// The position of the stream.
+    /// </summary>
     public override long Position
     {
         get
@@ -108,6 +123,9 @@ public class WSFileStream : Stream
         }
     }
 
+    /// <summary>
+    /// Flush the stream.
+    /// </summary>
     public override void Flush()
     {
         try
@@ -121,6 +139,13 @@ public class WSFileStream : Stream
         }
     }
 
+    /// <summary>
+    /// Read from the stream.
+    /// </summary>
+    /// <param name="buffer">The buffer</param>
+    /// <param name="offset">The offset</param>
+    /// <param name="count">The number of bytes to read</param>
+    /// <returns></returns>
     public override int Read(byte[] buffer, int offset, int count)
     {
         int res = GetInputStream().Read(buffer, offset, count);
@@ -128,6 +153,12 @@ public class WSFileStream : Stream
         return res;
     }
 
+    /// <summary>
+    /// Seek to a position.
+    /// </summary>
+    /// <param name="offset">The offset</param>
+    /// <param name="origin">The type of seek</param>
+    /// <returns></returns>
     public override long Seek(long offset, SeekOrigin origin)
     {
         long pos = this.position;
@@ -143,6 +174,11 @@ public class WSFileStream : Stream
         return this.position;
     }
 
+    /// <summary>
+    /// Set the length of the stream.
+    /// </summary>
+    /// <param name="value"></param>
+    /// <exception cref="IOException"></exception>
     public override void SetLength(long value)
     {
         if (this.closed)
@@ -177,6 +213,12 @@ public class WSFileStream : Stream
         Reset();
     }
 
+    /// <summary>
+    /// Write to the stream.
+    /// </summary>
+    /// <param name="buffer">The buffer</param>
+    /// <param name="offset">The offset</param>
+    /// <param name="count">The number of bytes to write</param>
     public override void Write(byte[] buffer, int offset, int count)
     {
         GetOutputStream().Write(buffer, offset, count);
@@ -294,7 +336,7 @@ public class WSFileStream : Stream
                             catch (IOException e)
                             {
                                 Console.Error.WriteLine(e);
-                                throw e;
+                                throw;
                             }
                         }
                     }
@@ -311,6 +353,9 @@ public class WSFileStream : Stream
         return this.outputStream;
     }
 
+    /// <summary>
+    /// Close the stream.
+    /// </summary>
     public override void Close()
     {
         Reset();

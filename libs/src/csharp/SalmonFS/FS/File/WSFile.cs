@@ -54,7 +54,14 @@ public class WSFile : IFile
     private string filePath;
     private Response response;
 
+    /// <summary>
+    /// Get the service path.
+    /// </summary>
     public string ServicePath { get; private set; }
+
+    /// <summary>
+    /// Get the service credentials.
+    /// </summary>
     public Credentials ServiceCredentials { get; set; }
 
     /// <summary>
@@ -62,9 +69,21 @@ public class WSFile : IFile
     /// </summary>
     public class Credentials
     {
+        /// <summary>
+        /// Get the user name.
+        /// </summary>
         public string ServiceUser { get; private set; }
+
+        /// <summary>
+        /// Get the password.
+        /// </summary>
         public string ServicePassword { get; private set; }
 
+        /// <summary>
+        /// Construct the credentials.
+        /// </summary>
+        /// <param name="serviceUser"></param>
+        /// <param name="servicePassword"></param>
         public Credentials(string serviceUser, string servicePassword)
         {
             this.ServiceUser = serviceUser;
@@ -72,30 +91,66 @@ public class WSFile : IFile
         }
     }
 
+    /// <summary>
+    /// Response from the web service.
+    /// </summary>
     public class Response
     {
+        /// <summary>
+        /// The virtual path.
+        /// </summary>
         [JsonPropertyName("path")]
         public string Path { get; set; }
+
+        /// <summary>
+        /// The file name.
+        /// </summary>
         [JsonPropertyName("name")]
         public string Name { get; set; }
+
+        /// <summary>
+        /// The lenght of the file.
+        /// </summary>
         [JsonPropertyName("length")]
         public long Length { get; set; }
+
+        /// <summary>
+        /// Last Date modified.
+        /// </summary>
         [JsonPropertyName("lastModified")]
         public long LastModified { get; set; }
+
+        /// <summary>
+        /// True if it's a directory
+        /// </summary>
         [JsonPropertyName("directory")]
         public bool IsDirectory { get; set; }
+
+        /// <summary>
+        /// True if it's a file.
+        /// </summary>
         [JsonPropertyName("file")]
         public bool IsFile { get; set; }
+
+        /// <summary>
+        /// True if it exists.
+        /// </summary>
         [JsonPropertyName("present")]
         public bool Exists { get; set; }
+
+        /// <summary>
+        /// Headers from the Http response
+        /// </summary>
         public HttpResponseHeaders Headers { get; set; }
     }
 
     /// <summary>
     ///  Instantiate a remote file represented by the filepath provided.
     ///  The REST API server path (ie https://localhost:8080/)
-	/// </summary>
-	///  <param name="path">The filepath.</param>
+    /// </summary>
+    ///  <param name="path">The filepath.</param>
+    /// <param name="servicePath">The service path</param>
+    /// <param name="credentials">The service credentials</param>
     public WSFile(string path, string servicePath, Credentials credentials)
     {
         this.filePath = path;
@@ -131,7 +186,7 @@ public class WSFile : IFile
         catch (IOException e)
         {
             Console.Error.WriteLine(e);
-            throw e;
+            throw;
         }
         finally
         {
@@ -144,7 +199,7 @@ public class WSFile : IFile
                 catch (IOException e)
                 {
                     Console.Error.WriteLine(e);
-                    throw e;
+                    throw;
                 }
             }
         }

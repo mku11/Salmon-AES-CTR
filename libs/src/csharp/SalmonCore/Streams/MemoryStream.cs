@@ -79,7 +79,8 @@ public class MemoryStream : Stream {
     }
 
     /**
-     * @return If the stream can be used for reading.
+	 * Check if the stream can be used for reading
+     * @return True if the stream can be used for reading.
      */
     override
     public bool CanRead => true;

@@ -30,11 +30,6 @@ namespace Mku.Salmon.Password;
 public class Password
 {
     /// <summary>
-    ///  WARNING! SHA1 is not secure anymore enable only if you know what you're doing!
-    /// </summary>
-    private static readonly bool ENABLE_SHA1 = false;
-
-    /// <summary>
     ///  Global PBKDF algorithm option that will be used for the master key derivation.
     /// </summary>
     public static PbkdfAlgo PbkdfAlgorithm { get; set; } = PbkdfAlgo.SHA256;
@@ -94,8 +89,6 @@ public class Password
     ///  <exception cref="SecurityException">Thrown when error with security</exception>
     public static byte[] GetKeyFromPassword(string password, byte[] salt, int iterations, int outputBytes)
     {
-        if (PbkdfAlgorithm == PbkdfAlgo.SHA1 && !ENABLE_SHA1)
-            throw new SecurityException("Cannot use SHA1, SHA1 is not secure anymore use SHA256!");
         return provider.GetKey(password, salt, iterations, outputBytes, PbkdfAlgorithm);
     }
 }

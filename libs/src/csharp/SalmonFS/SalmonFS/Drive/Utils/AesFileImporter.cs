@@ -30,12 +30,12 @@ using System;
 namespace Mku.SalmonFS.Drive.Utils;
 
 /// <summary>
-/// Import files from the real file system to the drive
+/// Import files into an encrypted virtual drive.
 /// </summary>
 public class AesFileImporter : FileImporter
 {
     /// <summary>
-    /// Construct an importer for importing files to AesDrive
+    /// Construct an importer.
     /// </summary>
     /// <param name="bufferSize">The buffer size</param>
     /// <param name="threads">The threads to use</param>
@@ -45,7 +45,7 @@ public class AesFileImporter : FileImporter
     }
 
     /// <summary>
-    /// Prepare the files before import
+    /// Prepare the files before import.
     /// </summary>
     /// <param name="importedFile">The imported file</param>
     /// <param name="integrity">True if apply integrity</param>
@@ -68,7 +68,6 @@ public class AesFileImporter : FileImporter
         return ((AesFile)file).GetMinimumPartSize();
     }
 
-
     /// <summary>
     ///  Imports a real file into the drive.
     /// </summary>
@@ -80,7 +79,7 @@ public class AesFileImporter : FileImporter
     ///  <param name="OnProgress">    Progress observer</param>
     ///  <returns>The AesFile that was imported</returns>
     override
-    public AesFile ImportFile(IFile fileToImport, IVirtualFile dir, String filename,
+    public AesFile ImportFile(IFile fileToImport, IVirtualFile dir, string filename,
                                    bool deleteSource, bool integrity, Action<long, long> OnProgress)
     {
         return (AesFile)base.ImportFile(fileToImport, dir, filename, deleteSource, integrity, OnProgress);

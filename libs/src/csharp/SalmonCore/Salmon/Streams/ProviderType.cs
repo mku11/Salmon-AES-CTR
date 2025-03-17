@@ -26,9 +26,10 @@ namespace Mku.Salmon.Streams;
 
 /// <summary>
 ///  AES provider types. List of AES implementations that currently supported.
-///  <para><see cref="Default"></see></para>
-///  <para><see cref="AesIntrinsics"></see></para>
-///  <para><see cref="TinyAES"></see></para>
+///  <para>Default see: <see cref="Default">Default</see></para>
+///  <para>Aes CPU-Accelerated see: <see cref="AesIntrinsics">AesIntrinsics</see></para>
+///  <para>Aes Native see: <see cref="Aes">Aes</see></para>
+///  <para>Aes GPU-Accelerated see: <see cref="AesGPU">AesGPU</see></para>
 ///  </summary>
 public enum ProviderType
 {

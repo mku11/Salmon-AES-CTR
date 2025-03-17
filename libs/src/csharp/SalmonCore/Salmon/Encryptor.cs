@@ -271,7 +271,7 @@ public class Encryptor
         catch (IOException ex)
         {
             Console.Error.WriteLine(ex);
-            throw ex;
+            throw;
         }
         finally
         {

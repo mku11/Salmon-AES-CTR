@@ -32,11 +32,6 @@ namespace Mku.Salmon.Password;
 public enum PbkdfAlgo
 {
     /// <summary>
-    ///  SHA1 hashing. DO NOT USE.
-    /// </summary>
-    [Obsolete("SHA1 is deprecated, use SHA256 instead.")]
-    SHA1,
-    /// <summary>
     ///  SHA256 hashing.
     /// </summary>
     SHA256

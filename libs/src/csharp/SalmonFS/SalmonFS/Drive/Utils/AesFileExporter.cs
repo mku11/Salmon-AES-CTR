@@ -29,7 +29,7 @@ using Mku.SalmonFS.File;
 namespace Mku.SalmonFS.Drive.Utils;
 
 /// <summary>
-/// Exports files from the drive to the real filesystem
+/// Exports files from an encrypted drive.
 /// </summary>
 public class AesFileExporter : FileExporter
 {

@@ -326,7 +326,7 @@ public class WinClientSequencer : INonceSequencer
         catch (Exception ex)
         {
             Console.Error.WriteLine(ex);
-            throw ex;
+            throw;
         }
         finally
         {
@@ -413,7 +413,7 @@ public class WinClientSequencer : INonceSequencer
             }
             catch (Exception ex)
             {
-                throw ex;
+                throw;
             }
             finally
             {

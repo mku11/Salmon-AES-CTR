@@ -182,7 +182,7 @@ public abstract class FileExporter
             Console.Error.WriteLine(ex);
             failed = true;
             stopped = true;
-            throw ex;
+            throw;
         }
 
         if (stopped || failed)

@@ -185,7 +185,7 @@ public abstract class FileImporter
             Console.Error.WriteLine(ex);
             failed = true;
             stopped = true;
-            throw ex;
+            throw;
         }
         if (stopped || failed)
         {

@@ -134,9 +134,10 @@ public class Integrity
 
     /// <summary>
     /// Get the total number of bytes for all hash signatures for data of a specific length.
-    ///  <param name="length">The length of the data.</param>
-	/// </summary>
-	///  <param name="chunkSize">     The byte size of the stream chunk that will be used to calculate the hash.</param>
+    /// </summary>
+    /// <param name="mode">The encryption mode</param>
+    /// <param name="length">The length of the data</param>
+    ///  <param name="chunkSize">     The byte size of the stream chunk that will be used to calculate the hash.</param>
     ///                        The length should be fixed value except for the last chunk which might be lesser since we don't use padding
     ///  <param name="hashOffset">    The hash key length that will be used as an offset</param>
     ///  <param name="hashLength">    The hash length.</param>

@@ -31,7 +31,7 @@ using Mku.FS.Drive.Utils;
 namespace Mku.SalmonFS.Drive.Utils;
 
 /// <summary>
-///  Facade class for file operations.
+///  Facade class for encrypted file operations in batch.
 /// </summary>
 public class AesFileCommander : FileCommander
 {

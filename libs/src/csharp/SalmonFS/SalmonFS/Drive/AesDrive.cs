@@ -492,7 +492,7 @@ public abstract class AesDrive : VirtualDrive
         catch (Exception ex)
         {
             OnUnlockError();
-            throw ex;
+            throw;
         }
         finally
         {

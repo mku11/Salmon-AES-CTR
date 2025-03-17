@@ -32,11 +32,10 @@ using Mku.FS.File;
 
 namespace Mku.FS.Streams;
 
-
-/**
- * An advanced Salmon File Stream implementation for java files.
- * This class is used internally for random file access of remote physical (real) files.
- */
+/// <summary>
+///  An advanced Salmon File Stream implementation for java files.
+/// This class is used internally for random file access of remote physical (real) files.
+/// </summary>
 public class HttpFileStream : Stream
 {
 
@@ -97,11 +96,22 @@ public class HttpFileStream : Stream
         }
     }
 
+    /// <summary>
+    /// Flusth the stream. Not supported.
+    /// </summary>
+    /// <exception cref="NotSupportedException"></exception>
     public override void Flush()
     {
         throw new NotSupportedException("Unsupported Operation, readonly filesystem");
     }
 
+    /// <summary>
+    /// Read from the stream.
+    /// </summary>
+    /// <param name="buffer">The buffer</param>
+    /// <param name="offset">The offset</param>
+    /// <param name="count">The number of bytes to read</param>
+    /// <returns></returns>
     public override int Read(byte[] buffer, int offset, int count)
     {
         int res = GetInputStream().Read(buffer, offset, count);
@@ -109,6 +119,12 @@ public class HttpFileStream : Stream
         return res;
     }
 
+    /// <summary>
+    /// Seek to a position.
+    /// </summary>
+    /// <param name="offset">The offset</param>
+    /// <param name="origin">The type of seek</param>
+    /// <returns></returns>
     public override long Seek(long offset, SeekOrigin origin)
     {
         long pos = this.position;
@@ -124,16 +140,27 @@ public class HttpFileStream : Stream
         return this.position;
     }
 
+    /// <summary>
+    /// Set the length of the stream.
+    /// </summary>
+    /// <param name="value"></param>
+    /// <exception cref="NotSupportedException"></exception>
     public override void SetLength(long value)
     {
         throw new NotSupportedException("Unsupported Operation, readonly filesystem");
     }
 
+    /// <summary>
+    /// Write to the stream.
+    /// </summary>
+    /// <param name="buffer">The buffer</param>
+    /// <param name="offset">The offset</param>
+    /// <param name="count">The number of bytes to write</param>
+    /// <exception cref="NotSupportedException"></exception>
     public override void Write(byte[] buffer, int offset, int count)
     {
         throw new NotSupportedException("Unsupported Operation, readonly filesystem");
     }
-
 
     private Stream GetInputStream()
     {
@@ -152,7 +179,7 @@ public class HttpFileStream : Stream
 
                 HttpRequestMessage requestMessage = new HttpRequestMessage(HttpMethod.Get, url);
                 SetDefaultHeaders(requestMessage);
-                if(this.position > 0)
+                if (this.position > 0)
                     requestMessage.Headers.Add("Range", "bytes=" + this.position + "-");
                 httpResponse = client.Send(requestMessage);
                 CheckStatus(httpResponse, startPosition > 0 ? HttpStatusCode.PartialContent : HttpStatusCode.OK);
@@ -177,7 +204,11 @@ public class HttpFileStream : Stream
             throw new IOException("A connection is already open");
         client = new HttpClient();
     }
-        public override void Close()
+
+    /// <summary>
+    /// Close the stream.
+    /// </summary>
+    public override void Close()
     {
         Reset();
         this.closed = true;

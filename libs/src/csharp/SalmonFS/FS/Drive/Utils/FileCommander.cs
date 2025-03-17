@@ -35,9 +35,20 @@ namespace Mku.FS.Drive.Utils;
 /// </summary>
 public class FileCommander
 {
+    /// <summary>
+    /// Get the file importer.
+    /// </summary>
     public FileImporter FileImporter { get; private set; }
+    /// <summary>
+    /// Get the file exporter.
+    /// </summary>
     public FileExporter FileExporter { get; private set; }
+
+    /// <summary>
+    /// Get the file searcher.
+    /// </summary>
     public FileSearcher FileSearcher { get; private set; }
+
     private bool stopJobs;
 
     /// <summary>
@@ -159,7 +170,7 @@ public class FileCommander
             }
             catch (SequenceException ex)
             {
-                throw ex;
+                throw;
             }
             catch (Exception ex)
             {
@@ -287,7 +298,7 @@ public class FileCommander
             }
             catch (SequenceException ex)
             {
-                throw ex;
+                throw;
             }
             catch (Exception ex)
             {
@@ -399,7 +410,7 @@ public class FileCommander
                 break;
             total += GetCountRecursively(filesToCopy[i]);
         }
-            
+
         foreach (IVirtualFile IVirtualFile in filesToCopy)
         {
             if (stopJobs)

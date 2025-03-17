@@ -54,10 +54,10 @@
 
 		<Compile Include="..\..\..\src\csharp\SalmonFS\SalmonFS\Sequence\FileSequencer.cs" Link="SalmonFS\Sequence\FileSequencer.cs" />
 		
-		<Compile Include="..\..\..\src\csharp\SalmonFS\SalmonFS\Drive\Utils\AesFileCommander.cs" Link="SalmonFS\Utils\AesFileCommander.cs" />
-		<Compile Include="..\..\..\src\csharp\SalmonFS\SalmonFS\Drive\Utils\AesFileExporter.cs" Link="SalmonFS\Utils\AesFileExporter.cs" />
-		<Compile Include="..\..\..\src\csharp\SalmonFS\SalmonFS\Drive\Utils\AesFileImporter.cs" Link="SalmonFS\Utils\AesFileImporter.cs" />
-		<Compile Include="..\..\..\src\csharp\SalmonFS\SalmonFS\Drive\Utils\AesFileComparators.cs" Link="SalmonFS\Utils\AesFileComparators.cs" />
+		<Compile Include="..\..\..\src\csharp\SalmonFS\SalmonFS\Drive\Utils\AesFileCommander.cs" Link="SalmonFS\Drive\Utils\AesFileCommander.cs" />
+		<Compile Include="..\..\..\src\csharp\SalmonFS\SalmonFS\Drive\Utils\AesFileExporter.cs" Link="SalmonFS\Drive\Utils\AesFileExporter.cs" />
+		<Compile Include="..\..\..\src\csharp\SalmonFS\SalmonFS\Drive\Utils\AesFileImporter.cs" Link="SalmonFS\Drive\Utils\AesFileImporter.cs" />
+		<Compile Include="..\..\..\src\csharp\SalmonFS\SalmonFS\Drive\Utils\AesFileComparators.cs" Link="SalmonFS\Drive\Utils\AesFileComparators.cs" />
 
 		<Compile Include="..\..\..\src\csharp\SalmonFS\FS\Drive\Utils\FileCommander.cs" Link="FS\Drive\Utils\FileCommander.cs" />
 		<Compile Include="..\..\..\src\csharp\SalmonFS\FS\Drive\Utils\FileExporter.cs" Link="FS\Drive\Utils\FileExporter.cs" />

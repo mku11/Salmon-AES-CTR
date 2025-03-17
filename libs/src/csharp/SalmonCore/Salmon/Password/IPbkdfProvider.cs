@@ -35,25 +35,16 @@ public interface IPbkdfProvider
     ///  C# Cipher key for SHA256;
     /// </summary>
     static readonly string PBKDF_SHA256 = "PBKDF2WithHmacSHA256";
-    /// <summary>
-    ///  C# Cipher key for SHA1.
-    ///  WARNING! SHA1 is considered insecure! Use PBKDF_SHA256 instead.
-    /// </summary>
-    [Obsolete("SHA1 is not secure use SHA256 instead")]
-    static readonly string PBKDF_SHA1 = "PBKDF2WithHmacSHA1";
 
     /// <summary>
     ///  Get the PBKDF C# cipher algorigthm string.
 	/// </summary>
 	///  <param name="pbkdfAlgo">The PBKDF algorithm to be used</param>
     ///  <returns>The C# cipher algorithm string.</returns>
-    [Obsolete("SHA1 is not secure use SHA256 instead")]
     static string GetPbkdfAlgoString(PbkdfAlgo pbkdfAlgo)
     {
         switch (pbkdfAlgo)
         {
-            case PbkdfAlgo.SHA1:
-                return IPbkdfProvider.PBKDF_SHA1;
             case PbkdfAlgo.SHA256:
                 return IPbkdfProvider.PBKDF_SHA256;
         }

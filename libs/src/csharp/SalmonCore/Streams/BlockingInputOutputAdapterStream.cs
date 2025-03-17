@@ -29,24 +29,48 @@ using System.Threading;
 
 namespace Mku.Streams;
 
-/**
- * Redirection output stream for read/write streams. 
- * Write() will write to temporary buffer and block until the backing stream reads.
- * This works as an adapter.
- */
+/// <summary>
+/// Adapter stream pipes a write stream to a read stream. 
+/// The Write() method will block until the InputStream.read() reads the data.
+/// </summary>
 public class BlockingInputOutputAdapterStream : Stream
 {
     internal AnonymousPipeServerStream PipeServer { get; set; }
     internal AnonymousPipeClientStream PipeClient { get; set; }
+
+    /// <summary>
+    /// Stream to read. Use with 3rd party libraries.
+    /// </summary>
     public BackingInputStream InputStream { get; internal set; }
+
+    /// <summary>
+    /// Check if stream can read.
+    /// </summary>
 
     public override bool CanRead => PipeServer.CanRead;
 
+
+    /// <summary>
+    /// Check if stream can seek.
+    /// </summary>
+
     public override bool CanSeek => PipeServer.CanSeek;
+
+    /// <summary>
+    /// Check if stream can write
+    /// </summary>
 
     public override bool CanWrite => PipeServer.CanWrite;
 
+    /// <summary>
+    /// Length of the stream.
+    /// </summary>
+
     public override long Length => PipeServer.Length;
+
+    /// <summary>
+    /// Position of the stream.
+    /// </summary>
 
     public override long Position
     {
@@ -65,6 +89,9 @@ public class BlockingInputOutputAdapterStream : Stream
     private readonly object readLock = new object();
     private readonly object receivedLock = new object();
 
+    /// <summary>
+    /// Construct an adapter stream.
+    /// </summary>
     public BlockingInputOutputAdapterStream()
     {
         PipeServer = new AnonymousPipeServerStream();
@@ -72,6 +99,12 @@ public class BlockingInputOutputAdapterStream : Stream
         InputStream = new BackingInputStream(this);
     }
 
+    /// <summary>
+    /// Write to stream. This will block until the InputStream (back stream) will read the data.
+    /// </summary>
+    /// <param name="buffer"></param>
+    /// <param name="offset"></param>
+    /// <param name="count"></param>
     public override void Write(byte[] buffer, int offset, int count)
     {
         PipeServer.Write(buffer, offset, count);
@@ -80,6 +113,9 @@ public class BlockingInputOutputAdapterStream : Stream
         WaitRead();
     }
 
+    /// <summary>
+    /// Flush the stream. Not supported
+    /// </summary>
     public override void Flush()
     {
         PipeServer.Flush();
@@ -87,11 +123,25 @@ public class BlockingInputOutputAdapterStream : Stream
         WaitRead();
     }
 
+    /// <summary>
+    /// Read from the stream. Not supported.
+    /// </summary>
+    /// <param name="buffer">The buffer</param>
+    /// <param name="offset">The offset</param>
+    /// <param name="count">The number of bytes to read</param>
+    /// <returns></returns>
+    /// <exception cref="NotImplementedException"></exception>
     public override int Read(byte[] buffer, int offset, int count)
     {
         throw new NotImplementedException();
     }
 
+    /// <summary>
+    /// Seek to position.
+    /// </summary>
+    /// <param name="offset">The offset</param>
+    /// <param name="origin">The type of seek</param>
+    /// <returns></returns>
     public override long Seek(long offset, SeekOrigin origin)
     {
         long newPosition = 0;
@@ -106,11 +156,18 @@ public class BlockingInputOutputAdapterStream : Stream
         return Position;
     }
 
+    /// <summary>
+    /// Set the length of the stream.
+    /// </summary>
+    /// <param name="value"></param>
     public override void SetLength(long value)
     {
         PipeServer.SetLength(value);
     }
 
+    /// <summary>
+    /// Close the stream.
+    /// </summary>
     public override void Close()
     {
         PipeServer.WaitForPipeDrain();
@@ -141,6 +198,10 @@ public class BlockingInputOutputAdapterStream : Stream
         }
     }
 
+    /// <summary>
+    /// Set to notify the end of receive.
+    /// </summary>
+    /// <param name="value">True to set the end</param>
     public void SetReceived(bool value)
     {
         received = value;
@@ -150,13 +211,17 @@ public class BlockingInputOutputAdapterStream : Stream
         }
     }
 
+    /// <summary>
+    /// Input stream to be used by 3rd party libraries to read the data.
+    /// See: BlockingInputOutputAdapterStream.
+    /// </summary>
     public class BackingInputStream : Stream
     {
         BlockingInputOutputAdapterStream parent;
         // PipeStream is throwing: Stream does not support seeking.
-        // so we keep track of the position
+        // so we keep track of the position internally
         private long position = 0;
-        public long GetPosition()
+        internal long GetPosition()
         {
             return position;
         }
@@ -165,14 +230,31 @@ public class BlockingInputOutputAdapterStream : Stream
         {
             this.parent = parent;
         }
+
+        /// <summary>
+        /// Check if stream can read
+        /// </summary>
         public override bool CanRead => parent.PipeClient.CanRead;
 
+        /// <summary>
+        /// Check if stream can seek
+        /// </summary>
         public override bool CanSeek => parent.PipeServer.CanSeek;
+
+        /// <summary>
+        /// Check if stream can write
+        /// </summary>
 
         public override bool CanWrite => parent.PipeClient.CanWrite;
 
+        /// <summary>
+        /// Get the length.
+        /// </summary>
         public override long Length => parent.PipeClient.Length;
 
+        /// <summary>
+        /// Get current position.
+        /// </summary>
         public override long Position
         {
             get
@@ -185,11 +267,22 @@ public class BlockingInputOutputAdapterStream : Stream
             }
         }
 
+        /// <summary>
+        /// Flush the stream.
+        /// </summary>
+        /// <exception cref="NotSupportedException"></exception>
         public override void Flush()
         {
             throw new NotSupportedException();
         }
 
+        /// <summary>
+        /// Read from stream
+        /// </summary>
+        /// <param name="buffer">The data buffer to read into</param>
+        /// <param name="offset">The data offset to use</param>
+        /// <param name="count">The nubmer of bytes to read</param>
+        /// <returns></returns>
         public override int Read(byte[] buffer, int offset, int count)
         {
             int res = parent.PipeClient.Read(buffer, offset, count);
@@ -201,21 +294,42 @@ public class BlockingInputOutputAdapterStream : Stream
             return res;
         }
 
+        /// <summary>
+        /// Seek to position
+        /// </summary>
+        /// <param name="offset">The offset</param>
+        /// <param name="origin">The type of seek</param>
+        /// <returns></returns>
         public override long Seek(long offset, SeekOrigin origin)
         {
             return parent.PipeClient.Seek(offset, origin);
         }
 
+        /// <summary>
+        /// Set the length.
+        /// </summary>
+        /// <param name="value">The new length</param>
+        /// <exception cref="NotSupportedException"></exception>
         public override void SetLength(long value)
         {
             throw new NotSupportedException();
         }
 
+        /// <summary>
+        /// Write to the stream
+        /// </summary>
+        /// <param name="buffer">The buffer</param>
+        /// <param name="offset">The offset</param>
+        /// <param name="count">The number of bytes to write</param>
+        /// <exception cref="NotSupportedException"></exception>
         public override void Write(byte[] buffer, int offset, int count)
         {
             throw new NotSupportedException();
         }
 
+        /// <summary>
+        /// Close the stream.
+        /// </summary>
         public override void Close()
         {
             parent.PipeClient.Close();
