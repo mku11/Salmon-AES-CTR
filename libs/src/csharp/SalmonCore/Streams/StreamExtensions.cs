@@ -30,7 +30,7 @@ namespace Mku.Streams;
 /// <summary>
 ///  Stream Extensions.
 /// </summary>
-public static class RandomAccessStreamExtensions
+public static class StreamExtensions
 {
     private static readonly int DEFAULT_BUFFER_SIZE = 256 * 1024;
 
@@ -48,7 +48,7 @@ public static class RandomAccessStreamExtensions
         if (!destStream.CanWrite)
             throw new IOException("Target stream not writable");
         if (bufferSize <= 0)
-            bufferSize = RandomAccessStreamExtensions.DEFAULT_BUFFER_SIZE;
+            bufferSize = StreamExtensions.DEFAULT_BUFFER_SIZE;
         int bytesRead;
         long pos = srcStream.Position;
         byte[] buffer = new byte[bufferSize];

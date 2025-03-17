@@ -262,6 +262,11 @@ public class HttpFileStream extends RandomAccessStream {
         this.closed = true;
     }
 
+	/**
+     * Reset the stream.
+     *
+     * @throws IOException Thrown if there is an IO error.
+     */
     public void reset() throws IOException {
         if (this.inputStream != null)
             this.inputStream.close();

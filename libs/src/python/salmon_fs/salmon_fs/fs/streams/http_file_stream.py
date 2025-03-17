@@ -199,6 +199,10 @@ class HttpFileStream(RandomAccessStream):
 
     @synchronized
     def reset(self):
+        """
+        Reset the stream.
+        :raises IOError: Thrown if there is an IO error.
+        """
         if self.__response:
             self.__response.close()
         if self.conn:

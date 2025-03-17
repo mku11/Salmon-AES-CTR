@@ -39,7 +39,7 @@ namespace Mku.Win.Salmon.Sequencer;
 /// </summary>
 public class WinClientSequencer : INonceSequencer
 {
-    private string pipeName;
+    private readonly string pipeName;
     private NamedPipeClientStream client;
     private StreamReader reader;
     private StreamWriter writer;

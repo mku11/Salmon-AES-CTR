@@ -49,6 +49,9 @@ public class WSFile : IFile
     private static readonly string DEST_DIR = "destDir";
     private static readonly string FILENAME = "filename";
     
+    /// <summary>
+    /// The directory separator.
+    /// </summary>
     public static readonly string Separator = "/";
     private static HttpClient client = new HttpClient();
     private string filePath;

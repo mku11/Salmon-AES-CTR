@@ -31,15 +31,14 @@ namespace Mku.FS.Drive;
 /// </summary>
 public abstract class VirtualDrive
 {
-
-    /**
-     * Method is called when the user is authenticated
-     */
+    /// <summary>
+    /// Method is called when the user is authenticated
+    /// </summary>
     public abstract void OnUnlockSuccess();
 
-    /**
-     * Method is called when unlocking the drive has failed
-     */
+    /// <summary>
+    /// Method is called when unlocking the drive has failed
+    /// </summary>
     public abstract void OnUnlockError();
 
     /// <summary>

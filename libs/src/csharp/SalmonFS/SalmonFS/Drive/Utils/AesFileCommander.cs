@@ -35,12 +35,12 @@ namespace Mku.SalmonFS.Drive.Utils;
 /// </summary>
 public class AesFileCommander : FileCommander
 {
-    /**
-     * Instantiate a new file commander object.
-     *
-     * @param importBufferSize The buffer size to use for importing files.
-     * @param exportBufferSize The buffer size to use for exporting files.
-     */
+    /// <summary>
+    /// Instantiate a new file commander object.
+    /// </summary>
+    /// <param name="importBufferSize">The buffer size to use for importing files.</param>
+    /// <param name="exportBufferSize">The buffer size to use for exporting files.</param>
+    /// <param name="threads">The number of parallel threads</param>
     public AesFileCommander(int importBufferSize = 0, int exportBufferSize = 0, int threads = 1)
         : base(new AesFileImporter(importBufferSize, threads),
                 new AesFileExporter(exportBufferSize, threads),

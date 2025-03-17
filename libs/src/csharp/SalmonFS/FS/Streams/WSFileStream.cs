@@ -49,27 +49,26 @@ public class WSFileStream : Stream
     private static readonly string LENGTH = "length";
 
     private HttpClient client;
-    /**
-     * The network input stream associated.
-     */
     private Stream inputStream;
-
-    /**
-     * The network output stream associated.
-     */
     private Stream outputStream;
     private bool closed;
     private WSFile file;
-    /**
-     * Maximum amount of bytes allowed to skip forwards when seeking otherwise will open a new connection
-     */
-    private long MaxNetBytesSkip { get; set; } = 32768;
+
+    /// <summary>
+    /// Maximum amount of bytes allowed to skip forwards when seeking otherwise will open a new connection
+    /// </summary>
+    public long MaxNetBytesSkip { get; set; } = 32768;
 
     private bool canWrite;
     private long position;
     private HttpResponseMessage httpResponse;
     private HttpResponseMessage outHttpResponse;
 
+    /// <summary>
+    /// Stream for web service file.
+    /// </summary>
+    /// <param name="file">The web service file</param>
+    /// <param name="access">The access mode</param>
     public WSFileStream(WSFile file, FileAccess access)
     {
         this.file = file;

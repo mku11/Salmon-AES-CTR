@@ -31,7 +31,8 @@ namespace Mku.Streams;
 
 /// <summary>
 /// Adapter stream pipes a write stream to a read stream. 
-/// The Write() method will block until the InputStream.read() reads the data.
+/// The InputStream.Read() method will block until 
+/// there are data written with BlockingInputOutputAdapterStream.Write().
 /// </summary>
 public class BlockingInputOutputAdapterStream : Stream
 {
@@ -102,9 +103,9 @@ public class BlockingInputOutputAdapterStream : Stream
     /// <summary>
     /// Write to stream. This will block until the InputStream (back stream) will read the data.
     /// </summary>
-    /// <param name="buffer"></param>
-    /// <param name="offset"></param>
-    /// <param name="count"></param>
+    /// <param name="buffer">The buffer</param>
+    /// <param name="offset">The offset</param>
+    /// <param name="count">The number of bytes to write</param>
     public override void Write(byte[] buffer, int offset, int count)
     {
         PipeServer.Write(buffer, offset, count);
@@ -129,7 +130,7 @@ public class BlockingInputOutputAdapterStream : Stream
     /// <param name="buffer">The buffer</param>
     /// <param name="offset">The offset</param>
     /// <param name="count">The number of bytes to read</param>
-    /// <returns></returns>
+    /// <returns>The number of bytes Read</returns>
     /// <exception cref="NotImplementedException"></exception>
     public override int Read(byte[] buffer, int offset, int count)
     {
@@ -159,7 +160,7 @@ public class BlockingInputOutputAdapterStream : Stream
     /// <summary>
     /// Set the length of the stream.
     /// </summary>
-    /// <param name="value"></param>
+    /// <param name="value">The new length</param>
     public override void SetLength(long value)
     {
         PipeServer.SetLength(value);

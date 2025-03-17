@@ -25,7 +25,7 @@ SOFTWARE.
 using Mku.FS.Drive.Utils;
 using System;
 using System.IO;
-using static Mku.Streams.RandomAccessStreamExtensions;
+using static Mku.Streams.StreamExtensions;
 
 namespace Mku.FS.File;
 

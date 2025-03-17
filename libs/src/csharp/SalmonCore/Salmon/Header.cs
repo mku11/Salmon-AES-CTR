@@ -108,6 +108,13 @@ public class Header
         return header;
     }
 
+    /// <summary>
+    /// Write nonce and chunk size to the header.
+    /// </summary>
+    /// <param name="stream"></param>
+    /// <param name="nonce"></param>
+    /// <param name="chunkSize"></param>
+    /// <returns>The new header that was written</returns>
     public static Header WriteHeader(Stream stream, byte[] nonce, int chunkSize)
     {
         byte[] magicBytes = Generator.GetMagicBytes();

@@ -27,85 +27,62 @@ using System.IO;
 
 namespace Mku.Streams;
 
-/**
- * Memory Stream for seeking, reading, and writing to a memory buffer (modeled after C# MemoryStream).
- * If the memory buffer is not specified then an internal resizable buffer will be created.
- */
+/// <summary>
+/// Memory Stream for seeking, reading, and writing to a memory buffer (modeled after C# MemoryStream).
+/// </summary>
 public class MemoryStream : Stream {
-
-    /**
-     * Increment to resize to when capacity is exhausted.
-     */
     private static readonly int _INITIAL_CAPACITY = 128 * 1024;
-
-    /**
-     * Buffer to store the data. This can be provided via the constructor.
-     */
     private byte[] _bytes;
-
-    /**
-     * Current position of the stream.
-     */
     private long _position;
-
-    /**
-     * Current capacity.
-     */
     private long _capacity;
-
-    /**
-     * Current length of the stream.
-     */
     private long _length;
 
-    /**
-     * Create a memory stream.
-     *
-     * @param bytes Optional existing byte array to use as backing buffer.
-     * If omitted a new backing array will be created automatically.
-     */
+    /// <summary>
+    /// Create a memory stream.
+    /// </summary>
+    /// <param name="bytes">existing byte array to use as backing buffer.</param>
     public MemoryStream(byte[] bytes) {
         this._length = bytes.Length;
         this._bytes = bytes;
         this._capacity = bytes.Length;
     }
 
-    /**
-     * Create a memory stream.
-     */
+    /// <summary>
+    /// 
+    /// Create a memory stream.
+    /// </summary>
     public MemoryStream() {
         _bytes = new byte[_INITIAL_CAPACITY];
         this._capacity = _INITIAL_CAPACITY;
     }
 
-    /**
-	 * Check if the stream can be used for reading
-     * @return True if the stream can be used for reading.
-     */
+    /// <summary>
+    ///Check if the stream can be used for reading 
+    /// </summary>
     override
     public bool CanRead => true;
 
-    /**
-     * @return If the stream can be used for writing.
-     */
+    /// <summary>
+    /// Check if the stream can be used for writing.
+    /// </summary>
     override
     public bool CanWrite => true;
 
-    /**
-     * @return If the stream is seekable.
-     */
+    /// <summary>
+    /// If the stream is seekable.
+    /// </summary>
     override
     public bool CanSeek => true;
 
-    /**
-     * @return The length of the stream.
-     */
+    /// <summary>
+    /// The length of the stream.
+    /// </summary>
     override
     public long Length => _length;
 
-    /**
-     * @return The position of the stream.
-     */
+    /// <summary>
+    /// The position of the stream.
+    /// </summary>
     override
     public long Position
     {
@@ -119,27 +96,24 @@ public class MemoryStream : Stream {
         }
     }
 
-    /**
-     * Changes the length of the stream. The capacity of the stream might also change if the value is lesser than the
-     * current capacity.
-     *
-     * @param value The new file length.
-     */
+    /// <summary>
+    /// Changes the length of the stream. The capacity of the stream might also change if the value is lesser than the
+    /// current capacity.
+    /// </summary>
+    /// <param name="value">The new length</param>
     override
     public void SetLength(long value) {
         checkAndResize(value);
         _capacity = value;
     }
 
-    /**
-     * Read a sequence of bytes into the provided buffer.
-     *
-     * @param buffer The buffer to write the bytes that are read from the stream.
-     * @param offset The offset of the buffer that will be used to write the bytes.
-     * @param count  The length of the bytes that can be read from the stream and written to the buffer.
-     * @return The number of bytes read.
-     * @Thrown if there is an IO error.
-     */
+    /// <summary>
+    /// Read a sequence of bytes into the provided buffer.
+    /// </summary>
+    /// <param name="buffer">The buffer</param>
+    /// <param name="offset">The offset</param>
+    /// <param name="count">The number of bytes to read</param>
+    /// <returns></returns>
     override
     public int Read(byte[] buffer, int offset, int count) {
         int bytesRead = (int) Math.Min(_length - Position, count);
@@ -150,13 +124,12 @@ public class MemoryStream : Stream {
         return bytesRead;
     }
 
-    /**
-     * Write a sequence of bytes into the stream.
-     *
-     * @param buffer The buffer that the bytes will be read from.
-     * @param offset The position offset that will be used to read from the buffer.
-     * @param count  The number of bytes that will be written to the stream.
-     */
+    /// <summary>
+    /// Write to the stream
+    /// </summary>
+    /// <param name="buffer">The buffer</param>
+    /// <param name="offset">The offset</param>
+    /// <param name="count">The number of bytes to write</param>
     override
     public void Write(byte[] buffer, int offset, int count) {
         checkAndResize(_position + count);
@@ -164,11 +137,6 @@ public class MemoryStream : Stream {
         Position = Position + count;
     }
 
-    /**
-     * Check if there is no more space in the byte array and increase the capacity.
-     *
-     * @param newLength The new length of the stream.
-     */
     private void checkAndResize(long newLength) {
         if (this._capacity < newLength) {
             long newCapacity = newLength * 2;
@@ -183,13 +151,12 @@ public class MemoryStream : Stream {
         this._length = newLength;
     }
 
-    /**
-     * Seek to a position in the stream.
-     *
-     * @param offset The offset to use.
-     * @param origin Possible Values: Begin, Current, End
-     * @return The new position after seeking.
-     */
+    /// <summary>
+    /// Seek to a position.
+    /// </summary>
+    /// <param name="offset">The offset</param>
+    /// <param name="origin">The type of seek</param>
+    /// <returns></returns>
     override
     public long Seek(long offset, SeekOrigin origin) {
         long nPos = 0;
@@ -205,27 +172,26 @@ public class MemoryStream : Stream {
         return Position;
     }
 
-    /**
-     * Flush the stream. Not-Applicable for memory stream.
-     */
+    /// <summary>
+    /// Flush the stream.
+    /// </summary>
     override
     public void Flush() {
         // nop
     }
 
-    /**
-     * Close any resources the stream is using. Not-Applicable for memory stream.
-     */
+    /// <summary>
+    /// Close any resources the stream is using.
+    /// </summary>
     override
     public void Close() {
         // nop
     }
 
-    /**
-     * Convert the stream to an array:
-     *
-     * @return A byte array containing the data from the stream.
-     */
+    /// <summary>
+    /// Convert the stream to an array.
+    /// </summary>
+    /// <returns>A byte array</returns>
     public byte[] ToArray() {
         byte[] nBytes = new byte[(int) _length];
         Array.Copy(this._bytes, 0, nBytes, 0, (int) _length);

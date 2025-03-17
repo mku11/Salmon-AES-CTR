@@ -94,6 +94,7 @@ public class AesStream : Stream
     ///  where creating your output buffers.
     /// </summary>
     ///  <param name="mode">The <see cref="EncryptionMode"/> Encrypt or Decrypt.</param>
+    /// <param name="length">The data length </param>
     ///  <param name="format">The format to use, see EncryptionFormat</param>
     ///  <param name="chunkSize">The chunk size for integrity chunks.</param>
     ///  <returns>The size of the output data.</returns>

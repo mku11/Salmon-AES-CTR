@@ -24,6 +24,7 @@ SOFTWARE.
 
 using Mku.FS.File;
 using Mku.Salmon.Sequence;
+using Mku.SalmonFS.Auth;
 using Mku.SalmonFS.File;
 using System;
 
@@ -100,7 +101,7 @@ public class Drive : AesDrive
     ///  Return the virtual root directory of the drive.
     /// </summary>
     ///  <returns>The root directory</returns>
-    ///  <exception cref="SalmonAuthException">Thrown when there is a failure during authorization</exception>
+    ///  <exception cref="AuthException">Thrown when there is a failure during authorization</exception>
     override
-    public AesFile Root => (AesFile) base.Root;
+    public AesFile Root => (AesFile)base.Root;
 }

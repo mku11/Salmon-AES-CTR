@@ -38,26 +38,25 @@ namespace Mku.FS.Streams;
 /// </summary>
 public class HttpFileStream : Stream
 {
-
     private HttpClient client;
-    /**
-     * The network input stream associated.
-     */
     private Stream inputStream;
-
-    /**
-     * The network output stream associated.
-     */
     private bool closed;
     private HttpFile file;
-    /**
-     * Maximum amount of bytes allowed to skip forwards when seeking otherwise will open a new connection
-     */
-    private long MaxNetBytesSkip { get; set; } = 32768;
+
+    /// <summary>
+    /// Maximun number of bytes that stream can skip ahead without resetting the network connection.
+    /// </summary>
+    public long MaxNetBytesSkip { get; set; } = 32768;
 
     private long position;
     private HttpResponseMessage httpResponse;
 
+    /// <summary>
+    /// Stream for HttpFile.
+    /// </summary>
+    /// <param name="file">The HTTP file</param>
+    /// <param name="access">The file access</param>
+    /// <exception cref="NotSupportedException"></exception>
     public HttpFileStream(HttpFile file, FileAccess access)
     {
         this.file = file;
@@ -67,14 +66,29 @@ public class HttpFileStream : Stream
         }
     }
 
+    /// <summary>
+    /// Check if stream can read.
+    /// </summary>
     public override bool CanRead => true;
 
+    /// <summary>
+    /// Check if stream can seek.
+    /// </summary>
     public override bool CanSeek => true;
 
+    /// <summary>
+    /// Check if stream can write.
+    /// </summary>
     public override bool CanWrite => false;
 
+    /// <summary>
+    /// The length of the stream.
+    /// </summary>
     public override long Length => file.Length;
 
+    /// <summary>
+    /// The position of the stream
+    /// </summary>
     public override long Position
     {
         get
@@ -151,7 +165,7 @@ public class HttpFileStream : Stream
     }
 
     /// <summary>
-    /// Write to the stream.
+    /// Write to the stream. Not supported.
     /// </summary>
     /// <param name="buffer">The buffer</param>
     /// <param name="offset">The offset</param>
@@ -214,6 +228,9 @@ public class HttpFileStream : Stream
         this.closed = true;
     }
 
+    /// <summary>
+    /// Reset the stream.
+    /// </summary>
     public void Reset()
     {
         if (this.inputStream != null)

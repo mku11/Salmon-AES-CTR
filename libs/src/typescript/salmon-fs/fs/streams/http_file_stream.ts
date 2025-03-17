@@ -250,7 +250,10 @@ export class HttpFileStream extends RandomAccessStream {
         this.closed = true;
     }
 
-    async reset(): Promise<void> {
+	/**
+     * Reset the stream.
+     */
+    public async reset(): Promise<void> {
         if (this.reader != null) {
             if(this.stream?.locked)
                 this.reader.releaseLock();

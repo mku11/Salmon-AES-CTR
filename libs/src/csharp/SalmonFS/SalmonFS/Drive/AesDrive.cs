@@ -68,7 +68,7 @@ public abstract class AesDrive : VirtualDrive
     /// <summary>
     /// Default export directory filename
     /// </summary>
-    public static string ExportDirectoryName { get; set; } = "export";  
+    public static string ExportDirectoryName { get; set; } = "export";
 
     /// <summary>
     /// Default file chunk that will be used to import new files.
@@ -91,10 +91,10 @@ public abstract class AesDrive : VirtualDrive
     public IFile RealRoot { get; private set; } = null;
     private AesFile virtualRoot = null;
     private readonly IHashProvider hashProvider = new HmacSHA256Provider();
-    
+
     /// <summary>
     ///  Set the nonce sequencer used for the current drive.
-	/// </summary>
+    /// </summary>
     public INonceSequencer Sequencer { get; set; }
 
     /// <summary>
@@ -616,9 +616,8 @@ public abstract class AesDrive : VirtualDrive
         return salmonConfig != null;
     }
 
-
     /// <summary>
-    ///  Close the drive and close associated resources.
+    /// Close the drive and close associated resources.
     /// </summary>
     public void Close()
     {
@@ -629,28 +628,29 @@ public abstract class AesDrive : VirtualDrive
             Key.Clear();
         Key = null;
     }
-	
-	
-	/**
-     * Create the config file for this drive. By default the config file is placed in the real root of the vault.
-     * You can override this with your own location, make sure you also override getConfigFile().
-     * @param realRoot The real root directory of the vault
-     * @returns The config file that was created
-     */
+
+    /// <summary>
+    /// Create the config file for this drive. By default the config file is placed in the real root of the vault.
+    /// You can override this with your own location, make sure you also override getConfigFile(). 
+    /// </summary>
+    /// <param name="realRoot">The real root directory of the vault</param>
+    /// <returns>The config file that was created</returns>
 	virtual
-    public IFile CreateConfigFile(IFile realRoot) {
+    public IFile CreateConfigFile(IFile realRoot)
+    {
         IFile configFile = realRoot.CreateFile(AesDrive.ConfigFilename);
         return configFile;
     }
 
-    /**
-     * Get the config file for this drive. By default the config file is placed in the real root of the vault.
-     * You can override this with your own location.
-     * @param realRoot The real root directory of the vault
-     * @returns The config file that will be used for this drive.
-     */
-	virtual
-    public IFile GetConfigFile(IFile realRoot) {
+    /// <summary>
+    /// Get the config file for this drive. By default the config file is placed in the real root of the vault.
+    /// You can override this with your own location.
+    /// </summary>
+    /// <param name="realRoot">The real root directory of the vault</param>
+    /// <returns>The config file that will be used for this drive.</returns>
+    virtual
+    public IFile GetConfigFile(IFile realRoot)
+    {
         IFile configFile = realRoot.GetChild(AesDrive.ConfigFilename);
         return configFile;
     }
