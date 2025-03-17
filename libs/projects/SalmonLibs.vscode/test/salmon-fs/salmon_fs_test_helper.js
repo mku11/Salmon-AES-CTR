@@ -46,6 +46,9 @@ import { Credentials, WSFile } from '../../lib/salmon-fs/fs/file/ws_file.js';
 import { WSDrive } from '../../lib/salmon-fs/salmonfs/drive/ws_drive.js';
 import { HttpFile } from '../../lib/salmon-fs/fs/file/http_file.js';
 import { HttpFileStream } from '../../lib/salmon-fs/fs/streams/http_file_stream.js';
+import { FileImportOptions } from '../../lib/salmon-fs/fs/drive/utils/file_importer.js';
+import { FileExportOptions } from '../../lib/salmon-fs/fs/drive/utils/file_exporter.js';
+import { BatchExportOptions } from '../../lib/salmon-fs/fs/drive/utils/file_commander.js';
 
 export const TestMode = {
     Local: { name: 'Local', ordinal: 0 },
@@ -247,8 +250,11 @@ export class SalmonFSTestHelper {
             SalmonFSTestHelper.TEST_IMPORT_LARGE_FILE,
         ];
         let importer = new AesFileImporter(SalmonFSTestHelper.ENC_IMPORT_BUFFER_SIZE, SalmonFSTestHelper.ENC_IMPORT_THREADS);
+        let importOptions = new FileImportOptions();
+        importOptions.deleteSource = false;
+        importOptions.integrity = true;
         for(let importFile of importFiles) {
-            await importer.importFile(importFile, rootDir, null, false, true);
+            await importer.importFile(importFile, rootDir, options);
         }
         importer.close();
     }
@@ -342,7 +348,10 @@ export class SalmonFSTestHelper {
             if (SalmonFSTestHelper.ENABLE_FILE_PROGRESS)
                 console.log("importing file: " + position + "/" + length);
         }
-        let aesFile = await SalmonFSTestHelper.fileImporter.importFile(fileToImport, rootDir, null, false, applyFileIntegrity, printImportProgress);
+        let importOptions = new FileImportOptions();
+        importOptions.integrity = applyFileIntegrity;
+        importOptions.onProgress = printImportProgress;
+        let aesFile = await SalmonFSTestHelper.fileImporter.importFile(fileToImport, rootDir, importOptions);
 		
 		// get fresh copy of the file
         // TODO: for remote files the output stream should clear all cached file properties
@@ -369,7 +378,7 @@ export class SalmonFSTestHelper {
             if ((await file.getName()) == fileToImport.getName()) {
                 if (shouldBeEqual) {
                     expect(await file.exists()).toBeTruthy();
-                    let fileSize = await file.getSize();
+                    let fileSize = await file.getLength();
                     expect(fileSize).toBe(realFileSize);
                 }
             }
@@ -387,7 +396,10 @@ export class SalmonFSTestHelper {
             await aesFile.setVerifyIntegrity(true);
 		else
 			await aesFile.setVerifyIntegrity(false);
-        let exportFile = await SalmonFSTestHelper.fileExporter.exportFile(aesFile, await drive.getExportDir(), null, false, verifyFileIntegrity, printExportProgress);
+        let exportOptions = new FileExportOptions();
+        exportOptions.integrity = verifyFileIntegrity;
+        exportOptions.onProgress = printExportProgress;
+        let exportFile = await SalmonFSTestHelper.fileExporter.exportFile(aesFile, await drive.getExportDir(), exportOptions);
         let hashPostExport = await SalmonFSTestHelper.getChecksum(exportFile);
         if (shouldBeEqual) {
             expect(hashPostExport).toBe(hashPreImport);
@@ -421,7 +433,7 @@ export class SalmonFSTestHelper {
         let rbasename = fileToImport.getName();
 
         // import
-        let aesFile = await SalmonFSTestHelper.fileImporter.importFile(fileToImport, rootDir, null, false, false, null);
+        let aesFile = await SalmonFSTestHelper.fileImporter.importFile(fileToImport, rootDir);
         expect(aesFile != null).toBeTruthy();
         expect(await aesFile.exists()).toBeTruthy();
 
@@ -443,7 +455,7 @@ export class SalmonFSTestHelper {
         let rbasename = fileToImport.getName();
 
         // import
-        let aesFile = await SalmonFSTestHelper.fileImporter.importFile(fileToImport, rootDir, null, false, false, null);
+        let aesFile = await SalmonFSTestHelper.fileImporter.importFile(fileToImport, rootDir);
 
         // trigger the cache to add the filename
         let basename = await aesFile.getName();
@@ -532,7 +544,7 @@ export class SalmonFSTestHelper {
         // import a test file
         let rootDir = await drive.getRoot();
         let fileToImport = importFilePath;
-        let aesFile1 = await SalmonFSTestHelper.fileImporter.importFile(fileToImport, rootDir, null, false, false, null);
+        let aesFile1 = await SalmonFSTestHelper.fileImporter.importFile(fileToImport, rootDir);
         let nonceA1 = BitConverter.toLong(aesFile1.getRequestedNonce(), 0, Generator.NONCE_LENGTH);
         drive.close();
 
@@ -544,7 +556,7 @@ export class SalmonFSTestHelper {
             // import a test file should fail because not authorized
             rootDir = await drive.getRoot();
             fileToImport = importFilePath;
-            await SalmonFSTestHelper.fileImporter.importFile(fileToImport, rootDir, null, false, false, null);
+            await SalmonFSTestHelper.fileImporter.importFile(fileToImport, rootDir);
             success = true;
         } catch (ignored) { }
 
@@ -562,7 +574,7 @@ export class SalmonFSTestHelper {
         // import another test file
         rootDir = await drive.getRoot();
         fileToImport = importFilePath;
-        let aesFileA2 = await SalmonFSTestHelper.fileImporter.importFile(fileToImport, rootDir, null, false, false, null);
+        let aesFileA2 = await SalmonFSTestHelper.fileImporter.importFile(fileToImport, rootDir);
         let nonceA2 = BitConverter.toLong(await aesFileA2.getFileNonce(), 0, Generator.NONCE_LENGTH);
         drive.close();
 
@@ -572,9 +584,9 @@ export class SalmonFSTestHelper {
         // now import a 3rd file
         rootDir = await drive.getRoot();
         fileToImport = importFilePath;
-        let aesFileB1 = await SalmonFSTestHelper.fileImporter.importFile(fileToImport, rootDir, null, false, false, null);
+        let aesFileB1 = await SalmonFSTestHelper.fileImporter.importFile(fileToImport, rootDir);
         let nonceB1 = BitConverter.toLong(await aesFileB1.getFileNonce(), 0, Generator.NONCE_LENGTH);
-        let aesFileB2 = await SalmonFSTestHelper.fileImporter.importFile(fileToImport, rootDir, null, false, false, null);
+        let aesFileB2 = await SalmonFSTestHelper.fileImporter.importFile(fileToImport, rootDir);
         let nonceB2 = BitConverter.toLong(await aesFileB2.getFileNonce(), 0, Generator.NONCE_LENGTH);
         drive.close();
 
@@ -605,7 +617,7 @@ export class SalmonFSTestHelper {
             let rootDir = await drive.getRoot();
             await rootDir.listFiles();
             let fileToImport = importFile;
-            let aesFile = await SalmonFSTestHelper.fileImporter.importFile(fileToImport, rootDir, null, false, false, null);
+            let aesFile = await SalmonFSTestHelper.fileImporter.importFile(fileToImport, rootDir);
             importSuccess = aesFile != null;
         } catch (ex) {
             console.error(ex);
@@ -820,7 +832,7 @@ export class SalmonFSTestHelper {
         let drive = await SalmonFSTestHelper.openDrive(vaultDir, SalmonFSTestHelper.driveClassType, SalmonCoreTestHelper.TEST_PASSWORD, sequencer);
         let root = await drive.getRoot();
         let file = await root.getChild(filename);
-        console.log("file size: " + await file.getSize());
+        console.log("file size: " + await file.getLength());
 		console.log("file last modified: " + await file.getLastDateModified());
         expect(await file.exists()).toBeTruthy();
         
@@ -904,6 +916,7 @@ export class SalmonFSTestHelper {
     static async exportFiles(files, dir, threads = 1) {
 		let bufferSize = 256 * 1024;
 		let commander = new AesFileCommander(bufferSize, bufferSize, threads);
+        commander.importFiles
 
 		// set the correct worker paths for multithreading
 		// commander.getFileImporter().setWorkerPath( '../lib/salmon-fs/salmon/utils/salmon_file_importer_worker.js');
@@ -914,12 +927,17 @@ export class SalmonFSTestHelper {
             hashPreExport.push(await SalmonFSTestHelper.getChecksum(file));
 
         // export files
-        let filesExported = await commander.exportFiles(files, dir, false, true,
-            autoRenameFile, async (sfile, ex) => {
-                // file failed to import
-                console.error(ex);
-                console.log("export failed: " + await sfile.getName() + "\n" + ex.stack);
-        }, async (taskProgress) => {
+        let exportOptions = new BatchExportOptions();
+        exportOptions.deleteSource = false;
+        exportOptions.integrity = true;
+        exportOptions.autoRename = autoRenameFile;
+        exportOptions.integrity = false;
+        exportOptions.onFailed = async (sfile, ex) => {
+            // file failed to import
+            console.error(ex);
+            console.log("export failed: " + await sfile.getName() + "\n" + ex.stack);
+        };
+        exportOptions.onProgressChanged = async (taskProgress) => {
             if(!SalmonFSTestHelper.ENABLE_FILE_PROGRESS)
                 return;
             try {
@@ -928,8 +946,8 @@ export class SalmonFSTestHelper {
             } catch (e) {
                 console.error(e);
             }
-        });
-			
+        };
+        let filesExported = await commander.exportFiles(files, dir, options);
         console.log("Files exported");
 
         for(let i = 0; i < files.length; i++) {

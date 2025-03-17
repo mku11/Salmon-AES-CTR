@@ -496,8 +496,8 @@ export abstract class AesDrive extends VirtualDrive {
      * Create a nonce sequence for the drive id and the authorization id provided. Should be called
      * once per driveId/authId combination.
      *
-     * @param driveId The driveId
-     * @param authId  The authId
+     * @param {Uint8Array} driveId The driveId
+     * @param  {Uint8Array} authId  The authId
      * @throws Exception
      */
     async createSequence(driveId: Uint8Array, authId: Uint8Array): Promise<void> {
@@ -673,7 +673,7 @@ export abstract class AesDrive extends VirtualDrive {
     /**
      * Create the config file for this drive. By default the config file is placed in the real root of the vault.
      * You can override this with your own location, make sure you also override getConfigFile().
-     * @param realRoot The real root directory of the vault
+     * @param {IFile} realRoot The real root directory of the vault
      * @returns The config file that was created
      */
     public async createConfigFile(realRoot: IFile): Promise<IFile>  {
@@ -684,7 +684,7 @@ export abstract class AesDrive extends VirtualDrive {
     /**
      * Get the config file for this drive. By default the config file is placed in the real root of the vault.
      * You can override this with your own location.
-     * @param realRoot The real root directory of the vault
+     * @param {IFile} realRoot The real root directory of the vault
      * @returns The config file that will be used for this drive.
      */
     public async getConfigFile(realRoot: IFile): Promise<IFile | null> {

@@ -81,10 +81,10 @@ export class AesServiceWorker {
 			await stream.skip(position);
 		}
 
-		let streamSize: number = await salmonFile.getSize() - position;
+		let streamSize: number = await salmonFile.getLength() - position;
 		let status: number = position == null ? 200 : 206;
 		let headers: Headers = new Headers();
-		let contentLength: number = await salmonFile.getSize();
+		let contentLength: number = await salmonFile.getLength();
 		headers.append("Content-Length", (streamSize) + "");
 		if (position != null)
 			headers.append("Content-Range", "bytes " + position + "-" + (position + streamSize - 1) + "/" + contentLength);

@@ -34,7 +34,7 @@ export class NativeProxy implements INativeProxy {
 
     /**
      * 
-     * @param libraryPath The library path to the native salmon library
+     * @param {string} libraryPath The library path to the native salmon library
      */
     public static setLibraryPath(libraryPath: string) {
         NativeProxy.#libraryPath = libraryPath;
@@ -43,7 +43,7 @@ export class NativeProxy implements INativeProxy {
     /**
      * Proxy Init the native code with AES implementation, and hash length options.
      *
-     * @param {number} aesImpl
+     * @param {number} aesImpl The implementation type see ProviderType
      */
     public init(aesImpl: number): void {
         this.loadLibrary();

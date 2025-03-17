@@ -55,22 +55,20 @@ export class FileSearcher {
      * Search files in directory and its subdirectories recursively for matching terms.
      * @param dir The directory to start the search.
      * @param terms The terms to search for.
-     * @param any True if you want to match any term otherwise match all terms.
-     * @param OnResultFound Callback interface to receive notifications when results found.
-     * @param onSearchEvent Callback interface to receive status events.
+     * @param {SearchOptions | null} options The options
      * @return An array with all the results found.
      */
-    public async search(dir: IVirtualFile, terms: string, any: boolean,
-        OnResultFound: (searchResult: IVirtualFile) => void,
-        onSearchEvent: (event: SearchEvent) => void | null): Promise<IVirtualFile[]> {
+    public async search(dir: IVirtualFile, terms: string, options: SearchOptions | null = null): Promise<IVirtualFile[]> {
+        if(options == null)
+            options = new SearchOptions();
         this.#running = true;
         this.#quit = false;
         let searchResults: { [key: string]: IVirtualFile } = {};
-        if (onSearchEvent != null)
-            onSearchEvent(SearchEvent.SearchingFiles);
-        await this.#searchDir(dir, terms, any, OnResultFound, searchResults);
-        if (onSearchEvent != null)
-            onSearchEvent(SearchEvent.SearchingFinished);
+        if (options.onSearchEvent != null)
+            options.onSearchEvent(SearchEvent.SearchingFiles);
+        await this.#searchDir(dir, terms, options.anyTerm, options.onResultFound, searchResults);
+        if (options.onSearchEvent != null)
+            options.onSearchEvent(SearchEvent.SearchingFinished);
         this.#running = false;
         return Object.values(searchResults);
     }
@@ -108,7 +106,7 @@ export class FileSearcher {
      * @param searchResults The array to store the search results.
      */
     async #searchDir(dir: IVirtualFile, terms: string, any: boolean,
-        OnResultFound: (file: IVirtualFile) => void,
+        onResultFound: ((file: IVirtualFile) => void) | null,
         searchResults: { [key: string]: IVirtualFile }): Promise<void> {
         if (this.#quit)
             return;
@@ -119,7 +117,7 @@ export class FileSearcher {
             if (this.#quit)
                 break;
             if (await file.isDirectory()) {
-                await this.#searchDir(file, terms, any, OnResultFound, searchResults);
+                await this.#searchDir(file, terms, any, onResultFound, searchResults);
             } else {
                 if (file.getRealPath() in searchResults)
                     continue;
@@ -127,8 +125,8 @@ export class FileSearcher {
                     let hits: number = this.#getSearchResults(await file.getName(), termsArray, any);
                     if (hits > 0) {
                         searchResults[file.getRealPath()] = file;
-                        if (OnResultFound != null)
-                            OnResultFound(file);
+                        if (onResultFound != null)
+                            onResultFound(file);
                     }
                 } catch (ex) {
                     console.error(ex);
@@ -152,3 +150,22 @@ export enum SearchEvent {
     SearchingFinished
 }
 
+/**
+ * Search options
+ */
+export class SearchOptions {
+    /**
+     * True to search for any term, otherwise match all
+     */
+    anyTerm: boolean = false;
+
+    /**
+     * Callback when result found
+     */
+    onResultFound: ((searchResult: IVirtualFile) => void) | null = null;
+
+    /**
+     * Callback when search event happens.
+     */
+    onSearchEvent: ((event: SearchEvent) => void) | null = null;
+}

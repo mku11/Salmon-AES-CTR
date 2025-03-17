@@ -48,7 +48,7 @@ export class AesFileExporter extends FileExporter {
             // or Web Service files (require passing the credentials)
             || sourceFile.getRealFile().constructor.name == 'WSFile' 
             || targetFile.constructor.name === 'WSFile)') {
-            return await (sourceFile as AesFile).getSize();
+            return await (sourceFile as AesFile).getLength();
         }
         return await (sourceFile as AesFile).getMinimumPartSize();
     }

@@ -35,13 +35,13 @@ import { DriveGenerator } from "./drive_generator.js";
  */
 export class DriveConfig {
     //TODO: support versioned formats for the file header
-    readonly magicBytes: Uint8Array = new Uint8Array(Generator.MAGIC_LENGTH);
-    readonly version: Uint8Array = new Uint8Array(Generator.VERSION_LENGTH);
-    readonly salt: Uint8Array = new Uint8Array(DriveGenerator.SALT_LENGTH);
-    readonly iterations: Uint8Array = new Uint8Array(DriveGenerator.ITERATIONS_LENGTH);
-    readonly iv: Uint8Array = new Uint8Array(DriveGenerator.IV_LENGTH);
-    readonly encryptedData: Uint8Array = new Uint8Array(DriveGenerator.COMBINED_KEY_LENGTH + DriveGenerator.DRIVE_ID_LENGTH);
-    readonly hashSignature: Uint8Array = new Uint8Array(Generator.HASH_RESULT_LENGTH);
+    readonly #magicBytes: Uint8Array = new Uint8Array(Generator.MAGIC_LENGTH);
+    readonly #version: Uint8Array = new Uint8Array(Generator.VERSION_LENGTH);
+    readonly #salt: Uint8Array = new Uint8Array(DriveGenerator.SALT_LENGTH);
+    readonly #iterations: Uint8Array = new Uint8Array(DriveGenerator.ITERATIONS_LENGTH);
+    readonly #iv: Uint8Array = new Uint8Array(DriveGenerator.IV_LENGTH);
+    readonly #encryptedData: Uint8Array = new Uint8Array(DriveGenerator.COMBINED_KEY_LENGTH + DriveGenerator.DRIVE_ID_LENGTH);
+    readonly #hashSignature: Uint8Array = new Uint8Array(Generator.HASH_RESULT_LENGTH);
 
     /**
      * Provide a class that hosts the properties of the drive config file
@@ -53,13 +53,13 @@ export class DriveConfig {
 
     public async init(contents: Uint8Array): Promise<void>{
         let ms: MemoryStream = new MemoryStream(contents);
-        await ms.read(this.magicBytes, 0, Generator.MAGIC_LENGTH);
-        await ms.read(this.version, 0, Generator.VERSION_LENGTH);
-        await ms.read(this.salt, 0, DriveGenerator.SALT_LENGTH);
-        await ms.read(this.iterations, 0, DriveGenerator.ITERATIONS_LENGTH);
-        await ms.read(this.iv, 0, DriveGenerator.IV_LENGTH);
-        await ms.read(this.encryptedData, 0, DriveGenerator.COMBINED_KEY_LENGTH + DriveGenerator.AUTH_ID_SIZE);
-        await ms.read(this.hashSignature, 0, Generator.HASH_RESULT_LENGTH);
+        await ms.read(this.#magicBytes, 0, Generator.MAGIC_LENGTH);
+        await ms.read(this.#version, 0, Generator.VERSION_LENGTH);
+        await ms.read(this.#salt, 0, DriveGenerator.SALT_LENGTH);
+        await ms.read(this.#iterations, 0, DriveGenerator.ITERATIONS_LENGTH);
+        await ms.read(this.#iv, 0, DriveGenerator.IV_LENGTH);
+        await ms.read(this.#encryptedData, 0, DriveGenerator.COMBINED_KEY_LENGTH + DriveGenerator.AUTH_ID_SIZE);
+        await ms.read(this.#hashSignature, 0, Generator.HASH_RESULT_LENGTH);
         await ms.close();
     }
 
@@ -102,13 +102,13 @@ export class DriveConfig {
      * Clear properties.
      */
     public clear(): void {
-        this.magicBytes.fill(0);
-        this.version.fill(0);
-        this.salt.fill(0);
-        this.iterations.fill(0);
-        this.iv.fill(0);
-        this.encryptedData.fill(0);
-        this.hashSignature.fill(0);
+        this.#magicBytes.fill(0);
+        this.#version.fill(0);
+        this.#salt.fill(0);
+        this.#iterations.fill(0);
+        this.#iv.fill(0);
+        this.#encryptedData.fill(0);
+        this.#hashSignature.fill(0);
     }
 
     /**
@@ -116,7 +116,7 @@ export class DriveConfig {
      * @return
      */
     public getMagicBytes(): Uint8Array {
-        return this.magicBytes;
+        return this.#magicBytes;
     }
 
     /**
@@ -124,7 +124,7 @@ export class DriveConfig {
      * @return
      */
     public getSalt(): Uint8Array {
-        return this.salt;
+        return this.#salt;
     }
 
     /**
@@ -132,9 +132,9 @@ export class DriveConfig {
      * @return
      */
     public getIterations(): number {
-        if (this.iterations == null)
+        if (this.#iterations == null)
             return 0;
-        return BitConverter.toLong(this.iterations, 0, DriveGenerator.ITERATIONS_LENGTH);
+        return BitConverter.toLong(this.#iterations, 0, DriveGenerator.ITERATIONS_LENGTH);
     }
 
     /**
@@ -142,7 +142,7 @@ export class DriveConfig {
      * @return
      */
     getEncryptedData(): Uint8Array {
-        return this.encryptedData;
+        return this.#encryptedData;
     }
 
     /**
@@ -150,7 +150,7 @@ export class DriveConfig {
      * @return
      */
     public getIv(): Uint8Array {
-        return this.iv;
+        return this.#iv;
     }
 
     /**
@@ -158,6 +158,6 @@ export class DriveConfig {
      * @return
      */
     public getHashSignature(): Uint8Array {
-        return this.hashSignature;
+        return this.#hashSignature;
     }
 }

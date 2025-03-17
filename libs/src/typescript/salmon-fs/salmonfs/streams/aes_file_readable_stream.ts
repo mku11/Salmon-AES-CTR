@@ -150,7 +150,7 @@ export class ReadableStreamFileReader {
     }
 
     public async initialize(): Promise<void> {
-        this.size = await this.salmonFile.getSize();
+        this.size = await this.salmonFile.getLength();
         this.positionStart = 0;
         this.positionEnd = this.size - 1;
         this.createBuffers();

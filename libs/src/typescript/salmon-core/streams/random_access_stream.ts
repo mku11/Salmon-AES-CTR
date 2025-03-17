@@ -118,11 +118,11 @@ export abstract class RandomAccessStream {
      * Write stream contents to another stream.
      * @param {RandomAccessStream} stream The target stream.
      * @param {number | null} bufferSize The buffer size to be used when copying.
-     * @param {((position: number, length: number) => void) | null} progressListener The listener to notify when progress changes.
+     * @param {((position: number, length: number) => void) | null} onProgressChanged The listener to notify when progress changes.
      * @throws IOException Thrown if there is an IO error.
      */
     public async copyTo(stream: RandomAccessStream, bufferSize: number | null = null, 
-        progressListener: ((position: number, length: number) => void) | null = null): Promise<void> {
+        onProgressChanged: ((position: number, length: number) => void) | null = null): Promise<void> {
         if (!(await this.canRead()))
             throw new IOException("Target stream not readable");
         if (!(await stream.canWrite()))
@@ -135,8 +135,8 @@ export abstract class RandomAccessStream {
         const buffer: Uint8Array = new Uint8Array(bufferSize);
         while ((bytesRead = await this.read(buffer, 0, bufferSize)) > 0) {
             await stream.write(buffer, 0, bytesRead);
-            if (progressListener != null)
-                progressListener(await this.getPosition(), await this.getLength());
+            if (onProgressChanged != null)
+                onProgressChanged(await this.getPosition(), await this.getLength());
         }
         await stream.flush();
         await this.setPosition(pos);

@@ -24,7 +24,7 @@ SOFTWARE.
 
 import { RandomAccessStream } from '../../../salmon-core/streams/random_access_stream.js';
 import { Base64 } from '../../../salmon-core/convert/base64.js';
-import { IFile } from './ifile.js';
+import { CopyOptions, IFile, MoveOptions } from './ifile.js';
 import { WSFileStream } from '../streams/ws_file_stream.js';
 import { IOException } from '../../../salmon-core/streams/io_exception.js';
 
@@ -319,12 +319,13 @@ export class WSFile implements IFile {
     /**
      * Move this file or directory under a new directory.
      * @param newDir The target directory.
-     * @param newName The new filename
-     * @param progressListener Observer to notify when progress changes.
+     * @param {MoveOptions | null} options The options
      * @return The moved file. Use this file for subsequent operations instead of the original.
      */
-    public async move(newDir: IFile, newName: string | null = null, progressListener: ((position: number, length: number) => void) | null = null): Promise<IFile> {
-        newName = newName != null ? newName : this.getName();
+    public async move(newDir: IFile, options: MoveOptions| null = null): Promise<IFile> {
+        if(options == null)
+            options = new MoveOptions();
+        let newName = options.newFilename != null ? options.newFilename : this.getName();
         if (newDir == null || !newDir.exists())
             throw new IOException("Target directory does not exist");
         let newFile: IFile | null = await newDir.getChild(newName);
@@ -354,13 +355,14 @@ export class WSFile implements IFile {
     /**
      * Move this file or directory under a new directory.
      * @param newDir    The target directory.
-     * @param newName   New filename
-     * @param progressListener Observer to notify when progress changes.
+     * @param {CopyOptions | null} options The options
      * @return The copied file. Use this file for subsequent operations instead of the original.
      * @throws IOException Thrown if there is an IO error.
      */
-    public async copy(newDir: IFile, newName: string | null = null, progressListener: ((position: number, length: number) => void) | null = null): Promise<IFile> {
-        newName = newName != null ? newName : this.getName();
+    public async copy(newDir: IFile, options: CopyOptions| null = null): Promise<IFile> {
+        if(options == null)
+            options = new CopyOptions();
+        let newName = options.newFilename != null ? options.newFilename : this.getName();
         if (newDir == null || !newDir.exists())
             throw new IOException("Target directory does not exists");
         let newFile: IFile | null = await newDir.getChild(newName);

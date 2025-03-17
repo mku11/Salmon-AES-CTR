@@ -75,7 +75,7 @@ export class AuthConfig {
 
     /**
      * Get the nonce maximum value the target device will use.
-     * @return
+     * @return The nonce max value.
      */
     public getMaxNonce(): Uint8Array {
         return this.#maxNonce;
@@ -89,6 +89,10 @@ export class AuthConfig {
 
     }
 
+    /**
+     * Initialize the authorization configuration.
+     * @param contents The authorization configuration data
+     */
     public async init(contents: Uint8Array): Promise<void> {
         let ms: MemoryStream = new MemoryStream(contents);
         await ms.read(this.#driveId, 0, DriveGenerator.DRIVE_ID_LENGTH);

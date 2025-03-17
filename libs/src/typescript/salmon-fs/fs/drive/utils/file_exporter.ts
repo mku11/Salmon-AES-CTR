@@ -100,21 +100,20 @@ export abstract class FileExporter {
     /**
      * Export a file from the drive to the external directory path
      *
-     * @param fileToExport The file that will be exported
-     * @param exportDir    The external directory the file will be exported to
-     * @param filename     The filename to use
-     * @param deleteSource Delete the source file when the export finishes successfully
-     * @param integrity    True to verify integrity
+     * @param {IVirtualFile} fileToExport The file that will be exported
+     * @param {IFile} exportDir    The external directory the file will be exported to
+     * @param {FileExportOptions | null} options     The options for the file export
      */
-    public async exportFile(fileToExport: IVirtualFile, exportDir: IFile, filename: string,
-        deleteSource: boolean, integrity: boolean, onProgress: ((position: number, length: number) => void | null)): Promise<IFile | null> {
+    public async exportFile(fileToExport: IVirtualFile, exportDir: IFile, options: FileExportOptions | null = null): Promise<IFile | null> {
+        if(options == null)
+            options = new FileExportOptions();
         if (this.isRunning())
             throw new Error("Another export is running");
         if (await fileToExport.isDirectory())
             throw new Error("Cannot export directory, use SalmonFileCommander instead");
 
         let exportFile: IFile;
-        filename = filename != null ? filename : await fileToExport.getName();
+        let filename = options.filename != null ? options.filename : await fileToExport.getName();
         try {
             if (!FileExporter.#enableMultiThread && this.#threads != 1)
                 throw new Error("Multithreading is not supported");
@@ -128,9 +127,9 @@ export abstract class FileExporter {
             if (!await exportDir.exists())
                 await exportDir.mkdir();
             exportFile = await exportDir.createFile(filename);
-            await this.onPrepare(fileToExport, integrity);
+            await this.onPrepare(fileToExport, options.integrity);
 
-            let fileSize: number = await fileToExport.getSize();
+            let fileSize: number = await fileToExport.getLength();
             let runningThreads: number = 1;
             let partSize: number = fileSize;
 
@@ -151,14 +150,14 @@ export abstract class FileExporter {
             }
 
             if (runningThreads == 1) {
-                await exportFilePart(fileToExport, exportFile, 0, fileSize, totalBytesWritten, onProgress, this.#bufferSize, this.#stopped);
+                await exportFilePart(fileToExport, exportFile, 0, fileSize, totalBytesWritten, options.onProgress, this.#bufferSize, this.#stopped);
             } else {
-                await this.#submitExportJobs(runningThreads, partSize, fileToExport, exportFile, totalBytesWritten, integrity, onProgress);
+                await this.#submitExportJobs(runningThreads, partSize, fileToExport, exportFile, totalBytesWritten, options.integrity, options.onProgress);
             }
 
             if (this.#stopped[0])
                 await exportFile.delete();
-            else if (deleteSource)
+            else if (options.deleteSource)
                 await fileToExport.getRealFile().delete();
             if (this.#lastException != null)
                 throw this.#lastException;
@@ -181,7 +180,7 @@ export abstract class FileExporter {
     async #submitExportJobs(runningThreads: number, partSize: number, fileToExport: IVirtualFile, exportedFile: IFile,
         totalBytesWritten: number[], integrity: boolean, 
         onProgress: ((position: number, length: number) => void) | null): Promise<void> {
-        let fileSize: number = await fileToExport.getSize();
+        let fileSize: number = await fileToExport.getLength();
         let bytesWritten: number[] = new Array(runningThreads);
         bytesWritten.fill(0);
         this.#promises = [];
@@ -282,4 +281,27 @@ export abstract class FileExporter {
     public getWorkerPath(): string {
         return this.#workerPath;
     }
+}
+
+
+export class FileExportOptions {
+    /**
+     * Override the filename
+     */
+    filename: string | null = null;
+
+    /**
+     * Delete the source file after completion.
+     */
+    deleteSource: boolean = false;
+
+    /**
+     * True to enable integrity.
+     */
+    integrity: boolean = false;
+
+    /**
+     * Callback when progress changes
+     */
+    onProgress: ((position: number, length: number)=>void) | null = null;
 }

@@ -75,7 +75,7 @@ export abstract class FileImporter {
     abstract onPrepare(targetFile: IVirtualFile, integrity: boolean): Promise<void>;
 
     /**
-     * Constructs a file importer that can be used to import files to the drive
+     * Initiliazes a file importer that can be used to import files to the drive
      *
      * @param bufferSize Buffer size to be used when encrypting files.
      *                   If using integrity this value has to be a multiple of the Chunk size.
@@ -123,20 +123,18 @@ export abstract class FileImporter {
      *
      * @param {IFile} fileToImport The source file that will be imported in to the drive.
      * @param {IFile} dir          The target directory in the drive that the file will be imported
-     * @param {boolean} deleteSource If true delete the source file.
-	 * @param {boolean} integrity    Apply data integrity
-	 * @param {onProgress | null} onProgress   Progress to notify
+     * @param {FileImportOptions | null} options Options
      * @returns {Promise<IVirtualFile | null>} A promise which resolves to a virtual file or null
      */
-    public async importFile(fileToImport: IFile, dir: IVirtualFile , filename: string,
-                                 deleteSource: boolean, integrity: boolean, 
-                                 onProgress: ((position: number, length: number)=>void) | null): Promise<IVirtualFile | null>{
+    public async importFile(fileToImport: IFile, dir: IVirtualFile, options: FileImportOptions | null = null): Promise<IVirtualFile | null>{
+        if(options == null)
+            options = new FileImportOptions();
         if (this.isRunning())
             throw new Error("Another import is running");
         if (await fileToImport.isDirectory())
             throw new Error("Cannot import directory, use FileCommander instead");
 
-        filename = filename != null ? filename : fileToImport.getName();
+        let filename = options.filename != null ? options.filename : fileToImport.getName();
         let totalBytesRead: number[] = [0];
         let importedFile: IVirtualFile | null = null;
         try {
@@ -148,7 +146,7 @@ export abstract class FileImporter {
             this.#lastException = null;
 
             importedFile = await dir.createFile(filename) as IVirtualFile;
-            await this.onPrepare(importedFile, integrity);
+            await this.onPrepare(importedFile, options.integrity);
 
             let fileSize: number = await fileToImport.getLength();
             let runningThreads: number = 1;
@@ -172,14 +170,14 @@ export abstract class FileImporter {
             }
 
             if(runningThreads == 1) {
-                await importFilePart(fileToImport, importedFile, 0, fileSize, totalBytesRead, onProgress, this.#bufferSize, this.#stopped);
+                await importFilePart(fileToImport, importedFile, 0, fileSize, totalBytesRead, options.onProgress, this.#bufferSize, this.#stopped);
             } else {
-                await this.#submitImportJobs(runningThreads, partSize, fileToImport, importedFile, totalBytesRead, integrity, onProgress);
+                await this.#submitImportJobs(runningThreads, partSize, fileToImport, importedFile, totalBytesRead, options.integrity, options.onProgress);
             }
 
             if (this.#stopped[0])
                 await importedFile.getRealFile().delete();
-            else if (deleteSource)
+            else if (options.deleteSource)
                 await fileToImport.delete();
             if (this.#lastException != null)
                 throw this.#lastException;
@@ -306,4 +304,29 @@ export abstract class FileImporter {
     public getWorkerPath(): string {
         return this.#workerPath;
     }
+}
+
+/**
+ * File importer options
+ */
+export class FileImportOptions {
+    /**
+     * Override the filename
+     */
+    filename: string | null = null;
+
+    /**
+     * Delete the source file after completion.
+     */
+    deleteSource: boolean = false;
+
+    /**
+     * True to enable integrity.
+     */
+    integrity: boolean = false;
+
+    /**
+     * Callback when progress changes
+     */
+    onProgress: ((position: number, length: number)=>void) | null = null;
 }

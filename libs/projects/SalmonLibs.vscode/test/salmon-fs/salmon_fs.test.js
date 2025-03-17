@@ -29,7 +29,7 @@ import { ProviderType } from '../../lib/salmon-core/salmon/streams/provider_type
 import { SalmonCoreTestHelper } from '../salmon-core/salmon_core_test_helper.js';
 import { getTestRunnerMode, SalmonFSTestHelper } from './salmon_fs_test_helper.js';
 import { IntegrityException } from '../../lib/salmon-core/salmon/integrity/integrity_exception.js';
-import { copyRecursively, moveRecursively, autoRenameFile } from '../../lib/salmon-fs/fs/file/ifile.js'
+import { copyRecursively, moveRecursively, autoRenameFile, RecursiveCopyOptions, RecursiveMoveOptions, CopyOptions, MoveOptions } from '../../lib/salmon-fs/fs/file/ifile.js'
 import { AesFileReadableStream } from '../../lib/salmon-fs/salmonfs/streams/aes_file_readable_stream.js';
 import { AesFileCommander } from '../../lib/salmon-fs/salmonfs/drive/utils/aes_file_commander.js';
 import { AuthException } from '../../lib/salmon-fs/salmonfs/auth/auth_exception.js'
@@ -419,7 +419,9 @@ describe('salmon-fs', () => {
             caught = true;
         }
         expect(true).toBe(caught);
-        file2 = await file.copy(dir, await autoRenameFile(file));
+        let copyOptions = new CopyOptions();
+        copyOptions.newFilename = await autoRenameFile(file);
+        file2 = await file.copy(dir, copyOptions);
 
         expect(2).toBe(await dir.getChildrenCount());
         expect(await dir.getChild(file.getName()).then(_ => _.exists())).toBeTruthy();
@@ -457,7 +459,9 @@ describe('salmon-fs', () => {
             caught = true;
         }
         expect(caught).toBeTruthy();
-        let file4 = await file3.move(await dir.getChild("folder1"), await autoRenameFile(file3));
+        let moveOptions = new MoveOptions();
+        moveOptions.newFilename = await autoRenameFile(file3);
+        let file4 = await file3.move(await dir.getChild("folder1"), moveOptions);
         expect(await file4.exists()).toBeTruthy();
         expect(3).toBe(await dir.getChild("folder1").then(_ => _.getChildrenCount()));
 
@@ -480,7 +484,11 @@ describe('salmon-fs', () => {
         expect(await dfile.delete()).toBeTruthy();
         expect(2).toBe(await dir.getChild("folder4").then(_ => _.getChild("folder1"))
             .then(_ => _.getChild("folder2")).then(_ => _.getChildrenCount()));
-        await copyRecursively(await dir.getChild("folder1"), folder3, autoRenameFile);
+        copyOptions = new RecursiveCopyOptions();
+        copyOptions.autoRename = autoRenameFile;
+        copyOptions = new RecursiveCopyOptions();
+        copyOptions.autoRename = autoRenameFile;
+        await copyRecursively(await dir.getChild("folder1"), folder3, copyOptions);
         expect(2).toBe(await dir.getChildrenCount());
         expect(1).toBe(await dir.getChild("folder4").then(_ => _.getChildrenCount()));
         expect(7).toBe(await dir.getChild("folder4").then(_ => _.getChild("folder1")).then(_ => _.getChildrenCount()));
@@ -492,9 +500,11 @@ describe('salmon-fs', () => {
         await dir.getChild("folder4").then(_ => _.getChild("folder1")).then(_ => _.getChild(file.getName()))
             .then(_ => _.delete());
         let failed = [];
-        await copyRecursively(await dir.getChild("folder1"), folder3, null, false, (failedFile, ex) => {
+        copyOptions = new RecursiveCopyOptions();
+        copyOptions.onFailed = (failedFile, ex) => {
             failed.push(failedFile);
-        });
+        };
+        await copyRecursively(await dir.getChild("folder1"), folder3, copyOptions);
         expect(4).toBe(await failed.length);
         expect(2).toBe(await dir.getChildrenCount());
         expect(1).toBe(await dir.getChild("folder4").then(_ => _.getChildrenCount()));
@@ -507,9 +517,12 @@ describe('salmon-fs', () => {
         await dir.getChild("folder4").then(_ => _.getChild("folder1")).then(_ => _.getChild(file.getName()))
             .then(_ => _.delete());
         let failedmv = [];
-        await moveRecursively(await dir.getChild("folder1"), await dir.getChild("folder4"), autoRenameFile, false, (failedFile, ex) => {
+        moveOptions = new RecursiveMoveOptions();
+        moveOptions.autoRename = autoRenameFile;
+        moveOptions.onFailed = (failedFile, ex) => {
             failedmv.push(failedFile);
-        });
+        };
+        await moveRecursively(await dir.getChild("folder1"), await dir.getChild("folder4"), moveOptions);
         expect(4).toBe(await failed.length);
         expect(1).toBe(await dir.getChildrenCount());
         expect(1).toBe(await dir.getChild("folder4").then(_ => _.getChildrenCount()));

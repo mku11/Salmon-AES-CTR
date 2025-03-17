@@ -22,12 +22,9 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 */
 
-import { BitConverter } from "../convert/bit_converter.js";
-import { MemoryStream } from "../streams/memory_stream.js";
 import { Integrity } from "./integrity/integrity.js";
 import { AesStream } from "./streams/aes_stream.js";
 import { EncryptionMode } from "./streams/encryption_mode.js";
-import { Generator } from "./generator.js";
 import { SecurityException } from "./security_exception.js";
 import { AESCTRTransformer } from "./transform/aes_ctr_transformer.js";
 import { encryptData } from "./encryptor_helper.js";
@@ -92,7 +89,7 @@ export class Encryptor {
      * @throws IntegrityException Thrown if the data are corrupt or tampered with.
      */
     public async encrypt(data: Uint8Array, key: Uint8Array, nonce: Uint8Array,
-        format: EncryptionFormat,
+        format: EncryptionFormat = EncryptionFormat.Salmon,
         integrity: boolean = false, hashKey: Uint8Array | null = null, 
         chunkSize: number = 0): Promise<Uint8Array> {
         if (key == null)

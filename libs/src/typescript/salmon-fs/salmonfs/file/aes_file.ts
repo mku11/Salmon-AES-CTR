@@ -32,7 +32,12 @@ import {
     IFile, autoRename as IFileAutoRename,
     copyRecursively as IFileCopyRecursively,
     moveRecursively as IFileMoveRecursively,
-    deleteRecursively as IFileDeleteRecursively
+    deleteRecursively as IFileDeleteRecursively,
+    RecursiveCopyOptions,
+    CopyOptions,
+    MoveOptions,
+    RecursiveMoveOptions,
+    RecursiveDeleteOptions
 } from "../../fs/file/ifile.js";
 import { AesDrive } from "../drive/aes_drive.js";
 import { EncryptionMode } from "../../../salmon-core/salmon/streams/encryption_mode.js";
@@ -43,8 +48,7 @@ import { TextDecryptor } from "../../../salmon-core/salmon/text/text_decryptor.j
 import { TextEncryptor } from "../../../salmon-core/salmon/text/text_encryptor.js";
 import { Integrity } from "../../../salmon-core/salmon/integrity/integrity.js";
 import { DriveKey } from "../drive/drive_key.js";
-import { IVirtualFile } from "../../fs/file/ivirtual_file.js";
-import { Encryptor } from "../../../salmon-core/salmon/encryptor.js";
+import { IVirtualFile, VirtualRecursiveCopyOptions, VirtualRecursiveMoveOptions, VirtualRecursiveDeleteOptions } from "../../fs/file/ivirtual_file.js";
 
 /**
  * A virtual file backed by an encrypted {@link IFile} on the real filesystem.
@@ -73,10 +77,10 @@ export class AesFile implements IVirtualFile {
 
     /**
      * Provides a file handle that can be used to create encrypted files.
-     * Requires a virtual drive that supports the underlying filesystem, see JavaFile implementation.
+     * Requires a virtual drive that supports the underlying filesystem see IFile.
      *
-     * @param drive    The file virtual system that will be used with file operations
-     * @param realFile The real file
+     * @param {AesDrive | null} drive    The file virtual system that will be used with file operations
+     * @param {IFile} realFile The real file
      */
     public constructor(realFile: IFile, drive: AesDrive | null = null, format: EncryptionFormat = EncryptionFormat.Salmon) {
         this.#realFile = realFile;
@@ -612,7 +616,7 @@ export class AesFile implements IVirtualFile {
     /**
      * Return the virtual size of the file excluding the header and hash signatures.
      */
-    public async getSize(): Promise<number> {
+    public async getLength(): Promise<number> {
         let rSize: number = await this.#realFile.getLength();
         if (rSize == 0)
             return rSize;
@@ -800,7 +804,9 @@ export class AesFile implements IVirtualFile {
      * @throws IOException Thrown if there is an IO error.
      */
     public async move(dir: AesFile, OnProgressListener: ((position: number, length: number) => void) | null = null): Promise<AesFile> {
-        let newRealFile: IFile = await this.#realFile.move(dir.getRealFile(), null, OnProgressListener);
+        let moveOptions: MoveOptions = new MoveOptions();
+        moveOptions.onProgressChanged = OnProgressListener;
+        let newRealFile: IFile = await this.#realFile.move(dir.getRealFile(), moveOptions);
         return new AesFile(newRealFile, this.#drive);
     }
 
@@ -813,7 +819,9 @@ export class AesFile implements IVirtualFile {
      * @throws IOException Thrown if there is an IO error.
      */
     public async copy(dir: AesFile, OnProgressListener: ((position: number, length: number) => void) | null = null): Promise<AesFile> {
-        let newRealFile: IFile | null = await this.#realFile.copy(dir.getRealFile(), null, OnProgressListener);
+        let copyOptions: CopyOptions = new CopyOptions();
+        copyOptions.onProgressChanged = OnProgressListener;
+        let newRealFile: IFile | null = await this.#realFile.copy(dir.getRealFile(), copyOptions);
         if (newRealFile == null)
             throw new IOException("Could not copy file");
         return new AesFile(newRealFile, this.#drive);
@@ -823,19 +831,16 @@ export class AesFile implements IVirtualFile {
      * Copy a directory recursively
      *
      * @param dest The destination directory
-     * @param autoRename The autorename function
-     * @param onFailed Callback when copy has failed
-     * @param progressListener The progress listener
+     * @param {VirtualRecursiveCopyOptions | null} options The options
      */
-    public async copyRecursively(dest: AesFile,
-        autoRename: ((salmonFile: AesFile) => Promise<string>) | null = null,
-        autoRenameFolders: boolean = false,
-        onFailed: ((salmonFile: AesFile, ex: Error) => void) | null = null,
-        progressListener: ((salmonFile: AesFile, position: number, length: number) => void) | null = null): Promise<void> {
+    public async copyRecursively(dest: AesFile, options: VirtualRecursiveCopyOptions| null = null): Promise<void> {
+        if(options == null)
+            options = new VirtualRecursiveCopyOptions();
         let onFailedRealFile: ((realFile: IFile, ex: Error) => void) | null = null;
-        if (onFailed != null) {
+        if (options.onFailed != null) {
             onFailedRealFile = (file, ex) => {
-                onFailed(new AesFile(file, this.getDrive()), ex);
+                if(options.onFailed != null)
+                    options.onFailed(new AesFile(file, this.getDrive()), ex);
             };
         }
         let renameRealFile: ((realFile: IFile) => Promise<string>) | null = null;
@@ -844,31 +849,31 @@ export class AesFile implements IVirtualFile {
             renameRealFile = async (file: IFile): Promise<string> => {
                 return await autoRename(new AesFile(file, this.getDrive()));
             };
-        await IFileCopyRecursively(this.#realFile, dest.getRealFile(),
-            renameRealFile, autoRenameFolders, onFailedRealFile, (file, position, length) => {
-                if (progressListener != null)
-                    progressListener(new AesFile(file, this.#drive), position, length);
-            });
+        let copyOptions: RecursiveCopyOptions = new RecursiveCopyOptions();
+        copyOptions.autoRename = renameRealFile;
+        copyOptions.autoRenameFolders = options.autoRenameFolders;
+        copyOptions.onFailed = onFailedRealFile;
+        copyOptions.onProgressChanged = (file, position, length) => {
+            if (options.onProgressChanged != null)
+                options.onProgressChanged(new AesFile(file, this.#drive), position, length);
+        };
+        await IFileCopyRecursively(this.#realFile, dest.getRealFile(), copyOptions);
     }
 
     /**
      * Move a directory recursively
      *
      * @param dest The destination directory
-     * @param autoRename The autorename function
-     * @param onFailed Callback when move has failed
-     * @param progressListener The progress listener
+     * @param {VirtualRecursiveMoveOptions | null} options The options
      */
-    public async moveRecursively(dest: AesFile,
-        autoRename: ((salmonFile: AesFile) => Promise<string>) | null,
-        autoRenameFolders: boolean,
-        onFailed: ((salmonFile: AesFile, ex: Error) => void) | null,
-        progressListener: ((salmonFile: AesFile, position: number, length: number) => void) | null): Promise<void> {
+    public async moveRecursively(dest: AesFile, options: VirtualRecursiveMoveOptions| null = null): Promise<void> {
+        if(options == null)
+            options = new VirtualRecursiveMoveOptions();
         let onFailedRealFile: ((realFile: IFile, ex: Error) => void) | null = null;
-        if (onFailed != null) {
+        if (options.onFailed != null) {
             onFailedRealFile = (file, ex) => {
-                if (onFailed != null)
-                    onFailed(new AesFile(file, this.getDrive()), ex);
+                if (options.onFailed != null)
+                    options.onFailed(new AesFile(file, this.getDrive()), ex);
             };
         }
         let renameRealFile: ((realFile: IFile) => Promise<string>) | null = null;
@@ -877,27 +882,39 @@ export class AesFile implements IVirtualFile {
             renameRealFile = async (file: IFile): Promise<string> => {
 				return await autoRename(new AesFile(file, this.getDrive()));
             };
-        await IFileMoveRecursively(this.#realFile, dest.getRealFile(),
-            renameRealFile, autoRenameFolders, onFailedRealFile, (file, position, length) => {
-                if (progressListener != null)
-                    progressListener(new AesFile(file, this.#drive), position, length);
-            },);
+        let moveOptions: RecursiveMoveOptions = new RecursiveMoveOptions();
+        moveOptions.autoRename = renameRealFile;
+        moveOptions.autoRenameFolders = options.autoRenameFolders;
+        moveOptions.onFailed = onFailedRealFile;
+        moveOptions.onProgressChanged = (file, position, length) => {
+            if (options.onProgressChanged != null)
+                options.onProgressChanged(new AesFile(file, this.#drive), position, length);
+        };
+        await IFileMoveRecursively(this.#realFile, dest.getRealFile(), moveOptions);
     }
 
-    public async deleteRecursively(
-        onFailed: ((salmonFile: AesFile, ex: Error) => void) | null = null,
-        progressListener: ((salmonFile: AesFile, position: number, length: number) => void) | null = null): Promise<void> {
+    /**
+     * Delete a directory recursively
+     *
+     * @param {VirtualRecursiveDeleteOptions | null} options The options
+     */
+    public async deleteRecursively(options: VirtualRecursiveDeleteOptions | null): Promise<void> {
+        if(options == null)
+            options = new VirtualRecursiveDeleteOptions();
         let onFailedRealFile: ((realFile: IFile, ex: Error) => void) | null = null;
-        if (onFailed != null) {
+        if (options.onFailed != null) {
             onFailedRealFile = (file, ex) => {
-                if (onFailed != null)
-                    onFailed(new AesFile(file, this.#drive), ex);
+                if (options.onFailed != null)
+                    options.onFailed(new AesFile(file, this.#drive), ex);
             };
         }
-        await IFileDeleteRecursively(this.getRealFile(), onFailedRealFile, (file, position, length) => {
-            if (progressListener != null)
-                progressListener(new AesFile(file, this.#drive), position, length);
-        });
+        let deleteOptions: RecursiveDeleteOptions = new RecursiveDeleteOptions();
+        deleteOptions.onFailed = onFailedRealFile;
+        deleteOptions.onProgressChanged = (file, position, length) => {
+            if (options.onProgressChanged != null)
+                options.onProgressChanged(new AesFile(file, this.#drive), position, length);
+        };
+        await IFileDeleteRecursively(this.getRealFile(), deleteOptions);
     }
 
     /**
