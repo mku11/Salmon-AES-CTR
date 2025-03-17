@@ -32,7 +32,7 @@ import com.mku.fs.drive.utils.FileImporter;
 import java.io.IOException;
 
 /**
- * Imports IFile(s) into an encrypted VirtualDrive.
+ * Imports files into an encrypted virtual drive.
  */
 public class AesFileImporter extends FileImporter {
 

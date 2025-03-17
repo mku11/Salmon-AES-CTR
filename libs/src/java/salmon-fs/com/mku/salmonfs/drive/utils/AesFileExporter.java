@@ -30,7 +30,7 @@ import com.mku.salmonfs.file.AesFile;
 import java.io.IOException;
 
 /**
- * Exports AesFile(s) from an encrypted AesDrive.
+ * Exports files from an encrypted virtual drive.
  */
 public class AesFileExporter extends FileExporter {
 	

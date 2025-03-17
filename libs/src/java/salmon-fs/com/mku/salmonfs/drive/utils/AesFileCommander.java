@@ -35,7 +35,7 @@ import com.mku.fs.drive.utils.FileSearcher;
 import java.util.ArrayList;
 
 /**
- * Facade class for file operations.
+ * Facade class for encrypted file operations in batch.
  */
 public class AesFileCommander extends FileCommander {
     /**
