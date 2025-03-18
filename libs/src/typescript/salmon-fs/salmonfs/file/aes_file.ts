@@ -80,7 +80,8 @@ export class AesFile implements IVirtualFile {
      * Requires a virtual drive that supports the underlying filesystem see IFile.
      *
      * @param {IFile} realFile The real file
-     * @param {AesDrive} [drive]    The file virtual system that will be used with file operations
+     * @param {AesDrive} [drive]    The file virtual system that will be used with file operations. 
+     * You usually don't have to set this since it will inherit from its parent.
      */
     public constructor(realFile: IFile, drive?: AesDrive, format: EncryptionFormat = EncryptionFormat.Salmon) {
         this.#realFile = realFile;

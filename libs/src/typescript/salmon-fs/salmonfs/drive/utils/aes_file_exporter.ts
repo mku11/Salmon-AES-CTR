@@ -40,6 +40,12 @@ export class AesFileExporter extends FileExporter {
         super.initialize(bufferSize, threads);
     }
 
+    /**
+     * 
+     * @param sourceFile 
+     * @param targetFile 
+     * @returns 
+     */
     async getMinimumPartSize(sourceFile: IVirtualFile, targetFile: IFile): Promise<number> {
         // we force the whole content to use 1 thread if:
         if(
@@ -53,11 +59,21 @@ export class AesFileExporter extends FileExporter {
         return await (sourceFile as AesFile).getMinimumPartSize();
     }
 
+    /**
+     * Called during preparation of export.
+     * @param {IVirtualFile} sourceFile The source file
+     * @param {boolean} integrity True if integrity enabled
+     */
     async onPrepare(sourceFile: IVirtualFile, integrity: boolean): Promise<void> {
         // we use the drive hash key for integrity verification
         await (sourceFile as AesFile).setVerifyIntegrity(integrity);
     }
-
+    
+    /**
+     * Tranform an error that can be thrown from a web worker.
+     * @param {any} err The original error
+     * @returns 
+     */
     getError(err: any) {
         if (err.error != undefined) {
             if (err.type == 'IntegrityException')
@@ -70,6 +86,19 @@ export class AesFileExporter extends FileExporter {
         return err;
     }
 
+    
+    /**
+     * Create a message for the web worker.
+     * @param {number} index The worker index
+     * @param {IVirtualFile} sourceFile The source file
+     * @param {IFile} targetFile The target file
+     * @param {number} runningThreads The number of threads scheduled
+     * @param {number} partSize The length of the file part that will be imported
+     * @param {number} fileSize The file size
+     * @param {number} bufferSize The buffer size
+     * @param {boolean} integrity True if integrity is enabled.
+     * @returns {any} The message to be sent to the worker
+     */
     async getWorkerMessage(index: number, sourceFile: IVirtualFile, targetFile: IFile,
         runningThreads: number, partSize: number, fileSize: number, bufferSize: number, integrity: boolean) {
         let fileToExport = sourceFile as AesFile;

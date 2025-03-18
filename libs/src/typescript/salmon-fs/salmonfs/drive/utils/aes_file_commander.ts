@@ -36,8 +36,8 @@ export class AesFileCommander extends FileCommander {
     /**
      * Instantiate a new file commander object.
      *
-     * @param importBufferSize The buffer size to use for importing files.
-     * @param exportBufferSize The buffer size to use for exporting files.
+     * @param {number} importBufferSize The buffer size to use for importing files.
+     * @param {number} exportBufferSize The buffer size to use for exporting files.
      */
     public constructor(importBufferSize: number = 0, exportBufferSize: number = 0, threads: number = 1) {
         super(new AesFileImporter(importBufferSize, threads), 
@@ -45,6 +45,11 @@ export class AesFileCommander extends FileCommander {
             new FileSearcher());
     }
 
+    /**
+     * Callback when error happens
+     * @param ex The error
+     * @returns True if handled
+     */
     onError(ex: Error | unknown | null): boolean {
         if (ex instanceof SequenceException)
             throw ex;

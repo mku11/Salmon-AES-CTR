@@ -32,7 +32,7 @@ import { IVirtualFile } from "../../file/ivirtual_file.js";
  * @param fileToImport   The external file that will be imported
  * @param salmonFile     The file that will be imported to
  * @param start          The start position of the byte data that will be imported
- * @param count          The length of the file content that will be imported
+ * @param {number} count          The length of the file content that will be imported
  * @param totalBytesRead The total bytes read from the external file
  * @param onProgress 	 Progress observer
  */

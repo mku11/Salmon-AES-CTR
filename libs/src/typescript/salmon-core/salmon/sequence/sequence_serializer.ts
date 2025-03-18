@@ -32,30 +32,30 @@ export class SequenceSerializer implements INonceSequenceSerializer {
     /**
      * Serialize the sequences to a json string.
      *
-     * @param driveAuthEntries The sequences to convert to text.
-     * @return
+     * @param {Map<string, NonceSequence>} driveAuthEntries The sequences to convert to text.
+     * @return {string} The contents
      * @throws SequenceException Thrown if error with the nonce sequence
      */
-    public serialize(driveAuthEntries: { [key: string]: NonceSequence }): string {
-        let contents: string = JSON.stringify(driveAuthEntries);
+    public serialize(driveAuthEntries: Map<string, NonceSequence>): string {
+        let contents: string = JSON.stringify(Object.fromEntries(driveAuthEntries));
         return contents;
     }
 
     /**
      * Deserialize sequences from json string.
      *
-     * @param contents The contents containing the nonce sequences.
-     * @return
+     * @param {string} contents The contents containing the nonce sequences.
+     * @return {Map<string, NonceSequence>} The sequences
      * @throws SequenceException Thrown if error with the nonce sequence
      */
-    public deserialize(contents: string): { [key: string]: NonceSequence } {
+    public deserialize(contents: string): Map<string, NonceSequence> {
         if(contents == '')
-            return {};
+            return new Map();
         let configsObj: any = JSON.parse(contents);
-        let configs: { [key: string]: NonceSequence } = {};
+        let configs: Map<string, NonceSequence> = new Map();
         for (let key in configsObj) {
             let seq = configsObj[key];
-            configs[key] = new NonceSequence(seq.id, seq.authId, this.#objToArray(seq.nextNonce), this.#objToArray(seq.maxNonce), seq.status);
+            configs.set(key, new NonceSequence(seq.id, seq.authId, this.#objToArray(seq.nextNonce), this.#objToArray(seq.maxNonce), seq.status));
         }
         return configs;
     }

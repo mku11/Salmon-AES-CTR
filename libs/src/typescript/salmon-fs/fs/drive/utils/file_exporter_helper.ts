@@ -32,7 +32,7 @@ import { RandomAccessStream } from "../../../../salmon-core/streams/random_acces
  * @param fileToExport      The file the part belongs to
  * @param exportFile        The file to copy the exported part to
  * @param start             The start position on the file
- * @param count             The length of the bytes to be decrypted
+ * @param {number} count             The length of the bytes to be decrypted
  * @param totalBytesWritten The total bytes that were written to the external file
  */
 export async function exportFilePart(fileToExport: IVirtualFile, exportFile: IFile, start: number, count: number,

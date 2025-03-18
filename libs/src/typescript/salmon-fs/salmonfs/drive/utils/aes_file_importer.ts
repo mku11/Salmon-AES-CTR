@@ -38,23 +38,34 @@ export class AesFileImporter extends FileImporter {
     /**
      * Constructs a file importer that can be used to import files to the drive
      *
-     * @param bufferSize Buffer size to be used when encrypting files.
+     * @param {number} bufferSize Buffer size to be used when encrypting files.
      *                   If using integrity this value has to be a multiple of the Chunk size.
      *                   If not using integrity it should be a multiple of the AES block size for better performance
-     * @param threads The threads to use
+     * @param {number} threads The threads to use
      */
-    public constructor(bufferSize: number, threads: number) {
+    public constructor(bufferSize: number = 0, threads: number = 1) {
         super();
         super.setWorkerPath('./lib/salmon-fs/salmonfs/drive/utils/aes_file_importer_worker.js');
         super.initialize(bufferSize, threads);
     }
 
+    /**
+     * Called during preparation of import.
+     * @param {IVirtualFile} targetFile The target file
+     * @param {boolean} integrity True if integrity enabled
+     */
     async onPrepare(targetFile: IVirtualFile, integrity: boolean) {
         (targetFile as AesFile).setAllowOverwrite(true);
         // we use default chunk file size
         await (targetFile as AesFile).setApplyIntegrity(integrity);
     }
 
+    /**
+     * Get the minimum part of a file that can run under a thread.
+     * @param {IFile} sourceFile The source file.
+     * @param {IVirtualFile} targetFile The target file
+     * @returns 
+     */
     async getMinimumPartSize(sourceFile: IFile, targetFile: IVirtualFile): Promise<number> {
         // we force the whole content to use 1 thread if:
         if(
@@ -68,6 +79,11 @@ export class AesFileImporter extends FileImporter {
         return await (targetFile as AesFile).getMinimumPartSize();
     }
 
+    /**
+     * Tranform an error that can be thrown from a web worker.
+     * @param {any} err The original error
+     * @returns 
+     */
     getError(err: any) {
         // deserialize the error
         if (err.error != undefined ) {
@@ -80,6 +96,19 @@ export class AesFileImporter extends FileImporter {
         }
         return err;
     }
+
+    /**
+     * Create a message for the web worker.
+     * @param {number} index The worker index
+     * @param {IFile} sourceFile The source file
+     * @param {IVirtualFile} targetFile The target file
+     * @param {number} runningThreads The number of threads scheduled
+     * @param {number} partSize The length of the file part that will be imported
+     * @param {number} fileSize The file size
+     * @param {number} bufferSize The buffer size
+     * @param {boolean} integrity True if integrity is enabled.
+     * @returns {any} The message to be sent to the worker
+     */
     async getWorkerMessage(index: number, sourceFile: IFile, targetFile: IVirtualFile,
         runningThreads: number, partSize: number, fileSize: number, bufferSize: number, integrity: boolean) {
         let importedFile = targetFile as AesFile;

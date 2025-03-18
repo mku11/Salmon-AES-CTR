@@ -77,7 +77,7 @@ export abstract class FileImporter {
     /**
      * Initiliazes a file importer that can be used to import files to the drive
      *
-     * @param bufferSize Buffer size to be used when encrypting files.
+     * @param {Uint8Array} bufferSize Buffer size to be used when encrypting files.
      *                   If using integrity this value has to be a multiple of the Chunk size.
      *                   If not using integrity it should be a multiple of the AES block size for better performance
      * @param threads The threads

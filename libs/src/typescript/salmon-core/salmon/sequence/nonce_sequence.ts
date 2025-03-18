@@ -34,7 +34,7 @@ export class NonceSequence {
     /**
      * The authorization id for a specific device.
      */
-    authId: string | null = null;
+    authId: string;
 
     /**
      * Then next available nonce.
@@ -49,18 +49,18 @@ export class NonceSequence {
     /**
      * The current status of the sequence.
      */
-    status: Status | null = null;
+    status: Status = Status.New;
 
     /**
      * Instantiate a nonce sequence with the provided authorization id.
-     * @param id The Id for this sequence.
-     * @param authId The authorization id for this device and drive.
-     * @param nextNonce The next available nonce to be used.
-     * @param maxNonce The maximum nonce.
-     * @param status The status of the sequencer.
+     * @param {string} id The Id for this sequence.
+     * @param {string} authId The authorization id for this device and drive.
+     * @param {Uint8Array | null} nextNonce The next available nonce to be used.
+     * @param {Uint8Array | null} maxNonce The maximum nonce.
+     * @param {Status} status The status of the sequencer.
      */
-    public constructor(id: string, authId: string | null = null, nextNonce: Uint8Array | null = null, 
-            maxNonce: Uint8Array | null = null, status: Status | null = null) {
+    public constructor(id: string, authId: string, nextNonce: Uint8Array | null, 
+            maxNonce: Uint8Array | null, status: Status) {
         this.id = id;
         this.authId = authId;
         this.nextNonce = nextNonce;
@@ -70,7 +70,7 @@ export class NonceSequence {
 
     /**
      * The id for this sequence.
-     * @return
+     * @return {string} The id.
      */
     public getId(): string {
         return this.id;
@@ -78,7 +78,7 @@ export class NonceSequence {
 
     /**
      * Set the id.
-     * @param id The sequence id
+     * @param {string} id The sequence id
      */
     setId(id: string): void {
         this.id = id;
@@ -86,15 +86,15 @@ export class NonceSequence {
 
     /**
      * Get the authorization id for a specific device.
-     * @return
+     * @return {string} The auth id.
      */
-    public getAuthId(): string | null {
+    public getAuthId(): string {
         return this.authId;
     }
 
     /**
      * Set the authorization Id for a specific device.
-     * @param authId The authorization id
+     * @param {string} authId The authorization id
      */
     setAuthId(authId: string): void {
         this.authId = authId;
@@ -102,7 +102,7 @@ export class NonceSequence {
 
     /**
      * Get the next nonce.
-     * @return
+     * @return {Uint8Array | null} The next nonce.
      */
     public getNextNonce(): Uint8Array | null{
         return this.nextNonce;
@@ -110,7 +110,7 @@ export class NonceSequence {
 
     /**
      * Set the next nonce.
-     * @param nextNonce The next nonce
+     * @param {Uint8Array | null} nextNonce The next nonce
      */
     setNextNonce(nextNonce: Uint8Array): void {
         this.nextNonce = nextNonce;
@@ -118,7 +118,7 @@ export class NonceSequence {
 
     /**
      * Get the max nonce.
-     * @return
+     * @return Uint8Array | null} The maximum nonce.
      */
     getMaxNonce(): Uint8Array | null{
         return this.maxNonce;
@@ -126,7 +126,7 @@ export class NonceSequence {
 
     /**
      * Set the max nonce.
-     * @param maxNonce The max nonce
+     * @param {Uint8Array} maxNonce The max nonce
      */
     setMaxNonce(maxNonce: Uint8Array): void {
         this.maxNonce = maxNonce;
@@ -134,15 +134,15 @@ export class NonceSequence {
 
     /**
      * Get the sequence status.
-     * @return
+     * @return {Status} The status
      */
-    getStatus(): Status | null {
+    getStatus(): Status {
         return this.status;
     }
 
     /**
      * Set the sequence status.
-     * @param status The status
+     * @param {Status} status The status
      */
     setStatus(status: Status): void {
         this.status = status;

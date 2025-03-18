@@ -35,7 +35,7 @@ export interface INonceSequenceSerializer {
      * @return The nonce sequences.
      * @throws SequenceException Thrown if error with the nonce sequence
      */
-    deserialize(contents: string): {[key: string]: NonceSequence};
+    deserialize(contents: string): Map<string, NonceSequence>;
 
     /**
      * Generates the contents from sequences.
@@ -43,5 +43,5 @@ export interface INonceSequenceSerializer {
      * @return The string contents.
      * @throws SequenceException Thrown if error with the nonce sequence
      */
-    serialize(sequences: {[key: string]: NonceSequence} ): string;
+    serialize(sequences: Map<string, NonceSequence>): string;
 }

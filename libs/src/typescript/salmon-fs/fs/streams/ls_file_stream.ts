@@ -125,9 +125,9 @@ export class LocalStorageFileStream extends RandomAccessStream {
 
     /**
      * Read data from the file stream into the buffer provided.
-     * @param buffer The buffer to write the data.
-     * @param offset The offset of the buffer to start writing the data.
-     * @param count The maximum number of bytes to read from.
+     * @param {Uint8Array} buffer The buffer to write the data.
+     * @param {number} offset The offset of the buffer to start writing the data.
+     * @param {number} count The maximum number of bytes to read from.
      * @return
      * @throws IOException Thrown if there is an IO error.
      */
@@ -137,9 +137,9 @@ export class LocalStorageFileStream extends RandomAccessStream {
 
     /**
      * Write the data from the buffer provided into the stream.
-     * @param buffer The buffer to read the data from.
-     * @param offset The offset of the buffer to start reading the data.
-     * @param count The maximum number of bytes to read from the buffer.
+     * @param {Uint8Array} buffer The buffer to read the data from.
+     * @param {number} offset The offset of the buffer to start reading the data.
+     * @param {number} count The maximum number of bytes to read from the buffer.
      * @throws IOException Thrown if there is an IO error.
      */
     public override async write(buffer: Uint8Array, offset: number, count: number): Promise<void> {
@@ -148,7 +148,7 @@ export class LocalStorageFileStream extends RandomAccessStream {
 
     /**
      * Seek to the offset provided.
-     * @param offset The position to seek to.
+     * @param {number} offset The position to seek to.
      * @param origin The type of origin {@link RandomAccessStream.SeekOrigin}
      * @return The new position after seeking.
      * @throws IOException Thrown if there is an IO error.

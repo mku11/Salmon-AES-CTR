@@ -43,8 +43,8 @@ export class FileSequencer implements INonceSequencer {
     /**
      * Instantiate a nonce file sequencer.
      *
-     * @param sequenceFile The sequence file (json format).
-     * @param serializer   The serializer to be used.
+     * @param {IFile} sequenceFile The sequence file (json format).
+     * @param {INonceSequenceSerializer} serializer   The serializer to be used.
      * @throws IOException Thrown if there is an IO error.
      * @throws SequenceException Thrown if error with the nonce sequence
      */
@@ -53,16 +53,23 @@ export class FileSequencer implements INonceSequencer {
         this.#serializer = serializer;
     }
 
+    /**
+     * Initialize the file sequencer
+     */
     public async initialize(): Promise<void> {
         if (!await this.#sequenceFile.exists()) {
             let parent: IFile | null = await this.#sequenceFile.getParent();
             if(parent == null)
                 throw new Error("Could not get parent");
             await parent.createFile(this.#sequenceFile.getName());
-            await this.saveSequenceFile({});
+            await this.saveSequenceFile(new Map());
         }
     }
 
+    /**
+     * Get the sequence file
+     * @returns The sequence file
+     */
     public getSequenceFile(): IFile {
         return this.#sequenceFile;
     }
@@ -70,34 +77,34 @@ export class FileSequencer implements INonceSequencer {
     /**
      * Create a sequence for the drive ID and auth ID provided.
      *
-     * @param driveId The drive ID.
-     * @param authId  The authorization ID of the drive.
+     * @param {string} driveId The drive ID.
+     * @param {string} authId  The authorization ID of the drive.
      * @throws SequenceException Thrown if error with the nonce sequence
      */
     public async createSequence(driveId: string, authId: string): Promise<void> {
         let contents: string = await this.getContents();
-        let configs: { [key: string]: NonceSequence } = this.#serializer.deserialize(contents);
+        let configs: Map<string, NonceSequence> = this.#serializer.deserialize(contents);
         let sequence: NonceSequence | null = FileSequencer.#getSequence(configs, driveId);
         if (sequence)
             throw new SequenceException("Sequence already exists");
         let nsequence: NonceSequence = new NonceSequence(driveId, authId, null, null, Status.New);
-        configs[driveId + ":" + authId] = nsequence;
+        configs.set(driveId + ":" + authId, nsequence);
         await this.saveSequenceFile(configs);
     }
 
     /**
      * Initialize the sequence.
      *
-     * @param driveId    The drive ID.
-     * @param authId     The auth ID of the device for the drive.
-     * @param startNonce The starting nonce.
-     * @param maxNonce   The maximum nonce.
+     * @param {string} driveId    The drive ID.
+     * @param {string} authId     The auth ID of the device for the drive.
+     * @param {Uint8Array} startNonce The starting nonce.
+     * @param {Uint8Array} maxNonce   The maximum nonce.
      * @throws SequenceException Thrown if error with the nonce sequence
      * @throws IOException Thrown if there is an IO error.
      */
     public async initializeSequence(driveId: string, authId: string, startNonce: Uint8Array, maxNonce: Uint8Array): Promise<void> {
         let contents: string = await this.getContents();
-        let configs: { [key: string]: NonceSequence } = this.#serializer.deserialize(contents);
+        let configs: Map<string, NonceSequence> = this.#serializer.deserialize(contents);
         let sequence: NonceSequence | null = FileSequencer.#getSequence(configs, driveId);
         if (sequence == null)
             throw new SequenceException("Sequence does not exist");
@@ -112,14 +119,14 @@ export class FileSequencer implements INonceSequencer {
     /**
      * Set the maximum nonce.
      *
-     * @param driveId  The drive ID.
-     * @param authId   The auth ID of the device for the drive.
-     * @param maxNonce The maximum nonce.
+     * @param {string} driveId  The drive ID.
+     * @param {string} authId   The auth ID of the device for the drive.
+     * @param {Uint8Array} maxNonce The maximum nonce.
      * @throws SequenceException Thrown if error with the nonce sequence
      */
     public async setMaxNonce(driveId: string, authId: string, maxNonce: Uint8Array): Promise<void> {
         let contents: string = await this.getContents();
-        let configs: { [key: string]: NonceSequence } = this.#serializer.deserialize(contents);
+        let configs: Map<string, NonceSequence> = this.#serializer.deserialize(contents);
         let sequence: NonceSequence | null = FileSequencer.#getSequence(configs, driveId);
         if (sequence == null || sequence.getStatus() == Status.Revoked)
             throw new SequenceException("Sequence does not exist");
@@ -136,14 +143,14 @@ export class FileSequencer implements INonceSequencer {
     /**
      * Get the next nonce.
      *
-     * @param driveId The drive ID.
-     * @return
+     * @param {string} driveId The drive ID.
+     * @return {Promise<Uint8Array | null>} The next nonce
      * @throws SequenceException Thrown if error with the nonce sequence
      * @throws SalmonRangeExceededException Thrown if nonce has exceeded range
      */
     public async nextNonce(driveId: string): Promise<Uint8Array | null> {
         let contents: string = await this.getContents();
-        let configs: { [key: string]: NonceSequence } = this.#serializer.deserialize(contents);
+        let configs: Map<string, NonceSequence> = this.#serializer.deserialize(contents);
         let sequence: NonceSequence | null = FileSequencer.#getSequence(configs, driveId);
         if (sequence == null || sequence.getNextNonce() == null || sequence.getMaxNonce() == null)
             throw new SequenceException("Device not Authorized");
@@ -164,7 +171,7 @@ export class FileSequencer implements INonceSequencer {
     /**
      * Get the contents of a sequence file.
      *
-     * @return
+     * @return {Promise<string>} The file contents.
      * @throws SequenceException Thrown if error with the nonce sequence
      */
     protected async getContents(): Promise<string> {
@@ -200,12 +207,12 @@ export class FileSequencer implements INonceSequencer {
     /**
      * Revoke the current sequence for a specific drive.
      *
-     * @param driveId The drive ID.
+     * @param {string} driveId The drive ID.
      * @throws SequenceException Thrown if error with the nonce sequence
      */
     public async revokeSequence(driveId: string): Promise<void> {
         let contents: string = await this.getContents();
-        let configs: { [key: string]: NonceSequence } = this.#serializer.deserialize(contents);
+        let configs: Map<string, NonceSequence> = this.#serializer.deserialize(contents);
         let sequence: NonceSequence | null = FileSequencer.#getSequence(configs, driveId);
         if (sequence == null)
             throw new SequenceException("Sequence does not exist");
@@ -218,13 +225,13 @@ export class FileSequencer implements INonceSequencer {
     /**
      * Get the sequence by the drive ID.
      *
-     * @param driveId The drive ID.
+     * @param {string} driveId The drive ID.
      * @return
      * @throws SequenceException Thrown if error with the nonce sequence
      */
     public async getSequence(driveId: string): Promise<NonceSequence | null> {
         let contents: string = await this.getContents();
-        let configs: { [key: string]: NonceSequence } = this.#serializer.deserialize(contents);
+        let configs: Map<string, NonceSequence> = this.#serializer.deserialize(contents);
         let sequence: NonceSequence | null = FileSequencer.#getSequence(configs, driveId);
         return sequence;
     }
@@ -239,10 +246,10 @@ export class FileSequencer implements INonceSequencer {
     /**
      * Save the sequence file.
      *
-     * @param sequences The sequences.
+     * @param {Map<string, NonceSequence>} sequences The sequences.
      * @throws SequenceException Thrown if error with the nonce sequence
      */
-    protected async saveSequenceFile(sequences: { [key: string]: NonceSequence }): Promise<void> {
+    protected async saveSequenceFile(sequences: Map<string, NonceSequence>): Promise<void> {
         try {
             let contents: string = this.#serializer.serialize(sequences);
             await this.saveContents(contents);
@@ -254,7 +261,7 @@ export class FileSequencer implements INonceSequencer {
 
     /**
      * Save the contents of the file
-     * @param contents The contents
+     * @param {string} contents The contents
      */
     protected async saveContents(contents: string): Promise<void> {
         let inputStream: MemoryStream | null = null;
@@ -297,12 +304,12 @@ export class FileSequencer implements INonceSequencer {
     /**
      * Get the sequence for the drive provided.
      *
-     * @param configs All sequence configurations.
-     * @param driveId The drive ID.
-     * @return
+     * @param {Map<string, NonceSequence>} configs All sequence configurations.
+     * @param {string} driveId The drive ID.
+     * @return {NonceSequence | null} The nonce sequence
      * @throws SequenceException Thrown if error with the nonce sequence
      */
-    static #getSequence(configs: { [key: string]: NonceSequence }, driveId: string): NonceSequence | null {
+    static #getSequence(configs: Map<string, NonceSequence>, driveId: string): NonceSequence | null {
         let sequence: NonceSequence | null = null;
         for (let seq of Object.values(configs)) {
             if (driveId.toUpperCase() == seq.getId().toUpperCase()) {

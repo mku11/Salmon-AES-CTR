@@ -29,7 +29,7 @@ import { SeekOrigin } from "../../../salmon-core/streams/random_access_stream.js
  * Fills a cache buffer with the decrypted data from a part of an encrypted file
  *
  * @param cacheBuffer  The cache buffer that will store the decrypted contents
- * @param bufferSize   The length of the data requested
+ * @param {Uint8Array} bufferSize   The length of the data requested
  * @param salmonStream The stream that will be used to read from
  */
 export async function fillBufferPart(cacheBuffer: CacheBuffer, start: number, offset: number, bufferSize: number,
@@ -52,7 +52,7 @@ export class CacheBuffer {
     /**
      * Instantiate a cache buffer.
      *
-     * @param bufferSize The buffer size
+     * @param {Uint8Array} bufferSize The buffer size
      */
     public constructor(bufferSize: number) {
         this.buffer = new Uint8Array(bufferSize);

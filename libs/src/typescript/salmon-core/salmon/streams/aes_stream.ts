@@ -38,8 +38,7 @@ import { EncryptionMode } from "./encryption_mode.js";
 import { ProviderType } from "./provider_type.js";
 
 /**
- * Stream decorator provides AES256 encryption and decryption of stream.
- * Block data integrity is also supported.
+ * Stream wrapper provides AES256 encryption and decryption of a base stream.
  */
 export class AesStream extends RandomAccessStream {
 
@@ -147,13 +146,13 @@ export class AesStream extends RandomAccessStream {
      * @see {@link https://en.wikipedia.org/wiki/Block_cipher_mode_of_operation#Counter_(CTR)|Salmon README.md}
      *
      * @param {Uint8Array} key            The AES key that is used to encrypt decrypt
-     * @param {Uint8Array | null} nonce          The nonce used for the initial counter
+     * @param {Uint8Array | null} nonce          The nonce used for the initial counter. Use null if you use Salmon format.
      * @param {EncryptionMode} encryptionMode Encryption mode Encrypt or Decrypt this cannot change later
      * @param {RandomAccessStream} baseStream     The base Stream that will be used to read the data
      * @param {EncryptionFormat} format         The format to use, see {@link EncryptionFormat}
      * @param {boolean} integrity      enable integrity
-     * @param {Uint8Array | null} hashKey        Hash key to be used with integrity
-     * @param {number} chunkSize      the chunk size to be used with integrity
+     * @param {Uint8Array | null} hashKey        Hash key to be used with integrity. Used with integrity=true.
+     * @param {number} chunkSize      the chunk size to be used with integrity.
      * @throws IOException Thrown if there is an IO error.
      * @throws SalmonSecurityException Thrown when error with security
      * @throws IntegrityException Thrown if the data are corrupt or tampered with.
@@ -699,7 +698,7 @@ export class AesStream extends RandomAccessStream {
      * wrt to the encryption block size. Use this method to align a position to the
      * start of the block or chunk.
      *
-     * @return
+     * @return {Promise<number>} The offset
      */
     async #getAlignedOffset(): Promise<number> {
         let alignOffset: number;
@@ -716,7 +715,7 @@ export class AesStream extends RandomAccessStream {
      * wrt to the encryption block size. Use this method to ensure that buffer sizes request
      * via the API are aligned for read/writes and integrity processing.
      *
-     * @return
+     * @return {number} The buffer size
      */
     #getNormalizedBufferSize(includeHashes: boolean): number {
         let bufferSize: number = this.#bufferSize;
@@ -744,9 +743,9 @@ export class AesStream extends RandomAccessStream {
     /**
      * Read the data from the buffer
      *
-     * @param buffer The source buffer.
-     * @param offset The offset to start reading the data.
-     * @param count  The number of requested bytes to read.
+     * @param {Uint8Array} buffer The source buffer.
+     * @param {number} offset The offset to start reading the data.
+     * @param {number} count  The number of requested bytes to read.
      * @return The array with the data that were read.
      */
     #readBufferData(buffer: Uint8Array, offset: number, count: number): Uint8Array {
@@ -759,7 +758,7 @@ export class AesStream extends RandomAccessStream {
     /**
      * Read the data from the base stream into the buffer.
      *
-     * @param count The number of bytes to read.
+     * @param {number} count The number of bytes to read.
      * @return The number of bytes read.
      * @throws IOException Thrown if there is an IO error.
      */
@@ -778,11 +777,11 @@ export class AesStream extends RandomAccessStream {
     /**
      * Write the buffer data to the destination buffer.
      *
-     * @param srcBuffer  The source byte array.
-     * @param srcOffset  The source byte offset.
-     * @param destBuffer  The source byte array.
-     * @param destOffset The destination byte offset.
-     * @param count      The number of bytes to write.
+     * @param {Uint8Array} srcBuffer  The source byte array.
+     * @param {number} srcOffset  The source byte offset.
+     * @param {Uint8Array} destBuffer  The source byte array.
+     * @param {number} destOffset The destination byte offset.
+     * @param {number} count      The number of bytes to write.
      */
     #writeToBuffer(srcBuffer: Uint8Array, srcOffset: number, destBuffer: Uint8Array, destOffset: number, count: number): void {
         for (let i = 0; i < count; i++)
@@ -792,9 +791,9 @@ export class AesStream extends RandomAccessStream {
     /**
      * Write data to the base stream.
      *
-     * @param buffer    The buffer to read from.
-     * @param chunkSize The chunk segment size to use when writing the buffer.
-     * @param hashes    The hash signature to write at the beginning of each chunk.
+     * @param {Uint8Array} buffer    The buffer to read from.
+     * @param {number} chunkSize The chunk segment size to use when writing the buffer.
+     * @param {Uint8Array[]} hashes    The hash signature to write at the beginning of each chunk.
      * @return The number of bytes written.
      * @throws IOException Thrown if there is an IO error.
      */
@@ -818,7 +817,7 @@ export class AesStream extends RandomAccessStream {
     /**
      * Strip hash signatures from the buffer.
      *
-     * @param buffer    The buffer.
+     * @param {Uint8Array} buffer    The buffer.
      * @param chunkSize The chunk size.
      * @return
      */

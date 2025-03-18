@@ -292,7 +292,7 @@ export abstract class AesDrive extends VirtualDrive {
      * Get the byte contents of a file from the real filesystem.
      *
      * @param file The file
-     * @param bufferSize The buffer to be used when reading
+     * @param {Uint8Array} bufferSize The buffer to be used when reading
      */
     public async getBytesFromRealFile(file: IFile, bufferSize: number): Promise<Uint8Array> {
         let stream: RandomAccessStream = await file.getInputStream();
