@@ -42,9 +42,9 @@ export class AesFileExporter extends FileExporter {
 
     /**
      * 
-     * @param sourceFile 
-     * @param targetFile 
-     * @returns 
+     * @param {IVirtualFile} sourceFile The source file
+     * @param {IFile} targetFile The traget file
+     * @returns {Promise<number>} The minimum file part.
      */
     async getMinimumPartSize(sourceFile: IVirtualFile, targetFile: IFile): Promise<number> {
         // we force the whole content to use 1 thread if:
@@ -72,9 +72,9 @@ export class AesFileExporter extends FileExporter {
     /**
      * Tranform an error that can be thrown from a web worker.
      * @param {any} err The original error
-     * @returns 
+     * @returns {any} The transformed error
      */
-    getError(err: any) {
+    getError(err: any): any {
         if (err.error != undefined) {
             if (err.type == 'IntegrityException')
                 err = new IntegrityException(err.error);

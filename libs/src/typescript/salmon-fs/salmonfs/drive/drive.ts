@@ -66,7 +66,7 @@ export class Drive extends AesDrive {
 
     /**
      * Get a private dir for sharing files with external applications.
-     * @return {IFile} The private directory.
+     * @returns {IFile} The private directory.
      * @throws Exception
      */
     public getPrivateDir(): IFile {

@@ -32,37 +32,37 @@ export abstract class RandomAccessStream {
 
     /**
      * @callback OnProgressChanged
-     * @param {number} position
-     * @param {number} length
+     * @param {number} position The position
+     * @param {number} length The length
      */
     
     /**
      * True if the stream is readable.
-     * @return {Promise<boolean>} True if can read.
+     * @returns {Promise<boolean>} True if can read.
      */
     public abstract canRead(): Promise<boolean>;
 
     /**
      * True if the stream is writeable.
-     * @return {Promise<boolean>} True if can write.
+     * @returns {Promise<boolean>} True if can write.
      */
     public abstract canWrite(): Promise<boolean>;
 
     /**
      * True if the stream is seekable.
-     * @return {Promise<boolean>} True if can seek.
+     * @returns {Promise<boolean>} True if can seek.
      */
     public abstract canSeek(): Promise<boolean>;
 
     /**
      * Get the length of the stream.
-     * @return {Promise<number>} The length of the stream.
+     * @returns {Promise<number>} The length of the stream.
      */
     public abstract getLength(): Promise<number>;
 
     /**
      * Get the current position of the stream.
-     * @return {Promise<number>} The current position.
+     * @returns {Promise<number>} The current position.
      * @throws IOException Thrown if there is an IO error.
      */
     public abstract getPosition(): Promise<number>;
@@ -86,7 +86,7 @@ export abstract class RandomAccessStream {
      * @param {Uint8Array} buffer The buffer to read into.
      * @param {number} offset The offset to start reading into the buffer.
      * @param {number} count The number of bytes that were read. If the stream reached the end return -1.
-     * @return {Promise<number>} The number of bytes read.
+     * @returns {Promise<number>} The number of bytes read.
      * @throws IOException Thrown if there is an IO error.
      */
     public abstract read(buffer: Uint8Array, offset: number, count: number): Promise<number>;
@@ -102,9 +102,9 @@ export abstract class RandomAccessStream {
 
     /**
      * Seek to a specific position in the stream.
-     * @param {number} position The offset to use.
+     * @param {number} offset The offset to use.
      * @param {SeekOrigin} origin The origin type.
-     * @return {Promise<number>} The position after the seeking was complete.
+     * @returns {Promise<number>} The position after the seeking was complete.
      * @throws IOException Thrown if there is an IO error.
      */
     public abstract seek(offset: number, origin: SeekOrigin): Promise<number>;

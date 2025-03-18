@@ -58,33 +58,33 @@ export class AesServiceWorker {
 		throw new Error("Unknown class type");
 	}
 
-	async getResponse(request: Request) {
+	async #getResponse(request: Request) {
 		let position: number = this.getPosition(request.headers);
 		let params: any = this.requests[request.url];
 		let file: IFile = await this.getFile(params.fileClass, params.fileHandle);
-		let salmonFile: AesFile = new AesFile(file);
-		salmonFile.setEncryptionKey(params.key);
-		await salmonFile.setVerifyIntegrity(params.integrity, params.hash_key);
+		let aesFile: AesFile = new AesFile(file);
+		aesFile.setEncryptionKey(params.key);
+		await aesFile.setVerifyIntegrity(params.integrity, params.hash_key);
 
 		let stream: any;
 		if (params.useFileReadableStream) {
-			stream = AesFileReadableStream.create(salmonFile,
+			stream = AesFileReadableStream.create(aesFile,
 				AesServiceWorker.BUFFERS, AesServiceWorker.BUFFER_SIZE,
 				AesServiceWorker.THREADS, AesServiceWorker.BACK_OFFSET);
 			await stream.setPositionStart(position);
 			stream.reset();
 			await stream.skip(0);
 		} else {
-			let encStream: AesStream = await salmonFile.getInputStream();
+			let encStream: AesStream = await aesFile.getInputStream();
 			stream = ReadableStreamWrapper.create(encStream);
 			await stream.reset();
 			await stream.skip(position);
 		}
 
-		let streamSize: number = await salmonFile.getLength() - position;
+		let streamSize: number = await aesFile.getLength() - position;
 		let status: number = position == null ? 200 : 206;
 		let headers: Headers = new Headers();
-		let contentLength: number = await salmonFile.getLength();
+		let contentLength: number = await aesFile.getLength();
 		headers.append("Content-Length", (streamSize) + "");
 		if (position)
 			headers.append("Content-Range", "bytes " + position + "-" + (position + streamSize - 1) + "/" + contentLength);
@@ -118,7 +118,7 @@ export class AesServiceWorker {
 		let url = event.request.url;
 		if (url in this.requests) {
 			return event.respondWith(new Promise(async (resolve, reject) => {
-				let response = await this.getResponse(event.request);
+				let response = await this.#getResponse(event.request);
 				resolve(response);
 			}));
 		}

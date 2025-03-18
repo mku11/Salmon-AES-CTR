@@ -36,7 +36,7 @@ export class HmacSHA256Provider implements IHashProvider {
      * @param {Uint8Array} buffer The buffer to read the data from.
      * @param {number} offset The position reading will start from.
      * @param {number} count The count of bytes to be read.
-     * @return {Promise<Uint8Array>} The HMAC SHA256 hash.
+     * @returns {Promise<Uint8Array>} The HMAC SHA256 hash.
      * @throws IntegrityException thrown if hash cannot be calculated
      */
     public async calc(hashKey: Uint8Array, buffer: Uint8Array, offset: number, count: number): Promise<Uint8Array> {

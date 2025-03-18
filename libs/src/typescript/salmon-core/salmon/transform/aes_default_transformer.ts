@@ -58,7 +58,7 @@ export class AesDefaultTransformer extends AESCTRTransformer {
      * @param {Uint8Array} destBuffer The destination byte array.
      * @param {number} destOffset The destination byte offset.
      * @param {number} count The number of bytes to transform.
-     * @return {Promise<number>} The number of bytes transformed.
+     * @returns {Promise<number>} The number of bytes transformed.
      * @throws SalmonSecurityException Thrown when error with security
      */
     public async encryptData(srcBuffer: Uint8Array, srcOffset: number,
@@ -91,7 +91,7 @@ export class AesDefaultTransformer extends AESCTRTransformer {
      * @param {Uint8Array} destBuffer The destination byte array.
      * @param {number} destOffset The destination byte offset.
      * @param {number} count The number of bytes to transform.
-     * @return {Promise<number>} The number of bytes transformed.
+     * @returns {Promise<number>} The number of bytes transformed.
      * @throws SalmonSecurityException Thrown when error with security
      */
     public async decryptData(srcBuffer: Uint8Array, srcOffset: number,

@@ -34,28 +34,18 @@ import fs from "fs";
  * This class can be used for random file access of local files using node js.
  */
 export class NodeFileStream extends RandomAccessStream {
-
-    /**
-     * The java file associated with this stream.
-     */
     readonly #file: IFile;
-
     #_position: number = 0;
-
-    #_buffer: Uint8Array | null = null;
-    #_bufferPosition: number = 0;
-
     #fd: number = 0;
     #_closed: boolean = false;
-
     #canWrite: boolean = false;
 
     /**
      * Construct a file stream from an NodeFile.
      * This will create a wrapper stream that will route read() and write() to the FileChannel
      *
-     * @param file The NodeFile that will be used to get the read/write stream
-     * @param mode The mode "r" for read "rw" for write
+     * @param {IFile} file The NodeFile that will be used to get the read/write stream
+     * @param {string} mode The mode "r" for read "rw" for write
      */
     public constructor(file: IFile, mode: string) {
         super();
@@ -86,7 +76,7 @@ export class NodeFileStream extends RandomAccessStream {
 
     /**
      * True if stream can read from file.
-     * @return
+     * @returns {Promise<boolean>} True if can read
      */
     public override async canRead(): Promise<boolean> {
         return !this.#canWrite;
@@ -94,7 +84,7 @@ export class NodeFileStream extends RandomAccessStream {
 
     /**
      * True if stream can write to file.
-     * @return
+     * @returns {Promise<boolean>} True if can write
      */
     public override async canWrite(): Promise<boolean> {
         return this.#canWrite;
@@ -102,7 +92,7 @@ export class NodeFileStream extends RandomAccessStream {
 
     /**
      * True if stream can seek.
-     * @return
+     * @returns {Promise<boolean>} True if can seek
      */
     public override async canSeek(): Promise<boolean> {
         return true;
@@ -110,7 +100,7 @@ export class NodeFileStream extends RandomAccessStream {
 
     /**
      * Get the length of the stream. This is the same as the backed file.
-     * @return
+     * @returns {Promise<number>} The length
      */
     public override async getLength(): Promise<number> {
         return await this.#file.getLength();
@@ -118,7 +108,7 @@ export class NodeFileStream extends RandomAccessStream {
 
     /**
      * Get the current position of the stream.
-     * @return
+     * @returns {Promise<number>} The position
      * @throws IOException Thrown if there is an IO error.
      */
     public override async getPosition(): Promise<number> {
@@ -127,18 +117,16 @@ export class NodeFileStream extends RandomAccessStream {
 
     /**
      * Set the current position of the stream.
-     * @param value The new position.
+     * @param {number} value The new position.
      * @throws IOException Thrown if there is an IO error.
      */
     public override async setPosition(value: number): Promise<void> {
-		if(this.#_position != value)
-			this.#reset();
         this.#_position = value;
     }
 
     /**
      * Set the length of the stream. This is applicable for write streams only.
-     * @param value The new length.
+     * @param {number} value The new length.
      * @throws IOException Thrown if there is an IO error.
      */
     public override async setLength(value: number): Promise<void> {
@@ -150,7 +138,7 @@ export class NodeFileStream extends RandomAccessStream {
      * @param {Uint8Array} buffer The buffer to write the data.
      * @param {number} offset The offset of the buffer to start writing the data.
      * @param {number} count The maximum number of bytes to read from.
-     * @return
+     * @returns {Promise<number>} The number of bytes read
      * @throws IOException Thrown if there is an IO error.
      */
     public override async read(buffer: Uint8Array, offset: number, count: number): Promise<number> {
@@ -176,8 +164,8 @@ export class NodeFileStream extends RandomAccessStream {
     /**
      * Seek to the offset provided.
      * @param {number} offset The position to seek to.
-     * @param origin The type of origin {@link RandomAccessStream.SeekOrigin}
-     * @return The new position after seeking.
+     * @param {SeekOrigin} origin The type of origin {@link SeekOrigin}
+     * @returns {Promise<number>} The new position after seeking.
      * @throws IOException Thrown if there is an IO error.
      */
     public override async seek(offset: number, origin: SeekOrigin): Promise<number> {
@@ -212,12 +200,6 @@ export class NodeFileStream extends RandomAccessStream {
     public override async close(): Promise<void> {
         if (this.#fd)
             fs.close(this.#fd);
-        this.#reset();
         this.#_closed = true;
-    }
-
-    #reset(): void {
-        this.#_buffer = null;
-        this.#_bufferPosition = 0;
     }
 }

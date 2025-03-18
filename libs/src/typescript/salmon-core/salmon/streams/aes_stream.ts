@@ -102,14 +102,11 @@ export class AesStream extends RandomAccessStream {
      * header and hash without executing any operations. This can be used to prevent over-allocating memory
      * where creating your output buffers.
      *
-     * @param {Uint8Array} data The data to be transformed.
-     * @param {Uint8Array} key The AES key.
-     * @param {Uint8Array} nonce The nonce for the CTR.
      * @param {EncryptionMode} mode The EncryptionMode Encrypt or Decrypt.
-     * @param {Uint8Array|null} headerData The header data to be embedded if you use Encryption.
-     * @param {Uint8Array | null} hashKey The hash key to be used for integrity checks.
+     * @param {number} length The data length
+     * @param {EncryptionFormat} format The format to use, see {@link EncryptionFormat}
      * @param {number} chunkSize The chunk size for integrity chunks.
-     * @return {Promise<number>} The size of the output data.
+     * @returns {Promise<number>} The size of the output data.
      * @throws SalmonSecurityException Thrown when error with security
      * @throws IntegrityException Thrown if the data are corrupt or tampered with.
      * @throws IOException Thrown if there is an IO error.
@@ -257,7 +254,7 @@ export class AesStream extends RandomAccessStream {
     /**
      * Get the global AES provider type. Supported types: {@link ProviderType}.
      *
-     * @return {ProviderType} The provider Type.
+     * @returns {ProviderType} The provider Type.
      */
     public static getAesProviderType(): ProviderType {
         return AesStream.#providerType;
@@ -266,7 +263,7 @@ export class AesStream extends RandomAccessStream {
     /**
      * Provides the length of the actual transformed data (minus the header and integrity data).
      *
-     * @return {Promise<number>} The length of the stream.
+     * @returns {Promise<number>} The length of the stream.
      */
     public async getLength(): Promise<number> {
         await this.#init();
@@ -280,7 +277,7 @@ export class AesStream extends RandomAccessStream {
     /**
      * Provides the position of the stream relative to the data to be transformed.
      *
-     * @return {Promise<number>} The current position of the stream.
+     * @returns {Promise<number>} The current position of the stream.
      * @throws IOException Thrown if there is an IO error.
      */
     public async getPosition(): Promise<number> {
@@ -295,7 +292,7 @@ export class AesStream extends RandomAccessStream {
      * Sets the current position of the stream relative to the data to be transformed.
      *
      * @param {number} value The new position
-     * @return {Promise<void>}
+     * @returns {Promise<void>}
      * @throws IOException Thrown if there is an IO error.
      */
     public async setPosition(value: number): Promise<void> {
@@ -313,7 +310,7 @@ export class AesStream extends RandomAccessStream {
     /**
      * If the stream is readable (only if EncryptionMode == Decrypted)
      *
-     * @return {Promise<boolean>} True if mode is decryption.
+     * @returns {Promise<boolean>} True if mode is decryption.
      */
     public async canRead(): Promise<boolean> {
         return await this.#baseStream.canRead() && this.#encryptionMode == EncryptionMode.Decrypt;
@@ -322,7 +319,7 @@ export class AesStream extends RandomAccessStream {
     /**
      * If the stream is seekable (supported only if base stream is seekable).
      *
-     * @return {Promise<boolean>} True if stream is seekable.
+     * @returns {Promise<boolean>} True if stream is seekable.
      */
     public async canSeek(): Promise<boolean> {
         return this.#baseStream.canSeek();
@@ -331,7 +328,7 @@ export class AesStream extends RandomAccessStream {
     /**
      * If the stream is writeable (only if EncryptionMode is Encrypt)
      *
-     * @return {Promise<boolean>} True if mode is decryption.
+     * @returns {Promise<boolean>} True if mode is decryption.
      */
     public async canWrite(): Promise<boolean> {
         return await this.#baseStream.canWrite() && this.#encryptionMode == EncryptionMode.Encrypt;
@@ -364,7 +361,7 @@ export class AesStream extends RandomAccessStream {
     /**
      * The length of the header data if the stream was initialized with a header.
      *
-     * @return {number} The header data length.
+     * @returns {number} The header data length.
      */
     #getHeaderLength(): number {
         if (this.#header == null)
@@ -424,7 +421,7 @@ export class AesStream extends RandomAccessStream {
     /**
      * Returns the current Counter value.
      *
-     * @return {Promise<Uint8Array>} The current Counter value.
+     * @returns {Promise<Uint8Array>} The current Counter value.
      */
     public async getCounter(): Promise<Uint8Array> {
         await this.#init();
@@ -544,7 +541,7 @@ export class AesStream extends RandomAccessStream {
      * @param {Uint8Array} buffer The buffer that the data will be stored after decryption
      * @param {number} offset The start position on the buffer that data will be written.
      * @param {number} count  The requested count of the data bytes that should be decrypted
-     * @return {Promise<number>} The number of data bytes that were decrypted.
+     * @returns {Promise<number>} The number of data bytes that were decrypted.
      */
     public async read(buffer: Uint8Array, offset: number, count: number): Promise<number> {
         await this.#init();
@@ -591,7 +588,7 @@ export class AesStream extends RandomAccessStream {
      * @param {Uint8Array} buffer The buffer that the data will be stored after decryption
      * @param {number} offset The start position on the buffer that data will be written.
      * @param {number} count  The requested count of the data bytes that should be decrypted
-     * @return {Promise<number>} The number of data bytes that were decrypted.
+     * @returns {Promise<number>} The number of data bytes that were decrypted.
      * @throws IOException Thrown if stream is not aligned.
      */
     async #readFromStream(buffer: Uint8Array, offset: number, count: number): Promise<number> {
@@ -698,7 +695,7 @@ export class AesStream extends RandomAccessStream {
      * wrt to the encryption block size. Use this method to align a position to the
      * start of the block or chunk.
      *
-     * @return {Promise<number>} The offset
+     * @returns {Promise<number>} The offset
      */
     async #getAlignedOffset(): Promise<number> {
         let alignOffset: number;
@@ -715,7 +712,7 @@ export class AesStream extends RandomAccessStream {
      * wrt to the encryption block size. Use this method to ensure that buffer sizes request
      * via the API are aligned for read/writes and integrity processing.
      *
-     * @return {number} The buffer size
+     * @returns {number} The buffer size
      */
     #getNormalizedBufferSize(includeHashes: boolean): number {
         let bufferSize: number = this.#bufferSize;
@@ -746,7 +743,7 @@ export class AesStream extends RandomAccessStream {
      * @param {Uint8Array} buffer The source buffer.
      * @param {number} offset The offset to start reading the data.
      * @param {number} count  The number of requested bytes to read.
-     * @return The array with the data that were read.
+     * @returns {Uint8Array} The array with the data that were read.
      */
     #readBufferData(buffer: Uint8Array, offset: number, count: number): Uint8Array {
         let data: Uint8Array = new Uint8Array(Math.min(count, buffer.length - offset));
@@ -759,7 +756,7 @@ export class AesStream extends RandomAccessStream {
      * Read the data from the base stream into the buffer.
      *
      * @param {number} count The number of bytes to read.
-     * @return The number of bytes read.
+     * @returns {number} The number of bytes read.
      * @throws IOException Thrown if there is an IO error.
      */
     async #readStreamData(count: number): Promise<Uint8Array> {
@@ -794,7 +791,7 @@ export class AesStream extends RandomAccessStream {
      * @param {Uint8Array} buffer    The buffer to read from.
      * @param {number} chunkSize The chunk segment size to use when writing the buffer.
      * @param {Uint8Array[]} hashes    The hash signature to write at the beginning of each chunk.
-     * @return The number of bytes written.
+     * @returns {number} The number of bytes written.
      * @throws IOException Thrown if there is an IO error.
      */
     async #writeToStream(buffer: Uint8Array, chunkSize: number, hashes: Uint8Array[] | null): Promise<number> {
@@ -818,8 +815,8 @@ export class AesStream extends RandomAccessStream {
      * Strip hash signatures from the buffer.
      *
      * @param {Uint8Array} buffer    The buffer.
-     * @param chunkSize The chunk size.
-     * @return
+     * @param {number} chunkSize The chunk size.
+     * @returns {Uint8Array} The data without the hash signatures
      */
     #stripSignatures(buffer: Uint8Array, chunkSize: number): Uint8Array {
         let bytes: number = Math.floor(buffer.length / (chunkSize + Generator.HASH_RESULT_LENGTH)) * chunkSize;
@@ -839,7 +836,7 @@ export class AesStream extends RandomAccessStream {
     /**
      * True if the stream has integrity enabled.
      *
-     * @return {boolean} If integrity is enabled for this stream.
+     * @returns {boolean} If integrity is enabled for this stream.
      */
     public isIntegrityEnabled(): boolean {
         return this.#integrity.useIntegrity();
@@ -848,7 +845,7 @@ export class AesStream extends RandomAccessStream {
     /**
      * Get the encryption mode.
      *
-     * @return {EncryptionMode} The encryption mode.
+     * @returns {EncryptionMode} The encryption mode.
      */
     public getEncryptionMode(): EncryptionMode {
         return this.#encryptionMode;
@@ -858,7 +855,7 @@ export class AesStream extends RandomAccessStream {
      * Get the allowed range write option. This can check if you can use random access write.
      * This is generally not a good option since it prevents reusing the same nonce/counter.
      *
-     * @return {boolean} True if the stream allowed to seek and write.
+     * @returns {boolean} True if the stream allowed to seek and write.
      */
     public isAllowRangeWrite(): boolean {
         return this.#allowRangeWrite;
@@ -874,7 +871,7 @@ export class AesStream extends RandomAccessStream {
 
     /**
      * Get the internal buffer size.
-     * @return {number} The buffer size.
+     * @returns {number} The buffer size.
      */
     public getBufferSize(): number{
         return this.#bufferSize;

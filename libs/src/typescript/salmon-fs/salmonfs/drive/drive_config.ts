@@ -116,7 +116,7 @@ export class DriveConfig {
 
     /**
      * Get the magic bytes from the config file.
-     * @return {Uint8Array} The magic bytes
+     * @returns {Uint8Array} The magic bytes
      */
     public getMagicBytes(): Uint8Array {
         return this.#magicBytes;
@@ -124,7 +124,7 @@ export class DriveConfig {
 
     /**
      * Get the salt to be used for the password key derivation.
-     * @return {Uint8Array} the salt
+     * @returns {Uint8Array} the salt
      */
     public getSalt(): Uint8Array {
         return this.#salt;
@@ -132,7 +132,7 @@ export class DriveConfig {
 
     /**
      * Get the iterations to be used for the key derivation.
-     * @return {number} The number of iterations
+     * @returns {number} The number of iterations
      */
     public getIterations(): number {
         if (this.#iterations == null)
@@ -142,7 +142,7 @@ export class DriveConfig {
 
     /**
      * Get encrypted data using the master key: drive key, hash key, drive id.
-     * @return {Uint8Array} The encrypted data
+     * @returns {Uint8Array} The encrypted data
      */
     getEncryptedData(): Uint8Array {
         return this.#encryptedData;
@@ -150,7 +150,7 @@ export class DriveConfig {
 
     /**
      * Get the initial vector that was used to encrypt this drive configuration.
-     * @return {Uint8Array} The initial vector
+     * @returns {Uint8Array} The initial vector
      */
     public getIv(): Uint8Array {
         return this.#iv;
@@ -158,7 +158,7 @@ export class DriveConfig {
 
     /**
      * Get the hash signature that was used to sign this drive configuration.
-     * @return {Uint8Array} The hash signature
+     * @returns {Uint8Array} The hash signature
      */
     public getHashSignature(): Uint8Array {
         return this.#hashSignature;

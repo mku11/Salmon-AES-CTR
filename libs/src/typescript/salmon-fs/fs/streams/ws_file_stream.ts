@@ -59,8 +59,8 @@ export class WSFileStream extends RandomAccessStream {
      * Construct a file stream from an WSFile.
      * This will create a wrapper stream that will route read() and write() to the FileChannel
      *
-     * @param file The WSFile that will be used to get the read/write stream
-     * @param mode The mode "r" for read "rw" for write
+     * @param {WSFile} file The WSFile that will be used to get the read/write stream
+     * @param {string} mode The mode "r" for read "rw" for write
      */
     public constructor(file: WSFile, mode: string) {
         super();
@@ -73,8 +73,8 @@ export class WSFileStream extends RandomAccessStream {
             throw new IOException("Stream is closed");
         if (this.readStream == null) {
             let headers: Headers = new Headers();
-            this.setDefaultHeaders(headers);
-            this.setServiceAuth(headers);
+            this.#setDefaultHeaders(headers);
+            this.#setServiceAuth(headers);
 
             let end = await this.getLength() - 1;
             if (end >= this.position + WSFileStream.MAX_LEN_PER_REQUEST) {
@@ -124,9 +124,9 @@ export class WSFileStream extends RandomAccessStream {
 			async function send() {
 				await body.write(footerData, 0, footerData.length);
 				let headers: Headers = new Headers();
-				sstream.setDefaultHeaders(headers);
+				sstream.#setDefaultHeaders(headers);
 				headers.append("Content-Type", "multipart/form-data;boundary="+boundary);
-				sstream.setServiceAuth(headers);
+				sstream.#setServiceAuth(headers);
 				let httpResponse: Response | null = null;
 				let data: Uint8Array = body.toArray();
 				
@@ -160,9 +160,8 @@ export class WSFileStream extends RandomAccessStream {
             throw new IOException("Could not retrieve stream");
         return this.writeStream;
     }
-
     
-    async getWriter(): Promise<WritableStreamDefaultWriter> {
+    async #getWriter(): Promise<WritableStreamDefaultWriter> {
         if (this.writer == null) {
             this.writer = (await this.getOutputStream()).getWriter();
         }
@@ -171,7 +170,7 @@ export class WSFileStream extends RandomAccessStream {
 
     /**
      * True if stream can read from file.
-     * @return
+     * @returns {Promise<boolean>} True if it can read
      */
     public override async canRead(): Promise<boolean> {
         return !this.#canWrite;;
@@ -179,7 +178,7 @@ export class WSFileStream extends RandomAccessStream {
 
     /**
      * True if stream can write to file.
-     * @return
+     * @returns {Promise<boolean>} True if it can write
      */
     public override async canWrite(): Promise<boolean> {
         return this.#canWrite;
@@ -187,7 +186,7 @@ export class WSFileStream extends RandomAccessStream {
 
     /**
      * True if stream can seek.
-     * @return
+     * @returns {Promise<boolean>} True if it can seek
      */
     public override async canSeek(): Promise<boolean> {
         return true;
@@ -195,7 +194,7 @@ export class WSFileStream extends RandomAccessStream {
 
     /**
      * Get the length of the stream. This is the same as the backed file.
-     * @return
+     * @returns {Promise<number>} The length
      */
     public override async getLength(): Promise<number> {
         return await this.file.getLength();
@@ -203,7 +202,7 @@ export class WSFileStream extends RandomAccessStream {
 
     /**
      * Get the current position of the stream.
-     * @return
+     * @returns {Promise<number>} The position
      * @throws IOException Thrown if there is an IO error.
      */
     public override async getPosition(): Promise<number> {
@@ -212,7 +211,7 @@ export class WSFileStream extends RandomAccessStream {
 
     /**
      * Set the current position of the stream.
-     * @param value The new position.
+     * @param {number} value The new position.
      * @throws IOException Thrown if there is an IO error.
      */
     public override async setPosition(value: number): Promise<void> {
@@ -223,13 +222,13 @@ export class WSFileStream extends RandomAccessStream {
 
     /**
      * Set the length of the stream. This is applicable for write streams only.
-     * @param value The new length.
+     * @param {number} value The new length.
      * @throws IOException Thrown if there is an IO error.
      */
     public override async setLength(value: number): Promise<void> {
         let headers: Headers = new Headers();
-        this.setDefaultHeaders(headers);
-        this.setServiceAuth(headers);
+        this.#setDefaultHeaders(headers);
+        this.#setServiceAuth(headers);
         let params: URLSearchParams = new URLSearchParams();
         params.append(WSFileStream.#PATH, this.file.getPath());
         params.append(WSFileStream.#LENGTH, value.toString());
@@ -245,7 +244,7 @@ export class WSFileStream extends RandomAccessStream {
      * @param {Uint8Array} buffer The buffer to write the data.
      * @param {number} offset The offset of the buffer to start writing the data.
      * @param {number} count The maximum number of bytes to read from.
-     * @return
+     * @returns {Promise<number>} The number of bytes read
      * @throws IOException Thrown if there is an IO error.
      */
     public override async read(buffer: Uint8Array, offset: number, count: number): Promise<number> {
@@ -291,7 +290,7 @@ export class WSFileStream extends RandomAccessStream {
      * @throws IOException Thrown if there is an IO error.
      */
     public override async write(buffer: Uint8Array, offset: number, count: number): Promise<void> {
-        let writer: WritableStreamDefaultWriter = await this.getWriter();
+        let writer: WritableStreamDefaultWriter = await this.#getWriter();
         await writer.write(buffer.slice(offset, offset + count));
         this.position += Math.min(buffer.length, count);
     }
@@ -299,8 +298,8 @@ export class WSFileStream extends RandomAccessStream {
     /**
      * Seek to the offset provided.
      * @param {number} offset The position to seek to.
-     * @param origin The type of origin {@link RandomAccessStream.SeekOrigin}
-     * @return The new position after seeking.
+     * @param {SeekOrigin} origin The type of origin {@link SeekOrigin}
+     * @returns {Promise<number>} The new position after seeking.
      * @throws IOException Thrown if there is an IO error.
      */
     public override async seek(offset: number, origin: SeekOrigin): Promise<number> {
@@ -332,6 +331,9 @@ export class WSFileStream extends RandomAccessStream {
         this.closed = true;
     }
 
+    /**
+     * Reset the stream
+     */
     async reset(): Promise<void> {
         if (this.reader) {
             if(this.readStream?.locked)
@@ -356,7 +358,7 @@ export class WSFileStream extends RandomAccessStream {
 		this.file.reset();
     }
     
-    private setServiceAuth(headers: Headers) {
+    #setServiceAuth(headers: Headers) {
         if(!this.file.getCredentials())
             return;
         headers.append('Authorization', 'Basic ' + new Base64().encode(
@@ -369,7 +371,7 @@ export class WSFileStream extends RandomAccessStream {
                     + " " + httpResponse.statusText);
     }
 
-    private setDefaultHeaders(headers: Headers) {
+    #setDefaultHeaders(headers: Headers) {
         headers.append("Cache", "no-store");
 		headers.append("Connection", "keep-alive");
     }

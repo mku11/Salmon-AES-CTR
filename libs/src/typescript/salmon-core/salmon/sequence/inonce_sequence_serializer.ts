@@ -31,16 +31,16 @@ export interface INonceSequenceSerializer {
 
     /**
      * Parse nonce sequences from text contents.
-     * @param contents The contents containing the nonce sequences.
-     * @return The nonce sequences.
+     * @param {string} contents The contents containing the nonce sequences.
+     * @returns {Map<string, NonceSequence>} The nonce sequences.
      * @throws SequenceException Thrown if error with the nonce sequence
      */
     deserialize(contents: string): Map<string, NonceSequence>;
 
     /**
      * Generates the contents from sequences.
-     * @param sequences The sequences to convert to text.
-     * @return The string contents.
+     * @param {Map<string, NonceSequence>} sequences The sequences to convert to text.
+     * @returns {string} The string contents.
      * @throws SequenceException Thrown if error with the nonce sequence
      */
     serialize(sequences: Map<string, NonceSequence>): string;

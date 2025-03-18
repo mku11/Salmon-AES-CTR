@@ -62,7 +62,7 @@ export class Header {
 
     /**
      * Get the nonce.
-     * @return {Uint8Array | null} The nonce saved in the header.
+     * @returns {Uint8Array | null} The nonce saved in the header.
      */
     public getNonce(): Uint8Array | null {
         return this.#nonce;
@@ -70,7 +70,7 @@ export class Header {
 
     /**
      * Get the chunk size.
-     * @return {number} Chunk size
+     * @returns {number} Chunk size
      */
     public getChunkSize(): number {
         return this.#chunkSize;
@@ -78,7 +78,7 @@ export class Header {
 
     /**
      * Get the raw header data.
-     * @return {Uint8Array | null} Header data
+     * @returns {Uint8Array | null} Header data
      */
     public getHeaderData(): Uint8Array {
         return this.#headerData;
@@ -86,7 +86,7 @@ export class Header {
 
     /**
      * Get the Salmon format  version
-     * @return {number} The format version
+     * @returns {number} The format version
      */
     public getVersion(): number {
         return this.#version;
@@ -94,7 +94,7 @@ export class Header {
 
     /**
      * Get the magic bytes
-     * @return {Uint8Array} Magic bytes
+     * @returns {Uint8Array} Magic bytes
      */
     public getMagicBytes(): Uint8Array {
         return this.#magicBytes;
@@ -107,7 +107,7 @@ export class Header {
     /**
      * Parse the header data from the stream
      * @param {RandomAccessStream} stream The stream.
-     * @return {Header} The header data.
+     * @returns {Header} The header data.
      * @throws IOException Thrown if there is an IO error.
      */
     public static async readHeaderData(stream: RandomAccessStream): Promise<Header|null> {

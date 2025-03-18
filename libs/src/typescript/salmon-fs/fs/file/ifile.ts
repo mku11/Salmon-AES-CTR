@@ -33,38 +33,38 @@ export interface IFile {
     /**
      * True if this file exists.
      *
-     * @return {Promise<boolean>}
+     * @returns {Promise<boolean>}
      */
     exists(): Promise<boolean>;
 
     /**
      * Delete this file.
      *
-     * @return {Promise<boolean>}
+     * @returns {Promise<boolean>}
      */
     delete(): Promise<boolean>;
 
     /**
      * Get a stream for reading the file.
      *
-     * @return
-     * @throws {Promise<RandomAccessStream>} FileNotFoundException
+     * @returns {Promise<RandomAccessStream>} The stream
+     * @throws FileNotFoundException
      */
     getInputStream(): Promise<RandomAccessStream>;
 
     /**
      * Get a stream for writing to the file.
      *
-     * @return
-     * @throws {Promise<RandomAccessStream>} FileNotFoundException
+     * @returns {Promise<RandomAccessStream>} The stream
+     * @throws FileNotFoundException
      */
     getOutputStream(): Promise<RandomAccessStream>;
 
     /**
      * Rename file.
      *
-     * @param newFilename The new filename
-     * @return {Promise<boolean>} True if success.
+     * @param {string} newFilename The new filename
+     * @returns {Promise<boolean>} True if success.
      * @throws FileNotFoundException
      */
     renameTo(newFilename: string): Promise<boolean>;
@@ -72,63 +72,63 @@ export interface IFile {
     /**
      * Get the length for the file.
      *
-     * @return {Promise<number>} The length.
+     * @returns {Promise<number>} The length.
      */
     getLength(): Promise<number>;
 
     /**
      * Get the count of files and subdirectories
      *
-     * @return {Promise<number>}
+     * @returns {Promise<number>} The number of files and subdirectories
      */
     getChildrenCount(): Promise<number>;
 
     /**
      * Get the last modified date of the file.
      *
-     * @return {Promise<number>}
+     * @returns {Promise<number>} The last date modified
      */
     getLastDateModified(): Promise<number>;
 
     /**
      * Get the display path.
      *
-     * @return {string}
+     * @returns {string} The display path
      */
     getDisplayPath(): string;
 
     /**
-     * Get the absolute path or handle of the file on disk.
+     * Get the path or any handle of the file on disk.
      *
-     * @return
+     * @returns {any} The path
      */
     getPath(): any;
 
     /**
      * True if this is a file.
      *
-     * @return {Promise<boolean>}
+     * @returns {Promise<boolean>} True if file.
      */
     isFile(): Promise<boolean>;
 
     /**
      * True if this is a directory.
      *
-     * @return {Promise<boolean>}
+     * @returns {Promise<boolean>} True if directory
      */
     isDirectory(): Promise<boolean>;
 
     /**
      * Get all files and directories under this directory.
      *
-     * @return {Promise<IFile[]>}
+     * @returns {Promise<IFile[]>} The list of files and subdirectories
      */
     listFiles(): Promise<IFile[]>;
 
     /**
-     * Get the basename of the file.
+     * Get the name of the file.
      *
-     * @return {string}
+     * @returns {string} The file name
      */
     getName(): string;
 
@@ -136,14 +136,14 @@ export interface IFile {
      * Create the directory with the name provided under this directory.
      *
      * @param {string} dirName Directory name.
-     * @return {Promise<IFile>} The newly created directory.
+     * @returns {Promise<IFile>} The newly created directory.
      */
     createDirectory(dirName: string): Promise<IFile>;
 
     /**
      * Get the parent directory of this file/directory.
      *
-     * @return {Promise<IFile | null>} The parent directory.
+     * @returns {Promise<IFile | null>} The parent directory.
      */
     getParent(): Promise<IFile | null>;
 
@@ -151,7 +151,7 @@ export interface IFile {
      * Create an empty file with the provided name.
      *
      * @param {string} filename The name for the new file.
-     * @return {Promise<IFile>} The newly create file.
+     * @returns {Promise<IFile>} The newly create file.
      * @throws IOException Thrown if there is an IO error.
      */
     createFile(filename: string): Promise<IFile>;
@@ -161,7 +161,7 @@ export interface IFile {
      *
      * @param {IFile} newDir           The target directory.
      * @param {MoveOptions} [options]          The options
-     * @return {Promise<IFile>} The file after the move. Use this instance for any subsequent file operations.
+     * @returns {Promise<IFile>} The file after the move. Use this instance for any subsequent file operations.
      */
     move(newDir: IFile, options?: MoveOptions): Promise<IFile>;
 
@@ -170,7 +170,7 @@ export interface IFile {
      *
      * @param {IFile} newDir           The target directory.
      * @param {CopyOptions} [options]          The options
-     * @return {Promise<IFile | null>} The file after the copy. Use this instance for any subsequent file operations.
+     * @returns {Promise<IFile | null>} The file after the copy. Use this instance for any subsequent file operations.
      * @throws IOException Thrown if there is an IO error.
      */
     copy(newDir: IFile, options?: CopyOptions): Promise<IFile | null>;
@@ -179,14 +179,14 @@ export interface IFile {
      * Get the file/directory matching the name provided under this directory.
      *
      * @param {string} filename The name of the file or directory to match.
-     * @return {Promise<IFile | null>} The file that was matched.
+     * @returns {Promise<IFile | null>} The file that was matched.
      */
     getChild(filename: string): Promise<IFile | null>;
 
     /**
      * Create a directory with the current filepath.
      *
-     * @return {Promise<boolean>}
+     * @returns {Promise<boolean>}
      */
     mkdir(): Promise<boolean>;
 	
@@ -203,7 +203,7 @@ export interface IFile {
  * @param {IFile} src              The source directory
  * @param {IFile} dest             The target directory
  * @param {CopyContentOptions} [options] The options 
- * @return
+ * @returns {Promise<boolean>} True if files are copied successfully
  * @throws IOException Thrown if there is an IO error.
  */
 export async function copyFileContents(src: IFile, dest: IFile, options?: CopyContentsOptions): Promise<boolean> {
@@ -278,7 +278,7 @@ export async function copyRecursively(src: IFile, destDir: IFile, options?: Recu
 /**
  * Move a directory recursively
  *
- * @param {IFile} src Source directory
+ * @param {IFile} file Source directory
  * @param {IFile} destDir Destination directory to move into.
  * @param {RecursiveMoveOptions} [options] The options 
  */
@@ -383,16 +383,18 @@ export async function deleteRecursively(file: IFile, options?: RecursiveDeleteOp
 
 /**
  * Get an auto generated copy of the name for a file.
+ * @param {IFile} file The file
+ * @returns {Promise<string>} The new file name
  */
-export async function autoRenameFile(file: IFile) {
+export async function autoRenameFile(file: IFile): Promise<string> {
     return autoRename(file.getName());
 };
 
 /**
- * Get an auto generated copy of a filename
+ * Get an auto generated copy of a file name
  *
- * @param filename
- * @return
+ * @param {string} filename The current file name
+ * @returns {string} The new file name
  */
 export function autoRename(filename: string): string {
     let ext: string = getExtension(filename);
@@ -410,6 +412,11 @@ export function autoRename(filename: string): string {
     return newFilename;
 }
 
+/**
+ * Get extension from file name
+ * @param {string} fileName The file name
+ * @returns {string} The extension
+ */
 export function getExtension(fileName: string): string {
     if (fileName == null)
         return "";
@@ -419,8 +426,6 @@ export function getExtension(fileName: string): string {
     } else
         return "";
 }
-
-
 
 /**
  * File copy options
@@ -501,7 +506,6 @@ export class RecursiveMoveOptions {
      */
     onProgressChanged?: ((file: IFile, position: number, length: number) => void);
 }
-
 
 /**
  * Directory move options (recursively)

@@ -43,7 +43,7 @@ export interface ISalmonCTRTransformer {
      * @param {Uint8Array} destBuffer The destination byte array.
      * @param {number} destOffset The destination byte offset.
      * @param {number} count The number of bytes to transform.
-     * @return {Promise<number>} The number of bytes transformed.
+     * @returns {Promise<number>} The number of bytes transformed.
      * @throws SalmonSecurityException Thrown when error with security
      * @throws SalmonRangeExceededException Thrown if nonce has exceeded range
      */
@@ -56,7 +56,7 @@ export interface ISalmonCTRTransformer {
      * @param {Uint8Array} destBuffer The destination byte array.
      * @param {number} destOffset The destination byte offset.
      * @param {number} count The number of bytes to transform.
-     * @return {Promise<number>} The number of bytes transformed.
+     * @returns {Promise<number>} The number of bytes transformed.
      * @throws SalmonSecurityException Thrown when error with security
      * @throws SalmonRangeExceededException Thrown if nonce has exceeded range
      */
@@ -64,25 +64,25 @@ export interface ISalmonCTRTransformer {
 
     /**
      * Get the current counter.
-     * @return {Uint8Array | null} The current counter.
+     * @returns {Uint8Array | null} The current counter.
      */
     getCounter(): Uint8Array | null;
 
     /**
      * Get the current encryption key.
-     * @return {Uint8Array | null}
+     * @returns {Uint8Array | null} The encryption key
      */
     getKey(): Uint8Array | null;
 
     /**
      * Get the current block.
-     * @return {number}
+     * @returns {number} The block
      */
     getBlock(): number;
 
     /**
      * Get the nonce (initial counter) to be used for the data.
-     * @return {Uint8Array | null}
+     * @returns {Uint8Array | null} The nonce
      */
     getNonce(): Uint8Array | null;
 

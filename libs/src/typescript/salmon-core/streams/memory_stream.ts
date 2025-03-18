@@ -73,21 +73,21 @@ export class MemoryStream extends RandomAccessStream {
     }
 
     /**
-     * @return {Promise<boolean>} If the stream can be used for reading.
+     * @returns {Promise<boolean>} If the stream can be used for reading.
      */
     public override async canRead(): Promise<boolean> {
         return true;
     }
 
     /**
-     * @return {Promise<boolean>} If the stream can be used for writing.
+     * @returns {Promise<boolean>} If the stream can be used for writing.
      */
     public override async canWrite(): Promise<boolean> {
         return true;
     }
 
     /**
-     * @return {Promise<boolean>} If the stream is seekable.
+     * @returns {Promise<boolean>} If the stream is seekable.
      */
     public override async canSeek(): Promise<boolean> {
         return true;
@@ -95,7 +95,7 @@ export class MemoryStream extends RandomAccessStream {
 
     /**
      *
-     * @return {Promise<number>} The length of the stream.
+     * @returns {Promise<number>} The length of the stream.
      */
     public override async getLength(): Promise<number> {
         return this.#length;
@@ -103,7 +103,7 @@ export class MemoryStream extends RandomAccessStream {
 
     /**
      *
-     * @return {Promise<number>} The position of the stream.
+     * @returns {Promise<number>} The position of the stream.
      */
     public override async getPosition(): Promise<number> {
         return this.#position;
@@ -111,7 +111,7 @@ export class MemoryStream extends RandomAccessStream {
 
     /**
      * Changes the current position of the stream. For more options use seek() method.
-     * @param value The new position of the stream.
+     * @param {number} value The new position of the stream.
      */
     public override async setPosition(value: number): Promise<void> {
         this.#position = value;
@@ -132,7 +132,7 @@ export class MemoryStream extends RandomAccessStream {
      * @param {Uint8Array} buffer The buffer to write the bytes that are read from the stream.
      * @param {number} offset The offset of the buffer that will be used to write the bytes.
      * @param {number} count The length of the bytes that can be read from the stream and written to the buffer.
-     * @return {Promise<number>} The number of bytes read.
+     * @returns {Promise<number>} The number of bytes read.
      * @throws IOException Thrown if there is an IO error.
      */
     public override async read(buffer: Uint8Array, offset: number, count: number): Promise<number> {
@@ -180,7 +180,7 @@ export class MemoryStream extends RandomAccessStream {
      * Seek to a position in the stream.
      * @param {number} offset The offset to use.
      * @param {SeekOrigin.Begin} origin The origin type.
-     * @return {Promise<number>} The position after the seeking was complete.
+     * @returns {Promise<number>} The position after the seeking was complete.
      */
     public override async seek(offset: number, origin: SeekOrigin): Promise<number> {
         let nPos: number = 0;
@@ -212,7 +212,7 @@ export class MemoryStream extends RandomAccessStream {
 
     /**
      * Convert the stream to an array:
-     * @return {Uint8Array} A byte array containing the data from the stream.
+     * @returns {Uint8Array} A byte array containing the data from the stream.
      */
     public toArray(): Uint8Array {
         const nBytes: Uint8Array = new Uint8Array(this.#length);

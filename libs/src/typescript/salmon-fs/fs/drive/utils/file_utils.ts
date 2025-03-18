@@ -28,8 +28,8 @@ SOFTWARE.
 export class FileUtils {
     /**
      * Detect if filename is a text file.
-     * @param filename The filename.
-     * @return True if text file.
+     * @param {string} filename The filename.
+     * @returns {Promise<boolean>} True if text file.
      */
     public static isText(filename: string): boolean {
         let ext: string = FileUtils.getExtensionFromFileName(filename).toLowerCase();
@@ -38,8 +38,8 @@ export class FileUtils {
 
     /**
      * Detect if filename is an image file.
-     * @param filename The filename.
-     * @return True if image file.
+     * @param {string} filename The filename.
+     * @returns {Promise<boolean>} True if image file.
      */
     public static isImage(filename: string): boolean {
         let ext: string = FileUtils.getExtensionFromFileName(filename).toLowerCase();
@@ -49,8 +49,8 @@ export class FileUtils {
 
     /**
      * Detect if filename is an audio file.
-     * @param filename The filename.
-     * @return True if audio file.
+     * @param {string} filename The filename.
+     * @returns {Promise<boolean>} True if audio file.
      */
     public static isAudio(filename: string): boolean {
         let ext: string = FileUtils.getExtensionFromFileName(filename).toLowerCase();
@@ -59,8 +59,8 @@ export class FileUtils {
 
     /**
      * Detect if filename is a video file.
-     * @param filename The filename.
-     * @return True if video file.
+     * @param {string} filename The filename.
+     * @returns {Promise<boolean>} True if video file.
      */
     public static isVideo(filename: string): boolean {
         let ext: string = FileUtils.getExtensionFromFileName(filename).toLowerCase();
@@ -69,8 +69,8 @@ export class FileUtils {
 
     /**
      * Detect if filename is a pdf file.
-     * @param filename The file name
-     * @return True if pdf
+     * @param {string} filename The file name
+     * @returns {Promise<boolean>} True if pdf
      */
     public static isPdf(filename: string): boolean {
         let ext: string = FileUtils.getExtensionFromFileName(filename).toLowerCase();
@@ -80,8 +80,8 @@ export class FileUtils {
     /**
      * Return the extension of a filename.
      *
-     * @param fileName The file name
-     * @returns File name extension
+     * @param {string} fileName The file name
+     * @returns {string} File name extension
      */
     public static getExtensionFromFileName(fileName: string): string {
         if (fileName == null)
@@ -96,8 +96,8 @@ export class FileUtils {
     /**
      * Return a filename without extension
      *
-     * @param fileName The file name
-     * @returns File name without extension
+     * @param {string} fileName The file name
+     * @returns {string} File name without extension
      */
     public static getFileNameWithoutExtension(fileName: string): string {
         if (fileName == null)
@@ -111,11 +111,11 @@ export class FileUtils {
 
     /**
      * 
-     * @param type The file class type string (ie: 'File')
-     * @param param The file constructor parameter
-     * @returns A file object (ie: File)
+     * @param {string} type The file class type string (ie: 'File')
+     * @param {any} param The file constructor parameter
+     * @returns {Promise<any>} A file object (ie: File)
      */
-    public static async getInstance(type: string, param: any) {
+    public static async getInstance(type: string, param: any): Promise<any> {
         switch (type) {
             case 'File':
                 const { File: File } = await import("../../../fs/file/file.js");

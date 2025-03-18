@@ -79,7 +79,7 @@ export class NativeProxy implements INativeProxy {
      * @param {Uint8Array} destBuffer The destination buffer
      * @param {number} destOffset The destination buffer offset
      * @param {number} count The number of bytes to transform
-     * @return {number} The number of bytes transformed
+     * @returns {number} The number of bytes transformed
      */
     public transform(key: Uint8Array, counter: Uint8Array, srcBuffer: Uint8Array, srcOffset: number, destBuffer: Uint8Array, destOffset: number, count: number): number {
         throw new Error("Not supported");

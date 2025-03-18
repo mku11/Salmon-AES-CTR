@@ -34,7 +34,7 @@ export const PBKDF_SHA256: string = "SHA-256";
  * Get the PBKDF java cipher algorigthm string.
  *
  * @param {PbkdfAlgo.SHA256} pbkdfAlgo The PBKDF algorithm to be used
- * @return {string} The java cipher algorithm string. See javax.crypto.SecretKeyFactory.
+ * @returns {string} The java cipher algorithm string. See javax.crypto.SecretKeyFactory.
  */
 export function getPbkdfAlgoString(pbkdfAlgo: PbkdfAlgo): string {
     switch (pbkdfAlgo) {
@@ -57,7 +57,7 @@ export interface ISalmonPbkdfProvider {
      * @param {number} iterations Iterations to use. Make sure you use a high number according to your hardware specs.
      * @param {number} outputBytes The length of the output key.
      * @param {PbkdfAlgo} pbkdfAlgo The hash algorithm to use.
-     * @return {Promise<Uint8Array>} The key.
+     * @returns {Promise<Uint8Array>} The key.
      * @throws SalmonSecurityException Thrown when error with security
      */
     getKey(password: string, salt: Uint8Array, iterations: number, outputBytes: number, pbkdfAlgo: PbkdfAlgo): Promise<Uint8Array>;

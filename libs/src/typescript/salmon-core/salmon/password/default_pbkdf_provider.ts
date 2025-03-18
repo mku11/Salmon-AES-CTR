@@ -37,7 +37,7 @@ export class DefaultPbkdfProvider implements ISalmonPbkdfProvider {
      * @param {number} iterations Iterations to use. Make sure you use a high number according to your hardware specs.
      * @param {number} outputBytes The length of the output key.
      * @param {PbkdfAlgo} pbkdfAlgo The hash algorithm to use.
-     * @return {Promise<Uint8Array>} The key.
+     * @returns {Promise<Uint8Array>} The key.
      * @throws SalmonSecurityException Thrown when error with security
      */
     public async getKey(password: string, salt: Uint8Array, iterations: number, outputBytes: number, pbkdfAlgo: PbkdfAlgo): Promise<Uint8Array> {

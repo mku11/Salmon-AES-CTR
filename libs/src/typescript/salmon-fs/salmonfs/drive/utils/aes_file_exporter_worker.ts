@@ -34,8 +34,8 @@ import { AesFile } from "../../file/aes_file.js";
 export class AesFileExporterWorker extends FileExporterWorker {
     /**
      * Get an instance of the file to export
-     * @param params The parameters
-     * @returns 
+     * @param {any} params The parameters
+     * @returns {Promise<IVirtualFile | null>} The virtual file
      */
     override async getSourceFile(params: any): Promise<IVirtualFile | null> {
         let realFile: IFile = await FileUtils.getInstance(params.exportFileClassType, params.fileToExportHandle);

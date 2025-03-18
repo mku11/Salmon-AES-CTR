@@ -65,7 +65,7 @@ export class NodeDrive extends AesDrive {
 
     /**
      * Get a private dir for sharing files with external applications.
-     * @return {IFile} The private dir
+     * @returns {IFile} The private dir
      * @throws Exception
      */
     public getPrivateDir(): IFile {
@@ -89,7 +89,7 @@ export class NodeDrive extends AesDrive {
     /**
      * 
      * @param file The real file.
-     * @returns The encrypted file.
+     * @returns {AesFile} The encrypted file.
      */
     public override getVirtualFile(file: IFile): AesFile {
         return new AesFile(file, this);

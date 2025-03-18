@@ -110,7 +110,7 @@ export abstract class FileExporter {
         if (this.isRunning())
             throw new Error("Another export is running");
         if (await fileToExport.isDirectory())
-            throw new Error("Cannot export directory, use SalmonFileCommander instead");
+            throw new Error("Cannot export directory, use AesFileCommander instead");
 
         let exportFile: IFile;
         let filename = options.filename  ? options.filename : await fileToExport.getName();
@@ -259,10 +259,10 @@ export abstract class FileExporter {
 
     /**
      * Override with your specific error transformation
-     * @param err The error
-     * @returns 
+     * @param {any} err The error
+     * @returns {any} The transformed error
      */
-    getError(err: any) {
+    getError(err: any): any {
         return err;
     }
 

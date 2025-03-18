@@ -86,7 +86,7 @@ export class DriveKey {
 
     /**
      * Get the master key.
-     * @return {Uint8Array | null} The master key
+     * @returns {Uint8Array | null} The master key
      */
     public getMasterKey(): Uint8Array | null {
         return this.#masterKey;
@@ -102,7 +102,7 @@ export class DriveKey {
 
     /**
      * Get the number of iterations for the master key derivation.
-     * @return {number} The iterations
+     * @returns {number} The iterations
      */
     public getIterations(): number {
         return this.#iterations;

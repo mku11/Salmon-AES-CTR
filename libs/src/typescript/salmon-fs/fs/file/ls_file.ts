@@ -31,22 +31,21 @@ import { LocalStorageFileStream } from '../streams/ls_file_stream.js';
  */
 export class LocalStorageFile implements IFile {
     public static readonly separator: string = "/";
-    public static readonly SMALL_FILE_MAX_LENGTH: number = 1 * 1024 * 1024;
 
     #filePath: string;
 
     /**
      * Instantiate a real file represented by the filepath provided.
-     * @param path The filepath.
+     * @param {string} path The filepath.
      */
     public constructor(path: string) {
         this.#filePath = path;
     }
 
     /**
-     * Create a directory under this directory.
-     * @param dirName The name of the new directory.
-     * @return The newly created directory.
+     * Create a directory under this directory. Not supported.
+     * @param {string} dirName The name of the new directory.
+     * @returns {Promise<IFile>} The newly created directory.
      */
     public async createDirectory(dirName: string): Promise<IFile> {
         throw new Error("Not supported");
@@ -54,8 +53,8 @@ export class LocalStorageFile implements IFile {
 
     /**
      * Create a file under this directory.
-     * @param filename The name of the new file.
-     * @return The newly created file.
+     * @param {string} filename The name of the new file.
+     * @returns {Promise<IFile>} The newly created file.
      * @throws IOException Thrown if there is an IO error.
      */
     public async createFile(filename: string): Promise<IFile> {
@@ -65,7 +64,7 @@ export class LocalStorageFile implements IFile {
 
     /**
      * Delete this file or directory.
-     * @return True if deletion is successful.
+     * @returns {Promise<boolean>} True if deletion is successful.
      */
     public async delete(): Promise<boolean> {
         localStorage.removeItem(this.#filePath);
@@ -74,7 +73,7 @@ export class LocalStorageFile implements IFile {
 
     /**
      * True if file or directory exists.
-     * @return
+     * @returns {Promise<boolean>} True if exists
      */
     public async exists(): Promise<boolean> {
         return localStorage.getItem(this.#filePath) != null;
@@ -82,15 +81,15 @@ export class LocalStorageFile implements IFile {
 
     /**
      * Get the path of this file. For java this is the same as the absolute filepath.
-     * @return
+     * @returns {string}  The file path
      */
     public getPath(): string {
         return this.#filePath;
     }
 
     /**
-     * Get the absolute path on the physical disk. For java this is the same as the filepath.
-     * @return The absolute path.
+     * Get the display path on the physical disk. For java this is the same as the filepath.
+     * @returns {string} The display path.
      */
     public getDisplayPath(): string {
         return this.#filePath;
@@ -98,7 +97,7 @@ export class LocalStorageFile implements IFile {
 
     /**
      * Get the name of this file or directory.
-     * @return The name of this file or directory.
+     * @returns {string} The name of this file or directory.
      */
     public getName(): string {
         if (this.#filePath == null)
@@ -108,7 +107,7 @@ export class LocalStorageFile implements IFile {
 
     /**
      * Get a stream for reading the file.
-     * @return The stream to read from.
+     * @returns {Promise<RandomAccessStream>} The stream to read from.
      * @throws FileNotFoundException
      */
     public async getInputStream(): Promise<RandomAccessStream> {
@@ -118,7 +117,7 @@ export class LocalStorageFile implements IFile {
 
     /**
      * Get a stream for writing to this file.
-     * @return The stream to write to.
+     * @returns {Promise<RandomAccessStream>} The stream to write to.
      * @throws FileNotFoundException
      */
     public async getOutputStream(): Promise<RandomAccessStream> {
@@ -128,7 +127,7 @@ export class LocalStorageFile implements IFile {
 
     /**
      * Get the parent directory of this file or directory.
-     * @return The parent directory.
+     * @returns {Promise<IFile>} The parent directory.
      */
     public async getParent(): Promise<IFile> {
 		let index: number = this.#filePath.lastIndexOf(LocalStorageFile.separator);
@@ -139,7 +138,7 @@ export class LocalStorageFile implements IFile {
 
     /**
      * True if this is a directory.
-     * @return
+     * @returns {Promise<boolean>} True if directory
      */
     public async isDirectory(): Promise<boolean> {
         return false;
@@ -147,15 +146,15 @@ export class LocalStorageFile implements IFile {
 
     /**
      * True if this is a file.
-     * @return
+     * @returns {Promise<boolean>} True if file
      */
     public async isFile(): Promise<boolean> {
         return true;
     }
 
     /**
-     * Get the last modified date on disk.
-     * @return
+     * Get the last modified date on disk. Not supported.
+     * @returns {Promise<number>} Last date modified
      */
     public async getLastDateModified(): Promise<number> {
         throw new Error("Not supported");
@@ -163,7 +162,7 @@ export class LocalStorageFile implements IFile {
 
     /**
      * Get the size of the file on disk.
-     * @return
+     * @returns {Promise<number>} The size
      */
     public async getLength(): Promise<number> {
         let contents: string | null = localStorage.getItem(this.#filePath);
@@ -173,35 +172,35 @@ export class LocalStorageFile implements IFile {
     }
 
     /**
-     * Get the count of files and subdirectories
-     * @return
+     * Get the count of files and subdirectories. Not supported.
+     * @returns {Promise<number>} The number of files and subdirectories.
      */
     public async getChildrenCount(): Promise<number> {
         throw new Error("Not supported");
     }
     /**
-     * List all files under this directory.
-     * @return The list of files.
+     * List all files under this directory. Not supported.
+     * @returns {Promise<IFile[]>} The list of files.
      */
     public async listFiles(): Promise<IFile[]> {
         throw new Error("Not supported");
     }
 
     /**
-     * Move this file or directory under a new directory.
-     * @param newDir The target directory.
+     * Move this file or directory under a new directory. Not supported.
+     * @param {IFile} newDir The target directory.
      * @param {MoveOptions} [options] The options.
-     * @return The moved file. Use this file for subsequent operations instead of the original.
+     * @returns {Promise<IFile>} The moved file. Use this file for subsequent operations instead of the original.
      */
     public async move(newDir: IFile, options?: MoveOptions): Promise<IFile> {
         throw new Error("Not supported");
     }
 
     /**
-     * Move this file or directory under a new directory.
-     * @param newDir    The target directory.
+     * Move this file or directory under a new directory. Not supported.
+     * @param {IFile} newDir    The target directory.
      * @param {CopyOptions} [options] The options
-     * @return The copied file. Use this file for subsequent operations instead of the original.
+     * @returns {Promise<IFile | null>} The copied file. Use this file for subsequent operations instead of the original.
      * @throws IOException Thrown if there is an IO error.
      */
     public async copy(newDir: IFile, options?: CopyOptions): Promise<IFile | null> {
@@ -210,8 +209,8 @@ export class LocalStorageFile implements IFile {
 
     /**
      * Get the file or directory under this directory with the provided name.
-     * @param filename The name of the file or directory.
-     * @return
+     * @param {string} filename The name of the file or directory.
+     * @returns {Promise<IFile | null>} The child
      */
     public async getChild(filename: string): Promise<IFile | null> {
         let child: IFile = new LocalStorageFile(this.#filePath + LocalStorageFile.separator + filename);
@@ -219,9 +218,9 @@ export class LocalStorageFile implements IFile {
     }
 
     /**
-     * Rename the current file or directory.
-     * @param newFilename The new name for the file or directory.
-     * @return True if successfully renamed.
+     * Rename the current file or directory. Not supported.
+     * @param {string} newFilename The new name for the file or directory.
+     * @returns {Promise<boolean>} True if successfully renamed.
      */
     public async renameTo(newFilename: string): Promise<boolean> {
         throw new Error("Not supported");
@@ -229,7 +228,7 @@ export class LocalStorageFile implements IFile {
 
     /**
      * Create this directory under the current filepath.
-     * @return True if created.
+     * @returns {boolean} True if created.
      */
     public async mkdir(): Promise<boolean> {
         // no-op
@@ -245,6 +244,7 @@ export class LocalStorageFile implements IFile {
 
     /**
      * Returns a string representation of this object
+     * @returns {string} The string
      */
     public toString(): string {
         return this.#filePath;

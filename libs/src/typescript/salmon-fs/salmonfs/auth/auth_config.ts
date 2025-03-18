@@ -51,7 +51,7 @@ export class AuthConfig {
 
     /**
      * Get the drive ID to grant authorization for.
-     * @return {Uint8Array} The drive id
+     * @returns {Uint8Array} The drive id
      */
     public getDriveId(): Uint8Array {
         return this.#driveId;
@@ -59,7 +59,7 @@ export class AuthConfig {
 
     /**
      * Get the authorization ID for the target device.
-     * @return {Uint8Array} The auth id
+     * @returns {Uint8Array} The auth id
      */
     public getAuthId(): Uint8Array {
         return this.#authId;
@@ -67,7 +67,7 @@ export class AuthConfig {
 
     /**
      * Get the nonce maximum value the target device will use.
-     * @return {Uint8Array} The starting nonce.
+     * @returns {Uint8Array} The starting nonce.
      */
     public getStartNonce(): Uint8Array {
         return this.#startNonce;
@@ -75,7 +75,7 @@ export class AuthConfig {
 
     /**
      * Get the nonce maximum value the target device will use.
-     * @return {Uint8Array} The nonce max value.
+     * @returns {Uint8Array} The nonce max value.
      */
     public getMaxNonce(): Uint8Array {
         return this.#maxNonce;
@@ -120,8 +120,8 @@ export class AuthConfig {
         let driveId: Uint8Array | null = drive.getDriveId();
         if (driveId == null)
             throw new Error("Could not write auth file, no drive id found");
-        let salmonFile: AesFile = new AesFile(authConfigFile, drive);
-        let stream: RandomAccessStream = await salmonFile.getOutputStream(configNonce);
+        let aesFile: AesFile = new AesFile(authConfigFile, drive);
+        let stream: RandomAccessStream = await aesFile.getOutputStream(configNonce);
         await AuthConfig.#writeToStream(stream, driveId, targetAuthId, targetStartingNonce, targetMaxNonce);
     }
 
@@ -162,12 +162,12 @@ export class AuthConfig {
      *
      * @param {AesDrive} drive The drive.
      * @param {IFile} authFile The encrypted authorization file.
-     * @return {Promise<AuthConfig>} The decrypted authorization file.
+     * @returns {Promise<AuthConfig>} The decrypted authorization file.
      * @throws Exception
      */
     static async #getAuthConfig(drive: AesDrive, authFile: IFile): Promise<AuthConfig> {
-        let salmonFile: AesFile = new AesFile(authFile, drive);
-        let stream: AesStream = await salmonFile.getInputStream();
+        let aesFile: AesFile = new AesFile(authFile, drive);
+        let stream: AesStream = await aesFile.getInputStream();
         let ms: MemoryStream = new MemoryStream();
         await stream.copyTo(ms);
         await ms.close();
@@ -185,7 +185,7 @@ export class AuthConfig {
      *
      * @param {AesDrive} drive The drive
      * @param {Uint8Array} authId The authorization id to verify.
-     * @return {Promise<boolean>} True if verification succeeds
+     * @returns {Promise<boolean>} True if verification succeeds
      * @throws Exception
      */
     static async #verifyAuthId(drive: AesDrive, authId: Uint8Array): Promise<boolean> {
@@ -245,7 +245,7 @@ export class AuthConfig {
     /**
      * @param {AesDrive} drive The drive
      * @param {string} targetAuthId The authorization id of the target device.
-     * @param {IFile} filename     The file
+     * @param {IFile} file     The file
      * @throws Exception If an error occurs during export
      */
     public static async exportAuthFile(drive: AesDrive, targetAuthId: string, file: IFile): Promise<void> {

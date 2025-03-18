@@ -33,7 +33,7 @@ export interface IHashProvider {
      * @param {number} buffer The buffer to read the data from.
      * @param {number} offset The position that reading will start from.
      * @param {number} count The count of bytes to read from.
-     * @return {Promise<Uint8Array>} The calculated hash.
+     * @returns {Promise<Uint8Array>} The calculated hash.
      * @throws IntegrityException thrown if hash cannot be calculated
      */
     calc(key: Uint8Array, buffer: Uint8Array, offset: number, count: number): Promise<Uint8Array>;

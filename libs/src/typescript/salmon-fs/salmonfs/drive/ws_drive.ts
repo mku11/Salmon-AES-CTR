@@ -58,7 +58,7 @@ export class WSDrive extends AesDrive {
      * @param {IFile} dir The directory that will host the drive. This should be a WSFile with the correct service path and credentials.
      * @param {string} password The password.
      * @param {ISalmonSequencer} sequencer The nonce sequencer that will be used for encryption.
-     * @return {Promise<AesDrive>} The drive.
+     * @returns {Promise<AesDrive>} The drive.
      * @throws IOException If error occurs during creating the drive.
      */
     static async create(dir: IFile, password: string, sequencer: INonceSequencer) {
@@ -68,7 +68,7 @@ export class WSDrive extends AesDrive {
         
     /**
      * Get a private dir for sharing files with external applications.
-     * @return {IFile} The private dir
+     * @returns {IFile} The private dir
      * @throws Exception
      */
     public getPrivateDir(): IFile {
@@ -92,8 +92,8 @@ export class WSDrive extends AesDrive {
     
     /**
      * 
-     * @param file The real file.
-     * @returns The encrypted file.
+     * @param {IFile} file The real file.
+     * @returns {AesFile} The encrypted file.
      */
     public override getVirtualFile(file: IFile): AesFile {
         return new AesFile(file, this);

@@ -38,7 +38,7 @@ export class TextEncryptor {
      * @param {string} text  Text to be encrypted.
      * @param {Uint8Array} key   The encryption key to be used.
      * @param {Uint8Array} nonce The nonce to be used.
-     * @param format The format to use, see {@link EncryptionFormat}
+     * @param {EncryptionFormat} format The format to use, see {@link EncryptionFormat}
      * @param {boolean} integrity True if you want to calculate and store hash signatures for each chunkSize
      * @param {Uint8Array | null} hashKey Hash key to be used for all chunks.
      * @param {Promise<string>} chunkSize The chunk size.

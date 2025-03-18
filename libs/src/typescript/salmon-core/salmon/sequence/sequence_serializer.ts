@@ -33,7 +33,7 @@ export class SequenceSerializer implements INonceSequenceSerializer {
      * Serialize the sequences to a json string.
      *
      * @param {Map<string, NonceSequence>} driveAuthEntries The sequences to convert to text.
-     * @return {string} The contents
+     * @returns {string} The contents
      * @throws SequenceException Thrown if error with the nonce sequence
      */
     public serialize(driveAuthEntries: Map<string, NonceSequence>): string {
@@ -45,7 +45,7 @@ export class SequenceSerializer implements INonceSequenceSerializer {
      * Deserialize sequences from json string.
      *
      * @param {string} contents The contents containing the nonce sequences.
-     * @return {Map<string, NonceSequence>} The sequences
+     * @returns {Map<string, NonceSequence>} The sequences
      * @throws SequenceException Thrown if error with the nonce sequence
      */
     public deserialize(contents: string): Map<string, NonceSequence> {

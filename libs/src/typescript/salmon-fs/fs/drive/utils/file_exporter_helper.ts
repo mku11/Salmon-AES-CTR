@@ -26,6 +26,15 @@ import { IFile } from "../../file/ifile.js";
 import { IVirtualFile } from "../../file/ivirtual_file.js";
 import { RandomAccessStream } from "../../../../salmon-core/streams/random_access_stream.js";
 
+
+/**
+ * Progress Callback
+ *
+ * @callback OnFileExportProgressChanged
+ * @param {number} position The current position
+ * @param {number} length The total length
+ */
+
 /**
  * Export a file part from the drive. Do not use this directly, use FileExporter instead.
  *
@@ -34,6 +43,7 @@ import { RandomAccessStream } from "../../../../salmon-core/streams/random_acces
  * @param {number} start             The start position on the file
  * @param {number} count             The length of the bytes to be decrypted
  * @param {number[]} totalBytesWritten The total bytes that were written to the external file
+ * @param {OnFileExportProgressChanged} onProgressChanged The file progress
  */
 export async function exportFilePart(fileToExport: IVirtualFile, exportFile: IFile, start: number, count: number,
     totalBytesWritten: number[], onProgressChanged: ((position: number, length: number) => void) | null, 

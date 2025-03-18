@@ -146,7 +146,7 @@ export abstract class AesDrive extends VirtualDrive {
 
     /**
      * Return the default file chunk size
-     * @return The default chunk size.
+     * @returns {number} The default chunk size.
      */
     public getDefaultFileChunkSize(): number {
         return this.#defaultFileChunkSize;
@@ -154,7 +154,7 @@ export abstract class AesDrive extends VirtualDrive {
 
     /**
      * Set the default file chunk size to be used with hash integrity.
-     * @param fileChunkSize
+     * @param {number} fileChunkSize
      */
     public setDefaultFileChunkSize(fileChunkSize: number): void {
         this.#defaultFileChunkSize = fileChunkSize;
@@ -162,7 +162,7 @@ export abstract class AesDrive extends VirtualDrive {
 
     /**
      * Return the encryption key that is used for encryption / decryption
-     * @return
+     * @returns {DriveKey | null} The drive key
      */
     public getKey(): DriveKey | null {
         return this.#key;
@@ -170,7 +170,7 @@ export abstract class AesDrive extends VirtualDrive {
 
     /**
      * Return the virtual root directory of the drive.
-     * @return
+     * @returns {Promise<IVirtualFile | null>} The virtual file
      * @throws SalmonAuthException Thrown when error during authorization
      */
     public async getRoot(): Promise<IVirtualFile | null> {
@@ -188,7 +188,7 @@ export abstract class AesDrive extends VirtualDrive {
     /**
      * Verify if the user password is correct otherwise it throws a SalmonAuthException
      *
-     * @param password The password.
+     * @param {string} password The password.
      */
     async #unlock(password: string): Promise<void> {
         let stream: AesStream | null = null;
@@ -245,10 +245,10 @@ export abstract class AesDrive extends VirtualDrive {
 
     /**
      * Sets the key properties.
-     * @param masterKey The master key.
-     * @param driveKey The drive key used for enc/dec of files and filenames.
-     * @param hashKey The hash key used for data integrity.
-     * @param iterations The iterations
+     * @param {Uint8Array} masterKey The master key.
+     * @param {Uint8Array} driveKey The drive key used for enc/dec of files and filenames.
+     * @param {Uint8Array} hashKey The hash key used for data integrity.
+     * @param {number} iterations The iterations
      */
     public setKey(masterKey: Uint8Array, driveKey: Uint8Array, hashKey: Uint8Array, iterations: number): void {
         if (this.#key == null)
@@ -262,9 +262,9 @@ export abstract class AesDrive extends VirtualDrive {
     /**
      * Verify that the hash signature is correct
      *
-     * @param salmonConfig The drive configuration
-     * @param data The data
-     * @param hashKey The hash key
+     * @param {DriveConfig} salmonConfig The drive configuration
+     * @param {Uint8Array} data The data
+     * @param {Uint8Array} hashKey The hash key
      */
     async #verifyHash(salmonConfig: DriveConfig, data: Uint8Array, hashKey: Uint8Array): Promise<void> {
         let hashSignature: Uint8Array = salmonConfig.getHashSignature();
@@ -276,7 +276,7 @@ export abstract class AesDrive extends VirtualDrive {
 
     /**
      * Get the next nonce from the sequencer. This advanced the sequencer so unique nonce are used.
-     * @return
+     * @returns {Promise<Uint8Array | null>} The next nonce.
      * @throws Exception
      */
     async getNextNonce(): Promise<Uint8Array | null> {
@@ -291,7 +291,7 @@ export abstract class AesDrive extends VirtualDrive {
     /**
      * Get the byte contents of a file from the real filesystem.
      *
-     * @param file The file
+     * @param {IFile} file The file
      * @param {Uint8Array} bufferSize The buffer to be used when reading
      */
     public async getBytesFromRealFile(file: IFile, bufferSize: number): Promise<Uint8Array> {
@@ -308,6 +308,7 @@ export abstract class AesDrive extends VirtualDrive {
 
     /**
      * Return the drive configuration file.
+     * @returns {Promise<IFile | null>} The file
      */
     async #getDriveConfigFile(): Promise<IFile | null> {
         if (this.#realRoot == null || !await this.#realRoot.exists())
@@ -318,7 +319,7 @@ export abstract class AesDrive extends VirtualDrive {
 
     /**
      * Return the default external export dir that all file can be exported to.
-     * @return The file on the real filesystem.
+     * @returns {Promise<IFile>} The file on the real filesystem.
      */
     public async getExportDir(): Promise<IFile> {
         if (this.#realRoot == null)
@@ -331,6 +332,7 @@ export abstract class AesDrive extends VirtualDrive {
 
     /**
      * Return the configuration properties of this drive.
+     * @returns {Promise<DriveConfig | null>} The configuration
      */
     protected async getDriveConfig(): Promise<DriveConfig | null> {
         let configFile: IFile | null = await this.#getDriveConfigFile();
@@ -344,6 +346,7 @@ export abstract class AesDrive extends VirtualDrive {
 
     /**
      * Return true if the drive is already created and has a configuration file.
+     * @returns {Promise<boolean>} True if configuration file was found
      */
     public async hasConfig(): Promise<boolean> {
         let salmonConfig: DriveConfig | null = null;
@@ -357,8 +360,8 @@ export abstract class AesDrive extends VirtualDrive {
     }
 
     /**
-     * Get the drive ID.
-     * @return
+     * Get the drive id.
+     * @returns {Uint8Array | null} The drive id.
      */
     public getDriveId(): Uint8Array | null {
         return this.#driveId;
@@ -394,6 +397,10 @@ export abstract class AesDrive extends VirtualDrive {
             this.#virtualRoot = this.getVirtualFile(virtualRootRealFile);
     }
 
+    /**
+     * Get the has provider for this drive.
+     * @returns {IHashProvider} The hash provider
+     */
     public getHashProvider(): IHashProvider {
         return this.#hashProvider;
     }
@@ -406,6 +413,7 @@ export abstract class AesDrive extends VirtualDrive {
      * @param {any} driveClassType The driver class type (ie Drive).
      * @param {string} password Text password to encrypt the drive configuration.
      * @param {INonceSequencer} [sequencer] The sequencer to use.
+     * @returns {Promise<AesDrive>} The drive
      */
     public static async openDrive(dir: IFile, driveClassType: any, password: string, sequencer?: INonceSequencer): Promise<AesDrive> {
         let drive: AesDrive = await AesDrive.#createDriveInstance(dir, false, driveClassType, sequencer);
@@ -423,7 +431,7 @@ export abstract class AesDrive extends VirtualDrive {
      * @param {any} driveClassType The driver class type (ie Drive).
      * @param {string} password Text password to encrypt the drive configuration.
      * @param {INonceSequencer} sequencer The sequencer to use.
-     * @return {Promise<AesDrive>} The newly created drive.
+     * @returns {Promise<AesDrive>} The newly created drive.
      * @throws IntegrityException Thrown if the data are corrupt or tampered with.
      * @throws SequenceException Thrown if error with the nonce sequence
      */
@@ -440,7 +448,7 @@ export abstract class AesDrive extends VirtualDrive {
      *
      * @param {IFile} dir The target directory where the drive is located.
      * @param {boolean} createIfNotExists Create the drive if it does not exist
-     * @return {Promise<AesDrive>} The drive
+     * @returns {Promise<AesDrive>} The drive
      * @throws SalmonSecurityException Thrown when error with security
      */
     static async #createDriveInstance(dir: IFile, createIfNotExists: boolean,
@@ -461,7 +469,7 @@ export abstract class AesDrive extends VirtualDrive {
     /**
      * Get the device authorization byte array for the current drive.
      *
-     * @return {Promise<Uint8Array>} The byte array with the auth id
+     * @returns {Promise<Uint8Array>} The byte array with the auth id
      * @throws Exception If error occurs during retrieval
      */
     public async getAuthIdBytes(): Promise<Uint8Array> {
@@ -488,7 +496,7 @@ export abstract class AesDrive extends VirtualDrive {
     /**
      * Get the default auth config filename.
      *
-     * @return {string} The authorization configuration file name.
+     * @returns {string} The authorization configuration file name.
      */
     public static getDefaultAuthConfigFilename(): string {
         return AesDrive.getAuthConfigFilename();
@@ -499,7 +507,7 @@ export abstract class AesDrive extends VirtualDrive {
      * once per driveId/authId combination.
      *
      * @param {Uint8Array} driveId The driveId
-     * @param  {Uint8Array} authId  The authId
+     * @param {Uint8Array} authId  The authId
      * @throws Exception If error occurs during creation
      */
     async createSequence(driveId: Uint8Array, authId: Uint8Array): Promise<void> {
@@ -548,7 +556,7 @@ export abstract class AesDrive extends VirtualDrive {
     /**
      * Get the authorization ID for the current device.
      *
-     * @return {Promise<string>} The auth id
+     * @returns {Promise<string>} The auth id
      * @throws SequenceException Thrown if error with the nonce sequence
      * @throws SalmonAuthException Thrown when error during authorization
      */
@@ -661,7 +669,7 @@ export abstract class AesDrive extends VirtualDrive {
     /**
      * Get the nonce sequencer used for the current drive.
      *
-     * @return {INonceSequencer | undefined} The nonce sequencer
+     * @returns {INonceSequencer | undefined} The nonce sequencer
      */
     public getSequencer(): INonceSequencer | undefined {
         if (!this.#sequencer)
@@ -682,7 +690,7 @@ export abstract class AesDrive extends VirtualDrive {
      * Create the config file for this drive. By default the config file is placed in the real root of the vault.
      * You can override this with your own location, make sure you also override getConfigFile().
      * @param {IFile} realRoot The real root directory of the vault
-     * @returns The config file that was created
+     * @returns {Promise<IFile>} The config file that was created
      */
     public async createConfigFile(realRoot: IFile): Promise<IFile> {
         let configFile: IFile = await realRoot.createFile(AesDrive.getConfigFilename());
@@ -693,7 +701,7 @@ export abstract class AesDrive extends VirtualDrive {
      * Get the config file for this drive. By default the config file is placed in the real root of the vault.
      * You can override this with your own location.
      * @param {IFile} realRoot The real root directory of the vault
-     * @returns The config file that will be used for this drive.
+     * @returns {Promise<IFile | null>} The config file that will be used for this drive.
      */
     public async getConfigFile(realRoot: IFile): Promise<IFile | null> {
         let configFile: IFile | null = await realRoot.getChild(AesDrive.getConfigFilename());

@@ -106,7 +106,7 @@ export class Integrity {
      * @param {number} count       Length of the buffer that will be used to calculate the hash.
      * @param {Uint8Array} key         Key that will be used
      * @param {Uint8Array | null} includeData Additional data to be included in the calculation.
-     * @return {Promise<Uint8Array>} The hash.
+     * @returns {Promise<Uint8Array>} The hash.
      * @throws IntegrityException Thrown if the data are corrupt or tampered with.
      */
     public static async calculateHash(provider: IHashProvider, buffer: Uint8Array, offset: number, count: number,
@@ -135,7 +135,7 @@ export class Integrity {
      *                       The length should be fixed value except for the last chunk which might be lesser since we don't use padding
      * @param {number} hashOffset     The hash key length that will be used as an offset.
      * @param {number} hashLength     The hash length.
-     * @return {number} The total number of bytes for all hash signatures.
+     * @returns {number} The total number of bytes for all hash signatures.
      */
     public static getTotalHashDataLength(mode: EncryptionMode, length: number, chunkSize: number,
         hashOffset: number, hashLength: number): number {
@@ -159,7 +159,7 @@ export class Integrity {
      *
      * @param {number} count      Actual length of the real data int the base stream including header and hash signatures.
      * @param {number} hashOffset The hash key length
-     * @return {number} The number of bytes all hash signatures occupy
+     * @returns {number} The number of bytes all hash signatures occupy
      */
     public getHashDataLength(count: number, hashOffset: number): number {
         if (this.#chunkSize <= 0)
@@ -169,7 +169,7 @@ export class Integrity {
 
     /**
      * Get the chunk size.
-     * @return {number} The chunk size.
+     * @returns {number} The chunk size.
      */
     public getChunkSize(): number {
         return this.#chunkSize;
@@ -177,7 +177,7 @@ export class Integrity {
 
     /**
      * Get the hash key.
-     * @return {Uint8Array} The hash key.
+     * @returns {Uint8Array} The hash key.
      */
     public getKey(): Uint8Array {
         if (this.#key == null)
@@ -187,7 +187,7 @@ export class Integrity {
 
     /**
      * Get the integrity enabled option.
-     * @return {boolean} True if integrity is enabled.
+     * @returns {boolean} True if integrity is enabled.
      */
     public useIntegrity(): boolean {
         return this.#integrity;
@@ -197,7 +197,7 @@ export class Integrity {
      * Generate a hash signatures for each data chunk.
      * @param {Uint8Array} buffer The buffer containing the data chunks.
      * @param {boolean} includeHeaderData Include the header data in the first chunk.
-     * @return {Promise<Uint8Array[] | null>} The hash signatures.
+     * @returns {Promise<Uint8Array[] | null>} The hash signatures.
      * @throws IntegrityException Thrown if the data are corrupt or tampered with.
      */
     public async generateHashes(buffer: Uint8Array, includeHeaderData: Uint8Array | null): Promise<Uint8Array[] | null> {
@@ -214,7 +214,7 @@ export class Integrity {
     /**
      * Get the hashes for each data chunk.
      * @param {Uint8Array} buffer The buffer that contains the data chunks.
-     * @return {Uint8Array[] | null} The hash signatures.
+     * @returns {Uint8Array[] | null} The hash signatures.
      */
     public getHashes(buffer: Uint8Array): Uint8Array[] | null {
         if (!this.#integrity)

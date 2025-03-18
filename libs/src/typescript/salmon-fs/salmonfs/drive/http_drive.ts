@@ -45,7 +45,6 @@ export class HttpDrive extends AesDrive {
      * Helper method that opens and initializes a Drive
      * @param {IFile} dir The real directory that contains the drive.
      * @param {string} password Text password to use with this drive.
-     * @param {ISalmonSequencer} sequencer Optional nonce sequencer that will be used for importing files.
      * @returns {Promise<AesDrive>} The drive.
      */
     public static async open(dir: IFile, password: string): Promise<AesDrive> {
@@ -54,7 +53,7 @@ export class HttpDrive extends AesDrive {
     
     /**
      * Get a private dir for sharing files with external applications.
-     * @return {IFile} The private dir
+     * @returns {IFile} The private dir
      * @throws Exception
      */
     public getPrivateDir(): IFile {
@@ -79,7 +78,7 @@ export class HttpDrive extends AesDrive {
     /**
      * 
      * @param file The real file.
-     * @returns The encrypted file.
+     * @returns {AesFile} The encrypted file.
      */
     public override getVirtualFile(file: IFile): AesFile {
         return new AesFile(file, this);

@@ -31,8 +31,8 @@ export class SecurityException extends Error {
 
     /**
      * Construct an exception with a specific message and inner exception.
-     * @param msg The provided message.
-     * @param ex The inner exception.
+     * @param {string | null} msg The provided message.
+     * @param {Error | unknown | null} ex The inner exception.
      */
     public constructor(msg: string | null = null, ex: Error | unknown | null = null) {
         super(msg ?? "");

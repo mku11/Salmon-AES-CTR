@@ -41,14 +41,14 @@ export interface INativeProxy {
 
     /**
      * Transforms data using CTR mode which is symmetric so you should use it for both encryption and decryption.
-     * @param {Uint8Array} The AES-256 encryption key (32 bytes)
+     * @param {Uint8Array} key The AES-256 encryption key (32 bytes)
      * @param {number} counter The counter (16 bytes)
      * @param {Uint8Array} srcBuffer The source buffer
      * @param {number} srcOffset The source offset
      * @param {Uint8Array} destBuffer The destination buffer
      * @param {number} destOffset The destination offset
      * @param {number} count The number of bytes to transform
-     * @return {number} The number of bytes that were transformed.
+     * @returns {number} The number of bytes that were transformed.
      */
     transform(key: Uint8Array, counter: Uint8Array,
         srcBuffer: Uint8Array, srcOffset: number,

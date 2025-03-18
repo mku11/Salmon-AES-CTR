@@ -60,7 +60,7 @@ export class AesNativeTransformer extends AESCTRTransformer {
     }
     /**
      * 
-     * @param implType The native implementation type see ProviderType enum
+     * @param {number} implType The native implementation type see ProviderType enum
      */
     public setImplType(implType: number) {
         this.#implType = implType;
@@ -68,7 +68,7 @@ export class AesNativeTransformer extends AESCTRTransformer {
 
     /**
      * Construct a SalmonNativeTransformer for using the native aes c library
-     * @param implType The AES native implementation see ProviderType enum
+     * @param {number} implType The AES native implementation see ProviderType enum
      */
     public constructor(implType: number) {
         super();
@@ -96,7 +96,7 @@ export class AesNativeTransformer extends AESCTRTransformer {
      * @param {Uint8Array} destBuffer The destination byte array.
      * @param {number} destOffset The destination byte offset.
      * @param {number} count The number of bytes to transform.
-     * @return The number of bytes transformed.
+     * @returns {Promise<number>} The number of bytes transformed.
      */
     public override async encryptData(srcBuffer: Uint8Array, srcOffset: number,
         destBuffer: Uint8Array, destOffset: number, count: number): Promise<number> {
@@ -119,7 +119,7 @@ export class AesNativeTransformer extends AESCTRTransformer {
      * @param {Uint8Array} destBuffer The destination byte array.
      * @param {number} destOffset The destination byte offset.
      * @param {number} count The number of bytes to transform.
-     * @return {Promise<number>} The number of bytes transformed.
+     * @returns {Promise<number>} The number of bytes transformed.
      */
     public override async decryptData(srcBuffer: Uint8Array, srcOffset: number,
         destBuffer: Uint8Array, destOffset: number, count: number): Promise<number> {

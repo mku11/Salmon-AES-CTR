@@ -40,7 +40,7 @@ export class Base64 implements IBase64 {
     /**
      * Encode a byte array into a Base64 encoded string.
      * @param {Uint8Array} data Byte array to be encoded
-     * @return {string} String of encoded data.
+     * @returns {string} String of encoded data.
      */
     public encode(data: Uint8Array): string {
         return btoa(String.fromCodePoint(...data));

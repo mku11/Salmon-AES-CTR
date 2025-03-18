@@ -36,7 +36,7 @@ import { EncryptionFormat } from "./streams/encryption_format.js";
  * @param {Uint8Array} outData     The buffer with the encrypted data.
  * @param {Uint8Array} key         The AES key to be used.
  * @param {Uint8Array} nonce       The nonce to be used.
- * @param format    The format to use, see {@link EncryptionFormat}
+ * @param {EncryptionFormat} format    The format to use, see {@link EncryptionFormat}
  * @param {boolean} integrity   True to apply integrity.
  * @param {Uint8Array | null} hashKey     The key to be used for integrity application.
  * @param {number} chunkSize   The chunk size. Thrown if there is an error with the stream.

@@ -38,11 +38,11 @@ export class TextDecryptor {
      * @param {string} text  Text to be decrypted.
      * @param {string} key   The encryption key to be used.
      * @param {Uint8Array | null} nonce The nonce to be used, set only if header=false.
-     * @param format The format to use, see {@link EncryptionFormat}
+     * @param {EncryptionFormat} format The format to use, see {@link EncryptionFormat}
      * @param {boolean} integrity True if you want to calculate and store hash signatures for each chunkSize
      * @param {Uint8Array | null} hashKey Hash key to be used for all chunks.
      * @param {number} chunkSize The chunk size.
-     * @return {Promise<string>} The decrypted text.
+     * @returns {Promise<string>} The decrypted text.
      * @throws IOException
      * @throws SalmonSecurityException Thrown when error with security
      * @throws IntegrityException Thrown if the data are corrupt or tampered with.

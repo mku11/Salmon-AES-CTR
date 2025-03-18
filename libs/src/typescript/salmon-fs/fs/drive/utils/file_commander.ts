@@ -61,7 +61,7 @@ export class FileCommander {
      * @param {IFile[]} filesToImport     The files to import.
      * @param {IVirtualFile} importDir         The target directory.
      * @param {BatchImportOptions} [options] The options
-     * @return {Promise<IVirtualFile[]>} The imported files if completes successfully.
+     * @returns {Promise<IVirtualFile[]>} The imported files if completes successfully.
      * @throws Exception If there was an error during import
      */
     public async importFiles(filesToImport: IFile[], importDir: IVirtualFile, options?: BatchImportOptions): Promise<IVirtualFile[]> {
@@ -176,7 +176,7 @@ export class FileCommander {
      * @param {IVirtualFile[]} filesToExport     The files to export.
      * @param {IFile} exportDir         The export target directory
      * @param {BatchExportOptions} [options] The options
-     * @return {Promise<IFile[]>} The exported files
+     * @returns {Promise<IFile[]>} The exported files
      * @throws Exception
      */
     public async exportFiles(filesToExport: IVirtualFile[], exportDir: IFile, options?: BatchExportOptions): Promise<IFile[]> {
@@ -435,7 +435,7 @@ export class FileCommander {
     /**
      * Check if the file search is currently running.
      *
-     * @return {boolean} True if the file search is currently running.
+     * @returns {boolean} True if the file search is currently running.
      */
     public isFileSearcherRunning(): boolean {
         return this.fileSearcher.isRunning();
@@ -444,7 +444,7 @@ export class FileCommander {
     /**
      * Check if jobs are currently running.
      *
-     * @return {boolean} True if jobs are currently running.
+     * @returns {boolean} True if jobs are currently running.
      */
     public isRunning(): boolean {
         return this.fileSearcher.isRunning() || this.fileImporter.isRunning() || this.fileExporter.isRunning();
@@ -453,7 +453,7 @@ export class FileCommander {
     /**
      * Check if file search stopped.
      *
-     * @return {boolean} True if file search stopped.
+     * @returns {boolean} True if file search stopped.
      */
     public isFileSearcherStopped(): boolean {
         return this.fileSearcher.isStopped();
@@ -472,7 +472,7 @@ export class FileCommander {
      * @param {IVirtualFile} dir           The directory to start the search.
      * @param {string} terms         The terms to search for.
      * @param {SearchOptions} [options] The options
-     * @return {Promise<IVirtualFile[]>} An array with all the results found.
+     * @returns {Promise<IVirtualFile[]>} An array with all the results found.
      */
     public async search(dir: IVirtualFile, terms: string, options?: SearchOptions): Promise<IVirtualFile[]> {
         return await this.fileSearcher.search(dir, terms, options);
@@ -481,7 +481,7 @@ export class FileCommander {
     /**
      * Check if all jobs are stopped.
      *
-     * @return {boolean} True if jobs are stopped
+     * @returns {boolean} True if jobs are stopped
      */
     public areJobsStopped(): boolean {
         return this.stopJobs;
@@ -491,7 +491,7 @@ export class FileCommander {
      * Get number of files recursively for the files provided.
      *
      * @param {IVirtualFile[]} files The files and directories.
-     * @return {Promise<number>} Total number of files and files under subdirectories.
+     * @returns {Promise<number>} Total number of files and files under subdirectories.
      */
     public async getFiles(files: IVirtualFile[]): Promise<number> {
         let total = 0;
@@ -517,11 +517,11 @@ export class FileCommander {
 
     /**
      * Rename an encrypted file
-     * @param {IVirtualFile} ifile The file
+     * @param {IVirtualFile} file The file
      * @param {string} newFilename The new filename
      */
-    public async renameFile(ifile: IVirtualFile, newFilename: string): Promise<void> {
-        await ifile.rename(newFilename);
+    public async renameFile(file: IVirtualFile, newFilename: string): Promise<void> {
+        await file.rename(newFilename);
     }
 
     /**
@@ -607,11 +607,11 @@ export class IVirtualFileTaskProgress extends FileTaskProgress {
 
     /**
      * Construct a task progress.
-     * @param {IVirtualFile} file 
-     * @param {number} processedBytes 
-     * @param {number} totalBytes 
-     * @param {number} processedFiles 
-     * @param {number} totalFiles 
+     * @param {IVirtualFile} file The file
+     * @param {number} processedBytes The processed bytes
+     * @param {number} totalBytes  The total bytes
+     * @param {number} processedFiles  The processed files
+     * @param {number} totalFiles  The total files
      */
     public constructor(file: IVirtualFile, processedBytes: number, totalBytes: number,
         processedFiles: number, totalFiles: number) {

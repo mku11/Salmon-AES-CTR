@@ -35,8 +35,8 @@ export class FileExporterWorker {
     
     /**
      * Override to specify the target file.
-     * @param params The parameters
-     * @returns Promise<IVirtualFile | null> The virtual file
+     * @param {any} params The parameters
+     * @returns {Promise<IVirtualFile | null>} The virtual file
      */
     async getSourceFile(params: any): Promise<IVirtualFile | null> {
         return null;

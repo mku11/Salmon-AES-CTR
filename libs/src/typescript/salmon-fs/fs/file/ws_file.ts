@@ -35,8 +35,10 @@ export class WSFile implements IFile {
     static readonly #PATH: string = "path";
     static readonly #DEST_DIR: string = "destDir";
     static readonly #FILENAME: string = "filename";
+    /**
+     * The directory separator
+     */
     public static readonly separator: string = "/";
-    public static readonly SMALL_FILE_MAX_LENGTH: number = 1 * 1024 * 1024;
 
     #filePath: string;
     #servicePath: string;
@@ -46,19 +48,27 @@ export class WSFile implements IFile {
         return this.#servicePath;
     }
 
+    /**
+     * Get the web service credentials
+     * @returns {Credentials | null } The credentials
+     */
     public getCredentials(): Credentials | null {
         return this.#credentials;
     }
 
     #credentials: Credentials;
 
+    /**
+     * Set the web service credentials
+     * @param {Credentials} credentials The credentials
+     */
     public setCredentials(credentials: Credentials) {
         this.#credentials = credentials;
     }
 
     /**
      * Instantiate a real file represented by the filepath provided.
-     * @param path The filepath.
+     * @param {string} path The filepath.
      */
     public constructor(path: string, servicePath: string, credentials: Credentials) {
         this.#servicePath = servicePath;
@@ -68,11 +78,11 @@ export class WSFile implements IFile {
         this.#credentials = credentials;
     }
 
-    async getResponse(): Promise<any> {
+    async #getResponse(): Promise<any> {
 		if (this.response == null) {
 			let headers = new Headers();
-			this.setDefaultHeaders(headers);
-			this.setServiceAuth(headers);
+			this.#setDefaultHeaders(headers);
+			this.#setServiceAuth(headers);
 			let httpResponse: Response | null = null;
 			httpResponse = (await fetch(this.#servicePath + "/api/info" 
 				+ "?" + WSFile.#PATH + "=" + encodeURIComponent(this.getPath()),
@@ -85,14 +95,14 @@ export class WSFile implements IFile {
 
     /**
      * Create a directory under this directory.
-     * @param dirName The name of the new directory.
-     * @return The newly created directory.
+     * @param {string} dirName The name of the new directory.
+     * @returns {Promise<IFile>} The newly created directory.
      */
     public async createDirectory(dirName: string): Promise<IFile> {
-        let nDirPath: string = this.getChildPath(dirName);
+        let nDirPath: string = this.#getChildPath(dirName);
         let headers: Headers = new Headers();
-        this.setDefaultHeaders(headers);
-        this.setServiceAuth(headers);
+        this.#setDefaultHeaders(headers);
+        this.#setServiceAuth(headers);
         let params: URLSearchParams = new URLSearchParams();
         params.append(WSFile.#PATH, nDirPath);
         let httpResponse: Response | null = null;
@@ -105,15 +115,15 @@ export class WSFile implements IFile {
 
     /**
      * Create a file under this directory.
-     * @param filename The name of the new file.
-     * @return The newly created file.
+     * @param {string} filename The name of the new file.
+     * @returns {Promise<IFile>} The newly created file.
      * @throws IOException Thrown if there is an IO error.
      */
     public async createFile(filename: string): Promise<IFile> {
-        let nFilePath: string = this.getChildPath(filename);
+        let nFilePath: string = this.#getChildPath(filename);
         let headers: Headers = new Headers();
-        this.setDefaultHeaders(headers);
-        this.setServiceAuth(headers);
+        this.#setDefaultHeaders(headers);
+        this.#setServiceAuth(headers);
         let params: URLSearchParams = new URLSearchParams();
         params.append(WSFile.#PATH, nFilePath);
         let httpResponse: Response | null = null;
@@ -126,7 +136,7 @@ export class WSFile implements IFile {
 
     /**
      * Delete this file or directory.
-     * @return True if deletion is successful.
+     * @returns {Promise<boolean>} True if deletion is successful.
      */
     public async delete(): Promise<boolean> {
 		this.reset();
@@ -134,8 +144,8 @@ export class WSFile implements IFile {
             let files: IFile[]  = await this.listFiles();
             for (let file of files) {
                 let headers: Headers = new Headers();
-                this.setDefaultHeaders(headers);
-                this.setServiceAuth(headers);
+                this.#setDefaultHeaders(headers);
+                this.#setServiceAuth(headers);
                 let params: URLSearchParams = new URLSearchParams();
                 params.append(WSFile.#PATH, file.getPath());
                 let httpResponse: Response | null = null;
@@ -146,8 +156,8 @@ export class WSFile implements IFile {
         }
 
         let headers: Headers = new Headers();
-        this.setDefaultHeaders(headers);
-        this.setServiceAuth(headers);
+        this.#setDefaultHeaders(headers);
+        this.#setServiceAuth(headers);
         let params: URLSearchParams = new URLSearchParams();
         params.append(WSFile.#PATH, this.#filePath);
         let httpResponse: Response | null = null;
@@ -160,23 +170,23 @@ export class WSFile implements IFile {
 
     /**
      * True if file or directory exists.
-     * @return
+     * @returns {Promise<boolean>} True if exists
      */
     public async exists(): Promise<boolean> {
-        return (await this.getResponse()).present;
+        return (await this.#getResponse()).present;
     }
 
     /**
      * Get the path of this file. For javascript this is the same as the absolute filepath.
-     * @return
+     * @returns {string} The path
      */
     public getPath(): string {
         return this.#filePath;
     }
 
     /**
-     * Get the absolute path on the physical disk. For javascript this is the same as the filepath.
-     * @return The absolute path.
+     * Get the display path on the physical disk. For javascript this is the same as the filepath.
+     * @returns {string} The display path.
      */
     public getDisplayPath(): string {
         return this.#filePath;
@@ -184,7 +194,7 @@ export class WSFile implements IFile {
 
     /**
      * Get the name of this file or directory.
-     * @return The name of this file or directory.
+     * @returns {string} The name of this file or directory.
      */
     public getName(): string {
         if (this.#filePath == null)
@@ -203,7 +213,7 @@ export class WSFile implements IFile {
 
     /**
      * Get a stream for reading the file.
-     * @return The stream to read from.
+     * @returns {Promise<RandomAccessStream>} The stream to read from.
      * @throws FileNotFoundException
      */
     public async getInputStream(): Promise<RandomAccessStream> {
@@ -214,7 +224,7 @@ export class WSFile implements IFile {
 
     /**
      * Get a stream for writing to this file.
-     * @return The stream to write to.
+     * @returns {Promise<RandomAccessStream>} The stream to write to.
      * @throws FileNotFoundException
      */
     public async getOutputStream(): Promise<RandomAccessStream> {
@@ -225,7 +235,7 @@ export class WSFile implements IFile {
 
     /**
      * Get the parent directory of this file or directory.
-     * @return The parent directory.
+     * @returns {Promise<IFile>} The parent directory.
      */
     public async getParent(): Promise<IFile> {
 		let path: string = this.#filePath;
@@ -236,16 +246,16 @@ export class WSFile implements IFile {
     }
 
     /**
-     * True if this is a directory.
-     * @return
+     * Check if this is a directory.
+     * @returns {Promise<boolean>} True if directory
      */
     public async isDirectory(): Promise<boolean> {
-        return (await this.getResponse()).directory;
+        return (await this.#getResponse()).directory;
     }
 
     /**
-     * True if this is a file.
-     * @return
+     * Check if this is a file.
+     * @returns {Promise<boolean>} True if file
      */
     public async isFile(): Promise<boolean> {
         return !await this.isDirectory();
@@ -253,29 +263,29 @@ export class WSFile implements IFile {
 
     /**
      * Get the last modified date on disk.
-     * @return
+     * @returns {Promise<number>} The last date modified
      */
     public async getLastDateModified(): Promise<number> {
-        return (await this.getResponse()).lastModified;
+        return (await this.#getResponse()).lastModified;
     }
 
     /**
      * Get the size of the file on disk.
-     * @return
+     * @returns {Promise<number>} The length
      */
     public async getLength(): Promise<number> {
-        return (await this.getResponse()).length;
+        return (await this.#getResponse()).length;
     }
 
     /**
      * Get the count of files and subdirectories
-     * @return
+     * @returns {Promise<number>} The number of files and subdirectories
      */
     public async getChildrenCount(): Promise<number> {
         if(await this.isDirectory()) {
             let headers: Headers = new Headers();
-            this.setDefaultHeaders(headers);
-            this.setServiceAuth(headers);
+            this.#setDefaultHeaders(headers);
+            this.#setServiceAuth(headers);
             let httpResponse: Response | null = null;
             httpResponse = (await fetch(this.#servicePath + "/api/list"
                 + "?" + WSFile.#PATH + "=" + encodeURIComponent(this.getPath()), 
@@ -289,13 +299,13 @@ export class WSFile implements IFile {
 
     /**
      * List all files under this directory.
-     * @return The list of files.
+     * @returns {Promise<IFile[]>} The list of files and subdirectories
      */
     public async listFiles(): Promise<IFile[]> {
         if(await this.isDirectory()) {
             let headers: Headers = new Headers();
-            this.setDefaultHeaders(headers);
-            this.setServiceAuth(headers);
+            this.#setDefaultHeaders(headers);
+            this.#setServiceAuth(headers);
             let httpResponse: Response | null = null;
             httpResponse = (await fetch(this.#servicePath + "/api/list"
                 + "?" + WSFile.#PATH + "=" + encodeURIComponent(this.getPath()),
@@ -318,9 +328,9 @@ export class WSFile implements IFile {
 
     /**
      * Move this file or directory under a new directory.
-     * @param newDir The target directory.
+     * @param {IFile} newDir The target directory.
      * @param {MoveOptions} options The options
-     * @return The moved file. Use this file for subsequent operations instead of the original.
+     * @returns {Promise<IFile>} The moved file. Use this file for subsequent operations instead of the original.
      */
     public async move(newDir: IFile, options?: MoveOptions): Promise<IFile> {
         if(!options)
@@ -336,8 +346,8 @@ export class WSFile implements IFile {
             throw new IOException("Could not move directory use IFile moveRecursively() instead");
         } else {
             let headers: Headers = new Headers();
-            this.setDefaultHeaders(headers);
-            this.setServiceAuth(headers);
+            this.#setDefaultHeaders(headers);
+            this.#setServiceAuth(headers);
             let params: URLSearchParams = new URLSearchParams();
             params.append(WSFile.#PATH, this.#filePath);
             params.append(WSFile.#DEST_DIR, newDir.getPath());
@@ -354,9 +364,9 @@ export class WSFile implements IFile {
 
     /**
      * Move this file or directory under a new directory.
-     * @param newDir    The target directory.
+     * @param {IFile} newDir    The target directory.
      * @param {CopyOptions} options The options
-     * @return The copied file. Use this file for subsequent operations instead of the original.
+     * @returns {Promise<IFile>} The copied file. Use this file for subsequent operations instead of the original.
      * @throws IOException Thrown if there is an IO error.
      */
     public async copy(newDir: IFile, options?: CopyOptions): Promise<IFile> {
@@ -372,8 +382,8 @@ export class WSFile implements IFile {
             throw new IOException("Could not copy directory use IFile copyRecursively() instead");
         } else {
             let headers: Headers = new Headers();
-            this.setDefaultHeaders(headers);
-            this.setServiceAuth(headers);
+            this.#setDefaultHeaders(headers);
+            this.#setServiceAuth(headers);
             let params: URLSearchParams = new URLSearchParams();
             params.append(WSFile.#PATH, this.#filePath);
             params.append(WSFile.#DEST_DIR, newDir.getPath());
@@ -390,27 +400,27 @@ export class WSFile implements IFile {
 
     /**
      * Get the file or directory under this directory with the provided name.
-     * @param filename The name of the file or directory.
-     * @return
+     * @param {string} filename The name of the file or directory.
+     * @returns {Promise<IFile | null>} The child
      */
     public async getChild(filename: string): Promise<IFile | null> {
         if (await this.isFile())
             return null;
-        let nFilepath: string = this.getChildPath(filename);
+        let nFilepath: string = this.#getChildPath(filename);
         let child: WSFile = new WSFile(nFilepath, this.#servicePath, this.#credentials);
         return child;
     }
 
     /**
      * Rename the current file or directory.
-     * @param newFilename The new name for the file or directory.
-     * @return True if successfully renamed.
+     * @param {string} newFilename The new name for the file or directory.
+     * @returns {Promise<boolean>} True if successfully renamed.
      */
     public async renameTo(newFilename: string): Promise<boolean> {
 		this.reset();
         let headers: Headers = new Headers();
-        this.setDefaultHeaders(headers);
-        this.setServiceAuth(headers);
+        this.#setDefaultHeaders(headers);
+        this.#setServiceAuth(headers);
         let params: URLSearchParams = new URLSearchParams();
         params.append(WSFile.#PATH, this.#filePath);
         params.append(WSFile.#FILENAME, newFilename);
@@ -423,13 +433,13 @@ export class WSFile implements IFile {
 
     /**
      * Create this directory under the current filepath.
-     * @return True if created.
+     * @returns {Promise<boolean>} True if created.
      */
     public async mkdir(): Promise<boolean> {
 		this.reset();
         let headers: Headers = new Headers();
-        this.setDefaultHeaders(headers);
-        this.setServiceAuth(headers);
+        this.#setDefaultHeaders(headers);
+        this.#setServiceAuth(headers);
         let params: URLSearchParams = new URLSearchParams();
         params.append(WSFile.#PATH, this.#filePath);
         let httpResponse: Response | null = null;
@@ -446,7 +456,7 @@ export class WSFile implements IFile {
 		this.response = null;
 	}
 
-    private getChildPath(filename: string) {
+    #getChildPath(filename: string) {
         let nFilepath = this.#filePath;
         if(!nFilepath.endsWith(WSFile.separator))
             nFilepath += WSFile.separator;
@@ -456,12 +466,13 @@ export class WSFile implements IFile {
 	
     /**
      * Returns a string representation of this object
+     * @returns {string} The string
      */
     public toString(): string {
         return this.#filePath;
     }
 
-    private setServiceAuth(headers: Headers) {
+    #setServiceAuth(headers: Headers) {
         if(!this.#credentials)
             return;
         headers.append('Authorization', 'Basic ' + new Base64().encode(
@@ -475,7 +486,7 @@ export class WSFile implements IFile {
                     + await httpResponse.text());
     }
 
-    private setDefaultHeaders(headers: Headers) {
+    #setDefaultHeaders(headers: Headers) {
         headers.append("Cache", "no-store");
 		headers.append("Connection", "keep-alive");
     }
@@ -484,16 +495,29 @@ export class WSFile implements IFile {
 export class Credentials {
     readonly #serviceUser: string;
 
+    /**
+     * Get the user name
+     * @returns {string} The user name
+     */
     public getServiceUser(): string {
         return this.#serviceUser;
     }
 
+    /**
+     * Get the password
+     * @returns {string} The password
+     */
     public getServicePassword(): string {
         return this.#servicePassword;
     }
 
     readonly #servicePassword: string;
 
+    /**
+     * Construct a credentials object.
+     * @param {string} serviceUser The user name
+     * @param {string} servicePassword The password
+     */
     public constructor(serviceUser: string, servicePassword: string) {
         this.#serviceUser = serviceUser;
         this.#servicePassword = servicePassword;

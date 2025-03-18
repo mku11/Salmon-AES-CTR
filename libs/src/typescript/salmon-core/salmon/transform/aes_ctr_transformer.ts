@@ -45,7 +45,7 @@ export abstract class AESCTRTransformer implements ISalmonCTRTransformer {
      * @param {Uint8Array} destBuffer The destination byte array.
      * @param {number} destOffset The destination byte offset.
      * @param {number} count The number of bytes to transform.
-     * @return The number of bytes transformed.
+     * @returns {Promise<number>} The number of bytes transformed.
      */
     public abstract encryptData(srcBuffer: Uint8Array, srcOffset: number, destBuffer: Uint8Array, destOffset: number, count: number): Promise<number>;
 
@@ -56,7 +56,7 @@ export abstract class AESCTRTransformer implements ISalmonCTRTransformer {
      * @param {Uint8Array} destBuffer The destination byte array.
      * @param {number} destOffset The destination byte offset.
      * @param {number} count The number of bytes to transform.
-     * @return {Promise<number>} The number of bytes transformed.
+     * @returns {Promise<number>} The number of bytes transformed.
      */
     public abstract decryptData(srcBuffer: Uint8Array, srcOffset: number, destBuffer: Uint8Array, destOffset: number, count: number): Promise<number>;
     
@@ -154,7 +154,7 @@ export abstract class AESCTRTransformer implements ISalmonCTRTransformer {
 
     /**
      * Get the current counter.
-     * @return {Uint8Array} The current counter.
+     * @returns {Uint8Array} The current counter.
      */
     public getCounter(): Uint8Array {
         if (this.#counter == null)
@@ -164,7 +164,7 @@ export abstract class AESCTRTransformer implements ISalmonCTRTransformer {
 
     /**
      * Get the current block.
-     * @return {number} The current block.
+     * @returns {number} The current block.
      */
     public getBlock(): number {
         return this.#block;
@@ -172,7 +172,7 @@ export abstract class AESCTRTransformer implements ISalmonCTRTransformer {
 
     /**
      * Get the current encryption key.
-     * @return {Uint8Array | null} The encryption key.
+     * @returns {Uint8Array | null} The encryption key.
      */
     public getKey(): Uint8Array | null{
         return this.#key;
@@ -180,7 +180,7 @@ export abstract class AESCTRTransformer implements ISalmonCTRTransformer {
 
     /**
      * Get the expanded key if available.
-     * @return {Uint8Array | null} The expanded key.
+     * @returns {Uint8Array | null} The expanded key.
      */
     protected getExpandedKey(): Uint8Array | null {
         return this.#expandedKey;
@@ -188,7 +188,7 @@ export abstract class AESCTRTransformer implements ISalmonCTRTransformer {
 
     /**
      * Get the nonce (initial counter)
-     * @return {Uint8Array | null} The nonce.
+     * @returns {Uint8Array | null} The nonce.
      */
     public getNonce(): Uint8Array | null{
         return this.#nonce;

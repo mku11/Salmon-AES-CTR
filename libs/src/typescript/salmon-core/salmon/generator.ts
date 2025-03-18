@@ -95,7 +95,7 @@ export class Generator {
     /**
      * Returns a secure random byte array. To be used when generating keys, initial vectors, and nonces.
      * @param {number} size The size of the byte array.
-     * @return The random secure byte array.
+     * @returns {Uint8Array} The random secure byte array.
      */
     public static getSecureRandomBytes(size: number): Uint8Array {
         let bytes: Uint8Array = new Uint8Array(size);

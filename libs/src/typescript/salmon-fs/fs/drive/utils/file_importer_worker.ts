@@ -35,8 +35,8 @@ export class FileImporterWorker {
 
     /**
      * Override if you want to source from another source
-     * @param params The parameters object
-     * @returns 
+     * @param {any} params The parameters object
+     * @returns {Promise<IFile>} The source file
      */
     async getSourceFile(params: any): Promise<IFile> {
         return await FileUtils.getInstance(params.importFileClassType, params.fileToImportHandle);
@@ -44,13 +44,18 @@ export class FileImporterWorker {
 
     /**
      * Override to specify the target file.
-     * @param {any} params 
-     * @returns 
+     * @param {any} params The parameters
+     * @returns {Promise<IVirtualFile | null>} The target file
      */
     async getTargetFile(params: any): Promise<IVirtualFile | null> {
         return null;
     }
 
+    /**
+     * Called when message received
+     * @param {FileImporterWorker} worker The web worker
+     * @param {any} event The event
+     */
     async receive(worker: FileImporterWorker, event: any) {
         if (event.message = 'start')
             await worker.startImport(event);

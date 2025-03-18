@@ -37,7 +37,7 @@ export class FileSearcher {
 
     /**
      * True if a search is running.
-     * @return True if running
+     * @returns {boolean} True if running
      */
     public isRunning(): boolean {
         return this.#running;
@@ -45,7 +45,7 @@ export class FileSearcher {
 
     /**
      * True if last search was stopped by user.
-     * @return True if stopped.
+     * @returns {boolean} True if stopped.
      */
     public isStopped(): boolean {
         return this.#quit;
@@ -53,10 +53,10 @@ export class FileSearcher {
 
     /**
      * Search files in directory and its subdirectories recursively for matching terms.
-     * @param dir The directory to start the search.
-     * @param terms The terms to search for.
+     * @param {IVirtualFile} dir The directory to start the search.
+     * @param {string} terms The terms to search for.
      * @param {SearchOptions} [options] The options
-     * @return An array with all the results found.
+     * @returns {Promise<IVirtualFile[]>} An array with all the results found.
      */
     public async search(dir: IVirtualFile, terms: string, options?: SearchOptions): Promise<IVirtualFile[]> {
         if(!options)
@@ -75,10 +75,10 @@ export class FileSearcher {
 
     /**
      * Match the current terms in the filename.
-     * @param filename The filename to match.
-     * @param terms The terms to match.
-     * @param any True if you want to match any term otherwise match all terms.
-     * @return A count of all matches.
+     * @param {string} filename The filename to match.
+     * @param {string} terms The terms to match.
+     * @param {boolean} any True if you want to match any term otherwise match all terms.
+     * @returns {number} A count of all matches.
      */
     #getSearchResults(filename: string, terms: string[], any: boolean): number {
         let count: number = 0;
@@ -99,11 +99,6 @@ export class FileSearcher {
 
     /**
      * Search a directory for all filenames matching the terms supplied.
-     * @param dir The directory to start the search.
-     * @param terms The terms to search for.
-     * @param any True if you want to match any term otherwise match all terms.
-     * @param OnResultFound Callback interface to receive notifications when results found.
-     * @param searchResults The array to store the search results.
      */
     async #searchDir(dir: IVirtualFile, terms: string, any: boolean,
         onResultFound: ((file: IVirtualFile) => void) | null,

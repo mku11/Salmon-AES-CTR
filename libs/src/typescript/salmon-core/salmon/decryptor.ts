@@ -81,7 +81,7 @@ export class Decryptor {
      * @param {boolean} integrity Verify hash integrity in the data.
      * @param {Uint8Array | null} hashKey The hash key to be used for integrity.
      * @param {number} chunkSize The chunk size.
-     * @return {Promise<Uint8Array>} The byte array with the decrypted data.
+     * @returns {Promise<Uint8Array>} The byte array with the decrypted data.
      * @ Thrown if there is a problem with decoding the array.
      * @throws SalmonSecurityException Thrown if the key and nonce are not provided.
      * @throws IOException Thrown if there is an IO error.
@@ -124,14 +124,6 @@ export class Decryptor {
 
     /**
      * Decrypt stream using parallel threads.
-     * @param {Uint8Array} data The input data to be decrypted
-     * @param outData The output buffer with the decrypted data.
-     * @param key The AES key.
-     * @param hashKey The hash key.
-     * @param {Uint8Array | null} nonce The nonce to be used for decryption.
-     * @param {EncryptionFormat} format      The format to use, see {@link EncryptionFormat}
-     * @param chunkSize The chunk size.
-     * @param integrity True to verify integrity.
      */
     async #decryptDataParallel(data: Uint8Array, outData: Uint8Array,
         key: Uint8Array, hashKey: Uint8Array | null, nonce: Uint8Array | null, 
@@ -166,17 +158,6 @@ export class Decryptor {
 
     /**
      * Submit decryption parallel jobs.
-     * @param runningThreads The number of threads to submit.
-     * @param partSize The data length of each part that belongs to each thread.
-     * @param data The buffer of data you want to decrypt. This is a shared byte array across all threads where each
-     *             thread will read each own part.
-     * @param outData The buffer of data containing the decrypted data.
-     * @param key The AES key.
-     * @param hashKey The hash key for integrity validation.
-     * @param nonce The nonce for the data.
-     * @param {EncryptionFormat} format      The format to use, see {@link EncryptionFormat}
-     * @param integrity True to verify the data integrity.
-     * @param chunkSize The chunk size.
      */
     async #submitDecryptJobs(runningThreads: number, partSize: number, data: Uint8Array, outData: Uint8Array,
         key: Uint8Array, hashKey: Uint8Array | null, nonce: Uint8Array | null,

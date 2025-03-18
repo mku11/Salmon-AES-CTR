@@ -27,16 +27,24 @@ import { IFile } from "../../file/ifile.js";
 import { IVirtualFile } from "../../file/ivirtual_file.js";
 
 /**
+ * Progress Callback
+ *
+ * @callback OnFileImportProgressChanged
+ * @param {number} position The current position
+ * @param {number} length The total length
+ */
+
+/**
  * Import a file part into a file in the drive. Do not use this directly, use FileImporter instead.
  *
  * @param {IFile} fileToImport   The external file that will be imported
- * @param {IVirtualFile} salmonFile     The file that will be imported to
+ * @param {IVirtualFile} aesFile     The file that will be imported to
  * @param {number} start          The start position of the byte data that will be imported
  * @param {number} count          The length of the file content that will be imported
  * @param {number} totalBytesRead The total bytes read from the external file
- * @param {CallableFunction} onProgress 	 Progress observer
+ * @param {OnFileImportProgressChanged} onProgressChanged 	 Progress observer
  */
-export async function importFilePart(fileToImport: IFile, salmonFile: IVirtualFile,
+export async function importFilePart(fileToImport: IFile, aesFile: IVirtualFile,
     start: number, count: number, totalBytesRead: number[], onProgressChanged: ((position: number, length: number) => void) | null,
     bufferSize: number, stopped: boolean[]): Promise<void> {
     let totalPartBytesRead: number = 0;
@@ -45,7 +53,7 @@ export async function importFilePart(fileToImport: IFile, salmonFile: IVirtualFi
     let sourceStream: RandomAccessStream | null = null;
 
     try {
-        targetStream = await salmonFile.getOutputStream();
+        targetStream = await aesFile.getOutputStream();
         await targetStream.setPosition(start);
 
         sourceStream = await fileToImport.getInputStream();

@@ -41,7 +41,7 @@ export class Base64Utils {
 
     /**
      * Get the global default Base64 implementation.
-     * @return {IBase64} The Base64 implementation.
+     * @returns {IBase64} The Base64 implementation.
      */
     public static getBase64(): IBase64 {
         return Base64Utils.#base64;

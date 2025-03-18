@@ -114,7 +114,7 @@ export class AesFile implements IVirtualFile {
     /**
      * Get the file chunk size from the header.
      *
-     * @return {Promise<number>} The chunk size.
+     * @returns {Promise<number>} The chunk size.
      * @throws IOException Throws exceptions if the format is corrupt.
      */
     public async getFileChunkSize(): Promise<number> {
@@ -127,7 +127,7 @@ export class AesFile implements IVirtualFile {
     /**
      * Get the custom {@link Header} from this file.
      *
-     * @return {Promise<Header | null>} The header
+     * @returns {Promise<Header | null>} The header
      * @throws IOException Thrown if there is an IO error.
      */
     public async getHeader(): Promise<Header | null> {
@@ -155,7 +155,7 @@ export class AesFile implements IVirtualFile {
     /**
      * Retrieves a SalmonStream that will be used for decrypting the file contents.
      *
-     * @return {Promise<AesStream>} The stream
+     * @returns {Promise<AesStream>} The stream
      * @throws IOException Thrown if there is an IO error.
      * @throws SalmonSecurityException Thrown when error with security
      * @throws IntegrityException Thrown if the data are corrupt or tampered with.
@@ -201,7 +201,7 @@ export class AesFile implements IVirtualFile {
      *
      * @param {Uint8Array | null} nonce Nonce to be used for encryption. Note that each file should have
      *              a unique nonce see {@link AesDrive#getNextNonce()}.
-     * @return {Promise<AesStream>} The output stream.
+     * @returns {Promise<AesStream>} The output stream.
      * @throws Exception
      */
     public async getOutputStream(nonce: Uint8Array | null = null): Promise<AesStream> {
@@ -407,7 +407,7 @@ export class AesFile implements IVirtualFile {
     /**
      * Get the nonce that is used for encryption/decryption of this file.
      *
-     * @return {Uint8Array | null} The nonce
+     * @returns {Uint8Array | null} The nonce
      */
     public getRequestedNonce(): Uint8Array | null {
         return this.#requestedNonce;
@@ -424,7 +424,7 @@ export class AesFile implements IVirtualFile {
     /**
      * Get the count of files and subdirectories
      *
-     * @return {Promise<number>} The children count
+     * @returns {Promise<number>} The children count
      */
     public async getChildrenCount(): Promise<number> {
         return await this.#realFile.getChildrenCount();
@@ -436,19 +436,19 @@ export class AesFile implements IVirtualFile {
      */
     public async listFiles(): Promise<AesFile[]> {
         let files: IFile[] = await this.#realFile.listFiles();
-        let salmonFiles: AesFile[] = [];
+        let aesFiles: AesFile[] = [];
         for (let iRealFile of await files) {
             let file: AesFile = new AesFile(iRealFile, this.#drive);
-            salmonFiles.push(file);
+            aesFiles.push(file);
         }
-        return salmonFiles;
+        return aesFiles;
     }
 
     /**
      * Get a child with this filename.
      *
      * @param {string} filename The filename to search for
-     * @return {Promise<AesFile | null>} The file or directory.
+     * @returns {Promise<AesFile | null>} The file or directory.
      * @throws SalmonSecurityException Thrown when error with security
      * @throws IntegrityException Thrown if the data are corrupt or tampered with.
      * @throws IOException Thrown if there is an IO error.
@@ -681,15 +681,15 @@ export class AesFile implements IVirtualFile {
 
         let encryptedFilename: string = await this.getEncryptedFilename(realFilename, key, fileNameNonce);
         let file: IFile = await this.#realFile.createFile(encryptedFilename);
-        let salmonFile: AesFile = new AesFile(file, this.#drive);
-        salmonFile.setEncryptionKey(key);
-        salmonFile.#integrity = this.#integrity;
+        let aesFile: AesFile = new AesFile(file, this.#drive);
+        aesFile.setEncryptionKey(key);
+        aesFile.#integrity = this.#integrity;
         if (this.#drive != null && (fileNonce != null || fileNameNonce))
             throw new SecurityException("Nonce is already set by the drive");
         if (this.#drive != null && key)
             throw new SecurityException("Key is already set by the drive");
-        salmonFile.#requestedNonce = fileNonce;
-        return salmonFile;
+        aesFile.#requestedNonce = fileNonce;
+        return aesFile;
     }
 
     /**
@@ -795,7 +795,7 @@ export class AesFile implements IVirtualFile {
     /**
      * Get the drive.
      *
-     * @return {AesDrive | undefined} The drive
+     * @returns {AesDrive | undefined} The drive
      */
     public getDrive(): AesDrive | undefined {
         return this.#drive;
@@ -804,7 +804,7 @@ export class AesFile implements IVirtualFile {
     /**
      * Set the tag for this file.
      *
-     * @param {object} tag: Any object
+     * @param {object} tag Any object
      */
     public setTag(tag: object): void {
         this.#tag = tag;
@@ -813,7 +813,7 @@ export class AesFile implements IVirtualFile {
     /**
      * Get the file tag.
      *
-     * @return {object | null} The file tag.
+     * @returns {object | null} The file tag.
      */
     public getTag(): object | null {
         return this.#tag;
@@ -824,7 +824,7 @@ export class AesFile implements IVirtualFile {
      *
      * @param {AesFile} dir                Target directory.
      * @param {MoveOptions} [options]                The options
-     * @return {Promise<AesFile>} The encrypted file
+     * @returns {Promise<AesFile>} The encrypted file
      * @throws IOException Thrown if there is an IO error.
      */
     public async move(dir: AesFile, options?: MoveOptions): Promise<AesFile> {
@@ -837,7 +837,7 @@ export class AesFile implements IVirtualFile {
      *
      * @param {AesFile} dir                Target directory.
      * @param {CopyOptions} [options] The options.
-     * @return {Promise<AesFile>} The encrypted file
+     * @returns {Promise<AesFile>} The encrypted file
      * @throws IOException Thrown if there is an IO error.
      */
     public async copy(dir: AesFile, options?: CopyOptions): Promise<AesFile> {

@@ -33,7 +33,6 @@ import { IOException } from '../../../salmon-core/streams/io_exception.js';
  */
 export class File implements IFile {
     public static readonly separator: string = "/";
-    public static readonly SMALL_FILE_MAX_LENGTH: number = 1 * 1024 * 1024;
 
     #fileHandle: any;
     #parent: File | null;
@@ -52,7 +51,7 @@ export class File implements IFile {
     /**
      * Create a directory under this directory.
      * @param {string} dirName The name of the new directory.
-     * @return The newly created directory.
+     * @returns {Promise<IFile>} The newly created directory.
      */
     public async createDirectory(dirName: string): Promise<IFile> {
         try {
@@ -71,7 +70,7 @@ export class File implements IFile {
     /**
      * Create a file under this directory.
      * @param {string} filename The name of the new file.
-     * @return The newly created file.
+     * @returns {Promise<IFile>} The newly created file.
      * @throws IOException Thrown if there is an IO error.
      */
     public async createFile(filename: string): Promise<IFile> {
@@ -83,7 +82,7 @@ export class File implements IFile {
 
     /**
      * Delete this file or directory.
-     * @return True if deletion is successful.
+     * @returns {Promise<boolean>} True if deletion is successful.
      */
     public async delete(): Promise<boolean> {
 		if (this.#fileHandle  && this.#fileHandle.remove != undefined)
@@ -95,7 +94,7 @@ export class File implements IFile {
 
     /**
      * True if file or directory exists.
-     * @return
+     * @returns {Promise<boolean>} True if exists
      */
     public async exists(): Promise<boolean> {
         // if this is the root handle we assume it always exists
@@ -121,7 +120,7 @@ export class File implements IFile {
 
     /**
      * Get the path of this file. For local filesystem see FileSystemHandle
-     * @return {FileSystemHandle} 
+     * @returns {FileSystemHandle} 
      */
     public getPath(): FileSystemHandle {
         return this.#fileHandle;
@@ -129,7 +128,7 @@ export class File implements IFile {
 
     /**
      * Get the absolute path on the physical disk. For local file system this is the FileHandle.
-     * @return {any} The absolute path.
+     * @returns {any} The absolute path.
      */
     public getDisplayPath(): any {
         let filename = this.#fileHandle  ? this.#fileHandle.name : this.#name;
@@ -140,7 +139,7 @@ export class File implements IFile {
 
     /**
      * Get the name of this file or directory.
-     * @return {string} The name of this file or directory.
+     * @returns {string} The name of this file or directory.
      */
     public getName(): string {
         if (this.#fileHandle == null && this.#name)
@@ -152,7 +151,7 @@ export class File implements IFile {
 
     /**
      * Get a stream for reading the file.
-     * @return {Promise<RandomAccessStream>} The stream to read from.
+     * @returns {Promise<RandomAccessStream>} The stream to read from.
      * @throws FileNotFoundException
      */
     public async getInputStream(): Promise<RandomAccessStream> {
@@ -162,7 +161,7 @@ export class File implements IFile {
 
     /**
      * Get a stream for writing to this file.
-     * @return {Promise<RandomAccessStream>} The stream to write to.
+     * @returns {Promise<RandomAccessStream>} The stream to write to.
      * @throws FileNotFoundException
      */
     public async getOutputStream(): Promise<RandomAccessStream> {
@@ -179,7 +178,7 @@ export class File implements IFile {
 
     /**
      * Get the parent directory of this file or directory.
-     * @return {Promise<IFile | null>} The parent directory.
+     * @returns {Promise<IFile | null>} The parent directory.
      */
     public async getParent(): Promise<IFile | null> {
         return this.#parent as IFile;
@@ -187,7 +186,7 @@ export class File implements IFile {
 
     /**
      * True if this is a directory.
-     * @return {Promise<boolean>} True if directory.
+     * @returns {Promise<boolean>} True if directory.
      */
     public async isDirectory(): Promise<boolean> {
         return this.#fileHandle  && this.#fileHandle.kind == 'directory';
@@ -195,7 +194,7 @@ export class File implements IFile {
 
     /**
      * True if this is a file.
-     * @return {Promise<boolean>} True if file.
+     * @returns {Promise<boolean>} True if file.
      */
     public async isFile(): Promise<boolean> {
         return this.#fileHandle  && !await this.isDirectory();
@@ -203,7 +202,7 @@ export class File implements IFile {
 
     /**
      * Get the last modified date on disk.
-     * @return {Promise<number>} The last date modified.
+     * @returns {Promise<number>} The last date modified.
      */
     public async getLastDateModified(): Promise<number> {
         if (await this.isDirectory())
@@ -214,7 +213,7 @@ export class File implements IFile {
 
     /**
      * Get the size of the file on disk.
-     * @return {Promise<number>} The file length
+     * @returns {Promise<number>} The file length
      */
     public async getLength(): Promise<number> {
         if (await this.isDirectory())
@@ -225,14 +224,14 @@ export class File implements IFile {
 
     /**
      * Get the count of files and subdirectories
-     * @return {Promise<number>} The number of children
+     * @returns {Promise<number>} The number of children
      */
     public async getChildrenCount(): Promise<number> {
         return (await this.listFiles()).length;
     }
     /**
      * List all files under this directory.
-     * @return The list of files.
+     * @returns {Promise<IFile[]>} The list of files.
      */
     public async listFiles(): Promise<IFile[]> {
         let files: IFile[] = [];
@@ -252,7 +251,7 @@ export class File implements IFile {
      * Move this file or directory under a new directory.
      * @param {IFile} newDir The target directory.
      * @param {MoveOptions} [options] The options
-     * @return The moved file. Use this file for subsequent operations instead of the original.
+     * @returns {Promise<IFile>} The moved file. Use this file for subsequent operations instead of the original.
      * @throws IOException Thrown if there is an IO error.
      */
     public async move(newDir: IFile, options?: MoveOptions): Promise<IFile> {
@@ -291,7 +290,7 @@ export class File implements IFile {
      * Move this file or directory under a new directory.
      * @param {IFile} newDir    The target directory.
      * @param {CopyOptions} [options] The options
-     * @return The copied file. Use this file for subsequent operations instead of the original.
+     * @returns {Promise<IFile | null>} The copied file. Use this file for subsequent operations instead of the original.
      * @throws IOException Thrown if there is an IO error.
      */
     public async copy(newDir: IFile, options?: CopyOptions): Promise<IFile | null> {
@@ -320,7 +319,7 @@ export class File implements IFile {
     /**
      * Get the file or directory under this directory with the provided name.
      * @param {string} filename The name of the file or directory.
-     * @return
+     * @returns {Promise<IFile | null>} The file or directory
      */
     public async getChild(filename: string): Promise<IFile | null> {
         if (await this.isFile())
@@ -343,7 +342,7 @@ export class File implements IFile {
     /**
      * Rename the current file or directory.
      * @param {string} newFilename The new name for the file or directory.
-     * @return True if successfully renamed.
+     * @returns {boolean} True if successfully renamed.
      */
     public async renameTo(newFilename: string): Promise<boolean> {
         if (typeof (this.#fileHandle.move) !== 'undefined')
@@ -363,7 +362,7 @@ export class File implements IFile {
 
     /**
      * Create this directory under the current filepath.
-     * @return True if created.
+     * @returns {boolean} True if created.
      */
     public async mkdir(): Promise<boolean> {
         if (this.#parent == null)
@@ -382,6 +381,7 @@ export class File implements IFile {
 
     /**
      * Returns a string representation of this object
+     * @returns {string} The string
      */
     public toString(): string {
         return this.getName();

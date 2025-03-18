@@ -40,38 +40,44 @@ export interface IVirtualFile {
 
     /**
      * List the files under this directory
+     * @returns {Promise<IVirtualFile[]>} The list of files
      */
     listFiles(): Promise<IVirtualFile[]>;
 
     /**
      * Get a file or directory under this directory
-     * @param filename The filename
-     * @returns The virtual file
+     * @param {string} filename The filename
+     * @returns {Promise<IVirtualFile | null>} The virtual file
      */
     getChild(filename: string): Promise<IVirtualFile | null>;
 
     /**
      * Check if this is a file
+     * @returns {Promise<boolean>} True if file.
      */
     isFile(): Promise<boolean>;
 
     /**
      * Check if this is a directory
+     * @returns {Promise<boolean>} True if directory
      */
     isDirectory(): Promise<boolean>;
 
     /**
      * Get the path.
+     * @returns {Promise<string>} The path
      */
     getPath(): Promise<string>;
     
     /**
      * Get the real path.
+     * @returns {string} The path
      */
     getRealPath(): string;
 
     /**
      * Get the real file
+     * @returns {IFile} The file
      */
     getRealFile(): IFile;
 
@@ -99,36 +105,39 @@ export interface IVirtualFile {
 
     /**
      * Get the last date modified
+     * @returns {Promise<number>} The last date modified
      */
     getLastDateModified(): Promise<number>;
 
     /**
      * Get the file length
+     * @returns {Promise<number>} The file length
      */
     getLength(): Promise<number>;
 
     /**
      * Check if it exists
+     * @returns {Promise<boolean>} True if exists
      */
     exists(): Promise<boolean>;
 
     /**
      * Create a new directory under this directory
-     * @param dirName The name of the directory
+     * @param {string} dirName The name of the directory
      * @returns {Promise<IVirtualFile>} The new directory
      */
     createDirectory(dirName: string): Promise<IVirtualFile>;
 
     /**
      * Create a new file under this directory
-     * @param realFilename The name of the file
+     * @param {string} realFilename The name of the file
      * @returns {Promise<IVirtualFile>} The new file
      */
     createFile(realFilename: string): Promise<IVirtualFile>;
 
     /**
      * Rename this file or directory
-     * @param newFilename The new file name
+     * @param {string} newFilename The new file name
      */
     rename(newFilename: string): Promise<void>;
 
@@ -136,13 +145,15 @@ export interface IVirtualFile {
      * Move this file.
      * @param {IVirtualFile} dir The destination directory
      * @param {MoveOptions} [options]
+     * @returns {Promise<IVirtualFile>} The moved file
      */
     move(dir: IVirtualFile, options?: MoveOptions): Promise<IVirtualFile>;
 
     /**
      * Copy this file
-     * @param dir The destination directory
+     * @param {IVirtualFile} dir The destination directory
      * @param {CopyOptions} [options] The options
+     * @returns {Promise<IVirtualFile>} The copied file
      */
     copy(dir: IVirtualFile, options?: CopyOptions): Promise<IVirtualFile>;
 

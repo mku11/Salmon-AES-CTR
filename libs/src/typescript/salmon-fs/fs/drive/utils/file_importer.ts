@@ -80,7 +80,7 @@ export abstract class FileImporter {
      * @param {Uint8Array} bufferSize Buffer size to be used when encrypting files.
      *                   If using integrity this value has to be a multiple of the Chunk size.
      *                   If not using integrity it should be a multiple of the AES block size for better performance
-     * @param threads The threads
+     * @param {number} threads The threads
      */
     public initialize(bufferSize: number = 0, threads: number = 1) {
         this.#bufferSize = bufferSize;
@@ -104,19 +104,11 @@ export abstract class FileImporter {
     /**
      * True if importer is currently running a job.
      *
-     * @return True if running
+     * @returns {boolean} True if running
      */
     public isRunning(): boolean {
         return !this.#stopped[0];
     }
-
-    /**
-     * Progress listener
-     *
-     * @callback onProgress
-     * @param {number} position The current position
-     * @param {number} length The total length
-     */
 
     /**
      * Imports a real file into the drive.
@@ -291,7 +283,7 @@ export abstract class FileImporter {
 
     /**
      * Set the path to the worker script to use
-     * @param path The path
+     * @param {string} path The path
      */
     public setWorkerPath(path: string) {
         this.#workerPath = path;
@@ -299,7 +291,7 @@ export abstract class FileImporter {
 
     /**
      * Get the current worker script path
-     * @returns The path
+     * @returns {string} The path
      */
     public getWorkerPath(): string {
         return this.#workerPath;

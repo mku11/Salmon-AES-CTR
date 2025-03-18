@@ -37,24 +37,24 @@ export class HttpFileStream extends RandomAccessStream {
      */
     readonly file: IFile;
 
-    position: number = 0;
-    end_position: number = 0;
+    #position: number = 0;
+    #end_position: number = 0;
 
 	// fetch will response will download the whole contents internally
 	// so we use our own "chunked" implementation with our own buffer
-    buffer: Uint8Array | null = null;
-    bufferPosition: number = 0;
+    #buffer: Uint8Array | null = null;
+    #bufferPosition: number = 0;
 
-    stream: ReadableStream<Uint8Array> | null = null;
-    reader: ReadableStreamDefaultReader<Uint8Array> | null = null;
-    closed: boolean = false;
+    #stream: ReadableStream<Uint8Array> | null = null;
+    #reader: ReadableStreamDefaultReader<Uint8Array> | null = null;
+    #closed: boolean = false;
 
     /**
      * Construct a file stream from an HttpFile.
      * This will create a wrapper stream that will route read() and write() to the FileChannel
      *
-     * @param file The HttpFile that will be used to get the read/write stream
-     * @param mode The mode "r" for read "rw" for write
+     * @param {IFile} file The HttpFile that will be used to get the read/write stream
+     * @param {string} mode The mode "r" for read "rw" for write
      */
     public constructor(file: IFile, mode: string) {
         super();
@@ -64,43 +64,43 @@ export class HttpFileStream extends RandomAccessStream {
         }
     }
 
-    async getStream(): Promise<ReadableStream<Uint8Array>> {
-        if (this.closed)
+    async #getStream(): Promise<ReadableStream<Uint8Array>> {
+        if (this.#closed)
             throw new IOException("Stream is closed");
-        if (this.stream == null) {
+        if (this.#stream == null) {
             let headers = new Headers();
-			this.setDefaultHeaders(headers);
+			this.#setDefaultHeaders(headers);
 			let end = await this.getLength() - 1;
             let requestLength = HttpFileStream.MAX_LEN_PER_REQUEST;
-            if (end == -1 || end >= this.position + requestLength) {
-                end = this.position + requestLength - 1;
+            if (end == -1 || end >= this.#position + requestLength) {
+                end = this.#position + requestLength - 1;
             }
             // fetch will read the whole content without streaming
             // so we want to specify the end if it's a range request
             // or it's a full request but we don't know the end
-            if(this.position > 0 || end == HttpFileStream.MAX_LEN_PER_REQUEST - 1)
-			    headers.append("Range", "bytes=" + this.position + "-" + end);
+            if(this.#position > 0 || end == HttpFileStream.MAX_LEN_PER_REQUEST - 1)
+			    headers.append("Range", "bytes=" + this.#position + "-" + end);
             let httpResponse = await fetch(this.file.getPath(), { cache: "no-store", keepalive: true, headers: headers });
 
             await this.#checkStatus(httpResponse, new Set([200, 206]));
-            this.stream = httpResponse.body;
-            this.end_position = end;
+            this.#stream = httpResponse.body;
+            this.#end_position = end;
         }
-        if (this.stream == null)
+        if (this.#stream == null)
             throw new IOException("Could not retrieve stream");
-        return this.stream;
+        return this.#stream;
     }
 
-    async getReader(): Promise<ReadableStreamDefaultReader> {
-        if (this.reader == null) {
-            this.reader = (await this.getStream()).getReader();
+    async #getReader(): Promise<ReadableStreamDefaultReader> {
+        if (this.#reader == null) {
+            this.#reader = (await this.#getStream()).getReader();
         }
-        return this.reader;
+        return this.#reader;
     }
 
     /**
      * True if stream can read from file.
-     * @return
+     * @returns {Promise<boolean>} True if it can read.
      */
     public override async canRead(): Promise<boolean> {
         return true;
@@ -108,7 +108,7 @@ export class HttpFileStream extends RandomAccessStream {
 
     /**
      * True if stream can write to file.
-     * @return
+     * @returns {Promise<boolean>} True if it can write
      */
     public override async canWrite(): Promise<boolean> {
         return false;
@@ -116,7 +116,7 @@ export class HttpFileStream extends RandomAccessStream {
 
     /**
      * True if stream can seek.
-     * @return
+     * @returns {Promise<boolean>} True if it can seek
      */
     public override async canSeek(): Promise<boolean> {
         return true;
@@ -124,7 +124,7 @@ export class HttpFileStream extends RandomAccessStream {
 
     /**
      * Get the length of the stream. This is the same as the backed file.
-     * @return
+     * @returns {Promise<number>} The length
      */
     public override async getLength(): Promise<number> {
         return await this.file.getLength();
@@ -132,27 +132,27 @@ export class HttpFileStream extends RandomAccessStream {
 
     /**
      * Get the current position of the stream.
-     * @return
+     * @returns {Promise<number>} The position
      * @throws IOException Thrown if there is an IO error.
      */
     public override async getPosition(): Promise<number> {
-        return this.position;
+        return this.#position;
     }
 
     /**
      * Set the current position of the stream.
-     * @param value The new position.
+     * @param {number} value The new position.
      * @throws IOException Thrown if there is an IO error.
      */
     public override async setPosition(value: number): Promise<void> {
-		if(this.position != value)
+		if(this.#position != value)
 			await this.reset();
-        this.position = value;
+        this.#position = value;
     }
 
     /**
      * Set the length of the stream. This is applicable for write streams only.
-     * @param value The new length.
+     * @param {number} value The new length.
      * @throws IOException Thrown if there is an IO error.
      */
     public override async setLength(value: number): Promise<void> {
@@ -164,23 +164,23 @@ export class HttpFileStream extends RandomAccessStream {
      * @param {Uint8Array} buffer The buffer to write the data.
      * @param {number} offset The offset of the buffer to start writing the data.
      * @param {number} count The maximum number of bytes to read from.
-     * @return
+     * @returns {Promise<number>} The number of bytes read
      * @throws IOException Thrown if there is an IO error.
      */
     public override async read(buffer: Uint8Array, offset: number, count: number): Promise<number> {
         let bytesRead: number = 0;
-        if (this.buffer  && this.bufferPosition < this.buffer.length) {
-            for (; this.bufferPosition < this.buffer.length;) {
-                buffer[offset + bytesRead++] = this.buffer[this.bufferPosition++];
+        if (this.#buffer  && this.#bufferPosition < this.#buffer.length) {
+            for (; this.#bufferPosition < this.#buffer.length;) {
+                buffer[offset + bytesRead++] = this.#buffer[this.#bufferPosition++];
                 if (bytesRead == count)
                     break;
             }
-            this.position += bytesRead;
+            this.#position += bytesRead;
         }
-        if(bytesRead < count && this.position == this.end_position + 1 && this.position < await this.file.getLength()) {
+        if(bytesRead < count && this.#position == this.#end_position + 1 && this.#position < await this.file.getLength()) {
             await this.reset();
         }
-        let reader: ReadableStreamDefaultReader = await this.getReader();
+        let reader: ReadableStreamDefaultReader = await this.#getReader();
         let res: ReadableStreamReadResult<any> | null = null;
         while (bytesRead < count) {
             res = await reader.read();
@@ -190,10 +190,10 @@ export class HttpFileStream extends RandomAccessStream {
                 for (; i < len; i++) {
                     buffer[offset + bytesRead++] = res.value[i];
                 }
-                this.position += len;
+                this.#position += len;
                 if (count == bytesRead) {
-                    this.buffer = res.value;
-                    this.bufferPosition = i;
+                    this.#buffer = res.value;
+                    this.#bufferPosition = i;
                 }
             } else {
                 break;
@@ -216,12 +216,12 @@ export class HttpFileStream extends RandomAccessStream {
     /**
      * Seek to the offset provided.
      * @param {number} offset The position to seek to.
-     * @param origin The type of origin {@link RandomAccessStream.SeekOrigin}
-     * @return The new position after seeking.
+     * @param {SeekOrigin} origin The type of origin {@link SeekOrigin}
+     * @returns {Promise<number>} The new position after seeking.
      * @throws IOException Thrown if there is an IO error.
      */
     public override async seek(offset: number, origin: SeekOrigin): Promise<number> {
-        let pos: number = this.position;
+        let pos: number = this.#position;
 
         if (origin == SeekOrigin.Begin)
             pos = offset;
@@ -231,7 +231,7 @@ export class HttpFileStream extends RandomAccessStream {
             pos = await this.file.getLength() - offset;
 
         await this.setPosition(pos);
-        return this.position;
+        return this.#position;
     }
 
     /**
@@ -247,23 +247,23 @@ export class HttpFileStream extends RandomAccessStream {
      */
     public override async close(): Promise<void> {
         await this.reset();
-        this.closed = true;
+        this.#closed = true;
     }
 
 	/**
      * Reset the stream.
      */
     public async reset(): Promise<void> {
-        if (this.reader) {
-            if(this.stream?.locked)
-                this.reader.releaseLock();
+        if (this.#reader) {
+            if(this.#stream?.locked)
+                this.#reader.releaseLock();
         }
-        this.reader = null;
-        if(this.stream)
-            await this.stream.cancel();
-        this.stream = null;
-        this.buffer = null;
-        this.bufferPosition = 0;
+        this.#reader = null;
+        if(this.#stream)
+            await this.#stream.cancel();
+        this.#stream = null;
+        this.#buffer = null;
+        this.#bufferPosition = 0;
     }
 	
     async #checkStatus(httpResponse: Response, status: Set<number>) {
@@ -273,7 +273,7 @@ export class HttpFileStream extends RandomAccessStream {
             }
     }
 
-    private setDefaultHeaders(headers: Headers) {
+    #setDefaultHeaders(headers: Headers) {
         headers.append("Cache", "no-store");
 		headers.append("Connection", "keep-alive");
     }

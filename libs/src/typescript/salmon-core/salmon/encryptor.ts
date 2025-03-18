@@ -83,7 +83,7 @@ export class Encryptor {
      * @param {boolean} integrity       True if you want to calculate and store hash signatures for each chunkSize.
      * @param {Uint8Array} hashKey         Hash key to be used for all chunks.
      * @param {number} chunkSize       The chunk size.
-     * @return {Promise<Uint8Array>} The byte array with the encrypted data.
+     * @returns {Promise<Uint8Array>} The byte array with the encrypted data.
      * @throws SalmonSecurityException Thrown when error with security
      * @throws IOException Thrown if there is an IO error.
      * @throws IntegrityException Thrown if the data are corrupt or tampered with.
@@ -163,17 +163,17 @@ export class Encryptor {
     /**
      * Submit encryption parallel jobs.
      *
-     * @param runningThreads The number of threads to submit.
-     * @param partSize       The data length of each part that belongs to each thread.
-     * @param data           The buffer of data you want to decrypt. This is a shared byte array across all threads where each
+     * @param {number} runningThreads The number of threads to submit.
+     * @param {number} partSize       The data length of each part that belongs to each thread.
+     * @param {Uint8Array} data           The buffer of data you want to decrypt. This is a shared byte array across all threads where each
      *                       thread will read each own part.
-     * @param outData        The buffer of data containing the encrypted data.
-     * @param key            The AES key.
-     * @param hashKey        The hash key for integrity.
-     * @param nonce          The nonce for the data.
+     * @param {Uint8Array} outData        The buffer of data containing the encrypted data.
+     * @param {Uint8Array} key            The AES key.
+     * @param {Uint8Array} hashKey        The hash key for integrity.
+     * @param {Uint8Array} nonce          The nonce for the data.
      * @param {EncryptionFormat} format      The format to use, see {@link EncryptionFormat}
-     * @param integrity      True to apply the data integrity.
-     * @param chunkSize      The chunk size.
+     * @param {boolean} integrity      True to apply the data integrity.
+     * @param {number} chunkSize      The chunk size.
      */
     async #submitEncryptJobs(runningThreads: number, partSize: number, data: Uint8Array, outData: Uint8Array,
         key: Uint8Array, hashKey: Uint8Array | null, nonce: Uint8Array,

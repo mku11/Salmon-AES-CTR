@@ -64,7 +64,7 @@ export class AesFileImporter extends FileImporter {
      * Get the minimum part of a file that can run under a thread.
      * @param {IFile} sourceFile The source file.
      * @param {IVirtualFile} targetFile The target file
-     * @returns 
+     * @returns {Promise<number>} The minimum file part.
      */
     async getMinimumPartSize(sourceFile: IFile, targetFile: IVirtualFile): Promise<number> {
         // we force the whole content to use 1 thread if:
@@ -82,9 +82,9 @@ export class AesFileImporter extends FileImporter {
     /**
      * Tranform an error that can be thrown from a web worker.
      * @param {any} err The original error
-     * @returns 
+     * @returns {any} The transformed error
      */
-    getError(err: any) {
+    getError(err: any): any {
         // deserialize the error
         if (err.error != undefined ) {
             if(err.type == 'IntegrityException')

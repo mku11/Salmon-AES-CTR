@@ -31,7 +31,8 @@ export class RangeExceededException extends Error {
 
     /**
      * Construct an exception with a specific message.
-     * @param msg The message.
+     * @param {string | null} msg The provided message.
+     * @param {Error | unknown | null} ex The inner exception.
      */
     public constructor(msg: string | null, ex: Error | unknown | null = null) {
         super(msg ?? "");

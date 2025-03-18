@@ -37,7 +37,7 @@ export class Nonce {
      *
      * @param {Uint8Array} startNonce The starting nonce
      * @param {Uint8Array} endNonce The end nonce
-     * @return {Uint8Array} The nonce after incrementing
+     * @returns {Uint8Array} The nonce after incrementing
      * @throws SalmonRangeExceededException Thrown if nonce has exceeded range
      */
     public static increaseNonce(startNonce: Uint8Array, endNonce: Uint8Array): Uint8Array {
@@ -57,7 +57,7 @@ export class Nonce {
      *
      * @param {Uint8Array} startNonce The starting nonce.
      * @param {Uint8Array} endNonce The ending nonce in the sequence.
-     * @return {Uint8Array} The byte array with the middle nonce.
+     * @returns {Uint8Array} The byte array with the middle nonce.
      * @throws SalmonSecurityException Thrown when error with security
      */
     public static splitNonceRange(startNonce: Uint8Array, endNonce: Uint8Array): Uint8Array {

@@ -28,14 +28,14 @@ import { SeekOrigin } from "../../../salmon-core/streams/random_access_stream.js
 /**
  * Fills a cache buffer with the decrypted data from a part of an encrypted file
  *
- * @param cacheBuffer  The cache buffer that will store the decrypted contents
+ * @param {CacheBuffer} cacheBuffer  The cache buffer that will store the decrypted contents
  * @param {Uint8Array} bufferSize   The length of the data requested
- * @param salmonStream The stream that will be used to read from
+ * @param {AesStream} aesStream The stream that will be used to read from
  */
 export async function fillBufferPart(cacheBuffer: CacheBuffer, start: number, offset: number, bufferSize: number,
-    salmonStream: AesStream): Promise<number> {
-    await salmonStream.seek(start, SeekOrigin.Begin);
-    let totalBytesRead = await salmonStream.read(cacheBuffer.buffer, offset, bufferSize);
+    aesStream: AesStream): Promise<number> {
+    await aesStream.seek(start, SeekOrigin.Begin);
+    let totalBytesRead = await aesStream.read(cacheBuffer.buffer, offset, bufferSize);
     return totalBytesRead;
 }
 

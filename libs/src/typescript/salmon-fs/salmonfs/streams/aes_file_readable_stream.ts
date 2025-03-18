@@ -31,7 +31,7 @@ import { AuthException } from "../auth/auth_exception.js";
 
 
 /**
- * Implementation of a javascript ReadableStream for seeking and reading a SalmonFile.
+ * Implementation of a javascript ReadableStream for seeking and reading a aesFile.
  * This class provides a seekable source with parallel substreams and cached buffers
  * for performance.
  * Make sure you use setWorkerPath() with the correct worker script.
@@ -49,15 +49,15 @@ export class AesFileReadableStream {
     /**
      * Instantiate a seekable stream from an encrypted file source
      *
-     * @param salmonFile   The source file.
+     * @param {AesFile} aesFile   The source file.
      * @param {Uint8Array} buffersCount Number of buffers to use.
      * @param {Uint8Array} bufferSize   The length of each buffer.
-     * @param threads      The number of threads/streams to source the file in parallel.
-     * @param backOffset   The back offset.  Negative offset for the buffers. Some stream consumers might request data right before
+     * @param {number} threads      The number of threads/streams to source the file in parallel.
+     * @param {number} backOffset   The back offset.  Negative offset for the buffers. Some stream consumers might request data right before
      * the last request. We provide this offset so we don't make multiple requests for filling
      * the buffers ending up with too much overlapping data.
      */
-    public static create(salmonFile: AesFile,
+    public static create(aesFile: AesFile,
         buffersCount: number = 0, bufferSize: number = 0, threads: number = 0, backOffset: number = 0) {
         if (buffersCount == 0)
             buffersCount = AesFileReadableStream.#DEFAULT_BUFFERS;
@@ -70,7 +70,7 @@ export class AesFileReadableStream {
         if (threads == 0)
             threads = AesFileReadableStream.#DEFAULT_THREADS;
 
-        let reader: ReadableStreamFileReader = new ReadableStreamFileReader(salmonFile,
+        let reader: ReadableStreamFileReader = new ReadableStreamFileReader(aesFile,
             buffersCount, bufferSize, threads, backOffset);
         let readableStream: any = new ReadableStream({
             type: 'bytes',
@@ -113,35 +113,34 @@ export class AesFileReadableStream {
 export class ReadableStreamFileReader {
     private workerPath = './lib/salmon-fs/salmonfs/streams/aes_file_readable_stream_worker.js';
     private readonly buffersCount: number;
-    private readonly salmonFile: AesFile;
+    private readonly aesFile: AesFile;
     private readonly cacheBufferSize: number;
     private readonly threads: number;
     private readonly backOffset: number;
 
-    private buffers: (CacheBuffer | null)[] | null = null;
-    private stream: AesStream | null = null;
-
+    #buffers: (CacheBuffer | null)[] | null = null;
+    #stream: AesStream | null = null;
     #promises: Promise<any>[] = [];
-
     #workers: any[] = [];
-
-    // private ExecutorService executor;
-    private position: number = 0;
-    private size: number = 0;
+    #position: number = 0;
+    #size: number = 0;
 
     /**
      * We reuse the least recently used buffer. Since the buffer count is relative
      * small (see {@link #MAX_BUFFERS}) there is no need for a fast-access lru queue
      * so a simple linked list of keeping the indexes is adequately fast.
      */
-    private lruBuffersIndex: number[] = [];
+    #lruBuffersIndex: number[] = [];
 
-    constructor(salmonFile: AesFile,
+    /**
+     * Construct a stream. Do not use this directly, use AesFileReadableStream.create() instead.
+     */
+    constructor(aesFile: AesFile,
         buffersCount: number, bufferSize: number, threads: number, backOffset: number) {
-        this.salmonFile = salmonFile;
+        this.aesFile = aesFile;
         this.buffersCount = buffersCount;
         this.cacheBufferSize = bufferSize;
-        if(this.salmonFile.getRealFile().constructor.name === 'WSFile'){
+        if(this.aesFile.getRealFile().constructor.name === 'WSFile'){
 			console.log("Multithreading for web service files is not supported, setting single thread");
 			threads = 1;
         }
@@ -150,20 +149,24 @@ export class ReadableStreamFileReader {
     }
 
     public async initialize(): Promise<void> {
-        this.size = await this.salmonFile.getLength();
+        this.#size = await this.aesFile.getLength();
         this.positionStart = 0;
-        this.positionEnd = this.size - 1;
-        this.createBuffers();
+        this.positionEnd = this.#size - 1;
+        this.#createBuffers();
         if (this.threads == 1) {
-            await this.createStream();
+            await this.#createStream();
         }
     }
 
+    /**
+     * Read from the encrypted stream
+     * @returns {Promise<Uint8Array | null>} The data read
+     */
     async read(): Promise<Uint8Array | null> {
-        if (this.buffers == null)
+        if (this.#buffers == null)
             await this.initialize();
         let buff: Uint8Array = new Uint8Array(this.cacheBufferSize);
-        let bytesRead: number = await this.readStream(buff, 0, buff.length);
+        let bytesRead: number = await this.#readStream(buff, 0, buff.length);
         if (bytesRead <= 0)
             return null;
         return buff.slice(0, bytesRead);
@@ -173,8 +176,8 @@ export class ReadableStreamFileReader {
     /**
      * Method creates the parallel streams for reading from the file
      */
-    private async createStream(): Promise<void> {
-        this.stream = await this.salmonFile.getInputStream();
+    async #createStream(): Promise<void> {
+        this.#stream = await this.aesFile.getInputStream();
     }
 
     /**
@@ -183,54 +186,53 @@ export class ReadableStreamFileReader {
      * The first buffer will be sourcing at the start of the encrypted file where the header and indexing are
      * The rest of the buffers can be placed to whatever position the user slides to
      */
-    private createBuffers(): void {
-        this.buffers = new Array(this.buffersCount);
-        for (let i = 0; i < this.buffers.length; i++)
-            this.buffers[i] = new CacheBuffer(this.cacheBufferSize);
+    #createBuffers(): void {
+        this.#buffers = new Array(this.buffersCount);
+        for (let i = 0; i < this.#buffers.length; i++)
+            this.#buffers[i] = new CacheBuffer(this.cacheBufferSize);
     }
 
     /**
      * Skip a number of bytes.
      *
-     * @param bytes the number of bytes to be skipped.
-     * @return
+     * @param {number} bytes the number of bytes to be skipped.
+     * @returns {Promise<number>} The new position
      */
     public async skip(bytes: number): Promise<number> {
-        if (this.buffers == null)
+        if (this.#buffers == null)
             await this.initialize();
         bytes += this.positionStart;
-        let currPos: number = this.position;
-        if (this.position + bytes > this.size)
-            this.position = this.size;
+        let currPos: number = this.#position;
+        if (this.#position + bytes > this.#size)
+            this.#position = this.#size;
         else
-            this.position += bytes;
-        return this.position - currPos;
+            this.#position += bytes;
+        return this.#position - currPos;
     }
 
+    /**
+     * Reset the stream
+     */
     public reset(): void {
-        this.position = 0;
+        this.#position = 0;
     }
 
     /**
      * Reads and decrypts the contents of an encrypted file
-     *
-     * @param {Uint8Array} buffer The buffer that will store the decrypted contents
-     * @param {number} offset The position on the buffer that the decrypted data will start
-     * @param {number} count  The length of the data requested
      */
-    public async readStream(buffer: Uint8Array, offset: number, count: number): Promise<number> {
-        if (this.position >= this.positionEnd + 1)
+    async #readStream(buffer: Uint8Array, offset: number, count: number): Promise<number> {
+        if (this.#position >= this.positionEnd + 1)
             return -1;
 
         let minCount: number;
         let bytesRead: number;
 
         // truncate the count so getCacheBuffer() reports the correct buffer
-        count = Math.floor(Math.min(count, this.size - this.position));
+        count = Math.floor(Math.min(count, this.#size - this.#position));
 
-        let cacheBuffer: CacheBuffer | null = this.getCacheBuffer(this.position, count);
+        let cacheBuffer: CacheBuffer | null = this.#getCacheBuffer(this.#position, count);
         if (cacheBuffer == null) {
-            cacheBuffer = this.getAvailCacheBuffer();
+            cacheBuffer = this.#getAvailCacheBuffer();
             // the stream is closed
             if (cacheBuffer == null)
                 return -1;
@@ -238,39 +240,36 @@ export class ReadableStreamFileReader {
             // in a position a few bytes before the first request. To make
             // sure we don't make 2 overlapping requests we start the buffer
             // a position ahead of the first request.
-            let startPosition = this.position - this.backOffset;
+            let startPosition = this.#position - this.backOffset;
             if (startPosition < 0)
                 startPosition = 0;
 
-            bytesRead = await this.fillBuffer(cacheBuffer, startPosition, this.cacheBufferSize);
+            bytesRead = await this.#fillBuffer(cacheBuffer, startPosition, this.cacheBufferSize);
 
             if (bytesRead <= 0)
                 return -1;
             cacheBuffer.startPos = startPosition;
             cacheBuffer.count = bytesRead;
         }
-        minCount = Math.min(count, Math.floor(cacheBuffer.count - this.position + cacheBuffer.startPos));
-        let cOffset: number = Math.floor(this.position - cacheBuffer.startPos);
+        minCount = Math.min(count, Math.floor(cacheBuffer.count - this.#position + cacheBuffer.startPos));
+        let cOffset: number = Math.floor(this.#position - cacheBuffer.startPos);
         for (let i = 0; i < minCount; i++)
             buffer[offset + i] = cacheBuffer.buffer[cOffset + i];
-        this.position += minCount;
+        this.#position += minCount;
         return minCount;
     }
 
     /**
      * Fills a cache buffer with the decrypted data from the encrypted source file.
-     *
-     * @param cacheBuffer The cache buffer that will store the decrypted contents
-     * @param {Uint8Array} bufferSize  The length of the data requested
      */
-    private async fillBuffer(cacheBuffer: CacheBuffer, startPosition: number, bufferSize: number): Promise<number> {
+    async #fillBuffer(cacheBuffer: CacheBuffer, startPosition: number, bufferSize: number): Promise<number> {
         let bytesRead: number;
         if (this.threads == 1) {
-            if (this.stream == null)
+            if (this.#stream == null)
                 return 0;
-            bytesRead = await fillBufferPart(cacheBuffer, startPosition, 0, bufferSize, this.stream);
+            bytesRead = await fillBufferPart(cacheBuffer, startPosition, 0, bufferSize, this.#stream);
         } else {
-            bytesRead = await this.fillBufferMulti(cacheBuffer, startPosition, bufferSize);
+            bytesRead = await this.#fillBufferMulti(cacheBuffer, startPosition, bufferSize);
         }
         return bytesRead;
     }
@@ -278,18 +277,14 @@ export class ReadableStreamFileReader {
 
     /**
      * Fill the buffer using parallel streams for performance
-     *
-     * @param cacheBuffer   The cache buffer that will store the decrypted data
-     * @param startPosition The source file position the read will start from
-     * @param {Uint8Array} bufferSize    The buffer size that will be used to read from the file
      */
-    private async fillBufferMulti(cacheBuffer: CacheBuffer, startPosition: number, bufferSize: number): Promise<number> {
+    async #fillBufferMulti(cacheBuffer: CacheBuffer, startPosition: number, bufferSize: number): Promise<number> {
         let partSize: number = Math.ceil(bufferSize / this.threads);
         let bytesRead: number = 0;
         this.#promises = [];
         for (let i = 0; i < this.threads; i++) {
             this.#promises.push(new Promise(async (resolve, reject) => {
-                let fileToReadHandle: any = await this.salmonFile.getRealFile().getPath();
+                let fileToReadHandle: any = await this.aesFile.getRealFile().getPath();
                 if (typeof process !== 'object') {
 
                     if (this.#workers[i] == null)
@@ -328,12 +323,12 @@ export class ReadableStreamFileReader {
                     index: i,
                     startPosition: startPosition,
                     fileToReadHandle: fileToReadHandle,
-                    readFileClassType: this.salmonFile.getRealFile().constructor.name,
+                    readFileClassType: this.aesFile.getRealFile().constructor.name,
                     start: start, length: length,
-                    key: this.salmonFile.getEncryptionKey(),
-                    integrity: this.salmonFile.isIntegrityEnabled(),
-                    hash_key: this.salmonFile.getHashKey(),
-                    chunk_size: this.salmonFile.getRequestedChunkSize(),
+                    key: this.aesFile.getEncryptionKey(),
+                    integrity: this.aesFile.isIntegrityEnabled(),
+                    hash_key: this.aesFile.getHashKey(),
+                    chunk_size: this.aesFile.getRequestedChunkSize(),
                     cacheBufferSize: this.cacheBufferSize
                 });
             }));
@@ -364,26 +359,26 @@ export class ReadableStreamFileReader {
     /**
      * Returns an available cache buffer if there is none then reuse the least recently used one.
      */
-    private getAvailCacheBuffer(): CacheBuffer | null {
-        if (this.buffers == null)
+    #getAvailCacheBuffer(): CacheBuffer | null {
+        if (this.#buffers == null)
             return null;
-        if (this.lruBuffersIndex.length == this.buffersCount) {
+        if (this.#lruBuffersIndex.length == this.buffersCount) {
             // getting least recently used buffer
-            let index: number = this.lruBuffersIndex.pop() as number;
+            let index: number = this.#lruBuffersIndex.pop() as number;
             // promote to the top
-            delete this.lruBuffersIndex[index];
-            this.lruBuffersIndex.unshift(index);
-            return this.buffers[this.lruBuffersIndex.pop() as number];
+            delete this.#lruBuffersIndex[index];
+            this.#lruBuffersIndex.unshift(index);
+            return this.#buffers[this.#lruBuffersIndex.pop() as number];
         }
-        for (let i = 0; i < this.buffers.length; i++) {
-            let buffer: CacheBuffer | null = this.buffers[i];
+        for (let i = 0; i < this.#buffers.length; i++) {
+            let buffer: CacheBuffer | null = this.#buffers[i];
             if (buffer  && buffer.count == 0) {
-                this.lruBuffersIndex.unshift(i);
+                this.#lruBuffersIndex.unshift(i);
                 return buffer;
             }
         }
-        if (this.buffers[this.buffers.length - 1])
-            return this.buffers[this.buffers.length - 1];
+        if (this.#buffers[this.#buffers.length - 1])
+            return this.#buffers[this.#buffers.length - 1];
         else
             return null;
     }
@@ -391,17 +386,18 @@ export class ReadableStreamFileReader {
     /**
      * Returns the buffer that contains the data requested.
      *
-     * @param position The source file position of the data to be read
+     * @param {number} position The source file position of the data to be read
+     * @param {number} count The number of bytes to read
      */
-    private getCacheBuffer(position: number, count: number): CacheBuffer | null {
-        if (this.buffers == null)
+    #getCacheBuffer(position: number, count: number): CacheBuffer | null {
+        if (this.#buffers == null)
             return null;
-        for (let i = 0; i < this.buffers.length; i++) {
-            let buffer: CacheBuffer | null = this.buffers[i];
+        for (let i = 0; i < this.#buffers.length; i++) {
+            let buffer: CacheBuffer | null = this.#buffers[i];
             if (buffer  && position >= buffer.startPos && position + count <= buffer.startPos + buffer.count) {
                 // promote buffer to the front
-                delete this.lruBuffersIndex[i];
-                this.lruBuffersIndex.unshift(i);
+                delete this.#lruBuffersIndex[i];
+                this.#lruBuffersIndex.unshift(i);
                 return buffer;
             }
         }
@@ -409,33 +405,46 @@ export class ReadableStreamFileReader {
     }
 
     private positionStart: number = 0;
+    /**
+     * Get the start position of the stream
+     * @returns {number} The start position of the stream
+     */
     public getPositionStart(): number {
         return this.positionStart;
     }
+
+    /**
+     * Set the start position of the stream.
+     * @param {number} pos The start position
+     */
     public async setPositionStart(pos: number): Promise<void> {
-        if (this.buffers == null)
+        if (this.#buffers == null)
             await this.initialize();
         this.positionStart = pos;
     }
     private positionEnd: number = 0;
+
+    /**
+     * Set the end position of the stream
+     * @param {number} pos The end position of the stream
+     */
     public async setPositionEnd(pos: number): Promise<void> {
-        if (this.buffers == null)
+        if (this.#buffers == null)
             await this.initialize();
         this.positionEnd = pos;
     }
 
-
     /**
      * Clear all buffers.
      */
-    private clearBuffers(): void {
-        if (this.buffers == null)
+    #clearBuffers(): void {
+        if (this.#buffers == null)
             return;
-        for (let i = 0; i < this.buffers.length; i++) {
-            let buffer = this.buffers[i];
+        for (let i = 0; i < this.#buffers.length; i++) {
+            let buffer = this.#buffers[i];
             if (buffer)
                 buffer.clear();
-            this.buffers[i] = null;
+            this.#buffers[i] = null;
         }
     }
 
@@ -444,17 +453,21 @@ export class ReadableStreamFileReader {
      *
      * @throws IOException Thrown if there is an IO error.
      */
-    private async closeStream(): Promise<void> {
-        if (this.stream)
-            await this.stream.close();
-        this.stream = null;
+    async #closeStream(): Promise<void> {
+        if (this.#stream)
+            await this.#stream.close();
+        this.#stream = null;
     }
 
     closed: Promise<undefined> = Promise.resolve(undefined);
 
+    /**
+     * Cancel the stream
+     * @param {any} [reason] The reason
+     */
     async cancel(reason?: any): Promise<void> {
-        await this.closeStream();
-        this.clearBuffers();
+        await this.#closeStream();
+        this.#clearBuffers();
         for (let i = 0; i < this.#workers.length; i++) {
             this.#workers[i].postMessage({ message: 'close' });
             this.#workers[i].terminate();
@@ -462,10 +475,19 @@ export class ReadableStreamFileReader {
         }
     }
 
-    setWorkerPath(path: string) {
+    /**
+     * Set the worker path
+     * @param {string} path The worker path
+     */
+    public setWorkerPath(path: string) {
         this.workerPath = path;
     }
-    getWorkerPath(): string {
+
+    /**
+     * Get the worker path used for parallel streaming
+     * @returns {string} The worker path
+     */
+    public getWorkerPath(): string {
         return this.workerPath;
     }
 }

@@ -68,7 +68,7 @@ export class FileSequencer implements INonceSequencer {
 
     /**
      * Get the sequence file
-     * @returns The sequence file
+     * @returns {IFile} The sequence file
      */
     public getSequenceFile(): IFile {
         return this.#sequenceFile;
@@ -144,7 +144,7 @@ export class FileSequencer implements INonceSequencer {
      * Get the next nonce.
      *
      * @param {string} driveId The drive ID.
-     * @return {Promise<Uint8Array | null>} The next nonce
+     * @returns {Promise<Uint8Array | null>} The next nonce
      * @throws SequenceException Thrown if error with the nonce sequence
      * @throws SalmonRangeExceededException Thrown if nonce has exceeded range
      */
@@ -171,7 +171,7 @@ export class FileSequencer implements INonceSequencer {
     /**
      * Get the contents of a sequence file.
      *
-     * @return {Promise<string>} The file contents.
+     * @returns {Promise<string>} The file contents.
      * @throws SequenceException Thrown if error with the nonce sequence
      */
     protected async getContents(): Promise<string> {
@@ -226,7 +226,7 @@ export class FileSequencer implements INonceSequencer {
      * Get the sequence by the drive ID.
      *
      * @param {string} driveId The drive ID.
-     * @return
+     * @returns {Promise<NonceSequence | null>} The sequence
      * @throws SequenceException Thrown if error with the nonce sequence
      */
     public async getSequence(driveId: string): Promise<NonceSequence | null> {
@@ -306,7 +306,7 @@ export class FileSequencer implements INonceSequencer {
      *
      * @param {Map<string, NonceSequence>} configs All sequence configurations.
      * @param {string} driveId The drive ID.
-     * @return {NonceSequence | null} The nonce sequence
+     * @returns {NonceSequence | null} The nonce sequence
      * @throws SequenceException Thrown if error with the nonce sequence
      */
     static #getSequence(configs: Map<string, NonceSequence>, driveId: string): NonceSequence | null {

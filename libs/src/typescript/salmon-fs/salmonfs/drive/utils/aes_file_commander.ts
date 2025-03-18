@@ -47,8 +47,8 @@ export class AesFileCommander extends FileCommander {
 
     /**
      * Callback when error happens
-     * @param ex The error
-     * @returns True if handled
+     * @param {Error | unknown | null} ex The error
+     * @returns {boolean} True if handled
      */
     onError(ex: Error | unknown | null): boolean {
         if (ex instanceof SequenceException)

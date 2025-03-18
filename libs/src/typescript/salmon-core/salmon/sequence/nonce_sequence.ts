@@ -70,7 +70,7 @@ export class NonceSequence {
 
     /**
      * The id for this sequence.
-     * @return {string} The id.
+     * @returns {string} The id.
      */
     public getId(): string {
         return this.id;
@@ -86,7 +86,7 @@ export class NonceSequence {
 
     /**
      * Get the authorization id for a specific device.
-     * @return {string} The auth id.
+     * @returns {string} The auth id.
      */
     public getAuthId(): string {
         return this.authId;
@@ -102,7 +102,7 @@ export class NonceSequence {
 
     /**
      * Get the next nonce.
-     * @return {Uint8Array | null} The next nonce.
+     * @returns {Uint8Array | null} The next nonce.
      */
     public getNextNonce(): Uint8Array | null{
         return this.nextNonce;
@@ -118,7 +118,7 @@ export class NonceSequence {
 
     /**
      * Get the max nonce.
-     * @return Uint8Array | null} The maximum nonce.
+     * @returns {Uint8Array | null} The maximum nonce.
      */
     getMaxNonce(): Uint8Array | null{
         return this.maxNonce;
@@ -134,7 +134,7 @@ export class NonceSequence {
 
     /**
      * Get the sequence status.
-     * @return {Status} The status
+     * @returns {Status} The status
      */
     getStatus(): Status {
         return this.status;

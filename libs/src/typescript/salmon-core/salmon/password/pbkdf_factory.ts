@@ -33,7 +33,7 @@ export class PbkdfFactory {
     /**
      * Create an instance of a pbkdf provider.
      * @param {PbkdfType} type The pbkdf type.
-     * @return The provider.
+     * @returns {ISalmonPbkdfProvider} The provider.
      */
     public static create(type: PbkdfType): ISalmonPbkdfProvider {
         switch (type) {
