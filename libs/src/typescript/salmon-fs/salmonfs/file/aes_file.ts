@@ -865,9 +865,10 @@ export class AesFile implements IVirtualFile {
         }
         let renameRealFile: ((realFile: IFile) => Promise<string>) | undefined;
         // use auto rename only when we are using a drive
-        if (autoRename != null && this.getDrive())
+		let autoRenameFunc: ((file: IVirtualFile) => Promise<string>) | undefined = options.autoRename;
+        if (autoRenameFunc && this.getDrive())
             renameRealFile = async (file: IFile): Promise<string> => {
-                return await autoRename(new AesFile(file, this.getDrive()));
+                return await autoRenameFunc(new AesFile(file, this.getDrive()));
             };
         let copyOptions: RecursiveCopyOptions = new RecursiveCopyOptions();
         copyOptions.autoRename = renameRealFile;
@@ -898,9 +899,10 @@ export class AesFile implements IVirtualFile {
         }
         let renameRealFile: ((realFile: IFile) => Promise<string>) | undefined;
         // use auto rename only when we are using a drive
-        if (autoRename != null && this.getDrive())
+		let autoRenameFunc: ((file: IVirtualFile) => Promise<string>) | undefined = options.autoRename;
+        if (autoRenameFunc && this.getDrive())
             renameRealFile = async (file: IFile): Promise<string> => {
-				return await autoRename(new AesFile(file, this.getDrive()));
+				return await autoRenameFunc(new AesFile(file, this.getDrive()));
             };
         let moveOptions: RecursiveMoveOptions = new RecursiveMoveOptions();
         moveOptions.autoRename = renameRealFile;

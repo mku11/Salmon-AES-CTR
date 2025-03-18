@@ -32,6 +32,7 @@ import { IntegrityException } from '../../lib/salmon-core/salmon/integrity/integ
 import { copyRecursively, moveRecursively, autoRenameFile, RecursiveCopyOptions, RecursiveMoveOptions, CopyOptions, MoveOptions } from '../../lib/salmon-fs/fs/file/ifile.js'
 import { AesFileReadableStream } from '../../lib/salmon-fs/salmonfs/streams/aes_file_readable_stream.js';
 import { AesFileCommander } from '../../lib/salmon-fs/salmonfs/drive/utils/aes_file_commander.js';
+import { BatchImportOptions, BatchExportOptions } from '../../lib/salmon-fs/fs/drive/utils/file_commander.js';
 import { AuthException } from '../../lib/salmon-fs/salmonfs/auth/auth_exception.js'
 import { getTestMode, TestMode } from "./salmon_fs_test_helper.js";
 
@@ -486,8 +487,6 @@ describe('salmon-fs', () => {
             .then(_ => _.getChild("folder2")).then(_ => _.getChildrenCount()));
         copyOptions = new RecursiveCopyOptions();
         copyOptions.autoRename = autoRenameFile;
-        copyOptions = new RecursiveCopyOptions();
-        copyOptions.autoRename = autoRenameFile;
         await copyRecursively(await dir.getChild("folder1"), folder3, copyOptions);
         expect(2).toBe(await dir.getChildrenCount());
         expect(1).toBe(await dir.getChild("folder4").then(_ => _.getChildrenCount()));
@@ -539,7 +538,9 @@ describe('salmon-fs', () => {
         let sequencer = await SalmonFSTestHelper.createSalmonFileSequencer();
         let drive = await SalmonFSTestHelper.createDrive(vaultDir, SalmonFSTestHelper.driveClassType, SalmonCoreTestHelper.TEST_PASSWORD, sequencer);
         let fileCommander = new AesFileCommander(SalmonFSTestHelper.ENC_IMPORT_BUFFER_SIZE, SalmonFSTestHelper.ENC_EXPORT_BUFFER_SIZE, 2);
-        let sfiles = await fileCommander.importFiles([file], await drive.getRoot(), false, true);
+		let importOptions = new BatchImportOptions();
+        importOptions.integrity = true;
+        let sfiles = await fileCommander.importFiles([file], await drive.getRoot(), importOptions);
 		fileCommander.close();
 		
         let fileInputStream1 = AesFileReadableStream.create(sfiles[0], 4, 4 * 1024 * 1024, 4, 256 * 1024);

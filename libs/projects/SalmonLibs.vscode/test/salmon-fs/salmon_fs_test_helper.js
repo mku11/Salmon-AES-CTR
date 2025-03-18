@@ -38,7 +38,7 @@ import { AesFileImporter } from '../../lib/salmon-fs/salmonfs/drive/utils/aes_fi
 import { AesFileExporter } from '../../lib/salmon-fs/salmonfs/drive/utils/aes_file_exporter.js';
 import { AesFileCommander } from '../../lib/salmon-fs/salmonfs/drive/utils/aes_file_commander.js';
 import { autoRenameFile as autoRenameFile } from '../../lib/salmon-fs/fs/file/ifile.js';
-import { FileSearcher } from '../../lib/salmon-fs/fs/drive/utils/file_searcher.js';
+import { FileSearcher, SearchOptions} from '../../lib/salmon-fs/fs/drive/utils/file_searcher.js';
 import { AesFileReadableStream } from '../../lib/salmon-fs/salmonfs/streams/aes_file_readable_stream.js';
 import { AuthConfig } from '../../lib/salmon-fs/salmonfs/auth/auth_config.js';
 import { HttpDrive } from '../../lib/salmon-fs/salmonfs/drive/http_drive.js';
@@ -350,7 +350,7 @@ export class SalmonFSTestHelper {
         }
         let importOptions = new FileImportOptions();
         importOptions.integrity = applyFileIntegrity;
-        importOptions.onProgress = printImportProgress;
+        importOptions.onProgressChanged = printImportProgress;
         let aesFile = await SalmonFSTestHelper.fileImporter.importFile(fileToImport, rootDir, importOptions);
 		
 		// get fresh copy of the file
@@ -398,7 +398,7 @@ export class SalmonFSTestHelper {
 			await aesFile.setVerifyIntegrity(false);
         let exportOptions = new FileExportOptions();
         exportOptions.integrity = verifyFileIntegrity;
-        exportOptions.onProgress = printExportProgress;
+        exportOptions.onProgressChanged = printExportProgress;
         let exportFile = await SalmonFSTestHelper.fileExporter.exportFile(aesFile, await drive.getExportDir(), exportOptions);
         let hashPostExport = await SalmonFSTestHelper.getChecksum(exportFile);
         if (shouldBeEqual) {
@@ -440,7 +440,9 @@ export class SalmonFSTestHelper {
         // search
         let basename = await aesFile.getName();
         let searcher = new FileSearcher();
-        let files = await searcher.search(rootDir, basename, true, null, null);
+		let searchOptions = new SearchOptions();
+		searchOptions.anyTerm = true;
+        let files = await searcher.search(rootDir, basename, searchOptions);
         expect(files.length > 0).toBeTruthy();
         expect(basename).toBe(await files[0].getName());
 
@@ -931,7 +933,6 @@ export class SalmonFSTestHelper {
         exportOptions.deleteSource = false;
         exportOptions.integrity = true;
         exportOptions.autoRename = autoRenameFile;
-        exportOptions.integrity = false;
         exportOptions.onFailed = async (sfile, ex) => {
             // file failed to import
             console.error(ex);
