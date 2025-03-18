@@ -265,7 +265,6 @@ export class FileCommander {
                             bytes, totalBytes, count[0], total));
                     }
                 };
-                exportOptions.filename = filename;
                 rfile = await this.fileExporter.exportFile(fileToExport as IVirtualFile, exportDir, exportOptions);
                 if (rfile) {
                     existingFiles[rfile.getName()] = rfile;
