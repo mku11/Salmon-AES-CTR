@@ -80,7 +80,7 @@ public class AndroidFile implements IFile {
         DocumentFile dir = documentFile.createDirectory(dirName);
         if (dir == null)
             return null;
-        clearCache();
+        reset();
         AndroidFile newDir = new AndroidFile(dir, AndroidDrive.getContext());
         return newDir;
     }
@@ -97,7 +97,7 @@ public class AndroidFile implements IFile {
         // somehow it includes the extension. to protect that we temporarily use another extension
         doc.renameTo(filename + ".dat");
         doc.renameTo(filename);
-        clearCache();
+        reset();
         AndroidFile newFile = new AndroidFile(doc, AndroidDrive.getContext());
         return newFile;
     }
@@ -112,7 +112,7 @@ public class AndroidFile implements IFile {
         boolean res = documentFile.delete();
         if (res && getParent() != null)
         {
-            ((AndroidFile)getParent()).clearCache();
+            ((AndroidFile)getParent()).reset();
         }
         return res;
     }
@@ -335,9 +335,9 @@ public class AndroidFile implements IFile {
             if (file != null && newName != null)
                 file.renameTo(newName);
             if(getParent()!=null)
-                ((AndroidFile)getParent()).clearCache();
-            androidDir.clearCache();
-            clearCache();
+                ((AndroidFile)getParent()).reset();
+            androidDir.reset();
+            reset();
             return file;
         }
         else
