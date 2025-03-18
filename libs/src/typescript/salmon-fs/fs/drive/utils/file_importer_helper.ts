@@ -62,18 +62,18 @@ export async function importFilePart(fileToImport: IFile, salmonFile: IVirtualFi
             totalPartBytesRead += bytesRead;
 
             totalBytesRead[0] += bytesRead;
-            if (onProgress != null)
+            if (onProgress)
                 onProgress(totalBytesRead[0], count);
         }
     } catch (ex) {
         console.error(ex);
         throw ex;
     } finally {
-        if (targetStream != null) {
+        if (targetStream) {
             await targetStream.flush();
             await targetStream.close();
         }
-        if (sourceStream != null) {
+        if (sourceStream) {
             await sourceStream.close();
         }
     }

@@ -23,7 +23,7 @@ SOFTWARE.
 */
 
 import { RandomAccessStream } from '../../../salmon-core/streams/random_access_stream.js';
-import { CopyOptions, IFile, MoveOptions, copyFileContents } from './ifile.js';
+import { CopyContentsOptions, CopyOptions, IFile, MoveOptions, copyFileContents } from './ifile.js';
 import { NodeFileStream } from '../streams/node_file_stream.js';
 import { IOException } from '../../../salmon-core/streams/io_exception.js';
 import { mkdir, stat, readdir, rename, open, FileHandle } from 'node:fs/promises';
@@ -216,18 +216,18 @@ export class NodeFile implements IFile {
     /**
      * Move this file or directory under a new directory.
      * @param newDir The target directory.
-     * @param {MoveOptions | null} options The options
+     * @param {MoveOptions} [options] The options
      * @param onProgressChanged Observer to notify when progress changes.
      * @return The moved file. Use this file for subsequent operations instead of the original.
      */
-    public async move(newDir: IFile, options: MoveOptions| null = null): Promise<IFile> {
-        if(options == null)
+    public async move(newDir: IFile, options?: MoveOptions): Promise<IFile> {
+        if(!options)
             options = new MoveOptions();
-        let newName = options.newFilename != null ? options.newFilename : this.getName();
+        let newName = options.newFilename  ? options.newFilename : this.getName();
         if (newDir == null || !await newDir.exists())
             throw new IOException("Target directory does not exists");
         let newFile: IFile | null = await newDir.getChild(newName);
-        if (newFile != null && await newFile.exists())
+        if (newFile  && await newFile.exists())
             throw new IOException("Another file/directory already exists");
         let nFilePath: string = newDir.getDisplayPath() + NodeFile.separator + newName;
         await rename(this.#filePath, nFilePath);
@@ -237,18 +237,18 @@ export class NodeFile implements IFile {
     /**
      * Move this file or directory under a new directory.
      * @param newDir    The target directory.
-     * @param {CopyOptions | null} options The options
+     * @param {CopyOptions} [options] The options
      * @return The copied file. Use this file for subsequent operations instead of the original.
      * @throws IOException Thrown if there is an IO error.
      */
-    public async copy(newDir: IFile, options: CopyOptions| null = null): Promise<IFile | null> {
-        if(options == null)
+    public async copy(newDir: IFile, options?: CopyOptions): Promise<IFile | null> {
+        if(!options)
             options = new CopyOptions();
-        let newName = options.newFilename != null ? options.newFilename : this.getName();
+        let newName = options.newFilename  ? options.newFilename : this.getName();
         if (newDir == null || !await newDir.exists())
             throw new IOException("Target directory does not exists");
         let newFile: IFile | null = await newDir.getChild(newName);
-        if (newFile != null && await newFile.exists())
+        if (newFile  && await newFile.exists())
             throw new IOException("Another file/directory already exists");
         if (await this.isDirectory()) {
             let parent: IFile | null = await this.getParent();
@@ -257,7 +257,9 @@ export class NodeFile implements IFile {
             return parent.createDirectory(newName);
         } else {
             newFile = await newDir.createFile(newName);
-            let res: boolean = await copyFileContents(this, newFile, false, options.onProgressChanged);
+            let copyContentOptions: CopyContentsOptions = new CopyContentsOptions();
+            copyContentOptions.onProgressChanged = options.onProgressChanged;
+            let res: boolean = await copyFileContents(this, newFile, copyContentOptions);
             return res ? newFile : null;
         }
     }

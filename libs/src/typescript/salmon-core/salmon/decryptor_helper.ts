@@ -76,11 +76,11 @@ export async function decryptData(data: Uint8Array, start: number, count: number
         console.error(ex);
         throw new SecurityException("Could not decrypt data", ex);
     } finally {
-        if (inputStream != null)
+        if (inputStream)
             await inputStream.close();
-        if (stream != null)
+        if (stream)
             await stream.close();
-        if (outputStream != null)
+        if (outputStream)
             await outputStream.close();
     }
     let endPos: number = await outputStream.getPosition();

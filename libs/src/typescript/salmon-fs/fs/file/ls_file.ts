@@ -190,21 +190,21 @@ export class LocalStorageFile implements IFile {
     /**
      * Move this file or directory under a new directory.
      * @param newDir The target directory.
-     * @param {MoveOptions | null} options The options.
+     * @param {MoveOptions} [options] The options.
      * @return The moved file. Use this file for subsequent operations instead of the original.
      */
-    public async move(newDir: IFile, options: MoveOptions | null = null): Promise<IFile> {
+    public async move(newDir: IFile, options?: MoveOptions): Promise<IFile> {
         throw new Error("Not supported");
     }
 
     /**
      * Move this file or directory under a new directory.
      * @param newDir    The target directory.
-     * @param {CopyOptions | null} options The options
+     * @param {CopyOptions} [options] The options
      * @return The copied file. Use this file for subsequent operations instead of the original.
      * @throws IOException Thrown if there is an IO error.
      */
-    public async copy(newDir: IFile, options: CopyOptions | null = null): Promise<IFile | null> {
+    public async copy(newDir: IFile, options?: CopyOptions): Promise<IFile | null> {
         throw new Error("Not supported");
     }
 

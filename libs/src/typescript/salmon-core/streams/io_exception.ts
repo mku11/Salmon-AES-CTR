@@ -36,7 +36,7 @@ export class IOException extends Error {
      */
     public constructor(msg: string | null = null, ex: Error | unknown | null = null) {
         super(msg ?? "");
-        if (ex != null) {
+        if (ex) {
             this.#cause = ex;
         }
     }

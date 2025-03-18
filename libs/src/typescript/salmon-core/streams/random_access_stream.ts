@@ -31,6 +31,12 @@ export abstract class RandomAccessStream {
     static #DEFAULT_BUFFER_SIZE = 256 * 1024;
 
     /**
+     * @callback OnProgressChanged
+     * @param {number} position
+     * @param {number} length
+     */
+    
+    /**
      * True if the stream is readable.
      * @return {Promise<boolean>} True if can read.
      */
@@ -117,17 +123,17 @@ export abstract class RandomAccessStream {
     /**
      * Write stream contents to another stream.
      * @param {RandomAccessStream} stream The target stream.
-     * @param {number | null} bufferSize The buffer size to be used when copying.
-     * @param {((position: number, length: number) => void) | null} onProgressChanged The listener to notify when progress changes.
+     * @param {number} bufferSize The buffer size to be used when copying.
+     * @param {OnProgressChanged} onProgressChanged The listener to notify when progress changes.
      * @throws IOException Thrown if there is an IO error.
      */
-    public async copyTo(stream: RandomAccessStream, bufferSize: number | null = null, 
-        onProgressChanged: ((position: number, length: number) => void) | null = null): Promise<void> {
+    public async copyTo(stream: RandomAccessStream, bufferSize: number = 0, 
+        onProgressChanged?: ((position: number, length: number) => void)): Promise<void> {
         if (!(await this.canRead()))
             throw new IOException("Target stream not readable");
         if (!(await stream.canWrite()))
             throw new IOException("Target stream not writable");
-        if (bufferSize == null || bufferSize <= 0) {
+        if (bufferSize <= 0) {
             bufferSize = RandomAccessStream.#DEFAULT_BUFFER_SIZE;
         }
         let bytesRead: number;
@@ -135,7 +141,7 @@ export abstract class RandomAccessStream {
         const buffer: Uint8Array = new Uint8Array(bufferSize);
         while ((bytesRead = await this.read(buffer, 0, bufferSize)) > 0) {
             await stream.write(buffer, 0, bytesRead);
-            if (onProgressChanged != null)
+            if (onProgressChanged)
                 onProgressChanged(await this.getPosition(), await this.getLength());
         }
         await stream.flush();

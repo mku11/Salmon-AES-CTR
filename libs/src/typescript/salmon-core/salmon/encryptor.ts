@@ -58,7 +58,7 @@ export class Encryptor {
      *                   a multiple of the chunk size if you enabled integrity
      *                   otherwise a multiple of the AES block size (16 bytes).
      */
-    public constructor(threads: number = 0, bufferSize: number = 0) {
+    public constructor(threads: number = 1, bufferSize: number = 0) {
         if (threads <= 0) {
             this.#threads = 1;
         } else {

@@ -169,7 +169,7 @@ export class HttpFileStream extends RandomAccessStream {
      */
     public override async read(buffer: Uint8Array, offset: number, count: number): Promise<number> {
         let bytesRead: number = 0;
-        if (this.buffer != null && this.bufferPosition < this.buffer.length) {
+        if (this.buffer  && this.bufferPosition < this.buffer.length) {
             for (; this.bufferPosition < this.buffer.length;) {
                 buffer[offset + bytesRead++] = this.buffer[this.bufferPosition++];
                 if (bytesRead == count)
@@ -254,12 +254,12 @@ export class HttpFileStream extends RandomAccessStream {
      * Reset the stream.
      */
     public async reset(): Promise<void> {
-        if (this.reader != null) {
+        if (this.reader) {
             if(this.stream?.locked)
                 this.reader.releaseLock();
         }
         this.reader = null;
-        if(this.stream != null)
+        if(this.stream)
             await this.stream.cancel();
         this.stream = null;
         this.buffer = null;

@@ -70,7 +70,7 @@ export class Integrity {
      *
      * @param {boolean} integrity True to enable integrity checks.
      * @param {Uint8Array} key       The key to use for hashing.
-     * @param {number | null} chunkSize The chunk size. Use 0 to enable integrity on the whole file (1 chunk).
+     * @param {number} chunkSize The chunk size. Use 0 to enable integrity on the whole file (1 chunk).
      *                  Use a positive number to specify integrity chunks.
      * @param {IHashProvider} provider  Hash implementation provider.
      * @param {number} hashSize The hash size.
@@ -78,8 +78,8 @@ export class Integrity {
      * @throws SalmonSecurityException When security has failed
      */
     public constructor(integrity: boolean, key: Uint8Array | null, chunkSize: number = 0, provider: IHashProvider, hashSize: number = 0) {
-        if (chunkSize !== null && (chunkSize < 0 || (chunkSize > 0 && chunkSize < AESCTRTransformer.BLOCK_SIZE)
-            || (chunkSize > 0 && chunkSize % AESCTRTransformer.BLOCK_SIZE != 0) || chunkSize > Integrity.MAX_CHUNK_SIZE)) {
+        if (chunkSize < 0 || (chunkSize > 0 && chunkSize < AESCTRTransformer.BLOCK_SIZE)
+            || (chunkSize > 0 && chunkSize % AESCTRTransformer.BLOCK_SIZE != 0) || chunkSize > Integrity.MAX_CHUNK_SIZE) {
             throw new IntegrityException("Invalid chunk size, specify zero for default value or a positive number multiple of: "
                 + AESCTRTransformer.BLOCK_SIZE + " and less than: " + Integrity.MAX_CHUNK_SIZE + " bytes");
         }
@@ -87,7 +87,7 @@ export class Integrity {
             throw new SecurityException("You need a hash key to use with integrity");
         if (integrity && (chunkSize === null || chunkSize == 0))
             this.#chunkSize = Integrity.DEFAULT_CHUNK_SIZE;
-        else if (chunkSize != null && (integrity || chunkSize > 0))
+        else if (chunkSize  && (integrity || chunkSize > 0))
             this.#chunkSize = chunkSize;
         if (hashSize < 0)
             throw new SecurityException("Hash size should be a positive number");
@@ -115,7 +115,7 @@ export class Integrity {
         let finalBuffer: Uint8Array = buffer;
         let finalOffset: number = offset;
         let finalCount: number = count;
-        if (includeData != null) {
+        if (includeData) {
             finalBuffer = new Uint8Array(count + includeData.length);
             finalCount = count + includeData.length;
             for (let i = 0; i < includeData.length; i++)

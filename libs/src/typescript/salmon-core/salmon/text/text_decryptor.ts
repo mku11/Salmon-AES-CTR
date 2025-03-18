@@ -41,7 +41,7 @@ export class TextDecryptor {
      * @param format The format to use, see {@link EncryptionFormat}
      * @param {boolean} integrity True if you want to calculate and store hash signatures for each chunkSize
      * @param {Uint8Array | null} hashKey Hash key to be used for all chunks.
-     * @param {chunkSize: number} chunkSize The chunk size.
+     * @param {number} chunkSize The chunk size.
      * @return {Promise<string>} The decrypted text.
      * @throws IOException
      * @throws SalmonSecurityException Thrown when error with security

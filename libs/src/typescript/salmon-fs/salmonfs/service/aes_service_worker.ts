@@ -42,7 +42,7 @@ export class AesServiceWorker {
 		let position = 0;
 		if (headers.has('range')) {
 			let range: string | null = headers.get('range');
-			if (range != null)
+			if (range)
 				position = parseInt(range.split("=")[1].split("-")[0]);
 		}
 		return position;
@@ -86,7 +86,7 @@ export class AesServiceWorker {
 		let headers: Headers = new Headers();
 		let contentLength: number = await salmonFile.getLength();
 		headers.append("Content-Length", (streamSize) + "");
-		if (position != null)
+		if (position)
 			headers.append("Content-Range", "bytes " + position + "-" + (position + streamSize - 1) + "/" + contentLength);
 		headers.append("Content-Type", params.mimeType);
 		return new Response(stream, {

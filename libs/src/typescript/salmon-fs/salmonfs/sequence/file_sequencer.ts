@@ -78,7 +78,7 @@ export class FileSequencer implements INonceSequencer {
         let contents: string = await this.getContents();
         let configs: { [key: string]: NonceSequence } = this.#serializer.deserialize(contents);
         let sequence: NonceSequence | null = FileSequencer.#getSequence(configs, driveId);
-        if (sequence != null)
+        if (sequence)
             throw new SequenceException("Sequence already exists");
         let nsequence: NonceSequence = new NonceSequence(driveId, authId, null, null, Status.New);
         configs[driveId + ":" + authId] = nsequence;
@@ -101,7 +101,7 @@ export class FileSequencer implements INonceSequencer {
         let sequence: NonceSequence | null = FileSequencer.#getSequence(configs, driveId);
         if (sequence == null)
             throw new SequenceException("Sequence does not exist");
-        if (sequence.getNextNonce() != null)
+        if (sequence.getNextNonce())
             throw new SequenceException("Cannot reinitialize sequence");
         sequence.setNextNonce(startNonce);
         sequence.setMaxNonce(maxNonce);
@@ -178,14 +178,14 @@ export class FileSequencer implements INonceSequencer {
             console.error(ex);
             throw new SequenceException("Could not get contents", ex);
         } finally {
-            if (stream != null) {
+            if (stream) {
                 try {
                     await stream.close();
                 } catch (e) {
                     throw new SequenceException("Could not get contents", e);
                 }
             }
-            if (outputStream != null) {
+            if (outputStream) {
                 try {
         			await outputStream.flush();
                     await outputStream.close();
@@ -274,7 +274,7 @@ export class FileSequencer implements INonceSequencer {
             console.error(ex);
             throw new SequenceException("Could not save sequence file", ex);
         } finally {
-            if (outputStream != null) {
+            if (outputStream) {
                 await outputStream.flush();
                 try {
                     await outputStream.close();
@@ -282,7 +282,7 @@ export class FileSequencer implements INonceSequencer {
                     throw new SequenceException("Could not save sequence file", e);
                 }
             }
-            if (inputStream != null) {
+            if (inputStream) {
                 try {
                     await inputStream.close();
                 } catch (e) {
@@ -308,7 +308,7 @@ export class FileSequencer implements INonceSequencer {
             if (driveId.toUpperCase() == seq.getId().toUpperCase()) {
                 // there should be only one sequence available
                 if (seq.getStatus() == Status.Active || seq.getStatus() == Status.New) {
-                    if (sequence != null)
+                    if (sequence)
                         throw new SequenceException("Corrupt sequence config");
                     sequence = seq;
                 }

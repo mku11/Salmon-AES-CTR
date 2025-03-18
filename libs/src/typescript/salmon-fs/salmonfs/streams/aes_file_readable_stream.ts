@@ -76,7 +76,7 @@ export class AesFileReadableStream {
             type: 'bytes',
             async pull(controller: any) {
                 let buff = await reader.read();
-                if (buff != null)
+                if (buff)
                     controller.enqueue(buff);
                 else
                     controller.close();
@@ -377,12 +377,12 @@ export class ReadableStreamFileReader {
         }
         for (let i = 0; i < this.buffers.length; i++) {
             let buffer: CacheBuffer | null = this.buffers[i];
-            if (buffer != null && buffer.count == 0) {
+            if (buffer  && buffer.count == 0) {
                 this.lruBuffersIndex.unshift(i);
                 return buffer;
             }
         }
-        if (this.buffers[this.buffers.length - 1] != null)
+        if (this.buffers[this.buffers.length - 1])
             return this.buffers[this.buffers.length - 1];
         else
             return null;
@@ -398,7 +398,7 @@ export class ReadableStreamFileReader {
             return null;
         for (let i = 0; i < this.buffers.length; i++) {
             let buffer: CacheBuffer | null = this.buffers[i];
-            if (buffer != null && position >= buffer.startPos && position + count <= buffer.startPos + buffer.count) {
+            if (buffer  && position >= buffer.startPos && position + count <= buffer.startPos + buffer.count) {
                 // promote buffer to the front
                 delete this.lruBuffersIndex[i];
                 this.lruBuffersIndex.unshift(i);
@@ -433,7 +433,7 @@ export class ReadableStreamFileReader {
             return;
         for (let i = 0; i < this.buffers.length; i++) {
             let buffer = this.buffers[i];
-            if (buffer != null)
+            if (buffer)
                 buffer.clear();
             this.buffers[i] = null;
         }
@@ -445,7 +445,7 @@ export class ReadableStreamFileReader {
      * @throws IOException Thrown if there is an IO error.
      */
     private async closeStream(): Promise<void> {
-        if (this.stream != null)
+        if (this.stream)
             await this.stream.close();
         this.stream = null;
     }

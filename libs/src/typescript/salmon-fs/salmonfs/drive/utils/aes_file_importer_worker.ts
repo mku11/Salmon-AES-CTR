@@ -32,7 +32,7 @@ export class AesFileImporterWorker extends FileImporterWorker {
 
     async getTargetFile(params: any): Promise<IVirtualFile | null> {
         let realFile: IFile = await FileUtils.getInstance(params.importedFileClassType, params.importedFileHandle);
-        let targetFile: AesFile = new AesFile(realFile, null);
+        let targetFile: AesFile = new AesFile(realFile);
         targetFile.setAllowOverwrite(true);
         targetFile.setEncryptionKey(params.key);
         await targetFile.setApplyIntegrity(params.integrity, params.hash_key, params.chunk_size);
@@ -43,7 +43,7 @@ export class AesFileImporterWorker extends FileImporterWorker {
 let worker = new AesFileImporterWorker();
 if (typeof process === 'object') {
     const { parentPort } = await import("worker_threads");
-    if (parentPort != null)
+    if (parentPort)
         parentPort.addListener('message', (event: any) => worker.receive(worker, event));
 }
 else {

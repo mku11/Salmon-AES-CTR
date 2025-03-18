@@ -250,7 +250,7 @@ export class WSFileStream extends RandomAccessStream {
      */
     public override async read(buffer: Uint8Array, offset: number, count: number): Promise<number> {
         let bytesRead: number = 0;
-        if (this.buffer != null && this.bufferPosition < this.buffer.length) {
+        if (this.buffer  && this.bufferPosition < this.buffer.length) {
             for (; this.bufferPosition < this.buffer.length;) {
                 buffer[offset + bytesRead++] = this.buffer[this.bufferPosition++];
                 if (bytesRead == count)
@@ -333,21 +333,21 @@ export class WSFileStream extends RandomAccessStream {
     }
 
     async reset(): Promise<void> {
-        if (this.reader != null) {
+        if (this.reader) {
             if(this.readStream?.locked)
                 this.reader.releaseLock();
         }
         this.reader = null;
-        if(this.readStream != null)
+        if(this.readStream)
             await this.readStream.cancel();
         this.readStream = null;
 
-        if (this.writer != null) {
+        if (this.writer) {
             if(this.writeStream?.locked)
                 this.writer.releaseLock();
         }
         this.writer = null;
-        if(this.writeStream != null)
+        if(this.writeStream)
             await this.writeStream.close();
         this.writeStream = null;
         

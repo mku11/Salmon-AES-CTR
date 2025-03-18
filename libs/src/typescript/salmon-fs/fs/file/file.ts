@@ -23,7 +23,7 @@ SOFTWARE.
 */
 
 import { RandomAccessStream } from '../../../salmon-core/streams/random_access_stream.js';
-import { CopyOptions, IFile, MoveOptions, copyFileContents } from './ifile.js';
+import { CopyContentsOptions, CopyOptions, IFile, MoveOptions, copyFileContents } from './ifile.js';
 import { FileStream } from '../streams/file_stream.js';
 import { IOException } from '../../../salmon-core/streams/io_exception.js';
 
@@ -58,7 +58,7 @@ export class File implements IFile {
         try {
             let nDirHandle: FileSystemDirectoryHandle = await (this.#fileHandle as FileSystemDirectoryHandle)
                 .getDirectoryHandle(dirName, { create: false });
-            if (nDirHandle != null)
+            if (nDirHandle)
                 throw new Error("directory already exists");
         } catch (ex) { }
 
@@ -86,9 +86,9 @@ export class File implements IFile {
      * @return True if deletion is successful.
      */
     public async delete(): Promise<boolean> {
-		if (this.#fileHandle != null && this.#fileHandle.remove != undefined)
+		if (this.#fileHandle  && this.#fileHandle.remove != undefined)
 			this.#fileHandle.remove();
-        else if (this.#parent != null)
+        else if (this.#parent)
 			await (this.#parent.getPath() as FileSystemDirectoryHandle).removeEntry(this.getName(), {recursive: true});
         return !await this.exists();
     }
@@ -113,7 +113,7 @@ export class File implements IFile {
                     nFileHandle = await (this.#parent.getPath() as FileSystemDirectoryHandle).getDirectoryHandle(this.getName(), { create: false });
                 } catch (ex) { }
             }
-            if(nFileHandle != null)
+            if(nFileHandle)
                 return true;
         } catch (ex) { }
         return false;
@@ -124,9 +124,9 @@ export class File implements IFile {
      * @return The absolute path.
      */
     public getDisplayPath(): any {
-        let filename = this.#fileHandle != null ? this.#fileHandle.name : this.#name;
+        let filename = this.#fileHandle  ? this.#fileHandle.name : this.#name;
         if (this.#parent == null)
-            return "/" + (filename != null ? filename : "");
+            return "/" + (filename  ? filename : "");
         return this.#parent.getDisplayPath() + File.separator + filename;
     }
 
@@ -135,7 +135,7 @@ export class File implements IFile {
      * @return The name of this file or directory.
      */
     public getName(): string {
-        if (this.#fileHandle == null && this.#name != null)
+        if (this.#fileHandle == null && this.#name)
             return this.#name;
         else if (this.#fileHandle == null)
             throw new Error("Filehandle is not assigned");
@@ -190,7 +190,7 @@ export class File implements IFile {
      * @return
      */
     public async isDirectory(): Promise<boolean> {
-        return this.#fileHandle != null && this.#fileHandle.kind == 'directory';
+        return this.#fileHandle  && this.#fileHandle.kind == 'directory';
     }
 
     /**
@@ -198,7 +198,7 @@ export class File implements IFile {
      * @return
      */
     public async isFile(): Promise<boolean> {
-        return this.#fileHandle != null && !await this.isDirectory();
+        return this.#fileHandle  && !await this.isDirectory();
     }
 
     /**
@@ -251,18 +251,18 @@ export class File implements IFile {
     /**
      * Move this file or directory under a new directory.
      * @param newDir The target directory.
-     * @param {MoveOptions | null} options The options
+     * @param {MoveOptions} [options] The options
      * @return The moved file. Use this file for subsequent operations instead of the original.
      * @throws IOException Thrown if there is an IO error.
      */
-    public async move(newDir: IFile, options: MoveOptions | null = null): Promise<IFile> {
-        if(options == null)
+    public async move(newDir: IFile, options?: MoveOptions): Promise<IFile> {
+        if(!options)
             options = new MoveOptions();
-        let newName = options.newFilename != null ? options.newFilename : this.getName();
+        let newName = options.newFilename  ? options.newFilename : this.getName();
         if (newDir == null || !await newDir.exists())
             throw new IOException("Target directory does not exist");
         let newFile: IFile | null = await newDir.getChild(newName);
-        if (newFile != null && await newFile.exists())
+        if (newFile  && await newFile.exists())
             throw new IOException("Another file/directory already exists");
 
         if (typeof (this.#fileHandle.move) !== 'undefined') {
@@ -278,9 +278,9 @@ export class File implements IFile {
             let newFile: IFile | null = await newDir.getChild(newName);
             if (newFile == null)
                 throw new IOException("Could not move file");
-            if (parent != null) {
+            if (parent) {
                 let oldFile: IFile | null = await parent.getChild(oldFilename);
-                if (oldFile != null)
+                if (oldFile)
                     await oldFile.delete();
             }
             return newFile;
@@ -290,18 +290,18 @@ export class File implements IFile {
     /**
      * Move this file or directory under a new directory.
      * @param newDir    The target directory.
-     * @param {CopyOptions | null} options The options
+     * @param {CopyOptions} [options] The options
      * @return The copied file. Use this file for subsequent operations instead of the original.
      * @throws IOException Thrown if there is an IO error.
      */
-    public async copy(newDir: IFile, options: CopyOptions | null = null): Promise<IFile | null> {
-        if(options == null)
+    public async copy(newDir: IFile, options?: CopyOptions): Promise<IFile | null> {
+        if(!options)
             options = new CopyOptions();
-        let newName = options.newFilename != null ? options.newFilename : this.getName();
+        let newName = options.newFilename  ? options.newFilename : this.getName();
         if (newDir == null || !await newDir.exists())
             throw new IOException("Target directory does not exists");
         let newFile: IFile | null = await newDir.getChild(newName);
-        if (newFile != null && await newFile.exists())
+        if (newFile  && await newFile.exists())
             throw new IOException("Another file/directory already exists");
         if (await this.isDirectory()) {
             let parent: IFile | null = await this.getParent();
@@ -310,7 +310,9 @@ export class File implements IFile {
             return parent.createDirectory(newName);
         } else {
             newFile = await newDir.createFile(newName);
-            let res: boolean = await copyFileContents(this, newFile, false, options.onProgressChanged);
+            let copyContentOptions: CopyContentsOptions = new CopyContentsOptions();
+            copyContentOptions.onProgressChanged = options.onProgressChanged;
+            let res: boolean = await copyFileContents(this, newFile, copyContentOptions);
             return res ? newFile : null;
         }
     }

@@ -323,9 +323,9 @@ export class SalmonFSTestHelper {
             let digest = BitConverter.toHex(new Uint8Array(await crypto.subtle.digest("SHA-256", ms.toArray())));
             return digest;
         } finally {
-            if (ms != null)
+            if (ms)
                 await ms.close();
-            if (stream != null) {
+            if (stream) {
                 await stream.close();
             }
         }
@@ -369,7 +369,7 @@ export class SalmonFSTestHelper {
         if (shouldBeEqual)
             expect(hashPreImport).toBe(hashPostImport);
 		
-        expect(aesFile != null).toBeTruthy();
+        expect(aesFile).toBeTruthy();
         expect(await aesFile.exists()).toBeTruthy();
 		
         let aesFiles = await (await drive.getRoot()).listFiles();
@@ -434,7 +434,7 @@ export class SalmonFSTestHelper {
 
         // import
         let aesFile = await SalmonFSTestHelper.fileImporter.importFile(fileToImport, rootDir);
-        expect(aesFile != null).toBeTruthy();
+        expect(aesFile).toBeTruthy();
         expect(await aesFile.exists()).toBeTruthy();
 
         // search
@@ -460,7 +460,7 @@ export class SalmonFSTestHelper {
         // trigger the cache to add the filename
         let basename = await aesFile.getName();
 
-        expect(aesFile != null).toBeTruthy();
+        expect(aesFile).toBeTruthy();
 
         expect(await aesFile.exists()).toBeTruthy();
 
@@ -472,7 +472,7 @@ export class SalmonFSTestHelper {
         else
             newFile = await aesFile.copy(newDir1, null);
 
-        expect(newFile != null).toBeTruthy();
+        expect(newFile).toBeTruthy();
         let checkSumAfter = await SalmonFSTestHelper.getChecksum(await newFile.getRealFile());
 
         expect(checkSumAfter).toBe(checkSumBefore);

@@ -60,12 +60,12 @@ export class FileCommander {
      *
      * @param {IFile[]} filesToImport     The files to import.
      * @param {IVirtualFile} importDir         The target directory.
-     * @param {BatchImportOptions} options The options
+     * @param {BatchImportOptions} [options] The options
      * @return {Promise<IVirtualFile[]>} The imported files if completes successfully.
      * @throws Exception If there was an error during import
      */
-    public async importFiles(filesToImport: IFile[], importDir: IVirtualFile, options: BatchImportOptions | null = null): Promise<IVirtualFile[]> {
-        if(options == null)
+    public async importFiles(filesToImport: IFile[], importDir: IVirtualFile, options?: BatchImportOptions): Promise<IVirtualFile[]> {
+        if(!options)
             options = new BatchImportOptions();
         this.stopJobs = false;
         let importedFiles: IVirtualFile[] = [];
@@ -108,22 +108,22 @@ export class FileCommander {
 
     private async importRecursively(fileToImport: IFile, importDir: IVirtualFile,
         deleteSource: boolean, integrity: boolean,
-        onProgressChanged: ((progress: RealFileTaskProgress) => void) | null,
-        autoRename: ((realFile: IFile) => Promise<string>) | null,
-        onFailed: ((realFile: IFile, error: Error | unknown) => void) | null,
+        onProgressChanged: ((progress: RealFileTaskProgress) => void) | undefined,
+        autoRename: ((realFile: IFile) => Promise<string>) | undefined,
+        onFailed: ((realFile: IFile, error: Error | unknown) => void) | undefined,
         importedFiles: IVirtualFile[], count: number[], total: number,
         existingFiles: { [key: string]: IVirtualFile }): Promise<void> {
 
         let sfile: IVirtualFile | null = fileToImport.getName() in existingFiles
             ? existingFiles[fileToImport.getName()] : null;
         if (await fileToImport.isDirectory()) {
-            if (onProgressChanged != null)
+            if (onProgressChanged)
                 onProgressChanged(new RealFileTaskProgress(fileToImport, 0, 1, count[0], total));
             if (sfile == null || !await sfile.exists())
                 sfile = await importDir.createDirectory(fileToImport.getName());
-            else if (sfile != null && await sfile.exists() && await sfile.isFile() && autoRename != null)
+            else if (sfile  && await sfile.exists() && await sfile.isFile() && autoRename)
                 sfile = await importDir.createDirectory(await autoRename(fileToImport));
-            if (onProgressChanged != null)
+            if (onProgressChanged)
                 onProgressChanged(new RealFileTaskProgress(fileToImport, 1, 1, count[0], total));
             count[0]++;
             if (sfile == null)
@@ -143,27 +143,27 @@ export class FileCommander {
         } else {
             try {
                 let filename: string = fileToImport.getName();
-                if (sfile != null && (await sfile.exists() || await sfile.isDirectory()) && autoRename != null)
+                if (sfile  && (await sfile.exists() || await sfile.isDirectory()) && autoRename)
                     filename = await autoRename(fileToImport);
                 let importOptions: FileImportOptions = new FileImportOptions();
                 importOptions.filename = filename;
                 importOptions.deleteSource = deleteSource;
                 importOptions.integrity = integrity;
                 importOptions.onProgress = (bytes, totalBytes) => {
-                    if (onProgressChanged != null) {
+                    if (onProgressChanged) {
                         onProgressChanged(new RealFileTaskProgress(fileToImport,
                             bytes, totalBytes, count[0], total));
                     }
                 };
                 sfile = await this.fileImporter.importFile(fileToImport, importDir, importOptions);
-                if (sfile != null) {
+                if (sfile) {
                     existingFiles[await sfile.getName()] = sfile;
                     importedFiles.push(sfile);
                 }
                 count[0]++;
             } catch (ex) {
                 if (!this.onError(ex)) {
-                    if (onFailed != null)
+                    if (onFailed)
                         onFailed(fileToImport, ex);
                 }
             }
@@ -175,12 +175,12 @@ export class FileCommander {
      *
      * @param {IVirtualFile[]} filesToExport     The files to export.
      * @param {IFile} exportDir         The export target directory
-     * @param {BatchExportOptions | null} options The options
+     * @param {BatchExportOptions} [options] The options
      * @return {Promise<IFile[]>} The exported files
      * @throws Exception
      */
-    public async exportFiles(filesToExport: IVirtualFile[], exportDir: IFile, options: BatchExportOptions | null = null): Promise<IFile[]> {
-        if(options == null)
+    public async exportFiles(filesToExport: IVirtualFile[], exportDir: IFile, options?: BatchExportOptions): Promise<IFile[]> {
+        if(!options)
             options = new BatchExportOptions();
         this.stopJobs = false;
         let exportedFiles: IFile[] = [];
@@ -221,9 +221,9 @@ export class FileCommander {
 
     private async exportRecursively(fileToExport: IVirtualFile, exportDir: IFile,
         deleteSource: boolean, integrity: boolean,
-        onProgressChanged: ((progress: IVirtualFileTaskProgress) => void) | null,
-        autoRename: ((file: IFile) => Promise<string>) | null,
-        onFailed: ((file: IVirtualFile, error: Error | unknown) => void) | null,
+        onProgressChanged: ((progress: IVirtualFileTaskProgress) => void) | undefined,
+        autoRename: ((file: IFile) => Promise<string>) | undefined,
+        onFailed: ((file: IVirtualFile, error: Error | unknown) => void) | undefined,
         exportedFiles: IFile[], count: number[], total: number,
         existingFiles: { [key: string]: IFile }): Promise<void> {
         let rfile: IFile | null = await fileToExport.getName() in existingFiles
@@ -232,9 +232,9 @@ export class FileCommander {
         if (await fileToExport.isDirectory()) {
             if (rfile == null || !await rfile.exists())
                 rfile = await exportDir.createDirectory(await fileToExport.getName());
-            else if (rfile != null && await rfile.isFile() && autoRename != null)
+            else if (rfile  && await rfile.isFile() && autoRename)
                 rfile = await exportDir.createDirectory(await autoRename(rfile));
-            if (onProgressChanged != null)
+            if (onProgressChanged)
                 onProgressChanged(new IVirtualFileTaskProgress(fileToExport as IVirtualFile, 1, 1, count[0], total));
             count[0]++;
             let nExistingFiles: { [key: string]: IFile } = await this.getExistingRealFiles(rfile);
@@ -253,28 +253,28 @@ export class FileCommander {
         } else {
             try {
                 let filename: string = await fileToExport.getName();
-                if (rfile != null && await rfile.exists() && autoRename != null)
+                if (rfile  && await rfile.exists() && autoRename)
                     filename = await autoRename(rfile);
                 let exportOptions: FileExportOptions = new FileExportOptions();
                 exportOptions.filename = filename;
                 exportOptions.deleteSource = deleteSource;
                 exportOptions.integrity = integrity;
                 exportOptions.onProgress = (bytes, totalBytes) => {
-                    if (onProgressChanged != null) {
+                    if (onProgressChanged) {
                         onProgressChanged(new IVirtualFileTaskProgress(fileToExport as IVirtualFile,
                             bytes, totalBytes, count[0], total));
                     }
                 };
                 exportOptions.filename = filename;
                 rfile = await this.fileExporter.exportFile(fileToExport as IVirtualFile, exportDir, exportOptions);
-                if (rfile != null) {
+                if (rfile) {
                     existingFiles[rfile.getName()] = rfile;
                     exportedFiles.push(rfile);
                 }
                 count[0]++;
             } catch (ex) {
                 if (!this.onError(ex)) {
-                    if (onFailed != null)
+                    if (onFailed)
                         onFailed(fileToExport as IVirtualFile, ex);
                 }
             }
@@ -313,10 +313,10 @@ export class FileCommander {
      * Delete files from a drive.
      *
      * @param {IVirtualFile[]} filesToDelete The files to delete.
-     * @param {FileDeleteOptions | null} options The options.
+     * @param {FileDeleteOptions} [options] The options.
      */
-    public async deleteFiles(filesToDelete: IVirtualFile[], options: FileDeleteOptions | null = null): Promise<void> {
-        if(options == null)
+    public async deleteFiles(filesToDelete: IVirtualFile[], options?: FileDeleteOptions): Promise<void> {
+        if(!options)
             options = new FileDeleteOptions();
         this.stopJobs = false;
         let count: number[] = [0];
@@ -336,7 +336,7 @@ export class FileCommander {
             deleteOptions.onProgressChanged = (file, position, length) => {
                 if (this.stopJobs)
                     throw new Error();
-                if (options.onProgressChanged != null) {
+                if (options.onProgressChanged) {
                     try {
                         options.onProgressChanged(new IVirtualFileTaskProgress(
                             file, position, length, count[0], finalTotal));
@@ -356,11 +356,11 @@ export class FileCommander {
      *
      * @param {IVirtualFile[]} filesToCopy       The array of files to copy.
      * @param {IVirtualFile} dir               The target directory.
-     * @param {BatchCopyOptions | null} options The options
+     * @param {BatchCopyOptions} [options] The options
      * @throws Exception When a error during copying occurs.
      */
-    public async copyFiles(filesToCopy: IVirtualFile[], dir: IVirtualFile, options: BatchCopyOptions | null = null): Promise<void> {
-        if(options == null)
+    public async copyFiles(filesToCopy: IVirtualFile[], dir: IVirtualFile, options?: BatchCopyOptions): Promise<void> {
+        if(!options)
             options = new BatchCopyOptions();
         this.stopJobs = false;
         let count: number[] = [0];
@@ -389,7 +389,7 @@ export class FileCommander {
                 moveOptions.onProgressChanged = (file, position, length) => {
                     if (this.stopJobs)
                         throw new Error();
-                    if (options.onProgressChanged != null) {
+                    if (options.onProgressChanged) {
                         try {
                             options.onProgressChanged(new IVirtualFileTaskProgress(
                                 file, position, length, count[0], finalTotal));
@@ -408,7 +408,7 @@ export class FileCommander {
                 copyOptions.onProgressChanged = (file, position, length) => {
                     if (this.stopJobs)
                         throw new Error();
-                    if (options.onProgressChanged != null) {
+                    if (options.onProgressChanged) {
                         try {
                             options.onProgressChanged(new IVirtualFileTaskProgress(file, position, length, count[0], finalTotal));
                         } catch (ignored) {
@@ -471,10 +471,10 @@ export class FileCommander {
      *
      * @param {IVirtualFile} dir           The directory to start the search.
      * @param {string} terms         The terms to search for.
-     * @param {SearchOptions | null} options The options
+     * @param {SearchOptions} [options] The options
      * @return {Promise<IVirtualFile[]>} An array with all the results found.
      */
-    public async search(dir: IVirtualFile, terms: string, options: SearchOptions | null = null): Promise<IVirtualFile[]> {
+    public async search(dir: IVirtualFile, terms: string, options?: SearchOptions): Promise<IVirtualFile[]> {
         return await this.fileSearcher.search(dir, terms, options);
     }
 
@@ -653,12 +653,12 @@ export class FileDeleteOptions {
     /**
      * Callback when delete fails
      */
-    onFailed: ((file: IVirtualFile, error: Error | unknown) => void) | null = null;
+    onFailed?: ((file: IVirtualFile, error: Error | unknown) => void);
 
     /**
      * Callback when progress changes
      */
-    onProgressChanged: ((progress: IVirtualFileTaskProgress) => void) | null = null;
+    onProgressChanged?: ((progress: IVirtualFileTaskProgress) => void);
 }
 
 
@@ -679,17 +679,17 @@ export class BatchImportOptions {
     /**
      * Callback when a file with the same name exists
      */
-    autoRename: ((file: IFile) => Promise<string>) | null = null;
+    autoRename?: ((file: IFile) => Promise<string>);
 
     /**
      * Callback when import fails
      */
-    onFailed: ((file: IFile, error: Error | unknown) => void) | null = null;
+    onFailed?: ((file: IFile, error: Error | unknown) => void);
 
     /**
      * Callback when progress changes
      */
-    onProgressChanged: ((progress: RealFileTaskProgress) => void) | null = null;
+    onProgressChanged?: ((progress: RealFileTaskProgress) => void);
 }
 
 /**
@@ -709,17 +709,17 @@ export class BatchExportOptions {
     /**
      * Callback when a file with the same name exists
      */
-    autoRename: ((file: IFile) => Promise<string>) | null = null;
+    autoRename?: ((file: IFile) => Promise<string>);
 
     /**
      * Callback when import fails
      */
-    onFailed: ((file: IVirtualFile, error: Error | unknown) => void) | null = null;
+    onFailed?: ((file: IVirtualFile, error: Error | unknown) => void);
 
     /**
      * Callback when progress changes
      */
-    onProgressChanged: ((progress: IVirtualFileTaskProgress) => void) | null = null;
+    onProgressChanged?: ((progress: IVirtualFileTaskProgress) => void);
 }
 
 /**
@@ -734,7 +734,7 @@ export class BatchCopyOptions {
     /**
      * Callback when another file with the same name exists.
      */
-    autoRename: ((file: IVirtualFile) => Promise<string>) | null = null;
+    autoRename?: ((file: IVirtualFile) => Promise<string>);
 
     /**
      * True to autorename folders
@@ -744,10 +744,10 @@ export class BatchCopyOptions {
     /**
      * Callback when copy fails
      */
-    onFailed: ((file: IVirtualFile, error: Error | unknown) => void) | null = null;
+    onFailed?: ((file: IVirtualFile, error: Error | unknown) => void);
 
     /**
      * Callback when progress changes.
      */
-    onProgressChanged: ((progress: IVirtualFileTaskProgress) => void) | null = null;
+    onProgressChanged?: ((progress: IVirtualFileTaskProgress) => void);
 }

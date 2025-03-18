@@ -222,7 +222,7 @@ export class FileStream extends RandomAccessStream {
      * @throws IOException Thrown if there is an IO error.
      */
     public override async close(): Promise<void> {
-        if (this.#writablefileStream != null)
+        if (this.#writablefileStream)
             await this.#writablefileStream.close();
     }
 }

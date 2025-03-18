@@ -55,7 +55,7 @@ export class Handler {
 					if (path == null && !remove)
 						resolve(null);
 					if (reg.active) {
-						if (path != null || remove) {
+						if (path  || remove) {
 							var messageChannel = new MessageChannel();
 							messageChannel.port1.onmessage = function (event) {
 								if (event.data.status == 'ok') {

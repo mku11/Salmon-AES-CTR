@@ -23,7 +23,6 @@ SOFTWARE.
 */
 
 import { IOException } from "../../streams/io_exception.js";
-import { MemoryStream } from "../../streams/memory_stream.js";
 import { RandomAccessStream, SeekOrigin } from "../../streams/random_access_stream.js";
 import { HmacSHA256Provider } from "../integrity/hmac_sha256_provider.js";
 import { Integrity } from "../integrity/integrity.js";
@@ -110,7 +109,7 @@ export class AesStream extends RandomAccessStream {
      * @param {EncryptionMode} mode The EncryptionMode Encrypt or Decrypt.
      * @param {Uint8Array|null} headerData The header data to be embedded if you use Encryption.
      * @param {Uint8Array | null} hashKey The hash key to be used for integrity checks.
-     * @param {number | null} chunkSize The chunk size for integrity chunks.
+     * @param {number} chunkSize The chunk size for integrity chunks.
      * @return {Promise<number>} The size of the output data.
      * @throws SalmonSecurityException Thrown when error with security
      * @throws IntegrityException Thrown if the data are corrupt or tampered with.
@@ -148,7 +147,7 @@ export class AesStream extends RandomAccessStream {
      * @see {@link https://en.wikipedia.org/wiki/Block_cipher_mode_of_operation#Counter_(CTR)|Salmon README.md}
      *
      * @param {Uint8Array} key            The AES key that is used to encrypt decrypt
-     * @param {Uint8Array} nonce          The nonce used for the initial counter
+     * @param {Uint8Array | null} nonce          The nonce used for the initial counter
      * @param {EncryptionMode} encryptionMode Encryption mode Encrypt or Decrypt this cannot change later
      * @param {RandomAccessStream} baseStream     The base Stream that will be used to read the data
      * @param {EncryptionFormat} format         The format to use, see {@link EncryptionFormat}
@@ -183,11 +182,11 @@ export class AesStream extends RandomAccessStream {
      */
     async #init(): Promise<void> {
         // init only once
-        if (this.#transformer.getKey() != null)
+        if (this.#transformer.getKey())
             return;
         this.#header = await this.getOrCreateHeader(this.#format, this.#nonce, 
             this.#enableIntegrity, this.#chunkSize);
-        if (this.#header != null) {
+        if (this.#header) {
             this.#chunkSize = this.#header.getChunkSize();
             this.#nonce = this.#header.getNonce();
         } else {
@@ -354,7 +353,7 @@ export class AesStream extends RandomAccessStream {
      *
      * @param {boolean} integrity True to enable integrity
      * @param {Uint8Array | null} hashKey The hash key for integrity
-     * @param {number | null} chunkSize The chunk size
+     * @param {number} chunkSize The chunk size
      * @throws SalmonSecurityException Thrown when error with security
      * @throws IntegrityException Thrown if the data are corrupt or tampered with.
      */
@@ -409,7 +408,7 @@ export class AesStream extends RandomAccessStream {
      * Flushes any buffered data to the base stream.
      */
     public async flush(): Promise<void> {
-        if (this.#baseStream != null) {
+        if (this.#baseStream) {
             await this.#baseStream.flush();
         }
     }
@@ -533,7 +532,7 @@ export class AesStream extends RandomAccessStream {
      * Close base stream
      */
     async #closeStreams(): Promise<void> {
-        if (this.#baseStream != null) {
+        if (this.#baseStream) {
             if (await this.canWrite())
                 await this.#baseStream.flush();
             await this.#baseStream.close();
@@ -631,7 +630,7 @@ export class AesStream extends RandomAccessStream {
                     srcBuffer = this.#stripSignatures(srcBuffer, this.#integrity.getChunkSize());
                 }
                 let destBuffer: Uint8Array = new Uint8Array(srcBuffer.length);
-                if (this.#integrity.useIntegrity() && integrityHashes != null && this.#header) {
+                if (this.#integrity.useIntegrity() && integrityHashes  && this.#header) {
                     await this.#integrity.verifyHashes(integrityHashes, srcBuffer, pos == 0 && bytes == 0 ? this.#header?.getHeaderData() : null);
                 }
                 await this.#transformer.decryptData(srcBuffer, 0, destBuffer, 0, srcBuffer.length);
@@ -805,7 +804,7 @@ export class AesStream extends RandomAccessStream {
         if (chunkSize <= 0)
             chunkSize = buffer.length;
         while (pos < buffer.length) {
-            if (hashes != null) {
+            if (hashes) {
                 await this.#baseStream.write(hashes[chunk], 0, hashes[chunk].length);
             }
             let len: number = Math.min(chunkSize, buffer.length - pos);

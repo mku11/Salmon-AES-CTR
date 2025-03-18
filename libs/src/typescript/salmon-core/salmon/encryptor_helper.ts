@@ -39,7 +39,7 @@ import { EncryptionFormat } from "./streams/encryption_format.js";
  * @param format    The format to use, see {@link EncryptionFormat}
  * @param {boolean} integrity   True to apply integrity.
  * @param {Uint8Array | null} hashKey     The key to be used for integrity application.
- * @param {number | null} chunkSize   The chunk size. Thrown if there is an error with the stream.
+ * @param {number} chunkSize   The chunk size. Thrown if there is an error with the stream.
  * @returns {Promise<{startPos: number,endPos: number}>} The number of bytes encrypted.
  * @throws SalmonSecurityException  Thrown if there is a security exception with the stream.
  * @throws IntegrityException Thrown if integrity cannot be applied.
@@ -79,9 +79,9 @@ export async function encryptData(data: Uint8Array, start: number, count: number
     }
     finally {
         await outputStream.close();
-        if (stream != null)
+        if (stream)
             await stream.close();
-        if (inputStream != null)
+        if (inputStream)
             await inputStream.close();
     }
     let endPos: number = await outputStream.getPosition();

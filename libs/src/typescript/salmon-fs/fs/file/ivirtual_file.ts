@@ -23,7 +23,7 @@ SOFTWARE.
 */
 
 import { RandomAccessStream } from "../../../salmon-core/streams/random_access_stream"
-import { IFile } from "./ifile";
+import { CopyOptions, IFile, MoveOptions } from "./ifile";
 /*
 * A virtual file.
 */
@@ -134,37 +134,37 @@ export interface IVirtualFile {
 
     /**
      * Move this file.
-     * @param dir The destination directory
-     * @param OnProgressListener 
+     * @param {IVirtualFile} dir The destination directory
+     * @param {MoveOptions} [options]
      */
-    move(dir: IVirtualFile, OnProgressListener: ((position: number, length: number) => void) | null): Promise<IVirtualFile>;
+    move(dir: IVirtualFile, options?: MoveOptions): Promise<IVirtualFile>;
 
     /**
      * Copy this file
      * @param dir The destination directory
-     * @param OnProgressListener 
+     * @param {CopyOptions} [options] The options
      */
-    copy(dir: IVirtualFile, OnProgressListener: ((position: number, length: number) => void) | null): Promise<IVirtualFile>;
+    copy(dir: IVirtualFile, options?: CopyOptions): Promise<IVirtualFile>;
 
     /**
      * Copy recursively
      * @param {IVirtualFile} dest The destination directory
-     * @param {VirtualRecursiveCopyOptions| null} options The options
+     * @param {VirtualRecursiveCopyOptions} [options] The options
      */
-    copyRecursively(dest: IVirtualFile, options: VirtualRecursiveCopyOptions | null): Promise<void>;
+    copyRecursively(dest: IVirtualFile, options?: VirtualRecursiveCopyOptions): Promise<void>;
 
     /**
      * Move recursively
      * @param {IVirtualFile} dest The destination directory
-     * @param {VirtualRecursiveMoveOptions| null} options The options
+     * @param {VirtualRecursiveMoveOptions} [options] The options
      */
-    moveRecursively(dest: IVirtualFile, options: VirtualRecursiveMoveOptions| null): Promise<void>;
+    moveRecursively(dest: IVirtualFile, options?: VirtualRecursiveMoveOptions): Promise<void>;
 
     /**
      * Delete recursively
-     * @param {VirtualRecursiveDeleteOptions| null} options The options
+     * @param {VirtualRecursiveDeleteOptions} [options] The options
      */
-    deleteRecursively(options: VirtualRecursiveDeleteOptions| null): Promise<void>;
+    deleteRecursively(options?: VirtualRecursiveDeleteOptions): Promise<void>;
 }
 
 /**
@@ -174,7 +174,7 @@ export class VirtualRecursiveCopyOptions {
     /**
      * Callback when file with same name exists
      */
-    autoRename: ((file: IVirtualFile) => Promise<string>) | null = null;
+    autoRename?: ((file: IVirtualFile) => Promise<string>);
 
     /**
      * True to autorename folders
@@ -184,12 +184,12 @@ export class VirtualRecursiveCopyOptions {
     /**
      * Callback when file changes
      */
-    onFailed: ((file: IVirtualFile, ex: Error) => void) | null = null;
+    onFailed?: ((file: IVirtualFile, ex: Error) => void);
 
     /**
      * Callback where progress changed
      */
-    onProgressChanged: ((file: IVirtualFile, position: number, length: number) => void) | null = null;
+    onProgressChanged?: ((file: IVirtualFile, position: number, length: number) => void);
 }
 
 /**
@@ -199,7 +199,7 @@ export class VirtualRecursiveMoveOptions {
     /**
      * Callback when file with the same name exists
      */
-    autoRename: ((file: IVirtualFile) => Promise<string>) | null = null;
+    autoRename?: ((file: IVirtualFile) => Promise<string>);
 
     /**
      * True to autorename folders
@@ -209,12 +209,12 @@ export class VirtualRecursiveMoveOptions {
     /**
      * Callback when file failed
      */
-    onFailed: ((file: IVirtualFile, ex: Error) => void) | null = null;
+    onFailed?: ((file: IVirtualFile, ex: Error) => void);
     
     /**
      * Callback when progress changes
      */
-    onProgressChanged: ((file: IVirtualFile, position: number, length: number) => void) | null = null;
+    onProgressChanged?: ((file: IVirtualFile, position: number, length: number) => void);
 }
 
 
@@ -225,10 +225,10 @@ export class VirtualRecursiveDeleteOptions {
     /**
      * Callback when file failed
      */
-    onFailed: ((file: IVirtualFile, ex: Error) => void) | null = null;
+    onFailed?: ((file: IVirtualFile, ex: Error) => void);
 
     /**
      * Callback when progress changed
      */
-    onProgressChanged: ((file: IVirtualFile, position: number, length: number) => void) | null = null;
+    onProgressChanged?: ((file: IVirtualFile, position: number, length: number) => void);
 }

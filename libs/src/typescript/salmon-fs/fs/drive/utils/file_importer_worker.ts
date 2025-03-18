@@ -66,7 +66,7 @@ export class FileImporterWorker {
                 let msg = { message: 'progress', index: params.index, position: position, length: length };
                 if (typeof process === 'object') {
                     const { parentPort } = await import("worker_threads");
-                    if (parentPort != null) {
+                    if (parentPort) {
                         parentPort.postMessage(msg);
                     }
                 }
@@ -84,7 +84,7 @@ export class FileImporterWorker {
             let msgComplete = { message: 'complete', totalBytesRead: totalBytesRead[0] };
             if (typeof process === 'object') {
                 const { parentPort } = await import("worker_threads");
-                if (parentPort != null) {
+                if (parentPort) {
                     parentPort.postMessage(msgComplete);
                 }
             }
@@ -97,7 +97,7 @@ export class FileImporterWorker {
             let msgError = { message: 'error', error: exMsg, type: type };
             if (typeof process === 'object') {
                 const { parentPort } = await import("worker_threads");
-                if (parentPort != null) {
+                if (parentPort) {
                     parentPort.postMessage(msgError);
                 }
             }

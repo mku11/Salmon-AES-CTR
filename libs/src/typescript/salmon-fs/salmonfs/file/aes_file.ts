@@ -58,7 +58,7 @@ import { IVirtualFile, VirtualRecursiveCopyOptions, VirtualRecursiveMoveOptions,
 export class AesFile implements IVirtualFile {
     public static readonly separator: string = "/";
 
-    readonly #drive: AesDrive | null = null;
+    readonly #drive: AesDrive | undefined;
     readonly #format: EncryptionFormat;
     readonly #realFile: IFile;
 
@@ -79,19 +79,19 @@ export class AesFile implements IVirtualFile {
      * Provides a file handle that can be used to create encrypted files.
      * Requires a virtual drive that supports the underlying filesystem see IFile.
      *
-     * @param {AesDrive | null} drive    The file virtual system that will be used with file operations
      * @param {IFile} realFile The real file
+     * @param {AesDrive} [drive]    The file virtual system that will be used with file operations
      */
-    public constructor(realFile: IFile, drive: AesDrive | null = null, format: EncryptionFormat = EncryptionFormat.Salmon) {
+    public constructor(realFile: IFile, drive?: AesDrive, format: EncryptionFormat = EncryptionFormat.Salmon) {
         this.#realFile = realFile;
         this.#drive = drive;
         this.#format = format;
         
-        if (this.#integrity && drive != null)
+        if (this.#integrity && drive)
             this.#reqChunkSize = drive.getDefaultFileChunkSize();
-        if (drive != null && drive.getKey() != null) {
+        if (drive != null && drive.getKey()) {
             let key: DriveKey | null = drive.getKey();
-            if (key != null)
+            if (key)
                 this.#hashKey = key.getHashKey();
         }
     }
@@ -113,7 +113,7 @@ export class AesFile implements IVirtualFile {
     /**
      * Get the file chunk size from the header.
      *
-     * @return The chunk size.
+     * @return {Promise<number>} The chunk size.
      * @throws IOException Throws exceptions if the format is corrupt.
      */
     public async getFileChunkSize(): Promise<number> {
@@ -126,13 +126,13 @@ export class AesFile implements IVirtualFile {
     /**
      * Get the custom {@link Header} from this file.
      *
-     * @return
+     * @return {Promise<Header | null>} The header
      * @throws IOException Thrown if there is an IO error.
      */
     public async getHeader(): Promise<Header | null> {
         if (!(await this.exists()))
             return null;
-        if (this.#_header != null)
+        if (this.#_header)
             return this.#_header;
         let header: Header | null = new Header(new Uint8Array());
         let stream: RandomAccessStream | null = null;
@@ -143,7 +143,7 @@ export class AesFile implements IVirtualFile {
             console.error(ex);
             throw new IOException("Could not get file header", ex);
         } finally {
-            if (stream != null) {
+            if (stream) {
                 await stream.close();
             }
         }
@@ -154,7 +154,7 @@ export class AesFile implements IVirtualFile {
     /**
      * Retrieves a SalmonStream that will be used for decrypting the file contents.
      *
-     * @return
+     * @return {Promise<AesStream>} The stream
      * @throws IOException Thrown if there is an IO error.
      * @throws SalmonSecurityException Thrown when error with security
      * @throws IntegrityException Thrown if the data are corrupt or tampered with.
@@ -198,9 +198,9 @@ export class AesFile implements IVirtualFile {
     /**
      * Get a {@link AesStream} for encrypting/writing contents to this file.
      *
-     * @param nonce Nonce to be used for encryption. Note that each file should have
+     * @param {Uint8Array | null} nonce Nonce to be used for encryption. Note that each file should have
      *              a unique nonce see {@link AesDrive#getNextNonce()}.
-     * @return The output stream.
+     * @return {Promise<AesStream>} The output stream.
      * @throws Exception
      */
     public async getOutputStream(nonce: Uint8Array | null = null): Promise<AesStream> {
@@ -213,16 +213,16 @@ export class AesFile implements IVirtualFile {
         if (nonceBytes == null) {
             // set it to zero (disabled integrity) or get the default chunk
             // size defined by the drive
-            if (this.#integrity && this.#reqChunkSize == null && this.#drive != null)
+            if (this.#integrity && this.#reqChunkSize == null && this.#drive)
                 this.#reqChunkSize = this.#drive.getDefaultFileChunkSize();
             else if (!this.#integrity)
                 this.#reqChunkSize = 0;
             if (this.#reqChunkSize == null)
                 throw new IntegrityException("File requires a chunk size");
 
-            if (nonce != null)
+            if (nonce)
                 this.#requestedNonce = nonce;
-            else if (this.#requestedNonce == null && this.#drive != null)
+            else if (this.#requestedNonce == null && this.#drive)
                 this.#requestedNonce = await this.#drive.getNextNonce();
 
             if (this.#requestedNonce == null)
@@ -251,13 +251,14 @@ export class AesFile implements IVirtualFile {
 
     /**
      * Returns the current encryption key
+     * @returns {Uint8Array | null} The key
      */
     public getEncryptionKey(): Uint8Array | null {
-        if (this.#encryptionKey != null)
+        if (this.#encryptionKey)
             return this.#encryptionKey;
-        if (this.#drive != null) {
+        if (this.#drive) {
             let key: DriveKey | null = this.#drive.getKey();
-            if (key != null)
+            if (key)
                 return key.getDriveKey();
         }
         return null;
@@ -266,7 +267,7 @@ export class AesFile implements IVirtualFile {
     /**
      * Sets the encryption key
      *
-     * @param encryptionKey The AES encryption key to be used
+     * @param {Uint8Array | null} encryptionKey The AES encryption key to be used
      */
     public setEncryptionKey(encryptionKey: Uint8Array | null): void {
         this.#encryptionKey = encryptionKey;
@@ -275,7 +276,8 @@ export class AesFile implements IVirtualFile {
     /**
      * Return the current header data that are stored in the file
      *
-     * @param realFile The real file containing the data
+     * @param {IFile} realFile The real file containing the data
+     * @returns {Promise<Uint8Array>} The header data.
      */
     async #getRealFileHeaderData(realFile: IFile): Promise<Uint8Array> {
         let realStream: RandomAccessStream = await realFile.getInputStream();
@@ -287,6 +289,7 @@ export class AesFile implements IVirtualFile {
 
     /**
      * Retrieve the current hash key that is used to encrypt / decrypt the file contents.
+     * @returns {Uint8Array | null} The hash key.
      */
     getHashKey(): Uint8Array | null {
         return this.#hashKey;
@@ -295,17 +298,17 @@ export class AesFile implements IVirtualFile {
     /**
      * Enabled verification of file integrity during read() and write()
      *
-     * @param integrity True if enable integrity verification
-     * @param hashKey   The hash key to be used for verification
+     * @param {boolean} integrity True if enable integrity verification
+     * @param {Uint8Array | null} hashKey   The hash key to be used for verification
      */
     public async setVerifyIntegrity(integrity: boolean, hashKey: Uint8Array | null = null): Promise<void> {
         let header: Header | null = await this.getHeader();
         if(header == null && integrity)
             throw new IntegrityException("File does not support integrity");
 
-        if (integrity && hashKey == null && this.#drive != null) {
+        if (integrity && hashKey == null && this.#drive) {
             let key: DriveKey | null = this.#drive.getKey();
-            if (key != null)
+            if (key)
                 hashKey = key.getHashKey();
         }
         this.#reqChunkSize = await this.getFileChunkSize();
@@ -321,11 +324,9 @@ export class AesFile implements IVirtualFile {
 
     /**
      * Appy integrity when writing to file.
-     * 
-     * @param integrity True to apply integrity
-     * @param hashKey The hash key
-     * @param requestChunkSize 0 use default file chunk.
-     *                         A positive number to specify integrity chunks.
+     * @param {boolean} integrity True to apply integrity
+     * @param {Uint8Array | null} hashKey The hash key
+     * @param {number} requestChunkSize A positive number to specify integrity chunk size.
      */
     public async setApplyIntegrity(integrity: boolean, hashKey: Uint8Array | null = null, requestChunkSize: number = 0): Promise<void> {
         let header: Header | null = await this.getHeader();
@@ -335,9 +336,9 @@ export class AesFile implements IVirtualFile {
         if (requestChunkSize < 0)
             throw new IntegrityException("Chunk size needs to be zero for default chunk size or a positive value");
 
-        if (integrity && hashKey == null && this.#drive != null) {
+        if (integrity && hashKey == null && this.#drive) {
             let key: DriveKey | null = this.#drive.getKey();
-            if (key != null)
+            if (key)
                 hashKey = key.getHashKey();
         }
         
@@ -346,7 +347,7 @@ export class AesFile implements IVirtualFile {
 
         this.#integrity = integrity;
         this.#reqChunkSize = requestChunkSize;
-        if (integrity && this.#reqChunkSize == null && this.#drive != null)
+        if (integrity && this.#reqChunkSize == null && this.#drive)
             this.#reqChunkSize = this.#drive.getDefaultFileChunkSize();
         this.#hashKey = hashKey;
     }
@@ -356,7 +357,7 @@ export class AesFile implements IVirtualFile {
      * This is not recommended if you use the stream on storing files or generally data if prior version can be inspected by others.
      * You should only use this setting for initial encryption with parallel streams and not for overwriting!
      *
-     * @param value True to allow overwriting operations
+     * @param {boolean} value True to allow overwriting operations
      */
     public setAllowOverwrite(value: boolean): void {
         this.#overwrite = value;
@@ -364,6 +365,7 @@ export class AesFile implements IVirtualFile {
 
     /**
      * Returns the file chunk size
+     * @returns {number} The chunk 
      */
     #getChunkSizeLength(): number {
         return Generator.CHUNK_SIZE_LENGTH;
@@ -371,6 +373,7 @@ export class AesFile implements IVirtualFile {
 
     /**
      * Returns the length of the header in bytes
+     * @returns {number} The header length
      */
     #getHeaderLength(): number {
         return Generator.MAGIC_LENGTH + Generator.VERSION_LENGTH +
@@ -379,6 +382,7 @@ export class AesFile implements IVirtualFile {
 
     /**
      * Returns the initial vector that is used for encryption / decryption
+     * @returns {Promise<Uint8Array | null>} The nonce
      */
     public async getFileNonce(): Promise<Uint8Array | null> {
         let header: Header | null = await this.getHeader();
@@ -390,11 +394,11 @@ export class AesFile implements IVirtualFile {
     /**
      * Set the nonce for encryption/decryption for this file.
      *
-     * @param nonce Nonce to be used.
+     * @param {Uint8Array} nonce Nonce to be used.
      * @throws SalmonSecurityException Thrown when error with security
      */
     public setRequestedNonce(nonce: Uint8Array): void {
-        if (this.#drive != null)
+        if (this.#drive)
             throw new SecurityException("Nonce is already set by the drive");
         this.#requestedNonce = nonce;
     }
@@ -402,7 +406,7 @@ export class AesFile implements IVirtualFile {
     /**
      * Get the nonce that is used for encryption/decryption of this file.
      *
-     * @return
+     * @return {Uint8Array | null} The nonce
      */
     public getRequestedNonce(): Uint8Array | null {
         return this.#requestedNonce;
@@ -410,6 +414,7 @@ export class AesFile implements IVirtualFile {
 
     /**
      * Return the AES block size for encryption / decryption
+     * @returns {number} The block size
      */
     public getBlockSize(): number {
         return Generator.BLOCK_SIZE;
@@ -418,7 +423,7 @@ export class AesFile implements IVirtualFile {
     /**
      * Get the count of files and subdirectories
      *
-     * @return
+     * @return {Promise<number>} The children count
      */
     public async getChildrenCount(): Promise<number> {
         return await this.#realFile.getChildrenCount();
@@ -426,6 +431,7 @@ export class AesFile implements IVirtualFile {
 
     /**
      * Lists files and directories under this directory
+     * @returns {Promise<AesFile[]>} The files
      */
     public async listFiles(): Promise<AesFile[]> {
         let files: IFile[] = await this.#realFile.listFiles();
@@ -440,8 +446,8 @@ export class AesFile implements IVirtualFile {
     /**
      * Get a child with this filename.
      *
-     * @param filename The filename to search for
-     * @return
+     * @param {string} filename The filename to search for
+     * @return {Promise<AesFile | null>} The file or directory.
      * @throws SalmonSecurityException Thrown when error with security
      * @throws IntegrityException Thrown if the data are corrupt or tampered with.
      * @throws IOException Thrown if there is an IO error.
@@ -459,9 +465,10 @@ export class AesFile implements IVirtualFile {
     /**
      * Creates a directory under this directory
      *
-     * @param dirName      The name of the directory to be created
-     * @param key          The key that will be used to encrypt the directory name
-     * @param dirNameNonce The nonce to be used for encrypting the directory name
+     * @param {string} dirName      The name of the directory to be created
+     * @param {Uint8Array | null} key          The key that will be used to encrypt the directory name
+     * @param {Uint8Array | null} dirNameNonce The nonce to be used for encrypting the directory name
+     * @returns {Promise<AesFile>} The file
      */
     public async createDirectory(dirName: string, key: Uint8Array | null = null, dirNameNonce: Uint8Array | null = null): Promise<AesFile> {
         if (this.#drive == null)
@@ -473,6 +480,7 @@ export class AesFile implements IVirtualFile {
 
     /**
      * Return the real file
+     * @returns {IFile} The file
      */
     public getRealFile(): IFile {
         return this.#realFile;
@@ -480,6 +488,7 @@ export class AesFile implements IVirtualFile {
 
     /**
      * Returns true if this is a file
+     * @returns {Promise<boolean>} True if file
      */
     public async isFile(): Promise<boolean> {
         return await this.#realFile.isFile();
@@ -487,6 +496,7 @@ export class AesFile implements IVirtualFile {
 
     /**
      * Returns True if this is a directory
+     * @returns {Promise<boolean>} True if directory
      */
     public async isDirectory(): Promise<boolean> {
         return await this.#realFile.isDirectory();
@@ -494,6 +504,7 @@ export class AesFile implements IVirtualFile {
 
     /**
      * Return the path of the real file stored
+     * @returns {Promise<string>} The path
      */
     public async getPath(): Promise<string> {
         let realPath: string = this.#realFile.getDisplayPath();
@@ -504,6 +515,7 @@ export class AesFile implements IVirtualFile {
      * Returns the virtual path for the drive and the file provided
      *
      * @param realPath The path of the real file
+     * @returns {Promise<string>} The path
      */
     async #getPath(realPath: string | null = null): Promise<string> {
         if (realPath == null)
@@ -522,6 +534,7 @@ export class AesFile implements IVirtualFile {
 
     /**
      * Return the path of the real file
+     * @returns {Promise<string>} The real path
      */
     public getRealPath(): string {
         return this.#realFile.getDisplayPath();
@@ -531,6 +544,7 @@ export class AesFile implements IVirtualFile {
      * Return the virtual relative path of the file belonging to a drive
      *
      * @param realPath The path of the real file
+     * @returns {Promise<string>} The relative path
      */
     async #getRelativePath(realPath: string): Promise<string> {
         if (this.#drive == null) {
@@ -549,12 +563,13 @@ export class AesFile implements IVirtualFile {
     }
 
     /**
-     * Returns the basename for the file
+     * Returns the name for the file
+     * @returns {Promise<string>} The file name
      */
     public async getName(): Promise<string> {
-        if (this.#_baseName != null)
+        if (this.#_baseName)
             return this.#_baseName;
-        if (this.#drive != null) {
+        if (this.#drive) {
             let virtualRoot: IVirtualFile | null = await this.#drive.getRoot();
             if (virtualRoot == null) {
                 throw new SecurityException("Could not get virtual root, you need to init drive first");
@@ -569,7 +584,8 @@ export class AesFile implements IVirtualFile {
     }
 
     /**
-     * Returns the virtual parent directory
+     * Get the virtual parent directory
+     * @returns {Promise<AesFile | null>} The file
      */
     public async getParent(): Promise<AesFile | null> {
         try {
@@ -608,6 +624,7 @@ export class AesFile implements IVirtualFile {
 
     /**
      * Returns the last date modified in milliseconds
+     * @returns {Promise<number>} The date modified
      */
     public async getLastDateModified(): Promise<number> {
         return await this.#realFile.getLastDateModified();
@@ -615,6 +632,7 @@ export class AesFile implements IVirtualFile {
 
     /**
      * Return the virtual size of the file excluding the header and hash signatures.
+     * @returns {Promise<number>} The length
      */
     public async getLength(): Promise<number> {
         let rSize: number = await this.#realFile.getLength();
@@ -627,6 +645,7 @@ export class AesFile implements IVirtualFile {
 
     /**
      * Returns the hash total bytes occupied by signatures
+     * @returns {Promise<number>} The total hash bytes
      */
     async #getHashTotalBytesLength(): Promise<number> {
         // file does not support integrity
@@ -647,10 +666,11 @@ export class AesFile implements IVirtualFile {
     /**
      * Create a file under this directory
      *
-     * @param realFilename  The real file name of the file (encrypted)
-     * @param key           The key that will be used for encryption
-     * @param fileNameNonce The nonce for the encrypting the filename
-     * @param fileNonce     The nonce for the encrypting the file contents
+     * @param {string} realFilename  The real file name of the file (encrypted)
+     * @param {Uint8Array | null} key           The key that will be used for encryption
+     * @param {Uint8Array | null} fileNameNonce The nonce for the encrypting the filename
+     * @param {Uint8Array | null} fileNonce     The nonce for the encrypting the file contents
+     * @returns {Promise<AesFile>} The new file
      */
     //TODO: files with real same name can exists we can add checking all files in the dir
     // and throw an Exception though this could be an expensive operation
@@ -663,9 +683,9 @@ export class AesFile implements IVirtualFile {
         let salmonFile: AesFile = new AesFile(file, this.#drive);
         salmonFile.setEncryptionKey(key);
         salmonFile.#integrity = this.#integrity;
-        if (this.#drive != null && (fileNonce != null || fileNameNonce != null))
+        if (this.#drive != null && (fileNonce != null || fileNameNonce))
             throw new SecurityException("Nonce is already set by the drive");
-        if (this.#drive != null && key != null)
+        if (this.#drive != null && key)
             throw new SecurityException("Key is already set by the drive");
         salmonFile.#requestedNonce = fileNonce;
         return salmonFile;
@@ -674,8 +694,8 @@ export class AesFile implements IVirtualFile {
     /**
      * Rename the virtual file name
      *
-     * @param newFilename The new filename this file will be renamed to
-     * @param nonce       The nonce to use
+     * @param {string} newFilename The new filename this file will be renamed to
+     * @param {Uint8Array | null} nonce       The nonce to use
      */
     public async rename(newFilename: string, nonce: Uint8Array | null = null): Promise<void> {
 
@@ -689,6 +709,7 @@ export class AesFile implements IVirtualFile {
 
     /**
      * Returns true if this file exists
+     * @returns {Promise<boolean>} True if exists
      */
     public async exists(): Promise<boolean> {
         if (this.#realFile == null)
@@ -699,7 +720,8 @@ export class AesFile implements IVirtualFile {
     /**
      * Return the decrypted filename of a real filename
      *
-     * @param filename The filename of a real file
+     * @param {string} filename The filename of a real file
+     * @returns {Promise<string>} The decrypted filename
      */
     async #getDecryptedFilename(filename: string): Promise<string> {
         if (this.#drive == null && (this.#encryptionKey == null || this.#requestedNonce == null))
@@ -710,20 +732,20 @@ export class AesFile implements IVirtualFile {
     /**
      * Return the decrypted filename of a real filename
      *
-     * @param filename The filename of a real file
-     * @param key      The encryption key if the file doesn't belong to a drive
-     * @param nonce    The nonce if the file doesn't belong to a drive
+     * @param {string} filename The filename of a real file
+     * @param {Uint8Array | null} key      The encryption key if the file doesn't belong to a drive
+     * @param {Uint8Array | null} nonce    The nonce if the file doesn't belong to a drive
      */
     protected async getDecryptedFilename(filename: string, key: Uint8Array | null = null, nonce: Uint8Array | null = null): Promise<string> {
         let rfilename: string = filename.replace(/-/g, "/");
-        if (this.#drive != null && nonce != null)
+        if (this.#drive != null && nonce)
             throw new SecurityException("Filename nonce is already set by the drive");
-        if (this.#drive != null && key != null)
+        if (this.#drive != null && key)
             throw new SecurityException("Key is already set by the drive");
 
         if (key == null)
             key = this.#encryptionKey;
-        if (key == null && this.#drive != null) {
+        if (key == null && this.#drive) {
             let salmonKey: DriveKey | null = this.#drive.getKey();
             if (salmonKey == null) {
                 throw new SecurityException("Could not get the key, make sure you init the drive first");
@@ -740,18 +762,19 @@ export class AesFile implements IVirtualFile {
     /**
      * Return the encrypted filename of a virtual filename
      *
-     * @param filename The virtual filename
-     * @param key      The encryption key if the file doesn't belong to a drive
-     * @param nonce    The nonce if the file doesn't belong to a drive
+     * @param {string} filename The virtual filename
+     * @param {Uint8Array | null} key      The encryption key if the file doesn't belong to a drive
+     * @param {Uint8Array | null} nonce    The nonce if the file doesn't belong to a drive
+     * @returns {Promise<string>} The encrypted filename
      */
     protected async getEncryptedFilename(filename: string, key: Uint8Array | null = null, nonce: Uint8Array | null = null): Promise<string> {
-        if (this.#drive != null && nonce != null)
+        if (this.#drive != null && nonce)
             throw new SecurityException("Filename nonce is already set by the drive");
-        if (this.#drive != null)
+        if (this.#drive)
             nonce = await this.#drive.getNextNonce();
-        if (this.#drive != null && key != null)
+        if (this.#drive != null && key)
             throw new SecurityException("Key is already set by the drive");
-        if (this.#drive != null) {
+        if (this.#drive) {
             let salmonKey: DriveKey | null = this.#drive.getKey();
             if (salmonKey == null) {
                 throw new SecurityException("Could not get the key, make sure you init the drive first");
@@ -771,16 +794,16 @@ export class AesFile implements IVirtualFile {
     /**
      * Get the drive.
      *
-     * @return
+     * @return {AesDrive | undefined} The drive
      */
-    public getDrive(): AesDrive | null {
+    public getDrive(): AesDrive | undefined {
         return this.#drive;
     }
 
     /**
      * Set the tag for this file.
      *
-     * @param tag
+     * @param {object} tag: Any object
      */
     public setTag(tag: object): void {
         this.#tag = tag;
@@ -789,7 +812,7 @@ export class AesFile implements IVirtualFile {
     /**
      * Get the file tag.
      *
-     * @return The file tag.
+     * @return {object | null} The file tag.
      */
     public getTag(): object | null {
         return this.#tag;
@@ -798,30 +821,26 @@ export class AesFile implements IVirtualFile {
     /**
      * Move file to another directory.
      *
-     * @param dir                Target directory.
-     * @param OnProgressListener Observer to notify when move progress changes.
-     * @return
+     * @param {AesFile} dir                Target directory.
+     * @param {MoveOptions} [options]                The options
+     * @return {Promise<AesFile>} The encrypted file
      * @throws IOException Thrown if there is an IO error.
      */
-    public async move(dir: AesFile, OnProgressListener: ((position: number, length: number) => void) | null = null): Promise<AesFile> {
-        let moveOptions: MoveOptions = new MoveOptions();
-        moveOptions.onProgressChanged = OnProgressListener;
-        let newRealFile: IFile = await this.#realFile.move(dir.getRealFile(), moveOptions);
+    public async move(dir: AesFile, options?: MoveOptions): Promise<AesFile> {
+        let newRealFile: IFile = await this.#realFile.move(dir.getRealFile(), options);
         return new AesFile(newRealFile, this.#drive);
     }
 
     /**
      * Copy a file to another directory.
      *
-     * @param dir                Target directory.
-     * @param OnProgressListener Observer to notify when copy progress changes.
-     * @return
+     * @param {AesFile} dir                Target directory.
+     * @param {CopyOptions} [options] The options.
+     * @return {Promise<AesFile>} The encrypted file
      * @throws IOException Thrown if there is an IO error.
      */
-    public async copy(dir: AesFile, OnProgressListener: ((position: number, length: number) => void) | null = null): Promise<AesFile> {
-        let copyOptions: CopyOptions = new CopyOptions();
-        copyOptions.onProgressChanged = OnProgressListener;
-        let newRealFile: IFile | null = await this.#realFile.copy(dir.getRealFile(), copyOptions);
+    public async copy(dir: AesFile, options?: CopyOptions): Promise<AesFile> {
+        let newRealFile: IFile | null = await this.#realFile.copy(dir.getRealFile(), options);
         if (newRealFile == null)
             throw new IOException("Could not copy file");
         return new AesFile(newRealFile, this.#drive);
@@ -830,22 +849,22 @@ export class AesFile implements IVirtualFile {
     /**
      * Copy a directory recursively
      *
-     * @param dest The destination directory
-     * @param {VirtualRecursiveCopyOptions | null} options The options
+     * @param {AesFile} dest The destination directory
+     * @param {VirtualRecursiveCopyOptions} [options] The options
      */
-    public async copyRecursively(dest: AesFile, options: VirtualRecursiveCopyOptions| null = null): Promise<void> {
-        if(options == null)
+    public async copyRecursively(dest: AesFile, options?: VirtualRecursiveCopyOptions): Promise<void> {
+        if(!options)
             options = new VirtualRecursiveCopyOptions();
-        let onFailedRealFile: ((realFile: IFile, ex: Error) => void) | null = null;
-        if (options.onFailed != null) {
+        let onFailedRealFile: ((realFile: IFile, ex: Error) => void) | undefined;
+        if (options.onFailed) {
             onFailedRealFile = (file, ex) => {
-                if(options.onFailed != null)
+                if(options.onFailed)
                     options.onFailed(new AesFile(file, this.getDrive()), ex);
             };
         }
-        let renameRealFile: ((realFile: IFile) => Promise<string>) | null = null;
+        let renameRealFile: ((realFile: IFile) => Promise<string>) | undefined;
         // use auto rename only when we are using a drive
-        if (autoRename != null && this.getDrive() != null)
+        if (autoRename != null && this.getDrive())
             renameRealFile = async (file: IFile): Promise<string> => {
                 return await autoRename(new AesFile(file, this.getDrive()));
             };
@@ -854,7 +873,7 @@ export class AesFile implements IVirtualFile {
         copyOptions.autoRenameFolders = options.autoRenameFolders;
         copyOptions.onFailed = onFailedRealFile;
         copyOptions.onProgressChanged = (file, position, length) => {
-            if (options.onProgressChanged != null)
+            if (options.onProgressChanged)
                 options.onProgressChanged(new AesFile(file, this.#drive), position, length);
         };
         await IFileCopyRecursively(this.#realFile, dest.getRealFile(), copyOptions);
@@ -863,22 +882,22 @@ export class AesFile implements IVirtualFile {
     /**
      * Move a directory recursively
      *
-     * @param dest The destination directory
-     * @param {VirtualRecursiveMoveOptions | null} options The options
+     * @param {AesFile} dest The destination directory
+     * @param {VirtualRecursiveMoveOptions} [options] The options
      */
-    public async moveRecursively(dest: AesFile, options: VirtualRecursiveMoveOptions| null = null): Promise<void> {
-        if(options == null)
+    public async moveRecursively(dest: AesFile, options?: VirtualRecursiveMoveOptions): Promise<void> {
+        if(!options)
             options = new VirtualRecursiveMoveOptions();
-        let onFailedRealFile: ((realFile: IFile, ex: Error) => void) | null = null;
-        if (options.onFailed != null) {
+        let onFailedRealFile: ((realFile: IFile, ex: Error) => void) | undefined;
+        if (options.onFailed) {
             onFailedRealFile = (file, ex) => {
-                if (options.onFailed != null)
+                if (options.onFailed)
                     options.onFailed(new AesFile(file, this.getDrive()), ex);
             };
         }
-        let renameRealFile: ((realFile: IFile) => Promise<string>) | null = null;
+        let renameRealFile: ((realFile: IFile) => Promise<string>) | undefined;
         // use auto rename only when we are using a drive
-        if (autoRename != null && this.getDrive() != null)
+        if (autoRename != null && this.getDrive())
             renameRealFile = async (file: IFile): Promise<string> => {
 				return await autoRename(new AesFile(file, this.getDrive()));
             };
@@ -887,7 +906,7 @@ export class AesFile implements IVirtualFile {
         moveOptions.autoRenameFolders = options.autoRenameFolders;
         moveOptions.onFailed = onFailedRealFile;
         moveOptions.onProgressChanged = (file, position, length) => {
-            if (options.onProgressChanged != null)
+            if (options.onProgressChanged)
                 options.onProgressChanged(new AesFile(file, this.#drive), position, length);
         };
         await IFileMoveRecursively(this.#realFile, dest.getRealFile(), moveOptions);
@@ -896,22 +915,22 @@ export class AesFile implements IVirtualFile {
     /**
      * Delete a directory recursively
      *
-     * @param {VirtualRecursiveDeleteOptions | null} options The options
+     * @param {VirtualRecursiveDeleteOptions} [options] The options
      */
-    public async deleteRecursively(options: VirtualRecursiveDeleteOptions | null): Promise<void> {
-        if(options == null)
+    public async deleteRecursively(options?: VirtualRecursiveDeleteOptions): Promise<void> {
+        if(!options)
             options = new VirtualRecursiveDeleteOptions();
-        let onFailedRealFile: ((realFile: IFile, ex: Error) => void) | null = null;
-        if (options.onFailed != null) {
+        let onFailedRealFile: ((realFile: IFile, ex: Error) => void) | undefined;
+        if (options.onFailed) {
             onFailedRealFile = (file, ex) => {
-                if (options.onFailed != null)
+                if (options.onFailed)
                     options.onFailed(new AesFile(file, this.#drive), ex);
             };
         }
         let deleteOptions: RecursiveDeleteOptions = new RecursiveDeleteOptions();
         deleteOptions.onFailed = onFailedRealFile;
         deleteOptions.onProgressChanged = (file, position, length) => {
-            if (options.onProgressChanged != null)
+            if (options.onProgressChanged)
                 options.onProgressChanged(new AesFile(file, this.#drive), position, length);
         };
         await IFileDeleteRecursively(this.getRealFile(), deleteOptions);
@@ -920,6 +939,7 @@ export class AesFile implements IVirtualFile {
     /**
      * Returns the minimum part size that can be encrypted / decrypted in parallel
      * aligning to the integrity chunk size if available.
+     * @returns {Promise<number>} The minimum part size
      */
     public async getMinimumPartSize(): Promise<number> {
         let currChunkSize: number = await this.getFileChunkSize();
@@ -932,7 +952,11 @@ export class AesFile implements IVirtualFile {
     }
 }
 
-
+/**
+ * Default autorename.
+ * @param {AesFile} file The file to be renamed
+ * @returns {Promise<string>} The new file name
+ */
 export async function autoRename(file: AesFile): Promise<string> {
     try {
         return await autoRenameFile(file);
@@ -945,15 +969,15 @@ export async function autoRename(file: AesFile): Promise<string> {
     }
 }
 
-/// <summary>
-/// Get an auto generated copy of the name for the file.
-/// </summary>
-/// <param name="file"></param>
-/// <returns></returns>
+/**
+ * Default autorename.
+ * @param {AesFile} file The file to be renamed
+ * @returns {Promise<string>} The new file name
+ */
 export async function autoRenameFile(file: AesFile): Promise<string> {
     let filename: string = IFileAutoRename(await file.getName());
-    let drive: AesDrive | null = file.getDrive();
-    if (drive == null)
+    let drive: AesDrive | undefined = file.getDrive();
+    if (!drive)
         throw new IOException("Autorename is not supported without a drive");
     let nonce: Uint8Array | null = await drive.getNextNonce();
     if (nonce == null)

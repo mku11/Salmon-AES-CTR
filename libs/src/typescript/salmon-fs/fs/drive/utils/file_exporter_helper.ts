@@ -62,18 +62,18 @@ export async function exportFilePart(fileToExport: IVirtualFile, exportFile: IFi
             totalPartBytesWritten += bytesRead;
 
             totalBytesWritten[0] += bytesRead;
-            if (onProgress != null)
+            if (onProgress)
                 onProgress(totalBytesWritten[0], count);
         }
     } catch (ex) {
         console.error(ex);
         throw ex;
     } finally {
-        if (targetStream != null) {
+        if (targetStream) {
             await targetStream.flush();
             await targetStream.close();
         }
-        if (sourceStream != null) {
+        if (sourceStream) {
             await sourceStream.close();
         }
     }

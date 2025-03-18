@@ -393,7 +393,7 @@ export class SalmonCoreTestHelper {
             stream.getTransformer().increaseCounter(counter);
         } catch (ex) {
             console.error(ex);
-            if (typeof ex.getCause !== 'undefined' && ex.getCause() != null)
+            if (typeof ex.getCause !== 'undefined' && ex.getCause())
                 throw ex.getCause();
             else
                 throw ex;

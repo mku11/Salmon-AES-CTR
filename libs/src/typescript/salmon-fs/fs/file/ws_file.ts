@@ -319,17 +319,17 @@ export class WSFile implements IFile {
     /**
      * Move this file or directory under a new directory.
      * @param newDir The target directory.
-     * @param {MoveOptions | null} options The options
+     * @param {MoveOptions} [options] The options
      * @return The moved file. Use this file for subsequent operations instead of the original.
      */
-    public async move(newDir: IFile, options: MoveOptions| null = null): Promise<IFile> {
-        if(options == null)
+    public async move(newDir: IFile, options?: MoveOptions): Promise<IFile> {
+        if(!options)
             options = new MoveOptions();
-        let newName = options.newFilename != null ? options.newFilename : this.getName();
+        let newName = options.newFilename  ? options.newFilename : this.getName();
         if (newDir == null || !newDir.exists())
             throw new IOException("Target directory does not exist");
         let newFile: IFile | null = await newDir.getChild(newName);
-        if (newFile != null && await newFile.exists())
+        if (newFile  && await newFile.exists())
             throw new IOException("Another file/directory already exists");
 
         if (await this.isDirectory()) {
@@ -355,18 +355,18 @@ export class WSFile implements IFile {
     /**
      * Move this file or directory under a new directory.
      * @param newDir    The target directory.
-     * @param {CopyOptions | null} options The options
+     * @param {CopyOptions} [options] The options
      * @return The copied file. Use this file for subsequent operations instead of the original.
      * @throws IOException Thrown if there is an IO error.
      */
-    public async copy(newDir: IFile, options: CopyOptions| null = null): Promise<IFile> {
-        if(options == null)
+    public async copy(newDir: IFile, options?: CopyOptions): Promise<IFile> {
+        if(!options)
             options = new CopyOptions();
-        let newName = options.newFilename != null ? options.newFilename : this.getName();
+        let newName = options.newFilename  ? options.newFilename : this.getName();
         if (newDir == null || !newDir.exists())
             throw new IOException("Target directory does not exists");
         let newFile: IFile | null = await newDir.getChild(newName);
-        if (newFile != null && await newFile.exists())
+        if (newFile  && await newFile.exists())
             throw new IOException("Another file/directory already exists");
         if (await this.isDirectory()) {
             throw new IOException("Could not copy directory use IFile copyRecursively() instead");

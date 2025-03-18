@@ -161,20 +161,20 @@ export interface IFile {
      * Move this file to another directory.
      *
      * @param {IFile} newDir           The target directory.
-     * @param {MoveOptions | null} options          The options
+     * @param {MoveOptions} [options]          The options
      * @return {Promise<IFile>} The file after the move. Use this instance for any subsequent file operations.
      */
-    move(newDir: IFile, options: MoveOptions | null): Promise<IFile>;
+    move(newDir: IFile, options?: MoveOptions): Promise<IFile>;
 
     /**
      * Copy this file to another directory.
      *
      * @param {IFile} newDir           The target directory.
-     * @param {CopyOptions | null} options          The options
+     * @param {CopyOptions} [options]          The options
      * @return {Promise<IFile | null>} The file after the copy. Use this instance for any subsequent file operations.
      * @throws IOException Thrown if there is an IO error.
      */
-    copy(newDir: IFile, options: CopyOptions | null): Promise<IFile | null>;
+    copy(newDir: IFile, options?: CopyOptions): Promise<IFile | null>;
 
     /**
      * Get the file/directory matching the name provided under this directory.
@@ -203,17 +203,15 @@ export interface IFile {
  *
  * @param {IFile} src              The source directory
  * @param {IFile} dest             The target directory
- * @param {boolean} deleteAfter           True to delete the source files when complete
- * @param {((position: number, length: number) => void) | null} onProgressChanged The progress listener
+ * @param {CopyContentOptions} [options] The options 
  * @return
  * @throws IOException Thrown if there is an IO error.
  */
-export async function copyFileContents(src: IFile, dest: IFile, deleteAfter: boolean,
-    onProgressChanged: ((position: number, length: number) => void) | null): Promise<boolean> {
+export async function copyFileContents(src: IFile, dest: IFile, options?: CopyContentsOptions): Promise<boolean> {
     let source: RandomAccessStream = await src.getInputStream();
     let target: RandomAccessStream = await dest.getOutputStream();
     try {
-        await source.copyTo(target, 0, onProgressChanged);
+        await source.copyTo(target, 0, options?.onProgressChanged);
     } catch (ex) {
         await dest.delete();
         return false;
@@ -221,8 +219,6 @@ export async function copyFileContents(src: IFile, dest: IFile, deleteAfter: boo
         await source.close();
         await target.close();
     }
-    if (deleteAfter)
-        await src.delete();
     return true;
 }
 
@@ -231,21 +227,21 @@ export async function copyFileContents(src: IFile, dest: IFile, deleteAfter: boo
  *
  * @param {IFile} src Source directory
  * @param {IFile} destDir Destination directory to copy into.
- * @param {RecursiveCopyOptions | null} options The options.
+ * @param {RecursiveCopyOptions} [options] The options.
  * @throws IOException Thrown if there is an IO error.
  */
-export async function copyRecursively(src: IFile, destDir: IFile, options: RecursiveCopyOptions | null): Promise<void> {
-    if(options == null)
+export async function copyRecursively(src: IFile, destDir: IFile, options?: RecursiveCopyOptions | null): Promise<void> {
+    if(!options)
         options = new RecursiveCopyOptions();
     let newFilename: string = src.getName();
     let newFile: IFile | null;
     newFile = await destDir.getChild(newFilename);
     if (await src.isFile()) {
-        if (newFile != null && await newFile.exists()) {
-            if (options.autoRename != null) {
+        if (newFile  && await newFile.exists()) {
+            if (options.autoRename) {
                 newFilename = await options.autoRename(src);
             } else {
-                if (options.onFailed != null)
+                if (options.onFailed)
                     options.onFailed(src, new Error("Another file exists"));
                 return;
             }
@@ -253,24 +249,24 @@ export async function copyRecursively(src: IFile, destDir: IFile, options: Recur
         let copyOptions = new CopyOptions();
         copyOptions.newFilename = newFilename;
         copyOptions.onProgressChanged = (position, length) => {
-            if (options.onProgressChanged != null) {
+            if (options.onProgressChanged) {
                 options.onProgressChanged(src, position, length);
             }
         };
         await src.copy(destDir, copyOptions);
     } else if (await src.isDirectory()) {
-        if (options.onProgressChanged != null)
+        if (options.onProgressChanged)
             options.onProgressChanged(src, 0, 1);
         if (destDir.getDisplayPath().startsWith(src.getDisplayPath())) {
-            if (options.onProgressChanged != null)
+            if (options.onProgressChanged)
                 options.onProgressChanged(src, 1, 1);
             return;
         }
-        if (newFile != null && await newFile.exists() && options.autoRename != null && options.autoRenameFolders)
+        if (newFile  && await newFile.exists() && options.autoRename  && options.autoRenameFolders)
             newFile = await destDir.createDirectory(await options.autoRename(src));
         else if (newFile == null || !await newFile.exists())
             newFile = await destDir.createDirectory(newFilename);
-        if (options.onProgressChanged != null)
+        if (options.onProgressChanged)
             options.onProgressChanged(src, 1, 1);
         for (let child of await src.listFiles()) {
             if (newFile == null)
@@ -285,15 +281,15 @@ export async function copyRecursively(src: IFile, destDir: IFile, options: Recur
  *
  * @param {IFile} src Source directory
  * @param {IFile} destDir Destination directory to move into.
- * @param {RecursiveMoveOptions | null} options The options 
+ * @param {RecursiveMoveOptions} [options] The options 
  */
-export async function moveRecursively(file: IFile, destDir: IFile, options: RecursiveMoveOptions | null): Promise<void> {
-    if(options == null)
+export async function moveRecursively(file: IFile, destDir: IFile, options?: RecursiveMoveOptions | null): Promise<void> {
+    if(!options)
         options = new RecursiveMoveOptions();
     // target directory is the same
     let parent: IFile | null = await file.getParent();
-    if (parent != null && parent.getDisplayPath() == destDir.getDisplayPath()) {
-        if (options.onProgressChanged != null) {
+    if (parent  && parent.getDisplayPath() == destDir.getDisplayPath()) {
+        if (options.onProgressChanged) {
             options.onProgressChanged(file, 0, 1);
             options.onProgressChanged(file, 1, 1);
         }
@@ -304,13 +300,13 @@ export async function moveRecursively(file: IFile, destDir: IFile, options: Recu
     let newFile: IFile | null;
     newFile = await destDir.getChild(newFilename);
     if (await file.isFile()) {
-        if (newFile != null && await newFile.exists()) {
+        if (newFile  && await newFile.exists()) {
             if (newFile.getDisplayPath() == file.getDisplayPath())
                 return;
-            if (options.autoRename != null) {
+            if (options.autoRename) {
                 newFilename = await options.autoRename(file);
             } else {
-                if (options.onFailed != null)
+                if (options.onFailed)
                     options.onFailed(file, new Error("Another file exists"));
                 return;
             }
@@ -318,29 +314,29 @@ export async function moveRecursively(file: IFile, destDir: IFile, options: Recu
         let moveOptions: MoveOptions = new MoveOptions();
         moveOptions.newFilename = newFilename;
         moveOptions.onProgressChanged = (position: number, length: number) => {
-            if (options.onProgressChanged != null) {
+            if (options.onProgressChanged) {
                 options.onProgressChanged(file, position, length);
             }
         };
         await file.move(destDir, moveOptions);
     } else if (await file.isDirectory()) {
-        if (options.onProgressChanged != null)
+        if (options.onProgressChanged)
             options.onProgressChanged(file, 0, 1);
         if (destDir.getDisplayPath().startsWith(file.getDisplayPath())) {
-            if (options.onProgressChanged != null)
+            if (options.onProgressChanged)
                 options.onProgressChanged(file, 1, 1);
             return;
         }
-        if ((newFile != null && await newFile.exists() && options.autoRename != null && options.autoRenameFolders)
+        if ((newFile  && await newFile.exists() && options.autoRename  && options.autoRenameFolders)
             || newFile == null || !await newFile.exists()) {
-            if (options.autoRename != null) {
+            if (options.autoRename) {
                 let moveOptions: MoveOptions = new MoveOptions();
                 moveOptions.newFilename = await options.autoRename(file);
                 newFile = await file.move(destDir, moveOptions);
             }
             return;
         }
-        if (options.onProgressChanged != null)
+        if (options.onProgressChanged)
             options.onProgressChanged(file, 1, 1);
 
         for (let child of await file.listFiles()) {
@@ -350,7 +346,7 @@ export async function moveRecursively(file: IFile, destDir: IFile, options: Recu
         }
 
         if (!await file.delete()) {
-            if (options.onFailed != null)
+            if (options.onFailed)
                 options.onFailed(file, new Error("Could not delete source directory"));
             return;
         }
@@ -359,16 +355,16 @@ export async function moveRecursively(file: IFile, destDir: IFile, options: Recu
 
 /**
  * Delete a directory recursively
- * @param {RecursiveDeleteOptions | null} options The options
+ * @param {RecursiveDeleteOptions} [options] The options
  */
-export async function deleteRecursively(file: IFile, options: RecursiveDeleteOptions | null): Promise<void> {
-    if(options == null)
+export async function deleteRecursively(file: IFile, options?: RecursiveDeleteOptions | null): Promise<void> {
+    if(!options)
         options = new RecursiveDeleteOptions();
     if (await file.isFile()) {
         if(options.onProgressChanged)
             options.onProgressChanged(file, 0, 1);
         if (!file.delete()) {
-            if (options.onFailed != null)
+            if (options.onFailed)
                 options.onFailed(file, new Error("Could not delete file"));
             return;
         }
@@ -379,7 +375,7 @@ export async function deleteRecursively(file: IFile, options: RecursiveDeleteOpt
             await deleteRecursively(child, options);
         }
         if (await !file.delete()) {
-            if (options.onFailed != null)
+            if (options.onFailed)
                 options.onFailed(file, new Error("Could not delete directory"));
             return;
         }
@@ -434,12 +430,12 @@ export class CopyOptions {
     /**
      * Override filename
      */
-    newFilename: string | null = null;
+    newFilename?: string;
 
     /**
      * Callback where progress changed
      */
-    onProgressChanged: ((position: number, length: number) => void) | null = null;
+    onProgressChanged?: ((position: number, length: number) => void);
 }
 
 /**
@@ -449,12 +445,12 @@ export class MoveOptions {
     /**
      * Override filename
      */
-    newFilename: string | null = null;
+    newFilename?: string;
 
     /**
      * Callback where progress changed
      */
-    onProgressChanged: ((position: number, length: number) => void) | null = null;
+    onProgressChanged?: ((position: number, length: number) => void);
 }
 
 /**
@@ -464,7 +460,7 @@ export class RecursiveCopyOptions {
     /**
      * Callback when file with same name exists
      */
-    autoRename: ((file: IFile) => Promise<string>) | null = null;
+    autoRename?: ((file: IFile) => Promise<string>);
 
     /**
      * True to autorename folders
@@ -474,12 +470,12 @@ export class RecursiveCopyOptions {
     /**
      * Callback when file changes
      */
-    onFailed: ((file: IFile, ex: Error) => void) | null = null;
+    onFailed?: ((file: IFile, ex: Error) => void);
 
     /**
      * Callback where progress changed
      */
-    onProgressChanged: ((file: IFile, position: number, length: number) => void) | null = null;
+    onProgressChanged?: ((file: IFile, position: number, length: number) => void);
 }
 
 /**
@@ -489,7 +485,7 @@ export class RecursiveMoveOptions {
     /**
      * Callback when file with the same name exists
      */
-    autoRename: ((file: IFile) => Promise<string>) | null = null;
+    autoRename?: ((file: IFile) => Promise<string>);
 
     /**
      * True to autorename folders
@@ -499,12 +495,12 @@ export class RecursiveMoveOptions {
     /**
      * Callback when file failed
      */
-    onFailed: ((file: IFile, ex: Error) => void) | null = null;
+    onFailed?: ((file: IFile, ex: Error) => void);
     
     /**
      * Callback when progress changes
      */
-    onProgressChanged: ((file: IFile, position: number, length: number) => void) | null = null;
+    onProgressChanged?: ((file: IFile, position: number, length: number) => void);
 }
 
 
@@ -515,10 +511,17 @@ export class RecursiveDeleteOptions {
     /**
      * Callback when file failed
      */
-    onFailed: ((file: IFile, ex: Error) => void) | null = null;
+    onFailed?: ((file: IFile, ex: Error) => void);
 
     /**
      * Callback when progress changed
      */
-    onProgressChanged: ((file: IFile, position: number, length: number) => void) | null = null;
+    onProgressChanged?: ((file: IFile, position: number, length: number) => void);
+}
+
+/**
+ * Directory move options (recursively)
+ */
+export class CopyContentsOptions {
+    onProgressChanged?: ((position: number, length: number) => void);
 }

@@ -37,15 +37,15 @@ export class DriveKey {
      */
     public clear(): void {
 
-        if (this.#driveKey != null)
+        if (this.#driveKey)
             this.#driveKey.fill(0);
         this.#driveKey = null;
 
-        if (this.#hashKey != null)
+        if (this.#hashKey)
             this.#hashKey.fill(0);
         this.#hashKey = null;
 
-        if (this.#masterKey != null)
+        if (this.#masterKey)
             this.#masterKey.fill(0);
         this.#masterKey = null;
 

@@ -62,7 +62,7 @@ export class CacheBuffer {
      * Clear the buffer.
      */
     public clear(): void {
-        if (this.buffer != null)
+        if (this.buffer)
             this.buffer.fill(0);
     }
 }

@@ -217,7 +217,7 @@ export class AuthConfig {
             throw new Error("Could not get drive id, make sure you init the drive first");
 
         let sequence: NonceSequence | null = await drive.getSequencer().getSequence(BitConverter.toHex(driveId));
-        if (sequence != null && sequence.getStatus() == Status.Active)
+        if (sequence  && sequence.getStatus() == Status.Active)
             throw new Error("Device is already authorized");
 
         if (authConfigFile == null || !await authConfigFile.exists())
@@ -227,7 +227,7 @@ export class AuthConfig {
 
         let authIdBytes: Uint8Array = await drive.getAuthIdBytes();
         if (!authConfig.getAuthId().every((val, index) => val === authIdBytes[index])
-            || !authConfig.getDriveId().every((val, index) => driveId != null && val == driveId[index])
+            || !authConfig.getDriveId().every((val, index) => driveId  && val == driveId[index])
         )
             throw new Error("Auth file doesn't match driveId or authId");
 
@@ -259,7 +259,7 @@ export class AuthConfig {
 				await outStream.setLength(0);
             } catch(ex) {
             } finally {
-                if(outStream != null)
+                if(outStream)
                     await outStream.close();
             }
         }

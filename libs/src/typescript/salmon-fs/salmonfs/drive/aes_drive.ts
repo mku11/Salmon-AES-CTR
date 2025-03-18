@@ -73,7 +73,7 @@ export abstract class AesDrive extends VirtualDrive {
             return;
         this.#realRoot = realRoot;
         let parent: IFile | null = await this.#realRoot.getParent();
-        if (parent != null && !createIfNotExists && ! await this.hasConfig() && await this.#realRoot.getParent() != null && await parent.exists()) {
+        if (parent  && !createIfNotExists && ! await this.hasConfig() && await this.#realRoot.getParent()  && await parent.exists()) {
             // try the parent if this is the filesystem folder 
             let originalRealRoot: IFile = this.#realRoot;
             this.#realRoot = parent;
@@ -238,7 +238,7 @@ export abstract class AesDrive extends VirtualDrive {
             this.onUnlockError();
             throw ex;
         } finally {
-            if (stream != null)
+            if (stream)
                 await stream.close();
         }
     }
@@ -297,7 +297,7 @@ export abstract class AesDrive extends VirtualDrive {
     public async getBytesFromRealFile(file: IFile, bufferSize: number): Promise<Uint8Array> {
         let stream: RandomAccessStream = await file.getInputStream();
         let ms: MemoryStream = new MemoryStream();
-        await stream.copyTo(ms, bufferSize, null);
+        await stream.copyTo(ms, bufferSize);
         await ms.flush();
         await ms.setPosition(0);
         let byteContents: Uint8Array = ms.toArray();
@@ -371,7 +371,7 @@ export abstract class AesDrive extends VirtualDrive {
         this.#realRoot = null;
         this.#virtualRoot = null;
         this.#driveId = null;
-        if (this.#key != null)
+        if (this.#key)
             this.#key.clear();
         this.#key = null;
     }
@@ -390,7 +390,7 @@ export abstract class AesDrive extends VirtualDrive {
                 console.error(ex);
             }
         }
-        if (virtualRootRealFile != null)
+        if (virtualRootRealFile)
             this.#virtualRoot = this.getVirtualFile(virtualRootRealFile);
     }
 
@@ -449,7 +449,7 @@ export abstract class AesDrive extends VirtualDrive {
             let drive: AesDrive = new driveClassType;
             await drive.initialize(dir, createIfNotExists);
             drive.#sequencer = sequencer;
-            if(drive.#sequencer != null)
+            if(drive.#sequencer)
                 await drive.#sequencer.initialize();
             return drive;
         } catch (e) {
@@ -567,11 +567,11 @@ export abstract class AesDrive extends VirtualDrive {
             throw new Error("Cannot create config, no root found, make sure you init the drive first");
         let configFile: IFile | null = await this.getConfigFile(realRoot);
 
-        if (driveKey == null && configFile != null && await configFile.exists())
+        if (driveKey == null && configFile  && await configFile.exists())
             throw new AuthException("Not authenticated");
 
         // delete the old config file and create a new one
-        if (configFile != null && await configFile.exists())
+        if (configFile  && await configFile.exists())
             await configFile.delete();
         configFile = await this.createConfigFile(realRoot);
         if(configFile == null)

@@ -102,10 +102,10 @@ export abstract class FileExporter {
      *
      * @param {IVirtualFile} fileToExport The file that will be exported
      * @param {IFile} exportDir    The external directory the file will be exported to
-     * @param {FileExportOptions | null} options     The options for the file export
+     * @param {FileExportOptions} [options]     The options for the file export
      */
-    public async exportFile(fileToExport: IVirtualFile, exportDir: IFile, options: FileExportOptions | null = null): Promise<IFile | null> {
-        if(options == null)
+    public async exportFile(fileToExport: IVirtualFile, exportDir: IFile, options?: FileExportOptions): Promise<IFile | null> {
+        if(!options)
             options = new FileExportOptions();
         if (this.isRunning())
             throw new Error("Another export is running");
@@ -113,7 +113,7 @@ export abstract class FileExporter {
             throw new Error("Cannot export directory, use SalmonFileCommander instead");
 
         let exportFile: IFile;
-        let filename = options.filename != null ? options.filename : await fileToExport.getName();
+        let filename = options.filename  ? options.filename : await fileToExport.getName();
         try {
             if (!FileExporter.#enableMultiThread && this.#threads != 1)
                 throw new Error("Multithreading is not supported");
@@ -159,7 +159,7 @@ export abstract class FileExporter {
                 await exportFile.delete();
             else if (options.deleteSource)
                 await fileToExport.getRealFile().delete();
-            if (this.#lastException != null)
+            if (this.#lastException)
                 throw this.#lastException;
         } catch (ex) {
             console.error(ex);
@@ -192,7 +192,7 @@ export abstract class FileExporter {
 					this.#workers[i].removeEventListener('message', null);
                     this.#workers[i].removeEventListener('error', null);
                     this.#workers[i].addEventListener('message', (event: any) => {
-                        if (event.data.message == 'progress' && onProgress != null) {
+                        if (event.data.message == 'progress' && onProgress) {
                             bytesWritten[event.data.index] = event.data.position;
                             totalBytesWritten[0] = 0;
                             for (let i = 0; i < bytesWritten.length; i++) {
@@ -215,7 +215,7 @@ export abstract class FileExporter {
                         this.#workers[i] = new Worker(this.#workerPath);
 					this.#workers[i].removeAllListeners();
                     this.#workers[i].on('message', (event: any) => {
-                        if (event.message == 'progress' && onProgress != null) {
+                        if (event.message == 'progress' && onProgress) {
                             bytesWritten[event.index] = event.position;
                             totalBytesWritten[0] = 0;
                             for (let i = 0; i < bytesWritten.length; i++) {

@@ -55,19 +55,19 @@ export class FileSearcher {
      * Search files in directory and its subdirectories recursively for matching terms.
      * @param dir The directory to start the search.
      * @param terms The terms to search for.
-     * @param {SearchOptions | null} options The options
+     * @param {SearchOptions} [options] The options
      * @return An array with all the results found.
      */
-    public async search(dir: IVirtualFile, terms: string, options: SearchOptions | null = null): Promise<IVirtualFile[]> {
-        if(options == null)
+    public async search(dir: IVirtualFile, terms: string, options?: SearchOptions): Promise<IVirtualFile[]> {
+        if(!options)
             options = new SearchOptions();
         this.#running = true;
         this.#quit = false;
         let searchResults: { [key: string]: IVirtualFile } = {};
-        if (options.onSearchEvent != null)
+        if (options.onSearchEvent)
             options.onSearchEvent(SearchEvent.SearchingFiles);
         await this.#searchDir(dir, terms, options.anyTerm, options.onResultFound, searchResults);
-        if (options.onSearchEvent != null)
+        if (options.onSearchEvent)
             options.onSearchEvent(SearchEvent.SearchingFinished);
         this.#running = false;
         return Object.values(searchResults);
@@ -125,7 +125,7 @@ export class FileSearcher {
                     let hits: number = this.#getSearchResults(await file.getName(), termsArray, any);
                     if (hits > 0) {
                         searchResults[file.getRealPath()] = file;
-                        if (onResultFound != null)
+                        if (onResultFound)
                             onResultFound(file);
                     }
                 } catch (ex) {

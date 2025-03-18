@@ -123,18 +123,18 @@ export abstract class FileImporter {
      *
      * @param {IFile} fileToImport The source file that will be imported in to the drive.
      * @param {IFile} dir          The target directory in the drive that the file will be imported
-     * @param {FileImportOptions | null} options Options
+     * @param {FileImportOptions} [options] Options
      * @returns {Promise<IVirtualFile | null>} A promise which resolves to a virtual file or null
      */
-    public async importFile(fileToImport: IFile, dir: IVirtualFile, options: FileImportOptions | null = null): Promise<IVirtualFile | null>{
-        if(options == null)
+    public async importFile(fileToImport: IFile, dir: IVirtualFile, options?: FileImportOptions): Promise<IVirtualFile | null>{
+        if(!options)
             options = new FileImportOptions();
         if (this.isRunning())
             throw new Error("Another import is running");
         if (await fileToImport.isDirectory())
             throw new Error("Cannot import directory, use FileCommander instead");
 
-        let filename = options.filename != null ? options.filename : fileToImport.getName();
+        let filename = options.filename  ? options.filename : fileToImport.getName();
         let totalBytesRead: number[] = [0];
         let importedFile: IVirtualFile | null = null;
         try {
@@ -179,7 +179,7 @@ export abstract class FileImporter {
                 await importedFile.getRealFile().delete();
             else if (options.deleteSource)
                 await fileToImport.delete();
-            if (this.#lastException != null)
+            if (this.#lastException)
                 throw this.#lastException;
         } catch (ex) {
             console.log(ex);
@@ -211,7 +211,7 @@ export abstract class FileImporter {
                         this.#workers[i].removeEventListener('error', null);
 						this.#workers[i].removeEventListener('message', null);
                         this.#workers[i].addEventListener('message', (event: any) => {
-                            if(event.data.message == 'progress' && onProgress != null) {
+                            if(event.data.message == 'progress' && onProgress) {
                                 bytesRead[event.data.index] = event.data.position;
                                 totalBytesRead[0] = 0;
                                 for (let i = 0; i < bytesRead.length; i++) {
@@ -233,7 +233,7 @@ export abstract class FileImporter {
                             this.#workers[i] = new Worker(this.#workerPath);
 						this.#workers[i].removeAllListeners();
                         this.#workers[i].on('message', (event: any) => {
-                            if(event.message == 'progress' && onProgress != null) {
+                            if(event.message == 'progress' && onProgress) {
                                 bytesRead[event.index] = event.position;
                                 totalBytesRead[0] = 0;
                                 for (let i = 0; i < bytesRead.length; i++) {

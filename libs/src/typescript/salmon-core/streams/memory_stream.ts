@@ -62,7 +62,7 @@ export class MemoryStream extends RandomAccessStream {
      */
     public constructor(bytes: Uint8Array | null = null) {
         super();
-        if (bytes != null) {
+        if (bytes) {
             this.#length = bytes.length;
             this.#bytes = bytes;
             this.#capacity = bytes.length;

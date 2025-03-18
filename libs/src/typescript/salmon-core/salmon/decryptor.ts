@@ -60,7 +60,7 @@ export class Decryptor {
      *                   a multiple of the chunk size if you enabled integrity
      *                   otherwise a multiple of the AES block size (16 bytes).
      */
-    public constructor(threads: number = 0, bufferSize: number = 0) {
+    public constructor(threads: number = 1, bufferSize: number = 0) {
         if (threads <= 0)
             threads = 1;
         this.#threads = threads;
@@ -80,7 +80,7 @@ export class Decryptor {
      * @param {EncryptionFormat} format      The format to use, see {@link EncryptionFormat}
      * @param {boolean} integrity Verify hash integrity in the data.
      * @param {Uint8Array | null} hashKey The hash key to be used for integrity.
-     * @param {number | null} chunkSize The chunk size.
+     * @param {number} chunkSize The chunk size.
      * @return {Promise<Uint8Array>} The byte array with the decrypted data.
      * @ Thrown if there is a problem with decoding the array.
      * @throws SalmonSecurityException Thrown if the key and nonce are not provided.
@@ -98,7 +98,7 @@ export class Decryptor {
         let inputStream: MemoryStream = new MemoryStream(data);
         if (format == EncryptionFormat.Salmon) {
             let header: Header | null = await Header.readHeaderData(inputStream);
-            if (header != null)
+            if (header)
                 chunkSize = header.getChunkSize();
         } else if (integrity) {
             chunkSize = chunkSize <= 0 ? Integrity.DEFAULT_CHUNK_SIZE : chunkSize;
@@ -142,7 +142,7 @@ export class Decryptor {
 
         // if we want to check integrity we align to the chunk size otherwise to the AES Block
         let minPartSize: number = AESCTRTransformer.BLOCK_SIZE;
-        if (integrity && chunkSize != null)
+        if (integrity && chunkSize)
             minPartSize = chunkSize;
         else if (integrity)
             minPartSize = Integrity.DEFAULT_CHUNK_SIZE;

@@ -93,7 +93,7 @@ async function describe(testSuite, callback) {
 
 async function submitNext(testSuite, testCaseNum) {
     if (testCaseNum >= testCases.length) {
-        if (afterTestSuite != null)
+        if (afterTestSuite)
             await afterTestSuite();
         console.log("Test suite complete: " + testSuite);
         console.log("Test cases passed: " + passedTestCases + "/" + totalTestCases);
@@ -168,14 +168,14 @@ function expect(actual) {
 }
 
 async function executeTestSuite(testSuite) {
-    if (logReport != null)
+    if (logReport)
         logReport.value = "";
     let callback = testSuites[testSuite];
     testCases = [];
     passedTestCases = 0;
     totalTestCases = 0;
     await callback();
-    if (beforeTestSuite != null)
+    if (beforeTestSuite)
         await beforeTestSuite();
     await submitNext(testSuite, 0);
 }
@@ -185,7 +185,7 @@ function redirectLog() {
     console.log = function (message) {
         if (message == undefined)
             message = "";
-        if (logReport != null) {
+        if (logReport) {
             logReport.value += message + "\n";
         }
         consoleLog.apply(console, arguments);
@@ -195,7 +195,7 @@ function redirectLog() {
     console.error = function (message) {
         if (message == undefined)
             message = "";
-        if (logReport != null) {
+        if (logReport) {
             logReport.value += message + "\n";
         }
         consoleError.apply(console, arguments);

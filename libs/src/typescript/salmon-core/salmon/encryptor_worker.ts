@@ -32,7 +32,7 @@ async function receive(event: any) {
 		let msg = { startPos: startPos, endPos: endPos, outData: destBuffer };
 		if (typeof process === 'object') {
 			const { parentPort } = await import("worker_threads");
-			if (parentPort != null) {
+			if (parentPort) {
 				parentPort.postMessage(msg);
 			}
 		}
@@ -41,7 +41,7 @@ async function receive(event: any) {
 	} catch (ex) {
 		if (typeof process === 'object') {
             const { parentPort } = await import("worker_threads");
-            if (parentPort != null) {
+            if (parentPort) {
                 parentPort.postMessage(ex);
             }
         }
@@ -52,7 +52,7 @@ async function receive(event: any) {
 
 if (typeof process === 'object') {
     const { parentPort } = await import("worker_threads");
-    if (parentPort != null)
+    if (parentPort)
         parentPort.addListener('message', receive);
 }
 else {

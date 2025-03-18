@@ -45,9 +45,9 @@ function stopRead() {
 }
 
 async function close() {
-    if (stream != null)
+    if (stream)
         await stream.close();
-    if (cacheBuffer != null)
+    if (cacheBuffer)
         cacheBuffer.clear();
 }
 
@@ -74,7 +74,7 @@ async function startRead(event: any): Promise<void> {
         let chunkBytesRead: number = 0;
         if (stream == null) {
             let realFile: IFile = await getInstance(params.readFileClassType, params.fileToReadHandle);
-            let fileToExport: AesFile = new AesFile(realFile, null);
+            let fileToExport: AesFile = new AesFile(realFile);
             fileToExport.setEncryptionKey(params.key);
             await fileToExport.setVerifyIntegrity(params.integrity, params.hash_key);
             stream = await fileToExport.getInputStream();
@@ -94,7 +94,7 @@ async function startRead(event: any): Promise<void> {
         };
         if (typeof process === 'object') {
             const { parentPort } = await import("worker_threads");
-            if (parentPort != null) {
+            if (parentPort) {
                 parentPort.postMessage(msgComplete);
             }
         }
@@ -107,7 +107,7 @@ async function startRead(event: any): Promise<void> {
         let msgError = { message: 'error', error: exMsg, type: type };
         if (typeof process === 'object') {
             const { parentPort } = await import("worker_threads");
-            if (parentPort != null) {
+            if (parentPort) {
                 parentPort.postMessage(msgError);
             }
         }
@@ -118,7 +118,7 @@ async function startRead(event: any): Promise<void> {
 
 if (typeof process === 'object') {
     const { parentPort } = await import("worker_threads");
-    if (parentPort != null)
+    if (parentPort)
         parentPort.addListener('message', receive);
 }
 else {

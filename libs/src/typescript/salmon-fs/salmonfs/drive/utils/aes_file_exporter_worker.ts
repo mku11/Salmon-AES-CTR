@@ -36,7 +36,7 @@ export class AesFileExporterWorker extends FileExporterWorker {
      */
     async getSourceFile(params: any): Promise<IVirtualFile | null> {
         let realFile: IFile = await FileUtils.getInstance(params.exportFileClassType, params.fileToExportHandle);
-        let fileToExport: AesFile = new AesFile(realFile, null);
+        let fileToExport: AesFile = new AesFile(realFile);
         fileToExport.setEncryptionKey(params.key);
         await fileToExport.setVerifyIntegrity(params.integrity, params.hash_key);
         return fileToExport;
@@ -46,7 +46,7 @@ export class AesFileExporterWorker extends FileExporterWorker {
 let worker = new AesFileExporterWorker();
 if (typeof process === 'object') {
     const { parentPort } = await import("worker_threads");
-    if (parentPort != null)
+    if (parentPort)
         parentPort.addListener('message', (event: any) => worker.receive(worker, event));
 }
 else {

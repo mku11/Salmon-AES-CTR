@@ -199,7 +199,7 @@ export class NodeFileStream extends RandomAccessStream {
      */
     public override async flush(): Promise<void> {
         if (await this.canWrite()) {
-            if (this.#fd != null) {
+            if (this.#fd) {
                 // nop
             }
         }
