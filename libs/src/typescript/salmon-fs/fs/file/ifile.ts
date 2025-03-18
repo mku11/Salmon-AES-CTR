@@ -347,7 +347,6 @@ export async function moveRecursively(file: IFile, destDir: IFile, options?: Rec
         if (!await file.delete()) {
             if (options.onFailed)
                 options.onFailed(file, new Error("Could not delete source directory"));
-            return;
         }
     }
 }

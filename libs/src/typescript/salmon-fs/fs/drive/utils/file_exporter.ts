@@ -283,7 +283,9 @@ export abstract class FileExporter {
     }
 }
 
-
+/**
+ * File exporter options
+ */
 export class FileExportOptions {
     /**
      * Override the filename
