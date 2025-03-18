@@ -37,13 +37,13 @@ import { SequenceException } from "../../../salmon-core/salmon/sequence/sequence
 import { SecurityException } from "../../../salmon-core/salmon/security_exception.js";
 import { Nonce } from "../../../salmon-core/salmon/nonce.js";
 import { BitConverter } from "../../../salmon-core/convert/bit_converter.js";
+import { INonceSequencer } from "../../../salmon-core/salmon/sequence/inonce_sequencer.js";
 
 /**
  * Device Authorization Configuration. This represents the authorization that will be provided
  * to the target device to allow writing operations for a virtual drive.
  */
 export class AuthConfig {
-
     readonly #driveId: Uint8Array = new Uint8Array(DriveGenerator.DRIVE_ID_LENGTH);
     readonly #authId: Uint8Array = new Uint8Array(DriveGenerator.AUTH_ID_SIZE);
     readonly #startNonce: Uint8Array = new Uint8Array(Generator.NONCE_LENGTH);
@@ -51,7 +51,7 @@ export class AuthConfig {
 
     /**
      * Get the drive ID to grant authorization for.
-     * @return
+     * @return {Uint8Array} The drive id
      */
     public getDriveId(): Uint8Array {
         return this.#driveId;
@@ -59,7 +59,7 @@ export class AuthConfig {
 
     /**
      * Get the authorization ID for the target device.
-     * @return
+     * @return {Uint8Array} The auth id
      */
     public getAuthId(): Uint8Array {
         return this.#authId;
@@ -67,7 +67,7 @@ export class AuthConfig {
 
     /**
      * Get the nonce maximum value the target device will use.
-     * @return
+     * @return {Uint8Array} The starting nonce.
      */
     public getStartNonce(): Uint8Array {
         return this.#startNonce;
@@ -75,7 +75,7 @@ export class AuthConfig {
 
     /**
      * Get the nonce maximum value the target device will use.
-     * @return The nonce max value.
+     * @return {Uint8Array} The nonce max value.
      */
     public getMaxNonce(): Uint8Array {
         return this.#maxNonce;
@@ -83,7 +83,6 @@ export class AuthConfig {
 
     /**
      * Instantiate a class with the properties of the authorization config file.
-     * @param contents The byte array that contains the contents of the auth config file.
      */
     public constructor() {
 
@@ -91,7 +90,7 @@ export class AuthConfig {
 
     /**
      * Initialize the authorization configuration.
-     * @param contents The authorization configuration data
+     * @param {Uint8Array} contents The authorization configuration data
      */
     public async init(contents: Uint8Array): Promise<void> {
         let ms: MemoryStream = new MemoryStream(contents);
@@ -105,11 +104,12 @@ export class AuthConfig {
     /**
      * Write the properties of the auth configuration to a config file that will be imported by another device.
      * The new device will then be authorized editing operations ie: import, rename files, etc.
-     * @param authConfigFile
-     * @param drive The drive you want to create an auth config for.
-     * @param targetAuthId Authorization ID of the target device.
-     * @param targetStartingNonce Starting nonce for the target device.
-     * @param targetMaxNonce Maximum nonce for the target device.
+     * @param {IFile} authConfigFile The authorization configuration file.
+     * @param {AesDrive} drive The drive you want to create an auth config for.
+     * @param {Uint8Array} targetAuthId Authorization ID of the target device.
+     * @param {Uint8Array} targetStartingNonce Starting nonce for the target device.
+     * @param {Uint8Array} targetMaxNonce Maximum nonce for the target device.
+     * @param {Uint8Array} configNonce THe configuration nonce
      * @throws Exception
      */
     static async #writeAuthFile(authConfigFile: IFile,
@@ -127,11 +127,11 @@ export class AuthConfig {
 
     /**
      * Write authorization configuration to a SalmonStream.
-     * @param stream The stream to write to.
-     * @param driveId The drive id.
-     * @param authId The auth id of the new device.
-     * @param nextNonce The next nonce to be used by the new device.
-     * @param maxNonce The max nonce to be used byte the new device.
+     * @param {RandomAccessStream} stream The stream to write to.
+     * @param {Uint8Array} driveId The drive id.
+     * @param {Uint8Array} authId The auth id of the new device.
+     * @param {Uint8Array} nextNonce The next nonce to be used by the new device.
+     * @param {Uint8Array} maxNonce The max nonce to be used byte the new device.
      * @throws Exception
      */
     static async #writeToStream(stream: RandomAccessStream, driveId: Uint8Array, authId: Uint8Array,
@@ -160,9 +160,9 @@ export class AuthConfig {
     /**
      * Get the app drive pair configuration properties for this drive
      *
-     * @param authFile The drive.
-     * @param authFile The encrypted authorization file.
-     * @return The decrypted authorization file.
+     * @param {AesDrive} drive The drive.
+     * @param {IFile} authFile The encrypted authorization file.
+     * @return {Promise<AuthConfig>} The decrypted authorization file.
      * @throws Exception
      */
     static async #getAuthConfig(drive: AesDrive, authFile: IFile): Promise<AuthConfig> {
@@ -183,8 +183,9 @@ export class AuthConfig {
     /**
      * Verify the authorization id with the current drive auth id.
      *
-     * @param authId The authorization id to verify.
-     * @return
+     * @param {AesDrive} drive The drive
+     * @param {Uint8Array} authId The authorization id to verify.
+     * @return {Promise<boolean>} True if verification succeeds
      * @throws Exception
      */
     static async #verifyAuthId(drive: AesDrive, authId: Uint8Array): Promise<boolean> {
@@ -195,28 +196,35 @@ export class AuthConfig {
     /**
      * Import sequence into the current drive.
      *
-     * @param {AesDrive} drive
-     * @param {AuthConfig} authConfig
+     * @param {AesDrive} drive The drive
+     * @param {AuthConfig} authConfig The authorization configuration
      * @throws Exception
      */
     static async #importSequence(drive: AesDrive, authConfig: AuthConfig): Promise<void> {
+        let sequencer: INonceSequencer | undefined = drive.getSequencer();
+        if(!sequencer)
+            throw new Error("No sequencer defined");
         let drvStr: string = BitConverter.toHex(authConfig.getDriveId());
         let authStr: string = BitConverter.toHex(authConfig.getAuthId());
-        await drive.getSequencer().initializeSequence(drvStr, authStr, authConfig.getStartNonce(), authConfig.getMaxNonce());
+        await sequencer.initializeSequence(drvStr, authStr, authConfig.getStartNonce(), authConfig.getMaxNonce());
     }
     
     /**
      * Import the device authorization file.
      *
-     * @param authConfigFile The filepath to the authorization file.
+     * @param {AesDrive} drive The drive
+     * @param {IFile} authConfigFile The filepath to the authorization file.
      * @throws Exception
      */
     public static async importAuthFile(drive: AesDrive, authConfigFile: IFile): Promise<void> {
+        let sequencer: INonceSequencer | undefined = drive.getSequencer();
+        if(!sequencer)
+            throw new Error("No sequencer defined");
         let driveId: Uint8Array | null = drive.getDriveId();
         if (driveId == null)
             throw new Error("Could not get drive id, make sure you init the drive first");
 
-        let sequence: NonceSequence | null = await drive.getSequencer().getSequence(BitConverter.toHex(driveId));
+        let sequence: NonceSequence | null = await sequencer.getSequence(BitConverter.toHex(driveId));
         if (sequence  && sequence.getStatus() == Status.Active)
             throw new Error("Device is already authorized");
 
@@ -235,21 +243,24 @@ export class AuthConfig {
     }
     
     /**
-     * @param targetAuthId The authorization id of the target device.
-     * @param targetDir    The target dir the file will be written to.
-     * @param filename     The filename of the auth config file.
-     * @throws Exception
+     * @param {AesDrive} drive The drive
+     * @param {string} targetAuthId The authorization id of the target device.
+     * @param {IFile} filename     The file
+     * @throws Exception If an error occurs during export
      */
     public static async exportAuthFile(drive: AesDrive, targetAuthId: string, file: IFile): Promise<void> {
+        let sequencer: INonceSequencer | undefined = drive.getSequencer();
+        if(!sequencer)
+            throw new Error("No sequencer defined");
         let driveId: Uint8Array | null = drive.getDriveId();
         if (driveId == null)
             throw new Error("Could not get drive id, make sure you init the drive first");
 
-        let cfgNonce: Uint8Array | null = await drive.getSequencer().nextNonce(BitConverter.toHex(driveId));
+        let cfgNonce: Uint8Array | null = await sequencer.nextNonce(BitConverter.toHex(driveId));
         if (cfgNonce == null)
             throw new Error("Could not get config nonce");
 
-        let sequence: NonceSequence | null = await drive.getSequencer().getSequence(BitConverter.toHex(driveId));
+        let sequence: NonceSequence | null = await sequencer.getSequence(BitConverter.toHex(driveId));
         if (sequence == null)
             throw new Error("Device is not authorized to export");
         if(await file.exists() && await file.getLength() > 0) {
@@ -273,7 +284,7 @@ export class AuthConfig {
         let authId: string | null = sequence.getAuthId();
         if(authId == null)
             throw new SequenceException("Could not get auth id");
-        await drive.getSequencer().setMaxNonce(sequence.getId(), authId, pivotNonce);
+        await sequencer.setMaxNonce(sequence.getId(), authId, pivotNonce);
         await AuthConfig.#writeAuthFile(file, drive,
             BitConverter.hexToBytes(targetAuthId),
             pivotNonce, maxNonce,

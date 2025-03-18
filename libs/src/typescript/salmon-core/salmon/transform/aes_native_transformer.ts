@@ -53,7 +53,7 @@ export class AesNativeTransformer extends AESCTRTransformer {
     #implType: number;
     /**
      * 
-     * @returns The native implementation type see ProviderType enum
+     * @returns {number} The native implementation type see ProviderType enum
      */
     public getImplType(): number {
         return this.#implType;

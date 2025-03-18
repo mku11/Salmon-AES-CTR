@@ -167,6 +167,14 @@ export class WSFile implements IFile {
     }
 
     /**
+     * Get the path of this file. For javascript this is the same as the absolute filepath.
+     * @return
+     */
+    public getPath(): string {
+        return this.#filePath;
+    }
+
+    /**
      * Get the absolute path on the physical disk. For javascript this is the same as the filepath.
      * @return The absolute path.
      */
@@ -225,14 +233,6 @@ export class WSFile implements IFile {
 			path = path.slice(0,-1);
         let parentFilePath: string = path.substring(0, path.lastIndexOf(WSFile.separator));
         return new WSFile(parentFilePath, this.#servicePath,this.#credentials);
-    }
-
-    /**
-     * Get the path of this file. For javascript this is the same as the absolute filepath.
-     * @return
-     */
-    public getPath(): string {
-        return this.#filePath;
     }
 
     /**
@@ -319,7 +319,7 @@ export class WSFile implements IFile {
     /**
      * Move this file or directory under a new directory.
      * @param newDir The target directory.
-     * @param {MoveOptions} [options] The options
+     * @param {MoveOptions} options The options
      * @return The moved file. Use this file for subsequent operations instead of the original.
      */
     public async move(newDir: IFile, options?: MoveOptions): Promise<IFile> {
@@ -355,7 +355,7 @@ export class WSFile implements IFile {
     /**
      * Move this file or directory under a new directory.
      * @param newDir    The target directory.
-     * @param {CopyOptions} [options] The options
+     * @param {CopyOptions} options The options
      * @return The copied file. Use this file for subsequent operations instead of the original.
      * @throws IOException Thrown if there is an IO error.
      */

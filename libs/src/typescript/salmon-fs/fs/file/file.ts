@@ -41,7 +41,7 @@ export class File implements IFile {
 
     /**
      * Instantiate a real file represented by the filepath provided.
-     * @param path The filepath.
+     * @param {FileSystemHandle|null} fileHandle The fileHandle.
      */
     public constructor(fileHandle: FileSystemHandle | null, parent: File | null = null, name: string | null = null) {
         this.#fileHandle = fileHandle;
@@ -51,7 +51,7 @@ export class File implements IFile {
 
     /**
      * Create a directory under this directory.
-     * @param dirName The name of the new directory.
+     * @param {string} dirName The name of the new directory.
      * @return The newly created directory.
      */
     public async createDirectory(dirName: string): Promise<IFile> {
@@ -70,7 +70,7 @@ export class File implements IFile {
 
     /**
      * Create a file under this directory.
-     * @param filename The name of the new file.
+     * @param {string} filename The name of the new file.
      * @return The newly created file.
      * @throws IOException Thrown if there is an IO error.
      */
@@ -120,8 +120,16 @@ export class File implements IFile {
     }
 
     /**
-     * Get the absolute path on the physical disk. For js local file system this is the FileHandle.
-     * @return The absolute path.
+     * Get the path of this file. For local filesystem see FileSystemHandle
+     * @return {FileSystemHandle} 
+     */
+    public getPath(): FileSystemHandle {
+        return this.#fileHandle;
+    }
+
+    /**
+     * Get the absolute path on the physical disk. For local file system this is the FileHandle.
+     * @return {any} The absolute path.
      */
     public getDisplayPath(): any {
         let filename = this.#fileHandle  ? this.#fileHandle.name : this.#name;
@@ -132,7 +140,7 @@ export class File implements IFile {
 
     /**
      * Get the name of this file or directory.
-     * @return The name of this file or directory.
+     * @return {string} The name of this file or directory.
      */
     public getName(): string {
         if (this.#fileHandle == null && this.#name)
@@ -144,7 +152,7 @@ export class File implements IFile {
 
     /**
      * Get a stream for reading the file.
-     * @return The stream to read from.
+     * @return {Promise<RandomAccessStream>} The stream to read from.
      * @throws FileNotFoundException
      */
     public async getInputStream(): Promise<RandomAccessStream> {
@@ -154,7 +162,7 @@ export class File implements IFile {
 
     /**
      * Get a stream for writing to this file.
-     * @return The stream to write to.
+     * @return {Promise<RandomAccessStream>} The stream to write to.
      * @throws FileNotFoundException
      */
     public async getOutputStream(): Promise<RandomAccessStream> {
@@ -171,23 +179,15 @@ export class File implements IFile {
 
     /**
      * Get the parent directory of this file or directory.
-     * @return The parent directory.
+     * @return {Promise<IFile | null>} The parent directory.
      */
     public async getParent(): Promise<IFile | null> {
         return this.#parent as IFile;
     }
 
     /**
-     * Get the path of this file. For js local filesystem this is a relative path.
-     * @return
-     */
-    public getPath(): FileSystemHandle {
-        return this.#fileHandle;
-    }
-
-    /**
      * True if this is a directory.
-     * @return
+     * @return {Promise<boolean>} True if directory.
      */
     public async isDirectory(): Promise<boolean> {
         return this.#fileHandle  && this.#fileHandle.kind == 'directory';
@@ -195,7 +195,7 @@ export class File implements IFile {
 
     /**
      * True if this is a file.
-     * @return
+     * @return {Promise<boolean>} True if file.
      */
     public async isFile(): Promise<boolean> {
         return this.#fileHandle  && !await this.isDirectory();
@@ -203,7 +203,7 @@ export class File implements IFile {
 
     /**
      * Get the last modified date on disk.
-     * @return
+     * @return {Promise<number>} The last date modified.
      */
     public async getLastDateModified(): Promise<number> {
         if (await this.isDirectory())
@@ -214,7 +214,7 @@ export class File implements IFile {
 
     /**
      * Get the size of the file on disk.
-     * @return
+     * @return {Promise<number>} The file length
      */
     public async getLength(): Promise<number> {
         if (await this.isDirectory())
@@ -225,7 +225,7 @@ export class File implements IFile {
 
     /**
      * Get the count of files and subdirectories
-     * @return
+     * @return {Promise<number>} The number of children
      */
     public async getChildrenCount(): Promise<number> {
         return (await this.listFiles()).length;
@@ -250,7 +250,7 @@ export class File implements IFile {
 
     /**
      * Move this file or directory under a new directory.
-     * @param newDir The target directory.
+     * @param {IFile} newDir The target directory.
      * @param {MoveOptions} [options] The options
      * @return The moved file. Use this file for subsequent operations instead of the original.
      * @throws IOException Thrown if there is an IO error.
@@ -289,7 +289,7 @@ export class File implements IFile {
 
     /**
      * Move this file or directory under a new directory.
-     * @param newDir    The target directory.
+     * @param {IFile} newDir    The target directory.
      * @param {CopyOptions} [options] The options
      * @return The copied file. Use this file for subsequent operations instead of the original.
      * @throws IOException Thrown if there is an IO error.
@@ -319,7 +319,7 @@ export class File implements IFile {
 
     /**
      * Get the file or directory under this directory with the provided name.
-     * @param filename The name of the file or directory.
+     * @param {string} filename The name of the file or directory.
      * @return
      */
     public async getChild(filename: string): Promise<IFile | null> {
@@ -342,7 +342,7 @@ export class File implements IFile {
 
     /**
      * Rename the current file or directory.
-     * @param newFilename The new name for the file or directory.
+     * @param {string} newFilename The new name for the file or directory.
      * @return True if successfully renamed.
      */
     public async renameTo(newFilename: string): Promise<boolean> {

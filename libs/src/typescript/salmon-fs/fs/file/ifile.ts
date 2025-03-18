@@ -91,15 +91,14 @@ export interface IFile {
     getLastDateModified(): Promise<number>;
 
     /**
-     * Get the absolute path or handle of the file on disk.
+     * Get the display path.
      *
      * @return {string}
      */
     getDisplayPath(): string;
 
     /**
-     * Get the original filepath of this file. This might represent a symlinks or merged folders or a FileHandle. To get the display path
-     * use {@link #getADisplayPath()}.
+     * Get the absolute path or handle of the file on disk.
      *
      * @return
      */

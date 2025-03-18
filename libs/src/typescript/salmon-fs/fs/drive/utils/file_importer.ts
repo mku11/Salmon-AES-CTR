@@ -170,9 +170,9 @@ export abstract class FileImporter {
             }
 
             if(runningThreads == 1) {
-                await importFilePart(fileToImport, importedFile, 0, fileSize, totalBytesRead, options.onProgress, this.#bufferSize, this.#stopped);
+                await importFilePart(fileToImport, importedFile, 0, fileSize, totalBytesRead, options.onProgressChanged, this.#bufferSize, this.#stopped);
             } else {
-                await this.#submitImportJobs(runningThreads, partSize, fileToImport, importedFile, totalBytesRead, options.integrity, options.onProgress);
+                await this.#submitImportJobs(runningThreads, partSize, fileToImport, importedFile, totalBytesRead, options.integrity, options.onProgressChanged);
             }
 
             if (this.#stopped[0])
@@ -197,7 +197,7 @@ export abstract class FileImporter {
     }
 
     async #submitImportJobs(runningThreads: number, partSize: number, fileToImport: IFile, importedFile: IVirtualFile, 
-        totalBytesRead: number[], integrity: boolean, onProgress: ((position: number, length: number)=>void) | null): Promise<void> {
+        totalBytesRead: number[], integrity: boolean, onProgressChanged: ((position: number, length: number)=>void) | null): Promise<void> {
             let fileSize: number = await fileToImport.getLength();
             let bytesRead: number[] = new Array(runningThreads);
             bytesRead.fill(0);
@@ -211,13 +211,13 @@ export abstract class FileImporter {
                         this.#workers[i].removeEventListener('error', null);
 						this.#workers[i].removeEventListener('message', null);
                         this.#workers[i].addEventListener('message', (event: any) => {
-                            if(event.data.message == 'progress' && onProgress) {
+                            if(event.data.message == 'progress' && onProgressChanged) {
                                 bytesRead[event.data.index] = event.data.position;
                                 totalBytesRead[0] = 0;
                                 for (let i = 0; i < bytesRead.length; i++) {
                                     totalBytesRead[0] += bytesRead[i];
                                 }
-                                onProgress(totalBytesRead[0], fileSize);
+                                onProgressChanged(totalBytesRead[0], fileSize);
                             } else if(event.data.message == 'complete') {
                                 resolve(event.data);
                             } else if(event.data.message == 'error') {
@@ -233,13 +233,13 @@ export abstract class FileImporter {
                             this.#workers[i] = new Worker(this.#workerPath);
 						this.#workers[i].removeAllListeners();
                         this.#workers[i].on('message', (event: any) => {
-                            if(event.message == 'progress' && onProgress) {
+                            if(event.message == 'progress' && onProgressChanged) {
                                 bytesRead[event.index] = event.position;
                                 totalBytesRead[0] = 0;
                                 for (let i = 0; i < bytesRead.length; i++) {
                                     totalBytesRead[0] += bytesRead[i];
                                 }
-                                onProgress(totalBytesRead[0], fileSize);
+                                onProgressChanged(totalBytesRead[0], fileSize);
                             } else if(event.message == 'complete') {
                                 resolve(event);
                             } else if(event.message == 'error') {
@@ -328,5 +328,5 @@ export class FileImportOptions {
     /**
      * Callback when progress changes
      */
-    onProgress: ((position: number, length: number)=>void) | null = null;
+    onProgressChanged: ((position: number, length: number)=>void) | null = null;
 }

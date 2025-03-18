@@ -61,7 +61,7 @@ export class DriveGenerator {
 
     /**
      * Generate a Drive ID.
-     * @return The Drive ID.
+     * @return {Uint8Array} The Drive ID.
      */
     public static generateDriveID(): Uint8Array {
         return Generator.getSecureRandomBytes(DriveGenerator.DRIVE_ID_LENGTH);
@@ -69,7 +69,7 @@ export class DriveGenerator {
 
     /**
      * Generate a secure random authorization ID.
-     * @return The authorization Id (16 bytes).
+     * @return {Uint8Array} The authorization Id (16 bytes).
      */
     public static generateAuthId(): Uint8Array {
         return Generator.getSecureRandomBytes(DriveGenerator.AUTH_ID_SIZE);
@@ -77,7 +77,7 @@ export class DriveGenerator {
 
     /**
      * Generates a secure random combined key (drive key + hash key)
-     * @return The length of the combined key.
+     * @return {Uint8Array} The length of the combined key.
      */
     public static generateCombinedKey(): Uint8Array {
         return Generator.getSecureRandomBytes(DriveGenerator.COMBINED_KEY_LENGTH);
@@ -85,6 +85,7 @@ export class DriveGenerator {
 
     /**
      * Generates the initial vector that will be used with the master key to encrypt the combined key (drive key + hash key)
+     * @returns {Uint8Array} The master key initial vector
      */
     public static generateMasterKeyIV(): Uint8Array {
         return Generator.getSecureRandomBytes(DriveGenerator.IV_LENGTH);
@@ -92,7 +93,7 @@ export class DriveGenerator {
 
     /**
      * Generates a salt.
-     * @return The salt byte array.
+     * @return {Uint8Array} The salt byte array.
      */
     public static generateSalt(): Uint8Array {
         return Generator.getSecureRandomBytes(DriveGenerator.SALT_LENGTH);
@@ -100,7 +101,7 @@ export class DriveGenerator {
 
     /**
      * Get the starting nonce that will be used for encrypt drive files and filenames.
-     * @return A secure random byte array (8 bytes).
+     * @return {Uint8Array} A secure random byte array (8 bytes).
      */
     public static getStartingNonce(): Uint8Array {
         let bytes: Uint8Array = new Uint8Array(Generator.NONCE_LENGTH);
@@ -109,16 +110,16 @@ export class DriveGenerator {
 
     /**
      * Get the default max nonce to be used for drives.
-     * @return A secure random byte array (8 bytes).
+     * @return {Uint8Array} A secure random byte array (8 bytes).
      */
-    public static getMaxNonce() {
+    public static getMaxNonce(): Uint8Array {
         return BitConverter.toBytes(Number.MAX_SAFE_INTEGER, 8);
     }
 
     /**
      * Returns the iterations used for deriving the combined key from
      * the text password
-     * @return The current iterations for the key derivation.
+     * @return {number} The current iterations for the key derivation.
      */
     public static getIterations(): number {
         return DriveGenerator.#iterations;
@@ -126,7 +127,7 @@ export class DriveGenerator {
 
     /**
      * Set the default iterations.
-     * @param iterations The iterations
+     * @param {number} iterations The iterations
      */
     public static setIterations(iterations: number): void {
         DriveGenerator.#iterations = iterations;

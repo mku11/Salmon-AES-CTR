@@ -81,6 +81,14 @@ export class LocalStorageFile implements IFile {
     }
 
     /**
+     * Get the path of this file. For java this is the same as the absolute filepath.
+     * @return
+     */
+    public getPath(): string {
+        return this.#filePath;
+    }
+
+    /**
      * Get the absolute path on the physical disk. For java this is the same as the filepath.
      * @return The absolute path.
      */
@@ -127,14 +135,6 @@ export class LocalStorageFile implements IFile {
 		let dirPath: string = this.#filePath.substring(0, index);
 		let dir: IFile = new LocalStorageFile(dirPath);
         return dir;
-    }
-
-    /**
-     * Get the path of this file. For java this is the same as the absolute filepath.
-     * @return
-     */
-    public getPath(): string {
-        return this.#filePath;
     }
 
     /**

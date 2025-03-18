@@ -44,13 +44,16 @@ export class DriveConfig {
     readonly #hashSignature: Uint8Array = new Uint8Array(Generator.HASH_RESULT_LENGTH);
 
     /**
-     * Provide a class that hosts the properties of the drive config file
-     *
-     * @param contents The byte array that contains the contents of the config file
+     * Construct a class that hosts the properties of the drive config file
      */
     public constructor() {
     }
 
+    /**
+     * Initializes the properties of the drive config file
+     *
+     * @param {Uint8Array} contents The byte array that contains the contents of the config file
+     */
     public async init(contents: Uint8Array): Promise<void>{
         let ms: MemoryStream = new MemoryStream(contents);
         await ms.read(this.#magicBytes, 0, Generator.MAGIC_LENGTH);
@@ -66,14 +69,14 @@ export class DriveConfig {
     /**
      * Write the properties of a drive to a config file
      *
-     * @param configFile                   The configuration file that will be used to write the content into
-     * @param magicBytes                   The magic bytes for the header
-     * @param version                      The version of the file format
-     * @param salt                         The salt that will be used for encryption of the combined key
-     * @param iterations                   The iteration that will be used to derive the master key from a text password
-     * @param keyIv                        The initial vector that was used with the master password to encrypt the combined key
-     * @param encryptedData The encrypted combined key and drive id
-     * @param hashSignature                The hash signature of the drive id
+     * @param {IFile} configFile                   The configuration file that will be used to write the content into
+     * @param {Uint8Array} magicBytes                   The magic bytes for the header
+     * @param {number} version                      The version of the file format
+     * @param {Uint8Array} salt                         The salt that will be used for encryption of the combined key
+     * @param {number} iterations                   The iteration that will be used to derive the master key from a text password
+     * @param {Uint8Array} keyIv                        The initial vector that was used with the master password to encrypt the combined key
+     * @param {Uint8Array} encryptedData The encrypted combined key and drive id
+     * @param {Uint8Array} hashSignature                The hash signature of the drive id
      */
     public static async writeDriveConfig(configFile: IFile, magicBytes: Uint8Array, version: number, salt: Uint8Array,
         iterations: number, keyIv: Uint8Array,
@@ -113,7 +116,7 @@ export class DriveConfig {
 
     /**
      * Get the magic bytes from the config file.
-     * @return
+     * @return {Uint8Array} The magic bytes
      */
     public getMagicBytes(): Uint8Array {
         return this.#magicBytes;
@@ -121,7 +124,7 @@ export class DriveConfig {
 
     /**
      * Get the salt to be used for the password key derivation.
-     * @return
+     * @return {Uint8Array} the salt
      */
     public getSalt(): Uint8Array {
         return this.#salt;
@@ -129,7 +132,7 @@ export class DriveConfig {
 
     /**
      * Get the iterations to be used for the key derivation.
-     * @return
+     * @return {number} The number of iterations
      */
     public getIterations(): number {
         if (this.#iterations == null)
@@ -139,7 +142,7 @@ export class DriveConfig {
 
     /**
      * Get encrypted data using the master key: drive key, hash key, drive id.
-     * @return
+     * @return {Uint8Array} The encrypted data
      */
     getEncryptedData(): Uint8Array {
         return this.#encryptedData;
@@ -147,7 +150,7 @@ export class DriveConfig {
 
     /**
      * Get the initial vector that was used to encrypt this drive configuration.
-     * @return
+     * @return {Uint8Array} The initial vector
      */
     public getIv(): Uint8Array {
         return this.#iv;
@@ -155,7 +158,7 @@ export class DriveConfig {
 
     /**
      * Get the hash signature that was used to sign this drive configuration.
-     * @return
+     * @return {Uint8Array} The hash signature
      */
     public getHashSignature(): Uint8Array {
         return this.#hashSignature;

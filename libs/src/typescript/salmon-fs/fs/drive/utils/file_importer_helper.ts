@@ -27,17 +27,17 @@ import { IFile } from "../../file/ifile.js";
 import { IVirtualFile } from "../../file/ivirtual_file.js";
 
 /**
- * Import a file part into a file in the drive.
+ * Import a file part into a file in the drive. Do not use this directly, use FileImporter instead.
  *
- * @param fileToImport   The external file that will be imported
- * @param salmonFile     The file that will be imported to
- * @param start          The start position of the byte data that will be imported
+ * @param {IFile} fileToImport   The external file that will be imported
+ * @param {IVirtualFile} salmonFile     The file that will be imported to
+ * @param {number} start          The start position of the byte data that will be imported
  * @param {number} count          The length of the file content that will be imported
- * @param totalBytesRead The total bytes read from the external file
- * @param onProgress 	 Progress observer
+ * @param {number} totalBytesRead The total bytes read from the external file
+ * @param {CallableFunction} onProgress 	 Progress observer
  */
 export async function importFilePart(fileToImport: IFile, salmonFile: IVirtualFile,
-    start: number, count: number, totalBytesRead: number[], onProgress: ((position: number, length: number) => void) | null,
+    start: number, count: number, totalBytesRead: number[], onProgressChanged: ((position: number, length: number) => void) | null,
     bufferSize: number, stopped: boolean[]): Promise<void> {
     let totalPartBytesRead: number = 0;
 
@@ -62,8 +62,8 @@ export async function importFilePart(fileToImport: IFile, salmonFile: IVirtualFi
             totalPartBytesRead += bytesRead;
 
             totalBytesRead[0] += bytesRead;
-            if (onProgress)
-                onProgress(totalBytesRead[0], count);
+            if (onProgressChanged)
+                onProgressChanged(totalBytesRead[0], count);
         }
     } catch (ex) {
         console.error(ex);

@@ -27,6 +27,9 @@ import { IVirtualFile } from "../../file/ivirtual_file.js";
 import { importFilePart } from "./file_importer_helper.js";
 import { FileUtils } from "./file_utils.js";
 
+/**
+ * Web worker for parallel file import.
+ */
 export class FileImporterWorker {
     stopped: boolean[] = [false];
 
@@ -41,7 +44,7 @@ export class FileImporterWorker {
 
     /**
      * Override to specify the target file.
-     * @param params 
+     * @param {any} params 
      * @returns 
      */
     async getTargetFile(params: any): Promise<IVirtualFile | null> {
@@ -62,7 +65,7 @@ export class FileImporterWorker {
     async startImport(event: any): Promise<void> {
         try {
             let params = typeof process === 'object' ? event : event.data;
-            let onProgress: (position: number, length: number) => void = async function (position, length): Promise<void> {
+            let onProgressChanged: (position: number, length: number) => void = async function (position, length): Promise<void> {
                 let msg = { message: 'progress', index: params.index, position: position, length: length };
                 if (typeof process === 'object') {
                     const { parentPort } = await import("worker_threads");
@@ -80,7 +83,7 @@ export class FileImporterWorker {
                 throw new Error("Could not obtain a target file, override getTargetFile()");
 
             await importFilePart(fileToImport, importedFile, params.start, params.length, totalBytesRead,
-                onProgress, params.bufferSize, this.stopped);
+                onProgressChanged, params.bufferSize, this.stopped);
             let msgComplete = { message: 'complete', totalBytesRead: totalBytesRead[0] };
             if (typeof process === 'object') {
                 const { parentPort } = await import("worker_threads");

@@ -28,9 +28,12 @@ import { FileImporterWorker } from "../../../fs/drive/utils/file_importer_worker
 import { FileUtils } from "../../../fs/drive/utils/file_utils.js";
 import { AesFile } from "../../file/aes_file.js";
 
+/**
+ * Web worker for parallel encrypted file import.
+ */
 export class AesFileImporterWorker extends FileImporterWorker {
 
-    async getTargetFile(params: any): Promise<IVirtualFile | null> {
+    override async getTargetFile(params: any): Promise<IVirtualFile | null> {
         let realFile: IFile = await FileUtils.getInstance(params.importedFileClassType, params.importedFileHandle);
         let targetFile: AesFile = new AesFile(realFile);
         targetFile.setAllowOverwrite(true);

@@ -150,9 +150,9 @@ export abstract class FileExporter {
             }
 
             if (runningThreads == 1) {
-                await exportFilePart(fileToExport, exportFile, 0, fileSize, totalBytesWritten, options.onProgress, this.#bufferSize, this.#stopped);
+                await exportFilePart(fileToExport, exportFile, 0, fileSize, totalBytesWritten, options.onProgressChanged, this.#bufferSize, this.#stopped);
             } else {
-                await this.#submitExportJobs(runningThreads, partSize, fileToExport, exportFile, totalBytesWritten, options.integrity, options.onProgress);
+                await this.#submitExportJobs(runningThreads, partSize, fileToExport, exportFile, totalBytesWritten, options.integrity, options.onProgressChanged);
             }
 
             if (this.#stopped[0])
@@ -179,7 +179,7 @@ export abstract class FileExporter {
 
     async #submitExportJobs(runningThreads: number, partSize: number, fileToExport: IVirtualFile, exportedFile: IFile,
         totalBytesWritten: number[], integrity: boolean, 
-        onProgress: ((position: number, length: number) => void) | null): Promise<void> {
+        onProgressChanged: ((position: number, length: number) => void) | null): Promise<void> {
         let fileSize: number = await fileToExport.getLength();
         let bytesWritten: number[] = new Array(runningThreads);
         bytesWritten.fill(0);
@@ -192,13 +192,13 @@ export abstract class FileExporter {
 					this.#workers[i].removeEventListener('message', null);
                     this.#workers[i].removeEventListener('error', null);
                     this.#workers[i].addEventListener('message', (event: any) => {
-                        if (event.data.message == 'progress' && onProgress) {
+                        if (event.data.message == 'progress' && onProgressChanged) {
                             bytesWritten[event.data.index] = event.data.position;
                             totalBytesWritten[0] = 0;
                             for (let i = 0; i < bytesWritten.length; i++) {
                                 totalBytesWritten[0] += bytesWritten[i];
                             }
-                            onProgress(totalBytesWritten[0], fileSize);
+                            onProgressChanged(totalBytesWritten[0], fileSize);
                         }
                         else if (event.data.message == 'complete') {
                             resolve(event.data);
@@ -215,13 +215,13 @@ export abstract class FileExporter {
                         this.#workers[i] = new Worker(this.#workerPath);
 					this.#workers[i].removeAllListeners();
                     this.#workers[i].on('message', (event: any) => {
-                        if (event.message == 'progress' && onProgress) {
+                        if (event.message == 'progress' && onProgressChanged) {
                             bytesWritten[event.index] = event.position;
                             totalBytesWritten[0] = 0;
                             for (let i = 0; i < bytesWritten.length; i++) {
                                 totalBytesWritten[0] += bytesWritten[i];
                             }
-                            onProgress(totalBytesWritten[0], fileSize);
+                            onProgressChanged(totalBytesWritten[0], fileSize);
                         }
                         else if (event.message == 'complete') {
                             resolve(event);
@@ -303,5 +303,5 @@ export class FileExportOptions {
     /**
      * Callback when progress changes
      */
-    onProgress: ((position: number, length: number)=>void) | null = null;
+    onProgressChanged: ((position: number, length: number)=>void) | null = null;
 }

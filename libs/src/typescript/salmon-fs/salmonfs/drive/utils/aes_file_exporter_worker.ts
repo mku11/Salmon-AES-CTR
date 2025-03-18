@@ -28,13 +28,16 @@ import { FileExporterWorker } from "../../../fs/drive/utils/file_exporter_worker
 import { FileUtils } from "../../../fs/drive/utils/file_utils.js";
 import { AesFile } from "../../file/aes_file.js";
 
+/**
+ * Web worker for parallel encrypted file export.
+ */
 export class AesFileExporterWorker extends FileExporterWorker {
     /**
      * Get an instance of the file to export
      * @param params The parameters
      * @returns 
      */
-    async getSourceFile(params: any): Promise<IVirtualFile | null> {
+    override async getSourceFile(params: any): Promise<IVirtualFile | null> {
         let realFile: IFile = await FileUtils.getInstance(params.exportFileClassType, params.fileToExportHandle);
         let fileToExport: AesFile = new AesFile(realFile);
         fileToExport.setEncryptionKey(params.key);

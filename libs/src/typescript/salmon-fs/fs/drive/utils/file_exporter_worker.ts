@@ -27,22 +27,25 @@ import { IVirtualFile } from "../../file/ivirtual_file.js";
 import { exportFilePart } from "./file_exporter_helper.js";
 import { FileUtils } from "./file_utils.js";
 
+/**
+ * Web worker for parallel file export.
+ */
 export class FileExporterWorker {
     stopped: boolean[] = [false];
     
     /**
      * Override to specify the target file.
      * @param params The parameters
-     * @returns 
+     * @returns Promise<IVirtualFile | null> The virtual file
      */
     async getSourceFile(params: any): Promise<IVirtualFile | null> {
         return null;
     }
 
     /**
-     * Override if you want to source from another source
-     * @param params The parameters
-     * @returns 
+     * Override if you want to target another file
+     * @param {any} params The parameters
+     * @returns {Promise<IFile>} The target file
      */
     async getTargetFile(params: any): Promise<IFile> {
         return await FileUtils.getInstance(params.exportedFileClassType, params.exportedFileHandle);
@@ -62,7 +65,7 @@ export class FileExporterWorker {
     async startExport(event: any): Promise<void> {
         try {
             let params = typeof process === 'object' ? event : event.data;
-            let onProgress: (position: number, length: number) => void = async function (position, length): Promise<void> {
+            let onProgressChanged: (position: number, length: number) => void = async function (position, length): Promise<void> {
                 let msg = { message: 'progress', index: params.index, position: position, length: length };
                 if (typeof process === 'object') {
                     const { parentPort } = await import("worker_threads");
@@ -81,7 +84,7 @@ export class FileExporterWorker {
                 throw new Error("Could not obtain a source file, override getSourceFile()");
 
             await exportFilePart(fileToExport, exportedFile, params.start, params.length, totalBytesWritten,
-                onProgress, params.bufferSize, this.stopped);
+                onProgressChanged, params.bufferSize, this.stopped);
             let msgComplete = { message: 'complete', totalBytesWritten: totalBytesWritten[0] };
             if (typeof process === 'object') {
                 const { parentPort } = await import("worker_threads");

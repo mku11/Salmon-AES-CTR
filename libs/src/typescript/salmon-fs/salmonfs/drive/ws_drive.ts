@@ -46,10 +46,10 @@ export class WSDrive extends AesDrive {
      * Helper method that opens and initializes a WSDrive
      * @param {IFile} dir The real directory that contains the drive.
      * @param {string} password Text password to use with this drive.
-     * @param {ISalmonSequencer} sequencer Optional nonce sequencer that will be used for importing files.
+     * @param {ISalmonSequencer} [sequencer] Optional nonce sequencer that will be used for importing files.
      * @returns {Promise<AesDrive>} The drive.
      */
-    public static async open(dir: IFile, password: string, sequencer: INonceSequencer | null = null): Promise<AesDrive> {
+    public static async open(dir: IFile, password: string, sequencer?: INonceSequencer): Promise<AesDrive> {
         return await AesDrive.openDrive(dir, WSDrive, password, sequencer);
     }
     

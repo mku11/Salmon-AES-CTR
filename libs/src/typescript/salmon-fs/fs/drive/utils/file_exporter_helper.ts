@@ -27,16 +27,16 @@ import { IVirtualFile } from "../../file/ivirtual_file.js";
 import { RandomAccessStream } from "../../../../salmon-core/streams/random_access_stream.js";
 
 /**
- * Export a file part from the drive.
+ * Export a file part from the drive. Do not use this directly, use FileExporter instead.
  *
- * @param fileToExport      The file the part belongs to
- * @param exportFile        The file to copy the exported part to
- * @param start             The start position on the file
+ * @param {IVirtualFile} fileToExport      The file the part belongs to
+ * @param {IFile} exportFile        The file to copy the exported part to
+ * @param {number} start             The start position on the file
  * @param {number} count             The length of the bytes to be decrypted
- * @param totalBytesWritten The total bytes that were written to the external file
+ * @param {number[]} totalBytesWritten The total bytes that were written to the external file
  */
 export async function exportFilePart(fileToExport: IVirtualFile, exportFile: IFile, start: number, count: number,
-    totalBytesWritten: number[], onProgress: ((position: number, length: number) => void) | null, 
+    totalBytesWritten: number[], onProgressChanged: ((position: number, length: number) => void) | null, 
     bufferSize: number, stopped: boolean[]): Promise<void> {
     let totalPartBytesWritten: number = 0;
 
@@ -62,8 +62,8 @@ export async function exportFilePart(fileToExport: IVirtualFile, exportFile: IFi
             totalPartBytesWritten += bytesRead;
 
             totalBytesWritten[0] += bytesRead;
-            if (onProgress)
-                onProgress(totalBytesWritten[0], count);
+            if (onProgressChanged)
+                onProgressChanged(totalBytesWritten[0], count);
         }
     } catch (ex) {
         console.error(ex);

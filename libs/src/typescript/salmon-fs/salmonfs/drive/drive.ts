@@ -46,10 +46,10 @@ export class Drive extends AesDrive {
      * Helper method that opens and initializes a Drive
      * @param {IFile} dir The real directory that contains the drive.
      * @param {string} password Text password to use with this drive.
-     * @param {ISalmonSequencer} sequencer Optional nonce sequencer that will be used for importing files.
+     * @param {ISalmonSequencer} [sequencer] Optional nonce sequencer that will be used for importing files.
      * @returns {Promise<AesDrive>} The drive.
      */
-    public static async open(dir: IFile, password: string, sequencer: INonceSequencer | null = null): Promise<AesDrive> {
+    public static async open(dir: IFile, password: string, sequencer?: INonceSequencer): Promise<AesDrive> {
         return await AesDrive.openDrive(dir, Drive, password, sequencer);
     }
 
@@ -89,8 +89,8 @@ export class Drive extends AesDrive {
     
     /**
      * 
-     * @param file The real file.
-     * @returns The encrypted file.
+     * @param {IFile} file The real file.
+     * @returns {AesFile} The encrypted file.
      */
     public override getVirtualFile(file: IFile): AesFile {
         return new AesFile(file, this);

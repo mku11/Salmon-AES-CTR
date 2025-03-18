@@ -149,7 +149,7 @@ export class FileCommander {
                 importOptions.filename = filename;
                 importOptions.deleteSource = deleteSource;
                 importOptions.integrity = integrity;
-                importOptions.onProgress = (bytes, totalBytes) => {
+                importOptions.onProgressChanged = (bytes, totalBytes) => {
                     if (onProgressChanged) {
                         onProgressChanged(new RealFileTaskProgress(fileToImport,
                             bytes, totalBytes, count[0], total));
@@ -259,7 +259,7 @@ export class FileCommander {
                 exportOptions.filename = filename;
                 exportOptions.deleteSource = deleteSource;
                 exportOptions.integrity = integrity;
-                exportOptions.onProgress = (bytes, totalBytes) => {
+                exportOptions.onProgressChanged = (bytes, totalBytes) => {
                     if (onProgressChanged) {
                         onProgressChanged(new IVirtualFileTaskProgress(fileToExport as IVirtualFile,
                             bytes, totalBytes, count[0], total));
@@ -546,7 +546,7 @@ export class FileTaskProgress {
 
     /**
      * Get the total bytes.
-     * @returns The total bytes
+     * @returns {number} The total bytes
      */
     public getTotalBytes(): number {
         return this.totalBytes;

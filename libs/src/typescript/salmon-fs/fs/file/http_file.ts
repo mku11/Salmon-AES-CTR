@@ -94,6 +94,14 @@ export class HttpFile implements IFile {
     }
 
     /**
+     * Get the path of this file. For Javascript this is the same as the absolute filepath.
+     * @return
+     */
+    public getPath(): string {
+        return this.filePath;
+    }
+
+    /**
      * Get the absolute path on the physical disk. For javascript this is the same as the filepath.
      * @return The absolute path.
      */
@@ -149,14 +157,6 @@ export class HttpFile implements IFile {
 			path = path.slice(0,-1);
         let parentFilePath: string = path.substring(0, path.lastIndexOf(HttpFile.separator));
         return new HttpFile(parentFilePath);
-    }
-
-    /**
-     * Get the path of this file. For Javascript this is the same as the absolute filepath.
-     * @return
-     */
-    public getPath(): string {
-        return this.filePath;
     }
 
     /**

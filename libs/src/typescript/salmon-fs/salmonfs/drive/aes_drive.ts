@@ -65,7 +65,7 @@ export abstract class AesDrive extends VirtualDrive {
     #virtualRoot: IVirtualFile | null = null;
 
     readonly #hashProvider: IHashProvider = new HmacSHA256Provider();
-    #sequencer: INonceSequencer | null = null;
+    #sequencer: INonceSequencer | undefined;
 
     public async initialize(realRoot: IFile, createIfNotExists: boolean): Promise<void> {
         this.close();
@@ -73,7 +73,7 @@ export abstract class AesDrive extends VirtualDrive {
             return;
         this.#realRoot = realRoot;
         let parent: IFile | null = await this.#realRoot.getParent();
-        if (parent  && !createIfNotExists && ! await this.hasConfig() && await this.#realRoot.getParent()  && await parent.exists()) {
+        if (parent && !createIfNotExists && ! await this.hasConfig() && await this.#realRoot.getParent() && await parent.exists()) {
             // try the parent if this is the filesystem folder 
             let originalRealRoot: IFile = this.#realRoot;
             this.#realRoot = parent;
@@ -280,7 +280,7 @@ export abstract class AesDrive extends VirtualDrive {
      * @throws Exception
      */
     async getNextNonce(): Promise<Uint8Array | null> {
-        if (this.#sequencer == null)
+        if (!this.#sequencer)
             throw new AuthException("No sequencer found");
         let driveId: Uint8Array | null = this.getDriveId();
         if (driveId == null)
@@ -375,7 +375,7 @@ export abstract class AesDrive extends VirtualDrive {
             this.#key.clear();
         this.#key = null;
     }
-    
+
     /**
      * Initialize the drive virtual filesystem.
      */
@@ -397,17 +397,17 @@ export abstract class AesDrive extends VirtualDrive {
     public getHashProvider(): IHashProvider {
         return this.#hashProvider;
     }
-    
+
     /**
      * Set the drive location to an external directory.
      * This requires you previously use SetDriveClass() to provide a class for the drive
      *
-     * @param dir The directory path that will be used for storing the contents of the drive
-     * @param driveClassType The driver class type (ie Drive).
-     * @param password Text password to encrypt the drive configuration.
-     * @param sequencer The sequencer to use.
+     * @param {IFile} dir The directory path that will be used for storing the contents of the drive
+     * @param {any} driveClassType The driver class type (ie Drive).
+     * @param {string} password Text password to encrypt the drive configuration.
+     * @param {INonceSequencer} [sequencer] The sequencer to use.
      */
-    public static async openDrive(dir: IFile, driveClassType: any, password: string, sequencer: INonceSequencer | null = null): Promise<AesDrive> {
+    public static async openDrive(dir: IFile, driveClassType: any, password: string, sequencer?: INonceSequencer): Promise<AesDrive> {
         let drive: AesDrive = await AesDrive.#createDriveInstance(dir, false, driveClassType, sequencer);
         if (!await drive.hasConfig()) {
             throw new Error("Drive does not exist");
@@ -419,11 +419,11 @@ export abstract class AesDrive extends VirtualDrive {
     /**
      * Create a new drive in the provided location.
      *
-     * @param dir  Directory to store the drive configuration and virtual filesystem.
-     * @param driveClassType The driver class type (ie Drive).
-     * @param password Text password to encrypt the drive configuration.
-     * @param sequencer The sequencer to use.
-     * @return The newly created drive.
+     * @param {IFile} dir  Directory to store the drive configuration and virtual filesystem.
+     * @param {any} driveClassType The driver class type (ie Drive).
+     * @param {string} password Text password to encrypt the drive configuration.
+     * @param {INonceSequencer} sequencer The sequencer to use.
+     * @return {Promise<AesDrive>} The newly created drive.
      * @throws IntegrityException Thrown if the data are corrupt or tampered with.
      * @throws SequenceException Thrown if error with the nonce sequence
      */
@@ -438,18 +438,18 @@ export abstract class AesDrive extends VirtualDrive {
     /**
      * Create a drive instance.
      *
-     * @param dirPath The target directory where the drive is located.
-     * @param createIfNotExists Create the drive if it does not exist
-     * @return
+     * @param {IFile} dir The target directory where the drive is located.
+     * @param {boolean} createIfNotExists Create the drive if it does not exist
+     * @return {Promise<AesDrive>} The drive
      * @throws SalmonSecurityException Thrown when error with security
      */
-    static async #createDriveInstance(dir: IFile, createIfNotExists: boolean, 
-        driveClassType: any, sequencer: INonceSequencer | null = null): Promise<AesDrive> {
+    static async #createDriveInstance(dir: IFile, createIfNotExists: boolean,
+        driveClassType: any, sequencer?: INonceSequencer): Promise<AesDrive> {
         try {
             let drive: AesDrive = new driveClassType;
             await drive.initialize(dir, createIfNotExists);
             drive.#sequencer = sequencer;
-            if(drive.#sequencer)
+            if (drive.#sequencer)
                 await drive.#sequencer.initialize();
             return drive;
         } catch (e) {
@@ -461,20 +461,22 @@ export abstract class AesDrive extends VirtualDrive {
     /**
      * Get the device authorization byte array for the current drive.
      *
-     * @return
-     * @throws Exception
+     * @return {Promise<Uint8Array>} The byte array with the auth id
+     * @throws Exception If error occurs during retrieval
      */
     public async getAuthIdBytes(): Promise<Uint8Array> {
+        if(!this.#sequencer)
+            throw new Error("No sequencer defined");
         let driveId: Uint8Array | null = this.getDriveId();
         if (driveId == null)
             throw new Error("Could not get drive id, make sure you init the drive first");
         let drvStr: string = BitConverter.toHex(driveId);
-        let sequence: NonceSequence | null = await this.getSequencer().getSequence(drvStr);
+        let sequence: NonceSequence | null = await this.#sequencer.getSequence(drvStr);
         if (sequence == null) {
             let authId: Uint8Array = DriveGenerator.generateAuthId();
             await this.createSequence(driveId, authId);
         }
-        sequence = await this.getSequencer().getSequence(drvStr);
+        sequence = await this.#sequencer.getSequence(drvStr);
         if (sequence == null)
             throw new Error("Could not get sequence");
         let authId: string | null = sequence.getAuthId();
@@ -486,7 +488,7 @@ export abstract class AesDrive extends VirtualDrive {
     /**
      * Get the default auth config filename.
      *
-     * @return
+     * @return {string} The authorization configuration file name.
      */
     public static getDefaultAuthConfigFilename(): string {
         return AesDrive.getAuthConfigFilename();
@@ -498,28 +500,32 @@ export abstract class AesDrive extends VirtualDrive {
      *
      * @param {Uint8Array} driveId The driveId
      * @param  {Uint8Array} authId  The authId
-     * @throws Exception
+     * @throws Exception If error occurs during creation
      */
     async createSequence(driveId: Uint8Array, authId: Uint8Array): Promise<void> {
+        if(!this.#sequencer)
+            throw new Error("No sequencer defined");
         let drvStr: string = BitConverter.toHex(driveId);
         let authStr: string = BitConverter.toHex(authId);
-        await this.getSequencer().createSequence(drvStr, authStr);
+        await this.#sequencer.createSequence(drvStr, authStr);
     }
 
     /**
      * Initialize the nonce sequencer with the current drive nonce range. Should be called
      * once per driveId/authId combination.
      *
-     * @param driveId Drive ID.
-     * @param authId  Authorization ID.
-     * @throws Exception
+     * @param {Uint8Array} driveId Drive ID.
+     * @param {Uint8Array} authId  Authorization ID.
+     * @throws Exception If error occurs during initialization
      */
     async initializeSequence(driveId: Uint8Array, authId: Uint8Array): Promise<void> {
+        if(!this.#sequencer)
+            throw new Error("No sequencer defined");
         let startingNonce: Uint8Array = DriveGenerator.getStartingNonce();
         let maxNonce: Uint8Array = DriveGenerator.getMaxNonce();
         let drvStr: string = BitConverter.toHex(driveId);
         let authStr: string = BitConverter.toHex(authId);
-        await this.getSequencer().initializeSequence(drvStr, authStr, startingNonce, maxNonce);
+        await this.#sequencer.initializeSequence(drvStr, authStr, startingNonce, maxNonce);
     }
 
     /**
@@ -527,20 +533,22 @@ export abstract class AesDrive extends VirtualDrive {
      * by the current device. Warning: If you need to authorize write operations to the device again you will need
      * to have another device to export an authorization config file and reimport it.
      *
-     * @throws Exception
+     * @throws Exception If error occurs during revoke.
      * @see <a href="https://github.com/mku11/Salmon-AES-CTR#readme">Salmon README.md</a>
      */
     public async revokeAuthorization(): Promise<void> {
+        if(!this.#sequencer)
+            throw new Error("No sequencer defined");
         let driveId: Uint8Array | null = this.getDriveId();
         if (driveId == null)
             throw new Error("Could not get revoke, make sure you initialize the drive first");
-        await this.getSequencer().revokeSequence(BitConverter.toHex(driveId));
+        await this.#sequencer.revokeSequence(BitConverter.toHex(driveId));
     }
 
     /**
      * Get the authorization ID for the current device.
      *
-     * @return
+     * @return {Promise<string>} The auth id
      * @throws SequenceException Thrown if error with the nonce sequence
      * @throws SalmonAuthException Thrown when error during authorization
      */
@@ -551,7 +559,7 @@ export abstract class AesDrive extends VirtualDrive {
     /**
      * Create a configuration file for the drive.
      *
-     * @param password The new password to be saved in the configuration
+     * @param {string} password The new password to be saved in the configuration
      *                 This password will be used to derive the master key that will be used to
      *                 encrypt the combined key (encryption key + hash key)
      */
@@ -567,14 +575,14 @@ export abstract class AesDrive extends VirtualDrive {
             throw new Error("Cannot create config, no root found, make sure you init the drive first");
         let configFile: IFile | null = await this.getConfigFile(realRoot);
 
-        if (driveKey == null && configFile  && await configFile.exists())
+        if (driveKey == null && configFile && await configFile.exists())
             throw new AuthException("Not authenticated");
 
         // delete the old config file and create a new one
-        if (configFile  && await configFile.exists())
+        if (configFile && await configFile.exists())
             await configFile.delete();
         configFile = await this.createConfigFile(realRoot);
-        if(configFile == null)
+        if (configFile == null)
             throw new AuthException("Could not crete config file");
 
         let magicBytes: Uint8Array = Generator.getMagicBytes();
@@ -626,7 +634,7 @@ export abstract class AesDrive extends VirtualDrive {
 
         await DriveConfig.writeDriveConfig(configFile, magicBytes, version, salt, iterations, masterKeyIv,
             encData, hashSignature);
-            this.setKey(masterKey, driveKey, hashKey, iterations);
+        this.setKey(masterKey, driveKey, hashKey, iterations);
 
         if (newDrive) {
             // create a full sequence for nonces
@@ -639,7 +647,7 @@ export abstract class AesDrive extends VirtualDrive {
 
     /**
      * Change the user password.
-     * @param pass The new password.
+     * @param {string} pass The new password.
      * @throws IOException Thrown if there is an IO error.
      * @throws SalmonAuthException Thrown when error during authorization
      * @throws SalmonSecurityException Thrown when error with security
@@ -653,20 +661,20 @@ export abstract class AesDrive extends VirtualDrive {
     /**
      * Get the nonce sequencer used for the current drive.
      *
-     * @return The nonce sequencer
+     * @return {INonceSequencer | undefined} The nonce sequencer
      */
-    public getSequencer(): INonceSequencer {
-        if(this.#sequencer == null)
+    public getSequencer(): INonceSequencer | undefined {
+        if (!this.#sequencer)
             throw new Error("Could not find a sequencer");
         return this.#sequencer;
     }
-	
-	/**
+
+    /**
      * Set the nonce sequencer used for the current drive.
      *
-     * @param The nonce sequencer
+     * @param {INonceSequencer | undefined} sequencer The nonce sequencer
      */
-    public setSequencer(sequencer: INonceSequencer) {
+    public setSequencer(sequencer: INonceSequencer | undefined) {
         this.#sequencer = sequencer;
     }
 
@@ -676,7 +684,7 @@ export abstract class AesDrive extends VirtualDrive {
      * @param {IFile} realRoot The real root directory of the vault
      * @returns The config file that was created
      */
-    public async createConfigFile(realRoot: IFile): Promise<IFile>  {
+    public async createConfigFile(realRoot: IFile): Promise<IFile> {
         let configFile: IFile = await realRoot.createFile(AesDrive.getConfigFilename());
         return configFile;
     }

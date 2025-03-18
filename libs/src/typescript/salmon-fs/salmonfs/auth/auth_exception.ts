@@ -31,8 +31,8 @@ export class AuthException extends Error {
 
     /**
      * Construct an exception with a specific message and inner exception
-     * @param msg The provided message
-     * @param ex The inner exception
+     * @param {string} msg The provided message
+     * @param {Error | unknown | null} ex The inner exception
      */
     public constructor(msg: string | null = null, ex: Error | unknown | null = null) {
         super(msg ?? "");
@@ -41,10 +41,11 @@ export class AuthException extends Error {
         }
     }
 
+    /**
+     * Get the nested error.
+     * @returns The cause of the error
+     */
     public getCause(): Error | unknown | null {
         return this.cause;
     }
 }
-
-let oldToString = AuthException.prototype.toString;
-

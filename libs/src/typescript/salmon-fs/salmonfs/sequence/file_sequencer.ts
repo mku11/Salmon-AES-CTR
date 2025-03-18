@@ -311,7 +311,7 @@ export class FileSequencer implements INonceSequencer {
      */
     static #getSequence(configs: Map<string, NonceSequence>, driveId: string): NonceSequence | null {
         let sequence: NonceSequence | null = null;
-        for (let seq of Object.values(configs)) {
+        for (let [key, seq] of configs) {
             if (driveId.toUpperCase() == seq.getId().toUpperCase()) {
                 // there should be only one sequence available
                 if (seq.getStatus() == Status.Active || seq.getStatus() == Status.New) {

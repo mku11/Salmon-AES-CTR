@@ -104,6 +104,14 @@ export class NodeFile implements IFile {
     }
 
     /**
+     * Get the path of this file. For java this is the same as the absolute filepath.
+     * @return
+     */
+    public getPath(): string {
+        return this.#filePath;
+    }
+
+    /**
      * Get the absolute path on the physical disk. For java this is the same as the filepath.
      * @return The absolute path.
      */
@@ -148,14 +156,6 @@ export class NodeFile implements IFile {
     public async getParent(): Promise<IFile> {
         let parentFilePath: string = path.dirname(this.getDisplayPath());
         return new NodeFile(parentFilePath);
-    }
-
-    /**
-     * Get the path of this file. For java this is the same as the absolute filepath.
-     * @return
-     */
-    public getPath(): string {
-        return this.#filePath;
     }
 
     /**

@@ -54,6 +54,7 @@ export class DriveKey {
 
     /**
      * Function returns the encryption key that will be used to encrypt/decrypt the files
+     * @returns {Uint8Array | null} The drive key
      */
     public getDriveKey(): Uint8Array | null {
         return this.#driveKey;
@@ -61,6 +62,7 @@ export class DriveKey {
 
     /**
      * Function returns the hash key that will be used to sign the file chunks
+     * @returns {Uint8Array | null} The hash key
      */
     public getHashKey(): Uint8Array | null {
         return this.#hashKey;
@@ -68,7 +70,7 @@ export class DriveKey {
 
     /**
      * Set the drive key.
-     * @param this.driveKey The drive key
+     * @param {Uint8Array | null} driveKey The drive key
      */
     public setDriveKey(driveKey: Uint8Array | null): void {
         this.#driveKey = driveKey;
@@ -76,7 +78,7 @@ export class DriveKey {
 
     /**
      * Set the hash key.
-     * @param hashKey The hash key
+     * @param {Uint8Array | null} hashKey The hash key
      */
     public setHashKey(hashKey: Uint8Array | null): void {
         this.#hashKey = hashKey;
@@ -84,7 +86,7 @@ export class DriveKey {
 
     /**
      * Get the master key.
-     * @return
+     * @return {Uint8Array | null} The master key
      */
     public getMasterKey(): Uint8Array | null {
         return this.#masterKey;
@@ -92,7 +94,7 @@ export class DriveKey {
 
     /**
      * Set the master key.
-     * @param masterKey The master key
+     * @param {Uint8Array | null} masterKey The master key
      */
     public setMasterKey(masterKey: Uint8Array | null): void {
         this.#masterKey = masterKey;
@@ -100,7 +102,7 @@ export class DriveKey {
 
     /**
      * Get the number of iterations for the master key derivation.
-     * @return
+     * @return {number} The iterations
      */
     public getIterations(): number {
         return this.#iterations;
@@ -108,7 +110,7 @@ export class DriveKey {
 
     /**
      * Set the number of iterations for the master key derivation.
-     * @param iterations The iterations
+     * @param {number} iterations The iterations
      */
     public setIterations(iterations: number): void {
         this.#iterations = iterations;
