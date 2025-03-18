@@ -134,15 +134,15 @@ class Expect {
             throw Error("assert failed: " + this.#actual + " == " + val);
     }
     toBeTruthy() {
-        if (this.#actual !== true && !this.#isNot)
+        if (!this.#actual && !this.#isNot)
             throw Error("assert failed: " + this.#actual + " != true");
-        else if (this.#actual === true && this.#isNot)
+        else if (this.#actual && this.#isNot)
             throw Error("assert failed: " + this.#actual + " == true");
     }
     toBeFalsy() {
-        if (this.#actual !== false && !this.#isNot)
+        if (this.#actual && !this.#isNot)
             throw Error("assert failed: " + this.#actual + " != false");
-        else if (this.#actual === false && this.#isNot)
+        else if (!this.#actual && this.#isNot)
             throw Error("assert failed: " + this.#actual + " == false");
     }
     toBeDefined() {
