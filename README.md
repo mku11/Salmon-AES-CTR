@@ -118,15 +118,15 @@ In case you need more speed Salmon has baked-in multithreaded read/write operati
 
 ```
 // Simple encryption and decryption of byte array
-byte[] key = SalmonGenerator.getSecureRandomBytes(32); // Generate a secure key, keep this somewhere safe!
-byte[] nonce = SalmonGenerator.getSecureRandomBytes(8); // Generate a nonce, you must NOT reuse this again for encryption!
+byte[] key = Generator.getSecureRandomBytes(32); // Generate a secure key, keep this somewhere safe!
+byte[] nonce = Generator.getSecureRandomBytes(8); // Generate a nonce, you must NOT reuse this again for encryption!
 byte[] bytes = ..; // data you want to encrypt
 
-SalmonEncryptor encryptor = new SalmonEncryptor(2); // use 2 threads to encrypt
+Encryptor encryptor = new Encryptor(2); // use 2 threads to encrypt
 byte[] encBytes = encryptor.encrypt(bytes, key, nonce, false);
 encryptor.close();
 
-SalmonDecryptor decryptor = new SalmonDecryptor(2); // use 2 threads to decrypt
+Decryptor decryptor = new Decryptor(2); // use 2 threads to decrypt
 byte[] decBytes = decryptor.decrypt(encBytes, key, nonce, false);
 decryptor.close();
 ```
@@ -135,11 +135,11 @@ decryptor.close();
 ```
 // Create a sequencer. Make sure this path is secure and excluded from your backups.
 String sequencerPath = "c:\\users\\<username>\\AppData\\Local\\<somefolder>\\salmon_sequencer.xml";
-SalmonFileSequencer sequencer = new SalmonFileSequencer(new JavaFile(sequencerPath), new SalmonSequenceSerializer());
+FileSequencer sequencer = new FileSequencer(new File(sequencerPath), new SequenceSerializer());
 
 // create() or open() a virtual drive provided with a location and a text password
-// Supported drives: JavaDrive, DotNetDrive, PyDrive, JsDrive, JsHttpDrive (remote), JsNodeDrive (node.js)
-SalmonDrive drive = JavaDrive.create(new JavaFile("c:\\path\\to\\your\\virtual\\drive"), password, sequencer);
+// Supported drives: Drive, HttpDrive, WSDrive, NodeDrive (node.js)
+AesDrive drive = Drive.create(new File("c:\\path\\to\\your\\virtual\\drive"), password, sequencer);
 // you can now import files, create and list directories, for more info see the samples documentation
 ```
 
