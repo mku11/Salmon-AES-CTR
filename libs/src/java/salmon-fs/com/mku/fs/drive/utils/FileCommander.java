@@ -89,14 +89,12 @@ public class FileCommander {
      *
      * @param filesToImport The files to import.
      * @param importDir     The target directory.
-     * @param deleteSource  True if you want to delete the source files when import complete.
-     * @param integrity     True to apply integrity to imported files.
      * @return The imported files.
      * @throws Exception Thrown if error occurs during import
      */
-    public IVirtualFile[] importFiles(IFile[] filesToImport, IVirtualFile importDir,
-                                      boolean deleteSource, boolean integrity) throws Exception {
-        return importFiles(filesToImport, importDir, deleteSource, integrity, null, null, null);
+    public IVirtualFile[] importFiles(IFile[] filesToImport, IVirtualFile importDir)
+            throws Exception {
+        return importFiles(filesToImport, importDir, null);
     }
 
     /**
@@ -104,56 +102,14 @@ public class FileCommander {
      *
      * @param filesToImport The files to import.
      * @param importDir     The target directory.
-     * @param deleteSource  True if you want to delete the source files when import complete.
-     * @param integrity     True to apply integrity to imported files.
-     * @param autoRename    Function to rename file if another file with the same filename exists
+     * @param options       The options
      * @return The imported files.
      * @throws Exception Thrown if error occurs during import
      */
-    public IVirtualFile[] importFiles(IFile[] filesToImport, IVirtualFile importDir,
-                                      boolean deleteSource, boolean integrity,
-                                      Function<IFile, String> autoRename) throws Exception {
-        return importFiles(filesToImport, importDir, deleteSource, integrity, autoRename, null, null);
-    }
-
-
-    /**
-     * Import IFile(s) into the drive.
-     *
-     * @param filesToImport The files to import.
-     * @param importDir     The target directory.
-     * @param deleteSource  True if you want to delete the source files when import complete.
-     * @param integrity     True to apply integrity to imported files.
-     * @param autoRename    Function to rename file if another file with the same filename exists
-     * @param onFailed      Observer to notify when a file fails importing
-     * @return The imported files.
-     * @throws Exception Thrown if error occurs during import
-     */
-    public IVirtualFile[] importFiles(IFile[] filesToImport, IVirtualFile importDir,
-                                      boolean deleteSource, boolean integrity,
-                                      Function<IFile, String> autoRename,
-                                      BiConsumer<IFile, Exception> onFailed) throws Exception {
-        return importFiles(filesToImport, importDir, deleteSource, integrity, autoRename, onFailed, null);
-    }
-
-    /**
-     * Import IFile(s) into the drive.
-     *
-     * @param filesToImport     The files to import.
-     * @param importDir         The target directory.
-     * @param deleteSource      True if you want to delete the source files when import complete.
-     * @param integrity         True to apply integrity to imported files.
-     * @param autoRename        Function to rename file if another file with the same filename exists
-     * @param onFailed          Observer to notify when a file fails importing
-     * @param onProgressChanged Observer to notify when progress changes.
-     * @return The imported files.
-     * @throws Exception Thrown if error occurs during import
-     */
-    public IVirtualFile[] importFiles(IFile[] filesToImport, IVirtualFile importDir,
-                                      boolean deleteSource, boolean integrity,
-                                      Function<IFile, String> autoRename,
-                                      BiConsumer<IFile, Exception> onFailed,
-                                      Consumer<RealFileTaskProgress> onProgressChanged) throws Exception {
+    public IVirtualFile[] importFiles(IFile[] filesToImport, IVirtualFile importDir, BatchImportOptions options)
+            throws Exception {
+        if (options == null)
+            options = new BatchImportOptions();
         stopJobs = false;
         ArrayList<IVirtualFile> importedFiles = new ArrayList<>();
 
@@ -169,8 +125,8 @@ public class FileCommander {
             if (stopJobs)
                 break;
             importRecursively(filesToImport[i], importDir,
-                    deleteSource, integrity,
-                    onProgressChanged, autoRename, onFailed,
+                    options.deleteSource, options.integrity,
+                    options.onProgressChanged, options.autoRename, options.onFailed,
                     importedFiles, count, total,
                     existingFiles);
         }
@@ -223,13 +179,18 @@ public class FileCommander {
                 String filename = fileToImport.getName();
                 if (sfile != null && (sfile.exists() || sfile.isDirectory()) && autoRename != null)
                     filename = autoRename.apply(fileToImport);
-                sfile = fileImporter.importFile(fileToImport, importDir, filename, deleteSource, integrity,
-                        (bytes, totalBytes) -> {
-                            if (onProgressChanged != null) {
-                                onProgressChanged.accept(new RealFileTaskProgress(fileToImport,
-                                        bytes, totalBytes, count[0], total));
-                            }
-                        });
+
+                FileImporter.FileImportOptions importOptions = new FileImporter.FileImportOptions();
+                importOptions.filename = filename;
+                importOptions.deleteSource = deleteSource;
+                importOptions.integrity = integrity;
+                importOptions.onProgressChanged = (bytes, totalBytes) -> {
+                    if (onProgressChanged != null) {
+                        onProgressChanged.accept(new RealFileTaskProgress(fileToImport,
+                                bytes, totalBytes, count[0], total));
+                    }
+                };
+                sfile = fileImporter.importFile(fileToImport, importDir, importOptions);
                 existingFiles.put(sfile.getName(), sfile);
                 importedFiles.add(sfile);
                 count[0]++;
@@ -242,81 +203,34 @@ public class FileCommander {
         }
     }
 
-    /**
-     * Export IVirtualFile(s) from the drive.
-     *
-     * @param filesToExport The files to export.
-     * @param exportDir     The export target directory
-     * @param deleteSource  True if you want to delete the source files
-     * @param integrity     True to use integrity verification before exporting files
-     * @return The exported files
-     * @throws Exception Thrown if error occurs during export
-     */
-    public IFile[] exportFiles(IVirtualFile[] filesToExport, IFile exportDir,
-                               boolean deleteSource, boolean integrity)
-            throws Exception {
-        return exportFiles(filesToExport, exportDir, deleteSource, integrity, null, null, null);
-    }
-
 
     /**
      * Export IVirtualFile(s) from the drive.
      *
      * @param filesToExport The files to export.
      * @param exportDir     The export target directory
-     * @param deleteSource  True if you want to delete the source files
-     * @param integrity     True to use integrity verification before exporting files
-     * @param autoRename    Function to rename file if another file with the same filename exists
      * @return The exported files
      * @throws Exception Thrown if error occurs during export
      */
-    public IFile[] exportFiles(IVirtualFile[] filesToExport, IFile exportDir,
-                               boolean deleteSource, boolean integrity,
-                               Function<IFile, String> autoRename)
+    public IFile[] exportFiles(IVirtualFile[] filesToExport, IFile exportDir)
             throws Exception {
-        return exportFiles(filesToExport, exportDir, deleteSource, integrity, autoRename, null, null);
+        return exportFiles(filesToExport, exportDir, null);
     }
-
 
     /**
      * Export IVirtualFile(s) from the drive.
      *
      * @param filesToExport The files to export.
      * @param exportDir     The export target directory
-     * @param deleteSource  True if you want to delete the source files
-     * @param integrity     True to use integrity verification before exporting files
-     * @param autoRename    Function to rename file if another file with the same filename exists
-     * @param onFailed      Observer to notify when a file fails exporting
+     * @param options       The options
      * @return The exported files
      * @throws Exception Thrown if error occurs during export
      */
-    public IFile[] exportFiles(IVirtualFile[] filesToExport, IFile exportDir,
-                               boolean deleteSource, boolean integrity,
-                               Function<IFile, String> autoRename,
-                               BiConsumer<IVirtualFile, Exception> onFailed)
+    public IFile[] exportFiles(IVirtualFile[] filesToExport, IFile exportDir, BatchExportOptions options)
             throws Exception {
-        return exportFiles(filesToExport, exportDir, deleteSource, integrity, autoRename, onFailed, null);
-    }
+        if (options == null)
+            options = new BatchExportOptions();
 
-    /**
-     * Export IVirtualFile(s) from the drive.
-     *
-     * @param filesToExport     The files to export.
-     * @param exportDir         The export target directory
-     * @param deleteSource      True if you want to delete the source files
-     * @param integrity         True to use integrity verification before exporting files
-     * @param autoRename        Function to rename file if another file with the same filename exists
-     * @param onFailed          Observer to notify when a file fails exporting
-     * @param onProgressChanged Observer to notify when progress changes.
-     * @return The exported files
-     * @throws Exception Thrown if error occurs during export
-     */
-    public IFile[] exportFiles(IVirtualFile[] filesToExport, IFile exportDir,
-                               boolean deleteSource, boolean integrity,
-                               Function<IFile, String> autoRename,
-                               BiConsumer<IVirtualFile, Exception> onFailed,
-                               Consumer<VirtualFileTaskProgress> onProgressChanged)
-            throws Exception {
         stopJobs = false;
         ArrayList<IFile> exportedFiles = new ArrayList<>();
 
@@ -334,8 +248,8 @@ public class FileCommander {
             if (stopJobs)
                 break;
             exportRecursively(filesToExport[i], exportDir,
-                    deleteSource, integrity,
-                    onProgressChanged, autoRename, onFailed,
+                    options.deleteSource, options.integrity,
+                    options.onProgressChanged, options.autoRename, options.onFailed,
                     exportedFiles, count, total,
                     existingFiles);
         }
@@ -387,13 +301,18 @@ public class FileCommander {
                 String filename = fileToExport.getName();
                 if (rfile != null && rfile.exists() && autoRename != null)
                     filename = autoRename.apply(rfile);
-                rfile = fileExporter.exportFile(fileToExport, exportDir, filename, deleteSource, integrity,
-                        (bytes, totalBytes) -> {
-                            if (onProgressChanged != null) {
-                                onProgressChanged.accept(new VirtualFileTaskProgress(fileToExport,
-                                        bytes, totalBytes, count[0], total));
-                            }
-                        });
+
+                FileExporter.FileExportOptions exportOptions = new FileExporter.FileExportOptions();
+                exportOptions.filename = filename;
+                exportOptions.deleteSource = deleteSource;
+                exportOptions.integrity = integrity;
+                exportOptions.onProgressChanged = (bytes, totalBytes) -> {
+                    if (onProgressChanged != null) {
+                        onProgressChanged.accept(new VirtualFileTaskProgress(fileToExport,
+                                bytes, totalBytes, count[0], total));
+                    }
+                };
+                rfile = fileExporter.exportFile(fileToExport, exportDir, exportOptions);
                 existingFiles.put(rfile.getName(), rfile);
                 exportedFiles.add(rfile);
                 count[0]++;
@@ -436,30 +355,18 @@ public class FileCommander {
      * @param filesToDelete The files to delete.
      */
     public void deleteFiles(IVirtualFile[] filesToDelete) {
-        deleteFiles(filesToDelete, null, null);
+        deleteFiles(filesToDelete, null);
     }
 
     /**
      * Delete files from a drive.
      *
      * @param filesToDelete The files to delete.
-     * @param onFailed      The observer to notify when a file has failed.
+     * @param options       The options
      */
-    public void deleteFiles(IVirtualFile[] filesToDelete,
-                            BiConsumer<IVirtualFile, Exception> onFailed) {
-        deleteFiles(filesToDelete, onFailed, null);
-    }
-
-    /**
-     * Delete files from a drive.
-     *
-     * @param filesToDelete     The files to delete.
-     * @param onFailed          The observer to notify when a file has failed.
-     * @param onProgressChanged The observer to notify when each file is deleted.
-     */
-    public void deleteFiles(IVirtualFile[] filesToDelete,
-                            BiConsumer<IVirtualFile, Exception> onFailed,
-                            Consumer<VirtualFileTaskProgress> onProgressChanged) {
+    public void deleteFiles(IVirtualFile[] filesToDelete, FileDeleteOptions options) {
+        if (options == null)
+            options = new FileDeleteOptions();
         stopJobs = false;
         int[] count = new int[1];
         int total = 0;
@@ -472,106 +379,40 @@ public class FileCommander {
             if (stopJobs)
                 break;
             int finalTotal = total;
-            virtualFile.deleteRecursively(onFailed, (file, position, length) ->
+            IVirtualFile.VirtualRecursiveDeleteOptions deleteOptions = new IVirtualFile.VirtualRecursiveDeleteOptions();
+            deleteOptions.onFailed = options.onFailed;
+            FileDeleteOptions finalOptions = options;
+            deleteOptions.onProgressChanged = (file, position, length) ->
             {
                 if (stopJobs)
                     throw new CancellationException();
-                if (onProgressChanged != null) {
+                if (finalOptions.onProgressChanged != null) {
                     try {
-                        onProgressChanged.accept(new VirtualFileTaskProgress(
+                        finalOptions.onProgressChanged.accept(new VirtualFileTaskProgress(
                                 file, position, length, count[0], finalTotal));
                     } catch (Exception ex) {
                     }
                 }
                 if (position == (long) length)
                     count[0]++;
-            });
+            };
+            virtualFile.deleteRecursively(deleteOptions);
         }
     }
 
-
-	/**
-     * Copy files to another directory.
-     *
-     * @param filesToCopy       The array of files to copy.
-     * @param dir               The target directory.
-     * @param move              True if moving files instead of copying.
-     * @throws Exception Thrown if error occurs during copying
-     */
-    public void copyFiles(IVirtualFile[] filesToCopy, IVirtualFile dir, boolean move)
-            throws Exception {
-		copyFiles(filesToCopy, dir, move, null, false, null, null);
-	}
-
-	/**
-     * Copy files to another directory.
-     *
-     * @param filesToCopy       The array of files to copy.
-     * @param dir               The target directory.
-     * @param move              True if moving files instead of copying.
-     * @param autoRename        The auto rename function to use when files with same filename are found
-     * @throws Exception Thrown if error occurs during copying
-     */
-    public void copyFiles(IVirtualFile[] filesToCopy, IVirtualFile dir, boolean move, 
-                          Function<IVirtualFile, String> autoRename)
-            throws Exception {
-		copyFiles(filesToCopy, dir, move, autoRename, false, null, null);
-	}
-
-	/**
-     * Copy files to another directory.
-     *
-     * @param filesToCopy       The array of files to copy.
-     * @param dir               The target directory.
-     * @param move              True if moving files instead of copying.
-     * @param autoRename        The auto rename function to use when files with same filename are found
-     * @param autoRenameFolders True to autorename folders
-     * @throws Exception Thrown if error occurs during copying
-     */
-    public void copyFiles(IVirtualFile[] filesToCopy, IVirtualFile dir, boolean move, 
-                          Function<IVirtualFile, String> autoRename,
-                          boolean autoRenameFolders)
-            throws Exception {
-		copyFiles(filesToCopy, dir, move, autoRename, autoRenameFolders, null, null);
-	}
-	
-	/**
-     * Copy files to another directory.
-     *
-     * @param filesToCopy       The array of files to copy.
-     * @param dir               The target directory.
-     * @param move              True if moving files instead of copying.
-     * @param autoRename        The auto rename function to use when files with same filename are found
-     * @param autoRenameFolders True to autorename folders
-     * @param onFailed          The observer to notify when failures occur
-     * @throws Exception Thrown if error occurs during copying
-     */
-    public void copyFiles(IVirtualFile[] filesToCopy, IVirtualFile dir, boolean move, 
-                          Function<IVirtualFile, String> autoRename,
-                          boolean autoRenameFolders, 
-						  BiConsumer<IVirtualFile, Exception> onFailed)
-            throws Exception {
-		copyFiles(filesToCopy, dir, move, autoRename, autoRenameFolders, onFailed, null);
-	}
-			
     /**
      * Copy files to another directory.
      *
-     * @param filesToCopy       The array of files to copy.
-     * @param dir               The target directory.
-     * @param move              True if moving files instead of copying.
-     * @param autoRename        The auto rename function to use when files with same filename are found
-     * @param autoRenameFolders True to autorename folders
-     * @param onFailed          The observer to notify when failures occur
-     * @param onProgressChanged The progress change observer to notify.
+     * @param filesToCopy The array of files to copy.
+     * @param dir         The target directory.
+     * @param options     The options
      * @throws Exception Thrown if error occurs during copying
      */
-    public void copyFiles(IVirtualFile[] filesToCopy, IVirtualFile dir, boolean move, 
-                          Function<IVirtualFile, String> autoRename,
-                          boolean autoRenameFolders, 
-						  BiConsumer<IVirtualFile, Exception> onFailed,
-						  Consumer<VirtualFileTaskProgress> onProgressChanged)
+    public void copyFiles(IVirtualFile[] filesToCopy, IVirtualFile dir, BatchCopyOptions options)
             throws Exception {
+        if (options == null)
+            options = new BatchCopyOptions();
+
         stopJobs = false;
         int[] count = new int[1];
         int total = 0;
@@ -586,37 +427,47 @@ public class FileCommander {
                 break;
             if (dir.getRealFile().getPath().startsWith(VirtualFile.getRealFile().getPath()))
                 continue;
-            if (move) {
-                VirtualFile.moveRecursively(dir, autoRename, autoRenameFolders, onFailed,
-                        (file, position, length) ->
-                        {
-                            if (stopJobs)
-                                throw new CancellationException();
-                            if (onProgressChanged != null) {
-                                try {
-                                    onProgressChanged.accept(new VirtualFileTaskProgress(
-                                            file, position, length, count[0], finalTotal));
-                                } catch (Exception ex) {
-                                }
-                            }
-                            if (position == (long) length)
-                                count[0]++;
-                        });
+            if (options.move) {
+                IVirtualFile.VirtualRecursiveMoveOptions moveOptions = new IVirtualFile.VirtualRecursiveMoveOptions();
+                moveOptions.autoRename = options.autoRename;
+                moveOptions.autoRenameFolders = options.autoRenameFolders;
+                moveOptions.onFailed = options.onFailed;
+                BatchCopyOptions finalOptions = options;
+                moveOptions.onProgressChanged = (file, position, length) ->
+                {
+                    if (stopJobs)
+                        throw new CancellationException();
+                    if (finalOptions.onProgressChanged != null) {
+                        try {
+                            finalOptions.onProgressChanged.accept(new VirtualFileTaskProgress(
+                                    file, position, length, count[0], finalTotal));
+                        } catch (Exception ex) {
+                        }
+                    }
+                    if (position == (long) length)
+                        count[0]++;
+                };
+                VirtualFile.moveRecursively(dir, moveOptions);
             } else {
-                VirtualFile.copyRecursively(dir, autoRename, autoRenameFolders, onFailed,
-                        (file, position, length) ->
-                        {
-                            if (stopJobs)
-                                throw new CancellationException();
-                            if (onProgressChanged != null) {
-                                try {
-                                    onProgressChanged.accept(new VirtualFileTaskProgress(file, position, length, count[0], finalTotal));
-                                } catch (Exception ignored) {
-                                }
-                            }
-                            if (position == (long) length)
-                                count[0]++;
-                        });
+                IVirtualFile.VirtualRecursiveCopyOptions copyOptions = new IVirtualFile.VirtualRecursiveCopyOptions();
+                copyOptions.autoRename = options.autoRename;
+                copyOptions.autoRenameFolders = options.autoRenameFolders;
+                copyOptions.onFailed = options.onFailed;
+                BatchCopyOptions finalOptions1 = options;
+                copyOptions.onProgressChanged = (file, position, length) ->
+                {
+                    if (stopJobs)
+                        throw new CancellationException();
+                    if (finalOptions1.onProgressChanged != null) {
+                        try {
+                            finalOptions1.onProgressChanged.accept(new VirtualFileTaskProgress(file, position, length, count[0], finalTotal));
+                        } catch (Exception ignored) {
+                        }
+                    }
+                    if (position == (long) length)
+                        count[0]++;
+                };
+                VirtualFile.copyRecursively(dir, copyOptions);
             }
         }
     }
@@ -681,17 +532,13 @@ public class FileCommander {
     /**
      * Search for files in a drive.
      *
-     * @param dir           The directory to start the search.
-     * @param terms         The terms to search for.
-     * @param any           True if you want to match any term otherwise match all terms.
-     * @param OnResultFound Callback interface to receive notifications when results found.
-     * @param OnSearchEvent Callback interface to receive status events.
+     * @param dir     The directory to start the search.
+     * @param terms   The terms to search for.
+     * @param options The options
      * @return An array with all the results found.
      */
-    public IVirtualFile[] search(IVirtualFile dir, String terms, boolean any,
-                                 FileSearcher.OnResultFoundListener OnResultFound,
-                                 Consumer<FileSearcher.SearchEvent> OnSearchEvent) {
-        return fileSearcher.search(dir, terms, any, OnResultFound, OnSearchEvent);
+    public IVirtualFile[] search(IVirtualFile dir, String terms, FileSearcher.SearchOptions options) {
+        return fileSearcher.search(dir, terms, options);
     }
 
     /**
@@ -837,5 +684,108 @@ public class FileCommander {
             super(processedBytes, totalBytes, processedFiles, totalFiles);
             this.file = file;
         }
+    }
+
+    public class FileDeleteOptions {
+        /**
+         * Callback when delete fails
+         */
+        public BiConsumer<IVirtualFile, Exception> onFailed;
+
+        /**
+         * Callback when progress changes
+         */
+        public Consumer<VirtualFileTaskProgress> onProgressChanged;
+    }
+
+
+    /**
+     * Batch import options
+     */
+    public static class BatchImportOptions {
+        /**
+         * Delete the source file when complete.
+         */
+        public boolean deleteSource = false;
+
+        /**
+         * True to enable integrity
+         */
+        public boolean integrity = false;
+
+        /**
+         * Callback when a file with the same name exists
+         */
+        public Function<IFile, String> autoRename;
+
+        /**
+         * Callback when import fails
+         */
+        public BiConsumer<IFile, Exception> onFailed;
+
+        /**
+         * Callback when progress changes
+         */
+        public Consumer<RealFileTaskProgress> onProgressChanged;
+    }
+
+    /**
+     * Batch export options
+     */
+    public static class BatchExportOptions {
+        /**
+         * Delete the source file when complete.
+         */
+        public boolean deleteSource = false;
+
+        /**
+         * True to enable integrity
+         */
+        public boolean integrity = false;
+
+        /**
+         * Callback when a file with the same name exists
+         */
+        public Function<IFile, String> autoRename;
+
+        /**
+         * Callback when import fails
+         */
+        public BiConsumer<IVirtualFile, Exception> onFailed;
+
+        /**
+         * Callback when progress changes
+         */
+        public Consumer<VirtualFileTaskProgress> onProgressChanged;
+    }
+
+    /**
+     * Batch copy options
+     */
+    public class BatchCopyOptions {
+        /**
+         * True to move, false to copy
+         */
+        public boolean move = false;
+
+        /**
+         * Callback when another file with the same name exists.
+         */
+        public Function<IVirtualFile, String> autoRename;
+
+        /**
+         * True to autorename folders
+         */
+        public boolean autoRenameFolders = false;
+
+        /**
+         * Callback when copy fails
+         */
+        public BiConsumer<IVirtualFile, Exception> onFailed;
+
+        /**
+         * Callback when progress changes.
+         */
+        public Consumer<VirtualFileTaskProgress> onProgressChanged;
     }
 }

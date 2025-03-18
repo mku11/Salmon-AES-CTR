@@ -25,6 +25,9 @@ SOFTWARE.
 */
 
 import com.mku.convert.BitConverter;
+import com.mku.fs.drive.utils.FileCommander;
+import com.mku.fs.drive.utils.FileExporter;
+import com.mku.fs.drive.utils.FileImporter;
 import com.mku.fs.drive.utils.FileSearcher;
 import com.mku.fs.file.*;
 import com.mku.func.BiConsumer;
@@ -38,12 +41,12 @@ import com.mku.salmonfs.drive.AesDrive;
 import com.mku.salmonfs.drive.Drive;
 import com.mku.salmonfs.drive.HttpDrive;
 import com.mku.salmonfs.drive.WSDrive;
-import com.mku.salmonfs.file.AesFile;
-import com.mku.salmonfs.sequence.FileSequencer;
-import com.mku.salmonfs.streams.AesFileInputStream;
 import com.mku.salmonfs.drive.utils.AesFileCommander;
 import com.mku.salmonfs.drive.utils.AesFileExporter;
 import com.mku.salmonfs.drive.utils.AesFileImporter;
+import com.mku.salmonfs.file.AesFile;
+import com.mku.salmonfs.sequence.FileSequencer;
+import com.mku.salmonfs.streams.AesFileInputStream;
 import com.mku.streams.InputStreamWrapper;
 import com.mku.streams.MemoryStream;
 import com.mku.streams.RandomAccessStream;
@@ -226,7 +229,7 @@ public class SalmonFSTestHelper {
         };
         AesFileImporter importer = new AesFileImporter(SalmonFSTestHelper.ENC_IMPORT_BUFFER_SIZE, SalmonFSTestHelper.ENC_IMPORT_THREADS);
         for (IFile importFile : importFiles) {
-            importer.importFile(importFile, rootDir, null, false, true, null);
+            importer.importFile(importFile, rootDir);
         }
         importer.close();
     }
@@ -344,7 +347,10 @@ public class SalmonFSTestHelper {
             if (SalmonFSTestHelper.ENABLE_FILE_PROGRESS)
                 System.out.println("importing file: " + position + "/" + length);
         };
-        AesFile aesFile = fileImporter.importFile(fileToImport, rootDir, null, false, applyFileIntegrity, printImportProgress);
+        FileImporter.FileImportOptions importOptions = new FileImporter.FileImportOptions();
+        importOptions.integrity = applyFileIntegrity;
+        importOptions.onProgressChanged = printImportProgress;
+        AesFile aesFile = fileImporter.importFile(fileToImport, rootDir, importOptions);
 
         int chunkSize = aesFile.getFileChunkSize();
         if (chunkSize == 0 || !verifyFileIntegrity)
@@ -386,7 +392,10 @@ public class SalmonFSTestHelper {
             aesFile.setVerifyIntegrity(true);
 		else
             aesFile.setVerifyIntegrity(false);
-        IFile exportFile = fileExporter.exportFile(aesFile, drive.getExportDir(), null, false, verifyFileIntegrity, printExportProgress);
+        FileExporter.FileExportOptions exportOptions = new FileExporter.FileExportOptions();
+        exportOptions.integrity = verifyFileIntegrity;
+        exportOptions.onProgressChanged = printExportProgress;
+        IFile exportFile = fileExporter.exportFile(aesFile, drive.getExportDir(), exportOptions);
 
         String hashPostExport = SalmonFSTestHelper.getChecksum(exportFile);
         if (shouldBeEqual)
@@ -420,14 +429,16 @@ public class SalmonFSTestHelper {
         String rbasename = fileToImport.getName();
 
         // import
-        IVirtualFile salmonFile = fileImporter.importFile(fileToImport, rootDir, null, false, false, null);
+        IVirtualFile salmonFile = fileImporter.importFile(fileToImport, rootDir);
         assertNotNull(salmonFile);
         assertTrue(salmonFile.exists());
 
         // search
         String basename = salmonFile.getName();
         FileSearcher searcher = new FileSearcher();
-        IVirtualFile[] files = searcher.search(rootDir, basename, true, null, null);
+        FileSearcher.SearchOptions searchOptions = new FileSearcher.SearchOptions();
+        searchOptions.anyTerm = true;
+        IVirtualFile[] files = searcher.search(rootDir, basename, searchOptions);
         assertTrue(files.length > 0);
         assertEquals(files[0].getName(), basename);
 
@@ -443,8 +454,7 @@ public class SalmonFSTestHelper {
         String rbasename = fileToImport.getName();
 
         // import
-        IVirtualFile salmonFile = fileImporter.importFile(fileToImport, rootDir, null, false,
-                false, null);
+        IVirtualFile salmonFile = fileImporter.importFile(fileToImport, rootDir);
 
         // trigger the cache to add the filename
         String basename = salmonFile.getName();
@@ -539,8 +549,7 @@ public class SalmonFSTestHelper {
         // import a test file
         IVirtualFile rootDir = drive.getRoot();
         IFile fileToImport = importFilePath;
-        AesFile aesFileA1 = (AesFile) fileImporter.importFile(fileToImport, rootDir, null, false,
-                false, null);
+        AesFile aesFileA1 = (AesFile) fileImporter.importFile(fileToImport, rootDir);
         long nonceA1 = BitConverter.toLong(aesFileA1.getRequestedNonce(), 0, Generator.NONCE_LENGTH);
         drive.close();
 
@@ -552,7 +561,7 @@ public class SalmonFSTestHelper {
             // import a test file should fail because not authorized
             rootDir = drive.getRoot();
             fileToImport = importFilePath;
-            fileImporter.importFile(fileToImport, rootDir, null, false, false, null);
+            fileImporter.importFile(fileToImport, rootDir);
             success = true;
         } catch (Exception ignored) {
 
@@ -572,7 +581,7 @@ public class SalmonFSTestHelper {
         // import another test file
         rootDir = drive.getRoot();
         fileToImport = importFilePath;
-        AesFile aesFileA2 = fileImporter.importFile(fileToImport, rootDir, null, false, false, null);
+        AesFile aesFileA2 = fileImporter.importFile(fileToImport, rootDir);
         long nonceA2 = BitConverter.toLong(aesFileA2.getFileNonce(), 0, Generator.NONCE_LENGTH);
         drive.close();
 
@@ -582,9 +591,9 @@ public class SalmonFSTestHelper {
         // now import a 3rd file
         rootDir = drive.getRoot();
         fileToImport = importFilePath;
-        AesFile aesFileB1 = fileImporter.importFile(fileToImport, rootDir, null, false, false, null);
+        AesFile aesFileB1 = fileImporter.importFile(fileToImport, rootDir);
         long nonceB1 = BitConverter.toLong(aesFileB1.getFileNonce(), 0, Generator.NONCE_LENGTH);
-        AesFile aesFileB2 = fileImporter.importFile(fileToImport, rootDir, null, false, false, null);
+        AesFile aesFileB2 = fileImporter.importFile(fileToImport, rootDir);
         long nonceB2 = BitConverter.toLong(aesFileB2.getFileNonce(), 0, Generator.NONCE_LENGTH);
         drive.close();
 
@@ -618,7 +627,7 @@ public class SalmonFSTestHelper {
             rootDir.listFiles();
             IVirtualFile salmonRootDir = drive.getRoot();
             IFile fileToImport = importFile;
-            IVirtualFile salmonFile = fileImporter.importFile(fileToImport, salmonRootDir, null, false, false, null);
+            IVirtualFile salmonFile = fileImporter.importFile(fileToImport, salmonRootDir);
             importSuccess = salmonFile != null;
         } catch (Exception ex) {
             if (ex instanceof RangeExceededException)
@@ -904,27 +913,31 @@ public class SalmonFSTestHelper {
             hashPreExport.add(SalmonFSTestHelper.getChecksumStream(new InputStreamWrapper(file.getInputStream())));
 
         // export files
-        IFile[] filesExported = commander.exportFiles(files, dir, false, true,
-                IFile.autoRename, (sfile, ex) ->
-                {
-                    // file failed to import
-                    System.err.println(ex);
-                    try {
-                        System.out.println("export failed: " + sfile.getName() + "\n" + ex);
-                    } catch (IOException e) {
-                        throw new RuntimeException(e);
-                    }
-                }, (taskProgress) -> {
-                    if (!SalmonFSTestHelper.ENABLE_FILE_PROGRESS)
-                        return;
-                    try {
-                        System.out.println("file exporting: " + taskProgress.getFile().getName() + ": "
-                                + taskProgress.getProcessedBytes() + "/" + taskProgress.getTotalBytes() + " bytes");
-                    } catch (Exception e) {
-                        System.err.println(e);
-                    }
-                });
-
+        FileCommander.BatchExportOptions exportOptions = new FileCommander.BatchExportOptions();
+        exportOptions.deleteSource = false;
+        exportOptions.integrity = true;
+        exportOptions.autoRename = IFile.autoRename;
+        exportOptions.onFailed = (sfile, ex) ->
+        {
+            // file failed to import
+            System.err.println(ex);
+            try {
+                System.out.println("export failed: " + sfile.getName() + "\n" + ex);
+            } catch (IOException e) {
+                throw new RuntimeException(e);
+            }
+        };
+        exportOptions.onProgressChanged =(taskProgress) -> {
+            if (!SalmonFSTestHelper.ENABLE_FILE_PROGRESS)
+                return;
+            try {
+                System.out.println("file exporting: " + taskProgress.getFile().getName() + ": "
+                        + taskProgress.getProcessedBytes() + "/" + taskProgress.getTotalBytes() + " bytes");
+            } catch (Exception e) {
+                System.err.println(e);
+            }
+        };
+        IFile[] filesExported = commander.exportFiles(files, dir, exportOptions);
         System.out.println("Files exported");
 
         for (int i = 0; i < files.length; i++) {

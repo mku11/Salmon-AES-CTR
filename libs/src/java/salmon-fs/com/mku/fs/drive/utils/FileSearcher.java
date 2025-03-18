@@ -47,18 +47,8 @@ public class FileSearcher {
     }
 
     /**
-     * Functional interface that is called when result is found.
-     */
-    public interface OnResultFoundListener {
-        /**
-         * Fired when search result found.
-         * @param searchResult The search result.
-         */
-        void onResultFound(IVirtualFile searchResult);
-    }
-
-    /**
      * Check if a search is running.
+     *
      * @return True if running
      */
     public boolean isRunning() {
@@ -67,6 +57,7 @@ public class FileSearcher {
 
     /**
      * Check if last search was stopped by user.
+     *
      * @return True if user stopped
      */
     public boolean isStopped() {
@@ -75,33 +66,33 @@ public class FileSearcher {
 
     /**
      * Search files in directory and its subdirectories recursively for matching terms.
-     * @param dir The directory to start the search.
-     * @param terms The terms to search for.
-     * @param any True if you want to match any term otherwise match all terms.
-     * @param OnResultFound Callback interface to receive notifications when results found.
-     * @param onSearchEvent Callback interface to receive status events.
+     *
+     * @param dir     The directory to start the search.
+     * @param terms   The terms to search for.
+     * @param options The options
      * @return An array with all the results found.
      */
-    public IVirtualFile[] search(IVirtualFile dir, String terms, boolean any,
-                                 OnResultFoundListener OnResultFound,
-                                 Consumer<SearchEvent> onSearchEvent) {
+    public IVirtualFile[] search(IVirtualFile dir, String terms, SearchOptions options) {
+        if (options == null)
+            options = new SearchOptions();
         running = true;
         this.quit = false;
         HashMap<String, IVirtualFile> searchResults = new HashMap<>();
-        if (onSearchEvent != null)
-            onSearchEvent.accept(SearchEvent.SearchingFiles);
-        searchDir(dir, terms, any, OnResultFound, searchResults);
-        if (onSearchEvent != null)
-            onSearchEvent.accept(SearchEvent.SearchingFinished);
+        if (options.onSearchEvent != null)
+            options.onSearchEvent.accept(SearchEvent.SearchingFiles);
+        searchDir(dir, terms, options.anyTerm, options.onResultFound, searchResults);
+        if (options.onSearchEvent != null)
+            options.onSearchEvent.accept(SearchEvent.SearchingFinished);
         running = false;
         return searchResults.values().toArray(new IVirtualFile[0]);
     }
 
     /**
      * Match the current terms in the filename.
+     *
      * @param filename The filename to match.
-     * @param terms The terms to match.
-     * @param any True if you want to match any term otherwise match all terms.
+     * @param terms    The terms to match.
+     * @param any      True if you want to match any term otherwise match all terms.
      * @return A count of all matches.
      */
     private int getSearchResults(String filename, String[] terms, boolean any) {
@@ -123,13 +114,15 @@ public class FileSearcher {
 
     /**
      * Search a directory for all filenames matching the terms supplied.
-     * @param dir The directory to start the search.
-     * @param terms The terms to search for.
-     * @param any True if you want to match any term otherwise match all terms.
-     * @param OnResultFound Callback interface to receive notifications when results found.
+     *
+     * @param dir           The directory to start the search.
+     * @param terms         The terms to search for.
+     * @param any           True if you want to match any term otherwise match all terms.
+     * @param onResultFound Callback interface to receive notifications when results found.
      * @param searchResults The array to store the search results.
      */
-    private void searchDir(IVirtualFile dir, String terms, boolean any, OnResultFoundListener OnResultFound,
+    private void searchDir(IVirtualFile dir, String terms, boolean any,
+                           Consumer<IVirtualFile> onResultFound,
                            HashMap<String, IVirtualFile> searchResults) {
         if (quit)
             return;
@@ -139,16 +132,16 @@ public class FileSearcher {
             if (quit)
                 break;
             if (file.isDirectory()) {
-                searchDir(file, terms, any, OnResultFound, searchResults);
+                searchDir(file, terms, any, onResultFound, searchResults);
             } else {
                 if (searchResults.containsKey(file.getRealPath()))
                     continue;
                 try {
                     int hits = getSearchResults(file.getName(), termsArray, any);
-                    if(hits > 0) {
+                    if (hits > 0) {
                         searchResults.put(file.getRealPath(), file);
-                        if (OnResultFound != null)
-                            OnResultFound.onResultFound(file);
+                        if (onResultFound != null)
+                            onResultFound.accept(file);
                     }
                 } catch (Exception ex) {
                     ex.printStackTrace();
@@ -156,4 +149,25 @@ public class FileSearcher {
             }
         }
     }
+
+    /**
+     * Search options
+     */
+    public static class SearchOptions {
+        /**
+         * True to search for any term, otherwise match all
+         */
+        public boolean anyTerm = false;
+
+        /**
+         * Callback when result found
+         */
+        public Consumer<IVirtualFile> onResultFound;
+
+        /**
+         * Callback when search event happens.
+         */
+        public Consumer<SearchEvent> onSearchEvent;
+    }
+
 }

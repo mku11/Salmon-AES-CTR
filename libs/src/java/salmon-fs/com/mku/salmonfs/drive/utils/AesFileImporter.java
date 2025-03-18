@@ -23,11 +23,10 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 */
 
+import com.mku.fs.drive.utils.FileImporter;
 import com.mku.fs.file.IFile;
 import com.mku.fs.file.IVirtualFile;
-import com.mku.func.BiConsumer;
 import com.mku.salmonfs.file.AesFile;
-import com.mku.fs.drive.utils.FileImporter;
 
 import java.io.IOException;
 
@@ -37,15 +36,14 @@ import java.io.IOException;
 public class AesFileImporter extends FileImporter {
 
 
-	/**
+    /**
      * Instantiates a file importer for encrypted files.
-     *
      */
     public AesFileImporter() {
         super.initialize(0, 1);
     }
-	
-	/**
+
+    /**
      * Instantiates a file importer for encrypted files.
      *
      * @param bufferSize The buffer size to be used.
@@ -53,7 +51,7 @@ public class AesFileImporter extends FileImporter {
     public AesFileImporter(int bufferSize) {
         super.initialize(bufferSize, 1);
     }
-	
+
     /**
      * Instantiates a file importer for encrypted files.
      *
@@ -89,21 +87,28 @@ public class AesFileImporter extends FileImporter {
         return ((AesFile) file).getMinimumPartSize();
     }
 
+    /**
+     * Imports a real file into the drive.
+     *
+     * @param fileToImport The source file that will be imported in into the drive.
+     * @param dir          The target directory in the drive that the file will be imported
+     * @return The imported file
+     * @throws Exception Thrown if error occurs during import
+     */
+    public AesFile importFile(IFile fileToImport, IVirtualFile dir) throws Exception {
+        return importFile(fileToImport, dir, null);
+    }
 
     /**
      * Imports a real file into the drive.
      *
      * @param fileToImport The source file that will be imported in into the drive.
      * @param dir          The target directory in the drive that the file will be imported
-     * @param filename     The filename to use
-     * @param deleteSource If true delete the source file.
-     * @param integrity    Apply data integrity
-     * @param onProgress   Progress to notify
+     * @param options      The options
      * @return The imported file
      * @throws Exception Thrown if error occurs during import
      */
-    public AesFile importFile(IFile fileToImport, IVirtualFile dir, String filename,
-                              boolean deleteSource, boolean integrity, BiConsumer<Long, Long> onProgress) throws Exception {
-        return (AesFile) super.importFile(fileToImport, dir, filename, deleteSource, integrity, onProgress);
+    public AesFile importFile(IFile fileToImport, IVirtualFile dir, FileImportOptions options) throws Exception {
+        return (AesFile) super.importFile(fileToImport, dir, options);
     }
 }

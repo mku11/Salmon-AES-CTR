@@ -24,13 +24,10 @@ SOFTWARE.
 */
 
 import com.mku.fs.drive.utils.FileCommander;
+import com.mku.fs.drive.utils.FileSearcher;
 import com.mku.fs.file.IFile;
 import com.mku.fs.file.IVirtualFile;
-import com.mku.func.BiConsumer;
-import com.mku.func.Consumer;
-import com.mku.func.Function;
 import com.mku.salmonfs.file.AesFile;
-import com.mku.fs.drive.utils.FileSearcher;
 
 import java.util.ArrayList;
 
@@ -51,20 +48,17 @@ public class AesFileCommander extends FileCommander {
                 new FileSearcher());
     }
 
-
     /**
      * Import IFile(s) into the drive.
      *
      * @param filesToImport The files to import.
      * @param importDir     The target directory.
-     * @param deleteSource  True if you want to delete the source files when import complete.
-     * @param integrity     True to apply integrity to imported files.
      * @return The imported files.
      * @throws Exception Thrown if error occurs during import
      */
-    public IVirtualFile[] importFiles(IFile[] filesToImport, IVirtualFile importDir,
-                                      boolean deleteSource, boolean integrity) throws Exception {
-        return importFiles(filesToImport, importDir, deleteSource, integrity, null, null, null);
+    @Override
+    public AesFile[] importFiles(IFile[] filesToImport, IVirtualFile importDir) throws Exception {
+        return importFiles(filesToImport, importDir, null);
     }
 
     /**
@@ -72,142 +66,31 @@ public class AesFileCommander extends FileCommander {
      *
      * @param filesToImport The files to import.
      * @param importDir     The target directory.
-     * @param deleteSource  True if you want to delete the source files when import complete.
-     * @param integrity     True to apply integrity to imported files.
-     * @param autoRename    Function to rename file if another file with the same filename exists
-     * @return The imported files.
-     * @throws Exception Thrown if error occurs during import
-     */
-    public IVirtualFile[] importFiles(IFile[] filesToImport, IVirtualFile importDir,
-                                      boolean deleteSource, boolean integrity,
-                                      Function<IFile, String> autoRename) throws Exception {
-        return importFiles(filesToImport, importDir, deleteSource, integrity, autoRename, null, null);
-    }
-
-
-    /**
-     * Import IFile(s) into the drive.
-     *
-     * @param filesToImport The files to import.
-     * @param importDir     The target directory.
-     * @param deleteSource  True if you want to delete the source files when import complete.
-     * @param integrity     True to apply integrity to imported files.
-     * @param autoRename    Function to rename file if another file with the same filename exists
-     * @param onFailed      Observer to notify when a file fails importing
-     * @return The imported files.
-     * @throws Exception Thrown if error occurs during import
-     */
-    public IVirtualFile[] importFiles(IFile[] filesToImport, IVirtualFile importDir,
-                                      boolean deleteSource, boolean integrity,
-                                      Function<IFile, String> autoRename,
-                                      BiConsumer<IFile, Exception> onFailed) throws Exception {
-        return importFiles(filesToImport, importDir, deleteSource, integrity, autoRename, onFailed, null);
-    }
-
-    /**
-     * Import IFile(s) into the drive.
-     *
-     * @param filesToImport     The files to import.
-     * @param importDir         The target directory.
-     * @param deleteSource      True if you want to delete the source files when import complete.
-     * @param integrity         True to apply integrity to imported files.
-     * @param onProgressChanged Observer to notify when progress changes.
-     * @param autoRename        Function to rename file if another file with the same filename exists
-     * @param onFailed          Observer to notify when a file fails importing
+     * @param options       The options
      * @return The imported files.
      * @throws Exception Thrown if error occurs during import
      */
     @Override
     public AesFile[] importFiles(IFile[] filesToImport, IVirtualFile importDir,
-                                 boolean deleteSource, boolean integrity,
-                                 Function<IFile, String> autoRename,
-                                 BiConsumer<IFile, Exception> onFailed,
-                                 Consumer<RealFileTaskProgress> onProgressChanged) throws Exception {
-        IVirtualFile[] files = super.importFiles(filesToImport, importDir, deleteSource, integrity,
-                autoRename, onFailed, onProgressChanged);
+                                 BatchImportOptions options) throws Exception {
+        IVirtualFile[] files = super.importFiles(filesToImport, importDir, options);
         ArrayList<AesFile> sfiles = new ArrayList<>();
         for (IVirtualFile file : files)
             sfiles.add((AesFile) file);
         return sfiles.toArray(new AesFile[0]);
     }
 
-
     /**
      * Export AesFile(s) from the drive.
      *
      * @param filesToExport The files to export.
      * @param exportDir     The export target directory
-     * @param deleteSource  True if you want to delete the source files
-     * @param integrity     True to use integrity verification before exporting files
+     * @param options       The options
      * @return The exported files
      * @throws Exception Thrown if error occurs during export
      */
-    public IFile[] exportFiles(IVirtualFile[] filesToExport, IFile exportDir,
-                               boolean deleteSource, boolean integrity)
+    public IFile[] exportFiles(IVirtualFile[] filesToExport, IFile exportDir, BatchExportOptions options)
             throws Exception {
-        return exportFiles(filesToExport, exportDir, deleteSource, integrity, null, null, null);
-    }
-
-
-    /**
-     * Export AesFile(s) from the drive.
-     *
-     * @param filesToExport The files to export.
-     * @param exportDir     The export target directory
-     * @param deleteSource  True if you want to delete the source files
-     * @param integrity     True to use integrity verification before exporting files
-     * @param autoRename    Function to rename file if another file with the same filename exists
-     * @return The exported files
-     * @throws Exception Thrown if error occurs during export
-     */
-    public IFile[] exportFiles(IVirtualFile[] filesToExport, IFile exportDir,
-                               boolean deleteSource, boolean integrity,
-                               Function<IFile, String> autoRename)
-            throws Exception {
-        return exportFiles(filesToExport, exportDir, deleteSource, integrity, autoRename, null, null);
-    }
-
-
-    /**
-     * Export AesFile(s) from the drive.
-     *
-     * @param filesToExport The files to export.
-     * @param exportDir     The export target directory
-     * @param deleteSource  True if you want to delete the source files
-     * @param integrity     True to use integrity verification before exporting files
-     * @param autoRename    Function to rename file if another file with the same filename exists
-     * @param onFailed      Observer to notify when a file fails exporting
-     * @return The exported files
-     * @throws Exception Thrown if error occurs during export
-     */
-    public IFile[] exportFiles(IVirtualFile[] filesToExport, IFile exportDir,
-                               boolean deleteSource, boolean integrity,
-                               Function<IFile, String> autoRename,
-                               BiConsumer<IVirtualFile, Exception> onFailed)
-            throws Exception {
-        return exportFiles(filesToExport, exportDir, deleteSource, integrity, autoRename, onFailed, null);
-    }
-
-    /**
-     * Export AesFile(s) from the drive.
-     *
-     * @param filesToExport     The files to export.
-     * @param exportDir         The export target directory
-     * @param deleteSource      True if you want to delete the source files
-     * @param integrity         True to use integrity verification before exporting files
-     * @param autoRename        Function to rename file if another file with the same filename exists
-     * @param onFailed          Observer to notify when a file fails exporting
-     * @param onProgressChanged Observer to notify when progress changes.
-     * @return The exported files
-     * @throws Exception Thrown if error occurs during export
-     */
-    public IFile[] exportFiles(IVirtualFile[] filesToExport, IFile exportDir,
-                               boolean deleteSource, boolean integrity,
-                               Function<IFile, String> autoRename,
-                               BiConsumer<IVirtualFile, Exception> onFailed,
-                               Consumer<VirtualFileTaskProgress> onProgressChanged)
-            throws Exception {
-        return super.exportFiles(filesToExport, exportDir, deleteSource, integrity,
-                autoRename, onFailed, onProgressChanged);
+        return super.exportFiles(filesToExport, exportDir, options);
     }
 }

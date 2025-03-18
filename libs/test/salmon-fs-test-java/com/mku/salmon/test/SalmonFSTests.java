@@ -25,6 +25,7 @@ SOFTWARE.
 */
 
 import com.mku.convert.BitConverter;
+import com.mku.fs.drive.utils.FileCommander;
 import com.mku.fs.file.IFile;
 import com.mku.fs.file.IVirtualFile;
 import com.mku.salmon.integrity.Integrity;
@@ -480,7 +481,9 @@ public class SalmonFSTests {
             caught = true;
         }
         assertEquals(true, caught);
-        file2 = file.copy(dir, IFile.autoRename.apply(file));
+        IFile.CopyOptions copyOptions = new IFile.CopyOptions();
+        copyOptions.newFilename = IFile.autoRename.apply(file);
+        file2 = file.copy(dir, copyOptions);
 
         assertEquals(2, dir.getChildrenCount());
         assertTrue(dir.getChild(file.getName()).exists());
@@ -518,7 +521,9 @@ public class SalmonFSTests {
             caught = true;
         }
         assertTrue(caught);
-        IFile file4 = file3.move(dir.getChild("folder1"), IFile.autoRename.apply(file3));
+        IFile.MoveOptions moveOptions = new IFile.MoveOptions();
+        moveOptions.newFilename = IFile.autoRename.apply(file3);
+        IFile file4 = file3.move(dir.getChild("folder1"), moveOptions);
         assertTrue(file4.exists());
         assertEquals(3, dir.getChild("folder1").getChildrenCount());
 
@@ -539,7 +544,9 @@ public class SalmonFSTests {
         assertTrue(dfile.exists());
         assertTrue(dfile.delete());
         assertEquals(2, dir.getChild("folder4").getChild("folder1").getChild("folder2").getChildrenCount());
-        dir.getChild("folder1").copyRecursively(folder3, IFile.autoRename);
+        IFile.RecursiveCopyOptions recCopyOptions = new IFile.RecursiveCopyOptions();
+        recCopyOptions.autoRename = IFile.autoRename;
+        dir.getChild("folder1").copyRecursively(folder3, recCopyOptions);
         assertEquals(2, dir.getChildrenCount());
         assertEquals(1, dir.getChild("folder4").getChildrenCount());
         assertEquals(7, dir.getChild("folder4").getChild("folder1").getChildrenCount());
@@ -548,10 +555,12 @@ public class SalmonFSTests {
         dir.getChild("folder4").getChild("folder1").getChild("folder2").getChild(file.getName()).delete();
         dir.getChild("folder4").getChild("folder1").getChild(file.getName()).delete();
         ArrayList<IFile> failed = new ArrayList<IFile>();
-        dir.getChild("folder1").copyRecursively(folder3, null, false, (failedFile, ex) ->
+        recCopyOptions = new IFile.RecursiveCopyOptions();
+        recCopyOptions.onFailed = (failedFile, ex) ->
         {
             failed.add(failedFile);
-        });
+        };
+        dir.getChild("folder1").copyRecursively(folder3, recCopyOptions);
         assertEquals(4, failed.size());
         assertEquals(2, dir.getChildrenCount());
         assertEquals(1, dir.getChild("folder4").getChildrenCount());
@@ -561,10 +570,12 @@ public class SalmonFSTests {
         dir.getChild("folder4").getChild("folder1").getChild("folder2").getChild(file.getName()).delete();
         dir.getChild("folder4").getChild("folder1").getChild(file.getName()).delete();
         ArrayList<IFile> failedmv = new ArrayList<IFile>();
-        dir.getChild("folder1").moveRecursively(dir.getChild("folder4"), IFile.autoRename, false, (failedFile, ex) ->
-        {
+        IFile.RecursiveMoveOptions recMoveOptions = new IFile.RecursiveMoveOptions();
+        recMoveOptions.autoRename = IFile.autoRename;
+        recMoveOptions.onFailed = (failedFile, ex) -> {
             failedmv.add(failedFile);
-        });
+        };
+        dir.getChild("folder1").moveRecursively(dir.getChild("folder4"), recMoveOptions);
         assertEquals(4, failed.size());
         assertEquals(1, dir.getChildrenCount());
         assertEquals(1, dir.getChild("folder4").getChildrenCount());
@@ -580,7 +591,9 @@ public class SalmonFSTests {
         FileSequencer sequencer = SalmonFSTestHelper.createSalmonFileSequencer();
         AesDrive drive = SalmonFSTestHelper.createDrive(vaultDir, SalmonFSTestHelper.driveClassType, SalmonCoreTestHelper.TEST_PASSWORD, sequencer);
         AesFileCommander fileCommander = new AesFileCommander(Integrity.DEFAULT_CHUNK_SIZE, Integrity.DEFAULT_CHUNK_SIZE, 2);
-        IVirtualFile[] sfiles = fileCommander.importFiles(new IFile[]{file}, drive.getRoot(), false, true);
+        FileCommander.BatchImportOptions importOptions = new FileCommander.BatchImportOptions();
+        importOptions.integrity = true;
+        IVirtualFile[] sfiles = fileCommander.importFiles(new IFile[]{file}, drive.getRoot(), importOptions);
         fileCommander.close();
 
         long pos = Math.abs(new Random().nextLong() % file.getLength());

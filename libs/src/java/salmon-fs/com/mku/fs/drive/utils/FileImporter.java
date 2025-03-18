@@ -133,21 +133,32 @@ public abstract class FileImporter {
      *
      * @param fileToImport The source file that will be imported in into the drive.
      * @param dir          The target directory in the drive that the file will be imported
-     * @param filename     The filename to use
-     * @param deleteSource If true delete the source file.
-     * @param integrity    Apply data integrity
-     * @param onProgress   Progress to notify
      * @return The imported file
      * @throws Exception Thrown if error occurs during import
      */
-    public IVirtualFile importFile(IFile fileToImport, IVirtualFile dir, String filename,
-                                   boolean deleteSource, boolean integrity, BiConsumer<Long, Long> onProgress) throws Exception {
+    public IVirtualFile importFile(IFile fileToImport, IVirtualFile dir) throws Exception {
+        return importFile(fileToImport, null);
+    }
+
+    /**
+     * Imports a real file into the drive.
+     *
+     * @param fileToImport The source file that will be imported in into the drive.
+     * @param dir          The target directory in the drive that the file will be imported
+     * @param options      The options
+     * @return The imported file
+     * @throws Exception Thrown if error occurs during import
+     */
+    public IVirtualFile importFile(IFile fileToImport, IVirtualFile dir, FileImportOptions options) throws Exception {
+        if (options == null)
+            options = new FileImportOptions();
+
         if (isRunning())
             throw new Exception("Another import is running");
         if (fileToImport.isDirectory())
             throw new Exception("Cannot import directory, use AesFileCommander instead");
 
-        filename = filename != null ? filename : fileToImport.getName();
+        String filename = options.filename != null ? options.filename : fileToImport.getName();
         final long[] totalBytesRead = new long[]{0};
         final IVirtualFile importedFile;
         try {
@@ -156,7 +167,7 @@ public abstract class FileImporter {
             lastException = null;
 
             importedFile = dir.createFile(filename);
-            this.onPrepare(importedFile, integrity);
+            this.onPrepare(importedFile, options.integrity);
 
             final long fileSize = fileToImport.getLength();
             int runningThreads = 1;
@@ -174,14 +185,15 @@ public abstract class FileImporter {
             }
 
             if (runningThreads == 1) {
-                importFilePart(fileToImport, importedFile, 0, fileSize, totalBytesRead, onProgress);
+                importFilePart(fileToImport, importedFile, 0, fileSize, totalBytesRead, options.onProgressChanged);
             } else {
-                this.submitImportJobs(runningThreads, partSize, fileToImport, importedFile, totalBytesRead, integrity, onProgress);
+                this.submitImportJobs(runningThreads, partSize, fileToImport, importedFile, totalBytesRead,
+                        options.integrity, options.onProgressChanged);
             }
 
             if (stopped)
                 importedFile.getRealFile().delete();
-            else if (deleteSource)
+            else if (options.deleteSource)
                 fileToImport.delete();
             if (lastException != null)
                 throw lastException;
@@ -285,5 +297,31 @@ public abstract class FileImporter {
      */
     public void close() {
         executor.shutdownNow();
+    }
+
+
+    /**
+     * File importer options
+     */
+    public static class FileImportOptions {
+        /**
+         * Override the filename
+         */
+        public String filename;
+
+        /**
+         * Delete the source file after completion.
+         */
+        public boolean deleteSource = false;
+
+        /**
+         * True to enable integrity.
+         */
+        public boolean integrity = false;
+
+        /**
+         * Callback when progress changes
+         */
+        public BiConsumer<Long, Long> onProgressChanged;
     }
 }

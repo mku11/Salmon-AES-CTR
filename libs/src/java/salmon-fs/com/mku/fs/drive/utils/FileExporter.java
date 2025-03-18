@@ -131,15 +131,25 @@ public abstract class FileExporter {
      *
      * @param fileToExport The file that will be exported
      * @param exportDir    The external directory the file will be exported to
-     * @param filename     The filename to use
-     * @param deleteSource Delete the source file when the export finishes successfully
-     * @param integrity    True to verify integrity
-     * @param onProgress   Progress listener
      * @return The exported file
      * @throws Exception Thrown if error occurs during export
      */
-    public IFile exportFile(IVirtualFile fileToExport, IFile exportDir, String filename,
-                            boolean deleteSource, boolean integrity, BiConsumer<Long, Long> onProgress) throws Exception {
+    public IFile exportFile(IVirtualFile fileToExport, IFile exportDir) throws Exception {
+        return exportFile(fileToExport, exportDir, null);
+    }
+
+    /**
+     * Export a file from the drive to the external directory path
+     *
+     * @param fileToExport The file that will be exported
+     * @param exportDir    The external directory the file will be exported to
+     * @param options      The options
+     * @return The exported file
+     * @throws Exception Thrown if error occurs during export
+     */
+    public IFile exportFile(IVirtualFile fileToExport, IFile exportDir, FileExportOptions options) throws Exception {
+        if (options == null)
+            options = new FileExportOptions();
 
         if (isRunning())
             throw new Exception("Another export is running");
@@ -147,7 +157,7 @@ public abstract class FileExporter {
             throw new Exception("Cannot export directory, use VirtualFileCommander instead");
 
         final IFile exportFile;
-        filename = filename != null ? filename : fileToExport.getName();
+        String filename = options.filename != null ? options.filename : fileToExport.getName();
         try {
             stopped = false;
             final long[] totalBytesWritten = new long[]{0};
@@ -157,7 +167,7 @@ public abstract class FileExporter {
             if (!exportDir.exists())
                 exportDir.mkdir();
             exportFile = exportDir.createFile(filename);
-            onPrepare(fileToExport, integrity);
+            onPrepare(fileToExport, options.integrity);
 
             final long fileSize = fileToExport.getLength();
             int runningThreads = 1;
@@ -175,14 +185,15 @@ public abstract class FileExporter {
             }
 
             if (runningThreads == 1) {
-                exportFilePart(fileToExport, exportFile, 0, fileSize, totalBytesWritten, onProgress);
+                exportFilePart(fileToExport, exportFile, 0, fileSize, totalBytesWritten, options.onProgressChanged);
             } else {
-                this.submitExportJobs(runningThreads, partSize, fileToExport, exportFile, totalBytesWritten, integrity, onProgress);
+                this.submitExportJobs(runningThreads, partSize, fileToExport, exportFile, totalBytesWritten,
+                        options.integrity, options.onProgressChanged);
             }
 
             if (stopped)
                 exportFile.delete();
-            else if (deleteSource)
+            else if (options.deleteSource)
                 fileToExport.getRealFile().delete();
             if (lastException != null)
                 throw lastException;
@@ -287,5 +298,30 @@ public abstract class FileExporter {
      */
     public void close() {
         executor.shutdownNow();
+    }
+
+    /**
+     * File importer options
+     */
+    public static class FileExportOptions {
+        /**
+         * Override the filename
+         */
+        public String filename;
+
+        /**
+         * Delete the source file after completion.
+         */
+        public boolean deleteSource = false;
+
+        /**
+         * True to enable integrity.
+         */
+        public boolean integrity = false;
+
+        /**
+         * Callback when progress changes
+         */
+        public BiConsumer<Long, Long> onProgressChanged;
     }
 }

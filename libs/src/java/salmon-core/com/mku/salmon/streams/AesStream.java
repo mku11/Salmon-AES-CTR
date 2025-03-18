@@ -199,7 +199,7 @@ public class AesStream extends RandomAccessStream {
      * </p>
      *
      * @param key            The AES key that is used to encrypt decrypt
-     * @param nonce          The nonce used for the initial counter
+     * @param nonce          The nonce used for the initial counter. If mode is Decrypt and format is Salmon then use null.
      * @param encryptionMode Encryption mode Encrypt or Decrypt this cannot change later
      * @param baseStream     The base Stream that will be used to read the data
      * @param format         The format to use, see {@link EncryptionFormat}

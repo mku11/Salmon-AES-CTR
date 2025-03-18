@@ -28,7 +28,6 @@ import com.mku.func.Function;
 import com.mku.func.TriConsumer;
 import com.mku.salmon.SecurityException;
 import com.mku.salmon.integrity.IntegrityException;
-import com.mku.salmon.sequence.SequenceException;
 import com.mku.salmonfs.auth.AuthException;
 import com.mku.streams.RandomAccessStream;
 
@@ -53,13 +52,14 @@ public interface IVirtualFile {
      * Retrieves a stream that will be used for writing the file contents.
      *
      * @return The output stream
-	 * @throws IOException  Thrown if there is a problem with the stream.
+     * @throws IOException Thrown if there is a problem with the stream.
      */
     RandomAccessStream getOutputStream() throws IOException;
 
     /**
      * Lists files and directories under this directory
-	 * @return An array of files and subdirectories.
+     *
+     * @return An array of files and subdirectories.
      */
     IVirtualFile[] listFiles();
 
@@ -93,7 +93,7 @@ public interface IVirtualFile {
      * Return the virtual path for this file.
      *
      * @return The virtual path.
-	 * @throws IOException        Thrown if there is an IO error.
+     * @throws IOException Thrown if there is an IO error.
      */
     String getPath() throws IOException;
 
@@ -115,7 +115,7 @@ public interface IVirtualFile {
      * Returns the file name
      *
      * @return The file name
-	 * @throws IOException if there was a problem with the stream
+     * @throws IOException if there was a problem with the stream
      */
     String getName() throws IOException;
 
@@ -147,7 +147,7 @@ public interface IVirtualFile {
      * Return the virtual size of the file.
      *
      * @return The size in bytes.
-	 * @throws IOException if there was a problem with the stream
+     * @throws IOException if there was a problem with the stream
      */
     long getLength() throws IOException;
 
@@ -162,8 +162,8 @@ public interface IVirtualFile {
      * Creates a directory under this directory
      *
      * @param dirName The name of the directory to be created
-	 * @return The new directory.
-	 * @throws IOException if there was a problem with the stream
+     * @return The new directory.
+     * @throws IOException if there was a problem with the stream
      */
     IVirtualFile createDirectory(String dirName) throws IOException;
 
@@ -171,8 +171,8 @@ public interface IVirtualFile {
      * Create a file under this directory
      *
      * @param filename The file name.
-	 * @return The new file.
-	 * @throws IOException if there was a problem with the stream
+     * @return The new file.
+     * @throws IOException if there was a problem with the stream
      */
     IVirtualFile createFile(String filename) throws IOException;
 
@@ -180,7 +180,7 @@ public interface IVirtualFile {
      * Rename the virtual file name
      *
      * @param newFilename The new filename this file will be renamed to
-	 * @throws IOException if there was a problem with the stream
+     * @throws IOException if there was a problem with the stream
      */
     void rename(String newFilename) throws IOException;
 
@@ -197,11 +197,11 @@ public interface IVirtualFile {
      * Move file to another directory.
      *
      * @param dir                Target directory.
-     * @param OnProgressListener Observer to notify when move progress changes.
+     * @param options The options
      * @return The file
      * @throws IOException Thrown if there is an IO error.
      */
-    IVirtualFile move(IVirtualFile dir, BiConsumer<Long, Long> OnProgressListener) throws IOException;
+    IVirtualFile move(IVirtualFile dir, IFile.MoveOptions options) throws IOException;
 
     /**
      * Copy file to another directory.
@@ -216,95 +216,45 @@ public interface IVirtualFile {
      * Copy file to another directory.
      *
      * @param dir                Target directory.
-     * @param OnProgressListener Observer to notify when copy progress changes.
+     * @param options The options
      * @return The file
      * @throws IOException Thrown if there is an IO error.
      */
-    IVirtualFile copy(IVirtualFile dir, BiConsumer<Long, Long> OnProgressListener) throws IOException;
+    IVirtualFile copy(IVirtualFile dir, IFile.CopyOptions options) throws IOException;
 
     /**
      * Copy a directory recursively
      *
      * @param dest              The destination directory
-     * @param autoRename        The autorename function
-     * @param autoRenameFolders True to also auto rename folders
      * @throws IOException Thrown if there is an IO error.
      */
-    public void copyRecursively(IVirtualFile dest,
-                                Function<IVirtualFile, String> autoRename,
-                                boolean autoRenameFolders) throws IOException;
+    public void copyRecursively(IVirtualFile dest) throws IOException;
 
     /**
      * Copy a directory recursively
      *
      * @param dest              The destination directory
-     * @param autoRename        The autorename function
-     * @param autoRenameFolders True to also auto rename folders
-     * @param onFailed          The callback when file copying has failed
+     * @param options The options
      * @throws IOException Thrown if there is an IO error.
      */
-    public void copyRecursively(IVirtualFile dest,
-                                Function<IVirtualFile, String> autoRename,
-                                boolean autoRenameFolders,
-                                BiConsumer<IVirtualFile, Exception> onFailed) throws IOException;
-
-    /**
-     * Copy a directory recursively
-     *
-     * @param dest              The destination directory
-     * @param autoRename        The autorename function
-     * @param autoRenameFolders True to also auto rename folders
-     * @param onFailed          The callback when file copying has failed
-     * @param progressListener  The progress listener
-     * @throws IOException Thrown if there is an IO error.
-     */
-    public void copyRecursively(IVirtualFile dest,
-                                Function<IVirtualFile, String> autoRename,
-                                boolean autoRenameFolders,
-                                BiConsumer<IVirtualFile, Exception> onFailed,
-                                TriConsumer<IVirtualFile, Long, Long> progressListener) throws IOException;
+    public void copyRecursively(IVirtualFile dest, VirtualRecursiveCopyOptions options) throws IOException;
 
     /**
      * Move a directory recursively
      *
      * @param dest              The destination directory
-     * @param autoRename        The autorename function
-     * @param autoRenameFolders True to also auto rename folder
      * @throws IOException Thrown if there is an IO error.
      */
-    public void moveRecursively(IVirtualFile dest,
-                                Function<IVirtualFile, String> autoRename,
-                                boolean autoRenameFolders) throws IOException;
+    public void moveRecursively(IVirtualFile dest) throws IOException;
 
     /**
      * Move a directory recursively
      *
      * @param dest              The destination directory
-     * @param autoRename        The autorename function
-     * @param autoRenameFolders True to also auto rename folder
-     * @param onFailed          Callback when move fails
+     * @param options The options
      * @throws IOException Thrown if there is an IO error.
      */
-    public void moveRecursively(IVirtualFile dest,
-                                Function<IVirtualFile, String> autoRename,
-                                boolean autoRenameFolders,
-                                BiConsumer<IVirtualFile, Exception> onFailed) throws IOException;
-
-    /**
-     * Move a directory recursively
-     *
-     * @param dest              The destination directory
-     * @param autoRename        The autorename function
-     * @param autoRenameFolders True to also auto rename folders.
-     * @param onFailed          Callback when move fails
-     * @param progressListener  The progress listener
-     * @throws IOException Thrown if there is an IO error.
-     */
-    public void moveRecursively(IVirtualFile dest,
-                                Function<IVirtualFile, String> autoRename,
-                                boolean autoRenameFolders,
-                                BiConsumer<IVirtualFile, Exception> onFailed,
-                                TriConsumer<IVirtualFile, Long, Long> progressListener) throws IOException;
+    public void moveRecursively(IVirtualFile dest, VirtualRecursiveMoveOptions options) throws IOException;
 
     /**
      * Delete all subdirectories and files.
@@ -314,17 +264,72 @@ public interface IVirtualFile {
     /**
      * Delete all subdirectories and files.
      *
-     * @param onFailed Called when file fails during deletion.
+     * @param options The options
      */
-    void deleteRecursively(BiConsumer<IVirtualFile, Exception> onFailed);
+    void deleteRecursively(VirtualRecursiveDeleteOptions options);
 
     /**
-     * Delete all subdirectories and files.
-     *
-     * @param onFailed         Called when file fails during deletion.
-     * @param progressListener Called when progress is changed.
+     * Directory copy options (recursively)
      */
-    void deleteRecursively(BiConsumer<IVirtualFile, Exception> onFailed,
-                           TriConsumer<IVirtualFile, Long, Long> progressListener);
+    public class VirtualRecursiveCopyOptions {
+        /**
+         * Callback when file with same name exists
+         */
+        public Function<IVirtualFile, String> autoRename;
 
+        /**
+         * True to autorename folders
+         */
+        public boolean autoRenameFolders = false;
+
+        /**
+         * Callback when file changes
+         */
+        public BiConsumer<IVirtualFile, Exception> onFailed;
+
+        /**
+         * Callback where progress changed
+         */
+        public TriConsumer<IVirtualFile, Long, Long> onProgressChanged;
+    }
+
+    /**
+     * Directory move options (recursively)
+     */
+    public class VirtualRecursiveMoveOptions {
+        /**
+         * Callback when file with the same name exists
+         */
+        public Function<IVirtualFile, String> autoRename;
+
+        /**
+         * True to autorename folders
+         */
+        public boolean autoRenameFolders = false;
+
+        /**
+         * Callback when file failed
+         */
+        public BiConsumer<IVirtualFile, Exception> onFailed;
+
+        /**
+         * Callback when progress changes
+         */
+        public TriConsumer<IVirtualFile, Long, Long> onProgressChanged;
+    }
+
+    /**
+     * Directory move options (recursively)
+     */
+    public class VirtualRecursiveDeleteOptions {
+        /**
+         * Callback when file failed
+         */
+        public BiConsumer<IVirtualFile, Exception> onFailed;
+
+        /**
+         * Callback when progress changed
+         */
+        public TriConsumer<IVirtualFile, Long, Long> onProgressChanged;
+    }
 }

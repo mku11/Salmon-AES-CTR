@@ -59,7 +59,7 @@ public class HttpFile implements IFile {
     private static final String DATE_FORMAT = "EEE, dd MMM yyyy HH:mm:ss zzz";
 
     private String filePath;
-	private CloseableHttpResponse response;
+    private CloseableHttpResponse response;
     private static CloseableHttpClient client = HttpClients.createDefault();
 
     /**
@@ -337,40 +337,28 @@ public class HttpFile implements IFile {
     }
 
     /**
-     * Move this file or directory under a new directory.
+     * Move this file or directory under a new directory. Not supported.
      *
-     * @param newDir The target directory.
+     * @param newDir  The target directory.
      * @return The moved file. Use this file for subsequent operations instead of the original.
      */
     public IFile move(IFile newDir) throws IOException {
-        return move(newDir, null, null);
+        return move(newDir, null);
     }
 
     /**
-     * Move this file or directory under a new directory.
+     * Move this file or directory under a new directory. Not supported.
      *
      * @param newDir  The target directory.
-     * @param newName The new filename
+     * @param options The options
      * @return The moved file. Use this file for subsequent operations instead of the original.
      */
-    public IFile move(IFile newDir, String newName) throws IOException {
-        return move(newDir, newName, null);
-    }
-
-    /**
-     * Move this file or directory under a new directory.
-     *
-     * @param newDir           The target directory.
-     * @param newName          The new filename
-     * @param progressListener Observer to notify when progress changes.
-     * @return The moved file. Use this file for subsequent operations instead of the original.
-     */
-    public IFile move(IFile newDir, String newName, BiConsumer<Long, Long> progressListener) throws IOException {
+    public IFile move(IFile newDir, MoveOptions options) throws IOException {
         throw new UnsupportedOperationException("Unsupported Operation, readonly filesystem");
     }
 
     /**
-     * Move this file or directory under a new directory.
+     * Move this file or directory under a new directory. Not supported.
      *
      * @param newDir The target directory.
      * @return The copied file. Use this file for subsequent operations instead of the original.
@@ -378,33 +366,19 @@ public class HttpFile implements IFile {
      */
     @Override
     public IFile copy(IFile newDir) throws IOException {
-        return copy(newDir, null, null);
+        return copy(newDir, null);
     }
 
     /**
-     * Move this file or directory under a new directory.
-     *
-     * @param newDir  The target directory.
-     * @param newName New filename
-     * @return The copied file. Use this file for subsequent operations instead of the original.
-     * @throws IOException Thrown if there is an IO error.
-     */
-    @Override
-    public IFile copy(IFile newDir, String newName) throws IOException {
-        return copy(newDir, newName, null);
-    }
-
-    /**
-     * Move this file or directory under a new directory.
+     * Move this file or directory under a new directory. Not supported.
      *
      * @param newDir           The target directory.
-     * @param newName          New filename
-     * @param progressListener Observer to notify when progress changes.
+     * @param options          The options
      * @return The copied file. Use this file for subsequent operations instead of the original.
      * @throws IOException Thrown if there is an IO error.
      */
     @Override
-    public IFile copy(IFile newDir, String newName, BiConsumer<Long, Long> progressListener) throws IOException {
+    public IFile copy(IFile newDir, CopyOptions options) throws IOException {
         throw new UnsupportedOperationException("Unsupported Operation, readonly filesystem");
     }
 
@@ -417,7 +391,7 @@ public class HttpFile implements IFile {
     public IFile getChild(String filename) {
         if (isFile())
             return null;
-		String nFilepath = this.getChildPath(filename);
+        String nFilepath = this.getChildPath(filename);
         HttpFile child = new HttpFile(nFilepath);
         return child;
     }
@@ -440,23 +414,22 @@ public class HttpFile implements IFile {
     public boolean mkdir() {
         throw new UnsupportedOperationException("Unsupported Operation, readonly filesystem");
     }
-	
-	/**
+
+    /**
      * Reset cached properties
-     *
      */
     public void reset() {
-		this.response = null;
-	}
+        this.response = null;
+    }
 
     private String getChildPath(String filename) {
         String nFilepath = this.filePath;
-        if(!nFilepath.endsWith(HttpFile.Separator))
+        if (!nFilepath.endsWith(HttpFile.Separator))
             nFilepath += HttpFile.Separator;
         nFilepath += filename;
         return nFilepath;
     }
-	
+
     /**
      * Returns a string representation of this object
      */

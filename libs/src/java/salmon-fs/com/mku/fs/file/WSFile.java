@@ -24,7 +24,6 @@ SOFTWARE.
 */
 
 import com.mku.convert.Base64;
-import com.mku.func.BiConsumer;
 import com.mku.fs.stream.WSFileStream;
 import com.mku.streams.RandomAccessStream;
 import org.apache.http.*;
@@ -465,30 +464,20 @@ public class WSFile implements IFile {
      * @return The moved file. Use this file for subsequent operations instead of the original.
      */
     public IFile move(IFile newDir) throws IOException {
-        return move(newDir, null, null);
+        return move(newDir, null);
     }
 
     /**
      * Move this file or directory under a new directory.
      *
      * @param newDir  The target directory.
-     * @param newName The new filename
+     * @param options The options
      * @return The moved file. Use this file for subsequent operations instead of the original.
      */
-    public IFile move(IFile newDir, String newName) throws IOException {
-        return move(newDir, newName, null);
-    }
-
-    /**
-     * Move this file or directory under a new directory.
-     *
-     * @param newDir           The target directory.
-     * @param newName          The new filename
-     * @param progressListener Observer to notify when progress changes.
-     * @return The moved file. Use this file for subsequent operations instead of the original.
-     */
-    public IFile move(IFile newDir, String newName, BiConsumer<Long, Long> progressListener) throws IOException {
-        newName = newName != null ? newName : getName();
+    public IFile move(IFile newDir, MoveOptions options) throws IOException {
+        if (options == null)
+            options = new MoveOptions();
+        String newName = options.newFilename != null ? options.newFilename : getName();
         if (newDir == null || !newDir.exists())
             throw new IOException("Target directory does not exist");
         IFile newFile = newDir.getChild(newName);
@@ -526,7 +515,7 @@ public class WSFile implements IFile {
     }
 
     /**
-     * Move this file or directory under a new directory.
+     * Copy this file or directory under a new directory.
      *
      * @param newDir The target directory.
      * @return The copied file. Use this file for subsequent operations instead of the original.
@@ -534,34 +523,22 @@ public class WSFile implements IFile {
      */
     @Override
     public IFile copy(IFile newDir) throws IOException {
-        return copy(newDir, null, null);
+        return copy(newDir, null);
     }
 
     /**
-     * Move this file or directory under a new directory.
-     *
-     * @param newDir  The target directory.
-     * @param newName New filename
-     * @return The copied file. Use this file for subsequent operations instead of the original.
-     * @throws IOException Thrown if there is an IO error.
-     */
-    @Override
-    public IFile copy(IFile newDir, String newName) throws IOException {
-        return copy(newDir, newName, null);
-    }
-
-    /**
-     * Move this file or directory under a new directory.
+     * Copy this file or directory under a new directory.
      *
      * @param newDir           The target directory.
-     * @param newName          New filename
-     * @param progressListener Observer to notify when progress changes.
+     * @param options The options
      * @return The copied file. Use this file for subsequent operations instead of the original.
      * @throws IOException Thrown if there is an IO error.
      */
     @Override
-    public IFile copy(IFile newDir, String newName, BiConsumer<Long, Long> progressListener) throws IOException {
-        newName = newName != null ? newName : getName();
+    public IFile copy(IFile newDir, CopyOptions options) throws IOException {
+        if (options == null)
+            options = new CopyOptions();
+        String newName = options.newFilename != null ? options.newFilename : getName();
         if (newDir == null || !newDir.exists())
             throw new IOException("Target directory does not exists");
         IFile newFile = newDir.getChild(newName);

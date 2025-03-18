@@ -180,22 +180,11 @@ public interface IFile {
      * Move this file to another directory.
      *
      * @param newDir  The target directory.
-     * @param newName The new filename.
+     * @param options The options
      * @return The file after the move. Use this instance for any subsequent file operations.
      * @throws IOException Thrown if there is an IO error.
      */
-    IFile move(IFile newDir, String newName) throws IOException;
-
-    /**
-     * Move this file to another directory.
-     *
-     * @param newDir           The target directory.
-     * @param newName          The new filename.
-     * @param progressListener Observer to notify of the move progress.
-     * @return The file after the move. Use this instance for any subsequent file operations.
-     * @throws IOException Thrown if there is an IO error.
-     */
-    IFile move(IFile newDir, String newName, BiConsumer<Long, Long> progressListener) throws IOException;
+    IFile move(IFile newDir, MoveOptions options) throws IOException;
 
     /**
      * Copy this file to another directory.
@@ -210,22 +199,11 @@ public interface IFile {
      * Copy this file to another directory.
      *
      * @param newDir  The target directory.
-     * @param newName The new filename.
+     * @param options The options
      * @return The file after the copy. Use this instance for any subsequent file operations.
      * @throws IOException Thrown if there is an IO error.
      */
-    IFile copy(IFile newDir, String newName) throws IOException;
-
-    /**
-     * Copy this file to another directory.
-     *
-     * @param newDir           The target directory.
-     * @param newName          The new filename.
-     * @param progressListener Observer to notify of the copy progress.
-     * @return The file after the copy. Use this instance for any subsequent file operations.
-     * @throws IOException Thrown if there is an IO error.
-     */
-    IFile copy(IFile newDir, String newName, BiConsumer<Long, Long> progressListener) throws IOException;
+    IFile copy(IFile newDir, CopyOptions options) throws IOException;
 
     /**
      * Get the file/directory matching the name provided under this directory.
@@ -250,34 +228,31 @@ public interface IFile {
     /**
      * Copy contents of a file to another file.
      *
-     * @param src    The source directory
-     * @param dest   The target directory
-     * @param delete True to delete the source files when complete
+     * @param src  The source directory
+     * @param dest The target directory
      * @return True if contents were copied
      * @throws IOException Thrown if there is an IO error.
      */
-    static boolean copyFileContents(IFile src, IFile dest, boolean delete)
-            throws IOException {
-        return copyFileContents(src, dest, delete, null);
+    static boolean copyFileContents(IFile src, IFile dest) throws IOException {
+        return copyFileContents(src, dest, null);
     }
 
     /**
      * Copy contents of a file to another file.
      *
-     * @param src              The source directory
-     * @param dest             The target directory
-     * @param delete           True to delete the source files when complete
-     * @param progressListener The progress listener
+     * @param src     The source directory
+     * @param dest    The target directory
+     * @param options The options
      * @return True if contents were copied
      * @throws IOException Thrown if there is an IO error.
      */
-    static boolean copyFileContents(IFile src, IFile dest, boolean delete,
-                                    BiConsumer<Long, Long> progressListener)
+    static boolean copyFileContents(IFile src, IFile dest, CopyContentsOptions options)
             throws IOException {
+
         RandomAccessStream source = src.getInputStream();
         RandomAccessStream target = dest.getOutputStream();
         try {
-            source.copyTo(target, progressListener);
+            source.copyTo(target, options != null ? options.onProgressChanged : null);
         } catch (Exception ex) {
             dest.delete();
             return false;
@@ -285,115 +260,69 @@ public interface IFile {
             source.close();
             target.close();
         }
-        if (delete)
-            src.delete();
         return true;
     }
 
     /**
      * Copy a directory recursively
      *
-     * @param dest Destination directory
+     * @param destDir The destination directory
      * @throws IOException Thrown if there is an IO error.
      */
-    default void copyRecursively(IFile dest) throws IOException {
-        copyRecursively(dest, null, false, null);
-    }
-
-
-    /**
-     * Copy a directory recursively
-     *
-     * @param destDir    The destination directory
-     * @param autoRename The autorename function
-     * @throws IOException Thrown if there is an IO error.
-     */
-    default void copyRecursively(IFile destDir,
-                                 Function<IFile, String> autoRename) throws IOException {
-        copyRecursively(destDir, autoRename, false, null, null);
+    default void copyRecursively(IFile destDir) throws IOException {
+        copyRecursively(destDir, null);
     }
 
     /**
      * Copy a directory recursively
      *
-     * @param destDir           The destination directory
-     * @param autoRename        The autorename function
-     * @param autoRenameFolders Apply autorename to folders also (default is true)
+     * @param destDir The destination directory
+     * @param options The options
      * @throws IOException Thrown if there is an IO error.
      */
-    default void copyRecursively(IFile destDir,
-                                 Function<IFile, String> autoRename,
-                                 boolean autoRenameFolders) throws IOException {
-        copyRecursively(destDir, autoRename, autoRenameFolders, null, null);
-    }
-
-    /**
-     * Copy a directory recursively
-     *
-     * @param destDir           The destination directory
-     * @param autoRename        The autorename function
-     * @param autoRenameFolders Apply autorename to folders also
-     * @param onFailed          Callback if copy failed
-     * @throws IOException Thrown if there is an IO error.
-     */
-    default void copyRecursively(IFile destDir,
-                                 Function<IFile, String> autoRename,
-                                 boolean autoRenameFolders,
-                                 BiConsumer<IFile, Exception> onFailed) throws IOException {
-        copyRecursively(destDir, autoRename, autoRenameFolders, onFailed, null);
-    }
-
-    /**
-     * Copy a directory recursively
-     *
-     * @param destDir           The destination directory
-     * @param autoRename        The autorename function
-     * @param autoRenameFolders Apply autorename to folders also
-     * @param onFailed          Callback if copy failed
-     * @param progressListener  The progress listener
-     * @throws IOException Thrown if there is an IO error.
-     */
-    default void copyRecursively(IFile destDir,
-                                 Function<IFile, String> autoRename,
-                                 boolean autoRenameFolders,
-                                 BiConsumer<IFile, Exception> onFailed,
-                                 TriConsumer<IFile, Long, Long> progressListener) throws IOException {
+    default void copyRecursively(IFile destDir, RecursiveCopyOptions options) throws IOException {
+        if (options == null)
+            options = new RecursiveCopyOptions();
         String newFilename = getName();
         IFile newFile;
         newFile = destDir.getChild(newFilename);
         if (isFile()) {
             if (newFile != null && newFile.exists()) {
-                if (autoRename != null) {
-                    newFilename = autoRename.apply(this);
+                if (options.autoRename != null) {
+                    newFilename = options.autoRename.apply(this);
                 } else {
-                    if (onFailed != null)
-                        onFailed.accept(this, new Exception("Another file exists"));
+                    if (options.onFailed != null)
+                        options.onFailed.accept(this, new Exception("Another file exists"));
                     return;
                 }
             }
-            this.copy(destDir, newFilename, (position, length) ->
+            RecursiveCopyOptions finalOptions = options;
+            CopyOptions copyOptions = new CopyOptions();
+            copyOptions.newFilename = newFilename;
+            copyOptions.onProgressChanged = (position, length) ->
             {
-                if (progressListener != null) {
-                    progressListener.accept(this, position, length);
+                if (finalOptions.onProgressChanged != null) {
+                    finalOptions.onProgressChanged.accept(this, position, length);
                 }
-            });
+            };
+            this.copy(destDir, copyOptions);
         } else if (this.isDirectory()) {
-            if (progressListener != null)
-                progressListener.accept(this, 0L, 1L);
+            if (options.onProgressChanged != null)
+                options.onProgressChanged.accept(this, 0L, 1L);
             if (destDir.getDisplayPath().startsWith(this.getDisplayPath())) {
-                if (progressListener != null)
-                    progressListener.accept(this, 1L, 1L);
+                if (options.onProgressChanged != null)
+                    options.onProgressChanged.accept(this, 1L, 1L);
                 return;
             }
-            if (newFile != null && newFile.exists() && autoRename != null && autoRenameFolders)
-                newFile = destDir.createDirectory(autoRename.apply(this));
+            if (newFile != null && newFile.exists() && options.autoRename != null && options.autoRenameFolders)
+                newFile = destDir.createDirectory(options.autoRename.apply(this));
             else if (newFile == null || !newFile.exists())
                 newFile = destDir.createDirectory(newFilename);
-            if (progressListener != null)
-                progressListener.accept(this, 1L, 1L);
+            if (options.onProgressChanged != null)
+                options.onProgressChanged.accept(this, 1L, 1L);
 
             for (IFile child : this.listFiles()) {
-                child.copyRecursively(newFile, autoRename, autoRenameFolders, onFailed, progressListener);
+                child.copyRecursively(newFile, options);
             }
         }
     }
@@ -405,45 +334,24 @@ public interface IFile {
      * @throws IOException Thrown if there is an IO error.
      */
     default void moveRecursively(IFile destDir) throws IOException {
-        moveRecursively(destDir, null, false, null, null);
+        moveRecursively(destDir, null);
     }
 
     /**
      * Move a directory recursively
      *
-     * @param destDir           The target directory
-     * @param autoRename        The autorename function
-     * @param autoRenameFolders Apply autorename to folders also (default is true)
-     * @param onFailed          Callback when move failed
+     * @param destDir The target directory
+     * @param options The options
      * @throws IOException Thrown if there is an IO error.
      */
-    default void moveRecursively(IFile destDir,
-                                 Function<IFile, String> autoRename,
-                                 boolean autoRenameFolders,
-                                 BiConsumer<IFile, Exception> onFailed) throws IOException {
-        moveRecursively(destDir, autoRename, autoRenameFolders, onFailed, null);
-    }
-
-    /**
-     * Move a directory recursively
-     *
-     * @param destDir           The target directory
-     * @param autoRename        The autorename function
-     * @param autoRenameFolders Apply autorename to folders also (default is true)
-     * @param onFailed          Callback when move failed
-     * @param progressListener  The progress listener
-     * @throws IOException Thrown if there is an IO error.
-     */
-    default void moveRecursively(IFile destDir,
-                                 Function<IFile, String> autoRename,
-                                 boolean autoRenameFolders,
-                                 BiConsumer<IFile, Exception> onFailed,
-                                 TriConsumer<IFile, Long, Long> progressListener) throws IOException {
+    default void moveRecursively(IFile destDir, RecursiveMoveOptions options) throws IOException {
+        if (options == null)
+            options = new RecursiveMoveOptions();
         // target directory is the same
         if (getParent().getPath().equals(destDir.getPath())) {
-            if (progressListener != null) {
-                progressListener.accept(this, 0L, 1L);
-                progressListener.accept(this, 1L, 1L);
+            if (options.onProgressChanged != null) {
+                options.onProgressChanged.accept(this, 0L, 1L);
+                options.onProgressChanged.accept(this, 1L, 1L);
             }
             return;
         }
@@ -458,39 +366,44 @@ public interface IFile {
                 if (autoRename != null) {
                     newFilename = autoRename.apply(this);
                 } else {
-                    if (onFailed != null)
-                        onFailed.accept(this, new Exception("Another file exists"));
+                    if (options.onFailed != null)
+                        options.onFailed.accept(this, new Exception("Another file exists"));
                     return;
                 }
             }
-            this.move(destDir, newFilename, (position, length) ->
+            RecursiveMoveOptions finalOptions = options;
+            MoveOptions moveOptions = new MoveOptions();
+            moveOptions.newFilename = newFilename;
+            moveOptions.onProgressChanged = (position, length) ->
             {
-                if (progressListener != null) {
-                    progressListener.accept(this, position, length);
+                if (finalOptions.onProgressChanged != null) {
+                    finalOptions.onProgressChanged.accept(this, position, length);
                 }
-            });
+            };
+            this.move(destDir, moveOptions);
         } else if (this.isDirectory()) {
-            if (progressListener != null)
-                progressListener.accept(this, 0L, 1L);
+            if (options.onProgressChanged != null)
+                options.onProgressChanged.accept(this, 0L, 1L);
             if (destDir.getDisplayPath().startsWith(this.getDisplayPath())) {
-                if (progressListener != null)
-                    progressListener.accept(this, 1L, 1L);
+                if (options.onProgressChanged != null)
+                    options.onProgressChanged.accept(this, 1L, 1L);
                 return;
             }
-            if ((newFile != null && newFile.exists() && autoRename != null && autoRenameFolders)
+            if ((newFile != null && newFile.exists() && options.autoRename != null && options.autoRenameFolders)
                     || newFile == null || !newFile.exists()) {
-                newFile = move(destDir, autoRename.apply(this));
+                MoveOptions moveOptions = new MoveOptions();
+                moveOptions.newFilename = options.autoRename.apply(this);
+                newFile = move(destDir, moveOptions);
                 return;
             }
-            if (progressListener != null)
-                progressListener.accept(this, 1L, 1L);
+            if (options.onProgressChanged != null)
+                options.onProgressChanged.accept(this, 1L, 1L);
 
             for (IFile child : this.listFiles()) {
-                child.moveRecursively(newFile, autoRename, autoRenameFolders, onFailed, progressListener);
+                child.moveRecursively(newFile, options);
             }
             if (!this.delete()) {
-                onFailed.accept(this, new Exception("Could not delete source directory"));
-                return;
+                options.onFailed.accept(this, new Exception("Could not delete source directory"));
             }
         }
     }
@@ -500,39 +413,30 @@ public interface IFile {
      * Delete a directory recursively
      */
     default void deleteRecursively() {
-        deleteRecursively(null, null);
+        deleteRecursively(null);
     }
 
     /**
      * Delete a directory recursively
      *
-     * @param onFailed Callback when delete failed
+     * @param options The options
      */
-    default void deleteRecursively(BiConsumer<IFile, Exception> onFailed) {
-        deleteRecursively(onFailed, null);
-    }
-
-    /**
-     * Delete a directory recursively
-     *
-     * @param onFailed         Callback when delete failed
-     * @param progressListener The progress listener
-     */
-    default void deleteRecursively(BiConsumer<IFile, Exception> onFailed,
-                                   TriConsumer<IFile, Long, Long> progressListener) {
+    default void deleteRecursively(RecursiveDeleteOptions options) {
+        if (options == null)
+            options = new RecursiveDeleteOptions();
         if (isFile()) {
-            progressListener.accept(this, 0L, 1L);
+            options.onProgressChanged.accept(this, 0L, 1L);
             if (!this.delete()) {
-                onFailed.accept(this, new Exception("Could not delete file"));
+                options.onFailed.accept(this, new Exception("Could not delete file"));
                 return;
             }
-            progressListener.accept(this, 1L, 1L);
+            options.onProgressChanged.accept(this, 1L, 1L);
         } else if (this.isDirectory()) {
             for (IFile child : this.listFiles()) {
-                child.deleteRecursively(onFailed, progressListener);
+                child.deleteRecursively(options);
             }
             if (!this.delete()) {
-                onFailed.accept(this, new Exception("Could not delete directory"));
+                options.onFailed.accept(this, new Exception("Could not delete directory"));
                 return;
             }
         }
@@ -562,6 +466,109 @@ public interface IFile {
         if (ext.length() > 0)
             newFilename += "." + ext;
         return newFilename;
+    }
+
+
+    /**
+     * File copy options
+     */
+    class CopyOptions {
+        /**
+         * Override filename
+         */
+        public String newFilename;
+
+        /**
+         * Callback where progress changed
+         */
+        public BiConsumer<Long, Long> onProgressChanged;
+    }
+
+    /**
+     * File move options
+     */
+    class MoveOptions {
+        /**
+         * Override filename
+         */
+        public String newFilename;
+
+        /**
+         * Callback where progress changed
+         */
+        public BiConsumer<Long, Long> onProgressChanged;
+    }
+
+    /**
+     * Directory copy options (recursively)
+     */
+    class RecursiveCopyOptions {
+        /**
+         * Callback when file with same name exists
+         */
+        public Function<IFile, String> autoRename;
+
+        /**
+         * True to autorename folders
+         */
+        public boolean autoRenameFolders = false;
+
+        /**
+         * Callback when file changes
+         */
+        public BiConsumer<IFile, Exception> onFailed;
+
+        /**
+         * Callback where progress changed
+         */
+        public TriConsumer<IFile, Long, Long> onProgressChanged;
+    }
+
+    /**
+     * Directory move options (recursively)
+     */
+    public class RecursiveMoveOptions {
+        /**
+         * Callback when file with the same name exists
+         */
+        public Function<IFile, String> autoRename;
+
+        /**
+         * True to autorename folders
+         */
+        public boolean autoRenameFolders = false;
+
+        /**
+         * Callback when file failed
+         */
+        public BiConsumer<IFile, Exception> onFailed;
+
+        /**
+         * Callback when progress changes
+         */
+        public TriConsumer<IFile, Long, Long> onProgressChanged;
+    }
+
+    /**
+     * Directory move options (recursively)
+     */
+    public class RecursiveDeleteOptions {
+        /**
+         * Callback when file failed
+         */
+        public BiConsumer<IFile, Exception> onFailed;
+
+        /**
+         * Callback when progress changed
+         */
+        public TriConsumer<IFile, Long, Long> onProgressChanged;
+    }
+
+    /**
+     * Directory move options (recursively)
+     */
+    public class CopyContentsOptions {
+        public BiConsumer<Long, Long> onProgressChanged;
     }
 }
 

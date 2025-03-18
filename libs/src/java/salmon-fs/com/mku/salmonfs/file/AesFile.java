@@ -342,7 +342,7 @@ public class AesFile implements IVirtualFile {
      */
     public void setVerifyIntegrity(boolean integrity, byte[] hashKey) throws IOException {
         Header header = getHeader();
-        if(header == null && integrity)
+        if (header == null && integrity)
             throw new IntegrityException("File does not support integrity");
         if (integrity && hashKey == null && drive != null)
             hashKey = drive.getKey().getHashKey();
@@ -875,20 +875,19 @@ public class AesFile implements IVirtualFile {
      * @throws IOException Thrown if there is an IO error.
      */
     public AesFile move(IVirtualFile dir) throws IOException {
-        IFile newRealFile = realFile.move(dir.getRealFile(), null, null);
-        return new AesFile(newRealFile, drive);
+        return move(dir, null);
     }
 
     /**
      * Move file to another directory.
      *
-     * @param dir                Target directory.
-     * @param OnProgressListener Observer to notify when move progress changes.
+     * @param dir     Target directory.
+     * @param options The Options
      * @return The file
      * @throws IOException Thrown if there is an IO error.
      */
-    public AesFile move(IVirtualFile dir, BiConsumer<Long, Long> OnProgressListener) throws IOException {
-        IFile newRealFile = realFile.move(dir.getRealFile(), null, OnProgressListener);
+    public AesFile move(IVirtualFile dir, IFile.MoveOptions options) throws IOException {
+        IFile newRealFile = realFile.move(dir.getRealFile(), options);
         return new AesFile(newRealFile, drive);
     }
 
@@ -901,199 +900,153 @@ public class AesFile implements IVirtualFile {
      * @throws IOException Thrown if there is an IO error.
      */
     public AesFile copy(IVirtualFile dir) throws IOException {
-        IFile newRealFile = realFile.copy(dir.getRealFile(), null, null);
-        return new AesFile(newRealFile, drive);
+        return copy(dir, null);
     }
 
     /**
      * Copy file to another directory.
      *
-     * @param dir                Target directory.
-     * @param OnProgressListener Observer to notify when copy progress changes.
+     * @param dir     Target directory.
+     * @param options The options
      * @return The file
      * @throws IOException Thrown if there is an IO error.
      */
-    public AesFile copy(IVirtualFile dir, BiConsumer<Long, Long> OnProgressListener)
+    public AesFile copy(IVirtualFile dir, IFile.CopyOptions options)
             throws IOException {
-        IFile newRealFile = realFile.copy(dir.getRealFile(), null, OnProgressListener);
+        IFile newRealFile = realFile.copy(dir.getRealFile(), options);
         return new AesFile(newRealFile, drive);
     }
 
     /**
      * Copy a directory recursively
      *
-     * @param dest              The destination directory
-     * @param autoRename        The autorename function
-     * @param autoRenameFolders True to also auto rename folders
+     * @param dest The destination directory
      */
-    public void copyRecursively(IVirtualFile dest,
-                                Function<IVirtualFile, String> autoRename,
-                                boolean autoRenameFolders) throws IOException {
-        copyRecursively(dest, autoRename, autoRenameFolders, null, null);
+    public void copyRecursively(IVirtualFile dest) throws IOException {
+        copyRecursively(dest, null);
     }
 
     /**
      * Copy a directory recursively
      *
-     * @param dest              The destination directory
-     * @param autoRename        The autorename function
-     * @param autoRenameFolders True to also auto rename folders
-     * @param onFailed          The callback when file copying has failed
+     * @param dest    The destination directory
+     * @param options The options
      */
-    public void copyRecursively(IVirtualFile dest,
-                                Function<IVirtualFile, String> autoRename,
-                                boolean autoRenameFolders,
-                                BiConsumer<IVirtualFile, Exception> onFailed) throws IOException {
-        copyRecursively(dest, autoRename, autoRenameFolders, onFailed, null);
-    }
-
-    /**
-     * Copy a directory recursively
-     *
-     * @param dest              The destination directory
-     * @param autoRename        The autorename function
-     * @param autoRenameFolders True to also auto rename folders
-     * @param onFailed          The callback when file copying has failed
-     * @param progressListener  The progress listener
-     */
-    public void copyRecursively(IVirtualFile dest,
-                                Function<IVirtualFile, String> autoRename,
-                                boolean autoRenameFolders,
-                                BiConsumer<IVirtualFile, Exception> onFailed,
-                                TriConsumer<IVirtualFile, Long, Long> progressListener) throws IOException {
+    public void copyRecursively(IVirtualFile dest, VirtualRecursiveCopyOptions options) throws IOException {
+        if (options == null)
+            options = new VirtualRecursiveCopyOptions();
+        VirtualRecursiveCopyOptions finalOptions = options;
         BiConsumer<IFile, Exception> onFailedRealFile = null;
-        if (onFailed != null) {
+        if (options.onFailed != null) {
             onFailedRealFile = (file, ex) ->
             {
-                onFailed.accept(new AesFile(file, getDrive()), ex);
+                finalOptions.onFailed.accept(new AesFile(file, getDrive()), ex);
             };
         }
         Function<IFile, String> renameRealFile = null;
         // use auto rename only when we are using a drive
-        if (autoRename != null && getDrive() != null)
+        if (options.autoRename != null && getDrive() != null)
             renameRealFile = (file) -> {
                 try {
-                    return autoRename.apply(new AesFile(file, getDrive()));
+                    return finalOptions.autoRename.apply(new AesFile(file, getDrive()));
                 } catch (Exception e) {
                     return file.getName();
                 }
             };
-        this.realFile.copyRecursively(dest.getRealFile(), renameRealFile, autoRenameFolders, onFailedRealFile,
-                (file, position, length) ->
-                {
-                    if (progressListener != null)
-                        progressListener.accept(new AesFile(file, drive), position, length);
-                });
+        IFile.RecursiveCopyOptions copyOptions = new IFile.RecursiveCopyOptions();
+        copyOptions.autoRename = renameRealFile;
+        copyOptions.autoRenameFolders = options.autoRenameFolders;
+        copyOptions.onFailed = onFailedRealFile;
+        copyOptions.onProgressChanged = (file, position, length) ->
+        {
+            if (finalOptions.onProgressChanged != null)
+                finalOptions.onProgressChanged.accept(new AesFile(file, drive), position, length);
+        };
+        this.realFile.copyRecursively(dest.getRealFile(), copyOptions);
     }
 
     /**
      * Move a directory recursively
      *
      * @param dest              The destination directory
-     * @param autoRename        The autorename function
-     * @param autoRenameFolders True to also auto rename folder
      */
-    public void moveRecursively(IVirtualFile dest,
-                                Function<IVirtualFile, String> autoRename,
-                                boolean autoRenameFolders)
-            throws IOException {
-        moveRecursively(dest, autoRename, autoRenameFolders, null, null);
+    public void moveRecursively(IVirtualFile dest) throws IOException {
+        moveRecursively(dest, null);
     }
 
     /**
      * Move a directory recursively
      *
-     * @param dest              The destination directory
-     * @param autoRename        The autorename function
-     * @param autoRenameFolders True to also auto rename folder
-     * @param onFailed          Callback when move fails
+     * @param dest    The destination directory
+     * @param options The options
      */
-    public void moveRecursively(IVirtualFile dest,
-                                Function<IVirtualFile, String> autoRename,
-                                boolean autoRenameFolders,
-                                BiConsumer<IVirtualFile, Exception> onFailed)
+    public void moveRecursively(IVirtualFile dest, VirtualRecursiveMoveOptions options)
             throws IOException {
-        moveRecursively(dest, autoRename, autoRenameFolders, onFailed, null);
-    }
-
-    /**
-     * Move a directory recursively
-     *
-     * @param dest              The destination directory
-     * @param autoRename        The autorename function
-     * @param autoRenameFolders True to also auto rename folders.
-     * @param onFailed          Callback when move fails
-     * @param progressListener  The progress listener
-     */
-    public void moveRecursively(IVirtualFile dest,
-                                Function<IVirtualFile, String> autoRename,
-                                boolean autoRenameFolders,
-                                BiConsumer<IVirtualFile, Exception> onFailed,
-                                TriConsumer<IVirtualFile, Long, Long> progressListener)
-            throws IOException {
+        if (options == null)
+            options = new VirtualRecursiveMoveOptions();
+        VirtualRecursiveMoveOptions finalOptions = options;
         BiConsumer<IFile, Exception> onFailedRealFile = null;
-        if (onFailed != null) {
+        if (options.onFailed != null) {
             onFailedRealFile = (file, ex) ->
             {
-                if (onFailed != null)
-                    onFailed.accept(new AesFile(file, getDrive()), ex);
+                if (finalOptions.onFailed != null)
+                    finalOptions.onFailed.accept(new AesFile(file, getDrive()), ex);
             };
         }
         Function<IFile, String> renameRealFile = null;
         // use auto rename only when we are using a drive
-        if (autoRename != null && getDrive() != null)
+        if (options.autoRename != null && getDrive() != null)
             renameRealFile = (file) -> {
                 try {
-                    return autoRename.apply(new AesFile(file, getDrive()));
+                    return finalOptions.autoRename.apply(new AesFile(file, getDrive()));
                 } catch (Exception e) {
                     return file.getName();
                 }
             };
-        this.realFile.moveRecursively(dest.getRealFile(), renameRealFile, autoRenameFolders, onFailedRealFile,
-                (file, position, length) ->
-                {
-                    if (progressListener != null)
-                        progressListener.accept(new AesFile(file, drive), position, length);
-                });
+        IFile.RecursiveMoveOptions moveOptions = new IFile.RecursiveMoveOptions();
+        moveOptions.autoRename = renameRealFile;
+        moveOptions.autoRenameFolders = options.autoRenameFolders;
+        moveOptions.onFailed = onFailedRealFile;
+        moveOptions.onProgressChanged = (file, position, length) ->
+        {
+            if (finalOptions.onProgressChanged != null)
+                finalOptions.onProgressChanged.accept(new AesFile(file, drive), position, length);
+        };
+        this.realFile.moveRecursively(dest.getRealFile(), moveOptions);
     }
 
     /**
      * Delete all subdirectories and files.
      */
     public void deleteRecursively() {
-        deleteRecursively(null, null);
+        deleteRecursively(null);
     }
 
     /**
      * Delete all subdirectories and files.
      *
-     * @param onFailed Called when file fails during deletion.
+     * @param options The options
      */
-    public void deleteRecursively(BiConsumer<IVirtualFile, Exception> onFailed) {
-        deleteRecursively(onFailed, null);
-    }
-
-    /**
-     * Delete all subdirectories and files.
-     *
-     * @param onFailed         Called when file fails during deletion.
-     * @param progressListener Called when progress is changed.
-     */
-    public void deleteRecursively(BiConsumer<IVirtualFile, Exception> onFailed,
-                                  TriConsumer<IVirtualFile, Long, Long> progressListener) {
+    public void deleteRecursively(VirtualRecursiveDeleteOptions options) {
+        if(options == null)
+            options = new VirtualRecursiveDeleteOptions();
+        VirtualRecursiveDeleteOptions finalOptions = options;
         BiConsumer<IFile, Exception> onFailedRealFile = null;
-        if (onFailed != null) {
+        if (options.onFailed != null) {
             onFailedRealFile = (file, ex) ->
             {
-                if (onFailed != null)
-                    onFailed.accept(new AesFile(file, drive), ex);
+                if (finalOptions.onFailed != null)
+                    finalOptions.onFailed.accept(new AesFile(file, drive), ex);
             };
         }
-        this.getRealFile().deleteRecursively(onFailedRealFile, (file, position, length) ->
+        IFile.RecursiveDeleteOptions deleteOptions = new IFile.RecursiveDeleteOptions();
+        deleteOptions.onFailed = onFailedRealFile;
+        deleteOptions.onProgressChanged = (file, position, length) ->
         {
-            if (progressListener != null)
-                progressListener.accept(new AesFile(file, drive), position, length);
-        });
+            if (finalOptions.onProgressChanged != null)
+                finalOptions.onProgressChanged.accept(new AesFile(file, drive), position, length);
+        };
+        this.getRealFile().deleteRecursively(deleteOptions);
     }
 
 
