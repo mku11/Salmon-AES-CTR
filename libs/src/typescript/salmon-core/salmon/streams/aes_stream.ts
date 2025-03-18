@@ -143,7 +143,7 @@ export class AesStream extends RandomAccessStream {
      * @see {@link https://en.wikipedia.org/wiki/Block_cipher_mode_of_operation#Counter_(CTR)|Salmon README.md}
      *
      * @param {Uint8Array} key            The AES key that is used to encrypt decrypt
-     * @param {Uint8Array | null} nonce          The nonce used for the initial counter. Use null if you use Salmon format.
+     * @param {Uint8Array | null} nonce          The nonce used for the initial counter. If mode is Decrypt and you use Salmon format set to null.
      * @param {EncryptionMode} encryptionMode Encryption mode Encrypt or Decrypt this cannot change later
      * @param {RandomAccessStream} baseStream     The base Stream that will be used to read the data
      * @param {EncryptionFormat} format         The format to use, see {@link EncryptionFormat}
