@@ -364,9 +364,11 @@ public class FileCommander {
      * @param filesToDelete The files to delete.
      * @param options       The options
      */
-    public void deleteFiles(IVirtualFile[] filesToDelete, FileDeleteOptions options) {
+    public void deleteFiles(IVirtualFile[] filesToDelete, BatchDeleteOptions options) {
         if (options == null)
-            options = new FileDeleteOptions();
+            options = new BatchDeleteOptions();
+		BatchDeleteOptions finalOptions = options;
+					
         stopJobs = false;
         int[] count = new int[1];
         int total = 0;
@@ -381,7 +383,6 @@ public class FileCommander {
             int finalTotal = total;
             IVirtualFile.VirtualRecursiveDeleteOptions deleteOptions = new IVirtualFile.VirtualRecursiveDeleteOptions();
             deleteOptions.onFailed = options.onFailed;
-            FileDeleteOptions finalOptions = options;
             deleteOptions.onProgressChanged = (file, position, length) ->
             {
                 if (stopJobs)
@@ -412,7 +413,8 @@ public class FileCommander {
             throws Exception {
         if (options == null)
             options = new BatchCopyOptions();
-
+        BatchCopyOptions finalOptions = options;
+		
         stopJobs = false;
         int[] count = new int[1];
         int total = 0;
@@ -432,7 +434,6 @@ public class FileCommander {
                 moveOptions.autoRename = options.autoRename;
                 moveOptions.autoRenameFolders = options.autoRenameFolders;
                 moveOptions.onFailed = options.onFailed;
-                BatchCopyOptions finalOptions = options;
                 moveOptions.onProgressChanged = (file, position, length) ->
                 {
                     if (stopJobs)
@@ -453,14 +454,13 @@ public class FileCommander {
                 copyOptions.autoRename = options.autoRename;
                 copyOptions.autoRenameFolders = options.autoRenameFolders;
                 copyOptions.onFailed = options.onFailed;
-                BatchCopyOptions finalOptions1 = options;
                 copyOptions.onProgressChanged = (file, position, length) ->
                 {
                     if (stopJobs)
                         throw new CancellationException();
-                    if (finalOptions1.onProgressChanged != null) {
+                    if (finalOptions.onProgressChanged != null) {
                         try {
-                            finalOptions1.onProgressChanged.accept(new VirtualFileTaskProgress(file, position, length, count[0], finalTotal));
+                            finalOptions.onProgressChanged.accept(new VirtualFileTaskProgress(file, position, length, count[0], finalTotal));
                         } catch (Exception ignored) {
                         }
                     }
@@ -522,11 +522,10 @@ public class FileCommander {
      *
      * @param dir   The directory to start the search.
      * @param terms The terms to search for.
-     * @param any   True if you want to match any term otherwise match all terms.
      * @return An array with all the results found.
      */
-    public IVirtualFile[] search(IVirtualFile dir, String terms, boolean any) {
-        return search(dir, terms, any);
+    public IVirtualFile[] search(IVirtualFile dir, String terms) {
+        return search(dir, terms, null);
     }
 
     /**
@@ -686,7 +685,10 @@ public class FileCommander {
         }
     }
 
-    public class FileDeleteOptions {
+    /**
+     * Batch delete options
+     */
+    public class BatchDeleteOptions {
         /**
          * Callback when delete fails
          */
