@@ -33,6 +33,7 @@ import com.mku.android.fs.file.AndroidSharedFileObserver;
 import com.mku.fs.file.File;
 import com.mku.fs.file.IFile;
 import com.mku.salmonfs.drive.Drive;
+import com.mku.fs.drive.utils.FileExporter;
 import com.mku.salmonfs.drive.utils.AesFileExporter;
 import com.mku.salmonfs.file.AesFile;
 
@@ -85,7 +86,9 @@ public class AndroidDrive extends Drive {
 
         AndroidFile sharedDir = new AndroidFile(DocumentFile.fromFile(privateDir), context);
         AesFileExporter fileExporter = new AesFileExporter(ENC_BUFFER_SIZE, ENC_THREADS);
-        fileExporter.exportFile(aesFile, sharedDir, null, false, true, null);
+		FileExporter.FileExportOptions exportOptions = new FileExporter.FileExportOptions();
+		exportOptions.integrity = true;
+        fileExporter.exportFile(aesFile, sharedDir, exportOptions);
         return cacheFile;
     }
 

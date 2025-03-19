@@ -287,31 +287,21 @@ public class AndroidFile implements IFile {
      * @throws IOException Thrown if error during IO
      */
     public IFile move(IFile newDir) throws IOException {
-        return move(newDir, null, null);
+        return move(newDir, null);
     }
 
     /**
      * Move this file to another directory.
      *
      * @param newDir           The target directory.
-     * @param newName          The new filename
+     * @param options The options.
      * @return The moved file
      * @throws IOException Thrown if error during IO
      */
-    public IFile move(IFile newDir, String newName) throws IOException {
-        return move(newDir, newName, null);
-    }
-
-    /**
-     * Move this file to another directory.
-     *
-     * @param newDir           The target directory.
-     * @param progressListener Observer to notify of the move progress.
-     * @return The moved file
-     * @throws IOException Thrown if error during IO
-     */
-    public IFile move(IFile newDir, String newName, BiConsumer<Long, Long> progressListener)
+    public IFile move(IFile newDir, IFile.MoveOptions options)
             throws IOException {
+		if(options == null)
+			options = new IFile.MoveOptions();
         // target directory is the same
         if(getParent().getPath().equals(newDir.getPath()))
         {
@@ -321,28 +311,28 @@ public class AndroidFile implements IFile {
         AndroidFile androidDir = (AndroidFile)newDir;
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N)
         {
-            if (progressListener != null)
-                progressListener.accept(0L, 1L);
-            if (newName != null)
+            if (options.onProgressChanged != null)
+                options.onProgressChanged.accept(0L, this.getLength());
+            if (options.newFilename != null)
                 renameTo(System.currentTimeMillis() + ".dat");
 
             // TEST: does the documentFile reflect the new name?
             Uri uri = DocumentsContract.moveDocument(AndroidDrive.getContext().getContentResolver(),
                     documentFile.getUri(), documentFile.getParentFile().getUri(), androidDir.documentFile.getUri());
-            if (progressListener != null)
-                progressListener.accept(1L, 1L);
             IFile file = androidDir.getChild(getName());
-            if (file != null && newName != null)
-                file.renameTo(newName);
+            if (file != null && options.newFilename != null)
+                file.renameTo(options.newFilename);
             if(getParent()!=null)
                 ((AndroidFile)getParent()).reset();
             androidDir.reset();
             reset();
+			if (options.onProgressChanged != null)
+                options.onProgressChanged.accept(1L, file.getLength());
             return file;
         }
         else
         {
-            return copy(newDir, newName, true, progressListener);
+            return copy(newDir, options.newFilename, true, options.onProgressChanged);
         }
     }
 
@@ -354,37 +344,26 @@ public class AndroidFile implements IFile {
      * @throws IOException Thrown if error during IO
      */
     public IFile copy(IFile newDir) throws IOException {
-        return copy(newDir, null, null);
-    }
-
-    /**
-     * Copy this file to another directory with a new filename.
-     *
-     * @param newDir           The target directory.
-     * @param newName          The new filename
-     * @return The new file
-     * @throws IOException Thrown if error during IO
-     */
-    public IFile copy(IFile newDir, String newName) throws IOException {
-        return copy(newDir, newName, null);
+        return copy(newDir, null);
     }
 
     /**
      * Copy this file to another directory with a new filename with a progress.
      *
      * @param newDir           The target directory.
-     * @param newName          The new filename
-     * @param progressListener Observer to notify of the copy progress.
+     * @param options The options
      * @return The new file
      * @throws IOException Thrown if error during IO
      */
-    public IFile copy(IFile newDir, String newName, BiConsumer<Long,Long> progressListener)
+    public IFile copy(IFile newDir, IFile.CopyOptions options)
             throws IOException {
-        return copy(newDir, newName, false, progressListener);
+		if(options == null)
+			options = new IFile.CopyOptions();
+        return copy(newDir, options.newFilename, false, options.onProgressChanged);
     }
 
     private IFile copy(IFile newDir, String newName,
-                           boolean delete, BiConsumer<Long,Long> progressListener)
+                           boolean delete, BiConsumer<Long,Long> onProgressChanged)
             throws IOException {
         if (newDir == null || !newDir.exists())
             throw new IOException("Target directory does not exists");
@@ -401,7 +380,11 @@ public class AndroidFile implements IFile {
         else
         {
             IFile newFile = newDir.createFile(newName);
-            IFile.copyFileContents(this, newFile, delete, progressListener);
+			IFile.CopyContentsOptions copyContentOptions = new IFile.CopyContentsOptions();
+			copyContentOptions.onProgressChanged = onProgressChanged;
+            boolean res = IFile.copyFileContents(this, newFile, copyContentOptions);
+			if(res && delete)
+				this.delete();
             return newFile;
         }
     }
