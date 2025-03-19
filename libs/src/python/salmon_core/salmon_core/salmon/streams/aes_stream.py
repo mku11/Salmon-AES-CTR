@@ -105,7 +105,7 @@ class AesStream(RandomAccessStream):
         see <a href="https://en.wikipedia.org/wiki/Block_cipher_mode_of_operation#Counter_(CTR)">Salmon README.md</a>
         
         :param key:            The AES key that is used to encrypt decrypt
-        :param nonce:          The nonce used for the initial counter
+        :param nonce:          The nonce used for the initial counter. If mode is Decrypt and format is Salmon then use null.</param>
         :param encryption_mode: Encryption mode Encrypt or Decrypt this cannot change later
         :param base_stream:     The base Stream that will be used to read the data
         :param format: The {@link EncryptionFormat} Generic or Salmon.
@@ -165,7 +165,7 @@ class AesStream(RandomAccessStream):
 
         self.__encryption_mode = encryption_mode
         self.__base_stream = base_stream
-        self.__header: Header | None = self.get_or_create_header(format, nonce, integrity, chunk_size)
+        self.__header: Header | None = self.__get_or_create_header(format, nonce, integrity, chunk_size)
         if self.__header:
             chunk_size = self.__header.get_chunk_size()
             nonce = self.__header.get_nonce()
@@ -178,8 +178,8 @@ class AesStream(RandomAccessStream):
         self.__init_transformer(key, nonce)
         self.__init_stream()
 
-    def get_or_create_header(self, format: EncryptionFormat, nonce: bytearray | None, integrity: bool,
-                             chunk_size: int) -> Header | None:
+    def __get_or_create_header(self, format: EncryptionFormat, nonce: bytearray | None, integrity: bool,
+                               chunk_size: int) -> Header | None:
         if format == EncryptionFormat.Salmon:
             if self.__encryption_mode == EncryptionMode.Encrypt:
                 if not nonce:
