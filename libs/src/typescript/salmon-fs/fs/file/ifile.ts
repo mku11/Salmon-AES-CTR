@@ -364,7 +364,6 @@ export async function deleteRecursively(file: IFile, options?: RecursiveDeleteOp
         if (!file.delete()) {
             if (options.onFailed)
                 options.onFailed(file, new Error("Could not delete file"));
-            return;
         }
         if(options.onProgressChanged)
             options.onProgressChanged(file, 1, 1);
@@ -375,7 +374,6 @@ export async function deleteRecursively(file: IFile, options?: RecursiveDeleteOp
         if (await !file.delete()) {
             if (options.onFailed)
                 options.onFailed(file, new Error("Could not delete directory"));
-            return;
         }
     }
 }
@@ -525,5 +523,8 @@ export class RecursiveDeleteOptions {
  * Directory move options (recursively)
  */
 export class CopyContentsOptions {
+	/**
+      * Callback when progress changed
+      */
     onProgressChanged?: ((position: number, length: number) => void);
 }

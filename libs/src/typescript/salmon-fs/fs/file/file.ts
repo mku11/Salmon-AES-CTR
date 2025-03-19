@@ -261,12 +261,17 @@ export class File implements IFile {
         if (newDir == null || !await newDir.exists())
             throw new IOException("Target directory does not exist");
         let newFile: IFile | null = await newDir.getChild(newName);
-        if (newFile  && await newFile.exists())
+        if (newFile && await newFile.exists())
             throw new IOException("Another file/directory already exists");
 
         if (typeof (this.#fileHandle.move) !== 'undefined') {
+		if (options.onProgressChanged != null)
+				options.onProgressChanged(0, await this.getLength());
             await this.#fileHandle.move(newDir.getPath(), newName);
-            return await newDir.getChild(newName) as File;
+			newFile = await newDir.getChild(newName) as File;
+			if (options.onProgressChanged != null)
+				options.onProgressChanged(newFile.getLength(), newFile.getLength());
+			return newFile;            
         } else {
             let oldFilename: string = this.getName();
             let parent: IFile | null = await this.getParent();
