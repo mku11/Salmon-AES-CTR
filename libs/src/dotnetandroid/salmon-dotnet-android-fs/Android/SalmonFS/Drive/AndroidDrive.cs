@@ -28,6 +28,7 @@ using Mku.Android.FS.File;
 using Mku.FS.File;
 using Mku.SalmonFS.Drive;
 using Mku.SalmonFS.File;
+using Mku.FS.Drive.Utils;
 using Mku.SalmonFS.Drive.Utils;
 using Uri = Android.Net.Uri;
 
@@ -77,7 +78,9 @@ public class AndroidDrive : AesDrive
 
         AndroidFile sharedDir = new AndroidFile(DocumentFile.FromFile(privateDir), context);
         AesFileExporter fileExporter = new AesFileExporter(ENC_BUFFER_SIZE, ENC_THREADS);
-        fileExporter.ExportFile(salmonFile, sharedDir, null,  false, true, null);
+		FileExporter.FileExportOptions exportOptions = new FileExporter.FileExportOptions();
+		exportOptions.integrity = true;
+        fileExporter.ExportFile(salmonFile, sharedDir, exportOptions);
         return cacheFile;
     }
 

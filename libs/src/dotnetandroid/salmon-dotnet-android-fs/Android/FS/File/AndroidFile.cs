@@ -34,6 +34,7 @@ using System.Collections.Generic;
 using Mku.FS.File;
 using Mku.Android.SalmonFS.Drive;
 using Mku.Android.FS.Streams;
+using Mku.FS;
 
 namespace Mku.Android.FS.File;
 
@@ -290,12 +291,14 @@ public class AndroidFile : IFile
     ///  Move this file to another directory.
 	/// </summary>
 	///  <param name="newDir">The target directory.</param>
-    ///  <param name="progressListener">Observer to notify of the move progress.</param>
+    ///  <param name="options">The options</param>
     ///  <returns>The moved file</returns>
     ///  <exception cref="IOException">Thrown if error during IO</exception>
-    public IFile Move(IFile newDir, string newName = null,
-        Action<long,long> progressListener = null)
+    public IFile Move(IFile newDir, IFile.MoveOptions options = null)
     {
+		if(options == null)
+			options = new IFile.MoveOptions();
+		
         // target directory is the same
         if(Parent.Path.Equals(newDir.Path))
         {
@@ -305,27 +308,27 @@ public class AndroidFile : IFile
         AndroidFile androidDir = (AndroidFile)newDir;
         if (Build.VERSION.SdkInt >= BuildVersionCodes.N)
         {
-            if (progressListener != null)
-                progressListener(0, 1);
-            if (newName != null)
+            if (options.onProgressChanged != null)
+                options.onProgressChanged(0, this.Length);
+            if (options.newFilename != null)
                 RenameTo(Mku.Time.Time.CurrentTimeMillis() + ".dat");
             // TEST: does the documentFile reflect the new name?
             Uri uri = DocumentsContract.MoveDocument(AndroidDrive.Context.ContentResolver,
                     documentFile.Uri, documentFile.ParentFile.Uri, androidDir.documentFile.Uri);
-            if (progressListener != null)
-                progressListener(1, 1);
             IFile file = androidDir.GetChild(Name);
-            if (file != null && newName != null)
-                file.RenameTo(newName);
+            if (file != null && options.newFilename != null)
+                file.RenameTo(options.newFilename);
             if(Parent!=null)
                 (Parent as AndroidFile).ClearCache();
             androidDir.ClearCache();
             ClearCache();
+			if (options.onProgressChanged != null)
+                options.onProgressChanged(file.Length, file.Length);
             return file;
         }
         else
         {
-            return Copy(newDir, newName, true, progressListener);
+            return Copy(newDir, options.newFilename, true, options.onProgressChanged);
         }
     }
 
@@ -333,13 +336,14 @@ public class AndroidFile : IFile
     ///  Copy this file to another directory.
 	/// </summary>
 	///  <param name="newDir">The target directory.</param>
-    ///  <param name="progressListener">Observer to notify of the copy progress.</param>
+    ///  <param name="options">The options.</param>
     ///  <returns>The new file</returns>
     ///  <exception cref="IOException">Thrown if error during IO</exception>
-    public IFile Copy(IFile newDir, string newName = null,
-        Action<long,long> progressListener = null)
+    public IFile Copy(IFile newDir, IFile.CopyOptions options = null)
     {
-        return Copy(newDir, newName, false, progressListener);
+		if(options == null)
+			options = new IFile.CopyOptions();
+        return Copy(newDir, options.newFilename, false, options.onProgressChanged);
     }
 
     /// <summary>
@@ -347,11 +351,11 @@ public class AndroidFile : IFile
     /// </summary>
     ///  <param name="newDir">The destination directory</param>
     ///  <param name="delete">True to delete when complete</param>
-    ///  <param name="progressListener">The progess listener</param>
+    ///  <param name="onProgressChanged">The progess listener</param>
     ///  <returns>The new file</returns>
     ///  <exception cref="IOException">Thrown if error during IO</exception>
     private IFile Copy(IFile newDir, string newName = null,
-        bool delete = false, Action<long,long> progressListener = null)
+        bool delete = false, Action<long,long> onProgressChanged = null)
     {
         if (newDir == null || !newDir.Exists)
             throw new IOException("Target directory does not exists");
@@ -368,7 +372,11 @@ public class AndroidFile : IFile
         else
         {
             IFile newFile = newDir.CreateFile(newName);
-            IFile.CopyFileContents(this, newFile, delete, progressListener);
+			IFile.CopyContentsOptions copyContentOptions = new IFile.CopyContentsOptions();
+			copyContentOptions.onProgressChanged = onProgressChanged;
+            bool res = IFile.CopyFileContents(this, newFile, copyContentOptions);
+			if(res && delete)
+				this.Delete();
             return newFile;
         }
     }
