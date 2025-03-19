@@ -312,11 +312,11 @@ export class FileCommander {
      * Delete files from a drive.
      *
      * @param {IVirtualFile[]} filesToDelete The files to delete.
-     * @param {FileDeleteOptions} [options] The options.
+     * @param {BatchDeleteOptions} [options] The options.
      */
-    public async deleteFiles(filesToDelete: IVirtualFile[], options?: FileDeleteOptions): Promise<void> {
+    public async deleteFiles(filesToDelete: IVirtualFile[], options?: BatchDeleteOptions): Promise<void> {
         if(!options)
-            options = new FileDeleteOptions();
+            options = new BatchDeleteOptions();
         this.stopJobs = false;
         let count: number[] = [0];
         let total: number = 0;
@@ -648,7 +648,10 @@ export class RealFileTaskProgress extends FileTaskProgress {
     }
 }
 
-export class FileDeleteOptions {
+/**
+ * Batch delete options
+ */
+export class BatchDeleteOptions {
     /**
      * Callback when delete fails
      */
