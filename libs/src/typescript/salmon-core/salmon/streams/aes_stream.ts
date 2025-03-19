@@ -180,7 +180,7 @@ export class AesStream extends RandomAccessStream {
         // init only once
         if (this.#transformer.getKey())
             return;
-        this.#header = await this.getOrCreateHeader(this.#format, this.#nonce, 
+        this.#header = await this.#getOrCreateHeader(this.#format, this.#nonce, 
             this.#enableIntegrity, this.#chunkSize);
         if (this.#header) {
             this.#chunkSize = this.#header.getChunkSize();
@@ -197,7 +197,7 @@ export class AesStream extends RandomAccessStream {
         await this.#initStream();
     }
 
-    private async getOrCreateHeader(format: EncryptionFormat, nonce: Uint8Array | null, 
+    async #getOrCreateHeader(format: EncryptionFormat, nonce: Uint8Array | null, 
         integrity: boolean, chunkSize: number): Promise<Header|null> {
         if (format == EncryptionFormat.Salmon) {
             if (this.#encryptionMode == EncryptionMode.Encrypt) {
