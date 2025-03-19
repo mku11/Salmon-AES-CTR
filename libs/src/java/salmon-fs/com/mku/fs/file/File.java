@@ -252,13 +252,14 @@ public class File implements IFile {
             throw new RuntimeException("Another file/directory already exists");
         java.io.File nFile = new java.io.File(newFile.getDisplayPath());
         if (options.onProgressChanged != null)
-            options.onProgressChanged.accept(0L, newFile.getLength());
+            options.onProgressChanged.accept(0L, this.getLength());
         boolean res = new java.io.File(filePath).renameTo(nFile);
-        if (options.onProgressChanged != null)
-            options.onProgressChanged.accept(newFile.getLength(), newFile.getLength());
         if (!res)
             throw new RuntimeException("Could not move file/directory");
-        return new File(nFile.getPath());
+		newFile = new File(nFile.getPath());
+		if (options.onProgressChanged != null)
+            options.onProgressChanged.accept(newFile.getLength(), newFile.getLength());
+		return newFile;
     }
 
 

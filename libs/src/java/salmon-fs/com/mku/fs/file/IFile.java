@@ -425,19 +425,21 @@ public interface IFile {
         if (options == null)
             options = new RecursiveDeleteOptions();
         if (isFile()) {
-            options.onProgressChanged.accept(this, 0L, 1L);
+			if(options.onProgressChanged != null)
+				options.onProgressChanged.accept(this, 0L, 1L);
             if (!this.delete()) {
-                options.onFailed.accept(this, new Exception("Could not delete file"));
-                return;
+				if(options.onFailed != null)
+					options.onFailed.accept(this, new Exception("Could not delete file"));
             }
-            options.onProgressChanged.accept(this, 1L, 1L);
+			if(options.onProgressChanged != null)
+				options.onProgressChanged.accept(this, 1L, 1L);
         } else if (this.isDirectory()) {
             for (IFile child : this.listFiles()) {
                 child.deleteRecursively(options);
             }
             if (!this.delete()) {
-                options.onFailed.accept(this, new Exception("Could not delete directory"));
-                return;
+				if(options.onFailed != null)
+					options.onFailed.accept(this, new Exception("Could not delete directory"));
             }
         }
     }
@@ -568,6 +570,9 @@ public interface IFile {
      * Directory move options (recursively)
      */
     public class CopyContentsOptions {
+		/**
+         * Callback when progress changed
+         */
         public BiConsumer<Long, Long> onProgressChanged;
     }
 }
