@@ -73,15 +73,11 @@ public class AesFileImporter : FileImporter
     /// </summary>
     ///  <param name="fileToImport">The source file that will be imported in to the drive.</param>
     ///  <param name="dir">         The target directory in the drive that the file will be imported</param>
-    ///  <param name="filename">The filename to use</param>
-    ///  <param name="deleteSource">If true delete the source file.</param>
-    ///  <param name="integrity">True to enable integrity</param>
-    ///  <param name="OnProgress">    Progress observer</param>
+    ///  <param name="options">The options</param>
     ///  <returns>The AesFile that was imported</returns>
     override
-    public AesFile ImportFile(IFile fileToImport, IVirtualFile dir, string filename,
-                                   bool deleteSource, bool integrity, Action<long, long> OnProgress)
+    public AesFile ImportFile(IFile fileToImport, IVirtualFile dir, FileImportOptions options = null)
     {
-        return (AesFile)base.ImportFile(fileToImport, dir, filename, deleteSource, integrity, OnProgress);
+        return (AesFile)base.ImportFile(fileToImport, dir, options);
     }
 }

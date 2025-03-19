@@ -94,7 +94,7 @@ public class AesStream : Stream
     ///  where creating your output buffers.
     /// </summary>
     ///  <param name="mode">The <see cref="EncryptionMode"/> Encrypt or Decrypt.</param>
-    /// <param name="length">The data length </param>
+    ///  <param name="length">The data length </param>
     ///  <param name="format">The format to use, see EncryptionFormat</param>
     ///  <param name="chunkSize">The chunk size for integrity chunks.</param>
     ///  <returns>The size of the output data.</returns>
@@ -145,7 +145,7 @@ public class AesStream : Stream
     ///  <para>See: <see href="https://en.wikipedia.org/wiki/Block_cipher_mode_of_operation#Counter_(CTR)">README.md</see></para>
 	/// </summary>
     ///  <param name="key">           The AES key that is used to encrypt decrypt</param>
-    ///  <param name="nonce">         The nonce used for the initial counter</param>
+    ///  <param name="nonce">         The nonce used for the initial counter. If mode is Decrypt and format is Salmon then use null.</param>
     ///  <param name="encryptionMode">Encryption mode Encrypt or Decrypt this cannot change later</param>
     ///  <param name="baseStream">    The base Stream that will be used to read the data</param>
     ///  <param name="format">The format to use, see EncryptionFormat</param>

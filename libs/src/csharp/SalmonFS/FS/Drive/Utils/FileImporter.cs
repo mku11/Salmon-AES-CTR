@@ -122,21 +122,19 @@ public abstract class FileImporter
     /// </summary>
     ///  <param name="fileToImport">The source file that will be imported in to the drive.</param>
     ///  <param name="dir">         The target directory in the drive that the file will be imported</param>
-    ///  <param name="filename">The filename to use</param>
-    ///  <param name="deleteSource">If true delete the source file.</param>
-    ///  <param name="integrity">True to enable integrity</param>
-    ///  <param name="OnProgress">    Progress observer</param>
+    ///  <param name="options">         The options</param>
     ///  <returns>The IVirtualFile that was imported</returns>
     virtual
-    public IVirtualFile ImportFile(IFile fileToImport, IVirtualFile dir, string filename,
-        bool deleteSource, bool integrity, Action<long, long> OnProgress)
+    public IVirtualFile ImportFile(IFile fileToImport, IVirtualFile dir, FileImportOptions options)
     {
+        if (options == null)
+            options = new FileImportOptions();
         if (IsRunning())
             throw new Exception("Another import is running");
         if (fileToImport.IsDirectory)
             throw new Exception("Cannot import directory, use FileCommander instead");
 
-        filename = filename ?? fileToImport.Name;
+        string filename = options.filename ?? fileToImport.Name;
         long[] totalBytesRead = new long[] { 0 };
         IVirtualFile importedFile;
         try
@@ -146,7 +144,7 @@ public abstract class FileImporter
             lastException = null;
 
             importedFile = dir.CreateFile(filename);
-            this.OnPrepare(importedFile, integrity);
+            this.OnPrepare(importedFile, options.integrity);
 
             long fileSize = fileToImport.Length;
             int runningThreads = 1;
@@ -166,16 +164,18 @@ public abstract class FileImporter
 
             if (runningThreads == 1)
             {
-                ImportFilePart(fileToImport, importedFile, 0, fileSize, totalBytesRead, OnProgress);
+                ImportFilePart(fileToImport, importedFile, 0, fileSize, totalBytesRead, 
+                    options.onProgressChanged);
             }
             else
             {
-                this.SubmitImportJobs(runningThreads, partSize, fileToImport, importedFile, totalBytesRead, integrity, OnProgress);
+                this.SubmitImportJobs(runningThreads, partSize, fileToImport, importedFile, 
+                    totalBytesRead, options.integrity, options.onProgressChanged);
             }
 
             if (stopped)
                 importedFile.RealFile.Delete();
-            else if (deleteSource)
+            else if (options.deleteSource)
                 fileToImport.Delete();
             if (lastException != null)
                 throw lastException;
@@ -295,5 +295,31 @@ public abstract class FileImporter
     public void Close()
     {
         
+    }
+
+    /// <summary>
+    /// File importer options
+    /// </summary>
+    public class FileImportOptions
+    {
+        /// <summary>
+        /// Override the filename
+        /// </summary>
+        public string filename;
+
+        /// <summary>
+        /// Delete the source file after completion.
+        /// </summary>
+        public bool deleteSource = false;
+
+        /// <summary>
+        /// True to enable integrity.
+        /// </summary>
+        public bool integrity = false;
+
+        /// <summary>
+        /// Callback when progress changes
+        /// </summary>
+        public Action<long, long> onProgressChanged;
     }
 }

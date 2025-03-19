@@ -62,12 +62,6 @@ public class FileSearcher
     }
 
     /// <summary>
-    ///  Fired when search result found.
-    /// </summary>
-    ///  <param name="searchResult">The search result.</param>
-    public delegate void OnResultFoundListener(IVirtualFile searchResult);
-
-    /// <summary>
     ///  True if a search is running.
 	/// </summary>
 	///  <returns>True if running</returns>
@@ -90,22 +84,20 @@ public class FileSearcher
 	/// </summary>
 	///  <param name="dir">The directory to start the search.</param>
     ///  <param name="terms">The terms to search for.</param>
-    ///  <param name="any">True if you want to match any term otherwise match all terms.</param>
-    ///  <param name="OnResultFound">Callback interface to receive notifications when results found.</param>
-    ///  <param name="onSearchEvent">Callback interface to receive status events.</param>
+    ///  <param name="options">The options</param>
     ///  <returns>An array with all the results found.</returns>
-    public IVirtualFile[] Search(IVirtualFile dir, string terms, bool any,
-                               OnResultFoundListener OnResultFound,
-                               Action<SearchEvent> onSearchEvent)
+    public IVirtualFile[] Search(IVirtualFile dir, string terms, SearchOptions options)
     {
+        if (options == null)
+            options = new SearchOptions();
         running = true;
         this.quit = false;
         Dictionary<string, IVirtualFile> searchResults = new Dictionary<string, IVirtualFile>();
-        if (onSearchEvent != null)
-            onSearchEvent(SearchEvent.SearchingFiles);
-        SearchDir(dir, terms, any, OnResultFound, searchResults);
-        if (onSearchEvent != null)
-            onSearchEvent(SearchEvent.SearchingFinished);
+        if (options.onSearchEvent != null)
+            options.onSearchEvent(SearchEvent.SearchingFiles);
+        SearchDir(dir, terms, options.anyTerm, options.onResultFound, searchResults);
+        if (options.onSearchEvent != null)
+            options.onSearchEvent(SearchEvent.SearchingFinished);
         running = false;
         return searchResults.Values.ToArray();
     }
@@ -149,7 +141,7 @@ public class FileSearcher
     ///  <param name="any">True if you want to match any term otherwise match all terms.</param>
     ///  <param name="OnResultFound">Callback interface to receive notifications when results found.</param>
     ///  <param name="searchResults">The array to store the search results.</param>
-    private void SearchDir(IVirtualFile dir, string terms, bool any, OnResultFoundListener OnResultFound,
+    private void SearchDir(IVirtualFile dir, string terms, bool any, Action<IVirtualFile> OnResultFound,
                            Dictionary<string, IVirtualFile> searchResults)
     {
         if (quit)
@@ -184,5 +176,26 @@ public class FileSearcher
                 }
             }
         }
+    }
+
+    /// <summary>
+    /// Search options
+    /// </summary>
+    public class SearchOptions
+    {
+        /// <summary>
+        /// True to search for any term, otherwise match all
+        /// </summary>
+        public bool anyTerm = false;
+
+        /// <summary>
+        /// Callback when result found
+        /// </summary>
+        public Action<IVirtualFile> onResultFound;
+
+        /// <summary>
+        /// Callback when search event happens.
+        /// </summary>
+        public Action<SearchEvent> onSearchEvent;
     }
 }

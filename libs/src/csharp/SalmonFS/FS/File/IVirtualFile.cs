@@ -24,6 +24,7 @@ SOFTWARE.
 
 using System;
 using System.IO;
+using static Mku.FS.File.IFile;
 
 namespace Mku.FS.File;
 
@@ -141,51 +142,104 @@ public abstract class IVirtualFile
     ///  Move file to another directory.
     /// </summary>
     ///  <param name="dir">Target directory.</param>
-    ///  <param name="OnProgressListener">Observer to notify when move progress changes.</param>
+    ///  <param name="options">The options</param>
     ///  <returns>The moved file</returns>
-    public abstract IVirtualFile Move(IVirtualFile dir, Action<long, long> OnProgressListener);
+    public abstract IVirtualFile Move(IVirtualFile dir, MoveOptions options = null);
 
     /// <summary>
     ///  Copy a file to another directory.
 	/// </summary>
 	///  <param name="dir">Target directory.</param>
-    ///  <param name="OnProgressListener">Observer to notify when copy progress changes.</param>
+    ///  <param name="options">The options</param>
     ///  <returns>The new file</returns>
-    public abstract IVirtualFile Copy(IVirtualFile dir, Action<long, long> OnProgressListener);
+    public abstract IVirtualFile Copy(IVirtualFile dir, CopyOptions options = null);
 
     /// <summary>
     /// Move a directory recursively
     /// </summary>
     /// <param name="dest">The destination directory</param>
-    /// <param name="progressListener">The progress listener</param>
-    /// <param name="AutoRename">The autorename function to use when renaming files if they exist</param>
-    /// <param name="autoRenameFolders">Apply autorename to folders also (default is true)</param>
-    /// <param name="OnFailed">Callback when move fails</param>
-    public abstract void MoveRecursively(IVirtualFile dest,
-                                Action<IVirtualFile, long, long> progressListener,
-                                Func<IVirtualFile, string> AutoRename,
-                                bool autoRenameFolders,
-                                Action<IVirtualFile, Exception> OnFailed);
+    /// <param name="options">The options</param>
+    public abstract void MoveRecursively(IVirtualFile dest, VirtualRecursiveMoveOptions options = null);
 
     /// <summary>
     /// Copy a directory recursively
     /// </summary>
     /// <param name="dest">The destination directory</param>
-    /// <param name="progressListener">The progress listener</param>
-    /// <param name="AutoRename">The autorename function to use when renaming files if they exist</param>
-    /// <param name="autoRenameFolders">Apply autorename to folders also (default is true)</param>
-    /// <param name="OnFailed">Callback when copy fails</param>
-    public abstract void CopyRecursively(IVirtualFile dest,
-                                Action<IVirtualFile, long, long> progressListener,
-                                Func<IVirtualFile, string> AutoRename,
-                                bool autoRenameFolders,
-                                Action<IVirtualFile, Exception> OnFailed);
+    /// <param name="options">The options</param>
+    public abstract void CopyRecursively(IVirtualFile dest, VirtualRecursiveCopyOptions options = null);
 
     /// <summary>
     /// Delete a directory recursively
     /// </summary>
-    /// <param name="progressListener">The progress listener</param>
-    /// <param name="OnFailed">Callback when delete fails</param>
-    public abstract void DeleteRecursively(Action<IVirtualFile, long, long> progressListener,
-                           Action<IVirtualFile, Exception> OnFailed);
+    /// <param name="options">The options</param>
+    public abstract void DeleteRecursively(VirtualRecursiveDeleteOptions options = null);
+
+
+    /// <summary>
+    ///  Directory copy options (recursively)
+    /// </summary>
+    public class VirtualRecursiveCopyOptions
+    {
+        /// <summary>
+        ///  Callback when file with same name exists
+        /// </summary>
+        public Func<IVirtualFile, string> autoRename;
+
+        /// <summary>
+        ///  True to autorename folders
+        /// </summary>
+        public bool autoRenameFolders = false;
+
+        /// <summary>
+        ///  Callback when file changes
+        /// </summary>
+        public Action<IVirtualFile, Exception> onFailed;
+
+        /// <summary>
+        ///  Callback where progress changed
+        /// </summary>
+        public Action<IVirtualFile, long, long> onProgressChanged;
+    }
+
+    /// <summary>
+    ///  Directory move options (recursively)
+    /// </summary>
+    public class VirtualRecursiveMoveOptions
+    {
+        /// <summary>
+        ///  Callback when file with the same name exists
+        /// </summary>
+        public Func<IVirtualFile, string> autoRename;
+
+        /// <summary>
+        ///  True to autorename folders
+        /// </summary>
+        public bool autoRenameFolders = false;
+
+        /// <summary>
+        ///  Callback when file failed
+        /// </summary>
+        public Action<IVirtualFile, Exception> onFailed;
+
+        /// <summary>
+        ///  Callback when progress changes
+        /// </summary>
+        public Action<IVirtualFile, long, long> onProgressChanged;
+    }
+
+    /// <summary>
+    ///  Directory move options (recursively)
+    /// </summary>
+    public class VirtualRecursiveDeleteOptions
+    {
+        /// <summary>
+        ///  Callback when file failed
+        /// </summary>
+        public Action<IVirtualFile, Exception> onFailed;
+
+        /// <summary>
+        ///  Callback when progress changed
+        /// </summary>
+        public Action<IVirtualFile, long, long> onProgressChanged;
+    }
 }

@@ -26,6 +26,7 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using static Mku.FS.File.IFile;
 
 namespace Mku.FS.File;
 
@@ -218,22 +219,27 @@ public class File : IFile
     ///  Move this file or directory under a new directory.
     /// </summary>
     ///  <param name="newDir">The target directory.</param>
-    ///  <param name="newName">The new name.</param>
-    ///  <param name="progressListener">Observer to notify when progress changes.</param>
+    ///  <param name="options">The options</param>
     ///  <returns>The moved file. Use this file for subsequent operations instead of the original.</returns>
-    public IFile Move(IFile newDir, string newName = null, Action<long,long> progressListener = null)
+    public IFile Move(IFile newDir, MoveOptions options = null)
     {
-        newName = newName ?? Name;
+        if (options == null)
+            options = new MoveOptions();
+        string newName = options.newFilename ?? Name;
 		if (newDir == null || !newDir.Exists)
             throw new IOException("Target directory does not exist");
         IFile newFile = newDir.GetChild(newName);
         if (newFile != null && newFile.Exists)
             throw new IOException("Another file/directory already exists");
         string nFilePath = newDir.AbsolutePath + System.IO.Path.DirectorySeparatorChar + newName;
+        if (options.onProgressChanged != null)
+            options.onProgressChanged(0L, this.Length);
         if (IsDirectory)
             System.IO.Directory.Move(filePath, nFilePath);
         else if (IsFile)
             System.IO.File.Move(filePath, nFilePath);
+        if (options.onProgressChanged != null)
+            options.onProgressChanged(newFile.Length, newFile.Length);
         return new File(nFilePath);
     }
 
@@ -241,13 +247,14 @@ public class File : IFile
     ///  Move this file or directory under a new directory.
     /// </summary>
     ///  <param name="newDir">The target directory.</param>
-    ///  <param name="newName">The new file name</param>
-    ///  <param name="progressListener">Observer to notify when progress changes.</param>
+    ///  <param name="options">The options</param>
     ///  <returns>The copied file. Use this file for subsequent operations instead of the original.</returns>
     ///  <exception cref="IOException">Thrown if error during IO</exception>
-    public IFile Copy(IFile newDir, string newName = null, Action<long,long> progressListener = null)
+    public IFile Copy(IFile newDir, CopyOptions options = null)
     {
-        newName = newName ?? Name;
+        if (options == null)
+            options = new CopyOptions();
+        string newName = options.newFilename ?? Name;
         if (newDir == null || !newDir.Exists)
             throw new IOException("Target directory does not exists");
         IFile newFile = newDir.GetChild(newName);
@@ -260,7 +267,9 @@ public class File : IFile
         else
         {
             newFile = newDir.CreateFile(newName);
-            bool res = IFile.CopyFileContents(this, newFile, false, progressListener);
+            CopyContentsOptions copyContentOptions = new CopyContentsOptions();
+            copyContentOptions.onProgressChanged = options.onProgressChanged;
+            bool res = IFile.CopyFileContents(this, newFile, copyContentOptions);
             return res ? newFile : null;
         }
     }

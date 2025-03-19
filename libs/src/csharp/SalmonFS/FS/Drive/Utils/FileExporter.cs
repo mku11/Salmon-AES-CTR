@@ -119,20 +119,18 @@ public abstract class FileExporter
 	/// </summary>
 	///  <param name="fileToExport">The file that will be exported</param>
     ///  <param name="exportDir">   The external directory the file will be exported to</param>
-    ///  <param name="filename">    The filename to use</param>
-    ///  <param name="deleteSource">Delete the source file when the export finishes successfully</param>
-    ///  <param name="integrity">True to verify integrity</param>
-    ///  <param name="OnProgress">Progress listener</param>
-    public IFile ExportFile(IVirtualFile fileToExport, IFile exportDir, string filename,
-        bool deleteSource, bool integrity, Action<long, long> OnProgress)
+    ///  <param name="options">     The options</param>
+    public IFile ExportFile(IVirtualFile fileToExport, IFile exportDir, FileExportOptions options)
     {
+        if (options == null)
+            options = new FileExportOptions();
         if (IsRunning())
             throw new Exception("Another export is running");
         if (fileToExport.IsDirectory)
             throw new Exception("Cannot export directory, use FileCommander instead");
 
         IFile exportFile;
-        filename = filename ?? fileToExport.Name;
+        string filename = options.filename ?? fileToExport.Name;
         try
         {
             stopped = false;
@@ -143,7 +141,7 @@ public abstract class FileExporter
             if (!exportDir.Exists)
                 exportDir.Mkdir();
             exportFile = exportDir.CreateFile(filename);
-            OnPrepare(fileToExport, integrity);
+            OnPrepare(fileToExport, options.integrity);
 
             long fileSize = fileToExport.Length;
             int runningThreads = 1;
@@ -163,16 +161,16 @@ public abstract class FileExporter
 
             if (runningThreads == 1)
             {
-                ExportFilePart(fileToExport, exportFile, 0, fileSize, totalBytesWritten, OnProgress);
+                ExportFilePart(fileToExport, exportFile, 0, fileSize, totalBytesWritten, options.onProgressChanged);
             }
             else
             {
-                this.SubmitExportJobs(runningThreads, partSize, fileToExport, exportFile, totalBytesWritten, integrity, OnProgress);
+                this.SubmitExportJobs(runningThreads, partSize, fileToExport, exportFile, totalBytesWritten, options.integrity, options.onProgressChanged);
             }
 
             if (stopped)
                 exportFile.Delete();
-            else if (deleteSource)
+            else if (options.deleteSource)
                 fileToExport.RealFile.Delete();
             if (lastException != null)
                 throw lastException;
@@ -293,5 +291,31 @@ public abstract class FileExporter
     public void Close()
     {
 
+    }
+
+    /// <summary>
+    /// File importer options
+    /// </summary>
+    public class FileExportOptions
+    {
+        /// <summary>
+        /// Override the filename
+        /// </summary>
+        public string filename;
+
+        /// <summary>
+        /// Delete the source file after completion.
+        /// </summary>
+        public bool deleteSource = false;
+
+        /// <summary>
+        /// True to enable integrity.
+        /// </summary>
+        public bool integrity = false;
+
+        /// <summary>
+        /// Callback when progress changes
+        /// </summary>
+        public Action<long, long> onProgressChanged;
     }
 }

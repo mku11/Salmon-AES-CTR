@@ -35,6 +35,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Runtime.CompilerServices;
 using System.Text;
+using static Mku.FS.File.IFile;
 using BitConverter = Mku.Convert.BitConverter;
 
 namespace Mku.SalmonFS.File;
@@ -59,7 +60,8 @@ public class AesFile : IVirtualFile
     /// The real encrypted file on the physical disk.
     /// </summary>
     override
-    public IFile RealFile { get; protected set; }
+    public IFile RealFile
+    { get; protected set; }
 
     // cached values
     private string _baseName;
@@ -549,7 +551,7 @@ public class AesFile : IVirtualFile
     {
         string relativePath = GetRelativePath(realPath);
         StringBuilder path = new StringBuilder();
-        string[] parts = relativePath.Split(new char[] { '\\','/' });
+        string[] parts = relativePath.Split(new char[] { '\\', '/' });
         foreach (string part in parts)
         {
             if (!part.Equals(""))
@@ -793,13 +795,13 @@ public class AesFile : IVirtualFile
     ///  Move file to another directory.
 	/// </summary>
 	///  <param name="dir">Target directory.</param>
-    ///  <param name="OnProgressListener">Observer to notify when move progress changes.</param>
+    ///  <param name="options">The options</param>
     ///  <returns>The moved file</returns>
     ///  <exception cref="IOException">Thrown if error during IO</exception>
     override
-    public AesFile Move(IVirtualFile dir, Action<long,long> OnProgressListener)
+    public AesFile Move(IVirtualFile dir, MoveOptions options = null)
     {
-        IFile newRealFile = RealFile.Move(dir.RealFile, null, OnProgressListener);
+        IFile newRealFile = RealFile.Move(dir.RealFile, options);
         return new AesFile(newRealFile, Drive);
     }
 
@@ -807,13 +809,13 @@ public class AesFile : IVirtualFile
     ///  Copy a file to another directory.
 	/// </summary>
 	///  <param name="dir">Target directory.</param>
-    ///  <param name="OnProgressListener">Observer to notify when copy progress changes.</param>
+    ///  <param name="options">The options</param>
     ///  <returns>The new file</returns>
     ///  <exception cref="IOException">Thrown if error during IO</exception>
     override
-    public AesFile Copy(IVirtualFile dir, Action<long,long> OnProgressListener)
+    public AesFile Copy(IVirtualFile dir, CopyOptions options = null)
     {
-        IFile newRealFile = RealFile.Copy(dir.RealFile, null, OnProgressListener);
+        IFile newRealFile = RealFile.Copy(dir.RealFile, options);
         return new AesFile(newRealFile, Drive);
     }
 
@@ -821,34 +823,34 @@ public class AesFile : IVirtualFile
     /// Copy a directory recursively
     /// </summary>
     /// <param name="dest">The destination directory</param>
-    /// <param name="progressListener">The progress listener</param>
-    /// <param name="AutoRename">The autorename function to use when renaming files if they exist</param>
-    /// <param name="autoRenameFolders">Apply autorename to folders also (default is true)</param>
-    /// <param name="OnFailed">Callback when copy fails</param>
+    /// <param name="options">The progress listener</param>
     override
-    public void CopyRecursively(IVirtualFile dest,
-        Action<IVirtualFile, long, long> progressListener, Func<IVirtualFile, string> AutoRename,
-        bool autoRenameFolders,
-        Action<IVirtualFile, Exception> OnFailed)
+    public void CopyRecursively(IVirtualFile dest, VirtualRecursiveCopyOptions options = null)
     {
+        if (options == null)
+            options = new VirtualRecursiveCopyOptions();
         Action<IFile, Exception> OnFailedRealFile = null;
-        if (OnFailed != null)
+        if (options.onFailed != null)
         {
             OnFailedRealFile = (file, ex) =>
             {
-                OnFailed(new AesFile(file, Drive), ex);
+                options.onFailed(new AesFile(file, Drive), ex);
             };
         }
         Func<IFile, string> RenameRealFile = null;
         // use auto rename only when we are using a drive
         if (AutoRename != null && Drive != null)
             RenameRealFile = (file) => AutoRename(new AesFile(file, Drive));
-        this.RealFile.CopyRecursively(dest.RealFile, (file, position, length) =>
+        IFile.RecursiveCopyOptions copyOptions = new IFile.RecursiveCopyOptions();
+        copyOptions.autoRename = RenameRealFile;
+        copyOptions.autoRenameFolders = options.autoRenameFolders;
+        copyOptions.onFailed = OnFailedRealFile;
+        copyOptions.onProgressChanged = (file, position, length) =>
         {
-            if (progressListener != null)
-                progressListener(new AesFile(file, Drive), position, length);
-        },
-            RenameRealFile, autoRenameFolders, OnFailedRealFile);
+            if (options.onProgressChanged != null)
+                options.onProgressChanged(new AesFile(file, Drive), position, length);
+        };
+        this.RealFile.CopyRecursively(dest.RealFile, copyOptions);
     }
 
 
@@ -856,23 +858,19 @@ public class AesFile : IVirtualFile
     /// Move a directory recursively
     /// </summary>
     /// <param name="dest">The destination directory</param>
-    /// <param name="progressListener">The progress listener</param>
-    /// <param name="AutoRename">The autorename function to use when renaming files if they exist</param>
-    /// <param name="autoRenameFolders">Apply autorename to folders also (default is true)</param>
-    /// <param name="OnFailed">Callback when move fails</param>
+    /// <param name="options">The progress listener</param>
     override
-    public void MoveRecursively(IVirtualFile dest,
-        Action<IVirtualFile, long, long> progressListener, Func<IVirtualFile, string> AutoRename,
-        bool autoRenameFolders,
-        Action<IVirtualFile, Exception> OnFailed)
+    public void MoveRecursively(IVirtualFile dest, VirtualRecursiveMoveOptions options = null)
     {
+        if (options == null)
+            options = new VirtualRecursiveMoveOptions();
         Action<IFile, Exception> OnFailedRealFile = null;
-        if (OnFailed != null)
+        if (options.onFailed != null)
         {
             OnFailedRealFile = (file, ex) =>
             {
-                if (OnFailed != null)
-                    OnFailed(new AesFile(file, Drive), ex);
+                if (options.onFailed != null)
+                    options.onFailed(new AesFile(file, Drive), ex);
             };
         }
         Func<IFile, string> RenameRealFile = null;
@@ -880,35 +878,42 @@ public class AesFile : IVirtualFile
         if (AutoRename != null && Drive != null)
             RenameRealFile = (file) => AutoRename(new AesFile(file, Drive));
 
-        this.RealFile.MoveRecursively(dest.RealFile, (file, position, length) =>
+        IFile.RecursiveMoveOptions moveOptions = new IFile.RecursiveMoveOptions();
+        moveOptions.autoRename = RenameRealFile;
+        moveOptions.autoRenameFolders = options.autoRenameFolders;
+        moveOptions.onFailed = OnFailedRealFile;
+        moveOptions.onProgressChanged = (file, position, length) =>
         {
-            if (progressListener != null)
-                progressListener(new AesFile(file, Drive), position, length);
-        },RenameRealFile, autoRenameFolders, OnFailedRealFile);
+            if (options.onProgressChanged != null)
+                options.onProgressChanged(new AesFile(file, Drive), position, length);
+        };
+        this.RealFile.MoveRecursively(dest.RealFile, moveOptions);
     }
 
     /// <summary>
     /// Delete a directory recursively
     /// </summary>
-    /// <param name="progressListener">The progress listener</param>
-    /// <param name="OnFailed">Callback when delete fails</param>
+    /// <param name="options">The progress listener</param>
     override
-    public void DeleteRecursively(Action<IVirtualFile, long, long> progressListener, Action<IVirtualFile, Exception> OnFailed)
+    public void DeleteRecursively(VirtualRecursiveDeleteOptions options = null)
     {
         Action<IFile, Exception> OnFailedRealFile = null;
-        if (OnFailed != null)
+        if (options.onFailed != null)
         {
             OnFailedRealFile = (file, ex) =>
             {
-                if (OnFailed != null)
-                    OnFailed(new AesFile(file, Drive), ex);
+                if (options.onFailed != null)
+                    options.onFailed(new AesFile(file, Drive), ex);
             };
         }
-        this.RealFile.DeleteRecursively((file, position, length) =>
+        IFile.RecursiveDeleteOptions deleteOptions = new IFile.RecursiveDeleteOptions();
+        deleteOptions.onFailed = OnFailedRealFile;
+        deleteOptions.onProgressChanged = (file, position, length) =>
         {
-            if (progressListener != null)
-                progressListener(new AesFile(file, Drive), position, length);
-        }, OnFailedRealFile);
+            if (options.onProgressChanged!= null)
+                options.onProgressChanged(new AesFile(file, Drive), position, length);
+        };
+        this.RealFile.DeleteRecursively(deleteOptions);
     }
 
 
@@ -935,7 +940,7 @@ public class AesFile : IVirtualFile
     public static string AutoRename(IVirtualFile file)
     {
         string filename = IFile.AutoRename(file.Name);
-        byte[] nonce = ((AesFile) file).Drive.GetNextNonce();
+        byte[] nonce = ((AesFile)file).Drive.GetNextNonce();
         byte[] key = ((AesFile)file).Drive.Key.DriveEncKey;
         string encryptedPath = TextEncryptor.EncryptString(filename, key, nonce);
         encryptedPath = encryptedPath.Replace("/", "-");

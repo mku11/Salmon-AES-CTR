@@ -32,6 +32,7 @@ using System.Net.Http;
 using System.Text;
 using System.Text.RegularExpressions;
 using System.Web;
+using static Mku.FS.File.IFile;
 using MemoryStream = Mku.Streams.MemoryStream;
 
 namespace Mku.FS.File;
@@ -297,26 +298,24 @@ public class HttpFile : IFile
     }
 
     /// <summary>
-    ///  Move this file or directory under a new directory.
+    ///  Move this file or directory under a new directory. Not supported.
     /// </summary>
     ///  <param name="newDir">The target directory.</param>
-    ///  <param name="newName">The new name.</param>
-    ///  <param name="progressListener">Observer to notify when progress changes.</param>
+    ///  <param name="options">The options</param>
     ///  <returns>The moved file. Use this file for subsequent operations instead of the original.</returns>
-    public IFile Move(IFile newDir, string newName = null, Action<long, long> progressListener = null)
+    public IFile Move(IFile newDir, MoveOptions options = null)
     {
         throw new NotSupportedException("Unsupported Operation, readonly filesystem");
     }
 
     /// <summary>
-    ///  Move this file or directory under a new directory.
+    ///  Move this file or directory under a new directory. Not supported.
     /// </summary>
     ///  <param name="newDir">The target directory.</param>
-    ///  <param name="newName">The new file name</param>
-    ///  <param name="progressListener">Observer to notify when progress changes.</param>
+    ///  <param name="options">The options</param>
     ///  <returns>The copied file. Use this file for subsequent operations instead of the original.</returns>
     ///  <exception cref="IOException">Thrown if error during IO</exception>
-    public IFile Copy(IFile newDir, string newName = null, Action<long, long> progressListener = null)
+    public IFile Copy(IFile newDir, CopyOptions options = null)
     {
         throw new NotSupportedException("Unsupported Operation, readonly filesystem");
     }

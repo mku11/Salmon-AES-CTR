@@ -26,7 +26,9 @@ using Mku.FS.File;
 using Mku.Salmon.Sequence;
 using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Threading.Tasks;
+using static Mku.FS.Drive.Utils.FileCommander;
 
 namespace Mku.FS.Drive.Utils;
 
@@ -66,19 +68,14 @@ public class FileCommander
 	/// </summary>
 	///  <param name="filesToImport">The files to import.</param>
     ///  <param name="importDir">The target directory.</param>
-    ///  <param name="deleteSource">True if you want to delete the source files.</param>
-    ///  <param name="integrity">True to apply integrity to imported files</param>
-    ///  <param name="OnProgressChanged">Observer to notify when progress changes.</param>
-    ///  <param name="AutoRename">Function to rename file if another file with the same filename exists.</param>
-    ///  <param name="OnFailed">Observer to notify when a file fails importing.</param>
+    ///  <param name="options">The options</param>
     ///  <returns>The imported files.</returns>
     ///  <exception cref="Exception">Thrown if error during operation</exception>
     public virtual IVirtualFile[] ImportFiles(IFile[] filesToImport, IVirtualFile importDir,
-        bool deleteSource, bool integrity,
-        Action<RealFileTaskProgress> OnProgressChanged,
-        Func<IFile, string> AutoRename,
-        Action<IFile, Exception> OnFailed)
+        BatchImportOptions options = null)
     {
+        if (options == null)
+            options = new BatchImportOptions();
         stopJobs = false;
         List<IVirtualFile> importedFiles = new List<IVirtualFile>();
 
@@ -96,8 +93,8 @@ public class FileCommander
             if (stopJobs)
                 break;
             ImportRecursively(filesToImport[i], importDir,
-                deleteSource, integrity,
-                OnProgressChanged, AutoRename, OnFailed,
+                options.deleteSource, options.integrity,
+                options.onProgressChanged, options.autoRename, options.onFailed,
                 importedFiles, ref count, total,
                 existingFiles);
         }
@@ -154,16 +151,20 @@ public class FileCommander
                 if (sfile != null && (sfile.Exists || sfile.IsDirectory) && AutoRename != null)
                     filename = AutoRename(fileToImport);
                 int finalCount = count;
-                sfile = FileImporter.ImportFile(fileToImport, importDir, filename,
-                deleteSource, integrity,
-                (bytes, totalBytes) =>
+
+                FileImporter.FileImportOptions importOptions = new FileImporter.FileImportOptions();
+                importOptions.filename = filename;
+                importOptions.deleteSource = deleteSource;
+                importOptions.integrity = integrity;
+                importOptions.onProgressChanged = (bytes, totalBytes) =>
                 {
                     if (OnProgressChanged != null)
                     {
                         OnProgressChanged(new RealFileTaskProgress(fileToImport,
                                 bytes, totalBytes, finalCount, total));
                     }
-                });
+                };
+                sfile = FileImporter.ImportFile(fileToImport, importDir, importOptions);
                 existingFiles[sfile.Name] = sfile;
                 importedFiles.Add(sfile);
                 count++;
@@ -185,19 +186,14 @@ public class FileCommander
     /// </summary>
     ///  <param name="filesToExport">The files to export.</param>
     ///  <param name="exportDir">The export target directory.</param>
-    ///  <param name="deleteSource">True if you want to delete the source files.</param>
-    ///  <param name="integrity">True to use integrity verification before exporting files</param>
-    ///  <param name="OnProgressChanged">Observer to notify when progress changes.</param>
-    ///  <param name="AutoRename">Function to rename file if another file with the same filename exists.</param>
-    ///  <param name="OnFailed">Observer to notify when a file fails exporting.</param>
+    ///  <param name="options">The options</param>
     ///  <returns>True if complete successfully.</returns>
     ///  <exception cref="Exception">Thrown if error during operation</exception>
     public IFile[] ExportFiles(IVirtualFile[] filesToExport, IFile exportDir,
-        bool deleteSource, bool integrity,
-        Action<IVirtualFileTaskProgress> OnProgressChanged,
-        Func<IFile, string> AutoRename,
-        Action<IVirtualFile, Exception> OnFailed)
+        BatchExportOptions options = null)
     {
+        if (options == null)
+            options = new BatchExportOptions();
         stopJobs = false;
         List<IFile> exportedFiles = new List<IFile>();
 
@@ -217,11 +213,10 @@ public class FileCommander
                 break;
 
             ExportRecursively(filesToExport[i], exportDir,
-                deleteSource, integrity,
-                OnProgressChanged, AutoRename, OnFailed,
+                options.deleteSource, options.integrity,
+                options.onProgressChanged, options.autoRename, options.onFailed,
                 exportedFiles, ref count, total,
                 existingFiles);
-
         }
         return exportedFiles.ToArray();
     }
@@ -283,15 +278,19 @@ public class FileCommander
                 if (rfile != null && rfile.Exists && AutoRename != null)
                     filename = AutoRename(rfile);
                 int finalCount = count;
-                rfile = FileExporter.ExportFile(fileToExport, exportDir, filename, deleteSource, integrity,
-                    (bytes, totalBytes) =>
-                {
+
+                FileExporter.FileExportOptions exportOptions = new FileExporter.FileExportOptions();
+                exportOptions.filename = filename;
+                exportOptions.deleteSource = deleteSource;
+                exportOptions.integrity = integrity;
+                exportOptions.onProgressChanged = (bytes, totalBytes)=> {
                     if (OnProgressChanged != null)
                     {
                         OnProgressChanged(new IVirtualFileTaskProgress(fileToExport,
                                 bytes, totalBytes, finalCount, total));
                     }
-                });
+                };
+                rfile = FileExporter.ExportFile(fileToExport, exportDir, exportOptions);
                 existingFiles[rfile.Name] = rfile;
                 exportedFiles.Add(rfile);
                 count++;
@@ -343,12 +342,12 @@ public class FileCommander
     ///  Delete files.
 	/// </summary>
 	///  <param name="filesToDelete">The array of files to delete.</param>
-    ///  <param name="OnProgressChanged">The progress change observer to notify.</param>
-    ///  <param name="OnFailed">The observer to notify when failures occur.</param>
+    ///  <param name="options">The options.</param>
     ///  <exception cref="Exception">Thrown if error during operation</exception>
-    public void DeleteFiles(IVirtualFile[] filesToDelete, Action<IVirtualFileTaskProgress> OnProgressChanged,
-        Action<IVirtualFile, Exception> OnFailed)
+    public void DeleteFiles(IVirtualFile[] filesToDelete, BatchDeleteOptions options = null)
     {
+        if (options == null)
+            options = new BatchDeleteOptions();
         stopJobs = false;
         int count = 0;
         int total = 0;
@@ -362,15 +361,18 @@ public class FileCommander
         {
             if (stopJobs)
                 break;
-            IVirtualFile.DeleteRecursively((file, position, length) =>
+
+            IVirtualFile.VirtualRecursiveDeleteOptions deleteOptions = new IVirtualFile.VirtualRecursiveDeleteOptions();
+            deleteOptions.onFailed = options.onFailed;
+            deleteOptions.onProgressChanged = (file, position, length) =>
             {
                 if (stopJobs)
                     throw new TaskCanceledException();
-                if (OnProgressChanged != null)
+                if (options.onProgressChanged != null)
                 {
                     try
                     {
-                        OnProgressChanged(new IVirtualFileTaskProgress(
+                        options.onProgressChanged(new IVirtualFileTaskProgress(
                         file, position, length, count, total));
                     }
                     catch (Exception)
@@ -379,28 +381,22 @@ public class FileCommander
                 }
                 if (position == (long)length)
                     count++;
-            }, OnFailed);
+            };
+            IVirtualFile.DeleteRecursively(deleteOptions);
         }
     }
-
 
     /// <summary>
     ///  Copy files to another directory.
 	/// </summary>
 	///  <param name="filesToCopy">The array of files to copy.</param>
     ///  <param name="dir">The target directory.</param>
-    ///  <param name="move">True if moving files instead of copying.</param>
-    ///  <param name="OnProgressChanged">The progress change observer to notify.</param>
-    ///  <param name="AutoRename">The auto rename function to use when files with same filename are found.</param>
-    ///  <param name="autoRenameFolders">Apply autorename to folders also (default is true)</param>
-    ///  <param name="OnFailed">The observer to notify when failures occur.</param>
+    ///  <param name="options">The options</param>
     ///  <exception cref="Exception">Thrown if error during operation</exception>
-    public void CopyFiles(IVirtualFile[] filesToCopy, IVirtualFile dir, bool move,
-        Action<IVirtualFileTaskProgress> OnProgressChanged,
-        Func<IVirtualFile, string> AutoRename,
-        bool autoRenameFolders,
-        Action<IVirtualFile, Exception> OnFailed)
+    public void CopyFiles(IVirtualFile[] filesToCopy, IVirtualFile dir, BatchCopyOptions options = null)
     {
+        if (options == null)
+            options = new BatchCopyOptions();
         stopJobs = false;
         int count = 0;
         int total = 0;
@@ -418,17 +414,21 @@ public class FileCommander
             if (dir.RealFile.Path.StartsWith(IVirtualFile.RealFile.Path))
                 continue;
 
-            if (move)
+            if (options.move)
             {
-                IVirtualFile.MoveRecursively(dir, (file, position, length) =>
+                IVirtualFile.VirtualRecursiveMoveOptions moveOptions = new IVirtualFile.VirtualRecursiveMoveOptions();
+                moveOptions.autoRename = options.autoRename;
+                moveOptions.autoRenameFolders = options.autoRenameFolders;
+                moveOptions.onFailed = options.onFailed;
+                moveOptions.onProgressChanged = (file, position, length) =>
                 {
                     if (stopJobs)
                         throw new TaskCanceledException();
-                    if (OnProgressChanged != null)
+                    if (options.onProgressChanged != null)
                     {
                         try
                         {
-                            OnProgressChanged(new IVirtualFileTaskProgress(
+                            options.onProgressChanged(new IVirtualFileTaskProgress(
                             file, position, length, count, total));
                         }
                         catch (Exception)
@@ -437,27 +437,33 @@ public class FileCommander
                     }
                     if (position == (long)length)
                         count++;
-                }, AutoRename, autoRenameFolders, OnFailed);
+                };
+                IVirtualFile.MoveRecursively(dir, moveOptions);
             }
             else
             {
-                IVirtualFile.CopyRecursively(dir, (file, position, length) =>
+                IVirtualFile.VirtualRecursiveCopyOptions copyOptions = new IVirtualFile.VirtualRecursiveCopyOptions();
+                copyOptions.autoRename = options.autoRename;
+                copyOptions.autoRenameFolders = options.autoRenameFolders;
+                copyOptions.onFailed = options.onFailed;
+                copyOptions.onProgressChanged = (file, position, length) =>
                 {
                     if (stopJobs)
                         throw new TaskCanceledException();
-                    if (OnProgressChanged != null)
+                    if (options.onProgressChanged != null)
                     {
                         try
                         {
-                            OnProgressChanged(new IVirtualFileTaskProgress(file, position, length, count, total));
+                            options.onProgressChanged(new IVirtualFileTaskProgress(file, position, length, count, total));
                         }
                         catch (Exception ignored)
                         {
                         }
                     }
-                    if (position == (long)length)
+                    if (position == length)
                         count++;
-                }, AutoRename, autoRenameFolders, OnFailed);
+                };
+                IVirtualFile.CopyRecursively(dir, copyOptions);
             }
         }
     }
@@ -513,15 +519,11 @@ public class FileCommander
 	/// </summary>
 	///  <param name="dir">The directory to start the search.</param>
     ///  <param name="terms">The terms to search for.</param>
-    ///  <param name="any">True if you want to match any term otherwise match all terms.</param>
-    ///  <param name="OnResultFound">Callback interface to receive notifications when results found.</param>
-    ///  <param name="OnSearchEvent">Callback interface to receive status events.</param>
+    ///  <param name="options">The options.</param>
     ///  <returns>An array with all the results found.</returns>
-    public IVirtualFile[] Search(IVirtualFile dir, string terms, bool any,
-                               FileSearcher.OnResultFoundListener OnResultFound,
-                               Action<FileSearcher.SearchEvent> OnSearchEvent)
+    public IVirtualFile[] Search(IVirtualFile dir, string terms, FileSearcher.SearchOptions options = null)
     {
-        return FileSearcher.Search(dir, terms, any, OnResultFound, OnSearchEvent);
+        return FileSearcher.Search(dir, terms, options);
     }
 
     /// <summary>
@@ -620,5 +622,115 @@ public class FileCommander
         {
             this.File = file;
         }
+    }
+
+    /// <summary>
+    /// Batch delet options
+    /// </summary>
+    public class BatchDeleteOptions
+    {
+        /// <summary>
+        /// Callback when delete fails
+        /// </summary>
+        public Action<IVirtualFile, Exception> onFailed;
+
+        /// <summary>
+        /// Callback when progress changes
+        /// </summary>
+        public Action<IVirtualFileTaskProgress> onProgressChanged;
+    }
+
+
+    /// <summary>
+    /// Batch import options
+    /// </summary>
+    public class BatchImportOptions
+    {
+        /// <summary>
+        /// Delete the source file when complete.
+        /// </summary>
+        public bool deleteSource = false;
+
+        /// <summary>
+        /// True to enable integrity
+        /// </summary>
+        public bool integrity = false;
+
+        /// <summary>
+        /// Callback when a file with the same name exists
+        /// </summary>
+        public Func<IFile, string> autoRename;
+
+        /// <summary>
+        /// Callback when import fails
+        /// </summary>
+        public Action<IFile, Exception> onFailed;
+
+        /// <summary>
+        /// Callback when progress changes
+        /// </summary>
+        public Action<RealFileTaskProgress> onProgressChanged;
+    }
+
+    /// <summary>
+    /// Batch export options
+    /// </summary>
+    public class BatchExportOptions
+    {
+        /// <summary>
+        /// Delete the source file when complete.
+        /// </summary>
+        public bool deleteSource = false;
+
+        /// <summary>
+        /// True to enable integrity
+        /// </summary>
+        public bool integrity = false;
+
+        /// <summary>
+        /// Callback when a file with the same name exists
+        /// </summary>
+        public Func<IFile, string> autoRename;
+
+        /// <summary>
+        /// Callback when import fails
+        /// </summary>
+        public Action<IVirtualFile, Exception> onFailed;
+
+        /// <summary>
+        /// Callback when progress changes
+        /// </summary>
+        public Action<IVirtualFileTaskProgress> onProgressChanged;
+    }
+
+    /// <summary>
+    /// Batch copy options
+    /// </summary>
+    public class BatchCopyOptions
+    {
+        /// <summary>
+        /// True to move, false to copy
+        /// </summary>
+        public bool move = false;
+
+        /// <summary>
+        /// Callback when another file with the same name exists.
+        /// </summary>
+        public Func<IVirtualFile, String> autoRename;
+
+        /// <summary>
+        /// True to autorename folders
+        /// </summary>
+        public bool autoRenameFolders = false;
+
+        /// <summary>
+        /// Callback when copy fails
+        /// </summary>
+        public Action<IVirtualFile, Exception> onFailed;
+
+        /// <summary>
+        /// Callback when progress changes.
+        /// </summary>
+        public Action<IVirtualFileTaskProgress> onProgressChanged;
     }
 }

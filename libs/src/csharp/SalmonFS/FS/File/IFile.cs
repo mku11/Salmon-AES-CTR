@@ -152,21 +152,19 @@ public interface IFile
     ///  Move this file or directory recursively to another directory.
 	/// </summary>
 	///  <param name="newDir">The target directory.</param>
-    ///  <param name="newName">The new file name</param>
-    ///  <param name="progressListener">Observer to notify of the move progress.</param>
+    ///  <param name="options">The options</param>
     ///  <returns>The file after the move. Use this instance for any subsequent file operations.</returns>
     ///  <exception cref="IOException">Thrown if error during IO</exception>
-    IFile Move(IFile newDir, string newName = null, Action<long, long> progressListener = null);
+    IFile Move(IFile newDir, MoveOptions options = null);
 
     /// <summary>
     ///  Copy this file or directory recursively to another directory.
-	/// </summary>
-	///  <param name="newDir">The target directory.</param>
-    ///  <param name="newName">The new file name</param>
-    ///  <param name="progressListener">Observer to notify of the copy progress.</param>
+    /// </summary>
+    ///  <param name="newDir">The target directory.</param>
+    ///  <param name="options">The options</param>
     ///  <returns>The file after the copy. Use this instance for any subsequent file operations.</returns>
     ///  <exception cref="IOException">Thrown if error during IO</exception>
-    IFile Copy(IFile newDir, string newName = null, Action<long,long> progressListener = null);
+    IFile Copy(IFile newDir, CopyOptions options = null);
 
     /// <summary>
     ///  Get the file/directory matching the name provided under this directory.
@@ -191,16 +189,15 @@ public interface IFile
     /// </summary>
     /// <param name="src">The source file</param>
     /// <param name="dest">The destination file</param>
-    /// <param name="delete">True to delete the source file on success</param>
-    /// <param name="progressListener">The progress listener</param>
+    /// <param name="options">The options</param>
     /// <returns>True if success</returns>
-    public static bool CopyFileContents(IFile src, IFile dest, bool delete, Action<long,long> progressListener)
+    public static bool CopyFileContents(IFile src, IFile dest, CopyContentsOptions options)
     {
         Stream source = src.GetInputStream();
         Stream target = dest.GetOutputStream();
         try
         {
-            source.CopyTo(target, progressListener);
+            source.CopyTo(target, options.onProgressChanged);
         }
         catch (Exception)
         {
@@ -212,8 +209,6 @@ public interface IFile
             source.Close();
             target.Close();
         }
-        if (delete)
-            src.Delete();
         return true;
     }
 
@@ -221,16 +216,11 @@ public interface IFile
     /// Copy a directory recursively
     /// </summary>
     /// <param name="dest">The destination directory</param>
-    /// <param name="progressListener">The progress listener</param>
-    /// <param name="AutoRename">The autorename function to use when renaming files if they exist</param>
-    /// <param name="autoRenameFolders">Apply autorename to folders also (default is true)</param>
-    /// <param name="OnFailed">Callback when copy fails</param>
-    public sealed void CopyRecursively(IFile dest,
-        Action<IFile, long, long> progressListener = null,
-        Func<IFile, string> AutoRename = null,
-        bool autoRenameFolders = true,
-        Action<IFile, Exception> OnFailed = null)
+    /// <param name="options">The options</param>
+    public sealed void CopyRecursively(IFile dest, RecursiveCopyOptions options = null)
     {
+        if (options == null)
+            options = new RecursiveCopyOptions();
         string newFilename = Name;
         IFile newFile;
         newFile = dest.GetChild(newFilename);
@@ -238,45 +228,49 @@ public interface IFile
         {
             if (newFile != null && newFile.Exists)
             {
-                if (AutoRename != null)
+                if (options.autoRename != null)
                 {
                     newFilename = AutoRename(this);
                 }
                 else
                 {
-                    if (OnFailed != null)
-                        OnFailed(this, new Exception("Another file exists"));
+                    if (options.onFailed != null)
+                        options.onFailed(this, new Exception("Another file exists"));
                     return;
                 }
             }
-            this.Copy(dest, newFilename, (position, length) =>
+            RecursiveCopyOptions finalOptions = options;
+            CopyOptions copyOptions = new CopyOptions();
+            copyOptions.newFilename = newFilename;
+            copyOptions.onProgressChanged = (position, length) =>
             {
-                if (progressListener != null)
+                if (options.onProgressChanged != null)
                 {
-                    progressListener(this, position, length);
+                    options.onProgressChanged(this, position, length);
                 }
-            });
+            };
+            this.Copy(dest, copyOptions);
         }
         else if (this.IsDirectory)
         {
-            if (progressListener != null)
-                progressListener(this, 0, 1);
+            if (options.onProgressChanged != null)
+                options.onProgressChanged(this, 0, 1);
             if (dest.AbsolutePath.StartsWith(this.AbsolutePath))
             {
-                if (progressListener != null)
-                    progressListener(this, 1L, 1L);
+                if (options.onProgressChanged != null)
+                    options.onProgressChanged(this, 1L, 1L);
                 return;
             }
-            if (newFile != null && newFile.Exists && AutoRename != null && autoRenameFolders)
+            if (newFile != null && newFile.Exists && options.autoRename != null && options.autoRenameFolders)
                 newFile = dest.CreateDirectory(AutoRename(this));
             else if (newFile == null || !newFile.Exists)
                 newFile = dest.CreateDirectory(newFilename);
-            if (progressListener != null)
-                progressListener(this, 1, 1);
+            if (options.onProgressChanged != null)
+                options.onProgressChanged(this, 1, 1);
 
             foreach (IFile child in this.ListFiles())
             {
-                child.CopyRecursively(newFile, progressListener, AutoRename, autoRenameFolders, OnFailed);
+                child.CopyRecursively(newFile, options);
             }
         }
     }
@@ -285,21 +279,18 @@ public interface IFile
     /// Move a directory recursively
     /// </summary>
     /// <param name="dest">The directory to move to</param>
-    /// <param name="progressListener">The progress listener</param>
-    /// <param name="AutoRename">The autorename function to use when renaming files if they exist</param>
-    /// <param name="autoRenameFolders">Apply autorename to folders also (default is true)</param>
-    /// <param name="OnFailed">Callback when move fails</param>
-    public sealed void MoveRecursively(IFile dest,
-        Action<IFile, long, long> progressListener = null, Func<IFile, string> AutoRename = null,
-        bool autoRenameFolders = true, Action<IFile, Exception> OnFailed = null)
+    /// <param name="options">The options</param>
+    public sealed void MoveRecursively(IFile dest, RecursiveMoveOptions options = null)
     {
+        if (options == null)
+            options = new RecursiveMoveOptions();
         // target directory is the same
         if (Parent.Path.Equals(dest.Path))
         {
-            if (progressListener != null)
+            if (options.onProgressChanged != null)
             {
-                progressListener(this, 0, 1);
-                progressListener(this, 1, 1);
+                options.onProgressChanged(this, 0, 1);
+                options.onProgressChanged(this, 1, 1);
             }
             return;
         }
@@ -313,45 +304,51 @@ public interface IFile
             {
                 if (newFile.Path.Equals(this.Path))
                     return;
-                if (AutoRename != null)
+                if (options.autoRename != null)
                 {
                     newFilename = AutoRename(this);
                 }
                 else
                 {
-                    if (OnFailed != null)
-                        OnFailed(this, new Exception("Another file exists"));
+                    if (options.onFailed != null)
+                        options.onFailed(this, new Exception("Another file exists"));
                     return;
                 }
             }
-            this.Move(dest, newFilename, (position, length) =>
+            RecursiveMoveOptions finalOptions = options;
+            MoveOptions moveOptions = new MoveOptions();
+            moveOptions.newFilename = newFilename;
+            moveOptions.onProgressChanged = (position, length) =>
             {
-                if (progressListener != null)
+                if (options.onProgressChanged != null)
                 {
-                    progressListener(this, position, length);
+                    options.onProgressChanged(this, position, length);
                 }
-            });
+            };
+            this.Move(dest, moveOptions);
         }
         else if (this.IsDirectory)
         {
-            if (progressListener != null)
-                progressListener(this, 0, 1);
-            if ((newFile != null && newFile.Exists && AutoRename != null && autoRenameFolders)
+            if (options.onProgressChanged != null)
+                options.onProgressChanged(this, 0, 1);
+            if ((newFile != null && newFile.Exists && options.autoRename != null && options.autoRenameFolders)
                 || newFile == null || !newFile.Exists)
             {
-                newFile = Move(dest, AutoRename(this));
+                MoveOptions moveOptions = new MoveOptions();
+                moveOptions.newFilename = options.autoRename(this);
+                newFile = Move(dest, moveOptions);
                 return;
             }
-            if (progressListener != null)
-                progressListener(this, 1, 1);
+            if (options.onProgressChanged != null)
+                options.onProgressChanged(this, 1, 1);
 
             foreach (IFile child in this.ListFiles())
             {
-                child.MoveRecursively(newFile, progressListener, AutoRename, autoRenameFolders, OnFailed);
+                child.MoveRecursively(newFile, options);
             }
             if (!this.Delete())
             {
-                OnFailed(this, new Exception("Could not delete source directory"));
+                options.onFailed(this, new Exception("Could not delete source directory"));
                 return;
             }
         }
@@ -360,31 +357,31 @@ public interface IFile
     /// <summary>
     /// Delete a directory recursively
     /// </summary>
-    /// <param name="progressListener">The progress listener</param>
-    /// <param name="OnFailed">Callback when delete fails</param>
-    public sealed void DeleteRecursively(Action<IFile, long, long> progressListener = null,
-        Action<IFile, Exception> OnFailed = null)
+    /// <param name="options">The options</param>
+    public sealed void DeleteRecursively(RecursiveDeleteOptions options = null)
     {
+        if (options == null)
+            options = new RecursiveDeleteOptions();
         if (IsFile)
         {
-            progressListener(this, 0, 1);
+            options.onProgressChanged(this, 0, 1);
             if (!this.Delete())
             {
-                OnFailed(this, new Exception("Could not delete file"));
-                return;
+                if (options.onFailed != null)
+                    options.onFailed(this, new Exception("Could not delete file"));
             }
-            progressListener(this, 1, 1);
+            options.onProgressChanged(this, 1, 1);
         }
         else if (this.IsDirectory)
         {
             foreach (IFile child in this.ListFiles())
             {
-                child.DeleteRecursively(progressListener, OnFailed);
+                child.DeleteRecursively(options);
             }
             if (!this.Delete())
             {
-                OnFailed(this, new Exception("Could not delete directory"));
-                return;
+                if (options.onFailed != null)
+                    options.onFailed(this, new Exception("Could not delete directory"));
             }
         }
     }
@@ -416,6 +413,117 @@ public interface IFile
         if (ext.Length > 0)
             newFilename += "." + ext;
         return newFilename;
+    }
+
+    /// <summary>
+    /// File copy options
+    /// </summary>
+    class CopyOptions
+    {
+        /// <summary>
+        /// Override filename
+        /// </summary>
+        public string newFilename;
+
+        /// <summary>
+        /// Callback where progress changed
+        /// </summary>
+        public Action<long, long> onProgressChanged;
+    }
+
+    /// <summary>
+    /// File move options
+    /// </summary>
+    class MoveOptions
+    {
+        /// <summary>
+        /// Override filename
+        /// </summary>
+        public string newFilename;
+
+        /// <summary>
+        /// Callback where progress changed
+        /// </summary>
+        public Action<long, long> onProgressChanged;
+    }
+
+    /// <summary>
+    /// Directory copy options (recursively)
+    /// </summary>
+    class RecursiveCopyOptions
+    {
+        /// <summary>
+        /// Callback when file with same name exists
+        /// </summary>
+        public Func<IFile, string> autoRename;
+
+        /// <summary>
+        /// True to autorename folders
+        /// </summary>
+        public bool autoRenameFolders = false;
+
+        /// <summary>
+        /// Callback when file changes
+        /// </summary>
+        public Action<IFile, Exception> onFailed;
+
+        /// <summary>
+        /// Callback where progress changed
+        /// </summary>
+        public Action<IFile, long, long> onProgressChanged;
+    }
+
+    /// <summary>
+    /// Directory move options (recursively)
+    /// </summary>
+    public class RecursiveMoveOptions
+    {
+        /// <summary>
+        /// Callback when file with the same name exists
+        /// </summary>
+        public Func<IFile, string> autoRename;
+
+        /// <summary>
+        /// True to autorename folders
+        /// </summary>
+        public bool autoRenameFolders = false;
+
+        /// <summary>
+        /// Callback when file failed
+        /// </summary>
+        public Action<IFile, Exception> onFailed;
+
+        /// <summary>
+        /// Callback when progress changes
+        /// </summary>
+        public Action<IFile, long, long> onProgressChanged;
+    }
+
+    /// <summary>
+    /// Directory move options (recursively)
+    /// </summary>
+    public class RecursiveDeleteOptions
+    {
+        /// <summary>
+        /// Callback when file failed
+        /// </summary>
+        public Action<IFile, Exception> onFailed;
+
+        /// <summary>
+        /// Callback when progress changed
+        /// </summary>
+        public Action<IFile, long, long> onProgressChanged;
+    }
+
+    /// <summary>
+    /// Directory move options (recursively)
+    /// </summary>
+    public class CopyContentsOptions
+    {
+        /// <summary>
+        /// Callback when progress changed
+        /// </summary>
+        public Action<long, long> onProgressChanged;
     }
 }
 

@@ -37,6 +37,7 @@ using Mku.SalmonFS.Auth;
 using Mku.SalmonFS.File;
 using Mku.SalmonFS.Streams;
 using Mku.SalmonFS.Drive.Utils;
+using Mku.FS.Drive.Utils;
 
 namespace Mku.Salmon.Test;
 
@@ -47,20 +48,20 @@ public class SalmonFSTests
     public static void ClassInitialize(TestContext testContext)
     {
         // use TestMode: Local, WebService. Http is tested only in SalmonFSHttpTests.
-		string testDir = Environment.GetEnvironmentVariable("TEST_DIR") != null
-			&& !Environment.GetEnvironmentVariable("TEST_DIR").Equals("") ? Environment.GetEnvironmentVariable("TEST_DIR") : "d:\\tmp\\salmon\\test";
-		TestMode testMode = Environment.GetEnvironmentVariable("TEST_MODE") != null 
-			&& !Environment.GetEnvironmentVariable("TEST_DIR").Equals("") ? 
-			(TestMode) Enum.Parse(typeof(TestMode), Environment.GetEnvironmentVariable("TEST_MODE")) : TestMode.Local;
-		int threads = Environment.GetEnvironmentVariable("ENC_THREADS") != null && !Environment.GetEnvironmentVariable("ENC_THREADS").Equals("") ?
-			int.Parse(Environment.GetEnvironmentVariable("ENC_THREADS")) : 1;
-			
-		SalmonFSTestHelper.SetTestParams(testDir, testMode);
-		Console.WriteLine("testDir: " + testDir);
+        string testDir = Environment.GetEnvironmentVariable("TEST_DIR") != null
+            && !Environment.GetEnvironmentVariable("TEST_DIR").Equals("") ? Environment.GetEnvironmentVariable("TEST_DIR") : "d:\\tmp\\salmon\\test";
+        TestMode testMode = Environment.GetEnvironmentVariable("TEST_MODE") != null
+            && !Environment.GetEnvironmentVariable("TEST_DIR").Equals("") ?
+            (TestMode)Enum.Parse(typeof(TestMode), Environment.GetEnvironmentVariable("TEST_MODE")) : TestMode.Local;
+        int threads = Environment.GetEnvironmentVariable("ENC_THREADS") != null && !Environment.GetEnvironmentVariable("ENC_THREADS").Equals("") ?
+            int.Parse(Environment.GetEnvironmentVariable("ENC_THREADS")) : 1;
+
+        SalmonFSTestHelper.SetTestParams(testDir, testMode);
+        Console.WriteLine("testDir: " + testDir);
         Console.WriteLine("testMode: " + testMode);
-		Console.WriteLine("threads: " + threads);
+        Console.WriteLine("threads: " + threads);
         Console.WriteLine("ws server url: " + SalmonFSTestHelper.WS_SERVER_URL);
-		
+
         SalmonFSTestHelper.TEST_IMPORT_FILE = SalmonFSTestHelper.TEST_IMPORT_LARGE_FILE;
 
         // SalmonCoreTestHelper.TEST_ENC_BUFFER_SIZE = 1 * 1024 * 1024;
@@ -80,11 +81,11 @@ public class SalmonFSTests
         SalmonFSTestHelper.Initialize();
 
         ProviderType providerType = ProviderType.Default;
-		string aesProviderType = Environment.GetEnvironmentVariable("AES_PROVIDER_TYPE");
-		if(aesProviderType != null && !aesProviderType.Equals(""))
-			providerType = (ProviderType) Enum.Parse(typeof(ProviderType), aesProviderType);
-		Console.WriteLine("ProviderType: " + providerType);
-		
+        string aesProviderType = Environment.GetEnvironmentVariable("AES_PROVIDER_TYPE");
+        if (aesProviderType != null && !aesProviderType.Equals(""))
+            providerType = (ProviderType)Enum.Parse(typeof(ProviderType), aesProviderType);
+        Console.WriteLine("ProviderType: " + providerType);
+
         AesStream.AesProviderType = providerType;
     }
 
@@ -335,7 +336,7 @@ public class SalmonFSTests
         bool integrityFailed = false;
         try
         {
-            SalmonFSTestHelper.ImportAndExport(SalmonFSTestHelper.GenerateFolder(SalmonFSTestHelper.TEST_VAULT_DIRNAME), 
+            SalmonFSTestHelper.ImportAndExport(SalmonFSTestHelper.GenerateFolder(SalmonFSTestHelper.TEST_VAULT_DIRNAME),
                 SalmonCoreTestHelper.TEST_PASSWORD, SalmonFSTestHelper.TEST_IMPORT_FILE,
                     true, 20, false,
                     true, true);
@@ -574,7 +575,9 @@ public class SalmonFSTests
             caught = true;
         }
         Assert.AreEqual(true, caught);
-        file2 = file.Copy(dir, IFile.AutoRename(file));
+        IFile.CopyOptions copyOptions = new IFile.CopyOptions();
+        copyOptions.newFilename = IFile.AutoRename(file);
+        file2 = file.Copy(dir, copyOptions);
 
         Assert.AreEqual(2, dir.ChildrenCount);
         Assert.IsTrue(dir.GetChild(file.Name).Exists);
@@ -586,8 +589,6 @@ public class SalmonFSTests
         Assert.IsTrue(dir.GetChild("folder1").Exists);
         Assert.IsTrue(dir.GetChild("folder1").IsDirectory);
         Assert.AreEqual(3, dir.ChildrenCount);
-
-
 
         IFile folder1 = dir.CreateDirectory("folder2");
         Assert.IsTrue(folder1.Exists);
@@ -617,7 +618,9 @@ public class SalmonFSTests
             caught = true;
         }
         Assert.IsTrue(caught);
-        IFile file4 = file3.Move(dir.GetChild("folder1"), IFile.AutoRename(file3));
+        IFile.MoveOptions moveOptions = new IFile.MoveOptions();
+        moveOptions.newFilename = IFile.AutoRename(file3);
+        IFile file4 = file3.Move(dir.GetChild("folder1"), moveOptions);
         Assert.IsTrue(file4.Exists);
         Assert.AreEqual(3, dir.GetChild("folder1").ChildrenCount);
 
@@ -638,7 +641,9 @@ public class SalmonFSTests
         Assert.IsTrue(dfile.Exists);
         Assert.IsTrue(dfile.Delete());
         Assert.AreEqual(2, dir.GetChild("folder4").GetChild("folder1").GetChild("folder2").ChildrenCount);
-        dir.GetChild("folder1").CopyRecursively(folder3, null, IFile.AutoRename, false, null);
+        IFile.RecursiveCopyOptions recCopyOptions = new IFile.RecursiveCopyOptions();
+        recCopyOptions.autoRename = IFile.AutoRename;
+        dir.GetChild("folder1").CopyRecursively(folder3, recCopyOptions);
         Assert.AreEqual(2, dir.ChildrenCount);
         Assert.AreEqual(1, dir.GetChild("folder4").ChildrenCount);
         Assert.AreEqual(7, dir.GetChild("folder4").GetChild("folder1").ChildrenCount);
@@ -647,10 +652,12 @@ public class SalmonFSTests
         dir.GetChild("folder4").GetChild("folder1").GetChild("folder2").GetChild(file.Name).Delete();
         dir.GetChild("folder4").GetChild("folder1").GetChild(file.Name).Delete();
         List<IFile> failed = new List<IFile>();
-        dir.GetChild("folder1").CopyRecursively(folder3, null, null, false, (file, ex) =>
+        recCopyOptions = new IFile.RecursiveCopyOptions();
+        recCopyOptions.onFailed = (file, ex) =>
         {
             failed.Add(file);
-        });
+        };
+        dir.GetChild("folder1").CopyRecursively(folder3, recCopyOptions);
         Assert.AreEqual(4, failed.Count);
         Assert.AreEqual(2, dir.ChildrenCount);
         Assert.AreEqual(1, dir.GetChild("folder4").ChildrenCount);
@@ -661,10 +668,13 @@ public class SalmonFSTests
         dir.GetChild("folder4").GetChild("folder1").GetChild("folder2").GetChild(file.Name).Delete();
         dir.GetChild("folder4").GetChild("folder1").GetChild(file.Name).Delete();
         List<IFile> failedmv = new List<IFile>();
-        dir.GetChild("folder1").MoveRecursively(dir.GetChild("folder4"), null, IFile.AutoRename, false, (file, ex) =>
+        IFile.RecursiveMoveOptions recMoveOptions = new IFile.RecursiveMoveOptions();
+        recMoveOptions.autoRename = IFile.AutoRename;
+        recMoveOptions.onFailed = (file, ex) =>
         {
             failedmv.Add(file);
-        });
+        };
+        dir.GetChild("folder1").MoveRecursively(dir.GetChild("folder4"), recMoveOptions);
         Assert.AreEqual(4, failed.Count);
         Assert.AreEqual(1, dir.ChildrenCount);
         Assert.AreEqual(1, dir.GetChild("folder4").ChildrenCount);
@@ -681,10 +691,12 @@ public class SalmonFSTests
         FileSequencer sequencer = SalmonFSTestHelper.CreateSalmonFileSequencer();
         AesDrive drive = SalmonFSTestHelper.CreateDrive(vaultDir, SalmonFSTestHelper.DriveClassType, SalmonCoreTestHelper.TEST_PASSWORD, sequencer);
         AesFileCommander fileCommander = new AesFileCommander(Integrity.Integrity.DEFAULT_CHUNK_SIZE, Integrity.Integrity.DEFAULT_CHUNK_SIZE, 2);
-        AesFile[] sfiles = fileCommander.ImportFiles(new IFile[] { file },
-                drive.Root, false, true, null, null, null);
-		fileCommander.Close();
-		
+
+        FileCommander.BatchImportOptions importOptions = new FileCommander.BatchImportOptions();
+        importOptions.integrity = true;
+        AesFile[] sfiles = fileCommander.ImportFiles(new IFile[] { file }, drive.Root, importOptions);
+        fileCommander.Close();
+
         long pos = Math.Abs(new Random().NextInt64() % file.Length);
 
         AesFileInputStream fileInputStream1 = new AesFileInputStream(sfiles[0], 4, 4 * 1024 * 1024, 1, 256 * 1024);
@@ -703,14 +715,16 @@ public class SalmonFSTests
 
         Assert.AreEqual(h1, h2);
     }
-	
+
     [TestMethod]
-    public void TestRawFile() {
+    public void TestRawFile()
+    {
         SalmonFSTestHelper.TestRawFile();
     }
 
     [TestMethod]
-    public void TestEncDecFile() {
+    public void TestEncDecFile()
+    {
         SalmonFSTestHelper.TestEncDecFile();
     }
 }

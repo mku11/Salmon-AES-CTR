@@ -54,21 +54,13 @@ public class AesFileCommander : FileCommander
     /// </summary>
     ///  <param name="filesToImport">The files to import.</param>
     ///  <param name="importDir">The target directory.</param>
-    ///  <param name="deleteSource">True if you want to delete the source files.</param>
-    ///  <param name="integrity">True to apply integrity to imported files</param>
-    ///  <param name="OnProgressChanged">Observer to notify when progress changes.</param>
-    ///  <param name="AutoRename">Function to rename file if another file with the same filename exists.</param>
-    ///  <param name="OnFailed">Observer to notify when a file fails importing.</param>
+    ///  <param name="options">The options</param>
     ///  <returns>The imported files.</returns>
     ///  <exception cref="Exception">Thrown if error during operation</exception>
     override
-    public AesFile[] ImportFiles(IFile[] filesToImport, IVirtualFile importDir,
-        bool deleteSource, bool integrity, Action<RealFileTaskProgress> OnProgressChanged,
-                                      Func<IFile, string> AutoRename,
-                                      Action<IFile, Exception> OnFailed)
+    public AesFile[] ImportFiles(IFile[] filesToImport, IVirtualFile importDir, BatchImportOptions options = null)
     {
-        IVirtualFile[] files = base.ImportFiles(filesToImport, importDir, deleteSource, integrity, OnProgressChanged,
-                AutoRename, OnFailed);
+        IVirtualFile[] files = base.ImportFiles(filesToImport, importDir, options);
         return files.Cast<AesFile>().ToArray();
     }
 }

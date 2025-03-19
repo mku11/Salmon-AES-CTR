@@ -219,7 +219,7 @@ public class SalmonFSTestHelper
         AesFileImporter importer = new AesFileImporter(SalmonFSTestHelper.ENC_IMPORT_BUFFER_SIZE, SalmonFSTestHelper.ENC_IMPORT_THREADS);
         foreach (IFile importFile in importFiles)
         {
-            importer.ImportFile(importFile, rootDir, null, false, true, null);
+            importer.ImportFile(importFile, rootDir);
         }
         importer.Close();
     }
@@ -338,7 +338,10 @@ public class SalmonFSTestHelper
             if (SalmonFSTestHelper.ENABLE_FILE_PROGRESS)
                 Console.WriteLine("importing file: " + position + "/" + length);
         };
-        AesFile salmonFile = SalmonFSTestHelper.fileImporter.ImportFile(fileToImport, rootDir, null, false, ApplyFileIntegrity, printImportProgress);
+        FileImporter.FileImportOptions importOptions = new FileImporter.FileImportOptions();
+        importOptions.integrity = ApplyFileIntegrity;
+        importOptions.onProgressChanged = printImportProgress;
+        AesFile salmonFile = SalmonFSTestHelper.fileImporter.ImportFile(fileToImport, rootDir, importOptions);
 
         int chunkSize = salmonFile.FileChunkSize;
         if (chunkSize > 0 && !VerifyFileIntegrity)
@@ -377,7 +380,11 @@ public class SalmonFSTestHelper
         int chunkSize2 = salmonFile.FileChunkSize;
         if (chunkSize2 > 0 && VerifyFileIntegrity)
             salmonFile.SetVerifyIntegrity(true);
-        IFile exportFile = SalmonFSTestHelper.fileExporter.ExportFile(salmonFile, drive.ExportDir, null, false, VerifyFileIntegrity, printExportProgress);
+        FileExporter.FileExportOptions exportOptions = new FileExporter.FileExportOptions();
+        exportOptions.integrity = VerifyFileIntegrity;
+        exportOptions.onProgressChanged = printExportProgress;
+
+        IFile exportFile = SalmonFSTestHelper.fileExporter.ExportFile(salmonFile, drive.ExportDir, exportOptions);
 
         string hashPostExport = SalmonFSTestHelper.GetChecksum(exportFile);
         if (shouldBeEqual)
@@ -415,7 +422,7 @@ public class SalmonFSTestHelper
 
         // import
         AesFileImporter fileImporter = new AesFileImporter(importBufferSize, importThreads);
-        AesFile salmonFile = fileImporter.ImportFile(fileToImport, rootDir, null, false, false, null);
+        AesFile salmonFile = fileImporter.ImportFile(fileToImport, rootDir);
 
         // trigger the cache to add the filename
         string basename = salmonFile.Name;
@@ -426,7 +433,9 @@ public class SalmonFSTestHelper
         Assert.IsTrue(salmonFile.Exists);
 
         FileSearcher searcher = new FileSearcher();
-        IVirtualFile[] files = searcher.Search(rootDir, basename, true, null, null);
+        FileSearcher.SearchOptions searchOptions = new FileSearcher.SearchOptions();
+        searchOptions.anyTerm = true;
+        IVirtualFile[] files = searcher.Search(rootDir, basename, searchOptions);
 
 
         Assert.IsTrue(files.Length > 0);
@@ -446,7 +455,7 @@ public class SalmonFSTestHelper
 
         // import
         AesFileImporter fileImporter = new AesFileImporter(importBufferSize, importThreads);
-        AesFile salmonFile = fileImporter.ImportFile(fileToImport, rootDir, null, false, false, null);
+        AesFile salmonFile = fileImporter.ImportFile(fileToImport, rootDir);
 
         // trigger the cache to add the filename
         string basename = salmonFile.Name;
@@ -547,7 +556,7 @@ public class SalmonFSTestHelper
         AesFile rootDir = drive.Root;
         IFile fileToImport = importFilePath;
         AesFileImporter fileImporter = new AesFileImporter(0, 0);
-        AesFile salmonFileA1 = fileImporter.ImportFile(fileToImport, rootDir, null, false, false, null);
+        AesFile salmonFileA1 = fileImporter.ImportFile(fileToImport, rootDir);
         long nonceA1 = BitConverter.ToLong(salmonFileA1.RequestedNonce, 0, Generator.NONCE_LENGTH);
         drive.Close();
 
@@ -561,7 +570,7 @@ public class SalmonFSTestHelper
             rootDir = drive.Root;
             fileToImport = importFilePath;
             fileImporter = new AesFileImporter(0, 0);
-            fileImporter.ImportFile(fileToImport, rootDir, null, false, false, null);
+            fileImporter.ImportFile(fileToImport, rootDir);
             success = true;
         }
         catch (Exception)
@@ -584,7 +593,7 @@ public class SalmonFSTestHelper
         rootDir = drive.Root;
         fileToImport = importFilePath;
         fileImporter = new AesFileImporter(0, 0);
-        AesFile salmonFileA2 = fileImporter.ImportFile(fileToImport, rootDir, null, false, false, null);
+        AesFile salmonFileA2 = fileImporter.ImportFile(fileToImport, rootDir);
         long nonceA2 = BitConverter.ToLong(salmonFileA2.FileNonce, 0, Generator.NONCE_LENGTH);
         drive.Close();
 
@@ -594,9 +603,9 @@ public class SalmonFSTestHelper
         // now import a 3rd file
         rootDir = drive.Root;
         fileToImport = importFilePath;
-        AesFile salmonFileB1 = fileImporter.ImportFile(fileToImport, rootDir, null, false, false, null);
+        AesFile salmonFileB1 = fileImporter.ImportFile(fileToImport, rootDir);
         long nonceB1 = BitConverter.ToLong(salmonFileB1.FileNonce, 0, Generator.NONCE_LENGTH);
-        AesFile salmonFileB2 = fileImporter.ImportFile(fileToImport, rootDir, null, false, false, null);
+        AesFile salmonFileB2 = fileImporter.ImportFile(fileToImport, rootDir);
         long nonceB2 = BitConverter.ToLong(salmonFileB2.FileNonce, 0, Generator.NONCE_LENGTH);
         drive.Close();
 
@@ -635,7 +644,7 @@ public class SalmonFSTestHelper
             rootDir.ListFiles();
             IFile fileToImport = importFile;
             AesFileImporter fileImporter = new AesFileImporter(0, 0);
-            AesFile salmonFile = fileImporter.ImportFile(fileToImport, rootDir, null, false, false, null);
+            AesFile salmonFile = fileImporter.ImportFile(fileToImport, rootDir);
             importSuccess = salmonFile != null;
         }
         catch (Exception ex)
@@ -960,26 +969,31 @@ public class SalmonFSTestHelper
             hashPreExport.Add(SalmonFSTestHelper.GetChecksumStream(file.GetInputStream()));
 
         // export files
-        IFile[] filesExported = commander.ExportFiles(files, dir, false, true,
-            (taskProgress) =>
+        FileCommander.BatchExportOptions exportOptions = new FileCommander.BatchExportOptions();
+        exportOptions.deleteSource = false;
+        exportOptions.integrity = true;
+        exportOptions.autoRename = IFile.AutoRename;
+        exportOptions.onFailed = (sfile, ex) =>
+        {
+            // file failed to import
+            Console.Error.WriteLine(ex);
+            Console.WriteLine("export failed: " + sfile.Name + "\n" + ex);
+        };
+        exportOptions.onProgressChanged = (taskProgress) =>
+        {
+            if (!SalmonFSTestHelper.ENABLE_FILE_PROGRESS)
+                return;
+            try
             {
-                if (!SalmonFSTestHelper.ENABLE_FILE_PROGRESS)
-                    return;
-                try
-                {
-                    Console.WriteLine("file exporting: " + taskProgress.File.Name + ": "
-                    + taskProgress.ProcessedBytes + "/" + taskProgress.TotalBytes + " bytes");
-                }
-                catch (Exception e)
-                {
-                    Console.Error.Write(e);
-                }
-            }, IFile.AutoRename, (sfile, ex) =>
+                Console.WriteLine("file exporting: " + taskProgress.File.Name + ": "
+                + taskProgress.ProcessedBytes + "/" + taskProgress.TotalBytes + " bytes");
+            }
+            catch (Exception e)
             {
-                // file failed to import
-                Console.Error.WriteLine(ex);
-                Console.WriteLine("export failed: " + sfile.Name + "\n" + ex);
-            });
+                Console.Error.Write(e);
+            }
+        };
+        IFile[] filesExported = commander.ExportFiles(files, dir, exportOptions);
 
         Console.WriteLine("Files exported");
 
