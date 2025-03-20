@@ -1,5 +1,7 @@
 set CURRDIR=%CD%
 
+:: to run type VsDevCmd.bat in the windows console before running this script
+
 cd ..\..\..\..\libs\projects\SalmonLibs.VS2022
 
 call msbuild /property:Configuration=Debug /p:Platform=x64
