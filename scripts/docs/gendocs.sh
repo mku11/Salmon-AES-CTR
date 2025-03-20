@@ -17,6 +17,8 @@ doxygen Doxyfile.Net
 
 # Python
 doxygen DoxyfilePython
+# alternative for python
+# pdoc ../../libs/src/python/salmon_core ../../libs/src/python/salmon_fs -o ../../output/docs/python/ --html --force
 
 # C
 doxygen DoxyfileC
