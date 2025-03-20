@@ -262,8 +262,10 @@ class SalmonFSTestHelper:
                         SalmonFSTestHelper.TEST_IMPORT_MEDIUM_FILE,
                         SalmonFSTestHelper.TEST_IMPORT_LARGE_FILE]
         importer = AesFileImporter(SalmonFSTestHelper.ENC_IMPORT_BUFFER_SIZE, SalmonFSTestHelper.ENC_IMPORT_THREADS)
+        import_options: AesFileImporter.FileImportOptions = AesFileImporter.FileImportOptions()
+        import_options.integrity = True
         for import_file in import_files:
-            importer.import_file(import_file, root_dir)
+            importer.import_file(import_file, root_dir, import_options)
         importer.close()
 
     @staticmethod
@@ -938,7 +940,7 @@ class SalmonFSTestHelper:
             if not SalmonFSTestHelper.ENABLE_FILE_PROGRESS:
                 return
             try:
-                print("file exporting: " + task_progress.get_virtual_file().get_name() + ": "
+                print("file exporting: " + task_progress.get_file().get_name() + ": "
                       + str(task_progress.get_processed_bytes()) + "/" + str(task_progress.get_total_bytes())
                       + " bytes")
             except Exception as e:
@@ -947,6 +949,8 @@ class SalmonFSTestHelper:
         def on_failed(sfile: AesFile, ex: Exception):
             # file failed to import
             print(ex, file=sys.stderr)
+            if ex.__cause__:
+                print(ex.__cause__, file=sys.stderr)
             print("export failed: " + sfile.get_name() + "\n" + str(ex))
 
         # export files
