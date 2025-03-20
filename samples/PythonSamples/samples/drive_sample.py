@@ -57,8 +57,12 @@ class DriveSample:
             print("import failed: " + file.get_name() + "\n" + str(ex), file=sys.stderr)
 
         # import multiple files
-        files_imported = commander.import_files(files_to_import, drive.get_root(), False, True,
-                                                IFile.auto_rename_file, on_fail, on_progress)
+        import_options = AesFileCommander.BatchImportOptions()
+        import_options.integrity = True
+        import_options.autorename = IFile.auto_rename_file
+        import_options.on_failed = on_fail
+        import_options.on_progress_changed = on_progress
+        files_imported = commander.import_files(files_to_import, drive.get_root(), import_options)
 
         print("Files imported")
 
@@ -83,8 +87,12 @@ class DriveSample:
 
         # export all files
         files: list[AesFile] = drive.get_root().list_files()
-        files_exported = commander.export_files(files, v_dir, False, True,
-                                                IFile.auto_rename_file, on_fail, on_progress)
+        export_options = AesFileCommander.BatchExportOptions()
+        export_options.integrity = True
+        export_options.autorename = IFile.auto_rename_file
+        export_options.on_failed = on_fail
+        export_options.on_progress_changed = on_progress
+        files_exported = commander.export_files(files, v_dir, export_options)
         print("Files exported")
 
         # close the file commander
