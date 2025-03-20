@@ -947,7 +947,7 @@ export class SalmonFSTestHelper {
                 console.error(e);
             }
         };
-        let filesExported = await commander.exportFiles(files, dir, options);
+        let filesExported = await commander.exportFiles(files, dir, exportOptions);
         console.log("Files exported");
 
         for(let i = 0; i < files.length; i++) {
