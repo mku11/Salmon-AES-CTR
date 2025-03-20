@@ -55,7 +55,7 @@ class SalmonFSTests(TestCase):
     def setUpClass(cls):
 
         test_dir: str = os.getenv("TEST_DIR", "d:\\tmp\\salmon\\test")
-        test_mode: TestMode = TestMode[os.getenv("TEST_MODE")] if os.getenv("TEST_MODE") else TestMode.WebService
+        test_mode: TestMode = TestMode[os.getenv("TEST_MODE")] if os.getenv("TEST_MODE") else TestMode.Local
         threads: int = int(os.getenv("ENC_THREADS")) if os.getenv("ENC_THREADS") else 1
 
         SalmonFSTestHelper.set_test_params(test_dir, test_mode)
@@ -444,7 +444,9 @@ class SalmonFSTests(TestCase):
             caught = True
 
         self.assertEqual(True, caught)
-        file2 = file.copy(v_dir, IFile.auto_rename_file(file))
+        copy_options: IFile.CopyOptions = IFile.CopyOptions()
+        copy_options.new_filename = IFile.auto_rename_file(file)
+        file2 = file.copy(v_dir, copy_options)
 
         self.assertEqual(2, v_dir.get_children_count())
         self.assertTrue(v_dir.get_child(file.get_name()).exists())
@@ -482,7 +484,9 @@ class SalmonFSTests(TestCase):
             caught = True
 
         self.assertTrue(caught)
-        file4: IFile = file3.move(v_dir.get_child("folder1"), IFile.auto_rename_file(file3))
+        move_options = IFile.MoveOptions()
+        move_options.new_filename = IFile.auto_rename_file(file3)
+        file4: IFile = file3.move(v_dir.get_child("folder1"), move_options)
         self.assertTrue(file4.exists())
         self.assertEqual(3, v_dir.get_child("folder1").get_children_count())
 
@@ -504,7 +508,9 @@ class SalmonFSTests(TestCase):
         self.assertTrue(dfile.exists())
         self.assertTrue(dfile.delete())
         self.assertEqual(2, v_dir.get_child("folder4").get_child("folder1").get_child("folder2").get_children_count())
-        v_dir.get_child("folder1").copy_recursively(folder3, IFile.auto_rename_file)
+        rec_copy_options = IFile.RecursiveCopyOptions()
+        rec_copy_options.auto_rename = IFile.auto_rename_file
+        v_dir.get_child("folder1").copy_recursively(folder3, rec_copy_options)
         self.assertEqual(2, v_dir.get_children_count())
         self.assertEqual(1, v_dir.get_child("folder4").get_children_count())
         self.assertEqual(7, v_dir.get_child("folder4").get_child("folder1").get_children_count())
@@ -513,8 +519,9 @@ class SalmonFSTests(TestCase):
         v_dir.get_child("folder4").get_child("folder1").get_child("folder2").get_child(file.get_name()).delete()
         v_dir.get_child("folder4").get_child("folder1").get_child(file.get_name()).delete()
         failed: list[IFile] = []
-        v_dir.get_child("folder1").copy_recursively(folder3, None, False,
-                                                    lambda failed_file, e: failed.append(failed_file))
+        rec_copy_options = IFile.RecursiveCopyOptions()
+        rec_copy_options.on_failed = lambda failed_file, e: failed.append(failed_file)
+        v_dir.get_child("folder1").copy_recursively(folder3, rec_copy_options)
         self.assertEqual(4, len(failed))
         self.assertEqual(2, v_dir.get_children_count())
         self.assertEqual(1, v_dir.get_child("folder4").get_children_count())
@@ -524,8 +531,10 @@ class SalmonFSTests(TestCase):
         v_dir.get_child("folder4").get_child("folder1").get_child("folder2").get_child(file.get_name()).delete()
         v_dir.get_child("folder4").get_child("folder1").get_child(file.get_name()).delete()
         failedmv: list[IFile] = []
-        v_dir.get_child("folder1").move_recursively(v_dir.get_child("folder4"), IFile.auto_rename_file, False,
-                                                    lambda failed_file, e1: failedmv.append(failed_file))
+        rec_move_options: IFile.RecursiveMoveOptions = IFile.RecursiveMoveOptions()
+        rec_move_options.auto_rename = IFile.auto_rename_file
+        rec_move_options.on_failed = lambda failed_file, e1: failedmv.append(failed_file)
+        v_dir.get_child("folder1").move_recursively(v_dir.get_child("folder4"), rec_move_options)
         self.assertEqual(4, len(failed))
         self.assertEqual(1, v_dir.get_children_count())
         self.assertEqual(1, v_dir.get_child("folder4").get_children_count())
@@ -548,10 +557,11 @@ class SalmonFSTests(TestCase):
             print("Error while import: " + str(ex), file=sys.stderr)
             raise ex
 
-        sfiles: list[AesFile] = file_commander.import_files([file],
-                                                            drive.get_root(), False, True,
-                                                            auto_rename=IFile.auto_rename_file,
-                                                            on_failed=on_failed)
+        import_options: AesFileCommander.BatchImportOptions = AesFileCommander.BatchImportOptions()
+        import_options.integrity = True
+        import_options.auto_rename = IFile.auto_rename_file
+        import_options.on_failed = on_failed
+        sfiles: list[AesFile] = file_commander.import_files([file], drive.get_root(), import_options)
         file_commander.close()
 
         pos: int = abs(random.randint(0, file.get_length()))

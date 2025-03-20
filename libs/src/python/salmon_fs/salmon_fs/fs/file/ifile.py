@@ -183,26 +183,22 @@ class IFile(ABC):
         """
         pass
 
-    def move(self, new_dir: IFile, new_name: str | None = None,
-             progress_listener: Callable[[int, int], Any] | None = None) -> IFile:
+    def move(self, new_dir: IFile, options: IFile.MoveOptions | None = None) -> IFile:
         """
         Move this file to another directory.
         
         :param new_dir:           The target directory.
-        :param new_name:          The new filename.
-        :param progress_listener: Observer to notify of the move progress.
+        :param options: The options
         :return: The file after the move. Use this instance for any subsequent file operations.
         """
         pass
 
-    def copy(self, new_dir: IFile, new_name: str | None = None,
-             progress_listener: Callable[[int, int], Any] | None = None) -> IFile:
+    def copy(self, new_dir: IFile, options: IFile.CopyOptions | None = None) -> IFile:
         """
         Copy this file to another directory.
         
         :param new_dir:           The target directory.
-        :param new_name:          The new filename.
-        :param progress_listener: Observer to notify of the copy progress.
+        :param options: The options
         :return: The file after the copy. Use this instance for any subsequent file operations.
         :raises IOError: Thrown if there is an IO error.
         """
@@ -232,151 +228,149 @@ class IFile(ABC):
         pass
 
     @staticmethod
-    def copy_file_contents(src: IFile, dest: IFile, delete: bool = False,
-                           progress_listener: Callable[[int, int], Any] | None = None) -> bool:
+    def copy_file_contents(src: IFile, dest: IFile, options: IFile.CopyContentsOptions) -> bool:
         """
         Copy contents of a file to another file.
 
         :param src:              The source directory
         :param dest:             The target directory
-        :param delete:           True to delete the source files when complete
-        :param progress_listener: The progress listener
+        :param options:     The options
         :return: True if contents copied
         :raises IOError: Thrown if there is an IO error.
         """
         source: RandomAccessStream = src.get_input_stream()
         target: RandomAccessStream = dest.get_output_stream()
         try:
-            source.copy_to(target, progress_listener=progress_listener)
+            source.copy_to(target, on_progress_changed=options.on_progress_changed)
         except Exception as ex:
             dest.delete()
             return False
         finally:
             source.close()
             target.close()
-        if delete:
-            src.delete()
         return True
 
-    def copy_recursively(self, dest: IFile,
-                         auto_rename: Callable[[IFile], str] | None = None,
-                         auto_rename_folders: bool = False,
-                         on_failed: Callable[[IFile, Exception], Any] | None = None,
-                         progress_listener: Callable[[IFile, int, int], Any] | None = None):
+    def copy_recursively(self, dest: IFile, options: IFile.RecursiveCopyOptions | None = None):
         """
         Copy a directory recursively
 
         :param dest: The destination directory
-        :param progress_listener: The progress listener
-        :param auto_rename: The autorename function
-        :param auto_rename_folders: Apply autorename to folders also (default is True)
-        :param on_failed: Callback when copy failed
+        :param options: The options
         :raises IOError: Thrown if there is an IO error.
         """
+
+        if not options:
+            options = IFile.RecursiveCopyOptions()
         new_filename: str = self.get_name()
         new_file: IFile
         new_file = dest.get_child(new_filename)
         if self.is_file():
             if new_file is not None and new_file.exists():
-                if auto_rename is not None:
-                    new_filename = auto_rename(self)
+                if options.auto_rename is not None:
+                    new_filename = options.auto_rename(self)
                 else:
-                    if on_failed is not None:
-                        on_failed(self, Exception("Another file exists"))
+                    if options.on_failed is not None:
+                        options.on_failed(self, Exception("Another file exists"))
                     return
-
-            self.copy(dest, new_filename, lambda position, length: self.notify(position, length, progress_listener))
+            copy_options = IFile.CopyOptions()
+            copy_options.new_filename = new_filename
+            copy_options.on_progress_changed = lambda position, length: self.notify(position, length,
+                                                                                    options.on_progress_changed)
+            self.copy(dest, copy_options)
         elif self.is_directory():
-            if progress_listener is not None:
-                progress_listener(self, 0, 1)
+            if options.on_progress_changed is not None:
+                options.on_progress_changed(self, 0, 1)
             if dest.get_display_path().startswith(self.get_display_path()):
-                if progress_listener:
-                    progress_listener(self, 1, 1)
+                if options.on_progress_changed:
+                    options.on_progress_changed(self, 1, 1)
                 return
-            if new_file is not None and new_file.exists() and auto_rename is not None and auto_rename_folders:
-                new_file = dest.create_directory(auto_rename(self))
+            if new_file is not None and new_file.exists() and options.auto_rename and options.auto_rename_folders:
+                new_file = dest.create_directory(options.auto_rename(self))
             elif new_file is None or not new_file.exists():
                 new_file = dest.create_directory(new_filename)
-            if progress_listener is not None:
-                progress_listener(self, 1, 1)
+            if options.on_progress_changed is not None:
+                options.on_progress_changed(self, 1, 1)
 
             for child in self.list_files():
-                child.copy_recursively(new_file, auto_rename, auto_rename_folders, on_failed, progress_listener)
+                child.copy_recursively(new_file, options)
 
-    def move_recursively(self, dest: IFile,
-                         auto_rename: Callable[[IFile], str] | None = None,
-                         auto_rename_folders: bool = False,
-                         on_failed: Callable[[IFile, Exception], Any] | None = None,
-                         progress_listener: Callable[[IFile, int, int], Any] | None = None):
+    def move_recursively(self, dest: IFile, options: IFile.RecursiveMoveOptions | None = None):
         """
         Move a directory recursively
 
         :param dest:              The target directory
-        :param progress_listener: The progress listener
-        :param auto_rename: The autorename function
-        :param auto_rename_folders: Apply autorename to folders also (default is True)
-        :param on_failed: Callback when move failed
+        :param options: The options
         """
+        if not options:
+            options = IFile.RecursiveMoveOptions()
+
         # target directory is the same
         if self.get_parent().get_path() == dest.get_path():
-            if progress_listener is not None:
-                progress_listener(self, 0, 1)
-                progress_listener(self, 1, 1)
+            if options.on_progress_changed:
+                options.on_progress_changed(self, 0, 1)
+                options.on_progress_changed(self, 1, 1)
             return
 
         new_filename: str = self.get_name()
         new_file: IFile
         new_file = dest.get_child(new_filename)
         if self.is_file():
-            if new_file is not None and new_file.exists():
+            if new_file and new_file.exists():
                 if new_file.get_path() == self.get_path():
                     return
-                if auto_rename is not None:
-                    new_filename = auto_rename(self)
+                if options.auto_rename:
+                    new_filename = options.auto_rename(self)
                 else:
-                    if on_failed is not None:
-                        on_failed(self, Exception("Another file exists"))
+                    if options.on_failed is not None:
+                        options.on_failed(self, Exception("Another file exists"))
                     return
 
-            self.move(dest, new_filename,
-                      lambda position, length: self.notify(position, length, progress_listener))
+            move_options: IFile.MoveOptions = IFile.MoveOptions()
+            move_options.new_filename = new_filename
+            move_options.on_progress_changed = lambda position, length: self.notify(position, length,
+                                                                                    options.on_progress_changed)
+            self.move(dest, move_options)
         elif self.is_directory():
-            if progress_listener is not None:
-                progress_listener(self, 0, 1)
-            if (new_file is not None and new_file.exists() and auto_rename is not None and auto_rename_folders) \
-                    or new_file is None or not new_file.exists():
-                new_file = self.move(dest, auto_rename(self))
+            if options.on_progress_changed:
+                options.on_progress_changed(self, 0, 1)
+            if (new_file and new_file.exists() and options.auto_rename and options.auto_rename_folders) \
+                    or not new_file or not new_file.exists():
+                move_options: IFile.MoveOptions = IFile.MoveOptions()
+                move_options.new_filename = options.auto_rename(self)
+                new_file = self.move(dest, move_options)
                 return
 
-            if progress_listener is not None:
-                progress_listener(self, 1, 1)
+            if options.on_progress_changed is not None:
+                options.on_progress_changed(self, 1, 1)
 
             for child in self.list_files():
-                child.move_recursively(new_file, auto_rename, auto_rename_folders, on_failed, progress_listener)
+                child.move_recursively(new_file, options)
 
             if not self.delete():
-                on_failed(self, Exception("Could not delete source directory"))
+                options.on_failed(self, Exception("Could not delete source directory"))
 
-    def delete_recursively(self, on_failed: Callable[[IFile, Exception], Any] | None = None,
-                           progress_listener: Callable[[IFile, int, int], Any] | None = None):
+    def delete_recursively(self, options: IFile.RecursiveDeleteOptions | None = None):
         """
         Delete a directory recursively
-        :param progress_listener: Progress listener
-        :param on_failed: Callback when delete fails
+        :param options: The options
         """
+        if not options:
+            options = IFile.RecursiveDeleteOptions()
+
         if self.is_file():
-            progress_listener(self, 0, 1)
+            options.on_progress_changed(self, 0, 1)
             if not self.delete():
-                on_failed(self, Exception("Could not delete file"))
+                options.on_failed(self, Exception("Could not delete file"))
                 return
 
-            progress_listener(self, 1, 1)
+            options.on_progress_changed(self, 1, 1)
         elif self.is_directory():
             for child in self.list_files():
-                child.delete_recursively(on_failed, progress_listener)
+                child.delete_recursively(options)
 
             if not self.delete():
-                on_failed(self, Exception("Could not delete directory"))
+                if options.on_failed:
+                    options.on_failed(self, Exception("Could not delete directory"))
                 return
 
     @staticmethod
@@ -418,3 +412,108 @@ class IFile(ABC):
             return file_name[index + 1:]
         else:
             return ""
+
+    class CopyOptions:
+        """
+        File copy options
+        """
+
+        new_filename: str | None = None
+        """
+        Override filename
+        """
+
+        on_progress_changed: Callable[[int, int], Any] | None = None
+        """
+        Callback where progress changed
+        """
+
+    class MoveOptions:
+        """
+        File move options
+        """
+
+        new_filename: str | None = None
+        """
+        Override filename
+        """
+
+        on_progress_changed: Callable[[int, int], Any] | None = None
+        """
+        Callback where progress changed
+        """
+
+    class RecursiveCopyOptions:
+        """
+        Directory copy options (recursively)
+        """
+
+        auto_rename: Callable[[IFile], str] | None = None
+        """
+        Callback when file with same name exists
+        """
+
+        auto_rename_folders: bool = False
+        """
+        True to auto_rename folders
+        """
+
+        on_failed: Callable[[IFile, Exception], Any] | None = None
+        """
+        Callback when file changes
+        """
+
+        on_progress_changed: Callable[[IFile, int, int], Any] | None = None
+        """
+        Callback where progress changed
+        """
+
+    class RecursiveMoveOptions:
+        """
+        Directory move options (recursively)
+        """
+
+        auto_rename: Callable[[IFile], str] | None = None
+        """
+        Callback when file with the same name exists
+        """
+
+        auto_rename_folders: bool = False
+        """
+        True to auto_rename folders
+        """
+
+        on_failed: Callable[[IFile, Exception], Any] | None = None
+        """
+        Callback when file failed
+        """
+
+        on_progress_changed: Callable[[IFile, int, int], Any] | None = None
+        """
+        Callback when progress changes
+        """
+
+    class RecursiveDeleteOptions:
+        """
+        Directory move options (recursively)
+        """
+
+        on_failed: Callable[[IFile, Exception], Any] | None = None
+        """
+        Callback when file failed
+        """
+
+        on_progress_changed: Callable[[IFile, int, int], Any] | None = None
+        """
+        Callback when progress changed
+        """
+
+    class CopyContentsOptions:
+        """
+        Directory move options (recursively)
+        """
+
+        on_progress_changed: Callable[[int, int], Any] | None = None
+        """
+        Callback when progress changed
+        """

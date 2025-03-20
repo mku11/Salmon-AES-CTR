@@ -54,18 +54,6 @@ class FileSearcher:
     def stop(self):
         self.__quit = True
 
-    class OnResultFoundListener(ABC):
-        """
-        Functional interface to notify when result is found.
-        """
-
-        def on_result_found(self, search_result: AesFile):
-            """
-            Fired when search result found.
-            :param search_result: The search result.
-            """
-            pass
-
     def is_running(self) -> bool:
         """
         True if a search is running.
@@ -80,26 +68,25 @@ class FileSearcher:
         """
         return self.__quit
 
-    def search(self, v_dir: AesFile, terms: str, any_term: bool,
-               on_result_found: FileSearcher.OnResultFoundListener | None = None,
-               on_search_event: Callable[[FileSearcher.SearchEvent], Any] | None = None) -> list[AesFile]:
+    def search(self, v_dir: AesFile, terms: str, options: FileSearcher.SearchOptions | None = None) -> list[AesFile]:
         """
         Search files in directory and its subdirectories recursively for matching terms.
         :param v_dir: The directory to start the search.
         :param terms: The terms to search for.
-        :param any_term: True if you want to match any term otherwise match all terms.
-        :param on_result_found: Callback interface to receive notifications when results found.
-        :param on_search_event: Callback interface to receive status events.
+        :param options: The options
         :return: An array with all the results found.
         """
+
+        if not options:
+            options = FileSearcher.SearchOptions()
         self.__running = True
         self.__quit = False
         search_results: dict[str, AesFile] = {}
-        if on_search_event is not None:
-            on_search_event(FileSearcher.SearchEvent.SearchingFiles)
-        self.__search_dir(v_dir, terms, any_term, on_result_found, search_results)
-        if on_search_event is not None:
-            on_search_event(FileSearcher.SearchEvent.SearchingFinished)
+        if options.on_search_event is not None:
+            options.on_search_event(FileSearcher.SearchEvent.SearchingFiles)
+        self.__search_dir(v_dir, terms, options.any_term, options.on_result_found, search_results)
+        if options.on_search_event is not None:
+            options.on_search_event(FileSearcher.SearchEvent.SearchingFinished)
         self.__running = False
         return list(search_results.values())
 
@@ -124,7 +111,7 @@ class FileSearcher:
         return 0
 
     def __search_dir(self, v_dir: AesFile, terms: str, anyterm: bool,
-                     on_result_found: FileSearcher.OnResultFoundListener | None,
+                     on_result_found: Callable[[AesFile], Any] | None,
                      search_results: dict[str, AesFile]):
         """
         Search a directory for all filenames matching the terms supplied.
@@ -154,3 +141,23 @@ class FileSearcher:
                             on_result_found.on_result_found(file)
                 except Exception as ex:
                     print(ex, file=sys.stderr)
+
+    class SearchOptions:
+        """
+         Search options
+        """
+
+        any_term: bool = False
+        """
+         True to search for any term, otherwise match all
+        """
+
+        on_result_found: Callable[[IFile], Any] | None = None
+        """
+         Callback when result found
+        """
+
+        on_search_event: Callable[[FileSearcher.SearchEvent], Any] | None = None
+        """
+         Callback when search event happens.
+        """

@@ -26,7 +26,6 @@ SOFTWARE.
 """
 
 import os
-from typing import Any, Callable
 from typeguard import typechecked
 
 from salmon_fs.fs.file.ifile import IFile
@@ -194,21 +193,25 @@ class File(IFile):
         real_dirs.extend(real_files)
         return real_dirs
 
-    def move(self, new_dir: IFile, new_name: str | None = None,
-             progress_listener: Callable[[int, int], Any] | None = None) -> IFile:
+    def move(self, new_dir: IFile, options: IFile.MoveOptions | None = None) -> IFile:
         """
         Move this file or directory under a new directory.
         :param new_dir: The target directory.
-        :param new_name: The new filename
-        :param progress_listener: Observer to notify when progress changes.
+        :param options: The options
         :return: The moved file. Use this file for subsequent operations instead of the original.
         """
-        new_name = new_name if new_name is not None else self.get_name()
+
+        if not options:
+            options = IFile.MoveOptions()
+        new_name: str = options.new_filename if options.new_filename else self.get_name()
         if new_dir is None or not new_dir.exists():
             raise IOError("Target directory does not exists")
         new_file: IFile = new_dir.get_child(new_name)
-        if new_file is not None and new_file.exists():
+        if new_file and new_file.exists():
             raise IOError("Another file/directory already exists")
+
+        if options.on_progress_changed:
+            options.on_progress_changed(0, self.get_length())
         if self.is_directory():
             raise IOError("Could not move directory use IRealFile moveRecursively() instead")
         else:
@@ -216,19 +219,22 @@ class File(IFile):
             os.rename(self.__file_path, n_file_path)
             if not os.path.exists(n_file_path):
                 raise RuntimeError("directory already exists")
-            return File(n_file_path)
+            new_file = File(n_file_path)
+            if options.on_progress_changed:
+                options.on_progress_changed(new_file.get_length(), new_file.get_length())
+            return new_file
 
-    def copy(self, new_dir: IFile, new_name: str | None = None,
-             progress_listener: Callable[[int, int], Any] | None = None) -> IFile:
+    def copy(self, new_dir: IFile, options: IFile.CopyOptions | None = None) -> IFile:
         """
         Move this file or directory under a new directory.
         :param new_dir:    The target directory.
-        :param new_name:   New filename
-        :param progress_listener: Observer to notify when progress changes.
+        :param options:     The options
         :return: The copied file. Use this file for subsequent operations instead of the original.
         :raises IOError: Thrown if there is an IO error.
         """
-        new_name = new_name if new_name is not None else self.get_name()
+        if not options:
+            options = IFile.CopyOptions()
+        new_name: str = options.new_filename if options.new_filename else self.get_name()
         if new_dir is None or not new_dir.exists():
             raise IOError("Target directory does not exists")
         new_file: IFile = new_dir.get_child(new_name)
@@ -238,7 +244,9 @@ class File(IFile):
             raise IOError("Could not copy directory use IRealFile copyRecursively() instead")
         else:
             new_file = new_dir.create_file(new_name)
-            res: bool = IFile.copy_file_contents(self, new_file, False, progress_listener)
+            copy_content_options = IFile.CopyContentsOptions()
+            copy_content_options.on_progress_changed = options.on_progress_changed
+            res: bool = IFile.copy_file_contents(self, new_file, copy_content_options)
             return new_file if res else None
 
     def get_child(self, filename: str) -> IFile | None:

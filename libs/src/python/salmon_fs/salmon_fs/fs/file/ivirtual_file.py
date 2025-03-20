@@ -101,26 +101,82 @@ class IVirtualFile(ABC):
     def rename(self, new_filename: str):
         pass
 
-    def move(self, v_dir: IVirtualFile, on_progress_listener: Callable[[int, int], Any] | None = None) -> IVirtualFile:
+    def move(self, v_dir: IVirtualFile, options: IFile.MoveOptions | None = None) -> IVirtualFile:
         pass
 
-    def copy(self, v_dir: IVirtualFile, on_progress_listener: Callable[[int, int], Any] | None = None) -> IVirtualFile:
+    def copy(self, v_dir: IVirtualFile, options: IFile.CopyOptions | None = None) -> IVirtualFile:
         pass
 
-    def copy_recursively(self, dest: IVirtualFile,
-                         auto_rename: Callable[[IVirtualFile], str] | None = None,
-                         auto_rename_folders: bool = False,
-                         on_failed: Callable[[IVirtualFile, Exception], Any] | None = None,
-                         progress_listener: Callable[[IVirtualFile, int, int], Any] | None = None):
+    def copy_recursively(self, dest: IVirtualFile, options: IVirtualFile.VirtualRecursiveCopyOptions | None = None):
         pass
 
-    def move_recursively(self, dest: IVirtualFile,
-                         auto_rename: Callable[[IVirtualFile], str] | None = None,
-                         auto_rename_folders: bool = False,
-                         on_failed: Callable[[IVirtualFile, Exception], Any] | None = None,
-                         progress_listener: Callable[[IVirtualFile, int, int], Any] | None = None):
+    def move_recursively(self, dest: IVirtualFile, options: IVirtualFile.VirtualRecursiveMoveOptions | None = None):
         pass
 
-    def delete_recursively(self, on_failed: Callable[[IVirtualFile, Exception], Any] | None = None,
-                           progress_listener: Callable[[IVirtualFile, int, int], Any] | None = None):
+    def delete_recursively(self, options: IVirtualFile.VirtualRecursiveDeleteOptions | None = None):
         pass
+
+
+    class VirtualRecursiveCopyOptions:
+        """
+          Directory copy options (recursively)
+        """
+        auto_rename: Callable[[IVirtualFile], str] | None = None
+        """
+          Callback when file with same name exists
+        """
+
+        auto_rename_folders: bool = False
+        """
+          True to autorename folders
+        """
+
+        on_failed: Callable[[IVirtualFile, Exception], Any] | None = None
+        """
+          Callback when file changes
+        """
+
+        on_progress_changed: Callable[[IVirtualFile, int, int], Any] | None = None
+        """
+          Callback where progress changed
+        """
+
+    class VirtualRecursiveMoveOptions:
+        """
+          Directory move options (recursively)
+        """
+
+        auto_rename: Callable[[IVirtualFile], str] | None = None
+        """
+          Callback when file with the same name exists
+        """
+
+        auto_rename_folders: bool = False
+        """
+          True to autorename folders
+        """
+
+        on_failed: Callable[[IVirtualFile, Exception], Any] | None = None
+        """
+          Callback when file failed
+        """
+
+        on_progress_changed: Callable[[IVirtualFile, int, int], Any] | None = None
+        """
+          Callback when progress changes
+        """
+
+    class VirtualRecursiveDeleteOptions:
+        """
+          Directory move options (recursively)
+        """
+
+        on_failed: Callable[[IVirtualFile, Exception], Any] | None = None
+        """
+          Callback when file failed
+        """
+
+        on_progress_changed: Callable[[IVirtualFile, int, int], Any] | None = None
+        """
+          Callback when progress changed
+        """

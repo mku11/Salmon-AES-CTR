@@ -30,7 +30,7 @@ import http.client
 import urllib.parse
 from urllib.parse import urlparse
 from http.client import HTTPResponse, HTTPConnection, HTTPSConnection
-from typing import Any, Callable
+from typing import Any
 
 from typeguard import typechecked
 from threading import RLock
@@ -352,16 +352,18 @@ class WSFile(IFile):
                     http_response.close()
         return []
 
-    def move(self, new_dir: IFile, new_name: str | None = None,
-             progress_listener: Callable[[int, int], Any] | None = None) -> IFile:
+    def move(self, new_dir: IFile, options: IFile.MoveOptions | None = None) -> IFile:
         """
         Move this file or directory under a new directory.
         :param new_dir: The target directory.
-        :param new_name: The new filename
-        :param progress_listener: Observer to notify when progress changes.
+        :param options: The options
         :return: The moved file. Use this file for subsequent operations instead of the original.
         """
-        new_name = new_name if new_name is not None else self.get_name()
+
+        if not options:
+            options = IFile.MoveOptions()
+
+        new_name: str = options.new_filename if options.new_filename else self.get_name()
         if new_dir is None or not new_dir.exists():
             raise IOError("Target directory does not exist")
 
@@ -394,17 +396,15 @@ class WSFile(IFile):
                 if http_response:
                     http_response.close()
 
-    def copy(self, new_dir: IFile, new_name: str | None = None,
-             progress_listener: Callable[[int, int], Any] | None = None) -> IFile:
-        """
+    def copy(self, new_dir: IFile, options: IFile.CopyOptions | None = None) -> IFile:
+        """!
         Move this file or directory under a new directory.
         :param new_dir:    The target directory.
-        :param new_name:   New filename
-        :param progress_listener: Observer to notify when progress changes.
+        :param options: The options
         :return: The copied file. Use this file for subsequent operations instead of the original.
         :raises IOError: Thrown if there is an IO error.
         """
-        new_name = new_name if new_name is not None else self.get_name()
+        new_name: str = options.new_filename if options.new_filename else self.get_name()
         if new_dir is None or not new_dir.exists():
             raise IOError("Target directory does not exists")
         new_file: IFile | None = new_dir.get_child(new_name)

@@ -266,7 +266,7 @@ class SalmonFSTestHelper:
                         SalmonFSTestHelper.TEST_IMPORT_LARGE_FILE]
         importer = AesFileImporter(SalmonFSTestHelper.ENC_IMPORT_BUFFER_SIZE, SalmonFSTestHelper.ENC_IMPORT_THREADS)
         for import_file in import_files:
-            importer.import_file(import_file, root_dir, None, False, True, None)
+            importer.import_file(import_file, root_dir)
         importer.close()
 
     @staticmethod
@@ -362,9 +362,10 @@ class SalmonFSTestHelper:
             print("importing file: " + file_to_import.get_name() + ": " + str(vb) + "/" + str(
                 tb)) if SalmonFSTestHelper.ENABLE_FILE_PROGRESS else None
 
-        salmon_file: AesFile = SalmonFSTestHelper.file_importer.import_file(file_to_import, root_dir, None, False,
-                                                                            apply_file_integrity,
-                                                                            print_import_progress)
+        import_options = AesFileImporter.FileImportOptions()
+        import_options.integrity = apply_file_integrity
+        import_options.on_progress_changed = print_import_progress
+        salmon_file: AesFile = SalmonFSTestHelper.file_importer.import_file(file_to_import, root_dir, import_options)
 
         # get fresh copy of the file
         # TODO: for remote files the output stream should clear all cached file properties
@@ -407,10 +408,11 @@ class SalmonFSTestHelper:
         else:
             salmon_file.set_verify_integrity(False)
 
+        export_options = AesFileExporter.FileExportOptions()
+        export_options.integrity = verify_file_integrity
+        export_options.on_progress_changed = print_export_progress
         export_file: IFile = SalmonFSTestHelper.file_exporter.export_file(salmon_file, drive.get_export_dir(),
-                                                                          None,
-                                                                          False, verify_file_integrity,
-                                                                          print_export_progress)
+                                                                          export_options)
 
         hash_post_export: str = SalmonFSTestHelper.get_checksum(export_file)
         if should_be_equal:
@@ -442,8 +444,7 @@ class SalmonFSTestHelper:
         rbasename: str = file_to_import.get_name()
 
         # import
-        salmon_file: AesFile = SalmonFSTestHelper.file_importer.import_file(file_to_import, root_dir, None, False,
-                                                                            False, None)
+        salmon_file: AesFile = SalmonFSTestHelper.file_importer.import_file(file_to_import, root_dir)
 
         # trigger the cache to add the filename
         basename: str = salmon_file.get_name()
@@ -453,7 +454,9 @@ class SalmonFSTestHelper:
         SalmonFSTestHelper.testCase.assertTrue(salmon_file.exists())
 
         searcher: FileSearcher = FileSearcher()
-        files: list[AesFile] = searcher.search(root_dir, basename, True, None, None)
+        search_options = FileSearcher.SearchOptions()
+        search_options.any_term = True
+        files: list[AesFile] = searcher.search(root_dir, basename, search_options)
 
         SalmonFSTestHelper.testCase.assertTrue(len(files) > 0)
         SalmonFSTestHelper.testCase.assertEqual(files[0].get_name(), basename)
@@ -468,8 +471,7 @@ class SalmonFSTestHelper:
         rbasename: str = file_to_import.get_name()
 
         # import
-        salmon_file: AesFile = SalmonFSTestHelper.file_importer.import_file(file_to_import, root_dir, None, False,
-                                                                            False, None)
+        salmon_file: AesFile = SalmonFSTestHelper.file_importer.import_file(file_to_import, root_dir)
 
         # trigger the cache to add the filename
         basename: str = salmon_file.get_name()
@@ -565,9 +567,7 @@ class SalmonFSTestHelper:
         # import a test file
         root_dir: AesFile = drive.get_root()
         file_to_import: IFile = import_file_path
-        salmon_file_a1: AesFile = SalmonFSTestHelper.file_importer.import_file(file_to_import, root_dir, None, False,
-                                                                               False,
-                                                                               None)
+        salmon_file_a1: AesFile = SalmonFSTestHelper.file_importer.import_file(file_to_import, root_dir)
         nonce_a1: int = BitConverter.to_long(salmon_file_a1.get_requested_nonce(), 0, Generator.NONCE_LENGTH)
         drive.close()
 
@@ -580,7 +580,7 @@ class SalmonFSTestHelper:
             # import a test file should fail because not authorized
             root_dir = drive.get_root()
             file_to_import = import_file_path
-            SalmonFSTestHelper.file_importer.import_file(file_to_import, root_dir, None, False, False, None)
+            SalmonFSTestHelper.file_importer.import_file(file_to_import, root_dir)
             success = True
         except Exception as ignored:
             print("failed: " + str(ignored), file=sys.stderr)
@@ -601,9 +601,7 @@ class SalmonFSTestHelper:
         #  import another test file
         salmon_root_dir = drive.get_root()
         file_to_import = import_file_path
-        salmon_file_a2: AesFile = SalmonFSTestHelper.file_importer.import_file(file_to_import, salmon_root_dir, None,
-                                                                               False, False,
-                                                                               None)
+        salmon_file_a2: AesFile = SalmonFSTestHelper.file_importer.import_file(file_to_import, salmon_root_dir)
         nonce_a2: int = BitConverter.to_long(salmon_file_a2.get_file_nonce(), 0, Generator.NONCE_LENGTH)
         drive.close()
 
@@ -614,13 +612,9 @@ class SalmonFSTestHelper:
         # now import a 3rd file
         root_dir = drive.get_root()
         file_to_import = import_file_path
-        salmon_file_b1: AesFile = SalmonFSTestHelper.file_importer.import_file(file_to_import, root_dir, None, False,
-                                                                               False,
-                                                                               None)
+        salmon_file_b1: AesFile = SalmonFSTestHelper.file_importer.import_file(file_to_import, root_dir)
         nonce_b1: int = BitConverter.to_long(salmon_file_b1.get_file_nonce(), 0, Generator.NONCE_LENGTH)
-        salmon_file_b2: AesFile = SalmonFSTestHelper.file_importer.import_file(file_to_import, root_dir, None, False,
-                                                                               False,
-                                                                               None)
+        salmon_file_b2: AesFile = SalmonFSTestHelper.file_importer.import_file(file_to_import, root_dir)
         nonce_b2: int = BitConverter.to_long(salmon_file_b2.get_file_nonce(), 0, Generator.NONCE_LENGTH)
         drive.close()
 
@@ -650,8 +644,8 @@ class SalmonFSTestHelper:
         import_success: bool
         try:
             sequencer: FileSequencer = SalmonFSTestHelper.TestFileSequencer(seq_file,
-                                                                               SequenceSerializer(),
-                                                                               test_max_nonce, offset)
+                                                                            SequenceSerializer(),
+                                                                            test_max_nonce, offset)
             try:
                 drive = AesDrive.open_drive(vault_dir, SalmonFSTestHelper.drive_class_type,
                                             SalmonCoreTestHelper.TEST_PASSWORD, sequencer)
@@ -661,8 +655,7 @@ class SalmonFSTestHelper:
             root_dir: AesFile = drive.get_root()
             root_dir.list_files()
             file_to_import: IFile = import_file
-            salmon_file: AesFile = SalmonFSTestHelper.file_importer.import_file(file_to_import, root_dir,
-                                                                                None, False, False, None)
+            salmon_file: AesFile = SalmonFSTestHelper.file_importer.import_file(file_to_import, root_dir)
             import_success = salmon_file is not None
         except Exception as ex:
             if type(ex) is RangeExceededException:
@@ -960,9 +953,13 @@ class SalmonFSTestHelper:
             print("export failed: " + sfile.get_name() + "\n" + str(ex))
 
         # export files
-        files_exported = commander.export_files(files, v_dir, False, True,
-                                                IFile.auto_rename_file,
-                                                on_failed, print_export_progress)
+        export_options = AesFileCommander.BatchExportOptions()
+        export_options.delete_source = False
+        export_options.integrity = True
+        export_options.auto_rename = IFile.auto_rename_file
+        export_options.on_failed = on_failed
+        export_options.on_progress_changed = print_export_progress
+        files_exported = commander.export_files(files, v_dir, export_options)
 
         print("Files exported")
 

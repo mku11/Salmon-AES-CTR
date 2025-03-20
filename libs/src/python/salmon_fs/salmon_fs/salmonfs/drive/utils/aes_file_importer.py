@@ -83,7 +83,7 @@ def import_file_part(file_to_import: IFile, salmon_file: AesFile, start: int, co
                      total_bytes_read: memoryview | None, buffer_size: int,
                      shm_cancel_name: str | None = None,
                      stopped: list[bool] | None = None,
-                     on_progress: Callable[[int, int], Any] | None = None):
+                     on_progress_changed: Callable[[int, int], Any] | None = None):
     """
     Import a file part into a file in the drive.
     
@@ -129,8 +129,8 @@ def import_file_part(file_to_import: IFile, salmon_file: AesFile, start: int, co
             total_part_bytes_read += bytes_read
             if total_bytes_read is not None:
                 total_bytes_read[:8] = BitConverter.to_bytes(total_part_bytes_read, 8)[0:8]
-            if on_progress:
-                on_progress(total_part_bytes_read, count)
+            if on_progress_changed:
+                on_progress_changed(total_part_bytes_read, count)
     except Exception as ex:
         print(ex, file=sys.stderr)
         raise ex
@@ -229,25 +229,23 @@ class AesFileImporter:
         """
         return not self.__stopped[0]
 
-    def import_file(self, file_to_import: IFile, v_dir: AesFile, filename: str | None = None, delete_source: bool = False,
-                    integrity: bool = False,
-                    on_progress: Callable[[int, int], Any] | None = None) -> AesFile | None:
+    def import_file(self, file_to_import: IFile, v_dir: AesFile,
+                    options: AesFileImporter.FileImportOptions | None = None) -> AesFile | None:
         """
         Imports a real file into the drive.
         
         :param file_to_import: The source file that will be imported in to the drive.
         :param v_dir:          The target directory in the drive that the file will be imported
-        :param filename:    The file name
-        :param delete_source: If True delete the source file.
-        :param integrity:    Apply data integrity
-        :param on_progress:   Progress to notify
+        :param options: The options
          """
+        if not options:
+            options = AesFileImporter.FileImportOptions()
         if self.is_running():
             raise Exception("Another import is running")
         if file_to_import.is_directory():
             raise Exception("Cannot import directory, use AesFileCommander instead")
 
-        filename = filename if filename is not None else file_to_import.get_name()
+        filename: str = options.filename if options.filename else file_to_import.get_name()
         imported_file: AesFile
         try:
             self.__stopped[0] = False
@@ -257,7 +255,7 @@ class AesFileImporter:
             imported_file = v_dir.create_file(filename)
             imported_file.set_allow_overwrite(True)
             # we use default chunk file size
-            imported_file.set_apply_integrity(integrity)
+            imported_file.set_apply_integrity(options.integrity)
 
             file_size: int = file_to_import.get_length()
             running_threads: int = 1
@@ -281,14 +279,14 @@ class AesFileImporter:
 
             if running_threads == 1:
                 import_file_part(file_to_import, imported_file, 0, file_size, None, self.__buffer_size,
-                                 None, self.__stopped, on_progress)
+                                 None, self.__stopped, options.on_progress_changed)
             else:
                 self.__submit_import_jobs(running_threads, part_size, file_to_import, imported_file,
-                                          integrity, on_progress)
+                                          options.integrity, options.on_progress_changed)
 
             if self.__stopped[0]:
                 imported_file.get_real_file().delete()
-            elif delete_source:
+            elif options.delete_source:
                 file_to_import.delete()
             if self.__lastException is not None:
                 raise self.__lastException
@@ -308,7 +306,7 @@ class AesFileImporter:
     def __submit_import_jobs(self, running_threads: int, part_size: int, file_to_import: IFile,
                              imported_file: AesFile,
                              integrity: bool,
-                             on_progress: Callable[[int, int], Any] | None):
+                             on_progress_changed: Callable[[int, int], Any] | None):
 
         shm_total_bytes_read = shared_memory.SharedMemory(create=True, size=8 * running_threads)
         shm_total_bytes_read_name = shm_total_bytes_read.name
@@ -338,8 +336,8 @@ class AesFileImporter:
 
             if total_bytes_read != n_total_bytes_read:
                 total_bytes_read = n_total_bytes_read
-                if on_progress:
-                    on_progress(total_bytes_read, file_size)
+                if on_progress_changed:
+                    on_progress_changed(total_bytes_read, file_size)
 
             complete: bool = True
             for f in fs:
@@ -369,3 +367,28 @@ class AesFileImporter:
         self.__executor.shutdown()
         self.__shm_cancel.close()
         self.__shm_cancel.unlink()
+
+    class FileImportOptions:
+        """
+         File importer options
+        """
+
+        filename: str | None = None
+        """
+         Override the filename
+        """
+
+        delete_source: bool = False
+        """
+         Delete the source file after completion.
+        """
+
+        integrity: bool = False
+        """
+         True to enable integrity.
+        """
+
+        on_progress_changed: Callable[[int, int], Any] | None = None
+        """
+         Callback when progress changes
+        """

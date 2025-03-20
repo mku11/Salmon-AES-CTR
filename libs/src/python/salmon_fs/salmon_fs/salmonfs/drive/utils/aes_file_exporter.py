@@ -78,7 +78,7 @@ def export_file_part(file_to_export: AesFile, exported_file: IFile, start: int, 
                      total_bytes_written: memoryview | None, buffer_size: int,
                      shm_cancel_name: str | None = None,
                      stopped: list[bool] | None = None,
-                     on_progress: Callable[[int, int], Any] | None = None):
+                     on_progress_changed: Callable[[int, int], Any] | None = None):
     """
     Export a file part from the drive.
     
@@ -90,7 +90,7 @@ def export_file_part(file_to_export: AesFile, exported_file: IFile, start: int, 
     :param buffer_size: The buffer size
     :param shm_cancel_name: The shared memory for cancelation
     :param stopped: The stopped flag
-    :param on_progress: The progress listener
+    :param on_progress_changed: The progress listener
     """
 
     shm_cancel_data: memoryview | None = None
@@ -124,8 +124,8 @@ def export_file_part(file_to_export: AesFile, exported_file: IFile, start: int, 
             total_part_bytes_written += bytes_read
             if total_bytes_written is not None:
                 total_bytes_written[:8] = BitConverter.to_bytes(total_part_bytes_written, 8)[0:8]
-            if on_progress:
-                on_progress(total_part_bytes_written, count)
+            if on_progress_changed:
+                on_progress_changed(total_part_bytes_written, count)
     except Exception as ex:
         print(ex, file=sys.stderr)
         raise ex
@@ -221,20 +221,17 @@ class AesFileExporter:
         """
         return not self.__stopped[0]
 
-    def export_file(self, file_to_export: AesFile, export_dir: IFile, filename: str | None = None,
-                    delete_source: bool = False,
-                    integrity: bool = False,
-                    on_progress: Callable[[int, int], Any] | None = None) -> IFile | None:
+    def export_file(self, file_to_export: AesFile, export_dir: IFile,
+                    options: AesFileExporter.FileExportOptions | None = None) -> IFile | None:
         """
         Export a file from the drive to the external directory path
         
         :param file_to_export: The file that will be exported
         :param export_dir:    The external directory the file will be exported to
-        :param filename:     The filename to use
-        :param delete_source: Delete the source file when the export finishes successfully
-        :param integrity:    True to verify integrity
-        :param on_progress: Progress listener
+        :param options: The options
         """
+        if not options:
+            options = AesFileExporter.FileExportOptions()
 
         if self.is_running():
             Exception("Another export is running")
@@ -242,7 +239,7 @@ class AesFileExporter:
             raise Exception("Cannot export directory, use AesFileCommander instead")
 
         exported_file: IFile | None = None
-        filename = filename if filename is not None else file_to_export.get_name()
+        filename: str = options.filename if options.filename else file_to_export.get_name()
         try:
             self.__stopped[0] = False
             total_bytes_written = [0]
@@ -253,7 +250,7 @@ class AesFileExporter:
                 export_dir.mkdir()
             exported_file = export_dir.create_file(filename)
             # we use the drive hash key for integrity verification
-            file_to_export.set_verify_integrity(integrity)
+            file_to_export.set_verify_integrity(options.integrity)
 
             file_size: int = file_to_export.get_length()
             running_threads: int = 1
@@ -276,14 +273,14 @@ class AesFileExporter:
 
             if running_threads == 1:
                 export_file_part(file_to_export, exported_file, 0, file_size, None, self.__buffer_size,
-                                 None, self.__stopped, on_progress)
+                                 None, self.__stopped, options.on_progress_changed)
             else:
                 self.__submit_export_jobs(running_threads, part_size, file_to_export, exported_file,
-                                          integrity, on_progress)
+                                          options.integrity, options.on_progress_changed)
 
             if self.__stopped[0]:
                 exported_file.delete()
-            elif delete_source:
+            elif options.delete_source:
                 file_to_export.get_real_file().delete()
             if self.__lastException is not None:
                 raise self.__lastException
@@ -302,7 +299,7 @@ class AesFileExporter:
 
     def __submit_export_jobs(self, running_threads: int, part_size: int, file_to_export: AesFile,
                              exported_file: IFile,
-                             integrity: bool, on_progress: Callable[[int, int], Any] | None):
+                             integrity: bool, on_progress_changed: Callable[[int, int], Any] | None):
 
         shm_total_bytes_read = shared_memory.SharedMemory(create=True, size=8 * running_threads)
         shm_total_bytes_read_name = shm_total_bytes_read.name
@@ -333,8 +330,8 @@ class AesFileExporter:
 
             if total_bytes_written != n_total_bytes_read:
                 total_bytes_written = n_total_bytes_read
-            if on_progress:
-                on_progress(total_bytes_written, file_size)
+            if on_progress_changed:
+                on_progress_changed(total_bytes_written, file_size)
 
             complete: bool = True
             for f in fs:
@@ -364,3 +361,28 @@ class AesFileExporter:
         self.__executor.shutdown(False)
         self.__shm_cancel.close()
         self.__shm_cancel.unlink()
+
+    class FileExportOptions:
+        """
+         File exporter options
+        """
+
+        filename: str | None = None
+        """
+         Override the filename
+        """
+
+        delete_source: bool = False
+        """
+         Delete the source file after completion.
+        """
+
+        integrity: bool = False
+        """
+         True to enable integrity.
+        """
+
+        on_progress_changed: Callable[[int, int], Any] | None = None
+        """
+         Callback when progress changes
+        """

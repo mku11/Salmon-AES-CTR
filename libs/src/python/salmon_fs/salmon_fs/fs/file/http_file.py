@@ -248,24 +248,20 @@ class HttpFile(IFile):
                     stream.close()
         return []
 
-    def move(self, new_dir: IFile, new_name: str | None = None,
-             progress_listener: Callable[[int, int], Any] | None = None) -> IFile:
+    def move(self, new_dir: IFile, options: IFile.MoveOptions | None = None) -> IFile:
         """
-        Move this file or directory under a new directory.
+        Move this file or directory under a new directory. Not supported.
         :param new_dir: The target directory.
-        :param new_name: The new filename
-        :param progress_listener: Observer to notify when progress changes.
+        :param options: The options
         :return: The moved file. Use this file for subsequent operations instead of the original.
         """
         raise Exception("Unsupported Operation, readonly filesystem")
 
-    def copy(self, new_dir: IFile, new_name: str | None = None,
-             progress_listener: Callable[[int, int], Any] | None = None) -> IFile:
+    def copy(self, new_dir: IFile, options: IFile.CopyOptions | None = None) -> IFile:
         """
-        Move this file or directory under a new directory.
+        Move this file or directory under a new directory. Not supported.
         :param new_dir:    The target directory.
-        :param new_name:   New filename
-        :param progress_listener: Observer to notify when progress changes.
+        :param options: The options
         :return: The copied file. Use this file for subsequent operations instead of the original.
         :raises IOError: Thrown if there is an IO error.
         """

@@ -149,12 +149,12 @@ class RandomAccessStream(ABC):
         pass
 
     def copy_to(self, stream: RandomAccessStream, buffer_size: int | None = 0,
-                progress_listener: Callable[[int, int], Any] | None = None):
+                on_progress_changed: Callable[[int, int], Any] | None = None):
         """
         Write stream contents to another stream.
         :param stream: The target stream.
         :param buffer_size: The buffer size to be used when copying.
-        :param progress_listener: The listener to notify when progress changes.
+        :param on_progress_changed: The listener to notify when progress changes.
         :raises IOError: Thrown if there is an IO error.
         """
         if not self.can_read():
@@ -170,8 +170,8 @@ class RandomAccessStream(ABC):
         buffer: bytearray = bytearray(buffer_size)
         while (bytes_read := self.read(buffer, 0, buffer_size)) > 0:
             stream.write(buffer, 0, bytes_read)
-            if progress_listener is not None:
-                progress_listener(self.get_position(), self.get_length())
+            if on_progress_changed is not None:
+                on_progress_changed(self.get_position(), self.get_length())
         stream.flush()
         self.set_position(pos)
 

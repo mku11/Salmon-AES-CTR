@@ -30,6 +30,7 @@ from typing import Callable, Any
 from typeguard import typechecked
 
 from salmon_fs.fs.file.ifile import IFile
+from salmon_fs.salmonfs.file.aes_file import IVirtualFile
 from salmon_fs.salmonfs.file.aes_file import AesFile
 from salmon.sequence.sequence_exception import SequenceException
 from salmon_fs.salmonfs.drive.utils.aes_file_exporter import AesFileExporter
@@ -43,7 +44,8 @@ class AesFileCommander:
     Facade class for file operations.
     """
 
-    def __init__(self, import_buffer_size: int = 0, export_buffer_size: int = 0, threads: int = 1, multi_cpu: False = False):
+    def __init__(self, import_buffer_size: int = 0, export_buffer_size: int = 0, threads: int = 1,
+                 multi_cpu: False = False):
         """
         Instantiate a new file commander object.
         
@@ -67,23 +69,21 @@ class AesFileCommander:
         return self.__fileExporter
 
     def import_files(self, files_to_import: list[IFile], import_dir: AesFile,
-                     delete_source: bool, integrity: bool,
-                     auto_rename: Callable[[IFile], str] | None = None,
-                     on_failed: Callable[[IFile, Exception], Any] | None = None,
-                     on_progress_changed: Callable[[AesFileCommander.RealFileTaskProgress], Any] | None = None) -> list[
-        AesFile]:
+                     options: AesFileCommander.BatchImportOptions | None = None) -> \
+            list[AesFile]:
         """
         Import files to the drive.
         
         :param files_to_import:     The files to import.
         :param import_dir:         The target directory.
-        :param delete_source:      True if you want to delete the source files when import complete.
-        :param integrity:         True to apply integrity to imported files.
-        :param on_progress_changed: Observer to notify when progress changes.
-        :param auto_rename:        Function to rename file if another file with the same filename exists
-        :param on_failed:          Observer to notify when a file fails importing
+        :param options: The options
         :return: The imported files if completes successfully.
-        :raises Exception:         """
+        :raises Exception:
+        """
+
+        if not options:
+            options = AesFileCommander.BatchImportOptions()
+
         self.__stopJobs = False
         imported_files: list[AesFile] = []
 
@@ -98,8 +98,8 @@ class AesFileCommander:
             if self.__stopJobs:
                 break
             self.__import_recursively(files_to_import[i], import_dir,
-                                      delete_source, integrity,
-                                      on_progress_changed, auto_rename, on_failed,
+                                      options.delete_source, options.integrity,
+                                      options.on_progress_changed, options.auto_rename, options.on_failed,
                                       imported_files, count, total,
                                       existing_files)
 
@@ -150,13 +150,14 @@ class AesFileCommander:
                 filename: str = file_to_import.get_name()
                 if sfile is not None and (sfile.exists() or sfile.is_directory()) and auto_rename is not None:
                     filename = auto_rename(file_to_import)
-                sfile = self.__fileImporter.import_file(file_to_import, import_dir, filename, delete_source, integrity,
-                                                        lambda v_bytes, total_bytes2:
-                                                        self.__notify_real_file_progress(file_to_import,
-                                                                                         v_bytes,
-                                                                                         total_bytes2,
-                                                                                         count, total[0],
-                                                                                         on_progress_changed))
+
+                import_options: AesFileImporter.FileImportOptions = AesFileImporter.FileImportOptions()
+                import_options.filename = filename
+                import_options.deleteSource = delete_source
+                import_options.integrity = integrity
+                import_options.on_progress_changed = lambda v_bytes, total_bytes2: self.__notify_real_file_progress(
+                    file_to_import, v_bytes, total_bytes2, count, total[0], on_progress_changed)
+                sfile = self.__fileImporter.import_file(file_to_import, import_dir, import_options)
                 existing_files[sfile.get_name()] = sfile
                 imported_files.append(sfile)
                 count[0] += 1
@@ -167,23 +168,20 @@ class AesFileCommander:
                     on_failed(file_to_import, ex)
 
     def export_files(self, files_to_export: list[AesFile], export_dir: IFile,
-                     delete_source: bool, integrity: bool,
-                     auto_rename: Callable[[IFile], str] | None = None,
-                     on_failed: Callable[[AesFile, Exception], Any] | None = None,
-                     on_progress_changed: Callable[[AesFileCommander.AesFileTaskProgress], Any] | None = None) \
+                     options: AesFileCommander.BatchExportOptions | None = None) \
             -> list[IFile]:
         """
         Export a file from a drive.
         
         :param files_to_export:     The files to export.
         :param export_dir:         The export target directory
-        :param delete_source:      True if you want to delete the source files
-        :param integrity:         True to use integrity verification before exporting files
-        :param on_progress_changed: Observer to notify when progress changes.
-        :param auto_rename:        Function to rename file if another file with the same filename exists
-        :param on_failed:          Observer to notify when a file fails exporting
+        :param options: The options
         :return: The exported files
-        :raises Exception:         """
+        :raises Exception:
+        """
+
+        if not options:
+            options = AesFileCommander.BatchExportOptions()
         stop_jobs = False
         exported_files: list[IFile] = []
 
@@ -200,8 +198,8 @@ class AesFileCommander:
             if stop_jobs:
                 break
             self.__export_recursively(files_to_export[i], export_dir,
-                                      delete_source, integrity,
-                                      on_progress_changed, auto_rename, on_failed,
+                                      options.delete_source, options.integrity,
+                                      options.on_progress_changed, options.auto_rename, options.on_failed,
                                       exported_files, count, total,
                                       existing_files)
 
@@ -246,10 +244,15 @@ class AesFileCommander:
                 filename: str = file_to_export.get_name()
                 if rfile is not None and rfile.exists() and auto_rename is not None:
                     filename = auto_rename(rfile)
-                rfile = self.__fileExporter.export_file(file_to_export, export_dir, filename, delete_source, integrity,
-                                                        lambda v_bytes, total_bytes: self.__notify_salmon_file_progress(
-                                                            file_to_export, v_bytes, total_bytes, count, total,
-                                                            on_progress_changed))
+
+                export_options: AesFileExporter.FileExportOptions = AesFileExporter.FileExportOptions()
+                export_options.filename = filename
+                export_options.delete_source = delete_source
+                export_options.integrity = integrity
+                export_options.on_progress_changed = lambda v_bytes, total_bytes: self.__notify_salmon_file_progress(
+                    file_to_export, v_bytes, total_bytes, count, total,
+                    on_progress_changed)
+                rfile = self.__fileExporter.export_file(file_to_export, export_dir, export_options)
                 existing_files[rfile.get_name()] = rfile
                 exported_files.append(rfile)
                 count[0] += 1
@@ -278,16 +281,15 @@ class AesFileCommander:
 
         return count
 
-    def delete_files(self, files_to_delete: list[AesFile],
-                     on_failed: Callable[[AesFile, Exception], Any] | None = None,
-                     on_progress_changed: Callable[[AesFileCommander.AesFileTaskProgress], Any] | None = None):
+    def delete_files(self, files_to_delete: list[AesFile], options: AesFileCommander.BatchDeleteOptions | None = None):
         """
         Delete files.
         
         :param files_to_delete:         The files to delete.
-        :param on_progress_changed: The observer to notify when each file is deleted.
-        :param on_failed: The observer to notify when a file has failed.
+        :param options: The options
         """
+        if not options:
+            options = AesFileCommander.BatchDeleteOptions()
         self.__stopJobs = False
         count: list[int] = [1]
         total: int = 0
@@ -299,9 +301,12 @@ class AesFileCommander:
             if self.__stopJobs:
                 break
             final_total: int = total
-            aes_file.delete_recursively(
+            delete_options: IVirtualFile.VirtualRecursiveDeleteOptions = IVirtualFile.VirtualRecursiveDeleteOptions()
+            delete_options.on_failed = options.on_failed
+            delete_options.on_progress_changed = \
                 lambda file, position, length: self.__notify_delete_progress(file, position, length, count, final_total,
-                                                                             on_progress_changed), on_failed)
+                                                                             options.on_progress_changed)
+            aes_file.delete_recursively(delete_options)
 
     def __notify_delete_progress(self, file: AesFile, position: int, length: int, count: list[int], final_total: int,
                                  on_progress_changed: Callable[[AesFileCommander.AesFileTaskProgress], Any] | None):
@@ -316,22 +321,19 @@ class AesFileCommander:
                 if position == length:
                     count[0] += 1
 
-    def copy_files(self, files_to_copy: list[AesFile], v_dir: AesFile, move: bool,
-                   auto_rename: Callable[[AesFile, str], Any] | None = None,
-                   auto_rename_folders: bool = False,
-                   on_failed: Callable[[AesFile, Exception], Any] | None = None,
-                   on_progress_changed: Callable[[AesFileCommander.AesFileTaskProgress], Any] | None = None):
+    def copy_files(self, files_to_copy: list[AesFile], v_dir: AesFile,
+                   options: AesFileCommander.BatchCopyOptions | None = None):
         """
         Copy files to another directory.
-        
+
         :param files_to_copy:       The array of files to copy.
         :param v_dir:               The target directory.
-        :param move:              True if moving files instead of copying.
-        :param on_progress_changed: The progress change observer to notify.
-        :param auto_rename:        The auto rename function to use when files with same filename are found
-        :param auto_rename_folders: True to auto rename folders
-        :param on_failed:          The observer to notify when failures occur
-        :raises Exception:         """
+        :param options: The options
+        :raises Exception:
+        """
+
+        if not options:
+            options = AesFileCommander.BatchCopyOptions()
         self.__stopJobs = False
         count: list[int] = [1]
         total: int = 0
@@ -349,22 +351,28 @@ class AesFileCommander:
             if self.__stopJobs:
                 break
 
-            if move:
-                aes_file.move_recursively(v_dir,
-                                          lambda file, position, length:
-                                          self.__notify_move_progress(file, position,
-                                                                      length, count,
-                                                                      final_total,
-                                                                      on_progress_changed),
-                                          auto_rename, auto_rename_folders, on_failed)
+            if options.move:
+                move_options = IVirtualFile.VirtualRecursiveMoveOptions()
+                move_options.auto_rename = options.auto_rename
+                move_options.auto_rename_folders = options.auto_rename_folders
+                move_options.on_failed = options.on_failed
+                move_options.on_progress_changed = lambda file, position, length: \
+                    self.__notify_move_progress(file, position,
+                                                length, count,
+                                                final_total,
+                                                options.on_progress_changed)
+                aes_file.move_recursively(v_dir, move_options)
             else:
-                AesFile.copy_recursively(v_dir,
-                                         lambda file, position, length:
-                                         self.__notify_copy_progress(file, position,
-                                                                     length, count,
-                                                                     final_total,
-                                                                     on_progress_changed),
-                                         auto_rename, auto_rename_folders, on_failed)
+                copy_options = IVirtualFile.VirtualRecursiveCopyOptions()
+                copy_options.auto_rename = options.auto_rename
+                copy_options.auto_rename_folders = options.auto_rename_folders
+                copy_options.on_failed = options.on_failed
+                copy_options.on_progress_changed = lambda file, position, length: \
+                    self.__notify_copy_progress(file, position,
+                                                length, count,
+                                                final_total,
+                                                options.on_progress_changed)
+                AesFile.copy_recursively(v_dir, copy_options)
 
     def cancel(self):
         """
@@ -378,7 +386,7 @@ class AesFileCommander:
     def is_file_searcher_running(self) -> bool:
         """
         True if the file search is currently running.
-        
+
         :return: True if search running
         """
         return self.__fileSearcher.is_running()
@@ -386,7 +394,7 @@ class AesFileCommander:
     def is_running(self) -> bool:
         """
         True if jobs are currently running.
-        
+
         :return: True if running
         """
         return self.__fileSearcher.is_running() or self.__fileImporter.is_running() or self.__fileExporter.is_running()
@@ -394,7 +402,7 @@ class AesFileCommander:
     def is_file_searcher_stopped(self) -> bool:
         """
         True if file search stopped.
-        
+
         :return: True if search stopped
         """
         return self.__fileSearcher.is_stopped()
@@ -405,26 +413,22 @@ class AesFileCommander:
         """
         self.__fileSearcher.stop()
 
-    def search(self, v_dir: AesFile, terms: str, any_term: bool,
-               on_result_found: FileSearcher.OnResultFoundListener,
-               on_search_event: Callable[[FileSearcher.SearchEvent], Any]) -> [AesFile]:
+    def search(self, v_dir: AesFile, terms: str, options: FileSearcher.SearchOptions | None = None) -> [AesFile]:
         """
         Search
-        
+
         :param v_dir:           The directory to start the search.
         :param terms:         The terms to search for.
-        :param any_term:           True if you want to match any term otherwise match all terms.
-        :param on_result_found: Callback interface to receive notifications when results found.
-        :param on_search_event: Callback interface to receive status events.
+        :param options: The options
         :return: An array with all the results found.
         """
 
-        return self.__fileSearcher.search(v_dir, terms, any_term, on_result_found, on_search_event)
+        return self.__fileSearcher.search(v_dir, terms, options)
 
     def are_jobs_stopped(self) -> bool:
         """
         True if all jobs are stopped.
-        
+
         :return: True if stopped
         """
         return self.__stopJobs
@@ -432,7 +436,7 @@ class AesFileCommander:
     def __get_files(self, files: list[AesFile]) -> int:
         """
         Get number of files recursively for the files provided.
-        
+
         :param files: Total number of files and files under subdirectories.
         :return: The files
         """
@@ -453,7 +457,7 @@ class AesFileCommander:
     def rename_file(self, ifile: AesFile, new_filename: str):
         """
         Rename an encrypted file
-        
+
         """
         ifile.rename(new_filename)
 
@@ -542,3 +546,108 @@ class AesFileCommander:
                 pass
         if position == length:
             count[0] += 1
+
+    """
+    Batch delete options
+    """
+
+    class BatchDeleteOptions:
+        """
+        Callback when delete fails
+        """
+        on_failed: Callable[[AesFile, Exception], Any] | None = None
+
+        """
+        Callback when progress changes
+        """
+        on_progress_changed: Callable[[AesFileCommander.AesFileTaskProgress], Any] | None = None
+
+    """
+    Batch import options
+    """
+
+    class BatchImportOptions:
+        """
+        Delete the source file when complete.
+        """
+        delete_source: bool = False
+
+        """
+        True to enable integrity
+        """
+        integrity: bool = False
+
+        """
+        Callback when a file with the same name exists
+        """
+        auto_rename: Callable[[IFile, str], Any] | None = None
+
+        """
+        Callback when import fails
+        """
+        on_failed: Callable[[IFile, Exception], Any] | None = None
+
+        """
+        Callback when progress changes
+        """
+        on_progress_changed: Callable[[AesFileCommander.RealFileTaskProgress], Any] | None = None
+
+    """
+    Batch export options
+    """
+
+    class BatchExportOptions:
+        """
+        Delete the source file when complete.
+        """
+        delete_source: bool = False
+
+        """
+        True to enable integrity
+        """
+        integrity: bool = False
+
+        """
+        Callback when a file with the same name exists
+        """
+        auto_rename: Callable[[IFile, str], Any] | None = None
+
+        """
+        Callback when import fails
+        """
+        on_failed: Callable[[AesFile, Exception], Any] | None = None
+
+        """
+        Callback when progress changes
+        """
+        on_progress_changed: Callable[[AesFileCommander.AesFileTaskProgress], Any] | None = None
+
+    """
+    Batch copy options
+    """
+
+    class BatchCopyOptions:
+        """
+        True to move, false to copy
+        """
+        move: bool = False
+
+        """
+        Callback when another file with the same name exists.
+        """
+        auto_rename: Callable[[AesFile, str], Any] | None = None
+
+        """
+        True to autorename folders
+        """
+        auto_rename_folders: bool = False
+
+        """
+        Callback when copy fails
+        """
+        on_failed: Callable[[AesFile, Exception], Any] | None = None
+
+        """
+        Callback when progress changes.
+        """
+        on_progress_changed: Callable[[AesFileCommander.AesFileTaskProgress], Any] | None = None

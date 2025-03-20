@@ -689,96 +689,96 @@ class AesFile(IVirtualFile):
         """
         return self.__tag
 
-    def move(self, v_dir: AesFile, on_progress_listener: Callable[[int, int], Any] | None = None) -> AesFile:
+    def move(self, v_dir: AesFile, options: IFile.MoveOptions | None = None) -> AesFile:
         """
         Move file to another directory.
         
         :param v_dir:                Target directory.
-        :param on_progress_listener: Observer to notify when move progress changes.
+        :param options: The options
         :return: The new file
         :raises IOError: Thrown if there is an IO error.
         """
-        new_real_file: IFile = self.__real_file.move(v_dir.__real_file, None, on_progress_listener)
+        new_real_file: IFile = self.__real_file.move(v_dir.__real_file, options)
         return AesFile(new_real_file, self.__drive)
 
-    def copy(self, v_dir: AesFile, on_progress_listener: Callable[[int, int], Any] | None = None) -> AesFile:
+    def copy(self, v_dir: AesFile, options: IFile.CopyOptions | None = None) -> AesFile:
         """
         Copy a file to another directory.
         
         :param v_dir:                Target directory.
-        :param on_progress_listener: Observer to notify when copy progress changes.
+        :param options: The options
         :return: The new file
         :raises IOError: Thrown if there is an IO error.
         """
-        new_real_file: IFile = self.__real_file.copy(v_dir.__real_file, None, on_progress_listener)
+        new_real_file: IFile = self.__real_file.copy(v_dir.__real_file, options)
         return AesFile(new_real_file, self.__drive)
 
-    def copy_recursively(self, dest: AesFile,
-                         auto_rename: Callable[[AesFile], str] | None = None,
-                         auto_rename_folders: bool = False,
-                         on_failed: Callable[[AesFile, Exception], Any] | None = None,
-                         progress_listener: Callable[[AesFile, int, int], Any] | None = None):
+    def copy_recursively(self, dest: AesFile, options: IVirtualFile.VirtualRecursiveCopyOptions | None = None):
         """
         Copy a directory recursively
         
         :param dest: Destination directory
-        :param progress_listener: The progress listener
-        :param auto_rename: The autorename function
-        :param auto_rename_folders: Use autorename for folders also
-        :param on_failed: Callback when copy fails
+        :param options: The options
         """
+        if not options:
+            options = IFile.RecursiveCopyOptions()
         on_failed_real_file: Callable[[IFile, Exception], Any] | None = None
-        if on_failed is not None:
-            on_failed_real_file = lambda file, ex: on_failed(AesFile(file, self.get_drive()), ex)
+        if options.on_failed is not None:
+            on_failed_real_file = lambda file, ex: options.on_failed(AesFile(file, self.get_drive()), ex)
 
         rename_real_file: Callable[[IFile], str] | None = None
         # use auto rename only when we are using a drive
-        if auto_rename is not None and self.get_drive() is not None:
-            rename_real_file = lambda file: self.__delegate_rename(file, auto_rename)
+        if options.auto_rename and self.get_drive() is not None:
+            rename_real_file = lambda file: self.__delegate_rename(file, options.auto_rename)
+        copy_options: IFile.RecursiveCopyOptions = IFile.RecursiveCopyOptions()
+        copy_options.auto_rename = rename_real_file
+        copy_options.auto_rename_folders = options.auto_rename_folders
+        copy_options.on_failed = on_failed_real_file
+        copy_options.on_progress_changed = lambda file, position, length: \
+            self.__notify_progress(file, position, length, options.on_progress_changed)
 
-        self.__real_file.copy_recursively(dest.__real_file,
-                                          lambda file, position, length, progress_listener1:
-                                          self.__notify_progress(file, position, length, progress_listener1),
-                                          rename_real_file, auto_rename_folders, on_failed_real_file)
+        self.__real_file.copy_recursively(dest.__real_file, copy_options)
 
-    def move_recursively(self, dest: AesFile,
-                         auto_rename: Callable[[AesFile], str] | None = None,
-                         auto_rename_folders: bool = False,
-                         on_failed: Callable[[AesFile, Exception], Any] | None = None,
-                         progress_listener: Callable[[AesFile, int, int], Any] | None = None):
+    def move_recursively(self, dest: AesFile, options: IVirtualFile.VirtualRecursiveMoveOptions | None = None):
         """
         Move a directory recursively
         
         :param dest: The destination directory
-        :param progress_listener: The progress listener
-        :param auto_rename: The autorename function
-        :param auto_rename_folders: Use autorename for folders also
-        :param on_failed: Callback when move fails
+        :param options: The options
         """
 
+        if not options:
+            options = IFile.RecursiveMoveOptions()
+
         on_failed_real_file: Callable[[IFile, Exception], Any] | None = None
-        if on_failed is not None:
-            on_failed_real_file = lambda file, ex: self.__notify_failed(file, ex, on_failed)
+        if options.on_failed is not None:
+            on_failed_real_file = lambda file, ex: self.__notify_failed(file, ex, options.on_failed)
 
         rename_real_file: Callable[[IFile], str] | None = None
         # use auto rename only when we are using a drive
-        if auto_rename is not None and self.get_drive() is not None:
-            rename_real_file = lambda file: self.__delegate_rename(file, auto_rename)
+        if options.auto_rename is not None and self.get_drive() is not None:
+            rename_real_file = lambda file: self.__delegate_rename(file, options.auto_rename)
 
-        self.__real_file.move_recursively(dest.get_real_file(),
-                                          lambda file, position, length:
-                                          self.__notify_progress(file, position, length, progress_listener),
-                                          rename_real_file, auto_rename_folders, on_failed_real_file)
+        move_options: IFile.RecursiveCopyOptions = IFile.RecursiveCopyOptions()
+        move_options.auto_rename = rename_real_file
+        move_options.auto_rename_folders = options.auto_rename_folders
+        move_options.on_failed = on_failed_real_file
+        move_options.on_progress_changed = lambda file, position, length: \
+            self.__notify_progress(file, position, length, options.on_progress_changed)
+        self.__real_file.move_recursively(dest.get_real_file(), move_options)
 
-    def delete_recursively(self, on_failed: Callable[[AesFile, Exception], Any] | None = None,
-                           progress_listener: Callable[[AesFile, int, int], Any] | None = None):
+    def delete_recursively(self, options: IVirtualFile.VirtualRecursiveDeleteOptions | None = None):
+        if not options:
+            options = IVirtualFile.VirtualRecursiveDeleteOptions()
         on_failed_real_file: Callable[[IFile, Exception], Any] | None = None
-        if on_failed is not None:
-            on_failed_real_file = lambda file, ex: self.__notify_failed(file, ex, on_failed)
+        if options.on_failed is not None:
+            on_failed_real_file = lambda file, ex: self.__notify_failed(file, ex, options.on_failed)
 
-        self.get_real_file().delete_recursively(
-            lambda file, position, length: self.__notify_progress(file, position, length, progress_listener),
-            on_failed_real_file)
+        delete_options = IVirtualFile.VirtualRecursiveDeleteOptions()
+        delete_options.on_failed = options.on_failed
+        delete_options.on_progress_changed = lambda file, position, length: \
+            self.__notify_progress(file, position, length, options.on_progress_changed)
+        self.get_real_file().delete_recursively(delete_options)
 
     def get_minimum_part_size(self) -> int:
         curr_chunk_size = self.get_file_chunk_size()
