@@ -3,7 +3,7 @@ import { NodeFile } from '../lib/salmon-fs/fs/file/node_file.js';
 import { DriveSample } from '../samples/drive_sample.js';
 
 let password = "test123";
-let threads = 2;
+let threads = 1;
 
 // directories and files
 let dir = new NodeFile("./output");
