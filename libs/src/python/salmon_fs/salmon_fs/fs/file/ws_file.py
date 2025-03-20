@@ -90,7 +90,7 @@ class WSFile(IFile):
             if not self.__response:
                 headers = {}
                 self.__set_default_headers(headers)
-                self.set_service_auth(headers)
+                self.__set_service_auth(headers)
                 params = urllib.parse.urlencode({WSFile.__PATH: self.__file_path})
                 conn: HTTPConnection | HTTPSConnection | None = None
                 http_response: HTTPResponse | None = None
@@ -116,7 +116,7 @@ class WSFile(IFile):
         n_dir_path: str = self.get_child_path(dir_name)
         headers = {}
         self.__set_default_headers(headers)
-        self.set_service_auth(headers)
+        self.__set_service_auth(headers)
         params = urllib.parse.urlencode({WSFile.__PATH: n_dir_path})
         conn: HTTPConnection | HTTPSConnection | None = None
         http_response: HTTPResponse | None = None
@@ -143,7 +143,7 @@ class WSFile(IFile):
         n_filepath: str = self.get_child_path(filename)
         headers = {}
         self.__set_default_headers(headers)
-        self.set_service_auth(headers)
+        self.__set_service_auth(headers)
         params = urllib.parse.urlencode({WSFile.__PATH: n_filepath})
         conn: HTTPConnection | HTTPSConnection | None = None
         http_response: HTTPResponse | None = None
@@ -171,7 +171,7 @@ class WSFile(IFile):
             for p_file in p_files:
                 headers = {}
                 self.__set_default_headers(headers)
-                self.set_service_auth(headers)
+                self.__set_service_auth(headers)
                 params = urllib.parse.urlencode({WSFile.__PATH: p_file.get_path()})
                 conn: HTTPConnection | HTTPSConnection | None = None
                 http_response: HTTPResponse | None = None
@@ -188,7 +188,7 @@ class WSFile(IFile):
 
         headers = {}
         self.__set_default_headers(headers)
-        self.set_service_auth(headers)
+        self.__set_service_auth(headers)
         params = urllib.parse.urlencode({WSFile.__PATH: self.__file_path})
         conn: HTTPConnection | HTTPSConnection | None = None
         http_response: HTTPResponse | None = None
@@ -307,7 +307,7 @@ class WSFile(IFile):
         if self.is_directory():
             headers = {}
             self.__set_default_headers(headers)
-            self.set_service_auth(headers)
+            self.__set_service_auth(headers)
             params = urllib.parse.urlencode({WSFile.__PATH: self.get_path()})
             conn: HTTPConnection | HTTPSConnection | None = None
             http_response: HTTPResponse | None = None
@@ -333,7 +333,7 @@ class WSFile(IFile):
         if self.is_directory():
             headers = {}
             self.__set_default_headers(headers)
-            self.set_service_auth(headers)
+            self.__set_service_auth(headers)
             params = urllib.parse.urlencode({WSFile.__PATH: self.get_path()})
             conn: HTTPConnection | HTTPSConnection | None = None
             http_response: HTTPResponse | None = None
@@ -387,7 +387,7 @@ class WSFile(IFile):
         else:
             headers = {}
             self.__set_default_headers(headers)
-            self.set_service_auth(headers)
+            self.__set_service_auth(headers)
             params = urllib.parse.urlencode({WSFile.__PATH: self.get_path(),
                                              WSFile.__DEST_DIR: new_dir.get_path(),
                                              WSFile.__FILENAME: new_name})
@@ -430,7 +430,7 @@ class WSFile(IFile):
         else:
             headers = {}
             self.__set_default_headers(headers)
-            self.set_service_auth(headers)
+            self.__set_service_auth(headers)
             params = urllib.parse.urlencode({WSFile.__PATH: self.get_path(),
                                              WSFile.__DEST_DIR: new_dir.get_path(),
                                              WSFile.__FILENAME: new_name})
@@ -471,7 +471,7 @@ class WSFile(IFile):
         self.reset()
         headers = {}
         self.__set_default_headers(headers)
-        self.set_service_auth(headers)
+        self.__set_service_auth(headers)
         params = urllib.parse.urlencode({WSFile.__PATH: self.get_path(),
                                          WSFile.__FILENAME: new_filename})
         conn: HTTPConnection | HTTPSConnection | None = None
@@ -496,7 +496,7 @@ class WSFile(IFile):
         self.reset()
         headers = {}
         self.__set_default_headers(headers)
-        self.set_service_auth(headers)
+        self.__set_service_auth(headers)
         params = urllib.parse.urlencode({WSFile.__PATH: self.__file_path})
         conn: HTTPConnection | HTTPSConnection | None = None
         http_response: HTTPResponse | None = None
@@ -532,7 +532,7 @@ class WSFile(IFile):
         """
         return self.__file_path
 
-    def set_service_auth(self, headers: dict[str, str]):
+    def __set_service_auth(self, headers: dict[str, str]):
         if not self.__credentials:
             return
         headers['Authorization'] = 'Basic ' + Base64().encode(bytearray(

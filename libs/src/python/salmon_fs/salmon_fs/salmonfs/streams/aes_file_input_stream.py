@@ -116,7 +116,7 @@ class AesFileInputStream(BufferedIOBase):
         self.__positionStart = 0
         self.__positionEnd = self.__size - 1
 
-        self.create_buffers()
+        self.__create_buffers()
         self.__create_streams()
 
     def __create_streams(self):
@@ -132,7 +132,7 @@ class AesFileInputStream(BufferedIOBase):
         except (SecurityException, IntegrityException) as ex:
             raise IOError("Could not create streams") from ex
 
-    def create_buffers(self):
+    def __create_buffers(self):
         """
         Create cache buffers that will be used for sourcing the files.
         These will help reducing multiple small decryption reads from the encrypted source.

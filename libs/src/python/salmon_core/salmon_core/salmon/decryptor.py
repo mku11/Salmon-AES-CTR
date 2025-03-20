@@ -45,27 +45,13 @@ from typeguard import typechecked
 
 
 @typechecked
-def decrypt_shm(index: int, part_size: int, running_threads: int,
-                data: bytearray, shm_out_name: str, shm_length: int, shm_cancel_name: str, key: bytearray,
-                nonce: bytearray,
-                enc_format: EncryptionFormat,
-                integrity: bool, hash_key: bytearray | None, chunk_size: int, buffer_size: int):
+def _decrypt_shm(index: int, part_size: int, running_threads: int,
+                  data: bytearray, shm_out_name: str, shm_length: int, shm_cancel_name: str, key: bytearray,
+                  nonce: bytearray,
+                  enc_format: EncryptionFormat,
+                  integrity: bool, hash_key: bytearray | None, chunk_size: int, buffer_size: int):
     """
-    Do not use directly use decrypt() instead.
-    :param index: The worker index
-    :param part_size: The part size
-    :param running_threads: The threads
-    :param data: The data to decrypt
-    :param shm_out_name: The shared memory name
-    :param shm_length: The shared memory length
-    :param shm_cancel_name: The shared memory for cancelation
-    :param key: The encryption key
-    :param nonce: The nonce
-    :param enc_format: The {@link EncryptionFormat} Generic or Salmon.
-    :param integrity: True to verify integrity
-    :param hash_key: The hash key
-    :param chunk_size: The chunk size
-    :param buffer_size: The buffer size
+    Do not use directly use encrypt() instead.
     """
     start: int = part_size * index
     length: int
@@ -77,33 +63,18 @@ def decrypt_shm(index: int, part_size: int, running_threads: int,
     shm_out_data = shm_out.buf
     ins: MemoryStream = MemoryStream(data)
     out_data: bytearray = bytearray(shm_length)
-    (byte_start, byte_end) = decrypt_data(ins, start, length, out_data, key, nonce, enc_format,
-                                          integrity, hash_key, chunk_size, buffer_size, shm_cancel_name)
+    (byte_start, byte_end) = __decrypt_data(ins, start, length, out_data, key, nonce, enc_format,
+                                            integrity, hash_key, chunk_size, buffer_size, shm_cancel_name)
     shm_out_data[byte_start:byte_end] = out_data[byte_start:byte_end]
 
 
 @typechecked
-def decrypt_data(input_stream: RandomAccessStream, start: int, count: int, out_data: bytearray,
-                 key: bytearray, nonce: bytearray | None,
-                 enc_format: EncryptionFormat, integrity: bool, hash_key: bytearray | None,
-                 chunk_size: int, buffer_size: int, shm_cancel_name: str | None = None) -> (int, int):
+def _decrypt_data(input_stream: RandomAccessStream, start: int, count: int, out_data: bytearray,
+                   key: bytearray, nonce: bytearray | None,
+                   enc_format: EncryptionFormat, integrity: bool, hash_key: bytearray | None,
+                   chunk_size: int, buffer_size: int, shm_cancel_name: str | None = None) -> (int, int):
     """
-    Decrypt the data stream. Do not use directly use decrypt() instead.
-    :param input_stream: The Stream to be decrypted.
-    :param start: The start position of the stream to be decrypted.
-    :param count: The number of bytes to be decrypted.
-    :param out_data: The buffer with the decrypted data.
-    :param key: The AES key to be used.
-    :param nonce: The nonce to be used.
-    :param enc_format: The {@link EncryptionFormat} Generic or Salmon.
-    :param integrity: True to verify integrity.
-    :param hash_key: The hash key to be used for integrity verification.
-    :param chunk_size: The chunk size.
-    :param buffer_size: The buffer size.
-    :param shm_cancel_name: The shared memory cancelation name
-    :raises IOError: Thrown if there is an error with the stream.
-    :raises SalmonSecurityException: Thrown if there is a security exception with the stream.
-    :raises IntegrityException: Thrown if the stream is corrupt or tampered with.
+    Do not use directly use encrypt() instead.
     """
     shm_cancel_data: memoryview | None = None
     if shm_cancel_name:
@@ -230,8 +201,8 @@ class Decryptor:
 
         if self.__threads == 1:
             input_stream: MemoryStream = MemoryStream(data)
-            decrypt_data(input_stream, 0, input_stream.get_length(), out_data,
-                         key, nonce, enc_format, integrity, hash_key, chunk_size, self.__buffer_size)
+            _decrypt_data(input_stream, 0, input_stream.get_length(), out_data,
+                           key, nonce, enc_format, integrity, hash_key, chunk_size, self.__buffer_size)
         else:
             self.__decrypt_data_parallel(data, out_data,
                                          key, hash_key, nonce, enc_format,
@@ -308,7 +279,7 @@ class Decryptor:
         ex: Exception | None = None
         fs = []
         for i in range(0, running_threads):
-            fs.append(self.__executor.submit(decrypt_shm, i, part_size, running_threads,
+            fs.append(self.__executor.submit(_decrypt_shm, i, part_size, running_threads,
                                              data, shm_out_name, len(shm_out.buf), shm_cancel_name, key, nonce,
                                              enc_format,
                                              integrity, hash_key, chunk_size, self.__buffer_size))

@@ -123,7 +123,7 @@ class AesFileSearcher:
         :param v_dir: The directory to start the search.
         :param terms: The terms to search for.
         :param anyterm: True if you want to match any term otherwise match all terms.
-        :param on_result_found: Callback interface to receive notifications when results found.
+        :param on_result_found: Callback to receive notifications when results found.
         :param search_results: The array to store the search results.
         """
         if self.__quit:

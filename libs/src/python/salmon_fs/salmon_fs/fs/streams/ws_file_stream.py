@@ -72,13 +72,13 @@ class WSFileStream(RandomAccessStream):
         self.upload_thread: Thread | None = None
         self.closed: bool = False
 
-    def get_input_response(self) -> HTTPResponse:
+    def __get_input_response(self) -> HTTPResponse:
         if self.closed:
             raise IOError("Stream is closed")
         if not self.__response:
             headers = {}
             self.__set_default_headers(headers)
-            self.set_service_auth(headers)
+            self.__set_service_auth(headers)
             params = urllib.parse.urlencode({WSFileStream.__PATH: self.__file.get_path(),
                                              WSFileStream.__POSITION: self.position})
             self.conn = self.__create_connection()
@@ -134,7 +134,7 @@ class WSFileStream(RandomAccessStream):
             headers = {}
             self.__set_default_headers(headers)
             headers["Content-type"] = "multipart/form-data;boundary=" + boundary
-            self.set_service_auth(headers)
+            self.__set_service_auth(headers)
             params = urllib.parse.urlencode({WSFileStream.__PATH: self.__file.get_path(),
                                              WSFileStream.__POSITION: self.start_position})
             self.conn = self.__create_connection()
@@ -199,7 +199,7 @@ class WSFileStream(RandomAccessStream):
         """
         headers = {}
         self.__set_default_headers(headers)
-        self.set_service_auth(headers)
+        self.__set_service_auth(headers)
         params = urllib.parse.urlencode({WSFileStream.__PATH: self.__file.get_path(),
                                          WSFileStream.__LENGTH: str(value)})
         conn: HTTPConnection | HTTPSConnection | None = None
@@ -227,7 +227,7 @@ class WSFileStream(RandomAccessStream):
         """
         bytes_read: int = 0
         while bytes_read < count:
-            buff: bytes = self.get_input_response().read(count - bytes_read)
+            buff: bytes = self.__get_input_response().read(count - bytes_read)
             if not buff or len(buff) == 0:
                 break
             buffer[offset + bytes_read:offset + bytes_read + len(buff)] = buff[:]
@@ -311,7 +311,7 @@ class WSFileStream(RandomAccessStream):
         self.start_position = 0
         self.__file.reset()
 
-    def set_service_auth(self, headers: dict[str, str]):
+    def __set_service_auth(self, headers: dict[str, str]):
         if not self.__file.get_credentials():
             return
         headers['Authorization'] = 'Basic ' + Base64().encode(

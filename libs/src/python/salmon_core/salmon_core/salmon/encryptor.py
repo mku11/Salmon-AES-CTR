@@ -42,27 +42,13 @@ from salmon_core.salmon.security_exception import SecurityException
 
 
 @typechecked
-def encrypt_shm(index: int, part_size: int, running_threads: int,
-                data: bytearray, shm_out_name: str, shm_length: int, shm_cancel_name: str, key: bytearray,
-                nonce: bytearray,
-                enc_format: EncryptionFormat,
-                integrity: bool, hash_key: bytearray | None, chunk_size: int, buffer_size: int):
+def _encrypt_shm(index: int, part_size: int, running_threads: int,
+                 data: bytearray, shm_out_name: str, shm_length: int, shm_cancel_name: str, key: bytearray,
+                 nonce: bytearray,
+                 enc_format: EncryptionFormat,
+                 integrity: bool, hash_key: bytearray | None, chunk_size: int, buffer_size: int):
     """
     Do not use directly use encrypt() instead.
-    :param index: The worker index
-    :param part_size: The part size
-    :param running_threads: The threads
-    :param data: The data to encrypt
-    :param shm_out_name: The shared memory name
-    :param shm_length: The shared memory length
-    :param shm_cancel_name: The shared memory for cancelation
-    :param key: The encryption key
-    :param nonce: The nonce
-    :param enc_format: The {@link EncryptionFormat} Generic or Salmon.
-    :param integrity: True to apply integrity when encrypting
-    :param hash_key: The hash key for integrity
-    :param chunk_size: The chunk size for integrity
-    :param buffer_size: The buffer size
     """
 
     start: int = part_size * index
@@ -76,37 +62,21 @@ def encrypt_shm(index: int, part_size: int, running_threads: int,
 
     ins: MemoryStream = MemoryStream(data)
     out_data: bytearray = bytearray(shm_length)
-    (byte_start, byte_end) = encrypt_data(ins, start, length, out_data, key, nonce, enc_format,
-                                          integrity, hash_key, chunk_size, buffer_size, shm_cancel_name)
+    (byte_start, byte_end) = __encrypt_data(ins, start, length, out_data, key, nonce, enc_format,
+                                            integrity, hash_key, chunk_size, buffer_size, shm_cancel_name)
     if index == 0:
         byte_start = 0
     shm_out_data[byte_start:byte_end] = out_data[byte_start:byte_end]
 
 
 @typechecked
-def encrypt_data(input_stream: MemoryStream, start: int, count: int, out_data: bytearray,
-                 key: bytearray, nonce: bytearray, enc_format: EncryptionFormat,
-                 integrity: bool, hash_key: bytearray | None, chunk_size: int, buffer_size: int,
-                 shm_cancel_name: str | None = None) -> (
+def _encrypt_data(input_stream: MemoryStream, start: int, count: int, out_data: bytearray,
+                   key: bytearray, nonce: bytearray, enc_format: EncryptionFormat,
+                   integrity: bool, hash_key: bytearray | None, chunk_size: int, buffer_size: int,
+                   shm_cancel_name: str | None = None) -> (
         int, int):
     """
-    Encrypt the data stream. Do not use directly use encrypt() instead.
-
-    :param input_stream: The Stream to be encrypted.
-    :param start:       The start position of the stream to be encrypted.
-    :param count:       The number of bytes to be encrypted.
-    :param out_data:     The buffer with the encrypted data.
-    :param key:         The AES key to be used.
-    :param nonce:       The nonce to be used.
-    :param enc_format: The {@link EncryptionFormat} Generic or Salmon.
-    :param integrity:   True to apply integrity.
-    :param hash_key:     The key to be used for integrity application.
-    :param chunk_size:   The chunk size.
-    :param buffer_size:   The chunk size.
-    :param shm_cancel_name: The shared memory cancelation name.
-    :raises IOError:             Thrown if there is an error with the stream.
-    :raises SalmonSecurityException: Thrown if there is a security exception with the stream.
-    :raises IntegrityException: Thrown if integrity cannot be applied.
+    Do not use directly use encrypt() instead.
     """
     shm_cancel_data: memoryview | None = None
     if shm_cancel_name:
@@ -229,8 +199,8 @@ class Encryptor:
 
         if self.__threads == 1:
             input_stream: MemoryStream = MemoryStream(data)
-            encrypt_data(input_stream, 0, len(data), out_data,
-                         key, nonce, enc_format, integrity, hash_key, chunk_size, self.__buffer_size)
+            _encrypt_data(input_stream, 0, len(data), out_data,
+                           key, nonce, enc_format, integrity, hash_key, chunk_size, self.__buffer_size)
         else:
             self.__encrypt_data_parallel(data, out_data,
                                          key, hash_key, nonce, enc_format,
@@ -307,7 +277,7 @@ class Encryptor:
         ex: Exception | None = None
         fs = []
         for i in range(0, running_threads):
-            fs.append(self.__executor.submit(encrypt_shm, i, part_size, running_threads,
+            fs.append(self.__executor.submit(_encrypt_shm, i, part_size, running_threads,
                                              data, shm_out_name, len(shm_out.buf), shm_cancel_name, key, nonce,
                                              enc_format,
                                              integrity, hash_key, chunk_size, self.__buffer_size))
