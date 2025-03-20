@@ -116,7 +116,7 @@ class WSFileStream(RandomAccessStream):
                         self.buff = self.buff[size:]
                         return buf
                     buffer: bytearray = bytearray()
-                    while (message := self.queue.get()):
+                    while message := self.queue.get():
                         buffer.extend(message)
                         if len(buffer) > size:
                             self.buff = buffer[size:]
