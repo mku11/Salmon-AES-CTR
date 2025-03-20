@@ -140,7 +140,7 @@ export class ReadableStreamFileReader {
         this.aesFile = aesFile;
         this.buffersCount = buffersCount;
         this.cacheBufferSize = bufferSize;
-        if(this.aesFile.getRealFile().constructor.name === 'WSFile'){
+        if(threads > 1 && this.aesFile.getRealFile().constructor.name === 'WSFile'){
 			console.log("Multithreading for web service files is not supported, setting single thread");
 			threads = 1;
         }
