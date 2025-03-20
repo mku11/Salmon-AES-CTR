@@ -11,7 +11,7 @@ public class LocalDriveProgram
 {
     public static void main(String[] args) throws Exception {
         String password = "test123";
-        int threads = 2;
+        int threads = 1;
 
         AesStream.setAesProviderType(ProviderType.Default);
 

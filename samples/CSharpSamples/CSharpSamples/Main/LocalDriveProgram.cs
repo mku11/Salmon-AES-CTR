@@ -11,7 +11,7 @@ class LocalDriveProgram
     public static void RunMain(string[] args)
     {
         string password = "test123";
-        int threads = 2;
+        int threads = 1;
 
         AesStream.AesProviderType = ProviderType.Default;
 
