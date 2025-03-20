@@ -48,7 +48,7 @@ class TextEncryptor:
         :param key:   The encryption key to be used.
         :param nonce: The nonce to be used.
         :param enc_format: The {@link EncryptionFormat} Generic or Salmon.
-        :param integrity: True if you want to calculate and store hash signatures for each chunkSize
+        :param integrity: True if you want to calculate and store hash signatures for each chunk size
         :param hash_key: Hash key to be used for all chunks.
         :param chunk_size: The chunk size.
         :raises IOError: Thrown if there is an IO error.

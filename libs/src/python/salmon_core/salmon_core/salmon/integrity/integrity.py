@@ -67,7 +67,7 @@ class Integrity:
         :raises SalmonSecurityException: When security has failed
         """
 
-        self._chunkSize: int = -1
+        self._chunk_size: int = -1
         """
         The chunk size to be used for integrity.
         """
@@ -102,9 +102,9 @@ class Integrity:
         if integrity and key is None:
             raise SecurityException("You need a hash to use with integrity")
         if integrity and chunk_size == 0:
-            self._chunkSize = Integrity.DEFAULT_CHUNK_SIZE
+            self._chunk_size = Integrity.DEFAULT_CHUNK_SIZE
         elif integrity or chunk_size > 0:
-            self._chunkSize = chunk_size
+            self._chunk_size = chunk_size
         if hash_size < 0:
             raise SecurityException("Hash size should be a positive number")
         self._key = key
@@ -176,9 +176,9 @@ class Integrity:
         :param hash_offset: The hash key length
         :return: The number of bytes all hash signatures occupy
         """
-        if self._chunkSize <= 0:
+        if self._chunk_size <= 0:
             return 0
-        return Integrity.get_total_hash_data_length(EncryptionMode.Decrypt, count, self._chunkSize, hash_offset,
+        return Integrity.get_total_hash_data_length(EncryptionMode.Decrypt, count, self._chunk_size, hash_offset,
                                                     self._hashSize)
 
     def get_chunk_size(self) -> int:
@@ -186,7 +186,7 @@ class Integrity:
         Get the chunk size.
         :return: The chunk size.
         """
-        return self._chunkSize
+        return self._chunk_size
 
     def get_key(self) -> bytearray:
         """
@@ -213,8 +213,8 @@ class Integrity:
         if not self._integrity:
             return None
         hashes: list[bytearray] = []
-        for i in range(0, len(buffer), self._chunkSize):
-            length: int = min(self._chunkSize, len(buffer) - i)
+        for i in range(0, len(buffer), self._chunk_size):
+            length: int = min(self._chunk_size, len(buffer) - i)
             hashes.append(self.calculate_hash(self._provider, buffer, i, length, self.get_key(),
                                               include_header_data if i == 0 else None))
         return hashes
@@ -228,7 +228,7 @@ class Integrity:
         if not self._integrity:
             return None
         hashes: list[bytearray] = []
-        for i in range(0, len(buffer), Generator.HASH_KEY_LENGTH + self._chunkSize):
+        for i in range(0, len(buffer), Generator.HASH_KEY_LENGTH + self._chunk_size):
             v_hash: bytearray = bytearray(Generator.HASH_KEY_LENGTH)
             v_hash[0:Generator.HASH_KEY_LENGTH] = buffer[i:i + Generator.HASH_KEY_LENGTH]
             hashes.append(v_hash)
@@ -243,8 +243,8 @@ class Integrity:
         :raises IntegrityException: Thrown when data are corrupt or tampered with.
         """
         chunk: int = 0
-        for i in range(0, len(buffer), self._chunkSize):
-            n_chunk_size: int = min(self._chunkSize, len(buffer) - i)
+        for i in range(0, len(buffer), self._chunk_size):
+            n_chunk_size: int = min(self._chunk_size, len(buffer) - i)
             v_hash: bytearray = self.calculate_hash(self._provider, buffer, i, n_chunk_size, self.get_key(),
                                                     include_header_data if i == 0 else None)
             for k in range(0, len(v_hash)):
