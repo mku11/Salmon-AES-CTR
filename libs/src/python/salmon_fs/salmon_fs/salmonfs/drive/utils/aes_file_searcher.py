@@ -25,7 +25,6 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 """
 
-from abc import ABC
 from enum import Enum
 from typing import Callable, Any
 import sys
@@ -35,7 +34,7 @@ from salmon_fs.salmonfs.file.aes_file import AesFile
 
 
 @typechecked
-class FileSearcher:
+class AesFileSearcher:
     """
     Class searches for files in a AesDrive by filename.
     """
@@ -68,7 +67,7 @@ class FileSearcher:
         """
         return self.__quit
 
-    def search(self, v_dir: AesFile, terms: str, options: FileSearcher.SearchOptions | None = None) -> list[AesFile]:
+    def search(self, v_dir: AesFile, terms: str, options: AesFileSearcher.SearchOptions | None = None) -> list[AesFile]:
         """
         Search files in directory and its subdirectories recursively for matching terms.
         :param v_dir: The directory to start the search.
@@ -78,15 +77,15 @@ class FileSearcher:
         """
 
         if not options:
-            options = FileSearcher.SearchOptions()
+            options = AesFileSearcher.SearchOptions()
         self.__running = True
         self.__quit = False
         search_results: dict[str, AesFile] = {}
         if options.on_search_event is not None:
-            options.on_search_event(FileSearcher.SearchEvent.SearchingFiles)
+            options.on_search_event(AesFileSearcher.SearchEvent.SearchingFiles)
         self.__search_dir(v_dir, terms, options.any_term, options.on_result_found, search_results)
         if options.on_search_event is not None:
-            options.on_search_event(FileSearcher.SearchEvent.SearchingFinished)
+            options.on_search_event(AesFileSearcher.SearchEvent.SearchingFinished)
         self.__running = False
         return list(search_results.values())
 
@@ -152,12 +151,12 @@ class FileSearcher:
          True to search for any term, otherwise match all
         """
 
-        on_result_found: Callable[[IFile], Any] | None = None
+        on_result_found: Callable[[AesFile], Any] | None = None
         """
          Callback when result found
         """
 
-        on_search_event: Callable[[FileSearcher.SearchEvent], Any] | None = None
+        on_search_event: Callable[[AesFileSearcher.SearchEvent], Any] | None = None
         """
          Callback when search event happens.
         """

@@ -35,7 +35,7 @@ from salmon_fs.salmonfs.file.aes_file import AesFile
 from salmon.sequence.sequence_exception import SequenceException
 from salmon_fs.salmonfs.drive.utils.aes_file_exporter import AesFileExporter
 from salmon_fs.salmonfs.drive.utils.aes_file_importer import AesFileImporter
-from salmon_fs.fs.drive.utils.file_searcher import FileSearcher
+from salmon_fs.salmonfs.drive.utils.aes_file_searcher import AesFileSearcher
 
 
 @typechecked
@@ -55,12 +55,12 @@ class AesFileCommander:
         """
         self.__fileImporter: AesFileImporter
         self.__fileExporter: AesFileExporter
-        self.__fileSearcher: FileSearcher
+        self.__fileSearcher: AesFileSearcher
         self.__stopJobs: bool = False
 
         self.__fileImporter = AesFileImporter(import_buffer_size, threads, multi_cpu)
         self.__fileExporter = AesFileExporter(export_buffer_size, threads, multi_cpu)
-        self.__fileSearcher = FileSearcher()
+        self.__fileSearcher = AesFileSearcher()
 
     def get_file_importer(self):
         return self.__fileImporter
@@ -413,7 +413,7 @@ class AesFileCommander:
         """
         self.__fileSearcher.stop()
 
-    def search(self, v_dir: AesFile, terms: str, options: FileSearcher.SearchOptions | None = None) -> [AesFile]:
+    def search(self, v_dir: AesFile, terms: str, options: AesFileSearcher.SearchOptions | None = None) -> [AesFile]:
         """
         Search
 

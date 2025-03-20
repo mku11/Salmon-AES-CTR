@@ -65,7 +65,7 @@ from salmon_fs.salmonfs.sequence.file_sequencer import FileSequencer
 from salmon.sequence.sequence_serializer import SequenceSerializer
 from salmon_fs.salmonfs.drive.utils.aes_file_exporter import AesFileExporter
 from salmon_fs.salmonfs.drive.utils.aes_file_importer import AesFileImporter
-from salmon_fs.fs.drive.utils.file_searcher import FileSearcher
+from salmon_fs.salmonfs.drive.utils.aes_file_searcher import AesFileSearcher
 from salmon_fs.salmonfs.auth.auth_config import AuthConfig
 
 from salmon_core_test_helper import SalmonCoreTestHelper
@@ -453,8 +453,8 @@ class SalmonFSTestHelper:
 
         SalmonFSTestHelper.testCase.assertTrue(salmon_file.exists())
 
-        searcher: FileSearcher = FileSearcher()
-        search_options = FileSearcher.SearchOptions()
+        searcher: AesFileSearcher = AesFileSearcher()
+        search_options = AesFileSearcher.SearchOptions()
         search_options.any_term = True
         files: list[AesFile] = searcher.search(root_dir, basename, search_options)
 
