@@ -46,12 +46,12 @@ from typeguard import typechecked
 
 @typechecked
 def _decrypt_shm(index: int, part_size: int, running_threads: int,
-                  data: bytearray, shm_out_name: str, shm_length: int, shm_cancel_name: str, key: bytearray,
-                  nonce: bytearray,
-                  enc_format: EncryptionFormat,
-                  integrity: bool, hash_key: bytearray | None, chunk_size: int, buffer_size: int):
+                 data: bytearray, shm_out_name: str, shm_length: int, shm_cancel_name: str, key: bytearray,
+                 nonce: bytearray,
+                 enc_format: EncryptionFormat,
+                 integrity: bool, hash_key: bytearray | None, chunk_size: int, buffer_size: int):
     """
-    Do not use directly use encrypt() instead.
+    Do not use directly use Decryptor class instead.
     """
     start: int = part_size * index
     length: int
@@ -63,18 +63,18 @@ def _decrypt_shm(index: int, part_size: int, running_threads: int,
     shm_out_data = shm_out.buf
     ins: MemoryStream = MemoryStream(data)
     out_data: bytearray = bytearray(shm_length)
-    (byte_start, byte_end) = __decrypt_data(ins, start, length, out_data, key, nonce, enc_format,
-                                            integrity, hash_key, chunk_size, buffer_size, shm_cancel_name)
+    (byte_start, byte_end) = _decrypt_data(ins, start, length, out_data, key, nonce, enc_format,
+                                           integrity, hash_key, chunk_size, buffer_size, shm_cancel_name)
     shm_out_data[byte_start:byte_end] = out_data[byte_start:byte_end]
 
 
 @typechecked
 def _decrypt_data(input_stream: RandomAccessStream, start: int, count: int, out_data: bytearray,
-                   key: bytearray, nonce: bytearray | None,
-                   enc_format: EncryptionFormat, integrity: bool, hash_key: bytearray | None,
-                   chunk_size: int, buffer_size: int, shm_cancel_name: str | None = None) -> (int, int):
+                  key: bytearray, nonce: bytearray | None,
+                  enc_format: EncryptionFormat, integrity: bool, hash_key: bytearray | None,
+                  chunk_size: int, buffer_size: int, shm_cancel_name: str | None = None) -> (int, int):
     """
-    Do not use directly use encrypt() instead.
+    Do not use directly use Decryptor class instead.
     """
     shm_cancel_data: memoryview | None = None
     if shm_cancel_name:
@@ -136,21 +136,7 @@ class Decryptor:
         :multi_cpu:  Utilize multiple cpus. Windows does not have a fast fork() so it has a very slow startup
         """
 
-        self.__threads: int = 0
-        """
-        The number of parallel threads to use.
-        """
-
-        self.__executor: ProcessPoolExecutor | None = None
-        """
-        Executor for parallel tasks.
-        """
-
-        __buffer_size: int = 0
-        """
-        The buffer size to use.
-        """
-
+        self.__buffer_size: int = 0
         if threads <= 0:
             threads = 1
         self.__threads = threads
@@ -202,7 +188,7 @@ class Decryptor:
         if self.__threads == 1:
             input_stream: MemoryStream = MemoryStream(data)
             _decrypt_data(input_stream, 0, input_stream.get_length(), out_data,
-                           key, nonce, enc_format, integrity, hash_key, chunk_size, self.__buffer_size)
+                          key, nonce, enc_format, integrity, hash_key, chunk_size, self.__buffer_size)
         else:
             self.__decrypt_data_parallel(data, out_data,
                                          key, hash_key, nonce, enc_format,

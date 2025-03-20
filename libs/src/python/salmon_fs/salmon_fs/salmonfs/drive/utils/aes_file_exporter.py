@@ -42,15 +42,15 @@ from salmon_fs.salmonfs.file.aes_file import AesFile
 
 
 @typechecked
-def export_file(index: int, final_part_size: int, final_running_threads: int, file_size: int,
-                real_file_to_export: IFile,
-                real_file: IFile,
-                shm_total_bytes_read_name: str,
-                shm_cancel_name: str,
-                buffer_size: int, key: bytearray,
-                integrity: bool, hash_key: bytearray | None, chunk_size: int):
+def _export_file(index: int, final_part_size: int, final_running_threads: int, file_size: int,
+                 real_file_to_export: IFile,
+                 real_file: IFile,
+                 shm_total_bytes_read_name: str,
+                 shm_cancel_name: str,
+                 buffer_size: int, key: bytearray,
+                 integrity: bool, hash_key: bytearray | None, chunk_size: int):
     """
-    Export file. Do not use directly use AesFileExporter class instead
+    Do not use directly use AesFileExporter class instead.
     """
     file_to_export: AesFile = AesFile(real_file_to_export)
     file_to_export.set_encryption_key(key)
@@ -66,8 +66,8 @@ def export_file(index: int, final_part_size: int, final_running_threads: int, fi
     else:
         length = final_part_size
     try:
-        export_file_part(file_to_export, real_file, start, length, total_bytes_written,
-                         buffer_size, shm_cancel_name)
+        _export_file_part(file_to_export, real_file, start, length, total_bytes_written,
+                          buffer_size, shm_cancel_name)
     except Exception as ex:
         raise ex
     finally:
@@ -77,23 +77,13 @@ def export_file(index: int, final_part_size: int, final_running_threads: int, fi
 
 
 @typechecked
-def export_file_part(file_to_export: AesFile, exported_file: IFile, start: int, count: int,
-                     total_bytes_written: memoryview | None, buffer_size: int,
-                     shm_cancel_name: str | None = None,
-                     stopped: list[bool] | None = None,
-                     on_progress_changed: Callable[[int, int], Any] | None = None):
+def _export_file_part(file_to_export: AesFile, exported_file: IFile, start: int, count: int,
+                      total_bytes_written: memoryview | None, buffer_size: int,
+                      shm_cancel_name: str | None = None,
+                      stopped: list[bool] | None = None,
+                      on_progress_changed: Callable[[int, int], Any] | None = None):
     """
-    Export a file part from the drive.
-    
-    :param file_to_export:      The file the part belongs to
-    :param exported_file:        The file to copy the exported part to
-    :param start:             The start position on the file
-    :param count:             The length of the bytes to be decrypted
-    :param total_bytes_written: The total bytes that were written to the external file
-    :param buffer_size: The buffer size
-    :param shm_cancel_name: The shared memory for cancelation
-    :param stopped: The stopped flag
-    :param on_progress_changed: The progress listener
+    Do not use directly use AesFileExporter class instead.
     """
 
     shm_cancel_data: memoryview | None = None
@@ -212,8 +202,9 @@ class AesFileExporter:
         self.__threads = threads
         if self.__threads <= 0:
             self.__threads = AesFileExporter.__DEFAULT_THREADS
-
-        self.__executor = ThreadPoolExecutor(self.__threads) if not multi_cpu else ProcessPoolExecutor(self.__threads)
+        if self.__threads > 1:
+            self.__executor = ThreadPoolExecutor(self.__threads) if not multi_cpu else ProcessPoolExecutor(
+                self.__threads)
 
     def stop(self):
         """
@@ -282,8 +273,8 @@ class AesFileExporter:
                 running_threads = int(file_size // part_size)
 
             if running_threads == 1:
-                export_file_part(file_to_export, exported_file, 0, file_size, None, self.__buffer_size,
-                                 None, self.__stopped, options.on_progress_changed)
+                _export_file_part(file_to_export, exported_file, 0, file_size, None, self.__buffer_size,
+                                  None, self.__stopped, options.on_progress_changed)
             else:
                 self.__submit_export_jobs(running_threads, part_size, file_to_export, exported_file,
                                           options.integrity, options.on_progress_changed)
@@ -319,7 +310,7 @@ class AesFileExporter:
 
         fs: list[Future] = []
         for i in range(0, running_threads):
-            fs.append(self.__executor.submit(export_file, i, part_size,
+            fs.append(self.__executor.submit(_export_file, i, part_size,
                                              running_threads,
                                              file_size,
                                              file_to_export.get_real_file(),

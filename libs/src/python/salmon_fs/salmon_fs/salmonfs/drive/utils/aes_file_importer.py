@@ -43,15 +43,15 @@ from salmon_fs.salmonfs.file.aes_file import AesFile
 
 
 @typechecked
-def import_file(index: int, final_part_size: int, final_running_threads: int, file_size: int,
-                file_to_import: IFile,
-                salmon_real_file: IFile,
-                shm_total_bytes_read_name: str,
-                shm_cancel_name: str,
-                buffer_size: int, key: bytearray,
-                integrity: bool, hash_key: bytearray | None, chunk_size: int):
+def _import_file(index: int, final_part_size: int, final_running_threads: int, file_size: int,
+                 file_to_import: IFile,
+                 salmon_real_file: IFile,
+                 shm_total_bytes_read_name: str,
+                 shm_cancel_name: str,
+                 buffer_size: int, key: bytearray,
+                 integrity: bool, hash_key: bytearray | None, chunk_size: int):
     """
-    Import a file. Do not user directly. Use AesFileImporter instead.
+    Do not use directly use AesFileImporter class instead.
     """
     imported_file: AesFile = AesFile(salmon_real_file)
     imported_file.set_allow_overwrite(True)
@@ -69,9 +69,9 @@ def import_file(index: int, final_part_size: int, final_running_threads: int, fi
         length = final_part_size
 
     try:
-        import_file_part(file_to_import, imported_file, start, length, total_bytes_read,
-                         buffer_size,
-                         shm_cancel_name)
+        _import_file_part(file_to_import, imported_file, start, length, total_bytes_read,
+                          buffer_size,
+                          shm_cancel_name)
         pass
     except Exception as ex:
         raise ex
@@ -82,23 +82,13 @@ def import_file(index: int, final_part_size: int, final_running_threads: int, fi
 
 
 @typechecked
-def import_file_part(file_to_import: IFile, salmon_file: AesFile, start: int, count: int,
-                     total_bytes_read: memoryview | None, buffer_size: int,
-                     shm_cancel_name: str | None = None,
-                     stopped: list[bool] | None = None,
-                     on_progress_changed: Callable[[int, int], Any] | None = None):
+def _import_file_part(file_to_import: IFile, salmon_file: AesFile, start: int, count: int,
+                      total_bytes_read: memoryview | None, buffer_size: int,
+                      shm_cancel_name: str | None = None,
+                      stopped: list[bool] | None = None,
+                      on_progress_changed: Callable[[int, int], Any] | None = None):
     """
-    Import a file part into a file in the drive.
-
-    :param file_to_import:   The external file that will be imported
-    :param salmon_file:     The file that will be imported to
-    :param start:          The start position of the byte data that will be imported
-    :param count:          The length of the file content that will be imported
-    :param total_bytes_read: The total bytes read from the external file
-    :param buffer_size: The buffer size
-    :param shm_cancel_name: The shared memory for cancelation
-    :param stopped: The stopped flag
-    :param on_progress_changed: 	 Progress observer
+    Do not use directly use AesFileImporter class instead.
     """
     shm_cancel_data: memoryview | None = None
     shm_cancel: SharedMemory | None = None
@@ -217,8 +207,9 @@ class AesFileImporter:
         self.__threads = threads
         if self.__threads <= 0:
             self.__threads = AesFileImporter.__DEFAULT_THREADS
-
-        self.__executor = ThreadPoolExecutor(self.__threads) if not multi_cpu else ProcessPoolExecutor(self.__threads)
+        if self.__threads > 1:
+            self.__executor = ThreadPoolExecutor(self.__threads) if not multi_cpu else ProcessPoolExecutor(
+                self.__threads)
 
     def stop(self):
         """
@@ -285,8 +276,8 @@ class AesFileImporter:
                 running_threads = int(file_size // part_size)
 
             if running_threads == 1:
-                import_file_part(file_to_import, imported_file, 0, file_size, None, self.__buffer_size,
-                                 None, self.__stopped, options.on_progress_changed)
+                _import_file_part(file_to_import, imported_file, 0, file_size, None, self.__buffer_size,
+                                  None, self.__stopped, options.on_progress_changed)
             else:
                 self.__submit_import_jobs(running_threads, part_size, file_to_import, imported_file,
                                           options.integrity, options.on_progress_changed)
@@ -323,7 +314,7 @@ class AesFileImporter:
 
         fs: list[Future] = []
         for i in range(0, running_threads):
-            fs.append(self.__executor.submit(import_file, i, part_size, running_threads,
+            fs.append(self.__executor.submit(_import_file, i, part_size, running_threads,
                                              file_size,
                                              file_to_import,
                                              imported_file.get_real_file(),
