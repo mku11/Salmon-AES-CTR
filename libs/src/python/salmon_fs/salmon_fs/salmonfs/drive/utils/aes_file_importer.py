@@ -367,9 +367,6 @@ class AesFileImporter:
         shm_total_bytes_read.close()
         shm_total_bytes_read.unlink()
 
-    def _finalize(self):
-        self.close()
-
     def close(self):
         """
         Close this importer and associated resources

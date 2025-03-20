@@ -343,6 +343,3 @@ class Decryptor:
         """
         if self.__executor is not None:
             self.__executor.shutdown(False)
-
-    def __del__(self):
-        self.close()

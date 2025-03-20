@@ -55,13 +55,6 @@ class DriveKey:
         self.__masterKey = None
         self.__iterations = 0
 
-    # TODO:
-    def _finalize(self):
-        """
-        Finalize.
-        :raises Throwable:         """
-        self.clear()
-
     def get_drive_key(self) -> bytearray | None:
         """
         Function returns the encryption key that will be used to encrypt/decrypt the files
