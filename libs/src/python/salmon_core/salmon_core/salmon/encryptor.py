@@ -138,6 +138,8 @@ class Encryptor:
         """
 
         self.__buffer_size: int = 0
+        self.__executor: ThreadPoolExecutor | ProcessPoolExecutor | None = None
+
         if threads <= 0:
             self.__threads = 1
         self.__threads = threads

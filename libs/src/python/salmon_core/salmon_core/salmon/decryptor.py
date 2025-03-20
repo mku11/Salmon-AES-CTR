@@ -137,10 +137,12 @@ class Decryptor:
         """
 
         self.__buffer_size: int = 0
+        self.__executor: ThreadPoolExecutor | ProcessPoolExecutor | None = None
+
         if threads <= 0:
             threads = 1
         self.__threads = threads
-        if threads > 1:
+        if self.__threads > 1:
             self.__executor = ThreadPoolExecutor(self.__threads) if not multi_cpu else ProcessPoolExecutor(
                 self.__threads)
 

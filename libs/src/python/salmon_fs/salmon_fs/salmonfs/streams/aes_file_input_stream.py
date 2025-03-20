@@ -410,7 +410,8 @@ class AesFileInputStream(BufferedIOBase):
         """
         self.__close_streams()
         self.__clear_buffers()
-        self.__executor.shutdown()
+        if self.__executor:
+            self.__executor.shutdown(False)
 
     @synchronized
     def __clear_buffers(self):

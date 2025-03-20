@@ -359,9 +359,11 @@ class AesFileExporter:
         """!
         Close this importer and associated resources
         """
-        self.__executor.shutdown(False)
-        self.__shm_cancel.close()
-        self.__shm_cancel.unlink()
+        if self.__executor:
+            self.__executor.shutdown(False)
+        if self.__shm_cancel:
+            self.__shm_cancel.close()
+            self.__shm_cancel.unlink()
 
     class FileExportOptions:
         """!
