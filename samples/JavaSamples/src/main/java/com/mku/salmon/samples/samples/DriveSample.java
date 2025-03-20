@@ -64,14 +64,19 @@ public class DriveSample {
 
 
         // import multiple files
-        AesFile[] filesImported = commander.importFiles(filesToImport, drive.getRoot(), false, true,
-                IFile.autoRename, (file, ex) -> {
-                    // file failed to import
-                }, (taskProgress) ->
-                {
-                    System.out.println("file importing: " + taskProgress.getFile().getName() + ": "
-                            + taskProgress.getProcessedBytes() + "/" + taskProgress.getTotalBytes() + " bytes");
-                });
+		AesFileCommander.BatchImportOptions importOptions = new AesFileCommander.BatchImportOptions();
+        importOptions.integrity = true;
+        importOptions.autoRename = IFile.autoRename;
+        importOptions.onFailed = (file, ex) -> {
+			System.err.println("import failed: " + ex);
+		};
+        importOptions.onProgressChanged = (taskProgress) -> {
+			System.out.println("file importing: "
+			+ taskProgress.getFile().getName() + ": "
+			+ taskProgress.getProcessedBytes() + "/" 
+			+ taskProgress.getTotalBytes() + " bytes");
+		};
+        AesFile[] filesImported = commander.importFiles(filesToImport, drive.getRoot(), importOptions);
         System.out.println("Files imported");
 
         // close the file commander
@@ -87,18 +92,23 @@ public class DriveSample {
 
         // export all files
         AesFile[] files = drive.getRoot().listFiles();
-        IFile[] filesExported = commander.exportFiles(files, dir, false, true, IFile.autoRename,
-                (sfile, ex) -> {
-                    // file failed to import
-                }, (taskProgress) ->
-                {
-                    try {
-                        System.out.println("file exporting: " + taskProgress.getFile().getName() + ": "
-                                + taskProgress.getProcessedBytes() + "/" + taskProgress.getTotalBytes() + " bytes");
-                    } catch (Exception e) {
-                        System.err.println(e);
-                    }
-                });
+		AesFileCommander.BatchExportOptions exportOptions = new AesFileCommander.BatchExportOptions();
+        exportOptions.integrity = true;
+        exportOptions.autoRename = IFile.autoRename;
+        exportOptions.onFailed = (file, ex) -> {
+			System.err.println("export failed: " + ex);
+		};
+        exportOptions.onProgressChanged = (taskProgress) -> {
+			try {
+				System.out.println("file exporting: " 
+				+ taskProgress.getFile().getName() + ": "
+				+ taskProgress.getProcessedBytes() + "/" 
+				+ taskProgress.getTotalBytes() + " bytes");
+			} catch (Exception ex) {
+				System.err.println(ex);
+			}
+		};
+        IFile[] filesExported = commander.exportFiles(files, dir, exportOptions);
         System.out.println("Files exported");
 
         // close the file commander

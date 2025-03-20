@@ -5,7 +5,7 @@ using Mku.SalmonFS.Drive;
 using Mku.SalmonFS.File;
 using Mku.SalmonFS.Sequence;
 using Mku.SalmonFS.Streams;
-using Mku.SalmonFS.Utils;
+using Mku.SalmonFS.Drive.Utils;
 using File = Mku.FS.File.File;
 
 namespace Mku.Salmon.Samples.Samples;
@@ -55,17 +55,22 @@ class DriveSample
     {
         AesFileCommander commander = new AesFileCommander(256 * 1024, 256 * 1024, threads);
 
-
         // import multiple files
-        AesFile[] filesImported = commander.ImportFiles(filesToImport, drive.Root, false, true,
-            (taskProgress) =>
-            {
-                Console.WriteLine("file importing: " + taskProgress.File.Name + ": "
-                        + taskProgress.ProcessedBytes + "/" + taskProgress.TotalBytes + " bytes");
-            }, IFile.AutoRename, (file, ex) =>
-            {
-                // file failed to import
-            });
+		AesFileCommander.BatchImportOptions importOptions = new AesFileCommander.BatchImportOptions();
+        importOptions.integrity = true;
+        importOptions.autoRename = IFile.AutoRename;
+        importOptions.onFailed = (file, ex) =>
+		{
+			Console.Error.WriteLine("import failed: " + ex);
+		};
+        importOptions.onProgressChanged = (taskProgress) => 
+		{
+			Console.WriteLine("file importing: "
+				+ taskProgress.File.Name + ": "
+				+ taskProgress.ProcessedBytes + "/" 
+				+ taskProgress.TotalBytes + " bytes");
+		};
+        AesFile[] filesImported = commander.ImportFiles(filesToImport, drive.Root, importOptions);
         Console.WriteLine("Files imported");
 
         // close the file commander
@@ -78,22 +83,25 @@ class DriveSample
 
         // export all files
         AesFile[] files = drive.Root.ListFiles();
-        IFile[] filesExported = commander.ExportFiles(files, dir, false, true,
-            (taskProgress) =>
-            {
-                try
-                {
-                    Console.WriteLine("file exporting: " + taskProgress.File.Name + ": "
-                            + taskProgress.ProcessedBytes + "/" + taskProgress.TotalBytes + " bytes");
-                }
-                catch (Exception e)
-                {
-                    Console.Error.WriteLine(e);
-                }
-            }, IFile.AutoRename, (sfile, ex) =>
-            {
-                // file failed to import
-            });
+		AesFileCommander.BatchExportOptions exportOptions = new AesFileCommander.BatchExportOptions();
+        exportOptions.integrity = true;
+        exportOptions.autoRename = IFile.AutoRename;
+        exportOptions.onFailed = (sfile, ex) =>
+		{
+			Console.Error.WriteLine("export failed: " + ex);
+		};
+        exportOptions.onProgressChanged = (taskProgress) =>
+		{
+			try {
+				Console.WriteLine("file exporting: " 
+					+ taskProgress.File.Name + ": "
+					+ taskProgress.ProcessedBytes + "/" 
+					+ taskProgress.TotalBytes + " bytes");
+			} catch (Exception ex) {
+				Console.Error.WriteLine(ex);
+			}
+		};
+        IFile[] filesExported = commander.ExportFiles(files, dir, exportOptions);
         Console.WriteLine("Files exported");
 
         // close the file commander

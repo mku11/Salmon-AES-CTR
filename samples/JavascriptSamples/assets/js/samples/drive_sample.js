@@ -5,6 +5,7 @@ import { HttpDrive } from '../lib/salmon-fs/salmonfs/drive/http_drive.js';
 import { LocalStorageFile } from '../lib/salmon-fs/fs/file/ls_file.js';
 import { FileSequencer } from '../lib/salmon-fs/salmonfs/sequence/file_sequencer.js';
 import { SequenceSerializer } from '../lib/salmon-core/salmon/sequence/sequence_serializer.js';
+import { BatchImportOptions, BatchExportOptions } from '../lib/salmon-fs/fs/drive/utils/file_commander.js';
 import { AesFileCommander } from '../lib/salmon-fs/salmonfs/drive/utils/aes_file_commander.js';
 import { AesFileReadableStream } from '../lib/salmon-fs/salmonfs/streams/aes_file_readable_stream.js';
 
@@ -50,13 +51,19 @@ export class DriveSample {
 		commander.getFileExporter().setWorkerPath( './assets/js/lib/salmon-fs/salmonfs/drive/utils/aes_file_exporter_worker.js');
 		
         // import multiple files
-        let filesImported = await commander.importFiles(filesToImport, await drive.getRoot(), false, true,
-                autoRenameFile, async (file, ex) => {
-                    console.error("import failed: " + await file.getName() + "\n" + ex);
-                }, async (taskProgress) => {
-                    print( "file importing: " + taskProgress.getFile().getName() + ": "
-                            + taskProgress.getProcessedBytes() + "/" + taskProgress.getTotalBytes() + " bytes" );
-                });
+		let importOptions = new BatchImportOptions();
+        importOptions.integrity = true;
+        importOptions.autoRename = autoRenameFile;
+        importOptions.onFailed = async (file, ex) => {
+			console.error("file import failed: " + ex);
+		};
+        importOptions.onProgressChanged = async (taskProgress) => {
+			print("file importing: " 
+				+ taskProgress.getFile().getName() + ": "
+				+ taskProgress.getProcessedBytes() + "/" 
+				+ taskProgress.getTotalBytes() + " bytes" );
+		};
+        let filesImported = await commander.importFiles(filesToImport, await drive.getRoot(), importOptions);
 	
 		print("Files imported");
 
@@ -74,19 +81,23 @@ export class DriveSample {
 		
         // export all files
 		let files = await drive.getRoot().then((root)=>root.listFiles());
-        let filesExported = await commander.exportFiles(files, dir, false, true,
-                autoRenameFile, async (sfile, ex) => {
-                    // file failed to import
-					console.error(ex);
-					print("export failed: " + await sfile.getName() + "\n" + ex.stack);
-                }, async (taskProgress) => {
-                    try {
-                        print( "file exporting: " + await taskProgress.getFile().getName() + ": "
-                                + taskProgress.getProcessedBytes() + "/" + taskProgress.getTotalBytes() + " bytes"  );
-                    } catch (e) {
-                        console.error(e);
-                    }
-                });
+		let exportOptions = new BatchExportOptions();
+        exportOptions.integrity = true;
+        exportOptions.autoRename = autoRenameFile;
+        exportOptions.onFailed = async (sfile, ex) => {
+			console.error("file export failed: " + ex);
+		};
+        exportOptions.onProgressChanged = async (taskProgress) => {
+			try {
+				print( "file exporting: " 
+				+ await taskProgress.getFile().getName() + ": "
+				+ taskProgress.getProcessedBytes() + "/" 
+				+ taskProgress.getTotalBytes() + " bytes");
+			} catch (e) {
+				console.error(e);
+			}
+		};
+        let filesExported = await commander.exportFiles(files, dir, exportOptions);
 			
 		print("Files exported");
 
@@ -105,7 +116,7 @@ export class DriveSample {
 		}
 			
 		for(let file of files) {
-			print("file: " + await file.getName() + ", size: " + await file.getSize());
+			print("file: " + await file.getName() + ", size: " + await file.getLength());
 		}
 		
 		// to read you can use file.getInputStream() to get a low level RandomAccessStream

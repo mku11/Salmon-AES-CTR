@@ -50,13 +50,13 @@ class DriveSample:
         commander = AesFileCommander(buffer_size, buffer_size, threads, True)
 
         def on_progress(task_progress: AesFileCommander.RealFileTaskProgress):
-            print("file importing: " 
-                + task_progress.get_file().get_name() + ": "
-                + str(task_progress.get_processed_bytes()) + "/" 
+            print("file importing: " \
+                + str(task_progress.get_file().get_name()) + ": " \
+                + str(task_progress.get_processed_bytes()) + "/" \
                 + str(task_progress.get_total_bytes()) + " bytes")
 
         def on_fail(file: IFile, ex: Exception):
-            print("import failed: " + file.get_name() + "\n" + str(ex), file=sys.stderr)
+            print("import failed: " + str(ex), file=sys.stderr)
 
         # import multiple files
         import_options = AesFileCommander.BatchImportOptions()
@@ -77,13 +77,13 @@ class DriveSample:
         commander = AesFileCommander(buffer_size, buffer_size, threads, True)
 
         def on_progress(task_progress: AesFileCommander.AesFileTaskProgress):
-            print("file exporting: " 
-            + task_progress.get_file().get_name() + ": " 
-            + str(task_progress.get_processed_bytes()) + "/" 
-            + str(task_progress.get_total_bytes()) + " bytes")
+            print("file exporting: " \
+                + str(task_progress.get_file().get_name()) + ": " \
+                + str(task_progress.get_processed_bytes()) + "/" \
+                + str(task_progress.get_total_bytes()) + " bytes")
 
-        def on_fail(file: AesFile, ex):
-            print("export failed: " + file.get_name() + "\n" + str(ex), file=sys.stderr)
+        def on_fail(file: AesFile, ex: Exception):
+            print("export failed: " + str(ex), file=sys.stderr)
 
         # export all files
         files: list[AesFile] = drive.get_root().list_files()
