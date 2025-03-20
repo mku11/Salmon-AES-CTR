@@ -28,7 +28,6 @@ SOFTWARE.
 import http.client
 from urllib.parse import urlparse
 from http.client import HTTPResponse, HTTPConnection, HTTPSConnection
-from typing import Any, Callable
 import re
 from typeguard import typechecked
 import urllib

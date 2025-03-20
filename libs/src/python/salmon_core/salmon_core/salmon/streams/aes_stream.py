@@ -56,7 +56,7 @@ class AesStream(RandomAccessStream):
 
     @staticmethod
     def get_output_size(mode: EncryptionMode, length: int,
-                        format: EncryptionFormat,
+                        enc_format: EncryptionFormat,
                         chunk_size: int = Integrity.DEFAULT_CHUNK_SIZE) -> int:
         """
         Get the output size of the data to be transformed(encrypted or decrypted) including
@@ -65,7 +65,7 @@ class AesStream(RandomAccessStream):
 
         :param mode: The {@link EncryptionMode} Encrypt or Decrypt.
         :param length: The data length
-        :param format: The {@link EncryptionFormat} Generic or Salmon.
+        :param enc_format: The {@link EncryptionFormat} Generic or Salmon.
         :param chunk_size: The chunk size for integrity chunks.
         :return: The size of the output data.
         
@@ -74,7 +74,7 @@ class AesStream(RandomAccessStream):
         :raises IOError: Thrown if there is an IO error.
         """
         size: int = length
-        if format == EncryptionFormat.Salmon:
+        if enc_format == EncryptionFormat.Salmon:
             if mode == EncryptionMode.Encrypt:
                 size += Header.HEADER_LENGTH
                 if chunk_size > 0:
@@ -89,7 +89,7 @@ class AesStream(RandomAccessStream):
         return size
 
     def __init__(self, key: bytearray, nonce: bytearray | None, encryption_mode: EncryptionMode,
-                 base_stream: RandomAccessStream, format: EncryptionFormat = EncryptionFormat.Salmon,
+                 base_stream: RandomAccessStream, enc_format: EncryptionFormat = EncryptionFormat.Salmon,
                  integrity: bool = False, hash_key: bytearray | None = None, chunk_size: int = 0):
         """
         Instantiate a new Salmon stream with a base stream and optional header data and hash integrity.
@@ -105,10 +105,10 @@ class AesStream(RandomAccessStream):
         see <a href="https://en.wikipedia.org/wiki/Block_cipher_mode_of_operation#Counter_(CTR)">Salmon README.md</a>
         
         :param key:            The AES key that is used to encrypt decrypt
-        :param nonce:          The nonce used for the initial counter. If mode is Decrypt and format is Salmon then use null.</param>
+        :param nonce:      The nonce used for the initial counter. If mode is Decrypt and format is Salmon then use null
         :param encryption_mode: Encryption mode Encrypt or Decrypt this cannot change later
         :param base_stream:     The base Stream that will be used to read the data
-        :param format: The {@link EncryptionFormat} Generic or Salmon.
+        :param enc_format: The {@link EncryptionFormat} Generic or Salmon.
         :param integrity:      enable integrity
         :param chunk_size:      the chunk size to be used with integrity
         :param hash_key:        Hash key to be used with integrity
@@ -158,14 +158,14 @@ class AesStream(RandomAccessStream):
         Default buffer size for all internal streams including Encryptors and Decryptors
         """
 
-        if format == EncryptionFormat.Generic:
+        if enc_format == EncryptionFormat.Generic:
             integrity = False
-            hashKey = None
-            chunkSize = 0
+            hash_key = None
+            chunk_size = 0
 
         self.__encryption_mode = encryption_mode
         self.__base_stream = base_stream
-        self.__header: Header | None = self.__get_or_create_header(format, nonce, integrity, chunk_size)
+        self.__header: Header | None = self.__get_or_create_header(enc_format, nonce, integrity, chunk_size)
         if self.__header:
             chunk_size = self.__header.get_chunk_size()
             nonce = self.__header.get_nonce()
@@ -178,9 +178,9 @@ class AesStream(RandomAccessStream):
         self.__init_transformer(key, nonce)
         self.__init_stream()
 
-    def __get_or_create_header(self, format: EncryptionFormat, nonce: bytearray | None, integrity: bool,
+    def __get_or_create_header(self, enc_format: EncryptionFormat, nonce: bytearray | None, integrity: bool,
                                chunk_size: int) -> Header | None:
-        if format == EncryptionFormat.Salmon:
+        if enc_format == EncryptionFormat.Salmon:
             if self.__encryption_mode == EncryptionMode.Encrypt:
                 if not nonce:
                     raise SecurityException("Nonce is missing")
@@ -599,7 +599,8 @@ class AesStream(RandomAccessStream):
                 integrity_hashes: list | None = None
                 if self.integrity.use_integrity():
                     integrity_hashes = self.integrity.generate_hashes(dest_buffer,
-                                                                      self.__header.get_header_data() if self.get_position() == 0 else None)
+                                                                      self.__header.get_header_data()
+                                                                      if self.get_position() == 0 else None)
                 pos += self.__write_to_stream(dest_buffer, self.get_chunk_size(), integrity_hashes)
                 self.__transformer.sync_counter(self.get_position())
             except (SecurityException, RangeExceededException, IntegrityException) as ex:

@@ -116,7 +116,6 @@ class IVirtualFile(ABC):
     def delete_recursively(self, options: IVirtualFile.VirtualRecursiveDeleteOptions | None = None):
         pass
 
-
     class VirtualRecursiveCopyOptions:
         """
           Directory copy options (recursively)

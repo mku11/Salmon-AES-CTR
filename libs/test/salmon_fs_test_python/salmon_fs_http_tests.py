@@ -104,7 +104,7 @@ class SalmonFSHttpTests(TestCase):
         wrong_password: bool = False
         try:
             drive: HttpDrive = AesDrive.open_drive(vault_dir, SalmonFSTestHelper.drive_class_type,
-                                                        SalmonCoreTestHelper.TEST_FALSE_PASSWORD)
+                                                   SalmonCoreTestHelper.TEST_FALSE_PASSWORD)
         except Exception as ex:
             print(ex, file=sys.stderr)
             wrong_password = True
@@ -115,7 +115,7 @@ class SalmonFSHttpTests(TestCase):
         wrong_password: bool = False
         try:
             drive: HttpDrive = AesDrive.open_drive(vault_dir, SalmonFSTestHelper.drive_class_type,
-                                                        SalmonCoreTestHelper.TEST_PASSWORD)
+                                                   SalmonCoreTestHelper.TEST_PASSWORD)
         except Exception as ex:
             print(ex, file=sys.stderr)
             wrong_password = True
@@ -141,7 +141,7 @@ class SalmonFSHttpTests(TestCase):
     def test_shouldSeekAndReadEncryptedFileStreamFromDrive(self):
         vault_dir: IFile = SalmonFSTestHelper.HTTP_VAULT_DIR
         drive: HttpDrive = AesDrive.open_drive(vault_dir, SalmonFSTestHelper.drive_class_type,
-                                                    SalmonCoreTestHelper.TEST_PASSWORD)
+                                               SalmonCoreTestHelper.TEST_PASSWORD)
         root: IVirtualFile = drive.get_root()
         enc_file: IVirtualFile = root.get_child(SalmonFSTestHelper.TEST_IMPORT_SMALL_FILENAME)
         self.assertEqual(enc_file.get_name(), SalmonFSTestHelper.TEST_IMPORT_SMALL_FILENAME)

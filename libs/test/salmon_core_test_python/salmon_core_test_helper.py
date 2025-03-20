@@ -102,15 +102,16 @@ class SalmonCoreTestHelper:
 
         # set native library path
         platform_os: str = platform.system().upper()
+        projects_path: str = "../../projects"
         if "WIN" in platform_os:
-            NativeProxy.set_library_path(
-                "../../projects/salmonfs-libs-gradle/salmonfs-native/build/libs/salmonfs/shared/salmon.dll")
+            NativeProxy.set_library_path(projects_path +
+                                         "/salmonfs-libs-gradle/salmonfs-native/build/libs/salmonfs/shared/salmon.dll")
         elif "MAC" in platform_os:
-            NativeProxy.set_library_path(
-                "../../projects/salmonfs-libs-xcode-macos/salmonfs/DerivedData/salmonfs/Build/Products/Release/libsalmon.dylib")
+            NativeProxy.set_library_path(projects_path +
+                                         "/salmonfs-libs-xcode-macos/salmonfs/DerivedData/salmonfs/Build/Products/Release/libsalmon.dylib")
         elif "LINUX" in platform_os:
-            NativeProxy.set_library_path(
-                "../../projects/salmonfs-libs-gradle/salmonfs-native/build/libs/salmonfs/shared/libsalmon.so")
+            NativeProxy.set_library_path(projects_path +
+                                         "/salmonfs-libs-gradle/salmonfs-native/build/libs/salmonfs/shared/libsalmon.so")
 
     @staticmethod
     def close():
@@ -490,10 +491,12 @@ class SalmonCoreTestHelper:
     def encrypt_and_decrypt_byte_array2(data, enable_log):
         t1 = time.time() * 1000
         enc_data = SalmonCoreTestHelper.get_encryptor() \
-            .encrypt(data, SalmonCoreTestHelper.TEST_KEY_BYTES, SalmonCoreTestHelper.TEST_NONCE_BYTES, EncryptionFormat.Generic)
+            .encrypt(data, SalmonCoreTestHelper.TEST_KEY_BYTES, SalmonCoreTestHelper.TEST_NONCE_BYTES,
+                     EncryptionFormat.Generic)
         t2 = time.time() * 1000
         dec_data = SalmonCoreTestHelper.get_decryptor() \
-            .decrypt(enc_data, SalmonCoreTestHelper.TEST_KEY_BYTES, SalmonCoreTestHelper.TEST_NONCE_BYTES, EncryptionFormat.Generic)
+            .decrypt(enc_data, SalmonCoreTestHelper.TEST_KEY_BYTES, SalmonCoreTestHelper.TEST_NONCE_BYTES,
+                     EncryptionFormat.Generic)
         t3 = time.time() * 1000
 
         SalmonCoreTestHelper.assert_array_equal(data, dec_data)

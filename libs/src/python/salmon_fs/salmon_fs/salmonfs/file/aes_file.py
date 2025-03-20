@@ -58,7 +58,7 @@ class AesFile(IVirtualFile):
     separator: str = "/"
 
     def __init__(self, real_file: IFile, drive: AesDrive | None = None,
-                 format: EncryptionFormat = EncryptionFormat.Salmon):
+                 enc_format: EncryptionFormat = EncryptionFormat.Salmon):
         """
         Provides a file handle that can be used to create encrypted files.
         Requires a virtual drive that supports the underlying filesystem, see PyFile implementation.
@@ -86,7 +86,7 @@ class AesFile(IVirtualFile):
 
         self.__real_file = real_file
         self.__drive = drive
-        self.__format = format
+        self.__format = enc_format
         if drive is not None and drive.get_key() is not None:
             self.__hash_key = drive.get_key().get_hash_key()
 

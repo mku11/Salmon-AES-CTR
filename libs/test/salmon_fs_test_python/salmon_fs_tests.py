@@ -29,7 +29,8 @@ import hashlib
 import random
 from unittest import TestCase
 from typeguard import typechecked
-import os, sys
+import os
+import sys
 
 sys.path.append(os.path.dirname(__file__) + '/../../src/python/salmon_core')
 sys.path.append(os.path.dirname(__file__) + '/../../src/python/salmon_fs')
@@ -553,7 +554,7 @@ class SalmonFSTests(TestCase):
                                                             SalmonFSTestHelper.ENC_EXPORT_BUFFER_SIZE, 2,
                                                             multi_cpu=SalmonFSTestHelper.ENABLE_MULTI_CPU)
 
-        def on_failed(file, ex):
+        def on_failed(v_file, ex):
             print("Error while import: " + str(ex), file=sys.stderr)
             raise ex
 

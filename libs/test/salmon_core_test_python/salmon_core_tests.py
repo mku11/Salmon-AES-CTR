@@ -28,7 +28,8 @@ from typeguard import typechecked, TypeCheckError
 import time
 import traceback
 from unittest import TestCase
-import os, sys
+import os
+import sys
 
 sys.path.append(os.path.dirname(__file__) + '/../../src/python/salmon_core')
 from salmon_core.convert.bit_converter import BitConverter
@@ -597,16 +598,16 @@ class SalmonCoreTests(TestCase):
         data: bytearray = SalmonCoreTestHelper.get_rand_array(1 * 1024 * 1024)
         t1 = time.time() * 1000
         enc_data: bytearray = SalmonCoreTestHelper.get_encryptor().encrypt(data,
-                                                                          SalmonCoreTestHelper.TEST_KEY_BYTES,
-                                                                          SalmonCoreTestHelper.TEST_NONCE_BYTES,
-                                                                          EncryptionFormat.Salmon, True,
-                                                                          SalmonCoreTestHelper.TEST_HMAC_KEY_BYTES, 32)
+                                                                           SalmonCoreTestHelper.TEST_KEY_BYTES,
+                                                                           SalmonCoreTestHelper.TEST_NONCE_BYTES,
+                                                                           EncryptionFormat.Salmon, True,
+                                                                           SalmonCoreTestHelper.TEST_HMAC_KEY_BYTES, 32)
         t2 = time.time() * 1000
         dec_data = SalmonCoreTestHelper.get_decryptor().decrypt(enc_data,
-                                                               SalmonCoreTestHelper.TEST_KEY_BYTES,
-                                                               SalmonCoreTestHelper.TEST_NONCE_BYTES,
-                                                               EncryptionFormat.Salmon, True,
-                                                               SalmonCoreTestHelper.TEST_HMAC_KEY_BYTES)
+                                                                SalmonCoreTestHelper.TEST_KEY_BYTES,
+                                                                SalmonCoreTestHelper.TEST_NONCE_BYTES,
+                                                                EncryptionFormat.Salmon, True,
+                                                                SalmonCoreTestHelper.TEST_HMAC_KEY_BYTES)
 
         t3 = time.time() * 1000
 

@@ -32,7 +32,6 @@ import urllib
 from urllib import parse
 from urllib.parse import urlparse
 from io import RawIOBase
-from wrapt import synchronized
 
 from salmon_core.convert.base_64 import Base64
 from salmon_fs.fs.file.ifile import IFile

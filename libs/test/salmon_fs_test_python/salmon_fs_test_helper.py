@@ -27,7 +27,8 @@ SOFTWARE.
 
 import hashlib
 import time
-import sys, os
+import sys
+import os
 from enum import Enum
 from unittest import TestCase
 import random
@@ -42,12 +43,8 @@ from salmon_core.streams.memory_stream import MemoryStream
 from salmon_core.streams.random_access_stream import RandomAccessStream
 from salmon_core.salmon.streams.encryption_mode import EncryptionMode
 from salmon_core.salmon.streams.aes_stream import AesStream
-from salmon_core.salmon.decryptor import Decryptor
-from salmon_core.salmon.encryptor import Encryptor
 from salmon_core.salmon.generator import Generator
 from salmon_core.salmon.range_exceeded_exception import RangeExceededException
-from salmon_core.salmon.text.text_decryptor import TextDecryptor
-from salmon_core.salmon.text.text_encryptor import TextEncryptor
 from salmon_fs.salmonfs.drive.utils.aes_file_commander import AesFileCommander
 from salmon_fs.salmonfs.drive.ws_drive import WSDrive
 from salmon_fs.salmonfs.drive.http_drive import HttpDrive
@@ -670,7 +667,7 @@ class SalmonFSTestHelper:
         text = "This is a plaintext that will be used for testing"
         # for i in range(18):
         #     text += text
-        BUFF_SIZE = 256 * 1024
+        buff_size = 256 * 1024
         v_dir = SalmonFSTestHelper.generate_folder("test")
         filename = "file.txt"
         test_file = v_dir.create_file(filename)
@@ -681,7 +678,7 @@ class SalmonFSTestHelper:
         wstream: RandomAccessStream = write_file.get_output_stream()
         idx = 0
         while idx < len(text):
-            length = min(BUFF_SIZE, len(text) - idx)
+            length = min(buff_size, len(text) - idx)
             wstream.write(v_bytes, idx, length)
             idx += length
         wstream.flush()
@@ -690,7 +687,7 @@ class SalmonFSTestHelper:
         # read a file
         read_file: IFile = v_dir.get_child(filename)
         rstream: RandomAccessStream = read_file.get_input_stream()
-        read_buff = bytearray(BUFF_SIZE)
+        read_buff = bytearray(buff_size)
         bytes_read = 0
         lstream = MemoryStream()
         while (bytes_read := rstream.read(read_buff, 0, len(read_buff))) > 0:
@@ -707,7 +704,7 @@ class SalmonFSTestHelper:
         text = "This is a plaintext that will be used for testing"
         # for i in range(18):
         #     text += text
-        BUFF_SIZE = 256 * 1024
+        buff_size = 256 * 1024
 
         v_dir = SalmonFSTestHelper.generate_folder("test")
         filename = "file.dat"
@@ -727,7 +724,7 @@ class SalmonFSTestHelper:
         # encrypt data and write with a single call
         idx = 0
         while idx < len(text):
-            length = min(BUFF_SIZE, len(text) - idx)
+            length = min(buff_size, len(text) - idx)
             stream.write(bytearray(v_bytes[idx:idx + length]), 0, length)
             idx += length
         stream.flush()
@@ -738,7 +735,7 @@ class SalmonFSTestHelper:
         enc_file2 = AesFile(rfile)
         enc_file2.set_encryption_key(key)
         stream2 = enc_file2.get_input_stream()
-        dec_buff = bytearray(BUFF_SIZE)
+        dec_buff = bytearray(buff_size)
         lstream = MemoryStream()
         bytes_read = 0
         # decrypt and read data with a single call, you can also Seek() to any position before Read()

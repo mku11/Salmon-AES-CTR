@@ -86,7 +86,7 @@ def import_file_part(file_to_import: IFile, salmon_file: AesFile, start: int, co
                      on_progress_changed: Callable[[int, int], Any] | None = None):
     """
     Import a file part into a file in the drive.
-    
+
     :param file_to_import:   The external file that will be imported
     :param salmon_file:     The file that will be imported to
     :param start:          The start position of the byte data that will be imported
@@ -95,7 +95,7 @@ def import_file_part(file_to_import: IFile, salmon_file: AesFile, start: int, co
     :param buffer_size: The buffer size
     :param shm_cancel_name: The shared memory for cancelation
     :param stopped: The stopped flag
-    :param on_progress: 	 Progress observer
+    :param on_progress_changed: 	 Progress observer
     """
     shm_cancel_data: memoryview | None = None
     shm_cancel: SharedMemory | None = None

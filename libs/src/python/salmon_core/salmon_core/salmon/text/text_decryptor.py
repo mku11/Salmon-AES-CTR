@@ -40,7 +40,7 @@ class TextDecryptor:
 
     @staticmethod
     def decrypt_string(text: str, key: bytearray, nonce: bytearray | None = None,
-                       format: EncryptionFormat = EncryptionFormat.Salmon,
+                       enc_format: EncryptionFormat = EncryptionFormat.Salmon,
                        integrity: bool = False, hash_key: bytearray | None = None,
                        chunk_size: int = 0) -> str:
         """
@@ -49,7 +49,7 @@ class TextDecryptor:
         :param text:  Text to be decrypted.
         :param key:   The encryption key to be used.
         :param nonce: The nonce to be used, set only if header=false.
-        :param format: The {@link EncryptionFormat} Generic or Salmon.
+        :param enc_format: The {@link EncryptionFormat} Generic or Salmon.
         :param integrity: True if you want to calculate and store hash signatures for each chunkSize
         :param hash_key: Hash key to be used for all chunks.
         :param chunk_size: The chunk size.
@@ -59,7 +59,7 @@ class TextDecryptor:
         :raises IntegrityException: Thrown when data are corrupt or tampered with.
         """
         v_bytes: bytearray = Base64Utils.get_base64().decode(text)
-        dec_bytes: bytearray = TextDecryptor.__decryptor.decrypt(v_bytes, key, nonce, format, integrity, hash_key,
+        dec_bytes: bytearray = TextDecryptor.__decryptor.decrypt(v_bytes, key, nonce, enc_format, integrity, hash_key,
                                                                  chunk_size)
         dec_string: str = dec_bytes.decode('utf-8')
         return dec_string

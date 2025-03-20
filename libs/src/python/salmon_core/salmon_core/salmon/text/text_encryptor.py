@@ -39,7 +39,7 @@ class TextEncryptor:
 
     @staticmethod
     def encrypt_string(text: str, key: bytearray, nonce: bytearray,
-                       format: EncryptionFormat = EncryptionFormat.Salmon, integrity: bool = False,
+                       enc_format: EncryptionFormat = EncryptionFormat.Salmon, integrity: bool = False,
                        hash_key: bytearray | None = None, chunk_size: int = 0) -> str:
         """
         Encrypts a text String using AES256 with the key and nonce provided.
@@ -47,7 +47,7 @@ class TextEncryptor:
         :param text:  Text to be encrypted.
         :param key:   The encryption key to be used.
         :param nonce: The nonce to be used.
-        :param format: The {@link EncryptionFormat} Generic or Salmon.
+        :param enc_format: The {@link EncryptionFormat} Generic or Salmon.
         :param integrity: True if you want to calculate and store hash signatures for each chunkSize
         :param hash_key: Hash key to be used for all chunks.
         :param chunk_size: The chunk size.
@@ -57,7 +57,7 @@ class TextEncryptor:
         :raises IOError: Thrown if there is an IO error.
         """
         v_bytes: bytearray = bytearray(text.encode('utf-8'))
-        enc_bytes: bytearray = TextEncryptor.__encryptor.encrypt(v_bytes, key, nonce, format, integrity, hash_key,
+        enc_bytes: bytearray = TextEncryptor.__encryptor.encrypt(v_bytes, key, nonce, enc_format, integrity, hash_key,
                                                                  chunk_size)
         enc_string: str = Base64Utils.get_base64().encode(enc_bytes).replace("\n", "")
         return enc_string
