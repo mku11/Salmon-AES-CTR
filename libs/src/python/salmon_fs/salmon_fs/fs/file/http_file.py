@@ -49,7 +49,6 @@ class HttpFile(IFile):
 
     MAX_REDIRECTS: int = 5
     separator: str = "/"
-    __lock_object: RLock = RLock()
 
     def __init__(self, path: str):
         """
@@ -60,31 +59,30 @@ class HttpFile(IFile):
         self.__response: HTTPResponse | None = None
 
     def __get_response(self) -> HTTPResponse:
-        with HttpFile.__lock_object:
-            if not self.__response:
-                headers = {}
-                self.__set_default_headers(headers)
-                conn: HTTPConnection | HTTPSConnection | None = None
-                try:
-                    url = self.__file_path
-                    while count := HttpFile.MAX_REDIRECTS:
-                        conn = self.__create_connection(urlparse(url).netloc)
-                        conn.request("GET", urlparse(url).path, headers=headers)
-                        self.__response = conn.getresponse()
-                        if self.__response.getheader('location'):
-                            url = urljoin(url, self.__response.getheader('location'))
-                            count -= 1
-                            self.__response.close()
-                            conn.close()
-                        else:
-                            break
-                    self.__check_status(self.__response, 200)
-                finally:
-                    if conn:
-                        conn.close()
-                    if self.__response:
+        if not self.__response:
+            headers = {}
+            self.__set_default_headers(headers)
+            conn: HTTPConnection | HTTPSConnection | None = None
+            try:
+                url = self.__file_path
+                while count := HttpFile.MAX_REDIRECTS:
+                    conn = self.__create_connection(urlparse(url).netloc)
+                    conn.request("GET", urlparse(url).path, headers=headers)
+                    self.__response = conn.getresponse()
+                    if self.__response.getheader('location'):
+                        url = urljoin(url, self.__response.getheader('location'))
+                        count -= 1
                         self.__response.close()
-            return self.__response
+                        conn.close()
+                    else:
+                        break
+                self.__check_status(self.__response, 200)
+            finally:
+                if conn:
+                    conn.close()
+                if self.__response:
+                    self.__response.close()
+        return self.__response
 
     def create_directory(self, dir_name: str) -> IFile:
         """
@@ -297,8 +295,7 @@ class HttpFile(IFile):
         """
         Clear cached properties
         """
-        with HttpFile.__lock_object:
-            self.__response = None
+        self.__response = None
 
     def get_child_path(self, filename: str) -> str:
         n_filepath = self.__file_path
