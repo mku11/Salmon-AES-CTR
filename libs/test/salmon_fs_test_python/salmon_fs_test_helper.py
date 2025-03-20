@@ -142,8 +142,8 @@ class SalmonFSTestHelper:
     TEST_HTTP_FILE = None
     TEST_SEQ_DIR = None
     TEST_EXPORT_AUTH_DIR = None
-    file_importer = None
-    file_exporter = None
+    file_importer: AesFileImporter = None
+    file_exporter: AesFileExporter = None
     sequence_serializer = SequenceSerializer()
 
     ENABLE_MULTI_CPU = True
