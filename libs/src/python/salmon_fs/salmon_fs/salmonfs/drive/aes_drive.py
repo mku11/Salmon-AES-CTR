@@ -337,7 +337,7 @@ class AesDrive(VirtualDrive, ABC):
         if key is None:
             return False
         enc_key: bytearray | None = key.get_drive_key()
-        return enc_key
+        return enc_key is not None
 
     def get_bytes_from_real_file(self, file: IFile, buffer_size: int) -> bytearray:
         """
@@ -397,7 +397,7 @@ class AesDrive(VirtualDrive, ABC):
             print(ex, file=sys.stderr)
             return False
 
-        return salmon_config
+        return salmon_config is not None
 
     def get_drive_id(self) -> bytearray:
         """
