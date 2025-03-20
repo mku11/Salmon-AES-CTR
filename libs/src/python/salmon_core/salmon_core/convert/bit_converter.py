@@ -66,14 +66,14 @@ class BitConverter:
             mul *= 256
         return num
 
-    """
-    Convert a byte array to a hex representation.
-    :param data: The byte array to be converted.
-    :return: The hex string representation.
-    """
-
     @staticmethod
     def to_hex(data: bytearray) -> str:
+        """
+        Convert a byte array to a hex representation.
+        :param data: The byte array to be converted.
+        :return: The hex string representation.
+        """
+
         sb = ""
         for b in data:
             sb += format(b, '02x')
