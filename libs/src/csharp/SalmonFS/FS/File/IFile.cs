@@ -230,7 +230,7 @@ public interface IFile
             {
                 if (options.autoRename != null)
                 {
-                    newFilename = AutoRename(this);
+                    newFilename = options.autoRename(this);
                 }
                 else
                 {
@@ -262,7 +262,7 @@ public interface IFile
                 return;
             }
             if (newFile != null && newFile.Exists && options.autoRename != null && options.autoRenameFolders)
-                newFile = dest.CreateDirectory(AutoRename(this));
+                newFile = dest.CreateDirectory(options.autoRename(this));
             else if (newFile == null || !newFile.Exists)
                 newFile = dest.CreateDirectory(newFilename);
             if (options.onProgressChanged != null)
@@ -306,7 +306,7 @@ public interface IFile
                     return;
                 if (options.autoRename != null)
                 {
-                    newFilename = AutoRename(this);
+                    newFilename = options.autoRename(this);
                 }
                 else
                 {

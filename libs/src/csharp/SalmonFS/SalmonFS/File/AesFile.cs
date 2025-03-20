@@ -839,8 +839,8 @@ public class AesFile : IVirtualFile
         }
         Func<IFile, string> RenameRealFile = null;
         // use auto rename only when we are using a drive
-        if (AutoRename != null && Drive != null)
-            RenameRealFile = (file) => AutoRename(new AesFile(file, Drive));
+        if (options.autoRename != null && Drive != null)
+            RenameRealFile = (file) => options.autoRename(new AesFile(file, Drive));
         IFile.RecursiveCopyOptions copyOptions = new IFile.RecursiveCopyOptions();
         copyOptions.autoRename = RenameRealFile;
         copyOptions.autoRenameFolders = options.autoRenameFolders;
@@ -875,8 +875,8 @@ public class AesFile : IVirtualFile
         }
         Func<IFile, string> RenameRealFile = null;
         // use auto rename only when we are using a drive
-        if (AutoRename != null && Drive != null)
-            RenameRealFile = (file) => AutoRename(new AesFile(file, Drive));
+        if (options.autoRename != null && Drive != null)
+            RenameRealFile = (file) => options.autoRename(new AesFile(file, Drive));
 
         IFile.RecursiveMoveOptions moveOptions = new IFile.RecursiveMoveOptions();
         moveOptions.autoRename = RenameRealFile;
