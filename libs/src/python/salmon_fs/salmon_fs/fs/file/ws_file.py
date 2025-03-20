@@ -404,6 +404,10 @@ class WSFile(IFile):
         :return: The copied file. Use this file for subsequent operations instead of the original.
         :raises IOError: Thrown if there is an IO error.
         """
+
+        if not options:
+            options = IFile.CopyOptions()
+
         new_name: str = options.new_filename if options.new_filename else self.get_name()
         if new_dir is None or not new_dir.exists():
             raise IOError("Target directory does not exists")
