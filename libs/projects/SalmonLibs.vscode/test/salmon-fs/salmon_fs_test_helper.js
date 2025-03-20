@@ -251,7 +251,6 @@ export class SalmonFSTestHelper {
         ];
         let importer = new AesFileImporter(SalmonFSTestHelper.ENC_IMPORT_BUFFER_SIZE, SalmonFSTestHelper.ENC_IMPORT_THREADS);
         let importOptions = new FileImportOptions();
-        importOptions.deleteSource = false;
         importOptions.integrity = true;
         for(let importFile of importFiles) {
             await importer.importFile(importFile, rootDir, options);
