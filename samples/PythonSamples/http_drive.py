@@ -12,7 +12,7 @@ from samples.drive_sample import DriveSample
 
 http_drive_url = "http://localhost:8000/test/httpserv/vault"
 password = "test123"
-threads = 2
+threads = 1
 
 AesStream.set_aes_provider_type(ProviderType.Default)
 

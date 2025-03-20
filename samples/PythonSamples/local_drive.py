@@ -12,7 +12,7 @@ from salmon_fs.fs.file.file import File
 from samples.drive_sample import DriveSample
 
 password = "test123"
-threads = 2
+threads = 1
 
 AesStream.set_aes_provider_type(ProviderType.Default)
 
