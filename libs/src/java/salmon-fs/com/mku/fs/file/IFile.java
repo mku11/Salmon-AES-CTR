@@ -363,8 +363,8 @@ public interface IFile {
             if (newFile != null && newFile.exists()) {
                 if (newFile.getPath().equals(this.getPath()))
                     return;
-                if (autoRename != null) {
-                    newFilename = autoRename.apply(this);
+                if (options.autoRename != null) {
+                    newFilename = options.autoRename.apply(this);
                 } else {
                     if (options.onFailed != null)
                         options.onFailed.accept(this, new Exception("Another file exists"));
