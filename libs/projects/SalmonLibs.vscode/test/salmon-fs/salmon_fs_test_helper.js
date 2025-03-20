@@ -253,7 +253,7 @@ export class SalmonFSTestHelper {
         let importOptions = new FileImportOptions();
         importOptions.integrity = true;
         for(let importFile of importFiles) {
-            await importer.importFile(importFile, rootDir, options);
+            await importer.importFile(importFile, rootDir, importOptions);
         }
         importer.close();
     }
