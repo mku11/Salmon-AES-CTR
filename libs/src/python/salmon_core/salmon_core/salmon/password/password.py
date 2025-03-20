@@ -40,11 +40,6 @@ class Password:
     Generates security keys based on text passwords.
     """
 
-    ENABLE_SHA1: bool = False
-    """
-    WARNING! SHA1 is not secure anymore enable only if you know what you're doing!
-    """
-
     __pbkdfAlgo: PbkdfAlgo = PbkdfAlgo.SHA256
     """
     Global PBKDF algorithm option that will be used for the master key derivation.
@@ -115,6 +110,4 @@ class Password:
         :return: The derived key.
         :raises IntegrityException: Thrown when security error
         """
-        if Password.__pbkdfAlgo == PbkdfAlgo.SHA1 and not Password.ENABLE_SHA1:
-            raise RuntimeError("Cannot use SHA1, SHA1 is not secure anymore use SHA256!")
         return Password.__provider.get_key(password, salt, iterations, output_bytes, Password.__pbkdfAlgo)

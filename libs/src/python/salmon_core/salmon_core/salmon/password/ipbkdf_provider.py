@@ -40,12 +40,6 @@ class ISalmonPbkdfProvider(ABC):
     Python Cipher key for SHA256. See cryptodome
     """
 
-    PBKDF_SHA1: str = "sha1"
-    """
-    Cipher key for SHA1. See cryptodome
-    WARNING! SHA1 is considered insecure! Use PBKDF_SHA256 instead.
-    """
-
     @staticmethod
     def get_pbkdf_algo_string(pbkdf_algo: PbkdfAlgo) -> str:
         """
@@ -55,8 +49,6 @@ class ISalmonPbkdfProvider(ABC):
         :return: The python cipher algorithm string. See cryptodome
         """
         match pbkdf_algo:
-            case PbkdfAlgo.SHA1:
-                return ISalmonPbkdfProvider.PBKDF_SHA1
             case PbkdfAlgo.SHA256:
                 return ISalmonPbkdfProvider.PBKDF_SHA256
         raise SecurityException("Unknown pbkdf algorithm")
