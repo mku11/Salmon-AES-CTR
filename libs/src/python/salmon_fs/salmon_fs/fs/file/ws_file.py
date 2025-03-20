@@ -54,12 +54,23 @@ class WSFile(IFile):
     __lock_object: RLock = RLock()
 
     def get_service_path(self):
+        """
+        Get the service path
+        """
         return self.__service_path
 
     def get_credentials(self):
+        """
+        Get the web service credentials
+        :returns The credentials
+        """
         return self.__credentials
 
     def set_credentials(self, credentials: Credentials):
+        """
+        Set the web service credentials
+        :param credentials: The credentials
+        """
         self.__credentials = credentials
 
     def __init__(self, path: str, service_path: str, credentials: Credentials):
@@ -397,7 +408,7 @@ class WSFile(IFile):
                     http_response.close()
 
     def copy(self, new_dir: IFile, options: IFile.CopyOptions | None = None) -> IFile:
-        """!
+        """
         Move this file or directory under a new directory.
         :param new_dir:    The target directory.
         :param options: The options
@@ -550,12 +561,28 @@ class WSFile(IFile):
 
 
 class Credentials:
+    """
+    Credentials
+    """
     def __init__(self, service_user: str, service_password: str):
+        """
+        Instntiate the credentials
+        :param service_user: The user name
+        :param service_password: The password
+        """
         self.__service_user: str = service_user
         self.__service_password: str = service_password
 
     def get_service_user(self) -> str:
+        """
+        Get the service user name
+        :returns The user name
+        """
         return self.__service_user
 
     def get_service_password(self) -> str:
+        """
+        Get the service password
+        :returns The password
+        """
         return self.__service_password

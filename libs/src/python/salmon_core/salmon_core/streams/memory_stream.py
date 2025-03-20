@@ -40,11 +40,12 @@ class MemoryStream(RandomAccessStream):
     Increment to resize to when capacity is exhausted.
     """
 
-    """
-    Create a memory stream backed by an existing byte-array.
-    :param bytes:     """
-
     def __init__(self, v_bytes: bytearray | None = None):
+        """
+        Create a memory stream backed by an existing byte-array.
+        :param v_bytes: The buffer to use
+        """
+
         self.__bytes: bytearray | None = None
         """
         Buffer to store the data. This can be provided via the constructor.

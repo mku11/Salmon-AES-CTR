@@ -203,9 +203,19 @@ class AesFileInputStream(BufferedIOBase):
         return min_count
 
     def read(self, size: int = __DEFAULT_BUFFER_SIZE) -> bytearray:
+        """
+        Read from the stream
+        :param size: The number of bytes to read.
+        :return The data
+        """
         return self.read1(size)
 
     def read1(self, size: int = __DEFAULT_BUFFER_SIZE) -> bytearray:
+        """
+        Read from the stream
+        :param size: The number of bytes to read.
+        :return The data
+        """
         buff: bytearray = bytearray(size)
         bytes_read = self.readinto(buff)
         return buff[0:bytes_read]
@@ -214,9 +224,19 @@ class AesFileInputStream(BufferedIOBase):
         raise NotImplementedError()
 
     def write(self, __buffer: bytearray) -> int:
+        """
+        Write to the stream. Not supported
+        :param __buffer: The data to write.
+        :return The number of data written
+        """
         raise NotImplementedError()
 
     def readinto1(self, __buffer: bytearray) -> int:
+        """
+        Read from the stream
+        :param __buffer: The data to read into.
+        :return The number of bytes read
+        """
         return self.readinto(__buffer)
 
     def tell(self) -> int:
@@ -355,12 +375,31 @@ class AesFileInputStream(BufferedIOBase):
         return self.__positionEnd - self.__positionStart + 1
 
     def get_position_start(self) -> int:
+        """
+        Get the start position
+        :returns The start position
+        """
         return self.__positionStart
 
     def set_position_start(self, pos: int):
+        """
+        Set the start position
+        :param pos The start position
+        """
         self.__positionStart = pos
 
+    def get_position_end(self) -> int:
+        """
+        Get the end position
+        :returns The end position
+        """
+        return self.__positionEnd
+
     def set_position_end(self, pos: int):
+        """
+        Set the end position
+        :param pos The end position
+        """
         self.__positionEnd = pos
 
     def close(self):

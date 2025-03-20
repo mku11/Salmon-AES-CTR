@@ -39,7 +39,11 @@ class Header:
     Header embedded in the AesStream. Header contains nonce and other information for
     decrypting the stream.
     """
+
     HEADER_LENGTH: int = 16
+    """
+    Header length
+    """
 
     def __init__(self, header_data: bytearray):
         self.__magic_bytes: bytearray = bytearray(Generator.MAGIC_LENGTH)
@@ -138,7 +142,14 @@ class Header:
         return header
 
     @staticmethod
-    def write_header(stream: RandomAccessStream, nonce: bytearray, chunk_size: int):
+    def write_header(stream: RandomAccessStream, nonce: bytearray, chunk_size: int) -> Header:
+        """
+        Write the header to the stream
+        :param stream: The stream
+        :param nonce: The nonce
+        :param chunk_size: The chunk size
+        :return The header
+        """
         magic_bytes: bytearray = Generator.get_magic_bytes()
         version: int = Generator.get_version()
         version_bytes: bytearray = bytearray([version])

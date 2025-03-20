@@ -48,16 +48,21 @@ class NativeProxy(INativeProxy):
 
     @staticmethod
     def set_library_path(library_path: str):
+        """
+        Set the native library path
+        :param library_path: The path
+        """
         NativeProxy.__library_path = library_path
 
     @staticmethod
-    def get_char_array(v_bytes: bytearray):
+    def __get_char_array(v_bytes: bytearray):
         return (ctypes.c_char * len(v_bytes)).from_buffer(bytearray(v_bytes))
 
     def salmon_init(self, aes_impl: int):
         """
         Proxy Init the native code with AES implementation, and hash length options.
-        :param aes_impl:         """
+        :param aes_impl:         The AES implementation type see class ProviderType
+        """
         self._load_library()
         NativeProxy.__init(aes_impl)
 
@@ -92,8 +97,8 @@ class NativeProxy(INativeProxy):
         :param key: The key
         :param expanded_key: The expanded key
         """
-        c_key = NativeProxy.get_char_array(key)
-        c_expanded_key = NativeProxy.get_char_array(expanded_key)
+        c_key = NativeProxy.__get_char_array(key)
+        c_expanded_key = NativeProxy.__get_char_array(expanded_key)
         NativeProxy.__expand_key(c_key, c_expanded_key)
         expanded_key[0:len(expanded_key)] = bytearray(c_expanded_key)
 
@@ -112,10 +117,10 @@ class NativeProxy(INativeProxy):
         :return: The number of bytes transformed
         """
 
-        c_key = NativeProxy.get_char_array(key)
-        c_counter = NativeProxy.get_char_array(counter)
-        c_src_buffer = NativeProxy.get_char_array(src_buffer)
-        c_dest_buffer = NativeProxy.get_char_array(dest_buffer)
+        c_key = NativeProxy.__get_char_array(key)
+        c_counter = NativeProxy.__get_char_array(counter)
+        c_src_buffer = NativeProxy.__get_char_array(src_buffer)
+        c_dest_buffer = NativeProxy.__get_char_array(dest_buffer)
         v_bytes: int = NativeProxy.__transform(c_key, c_counter,
                                                c_src_buffer, src_offset,
                                                c_dest_buffer, dest_offset, count)

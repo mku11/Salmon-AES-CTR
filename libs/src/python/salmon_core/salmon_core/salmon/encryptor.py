@@ -336,6 +336,9 @@ class Encryptor:
                 raise RuntimeError() from e
 
     def close(self):
+        """
+        Close the encryptor and associated resources
+        """
         if self.__executor is not None:
             self.__executor.shutdown(False)
 

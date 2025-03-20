@@ -46,15 +46,14 @@ class ISalmonPbkdfProvider(ABC):
     WARNING! SHA1 is considered insecure! Use PBKDF_SHA256 instead.
     """
 
-    """
-    Get the PBKDF python cipher algorithm string.
-    
-    :param pbkdfAlgo: The PBKDF algorithm to be used
-    :return: The python cipher algorithm string. See cryptodome
-    """
-
     @staticmethod
     def get_pbkdf_algo_string(pbkdf_algo: PbkdfAlgo) -> str:
+        """
+        Get the PBKDF python cipher algorithm string.
+
+        :param pbkdf_algo: The PBKDF algorithm to be used
+        :return: The python cipher algorithm string. See cryptodome
+        """
         match pbkdf_algo:
             case PbkdfAlgo.SHA1:
                 return ISalmonPbkdfProvider.PBKDF_SHA1

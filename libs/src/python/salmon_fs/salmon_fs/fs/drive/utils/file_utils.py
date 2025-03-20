@@ -30,6 +30,10 @@ from typeguard import typechecked
 
 @typechecked
 class FileUtils:
+    """
+    File utilities
+    """
+
     @staticmethod
     def is_text(filename: str) -> bool:
         """

@@ -118,47 +118,87 @@ class AesDrive(VirtualDrive, ABC):
 
     @staticmethod
     def get_config_filename() -> str:
+        """
+        Get the default configuration file name
+        :returns The file name
+        """
         return AesDrive.__configFilename
 
     @staticmethod
     def set_config_filename(config_filename: str):
+        """
+        Set the default configuraation file name
+        :param config_filename: The configuration file name
+        """
         AesDrive.__configFilename = config_filename
 
     @staticmethod
     def get_auth_config_filename() -> str:
+        """
+        Get the authentication configuration file name
+        :returns The file name
+        """
         return AesDrive.__authConfigFilename
 
     @staticmethod
     def set_auth_config_filename(auth_config_filename: str):
+        """
+        Set the authentication configuration file name
+        :param auth_config_filename The file name
+        """
         AesDrive.__authConfigFilename = auth_config_filename
 
     @staticmethod
     def get_virtual_drive_directory_name() -> str:
+        """
+        Get the default virtual drive directory name
+        :returns The directory name
+        """
         return AesDrive.__virtualDriveDirectoryName
 
     @staticmethod
     def set_virtual_drive_directory_name(virtual_drive_directory_name: str):
+        """
+        Set the default virtual drive directory name
+        :param virtual_drive_directory_name The directory name
+        """
         AesDrive.__virtualDriveDirectoryName = virtual_drive_directory_name
 
     @staticmethod
     def get_export_directory_name() -> str:
+        """
+        Get the default export directory name
+        :returns The directory name
+        """
         return AesDrive.__exportDirectoryName
 
     @staticmethod
     def set_export_directory_name(export_directory_name: str):
+        """
+        Set the default export directory name
+        :param export_directory_name The directory name
+        """
         AesDrive.__exportDirectoryName = export_directory_name
 
     @staticmethod
     def get_share_directory_name() -> str:
+        """
+        Get the default share directory name
+        :returns The directory name
+        """
         return AesDrive.__shareDirectoryName
 
     @staticmethod
     def set_share_directory_name(share_directory_name: str):
+        """
+        Set the default share directory name
+        :param share_directory_name The directory name
+        """
         AesDrive.__shareDirectoryName = share_directory_name
 
     def __register_on_process_close(self):
         """
-       Clear sensitive information when app is close.
+        Clear sensitive information when app is close.
         """
         # TODO:
         # Runtime.getRuntime().addShutdownHook(new Thread(this::close))
@@ -197,6 +237,10 @@ class AesDrive(VirtualDrive, ABC):
         return self.__virtualRoot
 
     def get_real_root(self) -> IFile:
+        """
+        Get the real root
+        :return The real root
+        """
         return self.__realRoot
 
     def __unlock(self, password: str):
@@ -388,7 +432,11 @@ class AesDrive(VirtualDrive, ABC):
 
         self.__virtualRoot = self.get_virtual_file(virtual_root_real_file)
 
-    def get_hash_provider(self):
+    def get_hash_provider(self) -> IHashProvider:
+        """
+        Get the hash provider
+        :returns The hash provider
+        """
         return self.__hashProvider
 
     @staticmethod
@@ -634,7 +682,7 @@ class AesDrive(VirtualDrive, ABC):
         """
         config_file: IFile = real_root.create_file(AesDrive.get_config_filename())
         return config_file
-    
+
     def get_config_file(self, real_root: IFile) -> IFile:
         """
         Get the drive config file
@@ -643,5 +691,3 @@ class AesDrive(VirtualDrive, ABC):
         """
         config_file: IFile = real_root.get_child(AesDrive.get_config_filename())
         return config_file
-        
-    

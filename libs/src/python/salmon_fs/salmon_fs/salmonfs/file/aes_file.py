@@ -56,6 +56,9 @@ class AesFile(IVirtualFile):
     """
 
     separator: str = "/"
+    """
+    The directory separator
+    """
 
     def __init__(self, real_file: IFile, drive: AesDrive | None = None,
                  enc_format: EncryptionFormat = EncryptionFormat.Salmon):
@@ -768,6 +771,10 @@ class AesFile(IVirtualFile):
         self.__real_file.move_recursively(dest.get_real_file(), move_options)
 
     def delete_recursively(self, options: IVirtualFile.VirtualRecursiveDeleteOptions | None = None):
+        """
+        Delete directory (Recursively)
+        :param options: The options
+        """
         if not options:
             options = IVirtualFile.VirtualRecursiveDeleteOptions()
         on_failed_real_file: Callable[[IFile, Exception], Any] | None = None
@@ -781,6 +788,9 @@ class AesFile(IVirtualFile):
         self.get_real_file().delete_recursively(delete_options)
 
     def get_minimum_part_size(self) -> int:
+        """
+        Get the minimum size a file can be split for parallel processing
+        """
         curr_chunk_size = self.get_file_chunk_size()
         if curr_chunk_size is not None and curr_chunk_size != 0:
             return curr_chunk_size
@@ -790,6 +800,11 @@ class AesFile(IVirtualFile):
 
     @staticmethod
     def auto_rename(file: AesFile) -> str:
+        """
+        Default auto rename a file
+        :param file: The file
+        :returns The new file name
+        """
         try:
             return AesFile.auto_rename_file(file)
         except Exception as ex:

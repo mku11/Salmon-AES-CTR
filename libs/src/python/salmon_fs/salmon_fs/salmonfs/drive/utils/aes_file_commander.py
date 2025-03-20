@@ -62,10 +62,18 @@ class AesFileCommander:
         self.__fileExporter = AesFileExporter(export_buffer_size, threads, multi_cpu)
         self.__fileSearcher = AesFileSearcher()
 
-    def get_file_importer(self):
+    def get_file_importer(self) -> AesFileImporter:
+        """
+        Get the file importer
+        :returns The file importer
+        """
         return self.__fileImporter
 
-    def get_file_exporter(self):
+    def get_file_exporter(self) -> AesFileExporter:
+        """
+        Get the file exporter
+        :returns The file exporter
+        """
         return self.__fileExporter
 
     def import_files(self, files_to_import: list[IFile], import_dir: AesFile,
@@ -485,7 +493,15 @@ class AesFileCommander:
             self.__totalFiles = total_files
 
     class AesFileTaskProgress(FileTaskProgress):
+        """
+        The task progress for an encrypted file
+        """
+
         def get_file(self) -> AesFile:
+            """
+            Get the file
+            :returns The file
+            """
             return self.__file
 
         def __init__(self, file: AesFile, processed_bytes: int, total_bytes: int,
@@ -496,6 +512,10 @@ class AesFileCommander:
 
     class RealFileTaskProgress(FileTaskProgress):
         def get_file(self) -> IFile:
+            """
+            Get the file
+            :returns The file
+            """
             return self.__file
 
         def __init__(self, file: IFile, processed_bytes: int, total_bytes: int,
@@ -547,107 +567,107 @@ class AesFileCommander:
         if position == length:
             count[0] += 1
 
-    """
-    Batch delete options
-    """
-
     class BatchDeleteOptions:
+        """
+        Batch delete options
+        """
+
+        on_failed: Callable[[AesFile, Exception], Any] | None = None
         """
         Callback when delete fails
         """
-        on_failed: Callable[[AesFile, Exception], Any] | None = None
 
+        on_progress_changed: Callable[[AesFileCommander.AesFileTaskProgress], Any] | None = None
         """
         Callback when progress changes
         """
-        on_progress_changed: Callable[[AesFileCommander.AesFileTaskProgress], Any] | None = None
-
-    """
-    Batch import options
-    """
 
     class BatchImportOptions:
         """
+        Batch import options
+        """
+
+        delete_source: bool = False
+        """
         Delete the source file when complete.
         """
-        delete_source: bool = False
 
+        integrity: bool = False
         """
         True to enable integrity
         """
-        integrity: bool = False
 
+        auto_rename: Callable[[IFile, str], Any] | None = None
         """
         Callback when a file with the same name exists
         """
-        auto_rename: Callable[[IFile, str], Any] | None = None
 
+        on_failed: Callable[[IFile, Exception], Any] | None = None
         """
         Callback when import fails
         """
-        on_failed: Callable[[IFile, Exception], Any] | None = None
 
+        on_progress_changed: Callable[[AesFileCommander.RealFileTaskProgress], Any] | None = None
         """
         Callback when progress changes
         """
-        on_progress_changed: Callable[[AesFileCommander.RealFileTaskProgress], Any] | None = None
-
-    """
-    Batch export options
-    """
 
     class BatchExportOptions:
         """
+        Batch export options
+        """
+
+        delete_source: bool = False
+        """
         Delete the source file when complete.
         """
-        delete_source: bool = False
 
+        integrity: bool = False
         """
         True to enable integrity
         """
-        integrity: bool = False
 
+        auto_rename: Callable[[IFile, str], Any] | None = None
         """
         Callback when a file with the same name exists
         """
-        auto_rename: Callable[[IFile, str], Any] | None = None
 
+        on_failed: Callable[[AesFile, Exception], Any] | None = None
         """
         Callback when import fails
         """
-        on_failed: Callable[[AesFile, Exception], Any] | None = None
 
+        on_progress_changed: Callable[[AesFileCommander.AesFileTaskProgress], Any] | None = None
         """
         Callback when progress changes
         """
-        on_progress_changed: Callable[[AesFileCommander.AesFileTaskProgress], Any] | None = None
-
-    """
-    Batch copy options
-    """
 
     class BatchCopyOptions:
         """
+        Batch copy options
+        """
+
+        move: bool = False
+        """
         True to move, false to copy
         """
-        move: bool = False
 
+        auto_rename: Callable[[AesFile, str], Any] | None = None
         """
         Callback when another file with the same name exists.
         """
-        auto_rename: Callable[[AesFile, str], Any] | None = None
 
+        auto_rename_folders: bool = False
         """
         True to autorename folders
         """
-        auto_rename_folders: bool = False
 
+        on_failed: Callable[[AesFile, Exception], Any] | None = None
         """
         Callback when copy fails
         """
-        on_failed: Callable[[AesFile, Exception], Any] | None = None
 
+        on_progress_changed: Callable[[AesFileCommander.AesFileTaskProgress], Any] | None = None
         """
         Callback when progress changes.
         """
-        on_progress_changed: Callable[[AesFileCommander.AesFileTaskProgress], Any] | None = None

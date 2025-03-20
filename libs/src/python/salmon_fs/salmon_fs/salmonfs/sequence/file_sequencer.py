@@ -66,6 +66,10 @@ class FileSequencer(INonceSequencer):
             self._save_sequence_file(None)
 
     def get_sequence_file(self) -> IFile:
+        """
+        Get the sequence file
+        :return The file
+        """
         return self.__sequenceFile
 
     def create_sequence(self, drive_id: str, auth_id: str):

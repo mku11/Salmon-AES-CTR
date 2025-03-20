@@ -40,6 +40,9 @@ class AesFileComparators:
 
     @staticmethod
     def default_comparator(c1: AesFile, c2: AesFile):
+        """
+        Defoult comparator
+        """
         if c1.is_directory() and not c2.is_directory():
             return -1
         elif not c1.is_directory() and c2.is_directory():
@@ -49,6 +52,9 @@ class AesFileComparators:
 
     @staticmethod
     def filename_asc_comparator(c1: AesFile, c2: AesFile):
+        """
+        File name comparator
+        """
         if c1.is_directory() and not c2.is_directory():
             return -1
         elif not c1.is_directory() and c2.is_directory():
@@ -59,6 +65,9 @@ class AesFileComparators:
 
     @staticmethod
     def filename_desc_comparator(c1: AesFile, c2: AesFile):
+        """
+        File name descending comparator
+        """
         if c1.is_directory() and not c2.is_directory():
             return 1
         elif not c1.is_directory() and c2.is_directory():
@@ -69,6 +78,9 @@ class AesFileComparators:
 
     @staticmethod
     def size_asc_comparator(c1: AesFile, c2: AesFile):
+        """
+        Size comparator
+        """
         if c1.is_directory() and not c2.is_directory():
             return -1
         elif not c1.is_directory() and c2.is_directory():
@@ -78,6 +90,9 @@ class AesFileComparators:
 
     @staticmethod
     def size_desc_comparator(c1: AesFile, c2: AesFile):
+        """
+        Size descending comparator
+        """
         if c1.is_directory() and not c2.is_directory():
             return 1
         elif not c1.is_directory() and c2.is_directory():
@@ -87,6 +102,9 @@ class AesFileComparators:
 
     @staticmethod
     def type_asc_comparator(c1: AesFile, c2: AesFile):
+        """
+        Type comparator
+        """
         if c1.is_directory() and not c2.is_directory():
             return -1
         elif not c1.is_directory() and c2.is_directory():
@@ -97,6 +115,9 @@ class AesFileComparators:
 
     @staticmethod
     def type_desc_comparator(c1: AesFile, c2: AesFile):
+        """
+        Type descending comparator
+        """
         if c1.is_directory() and not c2.is_directory():
             return 1
         elif not c1.is_directory() and c2.is_directory():
@@ -107,6 +128,9 @@ class AesFileComparators:
 
     @staticmethod
     def date_asc_comparator(c1: AesFile, c2: AesFile):
+        """
+        Date comparator
+        """
         if c1.is_directory() and not c2.is_directory():
             return -1
         elif not c1.is_directory() and c2.is_directory():
@@ -116,6 +140,9 @@ class AesFileComparators:
 
     @staticmethod
     def date_desc_comparator(c1: AesFile, c2: AesFile):
+        """
+        Date descending comparator
+        """
         if c1.is_directory() and not c2.is_directory():
             return 1
         elif not c1.is_directory() and c2.is_directory():
@@ -125,6 +152,9 @@ class AesFileComparators:
 
     @staticmethod
     def relevance_comparator(c1: AesFile, c2: AesFile):
+        """
+        Relevance comparator for searching
+        """
         return int(str(c2.get_tag())) - int(str(c1.get_tag()))
 
     @staticmethod

@@ -33,7 +33,6 @@ from typeguard import typechecked
 import urllib
 from urllib.parse import urljoin
 from datetime import datetime
-from threading import RLock
 
 from salmon_core.streams.memory_stream import MemoryStream
 from salmon_fs.fs.file.ifile import IFile
@@ -86,7 +85,7 @@ class HttpFile(IFile):
 
     def create_directory(self, dir_name: str) -> IFile:
         """
-        Create a directory under this directory.
+        Create a directory under this directory. Not supported.
         :param dir_name: The name of the new directory.
         :return: The newly created directory.
         """
@@ -94,7 +93,7 @@ class HttpFile(IFile):
 
     def create_file(self, filename: str) -> IFile:
         """
-        Create a file under this directory.
+        Create a file under this directory. Not supported.
         :param filename: The name of the new file.
         :return: The newly created file.
         :raises IOError: Thrown if there is an IO error.
@@ -103,7 +102,7 @@ class HttpFile(IFile):
 
     def delete(self) -> bool:
         """
-        Delete this file or directory.
+        Delete this file or directory. Not supported.
         :return: True if deletion is successful.
         """
         raise Exception("Unsupported Operation, readonly filesystem")
@@ -148,7 +147,7 @@ class HttpFile(IFile):
 
     def get_output_stream(self) -> RandomAccessStream:
         """
-        Get a stream for writing to this file.
+        Get a stream for writing to this file. Not supported.
         :return: The stream to write to.
         :raises FileNotFoundException:         """
         raise Exception("Unsupported Operation, readonly filesystem")
@@ -278,7 +277,7 @@ class HttpFile(IFile):
 
     def rename_to(self, new_filename: str) -> bool:
         """
-        Rename the current file or directory.
+        Rename the current file or directory. Not supported.
         :param new_filename: The new name for the file or directory.
         :return: True if successfully renamed.
         """
@@ -286,7 +285,7 @@ class HttpFile(IFile):
 
     def mkdir(self) -> bool:
         """
-        Create this directory under the current filepath.
+        Create this directory under the current filepath. Not supported.
         :return: True if created.
         """
         raise Exception("Unsupported Operation, readonly filesystem")

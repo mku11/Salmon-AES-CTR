@@ -52,21 +52,20 @@ class Integrity:
     Default chunk size for integrity.
     """
 
-    """
-    Instantiate an object to be used for applying and verifying hash signatures for each of the data chunks.
-    
-    :param integrity: True to enable integrity checks.
-    :param key:       The key to use for hashing.
-    :param chunkSize: The chunk size. Use 0 to enable integrity on the whole file (1 chunk).
-                     Use a positive number to specify integrity chunks.
-    :param provider:  Hash implementation provider.
-    :param hashSize: The hash size.
-    :raises IntegrityException: When integrity is comprimised
-    :raises SalmonSecurityException: When security has failed
-     """
-
     def __init__(self, integrity: bool, key: bytearray | None, chunk_size: int,
                  provider: IHashProvider, hash_size: int):
+        """
+        Instantiate an object to be used for applying and verifying hash signatures for each of the data chunks.
+
+        :param integrity: True to enable integrity checks.
+        :param key:       The key to use for hashing.
+        :param chunk_size: The chunk size. Use 0 to enable integrity on the whole file (1 chunk).
+                         Use a positive number to specify integrity chunks.
+        :param provider:  Hash implementation provider.
+        :param hash_size: The hash size.
+        :raises IntegrityException: When integrity is comprimised
+        :raises SalmonSecurityException: When security has failed
+        """
 
         self._chunkSize: int = -1
         """
@@ -113,22 +112,21 @@ class Integrity:
         self._integrity = integrity
         self._hashSize = hash_size
 
-    """
-    Calculate hash of the data provided.
-    
-    :param provider:    Hash implementation provider.
-    :param buffer:      Data to calculate the hash.
-    :param offset:      Offset of the buffer that the hashing calculation will start from
-    :param count:       Length of the buffer that will be used to calculate the hash.
-    :param key:         Key that will be used
-    :param includeData: Additional data to be included in the calculation.
-    :return: The hash.
-    :raises IntegrityException: Thrown when data are corrupt or tampered with.
-     """
-
     @staticmethod
     def calculate_hash(provider: IHashProvider, buffer: bytearray, offset: int, count: int,
                        key: bytearray, include_data: bytearray | None) -> bytearray:
+        """
+        Calculate hash of the data provided.
+
+        :param provider:    Hash implementation provider.
+        :param buffer:      Data to calculate the hash.
+        :param offset:      Offset of the buffer that the hashing calculation will start from
+        :param count:       Length of the buffer that will be used to calculate the hash.
+        :param key:         Key that will be used
+        :param include_data: Additional data to be included in the calculation.
+        :return: The hash.
+        :raises IntegrityException: Thrown when data are corrupt or tampered with.
+        """
 
         final_buffer: bytearray = buffer
         final_offset: int = offset
@@ -197,12 +195,11 @@ class Integrity:
         """
         return self._key
 
-    """
-    Get the integrity enabled option.
-    :return: True if integrity is enabled.
-     """
-
     def use_integrity(self) -> bool:
+        """
+        Get the integrity enabled option.
+        :return: True if integrity is enabled.
+        """
         return self._integrity
 
     def generate_hashes(self, buffer: bytearray, include_header_data: bytearray | None) -> list[bytearray] | None:

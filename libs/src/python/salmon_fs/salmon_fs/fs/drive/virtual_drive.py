@@ -51,12 +51,23 @@ class VirtualDrive(ABC):
 
     @abstractmethod
     def get_private_dir(self) -> IFile:
+        """
+        Get the private dir to share files with other apps
+        """
         pass
 
     @abstractmethod
     def get_virtual_file(self, file: IFile) -> any:
+        """
+        Get the virtual file backed by the file provided
+        :param file: The real file
+        :returns The virtual file
+        """
         pass
 
     @abstractmethod
     def get_root(self) -> any:
+        """
+        Get the virtual root
+        """
         pass

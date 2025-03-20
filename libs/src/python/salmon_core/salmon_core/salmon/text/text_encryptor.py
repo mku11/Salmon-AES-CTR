@@ -56,6 +56,7 @@ class TextEncryptor:
         :raises IntegrityException: Thrown when data are corrupt or tampered with.
         :raises IOError: Thrown if there is an IO error.
         """
+
         v_bytes: bytearray = bytearray(text.encode('utf-8'))
         enc_bytes: bytearray = TextEncryptor.__encryptor.encrypt(v_bytes, key, nonce, enc_format, integrity, hash_key,
                                                                  chunk_size)

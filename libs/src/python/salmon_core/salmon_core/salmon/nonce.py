@@ -55,20 +55,19 @@ class Nonce:
         nonce += 1
         return BitConverter.to_bytes(nonce, 8)
 
-    """
-    Returns the middle nonce in the provided range.
-    Note: This assumes the nonce is 8 bytes, if you need to increase the nonce length
-    then the long transient variables will not hold. In that case you will need to
-    override with your own implementation.
-    
-    :param start_nonce: The starting nonce.
-    :param endNonce: The ending nonce in the sequence.
-    :return: The byte array with the middle nonce.
-    :raises IntegrityException: Thrown when security error
-    """
-
     @staticmethod
     def split_nonce_range(start_nonce: bytearray, end_nonce: bytearray) -> bytearray:
+        """
+        Returns the middle nonce in the provided range.
+        Note: This assumes the nonce is 8 bytes, if you need to increase the nonce length
+        then the long transient variables will not hold. In that case you will need to
+        override with your own implementation.
+
+        :param start_nonce: The starting nonce.
+        :param end_nonce: The ending nonce in the sequence.
+        :return: The byte array with the middle nonce.
+        :raises IntegrityException: Thrown when security error
+        """
         start: int = BitConverter.to_long(start_nonce, 0, Generator.NONCE_LENGTH)
         end: int = BitConverter.to_long(end_nonce, 0, Generator.NONCE_LENGTH)
         # we reserve some nonces

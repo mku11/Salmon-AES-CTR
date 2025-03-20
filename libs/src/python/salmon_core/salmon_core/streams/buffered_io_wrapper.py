@@ -64,11 +64,21 @@ class BufferedIOWrapper(BufferedIOBase):
         return bytes_read
 
     def read(self, size: int | None = ...) -> bytearray:
+        """
+        Read from the stream
+        :param size: The number of bytes to read
+        :returns The bytes read
+        """
         if size is None:
             size = BufferedIOWrapper.__DEFAULT_BUFFER_SIZE
         return self.read1(size)
 
     def read1(self, size: int = ...) -> bytearray:
+        """
+        Read from the stream
+        :param size: The number of bytes to read
+        :returns The bytes read
+        """
         buff: bytearray = bytearray(size)
         bytes_read = self.readinto(buff)
         return buff[0:bytes_read]
@@ -77,9 +87,19 @@ class BufferedIOWrapper(BufferedIOBase):
         raise NotImplementedError()
 
     def write(self, __buffer: bytearray) -> int:
+        """
+        Write to the stream. Not supported
+        :param __buffer: The buffer to write
+        :returns The number of bytes written
+        """
         raise NotImplementedError()
 
     def readinto1(self, __buffer: bytearray) -> int:
+        """
+        Read from the stream
+        :param __buffer: The buffer to read into
+        :returns The number of bytes read
+        """
         return self.readinto(__buffer)
 
     def close(self):
@@ -108,4 +128,8 @@ class BufferedIOWrapper(BufferedIOBase):
         return self.__stream.get_position()
 
     def tell(self):
+        """
+        Get the position of the stream
+        :returns The position
+        """
         return self.__stream.get_position()

@@ -50,6 +50,9 @@ def import_file(index: int, final_part_size: int, final_running_threads: int, fi
                 shm_cancel_name: str,
                 buffer_size: int, key: bytearray,
                 integrity: bool, hash_key: bytearray | None, chunk_size: int):
+    """
+    Import a file. Do not user directly. Use AesFileImporter instead.
+    """
     imported_file: AesFile = AesFile(salmon_real_file)
     imported_file.set_allow_overwrite(True)
     imported_file.set_encryption_key(key)
@@ -148,6 +151,10 @@ def import_file_part(file_to_import: IFile, salmon_file: AesFile, start: int, co
 
 @typechecked
 class AesFileImporter:
+    """
+    Import files into drives.
+    """
+
     __DEFAULT_BUFFER_SIZE = 512 * 1024
     """
     The global default buffer size to use when reading/writing on the AesStream.
@@ -364,6 +371,9 @@ class AesFileImporter:
         self.close()
 
     def close(self):
+        """
+        Close this importer and associated resources
+        """
         self.__executor.shutdown()
         self.__shm_cancel.close()
         self.__shm_cancel.unlink()

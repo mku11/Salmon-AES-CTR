@@ -49,6 +49,9 @@ def export_file(index: int, final_part_size: int, final_running_threads: int, fi
                 shm_cancel_name: str,
                 buffer_size: int, key: bytearray,
                 integrity: bool, hash_key: bytearray | None, chunk_size: int):
+    """
+    Export file. Do not use directly use AesFileExporter class instead
+    """
     file_to_export: AesFile = AesFile(real_file_to_export)
     file_to_export.set_encryption_key(key)
     file_to_export.set_verify_integrity(integrity, hash_key)
@@ -143,6 +146,10 @@ def export_file_part(file_to_export: AesFile, exported_file: IFile, start: int, 
 
 @typechecked
 class AesFileExporter:
+    """
+    Exports files from drices
+    """
+
     __DEFAULT_BUFFER_SIZE = 512 * 1024
     """
     The global default buffer size to use when reading/writing on the AesStream.
@@ -209,6 +216,9 @@ class AesFileExporter:
         self.__executor = ThreadPoolExecutor(self.__threads) if not multi_cpu else ProcessPoolExecutor(self.__threads)
 
     def stop(self):
+        """
+        Stop all tasks
+        """
         self.__stopped[0] = True
         # cancel all tasks
         self.__shm_cancel.buf[0] = 1
@@ -358,6 +368,9 @@ class AesFileExporter:
         self.close()
 
     def close(self):
+        """
+        Close this importer and associated resources
+        """
         self.__executor.shutdown(False)
         self.__shm_cancel.close()
         self.__shm_cancel.unlink()

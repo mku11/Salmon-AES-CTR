@@ -106,12 +106,11 @@ class File(IFile):
         return os.path.basename(self.__file_path)
 
     def get_input_stream(self) -> RandomAccessStream:
+        """
+        Get a stream for reading the file.
+        :return: The stream to read from.
+        :raises FileNotFoundException:     """
         return FileStream(self, "r")
-
-    """
-    Get a stream for reading the file.
-    :return: The stream to read from.
-    :raises FileNotFoundException:     """
 
     def get_output_stream(self) -> RandomAccessStream:
         """

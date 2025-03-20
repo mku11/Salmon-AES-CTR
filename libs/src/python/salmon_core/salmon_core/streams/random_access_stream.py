@@ -102,7 +102,7 @@ class RandomAccessStream(ABC):
     @abstractmethod
     def read(self, buffer: bytearray, offset: int, count: int) -> int:
         """
-        
+        Read from the stream
         :param buffer: The buffer to read into
         :param offset: The offset to start reading into
         :param count: The number of bytes that were read. If the stream reached the end return -1.
@@ -136,7 +136,7 @@ class RandomAccessStream(ABC):
     @abstractmethod
     def flush(self):
         """
-       Flush buffers.
+        Flush buffers.
         """
         pass
 

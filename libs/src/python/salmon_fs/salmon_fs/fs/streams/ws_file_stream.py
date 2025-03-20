@@ -177,6 +177,10 @@ class WSFileStream(RandomAccessStream):
         return self.__file.get_length()
 
     def get_position(self) -> int:
+        """
+        Get the position of the stream
+        :returns The position
+        """
         return self.position
 
     def set_position(self, value: int):
@@ -190,6 +194,9 @@ class WSFileStream(RandomAccessStream):
         self.position = value
 
     def set_length(self, value: int):
+        """
+        Set the length of the stream
+        """
         headers = {}
         self.__set_default_headers(headers)
         self.set_service_auth(headers)
@@ -278,6 +285,9 @@ class WSFileStream(RandomAccessStream):
         self.closed = True
 
     def reset(self):
+        """
+        Reset the stream
+        """
         if self.can_write():
             if self.queue:
                 self.queue.put(None)

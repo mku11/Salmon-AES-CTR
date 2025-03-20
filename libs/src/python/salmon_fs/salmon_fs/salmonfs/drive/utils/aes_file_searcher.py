@@ -40,6 +40,9 @@ class AesFileSearcher:
     """
 
     def __init__(self):
+        """
+        Construct a file searcher
+        """
         self.__running: bool = False
         self.__quit: bool = False
 
@@ -51,6 +54,9 @@ class AesFileSearcher:
         SearchingFinished = 1
 
     def stop(self):
+        """
+        Stop the search
+        """
         self.__quit = True
 
     def is_running(self) -> bool:
