@@ -53,37 +53,37 @@ class AuthConfig:
     """
 
     def get_drive_id(self) -> bytearray:
-        """
+        """!
         Get the drive ID to grant authorization for.
-        :return: The drive id
+        @returns The drive id
         """
         return self.__driveID
 
     def get_auth_id(self) -> bytearray:
-        """
+        """!
         Get the authorization ID for the target device.
-        :return: The authorization id
+        @returns The authorization id
         """
         return self.__authID
 
     def get_start_nonce(self) -> bytearray:
-        """
+        """!
         Get the nonce maximum value the target device will use.
-        :return: The starting nonce
+        @returns The starting nonce
         """
         return self.__startNonce
 
     def get_max_nonce(self) -> bytearray:
-        """
+        """!
         Get the nonce maximum value the target device will use.
-        :return: The max nonce
+        @returns The max nonce
         """
         return self.__maxNonce
 
     def __init__(self, contents: bytearray):
-        """
+        """!
         Instantiate a class with the properties of the authorization config file.
-        :param contents: The byte array that contains the contents of the auth config file.
+        @param contents: The byte array that contains the contents of the auth config file.
         """
 
         self.__driveID: bytearray = bytearray(DriveGenerator.DRIVE_ID_LENGTH)
@@ -105,16 +105,16 @@ class AuthConfig:
                         target_starting_nonce: bytearray,
                         target_max_nonce: bytearray,
                         config_nonce: bytearray):
-        """
+        """!
         Write the properties of the auth configuration to a config file that will be imported by another device.
         The new device will then be authorized editing operations ie: import, rename files, etc.
-        :param auth_config_file:
-        :param drive: The drive you want to create an auth config for.
-        :param target_auth_id: authorization ID of the target device.
-        :param target_starting_nonce: Starting nonce for the target device.
-        :param target_max_nonce: Maximum nonce for the target device.
-        :param config_nonce: The nonce for the config file itself.
-        :raises Exception: Thrown when error during writing file
+        @param auth_config_file:
+        @param drive: The drive you want to create an auth config for.
+        @param target_auth_id: authorization ID of the target device.
+        @param target_starting_nonce: Starting nonce for the target device.
+        @param target_max_nonce: Maximum nonce for the target device.
+        @param config_nonce: The nonce for the config file itself.
+        @exception Exception: Thrown when error during writing file
         """
         drive_id: bytearray = drive.get_drive_id()
         if drive_id is None:
@@ -127,14 +127,14 @@ class AuthConfig:
     @staticmethod
     def write_to_stream(stream: AesStream, drive_id: bytearray, auth_id: bytearray,
                         next_nonce: bytearray, max_nonce: bytearray):
-        """
+        """!
         Write authorization configuration to a AesStream.
-        :param stream: The stream to write to.
-        :param drive_id: The drive id.
-        :param auth_id: The auth id of the new device.
-        :param next_nonce: The next nonce to be used by the new device.
-        :param max_nonce: The max nonce to be used byte the new device.f
-        :raises Exception: Thrown when error during writing to stream
+        @param stream: The stream to write to.
+        @param drive_id: The drive id.
+        @param auth_id: The auth id of the new device.
+        @param next_nonce: The next nonce to be used by the new device.
+        @param max_nonce: The max nonce to be used byte the new device.f
+        @exception Exception: Thrown when error during writing to stream
         """
 
         ms: MemoryStream = MemoryStream()
@@ -157,12 +157,12 @@ class AuthConfig:
 
     @staticmethod
     def get_auth_config(drive: AesDrive, auth_file: IFile) -> AuthConfig:
-        """
+        """!
         Get the app drive pair configuration properties for this drive
-        :param drive: The drive
-        :param auth_file: The encrypted authorization file.
-        :return: The decrypted authorization file.
-        :raises Exception: Thrown when error during reading file
+        @param drive: The drive
+        @param auth_file: The encrypted authorization file.
+        @returns The decrypted authorization file.
+        @exception Exception: Thrown when error during reading file
         """
         salmon_file: AesFile = AesFile(auth_file, drive)
         stream: AesStream = salmon_file.get_input_stream()
@@ -177,21 +177,21 @@ class AuthConfig:
 
     @staticmethod
     def __verify_auth_id(drive: AesDrive, auth_id: bytearray) -> bool:
-        """
+        """!
         Verify the authorization id with the current drive auth id.
         
-        :param auth_id: The authorization id to verify.
-        :return: True if verifcation succeded
-        :raises Exception: Thrown when verification failed
+        @param auth_id: The authorization id to verify.
+        @returns True if verifcation succeded
+        @exception Exception: Thrown when verification failed
         """
         return AuthConfig.__arrays_equal(auth_id, drive.get_auth_id_bytes())
 
     @staticmethod
     def import_sequence(drive: AesDrive, auth_config: AuthConfig):
-        """
+        """!
         Import sequence into the current drive.
-        :param drive: The drive
-        :param auth_config:         :raises Exception: Thrown when error during importing sequence
+        @param drive: The drive
+        @param auth_config:         @exception Exception: Thrown when error during importing sequence
         """
         drv_str: str = BitConverter.to_hex(auth_config.get_drive_id())
         auth_str: str = BitConverter.to_hex(auth_config.get_auth_id())
@@ -200,11 +200,11 @@ class AuthConfig:
 
     @staticmethod
     def import_auth_file(drive: AesDrive, auth_config_file: IFile):
-        """
+        """!
         Import the device authorization file.
-        :param drive: The drive
-        :param auth_config_file: The config file
-        :raises Exception: Thrown when error during
+        @param drive: The drive
+        @param auth_config_file: The config file
+        @exception Exception: Thrown when error during
         """
         sequence: NonceSequence = drive.get_sequencer().get_sequence(
             BitConverter.to_hex(drive.get_drive_id()))
@@ -226,11 +226,11 @@ class AuthConfig:
 
     @staticmethod
     def export_auth_file(drive: AesDrive, target_auth_id: str, file: IFile):
-        """
-        :param drive: The drive
-        :param target_auth_id: The authorization id of the target device.
-        :param file:     The auth config file.
-        :raises Exception:         """
+        """!
+        @param drive: The drive
+        @param target_auth_id: The authorization id of the target device.
+        @param file:     The auth config file.
+        @exception Exception:         """
         cfg_nonce: bytearray = drive.get_sequencer().next_nonce(
             BitConverter.to_hex(drive.get_drive_id()))
 

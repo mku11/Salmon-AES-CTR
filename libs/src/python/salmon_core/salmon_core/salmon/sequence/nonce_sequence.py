@@ -37,13 +37,13 @@ class NonceSequence:
 
     def __init__(self, drive_id: str, auth_id: str | None, next_nonce: bytearray | None, max_nonce: bytearray | None,
                  status: NonceSequence.Status):
-        """
+        """!
         Instantiate a nonce sequence for a drive with the provided authorization id.
-        :param drive_id: The drive ID.
-        :param auth_id: The authorization id for this device and drive.
-        :param next_nonce: The next available nonce to be used.
-        :param max_nonce: The maximum nonce.
-        :param status: The status of the sequencer.
+        @param drive_id: The drive ID.
+        @param auth_id: The authorization id for this device and drive.
+        @param next_nonce: The next available nonce to be used.
+        @param max_nonce: The maximum nonce.
+        @param status: The status of the sequencer.
         """
 
         self.__driveID: str
@@ -78,7 +78,7 @@ class NonceSequence:
         self.__status = status
 
     class Status(Enum):
-        """
+        """!
         Sequencer status.
         @see #New
         @see #Active Active sequence.
@@ -101,66 +101,66 @@ class NonceSequence:
         """
 
     def get_drive_id(self) -> str:
-        """
+        """!
         Get the drive ID.
-        :return: The id
+        @returns The id
         """
         return self.__driveID
 
     def set_drive_id(self, drive_id: str):
-        """
+        """!
         Set the drive ID.
-        :param drive_id:         """
+        @param drive_id:         """
         self.__driveID = drive_id
 
     def get_auth_id(self) -> str:
-        """
+        """!
         Get the authorization id of the device.
-        :return: The authorization id
+        @returns The authorization id
         """
         return self.__authID
 
     def set_auth_id(self, auth_id: str):
-        """
+        """!
         Set the authorization ID of the device.
-        :param auth_id:         """
+        @param auth_id:         """
         self.__authID = auth_id
 
     def get_next_nonce(self) -> bytearray | None:
-        """
+        """!
         Get the next nonce.
-        :return: The next nonce
+        @returns The next nonce
         """
         return self.__nextNonce
 
     def set_next_nonce(self, next_nonce: bytearray):
-        """
+        """!
         Set the next nonce.
-        :param next_nonce:         """
+        @param next_nonce:         """
         self.__nextNonce = next_nonce
 
     def get_max_nonce(self) -> bytearray | None:
-        """
+        """!
         Get the max nonce.
-        :return: The max nonce
+        @returns The max nonce
         """
         return self.__maxNonce
 
     def set_max_nonce(self, max_nonce: bytearray):
-        """
+        """!
         Set the max nonce.
-        :param max_nonce:         """
+        @param max_nonce:         """
         self.__maxNonce = max_nonce
 
     def get_status(self) -> NonceSequence.Status:
-        """
+        """!
         Get the sequence status.
-        :return: The status
+        @returns The status
         """
         return self.__status
 
     def set_status(self, status: NonceSequence.Status):
-        """
+        """!
         Set the sequence status.
-        :param status:         """
+        @param status:         """
         self.__status = status

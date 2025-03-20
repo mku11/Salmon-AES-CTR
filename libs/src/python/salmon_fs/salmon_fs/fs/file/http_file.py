@@ -50,9 +50,9 @@ class HttpFile(IFile):
     separator: str = "/"
 
     def __init__(self, path: str):
-        """
+        """!
         Instantiate a real file represented by the filepath and service path provided.
-        :param path: The filepath.
+        @param path: The filepath.
         """
         self.__file_path: str = path
         self.__response: HTTPResponse | None = None
@@ -84,47 +84,47 @@ class HttpFile(IFile):
         return self.__response
 
     def create_directory(self, dir_name: str) -> IFile:
-        """
+        """!
         Create a directory under this directory. Not supported.
-        :param dir_name: The name of the new directory.
-        :return: The newly created directory.
+        @param dir_name: The name of the new directory.
+        @returns The newly created directory.
         """
         raise Exception("Unsupported Operation, readonly filesystem")
 
     def create_file(self, filename: str) -> IFile:
-        """
+        """!
         Create a file under this directory. Not supported.
-        :param filename: The name of the new file.
-        :return: The newly created file.
-        :raises IOError: Thrown if there is an IO error.
+        @param filename: The name of the new file.
+        @returns The newly created file.
+        @exception IOError: Thrown if there is an IO error.
         """
         raise Exception("Unsupported Operation, readonly filesystem")
 
     def delete(self) -> bool:
-        """
+        """!
         Delete this file or directory. Not supported.
-        :return: True if deletion is successful.
+        @returns True if deletion is successful.
         """
         raise Exception("Unsupported Operation, readonly filesystem")
 
     def exists(self) -> bool:
-        """
+        """!
         True if file or directory exists.
-        :return: True if exists
+        @returns True if exists
         """
         return self.__get_response().status == 200 or self.__get_response().status == 206
 
     def get_display_path(self) -> str:
-        """
+        """!
         Get the absolute path on the physical disk.
-        :return: The absolute path.
+        @returns The absolute path.
         """
         return self.__file_path
 
     def get_name(self) -> str:
-        """
+        """!
         Get the name of this file or directory.
-        :return: The name of this file or directory.
+        @returns The name of this file or directory.
         """
         if not self.__file_path:
             raise Exception("Filepath is not assigned")
@@ -139,23 +139,23 @@ class HttpFile(IFile):
         return basename
 
     def get_input_stream(self) -> RandomAccessStream:
-        """
+        """!
         Get a stream for reading the file.
-        :return: The stream to read from.
-        :raises FileNotFoundException:     """
+        @returns The stream to read from.
+        @exception FileNotFoundException:     """
         return HttpFileStream(self, "r")
 
     def get_output_stream(self) -> RandomAccessStream:
-        """
+        """!
         Get a stream for writing to this file. Not supported.
-        :return: The stream to write to.
-        :raises FileNotFoundException:         """
+        @returns The stream to write to.
+        @exception FileNotFoundException:         """
         raise Exception("Unsupported Operation, readonly filesystem")
 
     def get_parent(self) -> IFile:
-        """
+        """!
         Get the parent directory of this file or directory.
-        :return: The parent directory.
+        @returns The parent directory.
         """
         path: str = self.__file_path
         if path.endswith(HttpFile.separator):
@@ -165,16 +165,16 @@ class HttpFile(IFile):
         return HttpFile(parent_file_path)
 
     def get_path(self) -> str:
-        """
+        """!
         Get the path of this file. For python this is the same as the absolute filepath.
-        :return: The path
+        @returns The path
         """
         return self.__file_path
 
     def is_directory(self) -> bool:
-        """
+        """!
         True if this is a directory.
-        :return: True if directory
+        @returns True if directory
         """
         res: HTTPResponse = self.__get_response()
         if not res:
@@ -185,39 +185,39 @@ class HttpFile(IFile):
         return content_type.startswith("text/html")
 
     def is_file(self) -> bool:
-        """
+        """!
         True if this is a file.
-        :return: True if file
+        @returns True if file
         """
         return not self.is_directory()
 
     def get_last_date_modified(self) -> int:
-        """
+        """!
         Get the last modified date on disk.
-        :return: The last modified date in milliseconds
+        @returns The last modified date in milliseconds
         """
         response: HTTPResponse = self.__get_response()
         return int(datetime.strptime(response.headers['last-modified'], '%a, %d %b %Y %H:%M:%S GMT').timestamp())
 
     def get_length(self) -> int:
-        """
+        """!
         Get the size of the file on disk.
-        :return: The size
+        @returns The size
         """
         response: HTTPResponse = self.__get_response()
         return response.length
 
     def get_children_count(self) -> int:
-        """
+        """!
         Get the count of files and subdirectories
-        :return: The children
+        @returns The children
         """
         return len(self.list_files())
 
     def list_files(self) -> list[IFile]:
-        """
+        """!
         List all files under this directory.
-        :return: The list of files.
+        @returns The list of files.
         """
         if self.is_directory():
             ms: MemoryStream = MemoryStream()
@@ -245,29 +245,29 @@ class HttpFile(IFile):
         return []
 
     def move(self, new_dir: IFile, options: IFile.MoveOptions | None = None) -> IFile:
-        """
+        """!
         Move this file or directory under a new directory. Not supported.
-        :param new_dir: The target directory.
-        :param options: The options
-        :return: The moved file. Use this file for subsequent operations instead of the original.
+        @param new_dir: The target directory.
+        @param options: The options
+        @returns The moved file. Use this file for subsequent operations instead of the original.
         """
         raise Exception("Unsupported Operation, readonly filesystem")
 
     def copy(self, new_dir: IFile, options: IFile.CopyOptions | None = None) -> IFile:
-        """
+        """!
         Move this file or directory under a new directory. Not supported.
-        :param new_dir:    The target directory.
-        :param options: The options
-        :return: The copied file. Use this file for subsequent operations instead of the original.
-        :raises IOError: Thrown if there is an IO error.
+        @param new_dir:    The target directory.
+        @param options: The options
+        @returns The copied file. Use this file for subsequent operations instead of the original.
+        @exception IOError: Thrown if there is an IO error.
         """
         raise Exception("Unsupported Operation, readonly filesystem")
 
     def get_child(self, filename: str) -> IFile | None:
-        """
+        """!
         Get the file or directory under this directory with the provided name.
-        :param filename: The name of the file or directory.
-        :return: The child file
+        @param filename: The name of the file or directory.
+        @returns The child file
         """
         if self.is_file():
             return None
@@ -276,22 +276,22 @@ class HttpFile(IFile):
         return child
 
     def rename_to(self, new_filename: str) -> bool:
-        """
+        """!
         Rename the current file or directory. Not supported.
-        :param new_filename: The new name for the file or directory.
-        :return: True if successfully renamed.
+        @param new_filename: The new name for the file or directory.
+        @returns True if successfully renamed.
         """
         raise Exception("Unsupported Operation, readonly filesystem")
 
     def mkdir(self) -> bool:
-        """
+        """!
         Create this directory under the current filepath. Not supported.
-        :return: True if created.
+        @returns True if created.
         """
         raise Exception("Unsupported Operation, readonly filesystem")
 
     def reset(self):
-        """
+        """!
         Clear cached properties
         """
         self.__response = None
@@ -304,7 +304,7 @@ class HttpFile(IFile):
         return n_filepath
 
     def __str__(self) -> str:
-        """
+        """!
         Returns a string representation of this object
         """
         return self.__file_path

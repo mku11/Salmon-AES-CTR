@@ -40,7 +40,7 @@ class AesFileComparators:
 
     @staticmethod
     def default_comparator(c1: AesFile, c2: AesFile):
-        """
+        """!
         Defoult comparator
         """
         if c1.is_directory() and not c2.is_directory():
@@ -52,7 +52,7 @@ class AesFileComparators:
 
     @staticmethod
     def filename_asc_comparator(c1: AesFile, c2: AesFile):
-        """
+        """!
         File name comparator
         """
         if c1.is_directory() and not c2.is_directory():
@@ -65,7 +65,7 @@ class AesFileComparators:
 
     @staticmethod
     def filename_desc_comparator(c1: AesFile, c2: AesFile):
-        """
+        """!
         File name descending comparator
         """
         if c1.is_directory() and not c2.is_directory():
@@ -78,7 +78,7 @@ class AesFileComparators:
 
     @staticmethod
     def size_asc_comparator(c1: AesFile, c2: AesFile):
-        """
+        """!
         Size comparator
         """
         if c1.is_directory() and not c2.is_directory():
@@ -90,7 +90,7 @@ class AesFileComparators:
 
     @staticmethod
     def size_desc_comparator(c1: AesFile, c2: AesFile):
-        """
+        """!
         Size descending comparator
         """
         if c1.is_directory() and not c2.is_directory():
@@ -102,7 +102,7 @@ class AesFileComparators:
 
     @staticmethod
     def type_asc_comparator(c1: AesFile, c2: AesFile):
-        """
+        """!
         Type comparator
         """
         if c1.is_directory() and not c2.is_directory():
@@ -115,7 +115,7 @@ class AesFileComparators:
 
     @staticmethod
     def type_desc_comparator(c1: AesFile, c2: AesFile):
-        """
+        """!
         Type descending comparator
         """
         if c1.is_directory() and not c2.is_directory():
@@ -128,7 +128,7 @@ class AesFileComparators:
 
     @staticmethod
     def date_asc_comparator(c1: AesFile, c2: AesFile):
-        """
+        """!
         Date comparator
         """
         if c1.is_directory() and not c2.is_directory():
@@ -140,7 +140,7 @@ class AesFileComparators:
 
     @staticmethod
     def date_desc_comparator(c1: AesFile, c2: AesFile):
-        """
+        """!
         Date descending comparator
         """
         if c1.is_directory() and not c2.is_directory():
@@ -152,17 +152,17 @@ class AesFileComparators:
 
     @staticmethod
     def relevance_comparator(c1: AesFile, c2: AesFile):
-        """
+        """!
         Relevance comparator for searching
         """
         return int(str(c2.get_tag())) - int(str(c1.get_tag()))
 
     @staticmethod
     def __try_get_basename(salmon_file: AesFile) -> str:
-        """
+        """!
         Get the AesFile basename if available.
-        :param salmon_file:
-        :return: The base name
+        @param salmon_file:
+        @returns The base name
         """
         try:
             return salmon_file.get_name()
@@ -173,10 +173,10 @@ class AesFileComparators:
 
     @staticmethod
     def __try_get_type(salmon_file: AesFile) -> str:
-        """
+        """!
         Get the AesFile file type extension if available.
-        :param salmon_file:
-        :return: The file type
+        @param salmon_file:
+        @returns The file type
         """
         try:
             if salmon_file.is_directory():
@@ -189,10 +189,10 @@ class AesFileComparators:
 
     @staticmethod
     def __try_get_size(salmon_file: AesFile) -> int:
-        """
+        """!
         Get the AesFile size if available.
-        :param salmon_file:
-        :return: The size
+        @param salmon_file:
+        @returns The size
         """
         try:
             if salmon_file.is_directory():
@@ -208,10 +208,10 @@ class AesFileComparators:
 
     @staticmethod
     def __try_get_date(salmon_file: AesFile) -> int:
-        """
+        """!
         Get the AesFile date if available.
-        :param salmon_file:
-        :return: The date
+        @param salmon_file:
+        @returns The date
         """
         try:
             return salmon_file.get_last_date_modified()

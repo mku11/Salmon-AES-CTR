@@ -70,7 +70,7 @@ class AesDrive(VirtualDrive, ABC):
     __exportDirectoryName: str = "export"
 
     def __init__(self):
-        """
+        """!
         Create a virtual drive
         """
         super().__init__()
@@ -83,11 +83,11 @@ class AesDrive(VirtualDrive, ABC):
         self.__sequencer: INonceSequencer | None = None
 
     def initialize(self, real_root: IFile, create_if_not_exists: bool):
-        """
+        """!
         Initialize a virtual drive at the directory path provided
         
-        :param real_root: The directory for the drive
-        :param create_if_not_exists: Create the drive if it does not exist
+        @param real_root: The directory for the drive
+        @param create_if_not_exists: Create the drive if it does not exist
         """
 
         self.close()
@@ -118,86 +118,86 @@ class AesDrive(VirtualDrive, ABC):
 
     @staticmethod
     def get_config_filename() -> str:
-        """
+        """!
         Get the default configuration file name
-        :returns The file name
+        @returns The file name
         """
         return AesDrive.__configFilename
 
     @staticmethod
     def set_config_filename(config_filename: str):
-        """
+        """!
         Set the default configuraation file name
-        :param config_filename: The configuration file name
+        @param config_filename: The configuration file name
         """
         AesDrive.__configFilename = config_filename
 
     @staticmethod
     def get_auth_config_filename() -> str:
-        """
+        """!
         Get the authentication configuration file name
-        :returns The file name
+        @returns The file name
         """
         return AesDrive.__authConfigFilename
 
     @staticmethod
     def set_auth_config_filename(auth_config_filename: str):
-        """
+        """!
         Set the authentication configuration file name
-        :param auth_config_filename The file name
+        @param auth_config_filename The file name
         """
         AesDrive.__authConfigFilename = auth_config_filename
 
     @staticmethod
     def get_virtual_drive_directory_name() -> str:
-        """
+        """!
         Get the default virtual drive directory name
-        :returns The directory name
+        @returns The directory name
         """
         return AesDrive.__virtualDriveDirectoryName
 
     @staticmethod
     def set_virtual_drive_directory_name(virtual_drive_directory_name: str):
-        """
+        """!
         Set the default virtual drive directory name
-        :param virtual_drive_directory_name The directory name
+        @param virtual_drive_directory_name The directory name
         """
         AesDrive.__virtualDriveDirectoryName = virtual_drive_directory_name
 
     @staticmethod
     def get_export_directory_name() -> str:
-        """
+        """!
         Get the default export directory name
-        :returns The directory name
+        @returns The directory name
         """
         return AesDrive.__exportDirectoryName
 
     @staticmethod
     def set_export_directory_name(export_directory_name: str):
-        """
+        """!
         Set the default export directory name
-        :param export_directory_name The directory name
+        @param export_directory_name The directory name
         """
         AesDrive.__exportDirectoryName = export_directory_name
 
     @staticmethod
     def get_share_directory_name() -> str:
-        """
+        """!
         Get the default share directory name
-        :returns The directory name
+        @returns The directory name
         """
         return AesDrive.__shareDirectoryName
 
     @staticmethod
     def set_share_directory_name(share_directory_name: str):
-        """
+        """!
         Set the default share directory name
-        :param share_directory_name The directory name
+        @param share_directory_name The directory name
         """
         AesDrive.__shareDirectoryName = share_directory_name
 
     def __register_on_process_close(self):
-        """
+        """!
         Clear sensitive information when app is close.
         """
         # TODO:
@@ -205,30 +205,30 @@ class AesDrive(VirtualDrive, ABC):
         pass
 
     def get_default_file_chunk_size(self) -> int:
-        """
+        """!
         Return the default file chunk size
-        :return: The default chunk size.
+        @returns The default chunk size.
         """
         return self.__defaultFileChunkSize
 
     def set_default_file_chunk_size(self, file_chunk_size: int):
-        """
+        """!
         Set the default file chunk size to be used with hash integrity.
-        :param file_chunk_size:         """
+        @param file_chunk_size:         """
         self.__defaultFileChunkSize = file_chunk_size
 
     def get_key(self) -> DriveKey | None:
-        """
+        """!
         Return the encryption key that is used for encryption / decryption
-        :return: The key
+        @returns The key
         """
         return self.__key
 
     def get_root(self) -> IVirtualFile | None:
-        """
+        """!
         Return the virtual root directory of the drive.
-        :return: The drive root directory
-        :raises AuthException: Thrown when there is a failure in the nonce sequencer.
+        @returns The drive root directory
+        @exception AuthException: Thrown when there is a failure in the nonce sequencer.
         """
         if self.__realRoot is None or not self.__realRoot.exists():
             return None
@@ -237,17 +237,17 @@ class AesDrive(VirtualDrive, ABC):
         return self.__virtualRoot
 
     def get_real_root(self) -> IFile:
-        """
+        """!
         Get the real root
-        :return The real root
+        @returns The real root
         """
         return self.__realRoot
 
     def __unlock(self, password: str):
-        """
+        """!
         Verify if the user password is correct otherwise it throws a AuthException
         
-        :param password: The password.
+        @param password: The password.
         """
         stream: AesStream | None = None
         try:
@@ -298,22 +298,22 @@ class AesDrive(VirtualDrive, ABC):
                 stream.close()
 
     def set_key(self, master_key: bytearray, drive_key: bytearray, hash_key: bytearray, iterations: int):
-        """
+        """!
         Sets the key properties.
-        :param master_key: The master key.
-        :param drive_key: The drive key used for enc/dec of files and filenames.
-        :param hash_key: The hash key used for data integrity.
-        :param iterations:         """
+        @param master_key: The master key.
+        @param drive_key: The drive key used for enc/dec of files and filenames.
+        @param hash_key: The hash key used for data integrity.
+        @param iterations:         """
         self.__key.set_master_key(master_key)
         self.__key.set_drive_key(drive_key)
         self.__key.set_hash_key(hash_key)
         self.__key.set_iterations(iterations)
 
     def __verify_hash(self, salmon_config: DriveConfig, data: bytearray, hash_key: bytearray):
-        """
+        """!
         Verify that the hash signature is correct
         
-        :param salmon_config:         :param data:         :param hash_key:         """
+        @param salmon_config:         @param data:         @param hash_key:         """
         hash_signature: bytearray = salmon_config.get_hash_signature()
         v_hash: bytearray = Integrity.calculate_hash(self.__hashProvider, data, 0, len(data), hash_key, None)
         for i in range(0, len(hash_key)):
@@ -321,16 +321,16 @@ class AesDrive(VirtualDrive, ABC):
                 raise AuthException("Wrong password")
 
     def get_next_nonce(self) -> bytearray:
-        """
+        """!
         Get the next nonce from the sequencer. This advanced the sequencer so unique nonce are used.
-        :return: The next nonce
-        :raises Exception:         """
+        @returns The next nonce
+        @exception Exception:         """
         if not self.is_unlocked():
             raise AuthException("Not authorized")
         return self.__sequencer.next_nonce(BitConverter.to_hex(self.get_drive_id()))
 
     def is_unlocked(self) -> bool:
-        """
+        """!
         Returns True if password authorization has succeeded.
         """
         key: DriveKey = self.get_key()
@@ -340,11 +340,11 @@ class AesDrive(VirtualDrive, ABC):
         return enc_key is not None
 
     def get_bytes_from_real_file(self, file: IFile, buffer_size: int) -> bytearray:
-        """
+        """!
         Get the byte contents of a file from the real filesystem.
         
-        :param file: The file
-        :param buffer_size: The buffer to be used when reading
+        @param file: The file
+        @param buffer_size: The buffer to be used when reading
         """
         stream: RandomAccessStream = file.get_input_stream()
         ms: MemoryStream = MemoryStream()
@@ -357,7 +357,7 @@ class AesDrive(VirtualDrive, ABC):
         return byte_contents
 
     def get_drive_config_file(self) -> IFile | None:
-        """
+        """!
         Return the drive configuration file.
         """
         if self.__realRoot is None or not self.__realRoot.exists():
@@ -366,9 +366,9 @@ class AesDrive(VirtualDrive, ABC):
         return file
 
     def get_export_dir(self) -> IFile:
-        """
+        """!
         Return the default external export dir that all file can be exported to.
-        :return: The file on the real filesystem.
+        @returns The file on the real filesystem.
         """
         export_dir: IFile = self.__realRoot.get_child(AesDrive.__exportDirectoryName)
         if export_dir is None or not export_dir.exists():
@@ -376,7 +376,7 @@ class AesDrive(VirtualDrive, ABC):
         return export_dir
 
     def __get_drive_config(self) -> DriveConfig | None:
-        """
+        """!
         Return the configuration properties of this drive.
         """
         config_file: IFile = self.get_drive_config_file()
@@ -387,7 +387,7 @@ class AesDrive(VirtualDrive, ABC):
         return drive_config
 
     def has_config(self) -> bool:
-        """
+        """!
         Return True if the drive is already created and has a configuration file.
         """
         salmon_config: DriveConfig | None = None
@@ -400,14 +400,14 @@ class AesDrive(VirtualDrive, ABC):
         return salmon_config is not None
 
     def get_drive_id(self) -> bytearray:
-        """
+        """!
         Get the drive ID.
-        :return: The drive id
+        @returns The drive id
         """
         return self.__driveID
 
     def close(self):
-        """
+        """!
         Close the drive and close associated resources.
         """
         self.__realRoot = None
@@ -418,7 +418,7 @@ class AesDrive(VirtualDrive, ABC):
         self.__key = None
 
     def init_fs(self):
-        """
+        """!
         Initialize the drive virtual filesystem.
         """
         virtual_root_real_file: IFile = self.get_real_root().get_child(
@@ -433,23 +433,23 @@ class AesDrive(VirtualDrive, ABC):
         self.__virtualRoot = self.get_virtual_file(virtual_root_real_file)
 
     def get_hash_provider(self) -> IHashProvider:
-        """
+        """!
         Get the hash provider
-        :returns The hash provider
+        @returns The hash provider
         """
         return self.__hashProvider
 
     @staticmethod
     def open_drive(v_dir: IFile, drive_class_type: Type, password: str,
                    sequencer: INonceSequencer | None = None) -> AesDrive:
-        """
+        """!
         Set the drive location to an external directory.
         This requires you previously use SetDriveClass() to provide a class for the drive
         
-        :param v_dir: The directory path that will be used for storing the contents of the drive
-        :param drive_class_type: The drive class type (ie: PyDrive)
-        :param password: The password
-        :param sequencer: The sequencer
+        @param v_dir: The directory path that will be used for storing the contents of the drive
+        @param drive_class_type: The drive class type (ie: PyDrive)
+        @param password: The password
+        @param sequencer: The sequencer
         """
         drive: AesDrive = AesDrive.__create_drive_instance(v_dir, False, drive_class_type, sequencer)
         if not drive.has_config():
@@ -460,16 +460,16 @@ class AesDrive(VirtualDrive, ABC):
     @staticmethod
     def create_drive(v_dir: IFile, drive_class_type: Type, password: str,
                      sequencer: INonceSequencer) -> AesDrive:
-        """
+        """!
         Create a new drive in the provided location.
         
-        :param v_dir:  Directory to store the drive configuration and virtual filesystem.
-        :param password: Master password to encrypt the drive configuration.
-        :param drive_class_type: The drive class type (ie: PyDrive)
-        :param sequencer: The sequencer
-        :return: The newly created drive.
-        :raises IntegrityException: Thrown when data are corrupt or tampered with.
-        :raises SequenceException: Thrown when there is a failure in the nonce sequencer.
+        @param v_dir:  Directory to store the drive configuration and virtual filesystem.
+        @param password: Master password to encrypt the drive configuration.
+        @param drive_class_type: The drive class type (ie: PyDrive)
+        @param sequencer: The sequencer
+        @returns The newly created drive.
+        @exception IntegrityException: Thrown when data are corrupt or tampered with.
+        @exception SequenceException: Thrown when there is a failure in the nonce sequencer.
         """
         drive: AesDrive = AesDrive.__create_drive_instance(v_dir, True, drive_class_type, sequencer)
         if drive.has_config():
@@ -480,13 +480,13 @@ class AesDrive(VirtualDrive, ABC):
     @staticmethod
     def __create_drive_instance(v_dir: IFile, create_if_not_exists: bool,
                                 drive_class_type: Type, sequencer: INonceSequencer | None = None) -> AesDrive:
-        """
+        """!
         Create a drive instance.
         
-        :param v_dir: The target directory where the drive is located.
-        :param create_if_not_exists: Create the drive if it does not exist
-        :return: The drive created
-        :raises IntegrityException: Thrown when security error
+        @param v_dir: The target directory where the drive is located.
+        @param create_if_not_exists: Create the drive if it does not exist
+        @returns The drive created
+        @exception IntegrityException: Thrown when security error
         """
         drive: AesDrive | None = None
         try:
@@ -500,11 +500,11 @@ class AesDrive(VirtualDrive, ABC):
         return drive
 
     def get_auth_id_bytes(self) -> bytearray:
-        """
+        """!
         Get the device authorization byte array for the current drive.
         
-        :return: The auth id
-        :raises Exception:         """
+        @returns The auth id
+        @exception Exception:         """
         drv_str: str = BitConverter.to_hex(self.get_drive_id())
         sequence: NonceSequence | None = self.__sequencer.get_sequence(drv_str)
         if sequence is None:
@@ -516,33 +516,33 @@ class AesDrive(VirtualDrive, ABC):
 
     @staticmethod
     def get_default_auth_config_filename() -> str:
-        """
+        """!
         Get the default auth config filename.
         
-        :return: The default auth config file name
+        @returns The default auth config file name
         """
         return AesDrive.get_auth_config_filename()
 
     def create_sequence(self, drive_id: bytearray, auth_id: bytearray):
-        """
+        """!
         Create a nonce sequence for the drive id and the authorization id provided. Should be called
         once per drive_id/auth_id combination.
         
-        :param drive_id: The drive_id
-        :param auth_id:  The auth_id
-        :raises Exception:         """
+        @param drive_id: The drive_id
+        @param auth_id:  The auth_id
+        @exception Exception:         """
         drv_str: str = BitConverter.to_hex(drive_id)
         auth_str: str = BitConverter.to_hex(auth_id)
         self.__sequencer.create_sequence(drv_str, auth_str)
 
     def init_sequence(self, drive_id: bytearray, auth_id: bytearray):
-        """
+        """!
         Initialize the nonce sequencer with the current drive nonce range. Should be called
         once per drive_id/auth_id combination.
         
-        :param drive_id: Drive ID.
-        :param auth_id:  authorization ID.
-        :raises Exception:         """
+        @param drive_id: Drive ID.
+        @param auth_id:  authorization ID.
+        @exception Exception:         """
         starting_nonce: bytearray = DriveGenerator.get_starting_nonce()
         max_nonce: bytearray = DriveGenerator.get_max_nonce()
         drv_str: str = BitConverter.to_hex(drive_id)
@@ -550,31 +550,31 @@ class AesDrive(VirtualDrive, ABC):
         self.__sequencer.init_sequence(drv_str, auth_str, starting_nonce, max_nonce)
 
     def revoke_authorization(self):
-        """
+        """!
         Revoke authorization for this device. This will effectively terminate write operations on the current disk
         by the current device. Warning: If you need to authorize write operations to the device again you will need
         to have another device to export an authorization config file and reimport it.
         
-        :raises Exception:         @see <a href="https://github.com/mku11/Salmon-AES-CTR#readme">Salmon README.md</a>
+        @exception Exception:         @see <a href="https://github.com/mku11/Salmon-AES-CTR#readme">Salmon README.md</a>
         """
         drive_id: bytearray = self.get_drive_id()
         self.__sequencer.revoke_sequence(BitConverter.to_hex(drive_id))
 
     def get_auth_id(self) -> str:
-        """
+        """!
         Get the authorization ID for the current device.
         
-        :return: The authorization id
-        :raises SequenceException: Thrown when there is a failure in the nonce sequencer.
-        :raises AuthException: Thrown when there is a failure in the nonce sequencer.
+        @returns The authorization id
+        @exception SequenceException: Thrown when there is a failure in the nonce sequencer.
+        @exception AuthException: Thrown when there is a failure in the nonce sequencer.
         """
         return BitConverter.to_hex(self.get_auth_id_bytes())
 
     def __create_config(self, password: str):
-        """
+        """!
         Create a configuration file for the drive.
         
-        :param password: The new password to be saved in the configuration
+        @param password: The new password to be saved in the configuration
                         This password will be used to derive the master key that will be used to
                         encrypt the combined key (encryption key + hash key)
         """
@@ -649,45 +649,45 @@ class AesDrive(VirtualDrive, ABC):
         self.init_fs()
 
     def set_password(self, password: str):
-        """
+        """!
         Change the user password.
-        :param password: The new password.
-        :raises IOError: Thrown if there is an IO error.
-        :raises AuthException: Thrown when there is a failure in the nonce sequencer.
-        :raises IntegrityException: Thrown when security error
-        :raises IntegrityException: Thrown when data are corrupt or tampered with.
-        :raises SequenceException: Thrown when there is a failure in the nonce sequencer.
+        @param password: The new password.
+        @exception IOError: Thrown if there is an IO error.
+        @exception AuthException: Thrown when there is a failure in the nonce sequencer.
+        @exception IntegrityException: Thrown when security error
+        @exception IntegrityException: Thrown when data are corrupt or tampered with.
+        @exception SequenceException: Thrown when there is a failure in the nonce sequencer.
         """
         self.__create_config(password)
 
     def get_sequencer(self) -> INonceSequencer | None:
-        """
+        """!
         Get the sequencer
-        :return: The nonce sequencer
+        @returns The nonce sequencer
         """
         return self.__sequencer
 
     def set_sequencer(self, sequencer: INonceSequencer | None):
-        """
+        """!
         Set the sequencer
-        :param sequencer: The nonce sequencer
+        @param sequencer: The nonce sequencer
         """
         self.__sequencer = sequencer
 
     def create_config_file(self, real_root: IFile) -> IFile:
-        """
+        """!
         Create the drive config file
-        :param real_root: The real root directory.
-        :return: The config file
+        @param real_root: The real root directory.
+        @returns The config file
         """
         config_file: IFile = real_root.create_file(AesDrive.get_config_filename())
         return config_file
 
     def get_config_file(self, real_root: IFile) -> IFile:
-        """
+        """!
         Get the drive config file
-        :param real_root: The real root directory.
-        :return: The config file
+        @param real_root: The real root directory.
+        @returns The config file
         """
         config_file: IFile = real_root.get_child(AesDrive.get_config_filename())
         return config_file

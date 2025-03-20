@@ -63,11 +63,11 @@ class AesFileInputStream(BufferedIOBase):
         """
         Instantiate a seekable stream from an encrypted file source
         
-        :param salmon_file:   The source file.
-        :param buffers_count: Number of buffers to use.
-        :param buffer_size:   The length of each buffer.
-        :param threads:      The number of threads/streams to source the file in parallel.
-        :param back_offset:   The back offset.
+        @param salmon_file:   The source file.
+        @param buffers_count: Number of buffers to use.
+        @param buffer_size:   The length of each buffer.
+        @param threads:      The number of threads/streams to source the file in parallel.
+        @param back_offset:   The back offset.
         """
         self.__buffersCount: int
         self.__buffers: list[AesFileInputStream.CacheBuffer | None] | None = None
@@ -120,7 +120,7 @@ class AesFileInputStream(BufferedIOBase):
         self.__create_streams()
 
     def __create_streams(self):
-        """
+        """!
         Method creates the parallel streams for reading from the file
         """
         self.__executor = ThreadPoolExecutor(self.__threads)
@@ -133,7 +133,7 @@ class AesFileInputStream(BufferedIOBase):
             raise IOError("Could not create streams") from ex
 
     def __create_buffers(self):
-        """
+        """!
         Create cache buffers that will be used for sourcing the files.
         These will help reducing multiple small decryption reads from the encrypted source.
         The first buffer will be sourcing at the start of the encrypted file where the header and indexing are
@@ -144,12 +144,12 @@ class AesFileInputStream(BufferedIOBase):
             self.__buffers[i] = AesFileInputStream.CacheBuffer(self.__cacheBufferSize)
 
     def seek(self, v_bytes: int, whence: int = 0) -> int:
-        """
+        """!
         Seek to a position in the stream
         
-        :param v_bytes: the number of bytes to
-        :param whence: Origin: 0: from the start, 1: from the current position, 2: from the end of the stream
-        :return: The current position after seeking
+        @param v_bytes: the number of bytes to
+        @param whence: Origin: 0: from the start, 1: from the current position, 2: from the end of the stream
+        @returns The current position after seeking
         """
         if whence == 0:
             self.__position = v_bytes
@@ -160,10 +160,10 @@ class AesFileInputStream(BufferedIOBase):
         return self.__position
 
     def readinto(self, buffer: bytearray | memoryview) -> int:
-        """
+        """!
         Reads and decrypts the contents of an encrypted file
         
-        :param buffer: The buffer that will store the decrypted contents
+        @param buffer: The buffer that will store the decrypted contents
         """
 
         if self.__position >= self.__positionEnd + 1:
@@ -203,18 +203,18 @@ class AesFileInputStream(BufferedIOBase):
         return min_count
 
     def read(self, size: int = __DEFAULT_BUFFER_SIZE) -> bytearray:
-        """
+        """!
         Read from the stream
-        :param size: The number of bytes to read.
-        :return The data
+        @param size: The number of bytes to read.
+        @returns The data
         """
         return self.read1(size)
 
     def read1(self, size: int = __DEFAULT_BUFFER_SIZE) -> bytearray:
-        """
+        """!
         Read from the stream
-        :param size: The number of bytes to read.
-        :return The data
+        @param size: The number of bytes to read.
+        @returns The data
         """
         buff: bytearray = bytearray(size)
         bytes_read = self.readinto(buff)
@@ -224,18 +224,18 @@ class AesFileInputStream(BufferedIOBase):
         raise NotImplementedError()
 
     def write(self, __buffer: bytearray) -> int:
-        """
+        """!
         Write to the stream. Not supported
-        :param __buffer: The data to write.
-        :return The number of data written
+        @param __buffer: The data to write.
+        @returns The number of data written
         """
         raise NotImplementedError()
 
     def readinto1(self, __buffer: bytearray) -> int:
-        """
+        """!
         Read from the stream
-        :param __buffer: The data to read into.
-        :return The number of bytes read
+        @param __buffer: The data to read into.
+        @returns The number of bytes read
         """
         return self.readinto(__buffer)
 
@@ -245,11 +245,11 @@ class AesFileInputStream(BufferedIOBase):
     @synchronized
     def __fill_buffer(self, cache_buffer: AesFileInputStream.CacheBuffer, start_position: int,
                       buffer_size: int) -> int:
-        """
+        """!
         Fills a cache buffer with the decrypted data from the encrypted source file.
         
-        :param cache_buffer: The cache buffer that will store the decrypted contents
-        :param buffer_size:  The length of the data requested
+        @param cache_buffer: The cache buffer that will store the decrypted contents
+        @param buffer_size:  The length of the data requested
         """
 
         bytes_read: int
@@ -263,12 +263,12 @@ class AesFileInputStream(BufferedIOBase):
     def __fill_buffer_part(self, cache_buffer: AesFileInputStream.CacheBuffer, start: int, offset: int,
                            buffer_size: int,
                            salmon_stream: AesStream) -> int:
-        """
+        """!
         Fills a cache buffer with the decrypted data from a part of an encrypted file
         
-        :param cache_buffer:  The cache buffer that will store the decrypted contents
-        :param buffer_size:   The length of the data requested
-        :param salmon_stream: The stream that will be used to read from
+        @param cache_buffer:  The cache buffer that will store the decrypted contents
+        @param buffer_size:   The length of the data requested
+        @param salmon_stream: The stream that will be used to read from
         """
         salmon_stream.seek(start, RandomAccessStream.SeekOrigin.Begin)
         total_bytes_read: int = salmon_stream.read(cache_buffer.buffer, offset, buffer_size)
@@ -276,12 +276,12 @@ class AesFileInputStream(BufferedIOBase):
 
     def __fill_buffer_multi(self, cache_buffer: AesFileInputStream.CacheBuffer, start_position: int,
                             buffer_size: int) -> int:
-        """
+        """!
         Fill the buffer using parallel streams for performance
         
-        :param cache_buffer:   The cache buffer that will store the decrypted data
-        :param start_position: The source file position the read will start from
-        :param buffer_size:    The buffer size that will be used to read from the file
+        @param cache_buffer:   The cache buffer that will store the decrypted data
+        @param start_position: The source file position the read will start from
+        @param buffer_size:    The buffer size that will be used to read from the file
         """
         bytes_read = [0]
         ex: Exception | None = None
@@ -326,7 +326,7 @@ class AesFileInputStream(BufferedIOBase):
 
     @synchronized
     def __get_avail_cache_buffer(self) -> AesFileInputStream.CacheBuffer | None:
-        """
+        """!
         Returns an available cache buffer if there is none then reuse the least recently used one.
         """
         if len(self.__lruBuffersIndex) == self.__buffersCount:
@@ -350,10 +350,10 @@ class AesFileInputStream(BufferedIOBase):
 
     @synchronized
     def __get_cache_buffer(self, position: int, count: int) -> AesFileInputStream.CacheBuffer | None:
-        """
+        """!
         Returns the buffer that contains the data requested.
         
-        :param position: The source file position of the data to be read
+        @param position: The source file position of the data to be read
         """
         for i in range(0, len(self.__buffers)):
             buffer: AesFileInputStream.CacheBuffer = self.__buffers[i]
@@ -367,46 +367,46 @@ class AesFileInputStream(BufferedIOBase):
         return None
 
     def get_size(self) -> int:
-        """
+        """!
         Get the size of the stream.
         
-        :return: The size
+        @returns The size
         """
         return self.__positionEnd - self.__positionStart + 1
 
     def get_position_start(self) -> int:
-        """
+        """!
         Get the start position
-        :returns The start position
+        @returns The start position
         """
         return self.__positionStart
 
     def set_position_start(self, pos: int):
-        """
+        """!
         Set the start position
-        :param pos The start position
+        @param pos The start position
         """
         self.__positionStart = pos
 
     def get_position_end(self) -> int:
-        """
+        """!
         Get the end position
-        :returns The end position
+        @returns The end position
         """
         return self.__positionEnd
 
     def set_position_end(self, pos: int):
-        """
+        """!
         Set the end position
-        :param pos The end position
+        @param pos The end position
         """
         self.__positionEnd = pos
 
     def close(self):
-        """
+        """!
         Close the stream and associated backed streams and clear buffers.
         
-        :raises IOError: Thrown if there is an IO error.
+        @exception IOError: Thrown if there is an IO error.
         """
         self.__close_streams()
         self.__clear_buffers()
@@ -414,7 +414,7 @@ class AesFileInputStream(BufferedIOBase):
 
     @synchronized
     def __clear_buffers(self):
-        """
+        """!
         Clear all buffers.
         """
         for i in range(0, len(self.__buffers)):
@@ -424,10 +424,10 @@ class AesFileInputStream(BufferedIOBase):
 
     @synchronized
     def __close_streams(self):
-        """
+        """!
         Close all back streams.
         
-        :raises IOError: Thrown if there is an IO error.
+        @exception IOError: Thrown if there is an IO error.
         """
         for i in range(0, self.__threads):
             if self.__streams[i]:
@@ -436,7 +436,7 @@ class AesFileInputStream(BufferedIOBase):
 
     # TODO: replace the CacheBuffer with a MemoryStream to simplify the code
     class CacheBuffer:
-        """
+        """!
         Class will be used to cache decrypted data that can later be read via the ReadAt() method
         without requesting frequent decryption reads.
         """
@@ -445,7 +445,7 @@ class AesFileInputStream(BufferedIOBase):
             """
             Instantiate a cache buffer.
             
-            :param buffer_size:             """
+            @param buffer_size:             """
             self.buffer: bytearray
             self.startPos: int = 0
             self.count: int = 0

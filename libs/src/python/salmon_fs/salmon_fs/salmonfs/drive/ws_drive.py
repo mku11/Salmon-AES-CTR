@@ -44,38 +44,38 @@ class WSDrive(AesDrive):
     """
 
     def __init__(self):
-        """
+        """!
         Private constructor, use open() or create() instead.
         """
         super().__init__()
 
     @staticmethod
     def open(v_dir: IFile, password: str, sequencer: INonceSequencer) -> AesDrive:
-        """
+        """!
         Helper method that opens and initializes a JavaDrive
-        :param v_dir: The directory that hosts the drive.
-        :param password: The password.
-        :param sequencer: The nonce sequencer that will be used for encryption.
-        :return: The drive.
+        @param v_dir: The directory that hosts the drive.
+        @param password: The password.
+        @param sequencer: The nonce sequencer that will be used for encryption.
+        @returns The drive.
         """
         return AesDrive.open_drive(v_dir, WSDrive, password, sequencer)
 
     @staticmethod
     def create(v_dir: IFile, password: str, sequencer: INonceSequencer) -> AesDrive:
-        """
+        """!
         Helper method that creates and initializes a JavaDrive
-        :param v_dir: The directory that will host the drive.
-        :param password: The password.
-        :param sequencer: The nonce sequencer that will be used for encryption.
-        :return: The drive.
+        @param v_dir: The directory that will host the drive.
+        @param password: The password.
+        @param sequencer: The nonce sequencer that will be used for encryption.
+        @returns The drive.
         """
         return AesDrive.create_drive(v_dir, WSDrive, password, sequencer)
 
     def get_private_dir(self) -> IFile:
-        """
+        """!
         Get a private dir for sharing files with external applications.
-        :return: The private file
-        :raises Exception:         """
+        @returns The private file
+        @exception Exception:         """
         file_folder: str | None = None
         platform_os: str = platform.system().upper()
         if "WIN" in platform_os:
@@ -90,28 +90,28 @@ class WSDrive(AesDrive):
         return File(file_folder)
 
     def _on_unlock_success(self):
-        """
+        """!
         When authorization succeed.
         """
         print("drive unlocked")
 
     def _on_unlock_error(self):
-        """
+        """!
         When authorization succeeds.
         """
         print("drive failed to unlock")
 
     def get_virtual_file(self, file: IFile) -> IVirtualFile | None:
-        """
+        """!
         Get the virtual file backed by a real file
-        :param file: The file
-        :return: The
+        @param file: The file
+        @returns The
         """
         return AesFile(file, self)
 
     def get_root(self) -> AesFile | None:
-        """
+        """!
         Get the drive root
-        :return: The drive root directory
+        @returns The drive root directory
         """
         return super().get_root()

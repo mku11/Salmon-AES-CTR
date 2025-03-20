@@ -41,20 +41,20 @@ class BufferedIOWrapper(BufferedIOBase):
     __DEFAULT_BUFFER_SIZE = 512 * 1024
 
     def __init__(self, stream: RandomAccessStream):
-        """
+        """!
         Instantiates an BufferedIOWrapper with a base stream.
-        :param stream: The base AbsStream that you want to wrap.
+        @param stream: The base AbsStream that you want to wrap.
         """
 
         self.__stream = stream
 
     def readinto(self, buffer: bytearray) -> int:
-        """
+        """!
         Read a sequence of bytes from the base stream into the buffer provided.
         to specify the count and offset pass a memoryview instead
-        :param buffer:     the buffer into which the data is read.
-        :return: The number of bytes read.
-        :raises IOError: with an optional inner Exception if the base stream is a AesStream
+        @param buffer:     the buffer into which the data is read.
+        @returns The number of bytes read.
+        @exception IOError: with an optional inner Exception if the base stream is a AesStream
         """
         bytes_read: int
         try:
@@ -64,20 +64,20 @@ class BufferedIOWrapper(BufferedIOBase):
         return bytes_read
 
     def read(self, size: int | None = ...) -> bytearray:
-        """
+        """!
         Read from the stream
-        :param size: The number of bytes to read
-        :returns The bytes read
+        @param size: The number of bytes to read
+        @returns The bytes read
         """
         if size is None:
             size = BufferedIOWrapper.__DEFAULT_BUFFER_SIZE
         return self.read1(size)
 
     def read1(self, size: int = ...) -> bytearray:
-        """
+        """!
         Read from the stream
-        :param size: The number of bytes to read
-        :returns The bytes read
+        @param size: The number of bytes to read
+        @returns The bytes read
         """
         buff: bytearray = bytearray(size)
         bytes_read = self.readinto(buff)
@@ -87,35 +87,35 @@ class BufferedIOWrapper(BufferedIOBase):
         raise NotImplementedError()
 
     def write(self, __buffer: bytearray) -> int:
-        """
+        """!
         Write to the stream. Not supported
-        :param __buffer: The buffer to write
-        :returns The number of bytes written
+        @param __buffer: The buffer to write
+        @returns The number of bytes written
         """
         raise NotImplementedError()
 
     def readinto1(self, __buffer: bytearray) -> int:
-        """
+        """!
         Read from the stream
-        :param __buffer: The buffer to read into
-        :returns The number of bytes read
+        @param __buffer: The buffer to read into
+        @returns The number of bytes read
         """
         return self.readinto(__buffer)
 
     def close(self):
-        """
+        """!
         Closes the base stream.
-        :raises IOError: Thrown if there is an IO error.
+        @exception IOError: Thrown if there is an IO error.
         """
         self.__stream.close()
 
     def seek(self, pos: int, whence: int = ...) -> int:
-        """
+        """!
         Skip number of bytes on the stream.
-        :param pos:   the number of bytes to be skipped.
-        :param whence: Origin: 0: from the start, 1: from the current position, 2: from the end of the stream
-        :return: The number of bytes skipped
-        :raises IOError: Thrown if there is an IO error.
+        @param pos:   the number of bytes to be skipped.
+        @param whence: Origin: 0: from the start, 1: from the current position, 2: from the end of the stream
+        @returns The number of bytes skipped
+        @exception IOError: Thrown if there is an IO error.
         """
         if whence == 1:
             pos += self.__stream.get_position()
@@ -128,8 +128,8 @@ class BufferedIOWrapper(BufferedIOBase):
         return self.__stream.get_position()
 
     def tell(self):
-        """
+        """!
         Get the position of the stream
-        :returns The position
+        @returns The position
         """
         return self.__stream.get_position()

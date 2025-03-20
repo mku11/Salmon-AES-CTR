@@ -40,26 +40,26 @@ class FileStream(RandomAccessStream):
     """
 
     def __init__(self, file: IFile, mode: str):
-        """
+        """!
         Construct a file stream from an AndroidFile.
         This will create a wrapper stream that will route read() and write() to the file
         
-        :param file: The AndroidFile that will be used to get the read/write stream
-        :param mode: The mode "r" for read "rw" for write
+        @param file: The AndroidFile that will be used to get the read/write stream
+        @param mode: The mode "r" for read "rw" for write
         """
 
         self.__raf: BinaryIO | None = None
-        """
+        """!
         The random access file associated with this stream.
         """
 
         self.__mm: mmap | None = None
-        """
+        """!
         mapped memory file for random access
         """
 
         self.__file: IFile | None = None
-        """
+        """!
         The python file associated with this stream.
         """
 
@@ -79,30 +79,30 @@ class FileStream(RandomAccessStream):
             self.__mm.seek(0)
 
     def can_read(self) -> bool:
-        """
+        """!
         True if stream can read from file.
-        :return: True if readable
+        @returns True if readable
         """
         return not self.__canWrite
 
     def can_write(self) -> bool:
-        """
+        """!
         True if stream can write to file.
-        :return: True if writable
+        @returns True if writable
         """
         return self.__canWrite
 
     def can_seek(self) -> bool:
-        """
+        """!
         True if stream can seek.
-        :return: True if seekable
+        @returns True if seekable
         """
         return True
 
     def get_length(self) -> int:
-        """
+        """!
         Get the length of the stream. This is the same as the backed file.
-        :return: The length
+        @returns The length
         """
         return self.__file.get_length()
 
@@ -110,10 +110,10 @@ class FileStream(RandomAccessStream):
         return self.__mm.tell() if self.__mm else self.__raf.tell()
 
     def set_position(self, value: int):
-        """
+        """!
         Set the current position of the stream.
-        :param value: The new position.
-        :raises IOError: Thrown if there is an IO error.
+        @param value: The new position.
+        @exception IOError: Thrown if there is an IO error.
         """
         self.seek(value, RandomAccessStream.SeekOrigin.Begin)
 
@@ -121,13 +121,13 @@ class FileStream(RandomAccessStream):
         self.__raf.truncate(value)
 
     def read(self, buffer: bytearray, offset: int, count: int) -> int:
-        """
+        """!
         Read data from the file stream into the buffer provided.
-        :param buffer: The buffer to write the data.
-        :param offset: The offset of the buffer to start writing the data.
-        :param count: The maximum number of bytes to read from.
-        :return: The bytes read
-        :raises IOError: Thrown if there is an IO error.
+        @param buffer: The buffer to write the data.
+        @param offset: The offset of the buffer to start writing the data.
+        @param count: The maximum number of bytes to read from.
+        @returns The bytes read
+        @exception IOError: Thrown if there is an IO error.
         """
         buff: bytes = self.__raf.read(count)
         bytes_read: int = len(buff)
@@ -137,12 +137,12 @@ class FileStream(RandomAccessStream):
         return bytes_read
 
     def write(self, buffer: bytearray, offset: int, count: int):
-        """
+        """!
         Write the data from the buffer provided into the stream.
-        :param buffer: The buffer to read the data from.
-        :param offset: The offset of the buffer to start reading the data.
-        :param count: The maximum number of bytes to read from the buffer.
-        :raises IOError: Thrown if there is an IO error.
+        @param buffer: The buffer to read the data from.
+        @param offset: The offset of the buffer to start reading the data.
+        @param count: The maximum number of bytes to read from the buffer.
+        @exception IOError: Thrown if there is an IO error.
         """
         if self.__mm:
             if self.get_position() + count > self.__file.get_length():
@@ -152,12 +152,12 @@ class FileStream(RandomAccessStream):
             self.__raf.write(buffer[offset:offset + count])
 
     def seek(self, offset: int, origin: RandomAccessStream.SeekOrigin) -> int:
-        """
+        """!
         Seek to the offset provided.
-        :param offset: The position to seek to.
-        :param origin: The type of origin {@link RandomAccessStream.SeekOrigin}
-        :return: The new position after seeking.
-        :raises IOError: Thrown if there is an IO error.
+        @param offset: The position to seek to.
+        @param origin: The type of origin {@link RandomAccessStream.SeekOrigin}
+        @returns The new position after seeking.
+        @exception IOError: Thrown if there is an IO error.
         """
         pos: int = self.__mm.tell() if self.__mm else self.__raf.tell()
         if origin == RandomAccessStream.SeekOrigin.Begin:
@@ -174,7 +174,7 @@ class FileStream(RandomAccessStream):
         return self.__mm.tell() if self.__mm else self.__raf.tell()
 
     def flush(self):
-        """
+        """!
         Flush the buffers to the associated file.
         """
         try:
@@ -186,9 +186,9 @@ class FileStream(RandomAccessStream):
             print(ex, file=sys.stderr)
 
     def close(self):
-        """
+        """!
         Close this stream and associated resources.
-        :raises IOError: Thrown if there is an IO error.
+        @exception IOError: Thrown if there is an IO error.
         """
         if self.__mm:
             self.__mm.close()

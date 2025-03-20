@@ -81,31 +81,31 @@ class DriveGenerator:
 
     @staticmethod
     def generate_drive_id() -> bytearray:
-        """
+        """!
         Generate a Drive ID.
-        :return: The Drive ID.
+        @returns The Drive ID.
         """
         return Generator.get_secure_random_bytes(DriveGenerator.DRIVE_ID_LENGTH)
 
     @staticmethod
     def generate_auth_id() -> bytearray:
-        """
+        """!
         Generate a secure random authorization ID.
-        :return: The authorization Id (16 bytes).
+        @returns The authorization Id (16 bytes).
         """
         return Generator.get_secure_random_bytes(DriveGenerator.AUTH_ID_SIZE)
 
     @staticmethod
     def generate_combined_key() -> bytearray:
-        """
+        """!
         Generates a secure random combined key (drive key + hash key)
-        :return: The length of the combined key.
+        @returns The length of the combined key.
         """
         return Generator.get_secure_random_bytes(DriveGenerator.COMBINED_KEY_LENGTH)
 
     @staticmethod
     def generate_master_key_iv() -> bytearray:
-        """
+        """!
         Generates the initial vector that will be used with the master key
         to encrypt the combined key (drive key + hash key)
         """
@@ -113,41 +113,41 @@ class DriveGenerator:
 
     @staticmethod
     def generate_salt() -> bytearray:
-        """
+        """!
         Generates a salt.
-        :return: The salt byte array.
+        @returns The salt byte array.
         """
         return Generator.get_secure_random_bytes(DriveGenerator.SALT_LENGTH)
 
     @staticmethod
     def get_starting_nonce() -> bytearray:
-        """
+        """!
         Get the starting nonce that will be used for encrypt drive files and filenames.
-        :return: A secure random byte array (8 bytes).
+        @returns A secure random byte array (8 bytes).
         """
         v_bytes: bytearray = bytearray(Generator.NONCE_LENGTH)
         return v_bytes
 
     @staticmethod
     def get_max_nonce() -> bytearray:
-        """
+        """!
         Get the default max nonce to be used for drives.
-        :return: A secure random byte array (8 bytes).
+        @returns A secure random byte array (8 bytes).
         """
         return BitConverter.to_bytes(DriveGenerator.LONG_MAX_VALUE, 8)
 
     @staticmethod
     def get_iterations() -> int:
-        """
+        """!
         Returns the iterations used for deriving the combined key from
         the text password
-        :return: The current iterations for the key derivation.
+        @returns The current iterations for the key derivation.
         """
         return DriveGenerator.__iterations
 
     @staticmethod
     def set_iterations(iterations: int):
-        """
+        """!
         Set the default iterations.
-        :param iterations:         """
+        @param iterations:         """
         DriveGenerator.iterations = iterations

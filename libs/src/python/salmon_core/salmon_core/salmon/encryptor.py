@@ -127,11 +127,11 @@ class Encryptor:
     """
 
     def __init__(self, threads: int = 1, buffer_size: int = Integrity.DEFAULT_CHUNK_SIZE, multi_cpu: bool = False):
-        """
+        """!
         Instantiate an encryptor with parallel tasks and buffer size.
         
-        :param threads:    The number of threads to use.
-        :param buffer_size: The buffer size to use. It is recommended for performance  to use
+        @param threads:    The number of threads to use.
+        @param buffer_size: The buffer size to use. It is recommended for performance  to use
                           a multiple of the chunk size if you enabled integrity
                           otherwise a multiple of the AES block size (16 bytes).
         :multi_cpu:  Utilize multiple cpus. Windows does not have a fast fork() so it has a very slow startup
@@ -154,20 +154,20 @@ class Encryptor:
                 enc_format: EncryptionFormat = EncryptionFormat.Salmon,
                 integrity: bool = False, hash_key: bytearray | None = None,
                 chunk_size: int = 0) -> bytearray:
-        """
+        """!
         Encrypts a byte array using the provided key and nonce.
         
-        :param data:            The byte array to be encrypted.
-        :param key:             The AES key to be used.
-        :param nonce:           The nonce to be used.
-        :param enc_format: The {@link EncryptionFormat} Generic or Salmon.
-        :param integrity:       True if you want to calculate and store hash signatures for each chunk size.
-        :param hash_key:         Hash key to be used for all chunks.
-        :param chunk_size:       The chunk size.
-        :return: The byte array with the encrypted data.
-        :raises IntegrityException: Thrown when security error
-        :raises IOError: Thrown if there is an IO error.
-        :raises IntegrityException: Thrown when data are corrupt or tampered with.
+        @param data:            The byte array to be encrypted.
+        @param key:             The AES key to be used.
+        @param nonce:           The nonce to be used.
+        @param enc_format: The {@link EncryptionFormat} Generic or Salmon.
+        @param integrity:       True if you want to calculate and store hash signatures for each chunk size.
+        @param hash_key:         Hash key to be used for all chunks.
+        @param chunk_size:       The chunk size.
+        @returns The byte array with the encrypted data.
+        @exception IntegrityException: Thrown when security error
+        @exception IOError: Thrown if there is an IO error.
+        @exception IntegrityException: Thrown when data are corrupt or tampered with.
         """
 
         if key is None:
@@ -197,17 +197,17 @@ class Encryptor:
                                 key: bytearray, hash_key: bytearray | None, nonce: bytearray,
                                 enc_format: EncryptionFormat,
                                 chunk_size: int, integrity: bool):
-        """
+        """!
         Encrypt stream using parallel threads.
         
-        :param data:       The input data to be encrypted
-        :param out_data:    The output buffer with the encrypted data.
-        :param key:        The AES key.
-        :param hash_key:    The hash key.
-        :param nonce:      The nonce to be used for encryption.
-        :param enc_format: The {@link EncryptionFormat} Generic or Salmon.
-        :param chunk_size:  The chunk size.
-        :param integrity:  True to apply integrity.
+        @param data:       The input data to be encrypted
+        @param out_data:    The output buffer with the encrypted data.
+        @param key:        The AES key.
+        @param hash_key:    The hash key.
+        @param nonce:      The nonce to be used for encryption.
+        @param enc_format: The {@link EncryptionFormat} Generic or Salmon.
+        @param chunk_size:  The chunk size.
+        @param integrity:  True to apply integrity.
         """
 
         running_threads: int = 1
@@ -238,20 +238,20 @@ class Encryptor:
     def __submit_encrypt_jobs(self, running_threads: int, part_size: int, data: bytearray, out_data: bytearray,
                               key: bytearray, hash_key: bytearray | None, nonce: bytearray,
                               enc_format: EncryptionFormat, integrity: bool, chunk_size: int):
-        """
+        """!
         Submit encryption parallel jobs.
         
-        :param running_threads: The number of threads to submit.
-        :param part_size:       The data length of each part that belongs to each thread.
-        :param data:           The buffer of data you want to decrypt. This is a shared byte array across all threads
+        @param running_threads: The number of threads to submit.
+        @param part_size:       The data length of each part that belongs to each thread.
+        @param data:           The buffer of data you want to decrypt. This is a shared byte array across all threads
                                  where each thread will read each own part.
-        :param out_data:        The buffer of data containing the encrypted data.
-        :param key:            The AES key.
-        :param hash_key:        The hash key for integrity.
-        :param nonce:          The nonce for the data.
-        :param enc_format: The {@link EncryptionFormat} Generic or Salmon.
-        :param integrity:      True to apply the data integrity.
-        :param chunk_size:      The chunk size.
+        @param out_data:        The buffer of data containing the encrypted data.
+        @param key:            The AES key.
+        @param hash_key:        The hash key for integrity.
+        @param nonce:          The nonce for the data.
+        @param enc_format: The {@link EncryptionFormat} Generic or Salmon.
+        @param integrity:      True to apply the data integrity.
+        @param chunk_size:      The chunk size.
         """
 
         shm_out = shared_memory.SharedMemory(create=True, size=len(out_data))
@@ -292,7 +292,7 @@ class Encryptor:
                 raise RuntimeError() from e
 
     def close(self):
-        """
+        """!
         Close the encryptor and associated resources
         """
         if self.__executor:

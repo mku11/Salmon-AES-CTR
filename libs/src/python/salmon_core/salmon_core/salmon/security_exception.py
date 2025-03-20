@@ -33,8 +33,8 @@ class SecurityException(Exception):
     """
 
     def __init__(self, msg: str):
-        """
+        """!
         Construct an exception with a specific message.
-        :param msg: The provided message.
+        @param msg: The provided message.
         """
         super().__init__(msg)

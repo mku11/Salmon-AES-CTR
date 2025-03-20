@@ -49,12 +49,12 @@ class WSFileStream(RandomAccessStream):
     __LENGTH: str = "length"
 
     def __init__(self, file: IFile, mode: str):
-        """
+        """!
         Construct a file stream from an AndroidFile.
         This will create a wrapper stream that will route read() and write() to the file
 
-        :param file: The file that will be used to get the read/write stream
-        :param mode: The mode "r" for read "rw" for write
+        @param file: The file that will be used to get the read/write stream
+        @param mode: The mode "r" for read "rw" for write
         """
 
         self.__file: IFile | None = file
@@ -149,52 +149,52 @@ class WSFileStream(RandomAccessStream):
         return self.queue
 
     def can_read(self) -> bool:
-        """
+        """!
         True if stream can read from file.
-        :return: True if readable
+        @returns True if readable
         """
         return not self.__canWrite
 
     def can_write(self) -> bool:
-        """
+        """!
         True if stream can write to file.
-        :return: True if writable
+        @returns True if writable
         """
         return self.__canWrite
 
     def can_seek(self) -> bool:
-        """
+        """!
         True if stream can seek.
-        :return: True if seekable
+        @returns True if seekable
         """
         return True
 
     def get_length(self) -> int:
-        """
+        """!
         Get the length of the stream. This is the same as the backed file.
-        :return: The length
+        @returns The length
         """
         return self.__file.get_length()
 
     def get_position(self) -> int:
-        """
+        """!
         Get the position of the stream
-        :returns The position
+        @returns The position
         """
         return self.position
 
     def set_position(self, value: int):
-        """
+        """!
         Set the current position of the stream.
-        :param value: The new position.
-        :raises IOError: Thrown if there is an IO error.
+        @param value: The new position.
+        @exception IOError: Thrown if there is an IO error.
         """
         if self.position != value:
             self.reset()
         self.position = value
 
     def set_length(self, value: int):
-        """
+        """!
         Set the length of the stream
         """
         headers = {}
@@ -217,13 +217,13 @@ class WSFileStream(RandomAccessStream):
                 http_response.close()
 
     def read(self, buffer: bytearray, offset: int, count: int) -> int:
-        """
+        """!
         Read data from the file stream into the buffer provided.
-        :param buffer: The buffer to write the data.
-        :param offset: The offset of the buffer to start writing the data.
-        :param count: The maximum number of bytes to read from.
-        :return: The bytes read
-        :raises IOError: Thrown if there is an IO error.
+        @param buffer: The buffer to write the data.
+        @param offset: The offset of the buffer to start writing the data.
+        @param count: The maximum number of bytes to read from.
+        @returns The bytes read
+        @exception IOError: Thrown if there is an IO error.
         """
         bytes_read: int = 0
         while bytes_read < count:
@@ -238,12 +238,12 @@ class WSFileStream(RandomAccessStream):
         return bytes_read
 
     def write(self, buffer: bytearray, offset: int, count: int):
-        """
+        """!
         Write the data from the buffer provided into the stream.
-        :param buffer: The buffer to read the data from.
-        :param offset: The offset of the buffer to start reading the data.
-        :param count: The maximum number of bytes to read from the buffer.
-        :raises IOError: Thrown if there is an IO error.
+        @param buffer: The buffer to read the data from.
+        @param offset: The offset of the buffer to start reading the data.
+        @param count: The maximum number of bytes to read from the buffer.
+        @exception IOError: Thrown if there is an IO error.
         """
         buff = buffer[offset:offset + count]
         queue = self.get_output_queue()
@@ -251,12 +251,12 @@ class WSFileStream(RandomAccessStream):
         self.position += len(buff)
 
     def seek(self, offset: int, origin: RandomAccessStream.SeekOrigin) -> int:
-        """
+        """!
         Seek to the offset provided.
-        :param offset: The position to seek to.
-        :param origin: The type of origin {@link RandomAccessStream.SeekOrigin}
-        :return: The new position after seeking.
-        :raises IOError: Thrown if there is an IO error.
+        @param offset: The position to seek to.
+        @param origin: The type of origin {@link RandomAccessStream.SeekOrigin}
+        @returns The new position after seeking.
+        @exception IOError: Thrown if there is an IO error.
         """
         pos: int = self.position
         if origin == RandomAccessStream.SeekOrigin.Begin:
@@ -270,22 +270,22 @@ class WSFileStream(RandomAccessStream):
         return self.position
 
     def flush(self):
-        """
+        """!
         Flush the buffers to the associated file.
         """
         # TODO: flush network upload before queueing more?
         pass
 
     def close(self):
-        """
+        """!
         Close this stream and associated resources.
-        :raises IOError: Thrown if there is an IO error.
+        @exception IOError: Thrown if there is an IO error.
         """
         self.reset()
         self.closed = True
 
     def reset(self):
-        """
+        """!
         Reset the stream
         """
         if self.can_write():

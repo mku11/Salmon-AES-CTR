@@ -39,17 +39,17 @@ class Base64(IBase64):
     """
 
     def decode(self, text: str) -> bytearray:
-        """
+        """!
         Decode a Base64 encoded string into a byte array.
-        :param text: String to be decoded
-        :return: Byte array of decoded data.
+        @param text: String to be decoded
+        @returns Byte array of decoded data.
         """
         return bytearray(base64.b64decode(text))
 
     def encode(self, data: bytearray) -> str:
-        """
+        """!
         Encode a byte array into a Base64 encoded string.
-        :param data: Byte array to be encoded
-        :return: String of encoded data.
+        @param data: Byte array to be encoded
+        @returns String of encoded data.
         """
         return base64.b64encode(data).decode('utf-8')

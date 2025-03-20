@@ -38,36 +38,36 @@ class VirtualDrive(ABC):
 
     @abstractmethod
     def _on_unlock_success(self):
-        """
+        """!
         Method is called when the drive is unlocked
         """
         pass
 
     def _on_unlock_error(self):
-        """
+        """!
         Method is called when unlocking the drive has failed
         """
         pass
 
     @abstractmethod
     def get_private_dir(self) -> IFile:
-        """
+        """!
         Get the private dir to share files with other apps
         """
         pass
 
     @abstractmethod
     def get_virtual_file(self, file: IFile) -> any:
-        """
+        """!
         Get the virtual file backed by the file provided
-        :param file: The real file
-        :returns The virtual file
+        @param file: The real file
+        @returns The virtual file
         """
         pass
 
     @abstractmethod
     def get_root(self) -> any:
-        """
+        """!
         Get the virtual root
         """
         pass

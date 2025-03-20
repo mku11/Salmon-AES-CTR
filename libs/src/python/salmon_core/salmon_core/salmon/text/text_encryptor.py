@@ -41,20 +41,20 @@ class TextEncryptor:
     def encrypt_string(text: str, key: bytearray, nonce: bytearray,
                        enc_format: EncryptionFormat = EncryptionFormat.Salmon, integrity: bool = False,
                        hash_key: bytearray | None = None, chunk_size: int = 0) -> str:
-        """
+        """!
         Encrypts a text String using AES256 with the key and nonce provided.
         
-        :param text:  Text to be encrypted.
-        :param key:   The encryption key to be used.
-        :param nonce: The nonce to be used.
-        :param enc_format: The {@link EncryptionFormat} Generic or Salmon.
-        :param integrity: True if you want to calculate and store hash signatures for each chunk size
-        :param hash_key: Hash key to be used for all chunks.
-        :param chunk_size: The chunk size.
-        :raises IOError: Thrown if there is an IO error.
-        :raises IntegrityException: Thrown when security error
-        :raises IntegrityException: Thrown when data are corrupt or tampered with.
-        :raises IOError: Thrown if there is an IO error.
+        @param text:  Text to be encrypted.
+        @param key:   The encryption key to be used.
+        @param nonce: The nonce to be used.
+        @param enc_format: The {@link EncryptionFormat} Generic or Salmon.
+        @param integrity: True if you want to calculate and store hash signatures for each chunk size
+        @param hash_key: Hash key to be used for all chunks.
+        @param chunk_size: The chunk size.
+        @exception IOError: Thrown if there is an IO error.
+        @exception IntegrityException: Thrown when security error
+        @exception IntegrityException: Thrown when data are corrupt or tampered with.
+        @exception IOError: Thrown if there is an IO error.
         """
 
         v_bytes: bytearray = bytearray(text.encode('utf-8'))

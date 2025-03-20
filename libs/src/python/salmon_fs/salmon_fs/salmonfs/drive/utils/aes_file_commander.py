@@ -46,11 +46,11 @@ class AesFileCommander:
 
     def __init__(self, import_buffer_size: int = 0, export_buffer_size: int = 0, threads: int = 1,
                  multi_cpu: False = False):
-        """
+        """!
         Instantiate a new file commander object.
         
-        :param import_buffer_size: The buffer size to use for importing files.
-        :param export_buffer_size: The buffer size to use for exporting files.
+        @param import_buffer_size: The buffer size to use for importing files.
+        @param export_buffer_size: The buffer size to use for exporting files.
         :multi_cpu:  Utilize multiple cpus. Windows does not have a fast fork() so it has a very slow startup
         """
         self.__fileImporter: AesFileImporter
@@ -63,30 +63,30 @@ class AesFileCommander:
         self.__fileSearcher = AesFileSearcher()
 
     def get_file_importer(self) -> AesFileImporter:
-        """
+        """!
         Get the file importer
-        :returns The file importer
+        @returns The file importer
         """
         return self.__fileImporter
 
     def get_file_exporter(self) -> AesFileExporter:
-        """
+        """!
         Get the file exporter
-        :returns The file exporter
+        @returns The file exporter
         """
         return self.__fileExporter
 
     def import_files(self, files_to_import: list[IFile], import_dir: AesFile,
                      options: AesFileCommander.BatchImportOptions | None = None) -> \
             list[AesFile]:
-        """
+        """!
         Import files to the drive.
         
-        :param files_to_import:     The files to import.
-        :param import_dir:         The target directory.
-        :param options: The options
-        :return: The imported files if completes successfully.
-        :raises Exception:
+        @param files_to_import:     The files to import.
+        @param import_dir:         The target directory.
+        @param options: The options
+        @returns The imported files if completes successfully.
+        @exception Exception: When there is an error with import
         """
 
         if not options:
@@ -178,14 +178,14 @@ class AesFileCommander:
     def export_files(self, files_to_export: list[AesFile], export_dir: IFile,
                      options: AesFileCommander.BatchExportOptions | None = None) \
             -> list[IFile]:
-        """
+        """!
         Export a file from a drive.
         
-        :param files_to_export:     The files to export.
-        :param export_dir:         The export target directory
-        :param options: The options
-        :return: The exported files
-        :raises Exception:
+        @param files_to_export:     The files to export.
+        @param export_dir:         The export target directory
+        @param options: The options
+        @returns The exported files
+        @exception Exception: When there is an error with export
         """
 
         if not options:
@@ -290,11 +290,11 @@ class AesFileCommander:
         return count
 
     def delete_files(self, files_to_delete: list[AesFile], options: AesFileCommander.BatchDeleteOptions | None = None):
-        """
+        """!
         Delete files.
         
-        :param files_to_delete:         The files to delete.
-        :param options: The options
+        @param files_to_delete:         The files to delete.
+        @param options: The options
         """
         if not options:
             options = AesFileCommander.BatchDeleteOptions()
@@ -331,13 +331,13 @@ class AesFileCommander:
 
     def copy_files(self, files_to_copy: list[AesFile], v_dir: AesFile,
                    options: AesFileCommander.BatchCopyOptions | None = None):
-        """
+        """!
         Copy files to another directory.
 
-        :param files_to_copy:       The array of files to copy.
-        :param v_dir:               The target directory.
-        :param options: The options
-        :raises Exception:
+        @param files_to_copy:       The array of files to copy.
+        @param v_dir:               The target directory.
+        @param options: The options
+        @exception Exception: When there is an error with copying
         """
 
         if not options:
@@ -383,7 +383,7 @@ class AesFileCommander:
                 AesFile.copy_recursively(v_dir, copy_options)
 
     def cancel(self):
-        """
+        """!
         Cancel all jobs.
         """
         self.__stopJobs = True
@@ -392,61 +392,61 @@ class AesFileCommander:
         self.__fileSearcher.stop()
 
     def is_file_searcher_running(self) -> bool:
-        """
+        """!
         True if the file search is currently running.
 
-        :return: True if search running
+        @returns True if search running
         """
         return self.__fileSearcher.is_running()
 
     def is_running(self) -> bool:
-        """
+        """!
         True if jobs are currently running.
 
-        :return: True if running
+        @returns True if running
         """
         return self.__fileSearcher.is_running() or self.__fileImporter.is_running() or self.__fileExporter.is_running()
 
     def is_file_searcher_stopped(self) -> bool:
-        """
+        """!
         True if file search stopped.
 
-        :return: True if search stopped
+        @returns True if search stopped
         """
         return self.__fileSearcher.is_stopped()
 
     def stop_file_search(self):
-        """
+        """!
         Stop file search.
         """
         self.__fileSearcher.stop()
 
     def search(self, v_dir: AesFile, terms: str, options: AesFileSearcher.SearchOptions | None = None) -> [AesFile]:
-        """
+        """!
         Search
 
-        :param v_dir:           The directory to start the search.
-        :param terms:         The terms to search for.
-        :param options: The options
-        :return: An array with all the results found.
+        @param v_dir:           The directory to start the search.
+        @param terms:         The terms to search for.
+        @param options: The options
+        @returns An array with all the results found.
         """
 
         return self.__fileSearcher.search(v_dir, terms, options)
 
     def are_jobs_stopped(self) -> bool:
-        """
+        """!
         True if all jobs are stopped.
 
-        :return: True if stopped
+        @returns True if stopped
         """
         return self.__stopJobs
 
     def __get_files(self, files: list[AesFile]) -> int:
-        """
+        """!
         Get number of files recursively for the files provided.
 
-        :param files: Total number of files and files under subdirectories.
-        :return: The files
+        @param files: Total number of files and files under subdirectories.
+        @returns The files
         """
         total: int = 0
         for file in files:
@@ -463,14 +463,14 @@ class AesFileCommander:
         self.__fileExporter.close()
 
     def rename_file(self, ifile: AesFile, new_filename: str):
-        """
+        """!
         Rename an encrypted file
 
         """
         ifile.rename(new_filename)
 
     class FileTaskProgress:
-        """
+        """!
         File task progress class.
         """
 
@@ -493,14 +493,14 @@ class AesFileCommander:
             self.__totalFiles = total_files
 
     class AesFileTaskProgress(FileTaskProgress):
-        """
+        """!
         The task progress for an encrypted file
         """
 
         def get_file(self) -> AesFile:
             """
             Get the file
-            :returns The file
+            @returns The file
             """
             return self.__file
 
@@ -514,7 +514,7 @@ class AesFileCommander:
         def get_file(self) -> IFile:
             """
             Get the file
-            :returns The file
+            @returns The file
             """
             return self.__file
 
@@ -568,22 +568,22 @@ class AesFileCommander:
             count[0] += 1
 
     class BatchDeleteOptions:
-        """
+        """!
         Batch delete options
         """
 
         on_failed: Callable[[AesFile, Exception], Any] | None = None
-        """
+        """!
         Callback when delete fails
         """
 
         on_progress_changed: Callable[[AesFileCommander.AesFileTaskProgress], Any] | None = None
-        """
+        """!
         Callback when progress changes
         """
 
     class BatchImportOptions:
-        """
+        """!
         Batch import options
         """
 
@@ -598,22 +598,22 @@ class AesFileCommander:
         """
 
         auto_rename: Callable[[IFile, str], Any] | None = None
-        """
+        """!
         Callback when a file with the same name exists
         """
 
         on_failed: Callable[[IFile, Exception], Any] | None = None
-        """
+        """!
         Callback when import fails
         """
 
         on_progress_changed: Callable[[AesFileCommander.RealFileTaskProgress], Any] | None = None
-        """
+        """!
         Callback when progress changes
         """
 
     class BatchExportOptions:
-        """
+        """!
         Batch export options
         """
 
@@ -628,22 +628,22 @@ class AesFileCommander:
         """
 
         auto_rename: Callable[[IFile, str], Any] | None = None
-        """
+        """!
         Callback when a file with the same name exists
         """
 
         on_failed: Callable[[AesFile, Exception], Any] | None = None
-        """
+        """!
         Callback when import fails
         """
 
         on_progress_changed: Callable[[AesFileCommander.AesFileTaskProgress], Any] | None = None
-        """
+        """!
         Callback when progress changes
         """
 
     class BatchCopyOptions:
-        """
+        """!
         Batch copy options
         """
 
@@ -653,7 +653,7 @@ class AesFileCommander:
         """
 
         auto_rename: Callable[[AesFile, str], Any] | None = None
-        """
+        """!
         Callback when another file with the same name exists.
         """
 
@@ -663,11 +663,11 @@ class AesFileCommander:
         """
 
         on_failed: Callable[[AesFile, Exception], Any] | None = None
-        """
+        """!
         Callback when copy fails
         """
 
         on_progress_changed: Callable[[AesFileCommander.AesFileTaskProgress], Any] | None = None
-        """
+        """!
         Callback when progress changes.
         """

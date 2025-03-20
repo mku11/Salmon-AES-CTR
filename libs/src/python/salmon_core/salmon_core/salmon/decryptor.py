@@ -126,11 +126,11 @@ class Decryptor:
     """
 
     def __init__(self, threads: int = 1, buffer_size: int = Integrity.DEFAULT_CHUNK_SIZE, multi_cpu: bool = False):
-        """
+        """!
         Instantiate an encryptor with parallel tasks and buffer size.
         
-        :param threads:    The number of threads to use.
-        :param buffer_size: The buffer size to use. It is recommended for performance  to use
+        @param threads:    The number of threads to use.
+        @param buffer_size: The buffer size to use. It is recommended for performance  to use
                           a multiple of the chunk size if you enabled integrity
                           otherwise a multiple of the AES block size (16 bytes).
         :multi_cpu:  Utilize multiple cpus. Windows does not have a fast fork() so it has a very slow startup
@@ -152,20 +152,20 @@ class Decryptor:
     def decrypt(self, data: bytearray, key: bytearray, nonce: bytearray | None = None,
                 enc_format: EncryptionFormat = EncryptionFormat.Salmon,
                 integrity: bool = True, hash_key: bytearray | None = None, chunk_size: int = 0) -> bytearray:
-        """
+        """!
         Decrypt a byte array using AES256 based on the provided key and nonce.
-        :param data: The input data to be decrypted.
-        :param key: The AES key to use for decryption.
-        :param nonce: The nonce to use for decryption.
-        :param enc_format: The {@link EncryptionFormat} Generic or Salmon.
-        :param integrity: Verify hash integrity in the data.
-        :param hash_key: The hash key to be used for integrity.
-        :param chunk_size: The chunk size.
-        :return: The byte array with the decrypted data.
-        :raises IOError: Thrown if there is a problem with decoding the array.
-        :raises SalmonSecurityException: Thrown if the key and nonce are not provided.
-        :raises IOError: Thrown if there is an IO error.
-        :raises IntegrityException: Thrown when data are corrupt or tampered with.
+        @param data: The input data to be decrypted.
+        @param key: The AES key to use for decryption.
+        @param nonce: The nonce to use for decryption.
+        @param enc_format: The {@link EncryptionFormat} Generic or Salmon.
+        @param integrity: Verify hash integrity in the data.
+        @param hash_key: The hash key to be used for integrity.
+        @param chunk_size: The chunk size.
+        @returns The byte array with the decrypted data.
+        @exception IOError: Thrown if there is a problem with decoding the array.
+        @exception SalmonSecurityException: Thrown if the key and nonce are not provided.
+        @exception IOError: Thrown if there is an IO error.
+        @exception IntegrityException: Thrown when data are corrupt or tampered with.
         """
         if key is None:
             raise SecurityException("Key is missing")
@@ -199,16 +199,16 @@ class Decryptor:
                                 key: bytearray, hash_key: bytearray | None, nonce: bytearray,
                                 enc_format: EncryptionFormat,
                                 chunk_size: int, integrity: bool):
-        """
+        """!
         Decrypt stream using parallel threads.
-        :param data: The input data to be decrypted
-        :param out_data: The output buffer with the decrypted data.
-        :param key: The AES key.
-        :param hash_key: The hash key.
-        :param nonce: The nonce to be used for decryption.
-        :param enc_format: The {@link EncryptionFormat} Generic or Salmon.
-        :param chunk_size: The chunk size.
-        :param integrity: True to verify integrity.
+        @param data: The input data to be decrypted
+        @param out_data: The output buffer with the decrypted data.
+        @param key: The AES key.
+        @param hash_key: The hash key.
+        @param nonce: The nonce to be used for decryption.
+        @param enc_format: The {@link EncryptionFormat} Generic or Salmon.
+        @param chunk_size: The chunk size.
+        @param integrity: True to verify integrity.
         """
 
         running_threads: int = 1
@@ -244,17 +244,17 @@ class Decryptor:
 
         """
         Submit decryption parallel jobs.
-        :param running_threads: The number of threads to submit.
-        :param part_size: The data length of each part that belongs to each thread.
-        :param data: The buffer of data you want to decrypt. This is a shared byte array across all threads where each
+        @param running_threads: The number of threads to submit.
+        @param part_size: The data length of each part that belongs to each thread.
+        @param data: The buffer of data you want to decrypt. This is a shared byte array across all threads where each
                     thread will read each own part.
-        :param out_data: The buffer of data containing the decrypted data.
-        :param key: The AES key.
-        :param hash_key: The hash key for integrity validation.
-        :param nonce: The nonce for the data.
-        :param enc_format: The {@link EncryptionFormat} Generic or Salmon.
-        :param integrity: True to verify the data integrity.
-        :param chunk_size: The chunk size.
+        @param out_data: The buffer of data containing the decrypted data.
+        @param key: The AES key.
+        @param hash_key: The hash key for integrity validation.
+        @param nonce: The nonce for the data.
+        @param enc_format: The {@link EncryptionFormat} Generic or Salmon.
+        @param integrity: True to verify the data integrity.
+        @param chunk_size: The chunk size.
         """
         shm_out = shared_memory.SharedMemory(create=True, size=len(out_data))
         shm_out_name = shm_out.name
@@ -295,7 +295,7 @@ class Decryptor:
                 raise RuntimeError() from e
 
     def close(self):
-        """
+        """!
         Close the decryptor and associated resources
         """
         if self.__executor:

@@ -39,14 +39,14 @@ class HmacSHA256Provider(IHashProvider):
     """
 
     def calc(self, hash_key: bytearray, buffer: bytearray, offset: int, count: int) -> bytearray:
-        """
+        """!
         Calculate HMAC SHA256 hash for a byte buffer.
-        :param hash_key: The HMAC SHA256 key to use for hashing (32 bytes).
-        :param buffer: The buffer to read the data from.
-        :param offset: The position reading will start from.
-        :param count: The count of bytes to be read.
-        :return: The HMAC SHA256 hash.
-        :raises IntegrityException: thrown if hash cannot be calculated
+        @param hash_key: The HMAC SHA256 key to use for hashing (32 bytes).
+        @param buffer: The buffer to read the data from.
+        @param offset: The position reading will start from.
+        @param count: The count of bytes to be read.
+        @returns The HMAC SHA256 hash.
+        @exception IntegrityException: thrown if hash cannot be calculated
         """
         try:
             v_hmac = hmac.new(hash_key, memoryview(buffer)[offset:offset + count], digestmod=hashlib.sha256)

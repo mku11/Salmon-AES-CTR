@@ -43,200 +43,200 @@ class IFile(ABC):
     """
 
     def exists(self) -> bool:
-        """
+        """!
         True if this file exists.
         
-        :return: True if exists
+        @returns True if exists
         """
         pass
 
     def delete(self) -> bool:
-        """
+        """!
         Delete this file.
         
-        :return: True if file deleted
+        @returns True if file deleted
         """
         pass
 
     def get_input_stream(self) -> RandomAccessStream:
-        """
+        """!
         Get a stream for reading the file.
         
-        :return: The stream
-        :raises FileNotFoundException:         """
+        @returns The stream
+        @exception FileNotFoundException:         """
         pass
 
     def get_output_stream(self) -> RandomAccessStream:
-        """
+        """!
         Get a stream for writing to the file.
         
-        :return: The stream
-        :raises FileNotFoundException:         """
+        @returns The stream
+        @exception FileNotFoundException:         """
         pass
 
     def rename_to(self, new_filename: str) -> bool:
-        """
+        """!
         Rename file.
         
-        :param new_filename: The new filename
-        :return: True if success.
-        :raises FileNotFoundException:         """
+        @param new_filename: The new filename
+        @returns True if success.
+        @exception FileNotFoundException:         """
         pass
 
     def get_length(self) -> int:
-        """
+        """!
         Get the length for the file.
         
-        :return: The length.
+        @returns The length.
         """
         pass
 
     def get_children_count(self) -> int:
-        """
+        """!
         Get the count of files and subdirectories
         
-        :return: The children count
+        @returns The children count
         """
         pass
 
     def get_last_date_modified(self) -> int:
-        """
+        """!
         Get the last modified date of the file.
         
-        :return: The last modified date in milliseconds
+        @returns The last modified date in milliseconds
         """
         pass
 
     def get_display_path(self) -> str:
-        """
+        """!
         Get the absolute path of the file on disk.
         
-        :return: The absolute path
+        @returns The absolute path
         """
         pass
 
     def get_path(self) -> str:
-        """
+        """!
         Get the original filepath of this file. This might symlinks or merged folders. To get the absolute path
         use {@link #getAbsolutePath()}.
         
-        :return: The path
+        @returns The path
         """
         pass
 
     def is_file(self) -> bool:
-        """
+        """!
         True if this is a file.
         
-        :return: True if file
+        @returns True if file
         """
         pass
 
     def is_directory(self) -> bool:
-        """
+        """!
         True if this is a directory.
         
-        :return: True if directory
+        @returns True if directory
         """
         pass
 
     def list_files(self) -> list[IFile]:
-        """
+        """!
         Get all files and directories under this directory.
         
-        :return: The files
+        @returns The files
         """
         pass
 
     def get_name(self) -> str:
-        """
+        """!
         Get the basename of the file.
         
-        :return: The base name
+        @returns The base name
         """
         pass
 
     def create_directory(self, dir_name: str) -> IFile:
-        """
+        """!
         Create the directory with the name provided under this directory.
         
-        :param dir_name: Directory name.
-        :return: The newly created directory.
+        @param dir_name: Directory name.
+        @returns The newly created directory.
         """
         pass
 
     def get_parent(self) -> IFile:
-        """
+        """!
         Get the parent directory of this file/directory.
         
-        :return: The parent directory.
+        @returns The parent directory.
         """
         pass
 
     def create_file(self, filename: str) -> IFile:
-        """
+        """!
         Create an empty file with the provided name.
         
-        :param filename: The name for the new file.
-        :return: The newly create file.
-        :raises IOError: Thrown if there is an IO error.
+        @param filename: The name for the new file.
+        @returns The newly create file.
+        @exception IOError: Thrown if there is an IO error.
         """
         pass
 
     def move(self, new_dir: IFile, options: IFile.MoveOptions | None = None) -> IFile:
-        """
+        """!
         Move this file to another directory.
         
-        :param new_dir:           The target directory.
-        :param options: The options
-        :return: The file after the move. Use this instance for any subsequent file operations.
+        @param new_dir:           The target directory.
+        @param options: The options
+        @returns The file after the move. Use this instance for any subsequent file operations.
         """
         pass
 
     def copy(self, new_dir: IFile, options: IFile.CopyOptions | None = None) -> IFile:
-        """
+        """!
         Copy this file to another directory.
         
-        :param new_dir:           The target directory.
-        :param options: The options
-        :return: The file after the copy. Use this instance for any subsequent file operations.
-        :raises IOError: Thrown if there is an IO error.
+        @param new_dir:           The target directory.
+        @param options: The options
+        @returns The file after the copy. Use this instance for any subsequent file operations.
+        @exception IOError: Thrown if there is an IO error.
         """
         pass
 
     def get_child(self, filename: str) -> IFile:
-        """
+        """!
         Get the file/directory matching the name provided under this directory.
         
-        :param filename: The name of the file or directory to match.
-        :return: The file that was matched.
+        @param filename: The name of the file or directory to match.
+        @returns The file that was matched.
         """
         pass
 
     def mkdir(self) -> bool:
-        """
+        """!
         Create a directory with the current filepath.
         
-        :return: True if directory created
+        @returns True if directory created
         """
         pass
 
     def reset(self):
-        """
+        """!
         Clear cached properties
         """
         pass
 
     @staticmethod
     def copy_file_contents(src: IFile, dest: IFile, options: IFile.CopyContentsOptions) -> bool:
-        """
+        """!
         Copy contents of a file to another file.
 
-        :param src:              The source directory
-        :param dest:             The target directory
-        :param options:     The options
-        :return: True if contents copied
-        :raises IOError: Thrown if there is an IO error.
+        @param src:              The source directory
+        @param dest:             The target directory
+        @param options:     The options
+        @returns True if contents copied
+        @exception IOError: Thrown if there is an IO error.
         """
         source: RandomAccessStream = src.get_input_stream()
         target: RandomAccessStream = dest.get_output_stream()
@@ -251,12 +251,12 @@ class IFile(ABC):
         return True
 
     def copy_recursively(self, dest: IFile, options: IFile.RecursiveCopyOptions | None = None):
-        """
+        """!
         Copy a directory recursively
 
-        :param dest: The destination directory
-        :param options: The options
-        :raises IOError: Thrown if there is an IO error.
+        @param dest: The destination directory
+        @param options: The options
+        @exception IOError: Thrown if there is an IO error.
         """
 
         if not options:
@@ -295,11 +295,11 @@ class IFile(ABC):
                 child.copy_recursively(new_file, options)
 
     def move_recursively(self, dest: IFile, options: IFile.RecursiveMoveOptions | None = None):
-        """
+        """!
         Move a directory recursively
 
-        :param dest:              The target directory
-        :param options: The options
+        @param dest:              The target directory
+        @param options: The options
         """
         if not options:
             options = IFile.RecursiveMoveOptions()
@@ -350,9 +350,9 @@ class IFile(ABC):
                 options.on_failed(self, Exception("Could not delete source directory"))
 
     def delete_recursively(self, options: IFile.RecursiveDeleteOptions | None = None):
-        """
+        """!
         Delete a directory recursively
-        :param options: The options
+        @param options: The options
         """
         if not options:
             options = IFile.RecursiveDeleteOptions()
@@ -375,18 +375,18 @@ class IFile(ABC):
 
     @staticmethod
     def auto_rename_file(file: IFile) -> str:
-        """
+        """!
         Get an auto generated copy of the name for a file.
         """
         return IFile.auto_rename(file.get_name())
 
     @staticmethod
     def auto_rename(filename: str) -> str:
-        """
+        """!
         Get an auto generated copy of a filename
 
-        :param filename:
-        :return: The new file name
+        @param filename:
+        @returns The new file name
         """
         ext: str = IFile.__get_extension(filename)
         filename_no_ext: str | None = None
@@ -414,42 +414,42 @@ class IFile(ABC):
             return ""
 
     class CopyOptions:
-        """
+        """!
         File copy options
         """
 
         new_filename: str | None = None
-        """
+        """!
         Override filename
         """
 
         on_progress_changed: Callable[[int, int], Any] | None = None
-        """
+        """!
         Callback where progress changed
         """
 
     class MoveOptions:
-        """
+        """!
         File move options
         """
 
         new_filename: str | None = None
-        """
+        """!
         Override filename
         """
 
         on_progress_changed: Callable[[int, int], Any] | None = None
-        """
+        """!
         Callback where progress changed
         """
 
     class RecursiveCopyOptions:
-        """
+        """!
         Directory copy options (recursively)
         """
 
         auto_rename: Callable[[IFile], str] | None = None
-        """
+        """!
         Callback when file with same name exists
         """
 
@@ -459,22 +459,22 @@ class IFile(ABC):
         """
 
         on_failed: Callable[[IFile, Exception], Any] | None = None
-        """
+        """!
         Callback when file changes
         """
 
         on_progress_changed: Callable[[IFile, int, int], Any] | None = None
-        """
+        """!
         Callback where progress changed
         """
 
     class RecursiveMoveOptions:
-        """
+        """!
         Directory move options (recursively)
         """
 
         auto_rename: Callable[[IFile], str] | None = None
-        """
+        """!
         Callback when file with the same name exists
         """
 
@@ -484,36 +484,36 @@ class IFile(ABC):
         """
 
         on_failed: Callable[[IFile, Exception], Any] | None = None
-        """
+        """!
         Callback when file failed
         """
 
         on_progress_changed: Callable[[IFile, int, int], Any] | None = None
-        """
+        """!
         Callback when progress changes
         """
 
     class RecursiveDeleteOptions:
-        """
+        """!
         Directory move options (recursively)
         """
 
         on_failed: Callable[[IFile, Exception], Any] | None = None
-        """
+        """!
         Callback when file failed
         """
 
         on_progress_changed: Callable[[IFile, int, int], Any] | None = None
-        """
+        """!
         Callback when progress changed
         """
 
     class CopyContentsOptions:
-        """
+        """!
         Directory move options (recursively)
         """
 
         on_progress_changed: Callable[[int, int], Any] | None = None
-        """
+        """!
         Callback when progress changed
         """

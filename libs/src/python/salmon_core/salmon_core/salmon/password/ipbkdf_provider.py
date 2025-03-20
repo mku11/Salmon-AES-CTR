@@ -42,11 +42,11 @@ class ISalmonPbkdfProvider(ABC):
 
     @staticmethod
     def get_pbkdf_algo_string(pbkdf_algo: PbkdfAlgo) -> str:
-        """
+        """!
         Get the PBKDF python cipher algorithm string.
 
-        :param pbkdf_algo: The PBKDF algorithm to be used
-        :return: The python cipher algorithm string. See cryptodome
+        @param pbkdf_algo: The PBKDF algorithm to be used
+        @returns The python cipher algorithm string. See cryptodome
         """
         match pbkdf_algo:
             case PbkdfAlgo.SHA256:
@@ -56,15 +56,15 @@ class ISalmonPbkdfProvider(ABC):
     @abstractmethod
     def get_key(self, password: str, salt: bytearray, iterations: int, output_bytes: int,
                 pbkdf_algo: PbkdfAlgo) -> bytearray:
-        """
+        """!
         Get a key derived from a text password.
 
-        :param password: The text password.
-        :param salt: The salt needs to be at least 24 bytes.
-        :param iterations: Iterations to use. Make sure you use a high number according to your hardware specs.
-        :param output_bytes: The length of the output key.
-        :param pbkdf_algo: The hash algorithm to use.
-        :return: The key.
+        @param password: The text password.
+        @param salt: The salt needs to be at least 24 bytes.
+        @param iterations: Iterations to use. Make sure you use a high number according to your hardware specs.
+        @param output_bytes: The length of the output key.
+        @param pbkdf_algo: The hash algorithm to use.
+        @returns The key.
         :raises: SalmonSecurityException
         """
         pass

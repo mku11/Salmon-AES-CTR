@@ -40,11 +40,11 @@ class TransformerFactory:
 
     @staticmethod
     def create(v_type: ProviderType) -> ICTRTransformer:
-        """
+        """!
         Create an encryption transformer implementation.
-        :param v_type: The supported provider type.
-        :return: The transformer.
-        :raises IntegrityException: Thrown when security error
+        @param v_type: The supported provider type.
+        @returns The transformer.
+        @exception IntegrityException: Thrown when security error
         """
         match v_type:
             case ProviderType.Default:

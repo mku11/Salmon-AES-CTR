@@ -38,11 +38,11 @@ class BitConverter:
 
     @staticmethod
     def to_bytes(value: int, length: int) -> bytearray:
-        """
+        """!
         Converts a long value to byte array.
-        :param value: The value to be converted.
-        :param length: The length of the byte array to be returned.
-        :return: A byte array representation of the value.
+        @param value: The value to be converted.
+        @param length: The length of the byte array to be returned.
+        @returns A byte array representation of the value.
         """
         buffer: bytearray = bytearray(length)
         for i in range(length - 1, -1, -1):
@@ -52,12 +52,12 @@ class BitConverter:
 
     @staticmethod
     def to_long(v_bytes: bytearray, index: int, length: int) -> int:
-        """
+        """!
         Converts a byte array to a long value. Little endian only.
-        :param v_bytes: The byte array to be converted.
-        :param index: The starting index of the data in the array that will be converted.
-        :param length: The length of the data that will be converted.
-        :return: The long value representation of the byte array.
+        @param v_bytes: The byte array to be converted.
+        @param index: The starting index of the data in the array that will be converted.
+        @param length: The length of the data that will be converted.
+        @returns The long value representation of the byte array.
         """
         num: int = 0
         mul: int = 1
@@ -68,10 +68,10 @@ class BitConverter:
 
     @staticmethod
     def to_hex(data: bytearray) -> str:
-        """
+        """!
         Convert a byte array to a hex representation.
-        :param data: The byte array to be converted.
-        :return: The hex string representation.
+        @param data: The byte array to be converted.
+        @returns The hex string representation.
         """
 
         sb = ""
@@ -81,10 +81,10 @@ class BitConverter:
 
     @staticmethod
     def hex_to_bytes(data: str) -> bytearray:
-        """
+        """!
        Convert a hex string to a byte array.
-       :param data: The hex string to be converted.
-       :return: The byte array converted from the string.
+       @param data: The hex string to be converted.
+       @returns The byte array converted from the string.
         """
         v_bytes: bytearray = bytearray(bytes.fromhex(data))
         return v_bytes

@@ -62,12 +62,12 @@ class AesFile(IVirtualFile):
 
     def __init__(self, real_file: IFile, drive: AesDrive | None = None,
                  enc_format: EncryptionFormat = EncryptionFormat.Salmon):
-        """
+        """!
         Provides a file handle that can be used to create encrypted files.
         Requires a virtual drive that supports the underlying filesystem, see PyFile implementation.
         
-        :param drive:    The file virtual system that will be used with file operations
-        :param real_file: The real file
+        @param drive:    The file virtual system that will be used with file operations
+        @param real_file: The real file
         """
 
         super().__init__(real_file, drive)
@@ -95,17 +95,17 @@ class AesFile(IVirtualFile):
 
     @synchronized
     def get_requested_chunk_size(self) -> int:
-        """
+        """!
         Return the current chunk size requested that will be used for integrity
         """
         return self.__req_chunk_size
 
     def get_file_chunk_size(self) -> int:
-        """
+        """!
         Get the file chunk size from the header.
         
-        :return: The chunk size.
-        :raises IOError: Throws exceptions if the format is corrupt.
+        @returns The chunk size.
+        @exception IOError: Throws exceptions if the format is corrupt.
         """
         header: Header | None = self.get_header()
         if header is None:
@@ -113,11 +113,11 @@ class AesFile(IVirtualFile):
         return header.get_chunk_size()
 
     def get_header(self) -> Header | None:
-        """
+        """!
         Get the custom {@link SalmonHeader} from this file.
         
-        :return: The header
-        :raises IOError: Thrown if there is an IO error.
+        @returns The header
+        @exception IOError: Thrown if there is an IO error.
         """
         if not self.exists():
             return None
@@ -139,13 +139,13 @@ class AesFile(IVirtualFile):
         return header
 
     def get_input_stream(self) -> AesStream:
-        """
+        """!
         Retrieves a AesStream that will be used for decrypting the file contents.
         
-        :return: The stream
-        :raises IOError: Thrown if there is an IO error.
-        :raises IntegrityException: Thrown when security error
-        :raises IntegrityException: Thrown when data are corrupt or tampered with.
+        @returns The stream
+        @exception IOError: Thrown if there is an IO error.
+        @exception IntegrityException: Thrown when security error
+        @exception IntegrityException: Thrown when data are corrupt or tampered with.
         """
         if not self.exists():
             raise IOError("File does not exist")
@@ -178,13 +178,13 @@ class AesFile(IVirtualFile):
 
     @synchronized
     def get_output_stream(self, nonce: bytearray | None = None) -> AesStream:
-        """
+        """!
         Get a {@link AesStream} for encrypting/writing contents to this file.
         
-        :param nonce: Nonce to be used for encryption. Note that each file should have
+        @param nonce: Nonce to be used for encryption. Note that each file should have
                      a unique nonce see {@link AesDrive#getNextNonce()}.
-        :return: The output stream.
-        :raises Exception:         """
+        @returns The output stream.
+        @exception Exception:         """
 
         # check if we have an existing iv in the header
         header: Header = self.get_header()
@@ -234,7 +234,7 @@ class AesFile(IVirtualFile):
         return stream
 
     def get_encryption_key(self) -> bytearray | None:
-        """
+        """!
         Returns the current encryption key
         """
         if self.__encryptionKey:
@@ -244,18 +244,18 @@ class AesFile(IVirtualFile):
         return None
 
     def set_encryption_key(self, encryption_key: bytearray | None):
-        """
+        """!
         Sets the encryption key
         
-        :param encryption_key: The AES encryption key to be used
+        @param encryption_key: The AES encryption key to be used
         """
         self.__encryptionKey = encryption_key
 
     def __get_real_file_header_data(self, real_file: IFile) -> bytearray:
-        """
+        """!
         Return the current header data that are stored in the file
         
-        :param real_file: The real file containing the data
+        @param real_file: The real file containing the data
         """
         real_stream: RandomAccessStream = self.__real_file.get_input_stream()
         header_data: bytearray = bytearray(self.__get_header_length())
@@ -264,7 +264,7 @@ class AesFile(IVirtualFile):
         return header_data
 
     def get_hash_key(self) -> bytearray | None:
-        """
+        """!
         Retrieve the current hash key that is used to encrypt / decrypt the file contents.
         """
         return self.__hash_key
@@ -274,8 +274,8 @@ class AesFile(IVirtualFile):
         """
         Enabled verification of file integrity during read() and write()
         
-        :param integrity: True if enable integrity verification
-        :param hash_key:   The hash key to be used for verification
+        @param integrity: True if enable integrity verification
+        @param hash_key:   The hash key to be used for verification
         """
         header: Header = self.get_header()
         if not header and integrity:
@@ -289,11 +289,11 @@ class AesFile(IVirtualFile):
 
     def set_apply_integrity(self, integrity: bool, hash_key: bytearray | None = None,
                             request_chunk_size: int = 0):
-        """
+        """!
         Apply integrity when writing to file
-        :param integrity: True to apply integrity
-        :param hash_key: The hash key
-        :param request_chunk_size: 0 use default file chunk. A positive number to specify integrity chunks.
+        @param integrity: True to apply integrity
+        @param hash_key: The hash key
+        @param request_chunk_size: 0 use default file chunk. A positive number to specify integrity chunks.
         """
         if not hash_key:
             hash_key = self.__hash_key
@@ -318,32 +318,32 @@ class AesFile(IVirtualFile):
         self.__hash_key = hash_key
 
     def set_allow_overwrite(self, value: bool):
-        """
+        """!
         Warning! Allow overwriting on a current stream. Overwriting is not a good idea because it will
         re-use the same IV.
         This is not recommended if you use the stream on storing files or generally data if prior version can
         be inspected by others.
         You should only use this setting for initial encryption with parallel streams and not for overwriting!
         
-        :param value: True to allow overwriting operations
+        @param value: True to allow overwriting operations
         """
         self.__overwrite = value
 
     def __get_chunk_size_length(self) -> int:
-        """
+        """!
         Returns the file chunk size
         """
         return Generator.CHUNK_SIZE_LENGTH
 
     def __get_header_length(self) -> int:
-        """
+        """!
         Returns the length of the header in bytes
         """
         return Generator.MAGIC_LENGTH + Generator.VERSION_LENGTH + self.__get_chunk_size_length() \
             + Generator.NONCE_LENGTH
 
     def get_file_nonce(self) -> bytearray | None:
-        """
+        """!
         Returns the initial vector that is used for encryption / decryption
         """
         header: Header | None = self.get_header()
@@ -352,40 +352,40 @@ class AesFile(IVirtualFile):
         return self.get_header().get_nonce()
 
     def set_requested_nonce(self, nonce: bytearray):
-        """
+        """!
         Set the nonce for encryption/decryption for this file.
         
-        :param nonce: Nonce to be used.
-        :raises IntegrityException: Thrown when security error
+        @param nonce: Nonce to be used.
+        @exception IntegrityException: Thrown when security error
         """
         if self.__drive:
             raise SecurityException("Nonce is already set by the drive")
         self.__requested_nonce = nonce
 
     def get_requested_nonce(self) -> bytearray | None:
-        """
+        """!
         Get the nonce that is used for encryption/decryption of this file.
         
-        :return: The requested nonce
+        @returns The requested nonce
         """
         return self.__requested_nonce
 
     def get_block_size(self) -> int:
-        """
+        """!
         Return the AES block size for encryption / decryption
         """
         return Generator.BLOCK_SIZE
 
     def get_children_count(self) -> int:
-        """
+        """!
         Get the count of files and subdirectories
         
-        :return: The children count
+        @returns The children count
         """
         return self.__real_file.get_children_count()
 
     def list_files(self) -> list[AesFile]:
-        """
+        """!
         Lists files and directories under this directory
         """
         files: list[IFile] = self.__real_file.list_files()
@@ -397,15 +397,15 @@ class AesFile(IVirtualFile):
         return salmon_files
 
     def get_child(self, filename: str) -> AesFile | None:
-        """
+        """!
         Get a child with this filename.
         
-        :param filename: The filename to search for
-        :return: The child file
-        :raises IntegrityException: Thrown when security error
-        :raises IntegrityException: Thrown when data are corrupt or tampered with.
-        :raises IOError: Thrown if there is an IO error.
-        :raises AuthException: Thrown when there is a failure in the nonce sequencer.
+        @param filename: The filename to search for
+        @returns The child file
+        @exception IntegrityException: Thrown when security error
+        @exception IntegrityException: Thrown when data are corrupt or tampered with.
+        @exception IOError: Thrown if there is an IO error.
+        @exception AuthException: Thrown when there is a failure in the nonce sequencer.
         """
         files: list[AesFile] = self.list_files()
         for file in files:
@@ -415,12 +415,12 @@ class AesFile(IVirtualFile):
 
     def create_directory(self, dir_name: str, key: bytearray | None = None,
                          dir_name_nonce: bytearray | None = None) -> AesFile:
-        """
+        """!
         Creates a directory under this directory
         
-        :param dir_name:      The name of the directory to be created
-        :param key:          The key that will be used to encrypt the directory name
-        :param dir_name_nonce: The nonce to be used for encrypting the directory name
+        @param dir_name:      The name of the directory to be created
+        @param key:          The key that will be used to encrypt the directory name
+        @param dir_name_nonce: The nonce to be used for encrypting the directory name
         """
         if self.__drive is None:
             raise SecurityException("Need to pass the key and dir_name_nonce nonce if not using a drive")
@@ -430,35 +430,35 @@ class AesFile(IVirtualFile):
         return AesFile(real_dir, self.__drive)
 
     def get_real_file(self) -> IFile:
-        """
+        """!
         Return the real file
         """
         return self.__real_file
 
     def is_file(self) -> bool:
-        """
+        """!
         Returns True if this is a file
         """
         return self.__real_file.is_file()
 
     def is_directory(self) -> bool:
-        """
+        """!
         Returns True if this is a directory
         """
         return self.__real_file.is_directory()
 
     def get_path(self) -> str:
-        """
+        """!
         Return the path of the real file stored
         """
         real_path: str = self.__real_file.get_display_path()
         return self.__get_path(real_path)
 
     def __get_path(self, real_path: str) -> str:
-        """
+        """!
         Returns the virtual path for the drive and the file provided
         
-        :param real_path: The path of the real file
+        @param real_path: The path of the real file
         """
         relative_path: str = self.__get_relative_path(real_path)
         path: str = ""
@@ -471,16 +471,16 @@ class AesFile(IVirtualFile):
         return path
 
     def get_real_path(self) -> str:
-        """
+        """!
         Return the path of the real file
         """
         return self.__real_file.get_path()
 
     def __get_relative_path(self, real_path: str) -> str:
-        """
+        """!
         Return the virtual relative path of the file belonging to a drive
         
-        :param real_path: The path of the real file
+        @param real_path: The path of the real file
         """
         if not self.__drive:
             return self.get_real_file().get_name()
@@ -492,7 +492,7 @@ class AesFile(IVirtualFile):
         return real_path
 
     def get_name(self) -> str:
-        """
+        """!
         Returns the basename for the file
         """
         if self.__baseName:
@@ -505,7 +505,7 @@ class AesFile(IVirtualFile):
         return _baseName
 
     def get_parent(self) -> AesFile | None:
-        """
+        """!
         Returns the virtual parent directory
         """
         try:
@@ -521,25 +521,25 @@ class AesFile(IVirtualFile):
         return v_dir
 
     def delete(self):
-        """
+        """!
         Delete this file.
         """
         self.__real_file.delete()
 
     def mkdir(self):
-        """
+        """!
         Create this directory. Currently Not Supported
         """
         raise NotImplemented()
 
     def get_last_date_modified(self) -> int:
-        """
+        """!
         Returns the last modified date in milliseconds
         """
         return self.__real_file.get_last_date_modified()
 
     def get_length(self) -> int:
-        """
+        """!
         Return the virtual size of the file excluding the header and hash signatures.
         """
         r_size: int = self.__real_file.get_length()
@@ -548,7 +548,7 @@ class AesFile(IVirtualFile):
         return r_size - self.__get_header_length() - self.__get_hash_total_bytes_length()
 
     def __get_hash_total_bytes_length(self) -> int:
-        """
+        """!
         Returns the hash total bytes occupied by signatures
         """
         # file does not support integrity
@@ -570,13 +570,13 @@ class AesFile(IVirtualFile):
     #  and throw an Exception though this could be an expensive operation
     def create_file(self, real_filename: str, key: bytearray | None = None, file_name_nonce: bytearray | None = None,
                     file_nonce: bytearray | None = None) -> AesFile:
-        """
+        """!
         Create a file under this directory
         
-        :param real_filename:  The real file name of the file (encrypted)
-        :param key:           The key that will be used for encryption
-        :param file_name_nonce: The nonce for the encrypting the filename
-        :param file_nonce:     The nonce for the encrypting the file contents
+        @param real_filename:  The real file name of the file (encrypted)
+        @param key:           The key that will be used for encryption
+        @param file_name_nonce: The nonce for the encrypting the filename
+        @param file_nonce:     The nonce for the encrypting the file contents
         """
 
         if self.__drive is None and (key is None or file_name_nonce is None or file_nonce is None):
@@ -595,11 +595,11 @@ class AesFile(IVirtualFile):
         return salmon_file
 
     def rename(self, new_filename: str, nonce: bytearray = None):
-        """
+        """!
         Rename the virtual file name
         
-        :param new_filename: The new filename this file will be renamed to
-        :param nonce:       The nonce to use
+        @param new_filename: The new filename this file will be renamed to
+        @param nonce:       The nonce to use
         """
 
         if self.__drive is None and (self.__encryptionKey is None or self.__requested_nonce is None):
@@ -611,7 +611,7 @@ class AesFile(IVirtualFile):
         _baseName = None
 
     def exists(self) -> bool:
-        """
+        """!
         Returns True if this file exists
         """
         if self.__real_file is None:
@@ -619,22 +619,22 @@ class AesFile(IVirtualFile):
         return self.__real_file.exists()
 
     def __get_decrypted_filename(self, filename: str) -> str:
-        """
+        """!
         Return the decrypted filename of a real filename
         
-        :param filename: The filename of a real file
+        @param filename: The filename of a real file
         """
         if self.__drive is None and (self.__encryptionKey is None or self.__requested_nonce is None):
             SecurityException("Need to use a drive or pass key and nonce")
         return self._get_decrypted_filename(filename, None, None)
 
     def _get_decrypted_filename(self, filename: str, key: bytearray | None, nonce: bytearray | None) -> str:
-        """
+        """!
         Return the decrypted filename of a real filename
         
-        :param filename: The filename of a real file
-        :param key:      The encryption key if the file doesn't belong to a drive
-        :param nonce:    The nonce if the file doesn't belong to a drive
+        @param filename: The filename of a real file
+        @param key:      The encryption key if the file doesn't belong to a drive
+        @param nonce:    The nonce if the file doesn't belong to a drive
         """
         rfilename: str = filename.replace("-", "/")
         if self.__drive and nonce:
@@ -650,12 +650,12 @@ class AesFile(IVirtualFile):
         return decfilename
 
     def _get_encrypted_filename(self, filename: str, key: bytearray | None, nonce: bytearray | None) -> str:
-        """
+        """!
         Return the encrypted filename of a virtual filename
         
-        :param filename: The virtual filename
-        :param key:      The encryption key if the file doesn't belong to a drive
-        :param nonce:    The nonce if the file doesn't belong to a drive
+        @param filename: The virtual filename
+        @param key:      The encryption key if the file doesn't belong to a drive
+        @param nonce:    The nonce if the file doesn't belong to a drive
         """
         if self.__drive and nonce:
             raise SecurityException("Filename nonce is already set by the drive")
@@ -670,58 +670,58 @@ class AesFile(IVirtualFile):
         return encrypted_path
 
     def get_drive(self) -> AesDrive:
-        """
+        """!
         Get the drive.
         
-        :return: The drive
+        @returns The drive
         """
         return self.__drive
 
     def set_tag(self, tag: object):
-        """
+        """!
         Set the tag for this file.
         
-        :param tag:         """
+        @param tag:         """
         self.__tag = tag
 
     def get_tag(self) -> object:
-        """
+        """!
         Get the file tag.
         
-        :return: The file tag.
+        @returns The file tag.
         """
         return self.__tag
 
     def move(self, v_dir: AesFile, options: IFile.MoveOptions | None = None) -> AesFile:
-        """
+        """!
         Move file to another directory.
         
-        :param v_dir:                Target directory.
-        :param options: The options
-        :return: The new file
-        :raises IOError: Thrown if there is an IO error.
+        @param v_dir:                Target directory.
+        @param options: The options
+        @returns The new file
+        @exception IOError: Thrown if there is an IO error.
         """
         new_real_file: IFile = self.__real_file.move(v_dir.__real_file, options)
         return AesFile(new_real_file, self.__drive)
 
     def copy(self, v_dir: AesFile, options: IFile.CopyOptions | None = None) -> AesFile:
-        """
+        """!
         Copy a file to another directory.
         
-        :param v_dir:                Target directory.
-        :param options: The options
-        :return: The new file
-        :raises IOError: Thrown if there is an IO error.
+        @param v_dir:                Target directory.
+        @param options: The options
+        @returns The new file
+        @exception IOError: Thrown if there is an IO error.
         """
         new_real_file: IFile = self.__real_file.copy(v_dir.__real_file, options)
         return AesFile(new_real_file, self.__drive)
 
     def copy_recursively(self, dest: AesFile, options: IVirtualFile.VirtualRecursiveCopyOptions | None = None):
-        """
+        """!
         Copy a directory recursively
         
-        :param dest: Destination directory
-        :param options: The options
+        @param dest: Destination directory
+        @param options: The options
         """
         if not options:
             options = IFile.RecursiveCopyOptions()
@@ -743,11 +743,11 @@ class AesFile(IVirtualFile):
         self.__real_file.copy_recursively(dest.__real_file, copy_options)
 
     def move_recursively(self, dest: AesFile, options: IVirtualFile.VirtualRecursiveMoveOptions | None = None):
-        """
+        """!
         Move a directory recursively
         
-        :param dest: The destination directory
-        :param options: The options
+        @param dest: The destination directory
+        @param options: The options
         """
 
         if not options:
@@ -771,9 +771,9 @@ class AesFile(IVirtualFile):
         self.__real_file.move_recursively(dest.get_real_file(), move_options)
 
     def delete_recursively(self, options: IVirtualFile.VirtualRecursiveDeleteOptions | None = None):
-        """
+        """!
         Delete directory (Recursively)
-        :param options: The options
+        @param options: The options
         """
         if not options:
             options = IVirtualFile.VirtualRecursiveDeleteOptions()
@@ -788,7 +788,7 @@ class AesFile(IVirtualFile):
         self.get_real_file().delete_recursively(delete_options)
 
     def get_minimum_part_size(self) -> int:
-        """
+        """!
         Get the minimum size a file can be split for parallel processing
         """
         curr_chunk_size = self.get_file_chunk_size()
@@ -800,10 +800,10 @@ class AesFile(IVirtualFile):
 
     @staticmethod
     def auto_rename(file: AesFile) -> str:
-        """
+        """!
         Default auto rename a file
-        :param file: The file
-        :returns The new file name
+        @param file: The file
+        @returns The new file name
         """
         try:
             return AesFile.auto_rename_file(file)
@@ -815,7 +815,7 @@ class AesFile(IVirtualFile):
 
     @staticmethod
     def auto_rename_file(file: AesFile) -> str:
-        """
+        """!
         <summary>
         Get an auto generated copy of the name for the file.
         </summary>

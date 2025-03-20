@@ -42,120 +42,120 @@ class RandomAccessStream(ABC):
 
     @abstractmethod
     def can_read(self) -> bool:
-        """
+        """!
         True if the stream is readable.
-        :return: True if readable
+        @returns True if readable
         """
         pass
 
     @abstractmethod
     def can_write(self) -> bool:
-        """
+        """!
         True if the stream is writable.
-        :return: True if writable
+        @returns True if writable
         """
         pass
 
     @abstractmethod
     def can_seek(self) -> bool:
-        """
+        """!
         True if the stream is seekable.
-        :return: True if seekable
+        @returns True if seekable
         """
         pass
 
     @abstractmethod
     def get_length(self) -> int:
-        """
+        """!
         Get the length of the stream.
-        :return: The length
+        @returns The length
         """
         pass
 
     @abstractmethod
     def get_position(self) -> int:
-        """
+        """!
         Get the current position of the stream.
-        :return: The current position.
-        :raises IOError: Thrown if there is an IO error.
+        @returns The current position.
+        @exception IOError: Thrown if there is an IO error.
         """
         pass
 
     @abstractmethod
     def set_position(self, value: int):
-        """
+        """!
         Change the current position of the stream.
-        :param value: The new position.
-        :raises IOError: Thrown if there is an IO error.
+        @param value: The new position.
+        @exception IOError: Thrown if there is an IO error.
         """
         pass
 
     @abstractmethod
     def set_length(self, value: int):
-        """
+        """!
         Set the length of this stream.
-        :param value: The length.
-        :raises IOError: Thrown if there is an IO error.
+        @param value: The length.
+        @exception IOError: Thrown if there is an IO error.
         """
         pass
 
     @abstractmethod
     def read(self, buffer: bytearray, offset: int, count: int) -> int:
-        """
+        """!
         Read from the stream
-        :param buffer: The buffer to read into
-        :param offset: The offset to start reading into
-        :param count: The number of bytes that were read. If the stream reached the end return -1.
-        :return: The bytes read
-        :raises IOError: Thrown if there is an IO error.
+        @param buffer: The buffer to read into
+        @param offset: The offset to start reading into
+        @param count: The number of bytes that were read. If the stream reached the end return -1.
+        @returns The bytes read
+        @exception IOError: Thrown if there is an IO error.
         """
         pass
 
     @abstractmethod
     def write(self, buffer: bytearray, offset: int, count: int):
-        """
+        """!
         Write the contents of the buffer to this stream.
-        :param buffer: The buffer to read the contents from.
-        :param offset: The position the reading will start from.
-        :param count: The count of bytes to be read from the buffer.
-        :raises IOError: Thrown if there is an IO error.
+        @param buffer: The buffer to read the contents from.
+        @param offset: The position the reading will start from.
+        @param count: The count of bytes to be read from the buffer.
+        @exception IOError: Thrown if there is an IO error.
         """
         pass
 
     @abstractmethod
     def seek(self, position: int, origin: SeekOrigin) -> int:
-        """
+        """!
         Seek to a specific position in the stream.
-        :param position: The new position.
-        :param origin: The origin type.
-        :return: The position after the seeking was complete.
-        :raises IOError: Thrown if there is an IO error.
+        @param position: The new position.
+        @param origin: The origin type.
+        @returns The position after the seeking was complete.
+        @exception IOError: Thrown if there is an IO error.
         """
         pass
 
     @abstractmethod
     def flush(self):
-        """
+        """!
         Flush buffers.
         """
         pass
 
     @abstractmethod
     def close(self):
-        """
+        """!
         Close the stream and associated resources.
-        :raises IOError: Thrown if there is an IO error.
+        @exception IOError: Thrown if there is an IO error.
         """
         pass
 
     def copy_to(self, stream: RandomAccessStream, buffer_size: int | None = 0,
                 on_progress_changed: Callable[[int, int], Any] | None = None):
-        """
+        """!
         Write stream contents to another stream.
-        :param stream: The target stream.
-        :param buffer_size: The buffer size to be used when copying.
-        :param on_progress_changed: The listener to notify when progress changes.
-        :raises IOError: Thrown if there is an IO error.
+        @param stream: The target stream.
+        @param buffer_size: The buffer size to be used when copying.
+        @param on_progress_changed: The listener to notify when progress changes.
+        @exception IOError: Thrown if there is an IO error.
         """
         if not self.can_read():
             raise IOError("Target stream not readable")
@@ -176,7 +176,7 @@ class RandomAccessStream(ABC):
         self.set_position(pos)
 
     class SeekOrigin(Enum):
-        """
+        """!
         Used to identify the start offset for seeking to a stream.
         """
 

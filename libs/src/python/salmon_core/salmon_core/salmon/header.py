@@ -73,47 +73,47 @@ class Header:
         """
 
     def get_nonce(self) -> bytearray:
-        """
+        """!
         Get the nonce.
-        :return: The nonce
+        @returns The nonce
         """
         return self.__nonce
 
     def get_chunk_size(self) -> int:
-        """
+        """!
         Get the chunk size.
-        :return: Chunk size
+        @returns Chunk size
         """
         return self.__chunk_size
 
     def get_header_data(self) -> bytearray:
-        """
+        """!
         Get the raw header data.
-        :return: Header data
+        @returns Header data
         """
         return self.__header_data
 
     def get_version(self) -> int:
-        """
+        """!
         Get the Salmon format  version
-        :return: The format version
+        @returns The format version
         """
         return self.__version
 
     def get_magic_bytes(self) -> bytearray:
-        """
+        """!
         Get the magic bytes
-        :return: Magic bytes
+        @returns Magic bytes
         """
         return self.__magic_bytes
 
     @staticmethod
     def read_header_data(stream: RandomAccessStream) -> Header | None:
-        """
+        """!
         Parse the header data from the stream
-        :param stream: The stream.
-        :return: The header
-        :raises IOError: Thrown if there is an IO error.
+        @param stream: The stream.
+        @returns The header
+        @exception IOError: Thrown if there is an IO error.
         """
         if stream.get_length() == 0:
             return None
@@ -143,12 +143,12 @@ class Header:
 
     @staticmethod
     def write_header(stream: RandomAccessStream, nonce: bytearray, chunk_size: int) -> Header:
-        """
+        """!
         Write the header to the stream
-        :param stream: The stream
-        :param nonce: The nonce
-        :param chunk_size: The chunk size
-        :return The header
+        @param stream: The stream
+        @param nonce: The nonce
+        @param chunk_size: The chunk size
+        @returns The header
         """
         magic_bytes: bytearray = Generator.get_magic_bytes()
         version: int = Generator.get_version()
@@ -176,22 +176,22 @@ class Header:
         return header
 
     def set_chunk_size(self, chunk_size: int):
-        """
+        """!
         Set the header chunk size
-        :param chunk_size: The chunk size
+        @param chunk_size: The chunk size
         """
         self.__chunk_size = chunk_size
 
     def set_version(self, version: int):
-        """
+        """!
         Set the Salmon format version
-        :param version: The format version
+        @param version: The format version
         """
         self.__version = version
 
     def set_nonce(self, nonce: bytearray):
-        """
+        """!
         Set the nonce to be used.
-        :param nonce: The nonce
+        @param nonce: The nonce
         """
         self.__nonce = nonce

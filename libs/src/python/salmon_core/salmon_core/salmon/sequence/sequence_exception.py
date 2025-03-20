@@ -33,7 +33,7 @@ class SequenceException(Exception):
     """
 
     def __init__(self, msg: str):
-        """
+        """!
         Construct an exception with a specific message.
-        :param msg:         """
+        @param msg:         """
         super().__init__(msg)

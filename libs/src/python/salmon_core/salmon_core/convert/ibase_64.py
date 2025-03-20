@@ -38,18 +38,18 @@ class IBase64(ABC):
 
     @abstractmethod
     def decode(self, text: str) -> bytearray:
-        """
+        """!
         Decode a Base64 encoded string into a byte array.
-        :param text: String to be decoded
-        :return: Byte array of decoded data.
+        @param text: String to be decoded
+        @returns Byte array of decoded data.
         """
         pass
 
     @abstractmethod
     def encode(self, data: bytearray) -> str:
-        """
+        """!
         Encode a byte array into a Base64 encoded string.
-        :param data: Byte array to be encoded
-        :return: String of encoded data.
+        @param data: Byte array to be encoded
+        @returns String of encoded data.
         """
         pass

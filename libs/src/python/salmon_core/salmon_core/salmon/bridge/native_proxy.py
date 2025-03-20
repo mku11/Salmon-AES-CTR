@@ -48,9 +48,9 @@ class NativeProxy(INativeProxy):
 
     @staticmethod
     def set_library_path(library_path: str):
-        """
+        """!
         Set the native library path
-        :param library_path: The path
+        @param library_path: The path
         """
         NativeProxy.__library_path = library_path
 
@@ -59,15 +59,15 @@ class NativeProxy(INativeProxy):
         return (ctypes.c_char * len(v_bytes)).from_buffer(bytearray(v_bytes))
 
     def salmon_init(self, aes_impl: int):
-        """
+        """!
         Proxy Init the native code with AES implementation, and hash length options.
-        :param aes_impl:         The AES implementation type see class ProviderType
+        @param aes_impl:         The AES implementation type see class ProviderType
         """
         self._load_library()
         NativeProxy.__init(aes_impl)
 
     def _load_library(self):
-        """
+        """!
         Load the native library
         """
         if NativeProxy.__loaded:
@@ -92,10 +92,10 @@ class NativeProxy(INativeProxy):
         NativeProxy.__loaded = True
 
     def salmon_expand_key(self, key: bytearray, expanded_key: bytearray):
-        """
+        """!
         Proxy Key schedule algorithm for expanding the 32 byte key to 240 bytes required
-        :param key: The key
-        :param expanded_key: The expanded key
+        @param key: The key
+        @param expanded_key: The expanded key
         """
         c_key = NativeProxy.__get_char_array(key)
         c_expanded_key = NativeProxy.__get_char_array(expanded_key)
@@ -105,16 +105,16 @@ class NativeProxy(INativeProxy):
     def salmon_transform(self, key: bytearray, counter: bytearray,
                          src_buffer: bytearray, src_offset: int, dest_buffer: bytearray, dest_offset: int,
                          count: int) -> int:
-        """
+        """!
         Proxy Transform the input byte array using AES 256 using encryption or decryption mode.
-        :param key: The encryption key
-        :param counter: The counter
-        :param src_buffer: The source buffer
-        :param src_offset: The source buffer offset
-        :param dest_buffer: The destination buffer
-        :param dest_offset: The destination buffer offset
-        :param count: The number of bytes to transform
-        :return: The number of bytes transformed
+        @param key: The encryption key
+        @param counter: The counter
+        @param src_buffer: The source buffer
+        @param src_offset: The source buffer offset
+        @param dest_buffer: The destination buffer
+        @param dest_offset: The destination buffer offset
+        @param count: The number of bytes to transform
+        @returns The number of bytes transformed
         """
 
         c_key = NativeProxy.__get_char_array(key)

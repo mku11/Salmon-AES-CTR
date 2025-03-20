@@ -35,13 +35,13 @@ class IHashProvider(ABC):
 
     @abstractmethod
     def calc(self, key: bytearray, buffer: bytearray, offset: int, count: int) -> bytearray:
-        """
+        """!
         Calculate the hash for the data provided.
-        :param key: The key to be used for hashing.
-        :param buffer: The buffer to read the data from.
-        :param offset: The position that reading will start from.
-        :param count: The count of bytes to read from.
-        :return: The calculated hash.
-        :raises IntegrityException: thrown if hash cannot be calculated
+        @param key: The key to be used for hashing.
+        @param buffer: The buffer to read the data from.
+        @param offset: The position that reading will start from.
+        @param count: The count of bytes to read from.
+        @returns The calculated hash.
+        @exception IntegrityException: thrown if hash cannot be calculated
         """
         pass

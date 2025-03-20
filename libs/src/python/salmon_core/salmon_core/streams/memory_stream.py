@@ -41,13 +41,13 @@ class MemoryStream(RandomAccessStream):
     """
 
     def __init__(self, v_bytes: bytearray | None = None):
-        """
+        """!
         Create a memory stream backed by an existing byte-array.
-        :param v_bytes: The buffer to use
+        @param v_bytes: The buffer to use
         """
 
         self.__bytes: bytearray | None = None
-        """
+        """!
         Buffer to store the data. This can be provided via the constructor.
         """
 
@@ -75,63 +75,63 @@ class MemoryStream(RandomAccessStream):
         self.__capacity = len(v_bytes)
 
     def can_read(self) -> bool:
-        """
-        :return: Always True.
+        """!
+        @returns Always True.
         """
         return True
 
     def can_write(self) -> bool:
-        """
-        :return: Always True.
+        """!
+        @returns Always True.
         """
         return True
 
     def can_seek(self) -> bool:
-        """
-        :return: Always True.
+        """!
+        @returns Always True.
         """
         return True
 
     def get_length(self) -> int:
-        """
+        """!
         
-        :return: The length of the stream.
+        @returns The length of the stream.
         """
         return self.__length
 
     def get_position(self) -> int:
-        """
+        """!
         
-        :return: The position of the stream.
-        :raises IOError: Thrown if there is an IO error.
+        @returns The position of the stream.
+        @exception IOError: Thrown if there is an IO error.
         """
         return self.__position
 
     def set_position(self, value: int):
-        """
+        """!
         Changes the current position of the stream. For more options use seek() method.
-        :param value: The new position of the stream.
-        :raises IOError: Thrown if there is an IO error.
+        @param value: The new position of the stream.
+        @exception IOError: Thrown if there is an IO error.
         """
         self.__position = value
 
     def set_length(self, value: int):
-        """
+        """!
         Changes the length of the stream. The capacity of the stream might also change
         if the value is lesser than the current capacity.
-        :param value:         :raises IOError: Thrown if there is an IO error.
+        @param value:         @exception IOError: Thrown if there is an IO error.
         """
         self.__check_and_resize(value)
         self.__capacity = value
 
     def read(self, buffer: bytearray, offset: int, count: int) -> int:
-        """
+        """!
         Read a sequence of bytes into the provided buffer.
-        :param buffer: The buffer to write the bytes that are read from the stream.
-        :param offset: The offset of the buffer that will be used to write the bytes.
-        :param count: The length of the bytes that can be read from the stream and written to the buffer.
-        :return: The bytes read
-        :raises IOError: Thrown if there is an IO error.
+        @param buffer: The buffer to write the bytes that are read from the stream.
+        @param offset: The offset of the buffer that will be used to write the bytes.
+        @param count: The length of the bytes that can be read from the stream and written to the buffer.
+        @returns The bytes read
+        @exception IOError: Thrown if there is an IO error.
         """
         bytes_read: int = int(min(self.__length - self.get_position(), count))
         buffer[offset:offset + bytes_read] = self.__bytes[self.__position:self.__position + bytes_read]
@@ -141,21 +141,21 @@ class MemoryStream(RandomAccessStream):
         return bytes_read
 
     def write(self, buffer: bytearray, offset: int, count: int):
-        """
+        """!
         Write a sequence of bytes into the stream.
-        :param buffer: The buffer that the bytes will be read from.
-        :param offset: The position offset that will be used to read from the buffer.
-        :param count: The number of bytes that will be written to the stream.
-        :raises IOError: Thrown if there is an IO error.
+        @param buffer: The buffer that the bytes will be read from.
+        @param offset: The position offset that will be used to read from the buffer.
+        @param count: The number of bytes that will be written to the stream.
+        @exception IOError: Thrown if there is an IO error.
         """
         self.__check_and_resize(self.__position + count)
         self.__bytes[self.__position:self.__position + count] = buffer[offset:offset + count]
         self.set_position(self.get_position() + count)
 
     def __check_and_resize(self, new_length: int):
-        """
+        """!
         Check if there is no more space in the byte array and increase the capacity.
-        :param new_length: The new length of the stream.
+        @param new_length: The new length of the stream.
         """
         if self.__capacity < new_length:
             new_capacity: int = self.__capacity + MemoryStream.__CAPACITY_INCREMENT * (
@@ -169,12 +169,12 @@ class MemoryStream(RandomAccessStream):
         self.__length = new_length
 
     def seek(self, offset: int, origin: RandomAccessStream.SeekOrigin) -> int:
-        """
+        """!
         Seek to a position in the stream.
-        :param offset: The offset
-        :param origin: Possible Values: Begin, Current, End
-        :return: The current position after seeking
-        :raises IOError: Thrown if there is an IO error.
+        @param offset: The offset
+        @param origin: Possible Values: Begin, Current, End
+        @returns The current position after seeking
+        @exception IOError: Thrown if there is an IO error.
         """
         n_pos: int = 0
         if origin == RandomAccessStream.SeekOrigin.Begin:
@@ -188,21 +188,21 @@ class MemoryStream(RandomAccessStream):
         return self.get_position()
 
     def flush(self):
-        """
+        """!
         Flush the stream. Not-Applicable for memory stream.
         """
         pass
 
     def close(self):
-        """
+        """!
         Close any resources the stream is using. Not-Applicable for memory stream.
         """
         pass
 
     def to_array(self) -> bytearray:
-        """
+        """!
         Convert the stream to an array:
-        :return: A byte array containing the data from the stream.
+        @returns A byte array containing the data from the stream.
         """
         n_bytes: bytearray = bytearray(self.__length)
         n_bytes[0:self.__length] = self.__bytes[0:self.__length]

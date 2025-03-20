@@ -39,7 +39,7 @@ class DriveKey:
         self.__iterations: int = 0
 
     def clear(self):
-        """
+        """!
         Clear the properties from memory.
         """
         if self.__driveKey:
@@ -56,51 +56,51 @@ class DriveKey:
         self.__iterations = 0
 
     def get_drive_key(self) -> bytearray | None:
-        """
+        """!
         Function returns the encryption key that will be used to encrypt/decrypt the files
         """
         return self.__driveKey
 
     def get_hash_key(self) -> bytearray | None:
-        """
+        """!
         Function returns the hash key that will be used to sign the file chunks
         """
         return self.__hash_key
 
     def set_drive_key(self, drive_key: bytearray):
-        """
+        """!
         Set the drive key.
-        :param drive_key:         """
+        @param drive_key:         """
         self.__driveKey = drive_key
 
     def set_hash_key(self, hash_key: bytearray):
-        """
+        """!
         Set the hash key.
-        :param hash_key:         """
+        @param hash_key:         """
         self.__hash_key = hash_key
 
     def get_master_key(self) -> bytearray:
-        """
+        """!
         Get the master key.
-        :return: The master key
+        @returns The master key
         """
         return self.__masterKey
 
     def set_master_key(self, master_key: bytearray):
-        """
+        """!
         Set the master key.
-        :param master_key:         """
+        @param master_key:         """
         self.__masterKey = master_key
 
     def get_iterations(self) -> int:
-        """
+        """!
         Get the number of iterations for the master key derivation.
-        :return: The iterations
+        @returns The iterations
         """
         return self.__iterations
 
     def set_iterations(self, iterations: int):
-        """
+        """!
         Set the number of iterations for the master key derivation.
-        :param iterations:         """
+        @param iterations:         """
         self.__iterations = iterations

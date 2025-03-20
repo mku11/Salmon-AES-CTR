@@ -156,13 +156,13 @@ class AesFileImporter:
     """
 
     def __init__(self, buffer_size: int = 0, threads: int = 1, multi_cpu: bool = False):
-        """
+        """!
         Constructs a file importer that can be used to import files to the drive
         
-        :param buffer_size: Buffer size to be used when encrypting files.
+        @param buffer_size: Buffer size to be used when encrypting files.
                           If using integrity self value has to be a multiple of the Chunk size.
                           If not using integrity it should be a multiple of the AES block size for better performance
-        :param threads: The threads to use
+        @param threads: The threads to use
         :multi_cpu:  Utilize multiple cpus. Windows does not have a fast fork() so it has a very slow startup
         """
 
@@ -192,12 +192,12 @@ class AesFileImporter:
         """
 
         self.__lastException: Exception | None = None
-        """
+        """!
         Last exception occurred.
         """
 
         self.__executor: ThreadPoolExecutor | ProcessPoolExecutor | None = None
-        """
+        """!
         The executor to be used for running parallel exports.
         """
 
@@ -212,7 +212,7 @@ class AesFileImporter:
                 self.__threads)
 
     def stop(self):
-        """
+        """!
         Stops all current importing tasks
         """
         self.__stopped[0] = True
@@ -220,21 +220,21 @@ class AesFileImporter:
         self.__shm_cancel.buf[0] = 1
 
     def is_running(self) -> bool:
-        """
+        """!
         True if importer is currently running a job.
         
-        :return: Tru if running
+        @returns Tru if running
         """
         return not self.__stopped[0]
 
     def import_file(self, file_to_import: IFile, v_dir: AesFile,
                     options: AesFileImporter.FileImportOptions | None = None) -> AesFile | None:
-        """
+        """!
         Imports a real file into the drive.
         
-        :param file_to_import: The source file that will be imported in to the drive.
-        :param v_dir:          The target directory in the drive that the file will be imported
-        :param options: The options
+        @param file_to_import: The source file that will be imported in to the drive.
+        @param v_dir:          The target directory in the drive that the file will be imported
+        @param options: The options
          """
         if not options:
             options = AesFileImporter.FileImportOptions()
@@ -359,7 +359,7 @@ class AesFileImporter:
         shm_total_bytes_read.unlink()
 
     def close(self):
-        """
+        """!
         Close this importer and associated resources
         """
         self.__executor.shutdown()
@@ -367,12 +367,12 @@ class AesFileImporter:
         self.__shm_cancel.unlink()
 
     class FileImportOptions:
-        """
+        """!
          File importer options
         """
 
         filename: str | None = None
-        """
+        """!
          Override the filename
         """
 
@@ -387,6 +387,6 @@ class AesFileImporter:
         """
 
         on_progress_changed: Callable[[int, int], Any] | None = None
-        """
+        """!
          Callback when progress changes
         """

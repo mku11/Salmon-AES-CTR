@@ -47,7 +47,7 @@ class AESCTRTransformer(ICTRTransformer, ABC):
 
     def __init__(self):
         self.__key: bytearray | None = None
-        """
+        """!
         Key to be used for AES transformation.
         """
 
@@ -57,7 +57,7 @@ class AESCTRTransformer(ICTRTransformer, ABC):
         """
 
         self.__nonce: bytearray | None = None
-        """
+        """!
         Nonce to be used for CTR mode.
         """
 
@@ -67,12 +67,12 @@ class AESCTRTransformer(ICTRTransformer, ABC):
         """
 
         self.__counter: bytearray | None = None
-        """
+        """!
         Current operation counter.
         """
 
     def reset_counter(self):
-        """
+        """!
         Resets the Counter and the block count.
         """
 
@@ -83,7 +83,7 @@ class AESCTRTransformer(ICTRTransformer, ABC):
         self.__block = 0
 
     def sync_counter(self, position: int):
-        """
+        """!
         Syncs the Counter based on what AES block position the stream is at.
         The block count is already excluding the header and the hash signatures.
         """
@@ -93,11 +93,11 @@ class AESCTRTransformer(ICTRTransformer, ABC):
         self.__block = curr_block
 
     def _increase_counter(self, value: int):
-        """
+        """!
         Increase the Counter
         We use only big endianness for AES regardless of the machine architecture
         
-        :param value: value to increase counter by
+        @param value: value to increase counter by
         """
 
         if self.__counter is None or self.__nonce is None:
@@ -116,54 +116,54 @@ class AESCTRTransformer(ICTRTransformer, ABC):
             value //= 256
 
     def init(self, key: bytearray, nonce: bytearray):
-        """
+        """!
         Initialize the transformer. Most common operations include precalculating expansion keys or
         any other prior initialization for efficiency.
-        :param key: The key
-        :param nonce: The nonce
-        :raises IntegrityException: Thrown when security error
+        @param key: The key
+        @param nonce: The nonce
+        @exception IntegrityException: Thrown when security error
         """
         self.__key = key
         self.__nonce = nonce
 
     def get_counter(self) -> bytearray:
-        """
+        """!
         Get the current Counter.
-        :return: The counter
+        @returns The counter
         """
         return self.__counter
 
     def get_block(self) -> int:
-        """
+        """!
         Get the current block.
-        :return: The block
+        @returns The block
         """
         return self.__block
 
     def get_key(self) -> bytearray:
-        """
+        """!
         Get the current encryption key.
-        :return: The key
+        @returns The key
         """
         return self.__key
 
     def get_expanded_key(self) -> bytearray:
-        """
+        """!
         Get the expanded key if available.
-        :return: The expanded key
+        @returns The expanded key
         """
         return self.__expandedKey
 
     def get_nonce(self) -> bytearray:
-        """
+        """!
         Get the nonce (initial counter)
-        :return: The nonce
+        @returns The nonce
         """
         return self.__nonce
 
     def set_expanded_key(self, expanded_key: bytearray):
-        """
+        """!
         Set the expanded key. This should be called once during initialization phase.
-        :param expanded_key: The expanded key
+        @param expanded_key: The expanded key
         """
         self.__expandedKey = expanded_key

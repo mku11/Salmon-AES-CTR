@@ -86,24 +86,24 @@ class Generator:
 
     @staticmethod
     def get_magic_bytes() -> bytearray:
-        """
+        """!
         Gets the fixed magic bytes array
         """
         return bytearray(Generator.MAGIC_BYTES.encode('utf-8'))
 
     @staticmethod
     def get_version() -> int:
-        """
+        """!
         Returns the current Salmon format version.
         """
         return Generator.VERSION
 
     @staticmethod
     def get_secure_random_bytes(size: int) -> bytearray:
-        """
+        """!
         Returns a secure random byte array. To be used when generating keys, initial vectors, and nonces.
-        :param size: The size of the byte array.
-        :return: The random secure byte array.
+        @param size: The size of the byte array.
+        @returns The random secure byte array.
         """
         v_bytes: bytearray = bytearray(secrets.token_bytes(size))
         return v_bytes

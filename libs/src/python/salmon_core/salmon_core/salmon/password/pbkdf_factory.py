@@ -38,10 +38,10 @@ class SalmonPbkdfFactory:
 
     @staticmethod
     def create(pbkdf_type: PbkdfType) -> ISalmonPbkdfProvider:
-        """
+        """!
         Create an instance of a pbkdf provider.
-        :param pbkdf_type: The pbkdf type.
-        :return: The provider.
+        @param pbkdf_type: The pbkdf type.
+        @returns The provider.
         """
         match pbkdf_type:
             case PbkdfType.Default:

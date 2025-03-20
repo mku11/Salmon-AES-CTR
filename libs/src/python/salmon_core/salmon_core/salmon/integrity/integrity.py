@@ -54,17 +54,17 @@ class Integrity:
 
     def __init__(self, integrity: bool, key: bytearray | None, chunk_size: int,
                  provider: IHashProvider, hash_size: int):
-        """
+        """!
         Instantiate an object to be used for applying and verifying hash signatures for each of the data chunks.
 
-        :param integrity: True to enable integrity checks.
-        :param key:       The key to use for hashing.
-        :param chunk_size: The chunk size. Use 0 to enable integrity on the whole file (1 chunk).
+        @param integrity: True to enable integrity checks.
+        @param key:       The key to use for hashing.
+        @param chunk_size: The chunk size. Use 0 to enable integrity on the whole file (1 chunk).
                          Use a positive number to specify integrity chunks.
-        :param provider:  Hash implementation provider.
-        :param hash_size: The hash size.
-        :raises IntegrityException: When integrity is comprimised
-        :raises SalmonSecurityException: When security has failed
+        @param provider:  Hash implementation provider.
+        @param hash_size: The hash size.
+        @exception IntegrityException: When integrity is comprimised
+        @exception SalmonSecurityException: When security has failed
         """
 
         self._chunk_size: int = -1
@@ -115,17 +115,17 @@ class Integrity:
     @staticmethod
     def calculate_hash(provider: IHashProvider, buffer: bytearray, offset: int, count: int,
                        key: bytearray, include_data: bytearray | None) -> bytearray:
-        """
+        """!
         Calculate hash of the data provided.
 
-        :param provider:    Hash implementation provider.
-        :param buffer:      Data to calculate the hash.
-        :param offset:      Offset of the buffer that the hashing calculation will start from
-        :param count:       Length of the buffer that will be used to calculate the hash.
-        :param key:         Key that will be used
-        :param include_data: Additional data to be included in the calculation.
-        :return: The hash.
-        :raises IntegrityException: Thrown when data are corrupt or tampered with.
+        @param provider:    Hash implementation provider.
+        @param buffer:      Data to calculate the hash.
+        @param offset:      Offset of the buffer that the hashing calculation will start from
+        @param count:       Length of the buffer that will be used to calculate the hash.
+        @param key:         Key that will be used
+        @param include_data: Additional data to be included in the calculation.
+        @returns The hash.
+        @exception IntegrityException: Thrown when data are corrupt or tampered with.
         """
 
         final_buffer: bytearray = buffer
@@ -143,17 +143,17 @@ class Integrity:
     @staticmethod
     def get_total_hash_data_length(mode: EncryptionMode, length: int, chunk_size: int,
                                    hash_offset: int, hash_length: int) -> int:
-        """
+        """!
         Get the total number of bytes for all hash signatures for data of a specific length.
 
-        :param mode: The {@link EncryptionMode} Encrypt or Decrypt.
-        :param length: 		The length of the data.
-        :param chunk_size:      The byte size of the stream chunk that will be used to calculate the hash.
+        @param mode: The {@link EncryptionMode} Encrypt or Decrypt.
+        @param length: 		The length of the data.
+        @param chunk_size:      The byte size of the stream chunk that will be used to calculate the hash.
                               The length should be fixed value except for the last chunk which might be lesser since
                               we don't use padding
-        :param hash_offset:     The hash key length that will be used as an offset.
-        :param hash_length:     The hash length.
-        :return: The total hash length
+        @param hash_offset:     The hash key length that will be used as an offset.
+        @param hash_length:     The hash length.
+        @returns The total hash length
         """
         if mode == EncryptionMode.Decrypt:
             chunks: int = int(math.floor(length / (chunk_size + hash_offset)))
@@ -169,12 +169,12 @@ class Integrity:
             return chunks * hash_length
 
     def get_hash_data_length(self, count: int, hash_offset: int) -> int:
-        """
+        """!
         Return the number of bytes that all hash signatures occupy for each chunk size
         
-        :param count:      Actual length of the real data int the base stream including header and hash signatures.
-        :param hash_offset: The hash key length
-        :return: The number of bytes all hash signatures occupy
+        @param count:      Actual length of the real data int the base stream including header and hash signatures.
+        @param hash_offset: The hash key length
+        @returns The number of bytes all hash signatures occupy
         """
         if self._chunk_size <= 0:
             return 0
@@ -182,33 +182,33 @@ class Integrity:
                                                     self._hashSize)
 
     def get_chunk_size(self) -> int:
-        """
+        """!
         Get the chunk size.
-        :return: The chunk size.
+        @returns The chunk size.
         """
         return self._chunk_size
 
     def get_key(self) -> bytearray:
-        """
+        """!
         Get the hash key.
-        :return: The hash key.
+        @returns The hash key.
         """
         return self._key
 
     def use_integrity(self) -> bool:
-        """
+        """!
         Get the integrity enabled option.
-        :return: True if integrity is enabled.
+        @returns True if integrity is enabled.
         """
         return self._integrity
 
     def generate_hashes(self, buffer: bytearray, include_header_data: bytearray | None) -> list[bytearray] | None:
-        """
+        """!
         Generate a hash signatures for each data chunk.
-        :param buffer: The buffer containing the data chunks.
-        :param include_header_data: Include the header data in the first chunk.
-        :return: The hash signatures.
-        :raises IntegrityException: Thrown when data are corrupt or tampered with.
+        @param buffer: The buffer containing the data chunks.
+        @param include_header_data: Include the header data in the first chunk.
+        @returns The hash signatures.
+        @exception IntegrityException: Thrown when data are corrupt or tampered with.
          """
         if not self._integrity:
             return None
@@ -220,10 +220,10 @@ class Integrity:
         return hashes
 
     def get_hashes(self, buffer: bytearray) -> list[bytearray] | None:
-        """
+        """!
         Get the hashes for each data chunk.
-        :param buffer: The buffer that contains the data chunks.
-        :return: The hash signatures.
+        @param buffer: The buffer that contains the data chunks.
+        @returns The hash signatures.
         """
         if not self._integrity:
             return None
@@ -235,12 +235,12 @@ class Integrity:
         return hashes
 
     def verify_hashes(self, hashes: list | None, buffer: bytearray, include_header_data: bytearray | None):
-        """
+        """!
         Verify the buffer chunks against the hash signatures.
-        :param hashes: The hashes to verify.
-        :param buffer: The buffer that contains the chunks to verify the hashes.
-        :param include_header_data: Header data to include in the hash
-        :raises IntegrityException: Thrown when data are corrupt or tampered with.
+        @param hashes: The hashes to verify.
+        @param buffer: The buffer that contains the chunks to verify the hashes.
+        @param include_header_data: Header data to include in the hash
+        @exception IntegrityException: Thrown when data are corrupt or tampered with.
         """
         chunk: int = 0
         for i in range(0, len(buffer), self._chunk_size):

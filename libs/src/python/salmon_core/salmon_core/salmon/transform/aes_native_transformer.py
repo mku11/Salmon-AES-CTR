@@ -57,19 +57,19 @@ class AesNativeTransformer(AESCTRTransformer):
         return AesNativeTransformer.__native_proxy
 
     def __init__(self, impl_type: int):
-        """
+        """!
         Constructs a transformer that will use the native aes implementations
-        :param impl_type: The AES native implementation see ProviderType enum
+        @param impl_type: The AES native implementation see ProviderType enum
         """
         super().__init__()
         self.__impl_type = impl_type
 
     def init(self, key: bytearray, nonce: bytearray):
-        """
+        """!
         Initialize the native transformer.
-        :param key: The AES key to use.
-        :param nonce: The nonce to use.
-        :raises IntegrityException: Thrown when security error
+        @param key: The AES key to use.
+        @param nonce: The nonce to use.
+        @exception IntegrityException: Thrown when security error
         """
         self.get_native_proxy().salmon_init(self.__impl_type)
         expanded_key: bytearray = bytearray(AESCTRTransformer.EXPANDED_KEY_SIZE)
@@ -79,14 +79,14 @@ class AesNativeTransformer(AESCTRTransformer):
 
     def encrypt_data(self, src_buffer: bytearray, src_offset: int,
                      dest_buffer: bytearray, dest_offset: int, count: int) -> int:
-        """
+        """!
         Encrypt the data.
-        :param src_buffer: The source byte array.
-        :param src_offset: The source byte offset.
-        :param dest_buffer: The destination byte array.
-        :param dest_offset: The destination byte offset.
-        :param count: The number of bytes to transform.
-        :return: The number of bytes transformed.
+        @param src_buffer: The source byte array.
+        @param src_offset: The source byte offset.
+        @param dest_buffer: The destination byte array.
+        @param dest_offset: The destination byte offset.
+        @param count: The number of bytes to transform.
+        @returns The number of bytes transformed.
         """
 
         if self.get_key() is None:
@@ -108,14 +108,14 @@ class AesNativeTransformer(AESCTRTransformer):
 
     def decrypt_data(self, src_buffer: bytearray, src_offset: int,
                      dest_buffer: bytearray, dest_offset: int, count: int) -> int:
-        """
+        """!
         Decrypt the data.
-        :param src_buffer: The source byte array.
-        :param src_offset: The source byte offset.
-        :param dest_buffer: The destination byte array.
-        :param dest_offset: The destination byte offset.
-        :param count: The number of bytes to transform.
-        :return: The number of bytes transformed.
+        @param src_buffer: The source byte array.
+        @param src_offset: The source byte offset.
+        @param dest_buffer: The destination byte array.
+        @param dest_offset: The destination byte offset.
+        @param count: The number of bytes to transform.
+        @returns The number of bytes transformed.
         """
         if self.get_key() is None:
             raise SecurityException("No key found, run init first")

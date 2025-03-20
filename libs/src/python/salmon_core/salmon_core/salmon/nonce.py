@@ -39,14 +39,14 @@ class Nonce:
 
     @staticmethod
     def increase_nonce(start_nonce: bytearray, end_nonce: bytearray) -> bytearray:
-        """
+        """!
         Increase the sequential NONCE by a value of 1.
         This implementation assumes that the NONCE length is 8 bytes or fewer so it can fit in a long.
         
-        :param start_nonce: The starting nonce
-        :param end_nonce: The ending nonce
-        :return: The nonce after increasing
-        :raises SalmonRangeExceededException: Thrown when maximum nonce range is exceeded.
+        @param start_nonce: The starting nonce
+        @param end_nonce: The ending nonce
+        @returns The nonce after increasing
+        @exception SalmonRangeExceededException: Thrown when maximum nonce range is exceeded.
         """
         nonce: int = BitConverter.to_long(start_nonce, 0, Generator.NONCE_LENGTH)
         max_nonce: int = BitConverter.to_long(end_nonce, 0, Generator.NONCE_LENGTH)
@@ -57,16 +57,16 @@ class Nonce:
 
     @staticmethod
     def split_nonce_range(start_nonce: bytearray, end_nonce: bytearray) -> bytearray:
-        """
+        """!
         Returns the middle nonce in the provided range.
         Note: This assumes the nonce is 8 bytes, if you need to increase the nonce length
         then the long transient variables will not hold. In that case you will need to
         override with your own implementation.
 
-        :param start_nonce: The starting nonce.
-        :param end_nonce: The ending nonce in the sequence.
-        :return: The byte array with the middle nonce.
-        :raises IntegrityException: Thrown when security error
+        @param start_nonce: The starting nonce.
+        @param end_nonce: The ending nonce in the sequence.
+        @returns The byte array with the middle nonce.
+        @exception IntegrityException: Thrown when security error
         """
         start: int = BitConverter.to_long(start_nonce, 0, Generator.NONCE_LENGTH)
         end: int = BitConverter.to_long(end_nonce, 0, Generator.NONCE_LENGTH)

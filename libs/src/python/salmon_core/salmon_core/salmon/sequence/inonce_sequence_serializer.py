@@ -38,19 +38,19 @@ class INonceSequenceSerializer(ABC):
     """
 
     def deserialize(self, contents: str) -> dict[str, NonceSequence]:
-        """
+        """!
         Parse nonce sequences from text contents.
-        :param contents: The contents containing the nonce sequences.
-        :return: The nonce sequences.
-        :raises SequenceException: Thrown when there is a failure in the nonce sequencer.
+        @param contents: The contents containing the nonce sequences.
+        @returns The nonce sequences.
+        @exception SequenceException: Thrown when there is a failure in the nonce sequencer.
         """
         pass
 
     def serialize(self, sequences: dict[str, NonceSequence] | None):
-        """
+        """!
         Generates the contents from sequences.
-        :param sequences: The sequences to convert to text.
-        :return: The string contents.
-        :raises SequenceException: Thrown when there is a failure in the nonce sequencer.
+        @param sequences: The sequences to convert to text.
+        @returns The string contents.
+        @exception SequenceException: Thrown when there is a failure in the nonce sequencer.
         """
         pass

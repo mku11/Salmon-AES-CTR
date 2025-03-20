@@ -40,18 +40,18 @@ class File(IFile):
     """
 
     def __init__(self, path: str):
-        """
+        """!
         Instantiate a real file represented by the filepath provided.
-        :param path: The filepath.
+        @param path: The filepath.
         """
         self.__file_path: str | None = None
         self.__file_path = path
 
     def create_directory(self, dir_name: str) -> IFile:
-        """
+        """!
         Create a directory under this directory.
-        :param dir_name: The name of the new directory.
-        :return: The newly created directory.
+        @param dir_name: The name of the new directory.
+        @returns The newly created directory.
         """
         n_dir_path: str = self.__file_path + os.sep + dir_name
         os.makedirs(n_dir_path)
@@ -59,11 +59,11 @@ class File(IFile):
         return ndir
 
     def create_file(self, filename: str) -> IFile:
-        """
+        """!
         Create a file under this directory.
-        :param filename: The name of the new file.
-        :return: The newly created file.
-        :raises IOError: Thrown if there is an IO error.
+        @param filename: The name of the new file.
+        @returns The newly created file.
+        @exception IOError: Thrown if there is an IO error.
         """
         n_file_path: str = self.__file_path + os.sep + filename
         open(n_file_path, 'a').close()
@@ -71,9 +71,9 @@ class File(IFile):
         return n_file
 
     def delete(self) -> bool:
-        """
+        """!
         Delete this file or directory.
-        :return: True if deletion is successful.
+        @returns True if deletion is successful.
         """
         if self.is_directory():
             p_files: list[IFile] = self.list_files()
@@ -85,95 +85,95 @@ class File(IFile):
         return not os.path.exists(self.__file_path)
 
     def exists(self) -> bool:
-        """
+        """!
         True if file or directory exists.
-        :return: True if exists
+        @returns True if exists
         """
         return os.path.exists(self.__file_path)
 
     def get_display_path(self) -> str:
-        """
+        """!
         Get the absolute path on the physical disk.
-        :return: The absolute path.
+        @returns The absolute path.
         """
         return os.path.abspath(self.__file_path)
 
     def get_name(self) -> str:
-        """
+        """!
         Get the name of this file or directory.
-        :return: The name of this file or directory.
+        @returns The name of this file or directory.
         """
         return os.path.basename(self.__file_path)
 
     def get_input_stream(self) -> RandomAccessStream:
-        """
+        """!
         Get a stream for reading the file.
-        :return: The stream to read from.
-        :raises FileNotFoundException:     """
+        @returns The stream to read from.
+        @exception FileNotFoundException:     """
         return FileStream(self, "r")
 
     def get_output_stream(self) -> RandomAccessStream:
-        """
+        """!
         Get a stream for writing to this file.
-        :return: The stream to write to.
-        :raises FileNotFoundException:         """
+        @returns The stream to write to.
+        @exception FileNotFoundException:         """
         return FileStream(self, "rw")
 
     def get_parent(self) -> IFile:
-        """
+        """!
         Get the parent directory of this file or directory.
-        :return: The parent directory.
+        @returns The parent directory.
         """
         dir_path: str = os.path.dirname(self.get_display_path())
         parent: File = File(dir_path)
         return parent
 
     def get_path(self) -> str:
-        """
+        """!
         Get the path of this file. For python this is the same as the absolute filepath.
-        :return: The path
+        @returns The path
         """
         return self.__file_path
 
     def is_directory(self) -> bool:
-        """
+        """!
         True if this is a directory.
-        :return: True if directory
+        @returns True if directory
         """
         return os.path.isdir(self.__file_path)
 
     def is_file(self) -> bool:
-        """
+        """!
         True if this is a file.
-        :return: True if file
+        @returns True if file
         """
         return not self.is_directory()
 
     def get_last_date_modified(self) -> int:
-        """
+        """!
         Get the last modified date on disk.
-        :return: The last modified date in milliseconds
+        @returns The last modified date in milliseconds
         """
         return int(os.path.getmtime(self.__file_path))
 
     def get_length(self) -> int:
-        """
+        """!
         Get the size of the file on disk.
-        :return: The size
+        @returns The size
         """
         return os.path.getsize(self.__file_path)
 
     def get_children_count(self) -> int:
-        """
+        """!
         Get the count of files and subdirectories
-        :return: The children
+        @returns The children
         """
         return len(os.listdir(self.__file_path)) if self.is_directory() else 0
 
     def list_files(self) -> list[IFile]:
-        """
+        """!
         List all files under this directory.
-        :return: The list of files.
+        @returns The list of files.
         """
         files: list[str] = os.listdir(self.__file_path)
         if files is None:
@@ -193,11 +193,11 @@ class File(IFile):
         return real_dirs
 
     def move(self, new_dir: IFile, options: IFile.MoveOptions | None = None) -> IFile:
-        """
+        """!
         Move this file or directory under a new directory.
-        :param new_dir: The target directory.
-        :param options: The options
-        :return: The moved file. Use this file for subsequent operations instead of the original.
+        @param new_dir: The target directory.
+        @param options: The options
+        @returns The moved file. Use this file for subsequent operations instead of the original.
         """
 
         if not options:
@@ -224,12 +224,12 @@ class File(IFile):
             return new_file
 
     def copy(self, new_dir: IFile, options: IFile.CopyOptions | None = None) -> IFile:
-        """
+        """!
         Move this file or directory under a new directory.
-        :param new_dir:    The target directory.
-        :param options:     The options
-        :return: The copied file. Use this file for subsequent operations instead of the original.
-        :raises IOError: Thrown if there is an IO error.
+        @param new_dir:    The target directory.
+        @param options:     The options
+        @returns The copied file. Use this file for subsequent operations instead of the original.
+        @exception IOError: Thrown if there is an IO error.
         """
         if not options:
             options = IFile.CopyOptions()
@@ -249,10 +249,10 @@ class File(IFile):
             return new_file if res else None
 
     def get_child(self, filename: str) -> IFile | None:
-        """
+        """!
         Get the file or directory under this directory with the provided name.
-        :param filename: The name of the file or directory.
-        :return: The child file
+        @param filename: The name of the file or directory.
+        @returns The child file
         """
         if self.is_file():
             return None
@@ -260,31 +260,31 @@ class File(IFile):
         return child
 
     def rename_to(self, new_filename: str) -> bool:
-        """
+        """!
         Rename the current file or directory.
-        :param new_filename: The new name for the file or directory.
-        :return: True if successfully renamed.
+        @param new_filename: The new name for the file or directory.
+        @returns True if successfully renamed.
         """
         v_dir = os.path.dirname(self.__file_path)
         os.rename(self.__file_path, v_dir + os.sep + new_filename)
         return os.path.exists(v_dir + os.sep + new_filename)
 
     def mkdir(self) -> bool:
-        """
+        """!
         Create this directory under the current filepath.
-        :return: True if created.
+        @returns True if created.
         """
         os.makedirs(self.__file_path)
         return self.exists()
 
     def reset(self):
-        """
+        """!
         Clear cached properties
         """
         pass
 
     def __str__(self) -> str:
-        """
+        """!
         Returns a string representation of this object
         """
         return self.__file_path

@@ -40,46 +40,46 @@ class AesFileSearcher:
     """
 
     def __init__(self):
-        """
+        """!
         Construct a file searcher
         """
         self.__running: bool = False
         self.__quit: bool = False
 
     class SearchEvent(Enum):
-        """
+        """!
         Event status types.
         """
         SearchingFiles = 0
         SearchingFinished = 1
 
     def stop(self):
-        """
+        """!
         Stop the search
         """
         self.__quit = True
 
     def is_running(self) -> bool:
-        """
+        """!
         True if a search is running.
-        :return: True if running
+        @returns True if running
         """
         return self.__running
 
     def is_stopped(self) -> bool:
-        """
+        """!
         True if last search was stopped by user.
-        :return: True if stopped
+        @returns True if stopped
         """
         return self.__quit
 
     def search(self, v_dir: AesFile, terms: str, options: AesFileSearcher.SearchOptions | None = None) -> list[AesFile]:
-        """
+        """!
         Search files in directory and its subdirectories recursively for matching terms.
-        :param v_dir: The directory to start the search.
-        :param terms: The terms to search for.
-        :param options: The options
-        :return: An array with all the results found.
+        @param v_dir: The directory to start the search.
+        @param terms: The terms to search for.
+        @param options: The options
+        @returns An array with all the results found.
         """
 
         if not options:
@@ -96,12 +96,12 @@ class AesFileSearcher:
         return list(search_results.values())
 
     def __get_search_results(self, filename: str, terms: list[str], any_term: bool) -> int:
-        """
+        """!
         Match the current terms in the filename.
-        :param filename: The filename to match.
-        :param terms: The terms to match.
-        :param any_term: True if you want to match any term otherwise match all terms.
-        :return: A count of all matches.
+        @param filename: The filename to match.
+        @param terms: The terms to match.
+        @param any_term: True if you want to match any term otherwise match all terms.
+        @returns A count of all matches.
         """
         count: int = 0
         term: str
@@ -118,13 +118,13 @@ class AesFileSearcher:
     def __search_dir(self, v_dir: AesFile, terms: str, anyterm: bool,
                      on_result_found: Callable[[AesFile], Any] | None,
                      search_results: dict[str, AesFile]):
-        """
+        """!
         Search a directory for all filenames matching the terms supplied.
-        :param v_dir: The directory to start the search.
-        :param terms: The terms to search for.
-        :param anyterm: True if you want to match any term otherwise match all terms.
-        :param on_result_found: Callback to receive notifications when results found.
-        :param search_results: The array to store the search results.
+        @param v_dir: The directory to start the search.
+        @param terms: The terms to search for.
+        @param anyterm: True if you want to match any term otherwise match all terms.
+        @param on_result_found: Callback to receive notifications when results found.
+        @param search_results: The array to store the search results.
         """
         if self.__quit:
             return
@@ -148,7 +148,7 @@ class AesFileSearcher:
                     print(ex, file=sys.stderr)
 
     class SearchOptions:
-        """
+        """!
          Search options
         """
 
@@ -158,11 +158,11 @@ class AesFileSearcher:
         """
 
         on_result_found: Callable[[AesFile], Any] | None = None
-        """
+        """!
          Callback when result found
         """
 
         on_search_event: Callable[[AesFileSearcher.SearchEvent], Any] | None = None
-        """
+        """!
          Callback when search event happens.
         """

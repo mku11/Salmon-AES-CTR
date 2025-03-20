@@ -38,17 +38,17 @@ class INativeProxy(ABC):
 
     @abstractmethod
     def salmon_init(self, aes_impl: int):
-        """
+        """!
         Initializes the native library with the specified AES implementation.
-        :param aes_impl:         """
+        @param aes_impl:         """
         pass
 
     @abstractmethod
     def salmon_expand_key(self, key: bytearray, expanded_key: bytearray):
-        """
+        """!
         Expands the specified AES encryption key.
-        :param key: The AES-256 encryption key (32 bytes)
-        :param expanded_key: The expanded key (240 bytes)
+        @param key: The AES-256 encryption key (32 bytes)
+        @param expanded_key: The expanded key (240 bytes)
         """
         pass
 
@@ -56,15 +56,15 @@ class INativeProxy(ABC):
     def salmon_transform(self, key: bytearray, counter: bytearray,
                          src_buffer: bytearray, src_offset: int,
                          dest_buffer: bytearray, dest_offset: int, count: int) -> int:
-        """
+        """!
         Transforms data using CTR mode which is symmetric so you should use it for both encryption and decryption.
-        :param key: The AES-256 encryption key (32 bytes)
-        :param counter: The counter (16 bytes)
-        :param src_buffer: The source buffer
-        :param src_offset: The source buffer offset
-        :param dest_buffer: The destination buffer
-        :param dest_offset: The destination buffer offset
-        :param count: The number of bytes to transform
-        :return: The number of bytes transformed
+        @param key: The AES-256 encryption key (32 bytes)
+        @param counter: The counter (16 bytes)
+        @param src_buffer: The source buffer
+        @param src_offset: The source buffer offset
+        @param dest_buffer: The destination buffer
+        @param dest_offset: The destination buffer offset
+        @param count: The number of bytes to transform
+        @returns The number of bytes transformed
         """
         pass

@@ -151,13 +151,13 @@ class AesFileExporter:
     """
 
     def __init__(self, buffer_size: int = 0, threads: int = 1, multi_cpu: bool = False):
-        """
+        """!
         Constructs a file exporter that can be used to export files from the drive
         
-        :param buffer_size: Buffer size to be used when decrypting files.
+        @param buffer_size: Buffer size to be used when decrypting files.
                           If using integrity self value has to be a multiple of the Chunk size.
                           If not using integrity it should be a multiple of the AES block size for better performance
-        :param threads: The threads to use
+        @param threads: The threads to use
         :multi_cpu:  Utilize multiple cpus. Windows does not have a fast fork() so it has a very slow startup
         """
 
@@ -187,12 +187,12 @@ class AesFileExporter:
         """
 
         self.__lastException: Exception | None = None
-        """
+        """!
         Last exception occurred.
         """
 
         self.__executor: ThreadPoolExecutor | ProcessPoolExecutor | None = None
-        """
+        """!
         The executor to be used for running parallel exports.
         """
 
@@ -207,7 +207,7 @@ class AesFileExporter:
                 self.__threads)
 
     def stop(self):
-        """
+        """!
         Stop all tasks
         """
         self.__stopped[0] = True
@@ -215,21 +215,21 @@ class AesFileExporter:
         self.__shm_cancel.buf[0] = 1
 
     def is_running(self) -> bool:
-        """
+        """!
         True if exporter is currently running a job.
         
-        :return: True if running
+        @returns True if running
         """
         return not self.__stopped[0]
 
     def export_file(self, file_to_export: AesFile, export_dir: IFile,
                     options: AesFileExporter.FileExportOptions | None = None) -> IFile | None:
-        """
+        """!
         Export a file from the drive to the external directory path
         
-        :param file_to_export: The file that will be exported
-        :param export_dir:    The external directory the file will be exported to
-        :param options: The options
+        @param file_to_export: The file that will be exported
+        @param export_dir:    The external directory the file will be exported to
+        @param options: The options
         """
         if not options:
             options = AesFileExporter.FileExportOptions()
@@ -356,7 +356,7 @@ class AesFileExporter:
         shm_total_bytes_read.unlink()
 
     def close(self):
-        """
+        """!
         Close this importer and associated resources
         """
         self.__executor.shutdown(False)
@@ -364,12 +364,12 @@ class AesFileExporter:
         self.__shm_cancel.unlink()
 
     class FileExportOptions:
-        """
+        """!
          File exporter options
         """
 
         filename: str | None = None
-        """
+        """!
          Override the filename
         """
 
@@ -384,6 +384,6 @@ class AesFileExporter:
         """
 
         on_progress_changed: Callable[[int, int], Any] | None = None
-        """
+        """!
          Callback when progress changes
         """

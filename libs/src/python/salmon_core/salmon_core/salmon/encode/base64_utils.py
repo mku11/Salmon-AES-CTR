@@ -42,16 +42,16 @@ class Base64Utils:
 
     @staticmethod
     def set_base64(base64: IBase64):
-        """
+        """!
         Change the current global Base64 implementation.
-        :param base64: The new Base64 implementation.
+        @param base64: The new Base64 implementation.
         """
         Base64Utils.base64 = base64
 
     @staticmethod
     def get_base64() -> IBase64:
-        """
+        """!
         Get the global default Base64 implementation.
-        :return: The Base64 implementation.
+        @returns The Base64 implementation.
         """
         return Base64Utils.__base64

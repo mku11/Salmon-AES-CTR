@@ -40,15 +40,15 @@ class SalmonDefaultPbkdfProvider(ISalmonPbkdfProvider):
 
     def get_key(self, password: str, salt: bytearray, iterations: int, output_bytes: int,
                 pbkdf_algo: PbkdfAlgo) -> bytearray:
-        """
+        """!
         Get a key derived from a text password
-        :param password: The text password.
-        :param salt: The salt needs to be at least 24 bytes.
-        :param iterations: Iterations to use. Make sure you use a high number according to your hardware specs.
-        :param output_bytes: The length of the output key.
-        :param pbkdf_algo: The hash algorithm to use.
-        :return: The key.
-        :raises IntegrityException: Thrown when security error
+        @param password: The text password.
+        @param salt: The salt needs to be at least 24 bytes.
+        @param iterations: Iterations to use. Make sure you use a high number according to your hardware specs.
+        @param output_bytes: The length of the output key.
+        @param pbkdf_algo: The hash algorithm to use.
+        @returns The key.
+        @exception IntegrityException: Thrown when security error
         """
         # PBEKeySpec
         # keySpec = new

@@ -54,29 +54,29 @@ class WSFile(IFile):
     __lock_object: RLock = RLock()
 
     def get_service_path(self):
-        """
+        """!
         Get the service path
         """
         return self.__service_path
 
     def get_credentials(self):
-        """
+        """!
         Get the web service credentials
-        :returns The credentials
+        @returns The credentials
         """
         return self.__credentials
 
     def set_credentials(self, credentials: Credentials):
-        """
+        """!
         Set the web service credentials
-        :param credentials: The credentials
+        @param credentials: The credentials
         """
         self.__credentials = credentials
 
     def __init__(self, path: str, service_path: str, credentials: Credentials):
-        """
+        """!
         Instantiate a real file represented by the filepath and service path provided.
-        :param path: The filepath.
+        @param path: The filepath.
         """
         if not path.startswith(WSFile.separator):
             path = WSFile.separator + path
@@ -108,10 +108,10 @@ class WSFile(IFile):
             return self.__response
 
     def create_directory(self, dir_name: str) -> IFile:
-        """
+        """!
         Create a directory under this directory.
-        :param dir_name: The name of the new directory.
-        :return: The newly created directory.
+        @param dir_name: The name of the new directory.
+        @returns The newly created directory.
         """
         n_dir_path: str = self.get_child_path(dir_name)
         headers = {}
@@ -134,11 +134,11 @@ class WSFile(IFile):
         return ndir
 
     def create_file(self, filename: str) -> IFile:
-        """
+        """!
         Create a file under this directory.
-        :param filename: The name of the new file.
-        :return: The newly created file.
-        :raises IOError: Thrown if there is an IO error.
+        @param filename: The name of the new file.
+        @returns The newly created file.
+        @exception IOError: Thrown if there is an IO error.
         """
         n_filepath: str = self.get_child_path(filename)
         headers = {}
@@ -161,9 +161,9 @@ class WSFile(IFile):
         return n_file
 
     def delete(self) -> bool:
-        """
+        """!
         Delete this file or directory.
-        :return: True if deletion is successful.
+        @returns True if deletion is successful.
         """
         self.reset()
         if self.is_directory():
@@ -206,23 +206,23 @@ class WSFile(IFile):
                 http_response.close()
 
     def exists(self) -> bool:
-        """
+        """!
         True if file or directory exists.
-        :return: True if exists
+        @returns True if exists
         """
         return self.__get_response()['present']
 
     def get_display_path(self) -> str:
-        """
+        """!
         Get the absolute path on the physical disk.
-        :return: The absolute path.
+        @returns The absolute path.
         """
         return self.__file_path
 
     def get_name(self) -> str:
-        """
+        """!
         Get the name of this file or directory.
-        :return: The name of this file or directory.
+        @returns The name of this file or directory.
         """
         if not self.__file_path:
             raise Exception("Filepath is not assigned")
@@ -237,25 +237,25 @@ class WSFile(IFile):
         return basename
 
     def get_input_stream(self) -> RandomAccessStream:
-        """
+        """!
         Get a stream for reading the file.
-        :return: The stream to read from.
-        :raises FileNotFoundException:     """
+        @returns The stream to read from.
+        @exception FileNotFoundException:     """
         self.reset()
         return WSFileStream(self, "r")
 
     def get_output_stream(self) -> RandomAccessStream:
-        """
+        """!
         Get a stream for writing to this file.
-        :return: The stream to write to.
-        :raises FileNotFoundException:         """
+        @returns The stream to write to.
+        @exception FileNotFoundException:         """
         self.reset()
         return WSFileStream(self, "rw")
 
     def get_parent(self) -> IFile:
-        """
+        """!
         Get the parent directory of this file or directory.
-        :return: The parent directory.
+        @returns The parent directory.
         """
         path: str = self.__file_path
         if path.endswith(WSFile.separator):
@@ -265,44 +265,44 @@ class WSFile(IFile):
         return WSFile(parent_file_path, self.__service_path, self.__credentials)
 
     def get_path(self) -> str:
-        """
+        """!
         Get the path of this file. For python this is the same as the absolute filepath.
-        :return: The path
+        @returns The path
         """
         return self.__file_path
 
     def is_directory(self) -> bool:
-        """
+        """!
         True if this is a directory.
-        :return: True if directory
+        @returns True if directory
         """
         return self.__get_response()['directory']
 
     def is_file(self) -> bool:
-        """
+        """!
         True if this is a file.
-        :return: True if file
+        @returns True if file
         """
         return not self.is_directory()
 
     def get_last_date_modified(self) -> int:
-        """
+        """!
         Get the last modified date on disk.
-        :return: The last modified date in milliseconds
+        @returns The last modified date in milliseconds
         """
         return self.__get_response()['lastModified']
 
     def get_length(self) -> int:
-        """
+        """!
         Get the size of the file on disk.
-        :return: The size
+        @returns The size
         """
         return self.__get_response()['length']
 
     def get_children_count(self) -> int:
-        """
+        """!
         Get the count of files and subdirectories
-        :return: The children
+        @returns The children
         """
         if self.is_directory():
             headers = {}
@@ -326,9 +326,9 @@ class WSFile(IFile):
         return 0
 
     def list_files(self) -> list[IFile]:
-        """
+        """!
         List all files under this directory.
-        :return: The list of files.
+        @returns The list of files.
         """
         if self.is_directory():
             headers = {}
@@ -364,11 +364,11 @@ class WSFile(IFile):
         return []
 
     def move(self, new_dir: IFile, options: IFile.MoveOptions | None = None) -> IFile:
-        """
+        """!
         Move this file or directory under a new directory.
-        :param new_dir: The target directory.
-        :param options: The options
-        :return: The moved file. Use this file for subsequent operations instead of the original.
+        @param new_dir: The target directory.
+        @param options: The options
+        @returns The moved file. Use this file for subsequent operations instead of the original.
         """
 
         if not options:
@@ -408,12 +408,12 @@ class WSFile(IFile):
                     http_response.close()
 
     def copy(self, new_dir: IFile, options: IFile.CopyOptions | None = None) -> IFile:
-        """
+        """!
         Move this file or directory under a new directory.
-        :param new_dir:    The target directory.
-        :param options: The options
-        :return: The copied file. Use this file for subsequent operations instead of the original.
-        :raises IOError: Thrown if there is an IO error.
+        @param new_dir:    The target directory.
+        @param options: The options
+        @returns The copied file. Use this file for subsequent operations instead of the original.
+        @exception IOError: Thrown if there is an IO error.
         """
 
         if not options:
@@ -451,10 +451,10 @@ class WSFile(IFile):
                     http_response.close()
 
     def get_child(self, filename: str) -> IFile | None:
-        """
+        """!
         Get the file or directory under this directory with the provided name.
-        :param filename: The name of the file or directory.
-        :return: The child file
+        @param filename: The name of the file or directory.
+        @returns The child file
         """
         if self.is_file():
             return None
@@ -463,10 +463,10 @@ class WSFile(IFile):
         return child
 
     def rename_to(self, new_filename: str) -> bool:
-        """
+        """!
         Rename the current file or directory.
-        :param new_filename: The new name for the file or directory.
-        :return: True if successfully renamed.
+        @param new_filename: The new name for the file or directory.
+        @returns True if successfully renamed.
         """
         self.reset()
         headers = {}
@@ -489,9 +489,9 @@ class WSFile(IFile):
                 http_response.close()
 
     def mkdir(self) -> bool:
-        """
+        """!
         Create this directory under the current filepath.
-        :return: True if created.
+        @returns True if created.
         """
         self.reset()
         headers = {}
@@ -513,7 +513,7 @@ class WSFile(IFile):
                 http_response.close()
 
     def reset(self):
-        """
+        """!
         Clear cached properties
         """
         with WSFile.__lock_object:
@@ -527,7 +527,7 @@ class WSFile(IFile):
         return n_filepath
 
     def __str__(self) -> str:
-        """
+        """!
         Returns a string representation of this object
         """
         return self.__file_path
@@ -565,24 +565,24 @@ class Credentials:
     Credentials
     """
     def __init__(self, service_user: str, service_password: str):
-        """
+        """!
         Instntiate the credentials
-        :param service_user: The user name
-        :param service_password: The password
+        @param service_user: The user name
+        @param service_password: The password
         """
         self.__service_user: str = service_user
         self.__service_password: str = service_password
 
     def get_service_user(self) -> str:
-        """
+        """!
         Get the service user name
-        :returns The user name
+        @returns The user name
         """
         return self.__service_user
 
     def get_service_password(self) -> str:
-        """
+        """!
         Get the service password
-        :returns The password
+        @returns The password
         """
         return self.__service_password
