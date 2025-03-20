@@ -138,7 +138,7 @@ class FileSearcher:
                     if hits > 0:
                         search_results[file.get_real_path()] = file
                         if on_result_found is not None:
-                            on_result_found.on_result_found(file)
+                            on_result_found(file)
                 except Exception as ex:
                     print(ex, file=sys.stderr)
 
