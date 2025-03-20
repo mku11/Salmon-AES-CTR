@@ -7,13 +7,12 @@ license: MIT License https://github.com/mku11/Salmon-AES-CTR/blob/main/LICENSE
 Python 3.11+  
   
 #### Dependencies:
-* python-interface  
 * typeguard
 * pycryptodome
 * wrapt
   
 install dependencies:  
-python -m pip install python-interface typeguard pycryptodome wrapt  
+python -m pip install typeguard pycryptodome wrapt  
   
 to run tests from command line:
 cd libs\test\salmon_fs_test_python\
