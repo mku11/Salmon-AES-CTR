@@ -135,13 +135,13 @@ class AesFileCommander:
         sfile: AesFile | None = existing_files.get(
             file_to_import.get_name()) if file_to_import.get_name() in existing_files else None
         if file_to_import.is_directory():
-            if on_progress_changed is not None:
+            if on_progress_changed:
                 on_progress_changed(AesFileCommander.RealFileTaskProgress(file_to_import, 0, 1, count[0], total[0]))
             if sfile is None or not sfile.exists():
                 sfile = import_dir.create_directory(file_to_import.get_name())
-            elif sfile is not None and sfile.exists() and sfile.is_file() and auto_rename is not None:
+            elif sfile and sfile.exists() and sfile.is_file() and auto_rename:
                 sfile = import_dir.create_directory(auto_rename(file_to_import))
-            if on_progress_changed is not None:
+            if on_progress_changed:
                 on_progress_changed(AesFileCommander.RealFileTaskProgress(file_to_import, 1, 1, count[0], total[0]))
             count[0] += 1
             n_existing_files: dict[str, AesFile] = self.__get_existing_salmon_files(sfile)
@@ -156,7 +156,7 @@ class AesFileCommander:
         else:
             try:
                 filename: str = file_to_import.get_name()
-                if sfile is not None and (sfile.exists() or sfile.is_directory()) and auto_rename is not None:
+                if sfile and (sfile.exists() or sfile.is_directory()) and auto_rename:
                     filename = auto_rename(file_to_import)
 
                 import_options: AesFileImporter.FileImportOptions = AesFileImporter.FileImportOptions()
@@ -172,7 +172,7 @@ class AesFileCommander:
             except SequenceException as ex:
                 raise ex
             except Exception as ex:
-                if on_failed is not None:
+                if on_failed:
                     on_failed(file_to_import, ex)
 
     def export_files(self, files_to_export: list[AesFile], export_dir: IFile,
@@ -233,9 +233,9 @@ class AesFileCommander:
         if file_to_export.is_directory():
             if rfile is None or not rfile.exists():
                 rfile = export_dir.create_directory(file_to_export.get_name())
-            elif rfile is not None and rfile.is_file() and auto_rename is not None:
+            elif rfile and rfile.is_file() and auto_rename:
                 rfile = export_dir.create_directory(auto_rename(rfile))
-            if on_progress_changed is not None:
+            if on_progress_changed:
                 on_progress_changed(AesFileCommander.AesFileTaskProgress(file_to_export, 1, 1, count[0], total))
             count[0] += 1
             n_existing_files: dict[str, IFile] = self.__get_existing_real_files(rfile)
@@ -250,7 +250,7 @@ class AesFileCommander:
         else:
             try:
                 filename: str = file_to_export.get_name()
-                if rfile is not None and rfile.exists() and auto_rename is not None:
+                if rfile and rfile.exists() and auto_rename:
                     filename = auto_rename(rfile)
 
                 export_options: AesFileExporter.FileExportOptions = AesFileExporter.FileExportOptions()
@@ -267,7 +267,7 @@ class AesFileCommander:
             except SequenceException as ex:
                 raise ex
             except Exception as ex:
-                if on_failed is not None:
+                if on_failed:
                     on_failed(file_to_export, ex)
 
     def __get_salmon_files_count_recursively(self, file: AesFile) -> int:
@@ -320,7 +320,7 @@ class AesFileCommander:
                                  on_progress_changed: Callable[[AesFileCommander.AesFileTaskProgress], Any] | None):
         if self.__stopJobs:
             raise CancelledError()
-        if on_progress_changed is not None:
+        if on_progress_changed:
             try:
                 on_progress_changed(
                     AesFileCommander.AesFileTaskProgress(file, position, length, count[0], final_total))
@@ -527,7 +527,7 @@ class AesFileCommander:
     def __notify_real_file_progress(self, file_to_import: IFile, v_bytes: int, total_bytes: int, count: list[int],
                                     total: int,
                                     on_progress_changed: Callable[[AesFileCommander.RealFileTaskProgress], Any] | None):
-        if on_progress_changed is not None:
+        if on_progress_changed:
             on_progress_changed(
                 AesFileCommander.RealFileTaskProgress(file_to_import, v_bytes, total_bytes, count[0], total))
 
@@ -536,7 +536,7 @@ class AesFileCommander:
                                       total: int,
                                       on_progress_changed: Callable[
                                                                [AesFileCommander.AesFileTaskProgress], Any] | None):
-        if on_progress_changed is not None:
+        if on_progress_changed:
             on_progress_changed(
                 AesFileCommander.AesFileTaskProgress(file_to_export, v_bytes, total_bytes, count[0], total))
 
@@ -545,7 +545,7 @@ class AesFileCommander:
 
         if self.__stopJobs:
             raise CancelledError()
-        if on_progress_changed is not None:
+        if on_progress_changed:
             try:
                 on_progress_changed(
                     AesFileCommander.AesFileTaskProgress(file, position, length, count[0], final_total))
@@ -558,7 +558,7 @@ class AesFileCommander:
                                on_progress_changed: Callable[[AesFileCommander.AesFileTaskProgress], Any]):
         if self.__stopJobs:
             raise CancelledError()
-        if on_progress_changed is not None:
+        if on_progress_changed:
             try:
                 on_progress_changed(
                     AesFileCommander.AesFileTaskProgress(file, position, length, count[0], final_total))

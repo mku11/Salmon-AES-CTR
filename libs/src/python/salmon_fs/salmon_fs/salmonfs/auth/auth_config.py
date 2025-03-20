@@ -208,7 +208,7 @@ class AuthConfig:
         """
         sequence: NonceSequence = drive.get_sequencer().get_sequence(
             BitConverter.to_hex(drive.get_drive_id()))
-        if sequence is not None and sequence.get_status() == NonceSequence.Status.Active:
+        if sequence and sequence.get_status() == NonceSequence.Status.Active:
             raise Exception("Device is already authorized")
 
         if auth_config_file is None or not auth_config_file.exists():
@@ -245,7 +245,7 @@ class AuthConfig:
                 out_stream = file.getOutputStream()
                 out_stream.setLength(0)
             finally:
-                if out_stream is not None:
+                if out_stream:
                     out_stream.close()
         max_nonce: bytearray | None = sequence.get_max_nonce()
         if max_nonce is None:

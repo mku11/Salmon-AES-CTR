@@ -95,7 +95,7 @@ class AesDrive(VirtualDrive, ABC):
             return
         self.__realRoot = real_root
         if not create_if_not_exists and not self.has_config() \
-                and self.__realRoot.get_parent() is not None and self.__realRoot.get_parent().exists():
+                and self.__realRoot.get_parent() and self.__realRoot.get_parent().exists():
             # try the parent if this is the filesystem folder
             original_real_root: IFile = self.__realRoot
             self.__realRoot = self.__realRoot.get_parent()
@@ -294,7 +294,7 @@ class AesDrive(VirtualDrive, ABC):
             self._on_unlock_error()
             raise ex
         finally:
-            if stream is not None:
+            if stream:
                 stream.close()
 
     def set_key(self, master_key: bytearray, drive_key: bytearray, hash_key: bytearray, iterations: int):
@@ -337,7 +337,7 @@ class AesDrive(VirtualDrive, ABC):
         if key is None:
             return False
         enc_key: bytearray | None = key.get_drive_key()
-        return enc_key is not None
+        return enc_key
 
     def get_bytes_from_real_file(self, file: IFile, buffer_size: int) -> bytearray:
         """
@@ -397,7 +397,7 @@ class AesDrive(VirtualDrive, ABC):
             print(ex, file=sys.stderr)
             return False
 
-        return salmon_config is not None
+        return salmon_config
 
     def get_drive_id(self) -> bytearray:
         """
@@ -413,7 +413,7 @@ class AesDrive(VirtualDrive, ABC):
         self.__realRoot = None
         self.__virtualRoot = None
         self.__driveID = None
-        if self.__key is not None:
+        if self.__key:
             self.__key.clear()
         self.__key = None
 
@@ -582,11 +582,11 @@ class AesDrive(VirtualDrive, ABC):
         hash_key: bytearray | None = self.get_key().get_hash_key()
 
         config_file: IFile = self.get_config_file(self.get_real_root())
-        if drive_key is None and config_file is not None and config_file.exists():
+        if drive_key is None and config_file and config_file.exists():
             raise AuthException("Not authorized")
 
         # delete the old config file and create a new one
-        if config_file is not None and config_file.exists():
+        if config_file and config_file.exists():
             config_file.delete()
         config_file = self.create_config_file(self.get_real_root())
 

@@ -265,11 +265,11 @@ class IFile(ABC):
         new_file: IFile
         new_file = dest.get_child(new_filename)
         if self.is_file():
-            if new_file is not None and new_file.exists():
-                if options.auto_rename is not None:
+            if new_file and new_file.exists():
+                if options.auto_rename:
                     new_filename = options.auto_rename(self)
                 else:
-                    if options.on_failed is not None:
+                    if options.on_failed:
                         options.on_failed(self, Exception("Another file exists"))
                     return
             copy_options = IFile.CopyOptions()
@@ -278,17 +278,17 @@ class IFile(ABC):
                                                                                     options.on_progress_changed)
             self.copy(dest, copy_options)
         elif self.is_directory():
-            if options.on_progress_changed is not None:
+            if options.on_progress_changed:
                 options.on_progress_changed(self, 0, 1)
             if dest.get_display_path().startswith(self.get_display_path()):
                 if options.on_progress_changed:
                     options.on_progress_changed(self, 1, 1)
                 return
-            if new_file is not None and new_file.exists() and options.auto_rename and options.auto_rename_folders:
+            if new_file and new_file.exists() and options.auto_rename and options.auto_rename_folders:
                 new_file = dest.create_directory(options.auto_rename(self))
             elif new_file is None or not new_file.exists():
                 new_file = dest.create_directory(new_filename)
-            if options.on_progress_changed is not None:
+            if options.on_progress_changed:
                 options.on_progress_changed(self, 1, 1)
 
             for child in self.list_files():
@@ -321,7 +321,7 @@ class IFile(ABC):
                 if options.auto_rename:
                     new_filename = options.auto_rename(self)
                 else:
-                    if options.on_failed is not None:
+                    if options.on_failed:
                         options.on_failed(self, Exception("Another file exists"))
                     return
 
@@ -340,7 +340,7 @@ class IFile(ABC):
                 new_file = self.move(dest, move_options)
                 return
 
-            if options.on_progress_changed is not None:
+            if options.on_progress_changed:
                 options.on_progress_changed(self, 1, 1)
 
             for child in self.list_files():
@@ -400,7 +400,7 @@ class IFile(ABC):
         return new_filename
 
     def notify(self, position: int, length: int, progress_listener: Callable[[IFile, int, int], Any] | None = None):
-        if progress_listener is not None:
+        if progress_listener:
             progress_listener(self, position, length)
 
     @staticmethod

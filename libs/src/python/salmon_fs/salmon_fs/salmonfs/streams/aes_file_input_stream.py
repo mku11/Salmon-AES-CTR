@@ -316,7 +316,7 @@ class AesFileInputStream(BufferedIOBase):
         except InterruptedError as ignored:
             pass
 
-        if ex is not None:
+        if ex:
             try:
                 raise ex
             except Exception as e:
@@ -339,11 +339,11 @@ class AesFileInputStream(BufferedIOBase):
 
         for i in range(0, len(self.__buffers)):
             buffer: AesFileInputStream.CacheBuffer = self.__buffers[i]
-            if buffer is not None and buffer.count == 0:
+            if buffer and buffer.count == 0:
                 self.__lruBuffersIndex.insert(0, i)
                 return buffer
 
-        if self.__buffers[len(self.__buffers) - 1] is not None:
+        if self.__buffers[len(self.__buffers) - 1]:
             return self.__buffers[len(self.__buffers) - 1]
         else:
             return None
@@ -357,7 +357,7 @@ class AesFileInputStream(BufferedIOBase):
         """
         for i in range(0, len(self.__buffers)):
             buffer: AesFileInputStream.CacheBuffer = self.__buffers[i]
-            if buffer is not None and self.__position >= buffer.startPos and self.__position + count \
+            if buffer and self.__position >= buffer.startPos and self.__position + count \
                     <= buffer.startPos + buffer.count:
                 # promote buffer to the front
                 self.__lruBuffersIndex.remove(i)
@@ -418,7 +418,7 @@ class AesFileInputStream(BufferedIOBase):
         Clear all buffers.
         """
         for i in range(0, len(self.__buffers)):
-            if self.__buffers[i] is not None:
+            if self.__buffers[i]:
                 self.__buffers[i].clear()
             self.__buffers[i] = None
 
@@ -430,7 +430,7 @@ class AesFileInputStream(BufferedIOBase):
         :raises IOError: Thrown if there is an IO error.
         """
         for i in range(0, self.__threads):
-            if self.__streams[i] is not None:
+            if self.__streams[i]:
                 self.__streams[i].close()
             self.__streams[i] = None
 
@@ -456,5 +456,5 @@ class AesFileInputStream(BufferedIOBase):
             """
             Clear the buffer.
             """
-            if self.buffer is not None:
+            if self.buffer:
                 self.buffer[0:len(self.buffer)] = [0] * len(self.buffer)

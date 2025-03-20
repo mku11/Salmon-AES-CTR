@@ -111,12 +111,12 @@ class WSFileStream(RandomAccessStream):
                 def read(self, size: int | None = ...) -> bytearray | None:
                     if self.is_closed:
                         return None
-                    if self.buff is not None and len(self.buff) > 0:
+                    if self.buff and len(self.buff) > 0:
                         buf = self.buff[0:size]
                         self.buff = self.buff[size:]
                         return buf
                     buffer: bytearray = bytearray()
-                    while (message := self.queue.get()) is not None:
+                    while (message := self.queue.get()):
                         buffer.extend(message)
                         if len(buffer) > size:
                             self.buff = buffer[size:]

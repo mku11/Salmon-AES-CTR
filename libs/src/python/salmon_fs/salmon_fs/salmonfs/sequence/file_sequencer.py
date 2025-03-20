@@ -84,7 +84,7 @@ class FileSequencer(INonceSequencer):
         xml_contents: str = self.__get_contents()
         configs: dict[str, NonceSequence] = self.__serializer.deserialize(xml_contents)
         sequence: NonceSequence | None = self.__get_sequence(configs, drive_id)
-        if sequence is not None:
+        if sequence:
             raise SequenceException("Sequence already exists")
         nsequence: NonceSequence = NonceSequence(drive_id, auth_id, None, None, NonceSequence.Status.New)
         configs[drive_id + ":" + auth_id] = nsequence
@@ -107,7 +107,7 @@ class FileSequencer(INonceSequencer):
         sequence: NonceSequence = self.__get_sequence(configs, drive_id)
         if sequence is None:
             raise SequenceException("Sequence does not exist")
-        if sequence.get_next_nonce() is not None:
+        if sequence.get_next_nonce():
             raise SequenceException("Cannot reinitialize sequence")
         sequence.set_next_nonce(start_nonce)
         sequence.set_max_nonce(max_nonce)
@@ -176,12 +176,12 @@ class FileSequencer(INonceSequencer):
             print(ex, file=sys.stderr)
             raise SequenceException("Could not get XML Contents") from ex
         finally:
-            if stream is not None:
+            if stream:
                 try:
                     stream.close()
                 except IOError as e:
                     raise SequenceException("Could not get contents") from e
-            if output_stream is not None:
+            if output_stream:
                 try:
                     output_stream.flush()
                     output_stream.close()
@@ -262,14 +262,14 @@ class FileSequencer(INonceSequencer):
             print(ex, file=sys.stderr)
             raise SequenceException("Could not save sequence file") from ex
         finally:
-            if output_stream is not None:
+            if output_stream:
                 output_stream.flush()
                 try:
                     output_stream.close()
                 except IOError as e:
                     raise SequenceException("Could not save sequence file") from e
 
-            if input_stream is not None:
+            if input_stream:
                 try:
                     input_stream.close()
                 except IOError as e:
@@ -289,7 +289,7 @@ class FileSequencer(INonceSequencer):
             if drive_id.upper() == seq.get_drive_id().upper():
                 # there should be only one sequence available
                 if seq.get_status() == NonceSequence.Status.Active or seq.get_status() == NonceSequence.Status.New:
-                    if sequence is not None:
+                    if sequence:
                         raise SequenceException("Corrupt sequence config")
                     sequence = seq
         return sequence

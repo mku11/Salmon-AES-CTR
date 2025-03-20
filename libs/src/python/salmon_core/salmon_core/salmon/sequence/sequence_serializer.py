@@ -63,9 +63,9 @@ class SequenceSerializer(INonceSequenceSerializer):
                                                   driveID=value.get_drive_id(),
                                                   authID=value.get_auth_id(),
                                                   status=value.get_status().name)
-                if value.get_next_nonce() is not None:
+                if value.get_next_nonce():
                     drive.attrib["nextNonce"] = Base64Utils.get_base64().encode(value.get_next_nonce())
-                if value.get_max_nonce() is not None:
+                if value.get_max_nonce():
                     drive.attrib["maxNonce"] = Base64Utils.get_base64().encode(value.get_max_nonce())
         except Exception as ex:
             print(ex, file=sys.stderr)
@@ -85,7 +85,7 @@ class SequenceSerializer(INonceSequenceSerializer):
         configs: dict[str, NonceSequence] = {}
         drives: Et.Element = Et.fromstring(contents)
         try:
-            if drives is not None:
+            if drives:
                 children = list(drives.iter())
                 for i in range(0, len(children)):
                     drive: Et.Element = children[i]

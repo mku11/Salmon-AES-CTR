@@ -106,7 +106,7 @@ def decrypt_data(input_stream: RandomAccessStream, start: int, count: int, out_d
     :raises IntegrityException: Thrown if the stream is corrupt or tampered with.
     """
     shm_cancel_data: memoryview | None = None
-    if shm_cancel_name is not None:
+    if shm_cancel_name:
         shm_cancel = SharedMemory(shm_cancel_name, size=1)
         shm_cancel_data = shm_cancel.buf
 
@@ -129,7 +129,7 @@ def decrypt_data(input_stream: RandomAccessStream, start: int, count: int, out_d
         bytes_read: int
         while (bytes_read := stream.read(buff, 0, min(len(buff), (
                 count - total_chunk_bytes_read)))) > 0 and total_chunk_bytes_read < count:
-            if shm_cancel_data is not None and shm_cancel_data[0]:
+            if shm_cancel_data and shm_cancel_data[0]:
                 break
             output_stream.write(buff, 0, bytes_read)
             total_chunk_bytes_read += bytes_read
@@ -138,11 +138,11 @@ def decrypt_data(input_stream: RandomAccessStream, start: int, count: int, out_d
         print(ex, file=sys.stderr)
         raise SecurityException("Could not decrypt data") from ex
     finally:
-        if input_stream is not None:
+        if input_stream:
             input_stream.close()
-        if stream is not None:
+        if stream:
             stream.close()
-        if output_stream is not None:
+        if output_stream:
             output_stream.close()
     end_pos: int = output_stream.get_position()
     return start_pos, end_pos
@@ -331,7 +331,7 @@ class Decryptor:
         shm_out.close()
         shm_out.unlink()
 
-        if ex is not None:
+        if ex:
             try:
                 raise ex
             except Exception as e:
@@ -341,5 +341,5 @@ class Decryptor:
         """
         Close the decryptor and associated resources
         """
-        if self.__executor is not None:
+        if self.__executor:
             self.__executor.shutdown(False)

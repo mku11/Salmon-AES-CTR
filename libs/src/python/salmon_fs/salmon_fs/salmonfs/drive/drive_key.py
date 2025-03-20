@@ -42,15 +42,15 @@ class DriveKey:
         """
         Clear the properties from memory.
         """
-        if self.__driveKey is not None:
+        if self.__driveKey:
             self.__driveKey[0:len(self.__driveKey)] = [0] * len(self.__driveKey)
         self.__driveKey = None
 
-        if self.__hash_key is not None:
+        if self.__hash_key:
             self.__hash_key[0:len(self.__hash_key)] = [0] * len(self.__hash_key)
         self.__hash_key = None
 
-        if self.__masterKey is not None:
+        if self.__masterKey:
             self.__masterKey[0:len(self.__masterKey)] = [0] * len(self.__masterKey)
         self.__masterKey = None
         self.__iterations = 0

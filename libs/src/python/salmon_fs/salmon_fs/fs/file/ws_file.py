@@ -379,7 +379,7 @@ class WSFile(IFile):
             raise IOError("Target directory does not exist")
 
         new_file: IFile | None = new_dir.get_child(new_name)
-        if new_file is not None and new_file.exists():
+        if new_file and new_file.exists():
             raise IOError("Another file/directory already exists")
 
         if self.is_directory():
@@ -423,7 +423,7 @@ class WSFile(IFile):
         if new_dir is None or not new_dir.exists():
             raise IOError("Target directory does not exists")
         new_file: IFile | None = new_dir.get_child(new_name)
-        if new_file is not None and new_file.exists():
+        if new_file and new_file.exists():
             raise IOError("Another file/directory already exists")
         if self.is_directory():
             raise IOError("Could not copy directory use IRealFile copyRecursively() instead")

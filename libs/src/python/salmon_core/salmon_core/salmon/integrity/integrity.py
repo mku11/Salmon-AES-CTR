@@ -131,7 +131,7 @@ class Integrity:
         final_buffer: bytearray = buffer
         final_offset: int = offset
         final_count: int = count
-        if include_data is not None:
+        if include_data:
             final_buffer = bytearray(count + len(include_data))
             final_count = count + len(include_data)
             final_buffer[0:len(include_data)] = include_data[0:len(include_data)]

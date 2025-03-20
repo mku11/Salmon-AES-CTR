@@ -341,7 +341,7 @@ class SalmonFSTestHelper:
             return hash_md5.hexdigest()
 
         finally:
-            if stream is not None:
+            if stream:
                 stream.close()
 
     @staticmethod

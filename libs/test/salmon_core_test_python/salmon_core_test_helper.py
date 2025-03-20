@@ -164,7 +164,7 @@ class SalmonCoreTestHelper:
             t_builder += test_text
 
         plain_text = t_builder
-        if max_text_length is not None and max_text_length < len(plain_text):
+        if max_text_length and max_text_length < len(plain_text):
             plain_text = plain_text[0:max_text_length]
 
         input_bytes = bytearray(plain_text.encode('utf-8'))

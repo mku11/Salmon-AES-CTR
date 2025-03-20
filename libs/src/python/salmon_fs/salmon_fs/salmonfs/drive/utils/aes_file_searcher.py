@@ -87,10 +87,10 @@ class AesFileSearcher:
         self.__running = True
         self.__quit = False
         search_results: dict[str, AesFile] = {}
-        if options.on_search_event is not None:
+        if options.on_search_event:
             options.on_search_event(AesFileSearcher.SearchEvent.SearchingFiles)
         self.__search_dir(v_dir, terms, options.any_term, options.on_result_found, search_results)
-        if options.on_search_event is not None:
+        if options.on_search_event:
             options.on_search_event(AesFileSearcher.SearchEvent.SearchingFinished)
         self.__running = False
         return list(search_results.values())
@@ -142,7 +142,7 @@ class AesFileSearcher:
                     hits: int = self.__get_search_results(file.get_name(), terms_array, anyterm)
                     if hits > 0:
                         search_results[file.get_real_path()] = file
-                        if on_result_found is not None:
+                        if on_result_found:
                             on_result_found(file)
                 except Exception as ex:
                     print(ex, file=sys.stderr)

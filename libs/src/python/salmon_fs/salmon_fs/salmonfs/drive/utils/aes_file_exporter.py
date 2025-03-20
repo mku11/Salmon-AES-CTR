@@ -71,7 +71,7 @@ def export_file(index: int, final_part_size: int, final_running_threads: int, fi
     except Exception as ex:
         raise ex
     finally:
-        if shm_total_bytes_read is not None:
+        if shm_total_bytes_read:
             total_bytes_written.release()
             shm_total_bytes_read.close()
 
@@ -98,7 +98,7 @@ def export_file_part(file_to_export: AesFile, exported_file: IFile, start: int, 
 
     shm_cancel_data: memoryview | None = None
     shm_cancel: SharedMemory | None = None
-    if shm_cancel_name is not None:
+    if shm_cancel_name:
         shm_cancel = SharedMemory(shm_cancel_name, size=1)
         shm_cancel_data = shm_cancel.buf
 
@@ -121,11 +121,11 @@ def export_file_part(file_to_export: AesFile, exported_file: IFile, start: int, 
         while (bytes_read := source_stream.read(v_bytes, 0,
                                                 min(len(v_bytes), count - total_part_bytes_written))) > 0 \
                 and total_part_bytes_written < count:
-            if (shm_cancel_data is not None and shm_cancel_data[0]) or (stopped is not None and stopped[0]):
+            if (shm_cancel_data and shm_cancel_data[0]) or (stopped and stopped[0]):
                 break
             target_stream.write(v_bytes, 0, bytes_read)
             total_part_bytes_written += bytes_read
-            if total_bytes_written is not None:
+            if total_bytes_written:
                 total_bytes_written[:8] = BitConverter.to_bytes(total_part_bytes_written, 8)[0:8]
             if on_progress_changed:
                 on_progress_changed(total_part_bytes_written, count)
@@ -133,14 +133,14 @@ def export_file_part(file_to_export: AesFile, exported_file: IFile, start: int, 
         print(ex, file=sys.stderr)
         raise ex
     finally:
-        if target_stream is not None:
+        if target_stream:
             target_stream.flush()
             target_stream.close()
 
-        if source_stream is not None:
+        if source_stream:
             source_stream.close()
 
-        if shm_cancel is not None:
+        if shm_cancel:
             shm_cancel.close()
 
 
@@ -292,7 +292,7 @@ class AesFileExporter:
                 exported_file.delete()
             elif options.delete_source:
                 file_to_export.get_real_file().delete()
-            if self.__lastException is not None:
+            if self.__lastException:
                 raise self.__lastException
         except Exception as ex:
             print(ex, file=sys.stderr)

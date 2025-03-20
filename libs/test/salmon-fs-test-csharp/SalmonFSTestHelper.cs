@@ -217,6 +217,8 @@ public class SalmonFSTestHelper
                 SalmonFSTestHelper.TEST_IMPORT_LARGE_FILE
         };
         AesFileImporter importer = new AesFileImporter(SalmonFSTestHelper.ENC_IMPORT_BUFFER_SIZE, SalmonFSTestHelper.ENC_IMPORT_THREADS);
+		AesFileImporter.FileImportOptions import_options = new AesFileImporter.FileImportOptions();
+		import_options.integrity = true;
         foreach (IFile importFile in importFiles)
         {
             importer.ImportFile(importFile, rootDir);

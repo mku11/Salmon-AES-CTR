@@ -170,7 +170,7 @@ class RandomAccessStream(ABC):
         buffer: bytearray = bytearray(buffer_size)
         while (bytes_read := self.read(buffer, 0, buffer_size)) > 0:
             stream.write(buffer, 0, bytes_read)
-            if on_progress_changed is not None:
+            if on_progress_changed:
                 on_progress_changed(self.get_position(), self.get_length())
         stream.flush()
         self.set_position(pos)

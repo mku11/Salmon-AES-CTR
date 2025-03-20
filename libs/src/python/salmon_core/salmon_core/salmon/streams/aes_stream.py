@@ -352,7 +352,7 @@ class AesStream(RandomAccessStream):
         """
         Flushes any buffered data to the base stream.
         """
-        if self.__base_stream is not None:
+        if self.__base_stream:
             self.__base_stream.flush()
 
     def close(self):
@@ -451,7 +451,7 @@ class AesStream(RandomAccessStream):
         """
         Close base stream
         """
-        if self.__base_stream is not None:
+        if self.__base_stream:
             if self.can_write():
                 self.__base_stream.flush()
             self.__base_stream.close()
@@ -706,7 +706,7 @@ class AesStream(RandomAccessStream):
         if chunk_size <= 0:
             chunk_size = len(buffer)
         while pos < len(buffer):
-            if hashes is not None:
+            if hashes:
                 self.__base_stream.write(hashes[chunk], 0, len(hashes[chunk]))
             length: int = min(chunk_size, len(buffer) - pos)
             self.__base_stream.write(buffer, pos, length)
