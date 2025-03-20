@@ -1,4 +1,7 @@
 #!/usr/bin/env python3
+"""!@brief Configuration file for a drive
+"""
+
 __license__ = """
 MIT License
 
@@ -35,8 +38,8 @@ from salmon_fs.salmonfs.drive.drive_generator import DriveGenerator
 
 @typechecked
 class DriveConfig:
-    """
-    Represents a configuration file for a drive. The properties are encrypted in the file
+    """!
+    Configuration file for a drive. The properties are encrypted in the file
     with a master key which is password derived.
     """
 

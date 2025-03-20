@@ -1,4 +1,7 @@
-# not /usr/bin/env python3
+#!/usr/bin/env python3
+"""!@brief Useful comparators for AesFile.
+"""
+
 from __future__ import annotations
 
 __license__ = """
@@ -34,7 +37,7 @@ from salmon_fs.fs.drive.utils.file_utils import FileUtils
 
 @typechecked
 class AesFileComparators:
-    """
+    """!
     Useful comparators for AesFile.
     """
 

@@ -1,4 +1,7 @@
 #!/usr/bin/env python3
+"""!@brief Interface that represents a real file
+"""
+
 from __future__ import annotations
 
 __license__ = """
@@ -35,7 +38,7 @@ from salmon_core.streams.random_access_stream import RandomAccessStream
 
 @typechecked
 class IFile(ABC):
-    """
+    """!
     Interface that represents a real file. This class is used internally by the virtual disk to
     import, store, and export the encrypted files.
     Extend this to provide an interface to any file system, platform, or API ie: on disk, memory, network, or cloud.

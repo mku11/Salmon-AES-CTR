@@ -1,4 +1,7 @@
 #!/usr/bin/env python3
+"""!@brief Implementation of a Python BufferedIOBase for seeking and reading an AesFile.
+"""
+
 from __future__ import annotations
 
 __license__ = """
@@ -41,7 +44,7 @@ from salmon_fs.salmonfs.file.aes_file import AesFile
 
 @typechecked
 class AesFileInputStream(BufferedIOBase):
-    """
+    """!
     Implementation of a Python InputStream for seeking and reading a AesFile.
     This class provides a seekable source with parallel substreams and cached buffers
     for performance.

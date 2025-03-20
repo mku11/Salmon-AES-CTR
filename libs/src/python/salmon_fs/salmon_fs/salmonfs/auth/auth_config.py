@@ -1,4 +1,7 @@
 #!/usr/bin/env python3
+"""!@brief Device authorization configuration
+"""
+
 from __future__ import annotations
 
 __license__ = """
@@ -47,9 +50,8 @@ from salmon.sequence.sequence_exception import SequenceException
 
 @typechecked
 class AuthConfig:
-    """
-    Device Authorization Configuration. This represents the authorization that will be provided
-    to the target device to allow writing operations for a virtual drive.
+    """!
+    Device authorization configuration. This represents the authorization that will be provided to the target device to allow writing operations for a virtual drive.
     """
 
     def get_drive_id(self) -> bytearray:

@@ -1,4 +1,4 @@
-"""!@brief Encrypted file implementations
+"""!@brief File-based nonce sequencers
 """
 import os
 import sys

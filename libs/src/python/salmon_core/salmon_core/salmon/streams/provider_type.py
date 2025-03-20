@@ -1,4 +1,6 @@
 #!/usr/bin/env python3
+"""!@brief AES provider types
+"""
 __license__ = """
 MIT License
 
@@ -30,7 +32,7 @@ from typeguard import typechecked
 
 @typechecked
 class ProviderType(Enum):
-    """
+    """!
     AES provider types. List of AES implementations that currently supported.
     
     @see #Default

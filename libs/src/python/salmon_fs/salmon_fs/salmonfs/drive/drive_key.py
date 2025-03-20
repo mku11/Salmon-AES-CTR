@@ -1,4 +1,7 @@
 #!/usr/bin/env python3
+"""!@brief Encryption keys and properties.
+"""
+
 __license__ = """
 MIT License
 
@@ -28,7 +31,7 @@ from typeguard import typechecked
 
 @typechecked
 class DriveKey:
-    """
+    """!
     Encryption keys and properties.
     """
 

@@ -1,4 +1,7 @@
 #!/usr/bin/env python3
+"""!@brief A virtual file backed by an encrypted file.
+"""
+
 from __future__ import annotations
 
 __license__ = """
@@ -49,8 +52,8 @@ from salmon_fs.salmonfs.drive.aes_drive import AesDrive
 
 @typechecked
 class AesFile(IVirtualFile):
-    """
-    A virtual file backed by an encrypted {@link IRealFile} on the real filesystem.
+    """!
+    A virtual file backed by an encrypted file.
     Supports operations for retrieving {@link AesStream} for reading/decrypting
     and writing/encrypting contents.
     """

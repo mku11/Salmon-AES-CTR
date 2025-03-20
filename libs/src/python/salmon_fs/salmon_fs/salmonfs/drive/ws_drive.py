@@ -1,3 +1,6 @@
+#!/usr/bin/env python3
+"""!@brief Encrypted virtual drive implementation for web service files.
+"""
 from __future__ import annotations
 
 __license__ = """
@@ -38,8 +41,8 @@ from salmon.sequence.inonce_sequencer import INonceSequencer
 
 @typechecked
 class WSDrive(AesDrive):
-    """
-    AesDrive implementation for web service Python file API. This provides a virtual drive implementation
+    """!
+    Encrypted virtual drive implementation for web service files.
     that you can use to store and access encrypted files.
     """
 

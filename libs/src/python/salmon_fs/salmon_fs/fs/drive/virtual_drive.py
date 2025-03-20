@@ -1,4 +1,7 @@
 #!/usr/bin/env python3
+"""!@brief Virtual Drive
+"""
+
 from __future__ import annotations
 
 __license__ = """
@@ -32,7 +35,7 @@ from salmon_fs.fs.file.ifile import IFile
 
 @typechecked
 class VirtualDrive(ABC):
-    """
+    """!
     Virtual Drive
     """
 

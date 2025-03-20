@@ -1,4 +1,7 @@
 #!/usr/bin/env python3
+"""!@brief File utilities
+"""
+
 from __future__ import annotations
 
 __license__ = """
@@ -30,7 +33,7 @@ from typeguard import typechecked
 
 @typechecked
 class FileUtils:
-    """
+    """!
     File utilities
     """
 

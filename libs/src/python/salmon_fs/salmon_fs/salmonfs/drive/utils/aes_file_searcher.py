@@ -1,4 +1,7 @@
 #!/usr/bin/env python3
+"""!@brief Searches for files in a AesDrive by filename.
+"""
+
 from __future__ import annotations
 
 __license__ = """
@@ -35,8 +38,8 @@ from salmon_fs.salmonfs.file.aes_file import AesFile
 
 @typechecked
 class AesFileSearcher:
-    """
-    Class searches for files in a AesDrive by filename.
+    """!
+    Searches for files in a AesDrive by filename.
     """
 
     def __init__(self):

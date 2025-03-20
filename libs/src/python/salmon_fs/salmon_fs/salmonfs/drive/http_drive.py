@@ -1,3 +1,6 @@
+#!/usr/bin/env python3
+"""!@brief Encrypted virtual drive implementation for HTTP files.
+"""
 from __future__ import annotations
 
 __license__ = """
@@ -37,9 +40,8 @@ from salmon_fs.salmonfs.file.aes_file import AesFile
 
 @typechecked
 class HttpDrive(AesDrive):
-    """
-    AesDrive implementation for Python HTTP files. This provides a virtual drive implementation
-    that you can use to access encrypted files.
+    """!
+    Encrypted virtual drive implementation for HTTP files.
     """
 
     def __init__(self):

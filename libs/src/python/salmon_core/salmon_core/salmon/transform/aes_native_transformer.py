@@ -1,4 +1,7 @@
 #!/usr/bin/env python3
+"""!@brief Generic Native AES transformer. 
+"""
+
 __license__ = """
 MIT License
 
@@ -34,7 +37,7 @@ from threading import RLock
 
 @typechecked
 class AesNativeTransformer(AESCTRTransformer):
-    """
+    """!
     Generic Native AES transformer. Extend this with your specific
     native transformer.
     """

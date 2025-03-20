@@ -1,4 +1,7 @@
 #!/usr/bin/env python3
+"""!@brief Web Service File implementation for Python.
+"""
+
 from __future__ import annotations
 
 __license__ = """
@@ -43,8 +46,8 @@ from salmon_core.streams.random_access_stream import RandomAccessStream
 
 @typechecked
 class WSFile(IFile):
-    """
-    Salmon Web Service File implementation for Python.
+    """!
+    Web Service File implementation for Python.
     """
 
     __PATH: str = "path"
@@ -561,7 +564,7 @@ class WSFile(IFile):
 
 
 class Credentials:
-    """
+    """!
     Credentials
     """
     def __init__(self, service_user: str, service_password: str):

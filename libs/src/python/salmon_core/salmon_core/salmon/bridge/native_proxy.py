@@ -35,7 +35,7 @@ import sys
 
 @typechecked
 class NativeProxy(INativeProxy):
-    """
+    """!
     Proxy class for use with windows native library.
     """
 

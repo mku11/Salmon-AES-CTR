@@ -36,7 +36,7 @@ from typeguard import typechecked
 
 @typechecked
 class RandomAccessStream(ABC):
-    """
+    """!
     Abstract read-write seekable stream used by internal streams
     (modeled after c# Stream class).
     """
@@ -184,16 +184,16 @@ class RandomAccessStream(ABC):
         """
 
         Begin = 0
-        """
+        """!
         Start from the beginning of the stream.
         """
 
         Current = 1
-        """
+        """!
         Start from the current position of the stream.
         """
 
         End = 2
-        """
+        """!
         Start from the end of the stream.
         """

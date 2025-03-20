@@ -1,4 +1,7 @@
 #!/usr/bin/env python3
+"""!@brief Exports files from drives
+"""
+
 from __future__ import annotations
 
 __license__ = """
@@ -49,7 +52,7 @@ def _export_file(index: int, final_part_size: int, final_running_threads: int, f
                  shm_cancel_name: str,
                  buffer_size: int, key: bytearray,
                  integrity: bool, hash_key: bytearray | None, chunk_size: int):
-    """
+    """!
     Do not use directly use AesFileExporter class instead.
     """
     file_to_export: AesFile = AesFile(real_file_to_export)
@@ -82,7 +85,7 @@ def _export_file_part(file_to_export: AesFile, exported_file: IFile, start: int,
                       shm_cancel_name: str | None = None,
                       stopped: list[bool] | None = None,
                       on_progress_changed: Callable[[int, int], Any] | None = None):
-    """
+    """!
     Do not use directly use AesFileExporter class instead.
     """
 
@@ -136,8 +139,8 @@ def _export_file_part(file_to_export: AesFile, exported_file: IFile, start: int,
 
 @typechecked
 class AesFileExporter:
-    """
-    Exports files from drices
+    """!
+    Exports files from drives
     """
 
     __DEFAULT_BUFFER_SIZE = 512 * 1024

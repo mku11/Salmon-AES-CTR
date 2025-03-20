@@ -1,4 +1,7 @@
 #!/usr/bin/env python3
+"""!@brief File implementation for Python.
+"""
+
 from __future__ import annotations
 
 __license__ = """
@@ -35,8 +38,8 @@ from salmon_core.streams.random_access_stream import RandomAccessStream
 
 @typechecked
 class File(IFile):
-    """
-    Salmon RealFile implementation for Python.
+    """!
+    File implementation for Python.
     """
 
     def __init__(self, path: str):

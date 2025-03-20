@@ -1,4 +1,7 @@
 #!/usr/bin/env python3
+"""!@brief Creates an AES transformer object.
+"""
+
 __license__ = """
 MIT License
 
@@ -34,7 +37,7 @@ from salmon_core.salmon.transform.aes_native_transformer import AesNativeTransfo
 
 @typechecked
 class TransformerFactory:
-    """
+    """!
     Creates an AES transformer object.
     """
 

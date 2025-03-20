@@ -1,4 +1,7 @@
 #!/usr/bin/env python3
+"""!@brief Abstract virtual drive
+"""
+
 from __future__ import annotations
 
 __license__ = """
@@ -55,8 +58,8 @@ from salmon.sequence.nonce_sequence import NonceSequence
 
 @typechecked
 class AesDrive(VirtualDrive, ABC):
-    """
-    Class provides an abstract virtual drive that can be extended for use with
+    """!
+    Abstract virtual drive that can be extended for use with
     any filesystem ie disk, net, cloud, etc.
     Drive implementations needs to be realized together with {@link IRealFile}.
     """

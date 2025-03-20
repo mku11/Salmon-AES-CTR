@@ -1,3 +1,6 @@
+#!/usr/bin/env python3
+"""!@brief Encrypted virtual drive implementation for local file systems
+"""
 from __future__ import annotations
 
 __license__ = """
@@ -38,9 +41,8 @@ from salmon.sequence.inonce_sequencer import INonceSequencer
 
 @typechecked
 class Drive(AesDrive):
-    """
-    AesDrive implementation for standard Python file API. This provides a virtual drive implementation
-    that you can use to store and access encrypted files.
+    """!
+    Encrypted virtual drive implementation for local file systems. This provides a virtual drive implementation.
     """
 
     def __init__(self):

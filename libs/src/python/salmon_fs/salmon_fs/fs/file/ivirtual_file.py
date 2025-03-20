@@ -1,4 +1,7 @@
 #!/usr/bin/env python3
+"""!@brief Interface for a virtual file.
+"""
+
 from __future__ import annotations
 
 __license__ = """
@@ -36,9 +39,8 @@ from salmon_core.streams.random_access_stream import RandomAccessStream
 
 @typechecked
 class IVirtualFile(ABC):
-    """
-    A virtual file. Read-only operations are included. Since write operations can be implementation
-    specific ie for encryption they can be implemented by extending this class.
+    """!
+    Interface for a virtual file.
     """
 
     def __init__(self, real_file: IFile, drive: VirtualDrive | None = None):

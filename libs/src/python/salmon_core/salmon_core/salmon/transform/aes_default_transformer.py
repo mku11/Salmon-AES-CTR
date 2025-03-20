@@ -1,4 +1,7 @@
 #!/usr/bin/env python3
+"""!@brief Salmon AES transformer based on the cryptodome routines.
+"""
+
 __license__ = """
 MIT License
 
@@ -35,7 +38,7 @@ from typeguard import typechecked
 
 @typechecked
 class AesDefaultTransformer(AESCTRTransformer):
-    """
+    """!
     Salmon AES transformer based on the cryptodome routines.
     """
 

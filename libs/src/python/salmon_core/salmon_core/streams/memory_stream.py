@@ -33,7 +33,7 @@ from salmon_core.streams.random_access_stream import RandomAccessStream
 
 @typechecked
 class MemoryStream(RandomAccessStream):
-    """
+    """!
     Memory Stream for seeking, reading, and writing to a memory buffer (modeled after C# MemoryStream).
     If the memory buffer is not specified then an internal resizable buffer will be created.
     """

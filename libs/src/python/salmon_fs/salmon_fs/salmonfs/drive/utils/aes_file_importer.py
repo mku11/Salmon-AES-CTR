@@ -1,4 +1,7 @@
 #!/usr/bin/env python3
+"""!@brief Import files into drives.
+"""
+
 from __future__ import annotations
 
 __license__ = """
@@ -50,7 +53,7 @@ def _import_file(index: int, final_part_size: int, final_running_threads: int, f
                  shm_cancel_name: str,
                  buffer_size: int, key: bytearray,
                  integrity: bool, hash_key: bytearray | None, chunk_size: int):
-    """
+    """!
     Do not use directly use AesFileImporter class instead.
     """
     imported_file: AesFile = AesFile(salmon_real_file)
@@ -87,7 +90,7 @@ def _import_file_part(file_to_import: IFile, salmon_file: AesFile, start: int, c
                       shm_cancel_name: str | None = None,
                       stopped: list[bool] | None = None,
                       on_progress_changed: Callable[[int, int], Any] | None = None):
-    """
+    """!
     Do not use directly use AesFileImporter class instead.
     """
     shm_cancel_data: memoryview | None = None
@@ -141,7 +144,7 @@ def _import_file_part(file_to_import: IFile, salmon_file: AesFile, start: int, c
 
 @typechecked
 class AesFileImporter:
-    """
+    """!
     Import files into drives.
     """
 

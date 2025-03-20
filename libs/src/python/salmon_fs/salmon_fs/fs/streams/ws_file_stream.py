@@ -1,4 +1,7 @@
 #!/usr/bin/env python3
+"""!@brief Stream implemetation for web service files.
+"""
+
 __license__ = """
 MIT License
 
@@ -40,8 +43,8 @@ from salmon_core.streams.random_access_stream import RandomAccessStream
 
 @typechecked
 class WSFileStream(RandomAccessStream):
-    """
-    An advanced Salmon File Stream implementation for python web service files.
+    """!
+    Stream implemetation for web service files.
     This class is used internally for random file access of physical (real) files.
     """
     __PATH: str = "path"

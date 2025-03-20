@@ -1,4 +1,7 @@
 #!/usr/bin/env python3
+"""!@brief Nonce generator backed by a file.
+"""
+
 __license__ = """
 MIT License
 
@@ -43,8 +46,8 @@ from salmon.sequence.sequence_exception import SequenceException
 
 @typechecked
 class FileSequencer(INonceSequencer):
-    """
-    Generates nonces based on a sequencer backed by a file.
+    """!
+    Nonce generator backed by a file.
     """
 
     def __init__(self, sequence_file: IFile, serializer: INonceSequenceSerializer):

@@ -1,4 +1,7 @@
 #!/usr/bin/env python3
+"""!@brief Interface for the encryption/decryption transformers.
+"""
+
 __license__ = """
 MIT License
 
@@ -30,8 +33,8 @@ from typeguard import typechecked
 
 @typechecked
 class ICTRTransformer(ABC):
-    """
-    Contract for the encryption/decryption transformers.
+    """!
+    Interface for the encryption/decryption transformers.
     Note that Counter mode needs to be supported.
     """
 

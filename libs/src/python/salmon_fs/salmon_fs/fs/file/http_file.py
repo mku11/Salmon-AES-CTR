@@ -1,4 +1,7 @@
 #!/usr/bin/env python3
+"""!@brief Http (read only) File implementation for Python.
+"""
+
 from __future__ import annotations
 
 __license__ = """
@@ -42,8 +45,8 @@ from salmon_core.streams.random_access_stream import RandomAccessStream
 
 @typechecked
 class HttpFile(IFile):
-    """
-    Salmon Http (read only) File implementation for Python.
+    """!
+    Http (read only) File implementation for Python.
     """
 
     MAX_REDIRECTS: int = 5

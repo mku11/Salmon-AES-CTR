@@ -34,7 +34,7 @@ from salmon_core.streams.random_access_stream import RandomAccessStream
 
 @typechecked
 class BufferedIOWrapper(BufferedIOBase):
-    """
+    """!
     Wrapper stream of AbsStream to Python's native IOBase interface.
     Use this class to wrap any AbsStream to a less powerful but familiar and compatible Python InputStream.
     """

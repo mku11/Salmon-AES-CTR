@@ -1,4 +1,7 @@
 #!/usr/bin/env python3
+"""!@brief Utility class generates internal secure properties for the drive.
+"""
+
 from __future__ import annotations
 
 __license__ = """
@@ -33,7 +36,7 @@ from salmon_core.salmon.generator import Generator
 
 @typechecked
 class DriveGenerator:
-    """
+    """!
     Utility class generates internal secure properties for the drive.
     """
 

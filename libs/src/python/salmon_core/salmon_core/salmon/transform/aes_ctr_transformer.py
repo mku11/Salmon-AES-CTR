@@ -1,4 +1,7 @@
 #!/usr/bin/env python3
+"""!@brief Abstract class for AES256 transformer implementations.
+"""
+
 __license__ = """
 MIT License
 
@@ -35,7 +38,7 @@ from typeguard import typechecked
 
 @typechecked
 class AESCTRTransformer(ICTRTransformer, ABC):
-    """
+    """!
     Abstract class for AES256 transformer implementations.
     
     """

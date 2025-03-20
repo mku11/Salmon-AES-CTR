@@ -1,4 +1,7 @@
 #!/usr/bin/env python3
+"""!@brief Facade class for batch file operations.
+"""
+
 from __future__ import annotations
 
 __license__ = """
@@ -40,8 +43,8 @@ from salmon_fs.salmonfs.drive.utils.aes_file_searcher import AesFileSearcher
 
 @typechecked
 class AesFileCommander:
-    """
-    Facade class for file operations.
+    """!
+    Facade class for batch file operations.
     """
 
     def __init__(self, import_buffer_size: int = 0, export_buffer_size: int = 0, threads: int = 1,
@@ -511,6 +514,10 @@ class AesFileCommander:
             self.__file = file
 
     class RealFileTaskProgress(FileTaskProgress):
+        """!
+        The task progress for a real file
+        """
+        
         def get_file(self) -> IFile:
             """
             Get the file

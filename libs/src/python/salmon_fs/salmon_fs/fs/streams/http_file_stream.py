@@ -1,4 +1,7 @@
 #!/usr/bin/env python3
+"""!@brief Stream implemetation for HTTP files.
+"""
+
 __license__ = """
 MIT License
 
@@ -36,8 +39,8 @@ from salmon_core.streams.random_access_stream import RandomAccessStream
 
 @typechecked
 class HttpFileStream(RandomAccessStream):
-    """
-    An advanced Salmon File Stream implementation for python http files.
+    """!
+    Stream implemetation for HTTP files.
     This class is used internally for random file access of physical (real) files.
     """
 

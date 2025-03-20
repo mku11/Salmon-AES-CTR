@@ -1,4 +1,7 @@
 #!/usr/bin/env python3
+"""!@brief Stream implemetation for local files.
+"""
+
 __license__ = """
 MIT License
 
@@ -34,8 +37,8 @@ from salmon_core.streams.random_access_stream import RandomAccessStream
 
 @typechecked
 class FileStream(RandomAccessStream):
-    """
-    An advanced Salmon File Stream implementation for python files.
+    """!
+    Stream implemetation for local files.
     This class is used internally for random file access of physical (real) files.
     """
 
