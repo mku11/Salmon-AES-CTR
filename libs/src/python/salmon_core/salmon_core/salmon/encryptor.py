@@ -1,4 +1,7 @@
 #!/usr/bin/env python3
+"""!@brief Utility class that decrypts byte arrays. 
+"""
+
 __license__ = """
 MIT License
 
@@ -122,8 +125,8 @@ def _encrypt_data(input_stream: MemoryStream, start: int, count: int, out_data: 
 
 @typechecked
 class Encryptor:
-    """
-    Encrypts byte arrays.
+    """!
+    Utility class that encrypts byte arrays. 
     """
 
     def __init__(self, threads: int = 1, buffer_size: int = Integrity.DEFAULT_CHUNK_SIZE, multi_cpu: bool = False):

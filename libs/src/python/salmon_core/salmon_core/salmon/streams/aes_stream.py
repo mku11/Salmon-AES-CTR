@@ -1,4 +1,7 @@
 #!/usr/bin/env python3
+"""!@brief Stream wrapper provides AES256 encryption and decryption of streams.
+"""
+
 from __future__ import annotations
 
 __license__ = """
@@ -44,8 +47,8 @@ from salmon_core.salmon.transform.salmon_transformer_factory import TransformerF
 
 @typechecked
 class AesStream(RandomAccessStream):
-    """
-    Stream decorator provides AES256 encryption and decryption of stream.
+    """!
+    Stream wrapper provides AES256 encryption and decryption of stream.
     Block data integrity is also supported.
     """
 

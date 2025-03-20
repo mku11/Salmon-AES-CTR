@@ -1,4 +1,7 @@
 #!/usr/bin/env python3
+"""!@brief Utility class that decrypts byte arrays. 
+"""
+
 __license__ = """
 MIT License
 
@@ -50,7 +53,7 @@ def _decrypt_shm(index: int, part_size: int, running_threads: int,
                  nonce: bytearray,
                  enc_format: EncryptionFormat,
                  integrity: bool, hash_key: bytearray | None, chunk_size: int, buffer_size: int):
-    """
+    """!
     Do not use directly use Decryptor class instead.
     """
     start: int = part_size * index
@@ -73,7 +76,7 @@ def _decrypt_data(input_stream: RandomAccessStream, start: int, count: int, out_
                   key: bytearray, nonce: bytearray | None,
                   enc_format: EncryptionFormat, integrity: bool, hash_key: bytearray | None,
                   chunk_size: int, buffer_size: int, shm_cancel_name: str | None = None) -> (int, int):
-    """
+    """!
     Do not use directly use Decryptor class instead.
     """
     shm_cancel_data: memoryview | None = None
@@ -121,7 +124,7 @@ def _decrypt_data(input_stream: RandomAccessStream, start: int, count: int, out_
 
 @typechecked
 class Decryptor:
-    """
+    """!
     Utility class that decrypts byte arrays.
     """
 

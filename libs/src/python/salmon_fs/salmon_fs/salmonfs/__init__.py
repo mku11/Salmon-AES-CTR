@@ -1,3 +1,6 @@
+"""!@brief Salmon encrypted file system
+"""
+
 import os
 import sys
 

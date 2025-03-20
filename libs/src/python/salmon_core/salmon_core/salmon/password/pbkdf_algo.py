@@ -1,4 +1,7 @@
 #!/usr/bin/env python3
+"""!@brief Pbkdf algorithm types
+"""
+
 from __future__ import annotations
 
 __license__ = """
@@ -31,7 +34,7 @@ from typeguard import typechecked
 
 @typechecked
 class PbkdfAlgo(Enum):
-    """
+    """!
     Pbkdf algorithm implementation type.
     """
 

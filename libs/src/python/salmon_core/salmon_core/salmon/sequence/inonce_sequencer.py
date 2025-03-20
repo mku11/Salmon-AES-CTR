@@ -1,4 +1,7 @@
 #!/usr/bin/env python3
+"""!@brief Nonce sequencers
+"""
+
 __license__ = """
 MIT License
 
@@ -32,7 +35,7 @@ from salmon.sequence.nonce_sequence import NonceSequence
 
 @typechecked
 class INonceSequencer(ABC):
-    """
+    """!
     Salmon nonce sequencer.
     """
 

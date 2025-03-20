@@ -1,4 +1,7 @@
 #!/usr/bin/env python3
+"""!@brief Sequence exception
+"""
+
 __license__ = """
 MIT License
 
@@ -28,7 +31,7 @@ from typeguard import typechecked
 
 @typechecked
 class SequenceException(Exception):
-    """
+    """!
     Thrown when there is a failure in the nonce sequencer.
     """
 

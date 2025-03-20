@@ -1,3 +1,6 @@
+"""!@brief Password based key derivation utilities
+"""
+
 import os
 import sys
 

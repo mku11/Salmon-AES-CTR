@@ -1,3 +1,6 @@
+"""!@brief Drive utilities to import, export, and search files in encrypted virtual drives
+"""
+
 import os
 import sys
 

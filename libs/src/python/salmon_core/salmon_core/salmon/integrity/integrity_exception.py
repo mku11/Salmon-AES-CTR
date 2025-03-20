@@ -1,4 +1,7 @@
 #!/usr/bin/env python3
+"""!@brief Integrity exceptions
+"""
+
 __license__ = """
 MIT License
 
@@ -28,7 +31,7 @@ from typeguard import typechecked
 
 @typechecked
 class IntegrityException(Exception):
-    """
+    """!
     Thrown when data are corrupt or tampered with.
     """
 

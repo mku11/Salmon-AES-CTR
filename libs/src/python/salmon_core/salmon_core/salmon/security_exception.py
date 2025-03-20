@@ -1,4 +1,7 @@
 #!/usr/bin/env python3
+"""!@brief Salmon generic security exception.
+"""
+
 __license__ = """
 MIT License
 
@@ -28,7 +31,7 @@ from typeguard import typechecked
 
 @typechecked
 class SecurityException(Exception):
-    """
+    """!
     Salmon generic security exception.
     """
 

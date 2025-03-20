@@ -1,4 +1,7 @@
 #!/usr/bin/env python3
+"""!@brief Base64 utilities
+"""
+
 __license__ = """
 MIT License
 
@@ -31,7 +34,7 @@ from typeguard import typechecked
 
 @typechecked
 class Base64Utils:
-    """
+    """!
     Provides generic encoder (ie Base64).
     """
 

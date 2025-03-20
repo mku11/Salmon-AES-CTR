@@ -1,3 +1,6 @@
+"""!@brief Salmon encryption
+"""
+
 import os
 import sys
 

@@ -1,3 +1,5 @@
+"""!@brief Hash calculators used for integrity verfication and tamper detection
+"""
 import os
 import sys
 

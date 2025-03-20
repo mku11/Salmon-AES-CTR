@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""!@brief Interface for a Base64 encoder/decoder.
+"""!@brief Interfaces for a Base64 encoder/decoder.
 """
 
 __license__ = """
@@ -32,7 +32,7 @@ from typeguard import typechecked
 
 @typechecked
 class IBase64(ABC):
-    """
+    """!
     Interface for a Base64 encoder/decoder.
     """
 

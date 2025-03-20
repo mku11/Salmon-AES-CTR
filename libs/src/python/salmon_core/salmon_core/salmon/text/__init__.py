@@ -1,3 +1,6 @@
+"""!@brief Text encryption and decryption utilities
+"""
+
 import os
 import sys
 

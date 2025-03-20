@@ -1,4 +1,7 @@
 #!/usr/bin/env python3
+"""!@brief Python HMAC256 hashing.
+"""
+
 __license__ = """
 MIT License
 
@@ -34,7 +37,7 @@ from typeguard import typechecked
 
 @typechecked
 class HmacSHA256Provider(IHashProvider):
-    """
+    """!
     Provides Python HMAC256 hashing.
     """
 

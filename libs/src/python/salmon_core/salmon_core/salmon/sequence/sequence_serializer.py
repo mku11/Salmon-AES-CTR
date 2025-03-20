@@ -1,4 +1,7 @@
 #!/usr/bin/env python3
+"""!@brief Sequence serializer
+"""
+
 from __future__ import annotations
 
 __license__ = """
@@ -38,7 +41,7 @@ from salmon.sequence.sequence_exception import SequenceException
 
 @typechecked
 class SequenceSerializer(INonceSequenceSerializer):
-    """
+    """!
     Serializes sequences for all the drives the device is authorized.
     """
 

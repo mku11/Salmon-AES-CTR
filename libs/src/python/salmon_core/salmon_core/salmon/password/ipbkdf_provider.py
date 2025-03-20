@@ -1,4 +1,8 @@
 #!/usr/bin/env python3
+"""!@brief Pbkdf provider interfaces
+"""
+
+
 __license__ = """
 MIT License
 
@@ -31,8 +35,8 @@ from typeguard import typechecked
 
 @typechecked
 class ISalmonPbkdfProvider(ABC):
-    """
-    Provides key derivation based on text passwords.
+    """!
+    Provider interface for key derivation text passwords.
     """
 
     PBKDF_SHA256: str = "sha256"

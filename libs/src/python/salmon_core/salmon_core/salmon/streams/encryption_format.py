@@ -1,4 +1,7 @@
 #!/usr/bin/env python3
+"""!@brief Encryption Format
+"""
+
 __license__ = """
 MIT License
 
@@ -30,7 +33,7 @@ from typeguard import typechecked
 
 @typechecked
 class EncryptionFormat(Enum):
-    """
+    """!
     Encryption Format
     
     @see #Generic

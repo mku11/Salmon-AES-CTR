@@ -1,4 +1,7 @@
 #!/usr/bin/env python3
+"""!@brief Nonce sequence
+"""
+
 from __future__ import annotations
 
 __license__ = """
@@ -31,7 +34,7 @@ from typeguard import typechecked
 
 @typechecked
 class NonceSequence:
-    """
+    """!
     Represents a nonce sequence for a specific drive and device.
     """
 

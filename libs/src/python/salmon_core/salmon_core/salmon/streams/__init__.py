@@ -1,3 +1,6 @@
+"""!@brief Encryption and decryption streams
+"""
+
 import os
 import sys
 

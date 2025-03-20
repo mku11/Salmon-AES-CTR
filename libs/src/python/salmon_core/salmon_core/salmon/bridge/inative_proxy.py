@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""!@brief Interface to native libraries that provide AES-256 encryption in CTR mode.
+"""!@brief Interfaces to native libraries
 """
 
 __license__ = """
@@ -32,7 +32,7 @@ from typeguard import typechecked
 
 @typechecked
 class INativeProxy(ABC):
-    """
+    """!
     Interface to native libraries that provide AES-256 encryption in CTR mode.
     """
 

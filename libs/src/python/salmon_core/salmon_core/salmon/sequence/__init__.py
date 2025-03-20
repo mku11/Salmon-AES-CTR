@@ -1,3 +1,6 @@
+"""!@brief Nonce sequencers and serializer interfaces
+"""
+
 import os
 import sys
 

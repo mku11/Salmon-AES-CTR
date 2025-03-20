@@ -1,3 +1,6 @@
+"""!@brief 	Provides utilities for device authorization
+"""
+
 import os
 import sys
 

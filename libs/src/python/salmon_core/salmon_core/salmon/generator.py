@@ -1,4 +1,6 @@
 #!/usr/bin/env python3
+"""!@brief Utility class generates internal secure properties.
+"""
 __license__ = """
 MIT License
 
@@ -30,7 +32,7 @@ from typeguard import typechecked
 
 @typechecked
 class Generator:
-    """
+    """!
     Utility class generates internal secure properties.
     """
 

@@ -1,4 +1,7 @@
 #!/usr/bin/env python3
+"""!@brief Pbkdf factories
+"""
+
 __license__ = """
 MIT License
 
@@ -25,14 +28,14 @@ SOFTWARE.
 
 from salmon_core.salmon.password.ipbkdf_provider import ISalmonPbkdfProvider
 from salmon_core.salmon.password.pbkdf_type import PbkdfType
-from salmon_core.salmon.password.default_pbkdf_provider import SalmonDefaultPbkdfProvider
+from salmon_core.salmon.password.default_pbkdf_provider import DefaultPbkdfProvider
 
 from typeguard import typechecked
 
 
 @typechecked
-class SalmonPbkdfFactory:
-    """
+class PbkdfFactory:
+    """!
     Creates AES transformer implementations.
     """
 
@@ -45,5 +48,5 @@ class SalmonPbkdfFactory:
         """
         match pbkdf_type:
             case PbkdfType.Default:
-                return SalmonDefaultPbkdfProvider()
+                return DefaultPbkdfProvider()
         raise RuntimeError("Unknown Pbkdf provider type")

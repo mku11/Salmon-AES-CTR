@@ -1,4 +1,7 @@
 #!/usr/bin/env python3
+"""!@brief Memory Stream for seeking, reading, and writing to a memory buffer 
+"""
+
 __license__ = """
 MIT License
 

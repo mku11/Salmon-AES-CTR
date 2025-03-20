@@ -1,4 +1,7 @@
 #!/usr/bin/env python3
+"""!@brief Thrown when maximum nonce range is exceeded.
+"""
+
 __license__ = """
 MIT License
 
@@ -28,7 +31,7 @@ from typeguard import typechecked
 
 @typechecked
 class RangeExceededException(Exception):
-    """
+    """!
     Thrown when maximum nonce range is exceeded.
     """
 

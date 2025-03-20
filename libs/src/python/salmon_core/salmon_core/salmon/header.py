@@ -1,4 +1,7 @@
 #!/usr/bin/env python3
+"""!@brief Header embedded in the AesStream
+"""
+
 from __future__ import annotations
 
 __license__ = """
@@ -35,7 +38,7 @@ from salmon_core.salmon.generator import Generator
 
 @typechecked
 class Header:
-    """
+    """!
     Header embedded in the AesStream. Header contains nonce and other information for
     decrypting the stream.
     """

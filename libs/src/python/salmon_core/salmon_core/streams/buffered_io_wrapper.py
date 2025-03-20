@@ -1,4 +1,7 @@
 #!/usr/bin/env python3
+"""!@brief Wrapper stream of AbsStream to Python's native IOBase interface.
+"""
+
 __license__ = """
 MIT License
 

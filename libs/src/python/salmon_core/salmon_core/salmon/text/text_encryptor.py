@@ -1,4 +1,7 @@
 #!/usr/bin/env python3
+"""!@brief Utility class that encrypts text strings.
+"""
+
 __license__ = """
 MIT License
 
@@ -31,8 +34,8 @@ from typeguard import typechecked
 
 @typechecked
 class TextEncryptor:
-    """
-    Utility class that encrypts and decrypts text strings.
+    """!
+    Utility class that encrypts text strings.
     """
 
     __encryptor: Encryptor = Encryptor()

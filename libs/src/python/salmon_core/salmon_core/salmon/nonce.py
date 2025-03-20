@@ -1,4 +1,7 @@
 #!/usr/bin/env python3
+"""!@brief Utility provides nonce operations.
+"""
+
 __license__ = """
 MIT License
 
@@ -33,7 +36,7 @@ from salmon_core.salmon.security_exception import SecurityException
 
 @typechecked
 class Nonce:
-    """
+    """!
     Utility provides nonce operations.
     """
 

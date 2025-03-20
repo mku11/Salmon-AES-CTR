@@ -1,4 +1,7 @@
 #!/usr/bin/env python3
+"""!@brief Sequence serializers
+"""
+
 from __future__ import annotations
 
 __license__ = """
@@ -33,7 +36,7 @@ from salmon.sequence.nonce_sequence import NonceSequence
 
 @typechecked
 class INonceSequenceSerializer(ABC):
-    """
+    """!
     Serializes/Deserializes nonce sequences.
     """
 

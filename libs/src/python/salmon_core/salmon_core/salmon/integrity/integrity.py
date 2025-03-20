@@ -1,4 +1,7 @@
 #!/usr/bin/env python3
+"""!@brief Calculating, storing, and verifying data integrity
+"""
+
 __license__ = """
 MIT License
 
@@ -37,7 +40,7 @@ from typeguard import typechecked
 
 @typechecked
 class Integrity:
-    """
+    """!
     Provide operations for calculating, storing, and verifying data integrity.
     This class operates in chunks of data in buffers calculating the hash for each one.
      """

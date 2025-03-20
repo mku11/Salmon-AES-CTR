@@ -1,3 +1,5 @@
+"""!@brief Salmon encoders
+"""
 import os
 import sys
 

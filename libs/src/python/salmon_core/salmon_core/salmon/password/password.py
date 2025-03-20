@@ -1,4 +1,7 @@
 #!/usr/bin/env python3
+"""!@brief Text based key generators
+"""
+
 from __future__ import annotations
 
 __license__ = """
@@ -30,13 +33,13 @@ from typeguard import typechecked
 from salmon_core.salmon.password.ipbkdf_provider import ISalmonPbkdfProvider
 from salmon_core.salmon.password.pbkdf_algo import PbkdfAlgo
 from salmon_core.salmon.password.pbkdf_type import PbkdfType
-from salmon_core.salmon.password.default_pbkdf_provider import SalmonDefaultPbkdfProvider
-from salmon_core.salmon.password.pbkdf_factory import SalmonPbkdfFactory
+from salmon_core.salmon.password.default_pbkdf_provider import DefaultPbkdfProvider
+from salmon_core.salmon.password.pbkdf_factory import PbkdfFactory
 
 
 @typechecked
 class Password:
-    """
+    """!
     Generates security keys based on text passwords.
     """
 
@@ -45,7 +48,7 @@ class Password:
     Global PBKDF algorithm option that will be used for the master key derivation.
     """
 
-    __provider: ISalmonPbkdfProvider = SalmonDefaultPbkdfProvider()
+    __provider: ISalmonPbkdfProvider = DefaultPbkdfProvider()
     """
     Pbkdf provider.
     """
@@ -73,7 +76,7 @@ class Password:
         Set the global PBKDF implementation to be used for text key derivation.
         
         @param pbkdf_type:         """
-        __provider = SalmonPbkdfFactory.create(pbkdf_type)
+        __provider = PbkdfFactory.create(pbkdf_type)
 
     @staticmethod
     def set_pbkdf_provider(pbkdf_provider: ISalmonPbkdfProvider):

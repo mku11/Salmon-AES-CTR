@@ -1,4 +1,7 @@
 #!/usr/bin/env python3
+"""!@brief Interface for hashing calculators
+"""
+
 __license__ = """
 MIT License
 
@@ -29,8 +32,8 @@ from typeguard import typechecked
 
 @typechecked
 class IHashProvider(ABC):
-    """
-    Provides Hashing calculation.
+    """!
+    Interface for hashing calculators
     """
 
     @abstractmethod

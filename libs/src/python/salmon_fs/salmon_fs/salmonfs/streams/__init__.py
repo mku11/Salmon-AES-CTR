@@ -1,3 +1,5 @@
+"""!@brief Wrappers for encrypted file streams
+"""
 import os
 import sys
 

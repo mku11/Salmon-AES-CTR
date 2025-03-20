@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 
-"""!@brief Converts from/to byte arrays, integral values, and hex strings.
+"""!@brief Bit converters
 """
 
 __license__ = """
@@ -29,10 +29,9 @@ SOFTWARE.
 
 from typeguard import typechecked
 
-
 @typechecked
 class BitConverter:
-    """
+    """!
     Converts from/to byte arrays, integral values, and hex strings.
     """
 

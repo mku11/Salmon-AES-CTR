@@ -1,3 +1,6 @@
+"""!@brief Streams, wrappers, and pipe adapters
+"""
+
 import os
 import sys
 

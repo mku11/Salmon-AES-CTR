@@ -1,3 +1,6 @@
+"""!@brief Stream implementations for files
+"""
+
 import os
 import sys
 

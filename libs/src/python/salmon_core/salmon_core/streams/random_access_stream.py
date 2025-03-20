@@ -1,4 +1,7 @@
 #!/usr/bin/env python3
+"""!@brief Abstract read-write seekable stream used by internal streams
+"""
+
 from __future__ import annotations
 
 __license__ = """

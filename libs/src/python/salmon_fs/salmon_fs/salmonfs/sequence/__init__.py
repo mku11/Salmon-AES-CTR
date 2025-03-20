@@ -1,3 +1,5 @@
+"""!@brief Encrypted file implementations
+"""
 import os
 import sys
 

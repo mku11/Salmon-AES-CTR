@@ -1,6 +1,5 @@
 #!/usr/bin/env python3
-
-"""!@brief Base64 encoder/decoder.
+"""!@brief Base64 encoders/decoders.
 """
 
 __license__ = """
@@ -34,7 +33,7 @@ from salmon_core.convert.ibase_64 import IBase64
 
 @typechecked
 class Base64(IBase64):
-    """
+    """!
     Base64 encoder/decoder.
     """
 
