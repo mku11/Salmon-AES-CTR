@@ -226,7 +226,8 @@ export class Encryptor {
         }
         await Promise.all(this.#promises).then((results: any) => {
             for (let i = 0; i < results.length; i++) {
-                for (let j = results[i].startPos; j < results[i].endPos; j++) {
+                let startPos = i == 0 ? 0 : results[i].startPos;
+                for (let j = startPos; j < results[i].endPos; j++) {
                     outData[j] = results[i].outData[j];
                 }
             }
