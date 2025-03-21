@@ -6,7 +6,7 @@
   "scripts": {
     "build": "tsc --build",
     "clean": "tsc --build --clean",
-    "test": "jest --runInBand",
+    "test": "NODE_OPTIONS=--experimental-vm-modules jest --runInBand",
     "lint": "tslint --config tslint.json --project tsconfig.json",
     "eslint": "eslint ./test/**/*.js --ext .js",
     "jsdocs": "jsdoc ./lib -r -d ../../../output/docs/javascript/html",
