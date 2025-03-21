@@ -50,7 +50,7 @@ from typeguard import typechecked
 @typechecked
 def _decrypt_shm(index: int, part_size: int, running_threads: int,
                  data: bytearray, shm_out_name: str, shm_length: int, shm_cancel_name: str, key: bytearray,
-                 nonce: bytearray,
+                 nonce: bytearray | None,
                  enc_format: EncryptionFormat,
                  integrity: bool, hash_key: bytearray | None, chunk_size: int, buffer_size: int):
     """!
@@ -201,7 +201,7 @@ class Decryptor:
         return out_data
 
     def __decrypt_data_parallel(self, data: bytearray, out_data: bytearray,
-                                key: bytearray, hash_key: bytearray | None, nonce: bytearray,
+                                key: bytearray, hash_key: bytearray | None, nonce: bytearray | None,
                                 enc_format: EncryptionFormat,
                                 chunk_size: int, integrity: bool):
         """!
@@ -243,7 +243,7 @@ class Decryptor:
 
     def __submit_decrypt_jobs(self, running_threads: int, part_size: int,
                               data: bytearray, out_data: bytearray,
-                              key: bytearray, hash_key: bytearray | None, nonce: bytearray,
+                              key: bytearray, hash_key: bytearray | None, nonce: bytearray | None,
                               enc_format: EncryptionFormat,
                               integrity: bool, chunk_size: int):
 
