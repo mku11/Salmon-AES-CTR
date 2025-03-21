@@ -1,11 +1,9 @@
-![alt text](https://github.com/mku11/Salmon-AES-CTR/blob/wip/common/common-res/icons/logo.png)
-
 ## Salmon
 
 Salmon is an AES-256 encryption library with CPU and GPU acceleration, built-in data integrity, parallel operations, and seekable stream support. It provides a high level API for encrypting data arrays and streams, and a file system API for virtual drives.  
   
 [![License: MIT](https://img.shields.io/github/license/mku11/Salmon-AES-CTR.svg)](LICENSE)
-[![Version](https://img.shields.io/badge/version-2.2.0-blue)](https://github.com/mku11/Salmon-AES-CTR/releases)
+[![Version](https://img.shields.io/badge/version-3.0.0-blue)](https://github.com/mku11/Salmon-AES-CTR/releases)
 [![GitHub Releases](https://img.shields.io/github/downloads/mku11/Salmon-AES-CTR/latest/total?logo=github)](https://github.com/mku11/Salmon-AES-CTR/releases)
 
 ## Library Features  
@@ -18,7 +16,6 @@ Salmon is an AES-256 encryption library with CPU and GPU acceleration, built-in 
 - File system API for encrypted virtual drives  
 - Protected nonce sequencers (limited)  
 - Web Service for use with remote virtual drives (experimental Java/C# clients)
- 
  
 ## Live Web Demo
 ![alt text](https://github.com/mku11/Salmon-Vault/blob/main/screenshots/Screenshot.png)  
@@ -33,16 +30,17 @@ C# .NET 8+
 Python 3.11+  
 Typescript ESM/ES2020  
 Javascript ESM/ES2020  
-C/C++ (data encryption API only)  
+C/C++ (data encryption API only, no streams)  
   
-**Platforms Tested:**  
+**Platforms Supported:**  
 JavaFX 17+  
-Android 23+  
-.NET Android 23+  
-WPF, Xamarin, and MAUI  
-Chrome, Firefox, Safari (Remote read-only drives)  
-Chrome (Local read-write drives)  
-Node.js (Remote read-only and Local read-write drives)  
+.NET WPF
+.NET Xamarin and MAUI  
+Android 23+ (No GPU-accel)
+.NET Android 23+ (No GPU-accel)
+Chrome (default JS crypto only)
+Firefox, Safari (No Local drives / default JS crypto only)
+Node.js (ESM modules / default JS crypto only)
   
 **Operating Systems Tested:**  
 Windows 10+ x86_64  
@@ -150,11 +148,12 @@ For a showcase of the Salmon API visit [Salmon Vault App](https://github.com/mku
 or the [**Live Web Demo**](https://mku11.github.io/Salmon-Vault/demo).
 
 #### Salmon API Reference Documentation ####
-The API ref documentation is not complete but nontheless helpful:  
+The API ref documentation is now almost complete:  
 [Java](https://mku11.github.io/Salmon-AES-CTR/docs/2.1.0/java/html/)
  | [C#](https://mku11.github.io/Salmon-AES-CTR/docs/2.1.0/csharp/html/namespaces.html)
  | [C](https://mku11.github.io/Salmon-AES-CTR/docs/2.1.0/c/html/files.html)
- | [JavaScript](https://mku11.github.io/Salmon-AES-CTR/docs/2.1.0/javascript/html/Base64.html)
+ | [JavaScript](https://mku11.github.io/Salmon-AES-CTR/docs/2.1.0/javascript/html)
+ | [TypeScript](https://mku11.github.io/Salmon-AES-CTR/docs/2.1.0/typescript/html)
  | [Python](https://mku11.github.io/Salmon-AES-CTR/docs/2.1.0/python/html/namespaces.html)
 
 ### Sequence Files ###
