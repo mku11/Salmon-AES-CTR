@@ -70,7 +70,5 @@ lint.txt
 
 /samples/JavascriptSamples/assets/js/lib
 /samples/PythonSamples/lib
-vault_*
-data_*
 *.p12
 htmlReport
