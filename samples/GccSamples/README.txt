@@ -13,3 +13,5 @@ mv salmon-<platform>-<arch> salmon-lib
 To build type:
 make
 
+For linux and mac make sure you add the curr dir to the LD_LIBRARY_PATH:
+export LD_LIBRARY_PATH=.:$LD_LIBRARY_PATH
