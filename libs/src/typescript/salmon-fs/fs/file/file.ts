@@ -270,7 +270,7 @@ export class File implements IFile {
             await this.#fileHandle.move(newDir.getPath(), newName);
 			newFile = await newDir.getChild(newName) as File;
 			if (options.onProgressChanged != null)
-				options.onProgressChanged(newFile.getLength(), newFile.getLength());
+				options.onProgressChanged(await newFile.getLength(), await newFile.getLength());
 			return newFile;            
         } else {
             let oldFilename: string = this.getName();
