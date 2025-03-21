@@ -33,6 +33,7 @@ from unittest import TestCase
 from typeguard import typechecked
 
 sys.path.append(os.path.dirname(__file__) + '/../../src/python/salmon_core')
+sys.path.append(os.path.dirname(__file__) + '/../../test/salmon_core_test_python')
 from salmon_core.salmon.streams.provider_type import ProviderType
 from salmon_core.salmon.streams.aes_stream import AesStream
 from salmon_core.salmon.password.pbkdf_type import PbkdfType
