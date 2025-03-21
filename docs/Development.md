@@ -20,6 +20,11 @@ Also change to LF for all unix scripts:
 find . -name "*.sh" -exec dos2unix {} \;
 ```
 
+And gradle scripts:
+```
+find . -name "gradlew" -exec dos2unix {} \;
+```
+
 To refresh a branch from the remote repo:
 ```
 git pull origin wip-3.0.0

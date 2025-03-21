@@ -12,8 +12,11 @@ Build
 To build the app you will need:  
 1. Microsoft Visual Studio 2022  
 2. Microsoft Visual Studio C++ installed (visual studio installer)  
-3. Tiny AES key expansion subroutine. To pull Tiny AES code change to the main branch and from the project root folder type:  
+3. Tiny AES key expansion subroutine.  
+To pull Tiny AES code change to the main branch and type:  
+	```
 	git submodule update --init --recursive --remote  
+	```
 5. Enable intrinsic functions /Oi  
   
 Package:  
@@ -24,8 +27,10 @@ To create the nuget package for SalmonNative from the command line
 you need the Nuget executable. For instructions how to download it see:
 https://learn.microsoft.com/en-us/nuget/consume-packages/install-use-packages-nuget-cli
 And add the path to the PATH enviroment variable.
-Then you can either build the project, the task is post-build step.
-or package it manually:
+Then you can either build the project, the task should already exists as a post-build step in the vcxproj project file.
+or you can package it manually:
+```
 NuGet.exe pack SalmonNative.nuspec -outputDir ..\..\..\..\output\nuget\releases  
+```
 
   
