@@ -1,6 +1,6 @@
 CURRDIR=$(pwd)
 
-set ENC_THREADS=1
+export ENC_THREADS=1
 
 cd ../../../../libs/projects/SalmonLibs.vscode
 

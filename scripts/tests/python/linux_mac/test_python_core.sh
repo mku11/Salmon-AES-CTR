@@ -1,7 +1,7 @@
 CURRDIR=$(pwd)
 
-set ENABLE_GPU=false
-set ENC_THREADS=1
+export ENABLE_GPU=false
+export ENC_THREADS=1
 
 cd ../../../../libs/test/salmon_core_test_python
 
