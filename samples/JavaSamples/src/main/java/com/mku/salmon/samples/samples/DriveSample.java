@@ -154,8 +154,17 @@ public class DriveSample {
     public static FileSequencer createSequencer() throws IOException {
         // create a file nonce sequencer and place it in a private space
         // make sure you never edit or back up this file.
-        String seqFilename = "sequencer.xml";
-        IFile privateDir = new File(System.getenv("LOCALAPPDATA"));
+        String seqFilename = "sample_sequencer.xml";
+		
+		IFile privateDir = null;
+		String os = System.getProperty("os.name").toUpperCase();
+		if (os.toUpperCase().contains("WIN")) {
+            privateDir = new File(System.getenv("LOCALAPPDATA") + "\\" + "Salmon");
+        } else if (os.toUpperCase().contains("MAC")) {
+            privateDir = new File(System.getenv("HOME") + "/Salmon");
+        } else if (os.toUpperCase().contains("LINUX")) {
+            privateDir = new File(System.getenv("HOME") + "/Salmon");
+        }
 
         IFile sequencerDir = privateDir.getChild("sequencer");
         if (!sequencerDir.exists())

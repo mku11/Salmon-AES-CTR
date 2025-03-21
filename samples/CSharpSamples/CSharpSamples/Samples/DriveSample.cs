@@ -7,6 +7,7 @@ using Mku.SalmonFS.Sequence;
 using Mku.SalmonFS.Streams;
 using Mku.SalmonFS.Drive.Utils;
 using File = Mku.FS.File.File;
+using System.Runtime.InteropServices;
 
 namespace Mku.Salmon.Samples.Samples;
 
@@ -152,9 +153,21 @@ class DriveSample
     {
         // create a file nonce sequencer and place it in a private space
         // make sure you never edit or back up this file.
-        string seqFilename = "sequencer.xml";
-        IFile privateDir = new File(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData));
-
+        string seqFilename = "sample_sequencer.xml";
+		
+		IFile privateDir = null;
+		if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
+		{
+			privateDir = new File(Environment.GetEnvironmentVariable("LOCALAPPDATA") + "\\Salmon");
+		} 
+		else if (RuntimeInformation.IsOSPlatform(OSPlatform.Linux))
+		{
+			privateDir = new File(Environment.GetEnvironmentVariable("HOME") + "/Salmon");
+		} 
+		else if (RuntimeInformation.IsOSPlatform(OSPlatform.OSX))
+		{
+			privateDir = new File(Environment.GetEnvironmentVariable("HOME") + "/Salmon");
+		}
         IFile sequencerDir = privateDir.GetChild("sequencer");
         if (!sequencerDir.Exists)
             sequencerDir.Mkdir();

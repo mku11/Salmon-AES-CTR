@@ -150,12 +150,18 @@ export class DriveSample {
     static async createSequencer() {
         // create a file nonce sequencer and place it in a private space
         // make sure you never edit or back up this file.
-        let seqFilename = "sequencer.json";
+        let seqFilename = "sample_sequencer.json";
         let privateDir;
 		if (typeof process === 'object') { // node
 			const { NodeFile } = await import('../lib/salmon-fs/fs/file/node_file.js');
-			// if you use Linux/Macos use process.env.HOME
-			privateDir = new NodeFile(process.env.LOCALAPPDATA);
+			
+			if (process.platform === "win32")
+				privateDir = new NodeFile(process.env.LOCALAPPDATA + "\\Salmon");
+			else if (process.platform === "linux")
+				privateDir = new NodeFile(process.env.HOME + "/Salmon");
+			else if (process.platform === "darwin")
+				privateDir = new NodeFile(process.env.HOME + "/Salmon" );
+			
 		} else { // browser
 			privateDir = new LocalStorageFile(".");
 		}

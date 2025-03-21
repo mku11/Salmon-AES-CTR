@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 import os
 import sys
+import platform
 
 from salmon_fs.fs.file.ifile import IFile
 from salmon_fs.fs.file.file import File
@@ -137,10 +138,17 @@ class DriveSample:
     def create_sequencer():
         # create a file nonce sequencer and place it in a private space
         # make sure you never edit or back up this file.
-        seq_filename = "sequencer.xml"
-        # if you use Linux/macOS use HOME
-        private_dir: IFile = File(os.environ['LOCALAPPDATA'])
-
+        seq_filename = "sample_sequencer.xml"
+        
+        private_dir: IFile | None = None
+        platform_os: str = platform.system().upper()
+        if "WIN" in platform_os:
+            private_dir = File(os.getenv("LOCALAPPDATA") + "\\Salmon")
+        elif "MAC" in platform_os:
+            private_dir = File(os.getenv("HOME") + "/Salmon")
+        elif "LINUX" in platform_os:
+            private_dir = File(os.getenv("HOME") + "/Salmon")
+            
         sequencer_dir = private_dir.get_child("sequencer")
         if not sequencer_dir.exists():
             sequencer_dir.mkdir()
