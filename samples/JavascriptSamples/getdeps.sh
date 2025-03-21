@@ -27,5 +27,7 @@ unzip -qq -o $SALMON_CORE_LIB_FILENAME
 unzip -qq -o $SALMON_FS_LIB_FILENAME 
 
 cd ..
-mv -f packages/$SALMON_CORE assets/js/lib/
-mv -f packages/$SALMON_FS assets/js/lib/
+cp -rf packages/$SALMON_CORE assets/js/lib/
+rm -rf packages/$SALMON_CORE
+cp -rf packages/$SALMON_FS assets/js/lib/
+rm -rf packages/$SALMON_FS
