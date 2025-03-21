@@ -16,6 +16,10 @@ set TS_SALMON_FS_PACKAGE_NAME=%SALMON_FS%.ts.%SALMON_VERSION%
 set JS_SALMON_CORE_PACKAGE_NAME=%SALMON_CORE%.js.%SALMON_VERSION%
 set JS_SALMON_FS_PACKAGE_NAME=%SALMON_FS%.js.%SALMON_VERSION%
 
+:: Until ms fixes compress archive
+echo Cannot use zip file in linux that have been created with Compress-Archive backslashes, use package.sh instead
+exit /b
+
 powershell mkdir -ErrorAction SilentlyContinue %TS_OUTPUT_DIR%
 powershell mkdir -ErrorAction SilentlyContinue %JS_OUTPUT_DIR%
 
