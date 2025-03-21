@@ -94,6 +94,11 @@ class SalmonCoreTestHelper:
 
     testCase: TestCase = TestCase()
 
+    prj_path = "../../projects"
+    win_path = "/salmon-libs-gradle/salmon-native/build/libs/salmon/shared/salmon.dll"
+    mac_path = "/salmon-libs-xcode-macos/salmon/DerivedData/salmon/Build/Products/Release/libsalmon.dylib"
+    linux_path = "/salmon-libs-gradle/salmon-native/build/libs/salmon/shared/libsalmon.so"
+
     @staticmethod
     def initialize():
         SalmonCoreTestHelper.hashProvider = HmacSHA256Provider()
@@ -102,16 +107,13 @@ class SalmonCoreTestHelper:
 
         # set native library path
         platform_os: str = platform.system().upper()
-        projects_path: str = "../../projects"
+
         if "WIN" in platform_os:
-            NativeProxy.set_library_path(projects_path +
-                                         "/salmonfs-libs-gradle/salmonfs-native/build/libs/salmonfs/shared/salmon.dll")
+            NativeProxy.set_library_path(SalmonCoreTestHelper.prj_path + SalmonCoreTestHelper.win_path)
         elif "MAC" in platform_os:
-            NativeProxy.set_library_path(projects_path +
-                                         "/salmonfs-libs-xcode-macos/salmonfs/DerivedData/salmonfs/Build/Products/Release/libsalmon.dylib")
+            NativeProxy.set_library_path(SalmonCoreTestHelper.prj_path + SalmonCoreTestHelper.mac_path)
         elif "LINUX" in platform_os:
-            NativeProxy.set_library_path(projects_path +
-                                         "/salmonfs-libs-gradle/salmonfs-native/build/libs/salmonfs/shared/libsalmon.so")
+            NativeProxy.set_library_path(SalmonCoreTestHelper.projects_path + SalmonCoreTestHelper.linux_path)
 
     @staticmethod
     def close():

@@ -48,7 +48,7 @@ from salmon_core_test_helper import SalmonCoreTestHelper
 class SalmonNativeTests(TestCase):
     prj_path = "../../projects"
     win_path = prj_path + "/salmon-libs-gradle/salmon-native/build/libs/salmon/shared/salmon.dll"
-    mac_path = prj_path + "/salmon-libs-xcode-macos/salmon/DerivedData/salmonfs/Build/Products/Release/libsalmon.dylib"
+    mac_path = prj_path + "/salmon-libs-xcode-macos/salmon/DerivedData/salmon/Build/Products/Release/libsalmon.dylib"
     linux_path = prj_path + "/salmon-libs-gradle/salmon-native/build/libs/salmon/shared/libsalmon.so"
 
     ENC_THREADS = 1
