@@ -198,8 +198,11 @@ public class RealFileController {
         IFile nFile;
         if (source.isDirectory()) {
             throw new IOException("Cannot copy directories, use createDirectory and copy recursively");
-        } else
-            nFile = source.copy(dest, filename);
+        } else {
+			IFile.CopyOptions options = new IFile.CopyOptions();
+			options.newFilename = filename;
+            nFile = source.copy(dest, options);
+		}
         return new RealFileNode(nFile);
     }
 
@@ -227,8 +230,11 @@ public class RealFileController {
         IFile nFile;
         if (source.isDirectory()) {
             throw new IOException("Cannot move directories, use createDirectory and move recursively");
-        } else
-            nFile = source.move(dest, filename);
+        } else {
+			IFile.MoveOptions options = new IFile.MoveOptions();
+			options.newFilename = filename;
+            nFile = source.move(dest, options);
+		}
         return new RealFileNode(nFile);
     }
 
