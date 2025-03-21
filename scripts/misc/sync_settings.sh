@@ -71,6 +71,9 @@ PATTERN="^SALMON_VERSION=[^/]*"
 SUBST="SALMON_VERSION=$SALMON_VERSION"
 DIR=../samples
 sed -i -e "s/$PATTERN/$SUBST/g" $DIR/sample_gcc_win_x86_64.sh
+sed -i -e "s/$PATTERN/$SUBST/g" $DIR/sample_gcc_linux_x86_64.sh
+sed -i -e "s/$PATTERN/$SUBST/g" $DIR/sample_gcc_linux_aarch64.sh
+sed -i -e "s/$PATTERN/$SUBST/g" $DIR/sample_gcc_macos_x86_64.sh
 
 PATTERN="^SALMON_VERSION=[^/]*"
 SUBST="SALMON_VERSION=$SALMON_VERSION"
