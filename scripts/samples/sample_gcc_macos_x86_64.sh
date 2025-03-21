@@ -12,6 +12,6 @@ rm -rf salmon-lib
 tar -xzf ../../output/native/$PACKAGE_FILE
 mv $PACKAGE_NAME salmon-lib
 make
-./salmon_sample.exe
+./salmon_sample
 
 cd $CURRDIR
