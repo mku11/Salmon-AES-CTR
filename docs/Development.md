@@ -12,16 +12,13 @@ git update-index --chmod=+x
 
 To do this for all scripts under the repo:
 ```
-find . -name "*.sh" -exec git update-index --chmod=+x {}
+find . -name "*.sh" -exec git update-index --chmod=+x {} \;
+find . -name "gradlew" -exec git update-index --chmod=+x {} \;
 ```
 
 Also change to LF for all unix scripts:
 ```
 find . -name "*.sh" -exec dos2unix {} \;
-```
-
-And gradle scripts:
-```
 find . -name "gradlew" -exec dos2unix {} \;
 ```
 
