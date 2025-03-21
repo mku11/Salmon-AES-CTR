@@ -1,6 +1,6 @@
 CURRDIR=$(pwd)
 
-cd ../../libs/projects/salmon-libs-gradle
+cd ../../services/webservice/project
 ./gradlew --refresh-dependencies
 ./gradlew :salmon-ws:bootWar -x test --rerun-tasks
 cd salmon-ws
