@@ -113,7 +113,7 @@ class SalmonCoreTestHelper:
         elif "MAC" in platform_os:
             NativeProxy.set_library_path(SalmonCoreTestHelper.prj_path + SalmonCoreTestHelper.mac_path)
         elif "LINUX" in platform_os:
-            NativeProxy.set_library_path(SalmonCoreTestHelper.projects_path + SalmonCoreTestHelper.linux_path)
+            NativeProxy.set_library_path(SalmonCoreTestHelper.prj_path + SalmonCoreTestHelper.linux_path)
 
     @staticmethod
     def close():
