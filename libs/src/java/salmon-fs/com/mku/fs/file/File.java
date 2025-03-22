@@ -171,7 +171,7 @@ public class File implements IFile {
      * @return True if it's a file
      */
     public boolean isFile() {
-        return !isDirectory();
+        return new java.io.File(filePath).isFile();
     }
 
     /**

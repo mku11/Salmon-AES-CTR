@@ -230,7 +230,7 @@ public class HttpFile : IFile
     ///  True if this is a file.
     /// </summary>
     ///  <returns>True if file</returns>
-    public bool IsFile => !IsDirectory;
+    public bool IsFile => !IsDirectory && Exists;
 
     /// <summary>
     ///  Get the last modified date on disk.

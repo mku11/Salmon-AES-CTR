@@ -57,6 +57,7 @@ public class AndroidFile implements IFile {
     private Long _lastModified;
     private Integer _childrenCount;
     private Boolean _isDirectory;
+	private Boolean _isFile;
 
     /**
      * Construct an AndroidFile wrapper from an Android DocumentFile.
@@ -217,7 +218,10 @@ public class AndroidFile implements IFile {
      * @return True if is file
      */
     public boolean isFile() {
-        return !isDirectory();
+        if (_isFile != null)
+            return (boolean) _isFile;
+        _isFile = documentFile.isFile();
+        return (boolean) _isFile;
     }
 
     /**
@@ -441,6 +445,7 @@ public class AndroidFile implements IFile {
 		_basename = null;
         _childrenCount = null;
         _isDirectory = null;
+		_isFile = null;
         _lastModified = null;
         _length = null;
     }

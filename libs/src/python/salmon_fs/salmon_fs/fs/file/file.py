@@ -150,7 +150,7 @@ class File(IFile):
         True if this is a file.
         @returns True if file
         """
-        return not self.is_directory()
+        return os.path.isfile(self.__file_path)
 
     def get_last_date_modified(self) -> int:
         """!

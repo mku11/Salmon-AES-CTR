@@ -286,7 +286,7 @@ class WSFile(IFile):
         True if this is a file.
         @returns True if file
         """
-        return not self.is_directory()
+        return self.__get_response()['file']
 
     def get_last_date_modified(self) -> int:
         """!

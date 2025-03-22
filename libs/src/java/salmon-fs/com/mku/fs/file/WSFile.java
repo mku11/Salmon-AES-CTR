@@ -331,7 +331,11 @@ public class WSFile implements IFile {
      * @return True if it's a file
      */
     public boolean isFile() {
-        return !isDirectory();
+        try {
+            return getResponse().isFile;
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
     }
 
     /**

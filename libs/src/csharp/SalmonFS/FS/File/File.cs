@@ -164,7 +164,7 @@ public class File : IFile
     ///  True if this is a file.
 	/// </summary>
 	///  <returns>True if file</returns>
-    public bool IsFile => !IsDirectory;
+    public bool IsFile => System.IO.File.Exists(filePath);
 
     /// <summary>
     ///  Get the last modified date on disk.

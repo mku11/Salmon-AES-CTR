@@ -258,7 +258,7 @@ export class WSFile implements IFile {
      * @returns {Promise<boolean>} True if file
      */
     public async isFile(): Promise<boolean> {
-        return !await this.isDirectory();
+        return (await this.#getResponse()).file;
     }
 
     /**

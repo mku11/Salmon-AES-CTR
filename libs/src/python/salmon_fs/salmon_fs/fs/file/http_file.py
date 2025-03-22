@@ -192,7 +192,7 @@ class HttpFile(IFile):
         True if this is a file.
         @returns True if file
         """
-        return not self.is_directory()
+        return not self.is_directory() and self.exists()
 
     def get_last_date_modified(self) -> int:
         """!

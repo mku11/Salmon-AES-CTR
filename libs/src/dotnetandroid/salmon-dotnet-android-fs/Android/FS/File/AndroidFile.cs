@@ -54,6 +54,7 @@ public class AndroidFile : IFile
     private long? _lastModified;
     private int? _childrenCount;
     private bool? _isDirectory;
+	private bool? _isFile;
 
     /// <summary>
     ///  Construct an AndroidFile from an Android DocumentFile.
@@ -214,7 +215,16 @@ public class AndroidFile : IFile
     ///  True if it is a file.
 	/// </summary>
 	///  <returns>True if file</returns>
-    public bool IsFile => !IsDirectory;
+    public bool IsFile
+    {
+        get
+        {
+            if (_isFile != null)
+                return (bool)_isFile;
+            _isFile = documentFile.IsDirectory;
+            return (bool)_isFile;
+        }
+    }
 
     /// <summary>
     ///  Get the last modified time in milliseconds.
@@ -463,6 +473,7 @@ public class AndroidFile : IFile
         _basename = null;
         _childrenCount = null;
         _isDirectory = null;
+		_isFile = null;
         _lastModified = null;
         _length = null;
     }

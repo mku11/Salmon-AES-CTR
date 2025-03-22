@@ -232,7 +232,7 @@ public class HttpFile implements IFile {
      * @return True if it's a file
      */
     public boolean isFile() {
-        return !isDirectory();
+        return !isDirectory() && exists();
     }
 
     /**

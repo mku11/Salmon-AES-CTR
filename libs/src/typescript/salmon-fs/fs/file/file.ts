@@ -189,7 +189,7 @@ export class File implements IFile {
      * @returns {Promise<boolean>} True if directory.
      */
     public async isDirectory(): Promise<boolean> {
-        return this.#fileHandle  && this.#fileHandle.kind == 'directory';
+        return this.#fileHandle && this.#fileHandle.kind === 'directory';
     }
 
     /**
@@ -197,7 +197,7 @@ export class File implements IFile {
      * @returns {Promise<boolean>} True if file.
      */
     public async isFile(): Promise<boolean> {
-        return this.#fileHandle  && !await this.isDirectory();
+        return this.#fileHandle && this.#fileHandle.kind === 'file';
     }
 
     /**
