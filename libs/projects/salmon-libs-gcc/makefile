@@ -3,25 +3,24 @@ SALMON_VERSION=3.0.0
 SRC_ROOT=../../src/c
 SALMON_ROOT=$(SRC_ROOT)/salmon
 SALMON_JNI_ROOT=$(SRC_ROOT)/salmon-jni
-USE_AES_GPU?=0
-OPENCL_ROOT?=
+USE_OPENCL?=0
 OUTPUT_ROOT=../../../output
 CL_TARGET_OPENCL_VERSION?=120
-OPENCL_KERNEL=$(SALMON_ROOT)/kernels/salmon-aes-kernel.c
+OPENCL_KERNEL=$(SALMON_ROOT)/src/kernels/salmon-aes-kernel.c
        
 SALMON_INCLUDE=$(SALMON_ROOT)/include
 SALMON_JNI_INCLUDE=$(SALMON_JNI_ROOT)/include
 
-OPENCL_INCLUDE=$(OPENCL_ROOT)/include
-OPENCL_LIB=$(OPENCL_ROOT)/lib
+OPENCL_INCLUDE?=
+OPENCL_LIB?=
 
 $(info Usage:)
-$(info make PLATFORM=<value> ARCH=<value> ENABLE_JNI=<value>  USE_AES_GPU=<value> OPENCL_ROOT=<path>)
+$(info make PLATFORM=<value> ARCH=<value> ENABLE_JNI=<value>  USE_OPENCL=<value> OPENCL_INCLUDE=<path> OPENCL_LIB=<path>)
 $(info PLATFORM is the target OS, value: win, linux, macos)
 $(info ARCH is the target architecture, value: x86_64, aarch64)
 $(info ENABLE_JNI to use this lib from Java, value: 0 to disable, 1 to enable)
-$(info USE_AES_GPU to include GPU accel, value: 0 to disable, 1 to enable)
-$(info Example: make PLATFORM=win ARCH=x86_64 ENABLE_JNI=1 USE_AES_GPU=1)
+$(info USE_OPENCL to include GPU accel, value: 0 to disable, 1 to enable)
+$(info Example: make PLATFORM=win ARCH=x86_64 ENABLE_JNI=1 USE_OPENCL=1)
 $(info )
 
 PLATFORM?=win
@@ -73,10 +72,10 @@ LIB_DIR =$(MAIN_LIB_DIR)/$(ARCH)
 SRC=$(wildcard ../../src/c/salmon/src/*.c)
 
 ifeq ($(ENABLE_JNI),1)
-  _SRC+=../../src/c/salmon-jni/src/salmon-jni.c
+  SRC+=$(SALMON_JNI_ROOT)/src/salmon-jni.c
 endif
 
-ifeq ($(USE_AES_GPU),1)
+ifeq ($(USE_OPENCL),1)
 	SRC+=$(OPENCL_KERNEL)
 	CFLAGS+=-I$(OPENCL_INCLUDE)
 	CFLAGS+=-DUSE_OPENCL=1 -DCL_TARGET_OPENCL_VERSION=$(CL_TARGET_OPENCL_VERSION)
@@ -103,8 +102,10 @@ $(LIB_NAME): $(OBJECT)
 package: $(LIB_NAME)
 	@mkdir -p $(OUTPUT_DIR)/$(PACKAGE_NAME)
 	rm -rf $(OUTPUT_DIR)/$(PACKAGE_NAME)/*
-	@mkdir -p $(OUTPUT_DIR)/$(PACKAGE_NAME)/include
-	cp -r $(SALMON_INCLUDE)/* $(OUTPUT_DIR)/$(PACKAGE_NAME)/include
+	@mkdir -p $(OUTPUT_DIR)/$(PACKAGE_NAME)/salmon/include
+	cp -r $(SALMON_INCLUDE)/* $(OUTPUT_DIR)/$(PACKAGE_NAME)/salmon/include
+	@mkdir -p $(OUTPUT_DIR)/$(PACKAGE_NAME)/salmon-jni/include
+	cp -r $(SALMON_JNI_INCLUDE)/* $(OUTPUT_DIR)/$(PACKAGE_NAME)/salmon-jni/include
 	@mkdir -p $(OUTPUT_DIR)/$(PACKAGE_NAME)/lib
 	cp $(LIB_DIR)/$(LIB_NAME) $(OUTPUT_DIR)/$(PACKAGE_NAME)/lib
 	cp README.txt $(OUTPUT_DIR)/$(PACKAGE_NAME)
