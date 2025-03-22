@@ -5,6 +5,8 @@ ARCH=aarch64
 PACKAGE_NAME=salmon-gcc-$PLATFORM-$ARCH.$SALMON_VERSION
 PACKAGE_FILE=$PACKAGE_NAME.tar.gz
 
+export LD_LIBRARY_PATH=.:$LD_LIBRARY_PATH
+
 cd ../deploy
 ./build_gcc_${PLATFORM}_${ARCH}.sh
 cd ../../samples/GccSamples
