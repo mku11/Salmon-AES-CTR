@@ -21,6 +21,10 @@ sudo apt install gcc-aarch64-linux-gnu
 To build on a macos machine you will need:
 brew install gcc make
 
+You will also need to install OpenCL if you enable GPU acceleration
+If you are in linux and the linker does not find libOpenCL.so you need to create a symbolic link like so:
+sudo ln -s /usr/lib/x86_64-linux-gnu/libOpenCL.so.1 /usr/lib/libOpenCL.so
+
 Build:
 make PLATFORM=<value> ARCH=<value> USE_OPENCL=<value> ENABLE_JNI=<value>
 PLATFORM is the target OS, value: win, linux, macos
