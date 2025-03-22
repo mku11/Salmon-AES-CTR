@@ -31,7 +31,6 @@ dependencies {
     // salmon libs:
     implementation("com.mku.salmon:salmon-core:${version}")
     implementation("com.mku.salmon:salmon-fs:${version}")
-    // optional fast AES intrinsics and Tiny AES:
     implementation("com.mku.salmon:salmon-native:${version}:win-x86_64")
     nativeBundle("com.mku.salmon:salmon-native:${version}:win-x86_64")
 }
