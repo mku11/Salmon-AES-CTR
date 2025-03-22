@@ -1,5 +1,6 @@
 CURRDIR=$(pwd)
 
+export NODE_OPTIONS=--experimental-vm-modules
 # if you use WSL set this to a windows path instead
 # export TS_TEST_DIR="/mnt/d/tmp/salmon/test"
 # for Linux and macOS

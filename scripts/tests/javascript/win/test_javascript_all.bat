@@ -1,5 +1,7 @@
 set CURRDIR=%CD%
 
+set NODE_OPTIONS=--experimental-vm-modules
+
 :: ALL
 call test_javascript_core.bat
 if %ERRORLEVEL% GEQ 1 cd %CURRDIR% && EXIT /B 1

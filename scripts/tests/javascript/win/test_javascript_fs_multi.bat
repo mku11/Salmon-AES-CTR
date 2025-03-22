@@ -1,5 +1,6 @@
 set CURRDIR=%CD%
 
+set NODE_OPTIONS=--experimental-vm-modules
 set TEST_DIR="d:\tmp\salmon\test"
 set TEST_MODE=Node
 set ENC_THREADS=2

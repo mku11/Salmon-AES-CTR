@@ -1,5 +1,6 @@
 CURRDIR=$(pwd)
 
+export NODE_OPTIONS=--experimental-vm-modules
 export ENC_THREADS=1
 
 cd ../../../../libs/projects/SalmonLibs.vscode

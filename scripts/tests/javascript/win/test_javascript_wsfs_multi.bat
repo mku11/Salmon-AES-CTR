@@ -1,5 +1,6 @@
 set CURRDIR=%CD%
 
+set NODE_OPTIONS=--experimental-vm-modules
 set WS_SERVER_URL=http://localhost:8080
 set TEST_DIR="d:\tmp\salmon\test"
 set TEST_MODE=WebService

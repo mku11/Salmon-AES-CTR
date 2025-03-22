@@ -1,5 +1,7 @@
 CURRDIR=$(pwd)
 
+export NODE_OPTIONS=--experimental-vm-modules
+
 # ALL
 ./test_javascript_core.sh
 ./test_javascript_core_multi.sh

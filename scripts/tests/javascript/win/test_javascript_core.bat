@@ -1,5 +1,6 @@
 set CURRDIR=%CD%
 
+set NODE_OPTIONS=--experimental-vm-modules
 set ENC_THREADS=1
 
 cd ..\..\..\..\libs\projects\SalmonLibs.vscode
