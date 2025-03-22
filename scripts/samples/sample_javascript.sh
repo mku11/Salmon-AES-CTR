@@ -1,4 +1,6 @@
-set CURRDIR=$(pwd)
+CURRDIR=$(pwd)
+
+export NODE_OPTIONS=--experimental-vm-modules
 
 cd ../../samples/JavascriptSamples
 ./getdeps.sh

@@ -1,4 +1,4 @@
-set CURRDIR=$(pwd)
+CURRDIR=$(pwd)
 SALMON_VERSION=3.0.0
 
 pip install ../../output/python/salmon_core_py.$SALMON_VERSION.tar.gz

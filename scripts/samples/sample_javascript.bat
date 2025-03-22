@@ -1,5 +1,7 @@
 set CURRDIR=%CD%
 
+set NODE_OPTIONS=--experimental-vm-modules
+
 :: to run type VsDevCmd.bat in the windows console before running this script
 
 cd ..\..\samples\JavascriptSamples
