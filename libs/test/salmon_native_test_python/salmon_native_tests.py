@@ -65,7 +65,7 @@ class SalmonNativeTests(TestCase):
         elif "MAC" in platform_os:
             NativeProxy.set_library_path(SalmonNativeTests.mac_path)
         elif "LINUX" in platform_os:
-            NativeProxy.set_library_path(SalmonNativeTests.mac_path)
+            NativeProxy.set_library_path(SalmonNativeTests.linux_path)
 
         provider_type: ProviderType = ProviderType[os.getenv("AES_PROVIDER_TYPE")] if os.getenv(
             "AES_PROVIDER_TYPE") else ProviderType.Aes
