@@ -5,6 +5,23 @@ plugins {
 group 'com.mku.salmon'
 version '3.0.0'
 
+println "OS: ${os.familyName}"
+println "ARCH: ${System.getProperty("os.arch")}"
+
+if (os.isLinux()) {
+    project.ext.set('os', 'linux')
+} else if (os.isWindows()) {
+    project.ext.set('os', 'win')
+} else if (os.isMacOsX()) {
+    project.ext.set('os', 'macos')
+}
+
+if (System.getProperty("os.arch").equals("amd64")) {
+    project.ext.set('arch', 'x86_64')
+} else if (System.getProperty("os.arch").equals("aarch64")) {
+    project.ext.set('arch', 'aarch64')
+}
+
 repositories {
     maven {
         // uncomment for local repo
@@ -31,8 +48,10 @@ dependencies {
     // salmon libs:
     implementation("com.mku.salmon:salmon-core:${version}")
     implementation("com.mku.salmon:salmon-fs:${version}")
-    implementation("com.mku.salmon:salmon-native:${version}:win-x86_64")
-    nativeBundle("com.mku.salmon:salmon-native:${version}:win-x86_64")
+	
+	// salmon native libs
+    implementation("com.mku.salmon:salmon-native:${version}:${project.os}-${project.arch}")
+    nativeBundle("com.mku.salmon:salmon-native:${version}:${project.os}-${project.arch}")	
 }
 
 test {

@@ -10,8 +10,26 @@ plugins {
 group 'com.mku.salmon'
 description = 'Salmon AES256 CTR native encryption library'
 version '3.0.0'
-project.ext.set('arch', 'x86_64')
-project.ext.set('os', 'win')
+
+import org.gradle.internal.os.OperatingSystem
+OperatingSystem os = OperatingSystem.current();
+
+println "OS: ${os.familyName}"
+println "ARCH: ${System.getProperty("os.arch")}"
+
+if (os.isLinux()) {
+    project.ext.set('os', 'linux')
+} else if (os.isWindows()) {
+    project.ext.set('os', 'win')
+} else if (os.isMacOsX()) {
+    project.ext.set('os', 'macos')
+}
+
+if (System.getProperty("os.arch").equals("amd64")) {
+    project.ext.set('arch', 'x86_64')
+} else if (System.getProperty("os.arch").equals("aarch64")) {
+    project.ext.set('arch', 'aarch64')
+}
 
 // set to true to enable opencl or set via env vars
 project.ext.set('ENABLE_GPU', System.getProperty('ENABLE_GPU', "false").equals("true"))
