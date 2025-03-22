@@ -10,5 +10,5 @@ python -O data_stream.py
 python -O file.py
 python -O local_drive.py
 python -O web_service_drive.py
-python -O node_http_drive.py
+python -O http_drive.py
 cd $CURRDIR
