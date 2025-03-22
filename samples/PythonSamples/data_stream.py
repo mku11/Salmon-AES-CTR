@@ -7,6 +7,7 @@ from salmon_core.convert.bit_converter import BitConverter
 from salmon_core.salmon.generator import Generator
 from salmon_core.salmon.streams.aes_stream import AesStream
 from salmon_core.salmon.streams.aes_stream import ProviderType
+from salmon_core.salmon.bridge.native_proxy import NativeProxy
 
 from samples.data_stream_sample import DataStreamSample
 from samples.samples_common import get_key_from_password, generate_random_data
@@ -14,6 +15,8 @@ from samples.samples_common import get_key_from_password, generate_random_data
 password = "test123"
 size = 1 * 1024 * 1024
 
+# Set with the path to the salmon library if you use the native AES providers, see project on github for instructions
+# NativeProxy.set_library_path("/path/to/lib/salmon.dll|libsalmon.so|libsalmon.dylib")
 AesStream.set_aes_provider_type(ProviderType.Default)
 
 # generate a key

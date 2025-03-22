@@ -7,6 +7,7 @@ import time
 
 from salmon_core.salmon.streams.aes_stream import AesStream
 from salmon_core.salmon.streams.provider_type import ProviderType
+from salmon_core.salmon.bridge.native_proxy import NativeProxy
 from salmon_fs.fs.file.file import File
 
 from samples.drive_sample import DriveSample
@@ -14,6 +15,8 @@ from samples.drive_sample import DriveSample
 password = "test123"
 threads = 1
 
+# Set with the path to the salmon library if you use the native AES providers, see project on github for instructions
+# NativeProxy.set_library_path("/path/to/lib/salmon.dll|libsalmon.so|libsalmon.dylib")
 AesStream.set_aes_provider_type(ProviderType.Default)
 
 if __name__ == '__main__':
