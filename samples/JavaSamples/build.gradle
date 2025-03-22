@@ -5,6 +5,9 @@ plugins {
 group 'com.mku.salmon'
 version '3.0.0'
 
+import org.gradle.internal.os.OperatingSystem
+OperatingSystem os = OperatingSystem.current();
+
 println "OS: ${os.familyName}"
 println "ARCH: ${System.getProperty("os.arch")}"
 
