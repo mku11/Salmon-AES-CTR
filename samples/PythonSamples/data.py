@@ -16,7 +16,7 @@ size = 8 * 1024 * 1024
 threads = 1
 integrity = True
 
-# Set with the path to the salmon library if you use the native AES providers, see project on github for instructions
+# Set with the path to the salmon library if you use the native AES providers, see README.txt for instructions
 # NativeProxy.set_library_path("/path/to/lib/salmon.dll|libsalmon.so|libsalmon.dylib")
 AesStream.set_aes_provider_type(ProviderType.Default)
 
