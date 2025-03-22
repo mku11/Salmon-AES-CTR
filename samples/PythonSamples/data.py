@@ -18,7 +18,7 @@ integrity = True
 
 # Set with the path to the salmon library if you use the native AES providers, see project on github for instructions
 # NativeProxy.set_library_path("/path/to/lib/salmon.dll|libsalmon.so|libsalmon.dylib")
-AesStream.set_aes_provider_type(ProviderType.Aes)
+AesStream.set_aes_provider_type(ProviderType.Default)
 
 # generate a key
 print("generating keys and random data...")
