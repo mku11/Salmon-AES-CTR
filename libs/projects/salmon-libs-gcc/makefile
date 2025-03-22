@@ -113,4 +113,4 @@ package: $(LIB_NAME)
 .PHONY: all
 
 clean:
-	rm -rf $(OBJ_DIR)/* $(MAIN_LIB_DIR)/* $(PACKAGES_DIR)/*
+	rm -rf $(OBJ_DIR)/* $(MAIN_LIB_DIR)/* $(OUTPUT_DIR)/$(PACKAGE_NAME)/*
