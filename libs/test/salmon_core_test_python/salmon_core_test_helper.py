@@ -62,7 +62,7 @@ class SalmonCoreTestHelper:
     TEST_ENC_BUFFER_SIZE = 512 * 1024
     TEST_ENC_THREADS = 1
     TEST_DEC_BUFFER_SIZE = 512 * 1024
-    ENABLE_MULTI_CPU = False
+    ENABLE_MULTI_CPU = True
     TEST_DEC_THREADS = 1
 
     TEST_PASSWORD = "test123"
@@ -103,8 +103,8 @@ class SalmonCoreTestHelper:
     @staticmethod
     def initialize():
         SalmonCoreTestHelper.hashProvider = HmacSHA256Provider()
-        SalmonCoreTestHelper.encryptor = Encryptor(SalmonCoreTestHelper.TEST_ENC_THREADS)
-        SalmonCoreTestHelper.decryptor = Decryptor(SalmonCoreTestHelper.TEST_DEC_THREADS)
+        SalmonCoreTestHelper.encryptor = Encryptor(SalmonCoreTestHelper.TEST_ENC_THREADS, multi_cpu = SalmonCoreTestHelper.ENABLE_MULTI_CPU)
+        SalmonCoreTestHelper.decryptor = Decryptor(SalmonCoreTestHelper.TEST_DEC_THREADS, multi_cpu = SalmonCoreTestHelper.ENABLE_MULTI_CPU)
 
         # set native library path
         platform_os: str = platform.system().upper()
