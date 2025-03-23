@@ -353,6 +353,7 @@
 					"$(inherited)",
 					"USE_OPENCL=1",
 					"CL_TARGET_OPENCL_VERSION=120",
+					"__constant=",
 				);
 				"HEADER_SEARCH_PATHS[arch=*]" = /System/Library/Frameworks/JavaVM.framework/Versions/Current/Headers;
 				OTHER_CFLAGS = "-maes";
@@ -374,6 +375,7 @@
 				GCC_PREPROCESSOR_DEFINITIONS = (
 					"USE_OPENCL=1",
 					"CL_TARGET_OPENCL_VERSION=120",
+					"__constant=",
 				);
 				"HEADER_SEARCH_PATHS[arch=*]" = /System/Library/Frameworks/JavaVM.framework/Versions/Current/Headers;
 				OTHER_CFLAGS = "-maes";
