@@ -142,9 +142,9 @@ class DriveSample:
         
         private_dir: IFile | None = None
         platform_os: str = platform.system().upper()
-        if "WIN" in platform_os:
+        if "WINDOWS" in platform_os:
             private_dir = File(os.getenv("LOCALAPPDATA") + "\\Salmon")
-        elif "MAC" in platform_os:
+        elif "MAC" in platform_os or "DARWIN" in platform_os:
             private_dir = File(os.getenv("HOME") + "/Salmon")
         elif "LINUX" in platform_os:
             private_dir = File(os.getenv("HOME") + "/Salmon")

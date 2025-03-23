@@ -158,9 +158,9 @@ public class DriveSample {
 		
 		IFile privateDir = null;
 		String os = System.getProperty("os.name").toUpperCase();
-		if (os.toUpperCase().contains("WIN")) {
+		if (os.toUpperCase().contains("WINDOWS")) {
             privateDir = new File(System.getenv("LOCALAPPDATA") + "\\" + "Salmon");
-        } else if (os.toUpperCase().contains("MAC")) {
+        } else if (os.toUpperCase().contains("MAC") || os.toUpperCase().contains("DARWIN")) {
             privateDir = new File(System.getenv("HOME") + "/Salmon");
         } else if (os.toUpperCase().contains("LINUX")) {
             privateDir = new File(System.getenv("HOME") + "/Salmon");

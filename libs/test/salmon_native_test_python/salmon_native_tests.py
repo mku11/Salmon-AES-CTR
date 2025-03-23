@@ -49,7 +49,8 @@ from salmon_core_test_helper import SalmonCoreTestHelper
 class SalmonNativeTests(TestCase):
     prj_path = "../../projects"
     win_path = prj_path + "/salmon-libs-gradle/salmon-native/build/libs/salmon/shared/salmon.dll"
-    mac_path = prj_path + "/salmon-libs-xcode-macos/salmon/DerivedData/salmon/Build/Products/Release/libsalmon.dylib"
+    # mac_path = prj_path + "/salmon-libs-xcode-macos/salmon/DerivedData/salmon/Build/Products/Release/libsalmon.dylib"
+    mac_path = "/salmon-libs-gradle/salmon-native/build/libs/salmon/shared/libsalmon.dylib"
     linux_path = prj_path + "/salmon-libs-gradle/salmon-native/build/libs/salmon/shared/libsalmon.so"
 
     ENC_THREADS = 1
@@ -60,9 +61,9 @@ class SalmonNativeTests(TestCase):
     def setUp(self):
         # set native library path
         platform_os: str = platform.system().upper()
-        if "WIN" in platform_os:
+        if "WINDOWS" in platform_os:
             NativeProxy.set_library_path(SalmonNativeTests.win_path)
-        elif "MAC" in platform_os:
+        elif "MAC" in platform_os or "DARWIN" in platform_os:
             NativeProxy.set_library_path(SalmonNativeTests.mac_path)
         elif "LINUX" in platform_os:
             NativeProxy.set_library_path(SalmonNativeTests.linux_path)

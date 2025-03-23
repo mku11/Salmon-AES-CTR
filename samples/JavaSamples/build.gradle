@@ -19,7 +19,7 @@ if (os.isLinux()) {
     project.ext.set('os', 'macos')
 }
 
-if (System.getProperty("os.arch").equals("amd64")) {
+if (System.getProperty("os.arch").equals("amd64") || System.getProperty("os.arch").equals("x86_64")) {
     project.ext.set('arch', 'x86_64')
 } else if (System.getProperty("os.arch").equals("aarch64")) {
     project.ext.set('arch', 'aarch64')
