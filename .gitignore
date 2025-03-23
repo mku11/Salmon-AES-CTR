@@ -72,3 +72,5 @@ lint.txt
 /samples/PythonSamples/lib
 *.p12
 htmlReport
+*.log
+*.dylib
