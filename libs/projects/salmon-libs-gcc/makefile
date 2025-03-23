@@ -106,7 +106,7 @@ all: $(LIB_NAME)
 
 $(LIB_NAME): $(OBJECT)
 	@mkdir -p $(LIB_DIR)
-	$(CC) -shared -o $(LIB_DIR)/$@ $(subst $(SRC_ROOT),$(OBJ_DIR),$^) $(CFLAGS) $(LIBS)
+	$(CC) -shared -o $(LIB_DIR)/$@ $(subst $(SRC_ROOT),$(OBJ_DIR),$^) $(CFLAGS) $(LIBS) -rdynamic
 
 package: $(LIB_NAME)
 	@mkdir -p $(OUTPUT_DIR)/$(PACKAGE_NAME)
