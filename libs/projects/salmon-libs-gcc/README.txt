@@ -18,12 +18,15 @@ sudo apt install gcc make
 cross compiling for linux ARM64 you will need:
 sudo apt install gcc-aarch64-linux-gnu
 
-To build on a macos machine you will need:
+To build on a macos machine you will need gcc:
 brew install gcc make
+Note: your mac version might have a gcc executable that is actually clang you can use that but you won't be able to build with OpenCL support.
 
 You will also need to install OpenCL if you enable GPU acceleration
 If you are in linux and the linker does not find libOpenCL.so you need to create a symbolic link like so:
 sudo ln -s /usr/lib/x86_64-linux-gnu/libOpenCL.so.1 /usr/lib/libOpenCL.so
+
+If you want to include JNI headers you need to set JAVA_HOME env var to your java installation.
 
 Build:
 make PLATFORM=<value> ARCH=<value> USE_OPENCL=<value> ENABLE_JNI=<value>

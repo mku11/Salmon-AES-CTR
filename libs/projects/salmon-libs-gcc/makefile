@@ -61,7 +61,7 @@ ifeq ($(ENABLE_JNI),1)
 	CFLAGS+=-I"$(JAVA_HOME)/include/linux"
   endif
   ifeq ($(PLATFORM),macos)
-	CFLAGS+=-I"$(JAVA_HOME)/include/darwin"
+	CFLAGS+=-I"$(JAVA_HOME)/Headers"
   endif
 endif
 
@@ -79,8 +79,13 @@ ifeq ($(USE_OPENCL),1)
 	SRC+=$(OPENCL_KERNEL)
 	CFLAGS+=-I$(OPENCL_INCLUDE)
 	CFLAGS+=-DUSE_OPENCL=1 -DCL_TARGET_OPENCL_VERSION=$(CL_TARGET_OPENCL_VERSION)
-	CFLAGS+=-L$(OPENCL_LIB)
 	LIBS+=-lOpenCL
+	ifeq ($(PLATFORM),macos)
+  		CFLAGS+=-framework OpenCL.Framework
+		CFLAGS+=-std=gnu99
+	else
+		CFLAGS+=-L$(OPENCL_LIB)
+	endif
 endif
 
 _SALMON_DEPS = salmon.h salmon-aes-intr.h salmon-aes-opencl.h
