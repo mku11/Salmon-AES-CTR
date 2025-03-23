@@ -26,6 +26,7 @@ SOFTWARE.
 
 #if defined(_MSC_VER) || defined(__i386__) || defined(__x86_64__)
 #include <wmmintrin.h>
+#include <immintrin.h>
 #elif defined(__aarch64__) && defined(__ARM_FEATURE_CRYPTO)
 #include <arm_neon.h>
 #include <arm_acle.h>
@@ -121,7 +122,6 @@ int aes_intr_transform_ctr(const unsigned char* expandedKey, unsigned char* coun
 	int len;
 	kv = (__m128i*) expandedKey;
 	int j;
-	int blength = count / AES_BLOCK_SIZE;
 	int totalBytes = 0;
 	int idx = srcOffset / AES_BLOCK_SIZE;
 	load_round_keys(kvr, kv);

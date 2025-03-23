@@ -26,20 +26,14 @@ int main(int argc, char** argv) {
 	// initialize
 	salmon_init(implType);
 
-	// set up the encryption key
-	uint8_t* encKey = key;
-	if (implType == AES_IMPL_AES_INTR)
-	{
-		// if we use the intrinsics we expand the key
-		uint8_t expandedKey[240];
-		salmon_expandKey(key, expandedKey);
-		encKey = expandedKey;
-	}
+	// expand the key
+    uint8_t expandedKey[240];
+    salmon_expandKey(key, expandedKey);
 
 	// The text to encrypt:
 	char* bytes = "This is a plaintext that will be used for testing";
-	long length = strlen(bytes);
-	printf("%s\n", bytes);
+	int length = (int) strlen(bytes);
+	printf("Text: %s\n", bytes);
 	uint8_t* origPlainText = (uint8_t*)bytes;
 
 	// set the counter
@@ -50,23 +44,30 @@ int main(int argc, char** argv) {
 	// encrypt the byte array
 	uint8_t encText[1024];
 	int bytesEncrypted = salmon_transform(
-		encKey, counter,
+		expandedKey, counter,
 		origPlainText, 0,
 		encText, 0, length);
-
+    encText[bytesEncrypted] = '\0';
+    
+    printf("Encrypted text: %s\n", encText);
+    printf("bytes encrypted: %d\n", bytesEncrypted);
+    
 	// reset the counter
 	memset(counter, 0, 16);
 	memcpy(counter, nonce, 8);
 	
-	uint8_t plainText[1024];
+	uint8_t decText[1024];
 	// decrypt the byte array
 	int bytesDecrypted = salmon_transform(
-		encKey, counter,
+		expandedKey, counter,
 		encText, 0,
-		plainText, 0, length);
-	plainText[bytesDecrypted] = '\0';
+		decText, 0, length);
+    
+	decText[bytesDecrypted] = '\0';
 	
 	// this is the decrypted string
-	printf("%s\n", plainText);
+	printf("Decrypted text: %s\n", decText);
+    
+    printf("bytes decrypted: %d\n", bytesDecrypted);
 	return 0;
 }

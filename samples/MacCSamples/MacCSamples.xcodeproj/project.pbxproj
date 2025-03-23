@@ -7,7 +7,8 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
-		D73138572B5FD3C0002EAC60 /* main.c in Sources */ = {isa = PBXBuildFile; fileRef = D73138562B5FD3C0002EAC60 /* main.c */; };
+		D7295B412D9022DA00077DBD /* libsalmon.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = D7295B362D9022DA00077DBD /* libsalmon.dylib */; };
+		D7ADEAD82D8F393000513EA5 /* main.c in Sources */ = {isa = PBXBuildFile; fileRef = D7ADEAD72D8F393000513EA5 /* main.c */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXCopyFilesBuildPhase section */
@@ -23,13 +24,16 @@
 /* End PBXCopyFilesBuildPhase section */
 
 /* Begin PBXFileReference section */
+		D7295B362D9022DA00077DBD /* libsalmon.dylib */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.dylib"; path = libsalmon.dylib; sourceTree = "<group>"; };
+		D7295B372D9022DA00077DBD /* README.txt */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = README.txt; sourceTree = "<group>"; };
+		D7295B3A2D9022DA00077DBD /* salmon-aes-intr.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = "salmon-aes-intr.h"; sourceTree = "<group>"; };
+		D7295B3B2D9022DA00077DBD /* salmon-aes-opencl.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = "salmon-aes-opencl.h"; sourceTree = "<group>"; };
+		D7295B3C2D9022DA00077DBD /* salmon-aes.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = "salmon-aes.h"; sourceTree = "<group>"; };
+		D7295B3D2D9022DA00077DBD /* salmon.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = salmon.h; sourceTree = "<group>"; };
+		D7295B402D9022DA00077DBD /* salmon-jni.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = "salmon-jni.h"; sourceTree = "<group>"; };
 		D73138532B5FD3C0002EAC60 /* MacCSamples */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.executable"; includeInIndex = 0; path = MacCSamples; sourceTree = BUILT_PRODUCTS_DIR; };
-		D73138562B5FD3C0002EAC60 /* main.c */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.c; path = main.c; sourceTree = "<group>"; };
-		D751F8CE2B6046AE00643A32 /* salmon-aes-intr.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = "salmon-aes-intr.h"; sourceTree = "<group>"; };
-		D751F8CF2B6046AE00643A32 /* salmon.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = salmon.h; sourceTree = "<group>"; };
-		D751F8D12B6046AE00643A32 /* libsalmon.dylib */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.dylib"; path = libsalmon.dylib; sourceTree = "<group>"; };
-		D751F8D22B6046AE00643A32 /* README.txt */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = README.txt; sourceTree = "<group>"; };
 		D751F8D42B6046CE00643A32 /* README.txt */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = README.txt; sourceTree = "<group>"; };
+		D7ADEAD72D8F393000513EA5 /* main.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; name = main.c; path = MacCSamples/main.c; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -37,18 +41,74 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				D7295B412D9022DA00077DBD /* libsalmon.dylib in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
+		D7295B342D9022DA00077DBD /* salmon-lib */ = {
+			isa = PBXGroup;
+			children = (
+				D7295B352D9022DA00077DBD /* lib */,
+				D7295B372D9022DA00077DBD /* README.txt */,
+				D7295B382D9022DA00077DBD /* salmon */,
+				D7295B3E2D9022DA00077DBD /* salmon-jni */,
+			);
+			name = "salmon-lib";
+			path = "MacCSamples/salmon-lib";
+			sourceTree = "<group>";
+		};
+		D7295B352D9022DA00077DBD /* lib */ = {
+			isa = PBXGroup;
+			children = (
+				D7295B362D9022DA00077DBD /* libsalmon.dylib */,
+			);
+			path = lib;
+			sourceTree = "<group>";
+		};
+		D7295B382D9022DA00077DBD /* salmon */ = {
+			isa = PBXGroup;
+			children = (
+				D7295B392D9022DA00077DBD /* include */,
+			);
+			path = salmon;
+			sourceTree = "<group>";
+		};
+		D7295B392D9022DA00077DBD /* include */ = {
+			isa = PBXGroup;
+			children = (
+				D7295B3A2D9022DA00077DBD /* salmon-aes-intr.h */,
+				D7295B3B2D9022DA00077DBD /* salmon-aes-opencl.h */,
+				D7295B3C2D9022DA00077DBD /* salmon-aes.h */,
+				D7295B3D2D9022DA00077DBD /* salmon.h */,
+			);
+			path = include;
+			sourceTree = "<group>";
+		};
+		D7295B3E2D9022DA00077DBD /* salmon-jni */ = {
+			isa = PBXGroup;
+			children = (
+				D7295B3F2D9022DA00077DBD /* include */,
+			);
+			path = "salmon-jni";
+			sourceTree = "<group>";
+		};
+		D7295B3F2D9022DA00077DBD /* include */ = {
+			isa = PBXGroup;
+			children = (
+				D7295B402D9022DA00077DBD /* salmon-jni.h */,
+			);
+			path = include;
+			sourceTree = "<group>";
+		};
 		D731384A2B5FD3C0002EAC60 = {
 			isa = PBXGroup;
 			children = (
+				D7295B342D9022DA00077DBD /* salmon-lib */,
+				D7ADEAD72D8F393000513EA5 /* main.c */,
 				D751F8D42B6046CE00643A32 /* README.txt */,
-				D751F8CB2B6046AE00643A32 /* salmon-lib */,
-				D73138552B5FD3C0002EAC60 /* MacCSamples */,
 				D73138542B5FD3C0002EAC60 /* Products */,
 			);
 			sourceTree = "<group>";
@@ -59,50 +119,6 @@
 				D73138532B5FD3C0002EAC60 /* MacCSamples */,
 			);
 			name = Products;
-			sourceTree = "<group>";
-		};
-		D73138552B5FD3C0002EAC60 /* MacCSamples */ = {
-			isa = PBXGroup;
-			children = (
-				D73138562B5FD3C0002EAC60 /* main.c */,
-			);
-			path = MacCSamples;
-			sourceTree = "<group>";
-		};
-		D751F8CB2B6046AE00643A32 /* salmon-lib */ = {
-			isa = PBXGroup;
-			children = (
-				D751F8CC2B6046AE00643A32 /* include */,
-				D751F8D02B6046AE00643A32 /* lib */,
-				D751F8D22B6046AE00643A32 /* README.txt */,
-			);
-			name = "salmon-lib";
-			path = "MacCSamples/salmon-lib";
-			sourceTree = "<group>";
-		};
-		D751F8CC2B6046AE00643A32 /* include */ = {
-			isa = PBXGroup;
-			children = (
-				D751F8CD2B6046AE00643A32 /* salmon-aes-intr */,
-				D751F8CF2B6046AE00643A32 /* salmon.h */,
-			);
-			path = include;
-			sourceTree = "<group>";
-		};
-		D751F8CD2B6046AE00643A32 /* salmon-aes-intr */ = {
-			isa = PBXGroup;
-			children = (
-				D751F8CE2B6046AE00643A32 /* salmon-aes-intr.h */,
-			);
-			path = "salmon-aes-intr";
-			sourceTree = "<group>";
-		};
-		D751F8D02B6046AE00643A32 /* lib */ = {
-			isa = PBXGroup;
-			children = (
-				D751F8D12B6046AE00643A32 /* libsalmon.dylib */,
-			);
-			path = lib;
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
@@ -162,7 +178,7 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				D73138572B5FD3C0002EAC60 /* main.c in Sources */,
+				D7ADEAD82D8F393000513EA5 /* main.c in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -259,17 +275,21 @@
 		D731385B2B5FD3C0002EAC60 /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
-				HEADER_SEARCH_PATHS = "salmon-lib/include";
+				DEBUG_INFORMATION_FORMAT = dwarf;
+				EXPORTED_SYMBOLS_FILE = "";
+				GCC_C_LANGUAGE_STANDARD = gnu99;
+				GCC_OPTIMIZATION_LEVEL = s;
+				HEADER_SEARCH_PATHS = "";
+				LD_RUNPATH_SEARCH_PATHS = "";
 				LIBRARY_SEARCH_PATHS = (
 					"$(inherited)",
 					"$(PROJECT_DIR)/MacCSamples/salmon-lib/lib",
 				);
 				OTHER_CFLAGS = "";
-				OTHER_LDFLAGS = (
-					"-L$(PROJECT_DIR)/MacCSamples/salmon-lib/lib",
-					"-lsalmon",
-				);
+				OTHER_LDFLAGS = "-lsalmon";
+				OTHER_LIBTOOLFLAGS = "";
 				PRODUCT_NAME = "$(TARGET_NAME)";
+				STRIP_INSTALLED_PRODUCT = YES;
 				VALID_ARCHS = x86_64;
 			};
 			name = Debug;
@@ -277,17 +297,21 @@
 		D731385C2B5FD3C0002EAC60 /* Release */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
-				HEADER_SEARCH_PATHS = "salmon-lib/include";
+				DEBUG_INFORMATION_FORMAT = dwarf;
+				EXPORTED_SYMBOLS_FILE = "";
+				GCC_C_LANGUAGE_STANDARD = gnu99;
+				GCC_OPTIMIZATION_LEVEL = s;
+				HEADER_SEARCH_PATHS = "";
+				LD_RUNPATH_SEARCH_PATHS = "";
 				LIBRARY_SEARCH_PATHS = (
 					"$(inherited)",
 					"$(PROJECT_DIR)/MacCSamples/salmon-lib/lib",
 				);
 				OTHER_CFLAGS = "";
-				OTHER_LDFLAGS = (
-					"-L$(PROJECT_DIR)/MacCSamples/salmon-lib/lib",
-					"-lsalmon",
-				);
+				OTHER_LDFLAGS = "-lsalmon";
+				OTHER_LIBTOOLFLAGS = "";
 				PRODUCT_NAME = "$(TARGET_NAME)";
+				STRIP_INSTALLED_PRODUCT = YES;
 				VALID_ARCHS = x86_64;
 			};
 			name = Release;

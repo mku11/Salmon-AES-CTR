@@ -50,13 +50,12 @@ JNIEXPORT void JNICALL Java_com_mku_salmon_bridge_NativeProxy_expandkey(JNIEnv* 
 
 /**
  * Transform the data using AES-256 CTR mode.
- * @param expandedKey The expanded AES-256 key (240 bytes), see aes_key_expand
  * @param jCounter The counter to use.
  * @param jSrcBuffer The source byte array.
- * @param jSrcOffset The source byte offset.
+ * @param srcOffset The source byte offset.
  * @param jDestBuffer The destination byte array.
- * @param jDestOffset The destination byte offset.
- * @param jCount The number of bytes to transform.
+ * @param destOffset The destination byte offset.
+ * @param count The number of bytes to transform.
  * @return The number of bytes transformed.
  */
 JNIEXPORT jint JNICALL Java_com_mku_salmon_bridge_NativeProxy_transform(JNIEnv* env, jclass thiz,

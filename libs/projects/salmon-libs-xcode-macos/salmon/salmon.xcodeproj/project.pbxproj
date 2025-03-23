@@ -7,22 +7,34 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
-		D751F8782B60313A00643A32 /* salmon-aes-intr.c in Sources */ = {isa = PBXBuildFile; fileRef = D751F8742B60313A00643A32 /* salmon-aes-intr.c */; };
-		D751F8792B60313A00643A32 /* salmon.c in Sources */ = {isa = PBXBuildFile; fileRef = D751F8752B60313A00643A32 /* salmon.c */; };
-		D751F8AF2B60320400643A32 /* salmon-jni.c in Sources */ = {isa = PBXBuildFile; fileRef = D751F8AD2B60320400643A32 /* salmon-jni.c */; };
-		D751F8C42B60323100643A32 /* aes.c in Sources */ = {isa = PBXBuildFile; fileRef = D751F8B52B60323100643A32 /* aes.c */; };
+		D7295B242D8FE00F00077DBD /* salmon-aes-kernel.cpp in Sources */ = {isa = PBXBuildFile; fileRef = D7295B202D8FE00F00077DBD /* salmon-aes-kernel.cpp */; };
+		D7ADEAA42D8F23E700513EA5 /* OpenCL.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = D7ADEAA32D8F23E700513EA5 /* OpenCL.framework */; settings = {ATTRIBUTES = (Weak, ); }; };
+		D7ADEAB92D8F2D7600513EA5 /* salmon-aes-intr.h in Headers */ = {isa = PBXBuildFile; fileRef = D7ADEAA72D8F2D7600513EA5 /* salmon-aes-intr.h */; };
+		D7ADEABA2D8F2D7600513EA5 /* salmon-aes-opencl.h in Headers */ = {isa = PBXBuildFile; fileRef = D7ADEAA82D8F2D7600513EA5 /* salmon-aes-opencl.h */; };
+		D7ADEABB2D8F2D7600513EA5 /* salmon-aes.h in Headers */ = {isa = PBXBuildFile; fileRef = D7ADEAA92D8F2D7600513EA5 /* salmon-aes.h */; };
+		D7ADEABC2D8F2D7600513EA5 /* salmon.h in Headers */ = {isa = PBXBuildFile; fileRef = D7ADEAAA2D8F2D7600513EA5 /* salmon.h */; };
+		D7ADEAC02D8F2D7600513EA5 /* salmon-aes-intr.c in Sources */ = {isa = PBXBuildFile; fileRef = D7ADEAB02D8F2D7600513EA5 /* salmon-aes-intr.c */; };
+		D7ADEAC12D8F2D7600513EA5 /* salmon-aes-opencl.c in Sources */ = {isa = PBXBuildFile; fileRef = D7ADEAB12D8F2D7600513EA5 /* salmon-aes-opencl.c */; };
+		D7ADEAC22D8F2D7600513EA5 /* salmon-aes.c in Sources */ = {isa = PBXBuildFile; fileRef = D7ADEAB22D8F2D7600513EA5 /* salmon-aes.c */; };
+		D7ADEAC32D8F2D7600513EA5 /* salmon.c in Sources */ = {isa = PBXBuildFile; fileRef = D7ADEAB32D8F2D7600513EA5 /* salmon.c */; };
+		D7ADEAC42D8F2D7600513EA5 /* salmon-jni.h in Headers */ = {isa = PBXBuildFile; fileRef = D7ADEAB62D8F2D7600513EA5 /* salmon-jni.h */; };
+		D7ADEAC52D8F2D7600513EA5 /* salmon-jni.c in Sources */ = {isa = PBXBuildFile; fileRef = D7ADEAB82D8F2D7600513EA5 /* salmon-jni.c */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
+		D7295B202D8FE00F00077DBD /* salmon-aes-kernel.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = "salmon-aes-kernel.cpp"; sourceTree = "<group>"; };
 		D73137B22B5FB27B002EAC60 /* libsalmon.dylib */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.dylib"; includeInIndex = 0; path = libsalmon.dylib; sourceTree = BUILT_PRODUCTS_DIR; };
-		D751F8712B60313A00643A32 /* salmon-aes-intr.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = "salmon-aes-intr.h"; sourceTree = "<group>"; };
-		D751F8722B60313A00643A32 /* salmon.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = salmon.h; sourceTree = "<group>"; };
-		D751F8742B60313A00643A32 /* salmon-aes-intr.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = "salmon-aes-intr.c"; sourceTree = "<group>"; };
-		D751F8752B60313A00643A32 /* salmon.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = salmon.c; sourceTree = "<group>"; };
-		D751F8AC2B60320400643A32 /* salmon-jni.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = "salmon-jni.h"; sourceTree = "<group>"; };
-		D751F8AD2B60320400643A32 /* salmon-jni.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = "salmon-jni.c"; sourceTree = "<group>"; };
-		D751F8B52B60323100643A32 /* aes.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = aes.c; sourceTree = "<group>"; };
-		D751F8B62B60323100643A32 /* aes.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = aes.h; sourceTree = "<group>"; };
+		D7ADEAA32D8F23E700513EA5 /* OpenCL.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = OpenCL.framework; path = System/Library/Frameworks/OpenCL.framework; sourceTree = SDKROOT; };
+		D7ADEAA72D8F2D7600513EA5 /* salmon-aes-intr.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = "salmon-aes-intr.h"; sourceTree = "<group>"; };
+		D7ADEAA82D8F2D7600513EA5 /* salmon-aes-opencl.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = "salmon-aes-opencl.h"; sourceTree = "<group>"; };
+		D7ADEAA92D8F2D7600513EA5 /* salmon-aes.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = "salmon-aes.h"; sourceTree = "<group>"; };
+		D7ADEAAA2D8F2D7600513EA5 /* salmon.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = salmon.h; sourceTree = "<group>"; };
+		D7ADEAB02D8F2D7600513EA5 /* salmon-aes-intr.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = "salmon-aes-intr.c"; sourceTree = "<group>"; };
+		D7ADEAB12D8F2D7600513EA5 /* salmon-aes-opencl.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = "salmon-aes-opencl.c"; sourceTree = "<group>"; };
+		D7ADEAB22D8F2D7600513EA5 /* salmon-aes.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = "salmon-aes.c"; sourceTree = "<group>"; };
+		D7ADEAB32D8F2D7600513EA5 /* salmon.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = salmon.c; sourceTree = "<group>"; };
+		D7ADEAB62D8F2D7600513EA5 /* salmon-jni.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = "salmon-jni.h"; sourceTree = "<group>"; };
+		D7ADEAB82D8F2D7600513EA5 /* salmon-jni.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = "salmon-jni.c"; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -30,19 +42,28 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				D7ADEAA42D8F23E700513EA5 /* OpenCL.framework in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
+		D7295B1C2D8FE00F00077DBD /* kernels */ = {
+			isa = PBXGroup;
+			children = (
+				D7295B202D8FE00F00077DBD /* salmon-aes-kernel.cpp */,
+			);
+			path = kernels;
+			sourceTree = "<group>";
+		};
 		D73137A92B5FB27B002EAC60 = {
 			isa = PBXGroup;
 			children = (
-				D751F8B02B60323100643A32 /* tiny-AES-c */,
-				D751F8AA2B60320400643A32 /* salmon-jni */,
-				D751F86E2B60313A00643A32 /* salmon */,
+				D7ADEAA52D8F2D7600513EA5 /* salmon */,
+				D7ADEAB42D8F2D7600513EA5 /* salmon-jni */,
 				D73137B32B5FB27B002EAC60 /* Products */,
+				D7ADEAA22D8F23E600513EA5 /* Frameworks */,
 			);
 			sourceTree = "<group>";
 		};
@@ -54,68 +75,71 @@
 			name = Products;
 			sourceTree = "<group>";
 		};
-		D751F86E2B60313A00643A32 /* salmon */ = {
+		D7ADEAA22D8F23E600513EA5 /* Frameworks */ = {
 			isa = PBXGroup;
 			children = (
-				D751F86F2B60313A00643A32 /* include */,
-				D751F8732B60313A00643A32 /* salmon-aes-intr */,
-				D751F8752B60313A00643A32 /* salmon.c */,
+				D7ADEAA32D8F23E700513EA5 /* OpenCL.framework */,
+			);
+			name = Frameworks;
+			sourceTree = "<group>";
+		};
+		D7ADEAA52D8F2D7600513EA5 /* salmon */ = {
+			isa = PBXGroup;
+			children = (
+				D7ADEAA62D8F2D7600513EA5 /* include */,
+				D7ADEAAB2D8F2D7600513EA5 /* src */,
 			);
 			name = salmon;
 			path = ../../../src/c/salmon;
 			sourceTree = "<group>";
 		};
-		D751F86F2B60313A00643A32 /* include */ = {
+		D7ADEAA62D8F2D7600513EA5 /* include */ = {
 			isa = PBXGroup;
 			children = (
-				D751F8702B60313A00643A32 /* salmon-aes-intr */,
-				D751F8722B60313A00643A32 /* salmon.h */,
+				D7ADEAA72D8F2D7600513EA5 /* salmon-aes-intr.h */,
+				D7ADEAA82D8F2D7600513EA5 /* salmon-aes-opencl.h */,
+				D7ADEAA92D8F2D7600513EA5 /* salmon-aes.h */,
+				D7ADEAAA2D8F2D7600513EA5 /* salmon.h */,
 			);
 			path = include;
 			sourceTree = "<group>";
 		};
-		D751F8702B60313A00643A32 /* salmon-aes-intr */ = {
+		D7ADEAAB2D8F2D7600513EA5 /* src */ = {
 			isa = PBXGroup;
 			children = (
-				D751F8712B60313A00643A32 /* salmon-aes-intr.h */,
+				D7295B1C2D8FE00F00077DBD /* kernels */,
+				D7ADEAB02D8F2D7600513EA5 /* salmon-aes-intr.c */,
+				D7ADEAB12D8F2D7600513EA5 /* salmon-aes-opencl.c */,
+				D7ADEAB22D8F2D7600513EA5 /* salmon-aes.c */,
+				D7ADEAB32D8F2D7600513EA5 /* salmon.c */,
 			);
-			path = "salmon-aes-intr";
+			path = src;
 			sourceTree = "<group>";
 		};
-		D751F8732B60313A00643A32 /* salmon-aes-intr */ = {
+		D7ADEAB42D8F2D7600513EA5 /* salmon-jni */ = {
 			isa = PBXGroup;
 			children = (
-				D751F8742B60313A00643A32 /* salmon-aes-intr.c */,
-			);
-			path = "salmon-aes-intr";
-			sourceTree = "<group>";
-		};
-		D751F8AA2B60320400643A32 /* salmon-jni */ = {
-			isa = PBXGroup;
-			children = (
-				D751F8AB2B60320400643A32 /* include */,
-				D751F8AD2B60320400643A32 /* salmon-jni.c */,
+				D7ADEAB52D8F2D7600513EA5 /* include */,
+				D7ADEAB72D8F2D7600513EA5 /* src */,
 			);
 			name = "salmon-jni";
 			path = "../../../src/c/salmon-jni";
 			sourceTree = "<group>";
 		};
-		D751F8AB2B60320400643A32 /* include */ = {
+		D7ADEAB52D8F2D7600513EA5 /* include */ = {
 			isa = PBXGroup;
 			children = (
-				D751F8AC2B60320400643A32 /* salmon-jni.h */,
+				D7ADEAB62D8F2D7600513EA5 /* salmon-jni.h */,
 			);
 			path = include;
 			sourceTree = "<group>";
 		};
-		D751F8B02B60323100643A32 /* tiny-AES-c */ = {
+		D7ADEAB72D8F2D7600513EA5 /* src */ = {
 			isa = PBXGroup;
 			children = (
-				D751F8B52B60323100643A32 /* aes.c */,
-				D751F8B62B60323100643A32 /* aes.h */,
+				D7ADEAB82D8F2D7600513EA5 /* salmon-jni.c */,
 			);
-			name = "tiny-AES-c";
-			path = "../../../src/c/tiny-AES-c";
+			path = src;
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
@@ -125,6 +149,11 @@
 			isa = PBXHeadersBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				D7ADEABC2D8F2D7600513EA5 /* salmon.h in Headers */,
+				D7ADEAC42D8F2D7600513EA5 /* salmon-jni.h in Headers */,
+				D7ADEABB2D8F2D7600513EA5 /* salmon-aes.h in Headers */,
+				D7ADEAB92D8F2D7600513EA5 /* salmon-aes-intr.h in Headers */,
+				D7ADEABA2D8F2D7600513EA5 /* salmon-aes-opencl.h in Headers */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -185,10 +214,12 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				D751F8AF2B60320400643A32 /* salmon-jni.c in Sources */,
-				D751F8782B60313A00643A32 /* salmon-aes-intr.c in Sources */,
-				D751F8792B60313A00643A32 /* salmon.c in Sources */,
-				D751F8C42B60323100643A32 /* aes.c in Sources */,
+				D7ADEAC12D8F2D7600513EA5 /* salmon-aes-opencl.c in Sources */,
+				D7295B242D8FE00F00077DBD /* salmon-aes-kernel.cpp in Sources */,
+				D7ADEAC32D8F2D7600513EA5 /* salmon.c in Sources */,
+				D7ADEAC02D8F2D7600513EA5 /* salmon-aes-intr.c in Sources */,
+				D7ADEAC52D8F2D7600513EA5 /* salmon-jni.c in Sources */,
+				D7ADEAC22D8F2D7600513EA5 /* salmon-aes.c in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -311,20 +342,43 @@
 		D73137B72B5FB27B002EAC60 /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
+				DEBUG_INFORMATION_FORMAT = dwarf;
 				DYLIB_COMPATIBILITY_VERSION = 1;
 				DYLIB_CURRENT_VERSION = 1;
 				EXECUTABLE_PREFIX = lib;
+				GCC_C_LANGUAGE_STANDARD = gnu99;
+				GCC_OPTIMIZATION_LEVEL = s;
+				GCC_PREPROCESSOR_DEFINITIONS = (
+					"DEBUG=1",
+					"$(inherited)",
+					"USE_OPENCL=1",
+					"CL_TARGET_OPENCL_VERSION=120",
+				);
+				"HEADER_SEARCH_PATHS[arch=*]" = /System/Library/Frameworks/JavaVM.framework/Versions/Current/Headers;
+				OTHER_CFLAGS = "-maes";
 				PRODUCT_NAME = "$(TARGET_NAME)";
+				STRIP_INSTALLED_PRODUCT = YES;
 			};
 			name = Debug;
 		};
 		D73137B82B5FB27B002EAC60 /* Release */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
+				DEBUG_INFORMATION_FORMAT = dwarf;
 				DYLIB_COMPATIBILITY_VERSION = 1;
 				DYLIB_CURRENT_VERSION = 1;
 				EXECUTABLE_PREFIX = lib;
+				GCC_C_LANGUAGE_STANDARD = gnu99;
+				GCC_GENERATE_DEBUGGING_SYMBOLS = NO;
+				GCC_OPTIMIZATION_LEVEL = s;
+				GCC_PREPROCESSOR_DEFINITIONS = (
+					"USE_OPENCL=1",
+					"CL_TARGET_OPENCL_VERSION=120",
+				);
+				"HEADER_SEARCH_PATHS[arch=*]" = /System/Library/Frameworks/JavaVM.framework/Versions/Current/Headers;
+				OTHER_CFLAGS = "-maes";
 				PRODUCT_NAME = "$(TARGET_NAME)";
+				STRIP_INSTALLED_PRODUCT = YES;
 			};
 			name = Release;
 		};

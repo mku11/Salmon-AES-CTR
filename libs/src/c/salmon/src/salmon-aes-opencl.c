@@ -31,7 +31,12 @@ SOFTWARE.
 #include "salmon-aes-opencl.h"
 
 #if USE_OPENCL
+
+#if __APPLE__
+#include <OpenCL/opencl.h>
+#else
 #include <CL/opencl.h>
+#endif // __APPLE__
 
 extern const char* KERNEL_SRC;
 
@@ -48,8 +53,8 @@ extern const char* KERNEL_SRC;
 bool init = false;
 int platform_index = 0;
 int currentDevice = 0;
-int num_platforms;
-int num_devices;
+unsigned int num_platforms;
+unsigned int num_devices;
 char* source_str = NULL;
 size_t kernel_max_local_size;
 char device_name[MAX_CHARS];

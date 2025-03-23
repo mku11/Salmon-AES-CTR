@@ -29,8 +29,6 @@ SOFTWARE.
 #ifndef _SALMON_AES_OPENCL_H
 #define _SALMON_AES_OPENCL_H
 
-#include "salmon-aes.h"
-
 /**
  * Initialize OpenCL
  */

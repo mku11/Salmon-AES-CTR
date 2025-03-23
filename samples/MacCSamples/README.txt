@@ -11,7 +11,8 @@ README.txt
 MacCSamples
 -main.c
 -salmon-lib/
---include/
+--salmon/include/
+--salmon-jni/include/
 --lib/
 
 To build and run use xcode

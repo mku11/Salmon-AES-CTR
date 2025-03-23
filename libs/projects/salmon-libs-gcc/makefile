@@ -88,6 +88,10 @@ ifeq ($(USE_OPENCL),1)
 	endif
 endif
 
+# __constant is needed only for OpenCL kernel compiler for macos
+# for gcc and clang we use an empty macro to suppress the warnings
+CFLAGS+=-D__constant=
+
 _SALMON_DEPS = salmon.h salmon-aes-intr.h salmon-aes-opencl.h
 SALMON_DEPS = $(patsubst %,$(SALMON_INCLUDE)/%,$(_SALMON_DEPS))
 

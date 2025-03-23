@@ -71,6 +71,8 @@ model {
                     cCompiler.args '-I', "${jvmHome}/include"
                     cCompiler.args '-I', "${jvmHome}/include/darwin"
                     cCompiler.args '-mmacosx-version-min=10.4'
+                    cCompiler.args '-std=gnu99'
+                    cppCompiler.args '-std=c++11'
                     linker.args '-mmacosx-version-min=10.4'
                 } else if (targetPlatform.operatingSystem.linux) {
                     cCompiler.args '-I', "${jvmHome}/include"
@@ -88,18 +90,28 @@ model {
 
                 if (project.ENABLE_GPU) {
                     cCompiler.args '-DUSE_OPENCL=1'
-					cCompiler.args '-I' + project.OPENCL_INCLUDE
+                    cCompiler.args '-I' + project.OPENCL_INCLUDE
+                    cppCompiler.args '-DCL_TARGET_OPENCL_VERSION=120'
                     if (targetPlatform.operatingSystem.windows) {
                         linker.args '/LIBPATH:' + project.OPENCL_LIB
                         linker.args 'OpenCL.lib'
                     } else if (targetPlatform.operatingSystem.linux) {
                         linker.args '-L' + project.OPENCL_LIB
                         linker.args '-lOpenCL'
-                    }
+                    } else if (targetPlatform.operatingSystem.macOsX){
+						cCompiler.args '-framework'
+						cCompiler.args 'OpenCL'
+						linker.args '-framework'
+						linker.args 'OpenCL'
+		   			}
                 }
 
                 cCompiler.args '-O2'
                 cCompiler.args '-maes'
+				
+				// ___constant is needed only for OpenCL kernel compiler for macos
+				// for gcc and clang we use an empty macro to suppress the warnings
+				cCompiler.args '-D__constant='
             }
             sources {
                 c {

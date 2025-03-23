@@ -3,6 +3,12 @@ version: 3.0.0
 project: https://github.com/mku11/Salmon-AES-CTR  
 license: MIT License https://github.com/mku11/Salmon-AES-CTR/blob/main/LICENSE  
   
+To include in your library copy libsalmon.dylib to /usr/local/lib
+Then add the headers to your xcode project.
+Under Build Settings in xcode add:
+Other Linker Flags: -lsalmon
+Library Search Path: /the/path/to/salmonlib
+
 To build Salmon for MacOS you will need:
 xcode
 

@@ -31,13 +31,6 @@ SOFTWARE.
 
 #include <stdint.h>
 
-#if defined(_MSC_VER) || defined(__i386__) || defined(__x86_64__)
-#include <wmmintrin.h>
-#include <immintrin.h>
-void KEY_256_ASSIST_1(__m128i* temp1, __m128i* temp2);
-void KEY_256_ASSIST_2(__m128i* temp1, __m128i* temp3);
-#endif
-
 /**
  * Transform the data using AES-256 CTR mode.
  * @param expandedKey The expanded AES-256 key (240 bytes), see aes_key_expand()
