@@ -101,7 +101,7 @@ public class SalmonFSTests {
             providerType = ProviderType.valueOf(aesProviderType);
         System.out.println("ProviderType: " + providerType);
 
-        AesStream.setAesProviderType(ProviderType.AesIntrinsics);
+        AesStream.setAesProviderType(providerType);
     }
 
     @AfterAll
