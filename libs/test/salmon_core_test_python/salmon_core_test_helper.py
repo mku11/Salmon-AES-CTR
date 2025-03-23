@@ -110,7 +110,7 @@ class SalmonCoreTestHelper:
         platform_os: str = platform.system().upper()
         print(platform_os)
 
-        if "WIN" in platform_os:
+        if "WINDOWS" in platform_os:
             NativeProxy.set_library_path(SalmonCoreTestHelper.prj_path + SalmonCoreTestHelper.win_path)
         elif "MAC" in platform_os or "DARWIN" in platform_os:
             NativeProxy.set_library_path(SalmonCoreTestHelper.prj_path + SalmonCoreTestHelper.mac_path)
