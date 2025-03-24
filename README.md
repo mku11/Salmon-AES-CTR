@@ -1,6 +1,6 @@
 ## Salmon
 
-Salmon is an AES-256 encryption library with CPU and GPU acceleration, built-in data integrity, parallel operations, and seekable stream support. It provides a high level API for encrypting data arrays and streams, and a file system API for virtual drives.  
+Salmon is an AES-256 CTR encryption library with built-in integrity, parallel operations, and seekable stream support. It provides a high level API for encrypting data, byte streams, and a virtual drive API for encrypted local and remote files. Optimized for Intel x86_64, ARM64, and GPU cards.
   
 [![License: MIT](https://img.shields.io/github/license/mku11/Salmon-AES-CTR.svg)](LICENSE)
 [![Version](https://img.shields.io/badge/version-3.0.0-blue)](https://github.com/mku11/Salmon-AES-CTR/releases)
@@ -149,12 +149,12 @@ or the [**Live Web Demo**](https://mku11.github.io/Salmon-Vault/demo).
 
 #### Salmon API Reference Documentation ####
 The API ref documentation is now almost complete:  
-[Java](https://mku11.github.io/Salmon-AES-CTR/docs/2.1.0/java/html/)
- | [C#](https://mku11.github.io/Salmon-AES-CTR/docs/2.1.0/csharp/html/namespaces.html)
- | [C](https://mku11.github.io/Salmon-AES-CTR/docs/2.1.0/c/html/files.html)
- | [JavaScript](https://mku11.github.io/Salmon-AES-CTR/docs/2.1.0/javascript/html)
- | [TypeScript](https://mku11.github.io/Salmon-AES-CTR/docs/2.1.0/typescript/html)
- | [Python](https://mku11.github.io/Salmon-AES-CTR/docs/2.1.0/python/html/namespaces.html)
+[Java](https://mku11.github.io/Salmon-AES-CTR/docs/3.0.0/java/html/)
+ | [C#](https://mku11.github.io/Salmon-AES-CTR/docs/3.0.0/csharp/html/namespaces.html)
+ | [C](https://mku11.github.io/Salmon-AES-CTR/docs/3.0.0/c/html/files.html)
+ | [JavaScript](https://mku11.github.io/Salmon-AES-CTR/docs/3.0.0/javascript/html)
+ | [TypeScript](https://mku11.github.io/Salmon-AES-CTR/docs/3.0.0/typescript/html)
+ | [Python](https://mku11.github.io/Salmon-AES-CTR/docs/3.0.0/python/html/namespaces.html)
 
 ### Sequence Files ###
 User sequencer files keep information about the sequence ranges so they need to be kept in a protected space. Someone who has **write access to a sequencer file** and **repeated read access to your encrypted files** can leak encrypted information about your files. Also make sure that you never backup and restore the nonce sequencer files! You should always create them under a directory that is exluded from your backups, this will prevent nonce reuse!  
