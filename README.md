@@ -34,13 +34,13 @@ C/C++ (data encryption API only, no streams)
   
 **Platforms Supported:**  
 JavaFX 17+  
-.NET WPF
+.NET WPF  
 .NET Xamarin and MAUI  
-Android 23+ (No GPU-accel)
-.NET Android 23+ (No GPU-accel)
-Chrome (default JS crypto only)
-Firefox, Safari (No Local drives / default JS crypto only)
-Node.js (ESM modules / default JS crypto only)
+Android 23+ (No GPU-accel)  
+.NET Android 23+ (No GPU-accel)  
+Chrome (default JS crypto only)  
+Firefox, Safari (No Local drives / default JS crypto only)  
+Node.js (ESM modules / default JS crypto only)  
   
 **Operating Systems Tested:**  
 Windows 10+ x86_64  
