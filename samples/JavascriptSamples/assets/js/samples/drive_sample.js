@@ -13,7 +13,7 @@ export class DriveSample {
     static async createDrive(vaultDir, password) {
         // create a drive
         let drive;
-		if(vaultDir.constructor.name === 'JsFile') { // local
+		if(vaultDir.constructor.name === 'File') { // local
 			drive = await Drive.create(vaultDir, password, sequencer);
 		} else if(vaultDir.constructor.name === 'NodeFile') { // node.js
 			const { NodeDrive } = await import('../lib/salmon-fs/salmonfs/drive/node_drive.js');
