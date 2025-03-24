@@ -45,10 +45,14 @@ import java.util.List;
  * IFile implementation for a remote web service file.
  */
 public class WSFile implements IFile {
+	/**
+	 * Directory Separator
+	 */
+    public static final String separator = "/";
+	
     private static final String PATH = "path";
     private static final String DEST_DIR = "destDir";
     private static final String FILENAME = "filename";
-    public static String Separator = "/";
 
     private String filePath;
     private Response response;
@@ -664,8 +668,8 @@ public class WSFile implements IFile {
 
     private String getChildPath(String filename) {
         String nFilepath = this.filePath;
-        if (!nFilepath.endsWith(WSFile.Separator))
-            nFilepath += WSFile.Separator;
+        if (!nFilepath.endsWith(WSFile.separator))
+            nFilepath += WSFile.separator;
         nFilepath += filename;
         return nFilepath;
     }

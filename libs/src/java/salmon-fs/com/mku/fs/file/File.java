@@ -35,6 +35,10 @@ import java.util.List;
  * IFile implementation for a local file.
  */
 public class File implements IFile {
+	/**
+	 * Directory Separator
+	 */
+	public static final String separator = java.io.File.separator;
     private String filePath;
 
     /**
@@ -53,7 +57,7 @@ public class File implements IFile {
      * @return The newly created directory.
      */
     public IFile createDirectory(String dirName) {
-        String nDirPath = filePath + java.io.File.separator + dirName;
+        String nDirPath = filePath + File.separator + dirName;
         java.io.File file = new java.io.File(nDirPath);
         file.mkdirs();
         File dotNetDir = new File(nDirPath);
@@ -68,7 +72,7 @@ public class File implements IFile {
      * @throws IOException Thrown if there is an IO error.
      */
     public IFile createFile(String filename) throws IOException {
-        String nFilePath = filePath + java.io.File.separator + filename;
+        String nFilePath = filePath + File.separator + filename;
         new java.io.File(nFilePath).createNewFile();
         File File = new File(nFilePath);
         return File;
@@ -313,7 +317,7 @@ public class File implements IFile {
     public IFile getChild(String filename) {
         if (isFile())
             return null;
-        File child = new File(filePath + java.io.File.separator + filename);
+        File child = new File(filePath + File.separator + filename);
         return child;
     }
 

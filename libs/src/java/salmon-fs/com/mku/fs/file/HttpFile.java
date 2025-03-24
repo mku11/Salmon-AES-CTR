@@ -23,7 +23,6 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 */
 
-import com.mku.func.BiConsumer;
 import com.mku.fs.stream.HttpFileStream;
 import com.mku.streams.MemoryStream;
 import com.mku.streams.RandomAccessStream;
@@ -55,7 +54,7 @@ public class HttpFile implements IFile {
     /**
      * Directory separator
      */
-    public static final String Separator = "/";
+    public static final String separator = "/";
     private static final String DATE_FORMAT = "EEE, dd MMM yyyy HH:mm:ss zzz";
 
     private String filePath;
@@ -149,7 +148,7 @@ public class HttpFile implements IFile {
         String nFilePath = this.filePath;
         if (nFilePath.endsWith("/"))
             nFilePath = nFilePath.substring(0, nFilePath.length() - 1);
-        String[] parts = nFilePath.split(HttpFile.Separator);
+        String[] parts = nFilePath.split(HttpFile.separator);
         String basename = parts[parts.length - 1];
         if (basename == null)
             throw new RuntimeException("Could not get the file name");
@@ -316,7 +315,7 @@ public class HttpFile implements IFile {
                     if (filename.contains("%")) {
                         filename = URLDecoder.decode(filename, StandardCharsets.UTF_8);
                     }
-                    IFile file = new HttpFile(this.filePath + HttpFile.Separator + filename);
+                    IFile file = new HttpFile(this.filePath + HttpFile.separator + filename);
                     files.add(file);
                 }
             } catch (IOException e) {
@@ -424,8 +423,8 @@ public class HttpFile implements IFile {
 
     private String getChildPath(String filename) {
         String nFilepath = this.filePath;
-        if (!nFilepath.endsWith(HttpFile.Separator))
-            nFilepath += HttpFile.Separator;
+        if (!nFilepath.endsWith(HttpFile.separator))
+            nFilepath += HttpFile.separator;
         nFilepath += filename;
         return nFilepath;
     }
