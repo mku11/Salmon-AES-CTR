@@ -282,7 +282,7 @@ class Encryptor:
                 # cancel all tasks
                 shm_cancel.buf[0] = 1
 
-        out_data[:] = shm_out.buf[:]
+        out_data[:] = shm_out.buf[0:len(out_data)]
 
         shm_cancel.close()
         shm_cancel.unlink()
