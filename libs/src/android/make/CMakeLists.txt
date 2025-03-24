@@ -17,6 +17,10 @@ if(ANDROID_ABI STREQUAL x86_64)
     set(SALMON_ARM_CRYPTO "-maes")
 endif ()
 
+# ___constant is needed only for OpenCL kernel compiler for macos
+# for gcc and clang we use an empty macro to suppress the warnings
+set(SALMON_DEFS "${SALMON_DEFS} -D__constant=")
+
 set(SALMON_OPT_FLAGS " -O3")
 set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} ${SALMON_INCLUDE} ${SALMON_DEFS} ${SALMON_ARM_CRYPTO} ${SALMON_OPT_FLAGS}")
 
