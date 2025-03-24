@@ -418,7 +418,7 @@ public interface IFile
     /// <summary>
     /// File copy options
     /// </summary>
-    class CopyOptions
+    public class CopyOptions
     {
         /// <summary>
         /// Override filename
@@ -434,7 +434,7 @@ public interface IFile
     /// <summary>
     /// File move options
     /// </summary>
-    class MoveOptions
+    public class MoveOptions
     {
         /// <summary>
         /// Override filename
@@ -450,7 +450,7 @@ public interface IFile
     /// <summary>
     /// Directory copy options (recursively)
     /// </summary>
-    class RecursiveCopyOptions
+    public class RecursiveCopyOptions
     {
         /// <summary>
         /// Callback when file with same name exists
