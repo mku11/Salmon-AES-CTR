@@ -1,0 +1,287 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <title>JSDoc: Source: salmon-fs/fs/file/ls_file.js</title>
+
+    <script src="scripts/prettify/prettify.js"> </script>
+    <script src="scripts/prettify/lang-css.js"> </script>
+    <!--[if lt IE 9]>
+      <script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script>
+    <![endif]-->
+    <link type="text/css" rel="stylesheet" href="styles/prettify-tomorrow.css">
+    <link type="text/css" rel="stylesheet" href="styles/jsdoc-default.css">
+</head>
+
+<body>
+
+<div id="main">
+
+    <h1 class="page-title">Source: salmon-fs/fs/file/ls_file.js</h1>
+
+    
+
+
+
+    
+    <section>
+        <article>
+            <pre class="prettyprint source linenums"><code>/*
+MIT License
+
+Copyright (c) 2021 Max Kas
+
+Permission is hereby granted, free of charge, to any person obtaining a copy
+of this software and associated documentation files (the "Software"), to deal
+in the Software without restriction, including without limitation the rights
+to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+copies of the Software, and to permit persons to whom the Software is
+furnished to do so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in all
+copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+SOFTWARE.
+*/
+var __classPrivateFieldSet = (this &amp;&amp; this.__classPrivateFieldSet) || function (receiver, state, value, kind, f) {
+    if (kind === "m") throw new TypeError("Private method is not writable");
+    if (kind === "a" &amp;&amp; !f) throw new TypeError("Private accessor was defined without a setter");
+    if (typeof state === "function" ? receiver !== state || !f : !state.has(receiver)) throw new TypeError("Cannot write private member to an object whose class did not declare it");
+    return (kind === "a" ? f.call(receiver, value) : f ? f.value = value : state.set(receiver, value)), value;
+};
+var __classPrivateFieldGet = (this &amp;&amp; this.__classPrivateFieldGet) || function (receiver, state, kind, f) {
+    if (kind === "a" &amp;&amp; !f) throw new TypeError("Private accessor was defined without a getter");
+    if (typeof state === "function" ? receiver !== state || !f : !state.has(receiver)) throw new TypeError("Cannot read private member from an object whose class did not declare it");
+    return kind === "m" ? f : kind === "a" ? f.call(receiver) : f ? f.value : state.get(receiver);
+};
+var _LocalStorageFile_filePath;
+import { LocalStorageFileStream } from '../streams/ls_file_stream.js';
+/**
+ * Salmon localStorage implementation. This can be used to store small files.
+ */
+export class LocalStorageFile {
+    /**
+     * Instantiate a real file represented by the filepath provided.
+     * @param {string} path The filepath.
+     */
+    constructor(path) {
+        _LocalStorageFile_filePath.set(this, void 0);
+        __classPrivateFieldSet(this, _LocalStorageFile_filePath, path, "f");
+    }
+    /**
+     * Create a directory under this directory. Not supported.
+     * @param {string} dirName The name of the new directory.
+     * @returns {Promise&lt;IFile>} The newly created directory.
+     */
+    async createDirectory(dirName) {
+        throw new Error("Not supported");
+    }
+    /**
+     * Create a file under this directory.
+     * @param {string} filename The name of the new file.
+     * @returns {Promise&lt;IFile>} The newly created file.
+     * @throws IOException Thrown if there is an IO error.
+     */
+    async createFile(filename) {
+        let child = new LocalStorageFile(__classPrivateFieldGet(this, _LocalStorageFile_filePath, "f") + LocalStorageFile.separator + filename);
+        return child;
+    }
+    /**
+     * Delete this file or directory.
+     * @returns {Promise&lt;boolean>} True if deletion is successful.
+     */
+    async delete() {
+        localStorage.removeItem(__classPrivateFieldGet(this, _LocalStorageFile_filePath, "f"));
+        return true;
+    }
+    /**
+     * True if file or directory exists.
+     * @returns {Promise&lt;boolean>} True if exists
+     */
+    async exists() {
+        return localStorage.getItem(__classPrivateFieldGet(this, _LocalStorageFile_filePath, "f")) != null;
+    }
+    /**
+     * Get the path of this file. For java this is the same as the absolute filepath.
+     * @returns {string}  The file path
+     */
+    getPath() {
+        return __classPrivateFieldGet(this, _LocalStorageFile_filePath, "f");
+    }
+    /**
+     * Get the display path on the physical disk. For java this is the same as the filepath.
+     * @returns {string} The display path.
+     */
+    getDisplayPath() {
+        return __classPrivateFieldGet(this, _LocalStorageFile_filePath, "f");
+    }
+    /**
+     * Get the name of this file or directory.
+     * @returns {string} The name of this file or directory.
+     */
+    getName() {
+        if (__classPrivateFieldGet(this, _LocalStorageFile_filePath, "f") == null)
+            throw new Error("Filepath is not assigned");
+        return __classPrivateFieldGet(this, _LocalStorageFile_filePath, "f").split(LocalStorageFile.separator).pop();
+    }
+    /**
+     * Get a stream for reading the file.
+     * @returns {Promise&lt;RandomAccessStream>} The stream to read from.
+     * @throws FileNotFoundException
+     */
+    async getInputStream() {
+        let fileStream = new LocalStorageFileStream(this, "r");
+        return fileStream;
+    }
+    /**
+     * Get a stream for writing to this file.
+     * @returns {Promise&lt;RandomAccessStream>} The stream to write to.
+     * @throws FileNotFoundException
+     */
+    async getOutputStream() {
+        let fileStream = new LocalStorageFileStream(this, "rw");
+        return fileStream;
+    }
+    /**
+     * Get the parent directory of this file or directory.
+     * @returns {Promise&lt;IFile>} The parent directory.
+     */
+    async getParent() {
+        let index = __classPrivateFieldGet(this, _LocalStorageFile_filePath, "f").lastIndexOf(LocalStorageFile.separator);
+        let dirPath = __classPrivateFieldGet(this, _LocalStorageFile_filePath, "f").substring(0, index);
+        let dir = new LocalStorageFile(dirPath);
+        return dir;
+    }
+    /**
+     * True if this is a directory.
+     * @returns {Promise&lt;boolean>} True if directory
+     */
+    async isDirectory() {
+        return false;
+    }
+    /**
+     * True if this is a file.
+     * @returns {Promise&lt;boolean>} True if file
+     */
+    async isFile() {
+        return true;
+    }
+    /**
+     * Get the last modified date on disk. Not supported.
+     * @returns {Promise&lt;number>} Last date modified
+     */
+    async getLastDateModified() {
+        throw new Error("Not supported");
+    }
+    /**
+     * Get the size of the file on disk.
+     * @returns {Promise&lt;number>} The size
+     */
+    async getLength() {
+        let contents = localStorage.getItem(__classPrivateFieldGet(this, _LocalStorageFile_filePath, "f"));
+        if (contents == null)
+            return 0;
+        return btoa(contents).length;
+    }
+    /**
+     * Get the count of files and subdirectories. Not supported.
+     * @returns {Promise&lt;number>} The number of files and subdirectories.
+     */
+    async getChildrenCount() {
+        throw new Error("Not supported");
+    }
+    /**
+     * List all files under this directory. Not supported.
+     * @returns {Promise&lt;IFile[]>} The list of files.
+     */
+    async listFiles() {
+        throw new Error("Not supported");
+    }
+    /**
+     * Move this file or directory under a new directory. Not supported.
+     * @param {IFile} newDir The target directory.
+     * @param {MoveOptions} [options] The options.
+     * @returns {Promise&lt;IFile>} The moved file. Use this file for subsequent operations instead of the original.
+     */
+    async move(newDir, options) {
+        throw new Error("Not supported");
+    }
+    /**
+     * Move this file or directory under a new directory. Not supported.
+     * @param {IFile} newDir    The target directory.
+     * @param {CopyOptions} [options] The options
+     * @returns {Promise&lt;IFile | null>} The copied file. Use this file for subsequent operations instead of the original.
+     * @throws IOException Thrown if there is an IO error.
+     */
+    async copy(newDir, options) {
+        throw new Error("Not supported");
+    }
+    /**
+     * Get the file or directory under this directory with the provided name.
+     * @param {string} filename The name of the file or directory.
+     * @returns {Promise&lt;IFile | null>} The child
+     */
+    async getChild(filename) {
+        let child = new LocalStorageFile(__classPrivateFieldGet(this, _LocalStorageFile_filePath, "f") + LocalStorageFile.separator + filename);
+        return child;
+    }
+    /**
+     * Rename the current file or directory. Not supported.
+     * @param {string} newFilename The new name for the file or directory.
+     * @returns {Promise&lt;boolean>} True if successfully renamed.
+     */
+    async renameTo(newFilename) {
+        throw new Error("Not supported");
+    }
+    /**
+     * Create this directory under the current filepath.
+     * @returns {boolean} True if created.
+     */
+    async mkdir() {
+        // no-op
+        return true;
+    }
+    /**
+     * Reset cached properties
+     */
+    reset() {
+    }
+    /**
+     * Returns a string representation of this object
+     * @returns {string} The string
+     */
+    toString() {
+        return __classPrivateFieldGet(this, _LocalStorageFile_filePath, "f");
+    }
+}
+_LocalStorageFile_filePath = new WeakMap();
+LocalStorageFile.separator = "/";
+</code></pre>
+        </article>
+    </section>
+
+
+
+
+</div>
+
+<nav>
+    <h2><a href="index.html">Home</a></h2><h3>Classes</h3><ul><li><a href="AESCTRTransformer.html">AESCTRTransformer</a></li><li><a href="AesDefaultTransformer.html">AesDefaultTransformer</a></li><li><a href="AesDrive.html">AesDrive</a></li><li><a href="AesFile.html">AesFile</a></li><li><a href="AesFileCommander.html">AesFileCommander</a></li><li><a href="AesFileExporter.html">AesFileExporter</a></li><li><a href="AesFileExporterWorker.html">AesFileExporterWorker</a></li><li><a href="AesFileImporter.html">AesFileImporter</a></li><li><a href="AesFileImporterWorker.html">AesFileImporterWorker</a></li><li><a href="AesFileReadableStream.html">AesFileReadableStream</a></li><li><a href="AesNativeTransformer.html">AesNativeTransformer</a></li><li><a href="AesStream.html">AesStream</a></li><li><a href="AuthConfig.html">AuthConfig</a></li><li><a href="AuthException.html">AuthException</a></li><li><a href="Base64.html">Base64</a></li><li><a href="Base64Utils.html">Base64Utils</a></li><li><a href="BatchCopyOptions.html">BatchCopyOptions</a></li><li><a href="BatchDeleteOptions.html">BatchDeleteOptions</a></li><li><a href="BatchExportOptions.html">BatchExportOptions</a></li><li><a href="BatchImportOptions.html">BatchImportOptions</a></li><li><a href="BitConverter.html">BitConverter</a></li><li><a href="CacheBuffer.html">CacheBuffer</a></li><li><a href="CopyContentsOptions.html">CopyContentsOptions</a></li><li><a href="CopyOptions.html">CopyOptions</a></li><li><a href="Credentials_Credentials.html">Credentials</a></li><li><a href="Decryptor.html">Decryptor</a></li><li><a href="DefaultPbkdfProvider.html">DefaultPbkdfProvider</a></li><li><a href="Drive.html">Drive</a></li><li><a href="DriveConfig.html">DriveConfig</a></li><li><a href="DriveGenerator.html">DriveGenerator</a></li><li><a href="DriveKey.html">DriveKey</a></li><li><a href="Encryptor.html">Encryptor</a></li><li><a href="File.html">File</a></li><li><a href="FileCommander.html">FileCommander</a></li><li><a href="FileExportOptions.html">FileExportOptions</a></li><li><a href="FileExporter.html">FileExporter</a></li><li><a href="FileExporterWorker.html">FileExporterWorker</a></li><li><a href="FileImportOptions.html">FileImportOptions</a></li><li><a href="FileImporter.html">FileImporter</a></li><li><a href="FileImporterWorker.html">FileImporterWorker</a></li><li><a href="FileSearcher.html">FileSearcher</a></li><li><a href="FileSequencer.html">FileSequencer</a></li><li><a href="FileStream.html">FileStream</a></li><li><a href="FileTaskProgress.html">FileTaskProgress</a></li><li><a href="FileUtils.html">FileUtils</a></li><li><a href="Generator.html">Generator</a></li><li><a href="Handler.html">Handler</a></li><li><a href="Header.html">Header</a></li><li><a href="HmacSHA256Provider.html">HmacSHA256Provider</a></li><li><a href="HttpDrive.html">HttpDrive</a></li><li><a href="HttpFile.html">HttpFile</a></li><li><a href="HttpFileStream.html">HttpFileStream</a></li><li><a href="IOException.html">IOException</a></li><li><a href="IVirtualFileTaskProgress.html">IVirtualFileTaskProgress</a></li><li><a href="Integrity.html">Integrity</a></li><li><a href="IntegrityException.html">IntegrityException</a></li><li><a href="LocalStorageFile.html">LocalStorageFile</a></li><li><a href="LocalStorageFileStream.html">LocalStorageFileStream</a></li><li><a href="MemoryStream.html">MemoryStream</a></li><li><a href="MoveOptions.html">MoveOptions</a></li><li><a href="NativeProxy.html">NativeProxy</a></li><li><a href="NodeDrive.html">NodeDrive</a></li><li><a href="NodeFile.html">NodeFile</a></li><li><a href="NodeFileStream.html">NodeFileStream</a></li><li><a href="Nonce.html">Nonce</a></li><li><a href="NonceSequence.html">NonceSequence</a></li><li><a href="Password.html">Password</a></li><li><a href="PbkdfFactory.html">PbkdfFactory</a></li><li><a href="RandomAccessStream.html">RandomAccessStream</a></li><li><a href="RangeExceededException.html">RangeExceededException</a></li><li><a href="ReadableStreamFileReader_ReadableStreamFileReader.html">ReadableStreamFileReader</a></li><li><a href="RealFileTaskProgress.html">RealFileTaskProgress</a></li><li><a href="RecursiveCopyOptions.html">RecursiveCopyOptions</a></li><li><a href="RecursiveDeleteOptions.html">RecursiveDeleteOptions</a></li><li><a href="RecursiveMoveOptions.html">RecursiveMoveOptions</a></li><li><a href="SearchOptions.html">SearchOptions</a></li><li><a href="SecurityException.html">SecurityException</a></li><li><a href="SequenceException.html">SequenceException</a></li><li><a href="SequenceSerializer.html">SequenceSerializer</a></li><li><a href="TextDecryptor.html">TextDecryptor</a></li><li><a href="TextEncryptor.html">TextEncryptor</a></li><li><a href="TransformerFactory.html">TransformerFactory</a></li><li><a href="VirtualRecursiveCopyOptions.html">VirtualRecursiveCopyOptions</a></li><li><a href="VirtualRecursiveDeleteOptions.html">VirtualRecursiveDeleteOptions</a></li><li><a href="VirtualRecursiveMoveOptions.html">VirtualRecursiveMoveOptions</a></li><li><a href="WSDrive.html">WSDrive</a></li><li><a href="WSFile.html">WSFile</a></li><li><a href="WSFileStream.html">WSFileStream</a></li></ul><h3>Global</h3><ul><li><a href="global.html#EncryptionFormat">EncryptionFormat</a></li><li><a href="global.html#EncryptionFormat%255Bundefined%255D">EncryptionFormat[undefined]</a></li><li><a href="global.html#EncryptionMode">EncryptionMode</a></li><li><a href="global.html#EncryptionMode%255Bundefined%255D">EncryptionMode[undefined]</a></li><li><a href="global.html#PBKDF_SHA256">PBKDF_SHA256</a></li><li><a href="global.html#PbkdfAlgo">PbkdfAlgo</a></li><li><a href="global.html#PbkdfAlgo%255Bundefined%255D">PbkdfAlgo[undefined]</a></li><li><a href="global.html#PbkdfType">PbkdfType</a></li><li><a href="global.html#PbkdfType%255Bundefined%255D">PbkdfType[undefined]</a></li><li><a href="global.html#ProviderType">ProviderType</a></li><li><a href="global.html#ProviderType%255Bundefined%255D">ProviderType[undefined]</a></li><li><a href="global.html#SearchEvent">SearchEvent</a></li><li><a href="global.html#SearchEvent%255Bundefined%255D">SearchEvent[undefined]</a></li><li><a href="global.html#SeekOrigin">SeekOrigin</a></li><li><a href="global.html#SeekOrigin%255Bundefined%255D">SeekOrigin[undefined]</a></li><li><a href="global.html#Status">Status</a></li><li><a href="global.html#Status%255Bundefined%255D">Status[undefined]</a></li><li><a href="global.html#autoRename">autoRename</a></li><li><a href="global.html#autoRenameFile">autoRenameFile</a></li><li><a href="global.html#copyFileContents">copyFileContents</a></li><li><a href="global.html#copyRecursively">copyRecursively</a></li><li><a href="global.html#decryptData">decryptData</a></li><li><a href="global.html#deleteRecursively">deleteRecursively</a></li><li><a href="global.html#encryptData">encryptData</a></li><li><a href="global.html#exportFilePart">exportFilePart</a></li><li><a href="global.html#fillBufferPart">fillBufferPart</a></li><li><a href="global.html#getExtension">getExtension</a></li><li><a href="global.html#getPbkdfAlgoString">getPbkdfAlgoString</a></li><li><a href="global.html#importFilePart">importFilePart</a></li><li><a href="global.html#moveRecursively">moveRecursively</a></li></ul>
+</nav>
+
+<br class="clear">
+
+<footer>
+    Documentation generated by <a href="https://github.com/jsdoc/jsdoc">JSDoc 4.0.4</a> on Mon Mar 24 2025 20:18:54 GMT+0200 (Eastern European Standard Time)
+</footer>
+
+<script> prettyPrint(); </script>
+<script src="scripts/linenumber.js"> </script>
+</body>
+</html>

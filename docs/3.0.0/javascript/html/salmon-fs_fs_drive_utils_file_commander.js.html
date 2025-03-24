@@ -1,0 +1,669 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <title>JSDoc: Source: salmon-fs/fs/drive/utils/file_commander.js</title>
+
+    <script src="scripts/prettify/prettify.js"> </script>
+    <script src="scripts/prettify/lang-css.js"> </script>
+    <!--[if lt IE 9]>
+      <script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script>
+    <![endif]-->
+    <link type="text/css" rel="stylesheet" href="styles/prettify-tomorrow.css">
+    <link type="text/css" rel="stylesheet" href="styles/jsdoc-default.css">
+</head>
+
+<body>
+
+<div id="main">
+
+    <h1 class="page-title">Source: salmon-fs/fs/drive/utils/file_commander.js</h1>
+
+    
+
+
+
+    
+    <section>
+        <article>
+            <pre class="prettyprint source linenums"><code>/*
+MIT License
+
+Copyright (c) 2021 Max Kas
+
+Permission is hereby granted, free of charge, to any person obtaining a copy
+of this software and associated documentation files (the "Software"), to deal
+in the Software without restriction, including without limitation the rights
+to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+copies of the Software, and to permit persons to whom the Software is
+furnished to do so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in all
+copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+SOFTWARE.
+*/
+import { FileImportOptions } from "./file_importer.js";
+import { FileExportOptions } from "./file_exporter.js";
+import { VirtualRecursiveCopyOptions, VirtualRecursiveMoveOptions } from "../../file/ivirtual_file.js";
+/**
+ * Facade class for file operations.
+ */
+export class FileCommander {
+    /**
+     * Instantiate a new file commander object.
+     *
+     */
+    constructor(fileImporter, fileExporter, fileSearcher) {
+        this.stopJobs = false;
+        this.fileImporter = fileImporter;
+        this.fileExporter = fileExporter;
+        this.fileSearcher = fileSearcher;
+    }
+    getFileImporter() {
+        return this.fileImporter;
+    }
+    getFileExporter() {
+        return this.fileExporter;
+    }
+    /**
+     * Import files to the drive.
+     *
+     * @param {IFile[]} filesToImport     The files to import.
+     * @param {IVirtualFile} importDir         The target directory.
+     * @param {BatchImportOptions} [options] The options
+     * @returns {Promise&lt;IVirtualFile[]>} The imported files if completes successfully.
+     * @throws Exception If there was an error during import
+     */
+    async importFiles(filesToImport, importDir, options) {
+        if (!options)
+            options = new BatchImportOptions();
+        this.stopJobs = false;
+        let importedFiles = [];
+        let total = 0;
+        for (let i = 0; i &lt; filesToImport.length; i++) {
+            if (this.stopJobs)
+                break;
+            total += await this.getRealFilesCountRecursively(filesToImport[i]);
+        }
+        let count = [0];
+        let existingFiles = await this.getExistingIVirtualFiles(importDir);
+        for (let i = 0; i &lt; filesToImport.length; i++) {
+            if (this.stopJobs)
+                break;
+            await this.importRecursively(filesToImport[i], importDir, options.deleteSource, options.integrity, options.onProgressChanged, options.autoRename, options.onFailed, importedFiles, count, total, existingFiles);
+        }
+        return importedFiles;
+    }
+    async getExistingIVirtualFiles(importDir) {
+        let files = {};
+        let realFiles = await importDir.listFiles();
+        for (let i = 0; i &lt; realFiles.length; i++) {
+            if (this.stopJobs)
+                break;
+            let file = realFiles[i];
+            try {
+                files[await file.getName()] = file;
+            }
+            catch (ignored) {
+            }
+        }
+        return files;
+    }
+    async importRecursively(fileToImport, importDir, deleteSource, integrity, onProgressChanged, autoRename, onFailed, importedFiles, count, total, existingFiles) {
+        let sfile = fileToImport.getName() in existingFiles
+            ? existingFiles[fileToImport.getName()] : null;
+        if (await fileToImport.isDirectory()) {
+            if (onProgressChanged)
+                onProgressChanged(new RealFileTaskProgress(fileToImport, 0, 1, count[0], total));
+            if (sfile == null || !await sfile.exists())
+                sfile = await importDir.createDirectory(fileToImport.getName());
+            else if (sfile &amp;&amp; await sfile.exists() &amp;&amp; await sfile.isFile() &amp;&amp; autoRename)
+                sfile = await importDir.createDirectory(await autoRename(fileToImport));
+            if (onProgressChanged)
+                onProgressChanged(new RealFileTaskProgress(fileToImport, 1, 1, count[0], total));
+            count[0]++;
+            if (sfile == null)
+                throw new Error("Could not get import directory");
+            let nExistingFiles = await this.getExistingIVirtualFiles(sfile);
+            let lFiles = await fileToImport.listFiles();
+            for (let i = 0; i &lt; lFiles.length; i++) {
+                if (this.stopJobs)
+                    break;
+                let child = lFiles[i];
+                await this.importRecursively(child, sfile, deleteSource, integrity, onProgressChanged, autoRename, onFailed, importedFiles, count, total, nExistingFiles);
+            }
+            if (deleteSource &amp;&amp; !this.stopJobs)
+                await fileToImport.delete();
+        }
+        else {
+            try {
+                let filename = fileToImport.getName();
+                if (sfile &amp;&amp; (await sfile.exists() || await sfile.isDirectory()) &amp;&amp; autoRename)
+                    filename = await autoRename(fileToImport);
+                let importOptions = new FileImportOptions();
+                importOptions.filename = filename;
+                importOptions.deleteSource = deleteSource;
+                importOptions.integrity = integrity;
+                importOptions.onProgressChanged = (bytes, totalBytes) => {
+                    if (onProgressChanged) {
+                        onProgressChanged(new RealFileTaskProgress(fileToImport, bytes, totalBytes, count[0], total));
+                    }
+                };
+                sfile = await this.fileImporter.importFile(fileToImport, importDir, importOptions);
+                if (sfile) {
+                    existingFiles[await sfile.getName()] = sfile;
+                    importedFiles.push(sfile);
+                }
+                count[0]++;
+            }
+            catch (ex) {
+                if (!this.onError(ex)) {
+                    if (onFailed)
+                        onFailed(fileToImport, ex);
+                }
+            }
+        }
+    }
+    /**
+     * Export a file from a drive.
+     *
+     * @param {IVirtualFile[]} filesToExport     The files to export.
+     * @param {IFile} exportDir         The export target directory
+     * @param {BatchExportOptions} [options] The options
+     * @returns {Promise&lt;IFile[]>} The exported files
+     * @throws Exception
+     */
+    async exportFiles(filesToExport, exportDir, options) {
+        if (!options)
+            options = new BatchExportOptions();
+        this.stopJobs = false;
+        let exportedFiles = [];
+        let total = 0;
+        for (let i = 0; i &lt; filesToExport.length; i++) {
+            if (this.stopJobs)
+                break;
+            total += await this.getIVirtualFilesCountRecursively(filesToExport[i]);
+        }
+        let existingFiles = await this.getExistingRealFiles(exportDir);
+        let count = [0];
+        for (let i = 0; i &lt; filesToExport.length; i++) {
+            if (this.stopJobs)
+                break;
+            await this.exportRecursively(filesToExport[i], exportDir, options.deleteSource, options.integrity, options.onProgressChanged, options.autoRename, options.onFailed, exportedFiles, count, total, existingFiles);
+        }
+        return exportedFiles;
+    }
+    async getExistingRealFiles(exportDir) {
+        let files = {};
+        let lFiles = await exportDir.listFiles();
+        for (let i = 0; i &lt; lFiles.length; i++) {
+            if (this.stopJobs)
+                break;
+            let file = lFiles[i];
+            files[file.getName()] = file;
+        }
+        return files;
+    }
+    async exportRecursively(fileToExport, exportDir, deleteSource, integrity, onProgressChanged, autoRename, onFailed, exportedFiles, count, total, existingFiles) {
+        let rfile = await fileToExport.getName() in existingFiles
+            ? existingFiles[await fileToExport.getName()] : null;
+        if (await fileToExport.isDirectory()) {
+            if (rfile == null || !await rfile.exists())
+                rfile = await exportDir.createDirectory(await fileToExport.getName());
+            else if (rfile &amp;&amp; await rfile.isFile() &amp;&amp; autoRename)
+                rfile = await exportDir.createDirectory(await autoRename(rfile));
+            if (onProgressChanged)
+                onProgressChanged(new IVirtualFileTaskProgress(fileToExport, 1, 1, count[0], total));
+            count[0]++;
+            let nExistingFiles = await this.getExistingRealFiles(rfile);
+            let lFiles = await fileToExport.listFiles();
+            for (let i = 0; i &lt; lFiles.length; i++) {
+                if (this.stopJobs)
+                    break;
+                let child = lFiles[i];
+                await this.exportRecursively(child, rfile, deleteSource, integrity, onProgressChanged, autoRename, onFailed, exportedFiles, count, total, nExistingFiles);
+            }
+            if (deleteSource &amp;&amp; !this.stopJobs) {
+                fileToExport.delete();
+            }
+        }
+        else {
+            try {
+                let filename = await fileToExport.getName();
+                if (rfile &amp;&amp; await rfile.exists() &amp;&amp; autoRename)
+                    filename = await autoRename(rfile);
+                let exportOptions = new FileExportOptions();
+                exportOptions.filename = filename;
+                exportOptions.deleteSource = deleteSource;
+                exportOptions.integrity = integrity;
+                exportOptions.onProgressChanged = (bytes, totalBytes) => {
+                    if (onProgressChanged) {
+                        onProgressChanged(new IVirtualFileTaskProgress(fileToExport, bytes, totalBytes, count[0], total));
+                    }
+                };
+                rfile = await this.fileExporter.exportFile(fileToExport, exportDir, exportOptions);
+                if (rfile) {
+                    existingFiles[rfile.getName()] = rfile;
+                    exportedFiles.push(rfile);
+                }
+                count[0]++;
+            }
+            catch (ex) {
+                if (!this.onError(ex)) {
+                    if (onFailed)
+                        onFailed(fileToExport, ex);
+                }
+            }
+        }
+    }
+    async getIVirtualFilesCountRecursively(file) {
+        let count = 1;
+        if (await file.isDirectory()) {
+            let lFiles = await file.listFiles();
+            for (let i = 0; i &lt; lFiles.length; i++) {
+                if (this.stopJobs)
+                    break;
+                let child = lFiles[i];
+                count += await this.getIVirtualFilesCountRecursively(child);
+            }
+        }
+        return count;
+    }
+    async getRealFilesCountRecursively(file) {
+        let count = 1;
+        if (await file.isDirectory()) {
+            let lFiles = await file.listFiles();
+            for (let i = 0; i &lt; lFiles.length; i++) {
+                if (this.stopJobs)
+                    break;
+                let child = lFiles[i];
+                count += await this.getRealFilesCountRecursively(child);
+            }
+        }
+        return count;
+    }
+    /**
+     * Delete files from a drive.
+     *
+     * @param {IVirtualFile[]} filesToDelete The files to delete.
+     * @param {BatchDeleteOptions} [options] The options.
+     */
+    async deleteFiles(filesToDelete, options) {
+        if (!options)
+            options = new BatchDeleteOptions();
+        this.stopJobs = false;
+        let count = [0];
+        let total = 0;
+        for (let i = 0; i &lt; filesToDelete.length; i++) {
+            if (this.stopJobs)
+                break;
+            total += await this.getIVirtualFilesCountRecursively(filesToDelete[i]);
+        }
+        for (let i = 0; i &lt; filesToDelete.length; i++) {
+            let fileToDelete = filesToDelete[i];
+            if (this.stopJobs)
+                break;
+            let finalTotal = total;
+            let deleteOptions = new VirtualRecursiveCopyOptions();
+            deleteOptions.onFailed = options.onFailed;
+            deleteOptions.onProgressChanged = (file, position, length) => {
+                if (this.stopJobs)
+                    throw new Error();
+                if (options.onProgressChanged) {
+                    try {
+                        options.onProgressChanged(new IVirtualFileTaskProgress(file, position, length, count[0], finalTotal));
+                    }
+                    catch (ex) {
+                    }
+                }
+                if (position == length)
+                    count[0]++;
+            };
+            await fileToDelete.deleteRecursively(deleteOptions);
+        }
+    }
+    /**
+     * Copy files to another directory.
+     *
+     * @param {IVirtualFile[]} filesToCopy       The array of files to copy.
+     * @param {IVirtualFile} dir               The target directory.
+     * @param {BatchCopyOptions} [options] The options
+     * @throws Exception When a error during copying occurs.
+     */
+    async copyFiles(filesToCopy, dir, options) {
+        if (!options)
+            options = new BatchCopyOptions();
+        this.stopJobs = false;
+        let count = [0];
+        let total = 0;
+        for (let i = 0; i &lt; filesToCopy.length; i++) {
+            if (this.stopJobs)
+                break;
+            total += await this.getIVirtualFilesCountRecursively(filesToCopy[i]);
+        }
+        const finalTotal = total;
+        for (let i = 0; i &lt; filesToCopy.length; i++) {
+            if (this.stopJobs)
+                break;
+            let fileToCopy = filesToCopy[i];
+            if (dir.getRealFile().getDisplayPath().startsWith(fileToCopy.getRealFile().getDisplayPath()))
+                continue;
+            if (this.stopJobs)
+                break;
+            if (options.move) {
+                let moveOptions = new VirtualRecursiveMoveOptions();
+                moveOptions.autoRename = options.autoRename;
+                moveOptions.autoRenameFolders = options.autoRenameFolders;
+                moveOptions.onFailed = options.onFailed;
+                moveOptions.onProgressChanged = (file, position, length) => {
+                    if (this.stopJobs)
+                        throw new Error();
+                    if (options.onProgressChanged) {
+                        try {
+                            options.onProgressChanged(new IVirtualFileTaskProgress(file, position, length, count[0], finalTotal));
+                        }
+                        catch (ex) {
+                        }
+                    }
+                    if (position == length)
+                        count[0]++;
+                };
+                await fileToCopy.moveRecursively(dir, moveOptions);
+            }
+            else {
+                let copyOptions = new VirtualRecursiveCopyOptions();
+                copyOptions.autoRename = options.autoRename;
+                copyOptions.autoRenameFolders = options.autoRenameFolders;
+                copyOptions.onFailed = options.onFailed;
+                copyOptions.onProgressChanged = (file, position, length) => {
+                    if (this.stopJobs)
+                        throw new Error();
+                    if (options.onProgressChanged) {
+                        try {
+                            options.onProgressChanged(new IVirtualFileTaskProgress(file, position, length, count[0], finalTotal));
+                        }
+                        catch (ignored) {
+                        }
+                    }
+                    if (position == length)
+                        count[0]++;
+                };
+                await fileToCopy.copyRecursively(dir, copyOptions);
+            }
+        }
+    }
+    /**
+     * Cancel all jobs.
+     */
+    cancel() {
+        this.stopJobs = true;
+        this.fileImporter.stop();
+        this.fileExporter.stop();
+        this.fileSearcher.stop();
+    }
+    /**
+     * Check if the file search is currently running.
+     *
+     * @returns {boolean} True if the file search is currently running.
+     */
+    isFileSearcherRunning() {
+        return this.fileSearcher.isRunning();
+    }
+    /**
+     * Check if jobs are currently running.
+     *
+     * @returns {boolean} True if jobs are currently running.
+     */
+    isRunning() {
+        return this.fileSearcher.isRunning() || this.fileImporter.isRunning() || this.fileExporter.isRunning();
+    }
+    /**
+     * Check if file search stopped.
+     *
+     * @returns {boolean} True if file search stopped.
+     */
+    isFileSearcherStopped() {
+        return this.fileSearcher.isStopped();
+    }
+    /**
+     * Stop file search.
+     */
+    stopFileSearch() {
+        this.fileSearcher.stop();
+    }
+    /**
+     * Search
+     *
+     * @param {IVirtualFile} dir           The directory to start the search.
+     * @param {string} terms         The terms to search for.
+     * @param {SearchOptions} [options] The options
+     * @returns {Promise&lt;IVirtualFile[]>} An array with all the results found.
+     */
+    async search(dir, terms, options) {
+        return await this.fileSearcher.search(dir, terms, options);
+    }
+    /**
+     * Check if all jobs are stopped.
+     *
+     * @returns {boolean} True if jobs are stopped
+     */
+    areJobsStopped() {
+        return this.stopJobs;
+    }
+    /**
+     * Get number of files recursively for the files provided.
+     *
+     * @param {IVirtualFile[]} files The files and directories.
+     * @returns {Promise&lt;number>} Total number of files and files under subdirectories.
+     */
+    async getFiles(files) {
+        let total = 0;
+        for (let i = 0; i &lt; files.length; i++) {
+            if (this.stopJobs)
+                break;
+            let file = files[i];
+            total++;
+            if (await file.isDirectory()) {
+                total += await this.getFiles(await file.listFiles());
+            }
+        }
+        return total;
+    }
+    /**
+     * Close the commander and associated resources.
+     */
+    close() {
+        this.fileImporter.close();
+        this.fileExporter.close();
+    }
+    /**
+     * Rename an encrypted file
+     * @param {IVirtualFile} file The file
+     * @param {string} newFilename The new filename
+     */
+    async renameFile(file, newFilename) {
+        await file.rename(newFilename);
+    }
+    /**
+     * Handle the error.
+     * @param {Error | unknown | null} ex The error
+     * @returns {boolean} True if handled
+     */
+    onError(ex) {
+        return false;
+    }
+}
+/**
+ * File task progress.
+ */
+export class FileTaskProgress {
+    /**
+     * Get the total bytes.
+     * @returns {number} The total bytes
+     */
+    getTotalBytes() {
+        return this.totalBytes;
+    }
+    /**
+     * Get the processed bytes
+     * @returns {number} The processed bytes
+     */
+    getProcessedBytes() {
+        return this.processedBytes;
+    }
+    /**
+     * Get the processed files
+     * @returns {number} The processed files
+     */
+    getProcessedFiles() {
+        return this.processedFiles;
+    }
+    /**
+     * Get the total files
+     * @returns {number} The total files
+     */
+    getTotalFiles() {
+        return this.totalFiles;
+    }
+    /**
+     * Construct a file progress
+     * @param {number} processedBytes The processed bytes
+     * @param {number} totalBytes The total bytes
+     * @param {number} processedFiles The processed files
+     * @param {number} totalFiles The total files
+     */
+    constructor(processedBytes, totalBytes, processedFiles, totalFiles) {
+        this.processedBytes = processedBytes;
+        this.totalBytes = totalBytes;
+        this.processedFiles = processedFiles;
+        this.totalFiles = totalFiles;
+    }
+}
+/**
+ * Virtual file task progress.
+ */
+export class IVirtualFileTaskProgress extends FileTaskProgress {
+    /**
+     * Get the file
+     * @returns {IVirtualFile} The virtual file
+     */
+    getFile() {
+        return this.file;
+    }
+    /**
+     * Construct a task progress.
+     * @param {IVirtualFile} file The file
+     * @param {number} processedBytes The processed bytes
+     * @param {number} totalBytes  The total bytes
+     * @param {number} processedFiles  The processed files
+     * @param {number} totalFiles  The total files
+     */
+    constructor(file, processedBytes, totalBytes, processedFiles, totalFiles) {
+        super(processedBytes, totalBytes, processedFiles, totalFiles);
+        this.file = file;
+    }
+}
+/**
+ * Real file task progress.
+ */
+export class RealFileTaskProgress extends FileTaskProgress {
+    /**
+     *
+     * @returns {IFile} The real file
+     */
+    getFile() {
+        return this.file;
+    }
+    /**
+     *
+     * @param {IFile} file The file
+     * @param {number} processedBytes The processed bytes
+     * @param {number} totalBytes The total bytes
+     * @param {number} processedFiles The processed files
+     * @param {number} totalFiles The total files
+     */
+    constructor(file, processedBytes, totalBytes, processedFiles, totalFiles) {
+        super(processedBytes, totalBytes, processedFiles, totalFiles);
+        this.file = file;
+    }
+}
+/**
+ * Batch delete options
+ */
+export class BatchDeleteOptions {
+}
+/**
+ * Batch import options
+ */
+export class BatchImportOptions {
+    constructor() {
+        /**
+         * Delete the source file when complete.
+         */
+        this.deleteSource = false;
+        /**
+         * True to enable integrity
+         */
+        this.integrity = false;
+    }
+}
+/**
+ * Batch export options
+ */
+export class BatchExportOptions {
+    constructor() {
+        /**
+         * Delete the source file when complete.
+         */
+        this.deleteSource = false;
+        /**
+         * True to enable integrity
+         */
+        this.integrity = false;
+    }
+}
+/**
+ * Batch copy options
+ */
+export class BatchCopyOptions {
+    constructor() {
+        /**
+         * True to move, false to copy
+         */
+        this.move = false;
+        /**
+         * True to autorename folders
+         */
+        this.autoRenameFolders = false;
+    }
+}
+</code></pre>
+        </article>
+    </section>
+
+
+
+
+</div>
+
+<nav>
+    <h2><a href="index.html">Home</a></h2><h3>Classes</h3><ul><li><a href="AESCTRTransformer.html">AESCTRTransformer</a></li><li><a href="AesDefaultTransformer.html">AesDefaultTransformer</a></li><li><a href="AesDrive.html">AesDrive</a></li><li><a href="AesFile.html">AesFile</a></li><li><a href="AesFileCommander.html">AesFileCommander</a></li><li><a href="AesFileExporter.html">AesFileExporter</a></li><li><a href="AesFileExporterWorker.html">AesFileExporterWorker</a></li><li><a href="AesFileImporter.html">AesFileImporter</a></li><li><a href="AesFileImporterWorker.html">AesFileImporterWorker</a></li><li><a href="AesFileReadableStream.html">AesFileReadableStream</a></li><li><a href="AesNativeTransformer.html">AesNativeTransformer</a></li><li><a href="AesStream.html">AesStream</a></li><li><a href="AuthConfig.html">AuthConfig</a></li><li><a href="AuthException.html">AuthException</a></li><li><a href="Base64.html">Base64</a></li><li><a href="Base64Utils.html">Base64Utils</a></li><li><a href="BatchCopyOptions.html">BatchCopyOptions</a></li><li><a href="BatchDeleteOptions.html">BatchDeleteOptions</a></li><li><a href="BatchExportOptions.html">BatchExportOptions</a></li><li><a href="BatchImportOptions.html">BatchImportOptions</a></li><li><a href="BitConverter.html">BitConverter</a></li><li><a href="CacheBuffer.html">CacheBuffer</a></li><li><a href="CopyContentsOptions.html">CopyContentsOptions</a></li><li><a href="CopyOptions.html">CopyOptions</a></li><li><a href="Credentials_Credentials.html">Credentials</a></li><li><a href="Decryptor.html">Decryptor</a></li><li><a href="DefaultPbkdfProvider.html">DefaultPbkdfProvider</a></li><li><a href="Drive.html">Drive</a></li><li><a href="DriveConfig.html">DriveConfig</a></li><li><a href="DriveGenerator.html">DriveGenerator</a></li><li><a href="DriveKey.html">DriveKey</a></li><li><a href="Encryptor.html">Encryptor</a></li><li><a href="File.html">File</a></li><li><a href="FileCommander.html">FileCommander</a></li><li><a href="FileExportOptions.html">FileExportOptions</a></li><li><a href="FileExporter.html">FileExporter</a></li><li><a href="FileExporterWorker.html">FileExporterWorker</a></li><li><a href="FileImportOptions.html">FileImportOptions</a></li><li><a href="FileImporter.html">FileImporter</a></li><li><a href="FileImporterWorker.html">FileImporterWorker</a></li><li><a href="FileSearcher.html">FileSearcher</a></li><li><a href="FileSequencer.html">FileSequencer</a></li><li><a href="FileStream.html">FileStream</a></li><li><a href="FileTaskProgress.html">FileTaskProgress</a></li><li><a href="FileUtils.html">FileUtils</a></li><li><a href="Generator.html">Generator</a></li><li><a href="Handler.html">Handler</a></li><li><a href="Header.html">Header</a></li><li><a href="HmacSHA256Provider.html">HmacSHA256Provider</a></li><li><a href="HttpDrive.html">HttpDrive</a></li><li><a href="HttpFile.html">HttpFile</a></li><li><a href="HttpFileStream.html">HttpFileStream</a></li><li><a href="IOException.html">IOException</a></li><li><a href="IVirtualFileTaskProgress.html">IVirtualFileTaskProgress</a></li><li><a href="Integrity.html">Integrity</a></li><li><a href="IntegrityException.html">IntegrityException</a></li><li><a href="LocalStorageFile.html">LocalStorageFile</a></li><li><a href="LocalStorageFileStream.html">LocalStorageFileStream</a></li><li><a href="MemoryStream.html">MemoryStream</a></li><li><a href="MoveOptions.html">MoveOptions</a></li><li><a href="NativeProxy.html">NativeProxy</a></li><li><a href="NodeDrive.html">NodeDrive</a></li><li><a href="NodeFile.html">NodeFile</a></li><li><a href="NodeFileStream.html">NodeFileStream</a></li><li><a href="Nonce.html">Nonce</a></li><li><a href="NonceSequence.html">NonceSequence</a></li><li><a href="Password.html">Password</a></li><li><a href="PbkdfFactory.html">PbkdfFactory</a></li><li><a href="RandomAccessStream.html">RandomAccessStream</a></li><li><a href="RangeExceededException.html">RangeExceededException</a></li><li><a href="ReadableStreamFileReader_ReadableStreamFileReader.html">ReadableStreamFileReader</a></li><li><a href="RealFileTaskProgress.html">RealFileTaskProgress</a></li><li><a href="RecursiveCopyOptions.html">RecursiveCopyOptions</a></li><li><a href="RecursiveDeleteOptions.html">RecursiveDeleteOptions</a></li><li><a href="RecursiveMoveOptions.html">RecursiveMoveOptions</a></li><li><a href="SearchOptions.html">SearchOptions</a></li><li><a href="SecurityException.html">SecurityException</a></li><li><a href="SequenceException.html">SequenceException</a></li><li><a href="SequenceSerializer.html">SequenceSerializer</a></li><li><a href="TextDecryptor.html">TextDecryptor</a></li><li><a href="TextEncryptor.html">TextEncryptor</a></li><li><a href="TransformerFactory.html">TransformerFactory</a></li><li><a href="VirtualRecursiveCopyOptions.html">VirtualRecursiveCopyOptions</a></li><li><a href="VirtualRecursiveDeleteOptions.html">VirtualRecursiveDeleteOptions</a></li><li><a href="VirtualRecursiveMoveOptions.html">VirtualRecursiveMoveOptions</a></li><li><a href="WSDrive.html">WSDrive</a></li><li><a href="WSFile.html">WSFile</a></li><li><a href="WSFileStream.html">WSFileStream</a></li></ul><h3>Global</h3><ul><li><a href="global.html#EncryptionFormat">EncryptionFormat</a></li><li><a href="global.html#EncryptionFormat%255Bundefined%255D">EncryptionFormat[undefined]</a></li><li><a href="global.html#EncryptionMode">EncryptionMode</a></li><li><a href="global.html#EncryptionMode%255Bundefined%255D">EncryptionMode[undefined]</a></li><li><a href="global.html#PBKDF_SHA256">PBKDF_SHA256</a></li><li><a href="global.html#PbkdfAlgo">PbkdfAlgo</a></li><li><a href="global.html#PbkdfAlgo%255Bundefined%255D">PbkdfAlgo[undefined]</a></li><li><a href="global.html#PbkdfType">PbkdfType</a></li><li><a href="global.html#PbkdfType%255Bundefined%255D">PbkdfType[undefined]</a></li><li><a href="global.html#ProviderType">ProviderType</a></li><li><a href="global.html#ProviderType%255Bundefined%255D">ProviderType[undefined]</a></li><li><a href="global.html#SearchEvent">SearchEvent</a></li><li><a href="global.html#SearchEvent%255Bundefined%255D">SearchEvent[undefined]</a></li><li><a href="global.html#SeekOrigin">SeekOrigin</a></li><li><a href="global.html#SeekOrigin%255Bundefined%255D">SeekOrigin[undefined]</a></li><li><a href="global.html#Status">Status</a></li><li><a href="global.html#Status%255Bundefined%255D">Status[undefined]</a></li><li><a href="global.html#autoRename">autoRename</a></li><li><a href="global.html#autoRenameFile">autoRenameFile</a></li><li><a href="global.html#copyFileContents">copyFileContents</a></li><li><a href="global.html#copyRecursively">copyRecursively</a></li><li><a href="global.html#decryptData">decryptData</a></li><li><a href="global.html#deleteRecursively">deleteRecursively</a></li><li><a href="global.html#encryptData">encryptData</a></li><li><a href="global.html#exportFilePart">exportFilePart</a></li><li><a href="global.html#fillBufferPart">fillBufferPart</a></li><li><a href="global.html#getExtension">getExtension</a></li><li><a href="global.html#getPbkdfAlgoString">getPbkdfAlgoString</a></li><li><a href="global.html#importFilePart">importFilePart</a></li><li><a href="global.html#moveRecursively">moveRecursively</a></li></ul>
+</nav>
+
+<br class="clear">
+
+<footer>
+    Documentation generated by <a href="https://github.com/jsdoc/jsdoc">JSDoc 4.0.4</a> on Mon Mar 24 2025 20:18:54 GMT+0200 (Eastern European Standard Time)
+</footer>
+
+<script> prettyPrint(); </script>
+<script src="scripts/linenumber.js"> </script>
+</body>
+</html>

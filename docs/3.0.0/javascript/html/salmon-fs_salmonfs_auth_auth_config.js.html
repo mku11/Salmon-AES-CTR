@@ -1,0 +1,269 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <title>JSDoc: Source: salmon-fs/salmonfs/auth/auth_config.js</title>
+
+    <script src="scripts/prettify/prettify.js"> </script>
+    <script src="scripts/prettify/lang-css.js"> </script>
+    <!--[if lt IE 9]>
+      <script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script>
+    <![endif]-->
+    <link type="text/css" rel="stylesheet" href="styles/prettify-tomorrow.css">
+    <link type="text/css" rel="stylesheet" href="styles/jsdoc-default.css">
+</head>
+
+<body>
+
+<div id="main">
+
+    <h1 class="page-title">Source: salmon-fs/salmonfs/auth/auth_config.js</h1>
+
+    
+
+
+
+    
+    <section>
+        <article>
+            <pre class="prettyprint source linenums"><code>/*
+MIT License
+
+Copyright (c) 2021 Max Kas
+
+Permission is hereby granted, free of charge, to any person obtaining a copy
+of this software and associated documentation files (the "Software"), to deal
+in the Software without restriction, including without limitation the rights
+to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+copies of the Software, and to permit persons to whom the Software is
+furnished to do so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in all
+copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+SOFTWARE.
+*/
+var __classPrivateFieldGet = (this &amp;&amp; this.__classPrivateFieldGet) || function (receiver, state, kind, f) {
+    if (kind === "a" &amp;&amp; !f) throw new TypeError("Private accessor was defined without a getter");
+    if (typeof state === "function" ? receiver !== state || !f : !state.has(receiver)) throw new TypeError("Cannot read private member from an object whose class did not declare it");
+    return kind === "m" ? f : kind === "a" ? f.call(receiver) : f ? f.value : state.get(receiver);
+};
+var _a, _AuthConfig_driveId, _AuthConfig_authId, _AuthConfig_startNonce, _AuthConfig_maxNonce, _AuthConfig_writeAuthFile, _AuthConfig_writeToStream, _AuthConfig_getAuthConfig, _AuthConfig_verifyAuthId, _AuthConfig_importSequence;
+import { Generator } from "../../../salmon-core/salmon/generator.js";
+import { MemoryStream } from "../../../salmon-core/streams/memory_stream.js";
+import { Integrity } from "../../../salmon-core/salmon/integrity/integrity.js";
+import { DriveGenerator } from "../drive/drive_generator.js";
+import { AuthException } from "./auth_exception.js";
+import { AesFile } from "../file/aes_file.js";
+import { Status } from "../../../salmon-core/salmon/sequence/nonce_sequence.js";
+import { SequenceException } from "../../../salmon-core/salmon/sequence/sequence_exception.js";
+import { SecurityException } from "../../../salmon-core/salmon/security_exception.js";
+import { Nonce } from "../../../salmon-core/salmon/nonce.js";
+import { BitConverter } from "../../../salmon-core/convert/bit_converter.js";
+/**
+ * Device Authorization Configuration. This represents the authorization that will be provided
+ * to the target device to allow writing operations for a virtual drive.
+ */
+export class AuthConfig {
+    /**
+     * Get the drive ID to grant authorization for.
+     * @returns {Uint8Array} The drive id
+     */
+    getDriveId() {
+        return __classPrivateFieldGet(this, _AuthConfig_driveId, "f");
+    }
+    /**
+     * Get the authorization ID for the target device.
+     * @returns {Uint8Array} The auth id
+     */
+    getAuthId() {
+        return __classPrivateFieldGet(this, _AuthConfig_authId, "f");
+    }
+    /**
+     * Get the nonce maximum value the target device will use.
+     * @returns {Uint8Array} The starting nonce.
+     */
+    getStartNonce() {
+        return __classPrivateFieldGet(this, _AuthConfig_startNonce, "f");
+    }
+    /**
+     * Get the nonce maximum value the target device will use.
+     * @returns {Uint8Array} The nonce max value.
+     */
+    getMaxNonce() {
+        return __classPrivateFieldGet(this, _AuthConfig_maxNonce, "f");
+    }
+    /**
+     * Instantiate a class with the properties of the authorization config file.
+     */
+    constructor() {
+        _AuthConfig_driveId.set(this, new Uint8Array(DriveGenerator.DRIVE_ID_LENGTH));
+        _AuthConfig_authId.set(this, new Uint8Array(DriveGenerator.AUTH_ID_SIZE));
+        _AuthConfig_startNonce.set(this, new Uint8Array(Generator.NONCE_LENGTH));
+        _AuthConfig_maxNonce.set(this, new Uint8Array(Generator.NONCE_LENGTH));
+    }
+    /**
+     * Initialize the authorization configuration.
+     * @param {Uint8Array} contents The authorization configuration data
+     */
+    async init(contents) {
+        let ms = new MemoryStream(contents);
+        await ms.read(__classPrivateFieldGet(this, _AuthConfig_driveId, "f"), 0, DriveGenerator.DRIVE_ID_LENGTH);
+        await ms.read(__classPrivateFieldGet(this, _AuthConfig_authId, "f"), 0, DriveGenerator.AUTH_ID_SIZE);
+        await ms.read(__classPrivateFieldGet(this, _AuthConfig_startNonce, "f"), 0, Generator.NONCE_LENGTH);
+        await ms.read(__classPrivateFieldGet(this, _AuthConfig_maxNonce, "f"), 0, Generator.NONCE_LENGTH);
+        await ms.close();
+    }
+    /**
+     * Import the device authorization file.
+     *
+     * @param {AesDrive} drive The drive
+     * @param {IFile} authConfigFile The filepath to the authorization file.
+     * @throws Exception
+     */
+    static async importAuthFile(drive, authConfigFile) {
+        let sequencer = drive.getSequencer();
+        if (!sequencer)
+            throw new Error("No sequencer defined");
+        let driveId = drive.getDriveId();
+        if (driveId == null)
+            throw new Error("Could not get drive id, make sure you init the drive first");
+        let sequence = await sequencer.getSequence(BitConverter.toHex(driveId));
+        if (sequence &amp;&amp; sequence.getStatus() == Status.Active)
+            throw new Error("Device is already authorized");
+        if (authConfigFile == null || !await authConfigFile.exists())
+            throw new Error("Could not import file");
+        let authConfig = await __classPrivateFieldGet(_a, _a, "m", _AuthConfig_getAuthConfig).call(_a, drive, authConfigFile);
+        let authIdBytes = await drive.getAuthIdBytes();
+        if (!authConfig.getAuthId().every((val, index) => val === authIdBytes[index])
+            || !authConfig.getDriveId().every((val, index) => driveId &amp;&amp; val == driveId[index]))
+            throw new Error("Auth file doesn't match driveId or authId");
+        await __classPrivateFieldGet(_a, _a, "m", _AuthConfig_importSequence).call(_a, drive, authConfig);
+    }
+    /**
+     * @param {AesDrive} drive The drive
+     * @param {string} targetAuthId The authorization id of the target device.
+     * @param {IFile} file     The file
+     * @throws Exception If an error occurs during export
+     */
+    static async exportAuthFile(drive, targetAuthId, file) {
+        let sequencer = drive.getSequencer();
+        if (!sequencer)
+            throw new Error("No sequencer defined");
+        let driveId = drive.getDriveId();
+        if (driveId == null)
+            throw new Error("Could not get drive id, make sure you init the drive first");
+        let cfgNonce = await sequencer.nextNonce(BitConverter.toHex(driveId));
+        if (cfgNonce == null)
+            throw new Error("Could not get config nonce");
+        let sequence = await sequencer.getSequence(BitConverter.toHex(driveId));
+        if (sequence == null)
+            throw new Error("Device is not authorized to export");
+        if (await file.exists() &amp;&amp; await file.getLength() > 0) {
+            let outStream = null;
+            try {
+                outStream = await file.getOutputStream();
+                await outStream.setLength(0);
+            }
+            catch (ex) {
+            }
+            finally {
+                if (outStream)
+                    await outStream.close();
+            }
+        }
+        let maxNonce = sequence.getMaxNonce();
+        if (maxNonce == null)
+            throw new SequenceException("Could not get current max nonce");
+        let nextNonce = sequence.getNextNonce();
+        if (nextNonce == null)
+            throw new SequenceException("Could not get next nonce");
+        let pivotNonce = Nonce.splitNonceRange(nextNonce, maxNonce);
+        let authId = sequence.getAuthId();
+        if (authId == null)
+            throw new SequenceException("Could not get auth id");
+        await sequencer.setMaxNonce(sequence.getId(), authId, pivotNonce);
+        await __classPrivateFieldGet(_a, _a, "m", _AuthConfig_writeAuthFile).call(_a, file, drive, BitConverter.hexToBytes(targetAuthId), pivotNonce, maxNonce, cfgNonce);
+    }
+}
+_a = AuthConfig, _AuthConfig_driveId = new WeakMap(), _AuthConfig_authId = new WeakMap(), _AuthConfig_startNonce = new WeakMap(), _AuthConfig_maxNonce = new WeakMap(), _AuthConfig_writeAuthFile = async function _AuthConfig_writeAuthFile(authConfigFile, drive, targetAuthId, targetStartingNonce, targetMaxNonce, configNonce) {
+    let driveId = drive.getDriveId();
+    if (driveId == null)
+        throw new Error("Could not write auth file, no drive id found");
+    let aesFile = new AesFile(authConfigFile, drive);
+    let stream = await aesFile.getOutputStream(configNonce);
+    await __classPrivateFieldGet(_a, _a, "m", _AuthConfig_writeToStream).call(_a, stream, driveId, targetAuthId, targetStartingNonce, targetMaxNonce);
+}, _AuthConfig_writeToStream = async function _AuthConfig_writeToStream(stream, driveId, authId, nextNonce, maxNonce) {
+    let ms = new MemoryStream();
+    try {
+        await ms.write(driveId, 0, driveId.length);
+        await ms.write(authId, 0, authId.length);
+        await ms.write(nextNonce, 0, nextNonce.length);
+        await ms.write(maxNonce, 0, maxNonce.length);
+        let content = ms.toArray();
+        let buffer = new Uint8Array(Integrity.DEFAULT_CHUNK_SIZE);
+        for (let i = 0; i &lt; content.length; i++)
+            buffer[i] = content[i];
+        await stream.write(buffer, 0, content.length);
+    }
+    catch (ex) {
+        console.error(ex);
+        throw new AuthException("Could not write auth config", ex);
+    }
+    finally {
+        await ms.close();
+        await stream.flush();
+        await stream.close();
+    }
+}, _AuthConfig_getAuthConfig = async function _AuthConfig_getAuthConfig(drive, authFile) {
+    let aesFile = new AesFile(authFile, drive);
+    let stream = await aesFile.getInputStream();
+    let ms = new MemoryStream();
+    await stream.copyTo(ms);
+    await ms.close();
+    await stream.close();
+    let driveConfig = new _a();
+    await driveConfig.init(ms.toArray());
+    if (!await __classPrivateFieldGet(_a, _a, "m", _AuthConfig_verifyAuthId).call(_a, drive, driveConfig.getAuthId()))
+        throw new SecurityException("Could not authorize this device, the authorization id does not match");
+    return driveConfig;
+}, _AuthConfig_verifyAuthId = async function _AuthConfig_verifyAuthId(drive, authId) {
+    let authIdBytes = await drive.getAuthIdBytes();
+    return authId.every(async (val, index) => val === authIdBytes[index]);
+}, _AuthConfig_importSequence = async function _AuthConfig_importSequence(drive, authConfig) {
+    let sequencer = drive.getSequencer();
+    if (!sequencer)
+        throw new Error("No sequencer defined");
+    let drvStr = BitConverter.toHex(authConfig.getDriveId());
+    let authStr = BitConverter.toHex(authConfig.getAuthId());
+    await sequencer.initializeSequence(drvStr, authStr, authConfig.getStartNonce(), authConfig.getMaxNonce());
+};
+</code></pre>
+        </article>
+    </section>
+
+
+
+
+</div>
+
+<nav>
+    <h2><a href="index.html">Home</a></h2><h3>Classes</h3><ul><li><a href="AESCTRTransformer.html">AESCTRTransformer</a></li><li><a href="AesDefaultTransformer.html">AesDefaultTransformer</a></li><li><a href="AesDrive.html">AesDrive</a></li><li><a href="AesFile.html">AesFile</a></li><li><a href="AesFileCommander.html">AesFileCommander</a></li><li><a href="AesFileExporter.html">AesFileExporter</a></li><li><a href="AesFileExporterWorker.html">AesFileExporterWorker</a></li><li><a href="AesFileImporter.html">AesFileImporter</a></li><li><a href="AesFileImporterWorker.html">AesFileImporterWorker</a></li><li><a href="AesFileReadableStream.html">AesFileReadableStream</a></li><li><a href="AesNativeTransformer.html">AesNativeTransformer</a></li><li><a href="AesStream.html">AesStream</a></li><li><a href="AuthConfig.html">AuthConfig</a></li><li><a href="AuthException.html">AuthException</a></li><li><a href="Base64.html">Base64</a></li><li><a href="Base64Utils.html">Base64Utils</a></li><li><a href="BatchCopyOptions.html">BatchCopyOptions</a></li><li><a href="BatchDeleteOptions.html">BatchDeleteOptions</a></li><li><a href="BatchExportOptions.html">BatchExportOptions</a></li><li><a href="BatchImportOptions.html">BatchImportOptions</a></li><li><a href="BitConverter.html">BitConverter</a></li><li><a href="CacheBuffer.html">CacheBuffer</a></li><li><a href="CopyContentsOptions.html">CopyContentsOptions</a></li><li><a href="CopyOptions.html">CopyOptions</a></li><li><a href="Credentials_Credentials.html">Credentials</a></li><li><a href="Decryptor.html">Decryptor</a></li><li><a href="DefaultPbkdfProvider.html">DefaultPbkdfProvider</a></li><li><a href="Drive.html">Drive</a></li><li><a href="DriveConfig.html">DriveConfig</a></li><li><a href="DriveGenerator.html">DriveGenerator</a></li><li><a href="DriveKey.html">DriveKey</a></li><li><a href="Encryptor.html">Encryptor</a></li><li><a href="File.html">File</a></li><li><a href="FileCommander.html">FileCommander</a></li><li><a href="FileExportOptions.html">FileExportOptions</a></li><li><a href="FileExporter.html">FileExporter</a></li><li><a href="FileExporterWorker.html">FileExporterWorker</a></li><li><a href="FileImportOptions.html">FileImportOptions</a></li><li><a href="FileImporter.html">FileImporter</a></li><li><a href="FileImporterWorker.html">FileImporterWorker</a></li><li><a href="FileSearcher.html">FileSearcher</a></li><li><a href="FileSequencer.html">FileSequencer</a></li><li><a href="FileStream.html">FileStream</a></li><li><a href="FileTaskProgress.html">FileTaskProgress</a></li><li><a href="FileUtils.html">FileUtils</a></li><li><a href="Generator.html">Generator</a></li><li><a href="Handler.html">Handler</a></li><li><a href="Header.html">Header</a></li><li><a href="HmacSHA256Provider.html">HmacSHA256Provider</a></li><li><a href="HttpDrive.html">HttpDrive</a></li><li><a href="HttpFile.html">HttpFile</a></li><li><a href="HttpFileStream.html">HttpFileStream</a></li><li><a href="IOException.html">IOException</a></li><li><a href="IVirtualFileTaskProgress.html">IVirtualFileTaskProgress</a></li><li><a href="Integrity.html">Integrity</a></li><li><a href="IntegrityException.html">IntegrityException</a></li><li><a href="LocalStorageFile.html">LocalStorageFile</a></li><li><a href="LocalStorageFileStream.html">LocalStorageFileStream</a></li><li><a href="MemoryStream.html">MemoryStream</a></li><li><a href="MoveOptions.html">MoveOptions</a></li><li><a href="NativeProxy.html">NativeProxy</a></li><li><a href="NodeDrive.html">NodeDrive</a></li><li><a href="NodeFile.html">NodeFile</a></li><li><a href="NodeFileStream.html">NodeFileStream</a></li><li><a href="Nonce.html">Nonce</a></li><li><a href="NonceSequence.html">NonceSequence</a></li><li><a href="Password.html">Password</a></li><li><a href="PbkdfFactory.html">PbkdfFactory</a></li><li><a href="RandomAccessStream.html">RandomAccessStream</a></li><li><a href="RangeExceededException.html">RangeExceededException</a></li><li><a href="ReadableStreamFileReader_ReadableStreamFileReader.html">ReadableStreamFileReader</a></li><li><a href="RealFileTaskProgress.html">RealFileTaskProgress</a></li><li><a href="RecursiveCopyOptions.html">RecursiveCopyOptions</a></li><li><a href="RecursiveDeleteOptions.html">RecursiveDeleteOptions</a></li><li><a href="RecursiveMoveOptions.html">RecursiveMoveOptions</a></li><li><a href="SearchOptions.html">SearchOptions</a></li><li><a href="SecurityException.html">SecurityException</a></li><li><a href="SequenceException.html">SequenceException</a></li><li><a href="SequenceSerializer.html">SequenceSerializer</a></li><li><a href="TextDecryptor.html">TextDecryptor</a></li><li><a href="TextEncryptor.html">TextEncryptor</a></li><li><a href="TransformerFactory.html">TransformerFactory</a></li><li><a href="VirtualRecursiveCopyOptions.html">VirtualRecursiveCopyOptions</a></li><li><a href="VirtualRecursiveDeleteOptions.html">VirtualRecursiveDeleteOptions</a></li><li><a href="VirtualRecursiveMoveOptions.html">VirtualRecursiveMoveOptions</a></li><li><a href="WSDrive.html">WSDrive</a></li><li><a href="WSFile.html">WSFile</a></li><li><a href="WSFileStream.html">WSFileStream</a></li></ul><h3>Global</h3><ul><li><a href="global.html#EncryptionFormat">EncryptionFormat</a></li><li><a href="global.html#EncryptionFormat%255Bundefined%255D">EncryptionFormat[undefined]</a></li><li><a href="global.html#EncryptionMode">EncryptionMode</a></li><li><a href="global.html#EncryptionMode%255Bundefined%255D">EncryptionMode[undefined]</a></li><li><a href="global.html#PBKDF_SHA256">PBKDF_SHA256</a></li><li><a href="global.html#PbkdfAlgo">PbkdfAlgo</a></li><li><a href="global.html#PbkdfAlgo%255Bundefined%255D">PbkdfAlgo[undefined]</a></li><li><a href="global.html#PbkdfType">PbkdfType</a></li><li><a href="global.html#PbkdfType%255Bundefined%255D">PbkdfType[undefined]</a></li><li><a href="global.html#ProviderType">ProviderType</a></li><li><a href="global.html#ProviderType%255Bundefined%255D">ProviderType[undefined]</a></li><li><a href="global.html#SearchEvent">SearchEvent</a></li><li><a href="global.html#SearchEvent%255Bundefined%255D">SearchEvent[undefined]</a></li><li><a href="global.html#SeekOrigin">SeekOrigin</a></li><li><a href="global.html#SeekOrigin%255Bundefined%255D">SeekOrigin[undefined]</a></li><li><a href="global.html#Status">Status</a></li><li><a href="global.html#Status%255Bundefined%255D">Status[undefined]</a></li><li><a href="global.html#autoRename">autoRename</a></li><li><a href="global.html#autoRenameFile">autoRenameFile</a></li><li><a href="global.html#copyFileContents">copyFileContents</a></li><li><a href="global.html#copyRecursively">copyRecursively</a></li><li><a href="global.html#decryptData">decryptData</a></li><li><a href="global.html#deleteRecursively">deleteRecursively</a></li><li><a href="global.html#encryptData">encryptData</a></li><li><a href="global.html#exportFilePart">exportFilePart</a></li><li><a href="global.html#fillBufferPart">fillBufferPart</a></li><li><a href="global.html#getExtension">getExtension</a></li><li><a href="global.html#getPbkdfAlgoString">getPbkdfAlgoString</a></li><li><a href="global.html#importFilePart">importFilePart</a></li><li><a href="global.html#moveRecursively">moveRecursively</a></li></ul>
+</nav>
+
+<br class="clear">
+
+<footer>
+    Documentation generated by <a href="https://github.com/jsdoc/jsdoc">JSDoc 4.0.4</a> on Mon Mar 24 2025 20:18:53 GMT+0200 (Eastern European Standard Time)
+</footer>
+
+<script> prettyPrint(); </script>
+<script src="scripts/linenumber.js"> </script>
+</body>
+</html>
