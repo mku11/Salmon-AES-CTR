@@ -271,7 +271,7 @@ public interface IVirtualFile {
     /**
      * Directory copy options (recursively)
      */
-    public class VirtualRecursiveCopyOptions {
+    public static class VirtualRecursiveCopyOptions {
         /**
          * Callback when file with same name exists
          */
@@ -296,7 +296,7 @@ public interface IVirtualFile {
     /**
      * Directory move options (recursively)
      */
-    public class VirtualRecursiveMoveOptions {
+    public static class VirtualRecursiveMoveOptions {
         /**
          * Callback when file with the same name exists
          */
@@ -321,7 +321,7 @@ public interface IVirtualFile {
     /**
      * Directory move options (recursively)
      */
-    public class VirtualRecursiveDeleteOptions {
+    public static class VirtualRecursiveDeleteOptions {
         /**
          * Callback when file failed
          */

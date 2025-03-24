@@ -474,7 +474,7 @@ public interface IFile {
     /**
      * File copy options
      */
-    class CopyOptions {
+    public static class CopyOptions {
         /**
          * Override filename
          */
@@ -489,7 +489,7 @@ public interface IFile {
     /**
      * File move options
      */
-    class MoveOptions {
+    public static class MoveOptions {
         /**
          * Override filename
          */
@@ -504,7 +504,7 @@ public interface IFile {
     /**
      * Directory copy options (recursively)
      */
-    class RecursiveCopyOptions {
+    public static class RecursiveCopyOptions {
         /**
          * Callback when file with same name exists
          */
@@ -529,7 +529,7 @@ public interface IFile {
     /**
      * Directory move options (recursively)
      */
-    public class RecursiveMoveOptions {
+    public static class RecursiveMoveOptions {
         /**
          * Callback when file with the same name exists
          */
@@ -554,7 +554,7 @@ public interface IFile {
     /**
      * Directory move options (recursively)
      */
-    public class RecursiveDeleteOptions {
+    public static class RecursiveDeleteOptions {
         /**
          * Callback when file failed
          */
@@ -569,7 +569,7 @@ public interface IFile {
     /**
      * Directory move options (recursively)
      */
-    public class CopyContentsOptions {
+    public static class CopyContentsOptions {
 		/**
          * Callback when progress changed
          */

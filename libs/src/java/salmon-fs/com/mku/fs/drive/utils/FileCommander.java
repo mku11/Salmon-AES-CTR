@@ -688,7 +688,7 @@ public class FileCommander {
     /**
      * Batch delete options
      */
-    public class BatchDeleteOptions {
+    public static class BatchDeleteOptions {
         /**
          * Callback when delete fails
          */
@@ -764,7 +764,7 @@ public class FileCommander {
     /**
      * Batch copy options
      */
-    public class BatchCopyOptions {
+    public static class BatchCopyOptions {
         /**
          * True to move, false to copy
          */
