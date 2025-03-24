@@ -46,14 +46,15 @@ namespace Mku.FS.File;
 /// </summary>
 public class WSFile : IFile
 {
-    private static readonly string PATH = "path";
+    /// <summary>
+    /// Directory separator.
+    /// </summary>
+    public static readonly string Separator = "/";
+	
+	private static readonly string PATH = "path";
     private static readonly string DEST_DIR = "destDir";
     private static readonly string FILENAME = "filename";
     
-    /// <summary>
-    /// The directory separator.
-    /// </summary>
-    public static readonly string Separator = "/";
     private static HttpClient client = new HttpClient();
     private string filePath;
     private Response response;

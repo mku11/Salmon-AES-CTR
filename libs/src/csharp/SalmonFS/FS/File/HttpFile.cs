@@ -43,7 +43,7 @@ namespace Mku.FS.File;
 public class HttpFile : IFile
 {
     /// <summary>
-    /// The directory separator.
+    /// Directory separator.
     /// </summary>
     public static readonly string Separator = "/";
 

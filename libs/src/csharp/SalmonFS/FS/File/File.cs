@@ -35,6 +35,11 @@ namespace Mku.FS.File;
 /// </summary>
 public class File : IFile
 {
+	/// <summary>
+    /// Directory separator.
+    /// </summary>
+	public static readonly string Separator = System.IO.Path.DirectorySeparatorChar.ToString();
+	
     private string filePath;
 
     /// <summary>
@@ -67,7 +72,7 @@ public class File : IFile
     ///  <exception cref="IOException">Thrown if error during IO</exception>
     public IFile CreateFile(string filename)
     {
-        string nFilePath = filePath + System.IO.Path.DirectorySeparatorChar + filename;
+        string nFilePath = filePath + File.Separator + filename;
         System.IO.File.Create(nFilePath).Close();
         File dotNetFile = new File(nFilePath);
         return dotNetFile;
@@ -231,7 +236,7 @@ public class File : IFile
         IFile newFile = newDir.GetChild(newName);
         if (newFile != null && newFile.Exists)
             throw new IOException("Another file/directory already exists");
-        string nFilePath = newDir.AbsolutePath + System.IO.Path.DirectorySeparatorChar + newName;
+        string nFilePath = newDir.AbsolutePath + File.Separator + newName;
         if (options.onProgressChanged != null)
             options.onProgressChanged(0L, this.Length);
         if (IsDirectory)
@@ -283,7 +288,7 @@ public class File : IFile
     {
         if (IsFile)
             return null;
-        File child = new File(filePath + System.IO.Path.DirectorySeparatorChar + filename);
+        File child = new File(filePath + File.Separator + filename);
         return child;
     }
 
@@ -294,7 +299,7 @@ public class File : IFile
     ///  <returns>True if successfully renamed.</returns>
     public bool RenameTo(string newFilename)
     {
-        string newFilepath = Parent.Path + System.IO.Path.DirectorySeparatorChar + newFilename;
+        string newFilepath = Parent.Path + File.Separator + newFilename;
         if (IsDirectory)
             Directory.Move(filePath, newFilepath);
         else
