@@ -15,7 +15,7 @@ Salmon is an AES-256 CTR encryption library with built-in integrity, parallel op
 - Data and seekable stream encryption API  
 - File system API for encrypted virtual drives  
 - Protected nonce sequencers (limited)  
-- Web Service for use with remote virtual drives (experimental Java/C# clients)
+- Web Service for use with remote virtual drives (experimental)  
  
 ## Live Web Demo
 ![alt text](https://github.com/mku11/Salmon-Vault/blob/main/screenshots/Screenshot.png)  
@@ -149,8 +149,8 @@ or the [**Live Web Demo**](https://mku11.github.io/Salmon-Vault/demo).
 
 #### Salmon API Reference Documentation ####
 The API ref documentation is now almost complete:  
-[Java](https://mku11.github.io/Salmon-AES-CTR/docs/3.0.0/java/html/)
- | [C#](https://mku11.github.io/Salmon-AES-CTR/docs/3.0.0/csharp/html/namespaces.html)
+[Java/Android](https://mku11.github.io/Salmon-AES-CTR/docs/3.0.0/java/html/)
+ | [C#/.NET/Android](https://mku11.github.io/Salmon-AES-CTR/docs/3.0.0/csharp/html/namespaces.html)
  | [C](https://mku11.github.io/Salmon-AES-CTR/docs/3.0.0/c/html/files.html)
  | [JavaScript](https://mku11.github.io/Salmon-AES-CTR/docs/3.0.0/javascript/html)
  | [TypeScript](https://mku11.github.io/Salmon-AES-CTR/docs/3.0.0/typescript/html)
@@ -182,7 +182,7 @@ Salmon can inform if an encrypted file is tampered with. The verification works 
 - Data integrity works with file contents but not filenames.  
 
 ### Specifications ###
-Want to know more about Salmon specs and subprojects? See [Salmon specifications and formats](https://github.com/mku11/Salmon-AES-CTR/tree/main/docs). For how to compile and build each subproject see README.md under libs/projects folders.
+Want to know more about Salmon specs and subprojects? See [Salmon specifications and formats](https://github.com/mku11/Salmon-AES-CTR/tree/main/docs). For how to compile and build each subproject see README files under projects folders.
 
 ### Package Management ###
 To learn how to integrate Salmon into your project with Maven, Gradle, or VS Studio see [Package Management](https://github.com/mku11/Salmon-AES-CTR/blob/main/docs/Package_Management.md)  
