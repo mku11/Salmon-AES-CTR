@@ -179,7 +179,7 @@ export abstract class FileExporter {
 
     async #submitExportJobs(runningThreads: number, partSize: number, fileToExport: IVirtualFile, exportedFile: IFile,
         totalBytesWritten: number[], integrity: boolean, 
-        onProgressChanged: ((position: number, length: number) => void) | null): Promise<void> {
+        onProgressChanged: ((position: number, length: number) => void) | undefined): Promise<void> {
         let fileSize: number = await fileToExport.getLength();
         let bytesWritten: number[] = new Array(runningThreads);
         bytesWritten.fill(0);
@@ -290,7 +290,7 @@ export class FileExportOptions {
     /**
      * Override the filename
      */
-    filename: string | null = null;
+    filename?: string = undefined;
 
     /**
      * Delete the source file after completion.
@@ -304,6 +304,7 @@ export class FileExportOptions {
 
     /**
      * Callback when progress changes
+	 * (position: number, length: number) => void
      */
-    onProgressChanged: ((position: number, length: number)=>void) | null = null;
+    onProgressChanged?: ((position: number, length: number) => void) = undefined;
 }

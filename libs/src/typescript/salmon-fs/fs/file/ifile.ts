@@ -431,12 +431,13 @@ export class CopyOptions {
     /**
      * Override filename
      */
-    newFilename?: string;
+    newFilename?: string | null = undefined;
 
     /**
      * Callback where progress changed
+	 * (position: number, length: number) => void
      */
-    onProgressChanged?: ((position: number, length: number) => void);
+    onProgressChanged?: ((position: number, length: number) => void)  = undefined;
 }
 
 /**
@@ -446,12 +447,13 @@ export class MoveOptions {
     /**
      * Override filename
      */
-    newFilename?: string;
+    newFilename?: string = undefined;
 
     /**
      * Callback where progress changed
+	 * (position: number, length: number) => void
      */
-    onProgressChanged?: ((position: number, length: number) => void);
+    onProgressChanged?: ((position: number, length: number) => void) = undefined;
 }
 
 /**
@@ -460,8 +462,9 @@ export class MoveOptions {
 export class RecursiveCopyOptions {
     /**
      * Callback when file with same name exists
+	 * (file: IFile) => Promise<string>
      */
-    autoRename?: ((file: IFile) => Promise<string>);
+    autoRename?: ((file: IFile) => Promise<string>) = undefined;
 
     /**
      * True to autorename folders
@@ -470,13 +473,15 @@ export class RecursiveCopyOptions {
 
     /**
      * Callback when file changes
+	 * (file: IFile, ex: Error) => void
      */
-    onFailed?: ((file: IFile, ex: Error) => void);
+    onFailed?: ((file: IFile, ex: Error) => void) = undefined;
 
     /**
      * Callback where progress changed
+	 * (file: IFile, position: number, length: number) => void
      */
-    onProgressChanged?: ((file: IFile, position: number, length: number) => void);
+    onProgressChanged?: ((file: IFile, position: number, length: number) => void) = undefined;
 }
 
 /**
@@ -485,8 +490,9 @@ export class RecursiveCopyOptions {
 export class RecursiveMoveOptions {
     /**
      * Callback when file with the same name exists
+	 * (file: IFile) => Promise<string>
      */
-    autoRename?: ((file: IFile) => Promise<string>);
+    autoRename?: ((file: IFile) => Promise<string>) = undefined;
 
     /**
      * True to autorename folders
@@ -496,12 +502,13 @@ export class RecursiveMoveOptions {
     /**
      * Callback when file failed
      */
-    onFailed?: ((file: IFile, ex: Error) => void);
+    onFailed?: ((file: IFile, ex: Error) => void) = undefined;
     
     /**
      * Callback when progress changes
+	 * (file: IFile, position: number, length: number) => void
      */
-    onProgressChanged?: ((file: IFile, position: number, length: number) => void);
+    onProgressChanged?: ((file: IFile, position: number, length: number) => void) = undefined;
 }
 
 /**
@@ -510,13 +517,15 @@ export class RecursiveMoveOptions {
 export class RecursiveDeleteOptions {
     /**
      * Callback when file failed
+	 * (file: IFile, ex: Error) => void
      */
-    onFailed?: ((file: IFile, ex: Error) => void);
+    onFailed?: ((file: IFile, ex: Error) => void) = undefined;
 
     /**
      * Callback when progress changed
+	 * (file: IFile, position: number, length: number) => void
      */
-    onProgressChanged?: ((file: IFile, position: number, length: number) => void);
+    onProgressChanged?: ((file: IFile, position: number, length: number) => void) = undefined;
 }
 
 /**
@@ -525,6 +534,7 @@ export class RecursiveDeleteOptions {
 export class CopyContentsOptions {
 	/**
       * Callback when progress changed
+	  * (position: number, length: number) => void
       */
-    onProgressChanged?: ((position: number, length: number) => void);
+    onProgressChanged?: ((position: number, length: number) => void) = undefined;
 }

@@ -45,7 +45,7 @@ import { IVirtualFile } from "../../file/ivirtual_file.js";
  * @param {OnFileImportProgressChanged} onProgressChanged 	 Progress observer
  */
 export async function importFilePart(fileToImport: IFile, aesFile: IVirtualFile,
-    start: number, count: number, totalBytesRead: number[], onProgressChanged: ((position: number, length: number) => void) | null,
+    start: number, count: number, totalBytesRead: number[], onProgressChanged: ((position: number, length: number) => void) | undefined,
     bufferSize: number, stopped: boolean[]): Promise<void> {
     let totalPartBytesRead: number = 0;
 

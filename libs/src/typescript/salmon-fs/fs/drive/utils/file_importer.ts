@@ -189,7 +189,7 @@ export abstract class FileImporter {
     }
 
     async #submitImportJobs(runningThreads: number, partSize: number, fileToImport: IFile, importedFile: IVirtualFile, 
-        totalBytesRead: number[], integrity: boolean, onProgressChanged: ((position: number, length: number)=>void) | null): Promise<void> {
+        totalBytesRead: number[], integrity: boolean, onProgressChanged: ((position: number, length: number)=>void) | undefined): Promise<void> {
             let fileSize: number = await fileToImport.getLength();
             let bytesRead: number[] = new Array(runningThreads);
             bytesRead.fill(0);
@@ -305,7 +305,7 @@ export class FileImportOptions {
     /**
      * Override the filename
      */
-    filename: string | null = null;
+    filename?: string = undefined;
 
     /**
      * Delete the source file after completion.
@@ -319,6 +319,7 @@ export class FileImportOptions {
 
     /**
      * Callback when progress changes
+	 * (position: number, length: number) => void
      */
-    onProgressChanged: ((position: number, length: number)=>void) | null = null;
+    onProgressChanged?: ((position: number, length: number) => void) = undefined;
 }

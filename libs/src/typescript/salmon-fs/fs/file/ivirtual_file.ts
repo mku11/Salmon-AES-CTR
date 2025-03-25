@@ -184,8 +184,9 @@ export interface IVirtualFile {
 export class VirtualRecursiveCopyOptions {
     /**
      * Callback when file with same name exists
+	 * (file: IVirtualFile) => Promise<string>
      */
-    autoRename?: ((file: IVirtualFile) => Promise<string>);
+    autoRename?: ((file: IVirtualFile) => Promise<string>) = undefined;
 
     /**
      * True to autorename folders
@@ -194,13 +195,15 @@ export class VirtualRecursiveCopyOptions {
 
     /**
      * Callback when file changes
+	 * (file: IVirtualFile, ex: Error) => void
      */
-    onFailed?: ((file: IVirtualFile, ex: Error) => void);
+    onFailed?: ((file: IVirtualFile, ex: Error) => void) = undefined;
 
     /**
      * Callback where progress changed
+	 * (file: IVirtualFile, position: number, length: number) => void
      */
-    onProgressChanged?: ((file: IVirtualFile, position: number, length: number) => void);
+    onProgressChanged?: ((file: IVirtualFile, position: number, length: number) => void) = undefined;
 }
 
 /**
@@ -209,8 +212,9 @@ export class VirtualRecursiveCopyOptions {
 export class VirtualRecursiveMoveOptions {
     /**
      * Callback when file with the same name exists
+	 * (file: IVirtualFile) => Promise<string>
      */
-    autoRename?: ((file: IVirtualFile) => Promise<string>);
+    autoRename?: ((file: IVirtualFile) => Promise<string>) = undefined;
 
     /**
      * True to autorename folders
@@ -219,13 +223,15 @@ export class VirtualRecursiveMoveOptions {
 
     /**
      * Callback when file failed
+	 * (file: IVirtualFile, ex: Error) => void
      */
-    onFailed?: ((file: IVirtualFile, ex: Error) => void);
+    onFailed?: ((file: IVirtualFile, ex: Error) => void) = undefined;
     
     /**
      * Callback when progress changes
+	 * (file: IVirtualFile, position: number, length: number) => void
      */
-    onProgressChanged?: ((file: IVirtualFile, position: number, length: number) => void);
+    onProgressChanged?: ((file: IVirtualFile, position: number, length: number) => void) = undefined;
 }
 
 
@@ -235,11 +241,13 @@ export class VirtualRecursiveMoveOptions {
 export class VirtualRecursiveDeleteOptions {
     /**
      * Callback when file failed
+	 * (file: IVirtualFile, ex: Error) => void
      */
-    onFailed?: ((file: IVirtualFile, ex: Error) => void);
+    onFailed?: ((file: IVirtualFile, ex: Error) => void) = undefined;
 
     /**
      * Callback when progress changed
+	 * (file: IVirtualFile, position: number, length: number) => void
      */
-    onProgressChanged?: ((file: IVirtualFile, position: number, length: number) => void);
+    onProgressChanged?: ((file: IVirtualFile, position: number, length: number) => void) = undefined;
 }

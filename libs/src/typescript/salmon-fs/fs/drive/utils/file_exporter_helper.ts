@@ -46,7 +46,7 @@ import { RandomAccessStream } from "../../../../salmon-core/streams/random_acces
  * @param {OnFileExportProgressChanged} onProgressChanged The file progress
  */
 export async function exportFilePart(fileToExport: IVirtualFile, exportFile: IFile, start: number, count: number,
-    totalBytesWritten: number[], onProgressChanged: ((position: number, length: number) => void) | null, 
+    totalBytesWritten: number[], onProgressChanged: ((position: number, length: number) => void) | undefined, 
     bufferSize: number, stopped: boolean[]): Promise<void> {
     let totalPartBytesWritten: number = 0;
 

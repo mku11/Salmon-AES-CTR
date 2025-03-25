@@ -401,9 +401,9 @@ export class FileCommander {
                 await fileToCopy.moveRecursively(dir, moveOptions);
             } else {
                 let copyOptions: VirtualRecursiveCopyOptions = new VirtualRecursiveCopyOptions();
-                copyOptions.autoRename = options.autoRename;
+                copyOptions.autoRename = options?.autoRename;
                 copyOptions.autoRenameFolders = options.autoRenameFolders;
-                copyOptions.onFailed = options.onFailed;
+                copyOptions.onFailed = options?.onFailed;
                 copyOptions.onProgressChanged = (file, position, length) => {
                     if (this.stopJobs)
                         throw new Error();
@@ -654,13 +654,15 @@ export class RealFileTaskProgress extends FileTaskProgress {
 export class BatchDeleteOptions {
     /**
      * Callback when delete fails
+	 * (file: IVirtualFile, error: Error | unknown) => void
      */
-    onFailed?: ((file: IVirtualFile, error: Error | unknown) => void);
+    onFailed?: ((file: IVirtualFile, error: Error | unknown) => void) = undefined;
 
     /**
      * Callback when progress changes
+	 * (progress: IVirtualFileTaskProgress) => void
      */
-    onProgressChanged?: ((progress: IVirtualFileTaskProgress) => void);
+    onProgressChanged?: ((progress: IVirtualFileTaskProgress) => void) = undefined;
 }
 
 
@@ -680,18 +682,21 @@ export class BatchImportOptions {
 
     /**
      * Callback when a file with the same name exists
+	 * (file: IFile) => Promise<string>
      */
-    autoRename?: ((file: IFile) => Promise<string>);
+    autoRename?: ((file: IFile) => Promise<string>) = undefined;
 
     /**
      * Callback when import fails
+	 * (file: IFile, error: Error | unknown) => void
      */
-    onFailed?: ((file: IFile, error: Error | unknown) => void);
+    onFailed?: ((file: IFile, error: Error | unknown) => void) = undefined;
 
     /**
      * Callback when progress changes
+	 * (progress: RealFileTaskProgress) => void
      */
-    onProgressChanged?: ((progress: RealFileTaskProgress) => void);
+    onProgressChanged?: ((progress: RealFileTaskProgress) => void) = undefined;
 }
 
 /**
@@ -710,18 +715,21 @@ export class BatchExportOptions {
 
     /**
      * Callback when a file with the same name exists
+	 * (file: IFile) => Promise<string>
      */
-    autoRename?: ((file: IFile) => Promise<string>);
+    autoRename?: ((file: IFile) => Promise<string>) = undefined;
 
     /**
      * Callback when import fails
+	 * (file: IVirtualFile, error: Error | unknown) => void
      */
-    onFailed?: ((file: IVirtualFile, error: Error | unknown) => void);
+    onFailed?: ((file: IVirtualFile, error: Error | unknown) => void) = undefined;
 
     /**
      * Callback when progress changes
+	 * (progress: IVirtualFileTaskProgress) => void
      */
-    onProgressChanged?: ((progress: IVirtualFileTaskProgress) => void);
+    onProgressChanged?: ((progress: IVirtualFileTaskProgress) => void) = undefined;
 }
 
 /**
@@ -735,8 +743,9 @@ export class BatchCopyOptions {
 
     /**
      * Callback when another file with the same name exists.
+	 * (file: IVirtualFile) => Promise<string>
      */
-    autoRename?: ((file: IVirtualFile) => Promise<string>);
+    autoRename?: ((file: IVirtualFile) => Promise<string>) = undefined;
 
     /**
      * True to autorename folders
@@ -744,12 +753,14 @@ export class BatchCopyOptions {
     autoRenameFolders: boolean = false;
 
     /**
-     * Callback when copy fails
+     * Callback when copy fails.
+	 * (file: IVirtualFile, error: Error | unknown) => void
      */
-    onFailed?: ((file: IVirtualFile, error: Error | unknown) => void);
-
-    /**
-     * Callback when progress changes.
-     */
-    onProgressChanged?: ((progress: IVirtualFileTaskProgress) => void);
+    onFailed?: ((file: IVirtualFile, error: Error | unknown) => void) = undefined;	 
+	
+	/**
+	 * Callback when progress changes.
+	 * (progress: IVirtualFileTaskProgress) => void
+	 */
+    onProgressChanged?: ((progress: IVirtualFileTaskProgress) => void) = undefined;
 }
