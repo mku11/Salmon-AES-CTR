@@ -33,7 +33,7 @@ namespace Mku.SalmonWinService.Service;
 public class WinService
 {
     private SequenceServer sequenceServer;
-    public static string PIPE_NAME { get; set; } = "WinService";
+    public static string PIPE_NAME { get; set; } = "SalmonService";
     public static string SEQUENCER_FILENAME { get; set; } = "config.xml";
     public delegate void WriteEntryDelegate(string message, bool error);
     public WriteEntryDelegate WriteEntry;
