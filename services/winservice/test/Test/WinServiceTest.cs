@@ -23,6 +23,7 @@ SOFTWARE.
 */
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Mku.FS.File;
+using Mku.Salmon;
 using Mku.Salmon.Sequence;
 using Mku.SalmonWinService;
 using Mku.SalmonWinService.SalmonService.Sequence;
@@ -45,8 +46,8 @@ namespace Test;
 [TestClass]
 public class WinServiceTests
 {
-    private static readonly string TEST_SERVICE_PIPE_NAME = "WinService";
-    private static readonly string TEST_USER_PIPE_NAME = "UserService";
+    private static readonly string TEST_SERVICE_PIPE_NAME = "SalmonService"; // real service pipe name
+    private static readonly string TEST_USER_PIPE_NAME = "UserService"; // mock user service pipe name
     private static readonly string TEST_USER_SEQ_DIR_PATH = "D:\\tmp\\output";
     private static readonly string TEST_USER_SEQ_FILE_NAME = "seqfile.xml";
     private static readonly string TEST_USER_SEQ_FILE_PATH = TEST_USER_SEQ_DIR_PATH + "\\" + TEST_USER_SEQ_FILE_NAME;
@@ -64,9 +65,9 @@ public class WinServiceTests
     }
 
     [TestMethod]
-    public void TestStandalone()
+    public void TestConnectoToUserService()
     {
-        //Make sure you started the actual windows service
+        // mocks a user service
         SequenceServer sequenceServer = null;
 
         sequenceServer = new SequenceServer(TEST_USER_PIPE_NAME,
@@ -74,7 +75,10 @@ public class WinServiceTests
             new SequenceSerializer(), TEST_REG_KEY),
             (entry, warning) => Console.WriteLine(entry, warning),
             (ex) => { });
-        sequenceServer.Start();
+        Task.Run(() =>
+        {
+            sequenceServer.Start();
+        });
 
         ShouldConnectClient(TEST_USER_PIPE_NAME);
         Thread.Sleep(3000);
@@ -89,9 +93,9 @@ public class WinServiceTests
     }
 
     [TestMethod]
-    public void TestWithService()
+    public void TestConnectToRealService()
     {
-
+        //Start the real service before running this
         ShouldConnectClient(TEST_SERVICE_PIPE_NAME);
         Thread.Sleep(3000);
 
@@ -103,23 +107,31 @@ public class WinServiceTests
     }
 
     [TestMethod]
-    public void TestServerSid()
+    public void TestRealServiceSid()
     {
+        //Start the real service before running this
         bool res = ShouldCheckServerSid(TEST_SERVICE_PIPE_NAME);
         Assert.IsTrue(res);
         Thread.Sleep(2000);
     }
 
     [TestMethod]
-    public void TestServerSidNeg()
+    public void TestUserServerSidNeg()
     {
+        // mocks a user service
         SequenceServer sequenceServer = null;
         sequenceServer = new SequenceServer(TEST_USER_PIPE_NAME,
             new WinFileSequencer(new File(TEST_USER_SEQ_FILE_PATH),
             new SequenceSerializer(), TEST_REG_KEY),
-            (entry, warning) => Console.WriteLine(entry, warning), (ex) => { });
+            (entry, warning) =>
+            {
+                Console.WriteLine(entry, warning);
+            },
+            (ex) =>
+            {
+                Console.Error.Write(ex);
+            });
         sequenceServer.Start();
-
         bool res = ShouldCheckServerSid(TEST_USER_PIPE_NAME);
         sequenceServer.Stop();
         Assert.IsFalse(res);
@@ -130,13 +142,16 @@ public class WinServiceTests
     [TestMethod]
     public void TestServerShouldNotUseServicePipeName()
     {
-        //Start the service before running this
+        //Start the real service before running this
         SequenceServer sequenceServer = null;
         bool failed = false;
         sequenceServer = new SequenceServer(TEST_SERVICE_PIPE_NAME,
             new WinFileSequencer(new File(TEST_USER_SEQ_FILE_PATH),
             new SequenceSerializer(), TEST_REG_KEY),
-            (entry, warning) => Console.WriteLine(entry, warning),
+            (entry, warning) =>
+            {
+                Console.WriteLine(entry, warning);
+            },
             (ex) =>
             {
                 failed = true;
@@ -149,6 +164,7 @@ public class WinServiceTests
 
     private bool ShouldCheckServerSid(string pipeName)
     {
+        // make sure you run the real service
         NamedPipeClientStream client = new NamedPipeClientStream(pipeName);
         client.Connect(5000);
         PipeSecurity ac = client.GetAccessControl();
@@ -162,6 +178,7 @@ public class WinServiceTests
 
     private void ShouldConnectClient(string pipeName)
     {
+        // make sure you run the real service
         NamedPipeClientStream client = new NamedPipeClientStream(pipeName);
         StreamReader reader = new StreamReader(client);
         StreamWriter writer = new StreamWriter(client);
@@ -176,14 +193,15 @@ public class WinServiceTests
     }
 
     [TestMethod]
-    public void TestService()
+    public void TestUserService()
     {
+        // mocks a user service
         File file = new File(TEST_USER_SEQ_FILE_PATH);
         if (file.Exists)
             file.Delete();
-        WinService.PIPE_NAME = TEST_SERVICE_PIPE_NAME;
+        WinService.PIPE_NAME = TEST_USER_PIPE_NAME;
         WinService.SEQUENCER_FILENAME = TEST_USER_SEQ_FILE_PATH;
-        
+
         Task.Run(() =>
         {
             Program.Main(null);
@@ -191,24 +209,27 @@ public class WinServiceTests
         // wait for service
         Thread.Sleep(5000);
 
-        WinClientSequencer sequencer = new WinClientSequencer(TEST_SERVICE_PIPE_NAME, false);
-        sequencer.CreateSequence("AAAA", "AAAA");
-        sequencer.InitSequence("AAAA", "AAAA", 
-            Mku.Convert.BitConverter.ToBytes(1, 8), 
+        WinClientSequencer sequencer = new WinClientSequencer(TEST_USER_PIPE_NAME, false);
+        string randomDriveID = BitConverter.ToString(Generator.GetSecureRandomBytes(4));
+        string randomAuthID = BitConverter.ToString(Generator.GetSecureRandomBytes(4));
+        sequencer.CreateSequence(randomDriveID, randomAuthID);
+        sequencer.InitSequence(randomDriveID, randomAuthID,
+            Mku.Convert.BitConverter.ToBytes(1, 8),
             Mku.Convert.BitConverter.ToBytes(4, 8));
-        byte[] nonce = sequencer.NextNonce("AAAA");
+        byte[] nonce = sequencer.NextNonce(randomDriveID);
         Assert.AreEqual(1, Mku.Convert.BitConverter.ToLong(nonce, 0, 8));
-        nonce = sequencer.NextNonce("AAAA");
+        nonce = sequencer.NextNonce(randomDriveID);
         Assert.AreEqual(2, Mku.Convert.BitConverter.ToLong(nonce, 0, 8));
-        nonce = sequencer.NextNonce("AAAA");
+        nonce = sequencer.NextNonce(randomDriveID);
         Assert.AreEqual(3, Mku.Convert.BitConverter.ToLong(nonce, 0, 8));
 
         bool caught = false;
         try
         {
-            nonce = sequencer.NextNonce("AAAA");
+            nonce = sequencer.NextNonce(randomDriveID);
             Assert.AreNotEqual(5, Mku.Convert.BitConverter.ToLong(nonce, 0, 8));
-        } catch (SequenceException ex)
+        }
+        catch (SequenceException ex)
         {
             Debug.WriteLine(ex);
             caught = true;
@@ -218,4 +239,37 @@ public class WinServiceTests
         Program.Stop();
     }
 
+    [TestMethod]
+    public void TestWithRealService()
+    {
+        // make sure you run the real service
+        // the real seq file is in:
+        // C:\Windows\System32\config\systemprofile\AppData\Local\Salmon
+        WinClientSequencer sequencer = new WinClientSequencer(TEST_SERVICE_PIPE_NAME, true);
+        string randomDriveID = BitConverter.ToString(Generator.GetSecureRandomBytes(4));
+        string randomAuthID = BitConverter.ToString(Generator.GetSecureRandomBytes(4));
+        sequencer.CreateSequence(randomDriveID, randomAuthID);
+        sequencer.InitSequence(randomDriveID, randomAuthID,
+            Mku.Convert.BitConverter.ToBytes(1, 8),
+            Mku.Convert.BitConverter.ToBytes(4, 8));
+        byte[] nonce = sequencer.NextNonce(randomDriveID);
+        Assert.AreEqual(1, Mku.Convert.BitConverter.ToLong(nonce, 0, 8));
+        nonce = sequencer.NextNonce(randomDriveID);
+        Assert.AreEqual(2, Mku.Convert.BitConverter.ToLong(nonce, 0, 8));
+        nonce = sequencer.NextNonce(randomDriveID);
+        Assert.AreEqual(3, Mku.Convert.BitConverter.ToLong(nonce, 0, 8));
+
+        bool caught = false;
+        try
+        {
+            nonce = sequencer.NextNonce(randomDriveID);
+            Assert.AreNotEqual(5, Mku.Convert.BitConverter.ToLong(nonce, 0, 8));
+        }
+        catch (SequenceException ex)
+        {
+            Debug.WriteLine(ex);
+            caught = true;
+        }
+        Assert.IsTrue(caught);
+    }
 }

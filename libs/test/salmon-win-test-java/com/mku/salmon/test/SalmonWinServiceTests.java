@@ -87,20 +87,22 @@ public class SalmonWinServiceTests {
                 new SequenceSerializer(),
                 TEST_REG_CHCKSUM_KEY);
 
-        sequencer.createSequence("AAAA", "AAAA");
-        sequencer.initializeSequence("AAAA", "AAAA",
+		String randomDriveID = BitConverter.toString(Generator.getSecureRandomBytes(4));
+		String randomAuthID = BitConverter.toString(Generator.getSecureRandomBytes(4));
+        sequencer.createSequence(randomDriveID, randomAuthID);
+        sequencer.initializeSequence(randomDriveID, randomAuthID,
                 BitConverter.toBytes(1, 8),
                 BitConverter.toBytes(4, 8));
-        byte[] nonce = sequencer.nextNonce("AAAA");
+        byte[] nonce = sequencer.nextNonce(randomDriveID);
         assertEquals(1, BitConverter.toLong(nonce, 0, 8));
-        nonce = sequencer.nextNonce("AAAA");
+        nonce = sequencer.nextNonce(randomDriveID);
         assertEquals(2, BitConverter.toLong(nonce, 0, 8));
-        nonce = sequencer.nextNonce("AAAA");
+        nonce = sequencer.nextNonce(randomDriveID);
         assertEquals(3, BitConverter.toLong(nonce, 0, 8));
 
         boolean caught = false;
         try {
-            nonce = sequencer.nextNonce("AAAA");
+            nonce = sequencer.nextNonce(randomDriveID);
             assertNotEquals(5, BitConverter.toLong(nonce, 0, 8));
         } catch (RangeExceededException ex) {
             ex.printStackTrace();

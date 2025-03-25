@@ -43,7 +43,7 @@ public class SalmonWinServiceTests
     public static string TEST_SEQUENCER_FILENAME = "winfileseq.xml";
     private static string TEST_REG_CHCKSUM_KEY = "TestChkSum";
 	
-	public static string TEST_SERVICE_PIPE_NAME = "WinService";
+	public static string TEST_SERVICE_PIPE_NAME = "SalmonService";
 	
 	public static Registry registry = new Registry();
     
@@ -80,6 +80,7 @@ public class SalmonWinServiceTests
     [TestMethod]
     public void ShouldCreateWinFileSequencer()
     {
+		// 
         if(registry.Exists(TEST_REG_CHCKSUM_KEY))
             registry.Delete(TEST_REG_CHCKSUM_KEY);
 
@@ -90,21 +91,23 @@ public class SalmonWinServiceTests
             new SequenceSerializer(), 
             TEST_REG_CHCKSUM_KEY);
 
-        sequencer.CreateSequence("AAAA", "AAAA");
-        sequencer.InitSequence("AAAA", "AAAA",
+		string randomDriveID = BitConverter.ToString(Generator.GetSecureRandomBytes(4));
+		string randomAuthID = BitConverter.ToString(Generator.GetSecureRandomBytes(4));
+        sequencer.CreateSequence(randomDriveID, randomAuthID);
+        sequencer.InitSequence(randomDriveID, randomAuthID,
             Mku.Convert.BitConverter.ToBytes(1, 8),
             Mku.Convert.BitConverter.ToBytes(4, 8));
-        byte[] nonce = sequencer.NextNonce("AAAA");
+        byte[] nonce = sequencer.NextNonce(randomDriveID);
         Assert.AreEqual(1, Mku.Convert.BitConverter.ToLong(nonce, 0, 8));
-        nonce = sequencer.NextNonce("AAAA");
+        nonce = sequencer.NextNonce(randomDriveID);
         Assert.AreEqual(2, Mku.Convert.BitConverter.ToLong(nonce, 0, 8));
-        nonce = sequencer.NextNonce("AAAA");
+        nonce = sequencer.NextNonce(randomDriveID);
         Assert.AreEqual(3, Mku.Convert.BitConverter.ToLong(nonce, 0, 8));
 
         bool caught = false;
         try
         {
-            nonce = sequencer.NextNonce("AAAA");
+            nonce = sequencer.NextNonce(randomDriveID);
             Assert.AreNotEqual(5, Mku.Convert.BitConverter.ToLong(nonce, 0, 8));
         }
         catch (RangeExceededException ex)
