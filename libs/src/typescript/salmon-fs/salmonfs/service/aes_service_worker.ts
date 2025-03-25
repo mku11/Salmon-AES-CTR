@@ -83,11 +83,13 @@ export class AesServiceWorker {
 		}
 
 		let streamSize: number = await aesFile.getLength() - position;
-		let status: number = position == null ? 200 : 206;
 		let headers: Headers = new Headers();
 		let contentLength: number = await aesFile.getLength();
 		headers.append("Content-Length", (streamSize) + "");
-		if (position)
+		// if position is position or zero we always set the byte range and set the response status to 206
+		// to force html elements to stream the contents. 
+		let status: number = position == null ? 200 : 206;
+		if (position >= 0)
 			headers.append("Content-Range", "bytes " + position + "-" + (position + streamSize - 1) + "/" + contentLength);
 		headers.append("Content-Type", params.mimeType);
 		return new Response(stream, {
