@@ -523,7 +523,7 @@ export class AesFile implements IVirtualFile {
             realPath = this.#realFile.getDisplayPath();
         let relativePath: string = await this.#getRelativePath(realPath);
         let path: string = "";
-        let parts: string[] = relativePath.split("\\|/");
+        let parts: string[] = relativePath.split(/\\|\//);
         for (let part of parts) {
             if (part != "") {
                 path += AesFile.separator;
