@@ -71,6 +71,7 @@ export class AesServiceWorker {
 			stream = AesFileReadableStream.create(aesFile,
 				AesServiceWorker.BUFFERS, AesServiceWorker.BUFFER_SIZE,
 				AesServiceWorker.THREADS, AesServiceWorker.BACK_OFFSET);
+			stream.setWorkerPath(params.workerPath);
 			await stream.setPositionStart(position);
 			stream.reset();
 			await stream.skip(0);
