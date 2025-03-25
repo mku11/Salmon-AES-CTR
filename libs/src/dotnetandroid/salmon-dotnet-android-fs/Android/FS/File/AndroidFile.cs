@@ -221,7 +221,7 @@ public class AndroidFile : IFile
         {
             if (_isFile != null)
                 return (bool)_isFile;
-            _isFile = documentFile.IsDirectory;
+            _isFile = documentFile.IsFile;
             return (bool)_isFile;
         }
     }
