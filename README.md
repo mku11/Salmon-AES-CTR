@@ -19,44 +19,123 @@ Salmon is an AES-256 CTR encryption library with built-in integrity, parallel op
  
 ## Live Web Demo
 ![alt text](https://github.com/mku11/Salmon-Vault/blob/main/screenshots/Screenshot.png)  
-Access to the demo vault is remote and read-only so you won't be able to import new files.  
-Local drives are only available using Chrome.  
 Access to live web demo: [**Live Web Demo**](https://mku11.github.io/Salmon-Vault/demo.html)  
 Demo Vault files are licensed under [Content License](https://mku11.github.io/Salmon-Vault/vault/content_license.txt)  
 
-## API Support  
+\* Access to the demo vault is remote and read-only so you won't be able to import new files.  
+\* Local drives are only available using Chrome.  
+
+## Salmon API Support  
 **Languages:**  
-Java 11+  
-C# .NET 8+  
-Python 3.11+  
-Typescript ESM/ES2020  
-Javascript ESM/ES2020  
-C/C++ (data encryption API only, no streams)  
+- Java 11+  
+- C# .NET 8+  
+- Python 3.11+  
+- Typescript ESM/ES2020  
+- Javascript ESM/ES2020  
+- C/C++ (data encryption API only, no streams)  
   
-**Platforms Supported:**  
-JavaFX 17+  
-.NET WPF  
-.NET Xamarin and MAUI  
-Android 23+ (No GPU-accel)  
-.NET Android 23+ (No GPU-accel)  
-Chrome (default JS crypto only)  
-Firefox, Safari (No Local drives / default JS crypto only)  
-Node.js (ESM modules / default JS crypto only)  
+**Platforms:**  
+- JavaFX 17+  
+- .NET WPF  
+- .NET Xamarin and MAUI  
+- Android 23+ (No GPU-accel)  
+- .NET Android 23+ (No GPU-accel)  
+- Chrome (default JS crypto only)  
+- Firefox, Safari (No Local drives / default JS crypto only)  
+- Node.js (ESM modules / default JS crypto only)  
   
-**Operating Systems Tested:**  
-Windows 10+ x86_64  
-MacOS 10.11+ x86_64  
-Linux/Debian/Ubuntu x86_64, aarch64  
-Android 23+ ARM  
+**Operating Systems:**  
+- Windows 10+ x86_64  
+- MacOS 10.11+ x86_64  
+- Linux/Debian/Ubuntu x86_64, aarch64  
+- Android 23+ ARM  
 
-## Acceleration
-**CPU architectures:**  
-Intel AES-NI SIMD x86_64  
-ARM SIMD aarch64
+**Acceleration:**
+- Intel AES-NI SIMD x86_64  
+- ARM64 SIMD aarch64
+- GPU OpenCL 1.2+
 
-**GPU Platforms:**  
-OpenCL 1.2+
+#### Salmon Core API: ####
 
+```
+// Simple encryption and decryption of byte array
+byte[] key = Generator.getSecureRandomBytes(32); // Generate a secure key, keep this somewhere safe!
+byte[] nonce = Generator.getSecureRandomBytes(8); // Generate a nonce, you must NOT reuse this again for encryption!
+byte[] bytes = ..; // data you want to encrypt
+
+// use 2 threads for encryption
+Encryptor encryptor = new Encryptor(2);
+byte[] encBytes = encryptor.encrypt(bytes, key, nonce, false);
+encryptor.close();
+
+// use 2 threads for decryption
+Decryptor decryptor = new Decryptor(2); 
+byte[] decBytes = decryptor.decrypt(encBytes, key, nonce, false);
+decryptor.close();
+```
+
+#### Salmon FS API: ####
+```
+// Create a file-based nonce sequencer. 
+// Make sure this path is secure and excluded from your backups.
+String sequencerPath = "c:\\users\\<username>\\AppData\\Local\\<somefolder>\\salmon_sequencer.xml";
+FileSequencer sequencer = new FileSequencer(new File(sequencerPath), new SequenceSerializer());
+
+// create/open a virtual drive provided with a location and a text password
+// Supported drives: Drive, HttpDrive, WSDrive, NodeDrive (node.js)
+AesDrive drive = Drive.create(new File("c:\\path\\to\\your\\virtual\\drive"), password, sequencer);
+
+// get root directory and list files
+AesFile root = drive.getRoot();
+AesFile[] files = root.listFiles();
+
+// import files:
+AesFileCommander commander = new AesFileCommander();
+commander.importFiles(new File("myfile.txt"), root);
+
+// read a file:
+AesFile file = root.getChild("myfile.txt");
+RandomAccessStream stream = root.getInputStream();
+stream.close();
+```
+
+For complete samples for Java, C#, C, C++, Python, and JS:  
+[Samples](https://github.com/mku11/Salmon-AES-CTR/tree/main/samples)  
+Documentation:  
+[Samples Documentation](https://github.com/mku11/Salmon-AES-CTR/tree/main/docs/Samples.md)  
+
+For a showcase of the Salmon API for multiple platforms (JavaFx, WPF, Android, Web) visit:  
+[**Salmon Vault App**](https://github.com/mku11/Salmon-Vault)  
+
+#### Salmon API Reference Documentation ####
+The API ref documentation is now almost complete:  
+[Java/Android](https://mku11.github.io/Salmon-AES-CTR/docs/3.0.0/java/html/)
+ | [C#/.NET/Android](https://mku11.github.io/Salmon-AES-CTR/docs/3.0.0/csharp/html/namespaces.html)
+ | [C](https://mku11.github.io/Salmon-AES-CTR/docs/3.0.0/c/html/files.html)
+ | [JavaScript](https://mku11.github.io/Salmon-AES-CTR/docs/3.0.0/javascript/html)
+ | [TypeScript](https://mku11.github.io/Salmon-AES-CTR/docs/3.0.0/typescript/html)
+ | [Python](https://mku11.github.io/Salmon-AES-CTR/docs/3.0.0/python/html/namespaces.html)
+
+
+### Why another encryption library?  
+- Blazing fast CPU and GPU acceleration.  
+- Parallel baked-in encryption and decryption of data arrays, streams, and files.  
+- Low ceremony API for read/write/seek operations.  
+- Data integrity with interleaved HMAC signatures with a per-chunk authentication scheme.
+- Use of sequential nonces with strict ranges so no birthday problem.
+- Nonce sequences reside outside of encrypted drives so you can have multiple fully operational clones and backups.  
+- Import new files in virtual drives using multiple authorized devices.  
+- Sequence ranges are stored in app protected space (Android only).  
+- Any tampering is detected using an encrypted SHA256 checksum (Win10/11 only).  
+- Additional protection from non-admin users (Salmon Windows Service Win10/11 only).  
+- API for several popular programming languages, platforms, and operating systems.  
+- Implementation is based on abstract components which can easily be extended.  
+
+### Comparison: ###
+- Salmon uses AES-CTR which supports random access unlike GCM.  
+- Salmon uses HMAC-SHA256 which supports authentication unlike XTS.  
+- Salmon uses AES which supports hardware acceleration unlike Salsa20 and Chacha20.  
+  
 **Benchmarks**  
 How fast is Salmon?  
   
@@ -94,90 +173,10 @@ Time ms:
 
 In case you need more speed Salmon has baked-in multithreaded read/write operations, see API samples below. 
 
-### Why another encryption library?  
-- Blazing fast CPU and GPU acceleration.  
-- Parallel baked-in encryption and decryption of data arrays, streams, and files.  
-- Low ceremony API for read/write/seek operations.  
-- Data integrity with interleaved HMAC signatures with a per-chunk authentication scheme.
-- Use of sequential nonces with strict ranges so no birthday problem.
-- Nonce sequences reside outside of encrypted drives so you can have multiple fully operational clones and backups.  
-- Import new files in virtual drives using multiple authorized devices.  
-- Sequence ranges are stored in app protected space (Android only).  
-- Any tampering is detected using an encrypted SHA256 checksum (Win10/11 only).  
-- Additional protection from non-admin users (Salmon Windows Service Win10/11 only).  
-- API for several popular programming languages, platforms, and operating systems.  
-- Implementation is based on abstract components which can easily be extended.  
-
-### Comparison: ###
-- Salmon uses AES-CTR which supports random access unlike GCM.  
-- Salmon uses HMAC-SHA256 which supports authentication unlike XTS.  
-- Salmon uses AES which supports hardware acceleration unlike Salsa20 and Chacha20.  
-  
-#### Salmon Core API: ####
-
-```
-// Simple encryption and decryption of byte array
-byte[] key = Generator.getSecureRandomBytes(32); // Generate a secure key, keep this somewhere safe!
-byte[] nonce = Generator.getSecureRandomBytes(8); // Generate a nonce, you must NOT reuse this again for encryption!
-byte[] bytes = ..; // data you want to encrypt
-
-Encryptor encryptor = new Encryptor(2); // use 2 threads to encrypt
-byte[] encBytes = encryptor.encrypt(bytes, key, nonce, false);
-encryptor.close();
-
-Decryptor decryptor = new Decryptor(2); // use 2 threads to decrypt
-byte[] decBytes = decryptor.decrypt(encBytes, key, nonce, false);
-decryptor.close();
-```
-
-#### Salmon FS API: ####
-```
-// Create a file-based nonce sequencer. 
-// Make sure this path is secure and excluded from your backups.
-String sequencerPath = "c:\\users\\<username>\\AppData\\Local\\<somefolder>\\salmon_sequencer.xml";
-FileSequencer sequencer = new FileSequencer(new File(sequencerPath), new SequenceSerializer());
-
-// create/open a virtual drive provided with a location and a text password
-// Supported drives: Drive, HttpDrive, WSDrive, NodeDrive (node.js)
-AesDrive drive = Drive.create(new File("c:\\path\\to\\your\\virtual\\drive"), password, sequencer);
-
-// get root directory and list files
-AesFile root = drive.getRoot();
-AesFile[] files = root.listFiles();
-
-// import files:
-AesFileCommander commander = new AesFileCommander();
-commander.importFiles(new File("myfile.txt"), root);
-
-// read a file:
-AesFile file = root.getChild("myfile.txt");
-RandomAccessStream stream = root.getInputStream();
-stream.close();
-```
-
-For complete samples for Java, C#, C, C++, Python, and JS:  
-[Samples](https://github.com/mku11/Salmon-AES-CTR/tree/main/samples)  
-For documentation:  
-[Samples Documentation](https://github.com/mku11/Salmon-AES-CTR/tree/main/docs/Samples.md)  
-
-For a showcase of the Salmon API visit:  
-[Salmon Vault App](https://github.com/mku11/Salmon-Vault)  
-For a live web demo see:  
-[**Live Web Demo**](https://mku11.github.io/Salmon-Vault/demo).
-
-#### Salmon API Reference Documentation ####
-The API ref documentation is now almost complete:  
-[Java/Android](https://mku11.github.io/Salmon-AES-CTR/docs/3.0.0/java/html/)
- | [C#/.NET/Android](https://mku11.github.io/Salmon-AES-CTR/docs/3.0.0/csharp/html/namespaces.html)
- | [C](https://mku11.github.io/Salmon-AES-CTR/docs/3.0.0/c/html/files.html)
- | [JavaScript](https://mku11.github.io/Salmon-AES-CTR/docs/3.0.0/javascript/html)
- | [TypeScript](https://mku11.github.io/Salmon-AES-CTR/docs/3.0.0/typescript/html)
- | [Python](https://mku11.github.io/Salmon-AES-CTR/docs/3.0.0/python/html/namespaces.html)
-
 ### Sequence Files ###
 User sequencer files keep information about the sequence ranges so they need to be kept in a protected space. Someone who has **write access to a sequencer file** and **repeated read access to your encrypted files** can leak encrypted information about your files. Also make sure that you never backup and restore the nonce sequencer files! You should always create them under a directory that is exluded from your backups, this will prevent nonce reuse!  
 
-More specifically for:  
+More specifically:  
 - **Android**: You must create sequencer files in protected app space and not on external storage! Android apps work on sandbox environments so the sequence files are protected from other apps. Though for rooted devices there is no such guarantee since any app can run as a superuser.  
 - **Windows**: You should create a sequencer file under %LOCALAPPDATA% folder. Salmon for Windows will detect if a file is tampered with though it is recommended for additional security that you use the Salmon Windows Service. The Salmon Service is a better solution because it protects the sequencer files under a system administrator (LocalSystem) account.  
 - **Linux/Mac**: You can create a sequencer file under your $HOME folder. Keep in mind that Salmon has no anti-tampering support for these operating systems. Therefore, if you want to prevent other apps having access to the sequencer file you can do is implement a protected service like the equivalent of Salmon Windows Service or create your own tampering detection. You can do the latter by extending SalmonFileSequencer class, see WinFileSequencer implementation as an example.  
