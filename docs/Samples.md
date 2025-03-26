@@ -9,87 +9,54 @@ For short code samples see below.
 
 ### SalmonCore API: Byte Array and Text encryption/decryption
 ```
-// To encrypt byte data or text without using a drive you need to generate your own key and nonce.
-// Get a fresh secure random key and keep this somewhere safe.
-byte[] key = SalmonGenerator.getSecureRandomBytes(32); // 256-bit key
+// Simple encryption and decryption of byte array
+byte[] key = Generator.getSecureRandomBytes(32); // Generate a secure key, keep this somewhere safe!
+byte[] nonce = Generator.getSecureRandomBytes(8); // Generate a nonce, you must NOT reuse this again for encryption!
+byte[] bytes = ..; // data you want to encrypt
 
-// Also get a fresh nonce, nonce is not a secret thought it must only be used once per content!
-byte[] nonce = SalmonGenerator.getSecureRandomBytes(8); // 64-bit nonce
-
-// Generate some sample data to encrypt
-byte[] bytes = SalmonGenerator.getSecureRandomBytes(1024);
-
-// encrypt a byte array using 2 parallel threads
-SalmonEncryptor encryptor = new SalmonEncryptor(2);
-byte[] encBytes = encryptor.encrypt(bytes, key, nonce, false);
+// use 2 threads for encryption
+Encryptor encryptor = new Encryptor(2);
+byte[] encBytes = encryptor.encrypt(bytes, key, nonce);
 encryptor.close();
 
-// decrypt:
-SalmonDecryptor decryptor = new SalmonDecryptor(2);
-byte[] decBytes = decryptor.decrypt(encBytes, key, nonce, false);
+// use 2 threads for decryption
+// the nonce is already embedded
+Decryptor decryptor = new Decryptor(2); 
+byte[] decBytes = decryptor.decrypt(encBytes, key);
 decryptor.close();
 
 // Or encrypt a text string
-nonce = SalmonGenerator.getSecureRandomBytes(8); // always get a fresh nonce!
-String encText = SalmonTextEncryptor.encryptString(text, key, nonce, true);
+nonce = Generator.getSecureRandomBytes(8); // always get a fresh nonce!
+String encText = TextEncryptor.encryptString(text, key, nonce);
 
 // Decrypt the encrypted string, no need to specify the nonce again since it's embedded in the data
-String decText = SalmonTextDecryptor.decryptString(encText, key, null, true);
+String decText = TextDecryptor.decryptString(encText, key);
 ```
 
 ### SalmonFS API: file encryption via a virtual file system API
 ```
-// Create a sequencer. Make sure this path is secure and excluded from your backups.
+// Create a file-based nonce sequencer. 
+// Make sure this path is secure and excluded from your backups.
 String sequencerPath = "c:\\users\\<username>\\AppData\\Local\\<somefolder>\\salmon_sequencer.xml";
-SalmonFileSequencer sequencer = new SalmonFileSequencer(new JavaFile(sequencerPath), new SalmonSequenceSerializer());
+FileSequencer sequencer = new FileSequencer(new File(sequencerPath), new SequenceSerializer());
 
-// create() or open() a virtual drive provided with a location and a text password
-// Supported drives: JavaDrive, DotNetDrive, PyDrive, JsDrive, JsHttpDrive (remote), JsNodeDrive (node.js)
-SalmonDrive drive = JavaDrive.create(new JavaFile("c:\\path\\to\\your\\virtual\\drive"), password, sequencer);
+// create/open a virtual drive provided with a location and a text password
+// Supported drives: Drive, HttpDrive, WSDrive, NodeDrive (node.js)
+AesDrive drive = Drive.create(new File("c:\\path\\to\\your\\virtual\\drive"), password, sequencer);
 
-// Create an importer with 2 threads for parallel processing
-SalmonFileCommander commander = new SalmonFileCommander(256 * 1024, 256 * 1024, 2);
+// get root directory and list files
+AesFile root = drive.getRoot();
+AesFile[] files = root.listFiles();
 
-// you can create a batch of multiple files for encryption
-JavaFile[] files = new JavaFile[]{
-	new JavaFile("data/file1.txt"), 
-	new JavaFile("data/file2.jpg"), 
-	new JavaFile("data/file3.mp4")};
+// import files:
+AesFileCommander commander = new AesFileCommander();
+File[] newFiles = new File("myfile.txt");
+commander.importFiles(newFiles, root);
 
-// now import the files under the root directory
-commander.importFiles(files, drive.getRoot(), false, true, null, null, null);
-commander.close();
-
-// use the Salmon FS API to list files:
-SalmonFile root = drive.getRoot();
-SalmonFile[] salmonFiles = root.listFiles();
-
-// create directory
-SalmonFile dir = root.createDirectory("New Folder");
-SalmonFile parent = dir.getParent();
-
-// retrieve a file by filename
-SalmonFile file = root.getChild("file1.txt");
-
-// get file attributes
-String dirName = file.getName();
-String path = file.getPath();
-long size = file.getSize();
-long date = file.getLastDateTimeModified();
-
-// read the data from a file
-SalmonStream stream = file.getInputStream();
-// stream.read(...);
-// stream.seek(...);
+// read a file:
+AesFile file = root.getChild("myfile.txt");
+RandomAccessStream stream = root.getInputStream();
 stream.close();
-
-// or use a SalmonFileInputStream with parallel processing and caching
-SalmonFileInputStream inputStream = new SalmonFileInputStream(file, 2, 4 * 1024 * 1024, 2, 256 * 1024);
-inputStream.read(...);
-inputStream.close();
-
-// close the drive when done
-drive.close();
 ```
 
 

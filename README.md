@@ -65,13 +65,21 @@ byte[] bytes = ..; // data you want to encrypt
 
 // use 2 threads for encryption
 Encryptor encryptor = new Encryptor(2);
-byte[] encBytes = encryptor.encrypt(bytes, key, nonce, false);
+byte[] encBytes = encryptor.encrypt(bytes, key, nonce);
 encryptor.close();
 
 // use 2 threads for decryption
+// the nonce is already embedded
 Decryptor decryptor = new Decryptor(2); 
-byte[] decBytes = decryptor.decrypt(encBytes, key, nonce, false);
+byte[] decBytes = decryptor.decrypt(encBytes, key);
 decryptor.close();
+
+// Or encrypt a text string
+nonce = Generator.getSecureRandomBytes(8); // always get a fresh nonce!
+String encText = TextEncryptor.encryptString(text, key, nonce);
+
+// Decrypt the encrypted string, no need to specify the nonce again since it's embedded in the data
+String decText = TextDecryptor.decryptString(encText, key);
 ```
 
 #### Salmon FS API: ####
@@ -91,7 +99,8 @@ AesFile[] files = root.listFiles();
 
 // import files:
 AesFileCommander commander = new AesFileCommander();
-commander.importFiles(new File("myfile.txt"), root);
+File[] newFiles = new File("myfile.txt");
+commander.importFiles(newFiles, root);
 
 // read a file:
 AesFile file = root.getChild("myfile.txt");
@@ -101,9 +110,10 @@ stream.close();
 
 For complete samples for Java, C#, C, C++, Python, and JS:  
 [Samples](https://github.com/mku11/Salmon-AES-CTR/tree/main/samples)  
+  
 Documentation:  
 [Samples Documentation](https://github.com/mku11/Salmon-AES-CTR/tree/main/docs/Samples.md)  
-
+  
 For a showcase of the Salmon API for multiple platforms (JavaFx, WPF, Android, Web) visit:  
 [**Salmon Vault App**](https://github.com/mku11/Salmon-Vault)  
 
