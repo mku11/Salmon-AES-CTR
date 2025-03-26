@@ -132,14 +132,27 @@ decryptor.close();
 
 #### Salmon FS API: ####
 ```
-// Create a sequencer. Make sure this path is secure and excluded from your backups.
+// Create a file-based nonce sequencer. 
+// Make sure this path is secure and excluded from your backups.
 String sequencerPath = "c:\\users\\<username>\\AppData\\Local\\<somefolder>\\salmon_sequencer.xml";
 FileSequencer sequencer = new FileSequencer(new File(sequencerPath), new SequenceSerializer());
 
-// create() or open() a virtual drive provided with a location and a text password
+// create/open a virtual drive provided with a location and a text password
 // Supported drives: Drive, HttpDrive, WSDrive, NodeDrive (node.js)
 AesDrive drive = Drive.create(new File("c:\\path\\to\\your\\virtual\\drive"), password, sequencer);
-// you can now import files, create and list directories, for more info see the samples documentation
+
+// get root directory and list files
+AesFile root = drive.getRoot();
+AesFile[] files = root.listFiles();
+
+// import files:
+AesFileCommander commander = new AesFileCommander();
+commander.importFiles(new File("myfile.txt"), root);
+
+// read a file:
+AesFile file = root.getChild("myfile.txt");
+RandomAccessStream stream = root.getInputStream();
+stream.close();
 ```
 
 For complete samples for Java, C#, C, C++, Python, and JS:  
