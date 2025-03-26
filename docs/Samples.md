@@ -50,7 +50,7 @@ AesFile[] files = root.listFiles();
 
 // import files:
 AesFileCommander commander = new AesFileCommander();
-File[] newFiles = new File("myfile.txt");
+File[] newFiles = new File[]{new File("myfile.txt")};
 commander.importFiles(newFiles, root);
 
 // read a file:
