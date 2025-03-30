@@ -48,7 +48,7 @@ public class WSFileStream extends RandomAccessStream {
     private static final String POSITION = "position";
     private static final String LENGTH = "length";
 
-    public CloseableHttpClient client;
+    private CloseableHttpClient client;
 
     /**
      * The network input stream associated.
