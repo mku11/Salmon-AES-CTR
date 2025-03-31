@@ -1,5 +1,5 @@
 #!/bin/bash
-SALMON_VERSION=3.0.0
+SALMON_VERSION=3.0.1
 
 CURRDIR=$(pwd)
 JAVA_WS=java-ws

@@ -2,7 +2,7 @@
 <package >
   <metadata>
     <id>Salmon.Native</id>
-    <version>3.0.0</version>
+    <version>3.0.1</version>
     <title>Salmon AES-256 CTR native encryption library</title>
     <authors>Max Kas</authors>
     <requireLicenseAcceptance>true</requireLicenseAcceptance>

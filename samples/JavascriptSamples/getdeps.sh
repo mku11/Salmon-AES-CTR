@@ -1,4 +1,4 @@
-SALMON_VERSION=3.0.0
+SALMON_VERSION=3.0.1
 rm -rf packages
 mkdir packages
 rm -rf assets/js/lib

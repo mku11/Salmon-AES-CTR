@@ -3,7 +3,7 @@
   <PropertyGroup>
     <TargetFramework>net8.0-windows</TargetFramework>
     <IsPackable>false</IsPackable>
-    <SalmonVersion>3.0.0</SalmonVersion>
+    <SalmonVersion>3.0.1</SalmonVersion>
   </PropertyGroup>
 
   <ItemGroup>

@@ -1,5 +1,5 @@
 # salmon makefile
-SALMON_VERSION=3.0.0
+SALMON_VERSION=3.0.1
 SRC_ROOT=../../src/c
 SALMON_ROOT=$(SRC_ROOT)/salmon
 SALMON_JNI_ROOT=$(SRC_ROOT)/salmon-jni

@@ -1,5 +1,5 @@
 CURRDIR=$(pwd)
-SALMON_VERSION=3.0.0
+SALMON_VERSION=3.0.1
 
 mkdir -p /tmp/salmon
 cd ../../output/java-ws/java-ws.$SALMON_VERSION
