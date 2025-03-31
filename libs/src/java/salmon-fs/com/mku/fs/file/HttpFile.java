@@ -146,7 +146,7 @@ public class HttpFile implements IFile {
         if (this.filePath == null)
             throw new RuntimeException("Filepath is not assigned");
         String nFilePath = this.filePath;
-        if (nFilePath.endsWith("/"))
+        if (nFilePath.endsWith(HttpFile.separator))
             nFilePath = nFilePath.substring(0, nFilePath.length() - 1);
         String[] parts = nFilePath.split(HttpFile.separator);
         String basename = parts[parts.length - 1];
@@ -184,12 +184,12 @@ public class HttpFile implements IFile {
      * @return The parent directory.
      */
     public IFile getParent() {
-        if (filePath.length() == 0 || filePath.equals("/"))
+        if (filePath.length() == 0 || filePath.equals(HttpFile.separator))
             return null;
         String path = filePath;
-        if (path.endsWith("/"))
+        if (path.endsWith(HttpFile.separator))
             path = path.substring(0, path.length() - 1);
-        int index = path.lastIndexOf("/");
+        int index = path.lastIndexOf(HttpFile.separator);
         if (index == -1)
             return null;
         HttpFile parent = new HttpFile(path.substring(0, index));

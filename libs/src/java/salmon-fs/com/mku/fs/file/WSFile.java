@@ -84,6 +84,8 @@ public class WSFile implements IFile {
      * @param credentials The REST API credentials
      */
     public WSFile(String path, String servicePath, Credentials credentials) {
+		if(!path.startsWith("/"))
+            path = WSFile.separator + path;
         this.servicePath = servicePath;
         this.filePath = path;
         this.credentials = credentials;
@@ -295,12 +297,12 @@ public class WSFile implements IFile {
      * @return The parent directory.
      */
     public IFile getParent() {
-        if (filePath.length() == 0 || filePath.equals("/"))
+        if (filePath.length() == 0 || filePath.equals(WSFile.separator))
             return null;
         String path = filePath;
-        if (path.endsWith("/"))
+        if (path.endsWith(WSFile.separator))
             path = path.substring(0, path.length() - 1);
-        int index = path.lastIndexOf("/");
+        int index = path.lastIndexOf(WSFile.separator);
         if (index == -1)
             return null;
         WSFile parent = new WSFile(path.substring(0, index), servicePath, credentials);
