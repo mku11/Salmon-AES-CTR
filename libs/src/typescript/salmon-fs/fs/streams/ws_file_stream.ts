@@ -112,7 +112,7 @@ export class WSFileStream extends RandomAccessStream {
             header += "\r\n";
 			let headerData = new TextEncoder().encode(header);
             
-            let footer = "\r\n--"+boundary+"--"
+            let footer = "\r\n--"+boundary+"--";
             let footerData = new TextEncoder().encode(footer);
 
             // the new js stream API with HTTP2 doesn't seem very reliable 
