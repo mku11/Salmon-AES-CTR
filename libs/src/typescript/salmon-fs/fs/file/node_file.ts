@@ -246,7 +246,7 @@ export class NodeFile implements IFile {
         if (newDir == null || !await newDir.exists())
             throw new IOException("Target directory does not exists");
         let newFile: IFile | null = await newDir.getChild(newName);
-        if (newFile  && await newFile.exists())
+        if (newFile && await newFile.exists())
             throw new IOException("Another file/directory already exists");
         if (await this.isDirectory()) {
             let parent: IFile | null = await this.getParent();
