@@ -27,6 +27,7 @@ SOFTWARE.
 import com.mku.convert.BitConverter;
 import com.mku.fs.file.File;
 import com.mku.fs.file.IFile;
+import com.mku.salmon.Generator;
 import com.mku.salmon.RangeExceededException;
 import com.mku.salmon.sequence.SequenceSerializer;
 import com.mku.win.registry.Registry;
@@ -87,8 +88,8 @@ public class SalmonWinServiceTests {
                 new SequenceSerializer(),
                 TEST_REG_CHCKSUM_KEY);
 
-		String randomDriveID = BitConverter.toString(Generator.getSecureRandomBytes(4));
-		String randomAuthID = BitConverter.toString(Generator.getSecureRandomBytes(4));
+		String randomDriveID = BitConverter.toHex(Generator.getSecureRandomBytes(4));
+		String randomAuthID = BitConverter.toHex(Generator.getSecureRandomBytes(4));
         sequencer.createSequence(randomDriveID, randomAuthID);
         sequencer.initializeSequence(randomDriveID, randomAuthID,
                 BitConverter.toBytes(1, 8),
