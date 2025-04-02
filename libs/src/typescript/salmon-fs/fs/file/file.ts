@@ -133,7 +133,7 @@ export class File implements IFile {
     public getDisplayPath(): any {
         let filename = this.#fileHandle  ? this.#fileHandle.name : this.#name;
         if (this.#parent == null)
-            return "/" + (filename  ? filename : "");
+            return separator + (filename  ? filename : "");
         return this.#parent.getDisplayPath() + File.separator + filename;
     }
 
@@ -389,6 +389,6 @@ export class File implements IFile {
      * @returns {string} The string
      */
     public toString(): string {
-        return this.getName();
+        return this.getDisplayPath();
     }
 }
