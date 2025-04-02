@@ -47,7 +47,11 @@ import java.util.List;
  * This class is used by the AndroidDrive implementation so you can use AesFile wrapper transparently
  */
 public class AndroidFile implements IFile {
-    //TODO: remove the context
+    /**
+     * The directory separator
+     */
+    public static final String separator = "/";
+
     private final Context context;
     private DocumentFile documentFile;
     private AndroidFile parent;
@@ -133,11 +137,11 @@ public class AndroidFile implements IFile {
      * @return True if deletion is successful.
      */
     public boolean delete() {
-
         boolean res = documentFile.delete();
         if (res && getParent() != null) {
-            ((AndroidFile) getParent()).reset();
+            getParent().reset();
         }
+        reset();
         return res;
     }
 
@@ -159,7 +163,7 @@ public class AndroidFile implements IFile {
         try {
             String path = Uri.decode(documentFile.getUri().toString());
             int index = path.lastIndexOf(":");
-            return "/" + path.substring(index + 1);
+            return separator + path.substring(index + 1);
         } catch (Exception ex) {
             return documentFile.getUri().getPath();
         }
@@ -358,14 +362,15 @@ public class AndroidFile implements IFile {
             if (options.newFilename != null)
                 renameTo(System.currentTimeMillis() + ".dat");
 
-            // TEST: does the documentFile reflect the new name?
+            // store the name before the move
+            this.name = getName();
             Uri uri = DocumentsContract.moveDocument(context.getContentResolver(),
                     documentFile.getUri(), documentFile.getParentFile().getUri(), androidDir.documentFile.getUri());
             IFile file = androidDir.getChild(getName());
             if (file != null && options.newFilename != null)
                 file.renameTo(options.newFilename);
             if (getParent() != null)
-                ((AndroidFile) getParent()).reset();
+                getParent().reset();
             androidDir.reset();
             reset();
             if (options.onProgressChanged != null)
@@ -422,6 +427,7 @@ public class AndroidFile implements IFile {
             boolean res = IFile.copyFileContents(this, newFile, copyContentOptions);
             if (res && delete)
                 this.delete();
+            reset();
             return newFile;
         }
     }
@@ -450,13 +456,10 @@ public class AndroidFile implements IFile {
      * @throws FileNotFoundException Thrown if file is not found
      */
     public boolean renameTo(String newFilename) throws FileNotFoundException {
-        if (documentFile == null)
-            this.name = newFilename;
+        reset();
         DocumentsContract.renameDocument(context.getContentResolver(), documentFile.getUri(), newFilename);
-        //FIXME: we should also get a new documentFile since the old is renamed
         documentFile = ((AndroidFile) getParent().getChild(newFilename)).documentFile;
-        _basename = newFilename;
-        _lastModified = null;
+        name = newFilename;
         return true;
     }
 
@@ -466,6 +469,7 @@ public class AndroidFile implements IFile {
      * @return True if directory created
      */
     public boolean mkdir() {
+        reset();
         IFile parent = getParent();
         if (parent != null) {
             IFile dir = parent.createDirectory(getName());
@@ -502,6 +506,12 @@ public class AndroidFile implements IFile {
      */
     @Override
     public String toString() {
-        return documentFile.getUri().toString();
+        if(documentFile == null) {
+            if(parent != null)
+                return parent.getDisplayPath() + separator + this.name;
+            else
+                return this.name;
+        }
+        return getDisplayPath();
     }
 }
