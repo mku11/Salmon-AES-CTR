@@ -243,7 +243,7 @@ public abstract class AesDrive : VirtualDrive
         catch (Exception e)
         {
             Console.Error.WriteLine(e);
-            throw new SecurityException("Could not create drive instance", e);
+            throw new SecurityException("Could not initialize the drive", e);
         }
         return drive;
     }
