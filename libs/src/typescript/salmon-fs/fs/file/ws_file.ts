@@ -139,7 +139,6 @@ export class WSFile implements IFile {
      * @returns {Promise<boolean>} True if deletion is successful.
      */
     public async delete(): Promise<boolean> {
-		this.reset();
         if(await this.isDirectory()) {
             let files: IFile[]  = await this.listFiles();
             for (let file of files) {
