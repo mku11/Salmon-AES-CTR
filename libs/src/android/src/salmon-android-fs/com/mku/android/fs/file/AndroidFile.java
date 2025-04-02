@@ -415,7 +415,7 @@ public class AndroidFile implements IFile {
 
         newName = newName != null ? newName : getName();
         IFile dir = newDir.getChild(newName);
-        if (dir != null)
+        if (dir != null && dir.exists())
             throw new IOException("Target file/directory already exists");
         if (isDirectory()) {
             IFile file = newDir.createDirectory(newName);
