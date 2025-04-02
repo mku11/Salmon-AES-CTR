@@ -1,4 +1,4 @@
-package com.mku.fs.stream;
+package com.mku.fs.streams;
 /*
 MIT License
 

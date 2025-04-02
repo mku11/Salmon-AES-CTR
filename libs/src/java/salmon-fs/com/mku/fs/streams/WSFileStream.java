@@ -1,4 +1,4 @@
-package com.mku.fs.stream;
+package com.mku.fs.streams;
 /*
 MIT License
 
@@ -25,20 +25,15 @@ SOFTWARE.
 
 import com.mku.convert.Base64;
 import com.mku.fs.file.WSFile;
-import com.mku.streams.BlockingInputOutputAdapterStream;
 import com.mku.streams.RandomAccessStream;
-import org.apache.http.*;
-import org.apache.http.client.methods.CloseableHttpResponse;
-import org.apache.http.client.methods.HttpGet;
-import org.apache.http.client.methods.HttpPost;
-import org.apache.http.client.methods.HttpPut;
-import org.apache.http.client.utils.URIBuilder;
-import org.apache.http.entity.mime.MultipartEntityBuilder;
-import org.apache.http.entity.mime.content.InputStreamBody;
-import org.apache.http.impl.client.CloseableHttpClient;
-import org.apache.http.impl.client.HttpClients;
 
 import java.io.*;
+import java.net.HttpURLConnection;
+import java.net.URL;
+import java.net.URLEncoder;
+import java.nio.charset.StandardCharsets;
+import java.util.HashMap;
+import java.util.Map;
 
 /**
  * File stream implementation for web service files.
@@ -48,7 +43,9 @@ public class WSFileStream extends RandomAccessStream {
     private static final String POSITION = "position";
     private static final String LENGTH = "length";
 
-    private CloseableHttpClient client;
+    private static String boundary = "*******";
+
+    private HttpURLConnection conn;
 
     /**
      * The network input stream associated.
@@ -71,6 +68,7 @@ public class WSFileStream extends RandomAccessStream {
 
     /**
      * Maximum amount of bytes allowed to skip forwards when seeking otherwise will open a new connection
+     *
      * @param maxNetBytesSkip The maximum number of bytes to skip
      */
     public void setMaxNetBytesSkip(long maxNetBytesSkip) {
@@ -79,8 +77,11 @@ public class WSFileStream extends RandomAccessStream {
 
     private boolean canWrite;
     private long position;
-    private CloseableHttpResponse httpResponse;
-    private CloseableHttpResponse outHttpResponse;
+
+    /**
+     * Position to start writing from
+     */
+    private long startWritePosition;
 
     /**
      * Construct a file stream from a JavaFile.
@@ -101,89 +102,46 @@ public class WSFileStream extends RandomAccessStream {
         if (this.closed)
             throw new IOException("Stream is closed");
         if (this.inputStream == null) {
-            createClient();
             long startPosition = this.getPosition();
-            URIBuilder uriBuilder;
-            httpResponse = null;
             try {
-                uriBuilder = new URIBuilder(file.getServicePath() + "/api/get");
-                uriBuilder.addParameter(PATH, this.file.getPath());
-                uriBuilder.addParameter(POSITION, String.valueOf(startPosition));
-                HttpGet httpGet = new HttpGet(uriBuilder.build());
-                setDefaultHeaders(httpGet);
-                setServiceAuth(httpGet);
-                httpResponse = client.execute(httpGet);
-                checkStatus(httpResponse, startPosition > 0 ? HttpStatus.SC_PARTIAL_CONTENT : HttpStatus.SC_OK);
-                this.inputStream = new BufferedInputStream(httpResponse.getEntity().getContent());
+                HashMap<String, String> params = new HashMap<>();
+                params.put(PATH, this.file.getPath());
+                params.put(POSITION, String.valueOf(startPosition));
+                conn = createConnection("GET", file.getServicePath() + "/api/get", params);
+                setDefaultHeaders(conn);
+                setServiceAuth(conn);
+                conn.connect();
+                checkStatus(conn, startPosition > 0 ? HttpURLConnection.HTTP_PARTIAL : HttpURLConnection.HTTP_OK);
+                this.inputStream = new BufferedInputStream(conn.getInputStream());
             } catch (Exception e) {
                 throw new RuntimeException(e);
             }
         }
-        if (this.inputStream == null)
-            throw new IOException("Could not retrieve stream");
         return this.inputStream;
-    }
-
-    private void createClient() throws IOException {
-        if (client != null)
-            throw new IOException("A connection is already open");
-        client = HttpClients.createDefault();
     }
 
     private OutputStream getOutputStream() throws IOException {
         if (this.closed)
             throw new IOException("Stream is closed");
-        BlockingInputOutputAdapterStream outputStream;
         if (this.outputStream == null) {
-            createClient();
-            URIBuilder uriBuilder;
-            HttpPost httpPost = null;
-            long startPosition = this.getPosition();
+            startWritePosition = this.getPosition();
             try {
-                uriBuilder = new URIBuilder(file.getServicePath() + "/api/upload");
-                uriBuilder.addParameter(PATH, this.file.getPath());
-                uriBuilder.addParameter(POSITION, String.valueOf(startPosition));
-                httpPost = new HttpPost(uriBuilder.build());
-                setDefaultHeaders(httpPost);
-                setServiceAuth(httpPost);
-
-                outputStream = new BlockingInputOutputAdapterStream();
-                this.outputStream = outputStream;
+                HashMap<String, String> params = new HashMap<>();
+                params.put(PATH, this.file.getPath());
+                params.put(POSITION, String.valueOf(startWritePosition));
+                conn = createConnection("POST", file.getServicePath() + "/api/upload", params);
+                setDefaultHeaders(conn);
+                setServiceAuth(conn);
+                conn.setRequestProperty("Content-Type", "multipart/form-data;boundary=" + boundary);
+                conn.connect();
+                outputStream = conn.getOutputStream();
+                byte[] headerData = getHeader();
+                outputStream.write(headerData, 0, headerData.length);
+                outputStream.flush();
             } catch (Exception e) {
+                close();
                 throw new RuntimeException(e);
             }
-
-            HttpPost finalHttpPost = httpPost;
-            new Thread(() -> {
-                try {
-                    InputStream pipedInputStream = outputStream.getInputStream();
-                    HttpEntity entity = MultipartEntityBuilder.create()
-                            .addPart("file", new InputStreamBody(pipedInputStream, file.getName()))
-                            .build();
-                    finalHttpPost.setEntity(entity);
-                    outHttpResponse = client.execute(finalHttpPost);
-                    checkStatus(outHttpResponse, startPosition > 0 ? HttpStatus.SC_PARTIAL_CONTENT : HttpStatus.SC_OK);
-                    outputStream.setReceived(true);
-                } catch (Exception e) {
-                    e.printStackTrace();
-                    throw new RuntimeException(e);
-                } finally {
-                    if (this.outputStream != null) {
-                        try {
-                            this.outputStream.close();
-                        } catch (IOException e) {
-                            throw new RuntimeException(e);
-                        }
-                    }
-                    if (outHttpResponse != null) {
-                        try {
-                            outHttpResponse.close();
-                        } catch (IOException e) {
-                            throw new RuntimeException(e);
-                        }
-                    }
-                }
-            }).start();
         }
         if (this.outputStream == null)
             throw new IOException("Could not retrieve stream");
@@ -269,20 +227,18 @@ public class WSFileStream extends RandomAccessStream {
     public void setLength(long value) throws IOException {
         if (this.closed)
             throw new IOException("Stream is closed");
-        createClient();
-        HttpPut httpPut = new HttpPut(file.getServicePath() + "/api/setLength"
-                + "?" + PATH + "=" + file.getPath()
-                + "&" + LENGTH + "=" + value
-        );
-        setDefaultHeaders(httpPut);
-        setServiceAuth(httpPut);
-        CloseableHttpResponse httpResponse = null;
+        HttpURLConnection conn = null;
         try {
-            httpResponse = client.execute(httpPut);
-            checkStatus(httpResponse, HttpStatus.SC_OK);
+            HashMap<String, String> params = new HashMap<>();
+            params.put(PATH, file.getPath());
+            params.put(LENGTH, Long.toString(value));
+            conn = createConnection("PUT", file.getServicePath() + "/api/setLength", params);
+            setDefaultHeaders(conn);
+            setServiceAuth(conn);
+            conn.connect();
+            checkStatus(conn, HttpURLConnection.HTTP_OK);
         } finally {
-            if (httpResponse != null)
-                httpResponse.close();
+            closeConnection(conn);
         }
         reset();
     }
@@ -363,33 +319,117 @@ public class WSFileStream extends RandomAccessStream {
         this.closed = true;
     }
 
+    private void sendFooter() throws IOException {
+        if (this.outputStream != null) {
+            byte[] footerData = getFooter();
+            outputStream.write(footerData, 0, footerData.length);
+            outputStream.flush();
+            checkStatus(conn, startWritePosition > 0 ? HttpURLConnection.HTTP_PARTIAL : HttpURLConnection.HTTP_OK);
+        }
+    }
+
     public void reset() throws IOException {
+        if (this.outputStream != null)
+            sendFooter();
         if (this.inputStream != null)
             this.inputStream.close();
         this.inputStream = null;
         if (this.outputStream != null)
             this.outputStream.close();
         this.outputStream = null;
-        if (client != null)
-            client.close();
-        client = null;
+        if (conn != null)
+            conn.disconnect();
+        conn = null;
         file.reset();
     }
 
-    private void setServiceAuth(HttpRequest httpRequest) {
-        String encoding = new Base64().encode((file.getCredentials().getServiceUser() + ":"
-                + file.getCredentials().getServicePassword()).getBytes());
-        httpRequest.setHeader(HttpHeaders.AUTHORIZATION, "Basic " + encoding);
+    private HttpURLConnection createConnection(String method, String url) throws IOException {
+        return createConnection(method, url, null);
     }
 
-    private void checkStatus(HttpResponse httpResponse, int status) throws IOException {
-        if (httpResponse.getStatusLine().getStatusCode() != status)
-            throw new IOException(httpResponse.getStatusLine().getStatusCode()
-                    + " " + httpResponse.getStatusLine().getReasonPhrase());
+    private HttpURLConnection createConnection(String method, String url, HashMap<String, String> params) throws IOException {
+        StringBuilder stringBuilder = new StringBuilder();
+        if (params != null) {
+            for (Map.Entry<String, String> entry : params.entrySet()) {
+                if (stringBuilder.length() == 0)
+                    stringBuilder.append("?");
+                else
+                    stringBuilder.append("&");
+                stringBuilder.append(entry.getKey());
+                stringBuilder.append("=");
+                stringBuilder.append(URLEncoder.encode(entry.getValue(), StandardCharsets.UTF_8.name()));
+            }
+        }
+        HttpURLConnection conn = (HttpURLConnection) new URL(url + stringBuilder).openConnection();
+        conn.setUseCaches(false);
+        conn.setDefaultUseCaches(false);
+        conn.setRequestMethod(method);
+        conn.setDoInput(true);
+        conn.setDoOutput(true);
+        return conn;
     }
 
-    private void setDefaultHeaders(HttpRequest request) {
-        request.addHeader("Cache", "no-store");
-        request.addHeader("Connection", "keep-alive");
+    private byte[] getHeader() {
+        String header = "--" + boundary + "\r\n" +
+                "Content-Disposition: form-data; " +
+                "name=\"file\"; " +
+                "filename=\"" + this.file.getName() + "\"" +
+                "\r\n\r\n";
+        return header.getBytes();
+    }
+
+    private byte[] getFooter() {
+        return ("\r\n--" + boundary + "--").getBytes();
+    }
+
+    private void closeConnection(HttpURLConnection conn) {
+        if (conn != null) {
+            try {
+                conn.disconnect();
+            } catch (Exception e) {
+                throw new RuntimeException(e);
+            }
+        }
+    }
+
+    private void closeStream(Closeable stream) {
+        if (stream != null) {
+            try {
+                stream.close();
+            } catch (IOException e) {
+                throw new RuntimeException(e);
+            }
+        }
+    }
+
+    private void setServiceAuth(HttpURLConnection conn) {
+        String encoding = new Base64().encode((file.getCredentials().getServiceUser()
+                + ":" + file.getCredentials().getServicePassword()).getBytes());
+        conn.setRequestProperty("Authorization", "Basic " + encoding);
+    }
+
+    private void addParameters(OutputStream os, HashMap<String, String> params) throws IOException {
+        StringBuilder stringBuilder = new StringBuilder();
+        for (Map.Entry<String, String> entry : params.entrySet()) {
+            if (stringBuilder.length() > 0)
+                stringBuilder.append("&");
+            stringBuilder.append(entry.getKey());
+            stringBuilder.append("=");
+            stringBuilder.append(URLEncoder.encode(entry.getValue(), StandardCharsets.UTF_8.name()));
+        }
+        byte[] paramData = stringBuilder.toString().getBytes();
+        os.write(paramData, 0, paramData.length);
+        os.flush();
+    }
+
+    private void checkStatus(HttpURLConnection conn, int status) throws IOException {
+        if (conn.getResponseCode() != status)
+            throw new IOException(conn.getResponseCode()
+                    + " " + conn.getResponseMessage());
+    }
+
+    private void setDefaultHeaders(HttpURLConnection conn) {
+        conn.setRequestProperty("Cache", "no-store");
+        conn.setRequestProperty("Connection", "keep-alive");
     }
 }

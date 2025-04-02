@@ -23,27 +23,18 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 */
 
-import com.mku.fs.stream.HttpFileStream;
+import com.mku.fs.streams.HttpFileStream;
 import com.mku.streams.MemoryStream;
 import com.mku.streams.RandomAccessStream;
-import org.apache.http.HttpRequest;
-import org.apache.http.HttpResponse;
-import org.apache.http.HttpStatus;
-import org.apache.http.client.methods.CloseableHttpResponse;
-import org.apache.http.client.methods.HttpGet;
-import org.apache.http.client.utils.URIBuilder;
-import org.apache.http.impl.client.CloseableHttpClient;
-import org.apache.http.impl.client.HttpClients;
 
-import java.io.FileNotFoundException;
-import java.io.IOException;
+import java.io.*;
+import java.net.HttpURLConnection;
+import java.net.URL;
 import java.net.URLDecoder;
 import java.nio.charset.StandardCharsets;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.List;
+import java.util.*;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -58,8 +49,7 @@ public class HttpFile implements IFile {
     private static final String DATE_FORMAT = "EEE, dd MMM yyyy HH:mm:ss zzz";
 
     private String filePath;
-    private CloseableHttpResponse response;
-    private static CloseableHttpClient client = HttpClients.createDefault();
+    private HttpURLConnection conn;
 
     /**
      * Instantiate a real file represented by the filepath provided (Remote read-write drive)
@@ -70,18 +60,19 @@ public class HttpFile implements IFile {
         this.filePath = path;
     }
 
-    private CloseableHttpResponse getResponse() throws Exception {
-        URIBuilder uriBuilder = new URIBuilder(this.filePath);
-        HttpGet httpGet = new HttpGet(uriBuilder.build());
-        setDefaultHeaders(httpGet);
-        try {
-            this.response = client.execute(httpGet);
-            checkStatus(this.response, HttpStatus.SC_OK);
-        } finally {
-            if (this.response != null)
-                this.response.close();
+    private HttpURLConnection getResponse() throws Exception {
+        if(this.conn == null) {
+            try {
+                // TODO: should this be INFO method?
+                conn = createConnection("GET", this.filePath);
+                setDefaultHeaders(conn);
+                conn.connect();
+                checkStatus(this.conn, HttpURLConnection.HTTP_OK);
+            } finally {
+                closeConnection(conn);
+            }
         }
-        return this.response;
+        return this.conn;
     }
 
     /**
@@ -121,8 +112,8 @@ public class HttpFile implements IFile {
      */
     public boolean exists() {
         try {
-            return this.getResponse().getStatusLine().getStatusCode() == 200
-                    || this.getResponse().getStatusLine().getStatusCode() == 206;
+            return this.getResponse().getResponseCode() == HttpURLConnection.HTTP_OK
+                    || this.getResponse().getResponseCode() == HttpURLConnection.HTTP_PARTIAL;
         } catch (Exception e) {
             throw new RuntimeException(e);
         }
@@ -153,7 +144,12 @@ public class HttpFile implements IFile {
         if (basename == null)
             throw new RuntimeException("Could not get the file name");
         if (basename.contains("%")) {
-            basename = URLDecoder.decode(basename, StandardCharsets.UTF_8);
+			try {
+				// do not use the charset variable for backwards compatibility with android
+				basename = URLDecoder.decode(basename, StandardCharsets.UTF_8.name());
+			} catch (Exception e) {
+                throw new RuntimeException(e);
+            } 
         }
         return basename;
     }
@@ -211,7 +207,7 @@ public class HttpFile implements IFile {
      * @return True if it's a directory.
      */
     public boolean isDirectory() {
-        HttpResponse res = null;
+        HttpURLConnection res = null;
         try {
             res = this.getResponse();
         } catch (Exception e) {
@@ -219,7 +215,7 @@ public class HttpFile implements IFile {
         }
         if (res == null)
             throw new RuntimeException("Could not get response");
-        String contentType = res.getFirstHeader("Content-Type").getValue();
+        String contentType = res.getHeaderField("Content-Type");
         if (contentType == null)
             throw new RuntimeException("Could not get content type");
         return contentType.startsWith("text/html");
@@ -242,7 +238,7 @@ public class HttpFile implements IFile {
     public long getLastDateModified() {
         String lastDateModified = null;
         try {
-            lastDateModified = getResponse().getFirstHeader("last-modified").getValue();
+            lastDateModified = getResponse().getHeaderField("last-modified");
         } catch (Exception e) {
             throw new RuntimeException(e);
         }
@@ -265,7 +261,7 @@ public class HttpFile implements IFile {
      * @return The length
      */
     public long getLength() {
-        HttpResponse res = null;
+        HttpURLConnection res;
         try {
             res = this.getResponse();
         } catch (Exception e) {
@@ -275,7 +271,7 @@ public class HttpFile implements IFile {
             throw new RuntimeException("Could not get response");
 
         long length = 0;
-        String lenStr = res.getFirstHeader("content-length").getValue();
+        String lenStr = res.getHeaderField("content-length");
         if (lenStr != null) {
             length = Integer.parseInt(lenStr);
         }
@@ -313,12 +309,13 @@ public class HttpFile implements IFile {
                     if (filename.contains(":") || filename.contains(".."))
                         continue;
                     if (filename.contains("%")) {
-                        filename = URLDecoder.decode(filename, StandardCharsets.UTF_8);
+						// do not use the charset variable for backwards compatibility with android
+                        filename = URLDecoder.decode(filename, StandardCharsets.UTF_8.name());
                     }
                     IFile file = new HttpFile(this.filePath + HttpFile.separator + filename);
                     files.add(file);
                 }
-            } catch (IOException e) {
+            } catch (Exception e) {
                 throw new RuntimeException(e);
             } finally {
                 if (ms != null)
@@ -418,7 +415,7 @@ public class HttpFile implements IFile {
      * Reset cached properties
      */
     public void reset() {
-        this.response = null;
+        this.conn = null;
     }
 
     private String getChildPath(String filename) {
@@ -437,14 +434,45 @@ public class HttpFile implements IFile {
         return filePath;
     }
 
-    private void checkStatus(HttpResponse httpResponse, int status) throws IOException {
-        if (httpResponse.getStatusLine().getStatusCode() != status)
-            throw new IOException(httpResponse.getStatusLine().getStatusCode()
-                    + " " + httpResponse.getStatusLine().getReasonPhrase());
+
+    private HttpURLConnection createConnection(String method, String url) throws IOException {
+        HttpURLConnection conn = (HttpURLConnection) new URL(url).openConnection();
+        conn.setUseCaches(false);
+        conn.setDefaultUseCaches(false);
+        conn.setRequestMethod(method);
+        conn.setDoInput(true);
+        conn.setDoOutput(true);
+        return conn;
     }
 
-    private void setDefaultHeaders(HttpRequest request) {
-        request.addHeader("Cache", "no-store");
-        request.addHeader("Connection", "keep-alive");
+    private void closeConnection(HttpURLConnection conn) {
+        if (conn != null) {
+            try {
+                conn.disconnect();
+            } catch (Exception e) {
+                throw new RuntimeException(e);
+            }
+        }
+    }
+
+    private void closeStream(Closeable stream) {
+        if(stream != null) {
+            try {
+                stream.close();
+            } catch (IOException e) {
+                throw new RuntimeException(e);
+            }
+        }
+    }
+
+    private void checkStatus(HttpURLConnection conn, int status) throws IOException {
+        if (conn.getResponseCode() != status)
+            throw new IOException(conn.getResponseCode()
+                    + " " + conn.getResponseMessage());
+    }
+
+    private void setDefaultHeaders(HttpURLConnection conn) {
+        conn.setRequestProperty("Cache", "no-store");
+        conn.setRequestProperty("Connection", "keep-alive");
     }
 }

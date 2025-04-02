@@ -1,4 +1,4 @@
-package com.mku.fs.stream;
+package com.mku.fs.streams;
 /*
 MIT License
 
@@ -25,20 +25,15 @@ SOFTWARE.
 
 import com.mku.fs.file.HttpFile;
 import com.mku.streams.RandomAccessStream;
-import org.apache.http.*;
-import org.apache.http.client.methods.CloseableHttpResponse;
-import org.apache.http.client.methods.HttpGet;
-import org.apache.http.client.utils.URIBuilder;
-import org.apache.http.impl.client.CloseableHttpClient;
-import org.apache.http.impl.client.HttpClients;
 
 import java.io.*;
+import java.net.HttpURLConnection;
+import java.net.URL;
 
 /**
  * File stream implementation for remote HTTP files.
  */
 public class HttpFileStream extends RandomAccessStream {
-    private CloseableHttpClient client;
 
     /**
      * The network input stream associated.
@@ -53,6 +48,7 @@ public class HttpFileStream extends RandomAccessStream {
     private final HttpFile file;
 
     private long maxNetBytesSkip = 32768;
+    private HttpURLConnection conn;
 
     /**
      * Maximum amount of bytes allowed to skip forwards when seeking otherwise will open a new connection
@@ -64,7 +60,6 @@ public class HttpFileStream extends RandomAccessStream {
     }
 
     private long position;
-    private CloseableHttpResponse httpResponse;
 
     /**
      * Construct a file stream from a JavaFile.
@@ -84,32 +79,24 @@ public class HttpFileStream extends RandomAccessStream {
         if (this.closed)
             throw new IOException("Stream is closed");
         if (this.inputStream == null) {
-            createClient();
             long startPosition = this.getPosition();
-            URIBuilder uriBuilder;
-            httpResponse = null;
+            OutputStream outputStream = null;
             try {
-                uriBuilder = new URIBuilder(file.getPath());
-                HttpGet httpGet = new HttpGet(uriBuilder.build());
-                setDefaultHeaders(httpGet);
-                if (this.position > 0)
-                    httpGet.addHeader("Range", "bytes=" + this.position + "-");
-                httpResponse = client.execute(httpGet);
-                checkStatus(httpResponse, startPosition > 0 ? HttpStatus.SC_PARTIAL_CONTENT : HttpStatus.SC_OK);
-                this.inputStream = new BufferedInputStream(httpResponse.getEntity().getContent());
+                conn = createConnection("GET", file.getPath());
+                setDefaultHeaders(conn);
+                if (this.position > 0) {
+                    conn.addRequestProperty("Range", "bytes=" + this.position + "-");
+                }
+                conn.connect();
+                checkStatus(conn, startPosition > 0 ? HttpURLConnection.HTTP_PARTIAL : HttpURLConnection.HTTP_OK);
+                this.inputStream = new BufferedInputStream(conn.getInputStream());
             } catch (Exception e) {
                 throw new RuntimeException(e);
+            } finally {
+                closeStream(outputStream);
             }
         }
-        if (this.inputStream == null)
-            throw new IOException("Could not retrieve stream");
         return this.inputStream;
-    }
-
-    private void createClient() throws IOException {
-        if (client != null)
-            throw new IOException("A connection is already open");
-        client = HttpClients.createDefault();
     }
 
     /**
@@ -271,19 +258,39 @@ public class HttpFileStream extends RandomAccessStream {
         if (this.inputStream != null)
             this.inputStream.close();
         this.inputStream = null;
-        if (client != null)
-            client.close();
-        client = null;
+        if (conn != null)
+            conn.disconnect();
+        conn = null;
     }
 
-    private void checkStatus(HttpResponse httpResponse, int status) throws IOException {
-        if (httpResponse.getStatusLine().getStatusCode() != status)
-            throw new IOException(httpResponse.getStatusLine().getStatusCode()
-                    + " " + httpResponse.getStatusLine().getReasonPhrase());
+    private HttpURLConnection createConnection(String method, String url) throws IOException {
+        HttpURLConnection conn = (HttpURLConnection) new URL(url).openConnection();
+        conn.setUseCaches(false);
+        conn.setDefaultUseCaches(false);
+        conn.setRequestMethod(method);
+        conn.setDoInput(true);
+        conn.setDoOutput(true);
+        return conn;
     }
 
-    private void setDefaultHeaders(HttpRequest request) {
-        request.addHeader("Cache", "no-store");
-        request.addHeader("Connection", "keep-alive");
+    private void closeStream(Closeable stream) {
+        if (stream != null) {
+            try {
+                stream.close();
+            } catch (IOException e) {
+                throw new RuntimeException(e);
+            }
+        }
+    }
+
+    private void checkStatus(HttpURLConnection conn, int status) throws IOException {
+        if (conn.getResponseCode() != status)
+            throw new IOException(conn.getResponseCode()
+                    + " " + conn.getResponseMessage());
+    }
+
+    private void setDefaultHeaders(HttpURLConnection conn) {
+        conn.setRequestProperty("Cache", "no-store");
+        conn.setRequestProperty("Connection", "keep-alive");
     }
 }

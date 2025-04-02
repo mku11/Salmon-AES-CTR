@@ -24,32 +24,31 @@ SOFTWARE.
 */
 
 import com.mku.convert.Base64;
-import com.mku.fs.stream.WSFileStream;
+import com.mku.fs.streams.WSFileStream;
+import com.mku.streams.MemoryStream;
 import com.mku.streams.RandomAccessStream;
-import org.apache.http.*;
-import org.apache.http.client.methods.*;
-import org.apache.http.client.utils.URIBuilder;
-import org.apache.http.impl.client.CloseableHttpClient;
-import org.apache.http.impl.client.HttpClients;
 import org.json.JSONArray;
 import org.json.JSONObject;
 
-import java.io.FileNotFoundException;
-import java.io.IOException;
-import java.io.InputStream;
-import java.net.URISyntaxException;
+import java.io.*;
+import java.net.HttpURLConnection;
+import java.net.URL;
+import java.net.URLEncoder;
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 /**
  * IFile implementation for a remote web service file.
  */
 public class WSFile implements IFile {
-	/**
-	 * Directory Separator
-	 */
+    /**
+     * Directory Separator
+     */
     public static final String separator = "/";
-	
+
     private static final String PATH = "path";
     private static final String DEST_DIR = "destDir";
     private static final String FILENAME = "filename";
@@ -57,7 +56,6 @@ public class WSFile implements IFile {
     private String filePath;
     private Response response;
     private String servicePath;
-    public static CloseableHttpClient client = HttpClients.createDefault();
 
     public String getServicePath() {
         return servicePath;
@@ -84,7 +82,7 @@ public class WSFile implements IFile {
      * @param credentials The REST API credentials
      */
     public WSFile(String path, String servicePath, Credentials credentials) {
-		if(!path.startsWith("/"))
+        if (!path.startsWith("/"))
             path = WSFile.separator + path;
         this.servicePath = servicePath;
         this.filePath = path;
@@ -93,20 +91,19 @@ public class WSFile implements IFile {
 
     private Response getResponse() throws Exception {
         if (this.response == null) {
-            URIBuilder uriBuilder = new URIBuilder(this.servicePath + "/api/info");
-            uriBuilder.addParameter(PATH, this.filePath);
-            HttpGet httpGet = new HttpGet(uriBuilder.build());
-            setDefaultHeaders(httpGet);
-            setServiceAuth(httpGet);
-            CloseableHttpResponse httpResponse = null;
+            HttpURLConnection conn = null;
             try {
-                httpResponse = client.execute(httpGet);
-                checkStatus(httpResponse, HttpStatus.SC_OK);
-                this.response = new Response(new String(httpResponse.getEntity().getContent().readAllBytes()),
-                        httpResponse.getAllHeaders());
+                HashMap<String, String> params = new HashMap<>();
+                params.put(PATH, this.filePath);
+                conn = createConnection("GET", this.servicePath + "/api/info", params);
+                setDefaultHeaders(conn);
+                setServiceAuth(conn);
+                conn.connect();
+                checkStatus(conn, HttpURLConnection.HTTP_OK);
+                this.response = new Response(new String(readAllBytes(conn.getInputStream())),
+                        conn.getHeaderFields());
             } finally {
-                if (httpResponse != null)
-                    httpResponse.close();
+                closeConnection(conn);
             }
         }
         return response;
@@ -120,29 +117,28 @@ public class WSFile implements IFile {
      */
     public IFile createDirectory(String dirName) {
         String nDirPath = this.getChildPath(dirName);
-        CloseableHttpResponse httpResponse = null;
+        HttpURLConnection conn = null;
+        OutputStream outputStream = null;
         try {
-            URIBuilder uriBuilder = new URIBuilder(this.servicePath + "/api/mkdir");
-            uriBuilder.addParameter(PATH, nDirPath);
-            HttpPost httpPost = new HttpPost(uriBuilder.build());
-            setDefaultHeaders(httpPost);
-            setServiceAuth(httpPost);
+            conn = createConnection("POST", this.servicePath + "/api/mkdir");
+            HashMap<String, String> params = new HashMap<>();
+            params.put(PATH, nDirPath);
 
-            httpResponse = client.execute(httpPost);
-            checkStatus(httpResponse, HttpStatus.SC_OK);
-            httpResponse.close();
+            setDefaultHeaders(conn);
+            setServiceAuth(conn);
+
+            conn.connect();
+            outputStream = conn.getOutputStream();
+            addParameters(outputStream, params);
+
+            checkStatus(conn, HttpURLConnection.HTTP_OK);
             WSFile dir = new WSFile(nDirPath, servicePath, credentials);
             return dir;
-        } catch (IOException | URISyntaxException e) {
+        } catch (IOException e) {
             throw new RuntimeException(e);
         } finally {
-            if (httpResponse != null) {
-                try {
-                    httpResponse.close();
-                } catch (IOException e) {
-                    throw new RuntimeException(e);
-                }
-            }
+            closeConnection(conn);
+            closeStream(outputStream);
         }
     }
 
@@ -155,26 +151,26 @@ public class WSFile implements IFile {
      */
     public IFile createFile(String filename) throws IOException {
         String nFilePath = this.getChildPath(filename);
-        URIBuilder uriBuilder;
-        CloseableHttpResponse httpResponse = null;
+        HttpURLConnection conn = null;
+        OutputStream outputStream = null;
         try {
-            uriBuilder = new URIBuilder(this.servicePath + "/api/create");
-            uriBuilder.addParameter(PATH, nFilePath);
-            HttpPost httpPost = new HttpPost(uriBuilder.build());
-            setDefaultHeaders(httpPost);
-            setServiceAuth(httpPost);
-            httpResponse = client.execute(httpPost);
-            checkStatus(httpResponse, HttpStatus.SC_OK);
-            httpResponse.close();
+            conn = createConnection("POST", this.servicePath + "/api/create");
+            HashMap<String, String> params = new HashMap<>();
+            params.put(PATH, nFilePath);
+            setDefaultHeaders(conn);
+            setServiceAuth(conn);
+            conn.connect();
+            outputStream = conn.getOutputStream();
+            addParameters(outputStream, params);
+            checkStatus(conn, HttpURLConnection.HTTP_OK);
             WSFile nFile = new WSFile(nFilePath, servicePath, credentials);
             return nFile;
-        } catch (URISyntaxException e) {
+        } catch (Exception e) {
             throw new RuntimeException(e);
         } finally {
-            if (httpResponse != null)
-                httpResponse.close();
+            closeConnection(conn);
+            closeStream(outputStream);
         }
-
     }
 
     /**
@@ -187,50 +183,39 @@ public class WSFile implements IFile {
         if (isDirectory()) {
             IFile[] files = listFiles();
             for (IFile file : files) {
-                CloseableHttpResponse httpResponse = null;
+                HttpURLConnection conn = null;
                 try {
-                    URIBuilder uriBuilder = new URIBuilder(this.servicePath + "/api/delete");
-                    uriBuilder.addParameter(PATH, file.getPath());
-                    HttpDelete httpDelete = new HttpDelete(uriBuilder.build());
-                    setDefaultHeaders(httpDelete);
-                    setServiceAuth(httpDelete);
-                    httpResponse = client.execute(httpDelete);
-                    checkStatus(httpResponse, HttpStatus.SC_OK);
-                    httpResponse.close();
+                    HashMap<String, String> params = new HashMap<>();
+                    params.put(PATH, file.getPath());
+                    conn = createConnection("DELETE", this.servicePath + "/api/delete", params);
+                    setDefaultHeaders(conn);
+                    setServiceAuth(conn);
+                    conn.connect();
+                    checkStatus(conn, HttpURLConnection.HTTP_OK);
+                    conn.disconnect();
                 } catch (Exception e) {
                     throw new RuntimeException(e);
                 } finally {
-                    if (httpResponse != null) {
-                        try {
-                            httpResponse.close();
-                        } catch (IOException e) {
-                            throw new RuntimeException(e);
-                        }
-                    }
+                    closeConnection(conn);
                 }
             }
         }
-        CloseableHttpResponse httpResponse = null;
+
+        HttpURLConnection conn = null;
         try {
-            URIBuilder dirUriBuilder = new URIBuilder(this.servicePath + "/api/delete");
-            dirUriBuilder.addParameter(PATH, this.filePath);
-            HttpDelete httpDelete = new HttpDelete(dirUriBuilder.build());
-            setDefaultHeaders(httpDelete);
-            setServiceAuth(httpDelete);
-            httpResponse = client.execute(httpDelete);
-            checkStatus(httpResponse, HttpStatus.SC_OK);
-            httpResponse.close();
+            HashMap<String, String> params = new HashMap<>();
+            params.put(PATH, this.filePath);
+            conn = createConnection("DELETE", this.servicePath + "/api/delete", params);
+            setDefaultHeaders(conn);
+            setServiceAuth(conn);
+            conn.connect();
+            checkStatus(conn, HttpURLConnection.HTTP_OK);
             this.reset();
             return true;
         } catch (Exception e) {
-            if (httpResponse != null) {
-                try {
-                    httpResponse.close();
-                } catch (IOException ex) {
-                    throw new RuntimeException(ex);
-                }
-            }
             throw new RuntimeException(e);
+        } finally {
+            closeConnection(conn);
         }
     }
 
@@ -376,41 +361,35 @@ public class WSFile implements IFile {
      * @return The children count
      */
     public int getChildrenCount() {
-        CloseableHttpResponse httpResponse = null;
+        HttpURLConnection conn = null;
         try {
             if (getResponse().isDirectory) {
-                URIBuilder uriBuilder = new URIBuilder(this.servicePath + "/api/list");
-                uriBuilder.addParameter(PATH, this.filePath);
-                HttpGet httpGet = new HttpGet(uriBuilder.build());
-                setDefaultHeaders(httpGet);
-                setServiceAuth(httpGet);
-                httpResponse = client.execute(httpGet);
-                checkStatus(httpResponse, HttpStatus.SC_OK);
-                int res = getFileListCount(httpResponse.getEntity().getContent());
+                HashMap<String, String> params = new HashMap<>();
+                params.put(PATH, this.filePath);
+                conn = createConnection("GET", this.servicePath + "/api/list", params);
+                setDefaultHeaders(conn);
+                setServiceAuth(conn);
+                conn.connect();
+                checkStatus(conn, HttpURLConnection.HTTP_OK);
+                int res = getFileListCount(conn.getInputStream());
                 return res;
             }
         } catch (Exception e) {
             throw new RuntimeException(e);
         } finally {
-            if (httpResponse != null) {
-                try {
-                    httpResponse.close();
-                } catch (IOException e) {
-                    throw new RuntimeException(e);
-                }
-            }
+            closeConnection(conn);
         }
         return 0;
     }
 
     private int getFileListCount(InputStream contentInputStream) throws IOException {
-        String content = new String(contentInputStream.readAllBytes());
+        String content = new String(readAllBytes(contentInputStream));
         JSONArray object = new JSONArray(content);
         return object.length();
     }
 
     private List<Response> parseFileList(InputStream contentInputStream) throws IOException {
-        String content = new String(contentInputStream.readAllBytes());
+        String content = new String(readAllBytes(contentInputStream));
         JSONArray object = new JSONArray(content);
         List<Response> list = new ArrayList<>();
         for (Object obj : object) {
@@ -428,28 +407,22 @@ public class WSFile implements IFile {
      */
     public IFile[] listFiles() {
         Response[] files = null;
-        CloseableHttpResponse httpResponse = null;
+        HttpURLConnection conn = null;
         try {
             if (getResponse().isDirectory) {
-                URIBuilder uriBuilder = new URIBuilder(this.servicePath + "/api/list");
-                uriBuilder.addParameter(PATH, this.filePath);
-                HttpGet httpGet = new HttpGet(uriBuilder.build());
-                setDefaultHeaders(httpGet);
-                setServiceAuth(httpGet);
-                httpResponse = client.execute(httpGet);
-                checkStatus(httpResponse, HttpStatus.SC_OK);
-                files = parseFileList(httpResponse.getEntity().getContent()).toArray(new Response[0]);
+                HashMap<String, String> params = new HashMap<>();
+                params.put(PATH, this.filePath);
+                conn = createConnection("GET", this.servicePath + "/api/list", params);
+                setDefaultHeaders(conn);
+                setServiceAuth(conn);
+                conn.connect();
+                checkStatus(conn, HttpURLConnection.HTTP_OK);
+                files = parseFileList(conn.getInputStream()).toArray(new Response[0]);
             }
         } catch (Exception e) {
             throw new RuntimeException(e);
         } finally {
-            if (httpResponse != null) {
-                try {
-                    httpResponse.close();
-                } catch (IOException e) {
-                    throw new RuntimeException(e);
-                }
-            }
+            closeConnection(conn);
         }
         if (files == null)
             return new WSFile[0];
@@ -497,29 +470,26 @@ public class WSFile implements IFile {
         if (isDirectory()) {
             throw new IOException("Could not move directory use IFile moveRecursively() instead");
         } else {
-            URIBuilder uriBuilder;
-            CloseableHttpResponse httpResponse = null;
+            HttpURLConnection conn = null;
             try {
-                uriBuilder = new URIBuilder(this.servicePath + "/api/move");
-                uriBuilder.addParameter(PATH, this.filePath);
-                uriBuilder.addParameter(DEST_DIR, newDir.getPath());
-                uriBuilder.addParameter(FILENAME, newName);
-
-                HttpPut httpPut = new HttpPut(uriBuilder.build());
-                setDefaultHeaders(httpPut);
-                setServiceAuth(httpPut);
-                httpResponse = client.execute(httpPut);
-                checkStatus(httpResponse, HttpStatus.SC_OK);
-                Response response = new Response(new String(httpResponse.getEntity().getContent().readAllBytes()),
-                        httpResponse.getAllHeaders());
+                HashMap<String, String> params = new HashMap<>();
+                params.put(PATH, this.filePath);
+                params.put(DEST_DIR, newDir.getPath());
+                params.put(FILENAME, newName);
+                conn = createConnection("PUT", this.servicePath + "/api/move", params);
+                setDefaultHeaders(conn);
+                setServiceAuth(conn);
+                conn.connect();
+                checkStatus(conn, HttpURLConnection.HTTP_OK);
+                Response response = new Response(new String(readAllBytes(conn.getInputStream())),
+                        conn.getHeaderFields());
                 newFile = new WSFile(response.path, servicePath, credentials);
                 this.reset();
                 return newFile;
             } catch (Exception e) {
                 throw new RuntimeException(e);
             } finally {
-                if (httpResponse != null)
-                    httpResponse.close();
+                closeConnection(conn);
             }
         }
     }
@@ -539,7 +509,7 @@ public class WSFile implements IFile {
     /**
      * Copy this file or directory under a new directory.
      *
-     * @param newDir           The target directory.
+     * @param newDir  The target directory.
      * @param options The options
      * @return The copied file. Use this file for subsequent operations instead of the original.
      * @throws IOException Thrown if there is an IO error.
@@ -557,28 +527,30 @@ public class WSFile implements IFile {
         if (isDirectory()) {
             throw new IOException("Could not copy directory use IFile copyRecursively() instead");
         } else {
-            URIBuilder uriBuilder;
-            CloseableHttpResponse httpResponse = null;
+            HttpURLConnection conn = null;
+            OutputStream outputStream = null;
             try {
-                uriBuilder = new URIBuilder(this.servicePath + "/api/copy");
-                uriBuilder.addParameter(PATH, this.filePath);
-                uriBuilder.addParameter(DEST_DIR, newDir.getPath());
-                uriBuilder.addParameter(FILENAME, newName);
-                HttpPost httpPost = new HttpPost(uriBuilder.build());
-                setDefaultHeaders(httpPost);
-                setServiceAuth(httpPost);
-                httpResponse = client.execute(httpPost);
-                checkStatus(httpResponse, HttpStatus.SC_OK);
-                Response response = new Response(new String(httpResponse.getEntity().getContent().readAllBytes()),
-                        httpResponse.getAllHeaders());
+                conn = createConnection("POST", this.servicePath + "/api/copy");
+                HashMap<String, String> params = new HashMap<>();
+                params.put(PATH, this.filePath);
+                params.put(DEST_DIR, newDir.getPath());
+                params.put(FILENAME, newName);
+                setDefaultHeaders(conn);
+                setServiceAuth(conn);
+                conn.connect();
+                outputStream = conn.getOutputStream();
+                addParameters(outputStream, params);
+                checkStatus(conn, HttpURLConnection.HTTP_OK);
+                Response response = new Response(new String(readAllBytes(conn.getInputStream())),
+                        conn.getHeaderFields());
                 newFile = new WSFile(response.path, this.servicePath, credentials);
                 this.reset();
                 return newFile;
-            } catch (URISyntaxException e) {
+            } catch (Exception e) {
                 throw new RuntimeException(e);
             } finally {
-                if (httpResponse != null)
-                    httpResponse.close();
+                closeStream(outputStream);
+                closeConnection(conn);
             }
         }
     }
@@ -604,28 +576,22 @@ public class WSFile implements IFile {
      * @return True if successfully renamed.
      */
     public boolean renameTo(String newFilename) {
-        CloseableHttpResponse httpResponse = null;
+        HttpURLConnection conn = null;
         try {
             this.reset();
-            URIBuilder uriBuilder = new URIBuilder(this.servicePath + "/api/rename");
-            uriBuilder.addParameter(PATH, this.filePath);
-            uriBuilder.addParameter(FILENAME, newFilename);
-            HttpPut httpPut = new HttpPut(uriBuilder.build());
-            setDefaultHeaders(httpPut);
-            setServiceAuth(httpPut);
-            httpResponse = client.execute(httpPut);
-            checkStatus(httpResponse, HttpStatus.SC_OK);
+            HashMap<String, String> params = new HashMap<>();
+            params.put(PATH, this.filePath);
+            params.put(FILENAME, newFilename);
+            conn = createConnection("PUT", this.servicePath + "/api/rename", params);
+            setDefaultHeaders(conn);
+            setServiceAuth(conn);
+            conn.connect();
+            checkStatus(conn, HttpURLConnection.HTTP_OK);
             return true;
         } catch (Exception e) {
             e.printStackTrace();
         } finally {
-            if (httpResponse != null) {
-                try {
-                    httpResponse.close();
-                } catch (IOException e) {
-                    throw new RuntimeException(e);
-                }
-            }
+            closeConnection(conn);
         }
         return false;
     }
@@ -636,27 +602,21 @@ public class WSFile implements IFile {
      * @return True if created.
      */
     public boolean mkdir() {
-        CloseableHttpResponse httpResponse = null;
+        HttpURLConnection conn = null;
         try {
             this.reset();
-            URIBuilder uriBuilder = new URIBuilder(this.servicePath + "/api/mkdir");
-            uriBuilder.addParameter(PATH, this.filePath);
-            HttpPost httpPost = new HttpPost(uriBuilder.build());
-            setDefaultHeaders(httpPost);
-            setServiceAuth(httpPost);
-            httpResponse = client.execute(httpPost);
-            checkStatus(httpResponse, HttpStatus.SC_OK);
+            HashMap<String, String> params = new HashMap<>();
+            params.put(PATH, this.filePath);
+            conn = createConnection("PUT", this.servicePath + "/api/mkdir", params);
+            setDefaultHeaders(conn);
+            setServiceAuth(conn);
+            conn.connect();
+            checkStatus(conn, HttpURLConnection.HTTP_OK);
             return true;
         } catch (Exception e) {
             e.printStackTrace();
         } finally {
-            if (httpResponse != null) {
-                try {
-                    httpResponse.close();
-                } catch (IOException e) {
-                    throw new RuntimeException(e);
-                }
-            }
+            closeConnection(conn);
         }
         return false;
     }
@@ -684,21 +644,97 @@ public class WSFile implements IFile {
         return filePath;
     }
 
-    private void setServiceAuth(HttpRequest httpRequest) {
-        String encoding = new Base64().encode((credentials.getServiceUser() + ":" + credentials.getServicePassword()).getBytes());
-        httpRequest.setHeader(HttpHeaders.AUTHORIZATION, "Basic " + encoding);
+    private byte[] readAllBytes(InputStream stream) throws IOException {
+        MemoryStream ms = new MemoryStream();
+        byte[] buffer = new byte[32768];
+        int bytesRead;
+        try {
+            while ((bytesRead = stream.read(buffer, 0, buffer.length)) > 0) {
+                ms.write(buffer, 0, bytesRead);
+            }
+        } finally {
+            ms.close();
+            stream.close();
+        }
+        return ms.toArray();
     }
 
-    private void checkStatus(HttpResponse httpResponse, int status) throws IOException {
-        if (httpResponse.getStatusLine().getStatusCode() != status)
-            throw new IOException(httpResponse.getStatusLine().getStatusCode()
-                    + " " + httpResponse.getStatusLine().getReasonPhrase() + "\n"
-                    + new String(httpResponse.getEntity().getContent().readAllBytes()));
+    private HttpURLConnection createConnection(String method, String url) throws IOException {
+        return createConnection(method, url, null);
     }
 
-    private void setDefaultHeaders(HttpRequest request) {
-        request.addHeader("Cache", "no-store");
-        request.addHeader("Connection", "keep-alive");
+    private HttpURLConnection createConnection(String method, String url, HashMap<String, String> params) throws IOException {
+        StringBuilder stringBuilder = new StringBuilder();
+        if (params != null) {
+            for (Map.Entry<String, String> entry : params.entrySet()) {
+                if (stringBuilder.length() == 0)
+                    stringBuilder.append("?");
+                else
+                    stringBuilder.append("&");
+                stringBuilder.append(entry.getKey());
+                stringBuilder.append("=");
+                stringBuilder.append(URLEncoder.encode(entry.getValue(), StandardCharsets.UTF_8.name()));
+            }
+        }
+        HttpURLConnection conn = (HttpURLConnection) new URL(url + stringBuilder).openConnection();
+        conn.setUseCaches(false);
+        conn.setDefaultUseCaches(false);
+        conn.setRequestMethod(method);
+        conn.setDoInput(true);
+        conn.setDoOutput(true);
+        return conn;
+    }
+
+    private void closeConnection(HttpURLConnection conn) {
+        if (conn != null) {
+            try {
+                conn.disconnect();
+            } catch (Exception e) {
+                throw new RuntimeException(e);
+            }
+        }
+    }
+
+    private void closeStream(Closeable stream) {
+        if (stream != null) {
+            try {
+                stream.close();
+            } catch (IOException e) {
+                throw new RuntimeException(e);
+            }
+        }
+    }
+
+    private void setServiceAuth(HttpURLConnection conn) {
+        String encoding = new Base64().encode((credentials.getServiceUser()
+                + ":" + credentials.getServicePassword()).getBytes());
+        conn.setRequestProperty("Authorization", "Basic " + encoding);
+    }
+
+    private void addParameters(OutputStream os, HashMap<String, String> params) throws IOException {
+        StringBuilder stringBuilder = new StringBuilder();
+        for (Map.Entry<String, String> entry : params.entrySet()) {
+            if (stringBuilder.length() > 0)
+                stringBuilder.append("&");
+            stringBuilder.append(entry.getKey());
+            stringBuilder.append("=");
+            stringBuilder.append(URLEncoder.encode(entry.getValue(), StandardCharsets.UTF_8.name()));
+        }
+        byte[] paramData = stringBuilder.toString().getBytes();
+        os.write(paramData, 0, paramData.length);
+        os.flush();
+    }
+
+    private void checkStatus(HttpURLConnection conn, int status) throws IOException {
+        if (conn.getResponseCode() != status)
+            throw new IOException(conn.getResponseCode()
+                    + " " + conn.getResponseMessage() + "\n"
+                    + new String(readAllBytes(conn.getInputStream())));
+    }
+
+    private void setDefaultHeaders(HttpURLConnection conn) {
+        conn.setRequestProperty("Cache", "no-store");
+//        conn.setRequestProperty("Connection", "keep-alive");
     }
 
     private static class Response {
@@ -709,9 +745,9 @@ public class WSFile implements IFile {
         boolean isDirectory;
         boolean isFile;
         boolean exists;
-        Header[] headers;
+        Map<String, List<String>> headers;
 
-        Response(String jsonString, Header[] headers) {
+        Response(String jsonString, Map<String, List<String>> headers) {
             JSONObject obj = new JSONObject(jsonString);
             this.name = obj.getString("name");
             this.path = obj.getString("path");
