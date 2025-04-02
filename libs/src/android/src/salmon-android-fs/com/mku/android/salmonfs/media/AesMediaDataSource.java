@@ -104,7 +104,7 @@ public class AesMediaDataSource extends MediaDataSource {
                 integrityFailed = true;
                 if (activity != null) {
                     activity.runOnUiThread(() -> {
-                        Toast.makeText(AndroidDrive.getContext(), "File is corrupt or tampered",
+                        Toast.makeText(activity, "File is corrupt or tampered",
                                 Toast.LENGTH_LONG).show();
                     });
                 }

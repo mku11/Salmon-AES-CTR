@@ -12,6 +12,7 @@
           <set>
             <option value="$PROJECT_DIR$" />
             <option value="$PROJECT_DIR$/salmon-fs-android" />
+            <option value="$PROJECT_DIR$/salmon-fs-android-test" />
             <option value="$PROJECT_DIR$/salmon-native-android" />
           </set>
         </option>

@@ -33,6 +33,8 @@ import com.mku.fs.file.*;
 import com.mku.func.BiConsumer;
 import com.mku.salmon.Generator;
 import com.mku.salmon.RangeExceededException;
+import com.mku.salmon.sequence.INonceSequenceSerializer;
+import com.mku.salmon.sequence.INonceSequencer;
 import com.mku.salmon.sequence.SequenceSerializer;
 import com.mku.salmon.streams.AesStream;
 import com.mku.salmon.streams.EncryptionMode;
@@ -53,6 +55,7 @@ import com.mku.streams.RandomAccessStream;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.lang.reflect.Constructor;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.util.ArrayList;
@@ -71,7 +74,7 @@ enum TestMode {
 public class SalmonFSTestHelper {
     public static TestMode currTestMode;
     // dirs
-    static Class<?> driveClassType = null; // drive class type
+    public static Class<?> driveClassType = null; // drive class type
     static IFile TEST_ROOT_DIR; // root dir for testing
     static String TEST_INPUT_DIRNAME = "input";
     static String TEST_OUTPUT_DIRNAME = "output";
@@ -116,7 +119,7 @@ public class SalmonFSTestHelper {
     static boolean TEST_USE_FILE_INPUT_STREAM = false;
 
     // progress
-    static boolean ENABLE_FILE_PROGRESS = false;
+    public static boolean ENABLE_FILE_PROGRESS = false;
 
     // test dirs and files
     static IFile TEST_INPUT_DIR;
@@ -140,7 +143,7 @@ public class SalmonFSTestHelper {
     static IFile TEST_EXPORT_AUTH_DIR;
     static AesFileImporter fileImporter;
     static AesFileExporter fileExporter;
-    static SequenceSerializer sequenceSerializer = new SequenceSerializer();
+    public static INonceSequenceSerializer sequenceSerializer = new SequenceSerializer();
     static final Random random = new Random(System.currentTimeMillis());
 
     public static void setTestParams(String testDir, TestMode testMode) throws Exception {
@@ -177,8 +180,8 @@ public class SalmonFSTestHelper {
 
     public static IFile createDir(IFile parent, String dirName) {
         IFile dir = parent.getChild(dirName);
-        if (!dir.exists())
-            dir.mkdir();
+        if (dir == null || !dir.exists())
+            dir = parent.createDirectory(dirName);
         return dir;
     }
 
@@ -236,16 +239,9 @@ public class SalmonFSTestHelper {
         importer.close();
     }
 
-    public static void createFile(String path, String contents) throws Exception {
-        IFile file = new File(path);
-        RandomAccessStream stream = file.getOutputStream();
-        byte[] data = contents.getBytes();
-        stream.write(data, 0, data.length);
-        stream.flush();
-        stream.close();
-    }
-
     public static void createFile(IFile file, String contents) throws Exception {
+        if(file.exists())
+            return;
         RandomAccessStream stream = file.getOutputStream();
         byte[] data = contents.getBytes();
         stream.write(data, 0, data.length);
@@ -300,7 +296,7 @@ public class SalmonFSTestHelper {
         String dirName = name + (rand ? "_" + System.currentTimeMillis() : "");
         IFile dir = parent.getChild(dirName);
         if (!dir.exists())
-            dir.mkdir();
+            dir = parent.createDirectory(dirName);
         System.out.println("generated folder: " + dir.getDisplayPath());
         return dir;
     }

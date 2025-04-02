@@ -56,15 +56,6 @@ public class AndroidDrive extends Drive {
     }
 
     /**
-     * Get the Android context.
-     *
-     * @return The Android context
-     */
-    public static Context getContext() {
-        return context;
-    }
-
-    /**
      * Protected constructor, use open() and create() instead.
      */
     protected AndroidDrive() {
@@ -87,7 +78,7 @@ public class AndroidDrive extends Drive {
         AndroidFile sharedDir = new AndroidFile(DocumentFile.fromFile(privateDir), context);
         AesFileExporter fileExporter = new AesFileExporter(ENC_BUFFER_SIZE, ENC_THREADS);
 		FileExporter.FileExportOptions exportOptions = new FileExporter.FileExportOptions();
-		exportOptions.integrity = true;
+        exportOptions.integrity = true;
         fileExporter.exportFile(aesFile, sharedDir, exportOptions);
         return cacheFile;
     }
