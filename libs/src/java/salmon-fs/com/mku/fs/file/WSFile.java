@@ -392,8 +392,8 @@ public class WSFile implements IFile {
         String content = new String(readAllBytes(contentInputStream));
         JSONArray object = new JSONArray(content);
         List<Response> list = new ArrayList<>();
-        for (Object obj : object) {
-            JSONObject jsonObject = (JSONObject) obj;
+        for (int i = 0; i < object.length(); i++) {
+            JSONObject jsonObject = (JSONObject) object.get(i);
             Response response = new Response(jsonObject.toString(), null);
             list.add(response);
         }
@@ -681,7 +681,8 @@ public class WSFile implements IFile {
         conn.setDefaultUseCaches(false);
         conn.setRequestMethod(method);
         conn.setDoInput(true);
-        conn.setDoOutput(true);
+		if(!method.equals("GET") && !method.equals("HEAD"))
+			conn.setDoOutput(true);
         return conn;
     }
 
@@ -734,7 +735,7 @@ public class WSFile implements IFile {
 
     private void setDefaultHeaders(HttpURLConnection conn) {
         conn.setRequestProperty("Cache", "no-store");
-//        conn.setRequestProperty("Connection", "keep-alive");
+        conn.setRequestProperty("Connection", "keep-alive");
     }
 
     private static class Response {

@@ -269,7 +269,6 @@ public class HttpFileStream extends RandomAccessStream {
         conn.setDefaultUseCaches(false);
         conn.setRequestMethod(method);
         conn.setDoInput(true);
-        conn.setDoOutput(true);
         return conn;
     }
 

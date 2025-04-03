@@ -365,7 +365,8 @@ public class WSFileStream extends RandomAccessStream {
         conn.setDefaultUseCaches(false);
         conn.setRequestMethod(method);
         conn.setDoInput(true);
-        conn.setDoOutput(true);
+        if(!method.equals("GET") && !method.equals("HEAD"))
+			conn.setDoOutput(true);
         return conn;
     }
 
