@@ -24,14 +24,16 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 */
 
+import com.mku.fs.file.HttpFile;
 import com.mku.fs.file.IFile;
 import com.mku.fs.file.IVirtualFile;
-import com.mku.fs.file.HttpFile;
-import com.mku.salmonfs.drive.AesDrive;
-import com.mku.salmonfs.file.AesFile;
-import com.mku.salmonfs.drive.HttpDrive;
-import com.mku.salmon.streams.ProviderType;
 import com.mku.salmon.streams.AesStream;
+import com.mku.salmon.streams.ProviderType;
+import com.mku.salmonfs.drive.AesDrive;
+import com.mku.salmonfs.drive.HttpDrive;
+import com.mku.salmonfs.file.AesFile;
+import com.mku.salmonfs.handler.AesStreamHandler;
+import com.mku.streams.InputStreamWrapper;
 import com.mku.streams.MemoryStream;
 import com.mku.streams.RandomAccessStream;
 import org.junit.jupiter.api.AfterAll;
@@ -40,6 +42,9 @@ import org.junit.jupiter.api.Test;
 
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
+import java.io.InputStream;
+import java.net.URL;
+import java.net.URLConnection;
 import java.security.NoSuchAlgorithmException;
 import java.util.ArrayList;
 import java.util.List;
@@ -52,17 +57,17 @@ public class SalmonFSHttpTests {
     @BeforeAll
     static void beforeAll() throws Exception {
         SalmonFSHttpTests.oldTestMode = SalmonFSTestHelper.currTestMode;
-		String testDir = System.getProperty("TEST_DIR");
+        String testDir = System.getProperty("TEST_DIR");
         // use TestMode: Http only
-		TestMode testMode = TestMode.Http;
-		int threads = System.getProperty("ENC_THREADS") != null && !System.getProperty("ENC_THREADS").equals("") ?
-			Integer.parseInt(System.getProperty("ENC_THREADS")) : 1;
-			
+        TestMode testMode = TestMode.Http;
+        int threads = System.getProperty("ENC_THREADS") != null && !System.getProperty("ENC_THREADS").equals("") ?
+                Integer.parseInt(System.getProperty("ENC_THREADS")) : 1;
+
         SalmonFSTestHelper.setTestParams(testDir, testMode);
-		
-		System.out.println("testDir: " + testDir);
+
+        System.out.println("testDir: " + testDir);
         System.out.println("testMode: " + testMode);
-		System.out.println("threads: " + threads);
+        System.out.println("threads: " + threads);
         System.out.println("http server url: " + SalmonFSTestHelper.HTTP_SERVER_URL);
         System.out.println("HTTP_VAULT_DIR_URL: " + SalmonFSTestHelper.HTTP_VAULT_DIR_URL);
 
@@ -89,13 +94,13 @@ public class SalmonFSHttpTests {
         // gradlew.bat :salmon-ws:test --tests "com.mku.salmon.ws.fs.service.test.SalmonWSTests.testStartServer" --rerun-tasks -i
 
         // use the native library
-		ProviderType providerType = ProviderType.Default;
-		String aesProviderType = System.getProperty("AES_PROVIDER_TYPE");
-		System.out.println("ProviderTypeEnv: " + aesProviderType);
-		if(aesProviderType != null && !aesProviderType.equals(""))
-			providerType = ProviderType.valueOf(aesProviderType);
-		System.out.println("ProviderType: " + providerType);
-		
+        ProviderType providerType = ProviderType.Default;
+        String aesProviderType = System.getProperty("AES_PROVIDER_TYPE");
+        System.out.println("ProviderTypeEnv: " + aesProviderType);
+        if (aesProviderType != null && !aesProviderType.equals(""))
+            providerType = ProviderType.valueOf(aesProviderType);
+        System.out.println("ProviderType: " + providerType);
+
         AesStream.setAesProviderType(providerType);
     }
 
@@ -220,5 +225,28 @@ public class SalmonFSHttpTests {
         ms.close();
         stream.close();
         assertEquals(digest, localChkSum);
+    }
+
+
+    @Test
+    public void testStreamHandler() throws Exception {
+        IFile vaultDir = SalmonFSTestHelper.HTTP_VAULT_DIR;
+        AesDrive drive = SalmonFSTestHelper.openDrive(vaultDir, SalmonFSTestHelper.driveClassType, SalmonCoreTestHelper.TEST_PASSWORD);
+        AesFile file = drive.getRoot().getChild(SalmonFSTestHelper.TEST_HTTP_FILE.getName());
+
+        String url = AesStreamHandler.getInstance().register("test123", file);
+        URLConnection conn = new URL(url).openConnection();
+        conn.connect();
+        InputStream stream = conn.getInputStream();
+        String chksum = SalmonFSTestHelper.getChecksumStream(stream);
+        stream.close();
+
+        RandomAccessStream encStream = file.getInputStream();
+        InputStreamWrapper streamWrapper = new InputStreamWrapper(encStream);
+        String chksum2 = SalmonFSTestHelper.getChecksumStream(streamWrapper);
+        assertEquals(chksum2, chksum);
+        encStream.close();
+
+        drive.close();
     }
 }

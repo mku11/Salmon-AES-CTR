@@ -23,7 +23,6 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 */
 
-import com.mku.fs.file.IVirtualFile;
 import com.mku.salmonfs.file.AesFile;
 import com.mku.salmonfs.streams.AesFileInputStream;
 
@@ -35,10 +34,13 @@ import java.net.URLConnection;
 import java.net.URLStreamHandler;
 import java.util.HashMap;
 import java.util.Map;
+import java.net.URLEncoder;
+import java.nio.charset.StandardCharsets;
+import java.lang.reflect.Method;
 
 /**
- * Provides a local stream URL handler to read an {@link AesFile} as a source. 
- * This works with 3rd party libraries and apps that can read file only via URLs.
+ * Provides a local stream URL handler to read an {@link AesFile} as a source.
+ * This works with 3rd party libraries and apps that can read file via HTTP URLs.
  */
 public class AesStreamHandler extends URLStreamHandler {
     private static final int BUFFERS = 4;
@@ -46,15 +48,30 @@ public class AesStreamHandler extends URLStreamHandler {
     private static final int THREADS = 1;
     private static final int BACKOFFSET = 256 * 1024;
     private static AesStreamHandler instance;
+    private static URLStreamHandler defaultStreamHandler;
+    private static String protocol = "http";
+    private static String prefix = protocol + "://localhost/salmon?key=";
 
-    private final HashMap<String, IVirtualFile> requests = new HashMap<>();
+    private final HashMap<String, AesFile> requests = new HashMap<>();
 
     private AesStreamHandler() {
+        if (defaultStreamHandler == null)
+            defaultStreamHandler = getURLStreamHandler(protocol);
         URL.setURLStreamHandlerFactory(protocol -> {
             if (protocol.equals("http"))
                 return this;
             return null;
         });
+    }
+
+    private static URLStreamHandler getURLStreamHandler(String protocol) {
+        try {
+            Method method = URL.class.getDeclaredMethod("getURLStreamHandler", String.class);
+            method.setAccessible(true);
+            return (URLStreamHandler) method.invoke(null, protocol);
+        } catch (Exception e) {
+            return null;
+        }
     }
 
     /**
@@ -70,23 +87,29 @@ public class AesStreamHandler extends URLStreamHandler {
     }
 
     /**
-     * Register a path to be handled by this handler.
-     * @param path The URL path
-     * @param file The file associated with this path.
+     * Register a unique key associated to an encrypted AesFile. This will return a URL path that you can use to pass
+     * to 3rd party libraries that support URLConnection.
+     *
+     * @param key  A unique key.
+     * @param file The file associated.
+     * @return The URL path to use.
      */
-    public void register(String path, IVirtualFile file) {
-        requests.put(path, file);
+    public String register(String key, AesFile file) {
+        String regPath = prefix + URLEncoder.encode(key, StandardCharsets.UTF_8);
+        requests.put(regPath, file);
+        return regPath;
     }
 
     /**
      * Unregister a path.
+     *
      * @param path The URL path
      */
     public void unregister(String path) {
         if (path != null)
             requests.remove(path);
         else {
-            for (Map.Entry<String, IVirtualFile> entry : requests.entrySet()) {
+            for (Map.Entry<String, AesFile> entry : requests.entrySet()) {
                 requests.remove(entry.getKey());
             }
         }
@@ -100,87 +123,109 @@ public class AesStreamHandler extends URLStreamHandler {
      */
     @Override
     protected URLConnection openConnection(URL u) {
-        return new HttpURLConnection(u) {
-            private long pendingSeek = 0;
-            private InputStream stream;
+        String path = u.toString();
+        if (!requests.containsKey(path)) {
+            URLConnection conn = openDefaultConnection(u);
+            return conn;
+        }
+        return new AesURLConnection(u);
+    }
 
-            private IVirtualFile getFile() throws IOException {
-                String path = u.toString();
-                if (!requests.containsKey(path))
-                    throw new IOException("Could not find path in registered requests");
-                return requests.get(path);
-            }
+    private URLConnection openDefaultConnection(URL u) {
+        try {
+            Method method = URLStreamHandler.class.getDeclaredMethod("openConnection", URL.class);
+            method.setAccessible(true);
+            return (URLConnection) method.invoke(defaultStreamHandler, u);
+        } catch (Exception e) {
+            return null;
+        }
+    }
 
-            @Override
-            public void disconnect() {
-                try {
-                    if (stream != null)
-                        stream.close();
-                    stream = null;
-                } catch (IOException e) {
-                    e.printStackTrace();
-                }
-            }
+    private class AesURLConnection extends HttpURLConnection {
+        private long pendingSeek = 0;
+        private InputStream stream;
 
-            @Override
-            public boolean usingProxy() {
-                return false;
-            }
+        public AesURLConnection(URL url) {
+            super(url);
+            this.url = url;
+        }
 
-            @Override
-            public void connect() {
-                // nop
-            }
+        private AesFile getFile() throws IOException {
+            String path = url.toString();
+            if (!requests.containsKey(path))
+                throw new IOException("Could not find path in registered requests");
+            return requests.get(path);
+        }
 
-            public void setRequestProperty(String key, String value) {
-                if (key.equals("Range")) {
-                    String val = value.split("=")[1];
-                    pendingSeek = Long.parseLong(val.split("-")[0]);
-                }
+        @Override
+        public void disconnect() {
+            try {
+                if (stream != null)
+                    stream.close();
+                stream = null;
+            } catch (IOException e) {
+                e.printStackTrace();
             }
+        }
 
-            public String getContentType() {
-                try {
-                    return URLConnection.guessContentTypeFromName(getFile().getName());
-                } catch (Exception e) {
-                    e.printStackTrace();
-                }
-                return null;
-            }
+        @Override
+        public boolean usingProxy() {
+            return false;
+        }
 
-            public int getContentLength() {
-                try {
-                    return (int) getFile().getLength();
-                } catch (IOException e) {
-                    throw new RuntimeException(e);
-                }
-            }
+        @Override
+        public void connect() {
+            // nop
+        }
 
-            public long getContentLengthLong() {
-                try {
-                    return getFile().getLength();
-                } catch (IOException e) {
-                    throw new RuntimeException(e);
-                }
+        public void setRequestProperty(String key, String value) {
+            if (key.equals("Range")) {
+                String val = value.split("=")[1];
+                pendingSeek = Long.parseLong(val.split("-")[0]);
             }
+        }
 
-            public int getResponseCode() {
-                if (pendingSeek > 0)
-                    return 206;
-                else
-                    return 200;
+        public String getContentType() {
+            try {
+                return URLConnection.guessContentTypeFromName(getFile().getName());
+            } catch (Exception e) {
+                e.printStackTrace();
             }
+            return null;
+        }
 
-            @Override
-            public InputStream getInputStream() throws IOException {
-                AesFile file = (AesFile) getFile();
-                stream = new AesFileInputStream(file,
-                        BUFFERS, BUFFER_SIZE, THREADS, BACKOFFSET);
-                if (pendingSeek > 0) {
-                    pendingSeek = stream.skip(pendingSeek);
-                }
-                return stream;
+        public int getContentLength() {
+            try {
+                return (int) getFile().getLength();
+            } catch (IOException e) {
+                throw new RuntimeException(e);
             }
-        };
+        }
+
+        public long getContentLengthLong() {
+            try {
+                return getFile().getLength();
+            } catch (IOException e) {
+                throw new RuntimeException(e);
+            }
+        }
+
+        public int getResponseCode() {
+            if (pendingSeek > 0)
+                return 206;
+            else
+                return 200;
+        }
+
+        @Override
+        public InputStream getInputStream() throws IOException {
+            AesFile file = getFile();
+            stream = new AesFileInputStream(file,
+                    BUFFERS, BUFFER_SIZE, THREADS, BACKOFFSET);
+            if (pendingSeek > 0) {
+                pendingSeek = stream.skip(pendingSeek);
+            }
+            return stream;
+        }
     }
 }
