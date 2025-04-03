@@ -39,6 +39,7 @@ import java.io.ByteArrayInputStream;
 public class RealFileExceptionHandler {
     @ExceptionHandler
     public ResponseEntity<Resource> handleException(Exception e, HttpServletRequest request, HttpServletResponse response) {
+		e.printStackTrace();
         String msg = e.getMessage();
         InputStreamResource resource = new InputStreamResource(new ByteArrayInputStream(msg.getBytes()));
         return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
