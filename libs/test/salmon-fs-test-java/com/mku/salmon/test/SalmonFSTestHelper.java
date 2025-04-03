@@ -34,7 +34,6 @@ import com.mku.func.BiConsumer;
 import com.mku.salmon.Generator;
 import com.mku.salmon.RangeExceededException;
 import com.mku.salmon.sequence.INonceSequenceSerializer;
-import com.mku.salmon.sequence.INonceSequencer;
 import com.mku.salmon.sequence.SequenceSerializer;
 import com.mku.salmon.streams.AesStream;
 import com.mku.salmon.streams.EncryptionMode;
@@ -55,7 +54,6 @@ import com.mku.streams.RandomAccessStream;
 
 import java.io.IOException;
 import java.io.InputStream;
-import java.lang.reflect.Constructor;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.util.ArrayList;
