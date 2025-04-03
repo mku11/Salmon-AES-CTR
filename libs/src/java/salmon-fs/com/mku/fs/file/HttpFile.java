@@ -49,7 +49,7 @@ public class HttpFile implements IFile {
     private static final String DATE_FORMAT = "EEE, dd MMM yyyy HH:mm:ss zzz";
 
     private String filePath;
-    private HttpURLConnection conn;
+    private HttpFile.Response response;
 
     /**
      * Instantiate a real file represented by the filepath provided (Remote read-write drive)
@@ -60,19 +60,21 @@ public class HttpFile implements IFile {
         this.filePath = path;
     }
 
-    private HttpURLConnection getResponse() throws Exception {
-        if(this.conn == null) {
+    private HttpFile.Response getResponse() throws Exception {
+        if(this.response == null) {
+			HttpURLConnection conn = null;
             try {
                 // TODO: should this be INFO method?
                 conn = createConnection("GET", this.filePath);
                 setDefaultHeaders(conn);
                 conn.connect();
-                checkStatus(this.conn, HttpURLConnection.HTTP_OK);
+                checkStatus(conn, HttpURLConnection.HTTP_OK);
+				this.response = new Response(conn.getHeaderFields());
             } finally {
                 closeConnection(conn);
             }
         }
-        return this.conn;
+        return this.response;
     }
 
     /**
@@ -112,8 +114,7 @@ public class HttpFile implements IFile {
      */
     public boolean exists() {
         try {
-            return this.getResponse().getResponseCode() == HttpURLConnection.HTTP_OK
-                    || this.getResponse().getResponseCode() == HttpURLConnection.HTTP_PARTIAL;
+            return this.getResponse() != null;
         } catch (Exception e) {
             throw new RuntimeException(e);
         }
@@ -207,7 +208,7 @@ public class HttpFile implements IFile {
      * @return True if it's a directory.
      */
     public boolean isDirectory() {
-        HttpURLConnection res = null;
+        HttpFile.Response res = null;
         try {
             res = this.getResponse();
         } catch (Exception e) {
@@ -215,7 +216,7 @@ public class HttpFile implements IFile {
         }
         if (res == null)
             throw new RuntimeException("Could not get response");
-        String contentType = res.getHeaderField("Content-Type");
+        String contentType = res.getHeader("Content-Type");
         if (contentType == null)
             throw new RuntimeException("Could not get content type");
         return contentType.startsWith("text/html");
@@ -238,7 +239,7 @@ public class HttpFile implements IFile {
     public long getLastDateModified() {
         String lastDateModified = null;
         try {
-            lastDateModified = getResponse().getHeaderField("last-modified");
+            lastDateModified = getResponse().getHeader("last-modified");
         } catch (Exception e) {
             throw new RuntimeException(e);
         }
@@ -261,7 +262,7 @@ public class HttpFile implements IFile {
      * @return The length
      */
     public long getLength() {
-        HttpURLConnection res;
+        HttpFile.Response res;
         try {
             res = this.getResponse();
         } catch (Exception e) {
@@ -271,7 +272,7 @@ public class HttpFile implements IFile {
             throw new RuntimeException("Could not get response");
 
         long length = 0;
-        String lenStr = res.getHeaderField("content-length");
+        String lenStr = res.getHeader("content-length");
         if (lenStr != null) {
             length = Integer.parseInt(lenStr);
         }
@@ -415,7 +416,7 @@ public class HttpFile implements IFile {
      * Reset cached properties
      */
     public void reset() {
-        this.conn = null;
+        this.response = null;
     }
 
     private String getChildPath(String filename) {
@@ -473,5 +474,29 @@ public class HttpFile implements IFile {
     private void setDefaultHeaders(HttpURLConnection conn) {
         conn.setRequestProperty("Cache", "no-store");
         conn.setRequestProperty("Connection", "keep-alive");
+    }
+	
+    private static class Response {
+        private Map<String, List<String>> headers;
+
+        Response(Map<String, List<String>> headers) {
+            this.headers = headers;
+        }
+		
+		String getHeader(String name) {
+			for(Map.Entry<String, List<String>> entry : headers.entrySet()){
+				// status has a null key
+				if(entry.getKey() == null)
+					continue;
+				if(entry.getKey().toLowerCase().equals(name.toLowerCase())) {
+					if(entry.getValue().size() > 0) {
+						return entry.getValue().get(0);
+					} else {
+						return null;
+					}
+				}
+			}
+			return null;
+		}
     }
 }
