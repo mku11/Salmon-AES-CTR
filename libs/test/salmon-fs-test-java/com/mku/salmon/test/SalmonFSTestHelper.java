@@ -144,7 +144,7 @@ public class SalmonFSTestHelper {
     static AesFileImporter fileImporter;
     static AesFileExporter fileExporter;
     public static INonceSequenceSerializer sequenceSerializer = new SequenceSerializer();
-    static final Random random = new Random(System.currentTimeMillis());
+    static final Random random = new Random(0); // seed with zero for predictable results
 
     public static void setTestParams(String testDir, TestMode testMode) throws Exception {
         currTestMode = testMode;
@@ -255,8 +255,9 @@ public class SalmonFSTestHelper {
         byte[] data = new byte[65536];
         RandomAccessStream stream = file.getOutputStream();
         int len = 0;
+        Random rand = new Random(0); // seed with zero for predictable results
         while (size > 0) {
-            random.nextBytes(data);
+            rand.nextBytes(data);
             len = (int) Math.min(size, data.length);
             stream.write(data, 0, len);
             size -= len;

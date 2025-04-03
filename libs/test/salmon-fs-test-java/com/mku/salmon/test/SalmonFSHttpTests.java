@@ -114,7 +114,7 @@ public class SalmonFSHttpTests {
         try {
             AesDrive drive = SalmonFSTestHelper.openDrive(vaultDir, SalmonFSTestHelper.driveClassType, SalmonCoreTestHelper.TEST_FALSE_PASSWORD, null);
         } catch (Exception ex) {
-            System.err.println(ex);
+            ex.printStackTrace();
             wrongPassword = true;
         }
         assertTrue(wrongPassword);
@@ -128,7 +128,7 @@ public class SalmonFSHttpTests {
             AesDrive drive = SalmonFSTestHelper.openDrive(vaultDir, SalmonFSTestHelper.driveClassType, SalmonCoreTestHelper.TEST_PASSWORD, null);
             IVirtualFile root = drive.getRoot();
         } catch (Exception ex) {
-            System.err.println(ex);
+            ex.printStackTrace();
             wrongPassword = true;
         }
 

@@ -1,5 +1,29 @@
 package com.mku.salmon.test;
 
+/*
+MIT License
+
+Copyright (c) 2025 Max Kas
+
+Permission is hereby granted, free of charge, to any person obtaining a copy
+of this software and associated documentation files (the "Software"), to deal
+in the Software without restriction, including without limitation the rights
+to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+copies of the Software, and to permit persons to whom the Software is
+furnished to do so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in all
+copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+SOFTWARE.
+*/
+
 import static androidx.test.espresso.Espresso.onView;
 import static androidx.test.espresso.matcher.ViewMatchers.isRoot;
 
@@ -15,27 +39,15 @@ import androidx.test.ext.junit.rules.ActivityScenarioRule;
 import com.mku.android.fs.file.AndroidFile;
 import com.mku.android.fs.file.AndroidFileSystem;
 import com.mku.android.salmonfs.drive.AndroidDrive;
-import com.mku.fs.file.File;
 import com.mku.fs.file.HttpFile;
 import com.mku.fs.file.IFile;
 import com.mku.fs.file.WSFile;
-import com.mku.salmonfs.drive.Drive;
 import com.mku.salmonfs.drive.HttpDrive;
 import com.mku.salmonfs.drive.WSDrive;
 
 import org.hamcrest.BaseMatcher;
 import org.hamcrest.Description;
 import org.hamcrest.Matcher;
-
-import java.io.IOException;
-import java.lang.reflect.Field;
-import java.net.Socket;
-
-import javax.net.SocketFactory;
-import javax.net.ssl.SSLContext;
-import javax.net.ssl.SSLEngine;
-import javax.net.ssl.SSLSession;
-import javax.net.ssl.SSLSocket;
 
 public class SalmonFSAndroidTestHelper {
     // copy the test files to the device before running
@@ -45,6 +57,10 @@ public class SalmonFSAndroidTestHelper {
         // overwrite with android implementation
         if (testMode == TestMode.Local) {
             SalmonFSTestHelper.driveClassType = AndroidDrive.class;
+        } else if (testMode == TestMode.Http) {
+            SalmonFSTestHelper.driveClassType = HttpDrive.class;
+        } else if (testMode == TestMode.WebService) {
+            SalmonFSTestHelper.driveClassType = WSDrive.class;
         }
 
         SalmonFSTestHelper.TEST_ROOT_DIR = getFile(testDir, true);
@@ -64,6 +80,7 @@ public class SalmonFSAndroidTestHelper {
         SalmonFSTestHelper.TEST_EXPORT_AUTH_DIR = SalmonFSTestHelper.createDir(SalmonFSTestHelper.TEST_ROOT_DIR, SalmonFSTestHelper.TEST_EXPORT_AUTH_DIRNAME);
         SalmonFSTestHelper.HTTP_VAULT_DIR = new HttpFile(SalmonFSTestHelper.HTTP_VAULT_DIR_URL);
         SalmonFSTestHelper.createTestFiles();
+        SalmonFSTestHelper.createHttpFiles();
     }
 
     public static IFile getFile(String filepath, boolean isDirectory) {
