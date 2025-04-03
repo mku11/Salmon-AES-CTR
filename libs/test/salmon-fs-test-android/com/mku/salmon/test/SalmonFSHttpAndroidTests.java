@@ -193,4 +193,9 @@ public class SalmonFSHttpAndroidTests {
     public void ShouldReadRawFile() throws IOException, NoSuchAlgorithmException {
         salmonFSHttpTests.ShouldReadRawFile();
     }
+
+    @Test
+    public void testStreamHandler() throws Exception {
+        salmonFSHttpTests.testStreamHandler();
+    }
 }

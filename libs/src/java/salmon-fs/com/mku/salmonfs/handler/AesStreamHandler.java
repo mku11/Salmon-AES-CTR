@@ -37,6 +37,7 @@ import java.util.Map;
 import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
 import java.lang.reflect.Method;
+import java.lang.reflect.Field;
 
 /**
  * Provides a local stream URL handler to read an {@link AesFile} as a source.
@@ -49,29 +50,38 @@ public class AesStreamHandler extends URLStreamHandler {
     private static final int BACKOFFSET = 256 * 1024;
     private static AesStreamHandler instance;
     private static URLStreamHandler defaultStreamHandler;
-    private static String protocol = "http";
-    private static String prefix = protocol + "://localhost/salmon?key=";
+    private static final String protocol = "https";
+    private static final String prefix = protocol + "://localhost/salmon?key=";
 
     private final HashMap<String, AesFile> requests = new HashMap<>();
 
     private AesStreamHandler() {
         if (defaultStreamHandler == null)
-            defaultStreamHandler = getURLStreamHandler(protocol);
+            defaultStreamHandler = getURLStreamHandler();
         URL.setURLStreamHandlerFactory(protocol -> {
-            if (protocol.equals("http"))
+            if (protocol.equals(AesStreamHandler.protocol))
                 return this;
             return null;
         });
     }
 
-    private static URLStreamHandler getURLStreamHandler(String protocol) {
+    private static URLStreamHandler getURLStreamHandler() {
         try {
             Method method = URL.class.getDeclaredMethod("getURLStreamHandler", String.class);
             method.setAccessible(true);
             return (URLStreamHandler) method.invoke(null, protocol);
         } catch (Exception e) {
-            return null;
-        }
+		}
+		
+		try {
+			URL url = new URL(prefix);
+			Field handlerField = URL.class.getDeclaredField("handler");
+			handlerField.setAccessible(true);
+			return (URLStreamHandler)handlerField.get(url);
+		} catch (Exception e) {
+		}
+		
+		return null;
     }
 
     /**
@@ -95,9 +105,13 @@ public class AesStreamHandler extends URLStreamHandler {
      * @return The URL path to use.
      */
     public String register(String key, AesFile file) {
-        String regPath = prefix + URLEncoder.encode(key, StandardCharsets.UTF_8);
-        requests.put(regPath, file);
-        return regPath;
+		try {
+			String regPath = prefix + URLEncoder.encode(key, StandardCharsets.UTF_8.name());
+			requests.put(regPath, file);
+			return regPath;
+		} catch (Exception ex) {
+			throw new RuntimeException("Could not encode key", ex);
+		}
     }
 
     /**
