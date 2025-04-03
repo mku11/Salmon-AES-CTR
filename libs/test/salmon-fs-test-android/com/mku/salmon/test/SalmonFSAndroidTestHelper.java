@@ -13,6 +13,7 @@ import androidx.test.espresso.ViewAction;
 import androidx.test.ext.junit.rules.ActivityScenarioRule;
 
 import com.mku.android.fs.file.AndroidFile;
+import com.mku.android.fs.file.AndroidFileSystem;
 import com.mku.android.salmonfs.drive.AndroidDrive;
 import com.mku.fs.file.File;
 import com.mku.fs.file.HttpFile;
@@ -46,7 +47,7 @@ public class SalmonFSAndroidTestHelper {
             SalmonFSTestHelper.driveClassType = AndroidDrive.class;
         }
 
-        SalmonFSTestHelper.TEST_ROOT_DIR = getFile(context, testDir, true);
+        SalmonFSTestHelper.TEST_ROOT_DIR = getFile(testDir, true);
         if (!SalmonFSTestHelper.TEST_ROOT_DIR.exists())
             SalmonFSTestHelper.TEST_ROOT_DIR.mkdir();
 
@@ -65,14 +66,14 @@ public class SalmonFSAndroidTestHelper {
         SalmonFSTestHelper.createTestFiles();
     }
 
-    public static IFile getFile(Context context, String filepath, boolean isDirectory) {
+    public static IFile getFile(String filepath, boolean isDirectory) {
         IFile file;
         DocumentFile docFile;
         if (isDirectory)
-            docFile = DocumentFile.fromTreeUri(context, android.net.Uri.parse(filepath));
+            docFile = DocumentFile.fromTreeUri(AndroidFileSystem.getContext(), android.net.Uri.parse(filepath));
         else
-            docFile = DocumentFile.fromSingleUri(context, android.net.Uri.parse(filepath));
-        file = new AndroidFile(docFile, context);
+            docFile = DocumentFile.fromSingleUri(AndroidFileSystem.getContext(), android.net.Uri.parse(filepath));
+        file = new AndroidFile(docFile);
         return file;
     }
 

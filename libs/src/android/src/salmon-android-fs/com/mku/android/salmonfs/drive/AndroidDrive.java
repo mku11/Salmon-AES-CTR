@@ -29,6 +29,7 @@ import android.net.Uri;
 import androidx.documentfile.provider.DocumentFile;
 
 import com.mku.android.fs.file.AndroidFile;
+import com.mku.android.fs.file.AndroidFileSystem;
 import com.mku.android.fs.file.AndroidSharedFileObserver;
 import com.mku.fs.file.File;
 import com.mku.fs.file.IFile;
@@ -44,16 +45,6 @@ public class AndroidDrive extends Drive {
     private static final String TAG = AndroidDrive.class.getName();
     private static final int ENC_BUFFER_SIZE = 5 * 1024 * 1024;
     private static final int ENC_THREADS = 4;
-    private static Context context;
-
-    /**
-     * Initialize the Android Drive before creating or opening any virtual drives.
-     *
-     * @param context The context
-     */
-    public static void initialize(Context context) {
-        AndroidDrive.context = context.getApplicationContext();
-    }
 
     /**
      * Protected constructor, use open() and create() instead.
@@ -75,7 +66,7 @@ public class AndroidDrive extends Drive {
         AndroidSharedFileObserver.removeFileObserver(cacheFile);
         cacheFile.delete();
 
-        AndroidFile sharedDir = new AndroidFile(DocumentFile.fromFile(privateDir), context);
+        AndroidFile sharedDir = new AndroidFile(DocumentFile.fromFile(privateDir));
         AesFileExporter fileExporter = new AesFileExporter(ENC_BUFFER_SIZE, ENC_THREADS);
 		FileExporter.FileExportOptions exportOptions = new FileExporter.FileExportOptions();
         exportOptions.integrity = true;
@@ -90,7 +81,8 @@ public class AndroidDrive extends Drive {
      * @return The private directory
      */
     public IFile getPrivateDir() {
-        java.io.File sharedDir = new java.io.File(context.getCacheDir(), getShareDirectoryName());
+        java.io.File sharedDir = new java.io.File(AndroidFileSystem.getContext().getCacheDir(),
+                getShareDirectoryName());
         if (!sharedDir.exists())
             sharedDir.mkdir();
         return new File(sharedDir.getAbsolutePath());
@@ -106,10 +98,10 @@ public class AndroidDrive extends Drive {
     public IFile getRealFile(String uri, boolean isDirectory) {
         DocumentFile docFile;
         if (isDirectory)
-            docFile = DocumentFile.fromTreeUri(context, Uri.parse(uri));
+            docFile = DocumentFile.fromTreeUri(AndroidFileSystem.getContext(), Uri.parse(uri));
         else
-            docFile = DocumentFile.fromSingleUri(context, Uri.parse(uri));
-        AndroidFile file = new AndroidFile(docFile, context);
+            docFile = DocumentFile.fromSingleUri(AndroidFileSystem.getContext(), Uri.parse(uri));
+        AndroidFile file = new AndroidFile(docFile);
         return file;
     }
 
@@ -119,7 +111,7 @@ public class AndroidDrive extends Drive {
     @Override
     public void onUnlockSuccess() {
         AndroidSharedFileObserver.clearFileObservers();
-        clearCache(context.getCacheDir());
+        clearCache(AndroidFileSystem.getContext().getCacheDir());
     }
 
     /**
@@ -128,7 +120,7 @@ public class AndroidDrive extends Drive {
     @Override
     public void onUnlockError() {
         AndroidSharedFileObserver.clearFileObservers();
-        clearCache(context.getCacheDir());
+        clearCache(AndroidFileSystem.getContext().getCacheDir());
     }
 
     /**

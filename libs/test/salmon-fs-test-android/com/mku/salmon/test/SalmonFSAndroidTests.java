@@ -3,6 +3,7 @@ package com.mku.salmon.test;
 import androidx.test.ext.junit.rules.ActivityScenarioRule;
 import androidx.test.ext.junit.runners.AndroidJUnit4;
 
+import com.mku.android.fs.file.AndroidFileSystem;
 import com.mku.android.salmon.sequence.AndroidSequenceSerializer;
 import com.mku.android.salmonfs.drive.AndroidDrive;
 import com.mku.salmon.streams.AesStream;
@@ -42,7 +43,7 @@ public class SalmonFSAndroidTests {
             return;
         initialized = true;
 
-        AndroidDrive.initialize(activity);
+        AndroidFileSystem.initialize(activity);
         String testDir = SalmonFSAndroidTestHelper.getTestDir(activity);
         if (testDir == null)
             throw new RuntimeException("Set a test dir in the device before running tests");

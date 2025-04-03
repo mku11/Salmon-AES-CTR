@@ -16,6 +16,7 @@ import android.widget.Button;
 import android.widget.Toast;
 
 import com.mku.android.fs.file.AndroidFile;
+import com.mku.android.fs.file.AndroidFileSystem;
 import com.mku.fs.file.HttpFile;
 import com.mku.fs.file.IFile;
 
@@ -32,6 +33,7 @@ public class MainActivity extends AppCompatActivity {
         prefs = PreferenceManager.getDefaultSharedPreferences(getApplicationContext());
         setContentView(R.layout.activity_main);
         testFolder = findViewById(R.id.TEST_FOLDER_BUTTON);
+        AndroidFileSystem.initialize(this);
         testFolder.setOnClickListener((e) -> {
             openFilesystem(this, REQUEST_OPEN_FOLDER);
         });
@@ -57,7 +59,7 @@ public class MainActivity extends AppCompatActivity {
             docFile = DocumentFile.fromTreeUri(this, android.net.Uri.parse(filepath));
         else
             docFile = DocumentFile.fromSingleUri(this, android.net.Uri.parse(filepath));
-        file = new AndroidFile(docFile, this);
+        file = new AndroidFile(docFile);
         return file;
     }
 

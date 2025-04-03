@@ -52,7 +52,6 @@ public class AndroidFile implements IFile {
      */
     public static final String separator = "/";
 
-    private final Context context;
     private DocumentFile documentFile;
     private AndroidFile parent;
     private String name;
@@ -66,27 +65,43 @@ public class AndroidFile implements IFile {
     private Boolean _isFile;
 
     /**
+     * Initialize the Android Drive before creating or opening any virtual drives.
+     *
+     * @param context The context
+     */
+    public static void initialize(Context context) {
+        context = context.getApplicationContext();
+    }
+
+    /**
      * Construct an AndroidFile wrapper from an Android DocumentFile.
      *
      * @param documentFile The Android DocumentFile that will be associated to
-     * @param context      Android Context
      */
-    public AndroidFile(DocumentFile documentFile, Context context) {
+    public AndroidFile(DocumentFile documentFile) {
         this.documentFile = documentFile;
-        this.context = context;
+    }
+
+    /**
+     * Construct an AndroidFile wrapper from an Android DocumentFile.
+     *
+     * @param documentFile The Android DocumentFile that will be associated to
+     * @param parent The parent if available
+     */
+    public AndroidFile(DocumentFile documentFile, AndroidFile parent) {
+        this.documentFile = documentFile;
+        this.parent = parent;
     }
 
     /**
      * Construct an AndroidFile.
      *
      * @param parent  The parent file.
-     * @param parent  The file name.
-     * @param context Android Context
+     * @param name  The file name.
      */
-    public AndroidFile(AndroidFile parent, String name, Context context) {
+    public AndroidFile(AndroidFile parent, String name) {
         this.parent = parent;
         this.name = name;
-        this.context = context;
     }
 
 
@@ -110,7 +125,7 @@ public class AndroidFile implements IFile {
         if (dir == null)
             return null;
         reset();
-        AndroidFile newDir = new AndroidFile(dir, context);
+        AndroidFile newDir = new AndroidFile(dir, this);
         return newDir;
     }
 
@@ -127,7 +142,7 @@ public class AndroidFile implements IFile {
         doc.renameTo(filename + ".dat");
         doc.renameTo(filename);
         reset();
-        AndroidFile newFile = new AndroidFile(doc, context);
+        AndroidFile newFile = new AndroidFile(doc, this);
         return newFile;
     }
 
@@ -226,12 +241,12 @@ public class AndroidFile implements IFile {
      * @return The parent directory
      */
     public IFile getParent() {
-        if (documentFile == null)
+        if (parent != null)
             return parent;
         DocumentFile parentDocumentFile = documentFile.getParentFile();
         if (parentDocumentFile == null)
             return null;
-        AndroidFile parent = new AndroidFile(parentDocumentFile, context);
+        AndroidFile parent = new AndroidFile(parentDocumentFile, null);
         return parent;
     }
 
@@ -317,7 +332,7 @@ public class AndroidFile implements IFile {
         List<IFile> realFiles = new ArrayList<>();
         List<IFile> realDirs = new ArrayList<>();
         for (int i = 0; i < files.length; i++) {
-            AndroidFile file = new AndroidFile(files[i], context);
+            AndroidFile file = new AndroidFile(files[i], this);
             if (files[i].isDirectory())
                 realDirs.add(file);
             else
@@ -364,7 +379,7 @@ public class AndroidFile implements IFile {
 
             // store the name before the move
             this.name = getName();
-            Uri uri = DocumentsContract.moveDocument(context.getContentResolver(),
+            Uri uri = DocumentsContract.moveDocument(AndroidFileSystem.getContext().getContentResolver(),
                     documentFile.getUri(), documentFile.getParentFile().getUri(), androidDir.documentFile.getUri());
             IFile file = androidDir.getChild(getName());
             if (file != null && options.newFilename != null)
@@ -442,10 +457,10 @@ public class AndroidFile implements IFile {
         DocumentFile[] documentFiles = documentFile.listFiles();
         for (DocumentFile documentFile : documentFiles) {
             if (documentFile.getName().equals(filename))
-                return new AndroidFile(documentFile, context);
+                return new AndroidFile(documentFile, this);
         }
         // return an empty file
-        return new AndroidFile(this, filename, context);
+        return new AndroidFile(this, filename);
     }
 
     /**
@@ -457,7 +472,8 @@ public class AndroidFile implements IFile {
      */
     public boolean renameTo(String newFilename) throws FileNotFoundException {
         reset();
-        DocumentsContract.renameDocument(context.getContentResolver(), documentFile.getUri(), newFilename);
+        DocumentsContract.renameDocument(AndroidFileSystem.getContext().getContentResolver(),
+                documentFile.getUri(), newFilename);
         documentFile = ((AndroidFile) getParent().getChild(newFilename)).documentFile;
         name = newFilename;
         return true;
@@ -498,7 +514,8 @@ public class AndroidFile implements IFile {
      * @throws FileNotFoundException Thrown if file is not found
      */
     public ParcelFileDescriptor getFileDescriptor(String mode) throws FileNotFoundException {
-        return context.getContentResolver().openFileDescriptor(documentFile.getUri(), mode);
+        return AndroidFileSystem.getContext().getContentResolver()
+                .openFileDescriptor(documentFile.getUri(), mode);
     }
 
     /**
