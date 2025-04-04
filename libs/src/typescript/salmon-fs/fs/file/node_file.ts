@@ -34,6 +34,9 @@ import path from 'node:path';
  * Salmon real local filesystem implementation for node js. This can be used only with node js.
  */
 export class NodeFile implements IFile {
+	/**
+	 * Directory separator
+	 */
     public static readonly separator: string = "/";
 
     #filePath: string;

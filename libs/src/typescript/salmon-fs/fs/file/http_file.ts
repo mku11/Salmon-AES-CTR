@@ -32,6 +32,9 @@ import { MemoryStream } from '../../../salmon-core/streams/memory_stream.js';
  * Salmon RealFile implementation for Javascript.
  */
 export class HttpFile implements IFile {
+	/**
+	 * Directory separator
+	 */
     public static readonly separator: string = "/";
 
     filePath: string;

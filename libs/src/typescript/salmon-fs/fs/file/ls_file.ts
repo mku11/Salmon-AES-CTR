@@ -30,6 +30,9 @@ import { LocalStorageFileStream } from '../streams/ls_file_stream.js';
  * Salmon localStorage implementation. This can be used to store small files.
  */
 export class LocalStorageFile implements IFile {
+	/**
+	 * Directory separator
+	 */
     public static readonly separator: string = "/";
 
     #filePath: string;

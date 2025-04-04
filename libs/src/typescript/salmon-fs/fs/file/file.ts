@@ -32,6 +32,9 @@ import { IOException } from '../../../salmon-core/streams/io_exception.js';
  * browser.
  */
 export class File implements IFile {
+	/**
+	 * Directory separator
+	 */
     public static readonly separator: string = "/";
 
     #fileHandle: any;
@@ -133,7 +136,7 @@ export class File implements IFile {
     public getDisplayPath(): any {
         let filename = this.#fileHandle  ? this.#fileHandle.name : this.#name;
         if (this.#parent == null)
-            return separator + (filename  ? filename : "");
+            return File.separator + (filename  ? filename : "");
         return this.#parent.getDisplayPath() + File.separator + filename;
     }
 
