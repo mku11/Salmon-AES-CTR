@@ -63,6 +63,12 @@ public class DataStreamActivity extends AppCompatActivity {
         initialize();
     }
 
+    public void log(String msg) {
+        runOnUiThread(() -> {
+            outputText.append(msg + "\n");
+        });
+    }
+
     public void initialize() {
         AndroidFileSystem.initialize(this);
         AesStream.setAesProviderType(ProviderType.Default);
@@ -72,41 +78,41 @@ public class DataStreamActivity extends AppCompatActivity {
         outputText.setText("");
 
         // generate a key
-        outputText.append("generating keys and random data...");
+        log("generating keys and random data...");
         key = SamplesCommon.getKeyFromPassword(password.getText().toString());
 
         // Always request a new random secure nonce!
         // if you want to you can embed the nonce in the header data
         // see Encryptor implementation
         nonce = Generator.getSecureRandomBytes(8); // 64 bit nonce
-        outputText.append("Created nonce: " + BitConverter.toHex(nonce) + "\n");
+        log("Created nonce: " + BitConverter.toHex(nonce));
 
         // generate random data
         data = SamplesCommon.generateRandomData(
                 Integer.parseInt((String) dataSize.getSelectedItem()) * 1024 * 1024);
 
         try {
-            outputText.append("starting encryption..." + "\n");
+            log("starting encryption...");
             encData = DataStreamSample.encryptDataStream(data, key, nonce, (msg) -> {
-                outputText.append(msg + "\n");
+                log(msg);
             });
-        } catch (IOException e) {
+        } catch (Exception e) {
             e.printStackTrace();
-            outputText.append(e.getMessage() + "\n");
+            log(e.getMessage());
         }
     }
 
     public void decryptDataStream() {
 
         try {
-            outputText.append("starting decryption..." + "\n");
+            log("starting decryption...");
             byte[] decData = DataStreamSample.decryptDataStream(encData, key, nonce, (msg) -> {
-                outputText.append(msg + "\n");
+                log(msg);
             });
-            outputText.append("done" + "\n");
-        } catch (IOException e) {
+            log("done");
+        } catch (Exception e) {
             e.printStackTrace();
-            outputText.append(e.getMessage() + "\n");
+            log(e.getMessage());
         }
 
     }

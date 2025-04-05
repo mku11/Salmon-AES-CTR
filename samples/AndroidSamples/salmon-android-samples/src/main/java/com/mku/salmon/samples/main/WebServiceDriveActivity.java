@@ -20,6 +20,9 @@ import com.mku.salmon.streams.AesStream;
 import com.mku.salmonfs.drive.AesDrive;
 
 import java.io.IOException;
+import java.util.concurrent.Executor;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 
 public class WebServiceDriveActivity extends AppCompatActivity {
     public static final int REQUEST_IMPORT_FILES = 1002;
@@ -43,6 +46,8 @@ public class WebServiceDriveActivity extends AppCompatActivity {
     private static final String defaultUserName = "user";
     private static final String defaultWsPassword = "password";
     private static final String defaultDrivePath = "/example_drive_" + System.currentTimeMillis();
+
+    private final Executor executor = Executors.newCachedThreadPool();
 
     @Override
     public void onCreate(Bundle bundle) {
@@ -99,123 +104,87 @@ public class WebServiceDriveActivity extends AppCompatActivity {
         initialize();
     }
 
+    public void log(String msg) {
+        runOnUiThread(() -> {
+            outputText.append(msg + "\n");
+        });
+    }
+
     private void initialize() {
         AndroidFileSystem.initialize(this);
         AesStream.setAesProviderType(ProviderType.Default);
     }
 
     public void createDrive() {
-        new Thread(() -> {
+        outputText.setText("");
+        executor.execute(() -> {
             try {
                 IFile driveDir = new WSFile(drivePath.getText().toString(),
                         wsURL.getText().toString(),
                         new WSFile.Credentials(wsUserName.getText().toString(),
                                 wsPassword.getText().toString()));
                 if (!driveDir.exists()) {
-                    boolean res = driveDir.mkdir();
-                    if(!res) {
-                        runOnUiThread(() -> {
-                            outputText.append("Could not create directory" + "\n");
-                        });
-                        return;
-                    }
+                    driveDir.mkdir();
                 }
-                wsDrive = DriveSample.createDrive(driveDir, password.getText().toString(),
-                        (msg) -> {
-                            runOnUiThread(() -> {
-                                outputText.append(msg + "\n");
-                            });
-                        });
-            } catch (IOException e) {
+                wsDrive = DriveSample.createDrive(driveDir, password.getText().toString(), this::log);
+            } catch (Exception e) {
                 e.printStackTrace();
-                runOnUiThread(() -> {
-                    outputText.append(e.getMessage() + "\n");
-                });
+                log(e.getMessage());
             }
-        }).start();
+        });
     }
 
     public void openDrive() {
-        new Thread(() -> {
+        outputText.setText("");
+        executor.execute(() -> {
             try {
                 IFile driveDir = new WSFile(drivePath.getText().toString(),
                         wsURL.getText().toString(),
                         new WSFile.Credentials(wsUserName.getText().toString(),
                                 wsPassword.getText().toString()));
-                wsDrive = DriveSample.openDrive(driveDir, password.getText().toString(),
-                        (msg) -> {
-                            runOnUiThread(() -> {
-                                outputText.append(msg + "\n");
-                            });
-                        });
-            } catch (IOException e) {
+                wsDrive = DriveSample.openDrive(driveDir, password.getText().toString(), this::log);
+            } catch (Exception e) {
                 e.printStackTrace();
-                runOnUiThread(() -> {
-                    outputText.append(e.getMessage() + "\n");
-                });
+                log(e.getMessage());
             }
-        }).start();
+        });
     }
 
     public void importFiles(IFile[] filesToImport) {
-        new Thread(() -> {
+        executor.execute(() -> {
             try {
-                DriveSample.importFiles(wsDrive, filesToImport,
-                        (msg) -> {
-                            runOnUiThread(() -> {
-                                outputText.append(msg + "\n");
-                            });
-                        });
+                DriveSample.importFiles(wsDrive, filesToImport, this::log);
             } catch (Exception e) {
                 e.printStackTrace();
-                runOnUiThread(() -> {
-                    outputText.append(e.getMessage() + "\n");
-                });
+                log(e.getMessage());
             }
-        }).start();
+        });
     }
 
     public void listFiles() {
-        new Thread(() -> {
+        executor.execute(() -> {
             try {
-                DriveSample.listFiles(wsDrive, (msg) -> {
-                    runOnUiThread(() -> {
-                        outputText.append(msg + "\n");
-                    });
-                });
-            } catch (IOException e) {
+                DriveSample.listFiles(wsDrive, this::log);
+            } catch (Exception e) {
                 e.printStackTrace();
-                runOnUiThread(() -> {
-                    outputText.append(e.getMessage() + "\n");
-                });
+                log(e.getMessage());
             }
-        }).start();
+        });
     }
 
     public void exportFiles(IFile exportDir) {
         new Thread(() -> {
             try {
-                DriveSample.exportFiles(wsDrive, exportDir,
-                        (msg) -> {
-                            runOnUiThread(() -> {
-                                outputText.append(msg + "\n");
-                            });
-                        });
+                DriveSample.exportFiles(wsDrive, exportDir, this::log);
             } catch (Exception e) {
                 e.printStackTrace();
-                runOnUiThread(() -> {
-                    outputText.append(e.getMessage() + "\n");
-                });
+                log(e.getMessage());
             }
-        }).start();
+        });
     }
 
     public void closeDrive() {
-        DriveSample.closeDrive(wsDrive, (msg) -> {
-            runOnUiThread(() -> {
-                outputText.append(msg + "\n");
-            });
-        });
+        DriveSample.closeDrive(wsDrive, this::log);
     }
 
     @Override

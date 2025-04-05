@@ -56,6 +56,12 @@ public class TextActivity extends AppCompatActivity {
         initialize();
     }
 
+    public void log(String msg) {
+        runOnUiThread(() -> {
+            outputText.append(msg + "\n");
+        });
+    }
+
     private void initialize() {
         AndroidFileSystem.initialize(this);
         AesStream.setAesProviderType(ProviderType.Default);
@@ -71,19 +77,19 @@ public class TextActivity extends AppCompatActivity {
         try {
             String encText = TextSample.encryptText(text, key);
             encryptedText.setText(encText);
-        } catch (IOException e) {
+        } catch (Exception e) {
             e.printStackTrace();
-            outputText.append(e.getMessage() + "\n");
+            log(e.getMessage());
         }
     }
 
     private void decryptText() {
         try {
             String decText = TextSample.decryptText(encryptedText.getText().toString(), key);
-            outputText.append("Decrypted Text: " + "\n" + decText + "\n");
-        } catch (IOException e) {
+            log("Decrypted Text: " + "\n" + decText);
+        } catch (Exception e) {
             e.printStackTrace();
-            outputText.append(e.getMessage() + "\n");
+            log(e.getMessage());
         }
     }
 }

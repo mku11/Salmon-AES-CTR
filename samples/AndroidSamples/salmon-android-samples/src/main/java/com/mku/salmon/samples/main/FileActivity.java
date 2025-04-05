@@ -65,6 +65,12 @@ public class FileActivity extends AppCompatActivity {
         initialize();
     }
 
+    public void log(String msg) {
+        runOnUiThread(() -> {
+            outputText.append(msg + "\n");
+        });
+    }
+
     private void initialize() {
         AndroidFileSystem.initialize(this);
         AesStream.setAesProviderType(ProviderType.Default);
@@ -94,25 +100,25 @@ public class FileActivity extends AppCompatActivity {
         try {
             FileSample.encryptTextToFile(plainText.getText().toString(), key, integrityKey, file,
                     (msg) -> {
-                        outputText.append(msg + "\n");
+                        log(msg);
                     });
-            outputText.append("file saved" + "\n");
-        } catch (IOException e) {
+            log("file saved");
+        } catch (Exception e) {
             e.printStackTrace();
-            outputText.append(e.getMessage() + "\n");
+            log(e.getMessage());
         }
     }
 
     public void loadFile(IFile file) {
         try {
             String decText = FileSample.decryptTextFromFile(key, integrityKey, file, (msg) -> {
-                outputText.append(msg + "\n");
+                log(msg);
             });
-            outputText.append("file loaded" + "\n");
+            log("file loaded");
             decryptedText.setText(decText);
-        } catch (IOException e) {
+        } catch (Exception e) {
             e.printStackTrace();
-            outputText.append(e.getMessage() + "\n");
+            log(e.getMessage());
         }
     }
 

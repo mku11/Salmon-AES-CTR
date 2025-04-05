@@ -21,6 +21,8 @@ import com.mku.salmon.streams.AesStream;
 import com.mku.salmonfs.drive.AesDrive;
 
 import java.io.IOException;
+import java.util.concurrent.Executor;
+import java.util.concurrent.Executors;
 
 public class LocalDriveActivity extends AppCompatActivity {
     public static final int REQUEST_OPEN_DRIVE = 1000;
@@ -38,6 +40,8 @@ public class LocalDriveActivity extends AppCompatActivity {
     private AesDrive localDrive;
     private int threads = 1;
     private static final String defaultPassword = "test123";
+
+    private final Executor executor = Executors.newCachedThreadPool();
 
     @Override
     public void onCreate(Bundle bundle) {
@@ -85,6 +89,12 @@ public class LocalDriveActivity extends AppCompatActivity {
         initialize();
     }
 
+    public void log(String msg) {
+        runOnUiThread(() -> {
+            outputText.append(msg + "\n");
+        });
+    }
+
     private void initialize() {
         AndroidFileSystem.initialize(this);
         AesStream.setAesProviderType(ProviderType.Default);
@@ -92,68 +102,57 @@ public class LocalDriveActivity extends AppCompatActivity {
 
     public void createDrive(IFile driveDir) {
         outputText.setText("");
-        try {
-            localDrive = DriveSample.createDrive(driveDir, password.getText().toString(),
-                    (msg) -> {
-                        outputText.append(msg + "\n");
-                    });
-        } catch (IOException e) {
-            e.printStackTrace();
-            outputText.append(e.getMessage()+ "\n");
-        }
+        executor.execute(() -> {
+            try {
+                localDrive = DriveSample.createDrive(driveDir, password.getText().toString(), this::log);
+            } catch (Exception e) {
+                e.printStackTrace();
+                log(e.getMessage());
+            }
+        });
     }
 
     public void openDrive(IFile dir) {
         outputText.setText("");
-
-        try {
-            localDrive = DriveSample.openDrive(dir, password.getText().toString(),
-                    (msg) -> {
-                        outputText.append(msg + "\n");
-                    });
-        } catch (IOException e) {
-            e.printStackTrace();
-            outputText.append(e.getMessage()+ "\n");
-        }
+        executor.execute(() -> {
+            try {
+                localDrive = DriveSample.openDrive(dir, password.getText().toString(), this::log);
+            } catch (Exception e) {
+                e.printStackTrace();
+                log(e.getMessage());
+            }
+        });
     }
 
     public void importFiles(IFile[] filesToImport) {
         try {
-            DriveSample.importFiles(localDrive, filesToImport, threads, (msg) -> {
-                outputText.append(msg + "\n");
-            });
+            DriveSample.importFiles(localDrive, filesToImport, threads, this::log);
         } catch (Exception e) {
             e.printStackTrace();
-            outputText.append(e.getMessage()+ "\n");
+            log(e.getMessage());
         }
     }
 
     public void listFiles() {
         try {
-            DriveSample.listFiles(localDrive,  (msg) -> {
-                outputText.append(msg + "\n");
-            });
-        } catch (IOException e) {
+            DriveSample.listFiles(localDrive, this::log);
+        } catch (Exception e) {
             e.printStackTrace();
-            outputText.append(e.getMessage() + "\n");
+            log(e.getMessage());
         }
     }
 
     public void exportFiles(IFile exportDir) {
         try {
-            DriveSample.exportFiles(localDrive, exportDir, threads, (msg) -> {
-                outputText.append(msg + "\n");
-            });
+            DriveSample.exportFiles(localDrive, exportDir, threads, this::log);
         } catch (Exception e) {
             e.printStackTrace();
-            outputText.append(e.getMessage() + "\n");
+            log(e.getMessage());
         }
     }
 
     private void closeDrive() {
-        DriveSample.closeDrive(localDrive, (msg) -> {
-            outputText.append(msg + "\n");
-        });
+        DriveSample.closeDrive(localDrive, this::log);
     }
 
     @Override

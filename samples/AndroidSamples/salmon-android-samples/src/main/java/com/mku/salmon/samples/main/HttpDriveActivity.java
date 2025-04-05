@@ -21,6 +21,8 @@ import com.mku.salmon.streams.AesStream;
 import com.mku.salmonfs.drive.AesDrive;
 
 import java.io.IOException;
+import java.util.concurrent.Executor;
+import java.util.concurrent.Executors;
 
 public class HttpDriveActivity extends AppCompatActivity {
     public static final int REQUEST_EXPORT_FILES = 1003;
@@ -35,8 +37,8 @@ public class HttpDriveActivity extends AppCompatActivity {
     private int threads = 1;
     private static final String defaultPassword = "test123";
     String defaultHttpDriveURL = "";
-
     private AesDrive httpDrive;
+    private final Executor executor = Executors.newCachedThreadPool();
 
     @Override
     public void onCreate(Bundle bundle) {
@@ -76,6 +78,12 @@ public class HttpDriveActivity extends AppCompatActivity {
         initialize();
     }
 
+    public void log(String msg) {
+        runOnUiThread(() -> {
+            outputText.append(msg + "\n");
+        });
+    }
+
     private void initialize() {
         AndroidFileSystem.initialize(this);
         AesStream.setAesProviderType(ProviderType.Default);
@@ -83,65 +91,42 @@ public class HttpDriveActivity extends AppCompatActivity {
 
     public void openDrive() {
         outputText.setText("");
-        new Thread(() -> {
+        executor.execute(() -> {
             try {
                 IFile driveDir = new HttpFile(httpURL.getText().toString());
                 httpDrive = DriveSample.openDrive(driveDir, password.getText().toString(),
-                        (msg) -> {
-                            runOnUiThread(() -> {
-                                outputText.append(msg + "\n");
-                            });
-                        });
+                        this::log);
             } catch (Exception e) {
                 e.printStackTrace();
-                runOnUiThread(() -> {
-                    outputText.append(e.getMessage() + "\n");
-                    if(e.getCause() != null) {
-                        outputText.append(e.getCause().getMessage());
-                    }
-                });
+                log(e.getMessage());
             }
-        }).start();
+        });
     }
 
     public void listFiles() {
-        new Thread(() -> {
+        executor.execute(() -> {
             try {
-                DriveSample.listFiles(httpDrive, (msg) -> {
-                    runOnUiThread(() -> {
-                        outputText.append(msg + "\n");
-                    });
-                });
-            } catch (IOException e) {
+                DriveSample.listFiles(httpDrive, this::log);
+            } catch (Exception e) {
                 e.printStackTrace();
-                runOnUiThread(() -> {
-                    outputText.append(e.getMessage() + "\n");
-                });
+                log(e.getMessage());
             }
-        }).start();
+        });
     }
 
     public void exportFiles(IFile exportDir) {
-        new Thread(() -> {
+        executor.execute(() -> {
             try {
-                DriveSample.exportFiles(httpDrive, exportDir, threads, (msg) -> {
-                    runOnUiThread(() -> {
-                        outputText.append(msg + "\n");
-                    });
-                });
+                DriveSample.exportFiles(httpDrive, exportDir, threads, this::log);
             } catch (Exception e) {
                 e.printStackTrace();
-                runOnUiThread(() -> {
-                    outputText.append(e.getMessage() + "\n");
-                });
+                log(e.getMessage());
             }
-        }).start();
+        });
     }
 
     public void closeDrive() {
-        DriveSample.closeDrive(httpDrive, (msg) -> {
-            outputText.append(msg + "\n");
-        });
+        DriveSample.closeDrive(httpDrive, this::log);
     }
 
     @Override
@@ -151,11 +136,9 @@ public class HttpDriveActivity extends AppCompatActivity {
             return;
         android.net.Uri uri = data.getData();
         AndroidFileChooser.setUriPermissions(this, data, uri);
-        switch (requestCode) {
-            case REQUEST_EXPORT_FILES:
-                IFile exportDir = AndroidFileChooser.getFile(this, uri.toString(), true);
-                exportFiles(exportDir);
-                break;
+        if (requestCode == REQUEST_EXPORT_FILES) {
+            IFile exportDir = AndroidFileChooser.getFile(this, uri.toString(), true);
+            exportFiles(exportDir);
         }
     }
 }

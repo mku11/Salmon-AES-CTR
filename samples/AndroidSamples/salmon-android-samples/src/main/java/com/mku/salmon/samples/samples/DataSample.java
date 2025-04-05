@@ -13,7 +13,7 @@ import java.util.Arrays;
 
 public class DataSample {
 
-    public static byte[] encryptData(byte[] data, byte[] key, byte[] integrityKey, int threads,  Consumer<String> log) throws IOException {
+    public static byte[] encryptData(byte[] data, byte[] key, byte[] integrityKey, int threads, Consumer<String> log) throws IOException {
         log.accept("Encrypting bytes: " + BitConverter.toHex(Arrays.copyOf(data, 24)) + "...");
 
         // Always request a new random secure nonce.

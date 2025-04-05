@@ -28,7 +28,7 @@ public class DriveSample {
     static {
         try {
             sequencer = DriveSample.createSequencer();
-        } catch (IOException e) {
+        } catch (Exception e) {
             throw new RuntimeException(e);
         }
     }
@@ -133,7 +133,7 @@ public class DriveSample {
         // query for the file from the drive
         AesFile root = drive.getRoot();
         AesFile[] files = root.listFiles();
-        if(files.length == 0) {
+        if (files.length == 0) {
             log.accept("No files found");
             return;
         }
