@@ -5,11 +5,6 @@ To build the Salmon FS libraries for Android you need:
 Optional native libraries:  
 The android native include fast Salmon AES-NI intrinsics and native AES for x86 and ARM.  
   
-Requirements for native libraries:  
-1. Tiny-AES for more details on how to download see ROOT/c/src/README.md  
-2. Edit file build.gradle and uncomment line: path "../../make/CMakeLists.txt"      
-3. Android NDK you can download from within Android studio.    
-  
 Configure the sdk location
 Either create a file local.properties with the following:
 ```
