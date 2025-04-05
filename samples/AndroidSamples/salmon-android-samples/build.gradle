@@ -1,0 +1,65 @@
+plugins {
+    id 'com.android.application'
+}
+
+group 'com.mku.salmon.samples'
+description = 'Salmon Android Samples'
+version '3.0.1'
+
+
+repositories {
+    maven {
+        // uncomment for local repo
+        allowInsecureProtocol true
+        url 'http://localhost/repository/maven/releases'
+
+        // official salmon repo
+        // url 'https://github.com/mku11/Repo/raw/main/maven/releases'
+    }
+    mavenCentral()
+}
+
+android {
+    namespace 'com.mku.salmon.samples'
+    compileSdk 34
+
+    defaultConfig {
+        applicationId "com.mku.salmon.samples"
+        minSdk 23
+        targetSdk 34
+        versionCode 301
+        versionName "3.0.1"
+
+        testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
+    }
+
+    buildTypes {
+        release {
+            minifyEnabled false
+            proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
+        }
+        debug {
+            debuggable true
+        }
+    }
+    compileOptions {
+        sourceCompatibility JavaVersion.VERSION_1_8
+        targetCompatibility JavaVersion.VERSION_1_8
+    }
+
+    packagingOptions {
+        resources.excludes.add("META-INF/*")
+    }
+}
+
+dependencies {
+    implementation 'androidx.appcompat:appcompat:1.5.1'
+    implementation 'com.google.android.material:material:1.7.0'
+    implementation 'androidx.constraintlayout:constraintlayout:2.1.4'
+    annotationProcessor "androidx.lifecycle:lifecycle-compiler:2.3.1"
+
+    implementation("com.mku.salmon:salmon-core:${version}")
+    implementation("com.mku.salmon:salmon-fs:${version}")
+    implementation("com.mku.salmon:salmon-fs-android:${version}")
+	implementation("com.mku.salmon:salmon-native-android:${version}")
+}
