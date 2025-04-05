@@ -109,12 +109,12 @@ export class DriveSample {
         // query for the file from the drive
 		let root = await drive.getRoot();
         let files = await root.listFiles();
-		print("directory listing:")
 		if(files.length == 0) {
 			print("no files found");
 			return;
 		}
 			
+		print("directory listing:")
 		for(let file of files) {
 			print("file: " + await file.getName() + ", size: " + await file.getLength());
 		}

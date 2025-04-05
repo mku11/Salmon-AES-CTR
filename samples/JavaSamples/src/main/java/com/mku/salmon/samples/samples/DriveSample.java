@@ -119,6 +119,10 @@ public class DriveSample {
         // query for the file from the drive
         AesFile root = drive.getRoot();
         AesFile[] files = root.listFiles();
+		if(files.length == 0) {
+            System.out.println("No files found");
+            return;
+        }
         System.out.println("directory listing:");
         for (AesFile sfile : files) {
             System.out.println("file: " + sfile.getName() + ", size: " + sfile.getLength());

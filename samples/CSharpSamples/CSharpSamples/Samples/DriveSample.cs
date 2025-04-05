@@ -114,6 +114,10 @@ class DriveSample
         // query for the file from the drive
         AesFile root = drive.Root;
         AesFile[] files = root.ListFiles();
+		if(files.Length == 0) {
+            Console.WriteLine("No files found");
+            return;
+        }
         Console.WriteLine("directory listing:");
         foreach (AesFile sfile in files)
         {
