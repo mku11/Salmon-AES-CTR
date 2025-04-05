@@ -607,7 +607,7 @@ public class WSFile implements IFile {
             this.reset();
             HashMap<String, String> params = new HashMap<>();
             params.put(PATH, this.filePath);
-            conn = createConnection("PUT", this.servicePath + "/api/mkdir", params);
+            conn = createConnection("POST", this.servicePath + "/api/mkdir", params);
             setDefaultHeaders(conn);
             setServiceAuth(conn);
             conn.connect();
