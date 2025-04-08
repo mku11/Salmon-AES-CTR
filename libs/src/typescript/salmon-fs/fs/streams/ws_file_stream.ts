@@ -84,7 +84,7 @@ export class WSFileStream extends RandomAccessStream {
             httpResponse = await fetch(this.file.getServicePath() + "/api/get" 
                 + "?" + WSFileStream.#PATH + "=" + encodeURIComponent(this.file.getPath())
                 + "&" + WSFileStream.#POSITION + "=" + this.position.toString(), 
-                { method: 'GET', keepalive: true, headers: headers });
+                { method: 'GET', headers: headers });
             await this.#checkStatus(httpResponse, this.position > 0 ? 206 : 200);
 			this.readStream = httpResponse.body;
             this.end_position = end;
@@ -234,7 +234,7 @@ export class WSFileStream extends RandomAccessStream {
         params.append(WSFileStream.#LENGTH, value.toString());
         let httpResponse: Response | null = null;
         httpResponse = await fetch(this.file.getServicePath() + "/api/setLength", 
-		{ method: 'PUT', keepalive: true, body: params, headers: headers });
+		{ method: 'PUT', body: params, headers: headers });
         await this.#checkStatus(httpResponse, 200);
         await this.reset();
     }
@@ -373,6 +373,5 @@ export class WSFileStream extends RandomAccessStream {
 
     #setDefaultHeaders(headers: Headers) {
         headers.append("Cache", "no-store");
-		headers.append("Connection", "keep-alive");
     }
 }

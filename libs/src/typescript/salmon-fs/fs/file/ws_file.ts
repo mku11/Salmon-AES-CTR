@@ -86,7 +86,7 @@ export class WSFile implements IFile {
 			let httpResponse: Response | null = null;
 			httpResponse = (await fetch(this.#servicePath + "/api/info" 
 				+ "?" + WSFile.#PATH + "=" + encodeURIComponent(this.getPath()),
-				{method: 'GET', keepalive: true, headers: headers}));
+				{method: 'GET', headers: headers}));
 			await this.#checkStatus(httpResponse, 200);
 			this.response = await httpResponse.json();
 		}
@@ -107,7 +107,7 @@ export class WSFile implements IFile {
         params.append(WSFile.#PATH, nDirPath);
         let httpResponse: Response | null = null;
         httpResponse = (await fetch(this.#servicePath + "/api/mkdir", 
-            { method: 'POST', keepalive: true, body: params, headers: headers }));
+            { method: 'POST', body: params, headers: headers }));
         await this.#checkStatus(httpResponse, 200);
         let dir: WSFile = new WSFile(nDirPath, this.#servicePath, this.#credentials);
         return dir;
@@ -128,7 +128,7 @@ export class WSFile implements IFile {
         params.append(WSFile.#PATH, nFilePath);
         let httpResponse: Response | null = null;
         httpResponse = (await fetch(this.#servicePath + "/api/create", 
-            { method: 'POST', keepalive: true, body: params, headers: headers }));
+            { method: 'POST', body: params, headers: headers }));
         await this.#checkStatus(httpResponse, 200);
         let nFile: WSFile = new WSFile(nFilePath, this.#servicePath, this.#credentials);
         return nFile;
@@ -149,7 +149,7 @@ export class WSFile implements IFile {
                 params.append(WSFile.#PATH, file.getPath());
                 let httpResponse: Response | null = null;
                 httpResponse = (await fetch(this.#servicePath + "/api/delete", 
-                    { method: 'DELETE', keepalive: true, body: params, headers: headers }));
+                    { method: 'DELETE', body: params, headers: headers }));
                 await this.#checkStatus(httpResponse, 200);
             }
         }
@@ -161,7 +161,7 @@ export class WSFile implements IFile {
         params.append(WSFile.#PATH, this.#filePath);
         let httpResponse: Response | null = null;
         httpResponse = (await fetch(this.#servicePath + "/api/delete", 
-            { method: 'DELETE', keepalive: true, body: params, headers: headers }));
+            { method: 'DELETE', body: params, headers: headers }));
         await this.#checkStatus(httpResponse, 200);
 		this.reset();
         return true;
@@ -288,7 +288,7 @@ export class WSFile implements IFile {
             let httpResponse: Response | null = null;
             httpResponse = (await fetch(this.#servicePath + "/api/list"
                 + "?" + WSFile.#PATH + "=" + encodeURIComponent(this.getPath()), 
-                { method: 'GET', keepalive: true, headers: headers }));
+                { method: 'GET', headers: headers }));
             await this.#checkStatus(httpResponse, 200);
             let res: number = (await httpResponse.json()).length;
             return res;
@@ -308,7 +308,7 @@ export class WSFile implements IFile {
             let httpResponse: Response | null = null;
             httpResponse = (await fetch(this.#servicePath + "/api/list"
                 + "?" + WSFile.#PATH + "=" + encodeURIComponent(this.getPath()),
-                { method: 'GET', keepalive: true, headers: headers }));
+                { method: 'GET', headers: headers }));
             await this.#checkStatus(httpResponse, 200);
             let realFiles: WSFile[] = [];
             let realDirs: WSFile[] = [];
@@ -353,7 +353,7 @@ export class WSFile implements IFile {
             params.append(WSFile.#FILENAME, newName);
             let httpResponse: Response | null = null;
             httpResponse = (await fetch(this.#servicePath + "/api/move", 
-                { method: 'PUT', keepalive: true, body: params, headers: headers }));
+                { method: 'PUT', body: params, headers: headers }));
             await this.#checkStatus(httpResponse, 200);
             newFile = new WSFile((await httpResponse.json()).path, this.#servicePath, this.#credentials);
 			this.reset();
@@ -389,7 +389,7 @@ export class WSFile implements IFile {
             params.append(WSFile.#FILENAME, newName);
             let httpResponse: Response | null = null;
             httpResponse = (await fetch(this.#servicePath + "/api/copy", 
-                { method: 'POST', keepalive: true, body: params, headers: headers }));
+                { method: 'POST', body: params, headers: headers }));
             await this.#checkStatus(httpResponse, 200);
             newFile = new WSFile((await httpResponse.json()).path, this.#servicePath, this.#credentials);
 			this.reset();
@@ -425,7 +425,7 @@ export class WSFile implements IFile {
         params.append(WSFile.#FILENAME, newFilename);
         let httpResponse: Response | null = null;
         httpResponse = (await fetch(this.#servicePath + "/api/rename", 
-            { method: 'PUT', keepalive: true, body: params, headers: headers }));
+            { method: 'PUT', body: params, headers: headers }));
         await this.#checkStatus(httpResponse, 200);
         return true;
     }
@@ -443,7 +443,7 @@ export class WSFile implements IFile {
         params.append(WSFile.#PATH, this.#filePath);
         let httpResponse: Response | null = null;
         httpResponse = (await fetch(this.#servicePath + "/api/mkdir", 
-            { method: 'POST', keepalive: true, body: params, headers: headers }));
+            { method: 'POST', body: params, headers: headers }));
         await this.#checkStatus(httpResponse, 200);
         return true;
     }
@@ -487,7 +487,6 @@ export class WSFile implements IFile {
 
     #setDefaultHeaders(headers: Headers) {
         headers.append("Cache", "no-store");
-		headers.append("Connection", "keep-alive");
     }
 }
 

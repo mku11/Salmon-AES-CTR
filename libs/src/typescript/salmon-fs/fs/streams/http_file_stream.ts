@@ -80,7 +80,7 @@ export class HttpFileStream extends RandomAccessStream {
             // or it's a full request but we don't know the end
             if(this.#position > 0 || end == HttpFileStream.MAX_LEN_PER_REQUEST - 1)
 			    headers.append("Range", "bytes=" + this.#position + "-" + end);
-            let httpResponse = await fetch(this.file.getPath(), { cache: "no-store", keepalive: true, headers: headers });
+            let httpResponse = await fetch(this.file.getPath(), { cache: "no-store", headers: headers });
 
             await this.#checkStatus(httpResponse, new Set([200, 206]));
             this.#stream = httpResponse.body;
@@ -275,6 +275,5 @@ export class HttpFileStream extends RandomAccessStream {
 
     #setDefaultHeaders(headers: Headers) {
         headers.append("Cache", "no-store");
-		headers.append("Connection", "keep-alive");
     }
 }

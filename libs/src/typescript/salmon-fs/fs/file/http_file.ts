@@ -53,7 +53,7 @@ export class HttpFile implements IFile {
 			let headers = new Headers();
 			this.#setDefaultHeaders(headers);
             this.response = (await fetch(this.filePath, 
-			{method: 'HEAD', keepalive: true, headers: headers}));
+			{method: 'HEAD', headers: headers}));
 			await this.#checkStatus(this.response, 200);
 		}
         return this.response;
@@ -328,6 +328,5 @@ export class HttpFile implements IFile {
 
     #setDefaultHeaders(headers: Headers) {
         headers.append("Cache", "no-store");
-		headers.append("Connection", "keep-alive");
     }
 }
