@@ -37,7 +37,7 @@ import com.mku.salmonfs.drive.utils.AesFileExporter;
 import com.mku.salmonfs.file.AesFile;
 
 /**
- * Utility for Android files
+ * Utility for Android file system
  */
 public class AndroidFileSystem {
     private static Context context;

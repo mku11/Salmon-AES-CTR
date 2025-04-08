@@ -65,15 +65,6 @@ public class AndroidFile implements IFile {
     private Boolean _isFile;
 
     /**
-     * Initialize the Android Drive before creating or opening any virtual drives.
-     *
-     * @param context The context
-     */
-    public static void initialize(Context context) {
-        context = context.getApplicationContext();
-    }
-
-    /**
      * Construct an AndroidFile wrapper from an Android DocumentFile.
      *
      * @param documentFile The Android DocumentFile that will be associated to
@@ -267,7 +258,7 @@ public class AndroidFile implements IFile {
     public boolean isDirectory() {
         if (_isDirectory != null)
             return (boolean) _isDirectory;
-        _isDirectory = documentFile.isDirectory();
+        _isDirectory = documentFile != null && documentFile.isDirectory();
         return (boolean) _isDirectory;
     }
 
@@ -489,6 +480,7 @@ public class AndroidFile implements IFile {
         IFile parent = getParent();
         if (parent != null) {
             IFile dir = parent.createDirectory(getName());
+			this.documentFile = dir.getDocumentFile();
             return dir.exists() && dir.isDirectory();
         }
         return false;
