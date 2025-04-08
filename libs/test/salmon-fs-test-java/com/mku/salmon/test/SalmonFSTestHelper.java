@@ -314,14 +314,8 @@ public class SalmonFSTestHelper {
                 md.update(buffer, 0, bytesRead);
             }
             byte[] digest = md.digest();
-            StringBuilder hexString = new StringBuilder();
-            for (byte b : digest) {
-                StringBuilder h = new StringBuilder(Integer.toHexString(0xFF & b));
-                while (h.length() < 2)
-                    h.insert(0, "0");
-                hexString.append(h);
-            }
-            return hexString.toString();
+            String hexString = BitConverter.toHex(digest);
+            return hexString;
         } finally {
             if (stream != null)
                 stream.close();
