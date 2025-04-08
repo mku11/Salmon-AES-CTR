@@ -473,7 +473,6 @@ public class HttpFile implements IFile {
 
     private void setDefaultHeaders(HttpURLConnection conn) {
         conn.setRequestProperty("Cache", "no-store");
-        conn.setRequestProperty("Connection", "keep-alive");
     }
 	
     private static class Response {

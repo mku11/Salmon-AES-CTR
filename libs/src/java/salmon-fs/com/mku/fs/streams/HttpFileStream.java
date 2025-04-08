@@ -290,6 +290,5 @@ public class HttpFileStream extends RandomAccessStream {
 
     private void setDefaultHeaders(HttpURLConnection conn) {
         conn.setRequestProperty("Cache", "no-store");
-        conn.setRequestProperty("Connection", "keep-alive");
     }
 }

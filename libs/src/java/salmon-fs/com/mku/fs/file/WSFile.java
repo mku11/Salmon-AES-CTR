@@ -82,7 +82,7 @@ public class WSFile implements IFile {
      * @param credentials The REST API credentials
      */
     public WSFile(String path, String servicePath, Credentials credentials) {
-        if (!path.startsWith("/"))
+        if (!path.startsWith(WSFile.separator))
             path = WSFile.separator + path;
         this.servicePath = servicePath;
         this.filePath = path;
@@ -735,7 +735,6 @@ public class WSFile implements IFile {
 
     private void setDefaultHeaders(HttpURLConnection conn) {
         conn.setRequestProperty("Cache", "no-store");
-        conn.setRequestProperty("Connection", "keep-alive");
     }
 
     private static class Response {
