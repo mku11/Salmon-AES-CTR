@@ -329,7 +329,6 @@ class WSFileStream(RandomAccessStream):
 
     def __set_default_headers(self, headers: dict[str, str]):
         headers["Cache"] = "no-store"
-        headers["Connection"] = "keep-alive"
         headers["Content-type"] = "application/x-www-form-urlencoded"
 
     def __create_connection(self) -> HTTPConnection | HTTPSConnection:
