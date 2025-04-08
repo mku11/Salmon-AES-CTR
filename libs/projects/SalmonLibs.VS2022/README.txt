@@ -22,8 +22,8 @@ dotnet msbuild Salmon.Core
 To clean:
 msbuild -t:clean
 
-Test:
-To test the native libraries you will need Tiny Aes
+Testing only:
+To test the compatibility of the native libraries you will need Tiny Aes
 To download Tiny Aes source code from the project root folder type:
 git submodule update --recursive --init
 
