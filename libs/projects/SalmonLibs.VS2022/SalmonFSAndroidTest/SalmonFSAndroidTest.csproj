@@ -1,0 +1,40 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+	<PropertyGroup>
+		<TargetFramework>net8.0-android</TargetFramework>
+		<SupportedOSPlatformVersion>23</SupportedOSPlatformVersion>
+		<OutputType>Exe</OutputType>
+		<ApplicationId>com.mku.salmon.test</ApplicationId>
+		<ApplicationVersion>1</ApplicationVersion>
+		<ApplicationDisplayVersion>1.0</ApplicationDisplayVersion>
+	</PropertyGroup>
+	<PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|AnyCPU'">
+		<AndroidPackageFormat>apk</AndroidPackageFormat>
+	</PropertyGroup>
+	<ItemGroup>
+		<None Remove="Resources\drawable\logo.png" />
+		<None Remove="Resources\values\colors.xml" />
+		<None Remove="Resources\values\themes.xml" />
+	</ItemGroup>
+	<ItemGroup>
+		<Compile Include="..\..\..\test\salmon-core-test-csharp\SalmonCoreTestHelper.cs" Link="salmon-core-test-csharp\SalmonCoreTestHelper.cs" />
+		<Compile Include="..\..\..\test\salmon-fs-test-csharp\SalmonFSHttpTests.cs" Link="salmon-fs-test-csharp\SalmonFSHttpTests.cs" />
+		<Compile Include="..\..\..\test\salmon-fs-test-csharp\SalmonFSTestHelper.cs" Link="salmon-fs-test-csharp\SalmonFSTestHelper.cs" />
+		<Compile Include="..\..\..\test\salmon-fs-test-csharp\SalmonFSTests.cs" Link="salmon-fs-test-csharp\SalmonFSTests.cs" />
+		<Compile Include="..\..\..\test\salmon-fs-test-dotnet-android\SalmonFSAndroidTests.cs" Link="salmon-fs-test-dotnet-android\SalmonFSAndroidTests.cs" />
+		<Compile Include="..\..\..\test\salmon-fs-test-dotnet-android\SalmonFSAndroidTestHelper.cs" Link="salmon-fs-test-dotnet-android\SalmonFSAndroidTestHelper.cs" />
+		<Compile Include="..\..\..\test\salmon-fs-test-dotnet-android\SalmonFSHttpAndroidTests.cs" Link="salmon-fs-test-dotnet-android\SalmonFSHttpAndroidTests.cs" />
+	</ItemGroup>
+	<ItemGroup>
+		<PackageReference Include="Microsoft.NET.Test.Sdk" Version="17.9.0" />
+		<PackageReference Include="MSTest.TestAdapter" Version="3.2.2" />
+		<PackageReference Include="MSTest.TestFramework" Version="3.2.2" />
+		<PackageReference Include="Portable.BouncyCastle" Version="1.9.0" />
+		<PackageReference Include="Xamarin.Google.Android.Material" Version="1.9.0.3" />
+	</ItemGroup>
+	<ItemGroup>
+		<ProjectReference Include="..\Salmon.Core\Salmon.Core.csproj" />
+		<ProjectReference Include="..\Salmon.FS.Android\Salmon.FS.Android.csproj" />
+		<ProjectReference Include="..\Salmon.FS\Salmon.FS.csproj" />
+		<ProjectReference Include="..\Salmon.Native.Android\Salmon.Native.Android.csproj" />
+	</ItemGroup>
+</Project>
