@@ -25,6 +25,7 @@ SOFTWARE.
 using Mku.FS.File;
 using Mku.Salmon;
 using Mku.Salmon.Sequence;
+using Mku.Streams;
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -158,7 +159,7 @@ public class FileSequencer : INonceSequencer
 	[MethodImpl(MethodImplOptions.Synchronized)]
     protected virtual string GetContents()
     {
-        Stream stream = null;
+        RandomAccessStream stream = null;
         MemoryStream outputStream = null;
         try
         {
@@ -268,7 +269,7 @@ public class FileSequencer : INonceSequencer
     protected virtual void SaveContents(string contents)
     {
         MemoryStream inputStream = null;
-        Stream outputStream = null;
+        RandomAccessStream outputStream = null;
         try
         {
             outputStream = SequenceFile.GetOutputStream();

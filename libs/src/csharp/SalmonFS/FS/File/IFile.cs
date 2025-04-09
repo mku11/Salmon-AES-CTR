@@ -23,9 +23,9 @@ SOFTWARE.
 */
 
 using Mku.FS.Drive.Utils;
+using Mku.Streams;
 using System;
 using System.IO;
-using static Mku.Streams.StreamExtensions;
 
 namespace Mku.FS.File;
 
@@ -54,14 +54,14 @@ public interface IFile
 	/// </summary>
 	///  <returns>The input stream</returns>
     ///  <exception cref="FileNotFoundException">Thrown if file is not found</exception>
-    Stream GetInputStream();
+    RandomAccessStream GetInputStream();
 
     /// <summary>
     ///  Get a stream for writing to the file.
 	/// </summary>
 	///  <returns>The output stream</returns>
     ///  <exception cref="FileNotFoundException">Thrown if file is not found</exception>
-    Stream GetOutputStream();
+    RandomAccessStream GetOutputStream();
 
     /// <summary>
     ///  Rename file.
@@ -90,14 +90,14 @@ public interface IFile
     long LastDateModified { get; }
 
     /// <summary>
-    ///  Get the absolute path of the file on disk.
+    ///  Get the display path of the file on disk.
 	/// </summary>
-	///  <returns>The absolute path</returns>
-    string AbsolutePath { get; }
+	///  <returns>The display path</returns>
+    string DisplayPath { get; }
 
     /// <summary>
-    ///  Get the original filepath of this file. This might symlinks or merged folders. To get the absolute path
-    ///  use <see cref="AbsolutePath"/>
+    ///  Get the original filepath of this file. This might symlinks or merged folders. To get the display path
+    ///  use <see cref="DisplayPath"/>
 	/// </summary>
 	///  <returns>The path</returns>
     string Path { get; }
@@ -193,8 +193,8 @@ public interface IFile
     /// <returns>True if success</returns>
     public static bool CopyFileContents(IFile src, IFile dest, CopyContentsOptions options)
     {
-        Stream source = src.GetInputStream();
-        Stream target = dest.GetOutputStream();
+        RandomAccessStream source = src.GetInputStream();
+        RandomAccessStream target = dest.GetOutputStream();
         try
         {
             source.CopyTo(target, options.onProgressChanged);
@@ -255,7 +255,7 @@ public interface IFile
         {
             if (options.onProgressChanged != null)
                 options.onProgressChanged(this, 0, 1);
-            if (dest.AbsolutePath.StartsWith(this.AbsolutePath))
+            if (dest.DisplayPath.StartsWith(this.DisplayPath))
             {
                 if (options.onProgressChanged != null)
                     options.onProgressChanged(this, 1L, 1L);

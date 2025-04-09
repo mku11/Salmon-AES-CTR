@@ -110,7 +110,6 @@ public class BlockingInputOutputAdapterStream : Stream
     {
         PipeServer.Write(buffer, offset, count);
         position += count;
-        PipeServer.WaitForPipeDrain();
         WaitRead();
     }
 
@@ -120,7 +119,6 @@ public class BlockingInputOutputAdapterStream : Stream
     public override void Flush()
     {
         PipeServer.Flush();
-        PipeServer.WaitForPipeDrain();
         WaitRead();
     }
 
@@ -171,7 +169,6 @@ public class BlockingInputOutputAdapterStream : Stream
     /// </summary>
     public override void Close()
     {
-        PipeServer.WaitForPipeDrain();
         PipeServer.Close();
         WaitReceived();
     }

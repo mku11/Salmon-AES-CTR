@@ -30,6 +30,7 @@ using Mku.Salmon.Sequence;
 using Mku.Salmon.Streams;
 using Mku.Salmon.Text;
 using Mku.SalmonFS.Drive;
+using Mku.Streams;
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -75,7 +76,7 @@ public class AesFile : IVirtualFile
     {
         get
         {
-            string realPath = RealFile.AbsolutePath;
+            string realPath = RealFile.DisplayPath;
             return GetPath(realPath);
         }
     }
@@ -208,7 +209,7 @@ public class AesFile : IVirtualFile
             if (_header != null)
                 return _header;
             Header header = new Header(new byte[0]);
-            Stream stream = null;
+            RandomAccessStream stream = null;
             try
             {
                 stream = RealFile.GetInputStream();
@@ -244,7 +245,7 @@ public class AesFile : IVirtualFile
         if (!Exists)
             throw new IOException("File does not exist");
 
-        Stream realStream = RealFile.GetInputStream();
+        RandomAccessStream realStream = RealFile.GetInputStream();
         realStream.Seek(Generator.MAGIC_LENGTH + Generator.VERSION_LENGTH,
                 SeekOrigin.Begin);
 
@@ -328,7 +329,7 @@ public class AesFile : IVirtualFile
         // create a stream with the file chunk size specified which will be used to host the integrity hash
         // we also specify if stream ranges can be overwritten which is generally dangerous if the file is existing
         // but practical if the file is brand new and multithreaded writes for performance need to be used.
-        Stream realStream = RealFile.GetOutputStream();
+        RandomAccessStream realStream = RealFile.GetOutputStream();
 
         byte[] key = this.EncryptionKey;
         if (key == null)
@@ -368,7 +369,7 @@ public class AesFile : IVirtualFile
 	///  <param name="realFile">The real file containing the data</param>
     private byte[] GetRealFileHeaderData(IFile realFile)
     {
-        Stream realStream = realFile.GetInputStream();
+        RandomAccessStream realStream = realFile.GetInputStream();
         byte[] headerData = new byte[GetHeaderLength()];
         realStream.Read(headerData, 0, headerData.Length);
         realStream.Close();
@@ -574,7 +575,7 @@ public class AesFile : IVirtualFile
             return this.RealFile.Name;
         }
         AesFile virtualRoot = Drive.Root;
-        string virtualRootPath = virtualRoot.RealFile.AbsolutePath;
+        string virtualRootPath = virtualRoot.RealFile.DisplayPath;
         if (realPath.StartsWith(virtualRootPath))
         {
             return realPath.Replace(virtualRootPath, "");

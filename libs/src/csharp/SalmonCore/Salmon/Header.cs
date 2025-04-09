@@ -22,7 +22,7 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 */
 
-using System.IO;
+using Mku.Streams;
 using BitConverter = Mku.Convert.BitConverter;
 
 namespace Mku.Salmon;
@@ -78,8 +78,8 @@ public class Header
 	/// </summary>
 	///  <param name="stream">The stream.</param>
     ///  <returns>The header</returns>
-    ///  <exception cref="IOException">Thrown if error during IO</exception>
-    public static Header ReadHeaderData(Stream stream)
+    ///  <exception cref="System.IO.IOException">Thrown if error during IO</exception>
+    public static Header ReadHeaderData(RandomAccessStream stream)
     {
         if (stream.Length == 0)
             return null;
@@ -115,7 +115,7 @@ public class Header
     /// <param name="nonce"></param>
     /// <param name="chunkSize"></param>
     /// <returns>The new header that was written</returns>
-    public static Header WriteHeader(Stream stream, byte[] nonce, int chunkSize)
+    public static Header WriteHeader(RandomAccessStream stream, byte[] nonce, int chunkSize)
     {
         byte[] magicBytes = Generator.GetMagicBytes();
         byte version = Generator.VERSION;

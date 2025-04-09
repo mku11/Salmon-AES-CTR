@@ -47,7 +47,6 @@ namespace Mku.SalmonFS.Drive;
 /// </summary>
 public abstract class AesDrive : VirtualDrive
 {
-    private static readonly int DEFAULT_FILE_CHUNK_SIZE = 256 * 1024;
 
     /// <summary>
     /// Default config filename
@@ -73,7 +72,7 @@ public abstract class AesDrive : VirtualDrive
     /// <summary>
     /// Default file chunk that will be used to import new files.
     /// </summary>
-    public int DefaultFileChunkSize { get; set; } = DEFAULT_FILE_CHUNK_SIZE;
+    public int DefaultFileChunkSize { get; set; } = Integrity.DEFAULT_CHUNK_SIZE;
 
     /// <summary>
     /// The current key
@@ -548,9 +547,9 @@ public abstract class AesDrive : VirtualDrive
     ///  <param name="bufferSize">The buffer to be used when reading</param>
     public byte[] GetBytesFromRealFile(IFile file, int bufferSize)
     {
-        Stream stream = file.GetInputStream();
+        RandomAccessStream stream = file.GetInputStream();
         MemoryStream ms = new MemoryStream();
-        stream.CopyTo(ms, bufferSize, null);
+        stream.CopyTo(ms, bufferSize);
         ms.Flush();
         ms.Position = 0;
         byte[] byteContents = ms.ToArray();

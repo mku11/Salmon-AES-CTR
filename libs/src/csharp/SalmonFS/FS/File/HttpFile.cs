@@ -23,6 +23,7 @@ SOFTWARE.
 */
 
 using Mku.FS.Streams;
+using Mku.Streams;
 using System;
 using System.Collections.Generic;
 using System.Collections.Specialized;
@@ -47,7 +48,10 @@ public class HttpFile : IFile
     /// </summary>
     public static readonly string Separator = "/";
 
-    private static HttpClient client = new HttpClient();
+    /// <summary>
+    /// The Http Client
+    /// </summary>
+    public static HttpSyncClient Client { get; set; } = new HttpSyncClient();
     private string filePath;
     private Response response;
 
@@ -85,7 +89,7 @@ public class HttpFile : IFile
 
                 HttpRequestMessage requestMessage = new HttpRequestMessage(HttpMethod.Get, url);
                 SetDefaultHeaders(requestMessage);
-                httpResponse = client.Send(requestMessage);
+                httpResponse = Client.Send(requestMessage);
                 CheckStatus(httpResponse, HttpStatusCode.OK);
                 this.response = new Response()
                 {
@@ -134,7 +138,7 @@ public class HttpFile : IFile
     ///  Get the absolute path on the physical disk. For C# this is the same as the filepath.
 	/// </summary>
 	///  <returns>The absolute path.</returns>
-    public string AbsolutePath => filePath;
+    public string DisplayPath => filePath;
 
     /// <summary>
     ///  Get the name of this file or directory.
@@ -147,7 +151,7 @@ public class HttpFile : IFile
             if (this.filePath == null)
                 throw new Exception("Filepath is not assigned");
             string nFilePath = this.filePath;
-            if (nFilePath.EndsWith("/"))
+            if (nFilePath.EndsWith(HttpFile.Separator))
                 nFilePath = nFilePath.Substring(0, nFilePath.Length - 1);
             string[] parts = nFilePath.Split(HttpFile.Separator);
             string basename = parts[parts.Length - 1];
@@ -166,7 +170,7 @@ public class HttpFile : IFile
 	/// </summary>
 	///  <returns>The stream to read from.</returns>
     ///  <exception cref="FileNotFoundException">Thrown if file is not found</exception>
-    public Stream GetInputStream()
+    public RandomAccessStream GetInputStream()
     {
         return new HttpFileStream(this, FileAccess.Read);
     }
@@ -176,7 +180,7 @@ public class HttpFile : IFile
 	/// </summary>
 	///  <returns>The stream to write to.</returns>
     ///  <exception cref="FileNotFoundException">Thrown if file is not found</exception>
-    public Stream GetOutputStream()
+    public RandomAccessStream GetOutputStream()
     {
         throw new NotSupportedException("Unsupported Operation, readonly filesystem"); ;
     }
@@ -190,12 +194,12 @@ public class HttpFile : IFile
     {
         get
         {
-            if (filePath.Length == 0 || filePath.Equals("/"))
+            if (filePath.Length == 0 || filePath.Equals(HttpFile.Separator))
                 return null;
             string path = filePath;
-            if (path.EndsWith("/"))
+            if (path.EndsWith(HttpFile.Separator))
                 path = path.Substring(0, path.Length - 1);
-            int index = path.LastIndexOf("/");
+            int index = path.LastIndexOf(HttpFile.Separator);
             if (index == -1)
                 return null;
             HttpFile parent = new HttpFile(path.Substring(0, index));
@@ -259,7 +263,7 @@ public class HttpFile : IFile
         List<IFile> files = new List<IFile>();
         if (this.IsDirectory)
         {
-            Stream stream = null;
+            RandomAccessStream stream = null;
             MemoryStream ms = null;
             try
             {
@@ -392,7 +396,6 @@ public class HttpFile : IFile
     private void SetDefaultHeaders(HttpRequestMessage requestMessage)
     {
         requestMessage.Headers.Add("Cache", "no-store");
-        requestMessage.Headers.Add("Connection", "keep-alive");
     }
 
     class Response

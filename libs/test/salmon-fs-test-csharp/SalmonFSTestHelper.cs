@@ -41,6 +41,8 @@ using Mku.FS.Drive.Utils;
 using Mku.SalmonFS.Auth;
 using Mku.SalmonFS.Streams;
 using MemoryStream = Mku.Streams.MemoryStream;
+using Mku.Streams;
+using Mku.FS.Streams;
 
 namespace Mku.Salmon.Test;
 
@@ -62,6 +64,7 @@ public class SalmonFSTestHelper
     internal static string TEST_VAULT_DIRNAME = "vault";
     internal static string TEST_OPER_DIRNAME = "files";
     internal static string TEST_EXPORT_AUTH_DIRNAME = "auth";
+    internal static string TEST_EXPORT_DIRNAME = "export";
     internal static string TEST_IMPORT_TINY_FILENAME = "tiny_test.txt";
     internal static string TEST_IMPORT_SMALL_FILENAME = "small_test.dat";
     internal static string TEST_IMPORT_MEDIUM_FILENAME = "medium_test.dat";
@@ -73,13 +76,20 @@ public class SalmonFSTestHelper
     internal static string TEST_EXPORT_AUTH_FILENAME = "export.slma";
 
     // Web service
-    internal static string WS_SERVER_URL = "http://localhost:8080";
-    // static WS_SERVER_URL = "https://localhost:8443"; // for testing from the Web browser
+    static string WS_SERVER_DEFAULT_URL = "http://localhost:8080";
+    // static WS_SERVER_DEFAULT_URL = "https://localhost:8443"; // for testing from the Web browser
+    internal static string WS_SERVER_URL = System.Environment.GetEnvironmentVariable("WS_SERVER_URL") != null
+        && !System.Environment.GetEnvironmentVariable("WS_SERVER_URL").Equals("") ?
+            System.Environment.GetEnvironmentVariable("WS_SERVER_URL") : WS_SERVER_DEFAULT_URL;
     internal static string WS_TEST_DIRNAME = "ws";
     internal static WSFile.Credentials credentials = new WSFile.Credentials("user", "password");
 
     // HTTP server (Read-only)
-    internal static string HTTP_SERVER_URL = "http://localhost:8000";
+    //static string HTTP_SERVER_DEFAULT_URL = "http://localhost:8000";
+    static string HTTP_SERVER_DEFAULT_URL = "http://localhost";
+    internal static string HTTP_SERVER_URL = System.Environment.GetEnvironmentVariable("HTTP_SERVER_URL") != null
+        && !System.Environment.GetEnvironmentVariable("HTTP_SERVER_URL").Equals("") ?
+            System.Environment.GetEnvironmentVariable("HTTP_SERVER_URL") : HTTP_SERVER_DEFAULT_URL;
     internal static string HTTP_SERVER_VIRTUAL_URL = SalmonFSTestHelper.HTTP_SERVER_URL + "/test";
     internal static string HTTP_TEST_DIRNAME = "httpserv";
     internal static string HTTP_VAULT_DIRNAME = "vault";
@@ -118,6 +128,7 @@ public class SalmonFSTestHelper
     internal static IFile TEST_HTTP_FILE;
     internal static IFile TEST_SEQ_DIR;
     internal static IFile TEST_EXPORT_AUTH_DIR;
+    internal static IFile TEST_EXPORT_DIR;
     internal static AesFileImporter fileImporter;
     internal static AesFileExporter fileExporter;
     internal static SequenceSerializer sequenceSerializer = new SequenceSerializer();
@@ -144,7 +155,7 @@ public class SalmonFSTestHelper
         if (!SalmonFSTestHelper.TEST_ROOT_DIR.Exists)
             SalmonFSTestHelper.TEST_ROOT_DIR.Mkdir();
 
-        Console.WriteLine("setting test path: " + SalmonFSTestHelper.TEST_ROOT_DIR.AbsolutePath);
+        Console.WriteLine("setting test path: " + SalmonFSTestHelper.TEST_ROOT_DIR.DisplayPath);
 
         SalmonFSTestHelper.TEST_INPUT_DIR = SalmonFSTestHelper.CreateDir(SalmonFSTestHelper.TEST_ROOT_DIR, SalmonFSTestHelper.TEST_INPUT_DIRNAME);
         if (testMode == TestMode.WebService)
@@ -154,6 +165,7 @@ public class SalmonFSTestHelper
         SalmonFSTestHelper.WS_TEST_DIR = SalmonFSTestHelper.CreateDir(SalmonFSTestHelper.TEST_ROOT_DIR, SalmonFSTestHelper.WS_TEST_DIRNAME);
         SalmonFSTestHelper.HTTP_TEST_DIR = SalmonFSTestHelper.CreateDir(SalmonFSTestHelper.TEST_ROOT_DIR, SalmonFSTestHelper.HTTP_TEST_DIRNAME);
         SalmonFSTestHelper.TEST_SEQ_DIR = SalmonFSTestHelper.CreateDir(SalmonFSTestHelper.TEST_ROOT_DIR, SalmonFSTestHelper.TEST_SEQ_DIRNAME);
+        SalmonFSTestHelper.TEST_EXPORT_DIR = SalmonFSTestHelper.CreateDir(SalmonFSTestHelper.TEST_ROOT_DIR, SalmonFSTestHelper.TEST_EXPORT_DIRNAME);
         SalmonFSTestHelper.TEST_EXPORT_AUTH_DIR = SalmonFSTestHelper.CreateDir(SalmonFSTestHelper.TEST_ROOT_DIR, SalmonFSTestHelper.TEST_EXPORT_AUTH_DIRNAME);
         SalmonFSTestHelper.HTTP_VAULT_DIR = new HttpFile(SalmonFSTestHelper.HTTP_VAULT_DIR_URL);
         SalmonFSTestHelper.CreateTestFiles();
@@ -169,7 +181,7 @@ public class SalmonFSTestHelper
         return dir;
     }
 
-    static void CreateTestFiles()
+    internal static void CreateTestFiles()
     {
         SalmonFSTestHelper.TEST_IMPORT_TINY_FILE = SalmonFSTestHelper.TEST_INPUT_DIR.GetChild(SalmonFSTestHelper.TEST_IMPORT_TINY_FILENAME);
         SalmonFSTestHelper.TEST_IMPORT_SMALL_FILE = SalmonFSTestHelper.TEST_INPUT_DIR.GetChild(SalmonFSTestHelper.TEST_IMPORT_SMALL_FILENAME);
@@ -185,7 +197,7 @@ public class SalmonFSTestHelper
         // this.createFileRandomData(TEST_IMPORT_HUGE_FILE,512*1024*1024);
     }
 
-    static void CreateHttpFiles()
+    internal static void CreateHttpFiles()
     {
         SalmonFSTestHelper.TEST_HTTP_TINY_FILE = SalmonFSTestHelper.HTTP_TEST_DIR.GetChild(SalmonFSTestHelper.TEST_IMPORT_TINY_FILENAME);
         SalmonFSTestHelper.TEST_HTTP_SMALL_FILE = SalmonFSTestHelper.HTTP_TEST_DIR.GetChild(SalmonFSTestHelper.TEST_IMPORT_SMALL_FILENAME);
@@ -217,8 +229,8 @@ public class SalmonFSTestHelper
                 SalmonFSTestHelper.TEST_IMPORT_LARGE_FILE
         };
         AesFileImporter importer = new AesFileImporter(SalmonFSTestHelper.ENC_IMPORT_BUFFER_SIZE, SalmonFSTestHelper.ENC_IMPORT_THREADS);
-		AesFileImporter.FileImportOptions importOptions = new AesFileImporter.FileImportOptions();
-		importOptions.integrity = true;
+        AesFileImporter.FileImportOptions importOptions = new AesFileImporter.FileImportOptions();
+        importOptions.integrity = true;
         foreach (IFile importFile in importFiles)
         {
             importer.ImportFile(importFile, rootDir, importOptions);
@@ -229,7 +241,7 @@ public class SalmonFSTestHelper
     public static void CreateFile(string path, string contents)
     {
         IFile file = new FS.File.File(path);
-        Stream stream = file.GetOutputStream();
+        RandomAccessStream stream = file.GetOutputStream();
         byte[] data = UTF8Encoding.UTF8.GetBytes(contents);
         stream.Write(data, 0, data.Length);
         stream.Flush();
@@ -238,7 +250,7 @@ public class SalmonFSTestHelper
 
     public static void CreateFile(IFile file, string contents)
     {
-        Stream stream = file.GetOutputStream();
+        RandomAccessStream stream = file.GetOutputStream();
         byte[] data = UTF8Encoding.UTF8.GetBytes(contents);
         stream.Write(data, 0, data.Length);
         stream.Flush();
@@ -250,7 +262,8 @@ public class SalmonFSTestHelper
         if (file.Exists)
             return;
         byte[] data = new byte[65536];
-        Stream stream = file.GetOutputStream();
+        Random random = new Random(0); // seed zero for predictable results
+        RandomAccessStream stream = file.GetOutputStream();
         int len = 0;
         while (size > 0)
         {
@@ -271,10 +284,10 @@ public class SalmonFSTestHelper
 
     internal static void Close()
     {
-		if(SalmonFSTestHelper.fileImporter != null)
-			SalmonFSTestHelper.fileImporter.Close();
-		if(SalmonFSTestHelper.fileExporter != null)
-			SalmonFSTestHelper.fileExporter.Close();
+        if (SalmonFSTestHelper.fileImporter != null)
+            SalmonFSTestHelper.fileImporter.Close();
+        if (SalmonFSTestHelper.fileExporter != null)
+            SalmonFSTestHelper.fileExporter.Close();
     }
 
     public static FileSequencer CreateSalmonFileSequencer()
@@ -296,13 +309,13 @@ public class SalmonFSTestHelper
         IFile dir = parent.GetChild(dirName);
         if (!dir.Exists)
             dir.Mkdir();
-        Console.WriteLine("generated folder: " + dir.AbsolutePath);
+        Console.WriteLine("generated folder: " + dir.DisplayPath);
         return dir;
     }
 
     public static string GetChecksum(IFile realFile)
     {
-        Stream stream = realFile.GetInputStream();
+        Stream stream = realFile.GetInputStream().AsReadStream();
         return GetChecksumStream(stream);
     }
 
@@ -311,8 +324,8 @@ public class SalmonFSTestHelper
         try
         {
             MD5 md5 = MD5.Create();
-            byte[] hash = md5.ComputeHash(new BufferedStream(stream, 256 * 1024));
-            string hashstring = System.Convert.ToBase64String(hash);
+            byte[] hash = md5.ComputeHash(stream);
+            string hashstring = BitConverter.ToHex(hash);
             return hashstring;
         }
         finally
@@ -350,7 +363,7 @@ public class SalmonFSTestHelper
             salmonFile.SetVerifyIntegrity(false);
 
         Assert.IsTrue(salmonFile.Exists);
-        string hashPostImport = SalmonFSTestHelper.GetChecksumStream(salmonFile.GetInputStream());
+        string hashPostImport = SalmonFSTestHelper.GetChecksumStream(salmonFile.GetInputStream().AsReadStream());
         if (shouldBeEqual)
             Assert.AreEqual(hashPreImport, hashPostImport);
 
@@ -386,14 +399,15 @@ public class SalmonFSTestHelper
         exportOptions.integrity = VerifyFileIntegrity;
         exportOptions.onProgressChanged = printExportProgress;
 
-        IFile exportFile = SalmonFSTestHelper.fileExporter.ExportFile(salmonFile, drive.ExportDir, exportOptions);
+        IFile exportDir = SalmonFSTestHelper.GenerateFolder("export", SalmonFSTestHelper.TEST_EXPORT_DIR, false);
+        IFile exportFile = SalmonFSTestHelper.fileExporter.ExportFile(salmonFile, exportDir, exportOptions);
 
         string hashPostExport = SalmonFSTestHelper.GetChecksum(exportFile);
         if (shouldBeEqual)
             Assert.AreEqual(hashPreImport, hashPostExport);
     }
 
-	
+
     public static AesDrive OpenDrive(IFile vaultDir, Type driveClassType, string testPassword, FileSequencer sequencer = null)
     {
         if (driveClassType == typeof(WSDrive))
@@ -489,7 +503,7 @@ public class SalmonFSTestHelper
 
     private static void FlipBit(AesFile salmonFile, long position)
     {
-        Stream stream = salmonFile.RealFile.GetOutputStream();
+        RandomAccessStream stream = salmonFile.RealFile.GetOutputStream();
         stream.Position = position;
         stream.Write(new byte[] { 1 }, 0, 1);
         stream.Flush();
@@ -510,7 +524,7 @@ public class SalmonFSTestHelper
             newFile.SetApplyIntegrity(true, hashKey, chunkSize);
         else
             newFile.SetApplyIntegrity(false);
-        Stream stream = newFile.GetOutputStream();
+        RandomAccessStream stream = newFile.GetOutputStream();
 
         stream.Write(testBytes, 0, testBytes.Length);
         stream.Flush();
@@ -521,7 +535,7 @@ public class SalmonFSTestHelper
         if (flipBit)
         {
             IFile realTmpFile = newFile.RealFile;
-            Stream realStream = realTmpFile.GetOutputStream();
+            RandomAccessStream realStream = realTmpFile.GetOutputStream();
             realStream.Position = flipPosition;
             realStream.Write(new byte[] { 0 }, 0, 1);
             realStream.Flush();
@@ -575,9 +589,9 @@ public class SalmonFSTestHelper
             fileImporter.ImportFile(fileToImport, rootDir);
             success = true;
         }
-        catch (Exception)
+        catch (Exception ex)
         {
-
+            Console.Error.WriteLine(ex);
         }
 
         Assert.IsFalse(success);
@@ -679,7 +693,8 @@ public class SalmonFSTestHelper
         }
     }
 
-    public static void TestRawFile() {
+    public static void TestRawFile()
+    {
         string text = SalmonFSTestHelper.TINY_FILE_CONTENTS;
         int BUFF_SIZE = 16;
         IFile dir = GenerateFolder("test");
@@ -688,9 +703,10 @@ public class SalmonFSTestHelper
         byte[] bytes = UTF8Encoding.UTF8.GetBytes(text);
 
         // write to file
-        Stream wstream = testFile.GetOutputStream();
+        RandomAccessStream wstream = testFile.GetOutputStream();
         int idx = 0;
-        while (idx < text.Length) {
+        while (idx < text.Length)
+        {
             int len = Math.Min(BUFF_SIZE, text.Length - idx);
             wstream.Write(bytes, idx, len);
             idx += len;
@@ -700,11 +716,12 @@ public class SalmonFSTestHelper
 
         // read a file
         IFile writeFile = dir.GetChild(filename);
-        Stream rstream = writeFile.GetInputStream();
+        RandomAccessStream rstream = writeFile.GetInputStream();
         byte[] readBuff = new byte[BUFF_SIZE];
         int bytesRead = 0;
         MemoryStream lstream = new MemoryStream();
-        while ((bytesRead = rstream.Read(readBuff, 0, readBuff.Length)) > 0) {
+        while ((bytesRead = rstream.Read(readBuff, 0, readBuff.Length)) > 0)
+        {
             lstream.Write(readBuff, 0, bytesRead);
         }
         byte[] lbytes = lstream.ToArray();
@@ -715,13 +732,14 @@ public class SalmonFSTestHelper
         Assert.AreEqual(str, text);
     }
 
-    public static void TestEncDecFile() {
+    public static void TestEncDecFile()
+    {
         String text = SalmonFSTestHelper.TINY_FILE_CONTENTS;
         int BUFF_SIZE = 16;
         IFile dir = GenerateFolder("test");
         String filename = "file.dat";
         IFile testFile = dir.CreateFile(filename);
-        byte[] bytes =  UTF8Encoding.UTF8.GetBytes(text);
+        byte[] bytes = UTF8Encoding.UTF8.GetBytes(text);
         byte[] key = Generator.GetSecureRandomBytes(32);
         byte[] nonce = Generator.GetSecureRandomBytes(8);
 
@@ -730,9 +748,10 @@ public class SalmonFSTestHelper
         nonce = Generator.GetSecureRandomBytes(8);
         encFile.EncryptionKey = key;
         encFile.RequestedNonce = nonce;
-        Stream stream = encFile.GetOutputStream();
+        RandomAccessStream stream = encFile.GetOutputStream();
         int idx = 0;
-        while (idx < text.Length) {
+        while (idx < text.Length)
+        {
             int len = Math.Min(BUFF_SIZE, text.Length - idx);
             stream.Write(bytes, idx, len);
             idx += len;
@@ -744,12 +763,13 @@ public class SalmonFSTestHelper
         IFile rfile = dir.GetChild(filename);
         AesFile encFile2 = new AesFile(rfile);
         encFile2.EncryptionKey = key;
-        Stream stream2 = encFile2.GetInputStream();
+        RandomAccessStream stream2 = encFile2.GetInputStream();
         byte[] decBuff = new byte[BUFF_SIZE];
         MemoryStream lstream = new MemoryStream();
         int bytesRead = 0;
 
-        while ((bytesRead = stream2.Read(decBuff, 0, decBuff.Length)) > 0) {
+        while ((bytesRead = stream2.Read(decBuff, 0, decBuff.Length)) > 0)
+        {
             lstream.Write(decBuff, 0, bytesRead);
         }
         byte[] lbytes = lstream.ToArray();
@@ -762,7 +782,7 @@ public class SalmonFSTestHelper
     {
         MemoryStream encOutStream = new MemoryStream();
         AesStream encryptor = new AesStream(key, nonce, EncryptionMode.Encrypt, encOutStream);
-        Stream inputStream = new MemoryStream(data);
+        RandomAccessStream inputStream = new MemoryStream(data);
         inputStream.CopyTo(encryptor);
         encOutStream.Position = 0;
         byte[] encData = encOutStream.ToArray();
@@ -771,7 +791,7 @@ public class SalmonFSTestHelper
         encOutStream.Close();
         inputStream.Close();
 
-        Stream encInputStream = new MemoryStream(encData);
+        RandomAccessStream encInputStream = new MemoryStream(encData);
         AesStream decryptor = new AesStream(key, nonce, EncryptionMode.Decrypt, encInputStream);
         MemoryStream outStream = new MemoryStream();
         decryptor.CopyTo(outStream);
@@ -787,7 +807,7 @@ public class SalmonFSTestHelper
     public static byte[] GetRealFileContents(IFile filePath)
     {
         IFile file = filePath;
-        Stream ins = file.GetInputStream();
+        RandomAccessStream ins = file.GetInputStream();
         MemoryStream outs = new MemoryStream();
         ins.CopyTo(outs);
         outs.Position = 0;
@@ -853,7 +873,7 @@ public class SalmonFSTestHelper
 
     public static void CopyStream(AesFileInputStream src, MemoryStream dest)
     {
-        int bufferSize = 256 * 1024;
+        int bufferSize = RandomAccessStream.DEFAULT_BUFFER_SIZE;
         int bytesRead;
         byte[] buffer = new byte[bufferSize];
         while ((bytesRead = src.Read(buffer, 0, bufferSize)) > 0)
@@ -874,43 +894,38 @@ public class SalmonFSTestHelper
         AesDrive drive = SalmonFSTestHelper.OpenDrive(vaultDir, SalmonFSTestHelper.DriveClassType, SalmonCoreTestHelper.TEST_PASSWORD, sequencer);
         IVirtualFile root = drive.Root;
         IVirtualFile file = root.GetChild(filename);
-        Console.WriteLine("file size: " + file.Length);
+        Console.WriteLine("file TotalSize: " + file.Length);
         Console.WriteLine("file last modified: " + file.LastDateModified);
         Assert.IsTrue(file.Exists);
 
-        Stream stream = file.GetInputStream();
-        MemoryStream ms = new MemoryStream();
-        stream.CopyTo(ms);
-        ms.Flush();
-        ms.Position = 0;
-        string digest = SalmonFSTestHelper.GetChecksumStream(ms);
-        ms.Close();
+        RandomAccessStream stream = file.GetInputStream();
+        string digest = SalmonFSTestHelper.GetChecksumStream(stream.AsReadStream());
         stream.Close();
         Assert.AreEqual(digest, localChkSum);
     }
 
-    internal static void SeekAndReadHttpFile(byte[] data, IVirtualFile file, bool isEncrypted,
+    internal static void SeekAndReadHttpFile(byte[] data, AesFile file,
                                     int buffersCount, int bufferSize, int backOffset)
     {
-        SalmonFSTestHelper.SeekAndReadFileStream(data, file, isEncrypted,
+        SalmonFSTestHelper.SeekAndReadFileStream(data, file, 
                     0, 32, 0, 32,
                     buffersCount, bufferSize, backOffset);
-        SalmonFSTestHelper.SeekAndReadFileStream(data, file, isEncrypted,
+        SalmonFSTestHelper.SeekAndReadFileStream(data, file, 
                     220, 8, 2, 8,
                     buffersCount, bufferSize, backOffset);
-        SalmonFSTestHelper.SeekAndReadFileStream(data, file, isEncrypted,
+        SalmonFSTestHelper.SeekAndReadFileStream(data, file, 
                     100, 2, 0, 2,
                     buffersCount, bufferSize, backOffset);
-        SalmonFSTestHelper.SeekAndReadFileStream(data, file, isEncrypted,
+        SalmonFSTestHelper.SeekAndReadFileStream(data, file, 
                     6, 16, 0, 16,
                     buffersCount, bufferSize, backOffset);
-        SalmonFSTestHelper.SeekAndReadFileStream(data, file, isEncrypted,
+        SalmonFSTestHelper.SeekAndReadFileStream(data, file, 
                     50, 40, 0, 40,
                     buffersCount, bufferSize, backOffset);
-        SalmonFSTestHelper.SeekAndReadFileStream(data, file, isEncrypted,
+        SalmonFSTestHelper.SeekAndReadFileStream(data, file, 
                     124, 50, 0, 50,
                     buffersCount, bufferSize, backOffset);
-        SalmonFSTestHelper.SeekAndReadFileStream(data, file, isEncrypted,
+        SalmonFSTestHelper.SeekAndReadFileStream(data, file, 
                     250, 10, 0, 10,
                     buffersCount, bufferSize, backOffset);
     }
@@ -918,29 +933,22 @@ public class SalmonFSTestHelper
     // shouldReadLength should be equal to length
     // when checking Http files since the return buffer
     // might give us more data than requested
-    static void SeekAndReadFileStream(byte[] data, IVirtualFile file, bool isEncrypted,
+    static void SeekAndReadFileStream(byte[] data, AesFile file,
                                       int start, int length, int readOffset, int shouldReadLength,
                                       int buffersCount, int bufferSize, int backOffset)
     {
         byte[]
     buffer = new byte[length + readOffset];
 
-        AesFileInputStream stream = null;
-        if (SalmonFSTestHelper.TEST_USE_FILE_INPUT_STREAM && isEncrypted)
+        Stream stream = null;
+        if (SalmonFSTestHelper.TEST_USE_FILE_INPUT_STREAM)
         {
             // multi threaded
-            stream = new AesFileInputStream((AesFile)file, buffersCount, bufferSize, SalmonFSTestHelper.TEST_FILE_INPUT_STREAM_THREADS, backOffset);
+            stream = new AesFileInputStream(file, buffersCount, bufferSize, SalmonFSTestHelper.TEST_FILE_INPUT_STREAM_THREADS, backOffset);
         }
         else
-        {
-            //TODO: support IFile streams
-            //            RandomAccessStream fileStream;
-            //            if (isEncrypted) {
-            //                fileStream =  file.getInputStream();
-            //            } else {
-            //                fileStream = new JavaHttpFileStream(file);
-            //            }
-            //            stream = new InputStreamWrapper(fileStream);
+        { 
+            stream = file.GetInputStream().AsReadStream();
         }
 
         stream.Position = start;
@@ -961,14 +969,14 @@ public class SalmonFSTestHelper
         CollectionAssert.AreEqual(tdata, buffer);
     }
 
-    public static void ExportFiles(AesFile[] files, IFile dir, int threads = 1)
+    public static void ExportFiles(AesFile[] files, IFile dir)
     {
-        int bufferSize = 256 * 1024;
-        AesFileCommander commander = new AesFileCommander(bufferSize, bufferSize, threads);
+        int bufferSize = RandomAccessStream.DEFAULT_BUFFER_SIZE;
+        AesFileCommander commander = new AesFileCommander(bufferSize, bufferSize, SalmonFSTestHelper.ENC_EXPORT_THREADS);
 
         List<string> hashPreExport = new List<string>();
         foreach (AesFile file in files)
-            hashPreExport.Add(SalmonFSTestHelper.GetChecksumStream(file.GetInputStream()));
+            hashPreExport.Add(SalmonFSTestHelper.GetChecksumStream(file.GetInputStream().AsReadStream()));
 
         // export files
         FileCommander.BatchExportOptions exportOptions = new FileCommander.BatchExportOptions();
@@ -1001,8 +1009,8 @@ public class SalmonFSTestHelper
 
         for (int i = 0; i < files.Length; i++)
         {
-            Stream stream = filesExported[i].GetInputStream();
-            string hashPostImport = SalmonFSTestHelper.GetChecksumStream(stream);
+            RandomAccessStream stream = filesExported[i].GetInputStream();
+            string hashPostImport = SalmonFSTestHelper.GetChecksumStream(stream.AsReadStream());
             stream.Close();
             Assert.AreEqual(hashPostImport, hashPreExport[i]);
         }

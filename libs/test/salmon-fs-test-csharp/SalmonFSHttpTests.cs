@@ -24,40 +24,42 @@ SOFTWARE.
 
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using System;
-using System.IO;
 using System.Collections.Generic;
 using Mku.Salmon.Streams;
 using Mku.FS.File;
 using Mku.SalmonFS.Drive;
 using Mku.SalmonFS.File;
 using MemoryStream = Mku.Streams.MemoryStream;
+using Mku.Streams;
 
 namespace Mku.Salmon.Test;
 
 [TestClass]
 public class SalmonFSHttpTests
 {
-    static TestMode oldTestMode;
+    internal static TestMode oldTestMode;
 
     [ClassInitialize]
     public static void ClassInitialize(TestContext testContext)
     {
         SalmonFSHttpTests.oldTestMode = SalmonFSTestHelper.currTestMode;
-		string testDir = Environment.GetEnvironmentVariable("TEST_DIR") 
-			?? "d:\\tmp\\salmon\\test";
-		// use TestMode: Http only
-		TestMode testMode = TestMode.Http;
-		int threads = Environment.GetEnvironmentVariable("ENC_THREADS") != null && !Environment.GetEnvironmentVariable("ENC_THREADS").Equals("") ?
-			int.Parse(Environment.GetEnvironmentVariable("ENC_THREADS")) : 1;
-			
+        string testDir = Environment.GetEnvironmentVariable("TEST_DIR")
+            ?? "d:\\tmp\\salmon\\test";
+        // use TestMode: Http only
+        TestMode testMode = TestMode.Http;
+        int threads = Environment.GetEnvironmentVariable("ENC_THREADS") != null && !Environment.GetEnvironmentVariable("ENC_THREADS").Equals("") ?
+            int.Parse(Environment.GetEnvironmentVariable("ENC_THREADS")) : 1;
+
+        threads = 2;
+
         SalmonFSTestHelper.SetTestParams(testDir, testMode);
-		Console.WriteLine("testDir: " + testDir);
+        Console.WriteLine("testDir: " + testDir);
         Console.WriteLine("testMode: " + testMode);
-		Console.WriteLine("threads: " + threads);
+        Console.WriteLine("threads: " + threads);
         Console.WriteLine("http server url: " + SalmonFSTestHelper.HTTP_SERVER_URL);
         Console.WriteLine("HTTP_VAULT_DIR_URL: " + SalmonFSTestHelper.HTTP_VAULT_DIR_URL);
-		
-        SalmonFSTestHelper.TEST_HTTP_FILE = SalmonFSTestHelper.TEST_IMPORT_MEDIUM_FILE;
+
+        SalmonFSTestHelper.TEST_HTTP_FILE = SalmonFSTestHelper.TEST_HTTP_SMALL_FILE;
 
         // SalmonCoreTestHelper.TEST_ENC_BUFFER_SIZE = 1 * 1024 * 1024;
         // SalmonCoreTestHelper.TEST_DEC_BUFFER_SIZE = 1 * 1024 * 1024;
@@ -80,10 +82,10 @@ public class SalmonFSHttpTests
         // gradlew.bat :salmon-ws:test --tests "com.mku.salmon.ws.fs.service.test.SalmonWSTests.testStartServer" --rerun-tasks
 
         ProviderType providerType = ProviderType.Default;
-		string aesProviderType = Environment.GetEnvironmentVariable("AES_PROVIDER_TYPE");
-		if(aesProviderType != null && !aesProviderType.Equals(""))
-			providerType = (ProviderType) Enum.Parse(typeof(ProviderType), aesProviderType);
-		Console.WriteLine("ProviderType: " + providerType);
+        string aesProviderType = Environment.GetEnvironmentVariable("AES_PROVIDER_TYPE");
+        if (aesProviderType != null && !aesProviderType.Equals(""))
+            providerType = (ProviderType)Enum.Parse(typeof(ProviderType), aesProviderType);
+        Console.WriteLine("ProviderType: " + providerType);
         AesStream.AesProviderType = providerType;
     }
 
@@ -144,11 +146,13 @@ public class SalmonFSHttpTests
         SalmonFSTestHelper.ShouldReadFile(SalmonFSTestHelper.HTTP_VAULT_DIR, SalmonFSTestHelper.TEST_IMPORT_SMALL_FILENAME);
     }
 
+    [TestMethod]
     public void ShouldReadFromFileMedium()
     {
         SalmonFSTestHelper.ShouldReadFile(SalmonFSTestHelper.HTTP_VAULT_DIR, SalmonFSTestHelper.TEST_IMPORT_MEDIUM_FILENAME);
     }
 
+    [TestMethod]
     public void ShouldReadFromFileLarge()
     {
         SalmonFSTestHelper.ShouldReadFile(SalmonFSTestHelper.HTTP_VAULT_DIR, SalmonFSTestHelper.TEST_IMPORT_LARGE_FILENAME);
@@ -160,16 +164,16 @@ public class SalmonFSHttpTests
         IFile vaultDir = SalmonFSTestHelper.HTTP_VAULT_DIR;
         AesDrive drive = AesDrive.OpenDrive(vaultDir, SalmonFSTestHelper.DriveClassType, SalmonCoreTestHelper.TEST_PASSWORD, null);
         IVirtualFile root = drive.Root;
-        IVirtualFile encFile = root.GetChild(SalmonFSTestHelper.TEST_IMPORT_SMALL_FILENAME);
-        Assert.AreEqual(encFile.Name, SalmonFSTestHelper.TEST_IMPORT_SMALL_FILENAME);
+        AesFile encFile = (AesFile) root.GetChild(SalmonFSTestHelper.TEST_IMPORT_SMALL_FILENAME);
+        Assert.AreEqual(encFile.Name, encFile.Name);
 
-        Stream encStream = encFile.GetInputStream();
+        RandomAccessStream encStream = encFile.GetInputStream();
         MemoryStream ms = new MemoryStream();
         encStream.CopyTo(ms);
         byte[] data = ms.ToArray();
         ms.Close();
         encStream.Close();
-        SalmonFSTestHelper.SeekAndReadHttpFile(data, encFile, true, 3, 50, 12);
+        SalmonFSTestHelper.SeekAndReadHttpFile(data, encFile, 3, 50, 12);
     }
 
     [TestMethod]
@@ -196,14 +200,13 @@ public class SalmonFSHttpTests
     public void ShouldExportFileFromDrive()
     {
         IFile vaultDir = SalmonFSTestHelper.HTTP_VAULT_DIR;
-        int threads = 1;
         AesDrive drive = SalmonFSTestHelper.OpenDrive(vaultDir, SalmonFSTestHelper.DriveClassType, SalmonCoreTestHelper.TEST_PASSWORD);
         AesFile file = drive.Root.GetChild(SalmonFSTestHelper.TEST_HTTP_FILE.Name);
-        IFile exportDir = SalmonFSTestHelper.GenerateFolder("export_http", SalmonFSTestHelper.TEST_OUTPUT_DIR, false);
+        IFile exportDir = SalmonFSTestHelper.GenerateFolder("export_http", SalmonFSTestHelper.TEST_EXPORT_DIR, false);
         IFile localFile = exportDir.GetChild(SalmonFSTestHelper.TEST_HTTP_FILE.Name);
         if (localFile.Exists)
             localFile.Delete();
-        SalmonFSTestHelper.ExportFiles([file], exportDir, threads);
+        SalmonFSTestHelper.ExportFiles([file], exportDir);
         drive.Close();
     }
 
@@ -211,17 +214,15 @@ public class SalmonFSHttpTests
     public void ShouldReadRawFile()
     {
         IFile localFile = SalmonFSTestHelper.HTTP_TEST_DIR.GetChild(SalmonFSTestHelper.TEST_HTTP_FILE.Name);
+        Console.WriteLine("reading: " + localFile.Path);
         string localChkSum = SalmonFSTestHelper.GetChecksum(localFile);
         IFile httpRoot = new HttpFile(SalmonFSTestHelper.HTTP_SERVER_VIRTUAL_URL + "/" + SalmonFSTestHelper.HTTP_TEST_DIRNAME);
         IFile httpFile = httpRoot.GetChild(SalmonFSTestHelper.TEST_HTTP_FILE.Name);
-        Stream stream = httpFile.GetInputStream();
-        MemoryStream ms = new MemoryStream();
-        stream.CopyTo(ms);
-        ms.Flush();
-        ms.Position = 0;
-        string digest = SalmonFSTestHelper.GetChecksumStream(ms);
-        ms.Close();
+        RandomAccessStream stream = httpFile.GetInputStream();
+        string digest = SalmonFSTestHelper.GetChecksumStream(stream.AsReadStream());
         stream.Close();
-        Assert.AreEqual(digest, localChkSum);
+
+        Console.WriteLine(digest + " vs " + localChkSum);
+        Assert.AreEqual(localChkSum, digest);
     }
 }

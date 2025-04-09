@@ -24,6 +24,7 @@ SOFTWARE.
 
 using Mku.Convert;
 using Mku.FS.Streams;
+using Mku.Streams;
 using System;
 using System.Collections.Generic;
 using System.Collections.Specialized;
@@ -35,8 +36,8 @@ using System.Net.Http.Json;
 using System.Text;
 using System.Text.Json.Serialization;
 using System.Web;
+using static Mku.FS.File.HttpFile;
 using static Mku.FS.File.IFile;
-using MemoryStream = Mku.Streams.MemoryStream;
 
 
 namespace Mku.FS.File;
@@ -50,12 +51,15 @@ public class WSFile : IFile
     /// Directory separator.
     /// </summary>
     public static readonly string Separator = "/";
-	
-	private static readonly string PATH = "path";
+
+    private static readonly string PATH = "path";
     private static readonly string DEST_DIR = "destDir";
     private static readonly string FILENAME = "filename";
-    
-    private static HttpClient client = new HttpClient();
+
+    /// <summary>
+    /// The HTTP client
+    /// </summary>
+    public static HttpSyncClient Client { get; set; } = new HttpSyncClient();
     private string filePath;
     private Response response;
 
@@ -158,6 +162,8 @@ public class WSFile : IFile
     /// <param name="credentials">The service credentials</param>
     public WSFile(string path, string servicePath, Credentials credentials)
     {
+        if (!path.StartsWith(WSFile.Separator))
+            path = WSFile.Separator + path;
         this.filePath = path;
         this.ServicePath = servicePath;
         this.ServiceCredentials = credentials;
@@ -183,7 +189,7 @@ public class WSFile : IFile
             HttpRequestMessage requestMessage = new HttpRequestMessage(HttpMethod.Post, url);
             SetDefaultHeaders(requestMessage);
             SetServiceAuth(requestMessage);
-            httpResponse = client.Send(requestMessage);
+            httpResponse = Client.Send(requestMessage);
             CheckStatus(httpResponse, HttpStatusCode.OK);
             WSFile dir = new WSFile(nDirPath, ServicePath, ServiceCredentials);
             return dir;
@@ -226,7 +232,7 @@ public class WSFile : IFile
                 HttpRequestMessage requestMessage = new HttpRequestMessage(HttpMethod.Get, url);
                 SetDefaultHeaders(requestMessage);
                 SetServiceAuth(requestMessage);
-                httpResponse = client.Send(requestMessage);
+                httpResponse = Client.Send(requestMessage);
                 CheckStatus(httpResponse, HttpStatusCode.OK);
                 this.response = (Response)httpResponse.Content.ReadFromJsonAsync(typeof(Response)).Result;
                 this.response.Headers = httpResponse.Headers;
@@ -261,7 +267,7 @@ public class WSFile : IFile
             HttpRequestMessage requestMessage = new HttpRequestMessage(HttpMethod.Post, url);
             SetDefaultHeaders(requestMessage);
             SetServiceAuth(requestMessage);
-            httpResponse = client.Send(requestMessage);
+            httpResponse = Client.Send(requestMessage);
             CheckStatus(httpResponse, HttpStatusCode.OK);
             WSFile file = new WSFile(nFilePath, ServicePath, ServiceCredentials);
             return file;
@@ -300,7 +306,7 @@ public class WSFile : IFile
                     HttpRequestMessage requestMessage = new HttpRequestMessage(HttpMethod.Post, url);
                     SetDefaultHeaders(requestMessage);
                     SetServiceAuth(requestMessage);
-                    httpResponse = client.Send(requestMessage);
+                    httpResponse = Client.Send(requestMessage);
                     CheckStatus(httpResponse, HttpStatusCode.OK);
                 }
                 catch (Exception ex)
@@ -326,9 +332,9 @@ public class WSFile : IFile
             HttpRequestMessage requestMessage = new HttpRequestMessage(HttpMethod.Delete, url);
             SetDefaultHeaders(requestMessage);
             SetServiceAuth(requestMessage);
-            dirHttpResponse = client.Send(requestMessage);
+            dirHttpResponse = Client.Send(requestMessage);
             CheckStatus(dirHttpResponse, HttpStatusCode.OK);
-			this.Reset();
+            this.Reset();
             return true;
         }
         catch (Exception ex)
@@ -352,7 +358,7 @@ public class WSFile : IFile
     ///  Get the absolute path on the physical disk. For C# this is the same as the filepath.
 	/// </summary>
 	///  <returns>The absolute path.</returns>
-    public string AbsolutePath => filePath;
+    public string DisplayPath => filePath;
 
     /// <summary>
     ///  Get the name of this file or directory.
@@ -365,7 +371,7 @@ public class WSFile : IFile
 	/// </summary>
 	///  <returns>The stream to read from.</returns>
     ///  <exception cref="FileNotFoundException">Thrown if file is not found</exception>
-    public Stream GetInputStream()
+    public RandomAccessStream GetInputStream()
     {
         Reset();
         return new WSFileStream(this, FileAccess.Read);
@@ -376,7 +382,7 @@ public class WSFile : IFile
 	/// </summary>
 	///  <returns>The stream to write to.</returns>
     ///  <exception cref="FileNotFoundException">Thrown if file is not found</exception>
-    public Stream GetOutputStream()
+    public RandomAccessStream GetOutputStream()
     {
         Reset();
         return new WSFileStream(this, FileAccess.Write);
@@ -391,12 +397,12 @@ public class WSFile : IFile
     {
         get
         {
-            if (filePath.Length == 0 || filePath.Equals("/"))
+            if (filePath.Length == 0 || filePath.Equals(WSFile.Separator))
                 return null;
             string path = filePath;
-            if (path.EndsWith("/"))
+            if (path.EndsWith(WSFile.Separator))
                 path = path.Substring(0, path.Length - 1);
-            int index = path.LastIndexOf("/");
+            int index = path.LastIndexOf(WSFile.Separator);
             if (index == -1)
                 return null;
             WSFile parent = new WSFile(path.Substring(0, index), ServicePath, ServiceCredentials);
@@ -459,7 +465,7 @@ public class WSFile : IFile
                         HttpRequestMessage requestMessage = new HttpRequestMessage(HttpMethod.Get, url);
                         SetDefaultHeaders(requestMessage);
                         SetServiceAuth(requestMessage);
-                        httpResponse = client.Send(requestMessage);
+                        httpResponse = Client.Send(requestMessage);
                         CheckStatus(httpResponse, HttpStatusCode.OK);
                         int res = GetFileListCount(httpResponse.Content);
                         return res;
@@ -511,7 +517,7 @@ public class WSFile : IFile
             HttpRequestMessage requestMessage = new HttpRequestMessage(HttpMethod.Get, url);
             SetDefaultHeaders(requestMessage);
             SetServiceAuth(requestMessage);
-            httpResponse = client.Send(requestMessage);
+            httpResponse = Client.Send(requestMessage);
             CheckStatus(httpResponse, HttpStatusCode.OK);
             files = ParseFileList(httpResponse.Content);
         }
@@ -574,7 +580,7 @@ public class WSFile : IFile
                 HttpRequestMessage requestMessage = new HttpRequestMessage(HttpMethod.Put, url);
                 SetDefaultHeaders(requestMessage);
                 SetServiceAuth(requestMessage);
-                httpResponse = client.Send(requestMessage);
+                httpResponse = Client.Send(requestMessage);
                 CheckStatus(httpResponse, HttpStatusCode.OK);
                 Response response = (Response)httpResponse.Content.ReadFromJsonAsync(typeof(Response)).Result;
                 response.Headers = httpResponse.Headers;
@@ -632,7 +638,7 @@ public class WSFile : IFile
                 HttpRequestMessage requestMessage = new HttpRequestMessage(HttpMethod.Post, url);
                 SetDefaultHeaders(requestMessage);
                 SetServiceAuth(requestMessage);
-                httpResponse = client.Send(requestMessage);
+                httpResponse = Client.Send(requestMessage);
                 CheckStatus(httpResponse, HttpStatusCode.OK);
                 Response response = (Response)httpResponse.Content.ReadFromJsonAsync(typeof(Response)).Result;
                 response.Headers = httpResponse.Headers;
@@ -687,7 +693,7 @@ public class WSFile : IFile
             HttpRequestMessage requestMessage = new HttpRequestMessage(HttpMethod.Put, url);
             SetDefaultHeaders(requestMessage);
             SetServiceAuth(requestMessage);
-            httpResponse = client.Send(requestMessage);
+            httpResponse = Client.Send(requestMessage);
             CheckStatus(httpResponse, HttpStatusCode.OK);
             Response response = (Response)httpResponse.Content.ReadFromJsonAsync(typeof(Response)).Result;
             response.Headers = httpResponse.Headers;
@@ -724,7 +730,7 @@ public class WSFile : IFile
             HttpRequestMessage requestMessage = new HttpRequestMessage(HttpMethod.Post, url);
             SetDefaultHeaders(requestMessage);
             SetServiceAuth(requestMessage);
-            httpResponse = client.Send(requestMessage);
+            httpResponse = Client.Send(requestMessage);
             CheckStatus(httpResponse, HttpStatusCode.OK);
             Response response = (Response)httpResponse.Content.ReadFromJsonAsync(typeof(Response)).Result;
             response.Headers = httpResponse.Headers;
@@ -775,10 +781,10 @@ public class WSFile : IFile
         {
             string msg = "";
             Stream stream = null;
-            MemoryStream ms = null;
+            System.IO.MemoryStream ms = null;
             try
             {
-                ms = new MemoryStream();
+                ms = new System.IO.MemoryStream();
                 stream = httpResponse.Content.ReadAsStream();
                 stream.CopyTo(ms);
                 msg = UTF8Encoding.UTF8.GetString(ms.ToArray());
@@ -790,7 +796,7 @@ public class WSFile : IFile
             finally
             {
                 if (ms != null)
-                    ms.Dispose();
+                    ms.Close();
                 if (stream != null)
                     stream.Dispose();
             }
@@ -808,6 +814,5 @@ public class WSFile : IFile
     private void SetDefaultHeaders(HttpRequestMessage requestMessage)
     {
         requestMessage.Headers.Add("Cache", "no-store");
-        requestMessage.Headers.Add("Connection", "keep-alive");
     }
 }

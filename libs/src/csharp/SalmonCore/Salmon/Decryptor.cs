@@ -25,6 +25,7 @@ SOFTWARE.
 using Mku.Salmon.Integrity;
 using Mku.Salmon.Streams;
 using Mku.Salmon.Transform;
+using Mku.Streams;
 using System;
 using System.IO;
 using System.Threading.Tasks;
@@ -253,7 +254,7 @@ public class Decryptor
     ///  <exception cref="IOException"> Thrown if there is an error with the stream.</exception>
     ///  <exception cref="SecurityException">Thrown if there is a security exception with the stream.</exception>
     ///  <exception cref="IntegrityException">Thrown if the stream is corrupt or tampered with.</exception>
-    private void DecryptData(Stream inputStream, long start, long count, byte[] outData,
+    private void DecryptData(RandomAccessStream inputStream, long start, long count, byte[] outData,
                                     byte[] key, byte[] nonce,
                                     EncryptionFormat format, bool integrity, byte[] hashKey, int chunkSize)
     {
@@ -267,10 +268,8 @@ public class Decryptor
                     format, integrity, hashKey, chunkSize);
             stream.Position = start;
             long totalChunkBytesRead = 0;
-            // align to the chunksize if available
-            int buffSize = Math.Max(bufferSize, stream.ChunkSize);
-            // set the same buffer size for the internal stream
-            stream.BufferSize = buffSize;
+            int buffSize = RandomAccessStream.DEFAULT_BUFFER_SIZE;
+            buffSize = buffSize / stream.AlignSize * stream.AlignSize;
             byte[] buff = new byte[buffSize];
             int bytesRead;
             while ((bytesRead = stream.Read(buff, 0, Math.Min(buff.Length, (int)(count - totalChunkBytesRead)))) > 0

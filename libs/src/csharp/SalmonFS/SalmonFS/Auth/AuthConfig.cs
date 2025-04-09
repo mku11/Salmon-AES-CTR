@@ -29,6 +29,7 @@ using Mku.Salmon.Sequence;
 using Mku.Salmon.Streams;
 using Mku.SalmonFS.Drive;
 using Mku.SalmonFS.File;
+using Mku.Streams;
 using System;
 using System.IO;
 using System.Linq;
@@ -241,7 +242,7 @@ public class AuthConfig
 
         if (file.Exists && file.Length > 0)
         {
-            Stream outStream = null;
+            RandomAccessStream outStream = null;
             try
             {
                 outStream = file.GetOutputStream();

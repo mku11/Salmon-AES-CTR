@@ -38,10 +38,6 @@ namespace Mku.Salmon.Integrity;
 public class Integrity
 {
     /// <summary>
-    ///  Maximum chunk size for data integrity.
-    /// </summary>
-    public static readonly int MAX_CHUNK_SIZE = 8 * 1024 * 1024;
-    /// <summary>
     ///  Default chunk size for integrity.
     /// </summary>
     public static readonly int DEFAULT_CHUNK_SIZE = 256 * 1024;
@@ -83,10 +79,10 @@ public class Integrity
                            IHashProvider provider, int hashSize)
     {
         if (chunkSize < 0 || (chunkSize > 0 && chunkSize < AESCTRTransformer.BLOCK_SIZE)
-                || (chunkSize > 0 && chunkSize % AESCTRTransformer.BLOCK_SIZE != 0) || chunkSize > MAX_CHUNK_SIZE)
+                || (chunkSize > 0 && chunkSize % AESCTRTransformer.BLOCK_SIZE != 0))
         {
             throw new IntegrityException("Invalid chunk size, specify zero for default value or a positive number multiple of: "
-                    + AESCTRTransformer.BLOCK_SIZE + " and less than: " + Integrity.MAX_CHUNK_SIZE + " bytes");
+                    + AESCTRTransformer.BLOCK_SIZE);
         }
         if (integrity && key == null)
             throw new SecurityException("You need a hash to use with integrity");

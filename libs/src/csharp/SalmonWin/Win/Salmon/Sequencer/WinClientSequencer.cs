@@ -304,7 +304,7 @@ public class WinClientSequencer : INonceSequencer
     public string GenerateRequest(string driveId, string authId, RequestType type,
             byte[] nextNonce = null, byte[] maxNonce = null)
     {
-        MemoryStream stream = new MemoryStream();
+        System.IO.MemoryStream stream = new System.IO.MemoryStream();
         XmlWriter writer = null;
         try
         {
@@ -392,7 +392,7 @@ public class WinClientSequencer : INonceSequencer
         internal static Response Parse(string contents)
         {
             Response request = new Response();
-            MemoryStream stream = new MemoryStream(Encoding.UTF8.GetBytes(contents));
+            System.IO.MemoryStream stream = new System.IO.MemoryStream(Encoding.UTF8.GetBytes(contents));
             try
             {
                 stream.Position = 0;

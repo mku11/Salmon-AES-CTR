@@ -27,6 +27,8 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using static Mku.FS.File.IFile;
+using Mku.Streams;
+using FileStream = Mku.FS.Streams.FileStream;
 
 namespace Mku.FS.File;
 
@@ -90,9 +92,9 @@ public class File : IFile
             foreach (IFile file in files)
             {
                 if (file.IsDirectory)
-                    Directory.Delete(file.AbsolutePath);
+                    Directory.Delete(file.DisplayPath);
                 else
-                    System.IO.File.Delete(file.AbsolutePath);
+                    System.IO.File.Delete(file.DisplayPath);
             }
             Directory.Delete(filePath);
         }
@@ -111,7 +113,7 @@ public class File : IFile
     ///  Get the absolute path on the physical disk. For C# this is the same as the filepath.
 	/// </summary>
 	///  <returns>The absolute path.</returns>
-    public string AbsolutePath => filePath;
+    public string DisplayPath => filePath;
 
     /// <summary>
     ///  Get the name of this file or directory.
@@ -124,9 +126,9 @@ public class File : IFile
 	/// </summary>
 	///  <returns>The stream to read from.</returns>
     ///  <exception cref="FileNotFoundException">Thrown if file is not found</exception>
-    public Stream GetInputStream()
+    public RandomAccessStream GetInputStream()
     {
-        return System.IO.File.Open(filePath, FileMode.Open, FileAccess.Read, FileShare.ReadWrite);
+        return new FileStream(this, FileAccess.Read);
     }
 
     /// <summary>
@@ -134,9 +136,9 @@ public class File : IFile
 	/// </summary>
 	///  <returns>The stream to write to.</returns>
     ///  <exception cref="FileNotFoundException">Thrown if file is not found</exception>
-    public Stream GetOutputStream()
+    public RandomAccessStream GetOutputStream()
     {
-        return System.IO.File.Open(filePath, FileMode.OpenOrCreate, FileAccess.Write, FileShare.ReadWrite);
+        return new FileStream(this, FileAccess.Write);
     }
 
     /// <summary>
@@ -236,7 +238,7 @@ public class File : IFile
         IFile newFile = newDir.GetChild(newName);
         if (newFile != null && newFile.Exists)
             throw new IOException("Another file/directory already exists");
-        string nFilePath = newDir.AbsolutePath + File.Separator + newName;
+        string nFilePath = newDir.DisplayPath + File.Separator + newName;
         if (options.onProgressChanged != null)
             options.onProgressChanged(0L, this.Length);
         if (IsDirectory)

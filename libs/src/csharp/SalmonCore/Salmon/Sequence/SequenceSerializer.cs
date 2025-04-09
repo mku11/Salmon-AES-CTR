@@ -46,7 +46,7 @@ public class SequenceSerializer : INonceSequenceSerializer
     ///  <exception cref="SequenceException">Thrown when there is a failure in the nonce sequencer.</exception>
     public string Serialize(Dictionary<string, NonceSequence> sequences)
     {
-        MemoryStream stream = new MemoryStream();
+        System.IO.MemoryStream stream = new System.IO.MemoryStream();
         XmlWriter writer = null;
         TextWriter textWriter = null;
         try
@@ -103,7 +103,7 @@ public class SequenceSerializer : INonceSequenceSerializer
     public Dictionary<string, NonceSequence> Deserialize(string contents)
     {
         Dictionary<string, NonceSequence> configs = new Dictionary<string, NonceSequence>();
-        MemoryStream stream = new MemoryStream(Encoding.UTF8.GetBytes(contents));
+        System.IO.MemoryStream stream = new System.IO.MemoryStream(Encoding.UTF8.GetBytes(contents));
         try
         {
             stream.Position = 0;

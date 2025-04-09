@@ -34,21 +34,25 @@ using Mku.Convert;
 using System.Web;
 using System.Collections.Specialized;
 using Mku.FS.File;
+using static Mku.FS.File.HttpFile;
 
 namespace Mku.FS.Streams;
 
 
 /// <summary>
-/// An advanced Salmon File Stream implementation for java files.
+/// A Web Service File Stream implementation.
 /// This class is used internally for random file access of remote physical (real) files.
 /// </summary>
-public class WSFileStream : Stream
+public class WSFileStream : RandomAccessStream
 {
     private static readonly string PATH = "path";
     private static readonly string POSITION = "position";
     private static readonly string LENGTH = "length";
 
-    private HttpClient client;
+    /// <summary>
+    /// The HTTP client
+    /// </summary>
+    public static HttpSyncClient Client { get; set; } = new HttpSyncClient();
     private Stream inputStream;
     private Stream outputStream;
     private bool closed;
@@ -112,7 +116,13 @@ public class WSFileStream : Stream
             // if the new position is forwards we can skip a small amount rather opening up a new connection
             if (this.position < value && value - position < MaxNetBytesSkip && this.inputStream != null)
             {
-                inputStream.Seek(value, SeekOrigin.Begin);
+                byte[] buffer = new byte[32768];
+                int totalBytesRead = 0;
+                int bytesRead;
+                while ((bytesRead = inputStream.Read(buffer, 0, Math.Min(buffer.Length, (int)((value - position) - totalBytesRead)))) > 0)
+                {
+                    totalBytesRead += bytesRead;
+                }
             }
             else if (this.position != value)
             {
@@ -182,7 +192,6 @@ public class WSFileStream : Stream
     {
         if (this.closed)
             throw new IOException("Stream is closed");
-        CreateClient();
         HttpResponseMessage httpResponse = null;
         try
         {
@@ -196,7 +205,7 @@ public class WSFileStream : Stream
             HttpRequestMessage requestMessage = new HttpRequestMessage(HttpMethod.Get, url);
             SetDefaultHeaders(requestMessage);
             SetServiceAuth(requestMessage);
-            httpResponse = client.Send(requestMessage);
+            httpResponse = Client.Send(requestMessage);
             CheckStatus(httpResponse, HttpStatusCode.OK);
         }
         catch (Exception ex)
@@ -231,7 +240,6 @@ public class WSFileStream : Stream
             throw new IOException("Stream is closed");
         if (this.inputStream == null)
         {
-            CreateClient();
             long startPosition = this.Position;
             try
             {
@@ -245,10 +253,10 @@ public class WSFileStream : Stream
                 HttpRequestMessage requestMessage = new HttpRequestMessage(HttpMethod.Get, url);
                 SetDefaultHeaders(requestMessage);
                 SetServiceAuth(requestMessage);
-                httpResponse = client.Send(requestMessage);
+                httpResponse = Client.Send(requestMessage);
                 CheckStatus(httpResponse, startPosition > 0 ? HttpStatusCode.PartialContent : HttpStatusCode.OK);
-                Stream stream = new BufferedStream(httpResponse.Content.ReadAsStream());
-                this.inputStream = stream;
+                Stream stream = httpResponse.Content.ReadAsStream();
+                this.inputStream = new BufferedStream(stream, DEFAULT_BUFFER_SIZE);
                 return stream;
             }
             catch (Exception ex)
@@ -262,20 +270,12 @@ public class WSFileStream : Stream
         return this.inputStream;
     }
 
-    private void CreateClient()
-    {
-        if (client != null)
-            throw new IOException("A connection is already open");
-        client = new HttpClient();
-    }
-
     private Stream GetOutputStream()
     {
         if (this.closed)
             throw new IOException("Stream is closed");
         if (this.outputStream == null)
         {
-            CreateClient();
             HttpRequestMessage requestMessage = null;
             BlockingInputOutputAdapterStream outputStream = null;
             long startPosition = this.Position;
@@ -303,7 +303,7 @@ public class WSFileStream : Stream
                 {
                     try
                     {
-                        outHttpResponse = client.Send(requestMessage);
+                        outHttpResponse = Client.Send(requestMessage);
                         CheckStatus(outHttpResponse, startPosition > 0 ? HttpStatusCode.PartialContent : HttpStatusCode.OK);
                         outputStream.SetReceived(true);
                     }
@@ -376,9 +376,6 @@ public class WSFileStream : Stream
         if (outHttpResponse != null)
             outHttpResponse.Dispose();
 
-        if (client != null)
-            client.Dispose();
-        client = null;
         file.Reset();
     }
 
@@ -399,6 +396,5 @@ public class WSFileStream : Stream
     private void SetDefaultHeaders(HttpRequestMessage requestMessage)
     {
         requestMessage.Headers.Add("Cache", "no-store");
-        requestMessage.Headers.Add("Connection", "keep-alive");
     }
 }

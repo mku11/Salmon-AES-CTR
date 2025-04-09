@@ -38,6 +38,7 @@ using Org.BouncyCastle.Security;
 using Org.BouncyCastle.Crypto;
 using Mku.Streams;
 using MemoryStream = Mku.Streams.MemoryStream;
+using Mku.FS.Streams;
 
 namespace Mku.Salmon.Test;
 
@@ -169,7 +170,7 @@ public class SalmonCoreTestHelper
         AesStream writer = new AesStream(key, iv, EncryptionMode.Encrypt, outs,
                 EncryptionFormat.Salmon, integrity, hashKey, chunkSize);
 
-        if (bufferSize == 0) // use the internal buffer size of the memorystream to copy
+        if (bufferSize == 0) // use the internal buffer TotalSize of the memorystream to copy
         {
             ins.CopyTo(writer);
         }
@@ -582,7 +583,7 @@ public class SalmonCoreTestHelper
     {
         byte[] testData = GetRandArray(size);
         MD5 md = MD5.Create();
-        MemoryStream inStream = new MemoryStream(testData);
+        System.IO.MemoryStream inStream = new System.IO.MemoryStream(testData);
         byte[] digest = md.ComputeHash(inStream);
         inStream.Close();
 
@@ -596,7 +597,7 @@ public class SalmonCoreTestHelper
         Assert.AreEqual(testData.Length, data2.Length);
 
         md = MD5.Create();
-        MemoryStream is2 = new MemoryStream(data2);
+        System.IO.MemoryStream is2 = new System.IO.MemoryStream(data2);
         byte[] digest2 = md.ComputeHash(is2);
         ms1.Close();
         ms2.Close();
@@ -612,7 +613,7 @@ public class SalmonCoreTestHelper
 
         byte[] testData = GetRandArray(size);
         MD5 md = MD5.Create();
-        MemoryStream inStream = new MemoryStream(testData);
+        System.IO.MemoryStream inStream = new System.IO.MemoryStream(testData);
         byte[] digest2 = md.ComputeHash(inStream);
         inStream.Close();
 
@@ -627,10 +628,10 @@ public class SalmonCoreTestHelper
         MemoryStream ms3 = new MemoryStream();
         AesStream salmonStream = new AesStream(key, nonce, EncryptionMode.Encrypt, ms3,
                 EncryptionFormat.Salmon, integrity, hashKey, chunkSize);
-        // we always align the writes to the chunk size if we enable integrity
+        // we always align the writes to the chunk TotalSize if we enable integrity
         if (integrity)
             bufferSize = salmonStream.ChunkSize;
-        ms2.CopyTo(salmonStream, bufferSize, null);
+        ms2.CopyTo(salmonStream, bufferSize);
         salmonStream.Close();
         ms2.Close();
         byte[] encData = ms3.ToArray();
@@ -646,7 +647,7 @@ public class SalmonCoreTestHelper
         ms3.Close();
         ms4.Position = 0;
         md = MD5.Create();
-        byte[] digest3 = md.ComputeHash(ms4);
+        byte[] digest3 = md.ComputeHash(ms4.AsReadStream());
         ms4.Close();
     }
 

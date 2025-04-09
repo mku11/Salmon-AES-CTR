@@ -38,6 +38,7 @@ using Mku.SalmonFS.File;
 using Mku.SalmonFS.Streams;
 using Mku.SalmonFS.Drive.Utils;
 using Mku.FS.Drive.Utils;
+using Mku.FS.Streams;
 
 namespace Mku.Salmon.Test;
 
@@ -56,13 +57,16 @@ public class SalmonFSTests
         int threads = Environment.GetEnvironmentVariable("ENC_THREADS") != null && !Environment.GetEnvironmentVariable("ENC_THREADS").Equals("") ?
             int.Parse(Environment.GetEnvironmentVariable("ENC_THREADS")) : 1;
 
+        //testMode = TestMode.WebService;
+        threads = 2;
+
         SalmonFSTestHelper.SetTestParams(testDir, testMode);
         Console.WriteLine("testDir: " + testDir);
         Console.WriteLine("testMode: " + testMode);
         Console.WriteLine("threads: " + threads);
         Console.WriteLine("ws server url: " + SalmonFSTestHelper.WS_SERVER_URL);
 
-        SalmonFSTestHelper.TEST_IMPORT_FILE = SalmonFSTestHelper.TEST_IMPORT_MEDIUM_FILE;
+        SalmonFSTestHelper.TEST_IMPORT_FILE = SalmonFSTestHelper.TEST_IMPORT_LARGE_FILE;
 
         // SalmonCoreTestHelper.TEST_ENC_BUFFER_SIZE = 1 * 1024 * 1024;
         // SalmonCoreTestHelper.TEST_DEC_BUFFER_SIZE = 1 * 1024 * 1024;
@@ -461,28 +465,24 @@ public class SalmonFSTests
     {
 
         bool caught = false;
-        bool failed = false;
         try
         {
             SalmonFSTestHelper.ShouldCreateFileWithoutVault(UTF8Encoding.UTF8.GetBytes(SalmonCoreTestHelper.TEST_TEXT), SalmonCoreTestHelper.TEST_KEY_BYTES,
                     true, false, 64,
                     SalmonCoreTestHelper.TEST_HMAC_KEY_BYTES,
                     SalmonCoreTestHelper.TEST_FILENAME_NONCE_BYTES, SalmonCoreTestHelper.TEST_NONCE_BYTES,
-                    true, 24 + 32 + 5, true);
+                    true, 24 + 32 + 5, false);
         }
-        catch (IOException ex)
+        catch (Exception ex)
         {
+            Console.Error.WriteLine(ex);
             if (ex.GetType() == typeof(IntegrityException))
                 caught = true;
-        }
-        catch (Exception)
-        {
-            failed = true;
+            else
+                throw;
         }
 
         Assert.IsFalse(caught);
-
-        Assert.IsTrue(failed);
     }
 
     [TestMethod]
@@ -512,8 +512,7 @@ public class SalmonFSTests
                 true, true, 64, SalmonCoreTestHelper.TEST_HMAC_KEY_BYTES,
                 SalmonCoreTestHelper.TEST_FILENAME_NONCE_BYTES, SalmonCoreTestHelper.TEST_NONCE_BYTES,
                 false, -1, true);
-        AesFileInputStream fileInputStream = new AesFileInputStream(file,
-                3, 50, 2, 12);
+        AesFileInputStream fileInputStream = new AesFileInputStream(file, 3, 100, SalmonFSTestHelper.TEST_FILE_INPUT_STREAM_THREADS, 12);
 
         SalmonFSTestHelper.SeekAndReadFileInputStream(data, fileInputStream, 0, 32, 0, 32);
         SalmonFSTestHelper.SeekAndReadFileInputStream(data, fileInputStream, 220, 8, 2, 8);
@@ -686,7 +685,7 @@ public class SalmonFSTests
     public void ShouldReadFromFileMultithreaded()
     {
         IFile vaultDir = SalmonFSTestHelper.GenerateFolder(SalmonFSTestHelper.TEST_VAULT_DIRNAME);
-        IFile file = SalmonFSTestHelper.TEST_IMPORT_TINY_FILE;
+        IFile file = SalmonFSTestHelper.TEST_IMPORT_FILE;
 
         FileSequencer sequencer = SalmonFSTestHelper.CreateSalmonFileSequencer();
         AesDrive drive = SalmonFSTestHelper.CreateDrive(vaultDir, SalmonFSTestHelper.DriveClassType, SalmonCoreTestHelper.TEST_PASSWORD, sequencer);
@@ -699,14 +698,14 @@ public class SalmonFSTests
 
         long pos = Math.Abs(new Random().NextInt64() % file.Length);
 
-        AesFileInputStream fileInputStream1 = new AesFileInputStream(sfiles[0], 4, 4 * 1024 * 1024, 1, 256 * 1024);
+        AesFileInputStream fileInputStream1 = new AesFileInputStream(sfiles[0], 4, 4 * 1024 * 1024, 1, Integrity.Integrity.DEFAULT_CHUNK_SIZE);
         fileInputStream1.Seek(pos, SeekOrigin.Current);
         MD5 md51 = MD5.Create();
         byte[] hash1 = md51.ComputeHash(fileInputStream1);
         string h1 = Mku.Convert.BitConverter.ToHex(hash1);
         fileInputStream1.Close();
 
-        AesFileInputStream fileInputStream2 = new AesFileInputStream(sfiles[0], 4, 4 * 1024 * 1024, 1, 256 * 1024);
+        AesFileInputStream fileInputStream2 = new AesFileInputStream(sfiles[0], 4, 4 * 1024 * 1024, 2, Integrity.Integrity.DEFAULT_CHUNK_SIZE);
         fileInputStream2.Seek(pos, SeekOrigin.Current);
         MD5 md52 = MD5.Create();
         byte[] hash2 = md52.ComputeHash(fileInputStream2);

@@ -30,7 +30,8 @@ namespace Mku.Streams;
 /// <summary>
 /// Memory Stream for seeking, reading, and writing to a memory buffer (modeled after C# MemoryStream).
 /// </summary>
-public class MemoryStream : Stream {
+public class MemoryStream : RandomAccessStream
+{
     private static readonly int _INITIAL_CAPACITY = 128 * 1024;
     private byte[] _bytes;
     private long _position;
@@ -41,7 +42,8 @@ public class MemoryStream : Stream {
     /// Create a memory stream.
     /// </summary>
     /// <param name="bytes">existing byte array to use as backing buffer.</param>
-    public MemoryStream(byte[] bytes) {
+    public MemoryStream(byte[] bytes)
+    {
         this._length = bytes.Length;
         this._bytes = bytes;
         this._capacity = bytes.Length;
@@ -51,7 +53,8 @@ public class MemoryStream : Stream {
     /// 
     /// Create a memory stream.
     /// </summary>
-    public MemoryStream() {
+    public MemoryStream()
+    {
         _bytes = new byte[_INITIAL_CAPACITY];
         this._capacity = _INITIAL_CAPACITY;
     }
@@ -102,7 +105,8 @@ public class MemoryStream : Stream {
     /// </summary>
     /// <param name="value">The new length</param>
     override
-    public void SetLength(long value) {
+    public void SetLength(long value)
+    {
         checkAndResize(value);
         _capacity = value;
     }
@@ -115,9 +119,10 @@ public class MemoryStream : Stream {
     /// <param name="count">The number of bytes to read</param>
     /// <returns></returns>
     override
-    public int Read(byte[] buffer, int offset, int count) {
-        int bytesRead = (int) Math.Min(_length - Position, count);
-        Array.Copy(_bytes, (int) _position, buffer, offset, bytesRead);
+    public int Read(byte[] buffer, int offset, int count)
+    {
+        int bytesRead = (int)Math.Min(_length - Position, count);
+        Array.Copy(_bytes, (int)_position, buffer, offset, bytesRead);
         Position = Position + bytesRead;
         if (bytesRead <= 0)
             return 0;
@@ -131,18 +136,21 @@ public class MemoryStream : Stream {
     /// <param name="offset">The offset</param>
     /// <param name="count">The number of bytes to write</param>
     override
-    public void Write(byte[] buffer, int offset, int count) {
+    public void Write(byte[] buffer, int offset, int count)
+    {
         checkAndResize(_position + count);
-        Array.Copy(buffer, offset, _bytes, (int) _position, count);
+        Array.Copy(buffer, offset, _bytes, (int)_position, count);
         Position = Position + count;
     }
 
-    private void checkAndResize(long newLength) {
-        if (this._capacity < newLength) {
+    private void checkAndResize(long newLength)
+    {
+        if (this._capacity < newLength)
+        {
             long newCapacity = newLength * 2;
             if (newCapacity > int.MaxValue)
                 throw new Exception("Size too large");
-            byte[] nBytes = new byte[(int) newCapacity];
+            byte[] nBytes = new byte[(int)newCapacity];
             for (int i = 0; i < this._capacity; i++)
                 nBytes[i] = this._bytes[i];
             this._capacity = newCapacity;
@@ -158,16 +166,23 @@ public class MemoryStream : Stream {
     /// <param name="origin">The type of seek</param>
     /// <returns></returns>
     override
-    public long Seek(long offset, SeekOrigin origin) {
+    public long Seek(long offset, SeekOrigin origin)
+    {
         long nPos = 0;
-        if (origin == SeekOrigin.Begin) {
-            nPos = (int) offset;
-        } else if (origin == SeekOrigin.Current) {
-            nPos = Position + offset;
-        } else if (origin == SeekOrigin.End) {
-            nPos = (int) (_bytes.Length - offset);
+        if (origin == SeekOrigin.Begin)
+        {
+            nPos = (int)offset;
         }
-        checkAndResize(nPos);
+        else if (origin == SeekOrigin.Current)
+        {
+            nPos = Position + offset;
+        }
+        else if (origin == SeekOrigin.End)
+        {
+            nPos = (int)(_bytes.Length - offset);
+        }
+        if (nPos > this._length)
+            checkAndResize(nPos);
         Position = nPos;
         return Position;
     }
@@ -176,7 +191,8 @@ public class MemoryStream : Stream {
     /// Flush the stream.
     /// </summary>
     override
-    public void Flush() {
+    public void Flush()
+    {
         // nop
     }
 
@@ -184,7 +200,8 @@ public class MemoryStream : Stream {
     /// Close any resources the stream is using.
     /// </summary>
     override
-    public void Close() {
+    public void Close()
+    {
         // nop
     }
 
@@ -192,9 +209,10 @@ public class MemoryStream : Stream {
     /// Convert the stream to an array.
     /// </summary>
     /// <returns>A byte array</returns>
-    public byte[] ToArray() {
-        byte[] nBytes = new byte[(int) _length];
-        Array.Copy(this._bytes, 0, nBytes, 0, (int) _length);
+    public byte[] ToArray()
+    {
+        byte[] nBytes = new byte[(int)_length];
+        Array.Copy(this._bytes, 0, nBytes, 0, (int)_length);
         return nBytes;
     }
 }

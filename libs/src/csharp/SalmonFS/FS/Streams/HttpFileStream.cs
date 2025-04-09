@@ -29,16 +29,21 @@ using System.Net;
 using System.Web;
 using System.Collections.Specialized;
 using Mku.FS.File;
+using Mku.Streams;
+using static Mku.FS.File.HttpFile;
 
 namespace Mku.FS.Streams;
 
 /// <summary>
-///  An advanced Salmon File Stream implementation for java files.
+///  An HTTP File Stream implementation.
 /// This class is used internally for random file access of remote physical (real) files.
 /// </summary>
-public class HttpFileStream : Stream
+public class HttpFileStream : RandomAccessStream
 {
-    private HttpClient client;
+    /// <summary>
+    /// The HTTP client
+    /// </summary>
+    public static HttpSyncClient Client { get; set; } = new HttpSyncClient();
     private Stream inputStream;
     private bool closed;
     private HttpFile file;
@@ -100,7 +105,12 @@ public class HttpFileStream : Stream
             // if the new position is forwards we can skip a small amount rather opening up a new connection
             if (this.position < value && value - position < MaxNetBytesSkip && this.inputStream != null)
             {
-                inputStream.Seek(value, SeekOrigin.Begin);
+                byte[] buffer = new byte[32768];
+                int totalBytesRead = 0;
+                int bytesRead;
+                while ((bytesRead = inputStream.Read(buffer, 0, Math.Min(buffer.Length, (int) ((value - position) - totalBytesRead)))) > 0) {
+                    totalBytesRead += bytesRead;
+                }
             }
             else if (this.position != value)
             {
@@ -182,7 +192,6 @@ public class HttpFileStream : Stream
             throw new IOException("Stream is closed");
         if (this.inputStream == null)
         {
-            CreateClient();
             long startPosition = this.Position;
             try
             {
@@ -195,10 +204,10 @@ public class HttpFileStream : Stream
                 SetDefaultHeaders(requestMessage);
                 if (this.position > 0)
                     requestMessage.Headers.Add("Range", "bytes=" + this.position + "-");
-                httpResponse = client.Send(requestMessage);
+                httpResponse = Client.Send(requestMessage, HttpCompletionOption.ResponseHeadersRead);
                 CheckStatus(httpResponse, startPosition > 0 ? HttpStatusCode.PartialContent : HttpStatusCode.OK);
                 Stream stream = httpResponse.Content.ReadAsStream();
-                this.inputStream = stream;
+                this.inputStream = new BufferedStream(stream, DEFAULT_BUFFER_SIZE);
                 return stream;
             }
             catch (Exception ex)
@@ -210,13 +219,6 @@ public class HttpFileStream : Stream
         if (this.inputStream == null)
             throw new IOException("Could not retrieve stream");
         return this.inputStream;
-    }
-
-    private void CreateClient()
-    {
-        if (client != null)
-            throw new IOException("A connection is already open");
-        client = new HttpClient();
     }
 
     /// <summary>
@@ -239,11 +241,6 @@ public class HttpFileStream : Stream
 
         if (httpResponse != null)
             httpResponse.Dispose();
-
-        if (client != null)
-            client.Dispose();
-        client = null;
-
     }
 
     private void CheckStatus(HttpResponseMessage httpResponse, HttpStatusCode status)
@@ -258,6 +255,5 @@ public class HttpFileStream : Stream
     private void SetDefaultHeaders(HttpRequestMessage requestMessage)
     {
         requestMessage.Headers.Add("Cache", "no-store");
-        requestMessage.Headers.Add("Connection", "keep-alive");
     }
 }

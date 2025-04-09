@@ -28,6 +28,7 @@ using System;
 using System.IO;
 using MemoryStream = Mku.Streams.MemoryStream;
 using BitConverter = Mku.Convert.BitConverter;
+using Mku.Streams;
 
 namespace Mku.SalmonFS.Drive;
 
@@ -91,7 +92,7 @@ public class DriveConfig
         ms2.Position = 0;
 
         // we write the contents to the config file
-        Stream outputStream = configFile.GetOutputStream();
+        RandomAccessStream outputStream = configFile.GetOutputStream();
         ms2.CopyTo(outputStream);
         outputStream.Flush();
         outputStream.Close();

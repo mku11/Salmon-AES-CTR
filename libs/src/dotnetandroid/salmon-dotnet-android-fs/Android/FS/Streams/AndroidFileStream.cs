@@ -26,6 +26,7 @@ using Android.OS;
 using Java.Nio;
 using Java.Nio.Channels;
 using Mku.Android.FS.File;
+using Mku.Streams;
 using System;
 using System.IO;
 
@@ -36,7 +37,7 @@ namespace Mku.Android.FS.Streams;
 ///  which support external SD cards.
 /// </summary>
 ///
-public class AndroidFileStream : Stream
+public class AndroidFileStream : RandomAccessStream
 {
     private readonly AndroidFile file;
     private readonly ParcelFileDescriptor pfd;

@@ -23,6 +23,7 @@ SOFTWARE.
 */
 
 using Mku.FS.File;
+using Mku.Streams;
 using System;
 using System.IO;
 using System.Threading.Tasks;
@@ -241,8 +242,8 @@ public abstract class FileImporter
     {
         long totalPartBytesRead = 0;
 
-        Stream targetStream = null;
-        Stream sourceStream = null;
+        RandomAccessStream targetStream = null;
+        RandomAccessStream sourceStream = null;
 
         try
         {
@@ -252,7 +253,9 @@ public abstract class FileImporter
             sourceStream = fileToImport.GetInputStream();
             sourceStream.Position = start;
 
-            byte[] bytes = new byte[bufferSize];
+            int nBufferSize = bufferSize / targetStream.AlignSize * targetStream.AlignSize;
+
+            byte[] bytes = new byte[nBufferSize];
             int bytesRead;
             while ((bytesRead = sourceStream.Read(bytes, 0, (int)Math.Min((long)bytes.Length, count - totalPartBytesRead))) > 0
                     && totalPartBytesRead < count)

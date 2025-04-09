@@ -22,7 +22,6 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 */
 
-using Android.Content;
 using AndroidX.DocumentFile.Provider;
 using Mku.Android.FS.File;
 using Mku.FS.File;
@@ -43,40 +42,23 @@ public class AndroidDrive : AesDrive
     public static readonly string TAG = nameof(AndroidDrive);
     private static readonly int ENC_BUFFER_SIZE = 5 * 1024 * 1024;
     private static readonly int ENC_THREADS = 4;
-    private static Context context;
-
-    /// <summary>
-    ///  Initialize the Android Drive. This needs to run before you attempt to
-    ///  create or open any virtual drives.
-	/// </summary>
-	///  <param name="context">The context</param>
-    public static void Initialize(Context context)
-    {
-        AndroidDrive.context = context.ApplicationContext;
-    }
-
-    /// <summary>
-    ///  Get the Android context.
-	/// </summary>
-	///  <returns>The context</returns>
-    public static Context Context => context;
-
+    
     /// <summary>
     /// Private constructor, use open() and create() instead.
     /// </summary>
-    private AndroidDrive()
+    private AndroidDrive() : base()
     {
 
     }
 
     public Java.IO.File CopyToSharedFolder(AesFile salmonFile)
     {
-        Java.IO.File privateDir = new Java.IO.File(this.PrivateDir.AbsolutePath);
+        Java.IO.File privateDir = new Java.IO.File(this.PrivateDir.DisplayPath);
         Java.IO.File cacheFile = new Java.IO.File(privateDir, salmonFile.Name);
         AndroidSharedFileObserver.RemoveFileObserver(cacheFile);
         cacheFile.Delete();
 
-        AndroidFile sharedDir = new AndroidFile(DocumentFile.FromFile(privateDir), context);
+        AndroidFile sharedDir = new AndroidFile(DocumentFile.FromFile(privateDir));
         AesFileExporter fileExporter = new AesFileExporter(ENC_BUFFER_SIZE, ENC_THREADS);
 		FileExporter.FileExportOptions exportOptions = new FileExporter.FileExportOptions();
 		exportOptions.integrity = true;
@@ -94,7 +76,7 @@ public class AndroidDrive : AesDrive
     {
         get
         {
-            Java.IO.File sharedDir = new Java.IO.File(context.CacheDir, ShareDirectoryName);
+            Java.IO.File sharedDir = new Java.IO.File(AndroidFileSystem.GetContext().CacheDir, ShareDirectoryName);
             if (!sharedDir.Exists())
                 sharedDir.Mkdir();
             return new File(sharedDir.AbsolutePath);
@@ -111,10 +93,10 @@ public class AndroidDrive : AesDrive
     {
         DocumentFile docFile;
         if (isDirectory)
-            docFile = DocumentFile.FromTreeUri(context, Uri.Parse(filepath));
+            docFile = DocumentFile.FromTreeUri(AndroidFileSystem.GetContext(), Uri.Parse(filepath));
         else
-            docFile = DocumentFile.FromSingleUri(context, Uri.Parse(filepath));
-        AndroidFile file = new AndroidFile(docFile, context);
+            docFile = DocumentFile.FromSingleUri(AndroidFileSystem.GetContext(), Uri.Parse(filepath));
+        AndroidFile file = new AndroidFile(docFile);
         return file;
     }
 
@@ -126,7 +108,7 @@ public class AndroidDrive : AesDrive
     public void OnUnlockSuccess()
     {
         AndroidSharedFileObserver.ClearFileObservers();
-        ClearCache(context.CacheDir);
+        ClearCache(AndroidFileSystem.GetContext().CacheDir);
     }
 
     /// <summary>
@@ -137,7 +119,7 @@ public class AndroidDrive : AesDrive
     public void OnUnlockError()
     {
         AndroidSharedFileObserver.ClearFileObservers();
-        ClearCache(context.CacheDir);
+        ClearCache(AndroidFileSystem.GetContext().CacheDir);
     }
 
     /// <summary>

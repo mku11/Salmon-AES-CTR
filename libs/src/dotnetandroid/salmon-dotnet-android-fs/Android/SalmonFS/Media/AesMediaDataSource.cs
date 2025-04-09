@@ -32,6 +32,8 @@ using Android.Widget;
 using Mku.SalmonFS.File;
 using Mku.SalmonFS.Streams;
 using Mku.Android.SalmonFS.Drive;
+using Mku.Android.FS.File;
+using Mku.Streams;
 
 namespace Mku.Android.SalmonFS.Media;
 
@@ -71,7 +73,7 @@ public class AesMediaDataSource : MediaDataSource
             this.stream = new AesFileInputStream(salmonFile, buffers, bufferSize, threads, backOffset);
         else
         {
-            stream = salmonFile.GetInputStream();
+            stream = salmonFile.GetInputStream().AsReadStream();
         }
     }
 
@@ -110,7 +112,7 @@ public class AesMediaDataSource : MediaDataSource
                 {
                     activity.RunOnUiThread(() =>
                     {
-                        Toast.MakeText(AndroidDrive.Context, "File is corrupt or tampered",
+                        Toast.MakeText(AndroidFileSystem.GetContext(), "File is corrupt or tampered",
                                 ToastLength.Long).Show();
                     });
                 }

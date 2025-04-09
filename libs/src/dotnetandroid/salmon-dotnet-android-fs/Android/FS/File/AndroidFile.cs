@@ -25,16 +25,14 @@ SOFTWARE.
 using Uri = Android.Net.Uri;
 
 using AndroidX.DocumentFile.Provider;
-using global::Android.Content;
-using global::Android.OS;
-using global::Android.Provider;
+using Android.OS;
+using Android.Provider;
 using System.IO;
 using System;
 using System.Collections.Generic;
 using Mku.FS.File;
-using Mku.Android.SalmonFS.Drive;
 using Mku.Android.FS.Streams;
-using Mku.FS;
+using Mku.Streams;
 
 namespace Mku.Android.FS.File;
 
@@ -45,8 +43,14 @@ namespace Mku.Android.FS.File;
 ///
 public class AndroidFile : IFile
 {
-    private Context context;
-    private DocumentFile documentFile;
+    /// <summary>
+    /// Directory separator.
+    /// </summary>
+    public static readonly string Separator = "/";
+
+    public DocumentFile DocumentFile { get; private set; }
+    private AndroidFile parent;
+    private string name;
 
     // the DocumentFile interface can be slow so we cache some attrs
     private string _basename = null;
@@ -54,39 +58,60 @@ public class AndroidFile : IFile
     private long? _lastModified;
     private int? _childrenCount;
     private bool? _isDirectory;
-	private bool? _isFile;
+    private bool? _isFile;
+
+
+    /// <summary>
+    /// Construct an AndroidFile wrapper from an Android DocumentFile.
+    /// </summary>
+    /// <param name="DocumentFile">The Android DocumentFile that will be associated to</param>
+    /// <param name="parent">The parent if available</param>
+    public AndroidFile(DocumentFile DocumentFile, AndroidFile parent)
+    {
+        this.DocumentFile = DocumentFile;
+        this.parent = parent;
+    }
+
+    /// <summary>
+    /// Construct an AndroidFile.
+    /// </summary>
+    /// <param name="parent">The parent file.</param>
+    /// <param name="name">The file name.</param>
+    public AndroidFile(AndroidFile parent, String name)
+    {
+        this.parent = parent;
+        this.name = name;
+    }
 
     /// <summary>
     ///  Construct an AndroidFile from an Android DocumentFile.
-	/// </summary>
-	///  <param name="documentFile">The Android DocumentFile that will be associated to</param>
-    ///  <param name="context">     Android Context</param>
-    public AndroidFile(DocumentFile documentFile, Context context)
+    /// </summary>
+    ///  <param name="DocumentFile">The Android DocumentFile that will be associated to</param>
+    public AndroidFile(DocumentFile DocumentFile)
     {
-        this.documentFile = documentFile;
-        this.context = context;
+        this.DocumentFile = DocumentFile;
     }
 
     public IFile CreateDirectory(string dirName)
     {
-        DocumentFile dir = documentFile.CreateDirectory(dirName);
+        DocumentFile dir = DocumentFile.CreateDirectory(dirName);
         if (dir == null)
             return null;
-        ClearCache();
-        AndroidFile newDir = new AndroidFile(dir, AndroidDrive.Context);
+        Reset();
+        AndroidFile newDir = new AndroidFile(dir, this);
         return newDir;
 
     }
 
     public IFile CreateFile(string filename)
     {
-        DocumentFile doc = documentFile.CreateFile("*/*", filename);
+        DocumentFile doc = DocumentFile.CreateFile("*/*", filename);
         // for some reason android storage access framework even though it supports auto rename
         // somehow it includes the extension. to protect that we temporarily use another extension
         doc.RenameTo(filename + ".dat");
         doc.RenameTo(filename);
-        ClearCache();
-        AndroidFile newFile = new AndroidFile(doc, AndroidDrive.Context);
+        Reset();
+        AndroidFile newFile = new AndroidFile(doc, this);
         return newFile;
     }
 
@@ -96,10 +121,10 @@ public class AndroidFile : IFile
 	///  <returns>True if deletion is successful.</returns>
     public bool Delete()
     {
-        bool res = documentFile.Delete();
+        bool res = DocumentFile.Delete();
         if (res && Parent != null)
         {
-            (Parent as AndroidFile).ClearCache();
+            Parent.Reset();
         }
         return res;
     }
@@ -108,26 +133,26 @@ public class AndroidFile : IFile
     ///  True if file exists.
 	/// </summary>
 	///  <returns>True if exists</returns>
-    public bool Exists => documentFile.Exists();
+    public bool Exists => DocumentFile != null && DocumentFile.Exists();
 
 
     /// <summary>
     ///  Get the absolute path on the physical drive.
 	/// </summary>
 	///  <returns>The absolute path</returns>
-    public string AbsolutePath
+    public string DisplayPath
     {
         get
         {
             try
             {
-                string path = Uri.Decode(documentFile.Uri.ToString());
+                string path = Uri.Decode(DocumentFile.Uri.ToString());
                 int index = path.LastIndexOf(":");
-                return "/" + path.Substring(index + 1);
+                return AndroidFile.Separator + path.Substring(index + 1);
             }
             catch (Exception ex)
             {
-                return documentFile.Uri.Path;
+                return DocumentFile.Uri.Path;
             }
         }
     }
@@ -142,11 +167,10 @@ public class AndroidFile : IFile
         {
             if (_basename != null)
                 return _basename;
-
-            if (documentFile != null)
-            {
-                _basename = documentFile.Name;
-            }
+            if (DocumentFile == null)
+                _basename = this.name;
+            else
+                _basename = DocumentFile.Name;
             return _basename;
         }
     }
@@ -156,8 +180,9 @@ public class AndroidFile : IFile
 	/// </summary>
 	///  <returns>The input stream</returns>
     ///  <exception cref="FileNotFoundException">Thrown if file is not found</exception>
-    public Stream GetInputStream()
+    public RandomAccessStream GetInputStream()
     {
+        Reset();
         AndroidFileStream androidFileStream = new AndroidFileStream(this, "r");
         return androidFileStream;
     }
@@ -167,8 +192,25 @@ public class AndroidFile : IFile
 	/// </summary>
 	///  <returns>The output stream</returns>
     ///  <exception cref="FileNotFoundException">Thrown if file is not found</exception>
-    public Stream GetOutputStream()
+    public RandomAccessStream GetOutputStream()
     {
+        if (!this.Exists)
+        {
+            IFile parent = this.Parent;
+            if (parent == null)
+                throw new Java.Lang.Error("Could not get parent");
+            try
+            {
+                AndroidFile nFile = (AndroidFile)parent.CreateFile(this.Name);
+                this.DocumentFile = nFile.DocumentFile;
+                this.Reset();
+            }
+            catch (Exception e)
+            {
+                throw new FileNotFoundException("Could not find file");
+            }
+        }
+        this.Reset();
         AndroidFileStream androidFileStream = new AndroidFileStream(this, "rw");
         return androidFileStream;
     }
@@ -181,10 +223,12 @@ public class AndroidFile : IFile
     {
         get
         {
-            DocumentFile parentDocumentFile = documentFile.ParentFile;
+            if (this.parent != null)
+                return this.parent;
+            DocumentFile parentDocumentFile = DocumentFile.ParentFile;
             if (parentDocumentFile == null)
                 return null;
-            AndroidFile parent = new AndroidFile(parentDocumentFile, AndroidDrive.Context);
+            AndroidFile parent = new AndroidFile(parentDocumentFile, null);
             return parent;
         }
     }
@@ -193,20 +237,20 @@ public class AndroidFile : IFile
     ///  Get the path.
 	/// </summary>
 	///  <returns>The path</returns>
-    public string Path => documentFile.Uri.ToString();
+    public string Path => DocumentFile.Uri.ToString();
 
     /// <summary>
     ///  True if it is a directory.
 	/// </summary>
 	///  <returns>True if directory</returns>
-	// WORKAROUND: documentFile.isDirectory() is very slow so we try alternatively 
+	// WORKAROUND: DocumentFile.isDirectory() is very slow so we try alternatively 
     public bool IsDirectory
     {
         get
         {
             if (_isDirectory != null)
                 return (bool)_isDirectory;
-            _isDirectory = documentFile.IsDirectory;
+            _isDirectory = DocumentFile != null && DocumentFile.IsDirectory;
             return (bool)_isDirectory;
         }
     }
@@ -221,7 +265,7 @@ public class AndroidFile : IFile
         {
             if (_isFile != null)
                 return (bool)_isFile;
-            _isFile = documentFile.IsFile;
+            _isFile = DocumentFile != null && DocumentFile.IsFile;
             return (bool)_isFile;
         }
     }
@@ -236,7 +280,7 @@ public class AndroidFile : IFile
         {
             if (_lastModified != null)
                 return (long)_lastModified;
-            _lastModified = documentFile.LastModified();
+            _lastModified = DocumentFile != null ? DocumentFile.LastModified() : 0;
             return (long)_lastModified;
         }
     }
@@ -251,7 +295,7 @@ public class AndroidFile : IFile
         {
             if (_length != null)
                 return (long)_length;
-            _length = documentFile.Length();
+            _length = DocumentFile != null ? DocumentFile.Length() : 0;
             return (long)_length;
         }
     }
@@ -267,7 +311,7 @@ public class AndroidFile : IFile
             if (_childrenCount != null)
                 return (int)_childrenCount;
             if (IsDirectory)
-                _childrenCount = documentFile.ListFiles().Length;
+                _childrenCount = DocumentFile != null ? DocumentFile.ListFiles().Length : 0;
             else
                 _childrenCount = 0;
             return (int)_childrenCount;
@@ -280,14 +324,14 @@ public class AndroidFile : IFile
 	///  <returns>The files and subdirectories</returns>
     public IFile[] ListFiles()
     {
-        DocumentFile[] files = documentFile.ListFiles();
+        DocumentFile[] files = DocumentFile.ListFiles();
         if (files == null)
             return new AndroidFile[0];
         List<IFile> realFiles = new List<IFile>();
         List<IFile> realDirs = new List<IFile>();
         for (int i = 0; i < files.Length; i++)
         {
-            AndroidFile file = new AndroidFile(files[i], context);
+            AndroidFile file = new AndroidFile(files[i], this);
             if (files[i].IsDirectory)
                 realDirs.Add(file);
             else
@@ -306,11 +350,11 @@ public class AndroidFile : IFile
     ///  <exception cref="IOException">Thrown if error during IO</exception>
     public IFile Move(IFile newDir, IFile.MoveOptions options = null)
     {
-		if(options == null)
-			options = new IFile.MoveOptions();
-		
+        if (options == null)
+            options = new IFile.MoveOptions();
+
         // target directory is the same
-        if(Parent.Path.Equals(newDir.Path))
+        if (Parent.Path.Equals(newDir.Path))
         {
             throw new Exception("Source and Target directory are the same");
         }
@@ -322,17 +366,19 @@ public class AndroidFile : IFile
                 options.onProgressChanged(0, this.Length);
             if (options.newFilename != null)
                 RenameTo(Mku.Time.Time.CurrentTimeMillis() + ".dat");
-            // TEST: does the documentFile reflect the new name?
-            Uri uri = DocumentsContract.MoveDocument(AndroidDrive.Context.ContentResolver,
-                    documentFile.Uri, documentFile.ParentFile.Uri, androidDir.documentFile.Uri);
+
+            // store the name before the move
+            this.name = Name;
+            Uri uri = DocumentsContract.MoveDocument(AndroidFileSystem.GetContext().ContentResolver,
+                    DocumentFile.Uri, DocumentFile.ParentFile.Uri, androidDir.DocumentFile.Uri);
             IFile file = androidDir.GetChild(Name);
             if (file != null && options.newFilename != null)
                 file.RenameTo(options.newFilename);
-            if(Parent!=null)
-                (Parent as AndroidFile).ClearCache();
-            androidDir.ClearCache();
-            ClearCache();
-			if (options.onProgressChanged != null)
+            if (Parent != null)
+                (Parent as AndroidFile).Reset();
+            androidDir.Reset();
+            Reset();
+            if (options.onProgressChanged != null)
                 options.onProgressChanged(file.Length, file.Length);
             return file;
         }
@@ -351,8 +397,8 @@ public class AndroidFile : IFile
     ///  <exception cref="IOException">Thrown if error during IO</exception>
     public IFile Copy(IFile newDir, IFile.CopyOptions options = null)
     {
-		if(options == null)
-			options = new IFile.CopyOptions();
+        if (options == null)
+            options = new IFile.CopyOptions();
         return Copy(newDir, options.newFilename, false, options.onProgressChanged);
     }
 
@@ -365,14 +411,14 @@ public class AndroidFile : IFile
     ///  <returns>The new file</returns>
     ///  <exception cref="IOException">Thrown if error during IO</exception>
     private IFile Copy(IFile newDir, string newName = null,
-        bool delete = false, Action<long,long> onProgressChanged = null)
+        bool delete = false, Action<long, long> onProgressChanged = null)
     {
         if (newDir == null || !newDir.Exists)
             throw new IOException("Target directory does not exists");
 
         newName = newName ?? Name;
         IFile dir = newDir.GetChild(newName);
-        if (dir != null)
+        if (dir != null && dir.Exists)
             throw new IOException("Target file/directory already exists");
         if (IsDirectory)
         {
@@ -382,11 +428,11 @@ public class AndroidFile : IFile
         else
         {
             IFile newFile = newDir.CreateFile(newName);
-			IFile.CopyContentsOptions copyContentOptions = new IFile.CopyContentsOptions();
-			copyContentOptions.onProgressChanged = onProgressChanged;
+            IFile.CopyContentsOptions copyContentOptions = new IFile.CopyContentsOptions();
+            copyContentOptions.onProgressChanged = onProgressChanged;
             bool res = IFile.CopyFileContents(this, newFile, copyContentOptions);
-			if(res && delete)
-				this.Delete();
+            if (res && delete)
+                this.Delete();
             return newFile;
         }
     }
@@ -398,13 +444,14 @@ public class AndroidFile : IFile
     ///  <returns>The child file</returns>
     public IFile GetChild(string filename)
     {
-        DocumentFile[] documentFiles = documentFile.ListFiles();
-        foreach (DocumentFile documentFile in documentFiles)
+        DocumentFile[] DocumentFiles = DocumentFile.ListFiles();
+        foreach (DocumentFile DocumentFile in DocumentFiles)
         {
-            if (documentFile.Name.Equals(filename))
-                return new AndroidFile(documentFile, context);
+            if (DocumentFile.Name.Equals(filename))
+                return new AndroidFile(DocumentFile, this);
         }
-        return null;
+        // return an empty file
+        return new AndroidFile(this, filename);
     }
 
     /// <summary>
@@ -415,11 +462,10 @@ public class AndroidFile : IFile
     ///  <exception cref="FileNotFoundException">Thrown if file is not found</exception>
     public bool RenameTo(string newFilename)
     {
-        DocumentsContract.RenameDocument(context.ContentResolver, documentFile.Uri, newFilename);
-        //FIXME: we should also get a new documentFile since the old is renamed
-        documentFile = ((AndroidFile)Parent.GetChild(newFilename)).documentFile;
-        _basename = newFilename;
-        _lastModified = null;
+        Reset();
+        DocumentsContract.RenameDocument(AndroidFileSystem.GetContext().ContentResolver, DocumentFile.Uri, newFilename);
+        DocumentFile = ((AndroidFile)Parent.GetChild(newFilename)).DocumentFile;
+        name = newFilename;
         return true;
     }
 
@@ -429,21 +475,28 @@ public class AndroidFile : IFile
 	///  <returns>True if directory created</returns>
     public bool Mkdir()
     {
+        Reset();
         IFile parent = Parent;
         if (parent != null)
         {
             IFile dir = parent.CreateDirectory(Name);
+            this.DocumentFile = ((AndroidFile) dir).DocumentFile;
             return dir.Exists && dir.IsDirectory;
         }
         return false;
     }
-	
-	/// <summary>
+
+    /// <summary>
     ///  Clear cache properties
-	/// </summary>
+    /// </summary>
     public void Reset()
     {
-		
+        _basename = null;
+        _childrenCount = null;
+        _isDirectory = null;
+        _isFile = null;
+        _lastModified = null;
+        _length = null;
     }
 
     /// <summary>
@@ -454,7 +507,7 @@ public class AndroidFile : IFile
     ///  <exception cref="FileNotFoundException">Thrown if file is not found</exception>
     public ParcelFileDescriptor GetFileDescriptor(string mode)
     {
-        return AndroidDrive.Context.ContentResolver.OpenFileDescriptor(documentFile.Uri, mode);
+        return AndroidFileSystem.GetContext().ContentResolver.OpenFileDescriptor(DocumentFile.Uri, mode);
     }
 
     /// <summary>
@@ -465,16 +518,13 @@ public class AndroidFile : IFile
     override
     public string ToString()
     {
-        return documentFile.Uri.ToString();
-    }
-
-    public void ClearCache()
-    {
-        _basename = null;
-        _childrenCount = null;
-        _isDirectory = null;
-		_isFile = null;
-        _lastModified = null;
-        _length = null;
+        if (DocumentFile == null)
+        {
+            if (parent != null)
+                return parent.DisplayPath + Separator + this.name;
+            else
+                return this.name;
+        }
+        return DisplayPath;
     }
 }

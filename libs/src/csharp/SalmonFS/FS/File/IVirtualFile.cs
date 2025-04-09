@@ -22,6 +22,7 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 */
 
+using Mku.Streams;
 using System;
 using System.IO;
 using static Mku.FS.File.IFile;
@@ -38,14 +39,14 @@ public abstract class IVirtualFile
     ///  Opens a Stream that will be used for reading the file contents.
 	/// </summary>
 	///  <returns>The input stream</returns>
-    public abstract Stream GetInputStream();
+    public abstract RandomAccessStream GetInputStream();
 
 
     /// <summary>
     ///  Opens a stream for writing contents.
     /// </summary>
     ///  <returns>The output stream</returns>
-    public abstract Stream GetOutputStream();
+    public abstract RandomAccessStream GetOutputStream();
 
     /// <summary>
     ///  Lists files and directories under this directory
