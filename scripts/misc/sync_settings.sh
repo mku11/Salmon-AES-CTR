@@ -3,6 +3,7 @@ source $CURRDIR/settings.cfg
 
 echo Synchronizing project settings
 echo SALMON_VERSION: $SALMON_VERSION
+echo SALMON_VERSION: $SALMON_APP_VERSION
 
 # PROJECTS
 PATTERN="<SalmonVersion>[^/]*<\/SalmonVersion>"
@@ -98,6 +99,16 @@ sed -i -e "s/$PATTERN/$SUBST/g" $DIR/sample_python.sh
 PATTERN="^version '[^/]*'"
 SUBST="version '$SALMON_VERSION'"
 DIR=../../samples/JavaSamples
+sed -i -e "s/$PATTERN/$SUBST/g" $DIR/build.gradle
+
+PATTERN="^version '[^/]*'"
+SUBST="version '$SALMON_VERSION'"
+DIR=../../samples/AndroidSamples/salmon-android-samples
+sed -i -e "s/$PATTERN/$SUBST/g" $DIR/build.gradle
+
+PATTERN="^\sappVersion '[^/]*'"
+SUBST="\tappVersion '$SALMON_APP_VERSION'"
+DIR=../../samples/AndroidSamples/salmon-android-samples
 sed -i -e "s/$PATTERN/$SUBST/g" $DIR/build.gradle
 
 # README
