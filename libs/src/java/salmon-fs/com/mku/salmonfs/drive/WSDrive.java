@@ -44,7 +44,7 @@ public class WSDrive extends AesDrive {
     }
 
     /**
-     * Helper method that opens and initializes an HttpDrive
+     * Helper method that opens and initializes an WSDrive
      *
      * @param dir       The URL that hosts the drive. This can be either a raw URL
      *                  or a REST API URL, see Salmon Web Service for usage.

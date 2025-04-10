@@ -43,7 +43,7 @@ public class WSDrive : AesDrive
     }
 
     /// <summary>
-    /// Helper method that opens and initializes a JsDrive
+    /// Helper method that opens and initializes a WSDrive
     /// </summary>
     /// <param name="dir">The directory that will host the drive.</param>
     /// <param name="password">The password</param>
