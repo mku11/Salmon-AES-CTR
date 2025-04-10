@@ -111,6 +111,16 @@ SUBST="\tappVersion '$SALMON_APP_VERSION'"
 DIR=../../samples/AndroidSamples/salmon-android-samples
 sed -i -e "s/$PATTERN/$SUBST/g" $DIR/build.gradle
 
+PATTERN="<SalmonVersion>[^/]*<\/SalmonVersion>"
+SUBST="<SalmonVersion>$SALMON_VERSION<\/SalmonVersion>"
+DIR=../../samples/DotNetAndroidSamples/DotNetAndroidSamples
+sed -i -e "s/$PATTERN/$SUBST/g" $DIR/DotNetAndroidSamples.csproj
+
+PATTERN="<SalmonAppVersion>[^/]*<\/SalmonAppVersion>"
+SUBST="<SalmonAppVersion>$SALMON_APP_VERSION<\/SalmonAppVersion>"
+DIR=../../samples/DotNetAndroidSamples/DotNetAndroidSamples
+sed -i -e "s/$PATTERN/$SUBST/g" $DIR/DotNetAndroidSamples.csproj
+
 # README
 PATTERN="^version:[^/]*"
 SUBST="version: $SALMON_VERSION"
