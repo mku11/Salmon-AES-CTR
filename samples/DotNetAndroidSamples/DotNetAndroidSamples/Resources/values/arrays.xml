@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string-array name="threads">
+        <item>1</item>
+        <item>2</item>
+        <item>4</item>
+    </string-array>
+
+    <string-array name="data_size_mb">
+        <item>1</item>
+        <item>2</item>
+        <item>4</item>
+        <item>16</item>
+        <item>32</item>
+        <item>64</item>
+        <item>128</item>
+    </string-array>
+
+    <string-array name="enable">
+        <item>Enable</item>
+        <item>Disable</item>
+    </string-array>
+</resources>
