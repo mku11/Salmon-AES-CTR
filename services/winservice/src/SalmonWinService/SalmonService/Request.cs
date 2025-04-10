@@ -60,7 +60,7 @@ internal class Request
         }
         catch (Exception ex)
         {
-            throw ex;
+            throw;
         }
         finally
         {

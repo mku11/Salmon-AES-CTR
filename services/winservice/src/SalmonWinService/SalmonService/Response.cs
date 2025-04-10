@@ -63,7 +63,7 @@ internal class Response
         catch (Exception ex)
         {
             Console.Error.WriteLine(ex);
-            throw ex;
+            throw;
         }
         finally
         {
@@ -76,7 +76,7 @@ internal class Response
             }
             catch (IOException e)
             {
-                throw e;
+                throw;
             }
         }
         return Encoding.UTF8.GetString(stream.ToArray());
