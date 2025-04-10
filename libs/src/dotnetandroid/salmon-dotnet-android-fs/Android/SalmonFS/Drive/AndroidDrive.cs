@@ -30,6 +30,7 @@ using Mku.SalmonFS.File;
 using Mku.FS.Drive.Utils;
 using Mku.SalmonFS.Drive.Utils;
 using Uri = Android.Net.Uri;
+using Mku.Salmon.Sequence;
 
 namespace Mku.Android.SalmonFS.Drive;
 
@@ -42,13 +43,37 @@ public class AndroidDrive : AesDrive
     public static readonly string TAG = nameof(AndroidDrive);
     private static readonly int ENC_BUFFER_SIZE = 5 * 1024 * 1024;
     private static readonly int ENC_THREADS = 4;
-    
+
     /// <summary>
     /// Private constructor, use open() and create() instead.
     /// </summary>
     private AndroidDrive() : base()
     {
 
+    }
+
+    /// <summary>
+    /// Helper method that opens and initializes an AndroidDrive
+    /// </summary>
+    /// <param name="dir">The directory that will host the drive.</param>
+    /// <param name="password">The password</param>
+    /// <param name="sequencer">The nonce sequencer that will be used for encryption.</param>
+    /// <returns>The drive</returns>
+    public static AesDrive Open(IFile dir, string password, INonceSequencer sequencer)
+    {
+        return AesDrive.OpenDrive(dir, typeof(AndroidDrive), password, sequencer);
+    }
+
+    /// <summary>
+    /// Helper method that creates and initializes an AndroidDrive
+    /// </summary>
+    /// <param name="dir">The directory that will host the drive.</param>
+    /// <param name="password">The password</param>
+    /// <param name="sequencer">The nonce sequencer that will be used for encryption.</param>
+    /// <returns>The drive</returns>
+    public static AesDrive Create(IFile dir, string password, INonceSequencer sequencer)
+    {
+        return AesDrive.CreateDrive(dir, typeof(AndroidDrive), password, sequencer);
     }
 
     public Java.IO.File CopyToSharedFolder(AesFile salmonFile)
@@ -60,8 +85,8 @@ public class AndroidDrive : AesDrive
 
         AndroidFile sharedDir = new AndroidFile(DocumentFile.FromFile(privateDir));
         AesFileExporter fileExporter = new AesFileExporter(ENC_BUFFER_SIZE, ENC_THREADS);
-		FileExporter.FileExportOptions exportOptions = new FileExporter.FileExportOptions();
-		exportOptions.integrity = true;
+        FileExporter.FileExportOptions exportOptions = new FileExporter.FileExportOptions();
+        exportOptions.integrity = true;
         fileExporter.ExportFile(salmonFile, sharedDir, exportOptions);
         return cacheFile;
     }
@@ -81,23 +106,6 @@ public class AndroidDrive : AesDrive
                 sharedDir.Mkdir();
             return new File(sharedDir.AbsolutePath);
         }
-    }
-
-    /// <summary>
-    ///  Get the real file hosted on the android device.
-	/// </summary>
-	///  <param name="filepath">The file path</param>
-    ///  <param name="isDirectory">True if filepath corresponds to a directory.</param>
-    ///  <returns>The file </returns>
-    public IFile GetRealFile(string filepath, bool isDirectory)
-    {
-        DocumentFile docFile;
-        if (isDirectory)
-            docFile = DocumentFile.FromTreeUri(AndroidFileSystem.GetContext(), Uri.Parse(filepath));
-        else
-            docFile = DocumentFile.FromSingleUri(AndroidFileSystem.GetContext(), Uri.Parse(filepath));
-        AndroidFile file = new AndroidFile(docFile);
-        return file;
     }
 
     /// <summary>

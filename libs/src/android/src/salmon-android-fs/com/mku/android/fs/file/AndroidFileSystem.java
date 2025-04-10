@@ -61,4 +61,22 @@ public class AndroidFileSystem {
             throw new RuntimeException("Use AndroidFileSystem.initialize() before using any file");
         return context;
     }
+	
+    /**
+     * Get the real file hosted on the android device.
+     *
+     * @param uri         The content uri (ie: content://)
+     * @param isDirectory True if filepath corresponds to a directory.
+     * @return The real file
+     */
+    public static IFile getRealFile(String uri, boolean isDirectory) {
+        DocumentFile docFile;
+        if (isDirectory)
+            docFile = DocumentFile.fromTreeUri(AndroidFileSystem.getContext(), Uri.parse(uri));
+        else
+            docFile = DocumentFile.fromSingleUri(AndroidFileSystem.getContext(), Uri.parse(uri));
+        AndroidFile file = new AndroidFile(docFile);
+        return file;
+    }
+
 }

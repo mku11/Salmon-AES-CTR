@@ -22,12 +22,14 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 */
 
-using global::Android.Content;
+using Android.Content;
 using Java.Lang;
 using Mku.FS.File;
 using Mku.FS.Streams;
 using Xamarin.Android.Net;
 using static Mku.FS.File.HttpFile;
+using AndroidX.DocumentFile.Provider;
+using Uri = Android.Net.Uri;
 
 namespace Mku.Android.FS.File;
 
@@ -67,4 +69,22 @@ public class AndroidFileSystem
             throw new RuntimeException("Use AndroidFileSystem.initialize() before using any file");
         return context;
     }
+	
+    /// <summary>
+    ///  Get the real file hosted on the local android device.
+	/// </summary>
+	///  <param name="uri">The content uri path (ie content://)</param>
+    ///  <param name="isDirectory">True if filepath corresponds to a directory.</param>
+    ///  <returns>The file </returns>
+    public static IFile GetRealFile(string uri, bool isDirectory)
+    {
+        DocumentFile docFile;
+        if (isDirectory)
+            docFile = DocumentFile.FromTreeUri(AndroidFileSystem.GetContext(), Uri.Parse(uri));
+        else
+            docFile = DocumentFile.FromSingleUri(AndroidFileSystem.GetContext(), Uri.Parse(uri));
+        AndroidFile file = new AndroidFile(docFile);
+        return file;
+    }
+
 }

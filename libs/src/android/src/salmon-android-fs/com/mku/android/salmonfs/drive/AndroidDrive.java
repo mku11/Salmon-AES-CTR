@@ -41,7 +41,7 @@ import com.mku.salmonfs.file.AesFile;
 /**
  * Implementation of a virtual drive for android.
  */
-public class AndroidDrive extends Drive {
+public class AndroidDrive extends AesDrive {
     private static final String TAG = AndroidDrive.class.getName();
     private static final int ENC_BUFFER_SIZE = 5 * 1024 * 1024;
     private static final int ENC_THREADS = 4;
@@ -51,6 +51,36 @@ public class AndroidDrive extends Drive {
      */
     protected AndroidDrive() {
         super();
+    }
+
+
+    /**
+     * Helper method that opens and initializes an AndroidDrive
+     *
+     * @param dir       The URL that hosts the drive. This can be either a raw URL
+     *                  or a REST API URL, see Salmon Web Service for usage.
+     * @param password  The password.
+     * @param sequencer The nonce sequencer that will be used for encryption.
+     * @return The drive.
+     * @throws IOException Thrown if error occurs during opening the drive.
+     */
+	// TODO: Check why it is working with Drive.class for android
+    public static AesDrive1 open(IFile dir, String password, INonceSequencer sequencer) throws IOException {
+        return AesDrive.openDrive(dir, AndroidDrive.class, password, sequencer);
+    }
+
+    /**
+     * Helper method that creates and initializes a AndroidDrive
+     *
+     * @param dir       The directory that will host the drive.
+     * @param password  The password.
+     * @param sequencer The nonce sequencer that will be used for encryption.
+     * @return The drive.
+     * @throws IOException If error occurs during creating the drive.
+     */
+	 // TODO: Check why it is working with Drive.class for android
+    public static AesDrive1 create(IFile dir, String password, INonceSequencer sequencer) throws IOException {
+        return AesDrive.createDrive(dir, AndroidDrive.class, password, sequencer);
     }
 
     /**
@@ -86,23 +116,6 @@ public class AndroidDrive extends Drive {
         if (!sharedDir.exists())
             sharedDir.mkdir();
         return new File(sharedDir.getAbsolutePath());
-    }
-
-    /**
-     * Get the real file hosted on the android device.
-     *
-     * @param uri         The real file uri
-     * @param isDirectory True if filepath corresponds to a directory.
-     * @return The real file
-     */
-    public IFile getRealFile(String uri, boolean isDirectory) {
-        DocumentFile docFile;
-        if (isDirectory)
-            docFile = DocumentFile.fromTreeUri(AndroidFileSystem.getContext(), Uri.parse(uri));
-        else
-            docFile = DocumentFile.fromSingleUri(AndroidFileSystem.getContext(), Uri.parse(uri));
-        AndroidFile file = new AndroidFile(docFile);
-        return file;
     }
 
     /**
