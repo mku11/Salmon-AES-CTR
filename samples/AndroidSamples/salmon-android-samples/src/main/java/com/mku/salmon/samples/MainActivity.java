@@ -33,8 +33,6 @@ public class MainActivity extends AppCompatActivity {
     private Button httpDriveButton;
     private Button webServiceButton;
 
-
-
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -74,7 +72,6 @@ public class MainActivity extends AppCompatActivity {
         webServiceButton.setOnClickListener((e) -> {
             runActivity(WebServiceDriveActivity.class);
         });
-
     }
 
     private void runActivity(Class<?> cls) {
