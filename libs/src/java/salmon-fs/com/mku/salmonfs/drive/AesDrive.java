@@ -347,7 +347,7 @@ public abstract class AesDrive extends VirtualDrive {
             drive.initialize(dir, createIfNotExists);
             drive.sequencer = sequencer;
         } catch (Exception e) {
-            throw new SecurityException("Could not instantiate a drive", e);
+            throw new SecurityException("Could not initialize the drive: " + e.getMessage(), e);
         }
         return drive;
     }

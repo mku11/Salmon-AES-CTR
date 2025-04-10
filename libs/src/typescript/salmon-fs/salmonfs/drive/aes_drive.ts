@@ -462,7 +462,7 @@ export abstract class AesDrive extends VirtualDrive {
             return drive;
         } catch (e) {
             console.error(e);
-            throw new SecurityException("Could not initialize the drive", e);
+            throw new SecurityException("Could not initialize the drive: " + e.message, e);
         }
     }
 

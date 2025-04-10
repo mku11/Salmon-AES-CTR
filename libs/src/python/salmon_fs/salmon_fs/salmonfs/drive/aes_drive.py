@@ -498,7 +498,7 @@ class AesDrive(VirtualDrive, ABC):
             drive.__sequencer = sequencer
             pass
         except Exception as e:
-            raise SecurityException("Could not initialize the drive") from e
+            raise SecurityException("Could not initialize the drive: " + str(e)) from e
 
         return drive
 
