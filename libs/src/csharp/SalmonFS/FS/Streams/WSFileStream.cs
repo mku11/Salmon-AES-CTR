@@ -170,7 +170,7 @@ public class WSFileStream : RandomAccessStream
     /// <returns></returns>
     public override long Seek(long offset, SeekOrigin origin)
     {
-        long pos = this.position;
+        long pos = this.Position;
 
         if (origin == SeekOrigin.Begin)
             pos = offset;
@@ -180,7 +180,7 @@ public class WSFileStream : RandomAccessStream
             pos = file.Length - offset;
 
         this.Position = pos;
-        return this.position;
+        return this.Position;
     }
 
     /// <summary>

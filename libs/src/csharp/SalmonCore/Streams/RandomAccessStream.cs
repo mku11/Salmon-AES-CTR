@@ -33,7 +33,7 @@ namespace Mku.Streams;
 public abstract class RandomAccessStream
 {
     /// <summary>
-    /// Default buffer size aligned with the default chunk TotalSize
+    /// Default buffer size
     /// </summary>
     public static readonly int DEFAULT_BUFFER_SIZE = 256 * 1024;
 

@@ -122,7 +122,17 @@ public class FileStream : RandomAccessStream
     /// <returns></returns>
     public override long Seek(long offset, SeekOrigin origin)
     {
-        return stream.Seek(offset, origin);
+        long pos = this.Position;
+
+        if (origin == SeekOrigin.Begin)
+            pos = offset;
+        else if (origin == SeekOrigin.Current)
+            pos += offset;
+        else if (origin == SeekOrigin.End)
+            pos = file.Length - offset;
+
+        this.Position = pos;
+        return this.Position;
     }
 
     /// <summary>

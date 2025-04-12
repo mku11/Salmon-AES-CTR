@@ -84,7 +84,7 @@ public class AesStream : RandomAccessStream
     private Integrity.Integrity salmonIntegrity;
 
     /// <summary>
-    /// Default buffer size for all internal streams including Encryptors and Decryptors
+    /// Align size for performance calculating the integrity when available.
     /// </summary>
     public override int AlignSize => salmonIntegrity.ChunkSize > 0 ? salmonIntegrity.ChunkSize : Generator.BLOCK_SIZE;
 
@@ -771,10 +771,9 @@ public class AesStream : RandomAccessStream
             throw new Exception("Stream is in write mode");
 
         // adjust for data integrity
-        int alignSize = HasIntegrity? ChunkSize : Generator.BLOCK_SIZE;
         int backOffset = 32768;
         int bufferSize = 4 * 1024 * 1024;
-        return new InputStreamWrapper(this, 1, bufferSize, backOffset, alignSize);
+        return new InputStreamWrapper(this, 1, bufferSize, backOffset, AlignSize);
     }
 }
 

@@ -63,6 +63,8 @@ public class AesFileInputStream : InputStreamWrapper
         this.TotalSize = salmonFile.Length;
         if (threads == 0)
             threads = DEFAULT_THREADS;
+		if((threads & (threads-1)) != 0)
+            throw new Exception("Threads needs to be a power of 2 (ie 1,2,4,8)");
         this.threads = threads;
         this.PositionEnd = TotalSize - 1;
         CreateStreams();
@@ -119,16 +121,27 @@ public class AesFileInputStream : InputStreamWrapper
         int bytesRead = 0;
         IOException ex = null;
         Task[] tasks = new Task[threads];
-        // Multithreaded decryption jobs
-        int partSize = (int)Math.Ceiling(totalBufferLength / (float)threads);
+		bool needsBackOffset = totalBufferLength == BufferSize;
+        int partSize;
+        if(needsBackOffset) {
+            partSize = (int) Math.Ceiling((totalBufferLength - BackOffset) / (float) threads);
+        } else {
+            partSize = (int) Math.Ceiling(totalBufferLength / (float) threads);
+        }
+		
         for (int i = 0; i < threads; i++)
         {
             int index = i;
             tasks[i] = Task.Run(() =>
             {
                 int start = partSize * index;
+				if(index > 0 && needsBackOffset) {
+                    start += BackOffset;
+                }
                 int length;
-                if (index == threads - 1)
+                if (index == 0 && needsBackOffset) {
+                    length = partSize + BackOffset;
+                } else if (index == threads - 1)
                     length = BufferSize - start;
                 else
                     length = partSize;

@@ -121,7 +121,10 @@ public class InputStreamWrapper : Stream
             bufferSize = DEFAULT_BUFFER_SIZE;
         if (backOffset < 0)
             backOffset = DEFAULT_BACK_OFFSET;
-
+		
+		if(alignSize <= 0 && stream != null)
+            alignSize = stream.AlignSize;
+		
         // align the buffers for performance
         if (alignSize > 0)
         {
@@ -218,11 +221,9 @@ public class InputStreamWrapper : Stream
 
             // if we have the backoffset data in an existing buffer we don't include the backoffset
             // in the new request because we want to prevent network streams resetting.
-            if (!HasBackoffset(startPosition))
+            if (startPosition > 0 && !HasBackoffset(startPosition))
             {
-                // if we're at the start of the stream we ignore the BackOffset
-                if (startPosition > BackOffset)
-                    startPosition -= BackOffset;
+				startPosition -= BackOffset;
             } else
             {
                 length -= BackOffset;
@@ -235,10 +236,18 @@ public class InputStreamWrapper : Stream
             cacheBuffer.StartPos = startPosition;
             cacheBuffer.Count = bytesRead;
         }
+		
+		// align the count also
+        long end = StreamPosition + count;
+        int nCount = (int) (end / AlignSize * AlignSize - StreamPosition);
+        if (nCount > 0 && nCount < count) {
+            count = nCount;
+		}
+		
         minCount = Math.Min(count, (int)(cacheBuffer.Count - StreamPosition + cacheBuffer.StartPos));
         if(minCount < count)
         {
-            throw new Exception("Buffers are not large enough, if you use a backoffset make sure you double the buffer TotalSize");
+            throw new Exception("Buffers are not large enough, if you use a backoffset make sure you double the buffer size");
         }
         Array.Copy(cacheBuffer.Data, (int)(StreamPosition - cacheBuffer.StartPos), buffer, offset, minCount);
 

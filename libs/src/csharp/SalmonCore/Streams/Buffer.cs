@@ -28,8 +28,7 @@ namespace Mku.Streams;
 
 
 /// <summary>
-///  Class will be used to cache decrypted data that can later be read via the ReadAt() method
-///  without requesting frequent decryption reads.
+/// Buffer that can be used for buffered streams.
 /// </summary>
 public class Buffer
 {
