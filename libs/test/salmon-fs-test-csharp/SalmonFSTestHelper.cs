@@ -106,7 +106,7 @@ public class SalmonFSTestHelper
     internal static bool TEST_USE_FILE_INPUT_STREAM = false;
 
     // progress
-    internal static bool ENABLE_FILE_PROGRESS = true;
+    internal static bool ENABLE_FILE_PROGRESS = false;
 
     // test dirs and files
     internal static IFile TEST_INPUT_DIR;
@@ -821,8 +821,12 @@ public class SalmonFSTestHelper
     {
         byte[] buffer = new byte[length + readOffset];
         fileInputStream.Position = start;
-        int bytesRead = fileInputStream.Read(buffer, readOffset, length);
-        Assert.AreEqual(shouldReadLength, bytesRead);
+        int totalBytesRead = 0;
+        int bytesRead;
+        while ((bytesRead = fileInputStream.Read(buffer, readOffset + totalBytesRead, length - totalBytesRead)) > 0) {
+            totalBytesRead += bytesRead;
+        }
+        Assert.AreEqual(shouldReadLength, totalBytesRead);
         byte[] tdata = new byte[buffer.Length];
         Array.Copy(data, start, tdata, readOffset, shouldReadLength);
         CollectionAssert.AreEqual(tdata, buffer);
@@ -894,7 +898,7 @@ public class SalmonFSTestHelper
         AesDrive drive = SalmonFSTestHelper.OpenDrive(vaultDir, SalmonFSTestHelper.DriveClassType, SalmonCoreTestHelper.TEST_PASSWORD, sequencer);
         IVirtualFile root = drive.Root;
         IVirtualFile file = root.GetChild(filename);
-        Console.WriteLine("file TotalSize: " + file.Length);
+        Console.WriteLine("file size: " + file.Length);
         Console.WriteLine("file last modified: " + file.LastDateModified);
         Assert.IsTrue(file.Exists);
 

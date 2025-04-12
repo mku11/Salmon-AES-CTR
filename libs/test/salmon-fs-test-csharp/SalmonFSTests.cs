@@ -57,8 +57,6 @@ public class SalmonFSTests
         int threads = Environment.GetEnvironmentVariable("ENC_THREADS") != null && !Environment.GetEnvironmentVariable("ENC_THREADS").Equals("") ?
             int.Parse(Environment.GetEnvironmentVariable("ENC_THREADS")) : 1;
 
-        //testMode = TestMode.WebService;
-        threads = 2;
 
         SalmonFSTestHelper.SetTestParams(testDir, testMode);
         Console.WriteLine("testDir: " + testDir);
@@ -687,32 +685,43 @@ public class SalmonFSTests
         IFile vaultDir = SalmonFSTestHelper.GenerateFolder(SalmonFSTestHelper.TEST_VAULT_DIRNAME);
         IFile file = SalmonFSTestHelper.TEST_IMPORT_FILE;
 
+		long pos = 3 * Integrity.Integrity.DEFAULT_CHUNK_SIZE + 3;
+
+        Stream stream = file.GetInputStream().AsReadStream();
+        stream.Seek(pos, SeekOrigin.Current);
+        String h1 = SalmonFSTestHelper.GetChecksumStream(stream);
+        stream.Close();
+
         FileSequencer sequencer = SalmonFSTestHelper.CreateSalmonFileSequencer();
         AesDrive drive = SalmonFSTestHelper.CreateDrive(vaultDir, SalmonFSTestHelper.DriveClassType, SalmonCoreTestHelper.TEST_PASSWORD, sequencer);
-        AesFileCommander fileCommander = new AesFileCommander(Integrity.Integrity.DEFAULT_CHUNK_SIZE, Integrity.Integrity.DEFAULT_CHUNK_SIZE, 2);
+        AesFileCommander fileCommander = new AesFileCommander(Integrity.Integrity.DEFAULT_CHUNK_SIZE, Integrity.Integrity.DEFAULT_CHUNK_SIZE,
+			SalmonFSTestHelper.ENC_IMPORT_THREADS);
 
         FileCommander.BatchImportOptions importOptions = new FileCommander.BatchImportOptions();
         importOptions.integrity = true;
         AesFile[] sfiles = fileCommander.ImportFiles(new IFile[] { file }, drive.Root, importOptions);
         fileCommander.Close();
+		Console.WriteLine("files imported");
 
-        long pos = Math.Abs(new Random().NextInt64() % file.Length);
-
+		Console.WriteLine("using 1 thread to read");
         AesFileInputStream fileInputStream1 = new AesFileInputStream(sfiles[0], 4, 4 * 1024 * 1024, 1, Integrity.Integrity.DEFAULT_CHUNK_SIZE);
+		Console.WriteLine("seeking to: " + pos);
         fileInputStream1.Seek(pos, SeekOrigin.Current);
         MD5 md51 = MD5.Create();
         byte[] hash1 = md51.ComputeHash(fileInputStream1);
-        string h1 = Mku.Convert.BitConverter.ToHex(hash1);
+        string h2 = Mku.Convert.BitConverter.ToHex(hash1);
         fileInputStream1.Close();
+		Assert.AreEqual(h1, h2);
 
+		Console.WriteLine("using 2 threads to read");
         AesFileInputStream fileInputStream2 = new AesFileInputStream(sfiles[0], 4, 4 * 1024 * 1024, 2, Integrity.Integrity.DEFAULT_CHUNK_SIZE);
+		Console.WriteLine("seeking to: " + pos);
         fileInputStream2.Seek(pos, SeekOrigin.Current);
         MD5 md52 = MD5.Create();
         byte[] hash2 = md52.ComputeHash(fileInputStream2);
-        string h2 = Mku.Convert.BitConverter.ToHex(hash2);
+        string h3 = Mku.Convert.BitConverter.ToHex(hash2);
         fileInputStream2.Close();
-
-        Assert.AreEqual(h1, h2);
+        Assert.AreEqual(h1, h3);
     }
 
     [TestMethod]

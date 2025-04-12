@@ -170,7 +170,7 @@ public class SalmonCoreTestHelper
         AesStream writer = new AesStream(key, iv, EncryptionMode.Encrypt, outs,
                 EncryptionFormat.Salmon, integrity, hashKey, chunkSize);
 
-        if (bufferSize == 0) // use the internal buffer TotalSize of the memorystream to copy
+        if (bufferSize == 0) // use the internal buffer size of the memorystream to copy
         {
             ins.CopyTo(writer);
         }
@@ -628,7 +628,7 @@ public class SalmonCoreTestHelper
         MemoryStream ms3 = new MemoryStream();
         AesStream salmonStream = new AesStream(key, nonce, EncryptionMode.Encrypt, ms3,
                 EncryptionFormat.Salmon, integrity, hashKey, chunkSize);
-        // we always align the writes to the chunk TotalSize if we enable integrity
+        // we always align the writes to the chunk size if we enable integrity
         if (integrity)
             bufferSize = salmonStream.ChunkSize;
         ms2.CopyTo(salmonStream, bufferSize);
