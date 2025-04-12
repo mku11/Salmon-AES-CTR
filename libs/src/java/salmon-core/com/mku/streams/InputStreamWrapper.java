@@ -107,6 +107,18 @@ public class InputStreamWrapper extends InputStream {
         this(stream, 1, DEFAULT_BUFFER_SIZE, DEFAULT_BACK_OFFSET, 0);
     }
 
+	/**
+     * Instantiates an InputStreamWrapper from a RandomAccessStream with buffer options.
+     *
+     * @param stream       The stream that you want to wrap.
+     * @param buffersCount The number of buffers to use
+     * @param bufferSize   The buffer size
+     * @param backOffset   The back offset
+     */
+    public InputStreamWrapper(RandomAccessStream stream, int buffersCount, int bufferSize, int backOffset) {
+		this(stream, buffersCount, bufferSize, backOffset, 0);
+	}
+		
     /**
      * Instantiates an InputStreamWrapper from a RandomAccessStream with buffer options.
      *

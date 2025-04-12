@@ -50,6 +50,15 @@ public class AesFileInputStream extends InputStreamWrapper {
     private ExecutorService executor;
 
 
+	/**
+     * Instantiate a seekable stream from an encrypted file source
+     *
+     * @param salmonFile   The source file.
+     * @throws IOException Thrown if there is an IO error.
+     */
+    public AesFileInputStream(AesFile salmonFile) throws IOException {
+		this(salmonFile, 1, 0, 1, 32768);
+	}
     /**
      * Instantiate a seekable stream from an encrypted file source
      *
