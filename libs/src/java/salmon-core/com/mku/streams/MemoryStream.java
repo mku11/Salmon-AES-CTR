@@ -207,7 +207,8 @@ public class MemoryStream extends RandomAccessStream {
         } else if (origin == SeekOrigin.End) {
             nPos = (int) (_bytes.length - offset);
         }
-        checkAndResize(nPos);
+		if (nPos > this._length)
+			checkAndResize(nPos);
         setPosition(nPos);
         return getPosition();
     }
