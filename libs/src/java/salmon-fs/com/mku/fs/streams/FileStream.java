@@ -180,7 +180,7 @@ public class FileStream extends RandomAccessStream {
      */
     @Override
     public long seek(long offset, SeekOrigin origin) throws IOException {
-        long pos = fileChannel.position();
+        long pos = this.getPosition();
 
         if (origin == SeekOrigin.Begin)
             pos = offset;
@@ -189,8 +189,8 @@ public class FileStream extends RandomAccessStream {
         else if (origin == SeekOrigin.End)
             pos = file.getLength() - offset;
 
-        fileChannel.position(pos);
-        return fileChannel.position();
+        this.setPosition(pos);
+        return getPosition();
 
     }
 

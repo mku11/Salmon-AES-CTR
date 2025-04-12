@@ -23,16 +23,15 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 */
 
+import com.mku.salmon.Generator;
+import com.mku.salmon.SecurityException;
 import com.mku.salmon.integrity.IntegrityException;
 import com.mku.salmon.streams.AesStream;
 import com.mku.salmonfs.file.AesFile;
-import com.mku.streams.RandomAccessStream;
-import com.mku.salmon.SecurityException;
+import com.mku.streams.Buffer;
+import com.mku.streams.InputStreamWrapper;
 
 import java.io.IOException;
-import java.io.InputStream;
-import java.util.Arrays;
-import java.util.LinkedList;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -43,78 +42,34 @@ import java.util.concurrent.atomic.AtomicReference;
  * This class provides a seekable source with parallel streams and cached buffers
  * for performance.
  */
-public class AesFileInputStream extends InputStream {
-    private static final String TAG = AesFileInputStream.class.getName();
-
-    // Default cache buffer should be high enough for some mpeg videos to work
-    // the cache buffers should be aligned to the AesFile chunk size for efficiency
-    private static final int DEFAULT_BUFFER_SIZE = 512 * 1024;
-
-    // default threads is one but you can increase it
+public class AesFileInputStream extends InputStreamWrapper {
     private static final int DEFAULT_THREADS = 1;
-
-    private static final int DEFAULT_BUFFERS = 3;
-
-    private static final int MAX_BUFFERS = 6;
-
-    private final int buffersCount;
-    private CacheBuffer[] buffers = null;
     private AesStream[] streams;
-    private final AesFile aesFile;
-    private final int cacheBufferSize;
+    private final AesFile salmonFile;
     private final int threads;
     private ExecutorService executor;
-    private long position;
-    private long size;
 
-    /**
-     * We reuse the least recently used buffer. Since the buffer count is relative
-     * small (see {@link #MAX_BUFFERS}) there is no need for a fast-access lru queue
-     * so a simple linked list of keeping the indexes is adequately fast.
-     */
-    private final LinkedList<Integer> lruBuffersIndex = new LinkedList<>();
-
-    /**
-     * Negative offset for the buffers. Some stream consumers might request data right before
-     * the last request. We provide this offset so we don't make multiple requests for filling
-     * the buffers ending up with too much overlapping data.
-     */
-    private final int backOffset;
 
     /**
      * Instantiate a seekable stream from an encrypted file source
      *
-     * @param aesFile      The source file.
+     * @param salmonFile   The source file.
      * @param buffersCount Number of buffers to use.
      * @param bufferSize   The length of each buffer.
      * @param threads      The number of threads/streams to source the file in parallel.
      * @param backOffset   The back offset.
      * @throws IOException Thrown if there is an IO error.
      */
-    public AesFileInputStream(AesFile aesFile,
-                              int buffersCount, int bufferSize, int threads, int backOffset)
-            throws IOException {
-        this.aesFile = aesFile;
-        this.size = aesFile.getLength();
-        if (buffersCount == 0)
-            buffersCount = DEFAULT_BUFFERS;
-        if (buffersCount > MAX_BUFFERS)
-            buffersCount = MAX_BUFFERS;
-        if (bufferSize == 0)
-            bufferSize = DEFAULT_BUFFER_SIZE;
-        if (backOffset > 0)
-            bufferSize += backOffset;
+    public AesFileInputStream(AesFile salmonFile, int buffersCount, int bufferSize, int threads, int backOffset) throws IOException {
+        super(null, buffersCount, bufferSize, backOffset, salmonFile.getFileChunkSize() > 0 ? salmonFile.getFileChunkSize() : Generator.BLOCK_SIZE);
+        this.salmonFile = salmonFile;
+        this.totalSize = salmonFile.getLength();
         if (threads == 0)
             threads = DEFAULT_THREADS;
-
-        this.buffersCount = buffersCount;
-        this.cacheBufferSize = bufferSize;
+        if((threads & (threads-1)) != 0)
+            throw new RuntimeException("Threads needs to be a power of 2 (ie 1,2,4,8)");
         this.threads = threads;
-        this.backOffset = backOffset;
-        this.positionStart = 0;
-        this.positionEnd = size - 1;
-
-        createBuffers();
+        this.setPositionEnd(totalSize - 1);
         createStreams();
     }
 
@@ -126,159 +81,63 @@ public class AesFileInputStream extends InputStream {
         streams = new AesStream[threads];
         try {
             for (int i = 0; i < threads; i++) {
-                streams[i] = aesFile.getInputStream();
+                streams[i] = salmonFile.getInputStream();
             }
         } catch (SecurityException | IntegrityException ex) {
             throw new IOException("Could not create streams", ex);
         }
     }
 
-    /**
-     * Create cache buffers that will be used for sourcing the files.
-     * These will help reducing multiple small decryption reads from the encrypted source.
-     * The first buffer will be sourcing at the start of the encrypted file where the header and indexing are
-     * The rest of the buffers can be placed to whatever position the user slides to
-     */
-    private void createBuffers() {
-        buffers = new CacheBuffer[buffersCount];
-        for (int i = 0; i < buffers.length; i++)
-            buffers[i] = new CacheBuffer(cacheBufferSize);
-    }
-
-    /**
-     * Skip a number of bytes.
-     *
-     * @param bytes the number of bytes to be skipped.
-     * @return The byte skipped
-     */
-    public long skip(long bytes) {
-        bytes += positionStart;
-        long currPos = this.position;
-        if (this.position + bytes > this.size)
-            this.position = this.size;
-        else
-            this.position += bytes;
-        return this.position - currPos;
-    }
-
-    /**
-     * Reset the stream.
-     */
-    @Override
-    public void reset() {
-        position = 0;
-    }
-
-    /**
-     * Read a byte from the stream.
-     *
-     * @return The bytes read
-     * @throws IOException Thrown if there is an IO error.
-     */
-    @Override
-    public int read() throws IOException {
-        byte[] buffer = new byte[1];
-
-        int bytesRead = read(buffer, 0, 1);
-        position += bytesRead;
-        return bytesRead;
-    }
-
-    /**
-     * Reads and decrypts the contents of an encrypted file
-     *
-     * @param buffer The buffer that will store the decrypted contents
-     * @param offset The position on the buffer that the decrypted data will start
-     * @param count  The length of the data requested
-     */
-    @Override
-    public int read(byte[] buffer, int offset, int count) throws IOException {
-        if (position >= positionEnd + 1)
-            return -1;
-
-        int minCount;
-        int bytesRead;
-
-        // truncate the count so getCacheBuffer() reports the correct buffer
-        count = (int) Math.min(count, size - position);
-
-        CacheBuffer cacheBuffer = getCacheBuffer(position, count);
-        if (cacheBuffer == null) {
-            cacheBuffer = getAvailCacheBuffer();
-            // the stream is closed
-            if (cacheBuffer == null)
-                return -1;
-            // for some applications like media players they make a second immediate request
-            // in a position a few bytes before the first request. To make
-            // sure we don't make 2 overlapping requests we start the buffer
-            // a position ahead of the first request.
-            long startPosition = position - backOffset;
-            if (startPosition < 0)
-                startPosition = 0;
-
-            bytesRead = fillBuffer(cacheBuffer, startPosition, cacheBufferSize);
-
-            if (bytesRead <= 0)
-                return -1;
-            cacheBuffer.startPos = startPosition;
-            cacheBuffer.count = bytesRead;
-        }
-        minCount = Math.min(count, (int) (cacheBuffer.count - position + cacheBuffer.startPos));
-        System.arraycopy(cacheBuffer.buffer, (int) (position - cacheBuffer.startPos), buffer, offset, minCount);
-
-        position += minCount;
-        return minCount;
-    }
 
     /**
      * Fills a cache buffer with the decrypted data from the encrypted source file.
      *
      * @param cacheBuffer The cache buffer that will store the decrypted contents
-     * @param bufferSize  The length of the data requested
+     * @param length      The length of the data requested
      */
-    private synchronized int fillBuffer(CacheBuffer cacheBuffer, long startPosition, int bufferSize) throws IOException {
+    @Override
+    protected synchronized int fillBuffer(Buffer cacheBuffer, long startPosition, int length) throws IOException {
         int bytesRead;
         if (threads == 1) {
-            bytesRead = fillBufferPart(cacheBuffer, startPosition, 0, bufferSize, streams[0]);
+            bytesRead = fillBufferPart(cacheBuffer, startPosition, 0, length, streams[0]);
         } else {
-            bytesRead = fillBufferMulti(cacheBuffer, startPosition, bufferSize);
+            bytesRead = fillBufferMulti(cacheBuffer, startPosition, length);
         }
         return bytesRead;
     }
 
-    /**
-     * Fills a cache buffer with the decrypted data from a part of an encrypted file
-     *
-     * @param cacheBuffer The cache buffer that will store the decrypted contents
-     * @param bufferSize  The length of the data requested
-     * @param aesStream   The stream that will be used to read from
-     */
-    private int fillBufferPart(CacheBuffer cacheBuffer, long start, int offset, int bufferSize,
-                               AesStream aesStream) throws IOException {
-        aesStream.seek(start, RandomAccessStream.SeekOrigin.Begin);
-        int totalBytesRead = aesStream.read(cacheBuffer.buffer, offset, bufferSize);
-        return totalBytesRead;
-    }
 
     /**
      * Fill the buffer using parallel streams for performance
      *
-     * @param cacheBuffer   The cache buffer that will store the decrypted data
-     * @param startPosition The source file position the read will start from
-     * @param bufferSize    The buffer size that will be used to read from the file
+     * @param cacheBuffer       The cache buffer that will store the decrypted data
+     * @param startPosition     The source file position the read will start from
+     * @param totalBufferLength The buffer size that will be used to read from the file
      */
-    private int fillBufferMulti(CacheBuffer cacheBuffer, long startPosition, int bufferSize) {
+    private int fillBufferMulti(Buffer cacheBuffer, long startPosition, int totalBufferLength) {
         final int[] bytesRead = {0};
         AtomicReference<IOException> ex = new AtomicReference<>();
         // Multithreaded decryption jobs
         CountDownLatch countDownLatch = new CountDownLatch(threads);
-        int partSize = (int) Math.ceil(bufferSize / (float) threads);
+        boolean needsBackOffset = totalBufferLength == bufferSize;
+        int partSize;
+        if(needsBackOffset) {
+            partSize = (int) Math.ceil((totalBufferLength - getBackOffset()) / (float) threads);
+        } else {
+            partSize = (int) Math.ceil(totalBufferLength / (float) threads);
+        }
+
         for (int i = 0; i < threads; i++) {
             final int index = i;
             executor.submit(() -> {
                 int start = partSize * index;
+                if(index > 0 && needsBackOffset) {
+                    start += getBackOffset();
+                }
                 int length;
-                if (index == threads - 1)
+                if (index == 0 && needsBackOffset) {
+                    length = partSize + getBackOffset();
+                } else if (index == threads - 1)
                     length = bufferSize - start;
                 else
                     length = partSize;
@@ -311,117 +170,14 @@ public class AesFileInputStream extends InputStream {
     }
 
     /**
-     * Returns an available cache buffer if there is none then reuse the least recently used one.
-     */
-    private synchronized CacheBuffer getAvailCacheBuffer() {
-        if (lruBuffersIndex.size() == buffersCount) {
-            // getting least recently used buffer
-            int index = lruBuffersIndex.getLast();
-            // promote to the top
-            lruBuffersIndex.remove((Integer) index);
-            lruBuffersIndex.addFirst(index);
-            return buffers[lruBuffersIndex.getLast()];
-        }
-        for (int i = 0; i < buffers.length; i++) {
-            CacheBuffer buffer = buffers[i];
-            if (buffer != null && buffer.count == 0) {
-                lruBuffersIndex.addFirst(i);
-                return buffer;
-            }
-        }
-        if (buffers[buffers.length - 1] != null)
-            return buffers[buffers.length - 1];
-        else
-            return null;
-    }
-
-    /**
-     * Returns the buffer that contains the data requested.
-     *
-     * @param position The source file position of the data to be read
-     */
-    private synchronized CacheBuffer getCacheBuffer(long position, int count) {
-        for (int i = 0; i < buffers.length; i++) {
-            CacheBuffer buffer = buffers[i];
-            if (buffer != null && position >= buffer.startPos && position + count <= buffer.startPos + buffer.count) {
-                // promote buffer to the front
-                lruBuffersIndex.remove((Integer) i);
-                lruBuffersIndex.addFirst(i);
-                return buffer;
-            }
-        }
-        return null;
-    }
-
-    /**
-     * Get the size of the stream.
-     *
-     * @return The size
-     */
-    public long getLength() {
-        return positionEnd - positionStart + 1;
-    }
-
-    private long positionStart;
-
-    /**
-     * Get the start position for the stream.
-     *
-     * @return The start position.
-     */
-    public long getPositionStart() {
-        return positionStart;
-    }
-
-    /**
-     * Set the start position for the stream.
-     *
-     * @param pos The start position.
-     */
-    public void setPositionStart(long pos) {
-        positionStart = pos;
-    }
-
-    private long positionEnd;
-
-    /**
-     * Get the end position for the stream.
-     *
-     * @return The end position.
-     */
-    public long getPositionEnd() {
-        return positionEnd;
-    }
-
-    /**
-     * Set the end position for the stream.
-     *
-     * @param pos The end position.
-     */
-    public void setPositionEnd(long pos) {
-        positionEnd = pos;
-    }
-
-    /**
      * Close the stream and associated backed streams and clear buffers.
      *
      * @throws IOException Thrown if there is an IO error.
      */
     public void close() throws IOException {
         closeStreams();
-        clearBuffers();
         executor.shutdownNow();
-    }
-
-    /**
-     * Clear all buffers.
-     */
-    private synchronized void clearBuffers() {
-        for (int i = 0; i < buffers.length; i++) {
-            if (buffers[i] != null)
-                buffers[i].clear();
-            buffers[i] = null;
-        }
+        super.close();
     }
 
     /**
@@ -434,34 +190,6 @@ public class AesFileInputStream extends InputStream {
             if (streams[i] != null)
                 streams[i].close();
             streams[i] = null;
-        }
-    }
-
-    /**
-     * Class is used to cache decrypted data that can later be read
-     * without requesting frequent decryption reads from the base stream.
-     */
-    //TODO: replace the CacheBuffer with a MemoryStream to simplify the code
-    private static class CacheBuffer {
-        byte[] buffer;
-        long startPos = 0;
-        long count = 0;
-
-        /**
-         * Instantiate a cache buffer.
-         *
-         * @param bufferSize The buffer size
-         */
-        CacheBuffer(int bufferSize) {
-            buffer = new byte[bufferSize];
-        }
-
-        /**
-         * Clear the buffer.
-         */
-        void clear() {
-            if (buffer != null)
-                Arrays.fill(buffer, 0, buffer.length, (byte) 0);
         }
     }
 }

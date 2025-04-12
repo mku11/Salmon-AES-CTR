@@ -89,7 +89,7 @@ public class HttpFileStream extends RandomAccessStream {
                 }
                 conn.connect();
                 checkStatus(conn, startPosition > 0 ? HttpURLConnection.HTTP_PARTIAL : HttpURLConnection.HTTP_OK);
-                this.inputStream = new BufferedInputStream(conn.getInputStream());
+                this.inputStream = new BufferedInputStream(conn.getInputStream(), DEFAULT_BUFFER_SIZE);
             } catch (Exception e) {
                 throw new RuntimeException(e);
             } finally {

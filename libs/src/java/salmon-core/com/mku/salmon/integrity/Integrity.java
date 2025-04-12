@@ -37,10 +37,6 @@ import java.util.List;
  */
 public class Integrity {
     /**
-     * Maximum chunk size for data integrity.
-     */
-    public static final int MAX_CHUNK_SIZE = 8 * 1024 * 1024;
-    /**
      * Default chunk size for integrity.
      */
     public static final int DEFAULT_CHUNK_SIZE = 256 * 1024;
@@ -81,9 +77,9 @@ public class Integrity {
      */
     public Integrity(boolean integrity, byte[] key, int chunkSize, IHashProvider provider, int hashSize) {
         if (chunkSize < 0 || (chunkSize > 0 && chunkSize < AesCTRTransformer.BLOCK_SIZE)
-                || (chunkSize > 0 && chunkSize % AesCTRTransformer.BLOCK_SIZE != 0) || chunkSize > MAX_CHUNK_SIZE) {
+                || (chunkSize > 0 && chunkSize % AesCTRTransformer.BLOCK_SIZE != 0)) {
             throw new IntegrityException("Invalid chunk size, specify zero for default value or a positive number multiple of: "
-                    + AesCTRTransformer.BLOCK_SIZE + " and less than: " + Integrity.MAX_CHUNK_SIZE + " bytes");
+                    + AesCTRTransformer.BLOCK_SIZE);
         }
         if (integrity && key == null)
             throw new SecurityException("You need a hash to use with integrity");

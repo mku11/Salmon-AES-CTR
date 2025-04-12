@@ -25,22 +25,21 @@ SOFTWARE.
 */
 
 import com.mku.convert.BitConverter;
-import com.mku.salmon.streams.EncryptionFormat;
-import com.mku.streams.InputStreamWrapper;
-import com.mku.streams.MemoryStream;
-import com.mku.streams.RandomAccessStream;
 import com.mku.salmon.Decryptor;
 import com.mku.salmon.Encryptor;
 import com.mku.salmon.Generator;
 import com.mku.salmon.integrity.HMACSHA256Provider;
 import com.mku.salmon.integrity.IHashProvider;
 import com.mku.salmon.integrity.Integrity;
+import com.mku.salmon.streams.AesStream;
+import com.mku.salmon.streams.EncryptionFormat;
 import com.mku.salmon.streams.EncryptionMode;
 import com.mku.salmon.streams.ProviderType;
-import com.mku.salmon.streams.AesStream;
-import com.mku.salmon.transform.ICTRTransformer;
 import com.mku.salmon.transform.AesCTRTransformer;
+import com.mku.salmon.transform.ICTRTransformer;
 import com.mku.salmon.transform.TransformerFactory;
+import com.mku.streams.MemoryStream;
+import com.mku.streams.RandomAccessStream;
 
 import javax.crypto.Cipher;
 import javax.crypto.spec.IvParameterSpec;
@@ -611,7 +610,7 @@ public class SalmonCoreTestHelper {
         // we always align the writes to the chunk size if we enable integrity
         if (integrity)
             bufferSize = aesStream.getChunkSize();
-        ms2.copyTo(aesStream, bufferSize, null);
+        ms2.copyTo(aesStream, bufferSize);
         aesStream.close();
         ms2.close();
         byte[] encData = ms3.toArray();
@@ -622,12 +621,12 @@ public class SalmonCoreTestHelper {
         MemoryStream ms4 = new MemoryStream();
         AesStream aesStream2 = new AesStream(key, nonce, EncryptionMode.Decrypt, ms3,
                 EncryptionFormat.Salmon, integrity, hashKey, chunkSize);
-        aesStream2.copyTo(ms4, bufferSize, null);
+        aesStream2.copyTo(ms4, bufferSize);
         aesStream2.close();
         ms3.close();
         ms4.setPosition(0);
         MessageDigest md2 = MessageDigest.getInstance("SHA-256");
-        DigestInputStream dis2 = new DigestInputStream(new InputStreamWrapper(ms4), md2);
+        DigestInputStream dis2 = new DigestInputStream(ms4.asReadStream(), md2);
         byte[] digest2 = md2.digest();
         ms4.close();
         dis2.close();

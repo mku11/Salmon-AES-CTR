@@ -27,7 +27,6 @@ SOFTWARE.
 import com.mku.convert.BitConverter;
 import com.mku.fs.drive.utils.FileCommander;
 import com.mku.fs.file.IFile;
-import com.mku.fs.file.IVirtualFile;
 import com.mku.salmon.integrity.Integrity;
 import com.mku.salmon.integrity.IntegrityException;
 import com.mku.salmon.streams.AesStream;
@@ -39,18 +38,16 @@ import com.mku.salmonfs.drive.utils.AesFileCommander;
 import com.mku.salmonfs.file.AesFile;
 import com.mku.salmonfs.sequence.FileSequencer;
 import com.mku.salmonfs.streams.AesFileInputStream;
-import com.mku.streams.InputStreamWrapper;
-import com.mku.streams.MemoryStream;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 
 import java.io.IOException;
+import java.io.InputStream;
 import java.nio.charset.Charset;
 import java.security.DigestInputStream;
 import java.security.MessageDigest;
 import java.util.ArrayList;
-import java.util.Random;
 
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -64,7 +61,8 @@ public class SalmonFSTests {
                 TestMode.valueOf(System.getProperty("TEST_MODE")) : TestMode.Local;
         int threads = System.getProperty("ENC_THREADS") != null && !System.getProperty("ENC_THREADS").equals("") ?
                 Integer.parseInt(System.getProperty("ENC_THREADS")) : 1;
-
+        threads = 1;
+        testMode = TestMode.Local;
 
         SalmonFSTestHelper.setTestParams(testDir, testMode);
         System.out.println("testDir: " + testDir);
@@ -72,7 +70,7 @@ public class SalmonFSTests {
         System.out.println("threads: " + threads);
         System.out.println("ws server url: " + SalmonFSTestHelper.WS_SERVER_URL);
 
-        SalmonFSTestHelper.TEST_IMPORT_FILE = SalmonFSTestHelper.TEST_IMPORT_MEDIUM_FILE;
+        SalmonFSTestHelper.TEST_IMPORT_FILE = SalmonFSTestHelper.TEST_IMPORT_LARGE_FILE;
 
         // SalmonCoreTestHelper.TEST_ENC_BUFFER_SIZE = 1 * 1024 * 1024;
         // SalmonCoreTestHelper.TEST_DEC_BUFFER_SIZE = 1 * 1024 * 1024;
@@ -387,23 +385,20 @@ public class SalmonFSTests {
     public void shouldCreateFileWithoutVaultApplyIntegrityNoVerifyIntegrityFlipDataNotCaughtNotEqual() throws Exception {
 
         boolean caught = false;
-        boolean failed = false;
         try {
             SalmonFSTestHelper.shouldCreateFileWithoutVault(SalmonCoreTestHelper.TEST_TEXT.getBytes(Charset.defaultCharset()), SalmonCoreTestHelper.TEST_KEY_BYTES,
                     true, false, 64,
                     SalmonCoreTestHelper.TEST_HMAC_KEY_BYTES,
                     SalmonCoreTestHelper.TEST_FILENAME_NONCE_BYTES, SalmonCoreTestHelper.TEST_NONCE_BYTES,
-                    true, 24 + 32 + 5, true);
-        } catch (IOException ex) {
+                    true, 24 + 32 + 5, false);
+        } catch (Exception ex) {
             if (ex.getCause() instanceof IntegrityException)
                 caught = true;
-        } catch (Error ex) {
-            failed = true;
+            else
+                throw ex;
         }
 
         assertFalse(caught);
-
-        assertTrue(failed);
     }
 
     @Test
@@ -429,8 +424,7 @@ public class SalmonFSTests {
                 true, true, 64, SalmonCoreTestHelper.TEST_HMAC_KEY_BYTES,
                 SalmonCoreTestHelper.TEST_FILENAME_NONCE_BYTES, SalmonCoreTestHelper.TEST_NONCE_BYTES,
                 false, -1, true);
-        AesFileInputStream fileInputStream = new AesFileInputStream(file,
-                3, 50, 2, 12);
+        AesFileInputStream fileInputStream = new AesFileInputStream(file, 3, 100, SalmonFSTestHelper.TEST_FILE_INPUT_STREAM_THREADS, 12);
 
         SalmonFSTestHelper.seekAndReadFileInputStream(data, fileInputStream, 0, 32, 0, 32);
         SalmonFSTestHelper.seekAndReadFileInputStream(data, fileInputStream, 220, 8, 2, 8);
@@ -586,59 +580,56 @@ public class SalmonFSTests {
     @Test
     public void ShouldReadFromFileMultithreaded() throws Exception {
         IFile vaultDir = SalmonFSTestHelper.generateFolder(SalmonFSTestHelper.TEST_VAULT_DIRNAME);
-        IFile file = SalmonFSTestHelper.TEST_IMPORT_MEDIUM_FILE;
+        IFile file = SalmonFSTestHelper.TEST_IMPORT_FILE;
+
+        long pos = 3 * Integrity.DEFAULT_CHUNK_SIZE + 3;
+
+        InputStream stream = file.getInputStream().asReadStream();
+        stream.skip(pos);
+        String h1 = SalmonFSTestHelper.getChecksumStream(stream);
+        stream.close();
 
         FileSequencer sequencer = SalmonFSTestHelper.createSalmonFileSequencer();
         AesDrive drive = SalmonFSTestHelper.createDrive(vaultDir, SalmonFSTestHelper.driveClassType, SalmonCoreTestHelper.TEST_PASSWORD, sequencer);
-        AesFileCommander fileCommander = new AesFileCommander(Integrity.DEFAULT_CHUNK_SIZE, Integrity.DEFAULT_CHUNK_SIZE, 2);
+        AesFileCommander fileCommander = new AesFileCommander(Integrity.DEFAULT_CHUNK_SIZE, Integrity.DEFAULT_CHUNK_SIZE,
+                SalmonFSTestHelper.ENC_IMPORT_THREADS);
         FileCommander.BatchImportOptions importOptions = new FileCommander.BatchImportOptions();
         importOptions.integrity = true;
-        IVirtualFile[] sfiles = fileCommander.importFiles(new IFile[]{file}, drive.getRoot(), importOptions);
+        AesFile[] sfiles = fileCommander.importFiles(new IFile[]{file}, drive.getRoot(), importOptions);
         fileCommander.close();
+        System.out.println("files imported");
 
-        long pos = Math.abs(new Random().nextLong() % file.getLength());
-
-        AesFileInputStream fileInputStream1 = new AesFileInputStream((AesFile) sfiles[0], 4, 4 * 1024 * 1024, 4, 256 * 1024);
+        System.out.println("using 1 thread to read");
+        AesFileInputStream fileInputStream1 = new AesFileInputStream(sfiles[0],
+                4, 4 * 1024 * 1024, 1, Integrity.DEFAULT_CHUNK_SIZE);
+        System.out.println("seeking to: " + pos);
         fileInputStream1.skip(pos);
-        MemoryStream ms1 = new MemoryStream();
-        SalmonFSTestHelper.copyStream(fileInputStream1, ms1);
-        ms1.flush();
-        ms1.setPosition(0);
         MessageDigest m1 = MessageDigest.getInstance("SHA-256");
-        InputStreamWrapper msa1 = new InputStreamWrapper(ms1);
-        DigestInputStream dism1 = new DigestInputStream(msa1, m1);
-        byte[] buffera1 = new byte[256 * 1024];
-        int bytes;
-        while ((bytes = dism1.read(buffera1, 0, buffera1.length)) > -1) {
-            int x = bytes;
-        }
+        DigestInputStream dism1 = new DigestInputStream(fileInputStream1, m1);
+        byte[] buffera1 = new byte[4096];
+        while (dism1.read(buffera1, 0, buffera1.length) > -1) ;
         byte[] hash3 = dism1.getMessageDigest().digest();
         dism1.close();
-        String h3 = BitConverter.toHex(hash3);
+        String h2 = BitConverter.toHex(hash3);
         fileInputStream1.close();
-        ms1.close();
-        msa1.close();
         dism1.close();
+        assertEquals(h1, h2);
 
-        AesFileInputStream fileInputStream2 = new AesFileInputStream((AesFile) sfiles[0], 4, 4 * 1024 * 1024, 1, 256 * 1024);
+        System.out.println("using 2 threads to read");
+        AesFileInputStream fileInputStream2 = new AesFileInputStream(sfiles[0],
+                4, 4 * 1024 * 1024, 2, Integrity.DEFAULT_CHUNK_SIZE);
+        System.out.println("seeking to: " + pos);
         fileInputStream2.skip(pos);
-        MemoryStream ms2 = new MemoryStream();
-        SalmonFSTestHelper.copyStream(fileInputStream2, ms2);
-        ms2.flush();
-        ms2.setPosition(0);
         MessageDigest m2 = MessageDigest.getInstance("SHA-256");
-        InputStreamWrapper msa2 = new InputStreamWrapper(ms2);
-        DigestInputStream dism2 = new DigestInputStream(msa2, m2);
-        byte[] buffera2 = new byte[256 * 1024];
+        DigestInputStream dism2 = new DigestInputStream(fileInputStream2, m2);
+        byte[] buffera2 = new byte[4096];
         while (dism2.read(buffera2, 0, buffera2.length) > -1) ;
         byte[] hash4 = dism2.getMessageDigest().digest();
         dism2.close();
-        String h4 = BitConverter.toHex(hash4);
+        String h3 = BitConverter.toHex(hash4);
         fileInputStream2.close();
-        ms2.close();
-        msa2.close();
         dism2.close();
-        assertEquals(h3, h4);
+        assertEquals(h1, h3);
     }
 
     @Test

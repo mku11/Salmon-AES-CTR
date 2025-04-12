@@ -79,6 +79,7 @@ public class SalmonFSTestHelper {
     static String TEST_VAULT_DIRNAME = "vault";
     static String TEST_OPER_DIRNAME = "files";
     static String TEST_EXPORT_AUTH_DIRNAME = "auth";
+    static String TEST_EXPORT_DIRNAME = "export";
     static String TEST_IMPORT_TINY_FILENAME = "tiny_test.txt";
     static String TEST_IMPORT_SMALL_FILENAME = "small_test.dat";
     static String TEST_IMPORT_MEDIUM_FILENAME = "medium_test.dat";
@@ -98,7 +99,8 @@ public class SalmonFSTestHelper {
     static WSFile.Credentials credentials = new WSFile.Credentials("user", "password");
 
     // HTTP server (Read-only)
-    static String HTTP_SERVER_DEFAULT_URL = "http://localhost:8000";
+//    static String HTTP_SERVER_DEFAULT_URL = "http://localhost:8000";
+    static String HTTP_SERVER_DEFAULT_URL = "http://localhost";
     static String HTTP_SERVER_URL = System.getProperty("HTTP_SERVER_URL") != null && !System.getProperty("HTTP_SERVER_URL").equals("") ?
             System.getProperty("HTTP_SERVER_URL") : HTTP_SERVER_DEFAULT_URL;
     static String HTTP_SERVER_VIRTUAL_URL = SalmonFSTestHelper.HTTP_SERVER_URL + "/test";
@@ -139,6 +141,7 @@ public class SalmonFSTestHelper {
     static IFile TEST_HTTP_FILE;
     static IFile TEST_SEQ_DIR;
     static IFile TEST_EXPORT_AUTH_DIR;
+    static IFile TEST_EXPORT_DIR;
     static AesFileImporter fileImporter;
     static AesFileExporter fileExporter;
     public static INonceSequenceSerializer sequenceSerializer = new SequenceSerializer();
@@ -169,6 +172,7 @@ public class SalmonFSTestHelper {
         SalmonFSTestHelper.WS_TEST_DIR = SalmonFSTestHelper.createDir(SalmonFSTestHelper.TEST_ROOT_DIR, SalmonFSTestHelper.WS_TEST_DIRNAME);
         SalmonFSTestHelper.HTTP_TEST_DIR = SalmonFSTestHelper.createDir(SalmonFSTestHelper.TEST_ROOT_DIR, SalmonFSTestHelper.HTTP_TEST_DIRNAME);
         SalmonFSTestHelper.TEST_SEQ_DIR = SalmonFSTestHelper.createDir(SalmonFSTestHelper.TEST_ROOT_DIR, SalmonFSTestHelper.TEST_SEQ_DIRNAME);
+        SalmonFSTestHelper.TEST_EXPORT_DIR = SalmonFSTestHelper.createDir(SalmonFSTestHelper.TEST_ROOT_DIR, SalmonFSTestHelper.TEST_EXPORT_DIRNAME);
         SalmonFSTestHelper.TEST_EXPORT_AUTH_DIR = SalmonFSTestHelper.createDir(SalmonFSTestHelper.TEST_ROOT_DIR, SalmonFSTestHelper.TEST_EXPORT_AUTH_DIRNAME);
         SalmonFSTestHelper.HTTP_VAULT_DIR = new HttpFile(SalmonFSTestHelper.HTTP_VAULT_DIR_URL);
         SalmonFSTestHelper.createTestFiles();
@@ -229,8 +233,8 @@ public class SalmonFSTestHelper {
                 SalmonFSTestHelper.TEST_IMPORT_LARGE_FILE
         };
         AesFileImporter importer = new AesFileImporter(SalmonFSTestHelper.ENC_IMPORT_BUFFER_SIZE, SalmonFSTestHelper.ENC_IMPORT_THREADS);
-		AesFileImporter.FileImportOptions importOptions = new AesFileImporter.FileImportOptions();
-		importOptions.integrity = true;
+        AesFileImporter.FileImportOptions importOptions = new AesFileImporter.FileImportOptions();
+        importOptions.integrity = true;
         for (IFile importFile : importFiles) {
             importer.importFile(importFile, rootDir, importOptions);
         }
@@ -238,7 +242,7 @@ public class SalmonFSTestHelper {
     }
 
     public static void createFile(IFile file, String contents) throws Exception {
-        if(file.exists())
+        if (file.exists())
             return;
         RandomAccessStream stream = file.getOutputStream();
         byte[] data = contents.getBytes();
@@ -301,7 +305,7 @@ public class SalmonFSTestHelper {
     }
 
     public static String getChecksum(IFile realFile) throws NoSuchAlgorithmException, IOException {
-        InputStreamWrapper stream = new InputStreamWrapper(realFile.getInputStream());
+        InputStream stream = realFile.getInputStream().asReadStream();
         return getChecksumStream(stream);
     }
 
@@ -346,11 +350,11 @@ public class SalmonFSTestHelper {
         int chunkSize = aesFile.getFileChunkSize();
         if (chunkSize == 0 || !verifyFileIntegrity)
             aesFile.setVerifyIntegrity(false);
-		else
+        else
             aesFile.setVerifyIntegrity(true);
 
         assertTrue(aesFile.exists());
-        String hashPostImport = SalmonFSTestHelper.getChecksumStream(new InputStreamWrapper(aesFile.getInputStream()));
+        String hashPostImport = SalmonFSTestHelper.getChecksumStream(aesFile.getInputStream().asReadStream());
         if (shouldBeEqual)
             assertEquals(hashPreImport, hashPostImport);
 
@@ -381,13 +385,14 @@ public class SalmonFSTestHelper {
         int chunkSize2 = aesFile.getFileChunkSize();
         if (chunkSize2 > 0 && verifyFileIntegrity)
             aesFile.setVerifyIntegrity(true);
-		else
+        else
             aesFile.setVerifyIntegrity(false);
         FileExporter.FileExportOptions exportOptions = new FileExporter.FileExportOptions();
         exportOptions.integrity = verifyFileIntegrity;
         exportOptions.onProgressChanged = printExportProgress;
-        IFile exportFile = fileExporter.exportFile(aesFile, drive.getExportDir(), exportOptions);
 
+        IFile exportDir = SalmonFSTestHelper.generateFolder("export", SalmonFSTestHelper.TEST_EXPORT_DIR, false);
+        IFile exportFile = fileExporter.exportFile(aesFile, exportDir, exportOptions);
         String hashPostExport = SalmonFSTestHelper.getChecksum(exportFile);
         if (shouldBeEqual)
             assertEquals(hashPreImport, hashPostExport);
@@ -494,7 +499,7 @@ public class SalmonFSTestHelper {
         System.out.println("new file: " + newFile.getPath());
         if (applyIntegrity)
             newFile.setApplyIntegrity(true, hashKey, chunkSize);
-		else
+        else
             newFile.setApplyIntegrity(false);
         RandomAccessStream stream = newFile.getOutputStream();
 
@@ -519,8 +524,8 @@ public class SalmonFSTestHelper {
         readFile.setRequestedNonce(fileNonce);
         if (verifyIntegrity)
             readFile.setVerifyIntegrity(true, hashKey);
-		else
-			readFile.setVerifyIntegrity(false);
+        else
+            readFile.setVerifyIntegrity(false);
         AesStream inStream = readFile.getInputStream();
         byte[] textBytes = new byte[testBytes.length];
         inStream.read(textBytes, 0, textBytes.length);
@@ -554,8 +559,8 @@ public class SalmonFSTestHelper {
             fileToImport = importFilePath;
             fileImporter.importFile(fileToImport, rootDir);
             success = true;
-        } catch (Exception ignored) {
-
+        } catch (Exception ex) {
+            ex.printStackTrace();
         }
 
         assertFalse(success);
@@ -750,8 +755,12 @@ public class SalmonFSTestHelper {
         byte[] buffer = new byte[length + readOffset];
         fileInputStream.reset();
         fileInputStream.skip(start);
-        int bytesRead = fileInputStream.read(buffer, readOffset, length);
-        assertEquals(shouldReadLength, bytesRead);
+        int totalBytesRead = 0;
+        int bytesRead;
+        while ((bytesRead = fileInputStream.read(buffer, readOffset + totalBytesRead, length - totalBytesRead)) > 0) {
+            totalBytesRead += bytesRead;
+        }
+        assertEquals(shouldReadLength, totalBytesRead);
         byte[] tdata = new byte[buffer.length];
         System.arraycopy(data, start, tdata, readOffset, shouldReadLength);
         assertArrayEquals(tdata, buffer);
@@ -793,7 +802,7 @@ public class SalmonFSTestHelper {
     }
 
     public static void copyStream(AesFileInputStream src, MemoryStream dest) throws IOException {
-        int bufferSize = 256 * 1024;
+        int bufferSize = RandomAccessStream.DEFAULT_BUFFER_SIZE;
         int bytesRead;
         byte[] buffer = new byte[bufferSize];
         while ((bytesRead = src.read(buffer, 0, bufferSize)) > 0) {
@@ -817,37 +826,32 @@ public class SalmonFSTestHelper {
         assertTrue(file.exists());
 
         RandomAccessStream stream = file.getInputStream();
-        MemoryStream ms = new MemoryStream();
-        stream.copyTo(ms);
-        ms.flush();
-        ms.setPosition(0);
-        String digest = SalmonFSTestHelper.getChecksumStream(new InputStreamWrapper(ms));
-        ms.close();
+        String digest = SalmonFSTestHelper.getChecksumStream(stream.asReadStream());
         stream.close();
         assertEquals(digest, localChkSum);
     }
 
-    static void seekAndReadHttpFile(byte[] data, IVirtualFile file, boolean isEncrypted,
+    static void seekAndReadHttpFile(byte[] data, AesFile file,
                                     int buffersCount, int bufferSize, int backOffset) throws IOException {
-        SalmonFSTestHelper.seekAndReadFileStream(data, file, isEncrypted,
+        SalmonFSTestHelper.seekAndReadFileStream(data, file,
                 0, 32, 0, 32,
                 buffersCount, bufferSize, backOffset);
-        SalmonFSTestHelper.seekAndReadFileStream(data, file, isEncrypted,
+        SalmonFSTestHelper.seekAndReadFileStream(data, file,
                 220, 8, 2, 8,
                 buffersCount, bufferSize, backOffset);
-        SalmonFSTestHelper.seekAndReadFileStream(data, file, isEncrypted,
+        SalmonFSTestHelper.seekAndReadFileStream(data, file,
                 100, 2, 0, 2,
                 buffersCount, bufferSize, backOffset);
-        SalmonFSTestHelper.seekAndReadFileStream(data, file, isEncrypted,
+        SalmonFSTestHelper.seekAndReadFileStream(data, file,
                 6, 16, 0, 16,
                 buffersCount, bufferSize, backOffset);
-        SalmonFSTestHelper.seekAndReadFileStream(data, file, isEncrypted,
+        SalmonFSTestHelper.seekAndReadFileStream(data, file,
                 50, 40, 0, 40,
                 buffersCount, bufferSize, backOffset);
-        SalmonFSTestHelper.seekAndReadFileStream(data, file, isEncrypted,
+        SalmonFSTestHelper.seekAndReadFileStream(data, file,
                 124, 50, 0, 50,
                 buffersCount, bufferSize, backOffset);
-        SalmonFSTestHelper.seekAndReadFileStream(data, file, isEncrypted,
+        SalmonFSTestHelper.seekAndReadFileStream(data, file,
                 250, 10, 0, 10,
                 buffersCount, bufferSize, backOffset);
     }
@@ -855,24 +859,17 @@ public class SalmonFSTestHelper {
     // shouldReadLength should be equal to length
     // when checking Http files since the return buffer
     // might give us more data than requested
-    static void seekAndReadFileStream(byte[] data, IVirtualFile file, boolean isEncrypted,
+    static void seekAndReadFileStream(byte[] data, AesFile file,
                                       int start, int length, int readOffset, int shouldReadLength,
                                       int buffersCount, int bufferSize, int backOffset) throws IOException {
         byte[] buffer = new byte[length + readOffset];
 
-        AesFileInputStream stream = null;
-        if (SalmonFSTestHelper.TEST_USE_FILE_INPUT_STREAM && isEncrypted) {
+        InputStream stream = null;
+        if (SalmonFSTestHelper.TEST_USE_FILE_INPUT_STREAM) {
             // multi threaded
-            stream = new AesFileInputStream((AesFile) file, buffersCount, bufferSize, SalmonFSTestHelper.TEST_FILE_INPUT_STREAM_THREADS, backOffset);
+            stream = new AesFileInputStream(file, buffersCount, bufferSize, SalmonFSTestHelper.TEST_FILE_INPUT_STREAM_THREADS, backOffset);
         } else {
-            //TODO: support IRealFile streams
-//            RandomAccessStream fileStream;
-//            if (isEncrypted) {
-//                fileStream =  file.getInputStream();
-//            } else {
-//                fileStream = new JavaHttpFileStream(file);
-//            }
-//            stream = new InputStreamWrapper(fileStream);
+            stream = file.getInputStream().asReadStream();
         }
 
         stream.skip(start);
@@ -892,12 +889,8 @@ public class SalmonFSTestHelper {
     }
 
     public static void exportFiles(AesFile[] files, IFile dir) throws Exception {
-        exportFiles(files, dir, 1);
-    }
-
-    public static void exportFiles(AesFile[] files, IFile dir, int threads) throws Exception {
-        int bufferSize = 256 * 1024;
-        AesFileCommander commander = new AesFileCommander(bufferSize, bufferSize, threads);
+        int bufferSize = RandomAccessStream.DEFAULT_BUFFER_SIZE;
+        AesFileCommander commander = new AesFileCommander(bufferSize, bufferSize, SalmonFSTestHelper.ENC_EXPORT_THREADS);
 
         List<String> hashPreExport = new ArrayList<>();
         for (AesFile file : files)
@@ -918,7 +911,7 @@ public class SalmonFSTestHelper {
                 throw new RuntimeException(e);
             }
         };
-        exportOptions.onProgressChanged =(taskProgress) -> {
+        exportOptions.onProgressChanged = (taskProgress) -> {
             if (!SalmonFSTestHelper.ENABLE_FILE_PROGRESS)
                 return;
             try {
@@ -933,7 +926,7 @@ public class SalmonFSTestHelper {
 
         for (int i = 0; i < files.length; i++) {
             RandomAccessStream stream = filesExported[i].getInputStream();
-            String hashPostImport = SalmonFSTestHelper.getChecksumStream(new InputStreamWrapper(stream));
+            String hashPostImport = SalmonFSTestHelper.getChecksumStream(stream.asReadStream());
             stream.close();
             assertEquals(hashPostImport, hashPreExport.get(i));
         }

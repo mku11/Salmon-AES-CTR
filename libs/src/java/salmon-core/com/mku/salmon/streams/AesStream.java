@@ -33,9 +33,11 @@ import com.mku.salmon.integrity.IntegrityException;
 import com.mku.salmon.transform.AesCTRTransformer;
 import com.mku.salmon.transform.ICTRTransformer;
 import com.mku.salmon.transform.TransformerFactory;
+import com.mku.streams.InputStreamWrapper;
 import com.mku.streams.RandomAccessStream;
 
 import java.io.IOException;
+import java.io.InputStream;
 
 /**
  * Stream wrapper provides AES-256 encryption, decryption, and integrity verification of a data stream.
@@ -88,6 +90,14 @@ public class AesStream extends RandomAccessStream {
      */
     private int bufferSize = Integrity.DEFAULT_CHUNK_SIZE;
 
+    /**
+     * Align size for performance calculating the integrity when available.
+     * @return The align size
+     */
+    @Override
+    public int getAlignSize() {
+        return integrity.getChunkSize() > 0 ? integrity.getChunkSize() : Generator.BLOCK_SIZE;
+    }
 
     /**
      * Get the output size of the data to be transformed (encrypted or decrypted) including
@@ -669,8 +679,11 @@ public class AesStream extends RandomAccessStream {
 
         int bytes = 0;
         while (bytes < count) {
+            // if there is no integrity make sure we don't overread for performance.
+            int nBufferSize = getChunkSize() > 0 ? bufferSize : Math.min(bufferSize, count - bytes);
+
             // read data and integrity signatures
-            byte[] srcBuffer = readStreamData(bufferSize);
+            byte[] srcBuffer = readStreamData(nBufferSize);
             try {
                 byte[][] integrityHashes = null;
                 // if there are integrity hashes strip them and get the data chunks only
@@ -770,7 +783,7 @@ public class AesStream extends RandomAccessStream {
      * @return The buffer size
      */
     private int getNormalizedBufferSize(boolean includeHashes) {
-        int bufferSize = this.bufferSize;
+        int bufferSize = Integrity.DEFAULT_CHUNK_SIZE;
         if (getChunkSize() > 0) {
             // buffer size should be a multiple of the chunk size if integrity is enabled
             int partSize = getChunkSize();
@@ -884,6 +897,22 @@ public class AesStream extends RandomAccessStream {
     }
 
     /**
+     * Get a native buffered stream to use with 3rd party libraries.
+     * @return The native read stream
+     */
+    @Override
+    public InputStream asReadStream()
+    {
+        if (canWrite())
+            throw new RuntimeException("Stream is in write mode");
+
+        // adjust for data integrity
+        int backOffset = 32768;
+        int bufferSize = 4 * 1024 * 1024;
+        return new InputStreamWrapper(this, 1, bufferSize, backOffset, getAlignSize());
+    }
+
+    /**
      * Check if the stream has integrity enabled.
      *
      * @return True if integrity is enabled
@@ -929,5 +958,7 @@ public class AesStream extends RandomAccessStream {
     public void setBufferSize(int bufferSize) {
         this.bufferSize = bufferSize;
     }
+
+
 }
 

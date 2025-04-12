@@ -262,7 +262,9 @@ public abstract class FileImporter {
             sourceStream = fileToImport.getInputStream();
             sourceStream.setPosition(start);
 
-            byte[] bytes = new byte[bufferSize];
+            int nBufferSize = bufferSize / targetStream.getAlignSize() * targetStream.getAlignSize();
+            byte[] bytes = new byte[nBufferSize];
+
             int bytesRead;
             while ((bytesRead = sourceStream.read(bytes, 0, (int) Math.min((long) bytes.length, count - totalPartBytesRead))) > 0
                     && totalPartBytesRead < count) {

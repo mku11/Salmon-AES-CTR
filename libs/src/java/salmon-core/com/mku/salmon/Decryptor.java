@@ -344,10 +344,8 @@ public class Decryptor {
                     integrity, hashKey, chunkSize);
             stream.setPosition(start);
             long totalChunkBytesRead = 0;
-            // align to the chunksize if available
-            int buffSize = Math.max(bufferSize, stream.getChunkSize());
-            // set the same buffer size for the internal stream
-            stream.setBufferSize(buffSize);
+            int buffSize = RandomAccessStream.DEFAULT_BUFFER_SIZE;
+            buffSize = buffSize / stream.getAlignSize() * stream.getAlignSize();
             byte[] buff = new byte[buffSize];
             int bytesRead;
             while ((bytesRead = stream.read(buff, 0, Math.min(buff.length, (int) (count - totalChunkBytesRead)))) > 0

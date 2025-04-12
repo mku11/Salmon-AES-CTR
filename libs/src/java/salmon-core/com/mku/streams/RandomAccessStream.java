@@ -26,12 +26,16 @@ SOFTWARE.
 import com.mku.func.BiConsumer;
 
 import java.io.IOException;
+import java.io.InputStream;
 
 /**
  * Base class for read-write seekable streams.
  */
 public abstract class RandomAccessStream {
-    private static final int DEFAULT_BUFFER_SIZE = 256 * 1024;
+    /**
+     * Default buffer size
+     */
+    public static final int DEFAULT_BUFFER_SIZE = 256 * 1024;
 
     /**
      * Check if the stream is readable.
@@ -76,6 +80,14 @@ public abstract class RandomAccessStream {
      * @throws IOException Thrown if there is an IO error.
      */
     public abstract void setPosition(long value) throws IOException;
+
+    /**
+     * The preferred align size
+     * @return The align size
+     */
+    public int getAlignSize() {
+        return 32768;
+    }
 
     /**
      * Set the length of this stream.
@@ -138,6 +150,19 @@ public abstract class RandomAccessStream {
         copyTo(stream, 0, null);
     }
 
+
+    /**
+     * Write stream contents to another stream.
+     *
+     * @param stream           The target stream.
+     * @param bufferSize       The buffer size to be used when copying.
+     * @throws IOException Thrown if there is an IO error.
+     */
+    public void copyTo(RandomAccessStream stream, int bufferSize)
+            throws IOException {
+        copyTo(stream, bufferSize, null);
+    }
+
     /**
      * Write stream contents to another stream.
      *
@@ -166,8 +191,8 @@ public abstract class RandomAccessStream {
             throw new IOException("Target stream not writable");
         if (bufferSize <= 0)
             bufferSize = RandomAccessStream.DEFAULT_BUFFER_SIZE;
+        bufferSize = bufferSize / getAlignSize() * getAlignSize();
         int bytesRead;
-        long pos = getPosition();
         byte[] buffer = new byte[bufferSize];
         while ((bytesRead = read(buffer, 0, bufferSize)) > 0) {
             stream.write(buffer, 0, bytesRead);
@@ -175,7 +200,11 @@ public abstract class RandomAccessStream {
                 progressListener.accept(getPosition(), getLength());
         }
         stream.flush();
-        setPosition(pos);
+    }
+
+    public InputStream asReadStream()
+    {
+        return new InputStreamWrapper(this);
     }
 
     /**

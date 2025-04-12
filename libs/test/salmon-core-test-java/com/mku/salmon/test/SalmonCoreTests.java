@@ -25,8 +25,10 @@ SOFTWARE.
 */
 
 import com.mku.convert.BitConverter;
+import com.mku.salmon.Generator;
+import com.mku.salmon.RangeExceededException;
 import com.mku.salmon.SecurityException;
-import com.mku.salmon.*;
+import com.mku.salmon.integrity.Integrity;
 import com.mku.salmon.integrity.IntegrityException;
 import com.mku.salmon.streams.AesStream;
 import com.mku.salmon.streams.EncryptionFormat;
@@ -675,11 +677,11 @@ public class SalmonCoreTests {
 
         SalmonCoreTestHelper.copyFromMemStreamToSalmonStream(1 * 1024 * 1024,
                 SalmonCoreTestHelper.TEST_KEY_BYTES, SalmonCoreTestHelper.TEST_NONCE_BYTES,
-                true, 256 * 1024, SalmonCoreTestHelper.TEST_HMAC_KEY_BYTES,
+                true, Integrity.DEFAULT_CHUNK_SIZE, SalmonCoreTestHelper.TEST_HMAC_KEY_BYTES,
                 0);
         SalmonCoreTestHelper.copyFromMemStreamToSalmonStream(1 * 1024 * 1024,
                 SalmonCoreTestHelper.TEST_KEY_BYTES, SalmonCoreTestHelper.TEST_NONCE_BYTES,
-                true, 256 * 1024, SalmonCoreTestHelper.TEST_HMAC_KEY_BYTES,
+                true, Integrity.DEFAULT_CHUNK_SIZE, SalmonCoreTestHelper.TEST_HMAC_KEY_BYTES,
                 32768);
 
         SalmonCoreTestHelper.copyFromMemStreamToSalmonStream(1 * 1024 * 1024,

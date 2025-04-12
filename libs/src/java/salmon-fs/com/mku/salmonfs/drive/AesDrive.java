@@ -53,7 +53,6 @@ import java.lang.reflect.Constructor;
  * Each drive implementation needs a corresponding implementation of {@link IFile}.
  */
 public abstract class AesDrive extends VirtualDrive {
-    private static final int DEFAULT_FILE_CHUNK_SIZE = 256 * 1024;
 
     private static String configFilename = "vault.slmn";
     private static String authConfigFilename = "auth.slma";
@@ -61,7 +60,7 @@ public abstract class AesDrive extends VirtualDrive {
     private static String shareDirectoryName = "share";
     private static String exportDirectoryName = "export";
 
-    private int defaultFileChunkSize = DEFAULT_FILE_CHUNK_SIZE;
+    private int defaultFileChunkSize = Integrity.DEFAULT_CHUNK_SIZE;
     private DriveKey key = null;
     private byte[] driveId;
     private IFile realRoot = null;
@@ -642,7 +641,7 @@ public abstract class AesDrive extends VirtualDrive {
     public byte[] getBytesFromRealFile(IFile file, int bufferSize) throws IOException {
         RandomAccessStream stream = file.getInputStream();
         MemoryStream ms = new MemoryStream();
-        stream.copyTo(ms, bufferSize, null);
+        stream.copyTo(ms, bufferSize);
         ms.flush();
         ms.setPosition(0);
         byte[] byteContents = ms.toArray();

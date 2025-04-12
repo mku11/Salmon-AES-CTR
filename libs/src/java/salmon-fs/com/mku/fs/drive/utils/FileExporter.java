@@ -263,7 +263,9 @@ public abstract class FileExporter {
             sourceStream = fileToExport.getInputStream();
             sourceStream.setPosition(start);
 
-            byte[] bytes = new byte[bufferSize];
+            int nBufferSize = bufferSize / sourceStream.getAlignSize() * sourceStream.getAlignSize();
+            byte[] bytes = new byte[nBufferSize];
+
             int bytesRead;
             while ((bytesRead = sourceStream.read(bytes, 0, (int) Math.min((long) bytes.length,
                     count - totalPartBytesWritten))) > 0 && totalPartBytesWritten < count) {
