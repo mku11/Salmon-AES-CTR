@@ -128,16 +128,15 @@ public class DriveSample {
             System.out.println("file: " + sfile.getName() + ", size: " + sfile.getLength());
         }
 
-        // to read you can use file.getInputStream() to get a low level RandomAccessStream
-        // or use a ReadableStream wrapper with parallel threads and caching, see below:
+
         AesFile file = files[0]; // pick the first file
         System.out.println("reading file: " + file.getName());
-        int buffers = 4;
-        int bufferSize = 4 * 1024 * 1024;
-        int bufferThreads = 1;
-        int backOffset = 256 * 1024; // optional, use for Media consumption
-        AesFileInputStream inputStream = new AesFileInputStream(file,
-                buffers, bufferSize, bufferThreads, backOffset);
+
+        // to read files you have use the following options:
+        // a) file.getInputStream() to get a low level RandomAccessStream
+        // b) file.getInputStream().asReadStream() to get a native Java InputStream with aligned buffers
+        // c) create an AesFileInputStream that uses aligned buffers and multithreading.
+        AesFileInputStream inputStream = new AesFileInputStream(file);
         byte[] buffer = new byte[256 * 1024];
         int totalBytesRead = 0;
         int bytesRead;

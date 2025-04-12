@@ -6,6 +6,7 @@ import com.mku.salmon.streams.AesStream;
 import com.mku.streams.MemoryStream;
 
 import java.io.IOException;
+import java.io.InputStream;
 import java.util.Arrays;
 
 public class DataStreamSample {
@@ -49,11 +50,14 @@ public class DataStreamSample {
         // and wrap it with a salmon stream to do the decryption
         AesStream decStream = new AesStream(key, nonce, EncryptionMode.Decrypt, memoryStream);
 
+        // for better performance we can use a native Java InputStream:
+        InputStream stream = decStream.asReadStream();
+
         // decrypt the data
         byte[] decData = new byte[(int) decStream.getLength()];
         int totalBytesRead = 0;
         int bytesRead = 0;
-        while ((bytesRead = decStream.read(decData, totalBytesRead, DataStreamSample.BUFFER_SIZE)) > 0) {
+        while ((bytesRead = stream.read(decData, totalBytesRead, DataStreamSample.BUFFER_SIZE)) > 0) {
             totalBytesRead += bytesRead;
         }
 

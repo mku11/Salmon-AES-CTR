@@ -12,7 +12,7 @@ import java.io.IOException;
 
 public class HttpDriveProgram {
     public static void main(String[] args) throws Exception {
-        String httpDriveURL = "http://localhost:8000/test/httpserv/vault";
+        String httpDriveURL = "http://localhost/test/httpserv/vault";
         String password = "test123";
         int threads = 1;
 
