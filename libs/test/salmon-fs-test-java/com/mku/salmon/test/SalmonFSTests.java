@@ -38,6 +38,8 @@ import com.mku.salmonfs.drive.utils.AesFileCommander;
 import com.mku.salmonfs.file.AesFile;
 import com.mku.salmonfs.sequence.FileSequencer;
 import com.mku.salmonfs.streams.AesFileInputStream;
+import com.mku.streams.InputStreamWrapper;
+
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
@@ -61,8 +63,6 @@ public class SalmonFSTests {
                 TestMode.valueOf(System.getProperty("TEST_MODE")) : TestMode.Local;
         int threads = System.getProperty("ENC_THREADS") != null && !System.getProperty("ENC_THREADS").equals("") ?
                 Integer.parseInt(System.getProperty("ENC_THREADS")) : 1;
-        threads = 1;
-        testMode = TestMode.Local;
 
         SalmonFSTestHelper.setTestParams(testDir, testMode);
         System.out.println("testDir: " + testDir);
@@ -630,6 +630,11 @@ public class SalmonFSTests {
         fileInputStream2.close();
         dism2.close();
         assertEquals(h1, h3);
+    }
+
+    @Test
+    public void testRawTextFile() throws IOException {
+        SalmonFSTestHelper.testRawTextFile();
     }
 
     @Test

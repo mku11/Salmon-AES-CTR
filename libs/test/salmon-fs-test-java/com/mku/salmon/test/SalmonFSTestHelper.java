@@ -62,6 +62,7 @@ import java.util.List;
 import java.util.Random;
 
 import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 enum TestMode {
     Local,
@@ -634,7 +635,7 @@ public class SalmonFSTestHelper {
         assertEquals(shouldImport, importSuccess);
     }
 
-    public static void testRawFile() throws IOException {
+    public static void testRawTextFile() throws IOException {
         String text = SalmonFSTestHelper.TINY_FILE_CONTENTS;
         int BUFF_SIZE = 16;
         IFile dir = generateFolder("test");
@@ -668,6 +669,47 @@ public class SalmonFSTestHelper {
         rstream.close();
 
         assertEquals(string, text);
+    }
+
+    public static void testRawFile() throws IOException {
+        IFile dir = generateFolder("test");
+        String filename = "file.dat";
+        IFile testFile = dir.createFile(filename);
+
+        // write to file
+        RandomAccessStream stream = SalmonFSTestHelper.TEST_IMPORT_FILE.getInputStream();
+        MemoryStream ms = new MemoryStream();
+        stream.copyTo(ms);
+        byte[] mbytes = ms.toArray();
+        ms.close();
+
+        stream.setPosition(0);
+        RandomAccessStream wstream = testFile.getOutputStream();
+        int bytesRead;
+        byte[] buff = new byte[32768];
+        while ((bytesRead = stream.read(buff, 0, buff.length)) > 0) {
+            wstream.write(buff, 0, bytesRead);
+        }
+        wstream.flush();
+        wstream.close();
+        stream.close();
+
+        // read a file
+        IFile writeFile = dir.getChild(filename);
+        long pos = writeFile.getLength() / 2;
+        RandomAccessStream rstream = writeFile.getInputStream();
+        rstream.setPosition(pos);
+        byte[] readBuff = new byte[32768];
+        MemoryStream lstream = new MemoryStream();
+        while ((bytesRead = rstream.read(readBuff, 0, readBuff.length)) > 0) {
+            lstream.write(readBuff, 0, bytesRead);
+        }
+        byte[] lbytes = lstream.toArray();
+        rstream.close();
+
+        byte[] mbytes1 = new byte[mbytes.length - (int) pos];
+        System.arraycopy(mbytes, (int) pos, mbytes1, 0, mbytes1.length);
+        assertArrayEquals(mbytes1, lbytes);
     }
 
     public static void testEncDecFile() throws IOException {

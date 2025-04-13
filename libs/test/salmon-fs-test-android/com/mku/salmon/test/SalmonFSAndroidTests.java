@@ -255,6 +255,12 @@ public class SalmonFSAndroidTests {
     }
 
     @Test
+    public void testRawTextFile() throws IOException {
+        salmonFSTests.testRawTextFile();
+    }
+
+
+    @Test
     public void testRawFile() throws IOException {
         salmonFSTests.testRawFile();
     }
