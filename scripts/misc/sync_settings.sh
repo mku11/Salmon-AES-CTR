@@ -51,6 +51,27 @@ SUBST="SALMON_VERSION=$SALMON_VERSION"
 DIR=../../libs/projects/salmon-libs-gcc
 sed -i -e "s/$PATTERN/$SUBST/g" $DIR/makefile
 
+PATTERN="^version '[^/]*'"
+SUBST="version '$SALMON_VERSION'"
+DIR=../../libs/projects/salmon-libs-gradle-android/salmon-fs-android-test
+sed -i -e "s/$PATTERN/$SUBST/g" $DIR/build.gradle
+
+PATTERN="^\tappVersion = '[^/]*'"
+SUBST="\tappVersion = '$SALMON_APP_VERSION'"
+DIR=../../libs/projects/salmon-libs-gradle-android/salmon-fs-android-test
+sed -i -e "s/$PATTERN/$SUBST/g" $DIR/build.gradle
+
+PATTERN=".*versionName '[^/]*'"
+SUBST="\t\tversionName '$SALMON_VERSION'"
+DIR=../../libs/projects/salmon-libs-gradle-android/salmon-fs-android-test
+sed -i -e "s/$PATTERN/$SUBST/g" $DIR/build.gradle
+
+PATTERN=".*versionCode [^/]*"
+SUBST="\t\tversionCode $SALMON_APP_VERSION"
+DIR=../../libs/projects/salmon-libs-gradle-android/salmon-fs-android-test
+sed -i -e "s/$PATTERN/$SUBST/g" $DIR/build.gradle
+
+
 # SAMPLES
 
 PATTERN="<SalmonVersion>[^/]*<\/SalmonVersion>"
@@ -106,8 +127,18 @@ SUBST="version '$SALMON_VERSION'"
 DIR=../../samples/AndroidSamples/salmon-android-samples
 sed -i -e "s/$PATTERN/$SUBST/g" $DIR/build.gradle
 
-PATTERN="^\sappVersion '[^/]*'"
-SUBST="\tappVersion '$SALMON_APP_VERSION'"
+PATTERN="^\sappVersion = '[^/]*'"
+SUBST="\tappVersion = '$SALMON_APP_VERSION'"
+DIR=../../samples/AndroidSamples/salmon-android-samples
+sed -i -e "s/$PATTERN/$SUBST/g" $DIR/build.gradle
+
+PATTERN=".*versionName '[^/]*'"
+SUBST="\t\tversionName '$SALMON_VERSION'"
+DIR=../../samples/AndroidSamples/salmon-android-samples
+sed -i -e "s/$PATTERN/$SUBST/g" $DIR/build.gradle
+
+PATTERN=".*versionCode [^/]*"
+SUBST="\t\tversionCode $SALMON_APP_VERSION"
 DIR=../../samples/AndroidSamples/salmon-android-samples
 sed -i -e "s/$PATTERN/$SUBST/g" $DIR/build.gradle
 
