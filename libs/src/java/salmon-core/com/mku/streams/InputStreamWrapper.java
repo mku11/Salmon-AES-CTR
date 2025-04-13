@@ -130,8 +130,14 @@ public class InputStreamWrapper extends InputStream {
      */
     public InputStreamWrapper(RandomAccessStream stream, int buffersCount, int bufferSize, int backOffset, int alignSize) {
         this.stream = stream;
-        if (stream != null)
+        if (stream != null) {
             this.totalSize = stream.getLength();
+			try {
+				this.streamPosition = stream.getPosition();
+			} catch (Exception ex) {
+				throw new RuntimeException("Could not get stream current position", ex);
+			}
+		}
         if (buffersCount <= 0)
             buffersCount = DEFAULT_BUFFERS;
         if (buffersCount > MAX_BUFFERS)

@@ -27,6 +27,9 @@ import com.mku.fs.file.File;
 import com.mku.fs.file.IFile;
 import com.mku.streams.RandomAccessStream;
 import org.springframework.web.multipart.MultipartFile;
+import org.apache.commons.text.StringEscapeUtils;
+import java.util.regex.Pattern;
+import java.util.regex.Matcher;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -36,7 +39,7 @@ import java.io.InputStream;
  */
 public class FileSystem {
     private static final int BUFF_LENGTH = 32768;
-
+	private static final Pattern pattern = Pattern.compile("^.+[\\:\\*\\?\\<\\>\\|]+$");
     private String path;
 
     private static FileSystem instance;
@@ -58,6 +61,7 @@ public class FileSystem {
     }
 
     public IFile getFile(String path) {
+		path = validateFilePath(path);
         String[] parts = path.split("/");
         IFile file = getRoot();
         for (String part : parts) {
@@ -69,6 +73,7 @@ public class FileSystem {
 			if(file == null)
 				return null;
         }
+		validateFile(file);
         return file;
     }
 
@@ -81,7 +86,9 @@ public class FileSystem {
         IFile rFile = getFile(path);
         if(!rFile.exists()) {
             IFile dir = rFile.getParent();
-            rFile = dir.createFile(file.getOriginalFilename());
+			validateFile(dir);
+			String originalFilename = validateFilePath(file.getOriginalFilename());
+            rFile = dir.createFile(originalFilename);
         }
         InputStream inputStream = null;
         RandomAccessStream outputStream = null;
@@ -105,4 +112,24 @@ public class FileSystem {
         }
         return rFile;
     }
+	
+	public String validateFilePath(String path) {
+		path = StringEscapeUtils.escapeHtml4(path);
+		Matcher matcher = pattern.matcher(path);
+		if(matcher.matches()){
+			throw new RuntimeException("Invalid characters in file path found");
+		}
+		return path;
+	}
+	
+	public void validateFile(IFile file) {
+		try {
+			java.io.File f = new java.io.File(file.getPath());
+			java.io.File r = new java.io.File(getRoot().getPath());
+			if(!f.getCanonicalPath().startsWith(r.getCanonicalPath()))
+				throw new RuntimeException("Could not validate file path");
+		} catch (Exception ex) {
+			throw new RuntimeException(ex);
+		}
+	}
 }

@@ -33,10 +33,13 @@ import com.mku.android.fs.file.AndroidFileSystem;
 import com.mku.android.fs.file.AndroidSharedFileObserver;
 import com.mku.fs.file.File;
 import com.mku.fs.file.IFile;
-import com.mku.salmonfs.drive.Drive;
+import com.mku.salmon.sequence.INonceSequencer;
+import com.mku.salmonfs.drive.AesDrive;
 import com.mku.fs.drive.utils.FileExporter;
 import com.mku.salmonfs.drive.utils.AesFileExporter;
 import com.mku.salmonfs.file.AesFile;
+
+import java.io.IOException;
 
 /**
  * Implementation of a virtual drive for android.
@@ -65,7 +68,7 @@ public class AndroidDrive extends AesDrive {
      * @throws IOException Thrown if error occurs during opening the drive.
      */
 	// TODO: Check why it is working with Drive.class for android
-    public static AesDrive1 open(IFile dir, String password, INonceSequencer sequencer) throws IOException {
+    public static AesDrive open(IFile dir, String password, INonceSequencer sequencer) throws IOException {
         return AesDrive.openDrive(dir, AndroidDrive.class, password, sequencer);
     }
 
@@ -79,7 +82,7 @@ public class AndroidDrive extends AesDrive {
      * @throws IOException If error occurs during creating the drive.
      */
 	 // TODO: Check why it is working with Drive.class for android
-    public static AesDrive1 create(IFile dir, String password, INonceSequencer sequencer) throws IOException {
+    public static AesDrive create(IFile dir, String password, INonceSequencer sequencer) throws IOException {
         return AesDrive.createDrive(dir, AndroidDrive.class, password, sequencer);
     }
 

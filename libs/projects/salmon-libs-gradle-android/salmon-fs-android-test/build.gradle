@@ -4,7 +4,10 @@ plugins {
 
 group 'com.mku.salmon'
 description = 'Salmon FS Android Tests'
-version '1'
+version '3.0.1'
+ext {
+	appVersion = '301'
+}
 
 repositories {
     maven {
@@ -26,8 +29,8 @@ android {
         applicationId "com.mku.salmon.test"
         minSdk 23
         targetSdk 34
-        versionCode 1
-        versionName "1"
+		versionCode 301
+		versionName '3.0.1'
 
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
     }
@@ -66,7 +69,7 @@ dependencies {
 
     implementation("com.mku.salmon:salmon-core:${version}")
     implementation("com.mku.salmon:salmon-fs:${version}")
-    implementation("com.mku.salmon:salmon-native-android:${version}")
+    implementation (project(path: ':salmon-native-android'))
     implementation (project(path: ':salmon-fs-android'))
 
     androidTestImplementation 'androidx.test.espresso:espresso-contrib:3.4.0'

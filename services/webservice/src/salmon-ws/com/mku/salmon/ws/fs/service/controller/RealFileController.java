@@ -57,6 +57,7 @@ public class RealFileController {
      */
     @GetMapping("/info")
     public RealFileNode info(String path) throws IOException {
+		path = FileSystem.getInstance().validateFilePath(path);
         System.out.println("INFO, path: " + path);
         IFile file = FileSystem.getInstance().getFile(path);
         if (file == null)
@@ -74,6 +75,7 @@ public class RealFileController {
      */
     @GetMapping("/list")
     public List<RealFileNode> list(String path) throws IOException {
+		path = FileSystem.getInstance().validateFilePath(path);
         System.out.println("LIST, path: " + path);
         ArrayList<RealFileNode> list = new ArrayList<>();
         IFile file = FileSystem.getInstance().getFile(path);
@@ -99,6 +101,7 @@ public class RealFileController {
      */
     @PostMapping("/mkdir")
     public RealFileNode mkdir(String path) throws IOException {
+		path = FileSystem.getInstance().validateFilePath(path);
         System.out.println("MKDIR, path: " + path);
         IFile file = FileSystem.getInstance().getFile(path);
         IFile parent = file.getParent();
@@ -121,6 +124,7 @@ public class RealFileController {
      */
     @PostMapping("/create")
     public RealFileNode create(String path) throws IOException {
+		path = FileSystem.getInstance().validateFilePath(path);
         System.out.println("CREATE, path: " + path);
         IFile file = FileSystem.getInstance().getFile(path);
         IFile parent = file.getParent();
@@ -145,6 +149,7 @@ public class RealFileController {
      */
     @PostMapping("/upload")
     public ResponseEntity<RealFileNode> upload(@RequestParam("file") MultipartFile file, String path, Long position) throws IOException {
+		path = FileSystem.getInstance().validateFilePath(path);
         System.out.println("UPLOAD, path: " + path + ", position: " + position + ", size: " + file.getSize());
         IFile rFile = FileSystem.getInstance().write(path, file, position);
         return new ResponseEntity<>(new RealFileNode(rFile), position > 0 ? HttpStatus.PARTIAL_CONTENT : HttpStatus.OK);
@@ -162,6 +167,7 @@ public class RealFileController {
      */
     @GetMapping(path = "/get")
     public ResponseEntity<Resource> get(String path, Long position) throws IOException {
+		path = FileSystem.getInstance().validateFilePath(path);
         System.out.println("GET, path: " + path + ", position: " + position);
         IFile rFile = FileSystem.getInstance().getFile(path);
         if (rFile == null || !rFile.exists() || !rFile.isFile())
@@ -188,6 +194,9 @@ public class RealFileController {
      */
     @PostMapping("/copy")
     public RealFileNode copy(String path, String destDir, String filename) throws IOException {
+		path = FileSystem.getInstance().validateFilePath(path);
+		destDir = FileSystem.getInstance().validateFilePath(destDir);
+		filename = FileSystem.getInstance().validateFilePath(filename);
         System.out.println("COPY, path: " + path + ", filename: " + filename);
         IFile source = FileSystem.getInstance().getFile(path);
         if (source == null || !source.exists())
@@ -220,6 +229,9 @@ public class RealFileController {
      */
     @PutMapping("/move")
     public RealFileNode move(String path, String destDir, String filename) throws IOException {
+		path = FileSystem.getInstance().validateFilePath(path);
+		destDir = FileSystem.getInstance().validateFilePath(destDir);
+		filename = FileSystem.getInstance().validateFilePath(filename);
         System.out.println("MOVE, path: " + path + ", destDir: " + destDir + ", filename: " + filename);
         IFile source = FileSystem.getInstance().getFile(path);
         if (source == null || !source.exists())
@@ -250,6 +262,8 @@ public class RealFileController {
      */
     @PutMapping("/rename")
     public RealFileNode rename(String path, String filename) throws IOException {
+		path = FileSystem.getInstance().validateFilePath(path);
+		filename = FileSystem.getInstance().validateFilePath(filename);
         System.out.println("RENAME, path: " + path + ", filename: " + filename);
         IFile file = FileSystem.getInstance().getFile(path);
         if (file == null || !file.exists())
@@ -268,6 +282,7 @@ public class RealFileController {
      */
     @DeleteMapping("/delete")
     public RealFileNode delete(String path) throws IOException {
+		path = FileSystem.getInstance().validateFilePath(path);
         System.out.println("DELETE, path: " + path);
         IFile file = FileSystem.getInstance().getFile(path);
         if (file == null || !file.exists())
@@ -288,6 +303,7 @@ public class RealFileController {
      */
     @PutMapping("/setLength")
     public RealFileNode setLength(String path, long length) throws IOException {
+		path = FileSystem.getInstance().validateFilePath(path);
         System.out.println("SETLENGTH, path: " + path + ", length: " + length);
         RandomAccessStream stream = null;
         try {

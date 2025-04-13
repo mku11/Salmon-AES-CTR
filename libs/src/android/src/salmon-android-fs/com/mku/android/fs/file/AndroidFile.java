@@ -479,7 +479,7 @@ public class AndroidFile implements IFile {
         reset();
         IFile parent = getParent();
         if (parent != null) {
-            IFile dir = parent.createDirectory(getName());
+            AndroidFile dir = (AndroidFile) parent.createDirectory(getName());
 			this.documentFile = dir.getDocumentFile();
             return dir.exists() && dir.isDirectory();
         }

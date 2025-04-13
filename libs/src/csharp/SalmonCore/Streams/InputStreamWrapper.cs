@@ -112,7 +112,10 @@ public class InputStreamWrapper : Stream
     {
         this.stream = stream;
         if (stream != null)
-            this.TotalSize = stream.Length;
+        {
+			this.TotalSize = stream.Length;
+			this.StreamPosition = stream.Position;
+		}
         if (buffersCount <= 0)
             buffersCount = DEFAULT_BUFFERS;
         if (buffersCount > MAX_BUFFERS)
