@@ -61,7 +61,7 @@ public class SalmonFSHttpAndroidTests {
     static {
         if (System.getProperty("HTTP_SERVER_URL") == null
                 || System.getProperty("HTTP_SERVER_URL").equals("")) {
-            System.setProperty("HTTP_SERVER_URL", "http://192.168.1.4:8000");
+            System.setProperty("HTTP_SERVER_URL", "http://192.168.1.4");
         }
     }
 
@@ -102,7 +102,7 @@ public class SalmonFSHttpAndroidTests {
         System.out.println("http server url: " + SalmonFSTestHelper.HTTP_SERVER_URL);
         System.out.println("HTTP_VAULT_DIR_URL: " + SalmonFSTestHelper.HTTP_VAULT_DIR_URL);
 
-        SalmonFSTestHelper.TEST_HTTP_FILE = SalmonFSTestHelper.TEST_IMPORT_MEDIUM_FILE;
+        SalmonFSTestHelper.TEST_HTTP_FILE = SalmonFSTestHelper.TEST_IMPORT_LARGE_FILE;
 
         // SalmonCoreTestHelper.TEST_ENC_BUFFER_SIZE = 1 * 1024 * 1024;
         // SalmonCoreTestHelper.TEST_DEC_BUFFER_SIZE = 1 * 1024 * 1024;
