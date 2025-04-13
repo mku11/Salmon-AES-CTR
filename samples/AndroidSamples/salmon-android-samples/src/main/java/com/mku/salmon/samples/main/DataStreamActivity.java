@@ -14,10 +14,11 @@ import com.mku.salmon.Generator;
 import com.mku.salmon.samples.R;
 import com.mku.salmon.samples.samples.DataStreamSample;
 import com.mku.salmon.samples.samples.SamplesCommon;
-import com.mku.salmon.streams.ProviderType;
 import com.mku.salmon.streams.AesStream;
+import com.mku.salmon.streams.ProviderType;
 
-import java.io.IOException;
+import java.util.concurrent.Executor;
+import java.util.concurrent.Executors;
 
 public class DataStreamActivity extends AppCompatActivity {
     private TextInputEditText password;
@@ -30,10 +31,11 @@ public class DataStreamActivity extends AppCompatActivity {
     private static final String defaultPassword = "test123";
 
     private byte[] key;
-    byte[] integrityKey = null;
     private byte[] data;
     private byte[] encData;
     private byte[] nonce;
+
+    private final Executor executor = Executors.newCachedThreadPool();
 
     @Override
     public void onCreate(Bundle bundle) {
@@ -49,12 +51,16 @@ public class DataStreamActivity extends AppCompatActivity {
 
         encryptButton = findViewById(R.id.ENCRYPT_BUTTON);
         encryptButton.setOnClickListener((e) -> {
-            encryptDataStream();
+			executor.execute(() -> {
+				encryptDataStream();
+			});
         });
 
         decryptButton = findViewById(R.id.DECRYPT_BUTTON);
         decryptButton.setOnClickListener((e) -> {
-            decryptDataStream();
+			executor.execute(() -> {
+				decryptDataStream();
+			});
         });
 
         outputText = findViewById(R.id.OUTPUT_TEXT);
@@ -68,6 +74,12 @@ public class DataStreamActivity extends AppCompatActivity {
             outputText.append(msg + "\n");
         });
     }
+	
+	public void clearLog() {
+        runOnUiThread(() -> {
+            outputText.setText("");
+        });
+    }
 
     public void initialize() {
         AndroidFileSystem.initialize(this);
@@ -75,7 +87,7 @@ public class DataStreamActivity extends AppCompatActivity {
     }
 
     public void encryptDataStream() {
-        outputText.setText("");
+        clearLog();
 
         // generate a key
         log("generating keys and random data...");
@@ -93,9 +105,7 @@ public class DataStreamActivity extends AppCompatActivity {
 
         try {
             log("starting encryption...");
-            encData = DataStreamSample.encryptDataStream(data, key, nonce, (msg) -> {
-                log(msg);
-            });
+            encData = DataStreamSample.encryptDataStream(data, key, nonce, this::log);
         } catch (Exception e) {
             e.printStackTrace();
             log(e.getMessage());
@@ -106,9 +116,7 @@ public class DataStreamActivity extends AppCompatActivity {
 
         try {
             log("starting decryption...");
-            byte[] decData = DataStreamSample.decryptDataStream(encData, key, nonce, (msg) -> {
-                log(msg);
-            });
+            byte[] decData = DataStreamSample.decryptDataStream(encData, key, nonce, this::log);
             log("done");
         } catch (Exception e) {
             e.printStackTrace();

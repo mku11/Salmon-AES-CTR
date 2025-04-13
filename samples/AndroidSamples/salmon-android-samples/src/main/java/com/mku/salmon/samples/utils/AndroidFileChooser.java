@@ -11,20 +11,10 @@ import android.widget.Toast;
 import androidx.documentfile.provider.DocumentFile;
 
 import com.mku.android.fs.file.AndroidFile;
+import com.mku.android.fs.file.AndroidFileSystem;
 import com.mku.fs.file.IFile;
 
 public class AndroidFileChooser {
-
-    public static IFile getFile(Context context, String uri, boolean isDirectory) {
-        IFile file;
-        DocumentFile docFile;
-        if (isDirectory)
-            docFile = DocumentFile.fromTreeUri(context, android.net.Uri.parse(uri));
-        else
-            docFile = DocumentFile.fromSingleUri(context, android.net.Uri.parse(uri));
-        file = new AndroidFile(docFile);
-        return file;
-    }
 
     public static void openFilesystem(Activity activity, int resultCode, boolean isFolder) {
         openFilesystem(activity, resultCode, isFolder, false);
@@ -91,12 +81,12 @@ public class AndroidFileChooser {
                 for (int i = 0; i < data.getClipData().getItemCount(); i++) {
                     android.net.Uri uri = data.getClipData().getItemAt(i).getUri();
                     AndroidFileChooser.setUriPermissions(context, data, uri);
-                    files[i] = getFile(context, uri.toString(), false);
+                    files[i] = AndroidFileSystem.getRealFile(uri.toString(), false);
                 }
             } else {
                 android.net.Uri uri = data.getData();
                 files = new IFile[1];
-                files[0] = getFile(context, uri.toString(), false);
+                files[0] = AndroidFileSystem.getRealFile(uri.toString(), false);
             }
         }
         return files;

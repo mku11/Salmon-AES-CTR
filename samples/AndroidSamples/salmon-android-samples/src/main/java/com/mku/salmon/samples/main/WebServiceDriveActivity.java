@@ -9,19 +9,16 @@ import androidx.appcompat.app.AppCompatActivity;
 
 import com.google.android.material.textfield.TextInputEditText;
 import com.mku.android.fs.file.AndroidFileSystem;
-import com.mku.fs.file.File;
 import com.mku.fs.file.IFile;
 import com.mku.fs.file.WSFile;
 import com.mku.salmon.samples.R;
 import com.mku.salmon.samples.samples.DriveSample;
 import com.mku.salmon.samples.utils.AndroidFileChooser;
-import com.mku.salmon.streams.ProviderType;
 import com.mku.salmon.streams.AesStream;
+import com.mku.salmon.streams.ProviderType;
 import com.mku.salmonfs.drive.AesDrive;
 
-import java.io.IOException;
 import java.util.concurrent.Executor;
-import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
 public class WebServiceDriveActivity extends AppCompatActivity {
@@ -68,12 +65,16 @@ public class WebServiceDriveActivity extends AppCompatActivity {
 
         createDriveButton = findViewById(R.id.CREATE_DRIVE_BUTTON);
         createDriveButton.setOnClickListener((e) -> {
-            createDrive();
+			executor.execute(() -> {
+				createDrive();
+			});
         });
 
         openDriveButton = findViewById(R.id.OPEN_DRIVE_BUTTON);
         openDriveButton.setOnClickListener((e) -> {
-            openDrive();
+			executor.execute(() -> {
+				openDrive();
+			});
         });
 
         importFilesButton = findViewById(R.id.IMPORT_FILES_BUTTON);
@@ -83,7 +84,9 @@ public class WebServiceDriveActivity extends AppCompatActivity {
 
         listFilesButton = findViewById(R.id.LIST_DRIVE_BUTTON);
         listFilesButton.setOnClickListener((e) -> {
-            listFiles();
+			executor.execute(() -> {
+				listFiles();
+			});
         });
         exportFilesButton = findViewById(R.id.EXPORT_FILES_BUTTON);
         exportFilesButton.setOnClickListener((e) -> {
@@ -92,7 +95,9 @@ public class WebServiceDriveActivity extends AppCompatActivity {
 
         closeDriveButton = findViewById(R.id.CLOSE_DRIVE_BUTTON);
         closeDriveButton.setOnClickListener((e) -> {
-            closeDrive();
+			executor.execute(() -> {
+				closeDrive();
+			});
         });
 
         outputText = findViewById(R.id.OUTPUT_TEXT);
@@ -109,6 +114,12 @@ public class WebServiceDriveActivity extends AppCompatActivity {
             outputText.append(msg + "\n");
         });
     }
+	
+	public void clearLog() {
+        runOnUiThread(() -> {
+            outputText.setText("");
+        });
+    }
 
     private void initialize() {
         AndroidFileSystem.initialize(this);
@@ -116,8 +127,8 @@ public class WebServiceDriveActivity extends AppCompatActivity {
     }
 
     public void createDrive() {
-        outputText.setText("");
-        executor.execute(() -> {
+        clearLog();
+        
             try {
                 IFile driveDir = new WSFile(drivePath.getText().toString(),
                         wsURL.getText().toString(),
@@ -131,12 +142,12 @@ public class WebServiceDriveActivity extends AppCompatActivity {
                 e.printStackTrace();
                 log(e.getMessage());
             }
-        });
+        
     }
 
     public void openDrive() {
-        outputText.setText("");
-        executor.execute(() -> {
+        clearLog();
+        
             try {
                 IFile driveDir = new WSFile(drivePath.getText().toString(),
                         wsURL.getText().toString(),
@@ -147,40 +158,38 @@ public class WebServiceDriveActivity extends AppCompatActivity {
                 e.printStackTrace();
                 log(e.getMessage());
             }
-        });
+        
     }
 
     public void importFiles(IFile[] filesToImport) {
-        executor.execute(() -> {
+        
             try {
                 DriveSample.importFiles(wsDrive, filesToImport, this::log);
             } catch (Exception e) {
                 e.printStackTrace();
                 log(e.getMessage());
             }
-        });
+        
     }
 
     public void listFiles() {
-        executor.execute(() -> {
+        
             try {
                 DriveSample.listFiles(wsDrive, this::log);
             } catch (Exception e) {
                 e.printStackTrace();
                 log(e.getMessage());
             }
-        });
+        
     }
 
     public void exportFiles(IFile exportDir) {
-        new Thread(() -> {
             try {
                 DriveSample.exportFiles(wsDrive, exportDir, this::log);
             } catch (Exception e) {
                 e.printStackTrace();
                 log(e.getMessage());
             }
-        });
     }
 
     public void closeDrive() {
@@ -196,12 +205,16 @@ public class WebServiceDriveActivity extends AppCompatActivity {
         switch (requestCode) {
             case REQUEST_IMPORT_FILES:
                 IFile[] filesToImport = AndroidFileChooser.getFiles(this, data);
-                importFiles(filesToImport);
+				executor.execute(() -> {
+					importFiles(filesToImport);
+				});
                 break;
             case REQUEST_EXPORT_FILES:
                 AndroidFileChooser.setUriPermissions(this, data, uri);
-                IFile exportDir = AndroidFileChooser.getFile(this, uri.toString(), true);
-                exportFiles(exportDir);
+                IFile exportDir = AndroidFileSystem.getRealFile(uri.toString(), true);
+				executor.execute(() -> {
+					exportFiles(exportDir);
+				});
                 break;
         }
     }

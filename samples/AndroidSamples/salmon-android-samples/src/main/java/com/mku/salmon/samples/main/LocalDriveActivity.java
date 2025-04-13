@@ -1,9 +1,7 @@
 package com.mku.salmon.samples.main;
 
 import android.content.Intent;
-import android.content.SharedPreferences;
 import android.os.Bundle;
-import android.preference.PreferenceManager;
 import android.widget.Button;
 import android.widget.EditText;
 
@@ -11,16 +9,14 @@ import androidx.appcompat.app.AppCompatActivity;
 
 import com.google.android.material.textfield.TextInputEditText;
 import com.mku.android.fs.file.AndroidFileSystem;
-import com.mku.fs.file.File;
 import com.mku.fs.file.IFile;
 import com.mku.salmon.samples.R;
 import com.mku.salmon.samples.samples.DriveSample;
 import com.mku.salmon.samples.utils.AndroidFileChooser;
-import com.mku.salmon.streams.ProviderType;
 import com.mku.salmon.streams.AesStream;
+import com.mku.salmon.streams.ProviderType;
 import com.mku.salmonfs.drive.AesDrive;
 
-import java.io.IOException;
 import java.util.concurrent.Executor;
 import java.util.concurrent.Executors;
 
@@ -68,7 +64,9 @@ public class LocalDriveActivity extends AppCompatActivity {
 
         listFilesButton = findViewById(R.id.LIST_DRIVE_BUTTON);
         listFilesButton.setOnClickListener((e) -> {
-            listFiles();
+            executor.execute(() -> {
+                listFiles();
+            });
         });
         exportFilesButton = findViewById(R.id.EXPORT_FILES_BUTTON);
         exportFilesButton.setOnClickListener((e) -> {
@@ -77,7 +75,9 @@ public class LocalDriveActivity extends AppCompatActivity {
 
         closeDriveButton = findViewById(R.id.CLOSE_DRIVE_BUTTON);
         closeDriveButton.setOnClickListener((e) -> {
-            closeDrive();
+            executor.execute(() -> {
+                closeDrive();
+            });
         });
 
         outputText = findViewById(R.id.OUTPUT_TEXT);
@@ -95,6 +95,12 @@ public class LocalDriveActivity extends AppCompatActivity {
         });
     }
 
+    public void clearLog() {
+        runOnUiThread(() -> {
+            outputText.setText("");
+        });
+    }
+
     private void initialize() {
         AndroidFileSystem.initialize(this);
         AesStream.setAesProviderType(ProviderType.Default);
@@ -102,26 +108,26 @@ public class LocalDriveActivity extends AppCompatActivity {
 
     public void createDrive(IFile driveDir) {
         outputText.setText("");
-        executor.execute(() -> {
-            try {
-                localDrive = DriveSample.createDrive(driveDir, password.getText().toString(), this::log);
-            } catch (Exception e) {
-                e.printStackTrace();
-                log(e.getMessage());
-            }
-        });
+
+        try {
+            localDrive = DriveSample.createDrive(driveDir, password.getText().toString(), this::log);
+        } catch (Exception e) {
+            e.printStackTrace();
+            log(e.getMessage());
+        }
+
     }
 
     public void openDrive(IFile dir) {
         outputText.setText("");
-        executor.execute(() -> {
-            try {
-                localDrive = DriveSample.openDrive(dir, password.getText().toString(), this::log);
-            } catch (Exception e) {
-                e.printStackTrace();
-                log(e.getMessage());
-            }
-        });
+
+        try {
+            localDrive = DriveSample.openDrive(dir, password.getText().toString(), this::log);
+        } catch (Exception e) {
+            e.printStackTrace();
+            log(e.getMessage());
+        }
+
     }
 
     public void importFiles(IFile[] filesToImport) {
@@ -161,23 +167,32 @@ public class LocalDriveActivity extends AppCompatActivity {
         if (data == null)
             return;
         android.net.Uri uri = data.getData();
-        AndroidFileChooser.setUriPermissions(this, data, uri);
         switch (requestCode) {
             case REQUEST_OPEN_DRIVE:
-                IFile driveDir = AndroidFileChooser.getFile(this, uri.toString(), true);
-                openDrive(driveDir);
+                AndroidFileChooser.setUriPermissions(this, data, uri);
+                IFile driveDir = AndroidFileSystem.getRealFile(uri.toString(), true);
+                executor.execute(() -> {
+                    openDrive(driveDir);
+                });
                 break;
             case REQUEST_CREATE_DRIVE:
-                IFile newDriveDir = AndroidFileChooser.getFile(this, uri.toString(), true);
-                createDrive(newDriveDir);
+                AndroidFileChooser.setUriPermissions(this, data, uri);
+                IFile newDriveDir = AndroidFileSystem.getRealFile(uri.toString(), true);
+                executor.execute(() -> {
+                    createDrive(newDriveDir);
+                });
                 break;
             case REQUEST_IMPORT_FILES:
                 IFile[] filesToImport = AndroidFileChooser.getFiles(this, data);
-                importFiles(filesToImport);
+                executor.execute(() -> {
+                    importFiles(filesToImport);
+                });
                 break;
             case REQUEST_EXPORT_FILES:
-                IFile exportDir = AndroidFileChooser.getFile(this, uri.toString(), true);
-                exportFiles(exportDir);
+                IFile exportDir = AndroidFileSystem.getRealFile(uri.toString(), true);
+                executor.execute(() -> {
+                    exportFiles(exportDir);
+                });
                 break;
         }
     }

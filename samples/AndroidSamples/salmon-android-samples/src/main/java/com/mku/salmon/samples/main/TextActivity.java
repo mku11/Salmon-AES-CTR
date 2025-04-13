@@ -11,10 +11,11 @@ import com.mku.android.fs.file.AndroidFileSystem;
 import com.mku.salmon.samples.R;
 import com.mku.salmon.samples.samples.SamplesCommon;
 import com.mku.salmon.samples.samples.TextSample;
-import com.mku.salmon.streams.ProviderType;
 import com.mku.salmon.streams.AesStream;
+import com.mku.salmon.streams.ProviderType;
 
-import java.io.IOException;
+import java.util.concurrent.Executor;
+import java.util.concurrent.Executors;
 
 public class TextActivity extends AppCompatActivity {
     private TextInputEditText password;
@@ -29,6 +30,8 @@ public class TextActivity extends AppCompatActivity {
     private static final String text = "This is a plain text that will be encrypted";
 
     private byte[] key;
+	
+	private final Executor executor = Executors.newCachedThreadPool();
 
     @Override
     public void onCreate(Bundle bundle) {
@@ -39,12 +42,16 @@ public class TextActivity extends AppCompatActivity {
 
         encryptButton = findViewById(R.id.ENCRYPT_BUTTON);
         encryptButton.setOnClickListener((e) -> {
-            encryptText();
+			executor.execute(() -> {
+				encryptText();
+			});
         });
 
         decryptButton = findViewById(R.id.DECRYPT_BUTTON);
         decryptButton.setOnClickListener((e) -> {
-            decryptText();
+			executor.execute(() -> {
+				decryptText();
+			});
         });
 
         plainText = findViewById(R.id.PLAIN_TEXT);
@@ -61,6 +68,18 @@ public class TextActivity extends AppCompatActivity {
             outputText.append(msg + "\n");
         });
     }
+	
+	public void clearLog() {
+        runOnUiThread(() -> {
+            outputText.setText("");
+        });
+    }
+	
+	public void clearEncText() {
+        runOnUiThread(() -> {
+            encryptedText.setText("");
+        });
+    }
 
     private void initialize() {
         AndroidFileSystem.initialize(this);
@@ -68,15 +87,17 @@ public class TextActivity extends AppCompatActivity {
     }
 
     private void encryptText() {
-        encryptedText.setText("");
-        outputText.setText("");
+		clearEncText();
+        clearLog();
 
         // generate an encryption key from the text password
         key = SamplesCommon.getKeyFromPassword(password.getText().toString());
 
         try {
             String encText = TextSample.encryptText(text, key);
-            encryptedText.setText(encText);
+            runOnUiThread(()->{
+                encryptedText.setText(encText);
+            });
         } catch (Exception e) {
             e.printStackTrace();
             log(e.getMessage());

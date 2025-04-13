@@ -15,10 +15,11 @@ import com.mku.salmon.samples.R;
 import com.mku.salmon.samples.samples.FileSample;
 import com.mku.salmon.samples.samples.SamplesCommon;
 import com.mku.salmon.samples.utils.AndroidFileChooser;
-import com.mku.salmon.streams.ProviderType;
 import com.mku.salmon.streams.AesStream;
+import com.mku.salmon.streams.ProviderType;
 
-import java.io.IOException;
+import java.util.concurrent.Executor;
+import java.util.concurrent.Executors;
 
 
 public class FileActivity extends AppCompatActivity {
@@ -37,6 +38,7 @@ public class FileActivity extends AppCompatActivity {
     private byte[] key;
     byte[] integrityKey = null;
 
+    private final Executor executor = Executors.newCachedThreadPool();
 
     @Override
     public void onCreate(Bundle bundle) {
@@ -71,6 +73,12 @@ public class FileActivity extends AppCompatActivity {
         });
     }
 
+    public void clearLog() {
+        runOnUiThread(() -> {
+            outputText.setText("");
+        });
+    }
+
     private void initialize() {
         AndroidFileSystem.initialize(this);
         AesStream.setAesProviderType(ProviderType.Default);
@@ -79,7 +87,7 @@ public class FileActivity extends AppCompatActivity {
     public void saveFile(IFile dir) {
         boolean integrity = true;
 
-        outputText.setText("");
+        clearLog();
         // generate an encryption key from the text password
         key = SamplesCommon.getKeyFromPassword(password.getText().toString());
 
@@ -98,10 +106,7 @@ public class FileActivity extends AppCompatActivity {
         }
 
         try {
-            FileSample.encryptTextToFile(plainText.getText().toString(), key, integrityKey, file,
-                    (msg) -> {
-                        log(msg);
-                    });
+            FileSample.encryptTextToFile(plainText.getText().toString(), key, integrityKey, file, this::log);
             log("file saved");
         } catch (Exception e) {
             e.printStackTrace();
@@ -111,11 +116,11 @@ public class FileActivity extends AppCompatActivity {
 
     public void loadFile(IFile file) {
         try {
-            String decText = FileSample.decryptTextFromFile(key, integrityKey, file, (msg) -> {
-                log(msg);
-            });
+            String decText = FileSample.decryptTextFromFile(key, integrityKey, file, this::log);
             log("file loaded");
-            decryptedText.setText(decText);
+            runOnUiThread(() -> {
+                decryptedText.setText(decText);
+            });
         } catch (Exception e) {
             e.printStackTrace();
             log(e.getMessage());
@@ -132,12 +137,16 @@ public class FileActivity extends AppCompatActivity {
         AndroidFileChooser.setUriPermissions(this, data, uri);
         switch (requestCode) {
             case REQUEST_SAVE_FILE:
-                IFile saveDir = AndroidFileChooser.getFile(this, uri.toString(), true);
-                saveFile(saveDir);
+                IFile saveDir = AndroidFileSystem.getRealFile(uri.toString(), true);
+                executor.execute(() -> {
+                    saveFile(saveDir);
+                });
                 break;
             case REQUEST_LOAD_FILE:
                 IFile filesToImport = AndroidFileChooser.getFiles(this, data)[0];
-                loadFile(filesToImport);
+                executor.execute(() -> {
+                    loadFile(filesToImport);
+                });
                 break;
         }
     }

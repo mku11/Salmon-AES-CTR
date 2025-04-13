@@ -11,11 +11,13 @@ import com.google.android.material.textfield.TextInputEditText;
 import com.mku.android.fs.file.AndroidFileSystem;
 import com.mku.salmon.Generator;
 import com.mku.salmon.samples.R;
-import com.mku.salmon.samples.samples.*;
+import com.mku.salmon.samples.samples.DataSample;
+import com.mku.salmon.samples.samples.SamplesCommon;
 import com.mku.salmon.streams.AesStream;
 import com.mku.salmon.streams.ProviderType;
 
-import java.io.IOException;
+import java.util.concurrent.Executor;
+import java.util.concurrent.Executors;
 
 public class DataActivity extends AppCompatActivity {
     private TextInputEditText password;
@@ -32,6 +34,8 @@ public class DataActivity extends AppCompatActivity {
     byte[] integrityKey = null;
     private byte[] data;
     private byte[] encData;
+	
+	private final Executor executor = Executors.newCachedThreadPool();
 
     @Override
     public void onCreate(Bundle bundle) {
@@ -46,12 +50,16 @@ public class DataActivity extends AppCompatActivity {
 
         encryptButton = findViewById(R.id.ENCRYPT_BUTTON);
         encryptButton.setOnClickListener((e) -> {
-            encryptData();
+			executor.execute(() -> {
+				encryptData();
+			});
         });
 
         decryptButton = findViewById(R.id.DECRYPT_BUTTON);
         decryptButton.setOnClickListener((e) -> {
-            decryptData();
+			executor.execute(() -> {
+				decryptData();
+			});
         });
 
         outputText = findViewById(R.id.OUTPUT_TEXT);
@@ -66,13 +74,19 @@ public class DataActivity extends AppCompatActivity {
         });
     }
 
+	public void clearLog() {
+        runOnUiThread(() -> {
+            outputText.setText("");
+        });
+    }
+	
     public void initialize() {
         AndroidFileSystem.initialize(this);
         AesStream.setAesProviderType(ProviderType.Default);
     }
 
     public void encryptData() {
-        outputText.setText("");
+        clearLog();
 
         // generate an encryption key from the text password
         log("generating keys and random data...");
@@ -90,9 +104,7 @@ public class DataActivity extends AppCompatActivity {
         try {
             log("starting encryption...");
             encData = DataSample.encryptData(data, key, integrityKey,
-                    Integer.parseInt((String) threads.getSelectedItem()), (msg) -> {
-                        log(msg);
-                    });
+                    Integer.parseInt((String) threads.getSelectedItem()), this::log);
         } catch (Exception e) {
             e.printStackTrace();
             log(e.getMessage());
@@ -103,9 +115,7 @@ public class DataActivity extends AppCompatActivity {
         log("starting decryption...");
         try {
             byte[] decData = DataSample.decryptData(encData, key, integrityKey,
-                    Integer.parseInt((String) threads.getSelectedItem()), (msg) -> {
-                        log(msg);
-                    });
+                    Integer.parseInt((String) threads.getSelectedItem()), this::log);
             log("done");
         } catch (Exception e) {
             e.printStackTrace();

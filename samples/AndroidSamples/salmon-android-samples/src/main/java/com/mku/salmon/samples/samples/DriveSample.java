@@ -80,6 +80,7 @@ public class DriveSample {
         importOptions.integrity = true;
         importOptions.autoRename = IFile.autoRename;
         importOptions.onFailed = (file, ex) -> {
+			System.err.println(ex);
             log.accept("import failed: " + ex);
         };
         importOptions.onProgressChanged = (taskProgress) -> {
@@ -109,7 +110,8 @@ public class DriveSample {
         exportOptions.integrity = true;
         exportOptions.autoRename = IFile.autoRename;
         exportOptions.onFailed = (file, ex) -> {
-            System.err.println("export failed: " + ex);
+            System.err.println(ex);
+			log.accept("export failed: " + ex);
         };
         exportOptions.onProgressChanged = (taskProgress) -> {
             try {
