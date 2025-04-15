@@ -562,7 +562,7 @@ export class SalmonCoreTestHelper {
 
         let ms1 = new MemoryStream(testData);
         let ms2 = new MemoryStream();
-        await ms1.copyTo(ms2, bufferSize, null);
+        await ms1.copyTo(ms2, bufferSize);
         await ms1.close();
         await ms2.close();
         let data2 = ms2.toArray();
@@ -577,7 +577,7 @@ export class SalmonCoreTestHelper {
 
     }
 
-    static async copyFromMemStreamToAesStream(size, key, nonce,
+    static async copyFromMemStreamToSalmonStream(size, key, nonce,
         integrity, chunkSize, hashKey,
         bufferSize) {
 
@@ -587,7 +587,7 @@ export class SalmonCoreTestHelper {
         // copy to a mem byte stream
         let ms1 = new MemoryStream(testData);
         let ms2 = new MemoryStream();
-        await ms1.copyTo(ms2, bufferSize, null);
+        await ms1.copyTo(ms2, bufferSize);
         await ms1.close();
 
         // encrypt to a memory byte stream

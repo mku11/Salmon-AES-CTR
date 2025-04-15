@@ -24,6 +24,7 @@ SOFTWARE.
 
 import { BitConverter } from '../../lib/salmon-core/convert/bit_converter.js';
 import { MemoryStream } from '../../lib/salmon-core/streams/memory_stream.js';
+import { RandomAccessStream } from '../../lib/salmon-core/streams/random_access_stream.js';
 import { Generator } from '../../lib/salmon-core/salmon/generator.js';
 import { AesStream } from '../../lib/salmon-core/salmon/streams/aes_stream.js';
 import { EncryptionMode } from '../../lib/salmon-core/salmon/streams/encryption_mode.js';
@@ -84,6 +85,7 @@ export class SalmonFSTestHelper {
     static TEST_VAULT_DIRNAME = "vault";
     static TEST_OPER_DIRNAME = "files";
     static TEST_EXPORT_AUTH_DIRNAME = "auth";
+    static TEST_EXPORT_DIRNAME = "export";
     static TEST_IMPORT_TINY_FILENAME = "tiny_test.txt";
     static TEST_IMPORT_SMALL_FILENAME = "small_test.dat";
     static TEST_IMPORT_MEDIUM_FILENAME = "medium_test.dat";
@@ -102,7 +104,7 @@ export class SalmonFSTestHelper {
     static credentials = new Credentials("user", "password");
     
     // HTTP server (Read-only)
-	static HTTP_SERVER_DEFAULT_URL = "http://localhost:8000";
+	static HTTP_SERVER_DEFAULT_URL = "http://localhost";
     static HTTP_SERVER_URL = SalmonFSTestHelper.HTTP_SERVER_DEFAULT_URL;
     static HTTP_TEST_DIRNAME = "httpserv";
     static HTTP_VAULT_DIRNAME = "vault";
@@ -141,6 +143,7 @@ export class SalmonFSTestHelper {
     static TEST_HTTP_FILE;
     static TEST_SEQ_DIR;
     static TEST_EXPORT_AUTH_DIR;
+    static TEST_EXPORT_DIR;
     static fileImporter;
     static fileExporter;
     static sequenceSerializer = new SequenceSerializer();
@@ -191,6 +194,7 @@ export class SalmonFSTestHelper {
         SalmonFSTestHelper.WS_TEST_DIR = await SalmonFSTestHelper.createDir(SalmonFSTestHelper.TEST_ROOT_DIR, SalmonFSTestHelper.WS_TEST_DIRNAME);
         SalmonFSTestHelper.HTTP_TEST_DIR = await SalmonFSTestHelper.createDir(SalmonFSTestHelper.TEST_ROOT_DIR, SalmonFSTestHelper.HTTP_TEST_DIRNAME);
         SalmonFSTestHelper.TEST_SEQ_DIR = await SalmonFSTestHelper.createDir(SalmonFSTestHelper.TEST_ROOT_DIR, SalmonFSTestHelper.TEST_SEQ_DIRNAME);
+        SalmonFSTestHelper.TEST_EXPORT_DIR = await SalmonFSTestHelper.createDir(SalmonFSTestHelper.TEST_ROOT_DIR, SalmonFSTestHelper.TEST_EXPORT_DIRNAME);
         SalmonFSTestHelper.TEST_EXPORT_AUTH_DIR = await SalmonFSTestHelper.createDir(SalmonFSTestHelper.TEST_ROOT_DIR, SalmonFSTestHelper.TEST_EXPORT_AUTH_DIRNAME);
         SalmonFSTestHelper.HTTP_VAULT_DIR = new HttpFile(SalmonFSTestHelper.HTTP_VAULT_DIR_URL);
 		await SalmonFSTestHelper.createTestFiles();
@@ -319,7 +323,8 @@ export class SalmonFSTestHelper {
         let ms = new MemoryStream();
         try {
             await stream.copyTo(ms);
-            let digest = BitConverter.toHex(new Uint8Array(await crypto.subtle.digest("SHA-256", ms.toArray())));
+            let data = ms.toArray();
+            let digest = BitConverter.toHex(new Uint8Array(await crypto.subtle.digest("SHA-256", data)));
             return digest;
         } finally {
             if (ms)
@@ -398,7 +403,8 @@ export class SalmonFSTestHelper {
         let exportOptions = new FileExportOptions();
         exportOptions.integrity = verifyFileIntegrity;
         exportOptions.onProgressChanged = printExportProgress;
-        let exportFile = await SalmonFSTestHelper.fileExporter.exportFile(aesFile, await drive.getExportDir(), exportOptions);
+        let exportDir = await SalmonFSTestHelper.generateFolder("export", SalmonFSTestHelper.TEST_EXPORT_DIR, false);
+        let exportFile = await SalmonFSTestHelper.fileExporter.exportFile(aesFile, exportDir, exportOptions);
         let hashPostExport = await SalmonFSTestHelper.getChecksum(exportFile);
         if (shouldBeEqual) {
             expect(hashPostExport).toBe(hashPreImport);
@@ -559,7 +565,9 @@ export class SalmonFSTestHelper {
             fileToImport = importFilePath;
             await SalmonFSTestHelper.fileImporter.importFile(fileToImport, rootDir);
             success = true;
-        } catch (ignored) { }
+        } catch (ex) { 
+            console.log(ex);
+        }
 
         expect(success).toBeFalsy();
         drive.close();
@@ -751,12 +759,18 @@ export class SalmonFSTestHelper {
         let reader = fileInputStream.getReader();
         await fileInputStream.reset();
         await fileInputStream.skip(start);
-        let buff = await reader.read();
-        if (buff.value == undefined)
-            throw new Error("Could not read from stream");
-        for (let i = 0; i < length; i++) {
-            buffer[readOffset + i] = buff.value[i];
+        let buff;
+        let totalBytesRead = 0;
+        while (totalBytesRead < length && (buff = await reader.read())) {
+            if(!buff.value)
+                break;
+            let len = Math.min(length - totalBytesRead, buff.value.length);
+            for (let i = 0; i < len; i++) {
+                buffer[readOffset + totalBytesRead + i] = buff.value[i];
+            }
+            totalBytesRead += len;
         }
+        
         let tdata = new Uint8Array(buffer.length);
         for (let i = 0; i < shouldReadLength; i++)
             tdata[readOffset + i] = data[start + i];
@@ -802,7 +816,7 @@ export class SalmonFSTestHelper {
     }
 
     static async copyStream(src, dest) {
-        let bufferSize = src.getBufferSize();
+        let bufferSize = RandomAccessStream.DEFAULT_BUFFER_SIZE;
         let bytesRead;
         let buffer = new Uint8Array(bufferSize);
         while ((bytesRead = await src.read(buffer, 0, bufferSize)) > 0) {
@@ -812,12 +826,14 @@ export class SalmonFSTestHelper {
     }
 
     static async copyReadableStream(src, dest) {
-        let bufferSize = 512 * 1024;
-        let bytesRead;
-        let buffer = new Uint8Array(bufferSize);
         let reader = src.getReader();
-        while ((bytesRead = await reader.read()) > 0) {
-            await dest.write(buffer, 0, bytesRead);
+        let buff;
+        let totalBytesRead = 0;
+        while (buff = await reader.read()) {
+            if(!buff.value)
+                break;
+            await dest.write(buff.value, 0, buff.value.length);
+            totalBytesRead += buff.value.length;
         }
         await dest.flush();
         reader.releaseLock();
@@ -850,27 +866,27 @@ export class SalmonFSTestHelper {
         expect(digest).toBe(localChkSum);
     }
 
-    static async seekAndReadHttpFile(data, file, isEncrypted = false,
+    static async seekAndReadHttpFile(data, file,
         buffersCount = 0, bufferSize = 0, backOffset = 0) {
-        await SalmonFSTestHelper.seekAndReadFileStream(data, file, isEncrypted,
+        await SalmonFSTestHelper.seekAndReadFileStream(data, file,
             0, 32, 0, 32,
             buffersCount, bufferSize, backOffset);
-        await SalmonFSTestHelper.seekAndReadFileStream(data, file, isEncrypted,
+        await SalmonFSTestHelper.seekAndReadFileStream(data, file,
             220, 8, 2, 8,
             buffersCount, bufferSize, backOffset);
-        await SalmonFSTestHelper.seekAndReadFileStream(data, file, isEncrypted,
+        await SalmonFSTestHelper.seekAndReadFileStream(data, file,
             100, 2, 0, 2,
             buffersCount, bufferSize, backOffset);
-        await SalmonFSTestHelper.seekAndReadFileStream(data, file, isEncrypted,
+        await SalmonFSTestHelper.seekAndReadFileStream(data, file,
             6, 16, 0, 16,
             buffersCount, bufferSize, backOffset);
-        await SalmonFSTestHelper.seekAndReadFileStream(data, file, isEncrypted,
+        await SalmonFSTestHelper.seekAndReadFileStream(data, file,
             50, 40, 0, 40,
             buffersCount, bufferSize, backOffset);
-        await SalmonFSTestHelper.seekAndReadFileStream(data, file, isEncrypted,
+        await SalmonFSTestHelper.seekAndReadFileStream(data, file,
             124, 50, 0, 50,
             buffersCount, bufferSize, backOffset);
-        await SalmonFSTestHelper.seekAndReadFileStream(data, file, isEncrypted,
+        await SalmonFSTestHelper.seekAndReadFileStream(data, file,
             250, 10, 0, 10,
             buffersCount, bufferSize, backOffset);
     }
@@ -878,22 +894,18 @@ export class SalmonFSTestHelper {
     // shouldReadLength should be equal to length
     // when checking Http files since the return buffer 
     // might give us more data than requested
-    static async seekAndReadFileStream(data, file, isEncrypted = false,
+    static async seekAndReadFileStream(data, file,
         start, length, readOffset, shouldReadLength,
         buffersCount = 0, bufferSize = 0, backOffset = 0) {
         let buffer = new Uint8Array(length + readOffset);
 
         let stream = null;
-        if (SalmonFSTestHelper.TEST_USE_FILE_INPUT_STREAM && isEncrypted) {
+        if (SalmonFSTestHelper.TEST_USE_FILE_INPUT_STREAM) {
             // multi threaded
-            stream = AesFileReadableStream.create(file, buffersCount, bufferSize, SalmonFSTestHelper.TEST_FILE_INPUT_STREAM_THREADS, backOffset);
+            stream = AesFileReadableStream.createFileReadableStream(file, buffersCount, bufferSize, 
+                SalmonFSTestHelper.TEST_FILE_INPUT_STREAM_THREADS, backOffset);
         } else {
-            let fileStream;
-            if (isEncrypted) {
-                fileStream = await file.getInputStream();
-            } else {
-                fileStream = new HttpFileStream(file, "r");
-            }
+            let fileStream = await file.getInputStream();
             stream = ReadableStreamWrapper.create(fileStream);
         }
         let reader = await stream.getReader();
@@ -915,8 +927,8 @@ export class SalmonFSTestHelper {
     }
 
     static async exportFiles(files, dir, threads = 1) {
-		let bufferSize = 256 * 1024;
-		let commander = new AesFileCommander(bufferSize, bufferSize, threads);
+		let bufferSize = RandomAccessStream.DEFAULT_BUFFER_SIZE;
+		let commander = new AesFileCommander(bufferSize, bufferSize, SalmonFSTestHelper.ENC_EXPORT_THREADS);
         commander.importFiles
 
 		// set the correct worker paths for multithreading

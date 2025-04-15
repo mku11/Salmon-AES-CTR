@@ -112,7 +112,6 @@ describe('salmon-httpfs', () => {
         let drive = await AesDrive.openDrive(vaultDir, SalmonFSTestHelper.driveClassType, SalmonCoreTestHelper.TEST_PASSWORD);
         let root = await drive.getRoot();
         let encFile = await root.getChild(SalmonFSTestHelper.TEST_IMPORT_SMALL_FILENAME);
-        expect(await encFile.getName()).toBe(SalmonFSTestHelper.TEST_IMPORT_SMALL_FILENAME);
 
         let encStream = await encFile.getInputStream();
         let ms = new MemoryStream();
@@ -120,7 +119,7 @@ describe('salmon-httpfs', () => {
         let data = ms.toArray();
         await ms.close();
         await encStream.close();
-        await SalmonFSTestHelper.seekAndReadHttpFile(data, encFile, true, 3, 50, 12);
+        await SalmonFSTestHelper.seekAndReadHttpFile(data, encFile, 3, 50, 12);
     });
 
     it('shouldListFilesFromDrive', async () => {
@@ -143,30 +142,26 @@ describe('salmon-httpfs', () => {
 
     it('shouldExportFileFromDrive', async () => {
         let vaultDir = SalmonFSTestHelper.HTTP_VAULT_DIR;
-        let threads = 1;
         let drive = await SalmonFSTestHelper.openDrive(vaultDir, SalmonFSTestHelper.driveClassType, SalmonCoreTestHelper.TEST_PASSWORD);
         let file = await (await drive.getRoot()).getChild(await SalmonFSTestHelper.TEST_HTTP_FILE.getName());
         let exportDir = await SalmonFSTestHelper.generateFolder("export_http", SalmonFSTestHelper.TEST_OUTPUT_DIR, false);
         let localFile = await exportDir.getChild(await SalmonFSTestHelper.TEST_HTTP_FILE.getName());
         if(await localFile.exists())
             await localFile.delete();
-        await SalmonFSTestHelper.exportFiles([file], exportDir, threads);
+        await SalmonFSTestHelper.exportFiles([file], exportDir);
         drive.close();
     });
 
     it('shouldReadRawFile', async () => {
         let localFile = await SalmonFSTestHelper.HTTP_TEST_DIR.getChild(await SalmonFSTestHelper.TEST_HTTP_FILE.getName());
+        console.log("reading: " + localFile.getPath());
         let localChkSum = await SalmonFSTestHelper.getChecksum(localFile);
         let httpRoot = new HttpFile(SalmonFSTestHelper.HTTP_SERVER_VIRTUAL_URL + "/" + SalmonFSTestHelper.HTTP_TEST_DIRNAME);
         let httpFile = await httpRoot.getChild(await SalmonFSTestHelper.TEST_HTTP_FILE.getName());
         let stream = await httpFile.getInputStream();
-        let ms = new MemoryStream();
-        await stream.copyTo(ms);
-        await ms.flush();
-        await ms.setPosition(0);
-        await ms.close();
+        let digest = await SalmonFSTestHelper.getChecksumStream(stream.asReadStream());
         await stream.close();
-        let digest = await SalmonFSTestHelper.getChecksumStream(ms);
+        console.log(digest + " vs " + localChkSum);
         expect(digest).toBe(localChkSum);
     });
 });

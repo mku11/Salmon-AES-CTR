@@ -29,12 +29,14 @@ import { ProviderType } from '../../lib/salmon-core/salmon/streams/provider_type
 import { SalmonCoreTestHelper } from '../salmon-core/salmon_core_test_helper.js';
 import { getTestRunnerMode, SalmonFSTestHelper } from './salmon_fs_test_helper.js';
 import { IntegrityException } from '../../lib/salmon-core/salmon/integrity/integrity_exception.js';
+import { Integrity } from '../../lib/salmon-core/salmon/integrity/integrity.js';
 import { copyRecursively, moveRecursively, autoRenameFile, RecursiveCopyOptions, RecursiveMoveOptions, CopyOptions, MoveOptions } from '../../lib/salmon-fs/fs/file/ifile.js'
 import { AesFileReadableStream } from '../../lib/salmon-fs/salmonfs/streams/aes_file_readable_stream.js';
 import { AesFileCommander } from '../../lib/salmon-fs/salmonfs/drive/utils/aes_file_commander.js';
-import { BatchImportOptions, BatchExportOptions } from '../../lib/salmon-fs/fs/drive/utils/file_commander.js';
+import { BatchImportOptions } from '../../lib/salmon-fs/fs/drive/utils/file_commander.js';
 import { AuthException } from '../../lib/salmon-fs/salmonfs/auth/auth_exception.js'
 import { getTestMode, TestMode } from "./salmon_fs_test_helper.js";
+import { SeekOrigin } from "../../lib/salmon-core/streams/random_access_stream.js";
 
 function checkParams() {
     if(getTestMode() == TestMode.Http) {
@@ -330,23 +332,21 @@ describe('salmon-fs', () => {
 
     it('shouldCreateFileWithoutVaultApplyIntegrityNoVerifyIntegrityFlipDataNotCaughtNotEqual', async () => {
         let caught = false;
-        let failed = false;
         try {
             await SalmonFSTestHelper.shouldCreateFileWithoutVault(new TextEncoder().encode(SalmonCoreTestHelper.TEST_TEXT), SalmonCoreTestHelper.TEST_KEY_BYTES,
                 true, false, 64,
                 SalmonCoreTestHelper.TEST_HMAC_KEY_BYTES,
                 SalmonCoreTestHelper.TEST_FILENAME_NONCE_BYTES, SalmonCoreTestHelper.TEST_NONCE_BYTES,
-                true, 24 + 32 + 5, true);
+                true, 24 + 32 + 5, false);
         } catch (ex) {
             console.error(ex);
             if (ex.getCause != undefined && ex.getCause() instanceof IntegrityException)
                 caught = true;
             else
-                failed = true;
+                throw ex;
         }
 
         expect(caught).toBeFalsy();
-        expect(failed).toBeTruthy();
     });
 
     it('shouldExportAndImportAuth', async () => {
@@ -369,8 +369,7 @@ describe('salmon-fs', () => {
             true, true, 64, SalmonCoreTestHelper.TEST_HMAC_KEY_BYTES,
             SalmonCoreTestHelper.TEST_FILENAME_NONCE_BYTES, SalmonCoreTestHelper.TEST_NONCE_BYTES,
             false, -1, true);
-        let fileInputStream = AesFileReadableStream.create(file,
-            3, 50, SalmonFSTestHelper.TEST_FILE_INPUT_STREAM_THREADS, 12);
+        let fileInputStream = AesFileReadableStream.createFileReadableStream(file, 3, 100, SalmonFSTestHelper.TEST_FILE_INPUT_STREAM_THREADS, 12);
 
         await SalmonFSTestHelper.seekAndReadFileInputStream(data, fileInputStream, 0, 32, 0, 32);
         await SalmonFSTestHelper.seekAndReadFileInputStream(data, fileInputStream, 220, 8, 2, 8);
@@ -535,28 +534,50 @@ describe('salmon-fs', () => {
         let vaultDir = await SalmonFSTestHelper.generateFolder(SalmonFSTestHelper.TEST_VAULT_DIRNAME);
         let file = SalmonFSTestHelper.TEST_IMPORT_MEDIUM_FILE;
 
+        let pos = 3 * Integrity.DEFAULT_CHUNK_SIZE + 3;
+
+        let stream = await file.getInputStream();
+        await stream.seek(pos, SeekOrigin.Current);
+        let h1 = await SalmonFSTestHelper.getChecksumStream(stream);
+        await stream.close();
+
         let sequencer = await SalmonFSTestHelper.createSalmonFileSequencer();
         let drive = await SalmonFSTestHelper.createDrive(vaultDir, SalmonFSTestHelper.driveClassType, SalmonCoreTestHelper.TEST_PASSWORD, sequencer);
-        let fileCommander = new AesFileCommander(SalmonFSTestHelper.ENC_IMPORT_BUFFER_SIZE, SalmonFSTestHelper.ENC_EXPORT_BUFFER_SIZE, 2);
+        let fileCommander = new AesFileCommander(SalmonFSTestHelper.ENC_IMPORT_BUFFER_SIZE, SalmonFSTestHelper.ENC_EXPORT_BUFFER_SIZE, 
+            SalmonFSTestHelper.ENC_IMPORT_THREADS);
 		let importOptions = new BatchImportOptions();
         importOptions.integrity = true;
         let sfiles = await fileCommander.importFiles([file], await drive.getRoot(), importOptions);
 		fileCommander.close();
-		
-        let fileInputStream1 = AesFileReadableStream.create(sfiles[0], 4, 4 * 1024 * 1024, 4, 256 * 1024);
+        console.log("files imported");
+
+        console.log("using 1 thread to read");
+        let fileInputStream1 = AesFileReadableStream.createFileReadableStream(sfiles[0], 4, 4 * 1024 * 1024, 1, 256 * 1024);
+        console.log("seeking to: " + pos);
+        await fileInputStream1.skip(pos);
         let ms = new MemoryStream();
         await SalmonFSTestHelper.copyReadableStream(fileInputStream1, ms);
         await ms.flush();
         await ms.close();
-        let h1 = BitConverter.toHex(new Uint8Array(await crypto.subtle.digest("SHA-256", ms.toArray())));
+        ms.setPosition(0);
+        let h2 = await SalmonFSTestHelper.getChecksumStream(ms);
+        await fileInputStream1.cancel();
+        ms.close();
+        expect(h2).toBe(h1);
 
-        let fileInputStream2 = AesFileReadableStream.create(sfiles[0], 4, 4 * 1024 * 1024, 1, 256 * 1024);
-        let ms52 = new MemoryStream();
-        await SalmonFSTestHelper.copyReadableStream(fileInputStream2, ms52);
-        await ms52.flush();
-        await ms52.close();
-        let h2 = BitConverter.toHex(new Uint8Array(await crypto.subtle.digest("SHA-256", ms52.toArray())));
-        expect(h1).toBe(h2);
+        console.log("using 2 threads to read");
+        let fileInputStream2 = AesFileReadableStream.createFileReadableStream(sfiles[0], 4, 4 * 1024 * 1024, 2, 256 * 1024);
+        console.log("seeking to: " + pos);
+        await fileInputStream2.skip(pos);
+        let ms2 = new MemoryStream();
+        await SalmonFSTestHelper.copyReadableStream(fileInputStream2, ms2);
+        await ms2.flush();
+        await ms2.close();
+        ms2.setPosition(0);
+        let h3 = await SalmonFSTestHelper.getChecksumStream(ms2);
+        await fileInputStream2.cancel();
+        ms2.close();
+        expect(h3).toBe(h1);
     });
 
     it('testRawFile', async () => {

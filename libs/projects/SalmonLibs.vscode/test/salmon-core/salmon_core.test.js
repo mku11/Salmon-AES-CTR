@@ -26,6 +26,7 @@ import { BitConverter } from '../../lib/salmon-core/convert/bit_converter.js';
 import { MemoryStream } from '../../lib/salmon-core/streams/memory_stream.js';
 import { EncryptionMode } from '../../lib/salmon-core/salmon/streams/encryption_mode.js';
 import { IntegrityException } from '../../lib/salmon-core/salmon/integrity/integrity_exception.js';
+import { Integrity } from '../../lib/salmon-core/salmon/integrity/integrity.js';
 import { Generator } from '../../lib/salmon-core/salmon/generator.js';
 import { TextEncryptor } from '../../lib/salmon-core/salmon/text/text_encryptor.js';
 import { TextDecryptor } from '../../lib/salmon-core/salmon/text/text_decryptor.js';
@@ -600,29 +601,29 @@ describe('salmon-core', () => {
     });
 
     it('shouldCopyFromMemoryStreamToAesStream', async () => {
-        await SalmonCoreTestHelper.copyFromMemStreamToAesStream(1 * 1024 * 1024,
+        await SalmonCoreTestHelper.copyFromMemStreamToSalmonStream(1 * 1024 * 1024,
             SalmonCoreTestHelper.TEST_KEY_BYTES, SalmonCoreTestHelper.TEST_NONCE_BYTES,
             true, 0, SalmonCoreTestHelper.TEST_HMAC_KEY_BYTES,
             0);
-        await SalmonCoreTestHelper.copyFromMemStreamToAesStream(1 * 1024 * 1024,
+        await SalmonCoreTestHelper.copyFromMemStreamToSalmonStream(1 * 1024 * 1024,
             SalmonCoreTestHelper.TEST_KEY_BYTES, SalmonCoreTestHelper.TEST_NONCE_BYTES,
             true, 0, SalmonCoreTestHelper.TEST_HMAC_KEY_BYTES,
             32768);
 
-        await SalmonCoreTestHelper.copyFromMemStreamToAesStream(1 * 1024 * 1024,
+        await SalmonCoreTestHelper.copyFromMemStreamToSalmonStream(1 * 1024 * 1024,
             SalmonCoreTestHelper.TEST_KEY_BYTES, SalmonCoreTestHelper.TEST_NONCE_BYTES,
-            true, 256 * 1024, SalmonCoreTestHelper.TEST_HMAC_KEY_BYTES,
+            true, Integrity.DEFAULT_CHUNK_SIZE, SalmonCoreTestHelper.TEST_HMAC_KEY_BYTES,
             0);
-        await SalmonCoreTestHelper.copyFromMemStreamToAesStream(1 * 1024 * 1024,
+        await SalmonCoreTestHelper.copyFromMemStreamToSalmonStream(1 * 1024 * 1024,
             SalmonCoreTestHelper.TEST_KEY_BYTES, SalmonCoreTestHelper.TEST_NONCE_BYTES,
-            true, 256 * 1024, SalmonCoreTestHelper.TEST_HMAC_KEY_BYTES,
+            true, Integrity.DEFAULT_CHUNK_SIZE, SalmonCoreTestHelper.TEST_HMAC_KEY_BYTES,
             32768);
 
-        await SalmonCoreTestHelper.copyFromMemStreamToAesStream(1 * 1024 * 1024,
+        await SalmonCoreTestHelper.copyFromMemStreamToSalmonStream(1 * 1024 * 1024,
             SalmonCoreTestHelper.TEST_KEY_BYTES, SalmonCoreTestHelper.TEST_NONCE_BYTES,
             true, 128 * 1024, SalmonCoreTestHelper.TEST_HMAC_KEY_BYTES,
             0);
-        await SalmonCoreTestHelper.copyFromMemStreamToAesStream(1 * 1024 * 1024,
+        await SalmonCoreTestHelper.copyFromMemStreamToSalmonStream(1 * 1024 * 1024,
             SalmonCoreTestHelper.TEST_KEY_BYTES, SalmonCoreTestHelper.TEST_NONCE_BYTES,
             true, 128 * 1024, SalmonCoreTestHelper.TEST_HMAC_KEY_BYTES,
             32768);
