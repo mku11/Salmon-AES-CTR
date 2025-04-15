@@ -248,10 +248,6 @@ public class InputStreamWrapper : Stream
 		}
 		
         minCount = Math.Min(count, (int)(cacheBuffer.Count - StreamPosition + cacheBuffer.StartPos));
-        if(minCount < count)
-        {
-            throw new Exception("Buffers are not large enough, if you use a backoffset make sure you double the buffer size");
-        }
         Array.Copy(cacheBuffer.Data, (int)(StreamPosition - cacheBuffer.StartPos), buffer, offset, minCount);
 
         StreamPosition += minCount;
@@ -313,28 +309,32 @@ public class InputStreamWrapper : Stream
     [MethodImpl(MethodImplOptions.Synchronized)]
     private Buffer GetAvailBuffer()
     {
-        if (lruBuffersIndex.Count == BuffersCount)
+        if (this.buffers == null)
+            throw new Exception("No buffers found");
+        int index = -1;
+        if (this.lruBuffersIndex.Count == this.BuffersCount)
         {
-            // getting least recently used buffer
-            int index = lruBuffersIndex.Last.Value;
-            // promote to the top
-            lruBuffersIndex.Remove(index);
-            lruBuffersIndex.AddFirst(index);
-            return buffers[lruBuffersIndex.Last.Value];
+
+            index = this.lruBuffersIndex.Last.Value;
+            this.lruBuffersIndex.RemoveLast();
         }
-        for (int i = 0; i < buffers.Length; i++)
+        else
         {
-            Buffer buffer = buffers[i];
-            if (buffer != null && buffer.Count == 0)
+            for (int i = 0; i < this.buffers.Length; i++)
             {
-                lruBuffersIndex.AddFirst(i);
-                return buffer;
+                Buffer buff = this.buffers[i];
+                if (buff != null && buff.Count == 0)
+                {
+                    index = i;
+                    break;
+                }
             }
         }
-        if (buffers[buffers.Length - 1] != null)
-            return buffers[buffers.Length - 1];
-        else
-            return null;
+        if (index < 0)
+            index = this.buffers.Length - 1;
+
+        this.lruBuffersIndex.AddFirst(index);
+        return this.buffers[index];
     }
 
     /// <summary>
@@ -348,7 +348,8 @@ public class InputStreamWrapper : Stream
         for (int i = 0; i < buffers.Length; i++)
         {
             Buffer buffer = buffers[i];
-            if (buffer != null && position >= buffer.StartPos && position + count <= buffer.StartPos + buffer.Count)
+            if (buffer != null && position >= buffer.StartPos 
+                && position + count <= buffer.StartPos + buffer.Count)
             {
                 // promote buffer to the front
                 lruBuffersIndex.Remove(i);
