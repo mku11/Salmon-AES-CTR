@@ -133,7 +133,7 @@ export abstract class FileExporter {
             let runningThreads: number = 1;
             let partSize: number = fileSize;
 
-            // for python we make sure to allocate enough space for the file
+            // for js we make sure to allocate enough space for the file
             let targetStream: RandomAccessStream = await exportFile.getOutputStream();
             await targetStream.setLength(fileSize);
             await targetStream.close();
