@@ -50,8 +50,6 @@ public class SalmonFSHttpTests
         int threads = Environment.GetEnvironmentVariable("ENC_THREADS") != null && !Environment.GetEnvironmentVariable("ENC_THREADS").Equals("") ?
             int.Parse(Environment.GetEnvironmentVariable("ENC_THREADS")) : 1;
 
-        threads = 2;
-
         SalmonFSTestHelper.SetTestParams(testDir, testMode);
         Console.WriteLine("testDir: " + testDir);
         Console.WriteLine("testMode: " + testMode);
@@ -165,7 +163,7 @@ public class SalmonFSHttpTests
         AesDrive drive = AesDrive.OpenDrive(vaultDir, SalmonFSTestHelper.DriveClassType, SalmonCoreTestHelper.TEST_PASSWORD, null);
         IVirtualFile root = drive.Root;
         AesFile encFile = (AesFile) root.GetChild(SalmonFSTestHelper.TEST_IMPORT_SMALL_FILENAME);
-        Assert.AreEqual(encFile.Name, encFile.Name);
+        Assert.AreEqual(encFile.Name, SalmonFSTestHelper.TEST_IMPORT_SMALL_FILENAME);
 
         RandomAccessStream encStream = encFile.GetInputStream();
         MemoryStream ms = new MemoryStream();
