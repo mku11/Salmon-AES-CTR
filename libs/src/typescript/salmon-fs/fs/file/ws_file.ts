@@ -71,9 +71,9 @@ export class WSFile implements IFile {
      * @param {string} path The filepath.
      */
     public constructor(path: string, servicePath: string, credentials: Credentials) {
-        this.#servicePath = servicePath;
         if(!path.startsWith(WSFile.separator))
             path = WSFile.separator + path;
+        this.#servicePath = servicePath;
         this.#filePath = path;
         this.#credentials = credentials;
     }
@@ -199,7 +199,7 @@ export class WSFile implements IFile {
         if (this.#filePath == null)
             throw new Error("Filepath is not assigned");
         let nFilePath = this.#filePath;
-        if(nFilePath.endsWith("/"))
+        if(nFilePath.endsWith(WSFile.separator))
             nFilePath = nFilePath.substring(0,nFilePath.length-1);
         let basename: string | undefined = nFilePath.split(WSFile.separator).pop();
         if (basename === undefined)
@@ -236,7 +236,9 @@ export class WSFile implements IFile {
      * Get the parent directory of this file or directory.
      * @returns {Promise<IFile>} The parent directory.
      */
-    public async getParent(): Promise<IFile> {
+    public async getParent(): Promise<IFile | null> {
+        if (this.#filePath.length == 0 || this.#filePath == WSFile.separator)
+            return null;
 		let path: string = this.#filePath;
 		if(path.endsWith(WSFile.separator))
 			path = path.slice(0,-1);
