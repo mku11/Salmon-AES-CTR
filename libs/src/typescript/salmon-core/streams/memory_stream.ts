@@ -191,7 +191,8 @@ export class MemoryStream extends RandomAccessStream {
         } else if (origin === SeekOrigin.End) {
             nPos = (this.#bytes.length - offset);
         }
-        this.#checkAndResize(nPos);
+        if (nPos > this.#length)
+            this.#checkAndResize(nPos);
         await this.setPosition(nPos);
         return await this.getPosition();
     }
