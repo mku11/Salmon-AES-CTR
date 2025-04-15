@@ -165,7 +165,7 @@ public class SalmonFSHttpTests {
         AesDrive drive = AesDrive.openDrive(vaultDir, SalmonFSTestHelper.driveClassType, SalmonCoreTestHelper.TEST_PASSWORD, null);
         IVirtualFile root = drive.getRoot();
         AesFile encFile = (AesFile) root.getChild(SalmonFSTestHelper.TEST_IMPORT_SMALL_FILENAME);
-        assertEquals(encFile.getName(), encFile.getName());
+        assertEquals(encFile.getName(), SalmonFSTestHelper.TEST_IMPORT_SMALL_FILENAME);
 
         RandomAccessStream encStream = encFile.getInputStream();
         MemoryStream ms = new MemoryStream();
