@@ -173,7 +173,7 @@ export class FileStream extends RandomAccessStream {
         for (let i = 0; i < buff.length; i++) {
             buffer[offset + i] = buff[i];
         }
-        await this.setPosition(this.#_position + buff.length);
+        this.#_position += buff.length;
         return buff.length;
     }
 
@@ -187,7 +187,7 @@ export class FileStream extends RandomAccessStream {
     public override async write(buffer: Uint8Array, offset: number, count: number): Promise<void> {
         let stream: FileSystemWritableFileStream = await this.#getStream();
         await stream.write(buffer.slice(offset, offset + count));
-        await this.setPosition(this.#_position + count);
+        this.#_position += count;
     }
 
     /**
