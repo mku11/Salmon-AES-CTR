@@ -35,10 +35,6 @@ import { IntegrityException } from "../integrity/integrity_exception.js";
  */
 export class Integrity {
     /**
-     * Maximum chunk size for data integrity.
-     */
-    public static readonly MAX_CHUNK_SIZE: number = 8 * 1024 * 1024;
-    /**
      * Default chunk size for integrity.
      */
     public static readonly DEFAULT_CHUNK_SIZE: number = 256 * 1024;
@@ -79,9 +75,9 @@ export class Integrity {
      */
     public constructor(integrity: boolean, key: Uint8Array | null, chunkSize: number = 0, provider: IHashProvider, hashSize: number = 0) {
         if (chunkSize < 0 || (chunkSize > 0 && chunkSize < AESCTRTransformer.BLOCK_SIZE)
-            || (chunkSize > 0 && chunkSize % AESCTRTransformer.BLOCK_SIZE != 0) || chunkSize > Integrity.MAX_CHUNK_SIZE) {
+            || (chunkSize > 0 && chunkSize % AESCTRTransformer.BLOCK_SIZE != 0)) {
             throw new IntegrityException("Invalid chunk size, specify zero for default value or a positive number multiple of: "
-                + AESCTRTransformer.BLOCK_SIZE + " and less than: " + Integrity.MAX_CHUNK_SIZE + " bytes");
+                + AESCTRTransformer.BLOCK_SIZE);
         }
         if (integrity && key == null)
             throw new SecurityException("You need a hash key to use with integrity");
