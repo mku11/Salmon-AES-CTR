@@ -307,9 +307,6 @@ public class InputStreamWrapper extends InputStream {
         }
 
         minCount = Math.min(count, (int) (cacheBuffer.getCount() - streamPosition + cacheBuffer.getStartPos()));
-        if (minCount < count) {
-            throw new RuntimeException("Buffers are not large enough, if you use a backoffset make sure you double the buffer size");
-        }
         System.arraycopy(cacheBuffer.getData(), (int) (streamPosition - cacheBuffer.getStartPos()), buffer, offset, minCount);
 
         streamPosition += minCount;
@@ -369,25 +366,25 @@ public class InputStreamWrapper extends InputStream {
      * Returns an available cache buffer if there is none then reuse the least recently used one.
      */
     private synchronized Buffer getAvailBuffer() {
-        if (lruBuffersIndex.size() == buffersCount) {
-            // getting least recently used buffer
-            int index = lruBuffersIndex.getLast();
-            // promote to the top
-            lruBuffersIndex.remove((Integer) index);
-            lruBuffersIndex.addFirst(index);
-            return buffers[lruBuffersIndex.getLast()];
-        }
-        for (int i = 0; i < buffers.length; i++) {
-            Buffer buffer = buffers[i];
-            if (buffer != null && buffer.getCount() == 0) {
-                lruBuffersIndex.addFirst(i);
-                return buffer;
+        if (this.buffers == null)
+            throw new Error("No buffers found");
+        int index = -1;
+        if (this.lruBuffersIndex.size() == this.buffersCount) {
+            index = this.lruBuffersIndex.removeLast();
+        } else {
+            for (int i = 0; i < this.buffers.length; i++) {
+                Buffer buff = this.buffers[i];
+                if (buff != null && buff.getCount() == 0) {
+                    index = i;
+                    break;
+                }
             }
         }
-        if (buffers[buffers.length - 1] != null)
-            return buffers[buffers.length - 1];
-        else
-            return null;
+        if(index < 0)
+            index = this.buffers.length - 1;
+
+        this.lruBuffersIndex.addFirst(index);
+        return this.buffers[index];
     }
 
     /**
@@ -396,6 +393,8 @@ public class InputStreamWrapper extends InputStream {
      * @param position The source file position of the data to be read
      */
     private synchronized Buffer getBuffer(long position, int count) {
+        if (this.buffers == null)
+            return null;
         for (int i = 0; i < buffers.length; i++) {
             Buffer buffer = buffers[i];
             if (buffer != null && position >= buffer.getStartPos()
