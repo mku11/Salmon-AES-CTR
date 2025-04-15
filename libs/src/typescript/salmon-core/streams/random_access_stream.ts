@@ -23,12 +23,16 @@ SOFTWARE.
 */
 
 import { IOException } from "./io_exception.js";
+import { ReadableStreamWrapper } from "./readable_stream_wrapper.js";
 
 /**
  * Base class for read-write seekable streams.
  */
 export abstract class RandomAccessStream {
-    static #DEFAULT_BUFFER_SIZE = 256 * 1024;
+    /**
+     * Default buffer size
+     */
+    public static readonly DEFAULT_BUFFER_SIZE = 256 * 1024;
 
     /**
      * @callback OnProgressChanged
@@ -73,6 +77,14 @@ export abstract class RandomAccessStream {
      * @throws IOException Thrown if there is an IO error.
      */
     public abstract setPosition(value: number): Promise<void>;
+
+    /**
+     * The preferred align size
+     * @return The align size
+     */
+    public getAlignSize() : number {
+        return 32768;
+    }
 
     /**
      * Set the length of this stream.
@@ -134,10 +146,10 @@ export abstract class RandomAccessStream {
         if (!(await stream.canWrite()))
             throw new IOException("Target stream not writable");
         if (bufferSize <= 0) {
-            bufferSize = RandomAccessStream.#DEFAULT_BUFFER_SIZE;
+            bufferSize = RandomAccessStream.DEFAULT_BUFFER_SIZE;
         }
+        bufferSize = Math.floor(bufferSize / this.getAlignSize()) * this.getAlignSize();
         let bytesRead: number;
-        const pos: number = await this.getPosition();
         const buffer: Uint8Array = new Uint8Array(bufferSize);
         while ((bytesRead = await this.read(buffer, 0, bufferSize)) > 0) {
             await stream.write(buffer, 0, bytesRead);
@@ -145,7 +157,11 @@ export abstract class RandomAccessStream {
                 onProgressChanged(await this.getPosition(), await this.getLength());
         }
         await stream.flush();
-        await this.setPosition(pos);
+    }
+    
+    public async asReadStream() : Promise<ReadableStream>
+    {
+        return ReadableStreamWrapper.createReadableStream(this);
     }
 }
 

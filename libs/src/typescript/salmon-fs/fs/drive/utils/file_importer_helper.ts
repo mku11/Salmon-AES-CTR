@@ -59,7 +59,9 @@ export async function importFilePart(fileToImport: IFile, aesFile: IVirtualFile,
         sourceStream = await fileToImport.getInputStream();
         await sourceStream.setPosition(start);
 
-        let bytes: Uint8Array = new Uint8Array(bufferSize);
+        let nBufferSize = Math.floor(bufferSize / targetStream.getAlignSize()) * targetStream.getAlignSize();
+        let bytes: Uint8Array = new Uint8Array(nBufferSize);
+
         let bytesRead: number = 0;
         while ((bytesRead = await sourceStream.read(bytes, 0, Math.min(bytes.length, count - totalPartBytesRead))) > 0
             && totalPartBytesRead < count) {

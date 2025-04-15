@@ -27,6 +27,7 @@ import { AesStream } from "./streams/aes_stream.js";
 import { EncryptionMode } from "./streams/encryption_mode.js";
 import { SecurityException } from "./security_exception.js";
 import { EncryptionFormat } from "./streams/encryption_format.js";
+import { RandomAccessStream } from "../streams/random_access_stream.js";
 
 /**
  * Decrypt the data.
@@ -60,10 +61,8 @@ export async function decryptData(data: Uint8Array, start: number, count: number
         await stream.setPosition(start);
         startPos = await outputStream.getPosition();
         let totalChunkBytesRead: number = 0;
-        // align to the chunksize if available
-        let buffSize: number = Math.max(bufferSize, stream.getChunkSize());
-		// set the same buffer size for the internal stream
-		stream.setBufferSize(buffSize);
+        let buffSize = RandomAccessStream.DEFAULT_BUFFER_SIZE;
+        buffSize = Math.floor(buffSize / stream.getAlignSize()) * stream.getAlignSize();
         let buff: Uint8Array = new Uint8Array(buffSize);
         let bytesRead: number;
         while ((bytesRead = await stream.read(buff, 0, Math.min(buff.length, count - totalChunkBytesRead))) > 0

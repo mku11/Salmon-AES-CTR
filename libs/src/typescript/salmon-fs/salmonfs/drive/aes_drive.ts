@@ -50,7 +50,6 @@ import { IVirtualFile } from "../../fs/file/ivirtual_file.js";
  * Each drive implementation needs a corresponding implementation of {@link IFile}.
  */
 export abstract class AesDrive extends VirtualDrive {
-    static readonly #DEFAULT_FILE_CHUNK_SIZE: number = 256 * 1024;
 
     static #configFilename: string = "vault.slmn";
     static #authConfigFilename: string = "auth.slma";
@@ -58,7 +57,7 @@ export abstract class AesDrive extends VirtualDrive {
     static #shareDirectoryName: string = "share";
     static #exportDirectoryName: string = "export";
 
-    #defaultFileChunkSize: number = AesDrive.#DEFAULT_FILE_CHUNK_SIZE;
+    #defaultFileChunkSize: number = Integrity.DEFAULT_CHUNK_SIZE;
     #key: DriveKey | null = null;
     #driveId: Uint8Array | null = null;
     #realRoot: IFile | null = null;
@@ -460,7 +459,7 @@ export abstract class AesDrive extends VirtualDrive {
             if (drive.#sequencer)
                 await drive.#sequencer.initialize();
             return drive;
-        } catch (e) {
+        } catch (e: any) {
             console.error(e);
             throw new SecurityException("Could not initialize the drive: " + e.message, e);
         }

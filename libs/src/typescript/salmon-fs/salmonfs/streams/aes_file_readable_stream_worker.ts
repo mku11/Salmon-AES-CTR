@@ -25,10 +25,12 @@ SOFTWARE.
 import { AesStream } from "../../../salmon-core/salmon/streams/aes_stream.js";
 import { IFile } from "../../fs/file/ifile.js";
 import { AesFile } from "../file/aes_file.js";
-import { fillBufferPart, CacheBuffer } from "./aes_file_readable_stream_helper.js";
+import { fillBufferPart } from "../../../salmon-core/streams/readable_stream_wrapper.js";
+import { Buffer } from "../../../salmon-core/streams/buffer.js";
+import { RandomAccessStream } from "../../../salmon-core/streams/random_access_stream.js";
 
 let stream: AesStream | null = null;
-let cacheBuffer: CacheBuffer | null = null;
+let cacheBuffer: Buffer | null = null;
 
 let stopped: boolean[] = [false];
 async function receive(event: any) {
@@ -80,16 +82,16 @@ async function startRead(event: any): Promise<void> {
             stream = await fileToExport.getInputStream();
         }
         if (cacheBuffer == null)
-            cacheBuffer = new CacheBuffer(params.cacheBufferSize);
+            cacheBuffer = new Buffer(params.cacheBufferSize);
 
-        chunkBytesRead = await fillBufferPart(cacheBuffer, params.startPosition + params.start, params.start, params.length,
-            stream as AesStream);
+        chunkBytesRead = await fillBufferPart(cacheBuffer, params.startPosition + params.start,
+             params.start, params.length, stream);
         if(chunkBytesRead <= 0)
             chunkBytesRead = 0;
         let msgComplete = {
             message: 'complete',
             chunkBytesRead: chunkBytesRead,
-            cacheBuffer: cacheBuffer.buffer,
+            cacheBuffer: cacheBuffer.getData(),
             start: params.start
         };
         if (typeof process === 'object') {

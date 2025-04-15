@@ -60,7 +60,8 @@ export async function exportFilePart(fileToExport: IVirtualFile, exportFile: IFi
         sourceStream = await fileToExport.getInputStream();
         await sourceStream.setPosition(start);
 
-        let bytes: Uint8Array = new Uint8Array(bufferSize);
+        let nBufferSize = Math.floor(bufferSize / sourceStream.getAlignSize()) * sourceStream.getAlignSize();
+        let bytes: Uint8Array = new Uint8Array(nBufferSize);
         let bytesRead: number;
 
         while ((bytesRead = await sourceStream.read(bytes, 0, Math.min(bytes.length,

@@ -24,6 +24,7 @@ SOFTWARE.
 
 import { IOException } from "../../streams/io_exception.js";
 import { RandomAccessStream, SeekOrigin } from "../../streams/random_access_stream.js";
+import { ReadableStreamWrapper } from "../../streams/readable_stream_wrapper.js";
 import { HmacSHA256Provider } from "../integrity/hmac_sha256_provider.js";
 import { Integrity } from "../integrity/integrity.js";
 import { IntegrityException } from "../integrity/integrity_exception.js";
@@ -96,6 +97,14 @@ export class AesStream extends RandomAccessStream {
     #hashKey: Uint8Array | null;
     #chunkSize: number;
     #enableIntegrity: boolean;
+
+    /**
+     * Align size for performance calculating the integrity when available.
+     * @returns The align size
+     */
+    public getAlignSize() {
+        return this.#integrity.getChunkSize() > 0 ? this.#integrity.getChunkSize() : Generator.BLOCK_SIZE;
+    }
 
     /**
      * Get the output size of the data to be transformed(encrypted or decrypted) including
@@ -615,8 +624,11 @@ export class AesStream extends RandomAccessStream {
 
         let bytes: number = 0;
         while (bytes < count) {
+            // if there is no integrity make sure we don't overread for performance.
+            let nBufferSize = this.getChunkSize() > 0 ? bufferSize : Math.min(bufferSize, count - bytes);
+       
             // read data and integrity signatures
-            let srcBuffer: Uint8Array = await this.#readStreamData(bufferSize);
+            let srcBuffer: Uint8Array = await this.#readStreamData(nBufferSize);
             try {
                 let integrityHashes: Uint8Array[] | null = null;
                 // if there are integrity hashes strip them and get the data chunks only
@@ -715,7 +727,7 @@ export class AesStream extends RandomAccessStream {
      * @returns {number} The buffer size
      */
     #getNormalizedBufferSize(includeHashes: boolean): number {
-        let bufferSize: number = this.#bufferSize;
+        let bufferSize: number = Integrity.DEFAULT_CHUNK_SIZE;
         if (this.getChunkSize() > 0) {
             // buffer size should be a multiple of the chunk size if integrity is enabled
             let partSize: number = this.getChunkSize();
@@ -831,6 +843,21 @@ export class AesStream extends RandomAccessStream {
             index += nChunkSize;
         }
         return buff;
+    }
+
+    /**
+     * Get a native buffered stream to use with 3rd party libraries.
+     * @returns The native read stream
+     */
+    public async asReadStream() : Promise<ReadableStream>
+    {
+        if (await this.canWrite())
+            throw new Error("Stream is in write mode");
+
+        // adjust for data integrity
+        let backOffset = 32768;
+        let bufferSize = 4 * 1024 * 1024;
+        return ReadableStreamWrapper.createReadableStream(this, 1, bufferSize, backOffset, this.getAlignSize());
     }
 
     /**

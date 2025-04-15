@@ -68,7 +68,7 @@ export class AesServiceWorker {
 
 		let stream: any;
 		if (params.useFileReadableStream) {
-			stream = AesFileReadableStream.create(aesFile,
+			stream = AesFileReadableStream.createFileReadableStream(aesFile,
 				AesServiceWorker.BUFFERS, AesServiceWorker.BUFFER_SIZE,
 				AesServiceWorker.THREADS, AesServiceWorker.BACK_OFFSET);
 			stream.setWorkerPath(params.workerPath);
@@ -77,7 +77,7 @@ export class AesServiceWorker {
 			await stream.skip(0);
 		} else {
 			let encStream: AesStream = await aesFile.getInputStream();
-			stream = ReadableStreamWrapper.create(encStream);
+			stream = ReadableStreamWrapper.createReadableStream(encStream);
 			await stream.reset();
 			await stream.skip(position);
 		}

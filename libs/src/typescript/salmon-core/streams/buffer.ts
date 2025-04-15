@@ -22,32 +22,37 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 */
 
-import { AesStream } from "../../../salmon-core/salmon/streams/aes_stream.js";
-import { SeekOrigin } from "../../../salmon-core/streams/random_access_stream.js";
-
 /**
- * Fills a cache buffer with the decrypted data from a part of an encrypted file
- *
- * @param {CacheBuffer} cacheBuffer  The cache buffer that will store the decrypted contents
- * @param {Uint8Array} bufferSize   The length of the data requested
- * @param {AesStream} aesStream The stream that will be used to read from
+ * Buffer that can be used for buffered streams.
  */
-export async function fillBufferPart(cacheBuffer: CacheBuffer, start: number, offset: number, bufferSize: number,
-    aesStream: AesStream): Promise<number> {
-    await aesStream.seek(start, SeekOrigin.Begin);
-    let totalBytesRead = await aesStream.read(cacheBuffer.buffer, offset, bufferSize);
-    return totalBytesRead;
-}
+export class Buffer {
+    #data: Uint8Array;
+    #startPos: number = 0;
+    #count: number = 0;
 
-/**
- * Class will be used to cache decrypted data that can later be read via the ReadAt() method
- * without requesting frequent decryption reads.
- */
-//TODO: replace the CacheBuffer with a MemoryStream to simplify the code
-export class CacheBuffer {
-    public buffer: Uint8Array;
-    public startPos: number = 0;
-    public count: number = 0;
+    public getData() : Uint8Array{
+        return this.#data;
+    }
+
+    public setData(data: Uint8Array) {
+        this.#data = data;
+    }
+
+    public getStartPos(): number {
+        return this.#startPos;
+    }
+
+    public setStartPos(startPos: number) {
+        this.#startPos = startPos;
+    }
+
+    public getCount() : number{
+        return this.#count;
+    }
+
+    public setCount(count: number) {
+        this.#count = count;
+    }
 
     /**
      * Instantiate a cache buffer.
@@ -55,14 +60,14 @@ export class CacheBuffer {
      * @param {Uint8Array} bufferSize The buffer size
      */
     public constructor(bufferSize: number) {
-        this.buffer = new Uint8Array(bufferSize);
+        this.#data = new Uint8Array(bufferSize);
     }
 
     /**
      * Clear the buffer.
      */
     public clear(): void {
-        if (this.buffer)
-            this.buffer.fill(0);
+        if (this.#data)
+            this.#data.fill(0);
     }
 }
