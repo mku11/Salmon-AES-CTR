@@ -215,8 +215,6 @@ export class WSFileStream extends RandomAccessStream {
      * @throws IOException Thrown if there is an IO error.
      */
     public override async setPosition(value: number): Promise<void> {
-        if(this.position != value)
-			await this.reset();
         this.position = value;
     }
 
