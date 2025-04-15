@@ -96,8 +96,19 @@ export class FileExporterWorker {
                 postMessage(msgComplete);
         } catch (ex: any) {
             console.error(ex);
-            let type = ex.getCause != undefined ? ex.getCause().constructor.name : ex.constructor.name;
-            let exMsg = ex.getCause != undefined ? ex.getCause() : ex;
+
+            let type;
+            if(ex.getCause != undefined && ex.getCause())
+                type = ex.getCause().constructor.name
+            else
+                type = ex.constructor.name;
+
+            let exMsg;
+            if(ex.getCause != undefined && ex.getCause())
+                exMsg = ex.getCause();
+            else
+                exMsg = ex;
+
             let msgError = { message: 'error', error: exMsg, type: type };
             if (typeof process === 'object') {
                 const { parentPort } = await import("worker_threads");
