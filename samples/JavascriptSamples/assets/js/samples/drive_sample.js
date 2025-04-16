@@ -127,7 +127,7 @@ export class DriveSample {
 		let bufferSize = 4 * 1024 * 1024;
 		let bufferThreads = 1;
 		let backOffset = 256 * 1024; // optional, use for Media consumption
-        let inputStream = AesFileReadableStream.create(file,
+        let inputStream = AesFileReadableStream.createFileReadableStream(file,
                 buffers, bufferSize, bufferThreads, backOffset);
 		inputStream.setWorkerPath('../lib/salmon-fs/salmonfs/streams/aes_file_readable_stream_worker.js');
 		let reader = await inputStream.getReader();
