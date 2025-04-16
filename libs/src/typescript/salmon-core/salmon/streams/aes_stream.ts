@@ -306,13 +306,14 @@ export class AesStream extends RandomAccessStream {
      */
     public async setPosition(value: number): Promise<void> {
         if (await this.canWrite() && !this.#allowRangeWrite && value != 0) {
-            throw new IOException(null, new SecurityException("Range Write is not allowed for security (non-reusable IVs). " +
+            throw new IOException("Could not set position", new SecurityException("Range Write is not allowed for security (non-reusable IVs). " +
                 "If you still want to take the risk you need to use SetAllowRangeWrite(true)"));
         }
         try {
             await this.#setVirtualPosition(value);
         } catch (e) {
-            throw new IOException(null, e);
+			console.error(e);
+            throw new IOException("Could not set position", e);
         }
     }
 
@@ -669,10 +670,10 @@ export class AesStream extends RandomAccessStream {
         await this.#init();
 
         if (this.#integrity.getChunkSize() > 0 && await this.getPosition() % this.#integrity.getChunkSize() != 0)
-            throw new IOException(null, new IntegrityException("All write operations should be aligned to the chunks size: "
+            throw new IOException("Error during write", new IntegrityException("All write operations should be aligned to the chunks size: "
                 + this.#integrity.getChunkSize()));
         else if (this.#integrity.getChunkSize() == 0 && await this.getPosition() % AESCTRTransformer.BLOCK_SIZE != 0)
-            throw new IOException(null, new IntegrityException("All write operations should be aligned to the block size: "
+            throw new IOException("Error during write", new IntegrityException("All write operations should be aligned to the block size: "
                 + AESCTRTransformer.BLOCK_SIZE));
 
         // if there are not enough data in the buffer
