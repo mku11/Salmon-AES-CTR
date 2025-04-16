@@ -489,6 +489,7 @@ export class WSFile implements IFile {
 
     #setDefaultHeaders(headers: Headers) {
         headers.append("Cache", "no-store");
+		headers.append("Connection", "close");
     }
 }
 

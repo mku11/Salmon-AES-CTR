@@ -275,5 +275,6 @@ export class HttpFileStream extends RandomAccessStream {
 
     #setDefaultHeaders(headers: Headers) {
         headers.append("Cache", "no-store");
+		headers.append("Connection", "close");
     }
 }
