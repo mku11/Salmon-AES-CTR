@@ -62,6 +62,8 @@ describe('salmon-fs', () => {
 
         SalmonFSTestHelper.TEST_USE_FILE_INPUT_STREAM = false;
 
+        SalmonFSTestHelper.ENABLE_FILE_PROGRESS = true;
+
         // only default provider is supported
         AesStream.setAesProviderType(ProviderType.Default);
         
