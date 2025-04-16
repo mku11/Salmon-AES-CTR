@@ -40,7 +40,7 @@ describe('salmon-httpfs', () => {
 		// SalmonCoreTestHelper.TEST_ENC_BUFFER_SIZE = 1 * 1024 * 1024;
         // SalmonCoreTestHelper.TEST_DEC_BUFFER_SIZE = 1 * 1024 * 1024;
         
-        SalmonFSTestHelper.TEST_HTTP_FILE = SalmonFSTestHelper.TEST_IMPORT_MEDIUM_FILE;
+        SalmonFSTestHelper.TEST_HTTP_FILE = SalmonFSTestHelper.TEST_IMPORT_LARGE_FILE;
 		
         // SalmonCoreTestHelper.TEST_ENC_BUFFER_SIZE = 1 * 1024 * 1024;
 		// SalmonCoreTestHelper.TEST_DEC_BUFFER_SIZE = 1 * 1024 * 1024;
@@ -50,6 +50,8 @@ describe('salmon-httpfs', () => {
 
         SalmonFSTestHelper.TEST_USE_FILE_INPUT_STREAM = true;
 
+        SalmonFSTestHelper.ENABLE_FILE_PROGRESS = true;
+        
         // only default provider is supported
         AesStream.setAesProviderType(ProviderType.Default);
 
@@ -159,7 +161,7 @@ describe('salmon-httpfs', () => {
         let httpRoot = new HttpFile(SalmonFSTestHelper.HTTP_SERVER_VIRTUAL_URL + "/" + SalmonFSTestHelper.HTTP_TEST_DIRNAME);
         let httpFile = await httpRoot.getChild(await SalmonFSTestHelper.TEST_HTTP_FILE.getName());
         let stream = await httpFile.getInputStream();
-        let digest = await SalmonFSTestHelper.getChecksumStream(stream.asReadStream());
+        let digest = await SalmonFSTestHelper.getChecksumStream(stream);
         await stream.close();
         console.log(digest + " vs " + localChkSum);
         expect(digest).toBe(localChkSum);
