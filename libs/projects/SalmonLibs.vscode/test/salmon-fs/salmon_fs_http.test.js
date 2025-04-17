@@ -156,7 +156,7 @@ describe('salmon-httpfs', () => {
 
     it('shouldReadRawFile', async () => {
         let localFile = await SalmonFSTestHelper.HTTP_TEST_DIR.getChild(await SalmonFSTestHelper.TEST_HTTP_FILE.getName());
-        console.log("reading: " + localFile.getPath());
+        console.log("reading: " + localFile.getDisplayPath());
         let localChkSum = await SalmonFSTestHelper.getChecksum(localFile);
         let httpRoot = new HttpFile(SalmonFSTestHelper.HTTP_SERVER_VIRTUAL_URL + "/" + SalmonFSTestHelper.HTTP_TEST_DIRNAME);
         let httpFile = await httpRoot.getChild(await SalmonFSTestHelper.TEST_HTTP_FILE.getName());
