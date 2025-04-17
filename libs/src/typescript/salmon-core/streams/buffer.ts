@@ -30,22 +30,47 @@ export class Buffer {
     #startPos: number = 0;
     #count: number = 0;
 
+	/**
+     * Get the data
+     *
+     * @returns {Uint8Array} The data
+     */
     public getData() : Uint8Array{
         return this.#data;
     }
 
+    /**
+     * Set the data
+     *
+     * @param {Uint8Array} data The data
+     */
     public setData(data: Uint8Array) {
         this.#data = data;
     }
 
+	/**
+     * Get the start position
+     *
+     * @returns {number} The start position
+     */
     public getStartPos(): number {
         return this.#startPos;
     }
 
+    /**
+     * Set the start position
+     *
+     * @param {number} startPos The start position
+     */
     public setStartPos(startPos: number) {
         this.#startPos = startPos;
     }
 
+	/**
+     * Get the data count
+     *
+     * @returns {number} The data count
+     */
     public getCount() : number{
         return this.#count;
     }
