@@ -34,7 +34,7 @@ import { Base64 } from "../../../salmon-core/convert/base64.js";
 export class LocalStorageFileStream extends RandomAccessStream {
 
     /**
-     * The java file associated with this stream.
+     * The virtual local storage file associated with this stream.
      */
     readonly #file: IFile;
     #stream: MemoryStream;

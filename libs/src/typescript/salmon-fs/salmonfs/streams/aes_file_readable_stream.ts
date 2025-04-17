@@ -46,22 +46,30 @@ export class AesFileReadableStream extends ReadableStreamWrapper {
     #promises: Promise<any>[] = [];
     #workers: any[] = [];
 
+    
+    /**
+     * Construct a wrapper do not use directly, use createFileReadableStream() instead.
+     */
+    protected constructor() {
+        super();
+    }
+
     /**
      * Creates a seekable stream from an encrypted file source
      *
      * @param {AesFile} aesFile   The source file.
-     * @param {Uint8Array} buffersCount Number of buffers to use.
+     * @param {number} buffersCount Number of buffers to use.
      * @param {Uint8Array} bufferSize   The length of each buffer.
-     * @param {number} threads      The number of threads/streams to source the file in parallel.
-     * @param {number} backOffset   The back offset.  Negative offset for the buffers. Some stream consumers might request data right before
-     * the last request. We provide this offset so we don't make multiple requests for filling
-     * the buffers ending up with too much overlapping data.
+     * @param {number} threads      The number of threads/streams to read the file in parallel.
+     * @param {number} backOffset   The backwards offset. Some media libraries might 
+     * request data rewinding the stream just a few bytes backwards. This ensures those bytes 
+     * are included so we don't reset the stream.
      */
     public static createFileReadableStream(aesFile: AesFile,
-        buffersCount: number = ReadableStreamWrapper.DEFAULT_BUFFERS, 
-        bufferSize: number = ReadableStreamWrapper.DEFAULT_BUFFER_SIZE, 
+        buffersCount: number = 1, 
+        bufferSize: number = 524288, 
         threads: number = 1, 
-        backOffset: number = ReadableStreamWrapper.DEFAULT_BACK_OFFSET) {
+        backOffset: number = 32768) {
         let fileReadableStream: AesFileReadableStream = new AesFileReadableStream();
         fileReadableStream.setBufferCount(buffersCount);
         fileReadableStream.setBufferSize(bufferSize);

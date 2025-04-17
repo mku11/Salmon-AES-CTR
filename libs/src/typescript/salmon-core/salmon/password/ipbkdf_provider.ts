@@ -31,10 +31,10 @@ import { PbkdfAlgo } from "./pbkdf_algo.js";
 export const PBKDF_SHA256: string = "SHA-256";
 
 /**
- * Get the PBKDF java cipher algorigthm string.
+ * Get the PBKDF JavaScript cipher algorigthm string.
  *
  * @param {PbkdfAlgo.SHA256} pbkdfAlgo The PBKDF algorithm to be used
- * @returns {string} The java cipher algorithm string. See javax.crypto.SecretKeyFactory.
+ * @returns {string} The JavaScript cipher algorithm string. See javax.crypto.SecretKeyFactory.
  */
 export function getPbkdfAlgoString(pbkdfAlgo: PbkdfAlgo): string {
     switch (pbkdfAlgo) {

@@ -10,7 +10,7 @@
     "lint": "tslint --config tslint.json --project tsconfig.json",
     "eslint": "eslint ./test/**/*.js --ext .js",
     "jsdocs": "jsdoc ./lib -r -d ../../../output/docs/javascript/html",
-    "tsdocs": "typedoc --entryPointStrategy Expand ../../src/typescript/ -out ../../../output/docs/typescript/html"
+    "tsdocs": "typedoc --name Salmon --entryPointStrategy Expand ../../src/typescript/ -out ../../../output/docs/typescript/html"
   },
   "keywords": [],
   "author": "",

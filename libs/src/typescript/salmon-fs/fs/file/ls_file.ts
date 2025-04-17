@@ -83,7 +83,7 @@ export class LocalStorageFile implements IFile {
     }
 
     /**
-     * Get the path of this file. For java this is the same as the absolute filepath.
+     * Get the path of this file. For local storage this is the same as the absolute filepath.
      * @returns {string}  The file path
      */
     public getPath(): string {
@@ -91,7 +91,7 @@ export class LocalStorageFile implements IFile {
     }
 
     /**
-     * Get the display path on the physical disk. For java this is the same as the filepath.
+     * Get the display path on the physical disk. For local storage this is the same as the filepath.
      * @returns {string} The display path.
      */
     public getDisplayPath(): string {

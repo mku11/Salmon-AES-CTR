@@ -30,13 +30,13 @@ import { IFile } from "../file/ifile.js";
 // see: https://issues.chromium.org/issues/40743502
 
 /**
- * An advanced file stream implementation for local files.
+ * An advanced file stream implementation for FileSystemFileHandle.
  * This class can be used for random file access of local files using the browser.
  */
 export class FileStream extends RandomAccessStream {
 
     /**
-     * The java file associated with this stream.
+     * The FileSystemFileHandle file associated with this stream.
      */
     readonly #file: IFile;
     #fileBlob: File | null = null;

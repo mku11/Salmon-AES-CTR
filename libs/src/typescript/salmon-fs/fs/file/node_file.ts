@@ -106,7 +106,7 @@ export class NodeFile implements IFile {
     }
 
     /**
-     * Get the path of this file. For java this is the same as the absolute filepath.
+     * Get the path of this file. For node.js this is the same as the absolute filepath.
      * @returns {string} The path
      */
     public getPath(): string {
@@ -114,7 +114,7 @@ export class NodeFile implements IFile {
     }
 
     /**
-     * Get the display path on the physical disk. For java this is the same as the filepath.
+     * Get the display path on the physical disk. For node.js this is the same as the filepath.
      * @returns {string} The display path.
      */
     public getDisplayPath(): string {

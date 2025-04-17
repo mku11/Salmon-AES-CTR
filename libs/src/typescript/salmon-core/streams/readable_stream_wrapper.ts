@@ -44,15 +44,17 @@ export async function fillBufferPart(cacheBuffer: Buffer, start: number, offset:
     return totalBytesRead;
 }
 
-/***
+/**
  * ReadableStream wrapper for RandomAccessStream.
  * Use this class to wrap any RandomAccessStream to a JavaScript ReadableStream to use with 3rd party libraries.
  */
 export class ReadableStreamWrapper {
-    
-    // Default cache buffer should be high enough for some mpeg videos to work
-    // the cache buffers should be aligned to the SalmonFile chunk size for efficiency
-    public static readonly DEFAULT_BUFFER_SIZE: number = 512 * 1024;
+
+    /**
+     * Default cache buffer should be high enough for some mpeg videos to work
+     * the cache buffers should be aligned to the SalmonFile chunk size for efficiency
+     */
+    public static readonly DEFAULT_BUFFER_SIZE: number = 524288;
 
     /**
      * The default buffer count
@@ -82,63 +84,121 @@ export class ReadableStreamWrapper {
     
     /**
      * We reuse the least recently used buffer. Since the buffer count is relative
-     * small (see {@link #MAX_BUFFERS}) there is no need for a fast-access lru queue
+     * small there is no need for a fast-access lru queue
      * so a simple linked list of keeping the indexes is adequately fast.
      */
     lruBuffersIndex: number[] = [];
 
+    /**
+     * Set the source stream
+     * @param {RandomAccessStream} stream The stream
+     */
     protected setStream(stream: RandomAccessStream) {
         this.#stream = stream;
     }
 
+    /**
+     * Get the source stream
+     * @returns {RandomAccessStream} The source stream
+     */
     public getStream() : RandomAccessStream | null {
         return this.#stream;
     }
 
+    /**
+     * Get the back offset
+     * @returns {number} The back offset
+     */
     public getBackOffset() : number {
         return this.#backOffset;
     }
 
+    /**
+     * Set the back offset
+     * @param backOffset The back offset
+     */
     protected setBackOffset(backOffset: number) {
         this.#backOffset = backOffset;
     }
 
+    /**
+     * Get the total size of the stream
+     * @returns The total size
+     */
     public getTotalSize() : number {
         return this.#totalSize;
     }
 
+    /**
+     * Set the total size of the stream
+     * @param {number} totalSize The total size of the stream
+     */
     protected setTotalSize(totalSize: number) {
         this.#totalSize = totalSize;
     }
 
+    /**
+     * Set the align size
+     * @param {number} alignSize The align size
+     */
     protected setAlignSize(alignSize: number) {
         this.#alignSize = alignSize;
     }
 
+    /**
+     * Get the buffer size
+     * @returns {number} The buffer size
+     */
     public getBufferSize() : number {
         return this.#bufferSize;
     }
 
+    /**
+     * Set the buffer size
+     * @param {number} bufferSize The buffer size
+     */
     protected setBufferSize(bufferSize: number) {
         this.#bufferSize = bufferSize;
     }
     
+    /**
+     * Get the buffer count
+     * @returns {number} The buffer count
+     */
     public getBufferCount() : number {
         return this.#buffersCount;
     }
 
+    /**
+     * Set the buffer count
+     * @param {number} buffersCount The buffer count
+     */
     protected setBufferCount(buffersCount: number) {
         this.#buffersCount = buffersCount;
     }
 
     /**
-     * Creates an ReadableStreamWrapper from a RandomAccessStream.
-     * @param {RandomAccessStream | null} stream The stream that you want to wrap.
+     * Construct a wrapper do not use directly, use createReadableStream() instead.
+     */
+    protected constructor() {
+
+    }
+
+    /**
+     * Creates a native ReadableStream from a RandomAccessStream
+     *
+     * @param {RandomAccessStream} stream   The source stream.
+     * @param {number} buffersCount Number of buffers to use.
+     * @param {Uint8Array} bufferSize   The length of each buffer.
+     * @param {number} backOffset   The backwards offset. Some media libraries might 
+     * request data rewinding the stream just a few bytes backwards. This ensures those bytes 
+     * are included so we don't reset the stream.
+     * @param {number} alignSize      The align size. Set to a positive number to override the stream aligned size.
      */
     public static createReadableStream(stream: RandomAccessStream,
-                buffersCount: number = ReadableStreamWrapper.DEFAULT_BUFFERS, 
-                bufferSize: number = ReadableStreamWrapper.DEFAULT_BUFFER_SIZE, 
-                backOffset: number = ReadableStreamWrapper.DEFAULT_BACK_OFFSET, 
+                buffersCount: number = 1, 
+                bufferSize: number = 524288, 
+                backOffset: number = 32768, 
                 alignSize: number = 0) {
         let readableStreamWrapper: ReadableStreamWrapper = new ReadableStreamWrapper();
         readableStreamWrapper.#stream = stream;
@@ -207,6 +267,9 @@ export class ReadableStreamWrapper {
             await streamWrapper.setPositionEnd(position);
         }
         streamWrapper.#readableStream = readableStream;
+        readableStream.getStreamWrapper = function (): ReadableStreamWrapper {
+            return streamWrapper;
+        }
         return readableStream;
     }
 
@@ -303,6 +366,10 @@ export class ReadableStreamWrapper {
 
     /**
      * Reads and decrypts the contents of an encrypted file
+     * @param {Uint8Array} buffer The buffer
+     * @param {number} offset The offset
+     * @param {number} count The count
+     * @returns {Promise<number>} The bytes read
      */
     protected async read(buffer: Uint8Array, offset: number, count: number): Promise<number> {
         if (this.#buffers == null)
@@ -381,6 +448,7 @@ export class ReadableStreamWrapper {
      * @param { Buffer } cacheBuffer The cache buffer that will store the decrypted contents
 	 * @param { number } startPosition The start position
      * @param { number } length      The length of the data requested
+     * @returns {Promise<number>} The bytes read
      */
     protected async fillBuffer(cacheBuffer: Buffer, startPosition: number, length: number): Promise<number> {
         let bytesRead: number;
@@ -464,8 +532,8 @@ export class ReadableStreamWrapper {
             await this.initialize();
         this.#positionStart = pos;
     }
-    #positionEnd: number = 0;
 
+    #positionEnd: number = 0;
     /**
      * Set the end position of the stream
      * @param {number} pos The end position of the stream
@@ -500,8 +568,6 @@ export class ReadableStreamWrapper {
             await this.#stream.close();
         this.#stream = null;
     }
-
-    closed: Promise<undefined> = Promise.resolve(undefined);
 
     /**
      * Cancel the stream
