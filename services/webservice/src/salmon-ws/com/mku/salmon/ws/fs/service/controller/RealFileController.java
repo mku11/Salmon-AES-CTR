@@ -79,7 +79,7 @@ public class RealFileController {
         System.out.println("LIST, path: " + path);
         ArrayList<RealFileNode> list = new ArrayList<>();
         IFile file = FileSystem.getInstance().getFile(path);
-        if (file == null)
+        if (file == null || !file.exists())
             throw new IOException("Directory does not exist");
         if (file.isDirectory()) {
             IFile[] files = file.listFiles();
