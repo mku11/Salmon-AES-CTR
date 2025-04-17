@@ -45,6 +45,7 @@ from salmon_core.salmon.text.text_encryptor import TextEncryptor
 from salmon_core.salmon.generator import Generator
 from salmon_core_test_helper import SalmonCoreTestHelper
 from salmon_core.salmon.integrity.integrity_exception import IntegrityException
+from salmon_core.salmon.integrity.integrity import Integrity
 
 
 @typechecked
