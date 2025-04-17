@@ -169,9 +169,6 @@ export class ReadableStreamWrapper {
                 if (bytesRead <= 0) {
                     controller.close();
                 }
-            },
-            async cancel(reason?: any): Promise<void> {
-                await streamWrapper.cancel(reason);
             }
         });
         let streamGetReader: any = readableStream.getReader;
@@ -193,6 +190,9 @@ export class ReadableStreamWrapper {
                 resetting = false;
             }
             await streamWrapper.reset();
+        }
+        readableStream.cancel = async function (reason?: any): Promise<void> {
+            await streamWrapper.cancel(reason);
         }
         readableStream.skip = async function (position: number): Promise<number> {
             return await streamWrapper.skip(position);

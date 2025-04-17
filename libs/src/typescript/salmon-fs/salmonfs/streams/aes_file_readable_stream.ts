@@ -221,9 +221,11 @@ export class AesFileReadableStream extends ReadableStreamWrapper {
      */
     async cancel(reason?: any): Promise<void> {
         for (let i = 0; i < this.#workers.length; i++) {
-            this.#workers[i].postMessage({ message: 'close' });
-            this.#workers[i].terminate();
-            this.#workers[i] = null;
+            if(this.#workers[i]) {
+                this.#workers[i].postMessage({ message: 'close' });
+                this.#workers[i].terminate();
+                this.#workers[i] = null;
+            }
         }
         await super.cancel(reason);
     }
