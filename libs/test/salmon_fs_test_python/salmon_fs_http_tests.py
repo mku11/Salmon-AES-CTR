@@ -152,7 +152,7 @@ class SalmonFSHttpTests(TestCase):
         data: bytearray = ms.to_array()
         ms.close()
         enc_stream.close()
-        SalmonFSTestHelper.seek_and_read_http_file(data, enc_file, True, 3, 50, 12)
+        SalmonFSTestHelper.seek_and_read_http_file(data, enc_file, 3, 50, 12)
 
     def test_shouldListFilesFromDrive(self):
         vault_dir: IFile = SalmonFSTestHelper.HTTP_VAULT_DIR
@@ -170,15 +170,14 @@ class SalmonFSHttpTests(TestCase):
 
     def test_shouldExportFileFromDrive(self):
         vault_dir = SalmonFSTestHelper.HTTP_VAULT_DIR
-        threads = 2
         drive = SalmonFSTestHelper.open_drive(vault_dir, SalmonFSTestHelper.drive_class_type,
                                               SalmonCoreTestHelper.TEST_PASSWORD)
         file = drive.get_root().get_child(SalmonFSTestHelper.TEST_HTTP_FILE.get_name())
-        export_dir = SalmonFSTestHelper.generate_folder("export_http", SalmonFSTestHelper.TEST_OUTPUT_DIR, False)
+        export_dir = SalmonFSTestHelper.generate_folder("export_http", SalmonFSTestHelper.TEST_EXPORT_DIR, False)
         local_file = export_dir.get_child(SalmonFSTestHelper.TEST_HTTP_FILE.get_name())
         if local_file.exists():
             local_file.delete()
-        SalmonFSTestHelper.export_files([file], export_dir, threads)
+        SalmonFSTestHelper.export_files([file], export_dir)
         drive.close()
 
     def test_shouldReadRawFile(self):

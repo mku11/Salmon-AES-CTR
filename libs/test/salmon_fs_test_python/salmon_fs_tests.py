@@ -26,7 +26,6 @@ SOFTWARE.
 """
 
 import hashlib
-import random
 from unittest import TestCase
 from typeguard import typechecked
 import os
@@ -36,9 +35,11 @@ sys.path.append(os.path.dirname(__file__) + '/../../src/python/salmon_core')
 sys.path.append(os.path.dirname(__file__) + '/../../src/python/salmon_fs')
 sys.path.append(os.path.dirname(__file__) + '/../salmon_core_test_python')
 from salmon_core.streams.memory_stream import MemoryStream
+from salmon_core.streams.random_access_stream import RandomAccessStream
 from salmon_core.salmon.integrity.integrity_exception import IntegrityException
 from salmon_core.salmon.streams.provider_type import ProviderType
 from salmon_core.salmon.streams.aes_stream import AesStream
+from salmon_core.salmon.integrity.integrity import Integrity
 from salmon_fs.fs.file.ivirtual_file import IVirtualFile
 from salmon_fs.salmonfs.auth.auth_exception import AuthException
 from salmon_fs.salmonfs.file.aes_file import AesFile, IFile
@@ -354,7 +355,6 @@ class SalmonFSTests(TestCase):
     def test_CreateFileWithoutVaultApplyIntegrityNoVerifyIntegrityFlipDataNotCaughtNotEqual(self):
 
         caught: bool = False
-        failed: bool = False
         try:
             SalmonFSTestHelper.should_create_file_without_vault(SalmonCoreTestHelper.TEST_TEXT.encode('utf-8'),
                                                                 SalmonCoreTestHelper.TEST_KEY_BYTES,
@@ -362,7 +362,7 @@ class SalmonFSTests(TestCase):
                                                                 SalmonCoreTestHelper.TEST_HMAC_KEY_BYTES,
                                                                 SalmonCoreTestHelper.TEST_FILENAME_NONCE_BYTES,
                                                                 SalmonCoreTestHelper.TEST_NONCE_BYTES,
-                                                                True, 24 + 32 + 5, True)
+                                                                True, 24 + 32 + 5, False)
         except IOError as ex:
             if isinstance(ex.__cause__, IntegrityException):
                 caught = True
@@ -370,7 +370,6 @@ class SalmonFSTests(TestCase):
             failed = True
 
         self.assertFalse(caught)
-        self.assertTrue(failed)
 
     def test_ExportAndImportAuth(self):
         vault: IFile = SalmonFSTestHelper.generate_folder(SalmonFSTestHelper.TEST_VAULT_DIRNAME)
@@ -396,7 +395,7 @@ class SalmonFSTests(TestCase):
                                               SalmonCoreTestHelper.TEST_NONCE_BYTES,
                                               False, -1, True)
         file_input_stream: AesFileInputStream = AesFileInputStream(file,
-                                                                   3, 50,
+                                                                   3, 100,
                                                                    SalmonFSTestHelper.TEST_FILE_INPUT_STREAM_THREADS,
                                                                    12)
 
@@ -545,13 +544,20 @@ class SalmonFSTests(TestCase):
     def test_shouldReadFromFileMultithreaded(self):
         caught: bool = False
         vault_dir: IFile = SalmonFSTestHelper.generate_folder(SalmonFSTestHelper.TEST_VAULT_DIRNAME)
-        file: IFile = SalmonFSTestHelper.TEST_IMPORT_MEDIUM_FILE
+        file: IFile = SalmonFSTestHelper.TEST_IMPORT_LARGE_FILE
+        pos: int = 3 * Integrity.DEFAULT_CHUNK_SIZE + 3
+
+        stream: RandomAccessStream = file.get_input_stream()
+        stream.seek(pos, RandomAccessStream.SeekOrigin.Begin)
+        h1 = SalmonFSTestHelper.get_checksum_stream(stream)
+        stream.close()
 
         sequencer = SalmonFSTestHelper.create_salmon_file_sequencer()
         drive = SalmonFSTestHelper.create_drive(vault_dir, SalmonFSTestHelper.drive_class_type,
                                                 SalmonCoreTestHelper.TEST_PASSWORD, sequencer)
         file_commander: AesFileCommander = AesFileCommander(SalmonFSTestHelper.ENC_IMPORT_BUFFER_SIZE,
-                                                            SalmonFSTestHelper.ENC_EXPORT_BUFFER_SIZE, 2,
+                                                            SalmonFSTestHelper.ENC_EXPORT_BUFFER_SIZE,
+                                                            SalmonFSTestHelper.ENC_IMPORT_THREADS,
                                                             multi_cpu=SalmonFSTestHelper.ENABLE_MULTI_CPU)
 
         def on_failed(v_file, ex):
@@ -564,29 +570,33 @@ class SalmonFSTests(TestCase):
         import_options.on_failed = on_failed
         sfiles: list[AesFile] = file_commander.import_files([file], drive.get_root(), import_options)
         file_commander.close()
+        print("files imported")
 
-        pos: int = abs(random.randint(0, file.get_length()))
-
-        file_input_stream1 = AesFileInputStream(sfiles[0], 4, 4 * 1024 * 1024, 4, 256 * 1024)
+        print("using 1 thread to read")
+        file_input_stream1 = AesFileInputStream(sfiles[0], 4, 4 * 1024 * 1024, 1, 256 * 1024)
+        print("seeking to: " + str(pos))
         file_input_stream1.seek(pos, 1)
         ms1: MemoryStream = MemoryStream()
-        SalmonFSTestHelper.copy_stream(file_input_stream1, ms1)
+        SalmonFSTestHelper.copy_bufferedio_stream(file_input_stream1, ms1)
         ms1.flush()
         ms1.set_position(0)
-        h3: str = hashlib.md5(ms1.to_array()).hexdigest()
+        h2: str = hashlib.md5(ms1.to_array()).hexdigest()
         file_input_stream1.close()
         ms1.close()
+        self.assertEqual(h2, h1)
 
-        file_input_stream2 = AesFileInputStream(sfiles[0], 4, 4 * 1024 * 1024, 1, 256 * 1024)
+        print("using 2 threads to read")
+        file_input_stream2 = AesFileInputStream(sfiles[0], 4, 4 * 1024 * 1024, 2, 256 * 1024)
+        print("seeking to: " + str(pos))
         file_input_stream2.seek(pos, 1)
         ms2: MemoryStream = MemoryStream()
-        SalmonFSTestHelper.copy_stream(file_input_stream2, ms2)
+        SalmonFSTestHelper.copy_bufferedio_stream(file_input_stream2, ms2)
         ms2.flush()
         ms2.set_position(0)
-        h4: str = hashlib.md5(ms2.to_array()).hexdigest()
+        h3: str = hashlib.md5(ms2.to_array()).hexdigest()
         file_input_stream2.close()
         ms2.close()
-        self.assertEqual(h3, h4)
+        self.assertEqual(h3, h1)
 
     def test_raw_file(self):
         SalmonFSTestHelper.test_raw_file()

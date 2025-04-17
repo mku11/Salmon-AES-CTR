@@ -637,13 +637,13 @@ class SalmonCoreTests(TestCase):
         SalmonCoreTestHelper.copy_from_mem_stream_to_salmon_stream(1 * 1024 * 1024,
                                                                    SalmonCoreTestHelper.TEST_KEY_BYTES,
                                                                    SalmonCoreTestHelper.TEST_NONCE_BYTES,
-                                                                   True, 256 * 1024,
+                                                                   True, Integrity.DEFAULT_CHUNK_SIZE,
                                                                    SalmonCoreTestHelper.TEST_HMAC_KEY_BYTES,
                                                                    0)
         SalmonCoreTestHelper.copy_from_mem_stream_to_salmon_stream(1 * 1024 * 1024,
                                                                    SalmonCoreTestHelper.TEST_KEY_BYTES,
                                                                    SalmonCoreTestHelper.TEST_NONCE_BYTES,
-                                                                   True, 256 * 1024,
+                                                                   True, Integrity.DEFAULT_CHUNK_SIZE,
                                                                    SalmonCoreTestHelper.TEST_HMAC_KEY_BYTES,
                                                                    32768)
 

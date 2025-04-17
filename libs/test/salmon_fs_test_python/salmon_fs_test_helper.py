@@ -32,15 +32,16 @@ import os
 from enum import Enum
 from unittest import TestCase
 import random
+from io import BufferedIOBase
 from typeguard import typechecked
 
 sys.path.append(os.path.dirname(__file__) + '/../../src/python/salmon_core')
 sys.path.append(os.path.dirname(__file__) + '/../../src/python/salmon_fs')
 sys.path.append(os.path.dirname(__file__) + '/../salmon_core_test_python')
-from salmon_core.streams.buffered_io_wrapper import BufferedIOWrapper
 from salmon_core.convert.bit_converter import BitConverter
 from salmon_core.streams.memory_stream import MemoryStream
 from salmon_core.streams.random_access_stream import RandomAccessStream
+from salmon_core.streams.buffered_io_wrapper import BufferedIOWrapper
 from salmon_core.salmon.streams.encryption_mode import EncryptionMode
 from salmon_core.salmon.streams.aes_stream import AesStream
 from salmon_core.salmon.generator import Generator
@@ -49,7 +50,6 @@ from salmon_fs.salmonfs.drive.utils.aes_file_commander import AesFileCommander
 from salmon_fs.salmonfs.drive.ws_drive import WSDrive
 from salmon_fs.salmonfs.drive.http_drive import HttpDrive
 from salmon_fs.salmonfs.drive.drive import Drive
-from salmon_fs.fs.streams.http_file_stream import HttpFileStream
 from salmon_fs.fs.file.http_file import HttpFile
 from salmon_fs.fs.file.ws_file import Credentials, WSFile
 from salmon_fs.fs.file.file import File
@@ -68,6 +68,7 @@ from salmon_fs.salmonfs.auth.auth_config import AuthConfig
 from salmon_core_test_helper import SalmonCoreTestHelper
 
 
+@typechecked
 class TestMode(Enum):
     Local = 0
     Http = 2
@@ -84,6 +85,7 @@ class SalmonFSTestHelper:
     TEST_VAULT_DIRNAME = "vault"
     TEST_OPER_DIRNAME = "files"
     TEST_EXPORT_AUTH_DIRNAME = "auth"
+    TEST_EXPORT_DIRNAME = "export"
     TEST_IMPORT_TINY_FILENAME = "tiny_test.txt"
     TEST_IMPORT_SMALL_FILENAME = "small_test.dat"
     TEST_IMPORT_MEDIUM_FILENAME = "medium_test.dat"
@@ -103,7 +105,7 @@ class SalmonFSTestHelper:
     credentials = Credentials("user", "password")
 
     # HTTP server(Read - only)
-    HTTP_SERVER_URL = "http://localhost:8000"
+    HTTP_SERVER_URL = "http://localhost"
     HTTP_SERVER_URL = os.getenv("HTTP_SERVER_URL", HTTP_SERVER_URL)
     HTTP_SERVER_VIRTUAL_URL = HTTP_SERVER_URL + "/test"
     HTTP_TEST_DIRNAME = "httpserv"
@@ -120,7 +122,7 @@ class SalmonFSTestHelper:
     TEST_USE_FILE_INPUT_STREAM = False
 
     # progress
-    ENABLE_FILE_PROGRESS = True
+    ENABLE_FILE_PROGRESS = False
 
     # test dirs and files
     TEST_INPUT_DIR = None
@@ -142,6 +144,7 @@ class SalmonFSTestHelper:
     TEST_HTTP_FILE = None
     TEST_SEQ_DIR = None
     TEST_EXPORT_AUTH_DIR = None
+    TEST_EXPORT_DIR = None
     file_importer: AesFileImporter = None
     file_exporter: AesFileExporter = None
     sequence_serializer = SequenceSerializer()
@@ -191,6 +194,8 @@ class SalmonFSTestHelper:
                                                                          SalmonFSTestHelper.HTTP_TEST_DIRNAME)
         SalmonFSTestHelper.TEST_SEQ_DIR = SalmonFSTestHelper.create_dir(SalmonFSTestHelper.TEST_ROOT_DIR,
                                                                         SalmonFSTestHelper.TEST_SEQ_DIRNAME)
+        SalmonFSTestHelper.TEST_EXPORT_DIR = SalmonFSTestHelper.create_dir(SalmonFSTestHelper.TEST_ROOT_DIR,
+                                                                           SalmonFSTestHelper.TEST_EXPORT_DIRNAME)
         SalmonFSTestHelper.TEST_EXPORT_AUTH_DIR = SalmonFSTestHelper.create_dir(SalmonFSTestHelper.TEST_ROOT_DIR,
                                                                                 SalmonFSTestHelper.TEST_EXPORT_AUTH_DIRNAME)
         SalmonFSTestHelper.HTTP_VAULT_DIR = HttpFile(SalmonFSTestHelper.HTTP_VAULT_DIR_URL)
@@ -270,6 +275,8 @@ class SalmonFSTestHelper:
 
     @staticmethod
     def create_file(file: IFile, contents: str):
+        if file.exists():
+            return
         stream = file.get_output_stream()
         data: bytearray = bytearray(contents.encode())
         stream.write(data, 0, len(data))
@@ -410,7 +417,8 @@ class SalmonFSTestHelper:
         export_options = AesFileExporter.FileExportOptions()
         export_options.integrity = verify_file_integrity
         export_options.on_progress_changed = print_export_progress
-        export_file: IFile = SalmonFSTestHelper.file_exporter.export_file(salmon_file, drive.get_export_dir(),
+        export_dir: IFile = SalmonFSTestHelper.generate_folder("export", SalmonFSTestHelper.TEST_EXPORT_DIR, False)
+        export_file: IFile = SalmonFSTestHelper.file_exporter.export_file(salmon_file, export_dir,
                                                                           export_options)
 
         hash_post_export: str = SalmonFSTestHelper.get_checksum(export_file)
@@ -583,7 +591,6 @@ class SalmonFSTestHelper:
             success = True
         except Exception as ignored:
             print("failed: " + str(ignored), file=sys.stderr)
-            pass
         SalmonFSTestHelper.testCase.assertFalse(success)
         drive.close()
 
@@ -622,6 +629,7 @@ class SalmonFSTestHelper:
         SalmonFSTestHelper.testCase.assertNotEqual(nonce_a2, nonce_b1)
         SalmonFSTestHelper.testCase.assertEqual(nonce_b1, nonce_b2 - 2)
 
+    @typechecked
     class TestFileSequencer(FileSequencer):
         def __init__(self, sequence_file: IFile, serializer: INonceSequenceSerializer, test_max_nonce: bytearray,
                      offset: int):
@@ -794,8 +802,11 @@ class SalmonFSTestHelper:
                                         read_offset: int, should_read_length: int):
         buffer: bytearray = bytearray(length + read_offset)
         file_input_stream.seek(start, 0)
-        bytes_read: int = file_input_stream.readinto(memoryview(buffer)[read_offset:read_offset + length])
-        SalmonFSTestHelper.testCase.assertEqual(should_read_length, bytes_read)
+        total_bytes_read = 0
+        while buff := file_input_stream.read(length - total_bytes_read):
+            buffer[read_offset + total_bytes_read:read_offset + total_bytes_read + len(buff)] = buff[:]
+            total_bytes_read += len(buff)
+        SalmonFSTestHelper.testCase.assertEqual(should_read_length, total_bytes_read)
         tdata: bytearray = bytearray(len(buffer))
         tdata[read_offset:read_offset + should_read_length] = data[start:start + should_read_length]
         SalmonFSTestHelper.assert_array_equal(tdata, buffer)
@@ -833,12 +844,18 @@ class SalmonFSTestHelper:
         return count
 
     @staticmethod
-    def copy_stream(src: AesFileInputStream, dest: MemoryStream):
-        buffer_size: int = 256 * 1024
+    def copy_bufferedio_stream(src: AesFileInputStream, dest: MemoryStream):
+        buffer_size: int = RandomAccessStream.DEFAULT_BUFFER_SIZE
         bytes_read: int
         buffer: bytearray = bytearray(buffer_size)
         while (bytes_read := src.readinto(memoryview(buffer)[0: buffer_size])) > 0:
             dest.write(buffer, 0, bytes_read)
+
+        # total_bytes_read = 0
+        # while buff := src.read(RandomAccessStream.DEFAULT_BUFFER_SIZE):
+        #     dest.write(buff, 0, len(buff))
+        #     total_bytes_read += len(buff)
+
         dest.flush()
 
     @staticmethod
@@ -869,48 +886,46 @@ class SalmonFSTestHelper:
         SalmonFSTestHelper.testCase.assertEqual(digest, local_chksum)
 
     @staticmethod
-    def seek_and_read_http_file(data, file, is_encrypted=False,
+    def seek_and_read_http_file(data, file,
                                 buffers_count=0, buffer_size=0, back_offset=0):
-        SalmonFSTestHelper.seek_and_read_file_stream(data, file, is_encrypted,
+        SalmonFSTestHelper.seek_and_read_file_stream(data, file,
                                                      0, 32, 0, 32,
                                                      buffers_count, buffer_size, back_offset)
-        SalmonFSTestHelper.seek_and_read_file_stream(data, file, is_encrypted,
+        SalmonFSTestHelper.seek_and_read_file_stream(data, file,
                                                      220, 8, 2, 8,
                                                      buffers_count, buffer_size, back_offset)
-        SalmonFSTestHelper.seek_and_read_file_stream(data, file, is_encrypted,
+        SalmonFSTestHelper.seek_and_read_file_stream(data, file,
                                                      100, 2, 0, 2,
                                                      buffers_count, buffer_size, back_offset)
-        SalmonFSTestHelper.seek_and_read_file_stream(data, file, is_encrypted,
+        SalmonFSTestHelper.seek_and_read_file_stream(data, file,
                                                      6, 16, 0, 16,
                                                      buffers_count, buffer_size, back_offset)
-        SalmonFSTestHelper.seek_and_read_file_stream(data, file, is_encrypted,
+        SalmonFSTestHelper.seek_and_read_file_stream(data, file,
                                                      50, 40, 0, 40,
                                                      buffers_count, buffer_size, back_offset)
-        SalmonFSTestHelper.seek_and_read_file_stream(data, file, is_encrypted,
+        SalmonFSTestHelper.seek_and_read_file_stream(data, file,
                                                      124, 50, 0, 50,
                                                      buffers_count, buffer_size, back_offset)
-        SalmonFSTestHelper.seek_and_read_file_stream(data, file, is_encrypted,
+        SalmonFSTestHelper.seek_and_read_file_stream(data, file,
                                                      250, 10, 0, 10,
                                                      buffers_count, buffer_size, back_offset)
 
     @staticmethod
-    def seek_and_read_file_stream(data, file, is_encrypted,
+    def seek_and_read_file_stream(data, file,
                                   start, length, read_offset, should_read_length,
                                   buffers_count=0, buffers_size=0, back_offset=0):
         buffer = bytearray(length + read_offset)
 
-        stream = None
-        if SalmonFSTestHelper.TEST_USE_FILE_INPUT_STREAM and is_encrypted:
+        stream: BufferedIOBase | None = None
+        if SalmonFSTestHelper.TEST_USE_FILE_INPUT_STREAM:
             # multi threaded
             stream = AesFileInputStream(file, buffers_count, buffers_size,
                                         SalmonFSTestHelper.TEST_FILE_INPUT_STREAM_THREADS, back_offset)
         else:
-            file_stream: RandomAccessStream | None = None
-            if is_encrypted:
-                file_stream = file.get_input_stream()
-            else:
-                file_stream = HttpFileStream(file, "r")
-            stream = BufferedIOWrapper(file_stream)
+            back_offset = 32768
+            buffer_size = 4 * 1024 * 1024
+            aes_stream: AesStream = file.get_input_stream()
+            stream = BufferedIOWrapper(aes_stream, 1, buffer_size, back_offset, aes_stream.get_align_size())
 
         stream.seek(start, 1)
         res = stream.read(length)
@@ -928,7 +943,7 @@ class SalmonFSTestHelper:
 
     @staticmethod
     def export_files(files: list[AesFile], v_dir: IFile, threads: int = 1):
-        buffer_size = 256 * 1024
+        buffer_size = RandomAccessStream.DEFAULT_BUFFER_SIZE
         commander = AesFileCommander(buffer_size, buffer_size, threads,
                                      multi_cpu=SalmonFSTestHelper.ENABLE_MULTI_CPU)
 

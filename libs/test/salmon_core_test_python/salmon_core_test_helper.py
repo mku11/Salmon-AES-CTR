@@ -582,7 +582,7 @@ class SalmonCoreTestHelper:
 
         ms1 = MemoryStream(test_data)
         ms2 = MemoryStream()
-        ms1.copy_to(ms2, buffer_size, None)
+        ms1.copy_to(ms2, buffer_size)
         ms1.close()
         ms2.close()
         data2: bytearray = ms2.to_array()
@@ -605,7 +605,7 @@ class SalmonCoreTestHelper:
         #  copy to a mem byte stream
         ms1 = MemoryStream(test_data)
         ms2 = MemoryStream()
-        ms1.copy_to(ms2, buffer_size, None)
+        ms1.copy_to(ms2, buffer_size)
         ms1.close()
 
         #  encrypt to a memory byte stream
@@ -616,7 +616,7 @@ class SalmonCoreTestHelper:
         #  we always align the writes to the chunk size if we enable integrity
         if integrity:
             buffer_size = salmon_stream.get_chunk_size()
-        ms2.copy_to(salmon_stream, buffer_size, None)
+        ms2.copy_to(salmon_stream, buffer_size)
         salmon_stream.close()
         ms2.close()
         enc_data = ms3.to_array()
@@ -627,7 +627,7 @@ class SalmonCoreTestHelper:
         ms4 = MemoryStream()
         salmon_stream2 = AesStream(key, nonce, EncryptionMode.Decrypt, ms3,
                                    EncryptionFormat.Salmon, integrity, hash_key, chunk_size)
-        salmon_stream2.copy_to(ms4, buffer_size, None)
+        salmon_stream2.copy_to(ms4, buffer_size)
         salmon_stream2.close()
         ms3.close()
         ms4.set_position(0)
