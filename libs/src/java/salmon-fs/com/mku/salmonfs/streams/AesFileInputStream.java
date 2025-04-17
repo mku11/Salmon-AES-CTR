@@ -72,13 +72,13 @@ public class AesFileInputStream extends InputStreamWrapper {
     public AesFileInputStream(AesFile salmonFile, int buffersCount, int bufferSize, int threads, int backOffset) throws IOException {
         super(null, buffersCount, bufferSize, backOffset, salmonFile.getFileChunkSize() > 0 ? salmonFile.getFileChunkSize() : Generator.BLOCK_SIZE);
         this.salmonFile = salmonFile;
-        this.totalSize = salmonFile.getLength();
+        this.setTotalSize(salmonFile.getLength());
         if (threads == 0)
             threads = DEFAULT_THREADS;
         if((threads & (threads-1)) != 0)
             throw new RuntimeException("Threads needs to be a power of 2 (ie 1,2,4,8)");
         this.threads = threads;
-        this.setPositionEnd(totalSize - 1);
+        this.setPositionEnd(getTotalSize() - 1);
         createStreams();
     }
 
@@ -129,7 +129,7 @@ public class AesFileInputStream extends InputStreamWrapper {
         AtomicReference<IOException> ex = new AtomicReference<>();
         // Multithreaded decryption jobs
         CountDownLatch countDownLatch = new CountDownLatch(threads);
-        boolean needsBackOffset = totalBufferLength == bufferSize;
+        boolean needsBackOffset = totalBufferLength == this.getBufferSize();
         int partSize;
         if(needsBackOffset) {
             partSize = (int) Math.ceil((totalBufferLength - getBackOffset()) / (float) threads);
@@ -148,7 +148,7 @@ public class AesFileInputStream extends InputStreamWrapper {
                 if (index == 0 && needsBackOffset) {
                     length = partSize + getBackOffset();
                 } else if (index == threads - 1)
-                    length = bufferSize - start;
+                    length = this.getBufferSize() - start;
                 else
                     length = partSize;
                 try {
