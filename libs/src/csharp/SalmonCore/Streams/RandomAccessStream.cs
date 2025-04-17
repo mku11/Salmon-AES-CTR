@@ -156,9 +156,9 @@ public abstract class RandomAccessStream
     }
 
     /// <summary>
-    /// Get a native stream for reading
+    /// Wrap to a native Stream for reading with 3rd party libraries
     /// </summary>
-    /// <returns></returns>
+    /// <returns>The native Stream</returns>
     public virtual Stream AsReadStream()
     {
         return new InputStreamWrapper(this);
