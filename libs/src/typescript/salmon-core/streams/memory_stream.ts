@@ -114,6 +114,8 @@ export class MemoryStream extends RandomAccessStream {
      * @param {number} value The new position of the stream.
      */
     public override async setPosition(value: number): Promise<void> {
+	    if (value > this.#length)
+            this.#checkAndResize(value);
         this.#position = value;
     }
 
@@ -191,8 +193,6 @@ export class MemoryStream extends RandomAccessStream {
         } else if (origin === SeekOrigin.End) {
             nPos = (this.#bytes.length - offset);
         }
-        if (nPos > this.#length)
-            this.#checkAndResize(nPos);
         await this.setPosition(nPos);
         return await this.getPosition();
     }
