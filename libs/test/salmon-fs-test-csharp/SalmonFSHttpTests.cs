@@ -212,7 +212,7 @@ public class SalmonFSHttpTests
     public void ShouldReadRawFile()
     {
         IFile localFile = SalmonFSTestHelper.HTTP_TEST_DIR.GetChild(SalmonFSTestHelper.TEST_HTTP_FILE.Name);
-        Console.WriteLine("reading: " + localFile.Path);
+        Console.WriteLine("reading: " + localFile.DisplayPath);
         string localChkSum = SalmonFSTestHelper.GetChecksum(localFile);
         IFile httpRoot = new HttpFile(SalmonFSTestHelper.HTTP_SERVER_VIRTUAL_URL + "/" + SalmonFSTestHelper.HTTP_TEST_DIRNAME);
         IFile httpFile = httpRoot.GetChild(SalmonFSTestHelper.TEST_HTTP_FILE.Name);

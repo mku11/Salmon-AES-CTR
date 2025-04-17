@@ -212,6 +212,7 @@ public class SalmonFSHttpTests {
     @Test
     public void ShouldReadRawFile() throws IOException, NoSuchAlgorithmException {
         IFile localFile = SalmonFSTestHelper.HTTP_TEST_DIR.getChild(SalmonFSTestHelper.TEST_HTTP_FILE.getName());
+		System.out.println("reading: " + localFile.getDisplayPath());
         String localChkSum = SalmonFSTestHelper.getChecksum(localFile);
         IFile httpRoot = new HttpFile(SalmonFSTestHelper.HTTP_SERVER_VIRTUAL_URL + "/" + SalmonFSTestHelper.HTTP_TEST_DIRNAME);
         IFile httpFile = httpRoot.getChild(SalmonFSTestHelper.TEST_HTTP_FILE.getName());

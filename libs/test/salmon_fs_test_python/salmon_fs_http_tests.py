@@ -183,6 +183,7 @@ class SalmonFSHttpTests(TestCase):
     def test_shouldReadRawFile(self):
         local_file = SalmonFSTestHelper.HTTP_TEST_DIR.get_child(
             SalmonFSTestHelper.TEST_HTTP_FILE.get_name())
+        print("reading: " + local_file.get_display_path())
         local_chk_sum = SalmonFSTestHelper.get_checksum(local_file)
         http_root = HttpFile(SalmonFSTestHelper.HTTP_SERVER_VIRTUAL_URL + "/" + SalmonFSTestHelper.HTTP_TEST_DIRNAME)
         http_file = http_root.get_child(SalmonFSTestHelper.TEST_HTTP_FILE.get_name())
