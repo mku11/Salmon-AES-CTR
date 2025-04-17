@@ -108,7 +108,8 @@ def _export_file_part(file_to_export: AesFile, exported_file: IFile, start: int,
         source_stream = file_to_export.get_input_stream()
         source_stream.set_position(start)
 
-        v_bytes: bytearray = bytearray(buffer_size)
+        n_buffer_size = buffer_size // source_stream.get_align_size() * source_stream.get_align_size()
+        v_bytes: bytearray = bytearray(n_buffer_size)
         bytes_read: int
 
         while (bytes_read := source_stream.read(v_bytes, 0,

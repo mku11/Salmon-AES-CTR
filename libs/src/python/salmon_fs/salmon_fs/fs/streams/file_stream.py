@@ -118,7 +118,10 @@ class FileStream(RandomAccessStream):
         @param value: The new position.
         @exception IOError: Thrown if there is an IO error.
         """
-        self.seek(value, RandomAccessStream.SeekOrigin.Begin)
+
+        if self.can_write() and value > self.__file.get_length():
+            self.__resize(value)
+        self.__mm.seek(value) if self.__mm else self.__raf.seek(value)
 
     def set_length(self, value: int):
         self.__raf.truncate(value)
@@ -170,11 +173,8 @@ class FileStream(RandomAccessStream):
         elif origin == RandomAccessStream.SeekOrigin.End:
             pos = self.__file.get_length() - offset
 
-        if self.can_write() and pos > self.__file.get_length():
-            self.__resize(pos)
-
-        self.__mm.seek(pos) if self.__mm else self.__raf.seek(pos)
-        return self.__mm.tell() if self.__mm else self.__raf.tell()
+        self.set_position(pos)
+        return self.get_position()
 
     def flush(self):
         """!

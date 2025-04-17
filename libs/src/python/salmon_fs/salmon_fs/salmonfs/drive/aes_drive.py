@@ -64,8 +64,6 @@ class AesDrive(VirtualDrive, ABC):
     Drive implementations needs to be realized together with {@link IRealFile}.
     """
 
-    __DEFAULT_FILE_CHUNK_SIZE: int = 256 * 1024
-
     __configFilename: str = "vault.slmn"
     __authConfigFilename: str = "auth.slma"
     __virtualDriveDirectoryName: str = "fs"
@@ -77,7 +75,7 @@ class AesDrive(VirtualDrive, ABC):
         Create a virtual drive
         """
         super().__init__()
-        self.__defaultFileChunkSize: int = AesDrive.__DEFAULT_FILE_CHUNK_SIZE
+        self.__defaultFileChunkSize: int = Integrity.DEFAULT_CHUNK_SIZE
         self.__key: DriveKey | None = None
         self.__driveID: bytearray | None = None
         self.__realRoot: IFile | None = None
@@ -351,7 +349,7 @@ class AesDrive(VirtualDrive, ABC):
         """
         stream: RandomAccessStream = file.get_input_stream()
         ms: MemoryStream = MemoryStream()
-        stream.copy_to(ms, buffer_size, None)
+        stream.copy_to(ms, buffer_size)
         ms.flush()
         ms.set_position(0)
         byte_contents: bytearray = ms.to_array()

@@ -45,11 +45,6 @@ class Integrity:
     This class operates in chunks of data in buffers calculating the hash for each one.
      """
 
-    MAX_CHUNK_SIZE = 8 * 1024 * 1024
-    """
-    * Maximum chunk size for data integrity.
-    """
-
     DEFAULT_CHUNK_SIZE = 256 * 1024
     """
     Default chunk size for integrity.
@@ -96,12 +91,10 @@ class Integrity:
         """
 
         if (chunk_size < 0 or (0 < chunk_size < Generator.BLOCK_SIZE)
-                or (chunk_size > 0 and chunk_size % Generator.BLOCK_SIZE != 0)
-                or chunk_size > Integrity.MAX_CHUNK_SIZE):
+                or (chunk_size > 0 and chunk_size % Generator.BLOCK_SIZE != 0)):
             raise IntegrityException(
                 "Invalid chunk size, specify zero for default value or a positive number multiple of: "
-                + str(Generator.BLOCK_SIZE) + " and less than: " + str(
-                    Integrity.MAX_CHUNK_SIZE) + " bytes")
+                + str(Generator.BLOCK_SIZE))
         if integrity and key is None:
             raise SecurityException("You need a hash to use with integrity")
         if integrity and chunk_size == 0:

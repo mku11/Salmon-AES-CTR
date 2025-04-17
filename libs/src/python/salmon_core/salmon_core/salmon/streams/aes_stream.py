@@ -57,6 +57,13 @@ class AesStream(RandomAccessStream):
     Current global AES provider type.
     """
 
+    def get_align_size(self) -> int:
+        """
+        Align size for performance calculating the integrity when available.
+        @returns The align size
+        """
+        return self.__integrity.get_chunk_size() if self.__integrity.get_chunk_size() > 0 else Generator.BLOCK_SIZE
+
     @staticmethod
     def get_output_size(mode: EncryptionMode, length: int,
                         enc_format: EncryptionFormat,
@@ -151,14 +158,9 @@ class AesStream(RandomAccessStream):
         The transformer to use for encryption.
         """
 
-        self.integrity: Integrity | None = None
+        self.__integrity: Integrity | None = None
         """!
         The integrity to use for hash signature creation and validation.
-        """
-
-        self.__buffer_size = Integrity.DEFAULT_CHUNK_SIZE
-        """
-        Default buffer size for all internal streams including Encryptors and Decryptors
         """
 
         if enc_format == EncryptionFormat.Generic:
@@ -218,8 +220,8 @@ class AesStream(RandomAccessStream):
         @returns The length of the stream.
         """
         total_hash_bytes: int
-        hash_offset: int = Generator.HASH_RESULT_LENGTH if self.integrity.get_chunk_size() > 0 else 0
-        total_hash_bytes = self.integrity.get_hash_data_length(self.__base_stream.get_length() - 1, hash_offset)
+        hash_offset: int = Generator.HASH_RESULT_LENGTH if self.__integrity.get_chunk_size() > 0 else 0
+        total_hash_bytes = self.__integrity.get_hash_data_length(self.__base_stream.get_length() - 1, hash_offset)
         return self.__base_stream.get_length() - self.get_header_length() - total_hash_bytes
 
     def get_position(self) -> int:
@@ -287,8 +289,8 @@ class AesStream(RandomAccessStream):
         @param chunk_size: The chunk size
         @exception IntegrityException: Thrown when data are corrupt or tampered with.
         """
-        self.integrity = Integrity(integrity, hash_key, chunk_size,
-                                   HmacSHA256Provider(), Generator.HASH_RESULT_LENGTH)
+        self.__integrity = Integrity(integrity, hash_key, chunk_size,
+                                     HmacSHA256Provider(), Generator.HASH_RESULT_LENGTH)
 
     def __init_stream(self):
         """!
@@ -390,7 +392,7 @@ class AesStream(RandomAccessStream):
         """!
         Returns a copy of the hash key.
         """
-        return self.integrity.get_key().copy()
+        return self.__integrity.get_key().copy()
 
     def get_nonce(self) -> bytearray:
         """!
@@ -402,7 +404,7 @@ class AesStream(RandomAccessStream):
         """!
         Returns the Chunk size used to apply hash signature
         """
-        return self.integrity.get_chunk_size()
+        return self.__integrity.get_chunk_size()
 
     def set_allow_range_write(self, value: bool):
         """!
@@ -434,7 +436,7 @@ class AesStream(RandomAccessStream):
         @exception SalmonRangeExceededException: Thrown when maximum nonce range is exceeded.
         """
         # we skip the header bytes and any hash values we have if the file has integrity set
-        total_hash_bytes: int = self.integrity.get_hash_data_length(value, 0)
+        total_hash_bytes: int = self.__integrity.get_hash_data_length(value, 0)
         value = value + total_hash_bytes + self.get_header_length()
         self.__base_stream.set_position(value)
 
@@ -446,8 +448,8 @@ class AesStream(RandomAccessStream):
         Returns the Virtual Position of the stream excluding the header and hash signatures.
         """
         total_hash_bytes: int
-        hash_offset: int = Generator.HASH_RESULT_LENGTH if self.integrity.get_chunk_size() > 0 else 0
-        total_hash_bytes = self.integrity.get_hash_data_length(self.__base_stream.get_position(), hash_offset)
+        hash_offset: int = Generator.HASH_RESULT_LENGTH if self.__integrity.get_chunk_size() > 0 else 0
+        total_hash_bytes = self.__integrity.get_hash_data_length(self.__base_stream.get_position(), hash_offset)
         return self.__base_stream.get_position() - self.get_header_length() - total_hash_bytes
 
     def __close_streams(self):
@@ -478,7 +480,7 @@ class AesStream(RandomAccessStream):
         if aligned_offset != 0:
             # read partially once
             self.set_position(self.get_position() - aligned_offset)
-            n_count: int = self.integrity.get_chunk_size() if self.integrity.get_chunk_size() > 0 \
+            n_count: int = self.__integrity.get_chunk_size() if self.__integrity.get_chunk_size() > 0 \
                 else Generator.BLOCK_SIZE
             buff: bytearray = bytearray(n_count)
             v_bytes = self.read(buff, 0, n_count)
@@ -514,10 +516,10 @@ class AesStream(RandomAccessStream):
         """
         if self.get_position() == self.get_length():
             return 0
-        if self.integrity.get_chunk_size() > 0 \
-                and self.get_position() % self.integrity.get_chunk_size() != 0:
-            raise IOError("All reads should be aligned to the chunks size: " + self.integrity.get_chunk_size())
-        elif self.integrity.get_chunk_size() == 0 and self.get_position() % Generator.BLOCK_SIZE != 0:
+        if self.__integrity.get_chunk_size() > 0 \
+                and self.get_position() % self.__integrity.get_chunk_size() != 0:
+            raise IOError("All reads should be aligned to the chunks size: " + self.__integrity.get_chunk_size())
+        elif self.__integrity.get_chunk_size() == 0 and self.get_position() % Generator.BLOCK_SIZE != 0:
             raise IOError("All reads should be aligned to the block size: " + Generator.BLOCK_SIZE)
 
         pos: int = self.get_position()
@@ -536,19 +538,22 @@ class AesStream(RandomAccessStream):
 
         v_bytes: int = 0
         while v_bytes < count:
+            # if there is no integrity make sure we don't overread for performance.
+            n_buffer_size = buffer_size if self.get_chunk_size() > 0 else min(buffer_size, count - v_bytes)
+
             # read data and integrity signatures
-            src_buffer: bytearray = self.__read_stream_data(buffer_size)
+            src_buffer: bytearray = self.__read_stream_data(n_buffer_size)
             try:
                 integrity_hashes: list | None = None
                 # if there are integrity hashes strip them and get the data chunks only
-                if self.integrity.get_chunk_size() > 0:
+                if self.__integrity.get_chunk_size() > 0:
                     # get the integrity signatures
-                    integrity_hashes = self.integrity.get_hashes(src_buffer)
-                    src_buffer = self.__strip_signatures(src_buffer, self.integrity.get_chunk_size())
+                    integrity_hashes = self.__integrity.get_hashes(src_buffer)
+                    src_buffer = self.__strip_signatures(src_buffer, self.__integrity.get_chunk_size())
                 dest_buffer: bytearray = bytearray(len(src_buffer))
-                if self.integrity.use_integrity():
-                    self.integrity.verify_hashes(integrity_hashes, src_buffer,
-                                                 self.__header.get_header_data() if pos == 0 and v_bytes == 0 else None)
+                if self.__integrity.use_integrity():
+                    self.__integrity.verify_hashes(integrity_hashes, src_buffer,
+                                                   self.__header.get_header_data() if pos == 0 and v_bytes == 0 else None)
                 self.__transformer.decrypt_data(src_buffer, 0, dest_buffer, 0, len(src_buffer))
                 length: int = min(count - v_bytes, len(dest_buffer))
                 self.__write_to_buffer(dest_buffer, 0, buffer, v_bytes + offset, length)
@@ -571,12 +576,12 @@ class AesStream(RandomAccessStream):
         @param count:  The length of the bytes that will be encrypted.
         
         """
-        if self.integrity.get_chunk_size() > 0 \
-                and self.get_position() % self.integrity.get_chunk_size() != 0:
+        if self.__integrity.get_chunk_size() > 0 \
+                and self.get_position() % self.__integrity.get_chunk_size() != 0:
             raise IOError() from \
                 IntegrityException("All write operations should be aligned to the chunks size: "
-                                   + str(self.integrity.get_chunk_size()))
-        elif self.integrity.get_chunk_size() == 0 \
+                                   + str(self.__integrity.get_chunk_size()))
+        elif self.__integrity.get_chunk_size() == 0 \
                 and self.get_position() % Generator.BLOCK_SIZE != 0:
             raise IOError() from \
                 IntegrityException("All write operations should be aligned to the block size: "
@@ -600,9 +605,9 @@ class AesStream(RandomAccessStream):
             try:
                 self.__transformer.encrypt_data(src_buffer, 0, dest_buffer, 0, len(src_buffer))
                 integrity_hashes: list | None = None
-                if self.integrity.use_integrity():
-                    integrity_hashes = self.integrity.generate_hashes(dest_buffer,
-                                                                      self.__header.get_header_data()
+                if self.__integrity.use_integrity():
+                    integrity_hashes = self.__integrity.generate_hashes(dest_buffer,
+                                                                        self.__header.get_header_data()
                                                                       if self.get_position() == 0 else None)
                 pos += self.__write_to_stream(dest_buffer, self.get_chunk_size(), integrity_hashes)
                 self.__transformer.sync_counter(self.get_position())
@@ -618,8 +623,8 @@ class AesStream(RandomAccessStream):
         @returns The aligned offset
         """
         align_offset: int
-        if self.integrity.get_chunk_size() > 0:
-            align_offset = self.get_position() % self.integrity.get_chunk_size()
+        if self.__integrity.get_chunk_size() > 0:
+            align_offset = self.get_position() % self.__integrity.get_chunk_size()
         else:
             align_offset = self.get_position() % Generator.BLOCK_SIZE
         return align_offset
@@ -632,7 +637,7 @@ class AesStream(RandomAccessStream):
         
         @returns The normalized buffer size
         """
-        buffer_size: int = self.__buffer_size
+        buffer_size: int = Integrity.DEFAULT_CHUNK_SIZE
         if self.get_chunk_size() > 0:
             # buffer size should be a multiple of the chunk size if integrity is enabled
             part_size: int = self.get_chunk_size()
@@ -744,7 +749,7 @@ class AesStream(RandomAccessStream):
         
         @returns True if integrity enabled
         """
-        return self.integrity.use_integrity()
+        return self.__integrity.use_integrity()
 
     def get_encryption_mode(self) -> EncryptionMode:
         """!
@@ -762,17 +767,3 @@ class AesStream(RandomAccessStream):
         @returns True if the stream allowed to seek and write.
         """
         return self.__allow_range_write
-
-    def get_buffer_size(self) -> int:
-        """!
-        Get the default buffer size for all internal streams including Encryptors and Decryptors.
-        @returns The buffer size
-        """
-        return self.__buffer_size
-
-    def set_buffer_size(self, buffer_size: int):
-        """!
-        Set the default buffer size for all internal streams including Encryptors and Decryptors.
-        
-        @param buffer_size:         """
-        self.__buffer_size = buffer_size

@@ -112,7 +112,8 @@ def _import_file_part(file_to_import: IFile, salmon_file: AesFile, start: int, c
         source_stream = file_to_import.get_input_stream()
         source_stream.set_position(start)
 
-        v_bytes: bytearray = bytearray(buffer_size)
+        n_buffer_size = buffer_size // target_stream.get_align_size() * target_stream.get_align_size()
+        v_bytes: bytearray = bytearray(n_buffer_size)
         bytes_read: int
 
         while (bytes_read := source_stream.read(

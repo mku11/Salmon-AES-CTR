@@ -35,6 +35,7 @@ import sys
 from typeguard import typechecked
 
 from salmon_core.streams.memory_stream import MemoryStream
+from salmon_core.streams.random_access_stream import RandomAccessStream
 from salmon_core.salmon.integrity.integrity import Integrity
 from salmon_core.salmon.integrity.integrity_exception import IntegrityException
 from salmon_core.salmon.streams.encryption_mode import EncryptionMode
@@ -97,10 +98,8 @@ def _encrypt_data(input_stream: MemoryStream, start: int, count: int, out_data: 
         stream.set_position(start)
         start_pos = output_stream.get_position()
         total_chunk_bytes_read: int = 0
-        # align to the chunk size if available
-        buff_size: int = max(buffer_size, stream.get_chunk_size())
-        # set the same buffer size for the internal stream
-        stream.set_buffer_size(buff_size)
+        buff_size = RandomAccessStream.DEFAULT_BUFFER_SIZE
+        buff_size = buff_size // stream.get_align_size() * stream.get_align_size();
         buff: bytearray = bytearray(buff_size)
         bytes_read: int
         while (bytes_read := input_stream.read(buff, 0, min(len(buff), count - total_chunk_bytes_read))) > 0 \

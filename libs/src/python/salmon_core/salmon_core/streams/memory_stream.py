@@ -116,6 +116,8 @@ class MemoryStream(RandomAccessStream):
         @param value: The new position of the stream.
         @exception IOError: Thrown if there is an IO error.
         """
+        if value > self.__length:
+            self.__check_and_resize(value)
         self.__position = value
 
     def set_length(self, value: int):
@@ -186,7 +188,7 @@ class MemoryStream(RandomAccessStream):
             n_pos = self.get_position() + offset
         elif origin == RandomAccessStream.SeekOrigin.End:
             n_pos = len(self.__bytes) - offset
-        self.__check_and_resize(n_pos)
+
         self.set_position(n_pos)
         return self.get_position()
 

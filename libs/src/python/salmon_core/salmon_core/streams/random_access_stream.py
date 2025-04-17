@@ -42,6 +42,9 @@ class RandomAccessStream(ABC):
     """
 
     DEFAULT_BUFFER_SIZE: int = 256 * 1024
+    """
+    Default buffer size
+    """
 
     @abstractmethod
     def can_read(self) -> bool:
@@ -92,6 +95,13 @@ class RandomAccessStream(ABC):
         @exception IOError: Thrown if there is an IO error.
         """
         pass
+
+    def get_align_size(self) -> int:
+        """
+        Get the preferred align size
+        @returns The aligned size
+        """
+        return 32768
 
     @abstractmethod
     def set_length(self, value: int):
@@ -168,16 +178,16 @@ class RandomAccessStream(ABC):
             buffer_size = 0
         if buffer_size <= 0:
             buffer_size = RandomAccessStream.DEFAULT_BUFFER_SIZE
+        buffer_size = buffer_size // self.get_align_size() * self.get_align_size()
         bytes_read: int
-        pos: int = self.get_position()
         buffer: bytearray = bytearray(buffer_size)
         while (bytes_read := self.read(buffer, 0, buffer_size)) > 0:
             stream.write(buffer, 0, bytes_read)
             if on_progress_changed:
                 on_progress_changed(self.get_position(), self.get_length())
         stream.flush()
-        self.set_position(pos)
 
+    @typechecked
     class SeekOrigin(Enum):
         """!
         Used to identify the start offset for seeking to a stream.
