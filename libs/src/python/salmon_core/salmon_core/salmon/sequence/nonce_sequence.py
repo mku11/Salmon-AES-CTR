@@ -80,6 +80,7 @@ class NonceSequence:
         self.__maxNonce = max_nonce
         self.__status = status
 
+    @typechecked
     class Status(Enum):
         """!
         Sequencer status.
