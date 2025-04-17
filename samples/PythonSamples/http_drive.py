@@ -11,8 +11,8 @@ from salmon_fs.fs.file.http_file import HttpFile
 
 from samples.drive_sample import DriveSample
 
-http_drive_url = "http://localhost:8000/test/httpserv/vault"
-password = "test123"
+http_drive_url = "http://localhost/testvault"
+password = "test"
 threads = 1
 
 # Set with the path to the salmon library if you use the native AES providers, see README.txt for instructions
