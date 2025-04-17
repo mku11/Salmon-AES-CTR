@@ -105,6 +105,7 @@ class WSFileStream(RandomAccessStream):
             footer = "\r\n--" + boundary + "--"
             footer_data: bytearray = bytearray(footer.encode())
 
+            @typechecked
             class PipedIO(RawIOBase):
                 def __init__(self, queue: Queue):
                     self.is_closed = False

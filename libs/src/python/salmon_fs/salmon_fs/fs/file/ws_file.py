@@ -561,7 +561,7 @@ class WSFile(IFile):
             conn = http.client.HTTPSConnection(urlparse(self.__service_path).netloc)
         return conn
 
-
+@typechecked
 class Credentials:
     """!
     Credentials

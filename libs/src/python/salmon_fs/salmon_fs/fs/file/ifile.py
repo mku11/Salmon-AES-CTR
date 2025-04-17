@@ -416,6 +416,7 @@ class IFile(ABC):
         else:
             return ""
 
+    @typechecked
     class CopyOptions:
         """!
         File copy options
@@ -431,6 +432,7 @@ class IFile(ABC):
         Callback where progress changed
         """
 
+    @typechecked
     class MoveOptions:
         """!
         File move options
@@ -446,6 +448,7 @@ class IFile(ABC):
         Callback where progress changed
         """
 
+    @typechecked
     class RecursiveCopyOptions:
         """!
         Directory copy options (recursively)
@@ -471,6 +474,7 @@ class IFile(ABC):
         Callback where progress changed
         """
 
+    @typechecked
     class RecursiveMoveOptions:
         """!
         Directory move options (recursively)
@@ -496,6 +500,7 @@ class IFile(ABC):
         Callback when progress changes
         """
 
+    @typechecked
     class RecursiveDeleteOptions:
         """!
         Directory move options (recursively)
@@ -511,6 +516,7 @@ class IFile(ABC):
         Callback when progress changed
         """
 
+    @typechecked
     class CopyContentsOptions:
         """!
         Directory move options (recursively)

@@ -218,6 +218,7 @@ class IVirtualFile(ABC):
         """
         pass
 
+    @typechecked
     class VirtualRecursiveCopyOptions:
         """!
           Directory copy options (recursively)
@@ -243,6 +244,7 @@ class IVirtualFile(ABC):
           Callback where progress changed
         """
 
+    @typechecked
     class VirtualRecursiveMoveOptions:
         """!
           Directory move options (recursively)
@@ -268,6 +270,7 @@ class IVirtualFile(ABC):
           Callback when progress changes
         """
 
+    @typechecked
     class VirtualRecursiveDeleteOptions:
         """!
           Directory move options (recursively)
