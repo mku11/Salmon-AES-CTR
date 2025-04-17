@@ -59,14 +59,15 @@ public class InputStreamWrapper extends InputStream {
     /**
      * The buffer size
      */
-    protected int bufferSize;
+    private int bufferSize;
 
-    public long getStreamPosition() {
-        return streamPosition;
-    }
-
-    protected void setStreamPosition(long streamPosition) {
-        this.streamPosition = streamPosition;
+	/**
+     * Get the buffer size
+     *
+     * @return The buffer size
+     */
+    public int getBufferSize() {
+        return bufferSize;
     }
 
     private long streamPosition;
@@ -74,14 +75,37 @@ public class InputStreamWrapper extends InputStream {
     /**
      * The total size of the base stream
      */
-    protected long totalSize;
+    private long totalSize;
+	
+	/**
+     * Get the total size
+     *
+     * @return The total size
+     */
+    public long getTotalSize() {
+        return totalSize;
+    }
 
-    protected void setAlignSize(int alignSize) {
-        this.alignSize = alignSize;
+    /**
+     * Set the total size
+     *
+     * @param totalSize The total size
+     */
+	protected void setTotalSize(long totalSize) {
+        this.totalSize = totalSize;
     }
 
     private int alignSize;
 
+    /**
+     * Get the align size
+     *
+     * @return The align size
+     */
+    public int getAlignSize() {
+        return alignSize;
+    }
+	
     /**
      * We reuse the least recently used buffer. Since the buffer count is relative
      * small (see {@link #MAX_BUFFERS}) there is no need for a fast-access lru queue
@@ -500,14 +524,5 @@ public class InputStreamWrapper extends InputStream {
         if (stream != null)
             stream.close();
         stream = null;
-    }
-
-    /**
-     * Get the align size
-     *
-     * @return The align size
-     */
-    public int getAlignSize() {
-        return alignSize;
     }
 }

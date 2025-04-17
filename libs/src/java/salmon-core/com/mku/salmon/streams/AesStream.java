@@ -86,11 +86,6 @@ public class AesStream extends RandomAccessStream {
     private Integrity integrity;
 
     /**
-     * Default buffer size for all internal streams including Encryptors and Decryptors
-     */
-    private int bufferSize = Integrity.DEFAULT_CHUNK_SIZE;
-
-    /**
      * Align size for performance calculating the integrity when available.
      * @return The align size
      */
@@ -939,26 +934,5 @@ public class AesStream extends RandomAccessStream {
     public boolean isAllowRangeWrite() {
         return allowRangeWrite;
     }
-
-
-    /**
-     * Get the internal buffer size.
-     *
-     * @return The buffer size
-     */
-    public int getBufferSize() {
-        return bufferSize;
-    }
-
-    /**
-     * Set the internal buffer size.
-     *
-     * @param bufferSize The new buffer size
-     */
-    public void setBufferSize(int bufferSize) {
-        this.bufferSize = bufferSize;
-    }
-
-
 }
 

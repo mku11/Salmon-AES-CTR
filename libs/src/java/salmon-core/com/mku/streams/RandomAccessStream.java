@@ -202,6 +202,10 @@ public abstract class RandomAccessStream {
         stream.flush();
     }
 
+	/**
+     * Wrap to a Java InputStream to use with 3rd party libraries.
+	 * @return The InputStream
+     */
     public InputStream asReadStream()
     {
         return new InputStreamWrapper(this);

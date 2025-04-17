@@ -10,22 +10,47 @@ public class Buffer {
         return data;
     }
 
+    /**
+     * Set the data
+     *
+     * @param data The data
+     */
     public void setData(byte[] data) {
         this.data = data;
     }
 
+	/**
+     * Get the start position
+     *
+     * @return The start position
+     */
     public long getStartPos() {
         return startPos;
     }
 
+    /**
+     * Set the start position
+     *
+     * @param startPos The start position
+     */
     public void setStartPos(long startPos) {
         this.startPos = startPos;
     }
 
+	/**
+     * Get the data count
+     *
+     * @return The data count
+     */
     public long getCount() {
         return count;
     }
 
+    /**
+     * Set the data count
+     *
+     * @param count The data count
+     */
     public void setCount(long count) {
         this.count = count;
     }
