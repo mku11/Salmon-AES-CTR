@@ -123,6 +123,8 @@ public class MemoryStream extends RandomAccessStream {
      */
     @Override
     public void setPosition(long value) {
+		if (value > this._length)
+			checkAndResize(value);
         _position = value;
     }
 
@@ -207,8 +209,6 @@ public class MemoryStream extends RandomAccessStream {
         } else if (origin == SeekOrigin.End) {
             nPos = (int) (_bytes.length - offset);
         }
-		if (nPos > this._length)
-			checkAndResize(nPos);
         setPosition(nPos);
         return getPosition();
     }
