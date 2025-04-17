@@ -86,12 +86,6 @@ export class AesStream extends RandomAccessStream {
      */
     #integrity: Integrity = new Integrity(false, null, 0, new HmacSHA256Provider(), Generator.HASH_RESULT_LENGTH);
 
-    
-    /**
-     * Internal buffer size by default should be aligned to the integrity for better performance
-     */
-    #bufferSize: number = Integrity.DEFAULT_CHUNK_SIZE;
-
     #key: Uint8Array;
     #nonce: Uint8Array | null;
     #hashKey: Uint8Array | null;
@@ -895,22 +889,5 @@ export class AesStream extends RandomAccessStream {
      */
     public getTransformer(): ISalmonCTRTransformer {
         return this.#transformer;
-    }
-
-    /**
-     * Get the internal buffer size.
-     * @returns {number} The buffer size.
-     */
-    public getBufferSize(): number{
-        return this.#bufferSize;
-    }
-
-    /**
-     * Set the internal buffer size.
-     *
-     * @param {number} bufferSize The new buffer size.
-     */
-    public setBufferSize(bufferSize: number): void {
-        this.#bufferSize = bufferSize;
     }
 }
