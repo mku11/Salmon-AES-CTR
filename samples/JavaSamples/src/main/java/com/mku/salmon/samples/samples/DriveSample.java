@@ -132,10 +132,10 @@ public class DriveSample {
         AesFile file = files[0]; // pick the first file
         System.out.println("reading file: " + file.getName());
 
-        // to read files you have use the following options:
+        // for reading files you have the following options:
         // a) file.getInputStream() to get a low level RandomAccessStream
-        // b) file.getInputStream().asReadStream() to get a native Java InputStream with aligned buffers
-        // c) create an AesFileInputStream that uses aligned buffers and multithreading.
+        // b) wrap the RandomAccessStream in a BufferedIOWrapper (a native Java InputStream with aligned buffers)
+        // c) wrap the RandomAccessStream in an AesFileInputStream (a native Java InputStream with aligned buffers and multithreading)
         AesFileInputStream inputStream = new AesFileInputStream(file);
         byte[] buffer = new byte[256 * 1024];
         int totalBytesRead = 0;

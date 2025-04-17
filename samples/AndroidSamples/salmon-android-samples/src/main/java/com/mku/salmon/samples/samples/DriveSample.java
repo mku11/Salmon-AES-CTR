@@ -144,8 +144,10 @@ public class DriveSample {
             log.accept("file: " + sfile.getName() + ", size: " + sfile.getLength());
         }
 
-        // to read you can use file.getInputStream() to get a low level RandomAccessStream
-        // or use a ReadableStream wrapper with parallel threads and caching, see below:
+        // for reading files you have the following options:
+        // a) file.getInputStream() to get a low level RandomAccessStream
+        // b) wrap the RandomAccessStream in a BufferedIOWrapper (a native Java InputStream with aligned buffers)
+        // c) wrap the RandomAccessStream in an AesFileInputStream (a native Java InputStream with aligned buffers and multithreading)
         AesFile file = files[0]; // pick the first file
         log.accept("reading file: " + file.getName());
         int buffers = 4;

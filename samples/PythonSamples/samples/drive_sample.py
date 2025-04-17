@@ -52,9 +52,9 @@ class DriveSample:
 
         def on_progress(task_progress: AesFileCommander.RealFileTaskProgress):
             print("file importing: " \
-                + str(task_progress.get_file().get_name()) + ": " \
-                + str(task_progress.get_processed_bytes()) + "/" \
-                + str(task_progress.get_total_bytes()) + " bytes")
+                  + str(task_progress.get_file().get_name()) + ": " \
+                  + str(task_progress.get_processed_bytes()) + "/" \
+                  + str(task_progress.get_total_bytes()) + " bytes")
 
         def on_fail(file: IFile, ex: Exception):
             print("import failed: " + str(ex), file=sys.stderr)
@@ -79,9 +79,9 @@ class DriveSample:
 
         def on_progress(task_progress: AesFileCommander.AesFileTaskProgress):
             print("file exporting: " \
-                + str(task_progress.get_file().get_name()) + ": " \
-                + str(task_progress.get_processed_bytes()) + "/" \
-                + str(task_progress.get_total_bytes()) + " bytes")
+                  + str(task_progress.get_file().get_name()) + ": " \
+                  + str(task_progress.get_processed_bytes()) + "/" \
+                  + str(task_progress.get_total_bytes()) + " bytes")
 
         def on_fail(file: AesFile, ex: Exception):
             print("export failed: " + str(ex), file=sys.stderr)
@@ -112,8 +112,10 @@ class DriveSample:
         for file in files:
             print("file: " + file.get_name() + ", size: " + str(file.get_length()))
 
-        # to read you can use file.get_input_stream() to get a low level RandomAccessStream
-        # or use AesFileInputStream which is a Python native BufferedIOBase wrapper with caching, see below:
+        # for reading files you have the following options:
+        # a) file.get_input_stream() to get a low level RandomAccessStream
+        # b) wrap the RandomAccessStream in a BufferedIOWrapper (a native Python BufferedIO stream with aligned buffers)
+        # c) wrap the RandomAccessStream in an AesFileInputStream (a native Python BufferedIO stream with aligned buffers and multithreading)
         file: AesFile = files[0]  # pick the first file
         print("reading file: " + file.get_name())
         buffers = 4
@@ -139,7 +141,7 @@ class DriveSample:
         # create a file nonce sequencer and place it in a private space
         # make sure you never edit or back up this file.
         seq_filename = "sample_sequencer.xml"
-        
+
         private_dir: IFile | None = None
         platform_os: str = platform.system().upper()
         if "WINDOWS" in platform_os:
@@ -148,7 +150,7 @@ class DriveSample:
             private_dir = File(os.getenv("HOME") + "/Salmon")
         elif "LINUX" in platform_os:
             private_dir = File(os.getenv("HOME") + "/Salmon")
-            
+
         sequencer_dir = private_dir.get_child("sequencer")
         if not sequencer_dir.exists():
             sequencer_dir.mkdir()

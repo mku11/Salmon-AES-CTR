@@ -119,8 +119,10 @@ export class DriveSample {
 			print("file: " + await file.getName() + ", size: " + await file.getLength());
 		}
 		
-		// to read you can use file.getInputStream() to get a low level RandomAccessStream
-		// or use a JS native ReadableStream wrapper with caching, see below:
+		// for reading files you have the following options:
+        // a) file.getInputStream() to get a low level RandomAccessStream
+        // b) wrap the RandomAccessStream in a BufferedIOWrapper (a native JavaScript ReadableStream with aligned buffers)
+        // c) wrap the RandomAccessStream in an AesFileInputStream (a native JavaScript ReadableStream with aligned buffers and multithreading)
 		let file = files[0]; // pick the first file
 		print("reading file: " + await file.getName());
 		let buffers = 4;

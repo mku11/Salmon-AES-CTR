@@ -159,8 +159,10 @@ public class DriveSample
             log("file: " + sfile.Name + ", size: " + sfile.Length);
         }
 
-        // to read you can use file.getInputStream() to get a low level RandomAccessStream
-        // or use a ReadableStream wrapper with parallel threads and caching, see below:
+        // for reading files you have the following options:
+        // a) file.GetInputStream() to get a low level RandomAccessStream
+        // b) wrap the RandomAccessStream in a BufferedIOWrapper (a native .NET Stream with aligned buffers)
+        // c) wrap the RandomAccessStream in an AesFileInputStream (a native .NET Stream with aligned buffers and multithreading)
         AesFile file = files[0]; // pick the first file
         log("reading file: " + file.Name);
         int buffers = 4;
