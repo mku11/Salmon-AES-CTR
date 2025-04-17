@@ -95,6 +95,8 @@ public class MemoryStream : RandomAccessStream
         }
         set
         {
+			if (value > this._length)
+				checkAndResize(value);
             _position = value;
         }
     }
@@ -181,8 +183,6 @@ public class MemoryStream : RandomAccessStream
         {
             nPos = (int)(_bytes.Length - offset);
         }
-        if (nPos > this._length)
-            checkAndResize(nPos);
         Position = nPos;
         return Position;
     }
