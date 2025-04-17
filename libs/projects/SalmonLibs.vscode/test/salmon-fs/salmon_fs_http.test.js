@@ -146,7 +146,7 @@ describe('salmon-httpfs', () => {
         let vaultDir = SalmonFSTestHelper.HTTP_VAULT_DIR;
         let drive = await SalmonFSTestHelper.openDrive(vaultDir, SalmonFSTestHelper.driveClassType, SalmonCoreTestHelper.TEST_PASSWORD);
         let file = await (await drive.getRoot()).getChild(await SalmonFSTestHelper.TEST_HTTP_FILE.getName());
-        let exportDir = await SalmonFSTestHelper.generateFolder("export_http", SalmonFSTestHelper.TEST_OUTPUT_DIR, false);
+        let exportDir = await SalmonFSTestHelper.generateFolder("export_http", SalmonFSTestHelper.TEST_EXPORT_DIR, false);
         let localFile = await exportDir.getChild(await SalmonFSTestHelper.TEST_HTTP_FILE.getName());
         if(await localFile.exists())
             await localFile.delete();
