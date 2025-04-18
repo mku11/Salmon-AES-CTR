@@ -31,6 +31,8 @@ import com.mku.salmon.Generator;
 import com.mku.salmon.integrity.HMACSHA256Provider;
 import com.mku.salmon.integrity.IHashProvider;
 import com.mku.salmon.integrity.Integrity;
+import com.mku.salmon.password.Password;
+import com.mku.salmon.password.PbkdfAlgo;
 import com.mku.salmon.streams.AesStream;
 import com.mku.salmon.streams.EncryptionFormat;
 import com.mku.salmon.streams.EncryptionMode;
@@ -49,6 +51,7 @@ import java.io.IOException;
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.nio.charset.Charset;
+import java.nio.charset.StandardCharsets;
 import java.security.DigestInputStream;
 import java.security.MessageDigest;
 import java.util.Arrays;
@@ -56,6 +59,10 @@ import java.util.Random;
 
 import static org.junit.jupiter.api.Assertions.assertArrayEquals;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+
+import org.bouncycastle.crypto.digests.SHA256Digest;
+import org.bouncycastle.crypto.generators.PKCS5S2ParametersGenerator;
+import org.bouncycastle.crypto.params.KeyParameter;
 
 public class SalmonCoreTestHelper {
     public static int TEST_ENC_BUFFER_SIZE = 512 * 1024;
@@ -91,10 +98,23 @@ public class SalmonCoreTestHelper {
     private static Encryptor encryptor;
     private static Decryptor decryptor;
 
+    // Alternative Pbkdf algo for older devices
+    static void setupBcPbkdfAlgo() {
+        Password.setPbkdfProvider((String password, byte[] salt, int iterations,
+                                   int outputBytes, PbkdfAlgo algo) -> {
+            SHA256Digest dig = new SHA256Digest();
+            PKCS5S2ParametersGenerator gen = new PKCS5S2ParametersGenerator(dig);
+            gen.init(password.getBytes(StandardCharsets.UTF_8), salt, iterations);
+            return ((KeyParameter) gen.generateDerivedParameters(outputBytes * 8)).getKey();
+        });
+    }
+
     static void initialize() {
         SalmonCoreTestHelper.hashProvider = new HMACSHA256Provider();
         SalmonCoreTestHelper.encryptor = new Encryptor(SalmonCoreTestHelper.TEST_ENC_THREADS);
         SalmonCoreTestHelper.decryptor = new Decryptor(SalmonCoreTestHelper.TEST_DEC_THREADS);
+        // enable for older devices only
+        // setupBcPbkdfAlgo();
     }
 
     static void close() {

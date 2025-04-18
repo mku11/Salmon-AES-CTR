@@ -21,7 +21,8 @@ endif ()
 # for gcc and clang we use an empty macro to suppress the warnings
 set(SALMON_DEFS "${SALMON_DEFS} -D__constant=")
 
-set(SALMON_OPT_FLAGS " -O3")
+# older devices do not like optimization so disable if it crashes with Native crash: Illegal instruction
+# set(SALMON_OPT_FLAGS " -O2")
 set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} ${SALMON_INCLUDE} ${SALMON_DEFS} ${SALMON_ARM_CRYPTO} ${SALMON_OPT_FLAGS}")
 
 add_library(

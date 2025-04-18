@@ -96,4 +96,10 @@ dependencies {
     testImplementation "androidx.arch.core:core-testing:2.1.0"
     androidTestImplementation "androidx.arch.core:core-testing:2.1.0"
 
+    testImplementation 'org.bouncycastle:bcprov-jdk15on:1.70'
+    testImplementation 'org.bouncycastle:bcpkix-jdk15on:1.70'
+
+    androidTestImplementation 'org.bouncycastle:bcprov-jdk15on:1.70'
+    androidTestImplementation 'org.bouncycastle:bcpkix-jdk15on:1.70'
+
 }

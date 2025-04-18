@@ -117,7 +117,7 @@ public class SalmonFSAndroidTestHelper {
     public static String getTestDir(MainActivity activity) throws InterruptedException {
         String testDir = activity.getVaultLocation();
         if (testDir == null) {
-            activity.getMainExecutor().execute(() -> {
+            activity.runOnUiThread(()-> {
                 Toast.makeText(activity, "Set a test folder before running tests", Toast.LENGTH_LONG).show();
             });
             Thread.sleep(60000);
