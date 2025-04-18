@@ -61,7 +61,7 @@ export class FileSequencer implements INonceSequencer {
             let parent: IFile | null = await this.#sequenceFile.getParent();
             if(parent == null)
                 throw new Error("Could not get parent");
-            await parent.createFile(this.#sequenceFile.getName());
+            this.#sequenceFile = await parent.createFile(this.#sequenceFile.getName());
             await this.saveSequenceFile(new Map());
         }
     }

@@ -65,7 +65,7 @@ class FileSequencer(INonceSequencer):
         self.__sequenceFile = sequence_file
         self.__serializer = serializer
         if not sequence_file.exists():
-            sequence_file.get_parent().create_file(sequence_file.get_name())
+            self.__sequenceFile = sequence_file.get_parent().create_file(sequence_file.get_name())
             self._save_sequence_file(None)
 
     def get_sequence_file(self) -> IFile:

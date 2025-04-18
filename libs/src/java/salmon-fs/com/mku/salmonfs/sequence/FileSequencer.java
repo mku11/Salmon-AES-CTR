@@ -46,7 +46,7 @@ import java.util.HashMap;
  * Generates nonces based on a sequencer backed by a file.
  */
 public class FileSequencer implements INonceSequencer {
-    private final IFile sequenceFile;
+    private IFile sequenceFile;
     private final INonceSequenceSerializer serializer;
 
     /**
@@ -62,7 +62,7 @@ public class FileSequencer implements INonceSequencer {
         this.sequenceFile = sequenceFile;
         this.serializer = serializer;
         if (!sequenceFile.exists()) {
-            sequenceFile.getParent().createFile(sequenceFile.getName());
+            this.sequenceFile = sequenceFile.getParent().createFile(sequenceFile.getName());
             saveSequenceFile(new HashMap<>());
         }
     }
