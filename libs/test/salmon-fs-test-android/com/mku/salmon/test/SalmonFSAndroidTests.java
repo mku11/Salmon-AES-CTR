@@ -27,8 +27,10 @@ SOFTWARE.
 import androidx.test.ext.junit.rules.ActivityScenarioRule;
 import androidx.test.ext.junit.runners.AndroidJUnit4;
 
+import com.mku.android.convert.Base64;
 import com.mku.android.fs.file.AndroidFileSystem;
 import com.mku.android.salmon.sequence.AndroidSequenceSerializer;
+import com.mku.salmon.encode.Base64Utils;
 import com.mku.salmon.streams.AesStream;
 import com.mku.salmon.streams.ProviderType;
 
@@ -127,6 +129,9 @@ public class SalmonFSAndroidTests {
         System.out.println("ProviderType: " + providerType);
 
         AesStream.setAesProviderType(providerType);
+
+        // setup for devices that do not support Java's Base64
+        // Base64Utils.setBase64(new Base64());
     }
 
     @Test
