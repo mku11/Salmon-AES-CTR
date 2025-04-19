@@ -41,7 +41,7 @@ repositories {
 project.ext.set('nativeLibsDir', "$buildDir/libs/natives")
 
 configurations {
-    nativeBundle
+    nativeImplementation
 }
 
 dependencies {
@@ -54,7 +54,7 @@ dependencies {
 	
 	// salmon native libs
     implementation("com.mku.salmon:salmon-native:${version}:${project.os}-${project.arch}")
-    nativeBundle("com.mku.salmon:salmon-native:${version}:${project.os}-${project.arch}")	
+    nativeImplementation("com.mku.salmon:salmon-native:${version}:${project.os}-${project.arch}")	
 }
 
 test {
@@ -63,7 +63,7 @@ test {
 
 task extractNativeBundle(type: Sync) {
     from {
-        configurations.nativeBundle.collect { zipTree(it) }
+        configurations.nativeImplementation.collect { zipTree(it) }
     }
     into file(project.nativeLibsDir)
 }
