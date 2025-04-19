@@ -17,8 +17,9 @@ dependencies {
     implementation project(path: ':salmon-core')
     implementation 'org.json:json:20240303'
 
-
     testImplementation 'org.junit.jupiter:junit-jupiter:5.8.1'
+    testImplementation 'org.bouncycastle:bcprov-jdk15on:1.70'
+    testImplementation 'org.junit.jupiter:junit-jupiter-api:5.10.0'
 }
 
 test {
