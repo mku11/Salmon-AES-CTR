@@ -28,7 +28,7 @@ import java.net.HttpURLConnection;
 import java.net.URL;
 
 /**
- * Security
+ * HTTP client
  */
 public class HttpSyncClient {
     private static boolean allowClearTextTraffic = false;
@@ -37,7 +37,7 @@ public class HttpSyncClient {
      * Check if clear text traffic (HTTP) is allowed, otherwise you need to use secure HTTPS protocols.
      * Clear text traffic should ONLY be used for testing purposes.
      *
-     * @return The user name.
+     * @return True if allow clear text traffic
      */
     public static boolean getAllowClearTextTraffic() {
         return allowClearTextTraffic;
@@ -52,10 +52,16 @@ public class HttpSyncClient {
         allowClearTextTraffic = allow;
     }
 
+	/**
+	 * Create a new connection from a url
+	 * @param urlPath The url
+	 * @return The connection
+	 * @throws IOException if error with IO
+	 */
     public static HttpURLConnection createConnection(String urlPath) throws IOException {
         URL url = new URL(urlPath);
         if(!url.getProtocol().equals("https") && !allowClearTextTraffic)
-            throw new RuntimeException("Clear text traffic should noly be used for testing purpores, " +
+            throw new RuntimeException("Clear text traffic should only be used for testing purpores, " +
                     "use HttpSyncClient.setAllowClearTextTraffic() to override");
 		if(url.getHost() == null || url.getHost().length() == 0)
 			throw new RuntimeException("Malformed URL or unknown service, check the path");
