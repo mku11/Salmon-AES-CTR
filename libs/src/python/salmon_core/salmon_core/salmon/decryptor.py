@@ -95,8 +95,8 @@ def _decrypt_data(input_stream: RandomAccessStream, start: int, count: int, out_
         stream.set_position(start)
         start_pos = output_stream.get_position()
         total_chunk_bytes_read: int = 0
-        buff_size = RandomAccessStream.DEFAULT_BUFFER_SIZE;
-        buff_size = buff_size // stream.get_align_size() * stream.get_align_size();
+        buff_size = RandomAccessStream.DEFAULT_BUFFER_SIZE
+        buff_size = buff_size // stream.get_align_size() * stream.get_align_size()
         buff: bytearray = bytearray(buff_size)
         bytes_read: int
         while (bytes_read := stream.read(buff, 0, min(len(buff), (

@@ -400,7 +400,7 @@ class BufferedIOWrapper(BufferedIOBase):
     def set_total_size(self, total_size: int):
         """!
         Set the total size
-        @param pos The total size
+        @param total_size The total size
         """
         self.__total_size = total_size
 
