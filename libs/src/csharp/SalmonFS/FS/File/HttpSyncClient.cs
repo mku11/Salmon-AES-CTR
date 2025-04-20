@@ -22,6 +22,7 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 */
 
+using System;
 using System.Net.Http;
 using System.Threading;
 using System.Threading.Tasks;
@@ -33,21 +34,22 @@ namespace Mku.FS.File;
 /// </summary>
 public class HttpSyncClient : HttpClient
 {
+    private static readonly int DEFAULT_TIMEOUT_MS = 10000;
     /// <summary>
     /// Construct a generic client
     /// </summary>
     public HttpSyncClient() : base()
     {
-
+		this.Timeout = TimeSpan.FromMilliseconds(DEFAULT_TIMEOUT_MS);
     }
 
     /// <summary>
     /// Construct a generic client based with the specified message handler
     /// </summary>
-    /// <param name="messageHandler"></param>
+    /// <param name="messageHandler">The message handler</param>
     public HttpSyncClient(HttpMessageHandler messageHandler) : base(messageHandler)
     {
-
+		this.Timeout = TimeSpan.FromMilliseconds(DEFAULT_TIMEOUT_MS);
     }
 
     /// <summary>
@@ -88,6 +90,7 @@ public class HttpSyncClient : HttpClient
     public virtual new HttpResponseMessage Send(HttpRequestMessage request, HttpCompletionOption completionOption, CancellationToken cancellationToken)
     {
         var task = Task.Run(async () => await SendAsync(request, HttpCompletionOption.ResponseHeadersRead));
+		task.ConfigureAwait(false);
         task.Wait();
         HttpResponseMessage response = task.Result;
         return response;
