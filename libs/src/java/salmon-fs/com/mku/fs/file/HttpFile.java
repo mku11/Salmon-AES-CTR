@@ -60,7 +60,7 @@ public class HttpFile implements IFile {
         this.filePath = path;
     }
 
-    private HttpFile.Response getResponse() throws Exception {
+    private synchronized HttpFile.Response getResponse() throws Exception {
         if(this.response == null) {
 			HttpURLConnection conn = null;
             try {

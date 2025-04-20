@@ -89,7 +89,7 @@ public class WSFile implements IFile {
         this.credentials = credentials;
     }
 
-    private Response getResponse() throws Exception {
+    private synchronized Response getResponse() throws Exception {
         if (this.response == null) {
             HttpURLConnection conn = null;
             try {
