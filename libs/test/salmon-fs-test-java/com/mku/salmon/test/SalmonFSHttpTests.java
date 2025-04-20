@@ -25,6 +25,7 @@ SOFTWARE.
 */
 
 import com.mku.fs.file.HttpFile;
+import com.mku.fs.file.HttpSyncClient;
 import com.mku.fs.file.IFile;
 import com.mku.fs.file.IVirtualFile;
 import com.mku.salmon.streams.AesStream;
@@ -42,7 +43,6 @@ import org.junit.jupiter.api.Test;
 
 import java.io.IOException;
 import java.io.InputStream;
-import java.net.URL;
 import java.net.URLConnection;
 import java.security.NoSuchAlgorithmException;
 import java.util.ArrayList;
@@ -214,7 +214,8 @@ public class SalmonFSHttpTests {
         IFile localFile = SalmonFSTestHelper.HTTP_TEST_DIR.getChild(SalmonFSTestHelper.TEST_HTTP_FILE.getName());
 		System.out.println("reading: " + localFile.getDisplayPath());
         String localChkSum = SalmonFSTestHelper.getChecksum(localFile);
-        IFile httpRoot = new HttpFile(SalmonFSTestHelper.HTTP_SERVER_VIRTUAL_URL + "/" + SalmonFSTestHelper.HTTP_TEST_DIRNAME);
+        IFile httpRoot = new HttpFile(SalmonFSTestHelper.HTTP_SERVER_VIRTUAL_URL
+                + "/" + SalmonFSTestHelper.HTTP_TEST_DIRNAME, SalmonFSTestHelper.httpCredentials);
         IFile httpFile = httpRoot.getChild(SalmonFSTestHelper.TEST_HTTP_FILE.getName());
         RandomAccessStream stream = httpFile.getInputStream();
         String digest = SalmonFSTestHelper.getChecksumStream(stream.asReadStream());
@@ -230,7 +231,7 @@ public class SalmonFSHttpTests {
         AesFile file = drive.getRoot().getChild(SalmonFSTestHelper.TEST_HTTP_FILE.getName());
 
         String url = AesStreamHandler.getInstance().register("test123", file);
-        URLConnection conn = new URL(url).openConnection();
+        URLConnection conn = HttpSyncClient.createConnection(url);
         conn.connect();
         InputStream stream = conn.getInputStream();
         String chksum = SalmonFSTestHelper.getChecksumStream(stream);

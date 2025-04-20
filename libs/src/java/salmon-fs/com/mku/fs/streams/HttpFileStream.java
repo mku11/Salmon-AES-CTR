@@ -24,11 +24,12 @@ SOFTWARE.
 */
 
 import com.mku.fs.file.HttpFile;
+import com.mku.fs.file.HttpSyncClient;
+import com.mku.salmon.encode.Base64Utils;
 import com.mku.streams.RandomAccessStream;
 
 import java.io.*;
 import java.net.HttpURLConnection;
-import java.net.URL;
 
 /**
  * File stream implementation for remote HTTP files.
@@ -84,6 +85,7 @@ public class HttpFileStream extends RandomAccessStream {
             try {
                 conn = createConnection("GET", file.getPath());
                 setDefaultHeaders(conn);
+                setServiceAuth(conn);
                 if (this.position > 0) {
                     conn.addRequestProperty("Range", "bytes=" + this.position + "-");
                 }
@@ -264,7 +266,7 @@ public class HttpFileStream extends RandomAccessStream {
     }
 
     private HttpURLConnection createConnection(String method, String url) throws IOException {
-        HttpURLConnection conn = (HttpURLConnection) new URL(url).openConnection();
+        HttpURLConnection conn = HttpSyncClient.createConnection(url);
         conn.setUseCaches(false);
         conn.setDefaultUseCaches(false);
         conn.setRequestMethod(method);
@@ -279,6 +281,14 @@ public class HttpFileStream extends RandomAccessStream {
             } catch (IOException e) {
                 throw new RuntimeException(e);
             }
+        }
+    }
+
+    private void setServiceAuth(HttpURLConnection conn) {
+        if (file.getCredentials() != null) {
+            String encoding = Base64Utils.getBase64().encode((file.getCredentials().getServiceUser()
+                    + ":" + file.getCredentials().getServicePassword()).getBytes());
+            conn.setRequestProperty("Authorization", "Basic " + encoding);
         }
     }
 

@@ -31,8 +31,8 @@ public class HttpDriveActivity : AppCompatActivity
     private EditText outputText;
 
     private int threads = 1;
-    private static readonly string defaultPassword = "test123";
-    string defaultHttpDriveURL = "";
+    private static readonly string defaultPassword = "test";
+    string defaultHttpDriveURL = "http://192.168.1.4/testvault";
     private AesDrive httpDrive;
 
     protected override void OnCreate(Bundle bundle)

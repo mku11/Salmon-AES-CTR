@@ -97,7 +97,7 @@ public class SalmonFSTestHelper {
     static String WS_SERVER_URL = System.getProperty("WS_SERVER_URL") != null && !System.getProperty("WS_SERVER_URL").equals("") ?
             System.getProperty("WS_SERVER_URL") : WS_SERVER_DEFAULT_URL;
     static String WS_TEST_DIRNAME = "ws";
-    static WSFile.Credentials credentials = new WSFile.Credentials("user", "password");
+    static Credentials credentials = new Credentials("user", "password");
 
     // HTTP server (Read-only)
 //    static String HTTP_SERVER_DEFAULT_URL = "http://localhost:8000";
@@ -110,6 +110,7 @@ public class SalmonFSTestHelper {
     static String HTTP_VAULT_DIR_URL = SalmonFSTestHelper.HTTP_SERVER_VIRTUAL_URL
             + "/" + SalmonFSTestHelper.HTTP_TEST_DIRNAME + "/" + SalmonFSTestHelper.HTTP_VAULT_DIRNAME;
     static String HTTP_VAULT_FILES_DIR_URL = SalmonFSTestHelper.HTTP_VAULT_DIR_URL + "/fs";
+	static Credentials httpCredentials = new Credentials("user", "password");
 
     // performance
     static int ENC_IMPORT_BUFFER_SIZE = 512 * 1024;
@@ -175,10 +176,12 @@ public class SalmonFSTestHelper {
         SalmonFSTestHelper.TEST_SEQ_DIR = SalmonFSTestHelper.createDir(SalmonFSTestHelper.TEST_ROOT_DIR, SalmonFSTestHelper.TEST_SEQ_DIRNAME);
         SalmonFSTestHelper.TEST_EXPORT_DIR = SalmonFSTestHelper.createDir(SalmonFSTestHelper.TEST_ROOT_DIR, SalmonFSTestHelper.TEST_EXPORT_DIRNAME);
         SalmonFSTestHelper.TEST_EXPORT_AUTH_DIR = SalmonFSTestHelper.createDir(SalmonFSTestHelper.TEST_ROOT_DIR, SalmonFSTestHelper.TEST_EXPORT_AUTH_DIRNAME);
-        SalmonFSTestHelper.HTTP_VAULT_DIR = new HttpFile(SalmonFSTestHelper.HTTP_VAULT_DIR_URL);
+        SalmonFSTestHelper.HTTP_VAULT_DIR = new HttpFile(SalmonFSTestHelper.HTTP_VAULT_DIR_URL, SalmonFSTestHelper.httpCredentials);
         SalmonFSTestHelper.createTestFiles();
         SalmonFSTestHelper.createHttpFiles();
         SalmonFSTestHelper.createHttpVault();
+
+        HttpSyncClient.setAllowClearTextTraffic(true); // only for testing purposes
     }
 
     public static IFile createDir(IFile parent, String dirName) {

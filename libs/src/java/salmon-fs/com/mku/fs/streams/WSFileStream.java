@@ -23,13 +23,13 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 */
 
-import com.mku.convert.Base64;
+import com.mku.fs.file.HttpSyncClient;
 import com.mku.fs.file.WSFile;
+import com.mku.salmon.encode.Base64Utils;
 import com.mku.streams.RandomAccessStream;
 
 import java.io.*;
 import java.net.HttpURLConnection;
-import java.net.URL;
 import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
 import java.util.HashMap;
@@ -360,13 +360,13 @@ public class WSFileStream extends RandomAccessStream {
                 stringBuilder.append(URLEncoder.encode(entry.getValue(), StandardCharsets.UTF_8.name()));
             }
         }
-        HttpURLConnection conn = (HttpURLConnection) new URL(url + stringBuilder).openConnection();
+        HttpURLConnection conn = HttpSyncClient.createConnection(url + stringBuilder);
         conn.setUseCaches(false);
         conn.setDefaultUseCaches(false);
         conn.setRequestMethod(method);
         conn.setDoInput(true);
-        if(!method.equals("GET") && !method.equals("HEAD"))
-			conn.setDoOutput(true);
+        if (!method.equals("GET") && !method.equals("HEAD"))
+            conn.setDoOutput(true);
         return conn;
     }
 
@@ -404,9 +404,11 @@ public class WSFileStream extends RandomAccessStream {
     }
 
     private void setServiceAuth(HttpURLConnection conn) {
-        String encoding = new Base64().encode((file.getCredentials().getServiceUser()
-                + ":" + file.getCredentials().getServicePassword()).getBytes());
-        conn.setRequestProperty("Authorization", "Basic " + encoding);
+        if (file.getCredentials() != null) {
+            String encoding = Base64Utils.getBase64().encode((file.getCredentials().getServiceUser()
+                    + ":" + file.getCredentials().getServicePassword()).getBytes());
+            conn.setRequestProperty("Authorization", "Basic " + encoding);
+        }
     }
 
     private void addParameters(OutputStream os, HashMap<String, String> params) throws IOException {

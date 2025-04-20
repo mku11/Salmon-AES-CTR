@@ -1,8 +1,6 @@
 package com.mku.salmon.samples.main;
 
-import com.mku.fs.file.File;
-import com.mku.fs.file.IFile;
-import com.mku.fs.file.WSFile;
+import com.mku.fs.file.*;
 import com.mku.salmon.samples.samples.DriveSample;
 import com.mku.salmon.streams.ProviderType;
 import com.mku.salmon.streams.AesStream;
@@ -16,6 +14,9 @@ public class WebServiceDriveProgram {
         String drivePath = "/example_drive_" + System.currentTimeMillis();
         String password = "test123";
 
+        // only for demo purposes, you should be using HTTPS traffic
+        HttpSyncClient.setAllowClearTextTraffic(true);
+
         AesStream.setAesProviderType(ProviderType.Default);
 
         IFile[] filesToImport = new File[]{new File("./data/file.txt")};
@@ -27,7 +28,7 @@ public class WebServiceDriveProgram {
         if (!exportDir.exists())
             exportDir.mkdir();
 
-        IFile driveDir = new WSFile(drivePath, wsServicePath, new WSFile.Credentials(wsUser, wsPassword));
+        IFile driveDir = new WSFile(drivePath, wsServicePath, new Credentials(wsUser, wsPassword));
         if (!driveDir.exists())
             driveDir.mkdir();
 

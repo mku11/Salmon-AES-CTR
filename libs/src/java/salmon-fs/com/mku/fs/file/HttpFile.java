@@ -24,17 +24,22 @@ SOFTWARE.
 */
 
 import com.mku.fs.streams.HttpFileStream;
+import com.mku.salmon.encode.Base64Utils;
 import com.mku.streams.MemoryStream;
 import com.mku.streams.RandomAccessStream;
 
-import java.io.*;
+import java.io.Closeable;
+import java.io.FileNotFoundException;
+import java.io.IOException;
 import java.net.HttpURLConnection;
-import java.net.URL;
 import java.net.URLDecoder;
 import java.nio.charset.StandardCharsets;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Date;
+import java.util.List;
+import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -51,13 +56,45 @@ public class HttpFile implements IFile {
     private String filePath;
     private HttpFile.Response response;
 
+
+	/**
+	 * Get the user credentials
+	 * @return The credentials
+	 */
+    public Credentials getCredentials() {
+        return credentials;
+    }
+
+    /**
+     * Salmon Web service credentials
+     */
+    private Credentials credentials;
+
+	/**
+	 * Set the user credentials
+	 * @param credentials The credentials
+	 */
+    public void setCredentials(Credentials credentials) {
+        this.credentials = credentials;
+    }
+
     /**
      * Instantiate a real file represented by the filepath provided (Remote read-write drive)
      *
      * @param path The filepath. This should be a relative path of the vault folder
      */
     public HttpFile(String path) {
+        this(path, null);
+    }
+    /**
+     * Instantiate a real file represented by the filepath provided (Remote read-write drive)
+     *
+     * @param path The filepath. This should be a relative path of the vault folder
+	 * @param credentials The credentials (Basic Auth)
+     */
+    public HttpFile(String path, Credentials credentials) {
         this.filePath = path;
+		this.credentials = credentials;
     }
 
     private synchronized HttpFile.Response getResponse() throws Exception {
@@ -67,6 +104,7 @@ public class HttpFile implements IFile {
                 // TODO: should this be INFO method?
                 conn = createConnection("GET", this.filePath);
                 setDefaultHeaders(conn);
+				setServiceAuth(conn);
                 conn.connect();
                 checkStatus(conn, HttpURLConnection.HTTP_OK);
 				this.response = new Response(conn.getHeaderFields());
@@ -189,7 +227,7 @@ public class HttpFile implements IFile {
         int index = path.lastIndexOf(HttpFile.separator);
         if (index == -1)
             return null;
-        HttpFile parent = new HttpFile(path.substring(0, index));
+        HttpFile parent = new HttpFile(path.substring(0, index), credentials);
         return parent;
     }
 
@@ -313,7 +351,7 @@ public class HttpFile implements IFile {
 						// do not use the charset variable for backwards compatibility with android
                         filename = URLDecoder.decode(filename, StandardCharsets.UTF_8.name());
                     }
-                    IFile file = new HttpFile(this.filePath + HttpFile.separator + filename);
+                    IFile file = new HttpFile(this.filePath + HttpFile.separator + filename, credentials);
                     files.add(file);
                 }
             } catch (Exception e) {
@@ -389,7 +427,7 @@ public class HttpFile implements IFile {
         if (isFile())
             return null;
         String nFilepath = this.getChildPath(filename);
-        HttpFile child = new HttpFile(nFilepath);
+        HttpFile child = new HttpFile(nFilepath, credentials);
         return child;
     }
 
@@ -437,7 +475,7 @@ public class HttpFile implements IFile {
 
 
     private HttpURLConnection createConnection(String method, String url) throws IOException {
-        HttpURLConnection conn = (HttpURLConnection) new URL(url).openConnection();
+        HttpURLConnection conn = HttpSyncClient.createConnection(url);
         conn.setUseCaches(false);
         conn.setDefaultUseCaches(false);
         conn.setRequestMethod(method);
@@ -465,6 +503,14 @@ public class HttpFile implements IFile {
         }
     }
 
+	private void setServiceAuth(HttpURLConnection conn) {
+		if(credentials != null) {
+			String encoding = Base64Utils.getBase64().encode((credentials.getServiceUser()
+					+ ":" + credentials.getServicePassword()).getBytes());
+			conn.setRequestProperty("Authorization", "Basic " + encoding);
+		}
+    }
+	
     private void checkStatus(HttpURLConnection conn, int status) throws IOException {
         if (conn.getResponseCode() != status)
             throw new IOException(conn.getResponseCode()

@@ -23,8 +23,8 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 */
 
-import com.mku.convert.Base64;
 import com.mku.fs.streams.WSFileStream;
+import com.mku.salmon.encode.Base64Utils;
 import com.mku.streams.MemoryStream;
 import com.mku.streams.RandomAccessStream;
 import org.json.JSONArray;
@@ -57,10 +57,18 @@ public class WSFile implements IFile {
     private Response response;
     private String servicePath;
 
+	/**
+	 * Get the service path
+	 * @return The service path
+	 */
     public String getServicePath() {
         return servicePath;
     }
 
+	/**
+	 * Get the user credentials
+	 * @return The credentials
+	 */
     public Credentials getCredentials() {
         return credentials;
     }
@@ -70,8 +78,23 @@ public class WSFile implements IFile {
      */
     private Credentials credentials;
 
+	/**
+	 * Set the user credentials
+	 * @param credentials The credentials
+	 */
     public void setCredentials(Credentials credentials) {
         this.credentials = credentials;
+    }
+
+
+    /**
+     * Instantiate a real file represented by the filepath provided (Remote read-write drive)
+     *
+     * @param path        The filepath. This should be a relative path of the vault folder
+     * @param servicePath The REST API server path
+     */
+    public WSFile(String path, String servicePath) {
+        this(path, servicePath, null);
     }
 
     /**
@@ -676,7 +699,7 @@ public class WSFile implements IFile {
                 stringBuilder.append(URLEncoder.encode(entry.getValue(), StandardCharsets.UTF_8.name()));
             }
         }
-        HttpURLConnection conn = (HttpURLConnection) new URL(url + stringBuilder).openConnection();
+        HttpURLConnection conn = HttpSyncClient.createConnection(url + stringBuilder);
         conn.setUseCaches(false);
         conn.setDefaultUseCaches(false);
         conn.setRequestMethod(method);
@@ -707,9 +730,11 @@ public class WSFile implements IFile {
     }
 
     private void setServiceAuth(HttpURLConnection conn) {
-        String encoding = new Base64().encode((credentials.getServiceUser()
-                + ":" + credentials.getServicePassword()).getBytes());
-        conn.setRequestProperty("Authorization", "Basic " + encoding);
+		if(credentials != null) {
+			String encoding = Base64Utils.getBase64().encode((credentials.getServiceUser()
+					+ ":" + credentials.getServicePassword()).getBytes());
+			conn.setRequestProperty("Authorization", "Basic " + encoding);
+		}
     }
 
     private void addParameters(OutputStream os, HashMap<String, String> params) throws IOException {
@@ -757,44 +782,6 @@ public class WSFile implements IFile {
             this.isFile = obj.getBoolean("file");
             this.exists = obj.getBoolean("present");
             this.headers = headers;
-        }
-    }
-
-    /**
-     * Web service credentials.
-     */
-    public static class Credentials {
-        private final String serviceUser;
-
-        /**
-         * Get the user name.
-         *
-         * @return The user name.
-         */
-        public String getServiceUser() {
-            return serviceUser;
-        }
-
-        /**
-         * Get the user password.
-         *
-         * @return The user password.
-         */
-        public String getServicePassword() {
-            return servicePassword;
-        }
-
-        private final String servicePassword;
-
-        /**
-         * Instantiate a Credentials object.
-         *
-         * @param serviceUser     The user name.
-         * @param servicePassword The user password.
-         */
-        public Credentials(String serviceUser, String servicePassword) {
-            this.serviceUser = serviceUser;
-            this.servicePassword = servicePassword;
         }
     }
 }
